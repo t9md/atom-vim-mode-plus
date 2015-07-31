@@ -115,9 +115,9 @@ class Change extends Insert
     # undo transactions are already handled.
     @vimState.setInsertionCheckpoint() unless @typingCompleted
 
-    if _.contains(@motion.select(count, excludeWhitespace: true), true)
+    if _.contains(@target.select(count, excludeWhitespace: true), true)
       @setTextRegister(@register, @editor.getSelectedText())
-      if @motion.isLinewise?() and not @typingCompleted
+      if @target.isLinewise?() and not @typingCompleted
         for selection in @editor.getSelections()
           selection.insertText("\n", autoIndent: true)
           selection.cursor.moveLeft()
@@ -136,7 +136,7 @@ class SubstituteLine extends Change
 
   constructor: (@editor, @vimState) ->
     @register = settings.defaultRegister()
-    @motion = new Motions.MoveToRelativeLine(@editor, @vimState)
+    @target = new Motions.MoveToRelativeLine(@editor, @vimState)
 
 # Takes a transaction and turns it into a string of what was typed.
 # This class is an implementation detail of Insert

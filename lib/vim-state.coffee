@@ -4,9 +4,9 @@ _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable} = require 'event-kit'
 settings = require './settings'
 
-Operators = require './operators/index'
-Prefixes = require './prefixes'
-Motions = require './motions/index'
+Operators  = require './operators/index'
+Prefixes   = require './prefixes'
+Motions    = require './motions/index'
 InsertMode = require './insert-mode'
 
 TextObjects = require './text-objects'
@@ -16,7 +16,7 @@ Scroll = require './scroll'
 module.exports =
 class VimState
   editor: null
-  opStack: null
+  operationsQueue: null
   mode: null
   submode: null
   destroyed: false
@@ -26,7 +26,7 @@ class VimState
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
     @editor = @editorElement.getModel()
-    @opStack = []
+    @operationsQueue = []
     @history = []
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
@@ -208,12 +208,12 @@ class VimState
     commands = {}
     for commandName, operationFn of operationCommands
       do (operationFn) =>
-        commands[commandName] = (event) => @pushOperations(operationFn(event))
+        commands[commandName] = (event) => @enqueueOperations(operationFn(event))
     @registerCommands(commands)
 
   # Private: Push the given operations onto the operation stack, then process
   # it.
-  pushOperations: (operations) ->
+  enqueueOperations: (operations) ->
     return unless operations?
     try
       @processing = true
@@ -221,24 +221,25 @@ class VimState
 
       for operation in operations
         # Motions in visual mode perform their selections.
-        if @mode is 'visual' and (operation instanceof Motions.Motion or operation instanceof TextObjects.TextObject)
+        if @mode is 'visual' and _.isFunction(operation.select)
+        # if @mode is 'visual' and (operation instanceof Motions.Motion or operation instanceof TextObjects.TextObject)
           operation.execute = operation.select
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack
-        if (topOp = @topOperation())? and topOp.canComposeWith? and not topOp.canComposeWith(operation)
+        if (topOp = @tailOperation())? and topOp.canComposeWith? and not topOp.canComposeWith(operation)
           @resetNormalMode()
           @emitter.emit('failed-to-compose')
           break
 
-        @opStack.push(operation)
+        @operationsQueue.push(operation)
 
         # If we've received an operator in visual mode, mark the current
         # selection as the motion to operate on.
         if @mode is 'visual' and operation instanceof Operators.Operator
-          @opStack.push(new Motions.CurrentSelection(@editor, this))
+          @operationsQueue.push(new TextObjects.CurrentSelection(@editor, this))
 
-        @processOpStack()
+        @processOperations()
     finally
       @processing = false
       @ensureCursorIsWithinLine(cursor) for cursor in @editor.getCursors()
@@ -252,8 +253,8 @@ class VimState
   # Private: Removes all operations from the stack.
   #
   # Returns nothing.
-  clearOpStack: ->
-    @opStack = []
+  clearOperations: ->
+    @operationsQueue = []
 
   undo: ->
     @editor.undo()
@@ -262,34 +263,34 @@ class VimState
   # Private: Processes the command if the last operation is complete.
   #
   # Returns nothing.
-  processOpStack: ->
-    unless @opStack.length > 0
+  processOperations: ->
+    unless @operationsQueue.length > 0
       return
 
-    unless @topOperation().isComplete()
-      if @mode is 'normal' and @topOperation() instanceof Operators.Operator
+    unless @tailOperation().isComplete()
+      if @mode is 'normal' and @tailOperation() instanceof Operators.Operator
         @activateOperatorPendingMode()
       return
 
-    poppedOperation = @opStack.pop()
-    if @opStack.length
+    operation = @operationsQueue.pop()
+    if @operationsQueue.length
       try
-        @topOperation().compose(poppedOperation)
-        @processOpStack()
+        @tailOperation().compose(operation)
+        @processOperations()
       catch e
         if (e instanceof Operators.OperatorError) or (e instanceof Motions.MotionError)
           @resetNormalMode()
         else
           throw e
     else
-      @history.unshift(poppedOperation) if poppedOperation.isRecordable()
-      poppedOperation.execute()
+      @history.unshift(operation) if operation.isRecordable()
+      operation.execute()
 
   # Private: Fetches the last operation.
   #
   # Returns the last operation.
-  topOperation: ->
-    _.last @opStack
+  tailOperation: ->
+    _.last @operationsQueue
 
   # Private: Fetches the value of a given register.
   #
@@ -404,7 +405,7 @@ class VimState
 
     @changeModeClass('normal-mode')
 
-    @clearOpStack()
+    @clearOperations()
     selection.clear(autoscroll: false) for selection in @editor.getSelections()
     for cursor in @editor.getCursors()
       if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
@@ -549,7 +550,7 @@ class VimState
   activateOperatorPendingMode: ->
     @deactivateInsertMode()
     @mode = 'operator-pending'
-    @submodule = null
+    @submode = null
     @changeModeClass('operator-pending-mode')
 
     @updateStatusBar()
@@ -565,7 +566,7 @@ class VimState
   #
   # Returns nothing.
   resetNormalMode: ->
-    @clearOpStack()
+    @clearOperations()
     @editor.clearSelections()
     @activateNormalMode()
 
@@ -597,13 +598,13 @@ class VimState
   repeatPrefix: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
     num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-    if @topOperation() instanceof Prefixes.Repeat
-      @topOperation().addDigit(num)
+    if @tailOperation() instanceof Prefixes.Repeat
+      @tailOperation().addDigit(num)
     else
       if num is 0
         e.abortKeyBinding()
       else
-        @pushOperations(new Prefixes.Repeat(num))
+        @enqueueOperations(new Prefixes.Repeat(num))
 
   reverseSelections: ->
     reversed = not @editor.getLastSelection().isReversed()
@@ -618,7 +619,7 @@ class VimState
   #
   # Returns new motion or nothing.
   moveOrRepeat: (e) ->
-    if @topOperation() instanceof Prefixes.Repeat
+    if @tailOperation() instanceof Prefixes.Repeat
       @repeatPrefix(e)
       null
     else
@@ -643,11 +644,11 @@ class VimState
   #
   isOperatorPending: (constructor) ->
     if constructor?
-      for op in @opStack
+      for op in @operationsQueue
         return op if op instanceof constructor
       false
     else
-      @opStack.length > 0
+      @operationsQueue.length > 0
 
   updateStatusBar: ->
     @statusBarManager.update(@mode, @submode)

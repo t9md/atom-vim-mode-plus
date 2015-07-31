@@ -32,11 +32,11 @@ class Operator
   # motion - The motion used to select what to operate on.
   #
   # Returns nothing.
-  compose: (motion) ->
-    if not motion.select
-      throw new OperatorError('Must compose with a motion')
+  compose: (target) ->
+    unless @canComposeWith(target)
+      throw new OperatorError('Must respond select method')
 
-    @motion = motion
+    @target = target
     @complete = true
 
   canComposeWith: (operation) -> operation.select?
@@ -45,7 +45,7 @@ class Operator
   #
   # Returns nothing
   setTextRegister: (register, text) ->
-    if @motion?.isLinewise?()
+    if @target?.isLinewise?()
       type = 'linewise'
       if text[-1..] isnt '\n'
         text += '\n'
@@ -63,7 +63,7 @@ class OperatorWithInput extends Operator
 
   compose: (operation) ->
     if operation.select?
-      @motion = operation
+      @target = operation
     if operation.characters?
       @input = operation
       @complete = true
@@ -84,13 +84,13 @@ class Delete extends Operator
   #
   # Returns nothing.
   execute: (count) ->
-    if _.contains(@motion.select(count), true)
+    if _.contains(@target.select(count), true)
       @setTextRegister(@register, @editor.getSelectedText())
       @editor.transact =>
         for selection in @editor.getSelections()
           selection.deleteSelectedText()
       for cursor in @editor.getCursors()
-        if @motion.isLinewise?()
+        if @target.isLinewise?()
           cursor.skipLeadingWhitespace()
         else
           cursor.moveLeft() if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
@@ -104,8 +104,8 @@ class ToggleCase extends Operator
   constructor: (@editor, @vimState, {@complete}={}) ->
 
   execute: (count=1) ->
-    if @motion?
-      if _.contains(@motion.select(count), true)
+    if @target?
+      if _.contains(@target.select(count), true)
         @editor.replaceSelectedText {}, (text) ->
           text.split('').map((char) ->
             lower = char.toLowerCase()
@@ -143,7 +143,7 @@ class UpperCase extends Operator
     @complete = false
 
   execute: (count=1) ->
-    if _.contains(@motion.select(count), true)
+    if _.contains(@target.select(count), true)
       @editor.replaceSelectedText {}, (text) ->
         text.toUpperCase()
 
@@ -157,7 +157,7 @@ class LowerCase extends Operator
     @complete = false
 
   execute: (count=1) ->
-    if _.contains(@motion.select(count), true)
+    if _.contains(@target.select(count), true)
       @editor.replaceSelectedText {}, (text) ->
         text.toLowerCase()
 
@@ -179,11 +179,11 @@ class Yank extends Operator
   # Returns nothing.
   execute: (count) ->
     originalPositions = @editor.getCursorBufferPositions()
-    if _.contains(@motion.select(count), true)
+    if _.contains(@target.select(count), true)
       text = @editor.getSelectedText()
       startPositions = _.pluck(@editor.getSelectedBufferRanges(), "start")
       newPositions = for originalPosition, i in originalPositions
-        if startPositions[i] and (@vimState.mode is 'visual' or not @motion.isLinewise?())
+        if startPositions[i] and (@vimState.mode is 'visual' or not @target.isLinewise?())
           Point.min(startPositions[i], originalPositions[i])
         else
           originalPosition

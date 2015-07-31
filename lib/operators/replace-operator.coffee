@@ -21,8 +21,8 @@ class Replace extends OperatorWithInput
       return
 
     @editor.transact =>
-      if @motion?
-        if _.contains(@motion.select(), true)
+      if @target?
+        if _.contains(@target.select(), true)
           @editor.replaceSelectedText null, (text) =>
             text.replace(/./g, @input.characters)
           for selection in @editor.getSelections()

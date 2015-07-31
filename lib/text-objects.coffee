@@ -1,6 +1,7 @@
 {Range} = require 'atom'
 AllWhitespace = /^\s$/
 WholeWordRegex = /\S+/
+_ = require 'underscore-plus'
 
 class TextObject
   constructor: (@editor, @state) ->
@@ -8,10 +9,33 @@ class TextObject
   isComplete: -> true
   isRecordable: -> false
 
+class CurrentSelection extends TextObject
+  constructor: ->
+    super
+    @selection = @editor.getSelectedBufferRanges()
+
+  execute: (count=1) ->
+    _.times(count, -> true)
+
+  select: (count=1) ->
+    @editor.setSelectedBufferRanges(@selection)
+    _.times(count, -> true)
+
 class SelectInsideWord extends TextObject
   select: ->
     @editor.selectWordsContainingCursors()
     [true]
+
+class SelectAWord extends TextObject
+  select: ->
+    for selection in @editor.getSelections()
+      selection.selectWord()
+      loop
+        endPoint = selection.getBufferRange().end
+        char = @editor.getTextInRange(Range.fromPointWithDelta(endPoint, 0, 1))
+        break unless AllWhitespace.test(char)
+        selection.selectRight()
+      true
 
 class SelectInsideWholeWord extends TextObject
   select: ->
@@ -137,17 +161,6 @@ class SelectInsideBrackets extends TextObject
           selection.setBufferRange([start, end])
       not selection.isEmpty()
 
-class SelectAWord extends TextObject
-  select: ->
-    for selection in @editor.getSelections()
-      selection.selectWord()
-      loop
-        endPoint = selection.getBufferRange().end
-        char = @editor.getTextInRange(Range.fromPointWithDelta(endPoint, 0, 1))
-        break unless AllWhitespace.test(char)
-        selection.selectRight()
-      true
-
 class SelectAWholeWord extends TextObject
   select: ->
     for selection in @editor.getSelections()
@@ -182,4 +195,4 @@ class SelectAParagraph extends TextObject
       true
 
 module.exports = {TextObject, SelectInsideWord, SelectInsideWholeWord, SelectInsideQuotes,
-  SelectInsideBrackets, SelectAWord, SelectAWholeWord, SelectInsideParagraph, SelectAParagraph}
+  SelectInsideBrackets, CurrentSelection, SelectAWord, SelectAWholeWord, SelectInsideParagraph, SelectAParagraph}
