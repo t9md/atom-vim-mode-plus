@@ -1,4 +1,5 @@
-[t9md] This is refactoring experiment for vim-mode.
+[t9md] This is refactoring experiment for vim-mode.  
+See [REFACTORING_IDEA](REFACTORING_IDEA.md).
 
 
 ## Vim Mode package [![Build Status](https://travis-ci.org/atom/vim-mode.svg?branch=master)](https://travis-ci.org/atom/vim-mode)
