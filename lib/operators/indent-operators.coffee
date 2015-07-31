@@ -3,7 +3,7 @@
 class AdjustIndentation extends Operator
   execute: (count=1) ->
     mode = @vimState.mode
-    @motion.select(count)
+    @target.select(count)
     {start} = @editor.getSelectedBufferRange()
 
     @indent()

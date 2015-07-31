@@ -63,19 +63,19 @@ describe "VimState", ->
         beforeEach -> keydown('x')
 
         it "clears the operator stack", ->
-          expect(vimState.opStack.length).toBe 0
+          expect(vimState.operations.length).toBe 0
 
       describe "the escape keybinding", ->
         beforeEach -> keydown('escape')
 
         it "clears the operator stack", ->
-          expect(vimState.opStack.length).toBe 0
+          expect(vimState.operations.length).toBe 0
 
       describe "the ctrl-c keybinding", ->
         beforeEach -> keydown('c', ctrl: true)
 
         it "clears the operator stack", ->
-          expect(vimState.opStack.length).toBe 0
+          expect(vimState.operations.length).toBe 0
 
     describe "the escape keybinding", ->
       it "clears any extra cursors", ->
@@ -169,11 +169,11 @@ describe "VimState", ->
     describe 'with character-input operations', ->
       beforeEach -> editor.setText('012345\nabcdef')
 
-      it 'properly clears the opStack', ->
+      it 'properly clears the operations', ->
         keydown('d')
         keydown('r')
         expect(vimState.mode).toBe 'normal'
-        expect(vimState.opStack.length).toBe 0
+        expect(vimState.operations.length).toBe 0
         atom.commands.dispatch(editor.normalModeInputView.editorElement, "core:cancel")
         keydown('d')
         expect(editor.getText()).toBe '012345\nabcdef'

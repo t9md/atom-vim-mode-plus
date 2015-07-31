@@ -50,8 +50,8 @@ class Find extends MotionWithInput
       cursor.setBufferPosition(match)
 
 class Till extends Find
-  constructor: (@editor, @vimState, opts={}) ->
-    super(@editor, @vimState, opts)
+  constructor: ->
+    super
     @offset = 1
 
   match: ->

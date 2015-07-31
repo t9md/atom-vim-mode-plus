@@ -108,8 +108,8 @@ class Motion
     @vimState.mode is 'visual' or @operatesInclusively
 
 class CurrentSelection extends Motion
-  constructor: (@editor, @vimState) ->
-    super(@editor, @vimState)
+  constructor: ->
+    super
     @selection = @editor.getSelectedBufferRanges()
 
   execute: (count=1) ->
@@ -121,8 +121,8 @@ class CurrentSelection extends Motion
 
 # Public: Generic class for motions that require extra input
 class MotionWithInput extends Motion
-  constructor: (@editor, @vimState) ->
-    super(@editor, @vimState)
+  constructor: ->
+    super
     @complete = false
 
   isComplete: -> @complete
