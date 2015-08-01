@@ -40,9 +40,9 @@ class VimState
     @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
       return unless @editor?
       if @editor.getSelections().every((selection) -> selection.isEmpty())
-        @activateNormalMode() if @mode is 'visual'
+        @activateNormalMode() if @isVisualMode()
       else
-        @activateVisualMode('characterwise') if @mode is 'normal'
+        @activateVisualMode('characterwise') if @isNormalMode()
     , 100)
 
     @subscriptions.add @editor.onDidChangeCursorPosition ({cursor}) => @ensureCursorIsWithinLine(cursor)
@@ -227,7 +227,7 @@ class VimState
 
       for operation in operations
         # Motions in visual mode perform their selections.
-        if @mode is 'visual' and _.isFunction(operation.select)
+        if @isVisualMode() and _.isFunction(operation.select)
         # if @mode is 'visual' and (operation instanceof Motions.Motion or operation instanceof TextObjects.TextObject)
           # console.log 'visu', operation.constructor.name
           # console.log 'type', operation.isMotion()
@@ -244,11 +244,7 @@ class VimState
 
         # If we've received an operator in visual mode, mark the current
         # selection as the motion to operate on.
-        if @mode is 'visual' and operation.isOperator?()
-          # console.log "--"
-          # console.log operation.constructor.name
-          # console.log operation.isOperator()
-          # console.log "--"
+        if @isVisualMode() and operation.isOperator?()
           @operationsQueue.push(new TextObjects.CurrentSelection(@editor, this))
 
         @processOperations()
@@ -280,7 +276,7 @@ class VimState
       return
 
     unless @tailOperation().isComplete()
-      if @mode is 'normal' and @tailOperation().isOperator?()
+      if @isNormalMode() and @tailOperation().isOperator?()
         @activateOperatorPendingMode()
       return
 
@@ -491,7 +487,7 @@ class VimState
       @replaceModeUndoListener = null
 
   deactivateVisualMode: ->
-    return unless @mode is 'visual'
+    return unless @isVisualMode()
     for selection in @editor.getSelections()
       selection.cursor.moveLeft() unless (selection.isEmpty() or selection.isReversed())
 
@@ -514,7 +510,7 @@ class VimState
     #  * activate-blockwise-visual-mode
     #  * activate-characterwise-visual-mode
     #  * activate-linewise-visual-mode
-    if @mode is 'visual'
+    if @isVisualMode()
       if @submode is type
         @activateNormalMode()
         return
@@ -661,6 +657,10 @@ class VimState
       false
     else
       @operationsQueue.length > 0
+
+  isVisualMode: -> @mode is 'visual'
+  isNormalMode: -> @mode is 'normal'
+  isInsertMode: -> @mode is 'insert'
 
   updateStatusBar: ->
     @statusBarManager.update(@mode, @submode)
