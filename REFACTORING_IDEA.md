@@ -26,3 +26,6 @@ target.select return array of boolean which is result of `not selection.isEmpty(
 
 - Can eliminate instanceof check for Operator, Motion, TextObject, checking use duck typing like `_.isFunction(target.select)`.
 target.select return array of boolean which is result of not selection.isEmpty()
+
+- Why `Scroll` class is not extended from `Motion`?
+ - it extend selection when scrolling, so I believe its make sense to be Motion's child class.
