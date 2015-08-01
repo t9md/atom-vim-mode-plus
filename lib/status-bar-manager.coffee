@@ -13,7 +13,7 @@ module.exports =
 class StatusBarManager
   constructor: ->
     @element = document.createElement("div")
-    @element.id = "status-bar-vim-mode"
+    @prefix = @element.id = "status-bar-vim-mode"
 
     @container = document.createElement("div")
     @container.className = "inline-block"
@@ -25,7 +25,7 @@ class StatusBarManager
     mode += ".#{submode}" if submode?
     if newContents = ContentsByMode[mode]
       [klass, text] = newContents
-      @element.className = "status-bar-vim-mode-#{klass}"
+      @element.className = "{@prefix}-#{klass}"
       @element.textContent = text
 
   # Private
