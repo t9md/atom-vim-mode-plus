@@ -1,4 +1,4 @@
-{Disposable, CompositeDisposable} = require 'event-kit'
+{Disposable, CompositeDisposable} = require 'atom'
 StatusBarManager = require './status-bar-manager'
 GlobalVimState = require './global-vim-state'
 VimState = require './vim-state'
