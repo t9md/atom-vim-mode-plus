@@ -1,4 +1,4 @@
-Motions = require '../motions/index'
+Motions = require '../motions/motions'
 {Operator, Delete} = require './general-operators'
 _ = require 'underscore-plus'
 settings = require '../settings'

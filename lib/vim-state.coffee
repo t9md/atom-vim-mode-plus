@@ -5,7 +5,7 @@ settings = require './settings'
 
 Operators  = require './operators/index'
 Prefixes   = require './prefixes'
-Motions    = require './motions/index'
+Motions    = require './motions/motions'
 InsertMode = require './insert-mode'
 Base       = require './base'
 
