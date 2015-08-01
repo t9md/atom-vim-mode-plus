@@ -11,7 +11,7 @@ class OperatorError
 
 class Operator extends Base
   vimState: null
-  motion: null
+  target: null
   complete: null
 
   constructor: (@editor, @vimState) ->
