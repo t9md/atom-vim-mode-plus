@@ -341,29 +341,32 @@ class VimState
   setRegister: (name, value) ->
     if name is '"'
       name = settings.defaultRegister()
-    if name in ['*', '+']
-      atom.clipboard.write(value.text)
-    else if name is '_'
-      # Blackhole register, nothing to do
-    else if /^[A-Z]$/.test(name)
-      @appendRegister(name.toLowerCase(), value)
-    else
-      @globalVimState.registers[name] = value
 
+    switch name
+      when '*', '+'
+        atom.clipboard.write(value.text)
+      when '_'
+        false
+      else
+        if /^[A-Z]$/.test(name)
+          @appendRegister(name.toLowerCase(), value)
+        else
+          @globalVimState.registers[name] = value
 
   # Private: append a value into a given register
   # like setRegister, but appends the value
-  appendRegister: (name, value) ->
+  appendRegister: (name, {type, text}) ->
     register = @globalVimState.registers[name] ?=
       type: 'character'
-      text: ""
-    if register.type is 'linewise' and value.type isnt 'linewise'
-      register.text += value.text + '\n'
-    else if register.type isnt 'linewise' and value.type is 'linewise'
-      register.text += '\n' + value.text
+      text: ''
+
+    if register.type is 'linewise' and type isnt 'linewise'
+      register.text += "#{text}\n"
+    else if register.type isnt 'linewise' and type is 'linewise'
+      register.text += "\n#{text}"
       register.type = 'linewise'
     else
-      register.text += value.text
+      register.text += text
 
   # Private: Sets the value of a given mark.
   #
