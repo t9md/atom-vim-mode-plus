@@ -243,7 +243,89 @@ class Mark extends OperatorWithInput
     @vimState.setMark(@input.characters, @editor.getCursorBufferPosition())
     @vimState.activateNormalMode()
 
+# Increase/Decrease
+# -------------------------
+#
+# It increases or decreases the next number on the line
+#
+class Increase extends Operator
+  step: 1
+
+  constructor: ->
+    super
+    @complete = true
+    @numberRegex = new RegExp(settings.numberRegex())
+
+  execute: (count=1) ->
+    @editor.transact =>
+      increased = false
+      for cursor in @editor.getCursors()
+        if @increaseNumber(count, cursor) then increased = true
+      atom.beep() unless increased
+
+  increaseNumber: (count, cursor) ->
+    # find position of current number, adapted from from SearchCurrentWord
+    cursorPosition = cursor.getBufferPosition()
+    numEnd = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @numberRegex, allowNext: false)
+
+    if numEnd.column is cursorPosition.column
+      # either we don't have a current number, or it ends on cursor, i.e. precedes it, so look for the next one
+      numEnd = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @numberRegex, allowNext: true)
+      return if numEnd.row isnt cursorPosition.row # don't look beyond the current line
+      return if numEnd.column is cursorPosition.column # no number after cursor
+
+    cursor.setBufferPosition numEnd
+    numStart = cursor.getBeginningOfCurrentWordBufferPosition(wordRegex: @numberRegex, allowPrevious: false)
+
+    range = new Range(numStart, numEnd)
+
+    # parse number, increase/decrease
+    number = parseInt(@editor.getTextInBufferRange(range), 10)
+    if isNaN(number)
+      cursor.setBufferPosition(cursorPosition)
+      return
+
+    number += @step*count
+
+    # replace current number with new
+    newValue = String(number)
+    @editor.setTextInBufferRange(range, newValue, normalizeLineEndings: false)
+
+    cursor.setBufferPosition(row: numStart.row, column: numStart.column-1+newValue.length)
+    return true
+
+class Decrease extends Increase
+  step: -1
+
+# AdjustIndentation
+# -------------------------
+class AdjustIndentation extends Operator
+  execute: (count=1) ->
+    mode = @vimState.mode
+    @target.select(count)
+    {start} = @editor.getSelectedBufferRange()
+
+    @indent()
+
+    @editor.setCursorBufferPosition([start.row, 0])
+    @editor.moveToFirstCharacterOfLine()
+    @vimState.activateNormalMode()
+
+class Indent extends AdjustIndentation
+  indent: ->
+    @editor.indentSelectedRows()
+
+class Outdent extends AdjustIndentation
+  indent: ->
+    @editor.outdentSelectedRows()
+
+class Autoindent extends AdjustIndentation
+  indent: ->
+    @editor.autoIndentSelectedRows()
+
 module.exports = {
   Operator, OperatorWithInput, OperatorError, Delete, ToggleCase,
   UpperCase, LowerCase, Yank, Join, Repeat, Mark
+  Increase, Decrease
+  Indent, Outdent, Autoindent
 }
