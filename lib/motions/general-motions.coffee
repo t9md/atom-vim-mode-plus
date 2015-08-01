@@ -1,6 +1,7 @@
 _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
 settings = require '../settings'
+Base = require '../base'
 
 WholeWordRegex = /\S+/
 WholeWordOrEmptyLineRegex = /^\s*$|\S+/
@@ -10,7 +11,7 @@ class MotionError
   constructor: (@message) ->
     @name = 'Motion Error'
 
-class Motion
+class Motion extends Base
   operatesInclusively: true
   operatesLinewise: false
 

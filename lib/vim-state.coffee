@@ -8,15 +8,24 @@ Operators  = require './operators/index'
 Prefixes   = require './prefixes'
 Motions    = require './motions/index'
 InsertMode = require './insert-mode'
+Base       = require './base'
 
 TextObjects = require './text-objects'
 Utils = require './utils'
 Scroll = require './scroll'
 
-isOperator   = (obj) -> obj instanceof Operators.Operator
-isTextObject = (obj) -> obj instanceof TextObjects.TextObject
-isMotion     = (obj) -> obj instanceof Motions.Motion
-isRepeat     = (obj) -> obj instanceof Prefixes.Repeat
+typeChecker =
+  isOperator:   (obj) -> obj instanceof Operators.Operator
+  isTextObject: (obj) -> obj instanceof TextObjects.TextObject
+  isMotion:     (obj) -> obj instanceof Motions.Motion
+  isRepeat:     (obj) -> obj instanceof Prefixes.Repeat
+
+isOperator =    (obj) -> obj instanceof Operators.Operator
+isTextObject =  (obj) -> obj instanceof TextObjects.TextObject
+isMotion =      (obj) -> obj instanceof Motions.Motion
+isRepeat =      (obj) -> obj instanceof Prefixes.Repeat
+
+Utils.include Base, typeChecker
 
 module.exports =
 class VimState
@@ -229,6 +238,7 @@ class VimState
         if @mode is 'visual' and _.isFunction(operation.select)
         # if @mode is 'visual' and (operation instanceof Motions.Motion or operation instanceof TextObjects.TextObject)
           console.log 'visu', operation.constructor.name
+          # console.log 'type', operation.isMotion()
           operation.execute = operation.select
 
         # if we have started an operation that responds to canComposeWith check if it can compose

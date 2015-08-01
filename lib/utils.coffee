@@ -12,3 +12,7 @@ module.exports =
       'linewise'
     else
       'character'
+
+  include: (klass, module) ->
+    for key, value of module
+      klass::[key] = value

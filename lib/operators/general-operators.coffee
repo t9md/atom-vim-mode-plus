@@ -3,12 +3,13 @@ _ = require 'underscore-plus'
 {ViewModel} = require '../view-models/view-model'
 Utils = require '../utils'
 settings = require '../settings'
+Base = require '../base'
 
 class OperatorError
   constructor: (@message) ->
     @name = 'Operator Error'
 
-class Operator
+class Operator extends Base
   vimState: null
   motion: null
   complete: null

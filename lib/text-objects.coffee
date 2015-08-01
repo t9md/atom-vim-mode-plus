@@ -1,9 +1,12 @@
 {Range} = require 'atom'
+
 AllWhitespace = /^\s$/
 WholeWordRegex = /\S+/
 _ = require 'underscore-plus'
+Base = require './base'
 
-class TextObject
+
+class TextObject extends Base
   constructor: (@editor, @state) ->
 
   isComplete: -> true
