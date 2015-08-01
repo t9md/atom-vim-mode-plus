@@ -732,15 +732,20 @@ class RepeatSearch extends SearchBase
     this
 
 module.exports = {
-  Motion, MotionWithInput, MoveLeft, MoveRight, MoveUp, MoveDown,
-  MoveToPreviousWord, MoveToPreviousWholeWord, MoveToNextWord, MoveToNextWholeWord,
-  MoveToEndOfWord, MoveToNextParagraph, MoveToPreviousParagraph, MoveToAbsoluteLine, MoveToRelativeLine, MoveToBeginningOfLine,
-  MoveToFirstCharacterOfLineUp, MoveToFirstCharacterOfLineDown,
-  MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineAndDown, MoveToLastCharacterOfLine,
-  MoveToLastNonblankCharacterOfLineAndDown, MoveToStartOfFile,
-  MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen, MoveToEndOfWholeWord, MotionError,
-  ScrollHalfUpKeepCursor, ScrollFullUpKeepCursor,
-  ScrollHalfDownKeepCursor, ScrollFullDownKeepCursor
+  Motion, MotionError
+  MotionWithInput
+  MoveLeft, MoveRight, MoveUp, MoveDown
+  MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
+  MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
+  MoveToNextParagraph, MoveToPreviousParagraph
+  MoveToAbsoluteLine, MoveToRelativeLine, MoveToBeginningOfLine
+  MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineUp
+  MoveToLastCharacterOfLine, MoveToFirstCharacterOfLineDown
+  MoveToFirstCharacterOfLineAndDown, MoveToLastNonblankCharacterOfLineAndDown
+  MoveToStartOfFile,
+  MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen,
+  ScrollHalfUpKeepCursor, ScrollHalfDownKeepCursor
+  ScrollFullUpKeepCursor, ScrollFullDownKeepCursor
   Find, Till
   MoveToMark
   Search, SearchCurrentWord, BracketMatchingMotion, RepeatSearch
