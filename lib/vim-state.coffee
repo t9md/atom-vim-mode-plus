@@ -235,7 +235,7 @@ class VimState
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack
-        if (tailOperation = @tailOperation())? and tailOperation.canComposeWith? and not tailOperation.canComposeWith(operation)
+        if (tailOperation = @getTailOperation())? and tailOperation.canComposeWith? and not tailOperation.canComposeWith(operation)
           @resetNormalMode()
           @emitter.emit('failed-to-compose')
           break
@@ -261,7 +261,7 @@ class VimState
   # Private: Removes all operations from the stack.
   #
   # Returns nothing.
-  clearOperations: ->
+  clearOperationsQueue: ->
     @operationsQueue = []
 
   undo: ->
@@ -272,18 +272,17 @@ class VimState
   #
   # Returns nothing.
   processOperations: ->
-    unless @operationsQueue.length > 0
-      return
+    return unless @operationsQueue.length
 
-    unless @tailOperation().isComplete()
-      if @isNormalMode() and @tailOperation().isOperator?()
+    unless @getTailOperation().isComplete()
+      if @isNormalMode() and @getTailOperation().isOperator?()
         @activateOperatorPendingMode()
       return
 
     operation = @operationsQueue.pop()
     if @operationsQueue.length
       try
-        @tailOperation().compose(operation)
+        @getTailOperation().compose(operation)
         @processOperations()
       catch e
         if (e instanceof Operators.OperatorError) or (e instanceof Motions.MotionError)
@@ -297,7 +296,7 @@ class VimState
   # Private: Fetches the last operation.
   #
   # Returns the last operation.
-  tailOperation: ->
+  getTailOperation: ->
     _.last @operationsQueue
 
   # Private: Fetches the value of a given register.
@@ -413,7 +412,7 @@ class VimState
 
     @changeModeClass('normal-mode')
 
-    @clearOperations()
+    @clearOperationsQueue()
     selection.clear(autoscroll: false) for selection in @editor.getSelections()
     for cursor in @editor.getCursors()
       if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
@@ -574,7 +573,7 @@ class VimState
   #
   # Returns nothing.
   resetNormalMode: ->
-    @clearOperations()
+    @clearOperationsQueue()
     @editor.clearSelections()
     @activateNormalMode()
 
@@ -606,8 +605,8 @@ class VimState
   repeatPrefix: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
     num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-    if @tailOperation()?.isRepeat?()
-      @tailOperation().addDigit(num)
+    if @getTailOperation()?.isRepeat?()
+      @getTailOperation().addDigit(num)
     else
       if num is 0
         e.abortKeyBinding()
@@ -627,7 +626,7 @@ class VimState
   #
   # Returns new motion or nothing.
   moveOrRepeat: (e) ->
-    if @tailOperation()?.isRepeat?()
+    if @getTailOperation()?.isRepeat?()
       @repeatPrefix(e)
       null
     else
@@ -641,6 +640,7 @@ class VimState
   # Returns nothing.
   linewiseAliasedOperator: (constructor) ->
     if @isSameOperatorPending(constructor)
+      # [FIXME] This is very quick and dirty solution.
       new Motions.MoveToRelativeLine(@editor, this)
     else
       new constructor(@editor, this)
