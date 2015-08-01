@@ -24,3 +24,6 @@ making saving history like saveHistory(entry) rather than current primitive @his
 
 
 target.select return array of boolean which is result of not selection.isEmpty()
+
+- Can eliminate instanceof check for Operator, Motion, TextObject, checking use duck typing like `_.isFunction(target.select)`.
+target.select return array of boolean which is result of not selection.isEmpty()
