@@ -1,6 +1,17 @@
-[t9md] This is refactoring experiment for vim-mode.  
-See [REFACTORING_IDEA](REFACTORING_IDEA.md).
+# Note by t9md
+This is refactoring experiment for vim-mode.  
 
+See [REFACTORING_IDEA](REFACTORING_IDEA.md).  
+See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode/issues/800).  
+
+# Step
+
+1. Improve readability by renaming without causing big internal change.
+2. Migrate each old TextObject, Operator, Motion(TOM for short) to new one.
+3. Introduce new OperationProcessor to process  new-TOM.
+
+
+# Note by t9md
 
 ## Vim Mode package [![Build Status](https://travis-ci.org/atom/vim-mode.svg?branch=master)](https://travis-ci.org/atom/vim-mode)
 
