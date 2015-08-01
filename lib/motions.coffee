@@ -1,9 +1,9 @@
 _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
-settings = require '../settings'
-{ViewModel, Input} = require '../view-models/view-model'
-SearchViewModel = require '../view-models/search-view-model'
-Base = require '../base'
+settings = require './settings'
+{ViewModel, Input} = require './view-models/view-model'
+SearchViewModel = require './view-models/search-view-model'
+Base = require './base'
 
 WholeWordRegex = /\S+/
 WholeWordOrEmptyLineRegex = /^\s*$|\S+/
