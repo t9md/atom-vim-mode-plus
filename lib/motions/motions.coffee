@@ -110,18 +110,6 @@ class Motion extends Base
   isInclusive: ->
     @vimState.mode is 'visual' or @operatesInclusively
 
-class CurrentSelection extends Motion
-  constructor: ->
-    super
-    @selection = @editor.getSelectedBufferRanges()
-
-  execute: (count=1) ->
-    _.times(count, -> true)
-
-  select: (count=1) ->
-    @editor.setSelectedBufferRanges(@selection)
-    _.times(count, -> true)
-
 # Public: Generic class for motions that require extra input
 class MotionWithInput extends Motion
   constructor: ->
@@ -744,7 +732,7 @@ class RepeatSearch extends SearchBase
     this
 
 module.exports = {
-  Motion, MotionWithInput, CurrentSelection, MoveLeft, MoveRight, MoveUp, MoveDown,
+  Motion, MotionWithInput, MoveLeft, MoveRight, MoveUp, MoveDown,
   MoveToPreviousWord, MoveToPreviousWholeWord, MoveToNextWord, MoveToNextWholeWord,
   MoveToEndOfWord, MoveToNextParagraph, MoveToPreviousParagraph, MoveToAbsoluteLine, MoveToRelativeLine, MoveToBeginningOfLine,
   MoveToFirstCharacterOfLineUp, MoveToFirstCharacterOfLineDown,
