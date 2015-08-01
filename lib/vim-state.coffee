@@ -49,7 +49,7 @@ class VimState
     @subscriptions.add @editor.onDidAddCursor @ensureCursorIsWithinLine
 
     @editorElement.classList.add("vim-mode")
-    @setupNormalMode()
+    @init()
     if settings.startInInsertMode()
       @activateInsertMode()
     else
@@ -71,7 +71,7 @@ class VimState
   # Private: Creates the plugin's bindings
   #
   # Returns nothing.
-  setupNormalMode: ->
+  init: ->
     @registerCommands
       'activate-normal-mode': => @activateNormalMode()
       'activate-linewise-visual-mode': => @activateVisualMode('linewise')
