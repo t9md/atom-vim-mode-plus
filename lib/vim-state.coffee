@@ -228,9 +228,6 @@ class VimState
       for operation in operations
         # Motions in visual mode perform their selections.
         if @isVisualMode() and _.isFunction(operation.select)
-        # if @mode is 'visual' and (operation instanceof Motions.Motion or operation instanceof TextObjects.TextObject)
-          # console.log 'visu', operation.constructor.name
-          # console.log 'type', operation.isMotion()
           operation.execute = operation.select
 
         # if we have started an operation that responds to canComposeWith check if it can compose
@@ -242,8 +239,8 @@ class VimState
 
         @operationsQueue.push(operation)
 
-        # If we've received an operator in visual mode, mark the current
-        # selection as the motion to operate on.
+        # If we've received an operator in visual mode, use inplict currentSelection textobject
+        # as a target of operator.
         if @isVisualMode() and operation.isOperator?()
           @operationsQueue.push(new TextObjects.CurrentSelection(@editor, this))
 
