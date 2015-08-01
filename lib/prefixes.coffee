@@ -1,4 +1,6 @@
-class Prefix
+Base = require './base'
+
+class Prefix extends Base
   complete: null
   composedObject: null
 
