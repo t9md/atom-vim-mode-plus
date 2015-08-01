@@ -11,7 +11,7 @@ See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode
 3. Introduce new OperationProcessor to process  new-TOM.
 
 
-# Note by t9md
+# END Note by t9md
 
 ## Vim Mode package [![Build Status](https://travis-ci.org/atom/vim-mode.svg?branch=master)](https://travis-ci.org/atom/vim-mode)
 
