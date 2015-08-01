@@ -11,7 +11,7 @@
 - Operator can take motion and textobject as target of operation although current argumenet name is motion, but it actually can be TextObject.
 
 Operator's @target variable name is not appropriate since it can take TextObject so @target should be better.
-But acceed from outer object
+But accessed from outer object
 
 @complete should be @executable ?
 
@@ -22,8 +22,7 @@ making saving history like saveHistory(entry) rather than current primitive @his
 - Constructor's argument and super() calling with argument is not necessary, redundant.
 - Select prefix for every TextObject like `SelectAParagraph` is not appropriate name for TextObject. simply Paragraph is better.
 
-
-target.select return array of boolean which is result of not selection.isEmpty()
+target.select return array of boolean which is result of `not selection.isEmpty()`
 
 - Can eliminate instanceof check for Operator, Motion, TextObject, checking use duck typing like `_.isFunction(target.select)`.
 target.select return array of boolean which is result of not selection.isEmpty()
