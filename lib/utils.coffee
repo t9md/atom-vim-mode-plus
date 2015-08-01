@@ -13,6 +13,7 @@ module.exports =
     else
       'character'
 
+  # Include module(object which normaly provides set of methods) to klass
   include: (klass, module) ->
     for key, value of module
       klass::[key] = value
