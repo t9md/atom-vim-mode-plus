@@ -33,8 +33,8 @@ class Operator
   #
   # Returns nothing.
   compose: (target) ->
-    unless @canComposeWith(target)
-      throw new OperatorError('Must respond select method')
+    unless _.isFunction(target.select)
+     throw new OperatorError('Must compose with a motion')
 
     @target = target
     @complete = true
