@@ -14,18 +14,11 @@ TextObjects = require './text-objects'
 Utils = require './utils'
 Scroll = require './scroll'
 
-typeChecker =
-  isOperator:   (obj) -> obj instanceof Operators.Operator
-  isTextObject: (obj) -> obj instanceof TextObjects.TextObject
-  isMotion:     (obj) -> obj instanceof Motions.Motion
-  isRepeat:     (obj) -> obj instanceof Prefixes.Repeat
-
-isOperator =    (obj) -> obj instanceof Operators.Operator
-isTextObject =  (obj) -> obj instanceof TextObjects.TextObject
-isMotion =      (obj) -> obj instanceof Motions.Motion
-isRepeat =      (obj) -> obj instanceof Prefixes.Repeat
-
-Utils.include Base, typeChecker
+Utils.include Base,
+  isOperator:   -> this instanceof Operators.Operator
+  isTextObject: -> this instanceof TextObjects.TextObject
+  isMotion:     -> this instanceof Motions.Motion
+  isRepeat:     -> this instanceof Prefixes.Repeat
 
 module.exports =
 class VimState
@@ -237,7 +230,7 @@ class VimState
         # Motions in visual mode perform their selections.
         if @mode is 'visual' and _.isFunction(operation.select)
         # if @mode is 'visual' and (operation instanceof Motions.Motion or operation instanceof TextObjects.TextObject)
-          console.log 'visu', operation.constructor.name
+          # console.log 'visu', operation.constructor.name
           # console.log 'type', operation.isMotion()
           operation.execute = operation.select
 
@@ -252,7 +245,11 @@ class VimState
 
         # If we've received an operator in visual mode, mark the current
         # selection as the motion to operate on.
-        if @mode is 'visual' and isOperator(operation)
+        if @mode is 'visual' and operation.isOperator?()
+          # console.log "--"
+          # console.log operation.constructor.name
+          # console.log operation.isOperator()
+          # console.log "--"
           @operationsQueue.push(new TextObjects.CurrentSelection(@editor, this))
 
         @processOperations()
@@ -284,7 +281,7 @@ class VimState
       return
 
     unless @tailOperation().isComplete()
-      if @mode is 'normal' and isOperator(@tailOperation())
+      if @mode is 'normal' and @tailOperation().isOperator?()
         @activateOperatorPendingMode()
       return
 
@@ -614,7 +611,7 @@ class VimState
   repeatPrefix: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
     num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-    if isRepeat(@tailOperation())
+    if @tailOperation()?.isRepeat?()
       @tailOperation().addDigit(num)
     else
       if num is 0
@@ -635,7 +632,7 @@ class VimState
   #
   # Returns new motion or nothing.
   moveOrRepeat: (e) ->
-    if isRepeat(@tailOperation())
+    if @tailOperation()?.isRepeat?()
       @repeatPrefix(e)
       null
     else
