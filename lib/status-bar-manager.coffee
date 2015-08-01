@@ -1,4 +1,4 @@
-{Disposable, CompositeDisposable} = require 'event-kit'
+{Disposable, CompositeDisposable} = require 'atom'
 
 ContentsByMode =
   'insert': ["status-bar-vim-mode-insert", "Insert"]
