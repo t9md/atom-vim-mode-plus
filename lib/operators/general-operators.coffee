@@ -30,12 +30,12 @@ class Operator extends Base
 
   # Public: Marks this as ready to execute and saves the motion.
   #
-  # motion - The motion used to select what to operate on.
+  # target - TextObject or Motion to operate on.
   #
   # Returns nothing.
   compose: (target) ->
     unless _.isFunction(target.select)
-     throw new OperatorError('Must compose with a motion')
+     throw new OperatorError('Must respond to select')
 
     @target = target
     @complete = true
