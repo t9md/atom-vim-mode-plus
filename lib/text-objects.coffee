@@ -1,10 +1,9 @@
 {Range} = require 'atom'
+_    = require 'underscore-plus'
+Base = require './base'
 
 AllWhitespace = /^\s$/
 WholeWordRegex = /\S+/
-_ = require 'underscore-plus'
-Base = require './base'
-
 
 class TextObject extends Base
   constructor: (@editor, @state) ->
@@ -24,6 +23,8 @@ class CurrentSelection extends TextObject
     @editor.setSelectedBufferRanges(@selection)
     _.times(count, -> true)
 
+# Word
+# -------------------------
 class SelectInsideWord extends TextObject
   select: ->
     @editor.selectWordsContainingCursors()
@@ -40,6 +41,8 @@ class SelectAWord extends TextObject
         selection.selectRight()
       true
 
+# WholeWord
+# -------------------------
 class SelectInsideWholeWord extends TextObject
   select: ->
     for selection in @editor.getSelections()
@@ -47,10 +50,21 @@ class SelectInsideWholeWord extends TextObject
       selection.setBufferRange(range)
       true
 
+class SelectAWholeWord extends TextObject
+  select: ->
+    for selection in @editor.getSelections()
+      range = selection.cursor.getCurrentWordBufferRange({wordRegex: WholeWordRegex})
+      selection.setBufferRange(range)
+      loop
+        endPoint = selection.getBufferRange().end
+        char = @editor.getTextInRange(Range.fromPointWithDelta(endPoint, 0, 1))
+        break unless AllWhitespace.test(char)
+        selection.selectRight()
+      true
+
 # SelectInsideQuotes and the next class defined (SelectInsideBrackets) are
 # almost-but-not-quite-repeated code. They are different because of the depth
 # checks in the bracket matcher.
-
 class SelectInsideQuotes extends TextObject
   constructor: (@editor, @char, @includeQuotes) ->
 
@@ -164,18 +178,8 @@ class SelectInsideBrackets extends TextObject
           selection.setBufferRange([start, end])
       not selection.isEmpty()
 
-class SelectAWholeWord extends TextObject
-  select: ->
-    for selection in @editor.getSelections()
-      range = selection.cursor.getCurrentWordBufferRange({wordRegex: WholeWordRegex})
-      selection.setBufferRange(range)
-      loop
-        endPoint = selection.getBufferRange().end
-        char = @editor.getTextInRange(Range.fromPointWithDelta(endPoint, 0, 1))
-        break unless AllWhitespace.test(char)
-        selection.selectRight()
-      true
-
+# Paragraph
+# -------------------------
 class SelectInsideParagraph extends TextObject
   constructor: (@editor, @inclusive) ->
   select: ->
@@ -197,5 +201,11 @@ class SelectAParagraph extends TextObject
         selection.selectDown()
       true
 
-module.exports = {TextObject, SelectInsideWord, SelectInsideWholeWord, SelectInsideQuotes,
-  SelectInsideBrackets, CurrentSelection, SelectAWord, SelectAWholeWord, SelectInsideParagraph, SelectAParagraph}
+module.exports = {
+  TextObject,
+  CurrentSelection,
+  SelectInsideWord, SelectAWord,
+  SelectInsideWholeWord, SelectAWholeWord,
+  SelectInsideQuotes, SelectInsideBrackets,
+  SelectInsideParagraph, SelectAParagraph
+}
