@@ -1,7 +1,6 @@
 Grim  = require 'grim'
 _ = require 'underscore-plus'
-{Point, Range} = require 'atom'
-{Emitter, Disposable, CompositeDisposable} = require 'event-kit'
+{Point, Range, Emitter, Disposable, CompositeDisposable} = require 'atom'
 settings = require './settings'
 
 Operators  = require './operators/index'
