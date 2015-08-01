@@ -13,6 +13,11 @@ TextObjects = require './text-objects'
 Utils = require './utils'
 Scroll = require './scroll'
 
+isOperator   = (obj) -> obj instanceof Operators.Operator
+isTextObject = (obj) -> obj instanceof TextObjects.TextObject
+isMotion     = (obj) -> obj instanceof Motions.Motion
+isRepeat     = (obj) -> obj instanceof Prefixes.Repeat
+
 module.exports =
 class VimState
   editor: null
@@ -223,11 +228,12 @@ class VimState
         # Motions in visual mode perform their selections.
         if @mode is 'visual' and _.isFunction(operation.select)
         # if @mode is 'visual' and (operation instanceof Motions.Motion or operation instanceof TextObjects.TextObject)
+          console.log 'visu', operation.constructor.name
           operation.execute = operation.select
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack
-        if (topOp = @tailOperation())? and topOp.canComposeWith? and not topOp.canComposeWith(operation)
+        if (tailOperation = @tailOperation())? and tailOperation.canComposeWith? and not tailOperation.canComposeWith(operation)
           @resetNormalMode()
           @emitter.emit('failed-to-compose')
           break
@@ -236,7 +242,7 @@ class VimState
 
         # If we've received an operator in visual mode, mark the current
         # selection as the motion to operate on.
-        if @mode is 'visual' and operation instanceof Operators.Operator
+        if @mode is 'visual' and isOperator(operation)
           @operationsQueue.push(new TextObjects.CurrentSelection(@editor, this))
 
         @processOperations()
@@ -268,7 +274,7 @@ class VimState
       return
 
     unless @tailOperation().isComplete()
-      if @mode is 'normal' and @tailOperation() instanceof Operators.Operator
+      if @mode is 'normal' and isOperator(@tailOperation())
         @activateOperatorPendingMode()
       return
 
@@ -598,7 +604,7 @@ class VimState
   repeatPrefix: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
     num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-    if @tailOperation() instanceof Prefixes.Repeat
+    if isRepeat(@tailOperation())
       @tailOperation().addDigit(num)
     else
       if num is 0
@@ -619,7 +625,7 @@ class VimState
   #
   # Returns new motion or nothing.
   moveOrRepeat: (e) ->
-    if @tailOperation() instanceof Prefixes.Repeat
+    if isRepeat(@tailOperation())
       @repeatPrefix(e)
       null
     else
@@ -644,8 +650,8 @@ class VimState
   #
   isOperatorPending: (constructor) ->
     if constructor?
-      for op in @operationsQueue
-        return op if op instanceof constructor
+      for operation in @operationsQueue
+        return operation if operation instanceof constructor
       false
     else
       @operationsQueue.length > 0
