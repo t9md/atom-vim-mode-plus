@@ -640,23 +640,21 @@ class VimState
   #
   # Returns nothing.
   linewiseAliasedOperator: (constructor) ->
-    if @isOperatorPending(constructor)
+    if @isSameOperatorPending(constructor)
       new Motions.MoveToRelativeLine(@editor, this)
     else
       new constructor(@editor, this)
 
-  # Private: Check if there is a pending operation of a certain type, or
-  # if there is any pending operation, if no type given.
+  # Private: Check if there is a pending operation of a certain type
   #
   # constructor - The constructor of the object type you're looking for.
   #
-  isOperatorPending: (constructor) ->
-    if constructor?
-      for operation in @operationsQueue
-        return operation if operation instanceof constructor
-      false
-    else
-      @operationsQueue.length > 0
+  isSameOperatorPending: (constructor) ->
+    _.detect @operationsQueue, (operation) ->
+      operation instanceof constructor
+
+  isOperatorPending: ->
+    @operationsQueue.length > 0
 
   isVisualMode: -> @mode is 'visual'
   isNormalMode: -> @mode is 'normal'
