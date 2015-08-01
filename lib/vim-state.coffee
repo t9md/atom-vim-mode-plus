@@ -670,7 +670,7 @@ class VimState
     @editor.insertText(text) if text?
 
   ensureCursorIsWithinLine: (cursor) =>
-    return if @processing or @mode isnt 'normal'
+    return if @processing or (not @isNormalMode())
 
     {goalColumn} = cursor
     if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
