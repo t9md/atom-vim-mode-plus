@@ -390,7 +390,7 @@ class VimState
   # Motions.Search - The confirmed search motion to append
   #
   # Returns nothing
-  pushSearchHistory: (search) ->
+  pushSearchHistory: (search) -> # should be saveSearchHistory for consistency.
     @globalVimState.searchHistory.unshift search
 
   # Public: Get the search history item at the given index.

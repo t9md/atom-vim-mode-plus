@@ -1,2 +1,2 @@
 module.exports =
-  class Base
+class Base
