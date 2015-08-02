@@ -1,5 +1,5 @@
 - vim-state: vim of vimState is redundant, state is enough.
-- OpStack is not stack actually, calling it OpQueue is well fit to concept.
+- ~~OpStack is not stack actually, calling it OpQueue is well fit to concept~~.
  - Its queue shifted from front in FIFO manner.
  - Enqueue multiple operations and dequeue and process it.
 - Motion.CurrentSelection should be TextObject.CurrentSelection or TextObject.Selection

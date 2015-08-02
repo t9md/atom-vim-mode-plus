@@ -263,6 +263,7 @@ class MoveToLine extends Motion
 
 class MoveToAbsoluteLine extends MoveToLine
   moveCursor: (cursor, count) ->
+    console.log "called!! #{count}"
     cursor.setBufferPosition([@getDestinationRow(count), Infinity])
     cursor.moveToFirstCharacterOfLine()
     cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0

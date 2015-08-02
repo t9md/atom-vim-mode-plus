@@ -230,7 +230,8 @@ class VimState
       for operation in operations
         # Motions in visual mode perform their selections.
         if @isVisualMode() and _.isFunction(operation.select)
-          operation.execute = operation.select
+          unless operation.isRepeat()
+            @operationsQueue.push(new Operators.Select(@editor, this))
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack
