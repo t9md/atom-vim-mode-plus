@@ -69,6 +69,10 @@ class OperatorWithInput extends Operator
       @input = operation
       @complete = true
 
+class Select extends Operator
+  execute: (count=null) ->
+    @target.select(count)
+
 #
 # It deletes everything selected by the following motion.
 #
@@ -325,6 +329,7 @@ class Autoindent extends AdjustIndentation
 
 module.exports = {
   Operator, OperatorWithInput, OperatorError, Delete, ToggleCase,
+  Select,
   UpperCase, LowerCase, Yank, Join, Repeat, Mark
   Increase, Decrease
   Indent, Outdent, Autoindent
