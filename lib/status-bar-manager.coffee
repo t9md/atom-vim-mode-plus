@@ -25,7 +25,7 @@ class StatusBarManager
     mode += ".#{submode}" if submode?
     if newContents = ContentsByMode[mode]
       [klass, text] = newContents
-      @element.className = "{@prefix}-#{klass}"
+      @element.className = "#{@prefix}-#{klass}"
       @element.textContent = text
 
   # Private
