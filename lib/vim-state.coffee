@@ -3,15 +3,16 @@ _ = require 'underscore-plus'
 {Point, Range, Emitter, Disposable, CompositeDisposable} = require 'atom'
 settings = require './settings'
 
-Operators  = require './operators/index'
-Prefixes   = require './prefixes'
-Motions    = require './motions'
-InsertMode = require './insert-mode'
-Base       = require './base'
-
+Base        = require './base'
+Operators   = require './operators/index'
+Prefixes    = require './prefixes'
+Motions     = require './motions'
+InsertMode  = require './insert-mode'
 TextObjects = require './text-objects'
-Utils = require './utils'
+
 Scroll = require './scroll'
+
+Utils  = require './utils'
 
 Utils.include Base,
   isOperator:   -> this instanceof Operators.Operator
@@ -45,7 +46,8 @@ class VimState
         @activateVisualMode('characterwise') if @isNormalMode()
     , 100)
 
-    @subscriptions.add @editor.onDidChangeCursorPosition ({cursor}) => @ensureCursorIsWithinLine(cursor)
+    @subscriptions.add @editor.onDidChangeCursorPosition ({cursor}) =>
+      @ensureCursorIsWithinLine(cursor)
     @subscriptions.add @editor.onDidAddCursor @ensureCursorIsWithinLine
 
     @editorElement.classList.add("vim-mode")
@@ -56,17 +58,17 @@ class VimState
       @activateNormalMode()
 
   destroy: ->
-    unless @destroyed
-      @destroyed = true
-      @emitter.emit 'did-destroy'
-      @subscriptions.dispose()
-      if @editor.isAlive()
-        @deactivateInsertMode()
-        @editorElement.component?.setInputEnabled(true)
-        @editorElement.classList.remove("vim-mode")
-        @editorElement.classList.remove("normal-mode")
-      @editor = null
-      @editorElement = null
+    return if @destroyed
+    @destroyed = true
+    @emitter.emit 'did-destroy'
+    @subscriptions.dispose()
+    if @editor.isAlive()
+      @deactivateInsertMode()
+      @editorElement.component?.setInputEnabled(true)
+      @editorElement.classList.remove("vim-mode")
+      @editorElement.classList.remove("normal-mode")
+    @editor = null
+    @editorElement = null
 
   # Private: Creates the plugin's bindings
   #
@@ -190,10 +192,10 @@ class VimState
       'repeat-find-reverse': => new @globalVimState.currentFind.constructor(@editor, this, repeated: true, reverse: true) if @globalVimState.currentFind
       'replace': => new Operators.Replace(@editor, this)
       'search': => new Motions.Search(@editor, this)
-      'reverse-search': => (new Motions.Search(@editor, this)).reversed()
+      'reverse-search': => new Motions.Search(@editor, this).reversed()
       'search-current-word': => new Motions.SearchCurrentWord(@editor, this)
       'bracket-matching-motion': => new Motions.BracketMatchingMotion(@editor, this)
-      'reverse-search-current-word': => (new Motions.SearchCurrentWord(@editor, this)).reversed()
+      'reverse-search-current-word': => new Motions.SearchCurrentWord(@editor, this).reversed()
 
   # Private: Register multiple command handlers via an {Object} that maps
   # command names to command handler functions.
@@ -201,9 +203,9 @@ class VimState
   # Prefixes the given command names with 'vim-mode:' to reduce redundancy in
   # the provided object.
   registerCommands: (commands) ->
-    for commandName, fn of commands
+    for name, fn of commands
       do (fn) =>
-        @subscriptions.add(atom.commands.add(@editorElement, "vim-mode:#{commandName}", fn))
+        @subscriptions.add atom.commands.add(@editorElement, "vim-mode:#{name}", fn)
 
   # Private: Register multiple Operators via an {Object} that
   # maps command names to functions that return operations to push.
@@ -212,9 +214,9 @@ class VimState
   # the given object.
   registerOperationCommands: (operationCommands) ->
     commands = {}
-    for commandName, operationFn of operationCommands
-      do (operationFn) =>
-        commands[commandName] = (event) => @enqueueOperations(operationFn(event))
+    for name, fn of operationCommands
+      do (fn) =>
+        commands[name] = (event) => @enqueueOperations(fn(event))
     @registerCommands(commands)
 
   # Private: Push the given operations onto the operation stack, then process
@@ -247,7 +249,8 @@ class VimState
         @processOperations()
     finally
       @processing = false
-      @ensureCursorIsWithinLine(cursor) for cursor in @editor.getCursors()
+      for cursor in @editor.getCursors()
+        @ensureCursorIsWithinLine(cursor)
 
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
@@ -305,20 +308,22 @@ class VimState
   getRegister: (name) ->
     if name is '"'
       name = settings.defaultRegister()
-    if name in ['*', '+']
-      text = atom.clipboard.read()
-      type = Utils.copyType(text)
-      {text, type}
-    else if name is '%'
-      text = @editor.getURI()
-      type = Utils.copyType(text)
-      {text, type}
-    else if name is "_" # Blackhole always returns nothing
-      text = ''
-      type = Utils.copyType(text)
-      {text, type}
-    else
-      @globalVimState.registers[name.toLowerCase()]
+
+    switch name
+      when '*', '+'
+        text = atom.clipboard.read()
+        type = Utils.copyType(text)
+        {text, type}
+      when '%'
+        text = @editor.getURI()
+        type = Utils.copyType(text)
+        {text, type}
+      when '_' # Blackhole always returns nothing
+        text = ''
+        type = Utils.copyType(text)
+        {text, type}
+      else
+        @globalVimState.registers[name.toLowerCase()]
 
   # Private: Fetches the value of a given mark.
   #
@@ -346,7 +351,7 @@ class VimState
       when '*', '+'
         atom.clipboard.write(value.text)
       when '_'
-        false
+        null
       else
         if /^[A-Z]$/.test(name)
           @appendRegister(name.toLowerCase(), value)
