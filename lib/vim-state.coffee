@@ -609,6 +609,7 @@ class VimState
   isVisualMode: -> @mode is 'visual'
   isNormalMode: -> @mode is 'normal'
   isInsertMode: -> @mode is 'insert'
+  isOperatorPendingMode: -> @mode is 'operator-pending'
 
   updateStatusBar: ->
     @statusBarManager.update(@mode, @submode)
