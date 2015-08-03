@@ -8,11 +8,11 @@ class ViewModel
     @vimState.onDidFailToCompose => @view.remove()
 
   confirm: (view) ->
-    @vimState.pushToOperationStack(new Input(@view.value))
+    @vimState.operationStack.push(new Input(@view.value))
 
   cancel: (view) ->
     if @vimState.isOperatorPending()
-      @vimState.pushToOperationStack(new Input(''))
+      @vimState.operationStack.push(new Input(''))
 
 class Input
   constructor: (@characters) ->
