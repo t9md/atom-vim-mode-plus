@@ -12,8 +12,7 @@ class OperationStack
   # it.
   push: (operations) ->
     return unless operations?
-    try
-      @startProcessing()
+    @withLock =>
       operations = [operations] unless _.isArray(operations)
 
       for operation in operations
@@ -38,10 +37,8 @@ class OperationStack
 
         @process()
 
-    finally
-      @finishProcessing()
-      for cursor in @vimState.editor.getCursors()
-        @vimState.ensureCursorIsWithinLine(cursor)
+    for cursor in @vimState.editor.getCursors()
+      @vimState.ensureCursorIsWithinLine(cursor)
 
   # Private: Processes the command if the last operation is complete.
   #
@@ -83,26 +80,19 @@ class OperationStack
   clear: ->
     @stack = []
 
+  isEmpty: ->
+    @stack.length is 0
+
   isSameOperatorPending: (constructor) ->
     _.detect @stack, (operation) ->
       operation instanceof constructor
 
-  isEmpty: ->
-    @stack.length is 0
-
-  setProcessing: (value) ->
-    @processing = value
-
   isProcessing: ->
     @processing
 
-  startProcessing: ->
-    @setProcessing true
-
-  finishProcessing: ->
-    @setProcessing false
-
-  withLockProcessing: (callback) ->
-    @startProcessing()
-    callback()
-    @finishProcessing()
+  withLock: (callback) ->
+    try
+      @processing = true
+      callback()
+    finally
+      @processing = false

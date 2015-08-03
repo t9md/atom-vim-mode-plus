@@ -627,7 +627,7 @@ class VimState
 
     {goalColumn} = cursor
     if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
-      @operationStack.withLockProcessing -> # to ignore the cursor change (and recursion) caused by the next line
+      @operationStack.withLock -> # to ignore the cursor change (and recursion) caused by the next line
         cursor.moveLeft()
     cursor.goalColumn = goalColumn
 
