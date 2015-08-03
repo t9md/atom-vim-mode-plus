@@ -48,7 +48,6 @@ class OperationStack
   # Returns nothing.
   process: ->
     return if @isEmpty()
-    # console.log @stack
 
     unless @getTopOperation().isComplete()
       if @vimState.isNormalMode() and @getTopOperation().isOperator?()
