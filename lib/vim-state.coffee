@@ -555,8 +555,8 @@ class VimState
   repeatPrefix: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
     num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-    if @operationStack.getTopOperation()?.isRepeat?()
-      @operationStack.getTopOperation().addDigit(num)
+    if @operationStack.peekTop()?.isRepeat?()
+      @operationStack.peekTop().addDigit(num)
     else
       if num is 0
         e.abortKeyBinding()
@@ -576,7 +576,7 @@ class VimState
   #
   # Returns new motion or nothing.
   moveOrRepeat: (e) ->
-    if @operationStack.getTopOperation()?.isRepeat?()
+    if @operationStack.peekTop()?.isRepeat?()
       @repeatPrefix(e)
       null
     else
