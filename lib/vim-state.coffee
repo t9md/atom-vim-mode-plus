@@ -11,6 +11,7 @@ InsertMode  = require './insert-mode'
 TextObjects = require './text-objects'
 
 Scroll = require './scroll'
+OperationStack = require './operation-stack'
 
 Utils  = require './utils'
 
@@ -37,6 +38,7 @@ class VimState
     @history = []
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
+    # @newOperationStack = new operationStack
 
     @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
       return unless @editor?
@@ -235,7 +237,7 @@ class VimState
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack
-        if (tailOperation = @getTailOperation())? and tailOperation.canComposeWith? and not tailOperation.canComposeWith(operation)
+        if (topOperation = @getTopOperation())? and topOperation.canComposeWith? and not topOperation.canComposeWith(operation)
           @resetNormalMode()
           @emitter.emit('failed-to-compose')
           break
@@ -275,15 +277,15 @@ class VimState
   processOperations: ->
     return unless @operationStack.length
 
-    unless @getTailOperation().isComplete()
-      if @isNormalMode() and @getTailOperation().isOperator?()
+    unless @getTopOperation().isComplete()
+      if @isNormalMode() and @getTopOperation().isOperator?()
         @activateOperatorPendingMode()
       return
 
     operation = @operationStack.pop()
     if @operationStack.length
       try
-        @getTailOperation().compose(operation)
+        @getTopOperation().compose(operation)
         @processOperations()
       catch e
         if (e instanceof Operators.OperatorError) or (e instanceof Motions.MotionError)
@@ -297,7 +299,7 @@ class VimState
   # Private: Fetches the last operation.
   #
   # Returns the last operation.
-  getTailOperation: ->
+  getTopOperation: ->
     _.last @operationStack
 
   # Private: Fetches the value of a given register.
@@ -611,8 +613,8 @@ class VimState
   repeatPrefix: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
     num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-    if @getTailOperation()?.isRepeat?()
-      @getTailOperation().addDigit(num)
+    if @getTopOperation()?.isRepeat?()
+      @getTopOperation().addDigit(num)
     else
       if num is 0
         e.abortKeyBinding()
@@ -632,7 +634,7 @@ class VimState
   #
   # Returns new motion or nothing.
   moveOrRepeat: (e) ->
-    if @getTailOperation()?.isRepeat?()
+    if @getTopOperation()?.isRepeat?()
       @repeatPrefix(e)
       null
     else

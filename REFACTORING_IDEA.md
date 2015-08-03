@@ -30,6 +30,8 @@ target.select return array of boolean which is result of not selection.isEmpty()
 - Why `Scroll` class is not extended from `Motion`?
  - it extend selection when scrolling, so I believe its make sense to be Motion's child class.
 
+- Eliminate `isComplete`, then use `haveTarget` which check existence of `@target`.
+
 # Naming
 
 - `vimState::pushSearchHistory` -> `vimState::saveSearchHistory`
