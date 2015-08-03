@@ -36,7 +36,6 @@ class VimState
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
     @editor = @editorElement.getModel()
-    # @operationStack = []
     @history = []
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
@@ -233,6 +232,10 @@ class VimState
     @editor.undo()
     @activateNormalMode()
 
+  ##############################################################################
+  # Register
+  ##############################################################################
+
   # Private: Fetches the value of a given register.
   #
   # name - The name of the register to fetch.
@@ -258,18 +261,6 @@ class VimState
         {text, type}
       else
         @globalVimState.registers[name.toLowerCase()]
-
-  # Private: Fetches the value of a given mark.
-  #
-  # name - The name of the mark to fetch.
-  #
-  # Returns the value of the given mark or undefined if it hasn't
-  # been set.
-  getMark: (name) ->
-    if @marks[name]
-      @marks[name].getBufferRange().start
-    else
-      undefined
 
   # Private: Sets the value of a given register.
   #
@@ -307,6 +298,22 @@ class VimState
     else
       register.text += text
 
+  ##############################################################################
+  # Mark
+  ##############################################################################
+
+  # Private: Fetches the value of a given mark.
+  #
+  # name - The name of the mark to fetch.
+  #
+  # Returns the value of the given mark or undefined if it hasn't
+  # been set.
+  getMark: (name) ->
+    if @marks[name]
+      @marks[name].getBufferRange().start
+    else
+      undefined
+
   # Private: Sets the value of a given mark.
   #
   # name  - The name of the mark to fetch.
@@ -318,6 +325,10 @@ class VimState
     if (charCode = name.charCodeAt(0)) >= 96 and charCode <= 122
       marker = @editor.markBufferRange(new Range(pos, pos), {invalidate: 'never', persistent: false})
       @marks[name] = marker
+
+  ##############################################################################
+  # Search History
+  ##############################################################################
 
   # Public: Append a search to the search history.
   #
