@@ -13,7 +13,7 @@ class OperationStack
   push: (operations) ->
     return unless operations?
     try
-      @setProcessing true
+      @startProcessing()
       operations = [operations] unless _.isArray(operations)
 
       for operation in operations
@@ -39,7 +39,7 @@ class OperationStack
         @process()
 
     finally
-      @setProcessing false
+      @finishProcessing()
       for cursor in @vimState.editor.getCursors()
         @vimState.ensureCursorIsWithinLine(cursor)
 
@@ -93,5 +93,16 @@ class OperationStack
   isProcessing: ->
     @processing
 
+  startProcessing: ->
+    @setProcessing true
+
+  finishProcessing: ->
+    @setProcessing false
+
   setProcessing: (value) ->
     @processing = value
+
+  withLockProcessing: (callback) ->
+    @startProcessing()
+    callback()
+    @finishProcessing()
