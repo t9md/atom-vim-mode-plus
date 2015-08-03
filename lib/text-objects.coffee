@@ -14,13 +14,8 @@ class TextObject extends Base
 class CurrentSelection extends TextObject
   constructor: ->
     super
-    @selection = @editor.getSelectedBufferRanges()
-
-  execute: (count=1) ->
-    _.times(count, -> true)
 
   select: (count=1) ->
-    @editor.setSelectedBufferRanges(@selection)
     _.times(count, -> true)
 
 # Word
