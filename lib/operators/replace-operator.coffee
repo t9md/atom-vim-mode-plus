@@ -13,7 +13,7 @@ class Replace extends OperatorWithInput
     if @input.characters is ""
       # replace canceled
 
-      if @vimState.mode is "visual"
+      if @vimState.isVisualMode()
         @vimState.resetVisualMode()
       else
         @vimState.activateNormalMode()
