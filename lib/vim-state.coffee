@@ -23,7 +23,7 @@ Utils.include Base,
 module.exports =
 class VimState
   editor: null
-  operationsQueue: null
+  operationStack: null
   mode: null
   submode: null
   destroyed: false
@@ -33,7 +33,7 @@ class VimState
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
     @editor = @editorElement.getModel()
-    @operationsQueue = []
+    @operationStack = []
     @history = []
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
@@ -216,12 +216,12 @@ class VimState
     commands = {}
     for name, fn of operationCommands
       do (fn) =>
-        commands[name] = (event) => @enqueueOperations(fn(event))
+        commands[name] = (event) => @pushToOperationStack(fn(event))
     @registerCommands(commands)
 
   # Private: Push the given operations onto the operation stack, then process
   # it.
-  enqueueOperations: (operations) ->
+  pushToOperationStack: (operations) ->
     return unless operations?
     try
       @processing = true
@@ -231,7 +231,7 @@ class VimState
         # Motions in visual mode perform their selections.
         if @isVisualMode() and _.isFunction(operation.select)
           unless operation.isRepeat()
-            @operationsQueue.push(new Operators.Select(@editor, this))
+            @operationStack.push(new Operators.Select(@editor, this))
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack
@@ -240,12 +240,12 @@ class VimState
           @emitter.emit('failed-to-compose')
           break
 
-        @operationsQueue.push(operation)
+        @operationStack.push(operation)
 
         # If we've received an operator in visual mode, use inplict currentSelection textobject
         # as a target of operator.
         if @isVisualMode() and operation.isOperator?()
-          @operationsQueue.push(new TextObjects.CurrentSelection(@editor, this))
+          @operationStack.push(new TextObjects.CurrentSelection(@editor, this))
 
         @processOperations()
     finally
@@ -262,8 +262,8 @@ class VimState
   # Private: Removes all operations from the stack.
   #
   # Returns nothing.
-  clearOperationsQueue: ->
-    @operationsQueue = []
+  clearoperationStack: ->
+    @operationStack = []
 
   undo: ->
     @editor.undo()
@@ -273,15 +273,15 @@ class VimState
   #
   # Returns nothing.
   processOperations: ->
-    return unless @operationsQueue.length
+    return unless @operationStack.length
 
     unless @getTailOperation().isComplete()
       if @isNormalMode() and @getTailOperation().isOperator?()
         @activateOperatorPendingMode()
       return
 
-    operation = @operationsQueue.pop()
-    if @operationsQueue.length
+    operation = @operationStack.pop()
+    if @operationStack.length
       try
         @getTailOperation().compose(operation)
         @processOperations()
@@ -298,7 +298,7 @@ class VimState
   #
   # Returns the last operation.
   getTailOperation: ->
-    _.last @operationsQueue
+    _.last @operationStack
 
   # Private: Fetches the value of a given register.
   #
@@ -418,7 +418,7 @@ class VimState
 
     @changeModeClass('normal-mode')
 
-    @clearOperationsQueue()
+    @clearoperationStack()
     selection.clear(autoscroll: false) for selection in @editor.getSelections()
     for cursor in @editor.getCursors()
       if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
@@ -579,7 +579,7 @@ class VimState
   #
   # Returns nothing.
   resetNormalMode: ->
-    @clearOperationsQueue()
+    @clearoperationStack()
     @editor.clearSelections()
     @activateNormalMode()
 
@@ -617,7 +617,7 @@ class VimState
       if num is 0
         e.abortKeyBinding()
       else
-        @enqueueOperations(new Prefixes.Repeat(num))
+        @pushToOperationStack(new Prefixes.Repeat(num))
 
   reverseSelections: ->
     reversed = not @editor.getLastSelection().isReversed()
@@ -656,11 +656,11 @@ class VimState
   # constructor - The constructor of the object type you're looking for.
   #
   isSameOperatorPending: (constructor) ->
-    _.detect @operationsQueue, (operation) ->
+    _.detect @operationStack, (operation) ->
       operation instanceof constructor
 
   isOperatorPending: ->
-    @operationsQueue.length > 0
+    @operationStack.length > 0
 
   isVisualMode: -> @mode is 'visual'
   isNormalMode: -> @mode is 'normal'
