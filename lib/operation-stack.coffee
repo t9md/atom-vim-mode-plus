@@ -24,7 +24,7 @@ class OperationStack
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack
-        if (topOperation = @getTopOperation())? and topOperation.canComposeWith? and not topOperation.canComposeWith(operation)
+        if (topOperation = @peekTop())? and topOperation.canComposeWith? and not topOperation.canComposeWith(operation)
           @vimState.resetNormalMode()
           @vimState.emitter.emit('failed-to-compose')
           break
@@ -49,15 +49,15 @@ class OperationStack
   process: ->
     return if @isEmpty()
 
-    unless @getTopOperation().isComplete()
-      if @vimState.isNormalMode() and @getTopOperation().isOperator?()
+    unless @peekTop().isComplete()
+      if @vimState.isNormalMode() and @peekTop().isOperator?()
         @vimState.activateOperatorPendingMode()
       return
 
     operation = @pop()
     unless @isEmpty()
       try
-        @getTopOperation().compose(operation)
+        @peekTop().compose(operation)
         @process()
       catch e
         if e.isOperatorError?() or e.isMotionError?()
@@ -71,7 +71,7 @@ class OperationStack
   # Private: Fetches the last operation.
   #
   # Returns the last operation.
-  getTopOperation: ->
+  peekTop: ->
     _.last @stack
 
   pop: ->
@@ -90,6 +90,9 @@ class OperationStack
   isEmpty: ->
     @stack.length is 0
 
+  setProcessing: (value) ->
+    @processing = value
+
   isProcessing: ->
     @processing
 
@@ -98,9 +101,6 @@ class OperationStack
 
   finishProcessing: ->
     @setProcessing false
-
-  setProcessing: (value) ->
-    @processing = value
 
   withLockProcessing: (callback) ->
     @startProcessing()
