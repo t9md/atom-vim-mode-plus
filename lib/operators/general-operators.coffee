@@ -188,7 +188,7 @@ class Yank extends Operator
       text = @editor.getSelectedText()
       startPositions = _.pluck(@editor.getSelectedBufferRanges(), "start")
       newPositions = for originalPosition, i in originalPositions
-        if startPositions[i] and (@vimState.mode is 'visual' or not @target.isLinewise?())
+        if startPositions[i] and (@vimState.isVisualMode() or not @target.isLinewise?())
           Point.min(startPositions[i], originalPositions[i])
         else
           originalPosition

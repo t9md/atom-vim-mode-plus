@@ -108,7 +108,7 @@ class Motion extends Base
       @operatesLinewise
 
   isInclusive: ->
-    @vimState.mode is 'visual' or @operatesInclusively
+    @vimState.isVisualMode() or @operatesInclusively
 
 # Public: Generic class for motions that require extra input
 class MotionWithInput extends Motion
@@ -142,7 +142,7 @@ class MoveRight extends Motion
 
       # when the motion is combined with an operator, we will only wrap to the next line
       # if we are already at the end of the line (after the last character)
-      wrapToNextLine = false if @vimState.mode is 'operator-pending' and not cursor.isAtEndOfLine()
+      wrapToNextLine = false if @vimState.isOperatorPendingMode() and not cursor.isAtEndOfLine()
 
       cursor.moveRight() unless cursor.isAtEndOfLine()
       cursor.moveRight() if wrapToNextLine and cursor.isAtEndOfLine()
