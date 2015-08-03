@@ -9,7 +9,7 @@ WholeWordRegex = /\S+/
 WholeWordOrEmptyLineRegex = /^\s*$|\S+/
 AllWhitespace = /^\s$/
 
-class MotionError
+class MotionError extends Base
   constructor: (@message) ->
     @name = 'Motion Error'
 

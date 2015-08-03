@@ -5,7 +5,7 @@ Utils = require '../utils'
 settings = require '../settings'
 Base = require '../base'
 
-class OperatorError
+class OperatorError extends Base
   constructor: (@message) ->
     @name = 'Operator Error'
 
