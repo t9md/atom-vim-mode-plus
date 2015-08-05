@@ -32,6 +32,9 @@ target.select return array of boolean which is result of not selection.isEmpty()
 
 - Eliminate `isComplete`, then use `haveTarget` which check existence of `@target`.
 
+# Spec
+- add keystroke method a111105dd8a018425a5a0aff3afbf04c46ca93b2
+
 # Naming
 
 - `vimState::pushSearchHistory` -> `vimState::saveSearchHistory`
