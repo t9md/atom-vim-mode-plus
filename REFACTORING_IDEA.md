@@ -32,12 +32,15 @@ target.select return array of boolean which is result of not selection.isEmpty()
 
 - Eliminate `isComplete`, then use `haveTarget` which check existence of `@target`.
 
+# Repeat
+
+Do Repeat really have to object?
+Make it simple instance var of vimState, then each TMO refer vimState.count if they want.
+
 # Spec
 
-- add keystroke method
-
-sha1 a5c3785ed8d6a35868bc169f07e40e889087fd2e
-sha2 a111105dd8a018425a5a0aff3afbf04c46ca93b2
+- [add keystroke method](https://github.com/t9md/vim-mode/commit/a111105dd8a018425a5a0aff3afbf04c46ca93b2)
+- I like [more neat spec](https://github.com/t9md/vim-mode/commit/987077e033b81f913b2503119bb05f3e202f9696).
 
 # Naming
 
