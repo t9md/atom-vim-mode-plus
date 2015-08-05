@@ -33,9 +33,11 @@ target.select return array of boolean which is result of not selection.isEmpty()
 - Eliminate `isComplete`, then use `haveTarget` which check existence of `@target`.
 
 # Spec
+
 - add keystroke method
-a111105dd8a018425a5a0aff3afbf04c46ca93b2
-a111105dd8a018425a5a0aff3afbf04c46ca93b2
+
+sha1 a5c3785ed8d6a35868bc169f07e40e889087fd2e
+sha2 a111105dd8a018425a5a0aff3afbf04c46ca93b2
 
 # Naming
 
