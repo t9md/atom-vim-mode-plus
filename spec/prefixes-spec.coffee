@@ -23,80 +23,98 @@ describe "Prefixes", ->
     for key in keys.split('')
       helpers.keydown(key, options)
 
+  text = (text=null)->
+    if text
+      editor.setText(text)
+    else
+      expect(editor.getText())
+
+  cursor = (point=null)->
+    if point
+      editor.setCursorScreenPosition(point)
+    else
+      expect(editor.getCursorScreenPosition())
+
+  register = (name, value)->
+    if value
+      vimState.setRegister(name, value)
+    else
+      expect(vimState.getRegister(name).text)
+
   describe "Repeat", ->
     describe "with operations", ->
       beforeEach ->
-        editor.setText("123456789abc")
-        editor.setCursorScreenPosition([0, 0])
+        text "123456789abc"
+        cursor [0, 0]
 
       it "repeats N times", ->
         keystroke '3x'
-        expect(editor.getText()).toBe '456789abc'
+        text().toBe '456789abc'
 
       it "repeats NN times", ->
         keystroke '10x'
-        expect(editor.getText()).toBe 'bc'
+        text().toBe 'bc'
 
     describe "with motions", ->
       beforeEach ->
-        editor.setText('one two three')
-        editor.setCursorScreenPosition([0, 0])
+        text 'one two three'
+        cursor [0, 0]
 
       it "repeats N times", ->
         keystroke 'd2w'
-        expect(editor.getText()).toBe 'three'
+        text().toBe 'three'
 
     describe "in visual mode", ->
       beforeEach ->
-        editor.setText('one two three')
-        editor.setCursorScreenPosition([0, 0])
+        text 'one two three'
+        cursor [0, 0]
 
       it "repeats movements in visual mode", ->
         keystroke 'v2w'
-        expect(editor.getCursorScreenPosition()).toEqual [0, 9]
+        cursor().toEqual [0, 9]
 
   describe "Register", ->
     describe "the a register", ->
       it "saves a value for future reading", ->
-        vimState.setRegister('a', text: 'new content')
-        expect(vimState.getRegister("a").text).toEqual 'new content'
+        register('a', text: 'new content')
+        register('a').toEqual 'new content'
 
       it "overwrites a value previously in the register", ->
-        vimState.setRegister('a', text: 'content')
-        vimState.setRegister('a', text: 'new content')
-        expect(vimState.getRegister("a").text).toEqual 'new content'
+        register('a', text: 'content')
+        register('a', text: 'new content')
+        register('a').toEqual 'new content'
 
     describe "the B register", ->
       it "saves a value for future reading", ->
-        vimState.setRegister('B', text: 'new content')
-        expect(vimState.getRegister("b").text).toEqual 'new content'
-        expect(vimState.getRegister("B").text).toEqual 'new content'
+        register('B', text: 'new content')
+        register('b').toEqual 'new content'
+        register('B').toEqual 'new content'
 
       it "appends to a value previously in the register", ->
-        vimState.setRegister('b', text: 'content')
-        vimState.setRegister('B', text: 'new content')
-        expect(vimState.getRegister("b").text).toEqual 'contentnew content'
+        register('b', text: 'content')
+        register('B', text: 'new content')
+        register("b").toEqual 'contentnew content'
 
       it "appends linewise to a linewise value previously in the register", ->
-        vimState.setRegister('b', {type: 'linewise', text: 'content\n'})
-        vimState.setRegister('B', text: 'new content')
-        expect(vimState.getRegister("b").text).toEqual 'content\nnew content\n'
+        register('b', {type: 'linewise', text: 'content\n'})
+        register('B', text: 'new content')
+        register('b').toEqual 'content\nnew content\n'
 
       it "appends linewise to a character value previously in the register", ->
-        vimState.setRegister('b', text: 'content')
-        vimState.setRegister('B', {type: 'linewise', text: 'new content\n'})
-        expect(vimState.getRegister("b").text).toEqual 'content\nnew content\n'
+        register('b', text: 'content')
+        register('B', {type: 'linewise', text: 'new content\n'})
+        register("b").toEqual 'content\nnew content\n'
 
 
     describe "the * register", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
-          expect(vimState.getRegister('*').text).toEqual 'initial clipboard content'
+          register('*').toEqual 'initial clipboard content'
           expect(vimState.getRegister('*').type).toEqual 'character'
 
       describe "writing", ->
         beforeEach ->
-          vimState.setRegister('*', text: 'new content')
+          register('*', text: 'new content')
 
         it "overwrites the contents of the system clipboard", ->
           expect(atom.clipboard.read()).toEqual 'new content'
@@ -108,12 +126,12 @@ describe "Prefixes", ->
     describe "the + register", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
-          expect(vimState.getRegister('*').text).toEqual 'initial clipboard content'
+          register('*').toEqual 'initial clipboard content'
           expect(vimState.getRegister('*').type).toEqual 'character'
 
       describe "writing", ->
         beforeEach ->
-          vimState.setRegister('*', text: 'new content')
+          register('*', text: 'new content')
 
         it "overwrites the contents of the system clipboard", ->
           expect(atom.clipboard.read()).toEqual 'new content'
@@ -121,12 +139,12 @@ describe "Prefixes", ->
     describe "the _ register", ->
       describe "reading", ->
         it "is always the empty string", ->
-          expect(vimState.getRegister("_").text).toEqual ''
+          register('_').toEqual ''
 
       describe "writing", ->
         it "throws away anything written to it", ->
-          vimState.setRegister('_', text: 'new content')
-          expect(vimState.getRegister("_").text).toEqual ''
+          register('_', text: 'new content')
+          register("_").toEqual ''
 
     describe "the % register", ->
       beforeEach ->
@@ -134,19 +152,19 @@ describe "Prefixes", ->
 
       describe "reading", ->
         it "returns the filename of the current editor", ->
-          expect(vimState.getRegister('%').text).toEqual '/Users/atom/known_value.txt'
+          register('%').toEqual '/Users/atom/known_value.txt'
 
       describe "writing", ->
         it "throws away anything written to it", ->
-          vimState.setRegister('%', "new content")
-          expect(vimState.getRegister('%').text).toEqual '/Users/atom/known_value.txt'
+          register('%', "new content")
+          register('%').toEqual '/Users/atom/known_value.txt'
 
     describe "the ctrl-r command in insert mode", ->
       beforeEach ->
-        editor.setText "02\n"
-        editor.setCursorScreenPosition [0, 0]
-        vimState.setRegister('"', text: '345')
-        vimState.setRegister('a', text: 'abc')
+        text "02\n"
+        cursor [0, 0]
+        register('"', text: '345')
+        register('a', text: 'abc')
         atom.clipboard.write "clip"
         keydown 'a'
         editor.insertText '1'
@@ -154,23 +172,23 @@ describe "Prefixes", ->
       it "inserts contents of the unnamed register with \"", ->
         keydown 'r', ctrl: true
         keydown '"'
-        expect(editor.getText()).toBe '013452\n'
+        text().toBe '013452\n'
 
       describe "when useClipboardAsDefaultRegister enabled", ->
         it "inserts contents from clipboard with \"", ->
           atom.config.set 'vim-mode.useClipboardAsDefaultRegister', true
           keydown 'r', ctrl: true
           keydown '"'
-          expect(editor.getText()).toBe '01clip2\n'
+          text().toBe '01clip2\n'
 
       it "inserts contents of the 'a' register", ->
         keydown 'r', ctrl: true
         keydown 'a'
-        expect(editor.getText()).toBe '01abc2\n'
+        text().toBe '01abc2\n'
 
       it "is cancelled with the escape key", ->
         keydown 'r', ctrl: true
         keydown 'escape'
-        expect(editor.getText()).toBe '012\n'
+        text().toBe '012\n'
         expect(vimState.mode).toBe "insert"
-        expect(editor.getCursorScreenPosition()).toEqual [0, 2]
+        cursor().toEqual [0, 2]
