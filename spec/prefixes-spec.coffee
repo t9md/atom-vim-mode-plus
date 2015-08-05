@@ -18,6 +18,11 @@ describe "Prefixes", ->
     options.element ?= editorElement
     helpers.keydown(key, options)
 
+  keystroke = (keys, options={}) ->
+    options.element ?= editorElement
+    for key in keys.split('')
+      helpers.keydown(key, options)
+
   describe "Repeat", ->
     describe "with operations", ->
       beforeEach ->
@@ -25,16 +30,11 @@ describe "Prefixes", ->
         editor.setCursorScreenPosition([0, 0])
 
       it "repeats N times", ->
-        keydown('3')
-        keydown('x')
-
+        keystroke '3x'
         expect(editor.getText()).toBe '456789abc'
 
       it "repeats NN times", ->
-        keydown('1')
-        keydown('0')
-        keydown('x')
-
+        keystroke '10x'
         expect(editor.getText()).toBe 'bc'
 
     describe "with motions", ->
@@ -43,10 +43,7 @@ describe "Prefixes", ->
         editor.setCursorScreenPosition([0, 0])
 
       it "repeats N times", ->
-        keydown('d')
-        keydown('2')
-        keydown('w')
-
+        keystroke 'd2w'
         expect(editor.getText()).toBe 'three'
 
     describe "in visual mode", ->
@@ -55,10 +52,7 @@ describe "Prefixes", ->
         editor.setCursorScreenPosition([0, 0])
 
       it "repeats movements in visual mode", ->
-        keydown("v")
-        keydown("2")
-        keydown("w")
-
+        keystroke 'v2w'
         expect(editor.getCursorScreenPosition()).toEqual [0, 9]
 
   describe "Register", ->
