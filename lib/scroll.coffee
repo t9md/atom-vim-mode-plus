@@ -1,4 +1,5 @@
-class Scroll
+Base = require './base'
+class Scroll extends Base
   isComplete: -> true
   isRecordable: -> false
   constructor: (@editorElement) ->
@@ -84,7 +85,7 @@ class ScrollCursorToBottom extends ScrollCursor
   moveToFirstNonBlank: ->
     @editor.moveToFirstCharacterOfLine()
 
-class ScrollHorizontal
+class ScrollHorizontal extends Base
   isComplete: -> true
   isRecordable: -> false
   constructor: (@editorElement) ->

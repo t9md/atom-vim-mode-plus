@@ -63,7 +63,10 @@ class OperationStack
           throw e
     else
       @vimState.history.unshift(operation) if operation.isRecordable()
-      operation.execute()
+      unless operation.isPure()
+        operation.execute()
+      else
+        null # Something new way of execution.
 
   # Private: Fetches the last operation.
   #
