@@ -10,6 +10,7 @@
     "atom": ">0.151.0"
   },
   "dependencies": {
+    "fs-plus": "^2.8.1",
     "grim": "^1.4.1",
     "underscore-plus": "1.x"
   },

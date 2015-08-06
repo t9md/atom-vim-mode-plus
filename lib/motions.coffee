@@ -114,6 +114,8 @@ class Motion extends Base
 
 # Public: Generic class for motions that require extra input
 class MotionWithInput extends Motion
+  @extend()
+
   constructor: ->
     super
     @complete = false
@@ -129,6 +131,8 @@ class MotionWithInput extends Motion
     @complete = true
 
 class MoveLeft extends Motion
+  @extend()
+
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -136,6 +140,8 @@ class MoveLeft extends Motion
       cursor.moveLeft() if not cursor.isAtBeginningOfLine() or settings.wrapLeftRightMotion()
 
 class MoveRight extends Motion
+  @extend()
+
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -150,6 +156,8 @@ class MoveRight extends Motion
       cursor.moveRight() if wrapToNextLine and cursor.isAtEndOfLine()
 
 class MoveUp extends Motion
+  @extend()
+
   operatesLinewise: true
 
   moveCursor: (cursor) ->
@@ -158,6 +166,8 @@ class MoveUp extends Motion
         cursor.moveUp()
 
 class MoveDown extends Motion
+  @extend()
+
   operatesLinewise: true
 
   moveCursor: (cursor) ->
@@ -166,6 +176,8 @@ class MoveDown extends Motion
         cursor.moveDown()
 
 class MoveToPreviousWord extends Motion
+  @extend()
+
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -173,6 +185,8 @@ class MoveToPreviousWord extends Motion
       cursor.moveToBeginningOfWord()
 
 class MoveToPreviousWholeWord extends Motion
+  @extend()
+
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -190,6 +204,8 @@ class MoveToPreviousWholeWord extends Motion
     not cur.row and not cur.column
 
 class MoveToNextWord extends Motion
+  @extend()
+
   wordRegex: null
   operatesInclusively: false
 
@@ -219,9 +235,13 @@ class MoveToNextWord extends Motion
     cur.row is eof.row and cur.column is eof.column
 
 class MoveToNextWholeWord extends MoveToNextWord
+  @extend()
+
   wordRegex: WholeWordOrEmptyLineRegex
 
 class MoveToEndOfWord extends Motion
+  @extend()
+
   wordRegex: null
 
   moveCursor: (cursor) ->
@@ -243,9 +263,13 @@ class MoveToEndOfWord extends Motion
       cursor.setBufferPosition(next)
 
 class MoveToEndOfWholeWord extends MoveToEndOfWord
+  @extend()
+
   wordRegex: WholeWordRegex
 
 class MoveToNextParagraph extends Motion
+  @extend()
+
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -253,23 +277,31 @@ class MoveToNextParagraph extends Motion
       cursor.moveToBeginningOfNextParagraph()
 
 class MoveToPreviousParagraph extends Motion
+  @extend()
+
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
       cursor.moveToBeginningOfPreviousParagraph()
 
 class MoveToLine extends Motion
+  @extend()
+
   operatesLinewise: true
 
   getDestinationRow: (count) ->
     if count? then count - 1 else (@editor.getLineCount() - 1)
 
 class MoveToAbsoluteLine extends MoveToLine
+  @extend()
+
   moveCursor: (cursor) ->
     cursor.setBufferPosition([@getDestinationRow(@getCount()), Infinity])
     cursor.moveToFirstCharacterOfLine()
     cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
 
 class MoveToRelativeLine extends MoveToLine
+  @extend()
+
   operatesLinewise: true
 
   moveCursor: (cursor) ->
@@ -277,6 +309,8 @@ class MoveToRelativeLine extends MoveToLine
     cursor.setBufferPosition([row + (@getCount(1) - 1), 0])
 
 class MoveToScreenLine extends MoveToLine
+  @extend()
+
   constructor: (@editorElement, @vimState, @scrolloff) ->
     @scrolloff = 2 # atom default
     super(@editorElement.getModel(), @vimState)
@@ -286,6 +320,8 @@ class MoveToScreenLine extends MoveToLine
     cursor.setScreenPosition([@getDestinationRow(@getCount(1)), 0])
 
 class MoveToBeginningOfLine extends Motion
+  @extend()
+
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -293,6 +329,8 @@ class MoveToBeginningOfLine extends Motion
       cursor.moveToBeginningOfLine()
 
 class MoveToFirstCharacterOfLine extends Motion
+  @extend()
+
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -301,6 +339,8 @@ class MoveToFirstCharacterOfLine extends Motion
       cursor.moveToFirstCharacterOfLine()
 
 class MoveToFirstCharacterOfLineAndDown extends Motion
+  @extend()
+
   operatesLinewise: true
   operatesInclusively: true
 
@@ -311,6 +351,8 @@ class MoveToFirstCharacterOfLineAndDown extends Motion
     cursor.moveToFirstCharacterOfLine()
 
 class MoveToLastCharacterOfLine extends Motion
+  @extend()
+
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -319,6 +361,8 @@ class MoveToLastCharacterOfLine extends Motion
       cursor.goalColumn = Infinity
 
 class MoveToLastNonblankCharacterOfLineAndDown extends Motion
+  @extend()
+
   operatesInclusively: true
 
   # moves cursor to the last non-whitespace character on the line
@@ -338,6 +382,8 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
     @skipTrailingWhitespace(cursor)
 
 class MoveToFirstCharacterOfLineUp extends Motion
+  @extend()
+
   operatesLinewise: true
   operatesInclusively: true
 
@@ -348,6 +394,8 @@ class MoveToFirstCharacterOfLineUp extends Motion
     cursor.moveToFirstCharacterOfLine()
 
 class MoveToFirstCharacterOfLineDown extends Motion
+  @extend()
+
   operatesLinewise: true
 
   moveCursor: (cursor) ->
@@ -357,6 +405,8 @@ class MoveToFirstCharacterOfLineDown extends Motion
     cursor.moveToFirstCharacterOfLine()
 
 class MoveToStartOfFile extends MoveToLine
+  @extend()
+
   moveCursor: (cursor) ->
     {row, column} = @editor.getCursorBufferPosition()
     cursor.setBufferPosition([@getDestinationRow(@getCount(1)), 0])
@@ -364,6 +414,7 @@ class MoveToStartOfFile extends MoveToLine
       cursor.moveToFirstCharacterOfLine()
 
 class MoveToTopOfScreen extends MoveToScreenLine
+  @extend()
   getDestinationRow: ->
     count = @getCount(0)
     firstScreenRow = @editorElement.getFirstVisibleScreenRow()
@@ -374,6 +425,7 @@ class MoveToTopOfScreen extends MoveToScreenLine
     firstScreenRow + offset
 
 class MoveToBottomOfScreen extends MoveToScreenLine
+  @extend()
   getDestinationRow: ->
     count = @getCount(0)
     lastScreenRow = @editorElement.getLastVisibleScreenRow()
@@ -385,6 +437,7 @@ class MoveToBottomOfScreen extends MoveToScreenLine
     lastScreenRow - offset
 
 class MoveToMiddleOfScreen extends MoveToScreenLine
+  @extend()
   getDestinationRow: ->
     firstScreenRow = @editorElement.getFirstVisibleScreenRow()
     lastScreenRow = @editorElement.getLastVisibleScreenRow()
@@ -392,6 +445,7 @@ class MoveToMiddleOfScreen extends MoveToScreenLine
     Math.floor(firstScreenRow + (height / 2))
 
 class ScrollKeepingCursor extends MoveToLine
+  @extend()
   previousFirstScreenRow: 0
   currentFirstScreenRow: 0
 
@@ -423,26 +477,31 @@ class ScrollKeepingCursor extends MoveToLine
     destination
 
 class ScrollHalfUpKeepCursor extends ScrollKeepingCursor
+  @extend()
   scrollDestination: ->
     half = (Math.floor(@editor.getRowsPerPage() / 2) * @editor.getLineHeightInPixels())
     @editor.getScrollTop() - @getCount(1) * half
 
 class ScrollFullUpKeepCursor extends ScrollKeepingCursor
+  @extend()
   scrollDestination: ->
     @editor.getScrollTop() - (@getCount(1) * @editor.getHeight())
 
 class ScrollHalfDownKeepCursor extends ScrollKeepingCursor
+  @extend()
   scrollDestination: ->
     half = (Math.floor(@editor.getRowsPerPage() / 2) * @editor.getLineHeightInPixels())
     @editor.getScrollTop() + @getCount(1) * half
 
 class ScrollFullDownKeepCursor extends ScrollKeepingCursor
+  @extend()
   scrollDestination: ->
     @editor.getScrollTop() + (@getCount(1) * @editor.getHeight())
 
 # Find Motion
 # -------------------------
 class Find extends MotionWithInput
+  @extend()
   constructor: (@editor, @vimState, opts={}) ->
     super(@editor, @vimState)
     @offset = 0
@@ -490,6 +549,7 @@ class Find extends MotionWithInput
       cursor.setBufferPosition(match)
 
 class Till extends Find
+  @extend()
   constructor: ->
     super
     @offset = 1
@@ -510,6 +570,7 @@ class Till extends Find
 # MoveToMark
 # -------------------------
 class MoveToMark extends MotionWithInput
+  @extend()
   operatesInclusively: false
 
   constructor: (@editor, @vimState, @linewise=true) ->
@@ -531,6 +592,7 @@ class MoveToMark extends MotionWithInput
       cursor.moveToFirstCharacterOfLine()
 
 class SearchBase extends MotionWithInput
+  @extend()
   operatesInclusively: false
 
   constructor: (@editor, @vimState, options = {}) ->
@@ -601,11 +663,13 @@ class SearchBase extends MotionWithInput
 # Search Motion
 # -------------------------
 class Search extends SearchBase
+  @extend()
   constructor: (@editor, @vimState) ->
     super(@editor, @vimState)
     @viewModel = new SearchViewModel(this)
 
 class SearchCurrentWord extends SearchBase
+  @extend()
   @keywordRegex: null
 
   constructor: (@editor, @vimState) ->
@@ -661,6 +725,7 @@ CloseBrackets = [')', '}', ']']
 AnyBracket = new RegExp(OpenBrackets.concat(CloseBrackets).map(_.escapeRegExp).join("|"))
 
 class BracketMatchingMotion extends SearchBase
+  @extend()
   operatesInclusively: true
 
   isComplete: -> true
@@ -725,6 +790,7 @@ class BracketMatchingMotion extends SearchBase
       cursor.setBufferPosition(matchPosition)
 
 class RepeatSearch extends SearchBase
+  @extend()
   constructor: (@editor, @vimState) ->
     super(@editor, @vimState, dontUpdateCurrentSearch: true)
     @input = new Input(@vimState.getSearchHistoryItem(0) ? "")

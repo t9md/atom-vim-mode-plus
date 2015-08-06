@@ -31,6 +31,17 @@ module.exports =
     @disposables.add new Disposable =>
       @vimStates.forEach (vimState) -> vimState.destroy()
 
+    @disposables.add atom.commands.add 'atom-workspace',
+      'vim-mode:report': => @showReport()
+      'vim-mode:report-detail': => @showReport(true)
+
+  showReport: (detail) ->
+    Base = require './base'
+    fs = require 'fs-plus'
+    filePath = fs.normalize("~/vim-mode-report.md")
+    atom.workspace.open(filePath).then (editor) ->
+      editor.setText Base.reportAll(detail)
+
   deactivate: ->
     @disposables.dispose()
 
