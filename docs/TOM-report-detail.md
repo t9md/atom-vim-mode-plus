@@ -1,6 +1,6 @@
 # TOM report detail
 All TOMs inherits Base class
-(Base class omitted from ancesstors list for screen spaces).  
+(Base class omitted from ancesstors list for screen spaces).
 - [OperatorError](#operatorerror)
 - [Operator](#operator)
 - [OperatorWithInput < Operator](#operatorwithinput--operator)
@@ -95,6 +95,7 @@ All TOMs inherits Base class
 - [ScrollHorizontal](#scrollhorizontal)
 - [ScrollCursorToLeft < ScrollHorizontal](#scrollcursortoleft--scrollhorizontal)
 - [ScrollCursorToRight < ScrollHorizontal](#scrollcursortoright--scrollhorizontal)
+
 ### OperatorError
 
 ### Operator

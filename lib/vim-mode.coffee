@@ -61,8 +61,8 @@ module.exports =
     body = """
     #{header}
     All TOMs inherits Base class
-    (Base class omitted from ancesstors list for screen spaces).  
-    #{toc}
+    (Base class omitted from ancesstors list for screen spaces).
+    #{toc}\n
     #{content}
     """
     atom.workspace.open(filePath).then (editor) ->
