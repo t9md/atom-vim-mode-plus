@@ -1,6 +1,6 @@
-## OperatorError
+## OperatorError < Base
 
-## Operator
+## Operator < Base
 - ::vimState
 - ::target
 - ::complete
@@ -10,72 +10,72 @@
 - ::canComposeWith
 - ::setTextRegister
 
-## OperatorWithInput
+## OperatorWithInput < Operator
 - ::canComposeWith
 - ::compose
 
-## Select
+## Select < Operator
 - ::execute
 
-## Delete
+## Delete < Operator
 - ::register
 - ::execute
 
-## ToggleCase
+## ToggleCase < Operator
 - ::execute
 
-## UpperCase
+## UpperCase < Operator
 - ::execute
 
-## LowerCase
+## LowerCase < Operator
 - ::execute
 
-## Yank
+## Yank < Operator
 - ::register
 - ::execute
 
-## Join
+## Join < Operator
 - ::execute
 
-## Repeat
+## Repeat < Operator
 - ::isRecordable
 - ::execute
 
-## Mark
+## Mark < OperatorWithInput
 - ::execute
 
-## Increase
+## Increase < Operator
 - ::step
 - ::execute
 - ::increaseNumber
 
-## Decrease
+## Decrease < Increase
 - ::step
 
-## AdjustIndentation
+## AdjustIndentation < Operator
 - ::execute
 
-## Indent
+## Indent < AdjustIndentation
 - ::indent
 
-## Outdent
+## Outdent < AdjustIndentation
 - ::indent
 
-## Autoindent
+## Autoindent < AdjustIndentation
 - ::indent
 
-## Put
+## Put < Operator
 - ::register
 - ::execute
 - ::onLastRow
 - ::onLastColumn
 
-## Replace
+## Replace < OperatorWithInput
 - ::execute
 
-## MotionError
+## MotionError < Base
 
-## Motion
+## Motion < Base
 - ::operatesInclusively
 - ::operatesLinewise
 - ::select
@@ -88,118 +88,118 @@
 - ::isLinewise
 - ::isInclusive
 
-## MotionWithInput
+## MotionWithInput < Motion
 - ::isComplete
 - ::canComposeWith
 - ::compose
 
-## MoveLeft
+## MoveLeft < Motion
 - ::operatesInclusively
 - ::moveCursor
 
-## MoveRight
+## MoveRight < Motion
 - ::operatesInclusively
 - ::moveCursor
 
-## MoveUp
+## MoveUp < Motion
 - ::operatesLinewise
 - ::moveCursor
 
-## MoveDown
+## MoveDown < Motion
 - ::operatesLinewise
 - ::moveCursor
 
-## MoveToPreviousWord
+## MoveToPreviousWord < Motion
 - ::operatesInclusively
 - ::moveCursor
 
-## MoveToPreviousWholeWord
+## MoveToPreviousWholeWord < Motion
 - ::operatesInclusively
 - ::moveCursor
 - ::isWholeWord
 - ::isBeginningOfFile
 
-## MoveToNextWord
+## MoveToNextWord < Motion
 - ::wordRegex
 - ::operatesInclusively
 - ::moveCursor
 - ::isEndOfFile
 
-## MoveToNextWholeWord
+## MoveToNextWholeWord < MoveToNextWord
 - ::wordRegex
 
-## MoveToEndOfWord
+## MoveToEndOfWord < Motion
 - ::wordRegex
 - ::moveCursor
 
-## MoveToEndOfWholeWord
+## MoveToEndOfWholeWord < MoveToEndOfWord
 - ::wordRegex
 
-## MoveToNextParagraph
+## MoveToNextParagraph < Motion
 - ::operatesInclusively
 - ::moveCursor
 
-## MoveToPreviousParagraph
+## MoveToPreviousParagraph < Motion
 - ::moveCursor
 
-## MoveToLine
+## MoveToLine < Motion
 - ::operatesLinewise
 - ::getDestinationRow
 
-## MoveToAbsoluteLine
+## MoveToAbsoluteLine < MoveToLine
 - ::moveCursor
 
-## MoveToRelativeLine
+## MoveToRelativeLine < MoveToLine
 - ::operatesLinewise
 - ::moveCursor
 
-## MoveToScreenLine
+## MoveToScreenLine < MoveToLine
 - ::moveCursor
 
-## MoveToBeginningOfLine
+## MoveToBeginningOfLine < Motion
 - ::operatesInclusively
 - ::moveCursor
 
-## MoveToFirstCharacterOfLine
+## MoveToFirstCharacterOfLine < Motion
 - ::operatesInclusively
 - ::moveCursor
 
-## MoveToFirstCharacterOfLineAndDown
+## MoveToFirstCharacterOfLineAndDown < Motion
 - ::operatesLinewise
 - ::operatesInclusively
 - ::moveCursor
 
-## MoveToLastCharacterOfLine
+## MoveToLastCharacterOfLine < Motion
 - ::operatesInclusively
 - ::moveCursor
 
-## MoveToLastNonblankCharacterOfLineAndDown
+## MoveToLastNonblankCharacterOfLineAndDown < Motion
 - ::operatesInclusively
 - ::skipTrailingWhitespace
 - ::moveCursor
 
-## MoveToFirstCharacterOfLineUp
+## MoveToFirstCharacterOfLineUp < Motion
 - ::operatesLinewise
 - ::operatesInclusively
 - ::moveCursor
 
-## MoveToFirstCharacterOfLineDown
+## MoveToFirstCharacterOfLineDown < Motion
 - ::operatesLinewise
 - ::moveCursor
 
-## MoveToStartOfFile
+## MoveToStartOfFile < MoveToLine
 - ::moveCursor
 
-## MoveToTopOfScreen
+## MoveToTopOfScreen < MoveToScreenLine
 - ::getDestinationRow
 
-## MoveToBottomOfScreen
+## MoveToBottomOfScreen < MoveToScreenLine
 - ::getDestinationRow
 
-## MoveToMiddleOfScreen
+## MoveToMiddleOfScreen < MoveToScreenLine
 - ::getDestinationRow
 
-## ScrollKeepingCursor
+## ScrollKeepingCursor < MoveToLine
 - ::previousFirstScreenRow
 - ::currentFirstScreenRow
 - ::select
@@ -208,33 +208,33 @@
 - ::getDestinationRow
 - ::scrollScreen
 
-## ScrollHalfUpKeepCursor
+## ScrollHalfUpKeepCursor < ScrollKeepingCursor
 - ::scrollDestination
 
-## ScrollFullUpKeepCursor
+## ScrollFullUpKeepCursor < ScrollKeepingCursor
 - ::scrollDestination
 
-## ScrollHalfDownKeepCursor
+## ScrollHalfDownKeepCursor < ScrollKeepingCursor
 - ::scrollDestination
 
-## ScrollFullDownKeepCursor
+## ScrollFullDownKeepCursor < ScrollKeepingCursor
 - ::scrollDestination
 
-## Find
+## Find < MotionWithInput
 - ::match
 - ::reverse
 - ::moveCursor
 
-## Till
+## Till < Find
 - ::match
 - ::moveSelectionInclusively
 
-## MoveToMark
+## MoveToMark < MotionWithInput
 - ::operatesInclusively
 - ::isLinewise
 - ::moveCursor
 
-## SearchBase
+## SearchBase < MotionWithInput
 - ::operatesInclusively
 - ::reversed
 - ::moveCursor
@@ -243,9 +243,9 @@
 - ::updateCurrentSearch
 - ::replicateCurrentSearch
 
-## Search
+## Search < SearchBase
 
-## SearchCurrentWord
+## SearchCurrentWord < SearchBase
 - @keywordRegex
 - ::getCurrentWord
 - ::cursorIsOnEOF
@@ -253,7 +253,7 @@
 - ::isComplete
 - ::execute
 
-## BracketMatchingMotion
+## BracketMatchingMotion < SearchBase
 - ::operatesInclusively
 - ::isComplete
 - ::searchForMatch
@@ -261,46 +261,46 @@
 - ::getSearchData
 - ::moveCursor
 
-## RepeatSearch
+## RepeatSearch < SearchBase
 - ::isComplete
 - ::reversed
 
-## Insert
+## Insert < Operator
 - ::standalone
 - ::isComplete
 - ::confirmChanges
 - ::execute
 - ::inputOperator
 
-## ReplaceMode
+## ReplaceMode < Insert
 - ::execute
 - ::countChars
 
-## InsertAfter
+## InsertAfter < Insert
 - ::execute
 
-## InsertAfterEndOfLine
+## InsertAfterEndOfLine < Insert
 - ::execute
 
-## InsertAtBeginningOfLine
+## InsertAtBeginningOfLine < Insert
 - ::execute
 
-## InsertAboveWithNewline
+## InsertAboveWithNewline < Insert
 - ::execute
 
-## InsertBelowWithNewline
+## InsertBelowWithNewline < Insert
 - ::execute
 
-## Change
+## Change < Insert
 - ::standalone
 - ::register
 - ::execute
 
-## SubstituteLine
+## SubstituteLine < Change
 - ::standalone
 - ::register
 
-## Prefix
+## Prefix < Base
 - ::complete
 - ::composedObject
 - ::isComplete
@@ -310,85 +310,85 @@
 - ::select
 - ::isLinewise
 
-## Register
+## Register < Prefix
 - ::name
 - ::compose
 
-## TextObject
+## TextObject < Base
 - ::isComplete
 - ::isRecordable
 
-## CurrentSelection
+## CurrentSelection < TextObject
 - ::select
 
-## SelectInsideWord
+## SelectInsideWord < TextObject
 - ::select
 
-## SelectAWord
+## SelectAWord < TextObject
 - ::select
 
-## SelectInsideWholeWord
+## SelectInsideWholeWord < TextObject
 - ::select
 
-## SelectAWholeWord
+## SelectAWholeWord < TextObject
 - ::select
 
-## SelectInsideQuotes
+## SelectInsideQuotes < TextObject
 - ::findOpeningQuote
 - ::isStartQuote
 - ::lookForwardOnLine
 - ::findClosingQuote
 - ::select
 
-## SelectInsideBrackets
+## SelectInsideBrackets < TextObject
 - ::findOpeningBracket
 - ::findClosingBracket
 - ::select
 
-## SelectInsideParagraph
+## SelectInsideParagraph < TextObject
 - ::select
 
-## SelectAParagraph
+## SelectAParagraph < TextObject
 - ::select
 
-## Scroll
+## Scroll < Base
 - ::isComplete
 - ::isRecordable
 
-## ScrollDown
+## ScrollDown < Scroll
 - ::execute
 - ::keepCursorOnScreen
 - ::scrollUp
 
-## ScrollUp
+## ScrollUp < Scroll
 - ::execute
 - ::keepCursorOnScreen
 - ::scrollDown
 
-## ScrollCursor
+## ScrollCursor < Scroll
 
-## ScrollCursorToTop
+## ScrollCursorToTop < ScrollCursor
 - ::execute
 - ::scrollUp
 - ::moveToFirstNonBlank
 
-## ScrollCursorToMiddle
+## ScrollCursorToMiddle < ScrollCursor
 - ::execute
 - ::scrollMiddle
 - ::moveToFirstNonBlank
 
-## ScrollCursorToBottom
+## ScrollCursorToBottom < ScrollCursor
 - ::execute
 - ::scrollDown
 - ::moveToFirstNonBlank
 
-## ScrollHorizontal
+## ScrollHorizontal < Base
 - ::isComplete
 - ::isRecordable
 - ::putCursorOnScreen
 
-## ScrollCursorToLeft
+## ScrollCursorToLeft < ScrollHorizontal
 - ::execute
 
-## ScrollCursorToRight
+## ScrollCursorToRight < ScrollHorizontal
 - ::execute
