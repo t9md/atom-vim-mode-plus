@@ -15,6 +15,13 @@ See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode
 
 - TMO: TextObject, Motion, Operator
 
+# TMO-report
+
+Done by extnding Base class, so each TMO and its instance can report itself.
+
+- [Simple](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TMO-report.md)
+- [Detail](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TMO-report-detail.md)
+
 # Status
 
 - [x] Make opeStack independent
