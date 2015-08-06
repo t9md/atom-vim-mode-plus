@@ -1,7 +1,7 @@
-# Class OperatorError
+# OperatorError
 - @extend
 
-# Class Operator
+# Operator
 - @extend
 - ::vimState
 - ::target
@@ -12,10 +12,10 @@
 - ::canComposeWith
 - ::setTextRegister
 
-# Class MotionError
+# MotionError
 - @extend
 
-# Class Motion
+# Motion
 - @extend
 - ::operatesInclusively
 - ::operatesLinewise
@@ -29,146 +29,146 @@
 - ::isLinewise
 - ::isInclusive
 
-# Class MotionWithInput
+# MotionWithInput
 - @extend
 - ::isComplete
 - ::canComposeWith
 - ::compose
 
-# Class MoveLeft
+# MoveLeft
 - @extend
 - ::operatesInclusively
 - ::moveCursor
 
-# Class MoveRight
+# MoveRight
 - @extend
 - ::operatesInclusively
 - ::moveCursor
 
-# Class MoveUp
+# MoveUp
 - @extend
 - ::operatesLinewise
 - ::moveCursor
 
-# Class MoveDown
+# MoveDown
 - @extend
 - ::operatesLinewise
 - ::moveCursor
 
-# Class MoveToPreviousWord
+# MoveToPreviousWord
 - @extend
 - ::operatesInclusively
 - ::moveCursor
 
-# Class MoveToPreviousWholeWord
+# MoveToPreviousWholeWord
 - @extend
 - ::operatesInclusively
 - ::moveCursor
 - ::isWholeWord
 - ::isBeginningOfFile
 
-# Class MoveToNextWord
+# MoveToNextWord
 - @extend
 - ::wordRegex
 - ::operatesInclusively
 - ::moveCursor
 - ::isEndOfFile
 
-# Class MoveToNextWholeWord
+# MoveToNextWholeWord
 - @extend
 - ::wordRegex
 
-# Class MoveToEndOfWord
+# MoveToEndOfWord
 - @extend
 - ::wordRegex
 - ::moveCursor
 
-# Class MoveToEndOfWholeWord
+# MoveToEndOfWholeWord
 - @extend
 - ::wordRegex
 
-# Class MoveToNextParagraph
+# MoveToNextParagraph
 - @extend
 - ::operatesInclusively
 - ::moveCursor
 
-# Class MoveToPreviousParagraph
+# MoveToPreviousParagraph
 - @extend
 - ::moveCursor
 
-# Class MoveToLine
+# MoveToLine
 - @extend
 - ::operatesLinewise
 - ::getDestinationRow
 
-# Class MoveToAbsoluteLine
+# MoveToAbsoluteLine
 - @extend
 - ::moveCursor
 
-# Class MoveToRelativeLine
-- @extend
-- ::operatesLinewise
-- ::moveCursor
-
-# Class MoveToScreenLine
-- @extend
-- ::moveCursor
-
-# Class MoveToBeginningOfLine
-- @extend
-- ::operatesInclusively
-- ::moveCursor
-
-# Class MoveToFirstCharacterOfLine
-- @extend
-- ::operatesInclusively
-- ::moveCursor
-
-# Class MoveToFirstCharacterOfLineAndDown
+# MoveToRelativeLine
 - @extend
 - ::operatesLinewise
-- ::operatesInclusively
 - ::moveCursor
 
-# Class MoveToLastCharacterOfLine
+# MoveToScreenLine
+- @extend
+- ::moveCursor
+
+# MoveToBeginningOfLine
 - @extend
 - ::operatesInclusively
 - ::moveCursor
 
-# Class MoveToLastNonblankCharacterOfLineAndDown
+# MoveToFirstCharacterOfLine
+- @extend
+- ::operatesInclusively
+- ::moveCursor
+
+# MoveToFirstCharacterOfLineAndDown
+- @extend
+- ::operatesLinewise
+- ::operatesInclusively
+- ::moveCursor
+
+# MoveToLastCharacterOfLine
+- @extend
+- ::operatesInclusively
+- ::moveCursor
+
+# MoveToLastNonblankCharacterOfLineAndDown
 - @extend
 - ::operatesInclusively
 - ::skipTrailingWhitespace
 - ::moveCursor
 
-# Class MoveToFirstCharacterOfLineUp
+# MoveToFirstCharacterOfLineUp
 - @extend
 - ::operatesLinewise
 - ::operatesInclusively
 - ::moveCursor
 
-# Class MoveToFirstCharacterOfLineDown
+# MoveToFirstCharacterOfLineDown
 - @extend
 - ::operatesLinewise
 - ::moveCursor
 
-# Class MoveToStartOfFile
+# MoveToStartOfFile
 - @extend
 - ::moveCursor
 
-# Class MoveToTopOfScreen
+# MoveToTopOfScreen
 - @extend
 - ::getDestinationRow
 
-# Class MoveToBottomOfScreen
+# MoveToBottomOfScreen
 - @extend
 - ::getDestinationRow
 
-# Class MoveToMiddleOfScreen
+# MoveToMiddleOfScreen
 - @extend
 - ::getDestinationRow
 
-# Class ScrollKeepingCursor
+# ScrollKeepingCursor
 - @extend
 - ::previousFirstScreenRow
 - ::currentFirstScreenRow
@@ -178,40 +178,40 @@
 - ::getDestinationRow
 - ::scrollScreen
 
-# Class ScrollHalfUpKeepCursor
+# ScrollHalfUpKeepCursor
 - @extend
 - ::scrollDestination
 
-# Class ScrollFullUpKeepCursor
+# ScrollFullUpKeepCursor
 - @extend
 - ::scrollDestination
 
-# Class ScrollHalfDownKeepCursor
+# ScrollHalfDownKeepCursor
 - @extend
 - ::scrollDestination
 
-# Class ScrollFullDownKeepCursor
+# ScrollFullDownKeepCursor
 - @extend
 - ::scrollDestination
 
-# Class Find
+# Find
 - @extend
 - ::match
 - ::reverse
 - ::moveCursor
 
-# Class Till
+# Till
 - @extend
 - ::match
 - ::moveSelectionInclusively
 
-# Class MoveToMark
+# MoveToMark
 - @extend
 - ::operatesInclusively
 - ::isLinewise
 - ::moveCursor
 
-# Class SearchBase
+# SearchBase
 - @extend
 - ::operatesInclusively
 - ::reversed
@@ -221,10 +221,10 @@
 - ::updateCurrentSearch
 - ::replicateCurrentSearch
 
-# Class Search
+# Search
 - @extend
 
-# Class SearchCurrentWord
+# SearchCurrentWord
 - @extend
 - @keywordRegex
 - ::getCurrentWord
@@ -233,7 +233,7 @@
 - ::isComplete
 - ::execute
 
-# Class BracketMatchingMotion
+# BracketMatchingMotion
 - @extend
 - ::operatesInclusively
 - ::isComplete
@@ -242,12 +242,12 @@
 - ::getSearchData
 - ::moveCursor
 
-# Class RepeatSearch
+# RepeatSearch
 - @extend
 - ::isComplete
 - ::reversed
 
-# Class TextObject
+# TextObject
 - @extend
 - ::isComplete
 - ::isRecordable
