@@ -17,8 +17,18 @@ class Base
   #   this instanceof Operator
   #
   children = []
-  excludeFromReports = ['__super__', 'report', 'reportAll', 'constructor', 'extend']
+  excludeFromReports = ['__super__', 'report', 'reportAll', 'constructor', 'extend', 'getParent', 'getAncestors']
   inspect = (obj) -> util.inspect(obj, depth: 0)
+
+  @getAncestors: ->
+    ancestors = []
+    ancestors.push (current=this)
+    while current = current.getParent()
+      ancestors.push current
+    ancestors
+
+  @getParent: ->
+    this.__super__?.constructor
 
   @extend: ->
     klass = this
@@ -28,8 +38,8 @@ class Base
     children.push klass
 
   @report: (detail=false) ->
-    parent = this.__super__.constructor.name
-    s = "## #{@name} < #{parent}\n"
+    ancestors = @getAncestors().map (p) -> p.name
+    s = "# #{ancestors.join(' < ')}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
       s += ": `#{inspect(value)}`" if detail
