@@ -1,3 +1,4 @@
+Base = require '../base'
 VimNormalModeInputElement = require './vim-normal-mode-input-element'
 
 class ViewModel
@@ -14,7 +15,8 @@ class ViewModel
     if @vimState.isOperatorPending()
       @vimState.operationStack.push(new Input(''))
 
-class Input
+class Input extends Base
+  @extend()
   constructor: (@characters) ->
   isComplete: -> true
   isRecordable: -> true

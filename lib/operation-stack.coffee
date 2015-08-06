@@ -1,18 +1,23 @@
 _ = require 'underscore-plus'
 TextObjects = require './text-objects'
 Operators   = require './operators/index'
+utils = require './utils'
+{debug, debugClear, initDebugEditor} = require './utils'
+settings = require './settings'
 
 module.exports =
 class OperationStack
   constructor: (@vimState) ->
     @stack = []
     @processing = false
+    initDebugEditor()
 
   # Private: Push the given operations onto the operation stack, then process
   # it.
   push: (operations) ->
     return unless operations?
-    console.clear() if @isEmpty()
+    if @isEmpty() and settings.debug()
+      debugClear()
     @withLock =>
       operations = [operations] unless _.isArray(operations)
 
@@ -41,25 +46,36 @@ class OperationStack
     for cursor in @vimState.editor.getCursors()
       @vimState.ensureCursorIsWithinLine(cursor)
 
+  inspectStack: ->
+    debug "@stack length = #{@stack.length}"
+    for op, i in @stack
+      indentString = _.multiplyString(' ', 2)
+      debug "#{indentString}[stack: idx = #{i}]"
+      debug op.report(indent: 4)
+
   # Private: Processes the command if the last operation is complete.
   #
   # Returns nothing.
   process: ->
     return if @isEmpty()
-    # console.log "# process [@stack #{@stack.length}]"
-    # for op in @stack
-      # console.log op.report()
+    debug "#=== Start processing"
 
     unless @peekTop().isComplete()
       if @vimState.isNormalMode() and @peekTop().isOperator?()
+        @inspectStack()
         @vimState.activateOperatorPendingMode()
+        debug "#=== Entering Operator Pending Mode, return"
       return
 
+    @inspectStack()
     operation = @pop()
     unless @isEmpty()
       try
+        debug "#=== Compose"
+        debug "  - owner = #{@peekTop().getKind()}"
+        debug "  - target = #{operation.getKind()}"
         @peekTop().compose(operation)
-        # console.log "-- call @processes() again!"
+        debug "  === @process() again!"
         @process()
       catch e
         if e.isOperatorError?() or e.isMotionError?()
@@ -69,8 +85,7 @@ class OperationStack
     else
       @vimState.history.unshift(operation) if operation.isRecordable()
       unless operation.isPure()
-        # console.log "# [Execute]"
-        # console.log operation.report()
+        debug "#=== Execute"
         operation.execute()
         @vimState.counter.reset()
       else
