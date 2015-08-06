@@ -1,4 +1,5 @@
 util = require('util')
+_ = require 'underscore-plus'
 
 module.exports =
 class Base
@@ -23,7 +24,11 @@ class Base
       this instanceof klass
     children.push klass
 
-  excludeFromReports = ['__super__', 'report', 'reportAll', 'constructor', 'extend', 'getParent', 'getAncestors']
+  excludeFromReports = [
+    '__super__', 'report', 'reportAll', 'constructor',
+    'extend', 'getParent', 'getAncestors',
+    'vimState'
+  ]
   inspect = (obj, options={}) ->
     options.depth ?= 0
     util.inspect(obj, options)
@@ -60,14 +65,24 @@ class Base
       s += "\n"
     s
 
-  report: (options) ->
+  report: (options={}) ->
     s = "## #{this}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
-      s += ": `#{inspect(value, options)}`"
-      s += "\n\n"
+      if key is 'target'
+        s += ":\n"
+        s += value.report(options)
+      else
+        s += ": `#{inspect(value, options)}`"
+      s += "\n"
 
+    s += "\n"
     s += @constructor.report(options)
+    if options?.indent?
+      indent = _.multiplyString(' ', options.indent)
+      s = s.split('\n').map (e) ->
+        indent + e
+      .join('\n')
     s
 
   getKind: ->
