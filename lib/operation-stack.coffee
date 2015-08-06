@@ -65,7 +65,7 @@ class OperationStack
       @vimState.history.unshift(operation) if operation.isRecordable()
       unless operation.isPure()
         operation.execute()
-        @vimState.resetCount()
+        @vimState.counter.reset()
       else
         null # Something new way of execution.
 
