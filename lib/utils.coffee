@@ -1,3 +1,5 @@
+settings = require './settings'
+
 module.exports =
   # Public: Determines if a string should be considered linewise or character
   #
@@ -17,3 +19,6 @@ module.exports =
   include: (klass, module) ->
     for key, value of module
       klass::[key] = value
+
+  debug: (msg) ->
+    console.log msg if settings.debug()

@@ -38,7 +38,7 @@ class Operator extends Base
   # Returns nothing.
   compose: (target) ->
     unless _.isFunction(target.select)
-     throw new OperatorError('Must respond to select')
+      throw new OperatorError('Must respond to select')
 
     @target = target
     @complete = true
