@@ -37,36 +37,36 @@ class Base
 
     children.push klass
 
-  @report: (detail=false) ->
+  @report: ->
     ancestors = @getAncestors().map (p) -> p.name
     ancestors.pop()
     s = "### #{ancestors.join(' < ')}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
-      s += ": `#{inspect(value)}`" if detail
+      s += ": `#{inspect(value)}`"
       s += "\n"
 
     for own key, value of this.prototype when key not in excludeFromReports
       s += "- ::#{key}"
-      s += ": `#{inspect(value)}`" if detail
+      s += ": `#{inspect(value)}`"
       s += "\n"
     s
 
-  @reportAll: (detail=false) ->
+  @reportAll: ->
     s = ""
     for child in children
-      s += child.report(detail)
+      s += child.report()
       s += "\n"
     s
 
-  report: (detail=false) ->
+  report: ->
     s = "## #{this}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
-      s += ": `#{inspect(value)}`" if detail
+      s += ": `#{inspect(value)}`"
       s += "\n\n"
 
-    s += @constructor.report(detail)
+    s += @constructor.report()
     s
 
   getName: ->
