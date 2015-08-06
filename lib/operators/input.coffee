@@ -66,7 +66,8 @@ class InsertAtBeginningOfLine extends Insert
     super
 
 class InsertAboveWithNewline extends Insert
-  execute: (count=1) ->
+  # FIXME need support count
+  execute: ->
     @vimState.setInsertionCheckpoint() unless @typingCompleted
     @editor.insertNewlineAbove()
     @editor.getLastCursor().skipLeadingWhitespace()
@@ -81,7 +82,8 @@ class InsertAboveWithNewline extends Insert
     @typingCompleted = true
 
 class InsertBelowWithNewline extends Insert
-  execute: (count=1) ->
+  # FIXME need support count
+  execute: ->
     @vimState.setInsertionCheckpoint() unless @typingCompleted
     @editor.insertNewlineBelow()
     @editor.getLastCursor().skipLeadingWhitespace()
@@ -110,12 +112,12 @@ class Change extends Insert
   # count - The number of times to execute.
   #
   # Returns nothing.
-  execute: (count) ->
+  execute: ->
     # If we've typed, we're being repeated. If we're being repeated,
     # undo transactions are already handled.
     @vimState.setInsertionCheckpoint() unless @typingCompleted
 
-    if _.contains(@target.select(count, excludeWhitespace: true), true)
+    if _.contains(@target.select(excludeWhitespace: true), true)
       @setTextRegister(@register, @editor.getSelectedText())
       if @target.isLinewise?() and not @typingCompleted
         for selection in @editor.getSelections()

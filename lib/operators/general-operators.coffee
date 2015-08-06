@@ -70,8 +70,8 @@ class OperatorWithInput extends Operator
       @complete = true
 
 class Select extends Operator
-  execute: (count=null) ->
-    @target.select(count)
+  execute: ->
+    @target.select(@getCount())
 
 #
 # It deletes everything selected by the following motion.
@@ -88,8 +88,8 @@ class Delete extends Operator
   # count - The number of times to execute.
   #
   # Returns nothing.
-  execute: (count) ->
-    if _.contains(@target.select(count), true)
+  execute: ->
+    if _.contains(@target.select(), true)
       @setTextRegister(@register, @editor.getSelectedText())
       @editor.transact =>
         for selection in @editor.getSelections()
@@ -108,9 +108,9 @@ class Delete extends Operator
 class ToggleCase extends Operator
   constructor: (@editor, @vimState, {@complete}={}) ->
 
-  execute: (count=1) ->
+  execute: ->
     if @target?
-      if _.contains(@target.select(count), true)
+      if _.contains(@target.select(), true)
         @editor.replaceSelectedText {}, (text) ->
           text.split('').map((char) ->
             lower = char.toLowerCase()
@@ -124,7 +124,7 @@ class ToggleCase extends Operator
         for cursor in @editor.getCursors()
           point = cursor.getBufferPosition()
           lineLength = @editor.lineTextForBufferRow(point.row).length
-          cursorCount = Math.min(count, lineLength - point.column)
+          cursorCount = Math.min(@getCount(1), lineLength - point.column)
 
           _.times cursorCount, =>
             point = cursor.getBufferPosition()
@@ -147,8 +147,9 @@ class UpperCase extends Operator
   constructor: (@editor, @vimState) ->
     @complete = false
 
-  execute: (count=1) ->
-    if _.contains(@target.select(count), true)
+  execute: ->
+    # if _.contains(@target.select(@getCount(1)), true)
+    if _.contains(@target.select(), true)
       @editor.replaceSelectedText {}, (text) ->
         text.toUpperCase()
 
@@ -161,8 +162,8 @@ class LowerCase extends Operator
   constructor: (@editor, @vimState) ->
     @complete = false
 
-  execute: (count=1) ->
-    if _.contains(@target.select(count), true)
+  execute: ->
+    if _.contains(@target.select(), true)
       @editor.replaceSelectedText {}, (text) ->
         text.toLowerCase()
 
@@ -182,9 +183,9 @@ class Yank extends Operator
   # count - The number of times to execute.
   #
   # Returns nothing.
-  execute: (count) ->
+  execute: ->
     originalPositions = @editor.getCursorBufferPositions()
-    if _.contains(@target.select(count), true)
+    if _.contains(@target.select(), true)
       text = @editor.getSelectedText()
       startPositions = _.pluck(@editor.getSelectedBufferRanges(), "start")
       newPositions = for originalPosition, i in originalPositions
@@ -212,9 +213,9 @@ class Join extends Operator
   # count - The number of times to execute.
   #
   # Returns nothing.
-  execute: (count=1) ->
+  execute: ->
     @editor.transact =>
-      _.times count, =>
+      _.times @getCount(1), =>
         @editor.joinLines()
     @vimState.activateNormalMode()
 
@@ -226,9 +227,9 @@ class Repeat extends Operator
 
   isRecordable: -> false
 
-  execute: (count=1) ->
+  execute: ->
     @editor.transact =>
-      _.times count, =>
+      _.times @getCount(1), =>
         cmd = @vimState.history[0]
         cmd?.execute()
 #
@@ -260,14 +261,14 @@ class Increase extends Operator
     @complete = true
     @numberRegex = new RegExp(settings.numberRegex())
 
-  execute: (count=1) ->
+  execute: ->
     @editor.transact =>
       increased = false
       for cursor in @editor.getCursors()
-        if @increaseNumber(count, cursor) then increased = true
+        if @increaseNumber(cursor) then increased = true
       atom.beep() unless increased
 
-  increaseNumber: (count, cursor) ->
+  increaseNumber: (cursor) ->
     # find position of current number, adapted from from SearchCurrentWord
     cursorPosition = cursor.getBufferPosition()
     numEnd = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @numberRegex, allowNext: false)
@@ -289,7 +290,7 @@ class Increase extends Operator
       cursor.setBufferPosition(cursorPosition)
       return
 
-    number += @step*count
+    number += @step * @getCount(1)
 
     # replace current number with new
     newValue = String(number)
@@ -304,9 +305,9 @@ class Decrease extends Increase
 # AdjustIndentation
 # -------------------------
 class AdjustIndentation extends Operator
-  execute: (count=1) ->
+  execute: ->
     mode = @vimState.mode
-    @target.select(count)
+    @target.select() # FIXME how to respect count of default 1 without passing count
     {start} = @editor.getSelectedBufferRange()
 
     @indent()

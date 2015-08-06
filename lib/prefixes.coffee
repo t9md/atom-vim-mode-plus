@@ -35,19 +35,20 @@ class Prefix extends Base
 # Used to track the number of times either a motion or operator should
 # be repeated.
 #
-class Repeat extends Prefix
-  count: null
-
-  # count - The initial digit of the repeat sequence.
-  constructor: (@count) -> @complete = false
-
-  # Public: Adds an additional digit to this repeat sequence.
-  #
-  # digit - A single digit, 0-9.
-  #
-  # Returns nothing.
-  addDigit: (digit) ->
-    @count = @count * 10 + digit
+# [deperecated by t9md]
+# class Repeat extends Prefix
+#   count: null
+#
+#   # count - The initial digit of the repeat sequence.
+#   constructor: (@count) -> @complete = false
+#
+#   # Public: Adds an additional digit to this repeat sequence.
+#   #
+#   # digit - A single digit, 0-9.
+#   #
+#   # Returns nothing.
+#   addDigit: (digit) ->
+#     @count = @count * 10 + digit
 
 #
 # Used to track which register the following operator should operate on.
@@ -67,4 +68,4 @@ class Register extends Prefix
     super(composedObject)
     composedObject.register = @name if composedObject.register?
 
-module.exports = {Repeat, Register}
+module.exports = {Register}

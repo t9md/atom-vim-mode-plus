@@ -597,7 +597,7 @@ describe "Motions", ->
       describe "as a motion", ->
         beforeEach -> keydown('-')
 
-        it "moves the cursor to the first character of the previous line", ->
+        it "moves the cursor to the last character of the previous line", ->
           expect(editor.getCursorScreenPosition()).toEqual [0, 0]
 
       describe "as a selection", ->

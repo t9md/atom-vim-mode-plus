@@ -9,7 +9,8 @@ class Replace extends OperatorWithInput
     super(@editor, @vimState)
     @viewModel = new ViewModel(this, class: 'replace', hidden: true, singleChar: true, defaultText: '\n')
 
-  execute: (count=1) ->
+  execute: ->
+    count = @getCount(1)
     if @input.characters is ""
       # replace canceled
 

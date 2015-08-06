@@ -18,8 +18,8 @@ class OperationStack
       for operation in operations
         # Motions in visual mode perform their selections.
         if @vimState.isVisualMode() and _.isFunction(operation.select)
-          unless operation.isRepeat()
-            @stack.push(new Operators.Select(@vimState.editor, @vimState))
+          # unless operation.isRepeat()
+          @stack.push(new Operators.Select(@vimState.editor, @vimState))
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack
@@ -65,6 +65,7 @@ class OperationStack
       @vimState.history.unshift(operation) if operation.isRecordable()
       unless operation.isPure()
         operation.execute()
+        @vimState.resetCount()
       else
         null # Something new way of execution.
 

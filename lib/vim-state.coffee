@@ -19,7 +19,6 @@ Utils.include Base,
   isOperator:      -> this instanceof Operators.Operator
   isTextObject:    -> this instanceof TextObjects.TextObject
   isMotion:        -> this instanceof Motions.Motion
-  isRepeat:        -> this instanceof Prefixes.Repeat
   isMotionError:   -> this instanceof Motions.MotionError
   isOperatorError: -> this instanceof Operators.OperatorError
 
@@ -31,6 +30,7 @@ class VimState
   submode: null
   destroyed: false
   replaceModeListener: null
+  count: null # Used to instruct number of repeat count to each operation.
 
   constructor: (@editorElement, @statusBarManager, @globalVimState) ->
     @emitter = new Emitter
@@ -83,7 +83,7 @@ class VimState
       'activate-characterwise-visual-mode': => @activateVisualMode('characterwise')
       'activate-blockwise-visual-mode': => @activateVisualMode('blockwise')
       'reset-normal-mode': => @resetNormalMode()
-      'repeat-prefix': (e) => @repeatPrefix(e)
+      'set-count': (e) => @setCount(e)
       'reverse-selections': (e) => @reverseSelections(e)
       'undo': => @undo()
       'replace-mode-backspace': => @replaceModeUndo()
@@ -552,16 +552,17 @@ class VimState
   # e - The event that triggered the Number prefix.
   #
   # Returns nothing.
-  repeatPrefix: (e) ->
+  setCount: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
     num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-    if @operationStack.peekTop()?.isRepeat?()
-      @operationStack.peekTop().addDigit(num)
-    else
-      if num is 0
-        e.abortKeyBinding()
-      else
-        @operationStack.push(new Prefixes.Repeat(num))
+    @count ?= 0
+    @count = @count * 10 + num
+
+  getCount: ->
+    @count
+
+  resetCount: ->
+    @count = null
 
   reverseSelections: ->
     reversed = not @editor.getLastSelection().isReversed()
@@ -576,8 +577,8 @@ class VimState
   #
   # Returns new motion or nothing.
   moveOrRepeat: (e) ->
-    if @operationStack.peekTop()?.isRepeat?()
-      @repeatPrefix(e)
+    if @getCount()?
+      @setCount(e)
       null
     else
       new Motions.MoveToBeginningOfLine(@editor, this)
@@ -594,14 +595,6 @@ class VimState
       new Motions.MoveToRelativeLine(@editor, this)
     else
       new constructor(@editor, this)
-
-  # Private: Check if there is a pending operation of a certain type
-  #
-  # constructor - The constructor of the object type you're looking for.
-  #
-  # isSameOperatorPending: (constructor) ->
-  #   _.detect @operationStack, (operation) ->
-  #     operation instanceof constructor
 
   isOperatorPending: ->
     not @operationStack.isEmpty()
