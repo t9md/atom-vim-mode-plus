@@ -42,7 +42,7 @@ module.exports =
       .map (s) ->
         name = s.replace(/^#+\s/, '')
         link = name.replace ///#{_.escapeRegExp(' < ')}///g, '--'
-        "- [#{name}](##{link})"
+        "- [#{name}](##{link.toLowerCase()})"
       .value().join('\n')
     toc
 
@@ -60,6 +60,8 @@ module.exports =
 
     body = """
     #{header}
+    All TOMs inherits Base class
+    (Base class omitted from ancesstors list for screen spaces).  
     #{toc}
     #{content}
     """
