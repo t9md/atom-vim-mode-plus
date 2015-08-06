@@ -39,7 +39,8 @@ class Base
 
   @report: (detail=false) ->
     ancestors = @getAncestors().map (p) -> p.name
-    s = "# #{ancestors.join(' < ')}\n"
+    # ancestors.pop()
+    s = "### #{ancestors.join(' < ')}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
       s += ": `#{inspect(value)}`" if detail
