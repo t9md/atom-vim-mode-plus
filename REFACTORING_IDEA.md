@@ -49,8 +49,11 @@ Its ambiguous. its actually do two thing, but name don't reflect that.
 - add Base::getCount() which retrieve @vimState.getCount()
 - make it repeatable/recordable by setting @count instance variable on object.
 - behave like following
- - `2dx`, `d2x`: both delete 2 chars.
- - `10d2x`: delete 2 chars, ignore `10`.
+ - [x] `2dx`, `d2x`: both delete 2 chars.
+ - [ ] `10d2x`: delete 2 chars, ignore `10`. Need to reseCount() on non-digit input.
+
+* [Done](https://github.com/t9md/vim-mode/commit/9b7d18e6a799304241ce7f168c496b9e6a64bf98)
+Maybe something broken but I didn't notice, all spec pass without modification
 
 # Spec
 
