@@ -12,4 +12,5 @@ class Base
   # Maybe we hould move this function to Operator and Motion?
   getCount: (defaultCount=null) ->
     # Setting count as instance var make operation repeatable.
-    @count ?= @vimState?.getCount() ? defaultCount
+    # @count ?= @vimState?.getCount() ? defaultCount
+    @count ?= @vimState?.counter.get() ? defaultCount

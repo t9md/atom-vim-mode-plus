@@ -30,7 +30,7 @@ class VimState
   submode: null
   destroyed: false
   replaceModeListener: null
-  count: null # Used to instruct number of repeat count to each operation.
+  # count: null # Used to instruct number of repeat count to each operation.
 
   constructor: (@editorElement, @statusBarManager, @globalVimState) ->
     @emitter = new Emitter
@@ -40,6 +40,7 @@ class VimState
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
     @operationStack = new OperationStack(this)
+    @counter = @getCounter()
 
     @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
       return unless @editor?
@@ -83,7 +84,7 @@ class VimState
       'activate-characterwise-visual-mode': => @activateVisualMode('characterwise')
       'activate-blockwise-visual-mode': => @activateVisualMode('blockwise')
       'reset-normal-mode': => @resetNormalMode()
-      'set-count': (e) => @setCount(e)
+      'set-count': (e) => @counter.set(e)
       'reverse-selections': (e) => @reverseSelections(e)
       'undo': => @undo()
       'replace-mode-backspace': => @replaceModeUndo()
@@ -547,26 +548,45 @@ class VimState
       name = name.slice(6)
     name
 
-  # Private: A generic way to create a Number prefix based on the event.
+  # Private: A create a Number prefix based on the event.
   #
   # e - The event that triggered the Number prefix.
   #
   # Returns nothing.
-  setCount: (e) ->
-    keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
-    num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
+  # setCount: (e) ->
+  #   keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
+  #   num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
+  #
+  #   # To cover scenario `10d3y` in this case we use 3, need to trash 10.
+  #   if @isOperatorPending()
+  #     @resetCount()
+  #   @count ?= 0
+  #   @count = @count * 10 + num
+  #
+  # getCount: ->
+  #   @count
+  #
+  # resetCount: ->
+  #   @count = null
 
-    # To cover scenario `10d3y` in this case we use 3, need to trash 10.
-    if @isOperatorPending()
-      @resetCount()
-    @count ?= 0
-    @count = @count * 10 + num
+  getCounter: ->
+    count = null
+    isOperatorPending = @isOperatorPending.bind(this)
+    set: (e) ->
+      keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
+      num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
 
-  getCount: ->
-    @count
+      # To cover scenario `10d3y` in this case we use 3, need to trash 10.
+      if isOperatorPending()
+        @reset()
+      count ?= 0
+      count = count * 10 + num
 
-  resetCount: ->
-    @count = null
+    get: ->
+      count
+
+    reset: ->
+      count = null
 
   reverseSelections: ->
     reversed = not @editor.getLastSelection().isReversed()
@@ -581,8 +601,8 @@ class VimState
   #
   # Returns new motion or nothing.
   moveOrRepeat: (e) ->
-    if @getCount()?
-      @setCount(e)
+    if @counter.get()?
+      @counter.set(e)
       null
     else
       new Motions.MoveToBeginningOfLine(@editor, this)
