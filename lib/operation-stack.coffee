@@ -12,6 +12,7 @@ class OperationStack
   # it.
   push: (operations) ->
     return unless operations?
+    console.clear() if @isEmpty()
     @withLock =>
       operations = [operations] unless _.isArray(operations)
 
@@ -45,6 +46,9 @@ class OperationStack
   # Returns nothing.
   process: ->
     return if @isEmpty()
+    # console.log "# process [@stack #{@stack.length}]"
+    # for op in @stack
+      # console.log op.report()
 
     unless @peekTop().isComplete()
       if @vimState.isNormalMode() and @peekTop().isOperator?()
@@ -55,6 +59,7 @@ class OperationStack
     unless @isEmpty()
       try
         @peekTop().compose(operation)
+        # console.log "-- call @processes() again!"
         @process()
       catch e
         if e.isOperatorError?() or e.isMotionError?()
@@ -64,6 +69,8 @@ class OperationStack
     else
       @vimState.history.unshift(operation) if operation.isRecordable()
       unless operation.isPure()
+        # console.log "# [Execute]"
+        # console.log operation.report()
         operation.execute()
         @vimState.counter.reset()
       else

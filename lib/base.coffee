@@ -17,8 +17,16 @@ class Base
   #   this instanceof Operator
   #
   children = []
+  @extend: ->
+    klass = this
+    Base::["is#{klass.name}"] = ->
+      this instanceof klass
+    children.push klass
+
   excludeFromReports = ['__super__', 'report', 'reportAll', 'constructor', 'extend', 'getParent', 'getAncestors']
-  inspect = (obj) -> util.inspect(obj, depth: 0)
+  inspect = (obj, options={}) ->
+    options.depth ?= 0
+    util.inspect(obj, options)
 
   @getAncestors: ->
     ancestors = []
@@ -30,25 +38,18 @@ class Base
   @getParent: ->
     this.__super__?.constructor
 
-  @extend: ->
-    klass = this
-    Base::["is#{klass.name}"] = ->
-      this instanceof klass
-
-    children.push klass
-
-  @report: ->
+  @report: (options) ->
     ancestors = @getAncestors().map (p) -> p.name
     ancestors.pop()
     s = "### #{ancestors.join(' < ')}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
-      s += ": `#{inspect(value)}`"
+      s += ": `#{inspect(value, options)}`"
       s += "\n"
 
     for own key, value of this.prototype when key not in excludeFromReports
       s += "- ::#{key}"
-      s += ": `#{inspect(value)}`"
+      s += ": `#{inspect(value, options)}`"
       s += "\n"
     s
 
@@ -59,17 +60,17 @@ class Base
       s += "\n"
     s
 
-  report: ->
+  report: (options) ->
     s = "## #{this}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
-      s += ": `#{inspect(value)}`"
+      s += ": `#{inspect(value, options)}`"
       s += "\n\n"
 
-    s += @constructor.report()
+    s += @constructor.report(options)
     s
 
-  getName: ->
+  getKind: ->
     @constructor.name
 
   isPure: ->
