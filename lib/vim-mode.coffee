@@ -3,6 +3,7 @@ StatusBarManager = require './status-bar-manager'
 GlobalVimState = require './global-vim-state'
 VimState = require './vim-state'
 settings = require './settings'
+_ = require 'underscore-plus'
 
 module.exports =
   config: settings.config
@@ -35,6 +36,16 @@ module.exports =
       'vim-mode:report': => @showReport()
       'vim-mode:report-detail': => @showReport(true)
 
+  getTableOfContent: (content) ->
+    toc = _.chain content.split('\n')
+      .filter (e) -> /^#/.test(e)
+      .map (s) ->
+        name = s.replace(/^#+\s/, '')
+        link = name.replace ///#{_.escapeRegExp(' < ')}///g, '--'
+        "- [#{name}](##{link})"
+      .value().join('\n')
+    toc
+
   showReport: (detail) ->
     Base = require './base'
     fs = require 'fs-plus'
@@ -42,8 +53,18 @@ module.exports =
     fileNameSuffix = if detail then "-detail.md" else ".md"
     fileName = 'TOM-report' + fileNameSuffix
     filePath = path.join(atom.config.get('core.projectHome'), 'vim-mode', 'docs', fileName)
+    header = "# TOM report"
+    header += " detail" if detail
+    content = Base.reportAll(detail)
+    toc = @getTableOfContent content
+
+    body = """
+    #{header}
+    #{toc}
+    #{content}
+    """
     atom.workspace.open(filePath).then (editor) ->
-      editor.setText Base.reportAll(detail)
+      editor.setText body
 
   deactivate: ->
     @disposables.dispose()
