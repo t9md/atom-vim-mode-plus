@@ -7,6 +7,7 @@ module.exports =
 # It pastes everything contained within the specifed register
 #
 class Put extends Operator
+  @extend()
   register: null
 
   constructor: (@editor, @vimState, {@location}={}) ->

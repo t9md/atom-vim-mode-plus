@@ -7,13 +7,14 @@ WholeWordRegex = /\S+/
 
 class TextObject extends Base
   @extend()
-  
+
   constructor: (@editor, @state) ->
 
   isComplete: -> true
   isRecordable: -> false
 
 class CurrentSelection extends TextObject
+  @extend()
   constructor: ->
     super
 
@@ -23,11 +24,13 @@ class CurrentSelection extends TextObject
 # Word
 # -------------------------
 class SelectInsideWord extends TextObject
+  @extend()
   select: ->
     @editor.selectWordsContainingCursors()
     [true]
 
 class SelectAWord extends TextObject
+  @extend()
   select: ->
     for selection in @editor.getSelections()
       selection.selectWord()
@@ -41,6 +44,7 @@ class SelectAWord extends TextObject
 # WholeWord
 # -------------------------
 class SelectInsideWholeWord extends TextObject
+  @extend()
   select: ->
     for selection in @editor.getSelections()
       range = selection.cursor.getCurrentWordBufferRange({wordRegex: WholeWordRegex})
@@ -48,6 +52,7 @@ class SelectInsideWholeWord extends TextObject
       true
 
 class SelectAWholeWord extends TextObject
+  @extend()
   select: ->
     for selection in @editor.getSelections()
       range = selection.cursor.getCurrentWordBufferRange({wordRegex: WholeWordRegex})
@@ -63,6 +68,7 @@ class SelectAWholeWord extends TextObject
 # almost-but-not-quite-repeated code. They are different because of the depth
 # checks in the bracket matcher.
 class SelectInsideQuotes extends TextObject
+  @extend()
   constructor: (@editor, @char, @includeQuotes) ->
 
   findOpeningQuote: (pos) ->
@@ -130,6 +136,7 @@ class SelectInsideQuotes extends TextObject
 # checks in the bracket matcher.
 
 class SelectInsideBrackets extends TextObject
+  @extend()
   constructor: (@editor, @beginChar, @endChar, @includeBrackets) ->
 
   findOpeningBracket: (pos) ->
@@ -178,6 +185,7 @@ class SelectInsideBrackets extends TextObject
 # Paragraph
 # -------------------------
 class SelectInsideParagraph extends TextObject
+  @extend()
   constructor: (@editor, @inclusive) ->
   select: ->
     for selection in @editor.getSelections()
@@ -188,6 +196,7 @@ class SelectInsideParagraph extends TextObject
       true
 
 class SelectAParagraph extends TextObject
+  @extend()
   constructor: (@editor, @inclusive) ->
   select: ->
     for selection in @editor.getSelections()

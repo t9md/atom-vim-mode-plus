@@ -8,9 +8,9 @@
 
 - Currently vim-mode's TextObject is not really object, its TextObject like command, it mixes operation with TextObject this limit flexibility.
 
-- Operator can take motion and textobject as target of operation although current argumenet name is motion, but it actually can be TextObject.
+- Operator can take motion and textobject as target of operation although current argument name is motion, but it actually can be TextObject.
 
-Operator's @target variable name is not appropriate since it can take TextObject so @target should be better.
+Operator's @motion variable name is not appropriate since it can take TextObject so @target should be better.
 But accessed from outer object
 
 @complete should be @executable ?
@@ -50,7 +50,7 @@ Its ambiguous. its actually do two thing, but name don't reflect that.
 - make it repeatable/recordable by setting @count instance variable on object.
 - behave like following
  - [x] `2dx`, `d2x`: both delete 2 chars.
- - [ ] `10d2x`: delete 2 chars, ignore `10`. Need to reseCount() on non-digit input.
+ - [x] `10d2x`: delete 2 chars, ignore `10`. Need to reseCount() on non-digit input.
 
 * [Done](https://github.com/t9md/vim-mode/commit/9b7d18e6a799304241ce7f168c496b9e6a64bf98)
 Maybe something broken but I didn't notice, all spec pass without modification

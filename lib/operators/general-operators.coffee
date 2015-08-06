@@ -59,6 +59,7 @@ class Operator extends Base
 
 # Public: Generic class for an operator that requires extra input
 class OperatorWithInput extends Operator
+  @extend()
   constructor: (@editor, @vimState) ->
     @editor = @editor
     @complete = false
@@ -73,6 +74,7 @@ class OperatorWithInput extends Operator
       @complete = true
 
 class Select extends Operator
+  @extend()
   execute: ->
     @target.select(@getCount())
 
@@ -80,6 +82,7 @@ class Select extends Operator
 # It deletes everything selected by the following motion.
 #
 class Delete extends Operator
+  @extend()
   register: null
 
   constructor: (@editor, @vimState) ->
@@ -109,6 +112,7 @@ class Delete extends Operator
 # It toggles the case of everything selected by the following motion
 #
 class ToggleCase extends Operator
+  @extend()
   constructor: (@editor, @vimState, {@complete}={}) ->
 
   execute: ->
@@ -147,6 +151,7 @@ class ToggleCase extends Operator
 # In visual mode or after `g` with a motion, it makes the selection uppercase
 #
 class UpperCase extends Operator
+  @extend()
   constructor: (@editor, @vimState) ->
     @complete = false
 
@@ -162,6 +167,7 @@ class UpperCase extends Operator
 # In visual mode or after `g` with a motion, it makes the selection lowercase
 #
 class LowerCase extends Operator
+  @extend()
   constructor: (@editor, @vimState) ->
     @complete = false
 
@@ -176,6 +182,7 @@ class LowerCase extends Operator
 # It copies everything selected by the following motion.
 #
 class Yank extends Operator
+  @extend()
   register: null
 
   constructor: (@editor, @vimState) ->
@@ -209,6 +216,7 @@ class Yank extends Operator
 # It combines the current line with the following line.
 #
 class Join extends Operator
+  @extend()
   constructor: (@editor, @vimState) -> @complete = true
 
   # Public: Combines the current with the following lines
@@ -226,6 +234,7 @@ class Join extends Operator
 # Repeat the last operation
 #
 class Repeat extends Operator
+  @extend()
   constructor: (@editor, @vimState) -> @complete = true
 
   isRecordable: -> false
@@ -239,6 +248,7 @@ class Repeat extends Operator
 # It creates a mark at the current cursor position
 #
 class Mark extends OperatorWithInput
+  @extend()
   constructor: (@editor, @vimState) ->
     super(@editor, @vimState)
     @viewModel = new ViewModel(this, class: 'mark', singleChar: true, hidden: true)
@@ -257,6 +267,7 @@ class Mark extends OperatorWithInput
 # It increases or decreases the next number on the line
 #
 class Increase extends Operator
+  @extend()
   step: 1
 
   constructor: ->
@@ -303,11 +314,13 @@ class Increase extends Operator
     return true
 
 class Decrease extends Increase
+  @extend()
   step: -1
 
 # AdjustIndentation
 # -------------------------
 class AdjustIndentation extends Operator
+  @extend()
   execute: ->
     mode = @vimState.mode
     @target.select() # FIXME how to respect count of default 1 without passing count
@@ -320,14 +333,17 @@ class AdjustIndentation extends Operator
     @vimState.activateNormalMode()
 
 class Indent extends AdjustIndentation
+  @extend()
   indent: ->
     @editor.indentSelectedRows()
 
 class Outdent extends AdjustIndentation
+  @extend()
   indent: ->
     @editor.outdentSelectedRows()
 
 class Autoindent extends AdjustIndentation
+  @extend()
   indent: ->
     @editor.autoIndentSelectedRows()
 

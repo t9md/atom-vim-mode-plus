@@ -13,20 +13,20 @@ See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode
 
 # Terminology
 
-- TMO: TextObject, Motion, Operator
+- TOM: TextObject, Operator, Motion
 
-# TMO-report
+# TOM-report
 
-Done by extnding Base class, so each TMO and its instance can report itself.
+Done by extnding Base class, so each TOM and its instance can report itself.
 
-- [Simple](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TMO-report.md)
-- [Detail](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TMO-report-detail.md)
+- [Simple](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TOM-report.md)
+- [Detail](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TOM-report-detail.md)
 
 # Status
 
 - [x] Make opeStack independent
 - [x] Eliminate Prefix.Repeat object. Count is provided as global to object by inheriting Base.
-- [x] TMO can respond to its class(e.g. isTextObject()?)
+- [x] TOM can respond to its class(e.g. isTextObject()?)
 
 # END Note by t9md
 

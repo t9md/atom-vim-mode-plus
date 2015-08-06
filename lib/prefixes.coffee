@@ -1,6 +1,7 @@
 Base = require './base'
 
 class Prefix extends Base
+  @extend()
   complete: null
   composedObject: null
 
@@ -54,6 +55,7 @@ class Prefix extends Base
 # Used to track which register the following operator should operate on.
 #
 class Register extends Prefix
+  @extend()
   name: null
 
   # name - The single character name of the desired register
