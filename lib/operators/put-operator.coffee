@@ -19,11 +19,11 @@ class Put extends Operator
   # count - The number of times to execute.
   #
   # Returns nothing.
-  execute: (count=1) ->
+  execute: ->
     {text, type} = @vimState.getRegister(@register) or {}
     return unless text
 
-    textToInsert = _.times(count, -> text).join('')
+    textToInsert = _.times(@getCount(1), -> text).join('')
 
     selection = @editor.getSelectedBufferRange()
     if selection.isEmpty()

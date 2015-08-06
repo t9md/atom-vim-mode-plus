@@ -32,10 +32,25 @@ target.select return array of boolean which is result of not selection.isEmpty()
 
 - Eliminate `isComplete`, then use `haveTarget` which check existence of `@target`.
 
-# Repeat
+# Repeat/Prefix
 
-Do Repeat really have to object?
-Make it simple instance var of vimState, then each TMO refer vimState.count if they want.
+Does Repeat and Prefix really need to be indpendent object.
+Simply make it globally available and let each object refer these value if they want.
+
+`move-to-beginning-of-line` bound to `@moveOrRepeat`.
+Its ambiguous. its actually do two thing, but name don't reflect that.
+
+```
+'move-to-beginning-of-line': (e) => @moveOrRepeat(e)
+```
+
+## [Experimental] Remove Prefix.Repeat
+- vimState::getCount(), vimState::setCount() provide count
+- add Base::getCount() which retrieve @vimState.getCount()
+- make it repeatable/recordable by setting @count instance variable on object.
+- behave like following
+ - `2dx`, `d2x`: both delete 2 chars.
+ - `10d2x`: delete 2 chars, ignore `10`.
 
 # Spec
 

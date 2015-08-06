@@ -15,8 +15,8 @@ class CurrentSelection extends TextObject
   constructor: ->
     super
 
-  select: (count=1) ->
-    _.times(count, -> true)
+  select: ->
+    _.times(@getCount(1), -> true)
 
 # Word
 # -------------------------
