@@ -26,7 +26,7 @@ class Base
     children.push klass
 
   @report: (detail=false) ->
-    s = "# Class #{@name}\n"
+    s = "# #{@name}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
       s += ": #{inspect(value, depth: 0)}" if detail

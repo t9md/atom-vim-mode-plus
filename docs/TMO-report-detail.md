@@ -1,7 +1,7 @@
-# Class OperatorError
+# OperatorError
 - @extend: [Function]
 
-# Class Operator
+# Operator
 - @extend: [Function]
 - ::vimState: null
 - ::target: null
@@ -12,10 +12,10 @@
 - ::canComposeWith: [Function]
 - ::setTextRegister: [Function]
 
-# Class MotionError
+# MotionError
 - @extend: [Function]
 
-# Class Motion
+# Motion
 - @extend: [Function]
 - ::operatesInclusively: true
 - ::operatesLinewise: false
@@ -29,146 +29,146 @@
 - ::isLinewise: [Function]
 - ::isInclusive: [Function]
 
-# Class MotionWithInput
+# MotionWithInput
 - @extend: [Function]
 - ::isComplete: [Function]
 - ::canComposeWith: [Function]
 - ::compose: [Function]
 
-# Class MoveLeft
+# MoveLeft
 - @extend: [Function]
 - ::operatesInclusively: false
 - ::moveCursor: [Function]
 
-# Class MoveRight
+# MoveRight
 - @extend: [Function]
 - ::operatesInclusively: false
 - ::moveCursor: [Function]
 
-# Class MoveUp
+# MoveUp
 - @extend: [Function]
 - ::operatesLinewise: true
 - ::moveCursor: [Function]
 
-# Class MoveDown
+# MoveDown
 - @extend: [Function]
 - ::operatesLinewise: true
 - ::moveCursor: [Function]
 
-# Class MoveToPreviousWord
+# MoveToPreviousWord
 - @extend: [Function]
 - ::operatesInclusively: false
 - ::moveCursor: [Function]
 
-# Class MoveToPreviousWholeWord
+# MoveToPreviousWholeWord
 - @extend: [Function]
 - ::operatesInclusively: false
 - ::moveCursor: [Function]
 - ::isWholeWord: [Function]
 - ::isBeginningOfFile: [Function]
 
-# Class MoveToNextWord
+# MoveToNextWord
 - @extend: [Function]
 - ::wordRegex: null
 - ::operatesInclusively: false
 - ::moveCursor: [Function]
 - ::isEndOfFile: [Function]
 
-# Class MoveToNextWholeWord
+# MoveToNextWholeWord
 - @extend: [Function]
 - ::wordRegex: /^\s*$|\S+/
 
-# Class MoveToEndOfWord
+# MoveToEndOfWord
 - @extend: [Function]
 - ::wordRegex: null
 - ::moveCursor: [Function]
 
-# Class MoveToEndOfWholeWord
+# MoveToEndOfWholeWord
 - @extend: [Function]
 - ::wordRegex: /\S+/
 
-# Class MoveToNextParagraph
+# MoveToNextParagraph
 - @extend: [Function]
 - ::operatesInclusively: false
 - ::moveCursor: [Function]
 
-# Class MoveToPreviousParagraph
+# MoveToPreviousParagraph
 - @extend: [Function]
 - ::moveCursor: [Function]
 
-# Class MoveToLine
+# MoveToLine
 - @extend: [Function]
 - ::operatesLinewise: true
 - ::getDestinationRow: [Function]
 
-# Class MoveToAbsoluteLine
+# MoveToAbsoluteLine
 - @extend: [Function]
 - ::moveCursor: [Function]
 
-# Class MoveToRelativeLine
+# MoveToRelativeLine
 - @extend: [Function]
 - ::operatesLinewise: true
 - ::moveCursor: [Function]
 
-# Class MoveToScreenLine
+# MoveToScreenLine
 - @extend: [Function]
 - ::moveCursor: [Function]
 
-# Class MoveToBeginningOfLine
-- @extend: [Function]
-- ::operatesInclusively: false
-- ::moveCursor: [Function]
-
-# Class MoveToFirstCharacterOfLine
+# MoveToBeginningOfLine
 - @extend: [Function]
 - ::operatesInclusively: false
 - ::moveCursor: [Function]
 
-# Class MoveToFirstCharacterOfLineAndDown
+# MoveToFirstCharacterOfLine
+- @extend: [Function]
+- ::operatesInclusively: false
+- ::moveCursor: [Function]
+
+# MoveToFirstCharacterOfLineAndDown
 - @extend: [Function]
 - ::operatesLinewise: true
 - ::operatesInclusively: true
 - ::moveCursor: [Function]
 
-# Class MoveToLastCharacterOfLine
+# MoveToLastCharacterOfLine
 - @extend: [Function]
 - ::operatesInclusively: false
 - ::moveCursor: [Function]
 
-# Class MoveToLastNonblankCharacterOfLineAndDown
+# MoveToLastNonblankCharacterOfLineAndDown
 - @extend: [Function]
 - ::operatesInclusively: true
 - ::skipTrailingWhitespace: [Function]
 - ::moveCursor: [Function]
 
-# Class MoveToFirstCharacterOfLineUp
+# MoveToFirstCharacterOfLineUp
 - @extend: [Function]
 - ::operatesLinewise: true
 - ::operatesInclusively: true
 - ::moveCursor: [Function]
 
-# Class MoveToFirstCharacterOfLineDown
+# MoveToFirstCharacterOfLineDown
 - @extend: [Function]
 - ::operatesLinewise: true
 - ::moveCursor: [Function]
 
-# Class MoveToStartOfFile
+# MoveToStartOfFile
 - @extend: [Function]
 - ::moveCursor: [Function]
 
-# Class MoveToTopOfScreen
+# MoveToTopOfScreen
 - @extend: [Function]
 - ::getDestinationRow: [Function]
 
-# Class MoveToBottomOfScreen
+# MoveToBottomOfScreen
 - @extend: [Function]
 - ::getDestinationRow: [Function]
 
-# Class MoveToMiddleOfScreen
+# MoveToMiddleOfScreen
 - @extend: [Function]
 - ::getDestinationRow: [Function]
 
-# Class ScrollKeepingCursor
+# ScrollKeepingCursor
 - @extend: [Function]
 - ::previousFirstScreenRow: 0
 - ::currentFirstScreenRow: 0
@@ -178,40 +178,40 @@
 - ::getDestinationRow: [Function]
 - ::scrollScreen: [Function]
 
-# Class ScrollHalfUpKeepCursor
+# ScrollHalfUpKeepCursor
 - @extend: [Function]
 - ::scrollDestination: [Function]
 
-# Class ScrollFullUpKeepCursor
+# ScrollFullUpKeepCursor
 - @extend: [Function]
 - ::scrollDestination: [Function]
 
-# Class ScrollHalfDownKeepCursor
+# ScrollHalfDownKeepCursor
 - @extend: [Function]
 - ::scrollDestination: [Function]
 
-# Class ScrollFullDownKeepCursor
+# ScrollFullDownKeepCursor
 - @extend: [Function]
 - ::scrollDestination: [Function]
 
-# Class Find
+# Find
 - @extend: [Function]
 - ::match: [Function]
 - ::reverse: [Function]
 - ::moveCursor: [Function]
 
-# Class Till
+# Till
 - @extend: [Function]
 - ::match: [Function]
 - ::moveSelectionInclusively: [Function]
 
-# Class MoveToMark
+# MoveToMark
 - @extend: [Function]
 - ::operatesInclusively: false
 - ::isLinewise: [Function]
 - ::moveCursor: [Function]
 
-# Class SearchBase
+# SearchBase
 - @extend: [Function]
 - ::operatesInclusively: false
 - ::reversed: [Function]
@@ -221,10 +221,10 @@
 - ::updateCurrentSearch: [Function]
 - ::replicateCurrentSearch: [Function]
 
-# Class Search
+# Search
 - @extend: [Function]
 
-# Class SearchCurrentWord
+# SearchCurrentWord
 - @extend: [Function]
 - @keywordRegex: null
 - ::getCurrentWord: [Function]
@@ -233,7 +233,7 @@
 - ::isComplete: [Function]
 - ::execute: [Function]
 
-# Class BracketMatchingMotion
+# BracketMatchingMotion
 - @extend: [Function]
 - ::operatesInclusively: true
 - ::isComplete: [Function]
@@ -242,12 +242,12 @@
 - ::getSearchData: [Function]
 - ::moveCursor: [Function]
 
-# Class RepeatSearch
+# RepeatSearch
 - @extend: [Function]
 - ::isComplete: [Function]
 - ::reversed: [Function]
 
-# Class TextObject
+# TextObject
 - @extend: [Function]
 - ::isComplete: [Function]
 - ::isRecordable: [Function]
