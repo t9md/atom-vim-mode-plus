@@ -6,6 +6,8 @@ AllWhitespace = /^\s$/
 WholeWordRegex = /\S+/
 
 class TextObject extends Base
+  @extend()
+  
   constructor: (@editor, @state) ->
 
   isComplete: -> true

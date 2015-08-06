@@ -3,7 +3,6 @@ _ = require 'underscore-plus'
 {Point, Range, Emitter, Disposable, CompositeDisposable} = require 'atom'
 settings = require './settings'
 
-Base        = require './base'
 Operators   = require './operators/index'
 Prefixes    = require './prefixes'
 Motions     = require './motions'
@@ -14,13 +13,6 @@ Scroll = require './scroll'
 OperationStack = require './operation-stack'
 
 Utils  = require './utils'
-
-Utils.include Base,
-  isOperator:      -> this instanceof Operators.Operator
-  isTextObject:    -> this instanceof TextObjects.TextObject
-  isMotion:        -> this instanceof Motions.Motion
-  isMotionError:   -> this instanceof Motions.MotionError
-  isOperatorError: -> this instanceof Operators.OperatorError
 
 module.exports =
 class VimState

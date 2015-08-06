@@ -10,10 +10,12 @@ WholeWordOrEmptyLineRegex = /^\s*$|\S+/
 AllWhitespace = /^\s$/
 
 class MotionError extends Base
+  @extend()
   constructor: (@message) ->
     @name = 'Motion Error'
 
 class Motion extends Base
+  @extend()
   operatesInclusively: true
   operatesLinewise: false
 
