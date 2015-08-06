@@ -11,6 +11,16 @@ See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode
 3. Introduce new OperationProcessor to process  new-TOM.
 
 
+# Terminology
+
+- TMO: TextObject, Motion, Operator
+
+# Status
+
+- [x] Make opeStack independent
+- [x] Eliminate Prefix.Repeat object. Count is provided as global to object by inheriting Base.
+- [x] TMO can respond to its class(e.g. isTextObject()?)
+
 # END Note by t9md
 
 ## Vim Mode package [![Build Status](https://travis-ci.org/atom/vim-mode.svg?branch=master)](https://travis-ci.org/atom/vim-mode)
