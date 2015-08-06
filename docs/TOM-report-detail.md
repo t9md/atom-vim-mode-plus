@@ -1,6 +1,6 @@
-## OperatorError
+## OperatorError < Base
 
-## Operator
+## Operator < Base
 - ::vimState: `null`
 - ::target: `null`
 - ::complete: `null`
@@ -10,72 +10,72 @@
 - ::canComposeWith: `[Function]`
 - ::setTextRegister: `[Function]`
 
-## OperatorWithInput
+## OperatorWithInput < Operator
 - ::canComposeWith: `[Function]`
 - ::compose: `[Function]`
 
-## Select
+## Select < Operator
 - ::execute: `[Function]`
 
-## Delete
+## Delete < Operator
 - ::register: `null`
 - ::execute: `[Function]`
 
-## ToggleCase
+## ToggleCase < Operator
 - ::execute: `[Function]`
 
-## UpperCase
+## UpperCase < Operator
 - ::execute: `[Function]`
 
-## LowerCase
+## LowerCase < Operator
 - ::execute: `[Function]`
 
-## Yank
+## Yank < Operator
 - ::register: `null`
 - ::execute: `[Function]`
 
-## Join
+## Join < Operator
 - ::execute: `[Function]`
 
-## Repeat
+## Repeat < Operator
 - ::isRecordable: `[Function]`
 - ::execute: `[Function]`
 
-## Mark
+## Mark < OperatorWithInput
 - ::execute: `[Function]`
 
-## Increase
+## Increase < Operator
 - ::step: `1`
 - ::execute: `[Function]`
 - ::increaseNumber: `[Function]`
 
-## Decrease
+## Decrease < Increase
 - ::step: `-1`
 
-## AdjustIndentation
+## AdjustIndentation < Operator
 - ::execute: `[Function]`
 
-## Indent
+## Indent < AdjustIndentation
 - ::indent: `[Function]`
 
-## Outdent
+## Outdent < AdjustIndentation
 - ::indent: `[Function]`
 
-## Autoindent
+## Autoindent < AdjustIndentation
 - ::indent: `[Function]`
 
-## Put
+## Put < Operator
 - ::register: `null`
 - ::execute: `[Function]`
 - ::onLastRow: `[Function]`
 - ::onLastColumn: `[Function]`
 
-## Replace
+## Replace < OperatorWithInput
 - ::execute: `[Function]`
 
-## MotionError
+## MotionError < Base
 
-## Motion
+## Motion < Base
 - ::operatesInclusively: `true`
 - ::operatesLinewise: `false`
 - ::select: `[Function]`
@@ -88,118 +88,118 @@
 - ::isLinewise: `[Function]`
 - ::isInclusive: `[Function]`
 
-## MotionWithInput
+## MotionWithInput < Motion
 - ::isComplete: `[Function]`
 - ::canComposeWith: `[Function]`
 - ::compose: `[Function]`
 
-## MoveLeft
+## MoveLeft < Motion
 - ::operatesInclusively: `false`
 - ::moveCursor: `[Function]`
 
-## MoveRight
+## MoveRight < Motion
 - ::operatesInclusively: `false`
 - ::moveCursor: `[Function]`
 
-## MoveUp
+## MoveUp < Motion
 - ::operatesLinewise: `true`
 - ::moveCursor: `[Function]`
 
-## MoveDown
+## MoveDown < Motion
 - ::operatesLinewise: `true`
 - ::moveCursor: `[Function]`
 
-## MoveToPreviousWord
+## MoveToPreviousWord < Motion
 - ::operatesInclusively: `false`
 - ::moveCursor: `[Function]`
 
-## MoveToPreviousWholeWord
+## MoveToPreviousWholeWord < Motion
 - ::operatesInclusively: `false`
 - ::moveCursor: `[Function]`
 - ::isWholeWord: `[Function]`
 - ::isBeginningOfFile: `[Function]`
 
-## MoveToNextWord
+## MoveToNextWord < Motion
 - ::wordRegex: `null`
 - ::operatesInclusively: `false`
 - ::moveCursor: `[Function]`
 - ::isEndOfFile: `[Function]`
 
-## MoveToNextWholeWord
+## MoveToNextWholeWord < MoveToNextWord
 - ::wordRegex: `/^\s*$|\S+/`
 
-## MoveToEndOfWord
+## MoveToEndOfWord < Motion
 - ::wordRegex: `null`
 - ::moveCursor: `[Function]`
 
-## MoveToEndOfWholeWord
+## MoveToEndOfWholeWord < MoveToEndOfWord
 - ::wordRegex: `/\S+/`
 
-## MoveToNextParagraph
+## MoveToNextParagraph < Motion
 - ::operatesInclusively: `false`
 - ::moveCursor: `[Function]`
 
-## MoveToPreviousParagraph
+## MoveToPreviousParagraph < Motion
 - ::moveCursor: `[Function]`
 
-## MoveToLine
+## MoveToLine < Motion
 - ::operatesLinewise: `true`
 - ::getDestinationRow: `[Function]`
 
-## MoveToAbsoluteLine
+## MoveToAbsoluteLine < MoveToLine
 - ::moveCursor: `[Function]`
 
-## MoveToRelativeLine
+## MoveToRelativeLine < MoveToLine
 - ::operatesLinewise: `true`
 - ::moveCursor: `[Function]`
 
-## MoveToScreenLine
+## MoveToScreenLine < MoveToLine
 - ::moveCursor: `[Function]`
 
-## MoveToBeginningOfLine
+## MoveToBeginningOfLine < Motion
 - ::operatesInclusively: `false`
 - ::moveCursor: `[Function]`
 
-## MoveToFirstCharacterOfLine
+## MoveToFirstCharacterOfLine < Motion
 - ::operatesInclusively: `false`
 - ::moveCursor: `[Function]`
 
-## MoveToFirstCharacterOfLineAndDown
+## MoveToFirstCharacterOfLineAndDown < Motion
 - ::operatesLinewise: `true`
 - ::operatesInclusively: `true`
 - ::moveCursor: `[Function]`
 
-## MoveToLastCharacterOfLine
+## MoveToLastCharacterOfLine < Motion
 - ::operatesInclusively: `false`
 - ::moveCursor: `[Function]`
 
-## MoveToLastNonblankCharacterOfLineAndDown
+## MoveToLastNonblankCharacterOfLineAndDown < Motion
 - ::operatesInclusively: `true`
 - ::skipTrailingWhitespace: `[Function]`
 - ::moveCursor: `[Function]`
 
-## MoveToFirstCharacterOfLineUp
+## MoveToFirstCharacterOfLineUp < Motion
 - ::operatesLinewise: `true`
 - ::operatesInclusively: `true`
 - ::moveCursor: `[Function]`
 
-## MoveToFirstCharacterOfLineDown
+## MoveToFirstCharacterOfLineDown < Motion
 - ::operatesLinewise: `true`
 - ::moveCursor: `[Function]`
 
-## MoveToStartOfFile
+## MoveToStartOfFile < MoveToLine
 - ::moveCursor: `[Function]`
 
-## MoveToTopOfScreen
+## MoveToTopOfScreen < MoveToScreenLine
 - ::getDestinationRow: `[Function]`
 
-## MoveToBottomOfScreen
+## MoveToBottomOfScreen < MoveToScreenLine
 - ::getDestinationRow: `[Function]`
 
-## MoveToMiddleOfScreen
+## MoveToMiddleOfScreen < MoveToScreenLine
 - ::getDestinationRow: `[Function]`
 
-## ScrollKeepingCursor
+## ScrollKeepingCursor < MoveToLine
 - ::previousFirstScreenRow: `0`
 - ::currentFirstScreenRow: `0`
 - ::select: `[Function]`
@@ -208,33 +208,33 @@
 - ::getDestinationRow: `[Function]`
 - ::scrollScreen: `[Function]`
 
-## ScrollHalfUpKeepCursor
+## ScrollHalfUpKeepCursor < ScrollKeepingCursor
 - ::scrollDestination: `[Function]`
 
-## ScrollFullUpKeepCursor
+## ScrollFullUpKeepCursor < ScrollKeepingCursor
 - ::scrollDestination: `[Function]`
 
-## ScrollHalfDownKeepCursor
+## ScrollHalfDownKeepCursor < ScrollKeepingCursor
 - ::scrollDestination: `[Function]`
 
-## ScrollFullDownKeepCursor
+## ScrollFullDownKeepCursor < ScrollKeepingCursor
 - ::scrollDestination: `[Function]`
 
-## Find
+## Find < MotionWithInput
 - ::match: `[Function]`
 - ::reverse: `[Function]`
 - ::moveCursor: `[Function]`
 
-## Till
+## Till < Find
 - ::match: `[Function]`
 - ::moveSelectionInclusively: `[Function]`
 
-## MoveToMark
+## MoveToMark < MotionWithInput
 - ::operatesInclusively: `false`
 - ::isLinewise: `[Function]`
 - ::moveCursor: `[Function]`
 
-## SearchBase
+## SearchBase < MotionWithInput
 - ::operatesInclusively: `false`
 - ::reversed: `[Function]`
 - ::moveCursor: `[Function]`
@@ -243,9 +243,9 @@
 - ::updateCurrentSearch: `[Function]`
 - ::replicateCurrentSearch: `[Function]`
 
-## Search
+## Search < SearchBase
 
-## SearchCurrentWord
+## SearchCurrentWord < SearchBase
 - @keywordRegex: `null`
 - ::getCurrentWord: `[Function]`
 - ::cursorIsOnEOF: `[Function]`
@@ -253,7 +253,7 @@
 - ::isComplete: `[Function]`
 - ::execute: `[Function]`
 
-## BracketMatchingMotion
+## BracketMatchingMotion < SearchBase
 - ::operatesInclusively: `true`
 - ::isComplete: `[Function]`
 - ::searchForMatch: `[Function]`
@@ -261,46 +261,46 @@
 - ::getSearchData: `[Function]`
 - ::moveCursor: `[Function]`
 
-## RepeatSearch
+## RepeatSearch < SearchBase
 - ::isComplete: `[Function]`
 - ::reversed: `[Function]`
 
-## Insert
+## Insert < Operator
 - ::standalone: `true`
 - ::isComplete: `[Function]`
 - ::confirmChanges: `[Function]`
 - ::execute: `[Function]`
 - ::inputOperator: `[Function]`
 
-## ReplaceMode
+## ReplaceMode < Insert
 - ::execute: `[Function]`
 - ::countChars: `[Function]`
 
-## InsertAfter
+## InsertAfter < Insert
 - ::execute: `[Function]`
 
-## InsertAfterEndOfLine
+## InsertAfterEndOfLine < Insert
 - ::execute: `[Function]`
 
-## InsertAtBeginningOfLine
+## InsertAtBeginningOfLine < Insert
 - ::execute: `[Function]`
 
-## InsertAboveWithNewline
+## InsertAboveWithNewline < Insert
 - ::execute: `[Function]`
 
-## InsertBelowWithNewline
+## InsertBelowWithNewline < Insert
 - ::execute: `[Function]`
 
-## Change
+## Change < Insert
 - ::standalone: `false`
 - ::register: `null`
 - ::execute: `[Function]`
 
-## SubstituteLine
+## SubstituteLine < Change
 - ::standalone: `true`
 - ::register: `null`
 
-## Prefix
+## Prefix < Base
 - ::complete: `null`
 - ::composedObject: `null`
 - ::isComplete: `[Function]`
@@ -310,85 +310,85 @@
 - ::select: `[Function]`
 - ::isLinewise: `[Function]`
 
-## Register
+## Register < Prefix
 - ::name: `null`
 - ::compose: `[Function]`
 
-## TextObject
+## TextObject < Base
 - ::isComplete: `[Function]`
 - ::isRecordable: `[Function]`
 
-## CurrentSelection
+## CurrentSelection < TextObject
 - ::select: `[Function]`
 
-## SelectInsideWord
+## SelectInsideWord < TextObject
 - ::select: `[Function]`
 
-## SelectAWord
+## SelectAWord < TextObject
 - ::select: `[Function]`
 
-## SelectInsideWholeWord
+## SelectInsideWholeWord < TextObject
 - ::select: `[Function]`
 
-## SelectAWholeWord
+## SelectAWholeWord < TextObject
 - ::select: `[Function]`
 
-## SelectInsideQuotes
+## SelectInsideQuotes < TextObject
 - ::findOpeningQuote: `[Function]`
 - ::isStartQuote: `[Function]`
 - ::lookForwardOnLine: `[Function]`
 - ::findClosingQuote: `[Function]`
 - ::select: `[Function]`
 
-## SelectInsideBrackets
+## SelectInsideBrackets < TextObject
 - ::findOpeningBracket: `[Function]`
 - ::findClosingBracket: `[Function]`
 - ::select: `[Function]`
 
-## SelectInsideParagraph
+## SelectInsideParagraph < TextObject
 - ::select: `[Function]`
 
-## SelectAParagraph
+## SelectAParagraph < TextObject
 - ::select: `[Function]`
 
-## Scroll
+## Scroll < Base
 - ::isComplete: `[Function]`
 - ::isRecordable: `[Function]`
 
-## ScrollDown
+## ScrollDown < Scroll
 - ::execute: `[Function]`
 - ::keepCursorOnScreen: `[Function]`
 - ::scrollUp: `[Function]`
 
-## ScrollUp
+## ScrollUp < Scroll
 - ::execute: `[Function]`
 - ::keepCursorOnScreen: `[Function]`
 - ::scrollDown: `[Function]`
 
-## ScrollCursor
+## ScrollCursor < Scroll
 
-## ScrollCursorToTop
+## ScrollCursorToTop < ScrollCursor
 - ::execute: `[Function]`
 - ::scrollUp: `[Function]`
 - ::moveToFirstNonBlank: `[Function]`
 
-## ScrollCursorToMiddle
+## ScrollCursorToMiddle < ScrollCursor
 - ::execute: `[Function]`
 - ::scrollMiddle: `[Function]`
 - ::moveToFirstNonBlank: `[Function]`
 
-## ScrollCursorToBottom
+## ScrollCursorToBottom < ScrollCursor
 - ::execute: `[Function]`
 - ::scrollDown: `[Function]`
 - ::moveToFirstNonBlank: `[Function]`
 
-## ScrollHorizontal
+## ScrollHorizontal < Base
 - ::isComplete: `[Function]`
 - ::isRecordable: `[Function]`
 - ::putCursorOnScreen: `[Function]`
 
-## ScrollCursorToLeft
+## ScrollCursorToLeft < ScrollHorizontal
 - ::execute: `[Function]`
 
-## ScrollCursorToRight
+## ScrollCursorToRight < ScrollHorizontal
 - ::execute: `[Function]`

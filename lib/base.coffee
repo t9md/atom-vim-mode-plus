@@ -28,7 +28,8 @@ class Base
     children.push klass
 
   @report: (detail=false) ->
-    s = "## #{@name}\n"
+    parent = this.__super__.constructor.name
+    s = "## #{@name} < #{parent}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
       s += ": `#{inspect(value)}`" if detail
