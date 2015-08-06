@@ -555,6 +555,10 @@ class VimState
   setCount: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
     num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
+
+    # To cover scenario `10d3y` in this case we use 3, need to trash 10.
+    if @isOperatorPending()
+      @resetCount()
     @count ?= 0
     @count = @count * 10 + num
 
