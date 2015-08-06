@@ -6,10 +6,13 @@ settings = require '../settings'
 Base = require '../base'
 
 class OperatorError extends Base
+  @extend()
   constructor: (@message) ->
     @name = 'Operator Error'
 
 class Operator extends Base
+  @extend()
+
   vimState: null
   target: null
   complete: null

@@ -2,6 +2,15 @@ module.exports =
 class Base
   pure: false
 
+  # Expected to be called by child class.
+  # it automatically create typecheck function like
+  # isOperator: ->
+  #   this instanceof Operator
+  @extend: ->
+    klass = this
+    Base::["is#{klass.name}"] = ->
+      this instanceof klass
+
   getName: ->
     @constructor.name
 
