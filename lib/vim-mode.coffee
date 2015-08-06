@@ -38,7 +38,10 @@ module.exports =
   showReport: (detail) ->
     Base = require './base'
     fs = require 'fs-plus'
-    filePath = fs.normalize("~/vim-mode-report.md")
+    path = require 'path'
+    fileNameSuffix = if detail then "-detail.md" else ".md"
+    fileName = 'TOM-report' + fileNameSuffix
+    filePath = path.join(atom.config.get('core.projectHome'), 'vim-mode', 'docs', fileName)
     atom.workspace.open(filePath).then (editor) ->
       editor.setText Base.reportAll(detail)
 

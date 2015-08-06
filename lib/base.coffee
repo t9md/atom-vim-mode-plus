@@ -1,4 +1,4 @@
-{inspect} = require('util')
+util = require('util')
 
 module.exports =
 class Base
@@ -17,7 +17,9 @@ class Base
   #   this instanceof Operator
   #
   children = []
-  excludeFromReports = ['__super__', 'report', 'reportAll', 'constructor']
+  excludeFromReports = ['__super__', 'report', 'reportAll', 'constructor', 'extend']
+  inspect = (obj) -> util.inspect(obj, depth: 0)
+
   @extend: ->
     klass = this
     Base::["is#{klass.name}"] = ->
@@ -26,15 +28,15 @@ class Base
     children.push klass
 
   @report: (detail=false) ->
-    s = "# #{@name}\n"
+    s = "## #{@name}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
-      s += ": #{inspect(value, depth: 0)}" if detail
+      s += ": `#{inspect(value)}`" if detail
       s += "\n"
 
     for own key, value of this.prototype when key not in excludeFromReports
       s += "- ::#{key}"
-      s += ": #{inspect(value, depth: 0)}" if detail
+      s += ": `#{inspect(value)}`" if detail
       s += "\n"
     s
 
@@ -46,10 +48,10 @@ class Base
     s
 
   report: (detail=false) ->
-    s = "# #{this}\n"
+    s = "## #{this}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
-      s += ": #{inspect(value, depth: 0)}" if detail
+      s += ": `#{inspect(value)}`" if detail
       s += "\n\n"
 
     s += @constructor.report(detail)

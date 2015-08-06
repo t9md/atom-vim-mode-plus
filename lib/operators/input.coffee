@@ -8,6 +8,7 @@ settings = require '../settings'
 # it's done. When the input operation is completed, the typingCompleted variable
 # tells the operation to repeat itself instead of enter insert mode.
 class Insert extends Operator
+  @extend()
   standalone: true
 
   isComplete: -> @standalone or super
@@ -30,6 +31,7 @@ class Insert extends Operator
   inputOperator: -> true
 
 class ReplaceMode extends Insert
+  @extend()
 
   execute: ->
     if @typingCompleted
@@ -50,22 +52,26 @@ class ReplaceMode extends Insert
     string.split(char).length - 1
 
 class InsertAfter extends Insert
+  @extend()
   execute: ->
     @editor.moveRight() unless @editor.getLastCursor().isAtEndOfLine()
     super
 
 class InsertAfterEndOfLine extends Insert
+  @extend()
   execute: ->
     @editor.moveToEndOfLine()
     super
 
 class InsertAtBeginningOfLine extends Insert
+  @extend()
   execute: ->
     @editor.moveToBeginningOfLine()
     @editor.moveToFirstCharacterOfLine()
     super
 
 class InsertAboveWithNewline extends Insert
+  @extend()
   # FIXME need support count
   execute: ->
     @vimState.setInsertionCheckpoint() unless @typingCompleted
@@ -82,6 +88,7 @@ class InsertAboveWithNewline extends Insert
     @typingCompleted = true
 
 class InsertBelowWithNewline extends Insert
+  @extend()
   # FIXME need support count
   execute: ->
     @vimState.setInsertionCheckpoint() unless @typingCompleted
@@ -101,6 +108,7 @@ class InsertBelowWithNewline extends Insert
 # Delete the following motion and enter insert mode to replace it.
 #
 class Change extends Insert
+  @extend()
   standalone: false
   register: null
 
@@ -133,6 +141,7 @@ class Change extends Insert
     @typingCompleted = true
 
 class SubstituteLine extends Change
+  @extend()
   standalone: true
   register: null
 

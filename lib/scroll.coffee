@@ -1,5 +1,6 @@
 Base = require './base'
 class Scroll extends Base
+  @extend()
   isComplete: -> true
   isRecordable: -> false
   constructor: (@editorElement) ->
@@ -11,6 +12,7 @@ class Scroll extends Base
       final: @editor.getLastScreenRow()
 
 class ScrollDown extends Scroll
+  @extend()
   execute: (count=1) ->
     @keepCursorOnScreen(count)
     @scrollUp(count)
@@ -26,6 +28,7 @@ class ScrollDown extends Scroll
     @editor.scrollToScreenPosition([lastScreenRow + count, 0])
 
 class ScrollUp extends Scroll
+  @extend()
   execute: (count=1) ->
     @keepCursorOnScreen(count)
     @scrollDown(count)
@@ -41,12 +44,14 @@ class ScrollUp extends Scroll
     @editor.scrollToScreenPosition([firstScreenRow - count, 0])
 
 class ScrollCursor extends Scroll
+  @extend()
   constructor: (@editorElement, @opts={}) ->
     super
     cursor = @editor.getCursorScreenPosition()
     @pixel = @editorElement.pixelPositionForScreenPosition(cursor).top
 
 class ScrollCursorToTop extends ScrollCursor
+  @extend()
   execute: ->
     @moveToFirstNonBlank() unless @opts.leaveCursor
     @scrollUp()
@@ -60,6 +65,7 @@ class ScrollCursorToTop extends ScrollCursor
     @editor.moveToFirstCharacterOfLine()
 
 class ScrollCursorToMiddle extends ScrollCursor
+  @extend()
   execute: ->
     @moveToFirstNonBlank() unless @opts.leaveCursor
     @scrollMiddle()
@@ -72,6 +78,7 @@ class ScrollCursorToMiddle extends ScrollCursor
     @editor.moveToFirstCharacterOfLine()
 
 class ScrollCursorToBottom extends ScrollCursor
+  @extend()
   execute: ->
     @moveToFirstNonBlank() unless @opts.leaveCursor
     @scrollDown()
@@ -86,6 +93,7 @@ class ScrollCursorToBottom extends ScrollCursor
     @editor.moveToFirstCharacterOfLine()
 
 class ScrollHorizontal extends Base
+  @extend()
   isComplete: -> true
   isRecordable: -> false
   constructor: (@editorElement) ->
@@ -98,11 +106,13 @@ class ScrollHorizontal extends Base
     @editor.scrollToCursorPosition({center: false})
 
 class ScrollCursorToLeft extends ScrollHorizontal
+  @extend()
   execute: ->
     @editor.setScrollLeft(@pixel)
     @putCursorOnScreen()
 
 class ScrollCursorToRight extends ScrollHorizontal
+  @extend()
   execute: ->
     @editor.setScrollRight(@pixel)
     @putCursorOnScreen()
