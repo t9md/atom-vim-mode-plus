@@ -17,9 +17,9 @@ See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode
 
 # TOM-report
 
-Done by extnding Base class, so each TOM and its instance can report itself.
+Done by extending Base class, so each TOM and its instance can report itself.
 
-- [Detail](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TOM-report.md)
+- [TOM-report](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TOM-report.md)
 
 # Status
 
