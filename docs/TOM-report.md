@@ -1,7 +1,7 @@
 # TOM report
 
 All TOMs inherits Base class  
-Base class omitted from ancesstors list for screen spaces  
+Base class omitted from ancestors list for screen spaces  
 
 - [Input](#input)
 - [OperatorError](#operatorerror)
