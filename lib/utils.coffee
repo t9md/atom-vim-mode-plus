@@ -1,8 +1,6 @@
 fs = require 'fs-plus'
 settings = require './settings'
 
-debugEditor = null
-
 module.exports =
   # Public: Determines if a string should be considered linewise or character
   #
@@ -19,24 +17,23 @@ module.exports =
       'character'
 
   # Include module(object which normaly provides set of methods) to klass
-
-  initDebugEditor: ->
-    return debugEditor if debugEditor?
-    filePath = fs.normalize("~/vim-mode-debug.log")
-    atom.workspace.open(filePath, activatePane: false).then (editor) ->
-      debugEditor = editor
-    debugEditor
+  include: (klass, module) ->
+    for key, value of module
+      klass::[key] = value
 
   debug: (msg) ->
     return unless settings.debug()
-    if settings.debugTarget() is 'console'
+    msg += "\n"
+    if settings.debugOutput() is 'console'
       console.log msg
     else
-      debugEditor.insertText(msg)
+      filePath = fs.normalize("~/sample.log")
+      fs.appendFile filePath, msg
 
   debugClear: ->
     return unless settings.debug()
-    if settings.debugTarget() is 'console'
+    if settings.debugOutput() is 'console'
       console.clear()
     else
-      debugEditor.setText('')
+      filePath = fs.normalize("~/sample.log")
+      # fs.writeFile filePath, ''
