@@ -8,22 +8,22 @@ excludeFromReports = [
   '__super__', 'report', 'reportAll', 'constructor',
   'extend', 'getParent', 'getAncestors',
 ]
-# 'vimState'
 
 inspectObject = (obj, options={}, prototype=false) ->
   excludeList = excludeFromReports.slice()
+  # When observing operationStack, I want vimState excluded,
+  #  since its have a lot of properties(occupy DevTools console output).
   excludeList.push 'vimState' if options.excludeVimState
   options.depth ?= 0
   obj = obj.prototype if prototype
   prefix = if prototype then '::' else '@'
-  s = ''
   ancesstors = obj.constructor.getAncestors?() ? []
   ancesstors.shift() # drop myself.
+  s = ''
   for own prop, value of obj when prop not in excludeList
     s += "- #{prefix}#{prop}"
     if value instanceof Base
-      s += ":\n"
-      s += value.report(options)
+      s += ":\n#{value.report(options)}"
     else
       if _.isFunction(value)
         s += getArgumentSignature(value)
@@ -67,34 +67,30 @@ class Base
     this.__super__?.constructor
 
   @report: (options) ->
-    ancestors = @getAncestors().map (p) -> p.name
-    ancestors.pop()
-    s = "### #{ancestors.join(' < ')}\n"
-    s += inspectObject(this, options)
-    s += inspectObject(this, options, true)
-    s
+    ancestors = @getAncestors()
+    ancestors.pop() # drop Base class.
+    [
+      "### " + _.pluck(ancestors, 'name').join(' < ')
+      inspectObject(this, options)
+      inspectObject(this, options, true)
+    ].filter (e) -> e.length
+    .join('\n')
+
 
   @reportAll: ->
-    s = ""
-    for child in children
-      s += child.report()
-      s += "\n"
-    s
+    (child.report() for child in children).join('\n')
 
   report: (options={}) ->
     options.excludeVimState = true
-    ancesstors = @constructor.getAncestors().map (p) -> p.name
+    ancesstors = @constructor.getAncestors()
     ancesstors.pop()
-    s = "## #{this}: #{ancesstors.join(' < ')}\n"
-    s += inspectObject(this, options) + '\n'
-    s += @constructor.report(options)
-
-    if options?.indent?
-      indent = _.multiplyString(' ', options.indent)
-      s = s.split('\n').map (e) ->
-        indent + e
-      .join('\n')
-    s
+    indent = _.multiplyString(' ', options.indent ? 0)
+    [
+      "## #{this}: " + _.pluck(ancesstors, 'name').join(' < ')
+      inspectObject(this, options)
+      @constructor.report(options)
+    ].filter (e) -> e.length
+    .join('\n').split('\n').map((e) -> indent + e).join('\n')
 
   getKind: ->
     @constructor.name
@@ -105,5 +101,5 @@ class Base
   # Used by Operator and Motion?
   # Maybe we hould move this function to Operator and Motion?
   getCount: (defaultCount=null) ->
-    # Setting count as instance var make operation repeatable.
+    # Setting count as instance variable make operation repeatable.
     @count ?= @vimState?.counter.get() ? defaultCount

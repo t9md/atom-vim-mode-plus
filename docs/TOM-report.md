@@ -1,7 +1,7 @@
 # TOM report
 
 All TOMs inherits Base class  
-Base class omitted from ancestors list for screen spaces  
+`Base` class itself is omitted from ancestors list to save screen space  
 
 - [Input](#input)
 - [OperatorError](#operatorerror)
@@ -104,7 +104,6 @@ Base class omitted from ancestors list for screen spaces
 - ::isRecordable(): `[Function]`
 
 ### OperatorError
-
 ### Operator
 - ::vimState: `null`
 - ::target: `null`
@@ -179,7 +178,6 @@ Base class omitted from ancestors list for screen spaces
 - ::execute(): `[Function]`
 
 ### MotionError
-
 ### Motion
 - ::operatesInclusively: `true`
 - ::operatesLinewise: `false`
@@ -349,9 +347,9 @@ Base class omitted from ancestors list for screen spaces
 - ::replicateCurrentSearch(): `[Function]`
 
 ### Search < SearchBase < MotionWithInput < Motion
-
 ### SearchCurrentWord < SearchBase < MotionWithInput < Motion
 - @keywordRegex: `null`
+
 - ::getCurrentWord(): `[Function]`
 - ::cursorIsOnEOF(cursor): `[Function]`
 - ::getCurrentWordMatch(): `[Function]`
@@ -471,7 +469,6 @@ Base class omitted from ancestors list for screen spaces
 - ::scrollDown(count): `[Function]`
 
 ### ScrollCursor < Scroll
-
 ### ScrollCursorToTop < ScrollCursor < Scroll
 - ::execute(): `[Function]`
 - ::scrollUp(): `[Function]`
