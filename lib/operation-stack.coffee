@@ -50,7 +50,7 @@ class OperationStack
     debug "  [@stack] size: #{@stack.length}"
     for op, i in @stack
       debug "  <idx: #{i}>"
-      debug op.report(indent: 2, colors: settings.debugOutput() is 'file')
+      debug op.report(indent: 2, colors: settings.debugOutput() is 'file') if settings.debug()
 
   # Private: Processes the command if the last operation is complete.
   #
