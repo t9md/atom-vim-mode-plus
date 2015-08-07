@@ -31,7 +31,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 # How Operation Stack works.
 
 Explained how [OperationStack](https://github.com/t9md/vim-mode/blob/refactor-experiment/lib/operation-stack.coffee) works.  
-Using yip`(Yank, inside paragraph) operation as example.  
+Using `yip`(Yank, inside paragraph) operation as example.  
 Below is explanation whan happend on each processing step and correspoinding debug output of operation-stack.  
 
 1. `y` cause instantiate new `Operators.Yank`. and then push this new instance to OperationStack.
