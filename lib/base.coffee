@@ -1,5 +1,33 @@
-util = require('util')
+{inspect} = require('util')
 _ = require 'underscore-plus'
+
+getArgumentSignature = (fun) ->
+  fun.toString().split("\n")[0].match(/(\(.*\))/)[1]
+
+excludeFromReports = [
+  '__super__', 'report', 'reportAll', 'constructor',
+  'extend', 'getParent', 'getAncestors',
+]
+# 'vimState'
+
+inspectObject = (obj, options={}, prototype=false) ->
+  excludeList = excludeFromReports.slice()
+  excludeList.push 'vimState' if options.excludeVimState
+  options.depth ?= 0
+  obj = obj.prototype if prototype
+  prefix = if prototype then '::' else '@'
+  s = ''
+  for own prop, value of obj when prop not in excludeList
+    s += "- #{prefix}#{prop}"
+    if value instanceof Base
+      s += ":\n"
+      s += value.report(options)
+    else
+      if _.isFunction(value)
+        s += getArgumentSignature(value)
+      s += ": `#{inspect(value, options)}`"
+    s += "\n"
+  s
 
 module.exports =
 class Base
@@ -24,15 +52,6 @@ class Base
       this instanceof klass
     children.push klass
 
-  excludeFromReports = [
-    '__super__', 'report', 'reportAll', 'constructor',
-    'extend', 'getParent', 'getAncestors',
-    'vimState'
-  ]
-  inspect = (obj, options={}) ->
-    options.depth ?= 0
-    util.inspect(obj, options)
-
   @getAncestors: ->
     ancestors = []
     ancestors.push (current=this)
@@ -47,15 +66,8 @@ class Base
     ancestors = @getAncestors().map (p) -> p.name
     ancestors.pop()
     s = "### #{ancestors.join(' < ')}\n"
-    for own key, value of this when key not in excludeFromReports
-      s += "- @#{key}"
-      s += ": `#{inspect(value, options)}`"
-      s += "\n"
-
-    for own key, value of this.prototype when key not in excludeFromReports
-      s += "- ::#{key}"
-      s += ": `#{inspect(value, options)}`"
-      s += "\n"
+    s += inspectObject(this, options)
+    s += inspectObject(this, options, true)
     s
 
   @reportAll: ->
@@ -66,20 +78,13 @@ class Base
     s
 
   report: (options={}) ->
+    options.excludeVimState = true
     ancesstors = @constructor.getAncestors().map (p) -> p.name
     ancesstors.pop()
     s = "## #{this}: #{ancesstors.join(' < ')}\n"
-    for own key, value of this when key not in excludeFromReports
-      s += "- @#{key}"
-      if key is 'target'
-        s += ":\n"
-        s += value.report(options)
-      else
-        s += ": `#{inspect(value, options)}`"
-      s += "\n"
-
-    s += "\n"
+    s += inspectObject(this, options) + '\n'
     s += @constructor.report(options)
+
     if options?.indent?
       indent = _.multiplyString(' ', options.indent)
       s = s.split('\n').map (e) ->
