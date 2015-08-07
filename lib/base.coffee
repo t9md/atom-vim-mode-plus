@@ -66,7 +66,9 @@ class Base
     s
 
   report: (options={}) ->
-    s = "## #{this}\n"
+    ancesstors = @constructor.getAncestors().map (p) -> p.name
+    ancesstors.pop()
+    s = "## #{this}: #{ancesstors.join(' < ')}\n"
     for own key, value of this when key not in excludeFromReports
       s += "- @#{key}"
       if key is 'target'

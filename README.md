@@ -30,9 +30,9 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 # How Operation Stack works.
 
-Explained how [OperationStack](https://github.com/t9md/vim-mode/blob/refactor-experiment/lib/operation-stack.coffee) works.  
-Using `yip`(Yank, inside paragraph) operation as example.  
-Below is explanation what happens on each processing step and corresponding debug output of operation-stack.  
+Expalaining how [OperationStack](https://github.com/t9md/vim-mode/blob/refactor-experiment/lib/operation-stack.coffee) works.  
+By using `yip`(Yank, inside paragraph) operation as example.  
+Below is what happens on each processing step and corresponding debug output of operation-stack.  
 
 1. `y` cause instantiate new `Operators.Yank`. and then `push()` this new instance to OperationStack.
 2. After pushing `Yank` Operator, then `process`, if operation is not `isComplete()`, activating operator-pending-mode, then return from process function.
@@ -43,51 +43,52 @@ Repeat this pop-and-compose(by calling `process()` recursively) until stack get 
 6. When stack got emptied, its time to execute, calling `opration.execute()` operates on `@target`(here `SelectInsideParagraph`) of operation, which target is object composed in process 6.
 
 ```
-#=== Start at 2015-08-07T04:05:04.360Z
-<--- @process(): enter --->
-  [stack: idx = 0]
-  @stack length = 1
-  ## [object Object]
-  - @editor: `<TextEditor 1462>`
+#=== Start at 2015-08-07T06:03:24.797Z
+-> @process(): start
+  [@stack] size: 1
+  <idx: 0>
+  ## [object Object]: Yank < Operator
+  - @editor: `<TextEditor 2404>`
   - @register: `'*'`
 
   ### Yank < Operator
   - ::register: `null`
   - ::execute: `[Function]`
 
-<--- @process(): return. Operator Pending Mode --->
-<--- @process(): enter --->
-  @stack length = 2
-  [stack: idx = 0]
-  ## [object Object]
-  - @editor: `<TextEditor 1462>`
+-> @process(): return. activate: operator-pending-mode
+-> @process(): start
+  [@stack] size: 2
+  <idx: 0>
+  ## [object Object]: Yank < Operator
+  - @editor: `<TextEditor 2404>`
   - @register: `'*'`
 
   ### Yank < Operator
   - ::register: `null`
   - ::execute: `[Function]`
 
-  [stack: idx = 1]
-  ## [object Object]
-  - @editor: `<TextEditor 1462>`
+  <idx: 1>
+  ## [object Object]: SelectInsideParagraph < TextObject
+  - @editor: `<TextEditor 2404>`
   - @inclusive: `false`
 
   ### SelectInsideParagraph < TextObject
   - ::select: `[Function]`
 
-<--- Compose --->
-  - owner = Yank
-  - target = SelectInsideParagraph
-  --- @process(): call @process() again!
-<--- @process(): enter --->
-  @stack length = 1
-  [stack: idx = 0]
-  ## [object Object]
-  - @editor: `<TextEditor 1462>`
+-> @pop()
+  - popped = <SelectInsideParagraph>
+  - newTop = <Yank>
+-> <Yank>.compose(<SelectInsideParagraph>)
+-> @process(): recursive
+-> @process(): start
+  [@stack] size: 1
+  <idx: 0>
+  ## [object Object]: Yank < Operator
+  - @editor: `<TextEditor 2404>`
   - @register: `'*'`
   - @target:
-    ## [object Object]
-    - @editor: `<TextEditor 1462>`
+    ## [object Object]: SelectInsideParagraph < TextObject
+    - @editor: `<TextEditor 2404>`
     - @inclusive: `false`
 
     ### SelectInsideParagraph < TextObject
@@ -99,8 +100,11 @@ Repeat this pop-and-compose(by calling `process()` recursively) until stack get 
   - ::register: `null`
   - ::execute: `[Function]`
 
-<--- Execute --->
-#=== Finish at 2015-08-07T04:05:04.730Z
+-> @pop()
+  - popped = <Yank>
+  - newTop = <undefined>
+ -> <Yank>.execute()
+#=== Finish at 2015-08-07T06:03:25.157Z
 ```
 
 # END Note by t9md
