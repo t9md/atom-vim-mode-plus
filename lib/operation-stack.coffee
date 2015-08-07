@@ -50,7 +50,11 @@ class OperationStack
     debug "  [@stack] size: #{@stack.length}"
     for op, i in @stack
       debug "  <idx: #{i}>"
-      debug op.report(indent: 2, colors: settings.debugOutput() is 'file') if settings.debug()
+      if settings.debug()
+        debug op.report
+          indent: 2
+          colors: settings.debugOutput() is 'file'
+          excludeProperties: ['vimState'] # vimState have many properties, occupy DevTool console.
 
   # Private: Processes the command if the last operation is complete.
   #

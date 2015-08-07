@@ -100,397 +100,496 @@ All TOMs inherits Base class
 - [ScrollCursorToRight < ScrollHorizontal](#scrollcursortoright--scrollhorizontal)
 
 ### Input
-- ::isComplete(): `[Function]`
-- ::isRecordable(): `[Function]`
+- ::`constructor(characters)`: **Overridden**
+- ::`isComplete()`
+- ::`isRecordable()`
 
 ### OperatorError
+- ::`constructor(message)`: **Overridden**
+
 ### Operator
-- ::vimState: `null`
-- ::target: `null`
-- ::complete: `null`
-- ::isComplete(): `[Function]`
-- ::isRecordable(): `[Function]`
-- ::compose(target): `[Function]`
-- ::canComposeWith(operation): `[Function]`
-- ::setTextRegister(register, text): `[Function]`
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`vimState`: `null`
+- ::`target`: `null`
+- ::`complete`: `null`
+- ::`isComplete()`
+- ::`isRecordable()`
+- ::`compose(target)`
+- ::`canComposeWith(operation)`
+- ::`setTextRegister(register, text)`
 
 ### OperatorWithInput < Operator
-- ::canComposeWith(operation): `[Function]`: **Overridden**
-- ::compose(operation): `[Function]`: **Overridden**
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`canComposeWith(operation)`: **Overridden**
+- ::`compose(operation)`: **Overridden**
 
 ### Select < Operator
-- ::execute(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`
 
 ### Delete < Operator
-- ::register: `null`
-- ::execute(): `[Function]`
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`register`: `null`
+- ::`execute()`
 
 ### ToggleCase < Operator
-- ::execute(): `[Function]`
+- ::`constructor(editor, vimState, _arg)`: **Overridden**
+- ::`execute()`
 
 ### UpperCase < Operator
-- ::execute(): `[Function]`
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`execute()`
 
 ### LowerCase < Operator
-- ::execute(): `[Function]`
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`execute()`
 
 ### Yank < Operator
-- ::register: `null`
-- ::execute(): `[Function]`
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`register`: `null`
+- ::`execute()`
 
 ### Join < Operator
-- ::execute(): `[Function]`
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`execute()`
 
 ### Repeat < Operator
-- ::isRecordable(): `[Function]`: **Overridden**
-- ::execute(): `[Function]`
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`isRecordable()`: **Overridden**
+- ::`execute()`
 
 ### Mark < OperatorWithInput < Operator
-- ::execute(): `[Function]`
+- ::`constructor(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
+- ::`execute()`
 
 ### Increase < Operator
-- ::step: `1`
-- ::execute(): `[Function]`
-- ::increaseNumber(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`step`: `1`
+- ::`execute()`
+- ::`increaseNumber(cursor)`
 
 ### Decrease < Increase < Operator
-- ::step: `-1`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`step`: `-1`: **Overridden**
 
 ### AdjustIndentation < Operator
-- ::execute(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`
 
 ### Indent < AdjustIndentation < Operator
-- ::indent(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`indent()`
 
 ### Outdent < AdjustIndentation < Operator
-- ::indent(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`indent()`
 
 ### Autoindent < AdjustIndentation < Operator
-- ::indent(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`indent()`
 
 ### Put < Operator
-- ::register: `null`
-- ::execute(): `[Function]`
-- ::onLastRow(): `[Function]`
-- ::onLastColumn(): `[Function]`
+- ::`constructor(editor, vimState, _arg)`: **Overridden**
+- ::`register`: `null`
+- ::`execute()`
+- ::`onLastRow()`
+- ::`onLastColumn()`
 
 ### Replace < OperatorWithInput < Operator
-- ::execute(): `[Function]`
+- ::`constructor(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
+- ::`execute()`
 
 ### MotionError
+- ::`constructor(message)`: **Overridden**
+
 ### Motion
-- ::operatesInclusively: `true`
-- ::operatesLinewise: `false`
-- ::select(options): `[Function]`
-- ::execute(): `[Function]`
-- ::moveSelectionLinewise(selection, options): `[Function]`
-- ::moveSelectionInclusively(selection, options): `[Function]`
-- ::moveSelection(selection, options): `[Function]`
-- ::isComplete(): `[Function]`
-- ::isRecordable(): `[Function]`
-- ::isLinewise(): `[Function]`
-- ::isInclusive(): `[Function]`
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`operatesInclusively`: `true`
+- ::`operatesLinewise`: `false`
+- ::`select(options)`
+- ::`execute()`
+- ::`moveSelectionLinewise(selection, options)`
+- ::`moveSelectionInclusively(selection, options)`
+- ::`moveSelection(selection, options)`
+- ::`isComplete()`
+- ::`isRecordable()`
+- ::`isLinewise()`
+- ::`isInclusive()`
 
 ### MotionWithInput < Motion
-- ::isComplete(): `[Function]`: **Overridden**
-- ::canComposeWith(operation): `[Function]`
-- ::compose(input): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`isComplete()`: **Overridden**
+- ::`canComposeWith(operation)`
+- ::`compose(input)`
 
 ### MoveLeft < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveRight < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveUp < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesLinewise`: `true`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveDown < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesLinewise`: `true`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToPreviousWord < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToPreviousWholeWord < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
-- ::isWholeWord(cursor): `[Function]`
-- ::isBeginningOfFile(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`moveCursor(cursor)`
+- ::`isWholeWord(cursor)`
+- ::`isBeginningOfFile(cursor)`
 
 ### MoveToNextWord < Motion
-- ::wordRegex: `null`
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor(cursor, options): `[Function]`
-- ::isEndOfFile(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`wordRegex`: `null`
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`moveCursor(cursor, options)`
+- ::`isEndOfFile(cursor)`
 
 ### MoveToNextWholeWord < MoveToNextWord < Motion
-- ::wordRegex: `/^\s*$|\S+/`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`wordRegex`: `/^\s*$|\S+/`: **Overridden**
 
 ### MoveToEndOfWord < Motion
-- ::wordRegex: `null`
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`wordRegex`: `null`
+- ::`moveCursor(cursor)`
 
 ### MoveToEndOfWholeWord < MoveToEndOfWord < Motion
-- ::wordRegex: `/\S+/`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`wordRegex`: `/\S+/`: **Overridden**
 
 ### MoveToNextParagraph < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToPreviousParagraph < Motion
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToLine < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::getDestinationRow(count): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesLinewise`: `true`: **Overridden**
+- ::`getDestinationRow(count)`
 
 ### MoveToAbsoluteLine < MoveToLine < Motion
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToRelativeLine < MoveToLine < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesLinewise`: `true`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToScreenLine < MoveToLine < Motion
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor(editorElement, vimState, scrolloff)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToBeginningOfLine < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToFirstCharacterOfLine < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToFirstCharacterOfLineAndDown < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::operatesInclusively: `true`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesLinewise`: `true`: **Overridden**
+- ::`operatesInclusively`: `true`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToLastCharacterOfLine < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToLastNonblankCharacterOfLineAndDown < Motion
-- ::operatesInclusively: `true`: **Overridden**
-- ::skipTrailingWhitespace(cursor): `[Function]`
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `true`: **Overridden**
+- ::`skipTrailingWhitespace(cursor)`
+- ::`moveCursor(cursor)`
 
 ### MoveToFirstCharacterOfLineUp < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::operatesInclusively: `true`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesLinewise`: `true`: **Overridden**
+- ::`operatesInclusively`: `true`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToFirstCharacterOfLineDown < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesLinewise`: `true`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToStartOfFile < MoveToLine < Motion
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### MoveToTopOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::getDestinationRow(): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`getDestinationRow()`: **Overridden**
 
 ### MoveToBottomOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::getDestinationRow(): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`getDestinationRow()`: **Overridden**
 
 ### MoveToMiddleOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::getDestinationRow(): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`getDestinationRow()`: **Overridden**
 
 ### ScrollKeepingCursor < MoveToLine < Motion
-- ::previousFirstScreenRow: `0`
-- ::currentFirstScreenRow: `0`
-- ::select(options): `[Function]`: **Overridden**
-- ::execute(): `[Function]`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
-- ::getDestinationRow(): `[Function]`: **Overridden**
-- ::scrollScreen(): `[Function]`
+- ::`constructor(editorElement, vimState)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
+- ::`previousFirstScreenRow`: `0`
+- ::`currentFirstScreenRow`: `0`
+- ::`select(options)`: `super(options)`: **Overridden**
+- ::`execute()`: `super`: **Overridden**
+- ::`moveCursor(cursor)`
+- ::`getDestinationRow()`: **Overridden**
+- ::`scrollScreen()`
 
 ### ScrollHalfUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::scrollDestination(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`scrollDestination()`
 
 ### ScrollFullUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::scrollDestination(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`scrollDestination()`
 
 ### ScrollHalfDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::scrollDestination(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`scrollDestination()`
 
 ### ScrollFullDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::scrollDestination(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`scrollDestination()`
 
 ### Find < MotionWithInput < Motion
-- ::match(cursor, count): `[Function]`
-- ::reverse(): `[Function]`
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor(editor, vimState, opts)`: `super(@editor, @vimState)`: **Overridden**
+- ::`match(cursor, count)`
+- ::`reverse()`
+- ::`moveCursor(cursor)`
 
 ### Till < Find < MotionWithInput < Motion
-- ::match(): `[Function]`: **Overridden**
-- ::moveSelectionInclusively(selection, options): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`match()`: `super`: **Overridden**
+- ::`moveSelectionInclusively(selection, options)`: `super`: **Overridden**
 
 ### MoveToMark < MotionWithInput < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::isLinewise(): `[Function]`: **Overridden**
-- ::moveCursor(cursor): `[Function]`
+- ::`constructor(editor, vimState, linewise)`: `super(@editor, @vimState)`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`isLinewise()`: **Overridden**
+- ::`moveCursor(cursor)`
 
 ### SearchBase < MotionWithInput < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::reversed(): `[Function]`
-- ::moveCursor(cursor): `[Function]`
-- ::scan(cursor): `[Function]`
-- ::getSearchTerm(term): `[Function]`
-- ::updateCurrentSearch(): `[Function]`
-- ::replicateCurrentSearch(): `[Function]`
+- ::`constructor(editor, vimState, options)`: `super(@editor, @vimState)`: **Overridden**
+- ::`operatesInclusively`: `false`: **Overridden**
+- ::`reversed()`
+- ::`moveCursor(cursor)`
+- ::`scan(cursor)`
+- ::`getSearchTerm(term)`
+- ::`updateCurrentSearch()`
+- ::`replicateCurrentSearch()`
 
 ### Search < SearchBase < MotionWithInput < Motion
-### SearchCurrentWord < SearchBase < MotionWithInput < Motion
-- @keywordRegex: `null`
+- ::`constructor(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
 
-- ::getCurrentWord(): `[Function]`
-- ::cursorIsOnEOF(cursor): `[Function]`
-- ::getCurrentWordMatch(): `[Function]`
-- ::isComplete(): `[Function]`: **Overridden**
-- ::execute(): `[Function]`: **Overridden**
+### SearchCurrentWord < SearchBase < MotionWithInput < Motion
+- @`keywordRegex`: `null`
+
+- ::`constructor(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
+- ::`getCurrentWord()`
+- ::`cursorIsOnEOF(cursor)`
+- ::`getCurrentWordMatch()`
+- ::`isComplete()`: **Overridden**
+- ::`execute()`: `super()`: **Overridden**
 
 ### BracketMatchingMotion < SearchBase < MotionWithInput < Motion
-- ::operatesInclusively: `true`: **Overridden**
-- ::isComplete(): `[Function]`: **Overridden**
-- ::searchForMatch(startPosition, reverse, inCharacter, outCharacter): `[Function]`
-- ::characterAt(position): `[Function]`
-- ::getSearchData(position): `[Function]`
-- ::moveCursor(cursor): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`operatesInclusively`: `true`: **Overridden**
+- ::`isComplete()`: **Overridden**
+- ::`searchForMatch(startPosition, reverse, inCharacter, outCharacter)`
+- ::`characterAt(position)`
+- ::`getSearchData(position)`
+- ::`moveCursor(cursor)`: **Overridden**
 
 ### RepeatSearch < SearchBase < MotionWithInput < Motion
-- ::isComplete(): `[Function]`: **Overridden**
-- ::reversed(): `[Function]`: **Overridden**
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`isComplete()`: **Overridden**
+- ::`reversed()`: **Overridden**
 
 ### Insert < Operator
-- ::standalone: `true`
-- ::isComplete(): `[Function]`: **Overridden**
-- ::confirmChanges(changes): `[Function]`
-- ::execute(): `[Function]`
-- ::inputOperator(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`standalone`: `true`
+- ::`isComplete()`: `super`: **Overridden**
+- ::`confirmChanges(changes)`
+- ::`execute()`
+- ::`inputOperator()`
 
 ### ReplaceMode < Insert < Operator
-- ::execute(): `[Function]`: **Overridden**
-- ::countChars(char, string): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`: **Overridden**
+- ::`countChars(char, string)`
 
 ### InsertAfter < Insert < Operator
-- ::execute(): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`: `super`: **Overridden**
 
 ### InsertAfterEndOfLine < Insert < Operator
-- ::execute(): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`: `super`: **Overridden**
 
 ### InsertAtBeginningOfLine < Insert < Operator
-- ::execute(): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`: `super`: **Overridden**
 
 ### InsertAboveWithNewline < Insert < Operator
-- ::execute(): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`: `super`: **Overridden**
 
 ### InsertBelowWithNewline < Insert < Operator
-- ::execute(): `[Function]`: **Overridden**
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`: `super`: **Overridden**
 
 ### Change < Insert < Operator
-- ::standalone: `false`: **Overridden**
-- ::register: `null`
-- ::execute(): `[Function]`: **Overridden**
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`standalone`: `false`: **Overridden**
+- ::`register`: `null`
+- ::`execute()`: `super`: **Overridden**
 
 ### SubstituteLine < Change < Insert < Operator
-- ::standalone: `true`: **Overridden**
-- ::register: `null`: **Overridden**
+- ::`constructor(editor, vimState)`: **Overridden**
+- ::`standalone`: `true`: **Overridden**
+- ::`register`: `null`: **Overridden**
 
 ### Prefix
-- ::complete: `null`
-- ::composedObject: `null`
-- ::isComplete(): `[Function]`
-- ::isRecordable(): `[Function]`
-- ::compose(composedObject): `[Function]`
-- ::execute(): `[Function]`
-- ::select(): `[Function]`
-- ::isLinewise(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`complete`: `null`
+- ::`composedObject`: `null`
+- ::`isComplete()`
+- ::`isRecordable()`
+- ::`compose(composedObject)`
+- ::`execute()`
+- ::`select()`
+- ::`isLinewise()`
 
 ### Register < Prefix
-- ::name: `null`
-- ::compose(composedObject): `[Function]`: **Overridden**
+- ::`constructor(name)`: **Overridden**
+- ::`name`: `null`
+- ::`compose(composedObject)`: `super(composedObject)`: **Overridden**
 
 ### TextObject
-- ::isComplete(): `[Function]`
-- ::isRecordable(): `[Function]`
+- ::`constructor(editor, state)`: **Overridden**
+- ::`isComplete()`
+- ::`isRecordable()`
 
 ### CurrentSelection < TextObject
-- ::select(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`select()`
 
 ### SelectInsideWord < TextObject
-- ::select(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`select()`
 
 ### SelectAWord < TextObject
-- ::select(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`select()`
 
 ### SelectInsideWholeWord < TextObject
-- ::select(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`select()`
 
 ### SelectAWholeWord < TextObject
-- ::select(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`select()`
 
 ### SelectInsideQuotes < TextObject
-- ::findOpeningQuote(pos): `[Function]`
-- ::isStartQuote(end): `[Function]`
-- ::lookForwardOnLine(pos): `[Function]`
-- ::findClosingQuote(start): `[Function]`
-- ::select(): `[Function]`
+- ::`constructor(editor, char, includeQuotes)`: **Overridden**
+- ::`findOpeningQuote(pos)`
+- ::`isStartQuote(end)`
+- ::`lookForwardOnLine(pos)`
+- ::`findClosingQuote(start)`
+- ::`select()`
 
 ### SelectInsideBrackets < TextObject
-- ::findOpeningBracket(pos): `[Function]`
-- ::findClosingBracket(start): `[Function]`
-- ::select(): `[Function]`
+- ::`constructor(editor, beginChar, endChar, includeBrackets)`: **Overridden**
+- ::`findOpeningBracket(pos)`
+- ::`findClosingBracket(start)`
+- ::`select()`
 
 ### SelectInsideParagraph < TextObject
-- ::select(): `[Function]`
+- ::`constructor(editor, inclusive)`: **Overridden**
+- ::`select()`
 
 ### SelectAParagraph < TextObject
-- ::select(): `[Function]`
+- ::`constructor(editor, inclusive)`: **Overridden**
+- ::`select()`
 
 ### Scroll
-- ::isComplete(): `[Function]`
-- ::isRecordable(): `[Function]`
+- ::`constructor(editorElement)`: **Overridden**
+- ::`isComplete()`
+- ::`isRecordable()`
 
 ### ScrollDown < Scroll
-- ::execute(count): `[Function]`
-- ::keepCursorOnScreen(count): `[Function]`
-- ::scrollUp(count): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute(count)`
+- ::`keepCursorOnScreen(count)`
+- ::`scrollUp(count)`
 
 ### ScrollUp < Scroll
-- ::execute(count): `[Function]`
-- ::keepCursorOnScreen(count): `[Function]`
-- ::scrollDown(count): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute(count)`
+- ::`keepCursorOnScreen(count)`
+- ::`scrollDown(count)`
 
 ### ScrollCursor < Scroll
+- ::`constructor(editorElement, opts)`: `super`: **Overridden**
+
 ### ScrollCursorToTop < ScrollCursor < Scroll
-- ::execute(): `[Function]`
-- ::scrollUp(): `[Function]`
-- ::moveToFirstNonBlank(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`
+- ::`scrollUp()`
+- ::`moveToFirstNonBlank()`
 
 ### ScrollCursorToMiddle < ScrollCursor < Scroll
-- ::execute(): `[Function]`
-- ::scrollMiddle(): `[Function]`
-- ::moveToFirstNonBlank(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`
+- ::`scrollMiddle()`
+- ::`moveToFirstNonBlank()`
 
 ### ScrollCursorToBottom < ScrollCursor < Scroll
-- ::execute(): `[Function]`
-- ::scrollDown(): `[Function]`
-- ::moveToFirstNonBlank(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`
+- ::`scrollDown()`
+- ::`moveToFirstNonBlank()`
 
 ### ScrollHorizontal
-- ::isComplete(): `[Function]`
-- ::isRecordable(): `[Function]`
-- ::putCursorOnScreen(): `[Function]`
+- ::`constructor(editorElement)`: **Overridden**
+- ::`isComplete()`
+- ::`isRecordable()`
+- ::`putCursorOnScreen()`
 
 ### ScrollCursorToLeft < ScrollHorizontal
-- ::execute(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`
 
 ### ScrollCursorToRight < ScrollHorizontal
-- ::execute(): `[Function]`
+- ::`constructor()`: `super`: **Overridden**
+- ::`execute()`
