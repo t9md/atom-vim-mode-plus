@@ -116,8 +116,8 @@ Base class omitted from ancesstors list for screen spaces
 - ::setTextRegister(register, text): `[Function]`
 
 ### OperatorWithInput < Operator
-- ::canComposeWith(operation): `[Function]`
-- ::compose(operation): `[Function]`
+- ::canComposeWith(operation): `[Function]`: **Overridden**
+- ::compose(operation): `[Function]`: **Overridden**
 
 ### Select < Operator
 - ::execute(): `[Function]`
@@ -143,7 +143,7 @@ Base class omitted from ancesstors list for screen spaces
 - ::execute(): `[Function]`
 
 ### Repeat < Operator
-- ::isRecordable(): `[Function]`
+- ::isRecordable(): `[Function]`: **Overridden**
 - ::execute(): `[Function]`
 
 ### Mark < OperatorWithInput < Operator
@@ -155,7 +155,7 @@ Base class omitted from ancesstors list for screen spaces
 - ::increaseNumber(cursor): `[Function]`
 
 ### Decrease < Increase < Operator
-- ::step: `-1`
+- ::step: `-1`: **Overridden**
 
 ### AdjustIndentation < Operator
 - ::execute(): `[Function]`
@@ -194,123 +194,123 @@ Base class omitted from ancesstors list for screen spaces
 - ::isInclusive(): `[Function]`
 
 ### MotionWithInput < Motion
-- ::isComplete(): `[Function]`
+- ::isComplete(): `[Function]`: **Overridden**
 - ::canComposeWith(operation): `[Function]`
 - ::compose(input): `[Function]`
 
 ### MoveLeft < Motion
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveRight < Motion
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveUp < Motion
-- ::operatesLinewise: `true`
+- ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveDown < Motion
-- ::operatesLinewise: `true`
+- ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToPreviousWord < Motion
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToPreviousWholeWord < Motion
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 - ::isWholeWord(cursor): `[Function]`
 - ::isBeginningOfFile(cursor): `[Function]`
 
 ### MoveToNextWord < Motion
 - ::wordRegex: `null`
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor(cursor, options): `[Function]`
 - ::isEndOfFile(cursor): `[Function]`
 
 ### MoveToNextWholeWord < MoveToNextWord < Motion
-- ::wordRegex: `/^\s*$|\S+/`
+- ::wordRegex: `/^\s*$|\S+/`: **Overridden**
 
 ### MoveToEndOfWord < Motion
 - ::wordRegex: `null`
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToEndOfWholeWord < MoveToEndOfWord < Motion
-- ::wordRegex: `/\S+/`
+- ::wordRegex: `/\S+/`: **Overridden**
 
 ### MoveToNextParagraph < Motion
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToPreviousParagraph < Motion
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToLine < Motion
-- ::operatesLinewise: `true`
+- ::operatesLinewise: `true`: **Overridden**
 - ::getDestinationRow(count): `[Function]`
 
 ### MoveToAbsoluteLine < MoveToLine < Motion
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToRelativeLine < MoveToLine < Motion
-- ::operatesLinewise: `true`
+- ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToScreenLine < MoveToLine < Motion
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToBeginningOfLine < Motion
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToFirstCharacterOfLine < Motion
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToFirstCharacterOfLineAndDown < Motion
-- ::operatesLinewise: `true`
-- ::operatesInclusively: `true`
+- ::operatesLinewise: `true`: **Overridden**
+- ::operatesInclusively: `true`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToLastCharacterOfLine < Motion
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToLastNonblankCharacterOfLineAndDown < Motion
-- ::operatesInclusively: `true`
+- ::operatesInclusively: `true`: **Overridden**
 - ::skipTrailingWhitespace(cursor): `[Function]`
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToFirstCharacterOfLineUp < Motion
-- ::operatesLinewise: `true`
-- ::operatesInclusively: `true`
+- ::operatesLinewise: `true`: **Overridden**
+- ::operatesInclusively: `true`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToFirstCharacterOfLineDown < Motion
-- ::operatesLinewise: `true`
+- ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToStartOfFile < MoveToLine < Motion
 - ::moveCursor(cursor): `[Function]`
 
 ### MoveToTopOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::getDestinationRow(): `[Function]`
+- ::getDestinationRow(): `[Function]`: **Overridden**
 
 ### MoveToBottomOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::getDestinationRow(): `[Function]`
+- ::getDestinationRow(): `[Function]`: **Overridden**
 
 ### MoveToMiddleOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::getDestinationRow(): `[Function]`
+- ::getDestinationRow(): `[Function]`: **Overridden**
 
 ### ScrollKeepingCursor < MoveToLine < Motion
 - ::previousFirstScreenRow: `0`
 - ::currentFirstScreenRow: `0`
-- ::select(options): `[Function]`
-- ::execute(): `[Function]`
+- ::select(options): `[Function]`: **Overridden**
+- ::execute(): `[Function]`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
-- ::getDestinationRow(): `[Function]`
+- ::getDestinationRow(): `[Function]`: **Overridden**
 - ::scrollScreen(): `[Function]`
 
 ### ScrollHalfUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
@@ -331,16 +331,16 @@ Base class omitted from ancesstors list for screen spaces
 - ::moveCursor(cursor): `[Function]`
 
 ### Till < Find < MotionWithInput < Motion
-- ::match(): `[Function]`
-- ::moveSelectionInclusively(selection, options): `[Function]`
+- ::match(): `[Function]`: **Overridden**
+- ::moveSelectionInclusively(selection, options): `[Function]`: **Overridden**
 
 ### MoveToMark < MotionWithInput < Motion
-- ::operatesInclusively: `false`
-- ::isLinewise(): `[Function]`
+- ::operatesInclusively: `false`: **Overridden**
+- ::isLinewise(): `[Function]`: **Overridden**
 - ::moveCursor(cursor): `[Function]`
 
 ### SearchBase < MotionWithInput < Motion
-- ::operatesInclusively: `false`
+- ::operatesInclusively: `false`: **Overridden**
 - ::reversed(): `[Function]`
 - ::moveCursor(cursor): `[Function]`
 - ::scan(cursor): `[Function]`
@@ -355,55 +355,55 @@ Base class omitted from ancesstors list for screen spaces
 - ::getCurrentWord(): `[Function]`
 - ::cursorIsOnEOF(cursor): `[Function]`
 - ::getCurrentWordMatch(): `[Function]`
-- ::isComplete(): `[Function]`
-- ::execute(): `[Function]`
+- ::isComplete(): `[Function]`: **Overridden**
+- ::execute(): `[Function]`: **Overridden**
 
 ### BracketMatchingMotion < SearchBase < MotionWithInput < Motion
-- ::operatesInclusively: `true`
-- ::isComplete(): `[Function]`
+- ::operatesInclusively: `true`: **Overridden**
+- ::isComplete(): `[Function]`: **Overridden**
 - ::searchForMatch(startPosition, reverse, inCharacter, outCharacter): `[Function]`
 - ::characterAt(position): `[Function]`
 - ::getSearchData(position): `[Function]`
-- ::moveCursor(cursor): `[Function]`
+- ::moveCursor(cursor): `[Function]`: **Overridden**
 
 ### RepeatSearch < SearchBase < MotionWithInput < Motion
-- ::isComplete(): `[Function]`
-- ::reversed(): `[Function]`
+- ::isComplete(): `[Function]`: **Overridden**
+- ::reversed(): `[Function]`: **Overridden**
 
 ### Insert < Operator
 - ::standalone: `true`
-- ::isComplete(): `[Function]`
+- ::isComplete(): `[Function]`: **Overridden**
 - ::confirmChanges(changes): `[Function]`
 - ::execute(): `[Function]`
 - ::inputOperator(): `[Function]`
 
 ### ReplaceMode < Insert < Operator
-- ::execute(): `[Function]`
+- ::execute(): `[Function]`: **Overridden**
 - ::countChars(char, string): `[Function]`
 
 ### InsertAfter < Insert < Operator
-- ::execute(): `[Function]`
+- ::execute(): `[Function]`: **Overridden**
 
 ### InsertAfterEndOfLine < Insert < Operator
-- ::execute(): `[Function]`
+- ::execute(): `[Function]`: **Overridden**
 
 ### InsertAtBeginningOfLine < Insert < Operator
-- ::execute(): `[Function]`
+- ::execute(): `[Function]`: **Overridden**
 
 ### InsertAboveWithNewline < Insert < Operator
-- ::execute(): `[Function]`
+- ::execute(): `[Function]`: **Overridden**
 
 ### InsertBelowWithNewline < Insert < Operator
-- ::execute(): `[Function]`
+- ::execute(): `[Function]`: **Overridden**
 
 ### Change < Insert < Operator
-- ::standalone: `false`
+- ::standalone: `false`: **Overridden**
 - ::register: `null`
-- ::execute(): `[Function]`
+- ::execute(): `[Function]`: **Overridden**
 
 ### SubstituteLine < Change < Insert < Operator
-- ::standalone: `true`
-- ::register: `null`
+- ::standalone: `true`: **Overridden**
+- ::register: `null`: **Overridden**
 
 ### Prefix
 - ::complete: `null`
@@ -417,7 +417,7 @@ Base class omitted from ancesstors list for screen spaces
 
 ### Register < Prefix
 - ::name: `null`
-- ::compose(composedObject): `[Function]`
+- ::compose(composedObject): `[Function]`: **Overridden**
 
 ### TextObject
 - ::isComplete(): `[Function]`

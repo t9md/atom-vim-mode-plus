@@ -17,6 +17,8 @@ inspectObject = (obj, options={}, prototype=false) ->
   obj = obj.prototype if prototype
   prefix = if prototype then '::' else '@'
   s = ''
+  ancesstors = obj.constructor.getAncestors?() ? []
+  ancesstors.shift() # drop myself.
   for own prop, value of obj when prop not in excludeList
     s += "- #{prefix}#{prop}"
     if value instanceof Base
@@ -26,6 +28,8 @@ inspectObject = (obj, options={}, prototype=false) ->
       if _.isFunction(value)
         s += getArgumentSignature(value)
       s += ": `#{inspect(value, options)}`"
+      if _.detect(ancesstors, (ancestor) -> ancestor::.hasOwnProperty(prop))
+        s += ": **Overridden**"
     s += "\n"
   s
 
@@ -102,5 +106,4 @@ class Base
   # Maybe we hould move this function to Operator and Motion?
   getCount: (defaultCount=null) ->
     # Setting count as instance var make operation repeatable.
-    # @count ?= @vimState?.getCount() ? defaultCount
     @count ?= @vimState?.counter.get() ? defaultCount
