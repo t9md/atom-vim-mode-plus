@@ -100,496 +100,496 @@ All TOMs inherits Base class
 - [ScrollCursorToRight < ScrollHorizontal](#scrollcursortoright--scrollhorizontal)
 
 ### Input
-- ::`constructor(characters)`: **Overridden**
-- ::`isComplete()`
-- ::`isRecordable()`
+- :::constructor`(characters)`: **Overridden**
+- :::isComplete`()`
+- :::isRecordable`()`
 
 ### OperatorError
-- ::`constructor(message)`: **Overridden**
+- :::constructor`(message)`: **Overridden**
 
 ### Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`vimState`: `null`
-- ::`target`: `null`
-- ::`complete`: `null`
-- ::`isComplete()`
-- ::`isRecordable()`
-- ::`compose(target)`
-- ::`canComposeWith(operation)`
-- ::`setTextRegister(register, text)`
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::vimState: `null`
+- :::target: `null`
+- :::complete: `null`
+- :::isComplete`()`
+- :::isRecordable`()`
+- :::compose`(target)`
+- :::canComposeWith`(operation)`
+- :::setTextRegister`(register, text)`
 
 ### OperatorWithInput < Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`canComposeWith(operation)`: **Overridden**
-- ::`compose(operation)`: **Overridden**
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::canComposeWith`(operation)`: **Overridden**
+- :::compose`(operation)`: **Overridden**
 
 ### Select < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`
 
 ### Delete < Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`register`: `null`
-- ::`execute()`
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::register: `null`
+- :::execute`()`
 
 ### ToggleCase < Operator
-- ::`constructor(editor, vimState, _arg)`: **Overridden**
-- ::`execute()`
+- :::constructor`(editor, vimState, _arg)`: **Overridden**
+- :::execute`()`
 
 ### UpperCase < Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`execute()`
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::execute`()`
 
 ### LowerCase < Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`execute()`
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::execute`()`
 
 ### Yank < Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`register`: `null`
-- ::`execute()`
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::register: `null`
+- :::execute`()`
 
 ### Join < Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`execute()`
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::execute`()`
 
 ### Repeat < Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`isRecordable()`: **Overridden**
-- ::`execute()`
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::isRecordable`()`: **Overridden**
+- :::execute`()`
 
 ### Mark < OperatorWithInput < Operator
-- ::`constructor(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
-- ::`execute()`
+- :::constructor`(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
+- :::execute`()`
 
 ### Increase < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`step`: `1`
-- ::`execute()`
-- ::`increaseNumber(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::step: `1`
+- :::execute`()`
+- :::increaseNumber`(cursor)`
 
 ### Decrease < Increase < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`step`: `-1`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::step: `-1`: **Overridden**
 
 ### AdjustIndentation < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`
 
 ### Indent < AdjustIndentation < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`indent()`
+- :::constructor`()`: `super`: **Overridden**
+- :::indent`()`
 
 ### Outdent < AdjustIndentation < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`indent()`
+- :::constructor`()`: `super`: **Overridden**
+- :::indent`()`
 
 ### Autoindent < AdjustIndentation < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`indent()`
+- :::constructor`()`: `super`: **Overridden**
+- :::indent`()`
 
 ### Put < Operator
-- ::`constructor(editor, vimState, _arg)`: **Overridden**
-- ::`register`: `null`
-- ::`execute()`
-- ::`onLastRow()`
-- ::`onLastColumn()`
+- :::constructor`(editor, vimState, _arg)`: **Overridden**
+- :::register: `null`
+- :::execute`()`
+- :::onLastRow`()`
+- :::onLastColumn`()`
 
 ### Replace < OperatorWithInput < Operator
-- ::`constructor(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
-- ::`execute()`
+- :::constructor`(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
+- :::execute`()`
 
 ### MotionError
-- ::`constructor(message)`: **Overridden**
+- :::constructor`(message)`: **Overridden**
 
 ### Motion
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`operatesInclusively`: `true`
-- ::`operatesLinewise`: `false`
-- ::`select(options)`
-- ::`execute()`
-- ::`moveSelectionLinewise(selection, options)`
-- ::`moveSelectionInclusively(selection, options)`
-- ::`moveSelection(selection, options)`
-- ::`isComplete()`
-- ::`isRecordable()`
-- ::`isLinewise()`
-- ::`isInclusive()`
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::operatesInclusively: `true`
+- :::operatesLinewise: `false`
+- :::select`(options)`
+- :::execute`()`
+- :::moveSelectionLinewise`(selection, options)`
+- :::moveSelectionInclusively`(selection, options)`
+- :::moveSelection`(selection, options)`
+- :::isComplete`()`
+- :::isRecordable`()`
+- :::isLinewise`()`
+- :::isInclusive`()`
 
 ### MotionWithInput < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`isComplete()`: **Overridden**
-- ::`canComposeWith(operation)`
-- ::`compose(input)`
+- :::constructor`()`: `super`: **Overridden**
+- :::isComplete`()`: **Overridden**
+- :::canComposeWith`(operation)`
+- :::compose`(input)`
 
 ### MoveLeft < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveRight < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveUp < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesLinewise`: `true`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesLinewise: `true`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveDown < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesLinewise`: `true`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesLinewise: `true`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToPreviousWord < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToPreviousWholeWord < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`moveCursor(cursor)`
-- ::`isWholeWord(cursor)`
-- ::`isBeginningOfFile(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::moveCursor`(cursor)`
+- :::isWholeWord`(cursor)`
+- :::isBeginningOfFile`(cursor)`
 
 ### MoveToNextWord < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`wordRegex`: `null`
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`moveCursor(cursor, options)`
-- ::`isEndOfFile(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::wordRegex: `null`
+- :::operatesInclusively: `false`: **Overridden**
+- :::moveCursor`(cursor, options)`
+- :::isEndOfFile`(cursor)`
 
 ### MoveToNextWholeWord < MoveToNextWord < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`wordRegex`: `/^\s*$|\S+/`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::wordRegex: `/^\s*$|\S+/`: **Overridden**
 
 ### MoveToEndOfWord < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`wordRegex`: `null`
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::wordRegex: `null`
+- :::moveCursor`(cursor)`
 
 ### MoveToEndOfWholeWord < MoveToEndOfWord < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`wordRegex`: `/\S+/`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::wordRegex: `/\S+/`: **Overridden**
 
 ### MoveToNextParagraph < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToPreviousParagraph < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesLinewise`: `true`: **Overridden**
-- ::`getDestinationRow(count)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesLinewise: `true`: **Overridden**
+- :::getDestinationRow`(count)`
 
 ### MoveToAbsoluteLine < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToRelativeLine < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesLinewise`: `true`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesLinewise: `true`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToScreenLine < MoveToLine < Motion
-- ::`constructor(editorElement, vimState, scrolloff)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`(editorElement, vimState, scrolloff)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToBeginningOfLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToFirstCharacterOfLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToFirstCharacterOfLineAndDown < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesLinewise`: `true`: **Overridden**
-- ::`operatesInclusively`: `true`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesLinewise: `true`: **Overridden**
+- :::operatesInclusively: `true`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToLastCharacterOfLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToLastNonblankCharacterOfLineAndDown < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `true`: **Overridden**
-- ::`skipTrailingWhitespace(cursor)`
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `true`: **Overridden**
+- :::skipTrailingWhitespace`(cursor)`
+- :::moveCursor`(cursor)`
 
 ### MoveToFirstCharacterOfLineUp < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesLinewise`: `true`: **Overridden**
-- ::`operatesInclusively`: `true`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesLinewise: `true`: **Overridden**
+- :::operatesInclusively: `true`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToFirstCharacterOfLineDown < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesLinewise`: `true`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesLinewise: `true`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToStartOfFile < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`()`: `super`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### MoveToTopOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`getDestinationRow()`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::getDestinationRow`()`: **Overridden**
 
 ### MoveToBottomOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`getDestinationRow()`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::getDestinationRow`()`: **Overridden**
 
 ### MoveToMiddleOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`getDestinationRow()`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::getDestinationRow`()`: **Overridden**
 
 ### ScrollKeepingCursor < MoveToLine < Motion
-- ::`constructor(editorElement, vimState)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
-- ::`previousFirstScreenRow`: `0`
-- ::`currentFirstScreenRow`: `0`
-- ::`select(options)`: `super(options)`: **Overridden**
-- ::`execute()`: `super`: **Overridden**
-- ::`moveCursor(cursor)`
-- ::`getDestinationRow()`: **Overridden**
-- ::`scrollScreen()`
+- :::constructor`(editorElement, vimState)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
+- :::previousFirstScreenRow: `0`
+- :::currentFirstScreenRow: `0`
+- :::select`(options)`: `super(options)`: **Overridden**
+- :::execute`()`: `super`: **Overridden**
+- :::moveCursor`(cursor)`
+- :::getDestinationRow`()`: **Overridden**
+- :::scrollScreen`()`
 
 ### ScrollHalfUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`scrollDestination()`
+- :::constructor`()`: `super`: **Overridden**
+- :::scrollDestination`()`
 
 ### ScrollFullUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`scrollDestination()`
+- :::constructor`()`: `super`: **Overridden**
+- :::scrollDestination`()`
 
 ### ScrollHalfDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`scrollDestination()`
+- :::constructor`()`: `super`: **Overridden**
+- :::scrollDestination`()`
 
 ### ScrollFullDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`scrollDestination()`
+- :::constructor`()`: `super`: **Overridden**
+- :::scrollDestination`()`
 
 ### Find < MotionWithInput < Motion
-- ::`constructor(editor, vimState, opts)`: `super(@editor, @vimState)`: **Overridden**
-- ::`match(cursor, count)`
-- ::`reverse()`
-- ::`moveCursor(cursor)`
+- :::constructor`(editor, vimState, opts)`: `super(@editor, @vimState)`: **Overridden**
+- :::match`(cursor, count)`
+- :::reverse`()`
+- :::moveCursor`(cursor)`
 
 ### Till < Find < MotionWithInput < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`match()`: `super`: **Overridden**
-- ::`moveSelectionInclusively(selection, options)`: `super`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::match`()`: `super`: **Overridden**
+- :::moveSelectionInclusively`(selection, options)`: `super`: **Overridden**
 
 ### MoveToMark < MotionWithInput < Motion
-- ::`constructor(editor, vimState, linewise)`: `super(@editor, @vimState)`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`isLinewise()`: **Overridden**
-- ::`moveCursor(cursor)`
+- :::constructor`(editor, vimState, linewise)`: `super(@editor, @vimState)`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::isLinewise`()`: **Overridden**
+- :::moveCursor`(cursor)`
 
 ### SearchBase < MotionWithInput < Motion
-- ::`constructor(editor, vimState, options)`: `super(@editor, @vimState)`: **Overridden**
-- ::`operatesInclusively`: `false`: **Overridden**
-- ::`reversed()`
-- ::`moveCursor(cursor)`
-- ::`scan(cursor)`
-- ::`getSearchTerm(term)`
-- ::`updateCurrentSearch()`
-- ::`replicateCurrentSearch()`
+- :::constructor`(editor, vimState, options)`: `super(@editor, @vimState)`: **Overridden**
+- :::operatesInclusively: `false`: **Overridden**
+- :::reversed`()`
+- :::moveCursor`(cursor)`
+- :::scan`(cursor)`
+- :::getSearchTerm`(term)`
+- :::updateCurrentSearch`()`
+- :::replicateCurrentSearch`()`
 
 ### Search < SearchBase < MotionWithInput < Motion
-- ::`constructor(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
+- :::constructor`(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
 
 ### SearchCurrentWord < SearchBase < MotionWithInput < Motion
-- @`keywordRegex`: `null`
+- @:keywordRegex: `null`
 
-- ::`constructor(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
-- ::`getCurrentWord()`
-- ::`cursorIsOnEOF(cursor)`
-- ::`getCurrentWordMatch()`
-- ::`isComplete()`: **Overridden**
-- ::`execute()`: `super()`: **Overridden**
+- :::constructor`(editor, vimState)`: `super(@editor, @vimState)`: **Overridden**
+- :::getCurrentWord`()`
+- :::cursorIsOnEOF`(cursor)`
+- :::getCurrentWordMatch`()`
+- :::isComplete`()`: **Overridden**
+- :::execute`()`: `super()`: **Overridden**
 
 ### BracketMatchingMotion < SearchBase < MotionWithInput < Motion
-- ::`constructor()`: `super`: **Overridden**
-- ::`operatesInclusively`: `true`: **Overridden**
-- ::`isComplete()`: **Overridden**
-- ::`searchForMatch(startPosition, reverse, inCharacter, outCharacter)`
-- ::`characterAt(position)`
-- ::`getSearchData(position)`
-- ::`moveCursor(cursor)`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::operatesInclusively: `true`: **Overridden**
+- :::isComplete`()`: **Overridden**
+- :::searchForMatch`(startPosition, reverse, inCharacter, outCharacter)`
+- :::characterAt`(position)`
+- :::getSearchData`(position)`
+- :::moveCursor`(cursor)`: **Overridden**
 
 ### RepeatSearch < SearchBase < MotionWithInput < Motion
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`isComplete()`: **Overridden**
-- ::`reversed()`: **Overridden**
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::isComplete`()`: **Overridden**
+- :::reversed`()`: **Overridden**
 
 ### Insert < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`standalone`: `true`
-- ::`isComplete()`: `super`: **Overridden**
-- ::`confirmChanges(changes)`
-- ::`execute()`
-- ::`inputOperator()`
+- :::constructor`()`: `super`: **Overridden**
+- :::standalone: `true`
+- :::isComplete`()`: `super`: **Overridden**
+- :::confirmChanges`(changes)`
+- :::execute`()`
+- :::inputOperator`()`
 
 ### ReplaceMode < Insert < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`: **Overridden**
-- ::`countChars(char, string)`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`: **Overridden**
+- :::countChars`(char, string)`
 
 ### InsertAfter < Insert < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`: `super`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`: `super`: **Overridden**
 
 ### InsertAfterEndOfLine < Insert < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`: `super`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`: `super`: **Overridden**
 
 ### InsertAtBeginningOfLine < Insert < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`: `super`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`: `super`: **Overridden**
 
 ### InsertAboveWithNewline < Insert < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`: `super`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`: `super`: **Overridden**
 
 ### InsertBelowWithNewline < Insert < Operator
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`: `super`: **Overridden**
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`: `super`: **Overridden**
 
 ### Change < Insert < Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`standalone`: `false`: **Overridden**
-- ::`register`: `null`
-- ::`execute()`: `super`: **Overridden**
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::standalone: `false`: **Overridden**
+- :::register: `null`
+- :::execute`()`: `super`: **Overridden**
 
 ### SubstituteLine < Change < Insert < Operator
-- ::`constructor(editor, vimState)`: **Overridden**
-- ::`standalone`: `true`: **Overridden**
-- ::`register`: `null`: **Overridden**
+- :::constructor`(editor, vimState)`: **Overridden**
+- :::standalone: `true`: **Overridden**
+- :::register: `null`: **Overridden**
 
 ### Prefix
-- ::`constructor()`: `super`: **Overridden**
-- ::`complete`: `null`
-- ::`composedObject`: `null`
-- ::`isComplete()`
-- ::`isRecordable()`
-- ::`compose(composedObject)`
-- ::`execute()`
-- ::`select()`
-- ::`isLinewise()`
+- :::constructor`()`: `super`: **Overridden**
+- :::complete: `null`
+- :::composedObject: `null`
+- :::isComplete`()`
+- :::isRecordable`()`
+- :::compose`(composedObject)`
+- :::execute`()`
+- :::select`()`
+- :::isLinewise`()`
 
 ### Register < Prefix
-- ::`constructor(name)`: **Overridden**
-- ::`name`: `null`
-- ::`compose(composedObject)`: `super(composedObject)`: **Overridden**
+- :::constructor`(name)`: **Overridden**
+- :::name: `null`
+- :::compose`(composedObject)`: `super(composedObject)`: **Overridden**
 
 ### TextObject
-- ::`constructor(editor, state)`: **Overridden**
-- ::`isComplete()`
-- ::`isRecordable()`
+- :::constructor`(editor, state)`: **Overridden**
+- :::isComplete`()`
+- :::isRecordable`()`
 
 ### CurrentSelection < TextObject
-- ::`constructor()`: `super`: **Overridden**
-- ::`select()`
+- :::constructor`()`: `super`: **Overridden**
+- :::select`()`
 
 ### SelectInsideWord < TextObject
-- ::`constructor()`: `super`: **Overridden**
-- ::`select()`
+- :::constructor`()`: `super`: **Overridden**
+- :::select`()`
 
 ### SelectAWord < TextObject
-- ::`constructor()`: `super`: **Overridden**
-- ::`select()`
+- :::constructor`()`: `super`: **Overridden**
+- :::select`()`
 
 ### SelectInsideWholeWord < TextObject
-- ::`constructor()`: `super`: **Overridden**
-- ::`select()`
+- :::constructor`()`: `super`: **Overridden**
+- :::select`()`
 
 ### SelectAWholeWord < TextObject
-- ::`constructor()`: `super`: **Overridden**
-- ::`select()`
+- :::constructor`()`: `super`: **Overridden**
+- :::select`()`
 
 ### SelectInsideQuotes < TextObject
-- ::`constructor(editor, char, includeQuotes)`: **Overridden**
-- ::`findOpeningQuote(pos)`
-- ::`isStartQuote(end)`
-- ::`lookForwardOnLine(pos)`
-- ::`findClosingQuote(start)`
-- ::`select()`
+- :::constructor`(editor, char, includeQuotes)`: **Overridden**
+- :::findOpeningQuote`(pos)`
+- :::isStartQuote`(end)`
+- :::lookForwardOnLine`(pos)`
+- :::findClosingQuote`(start)`
+- :::select`()`
 
 ### SelectInsideBrackets < TextObject
-- ::`constructor(editor, beginChar, endChar, includeBrackets)`: **Overridden**
-- ::`findOpeningBracket(pos)`
-- ::`findClosingBracket(start)`
-- ::`select()`
+- :::constructor`(editor, beginChar, endChar, includeBrackets)`: **Overridden**
+- :::findOpeningBracket`(pos)`
+- :::findClosingBracket`(start)`
+- :::select`()`
 
 ### SelectInsideParagraph < TextObject
-- ::`constructor(editor, inclusive)`: **Overridden**
-- ::`select()`
+- :::constructor`(editor, inclusive)`: **Overridden**
+- :::select`()`
 
 ### SelectAParagraph < TextObject
-- ::`constructor(editor, inclusive)`: **Overridden**
-- ::`select()`
+- :::constructor`(editor, inclusive)`: **Overridden**
+- :::select`()`
 
 ### Scroll
-- ::`constructor(editorElement)`: **Overridden**
-- ::`isComplete()`
-- ::`isRecordable()`
+- :::constructor`(editorElement)`: **Overridden**
+- :::isComplete`()`
+- :::isRecordable`()`
 
 ### ScrollDown < Scroll
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute(count)`
-- ::`keepCursorOnScreen(count)`
-- ::`scrollUp(count)`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`(count)`
+- :::keepCursorOnScreen`(count)`
+- :::scrollUp`(count)`
 
 ### ScrollUp < Scroll
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute(count)`
-- ::`keepCursorOnScreen(count)`
-- ::`scrollDown(count)`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`(count)`
+- :::keepCursorOnScreen`(count)`
+- :::scrollDown`(count)`
 
 ### ScrollCursor < Scroll
-- ::`constructor(editorElement, opts)`: `super`: **Overridden**
+- :::constructor`(editorElement, opts)`: `super`: **Overridden**
 
 ### ScrollCursorToTop < ScrollCursor < Scroll
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`
-- ::`scrollUp()`
-- ::`moveToFirstNonBlank()`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`
+- :::scrollUp`()`
+- :::moveToFirstNonBlank`()`
 
 ### ScrollCursorToMiddle < ScrollCursor < Scroll
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`
-- ::`scrollMiddle()`
-- ::`moveToFirstNonBlank()`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`
+- :::scrollMiddle`()`
+- :::moveToFirstNonBlank`()`
 
 ### ScrollCursorToBottom < ScrollCursor < Scroll
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`
-- ::`scrollDown()`
-- ::`moveToFirstNonBlank()`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`
+- :::scrollDown`()`
+- :::moveToFirstNonBlank`()`
 
 ### ScrollHorizontal
-- ::`constructor(editorElement)`: **Overridden**
-- ::`isComplete()`
-- ::`isRecordable()`
-- ::`putCursorOnScreen()`
+- :::constructor`(editorElement)`: **Overridden**
+- :::isComplete`()`
+- :::isRecordable`()`
+- :::putCursorOnScreen`()`
 
 ### ScrollCursorToLeft < ScrollHorizontal
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`
 
 ### ScrollCursorToRight < ScrollHorizontal
-- ::`constructor()`: `super`: **Overridden**
-- ::`execute()`
+- :::constructor`()`: `super`: **Overridden**
+- :::execute`()`
