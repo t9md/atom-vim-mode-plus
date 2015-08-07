@@ -4,31 +4,78 @@ _ = require 'underscore-plus'
 getArgumentSignature = (fun) ->
   fun.toString().split("\n")[0].match(/(\(.*\))/)[1]
 
-excludeFromReports = [
-  '__super__', 'report', 'reportAll', 'constructor',
+extractBetween = (str, s1, s2) ->
+  str.substring(str.indexOf(s1)+1, str.lastIndexOf(s2))
+
+inspectFunction = (fun, name) ->
+  superBase = _.escapeRegExp("#{fun.name}.__super__.#{name}")
+  superAsIs = superBase + _.escapeRegExp(".apply(this, arguments);")
+  superWithModify = superBase + '\\.call\\((.*)\\)'
+
+  body = extractBetween(fun.toString(), '{', '}')
+  body = body.split("\n").map (e) -> e.trim()
+  superSignature = null
+  for line in body
+    # if m = line.match(noConstructor)
+    #   superSignature = 'no constructor'
+    #   break
+    if m = line.match(superAsIs)
+      superSignature = 'super'
+      break
+    else if m = line.match(superWithModify)
+      args = m[1].replace(/this,?\s*/, '')
+      args = args.replace(/this\./g, '@')
+      superSignature = "super(#{args})"
+      break
+  # superSignature ?= 'no super'
+  superSignature
+
+# parseConstructor = (fun) ->
+#   superBase = _.escapeRegExp("#{fun.name}.__super__.constructor")
+#   superAsIs = superBase + _.escapeRegExp(".apply(this, arguments);")
+#   superWithModify = superBase + '\\.call\\((.*)\\)'
+#
+#   body = fun.toString().split("\n").map (e) -> e.trim()
+#   superSignature = ''
+#   for line in body
+#     if m = line.match(superAsIs)
+#       superSignature = 'super'
+#       break
+#     else if m = line.match(superWithModify)
+#       args = m[1].replace(/this,?\s*/, '')
+#       superSignature = "super(#{args})"
+#       break
+#   superSignature
+
+excludeProperties = [
+  '__super__', 'report', 'reportAll'
   'extend', 'getParent', 'getAncestors',
 ]
 
 inspectObject = (obj, options={}, prototype=false) ->
-  excludeList = excludeFromReports.slice()
-  # When observing operationStack, I want vimState excluded,
-  #  since its have a lot of properties(occupy DevTools console output).
-  excludeList.push 'vimState' if options.excludeVimState
+  excludeList = excludeProperties.concat (options.excludeProperties ? [])
   options.depth ?= 0
-  obj = obj.prototype if prototype
-  prefix = if prototype then '::' else '@'
+  prefix = '@'
+  if prototype
+    obj = obj.prototype
+    prefix = '::'
   ancesstors = obj.constructor.getAncestors?() ? []
   ancesstors.shift() # drop myself.
   s = ''
   for own prop, value of obj when prop not in excludeList
-    s += "- #{prefix}#{prop}"
+    s += "- #{prefix}:#{prop}"
     if value instanceof Base
       s += ":\n#{value.report(options)}"
     else
+      isOverridden = _.detect(ancesstors, (ancestor) -> ancestor::.hasOwnProperty(prop))
       if _.isFunction(value)
-        s += getArgumentSignature(value)
-      s += ": `#{inspect(value, options)}`"
-      if _.detect(ancesstors, (ancestor) -> ancestor::.hasOwnProperty(prop))
+        s += "`#{getArgumentSignature(value)}`"
+        if isOverridden
+          if result = inspectFunction(value, prop)
+            s += ": `#{result}`"
+      else
+        s += ": `#{inspect(value, options)}`"
+      if isOverridden
         s += ": **Overridden**"
     s += "\n"
   s
@@ -76,8 +123,8 @@ class Base
     ].filter (e) -> e.length
     .join('\n')
 
-
   @reportAll: ->
+    # children = children.filter (c) -> c.name is 'Operator'
     (child.report() for child in children).join('\n')
 
   report: (options={}) ->
