@@ -32,7 +32,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 Explained how [OperationStack](https://github.com/t9md/vim-mode/blob/refactor-experiment/lib/operation-stack.coffee) works.  
 Using `yip`(Yank, inside paragraph) operation as example.  
-Below is explanation whan happend on each processing step and correspoinding debug output of operation-stack.  
+Below is explanation what happens on each processing step and corresponding debug output of operation-stack.  
 
 1. `y` cause instantiate new `Operators.Yank`. and then push this new instance to OperationStack.
 2. After pushing `Yank` Operator, then `process`, if operation is not `isComplete()`, activating operator-pending-mode, then return from process function.
@@ -40,7 +40,7 @@ Below is explanation whan happend on each processing step and correspoinding deb
 4. Then process it. now SelectInsideParagraph is top of stack and it `isComplete()`, so in this time we don't enter operator-pendng-mode.
 5. Then processor pop() top operation, and it have still operation remain on stack, processor try to compose poped operation(here SelectInsideParagraph) to newTop operation.
 Repeat this pop-and-compose(by calling process recursively) until stack got emptied.
-6. When stack got emptied, its time to excute, call `opration.execute()` operate on `@target` of operation, which target is object composed in process 5.
+6. When stack got emptied, its time to execute, call `opration.execute()` operate on `@target` of operation, which target is object composed in process 5.
 
 ```
 #=== Start at 2015-08-07T04:05:04.360Z
