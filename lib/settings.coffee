@@ -26,7 +26,7 @@ settings =
       order: 6
       type: 'boolean'
       default: false
-    debugTarget:
+    debugOutput:
       order: 7
       type: 'string'
       default: 'console'

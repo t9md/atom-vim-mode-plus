@@ -33,7 +33,10 @@ module.exports =
       @vimStates.forEach (vimState) -> vimState.destroy()
 
     @disposables.add atom.commands.add 'atom-workspace',
-      'vim-mode:report': => @showReport()
+      'vim-mode:report': =>
+        @showReport()
+      'vim-mode:toggle-debug': ->
+        atom.config.set('vim-mode.debug', not settings.debug())
 
   getTableOfContent: (content) ->
     toc = _.chain content.split('\n')
