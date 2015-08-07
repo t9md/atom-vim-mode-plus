@@ -28,7 +28,7 @@ module.exports =
       console.log msg
     else
       filePath = fs.normalize("~/sample.log")
-      fs.appendFile filePath, msg
+      fs.appendFileSync filePath, msg
 
   debugClear: ->
     return unless settings.debug()

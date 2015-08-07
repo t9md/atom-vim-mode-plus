@@ -47,10 +47,9 @@ class OperationStack
       @vimState.ensureCursorIsWithinLine(cursor)
 
   inspectStack: ->
-    indentString = _.multiplyString(' ', 2)
-    debug "#{indentString}@stack length = #{@stack.length}"
+    debug "  [@stack] size: #{@stack.length}"
     for op, i in @stack
-      debug "#{indentString}[stack: idx = #{i}]"
+      debug "  <idx: #{i}>"
       debug op.report(indent: 2, colors: settings.debugOutput() is 'file')
 
   # Private: Processes the command if the last operation is complete.
@@ -58,24 +57,25 @@ class OperationStack
   # Returns nothing.
   process: ->
     return if @isEmpty()
-    debug "<--- @process(): enter --->"
+    debug "-> @process(): start"
 
     unless @peekTop().isComplete()
       if @vimState.isNormalMode() and @peekTop().isOperator?()
         @inspectStack()
         @vimState.activateOperatorPendingMode()
-        debug "<--- @process(): return. Operator Pending Mode --->"
+        debug "-> @process(): return. activate: operator-pending-mode"
       return
 
     @inspectStack()
     operation = @pop()
+    debug "-> @pop()"
+    debug "  - popped = <#{operation.getKind()}>"
+    debug "  - newTop = <#{@peekTop()?.getKind()}>"
     unless @isEmpty()
       try
-        debug "<--- Compose --->"
-        debug "  - owner = #{@peekTop().getKind()}"
-        debug "  - target = #{operation.getKind()}"
         @peekTop().compose(operation)
-        debug "  --- @process(): call @process() again!"
+        debug "-> <#{@peekTop().getKind()}>.compose(<#{operation.getKind()}>)"
+        debug "-> @process(): recursive"
         @process()
       catch e
         if e.isOperatorError?() or e.isMotionError?()
@@ -85,10 +85,10 @@ class OperationStack
     else
       @vimState.history.unshift(operation) if operation.isRecordable()
       unless operation.isPure()
-        debug "<--- Execute --->"
-        debug "#=== Finish at #{new Date().toISOString()}\n"
         operation.execute()
+        debug " -> <#{operation.getKind()}>.execute()"
         @vimState.counter.reset()
+        debug "#=== Finish at #{new Date().toISOString()}\n"
       else
         null # Something new way of execution.
 
