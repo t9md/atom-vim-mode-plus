@@ -60,6 +60,10 @@ Maybe something broken but I didn't notice, all spec pass without modification
 - [add keystroke method](https://github.com/t9md/vim-mode/commit/a111105dd8a018425a5a0aff3afbf04c46ca93b2)
 - I like [more neat spec](https://github.com/t9md/vim-mode/commit/987077e033b81f913b2503119bb05f3e202f9696).
 
+# TextObject
+- Around(or A), Inside could be consolidated by changing behavior with options argument.  
+- Scroll Motion can be consolidated by changing behavior with options arguments.
+
 # Naming
 
 - `vimState::pushSearchHistory` -> `vimState::saveSearchHistory`

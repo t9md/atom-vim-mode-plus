@@ -4,17 +4,31 @@ This is refactoring experiment for vim-mode.
 See [REFACTORING_IDEA](REFACTORING_IDEA.md).  
 See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode/issues/800).  
 
-# Step
+# What this folk project aiming to?
+
+Currently, each TOM(TextObject, Operator, Motion), do very different things, the behavior and responsibility of each TOM is not consistent.  
+This inconsistencies reduce flexibility and readablity of codebases, and it also making it difficult to introduce custom TOM.  
+By taking over tasks currently handled on TOM by new OperationProcessor, each TOM's implementation could be very simplified and easier to maintain.  
+This project aiming to prove above idea by implementing working example.  
+
+# Strategy
 
 1. Improve readability by renaming without causing big internal change.
 2. Migrate each old TextObject, Operator, Motion(TOM for short) to new one.
 3. Introduce new OperationProcessor to process  new-TOM.
 
-
 # Terminology
 
 - TOM: TextObject, Operator, Motion
 - Kind: Class Name of each TOM.
+- oTOM: old TOM, TOM of current vim-mode.
+- pTOM: pure TOM, TOM which do very minimal things which responsibility is only return Point or Range.
+- OperationProcessor
+
+# OperationProcessor
+- Handle multi cursor situation
+- Handle count(how much each operation should be repated).
+- Composing operation with target.
 
 # Spec
 - each TOM can respond to `getKind()` which return name of Class.
@@ -33,7 +47,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] TOM can respond to its class(e.g. isTextObject()?)
 - [x] Realtime observation of OperatonStack.
 
-# How Operation Stack works.
+# How Operation Stack works(for current official vim-mode).
 
 Expalaining how [OperationStack](https://github.com/t9md/vim-mode/blob/refactor-experiment/lib/operation-stack.coffee) works.  
 By using `yip`(Yank, inside paragraph) operation as example.  
