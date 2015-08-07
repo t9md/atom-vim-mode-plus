@@ -14,6 +14,11 @@ See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode
 # Terminology
 
 - TOM: TextObject, Operator, Motion
+- Kind: Class Name of each TOM.
+
+# Spec
+- each TOM can respond to `getKind()` which return name of Class.
+- each TOM can respond to `is#{Klass}()` function, which return result of `this instanceof klass`.
 
 # TOM-report
 
