@@ -545,22 +545,6 @@ class VimState
   # e - The event that triggered the Number prefix.
   #
   # Returns nothing.
-  # setCount: (e) ->
-  #   keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
-  #   num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-  #
-  #   # To cover scenario `10d3y` in this case we use 3, need to trash 10.
-  #   if @isOperatorPending()
-  #     @resetCount()
-  #   @count ?= 0
-  #   @count = @count * 10 + num
-  #
-  # getCount: ->
-  #   @count
-  #
-  # resetCount: ->
-  #   @count = null
-
   getCounter: ->
     count = null
     isOperatorPending = @isOperatorPending.bind(this)
