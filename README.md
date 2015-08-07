@@ -34,13 +34,13 @@ Explained how [OperationStack](https://github.com/t9md/vim-mode/blob/refactor-ex
 Using `yip`(Yank, inside paragraph) operation as example.  
 Below is explanation what happens on each processing step and corresponding debug output of operation-stack.  
 
-1. `y` cause instantiate new `Operators.Yank`. and then push this new instance to OperationStack.
+1. `y` cause instantiate new `Operators.Yank`. and then `push()` this new instance to OperationStack.
 2. After pushing `Yank` Operator, then `process`, if operation is not `isComplete()`, activating operator-pending-mode, then return from process function.
-3. Then user type `ip`, this cause instantiate new `TextObjects.SelectInsideParagraph`, then push it to OperationStack.
-4. Then process it. now SelectInsideParagraph is top of stack and it `isComplete()`, so in this time we don't enter operator-pendng-mode.
-5. Then processor pop() top operation, and it have still operation remain on stack, processor try to compose poped operation(here SelectInsideParagraph) to newTop operation.
-Repeat this pop-and-compose(by calling process recursively) until stack got emptied.
-6. When stack got emptied, its time to execute, call `opration.execute()` operate on `@target` of operation, which target is object composed in process 5.
+3. Then user type `ip`, this cause instantiate new `TextObjects.SelectInsideParagraph`, then `push()` it to OperationStack.
+4. Then `process()` it. now `SelectInsideParagraph` is top of stack and it `isComplete()`, so in this time we don't enter operator-pending-mode.
+5. Then processor `pop()` top operation, and it have still operations on stack, processor try to `compose()` `pop()`ed operation(here `SelectInsideParagraph`) to newTop operation(here `Yank`).
+Repeat this pop-and-compose(by calling `process()` recursively) until stack get emptied.
+6. When stack got emptied, its time to execute, calling `opration.execute()` operates on `@target`(here `SelectInsideParagraph`) of operation, which target is object composed in process 6.
 
 ```
 #=== Start at 2015-08-07T04:05:04.360Z
