@@ -42,7 +42,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 # Status
 
-- [x] Make opeStack independent
+- [x] Make opStack independent
 - [x] Eliminate Prefix.Repeat object. Count is provided as global to object by inheriting Base.
 - [x] TOM can respond to its class(e.g. isTextObject()?)
 - [x] Realtime observation of OperatonStack.
