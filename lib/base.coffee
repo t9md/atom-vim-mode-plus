@@ -1,34 +1,39 @@
 {inspect} = require('util')
 _ = require 'underscore-plus'
 
-getArgumentSignature = (fun) ->
-  fun.toString().split("\n")[0].match(/(\(.*\))/)[1]
-
 extractBetween = (str, s1, s2) ->
   str.substring(str.indexOf(s1)+1, str.lastIndexOf(s2))
+
+getSuperSignature = (str) ->
 
 inspectFunction = (fun, name) ->
   superBase = _.escapeRegExp("#{fun.name}.__super__.#{name}")
   superAsIs = superBase + _.escapeRegExp(".apply(this, arguments);")
   superWithModify = superBase + '\\.call\\((.*)\\)'
+  defaultConstructor = '^return '+  superAsIs
 
-  body = extractBetween(fun.toString(), '{', '}')
-  body = body.split("\n").map (e) -> e.trim()
+  funString = fun.toString()
+  argumentSignature = funString.split("\n")[0].match(/(\(.*\))/)[1]
+  body = extractBetween(funString, '{', '}').split("\n").map (e) -> e.trim()
   superSignature = null
+
+  if name is 'constructor' and body.length is 1
+    {argumentSignature, superSignature}
+    return
+
   for line in body
-    # if m = line.match(noConstructor)
-    #   superSignature = 'no constructor'
-    #   break
-    if m = line.match(superAsIs)
-      superSignature = 'super'
+    if name is 'constructor' and m = line.match(defaultConstructor)
+      superSignature = 'default'
+      break
+    else if m = line.match(superAsIs)
+      superSignature = "super"
       break
     else if m = line.match(superWithModify)
       args = m[1].replace(/this,?\s*/, '')
       args = args.replace(/this\./g, '@')
       superSignature = "super(#{args})"
       break
-  # superSignature ?= 'no super'
-  superSignature
+  {argumentSignature, superSignature}
 
 # parseConstructor = (fun) ->
 #   superBase = _.escapeRegExp("#{fun.name}.__super__.constructor")
@@ -61,24 +66,24 @@ inspectObject = (obj, options={}, prototype=false) ->
     prefix = '::'
   ancesstors = obj.constructor.getAncestors?() ? []
   ancesstors.shift() # drop myself.
-  s = ''
+  results = []
   for own prop, value of obj when prop not in excludeList
-    s += "- #{prefix}:#{prop}"
+    s = "- #{prefix}#{prop}"
     if value instanceof Base
       s += ":\n#{value.report(options)}"
     else
-      isOverridden = _.detect(ancesstors, (ancestor) -> ancestor::.hasOwnProperty(prop))
       if _.isFunction(value)
-        s += "`#{getArgumentSignature(value)}`"
-        if isOverridden
-          if result = inspectFunction(value, prop)
-            s += ": `#{result}`"
+        {argumentSignature, superSignature} = inspectFunction(value, prop)
+        # hide default constructor
+        continue if (prop is 'constructor') and (superSignature is 'default')
+        s += "`#{argumentSignature}`"
+        s += ": `#{superSignature}`" if superSignature?
       else
         s += ": `#{inspect(value, options)}`"
-      if isOverridden
-        s += ": **Overridden**"
-    s += "\n"
-  s
+      isOverridden = _.detect(ancesstors, (ancestor) -> ancestor::.hasOwnProperty(prop))
+      s += ": **Overridden**" if isOverridden
+    results.push s
+  results.join('\n')
 
 module.exports =
 class Base
