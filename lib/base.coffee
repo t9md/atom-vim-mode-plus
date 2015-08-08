@@ -29,6 +29,8 @@ inspectFunction = (fun, name) ->
 
   argumentSignature = '(' + funArgs.join(', ') + ')'
 
+  # C1.__super__.constructor.apply(this, arguments);
+  # C1.__super__.hello.call(this, a1);
   superSignature = null
   for line in body
     if name is 'constructor' and m = line.match(defaultConstructor)
