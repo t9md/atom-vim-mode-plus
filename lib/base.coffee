@@ -118,7 +118,7 @@ class Base
       inspectObject(this, options)
       inspectObject(this, options, true)
     ].filter (e) -> e.length
-    .join('\n')
+    .join('\n') + '\n'
 
   @reportAll: ->
     # children = children.filter (c) -> c.name is 'Operator'

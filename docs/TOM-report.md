@@ -103,8 +103,10 @@ All TOMs inherits Base class
 - ::constructor`(@characters)`: **Overridden**
 - ::isComplete`()`
 - ::isRecordable`()`
+
 ### OperatorError
 - ::constructor`(@message)`: **Overridden**
+
 ### Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::vimState: `null`
@@ -115,65 +117,85 @@ All TOMs inherits Base class
 - ::compose`(@target)`
 - ::canComposeWith`(operation)`
 - ::setTextRegister`(register, text)`
+
 ### OperatorWithInput < Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::canComposeWith`(operation)`: **Overridden**
 - ::compose`(operation)`: **Overridden**
+
 ### Select < Operator
 - ::execute`()`
+
 ### Delete < Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::register: `null`
 - ::execute`()`
+
 ### ToggleCase < Operator
 - ::constructor`(@editor, @vimState, _arg)`: **Overridden**
 - ::execute`()`
+
 ### UpperCase < Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::execute`()`
+
 ### LowerCase < Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::execute`()`
+
 ### Yank < Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::register: `null`
 - ::execute`()`
+
 ### Join < Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::execute`()`
+
 ### Repeat < Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::isRecordable`()`: **Overridden**
 - ::execute`()`
+
 ### Mark < OperatorWithInput < Operator
 - ::constructor`(@editor, @vimState)`: `super(@editor, @vimState)`: **Overridden**
 - ::execute`()`
+
 ### Increase < Operator
 - ::constructor`()`: `super`: **Overridden**
 - ::step: `1`
 - ::execute`()`
 - ::increaseNumber`(cursor)`
+
 ### Decrease < Increase < Operator
 - ::step: `-1`: **Overridden**
+
 ### AdjustIndentation < Operator
 - ::execute`()`
+
 ### Indent < AdjustIndentation < Operator
 - ::indent`()`
+
 ### Outdent < AdjustIndentation < Operator
 - ::indent`()`
+
 ### Autoindent < AdjustIndentation < Operator
 - ::indent`()`
+
 ### Put < Operator
 - ::constructor`(@editor, @vimState, _arg)`: **Overridden**
 - ::register: `null`
 - ::execute`()`
 - ::onLastRow`()`
 - ::onLastColumn`()`
+
 ### Replace < OperatorWithInput < Operator
 - ::constructor`(@editor, @vimState)`: `super(@editor, @vimState)`: **Overridden**
 - ::execute`()`
+
 ### MotionError
 - ::constructor`(@message)`: **Overridden**
+
 ### Motion
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::operatesInclusively: `true`
@@ -187,91 +209,120 @@ All TOMs inherits Base class
 - ::isRecordable`()`
 - ::isLinewise`()`
 - ::isInclusive`()`
+
 ### MotionWithInput < Motion
 - ::constructor`()`: `super`: **Overridden**
 - ::isComplete`()`: **Overridden**
 - ::canComposeWith`(operation)`
 - ::compose`(@input)`
+
 ### MoveLeft < Motion
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveRight < Motion
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveUp < Motion
 - ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveDown < Motion
 - ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToPreviousWord < Motion
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToPreviousWholeWord < Motion
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
 - ::isWholeWord`(cursor)`
 - ::isBeginningOfFile`(cursor)`
+
 ### MoveToNextWord < Motion
 - ::wordRegex: `null`
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor, options)`
 - ::isEndOfFile`(cursor)`
+
 ### MoveToNextWholeWord < MoveToNextWord < Motion
 - ::wordRegex: `/^\s*$|\S+/`: **Overridden**
+
 ### MoveToEndOfWord < Motion
 - ::wordRegex: `null`
 - ::moveCursor`(cursor)`
+
 ### MoveToEndOfWholeWord < MoveToEndOfWord < Motion
 - ::wordRegex: `/\S+/`: **Overridden**
+
 ### MoveToNextParagraph < Motion
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToPreviousParagraph < Motion
 - ::moveCursor`(cursor)`
+
 ### MoveToLine < Motion
 - ::operatesLinewise: `true`: **Overridden**
 - ::getDestinationRow`(count)`
+
 ### MoveToAbsoluteLine < MoveToLine < Motion
 - ::moveCursor`(cursor)`
+
 ### MoveToRelativeLine < MoveToLine < Motion
 - ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToScreenLine < MoveToLine < Motion
 - ::constructor`(@editorElement, @vimState, @scrolloff)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToBeginningOfLine < Motion
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToFirstCharacterOfLine < Motion
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToFirstCharacterOfLineAndDown < Motion
 - ::operatesLinewise: `true`: **Overridden**
 - ::operatesInclusively: `true`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToLastCharacterOfLine < Motion
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToLastNonblankCharacterOfLineAndDown < Motion
 - ::operatesInclusively: `true`: **Overridden**
 - ::skipTrailingWhitespace`(cursor)`
 - ::moveCursor`(cursor)`
+
 ### MoveToFirstCharacterOfLineUp < Motion
 - ::operatesLinewise: `true`: **Overridden**
 - ::operatesInclusively: `true`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToFirstCharacterOfLineDown < Motion
 - ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### MoveToStartOfFile < MoveToLine < Motion
 - ::moveCursor`(cursor)`
+
 ### MoveToTopOfScreen < MoveToScreenLine < MoveToLine < Motion
 - ::getDestinationRow`()`: **Overridden**
+
 ### MoveToBottomOfScreen < MoveToScreenLine < MoveToLine < Motion
 - ::getDestinationRow`()`: **Overridden**
+
 ### MoveToMiddleOfScreen < MoveToScreenLine < MoveToLine < Motion
 - ::getDestinationRow`()`: **Overridden**
+
 ### ScrollKeepingCursor < MoveToLine < Motion
 - ::constructor`(@editorElement, @vimState)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
 - ::previousFirstScreenRow: `0`
@@ -281,28 +332,36 @@ All TOMs inherits Base class
 - ::moveCursor`(cursor)`
 - ::getDestinationRow`()`: **Overridden**
 - ::scrollScreen`()`
+
 ### ScrollHalfUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
 - ::scrollDestination`()`
+
 ### ScrollFullUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
 - ::scrollDestination`()`
+
 ### ScrollHalfDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
 - ::scrollDestination`()`
+
 ### ScrollFullDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
 - ::scrollDestination`()`
+
 ### Find < MotionWithInput < Motion
 - ::constructor`(@editor, @vimState, opts)`: `super(@editor, @vimState)`: **Overridden**
 - ::match`(cursor, count)`
 - ::reverse`()`
 - ::moveCursor`(cursor)`
+
 ### Till < Find < MotionWithInput < Motion
 - ::constructor`()`: `super`: **Overridden**
 - ::match`()`: `super`: **Overridden**
 - ::moveSelectionInclusively`(selection, options)`: `super`: **Overridden**
+
 ### MoveToMark < MotionWithInput < Motion
 - ::constructor`(@editor, @vimState, linewise)`: `super(@editor, @vimState)`: **Overridden**
 - ::operatesInclusively: `false`: **Overridden**
 - ::isLinewise`()`: **Overridden**
 - ::moveCursor`(cursor)`
+
 ### SearchBase < MotionWithInput < Motion
 - ::constructor`(@editor, @vimState, options)`: `super(@editor, @vimState)`: **Overridden**
 - ::operatesInclusively: `false`: **Overridden**
@@ -312,8 +371,10 @@ All TOMs inherits Base class
 - ::getSearchTerm`(term)`
 - ::updateCurrentSearch`()`
 - ::replicateCurrentSearch`()`
+
 ### Search < SearchBase < MotionWithInput < Motion
 - ::constructor`(@editor, @vimState)`: `super(@editor, @vimState)`: **Overridden**
+
 ### SearchCurrentWord < SearchBase < MotionWithInput < Motion
 - @keywordRegex: `null`
 - ::constructor`(@editor, @vimState)`: `super(@editor, @vimState)`: **Overridden**
@@ -322,6 +383,7 @@ All TOMs inherits Base class
 - ::getCurrentWordMatch`()`
 - ::isComplete`()`: **Overridden**
 - ::execute`()`: `super()`: **Overridden**
+
 ### BracketMatchingMotion < SearchBase < MotionWithInput < Motion
 - ::operatesInclusively: `true`: **Overridden**
 - ::isComplete`()`: **Overridden**
@@ -329,38 +391,49 @@ All TOMs inherits Base class
 - ::characterAt`(position)`
 - ::getSearchData`(position)`
 - ::moveCursor`(cursor)`: **Overridden**
+
 ### RepeatSearch < SearchBase < MotionWithInput < Motion
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::isComplete`()`: **Overridden**
 - ::reversed`()`: **Overridden**
+
 ### Insert < Operator
 - ::standalone: `true`
 - ::isComplete`()`: `super`: **Overridden**
 - ::confirmChanges`(changes)`
 - ::execute`()`
 - ::inputOperator`()`
+
 ### ReplaceMode < Insert < Operator
 - ::execute`()`: **Overridden**
 - ::countChars`(char, string)`
+
 ### InsertAfter < Insert < Operator
 - ::execute`()`: `super`: **Overridden**
+
 ### InsertAfterEndOfLine < Insert < Operator
 - ::execute`()`: `super`: **Overridden**
+
 ### InsertAtBeginningOfLine < Insert < Operator
 - ::execute`()`: `super`: **Overridden**
+
 ### InsertAboveWithNewline < Insert < Operator
 - ::execute`()`: `super`: **Overridden**
+
 ### InsertBelowWithNewline < Insert < Operator
 - ::execute`()`: `super`: **Overridden**
+
 ### Change < Insert < Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::standalone: `false`: **Overridden**
 - ::register: `null`
 - ::execute`()`: `super`: **Overridden**
+
 ### SubstituteLine < Change < Insert < Operator
 - ::constructor`(@editor, @vimState)`: **Overridden**
 - ::standalone: `true`: **Overridden**
 - ::register: `null`: **Overridden**
+
 ### Prefix
 - ::complete: `null`
 - ::composedObject: `null`
@@ -370,25 +443,33 @@ All TOMs inherits Base class
 - ::execute`()`
 - ::select`()`
 - ::isLinewise`()`
+
 ### Register < Prefix
 - ::constructor`(@name)`: **Overridden**
 - ::name: `null`
 - ::compose`(composedObject)`: `super(composedObject)`: **Overridden**
+
 ### TextObject
 - ::constructor`(@editor, @state)`: **Overridden**
 - ::isComplete`()`
 - ::isRecordable`()`
+
 ### CurrentSelection < TextObject
 - ::constructor`()`: `super`: **Overridden**
 - ::select`()`
+
 ### SelectInsideWord < TextObject
 - ::select`()`
+
 ### SelectAWord < TextObject
 - ::select`()`
+
 ### SelectInsideWholeWord < TextObject
 - ::select`()`
+
 ### SelectAWholeWord < TextObject
 - ::select`()`
+
 ### SelectInsideQuotes < TextObject
 - ::constructor`(@editor, @char, @includeQuotes)`: **Overridden**
 - ::findOpeningQuote`(pos)`
@@ -396,49 +477,62 @@ All TOMs inherits Base class
 - ::lookForwardOnLine`(pos)`
 - ::findClosingQuote`(start)`
 - ::select`()`
+
 ### SelectInsideBrackets < TextObject
 - ::constructor`(@editor, @beginChar, @endChar, @includeBrackets)`: **Overridden**
 - ::findOpeningBracket`(pos)`
 - ::findClosingBracket`(start)`
 - ::select`()`
+
 ### SelectInsideParagraph < TextObject
 - ::constructor`(@editor, @inclusive)`: **Overridden**
 - ::select`()`
+
 ### SelectAParagraph < TextObject
 - ::constructor`(@editor, @inclusive)`: **Overridden**
 - ::select`()`
+
 ### Scroll
 - ::constructor`(@editorElement)`: **Overridden**
 - ::isComplete`()`
 - ::isRecordable`()`
+
 ### ScrollDown < Scroll
 - ::execute`(count)`
 - ::keepCursorOnScreen`(count)`
 - ::scrollUp`(count)`
+
 ### ScrollUp < Scroll
 - ::execute`(count)`
 - ::keepCursorOnScreen`(count)`
 - ::scrollDown`(count)`
+
 ### ScrollCursor < Scroll
 - ::constructor`(@editorElement, opts)`: `super`: **Overridden**
+
 ### ScrollCursorToTop < ScrollCursor < Scroll
 - ::execute`()`
 - ::scrollUp`()`
 - ::moveToFirstNonBlank`()`
+
 ### ScrollCursorToMiddle < ScrollCursor < Scroll
 - ::execute`()`
 - ::scrollMiddle`()`
 - ::moveToFirstNonBlank`()`
+
 ### ScrollCursorToBottom < ScrollCursor < Scroll
 - ::execute`()`
 - ::scrollDown`()`
 - ::moveToFirstNonBlank`()`
+
 ### ScrollHorizontal
 - ::constructor`(@editorElement)`: **Overridden**
 - ::isComplete`()`
 - ::isRecordable`()`
 - ::putCursorOnScreen`()`
+
 ### ScrollCursorToLeft < ScrollHorizontal
 - ::execute`()`
+
 ### ScrollCursorToRight < ScrollHorizontal
 - ::execute`()`
