@@ -13,14 +13,23 @@ inspectFunction = (fun, name) ->
   defaultConstructor = '^return '+  superAsIs
 
   funString = fun.toString()
-  argumentSignature = funString.split("\n")[0].match(/(\(.*\))/)[1]
   body = extractBetween(funString, '{', '}').split("\n").map (e) -> e.trim()
+
+  # Extract arguments from funString. e.g. function(a1, a1){} -> ['a1', 'a2'].
+  funArgs = funString.split("\n")[0].match(/\((.*)\)/)[1].split(/,\s*/g)
+
+  # Replace ['arg1', 'arg2'] to ['@arg1', '@arg2'].
+  # Only when instance variable assignment statement was found.
+  funArgs = funArgs.map (arg) ->
+    iVarAssign = '^' + _.escapeRegExp("this.#{arg} = #{arg};") + '$'
+    if (_.detect(body, (line) -> line.match(iVarAssign)))
+      '@' + arg
+    else
+      arg
+
+  argumentSignature = '(' + funArgs.join(', ') + ')'
+
   superSignature = null
-
-  if name is 'constructor' and body.length is 1
-    {argumentSignature, superSignature}
-    return
-
   for line in body
     if name is 'constructor' and m = line.match(defaultConstructor)
       superSignature = 'default'
@@ -34,23 +43,6 @@ inspectFunction = (fun, name) ->
       superSignature = "super(#{args})"
       break
   {argumentSignature, superSignature}
-
-# parseConstructor = (fun) ->
-#   superBase = _.escapeRegExp("#{fun.name}.__super__.constructor")
-#   superAsIs = superBase + _.escapeRegExp(".apply(this, arguments);")
-#   superWithModify = superBase + '\\.call\\((.*)\\)'
-#
-#   body = fun.toString().split("\n").map (e) -> e.trim()
-#   superSignature = ''
-#   for line in body
-#     if m = line.match(superAsIs)
-#       superSignature = 'super'
-#       break
-#     else if m = line.match(superWithModify)
-#       args = m[1].replace(/this,?\s*/, '')
-#       superSignature = "super(#{args})"
-#       break
-#   superSignature
 
 excludeProperties = [
   '__super__', 'report', 'reportAll'
