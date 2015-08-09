@@ -40,12 +40,15 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 - [TOM-report](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TOM-report.md)
 
-# Status
+# TODO
 
 - [x] Make opStack independent
 - [x] Eliminate Prefix.Repeat object. Count is provided as global to object by inheriting Base.
 - [x] TOM can respond to its class(e.g. isTextObject()?)
 - [x] Realtime observation of OperatonStack.
+- [ ] Eliminate Prefix.Register. make it available via vimState.
+- [ ] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself.
+- [ ] Consolidate arguments passed to each TOM. vimState should be available to all TOM. editor and editorElement should be removed since its available via vimState. This consistency will reduce developer's confusion while working on multiple TOMs.
 
 # How Operation Stack works(for current official vim-mode).
 
