@@ -86,12 +86,12 @@ class VimState
 
     @registerOperationCommands
       # Operators not following naming conventions.
-      # 'delete-right': => ['Delete' , new Motions.MoveRight(@editor, this)]
+      'delete-right': => ['Delete' , new Motions.MoveRight(@editor, this)]
       'delete-left': => ['Delete' , new Motions.MoveLeft(@editor, this)]
 
       'substitute': -> 'Substitute' #['Change', new Motions.MoveRight(@editor, this)]
       'change-to-last-character-of-line': -> 'ChangeToLastCharacterOfLine' # ['Change', new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'delete-right': -> 'DeleteRight' #, new Motions.MoveRight(@editor, this)]
+      # 'delete-right': -> 'DeleteRight' #, new Motions.MoveRight(@editor, this)]
       # 'delete-left': -> 'DeleteLeft' #, new Motions.MoveLeft(@editor, this)]
       'delete-to-last-character-of-line': -> 'DeleteToLastCharacterOfLine' # ['Delete', new Motions.MoveToLastCharacterOfLine(@editor, this)]
       'yank-line': -> 'YankLine' #['Yank', new Motions.MoveToRelativeLine(@editor, this)]
