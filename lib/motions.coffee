@@ -716,7 +716,7 @@ class SearchCurrentWord extends SearchBase
 
   isComplete: -> true
 
-  execute: () ->
+  execute: ->
     # @getCount(1)
     super() if @input.characters.length > 0
 

@@ -144,5 +144,4 @@ class Base
   getCount: (defaultCount=null) ->
     # Setting count as instance variable make operation repeatable.
     @count ?= @vimState?.counter.get() ? defaultCount
-    # console.log "@count is #{@count}"
     @count
