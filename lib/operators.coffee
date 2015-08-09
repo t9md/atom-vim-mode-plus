@@ -113,6 +113,28 @@ class Delete extends Operator
 
     @vimState.activateNormalMode()
 
+class DeleteRight extends Delete
+  @extend()
+  complete: true
+
+  constructor: ->
+    super
+    @compose(new Motions.MoveRight(@editor, @vimState))
+
+class DeleteLeft extends Delete
+  @extend()
+  complete: true
+  constructor: ->
+    super
+    @compose(new Motions.MoveLeft(@editor, @vimState))
+
+class DeleteToLastCharacterOfLine extends Delete
+  @extend()
+  complete: true
+  constructor: ->
+    super
+    @compose(new Motions.MoveToLastCharacterOfLine(@editor, @vimState))
+
 #
 # It toggles the case of everything selected by the following motion
 #
@@ -214,6 +236,13 @@ class Yank extends Operator
 
     @editor.setSelectedBufferRanges(newPositions.map (p) -> new Range(p, p))
     @vimState.activateNormalMode()
+
+class YankLine extends Yank
+  @extend()
+  complete: true
+  constructor: ->
+    super
+    @compose(new Motions.MoveToRelativeLine(@editor, @vimState))
 
 #
 # It combines the current line with the following line.
@@ -457,6 +486,7 @@ class Insert extends Operator
 
   inputOperator: -> true
 
+
 class ReplaceMode extends Insert
   @extend()
 
@@ -568,6 +598,14 @@ class Change extends Insert
     @vimState.activateInsertMode()
     @typingCompleted = true
 
+class Substitute extends Change
+  @extend()
+  complete: true
+
+  constructor: ->
+    super
+    @compose(new Motions.MoveRight(@editor, @vimState))
+
 class SubstituteLine extends Change
   @extend()
   complete: true
@@ -577,6 +615,14 @@ class SubstituteLine extends Change
     super
     @register = settings.defaultRegister()
     @target = new Motions.MoveToRelativeLine(@editor, @vimState)
+
+class ChangeToLastCharacterOfLine extends Change
+  @extend()
+  complete: true
+
+  constructor: ->
+    super
+    @compose(new Motions.MoveToLastCharacterOfLine(@editor, @vimState))
 
 # Takes a transaction and turns it into a string of what was typed.
 # This class is an implementation detail of Insert
@@ -690,6 +736,10 @@ class Replace extends OperatorWithInput
 
     @vimState.activateNormalMode()
 
+# Alias
+ActivateInsertMode = Insert
+ActivateReplaceMode = ReplaceMode
+
 module.exports = {
   # General
   Operator, OperatorWithInput, OperatorError, Delete,
@@ -703,14 +753,25 @@ module.exports = {
   PutBefore, PutAfter,
 
   # Input
-  Insert,
-  InsertAfter,
-  InsertAfterEndOfLine,
-  InsertAtBeginningOfLine,
-  InsertAboveWithNewline,
-  InsertBelowWithNewline,
-  ReplaceMode,
-  Change,
-  SubstituteLine,
+  Insert
+  InsertAfter
+  InsertAfterEndOfLine
+  InsertAtBeginningOfLine
+  InsertAboveWithNewline
+  InsertBelowWithNewline
+  ReplaceMode
+  Change
+  Substitute
+  SubstituteLine
   Replace
+
+  ChangeToLastCharacterOfLine
+  DeleteRight
+  DeleteLeft
+  DeleteToLastCharacterOfLine
+  YankLine
+
+  # [FIXME] Only to map from command-name. remove in future.
+  ActivateInsertMode
+  ActivateReplaceMode
 }
