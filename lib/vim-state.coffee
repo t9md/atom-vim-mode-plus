@@ -86,14 +86,15 @@ class VimState
 
     @registerOperationCommands
       # Operators not following naming conventions.
-      'activate-insert-mode': 'Insert'
-      'activate-replace-mode': 'ReplaceMode'
-      'substitute': => ['Change', new Motions.MoveRight(@editor, this)]
-      'change-to-last-character-of-line': => ['Change', new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'delete-right': => ['Delete', new Motions.MoveRight(@editor, this)]
-      'delete-left': => ['Delete', new Motions.MoveLeft(@editor, this)]
-      'delete-to-last-character-of-line': => ['Delete', new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'yank-line': => ['Yank', new Motions.MoveToRelativeLine(@editor, this)]
+      # 'delete-right': => ['Delete' , new Motions.MoveRight(@editor, this)]
+      'delete-left': => ['Delete' , new Motions.MoveLeft(@editor, this)]
+
+      'substitute': -> 'Substitute' #['Change', new Motions.MoveRight(@editor, this)]
+      'change-to-last-character-of-line': -> 'ChangeToLastCharacterOfLine' # ['Change', new Motions.MoveToLastCharacterOfLine(@editor, this)]
+      'delete-right': -> 'DeleteRight' #, new Motions.MoveRight(@editor, this)]
+      # 'delete-left': -> 'DeleteLeft' #, new Motions.MoveLeft(@editor, this)]
+      'delete-to-last-character-of-line': -> 'DeleteToLastCharacterOfLine' # ['Delete', new Motions.MoveToLastCharacterOfLine(@editor, this)]
+      'yank-line': -> 'YankLine' #['Yank', new Motions.MoveToRelativeLine(@editor, this)]
 
       # Motions
       'move-left': => new Motions.MoveLeft(@editor, this)
@@ -164,6 +165,8 @@ class VimState
       'reverse-search-current-word': => new Motions.SearchCurrentWord(@editor, this).reversed()
 
     @registerNewOperationCommands Operators, [
+      'activate-insert-mode'
+      'activate-replace-mode'
       'substitute-line'
       'insert-after'
       'insert-after-end-of-line'
