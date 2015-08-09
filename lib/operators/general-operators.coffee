@@ -12,7 +12,6 @@ class OperatorError extends Base
 
 class Operator extends Base
   @extend()
-
   vimState: null
   target: null
   complete: null
@@ -60,10 +59,6 @@ class Operator extends Base
 # Public: Generic class for an operator that requires extra input
 class OperatorWithInput extends Operator
   @extend()
-  constructor: (@editor, @vimState) ->
-    @editor = @editor
-    @complete = false
-
   canComposeWith: (operation) -> operation.characters? or operation.select?
 
   compose: (operation) ->
