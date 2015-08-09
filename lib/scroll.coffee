@@ -3,7 +3,7 @@ class Scroll extends Base
   @extend()
   isComplete: -> true
   isRecordable: -> false
-  constructor: (@editorElement) ->
+  constructor: (@editorElement, @vimState) ->
     # better to use editor.getVerticalScrollMargin() ?
     @scrolloff = 2 # atom default
     @editor = @editorElement.getModel()
@@ -14,39 +14,41 @@ class Scroll extends Base
 
 class ScrollDown extends Scroll
   @extend()
-  execute: (count=1) ->
-    @keepCursorOnScreen(count)
-    @scrollUp(count)
+  execute: ->
+    @keepCursorOnScreen()
+    @scrollUp()
 
-  keepCursorOnScreen: (count) ->
+  keepCursorOnScreen: ->
+    count = @getCount(1)
     {row, column} = @editor.getCursorScreenPosition()
     firstScreenRow = @rows.first + @scrolloff + 1
     if row - count <= firstScreenRow
       @editor.setCursorScreenPosition([firstScreenRow + count, column])
 
-  scrollUp: (count) ->
+  scrollUp: ->
     lastScreenRow = @rows.last - @scrolloff
-    @editor.scrollToScreenPosition([lastScreenRow + count, 0])
+    @editor.scrollToScreenPosition([lastScreenRow + @getCount(1), 0])
 
 class ScrollUp extends Scroll
   @extend()
-  execute: (count=1) ->
-    @keepCursorOnScreen(count)
-    @scrollDown(count)
+  execute: ->
+    @keepCursorOnScreen()
+    @scrollDown()
 
-  keepCursorOnScreen: (count) ->
+  keepCursorOnScreen: ->
+    count = @getCount(1)
     {row, column} = @editor.getCursorScreenPosition()
     lastScreenRow = @rows.last - @scrolloff - 1
     if row + count >= lastScreenRow
       @editor.setCursorScreenPosition([lastScreenRow - count, column])
 
-  scrollDown: (count) ->
+  scrollDown: ->
     firstScreenRow = @rows.first + @scrolloff
-    @editor.scrollToScreenPosition([firstScreenRow - count, 0])
+    @editor.scrollToScreenPosition([firstScreenRow - @getCount(1), 0])
 
 class ScrollCursor extends Scroll
   @extend()
-  constructor: (@editorElement, @opts={}) ->
+  constructor: (@editorElement, @vimState, @opts={}) ->
     super
     cursor = @editor.getCursorScreenPosition()
     @pixel = @editorElement.pixelPositionForScreenPosition(cursor).top
@@ -97,7 +99,7 @@ class ScrollHorizontal extends Base
   @extend()
   isComplete: -> true
   isRecordable: -> false
-  constructor: (@editorElement) ->
+  constructor: (@editorElement, @vimState) ->
     @editor = @editorElement.getModel()
     cursorPos = @editor.getCursorScreenPosition()
     @pixel = @editorElement.pixelPositionForScreenPosition(cursorPos).left

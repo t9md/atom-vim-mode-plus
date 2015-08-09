@@ -138,20 +138,20 @@ class VimState
       'move-to-top-of-screen': => new Motions.MoveToTopOfScreen(@editorElement, this)
       'move-to-bottom-of-screen': => new Motions.MoveToBottomOfScreen(@editorElement, this)
       'move-to-middle-of-screen': => new Motions.MoveToMiddleOfScreen(@editorElement, this)
-      'scroll-down': => new Scroll.ScrollDown(@editorElement)
-      'scroll-up': => new Scroll.ScrollUp(@editorElement)
-      'scroll-cursor-to-top': => new Scroll.ScrollCursorToTop(@editorElement)
-      'scroll-cursor-to-top-leave': => new Scroll.ScrollCursorToTop(@editorElement, {leaveCursor: true})
-      'scroll-cursor-to-middle': => new Scroll.ScrollCursorToMiddle(@editorElement)
-      'scroll-cursor-to-middle-leave': => new Scroll.ScrollCursorToMiddle(@editorElement, {leaveCursor: true})
-      'scroll-cursor-to-bottom': => new Scroll.ScrollCursorToBottom(@editorElement)
-      'scroll-cursor-to-bottom-leave': => new Scroll.ScrollCursorToBottom(@editorElement, {leaveCursor: true})
+      'scroll-down': => new Scroll.ScrollDown(@editorElement, this)
+      'scroll-up': => new Scroll.ScrollUp(@editorElement, this)
+      'scroll-cursor-to-top': => new Scroll.ScrollCursorToTop(@editorElement, this)
+      'scroll-cursor-to-top-leave': => new Scroll.ScrollCursorToTop(@editorElement, this, {leaveCursor: true})
+      'scroll-cursor-to-middle': => new Scroll.ScrollCursorToMiddle(@editorElement, this)
+      'scroll-cursor-to-middle-leave': => new Scroll.ScrollCursorToMiddle(@editorElement, this, {leaveCursor: true})
+      'scroll-cursor-to-bottom': => new Scroll.ScrollCursorToBottom(@editorElement, this)
+      'scroll-cursor-to-bottom-leave': => new Scroll.ScrollCursorToBottom(@editorElement, this, {leaveCursor: true})
       'scroll-half-screen-up': => new Motions.ScrollHalfUpKeepCursor(@editorElement, this)
       'scroll-full-screen-up': => new Motions.ScrollFullUpKeepCursor(@editorElement, this)
       'scroll-half-screen-down': => new Motions.ScrollHalfDownKeepCursor(@editorElement, this)
       'scroll-full-screen-down': => new Motions.ScrollFullDownKeepCursor(@editorElement, this)
-      'scroll-cursor-to-left': => new Scroll.ScrollCursorToLeft(@editorElement)
-      'scroll-cursor-to-right': => new Scroll.ScrollCursorToRight(@editorElement)
+      'scroll-cursor-to-left': => new Scroll.ScrollCursorToLeft(@editorElement, this)
+      'scroll-cursor-to-right': => new Scroll.ScrollCursorToRight(@editorElement, this)
       'select-inside-word': => new TextObjects.SelectInsideWord(@editor)
       'select-inside-whole-word': => new TextObjects.SelectInsideWholeWord(@editor)
       'select-inside-double-quotes': => new TextObjects.SelectInsideQuotes(@editor, '"', false)
@@ -557,6 +557,8 @@ class VimState
         @reset()
       count ?= 0
       count = count * 10 + num
+      console.log count
+      count
 
     get: ->
       count
