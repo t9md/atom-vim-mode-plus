@@ -9,9 +9,7 @@ settings = require '../settings'
 # tells the operation to repeat itself instead of enter insert mode.
 class Insert extends Operator
   @extend()
-  standalone: true
-
-  isComplete: -> @standalone or super
+  complete: true
 
   confirmChanges: (changes) ->
     bundler = new TransactionBundler(changes, @editor)
@@ -109,10 +107,11 @@ class InsertBelowWithNewline extends Insert
 #
 class Change extends Insert
   @extend()
-  standalone: false
+  complete: false
   register: null
 
-  constructor: (@editor, @vimState) ->
+  constructor: ->
+    super
     @register = settings.defaultRegister()
 
   # Public: Changes the text selected by the given motion.
@@ -142,10 +141,11 @@ class Change extends Insert
 
 class SubstituteLine extends Change
   @extend()
-  standalone: true
+  complete: true
   register: null
 
-  constructor: (@editor, @vimState) ->
+  constructor: ->
+    super
     @register = settings.defaultRegister()
     @target = new Motions.MoveToRelativeLine(@editor, @vimState)
 
