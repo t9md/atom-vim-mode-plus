@@ -53,6 +53,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] Realtime observation of OperatonStack.
 - [x] Eliminate `vimState.linewiseAliasedOperator()` [done](https://github.com/t9md/vim-mode/commit/9fc615e968ad08a5633490c71defeb4008cabc65)
 - [x] Readability improve for `registerOperationCommands`. Partially, experimentally done.
+- [ ] Operation really need to be List(`[]`) of Operation? Explicitly define operation is more neat and descriptive.
 - [ ] Eliminate Prefix.Register. make it available via vimState.
 - [ ] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself.
 - [ ] Consolidate arguments passed to each TOM. vimState should be available to all TOM. editor and editorElement should be removed since its available via vimState. This consistency will reduce developer's confusion while working on multiple TOMs.

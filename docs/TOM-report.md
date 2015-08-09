@@ -53,6 +53,7 @@ All TOMs inherits Base class
 - [Select < Operator](#select--operator)
 - [Delete < Operator](#delete--operator)
 - [ToggleCase < Operator](#togglecase--operator)
+- [ToggleCaseNow < ToggleCase < Operator](#togglecasenow--togglecase--operator)
 - [UpperCase < Operator](#uppercase--operator)
 - [LowerCase < Operator](#lowercase--operator)
 - [Yank < Operator](#yank--operator)
@@ -66,6 +67,8 @@ All TOMs inherits Base class
 - [Outdent < AdjustIndentation < Operator](#outdent--adjustindentation--operator)
 - [Autoindent < AdjustIndentation < Operator](#autoindent--adjustindentation--operator)
 - [Put < Operator](#put--operator)
+- [PutBefore < Put < Operator](#putbefore--put--operator)
+- [PutAfter < Put < Operator](#putafter--put--operator)
 - [Insert < Operator](#insert--operator)
 - [ReplaceMode < Insert < Operator](#replacemode--insert--operator)
 - [InsertAfter < Insert < Operator](#insertafter--insert--operator)
@@ -338,6 +341,9 @@ All TOMs inherits Base class
 ### ToggleCase < Operator
 - ::execute`()`
 
+### ToggleCaseNow < ToggleCase < Operator
+- ::complete: `true`: **Overridden**
+
 ### UpperCase < Operator
 - ::execute`()`
 
@@ -391,6 +397,12 @@ All TOMs inherits Base class
 - ::execute`()`
 - ::onLastRow`()`
 - ::onLastColumn`()`
+
+### PutBefore < Put < Operator
+- ::location: `'before'`
+
+### PutAfter < Put < Operator
+- ::location: `'after'`
 
 ### Insert < Operator
 - ::complete: `true`: **Overridden**
@@ -509,7 +521,7 @@ All TOMs inherits Base class
 - ::constructor`()`: `super`: **Overridden**
 - ::execute`()`
 - ::moveToFirstCharacterOfLine`()`
-- ::getOffSetPixelHeight`(where)`
+- ::getOffSetPixelHeight`(lineDelta)`
 
 ### ScrollCursorToTop < ScrollCursor < Scroll
 - ::isScrollable`()`
