@@ -49,6 +49,8 @@ class Operator extends Base
 
     @target = target
     @complete = true
+    if _.isFunction(target.onDidComposeBy)
+      @target.onDidComposeBy(this)
 
   canComposeWith: (operation) ->
     operation.select?

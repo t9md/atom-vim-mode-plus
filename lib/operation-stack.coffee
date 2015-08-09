@@ -26,10 +26,6 @@ class OperationStack
       operations = [operations] unless _.isArray(operations)
 
       for operation in operations
-        # Experiment
-        if _.isString(operation)
-          operation = @vimState.newOperation(operation)
-
         # Motions in visual mode perform their selections.
         if @vimState.isVisualMode() and _.isFunction(operation.select)
           # unless operation.isRepeat()
