@@ -14,21 +14,24 @@ class Operator extends Base
   @extend()
   vimState: null
   target: null
-  complete: null
+  complete: false
+  recodable: true
 
-  constructor: (@editor, @vimState) ->
-    @complete = false
+  constructor: (@editor, @vimState, options={}) ->
+    {@complete} = options if options.complete?
 
   # Public: Determines when the command can be executed.
   #
   # Returns true if ready to execute and false otherwise.
-  isComplete: -> @complete
+  isComplete: ->
+    @complete
 
   # Public: Determines if this command should be recorded in the command
   # history for repeats.
   #
   # Returns true if this command should be recorded.
-  isRecordable: -> true
+  isRecordable: ->
+    @recodable
 
   # Public: Marks this as ready to execute and saves the motion.
   #
@@ -42,7 +45,8 @@ class Operator extends Base
     @target = target
     @complete = true
 
-  canComposeWith: (operation) -> operation.select?
+  canComposeWith: (operation) ->
+    operation.select?
 
   # Public: Preps text and sets the text register
   #
@@ -109,7 +113,6 @@ class Delete extends Operator
 #
 class ToggleCase extends Operator
   @extend()
-  constructor: (@editor, @vimState, {@complete}={}) ->
 
   execute: ->
     if @target?
@@ -208,9 +211,7 @@ class Yank extends Operator
 #
 class Join extends Operator
   @extend()
-  constructor: ->
-    super
-    @complete = true
+  complete: true
 
   # Public: Combines the current with the following lines
   #
@@ -228,11 +229,8 @@ class Join extends Operator
 #
 class Repeat extends Operator
   @extend()
-  constructor: ->
-    super
-    @complete = true
-
-  isRecordable: -> false
+  complete: true
+  recodable: false
 
   execute: ->
     @editor.transact =>
@@ -264,10 +262,10 @@ class Mark extends OperatorWithInput
 class Increase extends Operator
   @extend()
   step: 1
+  complete: true
 
   constructor: ->
     super
-    @complete = true
     @numberRegex = new RegExp(settings.numberRegex())
 
   execute: ->
