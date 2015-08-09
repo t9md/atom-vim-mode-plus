@@ -67,12 +67,8 @@ class ScrollCursor extends Scroll
   moveToFirstCharacterOfLine: ->
     @editor.moveToFirstCharacterOfLine()
 
-  getOffSetPixelHeight: (where) ->
-    lineCount =
-      switch where
-        when 'top' then @scrolloff
-        when 'bottom' then @scrolloff + 1
-    @editor.getLineHeightInPixels() * lineCount
+  getOffSetPixelHeight: (lineDelta=0) ->
+    @editor.getLineHeightInPixels() * (@scrolloff + lineDelta)
 
 class ScrollCursorToTop extends ScrollCursor
   @extend()
@@ -80,7 +76,7 @@ class ScrollCursorToTop extends ScrollCursor
     not (@rows.last is @rows.final)
 
   getScrollTop: ->
-    @pixelCursorTop - @getOffSetPixelHeight('top')
+    @pixelCursorTop - @getOffSetPixelHeight()
 
 class ScrollCursorToBottom extends ScrollCursor
   @extend()
@@ -88,7 +84,7 @@ class ScrollCursorToBottom extends ScrollCursor
     not (@rows.first is 0)
 
   getScrollTop: ->
-    @pixelCursorTop - (@editor.getHeight() - @getOffSetPixelHeight('bottom'))
+    @pixelCursorTop - (@editor.getHeight() - @getOffSetPixelHeight(1))
 
 class ScrollCursorToMiddle extends ScrollCursor
   @extend()
@@ -122,5 +118,14 @@ class ScrollCursorToRight extends ScrollHorizontal
     @editor.setScrollRight(@pixelCursorTop)
     @putCursorOnScreen()
 
-module.exports = {ScrollDown, ScrollUp, ScrollCursorToTop, ScrollCursorToMiddle,
-  ScrollCursorToBottom, ScrollCursorToLeft, ScrollCursorToRight}
+module.exports = {
+  ScrollDown,
+  ScrollUp,
+
+  ScrollCursorToTop,
+  ScrollCursorToMiddle,
+  ScrollCursorToBottom,
+
+  ScrollCursorToLeft,
+  ScrollCursorToRight
+ }
