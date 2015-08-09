@@ -6,20 +6,18 @@ _ = require 'underscore-plus'
 module.exports =
 class Replace extends OperatorWithInput
   @extend()
-  constructor: (@editor, @vimState) ->
-    super(@editor, @vimState)
+  constructor: ->
+    super
     @viewModel = new ViewModel(this, class: 'replace', hidden: true, singleChar: true, defaultText: '\n')
 
   execute: ->
     count = @getCount(1)
     if @input.characters is ""
       # replace canceled
-
       if @vimState.isVisualMode()
         @vimState.resetVisualMode()
       else
         @vimState.activateNormalMode()
-
       return
 
     @editor.transact =>

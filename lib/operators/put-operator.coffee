@@ -9,10 +9,12 @@ module.exports =
 class Put extends Operator
   @extend()
   register: null
+  complete: true
 
-  constructor: (@editor, @vimState, {@location}={}) ->
+  constructor: ->
+    super
+    {@location} = @options
     @location ?= 'after'
-    @complete = true
     @register = settings.defaultRegister()
 
   # Public: Pastes the text in the given register.

@@ -85,35 +85,37 @@ class VimState
       'copy-from-line-below': => InsertMode.copyCharacterFromBelow(@editor, this)
 
     @registerOperationCommands
-      'activate-insert-mode': => new Operators.Insert(@editor, this)
-      'activate-replace-mode': => new Operators.ReplaceMode(@editor, this)
-      'substitute': => [new Operators.Change(@editor, this), new Motions.MoveRight(@editor, this)]
-      'substitute-line': => new Operators.SubstituteLine(@editor, this)
-      'insert-after': => new Operators.InsertAfter(@editor, this)
-      'insert-after-end-of-line': => new Operators.InsertAfterEndOfLine(@editor, this)
-      'insert-at-beginning-of-line': => new Operators.InsertAtBeginningOfLine(@editor, this)
-      'insert-above-with-newline': => new Operators.InsertAboveWithNewline(@editor, this)
-      'insert-below-with-newline': => new Operators.InsertBelowWithNewline(@editor, this)
+      # Operator
+      'activate-insert-mode': => new Operators.Insert(this)
+      'activate-replace-mode': => new Operators.ReplaceMode(this)
+      'substitute': => [new Operators.Change(this), new Motions.MoveRight(@editor, this)]
+      'substitute-line': => new Operators.SubstituteLine(this)
+      'insert-after': => new Operators.InsertAfter(this)
+      'insert-after-end-of-line': => new Operators.InsertAfterEndOfLine(this)
+      'insert-at-beginning-of-line': => new Operators.InsertAtBeginningOfLine(this)
+      'insert-above-with-newline': => new Operators.InsertAboveWithNewline(this)
+      'insert-below-with-newline': => new Operators.InsertBelowWithNewline(this)
       'delete': => @linewiseAliasedOperator(Operators.Delete)
       'change': => @linewiseAliasedOperator(Operators.Change)
-      'change-to-last-character-of-line': => [new Operators.Change(@editor, this), new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'delete-right': => [new Operators.Delete(@editor, this), new Motions.MoveRight(@editor, this)]
-      'delete-left': => [new Operators.Delete(@editor, this), new Motions.MoveLeft(@editor, this)]
-      'delete-to-last-character-of-line': => [new Operators.Delete(@editor, this), new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'toggle-case': => new Operators.ToggleCase(@editor, this)
-      'upper-case': => new Operators.UpperCase(@editor, this)
-      'lower-case': => new Operators.LowerCase(@editor, this)
-      'toggle-case-now': => new Operators.ToggleCase(@editor, this, complete: true)
+      'change-to-last-character-of-line': => [new Operators.Change(this), new Motions.MoveToLastCharacterOfLine(@editor, this)]
+      'delete-right': => [new Operators.Delete(this), new Motions.MoveRight(@editor, this)]
+      'delete-left': => [new Operators.Delete(this), new Motions.MoveLeft(@editor, this)]
+      'delete-to-last-character-of-line': => [new Operators.Delete(this), new Motions.MoveToLastCharacterOfLine(@editor, this)]
+      'toggle-case': => new Operators.ToggleCase(this)
+      'upper-case': => new Operators.UpperCase(this)
+      'lower-case': => new Operators.LowerCase(this)
+      'toggle-case-now': => new Operators.ToggleCase(this, complete: true)
       'yank': => @linewiseAliasedOperator(Operators.Yank)
-      'yank-line': => [new Operators.Yank(@editor, this), new Motions.MoveToRelativeLine(@editor, this)]
-      'put-before': => new Operators.Put(@editor, this, location: 'before')
-      'put-after': => new Operators.Put(@editor, this, location: 'after')
-      'join': => new Operators.Join(@editor, this)
+      'yank-line': => [new Operators.Yank(this), new Motions.MoveToRelativeLine(@editor, this)]
+      'put-before': => new Operators.Put(this, location: 'before')
+      'put-after': => new Operators.Put(this, location: 'after')
+      'join': => new Operators.Join(this)
       'indent': => @linewiseAliasedOperator(Operators.Indent)
       'outdent': => @linewiseAliasedOperator(Operators.Outdent)
       'auto-indent': => @linewiseAliasedOperator(Operators.Autoindent)
-      'increase': => new Operators.Increase(@editor, this)
-      'decrease': => new Operators.Decrease(@editor, this)
+      'increase': => new Operators.Increase(this)
+      'decrease': => new Operators.Decrease(this)
+
       'move-left': => new Motions.MoveLeft(@editor, this)
       'move-up': => new Motions.MoveUp(@editor, this)
       'move-down': => new Motions.MoveDown(@editor, this)
@@ -177,19 +179,19 @@ class VimState
       'select-around-parentheses': => new TextObjects.SelectInsideBrackets(@editor, '(', ')', true)
       'select-around-paragraph': => new TextObjects.SelectAParagraph(@editor, true)
       'register-prefix': (e) => @registerPrefix(e)
-      'repeat': => new Operators.Repeat(@editor, this)
+      'repeat': => new Operators.Repeat(this)
       'repeat-search': => new Motions.RepeatSearch(@editor, this)
       'repeat-search-backwards': => new Motions.RepeatSearch(@editor, this).reversed()
       'move-to-mark': => new Motions.MoveToMark(@editor, this)
       'move-to-mark-literal': => new Motions.MoveToMark(@editor, this, false)
-      'mark': => new Operators.Mark(@editor, this)
+      'mark': => new Operators.Mark(this)
       'find': => new Motions.Find(@editor, this)
       'find-backwards': => new Motions.Find(@editor, this).reverse()
       'till': => new Motions.Till(@editor, this)
       'till-backwards': => new Motions.Till(@editor, this).reverse()
       'repeat-find': => new @globalVimState.currentFind.constructor(@editor, this, repeated: true) if @globalVimState.currentFind
       'repeat-find-reverse': => new @globalVimState.currentFind.constructor(@editor, this, repeated: true, reverse: true) if @globalVimState.currentFind
-      'replace': => new Operators.Replace(@editor, this)
+      'replace': => new Operators.Replace(this)
       'search': => new Motions.Search(@editor, this)
       'reverse-search': => new Motions.Search(@editor, this).reversed()
       'search-current-word': => new Motions.SearchCurrentWord(@editor, this)
@@ -560,8 +562,6 @@ class VimState
         @reset()
       count ?= 0
       count = count * 10 + num
-      console.log count
-      count
 
     get: ->
       count
@@ -595,11 +595,12 @@ class VimState
   #
   # Returns nothing.
   linewiseAliasedOperator: (constructor) ->
+    # This constructor is always Operator. memo by t9md.
     if @operationStack.isSameOperatorPending(constructor)
       # [FIXME] This is very quick and dirty solution.
       new Motions.MoveToRelativeLine(@editor, this)
     else
-      new constructor(@editor, this)
+      new constructor(this)
 
   isOperatorPending: ->
     not @operationStack.isEmpty()
