@@ -151,6 +151,10 @@ class ToggleCase extends Operator
 
     @vimState.activateNormalMode()
 
+class ToggleCaseNow extends ToggleCase
+  @extend()
+  complete: true
+
 #
 # In visual mode or after `g` with a motion, it makes the selection uppercase
 #
@@ -350,6 +354,7 @@ class Autoindent extends AdjustIndentation
 #
 # It pastes everything contained within the specifed register
 #
+# Used by PutAfter and PutBefore, Put itself is not exposed.
 class Put extends Operator
   @extend()
   register: null
@@ -357,8 +362,6 @@ class Put extends Operator
 
   constructor: ->
     super
-    {@location} = @options
-    @location ?= 'after'
     @register = settings.defaultRegister()
 
   # Public: Pastes the text in the given register.
@@ -418,6 +421,14 @@ class Put extends Operator
 
   onLastColumn: ->
     @editor.getLastCursor().isAtEndOfLine()
+
+class PutBefore extends Put
+  @extend()
+  location: 'before'
+
+class PutAfter extends Put
+  @extend()
+  location: 'after'
 
 # Input
 # -------------------------
@@ -681,14 +692,16 @@ class Replace extends OperatorWithInput
 
 module.exports = {
   # General
-  Operator, OperatorWithInput, OperatorError, Delete, ToggleCase,
+  Operator, OperatorWithInput, OperatorError, Delete,
+  ToggleCase, ToggleCaseNow,
   Select,
   UpperCase, LowerCase, Yank, Join, Repeat, Mark,
   Increase, Decrease,
   Indent, Outdent, Autoindent,
 
   # Put
-  Put,
+  PutBefore,
+  PutAfter,
 
   # Input
   Insert,

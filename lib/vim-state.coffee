@@ -86,35 +86,35 @@ class VimState
 
     @registerOperationCommands
       # Operator
-      'activate-insert-mode':             -> Operators.Insert
-      'activate-replace-mode':            -> Operators.ReplaceMode
-      'substitute':                       => [new Operators.Change(this), new Motions.MoveRight(@editor, this)]
-      'substitute-line':                  -> Operators.SubstituteLine
-      'insert-after':                     -> Operators.InsertAfter
-      'insert-after-end-of-line':         -> Operators.InsertAfterEndOfLine
-      'insert-at-beginning-of-line':      -> Operators.InsertAtBeginningOfLine
-      'insert-above-with-newline':        -> Operators.InsertAboveWithNewline
-      'insert-below-with-newline':        -> Operators.InsertBelowWithNewline
-      'delete':                           -> Operators.Delete
-      'change':                           -> Operators.Change
-      'change-to-last-character-of-line': => [new Operators.Change(this), new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'delete-right':                     => [new Operators.Delete(this), new Motions.MoveRight(@editor, this)]
-      'delete-left':                      => [new Operators.Delete(this), new Motions.MoveLeft(@editor, this)]
-      'delete-to-last-character-of-line': => [new Operators.Delete(this), new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'toggle-case':                      -> Operators.ToggleCase
-      'upper-case':                       -> Operators.UpperCase
-      'lower-case':                       -> Operators.LowerCase
-      'toggle-case-now':                  => new Operators.ToggleCase(this, complete: true)
-      'yank':                             -> Operators.Yank
-      'yank-line':                        => [new Operators.Yank(this), new Motions.MoveToRelativeLine(@editor, this)]
-      'put-before':                       => new Operators.Put(this, location: 'before')
-      'put-after':                        => new Operators.Put(this, location: 'after')
-      'join':                             -> Operators.Join
-      'indent':                           -> Operators.Indent
-      'outdent':                          -> Operators.Outdent
-      'auto-indent':                      -> Operators.Autoindent
-      'increase':                         -> Operators.Increase
-      'decrease':                         -> Operators.Decrease
+      'activate-insert-mode': 'Insert'
+      'activate-replace-mode': 'ReplaceMode'
+      'substitute': => ['Change', new Motions.MoveRight(@editor, this)]
+      'substitute-line': 'SubstituteLine'
+      'insert-after': 'InsertAfter'
+      'insert-after-end-of-line': 'InsertAfterEndOfLine'
+      'insert-at-beginning-of-line': 'InsertAtBeginningOfLine'
+      'insert-above-with-newline': 'InsertAboveWithNewline'
+      'insert-below-with-newline': 'InsertBelowWithNewline'
+      'delete': 'Delete'
+      'change': 'Change'
+      'change-to-last-character-of-line': => ['Change', new Motions.MoveToLastCharacterOfLine(@editor, this)]
+      'delete-right': => ['Delete', new Motions.MoveRight(@editor, this)]
+      'delete-left': => ['Delete', new Motions.MoveLeft(@editor, this)]
+      'delete-to-last-character-of-line': => ['Delete', new Motions.MoveToLastCharacterOfLine(@editor, this)]
+      'toggle-case': 'ToggleCase'
+      'upper-case': 'UpperCase'
+      'lower-case': 'LowerCase'
+      'toggle-case-now': 'ToggleCaseNow'
+      'yank': 'Yank'
+      'yank-line': => ['Yank', new Motions.MoveToRelativeLine(@editor, this)]
+      'put-before': 'PutBefore'
+      'put-after': 'PutAfter'
+      'join': 'Join'
+      'indent': 'Indent'
+      'outdent': 'Outdent'
+      'auto-indent': 'Autoindent'
+      'increase': 'Increase'
+      'decrease': 'Decrease'
 
       'move-left': => new Motions.MoveLeft(@editor, this)
       'move-up': => new Motions.MoveUp(@editor, this)
@@ -208,6 +208,10 @@ class VimState
       do (fn) =>
         @subscriptions.add atom.commands.add(@editorElement, "vim-mode:#{name}", fn)
 
+  # Experiment: try to use for a while to evaluate 2015/08/10 by t9md.
+  newOperation: (operation) ->
+    new Operators[operation](this)
+
   # Private: Register multiple Operators via an {Object} that
   # maps command names to functions that return operations to push.
   #
@@ -217,6 +221,9 @@ class VimState
     commands = {}
     for name, fn of operationCommands
       do (fn) =>
+        if _.isString(fn)
+          operationName = fn
+          fn = => @newOperation(operationName)
         commands[name] = (event) => @operationStack.push(fn(event))
     @registerCommands(commands)
 
