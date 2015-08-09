@@ -1,6 +1,7 @@
 _ = require 'underscore-plus'
 TextObjects = require './text-objects'
 Operators   = require './operators'
+{MoveToRelativeLine} = require './motions'
 {debug} = require './utils'
 settings = require './settings'
 
@@ -18,6 +19,7 @@ class OperationStack
       debug "#=== Start at #{new Date().toISOString()}"
       if settings.debugOutput() is 'console'
         console.clear()
+
     @withLock =>
       operations = [operations] unless _.isArray(operations)
 
@@ -26,6 +28,11 @@ class OperationStack
         if @vimState.isVisualMode() and _.isFunction(operation.select)
           # unless operation.isRepeat()
           @stack.push(new Operators.Select(@vimState))
+
+        #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
+        if operation.getKind() in ['Delete', 'Change', 'Yank', 'Indent', 'Outdent', 'Autoindent'] and
+            @isSameOperatorPending(operation)
+          operation = new MoveToRelativeLine(@vimState.editor, @vimState)
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack
@@ -114,7 +121,8 @@ class OperationStack
   isEmpty: ->
     @stack.length is 0
 
-  isSameOperatorPending: (constructor) ->
+  isSameOperatorPending: (operation) ->
+    constructor = operation.constructor
     _.detect @stack, (operation) ->
       operation instanceof constructor
 

@@ -338,6 +338,14 @@
   'a p': 'vim-mode:select-around-paragraph'
   'x': 'vim-mode:reset-normal-mode'
 
+  # works as linewise
+  'd': 'vim-mode:delete'
+  'c': 'vim-mode:change'
+  'y': 'vim-mode:yank'
+  '>': 'vim-mode:indent'
+  '<': 'vim-mode:outdent'
+  '=': 'vim-mode:auto-indent'
+
 'atom-text-editor.vim-mode.visual-mode':
   'x': 'vim-mode:delete'
   's': 'vim-mode:change'

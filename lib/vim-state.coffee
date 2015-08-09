@@ -95,8 +95,8 @@ class VimState
       'insert-at-beginning-of-line':      => new Operators.InsertAtBeginningOfLine(this)
       'insert-above-with-newline':        => new Operators.InsertAboveWithNewline(this)
       'insert-below-with-newline':        => new Operators.InsertBelowWithNewline(this)
-      'delete':                           => @linewiseAliasedOperator(Operators.Delete)
-      'change':                           => @linewiseAliasedOperator(Operators.Change)
+      'delete':                           => new Operators.Delete(this)
+      'change':                           => new Operators.Change(this)
       'change-to-last-character-of-line': => [new Operators.Change(this), new Motions.MoveToLastCharacterOfLine(@editor, this)]
       'delete-right':                     => [new Operators.Delete(this), new Motions.MoveRight(@editor, this)]
       'delete-left':                      => [new Operators.Delete(this), new Motions.MoveLeft(@editor, this)]
@@ -105,14 +105,14 @@ class VimState
       'upper-case':                       => new Operators.UpperCase(this)
       'lower-case':                       => new Operators.LowerCase(this)
       'toggle-case-now':                  => new Operators.ToggleCase(this, complete: true)
-      'yank':                             => @linewiseAliasedOperator(Operators.Yank)
+      'yank':                             => new Operators.Yank(this)
       'yank-line':                        => [new Operators.Yank(this), new Motions.MoveToRelativeLine(@editor, this)]
       'put-before':                       => new Operators.Put(this, location: 'before')
       'put-after':                        => new Operators.Put(this, location: 'after')
       'join':                             => new Operators.Join(this)
-      'indent':                           => @linewiseAliasedOperator(Operators.Indent)
-      'outdent':                          => @linewiseAliasedOperator(Operators.Outdent)
-      'auto-indent':                      => @linewiseAliasedOperator(Operators.Autoindent)
+      'indent':                           => new Operators.Indent(this)
+      'outdent':                          => new Operators.Outdent(this)
+      'auto-indent':                      => new Operators.Autoindent(this)
       'increase':                         => new Operators.Increase(this)
       'decrease':                         => new Operators.Decrease(this)
 
@@ -587,26 +587,6 @@ class VimState
       null
     else
       new Motions.MoveToBeginningOfLine(@editor, this)
-
-  # Private: A generic way to handle Operators that can be repeated for
-  # their linewise form.
-  #
-  # constructor - The constructor of the operator.
-  #
-  # Returns nothing.
-  linewiseAliasedOperator: (constructor) ->
-    # This constructor is always Operator. memo by t9md.
-    # This utility methods covers following same-key-twice command.
-    #  - Delete `dd`
-    #  - Indent `>>`, `<<`
-    #  - Yank `yy`
-    #  - Change `cc`
-    #  - Auto-Indent `==`
-    if @operationStack.isSameOperatorPending(constructor)
-      # [FIXME] This is very quick and dirty solution.
-      new Motions.MoveToRelativeLine(@editor, this)
-    else
-      new constructor(this)
 
   isOperatorPending: ->
     not @operationStack.isEmpty()
