@@ -3,7 +3,7 @@ _ = require 'underscore-plus'
 {Point, Range, Emitter, Disposable, CompositeDisposable} = require 'atom'
 settings = require './settings'
 
-Operators   = require './operators/index'
+Operators   = require './operators'
 Prefixes    = require './prefixes'
 Motions     = require './motions'
 InsertMode  = require './insert-mode'

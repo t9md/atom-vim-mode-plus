@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
 TextObjects = require './text-objects'
-Operators   = require './operators/index'
+Operators   = require './operators'
 {debug} = require './utils'
 settings = require './settings'
 
