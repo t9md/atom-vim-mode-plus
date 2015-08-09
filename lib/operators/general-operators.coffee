@@ -59,7 +59,8 @@ class Operator extends Base
 # Public: Generic class for an operator that requires extra input
 class OperatorWithInput extends Operator
   @extend()
-  canComposeWith: (operation) -> operation.characters? or operation.select?
+  canComposeWith: (operation) ->
+    operation.characters? or operation.select?
 
   compose: (operation) ->
     if operation.select?
@@ -80,8 +81,8 @@ class Delete extends Operator
   @extend()
   register: null
 
-  constructor: (@editor, @vimState) ->
-    @complete = false
+  constructor: ->
+    super
     @register = settings.defaultRegister()
 
   # Public: Deletes the text selected by the given motion.
@@ -147,9 +148,6 @@ class ToggleCase extends Operator
 #
 class UpperCase extends Operator
   @extend()
-  constructor: (@editor, @vimState) ->
-    @complete = false
-
   execute: ->
     # if _.contains(@target.select(@getCount(1)), true)
     if _.contains(@target.select(), true)
@@ -163,9 +161,6 @@ class UpperCase extends Operator
 #
 class LowerCase extends Operator
   @extend()
-  constructor: (@editor, @vimState) ->
-    @complete = false
-
   execute: ->
     if _.contains(@target.select(), true)
       @editor.replaceSelectedText {}, (text) ->
@@ -180,7 +175,8 @@ class Yank extends Operator
   @extend()
   register: null
 
-  constructor: (@editor, @vimState) ->
+  constructor: ->
+    super
     @register = settings.defaultRegister()
 
   # Public: Copies the text selected by the given motion.
@@ -212,7 +208,9 @@ class Yank extends Operator
 #
 class Join extends Operator
   @extend()
-  constructor: (@editor, @vimState) -> @complete = true
+  constructor: ->
+    super
+    @complete = true
 
   # Public: Combines the current with the following lines
   #
@@ -230,7 +228,9 @@ class Join extends Operator
 #
 class Repeat extends Operator
   @extend()
-  constructor: (@editor, @vimState) -> @complete = true
+  constructor: ->
+    super
+    @complete = true
 
   isRecordable: -> false
 
@@ -244,8 +244,8 @@ class Repeat extends Operator
 #
 class Mark extends OperatorWithInput
   @extend()
-  constructor: (@editor, @vimState) ->
-    super(@editor, @vimState)
+  constructor: ->
+    super
     @viewModel = new ViewModel(this, class: 'mark', singleChar: true, hidden: true)
 
   # Public: Creates the mark in the specified mark register (from user input)
