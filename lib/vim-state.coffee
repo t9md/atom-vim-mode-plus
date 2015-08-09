@@ -112,7 +112,7 @@ class VimState
       'join': 'Join'
       'indent': 'Indent'
       'outdent': 'Outdent'
-      'auto-indent': 'Autoindent'
+      'auto-indent': 'AutoIndent'
       'increase': 'Increase'
       'decrease': 'Decrease'
 

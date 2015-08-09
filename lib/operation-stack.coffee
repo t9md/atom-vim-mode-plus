@@ -5,7 +5,7 @@ Operators   = require './operators'
 {debug} = require './utils'
 settings = require './settings'
 
-completableOperators = ['Delete', 'Change', 'Yank', 'Indent', 'Outdent', 'Autoindent']
+completableOperators = ['Delete', 'Change', 'Yank', 'Indent', 'Outdent', 'AutoIndent']
 
 module.exports =
 class OperationStack

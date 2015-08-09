@@ -344,7 +344,7 @@ class Outdent extends AdjustIndentation
   indent: ->
     @editor.outdentSelectedRows()
 
-class Autoindent extends AdjustIndentation
+class AutoIndent extends AdjustIndentation
   @extend()
   indent: ->
     @editor.autoIndentSelectedRows()
@@ -697,11 +697,10 @@ module.exports = {
   Select,
   UpperCase, LowerCase, Yank, Join, Repeat, Mark,
   Increase, Decrease,
-  Indent, Outdent, Autoindent,
+  Indent, Outdent, AutoIndent,
 
   # Put
-  PutBefore,
-  PutAfter,
+  PutBefore, PutAfter,
 
   # Input
   Insert,
