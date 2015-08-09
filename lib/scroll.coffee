@@ -4,6 +4,7 @@ class Scroll extends Base
   isComplete: -> true
   isRecordable: -> false
   constructor: (@editorElement) ->
+    # better to use editor.getVerticalScrollMargin() ?
     @scrolloff = 2 # atom default
     @editor = @editorElement.getModel()
     @rows =
