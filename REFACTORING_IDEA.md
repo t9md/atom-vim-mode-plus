@@ -56,6 +56,13 @@ Its ambiguous. its actually do two thing, but name don't reflect that.
 * [Done](https://github.com/t9md/vim-mode/commit/9b7d18e6a799304241ce7f168c496b9e6a64bf98)
 Maybe something broken but I didn't notice, all spec pass without modification
 
+## Reduce number of argument to TOM, and consistent argument.
+Currently arguments passed to each TOM is vary.  
+To reduce unnecessary complication for developer, its better to pass same arguments even if it won't be used.  
+The argument to be passed to all TOM should be
+ - vimState: passing editor and editorElement is not necessary since it could be accessed via vimState.
+The name of vimState is redundant simply `state` is enough since its vim-mode's state.
+
 # Spec
 
 - [add keystroke method](https://github.com/t9md/vim-mode/commit/a111105dd8a018425a5a0aff3afbf04c46ca93b2)
