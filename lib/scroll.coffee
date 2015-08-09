@@ -6,10 +6,12 @@ class Scroll extends Base
   isRecordable: ->
     false
 
-  constructor: (@editorElement, @vimState, @options={}) ->
+  constructor: (@vimState, @options={}) ->
+    {@editorElement} = @vimState
+    @editor = @editorElement.getModel()
+
     # better to use editor.getVerticalScrollMargin() ?
     @scrolloff = 2 # atom default
-    @editor = @editorElement.getModel()
     @rows =
       first: @editorElement.getFirstVisibleScreenRow()
       last: @editorElement.getLastVisibleScreenRow()
