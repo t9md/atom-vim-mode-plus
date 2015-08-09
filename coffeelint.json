@@ -22,7 +22,7 @@
       "left": 0,
       "right": 1
     },
-    "level": "error"
+    "level": "ignore"
   },
   "braces_spacing": {
     "spaces": 0,
