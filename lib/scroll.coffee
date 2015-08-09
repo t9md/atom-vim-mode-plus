@@ -54,6 +54,7 @@ class ScrollUp extends Scroll
 # Scroll without Cursor Position change.
 # -------------------------
 class ScrollCursor extends Scroll
+  keepCursor: false
   @extend()
   constructor: ->
     super
@@ -61,7 +62,7 @@ class ScrollCursor extends Scroll
     @pixelCursorTop = @editorElement.pixelPositionForScreenPosition(point).top
 
   execute: ->
-    @moveToFirstCharacterOfLine() unless @options.leaveCursor
+    @moveToFirstCharacterOfLine() unless @keepCursor
     @editor.setScrollTop @getScrollTop() if @isScrollable()
 
   moveToFirstCharacterOfLine: ->
@@ -94,6 +95,15 @@ class ScrollCursorToMiddle extends ScrollCursor
   getScrollTop: ->
     @pixelCursorTop - (@editor.getHeight() / 2)
 
+class ScrollCursorToTopLeave extends ScrollCursorToTop
+  keepCursor: true
+
+class ScrollCursorToBottomLeave extends ScrollCursorToBottom
+  keepCursor: true
+
+class ScrollCursorToMiddleLeave extends ScrollCursorToMiddle
+  keepCursor: true
+
 # Horizontal Scroll
 # -------------------------
 class ScrollHorizontal extends Scroll
@@ -125,6 +135,10 @@ module.exports = {
   ScrollCursorToTop,
   ScrollCursorToMiddle,
   ScrollCursorToBottom,
+
+  ScrollCursorToTopLeave,
+  ScrollCursorToMiddleLeave,
+  ScrollCursorToBottomLeave,
 
   ScrollCursorToLeft,
   ScrollCursorToRight
