@@ -52,11 +52,15 @@ All TOMs inherits Base class
 - [OperatorWithInput < Operator](#operatorwithinput--operator)
 - [Select < Operator](#select--operator)
 - [Delete < Operator](#delete--operator)
+- [DeleteRight < Delete < Operator](#deleteright--delete--operator)
+- [DeleteLeft < Delete < Operator](#deleteleft--delete--operator)
+- [DeleteToLastCharacterOfLine < Delete < Operator](#deletetolastcharacterofline--delete--operator)
 - [ToggleCase < Operator](#togglecase--operator)
 - [ToggleCaseNow < ToggleCase < Operator](#togglecasenow--togglecase--operator)
 - [UpperCase < Operator](#uppercase--operator)
 - [LowerCase < Operator](#lowercase--operator)
 - [Yank < Operator](#yank--operator)
+- [YankLine < Yank < Operator](#yankline--yank--operator)
 - [Join < Operator](#join--operator)
 - [Repeat < Operator](#repeat--operator)
 - [Mark < OperatorWithInput < Operator](#mark--operatorwithinput--operator)
@@ -77,7 +81,9 @@ All TOMs inherits Base class
 - [InsertAboveWithNewline < Insert < Operator](#insertabovewithnewline--insert--operator)
 - [InsertBelowWithNewline < Insert < Operator](#insertbelowwithnewline--insert--operator)
 - [Change < Insert < Operator](#change--insert--operator)
+- [Substitute < Change < Insert < Operator](#substitute--change--insert--operator)
 - [SubstituteLine < Change < Insert < Operator](#substituteline--change--insert--operator)
+- [ChangeToLastCharacterOfLine < Change < Insert < Operator](#changetolastcharacterofline--change--insert--operator)
 - [Replace < OperatorWithInput < Operator](#replace--operatorwithinput--operator)
 - [Prefix](#prefix)
 - [Register < Prefix](#register--prefix)
@@ -341,6 +347,18 @@ All TOMs inherits Base class
 - ::register: `null`
 - ::execute`()`
 
+### DeleteRight < Delete < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
+
+### DeleteLeft < Delete < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
+
+### DeleteToLastCharacterOfLine < Delete < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
+
 ### ToggleCase < Operator
 - ::execute`()`
 
@@ -357,6 +375,10 @@ All TOMs inherits Base class
 - ::constructor`()`: `super`: **Overridden**
 - ::register: `null`
 - ::execute`()`
+
+### YankLine < Yank < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
 
 ### Join < Operator
 - ::complete: `true`: **Overridden**
@@ -438,10 +460,18 @@ All TOMs inherits Base class
 - ::register: `null`
 - ::execute`()`: `super`: **Overridden**
 
+### Substitute < Change < Insert < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
+
 ### SubstituteLine < Change < Insert < Operator
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 - ::register: `null`: **Overridden**
+
+### ChangeToLastCharacterOfLine < Change < Insert < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
 
 ### Replace < OperatorWithInput < Operator
 - ::constructor`()`: `super`: **Overridden**
