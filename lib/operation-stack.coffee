@@ -24,6 +24,8 @@ class OperationStack
       operations = [operations] unless _.isArray(operations)
 
       for operation in operations
+        operation = @newOperation(operation) if _.isFunction(operation)
+
         # Motions in visual mode perform their selections.
         if @vimState.isVisualMode() and _.isFunction(operation.select)
           # unless operation.isRepeat()
@@ -52,6 +54,10 @@ class OperationStack
 
     for cursor in @vimState.editor.getCursors()
       @vimState.ensureCursorIsWithinLine(cursor)
+
+  # Experiment
+  newOperation: (operation) ->
+    new operation(@vimState)
 
   inspectStack: ->
     debug "  [@stack] size: #{@stack.length}"

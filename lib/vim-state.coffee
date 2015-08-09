@@ -86,35 +86,35 @@ class VimState
 
     @registerOperationCommands
       # Operator
-      'activate-insert-mode':             => new Operators.Insert(this)
-      'activate-replace-mode':            => new Operators.ReplaceMode(this)
+      'activate-insert-mode':             -> Operators.Insert
+      'activate-replace-mode':            -> Operators.ReplaceMode
       'substitute':                       => [new Operators.Change(this), new Motions.MoveRight(@editor, this)]
-      'substitute-line':                  => new Operators.SubstituteLine(this)
-      'insert-after':                     => new Operators.InsertAfter(this)
-      'insert-after-end-of-line':         => new Operators.InsertAfterEndOfLine(this)
-      'insert-at-beginning-of-line':      => new Operators.InsertAtBeginningOfLine(this)
-      'insert-above-with-newline':        => new Operators.InsertAboveWithNewline(this)
-      'insert-below-with-newline':        => new Operators.InsertBelowWithNewline(this)
-      'delete':                           => new Operators.Delete(this)
-      'change':                           => new Operators.Change(this)
+      'substitute-line':                  -> Operators.SubstituteLine
+      'insert-after':                     -> Operators.InsertAfter
+      'insert-after-end-of-line':         -> Operators.InsertAfterEndOfLine
+      'insert-at-beginning-of-line':      -> Operators.InsertAtBeginningOfLine
+      'insert-above-with-newline':        -> Operators.InsertAboveWithNewline
+      'insert-below-with-newline':        -> Operators.InsertBelowWithNewline
+      'delete':                           -> Operators.Delete
+      'change':                           -> Operators.Change
       'change-to-last-character-of-line': => [new Operators.Change(this), new Motions.MoveToLastCharacterOfLine(@editor, this)]
       'delete-right':                     => [new Operators.Delete(this), new Motions.MoveRight(@editor, this)]
       'delete-left':                      => [new Operators.Delete(this), new Motions.MoveLeft(@editor, this)]
       'delete-to-last-character-of-line': => [new Operators.Delete(this), new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'toggle-case':                      => new Operators.ToggleCase(this)
-      'upper-case':                       => new Operators.UpperCase(this)
-      'lower-case':                       => new Operators.LowerCase(this)
+      'toggle-case':                      -> Operators.ToggleCase
+      'upper-case':                       -> Operators.UpperCase
+      'lower-case':                       -> Operators.LowerCase
       'toggle-case-now':                  => new Operators.ToggleCase(this, complete: true)
-      'yank':                             => new Operators.Yank(this)
+      'yank':                             -> Operators.Yank
       'yank-line':                        => [new Operators.Yank(this), new Motions.MoveToRelativeLine(@editor, this)]
       'put-before':                       => new Operators.Put(this, location: 'before')
       'put-after':                        => new Operators.Put(this, location: 'after')
-      'join':                             => new Operators.Join(this)
-      'indent':                           => new Operators.Indent(this)
-      'outdent':                          => new Operators.Outdent(this)
-      'auto-indent':                      => new Operators.Autoindent(this)
-      'increase':                         => new Operators.Increase(this)
-      'decrease':                         => new Operators.Decrease(this)
+      'join':                             -> Operators.Join
+      'indent':                           -> Operators.Indent
+      'outdent':                          -> Operators.Outdent
+      'auto-indent':                      -> Operators.Autoindent
+      'increase':                         -> Operators.Increase
+      'decrease':                         -> Operators.Decrease
 
       'move-left': => new Motions.MoveLeft(@editor, this)
       'move-up': => new Motions.MoveUp(@editor, this)
