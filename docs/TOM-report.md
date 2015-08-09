@@ -4,26 +4,6 @@ All TOMs inherits Base class
 `Base` class itself is omitted from ancestors list to save screen space  
 
 - [Input](#input)
-- [OperatorError](#operatorerror)
-- [Operator](#operator)
-- [OperatorWithInput < Operator](#operatorwithinput--operator)
-- [Select < Operator](#select--operator)
-- [Delete < Operator](#delete--operator)
-- [ToggleCase < Operator](#togglecase--operator)
-- [UpperCase < Operator](#uppercase--operator)
-- [LowerCase < Operator](#lowercase--operator)
-- [Yank < Operator](#yank--operator)
-- [Join < Operator](#join--operator)
-- [Repeat < Operator](#repeat--operator)
-- [Mark < OperatorWithInput < Operator](#mark--operatorwithinput--operator)
-- [Increase < Operator](#increase--operator)
-- [Decrease < Increase < Operator](#decrease--increase--operator)
-- [AdjustIndentation < Operator](#adjustindentation--operator)
-- [Indent < AdjustIndentation < Operator](#indent--adjustindentation--operator)
-- [Outdent < AdjustIndentation < Operator](#outdent--adjustindentation--operator)
-- [Autoindent < AdjustIndentation < Operator](#autoindent--adjustindentation--operator)
-- [Put < Operator](#put--operator)
-- [Replace < OperatorWithInput < Operator](#replace--operatorwithinput--operator)
 - [MotionError](#motionerror)
 - [Motion](#motion)
 - [MotionWithInput < Motion](#motionwithinput--motion)
@@ -67,6 +47,25 @@ All TOMs inherits Base class
 - [SearchCurrentWord < SearchBase < MotionWithInput < Motion](#searchcurrentword--searchbase--motionwithinput--motion)
 - [BracketMatchingMotion < SearchBase < MotionWithInput < Motion](#bracketmatchingmotion--searchbase--motionwithinput--motion)
 - [RepeatSearch < SearchBase < MotionWithInput < Motion](#repeatsearch--searchbase--motionwithinput--motion)
+- [OperatorError](#operatorerror)
+- [Operator](#operator)
+- [OperatorWithInput < Operator](#operatorwithinput--operator)
+- [Select < Operator](#select--operator)
+- [Delete < Operator](#delete--operator)
+- [ToggleCase < Operator](#togglecase--operator)
+- [UpperCase < Operator](#uppercase--operator)
+- [LowerCase < Operator](#lowercase--operator)
+- [Yank < Operator](#yank--operator)
+- [Join < Operator](#join--operator)
+- [Repeat < Operator](#repeat--operator)
+- [Mark < OperatorWithInput < Operator](#mark--operatorwithinput--operator)
+- [Increase < Operator](#increase--operator)
+- [Decrease < Increase < Operator](#decrease--increase--operator)
+- [AdjustIndentation < Operator](#adjustindentation--operator)
+- [Indent < AdjustIndentation < Operator](#indent--adjustindentation--operator)
+- [Outdent < AdjustIndentation < Operator](#outdent--adjustindentation--operator)
+- [Autoindent < AdjustIndentation < Operator](#autoindent--adjustindentation--operator)
+- [Put < Operator](#put--operator)
 - [Insert < Operator](#insert--operator)
 - [ReplaceMode < Insert < Operator](#replacemode--insert--operator)
 - [InsertAfter < Insert < Operator](#insertafter--insert--operator)
@@ -76,6 +75,7 @@ All TOMs inherits Base class
 - [InsertBelowWithNewline < Insert < Operator](#insertbelowwithnewline--insert--operator)
 - [Change < Insert < Operator](#change--insert--operator)
 - [SubstituteLine < Change < Insert < Operator](#substituteline--change--insert--operator)
+- [Replace < OperatorWithInput < Operator](#replace--operatorwithinput--operator)
 - [Prefix](#prefix)
 - [Register < Prefix](#register--prefix)
 - [TextObject](#textobject)
@@ -103,94 +103,6 @@ All TOMs inherits Base class
 - ::constructor`(@characters)`: **Overridden**
 - ::isComplete`()`
 - ::isRecordable`()`
-
-### OperatorError
-- ::constructor`(@message)`: **Overridden**
-
-### Operator
-- ::constructor`(@vimState, options)`: **Overridden**
-- ::vimState: `null`
-- ::target: `null`
-- ::complete: `false`
-- ::recodable: `true`
-- ::isComplete`()`
-- ::isRecordable`()`
-- ::compose`(@target)`
-- ::canComposeWith`(operation)`
-- ::setTextRegister`(register, text)`
-
-### OperatorWithInput < Operator
-- ::canComposeWith`(operation)`: **Overridden**
-- ::compose`(operation)`: **Overridden**
-
-### Select < Operator
-- ::execute`()`
-
-### Delete < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::register: `null`
-- ::execute`()`
-
-### ToggleCase < Operator
-- ::execute`()`
-
-### UpperCase < Operator
-- ::execute`()`
-
-### LowerCase < Operator
-- ::execute`()`
-
-### Yank < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::register: `null`
-- ::execute`()`
-
-### Join < Operator
-- ::complete: `true`: **Overridden**
-- ::execute`()`
-
-### Repeat < Operator
-- ::complete: `true`: **Overridden**
-- ::recodable: `false`: **Overridden**
-- ::execute`()`
-
-### Mark < OperatorWithInput < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::execute`()`
-
-### Increase < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::step: `1`
-- ::complete: `true`: **Overridden**
-- ::execute`()`
-- ::increaseNumber`(cursor)`
-
-### Decrease < Increase < Operator
-- ::step: `-1`: **Overridden**
-
-### AdjustIndentation < Operator
-- ::execute`()`
-
-### Indent < AdjustIndentation < Operator
-- ::indent`()`
-
-### Outdent < AdjustIndentation < Operator
-- ::indent`()`
-
-### Autoindent < AdjustIndentation < Operator
-- ::indent`()`
-
-### Put < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::register: `null`
-- ::complete: `true`: **Overridden**
-- ::execute`()`
-- ::onLastRow`()`
-- ::onLastColumn`()`
-
-### Replace < OperatorWithInput < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::execute`()`
 
 ### MotionError
 - ::constructor`(@message)`: **Overridden**
@@ -396,6 +308,90 @@ All TOMs inherits Base class
 - ::isComplete`()`: **Overridden**
 - ::reversed`()`: **Overridden**
 
+### OperatorError
+- ::constructor`(@message)`: **Overridden**
+
+### Operator
+- ::constructor`(@vimState, options)`: **Overridden**
+- ::vimState: `null`
+- ::target: `null`
+- ::complete: `false`
+- ::recodable: `true`
+- ::isComplete`()`
+- ::isRecordable`()`
+- ::compose`(@target)`
+- ::canComposeWith`(operation)`
+- ::setTextRegister`(register, text)`
+
+### OperatorWithInput < Operator
+- ::canComposeWith`(operation)`: **Overridden**
+- ::compose`(operation)`: **Overridden**
+
+### Select < Operator
+- ::execute`()`
+
+### Delete < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::register: `null`
+- ::execute`()`
+
+### ToggleCase < Operator
+- ::execute`()`
+
+### UpperCase < Operator
+- ::execute`()`
+
+### LowerCase < Operator
+- ::execute`()`
+
+### Yank < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::register: `null`
+- ::execute`()`
+
+### Join < Operator
+- ::complete: `true`: **Overridden**
+- ::execute`()`
+
+### Repeat < Operator
+- ::complete: `true`: **Overridden**
+- ::recodable: `false`: **Overridden**
+- ::execute`()`
+
+### Mark < OperatorWithInput < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::execute`()`
+
+### Increase < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::step: `1`
+- ::complete: `true`: **Overridden**
+- ::execute`()`
+- ::increaseNumber`(cursor)`
+
+### Decrease < Increase < Operator
+- ::step: `-1`: **Overridden**
+
+### AdjustIndentation < Operator
+- ::execute`()`
+
+### Indent < AdjustIndentation < Operator
+- ::indent`()`
+
+### Outdent < AdjustIndentation < Operator
+- ::indent`()`
+
+### Autoindent < AdjustIndentation < Operator
+- ::indent`()`
+
+### Put < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::register: `null`
+- ::complete: `true`: **Overridden**
+- ::execute`()`
+- ::onLastRow`()`
+- ::onLastColumn`()`
+
 ### Insert < Operator
 - ::complete: `true`: **Overridden**
 - ::confirmChanges`(changes)`
@@ -431,6 +427,10 @@ All TOMs inherits Base class
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 - ::register: `null`: **Overridden**
+
+### Replace < OperatorWithInput < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::execute`()`
 
 ### Prefix
 - ::complete: `null`
