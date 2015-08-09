@@ -108,10 +108,11 @@ All TOMs inherits Base class
 - ::constructor`(@message)`: **Overridden**
 
 ### Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
+- ::constructor`(@vimState, options)`: **Overridden**
 - ::vimState: `null`
 - ::target: `null`
-- ::complete: `null`
+- ::complete: `false`
+- ::recodable: `true`
 - ::isComplete`()`
 - ::isRecordable`()`
 - ::compose`(@target)`
@@ -119,7 +120,6 @@ All TOMs inherits Base class
 - ::setTextRegister`(register, text)`
 
 ### OperatorWithInput < Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
 - ::canComposeWith`(operation)`: **Overridden**
 - ::compose`(operation)`: **Overridden**
 
@@ -127,43 +127,41 @@ All TOMs inherits Base class
 - ::execute`()`
 
 ### Delete < Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
+- ::constructor`()`: `super`: **Overridden**
 - ::register: `null`
 - ::execute`()`
 
 ### ToggleCase < Operator
-- ::constructor`(@editor, @vimState, _arg)`: **Overridden**
 - ::execute`()`
 
 ### UpperCase < Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
 - ::execute`()`
 
 ### LowerCase < Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
 - ::execute`()`
 
 ### Yank < Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
+- ::constructor`()`: `super`: **Overridden**
 - ::register: `null`
 - ::execute`()`
 
 ### Join < Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
+- ::complete: `true`: **Overridden**
 - ::execute`()`
 
 ### Repeat < Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
-- ::isRecordable`()`: **Overridden**
+- ::complete: `true`: **Overridden**
+- ::recodable: `false`: **Overridden**
 - ::execute`()`
 
 ### Mark < OperatorWithInput < Operator
-- ::constructor`(@editor, @vimState)`: `super(@editor, @vimState)`: **Overridden**
+- ::constructor`()`: `super`: **Overridden**
 - ::execute`()`
 
 ### Increase < Operator
 - ::constructor`()`: `super`: **Overridden**
 - ::step: `1`
+- ::complete: `true`: **Overridden**
 - ::execute`()`
 - ::increaseNumber`(cursor)`
 
@@ -183,14 +181,15 @@ All TOMs inherits Base class
 - ::indent`()`
 
 ### Put < Operator
-- ::constructor`(@editor, @vimState, _arg)`: **Overridden**
+- ::constructor`()`: `super`: **Overridden**
 - ::register: `null`
+- ::complete: `true`: **Overridden**
 - ::execute`()`
 - ::onLastRow`()`
 - ::onLastColumn`()`
 
 ### Replace < OperatorWithInput < Operator
-- ::constructor`(@editor, @vimState)`: `super(@editor, @vimState)`: **Overridden**
+- ::constructor`()`: `super`: **Overridden**
 - ::execute`()`
 
 ### MotionError
@@ -398,8 +397,7 @@ All TOMs inherits Base class
 - ::reversed`()`: **Overridden**
 
 ### Insert < Operator
-- ::standalone: `true`
-- ::isComplete`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
 - ::confirmChanges`(changes)`
 - ::execute`()`
 - ::inputOperator`()`
@@ -424,14 +422,14 @@ All TOMs inherits Base class
 - ::execute`()`: `super`: **Overridden**
 
 ### Change < Insert < Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
-- ::standalone: `false`: **Overridden**
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `false`: **Overridden**
 - ::register: `null`
 - ::execute`()`: `super`: **Overridden**
 
 ### SubstituteLine < Change < Insert < Operator
-- ::constructor`(@editor, @vimState)`: **Overridden**
-- ::standalone: `true`: **Overridden**
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
 - ::register: `null`: **Overridden**
 
 ### Prefix
