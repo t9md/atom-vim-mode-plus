@@ -65,7 +65,7 @@ All TOMs inherits Base class
 - [AdjustIndentation < Operator](#adjustindentation--operator)
 - [Indent < AdjustIndentation < Operator](#indent--adjustindentation--operator)
 - [Outdent < AdjustIndentation < Operator](#outdent--adjustindentation--operator)
-- [Autoindent < AdjustIndentation < Operator](#autoindent--adjustindentation--operator)
+- [AutoIndent < AdjustIndentation < Operator](#autoindent--adjustindentation--operator)
 - [Put < Operator](#put--operator)
 - [PutBefore < Put < Operator](#putbefore--put--operator)
 - [PutAfter < Put < Operator](#putafter--put--operator)
@@ -98,6 +98,9 @@ All TOMs inherits Base class
 - [ScrollCursorToTop < ScrollCursor < Scroll](#scrollcursortotop--scrollcursor--scroll)
 - [ScrollCursorToBottom < ScrollCursor < Scroll](#scrollcursortobottom--scrollcursor--scroll)
 - [ScrollCursorToMiddle < ScrollCursor < Scroll](#scrollcursortomiddle--scrollcursor--scroll)
+- [ScrollCursorToTopLeave < ScrollCursorToTop < ScrollCursor < Scroll](#scrollcursortotopleave--scrollcursortotop--scrollcursor--scroll)
+- [ScrollCursorToBottomLeave < ScrollCursorToBottom < ScrollCursor < Scroll](#scrollcursortobottomleave--scrollcursortobottom--scrollcursor--scroll)
+- [ScrollCursorToMiddleLeave < ScrollCursorToMiddle < ScrollCursor < Scroll](#scrollcursortomiddleleave--scrollcursortomiddle--scrollcursor--scroll)
 - [ScrollHorizontal < Scroll](#scrollhorizontal--scroll)
 - [ScrollCursorToLeft < ScrollHorizontal < Scroll](#scrollcursortoleft--scrollhorizontal--scroll)
 - [ScrollCursorToRight < ScrollHorizontal < Scroll](#scrollcursortoright--scrollhorizontal--scroll)
@@ -387,7 +390,7 @@ All TOMs inherits Base class
 ### Outdent < AdjustIndentation < Operator
 - ::indent`()`
 
-### Autoindent < AdjustIndentation < Operator
+### AutoIndent < AdjustIndentation < Operator
 - ::indent`()`
 
 ### Put < Operator
@@ -519,6 +522,7 @@ All TOMs inherits Base class
 
 ### ScrollCursor < Scroll
 - ::constructor`()`: `super`: **Overridden**
+- ::keepCursor: `false`
 - ::execute`()`
 - ::moveToFirstCharacterOfLine`()`
 - ::getOffSetPixelHeight`(lineDelta)`
@@ -534,6 +538,15 @@ All TOMs inherits Base class
 ### ScrollCursorToMiddle < ScrollCursor < Scroll
 - ::isScrollable`()`
 - ::getScrollTop`()`
+
+### ScrollCursorToTopLeave < ScrollCursorToTop < ScrollCursor < Scroll
+- ::keepCursor: `true`: **Overridden**
+
+### ScrollCursorToBottomLeave < ScrollCursorToBottom < ScrollCursor < Scroll
+- ::keepCursor: `true`: **Overridden**
+
+### ScrollCursorToMiddleLeave < ScrollCursorToMiddle < ScrollCursor < Scroll
+- ::keepCursor: `true`: **Overridden**
 
 ### ScrollHorizontal < Scroll
 - ::constructor`()`: `super`: **Overridden**

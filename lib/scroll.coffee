@@ -96,12 +96,15 @@ class ScrollCursorToMiddle extends ScrollCursor
     @pixelCursorTop - (@editor.getHeight() / 2)
 
 class ScrollCursorToTopLeave extends ScrollCursorToTop
+  @extend()
   keepCursor: true
 
 class ScrollCursorToBottomLeave extends ScrollCursorToBottom
+  @extend()
   keepCursor: true
 
 class ScrollCursorToMiddleLeave extends ScrollCursorToMiddle
+  @extend()
   keepCursor: true
 
 # Horizontal Scroll
