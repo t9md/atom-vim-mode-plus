@@ -4,8 +4,6 @@ _ = require 'underscore-plus'
 extractBetween = (str, s1, s2) ->
   str.substring(str.indexOf(s1)+1, str.lastIndexOf(s2))
 
-getSuperSignature = (str) ->
-
 inspectFunction = (fun, name) ->
   superBase = _.escapeRegExp("#{fun.name}.__super__.#{name}")
   superAsIs = superBase + _.escapeRegExp(".apply(this, arguments);")
@@ -33,17 +31,15 @@ inspectFunction = (fun, name) ->
   # C1.__super__.hello.call(this, a1);
   superSignature = null
   for line in body
-    if name is 'constructor' and m = line.match(defaultConstructor)
+    if name is 'constructor' and line.match(defaultConstructor)
       superSignature = 'default'
-      break
-    else if m = line.match(superAsIs)
+    else if line.match(superAsIs)
       superSignature = "super"
-      break
     else if m = line.match(superWithModify)
       args = m[1].replace(/this,?\s*/, '')
       args = args.replace(/this\./g, '@')
       superSignature = "super(#{args})"
-      break
+    break if superSignature?
   {argumentSignature, superSignature}
 
 excludeProperties = [
