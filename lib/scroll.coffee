@@ -1,9 +1,12 @@
 Base = require './base'
 class Scroll extends Base
   @extend()
-  isComplete: -> true
-  isRecordable: -> false
-  constructor: (@editorElement, @vimState) ->
+  isComplete: ->
+    true
+  isRecordable: ->
+    false
+
+  constructor: (@editorElement, @vimState, @options={}) ->
     # better to use editor.getVerticalScrollMargin() ?
     @scrolloff = 2 # atom default
     @editor = @editorElement.getModel()
@@ -48,15 +51,21 @@ class ScrollUp extends Scroll
 
 class ScrollCursor extends Scroll
   @extend()
-  constructor: (@editorElement, @vimState, @opts={}) ->
+  constructor: ->
     super
     cursor = @editor.getCursorScreenPosition()
     @pixel = @editorElement.pixelPositionForScreenPosition(cursor).top
 
+  execute: ->
+    @moveToFirstCharacterOfLine() unless @options.leaveCursor
+
+  moveToFirstCharacterOfLine: ->
+    @editor.moveToFirstCharacterOfLine()
+
 class ScrollCursorToTop extends ScrollCursor
   @extend()
   execute: ->
-    @moveToFirstNonBlank() unless @opts.leaveCursor
+    super
     @scrollUp()
 
   scrollUp: ->
@@ -64,26 +73,20 @@ class ScrollCursorToTop extends ScrollCursor
     @pixel -= (@editor.getLineHeightInPixels() * @scrolloff)
     @editor.setScrollTop(@pixel)
 
-  moveToFirstNonBlank: ->
-    @editor.moveToFirstCharacterOfLine()
-
 class ScrollCursorToMiddle extends ScrollCursor
   @extend()
   execute: ->
-    @moveToFirstNonBlank() unless @opts.leaveCursor
+    super
     @scrollMiddle()
 
   scrollMiddle: ->
     @pixel -= (@editor.getHeight() / 2)
     @editor.setScrollTop(@pixel)
 
-  moveToFirstNonBlank: ->
-    @editor.moveToFirstCharacterOfLine()
-
 class ScrollCursorToBottom extends ScrollCursor
   @extend()
   execute: ->
-    @moveToFirstNonBlank() unless @opts.leaveCursor
+    super
     @scrollDown()
 
   scrollDown: ->
@@ -92,18 +95,12 @@ class ScrollCursorToBottom extends ScrollCursor
     @pixel -= (@editor.getHeight() - offset)
     @editor.setScrollTop(@pixel)
 
-  moveToFirstNonBlank: ->
-    @editor.moveToFirstCharacterOfLine()
-
-class ScrollHorizontal extends Base
+class ScrollHorizontal extends Scroll
   @extend()
-  isComplete: -> true
-  isRecordable: -> false
-  constructor: (@editorElement, @vimState) ->
-    @editor = @editorElement.getModel()
+  constructor: ->
+    super
     cursorPos = @editor.getCursorScreenPosition()
     @pixel = @editorElement.pixelPositionForScreenPosition(cursorPos).left
-    @cursor = @editor.getLastCursor()
 
   putCursorOnScreen: ->
     @editor.scrollToCursorPosition({center: false})
