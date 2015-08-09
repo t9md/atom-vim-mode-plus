@@ -596,6 +596,12 @@ class VimState
   # Returns nothing.
   linewiseAliasedOperator: (constructor) ->
     # This constructor is always Operator. memo by t9md.
+    # This utility methods covers following same-key-twice command.
+    #  - Delete `dd`
+    #  - Indent `>>`, `<<`
+    #  - Yank `yy`
+    #  - Change `cc`
+    #  - Auto-Indent `==`
     if @operationStack.isSameOperatorPending(constructor)
       # [FIXME] This is very quick and dirty solution.
       new Motions.MoveToRelativeLine(@editor, this)
