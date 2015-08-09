@@ -49,6 +49,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [ ] Eliminate Prefix.Register. make it available via vimState.
 - [ ] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself.
 - [ ] Consolidate arguments passed to each TOM. vimState should be available to all TOM. editor and editorElement should be removed since its available via vimState. This consistency will reduce developer's confusion while working on multiple TOMs.
+- [ ] Remove MotionWithInput, it'd be OK by providing getImput() methods on Base class. it will remove some complexity.
 
 # How Operation Stack works(for current official vim-mode).
 
