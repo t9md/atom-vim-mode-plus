@@ -17,8 +17,9 @@ class Operator extends Base
   complete: false
   recodable: true
 
-  constructor: (@editor, @vimState, options={}) ->
-    {@complete} = options if options.complete?
+  constructor: (@vimState, @options={}) ->
+    {@editor} = @vimState
+    {@complete} = @options if @options.complete?
 
   # Public: Determines when the command can be executed.
   #
