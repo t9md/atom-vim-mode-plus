@@ -85,37 +85,17 @@ class VimState
       'copy-from-line-below': => InsertMode.copyCharacterFromBelow(@editor, this)
 
     @registerOperationCommands
-      # Operator
+      # Operators not following naming conventions.
       'activate-insert-mode': 'Insert'
       'activate-replace-mode': 'ReplaceMode'
       'substitute': => ['Change', new Motions.MoveRight(@editor, this)]
-      'substitute-line': 'SubstituteLine'
-      'insert-after': 'InsertAfter'
-      'insert-after-end-of-line': 'InsertAfterEndOfLine'
-      'insert-at-beginning-of-line': 'InsertAtBeginningOfLine'
-      'insert-above-with-newline': 'InsertAboveWithNewline'
-      'insert-below-with-newline': 'InsertBelowWithNewline'
-      'delete': 'Delete'
-      'change': 'Change'
       'change-to-last-character-of-line': => ['Change', new Motions.MoveToLastCharacterOfLine(@editor, this)]
       'delete-right': => ['Delete', new Motions.MoveRight(@editor, this)]
       'delete-left': => ['Delete', new Motions.MoveLeft(@editor, this)]
       'delete-to-last-character-of-line': => ['Delete', new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'toggle-case': 'ToggleCase'
-      'upper-case': 'UpperCase'
-      'lower-case': 'LowerCase'
-      'toggle-case-now': 'ToggleCaseNow'
-      'yank': 'Yank'
       'yank-line': => ['Yank', new Motions.MoveToRelativeLine(@editor, this)]
-      'put-before': 'PutBefore'
-      'put-after': 'PutAfter'
-      'join': 'Join'
-      'indent': 'Indent'
-      'outdent': 'Outdent'
-      'auto-indent': 'AutoIndent'
-      'increase': 'Increase'
-      'decrease': 'Decrease'
 
+      # Motions
       'move-left': => new Motions.MoveLeft(@editor, this)
       'move-up': => new Motions.MoveUp(@editor, this)
       'move-down': => new Motions.MoveDown(@editor, this)
@@ -167,26 +147,49 @@ class VimState
       'select-around-parentheses': => new TextObjects.SelectInsideBrackets(@editor, '(', ')', true)
       'select-around-paragraph': => new TextObjects.SelectAParagraph(@editor, true)
       'register-prefix': (e) => @registerPrefix(e)
-      'repeat': 'Repeat'
       'repeat-search': => new Motions.RepeatSearch(@editor, this)
       'repeat-search-backwards': => new Motions.RepeatSearch(@editor, this).reversed()
       'move-to-mark': => new Motions.MoveToMark(@editor, this)
       'move-to-mark-literal': => new Motions.MoveToMark(@editor, this, false)
-      'mark': 'Mark'
       'find': => new Motions.Find(@editor, this)
       'find-backwards': => new Motions.Find(@editor, this).reverse()
       'till': => new Motions.Till(@editor, this)
       'till-backwards': => new Motions.Till(@editor, this).reverse()
       'repeat-find': => new @globalVimState.currentFind.constructor(@editor, this, repeated: true) if @globalVimState.currentFind
       'repeat-find-reverse': => new @globalVimState.currentFind.constructor(@editor, this, repeated: true, reverse: true) if @globalVimState.currentFind
-      'replace': 'Replace'
       'search': => new Motions.Search(@editor, this)
       'reverse-search': => new Motions.Search(@editor, this).reversed()
       'search-current-word': => new Motions.SearchCurrentWord(@editor, this)
       'bracket-matching-motion': => new Motions.BracketMatchingMotion(@editor, this)
       'reverse-search-current-word': => new Motions.SearchCurrentWord(@editor, this).reversed()
 
-    @registerScrollCommands [
+    @registerNewOperationCommands Operators, [
+      'substitute-line'
+      'insert-after'
+      'insert-after-end-of-line'
+      'insert-at-beginning-of-line'
+      'insert-above-with-newline'
+      'insert-below-with-newline'
+      'delete'
+      'change'
+      'toggle-case'
+      'upper-case'
+      'lower-case'
+      'toggle-case-now'
+      'yank'
+      'put-before',
+      'put-after'
+      'join'
+      'indent'
+      'outdent'
+      'auto-indent'
+      'increase'
+      'decrease'
+      'repeat'
+      'mark'
+      'replace'
+    ]
+    @registerNewOperationCommands Scroll, [
       'scroll-down'
       'scroll-up'
       'scroll-cursor-to-top'
@@ -228,15 +231,17 @@ class VimState
         commands[name] = (event) => @operationStack.push(fn(event))
     @registerCommands(commands)
 
-  # Register Scroll command.
-  # By maping command name to correspoinding scroll class.
-  #  e.g. scroll-down -> ScrollDown
-  registerScrollCommands: (scrollCommands) ->
+  # 'New' is 'new' way of registration to distinguish exisiting function.
+  # By maping command name to correspoinding class.
+  #  e.g.
+  # join -> Join
+  # scroll-down -> ScrollDown
+  registerNewOperationCommands: (kind, names) ->
     commands = {}
-    for name in scrollCommands
+    for name in names
       do (name) =>
         klass = _.capitalize(_.camelize(name))
-        commands[name] = => new Scroll[klass](this)
+        commands[name] = => new kind[klass](this)
     @registerOperationCommands(commands)
 
   onDidFailToCompose: (fn) ->
