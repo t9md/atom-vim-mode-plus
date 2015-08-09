@@ -5,6 +5,8 @@ Operators   = require './operators'
 {debug} = require './utils'
 settings = require './settings'
 
+completableOperators = ['Delete', 'Change', 'Yank', 'Indent', 'Outdent', 'Autoindent']
+
 module.exports =
 class OperationStack
   constructor: (@vimState) ->
@@ -34,8 +36,8 @@ class OperationStack
           @stack.push(new Operators.Select(@vimState))
 
         #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
-        if operation.getKind() in ['Delete', 'Change', 'Yank', 'Indent', 'Outdent', 'Autoindent'] and
-            @isSameOperatorPending(operation)
+        if @vimState.isOperatorPendingMode() and
+            (operation.getKind() in completableOperators) and @isSameOperatorPending(operation)
           operation = new MoveToRelativeLine(@vimState.editor, @vimState)
 
         # if we have started an operation that responds to canComposeWith check if it can compose
