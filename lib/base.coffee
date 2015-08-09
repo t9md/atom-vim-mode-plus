@@ -123,7 +123,6 @@ class Base
     (child.report() for child in children).join('\n')
 
   report: (options={}) ->
-    options.excludeVimState = true
     ancesstors = @constructor.getAncestors()
     ancesstors.pop()
     indent = _.multiplyString(' ', options.indent ? 0)
@@ -145,3 +144,5 @@ class Base
   getCount: (defaultCount=null) ->
     # Setting count as instance variable make operation repeatable.
     @count ?= @vimState?.counter.get() ? defaultCount
+    # console.log "@count is #{@count}"
+    @count
