@@ -31,8 +31,13 @@ This project aiming to prove above idea by implementing working example.
 - Composing operation with target.
 
 # Spec
+
+Work in progress, may change depending on how was it useful after implement and evaluation of each spec.  
+
 - each TOM can respond to `getKind()` which return name of Class.
 - each TOM can respond to `is#{Klass}()` function, which return result of `this instanceof klass`.
+- Be consistent, dont' vary argument list passed to TOM, instead define explicit TOM.
+- TOM take only one argument, its vimState.
 
 # TOM-report
 
@@ -46,6 +51,8 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] Eliminate Prefix.Repeat object. Count is provided as global to object by inheriting Base.
 - [x] TOM can respond to its class(e.g. isTextObject()?)
 - [x] Realtime observation of OperatonStack.
+- [x] Eliminate `vimState.linewiseAliasedOperator()` [done](https://github.com/t9md/vim-mode/commit/9fc615e968ad08a5633490c71defeb4008cabc65)
+- [x] Readability improve for `registerOperationCommands`. Partially, experimentally done.
 - [ ] Eliminate Prefix.Register. make it available via vimState.
 - [ ] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself.
 - [ ] Consolidate arguments passed to each TOM. vimState should be available to all TOM. editor and editorElement should be removed since its available via vimState. This consistency will reduce developer's confusion while working on multiple TOMs.

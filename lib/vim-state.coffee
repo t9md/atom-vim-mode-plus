@@ -179,19 +179,19 @@ class VimState
       'select-around-parentheses': => new TextObjects.SelectInsideBrackets(@editor, '(', ')', true)
       'select-around-paragraph': => new TextObjects.SelectAParagraph(@editor, true)
       'register-prefix': (e) => @registerPrefix(e)
-      'repeat': => new Operators.Repeat(this)
+      'repeat': 'Repeat'
       'repeat-search': => new Motions.RepeatSearch(@editor, this)
       'repeat-search-backwards': => new Motions.RepeatSearch(@editor, this).reversed()
       'move-to-mark': => new Motions.MoveToMark(@editor, this)
       'move-to-mark-literal': => new Motions.MoveToMark(@editor, this, false)
-      'mark': => new Operators.Mark(this)
+      'mark': 'Mark'
       'find': => new Motions.Find(@editor, this)
       'find-backwards': => new Motions.Find(@editor, this).reverse()
       'till': => new Motions.Till(@editor, this)
       'till-backwards': => new Motions.Till(@editor, this).reverse()
       'repeat-find': => new @globalVimState.currentFind.constructor(@editor, this, repeated: true) if @globalVimState.currentFind
       'repeat-find-reverse': => new @globalVimState.currentFind.constructor(@editor, this, repeated: true, reverse: true) if @globalVimState.currentFind
-      'replace': => new Operators.Replace(this)
+      'replace': 'Replace'
       'search': => new Motions.Search(@editor, this)
       'reverse-search': => new Motions.Search(@editor, this).reversed()
       'search-current-word': => new Motions.SearchCurrentWord(@editor, this)
