@@ -85,17 +85,6 @@ class VimState
       'copy-from-line-below': => InsertMode.copyCharacterFromBelow(@editor, this)
 
     @registerOperationCommands
-      # Operators not following naming conventions.
-      'delete-right': => ['Delete' , new Motions.MoveRight(@editor, this)]
-      'delete-left': => ['Delete' , new Motions.MoveLeft(@editor, this)]
-
-      'substitute': -> 'Substitute' #['Change', new Motions.MoveRight(@editor, this)]
-      'change-to-last-character-of-line': -> 'ChangeToLastCharacterOfLine' # ['Change', new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      # 'delete-right': -> 'DeleteRight' #, new Motions.MoveRight(@editor, this)]
-      # 'delete-left': -> 'DeleteLeft' #, new Motions.MoveLeft(@editor, this)]
-      'delete-to-last-character-of-line': -> 'DeleteToLastCharacterOfLine' # ['Delete', new Motions.MoveToLastCharacterOfLine(@editor, this)]
-      'yank-line': -> 'YankLine' #['Yank', new Motions.MoveToRelativeLine(@editor, this)]
-
       # Motions
       'move-left': => new Motions.MoveLeft(@editor, this)
       'move-up': => new Motions.MoveUp(@editor, this)
@@ -167,6 +156,7 @@ class VimState
     @registerNewOperationCommands Operators, [
       'activate-insert-mode'
       'activate-replace-mode'
+      'substitute'
       'substitute-line'
       'insert-after'
       'insert-after-end-of-line'
@@ -175,11 +165,16 @@ class VimState
       'insert-below-with-newline'
       'delete'
       'change'
+      'change-to-last-character-of-line'
+      'delete-right'
+      'delete-left'
+      'delete-to-last-character-of-line'
       'toggle-case'
       'upper-case'
       'lower-case'
       'toggle-case-now'
       'yank'
+      'yank-line'
       'put-before',
       'put-after'
       'join'
@@ -215,10 +210,6 @@ class VimState
       do (fn) =>
         @subscriptions.add atom.commands.add(@editorElement, "vim-mode:#{name}", fn)
 
-  # Experiment: try to use for a while to evaluate 2015/08/10 by t9md.
-  newOperation: (operation) ->
-    new Operators[operation](this)
-
   # Private: Register multiple Operators via an {Object} that
   # maps command names to functions that return operations to push.
   #
@@ -228,9 +219,6 @@ class VimState
     commands = {}
     for name, fn of operationCommands
       do (fn) =>
-        if _.isString(fn)
-          operationName = fn
-          fn = => @newOperation(operationName)
         commands[name] = (event) => @operationStack.push(fn(event))
     @registerCommands(commands)
 

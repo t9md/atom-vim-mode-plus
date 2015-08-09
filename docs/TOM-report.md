@@ -144,7 +144,11 @@ All TOMs inherits Base class
 - ::moveCursor`(cursor)`
 
 ### MoveRight < Motion
+- ::constructor`()`: `super`: **Overridden**
+- ::didComposeByOperator: `false`
 - ::operatesInclusively: `false`: **Overridden**
+- ::onDidComposeBy`(operation)`
+- ::isOperatorPending`()`
 - ::moveCursor`(cursor)`
 
 ### MoveUp < Motion

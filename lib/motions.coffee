@@ -141,16 +141,26 @@ class MoveLeft extends Motion
 
 class MoveRight extends Motion
   @extend()
+  didComposeByOperator: false
 
   operatesInclusively: false
+  constructor: ->
+    super
+
+  onDidComposeBy: (operation) ->
+    if operation.isOperator()
+      @didComposeByOperator = true
+
+  isOperatorPending: ->
+    @vimState.isOperatorPendingMode() or @didComposeByOperator
 
   moveCursor: (cursor) ->
     _.times @getCount(1), =>
       wrapToNextLine = settings.wrapLeftRightMotion()
-
       # when the motion is combined with an operator, we will only wrap to the next line
       # if we are already at the end of the line (after the last character)
-      wrapToNextLine = false if @vimState.isOperatorPendingMode() and not cursor.isAtEndOfLine()
+      if @isOperatorPending() and not cursor.isAtEndOfLine()
+        wrapToNextLine = false
 
       cursor.moveRight() unless cursor.isAtEndOfLine()
       cursor.moveRight() if wrapToNextLine and cursor.isAtEndOfLine()
