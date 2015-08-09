@@ -93,11 +93,11 @@ All TOMs inherits Base class
 - [ScrollUp < Scroll](#scrollup--scroll)
 - [ScrollCursor < Scroll](#scrollcursor--scroll)
 - [ScrollCursorToTop < ScrollCursor < Scroll](#scrollcursortotop--scrollcursor--scroll)
-- [ScrollCursorToMiddle < ScrollCursor < Scroll](#scrollcursortomiddle--scrollcursor--scroll)
 - [ScrollCursorToBottom < ScrollCursor < Scroll](#scrollcursortobottom--scrollcursor--scroll)
-- [ScrollHorizontal](#scrollhorizontal)
-- [ScrollCursorToLeft < ScrollHorizontal](#scrollcursortoleft--scrollhorizontal)
-- [ScrollCursorToRight < ScrollHorizontal](#scrollcursortoright--scrollhorizontal)
+- [ScrollCursorToMiddle < ScrollCursor < Scroll](#scrollcursortomiddle--scrollcursor--scroll)
+- [ScrollHorizontal < Scroll](#scrollhorizontal--scroll)
+- [ScrollCursorToLeft < ScrollHorizontal < Scroll](#scrollcursortoleft--scrollhorizontal--scroll)
+- [ScrollCursorToRight < ScrollHorizontal < Scroll](#scrollcursortoright--scrollhorizontal--scroll)
 
 ### Input
 - ::constructor`(@characters)`: **Overridden**
@@ -493,46 +493,44 @@ All TOMs inherits Base class
 - ::select`()`
 
 ### Scroll
-- ::constructor`(@editorElement)`: **Overridden**
+- ::constructor`(@vimState, options)`: **Overridden**
 - ::isComplete`()`
 - ::isRecordable`()`
 
 ### ScrollDown < Scroll
-- ::execute`(count)`
-- ::keepCursorOnScreen`(count)`
-- ::scrollUp`(count)`
+- ::execute`()`
+- ::keepCursorOnScreen`()`
+- ::scrollUp`()`
 
 ### ScrollUp < Scroll
-- ::execute`(count)`
-- ::keepCursorOnScreen`(count)`
-- ::scrollDown`(count)`
+- ::execute`()`
+- ::keepCursorOnScreen`()`
+- ::scrollDown`()`
 
 ### ScrollCursor < Scroll
-- ::constructor`(@editorElement, opts)`: `super`: **Overridden**
+- ::constructor`()`: `super`: **Overridden**
+- ::execute`()`
+- ::moveToFirstCharacterOfLine`()`
+- ::getOffSetPixelHeight`(where)`
 
 ### ScrollCursorToTop < ScrollCursor < Scroll
-- ::execute`()`
-- ::scrollUp`()`
-- ::moveToFirstNonBlank`()`
-
-### ScrollCursorToMiddle < ScrollCursor < Scroll
-- ::execute`()`
-- ::scrollMiddle`()`
-- ::moveToFirstNonBlank`()`
+- ::isScrollable`()`
+- ::getScrollTop`()`
 
 ### ScrollCursorToBottom < ScrollCursor < Scroll
-- ::execute`()`
-- ::scrollDown`()`
-- ::moveToFirstNonBlank`()`
+- ::isScrollable`()`
+- ::getScrollTop`()`
 
-### ScrollHorizontal
-- ::constructor`(@editorElement)`: **Overridden**
-- ::isComplete`()`
-- ::isRecordable`()`
+### ScrollCursorToMiddle < ScrollCursor < Scroll
+- ::isScrollable`()`
+- ::getScrollTop`()`
+
+### ScrollHorizontal < Scroll
+- ::constructor`()`: `super`: **Overridden**
 - ::putCursorOnScreen`()`
 
-### ScrollCursorToLeft < ScrollHorizontal
+### ScrollCursorToLeft < ScrollHorizontal < Scroll
 - ::execute`()`
 
-### ScrollCursorToRight < ScrollHorizontal
+### ScrollCursorToRight < ScrollHorizontal < Scroll
 - ::execute`()`
