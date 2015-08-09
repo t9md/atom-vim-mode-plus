@@ -141,18 +141,6 @@ class VimState
       'move-to-bottom-of-screen': => new Motions.MoveToBottomOfScreen(@editorElement, this)
       'move-to-middle-of-screen': => new Motions.MoveToMiddleOfScreen(@editorElement, this)
 
-      # Scroll
-      'scroll-down': => new Scroll.ScrollDown(this)
-      'scroll-up': => new Scroll.ScrollUp(this)
-      'scroll-cursor-to-top': => new Scroll.ScrollCursorToTop(this)
-      'scroll-cursor-to-top-leave': => new Scroll.ScrollCursorToTop(this, leaveCursor: true)
-      'scroll-cursor-to-middle': => new Scroll.ScrollCursorToMiddle(this)
-      'scroll-cursor-to-middle-leave': => new Scroll.ScrollCursorToMiddle(this, leaveCursor: true)
-      'scroll-cursor-to-bottom': => new Scroll.ScrollCursorToBottom(this)
-      'scroll-cursor-to-bottom-leave': => new Scroll.ScrollCursorToBottom(this, leaveCursor: true)
-      'scroll-cursor-to-left': => new Scroll.ScrollCursorToLeft(this)
-      'scroll-cursor-to-right': => new Scroll.ScrollCursorToRight(this)
-
       'scroll-half-screen-up': => new Motions.ScrollHalfUpKeepCursor(@editorElement, this)
       'scroll-full-screen-up': => new Motions.ScrollFullUpKeepCursor(@editorElement, this)
       'scroll-half-screen-down': => new Motions.ScrollHalfDownKeepCursor(@editorElement, this)
@@ -198,6 +186,19 @@ class VimState
       'bracket-matching-motion': => new Motions.BracketMatchingMotion(@editor, this)
       'reverse-search-current-word': => new Motions.SearchCurrentWord(@editor, this).reversed()
 
+    @registerScrollCommands [
+      'scroll-down'
+      'scroll-up'
+      'scroll-cursor-to-top'
+      'scroll-cursor-to-middle'
+      'scroll-cursor-to-bottom'
+      'scroll-cursor-to-top-leave'
+      'scroll-cursor-to-middle-leave'
+      'scroll-cursor-to-bottom-leave'
+      'scroll-cursor-to-left'
+      'scroll-cursor-to-right'
+      ]
+
   # Private: Register multiple command handlers via an {Object} that maps
   # command names to command handler functions.
   #
@@ -226,6 +227,17 @@ class VimState
           fn = => @newOperation(operationName)
         commands[name] = (event) => @operationStack.push(fn(event))
     @registerCommands(commands)
+
+  # Register Scroll command.
+  # By maping command name to correspoinding scroll class.
+  #  e.g. scroll-down -> ScrollDown
+  registerScrollCommands: (scrollCommands) ->
+    commands = {}
+    for name in scrollCommands
+      do (name) =>
+        klass = _.capitalize(_.camelize(name))
+        commands[name] = => new Scroll[klass](this)
+    @registerOperationCommands(commands)
 
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
