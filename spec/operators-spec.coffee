@@ -107,7 +107,7 @@ describe "Operators", ->
           editor.setCursorScreenPosition([1, 4])
           atom.config.set('vim-mode.wrapLeftRightMotion', true)
 
-        fit "deletes a character", ->
+        it "deletes a character", ->
           # copy of the earlier test because wrapLeftRightMotion should not affect it
           keydown('x')
           expect(editor.getText()).toBe 'abc\n01235\n\nxyz'
