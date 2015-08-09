@@ -1,8 +1,7 @@
 _ = require 'underscore-plus'
 TextObjects = require './text-objects'
 Operators   = require './operators/index'
-utils = require './utils'
-{debug, debugClear} = require './utils'
+{debug} = require './utils'
 settings = require './settings'
 
 module.exports =
@@ -17,7 +16,8 @@ class OperationStack
     return unless operations?
     if @isEmpty() and settings.debug()
       debug "#=== Start at #{new Date().toISOString()}"
-      debugClear()
+      if settings.debugOutput() is 'console'
+        console.clear()
     @withLock =>
       operations = [operations] unless _.isArray(operations)
 
@@ -54,7 +54,7 @@ class OperationStack
         debug op.report
           indent: 2
           colors: settings.debugOutput() is 'file'
-          excludeProperties: ['vimState'] # vimState have many properties, occupy DevTool console.
+          excludeProperties: ['vimState', 'editorElement'] # vimState have many properties, occupy DevTool console.
 
   # Private: Processes the command if the last operation is complete.
   #
@@ -66,19 +66,19 @@ class OperationStack
     unless @peekTop().isComplete()
       if @vimState.isNormalMode() and @peekTop().isOperator?()
         @inspectStack()
-        @vimState.activateOperatorPendingMode()
         debug "-> @process(): return. activate: operator-pending-mode"
+        @vimState.activateOperatorPendingMode()
       return
 
     @inspectStack()
-    operation = @pop()
     debug "-> @pop()"
+    operation = @pop()
     debug "  - popped = <#{operation.getKind()}>"
     debug "  - newTop = <#{@peekTop()?.getKind()}>"
     unless @isEmpty()
       try
-        @peekTop().compose(operation)
         debug "-> <#{@peekTop().getKind()}>.compose(<#{operation.getKind()}>)"
+        @peekTop().compose(operation)
         debug "-> @process(): recursive"
         @process()
       catch e
@@ -89,8 +89,8 @@ class OperationStack
     else
       @vimState.history.unshift(operation) if operation.isRecordable()
       unless operation.isPure()
-        operation.execute()
         debug " -> <#{operation.getKind()}>.execute()"
+        operation.execute()
         @vimState.counter.reset()
         debug "#=== Finish at #{new Date().toISOString()}\n"
       else
