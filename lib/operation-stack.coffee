@@ -55,7 +55,7 @@ class OperationStack
     for cursor in @vimState.editor.getCursors()
       @vimState.ensureCursorIsWithinLine(cursor)
 
-  inspectStack: ->
+  inspect: ->
     debug "  [@stack] size: #{@stack.length}"
     for op, i in @stack
       debug "  <idx: #{i}>"
@@ -74,12 +74,12 @@ class OperationStack
 
     unless @peekTop().isComplete()
       if @vimState.isNormalMode() and @peekTop().isOperator?()
-        @inspectStack()
-        debug "-> @process(): return. activate: operator-pending-mode"
+        @inspect()
+        debug "-> @process(): return. activating: operator-pending-mode"
         @vimState.activateOperatorPendingMode()
       return
 
-    @inspectStack()
+    @inspect()
     debug "-> @pop()"
     operation = @pop()
     debug "  - popped = <#{operation.getKind()}>"
@@ -90,20 +90,20 @@ class OperationStack
         @peekTop().compose(operation)
         debug "-> @process(): recursive"
         @process()
-      catch e
-        if e.isOperatorError?() or e.isMotionError?()
+      catch error
+        if error.isOperatorError?() or error.isMotionError?()
           @vimState.resetNormalMode()
         else
-          throw e
+          throw error
     else
       @vimState.history.unshift(operation) if operation.isRecordable()
-      unless operation.isPure()
+      if operation.isPure()
+        null # Something new way of execution.
+      else
         debug " -> <#{operation.getKind()}>.execute()"
         operation.execute()
         @vimState.counter.reset()
         debug "#=== Finish at #{new Date().toISOString()}\n"
-      else
-        null # Something new way of execution.
 
   # Private: Fetches the last operation.
   #
