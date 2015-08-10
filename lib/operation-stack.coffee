@@ -77,13 +77,13 @@ class OperationStack
 
     @inspect()
     debug "-> @pop()"
-    operation = @pop()
-    debug "  - popped = <#{operation.getKind()}>"
+    op = @pop()
+    debug "  - popped = <#{op.getKind()}>"
     debug "  - newTop = <#{@peekTop()?.getKind()}>"
     unless @isEmpty()
       try
-        debug "-> <#{@peekTop().getKind()}>.compose(<#{operation.getKind()}>)"
-        @peekTop().compose(operation)
+        debug "-> <#{@peekTop().getKind()}>.compose(<#{op.getKind()}>)"
+        @peekTop().compose(op)
         debug "-> @process(): recursive"
         @process()
       catch error
@@ -92,12 +92,12 @@ class OperationStack
         else
           throw error
     else
-      @vimState.history.unshift(operation) if operation.isRecordable()
-      if operation.isPure()
+      @vimState.history.unshift(op) if op.isRecordable()
+      if op.isPure()
         null # Something new way of execution.
       else
-        debug " -> <#{operation.getKind()}>.execute()"
-        operation.execute()
+        debug " -> <#{op.getKind()}>.execute()"
+        op.execute()
         @vimState.counter.reset()
         debug "#=== Finish at #{new Date().toISOString()}\n"
 
@@ -119,10 +119,10 @@ class OperationStack
   isEmpty: ->
     @stack.length is 0
 
-  isSameOperatorPending: (operation) ->
-    constructor = operation.constructor
-    _.detect @stack, (operation) ->
-      operation instanceof constructor
+  isSameOperatorPending: (op) ->
+    constructor = op.constructor
+    _.detect @stack, (op) ->
+      op instanceof constructor
 
   isProcessing: ->
     @processing
