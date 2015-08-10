@@ -121,21 +121,21 @@ class DeleteRight extends Delete
 
   constructor: ->
     super
-    @compose(new Motions.MoveRight(@editor, @vimState))
+    @compose(new Motions.MoveRight(@vimState))
 
 class DeleteLeft extends Delete
   @extend()
   complete: true
   constructor: ->
     super
-    @compose(new Motions.MoveLeft(@editor, @vimState))
+    @compose(new Motions.MoveLeft(@vimState))
 
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
   complete: true
   constructor: ->
     super
-    @compose(new Motions.MoveToLastCharacterOfLine(@editor, @vimState))
+    @compose(new Motions.MoveToLastCharacterOfLine(@vimState))
 
 #
 # It toggles the case of everything selected by the following motion
@@ -244,7 +244,7 @@ class YankLine extends Yank
   complete: true
   constructor: ->
     super
-    @compose(new Motions.MoveToRelativeLine(@editor, @vimState))
+    @compose(new Motions.MoveToRelativeLine(@vimState))
 
 #
 # It combines the current line with the following line.
@@ -606,7 +606,7 @@ class Substitute extends Change
 
   constructor: ->
     super
-    @compose(new Motions.MoveRight(@editor, @vimState))
+    @compose(new Motions.MoveRight(@vimState))
 
 class SubstituteLine extends Change
   @extend()
@@ -616,7 +616,7 @@ class SubstituteLine extends Change
   constructor: ->
     super
     @register = settings.defaultRegister()
-    @target = new Motions.MoveToRelativeLine(@editor, @vimState)
+    @target = new Motions.MoveToRelativeLine(@vimState)
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
@@ -624,7 +624,7 @@ class ChangeToLastCharacterOfLine extends Change
 
   constructor: ->
     super
-    @compose(new Motions.MoveToLastCharacterOfLine(@editor, @vimState))
+    @compose(new Motions.MoveToLastCharacterOfLine(@vimState))
 
 # Takes a transaction and turns it into a string of what was typed.
 # This class is an implementation detail of Insert

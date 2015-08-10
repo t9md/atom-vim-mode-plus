@@ -86,35 +86,51 @@ class VimState
 
     @registerOperationCommands
       # Motions
-      'move-left': => new Motions.MoveLeft(@editor, this)
-      'move-up': => new Motions.MoveUp(@editor, this)
-      'move-down': => new Motions.MoveDown(@editor, this)
-      'move-right': => new Motions.MoveRight(@editor, this)
-      'move-to-next-word': => new Motions.MoveToNextWord(@editor, this)
-      'move-to-next-whole-word': => new Motions.MoveToNextWholeWord(@editor, this)
-      'move-to-end-of-word': => new Motions.MoveToEndOfWord(@editor, this)
-      'move-to-end-of-whole-word': => new Motions.MoveToEndOfWholeWord(@editor, this)
-      'move-to-previous-word': => new Motions.MoveToPreviousWord(@editor, this)
-      'move-to-previous-whole-word': => new Motions.MoveToPreviousWholeWord(@editor, this)
-      'move-to-next-paragraph': => new Motions.MoveToNextParagraph(@editor, this)
-      'move-to-previous-paragraph': => new Motions.MoveToPreviousParagraph(@editor, this)
-      'move-to-first-character-of-line': => new Motions.MoveToFirstCharacterOfLine(@editor, this)
-      'move-to-first-character-of-line-and-down': => new Motions.MoveToFirstCharacterOfLineAndDown(@editor, this)
-      'move-to-last-character-of-line': => new Motions.MoveToLastCharacterOfLine(@editor, this)
-      'move-to-last-nonblank-character-of-line-and-down': => new Motions.MoveToLastNonblankCharacterOfLineAndDown(@editor, this)
-      'move-to-beginning-of-line': (e) => @moveOrRepeat(e)
-      'move-to-first-character-of-line-up': => new Motions.MoveToFirstCharacterOfLineUp(@editor, this)
-      'move-to-first-character-of-line-down': => new Motions.MoveToFirstCharacterOfLineDown(@editor, this)
-      'move-to-start-of-file': => new Motions.MoveToStartOfFile(@editor, this)
-      'move-to-line': => new Motions.MoveToAbsoluteLine(@editor, this)
-      'move-to-top-of-screen': => new Motions.MoveToTopOfScreen(@editorElement, this)
-      'move-to-bottom-of-screen': => new Motions.MoveToBottomOfScreen(@editorElement, this)
-      'move-to-middle-of-screen': => new Motions.MoveToMiddleOfScreen(@editorElement, this)
+      'move-left': => new Motions.MoveLeft(this)
+      'move-up': => new Motions.MoveUp(this)
+      'move-down': => new Motions.MoveDown(this)
+      'move-right': => new Motions.MoveRight(this)
+      'move-to-next-word': => new Motions.MoveToNextWord(this)
+      'move-to-next-whole-word': => new Motions.MoveToNextWholeWord(this)
+      'move-to-end-of-word': => new Motions.MoveToEndOfWord(this)
+      'move-to-end-of-whole-word': => new Motions.MoveToEndOfWholeWord(this)
+      'move-to-previous-word': => new Motions.MoveToPreviousWord(this)
+      'move-to-previous-whole-word': => new Motions.MoveToPreviousWholeWord(this)
+      'move-to-next-paragraph': => new Motions.MoveToNextParagraph(this)
+      'move-to-previous-paragraph': => new Motions.MoveToPreviousParagraph(this)
+      'move-to-first-character-of-line': => new Motions.MoveToFirstCharacterOfLine(this)
+      'move-to-first-character-of-line-and-down': => new Motions.MoveToFirstCharacterOfLineAndDown(this)
+      'move-to-last-character-of-line': => new Motions.MoveToLastCharacterOfLine(this)
+      'move-to-last-nonblank-character-of-line-and-down': => new Motions.MoveToLastNonblankCharacterOfLineAndDown(this)
+      'move-to-first-character-of-line-up': => new Motions.MoveToFirstCharacterOfLineUp(this)
+      'move-to-first-character-of-line-down': => new Motions.MoveToFirstCharacterOfLineDown(this)
+      'move-to-start-of-file': => new Motions.MoveToStartOfFile(this)
+      'move-to-line': => new Motions.MoveToAbsoluteLine(this)
 
-      'scroll-half-screen-up': => new Motions.ScrollHalfUpKeepCursor(@editorElement, this)
-      'scroll-full-screen-up': => new Motions.ScrollFullUpKeepCursor(@editorElement, this)
-      'scroll-half-screen-down': => new Motions.ScrollHalfDownKeepCursor(@editorElement, this)
-      'scroll-full-screen-down': => new Motions.ScrollFullDownKeepCursor(@editorElement, this)
+      'move-to-top-of-screen': => new Motions.MoveToTopOfScreen(this)
+      'move-to-bottom-of-screen': => new Motions.MoveToBottomOfScreen(this)
+      'move-to-middle-of-screen': => new Motions.MoveToMiddleOfScreen(this)
+
+      'scroll-half-screen-up': => new Motions.ScrollHalfUpKeepCursor(this)
+      'scroll-full-screen-up': => new Motions.ScrollFullUpKeepCursor(this)
+      'scroll-half-screen-down': => new Motions.ScrollHalfDownKeepCursor(this)
+      'scroll-full-screen-down': => new Motions.ScrollFullDownKeepCursor(this)
+
+      'repeat-search': => new Motions.RepeatSearch(this)
+      'repeat-search-backwards': => new Motions.RepeatSearch(this).reversed()
+      'move-to-mark': => new Motions.MoveToMark(this)
+      'move-to-mark-literal': => new Motions.MoveToMark(this, false)
+      'find': => new Motions.Find(this)
+      'find-backwards': => new Motions.Find(this).reverse()
+      'till': => new Motions.Till(this)
+      'till-backwards': => new Motions.Till(this).reverse()
+      'search': => new Motions.Search(this)
+      'reverse-search': => new Motions.Search(this).reversed()
+      'search-current-word': => new Motions.SearchCurrentWord(this)
+      'bracket-matching-motion': => new Motions.BracketMatchingMotion(this)
+      'reverse-search-current-word': => new Motions.SearchCurrentWord(this).reversed()
+
+      # TextObject
       'select-inside-word': => new TextObjects.SelectInsideWord(@editor)
       'select-inside-whole-word': => new TextObjects.SelectInsideWholeWord(@editor)
       'select-inside-double-quotes': => new TextObjects.SelectInsideQuotes(@editor, '"', false)
@@ -136,22 +152,13 @@ class VimState
       'select-around-square-brackets': => new TextObjects.SelectInsideBrackets(@editor, '[', ']', true)
       'select-around-parentheses': => new TextObjects.SelectInsideBrackets(@editor, '(', ')', true)
       'select-around-paragraph': => new TextObjects.SelectAParagraph(@editor, true)
+
+      # [FIXME]
       'register-prefix': (e) => @registerPrefix(e)
-      'repeat-search': => new Motions.RepeatSearch(@editor, this)
-      'repeat-search-backwards': => new Motions.RepeatSearch(@editor, this).reversed()
-      'move-to-mark': => new Motions.MoveToMark(@editor, this)
-      'move-to-mark-literal': => new Motions.MoveToMark(@editor, this, false)
-      'find': => new Motions.Find(@editor, this)
-      'find-backwards': => new Motions.Find(@editor, this).reverse()
-      'till': => new Motions.Till(@editor, this)
-      'till-backwards': => new Motions.Till(@editor, this).reverse()
-      'repeat-find': => new @globalVimState.currentFind.constructor(@editor, this, repeated: true) if @globalVimState.currentFind
-      'repeat-find-reverse': => new @globalVimState.currentFind.constructor(@editor, this, repeated: true, reverse: true) if @globalVimState.currentFind
-      'search': => new Motions.Search(@editor, this)
-      'reverse-search': => new Motions.Search(@editor, this).reversed()
-      'search-current-word': => new Motions.SearchCurrentWord(@editor, this)
-      'bracket-matching-motion': => new Motions.BracketMatchingMotion(@editor, this)
-      'reverse-search-current-word': => new Motions.SearchCurrentWord(@editor, this).reversed()
+      'move-to-beginning-of-line': (e) => @moveOrRepeat(e)
+      'repeat-find': => new @globalVimState.currentFind.constructor(this, repeated: true) if @globalVimState.currentFind
+      'repeat-find-reverse': => new @globalVimState.currentFind.constructor(this, repeated: true, reverse: true) if @globalVimState.currentFind
+
 
     @registerNewOperationCommands Operators, [
       'activate-insert-mode'
@@ -601,7 +608,7 @@ class VimState
       @counter.set(e)
       null
     else
-      new Motions.MoveToBeginningOfLine(@editor, this)
+      new Motions.MoveToBeginningOfLine(this)
 
   isOperatorPending: ->
     not @operationStack.isEmpty()
