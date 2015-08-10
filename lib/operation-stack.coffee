@@ -34,7 +34,7 @@ class OperationStack
         #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
         if @vimState.isOperatorPendingMode() and
             (operation.getKind() in completableOperators) and @isSameOperatorPending(operation)
-          operation = new MoveToRelativeLine(@vimState.editor, @vimState)
+          operation = new MoveToRelativeLine(@vimState)
 
         # if we have started an operation that responds to canComposeWith check if it can compose
         # with the operation we're going to push onto the stack

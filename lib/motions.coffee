@@ -19,7 +19,8 @@ class Motion extends Base
   operatesInclusively: true
   operatesLinewise: false
 
-  constructor: (@editor, @vimState) ->
+  constructor: (@vimState) ->
+    {@editor, @editorElement} = @vimState
 
   select: (options) ->
     value = for selection in @editor.getSelections()
@@ -115,12 +116,10 @@ class Motion extends Base
 # Public: Generic class for motions that require extra input
 class MotionWithInput extends Motion
   @extend()
+  complete: false
 
-  constructor: ->
-    super
-    @complete = false
-
-  isComplete: -> @complete
+  isComplete: ->
+    @complete
 
   canComposeWith: (operation) -> return operation.characters?
 
@@ -142,10 +141,7 @@ class MoveLeft extends Motion
 class MoveRight extends Motion
   @extend()
   didComposeByOperator: false
-
   operatesInclusively: false
-  constructor: ->
-    super
 
   onDidComposeBy: (operation) ->
     if operation.isOperator()
@@ -167,7 +163,6 @@ class MoveRight extends Motion
 
 class MoveUp extends Motion
   @extend()
-
   operatesLinewise: true
 
   moveCursor: (cursor) ->
@@ -177,7 +172,6 @@ class MoveUp extends Motion
 
 class MoveDown extends Motion
   @extend()
-
   operatesLinewise: true
 
   moveCursor: (cursor) ->
@@ -187,7 +181,6 @@ class MoveDown extends Motion
 
 class MoveToPreviousWord extends Motion
   @extend()
-
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -196,7 +189,6 @@ class MoveToPreviousWord extends Motion
 
 class MoveToPreviousWholeWord extends Motion
   @extend()
-
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -215,7 +207,6 @@ class MoveToPreviousWholeWord extends Motion
 
 class MoveToNextWord extends Motion
   @extend()
-
   wordRegex: null
   operatesInclusively: false
 
@@ -246,12 +237,10 @@ class MoveToNextWord extends Motion
 
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
-
   wordRegex: WholeWordOrEmptyLineRegex
 
 class MoveToEndOfWord extends Motion
   @extend()
-
   wordRegex: null
 
   moveCursor: (cursor) ->
@@ -274,12 +263,10 @@ class MoveToEndOfWord extends Motion
 
 class MoveToEndOfWholeWord extends MoveToEndOfWord
   @extend()
-
   wordRegex: WholeWordRegex
 
 class MoveToNextParagraph extends Motion
   @extend()
-
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -288,14 +275,12 @@ class MoveToNextParagraph extends Motion
 
 class MoveToPreviousParagraph extends Motion
   @extend()
-
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
       cursor.moveToBeginningOfPreviousParagraph()
 
 class MoveToLine extends Motion
   @extend()
-
   operatesLinewise: true
 
   getDestinationRow: (count) ->
@@ -311,7 +296,6 @@ class MoveToAbsoluteLine extends MoveToLine
 
 class MoveToRelativeLine extends MoveToLine
   @extend()
-
   operatesLinewise: true
 
   moveCursor: (cursor) ->
@@ -321,9 +305,9 @@ class MoveToRelativeLine extends MoveToLine
 class MoveToScreenLine extends MoveToLine
   @extend()
 
-  constructor: (@editorElement, @vimState, @scrolloff) ->
+  constructor: (@vimState, @scrolloff) ->
+    super(@vimState)
     @scrolloff = 2 # atom default
-    super(@editorElement.getModel(), @vimState)
 
   moveCursor: (cursor) ->
     {row, column} = cursor.getBufferPosition()
@@ -459,9 +443,6 @@ class ScrollKeepingCursor extends MoveToLine
   previousFirstScreenRow: 0
   currentFirstScreenRow: 0
 
-  constructor: (@editorElement, @vimState) ->
-    super(@editorElement.getModel(), @vimState)
-
   select: (options) ->
     finalDestination = @scrollScreen()
     super(options)
@@ -512,8 +493,8 @@ class ScrollFullDownKeepCursor extends ScrollKeepingCursor
 # -------------------------
 class Find extends MotionWithInput
   @extend()
-  constructor: (@editor, @vimState, opts={}) ->
-    super(@editor, @vimState)
+  constructor: (@vimState, opts={}) ->
+    super(@vimState)
     @offset = 0
 
     if not opts.repeated
@@ -583,8 +564,8 @@ class MoveToMark extends MotionWithInput
   @extend()
   operatesInclusively: false
 
-  constructor: (@editor, @vimState, @linewise=true) ->
-    super(@editor, @vimState)
+  constructor: (@vimState, @linewise=true) ->
+    super(@vimState)
     @operatesLinewise = @linewise
     @viewModel = new ViewModel(this, class: 'move-to-mark', singleChar: true, hidden: true)
 
@@ -605,8 +586,8 @@ class SearchBase extends MotionWithInput
   @extend()
   operatesInclusively: false
 
-  constructor: (@editor, @vimState, options = {}) ->
-    super(@editor, @vimState)
+  constructor: (@vimState, options={}) ->
+    super(@vimState)
     @reverse = @initiallyReversed = false
     @updateCurrentSearch() unless options.dontUpdateCurrentSearch
 
@@ -674,16 +655,16 @@ class SearchBase extends MotionWithInput
 # -------------------------
 class Search extends SearchBase
   @extend()
-  constructor: (@editor, @vimState) ->
-    super(@editor, @vimState)
+  constructor: (@vimState) ->
+    super
     @viewModel = new SearchViewModel(this)
 
 class SearchCurrentWord extends SearchBase
   @extend()
   @keywordRegex: null
 
-  constructor: (@editor, @vimState) ->
-    super(@editor, @vimState)
+  constructor: (@vimState) ->
+    super
 
     # FIXME: This must depend on the current language
     defaultIsKeyword = "[@a-zA-Z0-9_\-]+"
@@ -801,8 +782,8 @@ class BracketMatchingMotion extends SearchBase
 
 class RepeatSearch extends SearchBase
   @extend()
-  constructor: (@editor, @vimState) ->
-    super(@editor, @vimState, dontUpdateCurrentSearch: true)
+  constructor: (@vimState) ->
+    super(@vimState, dontUpdateCurrentSearch: true)
     @input = new Input(@vimState.getSearchHistoryItem(0) ? "")
     @replicateCurrentSearch()
 
