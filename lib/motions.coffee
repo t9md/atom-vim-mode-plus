@@ -379,6 +379,7 @@ class MoveToLineBase extends Motion
   getDestinationRow: (count) ->
     if count? then count - 1 else (@editor.getLineCount() - 1)
 
+# keymap: G
 class MoveToLine extends MoveToLineBase
   @extend()
 
@@ -386,6 +387,16 @@ class MoveToLine extends MoveToLineBase
     cursor.setBufferPosition([@getDestinationRow(@getCount()), Infinity])
     cursor.moveToFirstCharacterOfLine()
     cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
+
+# keymap: gg
+class MoveToStartOfFile extends MoveToLineBase
+  @extend()
+
+  moveCursor: (cursor) ->
+    {row, column} = @editor.getCursorBufferPosition()
+    cursor.setBufferPosition([@getDestinationRow(@getCount(1)), 0])
+    unless @isLinewise()
+      cursor.moveToFirstCharacterOfLine()
 
 class MoveToRelativeLine extends MoveToLineBase
   @extend()
@@ -402,17 +413,7 @@ class MoveToScreenLine extends MoveToLineBase
 
   moveCursor: (cursor) ->
     {row, column} = cursor.getBufferPosition()
-    cursor.setScreenPosition([@getDestinationRow(@getCount(1)), 0])
-
-# keymap: gg
-class MoveToStartOfFile extends MoveToLineBase
-  @extend()
-
-  moveCursor: (cursor) ->
-    {row, column} = @editor.getCursorBufferPosition()
-    cursor.setBufferPosition([@getDestinationRow(@getCount(1)), 0])
-    unless @isLinewise()
-      cursor.moveToFirstCharacterOfLine()
+    cursor.setScreenPosition([@getDestinationRow(), 0])
 
 # keymap: H
 class MoveToTopOfScreen extends MoveToScreenLine
@@ -439,6 +440,7 @@ class MoveToBottomOfScreen extends MoveToScreenLine
       offset = if count > 0 then count - 1 else count
     lastScreenRow - offset
 
+# keymap: M
 class MoveToMiddleOfScreen extends MoveToScreenLine
   @extend()
   getDestinationRow: ->
@@ -451,6 +453,7 @@ class ScrollKeepingCursor extends MoveToLineBase
   @extend()
   previousFirstScreenRow: 0
   currentFirstScreenRow: 0
+  direction: null
 
   select: (options) ->
     finalDestination = @scrollScreen()
@@ -471,35 +474,48 @@ class ScrollKeepingCursor extends MoveToLineBase
 
   scrollScreen: ->
     @previousFirstScreenRow = @editorElement.getFirstVisibleScreenRow()
-    destination = @scrollDestination()
+
+    amountPx = @getCount(1) * @getAmountInPixel()
+    destination =
+      if @direction is 'up'
+        @editor.getScrollTop() - amountPx
+      else if @direction is 'down'
+        @editor.getScrollTop() + amountPx
+
     @editor.setScrollTop(destination)
     @currentFirstScreenRow = @editorElement.getFirstVisibleScreenRow()
     destination
 
-class ScrollHalfUpKeepCursor extends ScrollKeepingCursor
-  @extend()
-  scrollDestination: ->
-    half = (Math.floor(@editor.getRowsPerPage() / 2) * @editor.getLineHeightInPixels())
-    @editor.getScrollTop() - @getCount(1) * half
+  getHalfScreenPixel: ->
+    Math.floor(@editor.getRowsPerPage() / 2) * @editor.getLineHeightInPixels()
 
-class ScrollFullUpKeepCursor extends ScrollKeepingCursor
+# keymap: ctrl-u
+class ScrollHalfScreenUp extends ScrollKeepingCursor
   @extend()
-  scrollDestination: ->
-    @editor.getScrollTop() - (@getCount(1) * @editor.getHeight())
+  direction: 'up'
+  getAmountInPixel: ->
+    @getHalfScreenPixel()
 
-class ScrollHalfDownKeepCursor extends ScrollKeepingCursor
+# keymap: ctrl-d
+class ScrollHalfScreenDown extends ScrollHalfScreenUp
   @extend()
-  scrollDestination: ->
-    half = (Math.floor(@editor.getRowsPerPage() / 2) * @editor.getLineHeightInPixels())
-    @editor.getScrollTop() + @getCount(1) * half
+  direction: 'down'
 
-class ScrollFullDownKeepCursor extends ScrollKeepingCursor
+# keymap: ctrl-b
+class ScrollFullScreenUp extends ScrollKeepingCursor
   @extend()
-  scrollDestination: ->
-    @editor.getScrollTop() + (@getCount(1) * @editor.getHeight())
+  direction: 'up'
+  getAmountInPixel: ->
+    @editor.getHeight()
+
+# keymap: ctrl-f
+class ScrollFullScreenDown extends ScrollFullScreenUp
+  @extend()
+  direction: 'down'
 
 # Find Motion
 # -------------------------
+# keymap: f
 class Find extends MotionWithInput
   @extend()
   backwards: false
@@ -549,10 +565,12 @@ class Find extends MotionWithInput
     if (match = @match(cursor, @getCount(1)))?
       cursor.setBufferPosition(match)
 
+# keymap: F
 class FindBackwards extends Find
   @extend()
   backwards: true
 
+# keymap: t
 class Till extends Find
   @extend()
   offset: 1
@@ -570,12 +588,14 @@ class Till extends Find
       selection.modifySelection ->
         selection.cursor.moveRight()
 
+# keymap: T
 class TillBackwards extends Till
   @extend()
   backwards: true
 
-# MoveToMark
+# Mark
 # -------------------------
+# keymap: '
 class MoveToMark extends MotionWithInput
   @extend()
   operatesInclusively: false
@@ -598,12 +618,15 @@ class MoveToMark extends MotionWithInput
     if @linewise
       cursor.moveToFirstCharacterOfLine()
 
+# keymap: `
 class MoveToMarkLiteral extends MoveToMark
   @extend()
 
   constructor: (@vimState) ->
     super(@vimState, false)
 
+# Search
+# -------------------------
 class SearchBase extends MotionWithInput
   @extend()
   operatesInclusively: false
@@ -673,20 +696,21 @@ class SearchBase extends MotionWithInput
     @reverse = @vimState.globalVimState.currentSearch.reverse
     @initiallyReversed = @vimState.globalVimState.currentSearch.initiallyReversed
 
-# Search Motion
-# -------------------------
+# keymap: /
 class Search extends SearchBase
   @extend()
   constructor: ->
     super
     @viewModel = new SearchViewModel(this)
 
+# keymap: ?
 class ReverseSearch extends Search
   @extend()
   constructor: ->
     super
     @reversed()
 
+# keymap: *
 class SearchCurrentWord extends SearchBase
   @extend()
   @keywordRegex: null
@@ -739,6 +763,7 @@ class SearchCurrentWord extends SearchBase
     # @getCount(1)
     super() if @input.characters.length > 0
 
+# keymap: #
 class ReverseSearchCurrentWord extends SearchCurrentWord
   @extend()
   constructor: ->
@@ -749,6 +774,28 @@ OpenBrackets = ['(', '{', '[']
 CloseBrackets = [')', '}', ']']
 AnyBracket = new RegExp(OpenBrackets.concat(CloseBrackets).map(_.escapeRegExp).join("|"))
 
+# keymap: n
+class RepeatSearch extends SearchBase
+  @extend()
+  constructor: (@vimState) ->
+    super(@vimState, dontUpdateCurrentSearch: true)
+    @input = new Input(@vimState.getSearchHistoryItem(0) ? "")
+    @replicateCurrentSearch()
+
+  isComplete: -> true
+
+  reversed: ->
+    @reverse = not @initiallyReversed
+    this
+
+# keymap: N
+class RepeatSearchBackwards extends RepeatSearch
+  @extend()
+  constructor: ->
+    super
+    @reversed()
+
+# keymap: %
 class BracketMatchingMotion extends SearchBase
   @extend()
   operatesInclusively: true
@@ -814,32 +861,7 @@ class BracketMatchingMotion extends SearchBase
     if matchPosition = @searchForMatch(startPosition, reverse, inCharacter, outCharacter)
       cursor.setBufferPosition(matchPosition)
 
-class RepeatSearch extends SearchBase
-  @extend()
-  constructor: (@vimState) ->
-    super(@vimState, dontUpdateCurrentSearch: true)
-    @input = new Input(@vimState.getSearchHistoryItem(0) ? "")
-    @replicateCurrentSearch()
-
-  isComplete: -> true
-
-  reversed: ->
-    @reverse = not @initiallyReversed
-    this
-
-class RepeatSearchBackwards extends RepeatSearch
-  @extend()
-  constructor: ->
-    super
-    @reversed()
-
 # Alias
-# MoveToLine = MoveToAbsoluteLine
-ScrollHalfScreenUp = ScrollHalfUpKeepCursor
-ScrollHalfScreenDown = ScrollHalfDownKeepCursor
-ScrollFullScreenUp = ScrollFullUpKeepCursor
-ScrollFullScreenDown = ScrollFullDownKeepCursor
-
 module.exports = {
   MotionError
   Motion
