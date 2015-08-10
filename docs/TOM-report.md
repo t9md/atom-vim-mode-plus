@@ -40,13 +40,19 @@ All TOMs inherits Base class
 - [ScrollHalfDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion](#scrollhalfdownkeepcursor--scrollkeepingcursor--movetoline--motion)
 - [ScrollFullDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion](#scrollfulldownkeepcursor--scrollkeepingcursor--movetoline--motion)
 - [Find < MotionWithInput < Motion](#find--motionwithinput--motion)
+- [FindBackwards < Find < MotionWithInput < Motion](#findbackwards--find--motionwithinput--motion)
 - [Till < Find < MotionWithInput < Motion](#till--find--motionwithinput--motion)
+- [TillBackwards < Till < Find < MotionWithInput < Motion](#tillbackwards--till--find--motionwithinput--motion)
 - [MoveToMark < MotionWithInput < Motion](#movetomark--motionwithinput--motion)
+- [MoveToMarkLiteral < MoveToMark < MotionWithInput < Motion](#movetomarkliteral--movetomark--motionwithinput--motion)
 - [SearchBase < MotionWithInput < Motion](#searchbase--motionwithinput--motion)
 - [Search < SearchBase < MotionWithInput < Motion](#search--searchbase--motionwithinput--motion)
+- [ReverseSearch < Search < SearchBase < MotionWithInput < Motion](#reversesearch--search--searchbase--motionwithinput--motion)
 - [SearchCurrentWord < SearchBase < MotionWithInput < Motion](#searchcurrentword--searchbase--motionwithinput--motion)
+- [ReverseSearchCurrentWord < SearchCurrentWord < SearchBase < MotionWithInput < Motion](#reversesearchcurrentword--searchcurrentword--searchbase--motionwithinput--motion)
 - [BracketMatchingMotion < SearchBase < MotionWithInput < Motion](#bracketmatchingmotion--searchbase--motionwithinput--motion)
 - [RepeatSearch < SearchBase < MotionWithInput < Motion](#repeatsearch--searchbase--motionwithinput--motion)
+- [RepeatSearchBackwards < RepeatSearch < SearchBase < MotionWithInput < Motion](#repeatsearchbackwards--repeatsearch--searchbase--motionwithinput--motion)
 - [OperatorError](#operatorerror)
 - [Operator](#operator)
 - [OperatorWithInput < Operator](#operatorwithinput--operator)
@@ -120,7 +126,7 @@ All TOMs inherits Base class
 - ::constructor`(@message)`: **Overridden**
 
 ### Motion
-- ::constructor`(@editor, @vimState)`: **Overridden**
+- ::constructor`(@vimState)`: **Overridden**
 - ::operatesInclusively: `true`
 - ::operatesLinewise: `false`
 - ::select`(options)`
@@ -134,7 +140,7 @@ All TOMs inherits Base class
 - ::isInclusive`()`
 
 ### MotionWithInput < Motion
-- ::constructor`()`: `super`: **Overridden**
+- ::complete: `false`
 - ::isComplete`()`: **Overridden**
 - ::canComposeWith`(operation)`
 - ::compose`(@input)`
@@ -144,11 +150,9 @@ All TOMs inherits Base class
 - ::moveCursor`(cursor)`
 
 ### MoveRight < Motion
-- ::constructor`()`: `super`: **Overridden**
-- ::didComposeByOperator: `false`
 - ::operatesInclusively: `false`: **Overridden**
-- ::onDidComposeBy`(operation)`
-- ::isOperatorPending`()`
+- ::composer: `null`
+- ::onDidComposeBy`(@composer)`
 - ::moveCursor`(cursor)`
 
 ### MoveUp < Motion
@@ -204,7 +208,7 @@ All TOMs inherits Base class
 - ::moveCursor`(cursor)`
 
 ### MoveToScreenLine < MoveToLine < Motion
-- ::constructor`(@editorElement, @vimState, @scrolloff)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
+- ::constructor`(@vimState, @scrolloff)`: `super(@vimState)`: **Overridden**
 - ::moveCursor`(cursor)`
 
 ### MoveToBeginningOfLine < Motion
@@ -251,7 +255,6 @@ All TOMs inherits Base class
 - ::getDestinationRow`()`: **Overridden**
 
 ### ScrollKeepingCursor < MoveToLine < Motion
-- ::constructor`(@editorElement, @vimState)`: `super(@editorElement.getModel(), @vimState)`: **Overridden**
 - ::previousFirstScreenRow: `0`
 - ::currentFirstScreenRow: `0`
 - ::select`(options)`: `super(options)`: **Overridden**
@@ -273,24 +276,34 @@ All TOMs inherits Base class
 - ::scrollDestination`()`
 
 ### Find < MotionWithInput < Motion
-- ::constructor`(@editor, @vimState, opts)`: `super(@editor, @vimState)`: **Overridden**
+- ::constructor`(@vimState, options)`: `super(@vimState)`: **Overridden**
+- ::backwards: `false`
 - ::match`(cursor, count)`
 - ::reverse`()`
 - ::moveCursor`(cursor)`
+
+### FindBackwards < Find < MotionWithInput < Motion
+- ::backwards: `true`: **Overridden**
 
 ### Till < Find < MotionWithInput < Motion
 - ::constructor`()`: `super`: **Overridden**
 - ::match`()`: `super`: **Overridden**
 - ::moveSelectionInclusively`(selection, options)`: `super`: **Overridden**
 
+### TillBackwards < Till < Find < MotionWithInput < Motion
+- ::backwards: `true`: **Overridden**
+
 ### MoveToMark < MotionWithInput < Motion
-- ::constructor`(@editor, @vimState, linewise)`: `super(@editor, @vimState)`: **Overridden**
+- ::constructor`(@vimState, linewise)`: `super(@vimState)`: **Overridden**
 - ::operatesInclusively: `false`: **Overridden**
 - ::isLinewise`()`: **Overridden**
 - ::moveCursor`(cursor)`
 
+### MoveToMarkLiteral < MoveToMark < MotionWithInput < Motion
+- ::constructor`(@vimState)`: `super(@vimState, false)`: **Overridden**
+
 ### SearchBase < MotionWithInput < Motion
-- ::constructor`(@editor, @vimState, options)`: `super(@editor, @vimState)`: **Overridden**
+- ::constructor`(@vimState, options)`: `super(@vimState)`: **Overridden**
 - ::operatesInclusively: `false`: **Overridden**
 - ::reversed`()`
 - ::moveCursor`(cursor)`
@@ -300,16 +313,23 @@ All TOMs inherits Base class
 - ::replicateCurrentSearch`()`
 
 ### Search < SearchBase < MotionWithInput < Motion
-- ::constructor`(@editor, @vimState)`: `super(@editor, @vimState)`: **Overridden**
+- ::constructor`(@vimState)`: `super`: **Overridden**
+
+### ReverseSearch < Search < SearchBase < MotionWithInput < Motion
+- ::constructor`()`: `super`: **Overridden**
 
 ### SearchCurrentWord < SearchBase < MotionWithInput < Motion
 - @keywordRegex: `null`
-- ::constructor`(@editor, @vimState)`: `super(@editor, @vimState)`: **Overridden**
+- ::constructor`(@vimState)`: `super`: **Overridden**
 - ::getCurrentWord`()`
 - ::cursorIsOnEOF`(cursor)`
 - ::getCurrentWordMatch`()`
 - ::isComplete`()`: **Overridden**
 - ::execute`()`: `super()`: **Overridden**
+
+### ReverseSearchCurrentWord < SearchCurrentWord < SearchBase < MotionWithInput < Motion
+- @keywordRegex: `null`
+- ::constructor`()`: `super`: **Overridden**
 
 ### BracketMatchingMotion < SearchBase < MotionWithInput < Motion
 - ::operatesInclusively: `true`: **Overridden**
@@ -320,9 +340,12 @@ All TOMs inherits Base class
 - ::moveCursor`(cursor)`: **Overridden**
 
 ### RepeatSearch < SearchBase < MotionWithInput < Motion
-- ::constructor`(@editor, @vimState)`: **Overridden**
+- ::constructor`(@vimState)`: **Overridden**
 - ::isComplete`()`: **Overridden**
 - ::reversed`()`: **Overridden**
+
+### RepeatSearchBackwards < RepeatSearch < SearchBase < MotionWithInput < Motion
+- ::constructor`(@vimState)`: `super`: **Overridden**
 
 ### OperatorError
 - ::constructor`(@message)`: **Overridden**
