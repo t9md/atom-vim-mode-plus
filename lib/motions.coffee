@@ -493,13 +493,14 @@ class ScrollFullDownKeepCursor extends ScrollKeepingCursor
 # -------------------------
 class Find extends MotionWithInput
   @extend()
-  constructor: (@vimState, opts={}) ->
+  backwards: false
+  constructor: (@vimState, options={}) ->
     super(@vimState)
     @offset = 0
 
-    if not opts.repeated
+    if not options.repeated
       @viewModel = new ViewModel(this, class: 'find', singleChar: true, hidden: true)
-      @backwards = false
+      # @backwards = false # Moved to prototype property `backwards: false`
       @repeated = false
       @vimState.globalVimState.currentFind = this
 
@@ -511,7 +512,7 @@ class Find extends MotionWithInput
       @complete = orig.complete
       @input = orig.input
 
-      @reverse() if opts.reverse
+      @reverse() if options.reverse
 
   match: (cursor, count) ->
     currentPosition = cursor.getBufferPosition()
@@ -539,6 +540,10 @@ class Find extends MotionWithInput
     if (match = @match(cursor, @getCount(1)))?
       cursor.setBufferPosition(match)
 
+class FindBackwards extends Find
+  @extend()
+  backwards: true
+
 class Till extends Find
   @extend()
   constructor: ->
@@ -557,6 +562,10 @@ class Till extends Find
     if selection.isEmpty() and @selectAtLeastOne
       selection.modifySelection ->
         selection.cursor.moveRight()
+
+class TillBackwards extends Till
+  @extend()
+  backwards: true
 
 # MoveToMark
 # -------------------------
@@ -581,6 +590,12 @@ class MoveToMark extends MotionWithInput
     cursor.setBufferPosition(markPosition) if markPosition?
     if @linewise
       cursor.moveToFirstCharacterOfLine()
+
+class MoveToMarkLiteral extends MoveToMark
+  @extend()
+
+  constructor: (@vimState) ->
+    super(@vimState, false)
 
 class SearchBase extends MotionWithInput
   @extend()
@@ -659,6 +674,12 @@ class Search extends SearchBase
     super
     @viewModel = new SearchViewModel(this)
 
+class ReverseSearch extends Search
+  @extend()
+  constructor: ->
+    super
+    @reversed()
+
 class SearchCurrentWord extends SearchBase
   @extend()
   @keywordRegex: null
@@ -710,6 +731,12 @@ class SearchCurrentWord extends SearchBase
   execute: ->
     # @getCount(1)
     super() if @input.characters.length > 0
+
+class ReverseSearchCurrentWord extends SearchCurrentWord
+  @extend()
+  constructor: ->
+    super
+    @reversed()
 
 OpenBrackets = ['(', '{', '[']
 CloseBrackets = [')', '}', ']']
@@ -793,6 +820,19 @@ class RepeatSearch extends SearchBase
     @reverse = not @initiallyReversed
     this
 
+class RepeatSearchBackwards extends RepeatSearch
+  @extend()
+  constructor: (@vimState) ->
+    super
+    @reversed()
+
+# Alias
+MoveToLine = MoveToAbsoluteLine
+ScrollHalfScreenUp = ScrollHalfUpKeepCursor
+ScrollHalfScreenDown = ScrollHalfDownKeepCursor
+ScrollFullScreenUp = ScrollFullUpKeepCursor
+ScrollFullScreenDown = ScrollFullDownKeepCursor
+
 module.exports = {
   Motion, MotionError
   MotionWithInput
@@ -800,15 +840,36 @@ module.exports = {
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
   MoveToNextParagraph, MoveToPreviousParagraph
-  MoveToAbsoluteLine, MoveToRelativeLine, MoveToBeginningOfLine
+  MoveToAbsoluteLine, MoveToLine
+  MoveToRelativeLine, MoveToBeginningOfLine
   MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineUp
   MoveToLastCharacterOfLine, MoveToFirstCharacterOfLineDown
   MoveToFirstCharacterOfLineAndDown, MoveToLastNonblankCharacterOfLineAndDown
   MoveToStartOfFile,
   MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen,
-  ScrollHalfUpKeepCursor, ScrollHalfDownKeepCursor
-  ScrollFullUpKeepCursor, ScrollFullDownKeepCursor
-  Find, Till
+
+  ScrollHalfUpKeepCursor
+  ScrollHalfDownKeepCursor
+  ScrollFullUpKeepCursor
+  ScrollFullDownKeepCursor
+
+  # Alias
+  ScrollHalfScreenUp
+  ScrollHalfScreenDown
+  ScrollFullScreenUp
+  ScrollFullScreenDown
+
+  Find
+  FindBackwards
+  Till
+  TillBackwards
   MoveToMark
-  Search, SearchCurrentWord, BracketMatchingMotion, RepeatSearch
+  MoveToMarkLiteral
+  Search
+  ReverseSearch
+  SearchCurrentWord
+  ReverseSearchCurrentWord
+  BracketMatchingMotion
+  RepeatSearch
+  RepeatSearchBackwards
 }

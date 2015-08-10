@@ -85,51 +85,6 @@ class VimState
       'copy-from-line-below': => InsertMode.copyCharacterFromBelow(@editor, this)
 
     @registerOperationCommands
-      # Motions
-      'move-left': => new Motions.MoveLeft(this)
-      'move-up': => new Motions.MoveUp(this)
-      'move-down': => new Motions.MoveDown(this)
-      'move-right': => new Motions.MoveRight(this)
-      'move-to-next-word': => new Motions.MoveToNextWord(this)
-      'move-to-next-whole-word': => new Motions.MoveToNextWholeWord(this)
-      'move-to-end-of-word': => new Motions.MoveToEndOfWord(this)
-      'move-to-end-of-whole-word': => new Motions.MoveToEndOfWholeWord(this)
-      'move-to-previous-word': => new Motions.MoveToPreviousWord(this)
-      'move-to-previous-whole-word': => new Motions.MoveToPreviousWholeWord(this)
-      'move-to-next-paragraph': => new Motions.MoveToNextParagraph(this)
-      'move-to-previous-paragraph': => new Motions.MoveToPreviousParagraph(this)
-      'move-to-first-character-of-line': => new Motions.MoveToFirstCharacterOfLine(this)
-      'move-to-first-character-of-line-and-down': => new Motions.MoveToFirstCharacterOfLineAndDown(this)
-      'move-to-last-character-of-line': => new Motions.MoveToLastCharacterOfLine(this)
-      'move-to-last-nonblank-character-of-line-and-down': => new Motions.MoveToLastNonblankCharacterOfLineAndDown(this)
-      'move-to-first-character-of-line-up': => new Motions.MoveToFirstCharacterOfLineUp(this)
-      'move-to-first-character-of-line-down': => new Motions.MoveToFirstCharacterOfLineDown(this)
-      'move-to-start-of-file': => new Motions.MoveToStartOfFile(this)
-      'move-to-line': => new Motions.MoveToAbsoluteLine(this)
-
-      'move-to-top-of-screen': => new Motions.MoveToTopOfScreen(this)
-      'move-to-bottom-of-screen': => new Motions.MoveToBottomOfScreen(this)
-      'move-to-middle-of-screen': => new Motions.MoveToMiddleOfScreen(this)
-
-      'scroll-half-screen-up': => new Motions.ScrollHalfUpKeepCursor(this)
-      'scroll-full-screen-up': => new Motions.ScrollFullUpKeepCursor(this)
-      'scroll-half-screen-down': => new Motions.ScrollHalfDownKeepCursor(this)
-      'scroll-full-screen-down': => new Motions.ScrollFullDownKeepCursor(this)
-
-      'repeat-search': => new Motions.RepeatSearch(this)
-      'repeat-search-backwards': => new Motions.RepeatSearch(this).reversed()
-      'move-to-mark': => new Motions.MoveToMark(this)
-      'move-to-mark-literal': => new Motions.MoveToMark(this, false)
-      'find': => new Motions.Find(this)
-      'find-backwards': => new Motions.Find(this).reverse()
-      'till': => new Motions.Till(this)
-      'till-backwards': => new Motions.Till(this).reverse()
-      'search': => new Motions.Search(this)
-      'reverse-search': => new Motions.Search(this).reversed()
-      'search-current-word': => new Motions.SearchCurrentWord(this)
-      'bracket-matching-motion': => new Motions.BracketMatchingMotion(this)
-      'reverse-search-current-word': => new Motions.SearchCurrentWord(this).reversed()
-
       # TextObject
       'select-inside-word': => new TextObjects.SelectInsideWord(@editor)
       'select-inside-whole-word': => new TextObjects.SelectInsideWholeWord(@editor)
@@ -156,9 +111,55 @@ class VimState
       # [FIXME]
       'register-prefix': (e) => @registerPrefix(e)
       'move-to-beginning-of-line': (e) => @moveOrRepeat(e)
-      'repeat-find': => new @globalVimState.currentFind.constructor(this, repeated: true) if @globalVimState.currentFind
-      'repeat-find-reverse': => new @globalVimState.currentFind.constructor(this, repeated: true, reverse: true) if @globalVimState.currentFind
+      'repeat-find': => new @globalVimState.currentFind?.constructor(this, repeated: true)
+      'repeat-find-reverse': => new @globalVimState.currentFind?.constructor(this, repeated: true, reverse: true)
 
+
+    @registerNewOperationCommands Motions, [
+      'move-to-top-of-screen'
+      'move-to-bottom-of-screen'
+      'move-to-middle-of-screen'
+
+      'scroll-half-screen-up'
+      'scroll-full-screen-up'
+      'scroll-half-screen-down'
+      'scroll-full-screen-down'
+
+      'repeat-search'
+      'repeat-search-backwards'
+      'move-to-mark'
+      'move-to-mark-literal'
+      'find'
+      'find-backwards'
+      'till'
+      'till-backwards'
+      'search'
+      'reverse-search'
+      'search-current-word'
+      'bracket-matching-motion'
+      'reverse-search-current-word'
+
+      'move-left'
+      'move-up'
+      'move-down'
+      'move-right'
+      'move-to-next-word'
+      'move-to-next-whole-word'
+      'move-to-end-of-word'
+      'move-to-end-of-whole-word'
+      'move-to-previous-word'
+      'move-to-previous-whole-word'
+      'move-to-next-paragraph'
+      'move-to-previous-paragraph'
+      'move-to-first-character-of-line'
+      'move-to-first-character-of-line-and-down'
+      'move-to-last-character-of-line'
+      'move-to-last-nonblank-character-of-line-and-down'
+      'move-to-first-character-of-line-up'
+      'move-to-first-character-of-line-down'
+      'move-to-start-of-file'
+      'move-to-line'
+    ]
 
     @registerNewOperationCommands Operators, [
       'activate-insert-mode'
