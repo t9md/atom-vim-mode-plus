@@ -115,7 +115,29 @@ class VimState
       'repeat-find-reverse': => new @globalVimState.currentFind?.constructor(this, repeated: true, reverse: true)
 
 
+    # Motino
+    # -------------------------
     @registerNewOperationCommands Motions, [
+      'move-left'
+      'move-up'
+      'move-down'
+      'move-right'
+      'move-to-next-word'
+      'move-to-next-whole-word'
+      'move-to-end-of-word'
+      'move-to-end-of-whole-word'
+      'move-to-previous-word'
+      'move-to-previous-whole-word'
+      'move-to-next-paragraph'
+      'move-to-previous-paragraph'
+      'move-to-first-character-of-line'
+      'move-to-first-character-of-line-and-down'
+      'move-to-last-character-of-line'
+      'move-to-last-nonblank-character-of-line-and-down'
+      'move-to-first-character-of-line-up'
+      'move-to-first-character-of-line-down'
+      'move-to-start-of-file'
+      'move-to-line'
       'move-to-top-of-screen'
       'move-to-bottom-of-screen'
       'move-to-middle-of-screen'
@@ -138,29 +160,10 @@ class VimState
       'search-current-word'
       'bracket-matching-motion'
       'reverse-search-current-word'
-
-      'move-left'
-      'move-up'
-      'move-down'
-      'move-right'
-      'move-to-next-word'
-      'move-to-next-whole-word'
-      'move-to-end-of-word'
-      'move-to-end-of-whole-word'
-      'move-to-previous-word'
-      'move-to-previous-whole-word'
-      'move-to-next-paragraph'
-      'move-to-previous-paragraph'
-      'move-to-first-character-of-line'
-      'move-to-first-character-of-line-and-down'
-      'move-to-last-character-of-line'
-      'move-to-last-nonblank-character-of-line-and-down'
-      'move-to-first-character-of-line-up'
-      'move-to-first-character-of-line-down'
-      'move-to-start-of-file'
-      'move-to-line'
     ]
 
+    # Operator
+    # -------------------------
     @registerNewOperationCommands Operators, [
       'activate-insert-mode'
       'activate-replace-mode'
@@ -195,6 +198,9 @@ class VimState
       'mark'
       'replace'
     ]
+
+    # Scroll
+    # -------------------------
     @registerNewOperationCommands Scroll, [
       'scroll-down'
       'scroll-up'
