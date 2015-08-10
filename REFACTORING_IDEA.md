@@ -74,4 +74,7 @@ The name of vimState is redundant simply `state` is enough since its vim-mode's 
 
 # Naming
 
+- Motions.MoveToLine is very complicated.
+  MoveToLine is not directly exposed, and MoveToAbsoluteLine is mapped to move-to-line command.
+  So I renamed MoveToLine > MoveToLineBase, and MoveToAbsoluteLine > MoveToLine.
 - `vimState::pushSearchHistory` -> `vimState::saveSearchHistory`

@@ -18,6 +18,8 @@ class Motion extends Base
   @extend()
   operatesInclusively: true
   operatesLinewise: false
+  complete: true
+  recordable: false
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -100,13 +102,15 @@ class Motion extends Base
   moveSelection: (selection, options) ->
     selection.modifySelection => @moveCursor(selection.cursor, options)
 
-  isComplete: -> true
+  isComplete: ->
+    @complete
 
-  isRecordable: -> false
+  isRecordable: ->
+    @recordable
 
   isLinewise: ->
-    if @vimState?.mode is 'visual'
-      @vimState?.submode is 'linewise'
+    if @vimState.isVisualMode()
+      @vimState.submode is 'linewise'
     else
       @operatesLinewise
 
@@ -121,17 +125,17 @@ class MotionWithInput extends Motion
   isComplete: ->
     @complete
 
-  canComposeWith: (operation) -> return operation.characters?
+  canComposeWith: (operation) ->
+    return operation.characters?
 
   compose: (input) ->
-    if not input.characters
+    unless input.characters
       throw new MotionError('Must compose with an Input')
     @input = input
     @complete = true
 
 class MoveLeft extends Motion
   @extend()
-
   operatesInclusively: false
 
   moveCursor: (cursor) ->
@@ -141,18 +145,24 @@ class MoveLeft extends Motion
 class MoveRight extends Motion
   @extend()
   operatesInclusively: false
-  composer: null
+  composed: false
 
-  onDidComposeBy: (@composer) ->
+  onDidComposeBy: (operation) ->
+    # Don't save oeration to instance variable to avoid reference before I understand it correctly.
+    # Also reflection support circular reference detection to stop infinit reflection loop.
+    @composed = true if operation.isOperator()
+
+  isOperatorPending: ->
+    @vimState.isOperatorPendingMode() or @composed
 
   moveCursor: (cursor) ->
     _.times @getCount(1), =>
       wrapToNextLine = settings.wrapLeftRightMotion()
+
       # when the motion is combined with an operator, we will only wrap to the next line
       # if we are already at the end of the line (after the last character)
-      
-      # if @isOperatorPending() and not cursor.isAtEndOfLine()
-      if @composer?.isOperator() and not cursor.isAtEndOfLine()
+      if @isOperatorPending() and not cursor.isAtEndOfLine()
+      # if @composer?.isOperator() and not cursor.isAtEndOfLine()
         wrapToNextLine = false
 
       cursor.moveRight() unless cursor.isAtEndOfLine()
@@ -276,40 +286,6 @@ class MoveToPreviousParagraph extends Motion
     _.times @getCount(1), ->
       cursor.moveToBeginningOfPreviousParagraph()
 
-class MoveToLine extends Motion
-  @extend()
-  operatesLinewise: true
-
-  getDestinationRow: (count) ->
-    if count? then count - 1 else (@editor.getLineCount() - 1)
-
-class MoveToAbsoluteLine extends MoveToLine
-  @extend()
-
-  moveCursor: (cursor) ->
-    cursor.setBufferPosition([@getDestinationRow(@getCount()), Infinity])
-    cursor.moveToFirstCharacterOfLine()
-    cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
-
-class MoveToRelativeLine extends MoveToLine
-  @extend()
-  operatesLinewise: true
-
-  moveCursor: (cursor) ->
-    {row, column} = cursor.getBufferPosition()
-    cursor.setBufferPosition([row + (@getCount(1) - 1), 0])
-
-class MoveToScreenLine extends MoveToLine
-  @extend()
-
-  constructor: (@vimState, @scrolloff) ->
-    super(@vimState)
-    @scrolloff = 2 # atom default
-
-  moveCursor: (cursor) ->
-    {row, column} = cursor.getBufferPosition()
-    cursor.setScreenPosition([@getDestinationRow(@getCount(1)), 0])
-
 class MoveToBeginningOfLine extends Motion
   @extend()
 
@@ -395,7 +371,41 @@ class MoveToFirstCharacterOfLineDown extends Motion
     cursor.moveToBeginningOfLine()
     cursor.moveToFirstCharacterOfLine()
 
-class MoveToStartOfFile extends MoveToLine
+# Not directly used.
+class MoveToLineBase extends Motion
+  @extend()
+  operatesLinewise: true
+
+  getDestinationRow: (count) ->
+    if count? then count - 1 else (@editor.getLineCount() - 1)
+
+class MoveToLine extends MoveToLineBase
+  @extend()
+
+  moveCursor: (cursor) ->
+    cursor.setBufferPosition([@getDestinationRow(@getCount()), Infinity])
+    cursor.moveToFirstCharacterOfLine()
+    cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
+
+class MoveToRelativeLine extends MoveToLineBase
+  @extend()
+  operatesLinewise: true
+
+  moveCursor: (cursor) ->
+    {row, column} = cursor.getBufferPosition()
+    cursor.setBufferPosition([row + (@getCount(1) - 1), 0])
+
+# Not directly used.
+class MoveToScreenLine extends MoveToLineBase
+  @extend()
+  scrolloff: 2
+
+  moveCursor: (cursor) ->
+    {row, column} = cursor.getBufferPosition()
+    cursor.setScreenPosition([@getDestinationRow(@getCount(1)), 0])
+
+# keymap: gg
+class MoveToStartOfFile extends MoveToLineBase
   @extend()
 
   moveCursor: (cursor) ->
@@ -404,6 +414,7 @@ class MoveToStartOfFile extends MoveToLine
     unless @isLinewise()
       cursor.moveToFirstCharacterOfLine()
 
+# keymap: H
 class MoveToTopOfScreen extends MoveToScreenLine
   @extend()
   getDestinationRow: ->
@@ -415,6 +426,7 @@ class MoveToTopOfScreen extends MoveToScreenLine
       offset = if count > 0 then count - 1 else count
     firstScreenRow + offset
 
+# keymap: L
 class MoveToBottomOfScreen extends MoveToScreenLine
   @extend()
   getDestinationRow: ->
@@ -435,7 +447,7 @@ class MoveToMiddleOfScreen extends MoveToScreenLine
     height = lastScreenRow - firstScreenRow
     Math.floor(firstScreenRow + (height / 2))
 
-class ScrollKeepingCursor extends MoveToLine
+class ScrollKeepingCursor extends MoveToLineBase
   @extend()
   previousFirstScreenRow: 0
   currentFirstScreenRow: 0
@@ -491,9 +503,9 @@ class ScrollFullDownKeepCursor extends ScrollKeepingCursor
 class Find extends MotionWithInput
   @extend()
   backwards: false
+  offset: 0
   constructor: (@vimState, options={}) ->
     super(@vimState)
-    @offset = 0
 
     if not options.repeated
       @viewModel = new ViewModel(this, class: 'find', singleChar: true, hidden: true)
@@ -543,9 +555,7 @@ class FindBackwards extends Find
 
 class Till extends Find
   @extend()
-  constructor: ->
-    super
-    @offset = 1
+  offset: 1
 
   match: ->
     @selectAtLeastOne = false
@@ -667,7 +677,7 @@ class SearchBase extends MotionWithInput
 # -------------------------
 class Search extends SearchBase
   @extend()
-  constructor: (@vimState) ->
+  constructor: ->
     super
     @viewModel = new SearchViewModel(this)
 
@@ -819,25 +829,26 @@ class RepeatSearch extends SearchBase
 
 class RepeatSearchBackwards extends RepeatSearch
   @extend()
-  constructor: (@vimState) ->
+  constructor: ->
     super
     @reversed()
 
 # Alias
-MoveToLine = MoveToAbsoluteLine
+# MoveToLine = MoveToAbsoluteLine
 ScrollHalfScreenUp = ScrollHalfUpKeepCursor
 ScrollHalfScreenDown = ScrollHalfDownKeepCursor
 ScrollFullScreenUp = ScrollFullUpKeepCursor
 ScrollFullScreenDown = ScrollFullDownKeepCursor
 
 module.exports = {
-  Motion, MotionError
+  MotionError
+  Motion
   MotionWithInput
   MoveLeft, MoveRight, MoveUp, MoveDown
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
   MoveToNextParagraph, MoveToPreviousParagraph
-  MoveToAbsoluteLine, MoveToLine
+  MoveToLine,
   MoveToRelativeLine, MoveToBeginningOfLine
   MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineUp
   MoveToLastCharacterOfLine, MoveToFirstCharacterOfLineDown
@@ -845,12 +856,7 @@ module.exports = {
   MoveToStartOfFile,
   MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen,
 
-  ScrollHalfUpKeepCursor
-  ScrollHalfDownKeepCursor
-  ScrollFullUpKeepCursor
-  ScrollFullDownKeepCursor
-
-  # Alias
+  # Aliased
   ScrollHalfScreenUp
   ScrollHalfScreenDown
   ScrollFullScreenUp
