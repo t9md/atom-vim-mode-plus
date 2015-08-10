@@ -114,7 +114,6 @@ class VimState
       'repeat-find': => new @globalVimState.currentFind?.constructor(this, repeated: true)
       'repeat-find-reverse': => new @globalVimState.currentFind?.constructor(this, repeated: true, reverse: true)
 
-
     # Motino
     # -------------------------
     @registerNewOperationCommands Motions, [
