@@ -33,8 +33,6 @@ module.exports =
       @vimStates.forEach (vimState) -> vimState.destroy()
 
     @disposables.add atom.commands.add 'atom-workspace',
-      'vim-mode:report': =>
-        @showReport()
       'vim-mode:toggle-debug': ->
         atom.config.set('vim-mode.debug', not settings.debug())
 
@@ -47,21 +45,6 @@ module.exports =
         "- [#{name}](##{link.toLowerCase()})"
       .value().join('\n')
     toc
-
-  showReport: ->
-    Base = require './base'
-    fs = require 'fs-plus'
-    path = require 'path'
-    fileName = 'TOM-report.md'
-    filePath = path.join(atom.config.get('core.projectHome'), 'vim-mode', 'docs', fileName)
-    header = "# TOM report"
-    desc = 'All TOMs inherits Base class  \n'
-    desc += '`Base` class itself is omitted from ancestors list to save screen space  '
-    content = Base.reportAll()
-    toc = @getTableOfContent content
-    body = [header, desc, toc, content].join("\n\n")
-    atom.workspace.open(filePath).then (editor) ->
-      editor.setText body
 
   deactivate: ->
     @disposables.dispose()

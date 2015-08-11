@@ -1,134 +1,138 @@
-# TOM report
+# TOM(TextObject, Operator, Motion) report.
 
-All TOMs inherits Base class  
-`Base` class itself is omitted from ancestors list to save screen space  
+vim-mode version: 0.57.0  
+*generated at 2015-08-11T15:20:13.814Z*
 
-- [Input](#input)
-- [MotionError](#motionerror)
-- [Motion](#motion)
-- [MotionWithInput < Motion](#motionwithinput--motion)
-- [MoveLeft < Motion](#moveleft--motion)
-- [MoveRight < Motion](#moveright--motion)
-- [MoveUp < Motion](#moveup--motion)
-- [MoveDown < Motion](#movedown--motion)
-- [MoveToPreviousWord < Motion](#movetopreviousword--motion)
-- [MoveToPreviousWholeWord < Motion](#movetopreviouswholeword--motion)
-- [MoveToNextWord < Motion](#movetonextword--motion)
-- [MoveToNextWholeWord < MoveToNextWord < Motion](#movetonextwholeword--movetonextword--motion)
-- [MoveToEndOfWord < Motion](#movetoendofword--motion)
-- [MoveToEndOfWholeWord < MoveToEndOfWord < Motion](#movetoendofwholeword--movetoendofword--motion)
-- [MoveToNextParagraph < Motion](#movetonextparagraph--motion)
-- [MoveToPreviousParagraph < Motion](#movetopreviousparagraph--motion)
-- [MoveToLine < Motion](#movetoline--motion)
-- [MoveToAbsoluteLine < MoveToLine < Motion](#movetoabsoluteline--movetoline--motion)
-- [MoveToRelativeLine < MoveToLine < Motion](#movetorelativeline--movetoline--motion)
-- [MoveToScreenLine < MoveToLine < Motion](#movetoscreenline--movetoline--motion)
-- [MoveToBeginningOfLine < Motion](#movetobeginningofline--motion)
-- [MoveToFirstCharacterOfLine < Motion](#movetofirstcharacterofline--motion)
-- [MoveToFirstCharacterOfLineAndDown < Motion](#movetofirstcharacteroflineanddown--motion)
-- [MoveToLastCharacterOfLine < Motion](#movetolastcharacterofline--motion)
-- [MoveToLastNonblankCharacterOfLineAndDown < Motion](#movetolastnonblankcharacteroflineanddown--motion)
-- [MoveToFirstCharacterOfLineUp < Motion](#movetofirstcharacteroflineup--motion)
-- [MoveToFirstCharacterOfLineDown < Motion](#movetofirstcharacteroflinedown--motion)
-- [MoveToStartOfFile < MoveToLine < Motion](#movetostartoffile--movetoline--motion)
-- [MoveToTopOfScreen < MoveToScreenLine < MoveToLine < Motion](#movetotopofscreen--movetoscreenline--movetoline--motion)
-- [MoveToBottomOfScreen < MoveToScreenLine < MoveToLine < Motion](#movetobottomofscreen--movetoscreenline--movetoline--motion)
-- [MoveToMiddleOfScreen < MoveToScreenLine < MoveToLine < Motion](#movetomiddleofscreen--movetoscreenline--movetoline--motion)
-- [ScrollKeepingCursor < MoveToLine < Motion](#scrollkeepingcursor--movetoline--motion)
-- [ScrollHalfUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion](#scrollhalfupkeepcursor--scrollkeepingcursor--movetoline--motion)
-- [ScrollFullUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion](#scrollfullupkeepcursor--scrollkeepingcursor--movetoline--motion)
-- [ScrollHalfDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion](#scrollhalfdownkeepcursor--scrollkeepingcursor--movetoline--motion)
-- [ScrollFullDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion](#scrollfulldownkeepcursor--scrollkeepingcursor--movetoline--motion)
-- [Find < MotionWithInput < Motion](#find--motionwithinput--motion)
-- [FindBackwards < Find < MotionWithInput < Motion](#findbackwards--find--motionwithinput--motion)
-- [Till < Find < MotionWithInput < Motion](#till--find--motionwithinput--motion)
-- [TillBackwards < Till < Find < MotionWithInput < Motion](#tillbackwards--till--find--motionwithinput--motion)
-- [MoveToMark < MotionWithInput < Motion](#movetomark--motionwithinput--motion)
-- [MoveToMarkLiteral < MoveToMark < MotionWithInput < Motion](#movetomarkliteral--movetomark--motionwithinput--motion)
-- [SearchBase < MotionWithInput < Motion](#searchbase--motionwithinput--motion)
-- [Search < SearchBase < MotionWithInput < Motion](#search--searchbase--motionwithinput--motion)
-- [ReverseSearch < Search < SearchBase < MotionWithInput < Motion](#reversesearch--search--searchbase--motionwithinput--motion)
-- [SearchCurrentWord < SearchBase < MotionWithInput < Motion](#searchcurrentword--searchbase--motionwithinput--motion)
-- [ReverseSearchCurrentWord < SearchCurrentWord < SearchBase < MotionWithInput < Motion](#reversesearchcurrentword--searchcurrentword--searchbase--motionwithinput--motion)
-- [BracketMatchingMotion < SearchBase < MotionWithInput < Motion](#bracketmatchingmotion--searchbase--motionwithinput--motion)
-- [RepeatSearch < SearchBase < MotionWithInput < Motion](#repeatsearch--searchbase--motionwithinput--motion)
-- [RepeatSearchBackwards < RepeatSearch < SearchBase < MotionWithInput < Motion](#repeatsearchbackwards--repeatsearch--searchbase--motionwithinput--motion)
-- [OperatorError](#operatorerror)
-- [Operator](#operator)
-- [OperatorWithInput < Operator](#operatorwithinput--operator)
-- [Select < Operator](#select--operator)
-- [Delete < Operator](#delete--operator)
-- [DeleteRight < Delete < Operator](#deleteright--delete--operator)
-- [DeleteLeft < Delete < Operator](#deleteleft--delete--operator)
-- [DeleteToLastCharacterOfLine < Delete < Operator](#deletetolastcharacterofline--delete--operator)
-- [ToggleCase < Operator](#togglecase--operator)
-- [ToggleCaseNow < ToggleCase < Operator](#togglecasenow--togglecase--operator)
-- [UpperCase < Operator](#uppercase--operator)
-- [LowerCase < Operator](#lowercase--operator)
-- [Yank < Operator](#yank--operator)
-- [YankLine < Yank < Operator](#yankline--yank--operator)
-- [Join < Operator](#join--operator)
-- [Repeat < Operator](#repeat--operator)
-- [Mark < OperatorWithInput < Operator](#mark--operatorwithinput--operator)
-- [Increase < Operator](#increase--operator)
-- [Decrease < Increase < Operator](#decrease--increase--operator)
-- [AdjustIndentation < Operator](#adjustindentation--operator)
-- [Indent < AdjustIndentation < Operator](#indent--adjustindentation--operator)
-- [Outdent < AdjustIndentation < Operator](#outdent--adjustindentation--operator)
-- [AutoIndent < AdjustIndentation < Operator](#autoindent--adjustindentation--operator)
-- [Put < Operator](#put--operator)
-- [PutBefore < Put < Operator](#putbefore--put--operator)
-- [PutAfter < Put < Operator](#putafter--put--operator)
-- [Insert < Operator](#insert--operator)
-- [ReplaceMode < Insert < Operator](#replacemode--insert--operator)
-- [InsertAfter < Insert < Operator](#insertafter--insert--operator)
-- [InsertAfterEndOfLine < Insert < Operator](#insertafterendofline--insert--operator)
-- [InsertAtBeginningOfLine < Insert < Operator](#insertatbeginningofline--insert--operator)
-- [InsertAboveWithNewline < Insert < Operator](#insertabovewithnewline--insert--operator)
-- [InsertBelowWithNewline < Insert < Operator](#insertbelowwithnewline--insert--operator)
-- [Change < Insert < Operator](#change--insert--operator)
-- [Substitute < Change < Insert < Operator](#substitute--change--insert--operator)
-- [SubstituteLine < Change < Insert < Operator](#substituteline--change--insert--operator)
-- [ChangeToLastCharacterOfLine < Change < Insert < Operator](#changetolastcharacterofline--change--insert--operator)
-- [Replace < OperatorWithInput < Operator](#replace--operatorwithinput--operator)
-- [Prefix](#prefix)
-- [Register < Prefix](#register--prefix)
-- [TextObject](#textobject)
-- [CurrentSelection < TextObject](#currentselection--textobject)
-- [SelectInsideWord < TextObject](#selectinsideword--textobject)
-- [SelectAWord < TextObject](#selectaword--textobject)
-- [SelectInsideWholeWord < TextObject](#selectinsidewholeword--textobject)
-- [SelectAWholeWord < TextObject](#selectawholeword--textobject)
-- [SelectInsideQuotes < TextObject](#selectinsidequotes--textobject)
-- [SelectInsideBrackets < TextObject](#selectinsidebrackets--textobject)
-- [SelectInsideParagraph < TextObject](#selectinsideparagraph--textobject)
-- [SelectAParagraph < TextObject](#selectaparagraph--textobject)
-- [Scroll](#scroll)
-- [ScrollDown < Scroll](#scrolldown--scroll)
-- [ScrollUp < Scroll](#scrollup--scroll)
-- [ScrollCursor < Scroll](#scrollcursor--scroll)
-- [ScrollCursorToTop < ScrollCursor < Scroll](#scrollcursortotop--scrollcursor--scroll)
-- [ScrollCursorToBottom < ScrollCursor < Scroll](#scrollcursortobottom--scrollcursor--scroll)
-- [ScrollCursorToMiddle < ScrollCursor < Scroll](#scrollcursortomiddle--scrollcursor--scroll)
-- [ScrollCursorToTopLeave < ScrollCursorToTop < ScrollCursor < Scroll](#scrollcursortotopleave--scrollcursortotop--scrollcursor--scroll)
-- [ScrollCursorToBottomLeave < ScrollCursorToBottom < ScrollCursor < Scroll](#scrollcursortobottomleave--scrollcursortobottom--scrollcursor--scroll)
-- [ScrollCursorToMiddleLeave < ScrollCursorToMiddle < ScrollCursor < Scroll](#scrollcursortomiddleleave--scrollcursortomiddle--scrollcursor--scroll)
-- [ScrollHorizontal < Scroll](#scrollhorizontal--scroll)
-- [ScrollCursorToLeft < ScrollHorizontal < Scroll](#scrollcursortoleft--scrollhorizontal--scroll)
-- [ScrollCursorToRight < ScrollHorizontal < Scroll](#scrollcursortoright--scrollhorizontal--scroll)
+- [Base](#base) *Not exported*
+  - [Motion](#motion--base)
+    - [MotionWithInput](#motionwithinput--motion)
+      - [Find](#find--motionwithinput)
+        - [FindBackwards](#findbackwards--find)
+        - [Till](#till--find)
+          - [TillBackwards](#tillbackwards--till)
+      - [MoveToMark](#movetomark--motionwithinput)
+        - [MoveToMarkLiteral](#movetomarkliteral--movetomark)
+      - [SearchBase](#searchbase--motionwithinput) *Not exported*
+        - [BracketMatchingMotion](#bracketmatchingmotion--searchbase)
+        - [RepeatSearch](#repeatsearch--searchbase)
+          - [RepeatSearchBackwards](#repeatsearchbackwards--repeatsearch)
+        - [Search](#search--searchbase)
+          - [ReverseSearch](#reversesearch--search)
+        - [SearchCurrentWord](#searchcurrentword--searchbase)
+          - [ReverseSearchCurrentWord](#reversesearchcurrentword--searchcurrentword)
+    - [MoveDown](#movedown--motion)
+    - [MoveLeft](#moveleft--motion)
+    - [MoveRight](#moveright--motion)
+    - [MoveToBeginningOfLine](#movetobeginningofline--motion)
+    - [MoveToEndOfWord](#movetoendofword--motion)
+      - [MoveToEndOfWholeWord](#movetoendofwholeword--movetoendofword)
+    - [MoveToFirstCharacterOfLine](#movetofirstcharacterofline--motion)
+    - [MoveToFirstCharacterOfLineAndDown](#movetofirstcharacteroflineanddown--motion)
+    - [MoveToFirstCharacterOfLineDown](#movetofirstcharacteroflinedown--motion)
+    - [MoveToFirstCharacterOfLineUp](#movetofirstcharacteroflineup--motion)
+    - [MoveToLastCharacterOfLine](#movetolastcharacterofline--motion)
+    - [MoveToLastNonblankCharacterOfLineAndDown](#movetolastnonblankcharacteroflineanddown--motion)
+    - [MoveToLineBase](#movetolinebase--motion) *Not exported*
+      - [MoveToLine](#movetoline--movetolinebase)
+      - [MoveToRelativeLine](#movetorelativeline--movetolinebase)
+      - [MoveToScreenLine](#movetoscreenline--movetolinebase) *Not exported*
+        - [MoveToBottomOfScreen](#movetobottomofscreen--movetoscreenline)
+        - [MoveToMiddleOfScreen](#movetomiddleofscreen--movetoscreenline)
+        - [MoveToTopOfScreen](#movetotopofscreen--movetoscreenline)
+      - [MoveToStartOfFile](#movetostartoffile--movetolinebase)
+      - [ScrollKeepingCursor](#scrollkeepingcursor--movetolinebase) *Not exported*
+        - [ScrollFullScreenUp](#scrollfullscreenup--scrollkeepingcursor)
+          - [ScrollFullScreenDown](#scrollfullscreendown--scrollfullscreenup)
+        - [ScrollHalfScreenUp](#scrollhalfscreenup--scrollkeepingcursor)
+          - [ScrollHalfScreenDown](#scrollhalfscreendown--scrollhalfscreenup)
+    - [MoveToNextParagraph](#movetonextparagraph--motion)
+    - [MoveToNextWord](#movetonextword--motion)
+      - [MoveToNextWholeWord](#movetonextwholeword--movetonextword)
+    - [MoveToPreviousParagraph](#movetopreviousparagraph--motion)
+    - [MoveToPreviousWholeWord](#movetopreviouswholeword--motion)
+    - [MoveToPreviousWord](#movetopreviousword--motion)
+    - [MoveUp](#moveup--motion)
+  - [MotionError](#motionerror--base)
+  - [Operator](#operator--base)
+    - [AdjustIndentation](#adjustindentation--operator) *Not exported*
+      - [AutoIndent](#autoindent--adjustindentation)
+      - [Indent](#indent--adjustindentation)
+      - [Outdent](#outdent--adjustindentation)
+    - [Delete](#delete--operator)
+      - [DeleteLeft](#deleteleft--delete)
+      - [DeleteRight](#deleteright--delete)
+      - [DeleteToLastCharacterOfLine](#deletetolastcharacterofline--delete)
+    - [Increase](#increase--operator)
+      - [Decrease](#decrease--increase)
+    - [Insert](#insert--operator)
+    - [Insert](#insert--operator)
+      - [Change](#change--insert)
+        - [ChangeToLastCharacterOfLine](#changetolastcharacterofline--change)
+        - [Substitute](#substitute--change)
+        - [SubstituteLine](#substituteline--change)
+      - [InsertAboveWithNewline](#insertabovewithnewline--insert)
+      - [InsertAfter](#insertafter--insert)
+      - [InsertAfterEndOfLine](#insertafterendofline--insert)
+      - [InsertAtBeginningOfLine](#insertatbeginningofline--insert)
+      - [InsertBelowWithNewline](#insertbelowwithnewline--insert)
+      - [ReplaceMode](#replacemode--insert)
+      - [ReplaceMode](#replacemode--insert)
+    - [Join](#join--operator)
+    - [LowerCase](#lowercase--operator)
+    - [OperatorWithInput](#operatorwithinput--operator)
+      - [Mark](#mark--operatorwithinput)
+      - [Replace](#replace--operatorwithinput)
+    - [Put](#put--operator) *Not exported*
+      - [PutAfter](#putafter--put)
+      - [PutBefore](#putbefore--put)
+    - [Repeat](#repeat--operator)
+    - [Select](#select--operator)
+    - [ToggleCase](#togglecase--operator)
+      - [ToggleCaseNow](#togglecasenow--togglecase)
+    - [UpperCase](#uppercase--operator)
+    - [Yank](#yank--operator)
+      - [YankLine](#yankline--yank)
+  - [OperatorError](#operatorerror--base)
+  - [Prefix](#prefix--base) *Not exported*
+    - [Register](#register--prefix)
+  - [Scroll](#scroll--base) *Not exported*
+    - [ScrollCursor](#scrollcursor--scroll) *Not exported*
+      - [ScrollCursorToBottom](#scrollcursortobottom--scrollcursor)
+        - [ScrollCursorToBottomLeave](#scrollcursortobottomleave--scrollcursortobottom)
+      - [ScrollCursorToMiddle](#scrollcursortomiddle--scrollcursor)
+        - [ScrollCursorToMiddleLeave](#scrollcursortomiddleleave--scrollcursortomiddle)
+      - [ScrollCursorToTop](#scrollcursortotop--scrollcursor)
+        - [ScrollCursorToTopLeave](#scrollcursortotopleave--scrollcursortotop)
+    - [ScrollDown](#scrolldown--scroll)
+    - [ScrollHorizontal](#scrollhorizontal--scroll) *Not exported*
+      - [ScrollCursorToLeft](#scrollcursortoleft--scrollhorizontal)
+      - [ScrollCursorToRight](#scrollcursortoright--scrollhorizontal)
+    - [ScrollUp](#scrollup--scroll)
+  - [TextObject](#textobject--base)
+    - [CurrentSelection](#currentselection--textobject)
+    - [SelectAParagraph](#selectaparagraph--textobject)
+    - [SelectAWholeWord](#selectawholeword--textobject)
+    - [SelectAWord](#selectaword--textobject)
+    - [SelectInsideBrackets](#selectinsidebrackets--textobject)
+    - [SelectInsideParagraph](#selectinsideparagraph--textobject)
+    - [SelectInsideQuotes](#selectinsidequotes--textobject)
+    - [SelectInsideWholeWord](#selectinsidewholeword--textobject)
+    - [SelectInsideWord](#selectinsideword--textobject)
 
-### Input
-- ::constructor`(@characters)`: **Overridden**
-- ::isComplete`()`
-- ::isRecordable`()`
+## Base
+*Not exported*
 
-### MotionError
-- ::constructor`(@message)`: **Overridden**
-
-### Motion
+### Motion < Base
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`(@vimState)`: **Overridden**
 - ::operatesInclusively: `true`
 - ::operatesLinewise: `false`
+- ::complete: `true`
+- ::recordable: `false`
 - ::select`(options)`
 - ::execute`()`
 - ::moveSelectionLinewise`(selection, options)`
@@ -140,185 +144,129 @@ All TOMs inherits Base class
 - ::isInclusive`()`
 
 ### MotionWithInput < Motion
-- ::complete: `false`
-- ::isComplete`()`: **Overridden**
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::complete: `false`: **Overridden**
 - ::canComposeWith`(operation)`
 - ::compose`(@input)`
 
-### MoveLeft < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveRight < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::composer: `null`
-- ::onDidComposeBy`(@composer)`
-- ::moveCursor`(cursor)`
-
-### MoveUp < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveDown < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToPreviousWord < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToPreviousWholeWord < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor`(cursor)`
-- ::isWholeWord`(cursor)`
-- ::isBeginningOfFile`(cursor)`
-
-### MoveToNextWord < Motion
-- ::wordRegex: `null`
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor`(cursor, options)`
-- ::isEndOfFile`(cursor)`
-
-### MoveToNextWholeWord < MoveToNextWord < Motion
-- ::wordRegex: `/^\s*$|\S+/`: **Overridden**
-
-### MoveToEndOfWord < Motion
-- ::wordRegex: `null`
-- ::moveCursor`(cursor)`
-
-### MoveToEndOfWholeWord < MoveToEndOfWord < Motion
-- ::wordRegex: `/\S+/`: **Overridden**
-
-### MoveToNextParagraph < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToPreviousParagraph < Motion
-- ::moveCursor`(cursor)`
-
-### MoveToLine < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::getDestinationRow`(count)`
-
-### MoveToAbsoluteLine < MoveToLine < Motion
-- ::moveCursor`(cursor)`
-
-### MoveToRelativeLine < MoveToLine < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToScreenLine < MoveToLine < Motion
-- ::constructor`(@vimState, @scrolloff)`: `super(@vimState)`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToBeginningOfLine < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToFirstCharacterOfLine < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToFirstCharacterOfLineAndDown < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::operatesInclusively: `true`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToLastCharacterOfLine < Motion
-- ::operatesInclusively: `false`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToLastNonblankCharacterOfLineAndDown < Motion
-- ::operatesInclusively: `true`: **Overridden**
-- ::skipTrailingWhitespace`(cursor)`
-- ::moveCursor`(cursor)`
-
-### MoveToFirstCharacterOfLineUp < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::operatesInclusively: `true`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToFirstCharacterOfLineDown < Motion
-- ::operatesLinewise: `true`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToStartOfFile < MoveToLine < Motion
-- ::moveCursor`(cursor)`
-
-### MoveToTopOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::getDestinationRow`()`: **Overridden**
-
-### MoveToBottomOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::getDestinationRow`()`: **Overridden**
-
-### MoveToMiddleOfScreen < MoveToScreenLine < MoveToLine < Motion
-- ::getDestinationRow`()`: **Overridden**
-
-### ScrollKeepingCursor < MoveToLine < Motion
-- ::previousFirstScreenRow: `0`
-- ::currentFirstScreenRow: `0`
-- ::select`(options)`: `super(options)`: **Overridden**
-- ::execute`()`: `super`: **Overridden**
-- ::moveCursor`(cursor)`
-- ::getDestinationRow`()`: **Overridden**
-- ::scrollScreen`()`
-
-### ScrollHalfUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::scrollDestination`()`
-
-### ScrollFullUpKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::scrollDestination`()`
-
-### ScrollHalfDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::scrollDestination`()`
-
-### ScrollFullDownKeepCursor < ScrollKeepingCursor < MoveToLine < Motion
-- ::scrollDestination`()`
-
-### Find < MotionWithInput < Motion
+### Find < MotionWithInput
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`(@vimState, options)`: `super(@vimState)`: **Overridden**
 - ::backwards: `false`
+- ::offset: `0`
 - ::match`(cursor, count)`
 - ::reverse`()`
 - ::moveCursor`(cursor)`
 
-### FindBackwards < Find < MotionWithInput < Motion
+### FindBackwards < Find
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::backwards: `true`: **Overridden**
 
-### Till < Find < MotionWithInput < Motion
-- ::constructor`()`: `super`: **Overridden**
+### Till < Find
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::offset: `1`: **Overridden**
 - ::match`()`: `super`: **Overridden**
 - ::moveSelectionInclusively`(selection, options)`: `super`: **Overridden**
 
-### TillBackwards < Till < Find < MotionWithInput < Motion
+### TillBackwards < Till
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::backwards: `true`: **Overridden**
 
-### MoveToMark < MotionWithInput < Motion
+### MoveToMark < MotionWithInput
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`(@vimState, linewise)`: `super(@vimState)`: **Overridden**
 - ::operatesInclusively: `false`: **Overridden**
 - ::isLinewise`()`: **Overridden**
 - ::moveCursor`(cursor)`
 
-### MoveToMarkLiteral < MoveToMark < MotionWithInput < Motion
+### MoveToMarkLiteral < MoveToMark
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`(@vimState)`: `super(@vimState, false)`: **Overridden**
 
-### SearchBase < MotionWithInput < Motion
-- ::constructor`(@vimState, options)`: `super(@vimState)`: **Overridden**
-- ::operatesInclusively: `false`: **Overridden**
-- ::reversed`()`
-- ::moveCursor`(cursor)`
-- ::scan`(cursor)`
-- ::getSearchTerm`(term)`
-- ::updateCurrentSearch`()`
-- ::replicateCurrentSearch`()`
+### SearchBase < MotionWithInput
+*Not exported*
 
-### Search < SearchBase < MotionWithInput < Motion
-- ::constructor`(@vimState)`: `super`: **Overridden**
+### BracketMatchingMotion < SearchBase
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `true`: **Overridden**
+- ::isComplete`()`: **Overridden**
+- ::searchForMatch`(startPosition, reverse, inCharacter, outCharacter)`
+- ::characterAt`(position)`
+- ::getSearchData`(position)`
+- ::moveCursor`(cursor)`: **Overridden**
 
-### ReverseSearch < Search < SearchBase < MotionWithInput < Motion
+### RepeatSearch < SearchBase
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`(@vimState)`: **Overridden**
+- ::isComplete`()`: **Overridden**
+- ::reversed`()`: **Overridden**
+
+### RepeatSearchBackwards < RepeatSearch
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 
-### SearchCurrentWord < SearchBase < MotionWithInput < Motion
+### Search < SearchBase
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`()`: `super`: **Overridden**
+
+### ReverseSearch < Search
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`()`: `super`: **Overridden**
+
+### SearchCurrentWord < SearchBase
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - @keywordRegex: `null`
 - ::constructor`(@vimState)`: `super`: **Overridden**
 - ::getCurrentWord`()`
@@ -327,30 +275,299 @@ All TOMs inherits Base class
 - ::isComplete`()`: **Overridden**
 - ::execute`()`: `super()`: **Overridden**
 
-### ReverseSearchCurrentWord < SearchCurrentWord < SearchBase < MotionWithInput < Motion
+### ReverseSearchCurrentWord < SearchCurrentWord
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - @keywordRegex: `null`
 - ::constructor`()`: `super`: **Overridden**
 
-### BracketMatchingMotion < SearchBase < MotionWithInput < Motion
+### MoveDown < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesLinewise: `true`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MoveLeft < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `false`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MoveRight < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `false`: **Overridden**
+- ::composed: `false`
+- ::onDidComposeBy`(operation)`
+- ::isOperatorPending`()`
+- ::moveCursor`(cursor)`
+
+### MoveToBeginningOfLine < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `false`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MoveToEndOfWord < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::wordRegex: `null`
+- ::moveCursor`(cursor)`
+
+### MoveToEndOfWholeWord < MoveToEndOfWord
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::wordRegex: `/\S+/`: **Overridden**
+
+### MoveToFirstCharacterOfLine < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `false`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MoveToFirstCharacterOfLineAndDown < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesLinewise: `true`: **Overridden**
 - ::operatesInclusively: `true`: **Overridden**
-- ::isComplete`()`: **Overridden**
-- ::searchForMatch`(startPosition, reverse, inCharacter, outCharacter)`
-- ::characterAt`(position)`
-- ::getSearchData`(position)`
-- ::moveCursor`(cursor)`: **Overridden**
+- ::moveCursor`(cursor)`
 
-### RepeatSearch < SearchBase < MotionWithInput < Motion
-- ::constructor`(@vimState)`: **Overridden**
-- ::isComplete`()`: **Overridden**
-- ::reversed`()`: **Overridden**
+### MoveToFirstCharacterOfLineDown < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesLinewise: `true`: **Overridden**
+- ::moveCursor`(cursor)`
 
-### RepeatSearchBackwards < RepeatSearch < SearchBase < MotionWithInput < Motion
-- ::constructor`(@vimState)`: `super`: **Overridden**
+### MoveToFirstCharacterOfLineUp < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesLinewise: `true`: **Overridden**
+- ::operatesInclusively: `true`: **Overridden**
+- ::moveCursor`(cursor)`
 
-### OperatorError
+### MoveToLastCharacterOfLine < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `false`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MoveToLastNonblankCharacterOfLineAndDown < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `true`: **Overridden**
+- ::skipTrailingWhitespace`(cursor)`
+- ::moveCursor`(cursor)`
+
+### MoveToLineBase < Motion
+*Not exported*
+
+### MoveToLine < MoveToLineBase
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::moveCursor`(cursor)`
+
+### MoveToRelativeLine < MoveToLineBase
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesLinewise: `true`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MoveToScreenLine < MoveToLineBase
+*Not exported*
+
+### MoveToBottomOfScreen < MoveToScreenLine
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::getDestinationRow`()`: **Overridden**
+
+### MoveToMiddleOfScreen < MoveToScreenLine
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::getDestinationRow`()`: **Overridden**
+
+### MoveToTopOfScreen < MoveToScreenLine
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::getDestinationRow`()`: **Overridden**
+
+### MoveToStartOfFile < MoveToLineBase
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::moveCursor`(cursor)`
+
+### ScrollKeepingCursor < MoveToLineBase
+*Not exported*
+
+### ScrollFullScreenUp < ScrollKeepingCursor
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::direction: `'up'`: **Overridden**
+- ::getAmountInPixel`()`
+
+### ScrollFullScreenDown < ScrollFullScreenUp
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::direction: `'down'`: **Overridden**
+
+### ScrollHalfScreenUp < ScrollKeepingCursor
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::direction: `'up'`: **Overridden**
+- ::getAmountInPixel`()`
+
+### ScrollHalfScreenDown < ScrollHalfScreenUp
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::direction: `'down'`: **Overridden**
+
+### MoveToNextParagraph < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `false`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MoveToNextWord < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::wordRegex: `null`
+- ::operatesInclusively: `false`: **Overridden**
+- ::moveCursor`(cursor, options)`
+- ::isEndOfFile`(cursor)`
+
+### MoveToNextWholeWord < MoveToNextWord
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::wordRegex: `/^\s*$|\S+/`: **Overridden**
+
+### MoveToPreviousParagraph < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::moveCursor`(cursor)`
+
+### MoveToPreviousWholeWord < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `false`: **Overridden**
+- ::moveCursor`(cursor)`
+- ::isWholeWord`(cursor)`
+- ::isBeginningOfFile`(cursor)`
+
+### MoveToPreviousWord < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesInclusively: `false`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MoveUp < Motion
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::operatesLinewise: `true`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MotionError < Base
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`(@message)`: **Overridden**
 
-### Operator
+### Operator < Base
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`(@vimState, options)`: **Overridden**
 - ::vimState: `null`
 - ::target: `null`
@@ -362,185 +579,520 @@ All TOMs inherits Base class
 - ::canComposeWith`(operation)`
 - ::setTextRegister`(register, text)`
 
-### OperatorWithInput < Operator
-- ::canComposeWith`(operation)`: **Overridden**
-- ::compose`(operation)`: **Overridden**
+### AdjustIndentation < Operator
+*Not exported*
 
-### Select < Operator
-- ::execute`()`
+### AutoIndent < AdjustIndentation
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::indent`()`
+
+### Indent < AdjustIndentation
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::indent`()`
+
+### Outdent < AdjustIndentation
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::indent`()`
 
 ### Delete < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::register: `null`
 - ::execute`()`
 
-### DeleteRight < Delete < Operator
+### DeleteLeft < Delete
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
-### DeleteLeft < Delete < Operator
+### DeleteRight < Delete
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
-### DeleteToLastCharacterOfLine < Delete < Operator
+### DeleteToLastCharacterOfLine < Delete
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
-
-### ToggleCase < Operator
-- ::execute`()`
-
-### ToggleCaseNow < ToggleCase < Operator
-- ::complete: `true`: **Overridden**
-
-### UpperCase < Operator
-- ::execute`()`
-
-### LowerCase < Operator
-- ::execute`()`
-
-### Yank < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::register: `null`
-- ::execute`()`
-
-### YankLine < Yank < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::complete: `true`: **Overridden**
-
-### Join < Operator
-- ::complete: `true`: **Overridden**
-- ::execute`()`
-
-### Repeat < Operator
-- ::complete: `true`: **Overridden**
-- ::recodable: `false`: **Overridden**
-- ::execute`()`
-
-### Mark < OperatorWithInput < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::execute`()`
 
 ### Increase < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::step: `1`
 - ::complete: `true`: **Overridden**
 - ::execute`()`
 - ::increaseNumber`(cursor)`
 
-### Decrease < Increase < Operator
+### Decrease < Increase
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::step: `-1`: **Overridden**
 
-### AdjustIndentation < Operator
-- ::execute`()`
-
-### Indent < AdjustIndentation < Operator
-- ::indent`()`
-
-### Outdent < AdjustIndentation < Operator
-- ::indent`()`
-
-### AutoIndent < AdjustIndentation < Operator
-- ::indent`()`
-
-### Put < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::register: `null`
-- ::complete: `true`: **Overridden**
-- ::execute`()`
-- ::onLastRow`()`
-- ::onLastColumn`()`
-
-### PutBefore < Put < Operator
-- ::location: `'before'`
-
-### PutAfter < Put < Operator
-- ::location: `'after'`
-
 ### Insert < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::complete: `true`: **Overridden**
 - ::confirmChanges`(changes)`
 - ::execute`()`
 - ::inputOperator`()`
 
-### ReplaceMode < Insert < Operator
-- ::execute`()`: **Overridden**
-- ::countChars`(char, string)`
+### Insert < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::complete: `true`: **Overridden**
+- ::confirmChanges`(changes)`
+- ::execute`()`
+- ::inputOperator`()`
 
-### InsertAfter < Insert < Operator
-- ::execute`()`: `super`: **Overridden**
-
-### InsertAfterEndOfLine < Insert < Operator
-- ::execute`()`: `super`: **Overridden**
-
-### InsertAtBeginningOfLine < Insert < Operator
-- ::execute`()`: `super`: **Overridden**
-
-### InsertAboveWithNewline < Insert < Operator
-- ::execute`()`: `super`: **Overridden**
-
-### InsertBelowWithNewline < Insert < Operator
-- ::execute`()`: `super`: **Overridden**
-
-### Change < Insert < Operator
+### Change < Insert
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `false`: **Overridden**
 - ::register: `null`
 - ::execute`()`: `super`: **Overridden**
 
-### Substitute < Change < Insert < Operator
+### ChangeToLastCharacterOfLine < Change
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
-### SubstituteLine < Change < Insert < Operator
+### Substitute < Change
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
+
+### SubstituteLine < Change
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 - ::register: `null`: **Overridden**
 
-### ChangeToLastCharacterOfLine < Change < Insert < Operator
+### InsertAboveWithNewline < Insert
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`: `super`: **Overridden**
+
+### InsertAfter < Insert
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`: `super`: **Overridden**
+
+### InsertAfterEndOfLine < Insert
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`: `super`: **Overridden**
+
+### InsertAtBeginningOfLine < Insert
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`: `super`: **Overridden**
+
+### InsertBelowWithNewline < Insert
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`: `super`: **Overridden**
+
+### ReplaceMode < Insert
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`: **Overridden**
+- ::countChars`(char, string)`
+
+### ReplaceMode < Insert
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`: **Overridden**
+- ::countChars`(char, string)`
+
+### Join < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::complete: `true`: **Overridden**
+- ::execute`()`
+
+### LowerCase < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`
+
+### OperatorWithInput < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::canComposeWith`(operation)`: **Overridden**
+- ::compose`(operation)`: **Overridden**
+
+### Mark < OperatorWithInput
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`()`: `super`: **Overridden**
+- ::execute`()`
+
+### Replace < OperatorWithInput
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`()`: `super`: **Overridden**
+- ::execute`()`
+
+### Put < Operator
+*Not exported*
+
+### PutAfter < Put
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::location: `'after'`
+
+### PutBefore < Put
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::location: `'before'`
+
+### Repeat < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::complete: `true`: **Overridden**
+- ::recodable: `false`: **Overridden**
+- ::execute`()`
+
+### Select < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`
+
+### ToggleCase < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`
+
+### ToggleCaseNow < ToggleCase
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::complete: `true`: **Overridden**
+
+### UpperCase < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`
+
+### Yank < Operator
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`()`: `super`: **Overridden**
+- ::register: `null`
+- ::execute`()`
+
+### YankLine < Yank
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
-### Replace < OperatorWithInput < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::execute`()`
+### OperatorError < Base
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`(@message)`: **Overridden**
 
-### Prefix
-- ::complete: `null`
-- ::composedObject: `null`
-- ::isComplete`()`
-- ::isRecordable`()`
-- ::compose`(@composedObject)`
-- ::execute`()`
-- ::select`()`
-- ::isLinewise`()`
+### Prefix < Base
+*Not exported*
 
 ### Register < Prefix
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`(@name)`: **Overridden**
 - ::name: `null`
 - ::compose`(composedObject)`: `super(composedObject)`: **Overridden**
 
-### TextObject
+### Scroll < Base
+*Not exported*
+
+### ScrollCursor < Scroll
+*Not exported*
+
+### ScrollCursorToBottom < ScrollCursor
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::isScrollable`()`
+- ::getScrollTop`()`
+
+### ScrollCursorToBottomLeave < ScrollCursorToBottom
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::keepCursor: `true`: **Overridden**
+
+### ScrollCursorToMiddle < ScrollCursor
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::isScrollable`()`
+- ::getScrollTop`()`
+
+### ScrollCursorToMiddleLeave < ScrollCursorToMiddle
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::keepCursor: `true`: **Overridden**
+
+### ScrollCursorToTop < ScrollCursor
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::isScrollable`()`
+- ::getScrollTop`()`
+
+### ScrollCursorToTopLeave < ScrollCursorToTop
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::keepCursor: `true`: **Overridden**
+
+### ScrollDown < Scroll
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`
+- ::keepCursorOnScreen`()`
+- ::scrollUp`()`
+
+### ScrollHorizontal < Scroll
+*Not exported*
+
+### ScrollCursorToLeft < ScrollHorizontal
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`
+
+### ScrollCursorToRight < ScrollHorizontal
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`
+
+### ScrollUp < Scroll
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::execute`()`
+- ::keepCursorOnScreen`()`
+- ::scrollDown`()`
+
+### TextObject < Base
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`(@editor, @state)`: **Overridden**
 - ::isComplete`()`
 - ::isRecordable`()`
 
 ### CurrentSelection < TextObject
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`()`: `super`: **Overridden**
 - ::select`()`
 
-### SelectInsideWord < TextObject
-- ::select`()`
-
-### SelectAWord < TextObject
-- ::select`()`
-
-### SelectInsideWholeWord < TextObject
+### SelectAParagraph < TextObject
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`(@editor, @inclusive)`: **Overridden**
 - ::select`()`
 
 ### SelectAWholeWord < TextObject
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::select`()`
+
+### SelectAWord < TextObject
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::select`()`
+
+### SelectInsideBrackets < TextObject
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`(@editor, @beginChar, @endChar, @includeBrackets)`: **Overridden**
+- ::findOpeningBracket`(pos)`
+- ::findClosingBracket`(start)`
+- ::select`()`
+
+### SelectInsideParagraph < TextObject
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::constructor`(@editor, @inclusive)`: **Overridden**
 - ::select`()`
 
 ### SelectInsideQuotes < TextObject
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::constructor`(@editor, @char, @includeQuotes)`: **Overridden**
 - ::findOpeningQuote`(pos)`
 - ::isStartQuote`(end)`
@@ -548,69 +1100,18 @@ All TOMs inherits Base class
 - ::findClosingQuote`(start)`
 - ::select`()`
 
-### SelectInsideBrackets < TextObject
-- ::constructor`(@editor, @beginChar, @endChar, @includeBrackets)`: **Overridden**
-- ::findOpeningBracket`(pos)`
-- ::findClosingBracket`(start)`
+### SelectInsideWholeWord < TextObject
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
 - ::select`()`
 
-### SelectInsideParagraph < TextObject
-- ::constructor`(@editor, @inclusive)`: **Overridden**
-- ::select`()`
-
-### SelectAParagraph < TextObject
-- ::constructor`(@editor, @inclusive)`: **Overridden**
-- ::select`()`
-
-### Scroll
-- ::constructor`(@vimState, options)`: **Overridden**
-- ::isComplete`()`
-- ::isRecordable`()`
-
-### ScrollDown < Scroll
-- ::execute`()`
-- ::keepCursorOnScreen`()`
-- ::scrollUp`()`
-
-### ScrollUp < Scroll
-- ::execute`()`
-- ::keepCursorOnScreen`()`
-- ::scrollDown`()`
-
-### ScrollCursor < Scroll
-- ::constructor`()`: `super`: **Overridden**
-- ::keepCursor: `false`
-- ::execute`()`
-- ::moveToFirstCharacterOfLine`()`
-- ::getOffSetPixelHeight`(lineDelta)`
-
-### ScrollCursorToTop < ScrollCursor < Scroll
-- ::isScrollable`()`
-- ::getScrollTop`()`
-
-### ScrollCursorToBottom < ScrollCursor < Scroll
-- ::isScrollable`()`
-- ::getScrollTop`()`
-
-### ScrollCursorToMiddle < ScrollCursor < Scroll
-- ::isScrollable`()`
-- ::getScrollTop`()`
-
-### ScrollCursorToTopLeave < ScrollCursorToTop < ScrollCursor < Scroll
-- ::keepCursor: `true`: **Overridden**
-
-### ScrollCursorToBottomLeave < ScrollCursorToBottom < ScrollCursor < Scroll
-- ::keepCursor: `true`: **Overridden**
-
-### ScrollCursorToMiddleLeave < ScrollCursorToMiddle < ScrollCursor < Scroll
-- ::keepCursor: `true`: **Overridden**
-
-### ScrollHorizontal < Scroll
-- ::constructor`()`: `super`: **Overridden**
-- ::putCursorOnScreen`()`
-
-### ScrollCursorToLeft < ScrollHorizontal < Scroll
-- ::execute`()`
-
-### ScrollCursorToRight < ScrollHorizontal < Scroll
-- ::execute`()`
+### SelectInsideWord < TextObject
+- @extend`()`
+- @getAncestors`()`
+- @getParent`()`
+- @report`(options)`
+- @reportAll`()`
+- ::select`()
