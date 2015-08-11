@@ -4,6 +4,8 @@ Operators   = require './operators'
 {MoveToRelativeLine} = require './motions'
 {debug} = require './utils'
 settings = require './settings'
+Base = require './base'
+introspection = require './introspection'
 
 completableOperators = ['Delete', 'Change', 'Yank', 'Indent', 'Outdent', 'AutoIndent']
 
@@ -56,10 +58,15 @@ class OperationStack
     for op, i in @stack
       debug "  <idx: #{i}>"
       if settings.debug()
-        debug op.report
+        debug introspection.inspectInstance op,
           indent: 2
           colors: settings.debugOutput() is 'file'
-          excludeProperties: ['vimState', 'editorElement'] # vimState have many properties, occupy DevTool console.
+          excludeProperties: [
+            'vimState', 'editorElement'
+            'report', 'reportAll'
+            'extend', 'getParent', 'getAncestors',
+          ] # vimState have many properties, occupy DevTool console.
+          recursiveInspect: Base
 
   # Private: Processes the command if the last operation is complete.
   #

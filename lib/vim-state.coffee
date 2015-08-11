@@ -3,6 +3,7 @@ _ = require 'underscore-plus'
 {Point, Range, Emitter, Disposable, CompositeDisposable} = require 'atom'
 settings = require './settings'
 
+Base = require './base'
 Operators   = require './operators'
 Prefixes    = require './prefixes'
 Motions     = require './motions'
@@ -71,6 +72,9 @@ class VimState
   # Returns nothing.
   init: ->
     @registerCommands
+      'toggle-debug': ->
+          atom.config.set('vim-mode.debug', not settings.debug())
+          console.log "vim-mode debug:", atom.config.get('vim-mode.debug')
       'generate-introspection-report': => @generateIntrospectionReport()
       'activate-normal-mode': => @activateNormalMode()
       'activate-linewise-visual-mode': => @activateVisualMode('linewise')
@@ -647,9 +651,15 @@ class VimState
     cursor.goalColumn = goalColumn
 
   generateIntrospectionReport: ->
+    excludeProperties = [
+      'report', 'reportAll'
+      'extend', 'getParent', 'getAncestors',
+    ]
+    recursiveInspect = Base
+
     introspection = require './introspection'
     mods = [Operators, Motions, TextObjects, Scroll, Prefixes]
-    introspection.generateIntrospectionReport(mods)
+    introspection.generateIntrospectionReport(mods, {excludeProperties, recursiveInspect})
 
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.
