@@ -122,9 +122,6 @@ class MotionWithInput extends Motion
   @extend()
   complete: false
 
-  isComplete: ->
-    @complete
-
   canComposeWith: (operation) ->
     return operation.characters?
 
