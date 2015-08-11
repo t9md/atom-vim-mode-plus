@@ -71,6 +71,7 @@ class VimState
   # Returns nothing.
   init: ->
     @registerCommands
+      'generate-introspection-report': => @generateIntrospectionReport()
       'activate-normal-mode': => @activateNormalMode()
       'activate-linewise-visual-mode': => @activateVisualMode('linewise')
       'activate-characterwise-visual-mode': => @activateVisualMode('characterwise')
@@ -644,6 +645,11 @@ class VimState
       @operationStack.withLock -> # to ignore the cursor change (and recursion) caused by the next line
         cursor.moveLeft()
     cursor.goalColumn = goalColumn
+
+  generateIntrospectionReport: ->
+    introspection = require './introspection'
+    mods = [Operators, Motions, TextObjects, Scroll, Prefixes]
+    introspection.generateIntrospectionReport(mods)
 
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.
