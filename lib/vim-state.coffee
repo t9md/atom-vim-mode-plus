@@ -90,36 +90,29 @@ class VimState
       'copy-from-line-below': => InsertMode.copyCharacterFromBelow(@editor, this)
 
     @registerOperationCommands
-      # TextObject
-      'select-inside-word': => new TextObjects.SelectInsideWord(@editor)
-      'select-inside-whole-word': => new TextObjects.SelectInsideWholeWord(@editor)
-      'select-inside-double-quotes': => new TextObjects.SelectInsideQuotes(@editor, '"', false)
-      'select-inside-single-quotes': => new TextObjects.SelectInsideQuotes(@editor, '\'', false)
-      'select-inside-back-ticks': => new TextObjects.SelectInsideQuotes(@editor, '`', false)
-      'select-inside-curly-brackets': => new TextObjects.SelectInsideBrackets(@editor, '{', '}', false)
-      'select-inside-angle-brackets': => new TextObjects.SelectInsideBrackets(@editor, '<', '>', false)
-      'select-inside-tags': => new TextObjects.SelectInsideBrackets(@editor, '>', '<', false)
-      'select-inside-square-brackets': => new TextObjects.SelectInsideBrackets(@editor, '[', ']', false)
-      'select-inside-parentheses': => new TextObjects.SelectInsideBrackets(@editor, '(', ')', false)
-      'select-inside-paragraph': => new TextObjects.SelectInsideParagraph(@editor, false)
-      'select-a-word': => new TextObjects.SelectAWord(@editor)
-      'select-a-whole-word': => new TextObjects.SelectAWholeWord(@editor)
-      'select-around-double-quotes': => new TextObjects.SelectInsideQuotes(@editor, '"', true)
-      'select-around-single-quotes': => new TextObjects.SelectInsideQuotes(@editor, '\'', true)
-      'select-around-back-ticks': => new TextObjects.SelectInsideQuotes(@editor, '`', true)
-      'select-around-curly-brackets': => new TextObjects.SelectInsideBrackets(@editor, '{', '}', true)
-      'select-around-angle-brackets': => new TextObjects.SelectInsideBrackets(@editor, '<', '>', true)
-      'select-around-square-brackets': => new TextObjects.SelectInsideBrackets(@editor, '[', ']', true)
-      'select-around-parentheses': => new TextObjects.SelectInsideBrackets(@editor, '(', ')', true)
-      'select-around-paragraph': => new TextObjects.SelectAParagraph(@editor, true)
-
       # [FIXME]
       'register-prefix': (e) => @registerPrefix(e)
       'move-to-beginning-of-line': (e) => @moveOrRepeat(e)
       'repeat-find': => new @globalVimState.currentFind?.constructor(this, repeated: true)
       'repeat-find-reverse': => new @globalVimState.currentFind?.constructor(this, repeated: true, reverse: true)
 
-    # Motino
+    # Operator
+    # -------------------------
+    @registerNewOperationCommands TextObjects, [
+      'select-inside-word',            'select-inside-whole-word'
+      'select-inside-double-quotes',   'select-around-double-quotes'
+      'select-inside-single-quotes',   'select-around-single-quotes'
+      'select-inside-back-ticks',      'select-around-back-ticks'
+      'select-inside-paragraph',       'select-around-paragraph'
+      'select-a-word',                 'select-a-whole-word'
+      'select-inside-curly-brackets',  'select-around-curly-brackets'
+      'select-inside-angle-brackets',  'select-around-angle-brackets'
+      'select-inside-tags',             # why not around version exists?
+      'select-inside-square-brackets', 'select-around-square-brackets'
+      'select-inside-parentheses',     'select-around-parentheses'
+    ]
+
+    # Motion
     # -------------------------
     @registerNewOperationCommands Motions, [
       'move-left'

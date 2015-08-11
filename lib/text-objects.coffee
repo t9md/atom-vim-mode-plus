@@ -7,17 +7,21 @@ WholeWordRegex = /\S+/
 
 class TextObject extends Base
   @extend()
+  vimState: null
+  recodable: false
+  complete: true
 
-  constructor: (@editor, @state) ->
+  constructor: (@vimState) ->
+    {@editor} = @vimState
 
-  isComplete: -> true
-  isRecordable: -> false
+  isComplete: ->
+    @complete
+
+  isRecordable: ->
+    @recodable
 
 class CurrentSelection extends TextObject
   @extend()
-  constructor: ->
-    super
-
   select: ->
     _.times(@getCount(1), -> true)
 
@@ -26,6 +30,7 @@ class CurrentSelection extends TextObject
 class SelectInsideWord extends TextObject
   @extend()
   select: ->
+    console.log "SELECT!!"
     @editor.selectWordsContainingCursors()
     [true]
 
@@ -69,7 +74,8 @@ class SelectAWholeWord extends TextObject
 # checks in the bracket matcher.
 class SelectInsideQuotes extends TextObject
   @extend()
-  constructor: (@editor, @char, @includeQuotes) ->
+  char: null
+  includeQuotes: false
 
   findOpeningQuote: (pos) ->
     start = pos.copy()
@@ -131,13 +137,39 @@ class SelectInsideQuotes extends TextObject
           selection.setBufferRange([start, end])
       not selection.isEmpty()
 
+class SelectInsideDoubleQuotes extends SelectInsideQuotes
+  @extend()
+  char: '"'
+class SelectAroundDoubleQuotes extends SelectInsideDoubleQuotes
+  @extend()
+  includeQuotes: true
+
+class SelectInsideSingleQuotes extends SelectInsideQuotes
+  @extend()
+  char: '\''
+class SelectAroundSingleQuotes extends SelectInsideSingleQuotes
+  @extend()
+  includeQuotes: true
+
+class SelectInsideBackTicks extends SelectInsideQuotes
+  @extend()
+  char: '`'
+class SelectAroundBackTicks extends SelectInsideBackTicks
+  @extend()
+  includeQuotes: true
+
+
 # SelectInsideBrackets and the previous class defined (SelectInsideQuotes) are
 # almost-but-not-quite-repeated code. They are different because of the depth
 # checks in the bracket matcher.
 
 class SelectInsideBrackets extends TextObject
   @extend()
-  constructor: (@editor, @beginChar, @endChar, @includeBrackets) ->
+  beginChar: null
+  endChar: null
+  includeBrackets: false
+  # constructor: (@vimState, @beginChar, @endChar, @includeBrackets) ->
+  #   super(@vimState)
 
   findOpeningBracket: (pos) ->
     pos = pos.copy()
@@ -182,11 +214,50 @@ class SelectInsideBrackets extends TextObject
           selection.setBufferRange([start, end])
       not selection.isEmpty()
 
+class SelectInsideCurlyBrackets extends SelectInsideBrackets
+  @extend()
+  beginChar: '{'
+  endChar: '}'
+class SelectAroundCurlyBrackets extends SelectInsideCurlyBrackets
+  @extend()
+  includeBrackets: true
+
+class SelectInsideAngleBrackets extends SelectInsideBrackets
+  @extend()
+  beginChar: '<'
+  endChar: '>'
+class SelectAroundAngleBrackets extends SelectInsideAngleBrackets
+  @extend()
+  includeBrackets: true
+
+class SelectInsideTags extends SelectInsideBrackets
+  @extend()
+  beginChar: '>'
+  endChar: '<'
+class SelectAroundTags extends SelectInsideTags
+  @extend()
+  includeBrackets: true
+
+class SelectInsideSquareBrackets extends SelectInsideBrackets
+  @extend()
+  beginChar: '['
+  endChar: ']'
+class SelectAroundSquareBrackets extends SelectInsideSquareBrackets
+  @extend()
+  includeBrackets: true
+
+class SelectInsideParentheses extends SelectInsideBrackets
+  @extend()
+  beginChar: '('
+  endChar: ')'
+class SelectAroundParentheses extends SelectInsideParentheses
+  @extend()
+  includeBrackets: true
+
 # Paragraph
 # -------------------------
 class SelectInsideParagraph extends TextObject
   @extend()
-  constructor: (@editor, @inclusive) ->
   select: ->
     for selection in @editor.getSelections()
       range = selection.cursor.getCurrentParagraphBufferRange()
@@ -195,9 +266,8 @@ class SelectInsideParagraph extends TextObject
         selection.selectToBeginningOfNextParagraph()
       true
 
-class SelectAParagraph extends TextObject
+class SelectAroundParagraph extends TextObject
   @extend()
-  constructor: (@editor, @inclusive) ->
   select: ->
     for selection in @editor.getSelections()
       range = selection.cursor.getCurrentParagraphBufferRange()
@@ -210,8 +280,33 @@ class SelectAParagraph extends TextObject
 module.exports = {
   TextObject,
   CurrentSelection,
+
+  SelectInsideDoubleQuotes
+  SelectAroundDoubleQuotes
+
+  SelectInsideSingleQuotes
+  SelectAroundSingleQuotes
+
+  SelectInsideBackTicks
+  SelectAroundBackTicks
+
+  SelectInsideCurlyBrackets
+  SelectAroundCurlyBrackets
+
+  SelectInsideAngleBrackets
+  SelectAroundAngleBrackets
+
+  SelectInsideTags
+  SelectAroundTags
+
+  SelectInsideSquareBrackets
+  SelectAroundSquareBrackets
+
+  SelectInsideParentheses
+  SelectAroundParentheses
+
   SelectInsideWord, SelectAWord,
   SelectInsideWholeWord, SelectAWholeWord,
   SelectInsideQuotes, SelectInsideBrackets,
-  SelectInsideParagraph, SelectAParagraph
+  SelectInsideParagraph, SelectAroundParagraph
 }
