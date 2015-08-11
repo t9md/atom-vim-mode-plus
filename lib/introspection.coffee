@@ -76,7 +76,9 @@ inspectObject = (obj, options={}, prototype=false) ->
   results = []
   for own prop, value of obj when prop not in excludeList
     s = "- #{prefix}#{prop}"
-    if _.isFunction(value)
+    if value instanceof options.recursiveInspect
+      s += ":\n#{inspectInstance(value, options)}"
+    else if _.isFunction(value)
       {argumentsSignature, superSignature} = inspectFunction(value, prop)
       if (prop is 'constructor') and (superSignature is 'default')
         continue # hide default constructor
@@ -99,10 +101,10 @@ report = (obj, options={}) ->
     prototype: inspectObject(obj, options, true)
   }
 
-reportModule = (mod) ->
+reportModule = (mod, options) ->
   results = []
   for own prop, value of mod
-    results.push report(value)
+    results.push report(value, options)
   results
 
 sortByAncesstor = (list) ->
@@ -146,10 +148,10 @@ genTableOfContent = (obj) ->
   s += ' *Not exported*' if obj.virtual?
   s
 
-generateIntrospectionReport = (mods) ->
+generateIntrospectionReport = (mods, options) ->
   pack = atom.packages.getActivePackage('vim-mode')
   {version} = pack.metadata
-  results = _.flatten(reportModule(mod) for mod in mods)
+  results = _.flatten(reportModule(mod, options) for mod in mods)
   results = results.concat(getVirtualParents(results))
   results = sortByAncesstor(results)
 
@@ -180,4 +182,29 @@ generateIntrospectionReport = (mods) ->
     editor.setText content
     editor.setGrammar atom.grammars.grammarForScopeName('source.gfm')
 
-module.exports = {generateIntrospectionReport}
+formatReport = (report) ->
+  {instance, prototype, ancesstorsNames} = report
+  s = []
+  s.push "# #{ancesstorsNames.join(" < ")}"
+  s.push instance if instance?
+  s.push prototype if prototype?
+  s.join("\n")
+
+inspectInstance = (obj, options={}) ->
+  indent = _.multiplyString(' ', options.indent ? 0)
+  rep = report(obj.constructor,options)
+  [
+    "## #{obj}: #{rep.ancesstorsNames[0..1].join(" < ")}"
+    inspectObject(obj, options)
+    formatReport(rep)
+  ].filter (e) -> e
+  .join('\n').split('\n').map((e) -> indent + e).join('\n')
+
+module.exports = {
+  getAncestors
+  getParent
+  generateIntrospectionReport
+  report
+  inspectObject
+  inspectInstance
+}

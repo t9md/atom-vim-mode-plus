@@ -32,20 +32,6 @@ module.exports =
     @disposables.add new Disposable =>
       @vimStates.forEach (vimState) -> vimState.destroy()
 
-    @disposables.add atom.commands.add 'atom-workspace',
-      'vim-mode:toggle-debug': ->
-        atom.config.set('vim-mode.debug', not settings.debug())
-
-  getTableOfContent: (content) ->
-    toc = _.chain content.split('\n')
-      .filter (e) -> /^#/.test(e)
-      .map (s) ->
-        name = s.replace(/^#+\s/, '')
-        link = name.replace ///#{_.escapeRegExp(' < ')}///g, '--'
-        "- [#{name}](##{link.toLowerCase()})"
-      .value().join('\n')
-    toc
-
   deactivate: ->
     @disposables.dispose()
 
