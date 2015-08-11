@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-11T15:24:37.259Z*
+*generated at 2015-08-11T17:58:13.262Z*
 
 - [Base](#base) *Not exported*
   - [Motion](#motion--base)
@@ -110,12 +110,28 @@ vim-mode version: 0.57.0
     - [ScrollUp](#scrollup--scroll)
   - [TextObject](#textobject--base)
     - [CurrentSelection](#currentselection--textobject)
-    - [SelectAParagraph](#selectaparagraph--textobject)
     - [SelectAWholeWord](#selectawholeword--textobject)
     - [SelectAWord](#selectaword--textobject)
+    - [SelectAroundParagraph](#selectaroundparagraph--textobject)
     - [SelectInsideBrackets](#selectinsidebrackets--textobject)
+      - [SelectInsideAngleBrackets](#selectinsideanglebrackets--selectinsidebrackets)
+        - [SelectAroundAngleBrackets](#selectaroundanglebrackets--selectinsideanglebrackets)
+      - [SelectInsideCurlyBrackets](#selectinsidecurlybrackets--selectinsidebrackets)
+        - [SelectAroundCurlyBrackets](#selectaroundcurlybrackets--selectinsidecurlybrackets)
+      - [SelectInsideParentheses](#selectinsideparentheses--selectinsidebrackets)
+        - [SelectAroundParentheses](#selectaroundparentheses--selectinsideparentheses)
+      - [SelectInsideSquareBrackets](#selectinsidesquarebrackets--selectinsidebrackets)
+        - [SelectAroundSquareBrackets](#selectaroundsquarebrackets--selectinsidesquarebrackets)
+      - [SelectInsideTags](#selectinsidetags--selectinsidebrackets)
+        - [SelectAroundTags](#selectaroundtags--selectinsidetags)
     - [SelectInsideParagraph](#selectinsideparagraph--textobject)
     - [SelectInsideQuotes](#selectinsidequotes--textobject)
+      - [SelectInsideBackTicks](#selectinsidebackticks--selectinsidequotes)
+        - [SelectAroundBackTicks](#selectaroundbackticks--selectinsidebackticks)
+      - [SelectInsideDoubleQuotes](#selectinsidedoublequotes--selectinsidequotes)
+        - [SelectAroundDoubleQuotes](#selectarounddoublequotes--selectinsidedoublequotes)
+      - [SelectInsideSingleQuotes](#selectinsidesinglequotes--selectinsidequotes)
+        - [SelectAroundSingleQuotes](#selectaroundsinglequotes--selectinsidesinglequotes)
     - [SelectInsideWholeWord](#selectinsidewholeword--textobject)
     - [SelectInsideWord](#selectinsideword--textobject)
 
@@ -554,16 +570,14 @@ vim-mode version: 0.57.0
 - ::scrollDown`()`
 
 ### TextObject < Base
-- ::constructor`(@editor, @state)`: **Overridden**
+- ::constructor`(@vimState)`: **Overridden**
+- ::vimState: `null`
+- ::recodable: `false`
+- ::complete: `true`
 - ::isComplete`()`
 - ::isRecordable`()`
 
 ### CurrentSelection < TextObject
-- ::constructor`()`: `super`: **Overridden**
-- ::select`()`
-
-### SelectAParagraph < TextObject
-- ::constructor`(@editor, @inclusive)`: **Overridden**
 - ::select`()`
 
 ### SelectAWholeWord < TextObject
@@ -572,23 +586,81 @@ vim-mode version: 0.57.0
 ### SelectAWord < TextObject
 - ::select`()`
 
+### SelectAroundParagraph < TextObject
+- ::select`()`
+
 ### SelectInsideBrackets < TextObject
-- ::constructor`(@editor, @beginChar, @endChar, @includeBrackets)`: **Overridden**
+- ::beginChar: `null`
+- ::endChar: `null`
+- ::includeBrackets: `false`
 - ::findOpeningBracket`(pos)`
 - ::findClosingBracket`(start)`
 - ::select`()`
 
+### SelectInsideAngleBrackets < SelectInsideBrackets
+- ::beginChar: `'<'`: **Overridden**
+- ::endChar: `'>'`: **Overridden**
+
+### SelectAroundAngleBrackets < SelectInsideAngleBrackets
+- ::includeBrackets: `true`: **Overridden**
+
+### SelectInsideCurlyBrackets < SelectInsideBrackets
+- ::beginChar: `'{'`: **Overridden**
+- ::endChar: `'}'`: **Overridden**
+
+### SelectAroundCurlyBrackets < SelectInsideCurlyBrackets
+- ::includeBrackets: `true`: **Overridden**
+
+### SelectInsideParentheses < SelectInsideBrackets
+- ::beginChar: `'('`: **Overridden**
+- ::endChar: `')'`: **Overridden**
+
+### SelectAroundParentheses < SelectInsideParentheses
+- ::includeBrackets: `true`: **Overridden**
+
+### SelectInsideSquareBrackets < SelectInsideBrackets
+- ::beginChar: `'['`: **Overridden**
+- ::endChar: `']'`: **Overridden**
+
+### SelectAroundSquareBrackets < SelectInsideSquareBrackets
+- ::includeBrackets: `true`: **Overridden**
+
+### SelectInsideTags < SelectInsideBrackets
+- ::beginChar: `'>'`: **Overridden**
+- ::endChar: `'<'`: **Overridden**
+
+### SelectAroundTags < SelectInsideTags
+- ::includeBrackets: `true`: **Overridden**
+
 ### SelectInsideParagraph < TextObject
-- ::constructor`(@editor, @inclusive)`: **Overridden**
 - ::select`()`
 
 ### SelectInsideQuotes < TextObject
-- ::constructor`(@editor, @char, @includeQuotes)`: **Overridden**
+- ::char: `null`
+- ::includeQuotes: `false`
 - ::findOpeningQuote`(pos)`
 - ::isStartQuote`(end)`
 - ::lookForwardOnLine`(pos)`
 - ::findClosingQuote`(start)`
 - ::select`()`
+
+### SelectInsideBackTicks < SelectInsideQuotes
+- ::char: `'`'`: **Overridden**
+
+### SelectAroundBackTicks < SelectInsideBackTicks
+- ::includeQuotes: `true`: **Overridden**
+
+### SelectInsideDoubleQuotes < SelectInsideQuotes
+- ::char: `'"'`: **Overridden**
+
+### SelectAroundDoubleQuotes < SelectInsideDoubleQuotes
+- ::includeQuotes: `true`: **Overridden**
+
+### SelectInsideSingleQuotes < SelectInsideQuotes
+- ::char: `'\''`: **Overridden**
+
+### SelectAroundSingleQuotes < SelectInsideSingleQuotes
+- ::includeQuotes: `true`: **Overridden**
 
 ### SelectInsideWholeWord < TextObject
 - ::select`()`

@@ -22,7 +22,8 @@ class OperationStack
     if @isEmpty() and settings.debug()
       debug "#=== Start at #{new Date().toISOString()}"
       if settings.debugOutput() is 'console'
-        console.clear()
+        null
+        # console.clear()
 
     @withLock =>
       # Motions in visual mode perform their selections.
@@ -46,7 +47,7 @@ class OperationStack
       # If we've received an operator in visual mode, use inplict currentSelection textobject
       # as a target of operator.
       if @vimState.isVisualMode() and op.isOperator?()
-        @stack.push(new TextObjects.CurrentSelection(@vimState.editor, @vimState))
+        @stack.push(new TextObjects.CurrentSelection(@vimState))
 
       @process()
 
@@ -74,6 +75,7 @@ class OperationStack
   process: ->
     return if @isEmpty()
     debug "-> @process(): start"
+    @inspect()
 
     unless @peekTop().isComplete()
       if @vimState.isNormalMode() and @peekTop().isOperator?()
