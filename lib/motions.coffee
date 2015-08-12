@@ -514,6 +514,9 @@ class Find extends MotionWithInput
     super
 
     if not @options.repeated
+      # [FIXME] When ViewModel is initialize()ed, it'll get input from user
+      # and push Input instance with user's imput to operationStack.
+      # This is unnecessarily complecated and not intuitive.
       @viewModel = new ViewModel(this, class: 'find', singleChar: true, hidden: true)
       # @backwards = false # Moved to prototype property `backwards: false`
       @repeated = false
