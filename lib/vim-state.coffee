@@ -97,8 +97,6 @@ class VimState
     # Operator
     # -------------------------
     @registerNewOperationCommands TextObjects, [
-      # [FIXME] I want use inline comment(### ###), but current language-coffeescript don't correctly highlight
-      # if comment end in single line.
       # w
       'select-inside-word', 'select-a-word',
       # W
