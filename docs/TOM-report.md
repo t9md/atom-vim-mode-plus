@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-12T09:25:38.721Z*
+*generated at 2015-08-12T14:26:54.352Z*
 
 - [Base](#base) *Not exported*
   - [Motion](#motion--base)
@@ -78,13 +78,12 @@ vim-mode version: 0.57.0
       - [ReplaceMode](#replacemode--insert)
     - [Join](#join--operator)
     - [LowerCase](#lowercase--operator)
-    - [OperatorWithInput](#operatorwithinput--operator)
-      - [Mark](#mark--operatorwithinput)
-      - [Replace](#replace--operatorwithinput)
+    - [Mark](#mark--operator)
     - [Put](#put--operator) *Not exported*
       - [PutAfter](#putafter--put)
       - [PutBefore](#putbefore--put)
     - [Repeat](#repeat--operator)
+    - [Replace](#replace--operator)
     - [Select](#select--operator)
     - [ToggleCase](#togglecase--operator)
       - [ToggleCaseNow](#togglecasenow--togglecase)
@@ -361,6 +360,8 @@ vim-mode version: 0.57.0
 - ::compose`(@target)`
 - ::canComposeWith`(operation)`
 - ::setTextRegister`(register, text)`
+- ::getInput`()`
+- ::setInput`(@input)`
 
 ### AdjustIndentation < Operator
 *Not exported*
@@ -462,15 +463,7 @@ vim-mode version: 0.57.0
 ### LowerCase < Operator
 - ::execute`()`
 
-### OperatorWithInput < Operator
-- ::canComposeWith`(operation)`: **Overridden**
-- ::compose`(operation)`: **Overridden**
-
-### Mark < OperatorWithInput
-- ::constructor`()`: `super`: **Overridden**
-- ::execute`()`
-
-### Replace < OperatorWithInput
+### Mark < Operator
 - ::constructor`()`: `super`: **Overridden**
 - ::execute`()`
 
@@ -486,6 +479,12 @@ vim-mode version: 0.57.0
 ### Repeat < Operator
 - ::complete: `true`: **Overridden**
 - ::recodable: `false`: **Overridden**
+- ::execute`()`
+
+### Replace < Operator
+- ::constructor`()`: `super`: **Overridden**
+- ::input: `null`
+- ::isComplete`()`: **Overridden**
 - ::execute`()`
 
 ### Select < Operator
