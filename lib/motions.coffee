@@ -112,6 +112,9 @@ class Motion extends Base
 
 # Public: Generic class for motions that require extra input
 class MotionWithInput extends Motion
+  # [FIXME] Can be removed.Role of this class is to proxy user's input.
+  # If each motion can directly get input from user, this class can be eliminated.
+  # This simplify unessenstal inheritance hierarchies.
   @extend()
   complete: false
 
