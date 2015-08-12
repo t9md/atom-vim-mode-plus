@@ -89,12 +89,10 @@ class VimState
       'copy-from-line-above': => InsertMode.copyCharacterFromAbove(@editor, this)
       'copy-from-line-below': => InsertMode.copyCharacterFromBelow(@editor, this)
 
+    # [FIXME]
     @registerOperationCommands
-      # [FIXME]
       'register-prefix': (e) => @registerPrefix(e)
       'move-to-beginning-of-line': (e) => @moveOrRepeat(e)
-      'repeat-find': => new @globalVimState.currentFind?.constructor(this, repeated: true)
-      'repeat-find-reverse': => new @globalVimState.currentFind?.constructor(this, repeated: true, reverse: true)
 
     # Operator
     # -------------------------
@@ -128,6 +126,8 @@ class VimState
     # Motion
     # -------------------------
     @registerNewOperationCommands Motions, [
+      # ;, ,
+      'repeat-find', 'repeat-find-reverse'
       # j, k, h, l
       'move-down', 'move-up', 'move-left','move-right',
       # w, W
