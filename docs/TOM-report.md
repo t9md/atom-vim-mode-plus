@@ -1,25 +1,14 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-12T06:56:34.183Z*
+*generated at 2015-08-12T09:25:38.721Z*
 
 - [Base](#base) *Not exported*
   - [Motion](#motion--base)
-    - [MotionWithInput](#motionwithinput--motion)
-      - [Find](#find--motionwithinput)
-        - [FindBackwards](#findbackwards--find)
-        - [Till](#till--find)
-          - [TillBackwards](#tillbackwards--till)
-      - [MoveToMark](#movetomark--motionwithinput)
-        - [MoveToMarkLiteral](#movetomarkliteral--movetomark)
-      - [SearchBase](#searchbase--motionwithinput) *Not exported*
-        - [BracketMatchingMotion](#bracketmatchingmotion--searchbase)
-        - [RepeatSearch](#repeatsearch--searchbase)
-          - [RepeatSearchBackwards](#repeatsearchbackwards--repeatsearch)
-        - [Search](#search--searchbase)
-          - [ReverseSearch](#reversesearch--search)
-        - [SearchCurrentWord](#searchcurrentword--searchbase)
-          - [ReverseSearchCurrentWord](#reversesearchcurrentword--searchcurrentword)
+    - [Find](#find--motion)
+      - [FindBackwards](#findbackwards--find)
+      - [Till](#till--find)
+        - [TillBackwards](#tillbackwards--till)
     - [MoveDown](#movedown--motion)
     - [MoveLeft](#moveleft--motion)
     - [MoveRight](#moveright--motion)
@@ -45,6 +34,8 @@ vim-mode version: 0.57.0
           - [ScrollFullScreenDown](#scrollfullscreendown--scrollfullscreenup)
         - [ScrollHalfScreenUp](#scrollhalfscreenup--scrollkeepingcursor)
           - [ScrollHalfScreenDown](#scrollhalfscreendown--scrollhalfscreenup)
+    - [MoveToMark](#movetomark--motion)
+      - [MoveToMarkLiteral](#movetomarkliteral--movetomark)
     - [MoveToNextParagraph](#movetonextparagraph--motion)
     - [MoveToNextWord](#movetonextword--motion)
       - [MoveToNextWholeWord](#movetonextwholeword--movetonextword)
@@ -52,6 +43,14 @@ vim-mode version: 0.57.0
     - [MoveToPreviousWholeWord](#movetopreviouswholeword--motion)
     - [MoveToPreviousWord](#movetopreviousword--motion)
     - [MoveUp](#moveup--motion)
+    - [SearchBase](#searchbase--motion) *Not exported*
+      - [BracketMatchingMotion](#bracketmatchingmotion--searchbase)
+      - [RepeatSearch](#repeatsearch--searchbase)
+        - [RepeatSearchBackwards](#repeatsearchbackwards--repeatsearch)
+      - [Search](#search--searchbase)
+        - [ReverseSearch](#reversesearch--search)
+      - [SearchCurrentWord](#searchcurrentword--searchbase)
+        - [ReverseSearchCurrentWord](#reversesearchcurrentword--searchcurrentword)
   - [MotionError](#motionerror--base)
   - [Operator](#operator--base)
     - [AdjustIndentation](#adjustindentation--operator) *Not exported*
@@ -139,7 +138,7 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### Motion < Base
-- ::constructor`(@vimState)`: **Overridden**
+- ::constructor`(@vimState, options)`: **Overridden**
 - ::operatesInclusively: `true`
 - ::operatesLinewise: `false`
 - ::complete: `true`: **Overridden**
@@ -151,15 +150,13 @@ vim-mode version: 0.57.0
 - ::moveSelection`(selection, options)`
 - ::isLinewise`()`
 - ::isInclusive`()`
+- ::getInput`()`
+- ::setInput`(@input)`
 
-### MotionWithInput < Motion
-- ::complete: `false`: **Overridden**
-- ::canComposeWith`(operation)`
-- ::compose`(@input)`
-
-### Find < MotionWithInput
-- ::constructor`(@vimState, options)`: `super(@vimState)`: **Overridden**
+### Find < Motion
+- ::constructor`()`: `super`: **Overridden**
 - ::backwards: `false`
+- ::complete: `false`: **Overridden**
 - ::offset: `0`
 - ::match`(cursor, count)`
 - ::reverse`()`
@@ -175,53 +172,6 @@ vim-mode version: 0.57.0
 
 ### TillBackwards < Till
 - ::backwards: `true`: **Overridden**
-
-### MoveToMark < MotionWithInput
-- ::constructor`(@vimState, linewise)`: `super(@vimState)`: **Overridden**
-- ::operatesInclusively: `false`: **Overridden**
-- ::isLinewise`()`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToMarkLiteral < MoveToMark
-- ::constructor`(@vimState)`: `super(@vimState, false)`: **Overridden**
-
-### SearchBase < MotionWithInput
-*Not exported*
-
-### BracketMatchingMotion < SearchBase
-- ::operatesInclusively: `true`: **Overridden**
-- ::complete: `true`: **Overridden**
-- ::searchForMatch`(startPosition, reverse, inCharacter, outCharacter)`
-- ::characterAt`(position)`
-- ::getSearchData`(position)`
-- ::moveCursor`(cursor)`: **Overridden**
-
-### RepeatSearch < SearchBase
-- ::constructor`(@vimState)`: **Overridden**
-- ::complete: `true`: **Overridden**
-- ::reversed`()`: **Overridden**
-
-### RepeatSearchBackwards < RepeatSearch
-- ::constructor`()`: `super`: **Overridden**
-
-### Search < SearchBase
-- ::constructor`()`: `super`: **Overridden**
-
-### ReverseSearch < Search
-- ::constructor`()`: `super`: **Overridden**
-
-### SearchCurrentWord < SearchBase
-- @keywordRegex: `null`
-- ::constructor`(@vimState)`: `super`: **Overridden**
-- ::complete: `true`: **Overridden**
-- ::getCurrentWord`()`
-- ::cursorIsOnEOF`(cursor)`
-- ::getCurrentWordMatch`()`
-- ::execute`()`: `super()`: **Overridden**
-
-### ReverseSearchCurrentWord < SearchCurrentWord
-- @keywordRegex: `null`
-- ::constructor`()`: `super`: **Overridden**
 
 ### MoveDown < Motion
 - ::operatesLinewise: `true`: **Overridden**
@@ -318,6 +268,17 @@ vim-mode version: 0.57.0
 ### ScrollHalfScreenDown < ScrollHalfScreenUp
 - ::direction: `'down'`: **Overridden**
 
+### MoveToMark < Motion
+- ::constructor`()`: `super`: **Overridden**
+- ::operatesInclusively: `false`: **Overridden**
+- ::operatesLinewise: `true`: **Overridden**
+- ::complete: `false`: **Overridden**
+- ::isLinewise`()`: **Overridden**
+- ::moveCursor`(cursor)`
+
+### MoveToMarkLiteral < MoveToMark
+- ::operatesLinewise: `false`: **Overridden**
+
 ### MoveToNextParagraph < Motion
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
@@ -347,6 +308,46 @@ vim-mode version: 0.57.0
 ### MoveUp < Motion
 - ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor`(cursor)`
+
+### SearchBase < Motion
+*Not exported*
+
+### BracketMatchingMotion < SearchBase
+- ::operatesInclusively: `true`: **Overridden**
+- ::complete: `true`: **Overridden**
+- ::searchForMatch`(startPosition, reverse, inCharacter, outCharacter)`
+- ::characterAt`(position)`
+- ::getSearchData`(position)`
+- ::moveCursor`(cursor)`: **Overridden**
+
+### RepeatSearch < SearchBase
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
+- ::dontUpdateCurrentSearch: `true`: **Overridden**
+- ::reversed`()`: **Overridden**
+
+### RepeatSearchBackwards < RepeatSearch
+- ::constructor`()`: `super`: **Overridden**
+
+### Search < SearchBase
+- ::constructor`()`: `super`: **Overridden**
+- ::getInput`()`: **Overridden**
+
+### ReverseSearch < Search
+- ::constructor`()`: `super`: **Overridden**
+
+### SearchCurrentWord < SearchBase
+- @keywordRegex: `null`
+- ::constructor`()`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
+- ::getCurrentWord`()`
+- ::cursorIsOnEOF`(cursor)`
+- ::getCurrentWordMatch`()`
+- ::execute`()`: `super()`: **Overridden**
+
+### ReverseSearchCurrentWord < SearchCurrentWord
+- @keywordRegex: `null`
+- ::constructor`()`: `super`: **Overridden**
 
 ### MotionError < Base
 - ::constructor`(@message)`: **Overridden**
