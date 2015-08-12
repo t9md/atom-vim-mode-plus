@@ -12,7 +12,7 @@ class TextObject extends Base
   recodable: false
 
   constructor: (@vimState) ->
-    {@editor} = @vimState
+    {@editor, @editorElement} = @vimState
 
 class CurrentSelection extends TextObject
   @extend()

@@ -21,9 +21,8 @@ class Operator extends Base
   complete: false
   recodable: true
 
-  constructor: (@vimState, @options={}) ->
-    {@editor} = @vimState
-    {@complete} = @options if @options.complete?
+  constructor: (@vimState) ->
+    {@editor, @editorElement} = @vimState
 
   # Public: Marks this as ready to execute and saves the motion.
   #

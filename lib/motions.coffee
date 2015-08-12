@@ -20,7 +20,7 @@ class Motion extends Base
   complete: true
   recordable: false
 
-  constructor: (@vimState, @options={}) ->
+  constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
   select: (options) ->
@@ -504,25 +504,14 @@ class Find extends Motion
   @extend()
   backwards: false
   complete: false # will changed to true after Input provided by @getInput()(asynchronous)
+  repeated: false
+  reverse: false
   offset: 0
 
   constructor: ->
     super
-
-    if not @options.repeated
+    unless @repeated
       @getInput(this, class: 'find', singleChar: true, hidden: true)
-      @repeated = false
-      @vimState.globalVimState.currentFind = this
-
-    else
-      @repeated = true
-
-      orig = @vimState.globalVimState.currentFind
-      @backwards = orig.backwards
-      @complete = orig.complete
-      @input = orig.input
-
-      @reverse() if @options.reverse
 
   match: (cursor, count) ->
     currentPosition = cursor.getBufferPosition()
@@ -542,13 +531,38 @@ class Find extends Motion
       if index >= 0
         new Point(currentPosition.row, index - @offset)
 
-  reverse: ->
-    @backwards = not @backwards
-    this
-
   moveCursor: (cursor) ->
     if (match = @match(cursor, @getCount(1)))?
       cursor.setBufferPosition(match)
+
+    if @context
+      @backwards = not @backwards if @reverse
+    else
+      @vimState.globalVimState.currentFind = this
+
+# [FIXME] there is more better way to implement RepeatFind, RepeatFindReverse
+# Current implementation is not declarative.
+class RepeatFind extends Find
+  @extend()
+  repeated: true
+  reverse: false
+  offset: 0
+
+  constructor: ->
+    super
+    @context = @vimState.globalVimState.currentFind
+    {@offset, @backwards, @complete, @input} = @vimState.globalVimState.currentFind
+
+  moveCursor: (args...) ->
+    @context.moveCursor.apply(this, args)
+
+class RepeatFindReverse extends RepeatFind
+  @extend()
+  reverse: true
+
+  constructor: ->
+    super
+    @backwards = not @backwards
 
 # keymap: F
 class FindBackwards extends Find
@@ -877,6 +891,8 @@ module.exports = {
   ScrollFullScreenDown
 
   Find
+  RepeatFind
+  RepeatFindReverse
   FindBackwards
   Till
   TillBackwards

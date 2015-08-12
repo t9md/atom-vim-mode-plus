@@ -1,12 +1,14 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-12T14:26:54.352Z*
+*generated at 2015-08-12T16:17:12.815Z*
 
 - [Base](#base) *Not exported*
   - [Motion](#motion--base)
     - [Find](#find--motion)
       - [FindBackwards](#findbackwards--find)
+      - [RepeatFind](#repeatfind--find)
+        - [RepeatFindReverse](#repeatfindreverse--repeatfind)
       - [Till](#till--find)
         - [TillBackwards](#tillbackwards--till)
     - [MoveDown](#movedown--motion)
@@ -137,7 +139,7 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### Motion < Base
-- ::constructor`(@vimState, options)`: **Overridden**
+- ::constructor`(@vimState)`: **Overridden**
 - ::operatesInclusively: `true`
 - ::operatesLinewise: `false`
 - ::complete: `true`: **Overridden**
@@ -156,13 +158,25 @@ vim-mode version: 0.57.0
 - ::constructor`()`: `super`: **Overridden**
 - ::backwards: `false`
 - ::complete: `false`: **Overridden**
+- ::repeated: `false`
+- ::reverse: `false`
 - ::offset: `0`
 - ::match`(cursor, count)`
-- ::reverse`()`
 - ::moveCursor`(cursor)`
 
 ### FindBackwards < Find
 - ::backwards: `true`: **Overridden**
+
+### RepeatFind < Find
+- ::constructor`()`: `super`: **Overridden**
+- ::repeated: `true`: **Overridden**
+- ::reverse: `false`: **Overridden**
+- ::offset: `0`: **Overridden**
+- ::moveCursor`()`: **Overridden**
+
+### RepeatFindReverse < RepeatFind
+- ::constructor`()`: `super`: **Overridden**
+- ::reverse: `true`: **Overridden**
 
 ### Till < Find
 - ::offset: `1`: **Overridden**
@@ -352,7 +366,7 @@ vim-mode version: 0.57.0
 - ::constructor`(@message)`: **Overridden**
 
 ### Operator < Base
-- ::constructor`(@vimState, options)`: **Overridden**
+- ::constructor`(@vimState)`: **Overridden**
 - ::vimState: `null`
 - ::target: `null`
 - ::complete: `false`: **Overridden**
