@@ -20,7 +20,7 @@ class Motion extends Base
   complete: true
   recordable: false
 
-  constructor: (@vimState) ->
+  constructor: (@vimState, @options={}) ->
     {@editor, @editorElement} = @vimState
 
   select: (options) ->
@@ -510,10 +510,10 @@ class Find extends MotionWithInput
   @extend()
   backwards: false
   offset: 0
-  constructor: (@vimState, options={}) ->
-    super(@vimState)
+  constructor: ->
+    super
 
-    if not options.repeated
+    if not @options.repeated
       @viewModel = new ViewModel(this, class: 'find', singleChar: true, hidden: true)
       # @backwards = false # Moved to prototype property `backwards: false`
       @repeated = false
@@ -527,7 +527,7 @@ class Find extends MotionWithInput
       @complete = orig.complete
       @input = orig.input
 
-      @reverse() if options.reverse
+      @reverse() if @options.reverse
 
   match: (cursor, count) ->
     currentPosition = cursor.getBufferPosition()
@@ -589,13 +589,14 @@ class TillBackwards extends Till
 class MoveToMark extends MotionWithInput
   @extend()
   operatesInclusively: false
+  operatesLinewise: true
 
-  constructor: (@vimState, @linewise=true) ->
-    super(@vimState)
-    @operatesLinewise = @linewise
+  constructor: ->
+    super
     @viewModel = new ViewModel(this, class: 'move-to-mark', singleChar: true, hidden: true)
 
-  isLinewise: -> @linewise
+  isLinewise: ->
+    @operatesLinewise
 
   moveCursor: (cursor) ->
     markPosition = @vimState.getMark(@input.characters)
@@ -605,26 +606,25 @@ class MoveToMark extends MotionWithInput
       @vimState.setMark('`', cursor.getBufferPosition())
 
     cursor.setBufferPosition(markPosition) if markPosition?
-    if @linewise
+    if @operatesLinewise
       cursor.moveToFirstCharacterOfLine()
 
 # keymap: `
 class MoveToMarkLiteral extends MoveToMark
   @extend()
-
-  constructor: (@vimState) ->
-    super(@vimState, false)
+  operatesLinewise: false
 
 # Search
 # -------------------------
 class SearchBase extends MotionWithInput
   @extend()
   operatesInclusively: false
+  dontUpdateCurrentSearch: false
 
-  constructor: (@vimState, options={}) ->
-    super(@vimState)
+  constructor: ->
+    super
     @reverse = @initiallyReversed = false
-    @updateCurrentSearch() unless options.dontUpdateCurrentSearch
+    @updateCurrentSearch() unless @dontUpdateCurrentSearch
 
   reversed: =>
     @initiallyReversed = @reverse = true
@@ -706,7 +706,7 @@ class SearchCurrentWord extends SearchBase
   @keywordRegex: null
   complete: true
 
-  constructor: (@vimState) ->
+  constructor: ->
     super
 
     # FIXME: This must depend on the current language
@@ -767,9 +767,10 @@ AnyBracket = new RegExp(OpenBrackets.concat(CloseBrackets).map(_.escapeRegExp).j
 class RepeatSearch extends SearchBase
   @extend()
   complete: true
+  dontUpdateCurrentSearch: true
 
-  constructor: (@vimState) ->
-    super(@vimState, dontUpdateCurrentSearch: true)
+  constructor: ->
+    super
     @input = new Input(@vimState.getSearchHistoryItem(0) ? "")
     @replicateCurrentSearch()
 
