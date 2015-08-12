@@ -1,6 +1,8 @@
 Base = require './base'
 
 class ViewModel
+  char: null
+
   constructor: (@operation, opts={}) ->
     {@editor, @vimState} = @operation
     @view = new VimNormalModeInputElement().initialize(this, opts)
@@ -8,16 +10,30 @@ class ViewModel
     @vimState.onDidFailToCompose => @view.remove()
 
   confirm: (view) ->
-    @vimState.operationStack.push(new Input(@view.value))
+    if @operation.isMotion()
+      @setInput(@view.value)
+    else
+      @vimState.operationStack.push(new Input(@view.value))
+
+  setInput: (input) ->
+    @operation.setInput(new Input(input))
+    @vimState.operationStack.process() # Re-process!!
+
+  getInput: ->
+    @input
 
   cancel: (view) ->
     if @vimState.isOperatorPending()
-      @vimState.operationStack.push(new Input(''))
+      if @operation.isMotion()
+        @setInput('')
+      else
+        @vimState.operationStack.push(new Input(''))
 
 class Input extends Base
   @extend()
   complete: true
   recodable: true
+
   constructor: (@characters) ->
 
 class VimNormalModeInputElement extends HTMLDivElement

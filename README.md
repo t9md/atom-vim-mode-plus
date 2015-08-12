@@ -58,7 +58,8 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] Consolidate arguments passed to each TOM. vimState should be available to all TOM. editor and editorElement should be removed since its available via vimState. This consistency will reduce developer's confusion while working on multiple TOMs.
 - [ ] Eliminate Prefix.Register. make it available via vimState.
 - [ ] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself.
-- [ ] Remove MotionWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity.
+- [x] Remove MotionWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity.
+- [x] Remove OperatorWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity.
 - [ ] Scroll's scrolloff check can be consolidated by adjusting scrollTop max and min using Math.max, Math.min.
 
 # How Operation Stack works(for current official vim-mode).

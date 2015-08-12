@@ -110,21 +110,12 @@ class Motion extends Base
   isInclusive: ->
     @vimState.isVisualMode() or @operatesInclusively
 
-# Public: Generic class for motions that require extra input
-class MotionWithInput extends Motion
-  # [FIXME] Can be removed.Role of this class is to proxy user's input.
-  # If each motion can directly get input from user, this class can be eliminated.
-  # This simplify unessenstal inheritance hierarchies.
-  @extend()
-  complete: false
+  # Proxying request to ViewModel to get Input instance.
+  getInput: (args...) ->
+    new ViewModel(args...)
 
-  canComposeWith: (operation) ->
-    return operation.characters?
-
-  compose: (input) ->
-    unless input.characters
-      throw new MotionError('Must compose with an Input')
-    @input = input
+  # Callbacked by @getInput()
+  setInput: (@input) ->
     @complete = true
 
 class MoveLeft extends Motion
@@ -509,19 +500,17 @@ class ScrollFullScreenDown extends ScrollFullScreenUp
 # Find Motion
 # -------------------------
 # keymap: f
-class Find extends MotionWithInput
+class Find extends Motion
   @extend()
   backwards: false
+  complete: false # will changed to true after Input provided by @getInput()(asynchronous)
   offset: 0
+
   constructor: ->
     super
 
     if not @options.repeated
-      # [FIXME] When ViewModel is initialize()ed, it'll get input from user
-      # and push Input instance with user's imput to operationStack.
-      # This is unnecessarily complecated and not intuitive.
-      @viewModel = new ViewModel(this, class: 'find', singleChar: true, hidden: true)
-      # @backwards = false # Moved to prototype property `backwards: false`
+      @getInput(this, class: 'find', singleChar: true, hidden: true)
       @repeated = false
       @vimState.globalVimState.currentFind = this
 
@@ -592,14 +581,15 @@ class TillBackwards extends Till
 # Mark
 # -------------------------
 # keymap: '
-class MoveToMark extends MotionWithInput
+class MoveToMark extends Motion
   @extend()
   operatesInclusively: false
   operatesLinewise: true
+  complete: false # will changed to true after Input provided by @getInput()(asynchronous)
 
   constructor: ->
     super
-    @viewModel = new ViewModel(this, class: 'move-to-mark', singleChar: true, hidden: true)
+    @getInput(this, class: 'move-to-mark', singleChar: true, hidden: true)
 
   isLinewise: ->
     @operatesLinewise
@@ -622,10 +612,12 @@ class MoveToMarkLiteral extends MoveToMark
 
 # Search
 # -------------------------
-class SearchBase extends MotionWithInput
+# class SearchBase extends MotionWithInput
+class SearchBase extends Motion
   @extend()
   operatesInclusively: false
   dontUpdateCurrentSearch: false
+  complete: false
 
   constructor: ->
     super
@@ -697,7 +689,12 @@ class Search extends SearchBase
   @extend()
   constructor: ->
     super
-    @viewModel = new SearchViewModel(this)
+
+    @getInput()
+    # @viewModel = new SearchViewModel(this)
+
+  getInput: ->
+    new SearchViewModel(this)
 
 # keymap: ?
 class ReverseSearch extends Search
@@ -860,7 +857,7 @@ class BracketMatchingMotion extends SearchBase
 module.exports = {
   MotionError
   Motion
-  MotionWithInput
+  # MotionWithInput
   MoveLeft, MoveRight, MoveUp, MoveDown
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
