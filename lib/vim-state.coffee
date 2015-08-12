@@ -23,7 +23,6 @@ class VimState
   submode: null
   destroyed: false
   replaceModeListener: null
-  # count: null # Used to instruct number of repeat count to each operation.
 
   constructor: (@editorElement, @statusBarManager, @globalVimState) ->
     @emitter = new Emitter
