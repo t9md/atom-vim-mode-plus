@@ -8,17 +8,11 @@ WholeWordRegex = /\S+/
 class TextObject extends Base
   @extend()
   vimState: null
-  recodable: false
   complete: true
+  recodable: false
 
   constructor: (@vimState) ->
     {@editor} = @vimState
-
-  isComplete: ->
-    @complete
-
-  isRecordable: ->
-    @recodable
 
 class CurrentSelection extends TextObject
   @extend()

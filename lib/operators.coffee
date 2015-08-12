@@ -25,19 +25,6 @@ class Operator extends Base
     {@editor} = @vimState
     {@complete} = @options if @options.complete?
 
-  # Public: Determines when the command can be executed.
-  #
-  # Returns true if ready to execute and false otherwise.
-  isComplete: ->
-    @complete
-
-  # Public: Determines if this command should be recorded in the command
-  # history for repeats.
-  #
-  # Returns true if this command should be recorded.
-  isRecordable: ->
-    @recodable
-
   # Public: Marks this as ready to execute and saves the motion.
   #
   # target - TextObject or Motion to operate on.

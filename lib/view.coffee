@@ -16,9 +16,9 @@ class ViewModel
 
 class Input extends Base
   @extend()
+  complete: true
+  recodable: true
   constructor: (@characters) ->
-  isComplete: -> true
-  isRecordable: -> true
 
 class VimNormalModeInputElement extends HTMLDivElement
   createdCallback: ->

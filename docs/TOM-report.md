@@ -150,7 +150,6 @@ vim-mode version: 0.57.0
 - ::moveSelectionInclusively`(selection, options)`
 - ::moveSelection`(selection, options)`
 - ::isComplete`()`
-- ::isRecordable`()`
 - ::isLinewise`()`
 - ::isInclusive`()`
 
@@ -360,7 +359,6 @@ vim-mode version: 0.57.0
 - ::complete: `false`
 - ::recodable: `true`
 - ::isComplete`()`
-- ::isRecordable`()`
 - ::compose`(@target)`
 - ::canComposeWith`(operation)`
 - ::setTextRegister`(register, text)`
@@ -575,7 +573,6 @@ vim-mode version: 0.57.0
 - ::recodable: `false`
 - ::complete: `true`
 - ::isComplete`()`
-- ::isRecordable`()`
 
 ### CurrentSelection < TextObject
 - ::select`()`
