@@ -30,7 +30,6 @@ class CurrentSelection extends TextObject
 class SelectInsideWord extends TextObject
   @extend()
   select: ->
-    console.log "SELECT!!"
     @editor.selectWordsContainingCursors()
     [true]
 
