@@ -6,6 +6,11 @@ class Scroll extends Base
   isRecordable: ->
     false
 
+  getPixelCursor: (which) ->
+    # which is `top` or `left`
+    point = @editor.getCursorScreenPosition()
+    @editorElement.pixelPositionForScreenPosition(point)[which]
+
   constructor: (@vimState, @options={}) ->
     {@editorElement} = @vimState
     @editor = @editorElement.getModel()
@@ -56,10 +61,6 @@ class ScrollUp extends Scroll
 class ScrollCursor extends Scroll
   keepCursor: false
   @extend()
-  constructor: ->
-    super
-    point = @editor.getCursorScreenPosition()
-    @pixelCursorTop = @editorElement.pixelPositionForScreenPosition(point).top
 
   execute: ->
     @moveToFirstCharacterOfLine() unless @keepCursor
@@ -77,7 +78,7 @@ class ScrollCursorToTop extends ScrollCursor
     not (@rows.last is @rows.final)
 
   getScrollTop: ->
-    @pixelCursorTop - @getOffSetPixelHeight()
+    @getPixelCursor('top') - @getOffSetPixelHeight()
 
 class ScrollCursorToBottom extends ScrollCursor
   @extend()
@@ -85,7 +86,7 @@ class ScrollCursorToBottom extends ScrollCursor
     not (@rows.first is 0)
 
   getScrollTop: ->
-    @pixelCursorTop - (@editor.getHeight() - @getOffSetPixelHeight(1))
+    @getPixelCursor('top') - (@editor.getHeight() - @getOffSetPixelHeight(1))
 
 class ScrollCursorToMiddle extends ScrollCursor
   @extend()
@@ -93,7 +94,7 @@ class ScrollCursorToMiddle extends ScrollCursor
     true
 
   getScrollTop: ->
-    @pixelCursorTop - (@editor.getHeight() / 2)
+    @getPixelCursor('top') - (@editor.getHeight() / 2)
 
 class ScrollCursorToTopLeave extends ScrollCursorToTop
   @extend()
@@ -111,24 +112,19 @@ class ScrollCursorToMiddleLeave extends ScrollCursorToMiddle
 # -------------------------
 class ScrollHorizontal extends Scroll
   @extend()
-  constructor: ->
-    super
-    cursorPos = @editor.getCursorScreenPosition()
-    @pixelCursorTop = @editorElement.pixelPositionForScreenPosition(cursorPos).left
-
   putCursorOnScreen: ->
     @editor.scrollToCursorPosition({center: false})
 
 class ScrollCursorToLeft extends ScrollHorizontal
   @extend()
   execute: ->
-    @editor.setScrollLeft(@pixelCursorTop)
+    @editor.setScrollLeft(@getPixelCursor('left'))
     @putCursorOnScreen()
 
 class ScrollCursorToRight extends ScrollHorizontal
   @extend()
   execute: ->
-    @editor.setScrollRight(@pixelCursorTop)
+    @editor.setScrollRight(@getPixelCursor('left'))
     @putCursorOnScreen()
 
 module.exports = {
