@@ -54,18 +54,13 @@ class Operator extends Base
       type = Utils.copyType(text)
     @vimState.setRegister(register, {text, type}) unless text is ''
 
-# Public: Generic class for an operator that requires extra input
-class OperatorWithInput extends Operator
-  @extend()
-  canComposeWith: (operation) ->
-    operation.characters? or operation.select?
+  # Proxying request to ViewModel to get Input instance.
+  getInput: (args...) ->
+    new ViewModel(args...)
 
-  compose: (operation) ->
-    if operation.select?
-      @target = operation
-    if operation.characters?
-      @input = operation
-      @complete = true
+  # Callbacked by @getInput()
+  setInput: (@input) ->
+    @complete = true
 
 class Select extends Operator
   @extend()
@@ -267,11 +262,11 @@ class Repeat extends Operator
 #
 # It creates a mark at the current cursor position
 #
-class Mark extends OperatorWithInput
+class Mark extends Operator
   @extend()
   constructor: ->
     super
-    @viewModel = new ViewModel(this, class: 'mark', singleChar: true, hidden: true)
+    @getInput(this, class: 'mark', singleChar: true, hidden: true)
 
   # Public: Creates the mark in the specified mark register (from user input)
   # at the current position
@@ -680,13 +675,18 @@ class TransactionBundler
 
 # Replace
 # -------------------------
-class Replace extends OperatorWithInput
+class Replace extends Operator
   @extend()
+  input: null
   constructor: ->
     super
-    @viewModel = new ViewModel(this, class: 'replace', hidden: true, singleChar: true, defaultText: '\n')
+    @getInput(this, class: 'replace', hidden: true, singleChar: true, defaultText: '\n')
+
+  isComplete: ->
+    @input?
 
   execute: ->
+    console.log @complete
     count = @getCount(1)
     if @input.characters is ""
       # replace canceled
@@ -731,7 +731,7 @@ ActivateReplaceMode = ReplaceMode
 
 module.exports = {
   # General
-  Operator, OperatorWithInput, OperatorError, Delete,
+  Operator, OperatorError, Delete,
   ToggleCase, ToggleCaseNow,
   Select,
   UpperCase, LowerCase, Yank, Join, Repeat, Mark,

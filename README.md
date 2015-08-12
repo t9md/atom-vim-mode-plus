@@ -56,11 +56,10 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] Operation really need to be List(`[]`) of Operation? Explicitly define operation is more neat and descriptive. done, :fire: operator with list form.
 - [x] Consolidate files, remove subdirectories, all files are located directly under lib.(for easiness of refactoring, faster startup time.)
 - [x] Consolidate arguments passed to each TOM. vimState should be available to all TOM. editor and editorElement should be removed since its available via vimState. This consistency will reduce developer's confusion while working on multiple TOMs.
+- [x] Remove MotionWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity. [done](https://github.com/t9md/vim-mode/commit/0c7a4185ff4974ffe316459d8a98d2764057198d).
+- [x] Remove OperatorWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity.
 - [ ] Eliminate Prefix.Register. make it available via vimState.
 - [ ] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself.
-- [x] Remove MotionWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity. [done](https://github.com/t9md/vim-mode/commit/0c7a4185ff4974ffe316459d8a98d2764057198d).
-- [ ] Remove OperatorWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity.
-- [ ] Scroll's scrolloff check can be consolidated by adjusting scrollTop max and min using Math.max, Math.min.
 
 # How Operation Stack works(for current official vim-mode).
 

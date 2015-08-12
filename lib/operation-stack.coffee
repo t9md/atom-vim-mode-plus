@@ -41,13 +41,13 @@ class OperationStack
         @vimState.emitter.emit('failed-to-compose')
         return
 
+      debug "pushing <#{op.getKind()}>"
       @stack.push op
 
       # If we've received an operator in visual mode, use inplict currentSelection textobject
       # as a target of operator.
-      if @vimState.isVisualMode() and op.isOperator?()
+      if @vimState.isVisualMode() and op.isOperator()
         @stack.push(new TextObjects.CurrentSelection(@vimState))
-
       @process()
 
     for cursor in @vimState.editor.getCursors()
