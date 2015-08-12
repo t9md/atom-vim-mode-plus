@@ -101,12 +101,6 @@ class Motion extends Base
   moveSelection: (selection, options) ->
     selection.modifySelection => @moveCursor(selection.cursor, options)
 
-  isComplete: ->
-    @complete
-
-  isRecordable: ->
-    @recordable
-
   isLinewise: ->
     if @vimState.isVisualMode()
       @vimState.submode is 'linewise'
@@ -710,6 +704,7 @@ class ReverseSearch extends Search
 class SearchCurrentWord extends SearchBase
   @extend()
   @keywordRegex: null
+  complete: true
 
   constructor: (@vimState) ->
     super
@@ -753,8 +748,6 @@ class SearchCurrentWord extends SearchBase
     else
       characters
 
-  isComplete: -> true
-
   execute: ->
     # @getCount(1)
     super() if @input.characters.length > 0
@@ -773,12 +766,12 @@ AnyBracket = new RegExp(OpenBrackets.concat(CloseBrackets).map(_.escapeRegExp).j
 # keymap: n
 class RepeatSearch extends SearchBase
   @extend()
+  complete: true
+
   constructor: (@vimState) ->
     super(@vimState, dontUpdateCurrentSearch: true)
     @input = new Input(@vimState.getSearchHistoryItem(0) ? "")
     @replicateCurrentSearch()
-
-  isComplete: -> true
 
   reversed: ->
     @reverse = not @initiallyReversed
@@ -795,8 +788,7 @@ class RepeatSearchBackwards extends RepeatSearch
 class BracketMatchingMotion extends SearchBase
   @extend()
   operatesInclusively: true
-
-  isComplete: -> true
+  complete: true
 
   searchForMatch: (startPosition, reverse, inCharacter, outCharacter) ->
     depth = 0

@@ -11,6 +11,22 @@ module.exports =
 class Base
   pure: false
 
+  # Public: Determines when the command can be executed.
+  #
+  # Returns true if ready to execute and false otherwise.
+  complete: null
+  isComplete: ->
+    @complete
+
+  # Public: Determines if this command should be recorded in the command
+  # history for repeats.
+  #
+  # Returns true if this command should be recorded.
+  recodable: null
+  isRecordable: ->
+    @recodable
+
+
   # Expected to be called by child class.
   # It automatically create typecheck function like
   #
