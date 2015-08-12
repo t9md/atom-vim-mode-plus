@@ -91,7 +91,6 @@ class VimState
     # [FIXME]
     @registerOperationCommands
       'register-prefix': (e) => @registerPrefix(e)
-      'move-to-beginning-of-line': (e) => @moveOrRepeat(e)
 
     # Operator
     # -------------------------
@@ -123,6 +122,7 @@ class VimState
     # Motion
     # -------------------------
     @registerNewOperationCommands Motions, [
+      'move-to-beginning-of-line' #: (e) => @moveOrRepeat(e)
       # ;, ,
       'repeat-find', 'repeat-find-reverse'
       # j, k, h, l
@@ -586,8 +586,11 @@ class VimState
     count = null
     isOperatorPending = @isOperatorPending.bind(this)
     set: (e) ->
-      keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
-      num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
+      if _.isNumber(e)
+        num = e
+      else
+        keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
+        num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
 
       # To cover scenario `10d3y` in this case we use 3, need to trash 10.
       if isOperatorPending()
@@ -605,20 +608,6 @@ class VimState
     reversed = not @editor.getLastSelection().isReversed()
     for selection in @editor.getSelections()
       selection.setBufferRange(selection.getBufferRange(), {reversed})
-
-  # Private: Figure out whether or not we are in a repeat sequence or we just
-  # want to move to the beginning of the line. If we are within a repeat
-  # sequence, we pass control over to @repeatPrefix.
-  #
-  # e - The triggered event.
-  #
-  # Returns new motion or nothing.
-  moveOrRepeat: (e) ->
-    if @counter.get()?
-      @counter.set(e)
-      null
-    else
-      new Motions.MoveToBeginningOfLine(this)
 
   isOperatorPending: ->
     not @operationStack.isEmpty()
