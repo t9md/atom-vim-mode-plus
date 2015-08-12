@@ -19,6 +19,12 @@ class OperationStack
   # it.
   push: (op) ->
     return unless op?
+    if op.isMoveToBeginningOfLine()
+      # 0 is special need to differenciate `10`, 0
+      if @vimState.counter.get()?
+        @vimState.counter.set(0)
+        return
+
     if @isEmpty() and settings.debug()
       if settings.debugOutput() is 'console'
         console.clear()
