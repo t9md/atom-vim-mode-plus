@@ -32,7 +32,7 @@ class VimState
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
     @operationStack = new OperationStack(this)
-    @counter = @getCounter()
+    @counter = @getCountManager()
 
     @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
       return unless @editor?
@@ -582,7 +582,7 @@ class VimState
   # e - The event that triggered the Number prefix.
   #
   # Returns nothing.
-  getCounter: ->
+  getCountManager: ->
     count = null
     isOperatorPending = @isOperatorPending.bind(this)
     set: (e) ->
