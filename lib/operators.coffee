@@ -1,7 +1,7 @@
 _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
 
-{ViewModel} = require './view-models/view-model'
+{ViewModel} = require './view'
 Utils = require './utils'
 settings = require './settings'
 Base = require './base'
