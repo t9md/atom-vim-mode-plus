@@ -99,116 +99,125 @@ class VimState
     # Operator
     # -------------------------
     @registerNewOperationCommands TextObjects, [
-      'select-inside-word',            'select-inside-whole-word'
-      'select-inside-double-quotes',   'select-around-double-quotes'
-      'select-inside-single-quotes',   'select-around-single-quotes'
-      'select-inside-back-ticks',      'select-around-back-ticks'
-      'select-inside-paragraph',       'select-around-paragraph'
-      'select-a-word',                 'select-a-whole-word'
-      'select-inside-curly-brackets',  'select-around-curly-brackets'
-      'select-inside-angle-brackets',  'select-around-angle-brackets'
-      'select-inside-tags',             # why not around version exists?
+      # [FIXME] I want use inline comment(### ###), but current language-coffeescript don't correctly highlight
+      # if comment end in single line.
+      # w
+      'select-inside-word', 'select-a-word',
+      # W
+      'select-inside-whole-word', 'select-a-whole-word',
+      # "
+      'select-inside-double-quotes'  , 'select-around-double-quotes'
+      # '
+      'select-inside-single-quotes'  , 'select-around-single-quotes'
+      # `
+      'select-inside-back-ticks'     , 'select-around-back-ticks'
+      # p
+      'select-inside-paragraph'      , 'select-around-paragraph'
+      # {
+      'select-inside-curly-brackets' , 'select-around-curly-brackets'
+      # <
+      'select-inside-angle-brackets' , 'select-around-angle-brackets'
+      # [
       'select-inside-square-brackets', 'select-around-square-brackets'
-      'select-inside-parentheses',     'select-around-parentheses'
+      # (, b
+      'select-inside-parentheses'    , 'select-around-parentheses'
+      # t
+      'select-inside-tags'           , # why not around version exists?
     ]
 
     # Motion
     # -------------------------
     @registerNewOperationCommands Motions, [
-      'move-left'
-      'move-up'
-      'move-down'
-      'move-right'
-      'move-to-next-word'
-      'move-to-next-whole-word'
-      'move-to-end-of-word'
-      'move-to-end-of-whole-word'
-      'move-to-previous-word'
-      'move-to-previous-whole-word'
-      'move-to-next-paragraph'
-      'move-to-previous-paragraph'
-      'move-to-first-character-of-line'
-      'move-to-first-character-of-line-and-down'
-      'move-to-last-character-of-line'
-      'move-to-last-nonblank-character-of-line-and-down'
-      'move-to-first-character-of-line-up'
-      'move-to-first-character-of-line-down'
-      'move-to-start-of-file'
-      'move-to-line'
-      'move-to-top-of-screen'
-      'move-to-bottom-of-screen'
-      'move-to-middle-of-screen'
-
-      'scroll-half-screen-up'
-      'scroll-full-screen-up'
-      'scroll-half-screen-down'
-      'scroll-full-screen-down'
-
-      'repeat-search'
-      'repeat-search-backwards'
-      'move-to-mark'
-      'move-to-mark-literal'
-      'find'
-      'find-backwards'
-      'till'
-      'till-backwards'
-      'search'
-      'reverse-search'
-      'search-current-word'
-      'bracket-matching-motion'
-      'reverse-search-current-word'
+      # j, k, h, l
+      'move-down', 'move-up', 'move-left','move-right',
+      # w, W
+      'move-to-next-word'    , 'move-to-next-whole-word'    ,
+      # e, E
+      'move-to-end-of-word'  , 'move-to-end-of-whole-word'  ,
+      # b, B
+      'move-to-previous-word', 'move-to-previous-whole-word',
+      # }, {
+      'move-to-next-paragraph', 'move-to-previous-paragraph',
+      # ^, $
+      'move-to-first-character-of-line', 'move-to-last-character-of-line',
+      # -, +
+      'move-to-first-character-of-line-up', 'move-to-first-character-of-line-down',
+      # enter
+      'move-to-first-character-of-line-and-down',
+      # g_
+      'move-to-last-nonblank-character-of-line-and-down',
+      # gg, G
+      'move-to-start-of-file', 'move-to-line',
+      # H, L, M
+      'move-to-top-of-screen', 'move-to-bottom-of-screen', 'move-to-middle-of-screen',
+      # ctrl-u, ctrl-d
+      'scroll-half-screen-up', 'scroll-half-screen-down',
+      # ctrl-b, ctrl-f
+      'scroll-full-screen-up', 'scroll-full-screen-down',
+      # n, N
+      'repeat-search'          , 'repeat-search-backwards'    ,
+      # ', `
+      'move-to-mark'           , 'move-to-mark-literal'       ,
+      # f, F
+      'find'                   , 'find-backwards'             ,
+      # t, T
+      'till'                   , 'till-backwards'             ,
+      # /, ?
+      'search'                 , 'reverse-search'             ,
+      # *, #
+      'search-current-word'    , 'reverse-search-current-word',
+      # %
+      'bracket-matching-motion',
     ]
 
     # Operator
     # -------------------------
     @registerNewOperationCommands Operators, [
-      'activate-insert-mode'
+      # i, a
+      'activate-insert-mode', 'insert-after'
+      # r
       'activate-replace-mode'
-      'substitute'
-      'substitute-line'
-      'insert-after'
-      'insert-after-end-of-line'
-      'insert-at-beginning-of-line'
-      'insert-above-with-newline'
-      'insert-below-with-newline'
-      'delete'
-      'change'
-      'change-to-last-character-of-line'
-      'delete-right'
-      'delete-left'
-      'delete-to-last-character-of-line'
-      'toggle-case'
-      'upper-case'
-      'lower-case'
-      'toggle-case-now'
-      'yank'
-      'yank-line'
-      'put-before',
-      'put-after'
+      # s, S
+      'substitute', 'substitute-line',
+      # I, A
+      'insert-at-beginning-of-line', 'insert-after-end-of-line',
+      # o, O
+      'insert-below-with-newline', 'insert-above-with-newline',
+      # d, D
+      'delete', 'delete-to-last-character-of-line'
+      # x, X
+      'delete-right', 'delete-left',
+      # c, C
+      'change', 'change-to-last-character-of-line'
+      # y, Y
+      'yank', 'yank-line'
+      # p, P
+      'put-after', 'put-before'
+      # U, u, g~, ~
+      'upper-case', 'lower-case', 'toggle-case', 'toggle-case-now'
+      # J
       'join'
-      'indent'
-      'outdent'
-      'auto-indent'
-      'increase'
-      'decrease'
-      'repeat'
-      'mark'
-      'replace'
+      # >, <, =
+      'indent', 'outdent', 'auto-indent',
+      # ctrl-a, ctrl-x
+      'increase', 'decrease'
+      # ., m, r
+      'repeat', 'mark', 'replace'
     ]
 
     # Scroll
     # -------------------------
     @registerNewOperationCommands Scroll, [
-      'scroll-down'
-      'scroll-up'
-      'scroll-cursor-to-top'
-      'scroll-cursor-to-middle'
-      'scroll-cursor-to-bottom'
-      'scroll-cursor-to-top-leave'
-      'scroll-cursor-to-middle-leave'
-      'scroll-cursor-to-bottom-leave'
-      'scroll-cursor-to-left'
-      'scroll-cursor-to-right'
+      # ctrl-e, ctrl-y
+      'scroll-down', 'scroll-up'
+      # z enter, zt
+      'scroll-cursor-to-top', 'scroll-cursor-to-top-leave',
+      # z., zz
+      'scroll-cursor-to-middle', 'scroll-cursor-to-middle-leave',
+      # z-, zb
+      'scroll-cursor-to-bottom', 'scroll-cursor-to-bottom-leave',
+      # zs, ze
+      'scroll-cursor-to-left', 'scroll-cursor-to-right'
       ]
 
   # Private: Register multiple command handlers via an {Object} that maps
