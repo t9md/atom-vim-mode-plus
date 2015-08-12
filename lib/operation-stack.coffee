@@ -20,10 +20,9 @@ class OperationStack
   push: (op) ->
     return unless op?
     if @isEmpty() and settings.debug()
-      debug "#=== Start at #{new Date().toISOString()}"
       if settings.debugOutput() is 'console'
-        null
-        # console.clear()
+        console.clear()
+      debug "#=== Start at #{new Date().toISOString()}"
 
     @withLock =>
       # Motions in visual mode perform their selections.
@@ -75,7 +74,6 @@ class OperationStack
   process: ->
     return if @isEmpty()
     debug "-> @process(): start"
-    @inspect()
 
     unless @peekTop().isComplete()
       if @vimState.isNormalMode() and @peekTop().isOperator?()
