@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-11T17:58:13.262Z*
+*generated at 2015-08-12T06:56:34.183Z*
 
 - [Base](#base) *Not exported*
   - [Motion](#motion--base)
@@ -142,14 +142,13 @@ vim-mode version: 0.57.0
 - ::constructor`(@vimState)`: **Overridden**
 - ::operatesInclusively: `true`
 - ::operatesLinewise: `false`
-- ::complete: `true`
+- ::complete: `true`: **Overridden**
 - ::recordable: `false`
 - ::select`(options)`
 - ::execute`()`
 - ::moveSelectionLinewise`(selection, options)`
 - ::moveSelectionInclusively`(selection, options)`
 - ::moveSelection`(selection, options)`
-- ::isComplete`()`
 - ::isLinewise`()`
 - ::isInclusive`()`
 
@@ -191,7 +190,7 @@ vim-mode version: 0.57.0
 
 ### BracketMatchingMotion < SearchBase
 - ::operatesInclusively: `true`: **Overridden**
-- ::isComplete`()`: **Overridden**
+- ::complete: `true`: **Overridden**
 - ::searchForMatch`(startPosition, reverse, inCharacter, outCharacter)`
 - ::characterAt`(position)`
 - ::getSearchData`(position)`
@@ -199,7 +198,7 @@ vim-mode version: 0.57.0
 
 ### RepeatSearch < SearchBase
 - ::constructor`(@vimState)`: **Overridden**
-- ::isComplete`()`: **Overridden**
+- ::complete: `true`: **Overridden**
 - ::reversed`()`: **Overridden**
 
 ### RepeatSearchBackwards < RepeatSearch
@@ -214,10 +213,10 @@ vim-mode version: 0.57.0
 ### SearchCurrentWord < SearchBase
 - @keywordRegex: `null`
 - ::constructor`(@vimState)`: `super`: **Overridden**
+- ::complete: `true`: **Overridden**
 - ::getCurrentWord`()`
 - ::cursorIsOnEOF`(cursor)`
 - ::getCurrentWordMatch`()`
-- ::isComplete`()`: **Overridden**
 - ::execute`()`: `super()`: **Overridden**
 
 ### ReverseSearchCurrentWord < SearchCurrentWord
@@ -356,9 +355,8 @@ vim-mode version: 0.57.0
 - ::constructor`(@vimState, options)`: **Overridden**
 - ::vimState: `null`
 - ::target: `null`
-- ::complete: `false`
-- ::recodable: `true`
-- ::isComplete`()`
+- ::complete: `false`: **Overridden**
+- ::recodable: `true`: **Overridden**
 - ::compose`(@target)`
 - ::canComposeWith`(operation)`
 - ::setTextRegister`(register, text)`
@@ -570,9 +568,8 @@ vim-mode version: 0.57.0
 ### TextObject < Base
 - ::constructor`(@vimState)`: **Overridden**
 - ::vimState: `null`
-- ::recodable: `false`
-- ::complete: `true`
-- ::isComplete`()`
+- ::complete: `true`: **Overridden**
+- ::recodable: `false`: **Overridden**
 
 ### CurrentSelection < TextObject
 - ::select`()`
