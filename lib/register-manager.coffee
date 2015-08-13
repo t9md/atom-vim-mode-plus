@@ -10,8 +10,6 @@ settings = require './settings'
 # been set.
 module.exports =
 class RegisterManager
-  name = null
-
   constructor: (@vimState) ->
     {@editor, @globalVimState} = @vimState
 
