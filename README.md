@@ -60,7 +60,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] Remove OperatorWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity.
 - [x] Eliminate Prefix.Register. make it available via vimState.
 - [x] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself. [done](https://github.com/t9md/vim-mode/commit/5ac09c41beea779dd157ae76230d4c76b99989d4)
-- [ ] `introduce ViewModel.onDidGetInput(callback)` for operation which need user input.
+- [x] `introduce ViewModel.onDidGetInput(callback)` for operation which need user input.
 
 # How Operation Stack works(for current official vim-mode).
 
