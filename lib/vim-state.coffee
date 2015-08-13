@@ -233,8 +233,8 @@ class VimState
       do (fn) =>
         @subscriptions.add atom.commands.add(@editorElement, "vim-mode:#{name}", fn)
 
-  # 'New' is 'new' way of registration to distinguish exisiting function.
-  # By maping command name to correspoinding class.
+  # Register operation command.
+  # command-name is automatically mapped to correspoinding class.
   #  e.g.
   # join -> Join
   # scroll-down -> ScrollDown
@@ -245,7 +245,6 @@ class VimState
         klass = _.capitalize(_.camelize(name))
         commands[name] = => @operationStack.push new kind[klass](this)
     @registerCommands(commands)
-    # @registerOperationCommands(commands)
 
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)

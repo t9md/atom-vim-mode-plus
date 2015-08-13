@@ -1,20 +1,23 @@
 Base = require './base'
+{Emitter} = require 'atom'
 
 class ViewModel
-  char: null
-
   constructor: (@operation, opts={}) ->
     {@editor, @vimState} = @operation
+    @emitter = new Emitter
     @view = new VimNormalModeInputElement().initialize(this, opts)
     @editor.normalModeInputView = @view
     @vimState.onDidFailToCompose => @view.remove()
 
+  onDidGetInput: (callback) ->
+    @emitter.on 'did-get-input', callback
+
   confirm: (view) ->
-    @operation.setInput(new Input(@view.value))
+    @emitter.emit 'did-get-input', (new Input(@view.value))
 
   cancel: (view) ->
     if @vimState.operationStack.isOperatorPending()
-      @operation.setInput(new Input(''))
+      @emitter.emit 'did-get-input', (new Input(''))
 
 class Input extends Base
   @extend()

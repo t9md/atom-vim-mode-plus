@@ -55,12 +55,10 @@ class Operator extends Base
 
   # Proxying request to ViewModel to get Input instance.
   getInput: (args...) ->
-    new ViewModel(args...)
-
-  # Callbacked by @getInput()
-  setInput: (@input) ->
-    @complete = true
-    @vimState.operationStack.process() # Re-process!!
+    viewModel = new ViewModel(args...)
+    viewModel.onDidGetInput (@input) =>
+      @complete = true
+      @vimState.operationStack.process() # Re-process!!
 
   getRegisterName: ->
     @vimState.register.getName()
@@ -653,7 +651,6 @@ class Replace extends Operator
     @input?
 
   execute: ->
-    console.log @complete
     count = @getCount(1)
     if @input.characters is ""
       # replace canceled
