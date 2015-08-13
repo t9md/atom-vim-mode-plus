@@ -30,10 +30,6 @@ module.exports =
       filePath = fs.normalize("~/sample.log")
       fs.appendFileSync filePath, msg
 
-  # debugClear: ->
-  #   return unless settings.debug()
-  #   if settings.debugOutput() is 'console'
-  #     console.clear()
-  #   else
-  #     filePath = fs.normalize("~/sample.log")
-  #     # fs.writeFile filePath, ''
+  getKeystrokeForEvent: (event) ->
+    keyboardEvent = event.originalEvent?.originalEvent ? event.originalEvent
+    atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)

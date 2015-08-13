@@ -14,6 +14,7 @@ Scroll = require './scroll'
 OperationStack = require './operation-stack'
 RegisterManager = require './register-manager'
 CountManager = require './count-manager'
+{getKeystrokeForEvent} = require './utils'
 
 module.exports =
 class VimState
@@ -508,8 +509,7 @@ class VimState
   #
   # Returns the name of the register
   registerName: (e) ->
-    keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
-    name = atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
+    name = getKeystrokeForEvent(e)
     if name.lastIndexOf('shift-', 0) is 0
       name = name.slice(6)
     name
