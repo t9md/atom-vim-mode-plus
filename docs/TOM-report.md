@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-12T16:17:12.815Z*
+*generated at 2015-08-13T20:44:56.570Z*
 
 - [Base](#base) *Not exported*
   - [Motion](#motion--base)
@@ -93,8 +93,6 @@ vim-mode version: 0.57.0
     - [Yank](#yank--operator)
       - [YankLine](#yankline--yank)
   - [OperatorError](#operatorerror--base)
-  - [Prefix](#prefix--base) *Not exported*
-    - [Register](#register--prefix)
   - [Scroll](#scroll--base) *Not exported*
     - [ScrollCursor](#scrollcursor--scroll) *Not exported*
       - [ScrollCursorToBottom](#scrollcursortobottom--scrollcursor)
@@ -376,6 +374,7 @@ vim-mode version: 0.57.0
 - ::setTextRegister`(register, text)`
 - ::getInput`()`
 - ::setInput`(@input)`
+- ::getRegisterName`()`
 
 ### AdjustIndentation < Operator
 *Not exported*
@@ -390,8 +389,6 @@ vim-mode version: 0.57.0
 - ::indent`()`
 
 ### Delete < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::register: `null`
 - ::execute`()`
 
 ### DeleteLeft < Delete
@@ -429,9 +426,7 @@ vim-mode version: 0.57.0
 - ::inputOperator`()`
 
 ### Change < Insert
-- ::constructor`()`: `super`: **Overridden**
 - ::complete: `false`: **Overridden**
-- ::register: `null`
 - ::execute`()`: `super`: **Overridden**
 
 ### ChangeToLastCharacterOfLine < Change
@@ -445,7 +440,6 @@ vim-mode version: 0.57.0
 ### SubstituteLine < Change
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
-- ::register: `null`: **Overridden**
 
 ### InsertAboveWithNewline < Insert
 - ::execute`()`: `super`: **Overridden**
@@ -514,8 +508,6 @@ vim-mode version: 0.57.0
 - ::execute`()`
 
 ### Yank < Operator
-- ::constructor`()`: `super`: **Overridden**
-- ::register: `null`
 - ::execute`()`
 
 ### YankLine < Yank
@@ -524,14 +516,6 @@ vim-mode version: 0.57.0
 
 ### OperatorError < Base
 - ::constructor`(@message)`: **Overridden**
-
-### Prefix < Base
-*Not exported*
-
-### Register < Prefix
-- ::constructor`(@name)`: **Overridden**
-- ::name: `null`
-- ::compose`(composedObject)`: `super(composedObject)`: **Overridden**
 
 ### Scroll < Base
 *Not exported*
