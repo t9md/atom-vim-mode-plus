@@ -33,7 +33,7 @@ describe "TextObjects", ->
 
       expect(editor.getText()).toBe "12345  ABCDE"
       expect(editor.getCursorScreenPosition()).toEqual [0, 6]
-      expect(vimState.getRegister('"').text).toBe "abcde"
+      expect(vimState.register.get('"').text).toBe "abcde"
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -66,7 +66,7 @@ describe "TextObjects", ->
 
       expect(editor.getText()).toBe "12(45  ABCDE"
       expect(editor.getCursorScreenPosition()).toEqual [0, 6]
-      expect(vimState.getRegister('"').text).toBe "ab'de"
+      expect(vimState.register.get('"').text).toBe "ab'de"
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -200,7 +200,7 @@ describe "TextObjects", ->
 
       expect(editor.getText()).toBe "\nParagraph-1\nParagraph-1\nParagraph-1\n\n"
       expect(editor.getCursorScreenPosition()).toEqual [1, 0]
-      expect(vimState.getRegister('"').text).toBe "Paragraph-1\nParagraph-1\nParagraph-1\n"
+      expect(vimState.register.get('"').text).toBe "Paragraph-1\nParagraph-1\nParagraph-1\n"
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -224,7 +224,7 @@ describe "TextObjects", ->
 
       expect(editor.getText()).toBe "text\n\nParagraph-1\nParagraph-1\nParagraph-1\n\nmoretext"
       expect(editor.getCursorScreenPosition()).toEqual [2, 0]
-      expect(vimState.getRegister('"').text).toBe "Paragraph-1\nParagraph-1\nParagraph-1\n\n"
+      expect(vimState.register.get('"').text).toBe "Paragraph-1\nParagraph-1\nParagraph-1\n\n"
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -338,7 +338,7 @@ describe "TextObjects", ->
 
       expect(editor.getText()).toBe "12345 ABCDE"
       expect(editor.getCursorScreenPosition()).toEqual [0, 6]
-      expect(vimState.getRegister('"').text).toBe "abcde "
+      expect(vimState.register.get('"').text).toBe "abcde "
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -381,7 +381,7 @@ describe "TextObjects", ->
 
       expect(editor.getText()).toBe "12(45 ABCDE"
       expect(editor.getCursorScreenPosition()).toEqual [0, 6]
-      expect(vimState.getRegister('"').text).toBe "ab'de "
+      expect(vimState.register.get('"').text).toBe "ab'de "
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 

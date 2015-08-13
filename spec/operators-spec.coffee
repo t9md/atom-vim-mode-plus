@@ -47,46 +47,46 @@ describe "Operators", ->
           keydown('x')
           expect(editor.getText()).toBe 'abc\n01235\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 4]
-          expect(vimState.getRegister('"').text).toBe '4'
+          expect(vimState.register.get('"').text).toBe '4'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n0123\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 3]
-          expect(vimState.getRegister('"').text).toBe '5'
+          expect(vimState.register.get('"').text).toBe '5'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n012\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 2]
-          expect(vimState.getRegister('"').text).toBe '3'
+          expect(vimState.register.get('"').text).toBe '3'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n01\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 1]
-          expect(vimState.getRegister('"').text).toBe '2'
+          expect(vimState.register.get('"').text).toBe '2'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n0\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 0]
-          expect(vimState.getRegister('"').text).toBe '1'
+          expect(vimState.register.get('"').text).toBe '1'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 0]
-          expect(vimState.getRegister('"').text).toBe '0'
+          expect(vimState.register.get('"').text).toBe '0'
 
         it "deletes multiple characters with a count", ->
           keydown('2')
           keydown('x')
           expect(editor.getText()).toBe 'abc\n0123\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 3]
-          expect(vimState.getRegister('"').text).toBe '45'
+          expect(vimState.register.get('"').text).toBe '45'
 
           editor.setCursorScreenPosition([0, 1])
           keydown('3')
           keydown('x')
           expect(editor.getText()).toBe 'a\n0123\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [0, 0]
-          expect(vimState.getRegister('"').text).toBe 'bc'
+          expect(vimState.register.get('"').text).toBe 'bc'
 
       describe "with multiple cursors", ->
         beforeEach ->
@@ -112,32 +112,32 @@ describe "Operators", ->
           keydown('x')
           expect(editor.getText()).toBe 'abc\n01235\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 4]
-          expect(vimState.getRegister('"').text).toBe '4'
+          expect(vimState.register.get('"').text).toBe '4'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n0123\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 3]
-          expect(vimState.getRegister('"').text).toBe '5'
+          expect(vimState.register.get('"').text).toBe '5'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n012\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 2]
-          expect(vimState.getRegister('"').text).toBe '3'
+          expect(vimState.register.get('"').text).toBe '3'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n01\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 1]
-          expect(vimState.getRegister('"').text).toBe '2'
+          expect(vimState.register.get('"').text).toBe '2'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n0\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 0]
-          expect(vimState.getRegister('"').text).toBe '1'
+          expect(vimState.register.get('"').text).toBe '1'
 
           keydown('x')
           expect(editor.getText()).toBe 'abc\n\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 0]
-          expect(vimState.getRegister('"').text).toBe '0'
+          expect(vimState.register.get('"').text).toBe '0'
 
         it "deletes multiple characters and newlines with a count", ->
           atom.config.set('vim-mode.wrapLeftRightMotion', true)
@@ -145,20 +145,20 @@ describe "Operators", ->
           keydown('x')
           expect(editor.getText()).toBe 'abc\n0123\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [1, 3]
-          expect(vimState.getRegister('"').text).toBe '45'
+          expect(vimState.register.get('"').text).toBe '45'
 
           editor.setCursorScreenPosition([0, 1])
           keydown('3')
           keydown('x')
           expect(editor.getText()).toBe 'a0123\n\nxyz'
           expect(editor.getCursorScreenPosition()).toEqual [0, 1]
-          expect(vimState.getRegister('"').text).toBe 'bc\n'
+          expect(vimState.register.get('"').text).toBe 'bc\n'
 
           keydown('7')
           keydown('x')
           expect(editor.getText()).toBe 'ayz'
           expect(editor.getCursorScreenPosition()).toEqual [0, 1]
-          expect(vimState.getRegister('"').text).toBe '0123\n\nx'
+          expect(vimState.register.get('"').text).toBe '0123\n\nx'
 
 
     describe "on an empty line", ->
@@ -189,23 +189,23 @@ describe "Operators", ->
         keydown('X', shift: true)
         expect(editor.getText()).toBe 'ab\n02345'
         expect(editor.getCursorScreenPosition()).toEqual [1, 1]
-        expect(vimState.getRegister('"').text).toBe '1'
+        expect(vimState.register.get('"').text).toBe '1'
 
         keydown('X', shift: true)
         expect(editor.getText()).toBe 'ab\n2345'
         expect(editor.getCursorScreenPosition()).toEqual [1, 0]
-        expect(vimState.getRegister('"').text).toBe '0'
+        expect(vimState.register.get('"').text).toBe '0'
 
         keydown('X', shift: true)
         expect(editor.getText()).toBe 'ab\n2345'
         expect(editor.getCursorScreenPosition()).toEqual [1, 0]
-        expect(vimState.getRegister('"').text).toBe '0'
+        expect(vimState.register.get('"').text).toBe '0'
 
         atom.config.set('vim-mode.wrapLeftRightMotion', true)
         keydown('X', shift: true)
         expect(editor.getText()).toBe 'ab2345'
         expect(editor.getCursorScreenPosition()).toEqual [0, 2]
-        expect(vimState.getRegister('"').text).toBe '\n'
+        expect(vimState.register.get('"').text).toBe '\n'
 
 
     describe "on an empty line", ->
@@ -235,7 +235,7 @@ describe "Operators", ->
       expect(editorElement.classList.contains('insert-mode')).toBe(true)
       expect(editor.getText()).toBe '02345'
       expect(editor.getCursorScreenPosition()).toEqual [0, 1]
-      expect(vimState.getRegister('"').text).toBe '1'
+      expect(vimState.register.get('"').text).toBe '1'
 
     it "is repeatable", ->
       editor.setCursorScreenPosition([0, 0])
@@ -269,7 +269,7 @@ describe "Operators", ->
         expect(editorElement.classList.contains('insert-mode')).toBe(true)
         expect(editor.getText()).toBe '0345'
         expect(editor.getCursorScreenPosition()).toEqual [0, 1]
-        expect(vimState.getRegister('"').text).toBe '12'
+        expect(vimState.register.get('"').text).toBe '12'
 
   describe "the S keybinding", ->
     beforeEach ->
@@ -281,8 +281,8 @@ describe "Operators", ->
       expect(editorElement.classList.contains('insert-mode')).toBe(true)
       expect(editor.getText()).toBe "12345\n\nABCDE"
       expect(editor.getCursorScreenPosition()).toEqual [1, 0]
-      expect(vimState.getRegister('"').text).toBe "abcde\n"
-      expect(vimState.getRegister('"').type).toBe 'linewise'
+      expect(vimState.register.get('"').text).toBe "abcde\n"
+      expect(vimState.register.get('"').type).toBe 'linewise'
 
     it "is repeatable", ->
       keydown('S', shift: true)
@@ -328,7 +328,7 @@ describe "Operators", ->
 
         expect(editor.getText()).toBe "12345\n\nABCDE"
         expect(editor.getCursorScreenPosition()).toEqual [1, 0]
-        expect(vimState.getRegister('"').text).toBe "abcde\n"
+        expect(vimState.register.get('"').text).toBe "abcde\n"
         expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
         expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -429,7 +429,7 @@ describe "Operators", ->
 
         expect(editor.getText()).toBe "12345  ABCDE"
         expect(editor.getCursorScreenPosition()).toEqual [0, 6]
-        expect(vimState.getRegister('"').text).toBe "abcde"
+        expect(vimState.register.get('"').text).toBe "abcde"
         expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
         expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -755,10 +755,10 @@ describe "Operators", ->
         keydown('y')
 
       it "is in linewise motion", ->
-        expect(vimState.getRegister('"').type).toEqual "linewise"
+        expect(vimState.register.get('"').type).toEqual "linewise"
 
       it "saves the lines to the default register", ->
-        expect(vimState.getRegister('"').text).toBe "012 345\nabc\n"
+        expect(vimState.register.get('"').text).toBe "012 345\nabc\n"
 
       it "places the cursor at the beginning of the selection", ->
         expect(editor.getCursorBufferPositions()).toEqual([[0, 0]])
@@ -769,7 +769,7 @@ describe "Operators", ->
         keydown('y')
 
       it "saves the line to the default register", ->
-        expect(vimState.getRegister('"').text).toBe "012 345\n"
+        expect(vimState.register.get('"').text).toBe "012 345\n"
 
       it "leaves the cursor at the starting position", ->
         expect(editor.getCursorScreenPosition()).toEqual [0, 4]
@@ -788,7 +788,7 @@ describe "Operators", ->
         keydown('y')
 
       it "copies n lines, starting from the current", ->
-        expect(vimState.getRegister('"').text).toBe "012 345\nabc\n"
+        expect(vimState.register.get('"').text).toBe "012 345\nabc\n"
 
       it "leaves the cursor at the starting position", ->
         expect(editor.getCursorScreenPosition()).toEqual [0, 4]
@@ -801,14 +801,14 @@ describe "Operators", ->
         keydown('y')
 
       it "saves the line to the a register", ->
-        expect(vimState.getRegister('a').text).toBe "012 345\n"
+        expect(vimState.register.get('a').text).toBe "012 345\n"
 
       it "appends the line to the A register", ->
         keydown('"')
         keydown('A', shift: true)
         keydown('y')
         keydown('y')
-        expect(vimState.getRegister('a').text).toBe "012 345\n012 345\n"
+        expect(vimState.register.get('a').text).toBe "012 345\n012 345\n"
 
     describe "with a forward motion", ->
       beforeEach ->
@@ -816,7 +816,7 @@ describe "Operators", ->
         keydown('e')
 
       it "saves the selected text to the default register", ->
-        expect(vimState.getRegister('"').text).toBe '345'
+        expect(vimState.register.get('"').text).toBe '345'
 
       it "leaves the cursor at the starting position", ->
         expect(editor.getCursorScreenPosition()).toEqual [0, 4]
@@ -825,7 +825,7 @@ describe "Operators", ->
         keydown('y')
         keydown('t')
         normalModeInputKeydown('x')
-        expect(vimState.getRegister('"').text).toBe '345'
+        expect(vimState.register.get('"').text).toBe '345'
 
     describe "with a text object", ->
       it "moves the cursor to the beginning of the text object", ->
@@ -841,7 +841,7 @@ describe "Operators", ->
         keydown('h')
 
       it "saves the left letter to the default register", ->
-        expect(vimState.getRegister('"').text).toBe " "
+        expect(vimState.register.get('"').text).toBe " "
 
       it "moves the cursor position to the left", ->
         expect(editor.getCursorScreenPosition()).toEqual [0, 3]
@@ -852,7 +852,7 @@ describe "Operators", ->
         keydown 'j'
 
       it "saves both full lines to the default register", ->
-        expect(vimState.getRegister('"').text).toBe "012 345\nabc\n"
+        expect(vimState.register.get('"').text).toBe "012 345\nabc\n"
 
       it "leaves the cursor at the starting position", ->
         expect(editor.getCursorScreenPosition()).toEqual [0, 4]
@@ -910,7 +910,7 @@ describe "Operators", ->
         keydown("y")
         keydown("^")
 
-        expect(vimState.getRegister('"').text).toBe '123'
+        expect(vimState.register.get('"').text).toBe '123'
         expect(editor.getCursorBufferPositions()).toEqual [[0, 0], [1, 2]]
 
   describe "the yy keybinding", ->
@@ -924,7 +924,7 @@ describe "Operators", ->
         keydown('y')
         keydown('p')
 
-        expect(vimState.getRegister('"').text).toBe "exclamation!\n"
+        expect(vimState.register.get('"').text).toBe "exclamation!\n"
         expect(editor.getText()).toBe "exclamation!\nexclamation!\n"
 
     describe "on a single line file with no newline", ->
@@ -937,7 +937,7 @@ describe "Operators", ->
         keydown('y')
         keydown('p')
 
-        expect(vimState.getRegister('"').text).toBe "no newline!\n"
+        expect(vimState.register.get('"').text).toBe "no newline!\n"
         expect(editor.getText()).toBe "no newline!\nno newline!"
 
       it "copies the entire line and pastes it respecting count and new lines", ->
@@ -946,7 +946,7 @@ describe "Operators", ->
         keydown('2')
         keydown('p')
 
-        expect(vimState.getRegister('"').text).toBe "no newline!\n"
+        expect(vimState.register.get('"').text).toBe "no newline!\n"
         expect(editor.getText()).toBe "no newline!\nno newline!\nno newline!"
 
   describe "the Y keybinding", ->
@@ -957,7 +957,7 @@ describe "Operators", ->
     it "saves the line to the default register", ->
       keydown('Y', shift: true)
 
-      expect(vimState.getRegister('"').text).toBe "012 345\n"
+      expect(vimState.register.get('"').text).toBe "012 345\n"
       expect(editor.getCursorScreenPosition()).toEqual [0, 4]
 
   describe "the p keybinding", ->
@@ -965,8 +965,8 @@ describe "Operators", ->
       beforeEach ->
         editor.getBuffer().setText "012\n"
         editor.setCursorScreenPosition [0, 0]
-        vimState.setRegister('"', text: '345')
-        vimState.setRegister('a', text: 'a')
+        vimState.register.set('"', text: '345')
+        vimState.register.set('a', text: 'a')
         atom.clipboard.write "clip"
 
       describe "from the default register", ->
@@ -1028,7 +1028,7 @@ describe "Operators", ->
         beforeEach ->
           editor.getBuffer().setText("012")
           editor.setCursorScreenPosition([0, 1])
-          vimState.setRegister('"', text: " 345\n", type: 'linewise')
+          vimState.register.set('"', text: " 345\n", type: 'linewise')
 
         it "inserts the contents of the default register", ->
           keydown('p')
@@ -1046,7 +1046,7 @@ describe "Operators", ->
       describe "on multiple lines", ->
         beforeEach ->
           editor.getBuffer().setText("012\n 345")
-          vimState.setRegister('"', text: " 456\n", type: 'linewise')
+          vimState.register.set('"', text: " 456\n", type: 'linewise')
 
         it "inserts the contents of the default register at middle line", ->
           editor.setCursorScreenPosition([0, 1])
@@ -1066,7 +1066,7 @@ describe "Operators", ->
       beforeEach ->
         editor.getBuffer().setText("012\nabc")
         editor.setCursorScreenPosition([1, 0])
-        vimState.setRegister('"', text: " 345\n 678\n", type: 'linewise')
+        vimState.register.set('"', text: " 345\n 678\n", type: 'linewise')
         keydown('p')
 
       it "inserts the contents of the default register", ->
@@ -1077,7 +1077,7 @@ describe "Operators", ->
       beforeEach ->
         editor.setText("12345\nabcde\nABCDE\nQWERT")
         editor.setCursorScreenPosition([1, 1])
-        vimState.setRegister('"', text: '123')
+        vimState.register.set('"', text: '123')
         keydown('2')
         keydown('p')
 
@@ -1096,8 +1096,8 @@ describe "Operators", ->
       beforeEach ->
         editor.getBuffer().setText("012\n")
         editor.setCursorScreenPosition([0, 0])
-        vimState.setRegister('"', text: '345')
-        vimState.setRegister('a', text: 'a')
+        vimState.register.set('"', text: '345')
+        vimState.register.set('a', text: 'a')
         keydown('P', shift: true)
 
       it "inserts the contents of the default register above", ->

@@ -52,7 +52,7 @@ describe "Motions", ->
           keydown('y')
           keydown('h')
 
-          expect(vimState.getRegister('"').text).toBe 'a'
+          expect(vimState.register.get('"').text).toBe 'a'
           expect(editor.getCursorScreenPosition()).toEqual [1, 0]
 
     describe "the j keybinding", ->
@@ -169,7 +169,7 @@ describe "Motions", ->
           keydown('w')
 
         it "selects to the end of the word", ->
-          expect(vimState.getRegister('"').text).toBe 'ab '
+          expect(vimState.register.get('"').text).toBe 'ab '
 
       describe "between words", ->
         beforeEach ->
@@ -178,7 +178,7 @@ describe "Motions", ->
           keydown('w')
 
         it "selects the whitespace", ->
-          expect(vimState.getRegister('"').text).toBe ' '
+          expect(vimState.register.get('"').text).toBe ' '
 
   describe "the W keybinding", ->
     beforeEach -> editor.setText("cde1+- ab \n xyz\n\nzip")
@@ -205,7 +205,7 @@ describe "Motions", ->
           editor.setCursorScreenPosition([0, 0])
           keydown('y')
           keydown('W', shift: true)
-          expect(vimState.getRegister('"').text).toBe 'cde1+- '
+          expect(vimState.register.get('"').text).toBe 'cde1+- '
 
       it "continues past blank lines", ->
         editor.setCursorScreenPosition([2, 0])
@@ -213,7 +213,7 @@ describe "Motions", ->
         keydown('d')
         keydown('W', shift: true)
         expect(editor.getText()).toBe "cde1+- ab \n xyz\nzip"
-        expect(vimState.getRegister('"').text).toBe '\n'
+        expect(vimState.register.get('"').text).toBe '\n'
 
       it "doesn't go past the end of the file", ->
         editor.setCursorScreenPosition([3, 0])
@@ -221,7 +221,7 @@ describe "Motions", ->
         keydown('d')
         keydown('W', shift: true)
         expect(editor.getText()).toBe "cde1+- ab \n xyz\n\n"
-        expect(vimState.getRegister('"').text).toBe 'zip'
+        expect(vimState.register.get('"').text).toBe 'zip'
 
   describe "the e keybinding", ->
     beforeEach -> editor.setText("ab cde1+- \n xyz\n\nzip")
@@ -253,7 +253,7 @@ describe "Motions", ->
           keydown('e')
 
         it "selects to the end of the current word", ->
-          expect(vimState.getRegister('"').text).toBe 'ab'
+          expect(vimState.register.get('"').text).toBe 'ab'
 
       describe "between words", ->
         beforeEach ->
@@ -262,7 +262,7 @@ describe "Motions", ->
           keydown('e')
 
         it "selects to the end of the next word", ->
-          expect(vimState.getRegister('"').text).toBe ' cde1'
+          expect(vimState.register.get('"').text).toBe ' cde1'
 
   describe "the E keybinding", ->
     beforeEach -> editor.setText("ab  cde1+- \n xyz \n\nzip\n")
@@ -294,7 +294,7 @@ describe "Motions", ->
           keydown('E', shift: true)
 
         it "selects to the end of the current word", ->
-          expect(vimState.getRegister('"').text).toBe 'ab'
+          expect(vimState.register.get('"').text).toBe 'ab'
 
       describe "between words", ->
         beforeEach ->
@@ -303,7 +303,7 @@ describe "Motions", ->
           keydown('E', shift: true)
 
         it "selects to the end of the next word", ->
-          expect(vimState.getRegister('"').text).toBe '  cde1+-'
+          expect(vimState.register.get('"').text).toBe '  cde1+-'
 
       describe "press more than once", ->
         beforeEach ->
@@ -314,7 +314,7 @@ describe "Motions", ->
           keydown('y')
 
         it "selects to the end of the current word", ->
-          expect(vimState.getRegister('"').text).toBe 'ab  cde1+-'
+          expect(vimState.register.get('"').text).toBe 'ab  cde1+-'
 
   describe "the } keybinding", ->
     beforeEach ->
@@ -341,7 +341,7 @@ describe "Motions", ->
         keydown('}')
 
       it 'selects to the end of the current paragraph', ->
-        expect(vimState.getRegister('"').text).toBe "abcde\n"
+        expect(vimState.register.get('"').text).toBe "abcde\n"
 
   describe "the { keybinding", ->
     beforeEach ->
@@ -369,7 +369,7 @@ describe "Motions", ->
         keydown('{')
 
       it 'selects to the beginning of the current paragraph', ->
-        expect(vimState.getRegister('"').text).toBe "\nzip\n"
+        expect(vimState.register.get('"').text).toBe "\nzip\n"
 
   describe "the b keybinding", ->
     beforeEach -> editor.setText(" ab cde1+- \n xyz\n\nzip }\n last")
@@ -415,7 +415,7 @@ describe "Motions", ->
           keydown('b')
 
         it "selects to the beginning of the current word", ->
-          expect(vimState.getRegister('"').text).toBe 'a'
+          expect(vimState.register.get('"').text).toBe 'a'
           expect(editor.getCursorScreenPosition()).toEqual [0, 1]
 
       describe "between words", ->
@@ -425,7 +425,7 @@ describe "Motions", ->
           keydown('b')
 
         it "selects to the beginning of the last word", ->
-          expect(vimState.getRegister('"').text).toBe 'ab '
+          expect(vimState.register.get('"').text).toBe 'ab '
           expect(editor.getCursorScreenPosition()).toEqual [0, 1]
 
   describe "the B keybinding", ->
@@ -455,14 +455,14 @@ describe "Motions", ->
         editor.setCursorScreenPosition([1, 10])
         keydown('y')
         keydown('B', shift: true)
-        expect(vimState.getRegister('"').text).toBe 'xyz-12' # because cursor is on the `3`
+        expect(vimState.register.get('"').text).toBe 'xyz-12' # because cursor is on the `3`
 
       it "doesn't go past the beginning of the file", ->
         editor.setCursorScreenPosition([0, 0])
-        vimState.setRegister('"', text: 'abc')
+        vimState.register.set('"', text: 'abc')
         keydown('y')
         keydown('B', shift: true)
-        expect(vimState.getRegister('"').text).toBe 'abc'
+        expect(vimState.register.get('"').text).toBe 'abc'
 
   describe "the ^ keybinding", ->
     beforeEach ->

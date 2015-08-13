@@ -60,10 +60,10 @@ class Base
     @count
 
   getRegister: (args...) ->
-    @vimState.getRegister(args...)
+    @vimState.register.get(args...)
 
   setRegister: (args...) ->
-    @vimState.setRegister(args...)
+    @vimState.register.set(args...)
 
   @getAncestors: ->
     getAncestors(this)
