@@ -264,7 +264,6 @@ class VimState
   ##############################################################################
   # Register
   ##############################################################################
-
   # Private: Fetches the value of a given register.
   #
   # name - The name of the register to fetch.

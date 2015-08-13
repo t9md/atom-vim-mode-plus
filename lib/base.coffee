@@ -59,6 +59,12 @@ class Base
     @count ?= @vimState?.operationStack.counter.get() ? defaultCount
     @count
 
+  getRegister: (args...) ->
+    @vimState.getRegister(args...)
+
+  setRegister: (args...) ->
+    @vimState.setRegister(args...)
+
   @getAncestors: ->
     getAncestors(this)
 
