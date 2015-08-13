@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-13T20:44:56.570Z*
+*generated at 2015-08-13T21:35:51.671Z*
 
 - [Base](#base) *Not exported*
   - [Motion](#motion--base)
@@ -150,7 +150,6 @@ vim-mode version: 0.57.0
 - ::isLinewise`()`
 - ::isInclusive`()`
 - ::getInput`()`
-- ::setInput`(@input)`
 
 ### Find < Motion
 - ::constructor`()`: `super`: **Overridden**
@@ -373,7 +372,6 @@ vim-mode version: 0.57.0
 - ::canComposeWith`(operation)`
 - ::setTextRegister`(register, text)`
 - ::getInput`()`
-- ::setInput`(@input)`
 - ::getRegisterName`()`
 
 ### AdjustIndentation < Operator
