@@ -209,6 +209,7 @@
   '7': 'vim-mode:set-count'
   '8': 'vim-mode:set-count'
   '9': 'vim-mode:set-count'
+  # '"': 'vim-mode:set-count'
 
 'atom-text-editor.vim-mode.normal-mode':
   'i': 'vim-mode:activate-insert-mode'
