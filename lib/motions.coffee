@@ -117,6 +117,7 @@ class Motion extends Base
   # Callbacked by @getInput()
   setInput: (@input) ->
     @complete = true
+    @vimState.operationStack.process() # Re-process!!
 
 class MoveLeft extends Motion
   @extend()

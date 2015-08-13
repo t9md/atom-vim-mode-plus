@@ -1,5 +1,6 @@
 settings = require './settings'
-Utils  = require './utils'
+{getCopyType, getKeystrokeForEvent} = require './utils'
+{ViewModel} = require './view'
 
 # Private: Fetches the value of a given register.
 #
@@ -9,25 +10,28 @@ Utils  = require './utils'
 # been set.
 module.exports =
 class RegisterManager
+  name = null
+
   constructor: (@vimState) ->
     {@editor, @globalVimState} = @vimState
 
   get: (name) ->
+    name = @getName() unless name
     if name is '"'
       name = settings.defaultRegister()
 
     switch name
       when '*', '+'
         text = atom.clipboard.read()
-        type = Utils.copyType(text)
+        type = getCopyType(text)
         {text, type}
       when '%'
         text = @editor.getURI()
-        type = Utils.copyType(text)
+        type = getCopyType(text)
         {text, type}
       when '_' # Blackhole always returns nothing
         text = ''
-        type = Utils.copyType(text)
+        type = getCopyType(text)
         {text, type}
       else
         @globalVimState.registers[name.toLowerCase()]
@@ -67,3 +71,16 @@ class RegisterManager
       register.type = 'linewise'
     else
       register.text += text
+
+  getName: ->
+    @name ? settings.defaultRegister()
+
+  setName: ->
+    new ViewModel(this, class: 'read-register', singleChar: true, hidden: true)
+
+  reset: ->
+    @name = null
+
+  # Callbacked by ViewModel
+  setInput: (@input) ->
+    @name = @input.characters

@@ -5,7 +5,6 @@ settings = require './settings'
 
 Base = require './base'
 Operators   = require './operators'
-Prefixes    = require './prefixes'
 Motions     = require './motions'
 InsertMode  = require './insert-mode'
 TextObjects = require './text-objects'
@@ -33,7 +32,7 @@ class VimState
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
 
-    # [FIXME] Order matter.
+    # [FIXME] Order matter
     @register = new RegisterManager(this)
     @count = new CountManager(this)
     @operationStack = new OperationStack(this)
@@ -84,17 +83,13 @@ class VimState
       'activate-characterwise-visual-mode': => @activateVisualMode('characterwise')
       'activate-blockwise-visual-mode': => @activateVisualMode('blockwise')
       'reset-normal-mode': => @resetNormalMode()
-      'set-count': (e) => @count.set(e)
-      'reverse-selections': (e) => @reverseSelections(e)
-      'undo': => @undo()
+      'set-count': (e) => @count.set(e) # 0-9
+      'set-register-name': => @register.setName() # "
+      'reverse-selections': => @reverseSelections() # o
+      'undo': => @undo() # u
       'replace-mode-backspace': => @replaceModeUndo()
-      # 'insert-mode-put': (e) => @insertRegister(@registerName(e))
       'copy-from-line-above': => InsertMode.copyCharacterFromAbove(@editor, this)
       'copy-from-line-below': => InsertMode.copyCharacterFromBelow(@editor, this)
-
-    # [FIXME]
-    @registerOperationCommands
-      'register-prefix': (e) => @registerPrefix(e)
 
     # InsertMode
     # -------------------------
@@ -501,24 +496,6 @@ class VimState
     @operationStack.clear()
     @editor.clearSelections()
     @activateNormalMode()
-
-  # Private: A generic way to create a Register prefix based on the event.
-  #
-  # e - The event that triggered the Register prefix.
-  #
-  # Returns nothing.
-  registerPrefix: (e) ->
-    new Prefixes.Register(@registerName(e))
-
-  # Private: Gets a register name from a keyboard event
-  #
-  # e - The event
-  #
-  # Returns the name of the register
-  registerName: (e) ->
-    name = getKeystrokeForEvent(e)
-    name = name.slice(6) if name.startsWith('shift-')
-    name
 
   reverseSelections: ->
     reversed = not @editor.getLastSelection().isReversed()
