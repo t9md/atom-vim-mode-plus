@@ -37,9 +37,9 @@ describe "Prefixes", ->
 
   register = (name, value)->
     if value
-      vimState.setRegister(name, value)
+      vimState.register.set(name, value)
     else
-      expect(vimState.getRegister(name).text)
+      expect(vimState.register.get(name).text)
 
   describe "Repeat", ->
     describe "with operations", ->
@@ -110,7 +110,7 @@ describe "Prefixes", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
           register('*').toEqual 'initial clipboard content'
-          expect(vimState.getRegister('*').type).toEqual 'character'
+          expect(vimState.register.get('*').type).toEqual 'character'
 
       describe "writing", ->
         beforeEach ->
@@ -127,7 +127,7 @@ describe "Prefixes", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
           register('*').toEqual 'initial clipboard content'
-          expect(vimState.getRegister('*').type).toEqual 'character'
+          expect(vimState.register.get('*').type).toEqual 'character'
 
       describe "writing", ->
         beforeEach ->
