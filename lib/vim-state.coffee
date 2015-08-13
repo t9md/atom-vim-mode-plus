@@ -13,6 +13,7 @@ TextObjects = require './text-objects'
 Scroll = require './scroll'
 OperationStack = require './operation-stack'
 RegisterManager = require './register-manager'
+CountManager = require './count-manager'
 
 module.exports =
 class VimState
@@ -30,8 +31,11 @@ class VimState
     @history = []
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
-    @operationStack = new OperationStack(this)
+
+    # [FIXME] Order matter.
     @register = new RegisterManager(this)
+    @count = new CountManager(this)
+    @operationStack = new OperationStack(this)
 
     @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
       return unless @editor?
@@ -79,7 +83,7 @@ class VimState
       'activate-characterwise-visual-mode': => @activateVisualMode('characterwise')
       'activate-blockwise-visual-mode': => @activateVisualMode('blockwise')
       'reset-normal-mode': => @resetNormalMode()
-      'set-count': (e) => @operationStack.counter.set(e)
+      'set-count': (e) => @count.set(e)
       'reverse-selections': (e) => @reverseSelections(e)
       'undo': => @undo()
       'replace-mode-backspace': => @replaceModeUndo()
