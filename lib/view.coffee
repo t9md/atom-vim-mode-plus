@@ -13,18 +13,18 @@ class ViewModel
     @emitter.on 'did-get-input', callback
 
   confirm: (view) ->
-    @emitter.emit 'did-get-input', (new Input(@view.value))
+    @emitter.emit 'did-get-input', @view.value
 
   cancel: (view) ->
     if @vimState.operationStack.isOperatorPending()
-      @emitter.emit 'did-get-input', (new Input(''))
+      @emitter.emit 'did-get-input', ''
 
-class Input extends Base
-  @extend()
-  complete: true
-  recodable: true
-
-  constructor: (@characters) ->
+# class Input extends Base
+#   @extend()
+#   complete: true
+#   recodable: true
+#
+#   constructor: (@characters) ->
 
 class VimNormalModeInputElement extends HTMLDivElement
   createdCallback: ->
@@ -129,4 +129,4 @@ VimNormalModeInputElement = document.registerElement "vim-normal-mode-input",
   extends: "div",
   prototype: VimNormalModeInputElement.prototype
 
-module.exports = {ViewModel, Input, SearchViewModel, VimNormalModeInputElement}
+module.exports = {ViewModel, SearchViewModel, VimNormalModeInputElement}

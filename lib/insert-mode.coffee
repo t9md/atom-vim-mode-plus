@@ -25,7 +25,7 @@ class InsertRegister extends InsertMode
     @getInput(this, class: 'insert-register', singleChar: true, hidden: true)
 
   execute: ->
-    name = @input.characters
+    name = @input
     text = @vimState.register.get(name)?.text
     @editor.insertText(text) if text?
 
