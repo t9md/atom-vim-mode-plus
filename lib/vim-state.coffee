@@ -93,14 +93,14 @@ class VimState
 
     # InsertMode
     # -------------------------
-    @registerNewOperationCommands InsertMode, [
+    @registerOperationCommands InsertMode, [
       # ctrl-r [a-zA-Z*+%_"]
       'insert-register'
     ]
 
     # Operator
     # -------------------------
-    @registerNewOperationCommands TextObjects, [
+    @registerOperationCommands TextObjects, [
       # w
       'select-inside-word', 'select-a-word',
       # W
@@ -127,7 +127,7 @@ class VimState
 
     # Motion
     # -------------------------
-    @registerNewOperationCommands Motions, [
+    @registerOperationCommands Motions, [
       'move-to-beginning-of-line' #: (e) => @moveOrRepeat(e)
       # ;, ,
       'repeat-find', 'repeat-find-reverse'
@@ -175,7 +175,7 @@ class VimState
 
     # Operator
     # -------------------------
-    @registerNewOperationCommands Operators, [
+    @registerOperationCommands Operators, [
       # i, a
       'activate-insert-mode', 'insert-after'
       # r
@@ -210,7 +210,7 @@ class VimState
 
     # Scroll
     # -------------------------
-    @registerNewOperationCommands Scroll, [
+    @registerOperationCommands Scroll, [
       # ctrl-e, ctrl-y
       'scroll-down', 'scroll-up'
       # z enter, zt
@@ -233,30 +233,19 @@ class VimState
       do (fn) =>
         @subscriptions.add atom.commands.add(@editorElement, "vim-mode:#{name}", fn)
 
-  # Private: Register multiple Operators via an {Object} that
-  # maps command names to functions that return operations to push.
-  #
-  # Prefixes the given command names with 'vim-mode:' to reduce redundancy in
-  # the given object.
-  registerOperationCommands: (operationCommands) ->
-    commands = {}
-    for name, fn of operationCommands
-      do (fn) =>
-        commands[name] = (event) => @operationStack.push(fn(event))
-    @registerCommands(commands)
-
   # 'New' is 'new' way of registration to distinguish exisiting function.
   # By maping command name to correspoinding class.
   #  e.g.
   # join -> Join
   # scroll-down -> ScrollDown
-  registerNewOperationCommands: (kind, names) ->
+  registerOperationCommands: (kind, names) ->
     commands = {}
     for name in names
       do (name) =>
         klass = _.capitalize(_.camelize(name))
-        commands[name] = => new kind[klass](this)
-    @registerOperationCommands(commands)
+        commands[name] = => @operationStack.push new kind[klass](this)
+    @registerCommands(commands)
+    # @registerOperationCommands(commands)
 
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
