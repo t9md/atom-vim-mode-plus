@@ -527,7 +527,7 @@ class VimState
     recursiveInspect = Base
 
     introspection = require './introspection'
-    mods = [Operators, Motions, TextObjects, Scroll, Prefixes]
+    mods = [Operators, Motions, TextObjects, Scroll]
     introspection.generateIntrospectionReport(mods, {excludeProperties, recursiveInspect})
 
 # This uses private APIs and may break if TextBuffer is refactored.
