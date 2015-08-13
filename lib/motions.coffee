@@ -112,12 +112,10 @@ class Motion extends Base
 
   # Proxying request to ViewModel to get Input instance.
   getInput: (args...) ->
-    new ViewModel(args...)
-
-  # Callbacked by @getInput()
-  setInput: (@input) ->
-    @complete = true
-    @vimState.operationStack.process() # Re-process!!
+    viewModel = new ViewModel(args...)
+    viewModel.onDidGetInput (@input) =>
+      @complete = true
+      @vimState.operationStack.process() # Re-process!!
 
 class MoveLeft extends Motion
   @extend()
@@ -703,12 +701,13 @@ class Search extends SearchBase
   @extend()
   constructor: ->
     super
-
     @getInput()
-    # @viewModel = new SearchViewModel(this)
 
   getInput: ->
-    new SearchViewModel(this)
+    viewModel = new SearchViewModel(this)
+    viewModel.onDidGetInput (@input) =>
+      @complete = true
+      @vimState.operationStack.process() # Re-process!!
 
 # keymap: ?
 class ReverseSearch extends Search

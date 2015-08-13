@@ -12,12 +12,10 @@ class InsertMode extends Base
 
   # Proxying request to ViewModel to get Input instance.
   getInput: (args...) ->
-    new ViewModel(args...)
-
-  # Callbacked by @getInput()
-  setInput: (@input) ->
-    @complete = true
-    @vimState.operationStack.process() # Re-process!!
+    viewModel = new ViewModel(args...)
+    viewModel.onDidGetInput (@input) =>
+      @complete = true
+      @vimState.operationStack.process() # Re-process!!
 
 class InsertRegister extends InsertMode
   @extend()

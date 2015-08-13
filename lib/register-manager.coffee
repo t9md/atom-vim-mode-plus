@@ -76,11 +76,9 @@ class RegisterManager
     @name ? settings.defaultRegister()
 
   setName: ->
-    new ViewModel(this, class: 'read-register', singleChar: true, hidden: true)
+    viewModel = new ViewModel(this, class: 'read-register', singleChar: true, hidden: true)
+    viewModel.onDidGetInput (@input) =>
+      @name = @input.characters
 
   reset: ->
     @name = null
-
-  # Callbacked by ViewModel
-  setInput: (@input) ->
-    @name = @input.characters
