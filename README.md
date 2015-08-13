@@ -58,8 +58,9 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] Consolidate arguments passed to each TOM. vimState should be available to all TOM. editor and editorElement should be removed since its available via vimState. This consistency will reduce developer's confusion while working on multiple TOMs.
 - [x] Remove MotionWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity. [done](https://github.com/t9md/vim-mode/commit/0c7a4185ff4974ffe316459d8a98d2764057198d).
 - [x] Remove OperatorWithInput, it'd be OK by providing getInput() methods on Base class. it will remove some complexity.
-- [ ] Eliminate Prefix.Register. make it available via vimState.
-- [ ] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself.
+- [x] Eliminate Prefix.Register. make it available via vimState.
+- [x] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself. [done](https://github.com/t9md/vim-mode/commit/5ac09c41beea779dd157ae76230d4c76b99989d4)
+- [ ] `introduce ViewModel.onDidGetInput(callback)` for operation which need user input.
 
 # How Operation Stack works(for current official vim-mode).
 
