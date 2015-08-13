@@ -1,7 +1,7 @@
 _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
 settings = require './settings'
-{ViewModel, Input, SearchViewModel} = require './view'
+{ViewModel, SearchViewModel} = require './view'
 Base = require './base'
 
 WholeWordRegex = /\S+/
@@ -518,13 +518,13 @@ class Find extends Motion
       index = currentPosition.column
       for i in [0..count-1]
         return if index <= 0 # we can't move backwards any further, quick return
-        index = line.lastIndexOf(@input.characters, index-1-(@offset*@repeated))
+        index = line.lastIndexOf(@input, index-1-(@offset*@repeated))
       if index >= 0
         new Point(currentPosition.row, index + @offset)
     else
       index = currentPosition.column
       for i in [0..count-1]
-        index = line.indexOf(@input.characters, index+1+(@offset*@repeated))
+        index = line.indexOf(@input, index+1+(@offset*@repeated))
         return if index < 0 # no match found
       if index >= 0
         new Point(currentPosition.row, index - @offset)
@@ -607,9 +607,9 @@ class MoveToMark extends Motion
     @operatesLinewise
 
   moveCursor: (cursor) ->
-    markPosition = @vimState.getMark(@input.characters)
+    markPosition = @vimState.getMark(@input)
 
-    if @input.characters is '`' # double '`' pressed
+    if @input is '`' # double '`' pressed
       markPosition ?= [0, 0] # if markPosition not set, go to the beginning of the file
       @vimState.setMark('`', cursor.getBufferPosition())
 
@@ -650,12 +650,12 @@ class SearchBase extends Motion
       atom.beep()
 
   scan: (cursor) ->
-    return [] if @input.characters is ""
+    return [] if @input is ""
 
     currentPosition = cursor.getBufferPosition()
 
     [rangesBefore, rangesAfter] = [[], []]
-    @editor.scan @getSearchTerm(@input.characters), ({range}) =>
+    @editor.scan @getSearchTerm(@input), ({range}) =>
       isBefore = if @reverse
         range.start.compare(currentPosition) < 0
       else
@@ -731,7 +731,7 @@ class SearchCurrentWord extends SearchBase
     @keywordRegex = new RegExp(userIsKeyword or defaultIsKeyword)
 
     searchString = @getCurrentWordMatch()
-    @input = new Input(searchString)
+    @input = searchString
     @vimState.pushSearchHistory(searchString) unless searchString is @vimState.getSearchHistoryItem()
 
   getCurrentWord: ->
@@ -766,7 +766,7 @@ class SearchCurrentWord extends SearchBase
 
   execute: ->
     # @getCount(1)
-    super() if @input.characters.length > 0
+    super() if @input.length > 0
 
 # keymap: #
 class ReverseSearchCurrentWord extends SearchCurrentWord
@@ -787,7 +787,7 @@ class RepeatSearch extends SearchBase
 
   constructor: ->
     super
-    @input = new Input(@vimState.getSearchHistoryItem(0) ? "")
+    @input = @vimState.getSearchHistoryItem(0) ? ''
     @replicateCurrentSearch()
 
   reversed: ->

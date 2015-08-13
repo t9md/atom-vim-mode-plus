@@ -259,7 +259,7 @@ class Mark extends Operator
   #
   # Returns nothing.
   execute: ->
-    @vimState.setMark(@input.characters, @editor.getCursorBufferPosition())
+    @vimState.setMark(@input, @editor.getCursorBufferPosition())
     @vimState.activateNormalMode()
 
 # Increase/Decrease
@@ -652,7 +652,7 @@ class Replace extends Operator
 
   execute: ->
     count = @getCount(1)
-    if @input.characters is ""
+    if @input is ""
       # replace canceled
       if @vimState.isVisualMode()
         @vimState.resetVisualMode()
@@ -664,7 +664,7 @@ class Replace extends Operator
       if @target?
         if _.contains(@target.select(), true)
           @editor.replaceSelectedText null, (text) =>
-            text.replace(/./g, @input.characters)
+            text.replace(/./g, @input)
           for selection in @editor.getSelections()
             point = selection.getBufferRange().start
             selection.setBufferRange(Range.fromPointWithDelta(point, 0, 0))
@@ -676,13 +676,13 @@ class Replace extends Operator
 
           _.times count, =>
             point = cursor.getBufferPosition()
-            @editor.setTextInBufferRange(Range.fromPointWithDelta(point, 0, 1), @input.characters)
+            @editor.setTextInBufferRange(Range.fromPointWithDelta(point, 0, 1), @input)
             cursor.moveRight()
           cursor.setBufferPosition(pos)
 
         # Special case: when replaced with a newline move to the start of the
         # next row.
-        if @input.characters is "\n"
+        if @input is "\n"
           _.times count, =>
             @editor.moveDown()
           @editor.moveToFirstCharacterOfLine()
