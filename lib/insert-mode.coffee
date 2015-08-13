@@ -1,3 +1,37 @@
+{ViewModel, Input, SearchViewModel} = require './view'
+_ = require 'underscore-plus'
+Base = require './base'
+
+class InsertMode extends Base
+  @extend()
+  complete: true
+  recodable: false
+
+  constructor: (@vimState) ->
+    {@editor, @editorElement} = @vimState
+
+  # Proxying request to ViewModel to get Input instance.
+  getInput: (args...) ->
+    new ViewModel(args...)
+
+  # Callbacked by @getInput()
+  setInput: (@input) ->
+    @complete = true
+
+class InsertRegister extends InsertMode
+  @extend()
+  complete: false
+
+  constructor: ->
+    super
+    @getInput(this, class: 'insert-register', singleChar: true, hidden: true)
+
+  execute: ->
+    name = @input.characters
+    console.log name
+    text = @vimState.register.get(name)?.text
+    @editor.insertText(text) if text?
+
 copyCharacterFromAbove = (editor, vimState) ->
   editor.transact ->
     for cursor in editor.getCursors()
@@ -16,4 +50,5 @@ copyCharacterFromBelow = (editor, vimState) ->
 module.exports = {
   copyCharacterFromAbove,
   copyCharacterFromBelow
+  InsertRegister
 }

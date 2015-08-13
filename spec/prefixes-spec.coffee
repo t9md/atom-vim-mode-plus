@@ -23,6 +23,10 @@ describe "Prefixes", ->
     for key in keys.split('')
       helpers.keydown(key, options)
 
+  normalModeInputKeydown = (key, opts = {}) ->
+    theEditor = opts.editor or editor
+    theEditor.normalModeInputView.editorElement.getModel().setText(key)
+
   text = (text=null) ->
     if text
       editor.setText(text)
@@ -171,24 +175,24 @@ describe "Prefixes", ->
 
       it "inserts contents of the unnamed register with \"", ->
         keydown 'r', ctrl: true
-        keydown '"'
+        normalModeInputKeydown '"'
         text().toBe '013452\n'
 
       describe "when useClipboardAsDefaultRegister enabled", ->
         it "inserts contents from clipboard with \"", ->
           atom.config.set 'vim-mode.useClipboardAsDefaultRegister', true
           keydown 'r', ctrl: true
-          keydown '"'
+          normalModeInputKeydown '"'
           text().toBe '01clip2\n'
 
       it "inserts contents of the 'a' register", ->
         keydown 'r', ctrl: true
-        keydown 'a'
+        normalModeInputKeydown 'a'
         text().toBe '01abc2\n'
 
       it "is cancelled with the escape key", ->
         keydown 'r', ctrl: true
-        keydown 'escape'
+        normalModeInputKeydown 'escape'
         text().toBe '012\n'
         expect(vimState.mode).toBe "insert"
         cursor().toEqual [0, 2]

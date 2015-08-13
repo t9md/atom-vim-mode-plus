@@ -10,7 +10,7 @@ class ViewModel
     @vimState.onDidFailToCompose => @view.remove()
 
   confirm: (view) ->
-    if @operation.isMotion() or @operation.isOperator()
+    if @operation.isMotion() or @operation.isOperator() or @operation.isInsertRegister()
       @setInput(@view.value)
     else
       @vimState.operationStack.push(new Input(@view.value))
@@ -24,7 +24,7 @@ class ViewModel
 
   cancel: (view) ->
     if @vimState.operationStack.isOperatorPending()
-      if @operation.isMotion() or @operation.isOperator()
+      if @operation.isMotion() or @operation.isOperator() or @operation.isInsertRegister()
         @setInput('')
       else
         @vimState.operationStack.push(new Input(''))
