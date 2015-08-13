@@ -1,5 +1,4 @@
 Base = require './base'
-_ = require 'underscore-plus'
 
 class ViewModel
   char: null
@@ -11,19 +10,11 @@ class ViewModel
     @vimState.onDidFailToCompose => @view.remove()
 
   confirm: (view) ->
-    if _.isFunction(@operation.setInput)
-    # if @operation.isMotion() or @operation.isOperator() or @operation.isInsertRegister()
-      @operation.setInput(new Input(@view.value))
-    else
-      @vimState.operationStack.push(new Input(@view.value))
+    @operation.setInput(new Input(@view.value))
 
   cancel: (view) ->
     if @vimState.operationStack.isOperatorPending()
-      if _.isFunction(@operation.setInput)
-      # if @operation.isMotion() or @operation.isOperator() or @operation.isInsertRegister()
-        @operation.setInput(new Input(''))
-      else
-        @vimState.operationStack.push(new Input(''))
+      @operation.setInput(new Input(''))
 
 class Input extends Base
   @extend()
