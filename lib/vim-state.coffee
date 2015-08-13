@@ -1,6 +1,6 @@
 Grim  = require 'grim'
 _ = require 'underscore-plus'
-{Point, Range, Emitter, Disposable, CompositeDisposable} = require 'atom'
+{Range, Emitter, CompositeDisposable} = require 'atom'
 settings = require './settings'
 
 Base = require './base'
@@ -510,8 +510,7 @@ class VimState
   # Returns the name of the register
   registerName: (e) ->
     name = getKeystrokeForEvent(e)
-    if name.lastIndexOf('shift-', 0) is 0
-      name = name.slice(6)
+    name = name.slice(6) if name.startsWith('shift-')
     name
 
   reverseSelections: ->
