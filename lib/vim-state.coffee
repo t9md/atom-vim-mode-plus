@@ -32,7 +32,6 @@ class VimState
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
     @operationStack = new OperationStack(this)
-    @counter = @getCountManager()
 
     @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
       return unless @editor?
@@ -72,15 +71,15 @@ class VimState
   init: ->
     @registerCommands
       'toggle-debug': ->
-          atom.config.set('vim-mode.debug', not settings.debug())
-          console.log "vim-mode debug:", atom.config.get('vim-mode.debug')
+        atom.config.set('vim-mode.debug', not settings.debug())
+        console.log "vim-mode debug:", atom.config.get('vim-mode.debug')
       'generate-introspection-report': => @generateIntrospectionReport()
       'activate-normal-mode': => @activateNormalMode()
       'activate-linewise-visual-mode': => @activateVisualMode('linewise')
       'activate-characterwise-visual-mode': => @activateVisualMode('characterwise')
       'activate-blockwise-visual-mode': => @activateVisualMode('blockwise')
       'reset-normal-mode': => @resetNormalMode()
-      'set-count': (e) => @counter.set(e)
+      'set-count': (e) => @operationStack.counter.set(e)
       'reverse-selections': (e) => @reverseSelections(e)
       'undo': => @undo()
       'replace-mode-backspace': => @replaceModeUndo()
@@ -126,7 +125,7 @@ class VimState
       # ;, ,
       'repeat-find', 'repeat-find-reverse'
       # j, k, h, l
-      'move-down', 'move-up', 'move-left','move-right',
+      'move-down', 'move-up', 'move-left', 'move-right',
       # w, W
       'move-to-next-word'    , 'move-to-next-whole-word'    ,
       # e, E
@@ -577,40 +576,10 @@ class VimState
       name = name.slice(6)
     name
 
-  # Private: A create a Number prefix based on the event.
-  #
-  # e - The event that triggered the Number prefix.
-  #
-  # Returns nothing.
-  getCountManager: ->
-    count = null
-    isOperatorPending = @isOperatorPending.bind(this)
-    set: (e) ->
-      if _.isNumber(e)
-        num = e
-      else
-        keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
-        num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-
-      # To cover scenario `10d3y` in this case we use 3, need to trash 10.
-      if isOperatorPending()
-        @reset()
-      count ?= 0
-      count = count * 10 + num
-
-    get: ->
-      count
-
-    reset: ->
-      count = null
-
   reverseSelections: ->
     reversed = not @editor.getLastSelection().isReversed()
     for selection in @editor.getSelections()
       selection.setBufferRange(selection.getBufferRange(), {reversed})
-
-  isOperatorPending: ->
-    not @operationStack.isEmpty()
 
   isVisualMode: -> @mode is 'visual'
   isNormalMode: -> @mode is 'normal'
