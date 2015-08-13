@@ -26,7 +26,8 @@ describe "Operators", ->
     it "does not throw an error even if no operation is pending", ->
       # cancel operation pushes an empty input operation
       # doing this without a pending operation throws an exception
-      expect(-> vimState.operationStack.push(new Input(''))).toThrow()
+      expect(-> editor.normalModeInputView.viewModel.cancel()).toThrow()
+
 
       # make sure normalModeInputView is created
       keydown('/')
