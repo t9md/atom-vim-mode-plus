@@ -2,7 +2,7 @@ _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
 
 {ViewModel} = require './view'
-Utils = require './utils'
+{getCopyType} = require './utils'
 settings = require './settings'
 Base = require './base'
 Motions = require './motions'
@@ -50,7 +50,7 @@ class Operator extends Base
       if text[-1..] isnt '\n'
         text += '\n'
     else
-      type = Utils.copyType(text)
+      type = getCopyType(text)
     @setRegister(register, {text, type}) unless text is ''
 
   # Proxying request to ViewModel to get Input instance.
@@ -60,6 +60,10 @@ class Operator extends Base
   # Callbacked by @getInput()
   setInput: (@input) ->
     @complete = true
+    @vimState.operationStack.process() # Re-process!!
+
+  getRegisterName: ->
+    @vimState.register.getName()
 
 class Select extends Operator
   @extend()
@@ -71,11 +75,6 @@ class Select extends Operator
 #
 class Delete extends Operator
   @extend()
-  register: null
-
-  constructor: ->
-    super
-    @register = settings.defaultRegister()
 
   # Public: Deletes the text selected by the given motion.
   #
@@ -84,7 +83,7 @@ class Delete extends Operator
   # Returns nothing.
   execute: ->
     if _.contains(@target.select(), true)
-      @setTextRegister(@register, @editor.getSelectedText())
+      @setTextRegister(@getRegisterName(), @editor.getSelectedText())
       @editor.transact =>
         for selection in @editor.getSelections()
           selection.deleteSelectedText()
@@ -190,17 +189,7 @@ class LowerCase extends Operator
 #
 class Yank extends Operator
   @extend()
-  register: null
 
-  constructor: ->
-    super
-    @register = settings.defaultRegister()
-
-  # Public: Copies the text selected by the given motion.
-  #
-  # count - The number of times to execute.
-  #
-  # Returns nothing.
   execute: ->
     originalPositions = @editor.getCursorBufferPositions()
     if _.contains(@target.select(), true)
@@ -215,7 +204,7 @@ class Yank extends Operator
       text = ''
       newPositions = originalPositions
 
-    @setTextRegister(@register, text)
+    @setTextRegister(@getRegisterName(), text)
 
     @editor.setSelectedBufferRanges(newPositions.map (p) -> new Range(p, p))
     @vimState.activateNormalMode()
@@ -372,17 +361,8 @@ class Put extends Operator
   register: null
   complete: true
 
-  constructor: ->
-    super
-    @register = settings.defaultRegister()
-
-  # Public: Pastes the text in the given register.
-  #
-  # count - The number of times to execute.
-  #
-  # Returns nothing.
   execute: ->
-    {text, type} = @getRegister(@register) or {}
+    {text, type} = @getRegister(@getRegisterName()) or {}
     return unless text
 
     textToInsert = _.times(@getCount(1), -> text).join('')
@@ -550,24 +530,14 @@ class InsertBelowWithNewline extends Insert
 class Change extends Insert
   @extend()
   complete: false
-  register: null
 
-  constructor: ->
-    super
-    @register = settings.defaultRegister()
-
-  # Public: Changes the text selected by the given motion.
-  #
-  # count - The number of times to execute.
-  #
-  # Returns nothing.
   execute: ->
     # If we've typed, we're being repeated. If we're being repeated,
     # undo transactions are already handled.
     @vimState.setInsertionCheckpoint() unless @typingCompleted
 
     if _.contains(@target.select(excludeWhitespace: true), true)
-      @setTextRegister(@register, @editor.getSelectedText())
+      @setTextRegister(@getRegisterName(), @editor.getSelectedText())
       if @target.isLinewise?() and not @typingCompleted
         for selection in @editor.getSelections()
           selection.insertText("\n", autoIndent: true)
@@ -592,11 +562,9 @@ class Substitute extends Change
 class SubstituteLine extends Change
   @extend()
   complete: true
-  register: null
 
   constructor: ->
     super
-    @register = settings.defaultRegister()
     @target = new Motions.MoveToRelativeLine(@vimState)
 
 class ChangeToLastCharacterOfLine extends Change

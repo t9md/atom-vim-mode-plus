@@ -796,7 +796,7 @@ describe "Operators", ->
     describe "with a register", ->
       beforeEach ->
         keydown('"')
-        keydown('a')
+        normalModeInputKeydown('a')
         keydown('y')
         keydown('y')
 
@@ -805,7 +805,7 @@ describe "Operators", ->
 
       it "appends the line to the A register", ->
         keydown('"')
-        keydown('A', shift: true)
+        normalModeInputKeydown('A', shift: true)
         keydown('y')
         keydown('y')
         expect(vimState.register.get('a').text).toBe "012 345\n012 345\n"
@@ -994,7 +994,7 @@ describe "Operators", ->
       describe "from a specified register", ->
         beforeEach ->
           keydown('"')
-          keydown('a')
+          normalModeInputKeydown('a')
           keydown('p')
 
         it "inserts the contents of the 'a' register", ->

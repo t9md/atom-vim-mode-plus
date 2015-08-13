@@ -1,10 +1,10 @@
-{ViewModel, Input, SearchViewModel} = require './view'
+{ViewModel} = require './view'
 _ = require 'underscore-plus'
 Base = require './base'
 
 class InsertMode extends Base
   @extend()
-  complete: true
+  complete: false
   recodable: false
 
   constructor: (@vimState) ->
@@ -17,10 +17,10 @@ class InsertMode extends Base
   # Callbacked by @getInput()
   setInput: (@input) ->
     @complete = true
+    @vimState.operationStack.process() # Re-process!!
 
 class InsertRegister extends InsertMode
   @extend()
-  complete: false
 
   constructor: ->
     super
@@ -28,7 +28,6 @@ class InsertRegister extends InsertMode
 
   execute: ->
     name = @input.characters
-    console.log name
     text = @vimState.register.get(name)?.text
     @editor.insertText(text) if text?
 

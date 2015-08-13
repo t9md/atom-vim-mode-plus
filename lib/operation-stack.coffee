@@ -12,7 +12,6 @@ completableOperators = ['Delete', 'Change', 'Yank', 'Indent', 'Outdent', 'AutoIn
 module.exports =
 class OperationStack
   constructor: (@vimState) ->
-    {@count} = @vimState
     @stack = []
     @processing = false
 
@@ -22,8 +21,8 @@ class OperationStack
     return unless op?
     if op.isMoveToBeginningOfLine()
       # 0 is special need to differenciate `10`, 0
-      if @count.isEmpty()
-        @count.set(0)
+      if @vimState.count.isEmpty()
+        @vimState.count.set(0)
         return
 
     if @isEmpty() and settings.debug()
@@ -116,7 +115,8 @@ class OperationStack
       else
         debug " -> <#{op.getKind()}>.execute()"
         op.execute()
-        @count.reset()
+        @vimState.count.reset()
+        @vimState.register.reset()
         debug "#=== Finish at #{new Date().toISOString()}\n"
 
   # Private: Fetches the last operation.
