@@ -88,13 +88,20 @@ class VimState
       'reverse-selections': (e) => @reverseSelections(e)
       'undo': => @undo()
       'replace-mode-backspace': => @replaceModeUndo()
-      'insert-mode-put': (e) => @insertRegister(@registerName(e))
+      # 'insert-mode-put': (e) => @insertRegister(@registerName(e))
       'copy-from-line-above': => InsertMode.copyCharacterFromAbove(@editor, this)
       'copy-from-line-below': => InsertMode.copyCharacterFromBelow(@editor, this)
 
     # [FIXME]
     @registerOperationCommands
       'register-prefix': (e) => @registerPrefix(e)
+
+    # InsertMode
+    # -------------------------
+    @registerNewOperationCommands InsertMode, [
+      # ctrl-r [a-zA-Z*+%_"]
+      'insert-register'
+    ]
 
     # Operator
     # -------------------------
@@ -525,15 +532,6 @@ class VimState
 
   updateStatusBar: ->
     @statusBarManager.update(@mode, @submode)
-
-  # Private: insert the contents of the register in the editor
-  #
-  # name - the name of the register to insert
-  #
-  # Returns nothing.
-  insertRegister: (name) ->
-    text = @register.get(name)?.text
-    @editor.insertText(text) if text?
 
   ensureCursorIsWithinLine: (cursor) =>
     return if @operationStack.isProcessing() or (not @isNormalMode())

@@ -34,6 +34,7 @@ class OperationStack
     @withLock =>
       # Motions in visual mode perform their selections.
       if @vimState.isVisualMode() and _.isFunction(op.select)
+        debug "push INPLICIT Operators.Select"
         @stack.push(new Operators.Select(@vimState))
 
       #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
@@ -54,6 +55,7 @@ class OperationStack
       # If we've received an operator in visual mode, use inplict currentSelection textobject
       # as a target of operator.
       if @vimState.isVisualMode() and op.isOperator()
+        debug "push INPLICIT TextObjects.CurrentSelection"
         @stack.push(new TextObjects.CurrentSelection(@vimState))
       @process()
 
