@@ -53,6 +53,7 @@ Its ambiguous. its actually do two thing, but name don't reflect that.
  - [x] `10d2x`: delete 2 chars, ignore `10`. Need to reseCount() on non-digit input.
 - To provide count information via vimState::getCount() all TOM instance need to be able to access vimState.
 
+
 * [Done](https://github.com/t9md/vim-mode/commit/9b7d18e6a799304241ce7f168c496b9e6a64bf98)
 Maybe something broken but I didn't notice, all spec pass without modification
 
@@ -78,3 +79,6 @@ The name of vimState is redundant simply `state` is enough since its vim-mode's 
   MoveToLine is not directly exposed, and MoveToAbsoluteLine is mapped to move-to-line command.
   So I renamed MoveToLine > MoveToLineBase, and MoveToAbsoluteLine > MoveToLine.
 - `vimState::pushSearchHistory` -> `vimState::saveSearchHistory`
+
+
+`introduce ViewModel.onDidGetInput()` to simplify code.
