@@ -23,19 +23,19 @@ describe "Prefixes", ->
     for key in keys.split('')
       helpers.keydown(key, options)
 
-  text = (text=null)->
+  text = (text=null) ->
     if text
       editor.setText(text)
     else
       expect(editor.getText())
 
-  cursor = (point=null)->
+  cursor = (point=null) ->
     if point
       editor.setCursorScreenPosition(point)
     else
       expect(editor.getCursorScreenPosition())
 
-  register = (name, value)->
+  register = (name, value) ->
     if value
       vimState.register.set(name, value)
     else
