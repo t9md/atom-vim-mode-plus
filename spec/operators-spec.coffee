@@ -30,10 +30,10 @@ describe "Operators", ->
 
       # make sure normalModeInputView is created
       keydown('/')
-      expect(vimState.isOperatorPending()).toBe true
+      expect(vimState.operationStack.isOperatorPending()).toBe true
       editor.normalModeInputView.viewModel.cancel()
 
-      expect(vimState.isOperatorPending()).toBe false
+      expect(vimState.operationStack.isOperatorPending()).toBe false
       expect(-> editor.normalModeInputView.viewModel.cancel()).not.toThrow()
 
   describe "the x keybinding", ->

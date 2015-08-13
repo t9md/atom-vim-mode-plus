@@ -23,7 +23,7 @@ class ViewModel
     @input
 
   cancel: (view) ->
-    if @vimState.isOperatorPending()
+    if @vimState.operationStack.isOperatorPending()
       if @operation.isMotion() or @operation.isOperator()
         @setInput('')
       else

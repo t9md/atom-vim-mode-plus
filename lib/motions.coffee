@@ -133,7 +133,7 @@ class MoveRight extends Motion
 
   onDidComposeBy: (operation) ->
     # Don't save oeration to instance variable to avoid reference before I understand it correctly.
-    # Also reflection support circular reference detection to stop infinit reflection loop.
+    # Also introspection need to support circular reference detection to stop infinit reflection loop.
     @composed = true if operation.isOperator()
 
   isOperatorPending: ->
@@ -146,7 +146,6 @@ class MoveRight extends Motion
       # when the motion is combined with an operator, we will only wrap to the next line
       # if we are already at the end of the line (after the last character)
       if @isOperatorPending() and not cursor.isAtEndOfLine()
-      # if @composer?.isOperator() and not cursor.isAtEndOfLine()
         wrapToNextLine = false
 
       cursor.moveRight() unless cursor.isAtEndOfLine()
