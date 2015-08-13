@@ -12,9 +12,9 @@ completableOperators = ['Delete', 'Change', 'Yank', 'Indent', 'Outdent', 'AutoIn
 module.exports =
 class OperationStack
   constructor: (@vimState) ->
+    {@count} = @vimState
     @stack = []
     @processing = false
-    @counter = @getCountManager()
 
   # Private: Push the given operations onto the operation stack, then process
   # it.
@@ -22,8 +22,8 @@ class OperationStack
     return unless op?
     if op.isMoveToBeginningOfLine()
       # 0 is special need to differenciate `10`, 0
-      if @counter.isEmpty()
-        @counter.set(0)
+      if @count.isEmpty()
+        @count.set(0)
         return
 
     if @isEmpty() and settings.debug()
@@ -114,7 +114,7 @@ class OperationStack
       else
         debug " -> <#{op.getKind()}>.execute()"
         op.execute()
-        @counter.reset()
+        @count.reset()
         debug "#=== Finish at #{new Date().toISOString()}\n"
 
   # Private: Fetches the last operation.
@@ -153,34 +153,3 @@ class OperationStack
 
   isOperatorPending: ->
     not @isEmpty()
-
-  # Private: A create a Number prefix based on the event.
-  #
-  # e - The event that triggered the Number prefix.
-  #
-  # Returns nothing.
-  getCountManager: ->
-    count = null
-    operationStack = this
-
-    set: (e) ->
-      if _.isNumber(e)
-        num = e
-      else
-        keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
-        num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
-
-      # To cover scenario `10d3y` in this case we use 3, need to trash 10.
-      if operationStack.isOperatorPending()
-        @reset()
-      count ?= 0
-      count = count * 10 + num
-
-    get: ->
-      count
-
-    reset: ->
-      count = null
-
-    isEmpty: ->
-      count?
