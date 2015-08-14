@@ -13,7 +13,6 @@ Scroll = require './scroll'
 OperationStack = require './operation-stack'
 RegisterManager = require './register-manager'
 CountManager = require './count-manager'
-{getKeystrokeForEvent} = require './utils'
 
 module.exports =
 class VimState

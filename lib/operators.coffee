@@ -2,7 +2,6 @@ _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
 
 {ViewModel} = require './view'
-{getCopyType} = require './utils'
 settings = require './settings'
 Base = require './base'
 Motions = require './motions'
@@ -44,14 +43,10 @@ class Operator extends Base
   # Public: Preps text and sets the text register
   #
   # Returns nothing
-  setTextRegister: (register, text) ->
-    if @target?.isLinewise?()
-      type = 'linewise'
-      if text[-1..] isnt '\n'
-        text += '\n'
-    else
-      type = getCopyType(text)
-    @vimState.register.set(register, {text, type}) unless text is ''
+  setTextToRegister: (register, text) ->
+    if @target?.isLinewise?() and not text.endsWith('\n')
+      text += "\n"
+    @vimState.register.set(register, {text}) unless text is ''
 
   # Proxying request to ViewModel to get Input instance.
   getInput: (args...) ->
@@ -81,7 +76,7 @@ class Delete extends Operator
   # Returns nothing.
   execute: ->
     if _.contains(@target.select(), true)
-      @setTextRegister(@getRegisterName(), @editor.getSelectedText())
+      @setTextToRegister(@getRegisterName(), @editor.getSelectedText())
       @editor.transact =>
         for selection in @editor.getSelections()
           selection.deleteSelectedText()
@@ -202,7 +197,7 @@ class Yank extends Operator
       text = ''
       newPositions = originalPositions
 
-    @setTextRegister(@getRegisterName(), text)
+    @setTextToRegister(@getRegisterName(), text)
 
     @editor.setSelectedBufferRanges(newPositions.map (p) -> new Range(p, p))
     @vimState.activateNormalMode()
@@ -535,7 +530,7 @@ class Change extends Insert
     @vimState.setInsertionCheckpoint() unless @typingCompleted
 
     if _.contains(@target.select(excludeWhitespace: true), true)
-      @setTextRegister(@getRegisterName(), @editor.getSelectedText())
+      @setTextToRegister(@getRegisterName(), @editor.getSelectedText())
       if @target.isLinewise?() and not @typingCompleted
         for selection in @editor.getSelections()
           selection.insertText("\n", autoIndent: true)
