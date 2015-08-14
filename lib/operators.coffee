@@ -318,7 +318,6 @@ class Decrease extends Increase
 class AdjustIndentation extends Operator
   @extend()
   execute: ->
-    mode = @vimState.mode
     @target.select() # FIXME how to respect count of default 1 without passing count
     {start} = @editor.getSelectedBufferRange()
 
@@ -440,8 +439,8 @@ class Insert extends Operator
       @typingCompleted = true
     return
 
-  inputOperator: -> true
-
+  inputOperator: ->
+    true
 
 class ReplaceMode extends Insert
   @extend()
