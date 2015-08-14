@@ -557,7 +557,7 @@ class SubstituteLine extends Change
 
   constructor: ->
     super
-    @target = new Motions.MoveToRelativeLine(@vimState)
+    @compose(new Motions.MoveToRelativeLine(@vimState))
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
