@@ -51,7 +51,7 @@ class Operator extends Base
         text += '\n'
     else
       type = getCopyType(text)
-    @setRegister(register, {text, type}) unless text is ''
+    @vimState.register.set(register, {text, type}) unless text is ''
 
   # Proxying request to ViewModel to get Input instance.
   getInput: (args...) ->
@@ -360,7 +360,7 @@ class Put extends Operator
   complete: true
 
   execute: ->
-    {text, type} = @getRegister(@getRegisterName()) or {}
+    {text, type} = @vimState.register.get(@getRegisterName()) or {}
     return unless text
 
     textToInsert = _.times(@getCount(1), -> text).join('')
