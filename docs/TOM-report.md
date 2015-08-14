@@ -1,9 +1,13 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-13T21:35:51.671Z*
+*generated at 2015-08-14T03:48:25.035Z*
 
 - [Base](#base) *Not exported*
+  - [InsertMode](#insertmode--base) *Not exported*
+    - [CopyFromLineAbove](#copyfromlineabove--insertmode)
+      - [CopyFromLineBelow](#copyfromlinebelow--copyfromlineabove)
+    - [InsertRegister](#insertregister--insertmode)
   - [Motion](#motion--base)
     - [Find](#find--motion)
       - [FindBackwards](#findbackwards--find)
@@ -135,6 +139,22 @@ vim-mode version: 0.57.0
 
 ## Base
 *Not exported*
+
+### InsertMode < Base
+*Not exported*
+
+### CopyFromLineAbove < InsertMode
+- ::complete: `true`: **Overridden**
+- ::getRow`(row)`
+- ::getTextInScreenRange`(range)`
+- ::execute`()`
+
+### CopyFromLineBelow < CopyFromLineAbove
+- ::getRow`(row)`: **Overridden**
+
+### InsertRegister < InsertMode
+- ::constructor`()`: `super`: **Overridden**
+- ::execute`()`
 
 ### Motion < Base
 - ::constructor`(@vimState)`: **Overridden**
@@ -370,7 +390,7 @@ vim-mode version: 0.57.0
 - ::recodable: `true`: **Overridden**
 - ::compose`(@target)`
 - ::canComposeWith`(operation)`
-- ::setTextRegister`(register, text)`
+- ::setTextToRegister`(register, text)`
 - ::getInput`()`
 - ::getRegisterName`()`
 

@@ -6,8 +6,8 @@ settings = require './settings'
 Base = require './base'
 Operators   = require './operators'
 Motions     = require './motions'
-InsertMode  = require './insert-mode'
 TextObjects = require './text-objects'
+InsertMode  = require './insert-mode'
 
 Scroll = require './scroll'
 OperationStack = require './operation-stack'
@@ -517,7 +517,7 @@ class VimState
     recursiveInspect = Base
 
     introspection = require './introspection'
-    mods = [Operators, Motions, TextObjects, Scroll]
+    mods = [Operators, Motions, TextObjects, Scroll, InsertMode]
     introspection.generateIntrospectionReport(mods, {excludeProperties, recursiveInspect})
 
 # This uses private APIs and may break if TextBuffer is refactored.
