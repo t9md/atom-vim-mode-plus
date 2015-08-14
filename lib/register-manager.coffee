@@ -28,8 +28,6 @@ class RegisterManager
         type = @getCopyType(text)
       when '%'
         text = @editor.getURI()
-        console.log text
-        console.log @getCopyType(text)
         type = @getCopyType(text)
       when '_' # Blackhole always returns nothing
         text = ''
