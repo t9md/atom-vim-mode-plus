@@ -52,18 +52,10 @@ class Base
   isPure: ->
     @pure
 
-  # Used by Operator and Motion?
-  # Maybe we hould move this function to Operator and Motion?
   getCount: (defaultCount=null) ->
     # Setting count as instance variable make operation repeatable.
     @count ?= @vimState?.count.get() ? defaultCount
     @count
-
-  getRegister: (args...) ->
-    @vimState.register.get(args...)
-
-  setRegister: (args...) ->
-    @vimState.register.set(args...)
 
   @getAncestors: ->
     getAncestors(this)

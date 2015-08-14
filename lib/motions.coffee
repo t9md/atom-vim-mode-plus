@@ -765,7 +765,6 @@ class SearchCurrentWord extends SearchBase
       characters
 
   execute: ->
-    # @getCount(1)
     super() if @input.length > 0
 
 # keymap: #

@@ -8,13 +8,18 @@ settings = require './settings'
 #
 # Returns the value of the given register or undefined if it hasn't
 # been set.
+validRegisterNames = /[a-zA-Z*+%_"]/
+
 module.exports =
 class RegisterManager
   constructor: (@vimState) ->
     {@editor, @globalVimState} = @vimState
 
+  isValidRegisterName: (name) ->
+    validRegisterNames.test(name)
+
   get: (name) ->
-    name = @getName() unless name
+    return unless @isValidRegisterName(name)
     if name is '"'
       name = settings.defaultRegister()
 
@@ -22,17 +27,15 @@ class RegisterManager
       when '*', '+'
         text = atom.clipboard.read()
         type = getCopyType(text)
-        {text, type}
       when '%'
         text = @editor.getURI()
         type = getCopyType(text)
-        {text, type}
       when '_' # Blackhole always returns nothing
         text = ''
         type = getCopyType(text)
-        {text, type}
       else
-        @globalVimState.registers[name.toLowerCase()]
+        {text, type} = @globalVimState.registers[name.toLowerCase()] ? {}
+    {text, type}
 
   # Private: Sets the value of a given register.
   #
@@ -41,6 +44,7 @@ class RegisterManager
   #
   # Returns nothing.
   set: (name, value) ->
+    return unless @isValidRegisterName(name)
     if name is '"'
       name = settings.defaultRegister()
 
