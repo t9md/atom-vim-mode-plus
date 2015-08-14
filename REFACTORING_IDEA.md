@@ -80,5 +80,4 @@ The name of vimState is redundant simply `state` is enough since its vim-mode's 
   So I renamed MoveToLine > MoveToLineBase, and MoveToAbsoluteLine > MoveToLine.
 - `vimState::pushSearchHistory` -> `vimState::saveSearchHistory`
 
-
 `introduce ViewModel.onDidGetInput()` to simplify code.

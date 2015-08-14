@@ -64,8 +64,8 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] Eliminate Input class, its just proxying user-input. [done](https://github.com/t9md/vim-mode/commit/b18f7f74f549e76e103335790f9af2cbf2599ac4)
 - [ ] Slim vim-state.coffee
   - [x] Auto mapping from command-name to corresponding class.
-  - [ ] Separate mode handling to ModeManager
-  - [ ] Separate search hisotory management as SearchHistoryManager
+  - [x] Separate mode handling to ModeManager
+  - [ ] Separate search history management as SearchHistoryManager
 - [ ] improve introspection report to describe keymap to corresponding class(by consulting `atom.keymap`).
 - [ ] Recheck unnecessary count passing function.
 
