@@ -29,23 +29,33 @@ class InsertRegister extends InsertMode
     text = @vimState.register.get(name)?.text
     @editor.insertText(text) if text?
 
-copyCharacterFromAbove = (editor, vimState) ->
-  editor.transact ->
-    for cursor in editor.getCursors()
-      {row, column} = cursor.getScreenPosition()
-      continue if row is 0
-      range = [[row-1, column], [row-1, column+1]]
-      cursor.selection.insertText(editor.getTextInBufferRange(editor.bufferRangeForScreenRange(range)))
+class CopyFromLineAbove extends InsertMode
+  @extend()
+  complete: true
 
-copyCharacterFromBelow = (editor, vimState) ->
-  editor.transact ->
-    for cursor in editor.getCursors()
-      {row, column} = cursor.getScreenPosition()
-      range = [[row+1, column], [row+1, column+1]]
-      cursor.selection.insertText(editor.getTextInBufferRange(editor.bufferRangeForScreenRange(range)))
+  getRow: (row) ->
+    row - 1
+
+  getTextInScreenRange: (range) ->
+    @editor.getTextInBufferRange(@editor.bufferRangeForScreenRange(range))
+
+  execute: ->
+    @editor.transact =>
+      for cursor in @editor.getCursors()
+        {row, column} = cursor.getScreenPosition()
+        row = @getRow(row)
+        continue if row < 0
+        range = [[row, column], [row, column+1]]
+        cursor.selection.insertText @getTextInScreenRange(range)
+
+class CopyFromLineBelow extends CopyFromLineAbove
+  @extend()
+
+  getRow: (row) ->
+    row + 1
 
 module.exports = {
-  copyCharacterFromAbove,
-  copyCharacterFromBelow
+  CopyFromLineAbove,
+  CopyFromLineBelow
   InsertRegister
 }

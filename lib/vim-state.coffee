@@ -73,28 +73,31 @@ class VimState
   # Returns nothing.
   init: ->
     @registerCommands
+      'generate-introspection-report':      => @generateIntrospectionReport()
+      'activate-normal-mode':               => @activateNormalMode()
+      'activate-linewise-visual-mode':      => @activateVisualMode('linewise')
+      'activate-characterwise-visual-mode': => @activateVisualMode('characterwise')
+      'activate-blockwise-visual-mode':     => @activateVisualMode('blockwise')
+      'reset-normal-mode':                  => @resetNormalMode()
+
+      'set-count':         (e) => @count.set(e) # 0-9
+      'set-register-name': => @register.setName() # "
+
+      'reverse-selections':     => @reverseSelections() # o
+      'undo':                   => @undo() # u
+      'replace-mode-backspace': => @replaceModeUndo()
+
       'toggle-debug': ->
         atom.config.set('vim-mode.debug', not settings.debug())
         console.log "vim-mode debug:", atom.config.get('vim-mode.debug')
-      'generate-introspection-report': => @generateIntrospectionReport()
-      'activate-normal-mode': => @activateNormalMode()
-      'activate-linewise-visual-mode': => @activateVisualMode('linewise')
-      'activate-characterwise-visual-mode': => @activateVisualMode('characterwise')
-      'activate-blockwise-visual-mode': => @activateVisualMode('blockwise')
-      'reset-normal-mode': => @resetNormalMode()
-      'set-count': (e) => @count.set(e) # 0-9
-      'set-register-name': => @register.setName() # "
-      'reverse-selections': => @reverseSelections() # o
-      'undo': => @undo() # u
-      'replace-mode-backspace': => @replaceModeUndo()
-      'copy-from-line-above': => InsertMode.copyCharacterFromAbove(@editor, this)
-      'copy-from-line-below': => InsertMode.copyCharacterFromBelow(@editor, this)
 
     # InsertMode
     # -------------------------
     @registerOperationCommands InsertMode, [
       # ctrl-r [a-zA-Z*+%_"]
       'insert-register'
+      # ctrl-y, ctrl-e
+      'copy-from-line-above', 'copy-from-line-below'
     ]
 
     # Operator
