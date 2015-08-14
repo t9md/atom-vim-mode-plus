@@ -160,7 +160,7 @@ describe "Prefixes", ->
 
       describe "writing", ->
         it "throws away anything written to it", ->
-          register('%', "new content")
+          register('%', text: "new content")
           register('%').toEqual '/Users/atom/known_value.txt'
 
     describe "the ctrl-r command in insert mode", ->
