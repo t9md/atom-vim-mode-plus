@@ -14,6 +14,7 @@ OperationStack = require './operation-stack'
 RegisterManager = require './register-manager'
 CountManager = require './count-manager'
 MarkManager = require './mark-manager'
+ModeManager = require './mode-manager'
 
 module.exports =
 class VimState
@@ -35,6 +36,7 @@ class VimState
     @count = new CountManager(this)
     @mark = new MarkManager(this)
     @operationStack = new OperationStack(this)
+    @modeManager = new ModeManager(this)
 
     @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
       return unless @editor?
@@ -68,12 +70,23 @@ class VimState
     @editor = null
     @editorElement = null
 
+  isVisualMode: ->
+    @modeManager.isVisualMode()
+
+  isNormalMode: ->
+    @modeManager.isNormalMode()
+
+  isInsertMode: ->
+    @modeManager.isInsertMode()
+
+  isOperatorPendingMode: ->
+    @modeManager.isOperatorPendingMode()
+
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
 
   onDidDestroy: (fn) ->
     @emitter.on('did-destroy', fn)
-
 
   # Private: Register multiple command handlers via an {Object} that maps
   # command names to command handler functions.
@@ -256,14 +269,30 @@ class VimState
       'scroll-cursor-to-left', 'scroll-cursor-to-right'
       ]
 
+  # Miscellaneous commands
+  # -------------------------
   undo: ->
     @editor.undo()
     @activateNormalMode()
 
-  ##############################################################################
-  # Search History
-  ##############################################################################
+  reverseSelections: ->
+    reversed = not @editor.getLastSelection().isReversed()
+    for selection in @editor.getSelections()
+      selection.setBufferRange(selection.getBufferRange(), {reversed})
 
+  generateIntrospectionReport: ->
+    excludeProperties = [
+      'report', 'reportAll'
+      'extend', 'getParent', 'getAncestors',
+    ]
+    recursiveInspect = Base
+
+    introspection = require './introspection'
+    mods = [Operators, Motions, TextObjects, Scroll, InsertMode]
+    introspection.generateIntrospectionReport(mods, {excludeProperties, recursiveInspect})
+
+  # Search History
+  # -------------------------
   # Public: Append a search to the search history.
   #
   # Motions.Search - The confirmed search motion to append
@@ -280,29 +309,13 @@ class VimState
   getSearchHistoryItem: (index = 0) ->
     @globalVimState.searchHistory[index]
 
-  ##############################################################################
   # Mode Switching
-  ##############################################################################
-
+  # -------------------------
   # Private: Used to enable normal mode.
   #
   # Returns nothing.
   activateNormalMode: ->
-    @deactivateInsertMode()
-    @deactivateVisualMode()
-
-    @mode = 'normal'
-    @submode = null
-
-    @changeModeClass('normal-mode')
-
-    @operationStack.clear()
-    selection.clear(autoscroll: false) for selection in @editor.getSelections()
-    for cursor in @editor.getCursors()
-      if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
-        cursor.moveLeft()
-
-    @updateStatusBar()
+    @modeManager.activateNormalMode()
 
   # TODO: remove this method and bump the `vim-mode` service version number.
   activateCommandMode: ->
@@ -312,167 +325,32 @@ class VimState
   # Private: Used to enable insert mode.
   #
   # Returns nothing.
-  activateInsertMode: (subtype = null) ->
-    @mode = 'insert'
-    @editorElement.component.setInputEnabled(true)
-    @setInsertionCheckpoint()
-    @submode = subtype
-    @changeModeClass('insert-mode')
-    @updateStatusBar()
+  activateInsertMode: (submode=null) ->
+    @modeManager.activateInsertMode(submode)
+
+  activateOperatorPendingMode: ->
+    @modeManager.activateOperatorPendingMode()
 
   activateReplaceMode: ->
-    @activateInsertMode('replace')
-    @replaceModeCounter = 0
-    @editorElement.classList.add('replace-mode')
-    @subscriptions.add @replaceModeListener = @editor.onWillInsertText @replaceModeInsertHandler
-    @subscriptions.add @replaceModeUndoListener = @editor.onDidInsertText @replaceModeUndoHandler
-
-  replaceModeInsertHandler: (event) =>
-    chars = event.text?.split('') or []
-    selections = @editor.getSelections()
-    for char in chars
-      continue if char is '\n'
-      for selection in selections
-        selection.delete() unless selection.cursor.isAtEndOfLine()
-    return
-
-  replaceModeUndoHandler: (event) =>
-    @replaceModeCounter++
+    @modeManager.activateReplaceMode()
 
   replaceModeUndo: ->
-    if @replaceModeCounter > 0
-      @editor.undo()
-      @editor.undo()
-      @editor.moveLeft()
-      @replaceModeCounter--
-
-  setInsertionCheckpoint: ->
-    @insertionCheckpoint = @editor.createCheckpoint() unless @insertionCheckpoint?
+    @modeManager.replaceModeUndo()
 
   deactivateInsertMode: ->
-    return unless @mode in [null, 'insert']
-    @editorElement.component.setInputEnabled(false)
-    @editorElement.classList.remove('replace-mode')
-    @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
-    changes = getChangesSinceCheckpoint(@editor.buffer, @insertionCheckpoint)
-    item = @inputOperator(@history[0])
-    @insertionCheckpoint = null
-    if item?
-      item.confirmChanges(changes)
-    for cursor in @editor.getCursors()
-      cursor.moveLeft() unless cursor.isAtBeginningOfLine()
-    if @replaceModeListener?
-      @replaceModeListener.dispose()
-      @subscriptions.remove @replaceModeListener
-      @replaceModeListener = null
-      @replaceModeUndoListener.dispose()
-      @subscriptions.remove @replaceModeUndoListener
-      @replaceModeUndoListener = null
+    @modeManager.deactivateInsertMode()
 
   deactivateVisualMode: ->
-    return unless @isVisualMode()
-    for selection in @editor.getSelections()
-      selection.cursor.moveLeft() unless (selection.isEmpty() or selection.isReversed())
+    @modeManager.deactivateVisualMode()
 
-  # Private: Get the input operator that needs to be told about about the
-  # typed undo transaction in a recently completed operation, if there
-  # is one.
-  inputOperator: (item) ->
-    return item unless item?
-    return item if item.inputOperator?()
-    return item.composedObject if item.composedObject?.inputOperator?()
+  activateVisualMode: (submode) ->
+    @modeManager.activateVisualMode(submode)
 
-  # Private: Used to enable visual mode.
-  #
-  # type - One of 'characterwise', 'linewise' or 'blockwise'
-  #
-  # Returns nothing.
-  activateVisualMode: (type) ->
-    # Already in 'visual', this means one of following command is
-    # executed within `vim-mode.visual-mode`
-    #  * activate-blockwise-visual-mode
-    #  * activate-characterwise-visual-mode
-    #  * activate-linewise-visual-mode
-    if @isVisualMode()
-      if @submode is type
-        @activateNormalMode()
-        return
-
-      @submode = type
-      if @submode is 'linewise'
-        for selection in @editor.getSelections()
-          # Keep original range as marker's property to get back
-          # to characterwise.
-          # Since selectLine lost original cursor column.
-          originalRange = selection.getBufferRange()
-          selection.marker.setProperties({originalRange})
-          [start, end] = selection.getBufferRowRange()
-          selection.selectLine(row) for row in [start..end]
-
-      else if @submode in ['characterwise', 'blockwise']
-        # Currently, 'blockwise' is not yet implemented.
-        # So treat it as characterwise.
-        # Recover original range.
-        for selection in @editor.getSelections()
-          {originalRange} = selection.marker.getProperties()
-          if originalRange
-            [startRow, endRow] = selection.getBufferRowRange()
-            originalRange.start.row = startRow
-            originalRange.end.row   = endRow
-            selection.setBufferRange(originalRange)
-    else
-      @deactivateInsertMode()
-      @mode = 'visual'
-      @submode = type
-      @changeModeClass('visual-mode')
-
-      if @submode is 'linewise'
-        @editor.selectLinesContainingCursors()
-      else if @editor.getSelectedText() is ''
-        @editor.selectRight()
-
-    @updateStatusBar()
-
-  # Private: Used to re-enable visual mode
-  resetVisualMode: ->
-    @activateVisualMode(@submode)
-
-  # Private: Used to enable operator-pending mode.
-  activateOperatorPendingMode: ->
-    @deactivateInsertMode()
-    @mode = 'operator-pending'
-    @submode = null
-    @changeModeClass('operator-pending-mode')
-
-    @updateStatusBar()
-
-  changeModeClass: (targetMode) ->
-    for mode in ['normal-mode', 'insert-mode', 'visual-mode', 'operator-pending-mode']
-      if mode is targetMode
-        @editorElement.classList.add(mode)
-      else
-        @editorElement.classList.remove(mode)
-
-  # Private: Resets the normal mode back to it's initial state.
-  #
-  # Returns nothing.
   resetNormalMode: ->
-    @operationStack.clear()
-    @editor.clearSelections()
-    @activateNormalMode()
+    @modeManager.resetNormalMode()
 
-  reverseSelections: ->
-    reversed = not @editor.getLastSelection().isReversed()
-    for selection in @editor.getSelections()
-      selection.setBufferRange(selection.getBufferRange(), {reversed})
-
-  isVisualMode: -> @mode is 'visual'
-  isNormalMode: -> @mode is 'normal'
-  isInsertMode: -> @mode is 'insert'
-  isOperatorPendingMode: -> @mode is 'operator-pending'
-
-  updateStatusBar: ->
-    @statusBarManager.update(@mode, @submode)
+  setInsertionCheckpoint: ->
+    @modeManager.setInsertionCheckpoint()
 
   ensureCursorIsWithinLine: (cursor) =>
     return if @operationStack.isProcessing() or (not @isNormalMode())
@@ -482,24 +360,3 @@ class VimState
       @operationStack.withLock -> # to ignore the cursor change (and recursion) caused by the next line
         cursor.moveLeft()
     cursor.goalColumn = goalColumn
-
-  generateIntrospectionReport: ->
-    excludeProperties = [
-      'report', 'reportAll'
-      'extend', 'getParent', 'getAncestors',
-    ]
-    recursiveInspect = Base
-
-    introspection = require './introspection'
-    mods = [Operators, Motions, TextObjects, Scroll, InsertMode]
-    introspection.generateIntrospectionReport(mods, {excludeProperties, recursiveInspect})
-
-# This uses private APIs and may break if TextBuffer is refactored.
-# Package authors - copy and paste this code at your own risk.
-getChangesSinceCheckpoint = (buffer, checkpoint) ->
-  {history} = buffer
-
-  if (index = history.getCheckpointIndex(checkpoint))?
-    history.undoStack.slice(index)
-  else
-    []
