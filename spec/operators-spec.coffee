@@ -1512,7 +1512,7 @@ describe "Operators", ->
     it 'marks a position', ->
       keydown('m')
       normalModeInputKeydown('a')
-      expect(vimState.getMark('a')).toEqual [0, 1]
+      expect(vimState.mark.get('a')).toEqual [0, 1]
 
   describe 'the ~ keybinding', ->
     beforeEach ->

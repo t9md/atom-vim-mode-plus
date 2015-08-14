@@ -254,7 +254,7 @@ class Mark extends Operator
   #
   # Returns nothing.
   execute: ->
-    @vimState.setMark(@input, @editor.getCursorBufferPosition())
+    @vimState.mark.set(@input, @editor.getCursorBufferPosition())
     @vimState.activateNormalMode()
 
 # Increase/Decrease

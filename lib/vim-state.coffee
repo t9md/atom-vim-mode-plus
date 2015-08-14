@@ -13,6 +13,7 @@ Scroll = require './scroll'
 OperationStack = require './operation-stack'
 RegisterManager = require './register-manager'
 CountManager = require './count-manager'
+MarkManager = require './mark-manager'
 
 module.exports =
 class VimState
@@ -28,12 +29,11 @@ class VimState
     @subscriptions = new CompositeDisposable
     @editor = @editorElement.getModel()
     @history = []
-    @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
 
-    # [FIXME] Order matter
     @register = new RegisterManager(this)
     @count = new CountManager(this)
+    @mark = new MarkManager(this)
     @operationStack = new OperationStack(this)
 
     @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
@@ -68,6 +68,36 @@ class VimState
     @editor = null
     @editorElement = null
 
+  onDidFailToCompose: (fn) ->
+    @emitter.on('failed-to-compose', fn)
+
+  onDidDestroy: (fn) ->
+    @emitter.on('did-destroy', fn)
+
+
+  # Private: Register multiple command handlers via an {Object} that maps
+  # command names to command handler functions.
+  #
+  # Prefixes the given command names with 'vim-mode:' to reduce redundancy in
+  # the provided object.
+  registerCommands: (commands) ->
+    for name, fn of commands
+      do (fn) =>
+        @subscriptions.add atom.commands.add(@editorElement, "vim-mode:#{name}", fn)
+
+  # Register operation command.
+  # command-name is automatically mapped to correspoinding class.
+  #  e.g.
+  # join -> Join
+  # scroll-down -> ScrollDown
+  registerOperationCommands: (kind, names) ->
+    commands = {}
+    for name in names
+      do (name) =>
+        klass = _.capitalize(_.camelize(name))
+        commands[name] = => @operationStack.push new kind[klass](this)
+    @registerCommands(commands)
+
   # Private: Creates the plugin's bindings
   #
   # Returns nothing.
@@ -84,7 +114,8 @@ class VimState
       'set-register-name': => @register.setName() # "
 
       'reverse-selections':     => @reverseSelections() # o
-      'undo':                   => @undo() # u
+      'undo': => @undo() # u
+
       'replace-mode-backspace': => @replaceModeUndo()
 
       'toggle-debug': ->
@@ -225,66 +256,9 @@ class VimState
       'scroll-cursor-to-left', 'scroll-cursor-to-right'
       ]
 
-  # Private: Register multiple command handlers via an {Object} that maps
-  # command names to command handler functions.
-  #
-  # Prefixes the given command names with 'vim-mode:' to reduce redundancy in
-  # the provided object.
-  registerCommands: (commands) ->
-    for name, fn of commands
-      do (fn) =>
-        @subscriptions.add atom.commands.add(@editorElement, "vim-mode:#{name}", fn)
-
-  # Register operation command.
-  # command-name is automatically mapped to correspoinding class.
-  #  e.g.
-  # join -> Join
-  # scroll-down -> ScrollDown
-  registerOperationCommands: (kind, names) ->
-    commands = {}
-    for name in names
-      do (name) =>
-        klass = _.capitalize(_.camelize(name))
-        commands[name] = => @operationStack.push new kind[klass](this)
-    @registerCommands(commands)
-
-  onDidFailToCompose: (fn) ->
-    @emitter.on('failed-to-compose', fn)
-
-  onDidDestroy: (fn) ->
-    @emitter.on('did-destroy', fn)
-
   undo: ->
     @editor.undo()
     @activateNormalMode()
-
-  ##############################################################################
-  # Mark
-  ##############################################################################
-
-  # Private: Fetches the value of a given mark.
-  #
-  # name - The name of the mark to fetch.
-  #
-  # Returns the value of the given mark or undefined if it hasn't
-  # been set.
-  getMark: (name) ->
-    if @marks[name]
-      @marks[name].getBufferRange().start
-    else
-      undefined
-
-  # Private: Sets the value of a given mark.
-  #
-  # name  - The name of the mark to fetch.
-  # pos {Point} - The value to set the mark to.
-  #
-  # Returns nothing.
-  setMark: (name, pos) ->
-    # check to make sure name is in [a-z] or is `
-    if (charCode = name.charCodeAt(0)) >= 96 and charCode <= 122
-      marker = @editor.markBufferRange(new Range(pos, pos), {invalidate: 'never', persistent: false})
-      @marks[name] = marker
 
   ##############################################################################
   # Search History
