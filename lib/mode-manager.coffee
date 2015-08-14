@@ -1,19 +1,9 @@
 # Grim  = require 'grim'
 
-SUPPPOTED_MODES = [
-  'normal-mode'
-  'insert-mode'
-  'visual-mode'
-  'operator-pending-mode'
-]
-
 module.exports =
 class ModeManager
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
-
-  isVisualMode: ->
-    @vimState.mode is 'visual'
 
   isNormalMode: ->
     @vimState.mode is 'normal'
@@ -24,16 +14,32 @@ class ModeManager
   isOperatorPendingMode: ->
     @vimState.mode is 'operator-pending'
 
+  isVisualMode: ->
+    @vimState.mode is 'visual'
+
+  isVisualCharacterwiseMode: ->
+    @vimState.mode is 'visual' and @vimState.submode is 'characterwise'
+
+  isVisualBlockwiseMode: ->
+    @vimState.mode is 'visual' and @vimState.submode is 'blockwise'
+
+  isVisualLinewiseMode: ->
+    @vimState.mode is 'visual' and @vimState.submode is 'linewise'
+
+
   setMode: (mode, submode=null) ->
     @vimState.mode = mode
     @vimState.submode = submode
+    modes = ['normal', 'insert', 'visual', 'operator-pending']
+
+    for _mode in modes
+      @editorElement.classList.remove "#{_mode}-mode"
+    @editorElement.classList.add "#{mode}-mode"
 
   activateNormalMode: ->
     @deactivateInsertMode()
     @deactivateVisualMode()
-
     @setMode('normal')
-    @changeModeClass('normal-mode')
 
     @vimState.operationStack.clear()
     for selection in @editor.getSelections()
@@ -49,7 +55,6 @@ class ModeManager
 
   activateInsertMode: (submode=null) ->
     @setMode('insert', submode)
-    @changeModeClass('insert-mode')
     @updateStatusBar()
     @editorElement.component.setInputEnabled(true)
     @setInsertionCheckpoint()
@@ -57,6 +62,7 @@ class ModeManager
   activateReplaceMode: ->
     @activateInsertMode('replace')
     @editorElement.classList.add('replace-mode')
+
     @replaceModeCounter = 0
     @vimState.subscriptions.add @replaceModeListener = @editor.onWillInsertText @replaceModeInsertHandler
     @vimState.subscriptions.add @replaceModeUndoListener = @editor.onDidInsertText @replaceModeUndoHandler
@@ -160,7 +166,6 @@ class ModeManager
     else
       @deactivateInsertMode()
       @setMode('visual', submode)
-      @changeModeClass('visual-mode')
 
       if @vimState.submode is 'linewise'
         @editor.selectLinesContainingCursors()
@@ -175,16 +180,8 @@ class ModeManager
   # Private: Used to enable operator-pending mode.
   activateOperatorPendingMode: ->
     @deactivateInsertMode()
-    @setMode('operator-pending', null)
-    @changeModeClass('operator-pending-mode')
+    @setMode('operator-pending')
     @updateStatusBar()
-
-  changeModeClass: (targetMode) ->
-    for mode in SUPPPOTED_MODES
-      if mode is targetMode
-        @editorElement.classList.add(mode)
-      else
-        @editorElement.classList.remove(mode)
 
   # Private: Resets the normal mode back to it's initial state.
   #
