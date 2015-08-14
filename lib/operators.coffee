@@ -15,19 +15,13 @@ class OperatorError extends Base
 # -------------------------
 class Operator extends Base
   @extend()
-  vimState: null
   target: null
   complete: false
   recodable: true
-
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
-  # Public: Marks this as ready to execute and saves the motion.
-  #
   # target - TextObject or Motion to operate on.
-  #
-  # Returns nothing.
   compose: (target) ->
     unless _.isFunction(target.select)
       throw new OperatorError('Must respond to select')
@@ -38,7 +32,7 @@ class Operator extends Base
       @target.onDidComposeBy(this)
 
   canComposeWith: (operation) ->
-    operation.select?
+    _.isFunction(operation.select)
 
   # Public: Preps text and sets the text register
   #
@@ -63,17 +57,8 @@ class Select extends Operator
   execute: ->
     @target.select(@getCount())
 
-#
-# It deletes everything selected by the following motion.
-#
 class Delete extends Operator
   @extend()
-
-  # Public: Deletes the text selected by the given motion.
-  #
-  # count - The number of times to execute.
-  #
-  # Returns nothing.
   execute: ->
     if _.contains(@target.select(), true)
       @setTextToRegister(@getRegisterName(), @editor.getSelectedText())
@@ -91,7 +76,6 @@ class Delete extends Operator
 class DeleteRight extends Delete
   @extend()
   complete: true
-
   constructor: ->
     super
     @compose(new Motions.MoveRight(@vimState))
@@ -152,37 +136,24 @@ class ToggleCaseNow extends ToggleCase
   @extend()
   complete: true
 
-#
-# In visual mode or after `g` with a motion, it makes the selection uppercase
-#
 class UpperCase extends Operator
   @extend()
   execute: ->
-    # if _.contains(@target.select(@getCount(1)), true)
     if _.contains(@target.select(), true)
       @editor.replaceSelectedText {}, (text) ->
         text.toUpperCase()
-
     @vimState.activateNormalMode()
 
-#
-# In visual mode or after `g` with a motion, it makes the selection lowercase
-#
 class LowerCase extends Operator
   @extend()
   execute: ->
     if _.contains(@target.select(), true)
       @editor.replaceSelectedText {}, (text) ->
         text.toLowerCase()
-
     @vimState.activateNormalMode()
 
-#
-# It copies everything selected by the following motion.
-#
 class Yank extends Operator
   @extend()
-
   execute: ->
     originalPositions = @editor.getCursorBufferPositions()
     if _.contains(@target.select(), true)
@@ -209,50 +180,31 @@ class YankLine extends Yank
     super
     @compose(new Motions.MoveToRelativeLine(@vimState))
 
-#
-# It combines the current line with the following line.
-#
 class Join extends Operator
   @extend()
   complete: true
-
-  # Public: Combines the current with the following lines
-  #
-  # count - The number of times to execute.
-  #
-  # Returns nothing.
   execute: ->
     @editor.transact =>
       _.times @getCount(1), =>
         @editor.joinLines()
     @vimState.activateNormalMode()
 
-#
-# Repeat the last operation
-#
 class Repeat extends Operator
   @extend()
   complete: true
   recodable: false
-
   execute: ->
     @editor.transact =>
       _.times @getCount(1), =>
         cmd = @vimState.history[0]
         cmd?.execute()
-#
-# It creates a mark at the current cursor position
-#
+
 class Mark extends Operator
   @extend()
   constructor: ->
     super
     @getInput(this, class: 'mark', singleChar: true, hidden: true)
 
-  # Public: Creates the mark in the specified mark register (from user input)
-  # at the current position
-  #
-  # Returns nothing.
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
     @vimState.activateNormalMode()
@@ -320,9 +272,7 @@ class AdjustIndentation extends Operator
   execute: ->
     @target.select() # FIXME how to respect count of default 1 without passing count
     {start} = @editor.getSelectedBufferRange()
-
     @indent()
-
     @editor.setCursorBufferPosition([start.row, 0])
     @editor.moveToFirstCharacterOfLine()
     @vimState.activateNormalMode()
@@ -344,17 +294,12 @@ class AutoIndent extends AdjustIndentation
 
 # Put
 # -------------------------
-#
-# It pastes everything contained within the specifed register
-#
-# Used by PutAfter and PutBefore, Put itself is not exposed.
 class Put extends Operator
   @extend()
   register: null
   complete: true
-
   execute: ->
-    {text, type} = @vimState.register.get(@getRegisterName()) or {}
+    {text, type} = @vimState.register.get(@getRegisterName()) ? {}
     return unless text
 
     textToInsert = _.times(@getCount(1), -> text).join('')
