@@ -213,7 +213,8 @@ inspectInstance = (obj, options={}) ->
 getKeyBindingInfo = (klass) ->
   command = "vim-mode:#{_.dasherize(klass)}"
   results = null
-  for keybind in atom.keymaps.getKeyBindings() when keybind.command is command
+  for keybind in atom.keymaps.getKeyBindings() when (keybind.command is command) and
+      keybind.source.endsWith("keymaps/vim-mode.cson")
     {keystrokes, selector} = keybind
     results ?= []
     results.push {keystrokes, selector}

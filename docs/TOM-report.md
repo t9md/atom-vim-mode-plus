@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-15T18:50:27.145Z*
+*generated at 2015-08-15T18:54:24.703Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -689,7 +689,6 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `y`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `y`
-  - atom-text-editor.vim-mode.visual-mode: `cmd-c`
 - ::execute`()`
 
 ### YankLine < Yank
@@ -864,7 +863,6 @@ vim-mode version: 0.57.0
 ### SelectInsideParagraph < TextObject
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i p`
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `cmd-l`
 - ::select`()`
 
 ### SelectInsideQuotes < TextObject
@@ -899,7 +897,6 @@ vim-mode version: 0.57.0
 ### SelectInsideSingleQuotes < SelectInsideQuotes
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i '`
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `'`
 - ::char: `'\''`: **Overridden**
 
 ### SelectAroundSingleQuotes < SelectInsideSingleQuotes
