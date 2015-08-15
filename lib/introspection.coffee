@@ -97,6 +97,7 @@ report = (obj, options={}) ->
   {
     name: obj.name
     ancesstorsNames: _.pluck(getAncestors(obj), 'name')
+    keymaps: getKeyBindingInfo(obj.name)
     instance: inspectObject(obj, options)
     prototype: inspectObject(obj, options, true)
   }
@@ -151,7 +152,7 @@ genTableOfContent = (obj) ->
 generateIntrospectionReport = (mods, options) ->
   pack = atom.packages.getActivePackage('vim-mode')
   {version} = pack.metadata
-  results = _.flatten(reportModule(mod, options) for mod in mods)
+  results = _.flatten((reportModule(mod, options) for mod in mods))
   results = results.concat(getVirtualParents(results))
   results = sortByAncesstor(results)
 
@@ -165,7 +166,8 @@ generateIntrospectionReport = (mods, options) ->
     if result.virtual?
       s.push '*Not exported*'
     else
-      {instance, prototype} = result
+      {instance, prototype, keymaps} = result
+      s.push formatKeymaps(keymaps) if keymaps?
       s.push instance if instance?
       s.push prototype if prototype?
     body.push s.join("\n")
@@ -181,6 +183,14 @@ generateIntrospectionReport = (mods, options) ->
   atom.workspace.open().then (editor) ->
     editor.setText content
     editor.setGrammar atom.grammars.grammarForScopeName('source.gfm')
+
+formatKeymaps = (keymaps) ->
+  s = []
+  s.push '- keymaps'
+  for keymap in keymaps
+    {keystrokes, selector} = keymap
+    s.push "  - #{selector}: `#{keystrokes}`"
+  s.join("\n")
 
 formatReport = (report) ->
   {instance, prototype, ancesstorsNames} = report
@@ -200,7 +210,17 @@ inspectInstance = (obj, options={}) ->
   ].filter (e) -> e
   .join('\n').split('\n').map((e) -> indent + e).join('\n')
 
+getKeyBindingInfo = (klass) ->
+  command = "vim-mode:#{_.dasherize(klass)}"
+  results = null
+  for keybind in atom.keymaps.getKeyBindings() when keybind.command is command
+    {keystrokes, selector} = keybind
+    results ?= []
+    results.push {keystrokes, selector}
+  results
+
 module.exports = {
+  getKeyBindingInfo
   getAncestors
   getParent
   generateIntrospectionReport
