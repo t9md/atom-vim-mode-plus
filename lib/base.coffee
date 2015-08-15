@@ -1,3 +1,4 @@
+_ = require 'underscore-plus'
 {getAncestors, getParent} = require './introspection'
 
 module.exports =
@@ -26,10 +27,12 @@ class Base
   # Base::isOperator: ->
   #   this instanceof Operator
   #
+  children = []
   @extend: ->
     klass = this
     Base::["is#{klass.name}"] = ->
       this instanceof klass
+    children.push klass
 
   getKind: ->
     @constructor.name
@@ -38,6 +41,10 @@ class Base
     # Setting count as instance variable make operation repeatable.
     @count ?= @vimState?.count.get() ? defaultCount
     @count
+
+  @findClass: (klassName) ->
+    _.detect children, (child) ->
+      child.name is klassName
 
   @getAncestors: ->
     getAncestors(this)
