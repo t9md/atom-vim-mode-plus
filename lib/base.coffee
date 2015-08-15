@@ -1,31 +1,18 @@
-{inspect} = require('util')
-_ = require 'underscore-plus'
-{inspectObject, report, getAncestors, getParent} = require './introspection'
-
-excludeProperties = [
-  '__super__', 'report', 'reportAll'
-  'extend', 'getParent', 'getAncestors',
-]
+{getAncestors, getParent} = require './introspection'
 
 module.exports =
 class Base
+  isPure: ->
+    @pure
   pure: false
 
-  # Public: Determines when the command can be executed.
-  #
-  # Returns true if ready to execute and false otherwise.
-  complete: null
   isComplete: ->
     @complete
+  complete: null
 
-  # Public: Determines if this command should be recorded in the command
-  # history for repeats.
-  #
-  # Returns true if this command should be recorded.
-  recodable: null
   isRecordable: ->
     @recodable
-
+  recodable: null
 
   # Expected to be called by child class.
   # It automatically create typecheck function like
@@ -39,18 +26,13 @@ class Base
   # Base::isOperator: ->
   #   this instanceof Operator
   #
-  children = []
   @extend: ->
     klass = this
     Base::["is#{klass.name}"] = ->
       this instanceof klass
-    children.push klass
 
   getKind: ->
     @constructor.name
-
-  isPure: ->
-    @pure
 
   getCount: (defaultCount=null) ->
     # Setting count as instance variable make operation repeatable.
@@ -62,6 +44,3 @@ class Base
 
   @getParent: ->
     getParent(this)
-
-  @reportAll: ->
-    (child.report() for child in children).join('\n')

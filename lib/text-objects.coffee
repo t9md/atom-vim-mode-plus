@@ -7,7 +7,6 @@ WholeWordRegex = /\S+/
 
 class TextObject extends Base
   @extend()
-  vimState: null
   complete: true
   recodable: false
 
