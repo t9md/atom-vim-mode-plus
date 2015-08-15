@@ -15,10 +15,10 @@ class MotionError extends Base
 
 class Motion extends Base
   @extend()
-  operatesInclusively: true
-  operatesLinewise: false
   complete: true
   recordable: false
+  operatesInclusively: true
+  operatesLinewise: false
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState

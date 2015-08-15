@@ -24,5 +24,7 @@ class MarkManager
   set: (name, pos) ->
     # check to make sure name is in [a-z] or is `
     if (charCode = name.charCodeAt(0)) >= 96 and charCode <= 122
-      marker = @editor.markBufferPosition(pos, {invalidate: 'never', persistent: false})
+      marker = @editor.markBufferPosition pos,
+        invalidate: 'never',
+        persistent: false
       @marks[name] = marker
