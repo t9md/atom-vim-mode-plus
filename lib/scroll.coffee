@@ -1,70 +1,62 @@
 Base = require './base'
 class Scroll extends Base
   @extend()
-  isComplete: ->
-    true
-  isRecordable: ->
-    false
+  complete: true
+  recodable: false
+  scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
 
-  getPixelCursor: (which) ->
-    # which is `top` or `left`
+  constructor: (@vimState) ->
+    {@editor, @editorElement} = @vimState
+
+  getFirstVisibleScreenRow: ->
+    @editorElement.getFirstVisibleScreenRow()
+
+  getLastVisibleScreenRow: ->
+    @editorElement.getLastVisibleScreenRow()
+
+  getLastScreenRow: ->
+    @editor.getLastScreenRow()
+
+  getPixelCursor: (which) -> # which is `top` or `left`
     point = @editor.getCursorScreenPosition()
     @editorElement.pixelPositionForScreenPosition(point)[which]
 
-  constructor: (@vimState, @options={}) ->
-    {@editorElement} = @vimState
-    @editor = @editorElement.getModel()
-
-    # better to use editor.getVerticalScrollMargin() ?
-    @scrolloff = 2 # atom default
-    @rows =
-      first: @editorElement.getFirstVisibleScreenRow()
-      last: @editorElement.getLastVisibleScreenRow()
-      final: @editor.getLastScreenRow()
-
+# ctrl-e scroll lines downwards
 class ScrollDown extends Scroll
   @extend()
+  direction: 'down'
+
   execute: ->
-    @keepCursorOnScreen()
-    @scrollUp()
+    amountInPixel = @editor.getLineHeightInPixels() * @getCount(1)
+    scrollTop = @editor.getScrollTop()
+    switch @direction
+      when 'down' then scrollTop += amountInPixel
+      when 'up'   then scrollTop -= amountInPixel
+    @editor.setScrollTop scrollTop
+    @keepCursorOnScreen?()
 
   keepCursorOnScreen: ->
-    count = @getCount(1)
     {row, column} = @editor.getCursorScreenPosition()
-    firstScreenRow = @rows.first + @scrolloff + 1
-    if row - count <= firstScreenRow
-      @editor.setCursorScreenPosition([firstScreenRow + count, column])
+    newRow =
+      if row < (rowMin = @getFirstVisibleScreenRow() + @scrolloff)
+        rowMin
+      else if row > (rowMax = @getLastVisibleScreenRow() - (@scrolloff + 1))
+        rowMax
+    @editor.setCursorScreenPosition [newRow, column] if newRow?
 
-  scrollUp: ->
-    lastScreenRow = @rows.last - @scrolloff
-    @editor.scrollToScreenPosition([lastScreenRow + @getCount(1), 0])
-
-class ScrollUp extends Scroll
+# ctrl-y scroll lines upwards
+class ScrollUp extends ScrollDown
   @extend()
-  execute: ->
-    @keepCursorOnScreen()
-    @scrollDown()
-
-  keepCursorOnScreen: ->
-    count = @getCount(1)
-    {row, column} = @editor.getCursorScreenPosition()
-    lastScreenRow = @rows.last - @scrolloff - 1
-    if row + count >= lastScreenRow
-      @editor.setCursorScreenPosition([lastScreenRow - count, column])
-
-  scrollDown: ->
-    firstScreenRow = @rows.first + @scrolloff
-    @editor.scrollToScreenPosition([firstScreenRow - @getCount(1), 0])
+  direction: 'up'
 
 # Scroll without Cursor Position change.
 # -------------------------
 class ScrollCursor extends Scroll
-  keepCursor: false
   @extend()
-
   execute: ->
-    @moveToFirstCharacterOfLine() unless @keepCursor
-    @editor.setScrollTop @getScrollTop() if @isScrollable()
+    @moveToFirstCharacterOfLine?()
+    if @isScrollable()
+      @editor.setScrollTop @getScrollTop()
 
   moveToFirstCharacterOfLine: ->
     @editor.moveToFirstCharacterOfLine()
@@ -75,7 +67,7 @@ class ScrollCursor extends Scroll
 class ScrollCursorToTop extends ScrollCursor
   @extend()
   isScrollable: ->
-    not (@rows.last is @rows.final)
+    @getLastVisibleScreenRow() isnt @getLastScreenRow()
 
   getScrollTop: ->
     @getPixelCursor('top') - @getOffSetPixelHeight()
@@ -83,7 +75,7 @@ class ScrollCursorToTop extends ScrollCursor
 class ScrollCursorToBottom extends ScrollCursor
   @extend()
   isScrollable: ->
-    not (@rows.first is 0)
+    @getFirstVisibleScreenRow() isnt 0
 
   getScrollTop: ->
     @getPixelCursor('top') - (@editor.getHeight() - @getOffSetPixelHeight(1))
@@ -98,15 +90,15 @@ class ScrollCursorToMiddle extends ScrollCursor
 
 class ScrollCursorToTopLeave extends ScrollCursorToTop
   @extend()
-  keepCursor: true
+  moveToFirstCharacterOfLine: null
 
 class ScrollCursorToBottomLeave extends ScrollCursorToBottom
   @extend()
-  keepCursor: true
+  moveToFirstCharacterOfLine: null
 
 class ScrollCursorToMiddleLeave extends ScrollCursorToMiddle
   @extend()
-  keepCursor: true
+  moveToFirstCharacterOfLine: null
 
 # Horizontal Scroll
 # -------------------------
