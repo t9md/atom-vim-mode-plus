@@ -10,31 +10,32 @@ class InsertMode extends Base
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
-  # Proxying request to ViewModel to get Input instance.
+  # Proxying request to ViewModel to get input.
   getInput: (args...) ->
     viewModel = new ViewModel(args...)
     viewModel.onDidGetInput (@input) =>
       @complete = true
-      @vimState.operationStack.process() # Re-process!!
+      # Now completed, so re-process me(this)!
+      @vimState.operationStack.process()
 
 class InsertRegister extends InsertMode
   @extend()
 
   constructor: ->
     super
-    @getInput(this, class: 'insert-register', singleChar: true, hidden: true)
+    @getInput this,
+      class: 'insert-register'
+      singleChar: true
+      hidden: true
 
   execute: ->
-    name = @input
-    text = @vimState.register.get(name)?.text
-    @editor.insertText(text) if text?
+    if text = @vimState.register.get(@input)?.text
+      @editor.insertText(text)
 
 class CopyFromLineAbove extends InsertMode
   @extend()
   complete: true
-
-  getRow: (row) ->
-    row - 1
+  rowTransration: -1
 
   getTextInScreenRange: (range) ->
     @editor.getTextInBufferRange(@editor.bufferRangeForScreenRange(range))
@@ -43,16 +44,14 @@ class CopyFromLineAbove extends InsertMode
     @editor.transact =>
       for cursor in @editor.getCursors()
         {row, column} = cursor.getScreenPosition()
-        row = @getRow(row)
-        continue if row < 0
+        row += @rowTransration
+        continue if row < 0 # No line to copy from.
         range = [[row, column], [row, column+1]]
         cursor.selection.insertText @getTextInScreenRange(range)
 
 class CopyFromLineBelow extends CopyFromLineAbove
   @extend()
-
-  getRow: (row) ->
-    row + 1
+  rowTransration: +1
 
 module.exports = {
   CopyFromLineAbove,
