@@ -1,6 +1,6 @@
 helpers = require './spec-helper'
 
-describe "Scrolling", ->
+fdescribe "Scrolling", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
@@ -23,17 +23,19 @@ describe "Scrolling", ->
       editor.setText("1\n2\n3\n4\n5\n6\n7\n8\n9\n10")
       spyOn(editor, 'getFirstVisibleScreenRow').andReturn(2)
       spyOn(editor, 'getLastVisibleScreenRow').andReturn(8)
-      spyOn(editor, 'scrollToScreenPosition')
+      spyOn(editor, 'getLineHeightInPixels').andReturn(10)
+      spyOn(editor, 'getScrollTop').andReturn(100)
+      spyOn(editor, 'setScrollTop')
 
     describe "the ctrl-e keybinding", ->
       beforeEach ->
-        spyOn(editor, 'getCursorScreenPosition').andReturn({row: 4, column: 0})
+        spyOn(editor, 'getCursorScreenPosition').andReturn({row: 3, column: 0})
         spyOn(editor, 'setCursorScreenPosition')
 
       it "moves the screen down by one and keeps cursor onscreen", ->
         keydown('e', ctrl: true)
-        expect(editor.scrollToScreenPosition).toHaveBeenCalledWith([7, 0])
-        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([6, 0])
+        expect(editor.setScrollTop).toHaveBeenCalledWith(110)
+        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([4, 0])
 
     describe "the ctrl-y keybinding", ->
       beforeEach ->
@@ -42,8 +44,8 @@ describe "Scrolling", ->
 
       it "moves the screen up by one and keeps the cursor onscreen", ->
         keydown('y', ctrl: true)
-        expect(editor.scrollToScreenPosition).toHaveBeenCalledWith([3, 0])
-        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([4, 0])
+        expect(editor.setScrollTop).toHaveBeenCalledWith(90)
+        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([5, 0])
 
   describe "scroll cursor keybindings", ->
     beforeEach ->
