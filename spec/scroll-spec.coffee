@@ -1,6 +1,6 @@
 helpers = require './spec-helper'
 
-fdescribe "Scrolling", ->
+describe "Scrolling", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
