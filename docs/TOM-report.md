@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-15T18:54:24.703Z*
+*generated at 2015-08-16T04:42:46.061Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -144,6 +144,7 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### CopyFromLineAbove < InsertMode
+- command: `vim-mode:copy-from-line-above`
 - keymaps
   - atom-text-editor.vim-mode.insert-mode: `ctrl-y`
 - ::complete: `true`: **Overridden**
@@ -152,9 +153,11 @@ vim-mode version: 0.57.0
 - ::execute`()`
 
 ### CopyFromLineBelow < CopyFromLineAbove
+- command: `vim-mode:copy-from-line-below`
 - ::rowTransration: `1`: **Overridden**
 
 ### InsertRegister < InsertMode
+- command: `vim-mode:insert-register`
 - keymaps
   - atom-text-editor.vim-mode.insert-mode: `ctrl-r`
 - ::constructor`()`: `super`: **Overridden**
@@ -176,6 +179,7 @@ vim-mode version: 0.57.0
 - ::getInput`()`
 
 ### Find < Motion
+- command: `vim-mode:find`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `f`
 - ::constructor`()`: `super`: **Overridden**
@@ -188,11 +192,13 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`
 
 ### FindBackwards < Find
+- command: `vim-mode:find-backwards`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-F`
+  - atom-text-editor.vim-mode:not(.insert-mode): `F`
 - ::backwards: `true`: **Overridden**
 
 ### RepeatFind < Find
+- command: `vim-mode:repeat-find`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `;`
 - ::constructor`()`: `super`: **Overridden**
@@ -202,12 +208,14 @@ vim-mode version: 0.57.0
 - ::moveCursor`()`: **Overridden**
 
 ### RepeatFindReverse < RepeatFind
+- command: `vim-mode:repeat-find-reverse`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `,`
 - ::constructor`()`: `super`: **Overridden**
 - ::reverse: `true`: **Overridden**
 
 ### Till < Find
+- command: `vim-mode:till`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `t`
 - ::offset: `1`: **Overridden**
@@ -215,11 +223,13 @@ vim-mode version: 0.57.0
 - ::moveSelectionInclusively`(selection, options)`: `super`: **Overridden**
 
 ### TillBackwards < Till
+- command: `vim-mode:till-backwards`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-T`
+  - atom-text-editor.vim-mode:not(.insert-mode): `T`
 - ::backwards: `true`: **Overridden**
 
 ### MoveDown < Motion
+- command: `vim-mode:move-down`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `j`
   - atom-text-editor.vim-mode:not(.insert-mode): `down`
@@ -227,6 +237,7 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`
 
 ### MoveLeft < Motion
+- command: `vim-mode:move-left`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `h`
   - atom-text-editor.vim-mode:not(.insert-mode): `left`
@@ -234,6 +245,7 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`
 
 ### MoveRight < Motion
+- command: `vim-mode:move-right`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `l`
   - atom-text-editor.vim-mode:not(.insert-mode): `space`
@@ -245,29 +257,34 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`
 
 ### MoveToBeginningOfLine < Motion
+- command: `vim-mode:move-to-beginning-of-line`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `0`
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
 
 ### MoveToEndOfWord < Motion
+- command: `vim-mode:move-to-end-of-word`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `e`
 - ::wordRegex: `null`
 - ::moveCursor`(cursor)`
 
 ### MoveToEndOfWholeWord < MoveToEndOfWord
+- command: `vim-mode:move-to-end-of-whole-word`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-E`
+  - atom-text-editor.vim-mode:not(.insert-mode): `E`
 - ::wordRegex: `/\S+/`: **Overridden**
 
 ### MoveToFirstCharacterOfLine < Motion
+- command: `vim-mode:move-to-first-character-of-line`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `^`
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
 
 ### MoveToFirstCharacterOfLineAndDown < Motion
+- command: `vim-mode:move-to-first-character-of-line-and-down`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `_`
 - ::operatesLinewise: `true`: **Overridden**
@@ -275,6 +292,7 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`
 
 ### MoveToFirstCharacterOfLineDown < Motion
+- command: `vim-mode:move-to-first-character-of-line-down`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `+`
   - atom-text-editor.vim-mode:not(.insert-mode): `enter`
@@ -282,6 +300,7 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`
 
 ### MoveToFirstCharacterOfLineUp < Motion
+- command: `vim-mode:move-to-first-character-of-line-up`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `-`
 - ::operatesLinewise: `true`: **Overridden**
@@ -289,12 +308,14 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`
 
 ### MoveToLastCharacterOfLine < Motion
+- command: `vim-mode:move-to-last-character-of-line`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `$`
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
 
 ### MoveToLastNonblankCharacterOfLineAndDown < Motion
+- command: `vim-mode:move-to-last-nonblank-character-of-line-and-down`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `g _`
 - ::operatesInclusively: `true`: **Overridden**
@@ -305,8 +326,9 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### MoveToLine < MoveToLineBase
+- command: `vim-mode:move-to-line`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-G`
+  - atom-text-editor.vim-mode:not(.insert-mode): `G`
 - ::moveCursor`(cursor)`
 
 ### MoveToRelativeLine < MoveToLineBase
@@ -317,21 +339,25 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### MoveToBottomOfScreen < MoveToScreenLine
+- command: `vim-mode:move-to-bottom-of-screen`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-L`
+  - atom-text-editor.vim-mode:not(.insert-mode): `L`
 - ::getDestinationRow`()`: **Overridden**
 
 ### MoveToMiddleOfScreen < MoveToScreenLine
+- command: `vim-mode:move-to-middle-of-screen`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-M`
+  - atom-text-editor.vim-mode:not(.insert-mode): `M`
 - ::getDestinationRow`()`: **Overridden**
 
 ### MoveToTopOfScreen < MoveToScreenLine
+- command: `vim-mode:move-to-top-of-screen`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-H`
+  - atom-text-editor.vim-mode:not(.insert-mode): `H`
 - ::getDestinationRow`()`: **Overridden**
 
 ### MoveToStartOfFile < MoveToLineBase
+- command: `vim-mode:move-to-start-of-file`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `g g`
 - ::moveCursor`(cursor)`
@@ -340,28 +366,33 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### ScrollFullScreenUp < ScrollKeepingCursor
+- command: `vim-mode:scroll-full-screen-up`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `ctrl-b`
 - ::direction: `'up'`: **Overridden**
 - ::getAmountInPixel`()`
 
 ### ScrollFullScreenDown < ScrollFullScreenUp
+- command: `vim-mode:scroll-full-screen-down`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `ctrl-f`
 - ::direction: `'down'`: **Overridden**
 
 ### ScrollHalfScreenUp < ScrollKeepingCursor
+- command: `vim-mode:scroll-half-screen-up`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `ctrl-u`
 - ::direction: `'up'`: **Overridden**
 - ::getAmountInPixel`()`
 
 ### ScrollHalfScreenDown < ScrollHalfScreenUp
+- command: `vim-mode:scroll-half-screen-down`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `ctrl-d`
 - ::direction: `'down'`: **Overridden**
 
 ### MoveToMark < Motion
+- command: `vim-mode:move-to-mark`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `'`
 - ::constructor`()`: `super`: **Overridden**
@@ -372,17 +403,20 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`
 
 ### MoveToMarkLiteral < MoveToMark
+- command: `vim-mode:move-to-mark-literal`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): ```
 - ::operatesLinewise: `false`: **Overridden**
 
 ### MoveToNextParagraph < Motion
+- command: `vim-mode:move-to-next-paragraph`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `}`
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
 
 ### MoveToNextWord < Motion
+- command: `vim-mode:move-to-next-word`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `w`
 - ::wordRegex: `null`
@@ -391,30 +425,35 @@ vim-mode version: 0.57.0
 - ::isEndOfFile`(cursor)`
 
 ### MoveToNextWholeWord < MoveToNextWord
+- command: `vim-mode:move-to-next-whole-word`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-W`
+  - atom-text-editor.vim-mode:not(.insert-mode): `W`
 - ::wordRegex: `/^\s*$|\S+/`: **Overridden**
 
 ### MoveToPreviousParagraph < Motion
+- command: `vim-mode:move-to-previous-paragraph`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `{`
 - ::moveCursor`(cursor)`
 
 ### MoveToPreviousWholeWord < Motion
+- command: `vim-mode:move-to-previous-whole-word`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-B`
+  - atom-text-editor.vim-mode:not(.insert-mode): `B`
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
 - ::isWholeWord`(cursor)`
 - ::isBeginningOfFile`(cursor)`
 
 ### MoveToPreviousWord < Motion
+- command: `vim-mode:move-to-previous-word`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `b`
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
 
 ### MoveUp < Motion
+- command: `vim-mode:move-up`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `k`
   - atom-text-editor.vim-mode:not(.insert-mode): `up`
@@ -425,6 +464,7 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### BracketMatchingMotion < SearchBase
+- command: `vim-mode:bracket-matching-motion`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `%`
 - ::operatesInclusively: `true`: **Overridden**
@@ -435,6 +475,7 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`: **Overridden**
 
 ### RepeatSearch < SearchBase
+- command: `vim-mode:repeat-search`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `n`
 - ::constructor`()`: `super`: **Overridden**
@@ -443,22 +484,26 @@ vim-mode version: 0.57.0
 - ::reversed`()`: **Overridden**
 
 ### RepeatSearchBackwards < RepeatSearch
+- command: `vim-mode:repeat-search-backwards`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-N`
+  - atom-text-editor.vim-mode:not(.insert-mode): `N`
 - ::constructor`()`: `super`: **Overridden**
 
 ### Search < SearchBase
+- command: `vim-mode:search`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `/`
 - ::constructor`()`: `super`: **Overridden**
 - ::getInput`()`: **Overridden**
 
 ### ReverseSearch < Search
+- command: `vim-mode:reverse-search`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `?`
 - ::constructor`()`: `super`: **Overridden**
 
 ### SearchCurrentWord < SearchBase
+- command: `vim-mode:search-current-word`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `*`
 - @keywordRegex: `null`
@@ -470,6 +515,7 @@ vim-mode version: 0.57.0
 - ::execute`()`: `super()`: **Overridden**
 
 ### ReverseSearchCurrentWord < SearchCurrentWord
+- command: `vim-mode:reverse-search-current-word`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `#`
 - @keywordRegex: `null`
@@ -493,24 +539,28 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### AutoIndent < AdjustIndentation
+- command: `vim-mode:auto-indent`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `=`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `=`
 - ::indent`()`
 
 ### Indent < AdjustIndentation
+- command: `vim-mode:indent`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `>`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `>`
 - ::indent`()`
 
 ### Outdent < AdjustIndentation
+- command: `vim-mode:outdent`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `<`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `<`
 - ::indent`()`
 
 ### Delete < Operator
+- command: `vim-mode:delete`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `d`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `d`
@@ -518,24 +568,28 @@ vim-mode version: 0.57.0
 - ::execute`()`
 
 ### DeleteLeft < Delete
+- command: `vim-mode:delete-left`
 - keymaps
-  - atom-text-editor.vim-mode.normal-mode: `shift-X`
+  - atom-text-editor.vim-mode.normal-mode: `X`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
 ### DeleteRight < Delete
+- command: `vim-mode:delete-right`
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: `x`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
 ### DeleteToLastCharacterOfLine < Delete
+- command: `vim-mode:delete-to-last-character-of-line`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-D`
+  - atom-text-editor.vim-mode:not(.insert-mode): `D`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
 ### Increase < Operator
+- command: `vim-mode:increase`
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: `ctrl-a`
 - ::constructor`()`: `super`: **Overridden**
@@ -545,6 +599,7 @@ vim-mode version: 0.57.0
 - ::increaseNumber`(cursor)`
 
 ### Decrease < Increase
+- command: `vim-mode:decrease`
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: `ctrl-x`
 - ::step: `-1`: **Overridden**
@@ -562,6 +617,7 @@ vim-mode version: 0.57.0
 - ::inputOperator`()`
 
 ### Change < Insert
+- command: `vim-mode:change`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `c`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `c`
@@ -570,44 +626,52 @@ vim-mode version: 0.57.0
 - ::execute`()`: `super`: **Overridden**
 
 ### ChangeToLastCharacterOfLine < Change
+- command: `vim-mode:change-to-last-character-of-line`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-C`
+  - atom-text-editor.vim-mode:not(.insert-mode): `C`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
 ### Substitute < Change
+- command: `vim-mode:substitute`
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: `s`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
 ### SubstituteLine < Change
+- command: `vim-mode:substitute-line`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-S`
+  - atom-text-editor.vim-mode:not(.insert-mode): `S`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
 ### InsertAboveWithNewline < Insert
+- command: `vim-mode:insert-above-with-newline`
 - keymaps
-  - atom-text-editor.vim-mode.normal-mode: `shift-O`
+  - atom-text-editor.vim-mode.normal-mode: `O`
 - ::execute`()`: `super`: **Overridden**
 
 ### InsertAfter < Insert
+- command: `vim-mode:insert-after`
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: `a`
 - ::execute`()`: `super`: **Overridden**
 
 ### InsertAfterEndOfLine < Insert
+- command: `vim-mode:insert-after-end-of-line`
 - keymaps
-  - atom-text-editor.vim-mode.normal-mode: `shift-A`
+  - atom-text-editor.vim-mode.normal-mode: `A`
 - ::execute`()`: `super`: **Overridden**
 
 ### InsertAtBeginningOfLine < Insert
+- command: `vim-mode:insert-at-beginning-of-line`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-I`
+  - atom-text-editor.vim-mode:not(.insert-mode): `I`
 - ::execute`()`: `super`: **Overridden**
 
 ### InsertBelowWithNewline < Insert
+- command: `vim-mode:insert-below-with-newline`
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: `o`
 - ::execute`()`: `super`: **Overridden**
@@ -621,18 +685,21 @@ vim-mode version: 0.57.0
 - ::countChars`(char, string)`
 
 ### Join < Operator
+- command: `vim-mode:join`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-J`
+  - atom-text-editor.vim-mode:not(.insert-mode): `J`
 - ::complete: `true`: **Overridden**
 - ::execute`()`
 
 ### LowerCase < Operator
+- command: `vim-mode:lower-case`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `g u`
   - atom-text-editor.vim-mode.visual-mode: `u`
 - ::execute`()`
 
 ### Mark < Operator
+- command: `vim-mode:mark`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `m`
 - ::constructor`()`: `super`: **Overridden**
@@ -642,16 +709,19 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### PutAfter < Put
+- command: `vim-mode:put-after`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `p`
 - ::location: `'after'`
 
 ### PutBefore < Put
+- command: `vim-mode:put-before`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-P`
+  - atom-text-editor.vim-mode:not(.insert-mode): `P`
 - ::location: `'before'`
 
 ### Repeat < Operator
+- command: `vim-mode:repeat`
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: `.`
 - ::complete: `true`: **Overridden**
@@ -659,6 +729,7 @@ vim-mode version: 0.57.0
 - ::execute`()`
 
 ### Replace < Operator
+- command: `vim-mode:replace`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `r`
 - ::constructor`()`: `super`: **Overridden**
@@ -670,30 +741,35 @@ vim-mode version: 0.57.0
 - ::execute`()`
 
 ### ToggleCase < Operator
+- command: `vim-mode:toggle-case`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `g ~`
 - ::execute`()`
 
 ### ToggleCaseNow < ToggleCase
+- command: `vim-mode:toggle-case-now`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `~`
 - ::complete: `true`: **Overridden**
 
 ### UpperCase < Operator
+- command: `vim-mode:upper-case`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `g shift-U`
-  - atom-text-editor.vim-mode.visual-mode: `shift-U`
+  - atom-text-editor.vim-mode.visual-mode: `U`
 - ::execute`()`
 
 ### Yank < Operator
+- command: `vim-mode:yank`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `y`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `y`
 - ::execute`()`
 
 ### YankLine < Yank
+- command: `vim-mode:yank-line`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): `shift-Y`
+  - atom-text-editor.vim-mode:not(.insert-mode): `Y`
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: `true`: **Overridden**
 
@@ -707,39 +783,46 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### ScrollCursorToBottom < ScrollCursor
+- command: `vim-mode:scroll-cursor-to-bottom`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `z -`
 - ::isScrollable`()`
 - ::getScrollTop`()`
 
 ### ScrollCursorToBottomLeave < ScrollCursorToBottom
+- command: `vim-mode:scroll-cursor-to-bottom-leave`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `z b`
 - ::moveToFirstCharacterOfLine: `null`: **Overridden**
 
 ### ScrollCursorToMiddle < ScrollCursor
+- command: `vim-mode:scroll-cursor-to-middle`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `z .`
 - ::isScrollable`()`
 - ::getScrollTop`()`
 
 ### ScrollCursorToMiddleLeave < ScrollCursorToMiddle
+- command: `vim-mode:scroll-cursor-to-middle-leave`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `z z`
 - ::moveToFirstCharacterOfLine: `null`: **Overridden**
 
 ### ScrollCursorToTop < ScrollCursor
+- command: `vim-mode:scroll-cursor-to-top`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `z enter`
 - ::isScrollable`()`
 - ::getScrollTop`()`
 
 ### ScrollCursorToTopLeave < ScrollCursorToTop
+- command: `vim-mode:scroll-cursor-to-top-leave`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `z t`
 - ::moveToFirstCharacterOfLine: `null`: **Overridden**
 
 ### ScrollDown < Scroll
+- command: `vim-mode:scroll-down`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `ctrl-e`
 - ::direction: `'down'`
@@ -747,6 +830,7 @@ vim-mode version: 0.57.0
 - ::keepCursorOnScreen`()`
 
 ### ScrollUp < ScrollDown
+- command: `vim-mode:scroll-up`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `ctrl-y`
 - ::direction: `'up'`: **Overridden**
@@ -755,11 +839,13 @@ vim-mode version: 0.57.0
 *Not exported*
 
 ### ScrollCursorToLeft < ScrollHorizontal
+- command: `vim-mode:scroll-cursor-to-left`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `z s`
 - ::execute`()`
 
 ### ScrollCursorToRight < ScrollHorizontal
+- command: `vim-mode:scroll-cursor-to-right`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): `z e`
 - ::execute`()`
@@ -773,16 +859,19 @@ vim-mode version: 0.57.0
 - ::select`()`
 
 ### SelectAWholeWord < TextObject
+- command: `vim-mode:select-a-whole-word`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a shift-W`
 - ::select`()`
 
 ### SelectAWord < TextObject
+- command: `vim-mode:select-a-word`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a w`
 - ::select`()`
 
 ### SelectAroundParagraph < TextObject
+- command: `vim-mode:select-around-paragraph`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a p`
 - ::select`()`
@@ -796,6 +885,7 @@ vim-mode version: 0.57.0
 - ::select`()`
 
 ### SelectInsideAngleBrackets < SelectInsideBrackets
+- command: `vim-mode:select-inside-angle-brackets`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i <`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i >`
@@ -803,12 +893,14 @@ vim-mode version: 0.57.0
 - ::endChar: `'>'`: **Overridden**
 
 ### SelectAroundAngleBrackets < SelectInsideAngleBrackets
+- command: `vim-mode:select-around-angle-brackets`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a <`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a >`
 - ::includeBrackets: `true`: **Overridden**
 
 ### SelectInsideCurlyBrackets < SelectInsideBrackets
+- command: `vim-mode:select-inside-curly-brackets`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i {`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i }`
@@ -817,6 +909,7 @@ vim-mode version: 0.57.0
 - ::endChar: `'}'`: **Overridden**
 
 ### SelectAroundCurlyBrackets < SelectInsideCurlyBrackets
+- command: `vim-mode:select-around-curly-brackets`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a {`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a }`
@@ -824,6 +917,7 @@ vim-mode version: 0.57.0
 - ::includeBrackets: `true`: **Overridden**
 
 ### SelectInsideParentheses < SelectInsideBrackets
+- command: `vim-mode:select-inside-parentheses`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i (`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i )`
@@ -832,6 +926,7 @@ vim-mode version: 0.57.0
 - ::endChar: `')'`: **Overridden**
 
 ### SelectAroundParentheses < SelectInsideParentheses
+- command: `vim-mode:select-around-parentheses`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a (`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a )`
@@ -839,6 +934,7 @@ vim-mode version: 0.57.0
 - ::includeBrackets: `true`: **Overridden**
 
 ### SelectInsideSquareBrackets < SelectInsideBrackets
+- command: `vim-mode:select-inside-square-brackets`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i [`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i ]`
@@ -846,12 +942,14 @@ vim-mode version: 0.57.0
 - ::endChar: `']'`: **Overridden**
 
 ### SelectAroundSquareBrackets < SelectInsideSquareBrackets
+- command: `vim-mode:select-around-square-brackets`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a [`
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a ]`
 - ::includeBrackets: `true`: **Overridden**
 
 ### SelectInsideTags < SelectInsideBrackets
+- command: `vim-mode:select-inside-tags`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i t`
 - ::beginChar: `'>'`: **Overridden**
@@ -861,6 +959,7 @@ vim-mode version: 0.57.0
 - ::includeBrackets: `true`: **Overridden**
 
 ### SelectInsideParagraph < TextObject
+- command: `vim-mode:select-inside-paragraph`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i p`
 - ::select`()`
@@ -875,41 +974,49 @@ vim-mode version: 0.57.0
 - ::select`()`
 
 ### SelectInsideBackTicks < SelectInsideQuotes
+- command: `vim-mode:select-inside-back-ticks`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i ``
 - ::char: `'`'`: **Overridden**
 
 ### SelectAroundBackTicks < SelectInsideBackTicks
+- command: `vim-mode:select-around-back-ticks`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a ``
 - ::includeQuotes: `true`: **Overridden**
 
 ### SelectInsideDoubleQuotes < SelectInsideQuotes
+- command: `vim-mode:select-inside-double-quotes`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i "`
 - ::char: `'"'`: **Overridden**
 
 ### SelectAroundDoubleQuotes < SelectInsideDoubleQuotes
+- command: `vim-mode:select-around-double-quotes`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a "`
 - ::includeQuotes: `true`: **Overridden**
 
 ### SelectInsideSingleQuotes < SelectInsideQuotes
+- command: `vim-mode:select-inside-single-quotes`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i '`
 - ::char: `'\''`: **Overridden**
 
 ### SelectAroundSingleQuotes < SelectInsideSingleQuotes
+- command: `vim-mode:select-around-single-quotes`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `a '`
 - ::includeQuotes: `true`: **Overridden**
 
 ### SelectInsideWholeWord < TextObject
+- command: `vim-mode:select-inside-whole-word`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i shift-W`
 - ::select`()`
 
 ### SelectInsideWord < TextObject
+- command: `vim-mode:select-inside-word`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: `i w`
 - ::select`()

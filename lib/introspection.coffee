@@ -94,10 +94,12 @@ inspectObject = (obj, options={}, prototype=false) ->
   results.join('\n')
 
 report = (obj, options={}) ->
+  name = obj.name
   {
-    name: obj.name
+    name: name
     ancesstorsNames: _.pluck(getAncestors(obj), 'name')
-    keymaps: getKeyBindingInfo(obj.name)
+    command: getCommand(name)
+    keymaps: getKeyBindingInfo(name)
     instance: inspectObject(obj, options)
     prototype: inspectObject(obj, options, true)
   }
@@ -166,7 +168,8 @@ generateIntrospectionReport = (mods, options) ->
     if result.virtual?
       s.push '*Not exported*'
     else
-      {instance, prototype, keymaps} = result
+      {command, keymaps, instance, prototype} = result
+      s.push "- command: `#{command}`" if command?
       s.push formatKeymaps(keymaps) if keymaps?
       s.push instance if instance?
       s.push prototype if prototype?
@@ -210,12 +213,40 @@ inspectInstance = (obj, options={}) ->
   ].filter (e) -> e
   .join('\n').split('\n').map((e) -> indent + e).join('\n')
 
+keymapsForVimMode = null
+getKeyBindings =  ->
+  return keymapsForVimMode if keymapsForVimMode
+  pack = atom.packages.getActivePackage('vim-mode')
+  keymapPath = pack.getKeymapPaths().pop()
+  keymapsForVimMode =
+    (k for k in atom.keymaps.getKeyBindings() when k.source is keymapPath)
+  keymapsForVimMode
+
+commandsForVimMode = null
+getCommands = ->
+  return commandsForVimMode if commandsForVimMode
+  editor = atom.workspace.getActiveTextEditor()
+  editorElement = atom.views.getView(editor)
+  commands = atom.commands.findCommands(target: editorElement)
+  commandsForVimMode = _.pluck(commands, 'name')
+  commandsForVimMode
+
+getCommand = (klass) ->
+  command = "vim-mode:#{_.dasherize(klass)}"
+  # console.log command
+  # console.log getCommands()
+  # # console.log getCommands()
+  # console.log _.find getCommands(), (c) ->
+  #   c is command
+  _.detect getCommands(), (c) ->
+    c is command
+
 getKeyBindingInfo = (klass) ->
   command = "vim-mode:#{_.dasherize(klass)}"
   results = null
-  for keybind in atom.keymaps.getKeyBindings() when (keybind.command is command) and
-      keybind.source.endsWith("keymaps/vim-mode.cson")
-    {keystrokes, selector} = keybind
+  for k in getKeyBindings() when k.command is command
+    {keystrokes, selector} = k
+    keystrokes = keystrokes.replace(/^shift-/, '')
     results ?= []
     results.push {keystrokes, selector}
   results
