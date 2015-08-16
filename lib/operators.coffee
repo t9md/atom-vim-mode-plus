@@ -51,10 +51,10 @@ class Operator extends Base
   # Public: Preps text and sets the text register
   #
   # Returns nothing
-  setTextToRegister: (register, text) ->
+  setTextToRegister: (text) ->
     if @target?.isLinewise?() and not text.endsWith('\n')
       text += "\n"
-    @vimState.register.set(register, {text}) unless text is ''
+    @vimState.register.set(@getRegisterName(), {text}) unless text is ''
 
   # Proxying request to ViewModel to get Input instance.
   getInput: (args...) ->
@@ -77,7 +77,7 @@ class Delete extends Operator
 
   execute: ->
     if _.contains(@target.select(), true)
-      @setTextToRegister(@getRegisterName(), @editor.getSelectedText())
+      @setTextToRegister @editor.getSelectedText()
       @editor.transact =>
         for selection in @editor.getSelections()
           selection.deleteSelectedText()
@@ -185,7 +185,7 @@ class Yank extends Operator
       text = ''
       newPositions = originalPositions
 
-    @setTextToRegister(@getRegisterName(), text)
+    @setTextToRegister text
 
     @editor.setSelectedBufferRanges(newPositions.map (p) -> new Range(p, p))
     @vimState.activateNormalMode()
@@ -220,7 +220,10 @@ class Mark extends Operator
   @extend()
   constructor: ->
     super
-    @getInput(this, class: 'mark', singleChar: true, hidden: true)
+    @getInput this,
+      class: 'mark'
+      singleChar: true
+      hidden: true
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
@@ -495,7 +498,7 @@ class Change extends Insert
     @vimState.setInsertionCheckpoint() unless @typingCompleted
 
     if _.contains(@target.select(excludeWhitespace: true), true)
-      @setTextToRegister(@getRegisterName(), @editor.getSelectedText())
+      @setTextToRegister @editor.getSelectedText()
       if @target.isLinewise?() and not @typingCompleted
         for selection in @editor.getSelections()
           selection.insertText("\n", autoIndent: true)
@@ -605,7 +608,11 @@ class Replace extends Operator
   input: null
   constructor: ->
     super
-    @getInput(this, class: 'replace', hidden: true, singleChar: true, defaultText: '\n')
+    @getInput this,
+      class: 'replace'
+      hidden: true
+      singleChar: true
+      defaultText: '\n'
 
   isComplete: ->
     @input?
