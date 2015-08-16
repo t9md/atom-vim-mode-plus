@@ -196,7 +196,7 @@ formatKeymaps = (keymaps) ->
   s.push '- keymaps'
   for keymap in keymaps
     {keystrokes, selector} = keymap
-    s.push "  - #{selector}: `#{keystrokes}`"
+    s.push "  - #{selector}: <kbd>#{keystrokes.replace('_', '\\_')}</kbd>"
   s.join("\n")
 
 formatReport = (report) ->
