@@ -1,14 +1,14 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-16T04:58:36.371Z*
+*generated at 2015-08-16T05:19:53.389Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
     - [CopyFromLineAbove](#copyfromlineabove--insertmode)
       - [CopyFromLineBelow](#copyfromlinebelow--copyfromlineabove)
     - [InsertRegister](#insertregister--insertmode)
-  - [Motion](#motion--base)
+  - [Motion](#motion--base) *Not exported*
     - [Find](#find--motion)
       - [FindBackwards](#findbackwards--find)
       - [RepeatFind](#repeatfind--find)
@@ -139,9 +139,151 @@ vim-mode version: 0.57.0
 
 ## Base
 *Not exported*
+- ::isPure`()`
+- ::pure: `false`
+- ::isComplete`()`
+- ::complete: `null`
+- ::isRecordable`()`
+- ::recodable: `null`
+- ::getKind`()`
+- ::getCount`(defaultCount)`
+- ::isMotionError`()`
+- ::isMotion`()`
+- ::isMoveLeft`()`
+- ::isMoveRight`()`
+- ::isMoveUp`()`
+- ::isMoveDown`()`
+- ::isMoveToPreviousWord`()`
+- ::isMoveToPreviousWholeWord`()`
+- ::isMoveToNextWord`()`
+- ::isMoveToNextWholeWord`()`
+- ::isMoveToEndOfWord`()`
+- ::isMoveToEndOfWholeWord`()`
+- ::isMoveToNextParagraph`()`
+- ::isMoveToPreviousParagraph`()`
+- ::isMoveToBeginningOfLine`()`
+- ::isMoveToFirstCharacterOfLine`()`
+- ::isMoveToFirstCharacterOfLineAndDown`()`
+- ::isMoveToLastCharacterOfLine`()`
+- ::isMoveToLastNonblankCharacterOfLineAndDown`()`
+- ::isMoveToFirstCharacterOfLineUp`()`
+- ::isMoveToFirstCharacterOfLineDown`()`
+- ::isMoveToLineBase`()`
+- ::isMoveToLine`()`
+- ::isMoveToStartOfFile`()`
+- ::isMoveToRelativeLine`()`
+- ::isMoveToScreenLine`()`
+- ::isMoveToTopOfScreen`()`
+- ::isMoveToBottomOfScreen`()`
+- ::isMoveToMiddleOfScreen`()`
+- ::isScrollKeepingCursor`()`
+- ::isScrollHalfScreenUp`()`
+- ::isScrollHalfScreenDown`()`
+- ::isScrollFullScreenUp`()`
+- ::isScrollFullScreenDown`()`
+- ::isFind`()`
+- ::isRepeatFind`()`
+- ::isRepeatFindReverse`()`
+- ::isFindBackwards`()`
+- ::isTill`()`
+- ::isTillBackwards`()`
+- ::isMoveToMark`()`
+- ::isMoveToMarkLiteral`()`
+- ::isSearchBase`()`
+- ::isSearch`()`
+- ::isReverseSearch`()`
+- ::isSearchCurrentWord`()`
+- ::isReverseSearchCurrentWord`()`
+- ::isRepeatSearch`()`
+- ::isRepeatSearchBackwards`()`
+- ::isBracketMatchingMotion`()`
+- ::isOperatorError`()`
+- ::isOperator`()`
+- ::isSelect`()`
+- ::isDelete`()`
+- ::isDeleteRight`()`
+- ::isDeleteLeft`()`
+- ::isDeleteToLastCharacterOfLine`()`
+- ::isToggleCase`()`
+- ::isToggleCaseNow`()`
+- ::isUpperCase`()`
+- ::isLowerCase`()`
+- ::isYank`()`
+- ::isYankLine`()`
+- ::isJoin`()`
+- ::isRepeat`()`
+- ::isMark`()`
+- ::isIncrease`()`
+- ::isDecrease`()`
+- ::isAdjustIndentation`()`
+- ::isIndent`()`
+- ::isOutdent`()`
+- ::isAutoIndent`()`
+- ::isPut`()`
+- ::isPutBefore`()`
+- ::isPutAfter`()`
+- ::isInsert`()`
+- ::isReplaceMode`()`
+- ::isInsertAfter`()`
+- ::isInsertAfterEndOfLine`()`
+- ::isInsertAtBeginningOfLine`()`
+- ::isInsertAboveWithNewline`()`
+- ::isInsertBelowWithNewline`()`
+- ::isChange`()`
+- ::isSubstitute`()`
+- ::isSubstituteLine`()`
+- ::isChangeToLastCharacterOfLine`()`
+- ::isReplace`()`
+- ::isTextObject`()`
+- ::isCurrentSelection`()`
+- ::isSelectInsideWord`()`
+- ::isSelectAWord`()`
+- ::isSelectInsideWholeWord`()`
+- ::isSelectAWholeWord`()`
+- ::isSelectInsideQuotes`()`
+- ::isSelectInsideDoubleQuotes`()`
+- ::isSelectAroundDoubleQuotes`()`
+- ::isSelectInsideSingleQuotes`()`
+- ::isSelectAroundSingleQuotes`()`
+- ::isSelectInsideBackTicks`()`
+- ::isSelectAroundBackTicks`()`
+- ::isSelectInsideBrackets`()`
+- ::isSelectInsideCurlyBrackets`()`
+- ::isSelectAroundCurlyBrackets`()`
+- ::isSelectInsideAngleBrackets`()`
+- ::isSelectAroundAngleBrackets`()`
+- ::isSelectInsideTags`()`
+- ::isSelectAroundTags`()`
+- ::isSelectInsideSquareBrackets`()`
+- ::isSelectAroundSquareBrackets`()`
+- ::isSelectInsideParentheses`()`
+- ::isSelectAroundParentheses`()`
+- ::isSelectInsideParagraph`()`
+- ::isSelectAroundParagraph`()`
+- ::isInsertMode`()`
+- ::isInsertRegister`()`
+- ::isCopyFromLineAbove`()`
+- ::isCopyFromLineBelow`()`
+- ::isScroll`()`
+- ::isScrollDown`()`
+- ::isScrollUp`()`
+- ::isScrollCursor`()`
+- ::isScrollCursorToTop`()`
+- ::isScrollCursorToBottom`()`
+- ::isScrollCursorToMiddle`()`
+- ::isScrollCursorToTopLeave`()`
+- ::isScrollCursorToBottomLeave`()`
+- ::isScrollCursorToMiddleLeave`()`
+- ::isScrollHorizontal`()`
+- ::isScrollCursorToLeft`()`
+- ::isScrollCursorToRight`()`
 
 ### InsertMode < Base
 *Not exported*
+- ::constructor`(@vimState)`: **Overridden**
+- ::complete: `false`: **Overridden**
+- ::recodable: `false`: **Overridden**
+- ::getInput`()`
 
 ### CopyFromLineAbove < InsertMode
 - command: `vim-mode:copy-from-line-above`
@@ -164,6 +306,7 @@ vim-mode version: 0.57.0
 - ::execute`()`
 
 ### Motion < Base
+*Not exported*
 - ::constructor`(@vimState)`: **Overridden**
 - ::complete: `true`: **Overridden**
 - ::recordable: `false`
@@ -324,6 +467,8 @@ vim-mode version: 0.57.0
 
 ### MoveToLineBase < Motion
 *Not exported*
+- ::operatesLinewise: `true`: **Overridden**
+- ::getDestinationRow`(count)`
 
 ### MoveToLine < MoveToLineBase
 - command: `vim-mode:move-to-line`
@@ -337,6 +482,8 @@ vim-mode version: 0.57.0
 
 ### MoveToScreenLine < MoveToLineBase
 *Not exported*
+- ::scrolloff: `2`
+- ::moveCursor`(cursor)`
 
 ### MoveToBottomOfScreen < MoveToScreenLine
 - command: `vim-mode:move-to-bottom-of-screen`
@@ -364,6 +511,15 @@ vim-mode version: 0.57.0
 
 ### ScrollKeepingCursor < MoveToLineBase
 *Not exported*
+- ::previousFirstScreenRow: `0`
+- ::currentFirstScreenRow: `0`
+- ::direction: `null`
+- ::select`(options)`: `super(options)`: **Overridden**
+- ::execute`()`: `super`: **Overridden**
+- ::moveCursor`(cursor)`
+- ::getDestinationRow`()`: **Overridden**
+- ::scrollScreen`()`
+- ::getHalfScreenPixel`()`
 
 ### ScrollFullScreenUp < ScrollKeepingCursor
 - command: `vim-mode:scroll-full-screen-up`
@@ -462,6 +618,16 @@ vim-mode version: 0.57.0
 
 ### SearchBase < Motion
 *Not exported*
+- ::constructor`()`: `super`: **Overridden**
+- ::operatesInclusively: `false`: **Overridden**
+- ::dontUpdateCurrentSearch: `false`
+- ::complete: `false`: **Overridden**
+- ::reversed`()`
+- ::moveCursor`(cursor)`
+- ::scan`(cursor)`
+- ::getSearchTerm`(term)`
+- ::updateCurrentSearch`()`
+- ::replicateCurrentSearch`()`
 
 ### BracketMatchingMotion < SearchBase
 - command: `vim-mode:bracket-matching-motion`
@@ -537,6 +703,7 @@ vim-mode version: 0.57.0
 
 ### AdjustIndentation < Operator
 *Not exported*
+- ::execute`()`
 
 ### AutoIndent < AdjustIndentation
 - command: `vim-mode:auto-indent`
@@ -707,6 +874,11 @@ vim-mode version: 0.57.0
 
 ### Put < Operator
 *Not exported*
+- ::register: `null`
+- ::complete: `true`: **Overridden**
+- ::execute`()`
+- ::onLastRow`()`
+- ::onLastColumn`()`
 
 ### PutAfter < Put
 - command: `vim-mode:put-after`
@@ -778,9 +950,20 @@ vim-mode version: 0.57.0
 
 ### Scroll < Base
 *Not exported*
+- ::constructor`(@vimState)`: **Overridden**
+- ::complete: `true`: **Overridden**
+- ::recodable: `false`: **Overridden**
+- ::scrolloff: `2`
+- ::getFirstVisibleScreenRow`()`
+- ::getLastVisibleScreenRow`()`
+- ::getLastScreenRow`()`
+- ::getPixelCursor`(which)`
 
 ### ScrollCursor < Scroll
 *Not exported*
+- ::execute`()`
+- ::moveToFirstCharacterOfLine`()`
+- ::getOffSetPixelHeight`(lineDelta)`
 
 ### ScrollCursorToBottom < ScrollCursor
 - command: `vim-mode:scroll-cursor-to-bottom`
@@ -837,6 +1020,7 @@ vim-mode version: 0.57.0
 
 ### ScrollHorizontal < Scroll
 *Not exported*
+- ::putCursorOnScreen`()`
 
 ### ScrollCursorToLeft < ScrollHorizontal
 - command: `vim-mode:scroll-cursor-to-left`
