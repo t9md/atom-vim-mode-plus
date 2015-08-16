@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-16T04:47:43.621Z*
+*generated at 2015-08-16T04:52:29.456Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -167,7 +167,6 @@ vim-mode version: 0.57.0
 - ::execute`()`
 
 ### Motion < Base
-
 - ::constructor`(@vimState)`: **Overridden**
 - ::complete: `true`: **Overridden**
 - ::recordable: `false`
@@ -355,7 +354,6 @@ vim-mode version: 0.57.0
 - ::moveCursor`(cursor)`
 
 ### MoveToRelativeLine < MoveToLineBase
-
 - ::operatesLinewise: `true`: **Overridden**
 - ::moveCursor`(cursor)`
 
@@ -570,11 +568,9 @@ vim-mode version: 0.57.0
 - ::constructor`()`: `super`: **Overridden**
 
 ### MotionError < Base
-
 - ::constructor`(@message)`: **Overridden**
 
 ### Operator < Base
-
 - ::constructor`(@vimState)`: **Overridden**
 - ::target: `null`
 - ::complete: `false`: **Overridden**
@@ -664,14 +660,12 @@ vim-mode version: 0.57.0
 - ::step: `-1`: **Overridden**
 
 ### Insert < Operator
-
 - ::complete: `true`: **Overridden**
 - ::confirmChanges`(changes)`
 - ::execute`()`
 - ::inputOperator`()`
 
 ### Insert < Operator
-
 - ::complete: `true`: **Overridden**
 - ::confirmChanges`(changes)`
 - ::execute`()`
@@ -747,12 +741,10 @@ vim-mode version: 0.57.0
 - ::execute`()`: `super`: **Overridden**
 
 ### ReplaceMode < Insert
-
 - ::execute`()`: **Overridden**
 - ::countChars`(char, string)`
 
 ### ReplaceMode < Insert
-
 - ::execute`()`: **Overridden**
 - ::countChars`(char, string)`
 
@@ -817,7 +809,6 @@ vim-mode version: 0.57.0
 - ::execute`()`
 
 ### Select < Operator
-
 - ::execute`()`
 
 ### ToggleCase < Operator
@@ -859,7 +850,6 @@ vim-mode version: 0.57.0
 - ::complete: `true`: **Overridden**
 
 ### OperatorError < Base
-
 - ::constructor`(@message)`: **Overridden**
 
 ### Scroll < Base
@@ -947,13 +937,11 @@ vim-mode version: 0.57.0
 - ::execute`()`
 
 ### TextObject < Base
-
 - ::constructor`(@vimState)`: **Overridden**
 - ::complete: `true`: **Overridden**
 - ::recodable: `false`: **Overridden**
 
 ### CurrentSelection < TextObject
-
 - ::select`()`
 
 ### SelectAWholeWord < TextObject
@@ -978,7 +966,6 @@ vim-mode version: 0.57.0
 - ::select`()`
 
 ### SelectInsideBrackets < TextObject
-
 - ::beginChar: `null`
 - ::endChar: `null`
 - ::includeBrackets: `false`
@@ -1067,7 +1054,6 @@ vim-mode version: 0.57.0
 - ::endChar: `'<'`: **Overridden**
 
 ### SelectAroundTags < SelectInsideTags
-
 - ::includeBrackets: `true`: **Overridden**
 
 ### SelectInsideParagraph < TextObject
@@ -1078,7 +1064,6 @@ vim-mode version: 0.57.0
 - ::select`()`
 
 ### SelectInsideQuotes < TextObject
-
 - ::char: `null`
 - ::includeQuotes: `false`
 - ::findOpeningQuote`(pos)`
