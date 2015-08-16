@@ -1,13 +1,10 @@
 _ = require 'underscore-plus'
 TextObjects = require './text-objects'
 Operators   = require './operators'
-{MoveToRelativeLine} = require './motions'
 {debug} = require './utils'
 settings = require './settings'
 Base = require './base'
 introspection = require './introspection'
-
-completableOperators = ['Delete', 'Change', 'Yank', 'Indent', 'Outdent', 'AutoIndent']
 
 module.exports =
 class OperationStack
@@ -15,8 +12,6 @@ class OperationStack
     @stack = []
     @processing = false
 
-  # Private: Push the given operations onto the operation stack, then process
-  # it.
   push: (op) ->
     if @isEmpty() and settings.debug()
       if settings.debugOutput() is 'console'
@@ -29,12 +24,7 @@ class OperationStack
         debug "push INPLICIT Operators.Select"
         @stack.push(new Operators.Select(@vimState))
 
-      #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
-      if @vimState.isOperatorPendingMode() and
-          (op.getKind() in completableOperators) and @isSameOperatorPending(op)
-        op = new MoveToRelativeLine(@vimState)
-
-      # if we have started an operation that responds to canComposeWith check if it can compose
+      # If we have started an operation that responds to canComposeWith check if it can compose
       # with the operation we're going to push onto the stack
       if (topOperation = @peekTop())? and topOperation.canComposeWith? and not topOperation.canComposeWith(op)
         @vimState.resetNormalMode()
@@ -130,11 +120,6 @@ class OperationStack
   isEmpty: ->
     @stack.length is 0
 
-  isSameOperatorPending: (op) ->
-    constructor = op.constructor
-    _.detect @stack, (op) ->
-      op instanceof constructor
-
   isProcessing: ->
     @processing
 
@@ -144,7 +129,6 @@ class OperationStack
       callback()
     finally
       @processing = false
-
 
   isOperatorPending: ->
     not @isEmpty()
