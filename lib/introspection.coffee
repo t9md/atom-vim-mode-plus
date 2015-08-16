@@ -130,17 +130,20 @@ sortByAncesstor = (list) ->
   mapped.sort(compare).map((e) -> list[e.index])
 
 # Return non-existent parent.
-getVirtualParents = (list) ->
+getVirtualParents = (list, options) ->
   names = _.pluck(list, 'ancesstorsNames')
   ancesstors = names.map((e) -> e.join(' < '))
   candidates = names.map((e) -> e[1..].join(' < ')).filter((e) -> e.length)
 
-  virtuals = candidates.filter((e) -> e not in ancesstors)
-  _.uniq(virtuals).map (e) ->
+  virtuals = _.uniq(candidates.filter((e) -> e not in ancesstors))
+  Base = require './base'
+  virtuals.map (e) ->
     ancesstors = e.split(' < ')
-    name: ancesstors[0]
-    ancesstorsNames: ancesstors
-    virtual: true
+    klass = ancesstors[0]
+    obj = if klass is 'Base' then Base else Base.findClass(klass)
+    r = report(obj, options)
+    r.virtual = true
+    r
 
 genTableOfContent = (obj) ->
   {name, ancesstorsNames} = obj
@@ -155,7 +158,7 @@ generateIntrospectionReport = (mods, options) ->
   pack = atom.packages.getActivePackage('vim-mode')
   {version} = pack.metadata
   results = _.flatten((reportModule(mod, options) for mod in mods))
-  results = results.concat(getVirtualParents(results))
+  results = results.concat(getVirtualParents(results, options))
   results = sortByAncesstor(results)
 
   toc = results.map((e) -> genTableOfContent(e)).join('\n')
@@ -167,13 +170,13 @@ generateIntrospectionReport = (mods, options) ->
     s.push header
     if result.virtual?
       s.push '*Not exported*'
-    else
-      {command, keymaps, instance, prototype} = result
-      s.push "- command: `#{command}`" if command?
-      s.push formatKeymaps(keymaps) if keymaps?
-      # s[s.length - 1] += "  \n" if s.length > 1
-      s.push instance if instance?
-      s.push prototype if prototype?
+
+    {command, keymaps, instance, prototype} = result
+    s.push "- command: `#{command}`" if command?
+    s.push formatKeymaps(keymaps) if keymaps?
+    # s[s.length - 1] += "  \n" if s.length > 1
+    s.push instance if instance?
+    s.push prototype if prototype?
     body.push s.join("\n")
 
   date = new Date().toISOString()
@@ -234,11 +237,6 @@ getCommands = ->
 
 getCommand = (klass) ->
   command = "vim-mode:#{_.dasherize(klass)}"
-  # console.log command
-  # console.log getCommands()
-  # # console.log getCommands()
-  # console.log _.find getCommands(), (c) ->
-  #   c is command
   _.detect getCommands(), (c) ->
     c is command
 
