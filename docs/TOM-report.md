@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-16T07:05:57.538Z*
+*generated at 2015-08-16T10:19:03.136Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -145,8 +145,10 @@ vim-mode version: 0.57.0
 - ::isPure`()`
 - ::isComplete`()`
 - ::isRecordable`()`
+- ::abort`()`
 - ::getKind`()`
 - ::getCount`(defaultCount)`
+- ::isOperationAbortedError`()`
 - ::isMotionError`()`
 - ::isMotion`()`
 - ::isMoveLeft`()`
@@ -401,6 +403,7 @@ vim-mode version: 0.57.0
 - command: `vim-mode:move-to-beginning-of-line`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>0</kbd>
+- ::constructor`()`: `super`: **Overridden**
 - ::operatesInclusively: `false`: **Overridden**
 - ::moveCursor`(cursor)`
 
@@ -689,9 +692,11 @@ vim-mode version: 0.57.0
 - ::constructor`(@message)`: **Overridden**
 
 ### Operator < Base
+- ::constructor`()`: `super`: **Overridden**
 - ::target: `null`
 - ::complete: `false`: **Overridden**
 - ::recodable: `true`: **Overridden**
+- ::lineWiseAlias: `false`
 - ::compose`(@target)`
 - ::canComposeWith`(operation)`
 - ::setTextToRegister`(register, text)`
@@ -707,6 +712,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>=</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>=</kbd>
+- ::lineWiseAlias: `true`: **Overridden**
 - ::indent`()`
 
 ### Indent < AdjustIndentation
@@ -714,6 +720,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>></kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>></kbd>
+- ::lineWiseAlias: `true`: **Overridden**
 - ::indent`()`
 
 ### Outdent < AdjustIndentation
@@ -721,6 +728,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd><</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd><</kbd>
+- ::lineWiseAlias: `true`: **Overridden**
 - ::indent`()`
 
 ### Delete < Operator
@@ -729,6 +737,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>d</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>d</kbd>
   - atom-text-editor.vim-mode.visual-mode: <kbd>x</kbd>
+- ::lineWiseAlias: `true`: **Overridden**
 - ::execute`()`
 
 ### DeleteLeft < Delete
@@ -787,6 +796,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>c</kbd>
   - atom-text-editor.vim-mode.visual-mode: <kbd>s</kbd>
 - ::complete: `false`: **Overridden**
+- ::lineWiseAlias: `true`: **Overridden**
 - ::execute`()`: `super`: **Overridden**
 
 ### ChangeToLastCharacterOfLine < Change
@@ -933,6 +943,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>y</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>y</kbd>
+- ::lineWiseAlias: `true`: **Overridden**
 - ::execute`()`
 
 ### YankLine < Yank
@@ -1198,4 +1209,4 @@ vim-mode version: 0.57.0
 - command: `vim-mode:select-inside-word`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i w</kbd>
-- ::select`()`
+- ::select`()
