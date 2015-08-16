@@ -546,6 +546,7 @@ class RepeatFind extends Find
   constructor: ->
     super
     @context = @vimState.globalVimState.currentFind
+    @abort() unless @context
     {@offset, @backwards, @complete, @input} = @vimState.globalVimState.currentFind
 
   moveCursor: (args...) ->

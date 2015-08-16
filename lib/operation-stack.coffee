@@ -18,7 +18,6 @@ class OperationStack
   # Private: Push the given operations onto the operation stack, then process
   # it.
   push: (op) ->
-    return unless op?
     if op.isMoveToBeginningOfLine()
       # 0 is special need to differenciate `10`, 0
       if @vimState.count.isEmpty()

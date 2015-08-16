@@ -1,7 +1,6 @@
 _ = require 'underscore-plus'
 {getAncestors, getParent} = require './introspection'
 
-module.exports =
 class Base
   pure: false
   complete: null
@@ -13,11 +12,16 @@ class Base
   isPure: ->
     @pure
 
+  # Operation processor execute only when isComplete() return true.
+  # If false, operation processor postpone its execution.
   isComplete: ->
     @complete
 
   isRecordable: ->
     @recodable
+
+  abort: ->
+    throw new OperationAbortedError('Aborted')
 
   getKind: ->
     @constructor.name
@@ -57,3 +61,10 @@ class Base
 
   @getParent: ->
     getParent(this)
+
+class OperationAbortedError extends Base
+  @extend()
+  constructor: (@message) ->
+    @name = 'OperationAborted Error'
+
+module.exports = Base
