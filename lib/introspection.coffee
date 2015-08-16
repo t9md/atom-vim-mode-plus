@@ -171,7 +171,7 @@ generateIntrospectionReport = (mods, options) ->
       {command, keymaps, instance, prototype} = result
       s.push "- command: `#{command}`" if command?
       s.push formatKeymaps(keymaps) if keymaps?
-      s.push '' unless _.isEmpty(s)
+      s.push '' if s.length > 1
       s.push instance if instance?
       s.push prototype if prototype?
     body.push s.join("\n")
