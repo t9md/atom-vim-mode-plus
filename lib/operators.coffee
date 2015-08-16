@@ -63,6 +63,11 @@ class Operator extends Base
     if text
       @vimState.register.set(@getRegisterName(), {text})
 
+  execute: ->
+    @editor.transact =>
+      @operate()
+    @vimState.activateNormalMode()
+
 class Select extends Operator
   @extend()
   execute: ->
@@ -107,24 +112,24 @@ class DeleteToLastCharacterOfLine extends Delete
     super
     @compose(new MoveToLastCharacterOfLine(@vimState))
 
-#
-# It toggles the case of everything selected by the following motion
-#
 class ToggleCase extends Operator
   @extend()
-
   toggleCase: (char) ->
     if (charLower = char.toLowerCase()) is char
       char.toUpperCase()
     else
       charLower
 
+  getNewText: (text) ->
+    (@toggleCase(char) for char in text.split('')).join('')
+
   execute: ->
     if _.any @target.select()
       @editor.replaceSelectedText {}, (text) =>
-        (@toggleCase(char) for char in text.split('')).join('')
+        @getNewText(text)
     @vimState.activateNormalMode()
 
+# [TODO] Rename to ToggleCaseAndMoveRight
 class ToggleCaseNow extends ToggleCase
   @extend()
   complete: true
@@ -132,21 +137,15 @@ class ToggleCaseNow extends ToggleCase
     super
     @compose(new MoveRight(@vimState))
 
-class UpperCase extends Operator
+class UpperCase extends ToggleCase
   @extend()
-  execute: ->
-    if _.any @target.select()
-      @editor.replaceSelectedText {}, (text) ->
-        text.toUpperCase()
-    @vimState.activateNormalMode()
+  getNewText: (text) ->
+    text.toUpperCase()
 
-class LowerCase extends Operator
+class LowerCase extends ToggleCase
   @extend()
-  execute: ->
-    if _.any @target.select()
-      @editor.replaceSelectedText {}, (text) ->
-        text.toLowerCase()
-    @vimState.activateNormalMode()
+  getNewText: (text) ->
+    text.toLowerCase()
 
 class Yank extends Operator
   @extend()
@@ -154,20 +153,19 @@ class Yank extends Operator
   execute: ->
     originalPositions = @editor.getCursorBufferPositions()
     if _.any @target.select()
-      text = @editor.getSelectedText()
+      @setTextToRegister @editor.getSelectedText()
       startPositions = _.pluck(@editor.getSelectedBufferRanges(), "start")
-      newPositions = for originalPosition, i in originalPositions
-        if startPositions[i] and (@vimState.isVisualMode() or not @target.isLinewise?())
-          Point.min(startPositions[i], originalPositions[i])
-        else
-          originalPosition
-    else
-      text = ''
-      newPositions = originalPositions
+      # [FIXME] I can't understand this complexity.
+      # Let activateNormalMode do cursor position handling.
+      newPositions =
+        for originalPosition, i in originalPositions
+          if startPositions[i] and (@vimState.isVisualMode() or not @target.isLinewise?())
+            Point.min(startPositions[i], originalPositions[i])
+          else
+            originalPosition
+      @editor.setSelectedBufferRanges(newPositions.map (p) ->
+        new Range(p, p))
 
-    @setTextToRegister text
-
-    @editor.setSelectedBufferRanges(newPositions.map (p) -> new Range(p, p))
     @vimState.activateNormalMode()
 
 class YankLine extends Yank
@@ -193,8 +191,7 @@ class Repeat extends Operator
   execute: ->
     @editor.transact =>
       _.times @getCount(1), =>
-        cmd = @vimState.history[0]
-        cmd?.execute()
+        @vimState.history[0]?.execute()
 
 class Mark extends Operator
   @extend()
@@ -225,9 +222,9 @@ class Increase extends Operator
 
   execute: ->
     @editor.transact =>
-      increased = false
+      increased = null
       for cursor in @editor.getCursors()
-        if @increaseNumber(cursor) then increased = true
+        increased ?= @increaseNumber(cursor)
       atom.beep() unless increased
 
   increaseNumber: (cursor) ->
