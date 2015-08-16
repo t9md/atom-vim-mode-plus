@@ -43,6 +43,8 @@ class Base
     @count
 
   @findClass: (klassName) ->
+    # [FIXME] currently not care acncesstor's chain.
+    # Not accurate if there is different class with same.
     _.detect children, (child) ->
       child.name is klassName
 
