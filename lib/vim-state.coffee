@@ -112,7 +112,7 @@ class VimState
           try
             @operationStack.push new kind[klass](this)
           catch error
-            unless error.isOperationAbortedError()
+            unless error.isOperationAbortedError?()
               throw error
     @registerCommands(commands)
 

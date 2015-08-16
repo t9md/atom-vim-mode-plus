@@ -1,5 +1,6 @@
+{Point} = require 'atom'
 _ = require 'underscore-plus'
-{Point, Range} = require 'atom'
+
 settings = require './settings'
 {ViewModel, SearchViewModel} = require './view'
 Base = require './base'
