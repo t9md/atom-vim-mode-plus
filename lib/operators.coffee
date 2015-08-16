@@ -48,15 +48,6 @@ class Operator extends Base
   canComposeWith: (operation) ->
     _.isFunction(operation.select)
 
-  # Public: Preps text and sets the text register
-  #
-  # Returns nothing
-  setTextToRegister: (text) ->
-    if @target?.isLinewise?() and not text.endsWith('\n')
-      text += "\n"
-    @vimState.register.set(@getRegisterName(), {text}) unless text is ''
-
-  # Proxying request to ViewModel to get Input instance.
   getInput: (args...) ->
     viewModel = new ViewModel(args...)
     viewModel.onDidGetInput (@input) =>
@@ -66,17 +57,23 @@ class Operator extends Base
   getRegisterName: ->
     @vimState.register.getName()
 
+  setTextToRegister: (text) ->
+    if @target?.isLinewise?() and not text.endsWith('\n')
+      text += "\n"
+    if text
+      @vimState.register.set(@getRegisterName(), {text})
+
 class Select extends Operator
   @extend()
   execute: ->
-    @target.select(@getCount())
+    @target.select @getCount()
 
 class Delete extends Operator
   @extend()
   lineWiseAlias: true
 
   execute: ->
-    if _.contains(@target.select(), true)
+    if _.any @target.select()
       @setTextToRegister @editor.getSelectedText()
       @editor.transact =>
         for selection in @editor.getSelections()
@@ -116,17 +113,20 @@ class DeleteToLastCharacterOfLine extends Delete
 class ToggleCase extends Operator
   @extend()
 
+  toggleCase = (chars) ->
+    if (lowerChars = chars.toLowerCase()) is chars
+      chars.toUpperCase()
+    else
+      lowerChars
+
   execute: ->
     if @target?
-      if _.contains(@target.select(), true)
+      if _.any @target.select()
         @editor.replaceSelectedText {}, (text) ->
-          text.split('').map((char) ->
-            lower = char.toLowerCase()
-            if char is lower
-              char.toUpperCase()
-            else
-              lower
-          ).join('')
+          chars = text.split('')
+          chars.map (char) ->
+            toggleCase(char)
+          .join('')
     else
       @editor.transact =>
         for cursor in @editor.getCursors()
@@ -155,7 +155,7 @@ class ToggleCaseNow extends ToggleCase
 class UpperCase extends Operator
   @extend()
   execute: ->
-    if _.contains(@target.select(), true)
+    if _.any @target.select()
       @editor.replaceSelectedText {}, (text) ->
         text.toUpperCase()
     @vimState.activateNormalMode()
@@ -163,7 +163,7 @@ class UpperCase extends Operator
 class LowerCase extends Operator
   @extend()
   execute: ->
-    if _.contains(@target.select(), true)
+    if _.any @target.select()
       @editor.replaceSelectedText {}, (text) ->
         text.toLowerCase()
     @vimState.activateNormalMode()
@@ -173,7 +173,7 @@ class Yank extends Operator
   lineWiseAlias: true
   execute: ->
     originalPositions = @editor.getCursorBufferPositions()
-    if _.contains(@target.select(), true)
+    if _.any @target.select()
       text = @editor.getSelectedText()
       startPositions = _.pluck(@editor.getSelectedBufferRanges(), "start")
       newPositions = for originalPosition, i in originalPositions
@@ -497,7 +497,7 @@ class Change extends Insert
     # undo transactions are already handled.
     @vimState.setInsertionCheckpoint() unless @typingCompleted
 
-    if _.contains(@target.select(excludeWhitespace: true), true)
+    if _.any @target.select(excludeWhitespace: true)
       @setTextToRegister @editor.getSelectedText()
       if @target.isLinewise?() and not @typingCompleted
         for selection in @editor.getSelections()
@@ -629,7 +629,7 @@ class Replace extends Operator
 
     @editor.transact =>
       if @target?
-        if _.contains(@target.select(), true)
+        if _.any @target.select()
           @editor.replaceSelectedText null, (text) =>
             text.replace(/./g, @input)
           for selection in @editor.getSelections()
