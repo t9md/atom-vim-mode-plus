@@ -20,9 +20,6 @@ class Motion extends Base
   operatesInclusively: true
   operatesLinewise: false
 
-  constructor: (@vimState) ->
-    {@editor, @editorElement} = @vimState
-
   select: (options) ->
     value = for selection in @editor.getSelections()
       if @isLinewise()
@@ -868,7 +865,7 @@ class BracketMatchingMotion extends SearchBase
 # Alias
 module.exports = {
   MotionError
-  
+
   MoveLeft, MoveRight, MoveUp, MoveDown
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord

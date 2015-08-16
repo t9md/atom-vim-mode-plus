@@ -7,9 +7,6 @@ class InsertMode extends Base
   complete: false
   recodable: false
 
-  constructor: (@vimState) ->
-    {@editor, @editorElement} = @vimState
-
   # Proxying request to ViewModel to get input.
   getInput: (args...) ->
     viewModel = new ViewModel(args...)

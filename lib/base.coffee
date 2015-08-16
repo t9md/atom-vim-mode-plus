@@ -3,17 +3,29 @@ _ = require 'underscore-plus'
 
 module.exports =
 class Base
+  pure: false
+  complete: null
+  recodable: null
+
+  constructor: (@vimState) ->
+    {@editor, @editorElement} = @vimState
+
   isPure: ->
     @pure
-  pure: false
 
   isComplete: ->
     @complete
-  complete: null
 
   isRecordable: ->
     @recodable
-  recodable: null
+
+  getKind: ->
+    @constructor.name
+
+  getCount: (defaultCount=null) ->
+    # Setting count as instance variable make operation repeatable.
+    @count ?= @vimState?.count.get() ? defaultCount
+    @count
 
   # Expected to be called by child class.
   # It automatically create typecheck function like
@@ -33,14 +45,6 @@ class Base
     Base::["is#{klass.name}"] = ->
       this instanceof klass
     children.push klass
-
-  getKind: ->
-    @constructor.name
-
-  getCount: (defaultCount=null) ->
-    # Setting count as instance variable make operation repeatable.
-    @count ?= @vimState?.count.get() ? defaultCount
-    @count
 
   @findClass: (klassName) ->
     # [FIXME] currently not care acncesstor's chain.
