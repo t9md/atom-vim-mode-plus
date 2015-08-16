@@ -18,12 +18,6 @@ class OperationStack
   # Private: Push the given operations onto the operation stack, then process
   # it.
   push: (op) ->
-    if op.isMoveToBeginningOfLine()
-      # 0 is special need to differenciate `10`, 0
-      unless @vimState.count.isEmpty()
-        @vimState.count.set(0)
-        return
-
     if @isEmpty() and settings.debug()
       if settings.debugOutput() is 'console'
         console.clear()

@@ -267,8 +267,16 @@ class MoveToPreviousParagraph extends Motion
 
 class MoveToBeginningOfLine extends Motion
   @extend()
-
   operatesInclusively: false
+
+  constructor: ->
+    super
+
+    # 0 is special need to differenciate `10`, 0
+    # [NOTE] @getCount() depending on vimState, so we need to call super first.
+    if @getCount()?
+      @vimState.count.set(0)
+      @abort()
 
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
