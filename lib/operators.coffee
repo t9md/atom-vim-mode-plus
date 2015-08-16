@@ -113,44 +113,24 @@ class DeleteToLastCharacterOfLine extends Delete
 class ToggleCase extends Operator
   @extend()
 
-  toggleCase = (chars) ->
-    if (lowerChars = chars.toLowerCase()) is chars
-      chars.toUpperCase()
+  toggleCase: (char) ->
+    if (charLower = char.toLowerCase()) is char
+      char.toUpperCase()
     else
-      lowerChars
+      charLower
 
   execute: ->
-    if @target?
-      if _.any @target.select()
-        @editor.replaceSelectedText {}, (text) ->
-          chars = text.split('')
-          chars.map (char) ->
-            toggleCase(char)
-          .join('')
-    else
-      @editor.transact =>
-        for cursor in @editor.getCursors()
-          point = cursor.getBufferPosition()
-          lineLength = @editor.lineTextForBufferRow(point.row).length
-          cursorCount = Math.min(@getCount(1), lineLength - point.column)
-
-          _.times cursorCount, =>
-            point = cursor.getBufferPosition()
-            range = Range.fromPointWithDelta(point, 0, 1)
-            char = @editor.getTextInBufferRange(range)
-
-            if char is char.toLowerCase()
-              @editor.setTextInBufferRange(range, char.toUpperCase())
-            else
-              @editor.setTextInBufferRange(range, char.toLowerCase())
-
-            cursor.moveRight() unless point.column >= lineLength - 1
-
+    if _.any @target.select()
+      @editor.replaceSelectedText {}, (text) =>
+        (@toggleCase(char) for char in text.split('')).join('')
     @vimState.activateNormalMode()
 
 class ToggleCaseNow extends ToggleCase
   @extend()
   complete: true
+  constructor: ->
+    super
+    @compose(new MoveRight(@vimState))
 
 class UpperCase extends Operator
   @extend()
