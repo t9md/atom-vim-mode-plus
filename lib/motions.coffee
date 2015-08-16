@@ -868,8 +868,7 @@ class BracketMatchingMotion extends SearchBase
 # Alias
 module.exports = {
   MotionError
-  Motion
-  # MotionWithInput
+  
   MoveLeft, MoveRight, MoveUp, MoveDown
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
