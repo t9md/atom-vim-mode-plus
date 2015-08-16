@@ -18,6 +18,16 @@ class Operator extends Base
   target: null
   complete: false
   recodable: true
+  lineWiseAlias: false
+
+  constructor: ->
+    super
+    #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
+    if @lineWiseAlias and @vimState.isOperatorPendingMode()
+      opStack = @vimState.operationStack
+      if opStack.peekTop().constructor is @constructor
+        opStack.push new Motions.MoveToRelativeLine(@vimState)
+        @abort()
 
   # target - TextObject or Motion to operate on.
   compose: (target) ->
@@ -57,6 +67,8 @@ class Select extends Operator
 
 class Delete extends Operator
   @extend()
+  lineWiseAlias: true
+
   execute: ->
     if _.contains(@target.select(), true)
       @setTextToRegister(@getRegisterName(), @editor.getSelectedText())
@@ -152,6 +164,7 @@ class LowerCase extends Operator
 
 class Yank extends Operator
   @extend()
+  lineWiseAlias: true
   execute: ->
     originalPositions = @editor.getCursorBufferPositions()
     if _.contains(@target.select(), true)
@@ -277,16 +290,19 @@ class AdjustIndentation extends Operator
 
 class Indent extends AdjustIndentation
   @extend()
+  lineWiseAlias: true
   indent: ->
     @editor.indentSelectedRows()
 
 class Outdent extends AdjustIndentation
   @extend()
+  lineWiseAlias: true
   indent: ->
     @editor.outdentSelectedRows()
 
 class AutoIndent extends AdjustIndentation
   @extend()
+  lineWiseAlias: true
   indent: ->
     @editor.autoIndentSelectedRows()
 
@@ -465,6 +481,7 @@ class InsertBelowWithNewline extends Insert
 class Change extends Insert
   @extend()
   complete: false
+  lineWiseAlias: true
 
   execute: ->
     # If we've typed, we're being repeated. If we're being repeated,
