@@ -18,8 +18,6 @@ class Operator extends Base
   target: null
   complete: false
   recodable: true
-  constructor: (@vimState) ->
-    {@editor, @editorElement} = @vimState
 
   # target - TextObject or Motion to operate on.
   compose: (target) ->

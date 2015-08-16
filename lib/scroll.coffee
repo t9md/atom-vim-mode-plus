@@ -5,9 +5,6 @@ class Scroll extends Base
   recodable: false
   scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
 
-  constructor: (@vimState) ->
-    {@editor, @editorElement} = @vimState
-
   getFirstVisibleScreenRow: ->
     @editorElement.getFirstVisibleScreenRow()
 
