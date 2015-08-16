@@ -20,7 +20,7 @@ class OperationStack
   push: (op) ->
     if op.isMoveToBeginningOfLine()
       # 0 is special need to differenciate `10`, 0
-      if @vimState.count.isEmpty()
+      unless @vimState.count.isEmpty()
         @vimState.count.set(0)
         return
 

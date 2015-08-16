@@ -27,4 +27,4 @@ class CountManager
     @count = null
 
   isEmpty: ->
-    @count?
+    not @count
