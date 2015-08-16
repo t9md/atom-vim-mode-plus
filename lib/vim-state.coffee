@@ -108,7 +108,12 @@ class VimState
     for name in names
       do (name) =>
         klass = _.capitalize(_.camelize(name))
-        commands[name] = => @operationStack.push new kind[klass](this)
+        commands[name] = =>
+          try
+            @operationStack.push new kind[klass](this)
+          catch error
+            unless error.isOperationAbortedError()
+              throw error
     @registerCommands(commands)
 
   # Private: Creates the plugin's bindings
