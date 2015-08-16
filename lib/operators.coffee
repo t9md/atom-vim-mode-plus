@@ -4,7 +4,14 @@ _ = require 'underscore-plus'
 {ViewModel} = require './view'
 settings = require './settings'
 Base = require './base'
-Motions = require './motions'
+{
+  MoveToRelativeLine
+  MoveRight
+  MoveLeft
+  MoveToLastCharacterOfLine
+  MoveToRelativeLine
+} = require './motions'
+
 
 class OperatorError extends Base
   @extend()
@@ -23,10 +30,9 @@ class Operator extends Base
   constructor: ->
     super
     #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
-    if @lineWiseAlias and @vimState.isOperatorPendingMode()
-      opStack = @vimState.operationStack
-      if opStack.peekTop().constructor is @constructor
-        opStack.push new Motions.MoveToRelativeLine(@vimState)
+    if @lineWiseAlias and @vimState.isOperatorPendingMode() and
+      @vimState.operationStack.peekTop().constructor is @constructor
+        @vimState.operationStack.push new MoveToRelativeLine(@vimState)
         @abort()
 
   # target - TextObject or Motion to operate on.
@@ -88,21 +94,21 @@ class DeleteRight extends Delete
   complete: true
   constructor: ->
     super
-    @compose(new Motions.MoveRight(@vimState))
+    @compose(new MoveRight(@vimState))
 
 class DeleteLeft extends Delete
   @extend()
   complete: true
   constructor: ->
     super
-    @compose(new Motions.MoveLeft(@vimState))
+    @compose(new MoveLeft(@vimState))
 
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
   complete: true
   constructor: ->
     super
-    @compose(new Motions.MoveToLastCharacterOfLine(@vimState))
+    @compose(new MoveToLastCharacterOfLine(@vimState))
 
 #
 # It toggles the case of everything selected by the following motion
@@ -189,7 +195,7 @@ class YankLine extends Yank
   complete: true
   constructor: ->
     super
-    @compose(new Motions.MoveToRelativeLine(@vimState))
+    @compose(new MoveToRelativeLine(@vimState))
 
 class Join extends Operator
   @extend()
@@ -509,7 +515,7 @@ class Substitute extends Change
 
   constructor: ->
     super
-    @compose(new Motions.MoveRight(@vimState))
+    @compose(new MoveRight(@vimState))
 
 class SubstituteLine extends Change
   @extend()
@@ -517,7 +523,7 @@ class SubstituteLine extends Change
 
   constructor: ->
     super
-    @compose(new Motions.MoveToRelativeLine(@vimState))
+    @compose(new MoveToRelativeLine(@vimState))
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
@@ -525,7 +531,7 @@ class ChangeToLastCharacterOfLine extends Change
 
   constructor: ->
     super
-    @compose(new Motions.MoveToLastCharacterOfLine(@vimState))
+    @compose(new MoveToLastCharacterOfLine(@vimState))
 
 # Takes a transaction and turns it into a string of what was typed.
 # This class is an implementation detail of Insert
