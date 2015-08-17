@@ -218,45 +218,27 @@ class Increase extends Operator
 
   constructor: ->
     super
-    @numberRegex = new RegExp(settings.numberRegex())
+    @numberRegex = new RegExp(settings.numberRegex(), 'g')
 
   execute: ->
     @editor.transact =>
-      increased = null
-      for cursor in @editor.getCursors()
-        increased ?= @increaseNumber(cursor)
-      atom.beep() unless increased
+      results = (@increaseNumber(cursor) for cursor in @editor.getCursors())
+      unless _.any(results)
+        atom.beep()
 
   increaseNumber: (cursor) ->
-    # find position of current number, adapted from from SearchCurrentWord
-    cursorPosition = cursor.getBufferPosition()
-    numEnd = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @numberRegex, allowNext: false)
-
-    if numEnd.column is cursorPosition.column
-      # either we don't have a current number, or it ends on cursor, i.e. precedes it, so look for the next one
-      numEnd = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @numberRegex, allowNext: true)
-      return if numEnd.row isnt cursorPosition.row # don't look beyond the current line
-      return if numEnd.column is cursorPosition.column # no number after cursor
-
-    cursor.setBufferPosition numEnd
-    numStart = cursor.getBeginningOfCurrentWordBufferPosition(wordRegex: @numberRegex, allowPrevious: false)
-
-    range = new Range(numStart, numEnd)
-
-    # parse number, increase/decrease
-    number = parseInt(@editor.getTextInBufferRange(range), 10)
-    if isNaN(number)
-      cursor.setBufferPosition(cursorPosition)
-      return
-
-    number += @step * @getCount(1)
-
-    # replace current number with new
-    newValue = String(number)
-    @editor.setTextInBufferRange(range, newValue, normalizeLineEndings: false)
-
-    cursor.setBufferPosition(row: numStart.row, column: numStart.column-1+newValue.length)
-    return true
+    success = null
+    scanRange = cursor.getCurrentLineBufferRange()
+    @editor.scanInBufferRange @numberRegex, scanRange, ({matchText, range, stop, replace}) =>
+      unless range.end.isGreaterThan cursor.getBufferPosition()
+        return
+      number = parseInt(matchText, 10) + @step * @getCount(1)
+      newText = String(number)
+      replace newText
+      stop()
+      cursor.setBufferPosition(range.start.translate([0, newText.length-1]))
+      success = true
+    success
 
 class Decrease extends Increase
   @extend()
@@ -264,8 +246,9 @@ class Decrease extends Increase
 
 # AdjustIndentation
 # -------------------------
-class AdjustIndentation extends Operator
+class Indent extends Operator
   @extend()
+  lineWiseAlias: true
   execute: ->
     @target.select() # FIXME how to respect count of default 1 without passing count
     {start} = @editor.getSelectedBufferRange()
@@ -274,21 +257,16 @@ class AdjustIndentation extends Operator
     @editor.moveToFirstCharacterOfLine()
     @vimState.activateNormalMode()
 
-class Indent extends AdjustIndentation
-  @extend()
-  lineWiseAlias: true
   indent: ->
     @editor.indentSelectedRows()
 
-class Outdent extends AdjustIndentation
+class Outdent extends Indent
   @extend()
-  lineWiseAlias: true
   indent: ->
     @editor.outdentSelectedRows()
 
-class AutoIndent extends AdjustIndentation
+class AutoIndent extends Indent
   @extend()
-  lineWiseAlias: true
   indent: ->
     @editor.autoIndentSelectedRows()
 
