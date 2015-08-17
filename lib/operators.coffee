@@ -125,8 +125,7 @@ class ToggleCase extends Operator
 
   execute: ->
     if _.any @target.select()
-      @editor.replaceSelectedText {}, (text) =>
-        @getNewText(text)
+      @editor.replaceSelectedText {}, @getNewText.bind(this)
     @vimState.activateNormalMode()
 
 # [TODO] Rename to ToggleCaseAndMoveRight
@@ -206,15 +205,10 @@ class Mark extends Operator
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
     @vimState.activateNormalMode()
 
-# Increase/Decrease
-# -------------------------
-#
-# It increases or decreases the next number on the line
-#
 class Increase extends Operator
   @extend()
-  step: 1
   complete: true
+  step: 1
 
   constructor: ->
     super
@@ -244,16 +238,14 @@ class Decrease extends Increase
   @extend()
   step: -1
 
-# AdjustIndentation
-# -------------------------
 class Indent extends Operator
   @extend()
   lineWiseAlias: true
   execute: ->
-    @target.select() # FIXME how to respect count of default 1 without passing count
-    {start} = @editor.getSelectedBufferRange()
+    @target.select()
+    startRow = @editor.getSelectedBufferRange().start.row
     @indent()
-    @editor.setCursorBufferPosition([start.row, 0])
+    @editor.setCursorBufferPosition([startRow, 0])
     @editor.moveToFirstCharacterOfLine()
     @vimState.activateNormalMode()
 
