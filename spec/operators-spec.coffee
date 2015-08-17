@@ -1701,7 +1701,7 @@ describe "Operators", ->
       expect(editor.getText()).toBe "abcabc"
       expect(editor.getCursorScreenPosition()).toEqual [0, 5]
 
-  fdescribe "the ctrl-a/ctrl-x keybindings", ->
+  describe "the ctrl-a/ctrl-x keybindings", ->
     beforeEach ->
       atom.config.set 'vim-mode.numberRegex', settings.config.numberRegex.default
       editor.setText('123\nab45\ncd-67ef\nab-5\na-bcdef')
