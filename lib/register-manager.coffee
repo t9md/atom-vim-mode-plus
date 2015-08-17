@@ -100,4 +100,5 @@ class RegisterManager
     else if text.lastIndexOf("\r") is text.length - 1
       'linewise'
     else
+      # [FIXME] should characterwise or line and character
       'character'
