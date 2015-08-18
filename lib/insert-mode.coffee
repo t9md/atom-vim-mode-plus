@@ -32,7 +32,7 @@ class InsertRegister extends InsertMode
 class CopyFromLineAbove extends InsertMode
   @extend()
   complete: true
-  rowTransration: -1
+  rowTranslation: -1
 
   getTextInScreenRange: (range) ->
     @editor.getTextInBufferRange(@editor.bufferRangeForScreenRange(range))
@@ -41,14 +41,14 @@ class CopyFromLineAbove extends InsertMode
     @editor.transact =>
       for cursor in @editor.getCursors()
         {row, column} = cursor.getScreenPosition()
-        row += @rowTransration
+        row += @rowTranslation
         continue if row < 0 # No line to copy from.
         range = [[row, column], [row, column+1]]
         cursor.selection.insertText @getTextInScreenRange(range)
 
 class CopyFromLineBelow extends CopyFromLineAbove
   @extend()
-  rowTransration: +1
+  rowTranslation: +1
 
 module.exports = {
   CopyFromLineAbove,
