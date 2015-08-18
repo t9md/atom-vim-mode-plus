@@ -13,8 +13,8 @@ class OperationStack
     @processing = false
 
   push: (op) ->
-    if @isEmpty() and settings.debug()
-      if settings.debugOutput() is 'console'
+    if @isEmpty() and settings.get('debug')
+      if settings.get('debugOutput') is 'console'
         console.clear()
       debug "#=== Start at #{new Date().toISOString()}"
 
@@ -48,10 +48,10 @@ class OperationStack
     debug "  [@stack] size: #{@stack.length}"
     for op, i in @stack
       debug "  <idx: #{i}>"
-      if settings.debug()
+      if settings.get('debug')
         debug introspection.inspectInstance op,
           indent: 2
-          colors: settings.debugOutput() is 'file'
+          colors: settings.get('debugOutput') is 'file'
           excludeProperties: [
             'vimState', 'editorElement'
             'report', 'reportAll'
