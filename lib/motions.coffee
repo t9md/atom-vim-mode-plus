@@ -121,7 +121,7 @@ class MoveLeft extends Motion
 
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
-      cursor.moveLeft() if not cursor.isAtBeginningOfLine() or settings.wrapLeftRightMotion()
+      cursor.moveLeft() if not cursor.isAtBeginningOfLine() or settings.get('wrapLeftRightMotion')
 
 class MoveRight extends Motion
   @extend()
@@ -138,7 +138,7 @@ class MoveRight extends Motion
 
   moveCursor: (cursor) ->
     _.times @getCount(1), =>
-      wrapToNextLine = settings.wrapLeftRightMotion()
+      wrapToNextLine = settings.get('wrapLeftRightMotion')
 
       # when the motion is combined with an operator, we will only wrap to the next line
       # if we are already at the end of the line (after the last character)
@@ -681,7 +681,7 @@ class SearchBase extends Motion
   getSearchTerm: (term) ->
     modifiers = {'g': true}
 
-    if not term.match('[A-Z]') and settings.useSmartcaseForSearch()
+    if not term.match('[A-Z]') and settings.get('useSmartcaseForSearch')
       modifiers['i'] = true
 
     if term.indexOf('\\c') >= 0

@@ -212,7 +212,7 @@ class Increase extends Operator
 
   constructor: ->
     super
-    @numberRegex = new RegExp(settings.numberRegex(), 'g')
+    @numberRegex = new RegExp(settings.get('numberRegex'), 'g')
 
   execute: ->
     @editor.transact =>

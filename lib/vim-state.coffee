@@ -52,7 +52,7 @@ class VimState
 
     @editorElement.classList.add("vim-mode")
     @init()
-    if settings.startInInsertMode()
+    if settings.get('startInInsertMode')
       @activateInsertMode()
     else
       @activateNormalMode()
@@ -137,7 +137,7 @@ class VimState
 
       # Temproal dev-help commands. Might be removed after refactoring finished.
       'toggle-debug': ->
-        atom.config.set('vim-mode.debug', not settings.debug())
+        atom.config.set('vim-mode.debug', not settings.get('debug'))
         console.log "vim-mode debug:", atom.config.get('vim-mode.debug')
       'generate-introspection-report': => @generateIntrospectionReport()
       'jump-to-related': => @jumpToRelated()

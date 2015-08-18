@@ -8,9 +8,9 @@ module.exports =
       klass::[key] = value
 
   debug: (msg) ->
-    return unless settings.debug()
+    return unless settings.get('debug')
     msg += "\n"
-    if settings.debugOutput() is 'console'
+    if settings.get('debugOutput') is 'console'
       console.log msg
     else
       filePath = fs.normalize("~/sample.log")

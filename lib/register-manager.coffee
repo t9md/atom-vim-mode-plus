@@ -20,7 +20,7 @@ class RegisterManager
   get: (name) ->
     return unless @isValidRegisterName(name)
     if name is '"'
-      name = settings.defaultRegister()
+      name = settings.get('defaultRegister')
 
     switch name
       when '*', '+'
@@ -49,7 +49,7 @@ class RegisterManager
     type = @getCopyType(text) unless type
 
     if name is '"'
-      name = settings.defaultRegister()
+      name = settings.get('defaultRegister')
 
     switch name
       when '*', '+'
@@ -81,7 +81,7 @@ class RegisterManager
     @name = null
 
   getName: ->
-    @name ? settings.defaultRegister()
+    @name ? settings.get('defaultRegister')
 
   setName: ->
     viewModel = new ViewModel(this, class: 'read-register', singleChar: true, hidden: true)
