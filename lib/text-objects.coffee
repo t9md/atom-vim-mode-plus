@@ -2,9 +2,6 @@
 _    = require 'underscore-plus'
 Base = require './base'
 
-AllWhitespace = /^\s$/
-WholeWordRegex = /\S+/
-
 class TextObject extends Base
   @extend()
   complete: true
@@ -17,46 +14,41 @@ class CurrentSelection extends TextObject
 
 # Word
 # -------------------------
-class SelectInsideWord extends TextObject
-  @extend()
-  select: ->
-    @editor.selectWordsContainingCursors()
-    [true]
-
-class SelectAWord extends TextObject
-  @extend()
+class SelectWord extends TextObject
   select: ->
     for selection in @editor.getSelections()
-      selection.selectWord()
-      loop
-        endPoint = selection.getBufferRange().end
-        char = @editor.getTextInRange(Range.fromPointWithDelta(endPoint, 0, 1))
-        break unless AllWhitespace.test(char)
-        selection.selectRight()
-      true
+      wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
+      @selectExclusive(selection, wordRegex)
+      @selectInclusive(selection) if @inclusive
+      not selection.isEmpty()
 
-# WholeWord
-# -------------------------
-class SelectInsideWholeWord extends TextObject
-  @extend()
-  select: ->
-    for selection in @editor.getSelections()
-      range = selection.cursor.getCurrentWordBufferRange({wordRegex: WholeWordRegex})
-      selection.setBufferRange(range)
-      true
+  selectExclusive: (selection, wordRegex) ->
+    range = selection.cursor.getCurrentWordBufferRange({wordRegex})
+    selection.setBufferRange(range)
 
-class SelectAWholeWord extends TextObject
+  selectInclusive: (selection) ->
+    scanRange = selection.cursor.getCurrentLineBufferRange()
+    headPoint = selection.getHeadBufferPosition()
+    scanRange.start = headPoint
+    @editor.scanInBufferRange /\s+/, scanRange, ({range, stop}) ->
+      if headPoint.isEqual(range.start)
+        selection.selectToBufferPosition range.end
+        stop()
+
+class SelectInsideWord extends SelectWord
   @extend()
-  select: ->
-    for selection in @editor.getSelections()
-      range = selection.cursor.getCurrentWordBufferRange({wordRegex: WholeWordRegex})
-      selection.setBufferRange(range)
-      loop
-        endPoint = selection.getBufferRange().end
-        char = @editor.getTextInRange(Range.fromPointWithDelta(endPoint, 0, 1))
-        break unless AllWhitespace.test(char)
-        selection.selectRight()
-      true
+
+class SelectAWord extends SelectInsideWord
+  @extend()
+  inclusive: true
+
+class SelectInsideWholeWord extends SelectWord
+  @extend()
+  wordRegExp: /\S+/
+
+class SelectAWholeWord extends SelectInsideWholeWord
+  @extend()
+  inclusive: true
 
 # SelectInsideQuotes and the next class defined (SelectInsideBrackets) are
 # almost-but-not-quite-repeated code. They are different because of the depth
