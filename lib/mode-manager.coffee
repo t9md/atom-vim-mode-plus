@@ -26,7 +26,6 @@ class ModeManager
   isVisualLinewiseMode: ->
     @vimState.mode is 'visual' and @vimState.submode is 'linewise'
 
-
   setMode: (mode, submode=null) ->
     @vimState.mode = mode
     @vimState.submode = submode
