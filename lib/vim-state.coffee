@@ -70,18 +70,6 @@ class VimState
     @editor = null
     @editorElement = null
 
-  isVisualMode: ->
-    @modeManager.isVisualMode()
-
-  isNormalMode: ->
-    @modeManager.isNormalMode()
-
-  isInsertMode: ->
-    @modeManager.isInsertMode()
-
-  isOperatorPendingMode: ->
-    @modeManager.isOperatorPendingMode()
-
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
 
@@ -377,6 +365,27 @@ class VimState
 
   # Mode Switching
   # -------------------------
+  isNormalMode: ->
+    @modeManager.isNormalMode()
+
+  isInsertMode: ->
+    @modeManager.isInsertMode()
+
+  isOperatorPendingMode: ->
+    @modeManager.isOperatorPendingMode()
+
+  isVisualMode: ->
+    @modeManager.isVisualMode()
+
+  isVisualCharacterwiseMode: ->
+    @modeManager.isVisualCharacterwiseMode()
+
+  isVisualBlockwiseMode: ->
+    @modeManager.isVisualBlockwiseMode()
+
+  isVisualLinewiseMode: ->
+    @modeManager.isVisualLinewiseMode()
+
   # Private: Used to enable normal mode.
   #
   # Returns nothing.
