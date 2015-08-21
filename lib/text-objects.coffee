@@ -1,4 +1,4 @@
-{Range} = require 'atom'
+{Point, Range} = require 'atom'
 _    = require 'underscore-plus'
 Base = require './base'
 
@@ -237,26 +237,70 @@ class SelectAroundParentheses extends SelectInsideParentheses
 
 # Paragraph
 # -------------------------
+# In vim world Paragraph is defined as consecutive non-blank-line or consecutive blank-line.
+# depending on the start line is blankline or not.
+# Should change linewise selection.
+# selectExclusive = (selection, wordRegex) ->
+# In vim world Paragraph is defined as consecutive non-blank-line or consecutive blank-line.
+# depending on the start line is blankline or not.
+# Should change linewise selection.
 class SelectInsideParagraph extends TextObject
   @extend()
-  select: ->
-    for selection in @editor.getSelections()
-      range = selection.cursor.getCurrentParagraphBufferRange()
-      if range?
-        selection.setBufferRange(range)
-        selection.selectToBeginningOfNextParagraph()
-      true
 
-class SelectAroundParagraph extends TextObject
-  @extend()
+  isWhiteSpaceRow: (row) ->
+    /^\s*$/.test @editor.lineTextForBufferRow(row)
+
+  getRange: (point) ->
+    pattern = if @isWhiteSpaceRow(point.row) then /^.*\S.*$/ else /^\s*?$/
+    start = @findStart(point, pattern)
+    end = @findEnd(point, pattern)
+    new Range(start, end)
+
+  getNextRange: (point, direction) ->
+    rowTraverse = switch direction
+      when 'forward'  then +1
+      when 'backward' then -1
+    @getRange point.traverse([rowTraverse, 0])
+
+  findStart: (fromPoint, pattern) ->
+    scanRange = new Range(fromPoint, Point.ZERO)
+    point = null
+    @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
+      point = range.start.traverse([+1, 0])
+      stop()
+    point
+
+  findEnd: (fromPoint, pattern) ->
+    scanRange = new Range(fromPoint, Point.INFINITY)
+    point = null
+    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) =>
+      point = range.start
+      stop()
+    point
+
+  selectParagraph: (selection) ->
+    [startRow, endRow] = selection.getBufferRowRange()
+    selectionEndRow = selection.getBufferRange().end.row
+    if startRow is endRow
+      range = @getRange(new Point(startRow, 0))
+      selection.setBufferRange(range)
+    else # have direction
+      if selection.isReversed()
+        range = @getNextRange(new Point(startRow, 0), "backward")
+        selection.selectToBufferPosition(range.start)
+      else
+        range = @getNextRange(new Point(endRow, 0), "forward")
+        selection.selectToBufferPosition(range.end)
+
   select: ->
     for selection in @editor.getSelections()
-      range = selection.cursor.getCurrentParagraphBufferRange()
-      if range?
-        selection.setBufferRange(range)
-        selection.selectToBeginningOfNextParagraph()
-        selection.selectDown()
-      true
+      _.times @getCount(1), =>
+        @selectParagraph(selection)
+        @selectParagraph(selection) if @inclusive
+      not selection.isEmpty()
+
+class SelectAroundParagraph extends SelectInsideParagraph
+  inclusive: true
 
 module.exports = {
   TextObject,
