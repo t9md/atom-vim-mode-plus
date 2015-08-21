@@ -16,6 +16,8 @@ CountManager = require './count-manager'
 MarkManager = require './mark-manager'
 ModeManager = require './mode-manager'
 
+path = require 'path'
+
 module.exports =
 class VimState
   editor: null
@@ -130,6 +132,7 @@ class VimState
       'generate-introspection-report': => @generateIntrospectionReport()
       'jump-to-related': => @jumpToRelated()
       'report-key-binding': => @reportKeyBinding()
+      'open-in-vim': => @openInVim()
 
     # InsertMode
     # -------------------------
@@ -276,6 +279,9 @@ class VimState
     for selection in @editor.getSelections()
       selection.setBufferRange(selection.getBufferRange(), {reversed})
 
+  # Developper helpeing,
+  # [FIXME] clean up needed and make it available only in dev-mode.
+  # -------------------------
   generateIntrospectionReport: ->
     excludeProperties = [
       'findClass'
@@ -344,6 +350,13 @@ class VimState
     klass = @editor.getTextInBufferRange(range)
     {getKeyBindingInfo} = require './introspection'
     console.log getKeyBindingInfo(klass)
+
+  openInVim: ->
+    {BufferedProcess} = require 'atom'
+    {row} = @editor.getCursorBufferPosition()
+    new BufferedProcess
+      command: "/Applications/MacVim.app/Contents/MacOS/mvim"
+      args: [@editor.getPath(), "+#{row+1}"]
 
   # Search History
   # -------------------------
@@ -429,6 +442,9 @@ class VimState
 
   ensureCursorIsWithinLine: (cursor) =>
     return if @operationStack.isProcessing() or (not @isNormalMode())
+    # [FIXME] I'm developping in buffer 'tryit.coffee'.
+    # So disable auto-cursor modification especially for this bufffer temporarily.
+    return if path.basename(@editor.getPath()) is 'tryit.coffee'
 
     {goalColumn} = cursor
     if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
