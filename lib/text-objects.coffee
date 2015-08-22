@@ -57,156 +57,144 @@ class SelectAWholeWord extends SelectInsideWholeWord
   @extend()
   inclusive: true
 
-# Quote
+# Pair
 # -------------------------
-class SelectInsideQuotes extends TextObject
-  char: null
-  includeQuotes: false
+class SelectInsidePair extends TextObject
+  @extend()
+  inclusive: false
+  pair: null
 
-  findForward: (fromPoint) ->
-    pattern   = ///[^\\]?#{@char}///
-    scanRange = @rangeToEndOfFile(fromPoint)
+  findCharForward: (fromPoint, char) ->
+    @findChar(fromPoint, char, false)
+
+  findCharBackward: (fromPoint, char) ->
+    @findChar(fromPoint, char, true)
+
+  findChar: (fromPoint, char, backward=false) ->
+    if backward
+      scanRange = @rangeToBeginningOfFile(fromPoint)
+      scanFunc = 'backwardsScanInBufferRange'
+    else
+      scanRange = @rangeToEndOfFile(fromPoint)
+      scanFunc = 'scanInBufferRange'
+    pattern   = ///(?:[^\\]|^)(?:#{_.escapeRegExp(char)})///
     point = null
-    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
+    @editor[scanFunc] pattern, scanRange, ({range, stop}) ->
       point = range.end
       stop()
     point
 
-  findBackward: (fromPoint) ->
-    pattern   = ///[^\\]?#{@char}///
-    scanRange = @rangeToBeginningOfFile(fromPoint)
+  findPairClosing: (fromPoint, pair, backward=false) ->
+    @findPair(fromPoint, 'closing', pair, backward)
+
+  findPairOpening: (fromPoint, pair, backward=false) ->
+    @findPair(fromPoint, 'opening', pair, backward)
+
+  # which: opening or closing
+  findPair: (fromPoint, which, pair, backward=false) ->
+    [charOpening, charClosing] = pair.split('')
+    pair = pair.split('').map(_.escapeRegExp).join('|')
+    pattern   = ///(?:[^\\]|^)(?:#{pair})///g
+    if backward
+      scanRange = @rangeToBeginningOfFile(fromPoint)
+      scanFunc = 'backwardsScanInBufferRange'
+    else
+      scanRange = @rangeToEndOfFile(fromPoint)
+      scanFunc = 'scanInBufferRange'
+
+    switch which
+      when 'opening' then [searching, searchingPair] = [charOpening, charClosing]
+      when 'closing' then [searching, searchingPair] = [charClosing, charOpening]
+
+    nested = 0
     point = null
-    @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
-      point = range.end
-      stop()
+    @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) ->
+      if charOpening is charClosing
+        point = range.end
+      else
+        lastChar = matchText[matchText.length-1]
+        switch lastChar
+          when searching
+            if nested is 0
+              point = range.end
+            else
+              nested--
+          when searchingPair
+            nested++
+      stop() if point
     point
 
   select: ->
+    [charOpening, charClosing] = @pair.split('')
+    r = []
     for selection in @editor.getSelections()
-      point  = selection.getHeadBufferPosition()
-      start  = @findBackward(point)
-      start ?= @findForward(point)
-      end    = @findForward(start)?.traverse([0, -1])
+      point = selection.getHeadBufferPosition()
+      start = @findPairOpening(point, @pair, true)
+      start ?= @findPairOpening(point, @pair)
+      unless start?
+        r.push false
+        continue
 
+      end = @findPairClosing(start, @pair)?.traverse([0, -1])
       if start? and end?
-        if @includeQuotes
+        if @inclusive
           start = start.traverse([0, -1])
           end   = end.traverse([0, +1])
         selection.setBufferRange([start, end])
-      not selection.isEmpty()
+      r.push not selection.isEmpty()
+    r
 
-class SelectInsideDoubleQuotes extends SelectInsideQuotes
-  char: '"'
+class SelectInsideDoubleQuotes extends SelectInsidePair
+  pair: '""'
 class SelectAroundDoubleQuotes extends SelectInsideDoubleQuotes
-  includeQuotes: true
+  inclusive: true
 
-class SelectInsideSingleQuotes extends SelectInsideQuotes
-  char: '\''
+class SelectInsideSingleQuotes extends SelectInsidePair
+  pair: "''"
 class SelectAroundSingleQuotes extends SelectInsideSingleQuotes
-  includeQuotes: true
+  inclusive: true
 
-class SelectInsideBackTicks extends SelectInsideQuotes
+class SelectInsideBackTicks extends SelectInsidePair
   @extend()
-  char: '`'
+  pair: '``'
 class SelectAroundBackTicks extends SelectInsideBackTicks
   @extend()
-  includeQuotes: true
+  inclusive: true
 
-
-# SelectInsideBrackets and the previous class defined (SelectInsideQuotes) are
-# almost-but-not-quite-repeated code. They are different because of the depth
-# checks in the bracket matcher.
-
-class SelectInsideBrackets extends TextObject
+class SelectInsideCurlyBrackets extends SelectInsidePair
   @extend()
-  beginChar: null
-  endChar: null
-  includeBrackets: false
-  # constructor: (@vimState, @beginChar, @endChar, @includeBrackets) ->
-  #   super(@vimState)
-
-  findOpeningBracket: (pos) ->
-    pos = pos.copy()
-    depth = 0
-    while pos.row >= 0
-      line = @editor.lineTextForBufferRow(pos.row)
-      pos.column = line.length - 1 if pos.column is -1
-      while pos.column >= 0
-        switch line[pos.column]
-          when @endChar then ++ depth
-          when @beginChar
-            return pos if -- depth < 0
-        -- pos.column
-      pos.column = -1
-      -- pos.row
-
-  findClosingBracket: (start) ->
-    end = start.copy()
-    depth = 0
-    while end.row < @editor.getLineCount()
-      endLine = @editor.lineTextForBufferRow(end.row)
-      while end.column < endLine.length
-        switch endLine[end.column]
-          when @beginChar then ++ depth
-          when @endChar
-            if -- depth < 0
-              -- start.column if @includeBrackets
-              ++ end.column if @includeBrackets
-              return end
-        ++ end.column
-      end.column = 0
-      ++ end.row
-    return
-
-  select: ->
-    for selection in @editor.getSelections()
-      start = @findOpeningBracket(selection.cursor.getBufferPosition())
-      if start?
-        ++ start.column # skip the opening quote
-        end = @findClosingBracket(start)
-        if end?
-          selection.setBufferRange([start, end])
-      not selection.isEmpty()
-
-class SelectInsideCurlyBrackets extends SelectInsideBrackets
-  @extend()
-  beginChar: '{'
-  endChar: '}'
+  pair: '{}'
 class SelectAroundCurlyBrackets extends SelectInsideCurlyBrackets
   @extend()
-  includeBrackets: true
+  inclusive: true
 
-class SelectInsideAngleBrackets extends SelectInsideBrackets
+class SelectInsideAngleBrackets extends SelectInsidePair
   @extend()
-  beginChar: '<'
-  endChar: '>'
+  pair: '<>'
 class SelectAroundAngleBrackets extends SelectInsideAngleBrackets
   @extend()
-  includeBrackets: true
+  inclusive: true
 
-class SelectInsideTags extends SelectInsideBrackets
+class SelectInsideTags extends SelectInsidePair
   @extend()
-  beginChar: '>'
-  endChar: '<'
+  pair: '><'
 class SelectAroundTags extends SelectInsideTags
   @extend()
-  includeBrackets: true
+  inclusive: true
 
-class SelectInsideSquareBrackets extends SelectInsideBrackets
+class SelectInsideSquareBrackets extends SelectInsidePair
   @extend()
-  beginChar: '['
-  endChar: ']'
+  pair: '[]'
 class SelectAroundSquareBrackets extends SelectInsideSquareBrackets
   @extend()
-  includeBrackets: true
+  inclusive: true
 
-class SelectInsideParentheses extends SelectInsideBrackets
+class SelectInsideParentheses extends SelectInsidePair
   @extend()
-  beginChar: '('
-  endChar: ')'
+  pair: '()'
 class SelectAroundParentheses extends SelectInsideParentheses
   @extend()
-  includeBrackets: true
+  inclusive: true
 
 # Paragraph
 # -------------------------
@@ -276,35 +264,16 @@ class SelectAroundParagraph extends SelectInsideParagraph
   inclusive: true
 
 module.exports = {
-  TextObject,
-  CurrentSelection,
-
-  SelectInsideDoubleQuotes
-  SelectAroundDoubleQuotes
-
-  SelectInsideSingleQuotes
-  SelectAroundSingleQuotes
-
-  SelectInsideBackTicks
-  SelectAroundBackTicks
-
-  SelectInsideCurlyBrackets
-  SelectAroundCurlyBrackets
-
-  SelectInsideAngleBrackets
-  SelectAroundAngleBrackets
-
-  SelectInsideTags
-  SelectAroundTags
-
-  SelectInsideSquareBrackets
-  SelectAroundSquareBrackets
-
-  SelectInsideParentheses
-  SelectAroundParentheses
-
-  SelectInsideWord, SelectAWord,
-  SelectInsideWholeWord, SelectAWholeWord,
-  SelectInsideQuotes, SelectInsideBrackets,
-  SelectInsideParagraph, SelectAroundParagraph
+  CurrentSelection
+  SelectInsideWord          , SelectAWord
+  SelectInsideWholeWord     , SelectAWholeWord
+  SelectInsideDoubleQuotes  , SelectAroundDoubleQuotes
+  SelectInsideSingleQuotes  , SelectAroundSingleQuotes
+  SelectInsideBackTicks     , SelectAroundBackTicks
+  SelectInsideCurlyBrackets , SelectAroundCurlyBrackets
+  SelectInsideAngleBrackets , SelectAroundAngleBrackets
+  SelectInsideTags          , SelectAroundTags
+  SelectInsideSquareBrackets, SelectAroundSquareBrackets
+  SelectInsideParentheses   , SelectAroundParentheses
+  SelectInsideParagraph     , SelectAroundParagraph
 }
