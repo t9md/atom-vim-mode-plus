@@ -172,8 +172,8 @@ fdescribe "TextObjects", ->
       keydown('d')
       keydown('i')
       keydown('t')
-      expect(editor.getText()).toBe "<something>here</something><again>"
-      expect(editor.getCursorScreenPosition()).toEqual [0, 5]
+      expect(editor.getText()).toBe "<something></something><again>"
+      expect(editor.getCursorScreenPosition()).toEqual [0, 11]
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
