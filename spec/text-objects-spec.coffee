@@ -1,6 +1,6 @@
 helpers = require './spec-helper'
 
-describe "TextObjects", ->
+fdescribe "TextObjects", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
@@ -273,13 +273,16 @@ describe "TextObjects", ->
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
-    it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
+    # I don't like old behavior, that was not in Vim and furthermore, this is counter intuitive.
+    # Simply selecting area between quote is that normal user expects.
+    # it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
+    it "[Changed behavior] applies operators inside area between quote", ->
       editor.setCursorScreenPosition([0, 29])
       keydown('d')
       keydown('i')
       keydown('\'')
-      expect(editor.getText()).toBe "' something in here and in 'here'' and over here"
-      expect(editor.getCursorScreenPosition()).toEqual [0, 33]
+      expect(editor.getText()).toBe "' something in here and in '' ' and over here"
+      expect(editor.getCursorScreenPosition()).toEqual [0, 28]
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -307,13 +310,13 @@ describe "TextObjects", ->
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
-    it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
+    it "[Changed behavior] applies operators inside area between quote", ->
       editor.setCursorScreenPosition([0, 29])
       keydown('d')
       keydown('i')
       keydown('"')
-      expect(editor.getText()).toBe "\" something in here and in \"here\"\" and over here"
-      expect(editor.getCursorScreenPosition()).toEqual [0, 33]
+      expect(editor.getText()).toBe '" something in here and in "" " and over here'
+      expect(editor.getCursorScreenPosition()).toEqual [0, 28]
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -517,8 +520,8 @@ describe "TextObjects", ->
       keydown('d')
       keydown('a')
       keydown('\'')
-      expect(editor.getText()).toBe "' something in here and in 'here"
-      expect(editor.getCursorScreenPosition()).toEqual [0, 31]
+      expect(editor.getText()).toBe "' something in here and in  '"
+      expect(editor.getCursorScreenPosition()).toEqual [0, 27]
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
 
@@ -541,7 +544,7 @@ describe "TextObjects", ->
       keydown('d')
       keydown('a')
       keydown('"')
-      expect(editor.getText()).toBe "\" something in here and in \"here"
-      expect(editor.getCursorScreenPosition()).toEqual [0, 31]
+      expect(editor.getText()).toBe '" something in here and in  "'
+      expect(editor.getCursorScreenPosition()).toEqual [0, 27]
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(false)
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
