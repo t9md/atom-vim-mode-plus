@@ -7,10 +7,17 @@ class TextObject extends Base
   complete: true
   recodable: false
 
+  rangeToBeginningOfFile: (point) ->
+    new Range(Point.ZERO, point)
+
+  rangeToEndOfFile: (point) ->
+    new Range(point, Point.INFINITY)
+
 class CurrentSelection extends TextObject
   @extend()
   select: ->
-    _.times(@getCount(1), -> true)
+    _.times @getCount(1), ->
+      true
 
 # Word
 # -------------------------
@@ -50,86 +57,52 @@ class SelectAWholeWord extends SelectInsideWholeWord
   @extend()
   inclusive: true
 
-# SelectInsideQuotes and the next class defined (SelectInsideBrackets) are
-# almost-but-not-quite-repeated code. They are different because of the depth
-# checks in the bracket matcher.
+# Quote
+# -------------------------
 class SelectInsideQuotes extends TextObject
-  @extend()
   char: null
   includeQuotes: false
 
-  findOpeningQuote: (pos) ->
-    start = pos.copy()
-    pos = pos.copy()
-    while pos.row >= 0
-      line = @editor.lineTextForBufferRow(pos.row)
-      pos.column = line.length - 1 if pos.column is -1
-      while pos.column >= 0
-        if line[pos.column] is @char
-          if pos.column is 0 or line[pos.column - 1] isnt '\\'
-            if @isStartQuote(pos)
-              return pos
-            else
-              return @lookForwardOnLine(start)
-        -- pos.column
-      pos.column = -1
-      -- pos.row
-    @lookForwardOnLine(start)
+  findForward: (fromPoint) ->
+    pattern   = ///[^\\]?#{@char}///
+    scanRange = @rangeToEndOfFile(fromPoint)
+    point = null
+    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
+      point = range.end
+      stop()
+    point
 
-  isStartQuote: (end) ->
-    line = @editor.lineTextForBufferRow(end.row)
-    numQuotes = line.substring(0, end.column + 1).replace( "'#{@char}", '').split(@char).length - 1
-    numQuotes % 2
-
-  lookForwardOnLine: (pos) ->
-    line = @editor.lineTextForBufferRow(pos.row)
-
-    index = line.substring(pos.column).indexOf(@char)
-    if index >= 0
-      pos.column += index
-      return pos
-    null
-
-  findClosingQuote: (start) ->
-    end = start.copy()
-    escaping = false
-
-    while end.row < @editor.getLineCount()
-      endLine = @editor.lineTextForBufferRow(end.row)
-      while end.column < endLine.length
-        if endLine[end.column] is '\\'
-          ++ end.column
-        else if endLine[end.column] is @char
-          -- start.column if @includeQuotes
-          ++ end.column if @includeQuotes
-          return end
-        ++ end.column
-      end.column = 0
-      ++ end.row
-    return
+  findBackward: (fromPoint) ->
+    pattern   = ///[^\\]?#{@char}///
+    scanRange = @rangeToBeginningOfFile(fromPoint)
+    point = null
+    @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
+      point = range.end
+      stop()
+    point
 
   select: ->
     for selection in @editor.getSelections()
-      start = @findOpeningQuote(selection.cursor.getBufferPosition())
-      if start?
-        ++ start.column # skip the opening quote
-        end = @findClosingQuote(start)
-        if end?
-          selection.setBufferRange([start, end])
+      point  = selection.getHeadBufferPosition()
+      start  = @findBackward(point)
+      start ?= @findForward(point)
+      end    = @findForward(start)?.traverse([0, -1])
+
+      if start? and end?
+        if @includeQuotes
+          start = start.traverse([0, -1])
+          end   = end.traverse([0, +1])
+        selection.setBufferRange([start, end])
       not selection.isEmpty()
 
 class SelectInsideDoubleQuotes extends SelectInsideQuotes
-  @extend()
   char: '"'
 class SelectAroundDoubleQuotes extends SelectInsideDoubleQuotes
-  @extend()
   includeQuotes: true
 
 class SelectInsideSingleQuotes extends SelectInsideQuotes
-  @extend()
   char: '\''
 class SelectAroundSingleQuotes extends SelectInsideSingleQuotes
-  @extend()
   includeQuotes: true
 
 class SelectInsideBackTicks extends SelectInsideQuotes
@@ -263,7 +236,7 @@ class SelectInsideParagraph extends TextObject
     @getRange point.traverse([rowTraverse, 0])
 
   findStart: (fromPoint, pattern) ->
-    scanRange = new Range(fromPoint, Point.ZERO)
+    scanRange = @rangeToBeginningOfFile(fromPoint)
     point = null
     @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
       point = range.start.traverse([+1, 0])
@@ -271,7 +244,7 @@ class SelectInsideParagraph extends TextObject
     point
 
   findEnd: (fromPoint, pattern) ->
-    scanRange = new Range(fromPoint, Point.INFINITY)
+    scanRange = @rangeToEndOfFile(fromPoint)
     point = null
     @editor.scanInBufferRange pattern, scanRange, ({range, stop}) =>
       point = range.start
