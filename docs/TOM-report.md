@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-23T20:28:13.414Z*
+*generated at 2015-08-23T22:13:51.224Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -696,7 +696,6 @@ vim-mode version: 0.57.0
 - ::recodable: ```true```: **Overridden**
 - ::lineWiseAlias: ```false```
 - ::compose`(@target)`
-- ::canComposeWith`(operation)`
 - ::getInput`()`
 - ::getRegisterName`()`
 - ::setTextToRegister`(text)`
@@ -716,21 +715,18 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: <kbd>X</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::complete: ```true```: **Overridden**
 
 ### DeleteRight < Delete
 - command: `vim-mode:delete-right`
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: <kbd>x</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::complete: ```true```: **Overridden**
 
 ### DeleteToLastCharacterOfLine < Delete
 - command: `vim-mode:delete-to-last-character-of-line`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>D</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::complete: ```true```: **Overridden**
 
 ### Increase < Operator
 - command: `vim-mode:increase`
@@ -798,21 +794,18 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>C</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::complete: ```true```: **Overridden**
 
 ### Substitute < Change
 - command: `vim-mode:substitute`
 - keymaps
   - atom-text-editor.vim-mode.normal-mode: <kbd>s</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::complete: ```true```: **Overridden**
 
 ### SubstituteLine < Change
 - command: `vim-mode:substitute-line`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>S</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::complete: ```true```: **Overridden**
 
 ### InsertAboveWithNewline < Insert
 - command: `vim-mode:insert-above-with-newline`
@@ -927,7 +920,6 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>~</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::complete: ```true```: **Overridden**
 
 ### UpperCase < ToggleCase
 - command: `vim-mode:upper-case`
@@ -949,7 +941,6 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>Y</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::complete: ```true```: **Overridden**
 
 ### OperatorError < Base
 - ::constructor`(@message)`: **Overridden**
