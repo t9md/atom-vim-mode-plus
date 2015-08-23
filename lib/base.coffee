@@ -15,7 +15,10 @@ class Base
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
-    @complete
+    if @target?
+      @target.isComplete()
+    else
+      @complete
 
   isRecordable: ->
     @recodable
