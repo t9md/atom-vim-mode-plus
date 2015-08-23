@@ -85,7 +85,7 @@ inspectObject = (obj, options={}, prototype=false) ->
       s += "`#{argumentsSignature}`"
       s += ": `#{superSignature}`" if superSignature?
     else
-      s += ": `#{util.inspect(value, options).replace(/`/g, '\\`')}`"
+      s += ": ```#{util.inspect(value, options)}```"
     isOverridden = _.detect(ancesstors, (ancestor) -> ancestor::.hasOwnProperty(prop))
     s += ": **Overridden**" if isOverridden
     results.push s
@@ -196,7 +196,9 @@ formatKeymaps = (keymaps) ->
   s.push '- keymaps'
   for keymap in keymaps
     {keystrokes, selector} = keymap
-    s.push "  - #{selector}: <kbd>#{keystrokes.replace('_', '\\_')}</kbd>"
+    keystrokes = keystrokes.replace(/(`|_)/g, '\\$1')
+    s.push "  - #{selector}: <kbd>#{keystrokes}</kbd>"
+
   s.join("\n")
 
 formatReport = (report) ->
