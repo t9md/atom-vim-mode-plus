@@ -1,4 +1,5 @@
 Grim  = require 'grim'
+Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Range, Emitter, CompositeDisposable} = require 'atom'
 settings = require './settings'
@@ -20,12 +21,35 @@ path = require 'path'
 
 module.exports =
 class VimState
+  Delegato.includeInto(this)
+
   editor: null
   operationStack: null
   mode: null
   submode: null
   destroyed: false
   replaceModeListener: null
+
+  delegatingMethods = [
+    'isNormalMode'
+    'isInsertMode'
+    'isOperatorPendingMode'
+    'isVisualMode'
+    'isVisualCharacterwiseMode'
+    'isVisualBlockwiseMode'
+    'isVisualLinewiseMode'
+    'activateNormalMode'
+    'activateInsertMode'
+    'activateOperatorPendingMode'
+    'activateReplaceMode'
+    'replaceModeUndo'
+    'deactivateInsertMode'
+    'deactivateVisualMode'
+    'activateVisualMode'
+    'resetNormalMode'
+    'setInsertionCheckpoint'
+  ]
+  @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
 
   constructor: (@editorElement, @statusBarManager, @globalVimState) ->
     @emitter = new Emitter
@@ -376,69 +400,10 @@ class VimState
   getSearchHistoryItem: (index = 0) ->
     @globalVimState.searchHistory[index]
 
-  # Mode Switching
-  # -------------------------
-  isNormalMode: ->
-    @modeManager.isNormalMode()
-
-  isInsertMode: ->
-    @modeManager.isInsertMode()
-
-  isOperatorPendingMode: ->
-    @modeManager.isOperatorPendingMode()
-
-  isVisualMode: ->
-    @modeManager.isVisualMode()
-
-  isVisualCharacterwiseMode: ->
-    @modeManager.isVisualCharacterwiseMode()
-
-  isVisualBlockwiseMode: ->
-    @modeManager.isVisualBlockwiseMode()
-
-  isVisualLinewiseMode: ->
-    @modeManager.isVisualLinewiseMode()
-
-  # Private: Used to enable normal mode.
-  #
-  # Returns nothing.
-  activateNormalMode: ->
-    @modeManager.activateNormalMode()
-
   # TODO: remove this method and bump the `vim-mode` service version number.
   activateCommandMode: ->
     Grim.deprecate("Use ::activateNormalMode instead")
     @activateNormalMode()
-
-  # Private: Used to enable insert mode.
-  #
-  # Returns nothing.
-  activateInsertMode: (submode=null) ->
-    @modeManager.activateInsertMode(submode)
-
-  activateOperatorPendingMode: ->
-    @modeManager.activateOperatorPendingMode()
-
-  activateReplaceMode: ->
-    @modeManager.activateReplaceMode()
-
-  replaceModeUndo: ->
-    @modeManager.replaceModeUndo()
-
-  deactivateInsertMode: ->
-    @modeManager.deactivateInsertMode()
-
-  deactivateVisualMode: ->
-    @modeManager.deactivateVisualMode()
-
-  activateVisualMode: (submode) ->
-    @modeManager.activateVisualMode(submode)
-
-  resetNormalMode: ->
-    @modeManager.resetNormalMode()
-
-  setInsertionCheckpoint: ->
-    @modeManager.setInsertionCheckpoint()
 
   ensureCursorIsWithinLine: (cursor) =>
     return if @operationStack.isProcessing() or (not @isNormalMode())
