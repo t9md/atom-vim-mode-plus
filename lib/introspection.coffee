@@ -85,7 +85,7 @@ inspectObject = (obj, options={}, prototype=false) ->
       s += "`#{argumentsSignature}`"
       s += ": `#{superSignature}`" if superSignature?
     else
-      s += ": `#{util.inspect(value, options)}`"
+      s += ": `#{util.inspect(value, options).replace(/`/g, '\\`')}`"
     isOverridden = _.detect(ancesstors, (ancestor) -> ancestor::.hasOwnProperty(prop))
     s += ": **Overridden**" if isOverridden
     results.push s
