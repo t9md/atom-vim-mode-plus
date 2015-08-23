@@ -206,10 +206,8 @@ describe "Motions", ->
     describe "as a selection", ->
       describe "within a word", ->
         it "selects to the end of the word", ->
-          set
-            cursor: [0, 0]
-          ensure 'yw',
-            register: 'ab '
+          set cursor: [0, 0]
+          ensure 'yw', register: 'ab '
 
       describe "between words", ->
         it "selects the whitespace", ->
@@ -237,15 +235,13 @@ describe "Motions", ->
           ensure 'yW', register: 'cde1+- '
 
       it "continues past blank lines", ->
-        set
-          cursor: [2, 0]
+        set cursor: [2, 0]
         ensure 'dW',
           text: "cde1+- ab \n xyz\nzip"
           register: "\n"
 
       it "doesn't go past the end of the file", ->
-        set
-          cursor: [3, 0]
+        set cursor: [3, 0]
         ensure 'dW',
           text: "cde1+- ab \n xyz\n\n"
           register: 'zip'
@@ -367,8 +363,7 @@ describe "Motions", ->
     describe "as a selection", ->
       describe "within a word", ->
         it "selects to the beginning of the current word", ->
-          set
-            cursor: [0, 2]
+          set cursor: [0, 2]
           ensure 'yb',
             register: 'a'
             cursor: [0, 1]
@@ -401,11 +396,8 @@ describe "Motions", ->
         ensure 'yB', register: 'xyz-12' # because cursor is on the `3`
 
       it "doesn't go past the beginning of the file", ->
-        set
-          cursor: [0, 0]
-          register: 'abc'
-        ensure 'yB',
-          register: 'abc'
+        set cursor: [0, 0], register: 'abc'
+        ensure 'yB', register: 'abc'
 
   describe "the ^ keybinding", ->
     beforeEach ->
@@ -789,13 +781,8 @@ describe "Motions", ->
         ensure '2G', cursor: [1, 4]
 
     describe "as a selection", ->
-      beforeEach ->
-        set cursor: [1, 0]
-        editor.setCursorScreenPosition([1, 0])
-        vimState.activateVisualMode()
-        keydown('G', shift: true)
-
       it "selects to the last line in the file", ->
+        set cursor: [1, 0]
         ensure 'vG',
           selectedText: "    2\n 3abc\n "
           cursor: [3, 1]
@@ -817,14 +804,12 @@ describe "Motions", ->
 
     describe "as a motion", ->
       it "moves the cursor to the specified search pattern", ->
-        ensure ['/', normal: 'def'],
-          cursor: [1, 0]
+        ensure ['/', normal: 'def'], cursor: [1, 0]
         expect(pane.activate).toHaveBeenCalled()
 
       it "loops back around", ->
         set cursor: [3, 0]
-        ensure ['/', normal: 'def'],
-          cursor: [1, 0]
+        ensure ['/', normal: 'def'], cursor: [1, 0]
 
       it "uses a valid regex as a regex", ->
         # Cycle through the 'abc' on the first line with a character pattern
