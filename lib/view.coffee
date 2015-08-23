@@ -20,13 +20,6 @@ class ViewModel
     if @vimState.operationStack.isOperatorPending()
       @emitter.emit 'did-get-input', ''
 
-# class Input extends Base
-#   @extend()
-#   complete: true
-#   recodable: true
-#
-#   constructor: (@characters) ->
-
 class VimNormalModeInputElement extends HTMLDivElement
   createdCallback: ->
     @className = "normal-mode-input"
