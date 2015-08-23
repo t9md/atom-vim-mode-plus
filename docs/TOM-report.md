@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-23T20:14:42.177Z*
+*generated at 2015-08-23T20:19:14.871Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -1079,7 +1079,7 @@ vim-mode version: 0.57.0
 - command: `vim-mode:select-inside-back-ticks`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i `</kbd>
-- ::pair: `'``'`: **Overridden**
+- ::pair: `'\`\`'`: **Overridden**
 
 ### SelectAroundBackTicks < SelectInsideBackTicks
 - command: `vim-mode:select-around-back-ticks`
