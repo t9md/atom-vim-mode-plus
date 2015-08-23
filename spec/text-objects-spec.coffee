@@ -2,7 +2,7 @@ helpers = require './spec-helper'
 
 _ = require 'underscore-plus'
 
-fdescribe "TextObjects", ->
+describe "TextObjects", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
@@ -52,16 +52,16 @@ fdescribe "TextObjects", ->
       expect editor.getCursorBufferPosition()
 
   selectedScreenRange = ->
-      expect editor.getSelectedScreenRange()
+    expect editor.getSelectedScreenRange()
 
   selectedScreenRanges = ->
-      expect editor.getSelectedScreenRanges()
+    expect editor.getSelectedScreenRanges()
 
   selectedBufferRange = ->
-      expect editor.getSelectedBufferRange()
+    expect editor.getSelectedBufferRange()
 
   selectedBufferRanges = ->
-      expect editor.getSelectedBufferRanges()
+    expect editor.getSelectedBufferRanges()
 
   register = (name, value) ->
     if value
