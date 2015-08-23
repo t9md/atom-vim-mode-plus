@@ -27,6 +27,7 @@ class OperationStack
       # If we have started an operation that responds to canComposeWith check if it can compose
       # with the operation we're going to push onto the stack
       if (topOperation = @peekTop())? and topOperation.canComposeWith? and not topOperation.canComposeWith(op)
+        debug "can't compose #{topOperation.getKind()} with #{op.getKind()}, returning"
         @vimState.resetNormalMode()
         @vimState.emitter.emit('failed-to-compose')
         return
