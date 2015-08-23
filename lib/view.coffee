@@ -7,7 +7,8 @@ class ViewModel
     @emitter = new Emitter
     @view = new VimNormalModeInputElement().initialize(this, opts)
     @editor.normalModeInputView = @view
-    @vimState.onDidFailToCompose => @view.remove()
+    @vimState.onDidFailToCompose =>
+      @view.remove()
 
   onDidGetInput: (callback) ->
     @emitter.on 'did-get-input', callback
