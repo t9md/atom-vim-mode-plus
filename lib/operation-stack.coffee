@@ -19,23 +19,18 @@ class OperationStack
       debug "#=== Start at #{new Date().toISOString()}"
 
     @withLock =>
-      # Motions in visual mode perform their selections.
+      # If we've started in visual-mode, and pushed operation with select method,
+      # set implicit Select operator as operator to modify selection with select
+      # method on target. Here target is Motion or TextObject.
+      # So use implicit Select operator as operator.
       if @vimState.isVisualMode() and _.isFunction(op.select)
         debug "push INPLICIT Operators.Select"
         @stack.push(new Operators.Select(@vimState))
 
-      # If we have started an operation that responds to canComposeWith check if it can compose
-      # with the operation we're going to push onto the stack
-      if (topOperation = @peekTop())? and topOperation.canComposeWith? and not topOperation.canComposeWith(op)
-        debug "can't compose #{topOperation.getKind()} with #{op.getKind()}, returning"
-        @vimState.resetNormalMode()
-        @vimState.emitter.emit('failed-to-compose')
-        return
-
       debug "pushing <#{op.getKind()}>"
       @stack.push op
 
-      # If we've received an operator in visual mode, use inplict currentSelection textobject
+      # If we've received an operator in visual mode, set inplict CurrentSelection TextObject
       # as a target of operator.
       if @vimState.isVisualMode() and op.isOperator()
         debug "push INPLICIT TextObjects.CurrentSelection"
@@ -60,12 +55,25 @@ class OperationStack
           ] # vimState have many properties, occupy DevTool console.
           recursiveInspect: Base
 
-  # Private: Processes the command if the last operation is complete.
-  #
-  # Returns nothing.
+  # Processes the command if the last operation is complete.
   process: ->
-    return if @isEmpty()
     debug "-> @process(): start"
+
+    if @stack.length > 2
+      throw "Must not happen"
+
+    if @stack.length is 2
+      op = @pop()
+      try
+        debug "-> <#{@peekTop().getKind()}>.compose(<#{op.getKind()}>)"
+        @peekTop().compose(op)
+      catch error
+        if error.isOperatorError?() or error.isMotionError?()
+          debug error.message
+          @vimState.resetNormalMode()
+          return
+        else
+          throw error
 
     unless @peekTop().isComplete()
       if @vimState.isNormalMode() and @peekTop().isOperator?()
@@ -79,42 +87,19 @@ class OperationStack
     @inspect()
     debug "-> @pop()"
     op = @pop()
-    debug "  - popped = <#{op.getKind()}>"
-    debug "  - newTop = <#{@peekTop()?.getKind()}>"
-    unless @isEmpty()
-      try
-        debug "-> <#{@peekTop().getKind()}>.compose(<#{op.getKind()}>)"
-        @peekTop().compose(op)
-        debug "-> @process(): recursive"
-        @process()
-      catch error
-        if error.isOperatorError?() or error.isMotionError?()
-          @vimState.resetNormalMode()
-        else
-          throw error
-    else
-      @vimState.history.unshift(op) if op.isRecordable()
-      if op.isPure()
-        null # Something new way of execution.
-      else
-        debug " -> <#{op.getKind()}>.execute()"
-        op.execute()
-        @vimState.count.reset()
-        @vimState.register.reset()
-        debug "#=== Finish at #{new Date().toISOString()}\n"
+    @vimState.history.unshift(op) if op.isRecordable()
+    debug " -> <#{op.getKind()}>.execute()"
+    op.execute()
+    @vimState.count.reset()
+    @vimState.register.reset()
+    debug "#=== Finish at #{new Date().toISOString()}\n"
 
-  # Private: Fetches the last operation.
-  #
-  # Returns the last operation.
   peekTop: ->
     _.last @stack
 
   pop: ->
     @stack.pop()
 
-  # Private: Removes all operations from the stack.
-  #
-  # Returns nothing.
   clear: ->
     @stack = []
 

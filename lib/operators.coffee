@@ -38,15 +38,12 @@ class Operator extends Base
   # target - TextObject or Motion to operate on.
   compose: (target) ->
     unless _.isFunction(target.select)
-      throw new OperatorError('Must respond to select')
+      @vimState.emitter.emit('failed-to-compose')
+      throw new OperatorError("Failed to compose #{@getKind()} with #{target.getKind()}")
 
     @target = target
-    @complete = true
     if _.isFunction(target.onDidComposeBy)
       @target.onDidComposeBy(this)
-
-  canComposeWith: (operation) ->
-    _.isFunction(operation.select)
 
   getInput: (args...) ->
     viewModel = new ViewModel(args...)
@@ -93,21 +90,18 @@ class Delete extends Operator
 
 class DeleteRight extends Delete
   @extend()
-  complete: true
   constructor: ->
     super
     @compose(new MoveRight(@vimState))
 
 class DeleteLeft extends Delete
   @extend()
-  complete: true
   constructor: ->
     super
     @compose(new MoveLeft(@vimState))
 
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
-  complete: true
   constructor: ->
     super
     @compose(new MoveToLastCharacterOfLine(@vimState))
@@ -131,7 +125,6 @@ class ToggleCase extends Operator
 # [TODO] Rename to ToggleCaseAndMoveRight
 class ToggleCaseNow extends ToggleCase
   @extend()
-  complete: true
   constructor: ->
     super
     @compose(new MoveRight(@vimState))
@@ -169,7 +162,6 @@ class Yank extends Operator
 
 class YankLine extends Yank
   @extend()
-  complete: true
   constructor: ->
     super
     @compose(new MoveToRelativeLine(@vimState))
@@ -461,24 +453,18 @@ class Change extends Insert
 
 class Substitute extends Change
   @extend()
-  complete: true
-
   constructor: ->
     super
     @compose(new MoveRight(@vimState))
 
 class SubstituteLine extends Change
   @extend()
-  complete: true
-
   constructor: ->
     super
     @compose(new MoveToRelativeLine(@vimState))
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
-  complete: true
-
   constructor: ->
     super
     @compose(new MoveToLastCharacterOfLine(@vimState))
