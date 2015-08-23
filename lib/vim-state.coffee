@@ -25,19 +25,15 @@ class VimState
 
   editor: null
   operationStack: null
-  mode: null
-  submode: null
   destroyed: false
   replaceModeListener: null
 
+  # Mode handling is delegated to modeManager
   delegatingMethods = [
     'isNormalMode'
     'isInsertMode'
     'isOperatorPendingMode'
     'isVisualMode'
-    'isVisualCharacterwiseMode'
-    'isVisualBlockwiseMode'
-    'isVisualLinewiseMode'
     'activateNormalMode'
     'activateInsertMode'
     'activateOperatorPendingMode'
@@ -49,6 +45,11 @@ class VimState
     'resetNormalMode'
     'setInsertionCheckpoint'
   ]
+  delegatingProperties = [
+    'mode'
+    'submode'
+  ]
+  @delegatesProperty delegatingProperties..., toProperty: 'modeManager'
   @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
 
   constructor: (@editorElement, @statusBarManager, @globalVimState) ->

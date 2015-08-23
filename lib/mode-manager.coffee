@@ -2,38 +2,27 @@
 
 module.exports =
 class ModeManager
+  mode: null
+
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
   isNormalMode: ->
-    @vimState.mode is 'normal'
+    @mode is 'normal'
 
   isInsertMode: ->
-    @vimState.mode is 'insert'
+    @mode is 'insert'
 
   isOperatorPendingMode: ->
-    @vimState.mode is 'operator-pending'
+    @mode is 'operator-pending'
 
   isVisualMode: ->
-    @vimState.mode is 'visual'
+    @mode is 'visual'
 
-  isVisualCharacterwiseMode: ->
-    @vimState.mode is 'visual' and @vimState.submode is 'characterwise'
-
-  isVisualBlockwiseMode: ->
-    @vimState.mode is 'visual' and @vimState.submode is 'blockwise'
-
-  isVisualLinewiseMode: ->
-    @vimState.mode is 'visual' and @vimState.submode is 'linewise'
-
-  setMode: (mode, submode=null) ->
-    @vimState.mode = mode
-    @vimState.submode = submode
-    modes = ['normal', 'insert', 'visual', 'operator-pending']
-
-    for _mode in modes
-      @editorElement.classList.remove "#{_mode}-mode"
-    @editorElement.classList.add "#{mode}-mode"
+  setMode: (@mode, @submode=null) ->
+    for mode in ['normal', 'insert', 'visual', 'operator-pending']
+      @editorElement.classList.remove "#{mode}-mode"
+    @editorElement.classList.add "#{@mode}-mode"
 
   activateNormalMode: ->
     @deactivateInsertMode()
@@ -90,7 +79,7 @@ class ModeManager
       @insertionCheckpoint = @editor.createCheckpoint()
 
   deactivateInsertMode: ->
-    return unless @vimState.mode in [null, 'insert']
+    return unless @mode in [null, 'insert']
     @editorElement.component.setInputEnabled(false)
     @editorElement.classList.remove('replace-mode')
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
@@ -136,12 +125,12 @@ class ModeManager
     #  * activate-characterwise-visual-mode
     #  * activate-linewise-visual-mode
     if @isVisualMode()
-      if @vimState.submode is submode
+      if @submode is submode
         @activateNormalMode()
         return
 
-      @vimState.submode = submode
-      if @vimState.submode is 'linewise'
+      @submode = submode
+      if @submode is 'linewise'
         for selection in @editor.getSelections()
           # Keep original range as marker's property to get back
           # to characterwise.
@@ -151,7 +140,7 @@ class ModeManager
           [start, end] = selection.getBufferRowRange()
           selection.selectLine(row) for row in [start..end]
 
-      else if @vimState.submode in ['characterwise', 'blockwise']
+      else if @submode in ['characterwise', 'blockwise']
         # Currently, 'blockwise' is not yet implemented.
         # So treat it as characterwise.
         # Recover original range.
@@ -166,7 +155,7 @@ class ModeManager
       @deactivateInsertMode()
       @setMode('visual', submode)
 
-      if @vimState.submode is 'linewise'
+      if @submode is 'linewise'
         @editor.selectLinesContainingCursors()
       else if @editor.getSelectedText() is ''
         @editor.selectRight()
@@ -174,7 +163,7 @@ class ModeManager
 
   # Private: Used to re-enable visual mode
   resetVisualMode: ->
-    @activateVisualMode(@vimState.submode)
+    @activateVisualMode(@submode)
 
   # Private: Used to enable operator-pending mode.
   activateOperatorPendingMode: ->
@@ -191,7 +180,7 @@ class ModeManager
     @activateNormalMode()
 
   updateStatusBar: ->
-    @vimState.statusBarManager.update(@vimState.mode, @vimState.submode)
+    @vimState.statusBarManager.update(@mode, @submode)
 
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.
