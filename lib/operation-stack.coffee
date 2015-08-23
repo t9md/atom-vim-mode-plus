@@ -63,12 +63,12 @@ class OperationStack
       throw "Must not happen"
 
     if @stack.length is 2
-      op = @pop()
       try
+        op = @pop()
         debug "-> <#{@peekTop().getKind()}>.compose(<#{op.getKind()}>)"
         @peekTop().compose(op)
       catch error
-        if error.isOperatorError?() or error.isMotionError?()
+        if error.isOperatorError?()
           debug error.message
           @vimState.resetNormalMode()
           return

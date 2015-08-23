@@ -9,11 +9,6 @@ WholeWordRegex = /\S+/
 WholeWordOrEmptyLineRegex = /^\s*$|\S+/
 AllWhitespace = /^\s$/
 
-class MotionError extends Base
-  @extend()
-  constructor: (@message) ->
-    @name = 'Motion Error'
-
 class Motion extends Base
   @extend()
   complete: true
@@ -874,8 +869,6 @@ class BracketMatchingMotion extends SearchBase
 
 # Alias
 module.exports = {
-  MotionError
-
   MoveLeft, MoveRight, MoveUp, MoveDown
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
