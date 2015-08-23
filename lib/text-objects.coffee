@@ -22,6 +22,7 @@ class CurrentSelection extends TextObject
 # Word
 # -------------------------
 class SelectWord extends TextObject
+  @extend()
   select: ->
     for selection in @editor.getSelections()
       wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
@@ -145,13 +146,17 @@ class SelectInsidePair extends TextObject
     r
 
 class SelectInsideDoubleQuotes extends SelectInsidePair
+  @extend()
   pair: '""'
 class SelectAroundDoubleQuotes extends SelectInsideDoubleQuotes
+  @extend()
   inclusive: true
 
 class SelectInsideSingleQuotes extends SelectInsidePair
+  @extend()
   pair: "''"
 class SelectAroundSingleQuotes extends SelectInsideSingleQuotes
+  @extend()
   inclusive: true
 
 class SelectInsideBackTicks extends SelectInsidePair
@@ -175,6 +180,7 @@ class SelectAroundAngleBrackets extends SelectInsideAngleBrackets
   @extend()
   inclusive: true
 
+# [FIXME] See #795
 class SelectInsideTags extends SelectInsidePair
   @extend()
   pair: '><'
@@ -261,6 +267,7 @@ class SelectInsideParagraph extends TextObject
       not selection.isEmpty()
 
 class SelectAroundParagraph extends SelectInsideParagraph
+  @extend()
   inclusive: true
 
 module.exports = {
