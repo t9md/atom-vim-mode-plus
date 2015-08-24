@@ -1,6 +1,6 @@
 # Refactoring status: 80%
 helpers = require './spec-helper'
-{set, ensure} = helpers
+{set, ensure, keystroke} = helpers
 
 _ = require 'underscore-plus'
 
@@ -41,7 +41,7 @@ describe "TextObjects", ->
       set
         addCursor: [0, 1]
       ensure 'viw',
-        selectedBufferRanges: [
+        selectedBufferRange: [
           [[0, 6], [0, 11]]
           [[0, 0], [0, 5]]
         ]
@@ -86,7 +86,7 @@ describe "TextObjects", ->
         cursor: [0, 2]
         addCursor: [0, 18]
       ensure 'vi(',
-        selectedBufferRanges: [
+        selectedBufferRange: [
           [[0, 1],  [0, 6]]
           [[0, 13], [0, 20]]
         ]

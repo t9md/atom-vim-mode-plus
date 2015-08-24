@@ -6,8 +6,8 @@ describe "Operators", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
-    vimMode = atom.packages.loadPackage('vim-mode')
-    vimMode.activateResources()
+    pack = atom.packages.loadPackage('vim-mode')
+    pack.activateResources()
 
     helpers.getEditorElement (element, init) ->
       editorElement = element
