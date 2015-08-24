@@ -15,7 +15,3 @@ module.exports =
     else
       filePath = fs.normalize("~/sample.log")
       fs.appendFileSync filePath, msg
-
-  getKeystrokeForEvent: (event) ->
-    keyboardEvent = event.originalEvent?.originalEvent ? event.originalEvent
-    atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
