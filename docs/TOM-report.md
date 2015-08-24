@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-23T22:13:51.224Z*
+*generated at 2015-08-24T01:50:31.576Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -57,7 +57,6 @@ vim-mode version: 0.57.0
         - [ReverseSearch](#reversesearch--search)
       - [SearchCurrentWord](#searchcurrentword--searchbase)
         - [ReverseSearchCurrentWord](#reversesearchcurrentword--searchcurrentword)
-  - [MotionError](#motionerror--base)
   - [Operator](#operator--base)
     - [Delete](#delete--operator)
       - [DeleteLeft](#deleteleft--delete)
@@ -148,7 +147,6 @@ vim-mode version: 0.57.0
 - ::getKind`()`
 - ::getCount`(defaultCount)`
 - ::isOperationAbortedError`()`
-- ::isMotionError`()`
 - ::isMotion`()`
 - ::isMoveLeft`()`
 - ::isMoveRight`()`
@@ -685,9 +683,6 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>#</kbd>
 - @keywordRegex: ```null```
 - ::constructor`()`: `super`: **Overridden**
-
-### MotionError < Base
-- ::constructor`(@message)`: **Overridden**
 
 ### Operator < Base
 - ::constructor`()`: `super`: **Overridden**
