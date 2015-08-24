@@ -26,13 +26,13 @@ describe "VimState", ->
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->
-      ensure '',
+      ensure
         classListContains: ['vim-mode', 'normal-mode']
 
     it "puts the editor in insert-mode if startInInsertMode is true", ->
       atom.config.set 'vim-mode.startInInsertMode', true
       editor.vimState = new VimState(editorElement, new StatusBarManager)
-      ensure '', classListContains: 'insert-mode'
+      ensure classListContains: 'insert-mode'
 
   describe "::destroy", ->
     it "re-enables text input on the editor", ->
@@ -55,7 +55,7 @@ describe "VimState", ->
         keystroke '\\'
 
       it "stops propagation", ->
-        ensure '', text: ''
+        ensure text: ''
 
     describe "when entering an operator", ->
       beforeEach -> keystroke 'd'
@@ -73,7 +73,7 @@ describe "VimState", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the ctrl-c keybinding", ->
-        beforeEach -> keystroke ctrl: 'c'
+        beforeEach -> keystroke [ctrl: 'c']
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
@@ -83,14 +83,14 @@ describe "VimState", ->
         set
           text: "one-two-three"
           addCursor: [0, 3]
-        ensure '', numCursors: 2
+        ensure numCursors: 2
         ensure 'escape', numCursors: 1
 
     describe "the v keybinding", ->
       beforeEach -> keystroke 'v'
 
       it "puts the editor into visual characterwise mode", ->
-        ensure '',
+        ensure
           submode: 'characterwise'
           classListContains: 'vim-mode'
           classListNotContains: 'normal-mode'
@@ -124,12 +124,12 @@ describe "VimState", ->
         editor.setText("abc def")
 
       it "puts the editor into visual mode", ->
-        ensure '', mode: 'normal'
+        ensure mode: 'normal'
         set selectedBufferRange: [[0, 0], [0, 3]]
 
         advanceClock(100)
 
-        ensure '',
+        ensure
           mode: 'visual'
           submode: 'characterwise'
           selectedBufferRange: [[0, 0], [0, 3]]
@@ -159,12 +159,12 @@ describe "VimState", ->
       describe "on a line with content", ->
         it "does not allow the cursor to be placed on the \n character", ->
           set cursor: [0, 6]
-          ensure '', cursor: [0, 5]
+          ensure cursor: [0, 5]
 
       describe "on an empty line", ->
         it "allows the cursor to be placed on the \n character", ->
           set cursor: [1, 0]
-          ensure '', cursor: [1, 0]
+          ensure cursor: [1, 0]
 
     describe 'with character-input operations', ->
       beforeEach ->
@@ -200,7 +200,7 @@ describe "VimState", ->
       describe "on a line with content", ->
         it "allows the cursor to be placed on the \n character", ->
           set cursor: [0, 6]
-          ensure '', cursor: [0, 6]
+          ensure cursor: [0, 6]
 
     it "puts the editor into normal mode when <escape> is pressed", ->
       escape 'escape',
@@ -232,7 +232,7 @@ describe "VimState", ->
         it "allows the cursor to be placed on the \n character", ->
           keystroke 'R'
           set cursor: [0, 6]
-          ensure '', cursor: [0, 6]
+          ensure cursor: [0, 6]
 
     it "puts the editor into normal mode when <escape> is pressed", ->
       ensure ['R', 'escape'],
@@ -252,7 +252,7 @@ describe "VimState", ->
       keystroke 'v'
 
     it "selects the character under the cursor", ->
-      ensure '',
+      ensure
         selectedBufferRange: [[0, 4], [0, 5]]
         selectedText: 't'
 
@@ -263,7 +263,7 @@ describe "VimState", ->
         classListNotContains: 'visual-mode'
 
     it "puts the editor into normal mode when <escape> is pressed on selection is reversed", ->
-      ensure '', selectedText: 't'
+      ensure selectedText: 't'
       ensure 'hh',
         selectedText: 'e t'
         selectionIsReversed: true
@@ -413,12 +413,12 @@ describe "VimState", ->
 
     it "real (tracking) marking functionality", ->
       set cursor: [2, 2]
-      ensure ['m', char: 'q']
+      keystroke ['m', char: 'q']
       set cursor: [1, 2]
       ensure ['o', 'escape', '`', char: 'q'], cursor: [3, 2]
 
     it "real (tracking) marking functionality", ->
       set cursor: [2, 2]
-      ensure ['m', char: 'q']
+      keystroke ['m', char: 'q']
       set cursor: [1, 2]
       ensure ['dd', 'escape', '`', char: 'q'], cursor: [1, 2]

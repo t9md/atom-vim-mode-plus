@@ -12,8 +12,8 @@ beforeEach ->
   statusBarManager = null
   globalVimState = null
 
-E = null
-EL = null
+E  = null # editor
+EL = null # editorElement
 
 getEditorElement = (callback) ->
   editor = null
@@ -81,8 +81,17 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
   dispatchKeyboardEvent(element, 'keyup', eventArgs...)
 
 keystroke = (keys) ->
+  # keys must be String or Array
+  # Not support Object for keys intentionally to avoid ambiguity.
   mocked = null
-  for k in toArray(keys)
+  if _.isString(keys)
+    _keystroke(keys)
+    return
+
+  unless _.isArray(keys)
+    throw "Must not happen"
+
+  for k in keys
     if _.isString(k)
       _keystroke(k)
     else
@@ -133,9 +142,15 @@ set = (o={}) ->
       spyOn(s.obj, s.method).andReturn(s.return)
   keystroke(o.keystroke) if o.keystroke?
 
-ensure = (_keystroke, o={}) ->
+# ensure = (_keystroke, o={}) ->
+ensure = (args...) ->
+  [keys, o] = []
+  switch args.length
+    when 1 then [o] = args
+    when 2 then [keys, o] = args
+
   # Input
-  keystroke(_keystroke) unless _.isEmpty(_keystroke)
+  keystroke(keys) unless _.isEmpty(keys)
 
   # Validate
   # [NOTE] Order is important.
