@@ -45,6 +45,7 @@ class VimState
     'deactivateVisualMode'
     'activateVisualMode'
     'resetNormalMode'
+    'resetVisualMode'
     'setInsertionCheckpoint'
   ]
   delegatingProperties = [
