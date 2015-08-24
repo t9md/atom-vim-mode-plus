@@ -1,7 +1,7 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
 helpers = require './spec-helper'
-{set, ensure} = helpers
+{set, ensure, keystroke} = helpers
 
 describe "Motions", ->
   [editor, editorElement, vimState] = []
@@ -374,7 +374,7 @@ describe "Motions", ->
         ensure '$', cursor: [1, 0]
 
     describe "as a motion", ->
-      beforeEach -> keydown('$')
+      beforeEach -> keystroke '$'
 
       # FIXME: See atom/vim-mode#2
       it "moves the cursor to the end of the line", ->
@@ -567,24 +567,28 @@ describe "Motions", ->
           set
             text: startingText
             cursor: startingCursorPosition
-          keydown('+')
+          keystroke '+'
           referenceCursorPosition = editor.getCursorScreenPosition()
           set
             text: startingText
             cursor: startingCursorPosition
-          keydown(keydownCodeForEnter)
-          expect(editor.getCursorScreenPosition()).toEqual referenceCursorPosition
+          ensure keydownCodeForEnter,
+            cursor: referenceCursorPosition
 
       describe "as a selection", ->
         it "acts the same as the + keybinding", ->
           # do it with + and save the results
-          editor.setText(startingText)
-          editor.setCursorScreenPosition(startingCursorPosition)
-          keydown('d')
-          keydown('+')
+          set
+            text: startingText
+            cursor: startingCursorPosition
+
+          # editor.setText(startingText)
+          # editor.setCursorScreenPosition(startingCursorPosition)
+          keystroke 'd+'
           referenceText = editor.getText()
           referenceCursorPosition = editor.getCursorScreenPosition()
           # do it again with enter and compare the results
+
           editor.setText(startingText)
           editor.setCursorScreenPosition(startingCursorPosition)
           keydown('d')
@@ -776,7 +780,7 @@ describe "Motions", ->
 
       describe "repeating with search history", ->
         beforeEach ->
-          ensure ['/', chars: 'def']
+          keystroke ['/', chars: 'def']
 
         it "repeats previous search with /<enter>", ->
           ensure ['/', chars: ''], cursor: [3, 0]
@@ -815,7 +819,7 @@ describe "Motions", ->
 
       describe "repeating", ->
         beforeEach ->
-          ensure ['?', chars: 'def']
+          keystroke ['?', chars: 'def']
 
         it "repeats previous search as reversed with ?<enter>", ->
           ensure ['?', chars: ''], cursor: [1, 0]
@@ -1067,38 +1071,37 @@ describe "Motions", ->
 
     it 'moves to the beginning of the line of a mark', ->
       set cursor: [1, 1]
-      ensure ['m', char: 'a']
+      keystroke ['m', char: 'a']
       set cursor: [0, 0]
       ensure ["'", char: 'a'], cursor: [1, 4]
 
     it 'moves literally to a mark', ->
       set cursorBuffer: [1, 1]
-      ensure ['m', char: 'a']
+      keystroke ['m', char: 'a']
       set cursorBuffer: [0, 0]
       ensure ['`', char: 'a'], cursorBuffer: [1, 1]
 
     it 'deletes to a mark by line', ->
       set cursorBuffer: [1, 5]
-      ensure ['m', char: 'a']
+      keystroke ['m', char: 'a']
       set cursorBuffer: [0, 0]
-
       ensure ["d'", char: 'a'], text: '56\n'
 
     it 'deletes before to a mark literally', ->
       set cursorBuffer: [1, 5]
-      ensure ['m', char: 'a']
+      keystroke ['m', char: 'a']
       set cursorBuffer: [0, 1]
       ensure ['d`', char: 'a'], text: ' 4\n56\n'
 
     it 'deletes after to a mark literally', ->
       set cursorBuffer: [1, 5]
-      ensure ['m', char: 'a']
+      keystroke ['m', char: 'a']
       set cursorBuffer: [2, 1]
       ensure ['d`', char: 'a'], text: '  12\n    36\n'
 
     it 'moves back to previous', ->
       set cursorBuffer: [1, 5]
-      ensure ['`', char: '`']
+      keystroke ['`', char: '`']
       set cursorBuffer: [2, 1]
       ensure ['`', char: '`'], cursorBuffer: [1, 5]
 
@@ -1217,7 +1220,6 @@ describe "Motions", ->
       ensure ',', cursor: [0, 5]
       ensure ',', cursor: [0, 2]
 
-
     it "repeat F in opposite direction", ->
       set cursor: [0, 4]
       ensure ['F', char: 'c'], cursor: [0, 2]
@@ -1283,13 +1285,13 @@ describe "Motions", ->
 
         # replay same find in the other editor
         keydown(';', element: otherEditorElement)
-        ensure '', cursor: [0, 2]
+        ensure cursor: [0, 2]
         expect(otherEditor.getCursorScreenPosition()).toEqual [0, 4]
 
         # do a till in the other editor
         keydown('t', element: otherEditorElement)
         normalModeInputKeydown('r', editor: otherEditor)
-        ensure '', cursor: [0, 2]
+        ensure cursor: [0, 2]
         expect(otherEditor.getCursorScreenPosition()).toEqual [0, 5]
 
         # and replay in the normal editor

@@ -1,6 +1,6 @@
 # Refactoring status: 80%
 helpers = require './spec-helper'
-{set, ensure} = helpers
+{set, ensure, keystroke} = helpers
 _ = require 'underscore-plus'
 
 describe "Insert mode commands", ->
@@ -28,7 +28,7 @@ describe "Insert mode commands", ->
         text: "12345\n\nabcd\nefghi"
         cursorBuffer: [1, 0]
         addCursor: [3, 0]
-        keystroke: 'i'
+      keystroke 'i'
 
     describe "the ctrl-y command", ->
       it "copies from the line above", ->
@@ -46,7 +46,7 @@ describe "Insert mode commands", ->
           cursorBuffer: [0, 2]
           addCursor: [3, 2]
         editor.insertText 'a'
-        ensure '', text: '12a345\n\nabcd\nefaghi'
+        ensure text: '12a345\n\nabcd\nefaghi'
         ensure [ctrl: 'y'], text: '12a345\n\nabcd\nefadghi'
 
     describe "the ctrl-e command", ->
