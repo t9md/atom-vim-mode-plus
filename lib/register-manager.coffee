@@ -9,18 +9,18 @@ settings = require './settings'
 # name - The name of the register to fetch.
 #
 # Returns the value of the given register or undefined
-validRegisterNames = /[a-zA-Z*+%_"]/
+validNames = /[a-zA-Z*+%_"]/
 
 module.exports =
 class RegisterManager
   constructor: (@vimState) ->
     {@editor, @globalVimState} = @vimState
 
-  isValidRegisterName: (name) ->
-    validRegisterNames.test(name)
+  isValidName: (name) ->
+    validNames.test(name)
 
   get: (name) ->
-    return unless @isValidRegisterName(name)
+    return unless @isValidName(name)
     if name is '"'
       name = settings.get('defaultRegister')
 
@@ -47,7 +47,7 @@ class RegisterManager
   #
   # Returns nothing.
   set: (name, {text, type}={}) ->
-    return unless @isValidRegisterName(name)
+    return unless @isValidName(name)
     type = @getCopyType(text) unless type
 
     if name is '"'
