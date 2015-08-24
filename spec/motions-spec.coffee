@@ -1,3 +1,4 @@
+# Refactoring status: 0%
 helpers = require './spec-helper'
 _ = require 'underscore-plus'
 

@@ -1,3 +1,4 @@
+# Refactoring status: 0%
 _ = require 'underscore-plus'
 helpers = require './spec-helper'
 VimState = require '../lib/vim-state'

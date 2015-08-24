@@ -1,3 +1,4 @@
+# Refactoring status: 0%
 describe "VimMode", ->
   [editor, editorElement, workspaceElement] = []
 

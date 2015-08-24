@@ -1,3 +1,4 @@
+# Refactoring status: 0%
 VimState = require '../lib/vim-state'
 GlobalVimState = require '../lib/global-vim-state'
 VimMode  = require '../lib/vim-mode'
