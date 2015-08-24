@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-24T01:50:31.576Z*
+*generated at 2015-08-24T01:52:35.879Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -919,7 +919,7 @@ vim-mode version: 0.57.0
 ### UpperCase < ToggleCase
 - command: `vim-mode:upper-case`
 - keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g shift-U</kbd>
+  - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g U</kbd>
   - atom-text-editor.vim-mode.visual-mode: <kbd>U</kbd>
 - ::getNewText`(text)`: **Overridden**
 
@@ -1078,7 +1078,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i {</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i }</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i shift-B</kbd>
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i B</kbd>
 - ::pair: ```'{}'```: **Overridden**
 
 ### SelectAroundCurlyBrackets < SelectInsideCurlyBrackets
@@ -1086,7 +1086,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a {</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a }</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a shift-B</kbd>
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a B</kbd>
 - ::inclusive: ```true```: **Overridden**
 
 ### SelectInsideDoubleQuotes < SelectInsidePair
@@ -1179,13 +1179,13 @@ vim-mode version: 0.57.0
 ### SelectInsideWholeWord < SelectWord
 - command: `vim-mode:select-inside-whole-word`
 - keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i shift-W</kbd>
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i W</kbd>
 - ::wordRegExp: ```/\S+/```
 
 ### SelectAWholeWord < SelectInsideWholeWord
 - command: `vim-mode:select-a-whole-word`
 - keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a shift-W</kbd>
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a W</kbd>
 - ::inclusive: ```true```
 
 ### SelectInsideWord < SelectWord
