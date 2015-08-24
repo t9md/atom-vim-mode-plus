@@ -1,5 +1,4 @@
-# Grim  = require 'grim'
-
+# Refactoring status: 20%
 module.exports =
 class ModeManager
   mode: null
@@ -36,10 +35,6 @@ class ModeManager
       if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
         cursor.moveLeft()
     @updateStatusBar()
-
-  activateCommandMode: ->
-    Grim.deprecate("Use ::activateNormalMode instead")
-    @activateNormalMode()
 
   activateInsertMode: (submode=null) ->
     @setMode('insert', submode)

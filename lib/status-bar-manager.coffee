@@ -1,3 +1,4 @@
+# Refactoring status: 80%
 {Disposable, CompositeDisposable} = require 'atom'
 
 ContentsByMode =

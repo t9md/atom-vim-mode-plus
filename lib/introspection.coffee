@@ -1,4 +1,5 @@
-util = require('util')
+# Refactoring status: N/A
+util = require 'util'
 _ = require 'underscore-plus'
 
 extractBetween = (str, s1, s2) ->

@@ -1,3 +1,4 @@
+# Refactoring status: 90%
 Grim  = require 'grim'
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
@@ -17,6 +18,8 @@ CountManager    = require './count-manager'
 MarkManager     = require './mark-manager'
 ModeManager     = require './mode-manager'
 
+Developer = null # delay
+
 module.exports =
 class VimState
   Delegato.includeInto(this)
@@ -25,6 +28,7 @@ class VimState
   operationStack: null
   destroyed: false
   replaceModeListener: null
+  developer: null
 
   # Mode handling is delegated to modeManager
   delegatingMethods = [
@@ -120,8 +124,7 @@ class VimState
           try
             @operationStack.push new kind[klass](this)
           catch error
-            unless error.isOperationAbortedError?()
-              throw error
+            throw error unless error.isOperationAbortedError?()
     @registerCommands(commands)
 
   # Initialize all of vim-mode' commands.
@@ -137,11 +140,6 @@ class VimState
       'reverse-selections': => @reverseSelections() # o
       'undo': => @undo() # u
       'replace-mode-backspace': => @replaceModeUndo()
-
-    # load developer helper commands.
-    if atom.inDevMode()
-      Developer = require './developer'
-      (new Developer(this)).init()
 
     @registerOperationCommands InsertMode, [
       'insert-register'
@@ -212,6 +210,12 @@ class VimState
       'scroll-cursor-to-bottom', 'scroll-cursor-to-bottom-leave',
       'scroll-cursor-to-left', 'scroll-cursor-to-right'
       ]
+
+    # Load developer helper commands.
+    if atom.inDevMode()
+      Developer ?= require './developer'
+      @developer = new Developer(this)
+      @developer.init()
 
   # Miscellaneous commands
   # -------------------------

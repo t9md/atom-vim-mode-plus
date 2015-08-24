@@ -1,3 +1,4 @@
+# Refactoring status: 30%
 Base = require './base'
 {Emitter} = require 'atom'
 

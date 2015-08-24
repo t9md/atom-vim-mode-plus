@@ -1,3 +1,4 @@
+# Refactoring status: 0%, I won't touch for the time being.
 {Disposable, CompositeDisposable} = require 'atom'
 StatusBarManager = require './status-bar-manager'
 GlobalVimState = require './global-vim-state'

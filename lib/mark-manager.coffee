@@ -1,17 +1,17 @@
+# Refactoring status: 100%
 module.exports =
 class MarkManager
   marks: null
 
   constructor: (@vimState) ->
-    {@editor, @globalVimState} = @vimState
+    {@editor} = @vimState
     @marks = {}
 
   # Private: Fetches the value of a given mark.
   #
   # name - The name of the mark to fetch.
   #
-  # Returns the value of the given mark or undefined if it hasn't
-  # been set.
+  # Returns {Point} or underfined
   get: (name) ->
     @marks[name]?.getStartBufferPosition()
 
@@ -21,10 +21,10 @@ class MarkManager
   # pos {Point} - The value to set the mark to.
   #
   # Returns nothing.
-  set: (name, pos) ->
+  # [FIXME] Need to support Global mark with capital name [A-Z]
+  set: (name, point) ->
     # check to make sure name is in [a-z] or is `
     if (charCode = name.charCodeAt(0)) >= 96 and charCode <= 122
-      marker = @editor.markBufferPosition pos,
+      @marks[name] = @editor.markBufferPosition point,
         invalidate: 'never',
         persistent: false
-      @marks[name] = marker

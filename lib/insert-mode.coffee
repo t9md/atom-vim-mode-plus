@@ -1,3 +1,4 @@
+# Refactoring status: 100%
 {ViewModel} = require './view'
 _ = require 'underscore-plus'
 Base = require './base'
@@ -17,7 +18,6 @@ class InsertMode extends Base
 
 class InsertRegister extends InsertMode
   @extend()
-
   constructor: ->
     super
     @getInput this,

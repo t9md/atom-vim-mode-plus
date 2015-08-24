@@ -1,3 +1,4 @@
+# Refactoring status: 20%
 {Point} = require 'atom'
 _ = require 'underscore-plus'
 

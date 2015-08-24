@@ -1,3 +1,4 @@
+# Refactoring status: 100%
 {Point, Range} = require 'atom'
 _    = require 'underscore-plus'
 Base = require './base'

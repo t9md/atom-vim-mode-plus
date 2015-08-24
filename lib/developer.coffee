@@ -1,10 +1,14 @@
+# Refactoring status: N/A
 _ = require 'underscore-plus'
+
 Base        = require './base'
 Operators   = require './operators'
 Motions     = require './motions'
 TextObjects = require './text-objects'
 InsertMode  = require './insert-mode'
 Scroll      = require './scroll'
+settings    = require './settings'
+{debug}     = require './utils'
 
 module.exports =
 class Developer
@@ -21,9 +25,6 @@ class Developer
       'report-key-binding': => @reportKeyBinding()
       'open-in-vim': => @openInVim()
 
-  # Developper helpeing,
-  # [FIXME] clean up needed and make it available only in dev-mode.
-  # -------------------------
   generateIntrospectionReport: ->
     excludeProperties = [
       'findClass'
@@ -100,3 +101,20 @@ class Developer
     else
       content = "No keymap for #{klass}"
     atom.notifications.addInfo content, dismissable: true
+
+  inspectOperationStack: ->
+    {stack} = @vimState.operationStack
+
+    debug "  [@stack] size: #{stack.length}"
+    for op, i in stack
+      debug "  <idx: #{i}>"
+      if settings.get('debug')
+        debug introspection.inspectInstance op,
+          indent: 2
+          colors: settings.get('debugOutput') is 'file'
+          excludeProperties: [
+            'vimState', 'editorElement'
+            'report', 'reportAll'
+            'extend', 'getParent', 'getAncestors',
+          ] # vimState have many properties, occupy DevTool console.
+          recursiveInspect: Base
