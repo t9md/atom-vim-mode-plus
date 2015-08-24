@@ -1,7 +1,8 @@
 # Refactoring status: 0%
 helpers = require './spec-helper'
+{set, ensure, keystroke} = helpers
 
-describe "Prefixes", ->
+fdescribe "Prefixes", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
@@ -16,111 +17,72 @@ describe "Prefixes", ->
       vimState.resetNormalMode()
       init()
 
-  keydown = (key, options={}) ->
-    options.element ?= editorElement
-    helpers.keydown(key, options)
-
-  keystroke = (keys, options={}) ->
-    options.element ?= editorElement
-    for key in keys.split('')
-      helpers.keydown(key, options)
-
-  normalModeInputKeydown = (key, opts = {}) ->
-    theEditor = opts.editor or editor
-    theEditor.normalModeInputView.editorElement.getModel().setText(key)
-
-  text = (text=null) ->
-    if text
-      editor.setText(text)
-    else
-      expect(editor.getText())
-
-  cursor = (point=null) ->
-    if point
-      editor.setCursorScreenPosition(point)
-    else
-      expect(editor.getCursorScreenPosition())
-
-  register = (name, value) ->
-    if value
-      vimState.register.set(name, value)
-    else
-      expect(vimState.register.get(name).text)
-
   describe "Repeat", ->
     describe "with operations", ->
       beforeEach ->
-        text "123456789abc"
-        cursor [0, 0]
+        set text: "123456789abc", cursor: [0, 0]
 
       it "repeats N times", ->
-        keystroke '3x'
-        text().toBe '456789abc'
+        ensure '3x', text: '456789abc'
 
       it "repeats NN times", ->
-        keystroke '10x'
-        text().toBe 'bc'
+        ensure '10x', text: 'bc'
 
     describe "with motions", ->
       beforeEach ->
-        text 'one two three'
-        cursor [0, 0]
+        set text: 'one two three', cursor: [0, 0]
 
       it "repeats N times", ->
-        keystroke 'd2w'
-        text().toBe 'three'
+        ensure 'd2w', text: 'three'
 
     describe "in visual mode", ->
       beforeEach ->
-        text 'one two three'
-        cursor [0, 0]
+        set text: 'one two three', cursor: [0, 0]
 
       it "repeats movements in visual mode", ->
-        keystroke 'v2w'
-        cursor().toEqual [0, 9]
+        ensure 'v2w', cursor: [0, 9]
 
   describe "Register", ->
     describe "the a register", ->
       it "saves a value for future reading", ->
-        register('a', text: 'new content')
-        register('a').toEqual 'new content'
+        set    register: {a: {text: 'new content'}}
+        ensure register: {a: {text: 'new content'}}
 
       it "overwrites a value previously in the register", ->
-        register('a', text: 'content')
-        register('a', text: 'new content')
-        register('a').toEqual 'new content'
+        set    register: {a: {text: 'content'}}
+        set    register: {a: {text: 'new content'}}
+        ensure register: {a: {text: 'new content'}}
 
     describe "the B register", ->
       it "saves a value for future reading", ->
-        register('B', text: 'new content')
-        register('b').toEqual 'new content'
-        register('B').toEqual 'new content'
+        set    register: {B: {text: 'new content'}}
+        ensure register: {b: {text: 'new content'}}
+        ensure register: {B: {text: 'new content'}}
 
       it "appends to a value previously in the register", ->
-        register('b', text: 'content')
-        register('B', text: 'new content')
-        register("b").toEqual 'contentnew content'
+        set    register: {b: {text: 'content'}}
+        set    register: {B: {text: 'new content'}}
+        ensure register: {b: {text: 'contentnew content'}}
 
       it "appends linewise to a linewise value previously in the register", ->
-        register('b', {type: 'linewise', text: 'content\n'})
-        register('B', text: 'new content')
-        register('b').toEqual 'content\nnew content\n'
+        set    register: {b: {text: 'content\n', type: 'linewise'}}
+        set    register: {B: {text: 'new content'}}
+        ensure register: {b: {text: 'content\nnew content\n'}}
 
       it "appends linewise to a character value previously in the register", ->
-        register('b', text: 'content')
-        register('B', {type: 'linewise', text: 'new content\n'})
-        register("b").toEqual 'content\nnew content\n'
-
+        set    register: {b: {text: 'content'}}
+        set    register: {B: {text: 'new content\n', type: 'linewise'}}
+        ensure register: {b: {text: 'content\nnew content\n'}}
 
     describe "the * register", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
-          register('*').toEqual 'initial clipboard content'
-          expect(vimState.register.get('*').type).toEqual 'character'
+          ensure register:
+            {'*': {text: 'initial clipboard content', type: 'character'}}
 
       describe "writing", ->
         beforeEach ->
-          register('*', text: 'new content')
+          set register: {'*': {text: 'new content'}}
 
         it "overwrites the contents of the system clipboard", ->
           expect(atom.clipboard.read()).toEqual 'new content'
@@ -132,12 +94,12 @@ describe "Prefixes", ->
     describe "the + register", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
-          register('*').toEqual 'initial clipboard content'
-          expect(vimState.register.get('*').type).toEqual 'character'
+          ensure register:
+            {'*': {text: 'initial clipboard content', type: 'character'}}
 
       describe "writing", ->
         beforeEach ->
-          register('*', text: 'new content')
+          set register: {'*': {text: 'new content'}}
 
         it "overwrites the contents of the system clipboard", ->
           expect(atom.clipboard.read()).toEqual 'new content'
@@ -145,56 +107,50 @@ describe "Prefixes", ->
     describe "the _ register", ->
       describe "reading", ->
         it "is always the empty string", ->
-          register('_').toEqual ''
+          ensure register: {'_': {text: ''}}
 
       describe "writing", ->
         it "throws away anything written to it", ->
-          register('_', text: 'new content')
-          register("_").toEqual ''
+          set register:    {'_': {text: 'new content'}}
+          ensure register: {'_': {text: ''}}
 
     describe "the % register", ->
       beforeEach ->
-        spyOn(editor, 'getURI').andReturn('/Users/atom/known_value.txt')
+        set
+          spy:
+            obj: editor, method: 'getURI', return: '/Users/atom/known_value.txt'
 
       describe "reading", ->
         it "returns the filename of the current editor", ->
-          register('%').toEqual '/Users/atom/known_value.txt'
+          ensure register: {'%': {text: '/Users/atom/known_value.txt'}}
 
       describe "writing", ->
         it "throws away anything written to it", ->
-          register('%', text: "new content")
-          register('%').toEqual '/Users/atom/known_value.txt'
+          set    register: {'%': {text: 'new content'}}
+          ensure register: {'%': {text: '/Users/atom/known_value.txt'}}
 
     describe "the ctrl-r command in insert mode", ->
       beforeEach ->
-        text "02\n"
-        cursor [0, 0]
-        register('"', text: '345')
-        register('a', text: 'abc')
+        set text: "02\n", cursor: [0, 0]
+        set register: {'"': {text: '345'}}
+        set register: {'a': {text: 'abc'}}
         atom.clipboard.write "clip"
-        keydown 'a'
+        keystroke 'a'
         editor.insertText '1'
 
       it "inserts contents of the unnamed register with \"", ->
-        keydown 'r', ctrl: true
-        normalModeInputKeydown '"'
-        text().toBe '013452\n'
+        ensure [{ctrl: 'r'}, {char: '"'}], text: '013452\n'
 
       describe "when useClipboardAsDefaultRegister enabled", ->
         it "inserts contents from clipboard with \"", ->
           atom.config.set 'vim-mode.useClipboardAsDefaultRegister', true
-          keydown 'r', ctrl: true
-          normalModeInputKeydown '"'
-          text().toBe '01clip2\n'
+          ensure [{ctrl: 'r'}, {char: '"'}], text: '01clip2\n'
 
       it "inserts contents of the 'a' register", ->
-        keydown 'r', ctrl: true
-        normalModeInputKeydown 'a'
-        text().toBe '01abc2\n'
+        ensure [{ctrl: 'r'}, {char: 'a'}], text: '01abc2\n'
 
       it "is cancelled with the escape key", ->
-        keydown 'r', ctrl: true
-        normalModeInputKeydown 'escape'
-        text().toBe '012\n'
-        expect(vimState.mode).toBe "insert"
-        cursor().toEqual [0, 2]
+        ensure [{ctrl: 'r'}, {char: 'escape'}],
+          text: '012\n'
+          mode: 'insert'
+          cursor: [0, 2]

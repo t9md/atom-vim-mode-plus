@@ -2,8 +2,6 @@
 helpers = require './spec-helper'
 {set, ensure, keystroke} = helpers
 
-_ = require 'underscore-plus'
-
 describe "TextObjects", ->
   [editor, editorElement, vimState] = []
 
