@@ -1,6 +1,6 @@
 # Refactoring status: 80%
 helpers = require './spec-helper'
-{set, ensure, keystroke} = helpers
+{set, ensure, keystroke, getEditorElement} = require './spec-helper'
 
 describe "TextObjects", ->
   [editor, editorElement, vimState] = []
@@ -9,7 +9,7 @@ describe "TextObjects", ->
     pack = atom.packages.loadPackage('vim-mode')
     pack.activateResources()
 
-    helpers.getEditorElement (element, init) ->
+    getEditorElement (element, init) ->
       editorElement = element
       editor = editorElement.getModel()
       vimState = editorElement.vimState

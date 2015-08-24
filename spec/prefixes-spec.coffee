@@ -1,15 +1,14 @@
-# Refactoring status: 0%
-helpers = require './spec-helper'
-{set, ensure, keystroke} = helpers
+# Refactoring status: 70%
+{set, ensure, keystroke, getEditorElement} = require './spec-helper'
 
-fdescribe "Prefixes", ->
+describe "Prefixes", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
     pack = atom.packages.loadPackage('vim-mode')
     pack.activateResources()
 
-    helpers.getEditorElement (element, init) ->
+    getEditorElement (element, init) ->
       editorElement = element
       editor = editorElement.getModel()
       vimState = editorElement.vimState
