@@ -9,6 +9,7 @@ InsertMode  = require './insert-mode'
 Scroll      = require './scroll'
 settings    = require './settings'
 {debug}     = require './utils'
+introspection = require './introspection'
 
 module.exports =
 class Developer
