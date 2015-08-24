@@ -5,7 +5,6 @@ _ = require 'underscore-plus'
 {debug} = require './utils'
 
 settings = require './settings'
-introspection = require './introspection'
 
 module.exports =
 class OperationStack
