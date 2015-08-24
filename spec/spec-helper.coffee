@@ -135,9 +135,18 @@ set = (o={}) ->
   E.setCursorScreenPosition o.cursor if o.cursor?
   E.setCursorBufferPosition o.cursorBuffer if o.cursorBuffer?
   E.addCursorAtBufferPosition o.addCursor if o.addCursor?
-  EL.vimState.register.set '"', text: o.register if o.register?
+
+  if o.register?
+    if _.isObject(o.register)
+      for name, value of o.register
+        EL.vimState.register.set(name, value)
+    else
+      EL.vimState.register.set '"', text: o.register
+
   E.setSelectedBufferRange o.selectedBufferRange if o.selectedBufferRange?
   if o.spy?
+    # e.g.
+    # spyOn(editor, 'getURI').andReturn('/Users/atom/known_value.txt')
     for s in toArray(o.spy)
       spyOn(s.obj, s.method).andReturn(s.return)
   keystroke(o.keystroke) if o.keystroke?
@@ -173,7 +182,14 @@ ensure = (args...) ->
       toArray(o.cursorBuffer, o.cursorBuffer[0]))
 
   if o.register?
-    expect(EL.vimState.register.get('"').text).toBe o.register
+    if _.isObject(o.register)
+      for name, value of o.register
+        reg = EL.vimState.register.get(name)
+        for prop, _value of value
+          expect(reg[prop]).toEqual(_value)
+    else
+      expect(EL.vimState.register.get('"').text).toBe o.register
+
   if o.numCursors?
     expect(E.getCursors().length).toBe o.numCursors
 
@@ -215,4 +231,9 @@ ensure = (args...) ->
     for klass in toArray(o.classListNotContains)
       expect(EL.classList.contains(klass)).toBe(false)
 
-module.exports = {set, ensure, keydown, keystroke, getEditorElement, mockPlatform, unmockPlatform}
+module.exports = {
+  set, ensure,
+  keydown, keystroke,
+  getEditorElement,
+  mockPlatform, unmockPlatform
+}

@@ -1,3 +1,6 @@
+helpers = require './spec-helper'
+{set, ensure, keystroke} = helpers
+
 # Refactoring status: 0%
 describe "VimMode", ->
   [editor, editorElement, workspaceElement] = []
