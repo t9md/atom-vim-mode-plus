@@ -73,7 +73,7 @@ describe "VimState", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the ctrl-c keybinding", ->
-        beforeEach -> keystroke [ctrl: 'c']
+        beforeEach -> keystroke ctrl: 'c'
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
@@ -296,7 +296,7 @@ describe "VimState", ->
       it "reversed each selection", ->
         set addCursor: [0, Infinity]
         ensure 'iw',
-          selectedBufferRanges: [
+          selectedBufferRange: [
             [[0, 4], [0, 7]],
             [[0, 8], [0, 13]]
           ]
@@ -306,7 +306,7 @@ describe "VimState", ->
           ]
 
         ensure 'o',
-          selectedBufferRanges: [
+          selectedBufferRange: [
             [[0, 4], [0, 7]],
             [[0, 8], [0, 13]]
           ]
@@ -320,7 +320,7 @@ describe "VimState", ->
         keystroke 'ee'
         set addCursor: [0, Infinity]
         ensure 'hh',
-          selectedBufferRanges: [
+          selectedBufferRange: [
             [[0, 0], [0, 5]],
             [[0, 11], [0, 13]]
           ]
@@ -330,7 +330,7 @@ describe "VimState", ->
           ]
 
         ensure 'o',
-          selectedBufferRanges: [
+          selectedBufferRange: [
             [[0, 0], [0, 5]],
             [[0, 11], [0, 13]]
           ]

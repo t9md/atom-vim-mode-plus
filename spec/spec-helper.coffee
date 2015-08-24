@@ -7,14 +7,13 @@ _ = require 'underscore-plus'
 
 [globalVimState, statusBarManager] = []
 
-# [FIXME] maybe can remove.
 beforeEach ->
   atom.workspace ?= {}
   statusBarManager = null
   globalVimState = null
 
-EDITOR = null
-EDITOR_ELEMENT = null
+E = null
+EL = null
 
 getEditorElement = (callback) ->
   editor = null
@@ -35,8 +34,8 @@ getEditorElement = (callback) ->
       atom.keymaps.handleKeyboardEvent(e)
 
     init = ->
-      EDITOR = editor
-      EDITOR_ELEMENT = editorElement
+      E = editor
+      EL = editorElement
     callback(editorElement, init)
 
 mockPlatform = (editorElement, platform) ->
@@ -82,143 +81,123 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
   dispatchKeyboardEvent(element, 'keyup', eventArgs...)
 
 keystroke = (keys) ->
-  if _.isArray(keys)
-    for k in keys
-      if _.isString(k)
-        _keystroke(k)
-      else
-        if k.platform?
-          mockPlatform(EDITOR_ELEMENT, k.platform)
-        else if k.char?
-          normalModeInputKeydown k.char
-        else if k.chars?
-          submitNormalModeInputText k.chars
-        else if k.ctrl?
-          keydown k.ctrl, ctrl: true, element: EDITOR_ELEMENT
-        else if k.cmd?
-          atom.commands.dispatch(k.cmd.target, k.cmd.name)
-    if k.platform?
-      unmockPlatform(EDITOR_ELEMENT)
-  else
-    _keystroke(keys)
+  mocked = null
+  for k in toArray(keys)
+    if _.isString(k)
+      _keystroke(k)
+    else
+      if k.platform?
+        mockPlatform(EL, k.platform)
+        mocked = true
+      else if k.char?  then normalModeInputKeydown k.char
+      else if k.chars? then submitNormalModeInputText k.chars
+      else if k.ctrl? then keydown k.ctrl, ctrl: true, element: EL
+      else if k.cmd? then atom.commands.dispatch(k.cmd.target, k.cmd.name)
+  if mocked
+    unmockPlatform(EL)
 
 _keystroke = (keys) ->
   if keys is 'escape'
-    keydown(keys, element: EDITOR_ELEMENT)
+    keydown(keys, element: EL)
     return
   for key in keys.split('')
     if key.match(/[A-Z]/)
-      keydown(key, shift: true, element: EDITOR_ELEMENT)
+      keydown(key, shift: true, element: EL)
     else
-      keydown(key, element: EDITOR_ELEMENT)
+      keydown(key, element: EL)
 
 normalModeInputKeydown = (key, options={}) ->
-  theEditor = options.editor ? EDITOR
+  theEditor = options.editor ? E
   theEditor.normalModeInputView.editorElement.getModel().setText(key)
 
 submitNormalModeInputText = (text) ->
-  inputEditor = EDITOR.normalModeInputView.editorElement
+  inputEditor = E.normalModeInputView.editorElement
   inputEditor.getModel().setText(text)
   atom.commands.dispatch(inputEditor, 'core:confirm')
 
-set = (options={}) ->
-  if options.text?
-    EDITOR.setText(options.text)
-  if options.cursor?
-    EDITOR.setCursorScreenPosition options.cursor
-  if options.cursorBuffer?
-    EDITOR.setCursorBufferPosition options.cursorBuffer
-  if options.addCursor?
-    EDITOR.addCursorAtBufferPosition options.addCursor
-  if options.register?
-    EDITOR_ELEMENT.vimState.register.set '"', text: options.register
-  if options.selectedBufferRange?
-    EDITOR.setSelectedBufferRange options.selectedBufferRange
-  if options.selectedBufferRanges?
-    EDITOR.setSelectedBufferRanges options.selectedBufferRanges
-  if options.spy?
-    if _.isArray(options.spy)
-      for s in options.spy
-        spyOn(s.obj, s.method).andReturn(s.return)
-    else
-      spyOn(options.spy.obj, options.spy.method).andReturn(options.spy.return)
-  if options.keystroke?
-    keystroke(options.keystroke)
+toArray = (obj, cond=null) ->
+  if _.isArray(cond ? obj)
+    obj
+  else
+    [obj]
 
-ensure = (_keystroke, options={}) ->
-  # input
-  unless _.isEmpty(_keystroke)
-    keystroke(_keystroke)
+set = (o={}) ->
+  E.setText(o.text) if o.text?
+  E.setCursorScreenPosition o.cursor if o.cursor?
+  E.setCursorBufferPosition o.cursorBuffer if o.cursorBuffer?
+  E.addCursorAtBufferPosition o.addCursor if o.addCursor?
+  EL.vimState.register.set '"', text: o.register if o.register?
+  E.setSelectedBufferRange o.selectedBufferRange if o.selectedBufferRange?
+  if o.spy?
+    for s in toArray(o.spy)
+      spyOn(s.obj, s.method).andReturn(s.return)
+  keystroke(o.keystroke) if o.keystroke?
 
-  # validate
+ensure = (_keystroke, o={}) ->
+  # Input
+  keystroke(_keystroke) unless _.isEmpty(_keystroke)
+
+  # Validate
   # [NOTE] Order is important.
   # e.g. Text need to be set before changing cursor position.
-  if options.text?
-    if options.text.editor?
-      expect(options.text.editor.getText()).toEqual(options.text.value)
+  if o.text?
+    if o.text.editor?
+      expect(o.text.editor.getText()).toEqual(o.text.value)
     else
-      expect(EDITOR.getText()).toEqual(options.text)
-  if options.selectedText?
-    if _.isArray(options.selectedText)
-      texts = (s.getText() for s in EDITOR.getSelections())
-      expect(texts).toEqual options.selectedText
+      expect(E.getText()).toEqual(o.text)
+
+  if o.selectedText?
+    expect(s.getText() for s in E.getSelections()).toEqual(
+      toArray(o.selectedText))
+
+  if o.cursor?
+    expect(E.getCursorScreenPosition()).toEqual(o.cursor)
+
+  if o.cursorBuffer?
+    expect(E.getCursorBufferPositions()).toEqual(
+      toArray(o.cursorBuffer, o.cursorBuffer[0]))
+
+  if o.register?
+    expect(EL.vimState.register.get('"').text).toBe o.register
+  if o.numCursors?
+    expect(E.getCursors().length).toBe o.numCursors
+
+  if o.selectedScreenRange?
+    expect(E.getSelectedScreenRanges()).toEqual(
+      toArray(o.selectedScreenRange, o.selectedScreenRange[0][0]))
+
+  if o.selectedBufferRange?
+    expect(E.getSelectedBufferRanges()).toEqual(
+      toArray(o.selectedBufferRange, o.selectedBufferRange[0][0]))
+
+  if o.selectedBufferRangeStartRow?
+    {start} = E.getSelectedBufferRange()
+    expect(start.row).toEqual o.selectedBufferRangeStartRow
+  if o.selectedBufferRangeEndRow?
+    {end} = E.getSelectedBufferRange()
+    expect(end.row).toEqual o.selectedBufferRangeEndRow
+  if o.selectionIsReversed?
+    expect(E.getLastSelection().isReversed()).toBe(o.selectionIsReversed)
+
+  if o.scrollTop?
+    expect(E.getScrollTop()).toEqual o.scrollTop
+
+  if o.called?
+    if o.called.func
+      expect(o.called.func).toHaveBeenCalledWith(o.called.with)
     else
-      expect(EDITOR.getSelectedText()).toEqual options.selectedText
-  if options.cursor?
-    expect(EDITOR.getCursorScreenPosition()).toEqual options.cursor
-  if options.cursorBuffer?
-    if _.isArray(options.cursorBuffer[0])
-      expect(EDITOR.getCursorBufferPositions()).toEqual options.cursorBuffer
-    else
-      expect(EDITOR.getCursorBufferPosition()).toEqual options.cursorBuffer
-  if options.register?
-    expect(EDITOR_ELEMENT.vimState.register.get('"').text).toBe options.register
-  if options.numCursors?
-    expect(EDITOR.getCursors().length).toBe options.numCursors
+      expect(o.called).toHaveBeenCalled()
 
-  if options.selectedScreenRange?
-    expect(EDITOR.getSelectedScreenRange()).toEqual options.selectedScreenRange
-  if options.selectedScreenRanges?
-    expect(EDITOR.getSelectedScreenRanges()).toEqual options.selectedScreenRanges
-  if options.selectedBufferRange?
-    expect(EDITOR.getSelectedBufferRange()).toEqual options.selectedBufferRange
-  if options.selectedBufferRanges?
-    expect(EDITOR.getSelectedBufferRanges()).toEqual options.selectedBufferRanges
+  if o.mode?
+    expect(EL.vimState.mode).toEqual o.mode
+  if o.submode?
+    expect(EL.vimState.submode).toEqual o.submode
 
-  if options.selectedBufferRangeStartRow?
-    {start} = EDITOR.getSelectedBufferRange()
-    expect(start.row).toEqual options.selectedBufferRangeStartRow
-  if options.selectedBufferRangeEndRow?
-    {end} = EDITOR.getSelectedBufferRange()
-    expect(end.row).toEqual options.selectedBufferRangeEndRow
-  if options.selectionIsReversed?
-    expect(EDITOR.getLastSelection().isReversed()).toBe(options.selectionIsReversed)
-
-  if options.scrollTop?
-    expect(EDITOR.getScrollTop()).toEqual options.scrollTop
-
-  if options.called?
-    if options.called.func
-      expect(options.called.func).toHaveBeenCalledWith(options.called.with)
-    else
-      expect(options.called).toHaveBeenCalled()
-
-  if options.mode?
-    expect(EDITOR_ELEMENT.vimState.mode).toEqual options.mode
-  if options.submode?
-    expect(EDITOR_ELEMENT.vimState.submode).toEqual options.submode
-
-  if options.classListContains?
-    if _.isArray(options.classListContains)
-      for klass in options.classListContains
-        expect(EDITOR_ELEMENT.classList.contains(klass)).toBe(true)
-    else
-      expect(EDITOR_ELEMENT.classList.contains(options.classListContains)).toBe(true)
-  if options.classListNotContains?
-    if _.isArray(options.classListNotContains)
-      for klass in options.classListNotContains
-        expect(EDITOR_ELEMENT.classList.contains(klass)).toBe(false)
-    else
-      expect(EDITOR_ELEMENT.classList.contains(options.classListNotContains)).toBe(false)
+  if o.classListContains?
+    for klass in toArray(o.classListContains)
+      expect(EL.classList.contains(klass)).toBe(true)
+  if o.classListNotContains?
+    for klass in toArray(o.classListNotContains)
+      expect(EL.classList.contains(klass)).toBe(false)
 
 module.exports = {set, ensure, keydown, keystroke, getEditorElement, mockPlatform, unmockPlatform}
