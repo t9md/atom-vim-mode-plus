@@ -5,15 +5,16 @@ describe "Scrolling", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
-    vimMode = atom.packages.loadPackage('vim-mode')
-    vimMode.activateResources()
+    pack = atom.packages.loadPackage('vim-mode')
+    pack.activateResources()
 
-    helpers.getEditorElement (element) ->
+    helpers.getEditorElement (element, init) ->
       editorElement = element
       editor = editorElement.getModel()
       vimState = editorElement.vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
+      init()
 
   keydown = (key, options={}) ->
     options.element ?= editorElement

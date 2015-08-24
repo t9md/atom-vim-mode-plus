@@ -1,5 +1,6 @@
-# Refactoring status: 0%
+# Refactoring status: 80%
 helpers = require './spec-helper'
+{set, ensure} = helpers
 
 _ = require 'underscore-plus'
 
@@ -7,103 +8,16 @@ describe "TextObjects", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
-    vimMode = atom.packages.loadPackage('vim-mode')
-    vimMode.activateResources()
+    pack = atom.packages.loadPackage('vim-mode')
+    pack.activateResources()
 
-    helpers.getEditorElement (element) ->
+    helpers.getEditorElement (element, init) ->
       editorElement = element
       editor = editorElement.getModel()
       vimState = editorElement.vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
-
-  keydown = (key, options={}) ->
-    options.element ?= editorElement
-    helpers.keydown(key, options)
-
-  keystroke = (keys) ->
-    for key in keys.split('')
-      if key.match(/[A-Z]/)
-        keydown(key, shift: true)
-      else
-        keydown(key)
-
-  normalModeInputKeydown = (key, opts = {}) ->
-    editor.normalModeInputView.editorElement.getModel().setText(key)
-
-  text = (text=null) ->
-    if text
-      editor.setText text
-    else
-      expect editor.getText()
-
-  addCursor = (point) ->
-    editor.addCursorAtBufferPosition point
-
-  cursor = (point=null) ->
-    if point
-      editor.setCursorScreenPosition point
-    else
-      expect editor.getCursorScreenPosition()
-
-  cursorBuffer = (point=null) ->
-    if point
-      editor.setCursorBufferPosition point
-    else
-      expect editor.getCursorBufferPosition()
-
-  selectedScreenRange = ->
-    expect editor.getSelectedScreenRange()
-
-  selectedScreenRanges = ->
-    expect editor.getSelectedScreenRanges()
-
-  selectedBufferRange = ->
-    expect editor.getSelectedBufferRange()
-
-  selectedBufferRanges = ->
-    expect editor.getSelectedBufferRanges()
-
-  register = (name, value) ->
-    if value
-      vimState.register.set(name, value)
-    else
-      expect vimState.register.get(name).text
-
-  classListContains = (klass) ->
-    expect editorElement.classList.contains(klass)
-
-  ensure = (_keystroke, options={}) ->
-    keystroke(_keystroke)
-    if options.text?
-      text().toBe options.text
-    if options.cursor?
-      cursor().toEqual options.cursor
-    if options.register?
-      register('"').toBe options.register
-
-    if options.selectedBufferRange?
-      selectedBufferRange().toEqual options.selectedBufferRange
-    if options.selectedBufferRanges?
-      selectedBufferRanges().toEqual options.selectedBufferRanges
-
-    if options.selectedScreenRange?
-      selectedScreenRange().toEqual options.selectedScreenRange
-    if options.selectedScreenRanges?
-      selectedScreenRanges().toEqual options.selectedScreenRanges
-
-    notEnsureNormalMode = [
-      options.selectedBufferRange, options.selectedBufferRanges
-      options.selectedScreenRange, options.selectedScreenRanges
-    ].some((bool) -> bool)
-    unless notEnsureNormalMode
-      classListContains('operator-pending-mode').toBe(false)
-      classListContains('normal-mode').toBe(true)
-
-  set = (options={}) ->
-    text(options.text) if options.text?
-    cursor(options.cursor) if options.cursor?
-    addCursor(options.addCursor) if options.addCursor?
+      init()
 
   describe "the 'iw' text object", ->
     beforeEach ->
@@ -116,6 +30,8 @@ describe "TextObjects", ->
         text:     "12345  ABCDE"
         cursor:   [0, 6]
         register: 'abcde'
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
     it "selects inside the current word in visual mode", ->
       ensure 'viw',
@@ -373,6 +289,8 @@ describe "TextObjects", ->
         text: "12(45 ABCDE"
         cursor: [0, 6]
         register: "ab'de "
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
     it "selects from the start of the current whole word to the start of the next whole word in visual mode", ->
       ensure 'vaW',
@@ -395,6 +313,8 @@ describe "TextObjects", ->
       ensure 'da(',
         text: ''
         cursor: [0, 0]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
     it "applies operators around the current parentheses in operator-pending mode (second test)", ->
       set
@@ -413,6 +333,8 @@ describe "TextObjects", ->
       ensure 'da{',
         text: ''
         cursor: [0, 0]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
     it "applies operators around the current curly brackets in operator-pending mode (second test)", ->
       set
@@ -420,6 +342,8 @@ describe "TextObjects", ->
       ensure 'da{',
         text: "{ something in here and in  }"
         cursor: [0, 27]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
   describe "the 'a<' text object", ->
     beforeEach ->
@@ -431,6 +355,8 @@ describe "TextObjects", ->
       ensure 'da<',
         text: ''
         cursor: [0, 0]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
     it "applies operators around the current angle brackets in operator-pending mode (second test)", ->
       set
@@ -438,6 +364,8 @@ describe "TextObjects", ->
       ensure 'da<',
         text: "< something in here and in  >"
         cursor: [0, 27]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
   describe "the 'a[' text object", ->
     beforeEach ->
@@ -449,6 +377,8 @@ describe "TextObjects", ->
       ensure 'da[',
         text: ''
         cursor: [0, 0]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
     it "applies operators around the current square brackets in operator-pending mode (second test)", ->
       set
@@ -456,6 +386,8 @@ describe "TextObjects", ->
       ensure 'da[',
         text: "[ something in here and in  ]"
         cursor: [0, 27]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
   describe "the 'a\'' text object", ->
     beforeEach ->
@@ -467,6 +399,8 @@ describe "TextObjects", ->
       ensure "da'",
         text: "here' '"
         cursor: [0, 0]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
     it "applies operators around the current single quotes in operator-pending mode (second test)", ->
       set
@@ -474,6 +408,8 @@ describe "TextObjects", ->
       ensure "da'",
         text: "' something in here and in  '"
         cursor: [0, 27]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
   describe "the 'a\"' text object", ->
     beforeEach ->
@@ -485,6 +421,8 @@ describe "TextObjects", ->
       ensure 'da"',
         text: 'here" "'
         cursor: [0, 0]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'
 
     it "applies operators around the current double quotes in operator-pending mode (second test)", ->
       set
@@ -492,3 +430,5 @@ describe "TextObjects", ->
       ensure 'da"',
         text: '" something in here and in  "'
         cursor: [0, 27]
+        classListContains: 'normal-mode'
+        classListNotContains: 'operator-pending-mode'

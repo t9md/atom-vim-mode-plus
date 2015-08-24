@@ -1,6 +1,7 @@
 # Refactoring status: 70%
-helpers = require './spec-helper'
 _ = require 'underscore-plus'
+helpers = require './spec-helper'
+{set, ensure} = helpers
 
 describe "Motions", ->
   [editor, editorElement, vimState] = []
@@ -9,113 +10,21 @@ describe "Motions", ->
     pack = atom.packages.loadPackage('vim-mode')
     pack.activateResources()
 
-    helpers.getEditorElement (element) ->
+    helpers.getEditorElement (element, init) ->
       editorElement = element
       editor = editorElement.getModel()
       vimState = editorElement.vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
+      init()
 
   keydown = (key, options={}) ->
     options.element ?= editorElement
     helpers.keydown(key, options)
 
-  keystroke = (keys) ->
-    for key in keys.split('')
-      if key.match(/[A-Z]/)
-        keydown(key, shift: true)
-      else
-        keydown(key)
-
   normalModeInputKeydown = (key, options={}) ->
     theEditor = options.editor ? editor
     theEditor.normalModeInputView.editorElement.getModel().setText(key)
-
-  submitNormalModeInputText = (text) ->
-    inputEditor = editor.normalModeInputView.editorElement
-    inputEditor.getModel().setText(text)
-    atom.commands.dispatch(inputEditor, 'core:confirm')
-
-  set = (options={}) ->
-    if options.keystroke?
-      keystroke(options.keystroke)
-    if options.text?
-      editor.setText(options.text)
-    if options.cursor?
-      editor.setCursorScreenPosition options.cursor
-    if options.cursorBuffer?
-      editor.setCursorBufferPosition options.cursorBuffer
-    if options.addCursor?
-      editor.addCursorAtBufferPosition options.addCursor
-    if options.register?
-      vimState.register.set '"', text: options.register
-    if options.spy?
-      if _.isArray(options.spy)
-        for s in options.spy
-          spyOn(s.obj, s.method).andReturn(s.return)
-      else
-        spyOn(options.spy.obj, options.spy.method).andReturn(options.spy.return)
-
-  ensure = (_keystroke, options={}) ->
-    # input
-    unless _.isEmpty(_keystroke)
-      if _.isArray(_keystroke)
-        for k in _keystroke
-          if _.isString(k)
-            keystroke(k)
-          else
-            if k.char?
-              normalModeInputKeydown k.char
-            else if k.chars?
-              submitNormalModeInputText k.chars
-            else if k.ctrl?
-              keydown k.ctrl, ctrl: true
-            else if k.cmd?
-              atom.commands.dispatch(k.cmd.target, k.cmd.name)
-      else
-        keystroke(_keystroke)
-
-    # validate
-    # [NOTE] Order is important.
-    # e.g. Text need to be set before changing cursor position.
-    if options.text?
-      if options.text.editor?
-        expect(options.text.editor.getText()).toEqual(options.text.value)
-      else
-        expect(editor.getText()).toBe options.text
-    if options.selectedText?
-      expect(editor.getSelectedText()).toBe options.selectedText
-    if options.cursor?
-      expect(editor.getCursorScreenPosition()).toEqual options.cursor
-    if options.cursorBuffer?
-      expect(editor.getCursorBufferPosition()).toEqual options.cursorBuffer
-    if options.register?
-      expect(vimState.register.get('"').text).toBe options.register
-
-    if options.selectedScreenRange?
-      expect(editor.getSelectedScreenRange()).toEqual options.selectedScreenRange
-    if options.selectedScreenRanges?
-      expect(editor.getSelectedScreenRanges()).toEqual options.selectedScreenRanges
-    if options.selectedBufferRange?
-      expect(getSelectedBufferRange()).toEqual options.selectedBufferRange
-    if options.selectedBufferRanges?
-      expect(getSelectedBufferRanges()).toEqual options.selectedBufferRanges
-
-    if options.selectedBufferRangeStartRow?
-      {start} = editor.getSelectedBufferRange()
-      expect(start.row).toEqual options.selectedBufferRangeStartRow
-    if options.selectedBufferRangeEndRow?
-      {end} = editor.getSelectedBufferRange()
-      expect(end.row).toEqual options.selectedBufferRangeEndRow
-
-    if options.scrollTop?
-      expect(editor.getScrollTop()).toEqual options.scrollTop
-
-    if options.called?
-      if options.called.func
-        expect(options.called.func).toHaveBeenCalledWith(options.called.with)
-      else
-        expect(options.called).toHaveBeenCalled()
 
   describe "simple motions", ->
     beforeEach ->
@@ -1384,8 +1293,7 @@ describe "Motions", ->
         expect(otherEditor.getCursorScreenPosition()).toEqual [0, 5]
 
         # and replay in the normal editor
-        ensure ';',
-          cursor: [0, 7]
+        ensure ';', cursor: [0, 7]
         expect(otherEditor.getCursorScreenPosition()).toEqual [0, 5]
 
   describe 'the % motion', ->

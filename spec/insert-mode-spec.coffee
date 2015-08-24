@@ -1,19 +1,22 @@
-# Refactoring status: 0%
+# Refactoring status: 80%
 helpers = require './spec-helper'
+{set, ensure} = helpers
+_ = require 'underscore-plus'
 
 describe "Insert mode commands", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
-    vimMode = atom.packages.loadPackage('vim-mode')
-    vimMode.activateResources()
+    pack = atom.packages.loadPackage('vim-mode')
+    pack.activateResources()
 
-    helpers.getEditorElement (element) ->
+    helpers.getEditorElement (element, init) ->
       editorElement = element
       editor = editorElement.getModel()
       vimState = editorElement.vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
+      init()
 
   keydown = (key, options={}) ->
     options.element ?= editorElement
@@ -21,35 +24,30 @@ describe "Insert mode commands", ->
 
   describe "Copy from line above/below", ->
     beforeEach ->
-      editor.setText("12345\n\nabcd\nefghi")
-      editor.setCursorBufferPosition([1, 0])
-      editor.addCursorAtBufferPosition([3, 0])
-      keydown 'i'
+      set
+        text: "12345\n\nabcd\nefghi"
+        cursorBuffer: [1, 0]
+        addCursor: [3, 0]
+        keystroke: 'i'
 
     describe "the ctrl-y command", ->
       it "copies from the line above", ->
-        keydown 'y', ctrl: true
-        expect(editor.getText()).toBe '12345\n1\nabcd\naefghi'
-
+        ensure [ctrl: 'y'], text: '12345\n1\nabcd\naefghi'
         editor.insertText ' '
-        keydown 'y', ctrl: true
-        expect(editor.getText()).toBe '12345\n1 3\nabcd\na cefghi'
+        ensure [ctrl: 'y'], text: '12345\n1 3\nabcd\na cefghi'
 
       it "does nothing if there's nothing above the cursor", ->
         editor.insertText 'fill'
-        keydown 'y', ctrl: true
-        expect(editor.getText()).toBe '12345\nfill5\nabcd\nfillefghi'
-
-        keydown 'y', ctrl: true
-        expect(editor.getText()).toBe '12345\nfill5\nabcd\nfillefghi'
+        ensure [ctrl: 'y'], text: '12345\nfill5\nabcd\nfillefghi'
+        ensure [ctrl: 'y'], text: '12345\nfill5\nabcd\nfillefghi'
 
       it "does nothing on the first line", ->
-        editor.setCursorBufferPosition([0, 2])
-        editor.addCursorAtBufferPosition([3, 2])
+        set
+          cursorBuffer: [0, 2]
+          addCursor: [3, 2]
         editor.insertText 'a'
-        expect(editor.getText()).toBe '12a345\n\nabcd\nefaghi'
-        keydown 'y', ctrl: true
-        expect(editor.getText()).toBe '12a345\n\nabcd\nefadghi'
+        ensure '', text: '12a345\n\nabcd\nefaghi'
+        ensure [ctrl: 'y'], text: '12a345\n\nabcd\nefadghi'
 
     describe "the ctrl-e command", ->
       beforeEach ->
@@ -58,17 +56,11 @@ describe "Insert mode commands", ->
             'ctrl-e': 'vim-mode:copy-from-line-below'
 
       it "copies from the line below", ->
-        keydown 'e', ctrl: true
-        expect(editor.getText()).toBe '12345\na\nabcd\nefghi'
-
+        ensure [ctrl: 'e'], text: '12345\na\nabcd\nefghi'
         editor.insertText ' '
-        keydown 'e', ctrl: true
-        expect(editor.getText()).toBe '12345\na c\nabcd\n efghi'
+        ensure [ctrl: 'e'], text: '12345\na c\nabcd\n efghi'
 
       it "does nothing if there's nothing below the cursor", ->
         editor.insertText 'foo'
-        keydown 'e', ctrl: true
-        expect(editor.getText()).toBe '12345\nfood\nabcd\nfooefghi'
-
-        keydown 'e', ctrl: true
-        expect(editor.getText()).toBe '12345\nfood\nabcd\nfooefghi'
+        ensure [ctrl: 'e'], text: '12345\nfood\nabcd\nfooefghi'
+        ensure [ctrl: 'e'], text: '12345\nfood\nabcd\nfooefghi'
