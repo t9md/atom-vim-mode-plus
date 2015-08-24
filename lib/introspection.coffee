@@ -248,7 +248,7 @@ getKeyBindingInfo = (klass) ->
   results = null
   for k in getKeyBindings() when k.command is command
     {keystrokes, selector} = k
-    keystrokes = keystrokes.replace(/^shift-/, '')
+    keystrokes = keystrokes.replace(/shift-/, '')
     results ?= []
     results.push {keystrokes, selector}
   results
