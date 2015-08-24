@@ -1,7 +1,6 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
-helpers = require './spec-helper'
-{ensure, set, keystroke} = helpers
+{set, ensure, keystroke, getEditorElement} = require './spec-helper'
 VimState = require '../lib/vim-state'
 StatusBarManager = require '../lib/status-bar-manager'
 
@@ -12,17 +11,13 @@ describe "VimState", ->
     pack = atom.packages.loadPackage('vim-mode')
     pack.activateResources()
 
-    helpers.getEditorElement (element, init) ->
+    getEditorElement (element, init) ->
       editorElement = element
       editor = editorElement.getModel()
       vimState = editorElement.vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
       init()
-
-  keydown = (key, options={}) ->
-    options.element ?= editorElement
-    helpers.keydown(key, options)
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->

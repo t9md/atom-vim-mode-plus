@@ -1,7 +1,5 @@
 # Refactoring status: 70%
-_ = require 'underscore-plus'
-helpers = require './spec-helper'
-{set, ensure, keystroke} = helpers
+{set, ensure, keystroke, getEditorElement} = require './spec-helper'
 
 describe "Motions", ->
   [editor, editorElement, vimState] = []
@@ -10,21 +8,13 @@ describe "Motions", ->
     pack = atom.packages.loadPackage('vim-mode')
     pack.activateResources()
 
-    helpers.getEditorElement (element, init) ->
+    getEditorElement (element, init) ->
       editorElement = element
       editor = editorElement.getModel()
       vimState = editorElement.vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
       init()
-
-  keydown = (key, options={}) ->
-    options.element ?= editorElement
-    helpers.keydown(key, options)
-
-  normalModeInputKeydown = (key, options={}) ->
-    theEditor = options.editor ? editor
-    theEditor.normalModeInputView.editorElement.getModel().setText(key)
 
   describe "simple motions", ->
     beforeEach ->
@@ -591,8 +581,8 @@ describe "Motions", ->
 
           editor.setText(startingText)
           editor.setCursorScreenPosition(startingCursorPosition)
-          keydown('d')
-          keydown(keydownCodeForEnter)
+          keystroke('d')
+          keystroke(keydownCodeForEnter)
           expect(editor.getText()).toEqual referenceText
           expect(editor.getCursorScreenPosition()).toEqual referenceCursorPosition
 
@@ -846,7 +836,7 @@ describe "Motions", ->
         inputEditor = editor.normalModeInputView.editorElement
 
       it "allows searching history in the search field", ->
-        keydown('/')
+        keystroke('/')
         atom.commands.dispatch(inputEditor, 'core:move-up')
         expect(inputEditor.getModel().getText()).toEqual('abc')
         atom.commands.dispatch(inputEditor, 'core:move-up')
@@ -1269,7 +1259,7 @@ describe "Motions", ->
       ensure '2,', cursor: [0, 2]
 
     it "shares the most recent find/till command with other editors", ->
-      helpers.getEditorElement (otherEditorElement) ->
+      getEditorElement (otherEditorElement) ->
         otherEditor = otherEditorElement.getModel()
 
         set
@@ -1284,13 +1274,12 @@ describe "Motions", ->
         expect(otherEditor.getCursorScreenPosition()).toEqual [0, 0]
 
         # replay same find in the other editor
-        keydown(';', element: otherEditorElement)
+        keystroke(';', element: otherEditorElement)
         ensure cursor: [0, 2]
         expect(otherEditor.getCursorScreenPosition()).toEqual [0, 4]
 
         # do a till in the other editor
-        keydown('t', element: otherEditorElement)
-        normalModeInputKeydown('r', editor: otherEditor)
+        keystroke ['t', char: 'r'], element: otherEditorElement
         ensure cursor: [0, 2]
         expect(otherEditor.getCursorScreenPosition()).toEqual [0, 5]
 

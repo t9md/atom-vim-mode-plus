@@ -1,7 +1,5 @@
 # Refactoring status: 80%
-helpers = require './spec-helper'
-{set, ensure, keystroke} = helpers
-_ = require 'underscore-plus'
+{set, ensure, keystroke, getEditorElement} = require './spec-helper'
 
 describe "Insert mode commands", ->
   [editor, editorElement, vimState] = []
@@ -10,17 +8,13 @@ describe "Insert mode commands", ->
     pack = atom.packages.loadPackage('vim-mode')
     pack.activateResources()
 
-    helpers.getEditorElement (element, init) ->
+    getEditorElement (element, init) ->
       editorElement = element
       editor = editorElement.getModel()
       vimState = editorElement.vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
       init()
-
-  keydown = (key, options={}) ->
-    options.element ?= editorElement
-    helpers.keydown(key, options)
 
   describe "Copy from line above/below", ->
     beforeEach ->

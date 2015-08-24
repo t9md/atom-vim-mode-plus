@@ -80,12 +80,14 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
       element.value += key
   dispatchKeyboardEvent(element, 'keyup', eventArgs...)
 
-keystroke = (keys) ->
+keystroke = (keys, {element}={}) ->
   # keys must be String or Array
   # Not support Object for keys intentionally to avoid ambiguity.
+  element ?= EL
+  editor = element.getModel()
   mocked = null
   if _.isString(keys)
-    _keystroke(keys)
+    _keystroke(keys, {element})
     return
 
   unless _.isArray(keys)
@@ -93,27 +95,27 @@ keystroke = (keys) ->
 
   for k in keys
     if _.isString(k)
-      _keystroke(k)
+      _keystroke(k, {element})
     else
       if k.platform?
-        mockPlatform(EL, k.platform)
+        mockPlatform(element, k.platform)
         mocked = true
-      else if k.char?  then normalModeInputKeydown k.char
+      else if k.char?  then normalModeInputKeydown k.char, {editor}
       else if k.chars? then submitNormalModeInputText k.chars
-      else if k.ctrl? then keydown k.ctrl, ctrl: true, element: EL
+      else if k.ctrl? then keydown k.ctrl, {ctrl: true, element}
       else if k.cmd? then atom.commands.dispatch(k.cmd.target, k.cmd.name)
   if mocked
     unmockPlatform(EL)
 
-_keystroke = (keys) ->
+_keystroke = (keys, {element}) ->
   if keys is 'escape'
-    keydown(keys, element: EL)
+    keydown keys, {element}
     return
   for key in keys.split('')
     if key.match(/[A-Z]/)
-      keydown(key, shift: true, element: EL)
+      keydown key, {shift: true, element}
     else
-      keydown(key, element: EL)
+      keydown key, {element}
 
 normalModeInputKeydown = (key, options={}) ->
   theEditor = options.editor ? E
@@ -235,5 +237,7 @@ module.exports = {
   set, ensure,
   keydown, keystroke,
   getEditorElement,
+  normalModeInputKeydown
+  submitNormalModeInputText
   mockPlatform, unmockPlatform
 }
