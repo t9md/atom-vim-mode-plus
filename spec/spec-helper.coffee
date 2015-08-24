@@ -6,8 +6,9 @@ StatusBarManager = require '../lib/status-bar-manager'
 
 [globalVimState, statusBarManager] = []
 
+# [FIXME] maybe can remove.
 beforeEach ->
-  atom.workspace ||= {}
+  atom.workspace ?= {}
   statusBarManager = null
   globalVimState = null
 
@@ -43,7 +44,8 @@ dispatchKeyboardEvent = (target, eventArgs...) ->
   e = document.createEvent('KeyboardEvent')
   e.initKeyboardEvent(eventArgs...)
   # 0 is the default, and it's valid ASCII, but it's wrong.
-  Object.defineProperty(e, 'keyCode', get: -> undefined) if e.keyCode is 0
+  if e.keyCode is 0
+    Object.defineProperty(e, 'keyCode', get: -> undefined)
   target.dispatchEvent e
 
 dispatchTextEvent = (target, eventArgs...) ->
@@ -52,8 +54,9 @@ dispatchTextEvent = (target, eventArgs...) ->
   target.dispatchEvent e
 
 keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
-  key = "U+#{key.charCodeAt(0).toString(16)}" unless key is 'escape' or raw?
-  element ||= document.activeElement
+  unless key is 'escape' or raw?
+    key = "U+#{key.charCodeAt(0).toString(16)}"
+  element ?= document.activeElement
   eventArgs = [
     true, # bubbles
     true, # cancelable
@@ -64,8 +67,9 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
   ]
 
   canceled = not dispatchKeyboardEvent(element, 'keydown', eventArgs...)
+  # [FIXME] I think I can remove keypress event dispatch.
   dispatchKeyboardEvent(element, 'keypress', eventArgs...)
-  if not canceled
+  unless canceled
     if dispatchTextEvent(element, 'textInput', eventArgs...)
       element.value += key
   dispatchKeyboardEvent(element, 'keyup', eventArgs...)

@@ -1,4 +1,4 @@
-# Refactoring status: 100%
+# Refactoring status: 70%
 {Point, Range} = require 'atom'
 _    = require 'underscore-plus'
 Base = require './base'
@@ -61,6 +61,9 @@ class SelectAWholeWord extends SelectInsideWholeWord
 
 # Pair
 # -------------------------
+# [FIXME] Bug exists in following case.
+# | is coursor position.
+# expect(editor.getScrol|lTop()).toEqual options.scrollTop
 class SelectInsidePair extends TextObject
   @extend()
   inclusive: false
