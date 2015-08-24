@@ -553,12 +553,10 @@ class Replace extends Operator
 
   execute: ->
     count = @getCount(1)
-    if @input is ""
-      # replace canceled
-      if @vimState.isVisualMode()
-        @vimState.resetVisualMode()
-      else
+    if @input is '' # replace canceled
+      unless @vimState.isVisualMode()
         @vimState.activateNormalMode()
+      # replace canceled
       return
 
     @editor.transact =>

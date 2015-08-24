@@ -1461,9 +1461,16 @@ describe "Operators", ->
     it "does nothing when cancelled", ->
       keydown('r')
       expect(editorElement.classList.contains('operator-pending-mode')).toBe(true)
-      keydown('escape')
+      editor.normalModeInputView.viewModel.cancel()
       expect(editor.getText()).toBe '12\n34\n\n'
       expect(editorElement.classList.contains('normal-mode')).toBe(true)
+
+    it "remain visual-mode when cancelled", ->
+      keydown('v')
+      keydown('r')
+      editor.normalModeInputView.viewModel.cancel()
+      expect(editor.getText()).toBe '12\n34\n\n'
+      expect(editorElement.classList.contains('visual-mode')).toBe(true)
 
     it "replaces a single character with a line break", ->
       keydown('r')
