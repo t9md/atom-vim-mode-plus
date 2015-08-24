@@ -9,8 +9,8 @@ describe "VimState", ->
   [editor, editorElement, vimState] = []
 
   beforeEach ->
-    vimMode = atom.packages.loadPackage('vim-mode')
-    vimMode.activateResources()
+    pack = atom.packages.loadPackage('vim-mode')
+    pack.activateResources()
 
     helpers.getEditorElement (element, init) ->
       editorElement = element
@@ -23,9 +23,6 @@ describe "VimState", ->
   keydown = (key, options={}) ->
     options.element ?= editorElement
     helpers.keydown(key, options)
-
-  normalModeInputKeydown = (key, opts = {}) ->
-    editor.normalModeInputView.editorElement.getModel().setText(key)
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->
@@ -55,28 +52,28 @@ describe "VimState", ->
   describe "normal-mode", ->
     describe "when entering an insertable character", ->
       beforeEach ->
-        keydown('\\')
+        keystroke '\\'
 
       it "stops propagation", ->
         ensure '', text: ''
 
     describe "when entering an operator", ->
-      beforeEach -> keydown('d')
+      beforeEach -> keystroke 'd'
 
       describe "with an operator that can't be composed", ->
-        beforeEach -> keydown('x')
+        beforeEach -> keystroke 'x'
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the escape keybinding", ->
-        beforeEach -> keydown('escape')
+        beforeEach -> keystroke 'escape'
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the ctrl-c keybinding", ->
-        beforeEach -> keydown('c', ctrl: true)
+        beforeEach -> keystroke [ctrl: 'c']
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
@@ -90,7 +87,7 @@ describe "VimState", ->
         ensure 'escape', numCursors: 1
 
     describe "the v keybinding", ->
-      beforeEach -> keydown('v')
+      beforeEach -> keystroke 'v'
 
       it "puts the editor into visual characterwise mode", ->
         ensure '',
@@ -128,7 +125,6 @@ describe "VimState", ->
 
       it "puts the editor into visual mode", ->
         ensure '', mode: 'normal'
-        # expect(vimState.mode).toEqual 'normal'
         set selectedBufferRange: [[0, 0], [0, 3]]
 
         advanceClock(100)
@@ -185,8 +181,7 @@ describe "VimState", ->
           text: '012345\nabcdef'
 
   describe "insert-mode", ->
-    beforeEach ->
-      keydown('i')
+    beforeEach -> keystroke 'i'
 
     describe "with content", ->
       beforeEach ->
@@ -254,7 +249,7 @@ describe "VimState", ->
       set
         text: "one two three"
         cursorBuffer: [0, 4]
-      keydown('v')
+      keystroke 'v'
 
     it "selects the character under the cursor", ->
       ensure '',
@@ -346,9 +341,9 @@ describe "VimState", ->
 
     describe "activate visualmode within visualmode", ->
       beforeEach ->
-        keydown('escape')
-        expect(vimState.mode).toEqual 'normal'
-        expect(editorElement.classList.contains('normal-mode')).toBe(true)
+        ensure 'escape',
+          mode: 'normal'
+          classListContains: 'normal-mode'
 
       it "activateVisualMode with same type puts the editor into normal mode", ->
         ensure 'v',

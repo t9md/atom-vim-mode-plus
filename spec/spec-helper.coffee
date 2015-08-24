@@ -82,10 +82,30 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
   dispatchKeyboardEvent(element, 'keyup', eventArgs...)
 
 keystroke = (keys) ->
+  if _.isArray(keys)
+    for k in keys
+      if _.isString(k)
+        _keystroke(k)
+      else
+        if k.platform?
+          mockPlatform(EDITOR_ELEMENT, k.platform)
+        else if k.char?
+          normalModeInputKeydown k.char
+        else if k.chars?
+          submitNormalModeInputText k.chars
+        else if k.ctrl?
+          keydown k.ctrl, ctrl: true, element: EDITOR_ELEMENT
+        else if k.cmd?
+          atom.commands.dispatch(k.cmd.target, k.cmd.name)
+    if k.platform?
+      unmockPlatform(EDITOR_ELEMENT)
+  else
+    _keystroke(keys)
+
+_keystroke = (keys) ->
   if keys is 'escape'
     keydown(keys, element: EDITOR_ELEMENT)
     return
-
   for key in keys.split('')
     if key.match(/[A-Z]/)
       keydown(key, shift: true, element: EDITOR_ELEMENT)
@@ -128,25 +148,7 @@ set = (options={}) ->
 ensure = (_keystroke, options={}) ->
   # input
   unless _.isEmpty(_keystroke)
-    if _.isArray(_keystroke)
-      for k in _keystroke
-        if _.isString(k)
-          keystroke(k)
-        else
-          if k.platform?
-            mockPlatform(EDITOR_ELEMENT, k.platform)
-          else if k.char?
-            normalModeInputKeydown k.char
-          else if k.chars?
-            submitNormalModeInputText k.chars
-          else if k.ctrl?
-            keydown k.ctrl, ctrl: true, element: EDITOR_ELEMENT
-          else if k.cmd?
-            atom.commands.dispatch(k.cmd.target, k.cmd.name)
-      if k.platform?
-        unmockPlatform(EDITOR_ELEMENT)
-    else
-      keystroke(_keystroke)
+    keystroke(_keystroke)
 
   # validate
   # [NOTE] Order is important.
