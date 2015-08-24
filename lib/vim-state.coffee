@@ -149,25 +149,25 @@ class VimState
     @registerOperationCommands TextObjects, [
       'select-inside-word', 'select-a-word',
       'select-inside-whole-word', 'select-a-whole-word',
-      'select-inside-double-quotes'  , 'select-around-double-quotes'
-      'select-inside-single-quotes'  , 'select-around-single-quotes'
-      'select-inside-back-ticks'     , 'select-around-back-ticks'
-      'select-inside-paragraph'      , 'select-around-paragraph'
-      'select-inside-curly-brackets' , 'select-around-curly-brackets'
-      'select-inside-angle-brackets' , 'select-around-angle-brackets'
-      'select-inside-square-brackets', 'select-around-square-brackets'
-      'select-inside-parentheses'    , 'select-around-parentheses'
-      'select-inside-tags'           , # why not around version exists?
+      'select-inside-double-quotes'  , 'select-around-double-quotes',
+      'select-inside-single-quotes'  , 'select-around-single-quotes',
+      'select-inside-back-ticks'     , 'select-around-back-ticks',
+      'select-inside-paragraph'      , 'select-around-paragraph',
+      'select-inside-curly-brackets' , 'select-around-curly-brackets',
+      'select-inside-angle-brackets' , 'select-around-angle-brackets',
+      'select-inside-square-brackets', 'select-around-square-brackets',
+      'select-inside-parentheses'    , 'select-around-parentheses',
+      'select-inside-tags'           , # why not around version exists?,
     ]
 
     @registerOperationCommands Motions, [
-      'move-to-beginning-of-line'
-      'repeat-find', 'repeat-find-reverse'
+      'move-to-beginning-of-line',
+      'repeat-find', 'repeat-find-reverse',
       'move-down', 'move-up', 'move-left', 'move-right',
-      'move-to-next-word'     , 'move-to-next-whole-word'    ,
-      'move-to-end-of-word'   , 'move-to-end-of-whole-word'  ,
+      'move-to-next-word'     , 'move-to-next-whole-word',
+      'move-to-end-of-word'   , 'move-to-end-of-whole-word',
       'move-to-previous-word' , 'move-to-previous-whole-word',
-      'move-to-next-paragraph', 'move-to-previous-paragraph' ,
+      'move-to-next-paragraph', 'move-to-previous-paragraph',
       'move-to-first-character-of-line', 'move-to-last-character-of-line',
       'move-to-first-character-of-line-up', 'move-to-first-character-of-line-down',
       'move-to-first-character-of-line-and-down',
@@ -176,40 +176,40 @@ class VimState
       'move-to-top-of-screen', 'move-to-bottom-of-screen', 'move-to-middle-of-screen',
       'scroll-half-screen-up', 'scroll-half-screen-down',
       'scroll-full-screen-up', 'scroll-full-screen-down',
-      'repeat-search'          , 'repeat-search-backwards'    ,
-      'move-to-mark'           , 'move-to-mark-literal'       ,
-      'find'                   , 'find-backwards'             ,
-      'till'                   , 'till-backwards'             ,
-      'search'                 , 'reverse-search'             ,
+      'repeat-search'          , 'repeat-search-backwards',
+      'move-to-mark'           , 'move-to-mark-literal',
+      'find'                   , 'find-backwards',
+      'till'                   , 'till-backwards',
+      'search'                 , 'reverse-search',
       'search-current-word'    , 'reverse-search-current-word',
       'bracket-matching-motion',
     ]
 
     @registerOperationCommands Operators, [
-      'activate-insert-mode', 'insert-after'
-      'activate-replace-mode'
+      'activate-insert-mode', 'insert-after',
+      'activate-replace-mode',
       'substitute', 'substitute-line',
       'insert-at-beginning-of-line', 'insert-after-end-of-line',
       'insert-below-with-newline', 'insert-above-with-newline',
-      'delete', 'delete-to-last-character-of-line'
+      'delete', 'delete-to-last-character-of-line',
       'delete-right', 'delete-left',
-      'change', 'change-to-last-character-of-line'
-      'yank', 'yank-line'
-      'put-after', 'put-before'
-      'upper-case', 'lower-case', 'toggle-case', 'toggle-case-now'
-      'join'
+      'change', 'change-to-last-character-of-line',
+      'yank', 'yank-line',
+      'put-after', 'put-before',
+      'upper-case', 'lower-case', 'toggle-case', 'toggle-case-now',
+      'join',
       'indent', 'outdent', 'auto-indent',
-      'increase', 'decrease'
-      'repeat', 'mark', 'replace'
+      'increase', 'decrease',
+      'repeat', 'mark', 'replace',
     ]
 
     @registerOperationCommands Scroll, [
-      'scroll-down', 'scroll-up'
+      'scroll-down', 'scroll-up',
       'scroll-cursor-to-top', 'scroll-cursor-to-top-leave',
       'scroll-cursor-to-middle', 'scroll-cursor-to-middle-leave',
       'scroll-cursor-to-bottom', 'scroll-cursor-to-bottom-leave',
-      'scroll-cursor-to-left', 'scroll-cursor-to-right'
-      ]
+      'scroll-cursor-to-left', 'scroll-cursor-to-right',
+    ]
 
     # Load developer helper commands.
     if atom.inDevMode()
