@@ -1,3 +1,4 @@
+# Refactoring status: 100%
 fs = require 'fs-plus'
 settings = require './settings'
 

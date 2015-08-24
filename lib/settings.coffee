@@ -1,3 +1,4 @@
+# Refactoring status: 100%
 class ScopedConfig
   constructor: (@scope, @config) ->
 

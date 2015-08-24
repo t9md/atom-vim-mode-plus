@@ -1,3 +1,4 @@
+# Refactoring status: 100%
 _ = require 'underscore-plus'
 {getAncestors, getParent} = require './introspection'
 

@@ -1,3 +1,6 @@
+# Refactoring status: 50%
+# TODO: make global instead of refereing globalVimState.
+# no need to instantiate per vimState.
 settings = require './settings'
 {ViewModel} = require './view'
 
@@ -5,8 +8,7 @@ settings = require './settings'
 #
 # name - The name of the register to fetch.
 #
-# Returns the value of the given register or undefined if it hasn't
-# been set.
+# Returns the value of the given register or undefined
 validRegisterNames = /[a-zA-Z*+%_"]/
 
 module.exports =

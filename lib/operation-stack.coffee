@@ -1,9 +1,10 @@
+# Refactoring status: 100%
 _ = require 'underscore-plus'
-TextObjects = require './text-objects'
-Operators   = require './operators'
+{CurrentSelection} = require './text-objects'
+{Select} = require './operators'
 {debug} = require './utils'
+
 settings = require './settings'
-Base = require './base'
 introspection = require './introspection'
 
 module.exports =
@@ -25,7 +26,7 @@ class OperationStack
       # So use implicit Select operator as operator.
       if @vimState.isVisualMode() and _.isFunction(op.select)
         debug "push INPLICIT Operators.Select"
-        @stack.push(new Operators.Select(@vimState))
+        @stack.push(new Select(@vimState))
 
       debug "pushing <#{op.getKind()}>"
       @stack.push op
@@ -34,26 +35,11 @@ class OperationStack
       # as a target of operator.
       if @vimState.isVisualMode() and op.isOperator()
         debug "push INPLICIT TextObjects.CurrentSelection"
-        @stack.push(new TextObjects.CurrentSelection(@vimState))
+        @stack.push(new CurrentSelection(@vimState))
       @process()
 
     for cursor in @vimState.editor.getCursors()
       @vimState.ensureCursorIsWithinLine(cursor)
-
-  inspect: ->
-    debug "  [@stack] size: #{@stack.length}"
-    for op, i in @stack
-      debug "  <idx: #{i}>"
-      if settings.get('debug')
-        debug introspection.inspectInstance op,
-          indent: 2
-          colors: settings.get('debugOutput') is 'file'
-          excludeProperties: [
-            'vimState', 'editorElement'
-            'report', 'reportAll'
-            'extend', 'getParent', 'getAncestors',
-          ] # vimState have many properties, occupy DevTool console.
-          recursiveInspect: Base
 
   # Processes the command if the last operation is complete.
   process: ->
@@ -118,3 +104,6 @@ class OperationStack
 
   isOperatorPending: ->
     not @isEmpty()
+
+  inspect: ->
+    @vimState.developer?.inspectOperationStack()
