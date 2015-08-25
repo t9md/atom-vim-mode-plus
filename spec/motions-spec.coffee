@@ -569,19 +569,16 @@ describe "Motions", ->
             text: startingText
             cursor: startingCursorPosition
 
-          # editor.setText(startingText)
-          # editor.setCursorScreenPosition(startingCursorPosition)
           keystroke 'd+'
           referenceText = editor.getText()
           referenceCursorPosition = editor.getCursorScreenPosition()
-          # do it again with enter and compare the results
 
-          editor.setText(startingText)
-          editor.setCursorScreenPosition(startingCursorPosition)
-          keystroke('d')
-          keystroke(keydownCodeForEnter)
-          expect(editor.getText()).toEqual referenceText
-          expect(editor.getCursorScreenPosition()).toEqual referenceCursorPosition
+          set
+            text: startingText
+            cursor: startingCursorPosition
+          ensure ['d', keydownCodeForEnter],
+            text: referenceText
+            cursor: referenceCursorPosition
 
   describe "the gg keybinding", ->
     beforeEach ->
@@ -833,13 +830,13 @@ describe "Motions", ->
         inputEditor = editor.normalModeInputView.editorElement
 
       it "allows searching history in the search field", ->
-        keystroke('/')
-        atom.commands.dispatch(inputEditor, 'core:move-up')
-        expect(inputEditor.getModel().getText()).toEqual('abc')
-        atom.commands.dispatch(inputEditor, 'core:move-up')
-        expect(inputEditor.getModel().getText()).toEqual('def')
-        atom.commands.dispatch(inputEditor, 'core:move-up')
-        expect(inputEditor.getModel().getText()).toEqual('def')
+        _editor = inputEditor.getModel()
+        ensure ['/', cmd: {target: inputEditor, name: 'core:move-up'}],
+          text: {editor: _editor, value: 'abc'}
+        ensure [cmd: {target: inputEditor, name: 'core:move-up'}],
+          text: {editor: _editor, value: 'def'}
+        ensure [cmd: {target: inputEditor, name: 'core:move-up'}],
+          text: {editor: _editor, value: 'def'}
 
       it "resets the search field to empty when scrolling back", ->
         _editor = inputEditor.getModel()

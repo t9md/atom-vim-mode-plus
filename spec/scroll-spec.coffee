@@ -1,21 +1,16 @@
-# Refactoring status: 0%
-helpers = require './spec-helper'
+# Refactoring status: 5%
+{getVimState} = require './spec-helper'
 
 describe "Scrolling", ->
-  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
-  # [editor, editorElement, vimState] = []
+  [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    helpers.getVimState (_vimState, vim) ->
+    getVimState (_vimState, vim) ->
       vimState = _vimState
       {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
       {set, ensure, keystroke} = vim
-
-  keydown = (key, options={}) ->
-    options.element ?= editorElement
-    helpers.keydown(key, options)
 
   describe "scrolling keybindings", ->
     beforeEach ->
@@ -32,9 +27,10 @@ describe "Scrolling", ->
         spyOn(editor, 'setCursorScreenPosition')
 
       it "moves the screen down by one and keeps cursor onscreen", ->
-        keydown('e', ctrl: true)
-        expect(editor.setScrollTop).toHaveBeenCalledWith(110)
-        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([4, 0])
+        ensure [ctrl: 'e'], called: [
+            {func: editor.setScrollTop, with: 110},
+            {func: editor.setCursorScreenPosition, with: [4, 0]}
+          ]
 
     describe "the ctrl-y keybinding", ->
       beforeEach ->
@@ -42,9 +38,10 @@ describe "Scrolling", ->
         spyOn(editor, 'setCursorScreenPosition')
 
       it "moves the screen up by one and keeps the cursor onscreen", ->
-        keydown('y', ctrl: true)
-        expect(editor.setScrollTop).toHaveBeenCalledWith(90)
-        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([5, 0])
+        ensure [ctrl: 'y'], called: [
+            {func: editor.setScrollTop, with: 90},
+            {func: editor.setCursorScreenPosition, with: [5, 0]}
+          ]
 
   describe "scroll cursor keybindings", ->
     beforeEach ->
@@ -67,8 +64,7 @@ describe "Scrolling", ->
         spyOn(editor, 'pixelPositionForScreenPosition').andReturn({top: 1000, left: 0})
 
       it "moves the screen to position cursor at the top of the window and moves cursor to first non-blank in the line", ->
-        keydown('z')
-        keydown(keydownCodeForEnter)
+        keystroke ['z', keydownCodeForEnter]
         expect(editor.setScrollTop).toHaveBeenCalledWith(960)
         expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
 
@@ -77,8 +73,7 @@ describe "Scrolling", ->
         spyOn(editor, 'pixelPositionForScreenPosition').andReturn({top: 1000, left: 0})
 
       it "moves the screen to position cursor at the top of the window and leave cursor in the same column", ->
-        keydown('z')
-        keydown('t')
+        keystroke 'zt'
         expect(editor.setScrollTop).toHaveBeenCalledWith(960)
         expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
 
@@ -87,8 +82,7 @@ describe "Scrolling", ->
         spyOn(editor, 'pixelPositionForScreenPosition').andReturn({top: 1000, left: 0})
 
       it "moves the screen to position cursor at the center of the window and moves cursor to first non-blank in the line", ->
-        keydown('z')
-        keydown('.')
+        keystroke 'z.'
         expect(editor.setScrollTop).toHaveBeenCalledWith(900)
         expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
 
@@ -97,8 +91,7 @@ describe "Scrolling", ->
         spyOn(editor, 'pixelPositionForScreenPosition').andReturn({top: 1000, left: 0})
 
       it "moves the screen to position cursor at the center of the window and leave cursor in the same column", ->
-        keydown('z')
-        keydown('z')
+        keystroke 'zz'
         expect(editor.setScrollTop).toHaveBeenCalledWith(900)
         expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
 
@@ -107,8 +100,7 @@ describe "Scrolling", ->
         spyOn(editor, 'pixelPositionForScreenPosition').andReturn({top: 1000, left: 0})
 
       it "moves the screen to position cursor at the bottom of the window and moves cursor to first non-blank in the line", ->
-        keydown('z')
-        keydown('-')
+        keystroke 'z-'
         expect(editor.setScrollTop).toHaveBeenCalledWith(860)
         expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
 
@@ -117,8 +109,7 @@ describe "Scrolling", ->
         spyOn(editor, 'pixelPositionForScreenPosition').andReturn({top: 1000, left: 0})
 
       it "moves the screen to position cursor at the bottom of the window and leave cursor in the same column", ->
-        keydown('z')
-        keydown('b')
+        keystroke 'zb'
         expect(editor.setScrollTop).toHaveBeenCalledWith(860)
         expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
 
@@ -136,8 +127,7 @@ describe "Scrolling", ->
     describe "the zs keybinding", ->
       zsPos = (pos) ->
         editor.setCursorBufferPosition([0, pos])
-        keydown('z')
-        keydown('s')
+        keystroke 'zs'
         editor.getScrollLeft()
 
       startPosition = NaN
@@ -183,8 +173,7 @@ describe "Scrolling", ->
     describe "the ze keybinding", ->
       zePos = (pos) ->
         editor.setCursorBufferPosition([0, pos])
-        keydown('z')
-        keydown('e')
+        keystroke 'ze'
         editor.getScrollLeft()
 
       startPosition = NaN

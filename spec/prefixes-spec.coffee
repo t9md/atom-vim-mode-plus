@@ -2,7 +2,7 @@
 {getVimState} = require './spec-helper'
 
 describe "Prefixes", ->
-  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
+  [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (_vimState, vim) ->
@@ -40,44 +40,43 @@ describe "Prefixes", ->
   describe "Register", ->
     describe "the a register", ->
       it "saves a value for future reading", ->
-        set    register: {a: {text: 'new content'}}
-        ensure register: {a: {text: 'new content'}}
+        set    register: a: text: 'new content'
+        ensure register: a: text: 'new content'
 
       it "overwrites a value previously in the register", ->
-        set    register: {a: {text: 'content'}}
-        set    register: {a: {text: 'new content'}}
-        ensure register: {a: {text: 'new content'}}
+        set    register: a: text: 'content'
+        set    register: a: text: 'new content'
+        ensure register: a: text: 'new content'
 
     describe "the B register", ->
       it "saves a value for future reading", ->
-        set    register: {B: {text: 'new content'}}
-        ensure register: {b: {text: 'new content'}}
-        ensure register: {B: {text: 'new content'}}
+        set    register: B: text: 'new content'
+        ensure register: b: text: 'new content'
+        ensure register: B: text: 'new content'
 
       it "appends to a value previously in the register", ->
-        set    register: {b: {text: 'content'}}
-        set    register: {B: {text: 'new content'}}
-        ensure register: {b: {text: 'contentnew content'}}
+        set    register: b: text: 'content'
+        set    register: B: text: 'new content'
+        ensure register: b: text: 'contentnew content'
 
       it "appends linewise to a linewise value previously in the register", ->
-        set    register: {b: {text: 'content\n', type: 'linewise'}}
-        set    register: {B: {text: 'new content'}}
-        ensure register: {b: {text: 'content\nnew content\n'}}
+        set    register: b: text: 'content\n', type: 'linewise'
+        set    register: B: text: 'new content'
+        ensure register: b: text: 'content\nnew content\n'
 
       it "appends linewise to a character value previously in the register", ->
-        set    register: {b: {text: 'content'}}
-        set    register: {B: {text: 'new content\n', type: 'linewise'}}
-        ensure register: {b: {text: 'content\nnew content\n'}}
+        set    register: b: text: 'content'
+        set    register: B: text: 'new content\n', type: 'linewise'
+        ensure register: b: text: 'content\nnew content\n'
 
     describe "the * register", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
-          ensure register:
-            {'*': {text: 'initial clipboard content', type: 'character'}}
+          ensure register: '*': text: 'initial clipboard content', type: 'character'
 
       describe "writing", ->
         beforeEach ->
-          set register: {'*': {text: 'new content'}}
+          set register: '*': text: 'new content'
 
         it "overwrites the contents of the system clipboard", ->
           expect(atom.clipboard.read()).toEqual 'new content'
@@ -90,11 +89,11 @@ describe "Prefixes", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
           ensure register:
-            {'*': {text: 'initial clipboard content', type: 'character'}}
+            '*': text: 'initial clipboard content', type: 'character'
 
       describe "writing", ->
         beforeEach ->
-          set register: {'*': {text: 'new content'}}
+          set register: '*': text: 'new content'
 
         it "overwrites the contents of the system clipboard", ->
           expect(atom.clipboard.read()).toEqual 'new content'
@@ -102,12 +101,12 @@ describe "Prefixes", ->
     describe "the _ register", ->
       describe "reading", ->
         it "is always the empty string", ->
-          ensure register: {'_': {text: ''}}
+          ensure register: '_': text: ''
 
       describe "writing", ->
         it "throws away anything written to it", ->
-          set register:    {'_': {text: 'new content'}}
-          ensure register: {'_': {text: ''}}
+          set register:    '_': text: 'new content'
+          ensure register: '_': text: ''
 
     describe "the % register", ->
       beforeEach ->
@@ -117,18 +116,18 @@ describe "Prefixes", ->
 
       describe "reading", ->
         it "returns the filename of the current editor", ->
-          ensure register: {'%': {text: '/Users/atom/known_value.txt'}}
+          ensure register: '%': text: '/Users/atom/known_value.txt'
 
       describe "writing", ->
         it "throws away anything written to it", ->
-          set    register: {'%': {text: 'new content'}}
-          ensure register: {'%': {text: '/Users/atom/known_value.txt'}}
+          set    register: '%': text: 'new content'
+          ensure register: '%': text: '/Users/atom/known_value.txt'
 
     describe "the ctrl-r command in insert mode", ->
       beforeEach ->
         set text: "02\n", cursor: [0, 0]
-        set register: {'"': {text: '345'}}
-        set register: {'a': {text: 'abc'}}
+        set register: '"': text: '345'
+        set register: 'a': text: 'abc'
         atom.clipboard.write "clip"
         keystroke 'a'
         editor.insertText '1'
