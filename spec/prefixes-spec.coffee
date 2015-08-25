@@ -1,20 +1,16 @@
 # Refactoring status: 70%
-{set, ensure, keystroke, getEditorElement} = require './spec-helper'
+{getVimState} = require './spec-helper'
 
 describe "Prefixes", ->
-  [editor, editorElement, vimState] = []
+  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
 
   beforeEach ->
-    pack = atom.packages.loadPackage('vim-mode')
-    pack.activateResources()
-
-    getEditorElement (element, init) ->
-      editorElement = element
-      editor = editorElement.getModel()
-      vimState = editorElement.vimState
+    getVimState (_vimState, vim) ->
+      vimState = _vimState
+      {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
-      init()
+      {set, ensure, keystroke} = vim
 
   describe "Repeat", ->
     describe "with operations", ->
