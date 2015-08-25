@@ -40,7 +40,6 @@ class OperationStack
     for cursor in @vimState.editor.getCursors()
       @vimState.ensureCursorIsWithinLine(cursor)
 
-  # Processes the command if the last operation is complete.
   process: ->
     debug "-> @process(): start"
 
