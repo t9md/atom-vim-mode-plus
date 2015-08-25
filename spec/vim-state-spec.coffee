@@ -1,23 +1,19 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
-{set, ensure, keystroke, getEditorElement} = require './spec-helper'
 VimState = require '../lib/vim-state'
 StatusBarManager = require '../lib/status-bar-manager'
+{getVimState} = require './spec-helper'
 
 describe "VimState", ->
-  [editor, editorElement, vimState] = []
+  [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    pack = atom.packages.loadPackage('vim-mode')
-    pack.activateResources()
-
-    getEditorElement (element, init) ->
-      editorElement = element
-      editor = editorElement.getModel()
-      vimState = editorElement.vimState
+    getVimState (_vimState, vim) ->
+      vimState = _vimState
+      {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
-      init()
+      {set, ensure, keystroke} = vim
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->
@@ -26,8 +22,8 @@ describe "VimState", ->
 
     it "puts the editor in insert-mode if startInInsertMode is true", ->
       atom.config.set 'vim-mode.startInInsertMode', true
-      editor.vimState = new VimState(editorElement, new StatusBarManager)
-      ensure classListContains: 'insert-mode'
+      getVimState (_vimState, vim) ->
+        vim.ensure classListContains: 'insert-mode'
 
   describe "::destroy", ->
     it "re-enables text input on the editor", ->

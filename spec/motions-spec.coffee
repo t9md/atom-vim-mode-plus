@@ -1,23 +1,20 @@
 # Refactoring status: 70%
-{set, ensure, keystroke, getEditorElement} = require './spec-helper'
+{getVimState} = require './spec-helper'
 
 describe "Motions", ->
-  [editor, editorElement, vimState] = []
+  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
 
   beforeEach ->
-    pack = atom.packages.loadPackage('vim-mode')
-    pack.activateResources()
-
-    getEditorElement (element, init) ->
-      editorElement = element
-      editor = editorElement.getModel()
-      vimState = editorElement.vimState
+    getVimState (_vimState, _vim) ->
+      vimState = _vimState
+      {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
-      init()
+      {set, ensure, keystroke} = _vim
 
   describe "simple motions", ->
     beforeEach ->
+      # console.log vimState
       set
         text: "12345\nabcd\nABCDE"
         cursor: [1, 1]
@@ -1259,33 +1256,30 @@ describe "Motions", ->
       ensure '2,', cursor: [0, 2]
 
     it "shares the most recent find/till command with other editors", ->
-      getEditorElement (otherEditorElement) ->
-        otherEditor = otherEditorElement.getModel()
-
+      getVimState (_vimState, other) ->
         set
           text: "a baz bar\n"
           cursor: [0, 0]
 
-        otherEditor.setText("foo bar baz")
-        otherEditor.setCursorScreenPosition([0, 0])
+        other.set text: "foo bar baz", cursor: [0, 0]
 
         # by default keyDown and such go in the usual editor
         ensure ['f', char: 'b'], cursor: [0, 2]
-        expect(otherEditor.getCursorScreenPosition()).toEqual [0, 0]
+        other.ensure cursor: [0, 0]
 
         # replay same find in the other editor
-        keystroke(';', element: otherEditorElement)
+        other.keystroke ';'
         ensure cursor: [0, 2]
-        expect(otherEditor.getCursorScreenPosition()).toEqual [0, 4]
+        other.ensure cursor: [0, 4]
 
         # do a till in the other editor
-        keystroke ['t', char: 'r'], element: otherEditorElement
+        other.keystroke ['t', char: 'r']
         ensure cursor: [0, 2]
-        expect(otherEditor.getCursorScreenPosition()).toEqual [0, 5]
+        other.ensure cursor: [0, 5]
 
         # and replay in the normal editor
         ensure ';', cursor: [0, 7]
-        expect(otherEditor.getCursorScreenPosition()).toEqual [0, 5]
+        other.ensure cursor: [0, 5]
 
   describe 'the % motion', ->
     beforeEach ->

@@ -1,21 +1,16 @@
 # Refactoring status: 80%
-helpers = require './spec-helper'
-{set, ensure, keystroke, getEditorElement} = require './spec-helper'
+{getVimState} = require './spec-helper'
 
 describe "TextObjects", ->
-  [editor, editorElement, vimState] = []
+  [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    pack = atom.packages.loadPackage('vim-mode')
-    pack.activateResources()
-
-    getEditorElement (element, init) ->
-      editorElement = element
-      editor = editorElement.getModel()
-      vimState = editorElement.vimState
+    getVimState (_vimState, vim) ->
+      vimState = _vimState
+      {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
-      init()
+      {set, ensure, keystroke} = vim
 
   describe "the 'iw' text object", ->
     beforeEach ->

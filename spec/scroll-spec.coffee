@@ -2,19 +2,16 @@
 helpers = require './spec-helper'
 
 describe "Scrolling", ->
-  [editor, editorElement, vimState] = []
+  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
+  # [editor, editorElement, vimState] = []
 
   beforeEach ->
-    pack = atom.packages.loadPackage('vim-mode')
-    pack.activateResources()
-
-    helpers.getEditorElement (element, init) ->
-      editorElement = element
-      editor = editorElement.getModel()
-      vimState = editorElement.vimState
+    helpers.getVimState (_vimState, vim) ->
+      vimState = _vimState
+      {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
-      init()
+      {set, ensure, keystroke} = vim
 
   keydown = (key, options={}) ->
     options.element ?= editorElement

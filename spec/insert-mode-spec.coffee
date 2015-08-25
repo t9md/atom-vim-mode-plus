@@ -1,20 +1,17 @@
 # Refactoring status: 80%
-{set, ensure, keystroke, getEditorElement} = require './spec-helper'
+{getVimState} = require './spec-helper'
 
 describe "Insert mode commands", ->
-  [editor, editorElement, vimState] = []
+  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
+  # [editor, editorElement, vimState] = []
 
   beforeEach ->
-    pack = atom.packages.loadPackage('vim-mode')
-    pack.activateResources()
-
-    getEditorElement (element, init) ->
-      editorElement = element
-      editor = editorElement.getModel()
-      vimState = editorElement.vimState
+    getVimState (_vimState, vim) ->
+      vimState = _vimState
+      {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
-      init()
+      {set, ensure, keystroke} = vim
 
   describe "Copy from line above/below", ->
     beforeEach ->
@@ -38,7 +35,7 @@ describe "Insert mode commands", ->
         aefghi
         """
         editor.insertText ' '
-        ensure [ctrl: 'y'], text: '''
+        ensure [ctrl: 'y'], text: """
         12345
         1 3
         abcd
