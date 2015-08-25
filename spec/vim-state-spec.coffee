@@ -1,7 +1,5 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
-VimState = require '../lib/vim-state'
-StatusBarManager = require '../lib/status-bar-manager'
 {getVimState} = require './spec-helper'
 
 describe "VimState", ->

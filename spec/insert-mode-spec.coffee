@@ -2,8 +2,7 @@
 {getVimState} = require './spec-helper'
 
 describe "Insert mode commands", ->
-  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
-  # [editor, editorElement, vimState] = []
+  [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (_vimState, vim) ->

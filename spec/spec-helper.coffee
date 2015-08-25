@@ -1,4 +1,4 @@
-# Refactoring status: 50%
+# Refactoring status: 70%
 _ = require 'underscore-plus'
 
 getVimState = (callback) ->
@@ -97,7 +97,9 @@ getVim = (vimState) ->
     @editor.setText(o.text) if o.text?
     @editor.setCursorScreenPosition o.cursor if o.cursor?
     @editor.setCursorBufferPosition o.cursorBuffer if o.cursorBuffer?
-    @editor.addCursorAtBufferPosition o.addCursor if o.addCursor?
+    if o.addCursor?
+      for point in toArray(o.addCursor, o.addCursor[0])
+        @editor.addCursorAtBufferPosition point
 
     if o.register?
       if _.isObject(o.register)
@@ -133,11 +135,13 @@ getVim = (vimState) ->
         expect(@editor.getText()).toEqual(o.text)
 
     if o.selectedText?
+      console.log (s.getText() for s in @editor.getSelections())
       expect(s.getText() for s in @editor.getSelections()).toEqual(
         toArray(o.selectedText))
 
     if o.cursor?
-      expect(@editor.getCursorScreenPosition()).toEqual(o.cursor)
+      expect(@editor.getCursorScreenPositions()).toEqual(
+        toArray(o.cursor, o.cursor[0]))
 
     if o.cursorBuffer?
       expect(@editor.getCursorBufferPositions()).toEqual(
@@ -176,10 +180,11 @@ getVim = (vimState) ->
       expect(@editor.getScrollTop()).toEqual o.scrollTop
 
     if o.called?
-      if o.called.func
-        expect(o.called.func).toHaveBeenCalledWith(o.called.with)
-      else
-        expect(o.called).toHaveBeenCalled()
+      for c in toArray(o.called)
+        if c.func
+          expect(c.func).toHaveBeenCalledWith(c.with)
+        else
+          expect(c).toHaveBeenCalled()
 
     if o.mode?
       expect(vimState.mode).toEqual o.mode
@@ -214,14 +219,18 @@ getVim = (vimState) ->
         if k.platform?
           mockPlatform(element, k.platform)
           mocked = true
-        else if k.char?  then normalModeInputKeydown k.char, {@editor}
+        else if k.char?
+          if k.char.match(/[A-Z]/)
+            normalModeInputKeydown k.char, {shift: true, @editor}
+          else
+            normalModeInputKeydown k.char, {@editor}
         else if k.chars? then submitNormalModeInputText k.chars, {@editor}
         else if k.ctrl? then keydown k.ctrl, {ctrl: true, element}
+        else if k.raw? then keydown k.raw, {raw: true, element}
         else if k.cmd? then atom.commands.dispatch(k.cmd.target, k.cmd.name)
     if mocked
       unmockPlatform(element)
 
 module.exports = {
-  keydown
   getVimState,
 }
