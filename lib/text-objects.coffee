@@ -63,31 +63,11 @@ class SelectAWholeWord extends SelectInsideWholeWord
 # -------------------------
 # [FIXME] Bug exists in following case.
 # | is coursor position.
-# expect(editor.getScrol|lTop()).toEqual options.scrollTop
+# expect(editor.getScrol|lTop( )).toEqual options.scrollTop
 class SelectInsidePair extends TextObject
   @extend()
   inclusive: false
   pair: null
-
-  findCharForward: (fromPoint, char) ->
-    @findChar(fromPoint, char, false)
-
-  findCharBackward: (fromPoint, char) ->
-    @findChar(fromPoint, char, true)
-
-  findChar: (fromPoint, char, backward=false) ->
-    if backward
-      scanRange = @rangeToBeginningOfFile(fromPoint)
-      scanFunc = 'backwardsScanInBufferRange'
-    else
-      scanRange = @rangeToEndOfFile(fromPoint)
-      scanFunc = 'scanInBufferRange'
-    pattern   = ///(?:[^\\]|^)(?:#{_.escapeRegExp(char)})///
-    point = null
-    @editor[scanFunc] pattern, scanRange, ({range, stop}) ->
-      point = range.end
-      stop()
-    point
 
   findPairClosing: (fromPoint, pair, backward=false) ->
     @findPair(fromPoint, 'closing', pair, backward)
@@ -98,8 +78,8 @@ class SelectInsidePair extends TextObject
   # which: opening or closing
   findPair: (fromPoint, which, pair, backward=false) ->
     [charOpening, charClosing] = pair.split('')
-    pair = pair.split('').map(_.escapeRegExp).join('|')
-    pattern   = ///(?:[^\\]|^)(?:#{pair})///g
+    pairRegexp = pair.split('').map(_.escapeRegExp).join('|')
+    pattern   = ///(?:#{pairRegexp})///g
     if backward
       scanRange = @rangeToBeginningOfFile(fromPoint)
       scanFunc = 'backwardsScanInBufferRange'
@@ -113,7 +93,11 @@ class SelectInsidePair extends TextObject
 
     nested = 0
     point = null
-    @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) ->
+    @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) =>
+      charPre = @editor.getTextInBufferRange(range.traverse([0, -1], [0, -1]))
+      # Skip escaped char with '\'
+      return if charPre is '\\'
+
       if charOpening is charClosing
         point = range.end
       else
