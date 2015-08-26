@@ -73,6 +73,24 @@ describe "TextObjects", ->
         text: "( something in here and in () )"
         cursor: [0, 28]
 
+    it "select inner () by skipping nesting pair", ->
+      set
+        text: 'expect(editor.getScrollTop())'
+        cursor: [0, 7]
+      ensure 'vi(', selectedText: 'editor.getScrollTop()'
+
+    it "skip escaped pair case-1", ->
+      set text: 'expect(editor.g\\(etScrollTp())', cursor: [0, 7]
+      ensure 'vi(', selectedText: 'editor.g\\(etScrollTp()'
+
+    it "skip escaped pair case-2", ->
+      set text: 'expect(editor.getSc\\)rollTp())', cursor: [0, 7]
+      ensure 'vi(', selectedText: 'editor.getSc\\)rollTp()'
+
+    it "skip escaped pair case-3", ->
+      set text: 'expect(editor.ge\\(tSc\\)rollTp())', cursor: [0, 7]
+      ensure 'vi(', selectedText: 'editor.ge\\(tSc\\)rollTp()'
+
     it "works with multiple cursors", ->
       set
         text: "( a b ) cde ( f g h ) ijk"
