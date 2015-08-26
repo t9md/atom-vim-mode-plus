@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-24T01:52:35.879Z*
+*generated at 2015-08-26T08:03:53.242Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -1039,9 +1039,6 @@ vim-mode version: 0.57.0
 *Not exported*
 - ::inclusive: ```false```
 - ::pair: ```null```
-- ::findCharForward`(fromPoint, char)`
-- ::findCharBackward`(fromPoint, char)`
-- ::findChar`(fromPoint, char, backward)`
 - ::findPairClosing`(fromPoint, pair, backward)`
 - ::findPairOpening`(fromPoint, pair, backward)`
 - ::findPair`(fromPoint, which, pair, backward)`
