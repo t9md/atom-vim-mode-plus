@@ -8,12 +8,10 @@ class InsertMode extends Base
   complete: false
   recodable: false
 
-  # Proxying request to ViewModel to get input.
   getInput: (args...) ->
     viewModel = new ViewModel(args...)
     viewModel.onDidGetInput (@input) =>
       @complete = true
-      # Now completed, so re-process me(this)!
       @vimState.operationStack.process()
 
 class InsertRegister extends InsertMode
