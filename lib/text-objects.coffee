@@ -190,68 +190,44 @@ class SelectAroundParentheses extends SelectInsideParentheses
 
 # Paragraph
 # -------------------------
-# In vim world Paragraph is defined as consecutive non-blank-line or consecutive blank-line.
-# depending on the start line is blankline or not.
-# Should change linewise selection.
-# selectExclusive = (selection, wordRegex) ->
-# In vim world Paragraph is defined as consecutive non-blank-line or consecutive blank-line.
-# depending on the start line is blankline or not.
-# Should change linewise selection.
-# [FIXME] better to use? @editor.buffer.previousNonBlankRow(currentBufferPosition.row) 
+# In Vim world Paragraph is defined as consecutive (non-)blank-line.
 class SelectInsideParagraph extends TextObject
   @extend()
 
-  isWhiteSpaceRow: (row) ->
-    /^\s*$/.test @editor.lineTextForBufferRow(row)
+  getStartRow: (startRow) ->
+    startRowIsBlank = @editor.isBufferRowBlank(startRow)
+    for row in [startRow..0]
+      return row+1 if (@editor.isBufferRowBlank(row) isnt startRowIsBlank)
+    0
 
-  getRange: (point) ->
-    pattern = if @isWhiteSpaceRow(point.row) then /^.*\S.*$/ else /^\s*?$/
-    start = @findStart(point, pattern)
-    end = @findEnd(point, pattern)
-    new Range(start, end)
+  getEndRow: (startRow) ->
+    startRowIsBlank = @editor.isBufferRowBlank(startRow)
+    lastRow = @editor.getLastBufferRow()
+    for row in [startRow..lastRow]
+      return row if (@editor.isBufferRowBlank(row) isnt startRowIsBlank)
+    lastRow
 
-  getNextRange: (point, direction) ->
-    rowTraverse = switch direction
-      when 'forward'  then +1
-      when 'backward' then -1
-    @getRange point.traverse([rowTraverse, 0])
-
-  findStart: (fromPoint, pattern) ->
-    scanRange = @rangeToBeginningOfFile(fromPoint)
-    point = null
-    @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
-      point = range.start.traverse([+1, 0])
-      stop()
-    point
-
-  findEnd: (fromPoint, pattern) ->
-    scanRange = @rangeToEndOfFile(fromPoint)
-    point = null
-    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) =>
-      point = range.start
-      stop()
-    point
+  getRange: (startRow) ->
+    new Range([@getStartRow(startRow), 0], [@getEndRow(startRow), 0])
 
   selectParagraph: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
-    selectionEndRow = selection.getBufferRange().end.row
     if startRow is endRow
-      range = @getRange(new Point(startRow, 0))
-      selection.setBufferRange(range)
+      selection.setBufferRange(@getRange(startRow))
     else # have direction
       if selection.isReversed()
-        range = @getNextRange(new Point(startRow, 0), "backward")
-        selection.selectToBufferPosition(range.start)
+        range = @getRange(startRow-1)
+        selection.selectToBufferPosition range.start
       else
-        range = @getNextRange(new Point(endRow, 0), "forward")
-        selection.selectToBufferPosition(range.end)
+        range = @getRange(endRow+1)
+        selection.selectToBufferPosition range.end
 
   select: ->
     for selection in @editor.getSelections()
       _.times @getCount(1), =>
         @selectParagraph(selection)
         @selectParagraph(selection) if @inclusive
-      not selection.isEmpty()
+        not selection.isEmpty()
 
 class SelectAroundParagraph extends SelectInsideParagraph
   @extend()
