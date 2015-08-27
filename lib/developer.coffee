@@ -119,3 +119,10 @@ class Developer
             'extend', 'getParent', 'getAncestors',
           ] # vimState have many properties, occupy DevTool console.
           recursiveInspect: Base
+
+  openInVim: ->
+    {BufferedProcess} = require 'atom'
+    {row} = @editor.getCursorBufferPosition()
+    new BufferedProcess
+      command: "/Applications/MacVim.app/Contents/MacOS/mvim"
+      args: [@editor.getPath(), "+#{row+1}"]
