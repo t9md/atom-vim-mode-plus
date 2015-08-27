@@ -30,7 +30,7 @@ class SelectWord extends TextObject
       wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
       @selectExclusive(selection, wordRegex)
       @selectInclusive(selection) if @inclusive
-    not selection.isEmpty()
+      not selection.isEmpty()
 
   selectExclusive: (selection, wordRegex) ->
     range = selection.cursor.getCurrentWordBufferRange({wordRegex})
@@ -227,7 +227,7 @@ class SelectInsideParagraph extends TextObject
       _.times @getCount(1), =>
         @selectParagraph(selection)
         @selectParagraph(selection) if @inclusive
-        not selection.isEmpty()
+      not selection.isEmpty()
 
 class SelectAroundParagraph extends SelectInsideParagraph
   @extend()
