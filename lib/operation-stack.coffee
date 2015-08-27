@@ -10,7 +10,6 @@ module.exports =
 class OperationStack
   constructor: (@vimState) ->
     @stack = []
-    @processing = false
 
   push: (op) ->
     if @isEmpty() and settings.get('debug')
@@ -18,23 +17,19 @@ class OperationStack
         console.clear()
       debug "#=== Start at #{new Date().toISOString()}"
 
-    @withLock =>
-      # Use implicit Select operator as operator.
-      if @vimState.isVisualMode() and _.isFunction(op.select)
-        debug "push INPLICIT Operators.Select"
-        @stack.push(new Select(@vimState))
+    # Use implicit Select operator as operator.
+    if @vimState.isVisualMode() and _.isFunction(op.select)
+      debug "push INPLICIT Operators.Select"
+      @stack.push(new Select(@vimState))
 
-      debug "pushing <#{op.getKind()}>"
-      @stack.push op
+    debug "pushing <#{op.getKind()}>"
+    @stack.push op
 
-      # Operate on implicit CurrentSelection TextObject.
-      if @vimState.isVisualMode() and op.isOperator()
-        debug "push INPLICIT TextObjects.CurrentSelection"
-        @stack.push(new CurrentSelection(@vimState))
-      @process()
-
-    for cursor in @vimState.editor.getCursors()
-      @vimState.ensureCursorIsWithinLine(cursor)
+    # Operate on implicit CurrentSelection TextObject.
+    if @vimState.isVisualMode() and op.isOperator()
+      debug "push INPLICIT TextObjects.CurrentSelection"
+      @stack.push(new CurrentSelection(@vimState))
+    @process()
 
   process: ->
     debug '-> @process(): start'
@@ -69,7 +64,13 @@ class OperationStack
     op = @pop()
     @vimState.history.unshift(op) if op.isRecordable()
     debug " -> <#{op.getKind()}>.execute()"
-    op.execute()
+    @vimState.withLock ->
+      op.execute()
+    # isNormalMode() check is duplicated in the check done in
+    # dontPutCursorAtEndOfLine() but I want be explicit for intention.
+    if @vimState.isNormalMode()
+      for cursor in @vimState.editor.getCursors()
+        @vimState.dontPutCursorAtEndOfLine(cursor)
     @vimState.count.reset()
     @vimState.register.reset()
     debug "#=== Finish at #{new Date().toISOString()}\n"
@@ -85,16 +86,6 @@ class OperationStack
 
   isEmpty: ->
     @stack.length is 0
-
-  isProcessing: ->
-    @processing
-
-  withLock: (callback) ->
-    try
-      @processing = true
-      callback()
-    finally
-      @processing = false
 
   isOperatorPending: ->
     not @isEmpty()

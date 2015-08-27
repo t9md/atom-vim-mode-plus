@@ -29,6 +29,7 @@ class VimState
   destroyed: false
   replaceModeListener: null
   developer: null
+  locked: false
 
   # Mode handling is delegated to modeManager
   delegatingMethods = [
@@ -77,8 +78,8 @@ class VimState
     , 100)
 
     @subscriptions.add @editor.onDidChangeCursorPosition ({cursor}) =>
-      @ensureCursorIsWithinLine(cursor)
-    @subscriptions.add @editor.onDidAddCursor @ensureCursorIsWithinLine
+      @dontPutCursorAtEndOfLine(cursor)
+    @subscriptions.add @editor.onDidAddCursor @dontPutCursorAtEndOfLine.bind(this)
 
     @editorElement.classList.add("vim-mode")
     @init()
@@ -244,14 +245,20 @@ class VimState
     Grim.deprecate("Use ::activateNormalMode instead")
     @activateNormalMode()
 
-  ensureCursorIsWithinLine: (cursor) =>
-    return if @operationStack.isProcessing() or (not @isNormalMode())
-    # # [FIXME] I'm developping in buffer 'tryit.coffee'.
-    # # So disable auto-cursor modification especially for this bufffer temporarily.
-    # return if path.basename(@editor.getPath()) is 'tryit.coffee'
+  withLock: (callback) ->
+    try
+      @locked = true
+      callback()
+    finally
+      @locked = false
 
-    {goalColumn} = cursor
+  isLocked: ->
+    @locked
+
+  dontPutCursorAtEndOfLine: (cursor) ->
+    return if @isLocked() or not @isNormalMode()
     if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
-      @operationStack.withLock -> # to ignore the cursor change (and recursion) caused by the next line
+      @withLock ->
+        {goalColumn} = cursor
         cursor.moveLeft()
-    cursor.goalColumn = goalColumn
+        cursor.goalColumn = goalColumn
