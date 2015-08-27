@@ -13,8 +13,8 @@ validNames = /[a-zA-Z*+%_"]/
 
 module.exports =
 class RegisterManager
-  constructor: (@vimState) ->
-    {@editor, @globalVimState} = @vimState
+  constructor: ->
+    @data = {}
 
   isValidName: (name) ->
     validNames.test(name)
@@ -28,13 +28,13 @@ class RegisterManager
         text = atom.clipboard.read()
         type = @getCopyType(text)
       when '%'
-        text = @editor.getURI()
+        text = atom.workspace.getActiveTextEditor().getURI()
         type = @getCopyType(text)
       when '_' # Blackhole always returns nothing
         text = ''
         type = @getCopyType(text)
       else
-        {text, type} = @globalVimState.registers[name.toLowerCase()] ? {}
+        {text, type} = @data[name.toLowerCase()] ? {}
     {text, type}
 
   # Private: Sets the value of a given register.
@@ -59,14 +59,12 @@ class RegisterManager
         if /^[A-Z]$/.test(name)
           @append(name.toLowerCase(), {text, type})
         else
-          @globalVimState.registers[name] = {text, type}
+          @data[name] = {text, type}
 
   # Private: append a value into a given register
   # like setRegister, but appends the value
   append: (name, {type, text}) ->
-    register = @globalVimState.registers[name] ?=
-      type: 'character'
-      text: ''
+    register = @data[name] ?= type: 'character', text: ''
     if 'linewise' in [register.type, type]
       if register.type isnt 'linewise'
         register.text += '\n'
@@ -80,8 +78,8 @@ class RegisterManager
   getName: ->
     @name ? settings.get('defaultRegister')
 
-  setName: ->
-    viewModel = new ViewModel this,
+  setName: (vimState) ->
+    viewModel = new ViewModel vimState,
       class: 'read-register'
       singleChar: true
       hidden: true

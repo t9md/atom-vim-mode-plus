@@ -13,7 +13,6 @@ InsertMode  = require './insert-mode'
 Scroll      = require './scroll'
 
 OperationStack  = require './operation-stack'
-RegisterManager = require './register-manager'
 CountManager    = require './count-manager'
 MarkManager     = require './mark-manager'
 ModeManager     = require './mode-manager'
@@ -54,6 +53,7 @@ class VimState
     'submode'
   ]
   @delegatesProperty delegatingProperties..., toProperty: 'modeManager'
+  @delegatesProperty 'register', toProperty: 'globalVimState'
   @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
 
   constructor: (@editorElement, @statusBarManager, @globalVimState) ->
@@ -63,7 +63,6 @@ class VimState
     @history = []
     @subscriptions.add @editor.onDidDestroy => @destroy()
 
-    @register = new RegisterManager(this)
     @count = new CountManager(this)
     @mark = new MarkManager(this)
     @operationStack = new OperationStack(this)
@@ -138,7 +137,7 @@ class VimState
       'activate-blockwise-visual-mode': => @activateVisualMode('blockwise')
       'reset-normal-mode': => @resetNormalMode()
       'set-count': (e) => @count.set(e) # 0-9
-      'set-register-name': => @register.setName() # "
+      'set-register-name': => @register.setName(this) # "
       'reverse-selections': => @reverseSelections() # o
       'undo': => @undo() # u
       'replace-mode-backspace': => @replaceModeUndo()

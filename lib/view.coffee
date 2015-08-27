@@ -2,9 +2,10 @@
 Base = require './base'
 {Emitter} = require 'atom'
 
+# [FIXME] why normalModeInputView need to be property of @editor?
 class ViewModel
-  constructor: (@operation, opts={}) ->
-    {@editor, @vimState} = @operation
+  constructor: (@vimState, opts={}) ->
+    {@editor} = @vimState
     @emitter = new Emitter
     @view = new VimNormalModeInputElement().initialize(this, opts)
     @editor.normalModeInputView = @view
@@ -81,8 +82,9 @@ class VimNormalModeInputElement extends HTMLDivElement
     @panel.destroy()
 
 class SearchViewModel extends ViewModel
+  # [FIXME] constructor argument is not consitent
   constructor: (@searchMotion) ->
-    super(@searchMotion, class: 'search')
+    super(@searchMotion.vimState, class: 'search')
     @historyIndex = -1
 
     atom.commands.add(@view.editorElement, 'core:move-up', @increaseHistorySearch)
