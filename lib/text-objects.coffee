@@ -113,23 +113,16 @@ class SelectInsidePair extends TextObject
 
   select: ->
     [charOpening, charClosing] = @pair.split('')
-    r = []
     for selection in @editor.getSelections()
       point = selection.getHeadBufferPosition()
       start = @findPairOpening(point, @pair, true)
       start ?= @findPairOpening(point, @pair)
-      unless start?
-        r.push false
-        continue
-
-      end = @findPairClosing(start, @pair)?.traverse([0, -1])
-      if start? and end?
+      if start? and (end = @findPairClosing(start, @pair)?.traverse([0, -1]))
         if @inclusive
           start = start.traverse([0, -1])
           end   = end.traverse([0, +1])
         selection.setBufferRange([start, end])
-      r.push not selection.isEmpty()
-    r
+      not selection.isEmpty()
 
 class SelectInsideDoubleQuotes extends SelectInsidePair
   @extend()
