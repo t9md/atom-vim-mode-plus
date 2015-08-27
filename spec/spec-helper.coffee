@@ -135,7 +135,6 @@ getVim = (vimState) ->
         expect(@editor.getText()).toEqual(o.text)
 
     if o.selectedText?
-      console.log (s.getText() for s in @editor.getSelections())
       expect(s.getText() for s in @editor.getSelections()).toEqual(
         toArray(o.selectedText))
 
