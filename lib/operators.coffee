@@ -47,7 +47,7 @@ class Operator extends Base
       @target.onDidComposeBy(this)
 
   getInput: (args...) ->
-    viewModel = new ViewModel(args...)
+    viewModel = new ViewModel(@vimState, args...)
     viewModel.onDidGetInput (@input) =>
       @complete = true
       @vimState.operationStack.process() # Re-process!!
@@ -189,7 +189,7 @@ class Mark extends Operator
   @extend()
   constructor: ->
     super
-    @getInput this,
+    @getInput
       class: 'mark'
       singleChar: true
       hidden: true
@@ -542,7 +542,7 @@ class Replace extends Operator
   input: null
   constructor: ->
     super
-    @getInput this,
+    @getInput
       class: 'replace'
       hidden: true
       singleChar: true

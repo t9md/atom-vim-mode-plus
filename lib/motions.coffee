@@ -105,8 +105,8 @@ class Motion extends Base
     @vimState.isVisualMode() or @operatesInclusively
 
   # Proxying request to ViewModel to get Input instance.
-  getInput: (args...) ->
-    viewModel = new ViewModel(args...)
+  getInput: (options) ->
+    viewModel = new ViewModel(@vimState, options)
     viewModel.onDidGetInput (@input) =>
       @complete = true
       @vimState.operationStack.process() # Re-process!!
@@ -511,7 +511,10 @@ class Find extends Motion
   constructor: ->
     super
     unless @repeated
-      @getInput(this, class: 'find', singleChar: true, hidden: true)
+      @getInput
+        class: 'find'
+        singleChar: true
+        hidden: true
 
   match: (cursor, count) ->
     currentPosition = cursor.getBufferPosition()
@@ -604,7 +607,10 @@ class MoveToMark extends Motion
 
   constructor: ->
     super
-    @getInput(this, class: 'move-to-mark', singleChar: true, hidden: true)
+    @getInput
+      class: 'move-to-mark',
+      singleChar: true,
+      hidden: true
 
   isLinewise: ->
     @operatesLinewise

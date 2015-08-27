@@ -8,8 +8,8 @@ class InsertMode extends Base
   complete: false
   recodable: false
 
-  getInput: (args...) ->
-    viewModel = new ViewModel(args...)
+  getInput: (options) ->
+    viewModel = new ViewModel(@vimState, options)
     viewModel.onDidGetInput (@input) =>
       @complete = true
       @vimState.operationStack.process()
@@ -18,7 +18,7 @@ class InsertRegister extends InsertMode
   @extend()
   constructor: ->
     super
-    @getInput this,
+    @getInput
       class: 'insert-register'
       singleChar: true
       hidden: true
