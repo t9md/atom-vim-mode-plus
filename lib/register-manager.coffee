@@ -21,8 +21,7 @@ class RegisterManager
 
   get: (name) ->
     return unless @isValidName(name)
-    if name is '"'
-      name = settings.get('defaultRegister')
+    name = settings.get('defaultRegister') if name is '"'
 
     switch name
       when '*', '+'
@@ -48,10 +47,8 @@ class RegisterManager
   # Returns nothing.
   set: (name, {text, type}={}) ->
     return unless @isValidName(name)
-    type = @getCopyType(text) unless type
-
-    if name is '"'
-      name = settings.get('defaultRegister')
+    type ?= @getCopyType(text)
+    name = settings.get('defaultRegister') if name is '"'
 
     switch name
       when '*', '+'
@@ -70,14 +67,12 @@ class RegisterManager
     register = @globalVimState.registers[name] ?=
       type: 'character'
       text: ''
-
-    if register.type is 'linewise' and type isnt 'linewise'
-      register.text += "#{text}\n"
-    else if register.type isnt 'linewise' and type is 'linewise'
-      register.text += "\n#{text}"
-      register.type = 'linewise'
-    else
-      register.text += text
+    if 'linewise' in [register.type, type]
+      if register.type isnt 'linewise'
+        register.text += '\n'
+        register.type = 'linewise'
+      text += '\n' if type isnt 'linewise'
+    register.text += text
 
   reset: ->
     @name = null
@@ -86,16 +81,12 @@ class RegisterManager
     @name ? settings.get('defaultRegister')
 
   setName: ->
-    viewModel = new ViewModel(this, class: 'read-register', singleChar: true, hidden: true)
-    viewModel.onDidGetInput (@input) =>
-      @name = @input
+    viewModel = new ViewModel this,
+      class: 'read-register'
+      singleChar: true
+      hidden: true
+    viewModel.onDidGetInput (@name) =>
 
-  # Public: Determines if a string should be considered linewise or character
-  #
-  # text - The string to consider
-  #
-  # Returns 'linewise' if the string ends with a line return and 'character'
-  #  otherwise.
   getCopyType: (text) ->
     if text.lastIndexOf("\n") is text.length - 1
       'linewise'
