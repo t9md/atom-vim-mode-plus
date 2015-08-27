@@ -22,6 +22,7 @@ class CurrentSelection extends TextObject
 
 # Word
 # -------------------------
+# [FIXME] Need to be extendable.
 class SelectWord extends TextObject
   @extend()
   select: ->
@@ -61,9 +62,6 @@ class SelectAWholeWord extends SelectInsideWholeWord
 
 # Pair
 # -------------------------
-# [FIXME] Bug exists in following case.
-# | is coursor position.
-# expect(editor.getScrol|lTop( )).toEqual options.scrollTop
 class SelectInsidePair extends TextObject
   @extend()
   inclusive: false
@@ -199,6 +197,7 @@ class SelectAroundParentheses extends SelectInsideParentheses
 # In vim world Paragraph is defined as consecutive non-blank-line or consecutive blank-line.
 # depending on the start line is blankline or not.
 # Should change linewise selection.
+# [FIXME] better to use? @editor.buffer.previousNonBlankRow(currentBufferPosition.row) 
 class SelectInsideParagraph extends TextObject
   @extend()
 
