@@ -443,3 +443,7 @@ describe "TextObjects", ->
         cursor: [0, 27]
         classListContains: 'normal-mode'
         classListNotContains: 'operator-pending-mode'
+
+  # [TODO] needt test by setting grammar
+  describe 'the "comment" text object', ->
+    beforeEach ->
