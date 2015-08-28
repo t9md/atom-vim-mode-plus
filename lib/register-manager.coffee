@@ -1,6 +1,4 @@
 # Refactoring status: 50%
-# TODO: make global instead of refereing globalVimState.
-# no need to instantiate per vimState.
 settings = require './settings'
 {ViewModel} = require './view'
 
@@ -8,8 +6,8 @@ validNames = /[a-zA-Z*+%_"]/
 
 module.exports =
 class RegisterManager
-  constructor: ->
-    @data = {}
+  constructor: (@vimState) ->
+    @data = @vimState.globalVimState.register
 
   isValidName: (name) ->
     validNames.test(name)
@@ -77,8 +75,8 @@ class RegisterManager
   getName: ->
     @name ? settings.get('defaultRegister')
 
-  setName: (vimState) ->
-    viewModel = new ViewModel vimState,
+  setName: ->
+    viewModel = new ViewModel @vimState,
       class: 'read-register'
       singleChar: true
       hidden: true

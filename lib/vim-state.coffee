@@ -16,6 +16,7 @@ OperationStack  = require './operation-stack'
 CountManager    = require './count-manager'
 MarkManager     = require './mark-manager'
 ModeManager     = require './mode-manager'
+RegisterManager = require './register-manager'
 
 Developer = null # delay
 
@@ -53,7 +54,6 @@ class VimState
     'submode'
   ]
   @delegatesProperty delegatingProperties..., toProperty: 'modeManager'
-  @delegatesProperty 'register', toProperty: 'globalVimState'
   @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
 
   constructor: (@editorElement, @statusBarManager, @globalVimState) ->
@@ -65,6 +65,7 @@ class VimState
 
     @count = new CountManager(this)
     @mark = new MarkManager(this)
+    @register = new RegisterManager(this)
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
 
@@ -137,7 +138,7 @@ class VimState
       'activate-blockwise-visual-mode': => @activateVisualMode('blockwise')
       'reset-normal-mode': => @resetNormalMode()
       'set-count': (e) => @count.set(e) # 0-9
-      'set-register-name': => @register.setName(this) # "
+      'set-register-name': => @register.setName() # "
       'reverse-selections': => @reverseSelections() # o
       'undo': => @undo() # u
       'replace-mode-backspace': => @replaceModeUndo()
