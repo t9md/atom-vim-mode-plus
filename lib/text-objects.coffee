@@ -218,11 +218,20 @@ class SelectInsideParagraph extends TextObject
         if range = @getRange(endRow+1)
           selection.selectToBufferPosition range.end
 
+  selectExclusive: (selection) ->
+    @selectParagraph(selection)
+
+  selectInclusive: (selection) ->
+    @selectParagraph(selection)
+    @selectParagraph(selection)
+
   select: ->
     for selection in @editor.getSelections()
       _.times @getCount(1), =>
-        @selectParagraph(selection)
-        @selectParagraph(selection) if @inclusive
+        if @inclusive
+          @selectInclusive(selection)
+        else
+          @selectExclusive(selection)
       not selection.isEmpty()
 
 class SelectAroundParagraph extends SelectInsideParagraph
@@ -231,10 +240,13 @@ class SelectAroundParagraph extends SelectInsideParagraph
 
 class SelectInsideComment extends SelectInsideParagraph
   @extend()
+  selectInclusive: (selection) ->
+    @selectParagraph(selection)
 
   getRange: (startRow) ->
     return unless @editor.isBufferRowCommented(startRow)
     fn = (row) =>
+      return if (@inclusive and @editor.isBufferRowBlank(row))
       @editor.isBufferRowCommented(row) in [false, undefined]
     startRow = @getStartRow(startRow, fn)
     endRow   = @getEndRow(startRow, fn)
@@ -244,6 +256,30 @@ class SelectInsideComment extends SelectInsideParagraph
       null
 
 class SelectAroundComment extends SelectInsideComment
+  @extend()
+  inclusive: true
+
+class SelectInsideIndent extends SelectInsideParagraph
+  @extend()
+  selectInclusive: (selection) ->
+    @selectParagraph(selection)
+
+  getRange: (startRow) ->
+    text = @editor.lineTextForBufferRow(startRow)
+    baseIndentLevel = @editor.indentLevelForLine(text)
+    fn = (row) =>
+      return if (@inclusive and @editor.isBufferRowBlank(row))
+      text = @editor.lineTextForBufferRow(row)
+      @editor.indentLevelForLine(text) < baseIndentLevel
+
+    startRow = @getStartRow(startRow, fn)
+    endRow   = @getEndRow(startRow, fn)
+    if startRow and endRow
+      new Range([startRow, 0], [endRow, 0])
+    else
+      null
+
+class SelectAroundIndent extends SelectInsideIndent
   @extend()
   inclusive: true
 
@@ -261,4 +297,5 @@ module.exports = {
   SelectInsideParentheses   , SelectAroundParentheses
   SelectInsideParagraph     , SelectAroundParagraph
   SelectInsideComment       , SelectAroundComment
+  SelectInsideIndent        , SelectAroundIndent
 }
