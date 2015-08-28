@@ -1,10 +1,11 @@
 # This
 # is
 # Comment
-# -------------------------
 
-# Comment after blank line
-# -------------------------
+# One line comment
+
+# Comment
+# border
 class quicksort
   sort: (items) ->
     return items if items.length <= 1
@@ -24,13 +25,7 @@ class quicksort
 
     sort(left).concat(pivot).concat(sort(right))
 
-
   noop: ->
   # just a noop
 
 exports.modules = quicksort
-
-  # just a noop
-  # just a noop
-  # just a noop
-  # just a noop
