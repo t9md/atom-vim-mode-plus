@@ -445,7 +445,29 @@ describe "TextObjects", ->
         classListNotContains: 'operator-pending-mode'
 
   # [TODO] needt test by setting grammar
-  describe 'the "comment" text object', ->
+  fdescribe 'the "comment" text object', ->
+    coffeeEditor = null
     beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-coffee-script')
+      waitsForPromise ->
+        atom.project.open('sample.coffee').then (e) ->
+          coffeeEditor = e
+
+    afterEach: ->
+      atom.packages.deactivatePackage('language-coffee-script')
+
+    it 'select comment block', ->
+      ensure 'vip',
+        selectedScreenRange: [[1, 0], [4, 0]]
+      ensure 'vic',
+        selectedScreenRange: [[0, 6], [0, 11]]
+
+      atom.config.set 'editor.tabLength', 6, scopeSelector: '.source.coffee'
+      console.log coffeeEditor.getText()
+
+      expect(editor.getTabLength()).toBe 2
+      expect(coffeeEditor.getTabLength()).toBe 6
+
   describe 'the "indent" text object', ->
     beforeEach ->

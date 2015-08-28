@@ -190,20 +190,19 @@ class SelectInsideParagraph extends TextObject
   getStartRow: (startRow, fn) ->
     for row in [startRow..0] when fn(row)
       return row+1
-    null
+    0
 
   getEndRow: (startRow, fn) ->
-    for row in [startRow..@editor.getLastBufferRow()] when fn(row)
+    lastRow = @editor.getLastBufferRow()
+    for row in [startRow..lastRow] when fn(row)
       return row
-    null
+    lastRow+1
 
   getRange: (startRow) ->
     startRowIsBlank = @editor.isBufferRowBlank(startRow)
     fn = (row) =>
       @editor.isBufferRowBlank(row) isnt startRowIsBlank
-    startRow = @getStartRow(startRow, fn) ? 0
-    endRow   = @getEndRow(startRow, fn) ? @editor.getLastBufferRow()
-    new Range([startRow, 0], [endRow, 0])
+    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
   selectParagraph: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
@@ -248,12 +247,7 @@ class SelectInsideComment extends SelectInsideParagraph
     fn = (row) =>
       return if (@inclusive and @editor.isBufferRowBlank(row))
       @editor.isBufferRowCommented(row) in [false, undefined]
-    startRow = @getStartRow(startRow, fn)
-    endRow   = @getEndRow(startRow, fn)
-    if startRow and endRow
-      new Range([startRow, 0], [endRow, 0])
-    else
-      null
+    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
 class SelectAroundComment extends SelectInsideComment
   @extend()
@@ -265,19 +259,16 @@ class SelectInsideIndent extends SelectInsideParagraph
     @selectParagraph(selection)
 
   getRange: (startRow) ->
+    return if @editor.isBufferRowBlank(startRow)
     text = @editor.lineTextForBufferRow(startRow)
     baseIndentLevel = @editor.indentLevelForLine(text)
     fn = (row) =>
-      return if (@inclusive and @editor.isBufferRowBlank(row))
-      text = @editor.lineTextForBufferRow(row)
-      @editor.indentLevelForLine(text) < baseIndentLevel
-
-    startRow = @getStartRow(startRow, fn)
-    endRow   = @getEndRow(startRow, fn)
-    if startRow and endRow
-      new Range([startRow, 0], [endRow, 0])
-    else
-      null
+      if @editor.isBufferRowBlank(row)
+        if @inclusive then false else true
+      else
+        text = @editor.lineTextForBufferRow(row)
+        @editor.indentLevelForLine(text) < baseIndentLevel
+    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
 class SelectAroundIndent extends SelectInsideIndent
   @extend()
