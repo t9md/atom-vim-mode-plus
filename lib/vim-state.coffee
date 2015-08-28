@@ -69,13 +69,15 @@ class VimState
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
 
-    @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
+    handleSelectionChange = _.debounce =>
       return unless @editor?
-      if @editor.getSelections().every((selection) -> selection.isEmpty())
+      if @editor.getSelections().every((s) -> s.isEmpty())
         @activateNormalMode() if @isVisualMode()
       else
         @activateVisualMode('characterwise') if @isNormalMode()
-    , 100)
+    , 100
+
+    @subscriptions.add @editor.onDidChangeSelectionRange handleSelectionChange
 
     @subscriptions.add @editor.onDidChangeCursorPosition ({cursor}) =>
       @dontPutCursorAtEndOfLine(cursor)
