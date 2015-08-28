@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-26T08:03:53.242Z*
+*generated at 2015-08-28T06:15:19.286Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -129,6 +129,10 @@ vim-mode version: 0.57.0
         - [SelectAroundTags](#selectaroundtags--selectinsidetags)
     - [SelectInsideParagraph](#selectinsideparagraph--textobject)
       - [SelectAroundParagraph](#selectaroundparagraph--selectinsideparagraph)
+      - [SelectInsideComment](#selectinsidecomment--selectinsideparagraph)
+        - [SelectAroundComment](#selectaroundcomment--selectinsidecomment)
+      - [SelectInsideIndent](#selectinsideindent--selectinsideparagraph)
+        - [SelectAroundIndent](#selectaroundindent--selectinsideindent)
     - [SelectWord](#selectword--textobject) *Not exported*
       - [SelectInsideWholeWord](#selectinsidewholeword--selectword)
         - [SelectAWholeWord](#selectawholeword--selectinsidewholeword)
@@ -258,6 +262,10 @@ vim-mode version: 0.57.0
 - ::isSelectAroundParentheses`()`
 - ::isSelectInsideParagraph`()`
 - ::isSelectAroundParagraph`()`
+- ::isSelectInsideComment`()`
+- ::isSelectAroundComment`()`
+- ::isSelectInsideIndent`()`
+- ::isSelectAroundIndent`()`
 - ::isInsertMode`()`
 - ::isInsertRegister`()`
 - ::isCopyFromLineAbove`()`
@@ -280,7 +288,7 @@ vim-mode version: 0.57.0
 *Not exported*
 - ::complete: ```false```: **Overridden**
 - ::recodable: ```false```: **Overridden**
-- ::getInput`()`
+- ::getInput`(options)`
 
 ### CopyFromLineAbove < InsertMode
 - command: `vim-mode:copy-from-line-above`
@@ -315,7 +323,7 @@ vim-mode version: 0.57.0
 - ::moveSelection`(selection, options)`
 - ::isLinewise`()`
 - ::isInclusive`()`
-- ::getInput`()`
+- ::getInput`(options)`
 
 ### Find < Motion
 - command: `vim-mode:find`
@@ -1153,18 +1161,44 @@ vim-mode version: 0.57.0
 - command: `vim-mode:select-inside-paragraph`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i p</kbd>
-- ::isWhiteSpaceRow`(row)`
-- ::getRange`(point)`
-- ::getNextRange`(point, direction)`
-- ::findStart`(fromPoint, pattern)`
-- ::findEnd`(fromPoint, pattern)`
+- ::getStartRow`(startRow, fn)`
+- ::getEndRow`(startRow, fn)`
+- ::getRange`(startRow)`
 - ::selectParagraph`(selection)`
+- ::selectExclusive`(selection)`
+- ::selectInclusive`(selection)`
 - ::select`()`
 
 ### SelectAroundParagraph < SelectInsideParagraph
 - command: `vim-mode:select-around-paragraph`
 - keymaps
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a p</kbd>
+- ::inclusive: ```true```
+
+### SelectInsideComment < SelectInsideParagraph
+- command: `vim-mode:select-inside-comment`
+- keymaps
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i c</kbd>
+- ::selectInclusive`(selection)`: **Overridden**
+- ::getRange`(startRow)`: **Overridden**
+
+### SelectAroundComment < SelectInsideComment
+- command: `vim-mode:select-around-comment`
+- keymaps
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a c</kbd>
+- ::inclusive: ```true```
+
+### SelectInsideIndent < SelectInsideParagraph
+- command: `vim-mode:select-inside-indent`
+- keymaps
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i i</kbd>
+- ::selectInclusive`(selection)`: **Overridden**
+- ::getRange`(startRow)`: **Overridden**
+
+### SelectAroundIndent < SelectInsideIndent
+- command: `vim-mode:select-around-indent`
+- keymaps
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a i</kbd>
 - ::inclusive: ```true```
 
 ### SelectWord < TextObject
