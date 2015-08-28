@@ -4,11 +4,6 @@
 settings = require './settings'
 {ViewModel} = require './view'
 
-# Private: Fetches the value of a given register.
-#
-# name - The name of the register to fetch.
-#
-# Returns the value of the given register or undefined
 validNames = /[a-zA-Z*+%_"]/
 
 module.exports =
@@ -45,32 +40,36 @@ class RegisterManager
   #  type: (optional) if ommited automatically set from text.
   #
   # Returns nothing.
-  set: (name, {text, type}={}) ->
+  set: (name, value={}) ->
     return unless @isValidName(name)
-    type ?= @getCopyType(text)
+    value.type ?= @getCopyType(value.text)
     name = settings.get('defaultRegister') if name is '"'
 
     switch name
       when '*', '+'
-        atom.clipboard.write(text)
+        atom.clipboard.write(value.text)
       when '_', '%'
         null
       else
         if /^[A-Z]$/.test(name)
-          @append(name.toLowerCase(), {text, type})
+          @append(name.toLowerCase(), value)
         else
-          @data[name] = {text, type}
+          @data[name] = value
 
   # Private: append a value into a given register
   # like setRegister, but appends the value
-  append: (name, {type, text}) ->
-    register = @data[name] ?= type: 'character', text: ''
-    if 'linewise' in [register.type, type]
+  append: (name, value) ->
+    unless register = @data[name]
+      @data[name] = value
+      return
+
+    if 'linewise' in [register.type, value.type]
       if register.type isnt 'linewise'
         register.text += '\n'
         register.type = 'linewise'
-      text += '\n' if type isnt 'linewise'
-    register.text += text
+      if value.type isnt 'linewise'
+        value.text += '\n'
+    register.text += value.text
 
   reset: ->
     @name = null
