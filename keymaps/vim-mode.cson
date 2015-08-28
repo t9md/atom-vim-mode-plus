@@ -80,6 +80,7 @@
   'C': 'vim-mode:change-to-last-character-of-line'
   'S': 'vim-mode:substitute-line'
   'r': 'vim-mode:replace'
+  # '_': 'vim-mode:replace-with-register'
   'I': 'vim-mode:insert-at-beginning-of-line'
   '>': 'vim-mode:indent'
   '<': 'vim-mode:outdent'

@@ -1433,3 +1433,7 @@ describe "Operators", ->
       ensure 'R', classListContains: ['insert-mode', 'replace-mode']
       editor.insertText "\n"
       ensure 'escape', text: "12\n345\n67890"
+
+  # [TODO]
+  describe 'ReplaceWithRegister', ->
+    beforeEach ->
