@@ -444,30 +444,81 @@ describe "TextObjects", ->
         classListContains: 'normal-mode'
         classListNotContains: 'operator-pending-mode'
 
-  # [TODO] needt test by setting grammar
-  fdescribe 'the "comment" text object', ->
+  describe 'the "comment" text object', ->
     coffeeEditor = null
+    vim = null
     beforeEach ->
       waitsForPromise ->
         atom.packages.activatePackage('language-coffee-script')
-      waitsForPromise ->
-        atom.project.open('sample.coffee').then (e) ->
-          coffeeEditor = e
 
-    afterEach: ->
+      getVimState 'sample.coffee', (_vimState, _vim) ->
+        coffeeEditor = _vimState.editor
+        _vimState.activateNormalMode()
+        _vimState.resetNormalMode()
+        vim = _vim
+
+    afterEach ->
       atom.packages.deactivatePackage('language-coffee-script')
 
-    it 'select comment block', ->
-      ensure 'vip',
-        selectedScreenRange: [[1, 0], [4, 0]]
-      ensure 'vic',
-        selectedScreenRange: [[0, 6], [0, 11]]
+    describe 'select inside comment', ->
+      it 'select inside comment block', ->
+        vim.set cursor: [0, 0]
+        vim.ensure 'vic',
+          selectedText: '# This\n# is\n# Comment\n'
+          selectedBufferRange: [[0, 0], [3, 0]]
 
-      atom.config.set 'editor.tabLength', 6, scopeSelector: '.source.coffee'
-      console.log coffeeEditor.getText()
+      it 'select one line comment', ->
+        vim.set cursor: [4, 0]
+        vim.ensure 'vic',
+          selectedText: '# One line comment\n'
+          selectedBufferRange: [[4, 0], [5, 0]]
 
-      expect(editor.getTabLength()).toBe 2
-      expect(coffeeEditor.getTabLength()).toBe 6
+      it 'not select non-comment line', ->
+        vim.set cursor: [6, 0]
+        vim.ensure 'vic',
+          selectedText: '# Comment\n# border\n'
+          selectedBufferRange: [[6, 0], [8, 0]]
+
+    describe 'select around comment', ->
+      it 'include blank line when selecting comment', ->
+        vim.set cursor: [0, 0]
+        vim.ensure 'vac',
+          selectedText: """
+          # This
+          # is
+          # Comment
+
+          # One line comment
+
+          # Comment
+          # border\n
+          """
+          selectedBufferRange: [[0, 0], [8, 0]]
 
   describe 'the "indent" text object', ->
+    coffeeEditor = null
+    vim = null
     beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-coffee-script')
+
+      getVimState 'sample.coffee', (_vimState, _vim) ->
+        coffeeEditor = _vimState.editor
+        _vimState.activateNormalMode()
+        _vimState.resetNormalMode()
+        vim = _vim
+
+    afterEach ->
+      atom.packages.deactivatePackage('language-coffee-script')
+
+    describe 'select inside indent', ->
+      it 'select lines with deeper indent-level', ->
+        vim.set cursor: [12, 0]
+        vim.ensure 'vii',
+          selectedBufferRange: [[12, 0], [15, 0]]
+
+    describe 'select around indent', ->
+      it 'wont stop on blank line when selecting indent', ->
+        vim.set cursor: [12, 0]
+        vim.ensure 'vai',
+          selectedBufferRange: [[10, 0], [27, 0]]

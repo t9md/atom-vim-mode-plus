@@ -1,14 +1,21 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
 
-getVimState = (callback) ->
+getVimState = (args...) ->
+  [file, callback] = []
+  switch args.length
+    when 1 then [callback] = args
+    when 2 then [file, callback] = args
+
   editor = null
 
   waitsForPromise ->
     atom.packages.activatePackage('vim-mode')
 
   waitsForPromise ->
-    atom.workspace.open().then (e) ->
+    if file
+      file = atom.project.resolvePath('sample.coffee')
+    atom.workspace.open(file).then (e) ->
       editor = e
 
   runs ->

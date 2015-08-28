@@ -261,7 +261,7 @@ class VimState
 
   dontPutCursorAtEndOfLine: (cursor) ->
     return if @isLocked() or not @isNormalMode()
-    if @editor.getPath().endsWith 'tryit.coffee'
+    if @editor.getPath()?.endsWith 'tryit.coffee'
       return
     if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
       @withLock ->
