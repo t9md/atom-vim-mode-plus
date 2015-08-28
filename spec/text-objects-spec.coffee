@@ -447,3 +447,5 @@ describe "TextObjects", ->
   # [TODO] needt test by setting grammar
   describe 'the "comment" text object', ->
     beforeEach ->
+  describe 'the "indent" text object', ->
+    beforeEach ->

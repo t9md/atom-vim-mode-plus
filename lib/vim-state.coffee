@@ -158,6 +158,7 @@ class VimState
       'select-inside-back-ticks'     , 'select-around-back-ticks',
       'select-inside-paragraph'      , 'select-around-paragraph',
       'select-inside-comment'        , 'select-around-comment',
+      'select-inside-indent'         , 'select-around-indent',
       'select-inside-curly-brackets' , 'select-around-curly-brackets',
       'select-inside-angle-brackets' , 'select-around-angle-brackets',
       'select-inside-square-brackets', 'select-around-square-brackets',

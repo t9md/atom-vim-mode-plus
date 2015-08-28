@@ -200,6 +200,7 @@
   'i b': 'vim-mode:select-inside-parentheses'
   'i p': 'vim-mode:select-inside-paragraph'
   'i c': 'vim-mode:select-inside-comment'
+  'i i': 'vim-mode:select-inside-indent'
   'a w': 'vim-mode:select-a-word'
   'a W': 'vim-mode:select-a-whole-word'
   'a "': 'vim-mode:select-around-double-quotes'
@@ -217,6 +218,7 @@
   'a b': 'vim-mode:select-around-parentheses'
   'a p': 'vim-mode:select-around-paragraph'
   'a c': 'vim-mode:select-around-comment'
+  'a i': 'vim-mode:select-around-indent'
   'x': 'vim-mode:reset-normal-mode'
 
   # works as linewise
