@@ -187,33 +187,36 @@ class SelectAroundParentheses extends SelectInsideParentheses
 class SelectInsideParagraph extends TextObject
   @extend()
 
-  getStartRow: (startRow) ->
-    startRowIsBlank = @editor.isBufferRowBlank(startRow)
-    for row in [startRow..0]
-      return row+1 if (@editor.isBufferRowBlank(row) isnt startRowIsBlank)
-    0
+  getStartRow: (startRow, fn) ->
+    for row in [startRow..0] when fn(row)
+      return row+1
+    null
 
-  getEndRow: (startRow) ->
-    startRowIsBlank = @editor.isBufferRowBlank(startRow)
-    lastRow = @editor.getLastBufferRow()
-    for row in [startRow..lastRow]
-      return row if (@editor.isBufferRowBlank(row) isnt startRowIsBlank)
-    lastRow
+  getEndRow: (startRow, fn) ->
+    for row in [startRow..@editor.getLastBufferRow()] when fn(row)
+      return row
+    null
 
   getRange: (startRow) ->
-    new Range([@getStartRow(startRow), 0], [@getEndRow(startRow), 0])
+    startRowIsBlank = @editor.isBufferRowBlank(startRow)
+    fn = (row) =>
+      @editor.isBufferRowBlank(row) isnt startRowIsBlank
+    startRow = @getStartRow(startRow, fn) ? 0
+    endRow   = @getEndRow(startRow, fn) ? @editor.getLastBufferRow()
+    new Range([startRow, 0], [endRow, 0])
 
   selectParagraph: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
     if startRow is endRow
-      selection.setBufferRange(@getRange(startRow))
+      if range = @getRange(startRow)
+        selection.setBufferRange(range)
     else # have direction
       if selection.isReversed()
-        range = @getRange(startRow-1)
-        selection.selectToBufferPosition range.start
+        if range = @getRange(startRow-1)
+          selection.selectToBufferPosition range.start
       else
-        range = @getRange(endRow+1)
-        selection.selectToBufferPosition range.end
+        if range = @getRange(endRow+1)
+          selection.selectToBufferPosition range.end
 
   select: ->
     for selection in @editor.getSelections()
@@ -223,6 +226,24 @@ class SelectInsideParagraph extends TextObject
       not selection.isEmpty()
 
 class SelectAroundParagraph extends SelectInsideParagraph
+  @extend()
+  inclusive: true
+
+class SelectInsideComment extends SelectInsideParagraph
+  @extend()
+
+  getRange: (startRow) ->
+    return unless @editor.isBufferRowCommented(startRow)
+    fn = (row) =>
+      @editor.isBufferRowCommented(row) in [false, undefined]
+    startRow = @getStartRow(startRow, fn)
+    endRow   = @getEndRow(startRow, fn)
+    if startRow and endRow
+      new Range([startRow, 0], [endRow, 0])
+    else
+      null
+
+class SelectAroundComment extends SelectInsideComment
   @extend()
   inclusive: true
 
@@ -239,4 +260,5 @@ module.exports = {
   SelectInsideSquareBrackets, SelectAroundSquareBrackets
   SelectInsideParentheses   , SelectAroundParentheses
   SelectInsideParagraph     , SelectAroundParagraph
+  SelectInsideComment       , SelectAroundComment
 }
