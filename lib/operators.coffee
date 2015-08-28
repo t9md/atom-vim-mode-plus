@@ -13,7 +13,6 @@ Base = require './base'
   MoveToRelativeLine
 } = require './motions'
 
-
 class OperatorError extends Base
   @extend()
   constructor: (@message) ->
@@ -322,6 +321,17 @@ class PutAfter extends Put
   @extend()
   location: 'after'
 
+class ReplaceWithRegister extends Operator
+  @extend()
+  execute: ->
+    if _.any @target.select()
+      points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
+      @editor.replaceSelectedText {}, (text) =>
+        @vimState.register.get(@getRegisterName())?.text ? text
+      ranges = (new Range(p, p) for p in points)
+      @editor.setSelectedBufferRanges(ranges)
+    @vimState.activateNormalMode()
+
 # Input
 # -------------------------
 # The operation for text entered in input mode. Broadly speaking, input
@@ -626,4 +636,6 @@ module.exports = {
   # [FIXME] Only to map from command-name. remove in future.
   ActivateInsertMode
   ActivateReplaceMode
+
+  ReplaceWithRegister
 }

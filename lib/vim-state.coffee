@@ -207,6 +207,7 @@ class VimState
       'indent', 'outdent', 'auto-indent',
       'increase', 'decrease',
       'repeat', 'mark', 'replace',
+      'replace-with-register'
     ]
 
     @registerOperationCommands Scroll, [
