@@ -13,6 +13,7 @@ class RegisterManager
     validNames.test(name)
 
   get: (name) ->
+    name ?= @getName()
     return unless @isValidName(name)
     name = settings.get('defaultRegister') if name is '"'
 
@@ -38,10 +39,16 @@ class RegisterManager
   #  type: (optional) if ommited automatically set from text.
   #
   # Returns nothing.
-  set: (name, value={}) ->
+  set: (args...) ->
+    [name, value] = []
+    switch args.length
+      when 1 then [value] = args
+      when 2 then [name, value] = args
+
+    name ?= @getName()
     return unless @isValidName(name)
-    value.type ?= @getCopyType(value.text)
     name = settings.get('defaultRegister') if name is '"'
+    value.type ?= @getCopyType(value.text)
 
     switch name
       when '*', '+'
