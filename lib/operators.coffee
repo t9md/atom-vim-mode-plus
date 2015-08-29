@@ -51,14 +51,11 @@ class Operator extends Base
       @complete = true
       @vimState.operationStack.process() # Re-process!!
 
-  getRegisterName: ->
-    @vimState.register.getName()
-
   setTextToRegister: (text) ->
     if @target?.isLinewise?() and not text.endsWith('\n')
       text += "\n"
     if text
-      @vimState.register.set(@getRegisterName(), {text})
+      @vimState.register.set({text})
 
   execute: ->
     @editor.transact =>
@@ -261,7 +258,7 @@ class Put extends Operator
   register: null
   complete: true
   execute: ->
-    {text, type} = @vimState.register.get(@getRegisterName()) ? {}
+    {text, type} = @vimState.register.get()
     return unless text
 
     text = _.multiplyString(text, @getCount(1))
@@ -327,7 +324,7 @@ class ReplaceWithRegister extends Operator
     if _.any @target.select()
       points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
       @editor.replaceSelectedText {}, (text) =>
-        @vimState.register.get(@getRegisterName())?.text ? text
+        @vimState.register.get().text ? text
       ranges = (new Range(p, p) for p in points)
       @editor.setSelectedBufferRanges(ranges)
     @vimState.activateNormalMode()
