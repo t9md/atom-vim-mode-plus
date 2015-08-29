@@ -1434,6 +1434,45 @@ describe "Operators", ->
       editor.insertText "\n"
       ensure 'escape', text: "12\n345\n67890"
 
-  # [TODO]
   describe 'ReplaceWithRegister', ->
+    originalText = null
     beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode:not(.insert-mode)':
+          '_': 'vim-mode:replace-with-register'
+
+      originalText = """
+      abc def 'aaa'
+      here (parenthesis)
+      here (parenthesis)
+      """
+      set
+        text: originalText
+        cursor: [0, 9]
+
+      set register: {'"': text: 'default register', type: 'character'}
+      set register: {'a': text: 'A register', type: 'character'}
+
+    it "replace selection with regisgter's content", ->
+      ensure 'viw',
+        selectedText: 'aaa'
+      ensure '_',
+        mode: 'normal'
+        text: originalText.replace('aaa', 'default register')
+
+    it "replace text object with regisgter's content", ->
+      set cursor: [1, 6]
+      ensure '_i(',
+        mode: 'normal'
+        text: originalText.replace('parenthesis', 'default register')
+
+    it "can repeat", ->
+      ensure '_i(j.',
+        mode: 'normal'
+        text: originalText.replace(/parenthesis/g, 'default register')
+
+    it "can use specified register to replace with", ->
+      set cursor: [1, 6]
+      ensure ['"', char: 'a', '_i('],
+        mode: 'normal'
+        text: originalText.replace('parenthesis', 'A register')
