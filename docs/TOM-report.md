@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-08-28T06:15:19.286Z*
+*generated at 2015-08-29T08:57:11.924Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -87,6 +87,7 @@ vim-mode version: 0.57.0
       - [PutBefore](#putbefore--put)
     - [Repeat](#repeat--operator)
     - [Replace](#replace--operator)
+    - [ReplaceWithRegister](#replacewithregister--operator)
     - [Select](#select--operator)
     - [ToggleCase](#togglecase--operator)
       - [LowerCase](#lowercase--togglecase)
@@ -224,6 +225,7 @@ vim-mode version: 0.57.0
 - ::isPut`()`
 - ::isPutBefore`()`
 - ::isPutAfter`()`
+- ::isReplaceWithRegister`()`
 - ::isInsert`()`
 - ::isReplaceMode`()`
 - ::isInsertAfter`()`
@@ -897,6 +899,10 @@ vim-mode version: 0.57.0
 - ::constructor`()`: `super`: **Overridden**
 - ::input: ```null```
 - ::isComplete`()`: **Overridden**
+- ::execute`()`: **Overridden**
+
+### ReplaceWithRegister < Operator
+- command: `vim-mode:replace-with-register`
 - ::execute`()`: **Overridden**
 
 ### Select < Operator
