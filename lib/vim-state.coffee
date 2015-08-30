@@ -71,15 +71,10 @@ class VimState
 
     handleSelectionChange = _.debounce =>
       return unless @editor?
-      selections = @editor.getSelections()
-      switch
-        when selections.every((s) -> s.isEmpty())
-          @activateNormalMode() if @isVisualMode()
-        when selections.every((s) -> s.linewise)
-          unless (@isVisualMode() and @submode is 'linewise')
-            @activateVisualMode('linewise')
-        else
-          @activateVisualMode('characterwise') if @isNormalMode()
+      if @editor.getSelections().every((s) -> s.isEmpty())
+        @activateNormalMode() if @isVisualMode()
+      else
+        @activateVisualMode('characterwise') if @isNormalMode()
     , 100
 
     @subscriptions.add @editor.onDidChangeSelectionRange handleSelectionChange
