@@ -14,11 +14,11 @@ class TextObject extends Base
   rangeToEndOfFile: (point) ->
     new Range(point, Point.INFINITY)
 
-class CurrentSelection extends TextObject
-  @extend()
-  select: ->
-    _.times @getCount(1), ->
-      true
+# class CurrentSelection extends TextObject
+#   @extend()
+#   select: ->
+#     _.times @getCount(1), ->
+#       true
 
 # Word
 # -------------------------
@@ -259,7 +259,7 @@ class SelectAroundIndent extends SelectInsideIndent
   inclusive: true
 
 module.exports = {
-  CurrentSelection
+  # CurrentSelection
   SelectInsideWord          , SelectAWord
   SelectInsideWholeWord     , SelectAWholeWord
   SelectInsideDoubleQuotes  , SelectAroundDoubleQuotes
