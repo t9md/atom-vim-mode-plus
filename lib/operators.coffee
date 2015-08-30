@@ -353,37 +353,28 @@ class InsertAtBeginningOfLine extends Insert
     @editor.moveToFirstCharacterOfLine()
     super
 
+# FIXME need support count
 class InsertAboveWithNewline extends Insert
   @extend()
-  # FIXME need support count
+  direction: 'above'
   execute: ->
     @vimState.setInsertionCheckpoint() unless @typedText?
-    @editor.insertNewlineAbove()
+    switch @direction
+      when 'above' then @editor.insertNewlineAbove()
+      when 'below' then @editor.insertNewlineBelow()
     @editor.getLastCursor().skipLeadingWhitespace()
 
     if @typedText?
       # We'll have captured the inserted newline, but we want to do that
       # over again by hand, or differing indentations will be wrong.
       @typedText = @typedText.trimLeft()
-      return super
+      super
+    else
+      @vimState.activateInsertMode()
 
-    @vimState.activateInsertMode()
-
-class InsertBelowWithNewline extends Insert
+class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
-  # FIXME need support count
-  execute: ->
-    @vimState.setInsertionCheckpoint() unless @typedText?
-    @editor.insertNewlineBelow()
-    @editor.getLastCursor().skipLeadingWhitespace()
-
-    if @typedText
-      # We'll have captured the inserted newline, but we want to do that
-      # over again by hand, or differing indentations will be wrong.
-      @typedText = @typedText.trimLeft()
-      return super
-
-    @vimState.activateInsertMode()
+  direction: 'below'
 
 #
 # Delete the following motion and enter insert mode to replace it.
