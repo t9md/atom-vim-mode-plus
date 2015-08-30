@@ -67,61 +67,45 @@ class SelectInsidePair extends TextObject
   inclusive: false
   pair: null
 
-  findPairClosing: (fromPoint, pair, backward=false) ->
-    @findPair(fromPoint, 'closing', pair, backward)
-
-  findPairOpening: (fromPoint, pair, backward=false) ->
-    @findPair(fromPoint, 'opening', pair, backward)
-
-  # which: opening or closing
-  findPair: (fromPoint, which, pair, backward=false) ->
-    [charOpening, charClosing] = pair.split('')
-    pairRegexp = pair.split('').map(_.escapeRegExp).join('|')
+  findPair: (fromPoint, pair, backward=false) ->
+    [search, searchPair] = pair
+    pairRegexp = pair.map(_.escapeRegExp).join('|')
     pattern   = ///(?:#{pairRegexp})///g
-    if backward
-      scanRange = @rangeToBeginningOfFile(fromPoint)
-      scanFunc = 'backwardsScanInBufferRange'
-    else
-      scanRange = @rangeToEndOfFile(fromPoint)
-      scanFunc = 'scanInBufferRange'
 
-    switch which
-      when 'opening' then [searching, searchingPair] = [charOpening, charClosing]
-      when 'closing' then [searching, searchingPair] = [charClosing, charOpening]
+    [scanFunc, scanRange] =
+      if backward
+        ['backwardsScanInBufferRange', @rangeToBeginningOfFile(fromPoint)]
+      else
+        ['scanInBufferRange', @rangeToEndOfFile(fromPoint)]
 
-    nested = 0
+    nest = 0
     point = null
     @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) =>
       charPre = @editor.getTextInBufferRange(range.traverse([0, -1], [0, -1]))
-      # Skip escaped char with '\'
-      return if charPre is '\\'
-
-      if charOpening is charClosing
+      return if charPre is '\\' # Skip escaped char with '\'
+      if search is searchPair
         point = range.end
       else
         lastChar = matchText[matchText.length-1]
         switch lastChar
-          when searching
-            if nested is 0
-              point = range.end
-            else
-              nested--
-          when searchingPair
-            nested++
+          when search
+            if (nest is 0) then point = range.end else nest--
+          when searchPair
+            nest++
       stop() if point
     point
 
   select: ->
-    [charOpening, charClosing] = @pair.split('')
+    pair = @pair.split('')
+    pairReversed = pair.slice().reverse()
     for selection in @editor.getSelections()
-      point = selection.getHeadBufferPosition()
-      start = @findPairOpening(point, @pair, true)
-      start ?= @findPairOpening(point, @pair)
-      if start? and (end = @findPairClosing(start, @pair)?.traverse([0, -1]))
-        if @inclusive
-          start = start.traverse([0, -1])
-          end   = end.traverse([0, +1])
-        selection.setBufferRange([start, end])
+      point  = selection.getHeadBufferPosition()
+      start  = @findPair(point, pair, true)
+      start ?= @findPair(point, pair)
+      if start? and (end = @findPair(start, pairReversed)?.traverse([0, -1]))
+        range = new Range(start, end)
+        range = range.translate([0, -1], [0, 1]) if @inclusive
+        selection.setBufferRange(range)
       not selection.isEmpty()
 
 class SelectInsideDoubleQuotes extends SelectInsidePair
