@@ -297,21 +297,20 @@ class ReplaceWithRegister extends Operator
 class Insert extends Operator
   @extend()
   complete: true
+  typedText: null
 
   confirmChanges: (changes) ->
     bundler = new TransactionBundler(changes, @editor)
     @typedText = bundler.buildInsertText()
 
   execute: ->
-    if @typingCompleted
-      return unless @typedText? and @typedText.length > 0
+    if @typedText?
+      return unless @typedText
       @editor.insertText(@typedText, normalizeLineEndings: true, autoIndent: true)
-      for cursor in @editor.getCursors()
-        cursor.moveLeft() unless cursor.isAtBeginningOfLine()
+      for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
+        cursor.moveLeft()
     else
       @vimState.activateInsertMode()
-      @typingCompleted = true
-    return
 
   inputOperator: ->
     true
@@ -320,8 +319,8 @@ class ReplaceMode extends Insert
   @extend()
 
   execute: ->
-    if @typingCompleted
-      return unless @typedText? and @typedText.length > 0
+    if @typedText?
+      return unless @typedText
       @editor.transact =>
         @editor.insertText(@typedText, normalizeLineEndings: true)
         toDelete = @typedText.length - @countChars('\n', @typedText)
@@ -332,7 +331,6 @@ class ReplaceMode extends Insert
           cursor.moveLeft() unless cursor.isAtBeginningOfLine()
     else
       @vimState.activateReplaceMode()
-      @typingCompleted = true
 
   countChars: (char, string) ->
     string.split(char).length - 1
@@ -352,7 +350,6 @@ class InsertAfterEndOfLine extends Insert
 class InsertAtBeginningOfLine extends Insert
   @extend()
   execute: ->
-    @editor.moveToBeginningOfLine()
     @editor.moveToFirstCharacterOfLine()
     super
 
@@ -360,35 +357,33 @@ class InsertAboveWithNewline extends Insert
   @extend()
   # FIXME need support count
   execute: ->
-    @vimState.setInsertionCheckpoint() unless @typingCompleted
+    @vimState.setInsertionCheckpoint() unless @typedText?
     @editor.insertNewlineAbove()
     @editor.getLastCursor().skipLeadingWhitespace()
 
-    if @typingCompleted
+    if @typedText?
       # We'll have captured the inserted newline, but we want to do that
       # over again by hand, or differing indentations will be wrong.
       @typedText = @typedText.trimLeft()
       return super
 
     @vimState.activateInsertMode()
-    @typingCompleted = true
 
 class InsertBelowWithNewline extends Insert
   @extend()
   # FIXME need support count
   execute: ->
-    @vimState.setInsertionCheckpoint() unless @typingCompleted
+    @vimState.setInsertionCheckpoint() unless @typedText?
     @editor.insertNewlineBelow()
     @editor.getLastCursor().skipLeadingWhitespace()
 
-    if @typingCompleted
+    if @typedText
       # We'll have captured the inserted newline, but we want to do that
       # over again by hand, or differing indentations will be wrong.
       @typedText = @typedText.trimLeft()
       return super
 
     @vimState.activateInsertMode()
-    @typingCompleted = true
 
 #
 # Delete the following motion and enter insert mode to replace it.
@@ -401,11 +396,11 @@ class Change extends Insert
   execute: ->
     # If we've typed, we're being repeated. If we're being repeated,
     # undo transactions are already handled.
-    @vimState.setInsertionCheckpoint() unless @typingCompleted
+    @vimState.setInsertionCheckpoint() unless @typedText?
 
     if _.any @target.select(excludeWhitespace: true)
       @setTextToRegister @editor.getSelectedText()
-      if @target.isLinewise?() and not @typingCompleted
+      if @target.isLinewise?() and not @typedText?
         for selection in @editor.getSelections()
           selection.insertText("\n", autoIndent: true)
           selection.cursor.moveLeft()
@@ -413,10 +408,9 @@ class Change extends Insert
         for selection in @editor.getSelections()
           selection.deleteSelectedText()
 
-    return super if @typingCompleted
+    return super if @typedText?
 
     @vimState.activateInsertMode()
-    @typingCompleted = true
 
 class Substitute extends Change
   @extend()
@@ -498,7 +492,6 @@ class TransactionBundler
       cols = range.end.column - range.start.column
     else
       cols = 0
-
     @end = @end.translate [-rows, -cols]
 
 # Replace
