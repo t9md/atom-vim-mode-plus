@@ -133,7 +133,7 @@ class Yank extends Operator
   linewiseAlias: true
   execute: ->
     if @target.isLinewise?()
-      points = @editor.getCursorBufferPositions()
+      points = (s.getBufferRange().start for s in @editor.getSelections())
     if _.any @target.select()
       @setTextToRegister @editor.getSelectedText()
       for selection in @editor.getSelections()
