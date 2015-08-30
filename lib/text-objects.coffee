@@ -170,6 +170,10 @@ class SelectAroundParentheses extends SelectInsideParentheses
 # In Vim world Paragraph is defined as consecutive (non-)blank-line.
 class SelectInsideParagraph extends TextObject
   @extend()
+  linewise: false
+
+  isLinewise: ->
+    @linewise
 
   getStartRow: (startRow, fn) ->
     for row in [startRow..0] when fn(row)
@@ -191,6 +195,7 @@ class SelectInsideParagraph extends TextObject
   selectParagraph: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
     if startRow is endRow
+      @linewise = true
       if range = @getRange(startRow)
         {start, end} = range
         # [NOTE] Using selectLine() is very important since its internally set
