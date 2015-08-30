@@ -237,68 +237,43 @@ class AutoIndent extends Indent
 
 # Put
 # -------------------------
-class Put extends Operator
+class PutBefore extends Operator
   @extend()
-  register: null
   complete: true
+  location: 'before'
   execute: ->
     {text, type} = @vimState.register.get()
     return unless text
-
     text = _.multiplyString(text, @getCount(1))
-
-    selection = @editor.getSelectedBufferRange()
-    if selection.isEmpty()
-      # Clean up some corner cases on the last line of the file
-      if type is 'linewise'
-        text = text.replace(/\n$/, '')
-        if @location is 'after' and @onLastRow()
-          text = "\n#{text}"
-        else
-          text = "#{text}\n"
-
-      if @location is 'after'
+    @editor.transact =>
+      for selection in @editor.getSelections()
+        cursor = selection.cursor
         if type is 'linewise'
-          if @onLastRow()
-            @editor.moveToEndOfLine()
+          if selection.isEmpty()
+            if @location is 'before'
+              cursor.moveToBeginningOfLine()
+              selection.insertText("\n")
+              cursor.moveUp()
+            else
+              cursor.moveToEndOfLine()
+              selection.insertText("\n")
 
-            originalPosition = @editor.getCursorScreenPosition()
-            originalPosition.row += 1
+            text = text.replace(/\n$/, '')
+            range = selection.insertText(text)
+            cursor.setBufferPosition(range.start)
+            cursor.moveToFirstCharacterOfLine()
           else
-            @editor.moveDown()
-        else
-          unless @onLastColumn()
-            @editor.moveRight()
-
-      if type is 'linewise' and not originalPosition?
-        @editor.moveToBeginningOfLine()
-        originalPosition = @editor.getCursorScreenPosition()
-
-    @editor.insertText(text)
-
-    if originalPosition?
-      @editor.setCursorScreenPosition(originalPosition)
-      @editor.moveToFirstCharacterOfLine()
-
-    if type isnt 'linewise'
-      @editor.moveLeft()
+            selection.insertText("\n")
+            range = selection.insertText(text)
+            cursor.setBufferPosition(range.start)
+        else # character
+          if @location is 'after' and selection.isEmpty()
+            cursor.moveRight()
+          range = selection.insertText(text)
+          cursor.setBufferPosition(range.end.translate([0, -1]))
     @vimState.activateNormalMode()
 
-  # Private: Helper to determine if the editor is currently on the last row.
-  #
-  # Returns true on the last row and false otherwise.
-  onLastRow: ->
-    {row, column} = @editor.getCursorBufferPosition()
-    row is @editor.getBuffer().getLastRow()
-
-  onLastColumn: ->
-    @editor.getLastCursor().isAtEndOfLine()
-
-class PutBefore extends Put
-  @extend()
-  location: 'before'
-
-class PutAfter extends Put
+class PutAfter extends PutBefore
   @extend()
   location: 'after'
 
