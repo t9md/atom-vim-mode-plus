@@ -717,10 +717,9 @@ describe "Operators", ->
 
         it "replaces the current selection", ->
           editor.selectRight()
-          keystroke 'p'
-
-          ensure text: "0 345\n2"
-          ensure cursor: [1, 0]
+          ensure 'p',
+            text: "0\n 345\n2"
+            cursor: [1, 0]
 
       describe "on multiple lines", ->
         beforeEach ->
@@ -762,6 +761,17 @@ describe "Operators", ->
       describe "when undone", ->
         it "removes both lines", ->
           ensure 'u', text: "12345\nabcde\nABCDE\nQWERT"
+
+    describe "support multiple cursors", ->
+      it "paste text for each cursors", ->
+        set
+          text: "12345\nabcde\nABCDE\nQWERT"
+          cursor: [1, 0]
+          addCursor: [2, 0]
+          register: 'ZZZ'
+        ensure 'p',
+          text: "12345\naZZZbcde\nAZZZBCDE\nQWERT"
+          cursor: [[1, 3], [2, 3]]
 
   describe "the P keybinding", ->
     describe "with character contents", ->
