@@ -197,12 +197,7 @@ class SelectInsideParagraph extends TextObject
     if startRow is endRow
       @linewise = true
       if range = @getRange(startRow)
-        {start, end} = range
-        # [NOTE] Using selectLine() is very important since its internally set
-        # selection.linewise to `true`, and vim-state selection change observation
-        # check this property.
-        selection.selectLine(start.row)
-        selection.selectLine(end.row-1)
+        selection.setBufferRange(range)
     else # have direction
       if selection.isReversed()
         if range = @getRange(startRow-1)
@@ -219,13 +214,17 @@ class SelectInsideParagraph extends TextObject
     @selectParagraph(selection)
 
   select: ->
+    results = []
     for selection in @editor.getSelections()
       _.times @getCount(1), =>
         if @inclusive
           @selectInclusive(selection)
         else
           @selectExclusive(selection)
-      not selection.isEmpty()
+      results.push not selection.isEmpty()
+    if @isLinewise() and @vimState.isVisualMode() and @vimState.submode isnt 'linewise'
+      @vimState.activateVisualMode('linewise')
+    results
 
 class SelectAroundParagraph extends SelectInsideParagraph
   @extend()
