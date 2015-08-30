@@ -248,29 +248,30 @@ class PutBefore extends Operator
     @editor.transact =>
       for selection in @editor.getSelections()
         cursor = selection.cursor
-        if type is 'linewise'
-          if selection.isEmpty()
-            if @location is 'before'
-              cursor.moveToBeginningOfLine()
-              selection.insertText("\n")
-              cursor.moveUp()
-            else
-              cursor.moveToEndOfLine()
-              selection.insertText("\n")
+        switch type
+          when 'linewise'
+            if selection.isEmpty()
+              if @location is 'before'
+                cursor.moveToBeginningOfLine()
+                selection.insertText("\n")
+                cursor.moveUp()
+              else
+                cursor.moveToEndOfLine()
+                selection.insertText("\n")
 
-            text = text.replace(/\n$/, '')
+              text = text.replace(/\n$/, '')
+              range = selection.insertText(text)
+              cursor.setBufferPosition(range.start)
+              cursor.moveToFirstCharacterOfLine()
+            else
+              selection.insertText("\n")
+              range = selection.insertText(text)
+              cursor.setBufferPosition(range.start)
+          when 'character'
+            if @location is 'after' and selection.isEmpty()
+              cursor.moveRight()
             range = selection.insertText(text)
-            cursor.setBufferPosition(range.start)
-            cursor.moveToFirstCharacterOfLine()
-          else
-            selection.insertText("\n")
-            range = selection.insertText(text)
-            cursor.setBufferPosition(range.start)
-        else # character
-          if @location is 'after' and selection.isEmpty()
-            cursor.moveRight()
-          range = selection.insertText(text)
-          cursor.setBufferPosition(range.end.translate([0, -1]))
+            cursor.setBufferPosition(range.end.translate([0, -1]))
     @vimState.activateNormalMode()
 
 class PutAfter extends PutBefore
