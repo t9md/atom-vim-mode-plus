@@ -25,12 +25,12 @@ class Operator extends Base
   target: null
   complete: false
   recodable: true
-  lineWiseAlias: false
+  linewiseAlias: false
 
   constructor: ->
     super
     #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
-    if @lineWiseAlias and @vimState.isOperatorPendingMode() and
+    if @linewiseAlias and @vimState.isOperatorPendingMode() and
       @vimState.operationStack.peekTop().constructor is @constructor
         @vimState.operationStack.push new MoveToRelativeLine(@vimState)
         @abort()
@@ -57,11 +57,6 @@ class Operator extends Base
     if text
       @vimState.register.set({text})
 
-  execute: ->
-    @editor.transact =>
-      @operate()
-    @vimState.activateNormalMode()
-
 class Select extends Operator
   @extend()
   execute: ->
@@ -69,7 +64,7 @@ class Select extends Operator
 
 class Delete extends Operator
   @extend()
-  lineWiseAlias: true
+  linewiseAlias: true
 
   execute: ->
     if _.any @target.select()
@@ -77,12 +72,9 @@ class Delete extends Operator
       @editor.transact =>
         for selection in @editor.getSelections()
           selection.deleteSelectedText()
-      for cursor in @editor.getCursors()
-        if @target.isLinewise?()
+      if @target.isLinewise?()
+        for cursor in @editor.getCursors()
           cursor.skipLeadingWhitespace()
-        else
-          cursor.moveLeft() if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
-
     @vimState.activateNormalMode()
 
 class DeleteRight extends Delete
@@ -112,7 +104,7 @@ class ToggleCase extends Operator
       charLower
 
   getNewText: (text) ->
-    (@toggleCase(char) for char in text.split('')).join('')
+    text.split('').map(@toggleCase).join('')
 
   execute: ->
     if _.any @target.select()
@@ -138,23 +130,15 @@ class LowerCase extends ToggleCase
 
 class Yank extends Operator
   @extend()
-  lineWiseAlias: true
+  linewiseAlias: true
   execute: ->
-    originalPositions = @editor.getCursorBufferPositions()
+    if @target.isLinewise?()
+      points = @editor.getCursorBufferPositions()
     if _.any @target.select()
       @setTextToRegister @editor.getSelectedText()
-      startPositions = _.pluck(@editor.getSelectedBufferRanges(), "start")
-      # [FIXME] I can't understand this complexity.
-      # Let activateNormalMode do cursor position handling.
-      newPositions =
-        for originalPosition, i in originalPositions
-          if startPositions[i] and (@vimState.isVisualMode() or not @target.isLinewise?())
-            Point.min(startPositions[i], originalPositions[i])
-          else
-            originalPosition
-      @editor.setSelectedBufferRanges(newPositions.map (p) ->
-        new Range(p, p))
-
+      for selection in @editor.getSelections()
+        point = points?.shift() ? selection.getBufferRange().start
+        selection.cursor.setBufferPosition point
     @vimState.activateNormalMode()
 
 class YankLine extends Yank
@@ -229,7 +213,7 @@ class Decrease extends Increase
 
 class Indent extends Operator
   @extend()
-  lineWiseAlias: true
+  linewiseAlias: true
   execute: ->
     @target.select()
     startRow = @editor.getSelectedBufferRange().start.row
@@ -437,7 +421,7 @@ class InsertBelowWithNewline extends Insert
 class Change extends Insert
   @extend()
   complete: false
-  lineWiseAlias: true
+  linewiseAlias: true
 
   execute: ->
     # If we've typed, we're being repeated. If we're being repeated,
