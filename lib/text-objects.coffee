@@ -192,7 +192,12 @@ class SelectInsideParagraph extends TextObject
     [startRow, endRow] = selection.getBufferRowRange()
     if startRow is endRow
       if range = @getRange(startRow)
-        selection.setBufferRange(range)
+        {start, end} = range
+        # [NOTE] Using selectLine() is very important since its internally set
+        # selection.linewise to `true`, and vim-state selection change observation
+        # check this property.
+        selection.selectLine(start.row)
+        selection.selectLine(end.row-1)
     else # have direction
       if selection.isReversed()
         if range = @getRange(startRow-1)
