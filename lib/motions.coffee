@@ -111,6 +111,42 @@ class Motion extends Base
       @complete = true
       @vimState.operationStack.process() # Re-process!!
 
+class CurrentSelection extends Motion
+  @extend()
+  constructor: ->
+    super
+    @lastSelectionRange = @editor.getSelectedBufferRange()
+    @wasLinewise = @isLinewise()
+
+  execute: ->
+    _.times(@getCount(1), -> true)
+
+  select: (count=1) ->
+    # in visual mode, the current selections are already there
+    # if we're not in visual mode, we are repeating some operation and need to re-do the selections
+    unless @vimState.isVisualMode()
+      if @wasLinewise
+        @selectLines()
+      else
+        @selectCharacters()
+
+    _.times(@getCount(1), -> true)
+
+  selectLines: ->
+    lastSelectionExtent = @lastSelectionRange.getExtent()
+    for selection in @editor.getSelections()
+      cursor = selection.cursor.getBufferPosition()
+      selection.setBufferRange [[cursor.row, 0], [cursor.row + lastSelectionExtent.row, 0]]
+    return
+
+  selectCharacters: ->
+    lastSelectionExtent = @lastSelectionRange.getExtent()
+    for selection in @editor.getSelections()
+      {start} = selection.getBufferRange()
+      newEnd = start.traverse(lastSelectionExtent)
+      selection.setBufferRange([start, newEnd])
+    return
+
 class MoveLeft extends Motion
   @extend()
   operatesInclusively: false
@@ -876,6 +912,7 @@ class BracketMatchingMotion extends SearchBase
 
 # Alias
 module.exports = {
+  CurrentSelection
   MoveLeft, MoveRight, MoveUp, MoveDown
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord

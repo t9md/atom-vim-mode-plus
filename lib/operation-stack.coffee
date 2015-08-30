@@ -1,6 +1,6 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
-{CurrentSelection} = require './text-objects'
+{CurrentSelection} = require './motions'
 {Select} = require './operators'
 {debug} = require './utils'
 
@@ -27,7 +27,7 @@ class OperationStack
 
     # Operate on implicit CurrentSelection TextObject.
     if @vimState.isVisualMode() and op.isOperator()
-      debug "push INPLICIT TextObjects.CurrentSelection"
+      debug "push INPLICIT Motion.CurrentSelection"
       @stack.push(new CurrentSelection(@vimState))
     @process()
 
