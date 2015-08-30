@@ -40,7 +40,6 @@ class ModeManager
     @setMode('insert', submode)
     @updateStatusBar()
     @editorElement.component.setInputEnabled(true)
-    @insertionCheckpoint ?= @editor.createCheckpoint()
     @setInsertionCheckpoint()
 
   activateReplaceMode: ->
