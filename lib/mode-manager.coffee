@@ -40,6 +40,7 @@ class ModeManager
     @setMode('insert', submode)
     @updateStatusBar()
     @editorElement.component.setInputEnabled(true)
+    @insertionCheckpoint ?= @editor.createCheckpoint()
     @setInsertionCheckpoint()
 
   activateReplaceMode: ->
@@ -70,8 +71,7 @@ class ModeManager
       @replaceModeCounter--
 
   setInsertionCheckpoint: ->
-    unless @insertionCheckpoint?
-      @insertionCheckpoint = @editor.createCheckpoint()
+    @insertionCheckpoint ?= @editor.createCheckpoint()
 
   deactivateInsertMode: ->
     return unless @mode in [null, 'insert']
@@ -79,12 +79,11 @@ class ModeManager
     @editorElement.classList.remove('replace-mode')
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
     changes = getChangesSinceCheckpoint(@editor.buffer, @insertionCheckpoint)
-    item = @inputOperator(@vimState.history[0])
     @insertionCheckpoint = null
-    if item?
+    if (item = @vimState.history[0]) and item.inputOperator?()
       item.confirmChanges(changes)
-    for cursor in @editor.getCursors()
-      cursor.moveLeft() unless cursor.isAtBeginningOfLine()
+    for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
+      cursor.moveLeft()
     if @replaceModeListener?
       @replaceModeListener.dispose()
       @vimState.subscriptions.remove @replaceModeListener
@@ -97,16 +96,6 @@ class ModeManager
     return unless @isVisualMode()
     for selection in @editor.getSelections()
       selection.cursor.moveLeft() unless (selection.isEmpty() or selection.isReversed())
-
-  # Private: Get the input operator that needs to be told about about the
-  # typed undo transaction in a recently completed operation, if there
-  # is one.
-  inputOperator: (item) ->
-    return item unless item?
-    return item if item.inputOperator?()
-
-    # FIXME maybe code below can remove.
-    return item.composedObject if item.composedObject?.inputOperator?()
 
   # Private: Used to enable visual mode.
   #
