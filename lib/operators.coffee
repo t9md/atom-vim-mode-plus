@@ -241,38 +241,44 @@ class PutBefore extends Operator
   @extend()
   complete: true
   location: 'before'
+
   execute: ->
     {text, type} = @vimState.register.get()
     return unless text
     text = _.multiplyString(text, @getCount(1))
     @editor.transact =>
       for selection in @editor.getSelections()
-        cursor = selection.cursor
         switch type
-          when 'linewise'
-            if selection.isEmpty()
-              if @location is 'before'
-                cursor.moveToBeginningOfLine()
-                selection.insertText("\n")
-                cursor.moveUp()
-              else
-                cursor.moveToEndOfLine()
-                selection.insertText("\n")
-
-              text = text.replace(/\n$/, '')
-              range = selection.insertText(text)
-              cursor.setBufferPosition(range.start)
-              cursor.moveToFirstCharacterOfLine()
-            else
-              selection.insertText("\n")
-              range = selection.insertText(text)
-              cursor.setBufferPosition(range.start)
-          when 'character'
-            if @location is 'after' and selection.isEmpty()
-              cursor.moveRight()
-            range = selection.insertText(text)
-            cursor.setBufferPosition(range.end.translate([0, -1]))
+          when 'linewise'  then @pasteLinewise(selection, text)
+          when 'character' then @pasteCharacterwise(selection, text)
     @vimState.activateNormalMode()
+
+  pasteLinewise: (selection, text) ->
+    cursor = selection.cursor
+    if selection.isEmpty()
+      if @location is 'before'
+        cursor.moveToBeginningOfLine()
+        selection.insertText("\n")
+        cursor.moveUp()
+      else
+        cursor.moveToEndOfLine()
+        selection.insertText("\n")
+
+      text = text.replace(/\n$/, '')
+      range = selection.insertText(text)
+      cursor.setBufferPosition(range.start)
+      cursor.moveToFirstCharacterOfLine()
+    else
+      selection.insertText("\n")
+      range = selection.insertText(text)
+      cursor.setBufferPosition(range.start)
+
+  pasteCharacterwise: (selection, text) ->
+    cursor = selection.cursor
+    if @location is 'after' and selection.isEmpty()
+      cursor.moveRight()
+    range = selection.insertText(text)
+    cursor.setBufferPosition(range.end.translate([0, -1]))
 
 class PutAfter extends PutBefore
   @extend()
@@ -328,8 +334,8 @@ class ReplaceMode extends Insert
         for selection in @editor.getSelections()
           count = toDelete
           selection.delete() while count-- and not selection.cursor.isAtEndOfLine()
-        for cursor in @editor.getCursors()
-          cursor.moveLeft() unless cursor.isAtBeginningOfLine()
+        for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
+          cursor.moveLeft()
     else
       @vimState.activateReplaceMode()
 

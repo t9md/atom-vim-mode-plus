@@ -1,5 +1,4 @@
 # Refactoring status: 90%
-Grim  = require 'grim'
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
@@ -61,7 +60,8 @@ class VimState
     @subscriptions = new CompositeDisposable
     @editor = @editorElement.getModel()
     @history = []
-    @subscriptions.add @editor.onDidDestroy => @destroy()
+    @subscriptions.add @editor.onDidDestroy =>
+      @destroy()
 
     @count = new CountManager(this)
     @mark = new MarkManager(this)
@@ -242,13 +242,6 @@ class VimState
 
   getSearchHistoryItem: (index = 0) ->
     @globalVimState.searchHistory[index]
-
-  # Other
-  # -------------------------
-  # TODO: remove this method and bump the `vim-mode` service version number.
-  activateCommandMode: ->
-    Grim.deprecate("Use ::activateNormalMode instead")
-    @activateNormalMode()
 
   withLock: (callback) ->
     try
