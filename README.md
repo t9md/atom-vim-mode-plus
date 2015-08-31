@@ -49,7 +49,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 - [ ] Support visual-block by incorporating with [vim-mode-visual-block](https://github.com/t9md/atom-vim-mode-visual-block).
 - [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions.
-- [ ] Introduce new scope based motion by incorporating with [goto-scope]](https://github.com/t9md/atom-goto-scope).
+- [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
 - [x] Rewrite spec to be able to write test intuitively.
 - [x] Support new TextObject for Indent, and Comment.
 - [x] Support new Operator ReplaceWithRegister.
