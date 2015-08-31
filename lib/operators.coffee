@@ -319,9 +319,6 @@ class Insert extends Operator
     else
       @vimState.activateInsertMode()
 
-  inputOperator: ->
-    true
-
 class ReplaceMode extends Insert
   @extend()
 
