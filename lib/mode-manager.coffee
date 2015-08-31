@@ -79,7 +79,7 @@ class ModeManager
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
     changes = getChangesSinceCheckpoint(@editor.buffer, @insertionCheckpoint)
     @insertionCheckpoint = null
-    if (item = @vimState.history[0]) and item.inputOperator?()
+    if (item = @vimState.history[0]) and item.isInsert()
       item.confirmChanges(changes)
     for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
       cursor.moveLeft()
