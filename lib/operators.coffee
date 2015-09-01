@@ -203,21 +203,17 @@ class Increase extends Operator
   @extend()
   complete: true
   step: 1
-
-  constructor: ->
-    super
-    @numberRegex = new RegExp(settings.get('numberRegex'), 'g')
-
+  
   execute: ->
+    pattern = new RegExp(settings.get('numberRegex'), 'g')
     @editor.transact =>
-      results = (@increaseNumber(cursor) for cursor in @editor.getCursors())
-      unless _.any(results)
+      unless _.any(@increaseNumber(c, pattern) for c in @editor.getCursors())
         atom.beep()
 
-  increaseNumber: (cursor) ->
+  increaseNumber: (cursor, pattern) ->
     success = null
     scanRange = cursor.getCurrentLineBufferRange()
-    @editor.scanInBufferRange @numberRegex, scanRange, ({matchText, range, stop, replace}) =>
+    @editor.scanInBufferRange pattern, scanRange, ({matchText, range, stop, replace}) =>
       unless range.end.isGreaterThan cursor.getBufferPosition()
         return
       number = parseInt(matchText, 10) + @step * @getCount(1)
