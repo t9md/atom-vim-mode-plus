@@ -230,13 +230,17 @@
   '<': 'vim-mode:outdent'
   '=': 'vim-mode:auto-indent'
 
+  '~':   'vim-mode:toggle-case'
+  'g ~': 'vim-mode:toggle-case'
+  'U':   'vim-mode:upper-case'
+  'g U': 'vim-mode:upper-case'
+  'u':   'vim-mode:lower-case'
+  'g u': 'vim-mode:lower-case'
+
 'atom-text-editor.vim-mode.visual-mode':
   'x': 'vim-mode:delete'
   's': 'vim-mode:change'
   'o': 'vim-mode:reverse-selections'
-  'U': 'vim-mode:upper-case'
-  'u': 'vim-mode:lower-case'
-  '~': 'vim-mode:toggle-case'
 
   'v':      'vim-mode:activate-characterwise-visual-mode'
   'V':      'vim-mode:activate-linewise-visual-mode'
