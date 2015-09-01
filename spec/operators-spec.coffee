@@ -1158,14 +1158,21 @@ describe "Operators", ->
 
     describe "in visual mode", ->
       it "toggles the case of the selected text", ->
-        set
-          cursorBuffer: [0, 0]
+        set cursorBuffer: [0, 0]
         ensure 'V~', text: 'AbC\nXyZ'
 
     describe "with g and motion", ->
-      it "toggles the case of text", ->
+      it "toggles the case of text, won't move cursor", ->
         set cursorBuffer: [0, 0]
-        ensure 'g~2l', text: 'Abc\nXyZ'
+        ensure 'g~2l', text: 'Abc\nXyZ', cursor: [0, 0]
+
+      it "g~~ toggles the line of text, won't move cursor", ->
+        set cursorBuffer: [0, 1]
+        ensure 'g~~', text: 'AbC\nXyZ', cursor: [0, 1]
+
+      it "g~g~ toggles the line of text, won't move cursor", ->
+        set cursorBuffer: [0, 1]
+        ensure 'g~g~', text: 'AbC\nXyZ', cursor: [0, 1]
 
   describe 'the U keybinding', ->
     beforeEach ->
@@ -1173,25 +1180,41 @@ describe "Operators", ->
         text: 'aBc\nXyZ'
         cursorBuffer: [0, 0]
 
-    it "makes text uppercase with g and motion", ->
-      ensure 'gUl', text: 'ABc\nXyZ'
-      ensure 'gUe', text: 'ABC\nXyZ'
+    it "makes text uppercase with g and motion, and won't move cursor", ->
+      ensure 'gUl', text: 'ABc\nXyZ', cursor: [0, 0]
+      ensure 'gUe', text: 'ABC\nXyZ', cursor: [0, 0]
       set cursorBuffer: [1, 0]
-      ensure 'gU$', text: 'ABC\nXYZ', cursor: [1, 2]
+      ensure 'gU$', text: 'ABC\nXYZ', cursor: [1, 0]
 
     it "makes the selected text uppercase in visual mode", ->
       ensure 'VU', text: 'ABC\nXyZ'
+
+    it "gUU upcase the line of text, won't move cursor", ->
+      set cursorBuffer: [0, 1]
+      ensure 'gUU', text: 'ABC\nXyZ', cursor: [0, 1]
+
+    it "gUgU upcase the line of text, won't move cursor", ->
+      set cursorBuffer: [0, 1]
+      ensure 'gUgU', text: 'ABC\nXyZ', cursor: [0, 1]
 
   describe 'the u keybinding', ->
     beforeEach ->
       set text: 'aBc\nXyZ', cursorBuffer: [0, 0]
 
-
-    it "makes text lowercase with g and motion", ->
-      ensure 'gu$', text: 'abc\nXyZ', cursor: [0, 2]
+    it "makes text lowercase with g and motion, and won't move cursor", ->
+      ensure 'gu$', text: 'abc\nXyZ', cursor: [0, 0]
 
     it "makes the selected text lowercase in visual mode", ->
       ensure 'Vu', text: 'abc\nXyZ'
+
+    it "guu downcase the line of text, won't move cursor", ->
+      set cursorBuffer: [0, 1]
+      ensure 'guu', text: 'abc\nXyZ', cursor: [0, 1]
+
+    it "gugu downcase the line of text, won't move cursor", ->
+      set cursorBuffer: [0, 1]
+      ensure 'gugu', text: 'abc\nXyZ', cursor: [0, 1]
+
 
   describe "the i keybinding", ->
     beforeEach ->

@@ -96,6 +96,7 @@ class DeleteToLastCharacterOfLine extends Delete
 
 class ToggleCase extends Operator
   @extend()
+  linewiseAlias: true
   toggleCase: (char) ->
     if (charLower = char.toLowerCase()) is char
       char.toUpperCase()
@@ -105,9 +106,15 @@ class ToggleCase extends Operator
   getNewText: (text) ->
     text.split('').map(@toggleCase).join('')
 
+  # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
+    if @target.isLinewise?()
+      points = (s.getBufferRange().start for s in @editor.getSelections())
     if _.any @target.select()
       @editor.replaceSelectedText {}, @getNewText.bind(this)
+      for selection in @editor.getSelections() when not @isToggleCaseNow()
+        point = points?.shift() ? selection.getBufferRange().start
+        selection.cursor.setBufferPosition point
     @vimState.activateNormalMode()
 
 # [TODO] Rename to ToggleCaseAndMoveRight
