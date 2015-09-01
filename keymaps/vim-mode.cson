@@ -97,6 +97,9 @@
   'g U': 'vim-mode:upper-case'
   'g u': 'vim-mode:lower-case'
   'g u': 'vim-mode:lower-case'
+  'g c': 'vim-mode:camelize'
+  # 'g _': 'vim-mode:underscore'
+  'g -': 'vim-mode:dasherize'
 
   'ctrl-w ctrl-h': 'window:focus-pane-on-left'
   'ctrl-w h': 'window:focus-pane-on-left'

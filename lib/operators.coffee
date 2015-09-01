@@ -134,6 +134,21 @@ class LowerCase extends ToggleCase
   getNewText: (text) ->
     text.toLowerCase()
 
+class Camelize extends ToggleCase
+  @extend()
+  getNewText: (text) ->
+    _.camelize text
+
+class Underscore extends ToggleCase
+  @extend()
+  getNewText: (text) ->
+    _.underscore text
+
+class Dasherize extends ToggleCase
+  @extend()
+  getNewText: (text) ->
+    _.dasherize text
+
 class Yank extends Operator
   @extend()
   linewiseAlias: true
@@ -555,11 +570,19 @@ ActivateReplaceMode = ReplaceMode
 module.exports = {
   # General
   Operator, OperatorError, Delete,
-  ToggleCase, ToggleCaseNow,
   Select,
-  UpperCase, LowerCase, Yank, Join, Repeat, Mark,
+
+  Yank, Join, Repeat, Mark,
   Increase, Decrease,
   Indent, Outdent, AutoIndent,
+
+  # String transformation
+  ToggleCase, ToggleCaseNow,
+  UpperCase
+  LowerCase
+  Camelize
+  Underscore
+  Dasherize
 
   # Put
   PutBefore, PutAfter,
