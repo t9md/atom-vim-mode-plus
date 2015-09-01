@@ -10,7 +10,6 @@ Base = require './base'
   MoveRight
   MoveLeft
   MoveToLastCharacterOfLine
-  MoveToRelativeLine
 } = require './motions'
 
 class OperatorError extends Base
