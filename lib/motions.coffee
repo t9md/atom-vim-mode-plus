@@ -153,7 +153,8 @@ class MoveLeft extends Motion
 
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
-      cursor.moveLeft() if not cursor.isAtBeginningOfLine() or settings.get('wrapLeftRightMotion')
+      if not cursor.isAtBeginningOfLine() or settings.get('wrapLeftRightMotion')
+        cursor.moveLeft()
 
 class MoveRight extends Motion
   @extend()
@@ -213,16 +214,15 @@ class MoveToPreviousWholeWord extends Motion
   moveCursor: (cursor) ->
     _.times @getCount(1), =>
       cursor.moveToBeginningOfWord()
-      while not @isWholeWord(cursor) and not @isBeginningOfFile(cursor)
+      while not @isWholeWord(cursor) and not @isAtBeginningOfFile(cursor)
         cursor.moveToBeginningOfWord()
 
   isWholeWord: (cursor) ->
     char = cursor.getCurrentWordPrefix().slice(-1)
     AllWhitespace.test(char)
 
-  isBeginningOfFile: (cursor) ->
-    cur = cursor.getBufferPosition()
-    not cur.row and not cur.column
+  isAtBeginningOfFile: (cursor) ->
+    cursor.getBufferPosition().isEqual(Point.ZERO)
 
 class MoveToNextWord extends Motion
   @extend()
