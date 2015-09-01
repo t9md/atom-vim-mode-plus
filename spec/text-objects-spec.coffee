@@ -132,8 +132,7 @@ describe "TextObjects", ->
         cursor: [0, 1]
 
     it "applies operators inside the current word in operator-pending mode (second test)", ->
-      set
-        cursor: [0, 29]
+      set cursor: [0, 29]
       ensure 'di<',
         text: "< something in here and in <> >"
         cursor: [0, 28]
@@ -144,14 +143,16 @@ describe "TextObjects", ->
         text: "<something>here</something><again>"
         cursor: [0, 5]
 
-    it "applies only if in the value of a tag", ->
+    # [FIXME] original official vim-mode support this, but its also affect other
+    # TextObject like i( I don't like original behavior.
+    # So I disabled, but for HTML tags, there is some space to improve.
+    xit "applies only if in the value of a tag", ->
       ensure 'dit',
         text: "<something></something><again>"
         cursor: [0, 11]
 
     it "applies operators inside the current word in operator-pending mode", ->
-      set
-        cursor: [0, 13]
+      set cursor: [0, 13]
       ensure 'dit',
         text: "<something></something><again>"
         cursor: [0, 11]

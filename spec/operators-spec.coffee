@@ -1550,6 +1550,7 @@ describe "Operators", ->
         text: originalText.replace('parenthesis', 'default register')
 
     it "can repeat", ->
+      set cursor: [1, 6]
       ensure '_i(j.',
         mode: 'normal'
         text: originalText.replace(/parenthesis/g, 'default register')

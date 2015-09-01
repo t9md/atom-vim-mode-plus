@@ -101,7 +101,6 @@ class SelectInsidePair extends TextObject
     for selection in @editor.getSelections()
       point  = selection.getHeadBufferPosition()
       start  = @findPair(point, pair, true)
-      start ?= @findPair(point, pair)
       if start? and (end = @findPair(start, pairReversed)?.traverse([0, -1]))
         range = new Range(start, end)
         range = range.translate([0, -1], [0, 1]) if @inclusive
