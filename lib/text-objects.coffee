@@ -270,6 +270,7 @@ module.exports = {
   # CurrentSelection
   SelectInsideWord          , SelectAWord
   SelectInsideWholeWord     , SelectAWholeWord
+  SelectInsidePair, # used by Surround
   SelectInsideDoubleQuotes  , SelectAroundDoubleQuotes
   SelectInsideSingleQuotes  , SelectAroundSingleQuotes
   SelectInsideBackTicks     , SelectAroundBackTicks

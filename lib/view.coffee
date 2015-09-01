@@ -20,6 +20,8 @@ class ViewModel
 
   cancel: (view) ->
     if @vimState.operationStack.isOperatorPending()
+      # [FIXME] callbacking with empty string '' is BAD.
+      # its clear former value regardless its important or not.
       @emitter.emit 'did-get-input', ''
 
 class VimNormalModeInputElement extends HTMLDivElement

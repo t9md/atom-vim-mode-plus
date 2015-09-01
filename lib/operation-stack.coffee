@@ -57,6 +57,7 @@ class OperationStack
         @vimState.activateOperatorPendingMode()
       else
         debug "-> @process(): return: not <#{@peekTop().getKind()}>.isComplete()"
+        @inspect()
       return
 
     @inspect()

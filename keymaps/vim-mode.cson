@@ -100,6 +100,9 @@
   'g c': 'vim-mode:camelize'
   # 'g _': 'vim-mode:underscore'
   'g -': 'vim-mode:dasherize'
+  'g s s': 'vim-mode:surround'
+  'g d s': 'vim-mode:delete-surround'
+  'g c s': 'vim-mode:change-surround'
 
   'ctrl-w ctrl-h': 'window:focus-pane-on-left'
   'ctrl-w h': 'window:focus-pane-on-left'

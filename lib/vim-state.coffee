@@ -204,6 +204,7 @@ class VimState
       'put-after', 'put-before',
       'upper-case', 'lower-case', 'toggle-case', 'toggle-case-now',
       'camelize', 'underscore', 'dasherize',
+      'surround', 'delete-surround', 'change-surround',
       'join',
       'indent', 'outdent', 'auto-indent',
       'increase', 'decrease',
