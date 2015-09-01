@@ -387,7 +387,11 @@ describe "Motions", ->
 
   describe "the - keybinding", ->
     beforeEach ->
-      set text: "abcdefg\n  abc\n  abc\n"
+      set text: """
+        abcdefg
+          abc
+          abc\n
+        """
 
     describe "from the middle of a line", ->
       beforeEach ->
