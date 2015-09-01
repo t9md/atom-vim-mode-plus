@@ -4,6 +4,7 @@ _ = require 'underscore-plus'
 
 {ViewModel} = require './view'
 settings = require './settings'
+{SelectInsidePair} = require './text-objects'
 Base = require './base'
 {
   MoveToRelativeLine
@@ -149,6 +150,76 @@ class Dasherize extends ToggleCase
   getNewText: (text) ->
     _.dasherize text
 
+class Surround extends ToggleCase
+  @extend()
+  pairs: ['[]', '()', '{}', '<>']
+  input: null
+
+  constructor: ->
+    super
+    @viewModel = new ViewModel @vimState,
+      class: 'surround'
+      singleChar: true
+      hidden: true
+    @viewModel.onDidGetInput @onDidGetInput.bind(this)
+
+  onDidGetInput: (input) ->
+    @input = input if input
+    @vimState.operationStack.process() # Re-process!!
+
+  isComplete: ->
+    @target
+
+  getPair: (input) ->
+    pair = _.detect @pairs, (pair) => input in pair
+    pair ?= input+input
+
+  surround: (text, pair) ->
+    [open, close] = pair.split('')
+    open + text + close
+
+  getNewText: (text) ->
+    @surround text, @getPair(@input)
+
+class DeleteSurround extends Surround
+  @extend()
+  onDidGetInput: (input, reprocess=true) ->
+    pairTextObject = new SelectInsidePair(@vimState)
+    pairTextObject.pair = @getPair(input)
+    pairTextObject.inclusive = true
+    @compose(pairTextObject)
+    if reprocess
+      @vimState.operationStack.process() # Re-process!!
+
+  getNewText: (text) ->
+    text[1...-1]
+
+class ChangeSurround extends DeleteSurround
+  @extend()
+  isComplete: ->
+    @input
+
+  onDidGetInput: (input) ->
+    return unless input
+    super(input, false)
+    @viewModel.view.removePanel()
+    console.log input
+    viewModel = new ViewModel @vimState,
+      class: 'surround'
+      singleChar: true
+      hidden: false
+    viewModel.onDidGetInput (input) =>
+      console.log "INNNER"
+      console.log input
+      @input = input if input
+      if @input
+        @vimState.operationStack.process() # Re-process!!
+    viewModel.view.focus()
+
+  getNewText: (text) ->
+    @surround text[1...-1], @getPair(@input)
+    # "(" + text[1...-1] + ")"
+
 class Yank extends Operator
   @extend()
   linewiseAlias: true
@@ -203,7 +274,7 @@ class Increase extends Operator
   @extend()
   complete: true
   step: 1
-  
+
   execute: ->
     pattern = new RegExp(settings.get('numberRegex'), 'g')
     @editor.transact =>
@@ -579,6 +650,9 @@ module.exports = {
   Camelize
   Underscore
   Dasherize
+  Surround
+  DeleteSurround
+  ChangeSurround
 
   # Put
   PutBefore, PutAfter,
