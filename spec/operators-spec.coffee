@@ -1215,6 +1215,56 @@ describe "Operators", ->
       set cursorBuffer: [0, 1]
       ensure 'gugu', text: 'abc\nXyZ', cursor: [0, 1]
 
+  describe 'camelize', ->
+    beforeEach ->
+      set
+        text: 'vim-mode\natom-text-editor\n'
+        cursorBuffer: [0, 0]
+
+    it "camelize text and not move cursor", ->
+      ensure 'gc$', text: 'vimMode\natom-text-editor\n', cursor: [0, 0]
+      ensure 'jgc$', text: 'vimMode\natomTextEditor\n', cursor: [1, 0]
+
+    it "camelize selected text", ->
+      ensure 'Vjgc', text: 'vimMode\natomTextEditor\n', cursor: [0, 0]
+
+    it "gcgc camelize the line of text, won't move cursor", ->
+      ensure 'lgcgc', text: 'vimMode\natom-text-editor\n', cursor: [0, 1]
+
+  describe 'underscore', ->
+    beforeEach ->
+      set
+        text: 'vim-mode\natom-text-editor\n'
+        cursorBuffer: [0, 0]
+      atom.keymaps.add "g_",
+        'atom-text-editor.vim-mode:not(.insert-mode)':
+          'g _': 'vim-mode:underscore'
+
+    it "underscore text and not move cursor", ->
+      ensure 'g_$', text: 'vim_mode\natom-text-editor\n', cursor: [0, 0]
+      ensure 'jg_$', text: 'vim_mode\natom_text_editor\n', cursor: [1, 0]
+
+    it "underscore selected text", ->
+      ensure 'Vjg_', text: 'vim_mode\natom_text_editor\n', cursor: [0, 0]
+
+    it "gcgc underscore the line of text, won't move cursor", ->
+      ensure 'lg_g_', text: 'vim_mode\natom-text-editor\n', cursor: [0, 1]
+
+  describe 'dasherize', ->
+    beforeEach ->
+      set
+        text: 'vimMode\natom_text_editor\n'
+        cursorBuffer: [0, 0]
+
+    it "dasherize text and not move cursor", ->
+      ensure 'g-$', text: 'vim-mode\natom_text_editor\n', cursor: [0, 0]
+      ensure 'jg-$', text: 'vim-mode\natom-text-editor\n', cursor: [1, 0]
+
+    it "dsasherize selected text", ->
+      ensure 'Vjg-', text: 'vim-mode\natom-text-editor\n', cursor: [0, 0]
+
+    it "g-g- dasherize the line of text, won't move cursor", ->
+      ensure 'lg-g-', text: 'vim-mode\natom_text_editor\n', cursor: [0, 1]
 
   describe "the i keybinding", ->
     beforeEach ->

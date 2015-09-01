@@ -203,6 +203,7 @@ class VimState
       'yank', 'yank-line',
       'put-after', 'put-before',
       'upper-case', 'lower-case', 'toggle-case', 'toggle-case-now',
+      'camelize', 'underscore', 'dasherize',
       'join',
       'indent', 'outdent', 'auto-indent',
       'increase', 'decrease',
