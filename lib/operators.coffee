@@ -205,7 +205,7 @@ class Surround extends ToggleCase
     super
     viewModel = new ViewModel @vimState,
       class: 'surround'
-      singleChar: true
+      charsMax: 1
       hidden: true
     viewModel.onDidGetInput @onDidGetInput.bind(this)
 
@@ -249,7 +249,7 @@ class ChangeSurround extends DeleteSurround
     super(input, false)
     vm = new ViewModel @vimState,
       class: 'surround'
-      singleChar: true
+      charsMax: 1
       hidden: false
     vm.onDidGetInput (input) =>
       # console.log value
@@ -305,7 +305,7 @@ class Mark extends Operator
     super
     @getInput
       class: 'mark'
-      singleChar: true
+      charsMax: 1
       hidden: true
 
   execute: ->
@@ -641,7 +641,7 @@ class Replace extends Operator
     @getInput
       class: 'replace'
       hidden: true
-      singleChar: true
+      charsMax: 1
       defaultText: '\n'
 
   isComplete: ->
