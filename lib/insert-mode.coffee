@@ -20,7 +20,7 @@ class InsertRegister extends InsertMode
     super
     @getInput
       class: 'insert-register'
-      singleChar: true
+      charsMax: 1
       hidden: true
 
   execute: ->

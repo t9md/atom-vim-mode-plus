@@ -549,7 +549,7 @@ class Find extends Motion
     unless @repeated
       @getInput
         class: 'find'
-        singleChar: true
+        charsMax: 1
         hidden: true
 
   match: (cursor, count) ->
@@ -645,7 +645,7 @@ class MoveToMark extends Motion
     super
     @getInput
       class: 'move-to-mark',
-      singleChar: true,
+      charsMax: 1,
       hidden: true
 
   isLinewise: ->

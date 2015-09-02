@@ -1,12 +1,13 @@
 # Refactoring status: 30%
 Base = require './base'
+_ = require 'underscore-plus'
 {Emitter} = require 'atom'
 
 # [FIXME] why normalModeInputView need to be property of @editor?
 class ViewModel
-  constructor: (@vimState, opts={}) ->
+  constructor: (@vimState, options={}) ->
     @emitter = new Emitter
-    @view = new VimNormalModeInputElement().initialize(this, opts)
+    @view = new VimNormalModeInputElement().initialize(this, options)
     @vimState.editor.normalModeInputView = @view
     @vimState.onDidFailToCompose =>
       @view.remove()
@@ -34,42 +35,46 @@ class VimNormalModeInputElement extends HTMLDivElement
 
     @appendChild(@editorContainer)
 
-  initialize: (@viewModel, opts = {}) ->
-    if opts.class?
-      @editorContainer.classList.add(opts.class)
+  initialize: (@viewModel, options={}) ->
+    if options.class?
+      @editorContainer.classList.add(options.class)
 
-    if opts.hidden
+    if options.hidden
       @editorContainer.style.height = "0px"
 
     @editorElement = document.createElement "atom-text-editor"
     @editorElement.classList.add('editor')
-    @editorElement.getModel().setMini(true)
     @editorElement.setAttribute('mini', '')
+    @editor = @editorElement.getModel()
+    @editor.setMini(true)
     @editorContainer.appendChild(@editorElement)
 
-    @singleChar = opts.singleChar
-    @defaultText = opts.defaultText ? ''
+    @charsMax = options.charsMax
+    @defaultText = options.defaultText ? ''
 
     @panel = atom.workspace.addBottomPanel(item: this, priority: 100)
 
-    @focus()
     @handleEvents()
+    @focus()
     this
 
   handleEvents: ->
-    if @singleChar?
-      @editorElement.getModel().getBuffer().onDidChange (e) =>
-        @confirm() if e.newText
+    if @charsMax?
+      @editor.onDidChange =>
+        text = @editor.getText()
+        if text.length >= @charsMax
+          @confirm()
     else
-      atom.commands.add(@editorElement, 'editor:newline', @confirm.bind(this))
+      atom.commands.add @editorElement, 'editor:newline': => @confirm()
 
-    atom.commands.add(@editorElement, 'core:confirm', @confirm.bind(this))
-    atom.commands.add(@editorElement, 'core:cancel', @cancel.bind(this))
-    atom.commands.add(@editorElement, 'blur', @cancel.bind(this))
+    atom.commands.add @editorElement,
+      'core:confirm': => @confirm()
+      'core:cancel':  => @cancel()
+      'blur':         => @cancel()
 
   confirm: ->
-    @value = @editorElement.getModel().getText() or @defaultText
-    @viewModel.confirm(this)
+    @value = @editor.getText() or @defaultText
+    @viewModel.confirm()
     @removePanel()
 
   focus: ->
@@ -89,11 +94,12 @@ class SearchViewModel extends ViewModel
     super(@searchMotion.vimState, class: 'search')
     @historyIndex = -1
 
-    atom.commands.add(@view.editorElement, 'core:move-up', @increaseHistorySearch)
-    atom.commands.add(@view.editorElement, 'core:move-down', @decreaseHistorySearch)
+    atom.commands.add @view.editorElement,
+      'core:move-up': @increaseHistorySearch
+      'core:move-down': @decreaseHistorySearch
 
   restoreHistory: (index) ->
-    @view.editorElement.getModel().setText(@history(index))
+    @view.editor.setText(@history(index))
 
   history: (index) ->
     @vimState.getSearchHistoryItem(index)
@@ -107,12 +113,12 @@ class SearchViewModel extends ViewModel
     if @historyIndex <= 0
       # get us back to a clean slate
       @historyIndex = -1
-      @view.editorElement.getModel().setText('')
+      @view.editor.setText('')
     else
       @historyIndex -= 1
       @restoreHistory(@historyIndex)
 
-  confirm: (view) =>
+  confirm: =>
     repeatChar = if @searchMotion.initiallyReversed then '?' else '/'
     if @view.value is '' or @view.value is repeatChar
       lastSearch = @history(0)
@@ -121,7 +127,7 @@ class SearchViewModel extends ViewModel
       else
         @view.value = ''
         atom.beep()
-    super(view)
+    super()
     @vimState.pushSearchHistory(@view.value)
 
 VimNormalModeInputElement = document.registerElement "vim-normal-mode-input",
