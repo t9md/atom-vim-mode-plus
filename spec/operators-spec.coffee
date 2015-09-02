@@ -1560,3 +1560,7 @@ describe "Operators", ->
       ensure ['"', char: 'a', '_i('],
         mode: 'normal'
         text: originalText.replace('parenthesis', 'A register')
+
+  # [TODO]
+  describe 'ToggleLineComments', ->
+    beforeEach ->

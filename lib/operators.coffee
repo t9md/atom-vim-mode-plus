@@ -383,6 +383,23 @@ class ReplaceWithRegister extends Operator
       @editor.setSelectedBufferRanges(ranges)
     @vimState.activateNormalMode()
 
+class ToggleLineComments extends Operator
+  @extend()
+  execute: ->
+    markers = @editor.getCursorBufferPositions().map (point) =>
+      @editor.markBufferPosition point,
+        invalidate: 'never',
+        persistent: false
+
+    if _.any @target.select()
+      @editor.transact =>
+        for selection, i in @editor.getSelections()
+          selection.toggleLineComments()
+          if marker = markers[i]
+            selection.cursor.setBufferPosition marker.getStartBufferPosition()
+            marker.destroy()
+    @vimState.activateNormalMode()
+
 # Input
 # -------------------------
 # The operation for text entered in input mode. Broadly speaking, input
@@ -681,4 +698,5 @@ module.exports = {
   ActivateReplaceMode
 
   ReplaceWithRegister
+  ToggleLineComments
 }

@@ -210,6 +210,7 @@ class VimState
       'increase', 'decrease',
       'repeat', 'mark', 'replace',
       'replace-with-register'
+      'toggle-line-comments'
     ]
 
     @registerOperationCommands Scroll, [
