@@ -54,6 +54,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [ ] Flash(highlight) region for yanked, pasted, indented for giving instant feedback to user, beneficial especially used as operator like `yip`, `=ip`.
 - [ ] Don't change cursor position after yank, indent(break compatibility to Vim, but I thinks this is bettter).
 - [ ] New Operator for Surround, DeleteSurround, ChangeSurround.
+- [ ] Show current Register, Mark, Count as overlay decoration to giving instant feedback to user.
 - [x] New Operator for ToggleLineComments, Camelize, Dasherize, Underscore.
 - [x] New TextObject for Comment, Indent.
 - [x] Rewrite spec to be able to write test intuitively.
@@ -78,7 +79,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
   - [x] Auto mapping from command-name to corresponding class.
   - [x] Separate mode handling to ModeManager
   - [ ] Separate search history management as SearchHistoryManager
-- [ ] improve introspection report to describe keymap to corresponding class(by consulting `atom.keymap`).
+- [x] improve introspection report to describe keymap to corresponding class(by consulting `atom.keymap`).
 - [ ] Recheck unnecessary count passing function.
 
 # How Operation Stack works(for current official vim-mode).
