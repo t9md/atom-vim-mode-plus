@@ -57,6 +57,22 @@ class Operator extends Base
     if text
       @vimState.register.set({text})
 
+  markCursorBufferPositions: ->
+    markerByCursor = {}
+    for cursor in @editor.getCursors()
+      point = cursor.getBufferPosition()
+      markerByCursor[cursor.id] = @editor.markBufferPosition point,
+        invalidate: 'never',
+        persistent: false
+    markerByCursor
+
+  restoreMarkedCursorPositions: (markerByCursor) ->
+    for cursor in @editor.getCursors()
+      if marker = markerByCursor[cursor.id]
+        cursor.setBufferPosition marker.getStartBufferPosition()
+    for key, marker of markerByCursor
+      marker.destroy()
+
 class Select extends Operator
   @extend()
   execute: ->
@@ -386,18 +402,13 @@ class ReplaceWithRegister extends Operator
 class ToggleLineComments extends Operator
   @extend()
   execute: ->
-    markers = @editor.getCursorBufferPositions().map (point) =>
-      @editor.markBufferPosition point,
-        invalidate: 'never',
-        persistent: false
+    markerByCursor = @markCursorBufferPositions()
 
     if _.any @target.select()
       @editor.transact =>
         for selection, i in @editor.getSelections()
           selection.toggleLineComments()
-          if marker = markers[i]
-            selection.cursor.setBufferPosition marker.getStartBufferPosition()
-            marker.destroy()
+    @restoreMarkedCursorPositions markerByCursor
     @vimState.activateNormalMode()
 
 # Input
