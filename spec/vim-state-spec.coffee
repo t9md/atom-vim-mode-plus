@@ -329,33 +329,50 @@ describe "VimState", ->
           ]
 
     describe "activate visualmode within visualmode", ->
+      cursorPosition = null
       beforeEach ->
+        cursorPosition = [0, 4]
+        set
+          text: "line one\nline two\nline three\n"
+          cursor: cursorPosition
+
         ensure 'escape',
           mode: 'normal'
           classListContains: 'normal-mode'
 
-      it "activateVisualMode with same type puts the editor into normal mode", ->
-        ensure 'v',
-          submode: 'characterwise'
-          classListContains: 'visual-mode'
-          classListNotContains: 'normal-mode'
-        ensure 'v',
-          mode: 'normal'
-          classListContains: 'normal-mode'
-        ensure 'V',
-          submode: 'linewise'
-          classListContains: 'visual-mode'
-          classListNotContains: 'normal-mode'
-        ensure 'V',
-          mode: 'normal'
-          classListContains: 'normal-mode'
-        ensure [ctrl: 'v'],
-          submode: 'blockwise'
-          classListContains: 'visual-mode'
-          classListNotContains: 'normal-mode'
-        ensure [ctrl: 'v'],
-          mode: 'normal'
-          classListContains: 'normal-mode'
+      describe "activateVisualMode with same type puts the editor into normal mode", ->
+        describe "characterwise: vv", ->
+          it "activating twice make editor return to normal mode ", ->
+            ensure 'v',
+              submode: 'characterwise'
+              classListContains: 'visual-mode'
+              classListNotContains: 'normal-mode'
+            ensure 'v',
+              mode: 'normal'
+              classListContains: 'normal-mode'
+              cursor: cursorPosition
+
+        describe "linewise: VV", ->
+          it "activating twice make editor return to normal mode ", ->
+            ensure 'V',
+              submode: 'linewise'
+              classListContains: 'visual-mode'
+              classListNotContains: 'normal-mode'
+            ensure 'V',
+              mode: 'normal'
+              classListContains: 'normal-mode'
+              cursor: cursorPosition
+
+        describe "blockwise: ctrl-v twice", ->
+          it "activating twice make editor return to normal mode ", ->
+            ensure [ctrl: 'v'],
+              submode: 'blockwise'
+              classListContains: 'visual-mode'
+              classListNotContains: 'normal-mode'
+            ensure [ctrl: 'v'],
+              mode: 'normal'
+              classListContains: 'normal-mode'
+              cursor: cursorPosition
 
       describe "change submode within visualmode", ->
         beforeEach ->
