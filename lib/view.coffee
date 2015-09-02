@@ -5,24 +5,25 @@ Base = require './base'
 # [FIXME] why normalModeInputView need to be property of @editor?
 class ViewModel
   constructor: (@vimState, opts={}) ->
-    {@editor} = @vimState
     @emitter = new Emitter
     @view = new VimNormalModeInputElement().initialize(this, opts)
-    @editor.normalModeInputView = @view
+    @vimState.editor.normalModeInputView = @view
     @vimState.onDidFailToCompose =>
       @view.remove()
 
   onDidGetInput: (callback) ->
     @emitter.on 'did-get-input', callback
 
-  confirm: (view) ->
+  confirm: ->
     @emitter.emit 'did-get-input', @view.value
 
-  cancel: (view) ->
+  cancel: ->
     if @vimState.operationStack.isOperatorPending()
       # [FIXME] callbacking with empty string '' is BAD.
       # its clear former value regardless its important or not.
       @emitter.emit 'did-get-input', ''
+    # delete @editor.normalModeInputView
+    atom.workspace.getActivePane().activate()
 
 class VimNormalModeInputElement extends HTMLDivElement
   createdCallback: ->
@@ -53,7 +54,6 @@ class VimNormalModeInputElement extends HTMLDivElement
 
     @focus()
     @handleEvents()
-
     this
 
   handleEvents: ->
@@ -76,7 +76,7 @@ class VimNormalModeInputElement extends HTMLDivElement
     @editorElement.focus()
 
   cancel: (e) ->
-    @viewModel.cancel(this)
+    @viewModel.cancel()
     @removePanel()
 
   removePanel: ->
