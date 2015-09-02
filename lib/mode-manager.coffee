@@ -23,9 +23,9 @@ class ModeManager
       @editorElement.classList.remove "#{mode}-mode"
     @editorElement.classList.add "#{@mode}-mode"
 
-  activateNormalMode: (options={}) ->
+  activateNormalMode: ->
     @deactivateInsertMode()
-    @deactivateVisualMode(options.restoreColumn)
+    @deactivateVisualMode()
     @setMode('normal')
 
     @vimState.operationStack.clear()
@@ -91,8 +91,10 @@ class ModeManager
       @vimState.subscriptions.remove @replaceModeUndoListener
       @replaceModeUndoListener = null
 
-  deactivateVisualMode: (restoreColumn=true) ->
+  deactivateVisualMode: ->
     return unless @isVisualMode()
+    {lastOperation} = @vimState
+    restoreColumn = not (lastOperation?.isYank() or lastOperation?.isIndent())
     if restoreColumn and @submode is 'linewise'
       @selectCharacterwise()
     for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())

@@ -29,6 +29,7 @@ class VimState
   replaceModeListener: null
   developer: null
   locked: false
+  lastOperation: null
 
   # Mode handling is delegated to modeManager
   delegatingMethods = [
@@ -102,6 +103,7 @@ class VimState
       @editorElement.classList.remove("normal-mode")
     @editor = null
     @editorElement = null
+    @lastOperation = null
 
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
@@ -128,6 +130,7 @@ class VimState
           try
             @operationStack.push new kind[klass](this)
           catch error
+            @lastOperation = null
             throw error unless error.isOperationAbortedError?()
     @registerCommands(commands)
 
