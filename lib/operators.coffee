@@ -247,7 +247,7 @@ class Yank extends Operator
       for selection in @editor.getSelections()
         point = points?.shift() ? selection.getBufferRange().start
         selection.cursor.setBufferPosition point
-    @vimState.activateNormalMode(restoreColumn: false)
+    @vimState.activateNormalMode()
 
 class YankLine extends Yank
   @extend()
@@ -324,7 +324,7 @@ class Indent extends Operator
     @indent()
     @editor.setCursorBufferPosition([startRow, 0])
     @editor.moveToFirstCharacterOfLine()
-    @vimState.activateNormalMode(restoreColumn: false)
+    @vimState.activateNormalMode()
 
   indent: ->
     @editor.indentSelectedRows()
