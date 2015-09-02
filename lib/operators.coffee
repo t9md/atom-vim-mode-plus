@@ -203,11 +203,11 @@ class Surround extends ToggleCase
 
   constructor: ->
     super
-    @viewModel = new ViewModel @vimState,
+    viewModel = new ViewModel @vimState,
       class: 'surround'
       singleChar: true
       hidden: true
-    @viewModel.onDidGetInput @onDidGetInput.bind(this)
+    viewModel.onDidGetInput @onDidGetInput.bind(this)
 
   onDidGetInput: (input) ->
     @input = input if input
@@ -234,8 +234,7 @@ class DeleteSurround extends Surround
     pairTextObject.pair = @getPair(input)
     pairTextObject.inclusive = true
     @compose(pairTextObject)
-    if reprocess
-      @vimState.operationStack.process() # Re-process!!
+    @vimState.operationStack.process() # Re-process!!
 
   getNewText: (text) ->
     text[1...-1]
@@ -248,19 +247,15 @@ class ChangeSurround extends DeleteSurround
   onDidGetInput: (input) ->
     return unless input
     super(input, false)
-    @viewModel.view.removePanel()
-    console.log input
-    viewModel = new ViewModel @vimState,
+    vm = new ViewModel @vimState,
       class: 'surround'
       singleChar: true
       hidden: false
-    viewModel.onDidGetInput (input) =>
-      console.log "INNNER"
-      console.log input
+    vm.onDidGetInput (input) =>
+      # console.log value
       @input = input if input
       if @input
         @vimState.operationStack.process() # Re-process!!
-    viewModel.view.focus()
 
   getNewText: (text) ->
     @surround text[1...-1], @getPair(@input)
