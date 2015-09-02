@@ -127,3 +127,10 @@ atom-text-editor.vim-mode.operator-pending-mode.is-focused
     }
   }
 }
+
+// For flashing ranges operated on. e.g. flashing yanked region.
+atom-text-editor::shadow {
+  .vim-mode-flash .region {
+    background-color: @syntax-selection-flash-color;
+  }
+}

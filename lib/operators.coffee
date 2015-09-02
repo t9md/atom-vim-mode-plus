@@ -1,5 +1,6 @@
 # Refactoring status: 80%
 _ = require 'underscore-plus'
+{flash} = require './utils'
 {Point, Range} = require 'atom'
 
 {ViewModel} = require './view'
@@ -73,6 +74,37 @@ class Operator extends Base
     for key, marker of markerByCursor
       marker.destroy()
 
+  markSelections: ->
+    # [BUG] selection.marker.copy() return undefined.
+    # So I explictly create marker from getBufferRange().
+    markerBySelections = {}
+    for selection in @editor.getSelections()
+      range = selection.getBufferRange()
+      marker = @editor.markBufferRange range,
+        invalidate: 'never',
+        persistent: false
+      markerBySelections[selection.id] = marker
+    markerBySelections
+
+  withFlashing: (callback) ->
+    unless settings.get('flashOnOperate')
+      callback()
+      return
+
+    markerBySelections = @markSelections()
+    callback()
+    duration = settings.get('flashOnOperateDurationMilliSeconds')
+
+    for selection in @editor.getSelections()
+      marker = markerBySelections[selection.id]
+      flash @editor, marker, 'vim-mode-flash', duration
+
+    # Ensure destroy marker
+    setTimeout  =>
+      for key, marker of markerBySelections
+        marker.destroy()
+    , duration + 10
+
 class Select extends Operator
   @extend()
   execute: ->
@@ -128,7 +160,8 @@ class ToggleCase extends Operator
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
     if _.any @target.select()
-      @editor.replaceSelectedText {}, @getNewText.bind(this)
+      @withFlashing =>
+        @editor.replaceSelectedText {}, @getNewText.bind(this)
       for selection in @editor.getSelections() when not @isToggleCaseNow()
         point = points?.shift() ? selection.getBufferRange().start
         selection.cursor.setBufferPosition point
@@ -243,6 +276,7 @@ class Yank extends Operator
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
     if _.any @target.select()
+      @withFlashing =>
       @setTextToRegister @editor.getSelectedText()
       for selection in @editor.getSelections()
         point = points?.shift() ? selection.getBufferRange().start
@@ -392,22 +426,22 @@ class ReplaceWithRegister extends Operator
   @extend()
   execute: ->
     if _.any @target.select()
-      points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-      @editor.replaceSelectedText {}, (text) =>
-        @vimState.register.get().text ? text
-      ranges = (new Range(p, p) for p in points)
-      @editor.setSelectedBufferRanges(ranges)
+      @withFlashing =>
+        points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
+        @editor.replaceSelectedText {}, (text) =>
+          @vimState.register.get().text ? text
+        ranges = (new Range(p, p) for p in points)
+        @editor.setSelectedBufferRanges(ranges)
     @vimState.activateNormalMode()
 
 class ToggleLineComments extends Operator
   @extend()
   execute: ->
     markerByCursor = @markCursorBufferPositions()
-
     if _.any @target.select()
       @editor.transact =>
-        for selection, i in @editor.getSelections()
-          selection.toggleLineComments()
+        for s, i in @editor.getSelections()
+          s.toggleLineComments()
     @restoreMarkedCursorPositions markerByCursor
     @vimState.activateNormalMode()
 
