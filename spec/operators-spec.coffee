@@ -1561,6 +1561,55 @@ describe "Operators", ->
         mode: 'normal'
         text: originalText.replace('parenthesis', 'A register')
 
-  # [TODO]
   describe 'ToggleLineComments', ->
+    [oldGrammar, originalText] = []
     beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-coffee-script')
+
+      runs ->
+        oldGrammar = editor.getGrammar()
+        grammar = atom.grammars.grammarForScopeName('source.coffee')
+        editor.setGrammar(grammar)
+        originalText = """
+          class Base
+            constructor: (args) ->
+              pivot = items.shift()
+              left = []
+              right = []
+
+          console.log "hello"
+        """
+        set text: originalText
+
+    afterEach ->
+      editor.setGrammar(oldGrammar)
+
+    it 'toggle comment for textobject for indent and repeatable', ->
+      set cursor: [2, 0]
+      ensure 'g/ii',
+        text: """
+          class Base
+            constructor: (args) ->
+              # pivot = items.shift()
+              # left = []
+              # right = []
+
+          console.log "hello"
+        """
+      ensure '.', text: originalText
+
+    it 'toggle comment for textobject for paragraph and repeatable', ->
+      set cursor: [2, 0]
+      ensure 'g/ip',
+        text: """
+          # class Base
+          #   constructor: (args) ->
+          #     pivot = items.shift()
+          #     left = []
+          #     right = []
+
+          console.log "hello"
+        """
+
+      ensure '.', text: originalText
