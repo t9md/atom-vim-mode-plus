@@ -1,6 +1,5 @@
 # Refactoring status: 80%
 _ = require 'underscore-plus'
-{flash} = require './utils'
 {Point, Range} = require 'atom'
 
 {ViewModel} = require './view'
@@ -93,17 +92,15 @@ class Operator extends Base
 
     markerBySelections = @markSelections()
     callback()
-    duration = settings.get('flashOnOperateDurationMilliSeconds')
-
     for selection in @editor.getSelections()
-      marker = markerBySelections[selection.id]
-      flash @editor, marker, 'vim-mode-flash', duration
+      @editor.decorateMarker markerBySelections[selection.id],
+        type: 'highlight'
+        class: 'vim-mode-flash'
 
-    # Ensure destroy marker
+    # Ensure destroy all marker
     setTimeout  =>
-      for key, marker of markerBySelections
-        marker.destroy()
-    , duration + 10
+      marker.destroy() for __, marker of markerBySelections
+    , settings.get('flashOnOperateDurationMilliSeconds')
 
 class Select extends Operator
   @extend()

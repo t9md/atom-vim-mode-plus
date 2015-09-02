@@ -16,11 +16,3 @@ module.exports =
     else
       filePath = fs.normalize("~/sample.log")
       fs.appendFileSync filePath, msg
-
-  flash: (editor, marker, klass, duration=300) ->
-    decoration = editor.decorateMarker marker,
-      type: 'highlight'
-      class: klass
-    setTimeout  =>
-      decoration.getMarker().destroy()
-    , duration
