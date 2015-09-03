@@ -53,7 +53,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [ ] Improve search and introduce incrementalSearch.
 - [x] Flash(highlight) region for yanked, pasted, indented for giving instant feedback to user, beneficial especially used as operator like `yip`, `=ip`.
 - [ ] Don't change cursor position after yank, indent, toggle(break compatibility to Vim, but I thinks this is bettter).
-- [ ] New Operator for Surround, DeleteSurround, ChangeSurround.
+- [x] New Operator for Surround, DeleteSurround, ChangeSurround.
 - [ ] Show current Register, Mark, Count as overlay decoration to giving instant feedback to user.
 - [x] New Operator for ToggleLineComments, Camelize, Dasherize, Underscore.
 - [x] New TextObject for Comment, Indent.

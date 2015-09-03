@@ -146,7 +146,7 @@ class TransformString extends Operator
   linewiseAlias: true
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
-    if @target.isLinewise?()
+    if @target.isLinewise?() or settings.get('stay-on-transform-string')
       points = (s.getBufferRange().start for s in @editor.getSelections())
     if _.any @target.select()
       @withFlashing =>
