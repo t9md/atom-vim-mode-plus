@@ -16,7 +16,11 @@ describe "Motions", ->
     beforeEach ->
       # console.log vimState
       set
-        text: "12345\nabcd\nABCDE"
+        text: """
+          12345
+          abcd
+          ABCDE
+          """
         cursor: [1, 1]
 
     describe "the h keybinding", ->
@@ -275,7 +279,13 @@ describe "Motions", ->
 
   describe "the B keybinding", ->
     beforeEach ->
-      set text: "cde1+- ab \n\t xyz-123\n\n zip"
+      set
+        text: """
+          cde1+- ab
+          \t xyz-123
+
+           zip
+          """
 
     describe "as a motion", ->
       beforeEach ->
@@ -290,7 +300,7 @@ describe "Motions", ->
 
     describe "as a selection", ->
       it "selects to the beginning of the whole word", ->
-        set cursor: [1, 10]
+        set cursor: [1, 9]
         ensure 'yB', register: 'xyz-12' # because cursor is on the `3`
 
       it "doesn't go past the beginning of the file", ->

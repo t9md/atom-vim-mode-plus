@@ -65,14 +65,10 @@ class OperationStack
     op = @pop()
     @vimState.history.unshift(op) if op.isRecordable()
     debug " -> <#{op.getKind()}>.execute()"
-    @vimState.withLock =>
-      @vimState.lastOperation = op
-      op.execute()
-    # isNormalMode() check is duplicated in the check done in
-    # dontPutCursorAtEndOfLine() but I want be explicit for intention.
+    @vimState.lastOperation = op
+    op.execute()
     if @vimState.isNormalMode()
-      for cursor in @vimState.editor.getCursors()
-        @vimState.dontPutCursorAtEndOfLine(cursor)
+      @vimState.dontPutCursorsAtEndOfLine()
     @vimState.count.reset()
     @vimState.register.reset()
     @vimState.lastOperation = null

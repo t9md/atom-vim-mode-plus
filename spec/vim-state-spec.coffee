@@ -76,7 +76,13 @@ describe "VimState", ->
         ensure 'escape', numCursors: 1
 
     describe "the v keybinding", ->
-      beforeEach -> keystroke 'v'
+      beforeEach ->
+        set
+          text: """
+            abc
+            """
+          cursor: [0, 0]
+        keystroke 'v'
 
       it "puts the editor into visual characterwise mode", ->
         ensure
@@ -101,7 +107,8 @@ describe "VimState", ->
           selectedText: '012345\n'
 
     describe "the ctrl-v keybinding", ->
-      it "puts the editor into visual characterwise mode", ->
+      it "puts the editor into visual blockwise mode", ->
+        set text: "012345\n\nabcdef", cursor: [0, 0]
         ensure [ctrl: 'v'],
           submode: 'blockwise'
           classListContains: 'visual-mode'
@@ -109,25 +116,26 @@ describe "VimState", ->
 
     describe "selecting text", ->
       beforeEach ->
-        spyOn(_._, "now").andCallFake -> window.now
-        editor.setText("abc def")
+        set text: "abc def", cursor: [0, 0]
 
       it "puts the editor into visual mode", ->
         ensure mode: 'normal'
-        set selectedBufferRange: [[0, 0], [0, 3]]
 
-        advanceClock(100)
-
+        atom.commands.dispatch(editorElement, "core:select-right")
         ensure
           mode: 'visual'
           submode: 'characterwise'
-          selectedBufferRange: [[0, 0], [0, 3]]
+          selectedbufferrange: [[0, 0], [0, 1]]
 
       it "handles the editor being destroyed shortly after selecting text", ->
         set selectedBufferRange: [[0, 0], [0, 3]]
         editor.destroy()
         vimState.destroy()
         advanceClock(100)
+
+      it 'handles native selection such as core:select-all', ->
+        atom.commands.dispatch(editorElement, 'core:select-all')
+        ensure selectedBufferRange: [[0, 0], [0, 7]]
 
     describe "the i keybinding", ->
       it "puts the editor into insert mode", ->
@@ -143,11 +151,12 @@ describe "VimState", ->
 
     describe "with content", ->
       beforeEach ->
-        set text: "012345\n\nabcdef"
+        set text: "012345\n\nabcdef", cursor: [0, 0]
 
       describe "on a line with content", ->
-        it "does not allow the cursor to be placed on the \n character", ->
-          set cursor: [0, 6]
+        it "does not allow the atom-commands to place the cursor on the \n character", ->
+          ensure mode: 'normal'
+          atom.commands.dispatch(editorElement, "editor:move-to-end-of-line")
           ensure cursor: [0, 5]
 
       describe "on an empty line", ->
