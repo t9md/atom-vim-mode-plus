@@ -82,7 +82,7 @@ _keystroke = (keys, {element}) ->
 
 normalModeInputKeydown = (key, options={}) ->
   theEditor = options.editor ? E
-  theEditor.normalModeInputView.editorElement.getModel().setText(key)
+  theEditor.normalModeInputView.editorElement.getModel().insertText(key)
 
 submitNormalModeInputText = (text, options={}) ->
   theEditor = options.editor ? E
@@ -226,10 +226,15 @@ getVim = (vimState) ->
           mockPlatform(element, k.platform)
           mocked = true
         else if k.char?
-          if k.char.match(/[A-Z]/)
-            normalModeInputKeydown k.char, {shift: true, @editor}
-          else
-            normalModeInputKeydown k.char, {@editor}
+          chars =
+            if k.char in ['', 'escape']
+              toArray(k.char)
+            else
+              k.char.split('')
+          for c in chars
+            options = {@editor}
+            options.shift = true if c.match(/[A-Z]/)
+            normalModeInputKeydown c, options
         else if k.chars? then submitNormalModeInputText k.chars, {@editor}
         else if k.ctrl? then keydown k.ctrl, {ctrl: true, element}
         else if k.raw? then keydown k.raw, {raw: true, element}

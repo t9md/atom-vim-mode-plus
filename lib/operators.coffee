@@ -200,21 +200,23 @@ class Surround extends ToggleCase
   @extend()
   pairs: ['[]', '()', '{}', '<>']
   input: null
+  charsMax: 1
 
   constructor: ->
     super
     viewModel = new ViewModel @vimState,
       class: 'surround'
-      charsMax: 1
+      charsMax: @charsMax
       hidden: true
     viewModel.onDidGetInput @onDidGetInput.bind(this)
 
   onDidGetInput: (input) ->
-    @input = input if input
+    # [FIXME] Need to avoid asign again currently. Should be handled on ViewModel.
+    @input ?= input
     @vimState.operationStack.process() # Re-process!!
 
   isComplete: ->
-    @target
+    super and @input
 
   getPair: (input) ->
     pair = _.detect @pairs, (pair) => input in pair
@@ -229,9 +231,9 @@ class Surround extends ToggleCase
 
 class DeleteSurround extends Surround
   @extend()
-  onDidGetInput: (input, reprocess=true) ->
+  onDidGetInput: (@input) ->
     pairTextObject = new SelectInsidePair(@vimState)
-    pairTextObject.pair = @getPair(input)
+    pairTextObject.pair = @getPair(@input)
     pairTextObject.inclusive = true
     @compose(pairTextObject)
     @vimState.operationStack.process() # Re-process!!
@@ -241,25 +243,16 @@ class DeleteSurround extends Surround
 
 class ChangeSurround extends DeleteSurround
   @extend()
-  isComplete: ->
-    @input
+  charsMax: 2
+  char: null
 
   onDidGetInput: (input) ->
     return unless input
-    super(input, false)
-    vm = new ViewModel @vimState,
-      class: 'surround'
-      charsMax: 1
-      hidden: false
-    vm.onDidGetInput (input) =>
-      # console.log value
-      @input = input if input
-      if @input
-        @vimState.operationStack.process() # Re-process!!
+    [from, @char] = input.split('')
+    super(from)
 
   getNewText: (text) ->
-    @surround text[1...-1], @getPair(@input)
-    # "(" + text[1...-1] + ")"
+    @surround text[1...-1], @getPair(@char)
 
 class Yank extends Operator
   @extend()
@@ -432,7 +425,7 @@ class ToggleLineComments extends Operator
     markerByCursor = @markCursorBufferPositions()
     if _.any @target.select()
       @editor.transact =>
-        for s, i in @editor.getSelections()
+        for s in @editor.getSelections()
           s.toggleLineComments()
     @restoreMarkedCursorPositions markerByCursor
     @vimState.activateNormalMode()

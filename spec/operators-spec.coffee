@@ -1266,6 +1266,84 @@ describe "Operators", ->
     it "g-g- dasherize the line of text, won't move cursor", ->
       ensure 'lg-g-', text: 'vim-mode\natom_text_editor\n', cursor: [0, 1]
 
+  describe 'surround', ->
+    beforeEach ->
+      set
+        text: """
+          apple
+          pairs: [brackets]
+          pairs: [brackets]
+          ( multi
+            line )
+          """
+        cursorBuffer: [0, 0]
+
+    describe 'surround', ->
+      it "surround text object with ( and repeatable", ->
+        ensure ['gss', char: '(', 'iw'],
+          text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
+          cursor: [0,0]
+        ensure 'j.',
+          text: "(apple)\n(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
+      it "surround text object with { and repeatable", ->
+        ensure ['gss', char: '{', 'iw'],
+          text: "{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
+          cursor: [0,0]
+        ensure 'j.',
+          text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
+    describe 'delete surround', ->
+      beforeEach ->
+        set cursor: [1, 8]
+      it "delete surrounded chars and repeatable", ->
+        ensure ['gsd', char: '['],
+          text: "apple\npairs: brackets\npairs: [brackets]\n( multi\n  line )"
+        ensure 'jl.',
+          text: "apple\npairs: brackets\npairs: brackets\n( multi\n  line )"
+      it "delete surrounded chars expanded to multi-line", ->
+        set cursor: [3, 1]
+        ensure ['gsd', char: '('],
+          text: "apple\npairs: [brackets]\npairs: [brackets]\n multi\n  line "
+    describe 'change srurround', ->
+      beforeEach ->
+        set
+          text: """
+            (apple)
+            (grape)
+            <lemmon>
+            {orange}
+            """
+          cursorBuffer: [0, 1]
+      it "change surrounded chars and repeatable", ->
+        ensure ['gsc', char: '(['],
+          text: """
+            [apple]
+            (grape)
+            <lemmon>
+            {orange}
+            """
+        ensure 'jl.',
+          text: """
+            [apple]
+            [grape]
+            <lemmon>
+            {orange}
+            """
+      it "change surrounded chars", ->
+        ensure ['jjgsc', char: '<"'],
+          text: """
+            (apple)
+            (grape)
+            "lemmon"
+            {orange}
+            """
+        ensure ['jlgsc', char: '{!'],
+          text: """
+            (apple)
+            (grape)
+            "lemmon"
+            !orange!
+            """
+
   describe "the i keybinding", ->
     beforeEach ->
       set
