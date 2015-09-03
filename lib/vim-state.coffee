@@ -28,7 +28,6 @@ class VimState
   destroyed: false
   replaceModeListener: null
   developer: null
-  locked: false
   lastOperation: null
 
   # Mode handling is delegated to modeManager
@@ -70,19 +69,14 @@ class VimState
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
 
-    handleSelectionChange = _.debounce =>
-      return unless @editor?
-      if @editor.getSelections().every((s) -> s.isEmpty())
-        @activateNormalMode() if @isVisualMode()
-      else
-        @activateVisualMode('characterwise') if @isNormalMode()
-    , 100
+    @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
 
-    @subscriptions.add @editor.onDidChangeSelectionRange handleSelectionChange
+    if atom.commands.onDidDispatch?
+      @subscriptions.add atom.commands.onDidDispatch ({target}) =>
+        if target is @editorElement
+          @checkSelections()
 
-    @subscriptions.add @editor.onDidChangeCursorPosition ({cursor}) =>
-      @dontPutCursorAtEndOfLine(cursor)
-    @subscriptions.add @editor.onDidAddCursor @dontPutCursorAtEndOfLine.bind(this)
+    # @subscriptions.add @editor.onDidAddCursor @dontPutCursorAtEndOfLine.bind(this)
 
     @editorElement.classList.add("vim-mode")
     @init()
@@ -94,16 +88,17 @@ class VimState
   destroy: ->
     return if @destroyed
     @destroyed = true
-    @emitter.emit 'did-destroy'
     @subscriptions.dispose()
     if @editor.isAlive()
       @deactivateInsertMode()
       @editorElement.component?.setInputEnabled(true)
       @editorElement.classList.remove("vim-mode")
       @editorElement.classList.remove("normal-mode")
+    @editorElement.removeEventListener 'mouseup', @checkSelections
     @editor = null
     @editorElement = null
     @lastOperation = null
+    @emitter.emit 'did-destroy'
 
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
@@ -249,22 +244,21 @@ class VimState
   getSearchHistoryItem: (index = 0) ->
     @globalVimState.searchHistory[index]
 
-  withLock: (callback) ->
-    try
-      @locked = true
-      callback()
-    finally
-      @locked = false
+  checkSelections: ->
+    return unless @editor?
+    if @editor.getSelections().every((s) -> s.isEmpty())
+      if @isNormalMode()
+        @dontPutCursorsAtEndOfLine()
+      else if @isVisualMode()
+        @activateNormalMode()
+    else
+      @activateVisualMode('characterwise') if @isNormalMode()
 
-  isLocked: ->
-    @locked
-
-  dontPutCursorAtEndOfLine: (cursor) ->
-    return if @isLocked() or not @isNormalMode()
-    if @editor.getPath()?.endsWith 'tryit.coffee'
-      return
-    if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
-      @withLock ->
-        {goalColumn} = cursor
-        cursor.moveLeft()
-        cursor.goalColumn = goalColumn
+  dontPutCursorsAtEndOfLine: ->
+    # if @editor.getPath()?.endsWith 'tryit.coffee'
+    #   return
+    for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
+      continue if cursor.isAtBeginningOfLine()
+      {goalColumn} = cursor
+      cursor.moveLeft()
+      cursor.goalColumn = goalColumn
