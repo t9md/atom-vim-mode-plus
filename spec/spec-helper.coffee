@@ -73,12 +73,12 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
 _keystroke = (keys, {element}) ->
   if keys is 'escape'
     keydown keys, {element}
-    return
-  for key in keys.split('')
-    if key.match(/[A-Z]/)
-      keydown key, {shift: true, element}
-    else
-      keydown key, {element}
+  else
+    for key in keys.split('')
+      if key.match(/[A-Z]/)
+        keydown key, {shift: true, element}
+      else
+        keydown key, {element}
 
 normalModeInputKeydown = (key, options={}) ->
   theEditor = options.editor ? E
@@ -91,19 +91,22 @@ submitNormalModeInputText = (text, options={}) ->
   atom.commands.dispatch(inputEditor, 'core:confirm')
 
 toArray = (obj, cond=null) ->
-  if _.isArray(cond ? obj)
-    obj
-  else
-    [obj]
+  if _.isArray(cond ? obj) then obj else [obj]
 
 getVim = (vimState) ->
   editor: vimState.editor
   editorElement: vimState.editorElement
 
   set: (o={}) ->
-    @editor.setText(o.text) if o.text?
-    @editor.setCursorScreenPosition o.cursor if o.cursor?
-    @editor.setCursorBufferPosition o.cursorBuffer if o.cursorBuffer?
+    if o.text?
+      @editor.setText(o.text)
+
+    if o.cursor?
+      @editor.setCursorScreenPosition o.cursor
+
+    if o.cursorBuffer?
+      @editor.setCursorBufferPosition o.cursorBuffer
+
     if o.addCursor?
       for point in toArray(o.addCursor, o.addCursor[0])
         @editor.addCursorAtBufferPosition point
@@ -115,7 +118,9 @@ getVim = (vimState) ->
       else
         vimState.register.set '"', text: o.register
 
-    @editor.setSelectedBufferRange o.selectedBufferRange if o.selectedBufferRange?
+    if o.selectedBufferRange?
+      @editor.setSelectedBufferRange o.selectedBufferRange
+      
     if o.spy?
       # e.g.
       # spyOn(editor, 'getURI').andReturn('/Users/atom/known_value.txt')
@@ -176,9 +181,11 @@ getVim = (vimState) ->
     if o.selectedBufferRangeStartRow?
       {start} = @editor.getSelectedBufferRange()
       expect(start.row).toEqual o.selectedBufferRangeStartRow
+
     if o.selectedBufferRangeEndRow?
       {end} = @editor.getSelectedBufferRange()
       expect(end.row).toEqual o.selectedBufferRangeEndRow
+
     if o.selectionIsReversed?
       expect(@editor.getLastSelection().isReversed()).toBe(o.selectionIsReversed)
 
@@ -194,6 +201,7 @@ getVim = (vimState) ->
 
     if o.mode?
       expect(vimState.mode).toEqual o.mode
+
     if o.submode?
       expect(vimState.submode).toEqual o.submode
 
@@ -201,6 +209,7 @@ getVim = (vimState) ->
       for klass in toArray(o.classListContains)
         expect(@editorElement.classList.contains(klass)).toBe(true)
         expect(@editorElement.classList.contains(klass)).toBe(true)
+
     if o.classListNotContains?
       for klass in toArray(o.classListNotContains)
         expect(@editorElement.classList.contains(klass)).toBe(false)
@@ -208,7 +217,7 @@ getVim = (vimState) ->
 
   keystroke: (keys, {element}={}) ->
     # keys must be String or Array
-    # Not support Object for keys intentionally to avoid ambiguity.
+    # Not support Object for keys to avoid ambiguity.
     element ?= @editorElement
     mocked = null
     if _.isString(keys)
@@ -222,26 +231,25 @@ getVim = (vimState) ->
       if _.isString(k)
         _keystroke(k, {element})
       else
-        if k.platform?
-          mockPlatform(element, k.platform)
-          mocked = true
-        else if k.char?
-          chars =
-            if k.char in ['', 'escape']
-              toArray(k.char)
-            else
-              k.char.split('')
-          for c in chars
-            options = {@editor}
-            options.shift = true if c.match(/[A-Z]/)
-            normalModeInputKeydown c, options
-        else if k.chars? then submitNormalModeInputText k.chars, {@editor}
-        else if k.ctrl? then keydown k.ctrl, {ctrl: true, element}
-        else if k.raw? then keydown k.raw, {raw: true, element}
-        else if k.cmd? then atom.commands.dispatch(k.cmd.target, k.cmd.name)
+        switch
+          when k.platform?
+            mockPlatform(element, k.platform)
+            mocked = true
+          when k.char?
+            chars =
+              if k.char in ['', 'escape']
+                toArray(k.char)
+              else
+                k.char.split('')
+            for c in chars
+              options = {@editor}
+              options.shift = true if c.match(/[A-Z]/)
+              normalModeInputKeydown c, options
+          when k.chars? then submitNormalModeInputText k.chars, {@editor}
+          when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
+          when k.raw?   then keydown k.raw, {raw: true, element}
+          when k.cmd?   then atom.commands.dispatch(k.cmd.target, k.cmd.name)
     if mocked
       unmockPlatform(element)
 
-module.exports = {
-  getVimState,
-}
+module.exports = {getVimState}
