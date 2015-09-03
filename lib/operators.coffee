@@ -140,9 +140,24 @@ class DeleteToLastCharacterOfLine extends Delete
     super
     @compose(new MoveToLastCharacterOfLine(@vimState))
 
-class ToggleCase extends Operator
+class TransformString extends Operator
   @extend()
+  adjustCursor: true
   linewiseAlias: true
+  # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
+  execute: ->
+    if @target.isLinewise?()
+      points = (s.getBufferRange().start for s in @editor.getSelections())
+    if _.any @target.select()
+      @withFlashing =>
+        @editor.replaceSelectedText {}, @getNewText.bind(this)
+      for selection in @editor.getSelections() when @adjustCursor
+        point = points?.shift() ? selection.getBufferRange().start
+        selection.cursor.setBufferPosition point
+    @vimState.activateNormalMode()
+
+class ToggleCase extends TransformString
+  @extend()
   toggleCase: (char) ->
     if (charLower = char.toLowerCase()) is char
       char.toUpperCase()
@@ -152,51 +167,41 @@ class ToggleCase extends Operator
   getNewText: (text) ->
     text.split('').map(@toggleCase).join('')
 
-  # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
-  execute: ->
-    if @target.isLinewise?()
-      points = (s.getBufferRange().start for s in @editor.getSelections())
-    if _.any @target.select()
-      @withFlashing =>
-        @editor.replaceSelectedText {}, @getNewText.bind(this)
-      for selection in @editor.getSelections() when not @isToggleCaseNow()
-        point = points?.shift() ? selection.getBufferRange().start
-        selection.cursor.setBufferPosition point
-    @vimState.activateNormalMode()
 
 # [TODO] Rename to ToggleCaseAndMoveRight
 class ToggleCaseNow extends ToggleCase
   @extend()
+  adjustCursor: false
   constructor: ->
     super
     @compose(new MoveRight(@vimState))
 
-class UpperCase extends ToggleCase
+class UpperCase extends TransformString
   @extend()
   getNewText: (text) ->
     text.toUpperCase()
 
-class LowerCase extends ToggleCase
+class LowerCase extends TransformString
   @extend()
   getNewText: (text) ->
     text.toLowerCase()
 
-class Camelize extends ToggleCase
+class Camelize extends TransformString
   @extend()
   getNewText: (text) ->
     _.camelize text
 
-class Underscore extends ToggleCase
+class Underscore extends TransformString
   @extend()
   getNewText: (text) ->
     _.underscore text
 
-class Dasherize extends ToggleCase
+class Dasherize extends TransformString
   @extend()
   getNewText: (text) ->
     _.dasherize text
 
-class Surround extends ToggleCase
+class Surround extends TransformString
   @extend()
   pairs: ['[]', '()', '{}', '<>']
   input: null
