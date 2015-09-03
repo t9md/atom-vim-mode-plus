@@ -52,3 +52,8 @@ module.exports = new ScopedConfig 'vim-mode',
     type: 'integer'
     default: 100
     description: "Duration for flash"
+  stayOnTransformString:
+    order: 10
+    type: 'boolean'
+    default: false
+    description: "Dont move cursor when Toggle, Surround, etc"
