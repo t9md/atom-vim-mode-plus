@@ -1,6 +1,7 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
 
+{HoverModel} = require './view'
 module.exports =
 class CountManager
   count: null
@@ -14,12 +15,14 @@ class CountManager
     num = if _.isNumber(e) then e else parseInt(@getKeystrokeForEvent(e))
     @count ?= 0
     @count = (@count * 10) + num
+    @vimState.hover.set @count
 
   get: ->
     @count
 
   reset: ->
     @count = null
+    @vimState.hover.reset()
 
   isEmpty: ->
     not @count

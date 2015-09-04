@@ -81,6 +81,7 @@ class OperationStack
     @stack.pop()
 
   clear: ->
+    @vimState.hover.reset()
     @stack = []
 
   isEmpty: ->

@@ -17,6 +17,10 @@ class Motion extends Base
   operatesInclusively: true
   operatesLinewise: false
 
+  constructor: ->
+    super
+    @vimState.hover.set @hoverText if @hoverText?
+
   select: (options) ->
     value = for selection in @editor.getSelections()
       if @isLinewise()
@@ -553,7 +557,6 @@ class Find extends Motion
         charsMax: 1
         hidden: true
         prefix: @prefix
-        lineOffset: -1
 
   match: (cursor, count) ->
     currentPosition = cursor.getBufferPosition()
@@ -644,7 +647,7 @@ class MoveToMark extends Motion
   operatesInclusively: false
   operatesLinewise: true
   complete: false # will changed to true after Input provided by @getInput()(asynchronous)
-  prefix: "'"
+  hoverText: "'"
 
   constructor: ->
     super
@@ -652,8 +655,6 @@ class MoveToMark extends Motion
       class: 'move-to-mark',
       charsMax: 1,
       hidden: true
-      prefix: @prefix
-      lineOffset: -1
 
   isLinewise: ->
     @operatesLinewise
@@ -673,7 +674,7 @@ class MoveToMark extends Motion
 class MoveToMarkLiteral extends MoveToMark
   @extend()
   operatesLinewise: false
-  prefix: '`'
+  hoverText: '`'
 
 # Search
 # -------------------------

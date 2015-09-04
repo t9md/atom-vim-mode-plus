@@ -2,6 +2,7 @@
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
+{HoverModel} = require './view'
 
 settings = require './settings'
 
@@ -68,6 +69,7 @@ class VimState
     @register = new RegisterManager(this)
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
+    @hover = new HoverModel(this)
 
     @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
 
@@ -98,6 +100,7 @@ class VimState
     @editor = null
     @editorElement = null
     @lastOperation = null
+    @hover.destroy()
     @emitter.emit 'did-destroy'
 
   onDidFailToCompose: (fn) ->
@@ -127,6 +130,7 @@ class VimState
           catch error
             @lastOperation = null
             throw error unless error.isOperationAbortedError?()
+
     @registerCommands(commands)
 
   # Initialize all of vim-mode' commands.

@@ -29,6 +29,7 @@ class Operator extends Base
 
   constructor: ->
     super
+    @vimState.hover.set @hoverText if @hoverText?
     #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
     if @linewiseAlias and @vimState.isOperatorPendingMode() and
       @vimState.operationStack.peekTop().constructor is @constructor
@@ -157,6 +158,8 @@ class TransformString extends Operator
   @extend()
   adjustCursor: true
   linewiseAlias: true
+  hoverText: null
+
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
     if @target.isLinewise?() or settings.get('stayOnTransformString')
@@ -171,6 +174,7 @@ class TransformString extends Operator
 
 class ToggleCase extends TransformString
   @extend()
+  hoverText: '~'
   toggleCase: (char) ->
     if (charLower = char.toLowerCase()) is char
       char.toUpperCase()
@@ -184,6 +188,7 @@ class ToggleCase extends TransformString
 # [TODO] Rename to ToggleCaseAndMoveRight
 class ToggleCaseNow extends ToggleCase
   @extend()
+  hoverText: null
   adjustCursor: false
   constructor: ->
     super
@@ -191,26 +196,31 @@ class ToggleCaseNow extends ToggleCase
 
 class UpperCase extends TransformString
   @extend()
+  hoverText: 'U'
   getNewText: (text) ->
     text.toUpperCase()
 
 class LowerCase extends TransformString
   @extend()
+  hoverText: 'u'
   getNewText: (text) ->
     text.toLowerCase()
 
 class Camelize extends TransformString
   @extend()
+  hoverText: '🐪'
   getNewText: (text) ->
     _.camelize text
 
 class Underscore extends TransformString
   @extend()
+  hoverText: '_'
   getNewText: (text) ->
     _.underscore text
 
 class Dasherize extends TransformString
   @extend()
+  hoverText: '💨'
   getNewText: (text) ->
     _.dasherize text
 
@@ -219,6 +229,8 @@ class Surround extends TransformString
   pairs: ['[]', '()', '{}', '<>']
   input: null
   charsMax: 1
+  userHover: false
+  hoverText: '👭'
 
   constructor: ->
     super
@@ -226,8 +238,10 @@ class Surround extends TransformString
       class: 'surround'
       charsMax: @charsMax
       hidden: true
-      prefix: 'S:'
+
     viewModel.onDidGetInput @onDidGetInput.bind(this)
+    viewModel.onDidChangeInput (input) =>
+      @vimState.hover.add(input)
 
   onDidGetInput: (input) ->
     # [FIXME] Need to avoid asign again currently. Should be handled on ViewModel.
@@ -313,14 +327,13 @@ class Repeat extends Operator
 
 class Mark extends Operator
   @extend()
+  hoverText: '📎'
   constructor: ->
     super
     @getInput
       class: 'mark'
       charsMax: 1
       hidden: true
-      prefix: 'm'
-      lineOffset: -1
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
@@ -445,6 +458,7 @@ class ReplaceWithRegister extends Operator
 
 class ToggleLineComments extends Operator
   @extend()
+  hoverText: '🔇'
   execute: ->
     markerByCursor = @markCursorBufferPositions()
     if _.any @target.select()
