@@ -640,6 +640,7 @@ class MoveToMark extends Motion
   operatesInclusively: false
   operatesLinewise: true
   complete: false # will changed to true after Input provided by @getInput()(asynchronous)
+  prefix: "'"
 
   constructor: ->
     super
@@ -647,6 +648,7 @@ class MoveToMark extends Motion
       class: 'move-to-mark',
       charsMax: 1,
       hidden: true
+      prefix: @prefix
 
   isLinewise: ->
     @operatesLinewise
@@ -666,6 +668,7 @@ class MoveToMark extends Motion
 class MoveToMarkLiteral extends MoveToMark
   @extend()
   operatesLinewise: false
+  prefix: '`'
 
 # Search
 # -------------------------

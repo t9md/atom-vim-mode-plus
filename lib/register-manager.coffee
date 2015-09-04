@@ -86,6 +86,7 @@ class RegisterManager
     viewModel = new ViewModel @vimState,
       class: 'read-register'
       charsMax: 1
+      prefix: '"'
       hidden: true
     viewModel.onDidGetInput (@name) =>
 
