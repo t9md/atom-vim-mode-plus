@@ -142,8 +142,9 @@ class HoverElement extends HTMLElement
     @classList.add 'vim-mode-hover'
     this
 
-  initialize: (@viewModel, {prefix}={}) ->
+  initialize: (@viewModel, {prefix, @lineOffset}={}) ->
     prefix ?= ''
+    @lineOffset ?= 0
     @textContent = prefix
     @viewModel.onDidChangeInput (input) =>
       @textContent = prefix + input
@@ -152,7 +153,10 @@ class HoverElement extends HTMLElement
 
   setup: ->
     editor = @viewModel.vimState.editor
-    @style.marginTop = (editor.getLineHeightInPixels() * -2) + 'px'
+    @style.paddingLeft  = '0.2em'
+    @style.paddingRight = '0.2em'
+    @style.marginLeft   = '-0.2em'
+    @style.marginTop = (editor.getLineHeightInPixels() * @lineOffset) + 'px'
     # @style.marginTop = if top <= 10 then '0px' else '-20px'
     # @style.marginTop = '-50px'
 
