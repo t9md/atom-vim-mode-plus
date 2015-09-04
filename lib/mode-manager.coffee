@@ -168,6 +168,7 @@ class ModeManager
   # Returns nothing.
   resetNormalMode: ->
     @vimState.operationStack.clear()
+    @vimState.hover.reset()
     @editor.clearSelections()
     @activateNormalMode()
 

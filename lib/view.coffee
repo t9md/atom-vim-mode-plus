@@ -9,7 +9,6 @@ class ViewModel
     @emitter = new Emitter
     @view = new VimNormalModeInputElement().initialize(this, options)
     @vimState.editor.normalModeInputView = @view
-    @hover = new HoverElemnt().initialize(this, options)
     @vimState.onDidFailToCompose =>
       @view.remove()
 
@@ -21,7 +20,6 @@ class ViewModel
 
   confirm: ->
     @emitter.emit 'did-get-input', @view.value
-    @hover.destroy()
 
   cancel: ->
     if @vimState.operationStack.isOperatorPending()
@@ -30,7 +28,6 @@ class ViewModel
       @emitter.emit 'did-get-input', ''
     # delete @editor.normalModeInputView
     atom.workspace.getActivePane().activate()
-    @hover.destroy()
 
 class VimNormalModeInputElement extends HTMLDivElement
   createdCallback: ->
@@ -137,53 +134,79 @@ class SearchViewModel extends ViewModel
     super()
     @vimState.pushSearchHistory(@view.value)
 
+class HoverModel
+  constructor: (@vimState, text='') ->
+    @view = new HoverElement()
+    @view.initialize(@vimState)
+    @set text
+
+  add: (text) ->
+    @view.textContent += text
+    @view.show()
+
+  set: (text) ->
+    @view.textContent = text
+    @view.show()
+
+  reset: ->
+    @view.textContent = ''
+    @view.reset()
+
+  destroy: ->
+    @view?.destroy()
+    @view = null
+
 class HoverElement extends HTMLElement
   createdCallback: ->
     @classList.add 'vim-mode-hover'
     this
 
-  initialize: (@viewModel, {prefix, @lineOffset}={}) ->
-    prefix ?= ''
-    @lineOffset ?= 0
-    @textContent = prefix
-    @viewModel.onDidChangeInput (input) =>
-      @textContent = prefix + input
-    @setup()
+  initialize: (@vimState, @options={}) ->
+    {@editor} = @vimState
+    @textContent = @options.prefix ? ''
+    @show()
     this
 
-  setup: ->
-    editor = @viewModel.vimState.editor
+  show: ->
+    lineOffset = @options.lineOffset ? -2
     @style.paddingLeft  = '0.2em'
     @style.paddingRight = '0.2em'
     @style.marginLeft   = '-0.2em'
-    @style.marginTop = (editor.getLineHeightInPixels() * @lineOffset) + 'px'
+    @style.marginTop = (@editor.getLineHeightInPixels() * lineOffset) + 'px'
     # @style.marginTop = if top <= 10 then '0px' else '-20px'
     # @style.marginTop = '-50px'
 
-    point = editor.getCursorBufferPosition()
-    @marker = editor.markBufferPosition point,
+    point = @editor.getCursorBufferPosition()
+    @marker = @editor.markBufferPosition point,
       invalidate: "never",
       persistent: false
 
-    decoration = editor.decorateMarker @marker,
+    decoration = @editor.decorateMarker @marker,
       type: 'overlay'
       item: this
 
+  reset: ->
+    @marker?.destroy()
+
   destroy: ->
-    @marker.destroy()
+    @vimState = null
+    @options = null
+    @editor = null
+    @marker?.destroy()
     @remove()
 
 VimNormalModeInputElement = document.registerElement "vim-normal-mode-input",
   extends: "div",
   prototype: VimNormalModeInputElement.prototype
 
-HoverElemnt = document.registerElement 'vim-mode-hover',
+HoverElement = document.registerElement 'vim-mode-hover',
   prototype: HoverElement.prototype
   extends:   'div'
 
 module.exports = {
   ViewModel
   SearchViewModel
+  HoverElement
+  HoverModel
   VimNormalModeInputElement
-  HoverElemnt
 }
