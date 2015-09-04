@@ -159,16 +159,14 @@ class TransformString extends Operator
   linewiseAlias: true
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
-    adjustCursor = @adjustCursor and
-      (@target.isLinewise?() or settings.get('stayOnTransformString'))
+    if @target.isLinewise?() or settings.get('stayOnTransformString')
+      points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
     if _.any @target.select()
       @withFlashing =>
         for selection in @editor.getSelections()
-          if adjustCursor
-            point = selection.getBufferRange().start
           range = selection.insertText @getNewText(selection.getText())
-          if adjustCursor
-            selection.cursor.setBufferPosition(point ? range.start)
+          if @adjustCursor
+            selection.cursor.setBufferPosition(points.shift() ? range.start)
     @vimState.activateNormalMode()
 
 class ToggleCase extends TransformString
