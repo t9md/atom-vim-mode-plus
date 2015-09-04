@@ -166,7 +166,7 @@ class TransformString extends Operator
         for selection in @editor.getSelections()
           range = selection.insertText @getNewText(selection.getText())
           if @adjustCursor
-            selection.cursor.setBufferPosition(points.shift() ? range.start)
+            selection.cursor.setBufferPosition(points?.shift() ? range.start)
     @vimState.activateNormalMode()
 
 class ToggleCase extends TransformString
@@ -226,6 +226,7 @@ class Surround extends TransformString
       class: 'surround'
       charsMax: @charsMax
       hidden: true
+      prefix: 'S:'
     viewModel.onDidGetInput @onDidGetInput.bind(this)
 
   onDidGetInput: (input) ->
@@ -318,6 +319,7 @@ class Mark extends Operator
       class: 'mark'
       charsMax: 1
       hidden: true
+      prefix: 'm'
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
@@ -657,6 +659,7 @@ class Replace extends Operator
       hidden: true
       charsMax: 1
       defaultText: '\n'
+      prefix: 'r'
 
   isComplete: ->
     @input?

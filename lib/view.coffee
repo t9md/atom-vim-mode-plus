@@ -9,14 +9,19 @@ class ViewModel
     @emitter = new Emitter
     @view = new VimNormalModeInputElement().initialize(this, options)
     @vimState.editor.normalModeInputView = @view
+    @hover = new HoverElemnt().initialize(this, options)
     @vimState.onDidFailToCompose =>
       @view.remove()
 
   onDidGetInput: (callback) ->
     @emitter.on 'did-get-input', callback
 
+  onDidChangeInput: (callback) ->
+    @emitter.on 'did-change-input', callback
+
   confirm: ->
     @emitter.emit 'did-get-input', @view.value
+    @hover.destroy()
 
   cancel: ->
     if @vimState.operationStack.isOperatorPending()
@@ -25,6 +30,7 @@ class ViewModel
       @emitter.emit 'did-get-input', ''
     # delete @editor.normalModeInputView
     atom.workspace.getActivePane().activate()
+    @hover.destroy()
 
 class VimNormalModeInputElement extends HTMLDivElement
   createdCallback: ->
@@ -61,6 +67,7 @@ class VimNormalModeInputElement extends HTMLDivElement
   handleEvents: ->
     if @charsMax?
       @editor.onDidChange =>
+        @viewModel.emitter.emit 'did-change-input', @editor.getText()
         text = @editor.getText()
         if text.length >= @charsMax
           @confirm()
@@ -130,8 +137,49 @@ class SearchViewModel extends ViewModel
     super()
     @vimState.pushSearchHistory(@view.value)
 
+class HoverElement extends HTMLElement
+  createdCallback: ->
+    @classList.add 'vim-mode-hover'
+    this
+
+  initialize: (@viewModel, {prefix}={}) ->
+    prefix ?= ''
+    @textContent = prefix
+    @viewModel.onDidChangeInput (input) =>
+      @textContent = prefix + input
+    @setup()
+    this
+
+  setup: ->
+    editor = @viewModel.vimState.editor
+    @style.marginTop = (editor.getLineHeightInPixels() * -2) + 'px'
+    # @style.marginTop = if top <= 10 then '0px' else '-20px'
+    # @style.marginTop = '-50px'
+
+    point = editor.getCursorBufferPosition()
+    @marker = editor.markBufferPosition point,
+      invalidate: "never",
+      persistent: false
+
+    decoration = editor.decorateMarker @marker,
+      type: 'overlay'
+      item: this
+
+  destroy: ->
+    @marker.destroy()
+    @remove()
+
 VimNormalModeInputElement = document.registerElement "vim-normal-mode-input",
   extends: "div",
   prototype: VimNormalModeInputElement.prototype
 
-module.exports = {ViewModel, SearchViewModel, VimNormalModeInputElement}
+HoverElemnt = document.registerElement 'vim-mode-hover',
+  prototype: HoverElement.prototype
+  extends:   'div'
+
+module.exports = {
+  ViewModel
+  SearchViewModel
+  VimNormalModeInputElement
+  HoverElemnt
+}
