@@ -543,6 +543,7 @@ class Find extends Motion
   repeated: false
   reverse: false
   offset: 0
+  prefix: 'f'
 
   constructor: ->
     super
@@ -551,6 +552,8 @@ class Find extends Motion
         class: 'find'
         charsMax: 1
         hidden: true
+        prefix: @prefix
+        lineOffset: -1
 
   match: (cursor, count) ->
     currentPosition = cursor.getBufferPosition()
@@ -608,6 +611,7 @@ class RepeatFindReverse extends RepeatFind
 class FindBackwards extends Find
   @extend()
   backwards: true
+  prefix: 'F'
 
 # keymap: t
 class Till extends Find
@@ -649,6 +653,7 @@ class MoveToMark extends Motion
       charsMax: 1,
       hidden: true
       prefix: @prefix
+      lineOffset: -1
 
   isLinewise: ->
     @operatesLinewise

@@ -320,6 +320,7 @@ class Mark extends Operator
       charsMax: 1
       hidden: true
       prefix: 'm'
+      lineOffset: -1
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
