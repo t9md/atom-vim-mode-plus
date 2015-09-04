@@ -85,6 +85,19 @@ class Operator extends Base
       markerBySelections[selection.id] = marker
     markerBySelections
 
+  flash: (range) ->
+    marker = @editor.markBufferRange range,
+      invalidate: 'never',
+      persistent: false
+
+    @editor.decorateMarker marker,
+      type: 'highlight'
+      class: 'vim-mode-flash'
+
+    setTimeout  =>
+      marker.destroy()
+    , settings.get('flashOnOperateDurationMilliSeconds')
+
   withFlashing: (callback) ->
     unless settings.get('flashOnOperate')
       callback()
@@ -146,14 +159,16 @@ class TransformString extends Operator
   linewiseAlias: true
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
-    if @target.isLinewise?() or settings.get('stayOnTransformString')
-      points = (s.getBufferRange().start for s in @editor.getSelections())
+    adjustCursor = @adjustCursor and
+      (@target.isLinewise?() or settings.get('stayOnTransformString'))
     if _.any @target.select()
       @withFlashing =>
-        @editor.replaceSelectedText {}, @getNewText.bind(this)
-      for selection in @editor.getSelections() when @adjustCursor
-        point = points?.shift() ? selection.getBufferRange().start
-        selection.cursor.setBufferPosition point
+        for selection in @editor.getSelections()
+          if adjustCursor
+            point = selection.getBufferRange().start
+          range = selection.insertText @getNewText(selection.getText())
+          if adjustCursor
+            selection.cursor.setBufferPosition(point ? range.start)
     @vimState.activateNormalMode()
 
 class ToggleCase extends TransformString
@@ -394,11 +409,13 @@ class PutBefore extends Operator
 
       text = text.replace(/\n$/, '')
       range = selection.insertText(text)
+      @flash range
       cursor.setBufferPosition(range.start)
       cursor.moveToFirstCharacterOfLine()
     else
       selection.insertText("\n")
       range = selection.insertText(text)
+      @flash range
       cursor.setBufferPosition(range.start)
 
   pasteCharacterwise: (selection, text) ->
@@ -406,6 +423,7 @@ class PutBefore extends Operator
     if @location is 'after' and selection.isEmpty()
       cursor.moveRight()
     range = selection.insertText(text)
+    @flash range
     cursor.setBufferPosition(range.end.translate([0, -1]))
 
 class PutAfter extends PutBefore
