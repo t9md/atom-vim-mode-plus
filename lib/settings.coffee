@@ -57,3 +57,7 @@ module.exports = new ScopedConfig 'vim-mode',
     type: 'boolean'
     default: false
     description: "Dont move cursor when Toggle, Surround, etc"
+  enableHoverIndicator:
+    order: 11
+    type: 'boolean'
+    default: false
