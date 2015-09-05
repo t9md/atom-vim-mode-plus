@@ -3,6 +3,7 @@ Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
 {Hover} = require './hover'
+{Input} = require './input'
 
 settings = require './settings'
 
@@ -70,6 +71,7 @@ class VimState
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
     @hover = new Hover(this)
+    @input = new Input(this)
 
     @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
 
@@ -101,6 +103,7 @@ class VimState
     @editorElement = null
     @lastOperation = null
     @hover.destroy()
+    @input.destroy()
     @emitter.emit 'did-destroy'
 
   onDidFailToCompose: (fn) ->

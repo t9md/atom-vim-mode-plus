@@ -67,11 +67,14 @@ class OperationStack
     debug " -> <#{op.getKind()}>.execute()"
     @vimState.lastOperation = op
     op.execute()
+    @finish()
+    debug "#=== Finish at #{new Date().toISOString()}\n"
+
+  finish: ->
     if @vimState.isNormalMode()
       @vimState.dontPutCursorsAtEndOfLine()
     @vimState.reset()
     @vimState.lastOperation = null
-    debug "#=== Finish at #{new Date().toISOString()}\n"
 
   peekTop: ->
     _.last @stack

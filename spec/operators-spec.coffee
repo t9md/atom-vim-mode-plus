@@ -1084,22 +1084,21 @@ describe "Operators", ->
     it "does nothing when cancelled", ->
       ensure 'r',
         classListContains: 'operator-pending-mode'
-      editor.normalModeInputView.viewModel.cancel()
+      vimState.input.cancel()
       ensure
         text: '12\n34\n\n'
         classListContains: 'normal-mode'
 
     it "remain visual-mode when cancelled", ->
       keystroke 'vr'
-      editor.normalModeInputView.viewModel.cancel()
+      vimState.input.cancel()
       ensure
         text: '12\n34\n\n'
         classListContains: 'visual-mode'
 
     it "replaces a single character with a line break", ->
       keystroke 'r'
-      atom.commands.dispatch(editor.normalModeInputView.editorElement, 'core:confirm')
-      ensure
+      ensure [char: '\n'],
         text: '\n2\n\n4\n\n'
         cursorBuffer: [[1, 0], [3, 0]]
 

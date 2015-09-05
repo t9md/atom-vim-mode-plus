@@ -4,6 +4,8 @@ StatusBarManager = require './status-bar-manager'
 GlobalVimState = require './global-vim-state'
 VimState = require './vim-state'
 settings = require './settings'
+{Hover, HoverElement} = require './hover'
+{Input, InputElement} = require './input'
 _ = require 'underscore-plus'
 
 module.exports =
@@ -35,9 +37,10 @@ module.exports =
       @vimStates.forEach (vimState) -> vimState.destroy()
 
   registerViewProviders: ->
-    {Hover, HoverElement} = require './hover'
     atom.views.addViewProvider Hover, (model) ->
       new HoverElement().initialize(model)
+    atom.views.addViewProvider Input, (model) ->
+      new InputElement().initialize(model)
 
   deactivate: ->
     @disposables.dispose()

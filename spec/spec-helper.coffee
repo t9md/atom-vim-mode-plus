@@ -120,7 +120,7 @@ getVim = (vimState) ->
 
     if o.selectedBufferRange?
       @editor.setSelectedBufferRange o.selectedBufferRange
-      
+
     if o.spy?
       # e.g.
       # spyOn(editor, 'getURI').andReturn('/Users/atom/known_value.txt')
@@ -242,9 +242,7 @@ getVim = (vimState) ->
               else
                 k.char.split('')
             for c in chars
-              options = {@editor}
-              options.shift = true if c.match(/[A-Z]/)
-              normalModeInputKeydown c, options
+              vimState.input.view.editor.insertText(c)
           when k.chars? then submitNormalModeInputText k.chars, {@editor}
           when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
           when k.raw?   then keydown k.raw, {raw: true, element}
