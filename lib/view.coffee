@@ -136,21 +136,22 @@ class SearchViewModel extends ViewModel
 
 class Hover
   constructor: (@vimState, text='') ->
-    @emitter = new Emitter()
     @view = atom.views.getView(this)
     @set text
 
-  onDidSet: (callback) -> @emitter.on 'did-set', callback
-  onDidAdd: (callback) -> @emitter.on 'did-add', callback
-  onDidReset: (callback) -> @emitter.on 'did-reset', callback
-  onDidDestroy: (callback) -> @emitter.on 'did-destroy', callback
+  set: (text) ->
+    @view.textContent = text
+    @view.show()
 
-  set: (text) -> @emitter.emit 'did-set', text
-  add: (text) -> @emitter.emit 'did-add', text
-  reset: -> @emitter.emit 'did-reset'
+  add: (text) ->
+    @view.textContent += text
+    @view.show()
+
+  reset: -> @view.reset()
+
   destroy: ->
     @vimState = null
-    @emitter.emit 'did-destroy'
+    @view.destroy()
 
 class HoverElement extends HTMLElement
   createdCallback: ->
@@ -158,10 +159,6 @@ class HoverElement extends HTMLElement
     this
 
   initialize: (@model) ->
-    @model.onDidSet (text) => @set(text)
-    @model.onDidAdd (text) => @add(text)
-    @model.onDidReset => @reset()
-    @model.onDidDestroy => @destroy()
     this
 
   show: ->
@@ -180,14 +177,8 @@ class HoverElement extends HTMLElement
       type: 'overlay'
       item: this
 
-  set: (@textContent) ->
-    @show()
-
-  add: (text) ->
-    @textContent += text
-
   reset: ->
-    @set ''
+    @textContent = ''
     @marker?.destroy()
 
   destroy: ->
@@ -206,7 +197,6 @@ HoverElement = document.registerElement 'vim-mode-hover',
 module.exports = {
   ViewModel
   SearchViewModel
-  Hover
-  HoverElement
+  Hover, HoverElement
   VimNormalModeInputElement
 }
