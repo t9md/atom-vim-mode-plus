@@ -1,5 +1,5 @@
 emoji = require 'emoji-images'
-emojiFolder = 'atom://autocomplete-emojis/node_modules/emoji-images/pngs'
+emojiFolder = 'atom://vim-mode/node_modules/emoji-images/pngs'
 settings = require './settings'
 
 class Hover

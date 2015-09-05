@@ -41,9 +41,7 @@ class Base
     obj = new (Base.findClass(klassName))(@vimState)
     _.extend(obj, properties)
 
-  getInput: (options={}) ->
-    options.hidden ?= true
-    options.charsMax ?= 1
+  getInput: (options) ->
     viewModel = new ViewModel(@vimState, options)
     viewModel.onDidGetInput (@input) =>
       @complete = true
