@@ -2,7 +2,7 @@
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
-{HoverModel} = require './view'
+{Hover} = require './view'
 
 settings = require './settings'
 
@@ -69,7 +69,7 @@ class VimState
     @register = new RegisterManager(this)
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
-    @hover = new HoverModel(this)
+    @hover = new Hover(this)
 
     @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
 

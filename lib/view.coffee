@@ -134,64 +134,64 @@ class SearchViewModel extends ViewModel
     super()
     @vimState.pushSearchHistory(@view.value)
 
-class HoverModel
+class Hover
   constructor: (@vimState, text='') ->
-    @view = new HoverElement()
-    @view.initialize(@vimState)
+    @emitter = new Emitter()
+    @view = atom.views.getView(this)
     @set text
 
-  add: (text) ->
-    @view.textContent += text
-    @view.show()
+  onDidSet: (callback) -> @emitter.on 'did-set', callback
+  onDidAdd: (callback) -> @emitter.on 'did-add', callback
+  onDidReset: (callback) -> @emitter.on 'did-reset', callback
+  onDidDestroy: (callback) -> @emitter.on 'did-destroy', callback
 
-  set: (text) ->
-    @view.textContent = text
-    @view.show()
-
-  reset: ->
-    @view.textContent = ''
-    @view.reset()
-
+  set: (text) -> @emitter.emit 'did-set', text
+  add: (text) -> @emitter.emit 'did-add', text
+  reset: -> @emitter.emit 'did-reset'
   destroy: ->
-    @view?.destroy()
-    @view = null
+    @vimState = null
+    @emitter.emit 'did-destroy'
 
 class HoverElement extends HTMLElement
   createdCallback: ->
     @classList.add 'vim-mode-hover'
     this
 
-  initialize: (@vimState, @options={}) ->
-    {@editor} = @vimState
-    @textContent = @options.prefix ? ''
-    @show()
+  initialize: (@model) ->
+    @model.onDidSet (text) => @set(text)
+    @model.onDidAdd (text) => @add(text)
+    @model.onDidReset => @reset()
+    @model.onDidDestroy => @destroy()
     this
 
   show: ->
-    lineOffset = @options.lineOffset ? -2
+    {editor} = @model.vimState
     @style.paddingLeft  = '0.2em'
     @style.paddingRight = '0.2em'
     @style.marginLeft   = '-0.2em'
-    @style.marginTop = (@editor.getLineHeightInPixels() * lineOffset) + 'px'
-    # @style.marginTop = if top <= 10 then '0px' else '-20px'
-    # @style.marginTop = '-50px'
+    @style.marginTop = (editor.getLineHeightInPixels() * -2) + 'px'
 
-    point = @editor.getCursorBufferPosition()
-    @marker = @editor.markBufferPosition point,
+    point = editor.getCursorBufferPosition()
+    @marker = editor.markBufferPosition point,
       invalidate: "never",
       persistent: false
 
-    decoration = @editor.decorateMarker @marker,
+    decoration = editor.decorateMarker @marker,
       type: 'overlay'
       item: this
 
+  set: (@textContent) ->
+    @show()
+
+  add: (text) ->
+    @textContent += text
+
   reset: ->
+    @set ''
     @marker?.destroy()
 
   destroy: ->
-    @vimState = null
-    @options = null
-    @editor = null
+    @model = null
     @marker?.destroy()
     @remove()
 
@@ -206,7 +206,7 @@ HoverElement = document.registerElement 'vim-mode-hover',
 module.exports = {
   ViewModel
   SearchViewModel
+  Hover
   HoverElement
-  HoverModel
   VimNormalModeInputElement
 }
