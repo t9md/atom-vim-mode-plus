@@ -1,6 +1,7 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
 {getAncestors, getParent} = require './introspection'
+{ViewModel} = require './view'
 
 class Base
   pure: false
@@ -40,6 +41,13 @@ class Base
     obj = new (Base.findClass(klassName))(@vimState)
     _.extend(obj, properties)
 
+  getInput: (options={}) ->
+    options.hidden ?= true
+    options.charsMax ?= 1
+    viewModel = new ViewModel(@vimState, options)
+    viewModel.onDidGetInput (@input) =>
+      @complete = true
+      @vimState.operationStack.process() # Re-process!!
 
   # Expected to be called by child class.
   # It automatically create typecheck function like
