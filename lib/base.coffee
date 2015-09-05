@@ -35,6 +35,11 @@ class Base
     @count ?= @vimState?.count.get() ? defaultCount
     @count
 
+  new: (klassName, properties={}) ->
+    obj = new (Base.findClass(klassName))(@vimState)
+    _.extend(obj, properties)
+
+
   # Expected to be called by child class.
   # It automatically create typecheck function like
   #

@@ -4,7 +4,6 @@ _ = require 'underscore-plus'
 
 {ViewModel} = require './view'
 settings = require './settings'
-{SelectInsidePair} = require './text-objects'
 Base = require './base'
 {
   MoveToRelativeLine
@@ -265,10 +264,10 @@ class Surround extends TransformString
 class DeleteSurround extends Surround
   @extend()
   onDidGetInput: (@input) ->
-    pairTextObject = new SelectInsidePair(@vimState)
-    pairTextObject.pair = @getPair(@input)
-    pairTextObject.inclusive = true
-    @compose(pairTextObject)
+    @compose(@new 'SelectInsidePair',
+      pair: @getPair(@input)
+      inclusive: true
+    )
     @vimState.operationStack.process() # Re-process!!
 
   getNewText: (text) ->
