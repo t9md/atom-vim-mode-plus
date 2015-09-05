@@ -3,7 +3,7 @@
 _ = require 'underscore-plus'
 
 settings = require './settings'
-{ViewModel, SearchViewModel} = require './view'
+{SearchViewModel} = require './view'
 Base = require './base'
 
 WholeWordRegex = /\S+/

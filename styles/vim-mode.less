@@ -16,6 +16,21 @@
   }
 }
 
+.vim-mode-input atom-text-editor[mini] {
+  background-color: inherit;
+  border: none;
+  width: 100%;
+  font-weight: normal;
+  color: @text-color;
+  line-height: 1.28;
+  cursor: default;
+  white-space: nowrap;
+  padding-left: 10px;
+  &.is-focused {
+    box-shadow: none;
+  }
+}
+
 .block-cursor(@visibility: visible) {
   border: 0;
   background-color: @syntax-cursor-color;

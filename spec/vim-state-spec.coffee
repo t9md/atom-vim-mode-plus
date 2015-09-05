@@ -174,7 +174,7 @@ describe "VimState", ->
         expect(vimState.operationStack.isEmpty()).toBe(true)
         ensure 'd',
           cmd:
-            target: editor.normalModeInputView.editorElement
+            target: vimState.input.view.editorElement
             name: "core:cancel"
           text: '012345\nabcdef'
 

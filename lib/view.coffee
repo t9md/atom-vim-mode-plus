@@ -1,27 +1,55 @@
-# Refactoring status: 30%
+# Refactoring status: 50%
 {Emitter} = require 'atom'
-_ = require 'underscore-plus'
 
-# [FIXME] why normalModeInputView need to be property of @editor?
-class ViewModel
-  constructor: (@vimState, options={}) ->
-    if @constructor.name is 'ViewModel'
-      defaultOptions = {hidden: true, charsMax: 1}
-      _.defaults options, defaultOptions
+class SearchViewModel
+  # [FIXME] constructor argument is not consitent
+  constructor: (@searchMotion) ->
+    {@vimState} = @searchMotion
     @emitter = new Emitter
-    @view = new VimNormalModeInputElement().initialize(this, options)
+    @view = new VimNormalModeInputElement().initialize(this, class: 'search')
     @vimState.editor.normalModeInputView = @view
     @vimState.onDidFailToCompose =>
       @view.remove()
+    @historyIndex = -1
+
+    atom.commands.add @view.editorElement,
+      'core:move-up': @increaseHistorySearch
+      'core:move-down': @decreaseHistorySearch
 
   onDidGetInput: (callback) ->
     @emitter.on 'did-get-input', callback
 
-  onDidChangeInput: (callback) ->
-    @emitter.on 'did-change-input', callback
+  restoreHistory: (index) ->
+    @view.editor.setText(@history(index))
 
-  confirm: ->
+  history: (index) ->
+    @vimState.getSearchHistoryItem(index)
+
+  increaseHistorySearch: =>
+    if @history(@historyIndex + 1)?
+      @historyIndex += 1
+      @restoreHistory(@historyIndex)
+
+  decreaseHistorySearch: =>
+    if @historyIndex <= 0
+      # get us back to a clean slate
+      @historyIndex = -1
+      @view.editor.setText('')
+    else
+      @historyIndex -= 1
+      @restoreHistory(@historyIndex)
+
+  confirm: =>
+    repeatChar = if @searchMotion.initiallyReversed then '?' else '/'
+    if @view.value is '' or @view.value is repeatChar
+      lastSearch = @history(0)
+      if lastSearch?
+        @view.value = lastSearch
+      else
+        @view.value = ''
+        atom.beep()
     @emitter.emit 'did-get-input', @view.value
+    @vimState.pushSearchHistory(@view.value)
 
   cancel: ->
     if @vimState.operationStack.isOperatorPending()
@@ -94,54 +122,11 @@ class VimNormalModeInputElement extends HTMLDivElement
     atom.workspace.getActivePane().activate()
     @panel.destroy()
 
-class SearchViewModel extends ViewModel
-  # [FIXME] constructor argument is not consitent
-  constructor: (@searchMotion) ->
-    super(@searchMotion.vimState, class: 'search')
-    @historyIndex = -1
-
-    atom.commands.add @view.editorElement,
-      'core:move-up': @increaseHistorySearch
-      'core:move-down': @decreaseHistorySearch
-
-  restoreHistory: (index) ->
-    @view.editor.setText(@history(index))
-
-  history: (index) ->
-    @vimState.getSearchHistoryItem(index)
-
-  increaseHistorySearch: =>
-    if @history(@historyIndex + 1)?
-      @historyIndex += 1
-      @restoreHistory(@historyIndex)
-
-  decreaseHistorySearch: =>
-    if @historyIndex <= 0
-      # get us back to a clean slate
-      @historyIndex = -1
-      @view.editor.setText('')
-    else
-      @historyIndex -= 1
-      @restoreHistory(@historyIndex)
-
-  confirm: =>
-    repeatChar = if @searchMotion.initiallyReversed then '?' else '/'
-    if @view.value is '' or @view.value is repeatChar
-      lastSearch = @history(0)
-      if lastSearch?
-        @view.value = lastSearch
-      else
-        @view.value = ''
-        atom.beep()
-    super()
-    @vimState.pushSearchHistory(@view.value)
-
 VimNormalModeInputElement = document.registerElement "vim-normal-mode-input",
   extends: "div",
   prototype: VimNormalModeInputElement.prototype
 
 module.exports = {
-  ViewModel
   SearchViewModel
   VimNormalModeInputElement
 }

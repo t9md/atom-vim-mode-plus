@@ -1,6 +1,5 @@
 # Refactoring status: 50%
 settings = require './settings'
-{ViewModel} = require './view'
 
 validNames = /[a-zA-Z*+%_"]/
 
@@ -84,8 +83,10 @@ class RegisterManager
 
   setName: ->
     @vimState.hover.add '"'
-    new ViewModel(@vimState).onDidGetInput (@name) =>
+    disposable = @vimState.input.onDidGet {charsMax: 1}, (@name) =>
+      disposable.dispose()
       @vimState.hover.add @name
+    @vimState.input.focus()
 
   getCopyType: (text) ->
     if text.lastIndexOf("\n") is text.length - 1

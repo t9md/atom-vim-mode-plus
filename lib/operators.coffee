@@ -1,8 +1,8 @@
 # Refactoring status: 80%
 _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
+{CompositeDisposable} = require 'atom'
 
-{ViewModel} = require './view'
 settings = require './settings'
 Base = require './base'
 {
@@ -225,17 +225,21 @@ class Surround extends TransformString
 
   constructor: ->
     super
-    viewModel = new ViewModel @vimState,
-      class: 'surround'
-      charsMax: @charsMax
-      hidden: true
-
-    viewModel.onDidGetInput @onDidGetInput.bind(this)
-    viewModel.onDidChangeInput (input) =>
+    # [BUG][FIXME] subscription not disposed on cancel()?
+    # I think fixed but check again when I'm not sleepy.
+    subs = new CompositeDisposable
+    subs.add @vimState.input.onDidChange (input) =>
       @vimState.hover.add(input)
+    subs.add @vimState.input.onDidGet {@charsMax}, (input) =>
+      subs.dispose()
+      unless input
+        @vimState.resetNormalMode()
+        return
+      @onDidGetInput(input)
+    @vimState.input.focus()
 
   onDidGetInput: (input) ->
-    # [FIXME] Need to avoid asign again currently. Should be handled on ViewModel.
+    # [FIXME] Need to avoid asign again currently.
     @input ?= input
     @vimState.operationStack.process() # Re-process!!
 
@@ -659,7 +663,7 @@ class Replace extends Operator
   hoverText: ':tractor:'
   constructor: ->
     super
-    @getInput defaultText: '\n'
+    @getInput(defaultInput: "\n")
 
   isComplete: ->
     @input?
