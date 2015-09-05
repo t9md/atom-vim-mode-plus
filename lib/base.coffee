@@ -9,6 +9,7 @@ class Base
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
+    @vimState.hover.add @hoverText if @hoverText?
 
   isPure: ->
     @pure

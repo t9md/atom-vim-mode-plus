@@ -26,6 +26,7 @@ class ModeManager
   activateNormalMode: ->
     @deactivateInsertMode()
     @deactivateVisualMode()
+    @vimState.reset()
     @setMode('normal')
 
     @vimState.operationStack.clear()
@@ -168,7 +169,6 @@ class ModeManager
   # Returns nothing.
   resetNormalMode: ->
     @vimState.operationStack.clear()
-    @vimState.reset()
     @editor.clearSelections()
     @activateNormalMode()
 

@@ -35,7 +35,7 @@ module.exports =
       @vimStates.forEach (vimState) -> vimState.destroy()
 
   registerViewProviders: ->
-    {Hover, HoverElement} = require './view'
+    {Hover, HoverElement} = require './hover'
     atom.views.addViewProvider Hover, (model) ->
       new HoverElement().initialize(model)
 
