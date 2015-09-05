@@ -1,6 +1,4 @@
 # Refactoring status: 30%
-Base = require './base'
-_ = require 'underscore-plus'
 {Emitter} = require 'atom'
 
 # [FIXME] why normalModeInputView need to be property of @editor?

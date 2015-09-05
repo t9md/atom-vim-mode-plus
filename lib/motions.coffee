@@ -104,13 +104,6 @@ class Motion extends Base
   isInclusive: ->
     @vimState.isVisualMode() or @operatesInclusively
 
-  # Proxying request to ViewModel to get Input instance.
-  getInput: (options) ->
-    viewModel = new ViewModel(@vimState, options)
-    viewModel.onDidGetInput (@input) =>
-      @complete = true
-      @vimState.operationStack.process() # Re-process!!
-
 class CurrentSelection extends Motion
   @extend()
   constructor: ->
@@ -539,20 +532,16 @@ class ScrollFullScreenDown extends ScrollFullScreenUp
 class Find extends Motion
   @extend()
   backwards: false
-  complete: false # will changed to true after Input provided by @getInput()(asynchronous)
+  complete: false
   repeated: false
   reverse: false
   offset: 0
-  prefix: 'f'
+  hoverText: ':mag_right:'
 
   constructor: ->
     super
     unless @repeated
-      @getInput
-        class: 'find'
-        charsMax: 1
-        hidden: true
-        prefix: @prefix
+      @getInput()
 
   match: (cursor, count) ->
     currentPosition = cursor.getBufferPosition()
@@ -610,7 +599,7 @@ class RepeatFindReverse extends RepeatFind
 class FindBackwards extends Find
   @extend()
   backwards: true
-  prefix: 'F'
+  hoverText: ':mag:'
 
 # keymap: t
 class Till extends Find
@@ -642,15 +631,12 @@ class MoveToMark extends Motion
   @extend()
   operatesInclusively: false
   operatesLinewise: true
-  complete: false # will changed to true after Input provided by @getInput()(asynchronous)
+  complete: false
   hoverText: "'"
 
   constructor: ->
     super
-    @getInput
-      class: 'move-to-mark',
-      charsMax: 1,
-      hidden: true
+    @getInput()
 
   isLinewise: ->
     @operatesLinewise

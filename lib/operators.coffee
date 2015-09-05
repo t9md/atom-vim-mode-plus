@@ -44,12 +44,6 @@ class Operator extends Base
     if _.isFunction(target.onDidComposeBy)
       @target.onDidComposeBy(this)
 
-  getInput: (args...) ->
-    viewModel = new ViewModel(@vimState, args...)
-    viewModel.onDidGetInput (@input) =>
-      @complete = true
-      @vimState.operationStack.process() # Re-process!!
-
   setTextToRegister: (text) ->
     if @target?.isLinewise?() and not text.endsWith('\n')
       text += "\n"
@@ -328,10 +322,7 @@ class Mark extends Operator
   hoverText: ':bookmark:'
   constructor: ->
     super
-    @getInput
-      class: 'mark'
-      charsMax: 1
-      hidden: true
+    @getInput()
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
@@ -665,14 +656,10 @@ class TransactionBundler
 class Replace extends Operator
   @extend()
   input: null
+  hoverText: ':tractor:'
   constructor: ->
     super
-    @getInput
-      class: 'replace'
-      hidden: true
-      charsMax: 1
-      defaultText: '\n'
-      prefix: 'r'
+    @getInput defaultText: '\n'
 
   isComplete: ->
     @input?
