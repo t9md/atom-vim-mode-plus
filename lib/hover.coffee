@@ -3,15 +3,23 @@ emojiFolder = 'atom://autocomplete-emojis/node_modules/emoji-images/pngs'
 
 class Hover
   constructor: (@vimState) ->
-    @text = ''
+    @text = []
     @view = atom.views.getView(this)
 
   add: (text) ->
-    @text += text
+    @text.push text
     @view.show()
 
+  getText: ->
+    limit = switch
+              when ':clipboard:' in @text then 3
+              when ':scissors:' in @text then 3
+              else  2
+    return if @text.length < limit
+    @text.join('')
+
   reset: ->
-    @text = ''
+    @text = []
     @view.reset()
 
   destroy: ->
@@ -26,16 +34,19 @@ class HoverElement extends HTMLElement
   initialize: (@model) ->
     this
 
-  emojify: (text) ->
-    emoji(String(text), emojiFolder, 20)
+  emojify: (text, size=20) ->
+    emoji(String(text), emojiFolder, size)
 
   show: ->
-    @innerHTML = @emojify(@model.text)
     {editor} = @model.vimState
+    lineHeightInPixels = editor.getLineHeightInPixels()
+    unless text = @model.getText()
+      return
+    @innerHTML = @emojify(text, lineHeightInPixels * 0.9 + 'px')
     @style.paddingLeft  = '0.2em'
     @style.paddingRight = '0.2em'
     @style.marginLeft   = '-0.2em'
-    @style.marginTop = (editor.getLineHeightInPixels() * -2) + 'px'
+    @style.marginTop = (lineHeightInPixels * -2) + 'px'
 
     point = editor.getCursorBufferPosition()
     @marker = editor.markBufferPosition point,
