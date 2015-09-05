@@ -1,9 +1,13 @@
 # Refactoring status: 30%
 {Emitter} = require 'atom'
+_ = require 'underscore-plus'
 
 # [FIXME] why normalModeInputView need to be property of @editor?
 class ViewModel
   constructor: (@vimState, options={}) ->
+    if @constructor.name is 'ViewModel'
+      defaultOptions = {hidden: true, charsMax: 1}
+      _.defaults options, defaultOptions
     @emitter = new Emitter
     @view = new VimNormalModeInputElement().initialize(this, options)
     @vimState.editor.normalModeInputView = @view

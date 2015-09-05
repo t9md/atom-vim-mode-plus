@@ -1,6 +1,4 @@
 # Refactoring status: 100%
-{ViewModel} = require './view'
-_ = require 'underscore-plus'
 Base = require './base'
 
 class InsertMode extends Base
@@ -8,20 +6,12 @@ class InsertMode extends Base
   complete: false
   recodable: false
 
-  getInput: (options) ->
-    viewModel = new ViewModel(@vimState, options)
-    viewModel.onDidGetInput (@input) =>
-      @complete = true
-      @vimState.operationStack.process()
-
 class InsertRegister extends InsertMode
   @extend()
+  hoverText: '"'
   constructor: ->
     super
-    @getInput
-      class: 'insert-register'
-      charsMax: 1
-      hidden: true
+    @getInput()
 
   execute: ->
     if text = @vimState.register.get(@input).text

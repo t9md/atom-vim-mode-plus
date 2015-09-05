@@ -83,13 +83,9 @@ class RegisterManager
     @name ? settings.get('defaultRegister')
 
   setName: ->
-    viewModel = new ViewModel @vimState,
-      class: 'read-register'
-      charsMax: 1
-      hidden: true
-    viewModel.onDidGetInput (@name) =>
-      @vimState.hover.add @name
     @vimState.hover.add '"'
+    new ViewModel(@vimState).onDidGetInput (@name) =>
+      @vimState.hover.add @name
 
   getCopyType: (text) ->
     if text.lastIndexOf("\n") is text.length - 1
