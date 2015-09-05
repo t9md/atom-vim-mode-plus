@@ -229,6 +229,11 @@ class VimState
       @developer = new Developer(this)
       @developer.init()
 
+  reset: ->
+    @count.reset()
+    @register.reset()
+    @hover.reset()
+
   # Miscellaneous commands
   # -------------------------
   undo: ->
