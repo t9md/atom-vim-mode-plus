@@ -1,5 +1,6 @@
 emoji = require 'emoji-images'
 emojiFolder = 'atom://autocomplete-emojis/node_modules/emoji-images/pngs'
+settings = require './settings'
 
 class Hover
   constructor: (@vimState) ->
@@ -14,7 +15,7 @@ class Hover
     limit = switch
               when ':clipboard:' in @text then 3
               when ':scissors:' in @text then 3
-              else  2
+              else  1
     return if @text.length < limit
     @text.join('')
 
@@ -38,6 +39,8 @@ class HoverElement extends HTMLElement
     emoji(String(text), emojiFolder, size)
 
   show: ->
+    return unless settings.get('enableHoverIndicator')
+
     {editor} = @model.vimState
     lineHeightInPixels = editor.getLineHeightInPixels()
     unless text = @model.getText()
