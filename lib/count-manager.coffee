@@ -1,7 +1,6 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
 
-{HoverModel} = require './view'
 module.exports =
 class CountManager
   count: null
@@ -9,7 +8,6 @@ class CountManager
   constructor: (@vimState) ->
 
   set: (e) ->
-    # To cover scenario `10d3y` in this case we use 3, need to trash 10.
     if @vimState.operationStack.isOperatorPending()
       @reset()
     num = if _.isNumber(e) then e else parseInt(@getKeystrokeForEvent(e))
@@ -22,7 +20,6 @@ class CountManager
 
   reset: ->
     @count = null
-    @vimState.hover.reset()
 
   isEmpty: ->
     not @count

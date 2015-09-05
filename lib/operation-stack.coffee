@@ -69,8 +69,7 @@ class OperationStack
     op.execute()
     if @vimState.isNormalMode()
       @vimState.dontPutCursorsAtEndOfLine()
-    @vimState.count.reset()
-    @vimState.register.reset()
+    @vimState.reset()
     @vimState.lastOperation = null
     debug "#=== Finish at #{new Date().toISOString()}\n"
 
@@ -81,7 +80,6 @@ class OperationStack
     @stack.pop()
 
   clear: ->
-    @vimState.hover.reset()
     @stack = []
 
   isEmpty: ->
