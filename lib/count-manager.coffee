@@ -8,12 +8,10 @@ class CountManager
   constructor: (@vimState) ->
 
   set: (e) ->
-    if @vimState.operationStack.isOperatorPending()
-      @reset()
     num = if _.isNumber(e) then e else parseInt(@getKeystrokeForEvent(e))
     @count ?= 0
     @count = (@count * 10) + num
-    @vimState.hover.set @count
+    @vimState.hover.add num
 
   get: ->
     @count

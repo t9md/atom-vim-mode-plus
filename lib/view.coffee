@@ -134,69 +134,12 @@ class SearchViewModel extends ViewModel
     super()
     @vimState.pushSearchHistory(@view.value)
 
-class Hover
-  constructor: (@vimState, text='') ->
-    @view = atom.views.getView(this)
-    @set text
-
-  set: (text) ->
-    @view.textContent = text
-    @view.show()
-
-  add: (text) ->
-    @view.textContent += text
-    @view.show()
-
-  reset: -> @view.reset()
-
-  destroy: ->
-    @vimState = null
-    @view.destroy()
-
-class HoverElement extends HTMLElement
-  createdCallback: ->
-    @classList.add 'vim-mode-hover'
-    this
-
-  initialize: (@model) ->
-    this
-
-  show: ->
-    {editor} = @model.vimState
-    @style.paddingLeft  = '0.2em'
-    @style.paddingRight = '0.2em'
-    @style.marginLeft   = '-0.2em'
-    @style.marginTop = (editor.getLineHeightInPixels() * -2) + 'px'
-
-    point = editor.getCursorBufferPosition()
-    @marker = editor.markBufferPosition point,
-      invalidate: "never",
-      persistent: false
-
-    decoration = editor.decorateMarker @marker,
-      type: 'overlay'
-      item: this
-
-  reset: ->
-    @textContent = ''
-    @marker?.destroy()
-
-  destroy: ->
-    @model = null
-    @marker?.destroy()
-    @remove()
-
 VimNormalModeInputElement = document.registerElement "vim-normal-mode-input",
   extends: "div",
   prototype: VimNormalModeInputElement.prototype
 
-HoverElement = document.registerElement 'vim-mode-hover',
-  prototype: HoverElement.prototype
-  extends:   'div'
-
 module.exports = {
   ViewModel
   SearchViewModel
-  Hover, HoverElement
   VimNormalModeInputElement
 }

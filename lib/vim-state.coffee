@@ -2,7 +2,7 @@
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
-{Hover} = require './view'
+{Hover} = require './hover'
 
 settings = require './settings'
 

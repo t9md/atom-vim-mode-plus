@@ -17,10 +17,6 @@ class Motion extends Base
   operatesInclusively: true
   operatesLinewise: false
 
-  constructor: ->
-    super
-    @vimState.hover.set @hoverText if @hoverText?
-
   select: (options) ->
     value = for selection in @editor.getSelections()
       if @isLinewise()

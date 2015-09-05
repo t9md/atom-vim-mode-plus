@@ -28,7 +28,6 @@ class Operator extends Base
 
   constructor: ->
     super
-    @vimState.hover.set @hoverText if @hoverText?
     #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
     if @linewiseAlias and @vimState.isOperatorPendingMode() and
       @vimState.operationStack.peekTop().constructor is @constructor
@@ -123,6 +122,7 @@ class Select extends Operator
 class Delete extends Operator
   @extend()
   linewiseAlias: true
+  hoverText: ':scissors:'
 
   execute: ->
     if _.any @target.select()
@@ -157,7 +157,6 @@ class TransformString extends Operator
   @extend()
   adjustCursor: true
   linewiseAlias: true
-  hoverText: null
 
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
@@ -195,19 +194,19 @@ class ToggleCaseNow extends ToggleCase
 
 class UpperCase extends TransformString
   @extend()
-  hoverText: 'U'
+  hoverText: ':arrow_up:'
   getNewText: (text) ->
     text.toUpperCase()
 
 class LowerCase extends TransformString
   @extend()
-  hoverText: 'u'
+  hoverText: ':arrow_down:'
   getNewText: (text) ->
     text.toLowerCase()
 
 class Camelize extends TransformString
   @extend()
-  hoverText: '🐪'
+  hoverText: ':camel:'
   getNewText: (text) ->
     _.camelize text
 
@@ -219,7 +218,7 @@ class Underscore extends TransformString
 
 class Dasherize extends TransformString
   @extend()
-  hoverText: '💨'
+  hoverText: ':dash:'
   getNewText: (text) ->
     _.dasherize text
 
@@ -228,8 +227,7 @@ class Surround extends TransformString
   pairs: ['[]', '()', '{}', '<>']
   input: null
   charsMax: 1
-  userHover: false
-  hoverText: '👭'
+  hoverText: ':two_women_holding_hands:'
 
   constructor: ->
     super
@@ -289,6 +287,7 @@ class ChangeSurround extends DeleteSurround
 class Yank extends Operator
   @extend()
   linewiseAlias: true
+  hoverText: ':clipboard:'
   execute: ->
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
@@ -326,7 +325,7 @@ class Repeat extends Operator
 
 class Mark extends Operator
   @extend()
-  hoverText: '📎'
+  hoverText: ':bookmark:'
   constructor: ->
     super
     @getInput
@@ -457,7 +456,7 @@ class ReplaceWithRegister extends Operator
 
 class ToggleLineComments extends Operator
   @extend()
-  hoverText: '🔇'
+  hoverText: ':mute:'
   execute: ->
     markerByCursor = @markCursorBufferPositions()
     if _.any @target.select()
