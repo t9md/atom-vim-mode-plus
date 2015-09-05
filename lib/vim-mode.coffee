@@ -13,6 +13,7 @@ module.exports =
     @disposables = new CompositeDisposable
     @globalVimState = new GlobalVimState
     @statusBarManager = new StatusBarManager
+    @registerViewProviders()
 
     @vimStates = new Set
     @vimStatesByEditor = new WeakMap
@@ -25,13 +26,18 @@ module.exports =
         @statusBarManager,
         @globalVimState
       )
-
       @vimStates.add(vimState)
       @vimStatesByEditor.set(editor, vimState)
-      vimState.onDidDestroy => @vimStates.delete(vimState)
+      vimState.onDidDestroy =>
+        @vimStates.delete(vimState)
 
     @disposables.add new Disposable =>
       @vimStates.forEach (vimState) -> vimState.destroy()
+
+  registerViewProviders: ->
+    {Hover, HoverElement} = require './view'
+    atom.views.addViewProvider Hover, (model) ->
+      new HoverElement().initialize(model)
 
   deactivate: ->
     @disposables.dispose()
