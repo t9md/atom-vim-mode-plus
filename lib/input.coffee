@@ -1,10 +1,11 @@
 # Refactoring status: 100%
 {Emitter} = require 'atom'
-{CompositeDisposable} = require 'atom'
+{CompositeDisposable, Range} = require 'atom'
 _ = require 'underscore-plus'
 
 class Input
   subscriptions: null
+  marker: null
 
   constructor: (@vimState) ->
     @emitter = new Emitter
@@ -26,9 +27,24 @@ class Input
     @subscriptions.add @emitter.on 'did-cancel', callback
 
   focus: ->
+    {editor} = @vimState
+    start = editor.getCursorBufferPosition()
+    end = start.translate([0, 1])
+
+    @marker = editor.markBufferRange Range(start, end),
+      invalidate: 'never'
+      persistent: false
+
+    klass = if @vimState.mode is 'insert' then 'insert' else 'normal'
+
+    editor.decorateMarker @marker,
+      type: 'highlight'
+      class: "vim-mode-cursor-#{klass}"
+
     @view.focus()
 
   unfocus: ->
+    @marker?.destroy()
     @subscriptions?.dispose()
     @subscriptions = null
 

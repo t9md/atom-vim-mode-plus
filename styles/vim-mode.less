@@ -148,7 +148,17 @@ atom-text-editor::shadow {
   .vim-mode-flash .region {
     background-color: @syntax-selection-flash-color;
   }
+  .vim-mode-cursor-normal .region {
+    background-color: @syntax-cursor-color;
+    opacity: 0.5;
+  }
+  .vim-mode-cursor-insert .region {
+    // [FIXME] I want i-bar style cursor for insert-mode.
+    background-color: @syntax-cursor-color;
+    opacity: 0.5;
+  }
 }
+
 
 .vim-mode-hover {
   color: @text-color-highlight;
