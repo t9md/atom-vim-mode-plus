@@ -5,6 +5,8 @@ emojiFolder = 'atom://vim-mode/node_modules/emoji-images/pngs'
 settings = require './settings'
 
 class Hover
+  lineHeight: null
+
   constructor: (@vimState) ->
     @text = []
     @view = atom.views.getView(this)
@@ -14,12 +16,13 @@ class Hover
     @view.show()
 
   getText: ->
-    limit =
-      switch
-        when ':clipboard:' in @text then 3
-        when ':scissors:' in @text then 3
-        else  1
-    return if @text.length < limit
+    minLengthToDisplay = 1
+    # minLengthToDisplay =
+    #   switch
+    #     when ':clipboard:' in @text then 3
+    #     when ':scissors:' in @text then 3
+    #     else  1
+    return if @text.length < minLengthToDisplay
     @text.join('')
 
   reset: ->
@@ -36,6 +39,9 @@ class HoverElement extends HTMLElement
     this
 
   initialize: (@model) ->
+    @style.paddingLeft  = '0.2em'
+    @style.paddingRight = '0.2em'
+    @style.marginLeft   = '-0.2em'
     this
 
   emojify: (text, size) ->
@@ -43,17 +49,19 @@ class HoverElement extends HTMLElement
 
   show: ->
     return unless settings.get('enableHoverIndicator')
-
-    {editor} = @model.vimState
-    lineHeightInPixels = editor.getLineHeightInPixels()
     unless text = @model.getText()
       return
-    @innerHTML = @emojify(text, lineHeightInPixels * 0.9 + 'px')
-    @style.paddingLeft  = '0.2em'
-    @style.paddingRight = '0.2em'
-    @style.marginLeft   = '-0.2em'
-    @style.marginTop = (lineHeightInPixels * -2) + 'px'
+    {editor} = @model.vimState
 
+    unless @marker
+      @createOverlay()
+      @lineHeight = editor.getLineHeightInPixels()
+
+    @style.marginTop = (@lineHeight * -2) + 'px'
+    @innerHTML = @emojify(text, @lineHeight * 0.9 + 'px')
+
+  createOverlay: ->
+    {editor} = @model.vimState
     point = editor.getCursorBufferPosition()
     @marker = editor.markBufferPosition point,
       invalidate: "never",
@@ -66,9 +74,12 @@ class HoverElement extends HTMLElement
   reset: ->
     @textContent = ''
     @marker?.destroy()
+    @marker = null
+    @lineHeight = null
 
   destroy: ->
     @model = null
+    @lineHeight = null
     @marker?.destroy()
     @remove()
 
