@@ -38,7 +38,7 @@ class HoverElement extends HTMLElement
   initialize: (@model) ->
     this
 
-  emojify: (text, size=20) ->
+  emojify: (text, size) ->
     emoji(String(text), emojiFolder, size)
 
   show: ->
