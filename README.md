@@ -20,9 +20,8 @@ This project aiming to prove above idea by implementing working example.
 # New Features
 
 This project started at August 1st 2015 as folk of vim-mode.  
-After 1 month of refactoring, I eliminated lots of unessential code and class and completely rewrite specs.   
-But I'm getting tired now for long long refactoring marathon.  
-My 1st prioritized TODO is refactor `motion.coffee`, I know it.  
+After 1 month of refactoring, I'm getting tired for long long refactoring marathon.  
+My current(2015.9.6.) 1st prioritized TODO is refactor `motion.coffee`, I know it.  
 But I need some pastime, refresher, So I added following new features which is not included Vim and vim-mode as pastime.  
 
 - New Operator
