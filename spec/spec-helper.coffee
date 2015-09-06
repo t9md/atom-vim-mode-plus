@@ -237,6 +237,7 @@ getVim = (vimState) ->
             mocked = true
           when k.char?
             chars =
+              # [FIXME] Cause insertText('escape'), useless.
               if k.char in ['', 'escape']
                 toArray(k.char)
               else

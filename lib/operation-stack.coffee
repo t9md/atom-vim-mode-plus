@@ -63,10 +63,14 @@ class OperationStack
     @inspect()
     debug '-> @pop()'
     op = @pop()
-    @vimState.history.unshift(op) if op.isRecordable()
-    debug " -> <#{op.getKind()}>.execute()"
     @vimState.lastOperation = op
-    op.execute()
+    if op.isCanceled()
+      debug " -> <#{op.getKind()}>.cancel()"
+      op.cancel()
+    else
+      debug " -> <#{op.getKind()}>.execute()"
+      op.execute()
+      @vimState.history.unshift(op) if op.isRecordable()
     @finish()
     debug "#=== Finish at #{new Date().toISOString()}\n"
 

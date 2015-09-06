@@ -1,31 +1,33 @@
 {Emitter} = require 'atom'
-_ = require 'underscore-plus'
 
-# [FIXME] why normalModeInputView need to be property of @editor?
 class Input
   constructor: (@vimState) ->
     @emitter = new Emitter
     @view = atom.views.getView(this)
     @vimState.onDidFailToCompose =>
-      @view.destroy()
+      @view.cancel()
 
-  onDidGet: (options={}, callback) ->
-    @view.charsMax = options.charsMax ? 1
-    @view.defaultInput = options.defaultInput ? ''
+  onDidGet: ({charsMax, defaultInput}={}, callback) ->
+    @view.charsMax = charsMax ? 1
+    @view.defaultInput = defaultInput ? ''
     @emitter.on 'did-get', callback
 
   onDidChange: (callback) ->
     @emitter.on 'did-change', callback
 
+  onDidCancel: (callback) ->
+    @emitter.on 'did-cancel', callback
+
   focus: ->
-    @view.focus()
+      @view.focus()
 
-  cancel: ->
-    if @vimState.operationStack.isOperatorPending()
-      # [FIXME] callbacking with empty string '' is BAD.
-      # its clear former value regardless its important or not.
-      @emitter.emit 'did-get', ''
-
+  # cancel: ->
+  #   @emitter.emit 'did-cancel'
+  #   # if @vimState.operationStack.isOperatorPending()
+  #   #   # [FIXME] callbacking with empty string '' is BAD.
+  #   #   # its clear former value regardless its important or not.
+  #   #   @emitter.emit 'did-get', ''
+  #
   destroy: ->
     @vimState = null
     @view.destroy()
@@ -60,10 +62,14 @@ class InputElement extends HTMLElement
         @confirm()
 
   confirm: ->
-    @model.emitter.emit 'did-get', (@editor.getText() or @defaultInput)
-    atom.workspace.getActivePane().activate()
-    @reset()
-    @panel.hide()
+    # Cancel if confirmed input was empty
+    unless input = @editor.getText() or @defaultInput
+      @cancel()
+    else
+      @model.emitter.emit 'did-get', input
+      atom.workspace.getActivePane().activate()
+      @reset()
+      @panel.hide()
 
   reset: ->
     @editor.setText ''
@@ -76,7 +82,7 @@ class InputElement extends HTMLElement
     atom.workspace.getActivePane().activate()
     @reset()
     @panel.hide()
-    @model.cancel()
+    @model.emitter.emit 'did-cancel'
 
   destroy: ->
     @model = null

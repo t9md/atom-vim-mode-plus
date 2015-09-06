@@ -537,6 +537,7 @@ class Find extends Motion
   reverse: false
   offset: 0
   hoverText: ':mag_right:'
+  requireInput: true
 
   constructor: ->
     super
@@ -633,6 +634,7 @@ class MoveToMark extends Motion
   operatesLinewise: true
   complete: false
   hoverText: "'"
+  requireInput: true
 
   constructor: ->
     super

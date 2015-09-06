@@ -1084,14 +1084,14 @@ describe "Operators", ->
     it "does nothing when cancelled", ->
       ensure 'r',
         classListContains: 'operator-pending-mode'
-      vimState.input.cancel()
+      vimState.input.view.cancel()
       ensure
         text: '12\n34\n\n'
         classListContains: 'normal-mode'
 
     it "remain visual-mode when cancelled", ->
       keystroke 'vr'
-      vimState.input.cancel()
+      vimState.input.view.cancel()
       ensure
         text: '12\n34\n\n'
         classListContains: 'visual-mode'
