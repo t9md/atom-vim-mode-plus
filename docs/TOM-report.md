@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-09-03T16:25:34.107Z*
+*generated at 2015-09-06T13:09:49.288Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -91,15 +91,15 @@ vim-mode version: 0.57.0
     - [Select](#select--operator)
     - [ToggleLineComments](#togglelinecomments--operator)
     - [TransformString](#transformstring--operator) *Not exported*
-      - [Camelize](#camelize--transformstring)
-      - [Dasherize](#dasherize--transformstring)
+      - [CamelCase](#camelcase--transformstring)
+      - [DashCase](#dashcase--transformstring)
       - [LowerCase](#lowercase--transformstring)
+      - [SnakeCase](#snakecase--transformstring)
       - [Surround](#surround--transformstring)
         - [DeleteSurround](#deletesurround--surround)
           - [ChangeSurround](#changesurround--deletesurround)
       - [ToggleCase](#togglecase--transformstring)
         - [ToggleCaseNow](#togglecasenow--togglecase)
-      - [Underscore](#underscore--transformstring)
       - [UpperCase](#uppercase--transformstring)
     - [Yank](#yank--operator)
       - [YankLine](#yankline--yank)
@@ -118,7 +118,9 @@ vim-mode version: 0.57.0
       - [ScrollCursorToLeft](#scrollcursortoleft--scrollhorizontal)
       - [ScrollCursorToRight](#scrollcursortoright--scrollhorizontal)
   - [TextObject](#textobject--base) *Not exported*
-    - [SelectInsidePair](#selectinsidepair--textobject)
+    - [SelectInsideCurrentLine](#selectinsidecurrentline--textobject)
+      - [SelectAroundCurrentLine](#selectaroundcurrentline--selectinsidecurrentline)
+    - [SelectInsidePair](#selectinsidepair--textobject) *Not exported*
       - [SelectInsideAngleBrackets](#selectinsideanglebrackets--selectinsidepair)
         - [SelectAroundAngleBrackets](#selectaroundanglebrackets--selectinsideanglebrackets)
       - [SelectInsideBackTicks](#selectinsidebackticks--selectinsidepair)
@@ -152,42 +154,19 @@ vim-mode version: 0.57.0
 - ::pure: ```false```
 - ::complete: ```null```
 - ::recodable: ```null```
+- ::requireInput: ```false```
+- ::canceled: ```false```
 - ::isPure`()`
 - ::isComplete`()`
 - ::isRecordable`()`
 - ::abort`()`
 - ::getKind`()`
 - ::getCount`(defaultCount)`
+- ::new`(klassName, properties)`
+- ::getInput`(options)`
+- ::isCanceled`()`
+- ::cancel`()`
 - ::isOperationAbortedError`()`
-- ::isTextObject`()`
-- ::isSelectWord`()`
-- ::isSelectInsideWord`()`
-- ::isSelectAWord`()`
-- ::isSelectInsideWholeWord`()`
-- ::isSelectAWholeWord`()`
-- ::isSelectInsidePair`()`
-- ::isSelectInsideDoubleQuotes`()`
-- ::isSelectAroundDoubleQuotes`()`
-- ::isSelectInsideSingleQuotes`()`
-- ::isSelectAroundSingleQuotes`()`
-- ::isSelectInsideBackTicks`()`
-- ::isSelectAroundBackTicks`()`
-- ::isSelectInsideCurlyBrackets`()`
-- ::isSelectAroundCurlyBrackets`()`
-- ::isSelectInsideAngleBrackets`()`
-- ::isSelectAroundAngleBrackets`()`
-- ::isSelectInsideTags`()`
-- ::isSelectAroundTags`()`
-- ::isSelectInsideSquareBrackets`()`
-- ::isSelectAroundSquareBrackets`()`
-- ::isSelectInsideParentheses`()`
-- ::isSelectAroundParentheses`()`
-- ::isSelectInsideParagraph`()`
-- ::isSelectAroundParagraph`()`
-- ::isSelectInsideComment`()`
-- ::isSelectAroundComment`()`
-- ::isSelectInsideIndent`()`
-- ::isSelectAroundIndent`()`
 - ::isMotion`()`
 - ::isCurrentSelection`()`
 - ::isMoveLeft`()`
@@ -250,9 +229,9 @@ vim-mode version: 0.57.0
 - ::isToggleCaseNow`()`
 - ::isUpperCase`()`
 - ::isLowerCase`()`
-- ::isCamelize`()`
-- ::isUnderscore`()`
-- ::isDasherize`()`
+- ::isCamelCase`()`
+- ::isSnakeCase`()`
+- ::isDashCase`()`
 - ::isSurround`()`
 - ::isDeleteSurround`()`
 - ::isChangeSurround`()`
@@ -282,6 +261,37 @@ vim-mode version: 0.57.0
 - ::isSubstituteLine`()`
 - ::isChangeToLastCharacterOfLine`()`
 - ::isReplace`()`
+- ::isTextObject`()`
+- ::isSelectWord`()`
+- ::isSelectInsideWord`()`
+- ::isSelectAWord`()`
+- ::isSelectInsideWholeWord`()`
+- ::isSelectAWholeWord`()`
+- ::isSelectInsidePair`()`
+- ::isSelectInsideDoubleQuotes`()`
+- ::isSelectAroundDoubleQuotes`()`
+- ::isSelectInsideSingleQuotes`()`
+- ::isSelectAroundSingleQuotes`()`
+- ::isSelectInsideBackTicks`()`
+- ::isSelectAroundBackTicks`()`
+- ::isSelectInsideCurlyBrackets`()`
+- ::isSelectAroundCurlyBrackets`()`
+- ::isSelectInsideAngleBrackets`()`
+- ::isSelectAroundAngleBrackets`()`
+- ::isSelectInsideTags`()`
+- ::isSelectAroundTags`()`
+- ::isSelectInsideSquareBrackets`()`
+- ::isSelectAroundSquareBrackets`()`
+- ::isSelectInsideParentheses`()`
+- ::isSelectAroundParentheses`()`
+- ::isSelectInsideParagraph`()`
+- ::isSelectAroundParagraph`()`
+- ::isSelectInsideComment`()`
+- ::isSelectAroundComment`()`
+- ::isSelectInsideIndent`()`
+- ::isSelectAroundIndent`()`
+- ::isSelectInsideCurrentLine`()`
+- ::isSelectAroundCurrentLine`()`
 - ::isInsertMode`()`
 - ::isInsertRegister`()`
 - ::isCopyFromLineAbove`()`
@@ -304,7 +314,6 @@ vim-mode version: 0.57.0
 *Not exported*
 - ::complete: ```false```: **Overridden**
 - ::recodable: ```false```: **Overridden**
-- ::getInput`(options)`
 
 ### CopyFromLineAbove < InsertMode
 - command: `vim-mode:copy-from-line-above`
@@ -324,6 +333,8 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode.insert-mode: <kbd>ctrl-r</kbd>
 - ::constructor`()`: `super`: **Overridden**
+- ::hoverText: ```'"'```
+- ::requireInput: ```true```: **Overridden**
 - ::execute`()`
 
 ### Motion < Base
@@ -339,7 +350,6 @@ vim-mode version: 0.57.0
 - ::moveSelection`(selection, options)`
 - ::isLinewise`()`
 - ::isInclusive`()`
-- ::getInput`(options)`
 
 ### CurrentSelection < Motion
 - ::constructor`()`: `super`: **Overridden**
@@ -358,6 +368,8 @@ vim-mode version: 0.57.0
 - ::repeated: ```false```
 - ::reverse: ```false```
 - ::offset: ```0```
+- ::hoverText: ```':mag_right:'```
+- ::requireInput: ```true```: **Overridden**
 - ::match`(cursor, count)`
 - ::moveCursor`(cursor)`
 
@@ -366,6 +378,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>F</kbd>
 - ::backwards: ```true```: **Overridden**
+- ::hoverText: ```':mag:'```: **Overridden**
 
 ### RepeatFind < Find
 - command: `vim-mode:repeat-find`
@@ -583,6 +596,8 @@ vim-mode version: 0.57.0
 - ::operatesInclusively: ```false```: **Overridden**
 - ::operatesLinewise: ```true```: **Overridden**
 - ::complete: ```false```: **Overridden**
+- ::hoverText: ```':round_pushpin:\''```
+- ::requireInput: ```true```: **Overridden**
 - ::isLinewise`()`: **Overridden**
 - ::moveCursor`(cursor)`
 
@@ -591,6 +606,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>\`</kbd>
 - ::operatesLinewise: ```false```: **Overridden**
+- ::hoverText: ```':round_pushpin:`'```: **Overridden**
 
 ### MoveToNextParagraph < Motion
 - command: `vim-mode:move-to-next-paragraph`
@@ -722,11 +738,11 @@ vim-mode version: 0.57.0
 - ::recodable: ```true```: **Overridden**
 - ::linewiseAlias: ```false```
 - ::compose`(@target)`
-- ::getInput`()`
 - ::setTextToRegister`(text)`
 - ::markCursorBufferPositions`()`
 - ::restoreMarkedCursorPositions`(markerByCursor)`
 - ::markSelections`()`
+- ::flash`(range)`
 - ::withFlashing`(callback)`
 
 ### Delete < Operator
@@ -736,6 +752,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>d</kbd>
   - atom-text-editor.vim-mode.visual-mode: <kbd>x</kbd>
 - ::linewiseAlias: ```true```: **Overridden**
+- ::hoverText: ```':scissors:'```
 - ::execute`()`
 
 ### DeleteLeft < Delete
@@ -777,6 +794,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>></kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>></kbd>
 - ::linewiseAlias: ```true```: **Overridden**
+- ::hoverText: ```':point_right:'```
 - ::execute`()`
 - ::indent`()`
 
@@ -785,6 +803,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>=</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>=</kbd>
+- ::hoverText: ```':open_hands:'```: **Overridden**
 - ::indent`()`: **Overridden**
 
 ### Outdent < Indent
@@ -792,6 +811,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd><</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd><</kbd>
+- ::hoverText: ```':point_left:'```: **Overridden**
 - ::indent`()`: **Overridden**
 
 ### Insert < Operator
@@ -885,6 +905,8 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>m</kbd>
 - ::constructor`()`: `super`: **Overridden**
+- ::hoverText: ```':round_pushpin:'```
+- ::requireInput: ```true```: **Overridden**
 - ::execute`()`
 
 ### PutBefore < Operator
@@ -917,11 +939,13 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>r</kbd>
 - ::constructor`()`: `super`: **Overridden**
 - ::input: ```null```
-- ::isComplete`()`: **Overridden**
+- ::hoverText: ```':tractor:'```
+- ::requireInput: ```true```: **Overridden**
 - ::execute`()`
 
 ### ReplaceWithRegister < Operator
 - command: `vim-mode:replace-with-register`
+- ::hoverText: ```':pencil:'```
 - ::execute`()`
 
 ### Select < Operator
@@ -931,6 +955,7 @@ vim-mode version: 0.57.0
 - command: `vim-mode:toggle-line-comments`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g /</kbd>
+- ::hoverText: ```':mute:'```
 - ::execute`()`
 
 ### TransformString < Operator
@@ -939,16 +964,18 @@ vim-mode version: 0.57.0
 - ::linewiseAlias: ```true```: **Overridden**
 - ::execute`()`
 
-### Camelize < TransformString
-- command: `vim-mode:camelize`
+### CamelCase < TransformString
+- command: `vim-mode:camel-case`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g c</kbd>
+- ::hoverText: ```':camel:'```
 - ::getNewText`(text)`
 
-### Dasherize < TransformString
-- command: `vim-mode:dasherize`
+### DashCase < TransformString
+- command: `vim-mode:dash-case`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g -</kbd>
+- ::hoverText: ```':dash:'```
 - ::getNewText`(text)`
 
 ### LowerCase < TransformString
@@ -957,6 +984,12 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g u</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>u</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>g u</kbd>
+- ::hoverText: ```':point_down:'```
+- ::getNewText`(text)`
+
+### SnakeCase < TransformString
+- command: `vim-mode:snake-case`
+- ::hoverText: ```':snake:'```
 - ::getNewText`(text)`
 
 ### Surround < TransformString
@@ -967,8 +1000,9 @@ vim-mode version: 0.57.0
 - ::pairs: ```[ '[]', '()', '{}', '<>' ]```
 - ::input: ```null```
 - ::charsMax: ```1```
+- ::hoverText: ```':two_women_holding_hands:'```
+- ::requireInput: ```true```: **Overridden**
 - ::onDidGetInput`(@input)`
-- ::isComplete`()`: **Overridden**
 - ::getPair`(input)`
 - ::surround`(text, pair)`
 - ::getNewText`(text)`
@@ -995,6 +1029,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g ~</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>~</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>g ~</kbd>
+- ::hoverText: ```':clap:'```
 - ::toggleCase`(char)`
 - ::getNewText`(text)`
 
@@ -1003,11 +1038,8 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>~</kbd>
 - ::constructor`()`: `super`: **Overridden**
+- ::hoverText: ```null```: **Overridden**
 - ::adjustCursor: ```false```: **Overridden**
-
-### Underscore < TransformString
-- command: `vim-mode:underscore`
-- ::getNewText`(text)`
 
 ### UpperCase < TransformString
 - command: `vim-mode:upper-case`
@@ -1015,6 +1047,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g U</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>U</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>g U</kbd>
+- ::hoverText: ```':point_up:'```
 - ::getNewText`(text)`
 
 ### Yank < Operator
@@ -1023,6 +1056,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>y</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>y</kbd>
 - ::linewiseAlias: ```true```: **Overridden**
+- ::hoverText: ```':clipboard:'```
 - ::execute`()`
 
 ### YankLine < Yank
@@ -1126,7 +1160,20 @@ vim-mode version: 0.57.0
 - ::rangeToBeginningOfFile`(point)`
 - ::rangeToEndOfFile`(point)`
 
+### SelectInsideCurrentLine < TextObject
+- command: `vim-mode:select-inside-current-line`
+- keymaps
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i l</kbd>
+- ::select`()`
+
+### SelectAroundCurrentLine < SelectInsideCurrentLine
+- command: `vim-mode:select-around-current-line`
+- keymaps
+  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a l</kbd>
+- ::inclusive: ```true```
+
 ### SelectInsidePair < TextObject
+*Not exported*
 - ::inclusive: ```false```
 - ::pair: ```null```
 - ::findPair`(fromPoint, pair, backward)`
