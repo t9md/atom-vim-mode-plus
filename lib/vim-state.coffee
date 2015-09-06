@@ -156,8 +156,8 @@ class VimState
     ]
 
     @registerOperationCommands TextObjects, [
-      'select-inside-word', 'select-a-word',
-      'select-inside-whole-word', 'select-a-whole-word',
+      'select-inside-word'           , 'select-a-word',
+      'select-inside-whole-word'     , 'select-a-whole-word',
       'select-inside-double-quotes'  , 'select-around-double-quotes',
       'select-inside-single-quotes'  , 'select-around-single-quotes',
       'select-inside-back-ticks'     , 'select-around-back-ticks',
@@ -170,6 +170,7 @@ class VimState
       'select-inside-parentheses'    , 'select-around-parentheses',
       'select-inside-tags'           , # why not around version exists?,
       'select-inside-current-line'   , 'select-around-current-line'
+      'select-inside-entire'         , 'select-around-entire'
     ]
 
     @registerOperationCommands Motions, [

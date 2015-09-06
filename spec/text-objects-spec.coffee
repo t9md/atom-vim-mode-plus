@@ -526,3 +526,5 @@ describe "TextObjects", ->
 
   # [TODO]
   describe 'the "current-line" text object', ->
+  # [TODO]
+  describe 'the "entire" text object', ->
