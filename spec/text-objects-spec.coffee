@@ -523,3 +523,6 @@ describe "TextObjects", ->
         vim.set cursor: [12, 0]
         vim.ensure 'vai',
           selectedBufferRange: [[10, 0], [27, 0]]
+
+  # [TODO]
+  describe 'the "current-line" text object', ->

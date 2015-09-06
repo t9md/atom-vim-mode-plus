@@ -260,6 +260,20 @@ class SelectAroundIndent extends SelectInsideIndent
   @extend()
   inclusive: true
 
+class SelectInsideCurrentLine extends TextObject
+  @extend()
+  select: ->
+    for selection in @editor.getSelections()
+      selection.cursor.moveToBeginningOfLine()
+      unless @inclusive
+        selection.cursor.moveToFirstCharacterOfLine()
+      selection.selectToEndOfLine()
+      not selection.isEmpty()
+
+class SelectAroundCurrentLine extends SelectInsideCurrentLine
+  @extend()
+  inclusive: true
+
 module.exports = {
   # CurrentSelection
   SelectInsideWord          , SelectAWord
@@ -275,4 +289,5 @@ module.exports = {
   SelectInsideParagraph     , SelectAroundParagraph
   SelectInsideComment       , SelectAroundComment
   SelectInsideIndent        , SelectAroundIndent
+  SelectInsideCurrentLine   , SelectAroundCurrentLine
 }

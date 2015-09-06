@@ -169,6 +169,7 @@ class VimState
       'select-inside-square-brackets', 'select-around-square-brackets',
       'select-inside-parentheses'    , 'select-around-parentheses',
       'select-inside-tags'           , # why not around version exists?,
+      'select-inside-current-line'   , 'select-around-current-line'
     ]
 
     @registerOperationCommands Motions, [
