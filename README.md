@@ -28,8 +28,8 @@ But I need some pastime, refresher, So I added following new features which is n
 - New Operator
   - Surround, DeleteSurround, ChangeSurround. Instead of vim-surround atom package, its repeatable(very improtant) with `.`.
   - Common string transformation includes SnakeCase, CamelCase, DashCase.
-  - ToggleLineComments which toggle comment with motion of text-objects.
-  - ReplaceWithRegister which replace target area(text-object, motion) with register's text. Very useful since its repeatable.
+  - ToggleLineComments which toggle comment of target-area(selected by motion or text-objects).
+  - ReplaceWithRegister which replace target-area(selected by text-object or motion) with register's text. Very useful since its repeatable.
 - TextObject
   - Indent which select consecutive deeper indented lines
   - Entire buffer.
@@ -41,7 +41,7 @@ But I need some pastime, refresher, So I added following new features which is n
 - Developer friendly introspection report and real-time opration-stack monitoring(logged on console).
 - `gugu`, `guu` `gUgU`, `gUU` support which is yet supported in vim-mode.
 - SelectInsideBrackets family skip backslash escaped pair character.
-- Show cursor(by using decoration) while waiting user-input (e.g `m`, `"`). Cursor disappear in official vim-mode.
+- Show cursor(by using decoration) while waiting user input (e.g `m`, `"`). Cursor disappear in official vim-mode.
 
 # Terminology
 
