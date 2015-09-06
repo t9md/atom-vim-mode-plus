@@ -49,21 +49,15 @@ class Base
     obj = new (Base.findClass(klassName))(@vimState)
     _.extend(obj, properties)
 
-  subs = null
   getInput: (options={}) ->
-    subs?.dispose()
-    subs = new CompositeDisposable
-
-    subs.add @vimState.input.onDidGet options, (@input) =>
+    @vimState.input.onDidGet options, (@input) =>
       # console.log "#{@constructor.name}: #{@input}"
-      console.log "didGet input"
-      subs.dispose()
+      # console.log "get input"
       @complete = true
       @vimState.operationStack.process() # Re-process
 
-    subs.add @vimState.input.onDidCancel =>
-      console.log "Cancel!"
-      subs.dispose()
+    @vimState.input.onDidCancel =>
+      # console.log "Cancelled!"
       @canceled = true
       @vimState.operationStack.process() # Re-process
 
