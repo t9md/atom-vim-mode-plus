@@ -1,5 +1,6 @@
 # Refactoring status: 100%
 
+{debug} = require './utils'
 emoji = require 'emoji-images'
 emojiFolder = 'atom://vim-mode/node_modules/emoji-images/pngs'
 settings = require './settings'
@@ -57,6 +58,9 @@ class HoverElement extends HTMLElement
       @createOverlay()
       @lineHeight = editor.getLineHeightInPixels()
 
+    # [FIXME] now investigationg overlay position become wrong
+    # randomly happen.
+    # console.log  @marker.getBufferRange().toString()
     @style.marginTop = (@lineHeight * -2) + 'px'
     @innerHTML = @emojify(text, @lineHeight * 0.9 + 'px')
 
