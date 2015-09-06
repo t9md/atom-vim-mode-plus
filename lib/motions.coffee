@@ -633,7 +633,7 @@ class MoveToMark extends Motion
   operatesInclusively: false
   operatesLinewise: true
   complete: false
-  hoverText: "'"
+  hoverText: ":round_pushpin:'"
   requireInput: true
 
   constructor: ->
@@ -658,7 +658,7 @@ class MoveToMark extends Motion
 class MoveToMarkLiteral extends MoveToMark
   @extend()
   operatesLinewise: false
-  hoverText: '`'
+  hoverText: ":round_pushpin:`"
 
 # Search
 # -------------------------
