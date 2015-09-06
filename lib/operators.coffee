@@ -166,7 +166,7 @@ class TransformString extends Operator
 
 class ToggleCase extends TransformString
   @extend()
-  hoverText: '~'
+  hoverText: ':clap:'
   toggleCase: (char) ->
     if (charLower = char.toLowerCase()) is char
       char.toUpperCase()
@@ -188,29 +188,29 @@ class ToggleCaseNow extends ToggleCase
 
 class UpperCase extends TransformString
   @extend()
-  hoverText: ':arrow_up:'
+  hoverText: ':point_up:'
   getNewText: (text) ->
     text.toUpperCase()
 
 class LowerCase extends TransformString
   @extend()
-  hoverText: ':arrow_down:'
+  hoverText: ':point_down:'
   getNewText: (text) ->
     text.toLowerCase()
 
-class Camelize extends TransformString
+class CamelCase extends TransformString
   @extend()
   hoverText: ':camel:'
   getNewText: (text) ->
     _.camelize text
 
-class Underscore extends TransformString
+class SnakeCase extends TransformString
   @extend()
-  hoverText: '_'
+  hoverText: ':snake:'
   getNewText: (text) ->
     _.underscore text
 
-class Dasherize extends TransformString
+class DashCase extends TransformString
   @extend()
   hoverText: ':dash:'
   getNewText: (text) ->
@@ -315,7 +315,8 @@ class Repeat extends Operator
 
 class Mark extends Operator
   @extend()
-  hoverText: ':bookmark:'
+  # hoverText: ':bookmark:'
+  hoverText: ':round_pushpin:'
   requireInput: true
   constructor: ->
     super
@@ -357,6 +358,7 @@ class Decrease extends Increase
 class Indent extends Operator
   @extend()
   linewiseAlias: true
+  hoverText: ':point_right:'
   execute: ->
     @target.select()
     startRow = @editor.getSelectedBufferRange().start.row
@@ -370,11 +372,13 @@ class Indent extends Operator
 
 class Outdent extends Indent
   @extend()
+  hoverText: ':point_left:'
   indent: ->
     @editor.outdentSelectedRows()
 
 class AutoIndent extends Indent
   @extend()
+  hoverText: ':open_hands:'
   indent: ->
     @editor.autoIndentSelectedRows()
 
@@ -432,6 +436,7 @@ class PutAfter extends PutBefore
 
 class ReplaceWithRegister extends Operator
   @extend()
+  hoverText: ':pencil:'
   execute: ->
     if _.any @target.select()
       @withFlashing =>
@@ -448,9 +453,10 @@ class ToggleLineComments extends Operator
   execute: ->
     markerByCursor = @markCursorBufferPositions()
     if _.any @target.select()
-      @editor.transact =>
-        for s in @editor.getSelections()
-          s.toggleLineComments()
+      @withFlashing =>
+        @editor.transact =>
+          for s in @editor.getSelections()
+            s.toggleLineComments()
     @restoreMarkedCursorPositions markerByCursor
     @vimState.activateNormalMode()
 
@@ -707,14 +713,9 @@ module.exports = {
 
   # String transformation
   ToggleCase, ToggleCaseNow,
-  UpperCase
-  LowerCase
-  Camelize
-  Underscore
-  Dasherize
-  Surround
-  DeleteSurround
-  ChangeSurround
+  UpperCase, LowerCase
+  CamelCase, SnakeCase, DashCase
+  Surround, DeleteSurround, ChangeSurround
 
   # Put
   PutBefore, PutAfter,
