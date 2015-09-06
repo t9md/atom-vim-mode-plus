@@ -3,7 +3,6 @@ _ = require 'underscore-plus'
 {CurrentSelection} = require './motions'
 {Select} = require './operators'
 {debug} = require './utils'
-
 settings = require './settings'
 
 module.exports =

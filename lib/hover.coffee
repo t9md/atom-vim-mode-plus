@@ -1,3 +1,5 @@
+# Refactoring status: 100%
+
 emoji = require 'emoji-images'
 emojiFolder = 'atom://vim-mode/node_modules/emoji-images/pngs'
 settings = require './settings'
@@ -12,10 +14,11 @@ class Hover
     @view.show()
 
   getText: ->
-    limit = switch
-              when ':clipboard:' in @text then 3
-              when ':scissors:' in @text then 3
-              else  1
+    limit =
+      switch
+        when ':clipboard:' in @text then 3
+        when ':scissors:' in @text then 3
+        else  1
     return if @text.length < limit
     @text.join('')
 
