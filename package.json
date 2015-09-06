@@ -13,7 +13,6 @@
     "delegato": "^1.0.0",
     "emoji-images": "^0.1.1",
     "fs-plus": "^2.8.1",
-    "grim": "^1.4.1",
     "underscore-plus": "1.x"
   },
   "consumedServices": {
