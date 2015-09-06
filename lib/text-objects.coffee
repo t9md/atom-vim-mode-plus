@@ -274,6 +274,16 @@ class SelectAroundCurrentLine extends SelectInsideCurrentLine
   @extend()
   inclusive: true
 
+class SelectInsideEntire extends TextObject
+  @extend()
+  select: ->
+    @editor.selectAll()
+    not s.isEmpty() for s in @editor.getSelections()
+
+class SelectAroundEntire extends SelectInsideEntire
+  @extend()
+  inclusive: true
+
 module.exports = {
   # CurrentSelection
   SelectInsideWord          , SelectAWord
@@ -290,4 +300,5 @@ module.exports = {
   SelectInsideComment       , SelectAroundComment
   SelectInsideIndent        , SelectAroundIndent
   SelectInsideCurrentLine   , SelectAroundCurrentLine
+  SelectInsideEntire        , SelectAroundEntire
 }
