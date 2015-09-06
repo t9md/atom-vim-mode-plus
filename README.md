@@ -51,10 +51,11 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions.
 - [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
 - [ ] Improve search and introduce incrementalSearch.
+- [x] Get user's input with consistent manner via `@vimState.input`.
 - [x] Flash(highlight) region for yanked, pasted, indented for giving instant feedback to user, beneficial especially used as operator like `yip`, `=ip`.
-- [ ] Don't change cursor position after yank, indent, toggle(break compatibility to Vim, but I thinks this is bettter).
+- [x] Don't change cursor position after yank, indent, toggle(break compatibility to Vim, but I thinks this is bettter).
 - [x] New Operator for Surround, DeleteSurround, ChangeSurround.
-- [ ] Show current Register, Mark, Count as overlay decoration to giving instant feedback to user.
+- [x] Show current Register, Mark, Count as overlay decoration to giving instant feedback to user.
 - [x] New Operator for ToggleLineComments, Camelize, Dasherize, Underscore.
 - [x] New TextObject for Comment, Indent.
 - [x] Rewrite spec to be able to write test intuitively.
@@ -75,10 +76,9 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] By eliminating Prefix.Register and Prefix.Repeat, remove Prefix class itself. [done](https://github.com/t9md/vim-mode/commit/5ac09c41beea779dd157ae76230d4c76b99989d4)
 - [x] `introduce ViewModel.onDidGetInput(callback)` for operation which need user input.
 - [x] Eliminate Input class, its just proxying user-input. [done](https://github.com/t9md/vim-mode/commit/b18f7f74f549e76e103335790f9af2cbf2599ac4)
-- [ ] Slim vim-state.coffee
+- [x] Slim vim-state.coffee
   - [x] Auto mapping from command-name to corresponding class.
   - [x] Separate mode handling to ModeManager
-  - [ ] Separate search history management as SearchHistoryManager
 - [x] improve introspection report to describe keymap to corresponding class(by consulting `atom.keymap`).
 - [ ] Recheck unnecessary count passing function.
 

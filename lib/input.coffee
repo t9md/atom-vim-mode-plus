@@ -1,3 +1,4 @@
+# Refactoring status: 100%
 {Emitter} = require 'atom'
 {CompositeDisposable} = require 'atom'
 _ = require 'underscore-plus'

@@ -1,4 +1,4 @@
-# Refactoring status: 90%
+# Refactoring status: 100%
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'

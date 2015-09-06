@@ -1,4 +1,4 @@
-# Refactoring status: 50%
+# Refactoring status: 100%
 settings = require './settings'
 
 validNames = /[a-zA-Z*+%_"]/

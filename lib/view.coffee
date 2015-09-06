@@ -1,4 +1,5 @@
 # Refactoring status: 50%
+# Planed to be eliminiated
 {Emitter} = require 'atom'
 
 class SearchViewModel
