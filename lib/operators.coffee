@@ -226,26 +226,17 @@ class Surround extends TransformString
 
   constructor: ->
     super
-    # [BUG][FIXME] subscription not disposed on cancel()?
-    # I think fixed but check again when I'm not sleepy.
-    subs = new CompositeDisposable
-    subs.add @vimState.input.onDidChange (input) =>
+    @vimState.input.onDidChange (input) =>
       @vimState.hover.add(input)
-    subs.add @vimState.input.onDidGet {@charsMax}, (input) =>
-      subs.dispose()
+    @vimState.input.onDidGet {@charsMax}, (input) =>
       @onDidGetInput(input)
-
-    subs.add @vimState.input.onDidCancel =>
-      subs.dispose()
+    @vimState.input.onDidCancel =>
       @canceled = true
-      @vimState.operationStack.process() # Re-process
-
+      @vimState.operationStack.process()
     @vimState.input.focus()
 
-  onDidGetInput: (input) ->
-    # [FIXME] Need to avoid asign again currently.
-    @input ?= input
-    @vimState.operationStack.process() # Re-process!!
+  onDidGetInput: (@input) ->
+    @vimState.operationStack.process()
 
   getPair: (input) ->
     pair = _.detect @pairs, (pair) => input in pair
