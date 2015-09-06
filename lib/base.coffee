@@ -1,11 +1,14 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
+{CompositeDisposable} = require 'atom'
 {getAncestors, getParent} = require './introspection'
 
 class Base
   pure: false
   complete: null
   recodable: null
+  requireInput: false
+  canceled: false
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -17,6 +20,12 @@ class Base
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
+    if @isCanceled()
+      return true
+
+    if @requireInput and not @input
+      return false
+
     if @target?
       @target.isComplete()
     else
@@ -40,19 +49,32 @@ class Base
     obj = new (Base.findClass(klassName))(@vimState)
     _.extend(obj, properties)
 
+  subs = null
   getInput: (options={}) ->
-    disposable = @vimState.input.onDidGet options, (@input) =>
+    subs?.dispose()
+    subs = new CompositeDisposable
+
+    subs.add @vimState.input.onDidGet options, (@input) =>
       # console.log "#{@constructor.name}: #{@input}"
-      disposable.dispose()
-      unless @input
-        # [FIXME] currently cancelation is not well handled.
-        # Need to implement simply aborting on cancled()
-        if @isFind()
-          @vimState.resetNormalMode()
-          return
+      console.log "didGet input"
+      subs.dispose()
       @complete = true
       @vimState.operationStack.process() # Re-process
+
+    subs.add @vimState.input.onDidCancel =>
+      console.log "Cancel!"
+      subs.dispose()
+      @canceled = true
+      @vimState.operationStack.process() # Re-process
+
     @vimState.input.focus()
+
+  isCanceled: ->
+    @canceled
+
+  cancel: ->
+    unless @vimState.isVisualMode() or @vimState.isInsertMode()
+      @vimState.resetNormalMode()
 
   # Expected to be called by child class.
   # It automatically create typecheck function like

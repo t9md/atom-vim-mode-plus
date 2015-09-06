@@ -9,12 +9,13 @@ class InsertMode extends Base
 class InsertRegister extends InsertMode
   @extend()
   hoverText: '"'
+  requireInput: true
   constructor: ->
     super
     @getInput()
 
   execute: ->
-    if text = @vimState.register.get(@input)?.text
+    if text = @vimState.register.get(@input).text
       @editor.insertText(text)
 
 class CopyFromLineAbove extends InsertMode

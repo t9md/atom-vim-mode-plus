@@ -222,6 +222,7 @@ class Surround extends TransformString
   input: null
   charsMax: 1
   hoverText: ':two_women_holding_hands:'
+  requireInput: true
 
   constructor: ->
     super
@@ -232,19 +233,19 @@ class Surround extends TransformString
       @vimState.hover.add(input)
     subs.add @vimState.input.onDidGet {@charsMax}, (input) =>
       subs.dispose()
-      unless input
-        @vimState.resetNormalMode()
-        return
       @onDidGetInput(input)
+
+    subs.add @vimState.input.onDidCancel =>
+      subs.dispose()
+      @canceled = true
+      @vimState.operationStack.process() # Re-process
+
     @vimState.input.focus()
 
   onDidGetInput: (input) ->
     # [FIXME] Need to avoid asign again currently.
     @input ?= input
     @vimState.operationStack.process() # Re-process!!
-
-  isComplete: ->
-    super and @input
 
   getPair: (input) ->
     pair = _.detect @pairs, (pair) => input in pair
@@ -324,6 +325,7 @@ class Repeat extends Operator
 class Mark extends Operator
   @extend()
   hoverText: ':bookmark:'
+  requireInput: true
   constructor: ->
     super
     @getInput()
@@ -661,20 +663,14 @@ class Replace extends Operator
   @extend()
   input: null
   hoverText: ':tractor:'
+  requireInput: true
+
   constructor: ->
     super
     @getInput(defaultInput: "\n")
 
-  isComplete: ->
-    @input?
-
   execute: ->
     count = @getCount(1)
-    if @input is '' # replace canceled
-      unless @vimState.isVisualMode()
-        @vimState.activateNormalMode()
-      # replace canceled
-      return
 
     @editor.transact =>
       if @target?
