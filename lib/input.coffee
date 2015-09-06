@@ -1,18 +1,19 @@
 {Emitter} = require 'atom'
 {CompositeDisposable} = require 'atom'
+_ = require 'underscore-plus'
 
 class Input
   subscriptions: null
+
   constructor: (@vimState) ->
     @emitter = new Emitter
     @view = atom.views.getView(this)
     @vimState.onDidFailToCompose =>
       @view.cancel()
 
-  onDidGet: ({charsMax, defaultInput}={}, callback) ->
+  onDidGet: (spec={}, callback) ->
     @subscriptions ?= new CompositeDisposable
-    @view.charsMax = charsMax ? 1
-    @view.defaultInput = defaultInput ? ''
+    @view.setSpec(spec)
     @subscriptions.add @emitter.on 'did-get', callback
 
   onDidChange: (callback) ->
@@ -38,6 +39,7 @@ class Input
 
 class InputElement extends HTMLElement
   finishing: false
+  spec: null
 
   createdCallback: ->
     @className = 'vim-mode-input'
@@ -65,11 +67,17 @@ class InputElement extends HTMLElement
       return if @finishing
       text = @editor.getText()
       @model.emitter.emit 'did-change', text
-      if text.length >= @charsMax
+      if text.length >= @getSpec('charsMax')
         @confirm()
 
+  setSpec: (@spec) ->
+    _.defaults(@spec, {defaultInput: '', charsMax: 1})
+
+  getSpec: (name) ->
+    @spec[name]
+
   confirm: ->
-    if input = (@editor.getText() or @defaultInput)
+    if input = (@editor.getText() or @getSpec('defaultInput'))
       # console.log "called confirm with '#{input}'"
       @model.emitter.emit 'did-get', input
       @unfocus()
@@ -94,6 +102,7 @@ class InputElement extends HTMLElement
     @finishing = false
 
   destroy: ->
+    @spec = null
     @model = null
     @editor.destroy()
     @editor = null
