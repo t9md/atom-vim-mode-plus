@@ -24,19 +24,21 @@ After 1 month of refactoring, I eliminated lots of unessential code and class an
 But I'm getting tired now, I need to rewrite `motion.coffee` which is 1st priority in my TODO list now(2015.9.6).
 I know it but I started adding new features which is not included Vim and vim-mode as pastime.  
 
+- New Operator
+  - Surround, DeleteSurround, ChangeSurround. Instead of vim-surround atom package, its repeatable(very improtant) with `.`.
+  - Common string transformation includes SnakeCase, CamelCase, DashCase.
+  - ToggleLineComments which toggle comment with motion of text-objects.
+  - ReplaceWithRegister which replace target area(text-object, motion) with register's text. Very useful since its repeatable.
+- TextObject
+  - Indent which select consecutive deeper indented lines
+  - Entire buffer.
+  - CurrentLine. Useful when you do surround line.
+  - Comment. which select consecutive commented lines.
 - Instant feedback of your operation. Count/Register/Operation you typed is displayed as hover(overlay) element.
  - Showing emoji that representing operation.
 - Flashing(highlighting) operation affected area(range) for yank, paste, toggle etc..
-- New Operator Surround, DeleteSurround, ChangeSurround. Instead of vim-surround atom package, its repeatable(very improtant) with `.`.
 - Developer friendly introspection report and real-time opration-stack monitoring(logged on console).
-- New Operator for common string transformation like SnakeCase, CamelCase, DashCase.
-- New Operator for ToggleLineComments which toggle comment with motion of text-objects.
-- New Operator for ReplaceWithRegister which replace target area(text-object, motion) with register's text. Very useful since its repeatable.
 - `gugu`, `guu` `gUgU`, `gUU` support which is yet supported in vim-mode.
-- New TextObject for Indent.
-- New TextObject for Entire buffer.
-- New TextObject for CurrentLine. Useful when you do surround line.
-- New TextObject for Comment. which select consecutive commented lines.
 - SelectInsideBrackets family skip backslash escaped pair character.
 - Show cursor(by using decoration) while waiting user-input (e.g `m`, `"`). Cursor disappear in official vim-mode.
 
