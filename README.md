@@ -76,7 +76,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions.
 - [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
 - [ ] Improve search and introduce incrementalSearch.
-- [ ] Support web-font(?) font-awesome etc. to show on overlay hover.
+- [x] Support web-font(?) font-awesome etc. to show on overlay hover.(currently octicon only)
 - [ ] Spec re-write 2nd round to compact and simple description for each spec.
 - [x] Show emoji that representing current operation.
 - [x] Get user's input with consistent manner via `@vimState.input`.
