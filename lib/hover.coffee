@@ -41,14 +41,14 @@ class Hover
 class HoverElement extends HTMLElement
   createdCallback: ->
     @classList.add 'vim-mode-hover'
-    # @style['line-height'] = '10'
-    # @classList.add 'inline-block'
     this
 
   initialize: (@model) ->
-    @style.paddingLeft  = '0.2em'
-    @style.paddingRight = '0.2em'
-    @style.marginLeft   = '-0.5em'
+    @style.paddingTop    = '0.2em'
+    @style.paddingBottom = '0.2em'
+    @style.paddingLeft   = '0.2em'
+    @style.paddingRight  = '0.1em'
+    @style.marginLeft    = '-0.5em'
     this
 
   show: ->
@@ -82,7 +82,7 @@ class HoverElement extends HTMLElement
     @styleElement = document.createElement 'style'
     document.head.appendChild(@styleElement);
     selector = '.vim-mode-hover .icon::before'
-    size = "#{size*0.9}px"
+    size = "#{size*0.8}px"
     style = "font-size: #{size}; width: #{size}; hegith: #{size};"
     @styleElement.sheet.addRule(selector, style)
 
