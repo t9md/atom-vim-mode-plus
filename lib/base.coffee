@@ -1,6 +1,7 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
 {getAncestors, getParent} = require './introspection'
+settings = require './settings'
 
 class Base
   pure: false
@@ -11,7 +12,11 @@ class Base
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
-    @vimState.hover.add @hoverText if @hoverText?
+    hover =
+      switch settings.get('hoverStyle')
+        when 'emoji' then @hoverText if @hoverText?
+        when 'icon'  then @hoverIcon if @hoverIcon?
+    @vimState.hover.add hover if hover?
 
   isPure: ->
     @pure

@@ -16,15 +16,19 @@ class Hover
     @text.push text
     @view.show()
 
-  getText: ->
-    minLengthToDisplay = 1
-    # minLengthToDisplay =
-    #   switch
-    #     when ':clipboard:' in @text then 3
-    #     when ':scissors:' in @text then 3
-    #     else  1
-    return if @text.length < minLengthToDisplay
-    @text.join('')
+  iconRegexp = /^:.*:$/
+  getText: (lineHeight)->
+    unless @text.length
+      return null
+
+    @text.map (text) =>
+      text = String(text)
+      if settings.get('hoverStyle') is 'emoji'
+        emoji(String(text), emojiFolder, lineHeight)
+      else
+        text.replace /:(.*?):/g, (s, m) ->
+          "<span class='icon icon-#{m}'></span>"
+    .join('')
 
   reset: ->
     @text = []
@@ -37,32 +41,30 @@ class Hover
 class HoverElement extends HTMLElement
   createdCallback: ->
     @classList.add 'vim-mode-hover'
+    # @style['line-height'] = '10'
+    # @classList.add 'inline-block'
     this
 
   initialize: (@model) ->
     @style.paddingLeft  = '0.2em'
     @style.paddingRight = '0.2em'
-    @style.marginLeft   = '-0.2em'
+    @style.marginLeft   = '-0.5em'
     this
-
-  emojify: (text, size) ->
-    emoji(String(text), emojiFolder, size)
 
   show: ->
     return unless settings.get('enableHoverIndicator')
-    unless text = @model.getText()
-      return
     {editor} = @model.vimState
-
     unless @marker
       @createOverlay()
       @lineHeight = editor.getLineHeightInPixels()
+      @setIconSize(@lineHeight)
 
     # [FIXME] now investigationg overlay position become wrong
     # randomly happen.
-    # console.log  @marker.getBufferRange().toString()
+    console.log  @marker.getBufferRange().toString()
     @style.marginTop = (@lineHeight * -2) + 'px'
-    @innerHTML = @emojify(text, @lineHeight * 0.9 + 'px')
+    if text = @model.getText(@lineHeight)
+      @innerHTML = text
 
   createOverlay: ->
     {editor} = @model.vimState
@@ -75,9 +77,19 @@ class HoverElement extends HTMLElement
       type: 'overlay'
       item: this
 
+  setIconSize: (size) ->
+    @styleElement?.remove()
+    @styleElement = document.createElement 'style'
+    document.head.appendChild(@styleElement);
+    selector = '.vim-mode-hover .icon::before'
+    size = "#{size*0.9}px"
+    style = "font-size: #{size}; width: #{size}; hegith: #{size};"
+    @styleElement.sheet.addRule(selector, style)
+
   reset: ->
     @textContent = ''
     @marker?.destroy()
+    @styleElement?.remove()
     @marker = null
     @lineHeight = null
 
