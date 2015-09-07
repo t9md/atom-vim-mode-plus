@@ -207,7 +207,7 @@ class Indentation extends Paragraph
     baseIndentLevel = @editor.indentLevelForLine(text)
     fn = (row) =>
       if @editor.isBufferRowBlank(row)
-        if @inclusive then false else true
+        not @inclusive
       else
         text = @editor.lineTextForBufferRow(row)
         @editor.indentLevelForLine(text) < baseIndentLevel
