@@ -537,7 +537,7 @@ class Find extends Motion
   reverse: false
   offset: 0
   hoverText: ':mag_right:'
-  hoverIcon: ':search:'
+  hoverIcon: ':find:'
   requireInput: true
 
   constructor: ->
@@ -602,7 +602,7 @@ class FindBackwards extends Find
   @extend()
   backwards: true
   hoverText: ':mag:'
-  hoverIcon: ':search:'
+  hoverIcon: ':find:'
 
 # keymap: t
 class Till extends Find
@@ -635,12 +635,14 @@ class MoveToMark extends Motion
   operatesInclusively: false
   operatesLinewise: true
   complete: false
-  hoverText: ":round_pushpin:'"
-  hoverIcon: ":bookmark:'"
   requireInput: true
+  hoverText: ":round_pushpin:'"
+  hoverIcon: ":move-to-mark:'"
+  # hoverChar: "'"
 
   constructor: ->
     super
+    # @vimState.hover.add @hoverChar
     @getInput()
 
   isLinewise: ->
@@ -662,7 +664,8 @@ class MoveToMarkLiteral extends MoveToMark
   @extend()
   operatesLinewise: false
   hoverText: ":round_pushpin:`"
-  hoverIcon: ":bookmark:`"
+  hoverIcon: ":move-to-mark:"
+  # hoverChar: '`'
 
 # Search
 # -------------------------

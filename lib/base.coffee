@@ -12,11 +12,12 @@ class Base
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
-    hover =
-      switch settings.get('hoverStyle')
-        when 'emoji' then @hoverText if @hoverText?
-        when 'icon'  then @hoverIcon if @hoverIcon?
-    @vimState.hover.add hover if hover?
+    if settings.get('enableHoverIcon')
+      hover =
+        switch settings.get('hoverStyle')
+          when 'emoji' then @hoverText if @hoverText?
+          when 'icon'  then @hoverIcon if @hoverIcon?
+      @vimState.hover.add hover if hover?
 
   isPure: ->
     @pure

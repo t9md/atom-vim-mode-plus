@@ -61,8 +61,12 @@ module.exports = new ScopedConfig 'vim-mode',
     order: 11
     type: 'boolean'
     default: false
-  hoverStyle:
+  enableHoverIcon:
     order: 12
+    type: 'boolean'
+    default: false
+  hoverStyle:
+    order: 13
     type: 'string'
     default: 'emoji'
     enum: ['emoji', 'icon']
