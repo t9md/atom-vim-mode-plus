@@ -537,6 +537,7 @@ class Find extends Motion
   reverse: false
   offset: 0
   hoverText: ':mag_right:'
+  hoverIcon: ':search:'
   requireInput: true
 
   constructor: ->
@@ -601,6 +602,7 @@ class FindBackwards extends Find
   @extend()
   backwards: true
   hoverText: ':mag:'
+  hoverIcon: ':search:'
 
 # keymap: t
 class Till extends Find
@@ -634,6 +636,7 @@ class MoveToMark extends Motion
   operatesLinewise: true
   complete: false
   hoverText: ":round_pushpin:'"
+  hoverIcon: ":bookmark:'"
   requireInput: true
 
   constructor: ->
@@ -659,6 +662,7 @@ class MoveToMarkLiteral extends MoveToMark
   @extend()
   operatesLinewise: false
   hoverText: ":round_pushpin:`"
+  hoverIcon: ":bookmark:`"
 
 # Search
 # -------------------------

@@ -111,6 +111,7 @@ class Delete extends Operator
   @extend()
   linewiseAlias: true
   hoverText: ':scissors:'
+  hoverIcon: ':x:'
 
   execute: ->
     if _.any @target.select()
@@ -161,6 +162,7 @@ class TransformString extends Operator
 class ToggleCase extends TransformString
   @extend()
   hoverText: ':clap:'
+  hoverIcon: ':git-compare:'
   toggleCase: (char) ->
     if (charLower = char.toLowerCase()) is char
       char.toUpperCase()
@@ -175,6 +177,7 @@ class ToggleCase extends TransformString
 class ToggleCaseNow extends ToggleCase
   @extend()
   hoverText: null
+  hoverIcon: null
   adjustCursor: false
   constructor: ->
     super
@@ -183,30 +186,36 @@ class ToggleCaseNow extends ToggleCase
 class UpperCase extends TransformString
   @extend()
   hoverText: ':point_up:'
+  hoverIcon: ':arrow-up:'
   getNewText: (text) ->
     text.toUpperCase()
 
 class LowerCase extends TransformString
   @extend()
   hoverText: ':point_down:'
+  hoverIcon: ':arrow-down:'
   getNewText: (text) ->
     text.toLowerCase()
 
 class CamelCase extends TransformString
   @extend()
   hoverText: ':camel:'
+  hoverIcon: 'C'
+
   getNewText: (text) ->
     _.camelize text
 
 class SnakeCase extends TransformString
   @extend()
   hoverText: ':snake:'
+  hoverIcon: '_'
   getNewText: (text) ->
     _.underscore text
 
 class DashCase extends TransformString
   @extend()
   hoverText: ':dash:'
+  hoverIcon: '-'
   getNewText: (text) ->
     _.dasherize text
 
@@ -216,6 +225,7 @@ class Surround extends TransformString
   input: null
   charsMax: 1
   hoverText: ':two_women_holding_hands:'
+  hoverIcon: ':quote:'
   requireInput: true
 
   constructor: ->
@@ -265,6 +275,7 @@ class Yank extends Operator
   @extend()
   linewiseAlias: true
   hoverText: ':clipboard:'
+  hoverIcon: ':clippy:'
   execute: ->
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
@@ -302,8 +313,8 @@ class Repeat extends Operator
 
 class Mark extends Operator
   @extend()
-  # hoverText: ':bookmark:'
   hoverText: ':round_pushpin:'
+  hoverIcon: ':pin:'
   requireInput: true
   constructor: ->
     super
@@ -346,6 +357,7 @@ class Indent extends Operator
   @extend()
   linewiseAlias: true
   hoverText: ':point_right:'
+  hoverIcon: ':chevron-right:'
   execute: ->
     @target.select()
     startRow = @editor.getSelectedBufferRange().start.row
@@ -360,12 +372,15 @@ class Indent extends Operator
 class Outdent extends Indent
   @extend()
   hoverText: ':point_left:'
+  hoverIcon: ':chevron-left:'
+
   indent: ->
     @editor.outdentSelectedRows()
 
 class AutoIndent extends Indent
   @extend()
   hoverText: ':open_hands:'
+  hoverIcon: ':code:'
   indent: ->
     @editor.autoIndentSelectedRows()
 
@@ -424,6 +439,7 @@ class PutAfter extends PutBefore
 class ReplaceWithRegister extends Operator
   @extend()
   hoverText: ':pencil:'
+  hoverIcon: ':briefcase:'
   execute: ->
     if _.any @target.select()
       @withFlashing =>
@@ -437,6 +453,7 @@ class ReplaceWithRegister extends Operator
 class ToggleLineComments extends Operator
   @extend()
   hoverText: ':mute:'
+  hoverIcon: ':mute:'
   execute: ->
     markerByCursor = @markCursorBufferPositions()
     if _.any @target.select()
