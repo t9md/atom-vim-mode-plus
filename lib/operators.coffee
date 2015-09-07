@@ -252,11 +252,8 @@ class Surround extends TransformString
 class DeleteSurround extends Surround
   @extend()
   onDidGetInput: (@input) ->
-    @compose(@new 'SelectInsidePair',
-      pair: @getPair(@input)
-      inclusive: true
-    )
-    @vimState.operationStack.process() # Re-process!!
+    @compose @new('Pair', pair: @getPair(@input), inclusive: true)
+    @vimState.operationStack.process()
 
   getNewText: (text) ->
     text[1...-1]

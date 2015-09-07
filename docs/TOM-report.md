@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-09-06T13:09:49.288Z*
+*generated at 2015-09-07T02:05:50.389Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -118,36 +118,22 @@ vim-mode version: 0.57.0
       - [ScrollCursorToLeft](#scrollcursortoleft--scrollhorizontal)
       - [ScrollCursorToRight](#scrollcursortoright--scrollhorizontal)
   - [TextObject](#textobject--base) *Not exported*
-    - [SelectInsideCurrentLine](#selectinsidecurrentline--textobject)
-      - [SelectAroundCurrentLine](#selectaroundcurrentline--selectinsidecurrentline)
-    - [SelectInsidePair](#selectinsidepair--textobject) *Not exported*
-      - [SelectInsideAngleBrackets](#selectinsideanglebrackets--selectinsidepair)
-        - [SelectAroundAngleBrackets](#selectaroundanglebrackets--selectinsideanglebrackets)
-      - [SelectInsideBackTicks](#selectinsidebackticks--selectinsidepair)
-        - [SelectAroundBackTicks](#selectaroundbackticks--selectinsidebackticks)
-      - [SelectInsideCurlyBrackets](#selectinsidecurlybrackets--selectinsidepair)
-        - [SelectAroundCurlyBrackets](#selectaroundcurlybrackets--selectinsidecurlybrackets)
-      - [SelectInsideDoubleQuotes](#selectinsidedoublequotes--selectinsidepair)
-        - [SelectAroundDoubleQuotes](#selectarounddoublequotes--selectinsidedoublequotes)
-      - [SelectInsideParentheses](#selectinsideparentheses--selectinsidepair)
-        - [SelectAroundParentheses](#selectaroundparentheses--selectinsideparentheses)
-      - [SelectInsideSingleQuotes](#selectinsidesinglequotes--selectinsidepair)
-        - [SelectAroundSingleQuotes](#selectaroundsinglequotes--selectinsidesinglequotes)
-      - [SelectInsideSquareBrackets](#selectinsidesquarebrackets--selectinsidepair)
-        - [SelectAroundSquareBrackets](#selectaroundsquarebrackets--selectinsidesquarebrackets)
-      - [SelectInsideTags](#selectinsidetags--selectinsidepair)
-        - [SelectAroundTags](#selectaroundtags--selectinsidetags)
-    - [SelectInsideParagraph](#selectinsideparagraph--textobject)
-      - [SelectAroundParagraph](#selectaroundparagraph--selectinsideparagraph)
-      - [SelectInsideComment](#selectinsidecomment--selectinsideparagraph)
-        - [SelectAroundComment](#selectaroundcomment--selectinsidecomment)
-      - [SelectInsideIndent](#selectinsideindent--selectinsideparagraph)
-        - [SelectAroundIndent](#selectaroundindent--selectinsideindent)
-    - [SelectWord](#selectword--textobject) *Not exported*
-      - [SelectInsideWholeWord](#selectinsidewholeword--selectword)
-        - [SelectAWholeWord](#selectawholeword--selectinsidewholeword)
-      - [SelectInsideWord](#selectinsideword--selectword)
-        - [SelectAWord](#selectaword--selectinsideword)
+    - [CurrentLine](#currentline--textobject)
+    - [Entire](#entire--textobject)
+    - [Pair](#pair--textobject) *Not exported*
+      - [AngleBrackets](#anglebrackets--pair)
+      - [BackTicks](#backticks--pair)
+      - [CurlyBrackets](#curlybrackets--pair)
+      - [DoubleQuotes](#doublequotes--pair)
+      - [Parentheses](#parentheses--pair)
+      - [SingleQuotes](#singlequotes--pair)
+      - [SquareBrackets](#squarebrackets--pair)
+      - [Tags](#tags--pair)
+    - [Paragraph](#paragraph--textobject)
+      - [Comment](#comment--paragraph)
+      - [Indentation](#indentation--paragraph)
+    - [Word](#word--textobject)
+      - [WholeWord](#wholeword--word)
 
 ## Base
 *Not exported*
@@ -262,36 +248,22 @@ vim-mode version: 0.57.0
 - ::isChangeToLastCharacterOfLine`()`
 - ::isReplace`()`
 - ::isTextObject`()`
-- ::isSelectWord`()`
-- ::isSelectInsideWord`()`
-- ::isSelectAWord`()`
-- ::isSelectInsideWholeWord`()`
-- ::isSelectAWholeWord`()`
-- ::isSelectInsidePair`()`
-- ::isSelectInsideDoubleQuotes`()`
-- ::isSelectAroundDoubleQuotes`()`
-- ::isSelectInsideSingleQuotes`()`
-- ::isSelectAroundSingleQuotes`()`
-- ::isSelectInsideBackTicks`()`
-- ::isSelectAroundBackTicks`()`
-- ::isSelectInsideCurlyBrackets`()`
-- ::isSelectAroundCurlyBrackets`()`
-- ::isSelectInsideAngleBrackets`()`
-- ::isSelectAroundAngleBrackets`()`
-- ::isSelectInsideTags`()`
-- ::isSelectAroundTags`()`
-- ::isSelectInsideSquareBrackets`()`
-- ::isSelectAroundSquareBrackets`()`
-- ::isSelectInsideParentheses`()`
-- ::isSelectAroundParentheses`()`
-- ::isSelectInsideParagraph`()`
-- ::isSelectAroundParagraph`()`
-- ::isSelectInsideComment`()`
-- ::isSelectAroundComment`()`
-- ::isSelectInsideIndent`()`
-- ::isSelectAroundIndent`()`
-- ::isSelectInsideCurrentLine`()`
-- ::isSelectAroundCurrentLine`()`
+- ::isWord`()`
+- ::isWholeWord`()`
+- ::isPair`()`
+- ::isDoubleQuotes`()`
+- ::isSingleQuotes`()`
+- ::isBackTicks`()`
+- ::isCurlyBrackets`()`
+- ::isAngleBrackets`()`
+- ::isTags`()`
+- ::isSquareBrackets`()`
+- ::isParentheses`()`
+- ::isParagraph`()`
+- ::isComment`()`
+- ::isIndentation`()`
+- ::isCurrentLine`()`
+- ::isEntire`()`
 - ::isInsertMode`()`
 - ::isInsertRegister`()`
 - ::isCopyFromLineAbove`()`
@@ -642,7 +614,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>B</kbd>
 - ::operatesInclusively: ```false```: **Overridden**
 - ::moveCursor`(cursor)`
-- ::isWholeWord`(cursor)`
+- ::isWholeWord`(cursor)`: **Overridden**
 - ::isAtBeginningOfFile`(cursor)`
 
 ### MoveToPreviousWord < Motion
@@ -1160,134 +1132,44 @@ vim-mode version: 0.57.0
 - ::rangeToBeginningOfFile`(point)`
 - ::rangeToEndOfFile`(point)`
 
-### SelectInsideCurrentLine < TextObject
-- command: `vim-mode:select-inside-current-line`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i l</kbd>
+### CurrentLine < TextObject
 - ::select`()`
 
-### SelectAroundCurrentLine < SelectInsideCurrentLine
-- command: `vim-mode:select-around-current-line`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a l</kbd>
-- ::inclusive: ```true```
+### Entire < TextObject
+- ::select`()`
 
-### SelectInsidePair < TextObject
+### Pair < TextObject
 *Not exported*
 - ::inclusive: ```false```
 - ::pair: ```null```
 - ::findPair`(fromPoint, pair, backward)`
 - ::select`()`
 
-### SelectInsideAngleBrackets < SelectInsidePair
-- command: `vim-mode:select-inside-angle-brackets`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i <</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i ></kbd>
+### AngleBrackets < Pair
 - ::pair: ```'<>'```: **Overridden**
 
-### SelectAroundAngleBrackets < SelectInsideAngleBrackets
-- command: `vim-mode:select-around-angle-brackets`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a <</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a ></kbd>
-- ::inclusive: ```true```: **Overridden**
-
-### SelectInsideBackTicks < SelectInsidePair
-- command: `vim-mode:select-inside-back-ticks`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i \`</kbd>
+### BackTicks < Pair
 - ::pair: ```'``'```: **Overridden**
 
-### SelectAroundBackTicks < SelectInsideBackTicks
-- command: `vim-mode:select-around-back-ticks`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a \`</kbd>
-- ::inclusive: ```true```: **Overridden**
-
-### SelectInsideCurlyBrackets < SelectInsidePair
-- command: `vim-mode:select-inside-curly-brackets`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i {</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i }</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i B</kbd>
+### CurlyBrackets < Pair
 - ::pair: ```'{}'```: **Overridden**
 
-### SelectAroundCurlyBrackets < SelectInsideCurlyBrackets
-- command: `vim-mode:select-around-curly-brackets`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a {</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a }</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a B</kbd>
-- ::inclusive: ```true```: **Overridden**
-
-### SelectInsideDoubleQuotes < SelectInsidePair
-- command: `vim-mode:select-inside-double-quotes`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i "</kbd>
+### DoubleQuotes < Pair
 - ::pair: ```'""'```: **Overridden**
 
-### SelectAroundDoubleQuotes < SelectInsideDoubleQuotes
-- command: `vim-mode:select-around-double-quotes`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a "</kbd>
-- ::inclusive: ```true```: **Overridden**
-
-### SelectInsideParentheses < SelectInsidePair
-- command: `vim-mode:select-inside-parentheses`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i (</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i )</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i b</kbd>
+### Parentheses < Pair
 - ::pair: ```'()'```: **Overridden**
 
-### SelectAroundParentheses < SelectInsideParentheses
-- command: `vim-mode:select-around-parentheses`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a (</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a )</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a b</kbd>
-- ::inclusive: ```true```: **Overridden**
-
-### SelectInsideSingleQuotes < SelectInsidePair
-- command: `vim-mode:select-inside-single-quotes`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i '</kbd>
+### SingleQuotes < Pair
 - ::pair: ```'\'\''```: **Overridden**
 
-### SelectAroundSingleQuotes < SelectInsideSingleQuotes
-- command: `vim-mode:select-around-single-quotes`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a '</kbd>
-- ::inclusive: ```true```: **Overridden**
-
-### SelectInsideSquareBrackets < SelectInsidePair
-- command: `vim-mode:select-inside-square-brackets`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i [</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i ]</kbd>
+### SquareBrackets < Pair
 - ::pair: ```'[]'```: **Overridden**
 
-### SelectAroundSquareBrackets < SelectInsideSquareBrackets
-- command: `vim-mode:select-around-square-brackets`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a [</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a ]</kbd>
-- ::inclusive: ```true```: **Overridden**
-
-### SelectInsideTags < SelectInsidePair
-- command: `vim-mode:select-inside-tags`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i t</kbd>
+### Tags < Pair
 - ::pair: ```'><'```: **Overridden**
 
-### SelectAroundTags < SelectInsideTags
-- ::inclusive: ```true```: **Overridden**
-
-### SelectInsideParagraph < TextObject
-- command: `vim-mode:select-inside-paragraph`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i p</kbd>
+### Paragraph < TextObject
 - ::linewise: ```false```
 - ::isLinewise`()`
 - ::getStartRow`(startRow, fn)`
@@ -1298,63 +1180,18 @@ vim-mode version: 0.57.0
 - ::selectInclusive`(selection)`
 - ::select`()`
 
-### SelectAroundParagraph < SelectInsideParagraph
-- command: `vim-mode:select-around-paragraph`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a p</kbd>
-- ::inclusive: ```true```
-
-### SelectInsideComment < SelectInsideParagraph
-- command: `vim-mode:select-inside-comment`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i c</kbd>
+### Comment < Paragraph
 - ::selectInclusive`(selection)`: **Overridden**
 - ::getRange`(startRow)`: **Overridden**
 
-### SelectAroundComment < SelectInsideComment
-- command: `vim-mode:select-around-comment`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a c</kbd>
-- ::inclusive: ```true```
-
-### SelectInsideIndent < SelectInsideParagraph
-- command: `vim-mode:select-inside-indent`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i i</kbd>
+### Indentation < Paragraph
 - ::selectInclusive`(selection)`: **Overridden**
 - ::getRange`(startRow)`: **Overridden**
 
-### SelectAroundIndent < SelectInsideIndent
-- command: `vim-mode:select-around-indent`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a i</kbd>
-- ::inclusive: ```true```
-
-### SelectWord < TextObject
-*Not exported*
+### Word < TextObject
 - ::select`()`
 - ::selectExclusive`(selection, wordRegex)`
 - ::selectInclusive`(selection)`
 
-### SelectInsideWholeWord < SelectWord
-- command: `vim-mode:select-inside-whole-word`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i W</kbd>
+### WholeWord < Word
 - ::wordRegExp: ```/\S+/```
-
-### SelectAWholeWord < SelectInsideWholeWord
-- command: `vim-mode:select-a-whole-word`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a W</kbd>
-- ::inclusive: ```true```
-
-### SelectInsideWord < SelectWord
-- command: `vim-mode:select-inside-word`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>i w</kbd>
-
-### SelectAWord < SelectInsideWord
-- command: `vim-mode:select-a-word`
-- keymaps
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>a w</kbd>
-- ::inclusive: ```true```

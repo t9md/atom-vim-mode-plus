@@ -126,10 +126,17 @@ class VimState
     commands = {}
     for name in names
       do (name) =>
-        klass = _.capitalize(_.camelize(name))
+        if match = /^(a|around|inside)-(.*)/.exec(name)?.slice(1, 3) ? null
+          # Mapping command name to TextObject
+          inclusive = match[0] in ['a', 'around']
+          klass = _.capitalize(_.camelize(match[1]))
+        else
+          klass = _.capitalize(_.camelize(name))
         commands[name] = =>
           try
-            @operationStack.push new kind[klass](this)
+            op = new kind[klass](this)
+            op.inclusive = inclusive if inclusive
+            @operationStack.push op
           catch error
             @lastOperation = null
             throw error unless error.isOperationAbortedError?()
@@ -156,21 +163,21 @@ class VimState
     ]
 
     @registerOperationCommands TextObjects, [
-      'select-inside-word'           , 'select-a-word',
-      'select-inside-whole-word'     , 'select-a-whole-word',
-      'select-inside-double-quotes'  , 'select-around-double-quotes',
-      'select-inside-single-quotes'  , 'select-around-single-quotes',
-      'select-inside-back-ticks'     , 'select-around-back-ticks',
-      'select-inside-paragraph'      , 'select-around-paragraph',
-      'select-inside-comment'        , 'select-around-comment',
-      'select-inside-indent'         , 'select-around-indent',
-      'select-inside-curly-brackets' , 'select-around-curly-brackets',
-      'select-inside-angle-brackets' , 'select-around-angle-brackets',
-      'select-inside-square-brackets', 'select-around-square-brackets',
-      'select-inside-parentheses'    , 'select-around-parentheses',
-      'select-inside-tags'           , # why not around version exists?,
-      'select-inside-current-line'   , 'select-around-current-line'
-      'select-inside-entire'         , 'select-around-entire'
+      'inside-word'           , 'a-word'
+      'inside-whole-word'     , 'a-whole-word'
+      'inside-double-quotes'  , 'around-double-quotes'
+      'inside-single-quotes'  , 'around-single-quotes'
+      'inside-back-ticks'     , 'around-back-ticks'
+      'inside-paragraph'      , 'around-paragraph'
+      'inside-curly-brackets' , 'around-curly-brackets'
+      'inside-angle-brackets' , 'around-angle-brackets'
+      'inside-square-brackets', 'around-square-brackets'
+      'inside-parentheses'    , 'around-parentheses'
+      'inside-tags'           , # 'around-tags'
+      'inside-comment'        , 'around-comment'
+      'inside-indentation'    , 'around-indentation'
+      'inside-current-line'   , 'around-current-line'
+      'inside-entire'         , 'around-entire'
     ]
 
     @registerOperationCommands Motions, [

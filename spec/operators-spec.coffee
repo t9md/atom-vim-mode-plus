@@ -945,7 +945,11 @@ describe "Operators", ->
 
   describe "the > keybinding", ->
     beforeEach ->
-      set text: "12345\nabcde\nABCDE"
+      set text: """
+        12345
+        abcde
+        ABCDE
+        """
 
     describe "on the last line", ->
       beforeEach ->
