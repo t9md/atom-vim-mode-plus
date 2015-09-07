@@ -83,10 +83,8 @@ class RegisterManager
 
   setName: ->
     @vimState.hover.add '"'
-    @vimState.input.onDidGet {}, (@name) =>
-      @vimState.hover.add @name
-    @vimState.input.onDidCancel =>
-      @vimState.hover.reset()
+    @vimState.input.onDidGet {}, (@name) => @vimState.hover.add(@name)
+    @vimState.input.onDidCancel => @vimState.hover.reset()
     @vimState.input.focus()
 
   getCopyType: (text) ->

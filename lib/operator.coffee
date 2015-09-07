@@ -220,14 +220,10 @@ class Surround extends TransformString
 
   constructor: ->
     super
-    @vimState.input.onDidChange (input) =>
-      @vimState.hover.add(input)
-    @vimState.input.onDidGet {@charsMax}, (input) =>
-      @onDidGetInput(input)
-    @vimState.input.onDidCancel =>
-      @canceled = true
-      @vimState.operationStack.process()
-    @vimState.input.focus()
+    @getInput
+      charsMax: @charsMax,
+      onGet:    @onDidGetInput.bind(this)
+      onChange: @vimState.hover.add.bind(@vimState.hover)
 
   onDidGetInput: (@input) ->
     @vimState.operationStack.process()
