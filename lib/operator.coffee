@@ -200,7 +200,7 @@ class LowerCase extends TransformString
 class CamelCase extends TransformString
   @extend()
   hoverText: ':camel:'
-  hoverIcon: 'C'
+  hoverIcon: ':squirrel:'
 
   getNewText: (text) ->
     _.camelize text
@@ -208,14 +208,14 @@ class CamelCase extends TransformString
 class SnakeCase extends TransformString
   @extend()
   hoverText: ':snake:'
-  hoverIcon: '_'
+  hoverIcon: ':git-commit:' # [FIXME]
   getNewText: (text) ->
     _.underscore text
 
 class DashCase extends TransformString
   @extend()
   hoverText: ':dash:'
-  hoverIcon: '-'
+  hoverIcon: ':dash:'
   getNewText: (text) ->
     _.dasherize text
 
@@ -314,7 +314,7 @@ class Repeat extends Operator
 class Mark extends Operator
   @extend()
   hoverText: ':round_pushpin:'
-  hoverIcon: ':pin:'
+  hoverIcon: ':location:'
   requireInput: true
   constructor: ->
     super
