@@ -44,11 +44,11 @@ class HoverElement extends HTMLElement
     this
 
   initialize: (@model) ->
-    @style.paddingTop    = '0.2em'
-    @style.paddingBottom = '0.2em'
+    # @style.paddingTop    = '0.2em'
+    # @style.paddingBottom = '0.2em'
     @style.paddingLeft   = '0.2em'
-    @style.paddingRight  = '0.1em'
-    @style.marginLeft    = '-0.5em'
+    @style.paddingRight  = '0.2em'
+    @style.marginLeft    = '-0.1em'
     this
 
   show: ->
@@ -62,7 +62,7 @@ class HoverElement extends HTMLElement
     # [FIXME] now investigationg overlay position become wrong
     # randomly happen.
     console.log  @marker.getBufferRange().toString()
-    @style.marginTop = (@lineHeight * -2) + 'px'
+    @style.marginTop = (@lineHeight * -2.2) + 'px'
     if text = @model.getText(@lineHeight)
       @innerHTML = text
 
