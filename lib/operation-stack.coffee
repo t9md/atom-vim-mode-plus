@@ -1,7 +1,7 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
-{CurrentSelection} = require './motions'
-{Select} = require './operators'
+{CurrentSelection} = require './motion'
+{Select} = require './operator'
 {debug} = require './utils'
 settings = require './settings'
 
@@ -18,7 +18,7 @@ class OperationStack
 
     # Use implicit Select operator as operator.
     if @vimState.isVisualMode() and _.isFunction(op.select)
-      debug "push INPLICIT Operators.Select"
+      debug "push INPLICIT Operator.Select"
       @stack.push(new Select(@vimState))
 
     debug "pushing <#{op.getKind()}>"
