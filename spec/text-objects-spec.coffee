@@ -1,7 +1,7 @@
 # Refactoring status: 80%
 {getVimState} = require './spec-helper'
 
-describe "TextObjects", ->
+describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->

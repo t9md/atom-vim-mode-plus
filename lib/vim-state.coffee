@@ -7,9 +7,9 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 
-Operators   = require './operators'
-Motions     = require './motions'
-TextObjects = require './text-objects'
+Operator    = require './operator'
+Motion     = require './motion'
+TextObject = require './text-object'
 InsertMode  = require './insert-mode'
 Scroll      = require './scroll'
 
@@ -162,7 +162,7 @@ class VimState
       'copy-from-line-above', 'copy-from-line-below'
     ]
 
-    @registerOperationCommands TextObjects, [
+    @registerOperationCommands TextObject, [
       'inside-word'           , 'a-word'
       'inside-whole-word'     , 'a-whole-word'
       'inside-double-quotes'  , 'around-double-quotes'
@@ -180,7 +180,7 @@ class VimState
       'inside-entire'         , 'around-entire'
     ]
 
-    @registerOperationCommands Motions, [
+    @registerOperationCommands Motion, [
       'move-to-beginning-of-line',
       'repeat-find', 'repeat-find-reverse',
       'move-down', 'move-up', 'move-left', 'move-right',
@@ -205,7 +205,7 @@ class VimState
       'bracket-matching-motion',
     ]
 
-    @registerOperationCommands Operators, [
+    @registerOperationCommands Operator, [
       'activate-insert-mode', 'insert-after',
       'activate-replace-mode',
       'substitute', 'substitute-line',

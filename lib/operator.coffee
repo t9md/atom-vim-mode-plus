@@ -10,14 +10,14 @@ Base = require './base'
   MoveRight
   MoveLeft
   MoveToLastCharacterOfLine
-} = require './motions'
+} = require './motion'
 
 class OperatorError extends Base
   @extend()
   constructor: (@message) ->
     @name = 'Operator Error'
 
-# General Operators
+# General Operator
 # -------------------------
 class Operator extends Base
   @extend()

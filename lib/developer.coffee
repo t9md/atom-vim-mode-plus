@@ -1,13 +1,13 @@
 # Refactoring status: N/A
 _ = require 'underscore-plus'
 
-Base        = require './base'
-Operators   = require './operators'
-Motions     = require './motions'
-TextObjects = require './text-objects'
-InsertMode  = require './insert-mode'
-Scroll      = require './scroll'
-settings    = require './settings'
+Base       = require './base'
+Operator   = require './operator'
+Motion     = require './motion'
+TextObject = require './text-object'
+InsertMode = require './insert-mode'
+Scroll     = require './scroll'
+settings   = require './settings'
 {debug}     = require './utils'
 introspection = require './introspection'
 
@@ -34,7 +34,7 @@ class Developer
     recursiveInspect = Base
 
     introspection = require './introspection'
-    mods = [Operators, Motions, TextObjects, Scroll, InsertMode]
+    mods = [Operator, Motion, TextObject, Scroll, InsertMode]
     introspection.generateIntrospectionReport(mods, {excludeProperties, recursiveInspect})
 
   jumpToRelated: ->
@@ -46,20 +46,11 @@ class Developer
     srcName = @editor.getTextInBufferRange(range)
     return unless srcName
 
-    # if isDashCase(srcName) and @editor.getPath().endsWith('vim-mode.cson')
-    #   point = null
-    #   @editor.scan ///#{srcName}///, ({range, stop}) ->
-    #     point = range.start
-    #     stop()
-    #   if point
-    #     @editor.setCursorBufferPosition(point)
-    #     return
-
     if isDashCase(srcName)
       klass2file =
-        Motion:     'motions.coffee'
-        Operator:   'operators.coffee'
-        TextObject: 'text-objects.coffee'
+        Motion:     'motion.coffee'
+        Operator:   'operator.coffee'
+        TextObject: 'text-object.coffee'
         Scroll:     'scroll.coffee'
         InsertMode: 'insert-mode.coffee'
 
