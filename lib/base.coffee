@@ -49,16 +49,24 @@ class Base
     _.extend(obj, properties)
 
   getInput: (options={}) ->
-    @vimState.input.onDidGet options, (@input) =>
+    @vimState.input.onDidGet options, (input) =>
       # console.log "#{@constructor.name}: #{@input}"
       # console.log "get input"
-      @complete = true
-      @vimState.operationStack.process() # Re-process
+      if options.onGet?
+        options.onGet(input)
+      else
+        @input = input
+        @complete = true
+        @vimState.operationStack.process()
 
     @vimState.input.onDidCancel =>
       # console.log "Cancelled!"
       @canceled = true
-      @vimState.operationStack.process() # Re-process
+      @vimState.operationStack.process()
+
+    if options.onChange?
+      @vimState.input.onDidChange (input) ->
+        options.onChange(input)
 
     @vimState.input.focus()
 
