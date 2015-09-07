@@ -17,7 +17,7 @@ class TextObject extends Base
 # Word
 # -------------------------
 # [FIXME] Need to be extendable.
-class SelectWord extends TextObject
+class Word extends TextObject
   @extend()
   select: ->
     for selection in @editor.getSelections()
@@ -39,24 +39,13 @@ class SelectWord extends TextObject
         selection.selectToBufferPosition range.end
         stop()
 
-class SelectInsideWord extends SelectWord
-  @extend()
-
-class SelectAWord extends SelectInsideWord
-  @extend()
-  inclusive: true
-
-class SelectInsideWholeWord extends SelectWord
+class WholeWord extends Word
   @extend()
   wordRegExp: /\S+/
 
-class SelectAWholeWord extends SelectInsideWholeWord
-  @extend()
-  inclusive: true
-
 # Pair
 # -------------------------
-class SelectInsidePair extends TextObject
+class Pair extends TextObject
   @extend()
   inclusive: false
   pair: null
@@ -101,67 +90,43 @@ class SelectInsidePair extends TextObject
         selection.setBufferRange(range)
       not selection.isEmpty()
 
-class SelectInsideDoubleQuotes extends SelectInsidePair
+class DoubleQuotes extends Pair
   @extend()
   pair: '""'
-class SelectAroundDoubleQuotes extends SelectInsideDoubleQuotes
-  @extend()
-  inclusive: true
 
-class SelectInsideSingleQuotes extends SelectInsidePair
+class SingleQuotes extends Pair
   @extend()
   pair: "''"
-class SelectAroundSingleQuotes extends SelectInsideSingleQuotes
-  @extend()
-  inclusive: true
 
-class SelectInsideBackTicks extends SelectInsidePair
+class BackTicks extends Pair
   @extend()
   pair: '``'
-class SelectAroundBackTicks extends SelectInsideBackTicks
-  @extend()
-  inclusive: true
 
-class SelectInsideCurlyBrackets extends SelectInsidePair
+class CurlyBrackets extends Pair
   @extend()
   pair: '{}'
-class SelectAroundCurlyBrackets extends SelectInsideCurlyBrackets
-  @extend()
-  inclusive: true
 
-class SelectInsideAngleBrackets extends SelectInsidePair
+class AngleBrackets extends Pair
   @extend()
   pair: '<>'
-class SelectAroundAngleBrackets extends SelectInsideAngleBrackets
-  @extend()
-  inclusive: true
 
 # [FIXME] See #795
-class SelectInsideTags extends SelectInsidePair
+class Tags extends Pair
   @extend()
   pair: '><'
-class SelectAroundTags extends SelectInsideTags
-  @extend()
-  inclusive: true
 
-class SelectInsideSquareBrackets extends SelectInsidePair
+class SquareBrackets extends Pair
   @extend()
   pair: '[]'
-class SelectAroundSquareBrackets extends SelectInsideSquareBrackets
-  @extend()
-  inclusive: true
 
-class SelectInsideParentheses extends SelectInsidePair
+class Parentheses extends Pair
   @extend()
   pair: '()'
-class SelectAroundParentheses extends SelectInsideParentheses
-  @extend()
-  inclusive: true
 
 # Paragraph
 # -------------------------
 # In Vim world Paragraph is defined as consecutive (non-)blank-line.
-class SelectInsideParagraph extends TextObject
+class Paragraph extends TextObject
   @extend()
   linewise: false
 
@@ -219,11 +184,7 @@ class SelectInsideParagraph extends TextObject
       @vimState.activateVisualMode('linewise')
     results
 
-class SelectAroundParagraph extends SelectInsideParagraph
-  @extend()
-  inclusive: true
-
-class SelectInsideComment extends SelectInsideParagraph
+class Comment extends Paragraph
   @extend()
   selectInclusive: (selection) ->
     @selectParagraph(selection)
@@ -235,11 +196,7 @@ class SelectInsideComment extends SelectInsideParagraph
       @editor.isBufferRowCommented(row) in [false, undefined]
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
-class SelectAroundComment extends SelectInsideComment
-  @extend()
-  inclusive: true
-
-class SelectInsideIndent extends SelectInsideParagraph
+class Indentation extends Paragraph
   @extend()
   selectInclusive: (selection) ->
     @selectParagraph(selection)
@@ -256,11 +213,7 @@ class SelectInsideIndent extends SelectInsideParagraph
         @editor.indentLevelForLine(text) < baseIndentLevel
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
-class SelectAroundIndent extends SelectInsideIndent
-  @extend()
-  inclusive: true
-
-class SelectInsideCurrentLine extends TextObject
+class CurrentLine extends TextObject
   @extend()
   select: ->
     for selection in @editor.getSelections()
@@ -270,35 +223,16 @@ class SelectInsideCurrentLine extends TextObject
       selection.selectToEndOfLine()
       not selection.isEmpty()
 
-class SelectAroundCurrentLine extends SelectInsideCurrentLine
-  @extend()
-  inclusive: true
-
-class SelectInsideEntire extends TextObject
+class Entire extends TextObject
   @extend()
   select: ->
     @editor.selectAll()
     not s.isEmpty() for s in @editor.getSelections()
 
-class SelectAroundEntire extends SelectInsideEntire
-  @extend()
-  inclusive: true
-
 module.exports = {
-  # CurrentSelection
-  SelectInsideWord          , SelectAWord
-  SelectInsideWholeWord     , SelectAWholeWord
-  SelectInsideDoubleQuotes  , SelectAroundDoubleQuotes
-  SelectInsideSingleQuotes  , SelectAroundSingleQuotes
-  SelectInsideBackTicks     , SelectAroundBackTicks
-  SelectInsideCurlyBrackets , SelectAroundCurlyBrackets
-  SelectInsideAngleBrackets , SelectAroundAngleBrackets
-  SelectInsideTags          , SelectAroundTags
-  SelectInsideSquareBrackets, SelectAroundSquareBrackets
-  SelectInsideParentheses   , SelectAroundParentheses
-  SelectInsideParagraph     , SelectAroundParagraph
-  SelectInsideComment       , SelectAroundComment
-  SelectInsideIndent        , SelectAroundIndent
-  SelectInsideCurrentLine   , SelectAroundCurrentLine
-  SelectInsideEntire        , SelectAroundEntire
+  Word, WholeWord,
+  DoubleQuotes, SingleQuotes, BackTicks, CurlyBrackets , AngleBrackets, Tags,
+  SquareBrackets, Parentheses,
+  Paragraph, Comment, Indentation,
+  CurrentLine, Entire,
 }
