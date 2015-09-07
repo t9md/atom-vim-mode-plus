@@ -5,12 +5,6 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 Base = require './base'
-{
-  MoveToRelativeLine
-  MoveRight
-  MoveLeft
-  MoveToLastCharacterOfLine
-} = require './motion'
 
 class OperatorError extends Base
   @extend()
@@ -31,7 +25,7 @@ class Operator extends Base
     #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
     if @linewiseAlias and @vimState.isOperatorPendingMode() and
       @vimState.operationStack.peekTop().constructor is @constructor
-        @vimState.operationStack.push new MoveToRelativeLine(@vimState)
+        @vimState.operationStack.push @new('MoveToRelativeLine')
         @abort()
 
   # target - TextObject or Motion to operate on.
@@ -133,19 +127,19 @@ class DeleteRight extends Delete
   @extend()
   constructor: ->
     super
-    @compose(new MoveRight(@vimState))
+    @compose @new('MoveRight')
 
 class DeleteLeft extends Delete
   @extend()
   constructor: ->
     super
-    @compose(new MoveLeft(@vimState))
+    @compose @new('MoveLeft')
 
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
   constructor: ->
     super
-    @compose(new MoveToLastCharacterOfLine(@vimState))
+    @compose @new('MoveToLastCharacterOfLine')
 
 class TransformString extends Operator
   @extend()
@@ -184,7 +178,7 @@ class ToggleCaseNow extends ToggleCase
   adjustCursor: false
   constructor: ->
     super
-    @compose(new MoveRight(@vimState))
+    @compose @new('MoveRight')
 
 class UpperCase extends TransformString
   @extend()
@@ -290,7 +284,7 @@ class YankLine extends Yank
   @extend()
   constructor: ->
     super
-    @compose(new MoveToRelativeLine(@vimState))
+    @compose @new('MoveToRelativeLine')
 
 class Join extends Operator
   @extend()
@@ -573,19 +567,19 @@ class Substitute extends Change
   @extend()
   constructor: ->
     super
-    @compose(new MoveRight(@vimState))
+    @compose @new('MoveRight')
 
 class SubstituteLine extends Change
   @extend()
   constructor: ->
     super
-    @compose(new MoveToRelativeLine(@vimState))
+    @compose @new("MoveToRelativeLine")
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
   constructor: ->
     super
-    @compose(new MoveToLastCharacterOfLine(@vimState))
+    @compose @new('MoveToLastCharacterOfLine')
 
 # Takes a transaction and turns it into a string of what was typed.
 # This class is an implementation detail of Insert
