@@ -307,16 +307,18 @@ class MoveToBeginningOfLine extends Motion
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
       cursor.moveToBeginningOfLine()
+      if settings.get('swapZeroWithHat')
+        cursor.moveToFirstCharacterOfLine()
 
 class MoveToFirstCharacterOfLine extends Motion
   @extend()
-
   operatesInclusively: false
 
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
       cursor.moveToBeginningOfLine()
-      cursor.moveToFirstCharacterOfLine()
+      unless settings.get('swapZeroWithHat')
+        cursor.moveToFirstCharacterOfLine()
 
 class MoveToFirstCharacterOfLineAndDown extends Motion
   @extend()

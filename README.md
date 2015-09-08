@@ -34,6 +34,8 @@ But I need some pastime, refresher, So I added following new features which is n
   - Entire buffer.
   - CurrentLine. Useful when you do surround line.
   - Comment. which select consecutive commented lines.
+- Motion
+  - `0` is accessible position than `^` so provide config option to behave `0` like `^`(I want single `0` behave as `^` without losing setting count 0 ability).
 - Instant feedback of your operation. Count/Register/Operation you typed is displayed as hover(overlay) element.
  - Showing emoji that representing operation.
 - Flashing(highlighting) operation affected area(range) for yank, paste, toggle etc..
@@ -72,13 +74,13 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 # TODO
 
-- [ ] `0` is accessible position than `^` so provide config option to behave `0` like `^`(I want single `0` behave as `^`).
 - [ ] Support visual-block by incorporating with [vim-mode-visual-block](https://github.com/t9md/atom-vim-mode-visual-block).
 - [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions.
 - [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
 - [ ] Improve search and introduce incrementalSearch.
-- [x] Support web-font(?) font-awesome etc. to show on overlay hover.(currently octicon only)
 - [ ] Spec re-write 2nd round to compact and simple description for each spec.
+- [x] Support web-font(?) font-awesome etc. to show on overlay hover.
+- [x] `0` is accessible position than `^` so provide config option to behave `0` like `^`(I want single `0` behave as `^`).
 - [x] Show emoji that representing current operation.
 - [x] Get user's input with consistent manner via `@vimState.input`.
 - [x] Flash(highlight) region for yanked, pasted, indented for giving instant feedback to user, beneficial especially used as operator like `yip`, `=ip`.
