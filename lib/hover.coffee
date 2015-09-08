@@ -17,11 +17,11 @@ class Hover
     @view.show()
 
   iconRegexp = /^:.*:$/
-  getText: (lineHeight)->
+  getText: (lineHeight) ->
     unless @text.length
       return null
 
-    @text.map (text) =>
+    @text.map (text) ->
       text = String(text)
       if settings.get('hoverStyle') is 'emoji'
         emoji(String(text), emojiFolder, lineHeight)
@@ -44,11 +44,6 @@ class HoverElement extends HTMLElement
     this
 
   initialize: (@model) ->
-    # @style.paddingTop    = '0.2em'
-    # @style.paddingBottom = '0.2em'
-    @style.paddingLeft   = '0.2em'
-    @style.paddingRight  = '0.2em'
-    @style.marginLeft    = '-0.1em'
     this
 
   show: ->
@@ -80,7 +75,7 @@ class HoverElement extends HTMLElement
   setIconSize: (size) ->
     @styleElement?.remove()
     @styleElement = document.createElement 'style'
-    document.head.appendChild(@styleElement);
+    document.head.appendChild(@styleElement)
     selector = '.vim-mode-hover .icon::before'
     size = "#{size*0.8}px"
     style = "font-size: #{size}; width: #{size}; hegith: #{size};"
