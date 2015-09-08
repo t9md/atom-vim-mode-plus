@@ -126,9 +126,9 @@ class VimState
     commands = {}
     for name in names
       do (name) =>
-        if match = /^(a|around|inside)-(.*)/.exec(name)?.slice(1, 3) ? null
+        if match = /^(a|inner)-(.*)/.exec(name)?.slice(1, 3) ? null
           # Mapping command name to TextObject
-          inclusive = match[0] in ['a', 'around']
+          inclusive = match[0] is 'a'
           klass = _.capitalize(_.camelize(match[1]))
         else
           klass = _.capitalize(_.camelize(name))
@@ -163,21 +163,21 @@ class VimState
     ]
 
     @registerOperationCommands TextObject, [
-      'inside-word'           , 'a-word'
-      'inside-whole-word'     , 'a-whole-word'
-      'inside-double-quotes'  , 'around-double-quotes'
-      'inside-single-quotes'  , 'around-single-quotes'
-      'inside-back-ticks'     , 'around-back-ticks'
-      'inside-paragraph'      , 'around-paragraph'
-      'inside-curly-brackets' , 'around-curly-brackets'
-      'inside-angle-brackets' , 'around-angle-brackets'
-      'inside-square-brackets', 'around-square-brackets'
-      'inside-parentheses'    , 'around-parentheses'
-      'inside-tags'           , # 'around-tags'
-      'inside-comment'        , 'around-comment'
-      'inside-indentation'    , 'around-indentation'
-      'inside-current-line'   , 'around-current-line'
-      'inside-entire'         , 'around-entire'
+      'inner-word'           , 'a-word'
+      'inner-whole-word'     , 'a-whole-word'
+      'inner-double-quotes'  , 'a-double-quotes'
+      'inner-single-quotes'  , 'a-single-quotes'
+      'inner-back-ticks'     , 'a-back-ticks'
+      'inner-paragraph'      , 'a-paragraph'
+      'inner-curly-brackets' , 'a-curly-brackets'
+      'inner-angle-brackets' , 'a-angle-brackets'
+      'inner-square-brackets', 'a-square-brackets'
+      'inner-parentheses'    , 'a-parentheses'
+      'inner-tags'           , # 'a-tags'
+      'inner-comment'        , 'a-comment'
+      'inner-indentation'    , 'a-indentation'
+      'inner-current-line'   , 'a-current-line'
+      'inner-entire'         , 'a-entire'
     ]
 
     @registerOperationCommands Motion, [
@@ -225,6 +225,7 @@ class VimState
       'repeat', 'mark', 'replace',
       'replace-with-register'
       'toggle-line-comments'
+      'operate-on-inner-word'
     ]
 
     @registerOperationCommands Scroll, [
