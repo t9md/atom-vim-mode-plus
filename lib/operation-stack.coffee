@@ -33,10 +33,7 @@ class OperationStack
   process: ->
     debug '-> @process(): start'
 
-    if @stack.length > 2
-      throw 'Must not happen'
-
-    if @stack.length is 2
+    while @stack.length > 1
       try
         op = @pop()
         debug "-> <#{@peekTop().getKind()}>.compose(<#{op.getKind()}>)"
