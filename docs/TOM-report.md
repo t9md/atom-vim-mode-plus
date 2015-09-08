@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-09-07T02:05:50.389Z*
+*generated at 2015-09-08T08:30:33.845Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -99,7 +99,7 @@ vim-mode version: 0.57.0
         - [DeleteSurround](#deletesurround--surround)
           - [ChangeSurround](#changesurround--deletesurround)
       - [ToggleCase](#togglecase--transformstring)
-        - [ToggleCaseNow](#togglecasenow--togglecase)
+        - [ToggleCaseAndMoveRight](#togglecaseandmoveright--togglecase)
       - [UpperCase](#uppercase--transformstring)
     - [Yank](#yank--operator)
       - [YankLine](#yankline--yank)
@@ -153,6 +153,50 @@ vim-mode version: 0.57.0
 - ::isCanceled`()`
 - ::cancel`()`
 - ::isOperationAbortedError`()`
+- ::isOperatorError`()`
+- ::isOperator`()`
+- ::isSelect`()`
+- ::isDelete`()`
+- ::isDeleteRight`()`
+- ::isDeleteLeft`()`
+- ::isDeleteToLastCharacterOfLine`()`
+- ::isTransformString`()`
+- ::isToggleCase`()`
+- ::isToggleCaseAndMoveRight`()`
+- ::isUpperCase`()`
+- ::isLowerCase`()`
+- ::isCamelCase`()`
+- ::isSnakeCase`()`
+- ::isDashCase`()`
+- ::isSurround`()`
+- ::isDeleteSurround`()`
+- ::isChangeSurround`()`
+- ::isYank`()`
+- ::isYankLine`()`
+- ::isJoin`()`
+- ::isRepeat`()`
+- ::isMark`()`
+- ::isIncrease`()`
+- ::isDecrease`()`
+- ::isIndent`()`
+- ::isOutdent`()`
+- ::isAutoIndent`()`
+- ::isPutBefore`()`
+- ::isPutAfter`()`
+- ::isReplaceWithRegister`()`
+- ::isToggleLineComments`()`
+- ::isInsert`()`
+- ::isReplaceMode`()`
+- ::isInsertAfter`()`
+- ::isInsertAfterEndOfLine`()`
+- ::isInsertAtBeginningOfLine`()`
+- ::isInsertAboveWithNewline`()`
+- ::isInsertBelowWithNewline`()`
+- ::isChange`()`
+- ::isSubstitute`()`
+- ::isSubstituteLine`()`
+- ::isChangeToLastCharacterOfLine`()`
+- ::isReplace`()`
 - ::isMotion`()`
 - ::isCurrentSelection`()`
 - ::isMoveLeft`()`
@@ -203,50 +247,6 @@ vim-mode version: 0.57.0
 - ::isRepeatSearch`()`
 - ::isRepeatSearchBackwards`()`
 - ::isBracketMatchingMotion`()`
-- ::isOperatorError`()`
-- ::isOperator`()`
-- ::isSelect`()`
-- ::isDelete`()`
-- ::isDeleteRight`()`
-- ::isDeleteLeft`()`
-- ::isDeleteToLastCharacterOfLine`()`
-- ::isTransformString`()`
-- ::isToggleCase`()`
-- ::isToggleCaseNow`()`
-- ::isUpperCase`()`
-- ::isLowerCase`()`
-- ::isCamelCase`()`
-- ::isSnakeCase`()`
-- ::isDashCase`()`
-- ::isSurround`()`
-- ::isDeleteSurround`()`
-- ::isChangeSurround`()`
-- ::isYank`()`
-- ::isYankLine`()`
-- ::isJoin`()`
-- ::isRepeat`()`
-- ::isMark`()`
-- ::isIncrease`()`
-- ::isDecrease`()`
-- ::isIndent`()`
-- ::isOutdent`()`
-- ::isAutoIndent`()`
-- ::isPutBefore`()`
-- ::isPutAfter`()`
-- ::isReplaceWithRegister`()`
-- ::isToggleLineComments`()`
-- ::isInsert`()`
-- ::isReplaceMode`()`
-- ::isInsertAfter`()`
-- ::isInsertAfterEndOfLine`()`
-- ::isInsertAtBeginningOfLine`()`
-- ::isInsertAboveWithNewline`()`
-- ::isInsertBelowWithNewline`()`
-- ::isChange`()`
-- ::isSubstitute`()`
-- ::isSubstituteLine`()`
-- ::isChangeToLastCharacterOfLine`()`
-- ::isReplace`()`
 - ::isTextObject`()`
 - ::isWord`()`
 - ::isWholeWord`()`
@@ -341,6 +341,7 @@ vim-mode version: 0.57.0
 - ::reverse: ```false```
 - ::offset: ```0```
 - ::hoverText: ```':mag_right:'```
+- ::hoverIcon: ```':find:'```
 - ::requireInput: ```true```: **Overridden**
 - ::match`(cursor, count)`
 - ::moveCursor`(cursor)`
@@ -351,6 +352,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>F</kbd>
 - ::backwards: ```true```: **Overridden**
 - ::hoverText: ```':mag:'```: **Overridden**
+- ::hoverIcon: ```':find:'```: **Overridden**
 
 ### RepeatFind < Find
 - command: `vim-mode:repeat-find`
@@ -568,8 +570,9 @@ vim-mode version: 0.57.0
 - ::operatesInclusively: ```false```: **Overridden**
 - ::operatesLinewise: ```true```: **Overridden**
 - ::complete: ```false```: **Overridden**
-- ::hoverText: ```':round_pushpin:\''```
 - ::requireInput: ```true```: **Overridden**
+- ::hoverText: ```':round_pushpin:\''```
+- ::hoverIcon: ```':move-to-mark:\''```
 - ::isLinewise`()`: **Overridden**
 - ::moveCursor`(cursor)`
 
@@ -579,6 +582,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>\`</kbd>
 - ::operatesLinewise: ```false```: **Overridden**
 - ::hoverText: ```':round_pushpin:`'```: **Overridden**
+- ::hoverIcon: ```':move-to-mark:'```: **Overridden**
 
 ### MoveToNextParagraph < Motion
 - command: `vim-mode:move-to-next-paragraph`
@@ -725,6 +729,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode.visual-mode: <kbd>x</kbd>
 - ::linewiseAlias: ```true```: **Overridden**
 - ::hoverText: ```':scissors:'```
+- ::hoverIcon: ```':delete:'```
 - ::execute`()`
 
 ### DeleteLeft < Delete
@@ -767,6 +772,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>></kbd>
 - ::linewiseAlias: ```true```: **Overridden**
 - ::hoverText: ```':point_right:'```
+- ::hoverIcon: ```':indent:'```
 - ::execute`()`
 - ::indent`()`
 
@@ -776,6 +782,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>=</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>=</kbd>
 - ::hoverText: ```':open_hands:'```: **Overridden**
+- ::hoverIcon: ```':auto-indent:'```: **Overridden**
 - ::indent`()`: **Overridden**
 
 ### Outdent < Indent
@@ -784,6 +791,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd><</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd><</kbd>
 - ::hoverText: ```':point_left:'```: **Overridden**
+- ::hoverIcon: ```':outdent:'```: **Overridden**
 - ::indent`()`: **Overridden**
 
 ### Insert < Operator
@@ -878,6 +886,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>m</kbd>
 - ::constructor`()`: `super`: **Overridden**
 - ::hoverText: ```':round_pushpin:'```
+- ::hoverIcon: ```':mark:'```
 - ::requireInput: ```true```: **Overridden**
 - ::execute`()`
 
@@ -918,6 +927,7 @@ vim-mode version: 0.57.0
 ### ReplaceWithRegister < Operator
 - command: `vim-mode:replace-with-register`
 - ::hoverText: ```':pencil:'```
+- ::hoverIcon: ```':replace-with-register:'```
 - ::execute`()`
 
 ### Select < Operator
@@ -928,6 +938,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g /</kbd>
 - ::hoverText: ```':mute:'```
+- ::hoverIcon: ```':toggle-line-comment:'```
 - ::execute`()`
 
 ### TransformString < Operator
@@ -941,6 +952,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g c</kbd>
 - ::hoverText: ```':camel:'```
+- ::hoverIcon: ```':camel-case:'```
 - ::getNewText`(text)`
 
 ### DashCase < TransformString
@@ -948,6 +960,7 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g -</kbd>
 - ::hoverText: ```':dash:'```
+- ::hoverIcon: ```':dash-case:'```
 - ::getNewText`(text)`
 
 ### LowerCase < TransformString
@@ -957,11 +970,13 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>u</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>g u</kbd>
 - ::hoverText: ```':point_down:'```
+- ::hoverIcon: ```':lower-case:'```
 - ::getNewText`(text)`
 
 ### SnakeCase < TransformString
 - command: `vim-mode:snake-case`
 - ::hoverText: ```':snake:'```
+- ::hoverIcon: ```':snake-case:'```
 - ::getNewText`(text)`
 
 ### Surround < TransformString
@@ -973,6 +988,7 @@ vim-mode version: 0.57.0
 - ::input: ```null```
 - ::charsMax: ```1```
 - ::hoverText: ```':two_women_holding_hands:'```
+- ::hoverIcon: ```':surround:'```
 - ::requireInput: ```true```: **Overridden**
 - ::onDidGetInput`(@input)`
 - ::getPair`(input)`
@@ -1002,15 +1018,17 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>~</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>g ~</kbd>
 - ::hoverText: ```':clap:'```
+- ::hoverIcon: ```':toggle-case:'```
 - ::toggleCase`(char)`
 - ::getNewText`(text)`
 
-### ToggleCaseNow < ToggleCase
-- command: `vim-mode:toggle-case-now`
+### ToggleCaseAndMoveRight < ToggleCase
+- command: `vim-mode:toggle-case-and-move-right`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>~</kbd>
 - ::constructor`()`: `super`: **Overridden**
 - ::hoverText: ```null```: **Overridden**
+- ::hoverIcon: ```null```: **Overridden**
 - ::adjustCursor: ```false```: **Overridden**
 
 ### UpperCase < TransformString
@@ -1020,6 +1038,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>U</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>g U</kbd>
 - ::hoverText: ```':point_up:'```
+- ::hoverIcon: ```':upper-case:'```
 - ::getNewText`(text)`
 
 ### Yank < Operator
@@ -1029,6 +1048,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>y</kbd>
 - ::linewiseAlias: ```true```: **Overridden**
 - ::hoverText: ```':clipboard:'```
+- ::hoverIcon: ```':yank:'```
 - ::execute`()`
 
 ### YankLine < Yank

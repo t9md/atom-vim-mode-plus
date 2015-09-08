@@ -216,7 +216,7 @@ class VimState
       'change', 'change-to-last-character-of-line',
       'yank', 'yank-line',
       'put-after', 'put-before',
-      'upper-case', 'lower-case', 'toggle-case', 'toggle-case-now',
+      'upper-case', 'lower-case', 'toggle-case', 'toggle-case-and-move-right',
       'camel-case', 'snake-case', 'dash-case',
       'surround', 'delete-surround', 'change-surround',
       'join',
