@@ -24,24 +24,20 @@ module.exports = new ScopedConfig 'vim-mode',
     order: 3
     type: 'boolean'
     default: false
-  useClipboardAsDefaultRegister:
+  swapZeroWithHat:
     order: 4
     type: 'boolean'
     default: false
-  numberRegex:
+    description: 'swap behavior of `0` with `^` without losing "set-count 0" behavior of 0 keystroke.'
+  useClipboardAsDefaultRegister:
     order: 5
+    type: 'boolean'
+    default: false
+  numberRegex:
+    order: 6
     type: 'string'
     default: '-?[0-9]+'
     description: 'Use this to control how Ctrl-A/Ctrl-X finds numbers; use "(?:\\B-)?[0-9]+" to treat numbers as positive if the minus is preceded by a character, e.g. in "identifier-1".'
-  debug:
-    order: 6
-    type: 'boolean'
-    default: false
-  debugOutput:
-    order: 7
-    type: 'string'
-    default: 'console'
-    enum: ['console', 'file']
   flashOnOperate:
     order: 8
     type: 'boolean'
@@ -69,3 +65,12 @@ module.exports = new ScopedConfig 'vim-mode',
     type: 'string'
     default: 'emoji'
     enum: ['emoji', 'icon']
+  debug:
+    order: 100
+    type: 'boolean'
+    default: false
+  debugOutput:
+    order: 102
+    type: 'string'
+    default: 'console'
+    enum: ['console', 'file']
