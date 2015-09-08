@@ -29,6 +29,9 @@ class Operator extends Base
   constructor: ->
     super
     #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
+    if @isSameOperatorRepeated()
+      @vimState.operationStack.push @new('MoveToRelativeLine')
+      @abort()
 
   # target - TextObject or Motion to operate on.
   compose: (target) ->
@@ -83,7 +86,7 @@ class Operator extends Base
       type: 'highlight'
       class: 'vim-mode-flash'
 
-    setTimeout  =>
+    setTimeout  ->
       marker.destroy()
     , settings.get('flashOnOperateDurationMilliSeconds')
 
@@ -100,7 +103,7 @@ class Operator extends Base
         class: 'vim-mode-flash'
 
     # Ensure destroy all marker
-    setTimeout  =>
+    setTimeout  ->
       marker.destroy() for __, marker of markerBySelections
     , settings.get('flashOnOperateDurationMilliSeconds')
 
@@ -108,6 +111,33 @@ class Select extends Operator
   @extend()
   execute: ->
     @target.select @getCount()
+
+# [VERY EXPERIMENTAL DONT USE THIS]
+class OperateOnInnerWord extends Operator
+  @extend()
+
+  constructor: ->
+    super
+    @new('Word').select()
+    unless @vimState.isVisualMode()
+      @vimState.activateVisualMode()
+
+  compose: (target) ->
+    if target.isCurrentSelection()
+      return
+
+    unless target.isOperator()
+      @vimState.emitter.emit('failed-to-compose')
+      throw new OperatorError("Failed to compose #{@getKind()} with #{target.getKind()}")
+    @operator = target
+    @complete = true
+
+  execute: ->
+    if @editor.getLastSelection().isEmpty()
+      @operator.compose @new('Word')
+    else
+      @operator.compose @new('CurrentSelection')
+    @operator.execute()
 
 class Delete extends Operator
   @extend()
@@ -240,7 +270,7 @@ class Surround extends TransformString
     @vimState.operationStack.process()
 
   getPair: (input) ->
-    pair = _.detect @pairs, (pair) => input in pair
+    pair = _.detect @pairs, (pair) -> input in pair
     pair ?= input+input
 
   surround: (text, pair) ->
@@ -751,4 +781,6 @@ module.exports = {
 
   ReplaceWithRegister
   ToggleLineComments
+
+  OperateOnInnerWord
 }
