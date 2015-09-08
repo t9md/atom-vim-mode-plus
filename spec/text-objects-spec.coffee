@@ -524,7 +524,51 @@ describe "TextObject", ->
         vim.ensure 'vai',
           selectedBufferRange: [[10, 0], [27, 0]]
 
-  # [TODO]
   describe 'the "current-line" text object', ->
-  # [TODO]
+    beforeEach ->
+      set
+        text: """
+          This is
+            multi line
+          text
+          """
+
+    describe 'select inside line', ->
+      it 'select current line without including last newline', ->
+        set cursor: [0, 0]
+        ensure 'vil', selectedText: 'This is'
+
+      it 'also skip leading white space', ->
+        set cursor: [1, 0]
+        ensure 'vil', selectedText: 'multi line'
+
+    describe 'select around line', ->
+      it 'select current line without including last newline as like `vil`', ->
+        set cursor: [0, 0]
+        ensure 'val', selectedText: 'This is'
+
+      it 'wont skip leading white space not like `vil`', ->
+        set cursor: [1, 0]
+        ensure 'val', selectedText: '  multi line'
+
   describe 'the "entire" text object', ->
+    text = null
+    beforeEach ->
+      text = """
+        This is
+          multi line
+        text
+        """
+      set {text}
+    describe 'select inside/around(same behavior) entire buffer', ->
+      it 'select entire buffer', ->
+        set cursor: [0, 0]
+        ensure 'escape', selectedText: ''
+        ensure 'vie', selectedText: text
+        ensure 'escape', selectedText: ''
+        ensure 'jjvie', selectedText: text
+
+        ensure 'escape', selectedText: ''
+        ensure 'vae', selectedText: text
+        ensure 'escape', selectedText: ''
+        ensure 'jjvae', selectedText: text
