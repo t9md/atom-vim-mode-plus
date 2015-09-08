@@ -20,13 +20,15 @@ class Operator extends Base
   recodable: true
   linewiseAlias: false
 
+  isSameOperatorRepeated: ->
+    if @linewiseAlias and @vimState.isOperatorPendingMode()
+      @vimState.operationStack.peekTop().constructor is @constructor
+    else
+      false
+
   constructor: ->
     super
     #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
-    if @linewiseAlias and @vimState.isOperatorPendingMode() and
-      @vimState.operationStack.peekTop().constructor is @constructor
-        @vimState.operationStack.push @new('MoveToRelativeLine')
-        @abort()
 
   # target - TextObject or Motion to operate on.
   compose: (target) ->
