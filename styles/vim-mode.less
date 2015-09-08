@@ -150,12 +150,13 @@ atom-text-editor::shadow {
   }
   .vim-mode-cursor-normal .region {
     background-color: @syntax-cursor-color;
-    opacity: 0.5;
+    // background-color: @background-color-success;
+    opacity: 0.8;
   }
   .vim-mode-cursor-insert .region {
     // [FIXME] I want i-bar style cursor for insert-mode.
     background-color: @syntax-cursor-color;
-    opacity: 0.5;
+    opacity: 0.8;
   }
 }
 
@@ -164,5 +165,8 @@ atom-text-editor::shadow {
   background-color: @base-background-color;
   border-radius: @component-border-radius;
   box-shadow: 0 0 10px @syntax-text-color;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
+  margin-left: -0.1em;
   text-align: center;
 }
