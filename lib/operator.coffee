@@ -112,7 +112,7 @@ class Select extends Operator
   execute: ->
     @target.select @getCount()
 
-# [VERY EXPERIMENTAL DONT USE THIS]
+# # [VERY EXPERIMENTAL DONT USE THIS]
 class OperateOnInnerWord extends Operator
   @extend()
 
@@ -144,7 +144,6 @@ class Delete extends Operator
   linewiseAlias: true
   hoverText: ':scissors:'
   hoverIcon: ':delete:'
-  # icon: 'operation-delete'
 
   execute: ->
     if _.any @target.select()
