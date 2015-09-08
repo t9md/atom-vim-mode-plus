@@ -45,7 +45,6 @@ module.exports = new ScopedConfig 'vim-mode',
   flashOnOperate:
     order: 8
     type: 'boolean'
-    default: 'console'
     default: true
   flashOnOperateDurationMilliSeconds:
     order: 9
