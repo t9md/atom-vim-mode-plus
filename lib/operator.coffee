@@ -173,9 +173,7 @@ class ToggleCase extends TransformString
   getNewText: (text) ->
     text.split('').map(@toggleCase).join('')
 
-
-# [TODO] Rename to ToggleCaseAndMoveRight
-class ToggleCaseNow extends ToggleCase
+class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
   hoverText: null
   hoverIcon: null
@@ -718,7 +716,7 @@ module.exports = {
   Indent, Outdent, AutoIndent,
 
   # String transformation
-  ToggleCase, ToggleCaseNow,
+  ToggleCase, ToggleCaseAndMoveRight,
   UpperCase, LowerCase
   CamelCase, SnakeCase, DashCase
   Surround, DeleteSurround, ChangeSurround
