@@ -23,29 +23,28 @@ class Motion extends Base
   @extend()
   complete: true
   recordable: false
-  operatesInclusively: false
-  operatesLinewise: false
+  inclusive: false
+  linewise: false
 
   select: (options) ->
-    value = for selection in @editor.getSelections()
+    for selection in @editor.getSelections()
       if @isLinewise()
         @moveSelectionLinewise(selection, options)
       else if @vimState.mode is 'visual'
         @moveSelectionVisual(selection, options)
-      else if @operatesInclusively
+      else if @inclusive
         @moveSelectionInclusively(selection, options)
       else
         @moveSelection(selection, options)
-      not selection.isEmpty()
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
-    value
+
+    (not s.isEmpty() for s in @editor.getSelections())
 
   execute: ->
-    for cursor in @editor.getCursors()
+    @editor.moveCursors (cursor) =>
       @moveCursor(cursor)
-    @editor.mergeCursors()
 
   moveSelectionLinewise: (selection, options) ->
     selection.modifySelection =>
@@ -134,7 +133,7 @@ class Motion extends Base
     if @vimState.isVisualMode()
       @vimState.submode is 'linewise'
     else
-      @operatesLinewise
+      @linewise
 
 class CurrentSelection extends Motion
   @extend()
@@ -174,7 +173,7 @@ class CurrentSelection extends Motion
 
 class MoveLeft extends Motion
   @extend()
-  # operatesInclusively: false
+  # inclusive: false
 
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
@@ -183,7 +182,7 @@ class MoveLeft extends Motion
 
 class MoveRight extends Motion
   @extend()
-  # operatesInclusively: false
+  # inclusive: false
   composed: false
 
   onDidComposeBy: (operation) ->
@@ -208,7 +207,7 @@ class MoveRight extends Motion
 
 class MoveUp extends Motion
   @extend()
-  operatesLinewise: true
+  linewise: true
 
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
@@ -217,7 +216,7 @@ class MoveUp extends Motion
 
 class MoveDown extends Motion
   @extend()
-  operatesLinewise: true
+  linewise: true
 
   moveCursor: (cursor) ->
     _.times @getCount(1), =>
@@ -281,7 +280,7 @@ class MoveToNextWholeWord extends MoveToNextWord
 class MoveToEndOfWord extends Motion
   @extend()
   wordRegex: null
-  operatesInclusively: true
+  inclusive: true
 
   moveCursor: (cursor) ->
     _.times @getCount(1), =>
@@ -338,7 +337,7 @@ class MoveToBeginningOfLine extends Motion
 
 class MoveToFirstCharacterOfLine extends Motion
   @extend()
-  # operatesInclusively: false
+  # inclusive: false
 
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
@@ -349,7 +348,7 @@ class MoveToFirstCharacterOfLine extends Motion
 class MoveToFirstCharacterOfLineAndDown extends Motion
   @extend()
 
-  operatesLinewise: true
+  linewise: true
 
   moveCursor: (cursor) ->
     _.times (@getCount(0) - 1), ->
@@ -367,7 +366,7 @@ class MoveToLastCharacterOfLine extends Motion
 
 class MoveToLastNonblankCharacterOfLineAndDown extends Motion
   @extend()
-  operatesInclusively: true
+  inclusive: true
 
   # moves cursor to the last non-whitespace character on the line
   # similar to skipLeadingWhitespace() in atom's cursor.coffee
@@ -387,7 +386,7 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
 
 class MoveToFirstCharacterOfLineUp extends Motion
   @extend()
-  operatesLinewise: true
+  linewise: true
 
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
@@ -397,7 +396,7 @@ class MoveToFirstCharacterOfLineUp extends Motion
 
 class MoveToFirstCharacterOfLineDown extends Motion
   @extend()
-  operatesLinewise: true
+  linewise: true
 
   moveCursor: (cursor) ->
     _.times @getCount(1), ->
@@ -408,7 +407,7 @@ class MoveToFirstCharacterOfLineDown extends Motion
 # Not directly used.
 class MoveToLineBase extends Motion
   @extend()
-  operatesLinewise: true
+  linewise: true
 
   getDestinationRow: (count) ->
     if count? then count - 1 else (@editor.getLineCount() - 1)
@@ -435,7 +434,7 @@ class MoveToStartOfFile extends MoveToLineBase
 class MoveToRelativeLine extends MoveToLineBase
   @extend()
   # ??  #783 delete line below accsidentally?
-  operatesLinewise: true
+  linewise: true
 
   moveCursor: (cursor) ->
     {row, column} = cursor.getBufferPosition()
@@ -561,7 +560,7 @@ class Find extends Motion
   hoverText: ':mag_right:'
   hoverIcon: ':find:'
   requireInput: true
-  operatesInclusively: true
+  inclusive: true
 
   constructor: ->
     super
@@ -655,8 +654,8 @@ class TillBackwards extends Till
 # keymap: '
 class MoveToMark extends Motion
   @extend()
-  # operatesInclusively: false
-  operatesLinewise: true
+  # inclusive: false
+  linewise: true
   complete: false
   requireInput: true
   hoverText: ":round_pushpin:'"
@@ -669,7 +668,7 @@ class MoveToMark extends Motion
     @getInput()
 
   isLinewise: ->
-    @operatesLinewise
+    @linewise
 
   moveCursor: (cursor) ->
     markPosition = @vimState.mark.get(@input)
@@ -679,13 +678,13 @@ class MoveToMark extends Motion
       @vimState.mark.set('`', cursor.getBufferPosition())
 
     cursor.setBufferPosition(markPosition) if markPosition?
-    if @operatesLinewise
+    if @linewise
       cursor.moveToFirstCharacterOfLine()
 
 # keymap: `
 class MoveToMarkLiteral extends MoveToMark
   @extend()
-  operatesLinewise: false
+  linewise: false
   hoverText: ":round_pushpin:`"
   hoverIcon: ":move-to-mark:"
   # hoverChar: '`'
@@ -695,7 +694,7 @@ class MoveToMarkLiteral extends MoveToMark
 # class SearchBase extends MotionWithInput
 class SearchBase extends Motion
   @extend()
-  # operatesInclusively: false
+  # inclusive: false
   dontUpdateCurrentSearch: false
   complete: false
 
@@ -871,7 +870,7 @@ class RepeatSearchBackwards extends RepeatSearch
 # keymap: %
 class BracketMatchingMotion extends SearchBase
   @extend()
-  operatesInclusively: true
+  inclusive: true
   complete: true
 
   searchForMatch: (startPosition, reverse, inCharacter, outCharacter) ->
