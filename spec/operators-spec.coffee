@@ -1285,13 +1285,13 @@ describe "Operator", ->
       it "surround text object with ( and repeatable", ->
         ensure ['gss', char: '(', 'iw'],
           text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
-          cursor: [0,0]
+          cursor: [0, 0]
         ensure 'j.',
           text: "(apple)\n(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
       it "surround text object with { and repeatable", ->
         ensure ['gss', char: '{', 'iw'],
           text: "{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
-          cursor: [0,0]
+          cursor: [0, 0]
         ensure 'j.',
           text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
     describe 'delete surround', ->

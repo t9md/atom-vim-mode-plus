@@ -110,7 +110,7 @@ class Operator extends Base
 class Select extends Operator
   @extend()
   execute: ->
-    @target.select @getCount()
+    @target.select()
 
 # # [VERY EXPERIMENTAL DONT USE THIS]
 class OperateOnInnerWord extends Operator
@@ -310,7 +310,7 @@ class Yank extends Operator
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
     if _.any @target.select()
-      @withFlashing =>
+      @withFlashing ->
       @setTextToRegister @editor.getSelectedText()
       for selection in @editor.getSelections()
         point = points?.shift() ? selection.getBufferRange().start
