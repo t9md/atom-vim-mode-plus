@@ -1,6 +1,4 @@
 # Refactoring status: 20%
-
-
 # [TODO]
 # #774
 # #783
@@ -25,28 +23,27 @@ class Motion extends Base
   recordable: false
   inclusive: false
   linewise: false
+  defaultCount: 1
 
   select: (options) ->
     for selection in @editor.getSelections()
-      if @isLinewise()
-        @moveSelectionLinewise(selection, options)
-      else if @vimState.mode is 'visual'
-        @moveSelectionVisual(selection, options)
-      else if @inclusive
-        @moveSelectionInclusively(selection, options)
-      else
-        @moveSelection(selection, options)
+      # FIXME: Order is important maybe
+      switch
+        when @isLinewise() then @selectLinewise(selection, options)
+        when @vimState.isVisualMode() then @selectVisual(selection, options)
+        when @inclusive then @selectInclusive(selection, options)
+        else
+          @moveSelection(selection, options)
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
-
     (not s.isEmpty() for s in @editor.getSelections())
 
   execute: ->
     @editor.moveCursors (cursor) =>
       @moveCursor(cursor)
 
-  moveSelectionLinewise: (selection, options) ->
+  selectLinewise: (selection, options) ->
     selection.modifySelection =>
       [oldStartRow, oldEndRow] = selection.getBufferRowRange()
 
@@ -71,8 +68,8 @@ class Motion extends Base
 
       selection.setBufferRange([[newStartRow, 0], [newEndRow + 1, 0]])
 
-  moveSelectionInclusively: (selection, options) ->
-    return @moveSelectionVisual(selection, options) unless selection.isEmpty()
+  selectInclusive: (selection, options) ->
+    return @selectVisual(selection, options) unless selection.isEmpty()
 
     selection.modifySelection =>
       @moveCursor(selection.cursor, options)
@@ -86,7 +83,7 @@ class Motion extends Base
         # for forward motion, add the ending character of the motion
         selection.cursor.moveRight()
 
-  moveSelectionVisual: (selection, options) ->
+  selectVisual: (selection, options) ->
     selection.modifySelection =>
       range = selection.getBufferRange()
       [oldStart, oldEnd] = [range.start, range.end]
@@ -135,6 +132,10 @@ class Motion extends Base
     else
       @linewise
 
+  countTimes: (fn) ->
+    _.times @getCount(@defaultCount), ->
+      fn()
+
 class CurrentSelection extends Motion
   @extend()
   constructor: ->
@@ -143,7 +144,7 @@ class CurrentSelection extends Motion
     @wasLinewise = @isLinewise()
 
   execute: ->
-    _.times(@getCount(1), -> true)
+    @countTimes -> true
 
   select: (count=1) ->
     # in visual mode, the current selections are already there
@@ -153,8 +154,7 @@ class CurrentSelection extends Motion
         @selectLines()
       else
         @selectCharacters()
-
-    _.times(@getCount(1), -> true)
+    @countTimes -> true
 
   selectLines: ->
     lastSelectionExtent = @lastSelectionRange.getExtent()
@@ -171,18 +171,46 @@ class CurrentSelection extends Motion
       selection.setBufferRange([start, newEnd])
     return
 
+  isAtBoL: (cursor) ->
+    cursor.isAtBeginningOfLine()
+
+  isAtEOL: (cursor) ->
+    cursor.isAtEndOfLine()
+
+  isAtEoF: (cursor) ->
+    point = cursor.getBufferPosition()
+    eof = cursor.getEofBufferPosition()
+    point.isEqual eof
+
+  isAtBoF: (cursor) ->
+    point = cursor.getBufferPosition()
+    bof = Point.ZERO
+    point.isEqual bof
+
+  getLastScreenRow: ->
+    @editor.getLastScreenRow()
+
+  getLastBufferRow: ->
+    @editor.getLastBufferRow()
+
+  lineTextForBufferRow: (bufferRow) ->
+    @editor.lineTextForBufferRow(bufferRow)
+
+  bufferRangeForBufferRow: (bufferRow) ->
+    @editor.bufferRangeForBufferRow(bufferRow)
+
+  getEofBufferPosition: ->
+    @editor.getEofBufferPosition()
+
 class MoveLeft extends Motion
   @extend()
-  # inclusive: false
-
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       if not cursor.isAtBeginningOfLine() or settings.get('wrapLeftRightMotion')
         cursor.moveLeft()
 
 class MoveRight extends Motion
   @extend()
-  # inclusive: false
   composed: false
 
   onDidComposeBy: (operation) ->
@@ -194,7 +222,7 @@ class MoveRight extends Motion
     @vimState.isOperatorPendingMode() or @composed
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), =>
+    @countTimes =>
       wrapToNextLine = settings.get('wrapLeftRightMotion')
 
       # when the motion is combined with an operator, we will only wrap to the next line
@@ -210,7 +238,7 @@ class MoveUp extends Motion
   linewise: true
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       unless cursor.getScreenRow() is 0
         cursor.moveUp()
 
@@ -219,20 +247,20 @@ class MoveDown extends Motion
   linewise: true
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), =>
+    @countTimes =>
       unless cursor.getScreenRow() is @editor.getLastScreenRow()
         cursor.moveDown()
 
 class MoveToPreviousWord extends Motion
   @extend()
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       cursor.moveToBeginningOfWord()
 
 class MoveToPreviousWholeWord extends Motion
   @extend()
   moveCursor: (cursor) ->
-    _.times @getCount(1), =>
+    @countTimes =>
       cursor.moveToBeginningOfWord()
       while not @isWholeWord(cursor) and not @isAtBeginningOfFile(cursor)
         cursor.moveToBeginningOfWord()
@@ -249,7 +277,7 @@ class MoveToNextWord extends Motion
   wordRegex: null
 
   moveCursor: (cursor, options) ->
-    _.times @getCount(1), =>
+    @countTimes =>
       current = cursor.getBufferPosition()
 
       next = if options?.excludeWhitespace
@@ -283,7 +311,7 @@ class MoveToEndOfWord extends Motion
   inclusive: true
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), =>
+    @countTimes =>
       current = cursor.getBufferPosition()
 
       next = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
@@ -308,13 +336,13 @@ class MoveToNextParagraph extends Motion
   @extend()
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       cursor.moveToBeginningOfNextParagraph()
 
 class MoveToPreviousParagraph extends Motion
   @extend()
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       cursor.moveToBeginningOfPreviousParagraph()
 
 class MoveToBeginningOfLine extends Motion
@@ -330,37 +358,40 @@ class MoveToBeginningOfLine extends Motion
       @abort()
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       cursor.moveToBeginningOfLine()
       if settings.get('swapZeroWithHat')
         cursor.moveToFirstCharacterOfLine()
 
 class MoveToFirstCharacterOfLine extends Motion
   @extend()
-  # inclusive: false
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       cursor.moveToBeginningOfLine()
       unless settings.get('swapZeroWithHat')
         cursor.moveToFirstCharacterOfLine()
 
 class MoveToFirstCharacterOfLineAndDown extends Motion
   @extend()
-
   linewise: true
+  defaultCount: 0
+
+  getCount: ->
+    super - 1
 
   moveCursor: (cursor) ->
-    _.times (@getCount(0) - 1), ->
+    @countTimes ->
       cursor.moveDown()
     cursor.moveToBeginningOfLine()
     cursor.moveToFirstCharacterOfLine()
 
 class MoveToLastCharacterOfLine extends Motion
   @extend()
+  defaultCount: 1
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       cursor.moveToEndOfLine()
       cursor.goalColumn = Infinity
 
@@ -379,8 +410,11 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
       startOfTrailingWhitespace.column -= 1
     cursor.setBufferPosition(startOfTrailingWhitespace)
 
+  getCount: ->
+    super - 1
+
   moveCursor: (cursor) ->
-    _.times (@getCount(1) - 1), ->
+    @countTimes ->
       cursor.moveDown()
     @skipTrailingWhitespace(cursor)
 
@@ -389,7 +423,7 @@ class MoveToFirstCharacterOfLineUp extends Motion
   linewise: true
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       cursor.moveUp()
     cursor.moveToBeginningOfLine()
     cursor.moveToFirstCharacterOfLine()
@@ -399,7 +433,7 @@ class MoveToFirstCharacterOfLineDown extends Motion
   linewise: true
 
   moveCursor: (cursor) ->
-    _.times @getCount(1), ->
+    @countTimes ->
       cursor.moveDown()
     cursor.moveToBeginningOfLine()
     cursor.moveToFirstCharacterOfLine()
@@ -638,7 +672,7 @@ class Till extends Find
       @selectAtLeastOne = true
     retval
 
-  moveSelectionInclusively: (selection, options) ->
+  selectInclusive: (selection, options) ->
     super
     if selection.isEmpty() and @selectAtLeastOne
       selection.modifySelection ->
@@ -654,7 +688,6 @@ class TillBackwards extends Till
 # keymap: '
 class MoveToMark extends Motion
   @extend()
-  # inclusive: false
   linewise: true
   complete: false
   requireInput: true
@@ -694,7 +727,6 @@ class MoveToMarkLiteral extends MoveToMark
 # class SearchBase extends MotionWithInput
 class SearchBase extends Motion
   @extend()
-  # inclusive: false
   dontUpdateCurrentSearch: false
   complete: false
 
