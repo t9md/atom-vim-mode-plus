@@ -136,6 +136,28 @@ class Motion extends Base
     _.times @getCount(@defaultCount), ->
       fn()
 
+  isAt: (cursor, where) ->
+    switch where
+      when 'BoL' then cursor.isAtBeginningOfLine()
+      when 'EoL' then cursor.isAtEndOfLine()
+      when 'EoF' then cursor.getEofBufferPosition().isEqual(@editor.getEofBufferPosition())
+      when 'BoF' then cursor.getEofBufferPosition().isEqual(Point.ZERO)
+
+  getLastScreenRow: ->
+    @editor.getLastScreenRow()
+
+  getLastBufferRow: ->
+    @editor.getLastBufferRow()
+
+  lineTextForBufferRow: (bufferRow) ->
+    @editor.lineTextForBufferRow(bufferRow)
+
+  bufferRangeForBufferRow: (bufferRow) ->
+    @editor.bufferRangeForBufferRow(bufferRow)
+
+  getEofBufferPosition: ->
+    @editor.getEofBufferPosition()
+
 class CurrentSelection extends Motion
   @extend()
   constructor: ->
@@ -170,37 +192,6 @@ class CurrentSelection extends Motion
       newEnd = start.traverse(lastSelectionExtent)
       selection.setBufferRange([start, newEnd])
     return
-
-  isAtBoL: (cursor) ->
-    cursor.isAtBeginningOfLine()
-
-  isAtEOL: (cursor) ->
-    cursor.isAtEndOfLine()
-
-  isAtEoF: (cursor) ->
-    point = cursor.getBufferPosition()
-    eof = cursor.getEofBufferPosition()
-    point.isEqual eof
-
-  isAtBoF: (cursor) ->
-    point = cursor.getBufferPosition()
-    bof = Point.ZERO
-    point.isEqual bof
-
-  getLastScreenRow: ->
-    @editor.getLastScreenRow()
-
-  getLastBufferRow: ->
-    @editor.getLastBufferRow()
-
-  lineTextForBufferRow: (bufferRow) ->
-    @editor.lineTextForBufferRow(bufferRow)
-
-  bufferRangeForBufferRow: (bufferRow) ->
-    @editor.bufferRangeForBufferRow(bufferRow)
-
-  getEofBufferPosition: ->
-    @editor.getEofBufferPosition()
 
 class MoveLeft extends Motion
   @extend()
