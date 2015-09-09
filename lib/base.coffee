@@ -4,7 +4,6 @@ _ = require 'underscore-plus'
 settings = require './settings'
 
 class Base
-  pure: false
   complete: null
   recodable: null
   requireInput: false
@@ -18,9 +17,6 @@ class Base
           when 'emoji' then @hoverText if @hoverText?
           when 'icon'  then @hoverIcon if @hoverIcon?
       @vimState.hover.add hover if hover?
-
-  isPure: ->
-    @pure
 
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
