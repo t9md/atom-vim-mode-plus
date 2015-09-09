@@ -136,12 +136,12 @@ class Motion extends Base
     _.times @getCount(@defaultCount), ->
       fn()
 
-  isAt: (cursor, where) ->
+  at: (where, cursor) ->
     switch where
-      when 'BoL' then cursor.isAtBeginningOfLine()
-      when 'EoL' then cursor.isAtEndOfLine()
-      when 'EoF' then cursor.getEofBufferPosition().isEqual(@editor.getEofBufferPosition())
-      when 'BoF' then cursor.getEofBufferPosition().isEqual(Point.ZERO)
+      when 'BOL' then cursor.isAtBeginningOfLine()
+      when 'EOL' then cursor.isAtEndOfLine()
+      when 'BOF' then cursor.getBufferPosition().isEqual(Point.ZERO)
+      when 'EOF' then cursor.getBufferPosition().isEqual(@editor.getEofBufferPosition())
 
   getLastScreenRow: ->
     @editor.getLastScreenRow()
@@ -196,8 +196,8 @@ class CurrentSelection extends Motion
 class MoveLeft extends Motion
   @extend()
   moveCursor: (cursor) ->
-    @countTimes ->
-      if not cursor.isAtBeginningOfLine() or settings.get('wrapLeftRightMotion')
+    @countTimes =>
+      if not @at('BOL', cursor) or settings.get('wrapLeftRightMotion')
         cursor.moveLeft()
 
 class MoveRight extends Motion
@@ -218,11 +218,11 @@ class MoveRight extends Motion
 
       # when the motion is combined with an operator, we will only wrap to the next line
       # if we are already at the end of the line (after the last character)
-      if @isOperatorPending() and not cursor.isAtEndOfLine()
+      if @isOperatorPending() and not @at('EOL', cursor)
         wrapToNextLine = false
 
-      cursor.moveRight() unless cursor.isAtEndOfLine()
-      cursor.moveRight() if wrapToNextLine and cursor.isAtEndOfLine()
+      cursor.moveRight() unless @at('EOL', cursor)
+      cursor.moveRight() if wrapToNextLine and @at('EOL', cursor)
 
 class MoveUp extends Motion
   @extend()
@@ -253,15 +253,12 @@ class MoveToPreviousWholeWord extends Motion
   moveCursor: (cursor) ->
     @countTimes =>
       cursor.moveToBeginningOfWord()
-      while not @isWholeWord(cursor) and not @isAtBeginningOfFile(cursor)
+      while not @isWholeWord(cursor) and not @at('BOF', cursor)
         cursor.moveToBeginningOfWord()
 
   isWholeWord: (cursor) ->
     char = cursor.getCurrentWordPrefix().slice(-1)
     AllWhitespace.test(char)
-
-  isAtBeginningOfFile: (cursor) ->
-    cursor.getBufferPosition().isEqual(Point.ZERO)
 
 class MoveToNextWord extends Motion
   @extend()
@@ -276,9 +273,9 @@ class MoveToNextWord extends Motion
       else
         cursor.getBeginningOfNextWordBufferPosition(wordRegex: @wordRegex)
 
-      return if @isEndOfFile(cursor)
+      return if @at('EOF', cursor)
 
-      if cursor.isAtEndOfLine()
+      if @at('EOL', cursor)
         cursor.moveDown()
         cursor.moveToBeginningOfLine()
         cursor.skipLeadingWhitespace()
@@ -286,11 +283,6 @@ class MoveToNextWord extends Motion
         cursor.moveToEndOfWord()
       else
         cursor.setBufferPosition(next)
-
-  isEndOfFile: (cursor) ->
-    cur = cursor.getBufferPosition()
-    eof = @editor.getEofBufferPosition()
-    cur.row is eof.row and cur.column is eof.column
 
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
@@ -310,7 +302,7 @@ class MoveToEndOfWord extends Motion
 
       if next.isEqual(current)
         cursor.moveRight()
-        if cursor.isAtEndOfLine()
+        if @at('EOL', cursor)
           cursor.moveDown()
           cursor.moveToBeginningOfLine()
 
