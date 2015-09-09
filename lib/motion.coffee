@@ -142,12 +142,10 @@ class Motion extends Base
       when 'EOL' then cursor.isAtEndOfLine()
       when 'BOF' then cursor.getBufferPosition().isEqual(Point.ZERO)
       when 'EOF' then cursor.getBufferPosition().isEqual(@editor.getEofBufferPosition())
-
-  getLastScreenRow: ->
-    @editor.getLastScreenRow()
-
-  getLastBufferRow: ->
-    @editor.getLastBufferRow()
+      when 'FirstScreenRow'
+        cursor.getScreenRow() is 0
+      when 'LastScreenRow'
+        cursor.getScreenRow() is @editor.getLastScreenRow()
 
   lineTextForBufferRow: (bufferRow) ->
     @editor.lineTextForBufferRow(bufferRow)
@@ -168,7 +166,7 @@ class CurrentSelection extends Motion
   execute: ->
     @countTimes -> true
 
-  select: (count=1) ->
+  select: ->
     # in visual mode, the current selections are already there
     # if we're not in visual mode, we are repeating some operation and need to re-do the selections
     unless @vimState.isVisualMode()
@@ -179,19 +177,17 @@ class CurrentSelection extends Motion
     @countTimes -> true
 
   selectLines: ->
-    lastSelectionExtent = @lastSelectionRange.getExtent()
+    extent = @lastSelectionRange.getExtent()
     for selection in @editor.getSelections()
-      cursor = selection.cursor.getBufferPosition()
-      selection.setBufferRange [[cursor.row, 0], [cursor.row + lastSelectionExtent.row, 0]]
-    return
+      row = selection.cursor.getBufferRow()
+      selection.setBufferRange [[row, 0], [row + extent.row, 0]]
 
   selectCharacters: ->
-    lastSelectionExtent = @lastSelectionRange.getExtent()
+    extent = @lastSelectionRange.getExtent()
     for selection in @editor.getSelections()
       {start} = selection.getBufferRange()
-      newEnd = start.traverse(lastSelectionExtent)
-      selection.setBufferRange([start, newEnd])
-    return
+      end = start.traverse(extent)
+      selection.setBufferRange([start, end])
 
 class MoveLeft extends Motion
   @extend()
@@ -207,7 +203,8 @@ class MoveRight extends Motion
   onDidComposeBy: (operation) ->
     # Don't save oeration to instance variable to avoid reference before I understand it correctly.
     # Also introspection need to support circular reference detection to stop infinit reflection loop.
-    @composed = true if operation.isOperator()
+    if operation.isOperator()
+      @composed = true
 
   isOperatorPending: ->
     @vimState.isOperatorPendingMode() or @composed
@@ -229,8 +226,8 @@ class MoveUp extends Motion
   linewise: true
 
   moveCursor: (cursor) ->
-    @countTimes ->
-      unless cursor.getScreenRow() is 0
+    @countTimes =>
+      unless @at('FirstScreenRow', cursor)
         cursor.moveUp()
 
 class MoveDown extends Motion
@@ -239,7 +236,7 @@ class MoveDown extends Motion
 
   moveCursor: (cursor) ->
     @countTimes =>
-      unless cursor.getScreenRow() is @editor.getLastScreenRow()
+      unless @at('LastScreenRow', cursor)
         cursor.moveDown()
 
 class MoveToPreviousWord extends Motion
@@ -279,7 +276,7 @@ class MoveToNextWord extends Motion
         cursor.moveDown()
         cursor.moveToBeginningOfLine()
         cursor.skipLeadingWhitespace()
-      else if current.row is next.row and current.column is next.column
+      else if current.isEqual(next)
         cursor.moveToEndOfWord()
       else
         cursor.setBufferPosition(next)
@@ -295,12 +292,10 @@ class MoveToEndOfWord extends Motion
 
   moveCursor: (cursor) ->
     @countTimes =>
-      current = cursor.getBufferPosition()
-
       next = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
       next.column-- if next.column > 0
 
-      if next.isEqual(current)
+      if next.isEqual(cursor.getBufferPosition())
         cursor.moveRight()
         if @at('EOL', cursor)
           cursor.moveDown()
@@ -427,7 +422,7 @@ class MoveToLineBase extends Motion
   linewise: true
 
   getDestinationRow: (count) ->
-    if count? then count - 1 else (@editor.getLineCount() - 1)
+    if count? then count - 1 else @editor.getBuffer().getLastRow()
 
 # keymap: G
 class MoveToLine extends MoveToLineBase
@@ -463,7 +458,6 @@ class MoveToScreenLine extends MoveToLineBase
   scrolloff: 2
 
   moveCursor: (cursor) ->
-    {row, column} = cursor.getBufferPosition()
     cursor.setScreenPosition([@getDestinationRow(), 0])
 
 # keymap: H
@@ -707,7 +701,6 @@ class MoveToMarkLiteral extends MoveToMark
 
 # Search
 # -------------------------
-# class SearchBase extends MotionWithInput
 class SearchBase extends Motion
   @extend()
   dontUpdateCurrentSearch: false
@@ -836,8 +829,7 @@ class SearchCurrentWord extends SearchBase
 
   cursorIsOnEOF: (cursor) ->
     pos = cursor.getNextWordBoundaryBufferPosition(wordRegex: @keywordRegex)
-    eofPos = @editor.getEofBufferPosition()
-    pos.row is eofPos.row and pos.column is eofPos.column
+    pos.isEqual(@editor.getEofBufferPosition())
 
   getCurrentWordMatch: ->
     characters = @getCurrentWord()
@@ -847,7 +839,8 @@ class SearchCurrentWord extends SearchBase
       characters
 
   execute: ->
-    super() if @input.length > 0
+    if @input.length > 0
+      super
 
 # keymap: #
 class ReverseSearchCurrentWord extends SearchCurrentWord
