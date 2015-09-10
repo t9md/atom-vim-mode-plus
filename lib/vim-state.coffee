@@ -80,8 +80,8 @@ class VimState
         if target is @editorElement
           @checkSelections()
 
-        return unless @isVisualMode() and (@submode is 'characterwise')
-        @showCursor()
+        if @isVisualMode() and (@submode is 'characterwise') and settings.get('showCursorInVisualMode')
+          @showCursor()
 
     @editorElement.classList.add("vim-mode")
     @init()
@@ -287,6 +287,7 @@ class VimState
       cursor.goalColumn = goalColumn
 
   showCursor: ->
+    console.log @editorElement.classList
     for selection in @editor.getSelections()
       {cursor} = selection
       cursorRange = cursor.getScreenRange()

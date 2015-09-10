@@ -38,6 +38,10 @@ module.exports = new ScopedConfig 'vim-mode',
     type: 'string'
     default: '-?[0-9]+'
     description: 'Use this to control how Ctrl-A/Ctrl-X finds numbers; use "(?:\\B-)?[0-9]+" to treat numbers as positive if the minus is preceded by a character, e.g. in "identifier-1".'
+  showCursorInVisualMode:
+    order: 7
+    type: 'boolean'
+    default: true
   flashOnOperate:
     order: 8
     type: 'boolean'
