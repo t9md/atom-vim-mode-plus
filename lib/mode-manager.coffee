@@ -22,6 +22,10 @@ class ModeManager
     for mode in ['normal', 'insert', 'visual', 'operator-pending']
       @editorElement.classList.remove "#{mode}-mode"
     @editorElement.classList.add "#{@mode}-mode"
+    for submode in ['characterwise', 'linewise', 'blockwise']
+      @editorElement.classList.remove submode
+    if @submode
+      @editorElement.classList.add @submode
 
   activateNormalMode: ->
     @deactivateInsertMode()

@@ -80,7 +80,8 @@ class VimState
         if target is @editorElement
           @checkSelections()
 
-    # @subscriptions.add @editor.onDidAddCursor @dontPutCursorAtEndOfLine.bind(this)
+        return unless @isVisualMode() and (@submode is 'characterwise')
+        @showCursor()
 
     @editorElement.classList.add("vim-mode")
     @init()
@@ -284,3 +285,28 @@ class VimState
       {goalColumn} = cursor
       cursor.moveLeft()
       cursor.goalColumn = goalColumn
+
+  showCursor: ->
+    for selection in @editor.getSelections()
+      {cursor} = selection
+      cursorRange = cursor.getScreenRange()
+      unless cursor.isVisible()
+        cursor.setVisible(true)
+      if selection.isReversed()
+        @editorElement.classList.add('reversed')
+        # cursorElement =  @editorElement.shadowRoot.querySelector('.cursor')
+        # cursorElement.style.left = 0
+      else
+        @editorElement.classList.remove('reversed')
+
+        # cursorElement = @editorElement.shadowRoot.querySelector('.cursor')
+        # if cursor.isAtEndOfLine()
+        #   console.log 'EOL'
+        #   cursorRange = cursorRange.translate([0, -1], [0, -1])
+        #   {width} = @editor.pixelRectForScreenRange(cursorRange)
+        #   console.log @editor.getTextInBufferRange(@editor.bufferRangeForScreenRange(cursorRange))
+        #   console.log width
+        #   cursorElement.style.width = "#{width}px"
+        #   cursorElement.style.left = "-#{width}px"
+        # else
+        #   cursorElement.style.left = "-#{cursorElement.style.width}"
