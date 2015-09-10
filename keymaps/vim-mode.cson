@@ -263,3 +263,16 @@
   'ctrl-v': 'vim-mode:activate-blockwise-visual-mode'
 
   '"': 'vim-mode:set-register-name'
+
+'atom-text-editor.vim-mode.visual-mode.blockwise':
+  'o':      'vim-mode:blockwise-o'
+  'j':      'vim-mode:blockwise-j'
+  'k':      'vim-mode:blockwise-k'
+  'D':      'vim-mode:blockwise-D'
+  'C':      'vim-mode:blockwise-C'
+  'I':      'vim-mode:blockwise-I'
+  'A':      'vim-mode:blockwise-A'
+  'escape': 'vim-mode:blockwise-escape'
+  'ctrl-[': 'vim-mode:blockwise-escape'
+  'ctrl-c': 'vim-mode:blockwise-escape'
+  'ctrl-v': 'vim-mode:blockwise-ctrl-v'

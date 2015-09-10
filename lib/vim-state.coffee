@@ -12,6 +12,7 @@ Motion     = require './motion'
 TextObject = require './text-object'
 InsertMode  = require './insert-mode'
 Scroll      = require './scroll'
+VisualBlockwise = require './visual-blockwise'
 
 OperationStack  = require './operation-stack'
 CountManager    = require './count-manager'
@@ -237,6 +238,20 @@ class VimState
       'scroll-cursor-to-left', 'scroll-cursor-to-right',
     ]
 
+    @registerOperationCommands VisualBlockwise, [
+      'blockwise-o',
+      'blockwise-j',
+      'blockwise-k',
+      'blockwise-D',
+      'blockwise-C',
+      'blockwise-I',
+      'blockwise-A',
+      'blockwise-escape',
+      'blockwise-escape',
+      'blockwise-escape',
+      'blockwise-ctrl-v',
+    ]
+
     # Load developer helper commands.
     if atom.inDevMode()
       Developer ?= require './developer'
@@ -287,7 +302,6 @@ class VimState
       cursor.goalColumn = goalColumn
 
   showCursor: ->
-    console.log @editorElement.classList
     for selection in @editor.getSelections()
       {cursor} = selection
       cursorRange = cursor.getScreenRange()
