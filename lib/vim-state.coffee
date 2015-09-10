@@ -239,17 +239,14 @@ class VimState
     ]
 
     @registerOperationCommands VisualBlockwise, [
-      'blockwise-o',
-      'blockwise-j',
-      'blockwise-k',
-      'blockwise-D',
-      'blockwise-C',
-      'blockwise-I',
-      'blockwise-A',
+      'blockwise-reverse-selections',
+      'blockwise-move-down',
+      'blockwise-move-up',
+      'blockwise-delete-to-last-character-of-line',
+      'blockwise-change-to-last-character-of-line',
+      'blockwise-insert-at-beginning-of-line',
+      'blockwise-insert-after-end-of-line',
       'blockwise-escape',
-      'blockwise-escape',
-      'blockwise-escape',
-      'blockwise-ctrl-v',
     ]
 
     # Load developer helper commands.
