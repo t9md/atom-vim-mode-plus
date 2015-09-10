@@ -43,6 +43,9 @@ But I need some pastime, refresher, So I added following new features which is n
 - `gugu`, `guu` `gUgU`, `gUU` support which is yet supported in vim-mode.
 - SelectInsideBrackets family skip backslash escaped pair character.
 - Show cursor(by using decoration) while waiting user input (e.g `m`, `"`). Cursor disappear in official vim-mode.
+- Support visual-block-mode except blockwise yank, and paste.
+- Show cursor in visual-mode characterwise.
+- Expose visual-mode's submode to text-editor-element's css class to be used as selector.
 
 # Terminology
 
@@ -74,11 +77,11 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 # TODO
 
-- [ ] Support visual-block by incorporating with [vim-mode-visual-block](https://github.com/t9md/atom-vim-mode-visual-block).
-- [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions.
-- [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
+- [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions. - [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
 - [ ] Improve search and introduce incrementalSearch.
 - [ ] Spec re-write 2nd round to compact and simple description for each spec.
+- [x] Show cursor in visual-mode(now characterwise only) without hacking `Cursor.prototype`.
+- [x] Support visual-block by incorporating with [vim-mode-visual-block](https://github.com/t9md/atom-vim-mode-visual-block).
 - [x] Support web-font(?) font-awesome etc. to show on overlay hover.
 - [x] `0` is accessible position than `^` so provide config option to behave `0` like `^`(I want single `0` behave as `^`).
 - [x] Show emoji that representing current operation.
