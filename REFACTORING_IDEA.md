@@ -81,3 +81,18 @@ The name of vimState is redundant simply `state` is enough since its vim-mode's 
 - `vimState::pushSearchHistory` -> `vimState::saveSearchHistory`
 
 `introduce ViewModel.onDidGetInput()` to simplify code.
+
+# NOTE for refactoring motion.coffee
+
+## Preconditions
+
+- In visual-mode, we `selectRight()` when activating visual-mode.
+- After deactivating visualmode. we `moveLeft()` cursor.
+- selection maybe reversed.
+- In atom, when selecting whole single line range become [[0, 0], [1, 0]]
+- selection set `selection.linewise = true` when `selection.selectLine(row)`.
+- We can't `moveLeft()` when `isAtBeginningOfLine()` unless `wrapLeftRightMotion` is enabled.
+- When cursor `isAtEndOfLine()`, then `cursor.moveRight()` put cursor to nextline's column 0. (this mean skip 'newLine' char.)
+- When selecting whole line `selection.getBufferRange().isSingleLine()` return `false` since its expand multiple line ([selectedRow, 0], [nextRow, 0]).
+- Currently visual-mode not allow de-select first column char its bug, since Vim allow user to de-select first column.
+- To allow cursor
