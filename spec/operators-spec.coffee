@@ -186,8 +186,22 @@ describe "Operator", ->
       ensure 'escape', text: '12345\nabc\nABCDE'
       ensure 'u', text: "12345\nabcde\nABCDE", selectedText: ''
 
+    # Here is original spec I believe its not correct, if it says 'works'
+    # text result should be '\n' since S delete current line.
+    # Its orignally added in following commit, as fix of S(from description).
+    # But original SubstituteLine replaced with Change and MoveToRelativeLine combo.
+    # I believe this spec should have been failed at that time, but havent'.
+    # https://github.com/atom/vim-mode/commit/6acffd2559e56f7c18a4d766f0ad92c9ed6212ae
+    #
+    # it "works when the cursor's goal column is greater than its current column", ->
+    #   set text: "\n12345", cursor: [1, Infinity]
+    #   ensure 'kS', text: '\n12345'
+
     it "works when the cursor's goal column is greater than its current column", ->
       set text: "\n12345", cursor: [1, Infinity]
+      # Should be here, but I commented out before I have confidence.
+      # ensure 'kS', text: '\n'
+      # Folowing line include Bug ibelieve.
       ensure 'kS', text: '\n12345'
     # Can't be tested without setting grammar of test buffer
     xit "respects indentation", ->
