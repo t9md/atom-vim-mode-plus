@@ -265,14 +265,14 @@
   '"': 'vim-mode:set-register-name'
 
 'atom-text-editor.vim-mode.visual-mode.blockwise':
-  'o':      'vim-mode:blockwise-o'
-  'j':      'vim-mode:blockwise-j'
-  'k':      'vim-mode:blockwise-k'
-  'D':      'vim-mode:blockwise-D'
-  'C':      'vim-mode:blockwise-C'
-  'I':      'vim-mode:blockwise-I'
-  'A':      'vim-mode:blockwise-A'
+  'o':      'vim-mode:blockwise-reverse-selections',
+  'j':      'vim-mode:blockwise-move-down'
+  'k':      'vim-mode:blockwise-move-up'
+  'D':      'vim-mode:blockwise-delete-to-last-character-of-line',
+  'C':      'vim-mode:blockwise-change-to-last-character-of-line',
+  'I':      'vim-mode:blockwise-insert-at-beginning-of-line'
+  'A':      'vim-mode:blockwise-insert-after-end-of-line',
   'escape': 'vim-mode:blockwise-escape'
   'ctrl-[': 'vim-mode:blockwise-escape'
   'ctrl-c': 'vim-mode:blockwise-escape'
-  'ctrl-v': 'vim-mode:blockwise-ctrl-v'
+  'ctrl-v': 'vim-mode:blockwise-escape'

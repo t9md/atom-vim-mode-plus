@@ -105,8 +105,10 @@ class ModeManager
       @selectCharacterwise()
     for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())
       s.cursor.moveLeft()
-    if @submode is 'blockwise'
-      VisualBlockwise.reset()
+
+    # if @submode is 'blockwise'
+    #   VisualBlockwise.reset()
+    # @editor.clearSelections()
 
   # Private: Used to enable visual mode.
   #

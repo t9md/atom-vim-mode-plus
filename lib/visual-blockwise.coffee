@@ -21,40 +21,37 @@ class VisualBlockwise extends Base
   getCurrentRow: ->
     @currentRow
 
+  getTopCursor: ->
+    _.first @editor.getCursorsOrderedByBufferPosition()
+
+  getBottomCursor: ->
+    _.last @editor.getCursorsOrderedByBufferPosition()
+
   constructor: ->
     super
+    console.log @getKind()
     if @editor.getCursors().length is 1
       @reset()
     @currentRow  = @editor.getLastCursor()?.getBufferRow()
     START_ROW ?= @currentRow
 
-    if @delegateTo
-      @vimState.activateNormalMode()
-      @vimState.operationStack.push @new(@delegateTo)
-      @abort()
-
-class BlockwiseO extends VisualBlockwise
+class BlockwiseReverseSelections extends VisualBlockwise
   @extend()
   execute: ->
     START_ROW = @getCurrentRow()
 
-class BlockwiseJ extends VisualBlockwise
+class BlockwiseMoveDown extends VisualBlockwise
   @extend()
   command: 'j'
 
   execute: ->
-    cursors      = @editor.getCursorsOrderedByBufferPosition()
-    cursorTop    = _.first cursors
-    cursorBottom = _.last cursors
-
+    cursorTop    = @getTopCursor()
+    cursorBottom = @getBottomCursor()
     if (@command is 'j' and cursorTop.getBufferRow() >= START_ROW) or
         (@command is 'k' and cursorBottom.getBufferRow() <= START_ROW)
+
       lastSelection = @editor.getLastSelection()
-
-      switch @command
-        when 'j' then @editor.addSelectionBelow()
-        when 'k' then @editor.addSelectionAbove()
-
+      @addSelection()
       # [FIXME]
       # When addSelectionAbove(), addSelectionBelow() doesn't respect
       # reversed stated, need improved.
@@ -73,23 +70,37 @@ class BlockwiseJ extends VisualBlockwise
         @reset()
         return
 
-      switch @command
-        when 'j' then cursorTop.destroy()
-        when 'k' then cursorBottom.destroy()
+      @destroyCursor()
 
-class BlockwiseK extends BlockwiseJ
+  addSelection: ->
+    @editor.addSelectionBelow()
+
+  destroyCursor: ->
+    @getTopCursor().destroy()
+
+class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
   command: 'k'
+  addSelection: ->
+    @editor.addSelectionAbove()
+  destroyCursor: ->
+    @getBottomCursor().destroy()
 
-class BlockwiseD extends VisualBlockwise
+class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   @extend()
   delegateTo: 'DeleteToLastCharacterOfLine'
+  execute: ->
+    @vimState.activateNormalMode()
+    point = @getTopCursor().getBufferPosition()
+    @new(@delegateTo).execute()
+    @editor.clearSelections()
+    @editor.setCursorBufferPosition(point)
 
-class BlockwiseC extends BlockwiseD
+class BlockwiseChangeToLastCharacterOfLine extends BlockwiseDeleteToLastCharacterOfLine
   @extend()
   delegateTo: 'ChangeToLastCharacterOfLine'
 
-class BlockwiseI extends VisualBlockwise
+class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
   @extend()
   command: 'I'
   execute: ->
@@ -114,31 +125,25 @@ class BlockwiseI extends VisualBlockwise
     if @command is 'A' and  cursorsAdjusted.length
       cursor.moveRight() for cursor in cursorsAdjusted
 
-class BlockwiseA extends BlockwiseI
+class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
   command: 'A'
 
 class BlockwiseEscape extends VisualBlockwise
   @extend()
   execute: ->
-    @vimState.activateNormalMode()
-    @editor.clearSelections()
-
-class BlockwiseCtrlV extends VisualBlockwise
-  @extend()
-  execute: ->
+    @reset()
     @vimState.activateNormalMode()
     @editor.clearSelections()
 
 module.exports = {
   VisualBlockwise,
-  BlockwiseO,
-  BlockwiseJ,
-  BlockwiseK,
-  BlockwiseD,
-  BlockwiseC,
-  BlockwiseI,
-  BlockwiseA,
+  BlockwiseReverseSelections,
+  BlockwiseMoveDown,
+  BlockwiseMoveUp,
+  BlockwiseDeleteToLastCharacterOfLine,
+  BlockwiseChangeToLastCharacterOfLine,
+  BlockwiseInsertAtBeginningOfLine,
+  BlockwiseInsertAfterEndOfLine,
   BlockwiseEscape,
-  BlockwiseCtrlV,
 }
