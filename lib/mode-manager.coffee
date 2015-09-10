@@ -1,3 +1,4 @@
+{VisualBlockwise} = require './visual-blockwise'
 # Refactoring status: 20%
 module.exports =
 class ModeManager
@@ -104,6 +105,8 @@ class ModeManager
       @selectCharacterwise()
     for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())
       s.cursor.moveLeft()
+    if @submode is 'blockwise'
+      VisualBlockwise.reset()
 
   # Private: Used to enable visual mode.
   #
