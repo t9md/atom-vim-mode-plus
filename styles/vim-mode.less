@@ -160,6 +160,13 @@ atom-text-editor::shadow {
   }
 }
 
+atom-text-editor.vim-mode.visual-mode.characterwise:not(.reversed)::shadow {
+  .cursor {
+    // To support multibyte width, we need to dynamically calculate cursor width.
+    left: -0.5em;
+  }
+}
+
 .vim-mode-hover {
   color: @text-color-highlight;
   background-color: @base-background-color;
