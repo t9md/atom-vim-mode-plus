@@ -29,7 +29,6 @@ class VisualBlockwise extends Base
 
   constructor: ->
     super
-    console.log @getKind()
     if @editor.getCursors().length is 1
       @reset()
     @currentRow  = @editor.getLastCursor()?.getBufferRow()
