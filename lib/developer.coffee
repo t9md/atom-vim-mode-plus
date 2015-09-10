@@ -7,6 +7,7 @@ Motion     = require './motion'
 TextObject = require './text-object'
 InsertMode = require './insert-mode'
 Scroll     = require './scroll'
+VisualBlockwise = require './visual-blockwise'
 settings   = require './settings'
 {debug}     = require './utils'
 introspection = require './introspection'
@@ -34,7 +35,7 @@ class Developer
     recursiveInspect = Base
 
     introspection = require './introspection'
-    mods = [Operator, Motion, TextObject, Scroll, InsertMode]
+    mods = [Operator, Motion, TextObject, Scroll, InsertMode, VisualBlockwise]
     introspection.generateIntrospectionReport(mods, {excludeProperties, recursiveInspect})
 
   jumpToRelated: ->
@@ -53,6 +54,7 @@ class Developer
         TextObject: 'text-object.coffee'
         Scroll:     'scroll.coffee'
         InsertMode: 'insert-mode.coffee'
+        VisualBlockwise: 'visual-blockwise.coffee'
 
       klassName = getClassCase(srcName)
       unless klass = Base.findClass(klassName)
