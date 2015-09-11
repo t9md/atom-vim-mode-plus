@@ -31,20 +31,20 @@ class Input
     start = editor.getCursorBufferPosition()
     end = start.translate([0, 1])
 
-    @marker = editor.markBufferRange Range(start, end),
-      invalidate: 'never'
-      persistent: false
+    # @marker = editor.markBufferRange Range(start, end),
+    #   invalidate: 'never'
+    #   persistent: false
+    #
+    # klass = if @vimState.mode is 'insert' then 'insert' else 'normal'
 
-    klass = if @vimState.mode is 'insert' then 'insert' else 'normal'
-
-    editor.decorateMarker @marker,
-      type: 'highlight'
-      class: "vim-mode-cursor-#{klass}"
+    # editor.decorateMarker @marker,
+    #   type: 'highlight'
+    #   class: "vim-mode-cursor-#{klass}"
 
     @view.focus()
 
   unfocus: ->
-    @marker?.destroy()
+    # @marker?.destroy()
     @subscriptions?.dispose()
     @subscriptions = null
 
