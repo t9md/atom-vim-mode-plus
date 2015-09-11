@@ -28,7 +28,18 @@ class OperationStack
     if @vimState.isVisualMode() and op.isOperator()
       debug "push INPLICIT Motion.CurrentSelection"
       @stack.push(new CurrentSelection(@vimState))
-    @process()
+    @withLock =>
+      @process()
+
+  withLock: (callback) ->
+    try
+      @processing = true
+      callback()
+    finally
+      @processing = false
+
+  isProcessing: ->
+    @processing
 
   process: ->
     debug '-> @process(): start'
