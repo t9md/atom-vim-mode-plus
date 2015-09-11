@@ -313,7 +313,11 @@ describe "VimState", ->
             [0, 8]
           ]
 
-      it "harmonizes selection directions", ->
+      # [FIXME]
+      # Current spec is based on actual behavior.
+      # I disabled temporarily because simply passing this test is non-sence.
+      # I need re-think, how spec would be.
+      xit "harmonizes selection directions", ->
         set cursorBuffer: [0, 0]
         keystroke 'ee'
         set addCursor: [0, Infinity]
