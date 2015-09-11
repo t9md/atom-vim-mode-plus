@@ -75,12 +75,28 @@ class VimState
     @input = new Input(this)
 
     @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
+    # @subscriptions.add @editor.onDidAddCursor (cursor) =>
+    #   return if @operationStack.isProcessing()
+    #   if @isVisualMode() and (@submode is 'characterwise') and cursor.selection?.isEmpty()
+    #     cursor
+    #     cursor.selection.selectRight()
+    #   console.log @editor.getSelections().length
+    #   console.log @editor.getCursors().length
+    #   # console.log @editor.getSelections()
+    #   # console.log cursor
+    #   # console.log cursor.selection
+    #   # l
+    #   # return if @operationStack.isProcessing()
+    #   # if @isVisualMode() and (@submode is 'characterwise') and cursor.selection.isEmpty()
+    #   #   cursor.selection.selectRight()
+    # @subscriptions.add @editor.onDidChangeSelectionRange ({selection}) =>
+    #   console.log "selection Changed #{@editor.getCursors().length}"
 
     if atom.commands.onDidDispatch?
       @subscriptions.add atom.commands.onDidDispatch ({target}) =>
         if target is @editorElement
           @checkSelections()
-        if @isVisualMode() and (@submode is 'characterwise') and settings.get('showCursorInVisualMode')
+        if @isVisualMode('characterwise') and settings.get('showCursorInVisualMode')
           @showCursor()
 
     @editorElement.classList.add("vim-mode")
@@ -101,7 +117,7 @@ class VimState
       @editorElement.component?.setInputEnabled(true)
       @editorElement.classList.remove("vim-mode")
       @editorElement.classList.remove("normal-mode")
-    @editorElement.removeEventListener 'mouseup', @checkSelections
+    # @editorElement.removeEventListener 'mouseup', @checkSelections
     @editor = null
     @editorElement = null
     @lastOperation = null
@@ -269,6 +285,9 @@ class VimState
 
   reverseSelections: ->
     reversed = not @editor.getLastSelection().isReversed()
+    @syncSelectionsReversedSate(reversed)
+
+  syncSelectionsReversedSate: (reversed) ->
     for selection in @editor.getSelections()
       selection.setBufferRange(selection.getBufferRange(), {reversed})
 
@@ -288,7 +307,16 @@ class VimState
       else if @isVisualMode()
         @activateNormalMode()
     else
-      @activateVisualMode('characterwise') if @isNormalMode()
+      if @isNormalMode()
+        @activateVisualMode('characterwise')
+      else
+        # When cursor is added selection is empty
+        # using editor.onDidAddCursor not work since at the timing event callbacked,
+        # cursor.selection is `undefined` and editor.getCursors().length isnt editor.getSelections().length
+        # console.log "called!!"
+        lastSelection = @editor.getLastSelection()
+        if lastSelection.isEmpty()
+          lastSelection.selectRight()
 
   dontPutCursorsAtEndOfLine: ->
     # if @editor.getPath()?.endsWith 'tryit.coffee'
