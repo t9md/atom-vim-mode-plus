@@ -43,6 +43,31 @@ class Motion extends Base
     @editor.moveCursors (cursor) =>
       @moveCursor(cursor)
 
+  getSelectedBufferRow: (selection, which) ->
+    rows = selection.getBufferRowRange()
+    rows = rows.reverse() if selection.isReversed()
+    [tail, head] = rows
+    switch which
+      when 'head' then head
+      when 'tail' then tail
+
+  # selectLinewise: (selection, options) ->
+  #   selection.modifySelection =>
+  #     rowFrom = @getSelectedBufferRow(selection, 'tail')
+  #     if selection.isEmpty()
+  #       selection.cursor.moveRight()
+  #     unless selection.isEmpty() or selection.isReversed()
+  #       if selection.cursor.isAtBeginningOfLine()
+  #         selection.cursor.moveLeft()
+  #     @moveCursor(selection.cursor)
+  #     if selection.isEmpty()
+  #       selection.cursor.moveRight()
+  #     if selection.cursor.isAtBeginningOfLine()
+  #       selection.cursor.moveRight()
+  #     rowTo = @getSelectedBufferRow(selection, 'head')
+  #     selection.selectLine(rowFrom)
+  #     selection.selectLine(rowTo)
+
   selectLinewise: (selection, options) ->
     selection.modifySelection =>
       [oldStartRow, oldEndRow] = selection.getBufferRowRange()
@@ -82,6 +107,13 @@ class Motion extends Base
       else
         # for forward motion, add the ending character of the motion
         selection.cursor.moveRight()
+
+  isSingleColumnSelection: (selection) ->
+    selection.getBufferRange().toDelta().isEqual([0, 1])
+
+  # selectVisual: (selection, options) ->
+  #   selection.modifySelection =>
+  #     @moveCursor(selection.cursor, options)
 
   selectVisual: (selection, options) ->
     selection.modifySelection =>
