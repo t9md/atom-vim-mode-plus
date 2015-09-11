@@ -61,6 +61,9 @@ class Base
         @complete = true
         @vimState.operationStack.process()
 
+    # FIXME
+    # Cancelation currently depending on operationStack to call cancel()
+    # Should be better to observe cancel event on operationStack side.
     @vimState.input.onDidCancel =>
       # console.log "Cancelled!"
       @canceled = true
