@@ -80,7 +80,6 @@ class VimState
       @subscriptions.add atom.commands.onDidDispatch ({target}) =>
         if target is @editorElement
           @checkSelections()
-
         if @isVisualMode() and (@submode is 'characterwise') and settings.get('showCursorInVisualMode')
           @showCursor()
 
@@ -90,6 +89,8 @@ class VimState
       @activateInsertMode()
     else
       @activateNormalMode()
+
+  # setCursorStyle ({width, left})
 
   destroy: ->
     return if @destroyed
@@ -306,19 +307,5 @@ class VimState
         cursor.setVisible(true)
       if selection.isReversed()
         @editorElement.classList.add('reversed')
-        # cursorElement =  @editorElement.shadowRoot.querySelector('.cursor')
-        # cursorElement.style.left = 0
       else
         @editorElement.classList.remove('reversed')
-
-        # cursorElement = @editorElement.shadowRoot.querySelector('.cursor')
-        # if cursor.isAtEndOfLine()
-        #   console.log 'EOL'
-        #   cursorRange = cursorRange.translate([0, -1], [0, -1])
-        #   {width} = @editor.pixelRectForScreenRange(cursorRange)
-        #   console.log @editor.getTextInBufferRange(@editor.bufferRangeForScreenRange(cursorRange))
-        #   console.log width
-        #   cursorElement.style.width = "#{width}px"
-        #   cursorElement.style.left = "-#{width}px"
-        # else
-        #   cursorElement.style.left = "-#{cursorElement.style.width}"
