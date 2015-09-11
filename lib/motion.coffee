@@ -25,35 +25,44 @@ class Motion extends Base
   linewise: false
   defaultCount: 1
 
+  # Motion characteristics
+  # -------------------------
+  isLinewise: ->
+    if @vimState.isVisualMode()
+      @vimState.submode is 'linewise'
+    else
+      @linewise
+
+  isInclusive: ->
+    if @vimState.isVisualMode()
+      @vimState.submode is 'characterwise'
+    else
+      @inclusive
+
+  # Action
+  # -------------------------
+  execute: ->
+    @editor.moveCursors (cursor) =>
+      @moveCursor(cursor)
+
   select: (options) ->
     for selection in @editor.getSelections()
-      # FIXME: Order is important maybe
       switch
         when @isLinewise()
           @selectLinewise(selection, options)
-        when @vimState.isVisualMode('characterwise')
-          @selectVisual(selection, options)
-        when @inclusive
+        when @isInclusive()
           @selectInclusive(selection, options)
         else
-          @moveSelection(selection, options)
+          # Simply move cursor to extend selection.
+          selection.modifySelection =>
+            @moveCursor(selection.cursor, options)
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
     (not s.isEmpty() for s in @editor.getSelections())
 
-  execute: ->
-    @editor.moveCursors (cursor) =>
-      @moveCursor(cursor)
-
-  getSelectedBufferRow: (selection, which) ->
-    rows = selection.getBufferRowRange()
-    rows = rows.reverse() if selection.isReversed()
-    [tail, head] = rows
-    switch which
-      when 'head' then head
-      when 'tail' then tail
-
+  # Action
+  # -------------------------
   selectLinewise: (selection, options) ->
     selection.modifySelection =>
       [oldStartRow, oldEndRow] = selection.getBufferRowRange()
@@ -80,115 +89,45 @@ class Motion extends Base
       selection.setBufferRange([[newStartRow, 0], [newEndRow + 1, 0]])
 
   selectInclusive: (selection, options) ->
-    return @selectVisual(selection, options) unless selection.isEmpty()
+    if result = @getInclusiveRange(selection, options)
+      {range, reversed} = result
+      selection.setBufferRange(range, {reversed})
 
-    selection.modifySelection =>
-      @moveCursor(selection.cursor, options)
-      return if selection.isEmpty()
+  getInclusiveRange: (selection, options) ->
+    if selection.isEmpty()
+      wasEmpty = true
+      selection.selectRight()
 
-      if selection.isReversed()
-        # for backward motion, add the original starting character of the motion
-        {start, end} = selection.getBufferRange()
-        selection.setBufferRange([start, [end.row, end.column + 1]])
-      else
-        # for forward motion, add the ending character of the motion
-        selection.cursor.moveRight()
+    {cursor} = selection
+    tailRange = @getTailRange(selection)
+    pointSrc = selection.getTailBufferPosition()
+    unless selection.isReversed()
+      cursor.moveLeft()
+    selection.clear()
+    @moveCursor(cursor, options)
+    pointDst = cursor.getBufferPosition()
 
-  isSingleColumnSelection: (selection) ->
-    selection.getBufferRange().toDelta().isEqual([0, 1])
+    # When Motion is used as target of Operator,
+    # selection is initially empty and should not
+    # select anything when motion movement not happend.
+    if pointSrc.isEqual(pointDst) and wasEmpty
+      return
 
-  #
-  selectVisual: (selection, options) ->
-    selection.modifySelection =>
-      # Why selection possibily become empty even in visualMode()?
-      # console.log 'within', selection.isEmpty()
-      range = selection.getBufferRange()
-      [oldStart, oldEnd] = [range.start, range.end]
-
-      # in visual mode, atom cursor is after the last selected character,
-      # so here put cursor in the expected place for the following motion
-
-      wasEmpty = selection.isEmpty()
-      wasReversed = selection.isReversed()
-      unless wasEmpty or wasReversed
-        selection.cursor.moveLeft()
-
-      # put cursor back after the last character so it is also selected
-      @moveCursor(selection.cursor, options)
-
-      isEmpty = selection.isEmpty()
-      isReversed = selection.isReversed()
-      unless isEmpty or isReversed
-        selection.cursor.moveRight()
-
-      range = selection.getBufferRange()
-      [newStart, newEnd] = [range.start, range.end]
-
-      # if we reversed or emptied a normal selection
-      # we need to select again the last character deselected above the motion
-      if (isReversed or isEmpty) and not (wasReversed or wasEmpty)
-        selection.setBufferRange([newStart, [newEnd.row, oldStart.column + 1]])
-
-      # if we re-reversed a reversed non-empty selection,
-      # we need to keep the last character of the old selection selected
-      if wasReversed and not wasEmpty and not isReversed
-        selection.setBufferRange([[oldEnd.row, oldEnd.column - 1], newEnd])
-
-      # keep a single-character selection non-reversed
-      range = selection.getBufferRange()
-      [newStart, newEnd] = [range.start, range.end]
-      if selection.isReversed() and newStart.row is newEnd.row and newStart.column + 1 is newEnd.column
-        selection.setBufferRange(range, reversed: false)
+    if pointSrc.isLessThanOrEqual(pointDst)
+      cursor.moveRight()
+      pointDst = cursor.getBufferPosition()
+      reversed = false
+      range = new Range(pointSrc, pointDst)
+    else
+      reversed = true
+      range = new Range(pointDst, pointSrc)
+    {range: range.union(tailRange), reversed}
 
   # This tail position is always selected even if selection isReversed() as a result of cursor movement.
   getTailRange: (selection) ->
     point = selection.getTailBufferPosition()
     columnDelta = if selection.isReversed() then -1 else +1
     Range.fromPointWithDelta(point, 0, columnDelta)
-
-  selectVisual: (selection, options) ->
-    selection.modifySelection =>
-      {cursor} = selection
-      tailRange = @getTailRange(selection)
-
-      originallyReversed = selection.isReversed()
-      @moveCursor(cursor, options)
-
-      if selection.isEmpty()
-        point = cursor.getBufferPosition()
-        range = Range.fromPointWithDelta(point, 0, -1)
-        # range = [point.translate([0, -1]), point]
-        # range =### X ########
-#12345
-        console.log range.toString()
-        selection.setBufferRange(range)
-
-      if selection.isReversed()
-        if not originallyReversed
-          range = selection.getBufferRange().union(tailRange)
-          selection.setBufferRange(range)
-          console.log @editor.getTextInBufferRange(tailRange)
-      else
-        if originallyReversed
-          range = selection.getBufferRange().union(tailRange)
-          selection.setBufferRange(range)
-          console.log @editor.getTextInBufferRange(tailRange)
-      # else
-      #   selection.setBufferRange(tailRange)
-      #   unless @at('BOL', cursor)
-      #     cursor.moveLeft()
-      #     if @at('BOL', cursor)
-      #       cursor.moveRight()
-
-  moveSelection: (selection, options) ->
-    selection.modifySelection =>
-      @moveCursor(selection.cursor, options)
-
-  isLinewise: ->
-    if @vimState.isVisualMode()
-      @vimState.submode is 'linewise'
-    else
-      @linewise
 
   countTimes: (fn) ->
     _.times @getCount(@defaultCount), ->
@@ -701,15 +640,11 @@ class Till extends Find
   offset: 1
 
   match: ->
-    @selectAtLeastOne = false
-    retval = super
-    if retval? and not @backwards
-      @selectAtLeastOne = true
-    retval
+    @matched = super
 
   selectInclusive: (selection, options) ->
     super
-    if selection.isEmpty() and @selectAtLeastOne
+    if selection.isEmpty() and (@matched? and not @backwards)
       selection.modifySelection ->
         selection.cursor.moveRight()
 
