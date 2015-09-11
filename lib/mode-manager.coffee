@@ -16,8 +16,11 @@ class ModeManager
   isOperatorPendingMode: ->
     @mode is 'operator-pending'
 
-  isVisualMode: ->
-    @mode is 'visual'
+  isVisualMode: (submode=null) ->
+    if submode
+      @mode is 'visual' and @submode is submode
+    else
+      @mode is 'visual'
 
   setMode: (@mode, @submode=null) ->
     for mode in ['normal', 'insert', 'visual', 'operator-pending']
