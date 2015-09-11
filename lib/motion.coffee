@@ -29,9 +29,12 @@ class Motion extends Base
     for selection in @editor.getSelections()
       # FIXME: Order is important maybe
       switch
-        when @isLinewise() then @selectLinewise(selection, options)
-        when @vimState.isVisualMode() then @selectVisual(selection, options)
-        when @inclusive then @selectInclusive(selection, options)
+        when @isLinewise()
+          @selectLinewise(selection, options)
+        when @vimState.isVisualMode('characterwise')
+          @selectVisual(selection, options)
+        when @inclusive
+          @selectInclusive(selection, options)
         else
           @moveSelection(selection, options)
 
@@ -50,23 +53,6 @@ class Motion extends Base
     switch which
       when 'head' then head
       when 'tail' then tail
-
-  # selectLinewise: (selection, options) ->
-  #   selection.modifySelection =>
-  #     rowFrom = @getSelectedBufferRow(selection, 'tail')
-  #     if selection.isEmpty()
-  #       selection.cursor.moveRight()
-  #     unless selection.isEmpty() or selection.isReversed()
-  #       if selection.cursor.isAtBeginningOfLine()
-  #         selection.cursor.moveLeft()
-  #     @moveCursor(selection.cursor)
-  #     if selection.isEmpty()
-  #       selection.cursor.moveRight()
-  #     if selection.cursor.isAtBeginningOfLine()
-  #       selection.cursor.moveRight()
-  #     rowTo = @getSelectedBufferRow(selection, 'head')
-  #     selection.selectLine(rowFrom)
-  #     selection.selectLine(rowTo)
 
   selectLinewise: (selection, options) ->
     selection.modifySelection =>
@@ -111,17 +97,17 @@ class Motion extends Base
   isSingleColumnSelection: (selection) ->
     selection.getBufferRange().toDelta().isEqual([0, 1])
 
-  # selectVisual: (selection, options) ->
-  #   selection.modifySelection =>
-  #     @moveCursor(selection.cursor, options)
-
+  #
   selectVisual: (selection, options) ->
     selection.modifySelection =>
+      # Why selection possibily become empty even in visualMode()?
+      # console.log 'within', selection.isEmpty()
       range = selection.getBufferRange()
       [oldStart, oldEnd] = [range.start, range.end]
 
       # in visual mode, atom cursor is after the last selected character,
       # so here put cursor in the expected place for the following motion
+
       wasEmpty = selection.isEmpty()
       wasReversed = selection.isReversed()
       unless wasEmpty or wasReversed
