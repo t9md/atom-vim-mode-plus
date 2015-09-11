@@ -6,7 +6,7 @@
 # Motion is either @inclusive or @exclusive
 # Operator is either @linewise, @characterwise or @blockwise
 
-{Point} = require 'atom'
+{Point, Range} = require 'atom'
 _ = require 'underscore-plus'
 
 settings = require './settings'
@@ -139,6 +139,46 @@ class Motion extends Base
       [newStart, newEnd] = [range.start, range.end]
       if selection.isReversed() and newStart.row is newEnd.row and newStart.column + 1 is newEnd.column
         selection.setBufferRange(range, reversed: false)
+
+  # This tail position is always selected even if selection isReversed() as a result of cursor movement.
+  getTailRange: (selection) ->
+    point = selection.getTailBufferPosition()
+    columnDelta = if selection.isReversed() then -1 else +1
+    Range.fromPointWithDelta(point, 0, columnDelta)
+
+  selectVisual: (selection, options) ->
+    selection.modifySelection =>
+      {cursor} = selection
+      tailRange = @getTailRange(selection)
+
+      originallyReversed = selection.isReversed()
+      @moveCursor(cursor, options)
+
+      if selection.isEmpty()
+        point = cursor.getBufferPosition()
+        range = Range.fromPointWithDelta(point, 0, -1)
+        # range = [point.translate([0, -1]), point]
+        # range =### X ########
+#12345
+        console.log range.toString()
+        selection.setBufferRange(range)
+
+      if selection.isReversed()
+        if not originallyReversed
+          range = selection.getBufferRange().union(tailRange)
+          selection.setBufferRange(range)
+          console.log @editor.getTextInBufferRange(tailRange)
+      else
+        if originallyReversed
+          range = selection.getBufferRange().union(tailRange)
+          selection.setBufferRange(range)
+          console.log @editor.getTextInBufferRange(tailRange)
+      # else
+      #   selection.setBufferRange(tailRange)
+      #   unless @at('BOL', cursor)
+      #     cursor.moveLeft()
+      #     if @at('BOL', cursor)
+      #       cursor.moveRight()
 
   moveSelection: (selection, options) ->
     selection.modifySelection =>
