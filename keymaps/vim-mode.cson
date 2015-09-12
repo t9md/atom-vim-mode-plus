@@ -69,7 +69,7 @@
   'z R': 'editor:unfold-all'
   'z c': 'editor:fold-current-row'
   'z o': 'editor:unfold-current-row'
-  'G': 'vim-mode:move-to-line'
+  'G': 'vim-mode:move-to-last-line'
   'H': 'vim-mode:move-to-top-of-screen'
   'L': 'vim-mode:move-to-bottom-of-screen'
   'M': 'vim-mode:move-to-middle-of-screen'
