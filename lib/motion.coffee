@@ -317,6 +317,8 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
       cursor.moveDown()
     @skipTrailingWhitespace(cursor)
 
+# MoveToFirstCharacterOfLine faimily
+# ------------------------------------
 class MoveToFirstCharacterOfLine extends Motion
   @extend()
   moveCursor: (cursor) ->
