@@ -65,10 +65,42 @@ describe "Motion", ->
         it "selects the text while moving", ->
           ensure 'j', selectedText: "bcd\nAB"
 
+        it "keep same column(goalColumn) even after across the empty line", ->
+          keystroke 'escape'
+          set
+            text: """
+              abcdefg
+
+              abcdefg
+              """
+            cursor: [0, 3]
+          ensure 'v', cursor: [0, 4]
+          ensure 'jj',
+            cursor: [2, 4]
+            selectedText: "defg\n\nabcd"
+
     describe "the k keybinding", ->
       it "moves the cursor up, but not to the beginning of the first line", ->
         ensure 'k', cursor: [0, 1]
         ensure 'k', cursor: [0, 1]
+
+      describe "when visual mode", ->
+        # If selection is initially reversed and not re-reversed, we wont adjust
+        # cursor's side position (left/right) within select() methods,
+        # So maintaining gloalColumn is not our job, it handled by atom's native way.
+        # But I put spec to be correspond to `j` motion.
+        it "keep same column(goalColumn) even after across the empty line", ->
+          set
+            text: """
+              abcdefg
+
+              abcdefg
+              """
+            cursor: [2, 3]
+          ensure 'v', cursor: [2, 4]
+          ensure 'kk',
+            cursor: [0, 3]
+            selectedText: "defg\n\nabcd"
 
     describe "the l keybinding", ->
       beforeEach ->

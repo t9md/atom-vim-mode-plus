@@ -56,6 +56,11 @@ class Motion extends Base
     columnDelta = if selection.isReversed() then -1 else +1
     Range.fromPointWithDelta(point, 0, columnDelta)
 
+  withKeepingGoalColumn: (cursor, fn) ->
+    {goalColumn} = cursor
+    fn(cursor)
+    cursor.goalColumn = goalColumn if goalColumn
+
   selectInclusive: (selection, options) ->
     {cursor} = selection
 
@@ -66,13 +71,17 @@ class Motion extends Base
 
     selection.modifySelection =>
       tailRange = @getTailRange(selection)
-      cursor.moveLeft() unless selection.isReversed()
+      unless selection.isReversed()
+        @withKeepingGoalColumn cursor, (c) ->
+          c.moveLeft()
       @moveCursor(cursor, options)
 
       # Return if motion movement not happend if used as Operator target.
       return if (selection.isEmpty() and originallyEmpty)
 
-      cursor.moveRight() unless selection.isReversed()
+      unless selection.isReversed()
+        @withKeepingGoalColumn cursor, (c) ->
+          c.moveRight()
       selection.setBufferRange selection.getBufferRange().union(tailRange)
 
   selectLines: (selection) ->
