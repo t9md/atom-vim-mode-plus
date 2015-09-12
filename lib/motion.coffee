@@ -358,7 +358,7 @@ class MoveToLine extends MoveToLineBase
   moveCursor: (cursor) ->
     cursor.setBufferPosition([@getDestinationRow(@getCount()), Infinity])
     cursor.moveToFirstCharacterOfLine()
-    cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
+    # cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
 
 # keymap: gg
 class MoveToStartOfFile extends MoveToLineBase
