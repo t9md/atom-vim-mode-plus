@@ -109,6 +109,9 @@ class Motion extends Base
     cursor.moveToBeginningOfLine()
     cursor.moveToFirstCharacterOfLine()
 
+  getLastRow: ->
+    @editor.getBuffer().getLastRow()
+
 class CurrentSelection extends Motion
   @extend()
   selectedRange: null
@@ -351,23 +354,19 @@ class MoveToLineBase extends Motion
   getRow: (count) ->
     if count? then count - 1 else @editor.getBuffer().getLastRow()
 
-# keymap: G
-# [FIXME] can be consolidated G, gg
-class MoveToLastLine extends MoveToLineBase
-  @extend()
-  moveCursor: (cursor) ->
-    row = @getRow(@getCount())
-    cursor.setBufferPosition([row, 0])
-    cursor.moveToFirstCharacterOfLine()
-
 # keymap: gg
 class MoveToFirstLine extends MoveToLineBase
   @extend()
+  defaultRow: 1
   moveCursor: (cursor) ->
-    row = @getRow(@getCount(1))
+    row = @getRow @getCount(@defaultRow)
     cursor.setBufferPosition([row, 0])
-    unless @isLinewise()
-      cursor.moveToFirstCharacterOfLine()
+    cursor.moveToFirstCharacterOfLine()
+
+# keymap: G
+class MoveToLastLine extends MoveToFirstLine
+  @extend()
+  defaultRow: null # FIXME not self explanatory
 
 class MoveToRelativeLine extends MoveToLineBase
   @extend()
