@@ -355,18 +355,17 @@ class MoveToLineBase extends Motion
 # [FIXME] can be consolidated G, gg
 class MoveToLastLine extends MoveToLineBase
   @extend()
-
   moveCursor: (cursor) ->
-    cursor.setBufferPosition([@getRow(@getCount()), Infinity])
+    row = @getRow(@getCount())
+    cursor.setBufferPosition([row, 0])
     cursor.moveToFirstCharacterOfLine()
-    cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
 
 # keymap: gg
 class MoveToFirstLine extends MoveToLineBase
   @extend()
-
   moveCursor: (cursor) ->
-    cursor.setBufferPosition([@getRow(@getCount(1)), 0])
+    row = @getRow(@getCount(1))
+    cursor.setBufferPosition([row, 0])
     unless @isLinewise()
       cursor.moveToFirstCharacterOfLine()
 
@@ -870,7 +869,7 @@ module.exports = {
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
   MoveToNextParagraph, MoveToPreviousParagraph
-  MoveToFirstLine, MoveToLastLine,
+  MoveToLastLine, MoveToFirstLine,
   MoveToRelativeLine, MoveToBeginningOfLine
   MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineUp
   MoveToLastCharacterOfLine, MoveToFirstCharacterOfLineDown
