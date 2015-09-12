@@ -639,7 +639,11 @@ describe "Motion", ->
     describe "as a motion", ->
       describe "in normal mode", ->
         it "moves the cursor to the beginning of the first line", ->
-          ensure 'gg', cursor: [0, 0]
+          set cursor: [2, 0]
+          ensure 'gg', cursor: [0, 1]
+
+        it "move to same position if its on first line and first char", ->
+          ensure 'gg', cursor: [0, 1]
 
       describe "in linewise visual mode", ->
         it "selects to the first line in the file", ->
@@ -656,10 +660,10 @@ describe "Motion", ->
             selectedText: "1abc\n 2"
             cursor: [0, 1]
 
-    describe "as a repeated motion", ->
+    describe "when count specified", ->
       describe "in normal mode", ->
-        it "moves the cursor to a specified line", ->
-          ensure '2gg', cursor: [1, 0]
+        it "moves the cursor to first char of a specified line", ->
+          ensure '2gg', cursor: [1, 1]
 
       describe "in linewise visual motion", ->
         it "selects to a specified line", ->
