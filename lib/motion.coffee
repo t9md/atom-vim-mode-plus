@@ -362,7 +362,7 @@ class MoveToLastLine extends MoveToLineBase
     cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
 
 # keymap: gg
-class MoveToStartOfFile extends MoveToLineBase
+class MoveToFirstLine extends MoveToLineBase
   @extend()
 
   moveCursor: (cursor) ->
@@ -870,12 +870,11 @@ module.exports = {
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
   MoveToNextParagraph, MoveToPreviousParagraph
-  MoveToLastLine,
+  MoveToFirstLine, MoveToLastLine,
   MoveToRelativeLine, MoveToBeginningOfLine
   MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineUp
   MoveToLastCharacterOfLine, MoveToFirstCharacterOfLineDown
   MoveToFirstCharacterOfLineAndDown, MoveToLastNonblankCharacterOfLineAndDown
-  MoveToStartOfFile,
   MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen,
 
   ScrollHalfScreenUp

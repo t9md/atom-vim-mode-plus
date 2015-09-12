@@ -211,7 +211,7 @@ class VimState
       'move-to-first-character-of-line-up', 'move-to-first-character-of-line-down',
       'move-to-first-character-of-line-and-down',
       'move-to-last-nonblank-character-of-line-and-down',
-      'move-to-start-of-file', 'move-to-last-line',
+      'move-to-first-line', 'move-to-last-line',
       'move-to-top-of-screen', 'move-to-bottom-of-screen', 'move-to-middle-of-screen',
       'scroll-half-screen-up', 'scroll-half-screen-down',
       'scroll-full-screen-up', 'scroll-full-screen-down',
