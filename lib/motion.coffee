@@ -1,11 +1,4 @@
-# Refactoring status: 20%
-# [TODO]
-# #774
-# #783
-
-# Motion is either @inclusive or @exclusive
-# Operator is either @linewise, @characterwise or @blockwise
-
+# Refactoring status: 40%
 {Point, Range} = require 'atom'
 _ = require 'underscore-plus'
 
@@ -56,7 +49,8 @@ class Motion extends Base
         when @isInclusive()
           @selectInclusive(selection, options)
         else
-          @selectExclusive(selection, options)
+          selection.modifySelection =>
+            @moveCursor(selection.cursor, options)
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
@@ -65,43 +59,23 @@ class Motion extends Base
   # Action
   # -------------------------
   selectInclusive: (selection, options) ->
-    {range, reversed} = @getInclusiveRange(selection, options)
-    selection.setBufferRange(range, {reversed})
+    {cursor} = selection
 
-  selectExclusive: (selection, options) ->
-    selection.modifySelection =>
-      @moveCursor(selection.cursor, options)
-
-  getInclusiveRange: (selection, options) ->
+    # Selection maybe empty when Motion is used as target of Operator.
     if selection.isEmpty()
       originallyEmpty = true
       selection.selectRight()
 
-    {cursor} = selection
-    tailRange = @getTailRange(selection)
-    pointSrc = selection.getTailBufferPosition()
-    unless selection.isReversed()
-      cursor.moveLeft()
-    selection.clear()
-    @moveCursor(cursor, options)
-    pointDst = cursor.getBufferPosition()
+    selection.modifySelection =>
+      tailRange = @getTailRange(selection)
+      cursor.moveLeft() unless selection.isReversed()
+      @moveCursor(cursor, options)
 
-    switch
-      when pointSrc.isEqual(pointDst) and originallyEmpty
-        # When Motion is used as target of Operator,
-        # selection is initially empty and should not
-        # select anything when motion movement not happend.
-        {range: new Range(pointSrc, pointDst), reversed: false}
-      when pointSrc.isLessThanOrEqual(pointDst)
-        cursor.moveRight()
-        pointDst = cursor.getBufferPosition()
-        range = new Range(pointSrc, pointDst).union(tailRange)
-        reversed = false
-        {range, reversed}
-      else
-        range = new Range(pointDst, pointSrc).union(tailRange)
-        reversed = true
-        {range, reversed}
+      # Return if motion movement not happend if used as Operator target.
+      return if (selection.isEmpty() and originallyEmpty)
+
+      cursor.moveRight() unless selection.isReversed()
+      selection.setBufferRange selection.getBufferRange().union(tailRange)
 
   # This tail position is always selected even if selection isReversed() as a result of cursor movement.
   getTailRange: (selection) ->
