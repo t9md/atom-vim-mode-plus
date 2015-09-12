@@ -464,26 +464,26 @@ describe "TextObject", ->
     describe 'select inside comment', ->
       it 'select inside comment block', ->
         vim.set cursor: [0, 0]
-        vim.ensure 'vic',
+        vim.ensure 'vi/',
           selectedText: '# This\n# is\n# Comment\n'
           selectedBufferRange: [[0, 0], [3, 0]]
 
       it 'select one line comment', ->
         vim.set cursor: [4, 0]
-        vim.ensure 'vic',
+        vim.ensure 'vi/',
           selectedText: '# One line comment\n'
           selectedBufferRange: [[4, 0], [5, 0]]
 
       it 'not select non-comment line', ->
         vim.set cursor: [6, 0]
-        vim.ensure 'vic',
+        vim.ensure 'vi/',
           selectedText: '# Comment\n# border\n'
           selectedBufferRange: [[6, 0], [8, 0]]
 
     describe 'select around comment', ->
       it 'include blank line when selecting comment', ->
         vim.set cursor: [0, 0]
-        vim.ensure 'vac',
+        vim.ensure 'va/',
           selectedText: """
           # This
           # is
