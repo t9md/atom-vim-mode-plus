@@ -629,7 +629,11 @@ describe "Motion", ->
   describe "the gg keybinding", ->
     beforeEach ->
       set
-        text: " 1abc\n 2\n3\n"
+        text: """
+           1abc
+           2
+          3\n
+          """
         cursor: [0, 2]
 
     describe "as a motion", ->
