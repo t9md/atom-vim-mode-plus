@@ -48,14 +48,15 @@ class Motion extends Base
   select: (options) ->
     for selection in @editor.getSelections()
       switch
-        when @isLinewise()
-          @selectLinewise(selection, options)
+        when @isInclusive(), @isLinewise()
+          @selectInclusive(selection, options)
+          if @isLinewise()
+            for row in selection.getBufferRowRange()
+              selection.selectLine(row)
         when @isInclusive()
           @selectInclusive(selection, options)
         else
-          # Simply move cursor to extend selection.
-          selection.modifySelection =>
-            @moveCursor(selection.cursor, options)
+          @selectExclusive(selection, options)
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
@@ -63,39 +64,17 @@ class Motion extends Base
 
   # Action
   # -------------------------
-  selectLinewise: (selection, options) ->
-    selection.modifySelection =>
-      [oldStartRow, oldEndRow] = selection.getBufferRowRange()
-
-      wasEmpty = selection.isEmpty()
-      wasReversed = selection.isReversed()
-      unless wasEmpty or wasReversed
-        selection.cursor.moveLeft()
-
-      @moveCursor(selection.cursor, options)
-
-      isEmpty = selection.isEmpty()
-      isReversed = selection.isReversed()
-      unless isEmpty or isReversed
-        selection.cursor.moveRight()
-
-      [newStartRow, newEndRow] = selection.getBufferRowRange()
-
-      if isReversed and not wasReversed
-        newEndRow = Math.max(newEndRow, oldStartRow)
-      if wasReversed and not isReversed
-        newStartRow = Math.min(newStartRow, oldEndRow)
-
-      selection.setBufferRange([[newStartRow, 0], [newEndRow + 1, 0]])
-
   selectInclusive: (selection, options) ->
-    if result = @getInclusiveRange(selection, options)
-      {range, reversed} = result
-      selection.setBufferRange(range, {reversed})
+    {range, reversed} = @getInclusiveRange(selection, options)
+    selection.setBufferRange(range, {reversed})
+
+  selectExclusive: (selection, options) ->
+    selection.modifySelection =>
+      @moveCursor(selection.cursor, options)
 
   getInclusiveRange: (selection, options) ->
     if selection.isEmpty()
-      wasEmpty = true
+      originallyEmpty = true
       selection.selectRight()
 
     {cursor} = selection
@@ -107,21 +86,22 @@ class Motion extends Base
     @moveCursor(cursor, options)
     pointDst = cursor.getBufferPosition()
 
-    # When Motion is used as target of Operator,
-    # selection is initially empty and should not
-    # select anything when motion movement not happend.
-    if pointSrc.isEqual(pointDst) and wasEmpty
-      return
-
-    if pointSrc.isLessThanOrEqual(pointDst)
-      cursor.moveRight()
-      pointDst = cursor.getBufferPosition()
-      reversed = false
-      range = new Range(pointSrc, pointDst)
-    else
-      reversed = true
-      range = new Range(pointDst, pointSrc)
-    {range: range.union(tailRange), reversed}
+    switch
+      when pointSrc.isEqual(pointDst) and originallyEmpty
+        # When Motion is used as target of Operator,
+        # selection is initially empty and should not
+        # select anything when motion movement not happend.
+        {range: new Range(pointSrc, pointDst), reversed: false}
+      when pointSrc.isLessThanOrEqual(pointDst)
+        cursor.moveRight()
+        pointDst = cursor.getBufferPosition()
+        range = new Range(pointSrc, pointDst).union(tailRange)
+        reversed = false
+        {range, reversed}
+      else
+        range = new Range(pointDst, pointSrc).union(tailRange)
+        reversed = true
+        {range, reversed}
 
   # This tail position is always selected even if selection isReversed() as a result of cursor movement.
   getTailRange: (selection) ->
