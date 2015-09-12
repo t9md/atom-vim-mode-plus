@@ -24,11 +24,6 @@ module.exports = new ScopedConfig 'vim-mode',
     order: 3
     type: 'boolean'
     default: false
-  swapZeroWithHat:
-    order: 4
-    type: 'boolean'
-    default: false
-    description: 'swap behavior of `0` with `^` without losing "set-count 0" behavior of 0 keystroke.'
   useClipboardAsDefaultRegister:
     order: 5
     type: 'boolean'

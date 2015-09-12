@@ -88,6 +88,8 @@ class Motion extends Base
     for row in selection.getBufferRowRange()
       selection.selectLine(row)
 
+  # Utils
+  # -------------------------
   countTimes: (fn) ->
     _.times @getCount(@defaultCount), ->
       fn()
@@ -102,6 +104,10 @@ class Motion extends Base
         cursor.getScreenRow() is 0
       when 'LastScreenRow'
         cursor.getScreenRow() is @editor.getLastScreenRow()
+
+  moveToFirstCharacterOfLine: (cursor) ->
+    cursor.moveToBeginningOfLine()
+    cursor.moveToFirstCharacterOfLine()
 
 class CurrentSelection extends Motion
   @extend()
@@ -120,8 +126,7 @@ class CurrentSelection extends Motion
     unless @vimState.isVisualMode()
       @selectCharacters()
       if @wasLinewise
-        for s in @editor.getSelections()
-          @selectLines(s)
+        @selectLines(s) for s in @editor.getSelections()
 
     @countTimes -> true
     # (not s.isEmpty() for s in @editor.getSelections())
@@ -270,41 +275,15 @@ class MoveToBeginningOfLine extends Motion
 
   constructor: ->
     super
-
     # 0 is special need to differenciate `10`, 0
-    # [NOTE] @getCount() depending on vimState, so we need to call super first.
     if @getCount()?
+      # if true, it means preceeding number exist, so we should behave as `0`.
       @vimState.count.set(0)
       @abort()
 
   moveCursor: (cursor) ->
     @countTimes ->
       cursor.moveToBeginningOfLine()
-      if settings.get('swapZeroWithHat')
-        cursor.moveToFirstCharacterOfLine()
-
-class MoveToFirstCharacterOfLine extends Motion
-  @extend()
-
-  moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveToBeginningOfLine()
-      unless settings.get('swapZeroWithHat')
-        cursor.moveToFirstCharacterOfLine()
-
-class MoveToFirstCharacterOfLineAndDown extends Motion
-  @extend()
-  linewise: true
-  defaultCount: 0
-
-  getCount: ->
-    super - 1
-
-  moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveDown()
-    cursor.moveToBeginningOfLine()
-    cursor.moveToFirstCharacterOfLine()
 
 class MoveToLastCharacterOfLine extends Motion
   @extend()
@@ -338,25 +317,29 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
       cursor.moveDown()
     @skipTrailingWhitespace(cursor)
 
-class MoveToFirstCharacterOfLineUp extends Motion
+class MoveToFirstCharacterOfLine extends Motion
+  @extend()
+  moveCursor: (cursor) ->
+    @moveToFirstCharacterOfLine(cursor)
+
+class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
   linewise: true
-
   moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveUp()
-    cursor.moveToBeginningOfLine()
-    cursor.moveToFirstCharacterOfLine()
+    @countTimes -> cursor.moveUp()
+    super
 
-class MoveToFirstCharacterOfLineDown extends Motion
+class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
   linewise: true
-
   moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveDown()
-    cursor.moveToBeginningOfLine()
-    cursor.moveToFirstCharacterOfLine()
+    @countTimes -> cursor.moveDown()
+    super
+
+class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
+  @extend()
+  defaultCount: 0
+  getCount: -> super - 1
 
 # Not directly used.
 class MoveToLineBase extends Motion
@@ -893,7 +876,6 @@ module.exports = {
   MoveToStartOfFile,
   MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen,
 
-  # Aliased
   ScrollHalfScreenUp
   ScrollHalfScreenDown
   ScrollFullScreenUp
