@@ -351,11 +351,6 @@ describe "Motion", ->
         it "moves the cursor to the first character of the line", ->
           ensure '^', cursor: [0, 2]
 
-      describe "when 'swapZeroWithHat'", ->
-        it "behave as move-to-beginning-of-line", ->
-          atom.config.set('vim-mode.swapZeroWithHat', true)
-          ensure '^', cursor: [0, 0]
-
       describe "as a selection", ->
         it 'selects to the first character of the line', ->
           ensure 'd^', text: 'abcde', cursor: [0, 0]
@@ -391,11 +386,6 @@ describe "Motion", ->
     describe "as a motion", ->
       it "moves the cursor to the first column", ->
         ensure '0', cursor: [0, 0]
-
-    describe "when 'swapZeroWithHat'", ->
-      it "behave as move-to-first-character-of-line", ->
-        atom.config.set('vim-mode.swapZeroWithHat', true)
-        ensure '0', cursor: [0, 2]
 
     describe "as a selection", ->
       it 'selects to the first column of the line', ->

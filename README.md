@@ -35,7 +35,6 @@ But I need some pastime, refresher, So I added following new features which is n
   - CurrentLine. Useful when you do surround line.
   - Comment. which select consecutive commented lines.
 - Motion
-  - `0` is accessible position than `^` so provide config option to behave `0` like `^`(I want single `0` behave as `^` without losing setting count 0 ability).
 - Instant feedback of your operation. Count/Register/Operation you typed is displayed as hover(overlay) element.
  - Showing emoji that representing operation.
 - Flashing(highlighting) operation affected area(range) for yank, paste, toggle etc..
@@ -83,7 +82,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 - [x] Show cursor in visual-mode(now characterwise only) without hacking `Cursor.prototype`.
 - [x] Support visual-block by incorporating with [vim-mode-visual-block](https://github.com/t9md/atom-vim-mode-visual-block).
 - [x] Support web-font(?) font-awesome etc. to show on overlay hover.
-- [x] `0` is accessible position than `^` so provide config option to behave `0` like `^`(I want single `0` behave as `^`).
+- [x] `0` is accessible position than `^` so provide config option to behave `0` like `^`(I want single `0` behave as `^`). Removed this feature after evaluation, I don' need this.
 - [x] Show emoji that representing current operation.
 - [x] Get user's input with consistent manner via `@vimState.input`.
 - [x] Flash(highlight) region for yanked, pasted, indented for giving instant feedback to user, beneficial especially used as operator like `yip`, `=ip`.
