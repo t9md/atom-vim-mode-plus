@@ -18,8 +18,6 @@ class Motion extends Base
   linewise: false
   defaultCount: 1
 
-  # Motion characteristics
-  # -------------------------
   isLinewise: ->
     if @vimState.isVisualMode()
       @vimState.submode is 'linewise'
@@ -32,8 +30,6 @@ class Motion extends Base
     else
       @inclusive
 
-  # Action
-  # -------------------------
   execute: ->
     @editor.moveCursors (cursor) =>
       @moveCursor(cursor)
@@ -43,9 +39,7 @@ class Motion extends Base
       switch
         when @isInclusive(), @isLinewise()
           @selectInclusive(selection, options)
-          if @isLinewise()
-            for row in selection.getBufferRowRange()
-              selection.selectLine(row)
+          @selectLines(selection) if @isLinewise()
         when @isInclusive()
           @selectInclusive(selection, options)
         else
@@ -56,8 +50,12 @@ class Motion extends Base
     @editor.mergeIntersectingSelections()
     (not s.isEmpty() for s in @editor.getSelections())
 
-  # Action
-  # -------------------------
+  # This tail position is always selected even if selection isReversed() as a result of cursor movement.
+  getTailRange: (selection) ->
+    point = selection.getTailBufferPosition()
+    columnDelta = if selection.isReversed() then -1 else +1
+    Range.fromPointWithDelta(point, 0, columnDelta)
+
   selectInclusive: (selection, options) ->
     {cursor} = selection
 
@@ -77,11 +75,9 @@ class Motion extends Base
       cursor.moveRight() unless selection.isReversed()
       selection.setBufferRange selection.getBufferRange().union(tailRange)
 
-  # This tail position is always selected even if selection isReversed() as a result of cursor movement.
-  getTailRange: (selection) ->
-    point = selection.getTailBufferPosition()
-    columnDelta = if selection.isReversed() then -1 else +1
-    Range.fromPointWithDelta(point, 0, columnDelta)
+  selectLines: (selection) ->
+    for row in selection.getBufferRowRange()
+      selection.selectLine(row)
 
   countTimes: (fn) ->
     _.times @getCount(@defaultCount), ->
@@ -98,43 +94,31 @@ class Motion extends Base
       when 'LastScreenRow'
         cursor.getScreenRow() is @editor.getLastScreenRow()
 
-  lineTextForBufferRow: (bufferRow) ->
-    @editor.lineTextForBufferRow(bufferRow)
-
-  bufferRangeForBufferRow: (bufferRow) ->
-    @editor.bufferRangeForBufferRow(bufferRow)
-
-  getEofBufferPosition: ->
-    @editor.getEofBufferPosition()
-
 class CurrentSelection extends Motion
   @extend()
+  selectedRange: null
   constructor: ->
     super
-    @lastSelectionRange = @editor.getSelectedBufferRange()
+    @selectedRange = @editor.getSelectedBufferRange()
     @wasLinewise = @isLinewise()
 
   execute: ->
     @countTimes -> true
 
   select: ->
-    # in visual mode, the current selections are already there
-    # if we're not in visual mode, we are repeating some operation and need to re-do the selections
+    # In visual mode, the current selections are already there.
+    # If we're not in visual mode, we are repeating some operation and need to re-do the selections
     unless @vimState.isVisualMode()
+      @selectCharacters()
       if @wasLinewise
-        @selectLines()
-      else
-        @selectCharacters()
-    @countTimes -> true
+        for s in @editor.getSelections()
+          @selectLines(s)
 
-  selectLines: ->
-    extent = @lastSelectionRange.getExtent()
-    for selection in @editor.getSelections()
-      row = selection.cursor.getBufferRow()
-      selection.setBufferRange [[row, 0], [row + extent.row, 0]]
+    @countTimes -> true
+    # (not s.isEmpty() for s in @editor.getSelections())
 
   selectCharacters: ->
-    extent = @lastSelectionRange.getExtent()
+    extent = @selectedRange.getExtent()
     for selection in @editor.getSelections()
       {start} = selection.getBufferRange()
       end = start.traverse(extent)
@@ -211,7 +195,6 @@ class MoveToPreviousWholeWord extends Motion
 class MoveToNextWord extends Motion
   @extend()
   wordRegex: null
-
   moveCursor: (cursor, options) ->
     @countTimes =>
       current = cursor.getBufferPosition()
@@ -263,7 +246,6 @@ class MoveToEndOfWholeWord extends MoveToEndOfWord
 
 class MoveToNextParagraph extends Motion
   @extend()
-
   moveCursor: (cursor) ->
     @countTimes ->
       cursor.moveToBeginningOfNextParagraph()
