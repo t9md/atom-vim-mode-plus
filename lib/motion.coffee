@@ -348,25 +348,25 @@ class MoveToLineBase extends Motion
   @extend()
   linewise: true
 
-  getDestinationRow: (count) ->
+  getRow: (count) ->
     if count? then count - 1 else @editor.getBuffer().getLastRow()
 
 # keymap: G
-class MoveToLine extends MoveToLineBase
+# [FIXME] can be consolidated G, gg
+class MoveToLastLine extends MoveToLineBase
   @extend()
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition([@getDestinationRow(@getCount()), Infinity])
+    cursor.setBufferPosition([@getRow(@getCount()), Infinity])
     cursor.moveToFirstCharacterOfLine()
-    # cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
+    cursor.moveToEndOfLine() if cursor.getBufferColumn() is 0
 
 # keymap: gg
 class MoveToStartOfFile extends MoveToLineBase
   @extend()
 
   moveCursor: (cursor) ->
-    {row, column} = @editor.getCursorBufferPosition()
-    cursor.setBufferPosition([@getDestinationRow(@getCount(1)), 0])
+    cursor.setBufferPosition([@getRow(@getCount(1)), 0])
     unless @isLinewise()
       cursor.moveToFirstCharacterOfLine()
 
@@ -385,12 +385,12 @@ class MoveToScreenLine extends MoveToLineBase
   scrolloff: 2
 
   moveCursor: (cursor) ->
-    cursor.setScreenPosition([@getDestinationRow(), 0])
+    cursor.setScreenPosition([@getRow(), 0])
 
 # keymap: H
 class MoveToTopOfScreen extends MoveToScreenLine
   @extend()
-  getDestinationRow: ->
+  getRow: ->
     count = @getCount(0)
     firstScreenRow = @editorElement.getFirstVisibleScreenRow()
     if firstScreenRow > 0
@@ -402,7 +402,7 @@ class MoveToTopOfScreen extends MoveToScreenLine
 # keymap: L
 class MoveToBottomOfScreen extends MoveToScreenLine
   @extend()
-  getDestinationRow: ->
+  getRow: ->
     count = @getCount(0)
     lastScreenRow = @editorElement.getLastVisibleScreenRow()
     lastRow = @editor.getBuffer().getLastRow()
@@ -415,7 +415,7 @@ class MoveToBottomOfScreen extends MoveToScreenLine
 # keymap: M
 class MoveToMiddleOfScreen extends MoveToScreenLine
   @extend()
-  getDestinationRow: ->
+  getRow: ->
     firstScreenRow = @editorElement.getFirstVisibleScreenRow()
     lastScreenRow = @editorElement.getLastVisibleScreenRow()
     height = lastScreenRow - firstScreenRow
@@ -438,9 +438,9 @@ class ScrollKeepingCursor extends MoveToLineBase
     @editor.setScrollTop(finalDestination)
 
   moveCursor: (cursor) ->
-    cursor.setScreenPosition([@getDestinationRow(@getCount(1)), 0])
+    cursor.setScreenPosition([@getRow(@getCount(1)), 0])
 
-  getDestinationRow: ->
+  getRow: ->
     {row, column} = @editor.getCursorScreenPosition()
     @currentFirstScreenRow - @previousFirstScreenRow + row
 
@@ -870,7 +870,7 @@ module.exports = {
   MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
   MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
   MoveToNextParagraph, MoveToPreviousParagraph
-  MoveToLine,
+  MoveToLastLine,
   MoveToRelativeLine, MoveToBeginningOfLine
   MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineUp
   MoveToLastCharacterOfLine, MoveToFirstCharacterOfLineDown
