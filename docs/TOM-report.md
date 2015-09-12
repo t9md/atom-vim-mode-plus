@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-09-10T17:39:55.263Z*
+*generated at 2015-09-12T16:46:46.137Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -23,19 +23,19 @@ vim-mode version: 0.57.0
     - [MoveToEndOfWord](#movetoendofword--motion)
       - [MoveToEndOfWholeWord](#movetoendofwholeword--movetoendofword)
     - [MoveToFirstCharacterOfLine](#movetofirstcharacterofline--motion)
-    - [MoveToFirstCharacterOfLineAndDown](#movetofirstcharacteroflineanddown--motion)
-    - [MoveToFirstCharacterOfLineDown](#movetofirstcharacteroflinedown--motion)
-    - [MoveToFirstCharacterOfLineUp](#movetofirstcharacteroflineup--motion)
+      - [MoveToFirstCharacterOfLineDown](#movetofirstcharacteroflinedown--movetofirstcharacterofline)
+        - [MoveToFirstCharacterOfLineAndDown](#movetofirstcharacteroflineanddown--movetofirstcharacteroflinedown)
+      - [MoveToFirstCharacterOfLineUp](#movetofirstcharacteroflineup--movetofirstcharacterofline)
     - [MoveToLastCharacterOfLine](#movetolastcharacterofline--motion)
     - [MoveToLastNonblankCharacterOfLineAndDown](#movetolastnonblankcharacteroflineanddown--motion)
     - [MoveToLineBase](#movetolinebase--motion) *Not exported*
-      - [MoveToLine](#movetoline--movetolinebase)
+      - [MoveToFirstLine](#movetofirstline--movetolinebase)
+        - [MoveToLastLine](#movetolastline--movetofirstline)
       - [MoveToRelativeLine](#movetorelativeline--movetolinebase)
       - [MoveToScreenLine](#movetoscreenline--movetolinebase) *Not exported*
         - [MoveToBottomOfScreen](#movetobottomofscreen--movetoscreenline)
         - [MoveToMiddleOfScreen](#movetomiddleofscreen--movetoscreenline)
         - [MoveToTopOfScreen](#movetotopofscreen--movetoscreenline)
-      - [MoveToStartOfFile](#movetostartoffile--movetolinebase)
       - [ScrollKeepingCursor](#scrollkeepingcursor--movetolinebase) *Not exported*
         - [ScrollFullScreenUp](#scrollfullscreenup--scrollkeepingcursor)
           - [ScrollFullScreenDown](#scrollfullscreendown--scrollfullscreenup)
@@ -221,15 +221,15 @@ vim-mode version: 0.57.0
 - ::isMoveToNextParagraph`()`
 - ::isMoveToPreviousParagraph`()`
 - ::isMoveToBeginningOfLine`()`
-- ::isMoveToFirstCharacterOfLine`()`
-- ::isMoveToFirstCharacterOfLineAndDown`()`
 - ::isMoveToLastCharacterOfLine`()`
 - ::isMoveToLastNonblankCharacterOfLineAndDown`()`
+- ::isMoveToFirstCharacterOfLine`()`
 - ::isMoveToFirstCharacterOfLineUp`()`
 - ::isMoveToFirstCharacterOfLineDown`()`
+- ::isMoveToFirstCharacterOfLineAndDown`()`
 - ::isMoveToLineBase`()`
-- ::isMoveToLine`()`
-- ::isMoveToStartOfFile`()`
+- ::isMoveToFirstLine`()`
+- ::isMoveToLastLine`()`
 - ::isMoveToRelativeLine`()`
 - ::isMoveToScreenLine`()`
 - ::isMoveToTopOfScreen`()`
@@ -334,26 +334,24 @@ vim-mode version: 0.57.0
 - ::inclusive: ```false```
 - ::linewise: ```false```
 - ::defaultCount: ```1```
-- ::select`(options)`
-- ::execute`()`
-- ::getSelectedBufferRow`(selection, which)`
-- ::selectLinewise`(selection, options)`
-- ::selectInclusive`(selection, options)`
-- ::isSingleColumnSelection`(selection)`
-- ::selectVisual`(selection, options)`
-- ::moveSelection`(selection, options)`
 - ::isLinewise`()`
+- ::isInclusive`()`
+- ::execute`()`
+- ::select`(options)`
+- ::getTailRange`(selection)`
+- ::withKeepingGoalColumn`(cursor, fn)`
+- ::selectInclusive`(selection, options)`
+- ::selectLines`(selection)`
 - ::countTimes`(fn)`
 - ::at`(where, cursor)`
-- ::lineTextForBufferRow`(bufferRow)`
-- ::bufferRangeForBufferRow`(bufferRow)`
-- ::getEofBufferPosition`()`
+- ::moveToFirstCharacterOfLine`(cursor)`
+- ::getLastRow`()`
 
 ### CurrentSelection < Motion
 - ::constructor`()`: `super`: **Overridden**
+- ::selectedRange: ```null```
 - ::execute`()`: **Overridden**
 - ::select`()`: **Overridden**
-- ::selectLines`()`
 - ::selectCharacters`()`
 
 ### Find < Motion
@@ -465,29 +463,27 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>^</kbd>
 - ::moveCursor`(cursor)`
 
-### MoveToFirstCharacterOfLineAndDown < Motion
-- command: `vim-mode:move-to-first-character-of-line-and-down`
-- keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): <kbd>\_</kbd>
-- ::linewise: ```true```: **Overridden**
-- ::defaultCount: ```0```: **Overridden**
-- ::getCount`()`: **Overridden**
-- ::moveCursor`(cursor)`
-
-### MoveToFirstCharacterOfLineDown < Motion
+### MoveToFirstCharacterOfLineDown < MoveToFirstCharacterOfLine
 - command: `vim-mode:move-to-first-character-of-line-down`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>+</kbd>
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>enter</kbd>
 - ::linewise: ```true```: **Overridden**
-- ::moveCursor`(cursor)`
+- ::moveCursor`(cursor)`: `super`: **Overridden**
 
-### MoveToFirstCharacterOfLineUp < Motion
+### MoveToFirstCharacterOfLineAndDown < MoveToFirstCharacterOfLineDown
+- command: `vim-mode:move-to-first-character-of-line-and-down`
+- keymaps
+  - atom-text-editor.vim-mode:not(.insert-mode): <kbd>\_</kbd>
+- ::defaultCount: ```0```: **Overridden**
+- ::getCount`()`: **Overridden**
+
+### MoveToFirstCharacterOfLineUp < MoveToFirstCharacterOfLine
 - command: `vim-mode:move-to-first-character-of-line-up`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>-</kbd>
 - ::linewise: ```true```: **Overridden**
-- ::moveCursor`(cursor)`
+- ::moveCursor`(cursor)`: `super`: **Overridden**
 
 ### MoveToLastCharacterOfLine < Motion
 - command: `vim-mode:move-to-last-character-of-line`
@@ -508,13 +504,20 @@ vim-mode version: 0.57.0
 ### MoveToLineBase < Motion
 *Not exported*
 - ::linewise: ```true```: **Overridden**
-- ::getDestinationRow`(count)`
+- ::getRow`(count)`
 
-### MoveToLine < MoveToLineBase
-- command: `vim-mode:move-to-line`
+### MoveToFirstLine < MoveToLineBase
+- command: `vim-mode:move-to-first-line`
+- keymaps
+  - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g g</kbd>
+- ::defaultRow: ```1```
+- ::moveCursor`(cursor)`
+
+### MoveToLastLine < MoveToFirstLine
+- command: `vim-mode:move-to-last-line`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>G</kbd>
-- ::moveCursor`(cursor)`
+- ::defaultRow: ```null```: **Overridden**
 
 ### MoveToRelativeLine < MoveToLineBase
 - ::linewise: ```true```: **Overridden**
@@ -529,25 +532,19 @@ vim-mode version: 0.57.0
 - command: `vim-mode:move-to-bottom-of-screen`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>L</kbd>
-- ::getDestinationRow`()`: **Overridden**
+- ::getRow`()`: **Overridden**
 
 ### MoveToMiddleOfScreen < MoveToScreenLine
 - command: `vim-mode:move-to-middle-of-screen`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>M</kbd>
-- ::getDestinationRow`()`: **Overridden**
+- ::getRow`()`: **Overridden**
 
 ### MoveToTopOfScreen < MoveToScreenLine
 - command: `vim-mode:move-to-top-of-screen`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>H</kbd>
-- ::getDestinationRow`()`: **Overridden**
-
-### MoveToStartOfFile < MoveToLineBase
-- command: `vim-mode:move-to-start-of-file`
-- keymaps
-  - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g g</kbd>
-- ::moveCursor`(cursor)`
+- ::getRow`()`: **Overridden**
 
 ### ScrollKeepingCursor < MoveToLineBase
 *Not exported*
@@ -557,7 +554,7 @@ vim-mode version: 0.57.0
 - ::select`(options)`: `super(options)`: **Overridden**
 - ::execute`()`: `super`: **Overridden**
 - ::moveCursor`(cursor)`
-- ::getDestinationRow`()`: **Overridden**
+- ::getRow`()`: **Overridden**
 - ::scrollScreen`()`
 - ::getHalfScreenPixel`()`
 
