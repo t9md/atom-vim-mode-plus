@@ -17,6 +17,9 @@ class Motion extends Base
   inclusive: false
   linewise: false
   defaultCount: 1
+  options: null
+
+  setOptions: (@options) ->
 
   isLinewise: ->
     if @vimState.isVisualMode()
@@ -34,17 +37,18 @@ class Motion extends Base
     @editor.moveCursors (cursor) =>
       @moveCursor(cursor)
 
-  select: (options) ->
+  select: ->
     for selection in @editor.getSelections()
       switch
         when @isInclusive(), @isLinewise()
-          @selectInclusive(selection, options)
-          @selectLines(selection) if @isLinewise()
+          @selectInclusive selection
+          if @isLinewise()
+            @selectLines selection
         when @isInclusive()
-          @selectInclusive(selection, options)
+          @selectInclusive selection
         else
           selection.modifySelection =>
-            @moveCursor(selection.cursor, options)
+            @moveCursor selection.cursor
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
@@ -61,7 +65,7 @@ class Motion extends Base
     fn(cursor)
     cursor.goalColumn = goalColumn if goalColumn
 
-  selectInclusive: (selection, options) ->
+  selectInclusive: (selection) ->
     {cursor} = selection
 
     # Selection maybe empty when Motion is used as target of Operator.
@@ -74,7 +78,7 @@ class Motion extends Base
       unless selection.isReversed()
         @withKeepingGoalColumn cursor, (c) ->
           c.moveLeft()
-      @moveCursor(cursor, options)
+      @moveCursor(cursor)
 
       # Return if motion movement not happend if used as Operator target.
       return if (selection.isEmpty() and originallyEmpty)
@@ -87,6 +91,7 @@ class Motion extends Base
   selectLines: (selection) ->
     for row in selection.getBufferRowRange()
       selection.selectLine(row)
+
 
   # Utils
   # -------------------------
@@ -212,11 +217,12 @@ class MoveToPreviousWholeWord extends Motion
 class MoveToNextWord extends Motion
   @extend()
   wordRegex: null
-  moveCursor: (cursor, options) ->
+
+  moveCursor: (cursor) ->
     @countTimes =>
       current = cursor.getBufferPosition()
 
-      next = if options?.excludeWhitespace
+      next = if @options?.excludeWhitespace
         cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
       else
         cursor.getBeginningOfNextWordBufferPosition(wordRegex: @wordRegex)
@@ -431,9 +437,9 @@ class ScrollKeepingCursor extends MoveToLineBase
   currentFirstScreenRow: 0
   direction: null
 
-  select: (options) ->
+  select: ->
     finalDestination = @scrollScreen()
-    super(options)
+    super
     @editor.setScrollTop(finalDestination)
 
   execute: ->
@@ -576,7 +582,7 @@ class Till extends Find
   match: ->
     @matched = super
 
-  selectInclusive: (selection, options) ->
+  selectInclusive: (selection) ->
     super
     if selection.isEmpty() and (@matched? and not @backwards)
       selection.modifySelection ->
