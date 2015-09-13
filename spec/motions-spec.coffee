@@ -1016,39 +1016,35 @@ describe "Motion", ->
   describe "the H keybinding", ->
     beforeEach ->
       set
-        text: "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"
+        text: """
+            1
+          2
+          3
+          4
+            5
+          6
+          7
+          8
+          9
+            10\n
+          """
         cursor: [8, 0]
-        spy:
-          obj: editor.getLastCursor(),
-          method: 'setScreenPosition'
+        # spy:
+        #   obj: editor.getLastCursor(),
+        #   method: 'setScreenPosition'
       # spyOn(editor.getLastCursor(), 'setScreenPosition')
 
-    it "moves the cursor to the first row if visible", ->
-      set
-        spy:
-          obj: editor, method: 'getFirstVisibleScreenRow', return: 0
-      ensure 'H',
-        called:
-          func: editor.getLastCursor().setScreenPosition
-          with: [0, 0]
+    it "moves the cursor to the non-blank-char on first row if visible", ->
+      set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 0
+      ensure 'H', cursor: [0, 2]
 
-    it "moves the cursor to the first visible row plus offset", ->
-      set
-        spy:
-          obj: editor, method: 'getFirstVisibleScreenRow', return: 2
-      ensure 'H',
-        called:
-          func: editor.getLastCursor().setScreenPosition
-          with: [4, 0]
+    it "moves the cursor to the non-blank-char on first visible row plus scroll offset", ->
+      set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 2
+      ensure 'H', cursor: [4, 2]
 
     it "respects counts", ->
-      set
-        spy:
-          obj: editor, method: 'getFirstVisibleScreenRow', return: 0
-      ensure '3H',
-        called:
-          func: editor.getLastCursor().setScreenPosition
-          with: [2, 0]
+      set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 0
+      ensure '4H', cursor: [3, 0]
 
   describe "the L keybinding", ->
     beforeEach ->
