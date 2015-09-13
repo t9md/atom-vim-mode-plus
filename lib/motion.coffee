@@ -399,101 +399,77 @@ class MoveToTopOfScreen extends Motion
     cursor.moveToFirstCharacterOfLine()
 
   getRow: ->
-    count = @getCount(0)
-    firstScreenRow = @getFirstVisibleScreenRow()
-    if firstScreenRow > 0
-      offset = Math.max(count - 1, @scrolloff)
-    else
-      offset = if count > 0 then count - 1 else count
-    firstScreenRow + offset
-
-# keymap: M
-class MoveToMiddleOfScreen extends MoveToTopOfScreen
-  @extend()
-  getRow: ->
-    firstScreenRow = @getFirstVisibleScreenRow()
-    lastScreenRow = @getLastVisibleScreenRow()
-    height = lastScreenRow - firstScreenRow
-    Math.floor(firstScreenRow + (height / 2))
+    row = @getFirstVisibleScreenRow()
+    offset = if row is 0 then 0 else @scrolloff
+    row + Math.max(@getCount(0) - 1, offset)
 
 # keymap: L
 class MoveToBottomOfScreen extends MoveToTopOfScreen
   @extend()
   getRow: ->
-    count = @getCount(0)
-    lastScreenRow = @getLastVisibleScreenRow()
-    lastRow = @getLastRow()
-    if lastScreenRow isnt lastRow
-      offset = Math.max(count - 1, @scrolloff)
-    else
-      offset = if count > 0 then count - 1 else count
-    lastScreenRow - offset
+    row = @getLastVisibleScreenRow()
+    offset = if row is @getLastRow() then 0 else @scrolloff
+    row - Math.max(@getCount(0) - 1, offset)
 
+# keymap: M
+class MoveToMiddleOfScreen extends MoveToTopOfScreen
+  @extend()
+  getRow: ->
+    row = @getFirstVisibleScreenRow()
+    offset = Math.floor(@editor.getRowsPerPage() / 2) - 1
+    row + Math.max(offset, 0)
+
+# Scrolling
 # -------------------------
-
+# [FIXME] count behave differently from original Vim.
 class ScrollKeepingCursor extends Motion
   @extend()
-  previousFirstScreenRow: 0
-  currentFirstScreenRow: 0
+  scrolledRows: 0
   direction: null
 
-  select: ->
-    finalDestination = @scrollScreen()
-    super
-    @editor.setScrollTop(finalDestination)
+  withScroll: (fn) ->
+    newScreenTop = @scroll()
+    fn()
+    @editor.setScrollTop newScreenTop
 
-  execute: ->
-    finalDestination = @scrollScreen()
-    super
-    @editor.setScrollTop(finalDestination)
+  select: -> @withScroll => super()
+  execute: -> @withScroll => super()
 
   moveCursor: (cursor) ->
-    cursor.setScreenPosition([@getRow(@getCount(1)), 0])
+    row = @editor.getCursorScreenPosition().row + @scrolledRows
+    cursor.setScreenPosition([row, 0])
 
-  getRow: ->
-    {row, column} = @editor.getCursorScreenPosition()
-    @currentFirstScreenRow - @previousFirstScreenRow + row
+  # just scroll, not move cursor in this function.
+  scroll: ->
+    firstScreenRowOrg = @getFirstVisibleScreenRow()
+    px = @getCount(1) * @getAmountInPixel() * @direction
+    @editor.setScrollTop (@editor.getScrollTop() + px)
+    @scrolledRows = @getFirstVisibleScreenRow() - firstScreenRowOrg
+    @editor.getScrollTop()
 
-  scrollScreen: ->
-    @previousFirstScreenRow = @getFirstVisibleScreenRow()
-
-    amountPx = @getCount(1) * @getAmountInPixel()
-    destination =
-      if @direction is 'up'
-        @editor.getScrollTop() - amountPx
-      else if @direction is 'down'
-        @editor.getScrollTop() + amountPx
-
-    @editor.setScrollTop(destination)
-    @currentFirstScreenRow = @getFirstVisibleScreenRow()
-    destination
-
-  getHalfScreenPixel: ->
+# keymap: ctrl-d
+class ScrollHalfScreenDown extends ScrollKeepingCursor
+  @extend()
+  direction: +1
+  getAmountInPixel: ->
     Math.floor(@editor.getRowsPerPage() / 2) * @editor.getLineHeightInPixels()
 
 # keymap: ctrl-u
-class ScrollHalfScreenUp extends ScrollKeepingCursor
+class ScrollHalfScreenUp extends ScrollHalfScreenDown
   @extend()
-  direction: 'up'
-  getAmountInPixel: ->
-    @getHalfScreenPixel()
+  direction: -1
 
-# keymap: ctrl-d
-class ScrollHalfScreenDown extends ScrollHalfScreenUp
+# keymap: ctrl-f
+class ScrollFullScreenDown extends ScrollKeepingCursor
   @extend()
-  direction: 'down'
-
-# keymap: ctrl-b
-class ScrollFullScreenUp extends ScrollKeepingCursor
-  @extend()
-  direction: 'up'
+  direction: +1
   getAmountInPixel: ->
     @editor.getHeight()
 
-# keymap: ctrl-f
-class ScrollFullScreenDown extends ScrollFullScreenUp
+# keymap: ctrl-b
+class ScrollFullScreenUp extends ScrollFullScreenDown
   @extend()
-  direction: 'down'
+  direction: -1
 
 # Find Motion
 # -------------------------

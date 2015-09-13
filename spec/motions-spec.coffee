@@ -1061,7 +1061,7 @@ describe "Motion", ->
         set
           spy: [
             {obj: editor, method: 'getFirstVisibleScreenRow', return: 0},
-            {obj: editor, method: 'getLastVisibleScreenRow',  return: 9},
+            {obj: editor, method: 'getRowsPerPage',  return: 10},
           ]
 
       it "moves the cursor to the non-blank-char of middle of screen", ->
