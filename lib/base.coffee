@@ -42,7 +42,7 @@ class Base
     @constructor.name
 
   getCount: (defaultCount=null) ->
-    # Setting count as instance variable make operation repeatable.
+    # Setting count as instance variable make operation repeatable with same count.
     @count ?= @vimState?.count.get() ? defaultCount
     @count
 
