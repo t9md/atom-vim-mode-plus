@@ -355,18 +355,24 @@ class MoveToLineBase extends Motion
     if count? then count - 1 else @editor.getBuffer().getLastRow()
 
 # keymap: gg
-class MoveToFirstLine extends MoveToLineBase
+class MoveToFirstLine extends Motion
   @extend()
-  defaultRow: 1
+  linewise: true
+
+  getRow: ->
+    if count = @getCount() then count - 1 else @getDefaultRow()
+
+  getDefaultRow: -> 0
+
   moveCursor: (cursor) ->
-    row = @getRow @getCount(@defaultRow)
-    cursor.setBufferPosition([row, 0])
+    cursor.setBufferPosition([@getRow(), 0])
     cursor.moveToFirstCharacterOfLine()
 
 # keymap: G
 class MoveToLastLine extends MoveToFirstLine
   @extend()
-  defaultRow: null # FIXME not self explanatory
+  getDefaultRow: ->
+    @getLastRow()
 
 class MoveToRelativeLine extends MoveToLineBase
   @extend()

@@ -121,7 +121,8 @@ describe "Motion", ->
 
   describe "the w keybinding", ->
     beforeEach ->
-      set text: "ab cde1+- \n xyz\n\nzip"
+      set
+        text: "ab cde1+- \n xyz\n\nzip"
 
     describe "as a motion", ->
       beforeEach ->
