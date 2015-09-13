@@ -1013,7 +1013,7 @@ describe "Motion", ->
             cursorBuffer: [1, 0]
           ensure '*', cursorBuffer: [3, 0]
 
-  describe "the H keybinding", ->
+  describe "the H, M, L keybinding", ->
     beforeEach ->
       set
         text: """
@@ -1026,77 +1026,46 @@ describe "Motion", ->
           7
           8
           9
-            10\n
+            10
           """
         cursor: [8, 0]
-        # spy:
-        #   obj: editor.getLastCursor(),
-        #   method: 'setScreenPosition'
-      # spyOn(editor.getLastCursor(), 'setScreenPosition')
 
-    it "moves the cursor to the non-blank-char on first row if visible", ->
-      set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 0
-      ensure 'H', cursor: [0, 2]
+    describe "the H keybinding", ->
+      it "moves the cursor to the non-blank-char on first row if visible", ->
+        set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 0
+        ensure 'H', cursor: [0, 2]
 
-    it "moves the cursor to the non-blank-char on first visible row plus scroll offset", ->
-      set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 2
-      ensure 'H', cursor: [4, 2]
+      it "moves the cursor to the non-blank-char on first visible row plus scroll offset", ->
+        set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 2
+        ensure 'H', cursor: [4, 2]
 
-    it "respects counts", ->
-      set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 0
-      ensure '4H', cursor: [3, 0]
+      it "respects counts", ->
+        set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 0
+        ensure '4H', cursor: [3, 0]
 
-  describe "the L keybinding", ->
-    beforeEach ->
-      set
-        text: "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"
-        cursor: [8, 0]
-        spy:
-          obj: editor.getLastCursor(), method: 'setScreenPosition'
+    describe "the L keybinding", ->
+      it "moves the cursor to non-blank-char on last row if visible", ->
+        set spy: obj: editor, method: 'getLastVisibleScreenRow', return: 9
+        ensure 'L', cursor: [9, 2]
 
-    it "moves the cursor to the first row if visible", ->
-      set
-        spy:
-          obj: editor, method: 'getLastVisibleScreenRow', return: 10
-      ensure 'L',
-        called:
-          func: editor.getLastCursor().setScreenPosition
-          with: [10, 0]
+      it "moves the cursor to the first visible row plus offset", ->
+        set spy: obj: editor, method: 'getLastVisibleScreenRow', return: 6
+        ensure 'L', cursor: [4, 2]
 
-    it "moves the cursor to the first visible row plus offset", ->
-      set
-        spy:
-          obj: editor, method: 'getLastVisibleScreenRow', return: 6
-      ensure 'L',
-        called:
-          func: editor.getLastCursor().setScreenPosition
-          with: [4, 0]
+      it "respects counts", ->
+        set spy: obj: editor, method: 'getLastVisibleScreenRow', return: 9
+        ensure '3L', [8, 0]
 
-    it "respects counts", ->
-      set
-        spy:
-          obj: editor, method: 'getLastVisibleScreenRow', return: 10
-      ensure '3L',
-        called:
-          func: editor.getLastCursor().setScreenPosition
-          with: [8, 0]
+    describe "the M keybinding", ->
+      beforeEach ->
+        set
+          spy: [
+            {obj: editor, method: 'getFirstVisibleScreenRow', return: 0},
+            {obj: editor, method: 'getLastVisibleScreenRow',  return: 9},
+          ]
 
-  describe "the M keybinding", ->
-    beforeEach ->
-      set
-        text: "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"
-        cursor: [8, 0]
-        spy: [
-          {obj: editor.getLastCursor(), method: 'setScreenPosition'},
-          {obj: editor, method: 'getLastVisibleScreenRow', return: 10},
-          {obj: editor, method: 'getFirstVisibleScreenRow', return: 0},
-        ]
-
-    it "moves the cursor to the first row if visible", ->
-      ensure 'M',
-        called:
-          func: editor.getLastCursor().setScreenPosition
-          with: [5, 0]
+      it "moves the cursor to the non-blank-char of middle of screen", ->
+        ensure 'M', cursor: [4, 2]
 
   describe 'the mark keybindings', ->
     beforeEach ->
