@@ -47,7 +47,7 @@ class Motion extends Base
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
-    (not s.isEmpty() for s in @editor.getSelections())
+    @getSelectionsStatus()
 
   # This tail position is always selected even if selection isReversed() as a result of cursor movement.
   getTailRange: (selection) ->
@@ -87,7 +87,6 @@ class Motion extends Base
     for row in selection.getBufferRowRange()
       selection.selectLine(row)
 
-
   # Utils
   # -------------------------
   countTimes: (fn) ->
@@ -118,6 +117,11 @@ class Motion extends Base
   getLastVisibleScreenRow: ->
     @editorElement.getLastVisibleScreenRow()
 
+  # return list of isEmpty() result of each selections which is expected
+  # to return from select() methods.
+  getSelectionsStatus: ->
+    (not s.isEmpty() for s in @editor.getSelections())
+
 class CurrentSelection extends Motion
   @extend()
   selectedRange: null
@@ -136,9 +140,7 @@ class CurrentSelection extends Motion
       @selectCharacters()
       if @wasLinewise
         @selectLines(s) for s in @editor.getSelections()
-
-    @countTimes -> true
-    # (not s.isEmpty() for s in @editor.getSelections())
+    @getSelectionsStatus()
 
   selectCharacters: ->
     extent = @selectedRange.getExtent()
@@ -203,15 +205,12 @@ class MoveToPreviousWord extends Motion
 
 class MoveToPreviousWholeWord extends Motion
   @extend()
+  wordRegex: /^\s*$|\S+/
+
   moveCursor: (cursor) ->
     @countTimes =>
-      cursor.moveToBeginningOfWord()
-      while not @isWholeWord(cursor) and not @at('BOF', cursor)
-        cursor.moveToBeginningOfWord()
-
-  isWholeWord: (cursor) ->
-    char = cursor.getCurrentWordPrefix().slice(-1)
-    /\s/.test char
+      point = cursor.getBeginningOfCurrentWordBufferPosition({@wordRegex})
+      cursor.setBufferPosition(point)
 
 class MoveToNextWord extends Motion
   @extend()
@@ -224,18 +223,14 @@ class MoveToNextWord extends Motion
       cursor.getBeginningOfNextWordBufferPosition(wordRegex: @wordRegex)
 
   moveCursor: (cursor) ->
+    return if @at('EOF', cursor)
     @countTimes =>
-      current = cursor.getBufferPosition()
-
-      next = @getNext(cursor)
-      return if @at('EOF', cursor)
-
-      switch
-        when @at('EOL', cursor)
-          cursor.moveDown()
-          cursor.moveToBeginningOfLine()
-          cursor.skipLeadingWhitespace()
-        when current.isEqual(next)
+      if @at('EOL', cursor)
+        cursor.moveDown()
+        cursor.moveToFirstCharacterOfLine()
+      else
+        next = @getNext(cursor)
+        if next.isEqual(cursor.getBufferPosition())
           cursor.moveToEndOfWord()
         else
           cursor.setBufferPosition(next)
@@ -431,7 +426,11 @@ class ScrollFullScreenDown extends Motion
     fn()
     @editor.setScrollTop newScreenTop
 
-  select: -> @withScroll => super()
+  select: ->
+    @withScroll =>
+      super()
+    @getSelectionsStatus()
+
   execute: -> @withScroll => super()
 
   moveCursor: (cursor) ->
