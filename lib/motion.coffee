@@ -120,6 +120,9 @@ class Motion extends Base
   getFirstVisibleScreenRow: ->
     @editorElement.getFirstVisibleScreenRow()
 
+  getLastVisibleScreenRow: ->
+    @editorElement.getLastVisibleScreenRow()
+
 class CurrentSelection extends Motion
   @extend()
   selectedRange: null
@@ -393,11 +396,11 @@ class MoveToTopOfScreen extends Motion
 
   moveCursor: (cursor) ->
     cursor.setScreenPosition([@getRow(), 0])
-    # cursor.moveToFirstCharacterOfLine()
+    cursor.moveToFirstCharacterOfLine()
 
   getRow: ->
     count = @getCount(0)
-    firstScreenRow = @editorElement.getFirstVisibleScreenRow()
+    firstScreenRow = @getFirstVisibleScreenRow()
     if firstScreenRow > 0
       offset = Math.max(count - 1, @scrolloff)
     else
@@ -408,8 +411,8 @@ class MoveToTopOfScreen extends Motion
 class MoveToMiddleOfScreen extends MoveToTopOfScreen
   @extend()
   getRow: ->
-    firstScreenRow = @editorElement.getFirstVisibleScreenRow()
-    lastScreenRow = @editorElement.getLastVisibleScreenRow()
+    firstScreenRow = @getFirstVisibleScreenRow()
+    lastScreenRow = @getLastVisibleScreenRow()
     height = lastScreenRow - firstScreenRow
     Math.floor(firstScreenRow + (height / 2))
 
@@ -418,8 +421,8 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
   @extend()
   getRow: ->
     count = @getCount(0)
-    lastScreenRow = @editorElement.getLastVisibleScreenRow()
-    lastRow = @editor.getBuffer().getLastRow()
+    lastScreenRow = @getLastVisibleScreenRow()
+    lastRow = @getLastRow()
     if lastScreenRow isnt lastRow
       offset = Math.max(count - 1, @scrolloff)
     else
@@ -452,7 +455,7 @@ class ScrollKeepingCursor extends Motion
     @currentFirstScreenRow - @previousFirstScreenRow + row
 
   scrollScreen: ->
-    @previousFirstScreenRow = @editorElement.getFirstVisibleScreenRow()
+    @previousFirstScreenRow = @getFirstVisibleScreenRow()
 
     amountPx = @getCount(1) * @getAmountInPixel()
     destination =
@@ -462,7 +465,7 @@ class ScrollKeepingCursor extends Motion
         @editor.getScrollTop() + amountPx
 
     @editor.setScrollTop(destination)
-    @currentFirstScreenRow = @editorElement.getFirstVisibleScreenRow()
+    @currentFirstScreenRow = @getFirstVisibleScreenRow()
     destination
 
   getHalfScreenPixel: ->
