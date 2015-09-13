@@ -190,8 +190,7 @@ class MoveUp extends Motion
 
   moveCursor: (cursor) ->
     @countTimes =>
-      unless @at('FirstScreenRow', cursor)
-        cursor.moveUp()
+      cursor.moveUp() unless @at('FirstScreenRow', cursor)
 
 class MoveDown extends Motion
   @extend()
@@ -199,8 +198,7 @@ class MoveDown extends Motion
 
   moveCursor: (cursor) ->
     @countTimes =>
-      unless @at('LastScreenRow', cursor)
-        cursor.moveDown()
+      cursor.moveDown() unless @at('LastScreenRow', cursor)
 
 class MoveToPreviousWord extends Motion
   @extend()
@@ -422,10 +420,10 @@ class MoveToMiddleOfScreen extends MoveToTopOfScreen
 # Scrolling
 # -------------------------
 # [FIXME] count behave differently from original Vim.
-class ScrollKeepingCursor extends Motion
+class ScrollFullScreenDown extends Motion
   @extend()
   scrolledRows: 0
-  direction: null
+  direction: +1
 
   withScroll: (fn) ->
     newScreenTop = @scroll()
@@ -447,27 +445,22 @@ class ScrollKeepingCursor extends Motion
     @scrolledRows = @getFirstVisibleScreenRow() - firstScreenRowOrg
     @editor.getScrollTop()
 
-# keymap: ctrl-d
-class ScrollHalfScreenDown extends ScrollKeepingCursor
-  @extend()
-  direction: +1
-  getAmountInPixel: ->
-    Math.floor(@editor.getRowsPerPage() / 2) * @editor.getLineHeightInPixels()
-
-# keymap: ctrl-u
-class ScrollHalfScreenUp extends ScrollHalfScreenDown
-  @extend()
-  direction: -1
-
-# keymap: ctrl-f
-class ScrollFullScreenDown extends ScrollKeepingCursor
-  @extend()
-  direction: +1
   getAmountInPixel: ->
     @editor.getHeight()
 
 # keymap: ctrl-b
 class ScrollFullScreenUp extends ScrollFullScreenDown
+  @extend()
+  direction: -1
+
+# keymap: ctrl-d
+class ScrollHalfScreenDown extends ScrollFullScreenDown
+  @extend()
+  getAmountInPixel: ->
+    Math.floor(@editor.getRowsPerPage() / 2) * @editor.getLineHeightInPixels()
+
+# keymap: ctrl-u
+class ScrollHalfScreenUp extends ScrollHalfScreenDown
   @extend()
   direction: -1
 
@@ -571,23 +564,18 @@ class TillBackwards extends Till
 
 # Mark
 # -------------------------
-# keymap: '
+# keymap: `
 class MoveToMark extends Motion
   @extend()
-  linewise: true
   complete: false
   requireInput: true
-  hoverText: ":round_pushpin:'"
-  hoverIcon: ":move-to-mark:'"
-  # hoverChar: "'"
+  hoverText: ":round_pushpin:`"
+  hoverIcon: ":move-to-mark:"
+  # hoverChar: '`'
 
   constructor: ->
     super
-    # @vimState.hover.add @hoverChar
     @getInput()
-
-  isLinewise: ->
-    @linewise
 
   moveCursor: (cursor) ->
     markPosition = @vimState.mark.get(@input)
@@ -596,17 +584,17 @@ class MoveToMark extends Motion
       markPosition ?= [0, 0] # if markPosition not set, go to the beginning of the file
       @vimState.mark.set('`', cursor.getBufferPosition())
 
-    cursor.setBufferPosition(markPosition) if markPosition?
-    if @linewise
-      cursor.moveToFirstCharacterOfLine()
+    if markPosition?
+      cursor.setBufferPosition(markPosition)
+      cursor.moveToFirstCharacterOfLine() if @linewise
 
-# keymap: `
-class MoveToMarkLiteral extends MoveToMark
+# keymap: '
+class MoveToMarkLine extends MoveToMark
   @extend()
-  linewise: false
-  hoverText: ":round_pushpin:`"
-  hoverIcon: ":move-to-mark:"
-  # hoverChar: '`'
+  linewise: true
+  hoverText: ":round_pushpin:'"
+  hoverIcon: ":move-to-mark:'"
+  # hoverChar: "'"
 
 # Search
 # -------------------------
@@ -863,24 +851,17 @@ module.exports = {
   MoveToFirstCharacterOfLineAndDown, MoveToLastNonblankCharacterOfLineAndDown
   MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen,
 
-  ScrollHalfScreenUp
-  ScrollHalfScreenDown
-  ScrollFullScreenUp
-  ScrollFullScreenDown
+  ScrollFullScreenDown, ScrollFullScreenUp,
+  ScrollHalfScreenDown, ScrollHalfScreenUp
 
-  Find
-  RepeatFind
-  RepeatFindReverse
-  FindBackwards
-  Till
-  TillBackwards
-  MoveToMark
-  MoveToMarkLiteral
-  Search
-  ReverseSearch
-  SearchCurrentWord
-  ReverseSearchCurrentWord
+  MoveToMark, MoveToMarkLine,
+
+  Find, FindBackwards
+  Till, TillBackwards
+  RepeatFind, RepeatFindReverse,
+
+  Search, ReverseSearch
+  SearchCurrentWord, ReverseSearchCurrentWord
   BracketMatchingMotion
-  RepeatSearch
-  RepeatSearchBackwards
+  RepeatSearch, RepeatSearchBackwards
 }
