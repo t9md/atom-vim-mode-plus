@@ -6,10 +6,6 @@ settings = require './settings'
 {SearchViewModel} = require './view'
 Base = require './base'
 
-WholeWordRegex = /\S+/
-WholeWordOrEmptyLineRegex = /^\s*$|\S+/
-AllWhitespace = /^\s$/
-
 class Motion extends Base
   @extend()
   complete: true
@@ -42,8 +38,7 @@ class Motion extends Base
       switch
         when @isInclusive(), @isLinewise()
           @selectInclusive selection
-          if @isLinewise()
-            @selectLines selection
+          @selectLines selection if @isLinewise()
         when @isInclusive()
           @selectInclusive selection
         else
@@ -216,60 +211,64 @@ class MoveToPreviousWholeWord extends Motion
 
   isWholeWord: (cursor) ->
     char = cursor.getCurrentWordPrefix().slice(-1)
-    AllWhitespace.test(char)
+    /\s/.test char
 
 class MoveToNextWord extends Motion
   @extend()
   wordRegex: null
 
+  getNext: (cursor) ->
+    if @options?.excludeWhitespace
+      cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
+    else
+      cursor.getBeginningOfNextWordBufferPosition(wordRegex: @wordRegex)
+
   moveCursor: (cursor) ->
     @countTimes =>
       current = cursor.getBufferPosition()
 
-      next = if @options?.excludeWhitespace
-        cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
-      else
-        cursor.getBeginningOfNextWordBufferPosition(wordRegex: @wordRegex)
-
+      next = @getNext(cursor)
       return if @at('EOF', cursor)
 
-      if @at('EOL', cursor)
-        cursor.moveDown()
-        cursor.moveToBeginningOfLine()
-        cursor.skipLeadingWhitespace()
-      else if current.isEqual(next)
-        cursor.moveToEndOfWord()
-      else
-        cursor.setBufferPosition(next)
+      switch
+        when @at('EOL', cursor)
+          cursor.moveDown()
+          cursor.moveToBeginningOfLine()
+          cursor.skipLeadingWhitespace()
+        when current.isEqual(next)
+          cursor.moveToEndOfWord()
+        else
+          cursor.setBufferPosition(next)
 
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
-  wordRegex: WholeWordOrEmptyLineRegex
+  wordRegex: /^\s*$|\S+/
 
 class MoveToEndOfWord extends Motion
   @extend()
   wordRegex: null
   inclusive: true
 
+  getNext: (cursor) ->
+    point = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
+    if point.column > 0
+      point.column--
+    point
+
   moveCursor: (cursor) ->
     @countTimes =>
-      next = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
-      next.column-- if next.column > 0
-
-      if next.isEqual(cursor.getBufferPosition())
+      point = @getNext(cursor)
+      if point.isEqual(cursor.getBufferPosition())
         cursor.moveRight()
         if @at('EOL', cursor)
           cursor.moveDown()
           cursor.moveToBeginningOfLine()
-
-        next = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
-        next.column-- if next.column > 0
-
-      cursor.setBufferPosition(next)
+        point = @getNext(cursor)
+      cursor.setBufferPosition(point)
 
 class MoveToEndOfWholeWord extends MoveToEndOfWord
   @extend()
-  wordRegex: WholeWordRegex
+  wordRegex: /\S+/
 
 class MoveToNextParagraph extends Motion
   @extend()
@@ -341,14 +340,16 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
   linewise: true
   moveCursor: (cursor) ->
-    @countTimes -> cursor.moveUp()
+    @countTimes ->
+      cursor.moveUp()
     super
 
 class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
   linewise: true
   moveCursor: (cursor) ->
-    @countTimes -> cursor.moveDown()
+    @countTimes ->
+      cursor.moveDown()
     super
 
 class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
@@ -367,7 +368,7 @@ class MoveToFirstLine extends Motion
   getDefaultRow: -> 0
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition([@getRow(), 0])
+    cursor.setBufferPosition [@getRow(), 0]
     cursor.moveToFirstCharacterOfLine()
 
 # keymap: G
@@ -382,7 +383,7 @@ class MoveToRelativeLine extends Motion
 
   moveCursor: (cursor) ->
     newRow = cursor.getBufferRow() + (@getCount(1) - 1)
-    cursor.setBufferPosition([newRow, 0])
+    cursor.setBufferPosition [newRow, 0]
 
 # Position cursor without scrolling., H, M, L
 # -------------------------
