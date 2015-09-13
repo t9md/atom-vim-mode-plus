@@ -117,6 +117,9 @@ class Motion extends Base
   getLastRow: ->
     @editor.getBuffer().getLastRow()
 
+  getFirstVisibleScreenRow: ->
+    @editorElement.getFirstVisibleScreenRow()
+
 class CurrentSelection extends Motion
   @extend()
   selectedRange: null
@@ -352,14 +355,6 @@ class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
   defaultCount: 0
   getCount: -> super - 1
 
-# Not directly used.
-class MoveToLineBase extends Motion
-  @extend()
-  linewise: true
-
-  getRow: (count) ->
-    if count? then count - 1 else @editor.getBuffer().getLastRow()
-
 # keymap: gg
 class MoveToFirstLine extends Motion
   @extend()
@@ -380,26 +375,26 @@ class MoveToLastLine extends MoveToFirstLine
   getDefaultRow: ->
     @getLastRow()
 
-class MoveToRelativeLine extends MoveToLineBase
+class MoveToRelativeLine extends Motion
   @extend()
-  # ??  #783 delete line below accsidentally?
   linewise: true
 
   moveCursor: (cursor) ->
-    {row, column} = cursor.getBufferPosition()
-    cursor.setBufferPosition([row + (@getCount(1) - 1), 0])
+    newRow = cursor.getBufferRow() + (@getCount(1) - 1)
+    cursor.setBufferPosition([newRow, 0])
 
-# Not directly used.
-class MoveToScreenLine extends MoveToLineBase
+# Position cursor without scrolling., H, M, L
+# -------------------------
+# keymap: H
+class MoveToTopOfScreen extends Motion
   @extend()
+  linewise: true
   scrolloff: 2
 
   moveCursor: (cursor) ->
     cursor.setScreenPosition([@getRow(), 0])
+    # cursor.moveToFirstCharacterOfLine()
 
-# keymap: H
-class MoveToTopOfScreen extends MoveToScreenLine
-  @extend()
   getRow: ->
     count = @getCount(0)
     firstScreenRow = @editorElement.getFirstVisibleScreenRow()
@@ -409,8 +404,17 @@ class MoveToTopOfScreen extends MoveToScreenLine
       offset = if count > 0 then count - 1 else count
     firstScreenRow + offset
 
+# keymap: M
+class MoveToMiddleOfScreen extends MoveToTopOfScreen
+  @extend()
+  getRow: ->
+    firstScreenRow = @editorElement.getFirstVisibleScreenRow()
+    lastScreenRow = @editorElement.getLastVisibleScreenRow()
+    height = lastScreenRow - firstScreenRow
+    Math.floor(firstScreenRow + (height / 2))
+
 # keymap: L
-class MoveToBottomOfScreen extends MoveToScreenLine
+class MoveToBottomOfScreen extends MoveToTopOfScreen
   @extend()
   getRow: ->
     count = @getCount(0)
@@ -422,16 +426,9 @@ class MoveToBottomOfScreen extends MoveToScreenLine
       offset = if count > 0 then count - 1 else count
     lastScreenRow - offset
 
-# keymap: M
-class MoveToMiddleOfScreen extends MoveToScreenLine
-  @extend()
-  getRow: ->
-    firstScreenRow = @editorElement.getFirstVisibleScreenRow()
-    lastScreenRow = @editorElement.getLastVisibleScreenRow()
-    height = lastScreenRow - firstScreenRow
-    Math.floor(firstScreenRow + (height / 2))
+# -------------------------
 
-class ScrollKeepingCursor extends MoveToLineBase
+class ScrollKeepingCursor extends Motion
   @extend()
   previousFirstScreenRow: 0
   currentFirstScreenRow: 0
