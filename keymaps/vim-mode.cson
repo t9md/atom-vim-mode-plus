@@ -133,8 +133,8 @@
   'g T': 'pane:show-previous-item'
 
   'm': 'vim-mode:mark'
-  '`': 'vim-mode:move-to-mark-literal'
-  '\'': 'vim-mode:move-to-mark'
+  '`': 'vim-mode:move-to-mark'
+  '\'': 'vim-mode:move-to-mark-line'
 
   'f': 'vim-mode:find'
   'F': 'vim-mode:find-backwards'

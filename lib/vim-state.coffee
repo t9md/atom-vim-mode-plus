@@ -75,22 +75,6 @@ class VimState
     @input = new Input(this)
 
     @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
-    # @subscriptions.add @editor.onDidAddCursor (cursor) =>
-    #   return if @operationStack.isProcessing()
-    #   if @isVisualMode() and (@submode is 'characterwise') and cursor.selection?.isEmpty()
-    #     cursor
-    #     cursor.selection.selectRight()
-    #   console.log @editor.getSelections().length
-    #   console.log @editor.getCursors().length
-    #   # console.log @editor.getSelections()
-    #   # console.log cursor
-    #   # console.log cursor.selection
-    #   # l
-    #   # return if @operationStack.isProcessing()
-    #   # if @isVisualMode() and (@submode is 'characterwise') and cursor.selection.isEmpty()
-    #   #   cursor.selection.selectRight()
-    # @subscriptions.add @editor.onDidChangeSelectionRange ({selection}) =>
-    #   console.log "selection Changed #{@editor.getCursors().length}"
 
     if atom.commands.onDidDispatch?
       @subscriptions.add atom.commands.onDidDispatch ({target}) =>
@@ -216,7 +200,7 @@ class VimState
       'scroll-half-screen-up', 'scroll-half-screen-down',
       'scroll-full-screen-up', 'scroll-full-screen-down',
       'repeat-search'          , 'repeat-search-backwards',
-      'move-to-mark'           , 'move-to-mark-literal',
+      'move-to-mark'           , 'move-to-mark-line',
       'find'                   , 'find-backwards',
       'till'                   , 'till-backwards',
       'search'                 , 'reverse-search',
@@ -248,11 +232,11 @@ class VimState
     ]
 
     @registerOperationCommands Scroll, [
-      'scroll-down', 'scroll-up',
-      'scroll-cursor-to-top', 'scroll-cursor-to-top-leave',
+      'scroll-down'            , 'scroll-up'                    ,
+      'scroll-cursor-to-top'   , 'scroll-cursor-to-top-leave'   ,
       'scroll-cursor-to-middle', 'scroll-cursor-to-middle-leave',
       'scroll-cursor-to-bottom', 'scroll-cursor-to-bottom-leave',
-      'scroll-cursor-to-left', 'scroll-cursor-to-right',
+      'scroll-cursor-to-left'  , 'scroll-cursor-to-right'       ,
     ]
 
     @registerOperationCommands VisualBlockwise, [
