@@ -1,4 +1,4 @@
-# Refactoring status: 40%
+# Refactoring status: 50%
 {Point, Range} = require 'atom'
 _ = require 'underscore-plus'
 
@@ -837,7 +837,6 @@ class BracketMatchingMotion extends SearchBase
     if matchPosition = @searchForMatch(startPosition, reverse, inCharacter, outCharacter)
       cursor.setBufferPosition(matchPosition)
 
-# Alias
 module.exports = {
   CurrentSelection
   MoveLeft, MoveRight, MoveUp, MoveDown
