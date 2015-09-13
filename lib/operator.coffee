@@ -593,7 +593,9 @@ class Change extends Insert
     # undo transactions are already handled.
     @vimState.setInsertionCheckpoint() unless @typedText?
 
-    if _.any @target.select(excludeWhitespace: true)
+    @target.setOptions? excludeWhitespace: true
+
+    if _.any @target.select()
       @setTextToRegister @editor.getSelectedText()
       if @target.isLinewise?() and not @typedText?
         for selection in @editor.getSelections()
