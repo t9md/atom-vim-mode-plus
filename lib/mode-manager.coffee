@@ -121,23 +121,21 @@ class ModeManager
       @activateNormalMode()
       return
 
-    if @isVisualMode()
-      switch submode
-        when 'linewise' then @selectLinewise()
-        when 'characterwise' then @selectCharacterwise()
-        when 'blockwise' then @selectBlockwise()
-    else
-      @deactivateInsertMode()
-      if submode is 'linewise'
-        @selectLinewise()
-      else
-        @editor.selectRight()
+    # [FIXME] comment out to evaluate necessity.
+    # Since I can't understand why this is necessary.
+    # unless @isVisualMode()
+    #   @deactivateInsertMode()
 
+    switch submode
+      when 'linewise' then @selectLinewise()
+      when 'characterwise' then @selectCharacterwise()
+      when 'blockwise' then @selectBlockwise()
     @setMode('visual', submode)
     @updateStatusBar()
 
-  # Private: Select lines containing cursor with saving original column.
   selectLinewise: ->
+    if @editor.getLastSelection().isEmpty()
+      @editor.selectRight()
     # Keep original range as marker's property to restore column.
     for selection in @editor.getSelections()
       originalRange = selection.getBufferRange()
@@ -145,8 +143,11 @@ class ModeManager
       for row in selection.getBufferRowRange()
         selection.selectLine(row)
 
-  # Private:
   selectCharacterwise: ->
+    if @editor.getLastSelection().isEmpty()
+      @editor.selectRight()
+      return
+
     for selection in @editor.getSelections()
       {originalRange} = selection.marker.getProperties()
       if originalRange
@@ -156,8 +157,11 @@ class ModeManager
         selection.setBufferRange(originalRange)
 
   selectBlockwise: ->
-    selections = @editor.getSelections()
-    for selection in selections
+    if @editor.getLastSelection().isEmpty()
+      @editor.selectRight()
+      return
+
+    for selection in @editor.getSelections()
       tail = selection.getTailBufferPosition()
       head = selection.getHeadBufferPosition()
       {start, end} = selection.getBufferRange()
