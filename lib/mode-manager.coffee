@@ -1,5 +1,7 @@
-{VisualBlockwise} = require './visual-blockwise'
 # Refactoring status: 20%
+_ = require 'underscore-plus'
+{VisualBlockwise} = require './visual-blockwise'
+{Range} = require 'atom'
 module.exports =
 class ModeManager
   mode: null
@@ -109,54 +111,41 @@ class ModeManager
     for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())
       s.cursor.moveLeft()
 
-    # if @submode is 'blockwise'
-    #   VisualBlockwise.reset()
-    # @editor.clearSelections()
-
   # Private: Used to enable visual mode.
   #
   # submode - One of 'characterwise', 'linewise' or 'blockwise'
   #
   # Returns nothing.
   activateVisualMode: (submode) ->
-    # Already in 'visual', this means one of following command is
-    # executed within `vim-mode.visual-mode`
-    #  * activate-blockwise-visual-mode
-    #  * activate-characterwise-visual-mode
-    #  * activate-linewise-visual-mode
+    if @isVisualMode(submode)
+      @activateNormalMode()
+      return
+
     if @isVisualMode()
-      if @submode is submode
-        @activateNormalMode()
-        return
-
-      @submode = submode
-      if @submode is 'linewise'
-        @selectLinewise()
-
-      else if @submode in ['characterwise', 'blockwise']
-        # Currently, 'blockwise' is not yet implemented.
-        @selectCharacterwise()
+      switch submode
+        when 'linewise' then @selectLinewise()
+        when 'characterwise' then @selectCharacterwise()
+        when 'blockwise' then @selectBlockwise()
     else
       @deactivateInsertMode()
-      @setMode('visual', submode)
-
-      if @submode is 'linewise'
+      if submode is 'linewise'
         @selectLinewise()
-      else if @editor.getSelectedText() is ''
+      else
         @editor.selectRight()
+
+    @setMode('visual', submode)
     @updateStatusBar()
 
   # Private: Select lines containing cursor with saving original column.
   selectLinewise: ->
+    # Keep original range as marker's property to restore column.
     for selection in @editor.getSelections()
-      # Keep original range as marker's property to restore column.
       originalRange = selection.getBufferRange()
       selection.marker.setProperties({originalRange})
-      [start, end] = selection.getBufferRowRange()
-      for row in [start..end]
+      for row in selection.getBufferRowRange()
         selection.selectLine(row)
 
-  # Private: Set column of each selection to saved column.
+  # Private:
   selectCharacterwise: ->
     for selection in @editor.getSelections()
       {originalRange} = selection.marker.getProperties()
@@ -165,6 +154,22 @@ class ModeManager
         originalRange.start.row = startRow
         originalRange.end.row   = endRow
         selection.setBufferRange(originalRange)
+
+  selectBlockwise: ->
+    selections = @editor.getSelections()
+    for selection in selections
+      tail = selection.getTailBufferPosition()
+      head = selection.getHeadBufferPosition()
+      {start, end} = selection.getBufferRange()
+      range = new Range(tail, [tail.row, head.column])
+      if start.column >= end.column
+        range = range.translate([0, -1], [0, +1])
+      selection.setBufferRange(range)
+      direction = if selection.isReversed() then 'Above' else 'Below'
+      _.times (end.row - start.row), =>
+        @editor["addSelection#{direction}"]()
+      VisualBlockwise.setStartRow(tail.row)
+    @vimState.syncSelectionsReversedSate(head.column < tail.column)
 
   # Private: Used to re-enable visual mode
   resetVisualMode: ->

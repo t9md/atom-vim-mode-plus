@@ -257,7 +257,7 @@
   'x': 'vim-mode:delete'
   's': 'vim-mode:change'
   'o': 'vim-mode:reverse-selections'
-
+  
   'v':      'vim-mode:activate-characterwise-visual-mode'
   'V':      'vim-mode:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode:activate-blockwise-visual-mode'
@@ -265,7 +265,8 @@
   '"': 'vim-mode:set-register-name'
 
 'atom-text-editor.vim-mode.visual-mode.blockwise':
-  'o':      'vim-mode:blockwise-reverse-selections',
+  'o':      'vim-mode:blockwise-other-end',
+  'O':      'vim-mode:reverse-selections',
   'j':      'vim-mode:blockwise-move-down'
   'k':      'vim-mode:blockwise-move-up'
   'D':      'vim-mode:blockwise-delete-to-last-character-of-line',

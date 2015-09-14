@@ -6,7 +6,7 @@ ContentsByMode =
   'insert.replace':       ["insert", "Replace"]
   'normal':               ["normal", "Normal"]
   'visual':               ["visual", "Visual"]
-  'visual.characterwise': ["visual", "Visual"]
+  'visual.characterwise': ["visual", "Visual Chars"]
   'visual.linewise':      ["visual", "Visual Line"]
   'visual.blockwise':     ["visual", "Visual Block"]
 

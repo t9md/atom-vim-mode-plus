@@ -240,7 +240,7 @@ class VimState
     ]
 
     @registerOperationCommands VisualBlockwise, [
-      'blockwise-reverse-selections',
+      'blockwise-other-end',
       'blockwise-move-down',
       'blockwise-move-up',
       'blockwise-delete-to-last-character-of-line',

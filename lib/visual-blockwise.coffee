@@ -1,6 +1,8 @@
 Base = require './base'
 _ = require 'underscore-plus'
 
+# FIXME START_ROW handling is not 100% correct currently
+# FIXME Currently initally multi selected situation not supported.
 START_ROW = null
 class VisualBlockwise extends Base
   @extend()
@@ -9,6 +11,9 @@ class VisualBlockwise extends Base
 
   @reset: ->
     START_ROW = null
+
+  @setStartRow: (row) ->
+    START_ROW = row
 
   adjustSelections: (options) ->
     for selection in @editor.getSelections()
@@ -34,10 +39,11 @@ class VisualBlockwise extends Base
     @currentRow  = @editor.getLastCursor()?.getBufferRow()
     START_ROW ?= @currentRow
 
-class BlockwiseReverseSelections extends VisualBlockwise
+class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
   execute: ->
     START_ROW = @getCurrentRow()
+    @vimState.reverseSelections()
 
 class BlockwiseMoveDown extends VisualBlockwise
   @extend()
@@ -137,7 +143,7 @@ class BlockwiseEscape extends VisualBlockwise
 
 module.exports = {
   VisualBlockwise,
-  BlockwiseReverseSelections,
+  BlockwiseOtherEnd,
   BlockwiseMoveDown,
   BlockwiseMoveUp,
   BlockwiseDeleteToLastCharacterOfLine,
