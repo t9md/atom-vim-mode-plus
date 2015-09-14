@@ -1,4 +1,29 @@
 # Note by t9md
+
+# Gifs
+
+* Flash ranges on which operator operates.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/flashing-range.gif)
+
+* Hover indicator(icon)
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/hover-icon.gif)
+
+* Hover indicator(emoji)
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/hover-emoji.gif)
+
+* Complete submode shift between charcterwise, linewise, blockwise
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/visualmode-submod-shift.gif)
+
+* Surround natively supported.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/surround.gif)
+
+# Whats this?
+
 This is refactoring experiment for vim-mode.  
 
 See [REFACTORING_IDEA](REFACTORING_IDEA.md).  
@@ -77,8 +102,15 @@ Done by extending Base class, so each TOM and its instance can report itself.
 # TODO
 
 - [ ] Improve Visual mode: complete cursor visualization and switch between submode.
-  - [x] Shift: char-line, line-char
-  - [x] Shift: char-block
+  - [x] Shift between submode properly restoring column and reversed state.
+      fr\to| char | line | block
+      ---- | ---- | ---- | -------
+      char |  o   |  o   |   o
+      line |  o   |  o   |   o
+      block|  o   |  o   |   o
+v
+V v V v / c-v v c-v v / V c-v V c-v
+
   - [x] show cursor: characterwise
   - [ ] show cursor: linewise
   - [ ] show cursor: blockwise
