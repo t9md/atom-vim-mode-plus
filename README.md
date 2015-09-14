@@ -103,13 +103,12 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 - [ ] Improve Visual mode: complete cursor visualization and switch between submode.
   - [x] Shift between submode properly restoring column and reversed state.
-      fr\to| char | line | block
-      ---- | ---- | ---- | -------
-      char |  o   |  o   |   o
-      line |  o   |  o   |   o
-      block|  o   |  o   |   o
-v
-V v V v / c-v v c-v v / V c-v V c-v
+
+from \ to| char | line | block
+-------- | ---- | ---- | -----
+char     |  o   |  o   |   o
+line     |  o   |  o   |   o
+block    |  o   |  o   |   o
 
   - [x] show cursor: characterwise
   - [ ] show cursor: linewise
