@@ -417,7 +417,7 @@ describe "VimState", ->
             selectedText: ['one', 'three']
           ensure 'V',
             selectedText: ["line one\n", "line three\n"]
-          ensure [ctrl: 'v'],
+          ensure 'v',
             selectedText: ["one", "three"]
 
   describe "marks", ->

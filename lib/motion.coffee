@@ -25,7 +25,7 @@ class Motion extends Base
 
   isInclusive: ->
     if @vimState.isVisualMode()
-      @vimState.submode is 'characterwise'
+      @vimState.submode in ['characterwise', 'blockwise']
     else
       @inclusive
 
@@ -39,8 +39,6 @@ class Motion extends Base
         when @isInclusive(), @isLinewise()
           @selectInclusive selection
           @selectLines selection if @isLinewise()
-        when @isInclusive()
-          @selectInclusive selection
         else
           selection.modifySelection =>
             @moveCursor selection.cursor
