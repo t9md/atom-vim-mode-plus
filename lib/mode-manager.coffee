@@ -134,8 +134,9 @@ class ModeManager
     @updateStatusBar()
 
   selectLinewise: ->
-    if @editor.getLastSelection().isEmpty()
-      @editor.selectRight()
+    unless @isVisualMode('characterwise')
+      @selectCharacterwise()
+
     # Keep original range as marker's property to restore column.
     for selection in @editor.getSelections()
       originalRange = selection.getBufferRange()
@@ -143,23 +144,35 @@ class ModeManager
       for row in selection.getBufferRowRange()
         selection.selectLine(row)
 
+  # Private:
   selectCharacterwise: ->
     if @editor.getLastSelection().isEmpty()
       @editor.selectRight()
       return
 
-    for selection in @editor.getSelections()
-      {originalRange} = selection.marker.getProperties()
-      if originalRange
-        [startRow, endRow] = selection.getBufferRowRange()
-        originalRange.start.row = startRow
-        originalRange.end.row   = endRow
-        selection.setBufferRange(originalRange)
+    # [FIXME] could be simplified further if we improve
+    #  handling of START_ROW, revesed state ofvisual-blockwise.coffee.
+    if @isVisualMode('blockwise')
+      selections = @editor.getSelectionsOrderedByBufferPosition()
+      startRow   = _.first(selections).getBufferRowRange()[0]
+      endRow     = _.last(selections).getBufferRowRange()[0]
+      selection = @editor.getLastSelection()
+      range = selection.getBufferRange()
+      range.start.row = startRow
+      range.end.row = endRow
+      @editor.setSelectedBufferRange(range)
+    else
+      for selection in @editor.getSelections()
+        {originalRange} = selection.marker.getProperties()
+        if originalRange
+          [startRow, endRow] = selection.getBufferRowRange()
+          originalRange.start.row = startRow
+          originalRange.end.row   = endRow
+          selection.setBufferRange(originalRange)
 
   selectBlockwise: ->
-    if @editor.getLastSelection().isEmpty()
-      @editor.selectRight()
-      return
+    unless @isVisualMode('characterwise')
+      @selectCharacterwise()
 
     for selection in @editor.getSelections()
       tail = selection.getTailBufferPosition()
