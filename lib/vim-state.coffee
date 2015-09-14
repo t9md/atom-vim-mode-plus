@@ -82,6 +82,8 @@ class VimState
           @checkSelections()
         if @isVisualMode('characterwise') and settings.get('showCursorInVisualMode')
           @showCursor()
+        else if @isVisualMode()
+          @hideCursor()
 
     @editorElement.classList.add("vim-mode")
     @init()
@@ -321,3 +323,7 @@ class VimState
         @editorElement.classList.add('reversed')
       else
         @editorElement.classList.remove('reversed')
+
+  hideCursor: ->
+    for cursor in @editor.getCursors() when cursor.isVisible()
+      cursor.setVisible(false)
