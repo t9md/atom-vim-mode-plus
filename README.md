@@ -76,6 +76,12 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 # TODO
 
+- [ ] Improve Visual mode: complete cursor visualization and switch between submode.
+  - [x] Shift: char-line, line-char
+  - [x] Shift: char-block
+  - [x] show cursor: characterwise
+  - [ ] show cursor: linewise
+  - [ ] show cursor: blockwise
 - [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions. - [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
 - [ ] Improve search and introduce incrementalSearch.
 - [ ] Spec re-write 2nd round to compact and simple description for each spec.
