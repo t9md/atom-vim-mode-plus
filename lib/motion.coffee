@@ -568,7 +568,7 @@ class MoveToMark extends Motion
   complete: false
   requireInput: true
   hoverText: ":round_pushpin:`"
-  hoverIcon: ":move-to-mark:"
+  hoverIcon: ":move-to-mark:`"
   # hoverChar: '`'
 
   constructor: ->
