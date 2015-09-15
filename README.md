@@ -1,6 +1,6 @@
 # Note by t9md
 
-## Vim Mode package [![Build Status](https://travis-ci.org/t9md/vim-mode.svg?branch=refactor-experiment)](https://travis-ci.org/t9md/vim-mode)
+## Vim Mode package [![Build Status](https://travis-ci.org/t9md/vim-mode.svg)](https://travis-ci.org/t9md/vim-mode)
 
 # Gifs
 
