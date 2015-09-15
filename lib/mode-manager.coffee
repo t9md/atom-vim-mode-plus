@@ -10,14 +10,9 @@ class ModeManager
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
-  isNormalMode: ->
-    @mode is 'normal'
-
-  isInsertMode: ->
-    @mode is 'insert'
-
-  isOperatorPendingMode: ->
-    @mode is 'operator-pending'
+  isNormalMode: -> @mode is 'normal'
+  isInsertMode: -> @mode is 'insert'
+  isOperatorPendingMode: -> @mode is 'operator-pending'
 
   isVisualMode: (submode=null) ->
     if submode
@@ -142,7 +137,6 @@ class ModeManager
         selection.selectLine(row)
     @hideCursors()
 
-  # Private:
   selectCharacterwise: (oldSubmode) ->
     if @editor.getLastSelection().isEmpty()
       @editor.selectRight()
@@ -164,18 +158,13 @@ class ModeManager
       @selectCharacterwise()
     @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
-  # Private: Used to re-enable visual mode
   resetVisualMode: ->
     @activateVisualMode(@submode)
 
-  # Private: Used to enable operator-pending mode.
   activateOperatorPendingMode: ->
     @deactivateInsertMode()
     @setMode('operator-pending')
 
-  # Private: Resets the normal mode back to it's initial state.
-  #
-  # Returns nothing.
   resetNormalMode: ->
     @vimState.operationStack.clear()
     @editor.clearSelections()
