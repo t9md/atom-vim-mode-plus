@@ -2,7 +2,6 @@
 _ = require 'underscore-plus'
 
 class SpecError
-  @extend()
   constructor: (@message) ->
     @name = 'SpecError'
 
