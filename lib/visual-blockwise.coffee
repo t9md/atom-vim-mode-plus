@@ -1,102 +1,98 @@
 Base = require './base'
 _ = require 'underscore-plus'
 
-# FIXME START_ROW handling is not 100% correct currently
 # FIXME Currently initally multi selected situation not supported.
-START_ROW = null
 class VisualBlockwise extends Base
   @extend()
   complete: true
   recodable: false
 
-  @reset: ->
-    START_ROW = null
+  clearTail: ->
+    for s in @editor.getSelections()
+      s.marker.setProperties(vimModeBlockwiseTail: false)
 
-  @setStartRow: (row) ->
-    START_ROW = row
+  getTop: ->
+    _.first @editor.getSelectionsOrderedByBufferPosition()
 
-  adjustSelections: (options) ->
-    for selection in @editor.getSelections()
-      range = selection.getBufferRange()
-      selection.setBufferRange range, options
+  getBottom: ->
+    _.last @editor.getSelectionsOrderedByBufferPosition()
 
-  reset: ->
-    @constructor.reset()
+  isReversed: ->
+    if @isSingle()
+      false
+    else
+      @getTail().marker.isEqual @getBottom().marker
 
-  getCurrentRow: ->
-    @currentRow
+  isSingle: ->
+    @editor.getSelections().length is 1
 
-  getTopCursor: ->
-    _.first @editor.getCursorsOrderedByBufferPosition()
+  getHead: ->
+    if @isReversed()
+      @getTop()
+    else
+      @getBottom()
 
-  getBottomCursor: ->
-    _.last @editor.getCursorsOrderedByBufferPosition()
+  getTail: ->
+    _.detect @editor.getSelections(), (s) ->
+      s.marker.getProperties().vimModeBlockwiseTail
+
+  setTail: (newTail) ->
+    @clearTail()
+    newTail.marker.setProperties(vimModeBlockwiseTail: true)
 
   constructor: ->
     super
-    if @editor.getCursors().length is 1
-      @reset()
-    @currentRow  = @editor.getLastCursor()?.getBufferRow()
-    START_ROW ?= @currentRow
+    if @isSingle()
+      @clearTail()
+
+  dump: (header) ->
+    console.log "--#{header}-"
+    for s in @editor.getSelections()
+      range = s.marker.getBufferRange().toString()
+      isTail = s.marker.getProperties().vimModeBlockwiseTail
+      console.log "#{range} #{isTail}"
+    console.log "---"
+
+  reverse: ->
+    newTail = if @isReversed() then @getTop() else @getBottom()
+    @setTail newTail
 
 class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
   execute: ->
-    START_ROW = @getCurrentRow()
+    unless @isSingle()
+      @reverse()
     @vimState.reverseSelections()
 
 class BlockwiseMoveDown extends VisualBlockwise
   @extend()
-  command: 'j'
+  direction: 'Below'
+
+  isForward: ->
+    not @isReversed()
 
   execute: ->
-    cursorTop    = @getTopCursor()
-    cursorBottom = @getBottomCursor()
-    if (@command is 'j' and cursorTop.getBufferRow() >= START_ROW) or
-        (@command is 'k' and cursorBottom.getBufferRow() <= START_ROW)
+    if @isSingle()
+      @setTail @getTop()
 
-      lastSelection = @editor.getLastSelection()
-      @addSelection()
-      # [FIXME]
-      # When addSelectionAbove(), addSelectionBelow() doesn't respect
-      # reversed stated, need improved.
-      #
-      # and one more..
-      #
-      # When selection is NOT empty and add selection by addSelectionAbove()
-      # and then move right, selection range got wrong, maybe this is bug..
-      @adjustSelections reversed: lastSelection.isReversed()
+    if @isForward()
+      @editor["addSelection#{@direction}"]()
+      @vimState.syncSelectionsReversedSate(@getTail().isReversed())
     else
-      # [FIXME]
-      # Guard to not destroying last cursor
-      # This guard is no longer needed
-      # Remove unnecessary code after re-think.
-      if (@editor.getCursors().length < 2)
-        @reset()
-        return
-
-      @destroyCursor()
-
-  addSelection: ->
-    @editor.addSelectionBelow()
-
-  destroyCursor: ->
-    @getTopCursor().destroy()
+      @getHead().destroy()
 
 class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
-  command: 'k'
-  addSelection: ->
-    @editor.addSelectionAbove()
-  destroyCursor: ->
-    @getBottomCursor().destroy()
+  direction: 'Above'
+  isForward: ->
+    @isSingle() or @isReversed()
 
 class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   @extend()
   delegateTo: 'DeleteToLastCharacterOfLine'
   execute: ->
     @vimState.activateNormalMode()
-    point = @getTopCursor().getBufferPosition()
+    point = @getTop().cursor.getBufferPosition()
     @new(@delegateTo).execute()
     @editor.clearSelections()
     @editor.setCursorBufferPosition(point)
@@ -137,7 +133,7 @@ class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
 class BlockwiseEscape extends VisualBlockwise
   @extend()
   execute: ->
-    @reset()
+    @clearTail()
     @vimState.activateNormalMode()
     @editor.clearSelections()
 

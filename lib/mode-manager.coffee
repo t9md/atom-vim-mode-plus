@@ -1,6 +1,6 @@
 # Refactoring status: 20%
 _ = require 'underscore-plus'
-{VisualBlockwise} = require './visual-blockwise'
+{BlockwiseMoveDown, BlockwiseMoveUp} = require './visual-blockwise'
 {Range} = require 'atom'
 module.exports =
 class ModeManager
@@ -152,13 +152,12 @@ class ModeManager
       return
 
     # [FIXME] could be simplified further if we improve
-    #  handling of START_ROW, revesed state ofvisual-blockwise.coffee.
+    #  handling of TAIL_ROW, revesed state ofvisual-blockwise.coffee.
     if @isVisualMode('blockwise')
       selections = @editor.getSelectionsOrderedByBufferPosition()
       startRow   = _.first(selections).getBufferRowRange()[0]
       endRow     = _.last(selections).getBufferRowRange()[0]
-      selection = @editor.getLastSelection()
-      range = selection.getBufferRange()
+      range = @editor.getLastSelection().getBufferRange()
       range.start.row = startRow
       range.end.row = endRow
       @editor.setSelectedBufferRange(range)
@@ -175,18 +174,23 @@ class ModeManager
     unless @isVisualMode('characterwise')
       @selectCharacterwise()
 
-    for selection in @editor.getSelections()
-      tail = selection.getTailBufferPosition()
-      head = selection.getHeadBufferPosition()
-      {start, end} = selection.getBufferRange()
-      range = new Range(tail, [tail.row, head.column])
-      if start.column >= end.column
-        range = range.translate([0, -1], [0, +1])
-      selection.setBufferRange(range)
-      direction = if selection.isReversed() then 'Above' else 'Below'
-      _.times (end.row - start.row), =>
-        @editor["addSelection#{direction}"]()
-      VisualBlockwise.setStartRow(tail.row)
+    selection = @editor.getLastSelection()
+    tail      = selection.getTailBufferPosition()
+    head      = selection.getHeadBufferPosition()
+    {start, end} = selection.getBufferRange()
+
+    range = new Range(tail, [tail.row, head.column])
+    if start.column >= end.column
+      range = range.translate([0, -1], [0, +1])
+
+    action =
+      if selection.isReversed()
+        BlockwiseMoveUp
+      else
+        BlockwiseMoveDown
+    selection.setBufferRange(range)
+    _.times (end.row - start.row), =>
+      @vimState.operationStack.push new action(@vimState)
     @vimState.hideCursor()
     @vimState.syncSelectionsReversedSate(head.column < tail.column)
 
