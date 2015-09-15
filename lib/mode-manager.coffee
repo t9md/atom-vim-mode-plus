@@ -143,6 +143,7 @@ class ModeManager
       selection.marker.setProperties({originalRange})
       for row in selection.getBufferRowRange()
         selection.selectLine(row)
+    @vimState.hideCursor()
 
   # Private:
   selectCharacterwise: ->
@@ -186,6 +187,7 @@ class ModeManager
       _.times (end.row - start.row), =>
         @editor["addSelection#{direction}"]()
       VisualBlockwise.setStartRow(tail.row)
+    @vimState.hideCursor()
     @vimState.syncSelectionsReversedSate(head.column < tail.column)
 
   # Private: Used to re-enable visual mode

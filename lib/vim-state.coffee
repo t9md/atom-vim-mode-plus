@@ -82,8 +82,6 @@ class VimState
           @checkSelections()
         if @isVisualMode('characterwise') and settings.get('showCursorInVisualMode')
           @showCursor()
-        else if @isVisualMode()
-          @hideCursor()
 
     @editorElement.classList.add("vim-mode")
     @init()
