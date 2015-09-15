@@ -1,6 +1,11 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
 
+class SpecError
+  @extend()
+  constructor: (@message) ->
+    @name = 'SpecError'
+
 getVimState = (args...) ->
   [file, callback] = []
   switch args.length
@@ -225,7 +230,7 @@ getVim = (vimState) ->
       return
 
     unless _.isArray(keys)
-      throw "Must not happen"
+      throw new SpecError('Must not happen')
 
     for k in keys
       if _.isString(k)
