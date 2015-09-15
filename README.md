@@ -1,5 +1,7 @@
 # Note by t9md
 
+## Vim Mode package [![Build Status](https://travis-ci.org/atom/vim-mode.svg?branch=master)](https://travis-ci.org/atom/vim-mode)
+
 # Gifs
 
 * Flash ranges on which operator operates.
