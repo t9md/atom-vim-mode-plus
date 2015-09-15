@@ -321,7 +321,3 @@ class VimState
         @editorElement.classList.add('reversed')
       else
         @editorElement.classList.remove('reversed')
-
-  hideCursor: ->
-    for cursor in @editor.getCursors() when cursor.isVisible()
-      cursor.setVisible(false)
