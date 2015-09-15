@@ -56,7 +56,7 @@ class HoverElement extends HTMLElement
 
     # [FIXME] now investigationg overlay position become wrong
     # randomly happen.
-    console.log  @marker.getBufferRange().toString()
+    # console.log  @marker.getBufferRange().toString()
     @style.marginTop = (@lineHeight * -2.2) + 'px'
     if text = @model.getText(@lineHeight)
       @innerHTML = text
