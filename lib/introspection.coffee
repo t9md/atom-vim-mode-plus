@@ -212,7 +212,7 @@ formatReport = (report) ->
 
 inspectInstance = (obj, options={}) ->
   indent = _.multiplyString(' ', options.indent ? 0)
-  rep = report(obj.constructor,options)
+  rep = report(obj.constructor, options)
   [
     "## #{obj}: #{rep.ancesstorsNames[0..1].join(" < ")}"
     inspectObject(obj, options)
