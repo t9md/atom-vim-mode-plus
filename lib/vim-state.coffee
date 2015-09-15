@@ -4,14 +4,13 @@ _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
 {Hover} = require './hover'
 {Input} = require './input'
-
 settings = require './settings'
 
-Operator    = require './operator'
-Motion     = require './motion'
-TextObject = require './text-object'
-InsertMode  = require './insert-mode'
-Scroll      = require './scroll'
+Operator        = require './operator'
+Motion          = require './motion'
+TextObject      = require './text-object'
+InsertMode      = require './insert-mode'
+Scroll          = require './scroll'
 VisualBlockwise = require './visual-blockwise'
 
 OperationStack  = require './operation-stack'
@@ -80,8 +79,15 @@ class VimState
       @subscriptions.add atom.commands.onDidDispatch ({target}) =>
         if target is @editorElement
           @checkSelections()
-        if @isVisualMode('characterwise') and settings.get('showCursorInVisualMode')
-          @showCursor()
+        return unless settings.get('showCursorInVisualMode')
+        switch
+          when @isVisualMode('characterwise')
+            @showCursors(@editor.getCursors())
+          when @isVisualMode('blockwise')
+            cursors =
+              for s in @editor.getSelections() when s.marker.getProperties().vimModeBlockwiseHead
+                s.cursor
+            @showCursors(cursors)
 
     @editorElement.classList.add("vim-mode")
     @init()
@@ -302,6 +308,14 @@ class VimState
         if lastSelection.isEmpty()
           lastSelection.selectRight()
 
+  showCursors: (cursors) ->
+    for cursor in cursors
+      cursor.setVisible(true) unless cursor.isVisible()
+      if cursor.selection.isReversed()
+        @editorElement.classList.add('reversed')
+      else
+        @editorElement.classList.remove('reversed')
+
   dontPutCursorsAtEndOfLine: ->
     # if @editor.getPath()?.endsWith 'tryit.coffee'
     #   return
@@ -310,14 +324,3 @@ class VimState
       {goalColumn} = cursor
       cursor.moveLeft()
       cursor.goalColumn = goalColumn
-
-  showCursor: ->
-    for selection in @editor.getSelections()
-      {cursor} = selection
-      cursorRange = cursor.getScreenRange()
-      unless cursor.isVisible()
-        cursor.setVisible(true)
-      if selection.isReversed()
-        @editorElement.classList.add('reversed')
-      else
-        @editorElement.classList.remove('reversed')
