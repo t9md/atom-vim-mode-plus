@@ -33,6 +33,8 @@ class ModeManager
     if @submode
       @editorElement.classList.add @submode
 
+    @vimState.statusBarManager.update(@mode, @submode)
+
   activateNormalMode: ->
     @deactivateInsertMode()
     @deactivateVisualMode()
@@ -45,11 +47,9 @@ class ModeManager
     for cursor in @editor.getCursors()
       if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
         cursor.moveLeft()
-    @updateStatusBar()
 
   activateInsertMode: (submode=null) ->
     @setMode('insert', submode)
-    @updateStatusBar()
     @editorElement.component.setInputEnabled(true)
     @setInsertionCheckpoint()
 
@@ -131,7 +131,6 @@ class ModeManager
       when 'characterwise' then @selectCharacterwise()
       when 'blockwise' then @selectBlockwise()
     @setMode('visual', submode)
-    @updateStatusBar()
 
   selectLinewise: ->
     unless @isVisualMode('characterwise')
@@ -143,7 +142,7 @@ class ModeManager
       selection.marker.setProperties({originalRange})
       for row in selection.getBufferRowRange()
         selection.selectLine(row)
-    @vimState.hideCursor()
+    @hideCursors()
 
   # Private:
   selectCharacterwise: ->
@@ -191,7 +190,7 @@ class ModeManager
     selection.setBufferRange(range)
     _.times (end.row - start.row), =>
       @vimState.operationStack.push new action(@vimState)
-    @vimState.hideCursor()
+    @hideCursors()
     @vimState.syncSelectionsReversedSate(head.column < tail.column)
 
   # Private: Used to re-enable visual mode
@@ -202,7 +201,6 @@ class ModeManager
   activateOperatorPendingMode: ->
     @deactivateInsertMode()
     @setMode('operator-pending')
-    @updateStatusBar()
 
   # Private: Resets the normal mode back to it's initial state.
   #
@@ -214,6 +212,10 @@ class ModeManager
 
   updateStatusBar: ->
     @vimState.statusBarManager.update(@mode, @submode)
+
+  hideCursors: ->
+    for cursor in @editor.getCursors() when cursor.isVisible()
+      cursor.setVisible(false)
 
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.
