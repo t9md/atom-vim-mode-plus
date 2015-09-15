@@ -1,7 +1,8 @@
 # Refactoring status: 20%
 _ = require 'underscore-plus'
-{BlockwiseMoveDown, BlockwiseMoveUp} = require './visual-blockwise'
+{BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 {Range} = require 'atom'
+
 module.exports =
 class ModeManager
   mode: null
@@ -32,7 +33,6 @@ class ModeManager
       @editorElement.classList.remove submode
     if @submode
       @editorElement.classList.add @submode
-
     @vimState.statusBarManager.update(@mode, @submode)
 
   activateNormalMode: ->
@@ -42,10 +42,9 @@ class ModeManager
     @setMode('normal')
 
     @vimState.operationStack.clear()
-    for selection in @editor.getSelections()
-      selection.clear(autoscroll: false)
-    for cursor in @editor.getCursors()
-      if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
+    selection.clear(autoscroll: false) for selection in @editor.getSelections()
+    for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
+      unless cursor.isAtBeginningOfLine()
         cursor.moveLeft()
 
   activateInsertMode: (submode=null) ->
@@ -111,11 +110,6 @@ class ModeManager
     for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())
       s.cursor.moveLeft()
 
-  # Private: Used to enable visual mode.
-  #
-  # submode - One of 'characterwise', 'linewise' or 'blockwise'
-  #
-  # Returns nothing.
   activateVisualMode: (submode) ->
     if @isVisualMode(submode)
       @activateNormalMode()
@@ -126,14 +120,18 @@ class ModeManager
     # unless @isVisualMode()
     #   @deactivateInsertMode()
 
-    switch submode
-      when 'linewise' then @selectLinewise()
-      when 'characterwise' then @selectCharacterwise()
-      when 'blockwise' then @selectBlockwise()
+    oldSubmode = @submode
+    # [NOTE] following operation depend operationStack
+    # So @setMode at first is important since operationStack do
+    # special cursor treatment depending on current mode.
     @setMode('visual', submode)
+    switch submode
+      when 'linewise' then @selectLinewise(oldSubmode)
+      when 'characterwise' then @selectCharacterwise(oldSubmode)
+      when 'blockwise' then @selectBlockwise(oldSubmode)
 
-  selectLinewise: ->
-    unless @isVisualMode('characterwise')
+  selectLinewise: (oldSubmode) ->
+    unless oldSubmode is 'characterwise'
       @selectCharacterwise()
 
     # Keep original range as marker's property to restore column.
@@ -145,21 +143,13 @@ class ModeManager
     @hideCursors()
 
   # Private:
-  selectCharacterwise: ->
+  selectCharacterwise: (oldSubmode) ->
     if @editor.getLastSelection().isEmpty()
       @editor.selectRight()
       return
 
-    # [FIXME] could be simplified further if we improve
-    #  handling of TAIL_ROW, revesed state ofvisual-blockwise.coffee.
-    if @isVisualMode('blockwise')
-      selections = @editor.getSelectionsOrderedByBufferPosition()
-      startRow   = _.first(selections).getBufferRowRange()[0]
-      endRow     = _.last(selections).getBufferRowRange()[0]
-      range = @editor.getLastSelection().getBufferRange()
-      range.start.row = startRow
-      range.end.row = endRow
-      @editor.setSelectedBufferRange(range)
+    if oldSubmode is 'blockwise'
+      @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
     else
       for selection in @editor.getSelections()
         {originalRange} = selection.marker.getProperties()
@@ -169,29 +159,10 @@ class ModeManager
           originalRange.end.row   = endRow
           selection.setBufferRange(originalRange)
 
-  selectBlockwise: ->
-    unless @isVisualMode('characterwise')
+  selectBlockwise: (oldSubmode) ->
+    unless oldSubmode is 'characterwise'
       @selectCharacterwise()
-
-    selection = @editor.getLastSelection()
-    tail      = selection.getTailBufferPosition()
-    head      = selection.getHeadBufferPosition()
-    {start, end} = selection.getBufferRange()
-
-    range = new Range(tail, [tail.row, head.column])
-    if start.column >= end.column
-      range = range.translate([0, -1], [0, +1])
-
-    action =
-      if selection.isReversed()
-        BlockwiseMoveUp
-      else
-        BlockwiseMoveDown
-    selection.setBufferRange(range)
-    _.times (end.row - start.row), =>
-      @vimState.operationStack.push new action(@vimState)
-    @hideCursors()
-    @vimState.syncSelectionsReversedSate(head.column < tail.column)
+    @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
   # Private: Used to re-enable visual mode
   resetVisualMode: ->
@@ -210,12 +181,9 @@ class ModeManager
     @editor.clearSelections()
     @activateNormalMode()
 
-  updateStatusBar: ->
-    @vimState.statusBarManager.update(@mode, @submode)
-
   hideCursors: ->
-    for cursor in @editor.getCursors() when cursor.isVisible()
-      cursor.setVisible(false)
+    for c in @editor.getCursors() when c.isVisible()
+      c.setVisible(false)
 
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.

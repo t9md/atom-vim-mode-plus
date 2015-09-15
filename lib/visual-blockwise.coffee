@@ -1,5 +1,6 @@
 Base = require './base'
 _ = require 'underscore-plus'
+{Range} = require 'atom'
 
 # FIXME Currently initally multi selected situation not supported.
 class VisualBlockwise extends Base
@@ -8,8 +9,16 @@ class VisualBlockwise extends Base
   recodable: false
 
   clearTail: ->
+    @setProperties(vimModeBlockwiseTail: false)
+
+  clearHead: ->
+    @setProperties(vimModeBlockwiseHead: false)
     for s in @editor.getSelections()
-      s.marker.setProperties(vimModeBlockwiseTail: false)
+      s.cursor.setVisible(false)
+
+  setProperties: (prop) ->
+    for s in @editor.getSelections()
+      s.marker.setProperties(prop)
 
   getTop: ->
     _.first @editor.getSelectionsOrderedByBufferPosition()
@@ -40,6 +49,11 @@ class VisualBlockwise extends Base
     @clearTail()
     newTail.marker.setProperties(vimModeBlockwiseTail: true)
 
+  # Only for making cursor visible.
+  setHead: (newHead) ->
+    @clearHead()
+    newHead.marker.setProperties(vimModeBlockwiseHead: true)
+
   constructor: ->
     super
     if @isSingle()
@@ -54,8 +68,9 @@ class VisualBlockwise extends Base
     console.log "---"
 
   reverse: ->
-    newTail = if @isReversed() then @getTop() else @getBottom()
+    [newHead, newTail] = [@getTail(), @getHead()]
     @setTail newTail
+    @setHead newHead
 
 class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
@@ -80,6 +95,7 @@ class BlockwiseMoveDown extends VisualBlockwise
       @vimState.syncSelectionsReversedSate(@getTail().isReversed())
     else
       @getHead().destroy()
+    @setHead @getHead()
 
 class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
@@ -137,6 +153,38 @@ class BlockwiseEscape extends VisualBlockwise
     @vimState.activateNormalMode()
     @editor.clearSelections()
 
+class BlockwiseSelect extends VisualBlockwise
+  @extend()
+  execute: ->
+    selection = @editor.getLastSelection()
+    tail      = selection.getTailBufferPosition()
+    head      = selection.getHeadBufferPosition()
+    {start, end} = selection.getBufferRange()
+
+    range = new Range(tail, [tail.row, head.column])
+    if start.column >= end.column
+      range = range.translate([0, -1], [0, +1])
+
+    klass =
+      if selection.isReversed()
+        "BlockwiseMoveUp"
+      else
+        "BlockwiseMoveDown"
+    selection.setBufferRange(range, reversed: head.column < tail.column)
+    _.times (end.row - start.row), =>
+      @new(klass).execute()
+
+class BlockwiseRestoreCharacterwise extends VisualBlockwise
+  @extend()
+  execute: ->
+    selections = @editor.getSelectionsOrderedByBufferPosition()
+    startRow = @getTop().getBufferRowRange()[0]
+    endRow = @getBottom().getBufferRowRange()[0]
+    range = @editor.getLastSelection().getBufferRange()
+    range.start.row = startRow
+    range.end.row   = endRow
+    @editor.setSelectedBufferRange(range)
+
 module.exports = {
   VisualBlockwise,
   BlockwiseOtherEnd,
@@ -147,4 +195,6 @@ module.exports = {
   BlockwiseInsertAtBeginningOfLine,
   BlockwiseInsertAfterEndOfLine,
   BlockwiseEscape,
+  BlockwiseSelect,
+  BlockwiseRestoreCharacterwise,
 }
