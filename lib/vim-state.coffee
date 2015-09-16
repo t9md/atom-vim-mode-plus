@@ -178,6 +178,7 @@ class VimState
       'inner-single-quotes'  , 'a-single-quotes'
       'inner-back-ticks'     , 'a-back-ticks'
       'inner-paragraph'      , 'a-paragraph'
+      'inner-pair-any'       , 'a-pair-any'
       'inner-curly-brackets' , 'a-curly-brackets'
       'inner-angle-brackets' , 'a-angle-brackets'
       'inner-square-brackets', 'a-square-brackets'
@@ -228,6 +229,7 @@ class VimState
       'upper-case', 'lower-case', 'toggle-case', 'toggle-case-and-move-right',
       'camel-case', 'snake-case', 'dash-case',
       'surround', 'delete-surround', 'change-surround',
+      'surround-word', 'delete-surround-pair-any'
       'join',
       'indent', 'outdent', 'auto-indent',
       'increase', 'decrease',

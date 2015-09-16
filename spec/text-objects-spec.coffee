@@ -423,6 +423,9 @@ describe "TextObject", ->
         classListContains: 'normal-mode'
         classListNotContains: 'operator-pending-mode'
 
+  # [TODO]
+  describe "pair-any text object", ->
+        
   describe "the 'a\"' text object", ->
     beforeEach ->
       set

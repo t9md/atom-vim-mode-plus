@@ -1295,6 +1295,10 @@ describe "Operator", ->
           """
         cursorBuffer: [0, 0]
 
+    # [TODO]
+    describe 'surround-word', ->
+    describe 'delete surround-pair-any', ->
+
     describe 'surround', ->
       it "surround text object with ( and repeatable", ->
         ensure ['gss', char: '(', 'iw'],
@@ -1308,6 +1312,7 @@ describe "Operator", ->
           cursor: [0, 0]
         ensure 'j.',
           text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
+
     describe 'delete surround', ->
       beforeEach ->
         set cursor: [1, 8]
@@ -1320,6 +1325,7 @@ describe "Operator", ->
         set cursor: [3, 1]
         ensure ['gsd', char: '('],
           text: "apple\npairs: [brackets]\npairs: [brackets]\n multi\n  line "
+
     describe 'change srurround', ->
       beforeEach ->
         set
