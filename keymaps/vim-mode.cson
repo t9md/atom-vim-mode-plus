@@ -197,7 +197,7 @@
 'atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode':
   'i w':  'vim-mode:inner-word'
   'i W':  'vim-mode:inner-whole-word'
-  'i ;':  'vim-mode:inner-pair-any'
+  'i s':  'vim-mode:inner-pair-any'
   'i "':  'vim-mode:inner-double-quotes'
   'i \'': 'vim-mode:inner-single-quotes'
   'i `':  'vim-mode:inner-back-ticks'
@@ -219,7 +219,7 @@
   'i e':  'vim-mode:inner-entire'
   'a w':  'vim-mode:a-word'
   'a W':  'vim-mode:a-whole-word'
-  'a ;':  'vim-mode:a-pair-any'
+  'a s':  'vim-mode:a-pair-any'
   'a "':  'vim-mode:a-double-quotes'
   'a \'': 'vim-mode:a-single-quotes'
   'a `':  'vim-mode:a-back-ticks'
