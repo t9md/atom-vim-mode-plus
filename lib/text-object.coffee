@@ -50,9 +50,19 @@ class Pair extends TextObject
   inclusive: false
   pair: null
 
-  findPair: (fromPoint, pair, backward=false) ->
-    [search, searchPair] = pair
-    pairRegexp = pair.map(_.escapeRegExp).join('|')
+  isStartingPair:(str, char) ->
+    pattern = ///[^\\]?#{_.escapeRegExp(char)}///
+    count = str.split(pattern).length - 1
+    (count % 2) is 1
+
+  needStopSearch: (pair, cursorRow, row) ->
+    pair not in ["{}", "[]", "()"] and (cursorRow isnt row)
+
+  findPair: (cursorPoint, fromPoint, pair, backward=false) ->
+    pairChars = pair.split('')
+    pairChars.reverse() unless backward
+    [search, searchPair] = pairChars
+    pairRegexp = pairChars.map(_.escapeRegExp).join('|')
     pattern   = ///(?:#{pairRegexp})///g
 
     [scanFunc, scanRange] =
@@ -66,8 +76,21 @@ class Pair extends TextObject
     @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) =>
       charPre = @editor.getTextInBufferRange(range.traverse([0, -1], [0, -1]))
       return if charPre is '\\' # Skip escaped char with '\'
+
+      # don't search across line unless specific pair.
+      if @needStopSearch(pair, cursorPoint.row, range.start.row)
+        stop(); return
+
       if search is searchPair
-        point = range.end
+        if backward
+          text = @editor.lineTextForBufferRow(fromPoint.row)
+          if @isStartingPair(text[0..range.end.column], search)
+            point = range.end
+        else
+          if range.end.isLessThan(cursorPoint)
+            stop(); return
+          else
+            point = range.end
       else
         lastChar = matchText[matchText.length-1]
         switch lastChar
@@ -78,15 +101,22 @@ class Pair extends TextObject
       stop() if point
     point
 
+  getRange: (selection, pair) ->
+    if originallyEmpty = selection.isEmpty()
+      selection.selectRight()
+    point = selection.getHeadBufferPosition()
+    start  = @findPair(point, point, pair, true)
+    range = null
+    if start? and (end = @findPair(point, start, pair)?.traverse([0, -1]))
+      range = new Range(start, end)
+      range = range.translate([0, -1], [0, 1]) if @inclusive
+    unless range and originallyEmpty
+      selection.selectLeft()
+    range
+
   select: ->
-    pair = @pair.split('')
-    pairReversed = pair.slice().reverse()
     for selection in @editor.getSelections()
-      point  = selection.getHeadBufferPosition()
-      start  = @findPair(point, pair, true)
-      if start? and (end = @findPair(start, pairReversed)?.traverse([0, -1]))
-        range = new Range(start, end)
-        range = range.translate([0, -1], [0, 1]) if @inclusive
+      if range = @getRange(selection, @pair)
         selection.setBufferRange(range)
       not selection.isEmpty()
 
@@ -98,15 +128,8 @@ class PairAny extends Pair
   select: ->
     for selection in @editor.getSelections()
       ranges = []
-      for pair in @pairs
-        pair = pair.split('')
-        pairReversed = pair.slice().reverse()
-        point  = selection.getHeadBufferPosition()
-        start  = @findPair(point, pair, true)
-        if start? and (end = @findPair(start, pairReversed)?.traverse([0, -1]))
-          range = new Range(start, end)
-          range = range.translate([0, -1], [0, 1]) if @inclusive
-          ranges.push range
+      for pair in @pairs when (range = @getRange(selection, pair))
+        ranges.push range
       unless _.isEmpty(ranges)
         ranges = ranges.sort (a, b) -> a.compare(b)
         selection.setBufferRange(_.last(ranges))

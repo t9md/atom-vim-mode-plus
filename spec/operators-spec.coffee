@@ -1298,6 +1298,7 @@ describe "Operator", ->
     # [TODO]
     describe 'surround-word', ->
     describe 'delete surround-pair-any', ->
+    describe 'change surround-pair-any', ->
 
     describe 'surround', ->
       it "surround text object with ( and repeatable", ->

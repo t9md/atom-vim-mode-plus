@@ -223,10 +223,11 @@ describe "TextObject", ->
     # it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
     it "[Changed behavior] applies operators inside area between quote", ->
       set
-        cursor: [0, 29]
+        cursor: [0, 26]
       ensure "di'",
-        text: "' something in here and in '' ' and over here"
-        cursor: [0, 28]
+        text: "''here' ' and over here"
+        cursor: [0, 1]
+# ' something in here and in '' ' and over here"
 
     it "makes no change if past the last string on a line", ->
       set
@@ -246,12 +247,12 @@ describe "TextObject", ->
         text: '""here" " and over here'
         cursor: [0, 1]
 
-    it "[Changed behavior] applies operators inside area between quote", ->
+    it "[Changed Behavior?] won't apply if quote is not within string", ->
       set
         cursor: [0, 29]
       ensure 'di"',
-        text: '" something in here and in "" " and over here'
-        cursor: [0, 28]
+        text: '" something in here and in "here" " and over here'
+        cursor: [0, 29]
 
     it "makes no change if past the last string on a line", ->
       set
@@ -402,9 +403,10 @@ describe "TextObject", ->
         classListNotContains: 'operator-pending-mode'
 
   describe "the 'a\'' text object", ->
+    originalText = "' something in here and in 'here' '"
     beforeEach ->
       set
-        text: "' something in here and in 'here' '"
+        text: originalText
         cursor: [0, 9]
 
     it "applies operators around the current single quotes in operator-pending mode", ->
@@ -414,22 +416,23 @@ describe "TextObject", ->
         classListContains: 'normal-mode'
         classListNotContains: 'operator-pending-mode'
 
-    it "applies operators around the current single quotes in operator-pending mode (second test)", ->
+    it "[Changed Behavior] wont applies if its not within string", ->
       set
         cursor: [0, 29]
       ensure "da'",
-        text: "' something in here and in  '"
-        cursor: [0, 27]
+        text: originalText
+        cursor: [0, 29]
         classListContains: 'normal-mode'
         classListNotContains: 'operator-pending-mode'
 
   # [TODO]
   describe "pair-any text object", ->
-        
+
   describe "the 'a\"' text object", ->
+    originalText = '" something in here and in "here" "'
     beforeEach ->
       set
-        text: '" something in here and in "here" "'
+        text: originalText
         cursor: [0, 9]
 
     it "applies operators around the current double quotes in operator-pending mode", ->
@@ -439,12 +442,12 @@ describe "TextObject", ->
         classListContains: 'normal-mode'
         classListNotContains: 'operator-pending-mode'
 
-    it "applies operators around the current double quotes in operator-pending mode (second test)", ->
+    it "[Changed Behavior] wont applies if its not within string", ->
       set
         cursor: [0, 29]
       ensure 'da"',
-        text: '" something in here and in  "'
-        cursor: [0, 27]
+        text: originalText
+        cursor: [0, 29]
         classListContains: 'normal-mode'
         classListNotContains: 'operator-pending-mode'
 

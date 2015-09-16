@@ -228,8 +228,9 @@ class VimState
       'put-after', 'put-before',
       'upper-case', 'lower-case', 'toggle-case', 'toggle-case-and-move-right',
       'camel-case', 'snake-case', 'dash-case',
-      'surround', 'delete-surround', 'change-surround',
-      'surround-word', 'delete-surround-pair-any'
+      'surround', 'surround-word',
+      'delete-surround', 'delete-surround-pair-any'
+      'change-surround', 'change-surround-pair-any'
       'join',
       'indent', 'outdent', 'auto-indent',
       'increase', 'decrease',
