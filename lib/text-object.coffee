@@ -121,7 +121,7 @@ class Pair extends TextObject
       not selection.isEmpty()
 
 # [FIXME] Improve nest handling across pairs
-class PairAny extends Pair
+class AnyPair extends Pair
   @extend()
   pairs: ['""', "''", "``", "{}", "<>", "><", "[]", "()"]
 
@@ -278,7 +278,7 @@ module.exports = {
   Word, WholeWord,
   DoubleQuotes, SingleQuotes, BackTicks, CurlyBrackets , AngleBrackets, Tags,
   SquareBrackets, Parentheses,
-  PairAny
+  AnyPair
   Paragraph, Comment, Indentation,
   CurrentLine, Entire,
 }

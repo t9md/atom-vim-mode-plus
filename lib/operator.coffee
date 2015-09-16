@@ -294,12 +294,12 @@ class DeleteSurround extends Surround
   getNewText: (text) ->
     text[1...-1]
 
-class DeleteSurroundPairAny extends DeleteSurround
+class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
   requireInput: false
   constructor: ->
     super
-    @compose @new("PairAny", inclusive: true)
+    @compose @new("AnyPair", inclusive: true)
 
 class ChangeSurround extends DeleteSurround
   @extend()
@@ -314,13 +314,13 @@ class ChangeSurround extends DeleteSurround
   getNewText: (text) ->
     @surround text[1...-1], @getPair(@char)
 
-class ChangeSurroundPairAny extends ChangeSurround
+class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
   charsMax: 1
 
   constructor: ->
     super
-    @compose @new("PairAny", inclusive: true)
+    @compose @new("AnyPair", inclusive: true)
 
   onDidGetInput: (@char) ->
     @input = @char
@@ -778,8 +778,8 @@ module.exports = {
   UpperCase, LowerCase
   CamelCase, SnakeCase, DashCase
   Surround, SurroundWord
-  DeleteSurround, DeleteSurroundPairAny
-  ChangeSurround, ChangeSurroundPairAny
+  DeleteSurround, DeleteSurroundAnyPair
+  ChangeSurround, ChangeSurroundAnyPair
 
   # Put
   PutBefore, PutAfter,
