@@ -105,7 +105,8 @@
   'g s w': 'vim-mode:surround-word'
   'g s d': 'vim-mode:delete-surround'
   'g s c': 'vim-mode:change-surround'
-  'g s d ;': 'vim-mode:delete-surround-pair-any'
+  # [FIXME] 'g s d ;' cause spec fail because of keymaping is not unique.
+  'g s ;': 'vim-mode:delete-surround-pair-any'
 
   'ctrl-w ctrl-h': 'window:focus-pane-on-left'
   'ctrl-w h': 'window:focus-pane-on-left'
