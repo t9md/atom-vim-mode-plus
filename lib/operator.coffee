@@ -260,6 +260,7 @@ class Surround extends TransformString
 
   constructor: ->
     super
+    return unless @requireInput
     @getInput
       charsMax: @charsMax,
       onGet:    @onDidGetInput.bind(this)
@@ -279,6 +280,11 @@ class Surround extends TransformString
   getNewText: (text) ->
     @surround text, @getPair(@input)
 
+class SurroundWord extends Surround
+  constructor: ->
+    super
+    @compose @new('Word')
+
 class DeleteSurround extends Surround
   @extend()
   onDidGetInput: (@input) ->
@@ -287,6 +293,13 @@ class DeleteSurround extends Surround
 
   getNewText: (text) ->
     text[1...-1]
+
+class DeleteSurroundPairAny extends DeleteSurround
+  @extend()
+  requireInput: false
+  constructor: ->
+    super
+    @compose @new("PairAny", inclusive: true)
 
 class ChangeSurround extends DeleteSurround
   @extend()
@@ -752,7 +765,9 @@ module.exports = {
   ToggleCase, ToggleCaseAndMoveRight,
   UpperCase, LowerCase
   CamelCase, SnakeCase, DashCase
-  Surround, DeleteSurround, ChangeSurround
+  Surround, SurroundWord
+  DeleteSurround, DeleteSurroundPairAny
+  ChangeSurround
 
   # Put
   PutBefore, PutAfter,

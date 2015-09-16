@@ -90,6 +90,28 @@ class Pair extends TextObject
         selection.setBufferRange(range)
       not selection.isEmpty()
 
+# [FIXME] Improve nest handling across pairs
+class PairAny extends Pair
+  @extend()
+  pairs: ['""', "''", "``", "{}", "<>", "><", "[]", "()"]
+
+  select: ->
+    for selection in @editor.getSelections()
+      ranges = []
+      for pair in @pairs
+        pair = pair.split('')
+        pairReversed = pair.slice().reverse()
+        point  = selection.getHeadBufferPosition()
+        start  = @findPair(point, pair, true)
+        if start? and (end = @findPair(start, pairReversed)?.traverse([0, -1]))
+          range = new Range(start, end)
+          range = range.translate([0, -1], [0, 1]) if @inclusive
+          ranges.push range
+      unless _.isEmpty(ranges)
+        ranges = ranges.sort (a, b) -> a.compare(b)
+        selection.setBufferRange(_.last(ranges))
+      not selection.isEmpty()
+
 class DoubleQuotes extends Pair
   @extend()
   pair: '""'
@@ -233,6 +255,7 @@ module.exports = {
   Word, WholeWord,
   DoubleQuotes, SingleQuotes, BackTicks, CurlyBrackets , AngleBrackets, Tags,
   SquareBrackets, Parentheses,
+  PairAny
   Paragraph, Comment, Indentation,
   CurrentLine, Entire,
 }
