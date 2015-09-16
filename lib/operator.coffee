@@ -314,6 +314,18 @@ class ChangeSurround extends DeleteSurround
   getNewText: (text) ->
     @surround text[1...-1], @getPair(@char)
 
+class ChangeSurroundPairAny extends ChangeSurround
+  @extend()
+  charsMax: 1
+
+  constructor: ->
+    super
+    @compose @new("PairAny", inclusive: true)
+
+  onDidGetInput: (@char) ->
+    @input = @char
+    @vimState.operationStack.process()
+
 class Yank extends Operator
   @extend()
   linewiseAlias: true
@@ -767,7 +779,7 @@ module.exports = {
   CamelCase, SnakeCase, DashCase
   Surround, SurroundWord
   DeleteSurround, DeleteSurroundPairAny
-  ChangeSurround
+  ChangeSurround, ChangeSurroundPairAny
 
   # Put
   PutBefore, PutAfter,
