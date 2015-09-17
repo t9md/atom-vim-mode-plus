@@ -23,5 +23,8 @@ class CountManager
     not @count
 
   getKeystrokeForEvent: (event) ->
-    keyboardEvent = event.originalEvent?.originalEvent ? event.originalEvent
+    if event.originalEvent.originalEvent?
+      console.log event.originalEvent.originalEvent
+    # keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
+    keyboardEvent = event.originalEvent
     atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
