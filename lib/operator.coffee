@@ -21,7 +21,7 @@ class Operator extends Base
   linewiseAlias: false
 
   isSameOperatorRepeated: ->
-    if @linewiseAlias and @vimState.isOperatorPendingMode()
+    if @linewiseAlias and @vimState.isMode('operator-pending')
       @vimState.operationStack.peekTop().constructor is @constructor
     else
       false
@@ -119,7 +119,7 @@ class OperateOnInnerWord extends Operator
   constructor: ->
     super
     @new('Word').select()
-    unless @vimState.isVisualMode()
+    unless @vimState.isMode('visual')
       @vimState.activateVisualMode()
 
   compose: (target) ->

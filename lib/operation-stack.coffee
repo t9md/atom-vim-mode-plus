@@ -17,16 +17,16 @@ class OperationStack
       debug "#=== Start at #{new Date().toISOString()}"
 
     # Use implicit Select operator as operator.
-    if @vimState.isVisualMode() and _.isFunction(op.select)
-      debug "push INPLICIT Operator.Select"
+    if @vimState.isMode('visual') and _.isFunction(op.select)
+      debug "push IMPLICIT Operator.Select"
       @stack.push(new Select(@vimState))
 
     debug "pushing <#{op.getKind()}>"
     @stack.push op
 
     # Operate on implicit CurrentSelection TextObject.
-    if @vimState.isVisualMode() and op.isOperator()
-      debug "push INPLICIT Motion.CurrentSelection"
+    if @vimState.isMode('visual') and op.isOperator()
+      debug "push IMPLICIT Motion.CurrentSelection"
       @stack.push(new CurrentSelection(@vimState))
     @withLock =>
       @process()
@@ -58,7 +58,7 @@ class OperationStack
           throw error
 
     unless @peekTop().isComplete()
-      if @vimState.isNormalMode() and @peekTop().isOperator?()
+      if @vimState.isMode('normal') and @peekTop().isOperator?()
         @inspect()
         debug '-> @process(): activating: operator-pending-mode'
         @vimState.activateOperatorPendingMode()
@@ -82,7 +82,7 @@ class OperationStack
     debug "#=== Finish at #{new Date().toISOString()}\n"
 
   finish: ->
-    if @vimState.isNormalMode()
+    if @vimState.isMode('normal')
       @vimState.dontPutCursorsAtEndOfLine()
     @vimState.reset()
     @vimState.lastOperation = null

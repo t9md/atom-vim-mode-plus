@@ -5,7 +5,6 @@ getFilePathForPackage = (packageName, file) ->
 
 requirePackageFile = (packageName, file) ->
   if lib = getFilePathForPackage(packageName, file)
-    console.log lib
     require lib
 
 getVimStateForEditor = (editor) ->

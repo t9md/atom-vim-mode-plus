@@ -79,7 +79,7 @@ class Base
     @canceled
 
   cancel: ->
-    unless @vimState.isVisualMode() or @vimState.isInsertMode()
+    unless @vimState.isMode('visual') or @vimState.isMode('insert')
       @vimState.resetNormalMode()
 
   # Expected to be called by child class.
