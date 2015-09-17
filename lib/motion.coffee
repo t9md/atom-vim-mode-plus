@@ -18,14 +18,14 @@ class Motion extends Base
   setOptions: (@options) ->
 
   isLinewise: ->
-    if @vimState.isVisualMode()
-      @vimState.submode is 'linewise'
+    if @vimState.isMode('visual')
+      @vimState.isMode('visual', 'linewise')
     else
       @linewise
 
   isInclusive: ->
-    if @vimState.isVisualMode()
-      @vimState.submode in ['characterwise', 'blockwise']
+    if @vimState.isMode('visual')
+      @vimState.isMode('visual', ['characterwise', 'blockwise'])
     else
       @inclusive
 
@@ -134,7 +134,7 @@ class CurrentSelection extends Motion
   select: ->
     # In visual mode, the current selections are already there.
     # If we're not in visual mode, we are repeating some operation and need to re-do the selections
-    unless @vimState.isVisualMode()
+    unless @vimState.isMode('visual')
       @selectCharacters()
       if @wasLinewise
         @selectLines(s) for s in @editor.getSelections()
@@ -165,7 +165,7 @@ class MoveRight extends Motion
       @composed = true
 
   isOperatorPending: ->
-    @vimState.isOperatorPendingMode() or @composed
+    @vimState.isMode('operator-pending') or @composed
 
   moveCursor: (cursor) ->
     @countTimes =>

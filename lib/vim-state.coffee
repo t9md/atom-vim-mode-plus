@@ -34,10 +34,7 @@ class VimState
 
   # Mode handling is delegated to modeManager
   delegatingMethods = [
-    'isNormalMode'
-    'isInsertMode'
-    'isOperatorPendingMode'
-    'isVisualMode'
+    'isMode'
     'activateNormalMode'
     'activateInsertMode'
     'activateOperatorPendingMode'
@@ -47,7 +44,6 @@ class VimState
     'deactivateVisualMode'
     'activateVisualMode'
     'resetNormalMode'
-    'resetVisualMode'
     'setInsertionCheckpoint'
   ]
   delegatingProperties = [
@@ -81,9 +77,9 @@ class VimState
           @checkSelections()
         return unless settings.get('showCursorInVisualMode')
         switch
-          when @isVisualMode('characterwise')
+          when @isMode('visual', 'characterwise')
             @showCursors(@editor.getCursors())
-          when @isVisualMode('blockwise')
+          when @isMode('visual', 'blockwise')
             cursors =
               for s in @editor.getSelections() when s.marker.getProperties().vimModeBlockwiseHead
                 s.cursor
@@ -295,18 +291,17 @@ class VimState
   checkSelections: ->
     return unless @editor?
     if @editor.getSelections().every((s) -> s.isEmpty())
-      if @isNormalMode()
+      if @isMode('normal')
         @dontPutCursorsAtEndOfLine()
-      else if @isVisualMode()
+      else if @isMode('visual')
         @activateNormalMode()
     else
-      if @isNormalMode()
+      if @isMode('normal')
         @activateVisualMode('characterwise')
       else
         # When cursor is added selection is empty
         # using editor.onDidAddCursor not work since at the timing event callbacked,
         # cursor.selection is `undefined` and editor.getCursors().length isnt editor.getSelections().length
-        # console.log "called!!"
         lastSelection = @editor.getLastSelection()
         if lastSelection.isEmpty()
           lastSelection.selectRight()

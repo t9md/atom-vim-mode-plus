@@ -10,15 +10,14 @@ class ModeManager
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
-  isNormalMode: -> @mode is 'normal'
-  isInsertMode: -> @mode is 'insert'
-  isOperatorPendingMode: -> @mode is 'operator-pending'
-
-  isVisualMode: (submode=null) ->
+  isMode: (mode, submode=null) ->
     if submode
-      @mode is 'visual' and @submode is submode
+      if _.isArray(submode)
+        @mode is mode and (@submode in submode)
+      else
+        @mode is mode and @submode is submode
     else
-      @mode is 'visual'
+      @mode is mode
 
   setMode: (@mode, @submode=null) ->
     for mode in ['normal', 'insert', 'visual', 'operator-pending']
@@ -97,22 +96,22 @@ class ModeManager
       @replaceModeUndoListener = null
 
   deactivateVisualMode: ->
-    return unless @isVisualMode()
+    return unless @isMode('visual')
     {lastOperation} = @vimState
     restoreColumn = not (lastOperation?.isYank() or lastOperation?.isIndent())
-    if restoreColumn and @submode is 'linewise'
+    if restoreColumn and @isMode('visual', 'linewise')
       @selectCharacterwise()
     for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())
       s.cursor.moveLeft()
 
   activateVisualMode: (submode) ->
-    if @isVisualMode(submode)
+    if @isMode('visual', submode)
       @activateNormalMode()
       return
 
     # [FIXME] comment out to evaluate necessity.
     # Since I can't understand why this is necessary.
-    # unless @isVisualMode()
+    # unless @isMode('visual')
     #   @deactivateInsertMode()
 
     oldSubmode = @submode
@@ -158,8 +157,8 @@ class ModeManager
       @selectCharacterwise()
     @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
-  resetVisualMode: ->
-    @activateVisualMode(@submode)
+  # resetVisualMode: ->
+  #   @activateVisualMode(@submode)
 
   activateOperatorPendingMode: ->
     @deactivateInsertMode()

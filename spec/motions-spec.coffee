@@ -14,7 +14,6 @@ describe "Motion", ->
 
   describe "simple motions", ->
     beforeEach ->
-      # console.log vimState
       set
         text: """
           12345

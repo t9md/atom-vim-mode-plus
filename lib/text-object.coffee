@@ -120,7 +120,6 @@ class Pair extends TextObject
         selection.setBufferRange(range)
       not selection.isEmpty()
 
-# [FIXME] Improve nest handling across pairs
 class AnyPair extends Pair
   @extend()
   pairs: ['""', "''", "``", "{}", "<>", "><", "[]", "()"]
@@ -225,7 +224,7 @@ class Paragraph extends TextObject
         else
           @selectExclusive(selection)
       results.push not selection.isEmpty()
-    if @isLinewise() and @vimState.isVisualMode() and @vimState.submode isnt 'linewise'
+    if @isLinewise() and @vimState.isMode('visual', ['characterwise', 'blockwise'])
       @vimState.activateVisualMode('linewise')
     results
 
