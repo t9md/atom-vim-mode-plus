@@ -18,10 +18,9 @@ class Operator extends Base
   target: null
   complete: false
   recodable: true
-  linewiseAlias: false
 
   isSameOperatorRepeated: ->
-    if @linewiseAlias and @vimState.isMode('operator-pending')
+    if @vimState.isMode('operator-pending')
       @vimState.operationStack.peekTop().constructor is @constructor
     else
       false
@@ -141,7 +140,6 @@ class OperateOnInnerWord extends Operator
 
 class Delete extends Operator
   @extend()
-  linewiseAlias: true
   hoverText: ':scissors:'
   hoverIcon: ':delete:'
 
@@ -177,7 +175,6 @@ class DeleteToLastCharacterOfLine extends Delete
 class TransformString extends Operator
   @extend()
   adjustCursor: true
-  linewiseAlias: true
 
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
@@ -328,7 +325,6 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
 class Yank extends Operator
   @extend()
-  linewiseAlias: true
   hoverText: ':clipboard:'
   hoverIcon: ':yank:'
   execute: ->
@@ -410,7 +406,6 @@ class Decrease extends Increase
 
 class Indent extends Operator
   @extend()
-  linewiseAlias: true
   hoverText: ':point_right:'
   # hoverIcon: ':indent:'
   hoverIcon: ':indent:'
@@ -611,7 +606,6 @@ class InsertBelowWithNewline extends InsertAboveWithNewline
 class Change extends Insert
   @extend()
   complete: false
-  linewiseAlias: true
 
   execute: ->
     # If we've typed, we're being repeated. If we're being repeated,
