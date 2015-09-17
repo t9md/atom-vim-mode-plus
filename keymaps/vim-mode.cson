@@ -178,7 +178,6 @@
   '7': 'vim-mode:set-count'
   '8': 'vim-mode:set-count'
   '9': 'vim-mode:set-count'
-  # '"': 'vim-mode:set-count'
 
 # normal
 # -------------------------
@@ -206,7 +205,8 @@
 
 # operator-pending, visual
 # -------------------------
-'atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode':
+'atom-text-editor.vim-mode.operator-pending-mode,
+ atom-text-editor.vim-mode.visual-mode':
   'x': 'vim-mode:reset-normal-mode'
   '~': 'vim-mode:toggle-case'
   'U': 'vim-mode:upper-case'
