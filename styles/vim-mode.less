@@ -142,6 +142,20 @@ atom-text-editor.vim-mode.operator-pending-mode.is-focused
     }
   }
 }
+atom-text-editor.vim-mode.visual-mode.characterwise:not(.reversed),
+atom-text-editor.vim-mode.visual-mode.blockwise:not(.reversed), {
+  &::shadow {
+    .cursor {
+      // Currently not well handling for multibyte char width
+      // So to support multibyte, we need to dynamically calculate cursor width.
+      // Need inmprove when uesr add cursor with cmd-click in visual charwise modeManager
+      // it selectRight to sync selection state, this -1 affect cursor decoration for just
+      // clicked position,,
+      left: -1ch;
+    }
+  }
+}
+
 
 // For flashing ranges operated on. e.g. flashing yanked region.
 atom-text-editor::shadow {
@@ -157,17 +171,6 @@ atom-text-editor::shadow {
     // [FIXME] I want i-bar style cursor for insert-mode.
     background-color: @syntax-cursor-color;
     opacity: 0.8;
-  }
-}
-
-atom-text-editor.vim-mode.visual-mode.characterwise:not(.reversed)::shadow {
-  .cursor {
-    // Currently not well handling for multibyte char width
-    // So to support multibyte, we need to dynamically calculate cursor width.
-    // Need inmprove when uesr add cursor with cmd-click in visual charwise modeManager
-    // it selectRight to sync selection state, this -1 affect cursor decoration for just
-    // clicked position,,
-    left: -1ch;
   }
 }
 
