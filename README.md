@@ -52,7 +52,11 @@ My current(2015.9.6.) 1st prioritized TODO is refactor `motion.coffee`, I know i
 But I need some pastime, refresher, So I added following new features which is not included Vim and vim-mode as pastime.  
 
 - New Operator
-  - Surround, DeleteSurround, ChangeSurround. Instead of vim-surround atom package, its repeatable(very improtant) with `.`.
+  - Surround
+    - Surround, DeleteSurround, ChangeSurround. Instead of vim-surround atom package, its repeatable(very improtant) with `.`.
+    - SurroundWord pre-targeted to iner-word
+    - DeleteSurroundAnyPair: Delete surrounding pair of AnyPair TextObject. You don't have to specify what pair you want to delete.
+    - ChangeSurroundAnyPair: Change surrounding pair of AnyPair TextObject. You don't have to specify what pair you want to change.
   - Common string transformation includes SnakeCase, CamelCase, DashCase.
   - ToggleLineComments which toggle comment of target-area(selected by motion or text-objects).
   - ReplaceWithRegister which replace target-area(selected by text-object or motion) with register's text. Very useful since its repeatable.
@@ -60,7 +64,10 @@ But I need some pastime, refresher, So I added following new features which is n
   - Indent which select consecutive deeper indented lines
   - Entire buffer.
   - CurrentLine. Useful when you do surround line.
+  - Fold
   - Comment. which select consecutive commented lines.
+  - AnyPair. it select nearest pair(surround) from one of following pair.
+    - '""', "''", "``", "{}", "<>", "><", "[]", "()".
 - Motion
 - Instant feedback of your operation. Count/Register/Operation you typed is displayed as hover(overlay) element.
  - Showing emoji that representing operation.
