@@ -637,3 +637,41 @@ describe "TextObject", ->
           ....  ....
           ....  ....
           """
+
+  describe 'the fold text object', ->
+    coffeeEditor = null
+    vim = null
+    beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-coffee-script')
+
+      getVimState 'sample.coffee', (_vimState, _vim) ->
+        coffeeEditor = _vimState.editor
+        _vimState.activateNormalMode()
+        _vimState.resetNormalMode()
+        vim = _vim
+
+    afterEach ->
+      atom.packages.deactivatePackage('language-coffee-script')
+
+    describe 'inner fold', ->
+      it 'select fold row range except stwart row', ->
+        vim.set cursor: [13, 0]
+        vim.ensure 'viz',
+          selectedBufferRange: [[10, 0], [26, 0]]
+
+      it 'select fold row range except stwart row', ->
+        vim.set cursor: [19, 0]
+        vim.ensure 'viz',
+          selectedBufferRange: [[19, 0], [24, 0]]
+
+    describe 'a fold', ->
+      it 'select fold row range', ->
+        vim.set cursor: [13, 0]
+        vim.ensure 'vaz',
+          selectedBufferRange: [[9, 0], [26, 0]]
+
+      it 'select fold row range except stwart row', ->
+        vim.set cursor: [19, 0]
+        vim.ensure 'vaz',
+          selectedBufferRange: [[18, 0], [24, 0]]
