@@ -655,12 +655,12 @@ describe "TextObject", ->
       atom.packages.deactivatePackage('language-coffee-script')
 
     describe 'inner fold', ->
-      it 'select fold row range except stwart row', ->
+      it 'select fold row range except start row', ->
         vim.set cursor: [13, 0]
         vim.ensure 'viz',
           selectedBufferRange: [[10, 0], [26, 0]]
 
-      it 'select fold row range except stwart row', ->
+      it 'select fold row range except start row', ->
         vim.set cursor: [19, 0]
         vim.ensure 'viz',
           selectedBufferRange: [[19, 0], [24, 0]]
@@ -671,7 +671,7 @@ describe "TextObject", ->
         vim.ensure 'vaz',
           selectedBufferRange: [[9, 0], [26, 0]]
 
-      it 'select fold row range except stwart row', ->
+      it 'select fold row range', ->
         vim.set cursor: [19, 0]
         vim.ensure 'vaz',
           selectedBufferRange: [[18, 0], [24, 0]]
