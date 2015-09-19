@@ -1295,11 +1295,6 @@ describe "Operator", ->
           """
         cursorBuffer: [0, 0]
 
-    # [TODO]
-    describe 'surround-word', ->
-    describe 'delete surround-any-pair', ->
-    describe 'change surround-any-pair', ->
-
     describe 'surround', ->
       it "surround text object with ( and repeatable", ->
         ensure ['gss', char: '(', 'iw'],
@@ -1367,6 +1362,79 @@ describe "Operator", ->
             "lemmon"
             !orange!
             """
+
+    describe 'surround-word', ->
+      it "surround a word with ( and repeatable", ->
+        ensure ['gsw', char: '('],
+          text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
+          cursor: [0, 0]
+        ensure 'j.',
+          text: "(apple)\n(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
+      it "surround a word with { and repeatable", ->
+        ensure ['gsw', char: '{'],
+          text: "{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
+          cursor: [0, 0]
+        ensure 'j.',
+          text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
+
+    describe 'delete surround-any-pair', ->
+      beforeEach ->
+        set
+          text: """
+            apple
+            (pairs: [brackets])
+            {pairs "s" [brackets]}
+            ( multi
+              line )
+            """
+          cursor: [1, 9]
+
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode:not(.insert-mode)':
+            'd s': 'vim-mode:delete-surround-any-pair'
+
+      it "delete surrounded any pair found and repeatable", ->
+        ensure 'ds',
+          text: 'apple\n(pairs: brackets)\n{pairs "s" [brackets]}\n( multi\n  line )'
+        ensure '.',
+          text: 'apple\npairs: brackets\n{pairs "s" [brackets]}\n( multi\n  line )'
+
+      it "delete surrounded any pair found with skip pair out of cursor and repeatable", ->
+        set cursor: [2, 14]
+        ensure 'ds',
+          text: 'apple\n(pairs: [brackets])\n{pairs "s" brackets}\n( multi\n  line )'
+        ensure '.',
+          text: 'apple\n(pairs: [brackets])\npairs "s" brackets\n( multi\n  line )'
+        ensure '.', # do nothing any more
+          text: 'apple\n(pairs: [brackets])\npairs "s" brackets\n( multi\n  line )'
+
+      it "delete surrounded chars expanded to multi-line", ->
+        set cursor: [3, 1]
+        ensure 'ds',
+          text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\n multi\n  line '
+
+    describe 'change surround-any-pair', ->
+      beforeEach ->
+        set
+          text: """
+            (apple)
+            (grape)
+            <lemmon>
+            {orange}
+            """
+          cursor: [0, 1]
+
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode:not(.insert-mode)':
+            'c s': 'vim-mode:change-surround-any-pair'
+
+      it "change any surrounded pair found and repeatable", ->
+        ensure ['cs', char: '<'],
+          text: "<apple>\n(grape)\n<lemmon>\n{orange}"
+        ensure 'j.',
+          text: "<apple>\n<grape>\n<lemmon>\n{orange}"
+        ensure 'jj.',
+          text: "<apple>\n<grape>\n<lemmon>\n<orange>"
 
   describe "the i keybinding", ->
     beforeEach ->
