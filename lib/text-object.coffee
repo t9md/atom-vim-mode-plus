@@ -14,17 +14,24 @@ class TextObject extends Base
   rangeToEndOfFile: (point) ->
     new Range(point, Point.INFINITY)
 
+  status: ->
+    (not s.isEmpty() for s in @editor.getSelections())
+
+  eachSelection: (callback) ->
+    for selection in @editor.getSelections()
+      callback selection
+    @status()
+
 # Word
 # -------------------------
 # [FIXME] Need to be extendable.
 class Word extends TextObject
   @extend()
   select: ->
-    for selection in @editor.getSelections()
+    @eachSelection (selection) =>
       wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
       @selectExclusive(selection, wordRegex)
       @selectInclusive(selection) if @inclusive
-      not selection.isEmpty()
 
   selectExclusive: (selection, wordRegex) ->
     range = selection.cursor.getCurrentWordBufferRange({wordRegex})
@@ -73,35 +80,26 @@ class Pair extends TextObject
 
     nest = 0
     found = null # We will search to fill this var.
-
     @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) =>
       charPre = @editor.getTextInBufferRange(range.traverse([0, -1], [0, -1]))
       return if charPre is '\\' # Skip escaped char with '\'
+      {end, start} = range
 
       # don't search across line unless specific pair.
-      if @needStopSearch(pair, cursorPoint.row, range.start.row)
-        return stop()
+      return stop() if @needStopSearch(pair, cursorPoint.row, start.row)
 
       if search is searchPair
         if backward
           text = @editor.lineTextForBufferRow(fromPoint.row)
-          if @isStartingPair(text[0..range.end.column], search)
-            found = range
-        else
-          # skip for pair not within cursorPoint.
-          if range.end.isLessThan(cursorPoint)
-            stop()
-          else
-            found = range
+          found = end if @isStartingPair(text[0..end.column], search)
+        else # skip for pair not within cursorPoint.
+          if end.isLessThan(cursorPoint) then stop() else found = end
       else
-        lastChar = matchText[matchText.length-1]
-        switch lastChar
-          when search
-            if (nest is 0) then found = range else nest--
-          when searchPair
-            nest++
+        switch matchText[matchText.length-1]
+          when search then (if (nest is 0) then found = end else nest--)
+          when searchPair then nest++
       stop() if found
-    if found? then found.end else null
+    found
 
   getRange: (selection, pair) ->
     if originallyEmpty = selection.isEmpty()
@@ -117,24 +115,22 @@ class Pair extends TextObject
     range
 
   select: ->
-    for selection in @editor.getSelections()
+    @eachSelection (selection) =>
       if range = @getRange(selection, @pair)
         selection.setBufferRange(range)
-      not selection.isEmpty()
 
 class AnyPair extends Pair
   @extend()
   pairs: ['""', "''", "``", "{}", "<>", "><", "[]", "()"]
 
   select: ->
-    for selection in @editor.getSelections()
+    @eachSelection (selection) =>
       ranges = []
       for pair in @pairs when (range = @getRange(selection, pair))
         ranges.push range
       unless _.isEmpty(ranges)
         ranges = ranges.sort (a, b) -> a.compare(b)
         selection.setBufferRange(_.last(ranges))
-      not selection.isEmpty()
 
 class DoubleQuotes extends Pair
   @extend()
@@ -218,17 +214,15 @@ class Paragraph extends TextObject
     @selectParagraph(selection)
 
   select: ->
-    results = []
-    for selection in @editor.getSelections()
+    status = @eachSelection (selection) =>
       _.times @getCount(1), =>
         if @inclusive
           @selectInclusive(selection)
         else
           @selectExclusive(selection)
-      results.push not selection.isEmpty()
     if @isLinewise() and @vimState.isMode('visual', ['characterwise', 'blockwise'])
       @vimState.activateVisualMode('linewise')
-    results
+    status
 
 class Comment extends Paragraph
   @extend()
@@ -236,7 +230,7 @@ class Comment extends Paragraph
     @selectParagraph(selection)
 
   getRange: (startRow) ->
-    return unless @editor.isBufferRowCommented(startRow)
+    return unless @editor.isBufferRowCommentd(startRow)
     fn = (row) =>
       return if (@inclusive and @editor.isBufferRowBlank(row))
       @editor.isBufferRowCommented(row) in [false, undefined]
@@ -262,18 +256,17 @@ class Indentation extends Paragraph
 class CurrentLine extends TextObject
   @extend()
   select: ->
-    for selection in @editor.getSelections()
-      selection.cursor.moveToBeginningOfLine()
-      unless @inclusive
-        selection.cursor.moveToFirstCharacterOfLine()
+    @eachSelection (selection) =>
+      {cursor} = selection
+      cursor.moveToBeginningOfLine()
+      cursor.moveToFirstCharacterOfLine() unless @inclusive
       selection.selectToEndOfLine()
-      not selection.isEmpty()
 
 class Entire extends TextObject
   @extend()
   select: ->
     @editor.selectAll()
-    not s.isEmpty() for s in @editor.getSelections()
+    @status()
 
 module.exports = {
   Word, WholeWord,
