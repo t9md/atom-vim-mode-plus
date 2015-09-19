@@ -1,5 +1,6 @@
 # Refactoring status: 20%
 _ = require 'underscore-plus'
+{selectLines, debug} = require './utils'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 {Range} = require 'atom'
 
@@ -132,8 +133,7 @@ class ModeManager
     for selection in @editor.getSelections()
       originalRange = selection.getBufferRange()
       selection.marker.setProperties({originalRange})
-      for row in selection.getBufferRowRange()
-        selection.selectLine(row)
+      selectLines(selection)
     @hideCursors()
 
   selectCharacterwise: (oldSubmode) ->
