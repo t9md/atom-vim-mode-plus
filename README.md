@@ -67,7 +67,8 @@ But I need some pastime, refresher, So I added following new features which is n
   - Fold
   - Comment. which select consecutive commented lines.
   - AnyPair. it select nearest pair(surround) from one of following pair.
-    - '""', "''", "``", "{}", "<>", "><", "[]", "()".
+    - `'""', "''", "``", "{}", "<>", "><", "[]", "()"`.
+  - Function. it select inner-function(body) or a-function.
 - Motion
 - Instant feedback of your operation. Count/Register/Operation you typed is displayed as hover(overlay) element.
  - Showing emoji that representing operation.

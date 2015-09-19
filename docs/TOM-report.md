@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-09-17T06:21:06.555Z*
+*generated at 2015-09-19T19:11:28.017Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -121,6 +121,8 @@ vim-mode version: 0.57.0
   - [TextObject](#textobject--base) *Not exported*
     - [CurrentLine](#currentline--textobject)
     - [Entire](#entire--textobject)
+    - [Fold](#fold--textobject)
+      - [Function](#function--fold)
     - [Pair](#pair--textobject) *Not exported*
       - [AngleBrackets](#anglebrackets--pair)
       - [AnyPair](#anypair--pair)
@@ -274,6 +276,8 @@ vim-mode version: 0.57.0
 - ::isParagraph`()`
 - ::isComment`()`
 - ::isIndentation`()`
+- ::isFold`()`
+- ::isFunction`()`
 - ::isCurrentLine`()`
 - ::isEntire`()`
 - ::isInsertMode`()`
@@ -348,7 +352,6 @@ vim-mode version: 0.57.0
 - ::getTailRange`(selection)`
 - ::withKeepingGoalColumn`(cursor, fn)`
 - ::selectInclusive`(selection)`
-- ::selectLines`(selection)`
 - ::countTimes`(fn)`
 - ::at`(where, cursor)`
 - ::moveToFirstCharacterOfLine`(cursor)`
@@ -737,7 +740,6 @@ vim-mode version: 0.57.0
 - command: `vim-mode:delete`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>d</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>d</kbd>
   - atom-text-editor.vim-mode.visual-mode: <kbd>x</kbd>
 - ::hoverText: ```':scissors:'```
 - ::hoverIcon: ```':delete:'```
@@ -780,7 +782,6 @@ vim-mode version: 0.57.0
 - command: `vim-mode:indent`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>></kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>></kbd>
 - ::hoverText: ```':point_right:'```
 - ::hoverIcon: ```':indent:'```
 - ::execute`()`
@@ -790,7 +791,6 @@ vim-mode version: 0.57.0
 - command: `vim-mode:auto-indent`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>=</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>=</kbd>
 - ::hoverText: ```':open_hands:'```: **Overridden**
 - ::hoverIcon: ```':auto-indent:'```: **Overridden**
 - ::indent`()`: **Overridden**
@@ -799,7 +799,6 @@ vim-mode version: 0.57.0
 - command: `vim-mode:outdent`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd><</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd><</kbd>
 - ::hoverText: ```':point_left:'```: **Overridden**
 - ::hoverIcon: ```':outdent:'```: **Overridden**
 - ::indent`()`: **Overridden**
@@ -820,7 +819,6 @@ vim-mode version: 0.57.0
 - command: `vim-mode:change`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>c</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>c</kbd>
   - atom-text-editor.vim-mode.visual-mode: <kbd>s</kbd>
 - ::complete: ```false```: **Overridden**
 - ::execute`()`: `super`: **Overridden**
@@ -982,7 +980,6 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g u</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>u</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>g u</kbd>
 - ::hoverText: ```':point_down:'```
 - ::hoverIcon: ```':lower-case:'```
 - ::getNewText`(text)`
@@ -1047,7 +1044,6 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g ~</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>~</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>g ~</kbd>
 - ::hoverText: ```':clap:'```
 - ::hoverIcon: ```':toggle-case:'```
 - ::toggleCase`(char)`
@@ -1067,7 +1063,6 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g U</kbd>
   - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>U</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>g U</kbd>
 - ::hoverText: ```':point_up:'```
 - ::hoverIcon: ```':upper-case:'```
 - ::getNewText`(text)`
@@ -1076,7 +1071,6 @@ vim-mode version: 0.57.0
 - command: `vim-mode:yank`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>y</kbd>
-  - atom-text-editor.vim-mode.operator-pending-mode, atom-text-editor.vim-mode.visual-mode: <kbd>y</kbd>
 - ::hoverText: ```':clipboard:'```
 - ::hoverIcon: ```':yank:'```
 - ::execute`()`
@@ -1179,14 +1173,30 @@ vim-mode version: 0.57.0
 *Not exported*
 - ::complete: ```true```: **Overridden**
 - ::recodable: ```false```: **Overridden**
+- ::isWholeLine`(_arg)`
 - ::rangeToBeginningOfFile`(point)`
 - ::rangeToEndOfFile`(point)`
+- ::status`()`
+- ::isLinewise`()`
+- ::eachSelection`(callback)`
 
 ### CurrentLine < TextObject
 - ::select`()`
 
 ### Entire < TextObject
 - ::select`()`
+
+### Fold < TextObject
+- ::getRowRangeForBufferRow`(bufferRow, inclusive)`
+- ::select`()`
+
+### Function < Fold
+- ::indentScopedLanguages: ```[ 'python', 'coffee' ]```
+- ::omitingClosingCharLanguages: ```[ 'go' ]```
+- ::getScopesForRow`(row)`
+- ::isIncludeFunctionScopeForRow`(row)`
+- ::getRowRangeForBufferRow`(bufferRow)`: **Overridden**
+- ::adjustRowRange`(startRow, endRow)`
 
 ### Pair < TextObject
 *Not exported*
@@ -1227,8 +1237,6 @@ vim-mode version: 0.57.0
 - ::pair: ```'><'```: **Overridden**
 
 ### Paragraph < TextObject
-- ::linewise: ```false```
-- ::isLinewise`()`
 - ::getStartRow`(startRow, fn)`
 - ::getEndRow`(startRow, fn)`
 - ::getRange`(startRow)`
