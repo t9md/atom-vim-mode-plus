@@ -230,7 +230,7 @@ class Comment extends Paragraph
     @selectParagraph(selection)
 
   getRange: (startRow) ->
-    return unless @editor.isBufferRowCommentd(startRow)
+    return unless @editor.isBufferRowCommented(startRow)
     fn = (row) =>
       return if (@inclusive and @editor.isBufferRowBlank(row))
       @editor.isBufferRowCommented(row) in [false, undefined]
