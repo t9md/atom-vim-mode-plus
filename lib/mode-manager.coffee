@@ -13,10 +13,8 @@ class ModeManager
 
   isMode: (mode, submode=null) ->
     if submode
-      if _.isArray(submode)
-        @mode is mode and (@submode in submode)
-      else
-        @mode is mode and @submode is submode
+      submode = [submode] if _.isString(submode)
+      @mode is mode and (@submode in submode)
     else
       @mode is mode
 
