@@ -183,6 +183,7 @@ class VimState
       'inner-comment'        , 'a-comment'
       'inner-indentation'    , 'a-indentation'
       'inner-fold'           , 'a-fold'
+      'inner-function'       , 'a-function'
       'inner-current-line'   , 'a-current-line'
       'inner-entire'         , 'a-entire'
     ]

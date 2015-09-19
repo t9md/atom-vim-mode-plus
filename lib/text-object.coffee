@@ -259,7 +259,7 @@ class Indentation extends Paragraph
 # TODO: make it extendable when repeated
 class Fold extends TextObject
   @extend()
-  getFoldRowRangeForBufferRow: (bufferRow, inclusive=null) ->
+  getRowRangeForBufferRow: (bufferRow, inclusive=null) ->
     for currentRow in [bufferRow..0] by -1
       [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
       continue unless startRow? and startRow <= bufferRow <= endRow
@@ -270,9 +270,47 @@ class Fold extends TextObject
     @eachSelection (selection) =>
       [startRow, endRow] = selection.getBufferRowRange()
       row = if selection.isReversed() then startRow else endRow
-      if rowRange = @getFoldRowRangeForBufferRow(row, @inclusive)
+      if rowRange = @getRowRangeForBufferRow(row, @inclusive)
         selectLines(selection, rowRange)
     @status()
+
+# NOTE: Function range determination is depending on fold.
+class Function extends Fold
+  @extend()
+  indentScopedLanguages: ['python', 'coffee']
+  # FIXME: why go dont' fold closing '}' for function? this is dirty workaround.
+  omitingClosingCharLanguages: ['go']
+
+  getScopesForRow: (row) ->
+    tokenizedLine = @editor.displayBuffer.tokenizedBuffer.tokenizedLineForRow(row)
+    for tag in tokenizedLine.tags when tag < 0 and (tag % 2 is -1)
+      atom.grammars.scopeForId(tag)
+
+  functionScopeRegexp = /^entity.name.function/
+  isIncludeFunctionScopeForRow: (row) ->
+    for scope in @getScopesForRow(row) when functionScopeRegexp.test(scope)
+      return true
+    null
+
+  # Greatly depending on fold, and what range is folded is vary from languages.
+  # So we need to adjust endRow based on scope.
+  getRowRangeForBufferRow: (bufferRow) ->
+    for currentRow in [bufferRow..0] by -1
+      [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
+      unless startRow? and (startRow <= bufferRow <= endRow) and @isIncludeFunctionScopeForRow(startRow)
+        continue
+      return @adjustRowRange(startRow, endRow)
+    null
+
+  adjustRowRange: (startRow, endRow) ->
+    {scopeName} = @editor.getGrammar()
+    languageName = scopeName.replace(/^source\./, '')
+    unless @inclusive
+      startRow += 1
+      unless languageName in @indentScopedLanguages
+        endRow -= 1
+    endRow += 1 if (languageName in @omitingClosingCharLanguages)
+    [startRow, endRow]
 
 class CurrentLine extends TextObject
   @extend()
@@ -294,6 +332,7 @@ module.exports = {
   DoubleQuotes, SingleQuotes, BackTicks, CurlyBrackets , AngleBrackets, Tags,
   SquareBrackets, Parentheses,
   AnyPair
-  Paragraph, Comment, Indentation, Fold
+  Paragraph, Comment, Indentation,
+  Fold, Function,
   CurrentLine, Entire,
 }

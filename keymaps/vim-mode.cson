@@ -271,6 +271,9 @@
   'i z':  'vim-mode:inner-fold'
   'a z':  'vim-mode:a-fold'
 
+  'i f':  'vim-mode:inner-function'
+  'a f':  'vim-mode:a-function'
+
   'i l':  'vim-mode:inner-current-line'
   'a l':  'vim-mode:a-current-line'
 

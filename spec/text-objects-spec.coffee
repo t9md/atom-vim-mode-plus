@@ -675,3 +675,115 @@ describe "TextObject", ->
         vim.set cursor: [19, 0]
         vim.ensure 'vaz',
           selectedBufferRange: [[18, 0], [24, 0]]
+
+  describe 'the function text object', ->
+    # Although following test picks specific language, other langauages are alsoe supported.
+    describe 'coffee', ->
+      pack = 'language-coffee-script'
+      scope = 'source.coffee'
+
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage(pack)
+
+        set
+          text: """
+            # Commment
+
+            hello = ->
+              a = 1
+              b = 2
+              c = 3
+
+            # Commment
+            """
+          cursor: [3, 0]
+
+        runs ->
+          grammar = atom.grammars.grammarForScopeName(scope)
+          editor.setGrammar(grammar)
+
+      afterEach ->
+        atom.packages.deactivatePackage(pack)
+
+      it 'inner- select function except start row', ->
+        ensure 'vif',
+          selectedBufferRange: [[3, 0], [6, 0]]
+
+      it 'a- select function', ->
+        ensure 'vaf',
+          selectedBufferRange: [[2, 0], [6, 0]]
+
+    describe 'ruby', ->
+      pack = 'language-ruby'
+      scope = 'source.ruby'
+
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage(pack)
+
+        set
+          text: """
+            # Commment
+
+            def hello
+              a = 1
+              b = 2
+              c = 3
+            end
+
+            # Commment
+            """
+          cursor: [3, 0]
+
+        runs ->
+          grammar = atom.grammars.grammarForScopeName(scope)
+          editor.setGrammar(grammar)
+
+      afterEach ->
+        atom.packages.deactivatePackage(pack)
+
+      it 'inner- select function except start row and end row', ->
+        ensure 'vif',
+          selectedBufferRange: [[3, 0], [6, 0]]
+
+      it 'a- select function', ->
+        ensure 'vaf',
+          selectedBufferRange: [[2, 0], [7, 0]]
+
+    describe 'go', ->
+      pack = 'language-go'
+      scope = 'source.go'
+
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage(pack)
+
+        set
+          text: """
+            // Commment
+
+            func main() {
+              a := 1
+              b := 2
+              c := 3
+            }
+
+            // Commment
+            """
+          cursor: [3, 0]
+
+        runs ->
+          grammar = atom.grammars.grammarForScopeName(scope)
+          editor.setGrammar(grammar)
+
+      afterEach ->
+        atom.packages.deactivatePackage(pack)
+
+      it 'inner- select function except start row and end row', ->
+        ensure 'vif',
+          selectedBufferRange: [[3, 0], [6, 0]]
+
+      it 'a- select function', ->
+        ensure 'vaf',
+          selectedBufferRange: [[2, 0], [7, 0]]
