@@ -72,34 +72,36 @@ class Pair extends TextObject
         ['scanInBufferRange', @rangeToEndOfFile(fromPoint)]
 
     nest = 0
-    point = null
+    found = null # We will search to fill this var.
+
     @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) =>
       charPre = @editor.getTextInBufferRange(range.traverse([0, -1], [0, -1]))
       return if charPre is '\\' # Skip escaped char with '\'
 
       # don't search across line unless specific pair.
       if @needStopSearch(pair, cursorPoint.row, range.start.row)
-        stop(); return
+        return stop()
 
       if search is searchPair
         if backward
           text = @editor.lineTextForBufferRow(fromPoint.row)
           if @isStartingPair(text[0..range.end.column], search)
-            point = range.end
+            found = range
         else
+          # skip for pair not within cursorPoint.
           if range.end.isLessThan(cursorPoint)
-            stop(); return
+            stop()
           else
-            point = range.end
+            found = range
       else
         lastChar = matchText[matchText.length-1]
         switch lastChar
           when search
-            if (nest is 0) then point = range.end else nest--
+            if (nest is 0) then found = range else nest--
           when searchPair
             nest++
-      stop() if point
-    point
+      stop() if found
+    if found? then found.end else null
 
   getRange: (selection, pair) ->
     if originallyEmpty = selection.isEmpty()
