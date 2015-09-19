@@ -95,3 +95,11 @@ The name of vimState is redundant simply `state` is enough since its vim-mode's 
 - When cursor `isAtEndOfLine()`, then `cursor.moveRight()` put cursor to nextline's column 0. (this mean skip 'newLine' char.)
 - When selecting whole line `selection.getBufferRange().isSingleLine()` return `false` since its expand multiple line ([selectedRow, 0], [nextRow, 0]).
 - Currently visual-mode not allow de-select first column char its bug, since Vim allow user to de-select first column.
+
+
+Cleanup Mode-shift
+
+main   submode
+Normal null
+Insert null, replace
+Visual characterwise, linewise, blockwise
