@@ -16,3 +16,10 @@ module.exports =
     else
       filePath = fs.normalize("~/sample.log")
       fs.appendFileSync filePath, msg
+
+  selectLines: (selection, option) ->
+    {editor} = selection
+    [startRow, endRow] = selection.getBufferRowRange()
+    range = editor.bufferRangeForBufferRow(startRow, includeNewline: true)
+    range = range.union(editor.bufferRangeForBufferRow(endRow, includeNewline: true))
+    selection.setBufferRange(range, option)

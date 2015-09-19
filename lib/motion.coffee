@@ -1,5 +1,7 @@
 # Refactoring status: 50%
 {Point, Range} = require 'atom'
+{selectLines} = require './utils'
+
 _ = require 'underscore-plus'
 
 settings = require './settings'
@@ -38,7 +40,7 @@ class Motion extends Base
       switch
         when @isInclusive(), @isLinewise()
           @selectInclusive selection
-          @selectLines selection if @isLinewise()
+          selectLines(selection) if @isLinewise()
         else
           selection.modifySelection =>
             @moveCursor selection.cursor
@@ -80,10 +82,6 @@ class Motion extends Base
         @withKeepingGoalColumn cursor, (c) ->
           c.moveRight()
       selection.setBufferRange selection.getBufferRange().union(tailRange)
-
-  selectLines: (selection) ->
-    for row in selection.getBufferRowRange()
-      selection.selectLine(row)
 
   # Utils
   # -------------------------
@@ -137,7 +135,7 @@ class CurrentSelection extends Motion
     unless @vimState.isMode('visual')
       @selectCharacters()
       if @wasLinewise
-        @selectLines(s) for s in @editor.getSelections()
+        selectLines(s) for s in @editor.getSelections()
     @getSelectionsStatus()
 
   selectCharacters: ->
