@@ -2,11 +2,15 @@
 {Point, Range} = require 'atom'
 _    = require 'underscore-plus'
 Base = require './base'
+{selectLines} = require './utils'
 
 class TextObject extends Base
   @extend()
   complete: true
   recodable: false
+
+  isWholeLine: ({start, end}) ->
+    (start.column is 0) and (end.column is 0) and start < end
 
   rangeToBeginningOfFile: (point) ->
     new Range(Point.ZERO, point)
@@ -17,9 +21,16 @@ class TextObject extends Base
   status: ->
     (not s.isEmpty() for s in @editor.getSelections())
 
+  isLinewise: ->
+    for s in @editor.getSelections() when not @isWholeLine s.getBufferRange()
+      return false
+    true
+
   eachSelection: (callback) ->
     for selection in @editor.getSelections()
       callback selection
+    if @isLinewise() and @vimState.isMode('visual', ['characterwise', 'blockwise'])
+      @vimState.activateVisualMode('linewise')
     @status()
 
 # Word
@@ -170,10 +181,6 @@ class Parentheses extends Pair
 # In Vim world Paragraph is defined as consecutive (non-)blank-line.
 class Paragraph extends TextObject
   @extend()
-  linewise: false
-
-  isLinewise: ->
-    @linewise
 
   getStartRow: (startRow, fn) ->
     for row in [startRow..0] when fn(row)
@@ -195,7 +202,6 @@ class Paragraph extends TextObject
   selectParagraph: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
     if startRow is endRow
-      @linewise = true
       if range = @getRange(startRow)
         selection.setBufferRange(range)
     else # have direction
@@ -214,15 +220,12 @@ class Paragraph extends TextObject
     @selectParagraph(selection)
 
   select: ->
-    status = @eachSelection (selection) =>
+    @eachSelection (selection) =>
       _.times @getCount(1), =>
         if @inclusive
           @selectInclusive(selection)
         else
           @selectExclusive(selection)
-    if @isLinewise() and @vimState.isMode('visual', ['characterwise', 'blockwise'])
-      @vimState.activateVisualMode('linewise')
-    status
 
 class Comment extends Paragraph
   @extend()
@@ -253,6 +256,24 @@ class Indentation extends Paragraph
         @editor.indentLevelForLine(text) < baseIndentLevel
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
+# TODO: make it extendable when repeated
+class Fold extends TextObject
+  @extend()
+  getFoldRowRangeForBufferRow: (bufferRow, inclusive=null) ->
+    for currentRow in [bufferRow..0] by -1
+      [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
+      continue unless startRow? and startRow <= bufferRow <= endRow
+      startRow += 1 unless inclusive
+      return [startRow, endRow]
+
+  select: ->
+    @eachSelection (selection) =>
+      [startRow, endRow] = selection.getBufferRowRange()
+      row = if selection.isReversed() then startRow else endRow
+      if rowRange = @getFoldRowRangeForBufferRow(row, @inclusive)
+        selectLines(selection, rowRange)
+    @status()
+
 class CurrentLine extends TextObject
   @extend()
   select: ->
@@ -273,6 +294,6 @@ module.exports = {
   DoubleQuotes, SingleQuotes, BackTicks, CurlyBrackets , AngleBrackets, Tags,
   SquareBrackets, Parentheses,
   AnyPair
-  Paragraph, Comment, Indentation,
+  Paragraph, Comment, Indentation, Fold
   CurrentLine, Entire,
 }
