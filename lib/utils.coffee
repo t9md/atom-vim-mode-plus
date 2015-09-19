@@ -23,3 +23,10 @@ module.exports =
     range = editor.bufferRangeForBufferRow(startRow, includeNewline: true)
     range = range.union(editor.bufferRangeForBufferRow(endRow, includeNewline: true))
     selection.setBufferRange(range)
+
+  getNonBlankCharPositionForRow: (editor, row) ->
+    scanRange = editor.bufferRangeForBufferRow(row)
+    point = null
+    editor.scanInBufferRange /^[ \t]*/, scanRange, ({range}) ->
+      point = range.end.translate([0, +1])
+    point
