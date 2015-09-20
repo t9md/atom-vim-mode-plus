@@ -110,6 +110,11 @@ class Operator extends Base
     if @target.select()
       callback()
 
+  selectTargetWithFlashing: (callback) ->
+    @selectTarget =>
+      @withFlashing ->
+        callback()
+
 class Select extends Operator
   @extend()
   execute: ->
@@ -184,12 +189,11 @@ class TransformString extends Operator
   execute: ->
     if @target.isLinewise?() or settings.get('stayOnTransformString')
       points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-    @selectTarget =>
-      @withFlashing =>
-        for selection in @editor.getSelections()
-          range = selection.insertText @getNewText(selection.getText())
-          if @adjustCursor
-            selection.cursor.setBufferPosition(points?.shift() ? range.start)
+    @selectTargetWithFlashing =>
+      for selection in @editor.getSelections()
+        range = selection.insertText @getNewText(selection.getText())
+        if @adjustCursor
+          selection.cursor.setBufferPosition(points?.shift() ? range.start)
     @vimState.activateNormalMode()
 
 class ToggleCase extends TransformString
@@ -334,8 +338,7 @@ class Yank extends Operator
   execute: ->
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
-    @selectTarget =>
-      @withFlashing ->
+    @selectTargetWithFlashing =>
       @setTextToRegister @editor.getSelectedText()
       for selection in @editor.getSelections()
         point = points?.shift() ? selection.getBufferRange().start
@@ -496,13 +499,12 @@ class ReplaceWithRegister extends Operator
   hoverText: ':pencil:'
   hoverIcon: ':replace-with-register:'
   execute: ->
-    @selectTarget =>
-      @withFlashing =>
-        points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-        @editor.replaceSelectedText {}, (text) =>
-          @vimState.register.get().text ? text
-        ranges = (new Range(p, p) for p in points)
-        @editor.setSelectedBufferRanges(ranges)
+    @selectTargetWithFlashing =>
+      points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
+      @editor.replaceSelectedText {}, (text) =>
+        @vimState.register.get().text ? text
+      ranges = (new Range(p, p) for p in points)
+      @editor.setSelectedBufferRanges(ranges)
     @vimState.activateNormalMode()
 
 class ToggleLineComments extends Operator
@@ -511,11 +513,10 @@ class ToggleLineComments extends Operator
   hoverIcon: ':toggle-line-comment:'
   execute: ->
     markerByCursor = @markCursorBufferPositions()
-    if @target.select()
-      @withFlashing =>
-        @editor.transact =>
-          for s in @editor.getSelections()
-            s.toggleLineComments()
+    @selectTargetWithFlashing =>
+      @editor.transact =>
+        for s in @editor.getSelections()
+          s.toggleLineComments()
     @restoreMarkedCursorPositions markerByCursor
     @vimState.activateNormalMode()
 
