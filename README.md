@@ -111,21 +111,17 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 # TODO
 
-- [ ] Improve Visual mode: complete cursor visualization and switch between submode.
+- [x] Improve Visual mode: complete cursor visualization and switch between submode.
   - [x] Shift between submode properly restoring column and reversed state.
-
-from \ to| char | line | block
--------- | ---- | ---- | -----
-char     |  o   |  o   |   o
-line     |  o   |  o   |   o
-block    |  o   |  o   |   o
-
   - [x] show cursor: characterwise
-  - [ ] show cursor: linewise
-  - [ ] show cursor: blockwise
+  - [x] show cursor: linewise(decided to not try to show cursor)
+  - [x] show cursor: blockwise
 - [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions. - [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
 - [ ] Improve search and introduce incrementalSearch.
+- [ ] Cancellation of operation on event subscription.
+- [ ] Improve visual-block's line end selection and sync range between selections.
 - [ ] Spec re-write 2nd round to compact and simple description for each spec.
+- [ ] Select fold without expanding
 - [x] Show cursor in visual-mode(now characterwise only) without hacking `Cursor.prototype`.
 - [x] Support visual-block by incorporating with [vim-mode-visual-block](https://github.com/t9md/atom-vim-mode-visual-block).
 - [x] Support web-font(?) font-awesome etc. to show on overlay hover.

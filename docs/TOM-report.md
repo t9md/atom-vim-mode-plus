@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode version: 0.57.0  
-*generated at 2015-09-19T19:11:28.017Z*
+*generated at 2015-09-20T16:18:24.182Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -124,15 +124,15 @@ vim-mode version: 0.57.0
     - [Fold](#fold--textobject)
       - [Function](#function--fold)
     - [Pair](#pair--textobject) *Not exported*
-      - [AngleBrackets](#anglebrackets--pair)
+      - [AngleBracket](#anglebracket--pair)
       - [AnyPair](#anypair--pair)
-      - [BackTicks](#backticks--pair)
-      - [CurlyBrackets](#curlybrackets--pair)
-      - [DoubleQuotes](#doublequotes--pair)
-      - [Parentheses](#parentheses--pair)
-      - [SingleQuotes](#singlequotes--pair)
-      - [SquareBrackets](#squarebrackets--pair)
-      - [Tags](#tags--pair)
+      - [BackTick](#backtick--pair)
+      - [CurlyBracket](#curlybracket--pair)
+      - [DoubleQuote](#doublequote--pair)
+      - [Parenthesis](#parenthesis--pair)
+      - [SingleQuote](#singlequote--pair)
+      - [SquareBracket](#squarebracket--pair)
+      - [Tag](#tag--pair)
     - [Paragraph](#paragraph--textobject)
       - [Comment](#comment--paragraph)
       - [Indentation](#indentation--paragraph)
@@ -265,14 +265,14 @@ vim-mode version: 0.57.0
 - ::isWholeWord`()`
 - ::isPair`()`
 - ::isAnyPair`()`
-- ::isDoubleQuotes`()`
-- ::isSingleQuotes`()`
-- ::isBackTicks`()`
-- ::isCurlyBrackets`()`
-- ::isAngleBrackets`()`
-- ::isTags`()`
-- ::isSquareBrackets`()`
-- ::isParentheses`()`
+- ::isDoubleQuote`()`
+- ::isSingleQuote`()`
+- ::isBackTick`()`
+- ::isCurlyBracket`()`
+- ::isAngleBracket`()`
+- ::isTag`()`
+- ::isSquareBracket`()`
+- ::isParenthesis`()`
 - ::isParagraph`()`
 - ::isComment`()`
 - ::isIndentation`()`
@@ -358,7 +358,7 @@ vim-mode version: 0.57.0
 - ::getLastRow`()`
 - ::getFirstVisibleScreenRow`()`
 - ::getLastVisibleScreenRow`()`
-- ::getSelectionsStatus`()`
+- ::status`()`
 
 ### CurrentSelection < Motion
 - ::constructor`()`: `super`: **Overridden**
@@ -727,14 +727,15 @@ vim-mode version: 0.57.0
 - ::target: ```null```
 - ::complete: ```false```: **Overridden**
 - ::recodable: ```true```: **Overridden**
+- ::flashTarget: ```true```
 - ::isSameOperatorRepeated`()`
 - ::compose`(@target)`
 - ::setTextToRegister`(text)`
 - ::markCursorBufferPositions`()`
 - ::restoreMarkedCursorPositions`(markerByCursor)`
 - ::markSelections`()`
-- ::flash`(range)`
-- ::withFlashing`(callback)`
+- ::flash`(range, fn)`
+- ::eachSelection`(fn)`
 
 ### Delete < Operator
 - command: `vim-mode:delete`
@@ -743,6 +744,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode.visual-mode: <kbd>x</kbd>
 - ::hoverText: ```':scissors:'```
 - ::hoverIcon: ```':delete:'```
+- ::flashTarget: ```false```: **Overridden**
 - ::execute`()`
 
 ### DeleteLeft < Delete
@@ -785,7 +787,7 @@ vim-mode version: 0.57.0
 - ::hoverText: ```':point_right:'```
 - ::hoverIcon: ```':indent:'```
 - ::execute`()`
-- ::indent`()`
+- ::indent`(s)`
 
 ### AutoIndent < Indent
 - command: `vim-mode:auto-indent`
@@ -793,7 +795,7 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>=</kbd>
 - ::hoverText: ```':open_hands:'```: **Overridden**
 - ::hoverIcon: ```':auto-indent:'```: **Overridden**
-- ::indent`()`: **Overridden**
+- ::indent`(s)`: **Overridden**
 
 ### Outdent < Indent
 - command: `vim-mode:outdent`
@@ -801,17 +803,19 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd><</kbd>
 - ::hoverText: ```':point_left:'```: **Overridden**
 - ::hoverIcon: ```':outdent:'```: **Overridden**
-- ::indent`()`: **Overridden**
+- ::indent`(s)`: **Overridden**
 
 ### Insert < Operator
 - ::complete: ```true```: **Overridden**
 - ::typedText: ```null```
+- ::flashTarget: ```false```: **Overridden**
 - ::confirmChanges`(changes)`
 - ::execute`()`
 
 ### Insert < Operator
 - ::complete: ```true```: **Overridden**
 - ::typedText: ```null```
+- ::flashTarget: ```false```: **Overridden**
 - ::confirmChanges`(changes)`
 - ::execute`()`
 
@@ -1176,7 +1180,6 @@ vim-mode version: 0.57.0
 - ::isWholeLine`(_arg)`
 - ::rangeToBeginningOfFile`(point)`
 - ::rangeToEndOfFile`(point)`
-- ::status`()`
 - ::isLinewise`()`
 - ::eachSelection`(callback)`
 
@@ -1187,7 +1190,7 @@ vim-mode version: 0.57.0
 - ::select`()`
 
 ### Fold < TextObject
-- ::getRowRangeForBufferRow`(bufferRow, inclusive)`
+- ::getRowRangeForBufferRow`(bufferRow)`
 - ::select`()`
 
 ### Function < Fold
@@ -1208,32 +1211,32 @@ vim-mode version: 0.57.0
 - ::getRange`(selection, pair)`
 - ::select`()`
 
-### AngleBrackets < Pair
+### AngleBracket < Pair
 - ::pair: ```'<>'```: **Overridden**
 
 ### AnyPair < Pair
 - ::pairs: ```[ '""', '\'\'', '``', '{}', '<>', '><', '[]', '()' ]```
 - ::select`()`: **Overridden**
 
-### BackTicks < Pair
+### BackTick < Pair
 - ::pair: ```'``'```: **Overridden**
 
-### CurlyBrackets < Pair
+### CurlyBracket < Pair
 - ::pair: ```'{}'```: **Overridden**
 
-### DoubleQuotes < Pair
+### DoubleQuote < Pair
 - ::pair: ```'""'```: **Overridden**
 
-### Parentheses < Pair
+### Parenthesis < Pair
 - ::pair: ```'()'```: **Overridden**
 
-### SingleQuotes < Pair
+### SingleQuote < Pair
 - ::pair: ```'\'\''```: **Overridden**
 
-### SquareBrackets < Pair
+### SquareBracket < Pair
 - ::pair: ```'[]'```: **Overridden**
 
-### Tags < Pair
+### Tag < Pair
 - ::pair: ```'><'```: **Overridden**
 
 ### Paragraph < TextObject
