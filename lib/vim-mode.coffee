@@ -1,8 +1,12 @@
-{Disposable, CompositeDisposable} = require 'event-kit'
+# Refactoring status: 0%, I won't touch for the time being.
+{Disposable, CompositeDisposable} = require 'atom'
 StatusBarManager = require './status-bar-manager'
 GlobalVimState = require './global-vim-state'
 VimState = require './vim-state'
 settings = require './settings'
+{Hover, HoverElement} = require './hover'
+{Input, InputElement} = require './input'
+_ = require 'underscore-plus'
 
 module.exports =
   config: settings.config
@@ -11,6 +15,7 @@ module.exports =
     @disposables = new CompositeDisposable
     @globalVimState = new GlobalVimState
     @statusBarManager = new StatusBarManager
+    @registerViewProviders()
 
     @vimStates = new Set
     @vimStatesByEditor = new WeakMap
@@ -23,13 +28,19 @@ module.exports =
         @statusBarManager,
         @globalVimState
       )
-
       @vimStates.add(vimState)
       @vimStatesByEditor.set(editor, vimState)
-      vimState.onDidDestroy => @vimStates.delete(vimState)
+      vimState.onDidDestroy =>
+        @vimStates.delete(vimState)
 
     @disposables.add new Disposable =>
       @vimStates.forEach (vimState) -> vimState.destroy()
+
+  registerViewProviders: ->
+    atom.views.addViewProvider Hover, (model) ->
+      new HoverElement().initialize(model)
+    atom.views.addViewProvider Input, (model) ->
+      new InputElement().initialize(model)
 
   deactivate: ->
     @disposables.dispose()

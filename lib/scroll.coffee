@@ -1,110 +1,134 @@
-class Scroll
-  isComplete: -> true
-  isRecordable: -> false
-  constructor: (@editorElement) ->
-    @scrolloff = 2 # atom default
-    @editor = @editorElement.getModel()
-    @rows =
-      first: @editorElement.getFirstVisibleScreenRow()
-      last: @editorElement.getLastVisibleScreenRow()
-      final: @editor.getLastScreenRow()
+# Refactoring status: 100%
+Base = require './base'
+class Scroll extends Base
+  @extend()
+  complete: true
+  recodable: false
+  scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
 
+  getFirstVisibleScreenRow: ->
+    @editorElement.getFirstVisibleScreenRow()
+
+  getLastVisibleScreenRow: ->
+    @editorElement.getLastVisibleScreenRow()
+
+  getLastScreenRow: ->
+    @editor.getLastScreenRow()
+
+  getPixelCursor: (which) -> # which is `top` or `left`
+    point = @editor.getCursorScreenPosition()
+    @editorElement.pixelPositionForScreenPosition(point)[which]
+
+# ctrl-e scroll lines downwards
 class ScrollDown extends Scroll
-  execute: (count=1) ->
-    @keepCursorOnScreen(count)
-    @scrollUp(count)
+  @extend()
+  direction: 'down'
 
-  keepCursorOnScreen: (count) ->
+  execute: ->
+    amountInPixel = @editor.getLineHeightInPixels() * @getCount(1)
+    scrollTop = @editor.getScrollTop()
+    switch @direction
+      when 'down' then scrollTop += amountInPixel
+      when 'up'   then scrollTop -= amountInPixel
+    @editor.setScrollTop scrollTop
+    @keepCursorOnScreen?()
+
+  keepCursorOnScreen: ->
     {row, column} = @editor.getCursorScreenPosition()
-    firstScreenRow = @rows.first + @scrolloff + 1
-    if row - count <= firstScreenRow
-      @editor.setCursorScreenPosition([firstScreenRow + count, column])
+    newRow =
+      if row < (rowMin = @getFirstVisibleScreenRow() + @scrolloff)
+        rowMin
+      else if row > (rowMax = @getLastVisibleScreenRow() - (@scrolloff + 1))
+        rowMax
+    @editor.setCursorScreenPosition [newRow, column] if newRow?
 
-  scrollUp: (count) ->
-    lastScreenRow = @rows.last - @scrolloff
-    @editor.scrollToScreenPosition([lastScreenRow + count, 0])
+# ctrl-y scroll lines upwards
+class ScrollUp extends ScrollDown
+  @extend()
+  direction: 'up'
 
-class ScrollUp extends Scroll
-  execute: (count=1) ->
-    @keepCursorOnScreen(count)
-    @scrollDown(count)
-
-  keepCursorOnScreen: (count) ->
-    {row, column} = @editor.getCursorScreenPosition()
-    lastScreenRow = @rows.last - @scrolloff - 1
-    if row + count >= lastScreenRow
-      @editor.setCursorScreenPosition([lastScreenRow - count, column])
-
-  scrollDown: (count) ->
-    firstScreenRow = @rows.first + @scrolloff
-    @editor.scrollToScreenPosition([firstScreenRow - count, 0])
-
+# Scroll without Cursor Position change.
+# -------------------------
 class ScrollCursor extends Scroll
-  constructor: (@editorElement, @opts={}) ->
-    super
-    cursor = @editor.getCursorScreenPosition()
-    @pixel = @editorElement.pixelPositionForScreenPosition(cursor).top
+  @extend()
+  execute: ->
+    @moveToFirstCharacterOfLine?()
+    if @isScrollable()
+      @editor.setScrollTop @getScrollTop()
+
+  moveToFirstCharacterOfLine: ->
+    @editor.moveToFirstCharacterOfLine()
+
+  getOffSetPixelHeight: (lineDelta=0) ->
+    @editor.getLineHeightInPixels() * (@scrolloff + lineDelta)
 
 class ScrollCursorToTop extends ScrollCursor
-  execute: ->
-    @moveToFirstNonBlank() unless @opts.leaveCursor
-    @scrollUp()
+  @extend()
+  isScrollable: ->
+    @getLastVisibleScreenRow() isnt @getLastScreenRow()
 
-  scrollUp: ->
-    return if @rows.last is @rows.final
-    @pixel -= (@editor.getLineHeightInPixels() * @scrolloff)
-    @editor.setScrollTop(@pixel)
-
-  moveToFirstNonBlank: ->
-    @editor.moveToFirstCharacterOfLine()
-
-class ScrollCursorToMiddle extends ScrollCursor
-  execute: ->
-    @moveToFirstNonBlank() unless @opts.leaveCursor
-    @scrollMiddle()
-
-  scrollMiddle: ->
-    @pixel -= (@editor.getHeight() / 2)
-    @editor.setScrollTop(@pixel)
-
-  moveToFirstNonBlank: ->
-    @editor.moveToFirstCharacterOfLine()
+  getScrollTop: ->
+    @getPixelCursor('top') - @getOffSetPixelHeight()
 
 class ScrollCursorToBottom extends ScrollCursor
-  execute: ->
-    @moveToFirstNonBlank() unless @opts.leaveCursor
-    @scrollDown()
+  @extend()
+  isScrollable: ->
+    @getFirstVisibleScreenRow() isnt 0
 
-  scrollDown: ->
-    return if @rows.first is 0
-    offset = (@editor.getLineHeightInPixels() * (@scrolloff + 1))
-    @pixel -= (@editor.getHeight() - offset)
-    @editor.setScrollTop(@pixel)
+  getScrollTop: ->
+    @getPixelCursor('top') - (@editor.getHeight() - @getOffSetPixelHeight(1))
 
-  moveToFirstNonBlank: ->
-    @editor.moveToFirstCharacterOfLine()
+class ScrollCursorToMiddle extends ScrollCursor
+  @extend()
+  isScrollable: ->
+    true
 
-class ScrollHorizontal
-  isComplete: -> true
-  isRecordable: -> false
-  constructor: (@editorElement) ->
-    @editor = @editorElement.getModel()
-    cursorPos = @editor.getCursorScreenPosition()
-    @pixel = @editorElement.pixelPositionForScreenPosition(cursorPos).left
-    @cursor = @editor.getLastCursor()
+  getScrollTop: ->
+    @getPixelCursor('top') - (@editor.getHeight() / 2)
 
+class ScrollCursorToTopLeave extends ScrollCursorToTop
+  @extend()
+  moveToFirstCharacterOfLine: null
+
+class ScrollCursorToBottomLeave extends ScrollCursorToBottom
+  @extend()
+  moveToFirstCharacterOfLine: null
+
+class ScrollCursorToMiddleLeave extends ScrollCursorToMiddle
+  @extend()
+  moveToFirstCharacterOfLine: null
+
+# Horizontal Scroll
+# -------------------------
+class ScrollHorizontal extends Scroll
+  @extend()
   putCursorOnScreen: ->
     @editor.scrollToCursorPosition({center: false})
 
 class ScrollCursorToLeft extends ScrollHorizontal
+  @extend()
   execute: ->
-    @editor.setScrollLeft(@pixel)
+    @editor.setScrollLeft(@getPixelCursor('left'))
     @putCursorOnScreen()
 
 class ScrollCursorToRight extends ScrollHorizontal
+  @extend()
   execute: ->
-    @editor.setScrollRight(@pixel)
+    @editor.setScrollRight(@getPixelCursor('left'))
     @putCursorOnScreen()
 
-module.exports = {ScrollDown, ScrollUp, ScrollCursorToTop, ScrollCursorToMiddle,
-  ScrollCursorToBottom, ScrollCursorToLeft, ScrollCursorToRight}
+module.exports = {
+  ScrollDown,
+  ScrollUp,
+
+  ScrollCursorToTop,
+  ScrollCursorToMiddle,
+  ScrollCursorToBottom,
+
+  ScrollCursorToTopLeave,
+  ScrollCursorToMiddleLeave,
+  ScrollCursorToBottomLeave,
+
+  ScrollCursorToLeft,
+  ScrollCursorToRight
+ }

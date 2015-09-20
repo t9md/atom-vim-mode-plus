@@ -1,34 +1,36 @@
-VimState = require '../lib/vim-state'
-GlobalVimState = require '../lib/global-vim-state'
-VimMode  = require '../lib/vim-mode'
-StatusBarManager = require '../lib/status-bar-manager'
+# Refactoring status: 70%
+_ = require 'underscore-plus'
 
-[globalVimState, statusBarManager] = []
+class SpecError
+  constructor: (@message) ->
+    @name = 'SpecError'
 
-beforeEach ->
-  atom.workspace ||= {}
-  statusBarManager = null
-  globalVimState = null
+getVimState = (args...) ->
+  [file, callback] = []
+  switch args.length
+    when 1 then [callback] = args
+    when 2 then [file, callback] = args
 
-getEditorElement = (callback) ->
-  textEditor = null
+  editor = null
 
   waitsForPromise ->
-    atom.project.open().then (e) ->
-      textEditor = e
+    atom.packages.activatePackage('vim-mode')
+
+  waitsForPromise ->
+    if file
+      file = atom.project.resolvePath('sample.coffee')
+    atom.workspace.open(file).then (e) ->
+      editor = e
 
   runs ->
-    element = document.createElement("atom-text-editor")
-    element.setModel(textEditor)
-    element.classList.add('vim-mode')
-    statusBarManager ?= new StatusBarManager
-    globalVimState ?= new GlobalVimState
-    element.vimState = new VimState(element, statusBarManager, globalVimState)
-
-    element.addEventListener "keydown", (e) ->
+    pack = atom.packages.getActivePackage('vim-mode')
+    main = pack.mainModule
+    vimState = main.getEditorState(editor)
+    {editorElement} = vimState
+    editorElement.addEventListener 'keydown', (e) ->
       atom.keymaps.handleKeyboardEvent(e)
 
-    callback(element)
+    callback(vimState, _.bindAll(getVim(vimState), 'set', 'ensure', 'keystroke'))
 
 mockPlatform = (editorElement, platform) ->
   wrapper = document.createElement('div')
@@ -42,7 +44,8 @@ dispatchKeyboardEvent = (target, eventArgs...) ->
   e = document.createEvent('KeyboardEvent')
   e.initKeyboardEvent(eventArgs...)
   # 0 is the default, and it's valid ASCII, but it's wrong.
-  Object.defineProperty(e, 'keyCode', get: -> undefined) if e.keyCode is 0
+  if e.keyCode is 0
+    Object.defineProperty(e, 'keyCode', get: -> undefined)
   target.dispatchEvent e
 
 dispatchTextEvent = (target, eventArgs...) ->
@@ -51,8 +54,9 @@ dispatchTextEvent = (target, eventArgs...) ->
   target.dispatchEvent e
 
 keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
-  key = "U+#{key.charCodeAt(0).toString(16)}" unless key is 'escape' or raw?
-  element ||= document.activeElement
+  unless key is 'escape' or raw?
+    key = "U+#{key.charCodeAt(0).toString(16)}"
+  element ?= document.activeElement
   eventArgs = [
     true, # bubbles
     true, # cancelable
@@ -63,10 +67,192 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
   ]
 
   canceled = not dispatchKeyboardEvent(element, 'keydown', eventArgs...)
+  # [FIXME] I think I can remove keypress event dispatch.
   dispatchKeyboardEvent(element, 'keypress', eventArgs...)
-  if not canceled
+  unless canceled
     if dispatchTextEvent(element, 'textInput', eventArgs...)
       element.value += key
   dispatchKeyboardEvent(element, 'keyup', eventArgs...)
 
-module.exports = {keydown, getEditorElement, mockPlatform, unmockPlatform}
+_keystroke = (keys, {element}) ->
+  if keys is 'escape'
+    keydown keys, {element}
+  else
+    for key in keys.split('')
+      if key.match(/[A-Z]/)
+        keydown key, {shift: true, element}
+      else
+        keydown key, {element}
+
+normalModeInputKeydown = (key, options={}) ->
+  theEditor = options.editor ? E
+  theEditor.normalModeInputView.editorElement.getModel().insertText(key)
+
+submitNormalModeInputText = (text, options={}) ->
+  theEditor = options.editor ? E
+  inputEditor = theEditor.normalModeInputView.editorElement
+  inputEditor.getModel().setText(text)
+  atom.commands.dispatch(inputEditor, 'core:confirm')
+
+toArray = (obj, cond=null) ->
+  if _.isArray(cond ? obj) then obj else [obj]
+
+getVim = (vimState) ->
+  editor: vimState.editor
+  editorElement: vimState.editorElement
+
+  set: (o={}) ->
+    if o.text?
+      @editor.setText(o.text)
+
+    if o.cursor?
+      @editor.setCursorScreenPosition o.cursor
+
+    if o.cursorBuffer?
+      @editor.setCursorBufferPosition o.cursorBuffer
+
+    if o.addCursor?
+      for point in toArray(o.addCursor, o.addCursor[0])
+        @editor.addCursorAtBufferPosition point
+
+    if o.register?
+      if _.isObject(o.register)
+        for name, value of o.register
+          vimState.register.set(name, value)
+      else
+        vimState.register.set '"', text: o.register
+
+    if o.selectedBufferRange?
+      @editor.setSelectedBufferRange o.selectedBufferRange
+
+    if o.spy?
+      # e.g.
+      # spyOn(editor, 'getURI').andReturn('/Users/atom/known_value.txt')
+      for s in toArray(o.spy)
+        spyOn(s.obj, s.method).andReturn(s.return)
+
+  ensure: (args...) ->
+    [keys, o] = []
+    switch args.length
+      when 1 then [o] = args
+      when 2 then [keys, o] = args
+
+    # Input
+    unless _.isEmpty(keys)
+      @keystroke(keys, {element: @editorElement})
+
+    # Validate
+    # [NOTE] Order is important.
+    # e.g. Text need to be set before changing cursor position.
+    if o.text?
+      if o.text.editor?
+        expect(o.text.editor.getText()).toEqual(o.text.value)
+      else
+        expect(@editor.getText()).toEqual(o.text)
+
+    if o.selectedText?
+      expect(s.getText() for s in @editor.getSelections()).toEqual(
+        toArray(o.selectedText))
+
+    if o.cursor?
+      expect(@editor.getCursorScreenPositions()).toEqual(
+        toArray(o.cursor, o.cursor[0]))
+
+    if o.cursorBuffer?
+      expect(@editor.getCursorBufferPositions()).toEqual(
+        toArray(o.cursorBuffer, o.cursorBuffer[0]))
+
+    if o.register?
+      if _.isObject(o.register)
+        for name, value of o.register
+          reg = vimState.register.get(name)
+          for prop, _value of value
+            expect(reg[prop]).toEqual(_value)
+      else
+        expect(vimState.register.get('"').text).toBe o.register
+
+    if o.numCursors?
+      expect(@editor.getCursors().length).toBe o.numCursors
+
+    if o.selectedScreenRange?
+      expect(@editor.getSelectedScreenRanges()).toEqual(
+        toArray(o.selectedScreenRange, o.selectedScreenRange[0][0]))
+
+    if o.selectedBufferRange?
+      expect(@editor.getSelectedBufferRanges()).toEqual(
+        toArray(o.selectedBufferRange, o.selectedBufferRange[0][0]))
+
+    if o.selectedBufferRangeStartRow?
+      {start} = @editor.getSelectedBufferRange()
+      expect(start.row).toEqual o.selectedBufferRangeStartRow
+
+    if o.selectedBufferRangeEndRow?
+      {end} = @editor.getSelectedBufferRange()
+      expect(end.row).toEqual o.selectedBufferRangeEndRow
+
+    if o.selectionIsReversed?
+      expect(@editor.getLastSelection().isReversed()).toBe(o.selectionIsReversed)
+
+    if o.scrollTop?
+      expect(@editor.getScrollTop()).toEqual o.scrollTop
+
+    if o.called?
+      for c in toArray(o.called)
+        if c.func
+          expect(c.func).toHaveBeenCalledWith(c.with)
+        else
+          expect(c).toHaveBeenCalled()
+
+    if o.mode?
+      expect(vimState.isMode(toArray(o.mode)...)).toBe(true)
+
+    if o.submode?
+      expect(vimState.submode).toEqual o.submode
+
+    if o.classListContains?
+      for klass in toArray(o.classListContains)
+        expect(@editorElement.classList.contains(klass)).toBe(true)
+        expect(@editorElement.classList.contains(klass)).toBe(true)
+
+    if o.classListNotContains?
+      for klass in toArray(o.classListNotContains)
+        expect(@editorElement.classList.contains(klass)).toBe(false)
+        expect(@editorElement.classList.contains(klass)).toBe(false)
+
+  keystroke: (keys, {element}={}) ->
+    # keys must be String or Array
+    # Not support Object for keys to avoid ambiguity.
+    element ?= @editorElement
+    mocked = null
+    if _.isString(keys)
+      _keystroke(keys, {element})
+      return
+
+    unless _.isArray(keys)
+      throw new SpecError('Must not happen')
+
+    for k in keys
+      if _.isString(k)
+        _keystroke(k, {element})
+      else
+        switch
+          when k.platform?
+            mockPlatform(element, k.platform)
+            mocked = true
+          when k.char?
+            chars =
+              # [FIXME] Cause insertText('escape'), useless.
+              if k.char in ['', 'escape']
+                toArray(k.char)
+              else
+                k.char.split('')
+            for c in chars
+              vimState.input.view.editor.insertText(c)
+          when k.chars? then submitNormalModeInputText k.chars, {@editor}
+          when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
+          when k.raw?   then keydown k.raw, {raw: true, element}
+          when k.cmd?   then atom.commands.dispatch(k.cmd.target, k.cmd.name)
+    if mocked
+      unmockPlatform(element)
+
+module.exports = {getVimState}
