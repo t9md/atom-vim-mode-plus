@@ -18,7 +18,7 @@ class Operator extends Base
   target: null
   complete: false
   recodable: true
-
+  flashTarget: true
   isSameOperatorRepeated: ->
     if @vimState.isMode('operator-pending')
       @vimState.operationStack.peekTop().constructor is @constructor
@@ -134,7 +134,7 @@ class Delete extends Operator
   @extend()
   hoverText: ':scissors:'
   hoverIcon: ':delete:'
-
+  flashTarget: false
   execute: ->
     @eachSelection (s) =>
       @setTextToRegister s.getText() if s.isLastSelection()
@@ -163,7 +163,6 @@ class DeleteToLastCharacterOfLine extends Delete
 class TransformString extends Operator
   @extend()
   adjustCursor: true
-  flashTarget: true
 
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
@@ -314,7 +313,6 @@ class Yank extends Operator
   @extend()
   hoverText: ':clipboard:'
   hoverIcon: ':yank:'
-  flashTarget: true
   execute: ->
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
@@ -394,7 +392,6 @@ class Indent extends Operator
   @extend()
   hoverText: ':point_right:'
   hoverIcon: ':indent:'
-  flashTarget: true
   execute: ->
     @eachSelection (s) =>
       startRow = s.getBufferRange().start.row
@@ -477,7 +474,6 @@ class ReplaceWithRegister extends Operator
   @extend()
   hoverText: ':pencil:'
   hoverIcon: ':replace-with-register:'
-  flashTarget: true
   execute: ->
     @eachSelection (s) =>
       range = s.getBufferRange()
@@ -491,7 +487,6 @@ class ToggleLineComments extends Operator
   @extend()
   hoverText: ':mute:'
   hoverIcon: ':toggle-line-comment:'
-  # flashTarget: true
   execute: ->
     markerByCursor = @markCursorBufferPositions()
     @eachSelection (s) ->
@@ -509,6 +504,7 @@ class Insert extends Operator
   @extend()
   complete: true
   typedText: null
+  flashTarget: false
 
   confirmChanges: (changes) ->
     bundler = new TransactionBundler(changes, @editor)
