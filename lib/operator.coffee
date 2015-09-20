@@ -76,11 +76,11 @@ class Operator extends Base
       markerBySelections[selection.id] = marker
     markerBySelections
 
-  flash: (range) ->
+  flash: (range, fn=null) ->
     marker = @editor.markBufferRange range,
       invalidate: 'never',
       persistent: false
-
+    fn?()
     @editor.decorateMarker marker,
       type: 'highlight'
       class: 'vim-mode-flash'
@@ -89,31 +89,14 @@ class Operator extends Base
       marker.destroy()
     , settings.get('flashOnOperateDurationMilliSeconds')
 
-  withFlashing: (callback) ->
-    unless settings.get('flashOnOperate')
-      callback()
-      return
-
-    markerBySelections = @markSelections()
-    callback()
-    for selection in @editor.getSelections()
-      @editor.decorateMarker markerBySelections[selection.id],
-        type: 'highlight'
-        class: 'vim-mode-flash'
-
-    # Ensure destroy all marker
-    setTimeout  ->
-      marker.destroy() for __, marker of markerBySelections
-    , settings.get('flashOnOperateDurationMilliSeconds')
-
-  selectTarget: (callback) ->
-    if @target.select()
-      callback()
-
-  selectTargetWithFlashing: (callback) ->
-    @selectTarget =>
-      @withFlashing ->
-        callback()
+  eachSelection: (fn) ->
+    return unless @target.select()
+    @editor.transact =>
+      for s in @editor.getSelections()
+        if @flashTarget and settings.get('flashOnOperate')
+          @flash s.getBufferRange(), -> fn(s)
+        else
+          fn(s)
 
 class Select extends Operator
   @extend()
@@ -153,14 +136,10 @@ class Delete extends Operator
   hoverIcon: ':delete:'
 
   execute: ->
-    @selectTarget =>
-      @setTextToRegister @editor.getSelectedText()
-      @editor.transact =>
-        for selection in @editor.getSelections()
-          selection.deleteSelectedText()
-      if @target.isLinewise?()
-        for cursor in @editor.getCursors()
-          cursor.skipLeadingWhitespace()
+    @eachSelection (s) =>
+      @setTextToRegister s.getText() if s.isLastSelection()
+      s.deleteSelectedText()
+      s.cursor.skipLeadingWhitespace() if @target.isLinewise?()
     @vimState.activateNormalMode()
 
 class DeleteRight extends Delete
@@ -184,16 +163,16 @@ class DeleteToLastCharacterOfLine extends Delete
 class TransformString extends Operator
   @extend()
   adjustCursor: true
+  flashTarget: true
 
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
     if @target.isLinewise?() or settings.get('stayOnTransformString')
       points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-    @selectTargetWithFlashing =>
-      for selection in @editor.getSelections()
-        range = selection.insertText @getNewText(selection.getText())
-        if @adjustCursor
-          selection.cursor.setBufferPosition(points?.shift() ? range.start)
+    @eachSelection (s) =>
+      range = s.insertText @getNewText(s.getText())
+      if @adjustCursor
+        s.cursor.setBufferPosition(points?.shift() ? range.start)
     @vimState.activateNormalMode()
 
 class ToggleCase extends TransformString
@@ -335,14 +314,14 @@ class Yank extends Operator
   @extend()
   hoverText: ':clipboard:'
   hoverIcon: ':yank:'
+  flashTarget: true
   execute: ->
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
-    @selectTargetWithFlashing =>
-      @setTextToRegister @editor.getSelectedText()
-      for selection in @editor.getSelections()
-        point = points?.shift() ? selection.getBufferRange().start
-        selection.cursor.setBufferPosition point
+    @eachSelection (s) =>
+      @setTextToRegister s.getText() if s.isLastSelection()
+      point = points?.shift() ? s.getBufferRange().start
+      s.cursor.setBufferPosition point
     @vimState.activateNormalMode()
 
 class YankLine extends Yank
@@ -414,33 +393,33 @@ class Decrease extends Increase
 class Indent extends Operator
   @extend()
   hoverText: ':point_right:'
-  # hoverIcon: ':indent:'
   hoverIcon: ':indent:'
+  flashTarget: true
   execute: ->
-    @target.select()
-    startRow = @editor.getSelectedBufferRange().start.row
-    @indent()
-    @editor.setCursorBufferPosition([startRow, 0])
-    @editor.moveToFirstCharacterOfLine()
+    @eachSelection (s) =>
+      startRow = s.getBufferRange().start.row
+      @indent(s)
+      s.cursor.setBufferPosition([startRow, 0])
+      s.cursor.moveToFirstCharacterOfLine()
     @vimState.activateNormalMode()
 
-  indent: ->
-    @editor.indentSelectedRows()
+  indent: (s) ->
+    s.indentSelectedRows()
 
 class Outdent extends Indent
   @extend()
   hoverText: ':point_left:'
   hoverIcon: ':outdent:'
 
-  indent: ->
-    @editor.outdentSelectedRows()
+  indent: (s) ->
+    s.outdentSelectedRows()
 
 class AutoIndent extends Indent
   @extend()
   hoverText: ':open_hands:'
   hoverIcon: ':auto-indent:'
-  indent: ->
-    @editor.autoIndentSelectedRows()
+  indent: (s) ->
+    s.autoIndentSelectedRows()
 
 # Put
 # -------------------------
@@ -498,25 +477,25 @@ class ReplaceWithRegister extends Operator
   @extend()
   hoverText: ':pencil:'
   hoverIcon: ':replace-with-register:'
+  flashTarget: true
   execute: ->
-    @selectTargetWithFlashing =>
-      points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-      @editor.replaceSelectedText {}, (text) =>
-        @vimState.register.get().text ? text
-      ranges = (new Range(p, p) for p in points)
-      @editor.setSelectedBufferRanges(ranges)
+    @eachSelection (s) =>
+      range = s.getBufferRange()
+      newText = @vimState.register.get().text ? s.getText()
+      s.deleteSelectedText()
+      s.insertText(newText)
+      s.cursor.setBufferPosition(range.start)
     @vimState.activateNormalMode()
 
 class ToggleLineComments extends Operator
   @extend()
   hoverText: ':mute:'
   hoverIcon: ':toggle-line-comment:'
+  # flashTarget: true
   execute: ->
     markerByCursor = @markCursorBufferPositions()
-    @selectTargetWithFlashing =>
-      @editor.transact =>
-        for s in @editor.getSelections()
-          s.toggleLineComments()
+    @eachSelection (s) ->
+      s.toggleLineComments()
     @restoreMarkedCursorPositions markerByCursor
     @vimState.activateNormalMode()
 
@@ -619,7 +598,7 @@ class Change extends Insert
 
     @target.setOptions? excludeWhitespace: true
 
-    @selectTarget =>
+    if @target.select()
       @setTextToRegister @editor.getSelectedText()
       if @target.isLinewise?() and not @typedText?
         for selection in @editor.getSelections()
@@ -732,7 +711,7 @@ class Replace extends Operator
 
     @editor.transact =>
       if @target?
-        @selectTarget =>
+        if @target.select()
           @editor.replaceSelectedText null, (text) =>
             text.replace(/./g, @input)
           for selection in @editor.getSelections()
