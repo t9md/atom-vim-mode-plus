@@ -27,7 +27,7 @@ class Operator extends Base
 
   constructor: ->
     super
-    #  To support, `dd`, `cc`, `yy` `>>`, `<<`, `==`
+    #  To support, `dd`, `cc` and a like.
     if @isSameOperatorRepeated()
       @vimState.operationStack.push @new('MoveToRelativeLine')
       @abort()
@@ -106,6 +106,10 @@ class Operator extends Base
       marker.destroy() for __, marker of markerBySelections
     , settings.get('flashOnOperateDurationMilliSeconds')
 
+  selectTarget: (callback) ->
+    if @target.select()
+      callback()
+
 class Select extends Operator
   @extend()
   execute: ->
@@ -144,7 +148,7 @@ class Delete extends Operator
   hoverIcon: ':delete:'
 
   execute: ->
-    if _.any @target.select()
+    @selectTarget =>
       @setTextToRegister @editor.getSelectedText()
       @editor.transact =>
         for selection in @editor.getSelections()
@@ -180,7 +184,7 @@ class TransformString extends Operator
   execute: ->
     if @target.isLinewise?() or settings.get('stayOnTransformString')
       points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-    if _.any @target.select()
+    @selectTarget =>
       @withFlashing =>
         for selection in @editor.getSelections()
           range = selection.insertText @getNewText(selection.getText())
@@ -330,7 +334,7 @@ class Yank extends Operator
   execute: ->
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
-    if _.any @target.select()
+    @selectTarget =>
       @withFlashing ->
       @setTextToRegister @editor.getSelectedText()
       for selection in @editor.getSelections()
@@ -492,7 +496,7 @@ class ReplaceWithRegister extends Operator
   hoverText: ':pencil:'
   hoverIcon: ':replace-with-register:'
   execute: ->
-    if _.any @target.select()
+    @selectTarget =>
       @withFlashing =>
         points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
         @editor.replaceSelectedText {}, (text) =>
@@ -507,7 +511,7 @@ class ToggleLineComments extends Operator
   hoverIcon: ':toggle-line-comment:'
   execute: ->
     markerByCursor = @markCursorBufferPositions()
-    if _.any @target.select()
+    if @target.select()
       @withFlashing =>
         @editor.transact =>
           for s in @editor.getSelections()
@@ -614,7 +618,7 @@ class Change extends Insert
 
     @target.setOptions? excludeWhitespace: true
 
-    if _.any @target.select()
+    @selectTarget =>
       @setTextToRegister @editor.getSelectedText()
       if @target.isLinewise?() and not @typedText?
         for selection in @editor.getSelections()
@@ -727,7 +731,7 @@ class Replace extends Operator
 
     @editor.transact =>
       if @target?
-        if _.any @target.select()
+        @selectTarget =>
           @editor.replaceSelectedText null, (text) =>
             text.replace(/./g, @input)
           for selection in @editor.getSelections()
@@ -769,8 +773,7 @@ module.exports = {
 
   # String transformation
   ToggleCase, ToggleCaseAndMoveRight,
-  UpperCase, LowerCase
-  CamelCase, SnakeCase, DashCase
+  UpperCase, LowerCase, CamelCase, SnakeCase, DashCase
   Surround, SurroundWord
   DeleteSurround, DeleteSurroundAnyPair
   ChangeSurround, ChangeSurroundAnyPair

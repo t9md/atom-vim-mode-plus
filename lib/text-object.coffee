@@ -19,7 +19,9 @@ class TextObject extends Base
     new Range(point, Point.INFINITY)
 
   status: ->
-    (not s.isEmpty() for s in @editor.getSelections())
+    for s in @editor.getSelections() when not s.isEmpty()
+      return true
+    false
 
   isLinewise: ->
     for s in @editor.getSelections() when not @isWholeLine s.getBufferRange()
