@@ -204,7 +204,7 @@ getVim = (vimState) ->
           expect(c).toHaveBeenCalled()
 
     if o.mode?
-      expect(vimState.mode).toEqual o.mode
+      expect(vimState.isMode(toArray(o.mode)...)).toBe(true)
 
     if o.submode?
       expect(vimState.submode).toEqual o.submode
