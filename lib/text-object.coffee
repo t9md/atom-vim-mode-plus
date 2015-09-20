@@ -259,18 +259,18 @@ class Indentation extends Paragraph
 # TODO: make it extendable when repeated
 class Fold extends TextObject
   @extend()
-  getRowRangeForBufferRow: (bufferRow, inclusive=null) ->
+  getRowRangeForBufferRow: (bufferRow) ->
     for currentRow in [bufferRow..0] by -1
       [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
       continue unless startRow? and startRow <= bufferRow <= endRow
-      startRow += 1 unless inclusive
+      startRow += 1 unless @inclusive
       return [startRow, endRow]
 
   select: ->
     @eachSelection (selection) =>
       [startRow, endRow] = selection.getBufferRowRange()
       row = if selection.isReversed() then startRow else endRow
-      if rowRange = @getRowRangeForBufferRow(row, @inclusive)
+      if rowRange = @getRowRangeForBufferRow(row)
         selectLines(selection, rowRange)
     @status()
 
