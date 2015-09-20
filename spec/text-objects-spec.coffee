@@ -149,8 +149,8 @@ describe "TextObject", ->
             ....  ....
             """
 
-  describe "DoubleQuotes", ->
-    describe "inner-double-quotes", ->
+  describe "DoubleQuote", ->
+    describe "inner-double-quote", ->
       beforeEach ->
         set
           text: '" something in here and in "here" " and over here'
@@ -172,7 +172,7 @@ describe "TextObject", ->
         ensure 'di"',
           text: '" something in here and in "here" " and over here'
           cursor: [0, 39]
-    describe "a-double-quotes", ->
+    describe "a-double-quote", ->
       originalText = '" something in here and in "here" "'
       beforeEach ->
         set text: originalText, cursor: [0, 9]
@@ -190,8 +190,8 @@ describe "TextObject", ->
           cursor: [0, 29]
           mode: 'normal'
 
-  describe "SingleQuotes", ->
-    describe "inner-single-quotes", ->
+  describe "SingleQuote", ->
+    describe "inner-single-quote", ->
       beforeEach ->
         set
           text: "' something in here and in 'here' ' and over here"
@@ -217,7 +217,7 @@ describe "TextObject", ->
         ensure "di'",
           text: "' something in here and in 'here' ' and over here"
           cursor: [0, 39]
-    describe "a-single-quotes", ->
+    describe "a-single-quote", ->
       originalText = "' something in here and in 'here' '"
       beforeEach ->
         set text: originalText, cursor: [0, 9]
@@ -235,19 +235,19 @@ describe "TextObject", ->
           cursor: [0, 29]
           mode: 'normal'
 
-  describe "BackTicks", ->
+  describe "BackTick", ->
     originalText = "this is `sample` text."
     beforeEach ->
       set text: originalText, cursor: [0, 9]
 
-    describe "inner-back-ticks", ->
+    describe "inner-back-tick", ->
       it "applies operators inner-area", ->
         ensure "di`", text: "this is `` text.", cursor: [0, 9]
 
       it "do nothing when pair range is not under cursor", ->
         set cursor: [0, 16]
         ensure "di`", text: originalText, cursor: [0, 16]
-    describe "a-back-ticks", ->
+    describe "a-back-tick", ->
       it "applies operators inner-area", ->
         ensure "da`", text: "this is  text.", cursor: [0, 8]
 
@@ -255,8 +255,8 @@ describe "TextObject", ->
         set cursor: [0, 16]
         ensure "di`", text: originalText, cursor: [0, 16]
 
-  describe "CurlyBrackets", ->
-    describe "inner-curly-brackets", ->
+  describe "CurlyBracket", ->
+    describe "inner-curly-bracket", ->
       beforeEach ->
         set
           text: "{ something in here and in {here} }"
@@ -273,7 +273,7 @@ describe "TextObject", ->
         ensure 'di{',
           text: "{ something in here and in {} }"
           cursor: [0, 28]
-    describe "a-curly-brackets", ->
+    describe "a-curly-bracket", ->
       beforeEach ->
         set
           text: "{ something in here and in {here} }"
@@ -292,8 +292,8 @@ describe "TextObject", ->
           cursor: [0, 27]
           mode: 'normal'
 
-  describe "AngleBrackets", ->
-    describe "inner-angle-brackets", ->
+  describe "AngleBracket", ->
+    describe "inner-angle-bracket", ->
       beforeEach ->
         set
           text: "< something in here and in <here> >"
@@ -309,7 +309,7 @@ describe "TextObject", ->
         ensure 'di<',
           text: "< something in here and in <> >"
           cursor: [0, 28]
-    describe "a-angle-brackets", ->
+    describe "a-angle-bracket", ->
       beforeEach ->
         set
           text: "< something in here and in <here> >"
@@ -328,8 +328,8 @@ describe "TextObject", ->
           cursor: [0, 27]
           mode: 'normal'
 
-  describe "Tags", ->
-    describe "inner-tags", ->
+  describe "Tag", ->
+    describe "inner-tag", ->
       beforeEach ->
         set
           text: "<something>here</something><again>"
@@ -349,8 +349,8 @@ describe "TextObject", ->
           text: "<something></something><again>"
           cursor: [0, 11]
 
-  describe "SquareBrackets", ->
-    describe "inner-square-brackets", ->
+  describe "SquareBracket", ->
+    describe "inner-square-bracket", ->
       beforeEach ->
         set
           text: "[ something in here and in [here] ]"
@@ -367,7 +367,7 @@ describe "TextObject", ->
         ensure 'di[',
           text: "[ something in here and in [] ]"
           cursor: [0, 28]
-    describe "a-square-brackets", ->
+    describe "a-square-bracket", ->
       beforeEach ->
         set
           text: "[ something in here and in [here] ]"
@@ -386,9 +386,9 @@ describe "TextObject", ->
           cursor: [0, 27]
           mode: 'normal'
 
-  describe "Parentheses", ->
-    describe "inner-parentheses", ->
-    describe "a-parentheses", ->
+  describe "Parenthesis", ->
+    describe "inner-parenthesis", ->
+    describe "a-parenthesis", ->
       beforeEach ->
         set
           text: "( something in here and in (here) )"
