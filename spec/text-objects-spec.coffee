@@ -5,15 +5,15 @@ describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    getVimState (_vimState, vim) ->
-      vimState = _vimState
+    getVimState (vimState, vim) ->
+      # vimState = state
       {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
       {set, ensure, keystroke} = vim
 
   describe "Word", ->
-    describe "inner-", ->
+    describe "inner-word", ->
       beforeEach ->
         set
           text: "12345 abcde ABCDE"
@@ -24,26 +24,22 @@ describe "TextObject", ->
           text:     "12345  ABCDE"
           cursor:   [0, 6]
           register: 'abcde'
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "selects inside the current word in visual mode", ->
         ensure 'viw',
           selectedScreenRange: [[0, 6], [0, 11]]
 
       it "works with multiple cursors", ->
-        set
-          addCursor: [0, 1]
+        set addCursor: [0, 1]
         ensure 'viw',
           selectedBufferRange: [
             [[0, 6], [0, 11]]
             [[0, 0], [0, 5]]
           ]
-    describe "a-", ->
+    describe "a-word", ->
       beforeEach ->
-        set
-          text: "12345 abcde ABCDE"
-          cursor: [0, 9]
+        set text: "12345 abcde ABCDE", cursor: [0, 9]
 
       it "applies operators from the start of the current word to the start of the next word in operator-pending mode", ->
         ensure 'daw',
@@ -52,64 +48,43 @@ describe "TextObject", ->
           register: "abcde "
 
       it "selects from the start of the current word to the start of the next word in visual mode", ->
-        ensure 'vaw',
-          selectedScreenRange: [[0, 6], [0, 12]]
+        ensure 'vaw', selectedScreenRange: [[0, 6], [0, 12]]
 
       it "doesn't span newlines", ->
-        set
-          text: "12345\nabcde ABCDE"
-          cursor: [0, 3]
-        ensure 'vaw',
-          selectedBufferRange: [[0, 0], [0, 5]]
+        set text: "12345\nabcde ABCDE", cursor: [0, 3]
+        ensure 'vaw', selectedBufferRange: [[0, 0], [0, 5]]
 
       it "doesn't span special characters", ->
-        set
-          text: "1(345\nabcde ABCDE"
-          cursor: [0, 3]
-        ensure 'vaw',
-          selectedBufferRange: [[0, 2], [0, 5]]
+        set text: "1(345\nabcde ABCDE", cursor: [0, 3]
+        ensure 'vaw', selectedBufferRange: [[0, 2], [0, 5]]
 
   describe "WholeWord", ->
-    describe "inner-", ->
-    describe "a-", ->
+    describe "inner-whole-word", ->
       beforeEach ->
-        set
-          text: "12(45 ab'de ABCDE"
-          cursor: [0, 9]
+        set text: "12(45 ab'de ABCDE", cursor: [0, 9]
+
+      it "applies operators inside the current whole word in operator-pending mode", ->
+        ensure 'diW', text: "12(45  ABCDE", cursor: [0, 6], register: "ab'de"
+
+      it "selects inside the current whole word in visual mode", ->
+        ensure 'viW', selectedScreenRange: [[0, 6], [0, 11]]
+    describe "a-whole-word", ->
+      beforeEach ->
+        set text: "12(45 ab'de ABCDE", cursor: [0, 9]
 
       it "applies operators from the start of the current whole word to the start of the next whole word in operator-pending mode", ->
         ensure 'daW',
           text: "12(45 ABCDE"
           cursor: [0, 6]
           register: "ab'de "
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "selects from the start of the current whole word to the start of the next whole word in visual mode", ->
-        ensure 'vaW',
-          selectedScreenRange: [[0, 6], [0, 12]]
+        ensure 'vaW', selectedScreenRange: [[0, 6], [0, 12]]
 
       it "doesn't span newlines", ->
-        set
-          text: "12(45\nab'de ABCDE"
-          cursor: [0, 4]
-        ensure 'vaW',
-          selectedBufferRange: [[0, 0], [0, 5]]
-
-      beforeEach ->
-        set
-          text: "12(45 ab'de ABCDE"
-          cursor: [0, 9]
-
-      it "applies operators inside the current whole word in operator-pending mode", ->
-        ensure 'diW',
-          text:     "12(45  ABCDE"
-          cursor:   [0, 6]
-          register: "ab'de"
-
-      it "selects inside the current whole word in visual mode", ->
-        ensure 'viW',
-          selectedScreenRange: [[0, 6], [0, 11]]
+        set text: "12(45\nab'de ABCDE", cursor: [0, 4]
+        ensure 'vaW', selectedBufferRange: [[0, 0], [0, 5]]
 
   describe "AnyPair", ->
     beforeEach ->
@@ -125,55 +100,57 @@ describe "TextObject", ->
           .... (abc) ....
           """
         cursor: [0, 7]
-    it "applies operators any innner-pair and repeatable", ->
-      ensure 'dis',
-        text: """
-          .... "" ....
-          .... 'abc' ....
-          .... `abc` ....
-          .... {abc} ....
-          .... <abc> ....
-          .... >abc< ....
-          .... [abc] ....
-          .... (abc) ....
-          """
-      ensure 'j.j.j.j.j.j.j.',
-        text: """
-          .... "" ....
-          .... '' ....
-          .... `` ....
-          .... {} ....
-          .... <> ....
-          .... >< ....
-          .... [] ....
-          .... () ....
-          """
-    it "applies operators any a-pair and repeatable", ->
-      ensure 'das',
-        text: """
-          ....  ....
-          .... 'abc' ....
-          .... `abc` ....
-          .... {abc} ....
-          .... <abc> ....
-          .... >abc< ....
-          .... [abc] ....
-          .... (abc) ....
-          """
-      ensure 'j.j.j.j.j.j.j.',
-        text: """
-          ....  ....
-          ....  ....
-          ....  ....
-          ....  ....
-          ....  ....
-          ....  ....
-          ....  ....
-          ....  ....
-          """
+    describe "inner-any-pair", ->
+      it "applies operators any inner-pair and repeatable", ->
+        ensure 'dis',
+          text: """
+            .... "" ....
+            .... 'abc' ....
+            .... `abc` ....
+            .... {abc} ....
+            .... <abc> ....
+            .... >abc< ....
+            .... [abc] ....
+            .... (abc) ....
+            """
+        ensure 'j.j.j.j.j.j.j.',
+          text: """
+            .... "" ....
+            .... '' ....
+            .... `` ....
+            .... {} ....
+            .... <> ....
+            .... >< ....
+            .... [] ....
+            .... () ....
+            """
+    describe "a-any-pair", ->
+      it "applies operators any a-pair and repeatable", ->
+        ensure 'das',
+          text: """
+            ....  ....
+            .... 'abc' ....
+            .... `abc` ....
+            .... {abc} ....
+            .... <abc> ....
+            .... >abc< ....
+            .... [abc] ....
+            .... (abc) ....
+            """
+        ensure 'j.j.j.j.j.j.j.',
+          text: """
+            ....  ....
+            ....  ....
+            ....  ....
+            ....  ....
+            ....  ....
+            ....  ....
+            ....  ....
+            ....  ....
+            """
 
   describe "DoubleQuotes", ->
-    describe "inner-", ->
+    describe "inner-double-quotes", ->
       beforeEach ->
         set
           text: '" something in here and in "here" " and over here'
@@ -185,43 +162,36 @@ describe "TextObject", ->
           cursor: [0, 1]
 
       it "[Changed Behavior?] won't apply if quote is not within string", ->
-        set
-          cursor: [0, 29]
+        set cursor: [0, 29]
         ensure 'di"',
           text: '" something in here and in "here" " and over here'
           cursor: [0, 29]
 
       it "makes no change if past the last string on a line", ->
-        set
-          cursor: [0, 39]
+        set cursor: [0, 39]
         ensure 'di"',
           text: '" something in here and in "here" " and over here'
           cursor: [0, 39]
-    describe "a-", ->
+    describe "a-double-quotes", ->
       originalText = '" something in here and in "here" "'
       beforeEach ->
-        set
-          text: originalText
-          cursor: [0, 9]
+        set text: originalText, cursor: [0, 9]
 
       it "applies operators around the current double quotes in operator-pending mode", ->
         ensure 'da"',
           text: 'here" "'
           cursor: [0, 0]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "[Changed Behavior] wont applies if its not within string", ->
-        set
-          cursor: [0, 29]
+        set cursor: [0, 29]
         ensure 'da"',
           text: originalText
           cursor: [0, 29]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
   describe "SingleQuotes", ->
-    describe "inner-", ->
+    describe "inner-single-quotes", ->
       beforeEach ->
         set
           text: "' something in here and in 'here' ' and over here"
@@ -237,56 +207,47 @@ describe "TextObject", ->
       # it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
 
       it "[Changed behavior] applies operators inside area between quote", ->
-        set
-          cursor: [0, 26]
+        set cursor: [0, 26]
         ensure "di'",
           text: "''here' ' and over here"
           cursor: [0, 1]
 
       it "makes no change if past the last string on a line", ->
-        set
-          cursor: [0, 39]
+        set cursor: [0, 39]
         ensure "di'",
           text: "' something in here and in 'here' ' and over here"
           cursor: [0, 39]
-    describe "a-", ->
+    describe "a-single-quotes", ->
       originalText = "' something in here and in 'here' '"
       beforeEach ->
-        set
-          text: originalText
-          cursor: [0, 9]
+        set text: originalText, cursor: [0, 9]
 
       it "applies operators around the current single quotes in operator-pending mode", ->
         ensure "da'",
           text: "here' '"
           cursor: [0, 0]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "[Changed Behavior] wont applies if its not within string", ->
-        set
-          cursor: [0, 29]
+        set cursor: [0, 29]
         ensure "da'",
           text: originalText
           cursor: [0, 29]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
   describe "BackTicks", ->
     originalText = "this is `sample` text."
     beforeEach ->
-      set
-        text: originalText, cursor: [0, 9]
+      set text: originalText, cursor: [0, 9]
 
-    describe "inner-", ->
+    describe "inner-back-ticks", ->
       it "applies operators inner-area", ->
         ensure "di`", text: "this is `` text.", cursor: [0, 9]
 
       it "do nothing when pair range is not under cursor", ->
         set cursor: [0, 16]
         ensure "di`", text: originalText, cursor: [0, 16]
-
-    describe "a-", ->
+    describe "a-back-ticks", ->
       it "applies operators inner-area", ->
         ensure "da`", text: "this is  text.", cursor: [0, 8]
 
@@ -295,7 +256,7 @@ describe "TextObject", ->
         ensure "di`", text: originalText, cursor: [0, 16]
 
   describe "CurlyBrackets", ->
-    describe "inner-", ->
+    describe "inner-curly-brackets", ->
       beforeEach ->
         set
           text: "{ something in here and in {here} }"
@@ -312,7 +273,7 @@ describe "TextObject", ->
         ensure 'di{',
           text: "{ something in here and in {} }"
           cursor: [0, 28]
-    describe "a-", ->
+    describe "a-curly-brackets", ->
       beforeEach ->
         set
           text: "{ something in here and in {here} }"
@@ -322,20 +283,17 @@ describe "TextObject", ->
         ensure 'da{',
           text: ''
           cursor: [0, 0]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "applies operators around the current curly brackets in operator-pending mode (second test)", ->
-        set
-          cursor: [0, 29]
+        set cursor: [0, 29]
         ensure 'da{',
           text: "{ something in here and in  }"
           cursor: [0, 27]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
   describe "AngleBrackets", ->
-    describe "inner-", ->
+    describe "inner-angle-brackets", ->
       beforeEach ->
         set
           text: "< something in here and in <here> >"
@@ -351,7 +309,7 @@ describe "TextObject", ->
         ensure 'di<',
           text: "< something in here and in <> >"
           cursor: [0, 28]
-    describe "a-", ->
+    describe "a-angle-brackets", ->
       beforeEach ->
         set
           text: "< something in here and in <here> >"
@@ -361,20 +319,17 @@ describe "TextObject", ->
         ensure 'da<',
           text: ''
           cursor: [0, 0]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "applies operators around the current angle brackets in operator-pending mode (second test)", ->
-        set
-          cursor: [0, 29]
+        set cursor: [0, 29]
         ensure 'da<',
           text: "< something in here and in  >"
           cursor: [0, 27]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
   describe "Tags", ->
-    describe "inner-", ->
+    describe "inner-tags", ->
       beforeEach ->
         set
           text: "<something>here</something><again>"
@@ -395,7 +350,7 @@ describe "TextObject", ->
           cursor: [0, 11]
 
   describe "SquareBrackets", ->
-    describe "inner-", ->
+    describe "inner-square-brackets", ->
       beforeEach ->
         set
           text: "[ something in here and in [here] ]"
@@ -412,7 +367,7 @@ describe "TextObject", ->
         ensure 'di[',
           text: "[ something in here and in [] ]"
           cursor: [0, 28]
-    describe "a-", ->
+    describe "a-square-brackets", ->
       beforeEach ->
         set
           text: "[ something in here and in [here] ]"
@@ -422,21 +377,18 @@ describe "TextObject", ->
         ensure 'da[',
           text: ''
           cursor: [0, 0]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "applies operators around the current square brackets in operator-pending mode (second test)", ->
-        set
-          cursor: [0, 29]
+        set cursor: [0, 29]
         ensure 'da[',
           text: "[ something in here and in  ]"
           cursor: [0, 27]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
   describe "Parentheses", ->
-    describe "inner-", ->
-    describe "a-", ->
+    describe "inner-parentheses", ->
+    describe "a-parentheses", ->
       beforeEach ->
         set
           text: "( something in here and in (here) )"
@@ -446,12 +398,10 @@ describe "TextObject", ->
         ensure 'da(',
           text: ''
           cursor: [0, 0]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "applies operators around the current parentheses in operator-pending mode (second test)", ->
-        set
-          cursor: [0, 29]
+        set cursor: [0, 29]
         ensure 'da(',
           text: "( something in here and in  )"
           cursor: [0, 27]
@@ -467,8 +417,7 @@ describe "TextObject", ->
           cursor: [0, 1]
 
       it "applies operators inside the current word in operator-pending mode (second test)", ->
-        set
-          cursor: [0, 29]
+        set cursor: [0, 29]
         ensure 'di(',
           text: "( something in here and in () )"
           cursor: [0, 28]
@@ -503,7 +452,7 @@ describe "TextObject", ->
           ]
 
   describe "Paragraph", ->
-    describe "inner-", ->
+    describe "inner-paragraph", ->
       beforeEach ->
         set
           text: "\nParagraph-1\nParagraph-1\nParagraph-1\n\n"
@@ -518,7 +467,7 @@ describe "TextObject", ->
       it "selects inside the current paragraph in visual mode", ->
         ensure 'vip',
           selectedScreenRange: [[1, 0], [4, 0]]
-    describe "a-", ->
+    describe "a-paragraph", ->
       beforeEach ->
         set
           text: "text\n\nParagraph-1\nParagraph-1\nParagraph-1\n\nmoretext"
@@ -535,43 +484,37 @@ describe "TextObject", ->
           selectedScreenRange: [[2, 0], [6, 0]]
 
   describe 'Comment', ->
-    coffeeEditor = null
-    vim = null
     beforeEach ->
       waitsForPromise ->
         atom.packages.activatePackage('language-coffee-script')
-
-      getVimState 'sample.coffee', (_vimState, _vim) ->
-        coffeeEditor = _vimState.editor
-        _vimState.activateNormalMode()
-        _vimState.resetNormalMode()
-        vim = _vim
-
+      getVimState 'sample.coffee', (vimState, vim) ->
+        {editor, editorElement} = vimState
+        {set, ensure, keystroke} = vim
     afterEach ->
       atom.packages.deactivatePackage('language-coffee-script')
 
-    describe 'inner-', ->
+    describe 'inner-comment', ->
       it 'select inside comment block', ->
-        vim.set cursor: [0, 0]
-        vim.ensure 'vi/',
+        set cursor: [0, 0]
+        ensure 'vi/',
           selectedText: '# This\n# is\n# Comment\n'
           selectedBufferRange: [[0, 0], [3, 0]]
 
       it 'select one line comment', ->
-        vim.set cursor: [4, 0]
-        vim.ensure 'vi/',
+        set cursor: [4, 0]
+        ensure 'vi/',
           selectedText: '# One line comment\n'
           selectedBufferRange: [[4, 0], [5, 0]]
 
       it 'not select non-comment line', ->
-        vim.set cursor: [6, 0]
-        vim.ensure 'vi/',
+        set cursor: [6, 0]
+        ensure 'vi/',
           selectedText: '# Comment\n# border\n'
           selectedBufferRange: [[6, 0], [8, 0]]
-    describe 'a-', ->
+    describe 'a-comment', ->
       it 'include blank line when selecting comment', ->
-        vim.set cursor: [0, 0]
-        vim.ensure 'va/',
+        set cursor: [0, 0]
+        ensure 'va/',
           selectedText: """
           # This
           # is
@@ -585,75 +528,58 @@ describe "TextObject", ->
           selectedBufferRange: [[0, 0], [8, 0]]
 
   describe 'Indentation', ->
-    coffeeEditor = null
-    vim = null
     beforeEach ->
       waitsForPromise ->
         atom.packages.activatePackage('language-coffee-script')
-
-      getVimState 'sample.coffee', (_vimState, _vim) ->
-        coffeeEditor = _vimState.editor
-        _vimState.activateNormalMode()
-        _vimState.resetNormalMode()
-        vim = _vim
-
+      getVimState 'sample.coffee', (vimState, vim) ->
+        {editor, editorElement} = vimState
+        {set, ensure, keystroke} = vim
     afterEach ->
       atom.packages.deactivatePackage('language-coffee-script')
 
-    describe 'inner-', ->
+    describe 'inner-indentation', ->
       it 'select lines with deeper indent-level', ->
-        vim.set cursor: [12, 0]
-        vim.ensure 'vii',
+        set cursor: [12, 0]
+        ensure 'vii',
           selectedBufferRange: [[12, 0], [15, 0]]
-    describe 'a-', ->
+    describe 'a-indentation', ->
       it 'wont stop on blank line when selecting indent', ->
-        vim.set cursor: [12, 0]
-        vim.ensure 'vai',
+        set cursor: [12, 0]
+        ensure 'vai',
           selectedBufferRange: [[10, 0], [27, 0]]
 
   describe 'Fold', ->
-    coffeeEditor = null
-    vim = null
     beforeEach ->
       waitsForPromise ->
         atom.packages.activatePackage('language-coffee-script')
-
-      getVimState 'sample.coffee', (_vimState, _vim) ->
-        coffeeEditor = _vimState.editor
-        _vimState.activateNormalMode()
-        _vimState.resetNormalMode()
-        vim = _vim
-
+      getVimState 'sample.coffee', (vimState, vim) ->
+        {editor, editorElement} = vimState
+        {set, ensure, keystroke} = vim
     afterEach ->
       atom.packages.deactivatePackage('language-coffee-script')
 
-    describe 'inner-', ->
+    describe 'inner-fold', ->
       it 'select fold row range except start row', ->
-        vim.set cursor: [13, 0]
-        vim.ensure 'viz',
-          selectedBufferRange: [[10, 0], [26, 0]]
+        set cursor: [13, 0]
+        ensure 'viz', selectedBufferRange: [[10, 0], [26, 0]]
 
       it 'select fold row range except start row', ->
-        vim.set cursor: [19, 0]
-        vim.ensure 'viz',
-          selectedBufferRange: [[19, 0], [24, 0]]
-    describe 'a-', ->
+        set cursor: [19, 0]
+        ensure 'viz', selectedBufferRange: [[19, 0], [24, 0]]
+    describe 'a-fold', ->
       it 'select fold row range', ->
-        vim.set cursor: [13, 0]
-        vim.ensure 'vaz',
-          selectedBufferRange: [[9, 0], [26, 0]]
+        set cursor: [13, 0]
+        ensure 'vaz', selectedBufferRange: [[9, 0], [26, 0]]
 
       it 'select fold row range', ->
-        vim.set cursor: [19, 0]
-        vim.ensure 'vaz',
-          selectedBufferRange: [[18, 0], [24, 0]]
+        set cursor: [19, 0]
+        ensure 'vaz', selectedBufferRange: [[18, 0], [24, 0]]
 
+  # Although following test picks specific language, other langauages are alsoe supported.
   describe 'Function', ->
-    # Although following test picks specific language, other langauages are alsoe supported.
     describe 'coffee', ->
       pack = 'language-coffee-script'
       scope = 'source.coffee'
-
       beforeEach ->
         waitsForPromise ->
           atom.packages.activatePackage(pack)
@@ -674,26 +600,23 @@ describe "TextObject", ->
         runs ->
           grammar = atom.grammars.grammarForScopeName(scope)
           editor.setGrammar(grammar)
-
       afterEach ->
         atom.packages.deactivatePackage(pack)
 
-      it 'inner- select function except start row', ->
-        ensure 'vif',
-          selectedBufferRange: [[3, 0], [6, 0]]
+      describe 'inner-function for coffee', ->
+        it 'select except start row', ->
+          ensure 'vif', selectedBufferRange: [[3, 0], [6, 0]]
 
-      it 'a- select function', ->
-        ensure 'vaf',
-          selectedBufferRange: [[2, 0], [6, 0]]
+      describe 'a-function for coffee', ->
+        it 'select function', ->
+          ensure 'vaf', selectedBufferRange: [[2, 0], [6, 0]]
 
     describe 'ruby', ->
       pack = 'language-ruby'
       scope = 'source.ruby'
-
       beforeEach ->
         waitsForPromise ->
           atom.packages.activatePackage(pack)
-
         set
           text: """
             # Commment
@@ -707,30 +630,25 @@ describe "TextObject", ->
             # Commment
             """
           cursor: [3, 0]
-
         runs ->
           grammar = atom.grammars.grammarForScopeName(scope)
           editor.setGrammar(grammar)
-
       afterEach ->
         atom.packages.deactivatePackage(pack)
 
-      it 'inner- select function except start row and end row', ->
-        ensure 'vif',
-          selectedBufferRange: [[3, 0], [6, 0]]
-
-      it 'a- select function', ->
-        ensure 'vaf',
-          selectedBufferRange: [[2, 0], [7, 0]]
+      describe 'inner-function for ruby', ->
+        it 'select except start row', ->
+          ensure 'vif', selectedBufferRange: [[3, 0], [6, 0]]
+      describe 'a-function for ruby', ->
+        it 'select function', ->
+          ensure 'vaf', selectedBufferRange: [[2, 0], [7, 0]]
 
     describe 'go', ->
       pack = 'language-go'
       scope = 'source.go'
-
       beforeEach ->
         waitsForPromise ->
           atom.packages.activatePackage(pack)
-
         set
           text: """
             // Commment
@@ -744,21 +662,19 @@ describe "TextObject", ->
             // Commment
             """
           cursor: [3, 0]
-
         runs ->
           grammar = atom.grammars.grammarForScopeName(scope)
           editor.setGrammar(grammar)
-
       afterEach ->
         atom.packages.deactivatePackage(pack)
 
-      it 'inner- select function except start row and end row', ->
-        ensure 'vif',
-          selectedBufferRange: [[3, 0], [6, 0]]
+      describe 'inner-function for go', ->
+        it 'select except start row', ->
+          ensure 'vif', selectedBufferRange: [[3, 0], [6, 0]]
 
-      it 'a- select function', ->
-        ensure 'vaf',
-          selectedBufferRange: [[2, 0], [7, 0]]
+      describe 'a-function for go', ->
+        it 'select function', ->
+          ensure 'vaf', selectedBufferRange: [[2, 0], [7, 0]]
 
   describe 'CurrentLine', ->
     beforeEach ->
@@ -769,7 +685,7 @@ describe "TextObject", ->
           text
           """
 
-    describe 'inner-', ->
+    describe 'inner-current-line', ->
       it 'select current line without including last newline', ->
         set cursor: [0, 0]
         ensure 'vil', selectedText: 'This is'
@@ -777,7 +693,7 @@ describe "TextObject", ->
       it 'also skip leading white space', ->
         set cursor: [1, 0]
         ensure 'vil', selectedText: 'multi line'
-    describe 'a-', ->
+    describe 'a-current-line', ->
       it 'select current line without including last newline as like `vil`', ->
         set cursor: [0, 0]
         ensure 'val', selectedText: 'This is'
@@ -794,15 +710,15 @@ describe "TextObject", ->
           multi line
         text
         """
-      set {text}
-    describe 'inner-/a- (no difference) entire buffer', ->
+      set {text, cursor: [0, 0]}
+    describe 'inner-entire', ->
       it 'select entire buffer', ->
-        set cursor: [0, 0]
         ensure 'escape', selectedText: ''
         ensure 'vie', selectedText: text
         ensure 'escape', selectedText: ''
         ensure 'jjvie', selectedText: text
-
+    describe 'a-entire', ->
+      it 'select entire buffer', ->
         ensure 'escape', selectedText: ''
         ensure 'vae', selectedText: text
         ensure 'escape', selectedText: ''
