@@ -18,11 +18,6 @@ class TextObject extends Base
   rangeToEndOfFile: (point) ->
     new Range(point, Point.INFINITY)
 
-  status: ->
-    for s in @editor.getSelections() when not s.isEmpty()
-      return true
-    false
-
   isLinewise: ->
     for s in @editor.getSelections() when not @isWholeLine s.getBufferRange()
       return false
@@ -33,7 +28,7 @@ class TextObject extends Base
       callback selection
     if @isLinewise() and @vimState.isMode('visual', ['characterwise', 'blockwise'])
       @vimState.activateVisualMode('linewise')
-    @status()
+    @editor.getSelections().some((s) -> not s.isEmpty())
 
 # Word
 # -------------------------
@@ -274,7 +269,6 @@ class Fold extends TextObject
       row = if selection.isReversed() then startRow else endRow
       if rowRange = @getRowRangeForBufferRow(row)
         selectLines(selection, rowRange)
-    @status()
 
 # NOTE: Function range determination is depending on fold.
 class Function extends Fold
@@ -327,7 +321,7 @@ class Entire extends TextObject
   @extend()
   select: ->
     @editor.selectAll()
-    @status()
+    @editor.getLastSelection().isEmpty()
 
 module.exports = {
   Word, WholeWord,

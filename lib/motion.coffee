@@ -116,9 +116,7 @@ class Motion extends Base
   # return list of isEmpty() result of each selections which is expected
   # to return from select() methods.
   status: ->
-    for s in @editor.getSelections() when not s.isEmpty()
-      return true
-    false
+    @editor.getSelections().some((s) -> not s.isEmpty())
 
 class CurrentSelection extends Motion
   @extend()
