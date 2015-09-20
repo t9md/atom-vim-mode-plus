@@ -1,14 +1,32 @@
+# Refactoring status: 100%
+fs = require 'fs-plus'
+settings = require './settings'
+
 module.exports =
-  # Public: Determines if a string should be considered linewise or character
-  #
-  # text - The string to consider
-  #
-  # Returns 'linewise' if the string ends with a line return and 'character'
-  #  otherwise.
-  copyType: (text) ->
-    if text.lastIndexOf("\n") is text.length - 1
-      'linewise'
-    else if text.lastIndexOf("\r") is text.length - 1
-      'linewise'
+  # Include module(object which normaly provides set of methods) to klass
+  include: (klass, module) ->
+    for key, value of module
+      klass::[key] = value
+
+  debug: (msg) ->
+    return unless settings.get('debug')
+    msg += "\n"
+    if settings.get('debugOutput') is 'console'
+      console.log msg
     else
-      'character'
+      filePath = fs.normalize("~/sample.log")
+      fs.appendFileSync filePath, msg
+
+  selectLines: (selection, rowRange=null) ->
+    {editor} = selection
+    [startRow, endRow] = if rowRange? then rowRange else selection.getBufferRowRange()
+    range = editor.bufferRangeForBufferRow(startRow, includeNewline: true)
+    range = range.union(editor.bufferRangeForBufferRow(endRow, includeNewline: true))
+    selection.setBufferRange(range)
+
+  getNonBlankCharPositionForRow: (editor, row) ->
+    scanRange = editor.bufferRangeForBufferRow(row)
+    point = null
+    editor.scanInBufferRange /^[ \t]*/, scanRange, ({range}) ->
+      point = range.end.translate([0, +1])
+    point

@@ -10,8 +10,9 @@
     "atom": ">0.151.0"
   },
   "dependencies": {
-    "event-kit": "^0.7.2",
-    "grim": "^1.4.1",
+    "delegato": "^1.0.0",
+    "emoji-images": "^0.1.1",
+    "fs-plus": "^2.8.1",
     "underscore-plus": "1.x"
   },
   "consumedServices": {
