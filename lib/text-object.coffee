@@ -143,36 +143,36 @@ class AnyPair extends Pair
         ranges = ranges.sort (a, b) -> a.compare(b)
         selection.setBufferRange(_.last(ranges))
 
-class DoubleQuotes extends Pair
+class DoubleQuote extends Pair
   @extend()
   pair: '""'
 
-class SingleQuotes extends Pair
+class SingleQuote extends Pair
   @extend()
   pair: "''"
 
-class BackTicks extends Pair
+class BackTick extends Pair
   @extend()
   pair: '``'
 
-class CurlyBrackets extends Pair
+class CurlyBracket extends Pair
   @extend()
   pair: '{}'
 
-class AngleBrackets extends Pair
+class AngleBracket extends Pair
   @extend()
   pair: '<>'
 
 # [FIXME] See #795
-class Tags extends Pair
+class Tag extends Pair
   @extend()
   pair: '><'
 
-class SquareBrackets extends Pair
+class SquareBracket extends Pair
   @extend()
   pair: '[]'
 
-class Parentheses extends Pair
+class Parenthesis extends Pair
   @extend()
   pair: '()'
 
@@ -329,8 +329,8 @@ class Entire extends TextObject
 
 module.exports = {
   Word, WholeWord,
-  DoubleQuotes, SingleQuotes, BackTicks, CurlyBrackets , AngleBrackets, Tags,
-  SquareBrackets, Parentheses,
+  DoubleQuote, SingleQuote, BackTick, CurlyBracket , AngleBracket, Tag,
+  SquareBracket, Parenthesis,
   AnyPair
   Paragraph, Comment, Indentation,
   Fold, Function,
