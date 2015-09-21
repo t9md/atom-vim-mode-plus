@@ -3,8 +3,6 @@ _ = require 'underscore-plus'
 {getVimState} = require './spec-helper'
 settings = require '../lib/settings'
 
-# TODO
-# Thorough CSS class check should be done in this file.
 describe "VimState", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
@@ -12,7 +10,6 @@ describe "VimState", ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      vimState.activateNormalMode()
       vimState.resetNormalMode()
       {set, ensure, keystroke} = vim
 
@@ -64,7 +61,9 @@ describe "VimState", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the ctrl-c keybinding", ->
-        beforeEach -> keystroke [ctrl: 'c']
+        beforeEach ->
+          keystroke [ctrl: 'c']
+          # keystroke [{platform: 'platform-darwin'}, {ctrl: 'c'}],
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)

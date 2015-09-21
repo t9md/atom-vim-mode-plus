@@ -9,7 +9,6 @@ describe "Motion", ->
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
-      vimState.activateNormalMode()
       vimState.resetNormalMode()
       {set, ensure, keystroke} = _vim
 
