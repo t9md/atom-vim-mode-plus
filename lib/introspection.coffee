@@ -1,6 +1,7 @@
 # Refactoring status: N/A
 util = require 'util'
 _ = require 'underscore-plus'
+packageName = 'vim-mode-plus'
 
 extractBetween = (str, s1, s2) ->
   str.substring(str.indexOf(s1)+1, str.lastIndexOf(s2))
@@ -156,7 +157,7 @@ genTableOfContent = (obj) ->
   s
 
 generateIntrospectionReport = (mods, options) ->
-  pack = atom.packages.getActivePackage('vim-mode')
+  pack = atom.packages.getActivePackage(packageName)
   {version} = pack.metadata
   results = _.flatten((reportModule(mod, options) for mod in mods))
   results = results.concat(getVirtualParents(results, options))
@@ -183,7 +184,7 @@ generateIntrospectionReport = (mods, options) ->
   date = new Date().toISOString()
   content = [
     '# TOM(TextObject, Operator, Motion) report.'
-    "vim-mode version: #{version}  \n*generated at #{date}*"
+    "#{packageName} version: #{version}  \n*generated at #{date}*"
     toc
     body.join("\n\n")
   ].join("\n\n")
@@ -223,7 +224,7 @@ inspectInstance = (obj, options={}) ->
 keymapsForVimMode = null
 getKeyBindings =  ->
   return keymapsForVimMode if keymapsForVimMode
-  pack = atom.packages.getActivePackage('vim-mode')
+  pack = atom.packages.getActivePackage(packageName)
   keymapPath = pack.getKeymapPaths().pop()
   keymapsForVimMode =
     (k for k in atom.keymaps.getKeyBindings() when k.source is keymapPath)

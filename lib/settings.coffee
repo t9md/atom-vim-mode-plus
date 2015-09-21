@@ -11,7 +11,7 @@ class ScopedConfig
   set: (param, value) ->
     atom.config.set "#{@scope}.#{param}", value
 
-module.exports = new ScopedConfig 'vim-mode',
+module.exports = new ScopedConfig 'vim-mode-plus',
   startInInsertMode:
     order: 1
     type: 'boolean'

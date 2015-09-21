@@ -1,4 +1,5 @@
 # Refactoring status: 0%
+packageName = 'vim-mode-plus'
 describe "VimMode", ->
   [editor, editorElement, workspaceElement] = []
 
@@ -9,7 +10,7 @@ describe "VimMode", ->
       atom.workspace.open()
 
     waitsForPromise ->
-      atom.packages.activatePackage('vim-mode')
+      atom.packages.activatePackage(packageName)
 
     waitsForPromise ->
       atom.packages.activatePackage('status-bar')
@@ -48,7 +49,7 @@ describe "VimMode", ->
 
   describe ".deactivate", ->
     it "removes the vim classes from the editor", ->
-      atom.packages.deactivatePackage('vim-mode')
+      atom.packages.deactivatePackage(packageName)
       expect(editorElement.classList.contains("vim-mode")).toBe(false)
       expect(editorElement.classList.contains("normal-mode")).toBe(false)
 
@@ -58,5 +59,5 @@ describe "VimMode", ->
           cmd.name.startsWith("vim-mode:")
 
       expect(vimCommands().length).toBeGreaterThan(0)
-      atom.packages.deactivatePackage('vim-mode')
+      atom.packages.deactivatePackage(packageName)
       expect(vimCommands().length).toBe(0)

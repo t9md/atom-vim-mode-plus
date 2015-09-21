@@ -20,8 +20,8 @@ class Developer
   init: ->
     @vimState.registerCommands
       'toggle-debug': ->
-        atom.config.set('vim-mode.debug', not settings.get('debug'))
-        console.log "vim-mode debug:", atom.config.get('vim-mode.debug')
+        settings.set('debug', not settings.get('debug'))
+        console.log "#{settings.scope} debug:", settings.get('debug')
       'generate-introspection-report': => @generateIntrospectionReport()
       'jump-to-related': => @jumpToRelated()
       'report-key-binding': => @reportKeyBinding()

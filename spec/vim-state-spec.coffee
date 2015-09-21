@@ -1,6 +1,7 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
 {getVimState} = require './spec-helper'
+settings = require '../lib/settings'
 
 describe "VimState", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -19,7 +20,7 @@ describe "VimState", ->
         classListContains: ['vim-mode', 'normal-mode']
 
     it "puts the editor in insert-mode if startInInsertMode is true", ->
-      atom.config.set 'vim-mode.startInInsertMode', true
+      settings.set 'startInInsertMode', true
       getVimState (_vimState, vim) ->
         vim.ensure classListContains: 'insert-mode'
 
