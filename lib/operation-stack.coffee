@@ -52,7 +52,7 @@ class OperationStack
       catch error
         if error.isOperatorError?()
           debug error.message
-          @vimState.resetNormalMode()
+          @vimState.setMode('reset')
           return
         else
           throw error

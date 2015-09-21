@@ -20,6 +20,10 @@ class ModeManager
       @mode is mode
 
   setMode: (mode, submode=null) ->
+    if mode is 'reset'
+      @editor.clearSelections()
+      mode = 'normal'
+
     switch mode
       when 'normal'
         @activateNormalMode()
@@ -55,9 +59,9 @@ class ModeManager
     s.clear(autoscroll: false) for s in @editor.getSelections()
     @vimState.dontPutCursorsAtEndOfLine()
 
+  # TODO: delete this in future.
   resetNormalMode: ->
-    @editor.clearSelections()
-    @setMode('normal')
+    @setMode('reset')
 
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)

@@ -147,7 +147,7 @@ class VimState
       'activate-linewise-visual-mode': => @setMode('visual', 'linewise')
       'activate-characterwise-visual-mode': => @setMode('visual', 'characterwise')
       'activate-blockwise-visual-mode': => @setMode('visual', 'blockwise')
-      'reset-normal-mode': => @resetNormalMode()
+      'reset-normal-mode': => @setMode('reset')
       'set-count': (e) => @count.set(e) # 0-9
       'set-register-name': => @register.setName() # "
       'reverse-selections': => @reverseSelections() # o
