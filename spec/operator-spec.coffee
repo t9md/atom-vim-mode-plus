@@ -1616,7 +1616,12 @@ describe "Operator", ->
 
   describe 'the R keybinding', ->
     beforeEach ->
-      set text: '12345\n67890', cursorBuffer: [0, 2]
+      set
+        text: """
+          12345
+          67890
+          """
+        cursorBuffer: [0, 2]
 
     it "enters replace mode and replaces characters", ->
       ensure 'R',

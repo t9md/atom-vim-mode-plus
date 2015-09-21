@@ -534,7 +534,7 @@ class ReplaceMode extends Insert
         for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
           cursor.moveLeft()
     else
-      @vimState.activateReplaceMode()
+      @vimState.activateInsertMode('replace')
 
   countChars: (char, string) ->
     string.split(char).length - 1
