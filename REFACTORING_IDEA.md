@@ -103,3 +103,16 @@ main   submode
 Normal null
 Insert null, replace
 Visual characterwise, linewise, blockwise
+
+|fr\to| n | i | ir | vc | vl | vb |
+|-----|---|---|----|----|--- |--- |
+| n   |   |   |    |    |    |    |
+| i   |   |   |    |    |    |    |
+| ir  |   |   |    |    |    |    |
+| vc  |   |   |    |    |    |    |
+| vl  |   |   |    |    |    |    |
+| vb  |   |   |    |    |    |    |
+
+### autocomplete-plus setting
+* suppressActivationForEditorClasses
+`vim-mode.normal-mode, vim-mode.visual-mode, vim-mode.operator-pending-mode, vim-mode.insert-mode.replace`
