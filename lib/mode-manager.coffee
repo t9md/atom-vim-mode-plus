@@ -6,7 +6,7 @@ _ = require 'underscore-plus'
 
 module.exports =
 class ModeManager
-  mode: null
+  mode: 'insert' # Native atom is not modal editor and its default is 'insert'
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -31,16 +31,20 @@ class ModeManager
     @vimState.statusBarManager.update(@mode, @submode)
 
   activateNormalMode: ->
-    @deactivateInsertMode()
-    @deactivateVisualMode() if @isMode('visual')
+    switch
+      when @isMode('insert') then @deactivateInsertMode()
+      when @isMode('visual') then @deactivateVisualMode()
+
+    @editorElement.component.setInputEnabled(false)
     @vimState.reset()
+
+    s.clear(autoscroll: false) for s in @editor.getSelections()
+    @vimState.dontPutCursorsAtEndOfLine()
     @setMode('normal')
 
-    @vimState.operationStack.clear()
-    for s in @editor.getSelections()
-      s.clear(autoscroll: false)
-    for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
-      c.moveLeft()
+  resetNormalMode: ->
+    @editor.clearSelections()
+    @activateNormalMode()
 
   activateInsertMode: (submode=null) ->
     @setMode('insert', submode)
@@ -73,9 +77,6 @@ class ModeManager
     @insertionCheckpoint ?= @editor.createCheckpoint()
 
   deactivateInsertMode: ->
-    return unless @mode in [null, 'insert']
-    @editorElement.component.setInputEnabled(false)
-    @editorElement.classList.remove('replace')
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
     changes = getChangesSinceCheckpoint(@editor.buffer, @insertionCheckpoint)
     @insertionCheckpoint = null
@@ -84,8 +85,9 @@ class ModeManager
     for c in @editor.getCursors() when not c.isAtBeginningOfLine()
       c.moveLeft()
 
-    @replaceModeSubscriptions?.dispose()
-    @replaceModeSubscriptions = null
+    if @isMode('insert', 'replace')
+      @replaceModeSubscriptions?.dispose()
+      @replaceModeSubscriptions = null
 
   deactivateVisualMode: ->
     {lastOperation} = @vimState
@@ -109,6 +111,10 @@ class ModeManager
       when 'linewise' then @selectLinewise(oldSubmode)
       when 'characterwise' then @selectCharacterwise(oldSubmode)
       when 'blockwise' then @selectBlockwise(oldSubmode)
+
+  activateOperatorPendingMode: ->
+    # @deactivateInsertMode()
+    @setMode('operator-pending')
 
   selectLinewise: (oldSubmode) ->
     unless oldSubmode is 'characterwise'
@@ -141,15 +147,6 @@ class ModeManager
     unless oldSubmode is 'characterwise'
       @selectCharacterwise()
     @vimState.operationStack.push new BlockwiseSelect(@vimState)
-
-  activateOperatorPendingMode: ->
-    # @deactivateInsertMode()
-    @setMode('operator-pending')
-
-  resetNormalMode: ->
-    @vimState.operationStack.clear()
-    @editor.clearSelections()
-    @activateNormalMode()
 
   hideCursors: ->
     for c in @editor.getCursors() when c.isVisible()
