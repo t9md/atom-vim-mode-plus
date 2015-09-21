@@ -30,7 +30,7 @@ class ModeManager
 
   activateNormalMode: ->
     @deactivateInsertMode()
-    @deactivateVisualMode()
+    @deactivateVisualMode() if @isMode('visual')
     @vimState.reset()
     @setMode('normal')
 
@@ -94,7 +94,6 @@ class ModeManager
       @replaceModeUndoListener = null
 
   deactivateVisualMode: ->
-    return unless @isMode('visual')
     {lastOperation} = @vimState
     restoreColumn = not (lastOperation?.isYank() or lastOperation?.isIndent())
     if restoreColumn and @isMode('visual', 'linewise')
@@ -106,11 +105,6 @@ class ModeManager
     if @isMode('visual', submode)
       @activateNormalMode()
       return
-
-    # [FIXME] comment out to evaluate necessity.
-    # Since I can't understand why this is necessary.
-    # unless @isMode('visual')
-    #   @deactivateInsertMode()
 
     oldSubmode = @submode
     # [NOTE] following operation depend operationStack
@@ -154,11 +148,8 @@ class ModeManager
       @selectCharacterwise()
     @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
-  # resetVisualMode: ->
-  #   @activateVisualMode(@submode)
-
   activateOperatorPendingMode: ->
-    @deactivateInsertMode()
+    # @deactivateInsertMode()
     @setMode('operator-pending')
 
   resetNormalMode: ->
