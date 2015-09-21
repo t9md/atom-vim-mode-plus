@@ -35,21 +35,12 @@ class VimState
   # Mode handling is delegated to modeManager
   delegatingMethods = [
     'isMode'
-    'activateNormalMode'
-    'activateInsertMode'
-    'activateOperatorPendingMode'
-    'activateReplaceMode'
-    'replaceModeUndo'
-    'deactivateInsertMode'
-    'deactivateVisualMode'
-    'activateVisualMode'
+    'setMode'
+    'replaceModeBackspace'
     'resetNormalMode'
     'setInsertionCheckpoint'
   ]
-  delegatingProperties = [
-    'mode'
-    'submode'
-  ]
+  delegatingProperties = ['mode', 'submode']
   @delegatesProperty delegatingProperties..., toProperty: 'modeManager'
   @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
 
@@ -88,19 +79,16 @@ class VimState
     @editorElement.classList.add("vim-mode")
     @init()
     if settings.get('startInInsertMode')
-      @activateInsertMode()
+      @setMode('insert')
     else
-      @activateNormalMode()
-
-  # setCursorStyle ({width, left})
+      @setMode('normal')
 
   destroy: ->
     return if @destroyed
     @destroyed = true
     @subscriptions.dispose()
     if @editor.isAlive()
-      @activateNormalMode() # reset to base mdoe.
-      # @deactivateInsertMode()
+      @setMode('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
       @editorElement.classList.remove("vim-mode")
       @editorElement.classList.remove("normal-mode")
@@ -155,16 +143,16 @@ class VimState
   # Initialize all of vim-mode' commands.
   init: ->
     @registerCommands
-      'activate-normal-mode': => @activateNormalMode()
-      'activate-linewise-visual-mode': => @activateVisualMode('linewise')
-      'activate-characterwise-visual-mode': => @activateVisualMode('characterwise')
-      'activate-blockwise-visual-mode': => @activateVisualMode('blockwise')
+      'activate-normal-mode': => @setMode('normal')
+      'activate-linewise-visual-mode': => @setMode('visual', 'linewise')
+      'activate-characterwise-visual-mode': => @setMode('visual', 'characterwise')
+      'activate-blockwise-visual-mode': => @setMode('visual', 'blockwise')
       'reset-normal-mode': => @resetNormalMode()
       'set-count': (e) => @count.set(e) # 0-9
       'set-register-name': => @register.setName() # "
       'reverse-selections': => @reverseSelections() # o
       'undo': => @undo() # u
-      'replace-mode-backspace': => @replaceModeUndo()
+      'replace-mode-backspace': => @replaceModeBackspace()
 
     @registerOperationCommands InsertMode, [
       'insert-register'
@@ -239,7 +227,6 @@ class VimState
       'repeat', 'mark', 'replace',
       'replace-with-register'
       'toggle-line-comments'
-      'operate-on-inner-word'
     ]
 
     @registerOperationCommands Scroll, [
@@ -277,7 +264,7 @@ class VimState
   # -------------------------
   undo: ->
     @editor.undo()
-    @activateNormalMode()
+    @setMode('normal')
 
   reverseSelections: ->
     reversed = not @editor.getLastSelection().isReversed()
@@ -301,10 +288,10 @@ class VimState
       if @isMode('normal')
         @dontPutCursorsAtEndOfLine()
       else if @isMode('visual')
-        @activateNormalMode()
+        @setMode('normal')
     else
       if @isMode('normal')
-        @activateVisualMode('characterwise')
+        @setMode('visual', 'characterwise')
       else
         # When cursor is added selection is empty
         # using editor.onDidAddCursor not work since at the timing event callbacked,

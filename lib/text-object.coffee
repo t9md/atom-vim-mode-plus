@@ -27,7 +27,7 @@ class TextObject extends Base
     for selection in @editor.getSelections()
       callback selection
     if @isLinewise() and @vimState.isMode('visual', ['characterwise', 'blockwise'])
-      @vimState.activateVisualMode('linewise')
+      @vimState.setMode('visual', 'linewise')
     @editor.getSelections().some((s) -> not s.isEmpty())
 
 # Word

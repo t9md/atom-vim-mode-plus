@@ -19,35 +19,47 @@ class ModeManager
     else
       @mode is mode
 
-  setMode: (@mode, @submode=null) ->
+  setMode: (mode, submode=null) ->
+    switch mode
+      when 'normal'
+        @activateNormalMode()
+      when 'insert'
+        @activateInsertMode(submode)
+      when 'visual'
+        if @isMode('visual', submode)
+          return @setMode('normal')
+        @activateVisualMode(submode)
+      when 'operator-pending'
+        null # This is just placeholder, nothing to do without updating selector.
+
+    @mode = mode
+    @submode = submode
+    @updateModeSelector(mode, submode)
+    @vimState.statusBarManager.update(mode, submode)
+
+  updateModeSelector: (newMode, newSubmode=null) ->
     for mode in ['normal', 'insert', 'visual', 'operator-pending']
-      method = if mode is @mode then 'add' else 'remove'
+      method = if mode is newMode then 'add' else 'remove'
       @editorElement.classList[method] "#{mode}-mode"
 
     for submode in ['characterwise', 'linewise', 'blockwise', 'replace']
-      method = if submode is @submode then 'add' else 'remove'
+      method = if submode is newSubmode then 'add' else 'remove'
       @editorElement.classList[method] "#{submode}"
-
-    @vimState.statusBarManager.update(@mode, @submode)
 
   activateNormalMode: ->
     switch
       when @isMode('insert') then @deactivateInsertMode()
       when @isMode('visual') then @deactivateVisualMode()
-
     @editorElement.component.setInputEnabled(false)
     @vimState.reset()
-
     s.clear(autoscroll: false) for s in @editor.getSelections()
     @vimState.dontPutCursorsAtEndOfLine()
-    @setMode('normal')
 
   resetNormalMode: ->
     @editor.clearSelections()
-    @activateNormalMode()
+    @setMode('normal')
 
   activateInsertMode: (submode=null) ->
-    @setMode('insert', submode)
     @editorElement.component.setInputEnabled(true)
     @setInsertionCheckpoint()
 
@@ -66,7 +78,7 @@ class ModeManager
     @replaceModeSubscriptions.add new Disposable =>
       @replacedCharsBySelection = null
 
-  replaceModeUndo: ->
+  replaceModeBackspace: ->
     for s in @editor.getSelections()
       char = @replacedCharsBySelection[s.id].pop()
       if char? # char maybe empty char ''.
@@ -98,23 +110,16 @@ class ModeManager
       s.cursor.moveLeft()
 
   activateVisualMode: (submode) ->
-    if @isMode('visual', submode)
-      @activateNormalMode()
-      return
-
     oldSubmode = @submode
-    # [NOTE] following operation depend operationStack
+    # [FIXME] following operation depend operationStack
     # So @setMode at first is important since operationStack do
     # special cursor treatment depending on current mode.
-    @setMode('visual', submode)
+    @mode = 'visual'
+    @submode = submode
     switch submode
       when 'linewise' then @selectLinewise(oldSubmode)
       when 'characterwise' then @selectCharacterwise(oldSubmode)
       when 'blockwise' then @selectBlockwise(oldSubmode)
-
-  activateOperatorPendingMode: ->
-    # @deactivateInsertMode()
-    @setMode('operator-pending')
 
   selectLinewise: (oldSubmode) ->
     unless oldSubmode is 'characterwise'

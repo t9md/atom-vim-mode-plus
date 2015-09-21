@@ -107,7 +107,7 @@ class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   @extend()
   delegateTo: 'DeleteToLastCharacterOfLine'
   execute: ->
-    @vimState.activateNormalMode()
+    @vimState.setMode('normal')
     point = @getTop().cursor.getBufferPosition()
     @new(@delegateTo).execute()
     @editor.clearSelections()
@@ -136,8 +136,8 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
 
     for selection in @editor.getSelections()
       adjustCursor(selection)
-    @vimState.activateNormalMode()
-    @vimState.activateInsertMode()
+    @vimState.setMode('normal')
+    @vimState.setMode('insert')
 
     if @command is 'A' and  cursorsAdjusted.length
       cursor.moveRight() for cursor in cursorsAdjusted
@@ -150,7 +150,7 @@ class BlockwiseEscape extends VisualBlockwise
   @extend()
   execute: ->
     @clearTail()
-    @vimState.activateNormalMode()
+    @vimState.setMode('normal')
     @editor.clearSelections()
 
 class BlockwiseSelect extends VisualBlockwise
