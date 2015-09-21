@@ -1,6 +1,6 @@
 # Note by t9md
 
-## Vim Mode package [![Build Status](https://travis-ci.org/t9md/vim-mode.svg)](https://travis-ci.org/t9md/vim-mode)
+# vim-mode-plus [![Build Status](https://travis-ci.org/t9md/atom-vim-mode-plus.svg)](https://travis-ci.org/t9md/atom-vim-mode-plus)
 
 # Gifs
 
