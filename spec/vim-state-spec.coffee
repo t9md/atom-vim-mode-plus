@@ -3,6 +3,8 @@ _ = require 'underscore-plus'
 {getVimState} = require './spec-helper'
 settings = require '../lib/settings'
 
+# TODO
+# Thorough CSS class check should be done in this file.
 describe "VimState", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
