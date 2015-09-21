@@ -1,6 +1,6 @@
-# Refactoring status: 20%
+# Refactoring status: 80%
 _ = require 'underscore-plus'
-{selectLines, debug} = require './utils'
+{selectLines} = require './utils'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 {Range, CompositeDisposable, Disposable} = require 'atom'
 
@@ -62,19 +62,22 @@ class ModeManager
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)
     @setInsertionCheckpoint()
+    if submode is 'replace'
+      @activateReplaceMode()
 
-    return unless submode is 'replace'
+  activateReplaceMode: ->
     @replacedCharsBySelection = {}
     @replaceModeSubscriptions ?= new CompositeDisposable
 
     @replaceModeSubscriptions.add @editor.onWillInsertText ({text, cancel}) =>
+      cancel()
       for s in @editor.getSelections()
         for char in text.split('') ? []
           unless char is "\n"
             s.selectRight() unless s.cursor.isAtEndOfLine()
           (@replacedCharsBySelection[s.id] ?= []).push s.getText()
           s.insertText(char)
-      cancel()
+
     @replaceModeSubscriptions.add new Disposable =>
       @replacedCharsBySelection = null
 
