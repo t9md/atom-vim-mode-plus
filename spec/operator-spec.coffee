@@ -1104,7 +1104,7 @@ describe "Operator", ->
       vimState.input.view.cancel()
       ensure
         text: '12\n34\n\n'
-        mode: 'visual'
+        mode: ['visual', 'characterwise']
 
     it "replaces a single character with a line break", ->
       keystroke 'r'
@@ -1620,7 +1620,7 @@ describe "Operator", ->
 
     it "enters replace mode and replaces characters", ->
       ensure 'R',
-        classListContains: ['insert-mode', 'replace-mode']
+        mode: ['insert', 'replace']
       editor.insertText "ab"
       ensure 'escape',
         text: "12ab5\n67890"
@@ -1628,7 +1628,8 @@ describe "Operator", ->
         mode: 'normal'
 
     it "continues beyond end of line as insert", ->
-      ensure 'R', classListContains: ['insert-mode', 'replace-mode']
+      ensure 'R',
+        mode: ['insert', 'replace']
       editor.insertText "abcde"
       ensure 'escape', text: '12abcde\n67890'
 
@@ -1674,7 +1675,7 @@ describe "Operator", ->
       ensure '.', text: "12b4b\n67b90", cursor: [0, 4]
 
     it "doesn't replace a character if newline is entered", ->
-      ensure 'R', classListContains: ['insert-mode', 'replace-mode']
+      ensure 'R', mode: ['insert', 'replace']
       editor.insertText "\n"
       ensure 'escape', text: "12\n345\n67890"
 

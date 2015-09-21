@@ -18,8 +18,7 @@ describe "VimState", ->
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->
-      ensure
-        classListContains: ['vim-mode', 'normal-mode']
+      ensure mode: 'normal'
 
     it "puts the editor in insert-mode if startInInsertMode is true", ->
       settings.set 'startInInsertMode', true
@@ -137,8 +136,7 @@ describe "VimState", ->
 
     describe "the R keybinding", ->
       it "puts the editor into replace mode", ->
-        ensure 'R',
-          classListContains: ['insert-mode', 'replace-mode']
+        ensure 'R', mode: ['insert', 'replace']
 
     describe "with content", ->
       beforeEach ->

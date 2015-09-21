@@ -1,6 +1,16 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
 
+supportedModeClass = [
+  'normal-mode'
+  'visual-mode'
+  'insert-mode'
+  'replace'
+  'linewise'
+  'blockwise'
+  'characterwise'
+]
+
 packageName = 'vim-mode-plus'
 class SpecError
   constructor: (@message) ->
@@ -206,10 +216,17 @@ getVim = (vimState) ->
           expect(c).toHaveBeenCalled()
 
     if o.mode?
-      expect(vimState.isMode(toArray(o.mode)...)).toBe(true)
+      currentMode = toArray(o.mode)
+      expect(vimState.isMode(currentMode...)).toBe(true)
 
-    if o.submode?
-      expect(vimState.submode).toEqual o.submode
+      currentMode[0] = "#{currentMode[0]}-mode"
+      currentMode = currentMode.filter((m) -> m)
+      expect(@editorElement.classList.contains('vim-mode')).toBe(true)
+      for m in currentMode
+        expect(@editorElement.classList.contains(m)).toBe(true)
+      shouldNotContainClasses = _.difference(supportedModeClass, currentMode)
+      for m in shouldNotContainClasses
+        expect(@editorElement.classList.contains(m)).toBe(false)
 
     if o.classListContains?
       for klass in toArray(o.classListContains)
