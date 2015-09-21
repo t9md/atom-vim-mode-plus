@@ -108,7 +108,10 @@ class VimState
     @editorElement = null
     @lastOperation = null
     @hover.destroy()
+    @hover = null
     @input.destroy()
+    @input = null
+    @modeManager = null
     @emitter.emit 'did-destroy'
 
   onDidFailToCompose: (fn) ->
