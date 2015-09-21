@@ -6,8 +6,8 @@ describe "Operator", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    getVimState (_vimState, vim) ->
-      vimState = _vimState
+    getVimState (state, vim) ->
+      vimState = state
       {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
@@ -128,7 +128,7 @@ describe "Operator", ->
 
     it "deletes the character to the right and enters insert mode", ->
       ensure 's',
-        classListContains: 'insert-mode'
+        mode: 'insert'
         text: '02345'
         cursor: [0, 1]
         register: '1'
@@ -154,7 +154,7 @@ describe "Operator", ->
 
       it "deletes the selected characters and enters insert mode", ->
         ensure
-          classListContains: 'insert-mode'
+          mode: 'insert'
           text: '0345'
           cursor: [0, 1]
           register: '12'
@@ -167,7 +167,7 @@ describe "Operator", ->
 
     it "deletes the entire line and enters insert mode", ->
       ensure 'S',
-        classListContains: 'insert-mode'
+        mode: 'insert'
         text: "12345\n\nABCDE"
         register: {'"': text: 'abcde\n', type: 'linewise'}
 
@@ -209,8 +209,7 @@ describe "Operator", ->
   describe "the d keybinding", ->
     it "enters operator-pending mode", ->
       ensure 'd',
-        classListContains: 'operator-pending-mode'
-        classListNotContains: 'normal-mode'
+        mode: 'operator-pending'
 
     describe "when followed by a d", ->
       it "deletes the current line and exits operator-pending mode", ->
@@ -219,8 +218,7 @@ describe "Operator", ->
           text: '12345\n\nABCDE'
           cursor: [1, 0]
           register: 'abcde\n'
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "deletes the last line", ->
         set text: "12345\nabcde\nABCDE", cursor: [2, 1]
@@ -255,8 +253,7 @@ describe "Operator", ->
         ensure 'dw',
           text: 'abcd abc'
           cursor: [0, 5]
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
       it "deletes to the beginning of the next word", ->
         set text: 'abcd efg', cursor: [0, 2]
@@ -269,14 +266,13 @@ describe "Operator", ->
         set text: "12345 abcde ABCDE", cursor: [0, 9]
 
         ensure 'd',
-          classListContains: 'operator-pending-mode'
+          mode: 'operator-pending'
 
         ensure 'iw',
           text: "12345  ABCDE"
           cursor: [0, 6]
           register: 'abcde'
-          classListContains: 'normal-mode'
-          classListNotContains: 'operator-pending-mode'
+          mode: 'normal'
 
     describe "when followed by a j", ->
       originalText = "12345\nabcde\nABCDE\n"
@@ -409,8 +405,7 @@ describe "Operator", ->
           ensure 'cc',
             text: "12345\n  \nABCDE"
             cursor: [1, 2]
-            classListNotContains: 'normal-mode'
-            classListContains: 'insert-mode'
+            mode: 'insert'
 
         it "is repeatable", ->
           keystroke 'cc'
@@ -431,8 +426,7 @@ describe "Operator", ->
           ensure 'cc',
             text: "12345\nabcde\n\n"
             cursor: [2, 0]
-            classListNotContains: 'normal-mode'
-            classListContains: 'insert-mode'
+            mode: 'insert'
 
       describe "when the cursor is on the only line", ->
         it "deletes the line's content and enters insert mode", ->
@@ -440,8 +434,7 @@ describe "Operator", ->
           ensure 'cc',
             text: "\n"
             cursor: [0, 0]
-            classListNotContains: 'normal-mode'
-            classListContains: 'insert-mode'
+            mode: 'insert'
 
     describe "when followed by i w", ->
       it "undo's and redo's completely", ->
@@ -449,13 +442,13 @@ describe "Operator", ->
         ensure 'ciw',
           text: "12345\n\nABCDE"
           cursor: [1, 0]
-          classListContains: 'insert-mode'
+          mode: 'insert'
 
         # Just cannot get "typing" to work correctly in test.
         set text: "12345\nfg\nABCDE"
         ensure 'escape',
           text: "12345\nfg\nABCDE"
-          classListContains: 'normal-mode'
+          mode: 'normal'
         ensure 'u', text: "12345\nabcde\nABCDE"
         ensure [ctrl: 'r'], text: "12345\nfg\nABCDE"
 
@@ -504,8 +497,7 @@ describe "Operator", ->
       ensure
         text: "0\n"
         cursor: [0, 1]
-        classListNotContains: 'normal-mode'
-        classListContains: 'insert-mode'
+        mode: 'insert'
 
   describe "the y keybinding", ->
     beforeEach ->
@@ -811,7 +803,7 @@ describe "Operator", ->
       ensure
         text: "  abc\n  \n  012\n"
         cursor: [1, 2]
-        classListContains: 'insert-mode'
+        mode: 'insert'
 
     it "is repeatable", ->
       set
@@ -841,7 +833,7 @@ describe "Operator", ->
     it "switches to insert and adds a newline above the current one", ->
       ensure 'o',
         text: "abc\n  012\n  \n"
-        classListContains: 'insert-mode'
+        mode: 'insert'
         cursor: [2, 2]
 
     # This works in practice, but the editor doesn't respect the indentation
@@ -872,7 +864,7 @@ describe "Operator", ->
         keystroke 'a'
 
       it "switches to insert mode and shifts to the right", ->
-        ensure cursor: [0, 1], classListContains: 'insert-mode'
+        ensure cursor: [0, 1], mode: 'insert'
 
     describe "at the end of the line", ->
       beforeEach ->
@@ -890,7 +882,7 @@ describe "Operator", ->
       it "switches to insert mode at the end of the line", ->
         set cursor: [0, 0]
         ensure 'A',
-          classListContains: 'insert-mode'
+          mode: 'insert'
           cursor: [0, 2]
 
       it "repeats always as insert at the end of the line", ->
@@ -902,7 +894,7 @@ describe "Operator", ->
 
         ensure '.',
           text: "11abc\n22abc\n"
-          classListNotContains: 'insert-mode'
+          mode: 'normal'
           cursor: [1, 4]
 
   describe "the I keybinding", ->
@@ -914,13 +906,13 @@ describe "Operator", ->
         set cursor: [0, 2]
         ensure 'I',
           cursor: [0, 0]
-          classListContains: 'insert-mode'
+          mode: 'insert'
 
       it "switches to insert mode after leading whitespace", ->
         set cursor: [1, 4]
         ensure 'I',
           cursor: [1, 2]
-          classListContains: 'insert-mode'
+          mode: 'insert'
 
 
       it "repeats always as insert at the first character of the line", ->
@@ -932,7 +924,7 @@ describe "Operator", ->
         ensure '.',
           text: "abc11\n  abc22\n"
           cursor: [1, 4]
-          classListNotContains: 'insert-mode'
+          mode: 'normal'
 
   describe "the J keybinding", ->
     beforeEach ->
@@ -1005,7 +997,7 @@ describe "Operator", ->
 
       it "indents the current line and exits visual mode", ->
         ensure
-          classListContains: 'normal-mode'
+          mode: 'normal'
           text: "  12345\nabcde\nABCDE"
           selectedBufferRange: [[0, 2], [0, 2]]
 
@@ -1038,7 +1030,7 @@ describe "Operator", ->
     describe "in visual mode", ->
       it "indents the current line and exits visual mode", ->
         ensure 'V<',
-          classListContains: 'normal-mode'
+          mode: 'normal'
           text: "12345\n  abcde\nABCDE"
           selectedBufferRange: [[0, 0], [0, 0]]
 
@@ -1101,18 +1093,18 @@ describe "Operator", ->
 
     it "does nothing when cancelled", ->
       ensure 'r',
-        classListContains: 'operator-pending-mode'
+        mode: 'operator-pending'
       vimState.input.view.cancel()
       ensure
         text: '12\n34\n\n'
-        classListContains: 'normal-mode'
+        mode: 'normal'
 
     it "remain visual-mode when cancelled", ->
       keystroke 'vr'
       vimState.input.view.cancel()
       ensure
         text: '12\n34\n\n'
-        classListContains: 'visual-mode'
+        mode: 'visual'
 
     it "replaces a single character with a line break", ->
       keystroke 'r'
@@ -1633,8 +1625,7 @@ describe "Operator", ->
       ensure 'escape',
         text: "12ab5\n67890"
         cursor: [0, 3]
-        classListContains: 'normal-mode'
-        classListNotContains: ['insert-mode', 'replace-mode']
+        mode: 'normal'
 
     it "continues beyond end of line as insert", ->
       ensure 'R', classListContains: ['insert-mode', 'replace-mode']

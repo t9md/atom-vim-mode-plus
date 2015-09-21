@@ -7,8 +7,8 @@ describe "VimState", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    getVimState (_vimState, vim) ->
-      vimState = _vimState
+    getVimState (state, vim) ->
+      vimState = state
       {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
@@ -21,8 +21,8 @@ describe "VimState", ->
 
     it "puts the editor in insert-mode if startInInsertMode is true", ->
       settings.set 'startInInsertMode', true
-      getVimState (_vimState, vim) ->
-        vim.ensure classListContains: 'insert-mode'
+      getVimState (state, vim) ->
+        vim.ensure mode: 'insert'
 
   describe "::destroy", ->
     it "re-enables text input on the editor", ->
@@ -87,9 +87,7 @@ describe "VimState", ->
 
       it "puts the editor into visual characterwise mode", ->
         ensure
-          submode: 'characterwise'
-          classListContains: 'vim-mode'
-          classListNotContains: 'normal-mode'
+          mode: ['visual', 'characterwise']
 
     describe "the V keybinding", ->
       beforeEach ->
@@ -98,10 +96,7 @@ describe "VimState", ->
           cursor: [0, 0]
 
       it "puts the editor into visual linewise mode", ->
-        ensure 'V',
-          submode: 'linewise'
-          classListContains: 'visual-mode'
-          classListNotContains: 'normal-mode'
+        ensure 'V', mode: ['visual', 'linewise']
 
       it "selects the current line", ->
         ensure 'V',
@@ -110,10 +105,7 @@ describe "VimState", ->
     describe "the ctrl-v keybinding", ->
       it "puts the editor into visual blockwise mode", ->
         set text: "012345\n\nabcdef", cursor: [0, 0]
-        ensure [ctrl: 'v'],
-          submode: 'blockwise'
-          classListContains: 'visual-mode'
-          classListNotContains: 'normal-mode'
+        ensure [ctrl: 'v'], mode: ['visual', 'blockwise']
 
     describe "selecting text", ->
       beforeEach ->
@@ -124,8 +116,7 @@ describe "VimState", ->
 
         atom.commands.dispatch(editorElement, "core:select-right")
         ensure
-          mode: 'visual'
-          submode: 'characterwise'
+          mode: ['visual', 'characterwise']
           selectedbufferrange: [[0, 0], [0, 1]]
 
       it "handles the editor being destroyed shortly after selecting text", ->
@@ -140,15 +131,12 @@ describe "VimState", ->
 
     describe "the i keybinding", ->
       it "puts the editor into insert mode", ->
-        ensure 'i',
-          classListContains: 'insert-mode'
-          classListNotContains: 'normal-mode'
+        ensure 'i', mode: 'insert'
 
     describe "the R keybinding", ->
       it "puts the editor into replace mode", ->
         ensure 'R',
           classListContains: ['insert-mode', 'replace-mode']
-          classListNotContains: 'normal-mode'
 
     describe "with content", ->
       beforeEach ->
@@ -203,13 +191,11 @@ describe "VimState", ->
 
     it "puts the editor into normal mode when <escape> is pressed", ->
       escape 'escape',
-        classListContains: 'normal-mode'
-        classListNotContains: ['insert-mode', 'visual-mode']
+        mode: 'normal'
 
     it "puts the editor into normal mode when <ctrl-c> is pressed", ->
       ensure [{platform: 'platform-darwin'}, {ctrl: 'c'}],
-        classListContains: 'normal-mode'
-        classListNotContains: ['insert-mode', 'visual-mode']
+        mode: 'normal'
 
   describe "replace-mode", ->
     describe "with content", ->
@@ -235,13 +221,11 @@ describe "VimState", ->
 
     it "puts the editor into normal mode when <escape> is pressed", ->
       ensure ['R', 'escape'],
-        classListContains: 'normal-mode'
-        classListNotContains: ['insert-mode', 'replace-mode', 'visual-mode']
+        mode: 'normal'
 
     it "puts the editor into normal mode when <ctrl-c> is pressed", ->
       ensure [{platform: 'platform-darwin'}, 'R', {ctrl: 'c'}],
-        classListContains: 'normal-mode'
-        classListNotContains: ['insert-mode', 'replace-mode', 'visual-mode']
+        mode: 'normal'
 
   describe "visual-mode", ->
     beforeEach ->
@@ -258,8 +242,7 @@ describe "VimState", ->
     it "puts the editor into normal mode when <escape> is pressed", ->
       ensure 'escape',
         cursorBuffer: [0, 4]
-        classListContains: 'normal-mode'
-        classListNotContains: 'visual-mode'
+        mode: 'normal'
 
     it "puts the editor into normal mode when <escape> is pressed on selection is reversed", ->
       ensure selectedText: 't'
@@ -267,7 +250,7 @@ describe "VimState", ->
         selectedText: 'e t'
         selectionIsReversed: true
       ensure 'escape',
-        classListContains: 'normal-mode'
+        mode: 'normal'
         cursorBuffer: [0, 2]
 
     describe "motions", ->
@@ -350,42 +333,28 @@ describe "VimState", ->
           text: "line one\nline two\nline three\n"
           cursor: cursorPosition
 
-        ensure 'escape',
-          mode: 'normal'
-          classListContains: 'normal-mode'
+        ensure 'escape', mode: 'normal'
 
       describe "activateVisualMode with same type puts the editor into normal mode", ->
         describe "characterwise: vv", ->
           it "activating twice make editor return to normal mode ", ->
             ensure 'v',
-              submode: 'characterwise'
-              classListContains: 'visual-mode'
-              classListNotContains: 'normal-mode'
-            ensure 'v',
-              mode: 'normal'
-              classListContains: 'normal-mode'
-              cursor: cursorPosition
+              mode: ['visual', 'characterwise']
+            ensure 'v', cursor: cursorPosition, mode: 'normal'
 
         describe "linewise: VV", ->
           it "activating twice make editor return to normal mode ", ->
             ensure 'V',
-              submode: 'linewise'
-              classListContains: 'visual-mode'
-              classListNotContains: 'normal-mode'
+              mode: ['visual', 'linewise']
             ensure 'V',
               mode: 'normal'
-              classListContains: 'normal-mode'
               cursor: cursorPosition
 
         describe "blockwise: ctrl-v twice", ->
           it "activating twice make editor return to normal mode ", ->
-            ensure [ctrl: 'v'],
-              submode: 'blockwise'
-              classListContains: 'visual-mode'
-              classListNotContains: 'normal-mode'
+            ensure [ctrl: 'v'], mode: ['visual', 'blockwise']
             ensure [ctrl: 'v'],
               mode: 'normal'
-              classListContains: 'normal-mode'
               cursor: cursorPosition
 
       describe "change submode within visualmode", ->
@@ -396,30 +365,15 @@ describe "VimState", ->
             addCursor: [2, 5]
 
         it "can change submode within visual mode", ->
-          ensure 'v',
-            submode: 'characterwise'
-            classListContains: 'visual-mode'
-            classListNotContains: 'normal-mode'
-          ensure 'V',
-            submode: 'linewise'
-            classListContains: 'visual-mode'
-            classListNotContains: 'normal-mode'
-          ensure [ctrl: 'v'],
-            submode: 'blockwise'
-            classListContains: 'visual-mode'
-            classListNotContains: 'normal-mode'
-          ensure 'v',
-            submode: 'characterwise'
-            classListContains: 'visual-mode'
-            classListNotContains: 'normal-mode'
+          ensure 'v'        , mode: ['visual', 'characterwise']
+          ensure 'V'        , mode: ['visual', 'linewise']
+          ensure [ctrl: 'v'], mode: ['visual', 'blockwise']
+          ensure 'v'        , mode: ['visual', 'characterwise']
 
         it "recover original range when shift from linewise to characterwise", ->
-          ensure 'viw',
-            selectedText: ['one', 'three']
-          ensure 'V',
-            selectedText: ["line one\n", "line three\n"]
-          ensure 'v',
-            selectedText: ["one", "three"]
+          ensure 'viw', selectedText: ['one', 'three']
+          ensure 'V', selectedText: ["line one\n", "line three\n"]
+          ensure 'v', selectedText: ["one", "three"]
 
   describe "marks", ->
     beforeEach -> set text: "text in line 1\ntext in line 2\ntext in line 3"

@@ -5,8 +5,7 @@ describe "Insert mode commands", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    getVimState (_vimState, vim) ->
-      vimState = _vimState
+    getVimState (vimState, vim) ->
       {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
