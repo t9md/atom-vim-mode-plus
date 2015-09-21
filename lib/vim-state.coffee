@@ -99,7 +99,8 @@ class VimState
     @destroyed = true
     @subscriptions.dispose()
     if @editor.isAlive()
-      @deactivateInsertMode()
+      @activateNormalMode() # reset to base mdoe.
+      # @deactivateInsertMode()
       @editorElement.component?.setInputEnabled(true)
       @editorElement.classList.remove("vim-mode")
       @editorElement.classList.remove("normal-mode")
@@ -270,6 +271,7 @@ class VimState
     @count.reset()
     @register.reset()
     @hover.reset()
+    @operationStack.clear()
 
   # Miscellaneous commands
   # -------------------------
@@ -322,8 +324,7 @@ class VimState
   dontPutCursorsAtEndOfLine: ->
     # if @editor.getPath()?.endsWith 'tryit.coffee'
     #   return
-    for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
-      continue if cursor.isAtBeginningOfLine()
-      {goalColumn} = cursor
-      cursor.moveLeft()
-      cursor.goalColumn = goalColumn
+    for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
+      {goalColumn} = c
+      c.moveLeft()
+      c.goalColumn = goalColumn
