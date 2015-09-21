@@ -9,7 +9,6 @@ describe "Prefixes", ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      vimState.activateNormalMode()
       vimState.resetNormalMode()
       {set, ensure, keystroke} = vim
 
