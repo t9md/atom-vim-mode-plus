@@ -5,8 +5,8 @@ describe "Scrolling", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    getVimState (_vimState, vim) ->
-      vimState = _vimState
+    getVimState (state, vim) ->
+      vimState = state
       {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()

@@ -6,8 +6,8 @@ describe "Motion", ->
   [set, ensure, keystroke, editor, editorElement, vimState, vim, config] = []
 
   beforeEach ->
-    getVimState (_vimState, _vim, config) ->
-      vimState = _vimState
+    getVimState (state, _vim) ->
+      vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
       vimState.activateNormalMode()
       vimState.resetNormalMode()
@@ -1273,7 +1273,7 @@ describe "Motion", ->
       ensure '2,', cursor: [0, 2]
 
     it "shares the most recent find/till command with other editors", ->
-      getVimState (_vimState, other) ->
+      getVimState (otherVimState, other) ->
         set
           text: "a baz bar\n"
           cursor: [0, 0]
