@@ -2,7 +2,7 @@
 _ = require 'underscore-plus'
 {selectLines, debug} = require './utils'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
-{Range} = require 'atom'
+{Range, CompositeDisposable} = require 'atom'
 
 module.exports =
 class ModeManager
@@ -10,6 +10,7 @@ class ModeManager
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
+    @disposables = new CompositeDisposable
 
   isMode: (mode, submode=null) ->
     if submode
@@ -20,12 +21,13 @@ class ModeManager
 
   setMode: (@mode, @submode=null) ->
     for mode in ['normal', 'insert', 'visual', 'operator-pending']
-      @editorElement.classList.remove "#{mode}-mode"
-    @editorElement.classList.add "#{@mode}-mode"
+      method = if mode is @mode then 'add' else 'remove'
+      @editorElement.classList[method] "#{mode}-mode"
+
     for submode in ['characterwise', 'linewise', 'blockwise', 'replace']
-      @editorElement.classList.remove submode
-    if @submode
-      @editorElement.classList.add @submode
+      method = if submode is @submode then 'add' else 'remove'
+      @editorElement.classList[method] "#{submode}"
+
     @vimState.statusBarManager.update(@mode, @submode)
 
   activateNormalMode: ->
@@ -35,10 +37,10 @@ class ModeManager
     @setMode('normal')
 
     @vimState.operationStack.clear()
-    selection.clear(autoscroll: false) for selection in @editor.getSelections()
-    for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
-      unless cursor.isAtBeginningOfLine()
-        cursor.moveLeft()
+    for s in @editor.getSelections()
+      s.clear(autoscroll: false)
+    for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
+      c.moveLeft()
 
   activateInsertMode: (submode=null) ->
     @setMode('insert', submode)
@@ -83,8 +85,8 @@ class ModeManager
     @insertionCheckpoint = null
     if (item = @vimState.history[0]) and item.isInsert()
       item.confirmChanges(changes)
-    for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
-      cursor.moveLeft()
+    for c in @editor.getCursors() when not c.isAtBeginningOfLine()
+      c.moveLeft()
     if @replaceModeListener?
       @replaceModeListener.dispose()
       @vimState.subscriptions.remove @replaceModeListener
