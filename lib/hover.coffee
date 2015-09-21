@@ -2,7 +2,7 @@
 
 {debug} = require './utils'
 emoji = require 'emoji-images'
-emojiFolder = 'atom://vim-mode/node_modules/emoji-images/pngs'
+emojiFolder = 'atom://vim-mode-plus/node_modules/emoji-images/pngs'
 settings = require './settings'
 
 class Hover

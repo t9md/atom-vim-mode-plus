@@ -1,6 +1,7 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
 
+packageName = 'vim-mode-plus'
 class SpecError
   constructor: (@message) ->
     @name = 'SpecError'
@@ -14,7 +15,7 @@ getVimState = (args...) ->
   editor = null
 
   waitsForPromise ->
-    atom.packages.activatePackage('vim-mode')
+    atom.packages.activatePackage(packageName)
 
   waitsForPromise ->
     if file
@@ -23,8 +24,9 @@ getVimState = (args...) ->
       editor = e
 
   runs ->
-    pack = atom.packages.getActivePackage('vim-mode')
+    pack = atom.packages.getActivePackage(packageName)
     main = pack.mainModule
+    {config} = pack.mainModule
     vimState = main.getEditorState(editor)
     {editorElement} = vimState
     editorElement.addEventListener 'keydown', (e) ->

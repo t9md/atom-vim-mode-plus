@@ -66,7 +66,7 @@ describe "Operator", ->
       describe "with vim-mode.wrapLeftRightMotion", ->
         beforeEach ->
           set text: 'abc\n012345\n\nxyz', cursor: [1, 4]
-          atom.config.set('vim-mode.wrapLeftRightMotion', true)
+          settings.set('wrapLeftRightMotion', true)
 
         it "deletes a character", ->
           # copy of the earlier test because wrapLeftRightMotion should not affect it
@@ -78,7 +78,7 @@ describe "Operator", ->
           ensure 'x', text: 'abc\n\n\nxyz'     , cursor: [1, 0], register: '0'
 
         it "deletes multiple characters and newlines with a count", ->
-          atom.config.set('vim-mode.wrapLeftRightMotion', true)
+          settings.set('wrapLeftRightMotion', true)
           ensure '2x', text: 'abc\n0123\n\nxyz', cursor: [1, 3], register: '45'
           set cursor: [0, 1]
           ensure '3x', text: 'a0123\n\nxyz', cursor: [0, 1], register: 'bc\n'
@@ -89,11 +89,11 @@ describe "Operator", ->
         set text: "abc\n012345\n\nxyz", cursor: [2, 0]
 
       it "deletes nothing on an empty line when vim-mode.wrapLeftRightMotion is false", ->
-        atom.config.set('vim-mode.wrapLeftRightMotion', false)
+        settings.set('wrapLeftRightMotion', false)
         ensure 'x', text: "abc\n012345\n\nxyz", cursor: [2, 0]
 
       it "deletes an empty line when vim-mode.wrapLeftRightMotion is true", ->
-        atom.config.set('vim-mode.wrapLeftRightMotion', true)
+        settings.set('wrapLeftRightMotion', true)
         ensure 'x', text: "abc\n012345\nxyz", cursor: [2, 0]
 
   describe "the X keybinding", ->
@@ -105,7 +105,7 @@ describe "Operator", ->
         ensure 'X', text: 'ab\n02345', cursor: [1, 1], register: '1'
         ensure 'X', text: 'ab\n2345', cursor: [1, 0], register: '0'
         ensure 'X', text: 'ab\n2345', cursor: [1, 0], register: '0'
-        atom.config.set('vim-mode.wrapLeftRightMotion', true)
+        settings.set('wrapLeftRightMotion', true)
         ensure 'X', text: 'ab2345', cursor: [0, 2], register: '\n'
 
     describe "on an empty line", ->
@@ -115,11 +115,11 @@ describe "Operator", ->
           cursor: [1, 0]
 
       it "deletes nothing when vim-mode.wrapLeftRightMotion is false", ->
-        atom.config.set('vim-mode.wrapLeftRightMotion', false)
+        settings.set('wrapLeftRightMotion', false)
         ensure 'X', text: "012345\n\nabcdef", cursor: [1, 0]
 
       it "deletes the newline when wrapLeftRightMotion is true", ->
-        atom.config.set('vim-mode.wrapLeftRightMotion', true)
+        settings.set('wrapLeftRightMotion', true)
         ensure 'X', text: "012345\nabcdef", cursor: [0, 5]
 
   describe "the s keybinding", ->
@@ -536,7 +536,7 @@ describe "Operator", ->
 
     describe "when useClipboardAsDefaultRegister enabled", ->
       it "writes to clipboard", ->
-        atom.config.set 'vim-mode.useClipboardAsDefaultRegister', true
+        settings.set 'useClipboardAsDefaultRegister', true
         keystroke 'yy'
         expect(atom.clipboard.read()).toBe '012 345\n'
 
@@ -695,7 +695,7 @@ describe "Operator", ->
 
       describe "when useClipboardAsDefaultRegister enabled", ->
         it "inserts contents from clipboard", ->
-          atom.config.set 'vim-mode.useClipboardAsDefaultRegister', true
+          settings.set 'useClipboardAsDefaultRegister', true
           ensure 'p', text: "0clip12\n"
 
       describe "from a specified register", ->
@@ -1524,7 +1524,7 @@ describe "Operator", ->
 
   describe "the ctrl-a/ctrl-x keybindings", ->
     beforeEach ->
-      atom.config.set 'vim-mode.numberRegex', settings.config.numberRegex.default
+      settings.set 'numberRegex', settings.config.numberRegex.default
       set
         text: '123\nab45\ncd-67ef\nab-5\na-bcdef'
         cursorBuffer: [0, 0]
@@ -1571,7 +1571,7 @@ describe "Operator", ->
           text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
           cursorBuffer: [0, 0]
           addCursor: [[1, 0], [2, 0], [3, 3], [4, 0]]
-        atom.config.set('vim-mode.numberRegex', '(?:\\B-)?[0-9]+')
+        settings.set('numberRegex', '(?:\\B-)?[0-9]+')
         ensure [ctrl: 'a'],
           cursorBuffer: [[0, 2], [1, 3], [2, 5], [3, 3], [4, 0]]
           text: '124\nab46\ncd -66ef\nab-6\na-bcdef'
@@ -1617,7 +1617,7 @@ describe "Operator", ->
           text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
           cursorBuffer: [0, 0]
           addCursor: [[1, 0], [2, 0], [3, 3], [4, 0]]
-        atom.config.set('vim-mode.numberRegex', '(?:\\B-)?[0-9]+')
+        settings.set('numberRegex', '(?:\\B-)?[0-9]+')
         ensure [ctrl: 'x'],
           text: '122\nab44\ncd -68ef\nab-4\na-bcdef'
           cursorBuffer: [[0, 2], [1, 3], [2, 5], [3, 3], [4, 0]]

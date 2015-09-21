@@ -1,11 +1,12 @@
 # Refactoring status: 70%
 {getVimState} = require './spec-helper'
+settings = require '../lib/settings'
 
 describe "Motion", ->
-  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
+  [set, ensure, keystroke, editor, editorElement, vimState, vim, config] = []
 
   beforeEach ->
-    getVimState (_vimState, _vim) ->
+    getVimState (_vimState, _vim, config) ->
       vimState = _vimState
       {editor, editorElement} = vimState
       vimState.activateNormalMode()
@@ -29,7 +30,7 @@ describe "Motion", ->
           ensure 'h', cursor: [1, 0]
 
         it "moves the cursor to the previous line if wrapLeftRightMotion is true", ->
-          atom.config.set('vim-mode.wrapLeftRightMotion', true)
+          settings.set('wrapLeftRightMotion', true)
           ensure 'hh', cursor: [0, 4]
 
       describe "as a selection", ->
@@ -110,7 +111,7 @@ describe "Motion", ->
         ensure 'l', cursor: [1, 3]
 
       it "moves the cursor to the next line if wrapLeftRightMotion is true", ->
-        atom.config.set('vim-mode.wrapLeftRightMotion', true)
+        settings.set('wrapLeftRightMotion', true)
         ensure 'll', cursor: [2, 0]
 
       describe "on a blank line", ->
@@ -800,12 +801,12 @@ describe "Motion", ->
           ensure 'n', cursor: [2, 0]
 
         it "uses case insensitive search if useSmartcaseForSearch is true and searching lowercase", ->
-          atom.config.set 'vim-mode.useSmartcaseForSearch', true
+          settings.set 'useSmartcaseForSearch', true
           ensure ['/', chars: 'abc'], cursor: [1, 0]
           ensure 'n', cursor: [2, 0]
 
         it "uses case sensitive search if useSmartcaseForSearch is true and searching uppercase", ->
-          atom.config.set 'vim-mode.useSmartcaseForSearch', true
+          settings.set 'useSmartcaseForSearch', true
           ensure ['/', chars: 'ABC'], cursor: [2, 0]
           ensure 'n', cursor: [2, 0]
 

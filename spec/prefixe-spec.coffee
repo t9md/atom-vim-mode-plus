@@ -1,5 +1,6 @@
 # Refactoring status: 70%
 {getVimState} = require './spec-helper'
+settings = require '../lib/settings'
 
 describe "Prefixes", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -137,7 +138,7 @@ describe "Prefixes", ->
 
       describe "when useClipboardAsDefaultRegister enabled", ->
         it "inserts contents from clipboard with \"", ->
-          atom.config.set 'vim-mode.useClipboardAsDefaultRegister', true
+          settings.set 'useClipboardAsDefaultRegister', true
           ensure [{ctrl: 'r'}, {char: '"'}], text: '01clip2\n'
 
       it "inserts contents of the 'a' register", ->
