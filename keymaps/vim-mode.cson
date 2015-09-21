@@ -29,7 +29,7 @@
 
 # Insert-replace
 # -------------------------
-'atom-text-editor.vim-mode.replace-mode':
+'atom-text-editor.vim-mode.insert-mode.replace':
   'backspace': 'vim-mode:replace-mode-backspace'
 
 # except insert

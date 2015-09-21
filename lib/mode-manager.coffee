@@ -22,7 +22,7 @@ class ModeManager
     for mode in ['normal', 'insert', 'visual', 'operator-pending']
       @editorElement.classList.remove "#{mode}-mode"
     @editorElement.classList.add "#{@mode}-mode"
-    for submode in ['characterwise', 'linewise', 'blockwise']
+    for submode in ['characterwise', 'linewise', 'blockwise', 'replace']
       @editorElement.classList.remove submode
     if @submode
       @editorElement.classList.add @submode
@@ -47,7 +47,6 @@ class ModeManager
 
   activateReplaceMode: ->
     @activateInsertMode('replace')
-    @editorElement.classList.add('replace-mode')
 
     @replaceModeCounter = 0
     @vimState.subscriptions.add @replaceModeListener = @editor.onWillInsertText @replaceModeInsertHandler
@@ -78,7 +77,7 @@ class ModeManager
   deactivateInsertMode: ->
     return unless @mode in [null, 'insert']
     @editorElement.component.setInputEnabled(false)
-    @editorElement.classList.remove('replace-mode')
+    @editorElement.classList.remove('replace')
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
     changes = getChangesSinceCheckpoint(@editor.buffer, @insertionCheckpoint)
     @insertionCheckpoint = null
