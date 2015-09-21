@@ -2,7 +2,7 @@
 _ = require 'underscore-plus'
 {selectLines, debug} = require './utils'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
-{Range, CompositeDisposable} = require 'atom'
+{Range, CompositeDisposable, Disposable} = require 'atom'
 
 module.exports =
 class ModeManager
@@ -47,31 +47,28 @@ class ModeManager
     @editorElement.component.setInputEnabled(true)
     @setInsertionCheckpoint()
 
-  activateReplaceMode: ->
-    @activateInsertMode('replace')
+    return unless submode is 'replace'
+    @replacedCharsBySelection = {}
+    @replaceModeSubscriptions ?= new CompositeDisposable
 
-    @replaceModeCounter = 0
-    @vimState.subscriptions.add @replaceModeListener = @editor.onWillInsertText @replaceModeInsertHandler
-    @vimState.subscriptions.add @replaceModeUndoListener = @editor.onDidInsertText @replaceModeUndoHandler
-
-  replaceModeInsertHandler: (event) =>
-    chars = event.text?.split('') or []
-    selections = @editor.getSelections()
-    for char in chars
-      continue if char is '\n'
-      for selection in selections
-        selection.delete() unless selection.cursor.isAtEndOfLine()
-    return
-
-  replaceModeUndoHandler: (event) =>
-    @replaceModeCounter++
+    @replaceModeSubscriptions.add @editor.onWillInsertText ({text, cancel}) =>
+      for s in @editor.getSelections()
+        for char in text.split('') ? []
+          unless char is "\n"
+            s.selectRight() unless s.cursor.isAtEndOfLine()
+          (@replacedCharsBySelection[s.id] ?= []).push s.getText()
+          s.insertText(char)
+      cancel()
+    @replaceModeSubscriptions.add new Disposable =>
+      @replacedCharsBySelection = null
 
   replaceModeUndo: ->
-    if @replaceModeCounter > 0
-      @editor.undo()
-      @editor.undo()
-      @editor.moveLeft()
-      @replaceModeCounter--
+    for s in @editor.getSelections()
+      char = @replacedCharsBySelection[s.id].pop()
+      if char? # char maybe empty char ''.
+        s.selectLeft()
+        s.insertText(char)
+        s.cursor.moveLeft() if char
 
   setInsertionCheckpoint: ->
     @insertionCheckpoint ?= @editor.createCheckpoint()
@@ -87,13 +84,9 @@ class ModeManager
       item.confirmChanges(changes)
     for c in @editor.getCursors() when not c.isAtBeginningOfLine()
       c.moveLeft()
-    if @replaceModeListener?
-      @replaceModeListener.dispose()
-      @vimState.subscriptions.remove @replaceModeListener
-      @replaceModeListener = null
-      @replaceModeUndoListener.dispose()
-      @vimState.subscriptions.remove @replaceModeUndoListener
-      @replaceModeUndoListener = null
+
+    @replaceModeSubscriptions?.dispose()
+    @replaceModeSubscriptions = null
 
   deactivateVisualMode: ->
     {lastOperation} = @vimState
