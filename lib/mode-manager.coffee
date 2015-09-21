@@ -67,8 +67,7 @@ class ModeManager
       char = @replacedCharsBySelection[s.id].pop()
       if char? # char maybe empty char ''.
         s.selectLeft()
-        s.insertText(char)
-        s.cursor.moveLeft() if char
+        s.cursor.moveLeft() unless s.insertText(char).isEmpty()
 
   setInsertionCheckpoint: ->
     @insertionCheckpoint ?= @editor.createCheckpoint()
