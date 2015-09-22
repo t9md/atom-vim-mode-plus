@@ -279,9 +279,9 @@ class VimState
 
   reselectLastVisual: ->
     return unless @lastVisual
+    @activate(mode, submode)
     {mode, submode, range, reversed} = @lastVisual
     @editor.getLastSelection().setBufferRange(range, reversed)
-    @activate(mode, submode)
 
   syncSelectionsReversedSate: (reversed) ->
     for selection in @editor.getSelections()
