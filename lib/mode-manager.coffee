@@ -26,12 +26,13 @@ class ModeManager
 
     switch mode
       when 'normal'
+        @deactivateInsertMode() if @isMode('insert')
+        @deactivateVisualMode() if @isMode('visual')
         @activateNormalMode()
       when 'insert'
         @activateInsertMode(submode)
       when 'visual'
-        if @isMode('visual', submode)
-          return @setMode('normal')
+        return @setMode('normal') if @isMode('visual', submode)
         @activateVisualMode(submode)
       when 'operator-pending'
         null # This is just placeholder, nothing to do without updating selector.
@@ -50,10 +51,9 @@ class ModeManager
       method = if submode is newSubmode then 'add' else 'remove'
       @editorElement.classList[method] "#{submode}"
 
+  # Normal
+  # -------------------------
   activateNormalMode: ->
-    switch
-      when @isMode('insert') then @deactivateInsertMode()
-      when @isMode('visual') then @deactivateVisualMode()
     @editorElement.component.setInputEnabled(false)
     @vimState.reset()
     s.clear(autoscroll: false) for s in @editor.getSelections()
@@ -63,37 +63,27 @@ class ModeManager
   resetNormalMode: ->
     @setMode('reset')
 
+  # Insert
+  # -------------------------
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)
     @setInsertionCheckpoint()
+
     if submode is 'replace'
-      @activateReplaceMode()
+      @replacedCharsBySelection = {}
+      @replaceModeSubscriptions ?= new CompositeDisposable
 
-  activateReplaceMode: ->
-    @replacedCharsBySelection = {}
-    @replaceModeSubscriptions ?= new CompositeDisposable
+      @replaceModeSubscriptions.add @editor.onWillInsertText ({text, cancel}) =>
+        cancel()
+        for s in @editor.getSelections()
+          for char in text.split('') ? []
+            unless char is "\n"
+              s.selectRight() unless s.cursor.isAtEndOfLine()
+            (@replacedCharsBySelection[s.id] ?= []).push s.getText()
+            s.insertText(char)
 
-    @replaceModeSubscriptions.add @editor.onWillInsertText ({text, cancel}) =>
-      cancel()
-      for s in @editor.getSelections()
-        for char in text.split('') ? []
-          unless char is "\n"
-            s.selectRight() unless s.cursor.isAtEndOfLine()
-          (@replacedCharsBySelection[s.id] ?= []).push s.getText()
-          s.insertText(char)
-
-    @replaceModeSubscriptions.add new Disposable =>
-      @replacedCharsBySelection = null
-
-  replaceModeBackspace: ->
-    for s in @editor.getSelections()
-      char = @replacedCharsBySelection[s.id].pop()
-      if char? # char maybe empty char ''.
-        s.selectLeft()
-        s.cursor.moveLeft() unless s.insertText(char).isEmpty()
-
-  setInsertionCheckpoint: ->
-    @insertionCheckpoint ?= @editor.createCheckpoint()
+      @replaceModeSubscriptions.add new Disposable =>
+        @replacedCharsBySelection = null
 
   deactivateInsertMode: ->
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
@@ -108,14 +98,18 @@ class ModeManager
       @replaceModeSubscriptions?.dispose()
       @replaceModeSubscriptions = null
 
-  deactivateVisualMode: ->
-    {lastOperation} = @vimState
-    restoreColumn = not (lastOperation?.isYank() or lastOperation?.isIndent())
-    if restoreColumn and @isMode('visual', 'linewise')
-      @selectCharacterwise()
-    for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())
-      s.cursor.moveLeft()
+  replaceModeBackspace: ->
+    for s in @editor.getSelections()
+      char = @replacedCharsBySelection[s.id].pop()
+      if char? # char maybe empty char ''.
+        s.selectLeft()
+        s.cursor.moveLeft() unless s.insertText(char).isEmpty()
 
+  setInsertionCheckpoint: ->
+    @insertionCheckpoint ?= @editor.createCheckpoint()
+
+  # Visual
+  # -------------------------
   activateVisualMode: (submode) ->
     oldSubmode = @submode
     # [FIXME] following operation depend operationStack
@@ -127,6 +121,14 @@ class ModeManager
       when 'linewise' then @selectLinewise(oldSubmode)
       when 'characterwise' then @selectCharacterwise(oldSubmode)
       when 'blockwise' then @selectBlockwise(oldSubmode)
+
+  deactivateVisualMode: ->
+    {lastOperation} = @vimState
+    restoreColumn = not (lastOperation?.isYank() or lastOperation?.isIndent())
+    if restoreColumn and @isMode('visual', 'linewise')
+      @selectCharacterwise()
+    for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())
+      s.cursor.moveLeft()
 
   selectLinewise: (oldSubmode) ->
     unless oldSubmode is 'characterwise'
@@ -160,6 +162,8 @@ class ModeManager
       @selectCharacterwise()
     @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
+  # Others
+  # -------------------------
   hideCursors: ->
     for c in @editor.getCursors() when c.isVisible()
       c.setVisible(false)
