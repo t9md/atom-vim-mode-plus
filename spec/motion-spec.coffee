@@ -1277,7 +1277,9 @@ describe "Motion", ->
           text: "a baz bar\n"
           cursor: [0, 0]
 
-        other.set text: "foo bar baz", cursor: [0, 0]
+        other.set
+          text: "foo bar baz",
+          cursor: [0, 0]
 
         # by default keyDown and such go in the usual editor
         ensure ['f', char: 'b'], cursor: [0, 2]
