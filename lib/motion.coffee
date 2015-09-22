@@ -596,13 +596,13 @@ class MoveToMarkLine extends MoveToMark
 # -------------------------
 class SearchBase extends Motion
   @extend()
-  dontUpdateCurrentSearch: false
+  saveCurrentSearch: true
   complete: false
 
   constructor: ->
     super
     @reverse = @initiallyReversed = false
-    @updateCurrentSearch() unless @dontUpdateCurrentSearch
+    @updateCurrentSearch() if @saveCurrentSearch
 
   reversed: =>
     @initiallyReversed = @reverse = true
@@ -687,7 +687,7 @@ class ReverseSearch extends Search
 # keymap: *
 class SearchCurrentWord extends SearchBase
   @extend()
-  @keywordRegex: null
+  wordRegex: null
   complete: true
 
   constructor: ->
@@ -696,40 +696,28 @@ class SearchCurrentWord extends SearchBase
     # FIXME: This must depend on the current language
     defaultIsKeyword = "[@a-zA-Z0-9_\-]+"
     userIsKeyword = atom.config.get('vim-mode.iskeyword')
-    @keywordRegex = new RegExp(userIsKeyword or defaultIsKeyword)
+    @wordRegex = new RegExp(userIsKeyword or defaultIsKeyword)
+    @abort() unless word = @getCurrentWord()
+    @input = if /\W/.test(word) then "#{word}\\b" else "\\b#{word}\\b"
+    unless @input is @vimState.getSearchHistoryItem()
+      @vimState.pushSearchHistory(@input)
 
-    searchString = @getCurrentWordMatch()
-    @input = searchString
-    @vimState.pushSearchHistory(searchString) unless searchString is @vimState.getSearchHistoryItem()
-
+  # FIXME: Should not move cursor.
   getCurrentWord: ->
     cursor = @editor.getLastCursor()
-    wordStart = cursor.getBeginningOfCurrentWordBufferPosition(wordRegex: @keywordRegex, allowPrevious: false)
-    wordEnd   = cursor.getEndOfCurrentWordBufferPosition      (wordRegex: @keywordRegex, allowNext: false)
-    cursorPosition = cursor.getBufferPosition()
+    rowStart = cursor.getBufferRow()
+    range = cursor.getCurrentWordBufferRange({@wordRegex})
+    if range.end.isEqual(cursor.getBufferPosition())
+      point = cursor.getBeginningOfNextWordBufferPosition({@wordRegex})
+      if point.row is rowStart
+        cursor.setBufferPosition(point)
+        range = cursor.getCurrentWordBufferRange({@wordRegex})
 
-    if wordEnd.column is cursorPosition.column
-      # either we don't have a current word, or it ends on cursor, i.e. precedes it, so look for the next one
-      wordEnd = cursor.getEndOfCurrentWordBufferPosition      (wordRegex: @keywordRegex, allowNext: true)
-      return "" if wordEnd.row isnt cursorPosition.row # don't look beyond the current line
-
-      cursor.setBufferPosition wordEnd
-      wordStart = cursor.getBeginningOfCurrentWordBufferPosition(wordRegex: @keywordRegex, allowPrevious: false)
-
-    cursor.setBufferPosition wordStart
-
-    @editor.getTextInBufferRange([wordStart, wordEnd])
-
-  getCurrentWordMatch: ->
-    characters = @getCurrentWord()
-    if characters.length > 0
-      if /\W/.test(characters) then "#{characters}\\b" else "\\b#{characters}\\b"
+    if range.isEmpty()
+      ''
     else
-      characters
-
-  execute: ->
-    if @input.length > 0
-      super
+      cursor.setBufferPosition(range.start)
+      @editor.getTextInBufferRange(range)
 
 # keymap: #
 class ReverseSearchCurrentWord extends SearchCurrentWord
@@ -738,15 +726,11 @@ class ReverseSearchCurrentWord extends SearchCurrentWord
     super
     @reversed()
 
-OpenBrackets = ['(', '{', '[']
-CloseBrackets = [')', '}', ']']
-AnyBracket = new RegExp(OpenBrackets.concat(CloseBrackets).map(_.escapeRegExp).join("|"))
-
 # keymap: n
 class RepeatSearch extends SearchBase
   @extend()
   complete: true
-  dontUpdateCurrentSearch: true
+  saveCurrentSearch: false
 
   constructor: ->
     super
@@ -765,6 +749,10 @@ class RepeatSearchBackwards extends RepeatSearch
     @reversed()
 
 # keymap: %
+OpenBrackets = ['(', '{', '[']
+CloseBrackets = [')', '}', ']']
+AnyBracket = new RegExp(OpenBrackets.concat(CloseBrackets).map(_.escapeRegExp).join("|"))
+
 class BracketMatchingMotion extends SearchBase
   @extend()
   inclusive: true
