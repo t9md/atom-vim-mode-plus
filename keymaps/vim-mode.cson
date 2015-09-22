@@ -167,7 +167,7 @@
   '#': 'vim-mode:search-current-word-backwards'
   'n': 'vim-mode:repeat-search'
   'N': 'vim-mode:repeat-search-reverse'
-  
+
   '%': 'vim-mode:bracket-matching-motion'
 
   '1': 'vim-mode:set-count'
@@ -203,6 +203,7 @@
   'ctrl-a': 'vim-mode:increase'
   'ctrl-x': 'vim-mode:decrease'
   '"':      'vim-mode:set-register-name'
+  'g v':    'vim-mode:reselect-last-visual'
 
 # operator-pending, visual
 # -------------------------
