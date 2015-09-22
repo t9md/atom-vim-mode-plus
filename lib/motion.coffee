@@ -598,16 +598,15 @@ class SearchBase extends Motion
   @extend()
   saveCurrentSearch: true
   complete: false
+  backwards: false
+
+  isBackwards: ->
+    @backwards
 
   constructor: ->
     super
-    @reverse = @initiallyReversed = false
-    @updateCurrentSearch() if @saveCurrentSearch
-
-  reversed: =>
-    @initiallyReversed = @reverse = true
-    @updateCurrentSearch()
-    this
+    if @saveCurrentSearch
+      @vimState.globalVimState.currentSearch.backwards = @backwards
 
   moveCursor: (cursor) ->
     ranges = @scan(cursor)
@@ -620,21 +619,23 @@ class SearchBase extends Motion
   scan: (cursor) ->
     return [] if @input is ""
 
-    currentPosition = cursor.getBufferPosition()
+    cursorPosition = cursor.getBufferPosition()
 
     [rangesBefore, rangesAfter] = [[], []]
     @editor.scan @getSearchTerm(@input), ({range}) =>
-      isBefore = if @reverse
-        range.start.compare(currentPosition) < 0
-      else
-        range.start.compare(currentPosition) <= 0
+      {start} = range
+      isBefore =
+        if @isBackwards()
+          start.compare(cursorPosition) < 0
+        else
+          start.compare(cursorPosition) <= 0
 
       if isBefore
         rangesBefore.push(range)
       else
         rangesAfter.push(range)
 
-    if @reverse
+    if @isBackwards()
       rangesAfter.concat(rangesBefore).reverse()
     else
       rangesAfter.concat(rangesBefore)
@@ -656,15 +657,8 @@ class SearchBase extends Motion
     catch
       new RegExp(_.escapeRegExp(term), modFlags)
 
-  updateCurrentSearch: ->
-    @vimState.globalVimState.currentSearch.reverse = @reverse
-    @vimState.globalVimState.currentSearch.initiallyReversed = @initiallyReversed
-
-  replicateCurrentSearch: ->
-    @reverse = @vimState.globalVimState.currentSearch.reverse
-    @initiallyReversed = @vimState.globalVimState.currentSearch.initiallyReversed
-
-# keymap: /
+# FIXME Saving search history is done in view.coffee
+# Should be saved within Searach class for clearity.
 class Search extends SearchBase
   @extend()
   constructor: ->
@@ -677,14 +671,10 @@ class Search extends SearchBase
       @complete = true
       @vimState.operationStack.process() # Re-process!!
 
-# keymap: ?
-class ReverseSearch extends Search
+class SearchBackwards extends Search
   @extend()
-  constructor: ->
-    super
-    @reversed()
+  backwards: true
 
-# keymap: *
 class SearchCurrentWord extends SearchBase
   @extend()
   wordRegex: null
@@ -719,14 +709,10 @@ class SearchCurrentWord extends SearchBase
       cursor.setBufferPosition(range.start)
       @editor.getTextInBufferRange(range)
 
-# keymap: #
-class ReverseSearchCurrentWord extends SearchCurrentWord
+class SearchCurrentWordBackwards extends SearchCurrentWord
   @extend()
-  constructor: ->
-    super
-    @reversed()
+  backwards: true
 
-# keymap: n
 class RepeatSearch extends SearchBase
   @extend()
   complete: true
@@ -735,18 +721,13 @@ class RepeatSearch extends SearchBase
   constructor: ->
     super
     @input = @vimState.getSearchHistoryItem(0) ? ''
-    @replicateCurrentSearch()
+    @backwards = @vimState.globalVimState.currentSearch.backwards
 
-  reversed: ->
-    @reverse = not @initiallyReversed
-    this
-
-# keymap: N
-class RepeatSearchBackwards extends RepeatSearch
+class RepeatSearchReverse extends RepeatSearch
   @extend()
-  constructor: ->
-    super
-    @reversed()
+
+  isBackwards: ->
+    not @backwards
 
 # keymap: %
 OpenBrackets = ['(', '{', '[']
@@ -839,8 +820,8 @@ module.exports = {
   Till, TillBackwards
   RepeatFind, RepeatFindReverse,
 
-  Search, ReverseSearch
-  SearchCurrentWord, ReverseSearchCurrentWord
+  Search, SearchBackwards
+  SearchCurrentWord, SearchCurrentWordBackwards
+  RepeatSearch, RepeatSearchReverse
   BracketMatchingMotion
-  RepeatSearch, RepeatSearchBackwards
 }
