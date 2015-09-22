@@ -75,7 +75,7 @@ class Motion extends Base
           c.moveLeft()
       @moveCursor(cursor)
 
-      # Return if motion movement not happend if used as Operator target.
+      # When motion is used as target of operator, return if motion movement not happend.
       return if (selection.isEmpty() and originallyEmpty)
 
       unless selection.isReversed()
@@ -113,8 +113,7 @@ class Motion extends Base
   getLastVisibleScreenRow: ->
     @editorElement.getLastVisibleScreenRow()
 
-  # return list of isEmpty() result of each selections which is expected
-  # to return from select() methods.
+  # return boolean that indicates at least one of selections is not isEmpty().
   status: ->
     @editor.getSelections().some((s) -> not s.isEmpty())
 
@@ -460,77 +459,56 @@ class ScrollHalfScreenUp extends ScrollHalfScreenDown
   @extend()
   direction: -1
 
-# Find Motion
+# Find
 # -------------------------
 # keymap: f
 class Find extends Motion
   @extend()
   backwards: false
   complete: false
-  repeated: false
-  reverse: false
-  offset: 0
-  hoverText: ':mag_right:'
-  hoverIcon: ':find:'
   requireInput: true
   inclusive: true
-
-  constructor: ->
-    super
-    unless @repeated
-      @getInput()
-
-  match: (cursor, count) ->
-    currentPosition = cursor.getBufferPosition()
-    line = @editor.lineTextForBufferRow(currentPosition.row)
-    if @backwards
-      index = currentPosition.column
-      for i in [0..count-1]
-        return if index <= 0 # we can't move backwards any further, quick return
-        index = line.lastIndexOf(@input, index-1-(@offset*@repeated))
-      if index >= 0
-        new Point(currentPosition.row, index + @offset)
-    else
-      index = currentPosition.column
-      for i in [0..count-1]
-        index = line.indexOf(@input, index+1+(@offset*@repeated))
-        return if index < 0 # no match found
-      if index >= 0
-        new Point(currentPosition.row, index - @offset)
-
-  moveCursor: (cursor) ->
-    if (match = @match(cursor, @getCount(1)))?
-      cursor.setBufferPosition(match)
-
-    if @context
-      @backwards = not @backwards if @reverse
-    else
-      @vimState.globalVimState.currentFind = this
-
-# [FIXME] there is more better way to implement RepeatFind, RepeatFindReverse
-# Current implementation is not declarative.
-class RepeatFind extends Find
-  @extend()
-  repeated: true
-  reverse: false
+  hoverText: ':mag_right:'
+  hoverIcon: ':find:'
   offset: 0
 
   constructor: ->
     super
-    @context = @vimState.globalVimState.currentFind
-    @abort() unless @context
-    {@offset, @backwards, @complete, @input} = @vimState.globalVimState.currentFind
+    @getInput() unless @isRepeatFind()
 
-  moveCursor: (args...) ->
-    @context.moveCursor.apply(this, args)
+  isBackwards: ->
+    @backwards
 
-class RepeatFindReverse extends RepeatFind
-  @extend()
-  reverse: true
+  getOffset: ->
+    if @isBackwards() then @offset else -@offset
 
-  constructor: ->
-    super
-    @backwards = not @backwards
+  getUnOffset: ->
+    -@getOffset() * @isRepeatFind()
+
+  find: (cursor) ->
+    cursorPoint = cursor.getBufferPosition()
+    {start, end} = @editor.bufferRangeForBufferRow(cursorPoint.row)
+
+    points   = []
+    offset   = @getOffset()
+    unOffset = @getUnOffset()
+    if @isBackwards()
+      scanRange = [start, cursorPoint.translate([0, unOffset])]
+      method    = 'backwardsScanInBufferRange'
+    else
+      scanRange = [cursorPoint.translate([0, 1 + unOffset]), end]
+      method    = 'scanInBufferRange'
+
+    @editor[method] ///#{_.escapeRegExp(@input)}///g, scanRange, ({range}) ->
+      points.push range.start
+
+    points[@getCount(1) - 1]?.translate([0, offset])
+
+  moveCursor: (cursor) ->
+    if point = @find(cursor)
+      cursor.setBufferPosition(point)
+    unless @isRepeatFind()
+      @vimState.globalVimState.currentFind = this
 
 # keymap: F
 class FindBackwards extends Find
@@ -544,12 +522,12 @@ class Till extends Find
   @extend()
   offset: 1
 
-  match: ->
-    @matched = super
+  find: ->
+    @point = super
 
   selectInclusive: (selection) ->
     super
-    if selection.isEmpty() and (@matched? and not @backwards)
+    if selection.isEmpty() and (@point? and not @backwards)
       selection.modifySelection ->
         selection.cursor.moveRight()
 
@@ -557,6 +535,19 @@ class Till extends Find
 class TillBackwards extends Till
   @extend()
   backwards: true
+
+class RepeatFind extends Find
+  @extend()
+  constructor: ->
+    super
+    unless findObj = @vimState.globalVimState.currentFind
+      @abort()
+    {@offset, @backwards, @complete, @input} = findObj
+
+class RepeatFindReverse extends RepeatFind
+  @extend()
+  isBackwards: ->
+    not @backwards
 
 # Mark
 # -------------------------
@@ -719,7 +710,6 @@ class RepeatSearch extends SearchBase
 
 class RepeatSearchReverse extends RepeatSearch
   @extend()
-
   isBackwards: ->
     not @backwards
 
