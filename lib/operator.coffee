@@ -77,17 +77,11 @@ class Operator extends Base
     markerBySelections
 
   flash: (range, fn=null) ->
-    marker = @editor.markBufferRange range,
-      invalidate: 'never',
-      persistent: false
-    fn?()
-    @editor.decorateMarker marker,
-      type: 'highlight'
-      class: 'vim-mode-flash'
-
-    setTimeout  ->
-      marker.destroy()
-    , settings.get('flashOnOperateDurationMilliSeconds')
+    options =
+      range: range
+      klass: 'vim-mode-flash'
+      timeout: settings.get('flashOnOperateDurationMilliSeconds')
+    super(options, fn)
 
   eachSelection: (fn) ->
     return unless @target.select()

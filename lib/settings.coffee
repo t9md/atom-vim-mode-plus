@@ -46,24 +46,41 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'integer'
     default: 100
     description: "Duration for flash"
-  stayOnTransformString:
+  flashOnSearch:
     order: 10
+    type: 'boolean'
+    default: true
+  flashOnSearchDurationMilliSeconds:
+    order: 11
+    type: 'integer'
+    default: 300
+    description: "Duration for flash"
+  stayOnTransformString:
+    order: 12
     type: 'boolean'
     default: false
     description: "Dont move cursor when Toggle, Surround, etc"
   enableHoverIndicator:
-    order: 11
+    order: 13
     type: 'boolean'
     default: false
   enableHoverIcon:
-    order: 12
+    order: 14
     type: 'boolean'
     default: false
   hoverStyle:
-    order: 13
+    order: 15
     type: 'string'
     default: 'emoji'
     enum: ['emoji', 'icon']
+  enableHoverSearchCounter:
+    order: 16
+    type: 'boolean'
+    default: false
+  searchCounterHoverDuration:
+    order: 17
+    type: 'integer'
+    default: 500
   debug:
     order: 100
     type: 'boolean'
