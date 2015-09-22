@@ -31,6 +31,7 @@ class VimState
   replaceModeListener: null
   developer: null
   lastOperation: null
+  lastVisual: null
 
   # Mode handling is delegated to modeManager
   delegatingMethods = [
@@ -155,6 +156,7 @@ class VimState
       'set-count': (e) => @count.set(e) # 0-9
       'set-register-name': => @register.setName() # "
       'reverse-selections': => @reverseSelections() # o
+      'reselect-last-visual': => @reselectLastVisual() # gv
       'undo': => @undo() # u
       'replace-mode-backspace': => @replaceModeBackspace()
 
@@ -274,6 +276,12 @@ class VimState
   reverseSelections: ->
     reversed = not @editor.getLastSelection().isReversed()
     @syncSelectionsReversedSate(reversed)
+
+  reselectLastVisual: ->
+    return unless @lastVisual
+    {mode, submode, range, reversed} = @lastVisual
+    @editor.getLastSelection().setBufferRange(range, reversed)
+    @activate(mode, submode)
 
   syncSelectionsReversedSate: (reversed) ->
     for selection in @editor.getSelections()
