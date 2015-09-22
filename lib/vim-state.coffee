@@ -196,12 +196,12 @@ class VimState
       'move-to-top-of-screen', 'move-to-bottom-of-screen', 'move-to-middle-of-screen',
       'scroll-half-screen-up', 'scroll-half-screen-down',
       'scroll-full-screen-up', 'scroll-full-screen-down',
-      'repeat-search'          , 'repeat-search-backwards',
       'move-to-mark'           , 'move-to-mark-line',
       'find'                   , 'find-backwards',
       'till'                   , 'till-backwards',
-      'search'                 , 'reverse-search',
-      'search-current-word'    , 'reverse-search-current-word',
+      'search'                 , 'search-backwards',
+      'search-current-word'    , 'search-current-word-backwards',
+      'repeat-search'          , 'repeat-search-reverse',
       'bracket-matching-motion',
     ]
 

@@ -162,11 +162,12 @@
   ',': 'vim-mode:repeat-find-reverse'
 
   '/': 'vim-mode:search'
-  '?': 'vim-mode:reverse-search'
+  '?': 'vim-mode:search-backwards'
   '*': 'vim-mode:search-current-word'
-  '#': 'vim-mode:reverse-search-current-word'
+  '#': 'vim-mode:search-current-word-backwards'
   'n': 'vim-mode:repeat-search'
-  'N': 'vim-mode:repeat-search-backwards'
+  'N': 'vim-mode:repeat-search-reverse'
+  
   '%': 'vim-mode:bracket-matching-motion'
 
   '1': 'vim-mode:set-count'

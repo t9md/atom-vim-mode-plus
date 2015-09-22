@@ -41,7 +41,7 @@ class SearchViewModel
       @restoreHistory(@historyIndex)
 
   confirm: =>
-    repeatChar = if @searchMotion.initiallyReversed then '?' else '/'
+    repeatChar = if @searchMotion.backwards then '?' else '/'
     if @view.value is '' or @view.value is repeatChar
       lastSearch = @history(0)
       if lastSearch?
