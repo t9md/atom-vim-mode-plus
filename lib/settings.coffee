@@ -1,5 +1,5 @@
 # Refactoring status: 100%
-class ScopedConfig
+class Settings
   constructor: (@scope, @config) ->
 
   get: (param) ->
@@ -11,7 +11,7 @@ class ScopedConfig
   set: (param, value) ->
     atom.config.set "#{@scope}.#{param}", value
 
-module.exports = new ScopedConfig 'vim-mode-plus',
+module.exports = new Settings 'vim-mode-plus',
   startInInsertMode:
     order: 1
     type: 'boolean'
