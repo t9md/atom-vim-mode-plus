@@ -12,9 +12,14 @@ class Hover
     @text = []
     @view = atom.views.getView(this)
 
-  add: (text) ->
+  add: (text, timeout=null) ->
+    @reset()
     @text.push text
     @view.show()
+    return unless timeout
+    @timeoutID = setTimeout  =>
+      @reset()
+    , timeout
 
   iconRegexp = /^:.*:$/
   getText: (lineHeight) ->
@@ -32,6 +37,8 @@ class Hover
 
   reset: ->
     @text = []
+    clearTimeout @timeoutID
+    @timeoutID = null
     @view.reset()
 
   destroy: ->

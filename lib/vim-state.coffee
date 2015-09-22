@@ -58,6 +58,7 @@ class VimState
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
     @hover = new Hover(this)
+    @hoverSearchCounter = new Hover(this)
     @input = new Input(this)
 
     @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
@@ -98,6 +99,8 @@ class VimState
     @lastOperation = null
     @hover.destroy()
     @hover = null
+    @hoverSearchCounter.destroy()
+    @hoverSearchCounter = null
     @input.destroy()
     @input = null
     @modeManager = null

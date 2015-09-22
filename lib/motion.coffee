@@ -1,6 +1,7 @@
 # Refactoring status: 50%
 {Point, Range} = require 'atom'
 {selectLines} = require './utils'
+{Hover} = require './hover'
 
 _ = require 'underscore-plus'
 
@@ -592,13 +593,34 @@ class SearchBase extends Motion
     if @saveCurrentSearch
       @vimState.globalVimState.currentSearch.backwards = @backwards
 
+  flash: (range, fn=null) ->
+    options =
+      range: range
+      klass: 'vim-mode-flash'
+      timeout: settings.get('flashOnSearchDurationMilliSeconds')
+    super(options, fn)
+
   moveCursor: (cursor) ->
     ranges = @scan(cursor)
-    if ranges.length > 0
-      range = ranges[(@getCount(1) - 1) % ranges.length]
-      cursor.setBufferPosition(range.start)
-    else
+    if ranges.length is 0
       atom.beep()
+      return
+
+    range = ranges[(@getCount(1) - 1) % ranges.length]
+    cursor.setBufferPosition(range.start)
+
+    if settings.get('flashOnSearch')
+      @flash range
+
+    if settings.get('enableHoverSearchCounter')
+      counter = @getCounter(range, ranges)
+      timeout = settings.get('searchCounterHoverDuration')
+      @vimState.hoverSearchCounter.add counter, timeout
+
+  getCounter: (range, ranges) ->
+    rangeSorted = ranges.slice().sort (a, b) -> a.compare(b)
+    current = rangeSorted.indexOf(range) + 1
+    "#{current}/#{ranges.length}"
 
   scan: (cursor) ->
     return [] if @input is ""
