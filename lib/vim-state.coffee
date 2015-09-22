@@ -146,11 +146,12 @@ class VimState
   # Initialize all of vim-mode' commands.
   init: ->
     @registerCommands
-      'activate-normal-mode': => @activate('normal')
-      'activate-linewise-visual-mode': => @activate('visual', 'linewise')
+      'activate-normal-mode':               => @activate('normal')
+      'activate-linewise-visual-mode':      => @activate('visual', 'linewise')
       'activate-characterwise-visual-mode': => @activate('visual', 'characterwise')
-      'activate-blockwise-visual-mode': => @activate('visual', 'blockwise')
-      'reset-normal-mode': => @activate('reset')
+      'activate-blockwise-visual-mode':     => @activate('visual', 'blockwise')
+      'reset-normal-mode':                  => @activate('reset')
+
       'set-count': (e) => @count.set(e) # 0-9
       'set-register-name': => @register.setName() # "
       'reverse-selections': => @reverseSelections() # o
@@ -158,8 +159,9 @@ class VimState
       'replace-mode-backspace': => @replaceModeBackspace()
 
     @registerOperationCommands InsertMode, [
-      'insert-register'
-      'copy-from-line-above', 'copy-from-line-below'
+      'insert-register',
+      'copy-from-line-above',
+      'copy-from-line-below'
     ]
 
     @registerOperationCommands TextObject, [
@@ -187,24 +189,24 @@ class VimState
       'move-to-beginning-of-line',
       'repeat-find', 'repeat-find-reverse',
       'move-down', 'move-up', 'move-left', 'move-right',
-      'move-to-next-word'     , 'move-to-next-whole-word',
-      'move-to-end-of-word'   , 'move-to-end-of-whole-word',
+      'move-to-next-word'     , 'move-to-next-whole-word'    ,
+      'move-to-end-of-word'   , 'move-to-end-of-whole-word'  ,
       'move-to-previous-word' , 'move-to-previous-whole-word',
-      'move-to-next-paragraph', 'move-to-previous-paragraph',
-      'move-to-first-character-of-line', 'move-to-last-character-of-line',
-      'move-to-first-character-of-line-up', 'move-to-first-character-of-line-down',
+      'move-to-next-paragraph', 'move-to-previous-paragraph' ,
+      'move-to-first-character-of-line'         , 'move-to-last-character-of-line'      ,
+      'move-to-first-character-of-line-up'      , 'move-to-first-character-of-line-down',
       'move-to-first-character-of-line-and-down',
       'move-to-last-nonblank-character-of-line-and-down',
       'move-to-first-line', 'move-to-last-line',
       'move-to-top-of-screen', 'move-to-bottom-of-screen', 'move-to-middle-of-screen',
-      'scroll-half-screen-up', 'scroll-half-screen-down',
-      'scroll-full-screen-up', 'scroll-full-screen-down',
-      'move-to-mark'           , 'move-to-mark-line',
-      'find'                   , 'find-backwards',
-      'till'                   , 'till-backwards',
-      'search'                 , 'search-backwards',
+      'scroll-half-screen-up'  , 'scroll-half-screen-down'      ,
+      'scroll-full-screen-up'  , 'scroll-full-screen-down'      ,
+      'move-to-mark'           , 'move-to-mark-line'            ,
+      'find'                   , 'find-backwards'               ,
+      'till'                   , 'till-backwards'               ,
+      'search'                 , 'search-backwards'             ,
       'search-current-word'    , 'search-current-word-backwards',
-      'repeat-search'          , 'repeat-search-reverse',
+      'repeat-search'          , 'repeat-search-reverse'        ,
       'bracket-matching-motion',
     ]
 
@@ -221,7 +223,7 @@ class VimState
       'put-after', 'put-before',
       'upper-case', 'lower-case', 'toggle-case', 'toggle-case-and-move-right',
       'camel-case', 'snake-case', 'dash-case',
-      'surround', 'surround-word',
+      'surround'       , 'surround-word'           ,
       'delete-surround', 'delete-surround-any-pair'
       'change-surround', 'change-surround-any-pair'
       'join',
