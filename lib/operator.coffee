@@ -113,7 +113,7 @@ class Delete extends Operator
       @setTextToRegister s.getText() if s.isLastSelection()
       s.deleteSelectedText()
       s.cursor.skipLeadingWhitespace() if @target.isLinewise?()
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
 class DeleteRight extends Delete
   @extend()
@@ -145,7 +145,7 @@ class TransformString extends Operator
       range = s.insertText @getNewText(s.getText())
       if @adjustCursor
         s.cursor.setBufferPosition(points?.shift() ? range.start)
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
 class ToggleCase extends TransformString
   @extend()
@@ -293,7 +293,7 @@ class Yank extends Operator
       @setTextToRegister s.getText() if s.isLastSelection()
       point = points?.shift() ? s.getBufferRange().start
       s.cursor.setBufferPosition point
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
 class YankLine extends Yank
   @extend()
@@ -308,7 +308,7 @@ class Join extends Operator
     @editor.transact =>
       _.times @getCount(1), =>
         @editor.joinLines()
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
 class Repeat extends Operator
   @extend()
@@ -330,7 +330,7 @@ class Mark extends Operator
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
 class Increase extends Operator
   @extend()
@@ -371,7 +371,7 @@ class Indent extends Operator
       @indent(s)
       s.cursor.setBufferPosition([startRow, 0])
       s.cursor.moveToFirstCharacterOfLine()
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
   indent: (s) ->
     s.indentSelectedRows()
@@ -407,7 +407,7 @@ class PutBefore extends Operator
         switch type
           when 'linewise'  then @pasteLinewise(selection, text)
           when 'character' then @pasteCharacterwise(selection, text)
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
   pasteLinewise: (selection, text) ->
     cursor = selection.cursor
@@ -454,7 +454,7 @@ class ReplaceWithRegister extends Operator
       s.deleteSelectedText()
       s.insertText(newText)
       s.cursor.setBufferPosition(range.start)
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
 class ToggleLineComments extends Operator
   @extend()
@@ -465,7 +465,7 @@ class ToggleLineComments extends Operator
     @eachSelection (s) ->
       s.toggleLineComments()
     @restoreMarkedCursorPositions markerByCursor
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
 # Input
 # -------------------------
@@ -490,7 +490,7 @@ class Insert extends Operator
       for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
         cursor.moveLeft()
     else
-      @vimState.setMode('insert')
+      @vimState.activate('insert')
 
 class ReplaceMode extends Insert
   @extend()
@@ -507,7 +507,7 @@ class ReplaceMode extends Insert
         for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
           cursor.moveLeft()
     else
-      @vimState.setMode('insert', 'replace')
+      @vimState.activate('insert', 'replace')
 
   countChars: (char, string) ->
     string.split(char).length - 1
@@ -547,7 +547,7 @@ class InsertAboveWithNewline extends Insert
       @typedText = @typedText.trimLeft()
       super
     else
-      @vimState.setMode('insert')
+      @vimState.activate('insert')
 
 class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
@@ -579,7 +579,7 @@ class Change extends Insert
 
     return super if @typedText?
 
-    @vimState.setMode('insert')
+    @vimState.activate('insert')
 
 class Substitute extends Change
   @extend()
@@ -705,7 +705,7 @@ class Replace extends Operator
             @editor.moveDown()
           @editor.moveToFirstCharacterOfLine()
 
-    @vimState.setMode('normal')
+    @vimState.activate('normal')
 
 # Alias
 ActivateInsertMode = Insert
