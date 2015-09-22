@@ -8,7 +8,7 @@ describe "TextObject", ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      vimState.setMode('reset')
+      vimState.activate('reset')
       {set, ensure, keystroke} = vim
 
   describe "Word", ->

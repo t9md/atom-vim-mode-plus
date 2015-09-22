@@ -8,7 +8,7 @@ describe "Scrolling", ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      vimState.setMode('reset')
+      vimState.activate('reset')
       {set, ensure, keystroke} = vim
 
   describe "scrolling keybindings", ->

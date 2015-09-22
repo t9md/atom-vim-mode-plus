@@ -52,7 +52,7 @@ class OperationStack
       catch error
         if error.isOperatorError?()
           debug error.message
-          @vimState.setMode('reset')
+          @vimState.activate('reset')
           return
         else
           throw error
@@ -61,7 +61,7 @@ class OperationStack
       if @vimState.isMode('normal') and @peekTop().isOperator?()
         @inspect()
         debug '-> @process(): activating: operator-pending-mode'
-        @vimState.setMode('operator-pending')
+        @vimState.activate('operator-pending')
       else
         debug "-> @process(): return: not <#{@peekTop().getKind()}>.isComplete()"
         @inspect()

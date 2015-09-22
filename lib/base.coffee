@@ -80,7 +80,7 @@ class Base
 
   cancel: ->
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
-      @vimState.setMode('reset')
+      @vimState.activate('reset')
 
   # Expected to be called by child class.
   # It automatically create typecheck function like

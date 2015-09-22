@@ -19,7 +19,7 @@ class ModeManager
     else
       @mode is mode
 
-  setMode: (mode, submode=null) ->
+  activate: (mode, submode=null) ->
     if mode is 'reset'
       @editor.clearSelections()
       mode = 'normal'
@@ -32,7 +32,7 @@ class ModeManager
       when 'insert'
         @activateInsertMode(submode)
       when 'visual'
-        return @setMode('normal') if @isMode('visual', submode)
+        return @activate('normal') if @isMode('visual', submode)
         @activateVisualMode(submode)
       when 'operator-pending'
         null # This is just placeholder, nothing to do without updating selector.
@@ -61,7 +61,7 @@ class ModeManager
 
   # TODO: delete this in future.
   resetNormalMode: ->
-    @setMode('reset')
+    @activate('reset')
 
   # Insert
   # -------------------------
@@ -113,7 +113,7 @@ class ModeManager
   activateVisualMode: (submode) ->
     oldSubmode = @submode
     # [FIXME] following operation depend operationStack
-    # So @setMode at first is important since operationStack do
+    # So @activate at first is important since operationStack do
     # special cursor treatment depending on current mode.
     @mode = 'visual'
     @submode = submode

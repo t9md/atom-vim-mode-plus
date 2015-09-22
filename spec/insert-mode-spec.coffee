@@ -7,7 +7,7 @@ describe "Insert mode commands", ->
   beforeEach ->
     getVimState (vimState, vim) ->
       {editor, editorElement} = vimState
-      vimState.setMode('reset')
+      vimState.activate('reset')
       {set, ensure, keystroke} = vim
 
   describe "Copy from line above/below", ->
