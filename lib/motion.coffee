@@ -479,19 +479,12 @@ class Find extends Motion
   isBackwards: ->
     @backwards
 
-  getOffset: ->
-    if @isBackwards() then @offset else -@offset
-
-  getUnOffset: ->
-    -@getOffset() * @isRepeatFind()
-
   find: (cursor) ->
     cursorPoint = cursor.getBufferPosition()
     {start, end} = @editor.bufferRangeForBufferRow(cursorPoint.row)
 
-    points   = []
-    offset   = @getOffset()
-    unOffset = @getUnOffset()
+    offset   = if @isBackwards() then @offset else -@offset
+    unOffset = -offset * @isRepeatFind()
     if @isBackwards()
       scanRange = [start, cursorPoint.translate([0, unOffset])]
       method    = 'backwardsScanInBufferRange'
@@ -499,9 +492,9 @@ class Find extends Motion
       scanRange = [cursorPoint.translate([0, 1 + unOffset]), end]
       method    = 'scanInBufferRange'
 
+    points   = []
     @editor[method] ///#{_.escapeRegExp(@input)}///g, scanRange, ({range}) ->
       points.push range.start
-
     points[@getCount(1) - 1]?.translate([0, offset])
 
   moveCursor: (cursor) ->
@@ -612,7 +605,8 @@ class SearchBase extends Motion
 
     cursorPosition = cursor.getBufferPosition()
     ranges = []
-    @editor.scan @getSearchTerm(@input), ({range}) ->
+    pattern = @getPattern(@input)
+    @editor.scan pattern, ({range}) ->
       ranges.push range
 
     [rangesBefore, rangesAfter] = _.partition ranges, ({start}) =>
@@ -625,9 +619,13 @@ class SearchBase extends Motion
     ranges.reverse() if @isBackwards()
     ranges
 
-  getSearchTerm: (term) ->
-    modifiers = {'g': true}
+  # getPattern: (text) ->
+  #   flags = 'g'
+  #   flags += 'i' if settings.get('useSmartcaseForSearch') and text.match('[A-Z]')
+  #   new RegExp(_.escapeRegExp(text), flags)
 
+  getPattern: (term) ->
+    modifiers = {'g': true}
     if not term.match('[A-Z]') and settings.get('useSmartcaseForSearch')
       modifiers['i'] = true
 
@@ -667,15 +665,19 @@ class SearchCurrentWord extends SearchBase
 
   constructor: ->
     super
-
     # FIXME: This must depend on the current language
     defaultIsKeyword = "[@a-zA-Z0-9_\-]+"
     userIsKeyword = atom.config.get('vim-mode.iskeyword')
     @wordRegex = new RegExp(userIsKeyword or defaultIsKeyword)
-    @abort() unless word = @getCurrentWord()
-    @input = if /\W/.test(word) then "#{word}\\b" else "\\b#{word}\\b"
+    unless @input = @getCurrentWord()
+      @abort()
     unless @input is @vimState.getSearchHistoryItem()
       @vimState.pushSearchHistory(@input)
+
+  getPattern: (text) ->
+    pattern = _.escapeRegExp(text)
+    pattern = if /\W/.test(text) then "#{pattern}\\b" else "\\b#{pattern}\\b"
+    new RegExp(pattern, 'gi') # always case insensitive.
 
   # FIXME: Should not move cursor.
   getCurrentWord: ->
