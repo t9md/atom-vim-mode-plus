@@ -720,10 +720,6 @@ class SearchCurrentWord extends SearchBase
 
     @editor.getTextInBufferRange([wordStart, wordEnd])
 
-  cursorIsOnEOF: (cursor) ->
-    pos = cursor.getNextWordBoundaryBufferPosition(wordRegex: @keywordRegex)
-    pos.isEqual(@editor.getEofBufferPosition())
-
   getCurrentWordMatch: ->
     characters = @getCurrentWord()
     if characters.length > 0
