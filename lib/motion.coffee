@@ -620,25 +620,19 @@ class SearchBase extends Motion
     return [] if @input is ""
 
     cursorPosition = cursor.getBufferPosition()
+    ranges = []
+    @editor.scan @getSearchTerm(@input), ({range}) ->
+      ranges.push range
 
-    [rangesBefore, rangesAfter] = [[], []]
-    @editor.scan @getSearchTerm(@input), ({range}) =>
-      {start} = range
-      isBefore =
-        if @isBackwards()
-          start.compare(cursorPosition) < 0
-        else
-          start.compare(cursorPosition) <= 0
-
-      if isBefore
-        rangesBefore.push(range)
+    [rangesBefore, rangesAfter] = _.partition ranges, ({start}) =>
+      if @isBackwards()
+        start.isLessThan(cursorPosition)
       else
-        rangesAfter.push(range)
+        start.isLessThanOrEqual(cursorPosition)
 
-    if @isBackwards()
-      rangesAfter.concat(rangesBefore).reverse()
-    else
-      rangesAfter.concat(rangesBefore)
+    ranges = rangesAfter.concat(rangesBefore)
+    ranges.reverse() if @isBackwards()
+    ranges
 
   getSearchTerm: (term) ->
     modifiers = {'g': true}
