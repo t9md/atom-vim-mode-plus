@@ -686,6 +686,7 @@ class Search extends SearchBase
         unless @vimState.isMode('visual') or @vimState.isMode('insert')
           @vimState.activate('reset')
         @resetFlash()
+        @hoverSearchCounter.reset()
         @vimState.reset()
     if settings.get('enableIncrementalSearch')
       handlers.onDidChange = (@input) =>
