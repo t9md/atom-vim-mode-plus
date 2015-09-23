@@ -743,38 +743,38 @@ describe "Motion", ->
 
     describe "as a motion", ->
       it "moves the cursor to the specified search pattern", ->
-        ensure ['/', chars: 'def'],
+        ensure ['/', search: 'def'],
           cursor: [1, 0]
           called: pane.activate
 
       it "loops back around", ->
         set cursor: [3, 0]
-        ensure ['/', chars: 'def'], cursor: [1, 0]
+        ensure ['/', search: 'def'], cursor: [1, 0]
 
       it "uses a valid regex as a regex", ->
         # Cycle through the 'abc' on the first line with a character pattern
-        ensure ['/', chars: '[abc]'], cursor: [0, 1]
+        ensure ['/', search: '[abc]'], cursor: [0, 1]
         ensure 'n', cursor: [0, 2]
 
       it "uses an invalid regex as a literal string", ->
         # Go straight to the literal [abc
         set text: "abc\n[abc]\n"
-        ensure ['/', chars: '[abc'], cursor: [1, 0]
+        ensure ['/', search: '[abc'], cursor: [1, 0]
         ensure 'n', cursor: [1, 0]
 
       it "uses ? as a literal string", ->
         set text: "abc\n[a?c?\n"
-        ensure ['/', chars: '?'], cursor: [1, 2]
+        ensure ['/', search: '?'], cursor: [1, 2]
         ensure 'n', cursor: [1, 4]
 
       it 'works with selection in visual mode', ->
         set text: 'one two three'
-        ensure ['v/', chars: 'th'], cursor: [0, 9]
+        ensure ['v/', search: 'th'], cursor: [0, 9]
         ensure 'd', text: 'hree'
 
       it 'extends selection when repeating search in visual mode', ->
         set text: 'line1\nline2\nline3'
-        ensure ['v/', chars: 'line'],
+        ensure ['v/', search: 'line'],
           selectedBufferRangeStartRow: 0
           selectedBufferRangeEndRow: 1
         ensure 'n',
@@ -788,25 +788,25 @@ describe "Motion", ->
             cursor: [0, 0]
 
         it "works in case sensitive mode", ->
-          ensure ['/', chars: 'ABC'], cursor: [2, 0]
+          ensure ['/', search: 'ABC'], cursor: [2, 0]
           ensure 'n', cursor: [2, 0]
 
         it "works in case insensitive mode", ->
-          ensure ['/', chars: '\\cAbC'], cursor: [1, 0]
+          ensure ['/', search: '\\cAbC'], cursor: [1, 0]
           ensure 'n', cursor: [2, 0]
 
         it "works in case insensitive mode wherever \\c is", ->
-          ensure ['/', chars: 'AbC\\c'], cursor: [1, 0]
+          ensure ['/', search: 'AbC\\c'], cursor: [1, 0]
           ensure 'n', cursor: [2, 0]
 
         it "uses case insensitive search if useSmartcaseForSearch is true and searching lowercase", ->
           settings.set 'useSmartcaseForSearch', true
-          ensure ['/', chars: 'abc'], cursor: [1, 0]
+          ensure ['/', search: 'abc'], cursor: [1, 0]
           ensure 'n', cursor: [2, 0]
 
         it "uses case sensitive search if useSmartcaseForSearch is true and searching uppercase", ->
           settings.set 'useSmartcaseForSearch', true
-          ensure ['/', chars: 'ABC'], cursor: [2, 0]
+          ensure ['/', search: 'ABC'], cursor: [2, 0]
           ensure 'n', cursor: [2, 0]
 
       describe "repeating", ->
@@ -818,13 +818,13 @@ describe "Motion", ->
 
       describe "repeating with search history", ->
         beforeEach ->
-          keystroke ['/', chars: 'def']
+          keystroke ['/', search: 'def']
 
         it "repeats previous search with /<enter>", ->
-          ensure ['/', chars: ''], cursor: [3, 0]
+          ensure ['/', search: ''], cursor: [3, 0]
 
         it "repeats previous search with //", ->
-          ensure ['/', chars: '/'], cursor: [3, 0]
+          ensure ['/', search: '/'], cursor: [3, 0]
 
         describe "the n keybinding", ->
           it "repeats the last search", ->
@@ -838,32 +838,32 @@ describe "Motion", ->
 
       describe "composing", ->
         it "composes with operators", ->
-          ensure ['d/', chars: 'def'], text: "def\nabc\ndef\n"
+          ensure ['d/', search: 'def'], text: "def\nabc\ndef\n"
 
         it "repeats correctly with operators", ->
-          ensure ['d/', chars: 'def', '.'],
+          ensure ['d/', search: 'def', '.'],
             text: "def\n"
 
     describe "when reversed as ?", ->
       it "moves the cursor backwards to the specified search pattern", ->
-        ensure ['?', chars: 'def'], cursor: [3, 0]
+        ensure ['?', search: 'def'], cursor: [3, 0]
 
       it "accepts / as a literal search pattern", ->
         set
           text: "abc\nd/f\nabc\nd/f\n"
           cursor: [0, 0]
-        ensure ['?', chars: '/'], cursor: [3, 1]
-        ensure ['?', chars: '/'], cursor: [1, 1]
+        ensure ['?', search: '/'], cursor: [3, 1]
+        ensure ['?', search: '/'], cursor: [1, 1]
 
       describe "repeating", ->
         beforeEach ->
-          keystroke ['?', chars: 'def']
+          keystroke ['?', search: 'def']
 
         it "repeats previous search as reversed with ?<enter>", ->
-          ensure ['?', chars: ''], cursor: [1, 0]
+          ensure ['?', search: ''], cursor: [1, 0]
 
         it "repeats previous search as reversed with ??", ->
-          ensure ['?', chars: '?'], cursor: [1, 0]
+          ensure ['?', search: '?'], cursor: [1, 0]
 
         describe 'the n keybinding', ->
           it "repeats the last search backwards", ->
@@ -879,8 +879,8 @@ describe "Motion", ->
       inputEditor = null
 
       beforeEach ->
-        ensure ['/', chars: 'def'], cursor: [1, 0]
-        ensure ['/', chars: 'abc'], cursor: [2, 0]
+        ensure ['/', search: 'def'], cursor: [1, 0]
+        ensure ['/', search: 'abc'], cursor: [2, 0]
         inputEditor = vimState.searchInput.view.editorElement
 
       it "allows searching history in the search field", ->
@@ -1344,7 +1344,7 @@ describe "Motion", ->
         cursor: [1, 3]
 
     it "does not affect search history", ->
-      ensure ['/', chars: 'func'], cursor: [0, 31]
+      ensure ['/', search: 'func'], cursor: [0, 31]
       ensure '%', cursor: [0, 60]
       ensure 'n', cursor: [0, 31]
 
