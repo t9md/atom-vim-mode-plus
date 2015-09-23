@@ -123,13 +123,13 @@ class ModeManager
       when 'blockwise' then @selectBlockwise(oldSubmode)
 
   deactivateVisualMode: ->
-    {lastOperation} = @vimState
-    lastSelection = @editor.getLastSelection()
-    @vimState.lastVisual =
-      mode: @mode,
-      submode: @submode
-      range: lastSelection.getBufferRange()
-      reversed: lastSelection.isReversed()
+    # {lastOperation} = @vimState
+    # lastSelection = @editor.getLastSelection()
+    # @vimState.lastVisual =
+    #   mode: @mode,
+    #   submode: @submode
+    #   range: lastSelection.getBufferRange()
+    #   reversed: lastSelection.isReversed()
 
     restoreColumn = not (lastOperation?.isYank() or lastOperation?.isIndent())
     if restoreColumn and @isMode('visual', 'linewise')

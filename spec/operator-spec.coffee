@@ -16,9 +16,9 @@ describe "Operator", ->
     it "clear pending operation", ->
       keystroke '/'
       expect(vimState.operationStack.isOperatorPending()).toBe true
-      vimState.search.view.cancel()
+      vimState.search.cancel()
       expect(vimState.operationStack.isOperatorPending()).toBe false
-      expect(-> vimState.search.view.cancel()).not.toThrow()
+      expect(-> vimState.search.cancel()).not.toThrow()
 
   describe "the x keybinding", ->
     describe "on a line with content", ->
@@ -1087,21 +1087,23 @@ describe "Operator", ->
     it "does nothing when cancelled", ->
       ensure 'r',
         mode: 'operator-pending'
-      vimState.input.view.cancel()
+      vimState.input.cancel()
       ensure
         text: '12\n34\n\n'
         mode: 'normal'
 
     it "remain visual-mode when cancelled", ->
       keystroke 'vr'
-      vimState.input.view.cancel()
+      vimState.input.cancel()
       ensure
         text: '12\n34\n\n'
         mode: ['visual', 'characterwise']
 
     it "replaces a single character with a line break", ->
+      inputEditorElement = vimState.input.view.editorElement
       keystroke 'r'
-      ensure [char: '\n'],
+      atom.commands.dispatch(inputEditorElement, 'core:confirm')
+      ensure
         text: '\n2\n\n4\n\n'
         cursorBuffer: [[1, 0], [3, 0]]
 

@@ -211,8 +211,7 @@ class Surround extends TransformString
   constructor: ->
     super
     return unless @requireInput
-    options = {defaultInput: '', @charsMax}
-    @vimState.input.readInput options, @getInputHandler()
+    @vimState.input.readInput {@charsMax}, @getInputHandler()
 
   getInputHandler: ->
     onDidConfirm: (input) =>
@@ -674,7 +673,11 @@ class Replace extends Operator
 
   constructor: ->
     super
-    @readInput(defaultInput: "\n")
+    @readInput()
+
+  isComplete: ->
+    @input = "\n" if @input is ''
+    super
 
   execute: ->
     count = @getCount(1)
