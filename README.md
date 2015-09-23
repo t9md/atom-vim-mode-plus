@@ -107,7 +107,7 @@ Work in progress, may change depending on how was it useful after implement and 
 
 Done by extending Base class, so each TOM and its instance can report itself.
 
-- [TOM-report](https://github.com/t9md/vim-mode/blob/refactor-experiment/docs/TOM-report.md)
+- [TOM-report](https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md)
 
 # TODO
 
