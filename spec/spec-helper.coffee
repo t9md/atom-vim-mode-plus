@@ -96,16 +96,6 @@ _keystroke = (keys, {element}) ->
       else
         keydown key, {element}
 
-normalModeInputKeydown = (key, options={}) ->
-  theEditor = options.editor ? E
-  theEditor.normalModeInputView.editorElement.getModel().insertText(key)
-
-submitNormalModeInputText = (text, options={}) ->
-  theEditor = options.editor ? E
-  inputEditor = theEditor.normalModeInputView.editorElement
-  inputEditor.getModel().setText(text)
-  atom.commands.dispatch(inputEditor, 'core:confirm')
-
 toArray = (obj, cond=null) ->
   if _.isArray(cond ? obj) then obj else [obj]
 
@@ -267,7 +257,10 @@ getVim = (vimState) ->
                 k.char.split('')
             for c in chars
               vimState.input.view.editor.insertText(c)
-          when k.chars? then submitNormalModeInputText k.chars, {@editor}
+          when k.chars?
+            {editor, editorElement} = vimState.searchInput.view
+            editor.insertText(k.chars)
+            atom.commands.dispatch(editorElement, 'core:confirm')
           when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
           when k.raw?   then keydown k.raw, {raw: true, element}
           when k.cmd?   then atom.commands.dispatch(k.cmd.target, k.cmd.name)

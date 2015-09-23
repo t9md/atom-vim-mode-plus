@@ -6,7 +6,8 @@
 _ = require 'underscore-plus'
 
 settings = require './settings'
-{SearchViewModel} = require './view'
+# {SearchViewModel} = require './view'
+{SearchInput} = require './input'
 Base = require './base'
 
 class Motion extends Base
@@ -665,19 +666,14 @@ class SearchBase extends Motion
     catch
       new RegExp(_.escapeRegExp(term), modFlags)
 
-# FIXME Saving search history is done in view.coffee
-# Should be saved within Searach class for clearity.
 class Search extends SearchBase
   @extend()
   constructor: ->
     super
-    @getInput()
+    @vimState.searchInput.focus({@backwards})
 
-  getInput: ->
-    viewModel = new SearchViewModel(@vimState, @backwards)
-    viewModel.onDidGetInput (@input) =>
-      @complete = true
-      @vimState.operationStack.process() # Re-process!!
+  isComplete: ->
+    @input = @vimState.searchInput.getInput()
 
 class SearchBackwards extends Search
   @extend()
