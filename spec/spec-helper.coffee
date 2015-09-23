@@ -257,9 +257,9 @@ getVim = (vimState) ->
                 k.char.split('')
             for c in chars
               vimState.input.view.editor.insertText(c)
-          when k.chars?
+          when k.search?
             {editor, editorElement} = vimState.searchInput.view
-            editor.insertText(k.chars)
+            editor.insertText(k.search)
             atom.commands.dispatch(editorElement, 'core:confirm')
           when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
           when k.raw?   then keydown k.raw, {raw: true, element}
