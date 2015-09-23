@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
-vim-mode version: 0.57.0  
-*generated at 2015-09-20T16:18:24.182Z*
+vim-mode-plus version: 0.1.0  
+*generated at 2015-09-23T17:28:23.843Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -50,11 +50,11 @@ vim-mode version: 0.57.0
     - [SearchBase](#searchbase--motion) *Not exported*
       - [BracketMatchingMotion](#bracketmatchingmotion--searchbase)
       - [RepeatSearch](#repeatsearch--searchbase)
-        - [RepeatSearchBackwards](#repeatsearchbackwards--repeatsearch)
+        - [RepeatSearchReverse](#repeatsearchreverse--repeatsearch)
       - [Search](#search--searchbase)
-        - [ReverseSearch](#reversesearch--search)
+        - [SearchBackwards](#searchbackwards--search)
       - [SearchCurrentWord](#searchcurrentword--searchbase)
-        - [ReverseSearchCurrentWord](#reversesearchcurrentword--searchcurrentword)
+        - [SearchCurrentWordBackwards](#searchcurrentwordbackwards--searchcurrentword)
   - [Operator](#operator--base)
     - [Delete](#delete--operator)
       - [DeleteLeft](#deleteleft--delete)
@@ -80,7 +80,6 @@ vim-mode version: 0.57.0
       - [ReplaceMode](#replacemode--insert)
     - [Join](#join--operator)
     - [Mark](#mark--operator)
-    - [OperateOnInnerWord](#operateoninnerword--operator)
     - [PutBefore](#putbefore--operator)
       - [PutAfter](#putafter--putbefore)
     - [Repeat](#repeat--operator)
@@ -162,14 +161,14 @@ vim-mode version: 0.57.0
 - ::getKind`()`
 - ::getCount`(defaultCount)`
 - ::new`(klassName, properties)`
-- ::getInput`(options)`
+- ::readInput`(_arg)`
 - ::isCanceled`()`
 - ::cancel`()`
+- ::flash`(_arg, fn)`
 - ::isOperationAbortedError`()`
 - ::isOperatorError`()`
 - ::isOperator`()`
 - ::isSelect`()`
-- ::isOperateOnInnerWord`()`
 - ::isDelete`()`
 - ::isDeleteRight`()`
 - ::isDeleteLeft`()`
@@ -245,20 +244,20 @@ vim-mode version: 0.57.0
 - ::isScrollHalfScreenDown`()`
 - ::isScrollHalfScreenUp`()`
 - ::isFind`()`
-- ::isRepeatFind`()`
-- ::isRepeatFindReverse`()`
 - ::isFindBackwards`()`
 - ::isTill`()`
 - ::isTillBackwards`()`
+- ::isRepeatFind`()`
+- ::isRepeatFindReverse`()`
 - ::isMoveToMark`()`
 - ::isMoveToMarkLine`()`
 - ::isSearchBase`()`
 - ::isSearch`()`
-- ::isReverseSearch`()`
+- ::isSearchBackwards`()`
 - ::isSearchCurrentWord`()`
-- ::isReverseSearchCurrentWord`()`
+- ::isSearchCurrentWordBackwards`()`
 - ::isRepeatSearch`()`
-- ::isRepeatSearchBackwards`()`
+- ::isRepeatSearchReverse`()`
 - ::isBracketMatchingMotion`()`
 - ::isTextObject`()`
 - ::isWord`()`
@@ -374,14 +373,13 @@ vim-mode version: 0.57.0
 - ::constructor`()`: `super`: **Overridden**
 - ::backwards: ```false```
 - ::complete: ```false```: **Overridden**
-- ::repeated: ```false```
-- ::reverse: ```false```
-- ::offset: ```0```
-- ::hoverText: ```':mag_right:'```
-- ::hoverIcon: ```':find:'```
 - ::requireInput: ```true```: **Overridden**
 - ::inclusive: ```true```: **Overridden**
-- ::match`(cursor, count)`
+- ::hoverText: ```':mag_right:'```
+- ::hoverIcon: ```':find:'```
+- ::offset: ```0```
+- ::isBackwards`()`
+- ::find`(cursor)`
 - ::moveCursor`(cursor)`
 
 ### FindBackwards < Find
@@ -397,24 +395,19 @@ vim-mode version: 0.57.0
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>;</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::repeated: ```true```: **Overridden**
-- ::reverse: ```false```: **Overridden**
-- ::offset: ```0```: **Overridden**
-- ::moveCursor`()`: **Overridden**
 
 ### RepeatFindReverse < RepeatFind
 - command: `vim-mode:repeat-find-reverse`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>,</kbd>
-- ::constructor`()`: `super`: **Overridden**
-- ::reverse: ```true```: **Overridden**
+- ::isBackwards`()`: **Overridden**
 
 ### Till < Find
 - command: `vim-mode:till`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>t</kbd>
 - ::offset: ```1```: **Overridden**
-- ::match`()`: `super`: **Overridden**
+- ::find`()`: `super`: **Overridden**
 - ::selectInclusive`(selection)`: `super`: **Overridden**
 
 ### TillBackwards < Till
@@ -655,14 +648,15 @@ vim-mode version: 0.57.0
 ### SearchBase < Motion
 *Not exported*
 - ::constructor`()`: `super`: **Overridden**
-- ::dontUpdateCurrentSearch: ```false```
+- ::saveCurrentSearch: ```true```
 - ::complete: ```false```: **Overridden**
-- ::reversed`()`
+- ::backwards: ```false```
+- ::isBackwards`()`
+- ::flash`(range, fn)`: `super(options, fn)`: **Overridden**
 - ::moveCursor`(cursor)`
+- ::getCounter`(range, ranges)`
 - ::scan`(cursor)`
-- ::getSearchTerm`(term)`
-- ::updateCurrentSearch`()`
-- ::replicateCurrentSearch`()`
+- ::getPattern`(term)`
 
 ### BracketMatchingMotion < SearchBase
 - command: `vim-mode:bracket-matching-motion`
@@ -681,46 +675,42 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>n</kbd>
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: ```true```: **Overridden**
-- ::dontUpdateCurrentSearch: ```true```: **Overridden**
-- ::reversed`()`: **Overridden**
+- ::saveCurrentSearch: ```false```: **Overridden**
 
-### RepeatSearchBackwards < RepeatSearch
-- command: `vim-mode:repeat-search-backwards`
+### RepeatSearchReverse < RepeatSearch
+- command: `vim-mode:repeat-search-reverse`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>N</kbd>
-- ::constructor`()`: `super`: **Overridden**
+- ::isBackwards`()`: **Overridden**
 
 ### Search < SearchBase
 - command: `vim-mode:search`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>/</kbd>
 - ::constructor`()`: `super`: **Overridden**
-- ::getInput`()`: **Overridden**
+- ::getInputHandler`()`
 
-### ReverseSearch < Search
-- command: `vim-mode:reverse-search`
+### SearchBackwards < Search
+- command: `vim-mode:search-backwards`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>?</kbd>
-- ::constructor`()`: `super`: **Overridden**
+- ::backwards: ```true```: **Overridden**
 
 ### SearchCurrentWord < SearchBase
 - command: `vim-mode:search-current-word`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>*</kbd>
-- @keywordRegex: ```null```
 - ::constructor`()`: `super`: **Overridden**
+- ::wordRegex: ```null```
 - ::complete: ```true```: **Overridden**
+- ::getPattern`(text)`: **Overridden**
 - ::getCurrentWord`()`
-- ::cursorIsOnEOF`(cursor)`
-- ::getCurrentWordMatch`()`
-- ::execute`()`: `super`: **Overridden**
 
-### ReverseSearchCurrentWord < SearchCurrentWord
-- command: `vim-mode:reverse-search-current-word`
+### SearchCurrentWordBackwards < SearchCurrentWord
+- command: `vim-mode:search-current-word-backwards`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>#</kbd>
-- @keywordRegex: ```null```
-- ::constructor`()`: `super`: **Overridden**
+- ::backwards: ```true```: **Overridden**
 
 ### Operator < Base
 - ::constructor`()`: `super`: **Overridden**
@@ -734,7 +724,7 @@ vim-mode version: 0.57.0
 - ::markCursorBufferPositions`()`
 - ::restoreMarkedCursorPositions`(markerByCursor)`
 - ::markSelections`()`
-- ::flash`(range, fn)`
+- ::flash`(range, fn)`: `super(options, fn)`: **Overridden**
 - ::eachSelection`(fn)`
 
 ### Delete < Operator
@@ -901,12 +891,6 @@ vim-mode version: 0.57.0
 - ::requireInput: ```true```: **Overridden**
 - ::execute`()`
 
-### OperateOnInnerWord < Operator
-- command: `vim-mode:operate-on-inner-word`
-- ::constructor`()`: `super`: **Overridden**
-- ::compose`(target)`: **Overridden**
-- ::execute`()`
-
 ### PutBefore < Operator
 - command: `vim-mode:put-before`
 - keymaps
@@ -939,6 +923,7 @@ vim-mode version: 0.57.0
 - ::input: ```null```
 - ::hoverText: ```':tractor:'```
 - ::requireInput: ```true```: **Overridden**
+- ::isComplete`()`: `super`: **Overridden**
 - ::execute`()`
 
 ### ReplaceWithRegister < Operator
@@ -1005,7 +990,8 @@ vim-mode version: 0.57.0
 - ::hoverText: ```':two_women_holding_hands:'```
 - ::hoverIcon: ```':surround:'```
 - ::requireInput: ```true```: **Overridden**
-- ::onDidGetInput`(@input)`
+- ::getInputHandler`()`
+- ::onDidConfirm`(@input)`
 - ::getPair`(input)`
 - ::surround`(text, pair)`
 - ::getNewText`(text)`
@@ -1014,7 +1000,7 @@ vim-mode version: 0.57.0
 - command: `vim-mode:delete-surround`
 - keymaps
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g s d</kbd>
-- ::onDidGetInput`(@input)`: **Overridden**
+- ::onDidConfirm`(@input)`: **Overridden**
 - ::getNewText`(text)`: **Overridden**
 
 ### ChangeSurround < DeleteSurround
@@ -1023,14 +1009,14 @@ vim-mode version: 0.57.0
   - atom-text-editor.vim-mode:not(.insert-mode): <kbd>g s c</kbd>
 - ::charsMax: ```2```: **Overridden**
 - ::char: ```null```
-- ::onDidGetInput`(input)`: `super(from)`: **Overridden**
+- ::onDidConfirm`(input)`: `super(from)`: **Overridden**
 - ::getNewText`(text)`: **Overridden**
 
 ### ChangeSurroundAnyPair < ChangeSurround
 - command: `vim-mode:change-surround-any-pair`
 - ::constructor`()`: `super`: **Overridden**
 - ::charsMax: ```1```: **Overridden**
-- ::onDidGetInput`(@char)`: **Overridden**
+- ::onDidConfirm`(@char)`: **Overridden**
 
 ### DeleteSurroundAnyPair < DeleteSurround
 - command: `vim-mode:delete-surround-any-pair`
