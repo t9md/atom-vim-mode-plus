@@ -738,7 +738,7 @@ describe "Motion", ->
           return: pane
 
       # clear search history
-      vimState.globalVimState.searchHistory = []
+      vimState.searchHistory.clear()
       vimState.globalVimState.currentSearch = {}
 
     describe "as a motion", ->
