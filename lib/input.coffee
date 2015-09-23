@@ -24,8 +24,13 @@ class InputBase
       return if @finishing
       text = @editor.getText()
       @emitter.emit 'did-change', text
-      if @options.charsMax
-        @confirm() if text.length >= @options.charsMax
+      @confirm() if @canConfirm()
+
+  canConfirm: ->
+    if @options?.charsMax
+      @editor.getText().length >= @options.charsMax
+    else
+      false
 
   readInput: (options, handlers={}) ->
     subs = new CompositeDisposable
@@ -58,6 +63,7 @@ class InputBase
   destroy: ->
     @vimState = null
     @view.destroy()
+
     @editor = null
     @editorElement = null
 
