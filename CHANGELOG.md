@@ -1,5 +1,9 @@
 ## HEAD
 
+## 0.1.0 2015.9.21 rename vim-mode to vim-mode-plus
+
+## 0.0.0 2015.8.1 forked from vim-mode.
+
 ## 0.57
 
 * Added replace ('R') mode! - @jacekkopecky
