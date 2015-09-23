@@ -593,32 +593,38 @@ class SearchBase extends Motion
     if @saveCurrentSearch
       @vimState.globalVimState.currentSearch.backwards = @backwards
 
-  flash: (range, fn=null) ->
+  flash: (range, timeout=null) ->
     options =
       range: range
       klass: 'vim-mode-flash'
-      timeout: settings.get('flashOnSearchDurationMilliSeconds')
-    super(options, fn)
+      timeout: timeout ? settings.get('flashOnSearchDurationMilliSeconds')
+    super(options)
 
   moveCursor: (cursor) ->
     ranges = @scan(cursor)
     if ranges.length is 0
+      @resetFlash()
       atom.beep()
       return
 
     range = ranges[(@getCount(1) - 1) % ranges.length]
-    @editor.scrollToBufferPosition(range.start, center: true)
-    cursor.setBufferPosition(range.start, center: true)
+    point = range.start
+    @editor.scrollToBufferPosition(point, center: true)
 
-    @vimState.searchHistory.save(@input)
+    # dont do acutual move in temporal visit in inclemental search.
+    if @isComplete()
+      cursor.setBufferPosition(point, center: true)
+      @vimState.searchHistory.save(@input)
 
     if settings.get('flashOnSearch')
-      @flash range
+      timeout = if @isComplete() then null else 99999
+      @flash range, timeout
 
     if settings.get('enableHoverSearchCounter')
       counter = @getCounter(range, ranges)
-      timeout = settings.get('searchCounterHoverDuration')
-      @vimState.hoverSearchCounter.add counter, timeout
+      timeout = 99999 unless @isComplete()
+      timeout ?= settings.get('searchCounterHoverDuration')
+      @vimState.hoverSearchCounter.addWithTimeout counter, point, timeout
 
   getCounter: (range, ranges) ->
     rangeSorted = ranges.slice().sort (a, b) -> a.compare(b)
@@ -644,11 +650,6 @@ class SearchBase extends Motion
     ranges.reverse() if @isBackwards()
     ranges
 
-  # getPattern: (text) ->
-  #   flags = 'g'
-  #   flags += 'i' if settings.get('useSmartcaseForSearch') and text.match('[A-Z]')
-  #   new RegExp(_.escapeRegExp(text), flags)
-
   getPattern: (term) ->
     modifiers = {'g': true}
     if not term.match('[A-Z]') and settings.get('useSmartcaseForSearch')
@@ -672,18 +673,25 @@ class Search extends SearchBase
     @vimState.search.readInput {@backwards}, @getInputHandler()
 
   getInputHandler: ->
-    onDidConfirm: (input) =>
-      repeatChar = if @backwards then '?' else '/'
-      if (input is '') or (input is repeatChar)
-        input = @vimState.searchHistory.get('prev')
-        atom.beep() if input is ''
-      @input = input
-      @complete = true
-      @vimState.operationStack.process()
-    onDidCancel: =>
-      unless @vimState.isMode('visual') or @vimState.isMode('insert')
-        @vimState.activate('reset')
-      @vimState.reset()
+    handlers =
+      onDidConfirm: (input) =>
+        repeatChar = if @backwards then '?' else '/'
+        if (input is '') or (input is repeatChar)
+          input = @vimState.searchHistory.get('prev')
+          atom.beep() if input is ''
+        @input = input
+        @complete = true
+        @vimState.operationStack.process()
+      onDidCancel: =>
+        unless @vimState.isMode('visual') or @vimState.isMode('insert')
+          @vimState.activate('reset')
+        @resetFlash()
+        @vimState.reset()
+    if settings.get('enableIncrementalSearch')
+      handlers.onDidChange = (@input) =>
+        for c in @editor.getCursors()
+          @moveCursor(c)
+    handlers
 
 class SearchBackwards extends Search
   @extend()

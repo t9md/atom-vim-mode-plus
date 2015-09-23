@@ -20,65 +20,69 @@ module.exports = new Settings 'vim-mode-plus',
     order: 2
     type: 'boolean'
     default: false
-  wrapLeftRightMotion:
+  enableIncrementalSearch:
     order: 3
     type: 'boolean'
     default: false
+  wrapLeftRightMotion:
+    order: 4
+    type: 'boolean'
+    default: false
   useClipboardAsDefaultRegister:
-    order: 5
+    order: 6
     type: 'boolean'
     default: false
   numberRegex:
-    order: 6
+    order: 7
     type: 'string'
     default: '-?[0-9]+'
     description: 'Use this to control how Ctrl-A/Ctrl-X finds numbers; use "(?:\\B-)?[0-9]+" to treat numbers as positive if the minus is preceded by a character, e.g. in "identifier-1".'
   showCursorInVisualMode:
-    order: 7
-    type: 'boolean'
-    default: true
-  flashOnOperate:
     order: 8
     type: 'boolean'
     default: true
-  flashOnOperateDurationMilliSeconds:
+  flashOnOperate:
     order: 9
+    type: 'boolean'
+    default: true
+  flashOnOperateDurationMilliSeconds:
+    order: 10
     type: 'integer'
     default: 100
     description: "Duration for flash"
   flashOnSearch:
-    order: 10
+    order: 11
     type: 'boolean'
     default: true
   flashOnSearchDurationMilliSeconds:
-    order: 11
+    order: 12
     type: 'integer'
     default: 300
     description: "Duration for flash"
   stayOnTransformString:
-    order: 12
+    order: 13
     type: 'boolean'
     default: false
     description: "Dont move cursor when Toggle, Surround, etc"
   enableHoverIndicator:
-    order: 13
-    type: 'boolean'
-    default: false
-  enableHoverIcon:
     order: 14
     type: 'boolean'
     default: false
-  hoverStyle:
+  enableHoverIcon:
     order: 15
+    type: 'boolean'
+    default: false
+  hoverStyle:
+    order: 16
     type: 'string'
     default: 'emoji'
     enum: ['emoji', 'icon']
   enableHoverSearchCounter:
-    order: 16
+    order: 17
     type: 'boolean'
     default: false
   searchCounterHoverDuration:
-    order: 17
+    order: 18
     type: 'integer'
     default: 500
   debug:

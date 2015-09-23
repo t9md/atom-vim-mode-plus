@@ -23,8 +23,11 @@ class InputBase
     @editor.onDidChange =>
       return if @finishing
       text = @editor.getText()
-      @emitter.emit 'did-change', text
-      @confirm() if @canConfirm()
+      # If we can confirm, no need to inform change.
+      if @canConfirm()
+        @confirm()
+      else
+        @emitter.emit 'did-change', text
 
   canConfirm: ->
     if @options?.charsMax
@@ -33,15 +36,16 @@ class InputBase
       false
 
   readInput: (options, handlers={}) ->
-    subs = new CompositeDisposable
+    @subs?.dispose()
+    @subs = new CompositeDisposable
     {onDidConfirm, onDidCancel, onDidChange} = handlers
 
-    subs.add @onDidChange(onDidChange) if onDidChange?
-    subs.add @onDidConfirm(onDidConfirm) if onDidConfirm?
-    subs.add @onDidCancel(onDidCancel) if onDidCancel?
-    subs.add @onWillUnfocus ->
-      subs.dispose()
-      subs = null
+    @subs.add @onDidChange(onDidChange) if onDidChange?
+    @subs.add @onDidConfirm(onDidConfirm) if onDidConfirm?
+    @subs.add @onDidCancel(onDidCancel) if onDidCancel?
+    @subs.add @onWillUnfocus =>
+      @subs.dispose()
+      @subs = null
     @focus(options)
 
   focus: (@options={}) ->
