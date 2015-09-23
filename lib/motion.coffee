@@ -672,7 +672,7 @@ class Search extends SearchBase
     @getInput()
 
   getInput: ->
-    viewModel = new SearchViewModel(this)
+    viewModel = new SearchViewModel(@vimState, @backwards)
     viewModel.onDidGetInput (@input) =>
       @complete = true
       @vimState.operationStack.process() # Re-process!!
