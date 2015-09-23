@@ -271,7 +271,6 @@ class VimState
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
-    @hoverSearchCounter.reset()
     @operationStack.clear()
 
 
