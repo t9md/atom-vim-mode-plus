@@ -607,7 +607,8 @@ class SearchBase extends Motion
       return
 
     range = ranges[(@getCount(1) - 1) % ranges.length]
-    cursor.setBufferPosition(range.start)
+    @editor.scrollToBufferPosition(range.start, center: true)
+    cursor.setBufferPosition(range.start, center: true)
 
     if settings.get('flashOnSearch')
       @flash range
