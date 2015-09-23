@@ -17,9 +17,7 @@ class SearchHistoryManager
 
   save: (entry) ->
     return if _.isEmpty(entry)
-    # @getEntries().unshift entry
     @replaceEntries _.uniq([entry].concat @getEntries())
-    # @replaceEntries _.uniq @getEntries() # Eliminate duplicates
     if @getSize() > settings.get('historySize')
       @getEntries().splice settings.get('historySize')
 
