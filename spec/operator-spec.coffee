@@ -13,18 +13,12 @@ describe "Operator", ->
       {set, ensure, keystroke} = vim
 
   describe "cancelling operations", ->
-    it "does not throw an error even if no operation is pending", ->
-      # cancel operation pushes an empty input operation
-      # doing this without a pending operation throws an exception
-      expect(-> editor.normalModeInputView.viewModel.cancel()).toThrow()
-
-      # make sure normalModeInputView is created
+    it "clear pending operation", ->
       keystroke '/'
       expect(vimState.operationStack.isOperatorPending()).toBe true
-      editor.normalModeInputView.viewModel.cancel()
-
+      vimState.searchInput.view.cancel()
       expect(vimState.operationStack.isOperatorPending()).toBe false
-      expect(-> editor.normalModeInputView.viewModel.cancel()).not.toThrow()
+      expect(-> vimState.searchInput.view.cancel()).not.toThrow()
 
   describe "the x keybinding", ->
     describe "on a line with content", ->

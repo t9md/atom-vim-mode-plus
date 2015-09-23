@@ -60,7 +60,6 @@ class InputElement extends HTMLElement
 
   createdCallback: ->
     @className = 'vim-mode-input'
-    @style.height = '0px'
 
     @editorElement = document.createElement 'atom-text-editor'
     @editorElement.classList.add('editor')
@@ -81,11 +80,12 @@ class InputElement extends HTMLElement
 
   handleInput: ->
     @editor.onDidChange =>
+      @editor.getText()
       return if @finishing
       text = @editor.getText()
       @model.emitter.emit 'did-change', text
-      if text.length >= @getSpec('charsMax')
-        @confirm()
+      if charsMax = @getSpec('charsMax')
+        @confirm() if text.length >= charsMax
 
   setSpec: (@spec) ->
     _.defaults(@spec, {defaultInput: '', charsMax: 1})
@@ -127,10 +127,69 @@ class InputElement extends HTMLElement
     @panel.destroy()
     @remove()
 
+class SearchInput extends Input
+  input: null
+
+  constructor: ->
+    super
+    {@searchHistory} = @vimState
+    atom.commands.add @view.editorElement,
+      'core:move-up':   => @view.editor.setText @searchHistory.get('prev')
+      'core:move-down': => @view.editor.setText @searchHistory.get('next')
+
+    @onDidGet {}, (@input) =>
+      @vimState.operationStack.process()
+
+    @onDidCancel =>
+      unless @vimState.isMode('visual') or @vimState.isMode('insert')
+        @vimState.activate('reset')
+      @vimState.reset()
+
+  getInput: ->
+    @input
+
+  focus: ({@backwards}={}) ->
+    @view.classList.add('backwards') if @backwards
+    super
+
+  unfocus: ->
+    @backwards = null
+    @input = null
+
+class SearchInputElement extends InputElement
+  createdCallback: ->
+    super
+    @className = "vim-mode-search-input"
+
+  setSpec: (@spec) ->
+
+  initialize: (@model) ->
+    super
+
+  unfocus: ->
+    @classList.remove('backwards')
+    super
+
+  confirm: ->
+    repeatChar = if @model.backwards then '?' else '/'
+    if (input = @editor.getText())?
+      if (input is '') or (input is repeatChar)
+        input = @model.searchHistory.get('prev')
+        atom.beep() if input is ''
+      @model.emitter.emit 'did-get', input
+      @unfocus()
+    else
+      @cancel()
+
 InputElement = document.registerElement 'vim-mode-input',
   prototype: InputElement.prototype
   extends: 'div',
 
+SearchInputElement = document.registerElement 'vim-mode-search-input',
+  prototype: SearchInputElement.prototype
+  extends: 'div',
+
 module.exports = {
-  Input, InputElement
+  Input, InputElement,
+  SearchInput, SearchInputElement
 }

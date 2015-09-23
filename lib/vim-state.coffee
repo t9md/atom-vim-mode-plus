@@ -3,7 +3,7 @@ Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
 {Hover} = require './hover'
-{Input} = require './input'
+{Input, SearchInput} = require './input'
 settings = require './settings'
 
 Operator        = require './operator'
@@ -63,6 +63,7 @@ class VimState
     @hover = new Hover(this)
     @hoverSearchCounter = new Hover(this)
     @input = new Input(this)
+    @searchInput = new SearchInput(this)
 
     @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
 
@@ -108,6 +109,8 @@ class VimState
     @searchHistor = null
     @input.destroy()
     @input = null
+    @searchInput.destroy()
+    @searchInput = null
     @modeManager = null
     @emitter.emit 'did-destroy'
 
