@@ -4,10 +4,11 @@
 
 class SearchViewModel
   # [FIXME] constructor argument is not consitent
-  constructor: (@searchMotion) ->
-    {@vimState} = @searchMotion
+  constructor: (@vimState, @backwards) ->
+    # {@vimState} = @searchMotion
     @emitter = new Emitter
-    @view = new VimNormalModeInputElement().initialize(this, class: 'search')
+    @view = new VimNormalModeInputElement().initialize(this, {class: 'search', @backwards})
+
     @vimState.editor.normalModeInputView = @view
     @vimState.onDidFailToCompose =>
       @view.remove()
@@ -41,7 +42,7 @@ class SearchViewModel
       @restoreHistory(@historyIndex)
 
   confirm: =>
-    repeatChar = if @searchMotion.backwards then '?' else '/'
+    repeatChar = if @backwards then '?' else '/'
     if @view.value is '' or @view.value is repeatChar
       lastSearch = @history(0)
       if lastSearch?
@@ -70,12 +71,6 @@ class VimNormalModeInputElement extends HTMLDivElement
     @appendChild(@editorContainer)
 
   initialize: (@viewModel, options={}) ->
-    if options.class?
-      @editorContainer.classList.add(options.class)
-
-    if options.hidden
-      @editorContainer.style.height = "0px"
-
     @editorElement = document.createElement "atom-text-editor"
     @editorElement.classList.add('editor')
     @editorElement.setAttribute('mini', '')
@@ -83,9 +78,8 @@ class VimNormalModeInputElement extends HTMLDivElement
     @editor.setMini(true)
     @editorContainer.appendChild(@editorElement)
 
-    @charsMax = options.charsMax
-    @defaultText = options.defaultText ? ''
-
+    @editorContainer.classList.add('search-input')
+    @editorContainer.classList.add('backwards') if options.backwards
     @panel = atom.workspace.addBottomPanel(item: this, priority: 100)
 
     @handleEvents()
@@ -93,22 +87,14 @@ class VimNormalModeInputElement extends HTMLDivElement
     this
 
   handleEvents: ->
-    if @charsMax?
-      @editor.onDidChange =>
-        @viewModel.emitter.emit 'did-change-input', @editor.getText()
-        text = @editor.getText()
-        if text.length >= @charsMax
-          @confirm()
-    else
-      atom.commands.add @editorElement, 'editor:newline': => @confirm()
-
     atom.commands.add @editorElement,
-      'core:confirm': => @confirm()
-      'core:cancel':  => @cancel()
-      'blur':         => @cancel()
+      'editor:newline': => @confirm()
+      'core:confirm':   => @confirm()
+      'core:cancel':    => @cancel()
+      'blur':           => @cancel()
 
   confirm: ->
-    @value = @editor.getText() or @defaultText
+    @value = @editor.getText()
     @viewModel.confirm()
     @removePanel()
 

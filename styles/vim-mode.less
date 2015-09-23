@@ -184,3 +184,12 @@ atom-text-editor::shadow {
   margin-left: -0.1em;
   text-align: center;
 }
+
+.search-input {
+  atom-text-editor[mini]::before {
+    content: '/';
+  }
+  &.backwards atom-text-editor[mini]::before {
+    content: '?';
+  }
+}
