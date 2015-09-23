@@ -610,6 +610,8 @@ class SearchBase extends Motion
     @editor.scrollToBufferPosition(range.start, center: true)
     cursor.setBufferPosition(range.start, center: true)
 
+    @vimState.searchHistory.save(@input)
+
     if settings.get('flashOnSearch')
       @flash range
 
@@ -694,8 +696,6 @@ class SearchCurrentWord extends SearchBase
     @wordRegex = new RegExp(userIsKeyword or defaultIsKeyword)
     unless @input = @getCurrentWord()
       @abort()
-    unless @input is @vimState.getSearchHistoryItem()
-      @vimState.pushSearchHistory(@input)
 
   getPattern: (text) ->
     pattern = _.escapeRegExp(text)
@@ -730,7 +730,7 @@ class RepeatSearch extends SearchBase
 
   constructor: ->
     super
-    @input = @vimState.getSearchHistoryItem(0) ? ''
+    @input = @vimState.searchHistory.get('prev')
     @backwards = @vimState.globalVimState.currentSearch.backwards
 
 class RepeatSearchReverse extends RepeatSearch

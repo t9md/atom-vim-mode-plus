@@ -13,11 +13,12 @@ InsertMode      = require './insert-mode'
 Scroll          = require './scroll'
 VisualBlockwise = require './visual-blockwise'
 
-OperationStack  = require './operation-stack'
-CountManager    = require './count-manager'
-MarkManager     = require './mark-manager'
-ModeManager     = require './mode-manager'
-RegisterManager = require './register-manager'
+OperationStack       = require './operation-stack'
+CountManager         = require './count-manager'
+MarkManager          = require './mark-manager'
+ModeManager          = require './mode-manager'
+RegisterManager      = require './register-manager'
+SearchHistoryManager = require './search-history-manager'
 
 Developer = null # delay
 
@@ -58,6 +59,7 @@ class VimState
     @register = new RegisterManager(this)
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
+    @searchHistory = new SearchHistoryManager(this)
     @hover = new Hover(this)
     @hoverSearchCounter = new Hover(this)
     @input = new Input(this)
@@ -102,6 +104,8 @@ class VimState
     @hover = null
     @hoverSearchCounter.destroy()
     @hoverSearchCounter = null
+    @searchHistory.destroy()
+    @searchHistor = null
     @input.destroy()
     @input = null
     @modeManager = null
@@ -264,6 +268,7 @@ class VimState
   reset: ->
     @count.reset()
     @register.reset()
+    @searchHistory.reset()
     @hover.reset()
     @operationStack.clear()
 
@@ -289,11 +294,12 @@ class VimState
 
   # Search History
   # -------------------------
-  pushSearchHistory: (search) -> # should be saveSearchHistory for consistency.
-    @globalVimState.searchHistory.unshift search
+  # TODO: Put here for compatibility remove in future
+  pushSearchHistory: (search) ->
+    @searchHistory.save(search)
 
-  getSearchHistoryItem: (index = 0) ->
-    @globalVimState.searchHistory[index]
+  getSearchHistoryItem: (index=0) ->
+    @searchHistory.getEntries[index]
 
   checkSelections: ->
     return unless @editor?
