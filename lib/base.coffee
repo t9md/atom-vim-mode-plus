@@ -71,7 +71,11 @@ class Base
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
       @vimState.activate('reset')
 
+  timeoutID = null
+  marker = null
   flash: ({range, klass, timeout}, fn=null) ->
+    @resetFlash()
+
     marker = @editor.markBufferRange range,
       invalidate: 'never',
       persistent: false
@@ -80,9 +84,14 @@ class Base
       type: 'highlight'
       class: klass
 
-    setTimeout  ->
-      marker.destroy()
+    timeoutID = setTimeout  =>
+      @resetFlash()
     , timeout
+
+  resetFlash: ->
+    marker?.destroy()
+    marker = null
+    clearTimeout timeoutID
 
   # Expected to be called by child class.
   # It automatically create typecheck function like

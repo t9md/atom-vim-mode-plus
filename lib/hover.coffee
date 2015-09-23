@@ -12,17 +12,16 @@ class Hover
     @text = []
     @view = atom.views.getView(this)
 
-  add: (text, timeout=null) ->
-    if timeout
-      @reset()
-
+  add: (text, point) ->
     @text.push text
-    @view.show()
+    @view.show(point)
 
-    if timeout
-      @timeoutID = setTimeout  =>
-        @reset()
-      , timeout
+  addWithTimeout: (text, point, timeout) ->
+    @reset()
+    @add(text, point)
+    @timeoutID = setTimeout  =>
+      @reset()
+    , timeout
 
   iconRegexp = /^:.*:$/
   getText: (lineHeight) ->
@@ -56,11 +55,11 @@ class HoverElement extends HTMLElement
   initialize: (@model) ->
     this
 
-  show: ->
+  show: (point) ->
     return unless settings.get('enableHoverIndicator')
     {editor} = @model.vimState
     unless @marker
-      @createOverlay()
+      @createOverlay(point)
       @lineHeight = editor.getLineHeightInPixels()
       @setIconSize(@lineHeight)
 
@@ -71,9 +70,9 @@ class HoverElement extends HTMLElement
     if text = @model.getText(@lineHeight)
       @innerHTML = text
 
-  createOverlay: ->
+  createOverlay: (point) ->
     {editor} = @model.vimState
-    point = editor.getCursorBufferPosition()
+    point ?= editor.getCursorBufferPosition()
     @marker = editor.markBufferPosition point,
       invalidate: "never",
       persistent: false
