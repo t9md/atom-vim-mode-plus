@@ -1,9 +1,8 @@
-# Refactoring status: 100%
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
 {Hover} = require './hover'
-{Input, SearchInput} = require './input'
+{Input, Search} = require './input'
 settings = require './settings'
 
 Operator        = require './operator'
@@ -63,7 +62,7 @@ class VimState
     @hover = new Hover(this)
     @hoverSearchCounter = new Hover(this)
     @input = new Input(this)
-    @searchInput = new SearchInput(this)
+    @search = new Search(this)
 
     @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
 
@@ -109,8 +108,8 @@ class VimState
     @searchHistor = null
     @input.destroy()
     @input = null
-    @searchInput.destroy()
-    @searchInput = null
+    @search.destroy()
+    @search = null
     @modeManager = null
     @emitter.emit 'did-destroy'
 
@@ -148,7 +147,6 @@ class VimState
           catch error
             @lastOperation = null
             throw error unless error.isOperationAbortedError?()
-
     @registerCommands(commands)
 
   # Initialize all of vim-mode' commands.

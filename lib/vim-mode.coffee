@@ -5,7 +5,7 @@ GlobalVimState = require './global-vim-state'
 VimState = require './vim-state'
 settings = require './settings'
 {Hover, HoverElement} = require './hover'
-{Input, InputElement, SearchInput, SearchInputElement} = require './input'
+{Input, InputElement, Search, SearchElement} = require './input'
 _ = require 'underscore-plus'
 
 module.exports =
@@ -39,13 +39,10 @@ module.exports =
   registerViewProviders: ->
     atom.views.addViewProvider Hover, (model) ->
       new HoverElement().initialize(model)
-    atom.views.addViewProvider SearchInput, (model) ->
-      new SearchInputElement().initialize(model)
-    # [FIXME] order matter.
-    # SearchInput need to come firster than its parent Input class.
-    # Unless SearchInput's view associated to InputElement rather than SearchInputElement.
     atom.views.addViewProvider Input, (model) ->
       new InputElement().initialize(model)
+    atom.views.addViewProvider Search, (model) ->
+      new SearchElement().initialize(model)
 
   deactivate: ->
     @disposables.dispose()

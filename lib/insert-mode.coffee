@@ -12,7 +12,7 @@ class InsertRegister extends InsertMode
   requireInput: true
   constructor: ->
     super
-    @getInput()
+    @readInput()
 
   execute: ->
     if text = @vimState.register.get(@input).text
