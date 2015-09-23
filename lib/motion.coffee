@@ -7,7 +7,7 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 # {SearchViewModel} = require './view'
-{SearchInput} = require './input'
+{Search} = require './input'
 Base = require './base'
 
 class Motion extends Base
@@ -476,7 +476,7 @@ class Find extends Motion
 
   constructor: ->
     super
-    @getInput() unless @isRepeatFind()
+    @readInput() unless @isRepeatFind()
 
   isBackwards: ->
     @backwards
@@ -557,7 +557,7 @@ class MoveToMark extends Motion
 
   constructor: ->
     super
-    @getInput()
+    @readInput()
 
   moveCursor: (cursor) ->
     markPosition = @vimState.mark.get(@input)
@@ -670,10 +670,10 @@ class Search extends SearchBase
   @extend()
   constructor: ->
     super
-    @vimState.searchInput.focus({@backwards})
+    @vimState.search.focus({@backwards})
 
   isComplete: ->
-    @input = @vimState.searchInput.getInput()
+    @input = @vimState.search.getInput()
 
 class SearchBackwards extends Search
   @extend()

@@ -3,71 +3,53 @@
 {CompositeDisposable, Range} = require 'atom'
 _ = require 'underscore-plus'
 
-class Input
-  subscriptions: null
-  marker: null
-
+class InputBase
   constructor: (@vimState) ->
     @emitter = new Emitter
     @view = atom.views.getView(this)
     @vimState.onDidFailToCompose =>
       @view.cancel()
 
-  onDidGet: (spec={}, callback) ->
-    @subscriptions ?= new CompositeDisposable
-    @view.setSpec(spec)
-    @subscriptions.add @emitter.on 'did-get', callback
+  onDidChange:   (fn) -> @emitter.on 'did-change', fn
+  onDidConfirm:  (fn) -> @emitter.on 'did-confirm', fn
+  onDidCancel:   (fn) -> @emitter.on 'did-cancel', fn
+  onWillUnfocus: (fn) -> @emitter.on 'wil-unfocus', fn
 
-  onDidChange: (callback) ->
-    @subscriptions ?= new CompositeDisposable
-    @subscriptions.add @emitter.on 'did-change', callback
-
-  onDidCancel: (callback) ->
-    @subscriptions ?= new CompositeDisposable
-    @subscriptions.add @emitter.on 'did-cancel', callback
-
-  focus: ->
-    {editor} = @vimState
-    start = editor.getCursorBufferPosition()
-    end = start.translate([0, 1])
-
-    # @marker = editor.markBufferRange Range(start, end),
-    #   invalidate: 'never'
-    #   persistent: false
-    #
-    # klass = if @vimState.mode is 'insert' then 'insert' else 'normal'
-
-    # editor.decorateMarker @marker,
-    #   type: 'highlight'
-    #   class: "vim-mode-cursor-#{klass}"
-
+  focus: (@options={}) ->
     @view.focus()
 
+  readInput: (options, handlers={}) ->
+    subs = new CompositeDisposable
+    {onDidConfirm, onDidCancel, onDidChange} = handlers
+
+    subs.add @onDidChange(onDidChange) if onDidChange?
+    subs.add @onDidConfirm(onDidConfirm) if onDidConfirm?
+    subs.add @onDidCancel(onDidCancel) if onDidCancel?
+    subs.add @onWillUnfocus ->
+      subs.dispose()
+      subs = null
+    @focus(options)
+
   unfocus: ->
-    # @marker?.destroy()
-    @subscriptions?.dispose()
-    @subscriptions = null
+    @model.emitter.emit 'will-unfocus'
 
   destroy: ->
-    @subscriptions?.dispose()
-    @subscriptions = null
     @vimState = null
     @view.destroy()
 
-class InputElement extends HTMLElement
+class InputBaseElement extends HTMLElement
   finishing: false
-  spec: null
+  klass: null
 
   createdCallback: ->
-    @className = 'vim-mode-input'
-
+    @className = @klass
     @editorElement = document.createElement 'atom-text-editor'
     @editorElement.classList.add('editor')
     @editorElement.setAttribute('mini', '')
     @editor = @editorElement.getModel()
     @editor.setMini(true)
-    @appendChild(@editorElement)
-    @panel = atom.workspace.addBottomPanel item: this, visible: false
+    @appendChild @editorElement
+    @panel = atom.workspace.addBottomPanel(item: this, visible: false)
     this
 
   initialize: (@model) ->
@@ -84,25 +66,17 @@ class InputElement extends HTMLElement
       return if @finishing
       text = @editor.getText()
       @model.emitter.emit 'did-change', text
-      if charsMax = @getSpec('charsMax')
+      if charsMax = @model.options.charsMax
         @confirm() if text.length >= charsMax
 
-  setSpec: (@spec) ->
-    _.defaults(@spec, {defaultInput: '', charsMax: 1})
-
-  getSpec: (name) ->
-    @spec[name]
-
   confirm: ->
-    if input = (@editor.getText() or @getSpec('defaultInput'))
-      # console.log "called confirm with '#{input}'"
-      @model.emitter.emit 'did-get', input
+    if input = (@editor.getText() or @model.options.defaultInput)
+      @model.emitter.emit 'did-confirm', input
       @unfocus()
     else
       @cancel()
 
   cancel: ->
-    # console.log "called cancel"
     @model.emitter.emit 'did-cancel'
     @unfocus()
 
@@ -119,25 +93,53 @@ class InputElement extends HTMLElement
     @finishing = false
 
   destroy: ->
-    @spec = null
+    @options = null
     @model = null
     @editor.destroy()
     @editor = null
-    @editorElement = null
     @panel.destroy()
+    @panel = null
+    @editorElement = null
     @remove()
 
-class SearchInput extends Input
+class Input extends InputBase
+  # marker: null
+  focus: ->
+    # {editor} = @vimState
+    # start = editor.getCursorBufferPosition()
+    # end = start.translate([0, 1])
+
+    # @marker = editor.markBufferRange Range(start, end),
+    #   invalidate: 'never'
+    #   persistent: false
+    #
+    # klass = if @vimState.mode is 'insert' then 'insert' else 'normal'
+
+    # editor.decorateMarker @marker,
+    #   type: 'highlight'
+    #   class: "vim-mode-cursor-#{klass}"
+    super
+
+  unfocus: ->
+    # @marker?.destroy()
+    @subscriptions?.dispose()
+    @subscriptions = null
+
+class InputElement extends InputBaseElement
+  klass: 'vim-mode-input'
+
+class Search extends InputBase
   input: null
 
   constructor: ->
     super
+    @options = {}
     {@searchHistory} = @vimState
     atom.commands.add @view.editorElement,
       'core:move-up':   => @view.editor.setText @searchHistory.get('prev')
       'core:move-down': => @view.editor.setText @searchHistory.get('next')
 
-    @onDidGet {}, (@input) =>
+    @onDidConfirm (@input) =>
       @vimState.operationStack.process()
 
     @onDidCancel =>
@@ -150,21 +152,16 @@ class SearchInput extends Input
 
   focus: ({@backwards}={}) ->
     @view.classList.add('backwards') if @backwards
-    super
+    @view.focus()
 
   unfocus: ->
     @backwards = null
     @input = null
 
-class SearchInputElement extends InputElement
-  createdCallback: ->
-    super
-    @className = "vim-mode-search-input"
+class SearchElement extends InputBaseElement
+  klass: 'vim-mode-search'
 
-  setSpec: (@spec) ->
-
-  initialize: (@model) ->
-    super
+  # setSpec: (@spec) ->
 
   unfocus: ->
     @classList.remove('backwards')
@@ -176,20 +173,20 @@ class SearchInputElement extends InputElement
       if (input is '') or (input is repeatChar)
         input = @model.searchHistory.get('prev')
         atom.beep() if input is ''
-      @model.emitter.emit 'did-get', input
+      @model.emitter.emit 'did-confirm', input
       @unfocus()
     else
       @cancel()
 
-InputElement = document.registerElement 'vim-mode-input',
+InputElement = document.registerElement 'vim-mode-plus-input',
   prototype: InputElement.prototype
   extends: 'div',
 
-SearchInputElement = document.registerElement 'vim-mode-search-input',
-  prototype: SearchInputElement.prototype
+SearchElement = document.registerElement 'vim-mode-plus-search',
+  prototype: SearchElement.prototype
   extends: 'div',
 
 module.exports = {
   Input, InputElement,
-  SearchInput, SearchInputElement
+  Search, SearchElement
 }

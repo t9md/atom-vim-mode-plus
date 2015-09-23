@@ -50,30 +50,20 @@ class Base
     obj = new (Base.findClass(klassName))(@vimState)
     _.extend(obj, properties)
 
-  getInput: (options={}) ->
-    @vimState.input.onDidGet options, (input) =>
-      # console.log "#{@constructor.name}: #{@input}"
-      # console.log "get input"
-      if options.onGet?
-        options.onGet(input)
-      else
+  readInput: (options={}) ->
+    _.defaults(options, defaultInput: '', charsMax: 1)
+
+    @vimState.input.readInput options,
+      onDidConfirm: (input) =>
         @input = input
         @complete = true
         @vimState.operationStack.process()
-
-    # FIXME
-    # Cancelation currently depending on operationStack to call cancel()
-    # Should be better to observe cancel event on operationStack side.
-    @vimState.input.onDidCancel =>
-      # console.log "Cancelled!"
-      @canceled = true
-      @vimState.operationStack.process()
-
-    if options.onChange?
-      @vimState.input.onDidChange (input) ->
-        options.onChange(input)
-
-    @vimState.input.focus()
+      onDidCancel: =>
+        # FIXME
+        # Cancelation currently depending on operationStack to call cancel()
+        # Should be better to observe cancel event on operationStack side.
+        @canceled = true
+        @vimState.operationStack.process()
 
   isCanceled: ->
     @canceled
