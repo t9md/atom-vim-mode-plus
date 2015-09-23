@@ -83,8 +83,7 @@ class RegisterManager
 
   setName: ->
     @vimState.hover.add '"'
-    options = {defaultInput: '', charsMax: 1}
-    @vimState.input.readInput options,
+    @vimState.input.readInput {charsMax: 1},
       onDidConfirm: (@name) => @vimState.hover.add(@name)
       onDidCancel: => @vimState.hover.reset()
 

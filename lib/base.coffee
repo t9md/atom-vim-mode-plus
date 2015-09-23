@@ -50,10 +50,9 @@ class Base
     obj = new (Base.findClass(klassName))(@vimState)
     _.extend(obj, properties)
 
-  readInput: (options={}) ->
-    _.defaults(options, defaultInput: '', charsMax: 1)
-
-    @vimState.input.readInput options,
+  readInput: ({charsMax}={}) ->
+    charsMax ?= 1
+    @vimState.input.readInput {charsMax},
       onDidConfirm: (input) =>
         @input = input
         @complete = true

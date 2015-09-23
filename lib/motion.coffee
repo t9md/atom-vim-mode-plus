@@ -6,7 +6,6 @@
 _ = require 'underscore-plus'
 
 settings = require './settings'
-# {SearchViewModel} = require './view'
 {Search} = require './input'
 Base = require './base'
 
@@ -670,10 +669,21 @@ class Search extends SearchBase
   @extend()
   constructor: ->
     super
-    @vimState.search.focus({@backwards})
+    @vimState.search.readInput {@backwards}, @getInputHandler()
 
-  isComplete: ->
-    @input = @vimState.search.getInput()
+  getInputHandler: ->
+    onDidConfirm: (input) =>
+      repeatChar = if @backwards then '?' else '/'
+      if (input is '') or (input is repeatChar)
+        input = @vimState.searchHistory.get('prev')
+        atom.beep() if input is ''
+      @input = input
+      @complete = true
+      @vimState.operationStack.process()
+    onDidCancel: =>
+      unless @vimState.isMode('visual') or @vimState.isMode('insert')
+        @vimState.activate('reset')
+      @vimState.reset()
 
 class SearchBackwards extends Search
   @extend()
