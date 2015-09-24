@@ -39,3 +39,7 @@ module.exports =
       for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
         editor.foldBufferRow row
       editor.setScrollTop scrollTop
+
+  getKeystrokeForEvent: (event) ->
+    keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
+    atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)

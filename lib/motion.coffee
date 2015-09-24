@@ -613,18 +613,16 @@ class SearchBase extends Motion
   moveCursor: (cursor) ->
     if @index?
       @visit(@index, cursor)
-      return
-
-    @ranges = @scan(cursor)
-    if @ranges.length is 0
-      unless @isComplete()
-        @destroyMarkers()
+    else
+      @ranges = @scan(cursor)
+      if @ranges.length is 0
         @flash(@getVisibleBufferRange(), timeout: 100)
-        @vimState.hoverSearchCounter.reset()
-      atom.beep()
-      return
-    @index = @getCount() % @ranges.length
-    @visit(@index, cursor)
+        atom.beep()
+        return
+      @index = @getCount() % @ranges.length
+      @visit(@index, cursor)
+    if @isComplete()
+      @index = null
 
   visit: (index, cursor=null) ->
     @current = @ranges[index]
@@ -747,20 +745,26 @@ class Search extends SearchBase
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
       @vimState.activate('reset')
     @destroyMarkers()
-    # @vimState.flasher.reset()
     @vimState.hoverSearchCounter.reset()
     @vimState.reset()
     @subscriptions?.dispose()
     @subscriptions = null
     @restoreEditorState?()
 
+  reset: ->
+    @index = null
+    @ranges = null
+    @destroyMarkers()
+    @vimState.hoverSearchCounter.reset()
+
   onChange: (@input) => # fat-arrow
     return unless settings.get('enableIncrementalSearch')
-    @index = null
-    for c in @editor.getCursors()
-      @moveCursor(c)
+    @reset()
+    unless @input is ''
+      @moveCursor(c) for c in @editor.getCursors()
 
   onCommand: (command) => # fat-arrow
+    return  @ranges.length
     switch command
       when 'visit-next'
         @index = (@index + 1) % @ranges.length

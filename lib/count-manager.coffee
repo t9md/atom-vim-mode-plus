@@ -1,5 +1,6 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
+{getKeystrokeForEvent} = require './utils'
 
 module.exports =
 class CountManager
@@ -8,7 +9,7 @@ class CountManager
   constructor: (@vimState) ->
 
   set: (e) ->
-    num = if _.isNumber(e) then e else parseInt(@getKeystrokeForEvent(e))
+    num = if _.isNumber(e) then e else parseInt(getKeystrokeForEvent(e))
     @count ?= 0
     @count = (@count * 10) + num
     @vimState.hover.add num
@@ -21,7 +22,3 @@ class CountManager
 
   isEmpty: ->
     not @count
-
-  getKeystrokeForEvent: (event) ->
-    keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
-    atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
