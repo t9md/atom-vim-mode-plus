@@ -5,9 +5,10 @@ settings = require './settings'
 
 class Base
   complete: null
-  recodable: null
-  requireInput: false
   canceled: false
+  recodable: null
+  defaultCount: 1
+  requireInput: 0
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -21,19 +22,20 @@ class Base
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
-    if @isCanceled()
-      return true
-
-    if @requireInput and not @input
-      return false
+    return true if @isCanceled()
+    return false if (@requireInput and not @input)
 
     if @target?
       @target.isComplete()
     else
       @complete
 
-  isRecordable: ->
-    @recodable
+  isCanceled: -> @canceled
+  isRecordable: -> @recodable
+
+  cancel: ->
+    unless @vimState.isMode('visual') or @vimState.isMode('insert')
+      @vimState.activate('reset')
 
   abort: ->
     throw new OperationAbortedError('Aborted')
@@ -41,9 +43,9 @@ class Base
   getKind: ->
     @constructor.name
 
-  getCount: (defaultCount=null) ->
+  getCount: ->
     # Setting count as instance variable make operation repeatable with same count.
-    @count ?= @vimState?.count.get() ? defaultCount
+    @count ?= @vimState?.count.get() ? @defaultCount
     @count
 
   new: (klassName, properties={}) ->
@@ -63,13 +65,6 @@ class Base
         # Should be better to observe cancel event on operationStack side.
         @canceled = true
         @vimState.operationStack.process()
-
-  isCanceled: ->
-    @canceled
-
-  cancel: ->
-    unless @vimState.isMode('visual') or @vimState.isMode('insert')
-      @vimState.activate('reset')
 
   timeoutID = null
   marker = null
