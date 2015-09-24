@@ -111,6 +111,8 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 # TODO
 
+- [ ] Change subscription link to use vimState as hub.
+  - [ ] Chang link from TOM-to-Input to vimState-to-Input and let vimState actively call TOM's function to inform event.
 - [x] Improve Visual mode: complete cursor visualization and switch between submode.
   - [x] Shift between submode properly restoring column and reversed state.
   - [x] show cursor: characterwise
