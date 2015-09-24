@@ -85,7 +85,10 @@ class Operator extends Base
     @vimState.flasher.flash(options, fn)
 
   eachSelection: (fn) ->
-    return unless @target.select()
+    if @selected?
+      return unless @selected
+    else
+      return unless @target.select()
     @editor.transact =>
       for s in @editor.getSelections()
         if @flashTarget and settings.get('flashOnOperate')
@@ -134,13 +137,18 @@ class TransformString extends Operator
 
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
-    if @target.isLinewise?() or settings.get('stayOnTransformString')
+    if @points?
+      points = @points
+    else if @target.isLinewise?() or settings.get('stayOnTransformString')
       points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
     @eachSelection (s) =>
       range = s.insertText @getNewText(s.getText())
       if @adjustCursor
         s.cursor.setBufferPosition(points?.shift() ? range.start)
     @vimState.activate('normal')
+    # FIXME: to more cleaner approach to preserve/restore Points.
+    @selected = null
+    @points = null
 
 class ToggleCase extends TransformString
   @extend()
@@ -276,6 +284,15 @@ class ChangeSurroundAnyPair extends ChangeSurround
   constructor: ->
     super
     @compose @new("AnyPair", inclusive: true)
+    @preSelect()
+
+  # FIXME very inperative implementation. find more generic and consistent approach.
+  # like preservePoints() and restorePoints().
+  preSelect: ->
+    if @target.isLinewise?() or settings.get('stayOnTransformString')
+      @points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
+    if @selected = @target.select()
+      @vimState.hover.add(@editor.getSelectedText()[0])
 
   onConfirm: (@char) ->
     @input = @char
