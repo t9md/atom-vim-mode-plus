@@ -1,7 +1,8 @@
 # Refactoring status: 50%
-{Point, Range} = require 'atom'
+{Point, Range, CompositeDisposable} = require 'atom'
 {selectLines} = require './utils'
 {Hover} = require './hover'
+{saveEditorState} = require './utils'
 
 _ = require 'underscore-plus'
 
@@ -610,19 +611,24 @@ class SearchBase extends Motion
     @vimState.flasher.flash(options)
 
   moveCursor: (cursor) ->
-    ranges = @scan(cursor)
-    if ranges.length is 0
-      @destroyMarkers()
-      @vimState.flasher.reset()
-      @vimState.hoverSearchCounter.reset()
+    @ranges = @scan(cursor)
+    if @ranges.length is 0
+      # @restoreEditorState?()
+      unless @isComplete()
+        @destroyMarkers()
+        @vimState.flasher.reset()
+        @flashScreen()
+        @vimState.hoverSearchCounter.reset()
       atom.beep()
       return
 
-    range = ranges[@getCount() % ranges.length]
-    point = range.start
+    @current = @ranges[@getCount() % @ranges.length]
+    point = @current.start
     @editor.scrollToBufferPosition(point, center: true)
+    if @editor.isFoldedAtBufferRow(point.row)
+      @editor.unfoldBufferRow point
 
-    @flash(range) if settings.get('flashOnSearch')
+    @flash(@current) if settings.get('flashOnSearch')
 
     # dont do acutual move in temporal visit in inclemental search.
     if @isComplete()
@@ -630,10 +636,10 @@ class SearchBase extends Motion
       @vimState.searchHistory.save(@input)
     else
       @destroyMarkers()
-      @decorateVisibleRanges(ranges, current: range)
+      @decorateVisibleRanges(@ranges, {@current})
 
     if settings.get('enableHoverSearchCounter')
-      counter = @getCounter(range, ranges)
+      counter = @getCounter(@current, @ranges)
       timeout =
         if @isComplete()
           switch
@@ -716,10 +722,19 @@ class Search extends SearchBase
   constructor: ->
     super
     isearchEnabled = settings.get('enableIncrementalSearch')
+
     @vimState.search.readInput {@backwards},
       onDidConfirm: @onDidConfirm.bind(this)
       onDidCancel:  @onDidCancel.bind(this)
       onDidChange:  if isearchEnabled then @onDidChange.bind(this) else null
+
+    if isearchEnabled
+      @restoreEditorState = saveEditorState(@editor)
+      @subscriptions = new CompositeDisposable
+      @subscriptions.add @editor.onDidChangeScrollTop =>
+        @decorateVisibleRanges(@ranges, {@current})
+      @subscriptions.add @editor.onDidChangeScrollLeft =>
+        @decorateVisibleRanges(@ranges, {@current})
 
   onDidConfirm: (input) =>
     repeatChar = if @backwards then '?' else '/'
@@ -729,6 +744,8 @@ class Search extends SearchBase
     @input = input
     @complete = true
     @vimState.operationStack.process()
+    @subscriptions?.dispose()
+    @subscriptions = null
     @destroyMarkers()
 
   onDidCancel: =>
@@ -738,10 +755,16 @@ class Search extends SearchBase
     @vimState.flasher.reset()
     @vimState.hoverSearchCounter.reset()
     @vimState.reset()
+    @subscriptions?.dispose()
+    @subscriptions = null
+    @restoreEditorState()
 
   onDidChange: (@input) =>
     for c in @editor.getCursors()
       @moveCursor(c)
+
+  flashScreen: ->
+    @flash @getVisibleBufferRange(), timeout: 100
 
 class SearchBackwards extends Search
   @extend()

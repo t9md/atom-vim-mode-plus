@@ -30,3 +30,12 @@ module.exports =
     editor.scanInBufferRange /^[ \t]*/, scanRange, ({range}) ->
       point = range.end.translate([0, +1])
     point
+
+  saveEditorState: (editor) ->
+    scrollTop = editor.getScrollTop()
+    foldStartRows = editor.displayBuffer.findFoldMarkers().map (m) ->
+      editor.displayBuffer.foldForMarker(m).getStartRow()
+    ->
+      for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
+        editor.foldBufferRow row
+      editor.setScrollTop scrollTop
