@@ -1,6 +1,7 @@
 # Refactoring status: 100%
 {Emitter} = require 'atom'
 {CompositeDisposable} = require 'atom'
+{getKeystrokeForEvent} = require './utils'
 
 class InputBase
   onChange:  (fn) -> @emitter.on 'change', fn
@@ -118,16 +119,36 @@ class Search extends InputBase
     super
     @options = {}
     {@searchHistory} = @vimState
+
+    literalModeSupportCommands =
+      "confirm":    => @confirm()
+      "cancel":     => @cancel()
+      "visit-next": => @emitter.emit('command', 'visit-next')
+      "visit-prev": => @emitter.emit('command', 'visit-prev')
+
+    prefix = 'vim-mode:search'
+    commands = {}
+    for command, fn of literalModeSupportCommands
+      do (fn) =>
+        commands["#{prefix}-#{command}"] = (event) =>
+          if @literalCharMode
+            @editor.insertText getKeystrokeForEvent(event)
+            @literalCharMode = false
+          else
+            fn()
+
+    atom.commands.add @editorElement, commands
     atom.commands.add @editorElement,
+      "vim-mode:search-set-literal-char": => @setLiteralChar()
+      "vim-mode:search-set-cursor-word": => @setCursorWord()
       'core:move-up':   => @editor.setText @searchHistory.get('prev')
       'core:move-down': => @editor.setText @searchHistory.get('next')
-      'vim-mode:search-confirm': => @confirm()
-      'vim-mode:search-set-cursor-word': => @setCursorWord()
-      'vim-mode:search-visit-next': => @emitter.emit 'command', 'visit-next'
-      'vim-mode:search-visit-prev': => @emitter.emit 'command', 'visit-prev'
 
   setCursorWord: ->
     @editor.setText @vimState.editor.getWordUnderCursor()
+
+  setLiteralChar: ->
+    @literalCharMode = true
 
   focus: ({backwards}) ->
     @view.classList.add('backwards') if backwards
