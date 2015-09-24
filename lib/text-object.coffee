@@ -7,7 +7,6 @@ Base = require './base'
 class TextObject extends Base
   @extend()
   complete: true
-  recodable: false
 
   isWholeLine: ({start, end}) ->
     (start.column is 0) and (end.column is 0) and start < end

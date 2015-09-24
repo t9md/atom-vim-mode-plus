@@ -3,8 +3,6 @@ Base = require './base'
 
 class InsertMode extends Base
   @extend()
-  complete: false
-  recodable: false
 
 class InsertRegister extends InsertMode
   @extend()

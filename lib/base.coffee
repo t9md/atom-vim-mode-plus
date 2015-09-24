@@ -4,11 +4,12 @@ _ = require 'underscore-plus'
 settings = require './settings'
 
 class Base
-  complete: null
+  complete: false
+  recodable: false
   canceled: false
-  recodable: null
+
   defaultCount: 1
-  requireInput: 0
+  requireInput: false
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
