@@ -84,7 +84,7 @@ module.exports = new Settings 'vim-mode-plus',
   searchCounterHoverDuration:
     order: 18
     type: 'integer'
-    default: 500
+    default: 700
   debug:
     order: 100
     type: 'boolean'

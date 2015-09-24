@@ -626,13 +626,14 @@ class SearchBase extends Motion
       @vimState.searchHistory.save(@input)
 
     if settings.get('flashOnSearch')
-      @flash range, timeout: (if @isComplete() then null else 99999)
-      # @flash range, {timeout}
+      @flash range
 
     if settings.get('enableHoverSearchCounter')
       counter = @getCounter(range, ranges)
-      timeout = 99999 unless @isComplete()
-      timeout ?= settings.get('searchCounterHoverDuration')
+      timeout = null
+      if @isComplete()
+        hoverIsVisible = @vimState.hoverSearchCounter.isVisible(point)
+        timeout = if hoverIsVisible then 0 else settings.get('searchCounterHoverDuration')
       @vimState.hoverSearchCounter.addWithTimeout counter, point, timeout
 
   getCounter: (range, ranges) ->
