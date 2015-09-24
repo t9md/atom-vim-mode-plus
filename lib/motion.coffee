@@ -612,7 +612,9 @@ class SearchBase extends Motion
   moveCursor: (cursor) ->
     ranges = @scan(cursor)
     if ranges.length is 0
+      @destroyMarkers()
       @vimState.flasher.reset()
+      @vimState.hoverSearchCounter.reset()
       atom.beep()
       return
 
@@ -713,31 +715,33 @@ class Search extends SearchBase
   @extend()
   constructor: ->
     super
-    @vimState.search.readInput {@backwards}, @getInputHandler()
+    isearchEnabled = settings.get('enableIncrementalSearch')
+    @vimState.search.readInput {@backwards},
+      onDidConfirm: @onDidConfirm.bind(this)
+      onDidCancel:  @onDidCancel.bind(this)
+      onDidChange:  if isearchEnabled then @onDidChange.bind(this) else null
 
-  getInputHandler: ->
-    handlers =
-      onDidConfirm: (input) =>
-        repeatChar = if @backwards then '?' else '/'
-        if (input is '') or (input is repeatChar)
-          input = @vimState.searchHistory.get('prev')
-          atom.beep() if input is ''
-        @input = input
-        @complete = true
-        @vimState.operationStack.process()
-        @destroyMarkers()
-      onDidCancel: =>
-        unless @vimState.isMode('visual') or @vimState.isMode('insert')
-          @vimState.activate('reset')
-        @destroyMarkers()
-        @vimState.flasher.reset()
-        @vimState.hoverSearchCounter.reset()
-        @vimState.reset()
-    if settings.get('enableIncrementalSearch')
-      handlers.onDidChange = (@input) =>
-        for c in @editor.getCursors()
-          @moveCursor(c)
-    handlers
+  onDidConfirm: (input) =>
+    repeatChar = if @backwards then '?' else '/'
+    if (input is '') or (input is repeatChar)
+      input = @vimState.searchHistory.get('prev')
+      atom.beep() if input is ''
+    @input = input
+    @complete = true
+    @vimState.operationStack.process()
+    @destroyMarkers()
+
+  onDidCancel: =>
+    unless @vimState.isMode('visual') or @vimState.isMode('insert')
+      @vimState.activate('reset')
+    @destroyMarkers()
+    @vimState.flasher.reset()
+    @vimState.hoverSearchCounter.reset()
+    @vimState.reset()
+
+  onDidChange: (@input) =>
+    for c in @editor.getCursors()
+      @moveCursor(c)
 
 class SearchBackwards extends Search
   @extend()
