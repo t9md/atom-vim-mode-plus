@@ -602,17 +602,17 @@ class SearchBase extends Motion
   getCount: ->
     super - 1
 
-  flash: (range, timeout=null) ->
+  flash: (range, {timeout}={}) ->
     options =
       range: range
       klass: 'vim-mode-flash'
       timeout: timeout ? settings.get('flashOnSearchDurationMilliSeconds')
-    super(options)
+    @vimState.flasher.flash(options)
 
   moveCursor: (cursor) ->
     ranges = @scan(cursor)
     if ranges.length is 0
-      @resetFlash()
+      @vimState.flasher.reset()
       atom.beep()
       return
 
@@ -626,8 +626,8 @@ class SearchBase extends Motion
       @vimState.searchHistory.save(@input)
 
     if settings.get('flashOnSearch')
-      timeout = if @isComplete() then null else 99999
-      @flash range, timeout
+      @flash range, timeout: (if @isComplete() then null else 99999)
+      # @flash range, {timeout}
 
     if settings.get('enableHoverSearchCounter')
       counter = @getCounter(range, ranges)
@@ -694,7 +694,7 @@ class Search extends SearchBase
       onDidCancel: =>
         unless @vimState.isMode('visual') or @vimState.isMode('insert')
           @vimState.activate('reset')
-        @resetFlash()
+        @vimState.flasher.reset()
         @vimState.hoverSearchCounter.reset()
         @vimState.reset()
     if settings.get('enableIncrementalSearch')

@@ -18,6 +18,7 @@ MarkManager          = require './mark-manager'
 ModeManager          = require './mode-manager'
 RegisterManager      = require './register-manager'
 SearchHistoryManager = require './search-history-manager'
+FlashManager         = require './flash-manager'
 
 Developer = null # delay
 
@@ -59,6 +60,7 @@ class VimState
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
     @searchHistory = new SearchHistoryManager(this)
+    @flasher = new FlashManager(this)
     @hover = new Hover(this)
     @hoverSearchCounter = new Hover(this)
     @input = new Input(this)
@@ -104,6 +106,8 @@ class VimState
     @hover = null
     @hoverSearchCounter.destroy()
     @hoverSearchCounter = null
+    @flasher.destroy()
+    @flasher = null
     @searchHistory.destroy()
     @searchHistor = null
     @input.destroy()

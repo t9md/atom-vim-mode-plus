@@ -67,28 +67,6 @@ class Base
         @canceled = true
         @vimState.operationStack.process()
 
-  timeoutID = null
-  marker = null
-  flash: ({range, klass, timeout}, fn=null) ->
-    @resetFlash()
-
-    marker = @editor.markBufferRange range,
-      invalidate: 'never',
-      persistent: false
-    fn?()
-    @editor.decorateMarker marker,
-      type: 'highlight'
-      class: klass
-
-    timeoutID = setTimeout  =>
-      @resetFlash()
-    , timeout
-
-  resetFlash: ->
-    marker?.destroy()
-    marker = null
-    clearTimeout timeoutID
-
   # Expected to be called by child class.
   # It automatically create typecheck function like
   #

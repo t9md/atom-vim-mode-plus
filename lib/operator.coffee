@@ -16,7 +16,7 @@ class OperatorError extends Base
 class Operator extends Base
   @extend()
   recodable: true
-  
+
   target: null
   flashTarget: true
 
@@ -66,7 +66,7 @@ class Operator extends Base
       marker.destroy()
 
   markSelections: ->
-    # [BUG] selection.marker.copy() return undefined.
+    # [NOTE] selection.marker.copy() return undefined.
     # So I explictly create marker from getBufferRange().
     markerBySelections = {}
     for selection in @editor.getSelections()
@@ -82,7 +82,7 @@ class Operator extends Base
       range: range
       klass: 'vim-mode-flash'
       timeout: settings.get('flashOnOperateDurationMilliSeconds')
-    super(options, fn)
+    @vimState.flasher.flash(options, fn)
 
   eachSelection: (fn) ->
     return unless @target.select()
