@@ -44,12 +44,10 @@ class ModeManager
 
   updateModeSelector: (newMode, newSubmode=null) ->
     for mode in ['normal', 'insert', 'visual', 'operator-pending']
-      method = if mode is newMode then 'add' else 'remove'
-      @editorElement.classList[method] "#{mode}-mode"
+      @vimState.updateClassCond(mode is newMode, "#{mode}-mode")
 
     for submode in ['characterwise', 'linewise', 'blockwise', 'replace']
-      method = if submode is newSubmode then 'add' else 'remove'
-      @editorElement.classList[method] "#{submode}"
+      @vimState.updateClassCond(submode is newSubmode, submode)
 
   # Normal
   # -------------------------

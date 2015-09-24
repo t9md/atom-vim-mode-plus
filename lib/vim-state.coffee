@@ -57,14 +57,15 @@ class VimState
     @count = new CountManager(this)
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
-    @operationStack = new OperationStack(this)
-    @modeManager = new ModeManager(this)
-    @searchHistory = new SearchHistoryManager(this)
     @flasher = new FlashManager(this)
     @hover = new Hover(this)
     @hoverSearchCounter = new Hover(this)
+    @searchHistory = new SearchHistoryManager(this)
     @input = new Input(this)
     @search = new Search(this)
+
+    @operationStack = new OperationStack(this)
+    @modeManager = new ModeManager(this)
 
     @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
 
@@ -82,7 +83,7 @@ class VimState
                 s.cursor
             @showCursors(cursors)
 
-    @editorElement.classList.add("vim-mode")
+    @addClass 'vim-mode'
     @init()
     if settings.get('startInInsertMode')
       @activate('insert')
@@ -96,8 +97,8 @@ class VimState
     if @editor.isAlive()
       @activate('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
-      @editorElement.classList.remove("vim-mode")
-      @editorElement.classList.remove("normal-mode")
+      @removeClass 'vim-mode'
+      @removeClass 'normal-mode'
     # @editorElement.removeEventListener 'mouseup', @checkSelections
     @editor = null
     @editorElement = null
@@ -328,10 +329,17 @@ class VimState
   showCursors: (cursors) ->
     for cursor in cursors
       cursor.setVisible(true) unless cursor.isVisible()
-      if cursor.selection.isReversed()
-        @editorElement.classList.add('reversed')
-      else
-        @editorElement.classList.remove('reversed')
+      @updateClassCond cursor.selection.isReversed(), 'reversed'
+
+  addClass:    (klass) ->
+    @editorElement.classList.add(klass)
+
+  removeClass: (klass) ->
+    @editorElement.classListr.remove(klass)
+
+  updateClassCond: (condition, klass) ->
+    action = (if condition then 'add' else 'remove')
+    @editorElement.classList[action](klass)
 
   dontPutCursorsAtEndOfLine: ->
     # if @editor.getPath()?.endsWith 'tryit.coffee'
