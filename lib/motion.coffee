@@ -764,7 +764,7 @@ class Search extends SearchBase
       @moveCursor(c) for c in @editor.getCursors()
 
   onCommand: (command) => # fat-arrow
-    return  @ranges.length
+    return unless @ranges.length
     switch command
       when 'visit-next'
         @index = (@index + 1) % @ranges.length
