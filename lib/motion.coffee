@@ -620,23 +620,54 @@ class SearchBase extends Motion
     point = range.start
     @editor.scrollToBufferPosition(point, center: true)
 
+    @flash(range) if settings.get('flashOnSearch')
+
     # dont do acutual move in temporal visit in inclemental search.
     if @isComplete()
       cursor.setBufferPosition(point, center: true)
       @vimState.searchHistory.save(@input)
-
-    if settings.get('flashOnSearch')
-      @flash range
-    if not @isComplete()
-      @flash range
+    else
+      @destroyMarkers()
+      @decorateVisibleRanges(ranges, current: range)
 
     if settings.get('enableHoverSearchCounter')
       counter = @getCounter(range, ranges)
-      timeout = null
-      if @isComplete()
-        hoverIsVisible = @vimState.hoverSearchCounter.isVisibleAtPoint(point)
-        timeout = if hoverIsVisible then 0 else settings.get('searchCounterHoverDuration')
+      timeout =
+        if @isComplete()
+          switch
+            when @vimState.hoverSearchCounter.isVisibleAtPoint(point)
+              0
+            else
+              settings.get('searchCounterHoverDuration')
+        else
+          null
       @vimState.hoverSearchCounter.addWithTimeout counter, point, timeout
+
+  decorateVisibleRanges: (ranges, {current}) ->
+    visibleRange = @getVisibleBufferRange()
+    rangesToRender = (r for r in ranges when visibleRange.containsRange(r))
+    for r in rangesToRender
+      klass = 'vim-mode-search-match'
+      klass += ' current' if r.isEqual(current)
+      @decorateRange r, class: klass
+
+  getVisibleBufferRange: ->
+    [startRow, endRow] = @editor.getVisibleRowRange().map (row) =>
+      @editor.bufferRowForScreenRow row
+    new Range([startRow, 0], [endRow, Infinity])
+
+  destroyMarkers: ->
+    m.destroy() for m in @markers ? []
+    @markers = null
+
+  decorateRange: (range, {class: klass}) ->
+    marker = @editor.markBufferRange range,
+      invalidate: 'never'
+      persistent: false
+    (@markers ?= []).push marker
+    @editor.decorateMarker marker,
+      type: 'highlight'
+      class: klass
 
   getCounter: (range, ranges) ->
     rangeSorted = ranges.slice().sort (a, b) -> a.compare(b)
@@ -694,9 +725,11 @@ class Search extends SearchBase
         @input = input
         @complete = true
         @vimState.operationStack.process()
+        @destroyMarkers()
       onDidCancel: =>
         unless @vimState.isMode('visual') or @vimState.isMode('insert')
           @vimState.activate('reset')
+        @destroyMarkers()
         @vimState.flasher.reset()
         @vimState.hoverSearchCounter.reset()
         @vimState.reset()
