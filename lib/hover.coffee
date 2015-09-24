@@ -18,7 +18,8 @@ class Hover
     @view.show(point)
     @point = point
 
-  isVisible: (point) ->
+  # Return boolean to indicate hover is shown at given Point.
+  isVisibleAtPoint: (point) ->
     @point?.isEqual point
 
   addWithTimeout: (text, point, timeout) ->
