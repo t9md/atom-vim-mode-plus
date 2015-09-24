@@ -765,10 +765,14 @@ class Search extends SearchBase
 
   onCommand: (command) => # fat-arrow
     return unless @ranges.length
-    switch command
-      when 'visit-next'
+    action =
+      switch command
+        when 'visit-next' then (if @isBackwards() then 'prev' else 'next')
+        when 'visit-prev' then (if @isBackwards() then 'next' else 'prev')
+    switch action
+      when 'next'
         @index = (@index + 1) % @ranges.length
-      when 'visit-prev'
+      when 'prev'
         @index -= 1
         @index = (@ranges.length - 1) if @index is -1
     @visit(@index)
