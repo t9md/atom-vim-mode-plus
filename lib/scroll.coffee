@@ -25,7 +25,7 @@ class ScrollDown extends Scroll
   direction: 'down'
 
   execute: ->
-    amountInPixel = @editor.getLineHeightInPixels() * @getCount(1)
+    amountInPixel = @editor.getLineHeightInPixels() * @getCount()
     scrollTop = @editor.getScrollTop()
     switch @direction
       when 'down' then scrollTop += amountInPixel

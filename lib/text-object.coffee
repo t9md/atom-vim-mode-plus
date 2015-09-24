@@ -218,7 +218,7 @@ class Paragraph extends TextObject
 
   select: ->
     @eachSelection (selection) =>
-      _.times @getCount(1), =>
+      _.times @getCount(), =>
         if @inclusive
           @selectInclusive(selection)
         else

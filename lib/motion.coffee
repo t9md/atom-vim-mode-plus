@@ -15,7 +15,6 @@ class Motion extends Base
   recordable: false
   inclusive: false
   linewise: false
-  defaultCount: 1
   options: null
 
   setOptions: (@options) ->
@@ -87,7 +86,7 @@ class Motion extends Base
   # Utils
   # -------------------------
   countTimes: (fn) ->
-    _.times @getCount(@defaultCount), ->
+    _.times @getCount(), ->
       fn()
 
   at: (where, cursor) ->
@@ -275,6 +274,7 @@ class MoveToPreviousParagraph extends Motion
 
 class MoveToBeginningOfLine extends Motion
   @extend()
+  defaultCount: null
 
   constructor: ->
     super
@@ -285,12 +285,10 @@ class MoveToBeginningOfLine extends Motion
       @abort()
 
   moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveToBeginningOfLine()
+    cursor.moveToBeginningOfLine()
 
 class MoveToLastCharacterOfLine extends Motion
   @extend()
-  defaultCount: 1
 
   moveCursor: (cursor) ->
     @countTimes ->
@@ -312,8 +310,7 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
       startOfTrailingWhitespace.column -= 1
     cursor.setBufferPosition(startOfTrailingWhitespace)
 
-  getCount: ->
-    super - 1
+  getCount: -> super - 1
 
   moveCursor: (cursor) ->
     @countTimes ->
@@ -352,9 +349,10 @@ class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
 class MoveToFirstLine extends Motion
   @extend()
   linewise: true
+  defaultCount: null
 
   getRow: ->
-    if count = @getCount() then count - 1 else @getDefaultRow()
+    if (count = @getCount()) then count - 1 else @getDefaultRow()
 
   getDefaultRow: -> 0
 
@@ -373,8 +371,10 @@ class MoveToRelativeLine extends Motion
   linewise: true
 
   moveCursor: (cursor) ->
-    newRow = cursor.getBufferRow() + (@getCount(1) - 1)
+    newRow = cursor.getBufferRow() + @getCount()
     cursor.setBufferPosition [newRow, 0]
+
+  getCount: -> super - 1
 
 # Position cursor without scrolling., H, M, L
 # -------------------------
@@ -383,6 +383,7 @@ class MoveToTopOfScreen extends Motion
   @extend()
   linewise: true
   scrolloff: 2
+  defaultCount: 0
 
   moveCursor: (cursor) ->
     cursor.setScreenPosition([@getRow(), 0])
@@ -391,7 +392,9 @@ class MoveToTopOfScreen extends Motion
   getRow: ->
     row = @getFirstVisibleScreenRow()
     offset = if row is 0 then 0 else @scrolloff
-    row + Math.max(@getCount(0) - 1, offset)
+    row + Math.max(@getCount(), offset)
+
+  getCount: -> super - 1
 
 # keymap: L
 class MoveToBottomOfScreen extends MoveToTopOfScreen
@@ -399,7 +402,7 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
   getRow: ->
     row = @getLastVisibleScreenRow()
     offset = if row is @getLastRow() then 0 else @scrolloff
-    row - Math.max(@getCount(0) - 1, offset)
+    row - Math.max(@getCount(), offset)
 
 # keymap: M
 class MoveToMiddleOfScreen extends MoveToTopOfScreen
@@ -436,7 +439,7 @@ class ScrollFullScreenDown extends Motion
   # just scroll, not move cursor in this function.
   scroll: ->
     firstScreenRowOrg = @getFirstVisibleScreenRow()
-    px = @getCount(1) * @getAmountInPixel() * @direction
+    px = @getCount() * @getAmountInPixel() * @direction
     @editor.setScrollTop (@editor.getScrollTop() + px)
     @scrolledRows = @getFirstVisibleScreenRow() - firstScreenRowOrg
     @editor.getScrollTop()
@@ -496,7 +499,10 @@ class Find extends Motion
     points   = []
     @editor[method] ///#{_.escapeRegExp(@input)}///g, scanRange, ({range}) ->
       points.push range.start
-    points[@getCount(1) - 1]?.translate([0, offset])
+    points[@getCount()]?.translate([0, offset])
+
+  getCount: ->
+    super - 1
 
   moveCursor: (cursor) ->
     if point = @find(cursor)
@@ -593,6 +599,9 @@ class SearchBase extends Motion
     if @saveCurrentSearch
       @vimState.globalVimState.currentSearch.backwards = @backwards
 
+  getCount: ->
+    super - 1
+
   flash: (range, timeout=null) ->
     options =
       range: range
@@ -607,7 +616,7 @@ class SearchBase extends Motion
       atom.beep()
       return
 
-    range = ranges[(@getCount(1) - 1) % ranges.length]
+    range = ranges[@getCount() % ranges.length]
     point = range.start
     @editor.scrollToBufferPosition(point, center: true)
 
@@ -686,7 +695,7 @@ class Search extends SearchBase
         unless @vimState.isMode('visual') or @vimState.isMode('insert')
           @vimState.activate('reset')
         @resetFlash()
-        @hoverSearchCounter.reset()
+        @vimState.hoverSearchCounter.reset()
         @vimState.reset()
     if settings.get('enableIncrementalSearch')
       handlers.onDidChange = (@input) =>

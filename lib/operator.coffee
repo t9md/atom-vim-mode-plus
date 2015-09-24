@@ -306,7 +306,7 @@ class Join extends Operator
   complete: true
   execute: ->
     @editor.transact =>
-      _.times @getCount(1), =>
+      _.times @getCount(), =>
         @editor.joinLines()
     @vimState.activate('normal')
 
@@ -316,7 +316,7 @@ class Repeat extends Operator
   recodable: false
   execute: ->
     @editor.transact =>
-      _.times @getCount(1), =>
+      _.times @getCount(), =>
         @vimState.history[0]?.execute()
 
 class Mark extends Operator
@@ -349,7 +349,7 @@ class Increase extends Operator
     @editor.scanInBufferRange pattern, scanRange, ({matchText, range, stop, replace}) =>
       unless range.end.isGreaterThan cursor.getBufferPosition()
         return
-      number = parseInt(matchText, 10) + @step * @getCount(1)
+      number = parseInt(matchText, 10) + @step * @getCount()
       newText = String(number)
       replace newText
       stop()
@@ -401,7 +401,7 @@ class PutBefore extends Operator
   execute: ->
     {text, type} = @vimState.register.get()
     return unless text
-    text = _.multiplyString(text, @getCount(1))
+    text = _.multiplyString(text, @getCount())
     @editor.transact =>
       for selection in @editor.getSelections()
         switch type
@@ -680,7 +680,7 @@ class Replace extends Operator
     super
 
   execute: ->
-    count = @getCount(1)
+    count = @getCount()
 
     @editor.transact =>
       if @target?
