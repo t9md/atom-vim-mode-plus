@@ -97,8 +97,7 @@ class VimState
     if @editor.isAlive()
       @activate('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
-      @removeClass 'vim-mode'
-      @removeClass 'normal-mode'
+      @removeClass 'vim-mode', 'normal-mode'
     # @editorElement.removeEventListener 'mouseup', @checkSelections
     @editor = null
     @editorElement = null
@@ -278,7 +277,6 @@ class VimState
     @hover.reset()
     @operationStack.clear()
 
-
   # Miscellaneous commands
   # -------------------------
   undo: ->
@@ -331,11 +329,11 @@ class VimState
       cursor.setVisible(true) unless cursor.isVisible()
       @updateClassCond cursor.selection.isReversed(), 'reversed'
 
-  addClass:    (klass) ->
-    @editorElement.classList.add(klass)
+  addClass: (klass...) ->
+    @editorElement.classList.add(klass...)
 
-  removeClass: (klass) ->
-    @editorElement.classListr.remove(klass)
+  removeClass: (klass...) ->
+    @editorElement.classList.remove(klass...)
 
   updateClassCond: (condition, klass) ->
     action = (if condition then 'add' else 'remove')
