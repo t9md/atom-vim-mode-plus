@@ -156,11 +156,13 @@ class ModeManager
     else
       for selection in @editor.getSelections()
         {originalRange} = selection.marker.getProperties()
-        if originalRange
+        if originalRange?
           [startRow, endRow] = selection.getBufferRowRange()
           originalRange.start.row = startRow
           originalRange.end.row   = endRow
           selection.setBufferRange(originalRange)
+          # [NOTE] Important! reset originalRange to null after restored.
+          selection.marker.setProperties(originalRange: null)
 
   selectBlockwise: (oldSubmode) ->
     unless oldSubmode is 'characterwise'
