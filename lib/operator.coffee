@@ -215,15 +215,13 @@ class Surround extends TransformString
     @vimState.input.readInput {@charsMax}, @getInputHandler()
 
   getInputHandler: ->
-    onDidConfirm: (input) =>
-      @onDidConfirm(input)
-    onDidChange: (input) =>
-      @vimState.hover.add(input)
-    onDidCancel: =>
+    onConfirm: (input) => @onConfirm(input)
+    onChange:  (input) => @vimState.hover.add(input)
+    onCancel:  =>
       @canceled = true
       @vimState.operationStack.process()
 
-  onDidConfirm: (@input) ->
+  onConfirm: (@input) ->
     @vimState.operationStack.process()
 
   getPair: (input) ->
@@ -244,7 +242,7 @@ class SurroundWord extends Surround
 
 class DeleteSurround extends Surround
   @extend()
-  onDidConfirm: (@input) ->
+  onConfirm: (@input) ->
     @compose @new('Pair', pair: @getPair(@input), inclusive: true)
     @vimState.operationStack.process()
 
@@ -263,7 +261,7 @@ class ChangeSurround extends DeleteSurround
   charsMax: 2
   char: null
 
-  onDidConfirm: (input) ->
+  onConfirm: (input) ->
     return unless input
     [from, @char] = input.split('')
     super(from)
@@ -279,7 +277,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
     super
     @compose @new("AnyPair", inclusive: true)
 
-  onDidConfirm: (@char) ->
+  onConfirm: (@char) ->
     @input = @char
     @vimState.operationStack.process()
 

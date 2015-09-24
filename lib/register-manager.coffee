@@ -84,8 +84,8 @@ class RegisterManager
   setName: ->
     @vimState.hover.add '"'
     @vimState.input.readInput {charsMax: 1},
-      onDidConfirm: (@name) => @vimState.hover.add(@name)
-      onDidCancel: => @vimState.hover.reset()
+      onConfirm: (@name) => @vimState.hover.add(@name)
+      onCancel: => @vimState.hover.reset()
 
   getCopyType: (text) ->
     if text.lastIndexOf("\n") is text.length - 1

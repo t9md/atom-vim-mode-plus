@@ -3,10 +3,10 @@
 {CompositeDisposable} = require 'atom'
 
 class InputBase
-  onDidChange:   (fn) -> @emitter.on 'did-change', fn
-  onDidConfirm:  (fn) -> @emitter.on 'did-confirm', fn
-  onDidCancel:   (fn) -> @emitter.on 'did-cancel', fn
-  onWillUnfocus: (fn) -> @emitter.on 'wil-unfocus', fn
+  onChange:  (fn) -> @emitter.on 'change', fn
+  onConfirm: (fn) -> @emitter.on 'confirm', fn
+  onCancel:  (fn) -> @emitter.on 'cancel', fn
+  onUnfocus: (fn) -> @emitter.on 'unfocus', fn
 
   constructor: (@vimState) ->
     @emitter = new Emitter
@@ -27,7 +27,7 @@ class InputBase
       if @canConfirm()
         @confirm()
       else
-        @emitter.emit 'did-change', text
+        @emitter.emit 'change', text
 
   canConfirm: ->
     if @options?.charsMax
@@ -38,12 +38,12 @@ class InputBase
   readInput: (options, handlers={}) ->
     @subs?.dispose()
     @subs = new CompositeDisposable
-    {onDidConfirm, onDidCancel, onDidChange} = handlers
+    {onConfirm, onCancel, onChange} = handlers
 
-    @subs.add @onDidChange(onDidChange) if onDidChange?
-    @subs.add @onDidConfirm(onDidConfirm) if onDidConfirm?
-    @subs.add @onDidCancel(onDidCancel) if onDidCancel?
-    @subs.add @onWillUnfocus =>
+    @subs.add @onChange(onChange)   if onChange?
+    @subs.add @onConfirm(onConfirm) if onConfirm?
+    @subs.add @onCancel(onCancel)   if onCancel?
+    @subs.add @onUnfocus =>
       @subs.dispose()
       @subs = null
     @focus(options)
@@ -54,14 +54,14 @@ class InputBase
 
   unfocus: ->
     @finishing = true
-    @emitter.emit 'will-unfocus'
+    @emitter.emit 'unfocus'
     atom.workspace.getActivePane().activate()
     @editor.setText ''
     @view.panel.hide()
     @finishing = false
 
   cancel: ->
-    @emitter.emit 'did-cancel'
+    @emitter.emit 'cancel'
     @unfocus()
 
   destroy: ->
@@ -73,7 +73,7 @@ class InputBase
 
   confirm: ->
     if (input = @editor.getText())?
-      @emitter.emit 'did-confirm', input
+      @emitter.emit 'confirm', input
       @unfocus()
     else
       @cancel()
@@ -120,6 +120,11 @@ class Search extends InputBase
       'core:move-up':   => @editor.setText @searchHistory.get('prev')
       'core:move-down': => @editor.setText @searchHistory.get('next')
       'vim-mode:search-set-cursor-word': => @setCursorWord()
+      'vim-mode:search-visit-next': => @emitter.emit 'command', 'visit-next'
+      'vim-mode:search-visit-prev': => @emitter.emit 'command', 'visit-prev'
+
+  onCommmand: (fn) ->
+    @emitter.on 'command', fn
 
   setCursorWord: ->
     @editor.setText @vimState.editor.getWordUnderCursor()

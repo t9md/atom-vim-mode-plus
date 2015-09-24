@@ -56,11 +56,11 @@ class Base
   readInput: ({charsMax}={}) ->
     charsMax ?= 1
     @vimState.input.readInput {charsMax},
-      onDidConfirm: (input) =>
+      onConfirm: (input) =>
         @input = input
         @complete = true
         @vimState.operationStack.process()
-      onDidCancel: =>
+      onCancel: =>
         # FIXME
         # Cancelation currently depending on operationStack to call cancel()
         # Should be better to observe cancel event on operationStack side.

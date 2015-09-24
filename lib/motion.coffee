@@ -620,7 +620,7 @@ class SearchBase extends Motion
       atom.beep()
       return
     @index = @getCount() % @ranges.length
-    @visit(index, cursor)
+    @visit(@index, cursor)
 
   visit: (index, cursor) ->
     @current = @ranges[index]
@@ -719,14 +719,14 @@ class Search extends SearchBase
   constructor: ->
     super
 
-    @vimState.search.readInput {@backwards}, {@onDidConfirm, @onDidCancel, @onDidChange}
+    @vimState.search.readInput {@backwards}, {@onConfirm, @onCancel, @onChange}
     if settings.get('enableIncrementalSearch')
       @restoreEditorState = saveEditorState(@editor)
       @subscriptions = new CompositeDisposable
       @subscriptions.add @editor.onDidChangeScrollTop => @showMatched()
       @subscriptions.add @editor.onDidChangeScrollLeft => @showMatched()
 
-  onDidConfirm: (input) => # fat-arrow
+  onConfirm: (input) => # fat-arrow
     latestSeachChars = ['', (if @isBackwards() then '?' else '/')]
     if input in latestSeachChars
       input = @vimState.searchHistory.get('prev')
@@ -738,7 +738,7 @@ class Search extends SearchBase
     @subscriptions = null
     @destroyMarkers()
 
-  onDidCancel: => # fat-arrow
+  onCancel: => # fat-arrow
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
       @vimState.activate('reset')
     @destroyMarkers()
@@ -749,7 +749,7 @@ class Search extends SearchBase
     @subscriptions = null
     @restoreEditorState?()
 
-  onDidChange: (@input) => # fat-arrow
+  onChange: (@input) => # fat-arrow
     return unless settings.get('enableIncrementalSearch')
     for c in @editor.getCursors()
       @moveCursor(c)
