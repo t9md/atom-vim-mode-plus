@@ -308,3 +308,8 @@
   'ctrl-[': 'vim-mode:blockwise-escape'
   'ctrl-c': 'vim-mode:blockwise-escape'
   'ctrl-v': 'vim-mode:blockwise-escape'
+
+# Search mini editor
+# -------------------------
+'atom-text-editor.vim-mode-search':
+  'ctrl-r ctrl-w': 'vim-mode:search-set-cursor-word'

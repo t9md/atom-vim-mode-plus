@@ -86,6 +86,7 @@ class InputBaseElement extends HTMLElement
     @className = @klass
     @editorElement = document.createElement 'atom-text-editor'
     @editorElement.classList.add('editor')
+    @editorElement.classList.add @klass
     @editorElement.setAttribute('mini', '')
     @editor = @editorElement.getModel()
     @editor.setMini(true)
@@ -118,6 +119,10 @@ class Search extends InputBase
     atom.commands.add @editorElement,
       'core:move-up':   => @editor.setText @searchHistory.get('prev')
       'core:move-down': => @editor.setText @searchHistory.get('next')
+      'vim-mode:search-set-cursor-word': => @setCursorWord()
+
+  setCursorWord: ->
+    @editor.setText @vimState.editor.getWordUnderCursor()
 
   focus: ({backwards}) ->
     @view.classList.add('backwards') if backwards
