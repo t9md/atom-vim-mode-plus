@@ -757,7 +757,7 @@ class Search extends SearchBase
     @vimState.reset()
     @subscriptions?.dispose()
     @subscriptions = null
-    @restoreEditorState()
+    @restoreEditorState?()
 
   onDidChange: (@input) =>
     for c in @editor.getCursors()
