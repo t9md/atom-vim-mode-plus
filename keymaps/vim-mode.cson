@@ -313,3 +313,5 @@
 # -------------------------
 'atom-text-editor.vim-mode-search':
   'ctrl-r ctrl-w': 'vim-mode:search-set-cursor-word'
+  # '[':             'vim-mode:search-visit-prev'
+  # ']':             'vim-mode:search-visit-next'

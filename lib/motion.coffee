@@ -611,6 +611,10 @@ class SearchBase extends Motion
     @vimState.flasher.flash(options)
 
   moveCursor: (cursor) ->
+    if @index?
+      @visit(@index, cursor)
+      return
+
     @ranges = @scan(cursor)
     if @ranges.length is 0
       unless @isComplete()
@@ -622,10 +626,10 @@ class SearchBase extends Motion
     @index = @getCount() % @ranges.length
     @visit(@index, cursor)
 
-  visit: (index, cursor) ->
+  visit: (index, cursor=null) ->
     @current = @ranges[index]
     point = @current.start
-    if @isComplete()
+    if @isComplete() and cursor?
       cursor.setBufferPosition(point, center: true)
       @vimState.searchHistory.save(@input)
     else
@@ -636,7 +640,7 @@ class SearchBase extends Motion
         @editor.unfoldBufferRow point
 
     @flash(@current) if settings.get('flashOnSearch')
-    @showHover(piont, @getCounter()) if settings.get('enableHoverSearchCounter')
+    @showHover(point, @getCounter()) if settings.get('enableHoverSearchCounter')
 
   showHover: (point, content) ->
     timeout = null
@@ -718,13 +722,14 @@ class Search extends SearchBase
   @extend()
   constructor: ->
     super
-
-    @vimState.search.readInput {@backwards}, {@onConfirm, @onCancel, @onChange}
+    handlers = {@onConfirm, @onCancel}
     if settings.get('enableIncrementalSearch')
       @restoreEditorState = saveEditorState(@editor)
       @subscriptions = new CompositeDisposable
       @subscriptions.add @editor.onDidChangeScrollTop => @showMatched()
       @subscriptions.add @editor.onDidChangeScrollLeft => @showMatched()
+      _.extend(handlers, {@onChange, @onCommand})
+    @vimState.search.readInput {@backwards}, handlers
 
   onConfirm: (input) => # fat-arrow
     latestSeachChars = ['', (if @isBackwards() then '?' else '/')]
@@ -751,8 +756,18 @@ class Search extends SearchBase
 
   onChange: (@input) => # fat-arrow
     return unless settings.get('enableIncrementalSearch')
+    @index = null
     for c in @editor.getCursors()
       @moveCursor(c)
+
+  onCommand: (command) => # fat-arrow
+    switch command
+      when 'visit-next'
+        @index = (@index + 1) % @ranges.length
+      when 'visit-prev'
+        @index -= 1
+        @index = (@ranges.length - 1) if @index is -1
+    @visit(@index)
 
 class SearchBackwards extends Search
   @extend()
