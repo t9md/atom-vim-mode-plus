@@ -12,7 +12,7 @@ Base = require './base'
 class Motion extends Base
   @extend()
   complete: true
-  recordable: false
+
   inclusive: false
   linewise: false
   options: null

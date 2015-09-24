@@ -3,7 +3,7 @@ Base = require './base'
 class Scroll extends Base
   @extend()
   complete: true
-  recodable: false
+  
   scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
 
   getFirstVisibleScreenRow: ->

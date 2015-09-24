@@ -15,10 +15,11 @@ class OperatorError extends Base
 # -------------------------
 class Operator extends Base
   @extend()
-  target: null
-  complete: false
   recodable: true
+  
+  target: null
   flashTarget: true
+
   isSameOperatorRepeated: ->
     if @vimState.isMode('operator-pending')
       @vimState.operationStack.peekTop().constructor is @constructor

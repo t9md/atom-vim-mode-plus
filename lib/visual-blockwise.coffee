@@ -6,7 +6,6 @@ _ = require 'underscore-plus'
 class VisualBlockwise extends Base
   @extend()
   complete: true
-  recodable: false
 
   clearTail: ->
     @setProperties(vimModeBlockwiseTail: false)
