@@ -7,6 +7,7 @@ settings = require './settings'
 
 class Hover
   lineHeight: null
+  visible: false
 
   constructor: (@vimState) ->
     @text = []
@@ -15,13 +16,18 @@ class Hover
   add: (text, point) ->
     @text.push text
     @view.show(point)
+    @point = point
+
+  isVisible: (point) ->
+    @point?.isEqual point
 
   addWithTimeout: (text, point, timeout) ->
     @reset()
     @add(text, point)
-    @timeoutID = setTimeout  =>
-      @reset()
-    , timeout
+    if timeout?
+      @timeoutID = setTimeout  =>
+        @reset()
+      , timeout
 
   iconRegexp = /^:.*:$/
   getText: (lineHeight) ->
@@ -42,6 +48,7 @@ class Hover
     clearTimeout @timeoutID
     @timeoutID = null
     @view.reset()
+    @point = null
 
   destroy: ->
     @vimState = null
