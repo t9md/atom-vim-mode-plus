@@ -609,9 +609,6 @@ class SearchBase extends Motion
       timeout: timeout
 
   finish: ->
-    @vimState.hoverSearchCounter.reset()
-    @subscriptions?.dispose()
-    @subscriptions = null
     @matches?.destroy()
     @matches = null
 
@@ -620,30 +617,34 @@ class SearchBase extends Motion
     if @matches.isEmpty()
       @flash getVisibleBufferRange(@editor), timeout: 100 # screen beep.
       atom.beep()
-      @finish()
-      return
+    else
+      if @isComplete()
+        @visit(cursor)
+        @vimState.searchHistory.save(@input)
+      else
+        @visit(null)
 
-    current = @matches.get()
-    @scroll(current)
     if @isComplete()
-      cursor.setBufferPosition(current.getStartPoint())
-      @vimState.searchHistory.save(@input)
       @finish()
+
+  # If cursor is passed, it move actual move, otherwise
+  # just visit matched point with decorate other matching.
+  visit: (cursor=null) ->
+    current = @matches.get()
+    current.visit()
+    if cursor
+      # In isearch, we already displayed hover and flash
+      # So I prefer being silent when landing.
+      @showEffect(current) unless @isIncrementalSearch()
+      cursor.setBufferPosition(current.getStartPoint())
     else
       @matches.show()
-
-  scroll: (match) ->
-    match.visit()
-    @showEffect(match)
+      @showEffect(current)
 
   isIncrementalSearch: ->
     settings.get('enableIncrementalSearch') and @isSearch()
 
   showEffect: (match) ->
-    # In isearch, we already show hover and flash
-    # So in UX perspective, I prefer being silent on confirm(isComplete()).
-    return if (@isComplete() and @isIncrementalSearch())
-
     if settings.get('flashOnSearch')
       @flash match.range, timeout: settings.get('flashOnSearchDurationMilliSeconds')
 
@@ -657,8 +658,8 @@ class SearchBase extends Motion
   scan: (cursor) ->
     return [] if @input is ''
     cursorPosition = cursor.getBufferPosition()
-    pattern = @getPattern(@input)
     ranges = []
+    pattern = @getPattern(@input)
     @editor.scan pattern, ({range}) ->
       ranges.push range
 
@@ -699,6 +700,13 @@ class Search extends SearchBase
   isRepeatLastSearch: (input) ->
     input in ['', (if @isBackwards() then '?' else '/')]
 
+  finish: ->
+    if @isIncrementalSearch()
+      @vimState.hoverSearchCounter.reset()
+    @subscriptions?.dispose()
+    @subscriptions = null
+    super
+
   onConfirm: (@input) => # fat-arrow
     if @isRepeatLastSearch(@input)
       unless @input = @vimState.searchHistory.get('prev')
@@ -723,7 +731,7 @@ class Search extends SearchBase
 
   onCommand: (direction) => # fat-arrow
     return if @matches.isEmpty()
-    @scroll @matches.get(direction)
+    @visit @matches.get(direction)
 
 class SearchBackwards extends Search
   @extend()
@@ -789,6 +797,7 @@ OpenBrackets = ['(', '{', '[']
 CloseBrackets = [')', '}', ']']
 AnyBracket = new RegExp(OpenBrackets.concat(CloseBrackets).map(_.escapeRegExp).join("|"))
 
+# TODO: refactor.
 class BracketMatchingMotion extends SearchBase
   @extend()
   inclusive: true
