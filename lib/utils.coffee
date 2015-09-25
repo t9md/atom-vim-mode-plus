@@ -31,6 +31,7 @@ module.exports =
       point = range.end.translate([0, +1])
     point
 
+  # Return function to restore editor's scrollTop and fold state.
   saveEditorState: (editor) ->
     scrollTop = editor.getScrollTop()
     foldStartRows = editor.displayBuffer.findFoldMarkers().map (m) ->
