@@ -121,8 +121,7 @@ class Motion extends Base
 class CurrentSelection extends Motion
   @extend()
   selectedRange: null
-  constructor: ->
-    super
+  initialize: ->
     @selectedRange = @editor.getSelectedBufferRange()
     @wasLinewise = @isLinewise()
 
@@ -277,8 +276,7 @@ class MoveToBeginningOfLine extends Motion
   @extend()
   defaultCount: null
 
-  constructor: ->
-    super
+  initialize: ->
     # 0 is special need to differenciate `10`, 0
     if @getCount()?
       # if true, it means preceeding number exist, so we should behave as `0`.
@@ -477,8 +475,7 @@ class Find extends Motion
   hoverIcon: ':find:'
   offset: 0
 
-  constructor: ->
-    super
+  initialize: ->
     @readInput() unless @isRepeatFind()
 
   isBackwards: ->
@@ -539,8 +536,7 @@ class TillBackwards extends Till
 
 class RepeatFind extends Find
   @extend()
-  constructor: ->
-    super
+  initialize: ->
     unless findObj = @vimState.globalVimState.currentFind
       @abort()
     {@offset, @backwards, @complete, @input} = findObj
@@ -561,8 +557,7 @@ class MoveToMark extends Motion
   hoverIcon: ":move-to-mark:`"
   # hoverChar: '`'
 
-  constructor: ->
-    super
+  initialize: ->
     @readInput()
 
   moveCursor: (cursor) ->
@@ -592,8 +587,7 @@ class SearchBase extends Motion
   complete: false
   backwards: false
 
-  constructor: ->
-    super
+  initialize: ->
     if @saveCurrentSearch
       @vimState.globalVimState.currentSearch.backwards = @backwards
 
@@ -743,7 +737,7 @@ class SearchBase extends Motion
 
 class Search extends SearchBase
   @extend()
-  constructor: ->
+  initialize: ->
     super
     handlers = {@onConfirm, @onCancel}
     if settings.get('enableIncrementalSearch')
@@ -801,7 +795,7 @@ class SearchCurrentWord extends SearchBase
   wordRegex: null
   complete: true
 
-  constructor: ->
+  initialize: ->
     super
     # FIXME: This must depend on the current language
     defaultIsKeyword = "[@a-zA-Z0-9_\-]+"
@@ -841,7 +835,7 @@ class RepeatSearch extends SearchBase
   complete: true
   saveCurrentSearch: false
 
-  constructor: ->
+  initialize: ->
     super
     @input = @vimState.searchHistory.get('prev')
     @backwards = @vimState.globalVimState.currentSearch.backwards

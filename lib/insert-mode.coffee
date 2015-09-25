@@ -8,8 +8,7 @@ class InsertRegister extends InsertMode
   @extend()
   hoverText: '"'
   requireInput: true
-  constructor: ->
-    super
+  initialize: ->
     @readInput()
 
   execute: ->

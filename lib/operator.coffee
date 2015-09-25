@@ -115,20 +115,17 @@ class Delete extends Operator
 
 class DeleteRight extends Delete
   @extend()
-  constructor: ->
-    super
+  initialize: ->
     @compose @new('MoveRight')
 
 class DeleteLeft extends Delete
   @extend()
-  constructor: ->
-    super
+  initialize: ->
     @compose @new('MoveLeft')
 
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
-  constructor: ->
-    super
+  initialize: ->
     @compose @new('MoveToLastCharacterOfLine')
 
 class TransformString extends Operator
@@ -168,8 +165,7 @@ class ToggleCaseAndMoveRight extends ToggleCase
   hoverText: null
   hoverIcon: null
   adjustCursor: false
-  constructor: ->
-    super
+  initialize: ->
     @compose @new('MoveRight')
 
 class UpperCase extends TransformString
@@ -217,8 +213,7 @@ class Surround extends TransformString
   hoverIcon: ':surround:'
   requireInput: true
 
-  constructor: ->
-    super
+  initialize: ->
     return unless @requireInput
     @vimState.input.readInput {@charsMax}, @getInputHandler()
 
@@ -244,7 +239,7 @@ class Surround extends TransformString
     @surround text, @getPair(@input)
 
 class SurroundWord extends Surround
-  constructor: ->
+  initialize: ->
     super
     @compose @new('Word')
 
@@ -260,7 +255,7 @@ class DeleteSurround extends Surround
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
   requireInput: false
-  constructor: ->
+  initialize: ->
     super
     @compose @new("AnyPair", inclusive: true)
 
@@ -281,7 +276,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
   charsMax: 1
 
-  constructor: ->
+  initialize: ->
     super
     @compose @new("AnyPair", inclusive: true)
     @preSelect()
@@ -313,8 +308,7 @@ class Yank extends Operator
 
 class YankLine extends Yank
   @extend()
-  constructor: ->
-    super
+  initialize: ->
     @compose @new('MoveToRelativeLine')
 
 class Join extends Operator
@@ -340,8 +334,7 @@ class Mark extends Operator
   hoverText: ':round_pushpin:'
   hoverIcon: ':mark:'
   requireInput: true
-  constructor: ->
-    super
+  initialize: ->
     @readInput()
 
   execute: ->
@@ -599,20 +592,17 @@ class Change extends Insert
 
 class Substitute extends Change
   @extend()
-  constructor: ->
-    super
+  initialize: ->
     @compose @new('MoveRight')
 
 class SubstituteLine extends Change
   @extend()
-  constructor: ->
-    super
+  initialize: ->
     @compose @new("MoveToRelativeLine")
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
-  constructor: ->
-    super
+  initialize: ->
     @compose @new('MoveToLastCharacterOfLine')
 
 # Takes a transaction and turns it into a string of what was typed.
@@ -687,8 +677,7 @@ class Replace extends Operator
   hoverText: ':tractor:'
   requireInput: true
 
-  constructor: ->
-    super
+  initialize: ->
     @readInput()
 
   isComplete: ->
