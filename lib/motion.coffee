@@ -592,16 +592,19 @@ class SearchBase extends Motion
   complete: false
   backwards: false
 
-  isBackwards: ->
-    @backwards
-
   constructor: ->
     super
     if @saveCurrentSearch
       @vimState.globalVimState.currentSearch.backwards = @backwards
 
+  isBackwards: ->
+    @backwards
+
+  # Not sure if I should support count
+  # but keep this for compatibility to official vim-mode.
   getCount: ->
-    super - 1
+    count = super
+    if @isBackwards() then -count else count - 1
 
   flash: (range, {timeout}={}) ->
     options =
@@ -612,21 +615,44 @@ class SearchBase extends Motion
 
   moveCursor: (cursor) ->
     if @index?
-      @visit(@index, cursor)
+      @visit('current', cursor)
     else
-      @ranges = @scan(cursor)
-      if @ranges.length is 0
+      ranges = @scan(cursor)
+      if ranges.length is 0
         @flash(@getVisibleBufferRange(), timeout: 100)
         atom.beep()
         return
-      @index = @getCount() % @ranges.length
-      @visit(@index, cursor)
+      @setMatches(ranges)
+      @visit('current', cursor)
     if @isComplete()
       @index = null
 
-  visit: (index, cursor=null) ->
-    @current = @ranges[index]
-    point = @current.start
+  getCurrentMatch: ->
+    @ranges[@index]
+
+  getMatches: ->
+    @ranges
+
+  getMatch: (direction) ->
+    switch direction
+      when 'next' then @updateIndex(@index + 1)
+      when 'prev' then @updateIndex(@index - 1)
+    @ranges[@index]
+
+  setMatches: (ranges) ->
+    @ranges = ranges
+    @updateIndex(@getCount())
+
+  updateIndex: (index) ->
+    ranges = @getMatches()
+    if index >= 0
+      @index = index % ranges.length
+    else
+      @index = (ranges.length + index)
+
+  visit: (direction, cursor=null) ->
+    match = @getMatch(direction)
+    point = match.start
     if @isComplete() and cursor?
       cursor.setBufferPosition(point, center: true)
       @vimState.searchHistory.save(@input)
@@ -637,8 +663,8 @@ class SearchBase extends Motion
       if @editor.isFoldedAtBufferRow(point.row)
         @editor.unfoldBufferRow point
 
-    @flash(@current) if settings.get('flashOnSearch')
-    @showHover(point, @getCounter()) if settings.get('enableHoverSearchCounter')
+    @flash(match) if settings.get('flashOnSearch')
+    @showHover(point, @getCounter(match, @getMatches())) if settings.get('enableHoverSearchCounter')
 
   showHover: (point, content) ->
     timeout = null
@@ -653,19 +679,11 @@ class SearchBase extends Motion
     @markers = []
     visibleRange = @getVisibleBufferRange()
     rangesToRender = (r for r in @ranges when visibleRange.containsRange(r))
+    current = @getCurrentMatch()
     for r in rangesToRender
       klass = 'vim-mode-search-match'
-      klass += ' current' if r.isEqual(@current)
+      klass += ' current' if r.isEqual(current)
       @markers.push(@decorate r, class: klass)
-
-  getVisibleBufferRange: ->
-    [startRow, endRow] = @editor.getVisibleRowRange().map (row) =>
-      @editor.bufferRowForScreenRow row
-    new Range([startRow, 0], [endRow, Infinity])
-
-  destroyMarkers: ->
-    m.destroy() for m in @markers ? []
-    @markers = null
 
   decorate: (range, {class: klass}) ->
     marker = @editor.markBufferRange range,
@@ -676,10 +694,19 @@ class SearchBase extends Motion
       class: klass
     marker
 
-  getCounter: ->
-    rangeSorted = @ranges.slice().sort (a, b) -> a.compare(b)
-    currentIndex = rangeSorted.indexOf(@current) + 1
-    "#{currentIndex}/#{@ranges.length}"
+  getVisibleBufferRange: ->
+    [startRow, endRow] = @editor.getVisibleRowRange().map (row) =>
+      @editor.bufferRowForScreenRow row
+    new Range([startRow, 0], [endRow, Infinity])
+
+  destroyMarkers: ->
+    m.destroy() for m in @markers ? []
+    @markers = null
+
+  getCounter: (current, ranges) ->
+    rangeSorted = ranges.slice().sort (a, b) -> a.compare(b)
+    currentIndex = rangeSorted.indexOf(current) + 1
+    "#{currentIndex}/#{ranges.length}"
 
   scan: (cursor) ->
     return [] if @input is ""
@@ -690,14 +717,12 @@ class SearchBase extends Motion
     @editor.scan pattern, ({range}) ->
       ranges.push range
 
-    [rangesBefore, rangesAfter] = _.partition ranges, ({start}) =>
-      if @isBackwards()
-        start.isLessThan(cursorPosition)
-      else
-        start.isLessThanOrEqual(cursorPosition)
+    cond = if @isBackwards() then 'isLessThan' else 'isLessThanOrEqual'
+    [rangesBefore, rangesAfter] = _.partition ranges, ({start, end}) ->
+      start[cond](cursorPosition)
 
     ranges = rangesAfter.concat(rangesBefore)
-    ranges.reverse() if @isBackwards()
+    # ranges.reverse() if @isBackwards()
     ranges
 
   getPattern: (term) ->
@@ -744,12 +769,12 @@ class Search extends SearchBase
   onCancel: => # fat-arrow
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
       @vimState.activate('reset')
-    @destroyMarkers()
     @vimState.hoverSearchCounter.reset()
+    @restoreEditorState?()
     @vimState.reset()
     @subscriptions?.dispose()
     @subscriptions = null
-    @restoreEditorState?()
+    @destroyMarkers()
 
   reset: ->
     @index = null
@@ -763,19 +788,9 @@ class Search extends SearchBase
     unless @input is ''
       @moveCursor(c) for c in @editor.getCursors()
 
-  onCommand: (command) => # fat-arrow
+  onCommand: (direction) => # fat-arrow
     return unless @ranges.length
-    action =
-      switch command
-        when 'visit-next' then (if @isBackwards() then 'prev' else 'next')
-        when 'visit-prev' then (if @isBackwards() then 'next' else 'prev')
-    switch action
-      when 'next'
-        @index = (@index + 1) % @ranges.length
-      when 'prev'
-        @index -= 1
-        @index = (@ranges.length - 1) if @index is -1
-    @visit(@index)
+    @visit(direction)
 
 class SearchBackwards extends Search
   @extend()

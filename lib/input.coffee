@@ -123,8 +123,8 @@ class Search extends InputBase
     literalModeSupportCommands =
       "confirm":    => @confirm()
       "cancel":     => @cancel()
-      "visit-next": => @emitter.emit('command', 'visit-next')
-      "visit-prev": => @emitter.emit('command', 'visit-prev')
+      "visit-next": => @emitter.emit('command', 'next')
+      "visit-prev": => @emitter.emit('command', 'prev')
 
     prefix = 'vim-mode:search'
     commands = {}
