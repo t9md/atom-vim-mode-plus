@@ -22,7 +22,7 @@ class Hover
   isVisibleAtPoint: (point) ->
     @point?.isEqual point
 
-  addWithTimeout: (text, point, timeout) ->
+  withTimeout: (point, {text, timeout}) ->
     @reset()
     @add(text, point)
     if timeout?
