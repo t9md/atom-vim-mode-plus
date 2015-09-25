@@ -3,6 +3,8 @@
 {selectLines} = require './utils'
 {Hover} = require './hover'
 {saveEditorState} = require './utils'
+{MatchList} = require './match'
+{getVisibleBufferRange} = require './utils'
 
 _ = require 'underscore-plus'
 
@@ -594,130 +596,76 @@ class SearchBase extends Motion
   isBackwards: ->
     @backwards
 
-  # Not sure if I should support count
-  # but keep this for compatibility to official vim-mode.
+  # Not sure if I should support count but keep this for compatibility to official vim-mode.
+  # Return value is directly used as index of matched list.
   getCount: ->
     count = super
     if @isBackwards() then -count else count - 1
 
   flash: (range, {timeout}={}) ->
-    options =
+    @vimState.flasher.flash
       range: range
       klass: 'vim-mode-flash'
-      timeout: timeout ? settings.get('flashOnSearchDurationMilliSeconds')
-    @vimState.flasher.flash(options)
+      timeout: timeout
+
+  finish: ->
+    @vimState.hoverSearchCounter.reset()
+    @subscriptions?.dispose()
+    @subscriptions = null
+    @matches?.destroy()
+    @matches = null
 
   moveCursor: (cursor) ->
-    if @index?
-      @visit('current', cursor)
-    else
-      ranges = @scan(cursor)
-      if ranges.length is 0
-        @flash(@getVisibleBufferRange(), timeout: 100)
-        atom.beep()
-        return
-      @setMatches(ranges)
-      @visit('current', cursor)
+    @matches ?= new MatchList(@vimState, @scan(cursor), @getCount())
+    if @matches.isEmpty()
+      @flash getVisibleBufferRange(@editor), timeout: 100 # screen beep.
+      atom.beep()
+      @finish()
+      return
+
+    current = @matches.get()
+    @scroll(current)
     if @isComplete()
-      @index = null
-
-  getCurrentMatch: ->
-    @ranges[@index]
-
-  getMatches: ->
-    @ranges
-
-  getMatch: (direction) ->
-    switch direction
-      when 'next' then @updateIndex(@index + 1)
-      when 'prev' then @updateIndex(@index - 1)
-    @ranges[@index]
-
-  setMatches: (ranges) ->
-    @ranges = ranges
-    @updateIndex(@getCount())
-
-  updateIndex: (index) ->
-    ranges = @getMatches()
-    if index >= 0
-      @index = index % ranges.length
-    else
-      @index = (ranges.length + index)
-
-  visit: (direction, cursor=null) ->
-    match = @getMatch(direction)
-    point = match.start
-    if @isComplete() and cursor?
-      cursor.setBufferPosition(point, center: true)
+      cursor.setBufferPosition(current.getStartPoint())
       @vimState.searchHistory.save(@input)
+      @finish()
     else
-      # dont do acutual move in temporal visit in inclemental search.
-      @showMatched()
-      @editor.scrollToBufferPosition(point, center: true)
-      if @editor.isFoldedAtBufferRow(point.row)
-        @editor.unfoldBufferRow point
+      @matches.show()
 
-    @flash(match) if settings.get('flashOnSearch')
-    @showHover(point, @getCounter(match, @getMatches())) if settings.get('enableHoverSearchCounter')
+  scroll: (match) ->
+    match.visit()
+    @showEffect(match)
 
-  showHover: (point, content) ->
-    timeout = null
-    if @isComplete()
-      timeout = switch
-        when @vimState.hoverSearchCounter.isVisibleAtPoint(point) then 0
-        else settings.get('searchCounterHoverDuration')
-    @vimState.hoverSearchCounter.addWithTimeout content, point, timeout
+  isIncrementalSearch: ->
+    settings.get('enableIncrementalSearch') and @isSearch()
 
-  showMatched: ->
-    @destroyMarkers()
-    @markers = []
-    visibleRange = @getVisibleBufferRange()
-    rangesToRender = (r for r in @ranges when visibleRange.containsRange(r))
-    current = @getCurrentMatch()
-    for r in rangesToRender
-      klass = 'vim-mode-search-match'
-      klass += ' current' if r.isEqual(current)
-      @markers.push(@decorate r, class: klass)
+  showEffect: (match) ->
+    # In isearch, we already show hover and flash
+    # So in UX perspective, I prefer being silent on confirm(isComplete()).
+    return if (@isComplete() and @isIncrementalSearch())
 
-  decorate: (range, {class: klass}) ->
-    marker = @editor.markBufferRange range,
-      invalidate: 'never'
-      persistent: false
-    @editor.decorateMarker marker,
-      type: 'highlight'
-      class: klass
-    marker
+    if settings.get('flashOnSearch')
+      @flash match.range, timeout: settings.get('flashOnSearchDurationMilliSeconds')
 
-  getVisibleBufferRange: ->
-    [startRow, endRow] = @editor.getVisibleRowRange().map (row) =>
-      @editor.bufferRowForScreenRow row
-    new Range([startRow, 0], [endRow, Infinity])
-
-  destroyMarkers: ->
-    m.destroy() for m in @markers ? []
-    @markers = null
-
-  getCounter: (current, ranges) ->
-    rangeSorted = ranges.slice().sort (a, b) -> a.compare(b)
-    currentIndex = rangeSorted.indexOf(current) + 1
-    "#{currentIndex}/#{ranges.length}"
+    if settings.get('enableHoverSearchCounter')
+      timeout = null
+      timeout = settings.get('searchCounterHoverDuration') if @isComplete()
+      @vimState.hoverSearchCounter.withTimeout match.range.start,
+        text: @matches.getInfo()
+        timeout: timeout
 
   scan: (cursor) ->
-    return [] if @input is ""
-
+    return [] if @input is ''
     cursorPosition = cursor.getBufferPosition()
-    ranges = []
     pattern = @getPattern(@input)
+    ranges = []
     @editor.scan pattern, ({range}) ->
       ranges.push range
 
     cond = if @isBackwards() then 'isLessThan' else 'isLessThanOrEqual'
-    [rangesBefore, rangesAfter] = _.partition ranges, ({start, end}) ->
+    [pre, post] = _.partition ranges, ({start}) ->
       start[cond](cursorPosition)
-
-    ranges = rangesAfter.concat(rangesBefore)
-    # ranges.reverse() if @isBackwards()
-    ranges
+    post.concat(pre)
 
   getPattern: (term) ->
     modifiers = {'g': true}
@@ -743,48 +691,39 @@ class Search extends SearchBase
     if settings.get('enableIncrementalSearch')
       @restoreEditorState = saveEditorState(@editor)
       @subscriptions = new CompositeDisposable
-      @subscriptions.add @editor.onDidChangeScrollTop => @showMatched()
-      @subscriptions.add @editor.onDidChangeScrollLeft => @showMatched()
+      @subscriptions.add @editor.onDidChangeScrollTop => @matches?.show()
+      @subscriptions.add @editor.onDidChangeScrollLeft => @matches?.show()
       _.extend(handlers, {@onChange, @onCommand})
     @vimState.search.readInput {@backwards}, handlers
 
-  onConfirm: (input) => # fat-arrow
-    latestSeachChars = ['', (if @isBackwards() then '?' else '/')]
-    if input in latestSeachChars
-      input = @vimState.searchHistory.get('prev')
-      atom.beep() if input is ''
-    @input = input
+  isRepeatLastSearch: (input) ->
+    input in ['', (if @isBackwards() then '?' else '/')]
+
+  onConfirm: (@input) => # fat-arrow
+    if @isRepeatLastSearch(@input)
+      unless @input = @vimState.searchHistory.get('prev')
+        atom.beep()
     @complete = true
     @vimState.operationStack.process()
-    @subscriptions?.dispose()
-    @subscriptions = null
-    @destroyMarkers()
+    @finish()
 
   onCancel: => # fat-arrow
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
       @vimState.activate('reset')
-    @vimState.hoverSearchCounter.reset()
     @restoreEditorState?()
     @vimState.reset()
-    @subscriptions?.dispose()
-    @subscriptions = null
-    @destroyMarkers()
-
-  reset: ->
-    @index = null
-    @ranges = null
-    @destroyMarkers()
-    @vimState.hoverSearchCounter.reset()
+    @finish()
 
   onChange: (@input) => # fat-arrow
     return unless settings.get('enableIncrementalSearch')
-    @reset()
+    @matches?.destroy()
+    @matches = null
     unless @input is ''
       @moveCursor(c) for c in @editor.getCursors()
 
   onCommand: (direction) => # fat-arrow
-    return unless @ranges.length
-    @visit(direction)
+    return if @matches.isEmpty()
+    @scroll @matches.get(direction)
 
 class SearchBackwards extends Search
   @extend()

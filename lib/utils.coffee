@@ -1,6 +1,7 @@
 # Refactoring status: 100%
 fs = require 'fs-plus'
 settings = require './settings'
+{Range} = require 'atom'
 
 module.exports =
   # Include module(object which normaly provides set of methods) to klass
@@ -44,3 +45,8 @@ module.exports =
   getKeystrokeForEvent: (event) ->
     keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
     atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
+
+  getVisibleBufferRange: (editor) ->
+    [startRow, endRow] = editor.getVisibleRowRange().map (row) ->
+      editor.bufferRowForScreenRow row
+    new Range([startRow, 0], [endRow, Infinity])
