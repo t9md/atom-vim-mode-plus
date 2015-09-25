@@ -19,6 +19,7 @@ class Base
           when 'emoji' then @hoverText if @hoverText?
           when 'icon'  then @hoverIcon if @hoverIcon?
       @vimState.hover.add hover if hover?
+    @initialize?()
 
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
