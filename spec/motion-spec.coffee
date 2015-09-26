@@ -78,6 +78,23 @@ describe "Motion", ->
             cursor: [2, 4]
             selectedText: "defg\n\nabcd"
 
+        # [FIXME] the place of this spec is not appropriate.
+        it "original visual line remains when jk acroll orignal selection", ->
+          set
+            text: """
+              line1
+              line2
+              line3\n
+              """
+            cursor: [1, 1]
+
+          ensure 'V', selectedText: 'line2\n'
+          ensure 'j', selectedText: 'line2\nline3\n'
+          ensure 'k', selectedText: 'line2\n'
+          ensure 'k', selectedText: 'line1\nline2\n'
+          ensure 'j', selectedText: 'line2\n'
+          ensure 'j', selectedText: 'line2\nline3\n'
+
     describe "the k keybinding", ->
       it "moves the cursor up, but not to the beginning of the first line", ->
         ensure 'k', cursor: [0, 1]
