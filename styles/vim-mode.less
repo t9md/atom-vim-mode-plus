@@ -189,20 +189,38 @@ atom-text-editor::shadow {
 // =========================
 // input
 .vim-mode-search {
-  atom-text-editor[mini] {
-    padding: @component-padding/4 @component-padding;
+  display: flex;
+  > div {
+    padding: @component-padding/4; // @component-padding/2;
     border: none;
-    color: @text-color;
-    cursor: default;
-    padding-left: 10px;
-    &.is-focused {
-      box-shadow: none;
+  }
+  .options-container {
+    padding: @component-padding/2 @component-padding;
+    .btn {
+      font-size: 1.0em;
+    }
+  }
+  .editor-container {
+    position: relative;
+    padding: @component-padding/2 @component-padding;
+    width: 100%;
+    atom-text-editor[mini] {
+      border: none;
+      color: @text-color;
+      cursor: default;
+      &.is-focused {
+        box-shadow: none;
+      }
     }
   }
   atom-text-editor[mini]::before {
+    font-size: 1.5em;
+    padding-right: 0.5em;
     content: '/';
   }
   &.backwards atom-text-editor[mini]::before {
+    font-size: 1.5em;
+    padding-right: 0.5em;
     content: '?';
   }
 }

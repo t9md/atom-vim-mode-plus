@@ -619,8 +619,9 @@ class SearchBase extends Motion
 
     @matches ?= new MatchList(@vimState, ranges, initialIndex)
     if @matches.isEmpty()
-      @flash getVisibleBufferRange(@editor), timeout: 100 # screen beep.
-      atom.beep()
+      unless @input is ''
+        @flash getVisibleBufferRange(@editor), timeout: 100 # screen beep.
+        atom.beep()
     else
       current = @matches.get()
       if @isComplete()
@@ -661,11 +662,18 @@ class SearchBase extends Motion
         timeout: timeout
 
   scan: (cursor) ->
+    # experimental if search word start with ' ' we switch escape mode.
+    if /^ /.test(@input)
+      @input = @input.replace(/^ /, '')
+      escape = true
+      @vimState.search.regexSearchStatusChanged(not escape)
+
     if @input is ''
       return {ranges: [], index: null}
     cursorPosition = cursor.getBufferPosition()
     ranges = []
-    pattern = @getPattern(@input)
+
+    pattern = @getPattern(@input, escape)
     @editor.scan pattern, ({range}) ->
       ranges.push range
 
@@ -680,8 +688,9 @@ class SearchBase extends Motion
         break
     {ranges, index}
 
-  getPattern: (term) ->
+  getPattern: (term, escape=false) ->
     modifiers = {'g': true}
+
     if not term.match('[A-Z]') and settings.get('useSmartcaseForSearch')
       modifiers['i'] = true
 
@@ -691,10 +700,13 @@ class SearchBase extends Motion
 
     modFlags = Object.keys(modifiers).join('')
 
-    try
-      new RegExp(term, modFlags)
-    catch
+    if escape
       new RegExp(_.escapeRegExp(term), modFlags)
+    else
+      try
+        new RegExp(term, modFlags)
+      catch
+        new RegExp(_.escapeRegExp(term), modFlags)
 
 class Search extends SearchBase
   @extend()
