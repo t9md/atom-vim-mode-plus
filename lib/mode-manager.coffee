@@ -52,6 +52,11 @@ class ModeManager
   # Normal
   # -------------------------
   activateNormalMode: ->
+    # NOTE: Since cursor is serialized and restored in next session.
+    # If we don't reset this propety, first find-and-replace:select-next will
+    # put selection wrong place.
+    for s in @editor.getSelections()
+      s.marker.setProperties(vimModeCharactewiseRange: null)
     @editorElement.component.setInputEnabled(false)
     @vimState.reset()
     s.clear(autoscroll: false) for s in @editor.getSelections()
