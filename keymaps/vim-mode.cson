@@ -309,6 +309,12 @@
   'ctrl-c': 'vim-mode:blockwise-escape'
   'ctrl-v': 'vim-mode:blockwise-escape'
 
+# Input mini editor e.g. mark, surround.
+# -------------------------
+'atom-text-editor.vim-mode-input':
+  'ctrl-c': 'core:cancel'
+  'ctrl-[': 'core:cancel'
+
 # Search mini editor
 # -------------------------
 'atom-text-editor.vim-mode-search':
