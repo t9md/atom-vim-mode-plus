@@ -321,3 +321,5 @@
   # ';': 'vim-mode:search-confirm'
   # '[': 'vim-mode:search-visit-prev'
   # ']': 'vim-mode:search-visit-next'
+  # 'ctrl-f': 'vim-mode:search-scroll-next'
+  # 'ctrl-b': 'vim-mode:search-scroll-prev'

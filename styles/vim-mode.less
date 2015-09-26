@@ -1,41 +1,8 @@
 @import "syntax-variables";
 @import "ui-variables";
 
-.vim-mode-search {
-  atom-text-editor[mini] {
-    padding: @component-padding/4 @component-padding;
-    border: none;
-    color: @text-color;
-    cursor: default;
-    padding-left: 10px;
-    &.is-focused {
-      box-shadow: none;
-    }
-  }
-  atom-text-editor[mini]::before {
-    content: '/';
-  }
-  &.backwards atom-text-editor[mini]::before {
-    content: '?';
-  }
-}
-
-.vim-mode-input atom-text-editor[mini] {
-  background-color: inherit;
-  border: none;
-  width: 100%;
-  height: 0px;
-  font-weight: normal;
-  color: @text-color;
-  line-height: 1.28;
-  cursor: default;
-  white-space: nowrap;
-  padding-left: 10px;
-  &.is-focused {
-    box-shadow: none;
-  }
-}
-
+// Cursor style
+// =========================
 .block-cursor(@visibility: visible) {
   border: 0;
   background-color: @syntax-cursor-color;
@@ -147,6 +114,8 @@ atom-text-editor.vim-mode.operator-pending-mode.is-focused
     }
   }
 }
+
+// Show cursor in visualmode
 atom-text-editor.vim-mode.visual-mode.characterwise:not(.reversed),
 atom-text-editor.vim-mode.visual-mode.blockwise:not(.reversed), {
   &::shadow {
@@ -161,8 +130,8 @@ atom-text-editor.vim-mode.visual-mode.blockwise:not(.reversed), {
   }
 }
 
-
-// For flashing ranges operated on. e.g. flashing yanked region.
+// Flash ranges e.g. flashing yanked range.
+// =========================
 atom-text-editor::shadow {
   .vim-mode-flash .region {
     background-color: @syntax-selection-flash-color;
@@ -179,6 +148,8 @@ atom-text-editor::shadow {
   }
 }
 
+// Hover Counter
+// =========================
 .vim-mode-hover {
   color: @text-color-highlight;
   background-color: @base-background-color;
@@ -188,4 +159,74 @@ atom-text-editor::shadow {
   padding-right: 0.2em;
   margin-left: -0.1em;
   text-align: center;
+  &.first {
+    background-color: @background-color-info;
+  }
+  &.last {
+    background-color: @background-color-error;
+  }
+}
+
+// Input mini editor, e.g surround char.
+// =========================
+.vim-mode-input atom-text-editor[mini] {
+  background-color: inherit;
+  border: none;
+  width: 100%;
+  height: 0px;
+  font-weight: normal;
+  color: @text-color;
+  line-height: 1.28;
+  cursor: default;
+  white-space: nowrap;
+  padding-left: 10px;
+  &.is-focused {
+    box-shadow: none;
+  }
+}
+
+// Search
+// =========================
+// input
+.vim-mode-search {
+  atom-text-editor[mini] {
+    padding: @component-padding/4 @component-padding;
+    border: none;
+    color: @text-color;
+    cursor: default;
+    padding-left: 10px;
+    &.is-focused {
+      box-shadow: none;
+    }
+  }
+  atom-text-editor[mini]::before {
+    content: '/';
+  }
+  &.backwards atom-text-editor[mini]::before {
+    content: '?';
+  }
+}
+
+// highlight
+.vim-mode {
+  &.round-box {
+    box-sizing: border-box;
+    border-radius: @component-border-radius;
+  }
+}
+atom-text-editor::shadow {
+  .vim-mode-search-match .region {
+    .vim-mode.round-box;
+    background-color: transparent;
+    border: 2px solid @syntax-result-marker-color;
+  }
+  .vim-mode-search-match.first .region {
+    border: 2px solid @syntax-color-renamed;
+  }
+  .vim-mode-search-match.last .region {
+    border: 2px solid @syntax-color-removed;
+  }
+  .vim-mode-search-match.current .region {
+    background-color: @syntax-selection-color;
+  }
 }
