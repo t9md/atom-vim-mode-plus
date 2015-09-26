@@ -314,6 +314,8 @@
 'atom-text-editor.vim-mode-search':
   'ctrl-r ctrl-w': 'vim-mode:search-set-cursor-word'
   'ctrl-v': 'vim-mode:search-set-literal-char'
+  'ctrl-c': 'core:cancel'
+  'ctrl-[': 'core:cancel'
 
   # Don't afraid to set following agressive keymap
   # If you want input literlly, `ctrl-v` then input char you want to insert
