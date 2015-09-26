@@ -661,7 +661,8 @@ class SearchBase extends Motion
         timeout: timeout
 
   scan: (cursor) ->
-    return [] if @input is ''
+    if @input is ''
+      return {ranges: [], index: null}
     cursorPosition = cursor.getBufferPosition()
     ranges = []
     pattern = @getPattern(@input)
