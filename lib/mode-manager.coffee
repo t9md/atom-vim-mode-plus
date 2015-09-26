@@ -141,8 +141,8 @@ class ModeManager
 
     # Keep original range as marker's property to restore column.
     for selection in @editor.getSelections()
-      originalRange = selection.getBufferRange()
-      selection.marker.setProperties({originalRange})
+      vimModeCharactewiseRange = selection.getBufferRange()
+      selection.marker.setProperties({vimModeCharactewiseRange})
       selectLines(selection)
     @hideCursors()
 
@@ -155,14 +155,14 @@ class ModeManager
       @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
     else
       for selection in @editor.getSelections()
-        {originalRange} = selection.marker.getProperties()
-        if originalRange?
+        {vimModeCharactewiseRange} = selection.marker.getProperties()
+        if vimModeCharactewiseRange?
           [startRow, endRow] = selection.getBufferRowRange()
-          originalRange.start.row = startRow
-          originalRange.end.row   = endRow
-          selection.setBufferRange(originalRange)
-          # [NOTE] Important! reset originalRange to null after restored.
-          selection.marker.setProperties(originalRange: null)
+          vimModeCharactewiseRange.start.row = startRow
+          vimModeCharactewiseRange.end.row   = endRow
+          selection.setBufferRange(vimModeCharactewiseRange)
+          # [NOTE] Important! reset vimModeCharactewiseRange to null after restored.
+          selection.marker.setProperties(vimModeCharactewiseRange: null)
 
   selectBlockwise: (oldSubmode) ->
     unless oldSubmode is 'characterwise'
