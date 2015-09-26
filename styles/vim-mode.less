@@ -188,39 +188,29 @@ atom-text-editor::shadow {
 // Search
 // =========================
 // input
-.vim-mode-search {
+.vim-mode-search-container {
   display: flex;
   > div {
-    padding: @component-padding/4; // @component-padding/2;
+    padding: @component-padding/2 @component-padding;
     border: none;
   }
-  .options-container {
-    padding: @component-padding/2 @component-padding;
-    .btn {
-      font-size: 1.0em;
-    }
-  }
   .editor-container {
-    position: relative;
-    padding: @component-padding/2 @component-padding;
     width: 100%;
-    atom-text-editor[mini] {
-      border: none;
-      color: @text-color;
-      cursor: default;
-      &.is-focused {
-        box-shadow: none;
-      }
-    }
   }
-  atom-text-editor[mini]::before {
-    font-size: 1.5em;
+}
+atom-text-editor[mini].vim-mode-search {
+  border: none;
+  color: @text-color;
+  cursor: default;
+  &.is-focused {
+    box-shadow: none;
+  }
+  &::before {
+    font-size: 1.2em;
     padding-right: 0.5em;
     content: '/';
   }
-  &.backwards atom-text-editor[mini]::before {
-    font-size: 1.5em;
-    padding-right: 0.5em;
+  &.backwards::before {
     content: '?';
   }
 }
