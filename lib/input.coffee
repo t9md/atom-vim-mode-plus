@@ -121,10 +121,12 @@ class Search extends InputBase
     {@searchHistory} = @vimState
 
     literalModeSupportCommands =
-      "confirm":    => @confirm()
-      "cancel":     => @cancel()
-      "visit-next": => @emitter.emit('command', 'next')
-      "visit-prev": => @emitter.emit('command', 'prev')
+      "confirm":     => @confirm()
+      "cancel":      => @cancel()
+      "visit-next":  => @emitter.emit('command', 'visit-next')
+      "visit-prev":  => @emitter.emit('command', 'visit-prev')
+      "scroll-next": => @emitter.emit('command', 'scroll-next')
+      "scroll-prev": => @emitter.emit('command', 'scroll-prev')
 
     prefix = 'vim-mode:search'
     commands = {}

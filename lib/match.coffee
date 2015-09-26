@@ -3,43 +3,78 @@ _ = require 'underscore-plus'
 
 # Match wrap Range in TextEditor with useful method.
 class MatchList
+  index: null
   constructor: (@vimState, ranges, index) ->
-    {@editor} = @vimState
-    @entries = (new Match(@vimState, r) for r in ranges)
-    @setIndex(index)
+    {@editor, @editorElement} = @vimState
+    @index = @determineIndex(index, ranges.length)
+    [first, others..., last] = ranges
+    current = ranges[@index]
+    @entries = []
+    for range in ranges
+      @entries.push new Match @vimState, range,
+        first: range is first
+        last: range is last
+        current: range is current
 
   isEmpty: ->
     @entries.length is 0
 
-  setIndex: (index) ->
+  determineIndex: (index, length) ->
+    index = index % length
     if index >= 0
-      @index = index % @entries.length
+      index
     else
-      @index = (@entries.length + index)
+      length + index
+
+  setIndex: (index) ->
+    @index = @determineIndex(index, @entries.length)
+    # index = index % @entries.length
+    # if index >= 0
+    #   @index = index
+    # else
+    #   @index = (@entries.length + index)
 
   get: (direction=null) ->
+    @entries[@index].current = false
     switch direction
       when 'next' then @setIndex(@index + 1)
       when 'prev' then @setIndex(@index - 1)
-    @entries[@index]
+    match = @entries[@index]
+    match.current = true
+    match
 
   getVisible: ->
     range = getVisibleBufferRange(@editor)
-    for m in @entries when range.containsRange(m.range)
-      m
+    (m for m in @entries when range.containsRange(m.range))
+
+  getOffSetPixelHeight: (lineDelta=0) ->
+    scrolloff = 2
+    @editor.getLineHeightInPixels() * (2 + lineDelta)
+
+  # make prev entry of first visible entry to bottom of screen
+  scroll: (direction) ->
+    switch direction
+      when 'next'
+        return if (match = _.last(@getVisible())).isLast()
+        step = +1
+        offsetPixel = @getOffSetPixelHeight()
+      when 'prev'
+        return if (match = _.first(@getVisible())).isFirst()
+        step = -1
+        offsetPixel = (@editor.getHeight() - @getOffSetPixelHeight(1))
+
+    @setIndex (@entries.indexOf(match) + step)
+    point = @editor.screenPositionForBufferPosition match.getStartPoint()
+    scrollTop = @editorElement.pixelPositionForScreenPosition(point).top
+    @editor.setScrollTop (scrollTop -= offsetPixel)
 
   show: ->
     @reset()
-    current = @get()
     for m in @getVisible()
-      klass = 'vim-mode-search-match'
-      klass += ' current' if m.isEqual(current)
-      m.decorate class: klass
+      m.show()
 
   getInfo: ->
-    sorted = @entries.slice().sort (a, b) -> a.compare(b)
-    current = sorted.indexOf(@get()) + 1
-    "#{current}/#{@entries.length}"
+    "#{@index + 1}/#{@entries.length}"
 
   reset: ->
     m.reset() for m in @entries
@@ -49,8 +84,25 @@ class MatchList
     {@entries, @index, @editor} = {}
 
 class Match
-  constructor: (@vimState, @range) ->
+  first: false
+  last: false
+  current: false
+
+  constructor: (@vimState, @range, {@first, @last, @current}) ->
     {@editor} = @vimState
+
+  getClassList: ->
+    # first and last is exclusive, prioritize 'first'.
+    last = (not @first) and @last
+    [
+      @first   and 'first',
+      last     and 'last',
+      @current and 'current'
+    ].filter (e) -> e
+
+  isFirst: -> @first
+  isLast: -> @last
+  isCurrent: -> @current
 
   compare: (other) ->
     @range.compare(other.range)
@@ -67,7 +119,10 @@ class Match
     if @editor.isFoldedAtBufferRow(point.row)
       @editor.unfoldBufferRow point.row
 
-  decorate: ({class: klass}) ->
+  show: ->
+    klass  = 'vim-mode-search-match'
+    if s = @getClassList().join(' ')
+      klass += " " + s
     @marker = @editor.markBufferRange @range,
       invalidate: 'never'
       persistent: false
@@ -81,6 +136,6 @@ class Match
 
   destroy: ->
     @marker?.destroy()
-    {@marker, @vimState, @range, @editor} = {}
+    {@marker, @vimState, @range, @editor, @first, @last, @current} = {}
 
 module.exports = {MatchList}

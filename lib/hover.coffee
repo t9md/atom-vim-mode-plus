@@ -22,8 +22,11 @@ class Hover
   isVisibleAtPoint: (point) ->
     @point?.isEqual point
 
-  withTimeout: (point, {text, timeout}) ->
+  withTimeout: (point, options) ->
     @reset()
+    {text, timeout} = options
+    if options.classList.length
+      @view.classList.add(options.classList...)
     @add(text, point)
     if timeout?
       @timeoutID = setTimeout  =>
@@ -57,7 +60,7 @@ class Hover
 
 class HoverElement extends HTMLElement
   createdCallback: ->
-    @classList.add 'vim-mode-hover'
+    @className = 'vim-mode-hover'
     this
 
   initialize: (@model) ->
@@ -99,6 +102,7 @@ class HoverElement extends HTMLElement
     @styleElement.sheet.addRule(selector, style)
 
   reset: ->
+    @className = 'vim-mode-hover'
     @textContent = ''
     @marker?.destroy()
     @styleElement?.remove()
