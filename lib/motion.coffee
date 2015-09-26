@@ -3,7 +3,6 @@
 {selectLines, saveEditorState, getVisibleBufferRange} = require './utils'
 {Hover} = require './hover'
 {MatchList} = require './match'
-# {getVisibleBufferRange} = require './utils'
 
 _ = require 'underscore-plus'
 
@@ -53,9 +52,14 @@ class Motion extends Base
 
   # This tail position is always selected even if selection isReversed() as a result of cursor movement.
   getTailRange: (selection) ->
-    point = selection.getTailBufferPosition()
-    columnDelta = if selection.isReversed() then -1 else +1
-    Range.fromPointWithDelta(point, 0, columnDelta)
+    if @isLinewise()
+      [startRow, endRow] = selection.getBufferRowRange()
+      row = if selection.isReversed() then endRow else startRow
+      @editor.bufferRangeForBufferRow(row, includeNewline: true)
+    else
+      point = selection.getTailBufferPosition()
+      columnDelta = if selection.isReversed() then -1 else +1
+      Range.fromPointWithDelta(point, 0, columnDelta)
 
   withKeepingGoalColumn: (cursor, fn) ->
     {goalColumn} = cursor
