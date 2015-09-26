@@ -20,10 +20,10 @@ class InputBase
     atom.commands.add @editorElement,
       'core:confirm': => @confirm()
       'core:cancel':  => @cancel()
-      # 'blur':         => @cancel()
+      'blur':         => @cancel() unless @finished
 
     @editor.onDidChange =>
-      return if @finishing
+      return if @finished
       text = @editor.getText()
       # If we can confirm, no need to inform change.
       if @canConfirm()
@@ -52,16 +52,16 @@ class InputBase
     @focus(options)
 
   focus: (@options={}) ->
+    @finished = false
     @view.panel.show()
     @editorElement.focus()
 
   unfocus: ->
-    @finishing = true
+    @finished = true
     @emitter.emit 'unfocus'
     atom.workspace.getActivePane().activate()
     @editor.setText ''
     @view.panel.hide()
-    @finishing = false
 
   cancel: ->
     @emitter.emit 'cancel'
@@ -82,7 +82,6 @@ class InputBase
       @cancel()
 
 class InputBaseElement extends HTMLElement
-  finishing: false
   klass: null
 
   createdCallback: ->
