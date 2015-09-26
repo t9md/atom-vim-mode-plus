@@ -79,7 +79,7 @@ describe "Motion", ->
             selectedText: "defg\n\nabcd"
 
         # [FIXME] the place of this spec is not appropriate.
-        it "original visual line remains when jk acroll orignal selection", ->
+        it "original visual line remains when jk across orignal selection", ->
           set
             text: """
               line1
