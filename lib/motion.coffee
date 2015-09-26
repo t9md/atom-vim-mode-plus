@@ -756,6 +756,7 @@ class Search extends SearchBase
 
   onCommand: (command) => # fat-arrow
     [action, args...] = command.split('-')
+    return unless @input
     return if @matches.isEmpty()
     switch action
       when 'visit'
