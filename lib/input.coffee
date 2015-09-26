@@ -113,6 +113,18 @@ class Input extends InputBase
 
 class InputElement extends InputBaseElement
   klass: 'vim-mode-input'
+  createdCallback: ->
+    super
+    # @className = @klass
+    @editorElement = document.createElement 'atom-text-editor'
+    @editorElement.classList.add('editor')
+    @editorElement.classList.add @klass
+    @editorElement.setAttribute('mini', '')
+    @editor = @editorElement.getModel()
+    @editor.setMini(true)
+    @appendChild @editorElement
+    @panel = atom.workspace.addBottomPanel(item: this, visible: false)
+    this
 
 class Search extends InputBase
   constructor: ->
@@ -127,7 +139,6 @@ class Search extends InputBase
       "visit-prev":  => @emitter.emit('command', 'visit-prev')
       "scroll-next": => @emitter.emit('command', 'scroll-next')
       "scroll-prev": => @emitter.emit('command', 'scroll-prev')
-
     prefix = 'vim-mode:search'
     commands = {}
     for command, fn of literalModeSupportCommands
@@ -152,16 +163,52 @@ class Search extends InputBase
   setLiteralChar: ->
     @literalCharMode = true
 
+  regexSearchStatusChanged: (enabled) ->
+    if enabled
+      @view.regexSearchStatus.classList.add 'btn-primary'
+    else
+      @view.regexSearchStatus.classList.remove 'btn-primary'
+
   focus: ({backwards}) ->
     @view.classList.add('backwards') if backwards
     super({})
 
   unfocus: ->
     @view.classList.remove('backwards')
+    @view.regexSearchStatus.classList.add 'btn-primary'
     super
 
 class SearchElement extends InputBaseElement
   klass: 'vim-mode-search'
+
+  createdCallback: ->
+    @className = @klass
+    @editorElement = document.createElement 'atom-text-editor'
+    @editorElement.classList.add('editor')
+    @editorElement.classList.add @klass
+    @editorElement.setAttribute('mini', '')
+    @editor = @editorElement.getModel()
+    @editor.setMini(true)
+    # @appendChild @editorElement
+
+    @editorContainer = document.createElement 'div'
+    @editorContainer.className = 'editor-container'
+    @editorContainer.appendChild @editorElement
+
+    @optionsContainer = document.createElement 'div'
+    @optionsContainer.className = 'options-container'
+    @regexSearchStatus = document.createElement 'span'
+    @regexSearchStatus.classList.add 'inline-block-tight', 'btn', 'btn-primary'
+    @regexSearchStatus.textContent = '.*'
+    @optionsContainer.appendChild @regexSearchStatus
+    @container = document.createElement 'div'
+    @container.className = 'container'
+    @appendChild @optionsContainer
+    @appendChild @editorContainer
+
+    @panel = atom.workspace.addBottomPanel(item: this, visible: false)
+    this
+
 
 InputElement = document.registerElement 'vim-mode-plus-input',
   prototype: InputElement.prototype
