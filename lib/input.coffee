@@ -169,26 +169,25 @@ class Search extends InputBase
       @view.regexSearchStatus.classList.remove 'btn-primary'
 
   focus: ({backwards}) ->
-    @view.classList.add('backwards') if backwards
+    @editorElement.classList.add('backwards') if backwards
     super({})
 
   unfocus: ->
-    @view.classList.remove('backwards')
+    @editorElement.classList.remove('backwards')
     @view.regexSearchStatus.classList.add 'btn-primary'
     super
 
 class SearchElement extends InputBaseElement
-  klass: 'vim-mode-search'
+  klass: 'vim-mode-search-container'
 
   createdCallback: ->
     @className = @klass
     @editorElement = document.createElement 'atom-text-editor'
     @editorElement.classList.add('editor')
-    @editorElement.classList.add @klass
+    @editorElement.classList.add 'vim-mode-search'
     @editorElement.setAttribute('mini', '')
     @editor = @editorElement.getModel()
     @editor.setMini(true)
-    # @appendChild @editorElement
 
     @editorContainer = document.createElement 'div'
     @editorContainer.className = 'editor-container'
