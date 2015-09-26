@@ -98,6 +98,11 @@ class VimState
       @activate('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
       @removeClass 'vim-mode', 'normal-mode'
+    # NOTE: Since cursor is serialized and restored in next session.
+    # If we don't reset this propety, first find-and-replace:select-next will
+    # put selection wrong place.
+    for s in @editor.getSelections()
+      s.marker.setProperties(originalRange: null)
     # @editorElement.removeEventListener 'mouseup', @checkSelections
     @editor = null
     @editorElement = null
