@@ -1,10 +1,9 @@
 # Refactoring status: 50%
 {Point, Range, CompositeDisposable} = require 'atom'
-{selectLines} = require './utils'
+{selectLines, saveEditorState, getVisibleBufferRange} = require './utils'
 {Hover} = require './hover'
-{saveEditorState} = require './utils'
 {MatchList} = require './match'
-{getVisibleBufferRange} = require './utils'
+# {getVisibleBufferRange} = require './utils'
 
 _ = require 'underscore-plus'
 
@@ -638,28 +637,17 @@ class SearchBase extends Motion
   visit: (match, cursor=null) ->
     match.visit()
     if cursor
-      # In isearch, we already displayed hover and flash
-      # So I prefer being silent when landing.
-      @showEffect(match) unless @isIncrementalSearch()
+      match.flash() unless @isIncrementalSearch()
+      timeout = settings.get('searchCounterHoverDuration')
+      @matches.showHover({timeout})
       cursor.setBufferPosition(match.getStartPoint())
     else
       @matches.show()
-      @showEffect(match)
+      @matches.showHover(timeout: null)
+      match.flash()
 
   isIncrementalSearch: ->
     settings.get('enableIncrementalSearch') and @isSearch()
-
-  showEffect: (match) ->
-    if settings.get('flashOnSearch')
-      @flash match.range, timeout: settings.get('flashOnSearchDurationMilliSeconds')
-
-    if settings.get('enableHoverSearchCounter')
-      timeout = null
-      timeout = settings.get('searchCounterHoverDuration') if @isComplete()
-      @vimState.hoverSearchCounter.withTimeout match.range.start,
-        text: @matches.getInfo()
-        classList: match.getClassList()
-        timeout: timeout
 
   scan: (cursor) ->
     # experimental if search word start with ' ' we switch escape mode.

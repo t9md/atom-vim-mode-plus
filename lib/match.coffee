@@ -1,5 +1,6 @@
 _ = require 'underscore-plus'
 {getVisibleBufferRange} = require './utils'
+settings = require './settings'
 
 # Match wrap Range in TextEditor with useful method.
 class MatchList
@@ -73,15 +74,21 @@ class MatchList
     for m in @getVisible()
       m.show()
 
-  getInfo: ->
-    "#{@index + 1}/#{@entries.length}"
-
   reset: ->
     m.reset() for m in @entries
 
   destroy: ->
     m.destroy() for m in @entries
     {@entries, @index, @editor} = {}
+
+  showHover: ({timeout}) ->
+    current = @get()
+    if settings.get('enableHoverSearchCounter')
+      # timeout ?= settings.get('searchCounterHoverDuration') #if @isComplete()
+      @vimState.hoverSearchCounter.withTimeout current.range.start,
+        text: "#{@index + 1}/#{@entries.length}"
+        classList: current.getClassList()
+        timeout: timeout
 
 class Match
   first: false
@@ -118,6 +125,12 @@ class Match
     @editor.scrollToBufferPosition(point, center: true)
     if @editor.isFoldedAtBufferRow(point.row)
       @editor.unfoldBufferRow point.row
+
+  flash: ({timeout}={}) ->
+    @vimState.flasher.flash
+      range: @range
+      klass: 'vim-mode-flash'
+      timeout: timeout ? settings.get('flashOnSearchDurationMilliSeconds')
 
   show: ->
     klass  = 'vim-mode-search-match'
