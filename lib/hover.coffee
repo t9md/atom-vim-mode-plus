@@ -8,6 +8,7 @@ settings = require './settings'
 class Hover
   lineHeight: null
   visible: false
+  point: null
 
   constructor: (@vimState, @param) ->
     @text = []
@@ -16,10 +17,14 @@ class Hover
   isEnabled: ->
     settings.get(@param)
 
+  setPoint: (point=null) ->
+    point ?= @vimState.editor.getCursorBufferPosition()
+    @point = point
+
   add: (text, point) ->
     @text.push text
-    @view.show(point)
-    @point = point
+    @point = point if point
+    @view.show(@point)
 
   # Return boolean to indicate hover is shown at given Point.
   isVisibleAtPoint: (point) ->
@@ -43,7 +48,7 @@ class Hover
 
     @text.map (text) ->
       text = String(text)
-      if settings.get('showHoverOnOperationIcon') is 'emoji'
+      if settings.get('showHoverOnOperateIcon') is 'emoji'
         emoji(String(text), emojiFolder, lineHeight)
       else
         text.replace /:(.*?):/g, (s, m) ->
