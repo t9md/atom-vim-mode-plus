@@ -9,16 +9,18 @@ class VisualBlockwise extends Base
   complete: true
 
   clearTail: ->
-    @setProperties(blockwiseTail: false)
+    prop = tail: false
+    for s in @editor.getSelections()
+      @updateProperty(s, tail: false)
 
   clearHead: ->
-    @setProperties(blockwiseHead: false)
+    prop = head: false
     for s in @editor.getSelections()
+      @updateProperty(s, prop)
       s.cursor.setVisible(false)
 
-  setProperties: (prop) ->
-    for s in @editor.getSelections()
-      swrap(s).update(prop)
+  updateProperty: (selection, prop) ->
+    swrap(selection).update {blockwise: prop}
 
   getTop: ->
     _.first @editor.getSelectionsOrderedByBufferPosition()
@@ -36,37 +38,25 @@ class VisualBlockwise extends Base
     @editor.getSelections().length is 1
 
   getHead: ->
-    if @isReversed()
-      @getTop()
-    else
-      @getBottom()
+    if @isReversed() then @getTop() else @getBottom()
 
   getTail: ->
     _.detect @editor.getSelections(), (s) ->
-      swrap(s).get().blockwiseTail
+      swrap(s).get().blockwise?.tail
 
   setTail: (newTail) ->
     @clearTail()
-    swrap(newTail).update blockwiseTail: true
-
+    @updateProperty(newTail, tail: true)
 
   # Only for making cursor visible.
   setHead: (newHead) ->
     @clearHead()
-    swrap(newHead).update blockwiseHead: true
+    @updateProperty(newHead, head: true)
 
   constructor: ->
     super
     if @isSingle()
       @clearTail()
-
-  # dump: (header) ->
-  #   console.log "--#{header}-"
-  #   for s in @editor.getSelections()
-  #     range = s.marker.getBufferRange().toString()
-  #     isTail = getSelectionProperty(s, 'vimModePlus')?.blockwiseTail
-  #     console.log "#{range} #{isTail}"
-  #   console.log "---"
 
   reverse: ->
     [newHead, newTail] = [@getTail(), @getHead()]
@@ -93,7 +83,7 @@ class BlockwiseMoveDown extends VisualBlockwise
 
     if @isForward()
       @editor["addSelection#{@direction}"]()
-      @vimState.syncSelectionsReversedSate(@getTail().isReversed())
+      @vimState.syncSelectionsReversedSate @getTail().isReversed()
     else
       @getHead().destroy()
     @setHead @getHead()

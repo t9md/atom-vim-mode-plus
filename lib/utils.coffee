@@ -85,18 +85,22 @@ selectVisibleBy = (editor, entries, fn) ->
   (e for e in entries when range.containsRange(fn(e)))
 
 swrap = (selection) ->
+  scope = 'vimModePlus'
   get: ->
-    selection.marker.getProperties().vimModePlus ? {}
+    selection.marker.getProperties()[scope] ? {}
 
-  set: (prop) ->
-    selection.marker.setProperties(vimModePlus: prop)
+  set: (newProp) ->
+    prop = {}
+    prop[scope] = newProp
+    selection.marker.setProperties prop
 
   update: (value) ->
-    prop = _.extend({}, @get())
-    @set(_.extend(prop, value))
+    # @get() get result of getProperties() which is safe to extend.
+    # So OK to directly extend.
+    @set _.deepExtend(@get(), value)
 
   clear: ->
-    @set(null)
+    @set null
 
   preserveCharacterwise: ->
     @update
@@ -122,6 +126,7 @@ swrap = (selection) ->
       rangeTaranslation = [[0, +1], [0, -1]]
       rangeTaranslation.reverse() if selection.isReversed()
       range = range.translate(rangeTaranslation...)
+
     selection.setBufferRange(range)
     # [NOTE] Important! reset to null after restored.
     @clear()
