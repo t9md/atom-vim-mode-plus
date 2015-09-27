@@ -1,7 +1,7 @@
 # Refactoring status: 100%
 fs = require 'fs-plus'
 settings = require './settings'
-{Range} = require 'atom'
+{Range, Point} = require 'atom'
 
 module.exports =
   # Include module(object which normaly provides set of methods) to klass
@@ -50,3 +50,22 @@ module.exports =
     [startRow, endRow] = editor.getVisibleRowRange().map (row) ->
       editor.bufferRowForScreenRow row
     new Range([startRow, 0], [endRow, Infinity])
+
+  isLinewiseRange: (range) ->
+    (range.start.column is 0) and (range.end.column is 0) and (not range.isEmpty())
+
+  rangeToBeginningOfFileFromPoint: (point) ->
+    new Range(Point.ZERO, point)
+
+  rangeToEndOfFileFromPoint: (point) ->
+    new Range(point, Point.INFINITY)
+
+  isIncludeNonEmptySelection: (selections) ->
+    selections.some((s) -> not s.isEmpty())
+
+  sortRanges: (ranges) ->
+    ranges.sort((a, b) -> a.compare(b))
+
+  setSelectionBufferRangeSafely: (selection, range) ->
+    if range
+      selection.setBufferRange(range)
