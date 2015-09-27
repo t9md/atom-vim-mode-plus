@@ -1,42 +1,33 @@
-# Refactoring status: 70%
-{Point, Range} = require 'atom'
+# Refactoring status: 95%
+{Range} = require 'atom'
 _    = require 'underscore-plus'
 Base = require './base'
-{selectLines} = require './utils'
+{
+  selectLines
+  isLinewiseRange
+  rangeToBeginningOfFileFromPoint
+  rangeToEndOfFileFromPoint
+  isIncludeNonEmptySelection
+  sortRanges
+  setSelectionBufferRangeSafely
+} = require './utils'
 
 class TextObject extends Base
   @extend()
   complete: true
 
-  isLinewiseRange: (range) ->
-    (range.start.column is 0) and (range.end.column is 0) and (not range.isEmpty())
-
-  rangeToBeginningOfFile: (point) ->
-    new Range(Point.ZERO, point)
-
-  rangeToEndOfFile: (point) ->
-    new Range(point, Point.INFINITY)
-
   isLinewise: ->
-    @editor.getSelections().every (s) =>
-      @isLinewiseRange s.getBufferRange()
+    @editor.getSelections().every (s) ->
+      isLinewiseRange s.getBufferRange()
 
-  eachSelection: (callback) ->
-    for s in @editor.getSelections()
-      callback s
+  eachSelection: (fn) ->
+    fn(s) for s in @editor.getSelections()
     if @isLinewise() and not @vimState.isMode('visual', 'linewise')
       @vimState.activate('visual', 'linewise')
-    @isIncludeNonEmptySelection()
+    @status()
 
-  isIncludeNonEmptySelection: ->
-    @editor.getSelections().some((s) -> not s.isEmpty())
-
-  sortRanges: (ranges) ->
-    ranges.sort((a, b) -> a.compare(b))
-
-  setBufferRangeSafely: (selection, range) ->
-    if range
-      selection.setBufferRange(range)
+  status: ->
+    isIncludeNonEmptySelection @editor.getSelections()
 
 # Word
 # -------------------------
@@ -50,7 +41,7 @@ class Word extends TextObject
       @selectInclusive(selection) if @inclusive
 
   selectExclusive: (s, wordRegex) ->
-    @setBufferRangeSafely s, s.cursor.getCurrentWordBufferRange({wordRegex})
+    setSelectionBufferRangeSafely s, s.cursor.getCurrentWordBufferRange({wordRegex})
 
   selectInclusive: (selection) ->
     scanRange = selection.cursor.getCurrentLineBufferRange()
@@ -89,9 +80,9 @@ class Pair extends TextObject
 
     [scanFunc, scanRange] =
       if backward
-        ['backwardsScanInBufferRange', @rangeToBeginningOfFile(fromPoint)]
+        ['backwardsScanInBufferRange', rangeToBeginningOfFileFromPoint(fromPoint)]
       else
-        ['scanInBufferRange', @rangeToEndOfFile(fromPoint)]
+        ['scanInBufferRange', rangeToEndOfFileFromPoint(fromPoint)]
 
     nest = 0
     found = null # We will search to fill this var.
@@ -131,7 +122,7 @@ class Pair extends TextObject
 
   select: ->
     @eachSelection (s) =>
-      @setBufferRangeSafely s, @getRange(s, @pair)
+      setSelectionBufferRangeSafely s, @getRange(s, @pair)
 
 class AnyPair extends Pair
   @extend()
@@ -141,11 +132,11 @@ class AnyPair extends Pair
     ranges = []
     for pair in pairs when (range = @getRange(selection, pair))
       ranges.push range
-    _.last(@sortRanges(ranges)) unless _.isEmpty(ranges)
+    _.last(sortRanges(ranges)) if ranges.length
 
   select: ->
     @eachSelection (s) =>
-      @setBufferRangeSafely s, @getNearestRange(s, @pairs)
+      setSelectionBufferRangeSafely s, @getNearestRange(s, @pairs)
 
 class DoubleQuote extends Pair
   @extend()
@@ -206,7 +197,7 @@ class Paragraph extends TextObject
   selectParagraph: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
     if startRow is endRow
-      @setBufferRangeSafely selection, @getRange(startRow)
+      setSelectionBufferRangeSafely selection, @getRange(startRow)
     else # have direction
       if selection.isReversed()
         if range = @getRange(startRow-1)
@@ -327,7 +318,7 @@ class Entire extends TextObject
   @extend()
   select: ->
     @editor.selectAll()
-    @isIncludeNonEmptySelection()
+    @status()
 
 module.exports = {
   Word, WholeWord,
