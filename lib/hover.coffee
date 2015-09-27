@@ -9,9 +9,12 @@ class Hover
   lineHeight: null
   visible: false
 
-  constructor: (@vimState) ->
+  constructor: (@vimState, @param) ->
     @text = []
     @view = atom.views.getView(this)
+
+  isEnabled: ->
+    settings.get(@param)
 
   add: (text, point) ->
     @text.push text
@@ -40,7 +43,7 @@ class Hover
 
     @text.map (text) ->
       text = String(text)
-      if settings.get('hoverStyle') is 'emoji'
+      if settings.get('showHoverOnOperationIcon') is 'emoji'
         emoji(String(text), emojiFolder, lineHeight)
       else
         text.replace /:(.*?):/g, (s, m) ->
@@ -55,6 +58,7 @@ class Hover
     @point = null
 
   destroy: ->
+    @param = null
     @vimState = null
     @view.destroy()
 
@@ -67,7 +71,9 @@ class HoverElement extends HTMLElement
     this
 
   show: (point) ->
-    return unless settings.get('enableHoverIndicator')
+    unless @model.isEnabled()
+      return
+
     {editor} = @model.vimState
     unless @marker
       @createOverlay(point)

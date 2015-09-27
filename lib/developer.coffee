@@ -71,7 +71,7 @@ class Developer
             stop()
     else if isCamelCase(srcName)
       files = [
-        "keymaps/vim-mode.cson"
+        "keymaps/vim-mode-plus.cson"
         "lib/vim-state.coffee"
       ]
       dashName = _.dasherize(srcName)

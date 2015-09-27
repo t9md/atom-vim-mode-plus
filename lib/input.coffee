@@ -23,6 +23,7 @@ class InputBase
       'core:confirm': => @confirm()
       'core:cancel':  => @cancel()
       'blur':         => @cancel() unless @finished
+      'vim-mode-plus:input-cancel': => @cancel()
 
     @editor.onDidChange =>
       return if @finished
@@ -163,11 +164,11 @@ class Search extends InputBase
   setLiteralChar: ->
     @literalCharMode = true
 
-  regexSearchStatusChanged: (enabled) ->
-    if enabled
-      @view.regexSearchStatus.classList.add 'btn-primary'
-    else
+  updateOptionSettings: ({escapeRegExp}={}) ->
+    if escapeRegExp
       @view.regexSearchStatus.classList.remove 'btn-primary'
+    else
+      @view.regexSearchStatus.classList.add 'btn-primary'
 
   focus: ({backwards}) ->
     @editorElement.classList.add('backwards') if backwards

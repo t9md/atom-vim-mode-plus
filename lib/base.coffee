@@ -13,12 +13,12 @@ class Base
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
-    if settings.get('enableHoverIcon')
-      hover =
-        switch settings.get('hoverStyle')
-          when 'emoji' then @hoverText if @hoverText?
-          when 'icon'  then @hoverIcon if @hoverIcon?
-      @vimState.hover.add hover if hover?
+    hover =
+      switch settings.get('showHoverOnOperationIcon')
+        when 'emoji' then @hoverText if @hoverText?
+        when 'icon'  then @hoverIcon if @hoverIcon?
+        else null
+    @vimState.hover.add hover if hover?
     @initialize?()
 
   # Operation processor execute only when isComplete() return true.

@@ -591,6 +591,7 @@ class SearchBase extends Motion
   saveCurrentSearch: true
   complete: false
   backwards: false
+  escapeRegExp: false
 
   initialize: ->
     if @saveCurrentSearch
@@ -637,7 +638,7 @@ class SearchBase extends Motion
     match.visit()
     if cursor
       match.flash() unless @isIncrementalSearch()
-      timeout = settings.get('searchCounterHoverDuration')
+      timeout = settings.get('showHoverSearchCounterDuration')
       @matches.showHover({timeout})
       cursor.setBufferPosition(match.getStartPoint())
     else
@@ -646,19 +647,13 @@ class SearchBase extends Motion
       match.flash()
 
   isIncrementalSearch: ->
-    settings.get('enableIncrementalSearch') and @isSearch()
+    settings.get('incrementalSearch') and @isSearch()
 
   scan: (cursor) ->
-    escapeRegExp = null
     ranges = []
-
-    # experimental if search word start with ' ' we switch escape mode.
-    if escapeRegExp = /^ /.test(@input)
-      @input = @input.replace(/^ /, '')
-    @vimState.search.regexSearchStatusChanged(not escapeRegExp)
-
     return ranges if @input is ''
-    @editor.scan @getPattern(@input, {escapeRegExp}), ({range}) ->
+
+    @editor.scan @getPattern(@input), ({range}) ->
       ranges.push range
 
     point = cursor.getBufferPosition()
@@ -670,8 +665,7 @@ class SearchBase extends Motion
 
     post.concat(pre)
 
-  getPattern: (term, {escapeRegExp}={}) ->
-    escapeRegExp ?= false
+  getPattern: (term) ->
     modifiers = {'g': true}
 
     if not term.match('[A-Z]') and settings.get('useSmartcaseForSearch')
@@ -683,7 +677,7 @@ class SearchBase extends Motion
 
     modFlags = Object.keys(modifiers).join('')
 
-    if escapeRegExp
+    if @escapeRegExp
       new RegExp(_.escapeRegExp(term), modFlags)
     else
       try
@@ -691,17 +685,28 @@ class SearchBase extends Motion
       catch
         new RegExp(_.escapeRegExp(term), modFlags)
 
+  # NOTE: trim first space if it is.
+  # experimental if search word start with ' ' we switch escape mode.
+  updateEscapeRegExpOption: (input) ->
+    if @escapeRegExp = /^ /.test(input)
+      input = input.replace(/^ /, '')
+    @updateUI {@escapeRegExp}
+    input
+
+  updateUI: (options) ->
+    @vimState.search.updateOptionSettings(options)
+
 class Search extends SearchBase
   @extend()
   initialize: ->
     super
-    handlers = {@onConfirm, @onCancel}
-    if settings.get('enableIncrementalSearch')
+    handlers = {@onConfirm, @onCancel, @onChange}
+    if settings.get('incrementalSearch')
       @restoreEditorState = saveEditorState(@editor)
       @subscriptions = new CompositeDisposable
       @subscriptions.add @editor.onDidChangeScrollTop => @matches?.show()
       @subscriptions.add @editor.onDidChangeScrollLeft => @matches?.show()
-      _.extend(handlers, {@onChange, @onCommand})
+      handlers.onCommand = @onCommand
     @vimState.search.readInput {@backwards}, handlers
 
   isRepeatLastSearch: (input) ->
@@ -730,7 +735,8 @@ class Search extends SearchBase
     @finish()
 
   onChange: (@input) => # fat-arrow
-    return unless settings.get('enableIncrementalSearch')
+    @input = @updateEscapeRegExpOption(@input)
+    return unless @isIncrementalSearch()
     @matches?.destroy()
     @vimState.hoverSearchCounter.reset()
     @matches = null

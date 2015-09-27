@@ -77,8 +77,7 @@ class MatchList
 
   showHover: ({timeout}) ->
     current = @get()
-    if settings.get('enableHoverSearchCounter')
-      # timeout ?= settings.get('searchCounterHoverDuration') #if @isComplete()
+    if settings.get('showHoverSearchCounter')
       @vimState.hoverSearchCounter.withTimeout current.range.start,
         text: "#{@index + 1}/#{@entries.length}"
         classList: current.getClassList()
@@ -124,7 +123,7 @@ class Match
     @vimState.flasher.flash
       range: @range
       klass: 'vim-mode-plus-flash'
-      timeout: timeout ? settings.get('flashOnSearchDurationMilliSeconds')
+      timeout: timeout ? settings.get('flashOnSearchDuration')
 
   show: ->
     klass  = 'vim-mode-plus-search-match'

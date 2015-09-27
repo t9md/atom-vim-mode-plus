@@ -312,20 +312,21 @@
 # Input mini editor e.g. mark, surround.
 # -------------------------
 'atom-text-editor.vim-mode-plus-input':
-  'ctrl-c': 'core:cancel'
-  'ctrl-[': 'core:cancel'
+  'ctrl-c': 'vim-mode-plus:input-cancel'
+  'ctrl-[': 'vim-mode-plus:input-cancel'
 
 # Search mini editor
 # -------------------------
 'atom-text-editor.vim-mode-plus-search':
   'ctrl-r ctrl-w': 'vim-mode-plus:search-set-cursor-word'
   'ctrl-v': 'vim-mode-plus:search-set-literal-char'
-  'ctrl-c': 'core:cancel'
-  'ctrl-[': 'core:cancel'
+  'ctrl-c': 'vim-mode-plus:search-cancel'
+  'ctrl-[': 'vim-mode-plus:search-cancel'
 
   # Don't afraid to set following agressive keymap
   # If you want input literlly, `ctrl-v` then input char you want to insert
   # on search field.
+  # 'ctrl-g': 'vim-mode-plus:search-cancel'
   # ';': 'vim-mode-plus:search-confirm'
   # '[': 'vim-mode-plus:search-visit-prev'
   # ']': 'vim-mode-plus:search-visit-next'
