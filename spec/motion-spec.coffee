@@ -747,7 +747,12 @@ describe "Motion", ->
     beforeEach ->
       pane = {activate: jasmine.createSpy("activate")}
       set
-        text: "abc\ndef\nabc\ndef\n"
+        text: """
+            abc
+            def
+            abc
+            def\n
+          """
         cursor: [0, 0]
         spy:
           obj: atom.workspace

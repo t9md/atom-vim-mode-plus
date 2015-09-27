@@ -600,10 +600,9 @@ class SearchBase extends Motion
     @backwards
 
   # Not sure if I should support count but keep this for compatibility to official vim-mode.
-  # Return value is directly used as index of matched list.
   getCount: ->
-    count = super - 1
-    if @isBackwards() then count * -1 else count
+    count = super
+    if @isBackwards() then -count else count - 1
 
   flash: (range, {timeout}={}) ->
     @vimState.flasher.flash
@@ -616,11 +615,7 @@ class SearchBase extends Motion
     @matches = null
 
   moveCursor: (cursor) ->
-    {ranges, index} = @scan(cursor)
-    index ?= if @isBackwards() then ranges.length - 1 else 0
-    initialIndex = index + @getCount()
-
-    @matches ?= new MatchList(@vimState, ranges, initialIndex)
+    @matches ?= new MatchList(@vimState, @scan(cursor), @getCount())
     if @matches.isEmpty()
       unless @input is ''
         @flash getVisibleBufferRange(@editor), timeout: 100 # screen beep.
@@ -654,33 +649,29 @@ class SearchBase extends Motion
     settings.get('enableIncrementalSearch') and @isSearch()
 
   scan: (cursor) ->
-    # experimental if search word start with ' ' we switch escape mode.
-    if /^ /.test(@input)
-      @input = @input.replace(/^ /, '')
-      escape = true
-      @vimState.search.regexSearchStatusChanged(not escape)
-
-    if @input is ''
-      return {ranges: [], index: null}
-    cursorPosition = cursor.getBufferPosition()
+    escapeRegExp = null
     ranges = []
 
-    pattern = @getPattern(@input, escape)
-    @editor.scan pattern, ({range}) ->
+    # experimental if search word start with ' ' we switch escape mode.
+    if escapeRegExp = /^ /.test(@input)
+      @input = @input.replace(/^ /, '')
+    @vimState.search.regexSearchStatusChanged(not escapeRegExp)
+
+    return ranges if @input is ''
+    @editor.scan @getPattern(@input, {escapeRegExp}), ({range}) ->
       ranges.push range
 
-    index = null
-    if @isBackwards()
-      for {start}, i in ranges.slice().reverse() when start.isLessThan(cursorPosition)
-        index = ranges.length - (1+i)
-        break
-    else
-      for {start}, i in ranges when start.isGreaterThan(cursorPosition)
-        index = i
-        break
-    {ranges, index}
+    point = cursor.getBufferPosition()
+    [pre, post] = _.partition ranges, ({start}) =>
+      if @isBackwards()
+        start.isLessThan(point)
+      else
+        start.isLessThanOrEqual(point)
 
-  getPattern: (term, escape=false) ->
+    post.concat(pre)
+
+  getPattern: (term, {escapeRegExp}={}) ->
+    escapeRegExp ?= false
     modifiers = {'g': true}
 
     if not term.match('[A-Z]') and settings.get('useSmartcaseForSearch')
@@ -692,7 +683,7 @@ class SearchBase extends Motion
 
     modFlags = Object.keys(modifiers).join('')
 
-    if escape
+    if escapeRegExp
       new RegExp(_.escapeRegExp(term), modFlags)
     else
       try
