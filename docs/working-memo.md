@@ -1,3 +1,128 @@
+## Old memo
+
+# Whats this?
+
+This is refactoring experiment for vim-mode.  
+
+See [REFACTORING_IDEA](REFACTORING_IDEA.md).  
+See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode/issues/800).  
+
+# What this folk project aiming to?
+
+Currently, each TOM(TextObject, Operator, Motion), do very different things, the behavior and responsibility of each TOM is not consistent.  
+This inconsistencies reduce flexibility and readablity of codebases, and it also making it difficult to introduce custom TOM.  
+By taking over tasks currently handled on TOM by new OperationProcessor, each TOM's implementation could be very simplified and easier to maintain.  
+This project aiming to prove above idea by implementing working example.  
+
+# Strategy
+
+1. Improve readability by renaming without causing big internal change.
+2. Migrate each old TextObject, Operator, Motion(TOM for short) to new one.
+3. Introduce new OperationProcessor to process  new-TOM.
+
+# Terminology
+
+- TOM: TextObject, Operator, Motion
+- Kind: Class Name of each TOM.
+- oTOM: old TOM, TOM of current vim-mode.
+- pTOM: pure TOM, TOM which do very minimal things which responsibility is only return Point or Range.
+- OperationProcessor
+
+# OperationProcessor
+- Handle multi cursor situation
+- Handle count(how much each operation should be repated).
+- Composing operation with target.
+
+# Spec
+
+Work in progress, may change depending on how was it useful after implement and evaluation of each spec.  
+
+- each TOM can respond to `getKind()` which return name of Class.
+- each TOM can respond to `is#{Klass}()` function, which return result of `this instanceof klass`.
+- Be consistent, dont' vary argument list passed to TOM, instead define explicit TOM.
+- TOM take only one argument, its vimState.
+
+# How Operation Stack works(for current official vim-mode).
+
+Expalaining how [OperationStack](https://github.com/t9md/vim-mode/blob/refactor-experiment/lib/operation-stack.coffee) works.  
+By using `yip`(Yank, inside paragraph) operation as example.  
+Below is what happens on each processing step and corresponding debug output of operation-stack.  
+
+1. `y` cause instantiate new `Operators.Yank`. and then `push()` this new instance to OperationStack.
+2. After pushing `Yank` Operator, then `process`, if operation is not `isComplete()`, activating operator-pending-mode, then return from process function.
+3. Then user type `ip`, this cause instantiate new `TextObjects.SelectInsideParagraph`, then `push()` it to OperationStack.
+4. Then `process()` it. now `SelectInsideParagraph` is top of stack and it `isComplete()`, so in this time we don't enter operator-pending-mode.
+5. Then processor `pop()` top operation, and it have still operations on stack, processor try to `compose()` `pop()`ed operation(here `SelectInsideParagraph`) to newTop operation(here `Yank`).
+Repeat this pop-and-compose(by calling `process()` recursively) until stack get emptied.
+6. When stack got emptied, its time to execute, calling `opration.execute()` operates on `@target`(here `SelectInsideParagraph`) of operation, which target is object composed in process 6.
+
+```
+#=== Start at 2015-08-07T06:03:24.797Z
+-> @process(): start
+  [@stack] size: 1
+  <idx: 0>
+  ## [object Object]: Yank < Operator
+  - @editor: `<TextEditor 2404>`
+  - @register: `'*'`
+
+  ### Yank < Operator
+  - ::register: `null`
+  - ::execute: `[Function]`
+
+-> @process(): return. activate: operator-pending-mode
+-> @process(): start
+  [@stack] size: 2
+  <idx: 0>
+  ## [object Object]: Yank < Operator
+  - @editor: `<TextEditor 2404>`
+  - @register: `'*'`
+
+  ### Yank < Operator
+  - ::register: `null`
+  - ::execute: `[Function]`
+
+  <idx: 1>
+  ## [object Object]: SelectInsideParagraph < TextObject
+  - @editor: `<TextEditor 2404>`
+  - @inclusive: `false`
+
+  ### SelectInsideParagraph < TextObject
+  - ::select: `[Function]`
+
+-> @pop()
+  - popped = <SelectInsideParagraph>
+  - newTop = <Yank>
+-> <Yank>.compose(<SelectInsideParagraph>)
+-> @process(): recursive
+-> @process(): start
+  [@stack] size: 1
+  <idx: 0>
+  ## [object Object]: Yank < Operator
+  - @editor: `<TextEditor 2404>`
+  - @register: `'*'`
+  - @target:
+    ## [object Object]: SelectInsideParagraph < TextObject
+    - @editor: `<TextEditor 2404>`
+    - @inclusive: `false`
+
+    ### SelectInsideParagraph < TextObject
+    - ::select: `[Function]`
+
+  - @complete: `true`
+
+  ### Yank < Operator
+  - ::register: `null`
+  - ::execute: `[Function]`
+
+-> @pop()
+  - popped = <Yank>
+  - newTop = <undefined>
+ -> <Yank>.execute()
+#=== Finish at 2015-08-07T06:03:25.157Z
+```
+
+## memo
+
 - vim-state: vim of vimState is redundant, state is enough.
 - ~~OpStack is not stack actually, calling it OpQueue is well fit to concept~~.
  - ~~Its queue shifted from front in FIFO manner.~~
@@ -96,7 +221,6 @@ The name of vimState is redundant simply `state` is enough since its vim-mode's 
 - When selecting whole line `selection.getBufferRange().isSingleLine()` return `false` since its expand multiple line ([selectedRow, 0], [nextRow, 0]).
 - Currently visual-mode not allow de-select first column char its bug, since Vim allow user to de-select first column.
 
-
 Cleanup Mode-shift
 
 main   submode
@@ -112,7 +236,3 @@ Visual characterwise, linewise, blockwise
 | vc  |   |   |    |    |    |    |
 | vl  |   |   |    |    |    |    |
 | vb  |   |   |    |    |    |    |
-
-### autocomplete-plus setting
-* suppressActivationForEditorClasses
-`vim-mode.normal-mode, vim-mode.visual-mode, vim-mode.operator-pending-mode, vim-mode.insert-mode.replace`
