@@ -1,6 +1,6 @@
 # Refactoring status: 80%
 _ = require 'underscore-plus'
-{selectLines, getSelectionProperty, setSelectionProperty, updateSelectionProperty} = require './utils'
+{selectLines, swrap} = require './utils'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 {Range, CompositeDisposable, Disposable} = require 'atom'
 
@@ -56,7 +56,7 @@ class ModeManager
     # If we don't reset this propety, first find-and-replace:select-next will
     # put selection wrong place.
     for s in @editor.getSelections()
-      setSelectionProperty(s, vimModePlus: null)
+      swrap(s).clear()
     @editorElement.component.setInputEnabled(false)
     @vimState.reset()
     s.clear(autoscroll: false) for s in @editor.getSelections()
@@ -126,14 +126,6 @@ class ModeManager
       when 'blockwise' then @selectBlockwise(oldSubmode)
 
   deactivateVisualMode: ->
-    # {lastOperation} = @vimState
-    # lastSelection = @editor.getLastSelection()
-    # @vimState.lastVisual =
-    #   mode: @mode,
-    #   submode: @submode
-    #   range: lastSelection.getBufferRange()
-    #   reversed: lastSelection.isReversed()
-
     restoreColumn = not (lastOperation?.isYank() or lastOperation?.isIndent())
     if restoreColumn and @isMode('visual', 'linewise')
       @selectCharacterwise()
@@ -146,8 +138,7 @@ class ModeManager
 
     # Keep original range as marker's property to restore column.
     for selection in @editor.getSelections()
-      characterwiseRange = selection.getBufferRange()
-      updateSelectionProperty(selection, 'vimModePlus', {characterwiseRange})
+      swrap(selection).preserveCharacterwise()
       selectLines(selection)
     @hideCursors()
 
@@ -160,14 +151,7 @@ class ModeManager
       @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
     else
       for s in @editor.getSelections()
-        {characterwiseRange} = getSelectionProperty(s, 'vimModePlus')
-        if characterwiseRange?
-          [startRow, endRow] = s.getBufferRowRange()
-          characterwiseRange.start.row = startRow
-          characterwiseRange.end.row   = endRow
-          s.setBufferRange(characterwiseRange)
-          # [NOTE] Important! reset to null after restored.
-          setSelectionProperty(s, vimModePlus: null)
+        swrap(s).restoreCharacterwise()
 
   selectBlockwise: (oldSubmode) ->
     unless oldSubmode is 'characterwise'

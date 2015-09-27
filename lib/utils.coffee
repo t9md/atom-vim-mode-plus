@@ -84,18 +84,47 @@ selectVisibleBy = (editor, entries, fn) ->
   range = getVisibleBufferRange.bind(this)(editor)
   (e for e in entries when range.containsRange(fn(e)))
 
-getSelectionProperty = (selection, scope) ->
-  selection.marker.getProperties()[scope] ? {}
+swrap = (selection) ->
+  get: ->
+    selection.marker.getProperties().vimModePlus ? {}
 
-setSelectionProperty = (selection, value) ->
-  selection.marker.setProperties(value)
+  set: (prop) ->
+    selection.marker.setProperties(vimModePlus: prop)
 
-updateSelectionProperty = (selection, scope, value) ->
-  newParam = value
-  oldParam = selection.marker.getProperties()[scope] ? {}
-  params = {}
-  params[scope] = _.extend(oldParam, newParam)
-  selection.marker.setProperties(params)
+  update: (value) ->
+    prop = _.extend({}, @get())
+    @set(_.extend(prop, value))
+
+  clear: ->
+    @set(null)
+
+  preserveCharacterwise: ->
+    @update
+      characterwise:
+        range: selection.getBufferRange()
+        reversed: selection.isReversed()
+
+  restoreCharacterwise: ->
+    {characterwise} = @get()
+    return unless characterwise
+    {range: {start, end}, reversed} = characterwise
+    rows = selection.getBufferRowRange()
+
+    reversedChanged = (selection.isReversed() isnt reversed) # reverse status changed
+    rows.reverse() if reversedChanged
+
+    [startRow, endRow] = rows
+    start.row = startRow
+    end.row = endRow
+    range = new Range(start, end)
+
+    if reversedChanged
+      rangeTaranslation = [[0, +1], [0, -1]]
+      rangeTaranslation.reverse() if selection.isReversed()
+      range = range.translate(rangeTaranslation...)
+    selection.setBufferRange(range)
+    # [NOTE] Important! reset to null after restored.
+    @clear()
 
 module.exports = {
   include
@@ -113,7 +142,5 @@ module.exports = {
   getIndex
   getVisibleBufferRange
   selectVisibleBy
-  getSelectionProperty
-  setSelectionProperty
-  updateSelectionProperty
+  swrap
 }

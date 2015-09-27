@@ -1,6 +1,6 @@
 Base = require './base'
 _ = require 'underscore-plus'
-{getSelectionProperty, updateSelectionProperty} = require './utils'
+{swrap} = require './utils'
 {Range} = require 'atom'
 
 # FIXME Currently initally multi selected situation not supported.
@@ -18,7 +18,7 @@ class VisualBlockwise extends Base
 
   setProperties: (prop) ->
     for s in @editor.getSelections()
-      updateSelectionProperty(s, 'vimModePlus', prop)
+      swrap(s).update(prop)
 
   getTop: ->
     _.first @editor.getSelectionsOrderedByBufferPosition()
@@ -43,17 +43,17 @@ class VisualBlockwise extends Base
 
   getTail: ->
     _.detect @editor.getSelections(), (s) ->
-      getSelectionProperty(s, 'vimModePlus')?.blockwiseTail
+      swrap(s).get().blockwiseTail
 
   setTail: (newTail) ->
     @clearTail()
-    updateSelectionProperty(newTail, 'vimModePlus', blockwiseTail: true)
+    swrap(newTail).update blockwiseTail: true
 
 
   # Only for making cursor visible.
   setHead: (newHead) ->
     @clearHead()
-    updateSelectionProperty(newHead, 'vimModePlus', blockwiseHead: true)
+    swrap(newHead).update blockwiseHead: true
 
   constructor: ->
     super
