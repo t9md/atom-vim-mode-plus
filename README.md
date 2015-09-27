@@ -111,7 +111,7 @@ Done by extending Base class, so each TOM and its instance can report itself.
 
 # TODO
 
-- [ ] When hover Icon disabled, icon position is not at original cursor position.
+- [x] When hover Icon disabled, icon position is not at original cursor position.
 - [x] Make independent showHoverCounter from showHover config parameter.
 - [x] Use single scope for custom selection property.
 - [ ] Change subscription link to use vimState as hub.

@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode-plus version: 0.1.0  
-*generated at 2015-09-27T06:47:37.782Z*
+*generated at 2015-09-27T16:01:46.762Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -651,6 +651,7 @@ vim-mode-plus version: 0.1.0
 - ::saveCurrentSearch: ```true```
 - ::complete: ```false```: **Overridden**
 - ::backwards: ```false```
+- ::escapeRegExp: ```false```
 - ::initialize`()`
 - ::isBackwards`()`
 - ::getCount`()`: `super`: **Overridden**
@@ -660,7 +661,9 @@ vim-mode-plus version: 0.1.0
 - ::visit`(match, cursor)`
 - ::isIncrementalSearch`()`
 - ::scan`(cursor)`
-- ::getPattern`(term, _arg)`
+- ::getPattern`(term)`
+- ::updateEscapeRegExpOption`(input)`
+- ::updateUI`(options)`
 
 ### BracketMatchingMotion < SearchBase
 - command: `vim-mode-plus:bracket-matching-motion`
@@ -1261,7 +1264,7 @@ vim-mode-plus version: 0.1.0
 - ::complete: ```true```: **Overridden**
 - ::clearTail`()`
 - ::clearHead`()`
-- ::setProperties`(prop)`
+- ::updateProperty`(selection, prop)`
 - ::getTop`()`
 - ::getBottom`()`
 - ::isReversed`()`
@@ -1270,7 +1273,6 @@ vim-mode-plus version: 0.1.0
 - ::getTail`()`
 - ::setTail`(newTail)`
 - ::setHead`(newHead)`
-- ::dump`(header)`
 - ::reverse`()`
 
 ### BlockwiseDeleteToLastCharacterOfLine < VisualBlockwise
