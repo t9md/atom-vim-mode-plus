@@ -8,8 +8,8 @@ class TextObject extends Base
   @extend()
   complete: true
 
-  isWholeLine: ({start, end}) ->
-    (start.column is 0) and (end.column is 0) and start < end
+  isLinewiseRange: (range) ->
+    (range.start.column is 0) and (range.end.column is 0) and (not range.isEmpty())
 
   rangeToBeginningOfFile: (point) ->
     new Range(Point.ZERO, point)
@@ -18,16 +18,25 @@ class TextObject extends Base
     new Range(point, Point.INFINITY)
 
   isLinewise: ->
-    for s in @editor.getSelections() when not @isWholeLine s.getBufferRange()
-      return false
-    true
+    @editor.getSelections().every (s) =>
+      @isLinewiseRange s.getBufferRange()
 
   eachSelection: (callback) ->
-    for selection in @editor.getSelections()
-      callback selection
-    if @isLinewise() and @vimState.isMode('visual', ['characterwise', 'blockwise'])
+    for s in @editor.getSelections()
+      callback s
+    if @isLinewise() and not @vimState.isMode('visual', 'linewise')
       @vimState.activate('visual', 'linewise')
+    @isIncludeNonEmptySelection()
+
+  isIncludeNonEmptySelection: ->
     @editor.getSelections().some((s) -> not s.isEmpty())
+
+  sortRanges: (ranges) ->
+    ranges.sort((a, b) -> a.compare(b))
+
+  setBufferRangeSafely: (selection, range) ->
+    if range
+      selection.setBufferRange(range)
 
 # Word
 # -------------------------
@@ -40,9 +49,8 @@ class Word extends TextObject
       @selectExclusive(selection, wordRegex)
       @selectInclusive(selection) if @inclusive
 
-  selectExclusive: (selection, wordRegex) ->
-    range = selection.cursor.getCurrentWordBufferRange({wordRegex})
-    selection.setBufferRange(range)
+  selectExclusive: (s, wordRegex) ->
+    @setBufferRangeSafely s, s.cursor.getCurrentWordBufferRange({wordRegex})
 
   selectInclusive: (selection) ->
     scanRange = selection.cursor.getCurrentLineBufferRange()
@@ -122,22 +130,22 @@ class Pair extends TextObject
     range
 
   select: ->
-    @eachSelection (selection) =>
-      if range = @getRange(selection, @pair)
-        selection.setBufferRange(range)
+    @eachSelection (s) =>
+      @setBufferRangeSafely s, @getRange(s, @pair)
 
 class AnyPair extends Pair
   @extend()
   pairs: ['""', "''", "``", "{}", "<>", "><", "[]", "()"]
 
+  getNearestRange: (selection, pairs) ->
+    ranges = []
+    for pair in pairs when (range = @getRange(selection, pair))
+      ranges.push range
+    _.last(@sortRanges(ranges)) unless _.isEmpty(ranges)
+
   select: ->
-    @eachSelection (selection) =>
-      ranges = []
-      for pair in @pairs when (range = @getRange(selection, pair))
-        ranges.push range
-      unless _.isEmpty(ranges)
-        ranges = ranges.sort (a, b) -> a.compare(b)
-        selection.setBufferRange(_.last(ranges))
+    @eachSelection (s) =>
+      @setBufferRangeSafely s, @getNearestRange(s, @pairs)
 
 class DoubleQuote extends Pair
   @extend()
@@ -198,8 +206,7 @@ class Paragraph extends TextObject
   selectParagraph: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
     if startRow is endRow
-      if range = @getRange(startRow)
-        selection.setBufferRange(range)
+      @setBufferRangeSafely selection, @getRange(startRow)
     else # have direction
       if selection.isReversed()
         if range = @getRange(startRow-1)
@@ -320,7 +327,7 @@ class Entire extends TextObject
   @extend()
   select: ->
     @editor.selectAll()
-    @editor.getLastSelection().isEmpty()
+    @isIncludeNonEmptySelection()
 
 module.exports = {
   Word, WholeWord,
