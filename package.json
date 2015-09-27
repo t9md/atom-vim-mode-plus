@@ -5,7 +5,7 @@
   "description": "vim-mode improved",
   "license": "MIT",
   "private": true,
-  "repository": "https://github.com/t9md/vim-mode-plus",
+  "repository": "https://github.com/t9md/atom-vim-mode-plus",
   "engines": {
     "atom": ">0.151.0"
   },
