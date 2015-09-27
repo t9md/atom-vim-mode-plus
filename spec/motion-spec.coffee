@@ -956,7 +956,7 @@ describe "Motion", ->
           set
             text: "abc\n@def\nabc\n@def1\n"
             cursorBuffer: [1, 1]
-          # this is because of the default isKeyword value of vim-mode that includes @
+          # this is because of the default isKeyword value of vim-mode-plus that includes @
           ensure '*', cursorBuffer: [1, 0]
 
         # FIXME: This behavior is different from the one found in

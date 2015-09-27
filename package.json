@@ -23,10 +23,10 @@
     }
   },
   "providedServices": {
-    "vim-mode": {
+    "vim-mode-plus": {
       "description": "",
       "versions": {
-        "0.1.0": "provideVimMode"
+        "0.1.0": "provideVimModePlus"
       }
     }
   },

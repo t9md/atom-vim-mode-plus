@@ -123,11 +123,11 @@ class Match
   flash: ({timeout}={}) ->
     @vimState.flasher.flash
       range: @range
-      klass: 'vim-mode-flash'
+      klass: 'vim-mode-plus-flash'
       timeout: timeout ? settings.get('flashOnSearchDurationMilliSeconds')
 
   show: ->
-    klass  = 'vim-mode-search-match'
+    klass  = 'vim-mode-plus-search-match'
     if s = @getClassList().join(' ')
       klass += " " + s
     @marker = @editor.markBufferRange @range,

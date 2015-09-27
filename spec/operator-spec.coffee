@@ -22,7 +22,7 @@ describe "Operator", ->
 
   describe "the x keybinding", ->
     describe "on a line with content", ->
-      describe "without vim-mode.wrapLeftRightMotion", ->
+      describe "without vim-mode-plus.wrapLeftRightMotion", ->
         beforeEach ->
           set
             text: "abc\n012345\n\nxyz"
@@ -56,7 +56,7 @@ describe "Operator", ->
           ensure 'x', text: "ac\n01235\n\nxyz"
           ensure 'u', text: 'abc\n012345\n\nxyz'
 
-      describe "with vim-mode.wrapLeftRightMotion", ->
+      describe "with vim-mode-plus.wrapLeftRightMotion", ->
         beforeEach ->
           set text: 'abc\n012345\n\nxyz', cursor: [1, 4]
           settings.set('wrapLeftRightMotion', true)
@@ -81,11 +81,11 @@ describe "Operator", ->
       beforeEach ->
         set text: "abc\n012345\n\nxyz", cursor: [2, 0]
 
-      it "deletes nothing on an empty line when vim-mode.wrapLeftRightMotion is false", ->
+      it "deletes nothing on an empty line when vim-mode-plus.wrapLeftRightMotion is false", ->
         settings.set('wrapLeftRightMotion', false)
         ensure 'x', text: "abc\n012345\n\nxyz", cursor: [2, 0]
 
-      it "deletes an empty line when vim-mode.wrapLeftRightMotion is true", ->
+      it "deletes an empty line when vim-mode-plus.wrapLeftRightMotion is true", ->
         settings.set('wrapLeftRightMotion', true)
         ensure 'x', text: "abc\n012345\nxyz", cursor: [2, 0]
 
@@ -107,7 +107,7 @@ describe "Operator", ->
           text: "012345\n\nabcdef"
           cursor: [1, 0]
 
-      it "deletes nothing when vim-mode.wrapLeftRightMotion is false", ->
+      it "deletes nothing when vim-mode-plus.wrapLeftRightMotion is false", ->
         settings.set('wrapLeftRightMotion', false)
         ensure 'X', text: "012345\n\nabcdef", cursor: [1, 0]
 
@@ -1241,8 +1241,8 @@ describe "Operator", ->
         text: 'vim-mode\natom-text-editor\n'
         cursorBuffer: [0, 0]
       atom.keymaps.add "g_",
-        'atom-text-editor.vim-mode:not(.insert-mode)':
-          'g _': 'vim-mode:snake-case'
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g _': 'vim-mode-plus:snake-case'
 
     it "SnakeCase text and not move cursor", ->
       ensure 'g_$', text: 'vim_mode\natom-text-editor\n', cursor: [0, 0]
@@ -1377,8 +1377,8 @@ describe "Operator", ->
           cursor: [1, 9]
 
         atom.keymaps.add "test",
-          'atom-text-editor.vim-mode:not(.insert-mode)':
-            'd s': 'vim-mode:delete-surround-any-pair'
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'd s': 'vim-mode-plus:delete-surround-any-pair'
 
       it "delete surrounded any pair found and repeatable", ->
         ensure 'ds',
@@ -1412,8 +1412,8 @@ describe "Operator", ->
           cursor: [0, 1]
 
         atom.keymaps.add "test",
-          'atom-text-editor.vim-mode:not(.insert-mode)':
-            'c s': 'vim-mode:change-surround-any-pair'
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'c s': 'vim-mode-plus:change-surround-any-pair'
 
       it "change any surrounded pair found and repeatable", ->
         ensure ['cs', char: '<'],
@@ -1553,7 +1553,7 @@ describe "Operator", ->
           cursorBuffer: [[0, 0], [1, 0]]
           text: '\n'
 
-      it "honours the vim-mode:numberRegex setting", ->
+      it "honours the vim-mode-plus.numberRegex setting", ->
         set
           text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
           cursorBuffer: [0, 0]
@@ -1599,7 +1599,7 @@ describe "Operator", ->
           text: '\n'
           cursorBuffer: [[0, 0], [1, 0]],
 
-      it "honours the vim-mode:numberRegex setting", ->
+      it "honours the vim-mode-plus.numberRegex setting", ->
         set
           text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
           cursorBuffer: [0, 0]
@@ -1683,8 +1683,8 @@ describe "Operator", ->
     originalText = null
     beforeEach ->
       atom.keymaps.add "test",
-        'atom-text-editor.vim-mode:not(.insert-mode)':
-          '_': 'vim-mode:replace-with-register'
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          '_': 'vim-mode-plus:replace-with-register'
 
       originalText = """
       abc def 'aaa'

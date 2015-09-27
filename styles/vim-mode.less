@@ -26,9 +26,9 @@
   opacity: 0.5;
 }
 
-atom-text-editor.vim-mode.normal-mode,
-atom-text-editor.vim-mode.operator-pending-mode,
-atom-text-editor.vim-mode.visual-mode,
+atom-text-editor.vim-mode-plus.normal-mode,
+atom-text-editor.vim-mode-plus.operator-pending-mode,
+atom-text-editor.vim-mode-plus.visual-mode,
 {
   &::shadow, // shadow-DOM enabled
   &           // shadow-DOM disabled
@@ -39,9 +39,9 @@ atom-text-editor.vim-mode.visual-mode,
   }
 }
 
-atom-text-editor.vim-mode.normal-mode.is-focused,
-atom-text-editor.vim-mode.operator-pending-mode.is-focused,
-atom-text-editor.vim-mode.visual-mode.is-focused
+atom-text-editor.vim-mode-plus.normal-mode.is-focused,
+atom-text-editor.vim-mode-plus.operator-pending-mode.is-focused,
+atom-text-editor.vim-mode-plus.visual-mode.is-focused
 {
   &::shadow, // shadow-DOM enabled
   &           // shadow-DOM disabled
@@ -52,7 +52,7 @@ atom-text-editor.vim-mode.visual-mode.is-focused
   }
 }
 
-atom-text-editor.vim-mode.visual-mode
+atom-text-editor.vim-mode-plus.visual-mode
 {
   &::shadow, // shadow-DOM enabled
   &           // shadow-DOM disabled
@@ -63,7 +63,7 @@ atom-text-editor.vim-mode.visual-mode
   }
 }
 
-atom-text-editor.vim-mode.insert-mode.replace
+atom-text-editor.vim-mode-plus.insert-mode.replace
 {
   &::shadow, // shadow-DOM enabled
   &           // shadow-DOM disabled
@@ -74,7 +74,7 @@ atom-text-editor.vim-mode.insert-mode.replace
   }
 }
 
-atom-text-editor.vim-mode.insert-mode.replace.is-focused
+atom-text-editor.vim-mode-plus.insert-mode.replace.is-focused
 {
   &::shadow, // shadow-DOM enabled
   &           // shadow-DOM disabled
@@ -89,7 +89,7 @@ atom-text-editor.vim-mode.insert-mode.replace.is-focused
   }
 }
 
-atom-text-editor.vim-mode.operator-pending-mode
+atom-text-editor.vim-mode-plus.operator-pending-mode
 {
   &::shadow, // shadow-DOM enabled
   &           // shadow-DOM disabled
@@ -100,7 +100,7 @@ atom-text-editor.vim-mode.operator-pending-mode
   }
 }
 
-atom-text-editor.vim-mode.operator-pending-mode.is-focused
+atom-text-editor.vim-mode-plus.operator-pending-mode.is-focused
 {
   &::shadow, // shadow-DOM enabled
   &           // shadow-DOM disabled
@@ -116,8 +116,8 @@ atom-text-editor.vim-mode.operator-pending-mode.is-focused
 }
 
 // Show cursor in visualmode
-atom-text-editor.vim-mode.visual-mode.characterwise:not(.reversed),
-atom-text-editor.vim-mode.visual-mode.blockwise:not(.reversed), {
+atom-text-editor.vim-mode-plus.visual-mode.characterwise:not(.reversed),
+atom-text-editor.vim-mode-plus.visual-mode.blockwise:not(.reversed), {
   &::shadow {
     .cursor {
       // Currently not well handling for multibyte char width
@@ -133,15 +133,15 @@ atom-text-editor.vim-mode.visual-mode.blockwise:not(.reversed), {
 // Flash ranges e.g. flashing yanked range.
 // =========================
 atom-text-editor::shadow {
-  .vim-mode-flash .region {
+  .vim-mode-plus-flash .region {
     background-color: @syntax-selection-flash-color;
   }
-  .vim-mode-cursor-normal .region {
+  .vim-mode-plus-cursor-normal .region {
     background-color: @syntax-cursor-color;
     // background-color: @background-color-success;
     opacity: 0.8;
   }
-  .vim-mode-cursor-insert .region {
+  .vim-mode-plus-cursor-insert .region {
     // [FIXME] I want i-bar style cursor for insert-mode.
     background-color: @syntax-cursor-color;
     opacity: 0.8;
@@ -150,7 +150,7 @@ atom-text-editor::shadow {
 
 // Hover Counter
 // =========================
-.vim-mode-hover {
+.vim-mode-plus-hover {
   color: @text-color-highlight;
   background-color: @base-background-color;
   border-radius: @component-border-radius;
@@ -169,7 +169,7 @@ atom-text-editor::shadow {
 
 // Input mini editor, e.g surround char.
 // =========================
-.vim-mode-input atom-text-editor[mini] {
+.vim-mode-plus-input atom-text-editor[mini] {
   background-color: inherit;
   border: none;
   width: 100%;
@@ -188,7 +188,7 @@ atom-text-editor::shadow {
 // Search
 // =========================
 // input
-.vim-mode-search-container {
+.vim-mode-plus-search-container {
   display: flex;
   > div {
     padding: @component-padding/2 @component-padding;
@@ -198,7 +198,7 @@ atom-text-editor::shadow {
     width: 100%;
   }
 }
-atom-text-editor[mini].vim-mode-search {
+atom-text-editor[mini].vim-mode-plus-search {
   border: none;
   color: @text-color;
   cursor: default;
@@ -216,25 +216,25 @@ atom-text-editor[mini].vim-mode-search {
 }
 
 // highlight
-.vim-mode {
+.vim-mode-plus {
   &.round-box {
     box-sizing: border-box;
     border-radius: @component-border-radius;
   }
 }
 atom-text-editor::shadow {
-  .vim-mode-search-match .region {
-    .vim-mode.round-box;
+  .vim-mode-plus-search-match .region {
+    .vim-mode-plus.round-box;
     background-color: transparent;
     border: 2px solid @syntax-result-marker-color;
   }
-  .vim-mode-search-match.first .region {
+  .vim-mode-plus-search-match.first .region {
     border: 2px solid @syntax-color-renamed;
   }
-  .vim-mode-search-match.last .region {
+  .vim-mode-plus-search-match.last .region {
     border: 2px solid @syntax-color-removed;
   }
-  .vim-mode-search-match.current .region {
+  .vim-mode-plus-search-match.current .region {
     background-color: @syntax-selection-color;
   }
 }

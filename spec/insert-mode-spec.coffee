@@ -55,8 +55,8 @@ describe "Insert mode commands", ->
     describe "the ctrl-e command", ->
       beforeEach ->
         atom.keymaps.add "test",
-          'atom-text-editor.vim-mode.insert-mode':
-            'ctrl-e': 'vim-mode:copy-from-line-below'
+          'atom-text-editor.vim-mode-plus.insert-mode':
+            'ctrl-e': 'vim-mode-plus:copy-from-line-below'
 
       it "copies from the line below", ->
         ensure [ctrl: 'e'], text: '12345\na\nabcd\nefghi'

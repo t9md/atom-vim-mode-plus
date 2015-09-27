@@ -60,7 +60,7 @@ class Hover
 
 class HoverElement extends HTMLElement
   createdCallback: ->
-    @className = 'vim-mode-hover'
+    @className = 'vim-mode-plus-hover'
     this
 
   initialize: (@model) ->
@@ -96,13 +96,13 @@ class HoverElement extends HTMLElement
     @styleElement?.remove()
     @styleElement = document.createElement 'style'
     document.head.appendChild(@styleElement)
-    selector = '.vim-mode-hover .icon::before'
+    selector = '.vim-mode-plus-hover .icon::before'
     size = "#{size*0.8}px"
     style = "font-size: #{size}; width: #{size}; hegith: #{size};"
     @styleElement.sheet.addRule(selector, style)
 
   reset: ->
-    @className = 'vim-mode-hover'
+    @className = 'vim-mode-plus-hover'
     @textContent = ''
     @marker?.destroy()
     @styleElement?.remove()
@@ -115,7 +115,7 @@ class HoverElement extends HTMLElement
     @marker?.destroy()
     @remove()
 
-HoverElement = document.registerElement 'vim-mode-hover',
+HoverElement = document.registerElement 'vim-mode-plus-hover',
   prototype: HoverElement.prototype
   extends:   'div'
 

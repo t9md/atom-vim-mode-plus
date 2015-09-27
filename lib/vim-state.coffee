@@ -22,6 +22,8 @@ FlashManager         = require './flash-manager'
 
 Developer = null # delay
 
+packageScope = 'vim-mode-plus'
+
 module.exports =
 class VimState
   Delegato.includeInto(this)
@@ -79,11 +81,11 @@ class VimState
             @showCursors(@editor.getCursors())
           when @isMode('visual', 'blockwise')
             cursors =
-              for s in @editor.getSelections() when s.marker.getProperties().vimModeBlockwiseHead
+              for s in @editor.getSelections() when s.marker.getProperties().vimModePlusBlockwiseHead
                 s.cursor
             @showCursors(cursors)
 
-    @addClass 'vim-mode'
+    @addClass packageScope
     @init()
     if settings.get('startInInsertMode')
       @activate('insert')
@@ -97,7 +99,7 @@ class VimState
     if @editor.isAlive()
       @activate('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
-      @removeClass 'vim-mode', 'normal-mode'
+      @removeClass packageScope, 'normal-mode'
     # @editorElement.removeEventListener 'mouseup', @checkSelections
     @editor = null
     @editorElement = null
@@ -126,7 +128,7 @@ class VimState
   registerCommands: (commands) ->
     for name, fn of commands
       do (fn) =>
-        @subscriptions.add atom.commands.add(@editorElement, "vim-mode:#{name}", fn)
+        @subscriptions.add atom.commands.add(@editorElement, "#{packageScope}:#{name}", fn)
 
   # Register operation command.
   # command-name is automatically mapped to correspoinding class.
@@ -153,7 +155,7 @@ class VimState
             throw error unless error.isOperationAbortedError?()
     @registerCommands(commands)
 
-  # Initialize all of vim-mode' commands.
+  # Initialize all commands.
   init: ->
     @registerCommands
       'activate-normal-mode':               => @activate('normal')
