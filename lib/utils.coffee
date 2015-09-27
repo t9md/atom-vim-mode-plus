@@ -2,6 +2,7 @@
 fs = require 'fs-plus'
 settings = require './settings'
 {Range, Point} = require 'atom'
+_ = require 'underscore-plus'
 
 # Include module(object which normaly provides set of methods) to klass
 include = (klass, module) ->
@@ -83,6 +84,19 @@ selectVisibleBy = (editor, entries, fn) ->
   range = getVisibleBufferRange.bind(this)(editor)
   (e for e in entries when range.containsRange(fn(e)))
 
+getSelectionProperty = (selection, scope) ->
+  selection.marker.getProperties()[scope] ? {}
+
+setSelectionProperty = (selection, value) ->
+  selection.marker.setProperties(value)
+
+updateSelectionProperty = (selection, scope, value) ->
+  newParam = value
+  oldParam = selection.marker.getProperties()[scope] ? {}
+  params = {}
+  params[scope] = _.extend(oldParam, newParam)
+  selection.marker.setProperties(params)
+
 module.exports = {
   include
   debug
@@ -99,4 +113,7 @@ module.exports = {
   getIndex
   getVisibleBufferRange
   selectVisibleBy
+  getSelectionProperty
+  setSelectionProperty
+  updateSelectionProperty
 }
