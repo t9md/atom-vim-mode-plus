@@ -1,65 +1,51 @@
-# Note by t9md
-
 # vim-mode-plus [![Build Status](https://travis-ci.org/t9md/atom-vim-mode-plus.svg)](https://travis-ci.org/t9md/atom-vim-mode-plus)
 
-# Gifs
+vim-mode improved.
 
-* Flash ranges on which operator operates.
+# Development state
 
-![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/flashing-range.gif)
-
-* Hover indicator(icon)
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/hover-icon.gif)
-
-* Hover indicator(emoji)
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/hover-emoji.gif)
-
-* Complete submode shift between charcterwise, linewise, blockwise
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/visualmode-submod-shift.gif)
-
-* Surround natively supported.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/353c34324887ab972368b8ef54bc1c96414a8537/img/vim-mode/surround.gif)
+Beta
 
 # Whats this?
 
-This is refactoring experiment for vim-mode.  
+Started as fork project from 2015.8.1, originally for doing some refactoring experiment.  
+After doing lots of refactoring, I started to add new feature.  
+So I decided to release this to get feedback from user.
 
-See [REFACTORING_IDEA](REFACTORING_IDEA.md).  
-See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode/issues/800).  
+# Thanks
 
-# What this folk project aiming to?
+My work is greatly owing to former achievement done by original vim-mode developer and many of its contributors.  
 
-Currently, each TOM(TextObject, Operator, Motion), do very different things, the behavior and responsibility of each TOM is not consistent.  
-This inconsistencies reduce flexibility and readablity of codebases, and it also making it difficult to introduce custom TOM.  
-By taking over tasks currently handled on TOM by new OperationProcessor, each TOM's implementation could be very simplified and easier to maintain.  
-This project aiming to prove above idea by implementing working example.  
+# Important Note
 
-# Strategy
+- You need to disable vim-mode to use vim-mode-plus, it can't work simultaneously.
+- vim-mode's If you use following pakages it won't work or unnecessary. why not work? since service API name is different.
+  - [vim-mode-clipboard-plus](https://atom.io/packages/vim-mode-clipboard-plus)
+  - [ex-mode](https://atom.io/packages/ex-mode)
+  - [vim-surround](https://atom.io/packages/vim-surround): surround feature included vim-mode-plus.
+  - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block): (this is my package) visual-block included in vim-mode-plus.
+- CSS selector scope, and keymap scope is different from vim-mode, **Not compatible**.
+- Internal code base is very different, Issue, PR should be directly sent to vim-mode-plus, DONT create issue, PR to vim-mode for vim-mode-plus's.
 
-1. Improve readability by renaming without causing big internal change.
-2. Migrate each old TextObject, Operator, Motion(TOM for short) to new one.
-3. Introduce new OperationProcessor to process  new-TOM.
+# autocomplete-plus setting
+
+To disable auto suggestion for vim-mode-plus, set following value on autocomplete-plus setting.
+
+* suppressActivationForEditorClasses
+`vim-mode.normal-mode, vim-mode.visual-mode, vim-mode.operator-pending-mode, vim-mode.insert-mode.replace`
 
 # New Features
 
-This project started at August 1st 2015 as folk of vim-mode.  
-After 1 month of refactoring, I'm getting tired for long long refactoring marathon.  
-My current(2015.9.6.) 1st prioritized TODO is refactor `motion.coffee`, I know it.  
-But I need some pastime, refresher, So I added following new features which is not included Vim and vim-mode as pastime.  
-
-- New Operator
+- Operator
   - Surround
     - Surround, DeleteSurround, ChangeSurround. Instead of vim-surround atom package, its repeatable(very improtant) with `.`.
     - SurroundWord pre-targeted to iner-word
     - DeleteSurroundAnyPair: Delete surrounding pair of AnyPair TextObject. You don't have to specify what pair you want to delete.
     - ChangeSurroundAnyPair: Change surrounding pair of AnyPair TextObject. You don't have to specify what pair you want to change.
-  - Common string transformation includes SnakeCase, CamelCase, DashCase.
+  - Common string transformation which includes SnakeCase, CamelCase, DashCase.
   - ToggleLineComments which toggle comment of target-area(selected by motion or text-objects).
   - ReplaceWithRegister which replace target-area(selected by text-object or motion) with register's text. Very useful since its repeatable.
+  - All target require operator behave as linwise alias when repeated, means `gugu`, `guu` `gUgU`, `gUU` support which is yet supported in vim-mode.
 - TextObject
   - Indent which select consecutive deeper indented lines
   - Entire buffer.
@@ -69,48 +55,130 @@ But I need some pastime, refresher, So I added following new features which is n
   - AnyPair. it select nearest pair(surround) from one of following pair.
     - `'""', "''", "``", "{}", "<>", "><", "[]", "()"`.
   - Function. it select inner-function(body) or a-function.
+  - SelectInsideBrackets family skip backslash escaped pair character.
 - Motion
-- Instant feedback of your operation. Count/Register/Operation you typed is displayed as hover(overlay) element.
- - Showing emoji that representing operation.
-- Flashing(highlighting) operation affected area(range) for yank, paste, toggle etc..
-- Developer friendly introspection report and real-time opration-stack monitoring(logged on console).
-- `gugu`, `guu` `gUgU`, `gUU` support which is yet supported in vim-mode.
-- SelectInsideBrackets family skip backslash escaped pair character.
-- Show cursor(by using decoration) while waiting user input (e.g `m`, `"`). Cursor disappear in official vim-mode.
-- Support visual-block-mode except blockwise yank, and paste.
-- Show cursor in visual-mode characterwise.
-- Expose visual-mode's submode to text-editor-element's css class to be used as selector.
-
-# Terminology
-
-- TOM: TextObject, Operator, Motion
-- Kind: Class Name of each TOM.
-- oTOM: old TOM, TOM of current vim-mode.
-- pTOM: pure TOM, TOM which do very minimal things which responsibility is only return Point or Range.
-- OperationProcessor
-
-# OperationProcessor
-- Handle multi cursor situation
-- Handle count(how much each operation should be repated).
-- Composing operation with target.
-
-# Spec
-
-Work in progress, may change depending on how was it useful after implement and evaluation of each spec.  
-
-- each TOM can respond to `getKind()` which return name of Class.
-- each TOM can respond to `is#{Klass}()` function, which return result of `this instanceof klass`.
-- Be consistent, dont' vary argument list passed to TOM, instead define explicit TOM.
-- TOM take only one argument, its vimState.
+  - Coming soon.
+- Instant UI feedback
+  - Showing icon/emoji representing operation.
+  - Show active counter to hover indicator like `10` when you do `10yy`.
+  - Show active register to hover indicator like `"a` when you do `"ayy`
+  - Flashing(highlighting) operation affected area(range) for yank, paste, toggle etc..
+  - Flashing found entry on Search and SearchCurrentWord.
+  - Show current/total hover counter on Search and SearchCurrentWord.
+- Incremental search.
+  - Auto scroll next matching entry as you type.
+  - [Experimental] disable default RegExp search by using space starting seach word 1st space removed on search.
+  - `search-visit-prev` and `vim-mode-plus:search-visit-next` allow you quickly visit match.
+  - `ctrl-v` on search editor start literal input mode, next single char you input is skip keybinding on search editor(useful when you keymap normal key like `;` to `confirm()`).
+  - [Experimental] Scroll next/prev "page" of matching entry, "page" is not actual page, so scroll only match found area, useful to quick skim for match out of screen.
+- VisualMode improve
+  - Show cursor in visual-mode except linewise submode.
+  - Include visual-block-mode except yank, and paste.
+  - Allow complete submode shift between char-block, block-line, line-char etc.., original column restored correctly.
+- Other
+  - Expose visual-mode's submode to text-editor-element's css class to be used as selector.
+  - [Disabled temporarily] Show cursor(by using decoration) while waiting user input (e.g `m`, `"`).
+  - Developer friendly introspection report and real-time opration-stack monitoring(logged on console).
+  - Spec is more easy to read by using mini DSL provided by spec helper.
+  - Lots of minor bug fix which is not fixed in official vim-mode.
 
 # TOM-report
 
-Done by extending Base class, so each TOM and its instance can report itself.
-
 - [TOM-report](https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md)
+
+Done by extending Base class, so each TOM and its instance can report itself.
+TOM: TextObject, Operator, Motion
+
+# Keymap
+
+Some of the keymap is not set by default, conslut [TOM-report](https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md), [keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson) for detail.  
+
+Here is my keymap as an example.
+
+```coffeescript
+'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+  # overwrite default 'vim-mode-plus:move-to-last-nonblank-character-of-line-and-down' which I never use.
+  'g _': 'vim-mode-plus:snake-case'
+
+'atom-text-editor.vim-mode-plus.normal-mode, atom-text-editor.vim-mode-plus.visual-mode':
+  '_': 'vim-mode-plus:replace-with-register'
+
+'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
+  # 'i s' is mapped to inner-any-pair by default. I can chose inner-any-pair with like `c;`, `v;`.
+  ';':  'vim-mode-plus:inner-any-pair'
+
+'atom-text-editor.vim-mode-plus.normal-mode':
+  'S':   'vim-mode-plus:surround-word'
+  'd s': 'vim-mode-plus:delete-surround-any-pair'
+  'c s': 'vim-mode-plus:change-surround-any-pair'
+
+# when you want to search `[`, `]`, `;`, input `ctrl-v` following these keys.
+'atom-text-editor.vim-mode-plus-search':
+  '[': 'vim-mode-plus:search-visit-prev'
+  ']': 'vim-mode-plus:search-visit-next'
+  ';': 'vim-mode-plus:search-confirm'
+  'ctrl-f': 'vim-mode-plus:search-scroll-next'
+  'ctrl-b': 'vim-mode-plus:search-scroll-prev'
+  'ctrl-g': 'vim-mode-plus:search-cancel'
+
+'atom-text-editor.vim-mode-plus-input':
+  'ctrl-g': 'vim-mode-plus:input-cancel'
+```
+
+# References
+
+- [operator, the true power of Vim](http://whileimautomaton.net/2008/11/vimm3/operator) by kana.  
+True power of Vim is Operator and TextOjbect.
+
+- [List of text-object as vim plugin](https://github.com/kana/vim-textobj-user/wiki)  
+vim-mod-plus builtin textobj for function, fold, entire, comment, indent, line, and any-pair(super set of many pair text-obj)
+
+# GIFs
+
+## Incremental search
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/incremental-search.gif)
+
+## Surround builtin.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/surround.gif)
+
+## Visual block mode builtin.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visual-blockwise-cursor.gif)
+
+## Flash on operate
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/flashing-range.gif)
+
+##  Hover icon
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/hover-icon.gif)
+
+## Hover emoji
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/hover-emoji.gif)
+
+## Pre-select affected surround pair before confirm available in ChangeSurroundAnyPair operator.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/preselect-changed-surround.gif)
+
+## Flash matched word on search and show current/total in hover indicator.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/search-flash-and-counter.gif)
+
+## Complete submode shift in visual-mode.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visualmode-submod-shift.gif)
+
+## Cursor properly shown in visual-mode.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visualmode-submod-shift.gif)
 
 # TODO
 
+- [ ] Write spec for lots of UI effect. hover, search counter etc.
+- [ ] Write tutorial for new Operator, TextObjet.
 - [x] When hover Icon disabled, icon position is not at original cursor position.
 - [x] Make independent showHoverCounter from showHover config parameter.
 - [x] Use single scope for custom selection property.
@@ -162,132 +230,3 @@ Done by extending Base class, so each TOM and its instance can report itself.
   - [x] Separate mode handling to ModeManager
 - [x] improve introspection report to describe keymap to corresponding class(by consulting `atom.keymap`).
 - [ ] Recheck unnecessary count passing function.
-
-# How Operation Stack works(for current official vim-mode).
-
-Expalaining how [OperationStack](https://github.com/t9md/vim-mode/blob/refactor-experiment/lib/operation-stack.coffee) works.  
-By using `yip`(Yank, inside paragraph) operation as example.  
-Below is what happens on each processing step and corresponding debug output of operation-stack.  
-
-1. `y` cause instantiate new `Operators.Yank`. and then `push()` this new instance to OperationStack.
-2. After pushing `Yank` Operator, then `process`, if operation is not `isComplete()`, activating operator-pending-mode, then return from process function.
-3. Then user type `ip`, this cause instantiate new `TextObjects.SelectInsideParagraph`, then `push()` it to OperationStack.
-4. Then `process()` it. now `SelectInsideParagraph` is top of stack and it `isComplete()`, so in this time we don't enter operator-pending-mode.
-5. Then processor `pop()` top operation, and it have still operations on stack, processor try to `compose()` `pop()`ed operation(here `SelectInsideParagraph`) to newTop operation(here `Yank`).
-Repeat this pop-and-compose(by calling `process()` recursively) until stack get emptied.
-6. When stack got emptied, its time to execute, calling `opration.execute()` operates on `@target`(here `SelectInsideParagraph`) of operation, which target is object composed in process 6.
-
-```
-#=== Start at 2015-08-07T06:03:24.797Z
--> @process(): start
-  [@stack] size: 1
-  <idx: 0>
-  ## [object Object]: Yank < Operator
-  - @editor: `<TextEditor 2404>`
-  - @register: `'*'`
-
-  ### Yank < Operator
-  - ::register: `null`
-  - ::execute: `[Function]`
-
--> @process(): return. activate: operator-pending-mode
--> @process(): start
-  [@stack] size: 2
-  <idx: 0>
-  ## [object Object]: Yank < Operator
-  - @editor: `<TextEditor 2404>`
-  - @register: `'*'`
-
-  ### Yank < Operator
-  - ::register: `null`
-  - ::execute: `[Function]`
-
-  <idx: 1>
-  ## [object Object]: SelectInsideParagraph < TextObject
-  - @editor: `<TextEditor 2404>`
-  - @inclusive: `false`
-
-  ### SelectInsideParagraph < TextObject
-  - ::select: `[Function]`
-
--> @pop()
-  - popped = <SelectInsideParagraph>
-  - newTop = <Yank>
--> <Yank>.compose(<SelectInsideParagraph>)
--> @process(): recursive
--> @process(): start
-  [@stack] size: 1
-  <idx: 0>
-  ## [object Object]: Yank < Operator
-  - @editor: `<TextEditor 2404>`
-  - @register: `'*'`
-  - @target:
-    ## [object Object]: SelectInsideParagraph < TextObject
-    - @editor: `<TextEditor 2404>`
-    - @inclusive: `false`
-
-    ### SelectInsideParagraph < TextObject
-    - ::select: `[Function]`
-
-  - @complete: `true`
-
-  ### Yank < Operator
-  - ::register: `null`
-  - ::execute: `[Function]`
-
--> @pop()
-  - popped = <Yank>
-  - newTop = <undefined>
- -> <Yank>.execute()
-#=== Finish at 2015-08-07T06:03:25.157Z
-```
-
-# END Note by t9md
-
-## Vim Mode package [![Build Status](https://travis-ci.org/atom/vim-mode.svg?branch=master)](https://travis-ci.org/atom/vim-mode)
-
-Provides vim modal control for Atom, ideally blending the best of vim
-and Atom.
-
-### Installing
-
-Use the Atom package manager, which can be found in the Settings view or
-run `apm install vim-mode` from the command line.
-
-### Current Status
-
-Sizable portions of Vim's normal mode work as you'd expect, including
-many complex combinations. Even so, this package is far from finished (Vim
-wasn't built in a day).
-
-If you want the vim ex line (for `:w`, `:s`, etc.), you can try [ex-mode](https://atom.io/packages/ex-mode)
-which works in conjuction with this plugin.
-
-Currently, vim-mode has some issues with international keyboard layouts.
-
-If there's a feature of Vim you're missing, it might just be that you use it
-more often than other developers. Adding a feature can be quick and easy. Check
-out the [closed pull requests](https://github.com/atom/vim-mode/pulls?direction=desc&page=1&sort=created&state=closed)
-to see examples of community contributions. We're looking forward to yours, too.
-
-### Documentation
-
-* [Overview](https://github.com/atom/vim-mode/blob/master/docs/overview.md)
-* [Motions and Text Objects](https://github.com/atom/vim-mode/blob/master/docs/motions.md)
-* [Operators](https://github.com/atom/vim-mode/blob/master/docs/operators.md)
-* [Windows](https://github.com/atom/vim-mode/blob/master/docs/windows.md)
-* [Scrolling](https://github.com/atom/vim-mode/blob/master/docs/scrolling.md)
-
-### Development
-
-* Create a branch with your feature/fix.
-* Add a spec (take inspiration from the ones that are already there).
-* If you're adding a command be sure to update the appropriate file in
-  `docs/`
-* Create a PR.
-
-When in doubt, open a PR earlier rather than later so that you can receive
-feedback from the community. We want to get your fix or feature included as much
-as you do.
-
-See [the contribution guide](https://github.com/atom/vim-mode/blob/master/CONTRIBUTING.md).
