@@ -27,13 +27,6 @@ My work is greatly owing to former achievement done by original vim-mode develop
 - CSS selector scope, and keymap scope is different from vim-mode, **Not compatible**.
 - Internal code base is very different, Issue, PR should be directly sent to vim-mode-plus, DONT create issue, PR to vim-mode for vim-mode-plus's.
 
-# autocomplete-plus setting
-
-To disable auto suggestion for vim-mode-plus, set following value on autocomplete-plus setting.
-
-* suppressActivationForEditorClasses
-`vim-mode.normal-mode, vim-mode.visual-mode, vim-mode.operator-pending-mode, vim-mode.insert-mode.replace`
-
 # New Features
 
 - Operator
@@ -89,7 +82,16 @@ To disable auto suggestion for vim-mode-plus, set following value on autocomplet
 Done by extending Base class, so each TOM and its instance can report itself.
 TOM: TextObject, Operator, Motion
 
-# Keymap
+# Configuration
+
+# Disable autocomplete-plus's auto suggestion in replace mode
+
+To disable auto suggestion for vim-mode-plus, set following value on autocomplete-plus setting.
+
+* suppressActivationForEditorClasses
+`vim-mode.normal-mode, vim-mode.visual-mode, vim-mode.operator-pending-mode, vim-mode.insert-mode.replace`
+
+## Keymap
 
 Some of the keymap is not set by default, conslut [TOM-report](https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md), [keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson) for detail.  
 
