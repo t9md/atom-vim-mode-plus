@@ -1,5 +1,6 @@
 Base = require './base'
 _ = require 'underscore-plus'
+{getSelectionProperty, updateSelectionProperty} = require './utils'
 {Range} = require 'atom'
 
 # FIXME Currently initally multi selected situation not supported.
@@ -8,16 +9,16 @@ class VisualBlockwise extends Base
   complete: true
 
   clearTail: ->
-    @setProperties(vimModePlusBlockwiseTail: false)
+    @setProperties(blockwiseTail: false)
 
   clearHead: ->
-    @setProperties(vimModePlusBlockwiseHead: false)
+    @setProperties(blockwiseHead: false)
     for s in @editor.getSelections()
       s.cursor.setVisible(false)
 
   setProperties: (prop) ->
     for s in @editor.getSelections()
-      s.marker.setProperties(prop)
+      updateSelectionProperty(s, 'vimModePlus', prop)
 
   getTop: ->
     _.first @editor.getSelectionsOrderedByBufferPosition()
@@ -42,29 +43,30 @@ class VisualBlockwise extends Base
 
   getTail: ->
     _.detect @editor.getSelections(), (s) ->
-      s.marker.getProperties().vimModePlusBlockwiseTail
+      getSelectionProperty(s, 'vimModePlus')?.blockwiseTail
 
   setTail: (newTail) ->
     @clearTail()
-    newTail.marker.setProperties(vimModePlusBlockwiseTail: true)
+    updateSelectionProperty(newTail, 'vimModePlus', blockwiseTail: true)
+
 
   # Only for making cursor visible.
   setHead: (newHead) ->
     @clearHead()
-    newHead.marker.setProperties(vimModePlusBlockwiseHead: true)
+    updateSelectionProperty(newHead, 'vimModePlus', blockwiseHead: true)
 
   constructor: ->
     super
     if @isSingle()
       @clearTail()
 
-  dump: (header) ->
-    console.log "--#{header}-"
-    for s in @editor.getSelections()
-      range = s.marker.getBufferRange().toString()
-      isTail = s.marker.getProperties().vimModePlusBlockwiseTail
-      console.log "#{range} #{isTail}"
-    console.log "---"
+  # dump: (header) ->
+  #   console.log "--#{header}-"
+  #   for s in @editor.getSelections()
+  #     range = s.marker.getBufferRange().toString()
+  #     isTail = getSelectionProperty(s, 'vimModePlus')?.blockwiseTail
+  #     console.log "#{range} #{isTail}"
+  #   console.log "---"
 
   reverse: ->
     [newHead, newTail] = [@getTail(), @getHead()]
