@@ -60,8 +60,11 @@ class VimState
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @flasher = new FlashManager(this)
-    @hover = new Hover(this)
-    @hoverSearchCounter = new Hover(this)
+    # FIXME: Direct reference for config param name.
+    # Handle with config onDidChange subscription?
+    @hover = new Hover(this, 'showHoverOnOperation')
+    @hoverSearchCounter = new Hover(this, 'showHoverSearchCounter')
+
     @searchHistory = new SearchHistoryManager(this)
     @input = new Input(this)
     @search = new Search(this)

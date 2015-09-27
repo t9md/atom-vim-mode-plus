@@ -8,14 +8,16 @@ include = (klass, module) ->
   for key, value of module
     klass::[key] = value
 
-debug = (msg) ->
+debug = (message) ->
   return unless settings.get('debug')
   msg += "\n"
-  if settings.get('debugOutput') is 'console'
-    console.log msg
-  else
-    filePath = fs.normalize("~/sample.log")
-    fs.appendFileSync filePath, msg
+  switch settings.get('debugOutput')
+    when 'console'
+      console.log message
+    when 'file'
+      filePath = fs.normalize settings.get('debugOutputFilePath')
+      if fs.existsSync(filePath)
+        fs.appendFileSync filePath, msg
 
 selectLines = (selection, rowRange=null) ->
   {editor} = selection

@@ -12,85 +12,88 @@ class Settings
     atom.config.set "#{@scope}.#{param}", value
 
 module.exports = new Settings 'vim-mode-plus',
-  startInInsertMode:
+  useClipboardAsDefaultRegister:
     order: 1
     type: 'boolean'
     default: false
-  useSmartcaseForSearch:
+  startInInsertMode:
     order: 2
     type: 'boolean'
     default: false
-  enableIncrementalSearch:
+  wrapLeftRightMotion:
     order: 3
     type: 'boolean'
     default: false
-  wrapLeftRightMotion:
+  numberRegex:
     order: 4
+    type: 'string'
+    default: '-?[0-9]+'
+    description: 'Used to find number in ctrl-a/ctrl-x. To ignore "-"(minus) char in string like "identifier-1" use "(?:\\B-)?[0-9]+"'
+  showCursorInVisualMode:
+    order: 5
     type: 'boolean'
-    default: false
-  useClipboardAsDefaultRegister:
+    default: true
+  useSmartcaseForSearch:
     order: 6
     type: 'boolean'
     default: false
-  numberRegex:
+  incrementalSearch:
     order: 7
-    type: 'string'
-    default: '-?[0-9]+'
-    description: 'Use this to control how Ctrl-A/Ctrl-X finds numbers; use "(?:\\B-)?[0-9]+" to treat numbers as positive if the minus is preceded by a character, e.g. in "identifier-1".'
-  showCursorInVisualMode:
+    type: 'boolean'
+    default: false
+  stayOnTransformString:
     order: 8
     type: 'boolean'
-    default: true
+    default: false
+    description: "Don't move cursor after string transformation e.g Toggle, Surround"
   flashOnOperate:
-    order: 9
+    order: 10
     type: 'boolean'
     default: true
-  flashOnOperateDurationMilliSeconds:
-    order: 10
+  flashOnOperateDuration:
+    order: 11
     type: 'integer'
     default: 100
-    description: "Duration for flash"
+    description: "Duration(msec) for flash"
   flashOnSearch:
-    order: 11
+    order: 12
     type: 'boolean'
     default: true
-  flashOnSearchDurationMilliSeconds:
-    order: 12
+  flashOnSearchDuration:
+    order: 13
     type: 'integer'
     default: 300
-    description: "Duration for flash"
-  stayOnTransformString:
-    order: 13
+    description: "Duration(msec) for search flash"
+  showHoverOnOperation:
+    order: 21
     type: 'boolean'
     default: false
-    description: "Dont move cursor when Toggle, Surround, etc"
-  enableHoverIndicator:
-    order: 14
-    type: 'boolean'
-    default: false
-  enableHoverIcon:
-    order: 15
-    type: 'boolean'
-    default: false
-  hoverStyle:
-    order: 16
+    description: "Show count, register and optional icon on hover overlay"
+  showHoverOnOperationIcon:
+    order: 23
     type: 'string'
-    default: 'emoji'
-    enum: ['emoji', 'icon']
-  enableHoverSearchCounter:
-    order: 17
+    default: 'icon'
+    enum: ['none', 'icon', 'emoji']
+  showHoverSearchCounter:
+    order: 24
     type: 'boolean'
     default: false
-  searchCounterHoverDuration:
-    order: 18
+  showHoverSearchCounterDuration:
+    order: 25
     type: 'integer'
     default: 700
+    description: "Duration(msec) for hover search counter"
   debug:
     order: 100
     type: 'boolean'
     default: false
+    description: "Show operationStack debug log on console"
   debugOutput:
-    order: 102
+    order: 101
     type: 'string'
     default: 'console'
     enum: ['console', 'file']
+  debugOutputFilePath:
+    order: 102
+    type: 'string'
+    default: ''
