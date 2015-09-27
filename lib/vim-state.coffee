@@ -85,7 +85,7 @@ class VimState
             @showCursors(@editor.getCursors())
           when @isMode('visual', 'blockwise')
             cursors =
-              for s in @editor.getSelections() when swrap(s).get().blockwiseHead
+              for s in @editor.getSelections() when swrap(s).get().blockwise?.head
                 s.cursor
             @showCursors(cursors)
 
