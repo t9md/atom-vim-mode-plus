@@ -8,10 +8,10 @@ class VisualBlockwise extends Base
   complete: true
 
   clearTail: ->
-    @setProperties(vimModeBlockwiseTail: false)
+    @setProperties(vimModePlusBlockwiseTail: false)
 
   clearHead: ->
-    @setProperties(vimModeBlockwiseHead: false)
+    @setProperties(vimModePlusBlockwiseHead: false)
     for s in @editor.getSelections()
       s.cursor.setVisible(false)
 
@@ -42,16 +42,16 @@ class VisualBlockwise extends Base
 
   getTail: ->
     _.detect @editor.getSelections(), (s) ->
-      s.marker.getProperties().vimModeBlockwiseTail
+      s.marker.getProperties().vimModePlusBlockwiseTail
 
   setTail: (newTail) ->
     @clearTail()
-    newTail.marker.setProperties(vimModeBlockwiseTail: true)
+    newTail.marker.setProperties(vimModePlusBlockwiseTail: true)
 
   # Only for making cursor visible.
   setHead: (newHead) ->
     @clearHead()
-    newHead.marker.setProperties(vimModeBlockwiseHead: true)
+    newHead.marker.setProperties(vimModePlusBlockwiseHead: true)
 
   constructor: ->
     super
@@ -62,7 +62,7 @@ class VisualBlockwise extends Base
     console.log "--#{header}-"
     for s in @editor.getSelections()
       range = s.marker.getBufferRange().toString()
-      isTail = s.marker.getProperties().vimModeBlockwiseTail
+      isTail = s.marker.getProperties().vimModePlusBlockwiseTail
       console.log "#{range} #{isTail}"
     console.log "---"
 

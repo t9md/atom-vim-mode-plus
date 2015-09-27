@@ -26,6 +26,6 @@
 1. To enable the VIM key binding `ctrl-e` to copy the character right below the cursor, please put this in your `keymap.cson`:
 
 ```
-'atom-text-editor.vim-mode.insert-mode':
-  'ctrl-e': 'vim-mode:copy-from-line-below'
+'atom-text-editor.vim-mode-plus.insert-mode':
+  'ctrl-e': 'vim-mode-plus:copy-from-line-below'
 ```

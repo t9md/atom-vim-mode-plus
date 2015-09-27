@@ -56,7 +56,7 @@ class ModeManager
     # If we don't reset this propety, first find-and-replace:select-next will
     # put selection wrong place.
     for s in @editor.getSelections()
-      s.marker.setProperties(vimModeCharactewiseRange: null)
+      s.marker.setProperties(vimModePlusCharacterwiseRange: null)
     @editorElement.component.setInputEnabled(false)
     @vimState.reset()
     s.clear(autoscroll: false) for s in @editor.getSelections()
@@ -146,8 +146,8 @@ class ModeManager
 
     # Keep original range as marker's property to restore column.
     for selection in @editor.getSelections()
-      vimModeCharactewiseRange = selection.getBufferRange()
-      selection.marker.setProperties({vimModeCharactewiseRange})
+      vimModePlusCharacterwiseRange = selection.getBufferRange()
+      selection.marker.setProperties({vimModePlusCharacterwiseRange})
       selectLines(selection)
     @hideCursors()
 
@@ -160,14 +160,14 @@ class ModeManager
       @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
     else
       for selection in @editor.getSelections()
-        {vimModeCharactewiseRange} = selection.marker.getProperties()
-        if vimModeCharactewiseRange?
+        {vimModePlusCharacterwiseRange} = selection.marker.getProperties()
+        if vimModePlusCharacterwiseRange?
           [startRow, endRow] = selection.getBufferRowRange()
-          vimModeCharactewiseRange.start.row = startRow
-          vimModeCharactewiseRange.end.row   = endRow
-          selection.setBufferRange(vimModeCharactewiseRange)
-          # [NOTE] Important! reset vimModeCharactewiseRange to null after restored.
-          selection.marker.setProperties(vimModeCharactewiseRange: null)
+          vimModePlusCharacterwiseRange.start.row = startRow
+          vimModePlusCharacterwiseRange.end.row   = endRow
+          selection.setBufferRange(vimModePlusCharacterwiseRange)
+          # [NOTE] Important! reset vimModePlusCharacterwiseRange to null after restored.
+          selection.marker.setProperties(vimModePlusCharacterwiseRange: null)
 
   selectBlockwise: (oldSubmode) ->
     unless oldSubmode is 'characterwise'

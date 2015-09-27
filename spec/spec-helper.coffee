@@ -211,7 +211,7 @@ getVim = (vimState) ->
 
       currentMode[0] = "#{currentMode[0]}-mode"
       currentMode = currentMode.filter((m) -> m)
-      expect(@editorElement.classList.contains('vim-mode')).toBe(true)
+      expect(@editorElement.classList.contains('vim-mode-plus')).toBe(true)
       for m in currentMode
         expect(@editorElement.classList.contains(m)).toBe(true)
       shouldNotContainClasses = _.difference(supportedModeClass, currentMode)

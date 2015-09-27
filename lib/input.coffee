@@ -2,6 +2,8 @@
 {Emitter} = require 'atom'
 {CompositeDisposable} = require 'atom'
 {getKeystrokeForEvent} = require './utils'
+packageScope = 'vim-mode-plus'
+searchScope = "#{packageScope}-search"
 
 class InputBase
   onChange:  (fn) -> @emitter.on 'change', fn
@@ -111,10 +113,9 @@ class InputBaseElement extends HTMLElement
 class Input extends InputBase
 
 class InputElement extends InputBaseElement
-  klass: 'vim-mode-input'
+  klass: "#{packageScope}-input"
   createdCallback: ->
     super
-    # @className = @klass
     @editorElement = document.createElement 'atom-text-editor'
     @editorElement.classList.add('editor')
     @editorElement.classList.add @klass
@@ -138,7 +139,7 @@ class Search extends InputBase
       "visit-prev":  => @emitter.emit('command', 'visit-prev')
       "scroll-next": => @emitter.emit('command', 'scroll-next')
       "scroll-prev": => @emitter.emit('command', 'scroll-prev')
-    prefix = 'vim-mode:search'
+    prefix = "#{packageScope}:search"
     commands = {}
     for command, fn of literalModeSupportCommands
       do (fn) =>
@@ -151,8 +152,8 @@ class Search extends InputBase
 
     atom.commands.add @editorElement, commands
     atom.commands.add @editorElement,
-      "vim-mode:search-set-literal-char": => @setLiteralChar()
-      "vim-mode:search-set-cursor-word": => @setCursorWord()
+      "vim-mode-plus:search-set-literal-char": => @setLiteralChar()
+      "vim-mode-plus:search-set-cursor-word": => @setCursorWord()
       'core:move-up':   => @editor.setText @searchHistory.get('prev')
       'core:move-down': => @editor.setText @searchHistory.get('next')
 
@@ -178,13 +179,13 @@ class Search extends InputBase
     super
 
 class SearchElement extends InputBaseElement
-  klass: 'vim-mode-search-container'
+  klass: "#{searchScope}-container"
 
   createdCallback: ->
     @className = @klass
     @editorElement = document.createElement 'atom-text-editor'
     @editorElement.classList.add('editor')
-    @editorElement.classList.add 'vim-mode-search'
+    @editorElement.classList.add "#{searchScope}"
     @editorElement.setAttribute('mini', '')
     @editor = @editorElement.getModel()
     @editor.setMini(true)
@@ -208,11 +209,11 @@ class SearchElement extends InputBaseElement
     this
 
 
-InputElement = document.registerElement 'vim-mode-plus-input',
+InputElement = document.registerElement "#{packageScope}-input",
   prototype: InputElement.prototype
   extends: 'div',
 
-SearchElement = document.registerElement 'vim-mode-plus-search',
+SearchElement = document.registerElement "#{packageScope}",
   prototype: SearchElement.prototype
   extends: 'div',
 

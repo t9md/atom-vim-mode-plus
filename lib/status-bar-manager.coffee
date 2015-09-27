@@ -14,7 +14,7 @@ module.exports =
 class StatusBarManager
   constructor: ->
     @element = document.createElement("div")
-    @prefix = @element.id = "status-bar-vim-mode"
+    @prefix = @element.id = 'status-bar-vim-mode-plus'
 
     @container = document.createElement("div")
     @container.className = "inline-block"

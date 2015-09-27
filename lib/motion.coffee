@@ -607,7 +607,7 @@ class SearchBase extends Motion
   flash: (range, {timeout}={}) ->
     @vimState.flasher.flash
       range: range
-      klass: 'vim-mode-flash'
+      klass: 'vim-mode-plus-flash'
       timeout: timeout
 
   finish: ->

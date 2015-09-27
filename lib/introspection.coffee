@@ -221,31 +221,31 @@ inspectInstance = (obj, options={}) ->
   ].filter (e) -> e
   .join('\n').split('\n').map((e) -> indent + e).join('\n')
 
-keymapsForVimMode = null
+keymapsForVimModePlus = null
 getKeyBindings =  ->
-  return keymapsForVimMode if keymapsForVimMode
+  return keymapsForVimModePlus if keymapsForVimModePlus
   pack = atom.packages.getActivePackage(packageName)
   keymapPath = pack.getKeymapPaths().pop()
-  keymapsForVimMode =
+  keymapsForVimModePlus =
     (k for k in atom.keymaps.getKeyBindings() when k.source is keymapPath)
-  keymapsForVimMode
+  keymapsForVimModePlus
 
-commandsForVimMode = null
+commandsForVimModePlus = null
 getCommands = ->
-  return commandsForVimMode if commandsForVimMode
+  return commandsForVimModePlus if commandsForVimModePlus
   editor = atom.workspace.getActiveTextEditor()
   editorElement = atom.views.getView(editor)
   commands = atom.commands.findCommands(target: editorElement)
-  commandsForVimMode = _.pluck(commands, 'name')
-  commandsForVimMode
+  commandsForVimModePlus = _.pluck(commands, 'name')
+  commandsForVimModePlus
 
 getCommand = (klass) ->
-  command = "vim-mode:#{_.dasherize(klass)}"
+  command = "#{packageName}:#{_.dasherize(klass)}"
   _.detect getCommands(), (c) ->
     c is command
 
 getKeyBindingInfo = (klass) ->
-  command = "vim-mode:#{_.dasherize(klass)}"
+  command = "#{packageName}:#{_.dasherize(klass)}"
   results = null
   for k in getKeyBindings() when k.command is command
     {keystrokes, selector} = k

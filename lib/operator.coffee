@@ -80,7 +80,7 @@ class Operator extends Base
   flash: (range, fn=null) ->
     options =
       range: range
-      klass: 'vim-mode-flash'
+      klass: 'vim-mode-plus-flash'
       timeout: settings.get('flashOnOperateDurationMilliSeconds')
     @vimState.flasher.flash(options, fn)
 

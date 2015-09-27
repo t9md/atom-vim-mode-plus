@@ -59,6 +59,6 @@ module.exports =
     @disposables.add new Disposable =>
       @statusBarManager.detach()
 
-  provideVimMode: ->
+  provideVimModePlus: ->
     getGlobalState: @getGlobalState.bind(this)
     getEditorState: @getEditorState.bind(this)
