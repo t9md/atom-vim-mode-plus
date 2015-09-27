@@ -1,16 +1,22 @@
 _ = require 'underscore-plus'
-{getVisibleBufferRange} = require './utils'
+{selectVisibleBy, sortRanges, getIndex} = require './utils'
 settings = require './settings'
 
-# Match wrap Range in TextEditor with useful method.
 class MatchList
   index: null
+  entries: null
+
   constructor: (@vimState, ranges, index) ->
     {@editor, @editorElement} = @vimState
-    @index = @determineIndex(index, ranges.length)
-    [first, others..., last] = ranges
-    current = ranges[@index]
     @entries = []
+    return unless ranges.length
+
+    # ranges are initially not sorted, so we sort and adjust index here.
+    current = ranges[getIndex(index, ranges)]
+    ranges = sortRanges(ranges)
+    @index = ranges.indexOf(current)
+
+    [first, others..., last] = ranges
     for range in ranges
       @entries.push new Match @vimState, range,
         first: range is first
@@ -20,20 +26,8 @@ class MatchList
   isEmpty: ->
     @entries.length is 0
 
-  determineIndex: (index, length) ->
-    index = index % length
-    if index >= 0
-      index
-    else
-      length + index
-
   setIndex: (index) ->
-    @index = @determineIndex(index, @entries.length)
-    # index = index % @entries.length
-    # if index >= 0
-    #   @index = index
-    # else
-    #   @index = (@entries.length + index)
+    @index = getIndex(index, @entries)
 
   get: (direction=null) ->
     @entries[@index].current = false
@@ -45,8 +39,8 @@ class MatchList
     match
 
   getVisible: ->
-    range = getVisibleBufferRange(@editor)
-    (m for m in @entries when range.containsRange(m.range))
+    selectVisibleBy @editor, @entries, (m) ->
+      m.range
 
   getOffSetPixelHeight: (lineDelta=0) ->
     scrolloff = 2
