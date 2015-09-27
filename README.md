@@ -15,6 +15,7 @@ So I decided to release this to get feedback from user.
 # Thanks
 
 My work is greatly owing to former achievement done by original vim-mode developer and many of its contributors.  
+As you can see in commit history, this project is originally started by forking official [vim-mode](https://github.com/atom/vim-mode).
 
 # Important Note
 
