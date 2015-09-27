@@ -90,7 +90,7 @@ module.exports = {
   getKeystrokeForEvent
   isLinewiseRange
   rangeToBeginningOfFileFromPoint
-  rangeToBeginningOfFileFromPoint
+  rangeToEndOfFileFromPoint
   isIncludeNonEmptySelection
   sortRanges
   setSelectionBufferRangeSafely
