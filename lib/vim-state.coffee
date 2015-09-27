@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
-{getSelectionProperty} = require './utils'
+{swrap} = require './utils'
 
 Operator        = require './operator'
 Motion          = require './motion'
@@ -85,7 +85,7 @@ class VimState
             @showCursors(@editor.getCursors())
           when @isMode('visual', 'blockwise')
             cursors =
-              for s in @editor.getSelections() when getSelectionProperty(s, 'vimModePlus')?.blockwiseHead
+              for s in @editor.getSelections() when swrap(s).get().blockwiseHead
                 s.cursor
             @showCursors(cursors)
 
