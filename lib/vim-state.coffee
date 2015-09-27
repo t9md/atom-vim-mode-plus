@@ -63,7 +63,7 @@ class VimState
     @flasher = new FlashManager(this)
     # FIXME: Direct reference for config param name.
     # Handle with config onDidChange subscription?
-    @hover = new Hover(this, 'showHoverOnOperation')
+    @hover = new Hover(this, 'showHoverOnOperate')
     @hoverSearchCounter = new Hover(this, 'showHoverSearchCounter')
 
     @searchHistory = new SearchHistoryManager(this)

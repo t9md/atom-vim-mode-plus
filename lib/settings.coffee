@@ -64,12 +64,12 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'integer'
     default: 300
     description: "Duration(msec) for search flash"
-  showHoverOnOperation:
+  showHoverOnOperate:
     order: 21
     type: 'boolean'
     default: false
     description: "Show count, register and optional icon on hover overlay"
-  showHoverOnOperationIcon:
+  showHoverOnOperateIcon:
     order: 23
     type: 'string'
     default: 'icon'
