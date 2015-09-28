@@ -8,14 +8,14 @@ Beta
 
 # Whats this?
 
-Started as fork project from 2015.8.1, originally for doing some refactoring experiment.  
+Started as fork project at 2015.8.1, originally for doing some refactoring experiment.  
 After doing lots of refactoring, I started to add new feature.  
-So I decided to release this to get feedback from user.
+So I decided to release this package to get feedback from broad user.  
 
 # Thanks
 
 My work is greatly owing to former achievement done by original vim-mode developer and many of its contributors.  
-As you can see in commit history, this project is originally started by forking official [vim-mode](https://github.com/atom/vim-mode).
+As you can see in commit history, this project is originally started by forking official [vim-mode](https://github.com/atom/vim-mode).  
 
 # Important Note
 
@@ -28,21 +28,28 @@ As you can see in commit history, this project is originally started by forking 
 - CSS selector scope, and keymap scope is different from vim-mode, **Not compatible**.
 - Internal code base is very different, Issue, PR should be directly sent to vim-mode-plus, DONT create issue, PR to vim-mode for vim-mode-plus's.
 
+# FAQ
+
+### Why fork? why not directly contribute to official vim-mode.
+
+- Changes are too big.
+- Some features are too experimental to merge official vim-mode.
+
 # New Features
 
 - Operator
-  - Surround
-    - Surround, DeleteSurround, ChangeSurround. Instead of vim-surround atom package, its repeatable(very improtant) with `.`.
-    - SurroundWord pre-targeted to iner-word
-    - DeleteSurroundAnyPair: Delete surrounding pair of AnyPair TextObject. You don't have to specify what pair you want to delete.
-    - ChangeSurroundAnyPair: Change surrounding pair of AnyPair TextObject. You don't have to specify what pair you want to change.
-  - Common string transformation which includes SnakeCase, CamelCase, DashCase.
-  - ToggleLineComments which toggle comment of target-area(selected by motion or text-objects).
-  - ReplaceWithRegister which replace target-area(selected by text-object or motion) with register's text. Very useful since its repeatable.
-  - All target require operator behave as linwise alias when repeated, means `gugu`, `guu` `gUgU`, `gUU` support which is yet supported in vim-mode.
+  - [Surround][Surround]:
+    - Surround, DeleteSurround, ChangeSurround. It's repeatable with `.`.
+    - SurroundWord pre-targeted to inner-word.
+    - DeleteSurroundAnyPair: Delete surrounding pair of AnyPair TextObject. Auto-find surround char to delete.
+    - ChangeSurroundAnyPair: Change surrounding pair of AnyPair TextObject. Auto-find surround char to change.
+  - Common string transformation: SnakeCase, CamelCase, DashCase.
+  - ToggleLineComments: Toggle comment for lines.
+  - ReplaceWithRegister: Replace with content of specified register.
+  - All target-requiring operator behave as linewise alias when repeated, e.g. `gugu`, `guu` `gUgU`, `gUU` and others.
 - TextObject
-  - Indent which select consecutive deeper indented lines
-  - Entire buffer.
+  - Indentation: Select consecutive lines with deeper indent level than current line's indent level.
+  - Entire: Entire buffer.
   - CurrentLine. Useful when you do surround line.
   - Fold
   - Comment. which select consecutive commented lines.
@@ -75,6 +82,10 @@ As you can see in commit history, this project is originally started by forking 
   - Developer friendly introspection report and real-time opration-stack monitoring(logged on console).
   - Spec is more easy to read by using mini DSL provided by spec helper.
   - Lots of minor bug fix which is not fixed in official vim-mode.
+
+[Surround]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#surround--transformstring
+[Surround]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#camelcase--transformstring]
+[sample](/docs/TOM-report.md)
 
 # TOM-report
 
