@@ -17,7 +17,8 @@ class OperationStack
       debug "#=== Start at #{new Date().toISOString()}"
 
     # Use implicit Select operator as operator.
-    if @vimState.isMode('visual') and _.isFunction(op.select)
+    if (@vimState.isMode('visual') and _.isFunction(op.select)) or
+        (@isEmpty() and op.isTextObject())
       debug "push IMPLICIT Operator.Select"
       @stack.push(new Select(@vimState))
 
