@@ -319,9 +319,16 @@
 # -------------------------
 'atom-text-editor.vim-mode-plus-search':
   'ctrl-r ctrl-w': 'vim-mode-plus:search-set-cursor-word'
-  'ctrl-v': 'vim-mode-plus:search-set-literal-char'
-  'ctrl-c': 'vim-mode-plus:search-cancel'
-  'ctrl-[': 'vim-mode-plus:search-cancel'
+
+  'ctrl-v':    'vim-mode-plus:search-set-literal-char'
+  'ctrl-c':    'vim-mode-plus:search-cancel'
+  'ctrl-[':    'vim-mode-plus:search-cancel'
+  'shift-tab': 'vim-mode-plus:search-visit-prev'
+  'tab':       'vim-mode-plus:search-visit-next'
+  'left':      'vim-mode-plus:search-visit-prev'
+  'right':     'vim-mode-plus:search-visit-next'
+  'down':      'vim-mode-plus:search-scroll-next'
+  'up':        'vim-mode-plus:search-scroll-prev'
 
   # Don't afraid to set following agressive keymap
   # If you want input literlly, `ctrl-v` then input char you want to insert
