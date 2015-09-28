@@ -1,3 +1,8 @@
+## 0.1.2
+- Add default keymaps on incremental search element for arrow and tab keys.
+- FIX: debug feature was broken
+- FIX:#4 select area when TextObject is executed via command-pallate(was throw err).
+
 ## 0.1.1
 - 1st public release
 
