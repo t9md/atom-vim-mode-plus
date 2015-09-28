@@ -43,39 +43,39 @@ As you can see in commit history, this project is originally started by forking 
     - SurroundWord pre-targeted to inner-word.
     - DeleteSurroundAnyPair: Delete surrounding pair of AnyPair TextObject. Auto-find surround char to delete.
     - ChangeSurroundAnyPair: Change surrounding pair of AnyPair TextObject. Auto-find surround char to change.
-  - Common string transformation: SnakeCase, CamelCase, DashCase.
+  - Common string transformation: [SnakeCase][SnakeCase], [CamelCase][CamelCase], [DashCase][DashCase].
   - ToggleLineComments: Toggle comment for lines.
   - ReplaceWithRegister: Replace with content of specified register.
   - All target-requiring operator behave as linewise alias when repeated, e.g. `gugu`, `guu` `gUgU`, `gUU` and others.
+  - Options to keep cursor position in string transformation. e.g. Not move cursor in `gUU`, surround etc.
 - TextObject
   - Indentation: Select consecutive lines with deeper indent level than current line's indent level.
   - Entire: Entire buffer.
-  - CurrentLine. Useful when you do surround line.
-  - Fold
-  - Comment. which select consecutive commented lines.
+  - CurrentLine: Useful when you do surround line.
+  - Fold:
+  - Comment: Consecutive commented lines.
   - AnyPair. it select nearest pair(surround) from one of following pair.
     - `'""', "''", "``", "{}", "<>", "><", "[]", "()"`.
-  - Function. it select inner-function(body) or a-function.
-  - SelectInsideBrackets family skip backslash escaped pair character.
-- Motion
-  - Coming soon.
+  - Function: Select inner-function(body) or a-function.
+  - Pair family skip backslash escaped pair character.
 - Instant UI feedback
-  - Showing icon/emoji representing operation.
-  - Show active counter to hover indicator like `10` when you do `10yy`.
-  - Show active register to hover indicator like `"a` when you do `"ayy`
+  - Showing icon/emoji which represent current operation e.g. show :camel: in CamelCase operation.
+  - Show active counter on hover indicator like `10` when you do `10yy`.
+  - Show active register on hover indicator like `"a` when you do `"ayy`
   - Flashing(highlighting) operation affected area(range) for yank, paste, toggle etc..
   - Flashing found entry on Search and SearchCurrentWord.
   - Show current/total hover counter on Search and SearchCurrentWord.
 - Incremental search.
   - Auto scroll next matching entry as you type.
-  - [Experimental] disable default RegExp search by using space starting seach word 1st space removed on search.
-  - `search-visit-prev` and `vim-mode-plus:search-visit-next` allow you quickly visit match.
+  - `search-visit-next` and `vim-mode-plus:search-visit-prev` allow you quickly visit match. Mapped to `tab`, 'right' and `shift-tab`, `left`.
   - `ctrl-v` on search editor start literal input mode, next single char you input is skip keybinding on search editor(useful when you keymap normal key like `;` to `confirm()`).
-  - [Experimental] Scroll next/prev "page" of matching entry, "page" is not actual page, so scroll only match found area, useful to quick skim for match out of screen.
+  - [Experimental] Disable default RegExp search by using space starting seach word 1st space removed on search.
+  - [Experimental] Scroll next/prev "page" of matching entry, "page" is not actual page, so scroll only match found area, useful to quick skim for match out of screen.  
+    Mapped to `up` and `down`.
 - VisualMode improve
   - Show cursor in visual-mode except linewise submode.
-  - Include visual-block-mode except yank, and paste.
-  - Allow complete submode shift between char-block, block-line, line-char etc.., original column restored correctly.
+  - Visual block mode except yank and paste.
+  - Columns are correctly remembered and restored when shift between submode: char-to-block, block-to-line, line-to-char etc.
 - Other
   - Expose visual-mode's submode to text-editor-element's css class to be used as selector.
   - [Disabled temporarily] Show cursor(by using decoration) while waiting user input (e.g `m`, `"`).
@@ -84,8 +84,9 @@ As you can see in commit history, this project is originally started by forking 
   - Lots of minor bug fix which is not fixed in official vim-mode.
 
 [Surround]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#surround--transformstring
-[Surround]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#camelcase--transformstring]
-[sample](/docs/TOM-report.md)
+[SnakeCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#snakecase--transformstring]
+[CamelCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#camelcase--transformstring]
+[DashCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#dashcase--transformstring]
 
 # TOM-report
 
