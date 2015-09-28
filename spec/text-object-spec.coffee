@@ -101,7 +101,7 @@ describe "TextObject", ->
         set text: "12(45\nab'de ABCDE", cursor: [0, 4]
         ensure 'vaW', selectedBufferRange: [[0, 0], [0, 5]]
 
-  describe "AnyPair", ->
+  fdescribe "AnyPair", ->
     beforeEach ->
       set
         text: """
@@ -277,30 +277,31 @@ describe "TextObject", ->
           text: "{ something in here and in {here} }"
           cursor: [0, 9]
 
-      it "applies operators inside the current word in operator-pending mode", ->
+      it "applies operators to inner-area in operator-pending mode", ->
         ensure 'di{',
           text: "{}"
           cursor: [0, 1]
 
-      it "applies operators inside the current word in operator-pending mode (second test)", ->
+      it "applies operators to inner-area in operator-pending mode (second test)", ->
         set
           cursor: [0, 29]
         ensure 'di{',
           text: "{ something in here and in {} }"
           cursor: [0, 28]
+
     describe "a-curly-bracket", ->
       beforeEach ->
         set
           text: "{ something in here and in {here} }"
           cursor: [0, 9]
 
-      it "applies operators around the current curly brackets in operator-pending mode", ->
+      it "applies operators to a-area in operator-pending mode", ->
         ensure 'da{',
           text: ''
           cursor: [0, 0]
           mode: 'normal'
 
-      it "applies operators around the current curly brackets in operator-pending mode (second test)", ->
+      it "applies operators to a-area in operator-pending mode (second test)", ->
         set cursor: [0, 29]
         ensure 'da{',
           text: "{ something in here and in  }"
@@ -403,24 +404,6 @@ describe "TextObject", ->
 
   describe "Parenthesis", ->
     describe "inner-parenthesis", ->
-    describe "a-parenthesis", ->
-      beforeEach ->
-        set
-          text: "( something in here and in (here) )"
-          cursor: [0, 9]
-
-      it "applies operators around the current parentheses in operator-pending mode", ->
-        ensure 'da(',
-          text: ''
-          cursor: [0, 0]
-          mode: 'normal'
-
-      it "applies operators around the current parentheses in operator-pending mode (second test)", ->
-        set cursor: [0, 29]
-        ensure 'da(',
-          text: "( something in here and in  )"
-          cursor: [0, 27]
-
       beforeEach ->
         set
           text: "( something in here and in (here) )"
@@ -465,6 +448,24 @@ describe "TextObject", ->
             [[0, 1],  [0, 6]]
             [[0, 13], [0, 20]]
           ]
+
+    describe "a-parenthesis", ->
+      beforeEach ->
+        set
+          text: "( something in here and in (here) )"
+          cursor: [0, 9]
+
+      it "applies operators around the current parentheses in operator-pending mode", ->
+        ensure 'da(',
+          text: ''
+          cursor: [0, 0]
+          mode: 'normal'
+
+      it "applies operators around the current parentheses in operator-pending mode (second test)", ->
+        set cursor: [0, 29]
+        ensure 'da(',
+          text: "( something in here and in  )"
+          cursor: [0, 27]
 
   describe "Paragraph", ->
     describe "inner-paragraph", ->
