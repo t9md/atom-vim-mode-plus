@@ -1,3 +1,6 @@
+## 0.1.3 [NOT RELEASED]
+- Now all TextObject Pair can expand selection.
+
 ## 0.1.2
 - Add default keymaps on incremental search element for arrow and tab keys.
 - FIX: debug feature was broken
