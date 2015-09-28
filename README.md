@@ -20,13 +20,13 @@ As you can see in commit history, this project is originally started by forking 
 # Important Note
 
 - You need to disable vim-mode to use vim-mode-plus, it can't work simultaneously.
-- Following pakages for official vim-mode won't work for vim-mode-plus. Why not work? Because service API name is different.Its easy to add support I believe. Please report to each project.
+- Following pakages for official vim-mode won't work for vim-mode-plus. Why not work? Because service API name is different. It's easy to add support I believe. Please report to each project.
   - [vim-mode-clipboard-plus](https://atom.io/packages/vim-mode-clipboard-plus)
   - [ex-mode](https://atom.io/packages/ex-mode)
   - [vim-surround](https://atom.io/packages/vim-surround): surround feature included vim-mode-plus.
   - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block): (this is my package) visual-block included in vim-mode-plus.
 - Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
-- Internal code base is very different.Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT** report vim-mode-plus's issue or PRs to official vim-mode.
+- Internal code base is very different. Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT** report vim-mode-plus's issue or PRs to official vim-mode.
 
 # FAQ
 
@@ -67,7 +67,7 @@ As you can see in commit history, this project is originally started by forking 
   - Show current/total hover counter on Search and SearchCurrentWord.
 - Incremental search.
   - Auto scroll next matching entry as you type.
-  - `search-visit-next` and `vim-mode-plus:search-visit-prev` allow you quickly visit match. Mapped to `tab`, 'right' and `shift-tab`, `left`.
+  - `search-visit-next` and `vim-mode-plus:search-visit-prev` allow you quickly visit match. Mapped to `tab`, `right` and `shift-tab`, `left`.
   - `ctrl-v` on search editor start literal input mode, next single char you input is skip keybinding on search editor(useful when you keymap normal key like `;` to `confirm()`).
   - [Experimental] Disable default RegExp search by using space starting seach word 1st space removed on search.
   - [Experimental] Scroll next/prev "page" of matching entry, "page" is not actual page, so scroll only match found area, useful to quick skim for match out of screen.  
@@ -106,7 +106,7 @@ To disable auto suggestion for vim-mode-plus, set following value on autocomplet
 
 ## Keymap
 
-Some of the keymap is not set by default, conslut [TOM-report](https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md), [keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson) for detail.  
+Some of the keymap is not set by default, consult [TOM-report](https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md), [keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson) for detail.  
 
 Here is my keymap as an example.
 
@@ -146,7 +146,7 @@ Here is my keymap as an example.
 True power of Vim is Operator and TextOjbect.
 
 - [List of text-object as vim plugin](https://github.com/kana/vim-textobj-user/wiki)  
-vim-mod-plus builtin textobj for function, fold, entire, comment, indent, line, and any-pair(super set of many pair text-obj)
+vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line, and any-pair(super set of many pair text-obj)
 
 # GIFs
 
