@@ -23,6 +23,7 @@ describe "TextObject", ->
 
     describe "when TextObject is excuted directly", ->
       it "select that TextObject", ->
+        set cursor: [8, 7]
         ensure [cmd: {target: editorElement, name: 'vim-mode-plus:inner-word'}],
           selectedText: 'QuickSort'
 
