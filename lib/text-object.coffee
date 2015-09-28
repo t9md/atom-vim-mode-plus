@@ -119,7 +119,7 @@ class Pair extends TextObject
     if start? and (end = @findPair(point, start, pair)?.traverse([0, -1]))
       range = new Range(start, end)
       range = range.translate([0, -1], [0, 1]) if @inclusive
-    unless range and originallyEmpty
+    if not range and originallyEmpty
       selection.selectLeft()
     range
 
