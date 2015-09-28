@@ -119,7 +119,9 @@ Here is my keymap as an example.
   '_': 'vim-mode-plus:replace-with-register'
 
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
-  # 'i s' is mapped to inner-any-pair by default. I can chose inner-any-pair with like `c;`, `v;`.
+  # 'i s' is mapped to inner-any-pair by default.
+  # I can choose inner-any-pair with like `c;`, `v;`.
+  # And more I can expand selection across any-pair with `vi;;;;` or `va;;;;`.
   ';':  'vim-mode-plus:inner-any-pair'
 
 'atom-text-editor.vim-mode-plus.normal-mode':
