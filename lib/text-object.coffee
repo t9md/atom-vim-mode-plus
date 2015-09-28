@@ -29,6 +29,9 @@ class TextObject extends Base
   status: ->
     isIncludeNonEmptySelection @editor.getSelections()
 
+  execute: ->
+    @select()
+
 # Word
 # -------------------------
 # [FIXME] Need to be extendable.
