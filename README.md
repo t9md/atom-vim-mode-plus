@@ -192,6 +192,7 @@ vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line,
 
 # TODO
 
+- [ ] Don't use typeCheck function like `isOperator()`, `isYank()` any more. instead use `instantOf` for being explicit what it meant to.
 - [ ] Make AnyPair TextObject expandable.
 - [ ] Don't depend on `atom.commands.onDidDispatch`, instead simply ensure cursor not put endOfLine **only for vim-mode-plus's command**.
 - [ ] Write spec for lots of UI effect. hover, search counter etc.
