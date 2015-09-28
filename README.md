@@ -192,6 +192,8 @@ vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line,
 
 # TODO
 
+- [ ] Make AnyPair TextObject expandable.
+- [ ] Don't depend on `atom.commands.onDidDispatch`, instead simply ensure cursor not put endOfLine **only for vim-mode-plus's command**.
 - [ ] Write spec for lots of UI effect. hover, search counter etc.
 - [ ] Write tutorial for new Operator, TextObjet.
 - [x] When hover Icon disabled, icon position is not at original cursor position.
