@@ -199,11 +199,12 @@ describe "TextObject", ->
           text: '""here" " and over here'
           cursor: [0, 1]
 
-      it "[Changed Behavior?] won't apply if quote is not within string", ->
+      # fit "[Changed Behavior?] won't apply if quote is not within string", ->
+      it "skip non-string area and operate forwarding string whithin line", ->
         set cursor: [0, 29]
         ensure 'di"',
-          text: '" something in here and in "here" " and over here'
-          cursor: [0, 29]
+          text: '" something in here and in "here"" and over here'
+          cursor: [0, 33]
 
       it "makes no change if past the last string on a line", ->
         set cursor: [0, 39]
@@ -221,11 +222,12 @@ describe "TextObject", ->
           cursor: [0, 0]
           mode: 'normal'
 
-      it "[Changed Behavior] wont applies if its not within string", ->
+      # it "[Changed Behavior] wont applies if its not within string", ->
+      it "skip non-string area and operate forwarding string whithin line", ->
         set cursor: [0, 29]
         ensure 'da"',
-          text: originalText
-          cursor: [0, 29]
+          text: '" something in here and in "here'
+          cursor: [0, 31]
           mode: 'normal'
 
   describe "SingleQuote", ->
@@ -240,11 +242,14 @@ describe "TextObject", ->
           text: "''here' ' and over here"
           cursor: [0, 1]
 
-      # I don't like old behavior, that was not in Vim and furthermore, this is counter intuitive.
+      # [NOTE]
+      # I don't like original behavior, this is counter intuitive.
       # Simply selecting area between quote is that normal user expects.
       # it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
+      # => Reverted to original behavior, but need careful consideration what is best.
 
-      it "[Changed behavior] applies operators inside area between quote", ->
+      # it "[Changed behavior] applies operators inside area between quote", ->
+      it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
         set cursor: [0, 26]
         ensure "di'",
           text: "''here' ' and over here"
@@ -266,11 +271,11 @@ describe "TextObject", ->
           cursor: [0, 0]
           mode: 'normal'
 
-      it "[Changed Behavior] wont applies if its not within string", ->
+      it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
         set cursor: [0, 29]
         ensure "da'",
-          text: originalText
-          cursor: [0, 29]
+          text: "' something in here and in 'here"
+          cursor: [0, 31]
           mode: 'normal'
 
   describe "BackTick", ->

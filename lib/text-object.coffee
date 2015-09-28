@@ -66,10 +66,13 @@ class Pair extends TextObject
   inclusive: false
   pair: null
 
-  isStartingPair:(str, char) ->
+  isOpeningPair:(str, char) ->
     pattern = ///[^\\]?#{_.escapeRegExp(char)}///
     count = str.split(pattern).length - 1
     (count % 2) is 1
+
+  isClosingPair:(str, char) ->
+    not @isOpeningPair(str, char)
 
   needStopSearch: (pair, cursorRow, row) ->
     pair not in ["{}", "[]", "()"] and (cursorRow isnt row)
@@ -97,12 +100,18 @@ class Pair extends TextObject
       # don't search across line unless specific pair.
       return stop() if @needStopSearch(pair, cursorPoint.row, start.row)
 
+      # [FIXME] aybe getting range within line and filter forwarding one afterward
+      # is more decralative and easy to read.
       if search is searchPair
         if backward
           text = @editor.lineTextForBufferRow(fromPoint.row)
-          found = end if @isStartingPair(text[0..end.column], search)
+          found = end if @isOpeningPair(text[0..end.column], search)
         else # skip for pair not within cursorPoint.
-          if end.isLessThan(cursorPoint) then stop() else found = end
+          text = @editor.lineTextForBufferRow(fromPoint.row)
+          if end.isGreaterThanOrEqual(cursorPoint)
+            found = end if @isClosingPair(text[0..end.column], search)
+          else
+            stop()
       else
         switch matchText[matchText.length-1]
           when search then (if (nest is 0) then found = end else nest--)
@@ -110,23 +119,46 @@ class Pair extends TextObject
       stop() if found
     found
 
+  getOpening: (cursorPoint, fromPoint, pair) ->
+    @findPair(cursorPoint, fromPoint, pair, true)
+
+  getClosing: (cursorPoint, fromPoint, pair) ->
+    @findPair(cursorPoint, fromPoint, pair)?.traverse([0, -1])
+
+  adjustRange: (range) ->
+    if @inclusive
+      range.translate([0, -1], [0, 1])
+    else
+      range
+
+  getRangeWithinCursor: (cursorPoint, pair) ->
+    p = cursorPoint
+    range = null
+    if (open = @getOpening(p, p, pair)) and (close = @getClosing(p, open, pair))
+      range = @adjustRange(new Range(open, close))
+    range
+
+  getForwardRange: (cursorPoint, pair) ->
+    p = cursorPoint
+    range = null
+    if (close = @getClosing(p, p, pair)) and (open = @getOpening(p, close, pair))
+      range = @adjustRange(new Range(open, close))
+    range
+
+  pairsCanBeOutOfCursor = ['``', "''", '""']
   getRange: (selection, pair) ->
     selection.selectRight() if wasEmpty = selection.isEmpty()
     rangeOrig = selection.getBufferRange()
     point = selection.getHeadBufferPosition()
 
-    loop
-      start = @findPair(point, point, pair, true)
-      range = null
-      if start? and (end = @findPair(point, start, pair)?.traverse([0, -1]))
-        range = new Range(start, end)
-        range = range.translate([0, -1], [0, 1]) if @inclusive
+    if pair in pairsCanBeOutOfCursor and not @isAnyPair()
+      range = @getRangeWithinCursor(point, pair) ? @getForwardRange(point, pair)
+    else
+      range = @getRangeWithinCursor(point, pair)
       if range?.isEqual(rangeOrig)
         # Since range is same area, retry to expand outer pair.
         point = range.start.translate([0, -1])
-      else
-        break
-        
+        range = @getRangeWithinCursor(point, pair)
     selection.selectLeft() if (not range) and wasEmpty
     range
 
