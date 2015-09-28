@@ -20,13 +20,13 @@ As you can see in commit history, this project is originally started by forking 
 # Important Note
 
 - You need to disable vim-mode to use vim-mode-plus, it can't work simultaneously.
-- vim-mode's If you use following pakages it won't work or unnecessary. why not work? since service API name is different.
+- Following pakages for official vim-mode won't work for vim-mode-plus. Why not work? Because service API name is different.Its easy to add support I believe. Please report to each project.
   - [vim-mode-clipboard-plus](https://atom.io/packages/vim-mode-clipboard-plus)
   - [ex-mode](https://atom.io/packages/ex-mode)
   - [vim-surround](https://atom.io/packages/vim-surround): surround feature included vim-mode-plus.
   - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block): (this is my package) visual-block included in vim-mode-plus.
-- CSS selector scope, and keymap scope is different from vim-mode, **Not compatible**.
-- Internal code base is very different, Issue, PR should be directly sent to vim-mode-plus, DONT create issue, PR to vim-mode for vim-mode-plus's.
+- Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
+- Internal code base is very different.Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT** report vim-mode-plus's issue or PRs to official vim-mode.
 
 # FAQ
 
@@ -84,9 +84,9 @@ As you can see in commit history, this project is originally started by forking 
   - Lots of minor bug fix which is not fixed in official vim-mode.
 
 [Surround]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#surround--transformstring
-[SnakeCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#snakecase--transformstring]
-[CamelCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#camelcase--transformstring]
-[DashCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#dashcase--transformstring]
+[SnakeCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#snakecase--transformstring
+[CamelCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#camelcase--transformstring
+[DashCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#dashcase--transformstring
 
 # TOM-report
 
