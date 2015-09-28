@@ -77,8 +77,8 @@ class VimState
 
     if atom.commands.onDidDispatch?
       @subscriptions.add atom.commands.onDidDispatch ({target}) =>
-        if target is @editorElement
-          @checkSelections()
+        return unless (target is @editorElement)
+        @checkSelections()
         return unless settings.get('showCursorInVisualMode')
         switch
           when @isMode('visual', 'characterwise')
