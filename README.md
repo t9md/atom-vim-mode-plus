@@ -205,6 +205,7 @@ With showing cursor appropriately in charcterwise and blockwise mode(still curso
 
 # TODO
 
+- [ ] Allow quoted-Pair to select quoted string outside of cursor postion within line(I don't like this behavior)?
 - [ ] Don't use typeCheck function like `isOperator()`, `isYank()` any more. instead use `instantOf` for being explicit what it meant to.
 - [x] Make AnyPair TextObject expandable.
 - [ ] Don't depend on `atom.commands.onDidDispatch`, instead simply ensure cursor not put endOfLine **only for vim-mode-plus's command**.
