@@ -152,15 +152,24 @@ vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line,
 
 ## Incremental search
 
+You can move between match with <kbd>tab</kbd> and <kbd>shift-tab</kdb>.
+
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/incremental-search.gif)
 
-## Surround builtin.
+## Surround builtin
 
+Off course, you can repeat with `.`.
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/surround.gif)
 
 ## Visual block mode builtin.
 
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visual-blockwise-cursor.gif)
+
+## AnyPair TextObject
+
+Auto detect inner and a Pair, and expandable.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/46f808a31fb62f6d122062b969c03a2cb9196d23/img/vim-mode-plus/text-object-any-pair.gif)
 
 ## Flash on operate
 
@@ -174,26 +183,28 @@ vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line,
 
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/hover-emoji.gif)
 
-## Pre-select affected surround pair before confirm available in ChangeSurroundAnyPair operator.
+## ChangeSurroundAnyPair Operator
+
+Auto detect pair, and pre-select target range and show pair char which will be changed on hover.
 
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/preselect-changed-surround.gif)
 
-## Flash matched word on search and show current/total in hover indicator.
+## Flash matched word on SearchCurrentWord
+
+When search with `#`, `*`, show 'current/total' match on hover, and flash word under cursor.
 
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/search-flash-and-counter.gif)
 
-## Complete submode shift in visual-mode.
+## Submode shift in Visual mode.
 
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visualmode-submod-shift.gif)
-
-## Cursor properly shown in visual-mode.
+With showing cursor appropriately in charcterwise and blockwise mode(still cursor hidden in linwise).
 
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visualmode-submod-shift.gif)
 
 # TODO
 
 - [ ] Don't use typeCheck function like `isOperator()`, `isYank()` any more. instead use `instantOf` for being explicit what it meant to.
-- [ ] Make AnyPair TextObject expandable.
+- [x] Make AnyPair TextObject expandable.
 - [ ] Don't depend on `atom.commands.onDidDispatch`, instead simply ensure cursor not put endOfLine **only for vim-mode-plus's command**.
 - [ ] Write spec for lots of UI effect. hover, search counter etc.
 - [ ] Write tutorial for new Operator, TextObjet.
