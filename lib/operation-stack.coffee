@@ -29,6 +29,7 @@ class OperationStack
     if @vimState.isMode('visual') and op.isOperator()
       debug "push IMPLICIT Motion.CurrentSelection"
       @stack.push(new CurrentSelection(@vimState))
+      
     @withLock =>
       @process()
 
