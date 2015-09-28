@@ -101,19 +101,28 @@ describe "TextObject", ->
         set text: "12(45\nab'de ABCDE", cursor: [0, 4]
         ensure 'vaW', selectedBufferRange: [[0, 0], [0, 5]]
 
-  fdescribe "AnyPair", ->
+  describe "AnyPair", ->
+    {simpleText, complexText} = {}
     beforeEach ->
+      simpleText = """
+        .... "abc" ....
+        .... 'abc' ....
+        .... `abc` ....
+        .... {abc} ....
+        .... <abc> ....
+        .... >abc< ....
+        .... [abc] ....
+        .... (abc) ....
+        """
+      complexText = """
+        [4s
+        --{3s
+        ----"2s(1s-1e)2e"
+        ---3e}-4e
+        ]
+        """
       set
-        text: """
-          .... "abc" ....
-          .... 'abc' ....
-          .... `abc` ....
-          .... {abc} ....
-          .... <abc> ....
-          .... >abc< ....
-          .... [abc] ....
-          .... (abc) ....
-          """
+        text: simpleText
         cursor: [0, 7]
     describe "inner-any-pair", ->
       it "applies operators any inner-pair and repeatable", ->
@@ -139,6 +148,13 @@ describe "TextObject", ->
             .... [] ....
             .... () ....
             """
+      it "can expand selection", ->
+        set text: complexText, cursor: [2, 8]
+        keystroke 'v'
+        ensure 'is', selectedText: """1s-1e"""
+        ensure 'is', selectedText: """2s(1s-1e)2e"""
+        ensure 'is', selectedText: """3s\n----"2s(1s-1e)2e"\n---3e"""
+        ensure 'is', selectedText: """4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e\n"""
     describe "a-any-pair", ->
       it "applies operators any a-pair and repeatable", ->
         ensure 'das',
@@ -163,6 +179,13 @@ describe "TextObject", ->
             ....  ....
             ....  ....
             """
+      it "can expand selection", ->
+        set text: complexText, cursor: [2, 8]
+        keystroke 'v'
+        ensure 'as', selectedText: """(1s-1e)"""
+        ensure 'as', selectedText: """\"2s(1s-1e)2e\""""
+        ensure 'as', selectedText: """{3s\n----"2s(1s-1e)2e"\n---3e}"""
+        ensure 'as', selectedText: """[4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e\n]"""
 
   describe "DoubleQuote", ->
     describe "inner-double-quote", ->

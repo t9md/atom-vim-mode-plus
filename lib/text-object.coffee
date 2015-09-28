@@ -111,16 +111,23 @@ class Pair extends TextObject
     found
 
   getRange: (selection, pair) ->
-    if originallyEmpty = selection.isEmpty()
-      selection.selectRight()
+    selection.selectRight() if wasEmpty = selection.isEmpty()
+    rangeOrig = selection.getBufferRange()
     point = selection.getHeadBufferPosition()
-    start  = @findPair(point, point, pair, true)
-    range = null
-    if start? and (end = @findPair(point, start, pair)?.traverse([0, -1]))
-      range = new Range(start, end)
-      range = range.translate([0, -1], [0, 1]) if @inclusive
-    if not range and originallyEmpty
-      selection.selectLeft()
+
+    loop
+      start = @findPair(point, point, pair, true)
+      range = null
+      if start? and (end = @findPair(point, start, pair)?.traverse([0, -1]))
+        range = new Range(start, end)
+        range = range.translate([0, -1], [0, 1]) if @inclusive
+      if range?.isEqual(rangeOrig)
+        # Since range is same area, retry to expand outer pair.
+        point = range.start.translate([0, -1])
+      else
+        break
+        
+    selection.selectLeft() if (not range) and wasEmpty
     range
 
   select: ->
