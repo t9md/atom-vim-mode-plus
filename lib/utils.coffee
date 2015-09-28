@@ -11,14 +11,14 @@ include = (klass, module) ->
 
 debug = (message) ->
   return unless settings.get('debug')
-  msg += "\n"
+  message += "\n"
   switch settings.get('debugOutput')
     when 'console'
       console.log message
     when 'file'
       filePath = fs.normalize settings.get('debugOutputFilePath')
       if fs.existsSync(filePath)
-        fs.appendFileSync filePath, msg
+        fs.appendFileSync filePath, message
 
 selectLines = (selection, rowRange=null) ->
   {editor} = selection
