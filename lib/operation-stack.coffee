@@ -84,7 +84,11 @@ class OperationStack
 
   finish: ->
     if @vimState.isMode('normal')
-      @vimState.dontPutCursorsAtEndOfLine()
+      if @vimState.editor.getLastSelection().isEmpty()
+        @vimState.dontPutCursorsAtEndOfLine()
+      else
+        # [FIXME] Eliminate this kind of inperative workaround.
+        @vimState.activate('visual', 'characterwise')
     @vimState.reset()
     @vimState.lastOperation = null
 

@@ -11,6 +11,21 @@ describe "TextObject", ->
       vimState.activate('reset')
       {set, ensure, keystroke} = vim
 
+  describe "TextObject", ->
+    beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-coffee-script')
+      getVimState 'sample.coffee', (state, vim) ->
+        {editor, editorElement} = state
+        {set, ensure, keystroke} = vim
+    afterEach ->
+      atom.packages.deactivatePackage('language-coffee-script')
+
+    describe "when TextObject is excuted directly", ->
+      it "select that TextObject", ->
+        ensure [cmd: {target: editorElement, name: 'vim-mode-plus:inner-word'}],
+          selectedText: 'QuickSort'
+
   describe "Word", ->
     describe "inner-word", ->
       beforeEach ->
