@@ -147,41 +147,40 @@ class Pair extends TextObject
   canSearchForwardingRange: ->
     @searchForwardingRange
 
-  getRange: (selection, pair) ->
+  getRange: (selection) ->
     selection.selectRight() if wasEmpty = selection.isEmpty()
     rangeOrig = selection.getBufferRange()
     from = selection.getHeadBufferPosition()
 
-    range  = @getRangeUnderCursor(from, pair)
-    range ?= @getForwardingRange(from, pair) if @canSearchForwardingRange()
+    range  = @getRangeUnderCursor(from, @pair)
+    range ?= @getForwardingRange(from, @pair) if @canSearchForwardingRange()
     if range?.isEqual(rangeOrig)
       # Since range is same area, retry to expand outer pair.
       from = range.start.translate([0, -1])
-      range = @getRangeUnderCursor(from, pair)
+      range = @getRangeUnderCursor(from, @pair)
     selection.selectLeft() if (not range) and wasEmpty
     range
 
   select: ->
     @eachSelection (s) =>
-      setSelectionBufferRangeSafely s, @getRange(s, @pair)
-
-class AnyPair extends Pair
-  @extend()
-  pairs: ['""', "''", "``", "{}", "<>", "><", "[]", "()"]
-
-  getNearestRange: (selection, pairs) ->
-    ranges = []
-    for pair in pairs when (range = @getRange(selection, pair))
-      ranges.push range
-    _.last(sortRanges(ranges)) if ranges.length
-
-  select: ->
-    @eachSelection (s) =>
-      setSelectionBufferRangeSafely s, @getNearestRange(s, @pairs)
+      setSelectionBufferRangeSafely s, @getRange(s)
 
 class Quote extends Pair
   @extend()
   searchForwardingRange: true
+  # getRange: (selection) ->
+  #   selection.selectRight() if wasEmpty = selection.isEmpty()
+  #   rangeOrig = selection.getBufferRange()
+  #   from = selection.getHeadBufferPosition()
+  #
+  #   range = @getForwardingRange(from, @pair)
+  #   if range?.isEqual(rangeOrig)
+  #     console.log "RETRY"
+  #     # Since range is same area, retry to expand outer pair.
+  #     from = range.end.translate([0, +1])
+  #     range = @getForwardingRange(from, @pair)
+  #   selection.selectLeft() if (not range) and wasEmpty
+  #   range
 
 class DoubleQuote extends Quote
   @extend()
@@ -194,6 +193,40 @@ class SingleQuote extends Quote
 class BackTick extends Quote
   @extend()
   pair: '``'
+
+class AnyPair extends Pair
+  @extend()
+  member: [
+    'DoubleQuote', 'SingleQuote', 'BackTick',
+    'CurlyBracket', 'AngleBracket', 'Tag', 'SquareBracket', 'Parenthesis'
+  ]
+
+  getRangeBy: (klass, selection) ->
+    @new(klass, {@inclusive, @searchForwardingRange}).getRange(selection)
+
+  getRanges: (selection) ->
+    ranges = []
+    for klass in @member when (range = @getRangeBy(klass, selection))
+      ranges.push range
+    ranges
+
+  getNearestRange: (selection) ->
+    ranges = @getRanges(selection)
+    _.last(sortRanges(ranges)) if ranges.length
+
+  select: ->
+    @eachSelection (s) =>
+      setSelectionBufferRangeSafely s, @getNearestRange(s)
+
+class AnyQuote extends AnyPair
+  @extend()
+  member: ['DoubleQuote', 'SingleQuote', 'BackTick']
+  getRangeBy: (klass, selection) ->
+    @new(klass, {@inclusive}).getRange(selection)
+
+  getNearestRange: (selection) ->
+    ranges = @getRanges(selection)
+    _.first(sortRanges(ranges)) if ranges.length
 
 class CurlyBracket extends Pair
   @extend()
@@ -369,7 +402,7 @@ module.exports = {
   Word, WholeWord,
   DoubleQuote, SingleQuote, BackTick, CurlyBracket , AngleBracket, Tag,
   SquareBracket, Parenthesis,
-  AnyPair
+  AnyPair, AnyQuote
   Paragraph, Comment, Indentation,
   Fold, Function,
   CurrentLine, Entire,

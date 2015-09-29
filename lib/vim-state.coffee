@@ -187,6 +187,7 @@ class VimState
       'inner-double-quote'  , 'a-double-quote'
       'inner-single-quote'  , 'a-single-quote'
       'inner-back-tick'     , 'a-back-tick'
+      'inner-any-quote'     , 'a-any-quote'
       'inner-paragraph'      , 'a-paragraph'
       'inner-any-pair'       , 'a-any-pair'
       'inner-curly-bracket' , 'a-curly-bracket'

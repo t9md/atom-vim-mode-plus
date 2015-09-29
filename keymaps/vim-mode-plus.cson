@@ -226,8 +226,11 @@
   'i "':  'vim-mode-plus:inner-double-quote'
   'a "':  'vim-mode-plus:a-double-quote'
 
-  'i \'': 'vim-mode-plus:inner-single-quote'
-  'a \'': 'vim-mode-plus:a-single-quote'
+  "i '": 'vim-mode-plus:inner-single-quote'
+  "a '": 'vim-mode-plus:a-single-quote'
+
+  "i q": 'vim-mode-plus:inner-any-quote'
+  "a q": 'vim-mode-plus:a-any-quote'
 
   'i `':  'vim-mode-plus:inner-back-tick'
   'a `':  'vim-mode-plus:a-back-tick'
