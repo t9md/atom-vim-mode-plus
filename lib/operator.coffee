@@ -246,7 +246,9 @@ class SurroundWord extends Surround
 class DeleteSurround extends Surround
   @extend()
   onConfirm: (@input) ->
-    @compose @new('Pair', pair: @getPair(@input), inclusive: true)
+    # FIXME: dont manage allowNextLine independently. Each Pair text-object can handle by themselvs.
+    allowNextLine = @input in ['[]', '()', '{}'].join('')
+    @compose @new('Pair', {pair: @getPair(@input), inclusive: true, allowNextLine})
     @vimState.operationStack.process()
 
   getNewText: (text) ->

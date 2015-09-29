@@ -84,6 +84,10 @@ selectVisibleBy = (editor, entries, fn) ->
   range = getVisibleBufferRange.bind(this)(editor)
   (e for e in entries when range.containsRange(fn(e)))
 
+getLineTextToPoint = (editor, point) ->
+  editor.lineTextForBufferRow(point.row)[0..point.column]
+  # editor.lineTextForBufferRow(point.row)[0...point.column]
+
 swrap = (selection) ->
   scope = 'vimModePlus'
   get: ->
@@ -147,5 +151,6 @@ module.exports = {
   getIndex
   getVisibleBufferRange
   selectVisibleBy
+  getLineTextToPoint
   swrap
 }
