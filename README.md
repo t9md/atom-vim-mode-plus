@@ -56,6 +56,8 @@ As you can see in commit history, this project is originally started by forking 
   - Comment: Consecutive commented lines.
   - AnyPair. it select nearest pair(surround) from one of following pair.
     - `'""', "''", "``", "{}", "<>", "><", "[]", "()"`.
+  - AnyQuote. it select nearest pair(surround) from one of following pair.
+    - `'""', "''", "``"`. Difference from AnyPair is it work within line and can select forwarding range out of cursor.
   - Function: Select inner-function(body) or a-function.
   - Pair family skip backslash escaped pair character.
 - Instant UI feedback
@@ -122,7 +124,9 @@ Here is my keymap as an example.
   # 'is' is mapped to inner-any-pair by default(so you can use `vis`, `cis` etc).
   # By mapping `;` here, I can choose inner-any-pair with like `c;`, `v;`.
   # And more, I can expand selection across any-pair with `vi;;;;` or `va;;;;`.
-  ';':  'vim-mode-plus:inner-any-pair'
+  ';': 'vim-mode-plus:inner-any-pair'
+  # I overwrite vim-mode-plus:inner-single-quote here so that I can select any Quoted pair with single quote.
+  "'": 'vim-mode-plus:inner-any-quote'
 
 'atom-text-editor.vim-mode-plus.normal-mode':
   'S':   'vim-mode-plus:surround-word'
@@ -205,7 +209,7 @@ With showing cursor appropriately in charcterwise and blockwise mode(still curso
 
 # TODO
 
-- [ ] Allow quoted-Pair to select quoted string outside of cursor postion within line(I don't like this behavior)?
+- [x] Allow quoted-Pair to select quoted string outside of cursor postion within line(I don't like this behavior)?
 - [ ] Don't use typeCheck function like `isOperator()`, `isYank()` any more. instead use `instantOf` for being explicit what it meant to.
 - [x] Make AnyPair TextObject expandable.
 - [ ] Don't depend on `atom.commands.onDidDispatch`, instead simply ensure cursor not put endOfLine **only for vim-mode-plus's command**.
