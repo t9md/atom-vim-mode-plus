@@ -111,7 +111,10 @@ class Pair extends TextObject
       return if @isEscapedCharAtPoint(start)
       return stop() if (not allowNextLine) and (from.row isnt start.row)
 
-      if @getPairState(pair, arg) is which then nest-- else nest++
+      if @getPairState(pair, arg) is which
+        nest = Math.max(nest-1, 0)
+      else
+        nest++
       if nest is 0
         found = end
         found = found.translate([0, -1]) if which is 'close'
@@ -168,19 +171,6 @@ class Pair extends TextObject
 class Quote extends Pair
   @extend()
   searchForwardingRange: true
-  # getRange: (selection) ->
-  #   selection.selectRight() if wasEmpty = selection.isEmpty()
-  #   rangeOrig = selection.getBufferRange()
-  #   from = selection.getHeadBufferPosition()
-  #
-  #   range = @getForwardingRange(from, @pair)
-  #   if range?.isEqual(rangeOrig)
-  #     console.log "RETRY"
-  #     # Since range is same area, retry to expand outer pair.
-  #     from = range.end.translate([0, +1])
-  #     range = @getForwardingRange(from, @pair)
-  #   selection.selectLeft() if (not range) and wasEmpty
-  #   range
 
 class DoubleQuote extends Quote
   @extend()
@@ -226,7 +216,8 @@ class AnyQuote extends AnyPair
 
   getNearestRange: (selection) ->
     ranges = @getRanges(selection)
-    _.first(sortRanges(ranges)) if ranges.length
+    # Pick range which end.colum is leftmost(mean, closed first)
+    _.first(_.sortBy(ranges, (r) -> r.end.column)) if ranges.length
 
 class CurlyBracket extends Pair
   @extend()

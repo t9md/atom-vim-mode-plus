@@ -187,70 +187,35 @@ describe "TextObject", ->
         ensure 'as', selectedText: """{3s\n----"2s(1s-1e)2e"\n---3e}"""
         ensure 'as', selectedText: """[4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e\n]"""
 
-  # describe "AnyQuote", ->
-  #   {simpleText, complexText} = {}
-  #   beforeEach ->
-  #     simpleText = """
-  #       --"abc" `def`  'efg'
-  #       """
-  #     set
-  #       text: simpleText
-  #       cursor: [0, 0]
-  #   describe "inner-any-quote", ->
-  #     it "applies operators any inner-pair and repeatable", ->
-  #       ensure 'diq',
-  #         text: """
-  #         --"abc" `def`  'efg'
-  #         """
-  #       ensure 'j.j.j.j.j.j.j.',
-  #         text: """
-  #           .... "" ....
-  #           .... '' ....
-  #           .... `` ....
-  #           .... {} ....
-  #           .... <> ....
-  #           .... >< ....
-  #           .... [] ....
-  #           .... () ....
-  #           """
-  #     it "can expand selection", ->
-  #       set text: complexText, cursor: [2, 8]
-  #       keystroke 'v'
-  #       ensure 'is', selectedText: """1s-1e"""
-  #       ensure 'is', selectedText: """2s(1s-1e)2e"""
-  #       ensure 'is', selectedText: """3s\n----"2s(1s-1e)2e"\n---3e"""
-  #       ensure 'is', selectedText: """4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e\n"""
-  #   describe "a-any-quote", ->
-  #     it "applies operators any a-pair and repeatable", ->
-  #       ensure 'das',
-  #         text: """
-  #           ....  ....
-  #           .... 'abc' ....
-  #           .... `abc` ....
-  #           .... {abc} ....
-  #           .... <abc> ....
-  #           .... >abc< ....
-  #           .... [abc] ....
-  #           .... (abc) ....
-  #           """
-  #       ensure 'j.j.j.j.j.j.j.',
-  #         text: """
-  #           ....  ....
-  #           ....  ....
-  #           ....  ....
-  #           ....  ....
-  #           ....  ....
-  #           ....  ....
-  #           ....  ....
-  #           ....  ....
-  #           """
-  #     it "can expand selection", ->
-  #       set text: complexText, cursor: [2, 8]
-  #       keystroke 'v'
-  #       ensure 'as', selectedText: """(1s-1e)"""
-  #       ensure 'as', selectedText: """\"2s(1s-1e)2e\""""
-  #       ensure 'as', selectedText: """{3s\n----"2s(1s-1e)2e"\n---3e}"""
-  #       ensure 'as', selectedText: """[4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e\n]"""
+  describe "AnyQuote", ->
+    beforeEach ->
+      set
+        text: """
+        --"abc" `def`  'efg'--
+        """
+        cursor: [0, 0]
+    describe "inner-any-quote", ->
+      it "applies operators any inner-pair and repeatable", ->
+        ensure 'diq', text: """--"" `def`  'efg'--"""
+        ensure '.', text: """--"" ``  'efg'--"""
+        ensure '.', text: """--"" ``  ''--"""
+        ensure '.'
+      it "can select next quote", ->
+        keystroke 'v'
+        ensure 'iq', selectedText: 'abc'
+        ensure 'iq', selectedText: 'def'
+        ensure 'iq', selectedText: 'efg'
+    describe "a-any-quote", ->
+      it "applies operators any a-quote and repeatable", ->
+        ensure 'daq', text: """-- `def`  'efg'--"""
+        ensure '.'  , text: """--   'efg'--"""
+        ensure '.'  , text: """--   --"""
+        ensure '.'
+      it "can select next quote", ->
+        keystroke 'v'
+        ensure 'aq', selectedText: '"abc"'
+        ensure 'aq', selectedText: '`def`'
+        ensure 'aq', selectedText: "'efg'"
 
   describe "DoubleQuote", ->
     describe "inner-double-quote", ->
