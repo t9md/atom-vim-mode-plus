@@ -10,6 +10,7 @@ Base = require './base'
   isIncludeNonEmptySelection
   sortRanges
   setSelectionBufferRangeSafely
+  getLineTextToPoint
 } = require './utils'
 
 class TextObject extends Base
@@ -64,7 +65,8 @@ class WholeWord extends Word
 class Pair extends TextObject
   @extend()
   inclusive: false
-  searchForwardingRange: false
+  allowNextLine: false
+  what: 'enclosed'
   pair: null
 
   isInclusive: ->
@@ -75,8 +77,8 @@ class Pair extends TextObject
     [openChar, closeChar] = pair.split('')
     {start, end} = range
     if openChar is closeChar
-      text = @editor.lineTextForBufferRow(start.row)
-      state = @pairStateInString(text[0..end.column], openChar)
+      text = getLineTextToPoint(@editor, end)
+      state = @pairStateInString(text, openChar)
     else
       state =
         switch pair.indexOf(matchText[matchText.length-1])
@@ -99,18 +101,25 @@ class Pair extends TextObject
 
   findPair: (pair, options) ->
     {from, which, allowNextLine, nest} = options
+    [charOpen, charClose] = pair.split('')
+
     [scanFunc, scanRange] =
       switch which
         when 'open' then ['backwardsScanInBufferRange', rangeToBeginningOfFileFromPoint(from)]
         when 'close' then ['scanInBufferRange', rangeToEndOfFileFromPoint(from)]
     pairRegexp = pair.split('').map(_.escapeRegExp).join('|')
     pattern = ///#{pairRegexp}///g
+
     found = null # We will search to fill this var.
     @editor[scanFunc] pattern, scanRange, (arg) =>
       {matchText, range: {start, end}, stop} = arg
       return if @isEscapedCharAtPoint(start)
       return stop() if (not allowNextLine) and (from.row isnt start.row)
 
+      if (charOpen is charClose) and (from.row isnt start.row)
+        switch which
+          when 'open' then return stop()
+          when 'close' then nest = 0
       if @getPairState(pair, arg) is which
         nest = Math.max(nest-1, 0)
       else
@@ -121,78 +130,55 @@ class Pair extends TextObject
         stop()
     found
 
-  # 1. Search opening point by searching backward from given cursor point
-  # 2. Search closing point by searching forwrad from opening point found in step-1.
-  getRangeUnderCursor: (from, pair) ->
+  getPairRange: (from, pair, what) ->
     range = null
-    nest = 1
-    allowNextLine = (pair in ["{}", "[]", "()"])
-    if open = @findPair pair, {from, allowNextLine, nest, which: 'open'}
-      close = @findPair pair, {from: open, allowNextLine, nest, which: 'close'}
+    switch what
+      when 'enclosed'
+        open  = @findPair pair, {from,       @allowNextLine, nest: 1, which: 'open'}
+        close = @findPair pair, {from: open, @allowNextLine, nest: 1, which: 'close'} if open?
+      when 'next'
+        close = @findPair pair, {from,        @allowNextLine, nest: 0, which: 'close'}
+        open  = @findPair pair, {from: close, @allowNextLine, nest: 1, which: 'open'} if close?
+      when 'previous' # FIXME but currently unused
+        open  = @findPair pair, {from,       @allowNextLine, nest: 0, which: 'open'}
+        close = @findPair pair, {from: open, @allowNextLine, nest: 1, which: 'close'} if open?
     if open and close
       range = new Range(open, close)
       range = range.translate([0, -1], [0, 1]) if @isInclusive()
     range
 
-  # 1. Search closing point by searching forward from given cursor point
-  # 2. Search opening point by searching backward from closing point found in step-1.
-  getForwardingRange: (from, pair) ->
-    range = null
-    allowNextLine = (pair in ["{}", "[]", "()"])
-    # By setting initial nest level to 0, we can pick first found opening pair.
-    if close = @findPair pair, {from, allowNextLine, nest: 0, which: 'close'}
-      open = @findPair pair, {from: close, allowNextLine, nest: 1, which: 'open'}
-    if open and close
-      range = new Range(open, close)
-      range = range.translate([0, -1], [0, 1]) if @isInclusive()
-    range
-
-  canSearchForwardingRange: ->
-    @searchForwardingRange
-
-  getRange: (selection) ->
+  getRange: (selection, what=@what) ->
     selection.selectRight() if wasEmpty = selection.isEmpty()
     rangeOrig = selection.getBufferRange()
     from = selection.getHeadBufferPosition()
 
-    range  = @getRangeUnderCursor(from, @pair)
-    range ?= @getForwardingRange(from, @pair) if @canSearchForwardingRange()
+    range  = @getPairRange(from, @pair, what)
     if range?.isEqual(rangeOrig)
+      switch what
+        when 'enclosed', 'previous'
+          from = range.start.translate([0, -1])
+        when 'next'
+          from = range.end.translate([0, +1])
       # Since range is same area, retry to expand outer pair.
-      from = range.start.translate([0, -1])
-      range = @getRangeUnderCursor(from, @pair)
+      range = @getPairRange(from, @pair, what)
     selection.selectLeft() if (not range) and wasEmpty
     range
 
   select: ->
     @eachSelection (s) =>
-      setSelectionBufferRangeSafely s, @getRange(s)
-
-class Quote extends Pair
-  @extend()
-  searchForwardingRange: true
-
-class DoubleQuote extends Quote
-  @extend()
-  pair: '""'
-
-class SingleQuote extends Quote
-  @extend()
-  pair: "''"
-
-class BackTick extends Quote
-  @extend()
-  pair: '``'
+      setSelectionBufferRangeSafely s, @getRange(s, @what)
 
 class AnyPair extends Pair
   @extend()
+  what: 'enclosed'
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
     'CurlyBracket', 'AngleBracket', 'Tag', 'SquareBracket', 'Parenthesis'
   ]
 
   getRangeBy: (klass, selection) ->
-    @new(klass, {@inclusive, @searchForwardingRange}).getRange(selection)
+    # overwite default @what
+    @new(klass, {@inclusive}).getRange(selection, @what)
 
   getRanges: (selection) ->
     ranges = []
@@ -210,18 +196,47 @@ class AnyPair extends Pair
 
 class AnyQuote extends AnyPair
   @extend()
+  what: 'next'
+  allowNextLine: false
   member: ['DoubleQuote', 'SingleQuote', 'BackTick']
   getRangeBy: (klass, selection) ->
-    @new(klass, {@inclusive}).getRange(selection)
+    # overwite default @what
+    @new(klass, {@inclusive, @allowNextLine}).getRange(selection, @what)
 
   getNearestRange: (selection) ->
     ranges = @getRanges(selection)
     # Pick range which end.colum is leftmost(mean, closed first)
     _.first(_.sortBy(ranges, (r) -> r.end.column)) if ranges.length
 
+class DoubleQuote extends Pair
+  @extend()
+  pair: '""'
+  what: 'next'
+
+class SingleQuote extends Pair
+  @extend()
+  pair: "''"
+  what: 'next'
+
+class BackTick extends Pair
+  @extend()
+  pair: '``'
+  what: 'next'
+
 class CurlyBracket extends Pair
   @extend()
   pair: '{}'
+  allowNextLine: true
+
+class SquareBracket extends Pair
+  @extend()
+  pair: '[]'
+  allowNextLine: true
+
+class Parenthesis extends Pair
+  @extend()
+  pair: '()'
+  allowNextLine: true
 
 class AngleBracket extends Pair
   @extend()
@@ -231,14 +246,6 @@ class AngleBracket extends Pair
 class Tag extends Pair
   @extend()
   pair: '><'
-
-class SquareBracket extends Pair
-  @extend()
-  pair: '[]'
-
-class Parenthesis extends Pair
-  @extend()
-  pair: '()'
 
 # Paragraph
 # -------------------------

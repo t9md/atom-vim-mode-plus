@@ -815,6 +815,19 @@ class RepeatSearchReverse extends RepeatSearch
   isBackwards: ->
     not @backwards
 
+# VERY EXPERIMENT DONT USE IT.
+class MoveToNextAnyQuote extends Motion
+  @extend()
+  moveCursor: (cursor) ->
+    point = cursor.getBufferPosition()
+    anyQuote = @new('AnyQuote', allowNextLine: true)
+    range = anyQuote.getNearestRange(cursor.selection)
+    if range?.start.isEqual(point)
+      cursor.setBufferPosition(range.end)
+      range = anyQuote.getNearestRange(cursor.selection)
+    if range?.start?
+      cursor.setBufferPosition(range.start)
+
 # keymap: %
 OpenBrackets = ['(', '{', '[']
 CloseBrackets = [')', '}', ']']
@@ -897,6 +910,7 @@ module.exports = {
   MoveToLastCharacterOfLine, MoveToFirstCharacterOfLineDown
   MoveToFirstCharacterOfLineAndDown, MoveToLastNonblankCharacterOfLineAndDown
   MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen,
+  MoveToNextAnyQuote,
 
   ScrollFullScreenDown, ScrollFullScreenUp,
   ScrollHalfScreenDown, ScrollHalfScreenUp
@@ -911,4 +925,5 @@ module.exports = {
   SearchCurrentWord, SearchCurrentWordBackwards
   RepeatSearch, RepeatSearchReverse
   BracketMatchingMotion
+
 }
