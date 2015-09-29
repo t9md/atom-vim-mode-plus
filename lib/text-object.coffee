@@ -64,101 +64,100 @@ class WholeWord extends Word
 class Pair extends TextObject
   @extend()
   inclusive: false
+  searchForwardingRange: false
   pair: null
 
-  isOpeningPair:(str, char) ->
+  isInclusive: ->
+    @inclusive
+
+  # Return 'open' or 'close'
+  getPairState: (pair, {matchText, range}) ->
+    [openChar, closeChar] = pair.split('')
+    {start, end} = range
+    if openChar is closeChar
+      text = @editor.lineTextForBufferRow(start.row)
+      state = @pairStateInString(text[0..end.column], openChar)
+    else
+      state =
+        switch pair.indexOf(matchText[matchText.length-1])
+          when 0 then 'open'
+          when 1 then 'close'
+    state
+
+  pairStateInString: (str, char) ->
     pattern = ///[^\\]?#{_.escapeRegExp(char)}///
     count = str.split(pattern).length - 1
-    (count % 2) is 1
+    switch count % 2
+      when 1 then 'open'
+      when 0 then 'close'
 
-  isClosingPair:(str, char) ->
-    not @isOpeningPair(str, char)
+  # Take start point of matched range.
+  escapeChar = '\\'
+  isEscapedCharAtPoint: (point) ->
+    range = Range.fromPointWithDelta(point, 0, -1)
+    @editor.getTextInBufferRange(range) is escapeChar
 
-  needStopSearch: (pair, cursorRow, row) ->
-    pair not in ["{}", "[]", "()"] and (cursorRow isnt row)
-
-  findPair: (cursorPoint, fromPoint, pair, backward=false) ->
-    pairChars = pair.split('')
-    pairChars.reverse() unless backward
-    [search, searchPair] = pairChars
-    pairRegexp = pairChars.map(_.escapeRegExp).join('|')
-    pattern   = ///(?:#{pairRegexp})///g
-
+  findPair: (pair, options) ->
+    {from, which, allowNextLine, nest} = options
     [scanFunc, scanRange] =
-      if backward
-        ['backwardsScanInBufferRange', rangeToBeginningOfFileFromPoint(fromPoint)]
-      else
-        ['scanInBufferRange', rangeToEndOfFileFromPoint(fromPoint)]
-
-    nest = 0
+      switch which
+        when 'open' then ['backwardsScanInBufferRange', rangeToBeginningOfFileFromPoint(from)]
+        when 'close' then ['scanInBufferRange', rangeToEndOfFileFromPoint(from)]
+    pairRegexp = pair.split('').map(_.escapeRegExp).join('|')
+    pattern = ///#{pairRegexp}///g
     found = null # We will search to fill this var.
-    @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) =>
-      charPre = @editor.getTextInBufferRange(range.traverse([0, -1], [0, -1]))
-      return if charPre is '\\' # Skip escaped char with '\'
-      {end, start} = range
+    @editor[scanFunc] pattern, scanRange, (arg) =>
+      {matchText, range: {start, end}, stop} = arg
+      return if @isEscapedCharAtPoint(start)
+      return stop() if (not allowNextLine) and (from.row isnt start.row)
 
-      # don't search across line unless specific pair.
-      return stop() if @needStopSearch(pair, cursorPoint.row, start.row)
-
-      # [FIXME] aybe getting range within line and filter forwarding one afterward
-      # is more decralative and easy to read.
-      if search is searchPair
-        if backward
-          text = @editor.lineTextForBufferRow(fromPoint.row)
-          found = end if @isOpeningPair(text[0..end.column], search)
-        else # skip for pair not within cursorPoint.
-          text = @editor.lineTextForBufferRow(fromPoint.row)
-          if end.isGreaterThanOrEqual(cursorPoint)
-            found = end if @isClosingPair(text[0..end.column], search)
-          else
-            stop()
-      else
-        switch matchText[matchText.length-1]
-          when search then (if (nest is 0) then found = end else nest--)
-          when searchPair then nest++
-      stop() if found
+      if @getPairState(pair, arg) is which then nest-- else nest++
+      if nest is 0
+        found = end
+        found = found.translate([0, -1]) if which is 'close'
+        stop()
     found
 
-  getOpening: (cursorPoint, fromPoint, pair) ->
-    @findPair(cursorPoint, fromPoint, pair, true)
-
-  getClosing: (cursorPoint, fromPoint, pair) ->
-    @findPair(cursorPoint, fromPoint, pair)?.traverse([0, -1])
-
-  adjustRange: (range) ->
-    if @inclusive
-      range.translate([0, -1], [0, 1])
-    else
-      range
-
-  getRangeWithinCursor: (cursorPoint, pair) ->
-    p = cursorPoint
+  # 1. Search opening point by searching backward from given cursor point
+  # 2. Search closing point by searching forwrad from opening point found in step-1.
+  getRangeUnderCursor: (from, pair) ->
     range = null
-    if (open = @getOpening(p, p, pair)) and (close = @getClosing(p, open, pair))
-      range = @adjustRange(new Range(open, close))
+    nest = 1
+    allowNextLine = (pair in ["{}", "[]", "()"])
+    if open = @findPair pair, {from, allowNextLine, nest, which: 'open'}
+      close = @findPair pair, {from: open, allowNextLine, nest, which: 'close'}
+    if open and close
+      range = new Range(open, close)
+      range = range.translate([0, -1], [0, 1]) if @isInclusive()
     range
 
-  getForwardRange: (cursorPoint, pair) ->
-    p = cursorPoint
+  # 1. Search closing point by searching forward from given cursor point
+  # 2. Search opening point by searching backward from closing point found in step-1.
+  getForwardingRange: (from, pair) ->
     range = null
-    if (close = @getClosing(p, p, pair)) and (open = @getOpening(p, close, pair))
-      range = @adjustRange(new Range(open, close))
+    allowNextLine = (pair in ["{}", "[]", "()"])
+    # By setting initial nest level to 0, we can pick first found opening pair.
+    if close = @findPair pair, {from, allowNextLine, nest: 0, which: 'close'}
+      open = @findPair pair, {from: close, allowNextLine, nest: 1, which: 'open'}
+    if open and close
+      range = new Range(open, close)
+      range = range.translate([0, -1], [0, 1]) if @isInclusive()
     range
 
-  pairsCanBeOutOfCursor = ['``', "''", '""']
+  canSearchForwardingRange: ->
+    @searchForwardingRange
+
   getRange: (selection, pair) ->
     selection.selectRight() if wasEmpty = selection.isEmpty()
     rangeOrig = selection.getBufferRange()
-    point = selection.getHeadBufferPosition()
+    from = selection.getHeadBufferPosition()
 
-    if pair in pairsCanBeOutOfCursor and not @isAnyPair()
-      range = @getRangeWithinCursor(point, pair) ? @getForwardRange(point, pair)
-    else
-      range = @getRangeWithinCursor(point, pair)
-      if range?.isEqual(rangeOrig)
-        # Since range is same area, retry to expand outer pair.
-        point = range.start.translate([0, -1])
-        range = @getRangeWithinCursor(point, pair)
+    range  = @getRangeUnderCursor(from, pair)
+    range ?= @getForwardingRange(from, pair) if @canSearchForwardingRange()
+    if range?.isEqual(rangeOrig)
+      # Since range is same area, retry to expand outer pair.
+      from = range.start.translate([0, -1])
+      range = @getRangeUnderCursor(from, pair)
     selection.selectLeft() if (not range) and wasEmpty
     range
 
@@ -180,15 +179,19 @@ class AnyPair extends Pair
     @eachSelection (s) =>
       setSelectionBufferRangeSafely s, @getNearestRange(s, @pairs)
 
-class DoubleQuote extends Pair
+class Quote extends Pair
+  @extend()
+  searchForwardingRange: true
+
+class DoubleQuote extends Quote
   @extend()
   pair: '""'
 
-class SingleQuote extends Pair
+class SingleQuote extends Quote
   @extend()
   pair: "''"
 
-class BackTick extends Pair
+class BackTick extends Quote
   @extend()
   pair: '``'
 
