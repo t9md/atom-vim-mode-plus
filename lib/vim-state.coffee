@@ -226,7 +226,6 @@ class VimState
       'search-current-word'    , 'search-current-word-backwards',
       'repeat-search'          , 'repeat-search-reverse'        ,
       'bracket-matching-motion',
-      'move-to-next-any-quote',
     ]
 
     @registerOperationCommands Operator, [
