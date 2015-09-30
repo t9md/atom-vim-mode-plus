@@ -73,12 +73,12 @@ class Pair extends TextObject
     @inclusive
 
   # Return 'open' or 'close'
-  getPairState: (pair, {matchText, range}) ->
+  getPairState: (pair, matchText, point) ->
     [openChar, closeChar] = pair.split('')
-    {start, end} = range
     if openChar is closeChar
-      text = getLineTextToPoint(@editor, end)
+      text = getLineTextToPoint(@editor, point)
       state = @pairStateInString(text, openChar)
+      # console.log state, text
     else
       state =
         switch pair.indexOf(matchText[matchText.length-1])
@@ -107,26 +107,32 @@ class Pair extends TextObject
       switch which
         when 'open' then ['backwardsScanInBufferRange', rangeToBeginningOfFileFromPoint(from)]
         when 'close' then ['scanInBufferRange', rangeToEndOfFileFromPoint(from)]
+    # console.log  "---#{which}-------"
+    # console.log @editor.getTextInBufferRange(scanRange)
+    # console.log  '----------'
     pairRegexp = pair.split('').map(_.escapeRegExp).join('|')
     pattern = ///#{pairRegexp}///g
 
     found = null # We will search to fill this var.
     @editor[scanFunc] pattern, scanRange, (arg) =>
-      {matchText, range: {start, end}, stop} = arg
+      {matchText, range, stop} = arg
+      {start, end} = range
+      # console.log "#{which}:", matchText
       return if @isEscapedCharAtPoint(start)
       return stop() if (not allowNextLine) and (from.row isnt start.row)
 
+      if which is 'close'
+        end = end.translate([0, -1])
       if (charOpen is charClose) and (from.row isnt start.row)
         switch which
           when 'open' then return stop()
           when 'close' then nest = 0
-      if @getPairState(pair, arg) is which
+      if @getPairState(pair, matchText, start) is which
         nest = Math.max(nest-1, 0)
       else
         nest++
       if nest is 0
         found = end
-        found = found.translate([0, -1]) if which is 'close'
         stop()
     found
 
@@ -137,8 +143,12 @@ class Pair extends TextObject
         open  = @findPair pair, {from,       @allowNextLine, nest: 1, which: 'open'}
         close = @findPair pair, {from: open, @allowNextLine, nest: 1, which: 'close'} if open?
       when 'next'
+        # {inspect} = require 'util'
+        # p = (subject, args...) -> console.log subject, inspect(args...)
         close = @findPair pair, {from,        @allowNextLine, nest: 0, which: 'close'}
+        # p 'close', close
         open  = @findPair pair, {from: close, @allowNextLine, nest: 1, which: 'open'} if close?
+        # p 'open', open
       when 'previous' # FIXME but currently unused
         open  = @findPair pair, {from,       @allowNextLine, nest: 0, which: 'open'}
         close = @findPair pair, {from: open, @allowNextLine, nest: 1, which: 'close'} if open?
@@ -148,9 +158,15 @@ class Pair extends TextObject
     range
 
   getRange: (selection, what=@what) ->
-    selection.selectRight() if wasEmpty = selection.isEmpty()
+    # selection.selectRight() if wasEmpty = selection.isEmpty()
     rangeOrig = selection.getBufferRange()
     from = selection.getHeadBufferPosition()
+
+    # Be inclusive, include char under cursor.
+    if selection.isEmpty()
+      from = from.translate([0, +1])
+    if what is 'next'
+      from = from.translate([0, -1])
 
     range  = @getPairRange(from, @pair, what)
     if range?.isEqual(rangeOrig)
@@ -161,7 +177,7 @@ class Pair extends TextObject
           from = range.end.translate([0, +1])
       # Since range is same area, retry to expand outer pair.
       range = @getPairRange(from, @pair, what)
-    selection.selectLeft() if (not range) and wasEmpty
+    # selection.selectLeft() if (not range) and wasEmpty
     range
 
   select: ->
