@@ -118,6 +118,58 @@ describe "Motion", ->
             cursor: [0, 3]
             selectedText: "defg\n\nabcd"
 
+    describe "jk in softwrap", ->
+      beforeEach ->
+        editor.setSoftWrapped(true)
+        editor.setEditorWidthInChars(10)
+        set
+          text: """
+            1st line of buffer
+            2nd line of buffer, Very long line
+            3rd line of buffer
+
+            5th line of buffer\n
+            """
+          cursor: [0, 0]
+
+      describe "selection is not reversed", ->
+        it "screen position and buffer position is different", ->
+          ensure 'j', cursor: [1, 0], cursorBuffer: [0, 9]
+          ensure 'j', cursor: [2, 0], cursorBuffer: [1, 0]
+          ensure 'j', cursor: [3, 0], cursorBuffer: [1, 9]
+          ensure 'j', cursor: [4, 0], cursorBuffer: [1, 20]
+
+        it "jk move selection buffer-line wise", ->
+          ensure 'V', selectedText: '1st line of buffer\n'
+          ensure 'j', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n'
+          ensure 'j', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n'
+          ensure 'j', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n\n'
+          ensure 'j', selectedText: "1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n\n5th line of buffer\n"
+          ensure 'k', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n\n'
+          ensure 'k', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n'
+          ensure 'k', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n'
+          ensure 'k', selectedText: '1st line of buffer\n'
+          ensure 'k', selectedText: '1st line of buffer\n' # do nothing
+      describe "selection is reversed", ->
+        it "screen position and buffer position is different", ->
+          ensure 'j', cursor: [1, 0], cursorBuffer: [0, 9]
+          ensure 'j', cursor: [2, 0], cursorBuffer: [1, 0]
+          ensure 'j', cursor: [3, 0], cursorBuffer: [1, 9]
+          ensure 'j', cursor: [4, 0], cursorBuffer: [1, 20]
+
+        it "jk move selection buffer-line wise", ->
+          set cursorBuffer: [4, 0]
+          ensure 'V', selectedText: '5th line of buffer\n'
+          ensure 'k', selectedText: "\n5th line of buffer\n"
+          ensure 'k', selectedText: "3rd line of buffer\n\n5th line of buffer\n"
+          ensure 'k', selectedText: "2nd line of buffer, Very long line\n3rd line of buffer\n\n5th line of buffer\n"
+          ensure 'k', selectedText: "1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n\n5th line of buffer\n"
+          ensure 'j', selectedText: "2nd line of buffer, Very long line\n3rd line of buffer\n\n5th line of buffer\n"
+          ensure 'j', selectedText: "3rd line of buffer\n\n5th line of buffer\n"
+          ensure 'j', selectedText: "\n5th line of buffer\n"
+          ensure 'j', selectedText: "5th line of buffer\n"
+          ensure 'j', selectedText: "5th line of buffer\n" # do nothing
+
     describe "the l keybinding", ->
       beforeEach ->
         set cursor: [1, 2]
