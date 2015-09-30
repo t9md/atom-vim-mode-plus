@@ -209,12 +209,13 @@ With showing cursor appropriately in charcterwise and blockwise mode(still curso
 
 # TODO
 
-- [x] Allow quoted-Pair to select quoted string outside of cursor postion within line(I don't like this behavior)?
+- [ ] Dont't do moveRight and moveLeft to adjust selection in `Motion::selectInclusive()` it complicate other motion. and prevent to stop at EOL in `l`, `$`
 - [ ] Don't use typeCheck function like `isOperator()`, `isYank()` any more. instead use `instantOf` for being explicit what it meant to.
-- [x] Make AnyPair TextObject expandable.
 - [ ] Don't depend on `atom.commands.onDidDispatch`, instead simply ensure cursor not put endOfLine **only for vim-mode-plus's command**.
 - [ ] Write spec for lots of UI effect. hover, search counter etc.
 - [ ] Write tutorial for new Operator, TextObjet.
+- [x] Allow quoted-Pair to select quoted string outside of cursor postion within line(I don't like this behavior)?
+- [x] Make AnyPair TextObject expandable.
 - [x] When hover Icon disabled, icon position is not at original cursor position.
 - [x] Make independent showHoverCounter from showHover config parameter.
 - [x] Use single scope for custom selection property.
@@ -226,7 +227,7 @@ With showing cursor appropriately in charcterwise and blockwise mode(still curso
   - [x] show cursor: linewise(decided to not try to show cursor)
   - [x] show cursor: blockwise
 - [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions. - [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
-- [ ] Improve search and introduce incrementalSearch.
+- [x] Improve search and introduce incrementalSearch.
 - [ ] Cancellation of operation on event subscription.
 - [ ] Improve visual-block's line end selection and sync range between selections.
 - [ ] Spec re-write 2nd round to compact and simple description for each spec.
@@ -265,4 +266,4 @@ With showing cursor appropriately in charcterwise and blockwise mode(still curso
   - [x] Auto mapping from command-name to corresponding class.
   - [x] Separate mode handling to ModeManager
 - [x] improve introspection report to describe keymap to corresponding class(by consulting `atom.keymap`).
-- [ ] Recheck unnecessary count passing function.
+- [x] Recheck unnecessary count passing function.

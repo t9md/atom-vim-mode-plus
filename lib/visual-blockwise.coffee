@@ -79,8 +79,6 @@ class BlockwiseMoveDown extends VisualBlockwise
     not @isReversed()
 
   execute: ->
-    # if @isSingle()
-    #   @setTail @getTop()
     if @isForward()
       @editor["addSelection#{@direction}"]()
       @vimState.syncSelectionsReversedSate @getTail().isReversed()
