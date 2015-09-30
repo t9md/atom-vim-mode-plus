@@ -1,3 +1,9 @@
+## 0.1.4
+- FIX: cursor not when activate visual-blockwise with one clumn selection.
+- FIX: move-down, move-up on visual-blockwise throw error when not have tail.
+- Revival once disabled text-object quote("''", "``", '""') select forwarding range.
+- New: TextObject.AnyQuote select any next AnyQuote within line.
+
 ## 0.1.3
 - Now all TextObject Pair can expand selection.
 - Fix TextObject AnyPair incorrectly expand selection when it fail to find pair.
