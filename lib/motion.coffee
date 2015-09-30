@@ -185,28 +185,37 @@ class MoveUp extends Motion
   @extend()
   linewise: true
 
+  isShrinking: (selection) ->
+    not selection.isReversed()
+
+  getActualBufferRow: (cursor) ->
+    unless @editor.isSoftWrapped() and @vimState.isMode('visual', 'linewise')
+      return
+    # When selection is shrinked cursor.moveUp/Down might not change actuall bufferRow.
+    # Since, cursor.moveUp/Down always move screenPosition wise.
+    # So we get actual bufferRow to adjust cursor to move bufferRow-wisely in visual-linewise.
+    if @isShrinking(cursor.selection)
+      cursor.selection.getHeadBufferPosition().row
+
   moveCursor: (cursor) ->
-    isSoftWrapped = @editor.isSoftWrapped()
-    isVisualMode    = @vimState.isMode('visual', 'linewise')
     @countTimes =>
       return if @at('FirstScreenRow', cursor)
-      if isVisualMode and isSoftWrapped and (not cursor.selection.isReversed())
-        point = cursor.selection.getHeadBufferPosition()
-        cursor.setBufferPosition([point.row, 0])
+      if row = @getActualBufferRow(cursor)
+        cursor.setBufferPosition([row, 0])
       cursor.moveUp()
 
-class MoveDown extends Motion
+class MoveDown extends MoveUp
   @extend()
   linewise: true
 
+  isShrinking: (selection) ->
+    selection.isReversed()
+
   moveCursor: (cursor) ->
-    isSoftWrapped = @editor.isSoftWrapped()
-    isVisualMode    = @vimState.isMode('visual', 'linewise')
     @countTimes =>
       return if @at('LastScreenRow', cursor)
-      if isVisualMode and isSoftWrapped and cursor.selection.isReversed()
-        point = cursor.selection.getHeadBufferPosition()
-        cursor.setBufferPosition([point.row, Infinity])
+      if row = @getActualBufferRow(cursor)
+        cursor.setBufferPosition([row, Infinity])
       cursor.moveDown()
 
 class MoveToPreviousWord extends Motion
