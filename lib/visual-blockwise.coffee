@@ -55,8 +55,9 @@ class VisualBlockwise extends Base
 
   constructor: ->
     super
-    if @isSingle()
-      @clearTail()
+    unless @getTail()?
+      @setTail @getTop()
+      @setHead @getBottom()
 
   reverse: ->
     [newHead, newTail] = [@getTail(), @getHead()]
@@ -78,9 +79,8 @@ class BlockwiseMoveDown extends VisualBlockwise
     not @isReversed()
 
   execute: ->
-    if @isSingle()
-      @setTail @getTop()
-
+    # if @isSingle()
+    #   @setTail @getTop()
     if @isForward()
       @editor["addSelection#{@direction}"]()
       @vimState.syncSelectionsReversedSate @getTail().isReversed()
@@ -141,6 +141,7 @@ class BlockwiseEscape extends VisualBlockwise
   @extend()
   execute: ->
     @clearTail()
+    @clearHead()
     @vimState.activate('normal')
     @editor.clearSelections()
 
