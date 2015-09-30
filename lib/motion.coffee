@@ -186,16 +186,28 @@ class MoveUp extends Motion
   linewise: true
 
   moveCursor: (cursor) ->
+    isSoftWrapped = @editor.isSoftWrapped()
+    isVisualMode    = @vimState.isMode('visual', 'linewise')
     @countTimes =>
-      cursor.moveUp() unless @at('FirstScreenRow', cursor)
+      return if @at('FirstScreenRow', cursor)
+      if isVisualMode and isSoftWrapped and (not cursor.selection.isReversed())
+        point = cursor.selection.getHeadBufferPosition()
+        cursor.setBufferPosition([point.row, 0])
+      cursor.moveUp()
 
 class MoveDown extends Motion
   @extend()
   linewise: true
 
   moveCursor: (cursor) ->
+    isSoftWrapped = @editor.isSoftWrapped()
+    isVisualMode    = @vimState.isMode('visual', 'linewise')
     @countTimes =>
-      cursor.moveDown() unless @at('LastScreenRow', cursor)
+      return if @at('LastScreenRow', cursor)
+      if isVisualMode and isSoftWrapped and cursor.selection.isReversed()
+        point = cursor.selection.getHeadBufferPosition()
+        cursor.setBufferPosition([point.row, Infinity])
+      cursor.moveDown()
 
 class MoveToPreviousWord extends Motion
   @extend()
