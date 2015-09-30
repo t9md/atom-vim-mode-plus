@@ -1,7 +1,10 @@
+## 0.1.5
+- FIX: In softwrapped line, moveDown/moveUp fail in visual-linewise mode.
+
 ## 0.1.4
 - FIX: cursor not when activate visual-blockwise with one clumn selection.
 - FIX: move-down, move-up on visual-blockwise throw error when not have tail.
-- Revival once disabled text-object quote("''", "``", '""') select forwarding range.
+- Revival once disabled text-object quote to select forwarding range.
 - New: TextObject.AnyQuote select any next AnyQuote within line.
 
 ## 0.1.3
