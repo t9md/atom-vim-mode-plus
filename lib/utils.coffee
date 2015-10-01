@@ -49,7 +49,7 @@ getKeystrokeForEvent = (event) ->
   atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
 
 isLinewiseRange = (range) ->
-  (range.start.column is 0) and (range.end.column is 0) and (not range.isEmpty())
+  (not range.isEmpty()) and (range.start.column is 0) and (range.end.column is 0)
 
 rangeToBeginningOfFileFromPoint = (point) ->
   new Range(Point.ZERO, point)
