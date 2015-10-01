@@ -223,6 +223,7 @@ class Surround extends TransformString
     onCancel: => @vimState.operationStack.cancel()
 
   onConfirm: (@input) ->
+    @vimState.hover.add(input)
     @vimState.operationStack.process()
 
   getPair: (input) ->
