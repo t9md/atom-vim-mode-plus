@@ -72,15 +72,20 @@ class OperationStack
     debug '-> @pop()'
     op = @pop()
     @vimState.lastOperation = op
-    if op.isCanceled()
-      debug " -> <#{op.getKind()}>.cancel()"
-      op.cancel()
-    else
-      debug " -> <#{op.getKind()}>.execute()"
-      op.execute()
-      @vimState.history.unshift(op) if op.isRecordable()
+    debug " -> <#{op.getKind()}>.execute()"
+    op.execute()
+    @vimState.history.unshift(op) if op.isRecordable()
     @finish()
     debug "#=== Finish at #{new Date().toISOString()}\n"
+
+  cancel: ->
+    debug "Cancelled stack size: #{@stack.length}"
+    for op in @pop()
+      debug  op.getKind()
+    unless @vimState.isMode('visual') or @vimState.isMode('insert')
+      @vimState.activate('reset')
+    @finish()
+    debug "#=== Canceled at #{new Date().toISOString()}\n"
 
   finish: ->
     if @vimState.isMode('normal')

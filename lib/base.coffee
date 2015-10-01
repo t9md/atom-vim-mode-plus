@@ -6,8 +6,6 @@ settings = require './settings'
 class Base
   complete: false
   recodable: false
-  canceled: false
-
   defaultCount: 1
   requireInput: false
 
@@ -21,26 +19,19 @@ class Base
           when 'icon'  then @hoverIcon if @hoverIcon?
           else null
       @vimState.hover.add hover if hover?
-
     @initialize?()
 
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
-    return true if @isCanceled()
     return false if (@requireInput and not @input)
-
     if @target?
       @target.isComplete()
     else
       @complete
 
-  isCanceled: -> @canceled
-  isRecordable: -> @recodable
-
-  cancel: ->
-    unless @vimState.isMode('visual') or @vimState.isMode('insert')
-      @vimState.activate('reset')
+  isRecordable: ->
+    @recodable
 
   abort: ->
     throw new OperationAbortedError('Aborted')
@@ -65,11 +56,7 @@ class Base
         @complete = true
         @vimState.operationStack.process()
       onCancel: =>
-        # FIXME
-        # Cancelation currently depending on operationStack to call cancel()
-        # Should be better to observe cancel event on operationStack side.
-        @canceled = true
-        @vimState.operationStack.process()
+        @vimState.operationStack.cancel()
 
   # Expected to be called by child class.
   # It automatically create typecheck function like

@@ -140,7 +140,7 @@ class Search extends InputBase
       "visit-prev":  => @emitter.emit('command', 'visit-prev')
       "scroll-next": => @emitter.emit('command', 'scroll-next')
       "scroll-prev": => @emitter.emit('command', 'scroll-prev')
-      
+
     prefix = "#{packageScope}:search"
     commands = {}
     for command, fn of literalModeSupportCommands
