@@ -220,9 +220,7 @@ class Surround extends TransformString
   getInputHandler: ->
     onConfirm: (input) => @onConfirm(input)
     onChange:  (input) => @vimState.hover.add(input)
-    onCancel:  =>
-      @canceled = true
-      @vimState.operationStack.process()
+    onCancel: => @vimState.operationStack.cancel()
 
   onConfirm: (@input) ->
     @vimState.operationStack.process()
