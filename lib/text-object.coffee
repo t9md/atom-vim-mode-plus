@@ -19,7 +19,7 @@ class TextObject extends Base
 
   isLinewise: ->
     @editor.getSelections().every (s) ->
-      isLinewiseRange s.getBufferRange()
+      isLinewiseRange(s.getBufferRange())
 
   eachSelection: (fn) ->
     fn(s) for s in @editor.getSelections()
