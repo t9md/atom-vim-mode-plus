@@ -161,8 +161,14 @@ class BlockwiseSelect extends VisualBlockwise
       else
         "BlockwiseMoveDown"
     selection.setBufferRange(range, reversed: head.column < tail.column)
+
+    # # FIXME: we need to skip blank line here, since addSelectionAbove/Bellow
+    # # skip blank rows. but find way to handled more consistent manner.
+    rowTranslation = if klass is 'BlockwiseMoveUp' then -1 else +1
     _.times (end.row - start.row), =>
-      @new(klass).execute()
+      range = range.translate([rowTranslation, 0], [rowTranslation, 0])
+      if @editor.getTextInBufferRange(range)
+        @new(klass).execute()
 
 class BlockwiseRestoreCharacterwise extends VisualBlockwise
   @extend()
