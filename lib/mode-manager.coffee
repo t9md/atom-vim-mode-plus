@@ -60,7 +60,7 @@ class ModeManager
     @editorElement.component.setInputEnabled(false)
     @vimState.reset()
     s.clear(autoscroll: false) for s in @editor.getSelections()
-    @vimState.dontPutCursorsAtEndOfLine()
+    @vimState.dontPutCursorsAtEndOfLine('activateNormalMode')
 
   # TODO: delete this in future.
   resetNormalMode: ->
