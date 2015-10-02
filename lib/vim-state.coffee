@@ -65,29 +65,19 @@ class VimState
     # Handle with config onDidChange subscription?
     @hover = new Hover(this, 'showHoverOnOperate')
     @hoverSearchCounter = new Hover(this, 'showHoverSearchCounter')
-
     @searchHistory = new SearchHistoryManager(this)
     @input = new Input(this)
     @search = new Search(this)
-
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
 
-    @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
+    # @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
 
     if atom.commands.onDidDispatch?
       @subscriptions.add atom.commands.onDidDispatch ({target}) =>
         return unless (target is @editorElement)
         @checkSelections()
-        return unless settings.get('showCursorInVisualMode')
-        switch
-          when @isMode('visual', 'characterwise')
-            @showCursors(@editor.getCursors())
-          when @isMode('visual', 'blockwise')
-            cursors =
-              for s in @editor.getSelections() when swrap(s).get().blockwise?.head
-                s.cursor
-            @showCursors(cursors)
+        @updateCursorsVisibility()
 
     @addClass packageScope
     @init()
@@ -294,12 +284,6 @@ class VimState
     reversed = not @editor.getLastSelection().isReversed()
     @syncSelectionsReversedSate(reversed)
 
-  # reselectLastVisual: ->
-  #   return unless @lastVisual
-  #   @activate(mode, submode)
-  #   {mode, submode, range, reversed} = @lastVisual
-  #   @editor.getLastSelection().setBufferRange(range, reversed)
-
   syncSelectionsReversedSate: (reversed) ->
     for selection in @editor.getSelections()
       selection.setBufferRange(selection.getBufferRange(), {reversed})
@@ -317,7 +301,8 @@ class VimState
     return unless @editor?
     if @editor.getSelections().every((s) -> s.isEmpty())
       if @isMode('normal')
-        @dontPutCursorsAtEndOfLine()
+        # null
+        @dontPutCursorsAtEndOfLine('checkSelections')
       else if @isMode('visual')
         @activate('normal')
     else
@@ -331,7 +316,15 @@ class VimState
         if lastSelection.isEmpty()
           lastSelection.selectRight()
 
-  showCursors: (cursors) ->
+  updateCursorsVisibility: ->
+    return unless settings.get('showCursorInVisualMode')
+    cursors = switch
+      when @isMode('visual', 'characterwise')
+        @editor.getCursors()
+      when @isMode('visual', 'blockwise')
+        (s.cursor for s in @editor.getSelections() when swrap(s).get().blockwise?.head)
+    return unless cursors
+
     for cursor in cursors
       cursor.setVisible(true) unless cursor.isVisible()
       @updateClassCond cursor.selection.isReversed(), 'reversed'
@@ -346,10 +339,9 @@ class VimState
     action = (if condition then 'add' else 'remove')
     @editorElement.classList[action](klass)
 
-  dontPutCursorsAtEndOfLine: ->
-    # if @editor.getPath()?.endsWith 'tryit.coffee'
-    #   return
+  dontPutCursorsAtEndOfLine: (whoCall) ->
     for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
+      # console.log "dontPutCursorsAtEOL: #{whoCall} MOVE!!"
       {goalColumn} = c
       c.moveLeft()
       c.goalColumn = goalColumn
