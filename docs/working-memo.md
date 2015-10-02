@@ -1,3 +1,8 @@
+prevent moveRight from moving across EOL in visual-mode,
+its very inconsitent.
+- I'm ok to if mouse click can put cursor at EOL, its out-of-scoep of vim-mode-plus.
+- Just check mouse is not at EOL at the begining of processing. cursor should never put on EOL in any vim-mode-plus operation.
+
 ## Old memo
 
 # Whats this?
