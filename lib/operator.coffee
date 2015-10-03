@@ -436,7 +436,10 @@ class PutBefore extends Operator
       cursor.setBufferPosition(range.start)
       cursor.moveToFirstCharacterOfLine()
     else
-      selection.insertText("\n")
+      if @vimState.isMode('visual', 'linewise')
+        text += '\n' unless text.endsWith('\n')
+      else
+        selection.insertText("\n")
       range = selection.insertText(text)
       @flash range
       cursor.setBufferPosition(range.start)
@@ -445,9 +448,14 @@ class PutBefore extends Operator
     cursor = selection.cursor
     if @location is 'after' and selection.isEmpty()
       cursor.moveRight()
+    if @vimState.isMode('visual', 'linewise')
+      text += '\n' unless text.endsWith('\n')
     range = selection.insertText(text)
     @flash range
-    cursor.setBufferPosition(range.end.translate([0, -1]))
+    if @vimState.isMode('visual', 'linewise')
+      cursor.setBufferPosition(range.start)
+    else
+      cursor.setBufferPosition(range.end.translate([0, -1]))
 
 class PutAfter extends PutBefore
   @extend()

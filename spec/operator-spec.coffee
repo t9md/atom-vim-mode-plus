@@ -764,9 +764,8 @@ describe "Operator", ->
           text: "12345\naZZZbcde\nAZZZBCDE\nQWERT"
           cursor: [[1, 3], [2, 3]]
 
-    fdescribe "with a selection", ->
+    describe "with a selection", ->
       beforeEach ->
-        settings.set 'useClipboardAsDefaultRegister', true
         set
           text: '012'
           cursor: [0, 1]
@@ -780,8 +779,9 @@ describe "Operator", ->
 
       describe "with linewise selection", ->
         it "replaces selection with charwise content", ->
+          set text: "012\nabc", cursor: [0, 1]
           set register: '"': text: "345"
-          ensure 'Vp', text: "345", cursor: [0, 0]
+          ensure 'Vp', text: "345\nabc", cursor: [0, 0]
         it "replaces selection with linewise content", ->
           set register: '"': text: "345\n"
           ensure 'Vp', text: "345\n", cursor: [0, 0]
