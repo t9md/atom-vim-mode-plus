@@ -126,9 +126,7 @@ class ModeManager
       when 'blockwise' then @selectBlockwise(oldSubmode)
 
   deactivateVisualMode: ->
-    restoreColumn = not (lastOperation?.isYank() or lastOperation?.isIndent())
-    if restoreColumn and @isMode('visual', 'linewise')
-      @selectCharacterwise()
+    @selectCharacterwise() if @isMode('visual', 'linewise')
     for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())
       s.cursor.moveLeft()
 
