@@ -109,12 +109,15 @@ describe "VimState", ->
 
     describe "selecting text", ->
       beforeEach ->
+        spyOn(_._, "now").andCallFake -> window.now
         set text: "abc def", cursor: [0, 0]
 
       it "puts the editor into visual mode", ->
         ensure mode: 'normal'
 
+        # [FIXME] shift to visual-charactorwise is debounced(delayed) how to test?
         atom.commands.dispatch(editorElement, "core:select-right")
+        advanceClock(100)
         ensure
           mode: ['visual', 'characterwise']
           selectedbufferrange: [[0, 0], [0, 1]]
@@ -142,10 +145,10 @@ describe "VimState", ->
         set text: "012345\n\nabcdef", cursor: [0, 0]
 
       describe "on a line with content", ->
-        it "does not allow the atom-commands to place the cursor on the \n character", ->
+        it "[Changed] won't adjust cursor position if outer command place the cursor on end of line('\\n') character", ->
           ensure mode: 'normal'
           atom.commands.dispatch(editorElement, "editor:move-to-end-of-line")
-          ensure cursor: [0, 5]
+          ensure cursor: [0, 6]
 
       describe "on an empty line", ->
         it "allows the cursor to be placed on the \n character", ->
@@ -373,6 +376,24 @@ describe "VimState", ->
           ensure 'viw', selectedText: ['one', 'three']
           ensure 'V', selectedText: ["line one\n", "line three\n"]
           ensure 'v', selectedText: ["one", "three"]
+
+    describe "deactivating visual mode", ->
+      beforeEach ->
+        ensure 'escape', mode: 'normal'
+        set
+          text: "line one\nline two\nline three\n"
+          cursor: [0, 7]
+      it "can put cursor at in visual char mode", ->
+        ensure 'v',
+          mode: ['visual', 'characterwise']
+          cursor: [0, 8]
+      it "adjust cursor position 1 column left when deactivated", ->
+        ensure ['v', 'escape'],
+          mode: 'normal'
+          cursor: [0, 7]
+        ensure ['vll', 'escape'],
+          mode: 'normal'
+          cursor: [0, 7]
 
   describe "marks", ->
     beforeEach -> set text: "text in line 1\ntext in line 2\ntext in line 3"

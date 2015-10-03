@@ -51,10 +51,10 @@ class VimState
 
   constructor: (@editorElement, @statusBarManager, @globalVimState) ->
     @emitter = new Emitter
-    @subscriptions = new CompositeDisposable
+    @subscriptions = subs = new CompositeDisposable
     @editor = @editorElement.getModel()
     @history = []
-    @subscriptions.add @editor.onDidDestroy =>
+    subs.add @editor.onDidDestroy =>
       @destroy()
 
     @count = new CountManager(this)
@@ -71,13 +71,17 @@ class VimState
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
 
-    # @editorElement.addEventListener 'mouseup', @checkSelections.bind(this)
-
-    if atom.commands.onDidDispatch?
-      @subscriptions.add atom.commands.onDidDispatch ({target}) =>
-        return unless (target is @editorElement)
-        @checkSelections()
+    subs.add @editor.onDidChangeSelectionRange =>
+      if @isMode('visual', ['characterwise', 'blockwise'])
         @updateCursorsVisibility()
+
+    selectionChangeHandler = =>
+      return unless @editor?
+      if @editor.getSelections().every((s) -> s.isEmpty())
+        @activate('normal') if @isMode('visual')
+      else
+        @activate('visual', 'characterwise') if @isMode('normal')
+    subs.add @editor.onDidChangeSelectionRange _.debounce(selectionChangeHandler, 100)
 
     @addClass packageScope
     @init()
@@ -300,11 +304,7 @@ class VimState
   checkSelections: ->
     return unless @editor?
     if @editor.getSelections().every((s) -> s.isEmpty())
-      if @isMode('normal')
-        # null
-        @dontPutCursorsAtEndOfLine('checkSelections')
-      else if @isMode('visual')
-        @activate('normal')
+      @activate('normal') if @isMode('visual')
     else
       if @isMode('normal')
         @activate('visual', 'characterwise')
@@ -338,10 +338,3 @@ class VimState
   updateClassCond: (condition, klass) ->
     action = (if condition then 'add' else 'remove')
     @editorElement.classList[action](klass)
-
-  dontPutCursorsAtEndOfLine: (whoCall) ->
-    for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
-      # console.log "dontPutCursorsAtEOL: #{whoCall} MOVE!!"
-      {goalColumn} = c
-      c.moveLeft()
-      c.goalColumn = goalColumn

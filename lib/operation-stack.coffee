@@ -88,14 +88,18 @@ class OperationStack
     debug "#=== Canceled at #{new Date().toISOString()}\n"
 
   finish: ->
+    {editor} = @vimState
     if @vimState.isMode('normal')
-      if @vimState.editor.getLastSelection().isEmpty()
-        @vimState.dontPutCursorsAtEndOfLine()
-      else
-        # [FIXME] Eliminate this kind of inperative workaround.
-        @vimState.activate('visual', 'characterwise')
+      if editor.getLastSelection().isEmpty()
+        @dontPutCursorsAtEndOfLine()
     @vimState.reset()
     @vimState.lastOperation = null
+
+  dontPutCursorsAtEndOfLine: ->
+    for c in @vimState.editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
+      {goalColumn} = c
+      c.moveLeft()
+      c.goalColumn = goalColumn
 
   peekTop: ->
     _.last @stack

@@ -60,7 +60,6 @@ class ModeManager
     @editorElement.component.setInputEnabled(false)
     @vimState.reset()
     s.clear(autoscroll: false) for s in @editor.getSelections()
-    @vimState.dontPutCursorsAtEndOfLine('activateNormalMode')
 
   # TODO: delete this in future.
   resetNormalMode: ->
@@ -94,12 +93,14 @@ class ModeManager
     @insertionCheckpoint = null
     if (item = @vimState.history[0]) and item.isInsert()
       item.confirmChanges(changes)
-    for c in @editor.getCursors() when not c.isAtBeginningOfLine()
-      c.moveLeft()
 
     if @isMode('insert', 'replace')
       @replaceModeSubscriptions?.dispose()
       @replaceModeSubscriptions = null
+
+    # Adjust cursor position
+    for c in @editor.getCursors() when not c.isAtBeginningOfLine()
+      c.moveLeft()
 
   replaceModeBackspace: ->
     for s in @editor.getSelections()
@@ -127,7 +128,12 @@ class ModeManager
 
   deactivateVisualMode: ->
     @selectCharacterwise() if @isMode('visual', 'linewise')
-    for s in @editor.getSelections() when not (s.isEmpty() or s.isReversed())
+
+    # Adjust cursor position
+    for s in @editor.getSelections() when (not s.isEmpty()) and (not s.isReversed())
+      # Since `vll` can select '\n' and put cursor on column 0 of next-line.
+      if s.cursor.isAtBeginningOfLine()
+        s.cursor.moveLeft()
       s.cursor.moveLeft()
 
   selectLinewise: (oldSubmode) ->
