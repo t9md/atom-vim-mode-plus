@@ -46,7 +46,7 @@ describe "Motion", ->
       it "moves the cursor to the end of the line, not past it", ->
         set cursor: [0, 4]
         ensure 'j', cursor: [1, 3]
-      it "remembers the position it column it was in after moving to shorter line", ->
+      it "remembers the column it was in after moving to shorter line", ->
         set cursor: [0, 4]
         ensure 'j', cursor: [1, 3]
         ensure 'j', cursor: [2, 4]
