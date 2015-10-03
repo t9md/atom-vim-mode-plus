@@ -414,9 +414,11 @@ class PutBefore extends Operator
     text = _.multiplyString(text, @getCount())
     @editor.transact =>
       for selection in @editor.getSelections()
-        switch type
-          when 'linewise'  then @pasteLinewise(selection, text)
-          when 'character' then @pasteCharacterwise(selection, text)
+        switch
+          when type is 'linewise', @vimState.isMode('visual', 'linewise')
+            @pasteLinewise(selection, text)
+          when 'character'
+            @pasteCharacterwise(selection, text)
     @vimState.activate('normal')
 
   pasteLinewise: (selection, text) ->
@@ -429,33 +431,24 @@ class PutBefore extends Operator
       else
         cursor.moveToEndOfLine()
         selection.insertText("\n")
-
       text = text.replace(/\n$/, '')
-      range = selection.insertText(text)
-      @flash range
-      cursor.setBufferPosition(range.start)
-      cursor.moveToFirstCharacterOfLine()
     else
       if @vimState.isMode('visual', 'linewise')
         text += '\n' unless text.endsWith('\n')
       else
         selection.insertText("\n")
-      range = selection.insertText(text)
-      @flash range
-      cursor.setBufferPosition(range.start)
+    range = selection.insertText(text)
+    @flash range
+    cursor.setBufferPosition(range.start)
+    cursor.moveToFirstCharacterOfLine()
 
   pasteCharacterwise: (selection, text) ->
     cursor = selection.cursor
     if @location is 'after' and selection.isEmpty()
       cursor.moveRight()
-    if @vimState.isMode('visual', 'linewise')
-      text += '\n' unless text.endsWith('\n')
     range = selection.insertText(text)
     @flash range
-    if @vimState.isMode('visual', 'linewise')
-      cursor.setBufferPosition(range.start)
-    else
-      cursor.setBufferPosition(range.end.translate([0, -1]))
+    cursor.setBufferPosition(range.end.translate([0, -1]))
 
 class PutAfter extends PutBefore
   @extend()
