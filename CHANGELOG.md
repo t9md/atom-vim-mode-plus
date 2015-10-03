@@ -1,5 +1,6 @@
-# 0.1.6 [WORKING]
+# 0.1.6
 - FIX:￼ shift from visual-char2block incorrectly add extra selection when rows contain blank row.
+- FIX:￼ p and P didn't correct replace text in visual-linewise mode.
 
 ## 0.1.5
 - FIX: In softwrapped line, moveDown/moveUp fail in visual-linewise mode.
