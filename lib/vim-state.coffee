@@ -35,7 +35,6 @@ class VimState
   replaceModeListener: null
   developer: null
   lastOperation: null
-  # lastVisual: null
 
   # Mode handling is delegated to modeManager
   delegatingMethods = [
@@ -98,7 +97,6 @@ class VimState
       @activate('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
       @removeClass packageScope, 'normal-mode'
-    # @editorElement.removeEventListener 'mouseup', @checkSelections
     @editor = null
     @editorElement = null
     @lastOperation = null
@@ -300,21 +298,6 @@ class VimState
 
   getSearchHistoryItem: (index=0) ->
     @searchHistory.getEntries[index]
-
-  checkSelections: ->
-    return unless @editor?
-    if @editor.getSelections().every((s) -> s.isEmpty())
-      @activate('normal') if @isMode('visual')
-    else
-      if @isMode('normal')
-        @activate('visual', 'characterwise')
-      else
-        # When cursor is added selection is empty
-        # using editor.onDidAddCursor not work since at the timing event callbacked,
-        # cursor.selection is `undefined` and editor.getCursors().length isnt editor.getSelections().length
-        lastSelection = @editor.getLastSelection()
-        if lastSelection.isEmpty()
-          lastSelection.selectRight()
 
   updateCursorsVisibility: ->
     return unless settings.get('showCursorInVisualMode')
