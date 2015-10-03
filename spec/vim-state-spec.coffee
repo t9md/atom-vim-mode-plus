@@ -115,7 +115,6 @@ describe "VimState", ->
       it "puts the editor into visual mode", ->
         ensure mode: 'normal'
 
-        # [FIXME] shift to visual-charactorwise is debounced(delayed) how to test?
         atom.commands.dispatch(editorElement, "core:select-right")
         advanceClock(100)
         ensure
@@ -391,7 +390,10 @@ describe "VimState", ->
         ensure ['v', 'escape'],
           mode: 'normal'
           cursor: [0, 7]
-        ensure ['vll', 'escape'],
+      it "adjust cursor position when it select new line '\\n'", ->
+        ensure 'vll',
+          cursor: [1, 0]
+        ensure 'escape',
           mode: 'normal'
           cursor: [0, 7]
 
