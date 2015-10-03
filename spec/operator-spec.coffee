@@ -695,14 +695,6 @@ describe "Operator", ->
           set text: "abcde\none two three", cursor: [1, 4]
           ensure 'd$k$p', text: "abcdetwo three\none "
 
-      describe "with a selection", ->
-        beforeEach ->
-          editor.selectRight()
-          keystroke 'p'
-
-        it "replaces the current selection", ->
-          ensure text: "34512\n", cursor: [0, 2]
-
     describe "with linewise contents", ->
       describe "on a single line", ->
         beforeEach ->
@@ -771,6 +763,28 @@ describe "Operator", ->
         ensure 'p',
           text: "12345\naZZZbcde\nAZZZBCDE\nQWERT"
           cursor: [[1, 3], [2, 3]]
+
+    fdescribe "with a selection", ->
+      beforeEach ->
+        settings.set 'useClipboardAsDefaultRegister', true
+        set
+          text: '012'
+          cursor: [0, 1]
+      describe "with characterwise selection", ->
+        it "replaces selection with charwise content", ->
+          set register: '"': text: "345"
+          ensure 'vp', text: "03452", cursor: [0, 3]
+        it "replaces selection with linewise content", ->
+          set register: '"': text: "345\n"
+          ensure 'vp', text: "0\n345\n2", cursor: [1, 0]
+
+      describe "with linewise selection", ->
+        it "replaces selection with charwise content", ->
+          set register: '"': text: "345"
+          ensure 'Vp', text: "345", cursor: [0, 0]
+        it "replaces selection with linewise content", ->
+          set register: '"': text: "345\n"
+          ensure 'Vp', text: "345\n", cursor: [0, 0]
 
   describe "the P keybinding", ->
     describe "with character contents", ->
