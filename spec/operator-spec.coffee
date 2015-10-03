@@ -706,11 +706,10 @@ describe "Operator", ->
         it "inserts the contents of the default register", ->
           ensure 'p', text: "012\n 345", cursor: [1, 1]
 
-        it "replaces the current selection", ->
-          editor.selectRight()
-          ensure 'p',
+        it "replaces the current selection and put cursor to the first char of line", ->
+          ensure 'vp',
             text: "0\n 345\n2"
-            cursor: [1, 0]
+            cursor: [1, 1]
 
       describe "on multiple lines", ->
         beforeEach ->
