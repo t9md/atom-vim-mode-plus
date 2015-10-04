@@ -32,10 +32,10 @@ class OperationStack
     @withLock =>
       @process()
 
-  withLock: (callback) ->
+  withLock: (fn) ->
     try
       @processing = true
-      callback()
+      fn()
     finally
       @processing = false
 
