@@ -71,7 +71,6 @@ class VimState
     @modeManager = new ModeManager(this)
 
     subs.add @editor.onDidChangeSelectionRange =>
-      return if @operationStack.isProcessing()
       if @isMode('visual', ['characterwise', 'blockwise'])
         @updateCursorsVisibility()
 
