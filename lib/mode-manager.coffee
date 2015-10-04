@@ -1,6 +1,6 @@
 # Refactoring status: 80%
 _ = require 'underscore-plus'
-{selectLines, swrap} = require './utils'
+{swrap} = require './utils'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 {Range, CompositeDisposable, Disposable} = require 'atom'
 
@@ -144,7 +144,7 @@ class ModeManager
     # Keep original range as marker's property to restore column.
     for selection in @editor.getSelections()
       swrap(selection).preserveCharacterwise()
-      selectLines(selection)
+      swrap(selection).expandOverLine()
     @hideCursors()
 
   selectCharacterwise: (oldSubmode) ->

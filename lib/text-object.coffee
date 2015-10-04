@@ -3,7 +3,6 @@
 _    = require 'underscore-plus'
 Base = require './base'
 {
-  selectLines
   isLinewiseRange
   rangeToBeginningOfFileFromPoint
   rangeToEndOfFileFromPoint
@@ -23,7 +22,7 @@ class TextObject extends Base
 
   eachSelection: (fn) ->
     fn(s) for s in @editor.getSelections()
-    if @isLinewise() and not @vimState.isMode('operator-pending') and
+    if not @vimState.isMode('operator-pending') and @isLinewise() and
         not @vimState.isMode('visual', 'linewise')
       @vimState.activate('visual', 'linewise')
     @status()
@@ -322,7 +321,7 @@ class Indentation extends Paragraph
 # TODO: make it extendable when repeated
 class Fold extends TextObject
   @extend()
-  getRowRangeForBufferRow: (bufferRow) ->
+  getFoldRowRangeForBufferRow: (bufferRow) ->
     for currentRow in [bufferRow..0] by -1
       [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
       continue unless startRow? and startRow <= bufferRow <= endRow
@@ -333,8 +332,8 @@ class Fold extends TextObject
     @eachSelection (selection) =>
       [startRow, endRow] = selection.getBufferRowRange()
       row = if selection.isReversed() then startRow else endRow
-      if rowRange = @getRowRangeForBufferRow(row)
-        selectLines(selection, rowRange)
+      if rowRange = @getFoldRowRangeForBufferRow(row)
+        swrap(selection).selectRowRange(rowRange)
 
 # NOTE: Function range determination is depending on fold.
 class Function extends Fold
