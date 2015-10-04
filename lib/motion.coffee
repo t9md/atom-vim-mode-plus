@@ -1,6 +1,6 @@
 # Refactoring status: 50%
 {Point, Range, CompositeDisposable} = require 'atom'
-{selectLines, saveEditorState, getVisibleBufferRange} = require './utils'
+{swrap, saveEditorState, getVisibleBufferRange} = require './utils'
 {Hover} = require './hover'
 {MatchList} = require './match'
 
@@ -40,7 +40,7 @@ class Motion extends Base
       switch
         when @isInclusive(), @isLinewise()
           @selectInclusive selection
-          selectLines(selection) if @isLinewise()
+          swrap(selection).expandOverLine() if @isLinewise()
         else
           selection.modifySelection =>
             @moveCursor selection.cursor
@@ -138,7 +138,7 @@ class CurrentSelection extends Motion
     unless @vimState.isMode('visual')
       @selectCharacters()
       if @wasLinewise
-        selectLines(s) for s in @editor.getSelections()
+        swrap(s).expandOverLine() for s in @editor.getSelections()
     @status()
 
   selectCharacters: ->

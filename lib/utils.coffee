@@ -20,13 +20,6 @@ debug = (message) ->
       if fs.existsSync(filePath)
         fs.appendFileSync filePath, message
 
-selectLines = (selection, rowRange=null) ->
-  {editor} = selection
-  [startRow, endRow] = if rowRange? then rowRange else selection.getBufferRowRange()
-  range = editor.bufferRangeForBufferRow(startRow, includeNewline: true)
-  range = range.union(editor.bufferRangeForBufferRow(endRow, includeNewline: true))
-  selection.setBufferRange(range)
-
 getNonBlankCharPositionForRow = (editor, row) ->
   scanRange = editor.bufferRangeForBufferRow(row)
   point = null
@@ -112,6 +105,17 @@ swrap = (selection) ->
   setReversedState: (boolean) ->
     selection.setBufferRange(selection.getBufferRange(), reversed: boolean)
 
+  selectRowRange: (rowRange) ->
+    {editor} = selection
+    [startRow, endRow] = rowRange
+    rangeStart = editor.bufferRangeForBufferRow(startRow, includeNewline: true)
+    rangeEnd   = editor.bufferRangeForBufferRow(endRow, includeNewline: true)
+    selection.setBufferRange(rangeStart.union(rangeEnd))
+
+  # Native selection.expandOverLine is not aware of actual rowRange of selection.
+  expandOverLine: ->
+    @selectRowRange selection.getBufferRowRange()
+
   preserveCharacterwise: ->
     @update
       characterwise:
@@ -144,7 +148,6 @@ swrap = (selection) ->
 module.exports = {
   include
   debug
-  selectLines
   getNonBlankCharPositionForRow
   saveEditorState
   getKeystrokeForEvent
