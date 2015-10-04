@@ -355,7 +355,7 @@ class Function extends Fold
 
   # Greatly depending on fold, and what range is folded is vary from languages.
   # So we need to adjust endRow based on scope.
-  getRowRangeForBufferRow: (bufferRow) ->
+  getFoldRowRangeForBufferRow: (bufferRow) ->
     for currentRow in [bufferRow..0] by -1
       [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
       unless startRow? and (startRow <= bufferRow <= endRow) and @isIncludeFunctionScopeForRow(startRow)
