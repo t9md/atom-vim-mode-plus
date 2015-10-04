@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
-{swrap} = require './utils'
+{swrap, haveSomeSelection} = require './utils'
 
 Operator        = require './operator'
 Motion          = require './motion'
@@ -78,7 +78,7 @@ class VimState
     selectionChangeHandler = =>
       return unless @editor?
       return if @operationStack.isProcessing()
-      someSelection = @editor.getSelections().some((s) -> not s.isEmpty())
+      someSelection = haveSomeSelection(@editor.getSelections())
       switch
         when @isMode('visual') and (not someSelection)
           @activate('normal')
@@ -288,12 +288,14 @@ class VimState
     @activate('normal')
 
   reverseSelections: ->
-    reversed = not @editor.getLastSelection().isReversed()
-    @syncSelectionsReversedSate(reversed)
+    selection = @editor.getLastSelection()
+    swrap(selection).reverse()
+    @syncSelectionsReversedSate(selection)
 
-  syncSelectionsReversedSate: (reversed) ->
-    for selection in @editor.getSelections()
-      selection.setBufferRange(selection.getBufferRange(), {reversed})
+  syncSelectionsReversedSate: (selection) ->
+    reversed = selection.isReversed()
+    for s in @editor.getSelections() when not (s is selection)
+      swrap(s).setReversedState(reversed)
 
   # Search History
   # -------------------------

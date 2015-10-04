@@ -57,15 +57,11 @@ rangeToBeginningOfFileFromPoint = (point) ->
 rangeToEndOfFileFromPoint = (point) ->
   new Range(point, Point.INFINITY)
 
-isIncludeNonEmptySelection = (selections) ->
+haveSomeSelection = (selections) ->
   selections.some((s) -> not s.isEmpty())
 
 sortRanges = (ranges) ->
   ranges.sort((a, b) -> a.compare(b))
-
-setSelectionBufferRangeSafely = (selection, range) ->
-  if range
-    selection.setBufferRange(range)
 
 # return adjusted index fit whitin length
 # return -1 if list is empty.
@@ -106,6 +102,16 @@ swrap = (selection) ->
   clear: ->
     @set null
 
+  setBufferRangeSafely: (range) ->
+    if range
+      selection.setBufferRange(range)
+
+  reverse: ->
+    @setReversedState(not selection.isReversed())
+
+  setReversedState: (boolean) ->
+    selection.setBufferRange(selection.getBufferRange(), reversed: boolean)
+
   preserveCharacterwise: ->
     @update
       characterwise:
@@ -145,9 +151,8 @@ module.exports = {
   isLinewiseRange
   rangeToBeginningOfFileFromPoint
   rangeToEndOfFileFromPoint
-  isIncludeNonEmptySelection
+  haveSomeSelection
   sortRanges
-  setSelectionBufferRangeSafely
   getIndex
   getVisibleBufferRange
   selectVisibleBy
