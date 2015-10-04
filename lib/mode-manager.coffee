@@ -1,6 +1,6 @@
 # Refactoring status: 80%
 _ = require 'underscore-plus'
-{swrap} = require './utils'
+swrap = require './selection-wrapper'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 {Range, CompositeDisposable, Disposable} = require 'atom'
 

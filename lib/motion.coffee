@@ -1,6 +1,7 @@
 # Refactoring status: 50%
 {Point, Range, CompositeDisposable} = require 'atom'
-{swrap, saveEditorState, getVisibleBufferRange} = require './utils'
+{saveEditorState, getVisibleBufferRange} = require './utils'
+swrap = require './selection-wrapper'
 {Hover} = require './hover'
 {MatchList} = require './match'
 
