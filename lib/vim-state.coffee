@@ -70,6 +70,7 @@ class VimState
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
 
+    # FIXME: Observe mousedown and mouseup event only for explicitness.
     subs.add @editor.onDidChangeSelectionRange =>
       if @isMode('visual', ['characterwise', 'blockwise'])
         @updateCursorsVisibility()
