@@ -7,9 +7,9 @@ Base = require './base'
   isLinewiseRange
   rangeToBeginningOfFileFromPoint
   rangeToEndOfFileFromPoint
-  isIncludeNonEmptySelection
+  haveSomeSelection
   sortRanges
-  setSelectionBufferRangeSafely
+  swrap
   getLineTextToPoint
 } = require './utils'
 
@@ -29,7 +29,7 @@ class TextObject extends Base
     @status()
 
   status: ->
-    isIncludeNonEmptySelection @editor.getSelections()
+    haveSomeSelection @editor.getSelections()
 
   execute: ->
     @select()
@@ -46,7 +46,7 @@ class Word extends TextObject
       @selectInclusive(selection) if @inclusive
 
   selectExclusive: (s, wordRegex) ->
-    setSelectionBufferRangeSafely s, s.cursor.getCurrentWordBufferRange({wordRegex})
+    swrap(s).setBufferRangeSafely s.cursor.getCurrentWordBufferRange({wordRegex})
 
   selectInclusive: (selection) ->
     scanRange = selection.cursor.getCurrentLineBufferRange()
@@ -164,7 +164,7 @@ class Pair extends TextObject
 
   select: ->
     @eachSelection (s) =>
-      setSelectionBufferRangeSafely s, @getRange(s, @what)
+      swrap(s).setBufferRangeSafely @getRange(s, @what)
 
 class AnyPair extends Pair
   @extend()
@@ -190,7 +190,7 @@ class AnyPair extends Pair
 
   select: ->
     @eachSelection (s) =>
-      setSelectionBufferRangeSafely s, @getNearestRange(s)
+      swrap(s).setBufferRangeSafely @getNearestRange(s)
 
 class AnyQuote extends AnyPair
   @extend()
@@ -266,7 +266,7 @@ class Paragraph extends TextObject
   selectParagraph: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
     if startRow is endRow
-      setSelectionBufferRangeSafely selection, @getRange(startRow)
+      swrap(selection).setBufferRangeSafely @getRange(startRow)
     else # have direction
       if selection.isReversed()
         if range = @getRange(startRow-1)
