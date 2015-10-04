@@ -92,6 +92,8 @@ class OperationStack
     if @vimState.isMode('normal')
       if editor.getLastSelection().isEmpty()
         @dontPutCursorsAtEndOfLine()
+    if @vimState.isMode('visual', 'blockwise')
+      @vimState.updateCursorsVisibility()
     @vimState.reset()
     @vimState.lastOperation = null
 

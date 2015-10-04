@@ -172,7 +172,6 @@ class ModeManager
     unless oldSubmode is 'characterwise'
       @selectCharacterwise()
     @vimState.operationStack.push new BlockwiseSelect(@vimState)
-    @vimState.updateCursorsVisibility()
 
   # Others
   # -------------------------
