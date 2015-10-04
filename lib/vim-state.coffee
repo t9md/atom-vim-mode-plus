@@ -71,16 +71,21 @@ class VimState
     @modeManager = new ModeManager(this)
 
     subs.add @editor.onDidChangeSelectionRange =>
+      return if @operationStack.isProcessing()
       if @isMode('visual', ['characterwise', 'blockwise'])
         @updateCursorsVisibility()
 
     selectionChangeHandler = =>
       return unless @editor?
-      if @editor.getSelections().every((s) -> s.isEmpty())
-        @activate('normal') if @isMode('visual')
-      else
-        @activate('visual', 'characterwise') if @isMode('normal')
-    subs.add @editor.onDidChangeSelectionRange _.debounce(selectionChangeHandler, 100)
+      return if @operationStack.isProcessing()
+      someSelection = @editor.getSelections().some((s) -> not s.isEmpty())
+      switch
+        when @isMode('visual') and (not someSelection)
+          @activate('normal')
+        when @isMode('normal') and someSelection
+          @activate('visual', 'characterwise')
+
+    subs.add @editor.onDidChangeSelectionRange _.debounce(selectionChangeHandler, 100) #, true)
 
     @addClass packageScope
     @init()

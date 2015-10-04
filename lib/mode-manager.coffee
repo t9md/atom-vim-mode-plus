@@ -127,7 +127,8 @@ class ModeManager
       when 'blockwise' then @selectBlockwise(oldSubmode)
 
   deactivateVisualMode: ->
-    @selectCharacterwise() if @isMode('visual', 'linewise')
+    if @isMode('visual', 'linewise')
+      @selectCharacterwise('linewise')
 
     # Adjust cursor position
     for s in @editor.getSelections() when (not s.isEmpty()) and (not s.isReversed())
@@ -147,15 +148,25 @@ class ModeManager
     @hideCursors()
 
   selectCharacterwise: (oldSubmode) ->
-    if @editor.getLastSelection().isEmpty()
-      @editor.selectRight()
+    selection = @editor.getLastSelection()
+    unless oldSubmode
+      if selection.isEmpty()
+        @editor.selectRight()
+      else
+        point = selection.getTailBufferPosition()
+        tailRange = Range.fromPointWithDelta(point, 0, +1)
+        newRange = selection.getBufferRange().union(tailRange)
+        selection.setBufferRange(newRange)
       return
 
-    if oldSubmode is 'blockwise'
-      @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
-    else
-      for s in @editor.getSelections()
-        swrap(s).restoreCharacterwise()
+    switch
+      when oldSubmode is 'blockwise'
+        @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
+      when oldSubmode is 'linewise' and selection.isEmpty()
+        @editor.selectRight()
+      else
+        for s in @editor.getSelections()
+          swrap(s).restoreCharacterwise()
 
   selectBlockwise: (oldSubmode) ->
     unless oldSubmode is 'characterwise'
