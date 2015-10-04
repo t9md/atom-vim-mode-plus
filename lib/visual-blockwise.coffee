@@ -150,12 +150,12 @@ class BlockwiseSelect extends VisualBlockwise
     tail = s.getTailBufferPosition()
     head = s.getHeadBufferPosition()
     {start, end} = s.getBufferRange()
+    [action, step] = if s.isReversed() then ['Up', -1] else ['Down', +1]
 
     range = new Range(tail, [tail.row, head.column])
     range = range.translate([0, -1], [0, +1]) if start.column >= end.column
-    s.setBufferRange(range, reversed: head.column < tail.column)
-    [action, step] = if s.isReversed() then ['Up', -1] else ['Down', +1]
 
+    s.setBufferRange(range, reversed: head.column < tail.column)
     # NOTE: Need to skip the amount of rows where no selectable chars exist.
     _.times (end.row - start.row), =>
       range = range.translate([step, 0], [step, 0])
