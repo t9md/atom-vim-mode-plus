@@ -1,6 +1,6 @@
 Base = require './base'
 _ = require 'underscore-plus'
-{swrap} = require './utils'
+swrap = require './selection-wrapper'
 {Range} = require 'atom'
 
 # FIXME Currently initally multi selected situation not supported.

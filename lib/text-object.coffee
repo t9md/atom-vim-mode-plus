@@ -2,13 +2,13 @@
 {Range} = require 'atom'
 _    = require 'underscore-plus'
 Base = require './base'
+swrap = require './selection-wrapper'
 {
   isLinewiseRange
   rangeToBeginningOfFileFromPoint
   rangeToEndOfFileFromPoint
   haveSomeSelection
   sortRanges
-  swrap
   getLineTextToPoint
 } = require './utils'
 
