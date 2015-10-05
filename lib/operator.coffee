@@ -279,12 +279,11 @@ class ChangeSurroundAnyPair extends ChangeSurround
   initialize: ->
     @compose @new("AnyPair", inclusive: true)
     @preSelect()
-    if @haveSomeSelection()
-      # FIXME: hide surround hover if preSelect() fail
-      @vimState.hover.add(@editor.getSelectedText()[0])
-      super
-    else
+    unless @haveSomeSelection()
+      @vimState.reset()
       @abort()
+    @vimState.hover.add(@editor.getSelectedText()[0])
+    super
 
   # FIXME very inperative implementation. find more generic and consistent approach.
   # like preservePoints() and restorePoints().
