@@ -234,7 +234,7 @@ class AngleBracket extends Pair
   @extend()
   pair: '<>'
 
-# [FIXME] See #795
+# [FIXME] See vim-mode#795
 class Tag extends Pair
   @extend()
   pair: '><'
