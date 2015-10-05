@@ -1,7 +1,7 @@
 # Refactoring status: 80%
 _ = require 'underscore-plus'
-{Point, Range} = require 'atom'
-{CompositeDisposable} = require 'atom'
+{Point, Range, CompositeDisposable} = require 'atom'
+{haveSomeSelection} = require './utils'
 
 settings = require './settings'
 Base = require './base'
@@ -19,6 +19,9 @@ class Operator extends Base
 
   target: null
   flashTarget: true
+
+  haveSomeSelection: ->
+    haveSomeSelection(@editor.getSelections())
 
   isSameOperatorRepeated: ->
     if @vimState.isMode('operator-pending')
@@ -85,10 +88,8 @@ class Operator extends Base
     @vimState.flasher.flash(options, fn)
 
   eachSelection: (fn) ->
-    if @selected?
-      return unless @selected
-    else
-      return unless @target.select()
+    @target.select() unless @haveSomeSelection()
+    return unless @haveSomeSelection()
     @editor.transact =>
       for s in @editor.getSelections()
         if @flashTarget and settings.get('flashOnOperate')
@@ -143,8 +144,6 @@ class TransformString extends Operator
       if @adjustCursor
         s.cursor.setBufferPosition(points?.shift() ? range.start)
     @vimState.activate('normal')
-    # FIXME: to more cleaner approach to preserve/restore Points.
-    @selected = null
     @points = null
 
 class ToggleCase extends TransformString
@@ -278,17 +277,21 @@ class ChangeSurroundAnyPair extends ChangeSurround
   charsMax: 1
 
   initialize: ->
-    super
     @compose @new("AnyPair", inclusive: true)
     @preSelect()
+    if @haveSomeSelection()
+      # FIXME: hide surround hover if preSelect() fail
+      @vimState.hover.add(@editor.getSelectedText()[0])
+      super
+    else
+      @abort()
 
   # FIXME very inperative implementation. find more generic and consistent approach.
   # like preservePoints() and restorePoints().
   preSelect: ->
     if @target.isLinewise?() or settings.get('stayOnTransformString')
       @points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-    if @selected = @target.select()
-      @vimState.hover.add(@editor.getSelectedText()[0])
+    @target.select()
 
   onConfirm: (@char) ->
     @input = @char
@@ -578,7 +581,8 @@ class Change extends Insert
 
     @target.setOptions? excludeWhitespace: true
 
-    if @target.select()
+    @target.select()
+    if @haveSomeSelection()
       @setTextToRegister @editor.getSelectedText()
       if @target.isLinewise?() and not @typedText?
         for selection in @editor.getSelections()
@@ -691,7 +695,8 @@ class Replace extends Operator
 
     @editor.transact =>
       if @target?
-        if @target.select()
+        @target.select()
+        if @haveSomeSelection()
           @editor.replaceSelectedText null, (text) =>
             text.replace(/./g, @input)
           for selection in @editor.getSelections()
