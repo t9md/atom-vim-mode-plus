@@ -7,7 +7,6 @@ swrap = require './selection-wrapper'
   isLinewiseRange
   rangeToBeginningOfFileFromPoint
   rangeToEndOfFileFromPoint
-  haveSomeSelection
   sortRanges
   getLineTextToPoint
 } = require './utils'
@@ -25,10 +24,6 @@ class TextObject extends Base
     if not @vimState.isMode('operator-pending') and @isLinewise() and
         not @vimState.isMode('visual', 'linewise')
       @vimState.activate('visual', 'linewise')
-    @status()
-
-  status: ->
-    haveSomeSelection @editor.getSelections()
 
   execute: ->
     @select()
@@ -386,7 +381,6 @@ class Entire extends TextObject
   @extend()
   select: ->
     @editor.selectAll()
-    @status()
 
 module.exports = {
   Word, WholeWord,

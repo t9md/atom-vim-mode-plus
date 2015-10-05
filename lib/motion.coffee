@@ -48,7 +48,6 @@ class Motion extends Base
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
-    @status()
 
   # This tail position is always selected even if selection isReversed() as a result of cursor movement.
   getTailRange: (selection) ->
@@ -119,10 +118,6 @@ class Motion extends Base
   getLastVisibleScreenRow: ->
     @editorElement.getLastVisibleScreenRow()
 
-  # return boolean that indicates at least one of selections is not isEmpty().
-  status: ->
-    @editor.getSelections().some((s) -> not s.isEmpty())
-
 class CurrentSelection extends Motion
   @extend()
   selectedRange: null
@@ -140,7 +135,6 @@ class CurrentSelection extends Motion
       @selectCharacters()
       if @wasLinewise
         swrap(s).expandOverLine() for s in @editor.getSelections()
-    @status()
 
   selectCharacters: ->
     extent = @selectedRange.getExtent()
@@ -448,7 +442,6 @@ class ScrollFullScreenDown extends Motion
   select: ->
     @withScroll =>
       super()
-    @status()
 
   execute: -> @withScroll => super()
 
