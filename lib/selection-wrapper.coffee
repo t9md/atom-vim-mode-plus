@@ -1,58 +1,61 @@
 _ = require 'underscore-plus'
 {Range} = require 'atom'
 
-swrap = (selection) ->
-  scope = 'vimModePlus'
-  get: ->
-    selection.marker.getProperties()[scope] ? {}
+class SelectionWrapper
+  scope: 'vim-mode-plus'
 
-  set: (newProp) ->
+  constructor: (@selection) ->
+
+  getProperties: ->
+    @selection.marker.getProperties()[@scope] ? {}
+
+  setProperties: (newProp) ->
     prop = {}
-    prop[scope] = newProp
-    selection.marker.setProperties prop
+    prop[@scope] = newProp
+    @selection.marker.setProperties prop
 
-  update: (value) ->
-    # @get() get result of getProperties() which is safe to extend.
+  updateProperties: (value) ->
+    # @getProperties() get result of getProperties() which is safe to extend.
     # So OK to directly extend.
-    @set _.deepExtend(@get(), value)
+    @setProperties _.deepExtend(@getProperties(), value)
 
-  clear: ->
-    @set null
+  resetProperties: ->
+    @setProperties null
 
   setBufferRangeSafely: (range) ->
     if range
-      selection.setBufferRange(range)
+      @selection.setBufferRange(range)
 
   reverse: ->
-    @setReversedState(not selection.isReversed())
+    @setReversedState(not @selection.isReversed())
 
   setReversedState: (boolean) ->
-    selection.setBufferRange(selection.getBufferRange(), reversed: boolean)
+    @selection.setBufferRange(@selection.getBufferRange(), reversed: boolean)
 
   selectRowRange: (rowRange) ->
-    {editor} = selection
+    {editor} = @selection
     [startRow, endRow] = rowRange
     rangeStart = editor.bufferRangeForBufferRow(startRow, includeNewline: true)
     rangeEnd   = editor.bufferRangeForBufferRow(endRow, includeNewline: true)
-    selection.setBufferRange(rangeStart.union(rangeEnd))
+    @selection.setBufferRange(rangeStart.union(rangeEnd))
 
   # Native selection.expandOverLine is not aware of actual rowRange of selection.
   expandOverLine: ->
-    @selectRowRange selection.getBufferRowRange()
+    @selectRowRange @selection.getBufferRowRange()
 
   preserveCharacterwise: ->
-    @update
+    @updateProperties
       characterwise:
-        range: selection.getBufferRange()
-        reversed: selection.isReversed()
+        range: @selection.getBufferRange()
+        reversed: @selection.isReversed()
 
   restoreCharacterwise: ->
-    {characterwise} = @get()
+    {characterwise} = @getProperties()
     return unless characterwise
     {range: {start, end}, reversed} = characterwise
-    rows = selection.getBufferRowRange()
+    rows = @selection.getBufferRowRange()
 
-    reversedChanged = (selection.isReversed() isnt reversed) # reverse status changed
+    reversedChanged = (@selection.isReversed() isnt reversed) # reverse status changed
     rows.reverse() if reversedChanged
 
     [startRow, endRow] = rows
@@ -62,11 +65,20 @@ swrap = (selection) ->
 
     if reversedChanged
       rangeTaranslation = [[0, +1], [0, -1]]
-      rangeTaranslation.reverse() if selection.isReversed()
+      rangeTaranslation.reverse() if @selection.isReversed()
       range = range.translate(rangeTaranslation...)
 
-    selection.setBufferRange(range)
+    @selection.setBufferRange(range)
     # [NOTE] Important! reset to null after restored.
-    @clear()
+    @resetProperties()
+
+  isBlockwiseHead: ->
+    @getProperties().blockwise?.head
+
+  isBlockwiseTail: ->
+    @getProperties().blockwise?.tail
+
+swrap = (selection) ->
+  new SelectionWrapper(selection)
 
 module.exports = swrap

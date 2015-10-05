@@ -56,7 +56,7 @@ class ModeManager
     # If we don't reset this propety, first find-and-replace:select-next will
     # put selection wrong place.
     for s in @editor.getSelections()
-      swrap(s).clear()
+      swrap(s).resetProperties()
     @editorElement.component.setInputEnabled(false)
     @vimState.reset()
     s.clear(autoscroll: false) for s in @editor.getSelections()
