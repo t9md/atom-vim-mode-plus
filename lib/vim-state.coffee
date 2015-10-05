@@ -313,7 +313,7 @@ class VimState
       when @isMode('visual', 'characterwise')
         @editor.getCursors()
       when @isMode('visual', 'blockwise')
-        (s.cursor for s in @editor.getSelections() when swrap(s).get().blockwise?.head)
+        (s.cursor for s in @editor.getSelections() when swrap(s).isBlockwiseHead())
     return unless cursors
 
     for cursor in cursors

@@ -20,7 +20,7 @@ class VisualBlockwise extends Base
       s.cursor.setVisible(false)
 
   updateProperty: (selection, prop) ->
-    swrap(selection).update {blockwise: prop}
+    swrap(selection).updateProperties(blockwise: prop)
 
   getTop: ->
     _.first @editor.getSelectionsOrderedByBufferPosition()
@@ -41,8 +41,7 @@ class VisualBlockwise extends Base
     if @isReversed() then @getTop() else @getBottom()
 
   getTail: ->
-    _.detect @editor.getSelections(), (s) ->
-      swrap(s).get().blockwise?.tail
+    _.detect @editor.getSelections(), ((s) -> swrap(s).isBlockwiseTail())
 
   setTail: (newTail) ->
     @clearTail()
