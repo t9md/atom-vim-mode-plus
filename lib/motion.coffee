@@ -49,17 +49,6 @@ class Motion extends Base
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
-  # This tail position is always selected even if selection isReversed() as a result of cursor movement.
-  getTailRange: (selection) ->
-    if @isLinewise()
-      [startRow, endRow] = selection.getBufferRowRange()
-      row = if selection.isReversed() then endRow else startRow
-      @editor.bufferRangeForBufferRow(row, includeNewline: true)
-    else
-      point = selection.getTailBufferPosition()
-      columnDelta = if selection.isReversed() then -1 else +1
-      Range.fromPointWithDelta(point, 0, columnDelta)
-
   withKeepingGoalColumn: (cursor, fn) ->
     {goalColumn} = cursor
     fn(cursor)
@@ -74,7 +63,7 @@ class Motion extends Base
       selection.selectRight()
 
     selection.modifySelection =>
-      tailRange = @getTailRange(selection)
+      tailRange = swrap(selection).getTailRange()
       unless selection.isReversed()
         @withKeepingGoalColumn cursor, (c) ->
           c.moveLeft()
