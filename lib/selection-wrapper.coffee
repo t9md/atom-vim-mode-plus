@@ -43,6 +43,17 @@ class SelectionWrapper
   expandOverLine: ->
     @selectRowRange @selection.getBufferRowRange()
 
+  getTailRange: ->
+    {start, end} = @selection.getBufferRange()
+    if (start.row isnt end.row) and (start.column is 0) and (end.column is 0)
+      [startRow, endRow] = @selection.getBufferRowRange()
+      row = if @selection.isReversed() then endRow else startRow
+      @selection.editor.bufferRangeForBufferRow(row, includeNewline: true)
+    else
+      point = @selection.getTailBufferPosition()
+      columnDelta = if @selection.isReversed() then -1 else +1
+      Range.fromPointWithDelta(point, 0, columnDelta)
+
   preserveCharacterwise: ->
     @updateProperties
       characterwise:
