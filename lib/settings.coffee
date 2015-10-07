@@ -64,6 +64,10 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'integer'
     default: 300
     description: "Duration(msec) for search flash"
+  flashScreenOnSearchHasNoMatch:
+    order: 14
+    type: 'boolean'
+    default: true
   showHoverOnOperate:
     order: 21
     type: 'boolean'
