@@ -617,7 +617,8 @@ class SearchBase extends Motion
     @matches ?= new MatchList(@vimState, @scan(cursor), @getCount())
     if @matches.isEmpty()
       unless @input is ''
-        @flash getVisibleBufferRange(@editor), timeout: 100 # screen beep.
+        if settings.get('flashScreenOnSearchHasNoMatch')
+          @flash getVisibleBufferRange(@editor), timeout: 100 # screen beep.
         atom.beep()
     else
       current = @matches.get()
