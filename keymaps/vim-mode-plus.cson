@@ -189,7 +189,7 @@
   'V':      'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
   'u':      'vim-mode-plus:undo'
-  'ctrl-r': 'core:redo'
+  'ctrl-r': 'vim-mode-plus:redo'
   'O':      'vim-mode-plus:insert-above-with-newline'
   'o':      'vim-mode-plus:insert-below-with-newline'
   'a':      'vim-mode-plus:insert-after'
