@@ -10,7 +10,6 @@ class ModeManager
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
-    @disposables = new CompositeDisposable
 
   isMode: (mode, submode=null) ->
     if submode
@@ -152,12 +151,7 @@ class ModeManager
     unless oldSubmode
       if selection.isEmpty()
         @editor.selectRight()
-      else
-        point = selection.getTailBufferPosition()
-        tailRange = Range.fromPointWithDelta(point, 0, +1)
-        newRange = selection.getBufferRange().union(tailRange)
-        selection.setBufferRange(newRange)
-      return
+        return
 
     switch
       when oldSubmode is 'blockwise'

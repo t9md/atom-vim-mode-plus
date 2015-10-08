@@ -117,13 +117,11 @@ class HoverElement extends HTMLElement
     @textContent = ''
     @marker?.destroy()
     @styleElement?.remove()
-    @marker = null
-    @lineHeight = null
+    {@marker, @lineHeight} = {}
 
   destroy: ->
-    @model = null
-    @lineHeight = null
     @marker?.destroy()
+    {@model, @lineHeight} = {}
     @remove()
 
 HoverElement = document.registerElement 'vim-mode-plus-hover',
