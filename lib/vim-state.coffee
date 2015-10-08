@@ -179,6 +179,7 @@ class VimState
       'reverse-selections': => @reverseSelections() # o
       # 'reselect-last-visual': => @reselectLastVisual() # gv
       'undo': => @undo() # u
+      'redo': => @redo() # ctrl-r
       'replace-mode-backspace': => @replaceModeBackspace()
 
     @registerOperationCommands InsertMode, [
@@ -295,6 +296,10 @@ class VimState
   undo: ->
     @editor.undo()
     @activate('normal')
+
+  redo: ->
+    @editor.redo()
+    @activate('reset')
 
   reverseSelections: ->
     selection = @editor.getLastSelection()
