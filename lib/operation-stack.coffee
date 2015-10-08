@@ -71,7 +71,6 @@ class OperationStack
     @inspect()
     debug '-> @pop()'
     op = @pop()
-    @vimState.lastOperation = op
     debug " -> <#{op.getKind()}>.execute()"
     op.execute()
     @vimState.history.unshift(op) if op.isRecordable()
@@ -95,7 +94,6 @@ class OperationStack
     if @vimState.isMode('visual', 'blockwise')
       @vimState.updateCursorsVisibility()
     @vimState.reset()
-    @vimState.lastOperation = null
 
   dontPutCursorsAtEndOfLine: ->
     for c in @vimState.editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()

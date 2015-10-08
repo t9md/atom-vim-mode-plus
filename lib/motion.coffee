@@ -48,6 +48,8 @@ class Motion extends Base
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
+    if @vimState.isMode('visual', ['characterwise', 'blockwise'])
+      @vimState.updateCursorsVisibility()
 
   withKeepingGoalColumn: (cursor, fn) ->
     {goalColumn} = cursor

@@ -25,11 +25,9 @@ class FlashManager
 
   reset: ->
     @marker?.destroy()
-    @marker = null
     clearTimeout @timeoutID
-    @timeoutID = null
+    {@marker, @timeoutID} = {}
 
   destroy: ->
     @reset()
-    @vimState = null
-    @editor   = null
+    {@vimState, @editor} = {}

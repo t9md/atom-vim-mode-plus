@@ -1,10 +1,10 @@
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
-{Emitter, CompositeDisposable} = require 'atom'
+{Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
-{haveSomeSelection} = require './utils'
+{haveSomeSelection, destroyVariables} = require './utils'
 swrap = require './selection-wrapper'
 
 Operator        = require './operator'
@@ -35,7 +35,6 @@ class VimState
   destroyed: false
   replaceModeListener: null
   developer: null
-  lastOperation: null
 
   # Mode handling is delegated to modeManager
   delegatingMethods = [
@@ -51,10 +50,10 @@ class VimState
 
   constructor: (@editorElement, @statusBarManager, @globalVimState) ->
     @emitter = new Emitter
-    @subscriptions = subs = new CompositeDisposable
+    @subscriptions = new CompositeDisposable
     @editor = @editorElement.getModel()
     @history = []
-    subs.add @editor.onDidDestroy =>
+    @subscriptions.add @editor.onDidDestroy =>
       @destroy()
 
     @count = new CountManager(this)
@@ -70,23 +69,7 @@ class VimState
     @search = new Search(this)
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
-
-    # FIXME: Observe mousedown and mouseup event only for explicitness.
-    subs.add @editor.onDidChangeSelectionRange =>
-      if @isMode('visual', ['characterwise', 'blockwise'])
-        @updateCursorsVisibility()
-
-    selectionChangeHandler = =>
-      return unless @editor?
-      return if @operationStack.isProcessing()
-      someSelection = haveSomeSelection(@editor.getSelections())
-      switch
-        when @isMode('visual') and (not someSelection)
-          @activate('normal')
-        when @isMode('normal') and someSelection
-          @activate('visual', 'characterwise')
-
-    subs.add @editor.onDidChangeSelectionRange _.debounce(selectionChangeHandler, 100) #, true)
+    @observeSelectionChange()
 
     @addClass packageScope
     @init()
@@ -103,23 +86,49 @@ class VimState
       @activate('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
       @removeClass packageScope, 'normal-mode'
-    @editor = null
-    @editorElement = null
-    @lastOperation = null
-    @hover.destroy()
-    @hover = null
-    @hoverSearchCounter.destroy()
-    @hoverSearchCounter = null
-    @flasher.destroy()
-    @flasher = null
-    @searchHistory.destroy()
-    @searchHistor = null
-    @input.destroy()
-    @input = null
-    @search.destroy()
-    @search = null
-    @modeManager = null
+
+    destroyVariables this, [
+      'hover', 'hoverSearchCounter',
+      'flasher', 'searchHistory',
+      'input', 'search', 'modeManager',
+    ]
+    {@editor, @editorElement} = {}
     @emitter.emit 'did-destroy'
+
+  observeSelectionChange: ->
+    handleSelectionChange = =>
+      return unless @editor?
+      return if @operationStack.isProcessing()
+      someSelection = haveSomeSelection(@editor.getSelections())
+      switch
+        when @isMode('visual') and (not someSelection)
+          @activate('normal')
+        when @isMode('normal') and someSelection
+          @activate('visual', 'characterwise')
+      @updateCursorsVisibility()
+
+    selectionWatcher = null
+    mouseDownHandler = =>
+      point = @editor.getLastCursor().getBufferPosition()
+      tailRange = Range.fromPointWithDelta(point, 0, +1)
+      selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) ->
+        selection.setBufferRange(selection.getBufferRange().union(tailRange))
+
+    mouseUpHandler = ->
+      handleSelectionChange()
+      selectionWatcher?.dispose()
+      selectionWatcher = null
+
+    selectionChangeHandler = _.debounce(->
+      handleSelectionChange() unless selectionWatcher?
+    , 100)
+
+    @editorElement.addEventListener 'mousedown', mouseDownHandler
+    @editorElement.addEventListener 'mouseup', mouseUpHandler
+    @subscriptions.add @editor.onDidChangeSelectionRange selectionChangeHandler
+    @subscriptions.add new Disposable =>
+      @editorElement.removeEventListener 'mousedown', mouseDownHandler
+      @editorElement.removeEventListener 'mouseup', mouseUpHandler
 
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
@@ -153,7 +162,6 @@ class VimState
             op.inclusive = inclusive if inclusive
             @operationStack.push op
           catch error
-            @lastOperation = null
             throw error unless error.isOperationAbortedError?()
     @registerCommands(commands)
 
