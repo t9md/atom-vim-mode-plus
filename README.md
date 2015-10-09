@@ -69,11 +69,11 @@ As you can see in commit history, this project is originally started by forking 
   - Show current/total hover counter on Search and SearchCurrentWord.
 - Incremental search.
   - Auto scroll next matching entry as you type.
-  - `search-visit-next` and `vim-mode-plus:search-visit-prev` allow you quickly visit match. Mapped to `tab`, `right` and `shift-tab`, `left`.
+  - `search-visit-next` and `vim-mode-plus:search-visit-prev` allow you quickly visit match. Mapped to `tab` and `shift-tab`.
   - `ctrl-v` on search editor start literal input mode, next single char you input is skip keybinding on search editor(useful when you keymap normal key like `;` to `confirm()`).
   - [Experimental] Disable default RegExp search by using space starting seach word 1st space removed on search.
   - [Experimental] Scroll next/prev "page" of matching entry, "page" is not actual page, so scroll only match found area, useful to quick skim for match out of screen.  
-    Mapped to `up` and `down`.
+  - `search-insert-wild-pattern` insert `.*?` pattern to search area you can keymap this command as shortcut for semi-fuzzy search.
 - VisualMode improve
   - Show cursor in visual-mode except linewise submode.
   - Visual block mode except yank and paste.
@@ -138,8 +138,7 @@ Here is my keymap as an example.
   '[': 'vim-mode-plus:search-visit-prev'
   ']': 'vim-mode-plus:search-visit-next'
   ';': 'vim-mode-plus:search-confirm'
-  'ctrl-f': 'vim-mode-plus:search-scroll-next'
-  'ctrl-b': 'vim-mode-plus:search-scroll-prev'
+  'space': 'vim-mode-plus:search-insert-wild-pattern'
   'ctrl-g': 'vim-mode-plus:search-cancel'
 
 'atom-text-editor.vim-mode-plus-input':

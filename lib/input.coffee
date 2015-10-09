@@ -140,6 +140,7 @@ class Search extends InputBase
       "visit-prev":  => @emitter.emit('command', 'visit-prev')
       "scroll-next": => @emitter.emit('command', 'scroll-next')
       "scroll-prev": => @emitter.emit('command', 'scroll-prev')
+      "insert-wild-pattern": => @editor.insertText '.*?'
 
     prefix = "#{packageScope}:search"
     commands = {}
