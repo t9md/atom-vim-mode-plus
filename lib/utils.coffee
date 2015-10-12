@@ -41,6 +41,21 @@ getKeystrokeForEvent = (event) ->
   keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
   atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
 
+keystrokeToCharCode =
+  backspace: 8
+  tab:       9
+  enter:     13
+  escape:    27
+  space:     32
+  delete:    127
+
+getCharacterForEvent = (event) ->
+  keystroke = getKeystrokeForEvent(event)
+  if charCode = keystrokeToCharCode[keystroke]
+    String.fromCharCode(charCode)
+  else
+    keystroke
+
 isLinewiseRange = (range) ->
   (not range.isEmpty()) and (range.start.column is 0) and (range.end.column is 0)
 
@@ -88,6 +103,7 @@ module.exports = {
   getNonBlankCharPositionForRow
   saveEditorState
   getKeystrokeForEvent
+  getCharacterForEvent
   isLinewiseRange
   rangeToBeginningOfFileFromPoint
   rangeToEndOfFileFromPoint
