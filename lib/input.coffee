@@ -1,7 +1,7 @@
 # Refactoring status: 100%
 {Emitter} = require 'atom'
 {CompositeDisposable} = require 'atom'
-{getKeystrokeForEvent} = require './utils'
+{getCharacterForEvent} = require './utils'
 packageScope = 'vim-mode-plus'
 searchScope = "#{packageScope}-search"
 
@@ -148,7 +148,7 @@ class Search extends InputBase
       do (fn) =>
         commands["#{prefix}-#{command}"] = (event) =>
           if @literalCharMode
-            @editor.insertText getKeystrokeForEvent(event)
+            @editor.insertText getCharacterForEvent(event)
             @literalCharMode = false
           else
             fn()
