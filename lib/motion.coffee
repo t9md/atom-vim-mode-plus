@@ -76,7 +76,8 @@ class Motion extends Base
 
       unless selection.isReversed()
         @withKeepingGoalColumn cursor, (c) ->
-          c.moveRight()
+          unless (c.isAtEndOfLine() and not c.isAtBeginningOfLine())
+            c.moveRight()
       selection.setBufferRange selection.getBufferRange().union(tailRange)
 
   # Utils
@@ -450,6 +451,7 @@ class ScrollFullScreenDown extends Motion
     {newScrollTop, scrollRows}
 
   getAmountInPixel: ->
+    @editor.getRowsPerPage()
     @editorElement.getHeight()
 
 # keymap: ctrl-b

@@ -128,7 +128,8 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
     @vimState.activate('insert')
 
     if @command is 'A' and  cursorsAdjusted.length
-      cursor.moveRight() for cursor in cursorsAdjusted
+      for cursor in cursorsAdjusted when not cursor.isAtEndOfLine()
+        cursor.moveRight()
 
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
