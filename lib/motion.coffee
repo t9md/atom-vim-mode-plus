@@ -426,30 +426,31 @@ class ScrollFullScreenDown extends Motion
   direction: +1
 
   withScroll: (fn) ->
-    newScreenTop = @scroll()
+    {@newScrollTop, @scrollRows} = @getScrollInfo()
     fn()
-    @editor.setScrollTop newScreenTop
+    @editorElement.setScrollTop @newScreenTop
 
   select: ->
     @withScroll =>
       super()
 
-  execute: -> @withScroll => super()
+  execute: ->
+    @withScroll =>
+      super()
 
   moveCursor: (cursor) ->
-    row = @editor.getCursorScreenPosition().row + @scrolledRows
+    row = @editor.getCursorScreenPosition().row + @scrollRows
     cursor.setScreenPosition([row, 0])
 
   # just scroll, not move cursor in this function.
-  scroll: ->
-    firstScreenRowOrg = @getFirstVisibleScreenRow()
+  getScrollInfo: ->
     px = @getCount() * @getAmountInPixel() * @direction
-    @editor.setScrollTop (@editor.getScrollTop() + px)
-    @scrolledRows = @getFirstVisibleScreenRow() - firstScreenRowOrg
-    @editor.getScrollTop()
+    newScrollTop = @editorElement.setScrollTop (@editorElement.getScrollTop() + px)
+    scrollRows = Math.floor(px / @editor.getLineHeightInPixels())
+    {newScrollTop, scrollRows}
 
   getAmountInPixel: ->
-    @editor.getHeight()
+    @editorElement.getHeight()
 
 # keymap: ctrl-b
 class ScrollFullScreenUp extends ScrollFullScreenDown
