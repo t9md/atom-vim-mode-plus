@@ -1,8 +1,10 @@
-# 0.1.7 [working]
+# 0.1.7
 - New config option to disable 'flashScreenOnSearchHasNoMatch'.
 - Don't use atom.commands.onDidDispatch.
 - FIX: selectBlockwise select incorrect range in some situation.
 - clear hover if ChangeSurroundAnyPair fail to find pair
+- FIX: c-f,c-b,c-u,c-d broken after upgrading Atom 1.1.
+- FIX: visual block $A operation put cursor on beginning of next line.
 
 # 0.1.6
 - FIX:￼ shift from visual-char2block incorrectly add extra selection when rows contain blank row.
