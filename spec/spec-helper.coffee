@@ -29,7 +29,7 @@ getVimState = (args...) ->
 
   waitsForPromise ->
     if file
-      file = atom.project.resolvePath('sample.coffee')
+      file = atom.project.resolvePath(file)
     atom.workspace.open(file).then (e) ->
       editor = e
 
