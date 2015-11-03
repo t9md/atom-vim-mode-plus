@@ -52,6 +52,31 @@ describe "TextObject", ->
             [[0, 6], [0, 11]]
             [[0, 0], [0, 5]]
           ]
+
+      describe "cursor is on next to NonWordCharacter", ->
+        beforeEach ->
+          set
+            text: "abc(def)"
+            cursor: [0, 4]
+
+        it "change inside word", ->
+          ensure 'ciw', text: "abc()", mode: "insert"
+
+        it "delete inside word", ->
+          ensure 'diw', text: "abc()", mode: "normal"
+
+      describe "cursor's next char is NonWordCharacter", ->
+        beforeEach ->
+          set
+            text: "abc(def)"
+            cursor: [0, 6]
+
+        it "change inside word", ->
+          ensure 'ciw', text: "abc()", mode: "insert"
+
+        it "delete inside word", ->
+          ensure 'diw', text: "abc()", mode: "normal"
+
     describe "a-word", ->
       beforeEach ->
         set text: "12345 abcde ABCDE", cursor: [0, 9]
