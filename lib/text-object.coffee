@@ -39,8 +39,8 @@ class Word extends TextObject
       @selectExclusive(selection, wordRegex)
       @selectInclusive(selection) if @inclusive
 
-  selectExclusive: (s, wordRegex) ->
-    swrap(s).setBufferRangeSafely s.cursor.getCurrentWordBufferRange({wordRegex})
+  selectExclusive: (selection, wordRegex=null) ->
+    selection.selectWord()
 
   selectInclusive: (selection) ->
     scanRange = selection.cursor.getCurrentLineBufferRange()
@@ -54,6 +54,8 @@ class Word extends TextObject
 class WholeWord extends Word
   @extend()
   wordRegExp: /\S+/
+  selectExclusive: (s, wordRegex) ->
+    swrap(s).setBufferRangeSafely s.cursor.getCurrentWordBufferRange({wordRegex})
 
 # Pair
 # -------------------------
