@@ -1,5 +1,7 @@
 # 0.1.9 [WIP]
 - Explicitly {autoscroll: false} when selection modified by `j`, `k` to avoid tail of selection on each movement. #23
+- Partially implemented to not expand fold when selection across folded area. folds are expanded by `l`, `h` movement.
+- Add keymap for home, end key.
 
 # 0.1.8
 - FIX deprecation warning for Atom 1.1.0
