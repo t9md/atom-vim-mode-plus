@@ -1,4 +1,4 @@
-# 0.1.9 [WIP]
+# 0.1.9
 - Explicitly {autoscroll: false} when selection modified by `j`, `k` to avoid tail of selection on each movement. #23
 - Partially implemented to not expand fold when selection across folded area. folds are expanded by `l`, `h` movement.
 - Add keymap for home, end key.
