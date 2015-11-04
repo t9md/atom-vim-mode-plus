@@ -24,20 +24,21 @@ class SelectionWrapper
 
   setBufferRangeSafely: (range) ->
     if range
-      @selection.setBufferRange(range)
+      @setBufferRange(range, {autoscroll: true})
 
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
   setReversedState: (boolean) ->
-    @selection.setBufferRange(@selection.getBufferRange(), reversed: boolean)
+    options = {autoscroll: true, reversed: boolean}
+    @setBufferRange @selection.getBufferRange(), options
 
   selectRowRange: (rowRange) ->
     {editor} = @selection
     [startRow, endRow] = rowRange
     rangeStart = editor.bufferRangeForBufferRow(startRow, includeNewline: true)
     rangeEnd   = editor.bufferRangeForBufferRow(endRow, includeNewline: true)
-    @selection.setBufferRange(rangeStart.union(rangeEnd))
+    @setBufferRange rangeStart.union(rangeEnd)
 
   # Native selection.expandOverLine is not aware of actual rowRange of selection.
   expandOverLine: ->
@@ -79,9 +80,14 @@ class SelectionWrapper
       rangeTaranslation.reverse() if @selection.isReversed()
       range = range.translate(rangeTaranslation...)
 
-    @selection.setBufferRange(range)
+    @setBufferRange(range)
     # [NOTE] Important! reset to null after restored.
     @resetProperties()
+
+  # Only for setting autoscroll option to false by default
+  setBufferRange: (range, options={})->
+    options.autoscroll ?= false
+    @selection.setBufferRange(range, options)
 
   isBlockwiseHead: ->
     @getProperties().blockwise?.head

@@ -1,3 +1,6 @@
+# 0.1.9 [WIP]
+- WIP
+
 # 0.1.8
 - FIX deprecation warning for Atom 1.1.0
 - Bump supported engines to >=1.1.0

@@ -78,7 +78,9 @@ class Motion extends Base
         @withKeepingGoalColumn cursor, (c) ->
           unless (c.isAtEndOfLine() and not c.isAtBeginningOfLine())
             c.moveRight()
-      selection.setBufferRange selection.getBufferRange().union(tailRange)
+      newRange = selection.getBufferRange().union(tailRange)
+      options = {autoscroll: false}
+      selection.setBufferRange(newRange, options)
 
   # Utils
   # -------------------------
