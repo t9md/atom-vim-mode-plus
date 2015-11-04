@@ -85,7 +85,7 @@ class SelectionWrapper
     @resetProperties()
 
   # Only for setting autoscroll option to false by default
-  setBufferRange: (range, options={})->
+  setBufferRange: (range, options={}) ->
     options.autoscroll ?= false
     @selection.setBufferRange(range, options)
 
