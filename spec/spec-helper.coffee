@@ -42,7 +42,10 @@ getVimState = (args...) ->
     editorElement.addEventListener 'keydown', (e) ->
       atom.keymaps.handleKeyboardEvent(e)
 
-    callback(vimState, _.bindAll(getVim(vimState), 'set', 'ensure', 'keystroke'))
+    callback(vimState, new Vim(vimState))
+
+getView = (model) ->
+  atom.views.getView(model)
 
 mockPlatform = (editorElement, platform) ->
   wrapper = document.createElement('div')
@@ -70,7 +73,7 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
     key = "U+#{key.charCodeAt(0).toString(16)}"
   element ?= document.activeElement
   eventArgs = [
-    true, # bubbles
+    false, # bubbles
     true, # cancelable
     null, # view
     key,  # key
@@ -99,11 +102,11 @@ _keystroke = (keys, {element}) ->
 toArray = (obj, cond=null) ->
   if _.isArray(cond ? obj) then obj else [obj]
 
-getVim = (vimState) ->
-  editor: vimState.editor
-  editorElement: vimState.editorElement
+class Vim
+  constructor: (@vimState) ->
+    {@editor, @editorElement} = @vimState
 
-  set: (o={}) ->
+  set: (o={}) =>
     if o.text?
       @editor.setText(o.text)
 
@@ -120,9 +123,9 @@ getVim = (vimState) ->
     if o.register?
       if _.isObject(o.register)
         for name, value of o.register
-          vimState.register.set(name, value)
+          @vimState.register.set(name, value)
       else
-        vimState.register.set '"', text: o.register
+        @vimState.register.set '"', text: o.register
 
     if o.selectedBufferRange?
       @editor.setSelectedBufferRange o.selectedBufferRange
@@ -133,7 +136,7 @@ getVim = (vimState) ->
       for s in toArray(o.spy)
         spyOn(s.obj, s.method).andReturn(s.return)
 
-  ensure: (args...) ->
+  ensure: (args...) =>
     [keys, o] = []
     switch args.length
       when 1 then [o] = args
@@ -167,11 +170,11 @@ getVim = (vimState) ->
     if o.register?
       if _.isObject(o.register)
         for name, value of o.register
-          reg = vimState.register.get(name)
+          reg = @vimState.register.get(name)
           for prop, _value of value
             expect(reg[prop]).toEqual(_value)
       else
-        expect(vimState.register.get('"').text).toBe o.register
+        expect(@vimState.register.get('"').text).toBe o.register
 
     if o.numCursors?
       expect(@editor.getCursors().length).toBe o.numCursors
@@ -196,7 +199,7 @@ getVim = (vimState) ->
       expect(@editor.getLastSelection().isReversed()).toBe(o.selectionIsReversed)
 
     if o.scrollTop?
-      expect(@editor.getScrollTop()).toEqual o.scrollTop
+      expect(@editorElement.getScrollTop()).toEqual o.scrollTop
 
     if o.called?
       for c in toArray(o.called)
@@ -207,7 +210,7 @@ getVim = (vimState) ->
 
     if o.mode?
       currentMode = toArray(o.mode)
-      expect(vimState.isMode(currentMode...)).toBe(true)
+      expect(@vimState.isMode(currentMode...)).toBe(true)
 
       currentMode[0] = "#{currentMode[0]}-mode"
       currentMode = currentMode.filter((m) -> m)
@@ -228,7 +231,7 @@ getVim = (vimState) ->
         expect(@editorElement.classList.contains(klass)).toBe(false)
         expect(@editorElement.classList.contains(klass)).toBe(false)
 
-  keystroke: (keys, {element}={}) ->
+  keystroke: (keys, {element}={}) =>
     # keys must be String or Array
     # Not support Object for keys to avoid ambiguity.
     element ?= @editorElement
@@ -256,9 +259,9 @@ getVim = (vimState) ->
               else
                 k.char.split('')
             for c in chars
-              vimState.input.view.editor.insertText(c)
+              @vimState.input.view.editor.insertText(c)
           when k.search?
-            {editor, editorElement} = vimState.search.view
+            {editor, editorElement} = @vimState.search.view
             editor.insertText(k.search)
             atom.commands.dispatch(editorElement, 'core:confirm')
           when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
@@ -267,4 +270,5 @@ getVim = (vimState) ->
     if mocked
       unmockPlatform(element)
 
-module.exports = {getVimState}
+
+module.exports = {getVimState, getView}
