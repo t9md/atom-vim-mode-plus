@@ -79,7 +79,7 @@ class Motion extends Base
           unless (c.isAtEndOfLine() and not c.isAtBeginningOfLine())
             c.moveRight()
       newRange = selection.getBufferRange().union(tailRange)
-      options = {autoscroll: false}
+      options = {autoscroll: false, preserveFold: true}
       selection.setBufferRange(newRange, options)
 
   # Utils
@@ -112,6 +112,11 @@ class Motion extends Base
   getLastVisibleScreenRow: ->
     @editorElement.getLastVisibleScreenRow()
 
+  unfoldAtCursorRow: (cursor) ->
+    row = cursor.getBufferRow()
+    if @editor.isFoldedAtBufferRow(row)
+      @editor.unfoldBufferRow row
+
 class CurrentSelection extends Motion
   @extend()
   selectedRange: null
@@ -142,6 +147,7 @@ class MoveLeft extends Motion
   moveCursor: (cursor) ->
     @countTimes =>
       if not @at('BOL', cursor) or settings.get('wrapLeftRightMotion')
+        @unfoldAtCursorRow(cursor)
         cursor.moveLeft()
 
 class MoveRight extends Motion
@@ -166,7 +172,9 @@ class MoveRight extends Motion
       if @isOperatorPending() and not @at('EOL', cursor)
         wrapToNextLine = false
 
-      cursor.moveRight() unless @at('EOL', cursor)
+      unless @at('EOL', cursor)
+        @unfoldAtCursorRow(cursor)
+        cursor.moveRight()
       cursor.moveRight() if wrapToNextLine and @at('EOL', cursor)
 
 class MoveUp extends Motion
