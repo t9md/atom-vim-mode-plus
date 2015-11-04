@@ -3,7 +3,6 @@ Base = require './base'
 class Scroll extends Base
   @extend()
   complete: true
-  
   scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
 
   getFirstVisibleScreenRow: ->
@@ -26,11 +25,11 @@ class ScrollDown extends Scroll
 
   execute: ->
     amountInPixel = @editor.getLineHeightInPixels() * @getCount()
-    scrollTop = @editor.getScrollTop()
+    scrollTop = @editorElement.getScrollTop()
     switch @direction
       when 'down' then scrollTop += amountInPixel
       when 'up'   then scrollTop -= amountInPixel
-    @editor.setScrollTop scrollTop
+    @editorElement.setScrollTop scrollTop
     @keepCursorOnScreen?()
 
   keepCursorOnScreen: ->
@@ -54,7 +53,7 @@ class ScrollCursor extends Scroll
   execute: ->
     @moveToFirstCharacterOfLine?()
     if @isScrollable()
-      @editor.setScrollTop @getScrollTop()
+      @editorElement.setScrollTop @getScrollTop()
 
   moveToFirstCharacterOfLine: ->
     @editor.moveToFirstCharacterOfLine()
@@ -62,60 +61,69 @@ class ScrollCursor extends Scroll
   getOffSetPixelHeight: (lineDelta=0) ->
     @editor.getLineHeightInPixels() * (@scrolloff + lineDelta)
 
+# z enter
 class ScrollCursorToTop extends ScrollCursor
   @extend()
   isScrollable: ->
     @getLastVisibleScreenRow() isnt @getLastScreenRow()
 
   getScrollTop: ->
+    # console.log 'top', @getPixelCursor('top')
     @getPixelCursor('top') - @getOffSetPixelHeight()
 
+# zt
+class ScrollCursorToTopLeave extends ScrollCursorToTop
+  @extend()
+  moveToFirstCharacterOfLine: null
+
+# z-
 class ScrollCursorToBottom extends ScrollCursor
   @extend()
   isScrollable: ->
     @getFirstVisibleScreenRow() isnt 0
 
   getScrollTop: ->
-    @getPixelCursor('top') - (@editor.getHeight() - @getOffSetPixelHeight(1))
+    @getPixelCursor('top') - (@editorElement.getHeight() - @getOffSetPixelHeight(1))
 
+# zb
+class ScrollCursorToBottomLeave extends ScrollCursorToBottom
+  @extend()
+  moveToFirstCharacterOfLine: null
+
+# z.
 class ScrollCursorToMiddle extends ScrollCursor
   @extend()
   isScrollable: ->
     true
 
   getScrollTop: ->
-    @getPixelCursor('top') - (@editor.getHeight() / 2)
+    @getPixelCursor('top') - (@editorElement.getHeight() / 2)
 
-class ScrollCursorToTopLeave extends ScrollCursorToTop
-  @extend()
-  moveToFirstCharacterOfLine: null
-
-class ScrollCursorToBottomLeave extends ScrollCursorToBottom
-  @extend()
-  moveToFirstCharacterOfLine: null
-
+# zz
 class ScrollCursorToMiddleLeave extends ScrollCursorToMiddle
   @extend()
   moveToFirstCharacterOfLine: null
 
 # Horizontal Scroll
 # -------------------------
-class ScrollHorizontal extends Scroll
+# zs
+class ScrollCursorToLeft extends Scroll
   @extend()
-  putCursorOnScreen: ->
-    @editor.scrollToCursorPosition({center: false})
+  direction: 'left'
 
-class ScrollCursorToLeft extends ScrollHorizontal
-  @extend()
-  execute: ->
-    @editor.setScrollLeft(@getPixelCursor('left'))
-    @putCursorOnScreen()
+  initialize: ->
+    @px = @getPixelCursor('left')
 
-class ScrollCursorToRight extends ScrollHorizontal
-  @extend()
   execute: ->
-    @editor.setScrollRight(@getPixelCursor('left'))
-    @putCursorOnScreen()
+    @editorElement.setScrollLeft(@px)
+
+# ze
+class ScrollCursorToRight extends ScrollCursorToLeft
+  @extend()
+  direction: 'right'
+
+  execute: ->
+    @editorElement.setScrollRight(@px)
 
 module.exports = {
   ScrollDown,

@@ -3,7 +3,7 @@
 settings = require '../lib/settings'
 
 describe "Motion", ->
-  [set, ensure, keystroke, editor, editorElement, vimState, vim, config] = []
+  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
 
   beforeEach ->
     getVimState (state, _vim) ->
@@ -1087,7 +1087,9 @@ describe "Motion", ->
           ensure '*', cursorBuffer: [3, 0]
 
   describe "the H, M, L keybinding", ->
+    [eel] = []
     beforeEach ->
+      eel = editorElement
       set
         text: """
             1
@@ -1105,35 +1107,35 @@ describe "Motion", ->
 
     describe "the H keybinding", ->
       it "moves the cursor to the non-blank-char on first row if visible", ->
-        set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 0
+        set spy: obj: eel, method: 'getFirstVisibleScreenRow', return: 0
         ensure 'H', cursor: [0, 2]
 
       it "moves the cursor to the non-blank-char on first visible row plus scroll offset", ->
-        set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 2
+        set spy: obj: eel, method: 'getFirstVisibleScreenRow', return: 2
         ensure 'H', cursor: [4, 2]
 
       it "respects counts", ->
-        set spy: obj: editor, method: 'getFirstVisibleScreenRow', return: 0
+        set spy: obj: eel, method: 'getFirstVisibleScreenRow', return: 0
         ensure '4H', cursor: [3, 0]
 
     describe "the L keybinding", ->
       it "moves the cursor to non-blank-char on last row if visible", ->
-        set spy: obj: editor, method: 'getLastVisibleScreenRow', return: 9
+        set spy: obj: eel, method: 'getLastVisibleScreenRow', return: 9
         ensure 'L', cursor: [9, 2]
 
       it "moves the cursor to the first visible row plus offset", ->
-        set spy: obj: editor, method: 'getLastVisibleScreenRow', return: 6
+        set spy: obj: eel, method: 'getLastVisibleScreenRow', return: 6
         ensure 'L', cursor: [4, 2]
 
       it "respects counts", ->
-        set spy: obj: editor, method: 'getLastVisibleScreenRow', return: 9
+        set spy: obj: eel, method: 'getLastVisibleScreenRow', return: 9
         ensure '3L', [8, 0]
 
     describe "the M keybinding", ->
       beforeEach ->
         set
           spy: [
-            {obj: editor, method: 'getFirstVisibleScreenRow', return: 0},
+            {obj: eel, method: 'getFirstVisibleScreenRow', return: 0},
             {obj: editor, method: 'getRowsPerPage',  return: 10},
           ]
 
@@ -1425,10 +1427,12 @@ describe "Motion", ->
   describe "scrolling screen and keeping cursor in the same screen position", ->
     beforeEach ->
       editor.setText([0...80].join("\n"))
-      editor.setHeight(20 * 10)
-      editor.setLineHeightInPixels(10)
-      editor.setScrollTop(40 * 10)
+      editorElement.setHeight(20 * 10)
+      editorElement.style.lineHeight = "10px"
+      atom.views.performDocumentPoll()
+      editorElement.setScrollTop(40 * 10)
       editor.setCursorBufferPosition([42, 0])
+      jasmine.attachToDOM(editorElement)
 
     describe "the ctrl-u keybinding", ->
       it "moves the screen down by half screen size and keeps cursor onscreen", ->

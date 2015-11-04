@@ -27,15 +27,19 @@ getNonBlankCharPositionForRow = (editor, row) ->
     point = range.end.translate([0, +1])
   point
 
+getView = (model) ->
+  atom.views.getView(model)
+
 # Return function to restore editor's scrollTop and fold state.
 saveEditorState = (editor) ->
-  scrollTop = editor.getScrollTop()
+  editorElement = getView(editor)
+  scrollTop = editorElement.getScrollTop()
   foldStartRows = editor.displayBuffer.findFoldMarkers().map (m) ->
     editor.displayBuffer.foldForMarker(m).getStartRow()
   ->
     for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
       editor.foldBufferRow row
-    editor.setScrollTop scrollTop
+    editorElement.setScrollTop scrollTop
 
 getKeystrokeForEvent = (event) ->
   keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
@@ -79,7 +83,7 @@ getIndex = (index, list) ->
   if (index >= 0) then index else (list.length + index)
 
 getVisibleBufferRange = (editor) ->
-  [startRow, endRow] = editor.getVisibleRowRange().map (row) ->
+  [startRow, endRow] = getView(editor).getVisibleRowRange().map (row) ->
     editor.bufferRowForScreenRow row
   new Range([startRow, 0], [endRow, Infinity])
 
@@ -101,6 +105,7 @@ module.exports = {
   include
   debug
   getNonBlankCharPositionForRow
+  getView
   saveEditorState
   getKeystrokeForEvent
   getCharacterForEvent

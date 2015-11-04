@@ -390,9 +390,9 @@ describe "VimState", ->
         ensure ['v', 'escape'],
           mode: 'normal'
           cursor: [0, 7]
-      it "adjust cursor position when it select new line '\\n'", ->
+      it "[CHANGED from vim-mode] can not select new line in characterwise visual mode", ->
         ensure 'vll',
-          cursor: [1, 0]
+          cursor: [0, 8]
         ensure 'escape',
           mode: 'normal'
           cursor: [0, 7]

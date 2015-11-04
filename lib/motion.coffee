@@ -419,56 +419,48 @@ class MoveToMiddleOfScreen extends MoveToTopOfScreen
     row + Math.max(offset, 0)
 
 # Scrolling
+# Half: ctrl-d, ctrl-u
+# Full: ctrl-f, ctrl-b
 # -------------------------
 # [FIXME] count behave differently from original Vim.
 class ScrollFullScreenDown extends Motion
   @extend()
-  scrolledRows: 0
-  direction: +1
+  coefficient: +1
 
-  withScroll: (fn) ->
-    {@newScrollTop, @scrollRows} = @getScrollInfo()
-    fn()
-    @editorElement.setScrollTop @newScreenTop
+  initialize: ->
+    @rowsToScroll = @editor.getRowsPerPage() * @coefficient
+    amountInPixel = @rowsToScroll * @editor.getLineHeightInPixels()
+    @newScrollTop = @editorElement.getScrollTop() + amountInPixel
+
+  scroll: ->
+    @editorElement.setScrollTop @newScrollTop
 
   select: ->
-    @withScroll =>
-      super()
+    super()
+    @scroll()
 
   execute: ->
-    @withScroll =>
-      super()
+    super()
+    @scroll()
 
   moveCursor: (cursor) ->
-    row = @editor.getCursorScreenPosition().row + @scrollRows
-    cursor.setScreenPosition([row, 0])
-
-  # just scroll, not move cursor in this function.
-  getScrollInfo: ->
-    px = @getCount() * @getAmountInPixel() * @direction
-    newScrollTop = @editorElement.setScrollTop (@editorElement.getScrollTop() + px)
-    scrollRows = Math.floor(px / @editor.getLineHeightInPixels())
-    {newScrollTop, scrollRows}
-
-  getAmountInPixel: ->
-    @editor.getRowsPerPage()
-    @editorElement.getHeight()
+    row = Math.floor(@editor.getCursorScreenPosition().row + @rowsToScroll)
+    cursor.setScreenPosition([row, 0], autoscroll: false)
 
 # keymap: ctrl-b
 class ScrollFullScreenUp extends ScrollFullScreenDown
   @extend()
-  direction: -1
+  coefficient: -1
 
 # keymap: ctrl-d
 class ScrollHalfScreenDown extends ScrollFullScreenDown
   @extend()
-  getAmountInPixel: ->
-    Math.floor(@editor.getRowsPerPage() / 2) * @editor.getLineHeightInPixels()
+  coefficient: +1 / 2
 
 # keymap: ctrl-u
 class ScrollHalfScreenUp extends ScrollHalfScreenDown
   @extend()
-  direction: -1
+  coefficient: -1 / 2
 
 # Find
 # -------------------------
@@ -708,8 +700,8 @@ class Search extends SearchBase
     if settings.get('incrementalSearch')
       @restoreEditorState = saveEditorState(@editor)
       @subscriptions = new CompositeDisposable
-      @subscriptions.add @editor.onDidChangeScrollTop => @matches?.show()
-      @subscriptions.add @editor.onDidChangeScrollLeft => @matches?.show()
+      @subscriptions.add @editorElement.onDidChangeScrollTop => @matches?.show()
+      @subscriptions.add @editorElement.onDidChangeScrollLeft => @matches?.show()
       handlers.onCommand = @onCommand
     @vimState.search.readInput {@backwards}, handlers
 

@@ -56,7 +56,7 @@ class MatchList
       when 'prev'
         return if (match = _.first(@getVisible())).isFirst()
         step = -1
-        offsetPixel = (@editor.getHeight() - @getOffSetPixelHeight(1))
+        offsetPixel = (@editorElement.getHeight() - @getOffSetPixelHeight(1))
 
     @setIndex (@entries.indexOf(match) + step)
     point = @editor.screenPositionForBufferPosition match.getStartPoint()
