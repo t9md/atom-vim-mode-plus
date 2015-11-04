@@ -1,3 +1,9 @@
+# 0.1.8
+- FIX deprecation warning for Atom 1.1.0
+- Bump supported engines to >=1.1.0
+- FIX zs ze broken
+- FIX c-f, c-b, c-u, c-d broken after Atom 1.1.0, Fix in 0.1.7 was quick fix and not appropriate behavior.
+
 # 0.1.7
 - New config option to disable 'flashScreenOnSearchHasNoMatch'.
 - Don't use atom.commands.onDidDispatch.
