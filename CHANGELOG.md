@@ -1,5 +1,5 @@
 # 0.1.9 [WIP]
-- WIP
+- Explicitly {autoscroll: false} when selection modified by `j`, `k` to avoid tail of selection on each movement. #23
 
 # 0.1.8
 - FIX deprecation warning for Atom 1.1.0
