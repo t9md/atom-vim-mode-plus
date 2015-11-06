@@ -1,5 +1,5 @@
 # 0.1.10 WIP
-- WIP
+- Now warn to console if duplicate constructor name is used, this is only for stability when developer add new TOM.
 
 # 0.1.9
 - Explicitly {autoscroll: false} when selection modified by `j`, `k` to avoid tail of selection on each movement. #23
