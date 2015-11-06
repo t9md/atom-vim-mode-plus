@@ -11,10 +11,10 @@ class ModeManager
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
-  isMode: (mode, submode=null) ->
-    if submode
-      submode = [submode] if _.isString(submode)
-      @mode is mode and (@submode in submode)
+  isMode: (mode, submodes=null) ->
+    if submodes
+      submodes = [submodes] unless _.isArray(submodes)
+      (@mode is mode) and (@submode in submodes)
     else
       @mode is mode
 
@@ -36,8 +36,7 @@ class ModeManager
       when 'operator-pending'
         null # This is just placeholder, nothing to do without updating selector.
 
-    @mode = mode
-    @submode = submode
+    [@mode, @submode] = [mode, submode]
     @updateModeSelector(mode, submode)
     @vimState.statusBarManager.update(mode, submode)
 
@@ -56,9 +55,9 @@ class ModeManager
     # put selection wrong place.
     for s in @editor.getSelections()
       swrap(s).resetProperties()
-    @editorElement.component.setInputEnabled(false)
+      s.clear(autoscroll: false)
     @vimState.reset()
-    s.clear(autoscroll: false) for s in @editor.getSelections()
+    @editorElement.component.setInputEnabled(false)
 
   # TODO: delete this in future.
   resetNormalMode: ->
@@ -78,10 +77,10 @@ class ModeManager
         cancel()
         for s in @editor.getSelections()
           for char in text.split('') ? []
-            unless char is "\n"
-              s.selectRight() unless s.cursor.isAtEndOfLine()
-            (@replacedCharsBySelection[s.id] ?= []).push s.getText()
-            s.insertText(char)
+            if (char isnt "\n") and (not s.cursor.isAtEndOfLine())
+              s.selectRight()
+            @replacedCharsBySelection[s.id] ?= []
+            @replacedCharsBySelection[s.id].push(swrap(s).replace(char))
 
       @replaceModeSubscriptions.add new Disposable =>
         @replacedCharsBySelection = null
@@ -106,7 +105,8 @@ class ModeManager
       char = @replacedCharsBySelection[s.id].pop()
       if char? # char maybe empty char ''.
         s.selectLeft()
-        s.cursor.moveLeft() unless s.insertText(char).isEmpty()
+        unless s.insertText(char).isEmpty()
+          s.cursor.moveLeft()
 
   setInsertionCheckpoint: ->
     @insertionCheckpoint ?= @editor.createCheckpoint()

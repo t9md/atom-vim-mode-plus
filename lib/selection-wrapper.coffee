@@ -95,6 +95,12 @@ class SelectionWrapper
   isBlockwiseTail: ->
     @getProperties().blockwise?.tail
 
+  # Return original text
+  replace: (text) ->
+    originalText = @selection.getText()
+    @selection.insertText(text)
+    originalText
+
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
