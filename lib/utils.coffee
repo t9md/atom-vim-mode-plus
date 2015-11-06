@@ -96,11 +96,6 @@ getLineTextToPoint = (editor, point) ->
   editor.lineTextForBufferRow(point.row)[0..point.column]
   # editor.lineTextForBufferRow(point.row)[0...point.column]
 
-destroyVariables = (self, vars) ->
-  for name in vars
-    self[name]?.destroy?()
-    self[name] = null
-
 module.exports = {
   include
   debug
@@ -118,5 +113,4 @@ module.exports = {
   getVisibleBufferRange
   selectVisibleBy
   getLineTextToPoint
-  destroyVariables
 }

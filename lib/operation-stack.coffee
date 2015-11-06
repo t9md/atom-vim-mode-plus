@@ -73,7 +73,8 @@ class OperationStack
     op = @pop()
     debug " -> <#{op.getKind()}>.execute()"
     op.execute()
-    @vimState.history.unshift(op) if op.isRecordable()
+
+    @vimState.recordOperation(op) if op.isRecordable()
     @finish()
     debug "#=== Finish at #{new Date().toISOString()}\n"
 
@@ -92,7 +93,7 @@ class OperationStack
       if editor.getLastSelection().isEmpty()
         @dontPutCursorsAtEndOfLine()
     if @vimState.isMode('visual', 'blockwise')
-      @vimState.updateCursorsVisibility()
+      @vimState.showCursors()
     @vimState.reset()
 
   dontPutCursorsAtEndOfLine: ->

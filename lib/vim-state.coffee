@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
-{haveSomeSelection, destroyVariables} = require './utils'
+{haveSomeSelection} = require './utils'
 swrap = require './selection-wrapper'
 
 Operator = require './operator'
@@ -51,7 +51,7 @@ class VimState
     @editorElement = atom.views.getView(@editor)
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
-    @history = []
+    @operationRecords = []
     @subscriptions.add @editor.onDidDestroy =>
       @destroy()
 
@@ -59,10 +59,12 @@ class VimState
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @flasher = new FlashManager(this)
+
     # FIXME: Direct reference for config param name.
     # Handle with config onDidChange subscription?
     @hover = new Hover(this, 'showHoverOnOperate')
     @hoverSearchCounter = new Hover(this, 'showHoverSearchCounter')
+
     @searchHistory = new SearchHistoryManager(this)
     @input = new Input(this)
     @search = new Search(this)
@@ -77,20 +79,34 @@ class VimState
     else
       @activate('normal')
 
+  getLastOperation: ->
+    @operationRecords[0]
+
+  # TODO: Is this really need to be history?
+  # I think just keeping last operation is enough for current requirement.
+  recordOperation: (operation) ->
+    @operationRecords.unshift(operation)
+
   destroy: ->
     return if @destroyed
     @destroyed = true
     @subscriptions.dispose()
+
     if @editor.isAlive()
       @activate('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
       @removeClass packageScope, 'normal-mode'
 
-    destroyVariables this, [
-      'hover', 'hoverSearchCounter',
-      'flasher', 'searchHistory',
-      'input', 'search', 'modeManager',
+    ivars = [
+      "hover", "hoverSearchCounter",
+      "flasher", "searchHistory",
+      "input", "search", "modeManager",
+      "operationRecords"
     ]
+    for ivar in ivars
+      this[name]?.destroy?()
+      this[name] = null
+
     {@editor, @editorElement} = {}
     @emitter.emit 'did-destroy'
 
@@ -104,30 +120,30 @@ class VimState
           @activate('normal')
         when @isMode('normal') and someSelection
           @activate('visual', 'characterwise')
-      @updateCursorsVisibility()
+      @showCursors()
 
     selectionWatcher = null
-    mouseDownHandler = =>
+    handleMouseDown = =>
       point = @editor.getLastCursor().getBufferPosition()
       tailRange = Range.fromPointWithDelta(point, 0, +1)
       selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) ->
         selection.setBufferRange(selection.getBufferRange().union(tailRange))
 
-    mouseUpHandler = ->
+    handleMouseUp = ->
       handleSelectionChange()
       selectionWatcher?.dispose()
       selectionWatcher = null
 
-    selectionChangeHandler = _.debounce(->
+    debouncedHandleSelectionChange = _.debounce(->
       handleSelectionChange() unless selectionWatcher?
     , 100)
 
-    @editorElement.addEventListener 'mousedown', mouseDownHandler
-    @editorElement.addEventListener 'mouseup', mouseUpHandler
-    @subscriptions.add @editor.onDidChangeSelectionRange selectionChangeHandler
+    @editorElement.addEventListener 'mousedown', handleMouseDown
+    @editorElement.addEventListener 'mouseup', handleMouseUp
+    @subscriptions.add @editor.onDidChangeSelectionRange debouncedHandleSelectionChange
     @subscriptions.add new Disposable =>
-      @editorElement.removeEventListener 'mousedown', mouseDownHandler
-      @editorElement.removeEventListener 'mouseup', mouseUpHandler
+      @editorElement.removeEventListener 'mousedown', handleMouseDown
+      @editorElement.removeEventListener 'mouseup', handleMouseUp
 
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
@@ -138,40 +154,42 @@ class VimState
   registerCommands: (commands) ->
     for name, fn of commands
       do (fn) =>
-        @subscriptions.add atom.commands.add(@editorElement, "#{packageScope}:#{name}", fn)
+        cmd = "#{packageScope}:#{name}"
+        @subscriptions.add atom.commands.add(@editorElement, cmd, fn)
 
-  # Register operation command.
-  # command-name is automatically mapped to correspoinding class.
-  # e.g.
-  #   join -> Join
-  #   scroll-down -> ScrollDown
+  textObjectCommandRegExp = /^(?:a|inner)-/
   registerOperationCommands: (kind, names) ->
     commands = {}
     for name in names
       do (name) =>
-        if match = /^(a|inner)-(.*)/.exec(name)?.slice(1, 3) ? null
-          # Mapping command name to TextObject
-          inclusive = match[0] is 'a'
-          klass = _.capitalize(_.camelize(match[1]))
-        else
-          klass = _.capitalize(_.camelize(name))
         commands[name] = =>
-          try
-            op = new kind[klass](this)
-            op.inclusive = inclusive if inclusive
-            @operationStack.push op
-          catch error
-            throw error unless error.isOperationAbortedError?()
+          @dispatchCommand(kind, name)
     @registerCommands(commands)
+
+  # command-name is automatically mapped to correspoinding class.
+  # e.g.
+  #   join -> Join
+  #   scroll-down -> ScrollDown
+  dispatchCommand: (kind, name) ->
+    if kind is TextObject
+      [prefix, name] = name.split(/-(.+)/, 2)
+    klass = _.capitalize(_.camelize(name))
+    try
+      op = new kind[klass](this)
+      if (kind is TextObject) and (prefix is 'a')
+        op.setInclusive(true)
+      @operationStack.push op
+    catch error
+      throw error unless error.isOperationAbortedError?()
 
   # Initialize all commands.
   init: ->
     @registerCommands
-      'activate-normal-mode':               => @activate('normal')
-      'activate-linewise-visual-mode':      => @activate('visual', 'linewise')
+      'activate-normal-mode': => @activate('normal')
+      'activate-linewise-visual-mode': => @activate('visual', 'linewise')
       'activate-characterwise-visual-mode': => @activate('visual', 'characterwise')
-      'activate-blockwise-visual-mode':     => @activate('visual', 'blockwise')
-      'reset-normal-mode':                  => @activate('reset')
+      'activate-blockwise-visual-mode': => @activate('visual', 'blockwise')
+      'reset-normal-mode': => @activate('reset')
 
       'set-count': (e) => @count.set(e) # 0-9
       'set-register-name': => @register.setName() # "
@@ -303,9 +321,9 @@ class VimState
   reverseSelections: ->
     selection = @editor.getLastSelection()
     swrap(selection).reverse()
-    @syncSelectionsReversedSate(selection)
+    @syncSelectionsReversedState(selection)
 
-  syncSelectionsReversedSate: (selection) ->
+  syncSelectionsReversedState: (selection) ->
     reversed = selection.isReversed()
     for s in @editor.getSelections() when not (s is selection)
       swrap(s).setReversedState(reversed)
@@ -319,7 +337,7 @@ class VimState
   getSearchHistoryItem: (index=0) ->
     @searchHistory.getEntries[index]
 
-  updateCursorsVisibility: ->
+  showCursors: ->
     return unless settings.get('showCursorInVisualMode')
     cursors = switch
       when @isMode('visual', 'characterwise')
