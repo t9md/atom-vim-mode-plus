@@ -157,7 +157,19 @@ TOM: TextObject, Operator, Motion
 To disable auto suggestion for vim-mode-plus, set following value on autocomplete-plus setting.
 
 * suppressActivationForEditorClasses
-`vim-mode.normal-mode, vim-mode.visual-mode, vim-mode.operator-pending-mode, vim-mode.insert-mode.replace`
+`vim-mode-plus.normal-mode, vim-mode-plus.visual-mode, vim-mode-plus.operator-pending-mode, vim-mode-plus.insert-mode.replace`
+
+If you want to directly edit `config.cson`, here is how it looks like.
+
+```coffeescript
+"autocomplete-plus":
+  suppressActivationForEditorClasses: [
+    "vim-mode-plus.normal-mode"
+    "vim-mode-plus.visual-mode"
+    "vim-mode-plus.operator-pending-mode"
+    "vim-mode-plus.insert-mode.replace"
+  ]
+```
 
 ## Keymap
 
