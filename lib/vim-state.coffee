@@ -7,20 +7,20 @@ settings = require './settings'
 {haveSomeSelection, destroyVariables} = require './utils'
 swrap = require './selection-wrapper'
 
-Operator        = require './operator'
-Motion          = require './motion'
-TextObject      = require './text-object'
-InsertMode      = require './insert-mode'
-Scroll          = require './scroll'
+Operator = require './operator'
+Motion = require './motion'
+TextObject = require './text-object'
+InsertMode = require './insert-mode'
+Scroll = require './scroll'
 VisualBlockwise = require './visual-blockwise'
 
-OperationStack       = require './operation-stack'
-CountManager         = require './count-manager'
-MarkManager          = require './mark-manager'
-ModeManager          = require './mode-manager'
-RegisterManager      = require './register-manager'
+OperationStack = require './operation-stack'
+CountManager = require './count-manager'
+MarkManager = require './mark-manager'
+ModeManager = require './mode-manager'
+RegisterManager = require './register-manager'
 SearchHistoryManager = require './search-history-manager'
-FlashManager         = require './flash-manager'
+FlashManager = require './flash-manager'
 
 Developer = null # delay
 
@@ -41,7 +41,6 @@ class VimState
     'isMode'
     'activate'
     'replaceModeBackspace'
-    'resetNormalMode'
     'setInsertionCheckpoint'
   ]
   delegatingProperties = ['mode', 'submode']
