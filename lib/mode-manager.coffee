@@ -130,11 +130,9 @@ class ModeManager
       @selectCharacterwise('linewise')
 
     # Adjust cursor position
-    for s in @editor.getSelections() when (not s.isEmpty()) and (not s.isReversed())
-      # Since `vll` can select '\n' and put cursor on column 0 of next-line.
-      if s.cursor.isAtBeginningOfLine()
+    for s in @editor.getSelections()
+      if (not s.isEmpty()) and (not s.isReversed())
         s.cursor.moveLeft()
-      s.cursor.moveLeft()
 
   selectLinewise: (oldSubmode) ->
     unless oldSubmode is 'characterwise'
