@@ -157,7 +157,6 @@ class VimState
         cmd = "#{packageScope}:#{name}"
         @subscriptions.add atom.commands.add(@editorElement, cmd, fn)
 
-  textObjectCommandRegExp = /^(?:a|inner)-/
   registerOperationCommands: (kind, names) ->
     commands = {}
     for name in names
@@ -172,6 +171,10 @@ class VimState
   #   scroll-down -> ScrollDown
   dispatchCommand: (kind, name) ->
     if kind is TextObject
+      # Split into [prefix, name] pair for TextObject commands.
+      # e.g.
+      #  'a-whole-word' -> ['a', 'whole-word']
+      #  'inner-double-quote' -> ['inner', 'double-quote']
       [prefix, name] = name.split(/-(.+)/, 2)
     klass = _.capitalize(_.camelize(name))
     try
