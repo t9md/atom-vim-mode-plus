@@ -1,7 +1,8 @@
-Base = require './base'
 _ = require 'underscore-plus'
-swrap = require './selection-wrapper'
 {Range} = require 'atom'
+
+Base = require './base'
+swrap = require './selection-wrapper'
 
 # FIXME Currently initally multi selected situation not supported.
 class VisualBlockwise extends Base
@@ -29,12 +30,13 @@ class VisualBlockwise extends Base
     _.last @editor.getSelectionsOrderedByBufferPosition()
 
   isReversed: ->
-    if @isSingle()
+    if @isSingleLine()
       false
     else
-      @getTail().marker.isEqual @getBottom().marker
+      @getTail() is @getBottom()
+      # @getTail().marker.isEqual @getBottom().marker
 
-  isSingle: ->
+  isSingleLine: ->
     @editor.getSelections().length is 1
 
   getHead: ->
@@ -66,7 +68,7 @@ class VisualBlockwise extends Base
 class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
   execute: ->
-    unless @isSingle()
+    unless @isSingleLine()
       @reverse()
     @vimState.reverseSelections()
 
@@ -89,7 +91,7 @@ class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
   direction: 'Above'
   isForward: ->
-    @isSingle() or @isReversed()
+    @isSingleLine() or @isReversed()
 
 class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   @extend()
