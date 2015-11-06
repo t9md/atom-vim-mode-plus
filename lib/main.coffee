@@ -1,12 +1,14 @@
 # Refactoring status: 0%, I won't touch for the time being.
+_ = require 'underscore-plus'
+
 {Disposable, CompositeDisposable} = require 'atom'
+
 StatusBarManager = require './status-bar-manager'
 GlobalVimState = require './global-vim-state'
 VimState = require './vim-state'
 settings = require './settings'
 {Hover, HoverElement} = require './hover'
 {Input, InputElement, Search, SearchElement} = require './input'
-_ = require 'underscore-plus'
 
 module.exports =
   config: settings.config

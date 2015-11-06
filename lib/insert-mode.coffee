@@ -21,7 +21,8 @@ class CopyFromLineAbove extends InsertMode
   rowTranslation: -1
 
   getTextInScreenRange: (range) ->
-    @editor.getTextInBufferRange(@editor.bufferRangeForScreenRange(range))
+    bufferRange = @editor.bufferRangeForScreenRange(range)
+    @editor.getTextInBufferRange(bufferRange)
 
   execute: ->
     @editor.transact =>
