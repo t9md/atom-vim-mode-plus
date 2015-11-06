@@ -47,10 +47,10 @@ class VimState
   @delegatesProperty delegatingProperties..., toProperty: 'modeManager'
   @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
 
-  constructor: (@editorElement, @statusBarManager, @globalVimState) ->
+  constructor: (@editor, @statusBarManager, @globalVimState) ->
+    @editorElement = atom.views.getView(@editor)
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
-    @editor = @editorElement.getModel()
     @history = []
     @subscriptions.add @editor.onDidDestroy =>
       @destroy()

@@ -26,7 +26,7 @@ module.exports =
       return if editor.isMini() or @vimStatesByEditor.get(editor)
 
       vimState = new VimState(
-        atom.views.getView(editor),
+        editor,
         @statusBarManager,
         @globalVimState
       )
