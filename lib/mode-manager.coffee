@@ -121,7 +121,9 @@ class ModeManager
     @mode = 'visual'
     @submode = submode
     switch submode
-      when 'linewise' then @selectLinewise(oldSubmode)
+      when 'linewise'
+        @selectCharacterwise() unless oldSubmode is 'characterwise'
+        @selectLinewise(oldSubmode)
       when 'characterwise' then @selectCharacterwise(oldSubmode)
       when 'blockwise' then @selectBlockwise(oldSubmode)
 
@@ -135,21 +137,19 @@ class ModeManager
         s.cursor.moveLeft()
 
   selectLinewise: (oldSubmode) ->
-    unless oldSubmode is 'characterwise'
-      @selectCharacterwise()
-
     # Keep original range as marker's property to restore column.
-    for selection in @editor.getSelections()
-      swrap(selection).preserveCharacterwise()
-      swrap(selection).expandOverLine()
-    @hideCursors()
+    for s in @editor.getSelections()
+      swrap(s).preserveCharacterwise()
+      swrap(s).expandOverLine()
+      {cursor} = s
+      cursor.setVisible(false) if cursor.isVisible()
 
-  selectCharacterwise: (oldSubmode) ->
+  # FIXME: Eliminate complexity.
+  selectCharacterwise: (oldSubmode=null) ->
     selection = @editor.getLastSelection()
-    unless oldSubmode
-      if selection.isEmpty()
-        @editor.selectRight()
-        return
+    if not oldSubmode? and selection.isEmpty()
+      @editor.selectRight()
+      return
 
     switch
       when oldSubmode is 'blockwise'
@@ -165,17 +165,10 @@ class ModeManager
       @selectCharacterwise()
     @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
-  # Others
-  # -------------------------
-  hideCursors: ->
-    for c in @editor.getCursors() when c.isVisible()
-      c.setVisible(false)
-
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.
 getChangesSinceCheckpoint = (buffer, checkpoint) ->
   {history} = buffer
-
   if (index = history.getCheckpointIndex(checkpoint))?
     history.undoStack.slice(index)
   else
