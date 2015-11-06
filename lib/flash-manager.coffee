@@ -1,4 +1,5 @@
-module.exports =
+# Refactoring status: 100%
+
 class FlashManager
   timeoutID: null
   marker: null
@@ -31,3 +32,5 @@ class FlashManager
   destroy: ->
     @reset()
     {@vimState, @editor} = {}
+
+module.exports = FlashManager

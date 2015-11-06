@@ -19,6 +19,3 @@ class CountManager
 
   reset: ->
     @count = null
-
-  isEmpty: ->
-    not @count
