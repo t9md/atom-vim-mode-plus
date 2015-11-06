@@ -338,18 +338,28 @@ class Fold extends TextObject
 # NOTE: Function range determination is depending on fold.
 class Function extends Fold
   @extend()
+
   indentScopedLanguages: ['python', 'coffee']
   # FIXME: why go dont' fold closing '}' for function? this is dirty workaround.
   omitingClosingCharLanguages: ['go']
+
+  initialize: ->
+    @language = @editor.getGrammar().scopeName.replace(/^source\./, '')
 
   getScopesForRow: (row) ->
     tokenizedLine = @editor.displayBuffer.tokenizedBuffer.tokenizedLineForRow(row)
     for tag in tokenizedLine.tags when tag < 0 and (tag % 2 is -1)
       atom.grammars.scopeForId(tag)
 
-  functionScopeRegexp = /^entity.name.function/
+  isFunctionScope: (scope) ->
+    regex = if @language in ['go']
+      /^entity.name.function/
+    else
+      /^meta.function/
+    regex.test(scope)
+
   isIncludeFunctionScopeForRow: (row) ->
-    for scope in @getScopesForRow(row) when functionScopeRegexp.test(scope)
+    for scope in @getScopesForRow(row) when @isFunctionScope(scope)
       return true
     null
 
@@ -363,14 +373,15 @@ class Function extends Fold
       return @adjustRowRange(startRow, endRow)
     null
 
+  getLanguageName: ->
+    @editor.getGrammar().scopeName.replace(/^source\./, '')
+
   adjustRowRange: (startRow, endRow) ->
-    {scopeName} = @editor.getGrammar()
-    languageName = scopeName.replace(/^source\./, '')
     unless @isInclusive()
       startRow += 1
-      unless languageName in @indentScopedLanguages
+      unless @language in @indentScopedLanguages
         endRow -= 1
-    endRow += 1 if (languageName in @omitingClosingCharLanguages)
+    endRow += 1 if (@language in @omitingClosingCharLanguages)
     [startRow, endRow]
 
 class CurrentLine extends TextObject
