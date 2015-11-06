@@ -36,16 +36,17 @@ class Base
   abort: ->
     throw new OperationAbortedError('Aborted')
 
+  # TODO: remove in near future
   getKind: ->
     @constructor.name
 
   getCount: ->
-    # Setting count as instance variable make operation repeatable with same count.
+    # Setting count as instance variable allows operation repeatable with same count.
     @count ?= @vimState?.count.get() ? @defaultCount
     @count
 
   new: (klassName, properties={}) ->
-    obj = new (Base.findClass(klassName))(@vimState)
+    obj = new (Base.getConstructor(klassName))(@vimState)
     _.extend(obj, properties)
 
   readInput: ({charsMax}={}) ->
@@ -70,18 +71,18 @@ class Base
   # Base::isOperator: ->
   #   this instanceof Operator
   #
-  children = []
+  # children = []
+  children = Object.create(null)
   @extend: ->
     klass = this
+    if klass.name of children
+      console.warn "Duplicate constructor #{klass.name}"
+    children[klass.name] = klass
     Base::["is#{klass.name}"] = ->
       this instanceof klass
-    children.push klass
 
-  @findClass: (klassName) ->
-    # [FIXME] currently not care acncesstor's chain.
-    # Not accurate if there is different class with same.
-    _.detect children, (child) ->
-      child.name is klassName
+  @getConstructor: (klassName) ->
+    children[klassName]
 
   @getAncestors: ->
     getAncestors(this)
