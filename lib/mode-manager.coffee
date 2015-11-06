@@ -59,10 +59,6 @@ class ModeManager
     @vimState.reset()
     @editorElement.component.setInputEnabled(false)
 
-  # TODO: delete this in future.
-  resetNormalMode: ->
-    @activate('reset')
-
   # Insert
   # -------------------------
   activateInsertMode: (submode=null) ->
@@ -89,7 +85,7 @@ class ModeManager
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
     changes = getChangesSinceCheckpoint(@editor.buffer, @insertionCheckpoint)
     @insertionCheckpoint = null
-    if (item = @vimState.history[0]) and item.isInsert()
+    if (item = @vimState.getLastOperation()) and item.isInsert()
       item.confirmChanges(changes)
 
     if @isMode('insert', 'replace')

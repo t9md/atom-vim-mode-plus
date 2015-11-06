@@ -14,6 +14,13 @@ swrap = require './selection-wrapper'
 class TextObject extends Base
   @extend()
   complete: true
+  inclusive: false
+
+  isInclusive: ->
+    @inclusive
+
+  setInclusive: (@inclusive) ->
+    @inclusive
 
   isLinewise: ->
     @editor.getSelections().every (s) ->
@@ -37,7 +44,7 @@ class Word extends TextObject
     @eachSelection (selection) =>
       wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
       @selectExclusive(selection, wordRegex)
-      @selectInclusive(selection) if @inclusive
+      @selectInclusive(selection) if @isInclusive()
 
   selectExclusive: (selection, wordRegex=null) ->
     selection.selectWord()
@@ -61,13 +68,9 @@ class WholeWord extends Word
 # -------------------------
 class Pair extends TextObject
   @extend()
-  inclusive: false
   allowNextLine: false
   what: 'enclosed'
   pair: null
-
-  isInclusive: ->
-    @inclusive
 
   # Return 'open' or 'close'
   getPairState: (pair, matchText, point) ->
@@ -281,7 +284,7 @@ class Paragraph extends TextObject
   select: ->
     @eachSelection (selection) =>
       _.times @getCount(), =>
-        if @inclusive
+        if @isInclusive()
           @selectInclusive(selection)
         else
           @selectExclusive(selection)
@@ -294,7 +297,7 @@ class Comment extends Paragraph
   getRange: (startRow) ->
     return unless @editor.isBufferRowCommented(startRow)
     fn = (row) =>
-      return if (@inclusive and @editor.isBufferRowBlank(row))
+      return if (@isInclusive() and @editor.isBufferRowBlank(row))
       @editor.isBufferRowCommented(row) in [false, undefined]
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
@@ -309,7 +312,7 @@ class Indentation extends Paragraph
     baseIndentLevel = @editor.indentLevelForLine(text)
     fn = (row) =>
       if @editor.isBufferRowBlank(row)
-        not @inclusive
+        not @isInclusive()
       else
         text = @editor.lineTextForBufferRow(row)
         @editor.indentLevelForLine(text) < baseIndentLevel
@@ -322,7 +325,7 @@ class Fold extends TextObject
     for currentRow in [bufferRow..0] by -1
       [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
       continue unless startRow? and startRow <= bufferRow <= endRow
-      startRow += 1 unless @inclusive
+      startRow += 1 unless @isInclusive()
       return [startRow, endRow]
 
   select: ->
@@ -363,7 +366,7 @@ class Function extends Fold
   adjustRowRange: (startRow, endRow) ->
     {scopeName} = @editor.getGrammar()
     languageName = scopeName.replace(/^source\./, '')
-    unless @inclusive
+    unless @isInclusive()
       startRow += 1
       unless languageName in @indentScopedLanguages
         endRow -= 1
@@ -376,7 +379,7 @@ class CurrentLine extends TextObject
     @eachSelection (selection) =>
       {cursor} = selection
       cursor.moveToBeginningOfLine()
-      cursor.moveToFirstCharacterOfLine() unless @inclusive
+      cursor.moveToFirstCharacterOfLine() unless @isInclusive()
       selection.selectToEndOfLine()
 
 class Entire extends TextObject
