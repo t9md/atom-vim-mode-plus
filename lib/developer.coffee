@@ -29,7 +29,7 @@ class Developer
 
   generateIntrospectionReport: ->
     excludeProperties = [
-      'findClass'
+      'getConstructor'
       'extend', 'getParent', 'getAncestors',
     ]
     recursiveInspect = Base
@@ -57,7 +57,7 @@ class Developer
         VisualBlockwise: 'visual-blockwise.coffee'
 
       klassName = getClassCase(srcName)
-      unless klass = Base.findClass(klassName)
+      unless klass = Base.getConstructor(klassName)
         return
       parentNames = (parent.name for parent in klass.getAncestors())
       parentNames.pop() # trash Base

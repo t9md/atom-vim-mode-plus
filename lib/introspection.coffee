@@ -142,7 +142,7 @@ getVirtualParents = (list, options) ->
   virtuals.map (e) ->
     ancesstors = e.split(' < ')
     klass = ancesstors[0]
-    obj = if klass is 'Base' then Base else Base.findClass(klass)
+    obj = if klass is 'Base' then Base else Base.getConstructor(klass)
     r = report(obj, options)
     r.virtual = true
     r
