@@ -373,9 +373,6 @@ class Function extends Fold
       return @adjustRowRange(startRow, endRow)
     null
 
-  getLanguageName: ->
-    @editor.getGrammar().scopeName.replace(/^source\./, '')
-
   adjustRowRange: (startRow, endRow) ->
     unless @isInclusive()
       startRow += 1
