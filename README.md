@@ -14,19 +14,72 @@ So I decided to release this package to get feedback from broad user.
 
 # Thanks
 
-My work is greatly owing to former achievement done by original vim-mode developer and many of its contributors.  
+My work is greatly owing to former achievement done by original vim-mode developers and many of its contributors.  
 As you can see in commit history, this project is originally started by forking official [vim-mode](https://github.com/atom/vim-mode).  
 
 # Important Note
 
-- You need to disable vim-mode to use vim-mode-plus, it can't work simultaneously.
-- Following pakages for official vim-mode won't work for vim-mode-plus. Why not work? Because service API name is different. It's easy to add support I believe. Please report to each project.
+- To use vim-mode-plus, you need to disable vim-mode first. You can't use both simultaneously.
+- Following packages for vim-mode won't work in vim-mode-plus. Why? Because service API name is different. It's easy to add support I believe. Please report to each project.
   - [vim-mode-clipboard-plus](https://atom.io/packages/vim-mode-clipboard-plus)
   - [ex-mode](https://atom.io/packages/ex-mode)
-  - [vim-surround](https://atom.io/packages/vim-surround): surround feature included vim-mode-plus.
-  - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block): (this is my package) visual-block included in vim-mode-plus.
+  - [vim-surround](https://atom.io/packages/vim-surround): surround feature included vim-mode-plus, so you won't need this.
+  - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block): (my package) builtin to vim-mode-plus with better integration.
 - Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
 - Internal code base is very different. Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT** report vim-mode-plus's issue or PRs to official vim-mode.
+
+# GIFs
+
+## Incremental search
+
+You can move between match with <kbd>tab</kbd> and <kbd>shift-tab</kdb>.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/incremental-search.gif)
+
+## Surround builtin
+
+Off course, you can repeat with `.`.
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/surround.gif)
+
+## Visual block mode builtin.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visual-blockwise-cursor.gif)
+
+## AnyPair TextObject
+
+Auto detect inner and a Pair, and expandable.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/46f808a31fb62f6d122062b969c03a2cb9196d23/img/vim-mode-plus/text-object-any-pair.gif)
+
+## Flash on operate
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/flashing-range.gif)
+
+##  Hover icon
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/hover-icon.gif)
+
+## Hover emoji
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/hover-emoji.gif)
+
+## ChangeSurroundAnyPair Operator
+
+Auto detect pair, and pre-select target range and show pair char which will be changed on hover.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/preselect-changed-surround.gif)
+
+## Flash matched word on SearchCurrentWord
+
+When search with `#`, `*`, show 'current/total' match on hover, and flash word under cursor.
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/search-flash-and-counter.gif)
+
+## Submode shift in Visual mode.
+
+With showing cursor appropriately in charcterwise and blockwise mode(still cursor hidden in linwise).
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visualmode-submod-shift.gif)
 
 # FAQ
 
@@ -145,6 +198,20 @@ Here is my keymap as an example.
   'ctrl-g': 'vim-mode-plus:input-cancel'
 ```
 
+# Helper packages
+
+Here is the list of my packages which provide more vim-like experience.  
+Why I dont builtin these feature? Its because it take time, and some feature is usefull for non-vim user.
+
+- [cursor-history](https://atom.io/packages/cursor-history)
+provides <kbd>c-i</kbd>, <kbd>c-o</kbd> to go/back cursor position history.
+- [paner](https://atom.io/packages/paner)
+provides <kbd>C-w x</kbd>, <kbd>C-w J,K,H,L</kbd> to move pane, swap pane item.
+- [open-this](https://atom.io/packages/open-this)
+provides <kbd>gf</kbd> to open file under cursor.
+- [clip-history](https://atom.io/packages/clip-history)
+Not exist in pure Vim, provides clip-board history you can pop yanked text until you get result you want.
+
 # References
 
 - [operator, the true power of Vim](http://whileimautomaton.net/2008/11/vimm3/operator) by kana.  
@@ -153,60 +220,9 @@ True power of Vim is Operator and TextOjbect.
 - [List of text-object as vim plugin](https://github.com/kana/vim-textobj-user/wiki)  
 vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line, and any-pair(super set of many pair text-obj)
 
-# GIFs
-
-## Incremental search
-
-You can move between match with <kbd>tab</kbd> and <kbd>shift-tab</kdb>.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/incremental-search.gif)
-
-## Surround builtin
-
-Off course, you can repeat with `.`.
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/surround.gif)
-
-## Visual block mode builtin.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visual-blockwise-cursor.gif)
-
-## AnyPair TextObject
-
-Auto detect inner and a Pair, and expandable.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/46f808a31fb62f6d122062b969c03a2cb9196d23/img/vim-mode-plus/text-object-any-pair.gif)
-
-## Flash on operate
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/flashing-range.gif)
-
-##  Hover icon
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/hover-icon.gif)
-
-## Hover emoji
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/hover-emoji.gif)
-
-## ChangeSurroundAnyPair Operator
-
-Auto detect pair, and pre-select target range and show pair char which will be changed on hover.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/preselect-changed-surround.gif)
-
-## Flash matched word on SearchCurrentWord
-
-When search with `#`, `*`, show 'current/total' match on hover, and flash word under cursor.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/search-flash-and-counter.gif)
-
-## Submode shift in Visual mode.
-
-With showing cursor appropriately in charcterwise and blockwise mode(still cursor hidden in linwise).
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visualmode-submod-shift.gif)
-
 # TODO
+
+Also refer [TODO Priority](https://github.com/t9md/atom-vim-mode-plus/issues/25)
 
 - [ ] Dont't do moveRight and moveLeft to adjust selection in `Motion::selectInclusive()` it complicate other motion. and prevent to stop at EOL in `l`, `$`
 - [ ] Don't use typeCheck function like `isOperator()`, `isYank()` any more. instead use `instantOf` for being explicit what it meant to.
