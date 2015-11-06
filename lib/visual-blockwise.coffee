@@ -80,7 +80,7 @@ class BlockwiseMoveDown extends VisualBlockwise
   execute: ->
     if @isForward()
       @editor["addSelection#{@direction}"]()
-      @vimState.syncSelectionsReversedSate @getTail()
+      @vimState.syncSelectionsReversedState @getTail()
     else
       @getHead().destroy()
     @setHead @getHead()
