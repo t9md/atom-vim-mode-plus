@@ -1,5 +1,7 @@
 # 0.1.10 WIP
 - Now warn to console if duplicate constructor name is used, this is only for stability when developer add new TOM.
+- Improve accuracy of TextObject.Function for language have `meta.function` scope.
+- Lots of cleanup/refactoring
 
 # 0.1.9
 - Explicitly {autoscroll: false} when selection modified by `j`, `k` to avoid tail of selection on each movement. #23
