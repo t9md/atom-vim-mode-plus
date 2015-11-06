@@ -1,7 +1,6 @@
 # Refactoring status: 100%
-
-{debug} = require './utils'
 emoji = require 'emoji-images'
+
 emojiFolder = 'atom://vim-mode-plus/node_modules/emoji-images/pngs'
 settings = require './settings'
 
@@ -18,17 +17,12 @@ class Hover
     settings.get(@param)
 
   setPoint: (point=null) ->
-    point ?= @vimState.editor.getCursorBufferPosition()
-    @point = point
+    @point = point ? @vimState.editor.getCursorBufferPosition()
 
   add: (text, point) ->
     @text.push text
-    @point = point if point
+    @setPoint(point) if point
     @view.show(@point)
-
-  # Return boolean to indicate hover is shown at given Point.
-  isVisibleAtPoint: (point) ->
-    @point?.isEqual point
 
   withTimeout: (point, options) ->
     @reset()
@@ -58,13 +52,11 @@ class Hover
   reset: ->
     @text = []
     clearTimeout @timeoutID
-    @timeoutID = null
     @view.reset()
-    @point = null
+    {@timeoutID, @point} = {}
 
   destroy: ->
-    @param = null
-    @vimState = null
+    {@param, @vimState} = {}
     @view.destroy()
 
 class HoverElement extends HTMLElement
