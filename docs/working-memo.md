@@ -1,7 +1,7 @@
 prevent moveRight from moving across EOL in visual-mode,
 its very inconsitent.
 - I'm ok to if mouse click can put cursor at EOL, its out-of-scoep of vim-mode-plus.
-- Just check mouse is not at EOL at the begining of processing. cursor should never put on EOL in any vim-mode-plus operation.
+- Just check mouse is not at EOL at the beginning of processing. cursor should never put on EOL in any vim-mode-plus operation.
 
 ## Old memo
 
@@ -218,9 +218,12 @@ The name of vimState is redundant simply `state` is enough since its vim-mode's 
 
 - In visual-mode, we `selectRight()` when activating visual-mode.
 - After deactivating visualmode. we `moveLeft()` cursor.
-- selection maybe reversed.
-- In atom, when selecting whole single line range become [[0, 0], [1, 0]]
+- selection can be reversed.
+- In atom, when selecting whole single line range become [[0, 0], [1, 0]], NOTE end row is not same row as start row.
 - selection set `selection.linewise = true` when `selection.selectLine(row)`.
+- moveRight, moverLeft wrap line
+  - When `moveLeft()` at BOL, cursor moved to EOL of previous line.
+  - When `moveRight()` at EOL, cursor moved to BOL of next line.
 - We can't `moveLeft()` when `isAtBeginningOfLine()` unless `wrapLeftRightMotion` is enabled.
 - When cursor `isAtEndOfLine()`, then `cursor.moveRight()` put cursor to nextline's column 0. (this mean skip 'newLine' char.)
 - When selecting whole line `selection.getBufferRange().isSingleLine()` return `false` since its expand multiple line ([selectedRow, 0], [nextRow, 0]).

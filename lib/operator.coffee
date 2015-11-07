@@ -1,8 +1,8 @@
 # Refactoring status: 80%
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
-{haveSomeSelection} = require './utils'
 
+{haveSomeSelection} = require './utils'
 settings = require './settings'
 Base = require './base'
 
@@ -16,7 +16,6 @@ class OperatorError extends Base
 class Operator extends Base
   @extend()
   recodable: true
-
   target: null
   flashTarget: true
 
@@ -37,13 +36,12 @@ class Operator extends Base
       @abort()
 
   # target - TextObject or Motion to operate on.
-  compose: (target) ->
-    unless _.isFunction(target.select)
+  compose: (@target) ->
+    unless _.isFunction(@target.select)
       @vimState.emitter.emit('failed-to-compose')
-      throw new OperatorError("Failed to compose #{@getKind()} with #{target.getKind()}")
+      throw new OperatorError("Failed to compose #{@getKind()} with #{@target.getKind()}")
 
-    @target = target
-    if _.isFunction(target.onDidComposeBy)
+    if _.isFunction(@target.onDidComposeBy)
       @target.onDidComposeBy(this)
 
   setTextToRegister: (text) ->
