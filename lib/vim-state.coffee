@@ -72,7 +72,7 @@ class VimState
     @modeManager = new ModeManager(this)
     @observeSelectionChange()
 
-    @addClass packageScope
+    @editorElement.classList.add packageScope
     @init()
     if settings.get('startInInsertMode')
       @activate('insert')
@@ -95,7 +95,7 @@ class VimState
     if @editor.isAlive()
       @activate('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
-      @removeClass packageScope, 'normal-mode'
+      @editorElement.classList.remove packageScope, 'normal-mode'
 
     ivars = [
       "hover", "hoverSearchCounter",
@@ -197,7 +197,6 @@ class VimState
       'set-count': (e) => @count.set(e) # 0-9
       'set-register-name': => @register.setName() # "
       'reverse-selections': => @reverseSelections() # o
-      # 'reselect-last-visual': => @reselectLastVisual() # gv
       'undo': => @undo() # u
       'redo': => @redo() # ctrl-r
       'replace-mode-backspace': => @replaceModeBackspace()
@@ -322,9 +321,8 @@ class VimState
     @activate('reset')
 
   reverseSelections: ->
-    selection = @editor.getLastSelection()
-    swrap(selection).reverse()
-    @syncSelectionsReversedState(selection)
+    swrap(s = @editor.getLastSelection()).reverse()
+    @syncSelectionsReversedState(s)
 
   syncSelectionsReversedState: (selection) ->
     reversed = selection.isReversed()
@@ -349,15 +347,9 @@ class VimState
         (s.cursor for s in @editor.getSelections() when swrap(s).isBlockwiseHead())
     return unless cursors
 
-    for cursor in cursors
-      cursor.setVisible(true) unless cursor.isVisible()
-      @updateClassCond cursor.selection.isReversed(), 'reversed'
-
-  addClass: (klass...) ->
-    @editorElement.classList.add(klass...)
-
-  removeClass: (klass...) ->
-    @editorElement.classList.remove(klass...)
+    for c in cursors
+      c.setVisible(true) unless c.isVisible()
+      @updateClassCond c.selection.isReversed(), 'reversed'
 
   updateClassCond: (condition, klass) ->
     action = (if condition then 'add' else 'remove')
