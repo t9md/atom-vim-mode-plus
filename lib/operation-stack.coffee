@@ -1,14 +1,15 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
+
 {CurrentSelection} = require './motion'
 {Select} = require './operator'
 {debug} = require './utils'
 settings = require './settings'
 
-module.exports =
 class OperationStack
   constructor: (@vimState) ->
     @stack = []
+    {@editor} = @vimState
 
   push: (op) ->
     if @isEmpty() and settings.get('debug')
@@ -18,24 +19,18 @@ class OperationStack
 
     # Use implicit Select operator as operator.
     if @vimState.isMode('visual') and _.isFunction(op.select)
-      debug "push IMPLICIT Operator.Select"
-      @stack.push(new Select(@vimState))
+      @pushToStack new Select(@vimState), message: "push IMPLICIT Operator.Select"
 
-    debug "pushing <#{op.getKind()}>"
-    @stack.push op
+    @pushToStack op, message: "push <#{op.getKind()}>"
 
     # Operate on implicit CurrentSelection TextObject.
     if @vimState.isMode('visual') and op.isOperator()
-      debug "push IMPLICIT Motion.CurrentSelection"
-      @stack.push(new CurrentSelection(@vimState))
+      @pushToStack new CurrentSelection(@vimState),
+        message: "push IMPLICIT Motion.CurrentSelection"
 
-    @withLock =>
-      @process()
-
-  withLock: (fn) ->
     try
       @processing = true
-      fn()
+      @process()
     finally
       @processing = false
 
@@ -58,7 +53,17 @@ class OperationStack
         else
           throw error
 
-    unless @peekTop().isComplete()
+    if @peekTop().isComplete()
+      @inspect()
+      debug '-> @pop()'
+      op = @pop()
+      debug " -> <#{op.getKind()}>.execute()"
+      op.execute()
+
+      @vimState.recordOperation(op) if op.isRecordable()
+      @finish()
+      debug "#=== Finish at #{new Date().toISOString()}\n"
+    else
       if @vimState.isMode('normal') and @peekTop().isOperator?()
         @inspect()
         debug '-> @process(): activating: operator-pending-mode'
@@ -66,44 +71,35 @@ class OperationStack
       else
         debug "-> @process(): return: not <#{@peekTop().getKind()}>.isComplete()"
         @inspect()
-      return
-
-    @inspect()
-    debug '-> @pop()'
-    op = @pop()
-    debug " -> <#{op.getKind()}>.execute()"
-    op.execute()
-
-    @vimState.recordOperation(op) if op.isRecordable()
-    @finish()
-    debug "#=== Finish at #{new Date().toISOString()}\n"
 
   cancel: ->
     debug "Cancelled stack size: #{@stack.length}"
-    for op in @pop()
-      debug  op.getKind()
+    debug(op.getKind()) for op in @pop()
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
       @vimState.activate('reset')
     @finish()
     debug "#=== Canceled at #{new Date().toISOString()}\n"
 
   finish: ->
-    {editor} = @vimState
     if @vimState.isMode('normal')
-      if editor.getLastSelection().isEmpty()
+      if @editor.getLastSelection().isEmpty()
         @dontPutCursorsAtEndOfLine()
     if @vimState.isMode('visual', 'blockwise')
       @vimState.showCursors()
     @vimState.reset()
 
   dontPutCursorsAtEndOfLine: ->
-    for c in @vimState.editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
+    for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
       {goalColumn} = c
       c.moveLeft()
       c.goalColumn = goalColumn
 
   peekTop: ->
     _.last @stack
+
+  pushToStack: (operation, {message}={}) ->
+    debug message if message?
+    @stack.push(operation)
 
   pop: ->
     @stack.pop()
@@ -119,3 +115,5 @@ class OperationStack
 
   inspect: ->
     @vimState.developer?.inspectOperationStack()
+
+module.exports = OperationStack
