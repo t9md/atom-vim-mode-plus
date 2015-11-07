@@ -1,6 +1,6 @@
 # 0.1.10 WIP
-- Now warn to console if duplicate constructor name is used, this is only for stability when developer add new TOM.
-- Improve accuracy of TextObject.Function for language have `meta.function` scope.
+- Now warn to console if duplicate constructor name is used, this is only for safe guard when developer add new TOM.
+- Improve accuracy of TextObject.Function for language which have `meta.function` scope.
 - Lots of cleanup/refactoring
 - Now commands are dispatched via vimState::dispatchCommand which translate command name to klassName with special translation for TextObject
 
