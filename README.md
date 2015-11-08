@@ -213,7 +213,7 @@ Here is my keymap as an example.
 # Helper packages
 
 Here is the list of my packages which provide more vim-like experience.  
-Why I dont builtin these feature? Its because it take time, and some feature is usefull for non-vim user.
+Why I don't builtin these feature? Its because it take time and some feature is useful for non-vim user.
 
 - [cursor-history](https://atom.io/packages/cursor-history)
 provides <kbd>c-i</kbd>, <kbd>c-o</kbd> to go/back cursor position history.
