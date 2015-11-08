@@ -1,4 +1,4 @@
-# 0.1.10 WIP
+# 0.1.10
 - Now warn to console if duplicate constructor name is used, this is only for safe guard when developer add new TOM.
 - Improve accuracy of TextObject.Function for language which have `meta.function` scope.
 - Lots of cleanup/refactoring
