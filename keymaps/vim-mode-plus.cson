@@ -309,10 +309,6 @@
   'C':      'vim-mode-plus:blockwise-change-to-last-character-of-line',
   'I':      'vim-mode-plus:blockwise-insert-at-beginning-of-line'
   'A':      'vim-mode-plus:blockwise-insert-after-end-of-line',
-  'escape': 'vim-mode-plus:blockwise-escape'
-  'ctrl-[': 'vim-mode-plus:blockwise-escape'
-  'ctrl-c': 'vim-mode-plus:blockwise-escape'
-  'ctrl-v': 'vim-mode-plus:blockwise-escape'
 
 # Input mini editor e.g. mark, surround.
 # -------------------------
