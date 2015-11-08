@@ -14,10 +14,10 @@ class SelectionWrapper
     prop[@scope] = newProp
     @selection.marker.setProperties prop
 
-  updateProperties: (value) ->
+  updateProperties: (newProp) ->
     # @getProperties() get result of getProperties() which is safe to extend.
     # So OK to directly extend.
-    @setProperties _.deepExtend(@getProperties(), value)
+    @setProperties _.deepExtend(@getProperties(), newProp)
 
   resetProperties: ->
     @setProperties null
