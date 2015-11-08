@@ -4,15 +4,17 @@ swrap = require './selection-wrapper'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 {Range, CompositeDisposable, Disposable} = require 'atom'
 
-module.exports =
+supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
+supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
+
 class ModeManager
   mode: 'insert' # Native atom is not modal editor and its default is 'insert'
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
-  isMode: (mode, submodes=null) ->
-    if submodes
+  isMode: (mode, submodes) ->
+    if submodes?
       submodes = [submodes] unless _.isArray(submodes)
       (@mode is mode) and (@submode in submodes)
     else
@@ -23,13 +25,10 @@ class ModeManager
       @editor.clearSelections()
       mode = 'normal'
 
+    @deactivate() unless @isMode(mode)
     switch mode
-      when 'normal'
-        @deactivateInsertMode() if @isMode('insert')
-        @deactivateVisualMode() if @isMode('visual')
-        @activateNormalMode()
-      when 'insert'
-        @activateInsertMode(submode)
+      when 'normal' then @activateNormalMode()
+      when 'insert' then @activateInsertMode(submode)
       when 'visual'
         return @activate('normal') if @isMode('visual', submode)
         @activateVisualMode(submode)
@@ -40,12 +39,16 @@ class ModeManager
     @updateModeSelector(mode, submode)
     @vimState.statusBarManager.update(mode, submode)
 
-  updateModeSelector: (newMode, newSubmode=null) ->
-    for mode in ['normal', 'insert', 'visual', 'operator-pending']
-      @vimState.updateClassCond(mode is newMode, "#{mode}-mode")
+  deactivate: ->
+    switch @mode
+      when 'insert' then @deactivateInsertMode(@submode)
+      when 'visual' then @deactivateVisualMode(@submode)
 
-    for submode in ['characterwise', 'linewise', 'blockwise', 'replace']
-      @vimState.updateClassCond(submode is newSubmode, submode)
+  updateModeSelector: (mode, submode) ->
+    for _mode in supportedModes
+      @vimState.updateClassCond(_mode is mode, "#{_mode}-mode")
+    for _submode in supportedSubModes
+      @vimState.updateClassCond(_submode is submode, _submode)
 
   # Normal
   # -------------------------
@@ -81,14 +84,14 @@ class ModeManager
       @replaceModeSubscriptions.add new Disposable =>
         @replacedCharsBySelection = null
 
-  deactivateInsertMode: ->
+  deactivateInsertMode: (oldSubmode) ->
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
     changes = getChangesSinceCheckpoint(@editor.buffer, @insertionCheckpoint)
     @insertionCheckpoint = null
     if (item = @vimState.getLastOperation()) and item.isInsert()
       item.confirmChanges(changes)
 
-    if @isMode('insert', 'replace')
+    if oldSubmode is 'replace'
       @replaceModeSubscriptions?.dispose()
       @replaceModeSubscriptions = null
 
@@ -118,48 +121,51 @@ class ModeManager
     @submode = submode
     switch submode
       when 'linewise'
-        @selectCharacterwise(oldSubmode) unless oldSubmode is 'characterwise'
-        @selectLinewise(oldSubmode)
-      when 'characterwise' then @selectCharacterwise(oldSubmode)
-      when 'blockwise' then @selectBlockwise(oldSubmode)
+        @selectCharacterwise(oldSubmode)
+        @selectLinewise()
+      when 'characterwise'
+        @selectCharacterwise(oldSubmode)
+      when 'blockwise'
+        @selectCharacterwise(oldSubmode)
+        @selectBlockwise()
 
-  deactivateVisualMode: ->
-    unless @isMode('visual', 'characterwise')
-      @selectCharacterwise(@submode)
-
+  deactivateVisualMode: (oldSubmode) ->
+    @selectCharacterwise(oldSubmode)
     # Adjust cursor position
     for s in @editor.getSelections()
       swrap(s).resetProperties()
       if (not s.isEmpty()) and (not s.isReversed())
         s.cursor.moveLeft()
 
-  selectLinewise: (oldSubmode) ->
-    # Keep original range as marker's property to restore column.
-    for s in @editor.getSelections()
-      swrap(s).preserveCharacterwise()
-      swrap(s).expandOverLine()
-      {cursor} = s
-      cursor.setVisible(false) if cursor.isVisible()
-
   # FIXME: Eliminate complexity.
-  selectCharacterwise: (oldSubmode=null) ->
+  selectCharacterwise: (oldSubmode) ->
     selection = @editor.getLastSelection()
-    if not oldSubmode? and selection.isEmpty()
-      @editor.selectRight()
-      return
-
     switch
+      when oldSubmode is 'characterwise'
+        # null
+        for s in @editor.getSelections()
+          swrap(s).preserveCharacterwise()
       when oldSubmode is 'blockwise'
         @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
       when oldSubmode is 'linewise' and selection.isEmpty()
+        null
+      when not oldSubmode? and selection.isEmpty()
         @editor.selectRight()
+        for s in @editor.getSelections()
+          swrap(s).preserveCharacterwise()
       else
         for s in @editor.getSelections()
           swrap(s).restoreCharacterwise()
 
-  selectBlockwise: (oldSubmode) ->
-    unless oldSubmode is 'characterwise'
-      @selectCharacterwise()
+  selectLinewise: ->
+    # Keep original range as marker's property to restore column.
+    for s in @editor.getSelections()
+      # swrap(s).preserveCharacterwise()
+      swrap(s).expandOverLine()
+      {cursor} = s
+      cursor.setVisible(false) if cursor.isVisible()
+
+  selectBlockwise: ->
     @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
 # This uses private APIs and may break if TextBuffer is refactored.
@@ -170,3 +176,5 @@ getChangesSinceCheckpoint = (buffer, checkpoint) ->
     history.undoStack.slice(index)
   else
     []
+
+module.exports = ModeManager

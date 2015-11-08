@@ -26,18 +26,18 @@ describe "Insert mode commands", ->
     describe "the ctrl-y command", ->
       it "copies from the line above", ->
         ensure [ctrl: 'y'], text: """
-        12345
-        1
-        abcd
-        aefghi
-        """
+          12345
+          1
+          abcd
+          aefghi
+          """
         editor.insertText ' '
         ensure [ctrl: 'y'], text: """
-        12345
-        1 3
-        abcd
-        a cefghi
-        """
+          12345
+          1 3
+          abcd
+          a cefghi
+          """
 
       it "does nothing if there's nothing above the cursor", ->
         editor.insertText 'fill'
