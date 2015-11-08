@@ -124,7 +124,7 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
 
     for selection in @editor.getSelections()
       adjustCursor(selection)
-    @vimState.activate('normal')
+    @vimState.activate('normal', null, {skipDeactivate: true})
     @vimState.activate('insert')
 
     if @command is 'A' and  cursorsAdjusted.length
@@ -169,7 +169,6 @@ class BlockwiseRestoreCharacterwise extends VisualBlockwise
     {start, end} = range
     range = range.translate([0, -1], [0, +1]) if start.column >= end.column
     @editor.setSelectedBufferRange(range, {reversed})
-    @vimState.showCursors()
 
 module.exports = {
   VisualBlockwise,

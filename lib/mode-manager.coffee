@@ -20,12 +20,13 @@ class ModeManager
     else
       @mode is mode
 
-  activate: (mode, submode=null) ->
+  activate: (mode, submode=null, {skipDeactivate}={}) ->
     if mode is 'reset'
       @editor.clearSelections()
       mode = 'normal'
 
-    @deactivate() unless @isMode(mode)
+    unless skipDeactivate
+      @deactivate(mode) unless @isMode(mode)
     switch mode
       when 'normal' then @activateNormalMode()
       when 'insert' then @activateInsertMode(submode)
@@ -36,10 +37,11 @@ class ModeManager
         null # This is just placeholder, nothing to do without updating selector.
 
     [@mode, @submode] = [mode, submode]
+    @vimState.showCursors() if @isMode('visual')
     @updateModeSelector(mode, submode)
     @vimState.statusBarManager.update(mode, submode)
 
-  deactivate: ->
+  deactivate: (mode) ->
     switch @mode
       when 'insert' then @deactivateInsertMode(@submode)
       when 'visual' then @deactivateVisualMode(@submode)
@@ -53,12 +55,6 @@ class ModeManager
   # Normal
   # -------------------------
   activateNormalMode: ->
-    # NOTE: Since cursor is serialized and restored in next session.
-    # If we don't reset this propety, first find-and-replace:select-next will
-    # put selection wrong place.
-    for s in @editor.getSelections()
-      swrap(s).resetProperties()
-      s.clear(autoscroll: false)
     @vimState.reset()
     @editorElement.component.setInputEnabled(false)
 
@@ -114,59 +110,49 @@ class ModeManager
   # -------------------------
   activateVisualMode: (submode) ->
     oldSubmode = @submode
-    # [FIXME] following operation depend operationStack
-    # So @activate at first is important since operationStack do
-    # special cursor treatment depending on current mode.
+    # [FIXME]
+    # Following operation depend operationStack,
+    # So setting @mode, @submode here is important since operationStack
+    # do special cursor treatment depending on current @mode, @submode.
     @mode = 'visual'
     @submode = submode
+    # console.log @mode, @submode
+    @selectCharacterwise(oldSubmode, 'activate')
     switch submode
       when 'linewise'
-        @selectCharacterwise(oldSubmode)
-        @selectLinewise()
-      when 'characterwise'
-        @selectCharacterwise(oldSubmode)
+        swrap(s).expandOverLine() for s in @editor.getSelections()
       when 'blockwise'
-        @selectCharacterwise(oldSubmode)
-        @selectBlockwise()
+        @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
   deactivateVisualMode: (oldSubmode) ->
-    @selectCharacterwise(oldSubmode)
-    # Adjust cursor position
+    @selectCharacterwise(oldSubmode, 'deactivate')
+    # NOTE: Since cursor is serialized and restored in next session.
+    # If we don't reset this propety, first find-and-replace:select-next will
+    # put selection wrong place.
     for s in @editor.getSelections()
       swrap(s).resetProperties()
       if (not s.isEmpty()) and (not s.isReversed())
         s.cursor.moveLeft()
+      s.clear(autoscroll: false)
 
-  # FIXME: Eliminate complexity.
-  selectCharacterwise: (oldSubmode) ->
-    selection = @editor.getLastSelection()
-    switch
-      when oldSubmode is 'characterwise'
-        # null
-        for s in @editor.getSelections()
-          swrap(s).preserveCharacterwise()
-      when oldSubmode is 'blockwise'
-        @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
-      when oldSubmode is 'linewise' and selection.isEmpty()
-        null
-      when not oldSubmode? and selection.isEmpty()
-        @editor.selectRight()
-        for s in @editor.getSelections()
-          swrap(s).preserveCharacterwise()
-      else
-        for s in @editor.getSelections()
-          swrap(s).restoreCharacterwise()
-
-  selectLinewise: ->
-    # Keep original range as marker's property to restore column.
+  preserveCharacterwise: ->
     for s in @editor.getSelections()
-      # swrap(s).preserveCharacterwise()
-      swrap(s).expandOverLine()
-      {cursor} = s
-      cursor.setVisible(false) if cursor.isVisible()
+      swrap(s).preserveCharacterwise()
 
-  selectBlockwise: ->
-    @vimState.operationStack.push new BlockwiseSelect(@vimState)
+  # FIXME: Eliminate complexity further
+  selectCharacterwise: (oldSubmode, stage) ->
+    switch oldSubmode
+      when 'linewise'
+        for s in @editor.getSelections() when not s.isEmpty()
+          swrap(s).restoreCharacterwise()
+        return
+      when 'characterwise'
+        null
+      when 'blockwise'
+        @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
+      else
+        @editor.selectRight() if @editor.getLastSelection().isEmpty()
+    @preserveCharacterwise()
 
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.

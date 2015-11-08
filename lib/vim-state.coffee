@@ -120,7 +120,7 @@ class VimState
           @activate('normal')
         when @isMode('normal') and someSelection
           @activate('visual', 'characterwise')
-      @showCursors()
+      @showCursors() if @isMode('visual')
 
     selectionWatcher = null
     handleMouseDown = =>
@@ -316,11 +316,13 @@ class VimState
   # -------------------------
   undo: ->
     @editor.undo()
+    s.clear() for s in @editor.getSelections()
     @activate('normal')
 
   redo: ->
     @editor.redo()
-    @activate('reset')
+    s.clear() for s in @editor.getSelections()
+    @activate('normal')
 
   reverseSelections: ->
     swrap(s = @editor.getLastSelection()).reverse()
@@ -342,16 +344,18 @@ class VimState
 
   showCursors: ->
     return unless settings.get('showCursorInVisualMode')
-    cursors = switch
-      when @isMode('visual', 'characterwise')
-        @editor.getCursors()
-      when @isMode('visual', 'blockwise')
-        (s.cursor for s in @editor.getSelections() when swrap(s).isBlockwiseHead())
-    return unless cursors
+    cursors = switch @submode
+      when 'linewise' then []
+      when 'characterwise' then @editor.getCursors()
+      when 'blockwise'
+        @editor.getCursors().filter (c) -> swrap(c.selection).isBlockwiseHead()
 
-    for c in cursors
-      c.setVisible(true) unless c.isVisible()
-      @updateClassCond c.selection.isReversed(), 'reversed'
+    for c in @editor.getCursors()
+      if c in cursors
+        c.setVisible(true) unless c.isVisible()
+        @updateClassCond c.selection.isReversed(), 'reversed'
+      else
+        c.setVisible(false)
 
   updateClassCond: (condition, klass) ->
     action = (if condition then 'add' else 'remove')

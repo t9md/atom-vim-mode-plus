@@ -81,11 +81,9 @@ class OperationStack
     debug "#=== Canceled at #{new Date().toISOString()}\n"
 
   finish: ->
-    if @vimState.isMode('normal')
-      if @editor.getLastSelection().isEmpty()
-        @dontPutCursorsAtEndOfLine()
-    if @vimState.isMode('visual', 'blockwise')
-      @vimState.showCursors()
+    if @vimState.isMode('normal') and @editor.getLastSelection().isEmpty()
+      @dontPutCursorsAtEndOfLine()
+    @vimState.showCursors() if @vimState.isMode('visual')
     @vimState.reset()
 
   dontPutCursorsAtEndOfLine: ->
