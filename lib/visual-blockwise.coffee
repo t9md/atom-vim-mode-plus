@@ -138,7 +138,7 @@ class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
 class BlockwiseSelect extends VisualBlockwise
   @extend()
   execute: ->
-    s    = @editor.getLastSelection()
+    s = @editor.getLastSelection()
     tail = s.getTailBufferPosition()
     head = s.getHeadBufferPosition()
     {start, end} = s.getBufferRange()
@@ -157,12 +157,19 @@ class BlockwiseSelect extends VisualBlockwise
 class BlockwiseRestoreCharacterwise extends VisualBlockwise
   @extend()
   execute: ->
+    reversed = @isReversed()
+    head = @getHead()
+    headIsReversed = head.isReversed()
     startRow = @getTop().getBufferRowRange().shift()
     endRow = @getBottom().getBufferRowRange().shift()
-    range = @editor.getLastSelection().getBufferRange()
-    range.start.row = startRow
-    range.end.row   = endRow
-    @editor.setSelectedBufferRange(range)
+    {start: {column: startColumn}, end: {column: endColumn}} = head.getBufferRange()
+    if reversed isnt headIsReversed
+      [startColumn, endColumn] = [endColumn, startColumn]
+    range = new Range([startRow, startColumn], [endRow, endColumn])
+    {start, end} = range
+    range = range.translate([0, -1], [0, +1]) if start.column >= end.column
+    @editor.setSelectedBufferRange(range, {reversed})
+    @vimState.showCursors()
 
 module.exports = {
   VisualBlockwise,

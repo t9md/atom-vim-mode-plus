@@ -140,7 +140,9 @@ class VimState
 
     @editorElement.addEventListener 'mousedown', handleMouseDown
     @editorElement.addEventListener 'mouseup', handleMouseUp
-    @subscriptions.add @editor.onDidChangeSelectionRange debouncedHandleSelectionChange
+    @subscriptions.add @editor.onDidChangeSelectionRange =>
+      return if @operationStack.isProcessing()
+      debouncedHandleSelectionChange()
     @subscriptions.add new Disposable =>
       @editorElement.removeEventListener 'mousedown', handleMouseDown
       @editorElement.removeEventListener 'mouseup', handleMouseUp
