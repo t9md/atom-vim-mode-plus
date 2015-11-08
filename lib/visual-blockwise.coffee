@@ -135,12 +135,6 @@ class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
   command: 'A'
 
-class BlockwiseEscape extends VisualBlockwise
-  @extend()
-  execute: ->
-    @vimState.activate('normal')
-    @editor.clearSelections()
-
 class BlockwiseSelect extends VisualBlockwise
   @extend()
   execute: ->
@@ -179,7 +173,6 @@ module.exports = {
   BlockwiseChangeToLastCharacterOfLine,
   BlockwiseInsertAtBeginningOfLine,
   BlockwiseInsertAfterEndOfLine,
-  BlockwiseEscape,
   BlockwiseSelect,
   BlockwiseRestoreCharacterwise,
 }
