@@ -20,13 +20,12 @@ class ModeManager
     else
       @mode is mode
 
-  activate: (mode, submode=null, {skipDeactivate}={}) ->
+  activate: (mode, submode=null) ->
     if mode is 'reset'
       @editor.clearSelections()
       mode = 'normal'
 
-    unless skipDeactivate
-      @deactivate(mode) unless @isMode(mode)
+    @deactivate(mode) unless @isMode(mode)
     switch mode
       when 'normal' then @activateNormalMode()
       when 'insert' then @activateInsertMode(submode)
@@ -116,7 +115,6 @@ class ModeManager
     # do special cursor treatment depending on current @mode, @submode.
     @mode = 'visual'
     @submode = submode
-    # console.log @mode, @submode
     @selectCharacterwise(oldSubmode, 'activate')
     switch submode
       when 'linewise'
@@ -149,7 +147,10 @@ class ModeManager
       when 'characterwise'
         null
       when 'blockwise'
-        @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
+        # Many of VisualBlockwise commands change mode in the middle of processing()
+        # in this case, we want to loose multi-cursor.
+        unless @vimState.operationStack.isProcessing()
+          @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
       else
         @editor.selectRight() if @editor.getLastSelection().isEmpty()
     @preserveCharacterwise()
