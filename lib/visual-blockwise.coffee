@@ -10,14 +10,12 @@ class VisualBlockwise extends Base
   complete: true
 
   clearTail: ->
-    prop = tail: false
     for s in @editor.getSelections()
-      @updateProperty(s, tail: false)
+      @updateProperty(s, {tail: false})
 
   clearHead: ->
-    prop = head: false
     for s in @editor.getSelections()
-      @updateProperty(s, prop)
+      @updateProperty(s, {head: false})
       s.cursor.setVisible(false)
 
   updateProperty: (selection, prop) ->
@@ -140,8 +138,6 @@ class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
 class BlockwiseEscape extends VisualBlockwise
   @extend()
   execute: ->
-    @clearTail()
-    @clearHead()
     @vimState.activate('normal')
     @editor.clearSelections()
 

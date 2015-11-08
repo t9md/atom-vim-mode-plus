@@ -118,17 +118,18 @@ class ModeManager
     @submode = submode
     switch submode
       when 'linewise'
-        @selectCharacterwise() unless oldSubmode is 'characterwise'
+        @selectCharacterwise(oldSubmode) unless oldSubmode is 'characterwise'
         @selectLinewise(oldSubmode)
       when 'characterwise' then @selectCharacterwise(oldSubmode)
       when 'blockwise' then @selectBlockwise(oldSubmode)
 
   deactivateVisualMode: ->
-    if @isMode('visual', 'linewise')
-      @selectCharacterwise('linewise')
+    unless @isMode('visual', 'characterwise')
+      @selectCharacterwise(@submode)
 
     # Adjust cursor position
     for s in @editor.getSelections()
+      swrap(s).resetProperties()
       if (not s.isEmpty()) and (not s.isReversed())
         s.cursor.moveLeft()
 
