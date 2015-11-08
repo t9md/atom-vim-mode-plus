@@ -179,8 +179,8 @@ class VimState
     klass = _.capitalize(_.camelize(name))
     try
       op = new kind[klass](this)
-      if (kind is TextObject) and (prefix is 'a')
-        op.setInclusive(true)
+      if (kind is TextObject) and (prefix is 'inner')
+        op.setInner(true)
       @operationStack.push op
     catch error
       throw error unless error.isOperationAbortedError?()

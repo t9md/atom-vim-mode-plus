@@ -1,6 +1,7 @@
 # Refactoring status: 95%
 {Range} = require 'atom'
 _    = require 'underscore-plus'
+
 Base = require './base'
 swrap = require './selection-wrapper'
 {
@@ -14,13 +15,13 @@ swrap = require './selection-wrapper'
 class TextObject extends Base
   @extend()
   complete: true
-  inclusive: false
+  inner: false
 
-  isInclusive: ->
-    @inclusive
+  isInner: ->
+    @inner
 
-  setInclusive: (@inclusive) ->
-    @inclusive
+  setInner: (@inner) ->
+    @inner
 
   isLinewise: ->
     @editor.getSelections().every (s) ->
@@ -28,8 +29,9 @@ class TextObject extends Base
 
   eachSelection: (fn) ->
     fn(s) for s in @editor.getSelections()
-    if not @vimState.isMode('operator-pending') and @isLinewise() and
-        not @vimState.isMode('visual', 'linewise')
+    return if @vimState.isMode('operator-pending')
+    return if @vimState.isMode('visual', 'linewise')
+    if @isLinewise()
       @vimState.activate('visual', 'linewise')
 
   execute: ->
@@ -44,7 +46,7 @@ class Word extends TextObject
     @eachSelection (selection) =>
       wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
       @selectExclusive(selection, wordRegex)
-      @selectInclusive(selection) if @isInclusive()
+      @selectInclusive(selection) unless @isInner()
 
   selectExclusive: (selection, wordRegex=null) ->
     selection.selectWord()
@@ -139,14 +141,14 @@ class Pair extends TextObject
         close = @findPair pair, {from: open, @allowNextLine, nest: 1, which: 'close'} if open?
     if open and close
       range = new Range(open, close)
-      range = range.translate([0, -1], [0, 1]) if @isInclusive()
+      range = range.translate([0, -1], [0, 1]) unless @isInner()
     range
 
   getRange: (selection, what=@what) ->
     rangeOrig = selection.getBufferRange()
     from = selection.getHeadBufferPosition()
 
-    # Be inclusive, include char under cursor.
+    # Be inner, include char under cursor.
     from = from.translate([0, +1]) if selection.isEmpty()
     from = from.translate([0, -1]) if what is 'next'
 
@@ -175,7 +177,7 @@ class AnyPair extends Pair
 
   getRangeBy: (klass, selection) ->
     # overwite default @what
-    @new(klass, {@inclusive}).getRange(selection, @what)
+    @new(klass, {@inner}).getRange(selection, @what)
 
   getRanges: (selection) ->
     ranges = []
@@ -284,10 +286,10 @@ class Paragraph extends TextObject
   select: ->
     @eachSelection (selection) =>
       _.times @getCount(), =>
-        if @isInclusive()
-          @selectInclusive(selection)
-        else
+        if @isInner()
           @selectExclusive(selection)
+        else
+          @selectInclusive(selection)
 
 class Comment extends Paragraph
   @extend()
@@ -297,7 +299,7 @@ class Comment extends Paragraph
   getRange: (startRow) ->
     return unless @editor.isBufferRowCommented(startRow)
     fn = (row) =>
-      return if (@isInclusive() and @editor.isBufferRowBlank(row))
+      return if (not @isInner() and @editor.isBufferRowBlank(row))
       @editor.isBufferRowCommented(row) in [false, undefined]
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
@@ -312,7 +314,7 @@ class Indentation extends Paragraph
     baseIndentLevel = @editor.indentLevelForLine(text)
     fn = (row) =>
       if @editor.isBufferRowBlank(row)
-        not @isInclusive()
+        @isInner()
       else
         text = @editor.lineTextForBufferRow(row)
         @editor.indentLevelForLine(text) < baseIndentLevel
@@ -325,7 +327,7 @@ class Fold extends TextObject
     for currentRow in [bufferRow..0] by -1
       [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
       continue unless startRow? and startRow <= bufferRow <= endRow
-      startRow += 1 unless @isInclusive()
+      startRow += 1 if @isInner()
       return [startRow, endRow]
 
   select: ->
@@ -374,7 +376,7 @@ class Function extends Fold
     null
 
   adjustRowRange: (startRow, endRow) ->
-    unless @isInclusive()
+    if @isInner()
       startRow += 1
       unless @language in @indentScopedLanguages
         endRow -= 1
@@ -387,7 +389,7 @@ class CurrentLine extends TextObject
     @eachSelection (selection) =>
       {cursor} = selection
       cursor.moveToBeginningOfLine()
-      cursor.moveToFirstCharacterOfLine() unless @isInclusive()
+      cursor.moveToFirstCharacterOfLine() if @isInner()
       selection.selectToEndOfLine()
 
 class Entire extends TextObject
