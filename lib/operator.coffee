@@ -51,20 +51,26 @@ class Operator extends Base
       @vimState.register.set({text})
 
   markCursorBufferPositions: ->
-    markerByCursor = {}
+    markerByCursor = new Map
+    markerOptions = {invalidate: 'never', persistent: false}
     for cursor in @editor.getCursors()
       point = cursor.getBufferPosition()
-      markerByCursor[cursor.id] = @editor.markBufferPosition point,
-        invalidate: 'never',
-        persistent: false
+      marker = @editor.markBufferPosition point, markerOptions
+      markerByCursor.set(cursor, marker)
     markerByCursor
 
   restoreMarkedCursorPositions: (markerByCursor) ->
     for cursor in @editor.getCursors()
-      if marker = markerByCursor[cursor.id]
-        cursor.setBufferPosition marker.getStartBufferPosition()
-    for key, marker of markerByCursor
+      if marker = markerByCursor.get(cursor)
+        cursor.setBufferPosition(marker.getStartBufferPosition())
+    markerByCursor.forEach (marker, cursor) ->
       marker.destroy()
+    markerByCursor.clear()
+
+  withKeepingCursorPosition: (fn) ->
+    markerByCursor = @markCursorBufferPositions()
+    fn()
+    @restoreMarkedCursorPositions(markerByCursor)
 
   markSelections: ->
     # [NOTE] selection.marker.copy() return undefined.
@@ -183,14 +189,13 @@ class CamelCase extends TransformString
   @extend()
   hoverText: ':camel:'
   hoverIcon: ':camel-case:'
-
   getNewText: (text) ->
     _.camelize text
 
 class SnakeCase extends TransformString
   @extend()
   hoverText: ':snake:'
-  hoverIcon: ':snake-case:' # [FIXME]
+  hoverIcon: ':snake-case:'
   getNewText: (text) ->
     _.underscore text
 
@@ -225,7 +230,7 @@ class Surround extends TransformString
 
   getPair: (input) ->
     pair = _.detect @pairs, (pair) -> input in pair
-    pair ?= input+input
+    pair ?= input + input
 
   surround: (text, pair) ->
     [open, close] = pair.split('')
@@ -241,10 +246,15 @@ class SurroundWord extends Surround
 
 class DeleteSurround extends Surround
   @extend()
+  pairChars: ['[]', '()', '{}'].join('')
+
   onConfirm: (@input) ->
     # FIXME: dont manage allowNextLine independently. Each Pair text-object can handle by themselvs.
-    allowNextLine = @input in ['[]', '()', '{}'].join('')
-    @compose @new('Pair', {pair: @getPair(@input), inclusive: true, allowNextLine})
+    target = @new 'Pair',
+      pair: @getPair(@input)
+      inclusive: true
+      allowNextLine: @input in @pairChars
+    @compose(target)
     @vimState.operationStack.process()
 
   getNewText: (text) ->
@@ -268,7 +278,7 @@ class ChangeSurround extends DeleteSurround
     super(from)
 
   getNewText: (text) ->
-    @surround text[1...-1], @getPair(@char)
+    @surround super(text), @getPair(@char)
 
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
@@ -412,16 +422,17 @@ class PutBefore extends Operator
     {text, type} = @vimState.register.get()
     return unless text
     text = _.multiplyString(text, @getCount())
+    paste = switch
+      when type is 'linewise', @vimState.isMode('visual', 'linewise')
+        @pasteLinewise
+      when 'character'
+        @pasteCharacterwise
+
     @editor.transact =>
-      for selection in @editor.getSelections()
-        switch
-          when type is 'linewise', @vimState.isMode('visual', 'linewise')
-            @pasteLinewise(selection, text)
-          when 'character'
-            @pasteCharacterwise(selection, text)
+      paste(s, text) for s in @editor.getSelections()
     @vimState.activate('normal')
 
-  pasteLinewise: (selection, text) ->
+  pasteLinewise: (selection, text) => # fat
     cursor = selection.cursor
     if selection.isEmpty()
       if @location is 'before'
@@ -442,7 +453,7 @@ class PutBefore extends Operator
     cursor.setBufferPosition(range.start)
     cursor.moveToFirstCharacterOfLine()
 
-  pasteCharacterwise: (selection, text) ->
+  pasteCharacterwise: (selection, text) => # fat
     cursor = selection.cursor
     if @location is 'after' and selection.isEmpty()
       cursor.moveRight()
@@ -472,10 +483,9 @@ class ToggleLineComments extends Operator
   hoverText: ':mute:'
   hoverIcon: ':toggle-line-comment:'
   execute: ->
-    markerByCursor = @markCursorBufferPositions()
-    @eachSelection (s) ->
-      s.toggleLineComments()
-    @restoreMarkedCursorPositions markerByCursor
+    @withKeepingCursorPosition =>
+      @eachSelection (s) ->
+        s.toggleLineComments()
     @vimState.activate('normal')
 
 # Input
@@ -503,7 +513,7 @@ class Insert extends Operator
     else
       @vimState.activate('insert')
 
-class ReplaceMode extends Insert
+class ActivateReplaceMode extends Insert
   @extend()
 
   execute: ->
@@ -720,12 +730,8 @@ class Replace extends Operator
 
     @vimState.activate('normal')
 
-# Alias
-ActivateInsertMode = Insert
-ActivateReplaceMode = ReplaceMode
-
+ActivateInsertMode = Insert # Alias
 module.exports = {
-  # General
   Operator, OperatorError, Delete,
   Select,
 
@@ -733,24 +739,21 @@ module.exports = {
   Increase, Decrease,
   Indent, Outdent, AutoIndent,
 
-  # String transformation
   ToggleCase, ToggleCaseAndMoveRight,
   UpperCase, LowerCase, CamelCase, SnakeCase, DashCase
   Surround, SurroundWord
   DeleteSurround, DeleteSurroundAnyPair
   ChangeSurround, ChangeSurroundAnyPair
 
-  # Put
   PutBefore, PutAfter,
 
-  # Input
-  Insert
+  ActivateInsertMode # Alias of Insert
   InsertAfter
   InsertAfterEndOfLine
   InsertAtBeginningOfLine
   InsertAboveWithNewline
   InsertBelowWithNewline
-  ReplaceMode
+  ActivateReplaceMode
   Change
   Substitute
   SubstituteLine
@@ -761,10 +764,6 @@ module.exports = {
   DeleteLeft
   DeleteToLastCharacterOfLine
   YankLine
-
-  # [FIXME] Only to map from command-name. remove in future.
-  ActivateInsertMode
-  ActivateReplaceMode
 
   ReplaceWithRegister
   ToggleLineComments
