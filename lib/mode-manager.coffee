@@ -109,7 +109,7 @@ class ModeManager
   # Visual
   # -------------------------
   activateVisualMode: (submode) ->
-    # Restern to charwise selection then preserve charwise range.
+    # If submode shift within visual mode, we first restore characterwise range
     if @submode?
       @restoreCharacterwiseRange()
     else
