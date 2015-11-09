@@ -111,7 +111,7 @@ class ModeManager
   activateVisualMode: (submode) ->
     # Restern to charwise selection then preserve charwise range.
     if @submode?
-      @restoreCharacterwiseRange {fromMode: @submode}
+      @restoreCharacterwiseRange()
     else
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
     swrap(s).preserveCharacterwise() for s in @editor.getSelections()
@@ -124,15 +124,15 @@ class ModeManager
         @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
   deactivateVisualMode: ->
-    @restoreCharacterwiseRange({fromMode: @submode})
+    @restoreCharacterwiseRange()
     for s in @editor.getSelections()
       swrap(s).resetProperties()
       if (not s.isEmpty()) and (not s.isReversed())
         s.cursor.moveLeft()
       s.clear(autoscroll: false)
 
-  restoreCharacterwiseRange: ({fromMode}) ->
-    switch fromMode
+  restoreCharacterwiseRange: ->
+    switch @submode
       when 'characterwise'
         null # nothiing to do, but I want to be explicte.
       when 'linewise'
