@@ -1,8 +1,9 @@
 # Refactoring status: 80%
 _ = require 'underscore-plus'
+{Range, CompositeDisposable, Disposable} = require 'atom'
+
 swrap = require './selection-wrapper'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
-{Range, CompositeDisposable, Disposable} = require 'atom'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
@@ -20,6 +21,8 @@ class ModeManager
     else
       @mode is mode
 
+  # activate: Public
+  #  Use this method to change mode, DONT use other direct method.
   activate: (mode, submode=null) ->
     if mode is 'reset'
       @editor.clearSelections()
@@ -41,16 +44,17 @@ class ModeManager
       when 'visual' then @activateVisualMode(submode)
       when 'operator-pending' then null # Nothing to do.
 
+    # Now update mode variables and update CSS selectors.
     [@mode, @submode] = [mode, submode]
     @vimState.showCursors()
-    @updateModeSelector(mode, submode)
+    @updateModeSelector()
     @vimState.statusBarManager.update(mode, submode)
 
-  updateModeSelector: (mode, submode) ->
-    for _mode in supportedModes
-      @vimState.updateClassCond(_mode is mode, "#{_mode}-mode")
-    for _submode in supportedSubModes
-      @vimState.updateClassCond(_submode is submode, _submode)
+  updateModeSelector: ->
+    for mode in supportedModes
+      @vimState.updateClassCond(mode is @mode, "#{mode}-mode")
+    for submode in supportedSubModes
+      @vimState.updateClassCond(submode is @submode, submode)
 
   # Normal
   # -------------------------
@@ -63,22 +67,7 @@ class ModeManager
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)
     @setInsertionCheckpoint()
-
-    if submode is 'replace'
-      @replacedCharsBySelection = {}
-      @replaceModeSubscriptions ?= new CompositeDisposable
-
-      @replaceModeSubscriptions.add @editor.onWillInsertText ({text, cancel}) =>
-        cancel()
-        for s in @editor.getSelections()
-          for char in text.split('') ? []
-            if (char isnt "\n") and (not s.cursor.isAtEndOfLine())
-              s.selectRight()
-            @replacedCharsBySelection[s.id] ?= []
-            @replacedCharsBySelection[s.id].push(swrap(s).replace(char))
-
-      @replaceModeSubscriptions.add new Disposable =>
-        @replacedCharsBySelection = null
+    @activateReplaceMode() if submode is 'replace'
 
   deactivateInsertMode: ->
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
@@ -87,21 +76,39 @@ class ModeManager
     if (item = @vimState.getLastOperation()) and item.isInsert()
       item.confirmChanges(changes)
 
-    if @submode is 'replace'
-      @replaceModeSubscriptions?.dispose()
-      @replaceModeSubscriptions = null
+    @deactivateReplaceMode() if @submode is 'replace'
 
     # Adjust cursor position
     for c in @editor.getCursors() when not c.isAtBeginningOfLine()
       c.moveLeft()
+
+  activateReplaceMode: ->
+    @replacedCharsBySelection = {}
+    @replaceModeSubscriptions ?= new CompositeDisposable
+
+    @replaceModeSubscriptions.add @editor.onWillInsertText ({text, cancel}) =>
+      cancel()
+      for s in @editor.getSelections()
+        for char in text.split('') ? []
+          if (char isnt "\n") and (not s.cursor.isAtEndOfLine())
+            s.selectRight()
+          @replacedCharsBySelection[s.id] ?= []
+          @replacedCharsBySelection[s.id].push(swrap(s).replace(char))
+
+    @replaceModeSubscriptions.add new Disposable =>
+      @replacedCharsBySelection = null
+
+  deactivateReplaceMode: ->
+    @replaceModeSubscriptions?.dispose()
+    @replaceModeSubscriptions = null
 
   replaceModeBackspace: ->
     for s in @editor.getSelections()
       char = @replacedCharsBySelection[s.id].pop()
       if char? # char maybe empty char ''.
         s.selectLeft()
-        unless s.insertText(char).isEmpty()
-          s.cursor.moveLeft()
+        range = s.insertText(char)
+        s.cursor.moveLeft() unless range.isEmpty()
 
   setInsertionCheckpoint: ->
     @insertionCheckpoint ?= @editor.createCheckpoint()
@@ -114,21 +121,20 @@ class ModeManager
       @restoreCharacterwiseRange()
     else
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
-    swrap(s).preserveCharacterwise() for s in @editor.getSelections()
+    # Preserve characterwise range to restore afterward.
+    selections = @editor.getSelections()
+    swrap(s).preserveCharacterwise() for s in selections
 
-    # Change selection range to final submode.
+    # Update selection area to final submode.
     switch submode
-      when 'linewise'
-        swrap(s).expandOverLine() for s in @editor.getSelections()
-      when 'blockwise'
-        @vimState.operationStack.push new BlockwiseSelect(@vimState)
+      when 'linewise' then swrap(s).expandOverLine() for s in selections
+      when 'blockwise' then @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
   deactivateVisualMode: ->
     @restoreCharacterwiseRange()
     for s in @editor.getSelections()
       swrap(s).resetProperties()
-      if (not s.isEmpty()) and (not s.isReversed())
-        s.cursor.moveLeft()
+      s.cursor.moveLeft() unless (s.isEmpty() or s.isReversed())
       s.clear(autoscroll: false)
 
   restoreCharacterwiseRange: ->
