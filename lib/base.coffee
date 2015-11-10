@@ -9,7 +9,7 @@ class Base
   defaultCount: 1
   requireInput: false
 
-  constructor: (@vimState) ->
+  constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
     if settings.get('showHoverOnOperate')
       @vimState.hover.setPoint() if @hoverText?
@@ -19,6 +19,7 @@ class Base
           when 'icon'  then @hoverIcon if @hoverIcon?
           else null
       @vimState.hover.add hover if hover?
+    _.extend(this, properties)
     @initialize?()
 
   # Operation processor execute only when isComplete() return true.
@@ -46,8 +47,8 @@ class Base
     @count
 
   new: (klassName, properties={}) ->
-    obj = new (Base.getConstructor(klassName))(@vimState)
-    _.extend(obj, properties)
+    klass = Base.getConstructor(klassName)
+    new klass(@vimState, properties)
 
   readInput: ({charsMax}={}) ->
     charsMax ?= 1

@@ -5,11 +5,19 @@ _ = require 'underscore-plus'
 {Select} = require './operator'
 {debug} = require './utils'
 settings = require './settings'
+Base = require './base'
 
 class OperationStack
   constructor: (@vimState) ->
     @stack = []
     {@editor} = @vimState
+
+  run: (klass, properties) ->
+    try
+      klass = Base.getConstructor(klass) if _.isString(klass)
+      @push new klass(@vimState, properties)
+    catch error
+      throw error unless error.isOperationAbortedError?()
 
   push: (op) ->
     if @isEmpty() and settings.get('debug')
