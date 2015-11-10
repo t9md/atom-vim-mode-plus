@@ -159,33 +159,27 @@ class VimState
         cmd = "#{packageScope}:#{name}"
         @subscriptions.add atom.commands.add(@editorElement, cmd, fn)
 
+  # command-name is automatically mapped to correspoinding class.
+  # e.g.
+  #   join -> Join
+  #   scroll-down -> ScrollDown
   registerOperationCommands: (kind, names) ->
     commands = {}
     for name in names
       do (name) =>
         commands[name] = =>
-          @dispatchCommand(kind, name)
+          klassName = name
+          properties = null
+          if kind is TextObject
+            # Split into [prefix, name] pair for TextObject commands.
+            # e.g.
+            #  'a-whole-word' -> ['a', 'whole-word']
+            #  'inner-double-quote' -> ['inner', 'double-quote']
+            [prefix, klassName] = name.split(/-(.+)/, 2)
+            properties = {inner: true} if prefix is 'inner'
+          klass = kind[_.capitalize(_.camelize(klassName))]
+          @operationStack.run(klass, properties)
     @registerCommands(commands)
-
-  # command-name is automatically mapped to correspoinding class.
-  # e.g.
-  #   join -> Join
-  #   scroll-down -> ScrollDown
-  dispatchCommand: (kind, name) ->
-    if kind is TextObject
-      # Split into [prefix, name] pair for TextObject commands.
-      # e.g.
-      #  'a-whole-word' -> ['a', 'whole-word']
-      #  'inner-double-quote' -> ['inner', 'double-quote']
-      [prefix, name] = name.split(/-(.+)/, 2)
-    klass = _.capitalize(_.camelize(name))
-    try
-      op = new kind[klass](this)
-      if (kind is TextObject) and (prefix is 'inner')
-        op.setInner(true)
-      @operationStack.push op
-    catch error
-      throw error unless error.isOperationAbortedError?()
 
   # Initialize all commands.
   init: ->

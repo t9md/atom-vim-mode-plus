@@ -3,7 +3,6 @@ _ = require 'underscore-plus'
 {Range, CompositeDisposable, Disposable} = require 'atom'
 
 swrap = require './selection-wrapper'
-{BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
@@ -130,7 +129,7 @@ class ModeManager
     # Update selection area to final submode.
     switch submode
       when 'linewise' then swrap(s).expandOverLine() for s in selections
-      when 'blockwise' then @vimState.operationStack.push new BlockwiseSelect(@vimState)
+      when 'blockwise' then @vimState.operationStack.run('BlockwiseSelect')
 
     new Disposable =>
       @restoreCharacterwiseRange()
@@ -150,7 +149,7 @@ class ModeManager
         # Many VisualBlockwise commands change mode in the middle of processing()
         # in this case, we dont want to loose multi-cursor.
         unless @vimState.operationStack.isProcessing()
-          @vimState.operationStack.push new BlockwiseRestoreCharacterwise(@vimState)
+          @vimState.operationStack.run "BlockwiseRestoreCharacterwise"
 
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.

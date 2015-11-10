@@ -20,9 +20,6 @@ class TextObject extends Base
   isInner: ->
     @inner
 
-  setInner: (@inner) ->
-    @inner
-
   isLinewise: ->
     @editor.getSelections().every (s) ->
       isLinewiseRange(s.getBufferRange())

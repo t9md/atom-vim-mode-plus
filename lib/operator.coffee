@@ -32,7 +32,7 @@ class Operator extends Base
     super
     #  To support, `dd`, `cc` and a like.
     if @isSameOperatorRepeated()
-      @vimState.operationStack.push @new('MoveToRelativeLine')
+      @vimState.operationStack.run 'MoveToRelativeLine'
       @abort()
 
   # target - TextObject or Motion to operate on.
@@ -240,6 +240,7 @@ class Surround extends TransformString
     @surround text, @getPair(@input)
 
 class SurroundWord extends Surround
+  @extend()
   initialize: ->
     super
     @compose @new('Word')
@@ -730,7 +731,9 @@ class Replace extends Operator
 
     @vimState.activate('normal')
 
-ActivateInsertMode = Insert # Alias
+# [TODO] remove bellow alias in future
+ActivateInsertMode = Insert
+
 module.exports = {
   Operator, OperatorError, Delete,
   Select,
