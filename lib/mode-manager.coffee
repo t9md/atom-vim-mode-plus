@@ -39,7 +39,7 @@ class ModeManager
       when 'normal' then @activateNormalMode()
       when 'insert' then @activateInsertMode(submode)
       when 'visual' then @activateVisualMode(submode)
-      when 'operator-pending' then new Disposable
+      when 'operator-pending' then new Disposable # Nothing to do.
 
     # Now update mode variables and update CSS selectors.
     [@mode, @submode] = [mode, submode]
