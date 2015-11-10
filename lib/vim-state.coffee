@@ -120,7 +120,7 @@ class VimState
           @activate('normal')
         when @isMode('normal') and someSelection
           @activate('visual', 'characterwise')
-      @showCursors() if @isMode('visual')
+      @showCursors()
 
     selectionWatcher = null
     handleMouseDown = =>
@@ -343,7 +343,7 @@ class VimState
     @searchHistory.getEntries[index]
 
   showCursors: ->
-    return unless settings.get('showCursorInVisualMode')
+    return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))
     cursors = switch @submode
       when 'linewise' then []
       when 'characterwise' then @editor.getCursors()
