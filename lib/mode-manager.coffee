@@ -32,17 +32,14 @@ class ModeManager
       submode = null
 
     # Deactivate old mode
-    if mode isnt @mode
-      switch @mode
-        when 'insert' then @deactivateInsertMode()
-        when 'visual' then @deactivateVisualMode()
+    @deactivator?.dispose() if (mode isnt @mode)
 
     # Activate
-    switch mode
+    @deactivator = switch mode
       when 'normal' then @activateNormalMode()
       when 'insert' then @activateInsertMode(submode)
       when 'visual' then @activateVisualMode(submode)
-      when 'operator-pending' then null # Nothing to do.
+      when 'operator-pending' then new Disposable
 
     # Now update mode variables and update CSS selectors.
     [@mode, @submode] = [mode, submode]
@@ -61,32 +58,34 @@ class ModeManager
   activateNormalMode: ->
     @vimState.reset()
     @editorElement.component.setInputEnabled(false)
+    new Disposable
 
   # Insert
   # -------------------------
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)
     @setInsertionCheckpoint()
-    @activateReplaceMode() if submode is 'replace'
+    replaceModeDeactivator = @activateReplaceMode() if (submode is 'replace')
 
-  deactivateInsertMode: ->
-    @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
-    changes = getChangesSinceCheckpoint(@editor.buffer, @insertionCheckpoint)
-    @insertionCheckpoint = null
-    if (item = @vimState.getLastOperation()) and item.isInsert()
-      item.confirmChanges(changes)
+    new Disposable =>
+      checkpoint = @getInsertionCheckpoint()
+      @editor.groupChangesSinceCheckpoint(checkpoint)
+      changes = getChangesSinceCheckpoint(@editor.buffer, checkpoint)
+      @resetInsertionCheckpoint()
+      if (item = @vimState.getLastOperation()) and item.isInsert()
+        item.confirmChanges(changes)
 
-    @deactivateReplaceMode() if @submode is 'replace'
+      replaceModeDeactivator?.dispose()
+      replaceModeDeactivator = null
 
-    # Adjust cursor position
-    for c in @editor.getCursors() when not c.isAtBeginningOfLine()
-      c.moveLeft()
+      # Adjust cursor position
+      for c in @editor.getCursors() when not c.isAtBeginningOfLine()
+        c.moveLeft()
 
   activateReplaceMode: ->
     @replacedCharsBySelection = {}
-    @replaceModeSubscriptions ?= new CompositeDisposable
-
-    @replaceModeSubscriptions.add @editor.onWillInsertText ({text, cancel}) =>
+    subs = new CompositeDisposable
+    subs.add @editor.onWillInsertText ({text, cancel}) =>
       cancel()
       for s in @editor.getSelections()
         for char in text.split('') ? []
@@ -95,12 +94,9 @@ class ModeManager
           @replacedCharsBySelection[s.id] ?= []
           @replacedCharsBySelection[s.id].push(swrap(s).replace(char))
 
-    @replaceModeSubscriptions.add new Disposable =>
+    subs.add new Disposable =>
       @replacedCharsBySelection = null
-
-  deactivateReplaceMode: ->
-    @replaceModeSubscriptions?.dispose()
-    @replaceModeSubscriptions = null
+    subs
 
   replaceModeBackspace: ->
     for s in @editor.getSelections()
@@ -112,6 +108,12 @@ class ModeManager
 
   setInsertionCheckpoint: ->
     @insertionCheckpoint ?= @editor.createCheckpoint()
+
+  resetInsertionCheckpoint: ->
+    @insertionCheckpoint = null
+
+  getInsertionCheckpoint: ->
+    @insertionCheckpoint
 
   # Visual
   # -------------------------
@@ -130,12 +132,12 @@ class ModeManager
       when 'linewise' then swrap(s).expandOverLine() for s in selections
       when 'blockwise' then @vimState.operationStack.push new BlockwiseSelect(@vimState)
 
-  deactivateVisualMode: ->
-    @restoreCharacterwiseRange()
-    for s in @editor.getSelections()
-      swrap(s).resetProperties()
-      s.cursor.moveLeft() unless (s.isEmpty() or s.isReversed())
-      s.clear(autoscroll: false)
+    new Disposable =>
+      @restoreCharacterwiseRange()
+      for s in @editor.getSelections()
+        swrap(s).resetProperties()
+        s.cursor.moveLeft() unless (s.isEmpty() or s.isReversed())
+        s.clear(autoscroll: false)
 
   restoreCharacterwiseRange: ->
     switch @submode
