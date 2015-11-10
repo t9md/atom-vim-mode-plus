@@ -24,6 +24,9 @@ class ModeManager
     if mode is 'reset'
       @editor.clearSelections()
       mode = 'normal'
+    else if mode is 'visual' and @isMode(mode, submode)
+      mode = 'normal'
+      submode = null
 
     # Deactivate old mode
     if mode isnt @mode
@@ -35,14 +38,11 @@ class ModeManager
     switch mode
       when 'normal' then @activateNormalMode()
       when 'insert' then @activateInsertMode(submode)
-      when 'visual'
-        return @activate('normal') if @isMode('visual', submode)
-        @activateVisualMode(submode)
-      when 'operator-pending'
-        null # This is just placeholder, nothing to do without updating selector.
+      when 'visual' then @activateVisualMode(submode)
+      when 'operator-pending' then null # Nothing to do.
 
     [@mode, @submode] = [mode, submode]
-    @vimState.showCursors() if @mode is 'visual'
+    @vimState.showCursors()
     @updateModeSelector(mode, submode)
     @vimState.statusBarManager.update(mode, submode)
 

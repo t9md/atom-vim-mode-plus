@@ -83,7 +83,7 @@ class OperationStack
   finish: ->
     if @vimState.isMode('normal') and @editor.getLastSelection().isEmpty()
       @dontPutCursorsAtEndOfLine()
-    @vimState.showCursors() if @vimState.isMode('visual')
+    @vimState.showCursors()
     @vimState.reset()
 
   dontPutCursorsAtEndOfLine: ->
