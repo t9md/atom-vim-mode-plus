@@ -9,20 +9,19 @@ class VisualBlockwise extends Base
   @extend()
   complete: true
 
-  clearTail: ->
+  eachSelection: (fn) ->
     for s in @editor.getSelections()
-      @updateProperty(s, {tail: false})
+      fn(s)
 
-  clearHead: ->
-    for s in @editor.getSelections()
-      @updateProperty(s, {head: false})
-      s.cursor.setVisible(false)
-
-  updateProperty: (selection, prop) ->
-    swrap(selection).updateProperties(blockwise: prop)
+  updateProperties: ({head, tail}) ->
+    @eachSelection (s) ->
+      prop = {}
+      prop.head = (s is head) if head?
+      prop.tail = (s is tail) if tail?
+      swrap(s).updateProperties(blockwise: prop)
 
   getTop: ->
-    _.first @editor.getSelectionsOrderedByBufferPosition()
+    @editor.getSelectionsOrderedByBufferPosition()[0]
 
   getBottom: ->
     _.last @editor.getSelectionsOrderedByBufferPosition()
@@ -32,7 +31,6 @@ class VisualBlockwise extends Base
       false
     else
       @getTail() is @getBottom()
-      # @getTail().marker.isEqual @getBottom().marker
 
   isSingleLine: ->
     @editor.getSelections().length is 1
@@ -41,33 +39,18 @@ class VisualBlockwise extends Base
     if @isReversed() then @getTop() else @getBottom()
 
   getTail: ->
-    _.detect @editor.getSelections(), ((s) -> swrap(s).isBlockwiseTail())
+    _.detect @editor.getSelections(), (s) -> swrap(s).isBlockwiseTail()
 
-  setTail: (newTail) ->
-    @clearTail()
-    @updateProperty(newTail, tail: true)
-
-  # Only for making cursor visible.
-  setHead: (newHead) ->
-    @clearHead()
-    @updateProperty(newHead, head: true)
-
-  constructor: ->
-    super
+  initialize: ->
+    # PlantTail
     unless @getTail()?
-      @setTail @getTop()
-      @setHead @getBottom()
-
-  reverse: ->
-    [newHead, newTail] = [@getTail(), @getHead()]
-    @setTail newTail
-    @setHead newHead
+      @updateProperties {tail: @getTop(), head: @getBottom()}
 
 class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
   execute: ->
     unless @isSingleLine()
-      @reverse()
+      @updateProperties {tail: @getHead(), head: @getTail()}
     @vimState.reverseSelections()
 
 class BlockwiseMoveDown extends VisualBlockwise
@@ -83,7 +66,7 @@ class BlockwiseMoveDown extends VisualBlockwise
       @vimState.syncSelectionsReversedState @getTail()
     else
       @getHead().destroy()
-    @setHead @getHead()
+    @updateProperties {head: @getHead()}
 
 class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
@@ -95,8 +78,8 @@ class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   @extend()
   delegateTo: 'DeleteToLastCharacterOfLine'
   execute: ->
-    for s in @editor.getSelections()
-      start = s.getBufferRange().start
+    @eachSelection (s) ->
+      {start} = s.getBufferRange()
       s.cursor.setBufferPosition(start)
     @vimState.activate('normal')
     @new(@delegateTo).execute()
@@ -124,8 +107,8 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
         cursorsAdjusted.push cursor
       cursor.setBufferPosition(pointTarget)
 
-    for selection in @editor.getSelections()
-      adjustCursor(selection)
+    @eachSelection (s) ->
+      adjustCursor(s)
     @vimState.activate('normal')
     @vimState.activate('insert')
 
