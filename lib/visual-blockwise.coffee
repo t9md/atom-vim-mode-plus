@@ -9,6 +9,11 @@ class VisualBlockwise extends Base
   @extend()
   complete: true
 
+  initialize: ->
+    # PlantTail
+    unless @getTail()?
+      @updateProperties {head: @getBottom(), tail: @getTop()}
+
   eachSelection: (fn) ->
     for s in @editor.getSelections()
       fn(s)
@@ -38,10 +43,10 @@ class VisualBlockwise extends Base
   getTail: ->
     _.detect @editor.getSelections(), (s) -> swrap(s).isBlockwiseTail()
 
-  initialize: ->
-    # PlantTail
-    unless @getTail()?
-      @updateProperties {head: @getBottom(), tail: @getTop()}
+  getBufferRowRange: ->
+    startRow = @getTop().getBufferRowRange()[0]
+    endRow = @getBottom().getBufferRowRange()[0]
+    [startRow, endRow]
 
 class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
@@ -107,7 +112,6 @@ class BlockwiseSelect extends VisualBlockwise
   execute: ->
     selection = @editor.getLastSelection()
     wasReversed = reversed = selection.isReversed()
-    [startRow, endRow] = selection.getBufferRowRange()
     {start: {column: startColumn}, end: {column: endColumn}} = selection.getBufferRange()
 
     if startColumn >= endColumn
@@ -115,6 +119,7 @@ class BlockwiseSelect extends VisualBlockwise
       startColumn += 1
       endColumn -= 1
 
+    [startRow, endRow] = selection.getBufferRowRange()
     ranges = ([[row, startColumn], [row, endColumn]] for row in [startRow..endRow])
     @editor.setSelectedBufferRanges(ranges, {reversed})
     if wasReversed
@@ -126,18 +131,18 @@ class BlockwiseSelect extends VisualBlockwise
 
 class BlockwiseRestoreCharacterwise extends VisualBlockwise
   @extend()
+
   execute: ->
     reversed = @isReversed()
     head = @getHead()
     headIsReversed = head.isReversed()
-    startRow = @getTop().getBufferRowRange().shift()
-    endRow = @getBottom().getBufferRowRange().shift()
+    [startRow, endRow] = @getBufferRowRange()
     {start: {column: startColumn}, end: {column: endColumn}} = head.getBufferRange()
     if reversed isnt headIsReversed
       [startColumn, endColumn] = [endColumn, startColumn]
-    range = new Range([startRow, startColumn], [endRow, endColumn])
-    {start, end} = range
-    range = range.translate([0, -1], [0, +1]) if start.column >= end.column
+      startColumn -= 1
+      endColumn += 1
+    range = [[startRow, startColumn], [endRow, endColumn]]
     @editor.setSelectedBufferRange(range, {reversed})
 
 module.exports = {
