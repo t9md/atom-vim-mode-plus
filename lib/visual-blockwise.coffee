@@ -20,6 +20,9 @@ class VisualBlockwise extends Base
       prop.tail = (s is tail) if tail?
       swrap(s).updateProperties(blockwise: prop)
 
+  isSingleLine: ->
+    @editor.getSelections().length is 1
+
   getTop: ->
     @editor.getSelectionsOrderedByBufferPosition()[0]
 
@@ -27,13 +30,7 @@ class VisualBlockwise extends Base
     _.last @editor.getSelectionsOrderedByBufferPosition()
 
   isReversed: ->
-    if @isSingleLine()
-      false
-    else
-      @getTail() is @getBottom()
-
-  isSingleLine: ->
-    @editor.getSelections().length is 1
+    (not @isSingleLine()) and @getTail() is @getBottom()
 
   getHead: ->
     if @isReversed() then @getTop() else @getBottom()
@@ -44,26 +41,29 @@ class VisualBlockwise extends Base
   initialize: ->
     # PlantTail
     unless @getTail()?
-      @updateProperties {tail: @getTop(), head: @getBottom()}
+      @updateProperties {head: @getBottom(), tail: @getTop()}
 
 class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
   execute: ->
     unless @isSingleLine()
-      @updateProperties {tail: @getHead(), head: @getTail()}
+      @updateProperties {head: @getTail(), tail: @getHead()}
     @vimState.reverseSelections()
 
 class BlockwiseMoveDown extends VisualBlockwise
   @extend()
   direction: 'Below'
 
-  isForward: ->
-    not @isReversed()
+  isExpanding: ->
+    return true if @isSingleLine()
+    switch @direction
+      when 'Below' then not @isReversed()
+      when 'Above' then @isReversed()
 
   execute: ->
-    if @isForward()
+    if @isExpanding()
       @editor["addSelection#{@direction}"]()
-      @vimState.syncSelectionsReversedState @getTail()
+      swrap.setReversedState @editor, @getTail().isReversed()
     else
       @getHead().destroy()
     @updateProperties {head: @getHead()}
@@ -71,20 +71,18 @@ class BlockwiseMoveDown extends VisualBlockwise
 class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
   direction: 'Above'
-  isForward: ->
-    @isSingleLine() or @isReversed()
 
 class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   @extend()
   delegateTo: 'DeleteToLastCharacterOfLine'
   execute: ->
     @eachSelection (s) ->
-      {start} = s.getBufferRange()
-      s.cursor.setBufferPosition(start)
+      s.cursor.setBufferPosition s.getBufferRange().start
+    finalPoint = @getTop().cursor.getBufferPosition()
     @vimState.activate('normal')
     @new(@delegateTo).execute()
     @editor.clearSelections()
-    @editor.setCursorBufferPosition(@getTop().cursor.getBufferPosition())
+    @editor.setCursorBufferPosition finalPoint
 
 class BlockwiseChangeToLastCharacterOfLine extends BlockwiseDeleteToLastCharacterOfLine
   @extend()
@@ -92,33 +90,18 @@ class BlockwiseChangeToLastCharacterOfLine extends BlockwiseDeleteToLastCharacte
 
 class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
   @extend()
-  command: 'I'
+  after: false
+
   execute: ->
-    cursorsAdjusted = []
-
-    adjustCursor = (selection) =>
-      {start, end} = selection.getBufferRange()
-      pointEndOfLine = @editor.bufferRangeForBufferRow(start.row).end
-      pointTarget = {'I': start, 'A': end}[@command]
-      {cursor} = selection
-
-      if pointTarget.isGreaterThanOrEqual(pointEndOfLine)
-        pointTarget = pointEndOfLine
-        cursorsAdjusted.push cursor
-      cursor.setBufferPosition(pointTarget)
-
+    which = if @after then 'end' else 'start'
     @eachSelection (s) ->
-      adjustCursor(s)
+      s.cursor.setBufferPosition s.getBufferRange()[which]
     @vimState.activate('normal')
     @vimState.activate('insert')
 
-    if @command is 'A' and  cursorsAdjusted.length
-      for cursor in cursorsAdjusted when not cursor.isAtEndOfLine()
-        cursor.moveRight()
-
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
-  command: 'A'
+  after: true
 
 class BlockwiseSelect extends VisualBlockwise
   @extend()
