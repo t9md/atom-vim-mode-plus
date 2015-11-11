@@ -123,13 +123,15 @@ class VimState
       @showCursors()
 
     selectionWatcher = null
-    handleMouseDown = =>
+    handleMouseDown = (evt) =>
+      return unless evt.button is 0 # Only care about left button
       point = @editor.getLastCursor().getBufferPosition()
       tailRange = Range.fromPointWithDelta(point, 0, +1)
       selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) ->
         selection.setBufferRange(selection.getBufferRange().union(tailRange))
 
-    handleMouseUp = ->
+    handleMouseUp = (evt) ->
+      return unless evt.button is 0 # Only care about left button
       handleSelectionChange()
       selectionWatcher?.dispose()
       selectionWatcher = null
