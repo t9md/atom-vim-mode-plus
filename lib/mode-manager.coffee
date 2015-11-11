@@ -1,4 +1,4 @@
-# Refactoring status: 80%
+# Refactoring status: 95%
 _ = require 'underscore-plus'
 {Range, CompositeDisposable, Disposable} = require 'atom'
 
@@ -26,7 +26,7 @@ class ModeManager
     if mode is 'reset'
       @editor.clearSelections()
       mode = 'normal'
-    else if mode is 'visual' and @isMode(mode, submode)
+    else if (mode is 'visual') and (@submode is submode)
       mode = 'normal'
       submode = null
 
@@ -99,7 +99,7 @@ class ModeManager
 
   replaceModeBackspace: ->
     for s in @editor.getSelections()
-      char = @replacedCharsBySelection[s.id].pop()
+      char = @replacedCharsBySelection[s.id]?.pop()
       if char? # char maybe empty char ''.
         s.selectLeft()
         range = s.insertText(char)
