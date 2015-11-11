@@ -166,20 +166,18 @@ class VimState
   registerOperationCommands: (kind, names) ->
     commands = {}
     for name in names
-      do (name) =>
-        commands[name] = =>
-          klassName = name
-          properties = null
-          if kind is TextObject
-            # Split into [prefix, name] pair for TextObject commands.
-            # e.g.
-            #  'a-whole-word' -> ['a', 'whole-word']
-            #  'inner-double-quote' -> ['inner', 'double-quote']
-            [prefix, klassName] = name.split(/-(.+)/, 2)
-            properties = {inner: true} if prefix is 'inner'
-          klass = kind[_.capitalize(_.camelize(klassName))]
-          @operationStack.run(klass, properties)
+      commands[name] = @getOperationCommand(kind, name)
     @registerCommands(commands)
+
+  getOperationCommand: (kind, name) ->
+    properties = null
+    if kind is TextObject
+      # Split into [prefix, name] pair for TextObject commands.
+      # e.g. 'inner-double-quote' -> ['inner', 'double-quote']
+      [prefix, name] = name.split(/-(.+)/, 2)
+      properties = {inner} if inner = (prefix is 'inner')
+    klassName = kind[_.capitalize(_.camelize(name))]
+    => @operationStack.run(klassName, properties)
 
   # Initialize all commands.
   init: ->
