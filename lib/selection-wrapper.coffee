@@ -29,9 +29,9 @@ class SelectionWrapper
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
-  setReversedState: (boolean) ->
-    options = {autoscroll: true, reversed: boolean}
-    @setBufferRange @selection.getBufferRange(), options
+  setReversedState: (reversed) ->
+    range = @selection.getBufferRange()
+    @setBufferRange range, {autoscroll: true, reversed}
 
   selectRowRange: (rowRange) ->
     {editor} = @selection
@@ -103,5 +103,9 @@ class SelectionWrapper
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
+
+swrap.setReversedState = (editor, reversed) ->
+  for s in editor.getSelections()
+    swrap(s).setReversedState(reversed)
 
 module.exports = swrap
