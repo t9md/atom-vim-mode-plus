@@ -27,6 +27,8 @@ class SelectionWrapper
       @setBufferRange(range, {autoscroll: true})
 
   reverse: ->
+    {row, column} = @selection.getBufferRange().getExtent()
+    return if (row is 0) and (column is 1)
     @setReversedState(not @selection.isReversed())
 
   setReversedState: (reversed) ->
