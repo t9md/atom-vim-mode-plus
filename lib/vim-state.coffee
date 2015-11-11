@@ -25,6 +25,7 @@ FlashManager = require './flash-manager'
 Developer = null # delay
 
 packageScope = 'vim-mode-plus'
+MOUSE_BUTTON_LEFT = 0
 
 module.exports =
 class VimState
@@ -123,15 +124,14 @@ class VimState
       @showCursors()
 
     selectionWatcher = null
-    handleMouseDown = (evt) =>
-      return unless evt.button is 0 # Only care about left button
+    handleMouseDown = =>
+      selectionWatcher?.dispose()
       point = @editor.getLastCursor().getBufferPosition()
       tailRange = Range.fromPointWithDelta(point, 0, +1)
       selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) ->
         selection.setBufferRange(selection.getBufferRange().union(tailRange))
 
-    handleMouseUp = (evt) ->
-      return unless evt.button is 0 # Only care about left button
+    handleMouseUp = ->
       handleSelectionChange()
       selectionWatcher?.dispose()
       selectionWatcher = null

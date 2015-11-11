@@ -1,5 +1,6 @@
 # 0.1.11 WIP
 - FIX #26: incorrect cursor position when escaped from visual-blockwise mode.
+- FIX #27: Coludn't escape from visual-mode if non-left mouse button is used during drug. Thanks @jackcasey for first PR.
 
 # 0.1.10
 - Now warn to console if duplicate constructor name is used, this is only for safe guard when developer add new TOM.
