@@ -25,7 +25,6 @@ FlashManager = require './flash-manager'
 Developer = null # delay
 
 packageScope = 'vim-mode-plus'
-MOUSE_BUTTON_LEFT = 0
 
 module.exports =
 class VimState
