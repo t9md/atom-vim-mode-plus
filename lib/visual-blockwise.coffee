@@ -96,8 +96,7 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
     which = if @after then 'end' else 'start'
     @eachSelection (s) ->
       s.cursor.setBufferPosition s.getBufferRange()[which]
-    @vimState.activate('normal')
-    @vimState.activate('insert')
+    @new('Insert').execute()
 
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
@@ -106,21 +105,24 @@ class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
 class BlockwiseSelect extends VisualBlockwise
   @extend()
   execute: ->
-    s = @editor.getLastSelection()
-    tail = s.getTailBufferPosition()
-    head = s.getHeadBufferPosition()
-    {start, end} = s.getBufferRange()
-    [action, step] = if s.isReversed() then ['Up', -1] else ['Down', +1]
+    selection = @editor.getLastSelection()
+    wasReversed = reversed = selection.isReversed()
+    [startRow, endRow] = selection.getBufferRowRange()
+    {start: {column: startColumn}, end: {column: endColumn}} = selection.getBufferRange()
 
-    range = new Range(tail, [tail.row, head.column])
-    range = range.translate([0, -1], [0, +1]) if start.column >= end.column
+    if startColumn >= endColumn
+      reversed = not reversed
+      startColumn += 1
+      endColumn -= 1
 
-    s.setBufferRange(range, reversed: head.column < tail.column)
-    # NOTE: Need to skip the amount of rows where no selectable chars exist.
-    _.times (end.row - start.row), =>
-      range = range.translate([step, 0], [step, 0])
-      if @editor.getTextInBufferRange(range)
-        @new("BlockwiseMove#{action}").execute()
+    ranges = ([[row, startColumn], [row, endColumn]] for row in [startRow..endRow])
+    @editor.setSelectedBufferRanges(ranges, {reversed})
+    if wasReversed
+      @updateProperties {head: @getTop(), tail: @getBottom()}
+    else
+      @updateProperties {head: @getBottom(), tail: @getTop()}
+    @eachSelection (s) ->
+      s.destroy() if s.isEmpty()
 
 class BlockwiseRestoreCharacterwise extends VisualBlockwise
   @extend()
