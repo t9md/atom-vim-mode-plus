@@ -2,7 +2,7 @@
 {Point, Range, CompositeDisposable} = require 'atom'
 
 globalState = require './global-state'
-{saveEditorState, getVisibleBufferRange} = require './utils'
+{saveEditorState, getVisibleBufferRange, withKeepingGoalColumn} = require './utils'
 swrap = require './selection-wrapper'
 {Hover} = require './hover'
 {MatchList} = require './match'
@@ -51,11 +51,6 @@ class Motion extends Base
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
-  withKeepingGoalColumn: (cursor, fn) ->
-    {goalColumn} = cursor
-    fn(cursor)
-    cursor.goalColumn = goalColumn if goalColumn
-
   selectInclusive: (selection) ->
     {cursor} = selection
 
@@ -67,7 +62,7 @@ class Motion extends Base
     selection.modifySelection =>
       tailRange = swrap(selection).getTailRange()
       unless selection.isReversed()
-        @withKeepingGoalColumn cursor, (c) ->
+        withKeepingGoalColumn cursor, (c) ->
           c.moveLeft()
       @moveCursor(cursor)
 
@@ -75,7 +70,7 @@ class Motion extends Base
       return if (selection.isEmpty() and originallyEmpty)
 
       unless selection.isReversed()
-        @withKeepingGoalColumn cursor, (c) ->
+        withKeepingGoalColumn cursor, (c) ->
           unless (c.isAtEndOfLine() and not c.isAtBeginningOfLine())
             c.moveRight()
       newRange = selection.getBufferRange().union(tailRange)

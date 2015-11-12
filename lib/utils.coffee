@@ -99,6 +99,11 @@ eachSelection = (editor, fn) ->
   for s in editor.getSelections()
     fn(s)
 
+withKeepingGoalColumn = (cursor, fn) ->
+  {goalColumn} = cursor
+  fn(cursor)
+  cursor.goalColumn = goalColumn if goalColumn
+
 module.exports = {
   include
   debug
@@ -117,4 +122,5 @@ module.exports = {
   selectVisibleBy
   getLineTextToPoint
   eachSelection
+  withKeepingGoalColumn
 }
