@@ -1,4 +1,4 @@
-# 0.2.0 WIP
+# 0.2.0
 - Cleanup: globalState no longer instance of class, and nor property of vimState, since its global. It should be treated as like settings.
 - New: #24 now folds kept closed when selection go over folded area. l, h expand folds as like Vim.
 - Recorded operation history is no longer extended infinitely, just keeping one lastRecordedOperation is enough.
