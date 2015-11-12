@@ -3,6 +3,7 @@ _ = require 'underscore-plus'
 {Range, CompositeDisposable, Disposable} = require 'atom'
 
 swrap = require './selection-wrapper'
+{eachSelection} = require './utils'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
@@ -12,6 +13,9 @@ class ModeManager
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
+
+  eachSelection: (fn) ->
+    eachSelection(@editor, fn)
 
   isMode: (mode, submodes) ->
     if submodes?
@@ -86,7 +90,7 @@ class ModeManager
     subs = new CompositeDisposable
     subs.add @editor.onWillInsertText ({text, cancel}) =>
       cancel()
-      for s in @editor.getSelections()
+      @eachSelection (s) =>
         for char in text.split('') ? []
           if (char isnt "\n") and (not s.cursor.isAtEndOfLine())
             s.selectRight()
@@ -98,7 +102,7 @@ class ModeManager
     subs
 
   replaceModeBackspace: ->
-    for s in @editor.getSelections()
+    @eachSelection (s) =>
       char = @replacedCharsBySelection[s.id]?.pop()
       if char? # char maybe empty char ''.
         s.selectLeft()
@@ -133,7 +137,7 @@ class ModeManager
 
     new Disposable =>
       @restoreCharacterwiseRange()
-      for s in @editor.getSelections()
+      @eachSelection (s) ->
         swrap(s).resetProperties()
         s.cursor.moveLeft() unless (s.isEmpty() or s.isReversed())
         s.clear(autoscroll: false)
@@ -143,8 +147,8 @@ class ModeManager
       when 'characterwise'
         null # nothiing to do, but I want to be explicte.
       when 'linewise'
-        for s in @editor.getSelections() when not s.isEmpty()
-          swrap(s).restoreCharacterwise()
+        @eachSelection (s) ->
+          swrap(s).restoreCharacterwise() unless s.isEmpty()
       when 'blockwise'
         # Many VisualBlockwise commands change mode in the middle of processing()
         # in this case, we dont want to loose multi-cursor.
