@@ -2,10 +2,6 @@
 
 vim-mode improved.
 
-# Development state
-
-Beta
-
 # Whats this?
 
 Started as fork project at 2015.8.1, originally for doing some refactoring experiment.  
@@ -77,7 +73,7 @@ When search with `#`, `*`, show 'current/total' match on hover, and flash word u
 
 ## Submode shift in Visual mode.
 
-With showing cursor appropriately in charcterwise and blockwise mode(still cursor hidden in linwise).
+With showing cursor appropriately in charcterwise and blockwise mode(still cursor hidden in linewise).
 
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visualmode-submod-shift.gif)
 
@@ -157,8 +153,11 @@ TOM: TextObject, Operator, Motion
 
 To disable auto suggestion for vim-mode-plus, set following value on autocomplete-plus setting.
 
-* suppressActivationForEditorClasses
-`vim-mode-plus.normal-mode, vim-mode-plus.visual-mode, vim-mode-plus.operator-pending-mode, vim-mode-plus.insert-mode.replace`
+### suppressActivationForEditorClasses
+
+```
+vim-mode-plus.normal-mode, vim-mode-plus.visual-mode, vim-mode-plus.operator-pending-mode, vim-mode-plus.insert-mode.replace
+```
 
 If you want to directly edit `config.cson`, here is how it looks like.
 
@@ -176,16 +175,42 @@ If you want to directly edit `config.cson`, here is how it looks like.
 
 Some of the keymap is not set by default, consult [TOM-report](https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md), [keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson) for detail.  
 
-Here is my keymap as an example.
+Here is my keymap as an example including keymaps for helper packages.
 
 ```coffeescript
+# Workspace
+# -------------------------
+# [other package] need to install cursor-history and paner
+'atom-workspace:not([mini])':
+  'ctrl-i': 'cursor-history:next'
+  'ctrl-o': 'cursor-history:prev'
+  'ctrl-cmd-i': 'cursor-history:next-within-editor'
+  'ctrl-cmd-o': 'cursor-history:prev-within-editor'
+  # Paner's split command sync scroll ratio when split vertically, horizontally.
+  # So you won't get lost where cursor is?
+  'cmd-2': 'paner:split-down'  # I don't use ctrl-w s.
+  'cmd-3': 'paner:split-right' # I don't use ctrl-w v.
+  'cmd-H': 'paner:very-left'   # ctrl-w H
+  'cmd-J': 'paner:very-bottom' # ctrl-w J
+  'cmd-K': 'paner:very-top'    # ctrl-w K
+  'cmd-L': 'paner:very-right'  # ctrl-w L
+
+'atom-workspace atom-text-editor:not([mini])':
+  'cmd-L': 'paner:very-right' # Need to overwrite here because it conflicts split-selection-into-line.
+
+# All mode except insert
+# -------------------------
 'atom-text-editor.vim-mode-plus:not(.insert-mode)':
   # overwrite default 'vim-mode-plus:move-to-last-nonblank-character-of-line-and-down' which I never use.
   'g _': 'vim-mode-plus:snake-case'
 
+# Normal, Visual
+# -------------------------
 'atom-text-editor.vim-mode-plus.normal-mode, atom-text-editor.vim-mode-plus.visual-mode':
   '_': 'vim-mode-plus:replace-with-register'
 
+# Operator pending, Visual
+# -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
   # 'is' is mapped to inner-any-pair by default(so you can use `vis`, `cis` etc).
   # By mapping `;` here, I can choose inner-any-pair with like `c;`, `v;`.
@@ -194,11 +219,27 @@ Here is my keymap as an example.
   # I overwrite vim-mode-plus:inner-single-quote here so that I can select any Quoted pair with single quote.
   "'": 'vim-mode-plus:inner-any-quote'
 
+# Normal
+# -------------------------
 'atom-text-editor.vim-mode-plus.normal-mode':
-  'S':   'vim-mode-plus:surround-word'
+  'S': 'vim-mode-plus:surround-word'
   'd s': 'vim-mode-plus:delete-surround-any-pair'
   'c s': 'vim-mode-plus:change-surround-any-pair'
 
+  # [other package] need to install open-this
+  'g f': 'open-this:here'
+  'ctrl-w f': 'open-this:split-down'
+  'ctrl-w F': 'open-this:split-right' # not exists in pure Vim
+
+  # [othe package] To maximize(zen-mode) current pane like ZoomWin vim.
+  'cmd-enter': 'paner:maximize'
+
+# cc to change cursor word instead of ciw
+'atom-text-editor.vim-mode-plus.operator-pending-mode':
+  'c': 'vim-mode-plus:inner-word'
+
+# Other
+# -------------------------
 # when you want to search `[`, `]`, `;`, input `ctrl-v` following these keys.
 'atom-text-editor.vim-mode-plus-search':
   '[': 'vim-mode-plus:search-visit-prev'
@@ -235,11 +276,11 @@ vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line,
 
 # TODO
 
-Also refer [TODO Priority](https://github.com/t9md/atom-vim-mode-plus/issues/25)
+See [TODO Priority](https://github.com/t9md/atom-vim-mode-plus/issues/25).
 
 - [ ] Dont't do moveRight and moveLeft to adjust selection in `Motion::selectInclusive()` it complicate other motion. and prevent to stop at EOL in `l`, `$`
 - [ ] Don't use typeCheck function like `isOperator()`, `isYank()` any more. instead use `instantOf` for being explicit what it meant to.
-- [ ] Don't depend on `atom.commands.onDidDispatch`, instead simply ensure cursor not put endOfLine **only for vim-mode-plus's command**.
+- [x] Don't depend on `atom.commands.onDidDispatch`, instead simply ensure cursor not put endOfLine **only for vim-mode-plus's command**.
 - [ ] Write spec for lots of UI effect. hover, search counter etc.
 - [ ] Write tutorial for new Operator, TextObjet.
 - [x] Allow quoted-Pair to select quoted string outside of cursor postion within line(I don't like this behavior)?
@@ -256,10 +297,10 @@ Also refer [TODO Priority](https://github.com/t9md/atom-vim-mode-plus/issues/25)
   - [x] show cursor: blockwise
 - [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions. - [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
 - [x] Improve search and introduce incrementalSearch.
-- [ ] Cancellation of operation on event subscription.
-- [ ] Improve visual-block's line end selection and sync range between selections.
+- [x] Cancellation of operation on event subscription.
+- [x] Improve visual-block's line end selection and sync range between selections.
 - [ ] Spec re-write 2nd round to compact and simple description for each spec.
-- [ ] Select fold without expanding
+- [x] Select fold without expanding
 - [x] Show cursor in visual-mode(now characterwise only) without hacking `Cursor.prototype`.
 - [x] Support visual-block by incorporating with [vim-mode-visual-block](https://github.com/t9md/atom-vim-mode-visual-block).
 - [x] Support web-font(?) font-awesome etc. to show on overlay hover.
