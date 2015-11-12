@@ -69,7 +69,7 @@ class OperationStack
       op.execute()
       # debug purpose for a while to refactor further
       @lastExecuted = op
-      @vimState.recordOperation(op) if op.isRecordable()
+      @recorded = op if op.isRecordable()
       @finish()
       debug "#=== Finish at #{new Date().toISOString()}\n"
     else
@@ -119,6 +119,9 @@ class OperationStack
 
   getLastExecuted: ->
     @lastExecuted
+
+  getRecorded: ->
+    @recorded
 
   inspect: ->
     @vimState.developer?.inspectOperationStack()

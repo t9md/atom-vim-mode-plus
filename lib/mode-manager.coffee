@@ -75,7 +75,7 @@ class ModeManager
       @editor.groupChangesSinceCheckpoint(checkpoint)
       changes = getChangesSinceCheckpoint(@editor.buffer, checkpoint)
       @resetInsertionCheckpoint()
-      if (item = @vimState.getRecordedOperation()) and item.isInsert()
+      if (item = @vimState.operationStack.getRecorded()) and item.isInsert()
         item.confirmChanges(changes)
 
       replaceModeDeactivator?.dispose()
