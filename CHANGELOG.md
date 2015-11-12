@@ -1,3 +1,6 @@
+# 0.2.0 WIP
+- New: #24 now folds kept closed when selection go over folded area. l, h expand folds as like Vim.
+
 # 0.1.11
 - FIX #26: incorrect cursor position when escaped from visual-blockwise mode.
 - FIX #27: Coludn't escape from visual-mode if non-left mouse button is used during drug. Thanks @jackcasey for first PR.
