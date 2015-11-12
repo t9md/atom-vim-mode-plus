@@ -1,6 +1,7 @@
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
+
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
@@ -23,7 +24,6 @@ SearchHistoryManager = require './search-history-manager'
 FlashManager = require './flash-manager'
 
 Developer = null # delay
-
 packageScope = 'vim-mode-plus'
 
 module.exports =
@@ -47,7 +47,7 @@ class VimState
   @delegatesProperty delegatingProperties..., toProperty: 'modeManager'
   @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
 
-  constructor: (@editor, @statusBarManager, @globalVimState) ->
+  constructor: (@editor, @statusBarManager) ->
     @editorElement = atom.views.getView(@editor)
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable

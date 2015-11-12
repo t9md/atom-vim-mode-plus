@@ -1,4 +1,5 @@
 # Refactoring status: 100%
+globalState = require './global-state'
 settings = require './settings'
 
 validNames = /[a-zA-Z*+%_"]/
@@ -19,7 +20,7 @@ validNames = /[a-zA-Z*+%_"]/
 module.exports =
 class RegisterManager
   constructor: (@vimState) ->
-    @data = @vimState.globalVimState.register
+    @data = globalState.register
 
   isValidName: (name) ->
     validNames.test(name)
