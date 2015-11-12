@@ -18,6 +18,10 @@ class VisualBlockwise extends Base
     for s in @editor.getSelections()
       fn(s)
 
+  countTimes: (fn) ->
+    _.times @getCount(), ->
+      fn()
+
   updateProperties: ({head, tail}) ->
     @eachSelection (s) ->
       prop = {}
@@ -66,11 +70,12 @@ class BlockwiseMoveDown extends VisualBlockwise
       when 'Above' then @isReversed()
 
   execute: ->
-    if @isExpanding()
-      @editor["addSelection#{@direction}"]()
-      swrap.setReversedState @editor, @getTail().isReversed()
-    else
-      @getHead().destroy()
+    @countTimes =>
+      if @isExpanding()
+        @editor["addSelection#{@direction}"]()
+        swrap.setReversedState @editor, @getTail().isReversed()
+      else
+        @getHead().destroy()
     @updateProperties {head: @getHead()}
 
 class BlockwiseMoveUp extends BlockwiseMoveDown
