@@ -89,12 +89,11 @@ getVisibleBufferRange = (editor) ->
 
 # NOTE: depending on getVisibleRowRange
 selectVisibleBy = (editor, entries, fn) ->
-  range = getVisibleBufferRange.bind(this)(editor)
+  range = getVisibleBufferRange(editor)
   (e for e in entries when range.containsRange(fn(e)))
 
 getLineTextToPoint = (editor, point) ->
   editor.lineTextForBufferRow(point.row)[0..point.column]
-  # editor.lineTextForBufferRow(point.row)[0...point.column]
 
 module.exports = {
   include
