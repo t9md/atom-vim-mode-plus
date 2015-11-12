@@ -74,7 +74,7 @@ class Motion extends Base
           unless (c.isAtEndOfLine() and not c.isAtBeginningOfLine())
             c.moveRight()
       newRange = selection.getBufferRange().union(tailRange)
-      options = {autoscroll: false, preserveFold: true}
+      options = {autoscroll: false, preserveFolds: true}
       selection.setBufferRange(newRange, options)
 
   # Utils
