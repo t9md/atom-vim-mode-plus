@@ -132,6 +132,7 @@ With showing cursor appropriately in charcterwise and blockwise mode(still curso
   - Visual block mode except yank and paste.
   - Columns are correctly remembered and restored when shift between submode: char-to-block, block-to-line, line-to-char etc.
 - Other
+  - Not expand folds when selection go across folded row. `l`, `h` expand fold.
   - Expose visual-mode's submode to text-editor-element's css class to be used as selector.
   - [Disabled temporarily] Show cursor(by using decoration) while waiting user input (e.g `m`, `"`).
   - Developer friendly introspection report and real-time opration-stack monitoring(logged on console).
