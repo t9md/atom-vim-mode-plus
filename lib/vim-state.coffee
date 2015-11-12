@@ -12,6 +12,7 @@ Operator = require './operator'
 Motion = require './motion'
 TextObject = require './text-object'
 InsertMode = require './insert-mode'
+Misc = require './misc-commands'
 Scroll = require './scroll'
 VisualBlockwise = require './visual-blockwise'
 
@@ -26,6 +27,10 @@ FlashManager = require './flash-manager'
 Developer = null # delay
 packageScope = 'vim-mode-plus'
 
+# Mode handling is delegated to modeManager
+delegatingMethods = ['isMode', 'activate', 'setInsertionCheckpoint']
+delegatingProperties = ['mode', 'submode']
+
 module.exports =
 class VimState
   Delegato.includeInto(this)
@@ -36,14 +41,6 @@ class VimState
   replaceModeListener: null
   developer: null
 
-  # Mode handling is delegated to modeManager
-  delegatingMethods = [
-    'isMode'
-    'activate'
-    'replaceModeBackspace'
-    'setInsertionCheckpoint'
-  ]
-  delegatingProperties = ['mode', 'submode']
   @delegatesProperty delegatingProperties..., toProperty: 'modeManager'
   @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
 
@@ -79,7 +76,7 @@ class VimState
     else
       @activate('normal')
 
-  getLastOperation: ->
+  getRecordedOperation: ->
     @operationRecords[0]
 
   # TODO: Is this really need to be history?
@@ -178,7 +175,7 @@ class VimState
       [prefix, name] = name.split(/-(.+)/, 2)
       properties = {inner} if inner = (prefix is 'inner')
     klassName = kind[_.capitalize(_.camelize(name))]
-    => @operationStack.run(klassName, properties)
+    => @operationStack.run(klassName, {inner})
 
   # Initialize all commands.
   init: ->
@@ -188,14 +185,14 @@ class VimState
       'activate-characterwise-visual-mode': => @activate('visual', 'characterwise')
       'activate-blockwise-visual-mode': => @activate('visual', 'blockwise')
       'reset-normal-mode': => @activate('reset')
-
       'set-count': (e) => @count.set(e) # 0-9
       'set-register-name': => @register.setName() # "
-      'reverse-selections': => @reverseSelections() # o
-      'undo': => @undo() # u
-      'redo': => @redo() # ctrl-r
-      'replace-mode-backspace': => @replaceModeBackspace()
+      'replace-mode-backspace': => @modeManager.replaceModeBackspace()
 
+    @registerOperationCommands Misc, [
+      'reverse-selections',
+      'undo', 'redo',
+    ]
     @registerOperationCommands InsertMode, [
       'insert-register',
       'copy-from-line-above',
@@ -304,27 +301,6 @@ class VimState
     @searchHistory.reset()
     @hover.reset()
     @operationStack.clear()
-
-  # Miscellaneous commands
-  # -------------------------
-  undo: ->
-    @editor.undo()
-    s.clear() for s in @editor.getSelections()
-    @activate('normal')
-
-  redo: ->
-    @editor.redo()
-    s.clear() for s in @editor.getSelections()
-    @activate('normal')
-
-  reverseSelections: ->
-    swrap(s = @editor.getLastSelection()).reverse()
-    @syncSelectionsReversedState(s)
-
-  syncSelectionsReversedState: (selection) ->
-    reversed = selection.isReversed()
-    for s in @editor.getSelections() when not (s is selection)
-      swrap(s).setReversedState(reversed)
 
   # Search History
   # -------------------------

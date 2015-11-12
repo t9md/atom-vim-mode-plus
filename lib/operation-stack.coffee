@@ -66,10 +66,9 @@ class OperationStack
       debug '-> @pop()'
       op = @pop()
       debug " -> <#{op.getKind()}>.execute()"
-      # debug purpose for a while to refactor further
-      @executing = op.getKind()
       op.execute()
-
+      # debug purpose for a while to refactor further
+      @lastExecuted = op
       @vimState.recordOperation(op) if op.isRecordable()
       @finish()
       debug "#=== Finish at #{new Date().toISOString()}\n"
@@ -117,6 +116,9 @@ class OperationStack
 
   isOperatorPending: ->
     not @isEmpty()
+
+  getLastExecuted: ->
+    @lastExecuted
 
   inspect: ->
     @vimState.developer?.inspectOperationStack()
