@@ -339,7 +339,7 @@ class Repeat extends Operator
   execute: ->
     @editor.transact =>
       _.times @getCount(), =>
-        @vimState.getLastOperation()?.execute()
+        @vimState.getRecordedOperation()?.execute()
 
 class Mark extends Operator
   @extend()

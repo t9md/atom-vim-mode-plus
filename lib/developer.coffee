@@ -6,6 +6,7 @@ Operator   = require './operator'
 Motion     = require './motion'
 TextObject = require './text-object'
 InsertMode = require './insert-mode'
+Misc = require './misc-commands'
 Scroll     = require './scroll'
 VisualBlockwise = require './visual-blockwise'
 settings   = require './settings'
@@ -35,7 +36,7 @@ class Developer
     recursiveInspect = Base
 
     introspection = require './introspection'
-    mods = [Operator, Motion, TextObject, Scroll, InsertMode, VisualBlockwise]
+    mods = [Operator, Motion, TextObject, Scroll, InsertMode, VisualBlockwise, Misc]
     introspection.generateIntrospectionReport(mods, {excludeProperties, recursiveInspect})
 
   jumpToRelated: ->

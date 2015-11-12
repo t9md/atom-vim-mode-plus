@@ -53,7 +53,7 @@ class BlockwiseOtherEnd extends VisualBlockwise
   execute: ->
     unless @isSingleLine()
       @updateProperties {head: @getTail(), tail: @getHead()}
-    @vimState.reverseSelections()
+    @new('ReverseSelections').execute()
 
 class BlockwiseMoveDown extends VisualBlockwise
   @extend()
