@@ -1,13 +1,17 @@
 # TOM(TextObject, Operator, Motion) report.
 
-vim-mode-plus version: 0.1.0  
-*generated at 2015-09-27T16:01:46.762Z*
+vim-mode-plus version: 0.1.11  
+*generated at 2015-11-12T11:18:41.031Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
     - [CopyFromLineAbove](#copyfromlineabove--insertmode)
       - [CopyFromLineBelow](#copyfromlinebelow--copyfromlineabove)
     - [InsertRegister](#insertregister--insertmode)
+  - [Misc](#misc--base) *Not exported*
+    - [ReverseSelections](#reverseselections--misc)
+    - [Undo](#undo--misc)
+      - [Redo](#redo--undo)
   - [Motion](#motion--base) *Not exported*
     - [CurrentSelection](#currentselection--motion)
     - [Find](#find--motion)
@@ -16,7 +20,6 @@ vim-mode-plus version: 0.1.0
         - [RepeatFindReverse](#repeatfindreverse--repeatfind)
       - [Till](#till--find)
         - [TillBackwards](#tillbackwards--till)
-    - [MoveDown](#movedown--motion)
     - [MoveLeft](#moveleft--motion)
     - [MoveRight](#moveright--motion)
     - [MoveToBeginningOfLine](#movetobeginningofline--motion)
@@ -43,6 +46,7 @@ vim-mode-plus version: 0.1.0
       - [MoveToBottomOfScreen](#movetobottomofscreen--movetotopofscreen)
       - [MoveToMiddleOfScreen](#movetomiddleofscreen--movetotopofscreen)
     - [MoveUp](#moveup--motion)
+      - [MoveDown](#movedown--moveup)
     - [ScrollFullScreenDown](#scrollfullscreendown--motion)
       - [ScrollFullScreenUp](#scrollfullscreenup--scrollfullscreendown)
       - [ScrollHalfScreenDown](#scrollhalfscreendown--scrollfullscreendown)
@@ -66,7 +70,7 @@ vim-mode-plus version: 0.1.0
       - [AutoIndent](#autoindent--indent)
       - [Outdent](#outdent--indent)
     - [Insert](#insert--operator)
-    - [Insert](#insert--operator)
+      - [ActivateReplaceMode](#activatereplacemode--insert)
       - [Change](#change--insert)
         - [ChangeToLastCharacterOfLine](#changetolastcharacterofline--change)
         - [Substitute](#substitute--change)
@@ -76,8 +80,6 @@ vim-mode-plus version: 0.1.0
       - [InsertAfter](#insertafter--insert)
       - [InsertAfterEndOfLine](#insertafterendofline--insert)
       - [InsertAtBeginningOfLine](#insertatbeginningofline--insert)
-      - [ReplaceMode](#replacemode--insert)
-      - [ReplaceMode](#replacemode--insert)
     - [Join](#join--operator)
     - [Mark](#mark--operator)
     - [PutBefore](#putbefore--operator)
@@ -112,11 +114,10 @@ vim-mode-plus version: 0.1.0
         - [ScrollCursorToMiddleLeave](#scrollcursortomiddleleave--scrollcursortomiddle)
       - [ScrollCursorToTop](#scrollcursortotop--scrollcursor)
         - [ScrollCursorToTopLeave](#scrollcursortotopleave--scrollcursortotop)
+    - [ScrollCursorToLeft](#scrollcursortoleft--scroll)
+      - [ScrollCursorToRight](#scrollcursortoright--scrollcursortoleft)
     - [ScrollDown](#scrolldown--scroll)
       - [ScrollUp](#scrollup--scrolldown)
-    - [ScrollHorizontal](#scrollhorizontal--scroll) *Not exported*
-      - [ScrollCursorToLeft](#scrollcursortoleft--scrollhorizontal)
-      - [ScrollCursorToRight](#scrollcursortoright--scrollhorizontal)
   - [TextObject](#textobject--base) *Not exported*
     - [CurrentLine](#currentline--textobject)
     - [Entire](#entire--textobject)
@@ -125,6 +126,7 @@ vim-mode-plus version: 0.1.0
     - [Pair](#pair--textobject) *Not exported*
       - [AngleBracket](#anglebracket--pair)
       - [AnyPair](#anypair--pair)
+        - [AnyQuote](#anyquote--anypair)
       - [BackTick](#backtick--pair)
       - [CurlyBracket](#curlybracket--pair)
       - [DoubleQuote](#doublequote--pair)
@@ -140,7 +142,6 @@ vim-mode-plus version: 0.1.0
   - [VisualBlockwise](#visualblockwise--base)
     - [BlockwiseDeleteToLastCharacterOfLine](#blockwisedeletetolastcharacterofline--visualblockwise)
       - [BlockwiseChangeToLastCharacterOfLine](#blockwisechangetolastcharacterofline--blockwisedeletetolastcharacterofline)
-    - [BlockwiseEscape](#blockwiseescape--visualblockwise)
     - [BlockwiseInsertAtBeginningOfLine](#blockwiseinsertatbeginningofline--visualblockwise)
       - [BlockwiseInsertAfterEndOfLine](#blockwiseinsertafterendofline--blockwiseinsertatbeginningofline)
     - [BlockwiseMoveDown](#blockwisemovedown--visualblockwise)
@@ -153,13 +154,10 @@ vim-mode-plus version: 0.1.0
 *Not exported*
 - ::complete: ```false```
 - ::recodable: ```false```
-- ::canceled: ```false```
 - ::defaultCount: ```1```
 - ::requireInput: ```false```
 - ::isComplete`()`
-- ::isCanceled`()`
 - ::isRecordable`()`
-- ::cancel`()`
 - ::abort`()`
 - ::getKind`()`
 - ::getCount`()`
@@ -182,6 +180,7 @@ vim-mode-plus version: 0.1.0
 - ::isSnakeCase`()`
 - ::isDashCase`()`
 - ::isSurround`()`
+- ::isSurroundWord`()`
 - ::isDeleteSurround`()`
 - ::isDeleteSurroundAnyPair`()`
 - ::isChangeSurround`()`
@@ -201,7 +200,7 @@ vim-mode-plus version: 0.1.0
 - ::isReplaceWithRegister`()`
 - ::isToggleLineComments`()`
 - ::isInsert`()`
-- ::isReplaceMode`()`
+- ::isActivateReplaceMode`()`
 - ::isInsertAfter`()`
 - ::isInsertAfterEndOfLine`()`
 - ::isInsertAtBeginningOfLine`()`
@@ -264,14 +263,15 @@ vim-mode-plus version: 0.1.0
 - ::isWholeWord`()`
 - ::isPair`()`
 - ::isAnyPair`()`
+- ::isAnyQuote`()`
 - ::isDoubleQuote`()`
 - ::isSingleQuote`()`
 - ::isBackTick`()`
 - ::isCurlyBracket`()`
-- ::isAngleBracket`()`
-- ::isTag`()`
 - ::isSquareBracket`()`
 - ::isParenthesis`()`
+- ::isAngleBracket`()`
+- ::isTag`()`
 - ::isParagraph`()`
 - ::isComment`()`
 - ::isIndentation`()`
@@ -283,17 +283,20 @@ vim-mode-plus version: 0.1.0
 - ::isInsertRegister`()`
 - ::isCopyFromLineAbove`()`
 - ::isCopyFromLineBelow`()`
+- ::isMisc`()`
+- ::isReverseSelections`()`
+- ::isUndo`()`
+- ::isRedo`()`
 - ::isScroll`()`
 - ::isScrollDown`()`
 - ::isScrollUp`()`
 - ::isScrollCursor`()`
 - ::isScrollCursorToTop`()`
-- ::isScrollCursorToBottom`()`
-- ::isScrollCursorToMiddle`()`
 - ::isScrollCursorToTopLeave`()`
+- ::isScrollCursorToBottom`()`
 - ::isScrollCursorToBottomLeave`()`
+- ::isScrollCursorToMiddle`()`
 - ::isScrollCursorToMiddleLeave`()`
-- ::isScrollHorizontal`()`
 - ::isScrollCursorToLeft`()`
 - ::isScrollCursorToRight`()`
 - ::isVisualBlockwise`()`
@@ -304,7 +307,6 @@ vim-mode-plus version: 0.1.0
 - ::isBlockwiseChangeToLastCharacterOfLine`()`
 - ::isBlockwiseInsertAtBeginningOfLine`()`
 - ::isBlockwiseInsertAfterEndOfLine`()`
-- ::isBlockwiseEscape`()`
 - ::isBlockwiseSelect`()`
 - ::isBlockwiseRestoreCharacterwise`()`
 
@@ -333,6 +335,30 @@ vim-mode-plus version: 0.1.0
 - ::initialize`()`
 - ::execute`()`
 
+### Misc < Base
+*Not exported*
+- ::complete: ```true```: **Overridden**
+
+### ReverseSelections < Misc
+- command: `vim-mode-plus:reverse-selections`
+- keymaps
+  - atom-text-editor.vim-mode-plus.visual-mode: <kbd>o</kbd>
+  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>O</kbd>
+- ::execute`()`
+
+### Undo < Misc
+- command: `vim-mode-plus:undo`
+- keymaps
+  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>u</kbd>
+- ::execute`()`
+- ::finish`()`
+
+### Redo < Undo
+- command: `vim-mode-plus:redo`
+- keymaps
+  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>ctrl-r</kbd>
+- ::execute`()`: **Overridden**
+
 ### Motion < Base
 *Not exported*
 - ::complete: ```true```: **Overridden**
@@ -344,8 +370,6 @@ vim-mode-plus version: 0.1.0
 - ::isInclusive`()`
 - ::execute`()`
 - ::select`()`
-- ::getTailRange`(selection)`
-- ::withKeepingGoalColumn`(cursor, fn)`
 - ::selectInclusive`(selection)`
 - ::countTimes`(fn)`
 - ::at`(where, cursor)`
@@ -353,7 +377,7 @@ vim-mode-plus version: 0.1.0
 - ::getLastRow`()`
 - ::getFirstVisibleScreenRow`()`
 - ::getLastVisibleScreenRow`()`
-- ::status`()`
+- ::unfoldAtCursorRow`(cursor)`
 
 ### CurrentSelection < Motion
 - ::selectedRange: ```null```
@@ -413,14 +437,6 @@ vim-mode-plus version: 0.1.0
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>T</kbd>
 - ::backwards: ```true```: **Overridden**
 
-### MoveDown < Motion
-- command: `vim-mode-plus:move-down`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>j</kbd>
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>down</kbd>
-- ::linewise: ```true```: **Overridden**
-- ::moveCursor`(cursor)`
-
 ### MoveLeft < Motion
 - command: `vim-mode-plus:move-left`
 - keymaps
@@ -443,6 +459,7 @@ vim-mode-plus version: 0.1.0
 - command: `vim-mode-plus:move-to-beginning-of-line`
 - keymaps
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>0</kbd>
+  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>home</kbd>
 - ::defaultCount: ```null```: **Overridden**
 - ::initialize`()`
 - ::moveCursor`(cursor)`
@@ -510,6 +527,7 @@ vim-mode-plus version: 0.1.0
 - command: `vim-mode-plus:move-to-last-character-of-line`
 - keymaps
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>$</kbd>
+  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>end</kbd>
 - ::moveCursor`(cursor)`
 
 ### MoveToLastNonblankCharacterOfLineAndDown < Motion
@@ -613,38 +631,49 @@ vim-mode-plus version: 0.1.0
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>k</kbd>
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>up</kbd>
 - ::linewise: ```true```: **Overridden**
+- ::amount: ```-1```
+- ::isMovable`(cursor)`
+- ::move`(cursor)`
 - ::moveCursor`(cursor)`
+
+### MoveDown < MoveUp
+- command: `vim-mode-plus:move-down`
+- keymaps
+  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>j</kbd>
+  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>down</kbd>
+- ::linewise: ```true```: **Overridden**
+- ::amount: ```1```: **Overridden**
+- ::isMovable`(cursor)`: **Overridden**
+- ::move`(cursor)`: **Overridden**
 
 ### ScrollFullScreenDown < Motion
 - command: `vim-mode-plus:scroll-full-screen-down`
 - keymaps
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-f</kbd>
-- ::scrolledRows: ```0```
-- ::direction: ```1```
-- ::withScroll`(fn)`
-- ::select`()`: `super(_)`: **Overridden**
-- ::execute`()`: `super(_)`: **Overridden**
-- ::moveCursor`(cursor)`
+- ::coefficient: ```1```
+- ::initialize`()`
 - ::scroll`()`
-- ::getAmountInPixel`()`
+- ::select`()`: `super()`: **Overridden**
+- ::execute`()`: `super()`: **Overridden**
+- ::moveCursor`(cursor)`
 
 ### ScrollFullScreenUp < ScrollFullScreenDown
 - command: `vim-mode-plus:scroll-full-screen-up`
 - keymaps
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-b</kbd>
-- ::direction: ```-1```: **Overridden**
+- ::coefficient: ```-1```: **Overridden**
 
 ### ScrollHalfScreenDown < ScrollFullScreenDown
 - command: `vim-mode-plus:scroll-half-screen-down`
 - keymaps
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-d</kbd>
-- ::getAmountInPixel`()`: **Overridden**
+- ::coefficient: ```0.5```: **Overridden**
 
 ### ScrollHalfScreenUp < ScrollHalfScreenDown
 - command: `vim-mode-plus:scroll-half-screen-up`
 - keymaps
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-u</kbd>
-- ::direction: ```-1```: **Overridden**
+- ::coefficient: ```-0.5```: **Overridden**
 
 ### SearchBase < Motion
 *Not exported*
@@ -729,11 +758,13 @@ vim-mode-plus version: 0.1.0
 - ::recodable: ```true```: **Overridden**
 - ::target: ```null```
 - ::flashTarget: ```true```
+- ::haveSomeSelection`()`
 - ::isSameOperatorRepeated`()`
 - ::compose`(@target)`
 - ::setTextToRegister`(text)`
 - ::markCursorBufferPositions`()`
 - ::restoreMarkedCursorPositions`(markerByCursor)`
+- ::withKeepingCursorPosition`(fn)`
 - ::markSelections`()`
 - ::flash`(range, fn)`
 - ::eachSelection`(fn)`
@@ -813,12 +844,12 @@ vim-mode-plus version: 0.1.0
 - ::confirmChanges`(changes)`
 - ::execute`()`
 
-### Insert < Operator
-- ::complete: ```true```: **Overridden**
-- ::typedText: ```null```
-- ::flashTarget: ```false```: **Overridden**
-- ::confirmChanges`(changes)`
-- ::execute`()`
+### ActivateReplaceMode < Insert
+- command: `vim-mode-plus:activate-replace-mode`
+- keymaps
+  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>R</kbd>
+- ::execute`()`: **Overridden**
+- ::countChars`(char, string)`
 
 ### Change < Insert
 - command: `vim-mode-plus:change`
@@ -876,14 +907,6 @@ vim-mode-plus version: 0.1.0
 - keymaps
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>I</kbd>
 - ::execute`()`: `super`: **Overridden**
-
-### ReplaceMode < Insert
-- ::execute`()`: **Overridden**
-- ::countChars`(char, string)`
-
-### ReplaceMode < Insert
-- ::execute`()`: **Overridden**
-- ::countChars`(char, string)`
 
 ### Join < Operator
 - command: `vim-mode-plus:join`
@@ -1011,6 +1034,7 @@ vim-mode-plus version: 0.1.0
 - command: `vim-mode-plus:delete-surround`
 - keymaps
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g s d</kbd>
+- ::pairChars: ```'[](){}'```
 - ::onConfirm`(@input)`: **Overridden**
 - ::getNewText`(text)`: **Overridden**
 
@@ -1021,7 +1045,7 @@ vim-mode-plus version: 0.1.0
 - ::charsMax: ```2```: **Overridden**
 - ::char: ```null```
 - ::onConfirm`(input)`: `super(from)`: **Overridden**
-- ::getNewText`(text)`: **Overridden**
+- ::getNewText`(text)`: `super(text), @getPair(@char))`: **Overridden**
 
 ### ChangeSurroundAnyPair < ChangeSurround
 - command: `vim-mode-plus:change-surround-any-pair`
@@ -1140,6 +1164,21 @@ vim-mode-plus version: 0.1.0
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z t</kbd>
 - ::moveToFirstCharacterOfLine: ```null```: **Overridden**
 
+### ScrollCursorToLeft < Scroll
+- command: `vim-mode-plus:scroll-cursor-to-left`
+- keymaps
+  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z s</kbd>
+- ::direction: ```'left'```
+- ::initialize`()`
+- ::execute`()`
+
+### ScrollCursorToRight < ScrollCursorToLeft
+- command: `vim-mode-plus:scroll-cursor-to-right`
+- keymaps
+  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z e</kbd>
+- ::direction: ```'right'```: **Overridden**
+- ::execute`()`: **Overridden**
+
 ### ScrollDown < Scroll
 - command: `vim-mode-plus:scroll-down`
 - keymaps
@@ -1154,28 +1193,14 @@ vim-mode-plus version: 0.1.0
   - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-y</kbd>
 - ::direction: ```'up'```: **Overridden**
 
-### ScrollHorizontal < Scroll
-*Not exported*
-- ::putCursorOnScreen`()`
-
-### ScrollCursorToLeft < ScrollHorizontal
-- command: `vim-mode-plus:scroll-cursor-to-left`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z s</kbd>
-- ::execute`()`
-
-### ScrollCursorToRight < ScrollHorizontal
-- command: `vim-mode-plus:scroll-cursor-to-right`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z e</kbd>
-- ::execute`()`
-
 ### TextObject < Base
 *Not exported*
 - ::complete: ```true```: **Overridden**
+- ::inner: ```false```
+- ::isInner`()`
 - ::isLinewise`()`
 - ::eachSelection`(fn)`
-- ::status`()`
+- ::execute`()`
 
 ### CurrentLine < TextObject
 - ::select`()`
@@ -1184,52 +1209,78 @@ vim-mode-plus version: 0.1.0
 - ::select`()`
 
 ### Fold < TextObject
-- ::getRowRangeForBufferRow`(bufferRow)`
+- ::getFoldRowRangeForBufferRow`(bufferRow)`
 - ::select`()`
 
 ### Function < Fold
 - ::indentScopedLanguages: ```[ 'python', 'coffee' ]```
 - ::omitingClosingCharLanguages: ```[ 'go' ]```
+- ::initialize`()`
 - ::getScopesForRow`(row)`
+- ::isFunctionScope`(scope)`
 - ::isIncludeFunctionScopeForRow`(row)`
-- ::getRowRangeForBufferRow`(bufferRow)`: **Overridden**
+- ::getFoldRowRangeForBufferRow`(bufferRow)`: **Overridden**
 - ::adjustRowRange`(startRow, endRow)`
 
 ### Pair < TextObject
 *Not exported*
-- ::inclusive: ```false```
+- ::allowNextLine: ```false```
+- ::what: ```'enclosed'```
 - ::pair: ```null```
-- ::isStartingPair`(str, char)`
-- ::needStopSearch`(pair, cursorRow, row)`
-- ::findPair`(cursorPoint, fromPoint, pair, backward)`
-- ::getRange`(selection, pair)`
+- ::getPairState`(pair, matchText, point)`
+- ::pairStateInString`(str, char)`
+- ::isEscapedCharAtPoint`(point)`
+- ::findPair`(pair, options)`
+- ::getPairRange`(from, pair, what)`
+- ::getRange`(selection, what)`
 - ::select`()`
 
 ### AngleBracket < Pair
 - ::pair: ```'<>'```: **Overridden**
 
 ### AnyPair < Pair
-- ::pairs: ```[ '""', '\'\'', '``', '{}', '<>', '><', '[]', '()' ]```
-- ::getNearestRange`(selection, pairs)`
+- ::what: ```'enclosed'```: **Overridden**
+- ::member: ```[ 'DoubleQuote',
+  'SingleQuote',
+  'BackTick',
+  'CurlyBracket',
+  'AngleBracket',
+  'Tag',
+  'SquareBracket',
+  'Parenthesis' ]```
+- ::getRangeBy`(klass, selection)`
+- ::getRanges`(selection)`
+- ::getNearestRange`(selection)`
 - ::select`()`: **Overridden**
+
+### AnyQuote < AnyPair
+- ::what: ```'next'```: **Overridden**
+- ::member: ```[ 'DoubleQuote', 'SingleQuote', 'BackTick' ]```: **Overridden**
+- ::getNearestRange`(selection)`: **Overridden**
 
 ### BackTick < Pair
 - ::pair: ```'``'```: **Overridden**
+- ::what: ```'next'```: **Overridden**
 
 ### CurlyBracket < Pair
 - ::pair: ```'{}'```: **Overridden**
+- ::allowNextLine: ```true```: **Overridden**
 
 ### DoubleQuote < Pair
 - ::pair: ```'""'```: **Overridden**
+- ::what: ```'next'```: **Overridden**
 
 ### Parenthesis < Pair
 - ::pair: ```'()'```: **Overridden**
+- ::allowNextLine: ```true```: **Overridden**
 
 ### SingleQuote < Pair
 - ::pair: ```'\'\''```: **Overridden**
+- ::what: ```'next'```: **Overridden**
 
 ### SquareBracket < Pair
 - ::pair: ```'[]'```: **Overridden**
+- ::allowNextLine: ```true```: **Overridden**
 
 ### Tag < Pair
 - ::pair: ```'><'```: **Overridden**
@@ -1253,27 +1304,25 @@ vim-mode-plus version: 0.1.0
 
 ### Word < TextObject
 - ::select`()`
-- ::selectExclusive`(s, wordRegex)`
+- ::selectExclusive`(selection, wordRegex)`
 - ::selectInclusive`(selection)`
 
 ### WholeWord < Word
 - ::wordRegExp: ```/\S+/```
+- ::selectExclusive`(s, wordRegex)`: **Overridden**
 
 ### VisualBlockwise < Base
-- ::constructor`()`: `super`: **Overridden**
 - ::complete: ```true```: **Overridden**
-- ::clearTail`()`
-- ::clearHead`()`
-- ::updateProperty`(selection, prop)`
+- ::initialize`()`
+- ::eachSelection`(fn)`
+- ::updateProperties`(_arg)`
+- ::isSingleLine`()`
 - ::getTop`()`
 - ::getBottom`()`
 - ::isReversed`()`
-- ::isSingle`()`
 - ::getHead`()`
 - ::getTail`()`
-- ::setTail`(newTail)`
-- ::setHead`(newHead)`
-- ::reverse`()`
+- ::getBufferRowRange`()`
 
 ### BlockwiseDeleteToLastCharacterOfLine < VisualBlockwise
 - command: `vim-mode-plus:blockwise-delete-to-last-character-of-line`
@@ -1288,34 +1337,25 @@ vim-mode-plus version: 0.1.0
   - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>C</kbd>
 - ::delegateTo: ```'ChangeToLastCharacterOfLine'```: **Overridden**
 
-### BlockwiseEscape < VisualBlockwise
-- command: `vim-mode-plus:blockwise-escape`
-- keymaps
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>escape</kbd>
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>ctrl-[</kbd>
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>ctrl-c</kbd>
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>ctrl-v</kbd>
-- ::execute`()`
-
 ### BlockwiseInsertAtBeginningOfLine < VisualBlockwise
 - command: `vim-mode-plus:blockwise-insert-at-beginning-of-line`
 - keymaps
   - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>I</kbd>
-- ::command: ```'I'```
+- ::after: ```false```
 - ::execute`()`
 
 ### BlockwiseInsertAfterEndOfLine < BlockwiseInsertAtBeginningOfLine
 - command: `vim-mode-plus:blockwise-insert-after-end-of-line`
 - keymaps
   - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>A</kbd>
-- ::command: ```'A'```: **Overridden**
+- ::after: ```true```: **Overridden**
 
 ### BlockwiseMoveDown < VisualBlockwise
 - command: `vim-mode-plus:blockwise-move-down`
 - keymaps
   - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>j</kbd>
 - ::direction: ```'Below'```
-- ::isForward`()`
+- ::isExpanding`()`
 - ::execute`()`
 
 ### BlockwiseMoveUp < BlockwiseMoveDown
@@ -1323,7 +1363,6 @@ vim-mode-plus version: 0.1.0
 - keymaps
   - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>k</kbd>
 - ::direction: ```'Above'```: **Overridden**
-- ::isForward`()`: **Overridden**
 
 ### BlockwiseOtherEnd < VisualBlockwise
 - command: `vim-mode-plus:blockwise-other-end`
