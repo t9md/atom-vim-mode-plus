@@ -1,6 +1,7 @@
 # Refactoring status: 70%
 {getVimState} = require './spec-helper'
 settings = require '../lib/settings'
+globalState = require '../lib/global-state'
 
 describe "Motion", ->
   [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
@@ -813,7 +814,7 @@ describe "Motion", ->
 
       # clear search history
       vimState.searchHistory.clear()
-      vimState.globalVimState.currentSearch = {}
+      globalState.currentSearch = {}
 
     describe "as a motion", ->
       it "moves the cursor to the specified search pattern", ->

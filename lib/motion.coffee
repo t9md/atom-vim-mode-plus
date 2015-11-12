@@ -1,5 +1,7 @@
 # Refactoring status: 50%
 {Point, Range, CompositeDisposable} = require 'atom'
+
+globalState = require './global-state'
 {saveEditorState, getVisibleBufferRange} = require './utils'
 swrap = require './selection-wrapper'
 {Hover} = require './hover'
@@ -514,7 +516,7 @@ class Find extends Motion
     if point = @find(cursor)
       cursor.setBufferPosition(point)
     unless @isRepeatFind()
-      @vimState.globalVimState.currentFind = this
+      globalState.currentFind = this
 
 # keymap: F
 class FindBackwards extends Find
@@ -545,7 +547,7 @@ class TillBackwards extends Till
 class RepeatFind extends Find
   @extend()
   initialize: ->
-    unless findObj = @vimState.globalVimState.currentFind
+    unless findObj = globalState.currentFind
       @abort()
     {@offset, @backwards, @complete, @input} = findObj
 
@@ -598,7 +600,7 @@ class SearchBase extends Motion
 
   initialize: ->
     if @saveCurrentSearch
-      @vimState.globalVimState.currentSearch.backwards = @backwards
+      globalState.currentSearch.backwards = @backwards
 
   isBackwards: ->
     @backwards
@@ -812,7 +814,7 @@ class RepeatSearch extends SearchBase
   initialize: ->
     super
     @input = @vimState.searchHistory.get('prev')
-    @backwards = @vimState.globalVimState.currentSearch.backwards
+    @backwards = globalState.currentSearch.backwards
 
 class RepeatSearchReverse extends RepeatSearch
   @extend()

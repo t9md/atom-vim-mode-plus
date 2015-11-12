@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 {Disposable, CompositeDisposable} = require 'atom'
 
 StatusBarManager = require './status-bar-manager'
-GlobalVimState = require './global-vim-state'
+globalState = require './global-state'
 VimState = require './vim-state'
 settings = require './settings'
 {Hover, HoverElement} = require './hover'
@@ -15,7 +15,6 @@ module.exports =
 
   activate: (state) ->
     @disposables = new CompositeDisposable
-    @globalVimState = new GlobalVimState
     @statusBarManager = new StatusBarManager
     @registerViewProviders()
 
@@ -28,7 +27,6 @@ module.exports =
       vimState = new VimState(
         editor,
         @statusBarManager,
-        @globalVimState
       )
       @vimStates.add(vimState)
       @vimStatesByEditor.set(editor, vimState)
@@ -50,7 +48,7 @@ module.exports =
     @disposables.dispose()
 
   getGlobalState: ->
-    @globalVimState
+    globalState
 
   getEditorState: (editor) ->
     @vimStatesByEditor.get(editor)
