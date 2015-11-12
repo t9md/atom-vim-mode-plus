@@ -95,6 +95,10 @@ selectVisibleBy = (editor, entries, fn) ->
 getLineTextToPoint = (editor, point) ->
   editor.lineTextForBufferRow(point.row)[0..point.column]
 
+eachSelection = (editor, fn) ->
+  for s in editor.getSelections()
+    fn(s)
+
 module.exports = {
   include
   debug
@@ -112,4 +116,5 @@ module.exports = {
   getVisibleBufferRange
   selectVisibleBy
   getLineTextToPoint
+  eachSelection
 }
