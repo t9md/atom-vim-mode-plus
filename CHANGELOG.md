@@ -1,6 +1,9 @@
 # 0.2.0 WIP
 - Cleanup: globalState no longer instance of class, and nor property of vimState, since its global. It should be treated as like settings.
 - New: #24 now folds kept closed when selection go over folded area. l, h expand folds as like Vim.
+- Recorded operation history is no longer extended infinitely, just keeping one lastRecordedOperation is enough.
+- Remove old meaningless(anymore) pushSearchHistory, getSearchHistoryItem on vimState.
+- Move misc commands(like vimState::reverseSelection) to separate misc-commands.coffee so now processed by operationStack good for consistency.
 
 # 0.1.11
 - FIX #26: incorrect cursor position when escaped from visual-blockwise mode.
