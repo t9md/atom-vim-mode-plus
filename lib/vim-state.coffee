@@ -1,3 +1,5 @@
+# Refactoring status: 100%
+
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
@@ -48,7 +50,6 @@ class VimState
     @editorElement = atom.views.getView(@editor)
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
-    @operationRecords = []
     @subscriptions.add @editor.onDidDestroy =>
       @destroy()
 
@@ -67,7 +68,7 @@ class VimState
     @search = new Search(this)
     @operationStack = new OperationStack(this)
     @modeManager = new ModeManager(this)
-    @observeSelectionChange()
+    @observeSelection()
 
     @editorElement.classList.add packageScope
     @init()
@@ -75,14 +76,6 @@ class VimState
       @activate('insert')
     else
       @activate('normal')
-
-  getRecordedOperation: ->
-    @operationRecords[0]
-
-  # TODO: Is this really need to be history?
-  # I think just keeping last operation is enough for current requirement.
-  recordOperation: (operation) ->
-    @operationRecords.unshift(operation)
 
   destroy: ->
     return if @destroyed
@@ -107,7 +100,7 @@ class VimState
     {@editor, @editorElement} = {}
     @emitter.emit 'did-destroy'
 
-  observeSelectionChange: ->
+  observeSelection: ->
     handleSelectionChange = =>
       return unless @editor?
       return if @operationStack.isProcessing()
@@ -302,15 +295,6 @@ class VimState
     @searchHistory.reset()
     @hover.reset()
     @operationStack.clear()
-
-  # Search History
-  # -------------------------
-  # TODO: Put here for compatibility remove in future
-  pushSearchHistory: (search) ->
-    @searchHistory.save(search)
-
-  getSearchHistoryItem: (index=0) ->
-    @searchHistory.getEntries[index]
 
   showCursors: ->
     return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))
