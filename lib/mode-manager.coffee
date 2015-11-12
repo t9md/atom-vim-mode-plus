@@ -3,7 +3,7 @@ _ = require 'underscore-plus'
 {Range, CompositeDisposable, Disposable} = require 'atom'
 
 swrap = require './selection-wrapper'
-{eachSelection} = require './utils'
+{eachSelection, toggleClassByCondition} = require './utils'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
@@ -52,9 +52,9 @@ class ModeManager
 
   updateModeSelector: ->
     for mode in supportedModes
-      @vimState.updateClassCond(mode is @mode, "#{mode}-mode")
+      toggleClassByCondition(@editorElement, "#{mode}-mode", mode is @mode)
     for submode in supportedSubModes
-      @vimState.updateClassCond(submode is @submode, submode)
+      toggleClassByCondition(@editorElement, submode, submode is @submode)
 
   # Normal
   # -------------------------

@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
-{haveSomeSelection} = require './utils'
+{haveSomeSelection, toggleClassByCondition} = require './utils'
 swrap = require './selection-wrapper'
 
 Operator = require './operator'
@@ -193,6 +193,7 @@ class VimState
       'reverse-selections',
       'undo', 'redo',
     ]
+
     @registerOperationCommands InsertMode, [
       'insert-register',
       'copy-from-line-above',
@@ -322,10 +323,6 @@ class VimState
     for c in @editor.getCursors()
       if c in cursors
         c.setVisible(true) unless c.isVisible()
-        @updateClassCond c.selection.isReversed(), 'reversed'
+        toggleClassByCondition(@editorElement, 'reversed', c.selection.isReversed())
       else
         c.setVisible(false)
-
-  updateClassCond: (condition, klass) ->
-    action = (if condition then 'add' else 'remove')
-    @editorElement.classList[action](klass)

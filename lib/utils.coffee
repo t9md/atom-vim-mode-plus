@@ -104,6 +104,10 @@ withKeepingGoalColumn = (cursor, fn) ->
   fn(cursor)
   cursor.goalColumn = goalColumn if goalColumn
 
+toggleClassByCondition = (element, klass, condition) ->
+  action = (if condition then 'add' else 'remove')
+  element.classList[action](klass)
+
 module.exports = {
   include
   debug
@@ -123,4 +127,5 @@ module.exports = {
   getLineTextToPoint
   eachSelection
   withKeepingGoalColumn
+  toggleClassByCondition
 }
