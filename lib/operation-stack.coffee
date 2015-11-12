@@ -3,7 +3,7 @@ _ = require 'underscore-plus'
 
 {CurrentSelection} = require './motion'
 {Select} = require './operator'
-{debug} = require './utils'
+{debug, withKeepingGoalColumn} = require './utils'
 settings = require './settings'
 Base = require './base'
 
@@ -66,6 +66,8 @@ class OperationStack
       debug '-> @pop()'
       op = @pop()
       debug " -> <#{op.getKind()}>.execute()"
+      # debug purpose for a while to refactor further
+      @executing = op.getKind()
       op.execute()
 
       @vimState.recordOperation(op) if op.isRecordable()
@@ -90,15 +92,12 @@ class OperationStack
 
   finish: ->
     if @vimState.isMode('normal') and @editor.getLastSelection().isEmpty()
-      @dontPutCursorsAtEndOfLine()
+      for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
+        # console.log "CALLED", @executing
+        withKeepingGoalColumn c, (c) ->
+          c.moveLeft()
     @vimState.showCursors()
     @vimState.reset()
-
-  dontPutCursorsAtEndOfLine: ->
-    for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
-      {goalColumn} = c
-      c.moveLeft()
-      c.goalColumn = goalColumn
 
   peekTop: ->
     _.last @stack
