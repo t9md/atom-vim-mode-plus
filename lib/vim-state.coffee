@@ -1,5 +1,4 @@
 # Refactoring status: 100%
-
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
@@ -7,7 +6,12 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
-{haveSomeSelection, toggleClassByCondition} = require './utils'
+{
+  haveSomeSelection,
+  toggleClassByCondition
+  kls2cmd
+  cmd2kls
+} = require './utils'
 swrap = require './selection-wrapper'
 
 Operator = require './operator'
@@ -131,12 +135,13 @@ class VimState
 
     @editorElement.addEventListener 'mousedown', handleMouseDown
     @editorElement.addEventListener 'mouseup', handleMouseUp
-    @subscriptions.add @editor.onDidChangeSelectionRange =>
-      return if @operationStack.isProcessing()
-      debouncedHandleSelectionChange()
     @subscriptions.add new Disposable =>
       @editorElement.removeEventListener 'mousedown', handleMouseDown
       @editorElement.removeEventListener 'mouseup', handleMouseUp
+
+    @subscriptions.add @editor.onDidChangeSelectionRange =>
+      return if @operationStack.isProcessing()
+      debouncedHandleSelectionChange()
 
   onDidFailToCompose: (fn) ->
     @emitter.on('failed-to-compose', fn)
@@ -150,25 +155,20 @@ class VimState
         cmd = "#{packageScope}:#{name}"
         @subscriptions.add atom.commands.add(@editorElement, cmd, fn)
 
-  # command-name is automatically mapped to correspoinding class.
-  # e.g.
-  #   join -> Join
-  #   scroll-down -> ScrollDown
-  registerOperationCommands: (kind, names) ->
+  registerOperationCommands: (kind) ->
     commands = {}
-    for name in names
-      commands[name] = @getOperationCommand(kind, name)
+    for klassName, klass of kind
+      name = kls2cmd(klassName)
+      do (name, klass) =>
+        if kind is TextObject
+          commands["a-#{name}"] = @getCommand(klass)
+          commands["inner-#{name}"] = @getCommand(klass, {inner: true})
+        else
+          commands[name] = @getCommand(klass)
     @registerCommands(commands)
 
-  getOperationCommand: (kind, name) ->
-    properties = null
-    if kind is TextObject
-      # Split into [prefix, name] pair for TextObject commands.
-      # e.g. 'inner-double-quote' -> ['inner', 'double-quote']
-      [prefix, name] = name.split(/-(.+)/, 2)
-      properties = {inner} if inner = (prefix is 'inner')
-    klassName = kind[_.capitalize(_.camelize(name))]
-    => @operationStack.run(klassName, {inner})
+  getCommand: (klass, properties) ->
+    => @operationStack.run(klass, properties)
 
   # Initialize all commands.
   init: ->
@@ -182,106 +182,8 @@ class VimState
       'set-register-name': => @register.setName() # "
       'replace-mode-backspace': => @modeManager.replaceModeBackspace()
 
-    @registerOperationCommands Misc, [
-      'reverse-selections',
-      'undo', 'redo',
-    ]
-
-    @registerOperationCommands InsertMode, [
-      'insert-register',
-      'copy-from-line-above',
-      'copy-from-line-below'
-    ]
-
-    @registerOperationCommands TextObject, [
-      'inner-word'           , 'a-word'
-      'inner-whole-word'     , 'a-whole-word'
-      'inner-double-quote'  , 'a-double-quote'
-      'inner-single-quote'  , 'a-single-quote'
-      'inner-back-tick'     , 'a-back-tick'
-      'inner-any-quote'     , 'a-any-quote'
-      'inner-paragraph'      , 'a-paragraph'
-      'inner-any-pair'       , 'a-any-pair'
-      'inner-curly-bracket' , 'a-curly-bracket'
-      'inner-angle-bracket' , 'a-angle-bracket'
-      'inner-square-bracket', 'a-square-bracket'
-      'inner-parenthesis'    , 'a-parenthesis'
-      'inner-tag'           , # 'a-tag'
-      'inner-comment'        , 'a-comment'
-      'inner-indentation'    , 'a-indentation'
-      'inner-fold'           , 'a-fold'
-      'inner-function'       , 'a-function'
-      'inner-current-line'   , 'a-current-line'
-      'inner-entire'         , 'a-entire'
-    ]
-
-    @registerOperationCommands Motion, [
-      'move-to-beginning-of-line',
-      'repeat-find', 'repeat-find-reverse',
-      'move-down', 'move-up', 'move-left', 'move-right',
-      'move-to-next-word'     , 'move-to-next-whole-word'    ,
-      'move-to-end-of-word'   , 'move-to-end-of-whole-word'  ,
-      'move-to-previous-word' , 'move-to-previous-whole-word',
-      'move-to-next-paragraph', 'move-to-previous-paragraph' ,
-      'move-to-first-character-of-line'         , 'move-to-last-character-of-line'      ,
-      'move-to-first-character-of-line-up'      , 'move-to-first-character-of-line-down',
-      'move-to-first-character-of-line-and-down',
-      'move-to-last-nonblank-character-of-line-and-down',
-      'move-to-first-line', 'move-to-last-line',
-      'move-to-top-of-screen', 'move-to-bottom-of-screen', 'move-to-middle-of-screen',
-      'scroll-half-screen-up'  , 'scroll-half-screen-down'      ,
-      'scroll-full-screen-up'  , 'scroll-full-screen-down'      ,
-      'move-to-mark'           , 'move-to-mark-line'            ,
-      'find'                   , 'find-backwards'               ,
-      'till'                   , 'till-backwards'               ,
-      'search'                 , 'search-backwards'             ,
-      'search-current-word'    , 'search-current-word-backwards',
-      'repeat-search'          , 'repeat-search-reverse'        ,
-      'bracket-matching-motion',
-    ]
-
-    @registerOperationCommands Operator, [
-      'activate-insert-mode', 'insert-after',
-      'activate-replace-mode',
-      'substitute', 'substitute-line',
-      'insert-at-beginning-of-line', 'insert-after-end-of-line',
-      'insert-below-with-newline', 'insert-above-with-newline',
-      'delete', 'delete-to-last-character-of-line',
-      'delete-right', 'delete-left',
-      'change', 'change-to-last-character-of-line',
-      'yank', 'yank-line',
-      'put-after', 'put-before',
-      'upper-case', 'lower-case', 'toggle-case', 'toggle-case-and-move-right',
-      'camel-case', 'snake-case', 'dash-case',
-      'surround'       , 'surround-word'           ,
-      'delete-surround', 'delete-surround-any-pair'
-      'change-surround', 'change-surround-any-pair'
-      'join',
-      'indent', 'outdent', 'auto-indent',
-      'increase', 'decrease',
-      'repeat', 'mark', 'replace',
-      'replace-with-register'
-      'toggle-line-comments'
-    ]
-
-    @registerOperationCommands Scroll, [
-      'scroll-down'            , 'scroll-up'                    ,
-      'scroll-cursor-to-top'   , 'scroll-cursor-to-top-leave'   ,
-      'scroll-cursor-to-middle', 'scroll-cursor-to-middle-leave',
-      'scroll-cursor-to-bottom', 'scroll-cursor-to-bottom-leave',
-      'scroll-cursor-to-left'  , 'scroll-cursor-to-right'       ,
-    ]
-
-    @registerOperationCommands VisualBlockwise, [
-      'blockwise-other-end',
-      'blockwise-move-down',
-      'blockwise-move-up',
-      'blockwise-delete-to-last-character-of-line',
-      'blockwise-change-to-last-character-of-line',
-      'blockwise-insert-at-beginning-of-line',
-      'blockwise-insert-after-end-of-line',
-      'blockwise-escape',
-    ]
+    for kind in [TextObject, Misc, InsertMode, Motion, Operator, Scroll, VisualBlockwise]
+      @registerOperationCommands(kind)
 
     # Load developer helper commands.
     if atom.inDevMode()

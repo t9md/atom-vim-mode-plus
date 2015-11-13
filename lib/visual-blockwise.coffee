@@ -151,7 +151,6 @@ class BlockwiseRestoreCharacterwise extends VisualBlockwise
     @editor.setSelectedBufferRange(range, {reversed})
 
 module.exports = {
-  VisualBlockwise,
   BlockwiseOtherEnd,
   BlockwiseMoveDown,
   BlockwiseMoveUp,
