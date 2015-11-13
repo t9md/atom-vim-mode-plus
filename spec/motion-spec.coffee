@@ -123,6 +123,7 @@ describe "Motion", ->
       beforeEach ->
         editor.setSoftWrapped(true)
         editor.setEditorWidthInChars(10)
+        editor.setDefaultCharWidth(1)
         set
           text: """
             1st line of buffer
