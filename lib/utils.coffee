@@ -108,6 +108,12 @@ toggleClassByCondition = (element, klass, condition) ->
   action = (if condition then 'add' else 'remove')
   element.classList[action](klass)
 
+kls2cmd = (klass) ->
+  _.dasherize(klass)
+
+cmd2kls = (command) ->
+  _.capitalize(_.camelize(command))
+
 module.exports = {
   include
   debug
@@ -128,4 +134,6 @@ module.exports = {
   eachSelection
   withKeepingGoalColumn
   toggleClassByCondition
+  kls2cmd
+  cmd2kls
 }

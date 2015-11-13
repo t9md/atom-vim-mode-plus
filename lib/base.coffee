@@ -72,7 +72,6 @@ class Base
   # Base::isOperator: ->
   #   this instanceof Operator
   #
-  # children = []
   children = Object.create(null)
   @extend: ->
     klass = this
