@@ -14,7 +14,6 @@ addCommand = (name, fn) ->
 
 class Base
   complete: false
-  register: true
   recodable: false
   defaultCount: 1
   requireInput: false
