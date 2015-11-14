@@ -46,10 +46,6 @@ class Base
   abort: ->
     throw new OperationAbortedError('Aborted')
 
-  # TODO: remove in near future
-  getKind: ->
-    @constructor.name
-
   getCount: ->
     # Setting count as instance variable allows operation repeatable with same count.
     @count ?= @vimState?.count.get() ? @defaultCount
@@ -69,6 +65,9 @@ class Base
       onCancel: =>
         @vimState.operationStack.cancel()
 
+  instanceof: (klassName) ->
+    this instanceof Base.getConstructor(klassName)
+
   # Class methods
   # -------------------------
   @init: (service) ->
@@ -79,17 +78,6 @@ class Base
       subscriptions = null
 
   # Expected to be called by child class.
-  # It automatically create typecheck function like
-  #
-  # e.g.
-  #   class Operator extends base
-  #     @extends()
-  #
-  # Above code automatically define following function.
-  #
-  # Base::isOperator: ->
-  #   this instanceof Operator
-  #
   operationKinds = [
     "TextObject",
     "Misc",
@@ -101,14 +89,11 @@ class Base
   ]
   children = Object.create(null)
   @extend: ->
-    klass = this
     if @name of children
       console.warn "Duplicate constructor #{@name}"
-    children[@name] = klass
-    Base::["is#{@name}"] = ->
-      this instanceof klass
+    children[@name] = this
     # Used to determine klass is TextObject in @registerCommand()
-    klass.kind = @name if @name in operationKinds
+    this.kind = @name if @name in operationKinds
 
   @getCommandName: ->
     kls2cmd(@name)
