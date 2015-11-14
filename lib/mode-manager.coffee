@@ -63,7 +63,7 @@ class ModeManager
     @editorElement.component.setInputEnabled(false)
     new Disposable
 
-  # Insert
+  # ActivateInsertMode
   # -------------------------
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)
@@ -75,7 +75,7 @@ class ModeManager
       @editor.groupChangesSinceCheckpoint(checkpoint)
       changes = getChangesSinceCheckpoint(@editor.buffer, checkpoint)
       @resetInsertionCheckpoint()
-      if (item = @vimState.operationStack.getRecorded()) and item.isInsert()
+      if (item = @vimState.operationStack.getRecorded()) and item.isActivateInsertMode()
         item.confirmChanges(changes)
 
       replaceModeDeactivator?.dispose()

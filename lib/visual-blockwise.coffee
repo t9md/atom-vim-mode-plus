@@ -106,7 +106,7 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
     which = if @after then 'end' else 'start'
     @eachSelection (s) ->
       s.cursor.setBufferPosition s.getBufferRange()[which]
-    @new('Insert').execute()
+    @new('ActivateInsertMode').execute()
 
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()

@@ -495,7 +495,7 @@ class ToggleLineComments extends Operator
 # operators manage an undo transaction and set a @typingCompleted variable when
 # it's done. When the input operation is completed, the typingCompleted variable
 # tells the operation to repeat itself instead of enter insert mode.
-class Insert extends Operator
+class ActivateInsertMode extends Operator
   @extend()
   complete: true
   typedText: null
@@ -514,7 +514,7 @@ class Insert extends Operator
     else
       @vimState.activate('insert')
 
-class ActivateReplaceMode extends Insert
+class ActivateReplaceMode extends ActivateInsertMode
   @extend()
 
   execute: ->
@@ -534,26 +534,26 @@ class ActivateReplaceMode extends Insert
   countChars: (char, string) ->
     string.split(char).length - 1
 
-class InsertAfter extends Insert
+class InsertAfter extends ActivateInsertMode
   @extend()
   execute: ->
     @editor.moveRight() unless @editor.getLastCursor().isAtEndOfLine()
     super
 
-class InsertAfterEndOfLine extends Insert
+class InsertAfterEndOfLine extends ActivateInsertMode
   @extend()
   execute: ->
     @editor.moveToEndOfLine()
     super
 
-class InsertAtBeginningOfLine extends Insert
+class InsertAtBeginningOfLine extends ActivateInsertMode
   @extend()
   execute: ->
     @editor.moveToFirstCharacterOfLine()
     super
 
 # FIXME need support count
-class InsertAboveWithNewline extends Insert
+class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
   direction: 'above'
   execute: ->
@@ -578,7 +578,7 @@ class InsertBelowWithNewline extends InsertAboveWithNewline
 #
 # Delete the following motion and enter insert mode to replace it.
 #
-class Change extends Insert
+class Change extends ActivateInsertMode
   @extend()
   complete: false
 
@@ -620,7 +620,7 @@ class ChangeToLastCharacterOfLine extends Change
     @compose @new('MoveToLastCharacterOfLine')
 
 # Takes a transaction and turns it into a string of what was typed.
-# This class is an implementation detail of Insert
+# This class is an implementation detail of ActivateInsertMode
 class TransactionBundler
   constructor: (@changes, @editor) ->
     @start = null
@@ -731,9 +731,6 @@ class Replace extends Operator
 
     @vimState.activate('normal')
 
-# [TODO] remove bellow alias in future
-ActivateInsertMode = Insert
-
 module.exports = {
   Operator, OperatorError, Delete,
   Select,
@@ -750,7 +747,7 @@ module.exports = {
 
   PutBefore, PutAfter,
 
-  ActivateInsertMode # Alias of Insert
+  ActivateInsertMode
   InsertAfter
   InsertAfterEndOfLine
   InsertAtBeginningOfLine
