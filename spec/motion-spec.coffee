@@ -1358,12 +1358,17 @@ describe "Motion", ->
         other.set
           text: "foo bar baz",
           cursor: [0, 0]
+        otherEditor = otherVimState.editor
+
+        pane = atom.workspace.getActivePane()
+        pane.activateItem(editor)
 
         # by default keyDown and such go in the usual editor
         ensure ['f', char: 'b'], cursor: [0, 2]
         other.ensure cursor: [0, 0]
 
         # replay same find in the other editor
+        pane.activateItem(otherEditor)
         other.keystroke ';'
         ensure cursor: [0, 2]
         other.ensure cursor: [0, 4]
@@ -1374,6 +1379,7 @@ describe "Motion", ->
         other.ensure cursor: [0, 5]
 
         # and replay in the normal editor
+        pane.activateItem(editor)
         ensure ';', cursor: [0, 7]
         other.ensure cursor: [0, 5]
 
