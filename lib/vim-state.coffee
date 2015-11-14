@@ -6,21 +6,8 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
-{
-  haveSomeSelection,
-  toggleClassByCondition
-  kls2cmd
-  cmd2kls
-} = require './utils'
+{haveSomeSelection, toggleClassByCondition} = require './utils'
 swrap = require './selection-wrapper'
-
-Operator = require './operator'
-Motion = require './motion'
-TextObject = require './text-object'
-InsertMode = require './insert-mode'
-Misc = require './misc-commands'
-Scroll = require './scroll'
-VisualBlockwise = require './visual-blockwise'
 
 OperationStack = require './operation-stack'
 CountManager = require './count-manager'
@@ -40,12 +27,7 @@ delegatingProperties = ['mode', 'submode']
 module.exports =
 class VimState
   Delegato.includeInto(this)
-
-  editor: null
-  operationStack: null
   destroyed: false
-  replaceModeListener: null
-  developer: null
 
   @delegatesProperty delegatingProperties..., toProperty: 'modeManager'
   @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
@@ -149,47 +131,14 @@ class VimState
   onDidDestroy: (fn) ->
     @emitter.on('did-destroy', fn)
 
-  registerCommands: (commands) ->
-    for name, fn of commands
-      do (fn) =>
-        cmd = "#{packageScope}:#{name}"
-        @subscriptions.add atom.commands.add(@editorElement, cmd, fn)
-
-  registerOperationCommands: (kind) ->
-    commands = {}
-    for klassName, klass of kind
-      name = kls2cmd(klassName)
-      do (name, klass) =>
-        if kind is TextObject
-          commands["a-#{name}"] = @getCommand(klass)
-          commands["inner-#{name}"] = @getCommand(klass, {inner: true})
-        else
-          commands[name] = @getCommand(klass)
-    @registerCommands(commands)
-
-  getCommand: (klass, properties) ->
-    => @operationStack.run(klass, properties)
-
   # Initialize all commands.
   init: ->
-    @registerCommands
-      'activate-normal-mode': => @activate('normal')
-      'activate-linewise-visual-mode': => @activate('visual', 'linewise')
-      'activate-characterwise-visual-mode': => @activate('visual', 'characterwise')
-      'activate-blockwise-visual-mode': => @activate('visual', 'blockwise')
-      'reset-normal-mode': => @activate('reset')
-      'set-count': (e) => @count.set(e) # 0-9
-      'set-register-name': => @register.setName() # "
-      'replace-mode-backspace': => @modeManager.replaceModeBackspace()
-
-    for kind in [TextObject, Misc, InsertMode, Motion, Operator, Scroll, VisualBlockwise]
-      @registerOperationCommands(kind)
-
+    # [FIXME]
     # Load developer helper commands.
-    if atom.inDevMode()
-      Developer ?= require './developer'
-      @developer = new Developer(this)
-      @developer.init()
+    # if atom.inDevMode()
+    #   Developer ?= require './developer'
+    #   @developer = new Developer(this)
+    #   @developer.init()
 
   reset: ->
     @count.reset()
