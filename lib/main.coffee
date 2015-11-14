@@ -9,8 +9,8 @@ settings = require './settings'
 VimState = require './vim-state'
 {Hover, HoverElement} = require './hover'
 {Input, InputElement, Search, SearchElement} = require './input'
-{kls2cmd, cmd2kls} = require './utils'
 
+Base = require './base'
 Operator = require './operator'
 Motion = require './motion'
 TextObject = require './text-object'
@@ -25,14 +25,14 @@ module.exports =
   config: settings.config
 
   activate: (state) ->
-    @disposables = new CompositeDisposable
+    @subscriptions = new CompositeDisposable
     @statusBarManager = new StatusBarManager
     @registerViewProviders()
 
     @vimStates = new Set
     @vimStatesByEditor = new WeakMap
 
-    @disposables.add atom.workspace.observeTextEditors (editor) =>
+    @subscriptions.add atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini() or @vimStatesByEditor.get(editor)
 
       vimState = new VimState(editor, @statusBarManager)
@@ -41,31 +41,19 @@ module.exports =
       vimState.onDidDestroy =>
         @vimStates.delete(vimState)
 
-    @disposables.add new Disposable =>
+    @subscriptions.add new Disposable =>
       @vimStates.forEach (vimState) -> vimState.destroy()
 
+    @subscriptions.add Base.init(@provideVimModePlus())
     @registerCommands()
 
-  registerCommand: (name, fn) ->
-    @disposables.add atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
-
   registerCommands: ->
+    for kind in [TextObject, Misc, InsertMode, Motion, Operator, Scroll, VisualBlockwise]
+      for klassName, klass of kind
+        klass.registerCommand()
+
     getState = =>
       @getEditorState(atom.workspace.getActiveTextEditor())
-
-    run = (klass, properties) ->
-      getState().operationStack.run(klass, properties)
-
-    for kind in [TextObject, Misc, InsertMode, Motion, Operator, Scroll, VisualBlockwise]
-      for name, klass of kind
-        name = kls2cmd(name)
-        do (name, klass) =>
-          if kind is TextObject
-            # e.g 'a-word' and 'inner-word' are mapped to TextObject.Word
-            @registerCommand "a-#{name}", -> run(klass)
-            @registerCommand "inner-#{name}", -> run(klass, {inner: true})
-          else
-            @registerCommand name, -> run(klass)
 
     vimStateCommands =
       'activate-normal-mode': -> getState().activate('normal')
@@ -77,7 +65,10 @@ module.exports =
       'set-register-name': -> getState().register.setName() # "
       'replace-mode-backspace': -> getState().modeManager.replaceModeBackspace()
 
-    @registerCommand(name, fn) for name, fn of vimStateCommands
+    @addCommand(name, fn) for name, fn of vimStateCommands
+
+  addCommand: (name, fn) ->
+    @subscriptions.add atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
 
   registerViewProviders: ->
     atom.views.addViewProvider Hover, (model) ->
@@ -88,7 +79,7 @@ module.exports =
       new SearchElement().initialize(model)
 
   deactivate: ->
-    @disposables.dispose()
+    @subscriptions.dispose()
 
   getGlobalState: ->
     globalState
@@ -99,7 +90,7 @@ module.exports =
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)
     @statusBarManager.attach()
-    @disposables.add new Disposable =>
+    @subscriptions.add new Disposable =>
       @statusBarManager.detach()
 
   provideVimModePlus: ->
