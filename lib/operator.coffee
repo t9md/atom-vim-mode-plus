@@ -39,7 +39,8 @@ class Operator extends Base
   compose: (@target) ->
     unless _.isFunction(@target.select)
       @vimState.emitter.emit('failed-to-compose')
-      throw new OperatorError("Failed to compose #{@getKind()} with #{@target.getKind()}")
+      message = "Failed to compose #{@constructor.name} with #{@target.constructor.name}"
+      throw new OperatorError(message)
 
     if _.isFunction(@target.onDidComposeBy)
       @target.onDidComposeBy(this)

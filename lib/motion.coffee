@@ -152,7 +152,7 @@ class MoveRight extends Motion
   onDidComposeBy: (operation) ->
     # Don't save oeration to instance variable to avoid reference before I understand it correctly.
     # Also introspection need to support circular reference detection to stop infinit reflection loop.
-    if operation.isOperator()
+    if operation.instanceof('Operator')
       @composed = true
 
   isOperatorPending: ->
@@ -481,7 +481,7 @@ class Find extends Motion
   offset: 0
 
   initialize: ->
-    @readInput() unless @isRepeatFind()
+    @readInput() unless @instanceof('RepeatFind')
 
   isBackwards: ->
     @backwards
@@ -491,7 +491,7 @@ class Find extends Motion
     {start, end} = @editor.bufferRangeForBufferRow(cursorPoint.row)
 
     offset   = if @isBackwards() then @offset else -@offset
-    unOffset = -offset * @isRepeatFind()
+    unOffset = -offset * @instanceof('RepeatFind')
     if @isBackwards()
       scanRange = [start, cursorPoint.translate([0, unOffset])]
       method    = 'backwardsScanInBufferRange'
@@ -510,7 +510,7 @@ class Find extends Motion
   moveCursor: (cursor) ->
     if point = @find(cursor)
       cursor.setBufferPosition(point)
-    unless @isRepeatFind()
+    unless @instanceof('RepeatFind')
       globalState.currentFind = this
 
 # keymap: F

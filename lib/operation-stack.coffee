@@ -17,7 +17,7 @@ class OperationStack
       klass = Base.getConstructor(klass) if _.isString(klass)
       @push new klass(@vimState, properties)
     catch error
-      throw error unless error.isOperationAbortedError?()
+      throw error unless error.instanceof?('OperationAbortedError')
 
   push: (op) ->
     if @isEmpty() and settings.get('debug')
@@ -29,10 +29,10 @@ class OperationStack
     if @vimState.isMode('visual') and _.isFunction(op.select)
       @pushToStack new Select(@vimState), message: "push IMPLICIT Operator.Select"
 
-    @pushToStack op, message: "push <#{op.getKind()}>"
+    @pushToStack op, message: "push <#{op.constructor.name}>"
 
     # Operate on implicit CurrentSelection TextObject.
-    if @vimState.isMode('visual') and op.isOperator()
+    if @vimState.isMode('visual') and op.instanceof('Operator')
       @pushToStack new CurrentSelection(@vimState),
         message: "push IMPLICIT Motion.CurrentSelection"
 
@@ -51,10 +51,10 @@ class OperationStack
     while @stack.length > 1
       try
         op = @pop()
-        debug "-> <#{@peekTop().getKind()}>.compose(<#{op.getKind()}>)"
+        debug "-> <#{@peekTop().constructor.name}>.compose(<#{op.constructor.name}>)"
         @peekTop().compose(op)
       catch error
-        if error.isOperatorError?()
+        if error.instanceof?('OperatorError')
           debug error.message
           @vimState.activate('reset')
           return
@@ -65,7 +65,7 @@ class OperationStack
       @inspect()
       debug '-> @pop()'
       op = @pop()
-      debug " -> <#{op.getKind()}>.execute()"
+      debug " -> <#{op.constructor.name}>.execute()"
       op.execute()
       # debug purpose for a while to refactor further
       @lastExecuted = op
@@ -73,17 +73,17 @@ class OperationStack
       @finish()
       debug "#=== Finish at #{new Date().toISOString()}\n"
     else
-      if @vimState.isMode('normal') and @peekTop().isOperator?()
+      if @vimState.isMode('normal') and @peekTop().instanceof?('Operator')
         @inspect()
         debug '-> @process(): activating: operator-pending-mode'
         @vimState.activate('operator-pending')
       else
-        debug "-> @process(): return: not <#{@peekTop().getKind()}>.isComplete()"
+        debug "-> @process(): return: not <#{@peekTop().constructor.name}>.isComplete()"
         @inspect()
 
   cancel: ->
     debug "Cancelled stack size: #{@stack.length}"
-    debug(op.getKind()) for op in @pop()
+    debug(op.constructor.name) for op in @pop()
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
       @vimState.activate('reset')
     @finish()
