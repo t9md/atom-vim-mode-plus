@@ -92,10 +92,8 @@ class VimState
       return if @operationStack.isProcessing()
       someSelection = haveSomeSelection(@editor.getSelections())
       switch
-        when @isMode('visual') and (not someSelection)
-          @activate('normal')
-        when @isMode('normal') and someSelection
-          @activate('visual', 'characterwise')
+        when @isMode('visual') and (not someSelection) then @activate('normal')
+        when @isMode('normal') and someSelection then @activate('visual', 'characterwise')
       @showCursors()
 
     selectionWatcher = null
