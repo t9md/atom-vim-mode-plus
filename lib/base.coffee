@@ -1,10 +1,20 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
+{Disposable, CompositeDisposable} = require 'atom'
 {getAncestors, getParent} = require './introspection'
+{kls2cmd} = require './utils'
 settings = require './settings'
+
+packageScope = 'vim-mode-plus'
+getEditorState = null # set in Base.int()
+subscriptions = null
+
+addCommand = (name, fn) ->
+  atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
 
 class Base
   complete: false
+  register: true
   recodable: false
   defaultCount: 1
   requireInput: false
@@ -60,6 +70,15 @@ class Base
       onCancel: =>
         @vimState.operationStack.cancel()
 
+  # Class methods
+  # -------------------------
+  @init: (service) ->
+    {getEditorState} = service
+    subscriptions = new CompositeDisposable
+    new Disposable ->
+      subscriptions.dispose()
+      subscriptions = null
+
   # Expected to be called by child class.
   # It automatically create typecheck function like
   #
@@ -72,14 +91,41 @@ class Base
   # Base::isOperator: ->
   #   this instanceof Operator
   #
+  operationKinds = [
+    "TextObject",
+    "Misc",
+    "InsertMode",
+    "Motion",
+    "Operator",
+    "Scroll",
+    "VisualBlockwise"
+  ]
   children = Object.create(null)
   @extend: ->
     klass = this
-    if klass.name of children
-      console.warn "Duplicate constructor #{klass.name}"
-    children[klass.name] = klass
-    Base::["is#{klass.name}"] = ->
+    if @name of children
+      console.warn "Duplicate constructor #{@name}"
+    children[@name] = klass
+    Base::["is#{@name}"] = ->
       this instanceof klass
+    # Used to determine klass is TextObject in @registerCommand()
+    klass.kind = @name if @name in operationKinds
+
+  @getCommandName: ->
+    kls2cmd(@name)
+
+  @run: (properties={}) ->
+    vimState = getEditorState(atom.workspace.getActiveTextEditor())
+    vimState.operationStack.run(this, properties)
+
+  @registerCommand: ->
+    name = @getCommandName()
+    subs = subscriptions
+    if @kind is 'TextObject'
+      subs.add addCommand("a-#{name}", => @run())
+      subs.add addCommand("inner-#{name}", => @run({inner: true}))
+    else
+      subs.add addCommand(name, => @run())
 
   @getConstructor: (klassName) ->
     children[klassName]
