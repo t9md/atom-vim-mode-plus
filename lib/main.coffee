@@ -27,20 +27,21 @@ module.exports =
   activate: (state) ->
     @subscriptions = new CompositeDisposable
     @statusBarManager = new StatusBarManager
+    @vimStates = new Map
+
     @registerViewProviders()
-    @editorStates = new Map
-    @subscriptions.add atom.workspace.observeTextEditors (editor) =>
-      return if editor.isMini() or @editorStates.has(editor)
-      vimState = new VimState(editor, @statusBarManager)
-      @editorStates.set(editor, vimState)
-      vimState.onDidDestroy =>
-        @editorStates.delete(editor)
-
-    @subscriptions.add new Disposable =>
-      @editorStates.forEach (vimState) -> vimState.destroy()
-
     @subscriptions.add Base.init(@provideVimModePlus())
     @registerCommands()
+
+    @subscriptions.add atom.workspace.observeTextEditors (editor) =>
+      return if editor.isMini() or @vimStates.has(editor)
+      vimState = new VimState(editor, @statusBarManager)
+      @vimStates.set(editor, vimState)
+      vimState.onDidDestroy =>
+        @vimStates.delete(editor)
+
+    @subscriptions.add new Disposable =>
+      @vimStates.forEach (vimState) -> vimState.destroy()
 
   registerCommands: ->
     for kind in [TextObject, Misc, InsertMode, Motion, Operator, Scroll, VisualBlockwise]
@@ -80,7 +81,7 @@ module.exports =
     globalState
 
   getEditorState: (editor) ->
-    @editorStates.get(editor)
+    @vimStates.get(editor)
 
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)
