@@ -626,11 +626,11 @@ class SearchBase extends Motion
       current = @matches.get()
       if @isComplete()
         @visit(current, cursor)
-        @vimState.searchHistory.save(@input)
       else
         @visit(current, null)
 
     if @isComplete()
+      @vimState.searchHistory.save(@input)
       @finish()
 
   # If cursor is passed, it move actual move, otherwise
