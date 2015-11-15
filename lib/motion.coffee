@@ -648,7 +648,7 @@ class SearchBase extends Motion
       match.flash()
 
   isIncrementalSearch: ->
-    settings.get('incrementalSearch') and @isSearch()
+    settings.get('incrementalSearch') and @instanceof('Search')
 
   scan: (cursor) ->
     ranges = []
