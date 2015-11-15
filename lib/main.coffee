@@ -28,21 +28,16 @@ module.exports =
     @subscriptions = new CompositeDisposable
     @statusBarManager = new StatusBarManager
     @registerViewProviders()
-
-    @vimStates = new Set
-    @vimStatesByEditor = new WeakMap
-
+    @editorStates = new Map
     @subscriptions.add atom.workspace.observeTextEditors (editor) =>
-      return if editor.isMini() or @vimStatesByEditor.get(editor)
-
+      return if editor.isMini() or @editorStates.has(editor)
       vimState = new VimState(editor, @statusBarManager)
-      @vimStates.add(vimState)
-      @vimStatesByEditor.set(editor, vimState)
+      @editorStates.set(editor, vimState)
       vimState.onDidDestroy =>
-        @vimStates.delete(vimState)
+        @editorStates.delete(editor)
 
     @subscriptions.add new Disposable =>
-      @vimStates.forEach (vimState) -> vimState.destroy()
+      @editorStates.forEach (vimState) -> vimState.destroy()
 
     @subscriptions.add Base.init(@provideVimModePlus())
     @registerCommands()
@@ -85,7 +80,7 @@ module.exports =
     globalState
 
   getEditorState: (editor) ->
-    @vimStatesByEditor.get(editor)
+    @editorStates.get(editor)
 
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)
