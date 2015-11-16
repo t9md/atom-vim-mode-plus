@@ -90,7 +90,7 @@ class Base
     "TextObject", "Misc", "InsertMode", "Motion", "Operator", "Scroll", "VisualBlockwise"
   ]
   registory = {Base}
-  @extend: (@command) ->
+  @extend: (@command=true) ->
     if @name of registory
       console.warn "Duplicate constructor #{@name}"
     registory[@name] = this
@@ -101,7 +101,7 @@ class Base
     registory
 
   @isCommand: ->
-    @command ? true
+    @command
 
   @getCommandName: ->
     _.dasherize(@name)

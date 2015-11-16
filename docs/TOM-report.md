@@ -1,18 +1,18 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode-plus version: 0.2.0  
-*generated at 2015-11-16T12:48:41.423Z*
+*generated at 2015-11-16T16:23:31.412Z*
 
-- [Base](#base) *Not exported*
-  - [InsertMode](#insertmode--base) *Not exported*
+- [Base](#base)
+  - [InsertMode](#insertmode--base)
     - [CopyFromLineAbove](#copyfromlineabove--insertmode)
       - [CopyFromLineBelow](#copyfromlinebelow--copyfromlineabove)
     - [InsertRegister](#insertregister--insertmode)
-  - [Misc](#misc--base) *Not exported*
+  - [Misc](#misc--base)
     - [ReverseSelections](#reverseselections--misc)
     - [Undo](#undo--misc)
       - [Redo](#redo--undo)
-  - [Motion](#motion--base) *Not exported*
+  - [Motion](#motion--base)
     - [CurrentSelection](#currentselection--motion)
     - [Find](#find--motion)
       - [FindBackwards](#findbackwards--find)
@@ -51,7 +51,7 @@ vim-mode-plus version: 0.2.0
       - [ScrollFullScreenUp](#scrollfullscreenup--scrollfullscreendown)
       - [ScrollHalfScreenDown](#scrollhalfscreendown--scrollfullscreendown)
         - [ScrollHalfScreenUp](#scrollhalfscreenup--scrollhalfscreendown)
-    - [SearchBase](#searchbase--motion) *Not exported*
+    - [SearchBase](#searchbase--motion)
       - [BracketMatchingMotion](#bracketmatchingmotion--searchbase)
       - [RepeatSearch](#repeatsearch--searchbase)
         - [RepeatSearchReverse](#repeatsearchreverse--repeatsearch)
@@ -59,6 +59,7 @@ vim-mode-plus version: 0.2.0
         - [SearchBackwards](#searchbackwards--search)
       - [SearchCurrentWord](#searchcurrentword--searchbase)
         - [SearchCurrentWordBackwards](#searchcurrentwordbackwards--searchcurrentword)
+  - [OperationAbortedError](#operationabortederror--base)
   - [Operator](#operator--base)
     - [ActivateInsertMode](#activateinsertmode--operator)
       - [ActivateReplaceMode](#activatereplacemode--activateinsertmode)
@@ -89,7 +90,7 @@ vim-mode-plus version: 0.2.0
     - [ReplaceWithRegister](#replacewithregister--operator)
     - [Select](#select--operator)
     - [ToggleLineComments](#togglelinecomments--operator)
-    - [TransformString](#transformstring--operator) *Not exported*
+    - [TransformString](#transformstring--operator)
       - [CamelCase](#camelcase--transformstring)
       - [DashCase](#dashcase--transformstring)
       - [LowerCase](#lowercase--transformstring)
@@ -106,8 +107,8 @@ vim-mode-plus version: 0.2.0
     - [Yank](#yank--operator)
       - [YankLine](#yankline--yank)
   - [OperatorError](#operatorerror--base)
-  - [Scroll](#scroll--base) *Not exported*
-    - [ScrollCursor](#scrollcursor--scroll) *Not exported*
+  - [Scroll](#scroll--base)
+    - [ScrollCursor](#scrollcursor--scroll)
       - [ScrollCursorToBottom](#scrollcursortobottom--scrollcursor)
         - [ScrollCursorToBottomLeave](#scrollcursortobottomleave--scrollcursortobottom)
       - [ScrollCursorToMiddle](#scrollcursortomiddle--scrollcursor)
@@ -118,12 +119,12 @@ vim-mode-plus version: 0.2.0
       - [ScrollCursorToRight](#scrollcursortoright--scrollcursortoleft)
     - [ScrollDown](#scrolldown--scroll)
       - [ScrollUp](#scrollup--scrolldown)
-  - [TextObject](#textobject--base) *Not exported*
+  - [TextObject](#textobject--base)
     - [CurrentLine](#currentline--textobject)
     - [Entire](#entire--textobject)
     - [Fold](#fold--textobject)
       - [Function](#function--fold)
-    - [Pair](#pair--textobject) *Not exported*
+    - [Pair](#pair--textobject)
       - [AngleBracket](#anglebracket--pair)
       - [AnyPair](#anypair--pair)
         - [AnyQuote](#anyquote--anypair)
@@ -139,7 +140,7 @@ vim-mode-plus version: 0.2.0
       - [Indentation](#indentation--paragraph)
     - [Word](#word--textobject)
       - [WholeWord](#wholeword--word)
-  - [VisualBlockwise](#visualblockwise--base) *Not exported*
+  - [VisualBlockwise](#visualblockwise--base)
     - [BlockwiseDeleteToLastCharacterOfLine](#blockwisedeletetolastcharacterofline--visualblockwise)
       - [BlockwiseChangeToLastCharacterOfLine](#blockwisechangetolastcharacterofline--blockwisedeletetolastcharacterofline)
     - [BlockwiseInsertAtBeginningOfLine](#blockwiseinsertatbeginningofline--visualblockwise)
@@ -151,7 +152,6 @@ vim-mode-plus version: 0.2.0
     - [BlockwiseSelect](#blockwiseselect--visualblockwise)
 
 ## Base
-*Not exported*
 - ::complete: ```false```
 - ::recodable: ```false```
 - ::defaultCount: ```1```
@@ -165,7 +165,6 @@ vim-mode-plus version: 0.2.0
 - ::instanceof`(klassName)`
 
 ### InsertMode < Base
-*Not exported*
 
 ### CopyFromLineAbove < InsertMode
 - command: `vim-mode-plus:copy-from-line-above`
@@ -190,7 +189,6 @@ vim-mode-plus version: 0.2.0
 - ::execute`()`
 
 ### Misc < Base
-*Not exported*
 - ::complete: ```true```: **Overridden**
 
 ### ReverseSelections < Misc
@@ -214,7 +212,6 @@ vim-mode-plus version: 0.2.0
 - ::execute`()`: **Overridden**
 
 ### Motion < Base
-*Not exported*
 - ::complete: ```true```: **Overridden**
 - ::inclusive: ```false```
 - ::linewise: ```false```
@@ -532,7 +529,6 @@ vim-mode-plus version: 0.2.0
 - ::coefficient: ```-0.5```: **Overridden**
 
 ### SearchBase < Motion
-*Not exported*
 - ::saveCurrentSearch: ```true```
 - ::complete: ```false```: **Overridden**
 - ::backwards: ```false```
@@ -609,8 +605,10 @@ vim-mode-plus version: 0.2.0
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>#</kbd>
 - ::backwards: ```true```: **Overridden**
 
+### OperationAbortedError < Base
+- ::constructor`(@message)`: **Overridden**
+
 ### Operator < Base
-- command: `vim-mode-plus:operator`
 - ::constructor`()`: `super`: **Overridden**
 - ::recodable: ```true```: **Overridden**
 - ::target: ```null```
@@ -839,7 +837,6 @@ vim-mode-plus version: 0.2.0
 - ::execute`()`
 
 ### TransformString < Operator
-*Not exported*
 - ::adjustCursor: ```true```
 - ::execute`()`
 
@@ -969,11 +966,10 @@ vim-mode-plus version: 0.2.0
 - ::initialize`()`
 
 ### OperatorError < Base
-- command: `vim-mode-plus:operator-error`
 - ::constructor`(@message)`: **Overridden**
 
 ### Scroll < Base
-*Not exported*
+- command: `vim-mode-plus:scroll`
 - ::complete: ```true```: **Overridden**
 - ::scrolloff: ```2```
 - ::getFirstVisibleScreenRow`()`
@@ -982,7 +978,7 @@ vim-mode-plus version: 0.2.0
 - ::getPixelCursor`(which)`
 
 ### ScrollCursor < Scroll
-*Not exported*
+- command: `vim-mode-plus:scroll-cursor`
 - ::execute`()`
 - ::moveToFirstCharacterOfLine`()`
 - ::getOffSetPixelHeight`(lineDelta)`
@@ -1056,7 +1052,6 @@ vim-mode-plus version: 0.2.0
 - ::direction: ```'up'```: **Overridden**
 
 ### TextObject < Base
-*Not exported*
 - ::complete: ```true```: **Overridden**
 - ::inner: ```false```
 - ::isInner`()`
@@ -1109,7 +1104,6 @@ vim-mode-plus version: 0.2.0
 - ::adjustRowRange`(startRow, endRow)`
 
 ### Pair < TextObject
-*Not exported*
 - ::allowNextLine: ```false```
 - ::what: ```'enclosed'```
 - ::pair: ```null```
@@ -1298,7 +1292,7 @@ vim-mode-plus version: 0.2.0
 - ::selectExclusive`(s, wordRegex)`: **Overridden**
 
 ### VisualBlockwise < Base
-*Not exported*
+- command: `vim-mode-plus:visual-blockwise`
 - ::complete: ```true```: **Overridden**
 - ::initialize`()`
 - ::eachSelection`(fn)`
@@ -1359,9 +1353,7 @@ vim-mode-plus version: 0.2.0
 - ::execute`()`
 
 ### BlockwiseRestoreCharacterwise < VisualBlockwise
-- command: `vim-mode-plus:blockwise-restore-characterwise`
 - ::execute`()`
 
 ### BlockwiseSelect < VisualBlockwise
-- command: `vim-mode-plus:blockwise-select`
 - ::execute`()`
