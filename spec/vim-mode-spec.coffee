@@ -60,4 +60,5 @@ describe "VimModePlus", ->
 
       expect(vimCommands().length).toBeGreaterThan(0)
       atom.packages.deactivatePackage(packageName)
+      console.log vimCommands()
       expect(vimCommands().length).toBe(0)
