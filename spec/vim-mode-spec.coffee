@@ -58,8 +58,6 @@ describe "VimModePlus", ->
         atom.commands.findCommands(target: editorElement).filter (cmd) ->
           cmd.name.startsWith("vim-mode-plus:")
 
-      _ = require 'underscore-plus'
       expect(vimCommands().length).toBeGreaterThan(0)
       atom.packages.deactivatePackage(packageName)
-      console.log _.pluck(vimCommands(), 'name')
       expect(vimCommands().length).toBe(0)
