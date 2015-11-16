@@ -3,6 +3,7 @@
 - No longer add commands per editorElement, commands are added on activate phase once.
 - Now each operations(TextObject, Motion, Operator etc) can registerCommands().
 - Base.init() do all necessary initialization.
+- Improve BlockwiseSelect when softwrapped.
 
 # 0.2.0
 - Cleanup: globalState no longer instance of class, and nor property of vimState, since its global. It should be treated as like settings.

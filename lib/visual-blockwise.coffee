@@ -117,16 +117,17 @@ class BlockwiseSelect extends VisualBlockwise
   execute: ->
     selection = @editor.getLastSelection()
     wasReversed = reversed = selection.isReversed()
-    {start: {column: startColumn}, end: {column: endColumn}} = selection.getBufferRange()
+    {start, end} = selection.getScreenRange()
+    startColumn = start.column
+    endColumn = end.column
 
     if startColumn >= endColumn
       reversed = not reversed
       startColumn += 1
       endColumn -= 1
 
-    [startRow, endRow] = selection.getBufferRowRange()
-    ranges = ([[row, startColumn], [row, endColumn]] for row in [startRow..endRow])
-    @editor.setSelectedBufferRanges(ranges, {reversed})
+    ranges = ([[row, startColumn], [row, endColumn]] for row in [start.row..end.row])
+    @editor.setSelectedScreenRanges(ranges, {reversed})
     if wasReversed
       @updateProperties {head: @getTop(), tail: @getBottom()}
     else
