@@ -2,7 +2,7 @@
 Base = require './base'
 
 class InsertMode extends Base
-  @extend()
+  @extend(false)
 
 class InsertRegister extends InsertMode
   @extend()
@@ -36,9 +36,3 @@ class CopyFromLineAbove extends InsertMode
 class CopyFromLineBelow extends CopyFromLineAbove
   @extend()
   rowTranslation: +1
-
-module.exports = {
-  CopyFromLineAbove,
-  CopyFromLineBelow
-  InsertRegister
-}

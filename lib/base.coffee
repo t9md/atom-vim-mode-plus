@@ -50,7 +50,7 @@ class Base
     @count
 
   new: (klassName, properties={}) ->
-    klass = Base.getConstructor(klassName)
+    klass = Base.getClass(klassName)
     new klass(@vimState, properties)
 
   readInput: ({charsMax}={}) ->
@@ -64,34 +64,44 @@ class Base
         @vimState.operationStack.cancel()
 
   instanceof: (klassName) ->
-    this instanceof Base.getConstructor(klassName)
+    this instanceof Base.getClass(klassName)
 
   # Class methods
   # -------------------------
   @init: (service) ->
     {getEditorState} = service
+
+    operations = [
+      './operator', './motion', './text-object',
+      './insert-mode', './misc-commands', './scroll', './visual-blockwise'
+    ]
+    require(lib) for lib in operations
+
     subscriptions = new CompositeDisposable
+    for key, klass of registory when klass.isCommand()
+      klass.registerCommands()
+
     new Disposable ->
       subscriptions.dispose()
       subscriptions = null
 
   # Expected to be called by child class.
   operationKinds = [
-    "TextObject",
-    "Misc",
-    "InsertMode",
-    "Motion",
-    "Operator",
-    "Scroll",
-    "VisualBlockwise"
+    "TextObject", "Misc", "InsertMode", "Motion", "Operator", "Scroll", "VisualBlockwise"
   ]
-  children = Object.create(null)
-  @extend: ->
-    if @name of children
+  registory = {Base}
+  @extend: (@command) ->
+    if @name of registory
       console.warn "Duplicate constructor #{@name}"
-    children[@name] = this
-    # Used to determine klass is TextObject in @registerCommand()
+    registory[@name] = this
+    # Used to determine klass is TextObject in @registerCommands()
     this.kind = @name if @name in operationKinds
+
+  @getRegistory: ->
+    registory
+
+  @isCommand: ->
+    @command ? true
 
   @getCommandName: ->
     _.dasherize(@name)
@@ -108,15 +118,15 @@ class Base
       commands["#{vim}:#{cmd}"] = => @run()
     commands
 
+  @registerCommands: ->
+    subscriptions.add atom.commands.add('atom-text-editor', @getCommands())
+
   @run: (properties={}) ->
     vimState = getEditorState(atom.workspace.getActiveTextEditor())
     vimState.operationStack.run(this, properties)
 
-  @registerCommands: ->
-    subscriptions.add atom.commands.add('atom-text-editor', @getCommands())
-
-  @getConstructor: (klassName) ->
-    children[klassName]
+  @getClass: (klassName) ->
+    registory[klassName]
 
   @getAncestors: ->
     ancestors = []
@@ -129,7 +139,7 @@ class Base
     this.__super__?.constructor
 
 class OperationAbortedError extends Base
-  @extend()
+  @extend(false)
   constructor: (@message) ->
     @name = 'OperationAborted Error'
 

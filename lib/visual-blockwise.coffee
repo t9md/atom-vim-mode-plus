@@ -113,7 +113,7 @@ class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   after: true
 
 class BlockwiseSelect extends VisualBlockwise
-  @extend()
+  @extend(false)
   execute: ->
     selection = @editor.getLastSelection()
     wasReversed = reversed = selection.isReversed()
@@ -135,7 +135,7 @@ class BlockwiseSelect extends VisualBlockwise
       s.destroy() if s.isEmpty()
 
 class BlockwiseRestoreCharacterwise extends VisualBlockwise
-  @extend()
+  @extend(false)
 
   execute: ->
     reversed = @isReversed()
@@ -149,15 +149,3 @@ class BlockwiseRestoreCharacterwise extends VisualBlockwise
       endColumn += 1
     range = [[startRow, startColumn], [endRow, endColumn]]
     @editor.setSelectedBufferRange(range, {reversed})
-
-module.exports = {
-  BlockwiseOtherEnd,
-  BlockwiseMoveDown,
-  BlockwiseMoveUp,
-  BlockwiseDeleteToLastCharacterOfLine,
-  BlockwiseChangeToLastCharacterOfLine,
-  BlockwiseInsertAtBeginningOfLine,
-  BlockwiseInsertAfterEndOfLine,
-  BlockwiseSelect,
-  BlockwiseRestoreCharacterwise,
-}

@@ -13,7 +13,7 @@ swrap = require './selection-wrapper'
 } = require './utils'
 
 class TextObject extends Base
-  @extend()
+  @extend(false)
   complete: true
   inner: false
 
@@ -66,7 +66,7 @@ class WholeWord extends Word
 # Pair
 # -------------------------
 class Pair extends TextObject
-  @extend()
+  @extend(false)
   allowNextLine: false
   what: 'enclosed'
   pair: null
@@ -393,13 +393,3 @@ class Entire extends TextObject
   @extend()
   select: ->
     @editor.selectAll()
-
-module.exports = {
-  Word, WholeWord,
-  DoubleQuote, SingleQuote, BackTick, CurlyBracket , AngleBracket, Tag,
-  SquareBracket, Parenthesis,
-  AnyPair, AnyQuote
-  Paragraph, Comment, Indentation,
-  Fold, Function,
-  CurrentLine, Entire,
-}
