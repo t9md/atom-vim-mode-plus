@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
-vim-mode-plus version: 0.1.11  
-*generated at 2015-11-12T11:18:41.031Z*
+vim-mode-plus version: 0.2.0  
+*generated at 2015-11-16T09:23:32.709Z*
 
 - [Base](#base) *Not exported*
   - [InsertMode](#insertmode--base) *Not exported*
@@ -60,6 +60,17 @@ vim-mode-plus version: 0.1.11
       - [SearchCurrentWord](#searchcurrentword--searchbase)
         - [SearchCurrentWordBackwards](#searchcurrentwordbackwards--searchcurrentword)
   - [Operator](#operator--base)
+    - [ActivateInsertMode](#activateinsertmode--operator)
+      - [ActivateReplaceMode](#activatereplacemode--activateinsertmode)
+      - [Change](#change--activateinsertmode)
+        - [ChangeToLastCharacterOfLine](#changetolastcharacterofline--change)
+        - [Substitute](#substitute--change)
+        - [SubstituteLine](#substituteline--change)
+      - [InsertAboveWithNewline](#insertabovewithnewline--activateinsertmode)
+        - [InsertBelowWithNewline](#insertbelowwithnewline--insertabovewithnewline)
+      - [InsertAfter](#insertafter--activateinsertmode)
+      - [InsertAfterEndOfLine](#insertafterendofline--activateinsertmode)
+      - [InsertAtBeginningOfLine](#insertatbeginningofline--activateinsertmode)
     - [Delete](#delete--operator)
       - [DeleteLeft](#deleteleft--delete)
       - [DeleteRight](#deleteright--delete)
@@ -69,17 +80,6 @@ vim-mode-plus version: 0.1.11
     - [Indent](#indent--operator)
       - [AutoIndent](#autoindent--indent)
       - [Outdent](#outdent--indent)
-    - [Insert](#insert--operator)
-      - [ActivateReplaceMode](#activatereplacemode--insert)
-      - [Change](#change--insert)
-        - [ChangeToLastCharacterOfLine](#changetolastcharacterofline--change)
-        - [Substitute](#substitute--change)
-        - [SubstituteLine](#substituteline--change)
-      - [InsertAboveWithNewline](#insertabovewithnewline--insert)
-        - [InsertBelowWithNewline](#insertbelowwithnewline--insertabovewithnewline)
-      - [InsertAfter](#insertafter--insert)
-      - [InsertAfterEndOfLine](#insertafterendofline--insert)
-      - [InsertAtBeginningOfLine](#insertatbeginningofline--insert)
     - [Join](#join--operator)
     - [Mark](#mark--operator)
     - [PutBefore](#putbefore--operator)
@@ -139,7 +139,7 @@ vim-mode-plus version: 0.1.11
       - [Indentation](#indentation--paragraph)
     - [Word](#word--textobject)
       - [WholeWord](#wholeword--word)
-  - [VisualBlockwise](#visualblockwise--base)
+  - [VisualBlockwise](#visualblockwise--base) *Not exported*
     - [BlockwiseDeleteToLastCharacterOfLine](#blockwisedeletetolastcharacterofline--visualblockwise)
       - [BlockwiseChangeToLastCharacterOfLine](#blockwisechangetolastcharacterofline--blockwisedeletetolastcharacterofline)
     - [BlockwiseInsertAtBeginningOfLine](#blockwiseinsertatbeginningofline--visualblockwise)
@@ -152,6 +152,11 @@ vim-mode-plus version: 0.1.11
 
 ## Base
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
 - ::complete: ```false```
 - ::recodable: ```false```
 - ::defaultCount: ```1```
@@ -159,164 +164,30 @@ vim-mode-plus version: 0.1.11
 - ::isComplete`()`
 - ::isRecordable`()`
 - ::abort`()`
-- ::getKind`()`
 - ::getCount`()`
 - ::new`(klassName, properties)`
 - ::readInput`(_arg)`
-- ::isOperationAbortedError`()`
-- ::isOperatorError`()`
-- ::isOperator`()`
-- ::isSelect`()`
-- ::isDelete`()`
-- ::isDeleteRight`()`
-- ::isDeleteLeft`()`
-- ::isDeleteToLastCharacterOfLine`()`
-- ::isTransformString`()`
-- ::isToggleCase`()`
-- ::isToggleCaseAndMoveRight`()`
-- ::isUpperCase`()`
-- ::isLowerCase`()`
-- ::isCamelCase`()`
-- ::isSnakeCase`()`
-- ::isDashCase`()`
-- ::isSurround`()`
-- ::isSurroundWord`()`
-- ::isDeleteSurround`()`
-- ::isDeleteSurroundAnyPair`()`
-- ::isChangeSurround`()`
-- ::isChangeSurroundAnyPair`()`
-- ::isYank`()`
-- ::isYankLine`()`
-- ::isJoin`()`
-- ::isRepeat`()`
-- ::isMark`()`
-- ::isIncrease`()`
-- ::isDecrease`()`
-- ::isIndent`()`
-- ::isOutdent`()`
-- ::isAutoIndent`()`
-- ::isPutBefore`()`
-- ::isPutAfter`()`
-- ::isReplaceWithRegister`()`
-- ::isToggleLineComments`()`
-- ::isInsert`()`
-- ::isActivateReplaceMode`()`
-- ::isInsertAfter`()`
-- ::isInsertAfterEndOfLine`()`
-- ::isInsertAtBeginningOfLine`()`
-- ::isInsertAboveWithNewline`()`
-- ::isInsertBelowWithNewline`()`
-- ::isChange`()`
-- ::isSubstitute`()`
-- ::isSubstituteLine`()`
-- ::isChangeToLastCharacterOfLine`()`
-- ::isReplace`()`
-- ::isMotion`()`
-- ::isCurrentSelection`()`
-- ::isMoveLeft`()`
-- ::isMoveRight`()`
-- ::isMoveUp`()`
-- ::isMoveDown`()`
-- ::isMoveToPreviousWord`()`
-- ::isMoveToPreviousWholeWord`()`
-- ::isMoveToNextWord`()`
-- ::isMoveToNextWholeWord`()`
-- ::isMoveToEndOfWord`()`
-- ::isMoveToEndOfWholeWord`()`
-- ::isMoveToNextParagraph`()`
-- ::isMoveToPreviousParagraph`()`
-- ::isMoveToBeginningOfLine`()`
-- ::isMoveToLastCharacterOfLine`()`
-- ::isMoveToLastNonblankCharacterOfLineAndDown`()`
-- ::isMoveToFirstCharacterOfLine`()`
-- ::isMoveToFirstCharacterOfLineUp`()`
-- ::isMoveToFirstCharacterOfLineDown`()`
-- ::isMoveToFirstCharacterOfLineAndDown`()`
-- ::isMoveToFirstLine`()`
-- ::isMoveToLastLine`()`
-- ::isMoveToRelativeLine`()`
-- ::isMoveToTopOfScreen`()`
-- ::isMoveToBottomOfScreen`()`
-- ::isMoveToMiddleOfScreen`()`
-- ::isScrollFullScreenDown`()`
-- ::isScrollFullScreenUp`()`
-- ::isScrollHalfScreenDown`()`
-- ::isScrollHalfScreenUp`()`
-- ::isFind`()`
-- ::isFindBackwards`()`
-- ::isTill`()`
-- ::isTillBackwards`()`
-- ::isRepeatFind`()`
-- ::isRepeatFindReverse`()`
-- ::isMoveToMark`()`
-- ::isMoveToMarkLine`()`
-- ::isSearchBase`()`
-- ::isSearch`()`
-- ::isSearchBackwards`()`
-- ::isSearchCurrentWord`()`
-- ::isSearchCurrentWordBackwards`()`
-- ::isRepeatSearch`()`
-- ::isRepeatSearchReverse`()`
-- ::isBracketMatchingMotion`()`
-- ::isTextObject`()`
-- ::isWord`()`
-- ::isWholeWord`()`
-- ::isPair`()`
-- ::isAnyPair`()`
-- ::isAnyQuote`()`
-- ::isDoubleQuote`()`
-- ::isSingleQuote`()`
-- ::isBackTick`()`
-- ::isCurlyBracket`()`
-- ::isSquareBracket`()`
-- ::isParenthesis`()`
-- ::isAngleBracket`()`
-- ::isTag`()`
-- ::isParagraph`()`
-- ::isComment`()`
-- ::isIndentation`()`
-- ::isFold`()`
-- ::isFunction`()`
-- ::isCurrentLine`()`
-- ::isEntire`()`
-- ::isInsertMode`()`
-- ::isInsertRegister`()`
-- ::isCopyFromLineAbove`()`
-- ::isCopyFromLineBelow`()`
-- ::isMisc`()`
-- ::isReverseSelections`()`
-- ::isUndo`()`
-- ::isRedo`()`
-- ::isScroll`()`
-- ::isScrollDown`()`
-- ::isScrollUp`()`
-- ::isScrollCursor`()`
-- ::isScrollCursorToTop`()`
-- ::isScrollCursorToTopLeave`()`
-- ::isScrollCursorToBottom`()`
-- ::isScrollCursorToBottomLeave`()`
-- ::isScrollCursorToMiddle`()`
-- ::isScrollCursorToMiddleLeave`()`
-- ::isScrollCursorToLeft`()`
-- ::isScrollCursorToRight`()`
-- ::isVisualBlockwise`()`
-- ::isBlockwiseOtherEnd`()`
-- ::isBlockwiseMoveDown`()`
-- ::isBlockwiseMoveUp`()`
-- ::isBlockwiseDeleteToLastCharacterOfLine`()`
-- ::isBlockwiseChangeToLastCharacterOfLine`()`
-- ::isBlockwiseInsertAtBeginningOfLine`()`
-- ::isBlockwiseInsertAfterEndOfLine`()`
-- ::isBlockwiseSelect`()`
-- ::isBlockwiseRestoreCharacterwise`()`
+- ::instanceof`(klassName)`
 
 ### InsertMode < Base
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'InsertMode'```
 
 ### CopyFromLineAbove < InsertMode
 - command: `vim-mode-plus:copy-from-line-above`
-- keymaps
-  - atom-text-editor.vim-mode-plus.insert-mode: <kbd>ctrl-y</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.insert-mode`: <kbd>ctrl-y</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'InsertMode'```
 - ::complete: ```true```: **Overridden**
 - ::rowTranslation: ```-1```
 - ::getTextInScreenRange`(range)`
@@ -324,12 +195,24 @@ vim-mode-plus version: 0.1.11
 
 ### CopyFromLineBelow < CopyFromLineAbove
 - command: `vim-mode-plus:copy-from-line-below`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'InsertMode'```
 - ::rowTranslation: ```1```: **Overridden**
 
 ### InsertRegister < InsertMode
 - command: `vim-mode-plus:insert-register`
-- keymaps
-  - atom-text-editor.vim-mode-plus.insert-mode: <kbd>ctrl-r</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.insert-mode`: <kbd>ctrl-r</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'InsertMode'```
 - ::hoverText: ```'"'```
 - ::requireInput: ```true```: **Overridden**
 - ::initialize`()`
@@ -337,30 +220,60 @@ vim-mode-plus version: 0.1.11
 
 ### Misc < Base
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Misc'```
 - ::complete: ```true```: **Overridden**
 
 ### ReverseSelections < Misc
 - command: `vim-mode-plus:reverse-selections`
-- keymaps
-  - atom-text-editor.vim-mode-plus.visual-mode: <kbd>o</kbd>
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>O</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.visual-mode`: <kbd>o</kbd>
+    - `atom-text-editor.vim-mode-plus.visual-mode.blockwise`: <kbd>O</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Misc'```
 - ::execute`()`
 
 ### Undo < Misc
 - command: `vim-mode-plus:undo`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>u</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>u</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Misc'```
 - ::execute`()`
 - ::finish`()`
 
 ### Redo < Undo
 - command: `vim-mode-plus:redo`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>ctrl-r</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>ctrl-r</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Misc'```
 - ::execute`()`: **Overridden**
 
 ### Motion < Base
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::complete: ```true```: **Overridden**
 - ::inclusive: ```false```
 - ::linewise: ```false```
@@ -380,6 +293,13 @@ vim-mode-plus version: 0.1.11
 - ::unfoldAtCursorRow`(cursor)`
 
 ### CurrentSelection < Motion
+- command: `vim-mode-plus:current-selection`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::selectedRange: ```null```
 - ::initialize`()`
 - ::execute`()`: **Overridden**
@@ -388,8 +308,14 @@ vim-mode-plus version: 0.1.11
 
 ### Find < Motion
 - command: `vim-mode-plus:find`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>f</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>f</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::backwards: ```false```
 - ::complete: ```false```: **Overridden**
 - ::requireInput: ```true```: **Overridden**
@@ -405,51 +331,93 @@ vim-mode-plus version: 0.1.11
 
 ### FindBackwards < Find
 - command: `vim-mode-plus:find-backwards`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>F</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>F</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::backwards: ```true```: **Overridden**
 - ::hoverText: ```':mag:'```: **Overridden**
 - ::hoverIcon: ```':find:'```: **Overridden**
 
 ### RepeatFind < Find
 - command: `vim-mode-plus:repeat-find`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>;</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>;</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::initialize`()`: **Overridden**
 
 ### RepeatFindReverse < RepeatFind
 - command: `vim-mode-plus:repeat-find-reverse`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>,</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>,</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::isBackwards`()`: **Overridden**
 
 ### Till < Find
 - command: `vim-mode-plus:till`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>t</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>t</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::offset: ```1```: **Overridden**
 - ::find`()`: `super`: **Overridden**
 - ::selectInclusive`(selection)`: `super`: **Overridden**
 
 ### TillBackwards < Till
 - command: `vim-mode-plus:till-backwards`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>T</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>T</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::backwards: ```true```: **Overridden**
 
 ### MoveLeft < Motion
 - command: `vim-mode-plus:move-left`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>h</kbd>
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>left</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>h</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>left</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::moveCursor`(cursor)`
 
 ### MoveRight < Motion
 - command: `vim-mode-plus:move-right`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>l</kbd>
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>space</kbd>
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>right</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>l</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>space</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>right</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::composed: ```false```
 - ::onDidComposeBy`(operation)`
 - ::isOperatorPending`()`
@@ -457,17 +425,29 @@ vim-mode-plus version: 0.1.11
 
 ### MoveToBeginningOfLine < Motion
 - command: `vim-mode-plus:move-to-beginning-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>0</kbd>
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>home</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>0</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>home</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::defaultCount: ```null```: **Overridden**
 - ::initialize`()`
 - ::moveCursor`(cursor)`
 
 ### MoveToEndOfWord < Motion
 - command: `vim-mode-plus:move-to-end-of-word`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>e</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>e</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::wordRegex: ```null```
 - ::inclusive: ```true```: **Overridden**
 - ::getNext`(cursor)`
@@ -475,42 +455,78 @@ vim-mode-plus version: 0.1.11
 
 ### MoveToEndOfWholeWord < MoveToEndOfWord
 - command: `vim-mode-plus:move-to-end-of-whole-word`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>E</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>E</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::wordRegex: ```/\S+/```: **Overridden**
 
 ### MoveToFirstCharacterOfLine < Motion
 - command: `vim-mode-plus:move-to-first-character-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>^</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>^</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::moveCursor`(cursor)`
 
 ### MoveToFirstCharacterOfLineDown < MoveToFirstCharacterOfLine
 - command: `vim-mode-plus:move-to-first-character-of-line-down`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>+</kbd>
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>enter</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>+</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>enter</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::linewise: ```true```: **Overridden**
 - ::moveCursor`(cursor)`: `super`: **Overridden**
 
 ### MoveToFirstCharacterOfLineAndDown < MoveToFirstCharacterOfLineDown
 - command: `vim-mode-plus:move-to-first-character-of-line-and-down`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>\_</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>\_</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::defaultCount: ```0```: **Overridden**
 - ::getCount`()`: **Overridden**
 
 ### MoveToFirstCharacterOfLineUp < MoveToFirstCharacterOfLine
 - command: `vim-mode-plus:move-to-first-character-of-line-up`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>-</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>-</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::linewise: ```true```: **Overridden**
 - ::moveCursor`(cursor)`: `super`: **Overridden**
 
 ### MoveToFirstLine < Motion
 - command: `vim-mode-plus:move-to-first-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g g</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g g</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::linewise: ```true```: **Overridden**
 - ::defaultCount: ```null```: **Overridden**
 - ::getRow`()`
@@ -519,21 +535,39 @@ vim-mode-plus version: 0.1.11
 
 ### MoveToLastLine < MoveToFirstLine
 - command: `vim-mode-plus:move-to-last-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>G</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>G</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::getDefaultRow`()`: **Overridden**
 
 ### MoveToLastCharacterOfLine < Motion
 - command: `vim-mode-plus:move-to-last-character-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>$</kbd>
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>end</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>$</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>end</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::moveCursor`(cursor)`
 
 ### MoveToLastNonblankCharacterOfLineAndDown < Motion
 - command: `vim-mode-plus:move-to-last-nonblank-character-of-line-and-down`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g \_</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g \_</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::inclusive: ```true```: **Overridden**
 - ::skipTrailingWhitespace`(cursor)`
 - ::getCount`()`: **Overridden**
@@ -541,8 +575,14 @@ vim-mode-plus version: 0.1.11
 
 ### MoveToMark < Motion
 - command: `vim-mode-plus:move-to-mark`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>\`</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>\`</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::complete: ```false```: **Overridden**
 - ::requireInput: ```true```: **Overridden**
 - ::hoverText: ```':round_pushpin:`'```
@@ -552,60 +592,115 @@ vim-mode-plus version: 0.1.11
 
 ### MoveToMarkLine < MoveToMark
 - command: `vim-mode-plus:move-to-mark-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>'</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>'</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::linewise: ```true```: **Overridden**
 - ::hoverText: ```':round_pushpin:\''```: **Overridden**
 - ::hoverIcon: ```':move-to-mark:\''```: **Overridden**
 
 ### MoveToNextParagraph < Motion
 - command: `vim-mode-plus:move-to-next-paragraph`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>}</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>}</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::moveCursor`(cursor)`
 
 ### MoveToNextWord < Motion
 - command: `vim-mode-plus:move-to-next-word`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>w</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>w</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::wordRegex: ```null```
 - ::getNext`(cursor)`
 - ::moveCursor`(cursor)`
 
 ### MoveToNextWholeWord < MoveToNextWord
 - command: `vim-mode-plus:move-to-next-whole-word`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>W</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>W</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::wordRegex: ```/^\s*$|\S+/```: **Overridden**
 
 ### MoveToPreviousParagraph < Motion
 - command: `vim-mode-plus:move-to-previous-paragraph`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>{</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>{</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::moveCursor`(cursor)`
 
 ### MoveToPreviousWholeWord < Motion
 - command: `vim-mode-plus:move-to-previous-whole-word`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>B</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>B</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::wordRegex: ```/^\s*$|\S+/```
 - ::moveCursor`(cursor)`
 
 ### MoveToPreviousWord < Motion
 - command: `vim-mode-plus:move-to-previous-word`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>b</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>b</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::moveCursor`(cursor)`
 
 ### MoveToRelativeLine < Motion
+- command: `vim-mode-plus:move-to-relative-line`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::linewise: ```true```: **Overridden**
 - ::moveCursor`(cursor)`
 - ::getCount`()`: **Overridden**
 
 ### MoveToTopOfScreen < Motion
 - command: `vim-mode-plus:move-to-top-of-screen`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>H</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>H</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::linewise: ```true```: **Overridden**
 - ::scrolloff: ```2```
 - ::defaultCount: ```0```: **Overridden**
@@ -615,21 +710,39 @@ vim-mode-plus version: 0.1.11
 
 ### MoveToBottomOfScreen < MoveToTopOfScreen
 - command: `vim-mode-plus:move-to-bottom-of-screen`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>L</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>L</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::getRow`()`: **Overridden**
 
 ### MoveToMiddleOfScreen < MoveToTopOfScreen
 - command: `vim-mode-plus:move-to-middle-of-screen`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>M</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>M</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::getRow`()`: **Overridden**
 
 ### MoveUp < Motion
 - command: `vim-mode-plus:move-up`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>k</kbd>
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>up</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>k</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>up</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::linewise: ```true```: **Overridden**
 - ::amount: ```-1```
 - ::isMovable`(cursor)`
@@ -638,9 +751,15 @@ vim-mode-plus version: 0.1.11
 
 ### MoveDown < MoveUp
 - command: `vim-mode-plus:move-down`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>j</kbd>
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>down</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>j</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>down</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::linewise: ```true```: **Overridden**
 - ::amount: ```1```: **Overridden**
 - ::isMovable`(cursor)`: **Overridden**
@@ -648,8 +767,14 @@ vim-mode-plus version: 0.1.11
 
 ### ScrollFullScreenDown < Motion
 - command: `vim-mode-plus:scroll-full-screen-down`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-f</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>ctrl-f</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::coefficient: ```1```
 - ::initialize`()`
 - ::scroll`()`
@@ -659,24 +784,48 @@ vim-mode-plus version: 0.1.11
 
 ### ScrollFullScreenUp < ScrollFullScreenDown
 - command: `vim-mode-plus:scroll-full-screen-up`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-b</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>ctrl-b</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::coefficient: ```-1```: **Overridden**
 
 ### ScrollHalfScreenDown < ScrollFullScreenDown
 - command: `vim-mode-plus:scroll-half-screen-down`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-d</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>ctrl-d</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::coefficient: ```0.5```: **Overridden**
 
 ### ScrollHalfScreenUp < ScrollHalfScreenDown
 - command: `vim-mode-plus:scroll-half-screen-up`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-u</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>ctrl-u</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::coefficient: ```-0.5```: **Overridden**
 
 ### SearchBase < Motion
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::saveCurrentSearch: ```true```
 - ::complete: ```false```: **Overridden**
 - ::backwards: ```false```
@@ -696,8 +845,14 @@ vim-mode-plus version: 0.1.11
 
 ### BracketMatchingMotion < SearchBase
 - command: `vim-mode-plus:bracket-matching-motion`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>%</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>%</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::inclusive: ```true```: **Overridden**
 - ::complete: ```true```: **Overridden**
 - ::searchForMatch`(startPosition, reverse, inCharacter, outCharacter)`
@@ -707,22 +862,40 @@ vim-mode-plus version: 0.1.11
 
 ### RepeatSearch < SearchBase
 - command: `vim-mode-plus:repeat-search`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>n</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>n</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::complete: ```true```: **Overridden**
 - ::saveCurrentSearch: ```false```: **Overridden**
 - ::initialize`()`: `super`: **Overridden**
 
 ### RepeatSearchReverse < RepeatSearch
 - command: `vim-mode-plus:repeat-search-reverse`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>N</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>N</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::isBackwards`()`: **Overridden**
 
 ### Search < SearchBase
 - command: `vim-mode-plus:search`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>/</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>/</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::initialize`()`: `super`: **Overridden**
 - ::isRepeatLastSearch`(input)`
 - ::finish`()`: `super`: **Overridden**
@@ -733,14 +906,26 @@ vim-mode-plus version: 0.1.11
 
 ### SearchBackwards < Search
 - command: `vim-mode-plus:search-backwards`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>?</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>?</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::backwards: ```true```: **Overridden**
 
 ### SearchCurrentWord < SearchBase
 - command: `vim-mode-plus:search-current-word`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>*</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>*</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::wordRegex: ```null```
 - ::complete: ```true```: **Overridden**
 - ::initialize`()`: `super`: **Overridden**
@@ -749,11 +934,24 @@ vim-mode-plus version: 0.1.11
 
 ### SearchCurrentWordBackwards < SearchCurrentWord
 - command: `vim-mode-plus:search-current-word-backwards`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>#</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>#</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Motion'```
 - ::backwards: ```true```: **Overridden**
 
 ### Operator < Base
+- command: `vim-mode-plus:operator`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::constructor`()`: `super`: **Overridden**
 - ::recodable: ```true```: **Overridden**
 - ::target: ```null```
@@ -769,11 +967,157 @@ vim-mode-plus version: 0.1.11
 - ::flash`(range, fn)`
 - ::eachSelection`(fn)`
 
+### ActivateInsertMode < Operator
+- command: `vim-mode-plus:activate-insert-mode`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>i</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::complete: ```true```: **Overridden**
+- ::typedText: ```null```
+- ::flashTarget: ```false```: **Overridden**
+- ::confirmChanges`(changes)`
+- ::execute`()`
+
+### ActivateReplaceMode < ActivateInsertMode
+- command: `vim-mode-plus:activate-replace-mode`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>R</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::execute`()`: **Overridden**
+- ::countChars`(char, string)`
+
+### Change < ActivateInsertMode
+- command: `vim-mode-plus:change`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>c</kbd>
+    - `atom-text-editor.vim-mode-plus.visual-mode`: <kbd>s</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::complete: ```false```: **Overridden**
+- ::execute`()`: `super`: **Overridden**
+
+### ChangeToLastCharacterOfLine < Change
+- command: `vim-mode-plus:change-to-last-character-of-line`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>C</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::initialize`()`
+
+### Substitute < Change
+- command: `vim-mode-plus:substitute`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>s</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::initialize`()`
+
+### SubstituteLine < Change
+- command: `vim-mode-plus:substitute-line`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>S</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::initialize`()`
+
+### InsertAboveWithNewline < ActivateInsertMode
+- command: `vim-mode-plus:insert-above-with-newline`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>O</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::direction: ```'above'```
+- ::execute`()`: `super`: **Overridden**
+
+### InsertBelowWithNewline < InsertAboveWithNewline
+- command: `vim-mode-plus:insert-below-with-newline`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>o</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::direction: ```'below'```: **Overridden**
+
+### InsertAfter < ActivateInsertMode
+- command: `vim-mode-plus:insert-after`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>a</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::execute`()`: `super`: **Overridden**
+
+### InsertAfterEndOfLine < ActivateInsertMode
+- command: `vim-mode-plus:insert-after-end-of-line`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>A</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::execute`()`: `super`: **Overridden**
+
+### InsertAtBeginningOfLine < ActivateInsertMode
+- command: `vim-mode-plus:insert-at-beginning-of-line`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>I</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
+- ::execute`()`: `super`: **Overridden**
+
 ### Delete < Operator
 - command: `vim-mode-plus:delete`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>d</kbd>
-  - atom-text-editor.vim-mode-plus.visual-mode: <kbd>x</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>d</kbd>
+    - `atom-text-editor.vim-mode-plus.visual-mode`: <kbd>x</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':scissors:'```
 - ::hoverIcon: ```':delete:'```
 - ::flashTarget: ```false```: **Overridden**
@@ -781,26 +1125,50 @@ vim-mode-plus version: 0.1.11
 
 ### DeleteLeft < Delete
 - command: `vim-mode-plus:delete-left`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>X</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>X</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::initialize`()`
 
 ### DeleteRight < Delete
 - command: `vim-mode-plus:delete-right`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>x</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>x</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::initialize`()`
 
 ### DeleteToLastCharacterOfLine < Delete
 - command: `vim-mode-plus:delete-to-last-character-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>D</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>D</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::initialize`()`
 
 ### Increase < Operator
 - command: `vim-mode-plus:increase`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>ctrl-a</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>ctrl-a</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::complete: ```true```: **Overridden**
 - ::step: ```1```
 - ::execute`()`
@@ -808,14 +1176,26 @@ vim-mode-plus version: 0.1.11
 
 ### Decrease < Increase
 - command: `vim-mode-plus:decrease`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>ctrl-x</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>ctrl-x</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::step: ```-1```: **Overridden**
 
 ### Indent < Operator
 - command: `vim-mode-plus:indent`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>></kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>></kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':point_right:'```
 - ::hoverIcon: ```':indent:'```
 - ::execute`()`
@@ -823,102 +1203,55 @@ vim-mode-plus version: 0.1.11
 
 ### AutoIndent < Indent
 - command: `vim-mode-plus:auto-indent`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>=</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>=</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':open_hands:'```: **Overridden**
 - ::hoverIcon: ```':auto-indent:'```: **Overridden**
 - ::indent`(s)`: **Overridden**
 
 ### Outdent < Indent
 - command: `vim-mode-plus:outdent`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd><</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd><</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':point_left:'```: **Overridden**
 - ::hoverIcon: ```':outdent:'```: **Overridden**
 - ::indent`(s)`: **Overridden**
 
-### Insert < Operator
-- ::complete: ```true```: **Overridden**
-- ::typedText: ```null```
-- ::flashTarget: ```false```: **Overridden**
-- ::confirmChanges`(changes)`
-- ::execute`()`
-
-### ActivateReplaceMode < Insert
-- command: `vim-mode-plus:activate-replace-mode`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>R</kbd>
-- ::execute`()`: **Overridden**
-- ::countChars`(char, string)`
-
-### Change < Insert
-- command: `vim-mode-plus:change`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>c</kbd>
-  - atom-text-editor.vim-mode-plus.visual-mode: <kbd>s</kbd>
-- ::complete: ```false```: **Overridden**
-- ::execute`()`: `super`: **Overridden**
-
-### ChangeToLastCharacterOfLine < Change
-- command: `vim-mode-plus:change-to-last-character-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>C</kbd>
-- ::initialize`()`
-
-### Substitute < Change
-- command: `vim-mode-plus:substitute`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>s</kbd>
-- ::initialize`()`
-
-### SubstituteLine < Change
-- command: `vim-mode-plus:substitute-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>S</kbd>
-- ::initialize`()`
-
-### InsertAboveWithNewline < Insert
-- command: `vim-mode-plus:insert-above-with-newline`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>O</kbd>
-- ::direction: ```'above'```
-- ::execute`()`: `super`: **Overridden**
-
-### InsertBelowWithNewline < InsertAboveWithNewline
-- command: `vim-mode-plus:insert-below-with-newline`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>o</kbd>
-- ::direction: ```'below'```: **Overridden**
-
-### InsertAfter < Insert
-- command: `vim-mode-plus:insert-after`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>a</kbd>
-- ::execute`()`: `super`: **Overridden**
-
-### InsertAfterEndOfLine < Insert
-- command: `vim-mode-plus:insert-after-end-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>A</kbd>
-- ::execute`()`: `super`: **Overridden**
-
-### InsertAtBeginningOfLine < Insert
-- command: `vim-mode-plus:insert-at-beginning-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>I</kbd>
-- ::execute`()`: `super`: **Overridden**
-
 ### Join < Operator
 - command: `vim-mode-plus:join`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>J</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>J</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::complete: ```true```: **Overridden**
 - ::execute`()`
 
 ### Mark < Operator
 - command: `vim-mode-plus:mark`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>m</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>m</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':round_pushpin:'```
 - ::hoverIcon: ```':mark:'```
 - ::requireInput: ```true```: **Overridden**
@@ -927,8 +1260,14 @@ vim-mode-plus version: 0.1.11
 
 ### PutBefore < Operator
 - command: `vim-mode-plus:put-before`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>P</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>P</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::complete: ```true```: **Overridden**
 - ::location: ```'before'```
 - ::execute`()`
@@ -937,22 +1276,40 @@ vim-mode-plus version: 0.1.11
 
 ### PutAfter < PutBefore
 - command: `vim-mode-plus:put-after`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>p</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>p</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::location: ```'after'```: **Overridden**
 
 ### Repeat < Operator
 - command: `vim-mode-plus:repeat`
-- keymaps
-  - atom-text-editor.vim-mode-plus.normal-mode: <kbd>.</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>.</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::complete: ```true```: **Overridden**
 - ::recodable: ```false```: **Overridden**
 - ::execute`()`
 
 ### Replace < Operator
 - command: `vim-mode-plus:replace`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>r</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>r</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::input: ```null```
 - ::hoverText: ```':tractor:'```
 - ::requireInput: ```true```: **Overridden**
@@ -962,61 +1319,116 @@ vim-mode-plus version: 0.1.11
 
 ### ReplaceWithRegister < Operator
 - command: `vim-mode-plus:replace-with-register`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':pencil:'```
 - ::hoverIcon: ```':replace-with-register:'```
 - ::execute`()`
 
 ### Select < Operator
+- command: `vim-mode-plus:select`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::execute`()`
 
 ### ToggleLineComments < Operator
 - command: `vim-mode-plus:toggle-line-comments`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g /</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g /</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':mute:'```
 - ::hoverIcon: ```':toggle-line-comment:'```
 - ::execute`()`
 
 ### TransformString < Operator
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::adjustCursor: ```true```
 - ::execute`()`
 
 ### CamelCase < TransformString
 - command: `vim-mode-plus:camel-case`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g c</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g c</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':camel:'```
 - ::hoverIcon: ```':camel-case:'```
 - ::getNewText`(text)`
 
 ### DashCase < TransformString
 - command: `vim-mode-plus:dash-case`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g -</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g -</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':dash:'```
 - ::hoverIcon: ```':dash-case:'```
 - ::getNewText`(text)`
 
 ### LowerCase < TransformString
 - command: `vim-mode-plus:lower-case`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g u</kbd>
-  - atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode: <kbd>u</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g u</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>u</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':point_down:'```
 - ::hoverIcon: ```':lower-case:'```
 - ::getNewText`(text)`
 
 ### SnakeCase < TransformString
 - command: `vim-mode-plus:snake-case`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':snake:'```
 - ::hoverIcon: ```':snake-case:'```
 - ::getNewText`(text)`
 
 ### Surround < TransformString
 - command: `vim-mode-plus:surround`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g s s</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g s s</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::pairs: ```[ '[]', '()', '{}', '<>' ]```
 - ::input: ```null```
 - ::charsMax: ```1```
@@ -1032,16 +1444,28 @@ vim-mode-plus version: 0.1.11
 
 ### DeleteSurround < Surround
 - command: `vim-mode-plus:delete-surround`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g s d</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g s d</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::pairChars: ```'[](){}'```
 - ::onConfirm`(@input)`: **Overridden**
 - ::getNewText`(text)`: **Overridden**
 
 ### ChangeSurround < DeleteSurround
 - command: `vim-mode-plus:change-surround`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g s c</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g s c</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::charsMax: ```2```: **Overridden**
 - ::char: ```null```
 - ::onConfirm`(input)`: `super(from)`: **Overridden**
@@ -1049,6 +1473,12 @@ vim-mode-plus version: 0.1.11
 
 ### ChangeSurroundAnyPair < ChangeSurround
 - command: `vim-mode-plus:change-surround-any-pair`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::charsMax: ```1```: **Overridden**
 - ::initialize`()`: `super`: **Overridden**
 - ::preSelect`()`
@@ -1056,20 +1486,38 @@ vim-mode-plus version: 0.1.11
 
 ### DeleteSurroundAnyPair < DeleteSurround
 - command: `vim-mode-plus:delete-surround-any-pair`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::requireInput: ```false```: **Overridden**
 - ::initialize`()`: `super`: **Overridden**
 
 ### SurroundWord < Surround
 - command: `vim-mode-plus:surround-word`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g s w</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g s w</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::initialize`()`: `super`: **Overridden**
 
 ### ToggleCase < TransformString
 - command: `vim-mode-plus:toggle-case`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g ~</kbd>
-  - atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode: <kbd>~</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g ~</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>~</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':clap:'```
 - ::hoverIcon: ```':toggle-case:'```
 - ::toggleCase`(char)`
@@ -1077,8 +1525,14 @@ vim-mode-plus version: 0.1.11
 
 ### ToggleCaseAndMoveRight < ToggleCase
 - command: `vim-mode-plus:toggle-case-and-move-right`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>~</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>~</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```null```: **Overridden**
 - ::hoverIcon: ```null```: **Overridden**
 - ::adjustCursor: ```false```: **Overridden**
@@ -1086,32 +1540,62 @@ vim-mode-plus version: 0.1.11
 
 ### UpperCase < TransformString
 - command: `vim-mode-plus:upper-case`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>g U</kbd>
-  - atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode: <kbd>U</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g U</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>U</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':point_up:'```
 - ::hoverIcon: ```':upper-case:'```
 - ::getNewText`(text)`
 
 ### Yank < Operator
 - command: `vim-mode-plus:yank`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>y</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>y</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::hoverText: ```':clipboard:'```
 - ::hoverIcon: ```':yank:'```
 - ::execute`()`
 
 ### YankLine < Yank
 - command: `vim-mode-plus:yank-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>Y</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>Y</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Operator'```
 - ::initialize`()`
 
 ### OperatorError < Base
+- command: `vim-mode-plus:operator-error`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
 - ::constructor`(@message)`: **Overridden**
 
 ### Scroll < Base
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::complete: ```true```: **Overridden**
 - ::scrolloff: ```2```
 - ::getFirstVisibleScreenRow`()`
@@ -1121,80 +1605,152 @@ vim-mode-plus version: 0.1.11
 
 ### ScrollCursor < Scroll
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::execute`()`
 - ::moveToFirstCharacterOfLine`()`
 - ::getOffSetPixelHeight`(lineDelta)`
 
 ### ScrollCursorToBottom < ScrollCursor
 - command: `vim-mode-plus:scroll-cursor-to-bottom`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z -</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>z -</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::isScrollable`()`
 - ::getScrollTop`()`
 
 ### ScrollCursorToBottomLeave < ScrollCursorToBottom
 - command: `vim-mode-plus:scroll-cursor-to-bottom-leave`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z b</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>z b</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::moveToFirstCharacterOfLine: ```null```: **Overridden**
 
 ### ScrollCursorToMiddle < ScrollCursor
 - command: `vim-mode-plus:scroll-cursor-to-middle`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z .</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>z .</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::isScrollable`()`
 - ::getScrollTop`()`
 
 ### ScrollCursorToMiddleLeave < ScrollCursorToMiddle
 - command: `vim-mode-plus:scroll-cursor-to-middle-leave`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z z</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>z z</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::moveToFirstCharacterOfLine: ```null```: **Overridden**
 
 ### ScrollCursorToTop < ScrollCursor
 - command: `vim-mode-plus:scroll-cursor-to-top`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z enter</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>z enter</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::isScrollable`()`
 - ::getScrollTop`()`
 
 ### ScrollCursorToTopLeave < ScrollCursorToTop
 - command: `vim-mode-plus:scroll-cursor-to-top-leave`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z t</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>z t</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::moveToFirstCharacterOfLine: ```null```: **Overridden**
 
 ### ScrollCursorToLeft < Scroll
 - command: `vim-mode-plus:scroll-cursor-to-left`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z s</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>z s</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::direction: ```'left'```
 - ::initialize`()`
 - ::execute`()`
 
 ### ScrollCursorToRight < ScrollCursorToLeft
 - command: `vim-mode-plus:scroll-cursor-to-right`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>z e</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>z e</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::direction: ```'right'```: **Overridden**
 - ::execute`()`: **Overridden**
 
 ### ScrollDown < Scroll
 - command: `vim-mode-plus:scroll-down`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-e</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>ctrl-e</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::direction: ```'down'```
 - ::execute`()`
 - ::keepCursorOnScreen`()`
 
 ### ScrollUp < ScrollDown
 - command: `vim-mode-plus:scroll-up`
-- keymaps
-  - atom-text-editor.vim-mode-plus:not(.insert-mode): <kbd>ctrl-y</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>ctrl-y</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'Scroll'```
 - ::direction: ```'up'```: **Overridden**
 
 ### TextObject < Base
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::complete: ```true```: **Overridden**
 - ::inner: ```false```
 - ::isInner`()`
@@ -1203,16 +1759,64 @@ vim-mode-plus version: 0.1.11
 - ::execute`()`
 
 ### CurrentLine < TextObject
+- command: `vim-mode-plus:a-current-line`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a l</kbd>
+- command: `vim-mode-plus:inner-current-line`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i l</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::select`()`
 
 ### Entire < TextObject
+- command: `vim-mode-plus:a-entire`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a e</kbd>
+- command: `vim-mode-plus:inner-entire`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i e</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::select`()`
 
 ### Fold < TextObject
+- command: `vim-mode-plus:a-fold`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a z</kbd>
+- command: `vim-mode-plus:inner-fold`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i z</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::getFoldRowRangeForBufferRow`(bufferRow)`
 - ::select`()`
 
 ### Function < Fold
+- command: `vim-mode-plus:a-function`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a f</kbd>
+- command: `vim-mode-plus:inner-function`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i f</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::indentScopedLanguages: ```[ 'python', 'coffee' ]```
 - ::omitingClosingCharLanguages: ```[ 'go' ]```
 - ::initialize`()`
@@ -1224,6 +1828,12 @@ vim-mode-plus version: 0.1.11
 
 ### Pair < TextObject
 *Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::allowNextLine: ```false```
 - ::what: ```'enclosed'```
 - ::pair: ```null```
@@ -1236,9 +1846,35 @@ vim-mode-plus version: 0.1.11
 - ::select`()`
 
 ### AngleBracket < Pair
+- command: `vim-mode-plus:a-angle-bracket`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a <</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a ></kbd>
+- command: `vim-mode-plus:inner-angle-bracket`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i <</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i ></kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::pair: ```'<>'```: **Overridden**
 
 ### AnyPair < Pair
+- command: `vim-mode-plus:a-any-pair`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a s</kbd>
+- command: `vim-mode-plus:inner-any-pair`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i s</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::what: ```'enclosed'```: **Overridden**
 - ::member: ```[ 'DoubleQuote',
   'SingleQuote',
@@ -1254,38 +1890,154 @@ vim-mode-plus version: 0.1.11
 - ::select`()`: **Overridden**
 
 ### AnyQuote < AnyPair
+- command: `vim-mode-plus:a-any-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a q</kbd>
+- command: `vim-mode-plus:inner-any-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i q</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::what: ```'next'```: **Overridden**
 - ::member: ```[ 'DoubleQuote', 'SingleQuote', 'BackTick' ]```: **Overridden**
 - ::getNearestRange`(selection)`: **Overridden**
 
 ### BackTick < Pair
+- command: `vim-mode-plus:a-back-tick`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a \`</kbd>
+- command: `vim-mode-plus:inner-back-tick`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i \`</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::pair: ```'``'```: **Overridden**
 - ::what: ```'next'```: **Overridden**
 
 ### CurlyBracket < Pair
+- command: `vim-mode-plus:a-curly-bracket`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a {</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a }</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a B</kbd>
+- command: `vim-mode-plus:inner-curly-bracket`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i {</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i }</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i B</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::pair: ```'{}'```: **Overridden**
 - ::allowNextLine: ```true```: **Overridden**
 
 ### DoubleQuote < Pair
+- command: `vim-mode-plus:a-double-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a "</kbd>
+- command: `vim-mode-plus:inner-double-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i "</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::pair: ```'""'```: **Overridden**
 - ::what: ```'next'```: **Overridden**
 
 ### Parenthesis < Pair
+- command: `vim-mode-plus:a-parenthesis`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a (</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a )</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a b</kbd>
+- command: `vim-mode-plus:inner-parenthesis`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i (</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i )</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i b</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::pair: ```'()'```: **Overridden**
 - ::allowNextLine: ```true```: **Overridden**
 
 ### SingleQuote < Pair
+- command: `vim-mode-plus:a-single-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a '</kbd>
+- command: `vim-mode-plus:inner-single-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i '</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::pair: ```'\'\''```: **Overridden**
 - ::what: ```'next'```: **Overridden**
 
 ### SquareBracket < Pair
+- command: `vim-mode-plus:a-square-bracket`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a [</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a ]</kbd>
+- command: `vim-mode-plus:inner-square-bracket`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i [</kbd>
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i ]</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::pair: ```'[]'```: **Overridden**
 - ::allowNextLine: ```true```: **Overridden**
 
 ### Tag < Pair
+- command: `vim-mode-plus:a-tag`
+- command: `vim-mode-plus:inner-tag`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i t</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::pair: ```'><'```: **Overridden**
 
 ### Paragraph < TextObject
+- command: `vim-mode-plus:a-paragraph`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a p</kbd>
+- command: `vim-mode-plus:inner-paragraph`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i p</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::getStartRow`(startRow, fn)`
 - ::getEndRow`(startRow, fn)`
 - ::getRange`(startRow)`
@@ -1295,26 +2047,82 @@ vim-mode-plus version: 0.1.11
 - ::select`()`
 
 ### Comment < Paragraph
+- command: `vim-mode-plus:a-comment`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a /</kbd>
+- command: `vim-mode-plus:inner-comment`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i /</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::selectInclusive`(selection)`: **Overridden**
 - ::getRange`(startRow)`: **Overridden**
 
 ### Indentation < Paragraph
+- command: `vim-mode-plus:a-indentation`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a i</kbd>
+- command: `vim-mode-plus:inner-indentation`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i i</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::selectInclusive`(selection)`: **Overridden**
 - ::getRange`(startRow)`: **Overridden**
 
 ### Word < TextObject
+- command: `vim-mode-plus:a-word`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a w</kbd>
+- command: `vim-mode-plus:inner-word`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i w</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::select`()`
 - ::selectExclusive`(selection, wordRegex)`
 - ::selectInclusive`(selection)`
 
 ### WholeWord < Word
+- command: `vim-mode-plus:a-whole-word`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a W</kbd>
+- command: `vim-mode-plus:inner-whole-word`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i W</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'TextObject'```
 - ::wordRegExp: ```/\S+/```
 - ::selectExclusive`(s, wordRegex)`: **Overridden**
 
 ### VisualBlockwise < Base
+*Not exported*
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::complete: ```true```: **Overridden**
 - ::initialize`()`
 - ::eachSelection`(fn)`
+- ::countTimes`(fn)`
 - ::updateProperties`(_arg)`
 - ::isSingleLine`()`
 - ::getTop`()`
@@ -1326,52 +2134,108 @@ vim-mode-plus version: 0.1.11
 
 ### BlockwiseDeleteToLastCharacterOfLine < VisualBlockwise
 - command: `vim-mode-plus:blockwise-delete-to-last-character-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>D</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.visual-mode.blockwise`: <kbd>D</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::delegateTo: ```'DeleteToLastCharacterOfLine'```
 - ::execute`()`
 
 ### BlockwiseChangeToLastCharacterOfLine < BlockwiseDeleteToLastCharacterOfLine
 - command: `vim-mode-plus:blockwise-change-to-last-character-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>C</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.visual-mode.blockwise`: <kbd>C</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::delegateTo: ```'ChangeToLastCharacterOfLine'```: **Overridden**
 
 ### BlockwiseInsertAtBeginningOfLine < VisualBlockwise
 - command: `vim-mode-plus:blockwise-insert-at-beginning-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>I</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.visual-mode.blockwise`: <kbd>I</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::after: ```false```
 - ::execute`()`
 
 ### BlockwiseInsertAfterEndOfLine < BlockwiseInsertAtBeginningOfLine
 - command: `vim-mode-plus:blockwise-insert-after-end-of-line`
-- keymaps
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>A</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.visual-mode.blockwise`: <kbd>A</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::after: ```true```: **Overridden**
 
 ### BlockwiseMoveDown < VisualBlockwise
 - command: `vim-mode-plus:blockwise-move-down`
-- keymaps
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>j</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.visual-mode.blockwise`: <kbd>j</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::direction: ```'Below'```
 - ::isExpanding`()`
 - ::execute`()`
 
 ### BlockwiseMoveUp < BlockwiseMoveDown
 - command: `vim-mode-plus:blockwise-move-up`
-- keymaps
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>k</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.visual-mode.blockwise`: <kbd>k</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::direction: ```'Above'```: **Overridden**
 
 ### BlockwiseOtherEnd < VisualBlockwise
 - command: `vim-mode-plus:blockwise-other-end`
-- keymaps
-  - atom-text-editor.vim-mode-plus.visual-mode.blockwise: <kbd>o</kbd>
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.visual-mode.blockwise`: <kbd>o</kbd>
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::execute`()`
 
 ### BlockwiseRestoreCharacterwise < VisualBlockwise
+- command: `vim-mode-plus:blockwise-restore-characterwise`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::execute`()`
 
 ### BlockwiseSelect < VisualBlockwise
+- command: `vim-mode-plus:blockwise-select`
+- @init`(service)`
+- @getCommandName`()`
+- @getCommands`()`
+- @run`(properties)`
+- @registerCommands`()`
+- @kind: ```'VisualBlockwise'```
 - ::execute`()`
