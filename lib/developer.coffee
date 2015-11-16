@@ -18,7 +18,7 @@ class Developer
 
     @addCommand(name, fn) for name, fn of commands
     new Disposable ->
-      @subscriptions.dispose()
+      @subscriptions?.dispose()
       @subscriptions = null
 
   addCommand: (name, fn) ->
