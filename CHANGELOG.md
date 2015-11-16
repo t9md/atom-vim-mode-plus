@@ -1,3 +1,9 @@
+# 0.3.0 WIP
+- FIX: #31 RepeatSearch(`n`) commands repeat last search regardless success or not.
+- No longer add commands per editorElement, commands are added on activate phase once.
+- Now each operations(TextObject, Motion, Operator etc) can registerCommands().
+- Base.init() do all necessary initialization.
+
 # 0.2.0
 - Cleanup: globalState no longer instance of class, and nor property of vimState, since its global. It should be treated as like settings.
 - New: #24 now folds kept closed when selection go over folded area. l, h expand folds as like Vim.
