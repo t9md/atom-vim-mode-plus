@@ -9,19 +9,18 @@ packageScope = 'vim-mode-plus'
 
 class Developer
   init: ->
-    @subscriptions = new CompositeDisposable
+    subscriptions = new CompositeDisposable
     commands =
       'toggle-debug': => @toggleDebug()
       'open-in-vim': => @openInVim()
       'generate-introspection-report': => @generateIntrospectionReport()
 
-    @addCommand(name, fn) for name, fn of commands
-    new Disposable ->
-      @subscriptions?.dispose()
-      @subscriptions = null
+    for name, fn of commands
+      subscriptions.add @addCommand(name, fn)
+    subscriptions
 
   addCommand: (name, fn) ->
-    @subscriptions.add atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
+    atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
 
   toggleDebug: ->
     settings.set('debug', not settings.get('debug'))
