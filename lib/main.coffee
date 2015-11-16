@@ -30,8 +30,12 @@ module.exports =
     @vimStates = new Map
 
     @registerViewProviders()
-    @subscriptions.add Base.init(@provideVimModePlus())
+    service = @provideVimModePlus()
+    @subscriptions.add Base.init(service)
     @registerCommands()
+    if atom.inDevMode()
+      developer = (new (require './developer'))
+      @subscriptions.add developer.init(service)
 
     @subscriptions.add atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini() or @vimStates.has(editor)
@@ -46,7 +50,7 @@ module.exports =
   registerCommands: ->
     for kind in [TextObject, Misc, InsertMode, Motion, Operator, Scroll, VisualBlockwise]
       for klassName, klass of kind
-        klass.registerCommand()
+        klass.registerCommands()
 
     getState = =>
       @getEditorState(atom.workspace.getActiveTextEditor())

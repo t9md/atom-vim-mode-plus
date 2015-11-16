@@ -1,8 +1,6 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
 {Disposable, CompositeDisposable} = require 'atom'
-{getAncestors, getParent} = require './introspection'
-{kls2cmd} = require './utils'
 settings = require './settings'
 
 packageScope = 'vim-mode-plus'
@@ -96,29 +94,39 @@ class Base
     this.kind = @name if @name in operationKinds
 
   @getCommandName: ->
-    kls2cmd(@name)
+    _.dasherize(@name)
+
+  # Return Array of commands bound to that class.
+  @getCommands: ->
+    commands = {}
+    vim = packageScope
+    cmd = @getCommandName()
+    if @kind is 'TextObject'
+      commands["#{vim}:a-#{cmd}"] = => @run()
+      commands["#{vim}:inner-#{cmd}"] = => @run({inner: true})
+    else
+      commands["#{vim}:#{cmd}"] = => @run()
+    commands
 
   @run: (properties={}) ->
     vimState = getEditorState(atom.workspace.getActiveTextEditor())
     vimState.operationStack.run(this, properties)
 
-  @registerCommand: ->
-    name = @getCommandName()
-    subs = subscriptions
-    if @kind is 'TextObject'
-      subs.add addCommand("a-#{name}", => @run())
-      subs.add addCommand("inner-#{name}", => @run({inner: true}))
-    else
-      subs.add addCommand(name, => @run())
+  @registerCommands: ->
+    subscriptions.add atom.commands.add('atom-text-editor', @getCommands())
 
   @getConstructor: (klassName) ->
     children[klassName]
 
   @getAncestors: ->
-    getAncestors(this)
+    ancestors = []
+    ancestors.push (current=this)
+    while current = current.getParent()
+      ancestors.push current
+    ancestors
 
   @getParent: ->
-    getParent(this)
+    this.__super__?.constructor
 
 class OperationAbortedError extends Base
   @extend()

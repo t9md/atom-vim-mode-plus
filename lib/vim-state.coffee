@@ -17,7 +17,6 @@ RegisterManager = require './register-manager'
 SearchHistoryManager = require './search-history-manager'
 FlashManager = require './flash-manager'
 
-Developer = null # delay
 packageScope = 'vim-mode-plus'
 
 # Mode handling is delegated to modeManager
@@ -57,7 +56,6 @@ class VimState
     @observeSelection()
 
     @editorElement.classList.add packageScope
-    @init()
     if settings.get('startInInsertMode')
       @activate('insert')
     else
@@ -128,15 +126,6 @@ class VimState
 
   onDidDestroy: (fn) ->
     @emitter.on('did-destroy', fn)
-
-  # Initialize all commands.
-  init: ->
-    # [FIXME]
-    # Load developer helper commands.
-    # if atom.inDevMode()
-    #   Developer ?= require './developer'
-    #   @developer = new Developer(this)
-    #   @developer.init()
 
   reset: ->
     @count.reset()

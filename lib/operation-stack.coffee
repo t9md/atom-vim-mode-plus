@@ -7,6 +7,8 @@ _ = require 'underscore-plus'
 settings = require './settings'
 Base = require './base'
 
+inspectInstance = null
+
 class OperationStack
   constructor: (@vimState) ->
     @stack = []
@@ -124,6 +126,19 @@ class OperationStack
     @recorded
 
   inspect: ->
-    @vimState.developer?.inspectOperationStack()
+    return unless settings.get('debug')
+    inspectInstance ?= (require './introspection').inspectInstance
+    debug "  [@stack] size: #{@stack.length}"
+    for op, i in @stack
+      debug "  <idx: #{i}>"
+      debug inspectInstance op,
+        indent: 2
+        colors: settings.get('debugOutput') is 'file'
+        excludeProperties: [
+          'vimState', 'editorElement'
+          'report', 'reportAll'
+          'extend', 'getParent', 'getAncestors',
+        ] # vimState have many properties, occupy DevTool console.
+        recursiveInspect: Base
 
 module.exports = OperationStack
