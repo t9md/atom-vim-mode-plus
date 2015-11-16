@@ -126,21 +126,6 @@ sortByAncesstor = (list) ->
 
   mapped.sort(compare).map((e) -> list[e.index])
 
-# Return non-existent parent.
-getVirtualParents = (list, options) ->
-  names = _.pluck(list, 'ancesstorsNames')
-  ancesstors = names.map((e) -> e.join(' < '))
-  candidates = names.map((e) -> e[1..].join(' < ')).filter((e) -> e.length)
-
-  virtuals = _.uniq(candidates.filter((e) -> e not in ancesstors))
-  virtuals.map (e) ->
-    ancesstors = e.split(' < ')
-    klass = ancesstors[0]
-    obj = Base.getClass(klass)
-    r = report(obj, options)
-    r.virtual = true
-    r
-
 genTableOfContent = (obj) ->
   {name, ancesstorsNames} = obj
   indentLevel = ancesstorsNames.length - 1
@@ -155,7 +140,6 @@ generateIntrospectionReport = (klasses, options) ->
   {version} = pack.metadata
 
   results = (report(klass, options) for klass in klasses)
-  results = results.concat(getVirtualParents(results, options))
   results = sortByAncesstor(results)
 
   toc = results.map((e) -> genTableOfContent(e)).join('\n')
@@ -166,15 +150,11 @@ generateIntrospectionReport = (klasses, options) ->
     s = []
     s.push header
     {commands, instance, prototype} = result
-    if result.virtual?
-      s.push '*Not exported*'
-    else
-      for command in commands
-        s.push "- command: `#{command}`"
-        keymaps = getKeyBindingForCommand(command)
-        s.push formatKeymaps(keymaps) if keymaps?
+    for command in commands
+      s.push "- command: `#{command}`"
+      keymaps = getKeyBindingForCommand(command)
+      s.push formatKeymaps(keymaps) if keymaps?
 
-    # s[s.length - 1] += "  \n" if s.length > 1
     s.push instance if instance?
     s.push prototype if prototype?
     body.push s.join("\n")
@@ -232,7 +212,10 @@ getKeyBindings =  ->
   keymapsForVimModePlus
 
 getCommandsFromClass = (klass) ->
-  _.keys(klass.getCommands())
+  if klass.isCommand()
+    _.keys(klass.getCommands())
+  else
+    []
 
 getKeyBindingForCommand = (command) ->
   results = null

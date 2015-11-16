@@ -41,7 +41,8 @@ class Developer
 
     generateIntrospectionReport _.values(Base.getRegistory()),
       excludeProperties: [
-        'getClass', 'extend', 'getParent', 'getAncestors', 'kind'
+        'getClass', 'extend', 'getParent', 'getAncestors', 'kind', 'isCommand'
+        'getRegistory', 'command'
         'init', 'getCommandName', 'getCommands', 'run', 'registerCommands',
       ]
       recursiveInspect: Base
