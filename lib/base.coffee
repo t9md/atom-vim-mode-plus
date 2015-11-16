@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 settings = require './settings'
 
 packageScope = 'vim-mode-plus'
-getEditorState = null # set in Base.int()
+getEditorState = null # set in Base.init()
 subscriptions = null
 
 addCommand = (name, fn) ->
@@ -78,7 +78,7 @@ class Base
     require(lib) for lib in operations
 
     subscriptions = new CompositeDisposable
-    for key, klass of registory when klass.isCommand()
+    for __, klass of @getRegistory() when klass.isCommand()
       klass.registerCommands()
 
     new Disposable ->
@@ -106,7 +106,6 @@ class Base
   @getCommandName: ->
     _.dasherize(@name)
 
-  # Return Array of commands bound to that class.
   @getCommands: ->
     commands = {}
     vim = packageScope

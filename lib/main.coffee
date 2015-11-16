@@ -25,7 +25,7 @@ module.exports =
     @registerViewProviders()
     @subscriptions.add Base.init(@provideVimModePlus())
     @registerCommands()
-    
+
     if atom.inDevMode()
       developer = (new (require './developer'))
       @subscriptions.add developer.init()
