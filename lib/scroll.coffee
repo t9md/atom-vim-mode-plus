@@ -1,5 +1,6 @@
 # Refactoring status: 100%
 Base = require './base'
+
 class Scroll extends Base
   @extend()
   complete: true
@@ -124,19 +125,3 @@ class ScrollCursorToRight extends ScrollCursorToLeft
 
   execute: ->
     @editorElement.setScrollRight(@px)
-
-module.exports = {
-  ScrollDown,
-  ScrollUp,
-
-  ScrollCursorToTop,
-  ScrollCursorToMiddle,
-  ScrollCursorToBottom,
-
-  ScrollCursorToTopLeave,
-  ScrollCursorToMiddleLeave,
-  ScrollCursorToBottomLeave,
-
-  ScrollCursorToLeft,
-  ScrollCursorToRight
- }

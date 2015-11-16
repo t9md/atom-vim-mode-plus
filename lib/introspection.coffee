@@ -107,12 +107,6 @@ report = (obj, options={}) ->
     prototype: inspectObject(obj, options, true)
   }
 
-reportModule = (mod, options) ->
-  results = []
-  for own prop, value of mod
-    results.push report(value, options)
-  results
-
 sortByAncesstor = (list) ->
   mapped = list.map (obj, i) ->
     {index: i, value: obj.ancesstorsNames.slice().reverse()}
@@ -139,11 +133,10 @@ getVirtualParents = (list, options) ->
   candidates = names.map((e) -> e[1..].join(' < ')).filter((e) -> e.length)
 
   virtuals = _.uniq(candidates.filter((e) -> e not in ancesstors))
-  Base = require './base'
   virtuals.map (e) ->
     ancesstors = e.split(' < ')
     klass = ancesstors[0]
-    obj = if klass is 'Base' then Base else Base.getConstructor(klass)
+    obj = Base.getClass(klass)
     r = report(obj, options)
     r.virtual = true
     r
@@ -157,10 +150,11 @@ genTableOfContent = (obj) ->
   s += ' *Not exported*' if obj.virtual?
   s
 
-generateIntrospectionReport = (mods, options) ->
+generateIntrospectionReport = (klasses, options) ->
   pack = atom.packages.getActivePackage(packageName)
   {version} = pack.metadata
-  results = _.flatten((reportModule(mod, options) for mod in mods))
+
+  results = (report(klass, options) for klass in klasses)
   results = results.concat(getVirtualParents(results, options))
   results = sortByAncesstor(results)
 

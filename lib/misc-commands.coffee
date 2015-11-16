@@ -5,7 +5,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 
 class Misc extends Base
-  @extend()
+  @extend(false)
   complete: true
 
 class ReverseSelections extends Misc
@@ -32,8 +32,3 @@ class Redo extends Undo
   execute: ->
     @editor.redo()
     @finish()
-
-module.exports = {
-  ReverseSelections
-  Undo, Redo
-}

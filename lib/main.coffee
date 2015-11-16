@@ -11,13 +11,6 @@ VimState = require './vim-state'
 {Input, InputElement, Search, SearchElement} = require './input'
 
 Base = require './base'
-Operator = require './operator'
-Motion = require './motion'
-TextObject = require './text-object'
-InsertMode = require './insert-mode'
-Misc = require './misc-commands'
-Scroll = require './scroll'
-VisualBlockwise = require './visual-blockwise'
 
 packageScope = 'vim-mode-plus'
 
@@ -30,12 +23,12 @@ module.exports =
     @vimStates = new Map
 
     @registerViewProviders()
-    service = @provideVimModePlus()
-    @subscriptions.add Base.init(service)
+    @subscriptions.add Base.init(@provideVimModePlus())
     @registerCommands()
+    
     if atom.inDevMode()
       developer = (new (require './developer'))
-      @subscriptions.add developer.init(service)
+      @subscriptions.add developer.init()
 
     @subscriptions.add atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini() or @vimStates.has(editor)
@@ -48,14 +41,10 @@ module.exports =
       @vimStates.forEach (vimState) -> vimState.destroy()
 
   registerCommands: ->
-    for kind in [TextObject, Misc, InsertMode, Motion, Operator, Scroll, VisualBlockwise]
-      for klassName, klass of kind
-        klass.registerCommands()
-
     getState = =>
       @getEditorState(atom.workspace.getActiveTextEditor())
 
-    vimStateCommands =
+    commands =
       'activate-normal-mode': -> getState().activate('normal')
       'activate-linewise-visual-mode': -> getState().activate('visual', 'linewise')
       'activate-characterwise-visual-mode': -> getState().activate('visual', 'characterwise')
@@ -65,7 +54,7 @@ module.exports =
       'set-register-name': -> getState().register.setName() # "
       'replace-mode-backspace': -> getState().modeManager.replaceModeBackspace()
 
-    @addCommand(name, fn) for name, fn of vimStateCommands
+    @addCommand(name, fn) for name, fn of commands
 
   addCommand: (name, fn) ->
     @subscriptions.add atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)

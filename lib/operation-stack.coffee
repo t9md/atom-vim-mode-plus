@@ -1,11 +1,11 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
 
-{CurrentSelection} = require './motion'
-{Select} = require './operator'
+Base = require './base'
+CurrentSelection = null
+Select = null
 {debug, withKeepingGoalColumn} = require './utils'
 settings = require './settings'
-Base = require './base'
 
 inspectInstance = null
 
@@ -16,7 +16,7 @@ class OperationStack
 
   run: (klass, properties) ->
     try
-      klass = Base.getConstructor(klass) if _.isString(klass)
+      klass = Base.getClass(klass) if _.isString(klass)
       @push new klass(@vimState, properties)
     catch error
       throw error unless error.instanceof?('OperationAbortedError')
@@ -29,12 +29,14 @@ class OperationStack
 
     # Use implicit Select operator as operator.
     if @vimState.isMode('visual') and _.isFunction(op.select)
+      Select ?= Base.getClass('Select')
       @pushToStack new Select(@vimState), message: "push IMPLICIT Operator.Select"
 
     @pushToStack op, message: "push <#{op.constructor.name}>"
 
     # Operate on implicit CurrentSelection TextObject.
     if @vimState.isMode('visual') and op.instanceof('Operator')
+      CurrentSelection ?= Base.getClass('CurrentSelection')
       @pushToStack new CurrentSelection(@vimState),
         message: "push IMPLICIT Motion.CurrentSelection"
 

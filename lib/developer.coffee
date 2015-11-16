@@ -8,8 +8,7 @@ settings = require './settings'
 packageScope = 'vim-mode-plus'
 
 class Developer
-  init: (service) ->
-    {@getEditorState} = service
+  init: ->
     @subscriptions = new CompositeDisposable
     commands =
       'toggle-debug': => @toggleDebug()
@@ -38,17 +37,13 @@ class Developer
 
   generateIntrospectionReport: ->
     Base = require './base'
-    Operator = require './operator'
-    Motion = require './motion'
-    TextObject = require './text-object'
-    InsertMode = require './insert-mode'
-    Misc = require './misc-commands'
-    Scroll = require './scroll'
-    VisualBlockwise = require './visual-blockwise'
     {generateIntrospectionReport} = require './introspection'
-    mods = [Operator, Motion, TextObject, Scroll, InsertMode, VisualBlockwise, Misc]
-    generateIntrospectionReport mods,
-      excludeProperties: ['getConstructor', 'extend', 'getParent', 'getAncestors']
+
+    generateIntrospectionReport _.values(Base.getRegistory()),
+      excludeProperties: [
+        'getClass', 'extend', 'getParent', 'getAncestors', 'kind'
+        'init', 'getCommandName', 'getCommands', 'run', 'registerCommands',
+      ]
       recursiveInspect: Base
 
 module.exports = Developer

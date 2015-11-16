@@ -7,14 +7,14 @@ settings = require './settings'
 Base = require './base'
 
 class OperatorError extends Base
-  @extend()
+  @extend(false)
   constructor: (@message) ->
     @name = 'Operator Error'
 
 # General Operator
 # -------------------------
 class Operator extends Base
-  @extend()
+  @extend(false)
   recodable: true
   target: null
   flashTarget: true
@@ -135,7 +135,7 @@ class DeleteToLastCharacterOfLine extends Delete
     @compose @new('MoveToLastCharacterOfLine')
 
 class TransformString extends Operator
-  @extend()
+  @extend(false)
   adjustCursor: true
 
   # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
@@ -576,9 +576,7 @@ class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
   direction: 'below'
 
-#
 # Delete the following motion and enter insert mode to replace it.
-#
 class Change extends ActivateInsertMode
   @extend()
   complete: false
@@ -731,41 +729,3 @@ class Replace extends Operator
           @editor.moveToFirstCharacterOfLine()
 
     @vimState.activate('normal')
-
-module.exports = {
-  Operator, OperatorError, Delete,
-  Select,
-
-  Yank, Join, Repeat, Mark,
-  Increase, Decrease,
-  Indent, Outdent, AutoIndent,
-
-  ToggleCase, ToggleCaseAndMoveRight,
-  UpperCase, LowerCase, CamelCase, SnakeCase, DashCase
-  Surround, SurroundWord
-  DeleteSurround, DeleteSurroundAnyPair
-  ChangeSurround, ChangeSurroundAnyPair
-
-  PutBefore, PutAfter,
-
-  ActivateInsertMode
-  InsertAfter
-  InsertAfterEndOfLine
-  InsertAtBeginningOfLine
-  InsertAboveWithNewline
-  InsertBelowWithNewline
-  ActivateReplaceMode
-  Change
-  Substitute
-  SubstituteLine
-  Replace
-
-  ChangeToLastCharacterOfLine
-  DeleteRight
-  DeleteLeft
-  DeleteToLastCharacterOfLine
-  YankLine
-
-  ReplaceWithRegister
-  ToggleLineComments
-}

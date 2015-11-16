@@ -14,7 +14,7 @@ settings = require './settings'
 Base = require './base'
 
 class Motion extends Base
-  @extend()
+  @extend(false)
   complete: true
   inclusive: false
   linewise: false
@@ -587,7 +587,7 @@ class MoveToMarkLine extends MoveToMark
 # Search
 # -------------------------
 class SearchBase extends Motion
-  @extend()
+  @extend(false)
   saveCurrentSearch: true
   complete: false
   backwards: false
@@ -756,7 +756,6 @@ class Search extends SearchBase
         @matches.scroll(args[0])
         @visit @matches.get()
 
-
 class SearchBackwards extends Search
   @extend()
   backwards: true
@@ -885,31 +884,3 @@ class BracketMatchingMotion extends SearchBase
 
     if matchPosition = @searchForMatch(startPosition, reverse, inCharacter, outCharacter)
       cursor.setBufferPosition(matchPosition)
-
-module.exports = {
-  CurrentSelection
-  MoveLeft, MoveRight, MoveUp, MoveDown
-  MoveToPreviousWord, MoveToNextWord, MoveToEndOfWord
-  MoveToPreviousWholeWord, MoveToNextWholeWord, MoveToEndOfWholeWord
-  MoveToNextParagraph, MoveToPreviousParagraph
-  MoveToLastLine, MoveToFirstLine,
-  MoveToRelativeLine, MoveToBeginningOfLine
-  MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineUp
-  MoveToLastCharacterOfLine, MoveToFirstCharacterOfLineDown
-  MoveToFirstCharacterOfLineAndDown, MoveToLastNonblankCharacterOfLineAndDown
-  MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen,
-
-  ScrollFullScreenDown, ScrollFullScreenUp,
-  ScrollHalfScreenDown, ScrollHalfScreenUp
-
-  MoveToMark, MoveToMarkLine,
-
-  Find, FindBackwards
-  Till, TillBackwards
-  RepeatFind, RepeatFindReverse,
-
-  Search, SearchBackwards
-  SearchCurrentWord, SearchCurrentWordBackwards
-  RepeatSearch, RepeatSearchReverse
-  BracketMatchingMotion
-}
