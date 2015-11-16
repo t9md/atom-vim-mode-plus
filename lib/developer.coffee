@@ -1,122 +1,54 @@
 # Refactoring status: N/A
 _ = require 'underscore-plus'
+{Disposable, CompositeDisposable} = require 'atom'
 
-Base       = require './base'
-Operator   = require './operator'
-Motion     = require './motion'
-TextObject = require './text-object'
-InsertMode = require './insert-mode'
-Misc = require './misc-commands'
-Scroll     = require './scroll'
-VisualBlockwise = require './visual-blockwise'
-settings   = require './settings'
-{debug}     = require './utils'
-introspection = require './introspection'
+settings = require './settings'
+{debug} = require './utils'
 
-module.exports =
+packageScope = 'vim-mode-plus'
+
 class Developer
-  constructor: (@vimState) ->
-    {@editor} = @vimState
-
-  init: ->
-    @vimState.registerCommands
-      'toggle-debug': ->
-        settings.set('debug', not settings.get('debug'))
-        console.log "#{settings.scope} debug:", settings.get('debug')
-      'generate-introspection-report': => @generateIntrospectionReport()
-      'jump-to-related': => @jumpToRelated()
-      'report-key-binding': => @reportKeyBinding()
+  init: (service) ->
+    {@getEditorState} = service
+    @subscriptions = new CompositeDisposable
+    commands =
+      'toggle-debug': => @toggleDebug()
       'open-in-vim': => @openInVim()
+      'generate-introspection-report': => @generateIntrospectionReport()
 
-  generateIntrospectionReport: ->
-    excludeProperties = [
-      'getConstructor'
-      'extend', 'getParent', 'getAncestors',
-    ]
-    recursiveInspect = Base
+    @addCommand(name, fn) for name, fn of commands
+    new Disposable ->
+      @subscriptions.dispose()
+      @subscriptions = null
 
-    introspection = require './introspection'
-    mods = [Operator, Motion, TextObject, Scroll, InsertMode, VisualBlockwise, Misc]
-    introspection.generateIntrospectionReport(mods, {excludeProperties, recursiveInspect})
+  addCommand: (name, fn) ->
+    @subscriptions.add atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
 
-  jumpToRelated: ->
-    isCamelCase  = (s) -> _.camelize(s) is s
-    isDashCase   = (s) -> _.dasherize(s) is s
-    getClassCase = (s) -> _.capitalize(_.camelize(s))
-
-    range = @editor.getLastCursor().getCurrentWordBufferRange(wordRegex: /[-\w/\.]+/)
-    srcName = @editor.getTextInBufferRange(range)
-    return unless srcName
-
-    if isDashCase(srcName)
-      klass2file =
-        Motion:     'motion.coffee'
-        Operator:   'operator.coffee'
-        TextObject: 'text-object.coffee'
-        Scroll:     'scroll.coffee'
-        InsertMode: 'insert-mode.coffee'
-        VisualBlockwise: 'visual-blockwise.coffee'
-
-      klassName = getClassCase(srcName)
-      unless klass = Base.getConstructor(klassName)
-        return
-      parentNames = (parent.name for parent in klass.getAncestors())
-      parentNames.pop() # trash Base
-      parent = _.last(parentNames)
-      if parent in _.keys(klass2file)
-        fileName = klass2file[parent]
-        filePath = atom.project.resolvePath("lib/#{fileName}")
-        atom.workspace.open(filePath).done (editor) ->
-          editor.scan ///^class\s+#{klassName}///, ({range, stop}) ->
-            editor.setCursorBufferPosition(range.start.translate([0, 'class '.length]))
-            stop()
-    else if isCamelCase(srcName)
-      files = [
-        "keymaps/vim-mode-plus.cson"
-        "lib/vim-state.coffee"
-      ]
-      dashName = _.dasherize(srcName)
-      fileName = files[0]
-      filePath = atom.project.resolvePath fileName
-      atom.workspace.open(filePath).done (editor) ->
-        editor.scan ///#{dashName}///, ({range, stop}) ->
-          editor.setCursorBufferPosition(range.start)
-          stop()
-
-  reportKeyBinding: ->
-    range = @editor.getLastCursor().getCurrentWordBufferRange(wordRegex: /[-\w/\.]+/)
-    klass = @editor.getTextInBufferRange(range)
-    {getKeyBindingInfo} = require './introspection'
-
-    if keymaps = getKeyBindingInfo(klass)
-      content = keymaps.map (keymap) ->
-        {keystrokes, selector} = keymap
-        "#{selector}: `#{keystrokes}`\n"
-      content = content.join('\n')
-    else
-      content = "No keymap for #{klass}"
-    atom.notifications.addInfo content, dismissable: true
-
-  inspectOperationStack: ->
-    {stack} = @vimState.operationStack
-
-    debug "  [@stack] size: #{stack.length}"
-    for op, i in stack
-      debug "  <idx: #{i}>"
-      if settings.get('debug')
-        debug introspection.inspectInstance op,
-          indent: 2
-          colors: settings.get('debugOutput') is 'file'
-          excludeProperties: [
-            'vimState', 'editorElement'
-            'report', 'reportAll'
-            'extend', 'getParent', 'getAncestors',
-          ] # vimState have many properties, occupy DevTool console.
-          recursiveInspect: Base
+  toggleDebug: ->
+    settings.set('debug', not settings.get('debug'))
+    console.log "#{settings.scope} debug:", settings.get('debug')
 
   openInVim: ->
     {BufferedProcess} = require 'atom'
-    {row} = @editor.getCursorBufferPosition()
+    editor = atom.workspace.getActiveTextEditor()
+    {row} = editor.getCursorBufferPosition()
     new BufferedProcess
       command: "/Applications/MacVim.app/Contents/MacOS/mvim"
-      args: [@editor.getPath(), "+#{row+1}"]
+      args: [editor.getPath(), "+#{row+1}"]
+
+  generateIntrospectionReport: ->
+    Base = require './base'
+    Operator = require './operator'
+    Motion = require './motion'
+    TextObject = require './text-object'
+    InsertMode = require './insert-mode'
+    Misc = require './misc-commands'
+    Scroll = require './scroll'
+    VisualBlockwise = require './visual-blockwise'
+    {generateIntrospectionReport} = require './introspection'
+    mods = [Operator, Motion, TextObject, Scroll, InsertMode, VisualBlockwise, Misc]
+    generateIntrospectionReport mods,
+      excludeProperties: ['getConstructor', 'extend', 'getParent', 'getAncestors']
+      recursiveInspect: Base
+
+module.exports = Developer
