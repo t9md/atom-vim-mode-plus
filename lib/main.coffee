@@ -1,4 +1,3 @@
-# Refactoring status: 0%, I won't touch for the time being.
 _ = require 'underscore-plus'
 
 {Disposable, CompositeDisposable} = require 'atom'
@@ -54,10 +53,9 @@ module.exports =
       'set-register-name': -> getState().register.setName() # "
       'replace-mode-backspace': -> getState().modeManager.replaceModeBackspace()
 
-    @addCommand(name, fn) for name, fn of commands
-
-  addCommand: (name, fn) ->
-    @subscriptions.add atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
+    scope = 'atom-text-editor'
+    for name, fn of commands
+      @subscriptions.add atom.commands.add(scope, "#{packageScope}:#{name}", fn)
 
   registerViewProviders: ->
     atom.views.addViewProvider Hover, (model) ->

@@ -227,8 +227,6 @@ getKeyBindingForCommand = (command) ->
   results
 
 module.exports = {
-  getAncestors
-  getParent
   generateIntrospectionReport
   inspectInstance
 }

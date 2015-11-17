@@ -15,9 +15,9 @@ describe "Operator", ->
   describe "cancelling operations", ->
     it "clear pending operation", ->
       keystroke '/'
-      expect(vimState.operationStack.isOperatorPending()).toBe true
+      expect(vimState.operationStack.isEmpty()).toBe false
       vimState.search.cancel()
-      expect(vimState.operationStack.isOperatorPending()).toBe false
+      expect(vimState.operationStack.isEmpty()).toBe true
       expect(-> vimState.search.cancel()).not.toThrow()
 
   describe "the x keybinding", ->

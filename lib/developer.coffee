@@ -1,7 +1,9 @@
 # Refactoring status: N/A
 _ = require 'underscore-plus'
-{Disposable, CompositeDisposable} = require 'atom'
+{Disposable, BufferedProcess, CompositeDisposable} = require 'atom'
 
+Base = require './base'
+{generateIntrospectionReport} = require './introspection'
 settings = require './settings'
 {debug} = require './utils'
 
@@ -9,12 +11,12 @@ packageScope = 'vim-mode-plus'
 
 class Developer
   init: ->
-    subscriptions = new CompositeDisposable
     commands =
       'toggle-debug': => @toggleDebug()
       'open-in-vim': => @openInVim()
       'generate-introspection-report': => @generateIntrospectionReport()
 
+    subscriptions = new CompositeDisposable
     for name, fn of commands
       subscriptions.add @addCommand(name, fn)
     subscriptions
@@ -27,7 +29,6 @@ class Developer
     console.log "#{settings.scope} debug:", settings.get('debug')
 
   openInVim: ->
-    {BufferedProcess} = require 'atom'
     editor = atom.workspace.getActiveTextEditor()
     {row} = editor.getCursorBufferPosition()
     new BufferedProcess
@@ -35,14 +36,11 @@ class Developer
       args: [editor.getPath(), "+#{row+1}"]
 
   generateIntrospectionReport: ->
-    Base = require './base'
-    {generateIntrospectionReport} = require './introspection'
-
     generateIntrospectionReport _.values(Base.getRegistory()),
       excludeProperties: [
         'getClass', 'extend', 'getParent', 'getAncestors', 'kind', 'isCommand'
         'getRegistory', 'command'
-        'init', 'getCommandName', 'getCommands', 'run', 'registerCommands',
+        'init', 'getCommandName', 'getCommands', 'registerCommands',
       ]
       recursiveInspect: Base
 

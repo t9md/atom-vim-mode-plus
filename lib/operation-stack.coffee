@@ -37,8 +37,7 @@ class OperationStack
     # Operate on implicit CurrentSelection TextObject.
     if @vimState.isMode('visual') and op.instanceof('Operator')
       CurrentSelection ?= Base.getClass('CurrentSelection')
-      @pushToStack new CurrentSelection(@vimState),
-        message: "push IMPLICIT Motion.CurrentSelection"
+      @pushToStack new CurrentSelection(@vimState), message: "push IMPLICIT Motion.CurrentSelection"
 
     try
       @processing = true
@@ -65,18 +64,7 @@ class OperationStack
         else
           throw error
 
-    if @peekTop().isComplete()
-      @inspect()
-      debug '-> @pop()'
-      op = @pop()
-      debug " -> <#{op.constructor.name}>.execute()"
-      op.execute()
-      # debug purpose for a while to refactor further
-      @lastExecuted = op
-      @recorded = op if op.isRecordable()
-      @finish()
-      debug "#=== Finish at #{new Date().toISOString()}\n"
-    else
+    unless @peekTop().isComplete()
       if @vimState.isMode('normal') and @peekTop().instanceof?('Operator')
         @inspect()
         debug '-> @process(): activating: operator-pending-mode'
@@ -84,6 +72,16 @@ class OperationStack
       else
         debug "-> @process(): return: not <#{@peekTop().constructor.name}>.isComplete()"
         @inspect()
+      return
+
+    @inspect()
+    debug '-> @pop()'
+    op = @pop()
+    debug " -> <#{op.constructor.name}>.execute()"
+    op.execute()
+    @record(op) if op.isRecordable()
+    @finish()
+    debug "#=== Finish at #{new Date().toISOString()}\n"
 
   cancel: ->
     debug "Cancelled stack size: #{@stack.length}"
@@ -96,7 +94,6 @@ class OperationStack
   finish: ->
     if @vimState.isMode('normal') and @editor.getLastSelection().isEmpty()
       for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
-        # console.log "CALLED", @executing
         withKeepingGoalColumn c, (c) ->
           c.moveLeft()
     @vimState.showCursors()
@@ -118,11 +115,7 @@ class OperationStack
   isEmpty: ->
     @stack.length is 0
 
-  isOperatorPending: ->
-    not @isEmpty()
-
-  getLastExecuted: ->
-    @lastExecuted
+  record: (@recorded) ->
 
   getRecorded: ->
     @recorded
@@ -136,11 +129,8 @@ class OperationStack
       debug inspectInstance op,
         indent: 2
         colors: settings.get('debugOutput') is 'file'
-        excludeProperties: [
-          'vimState', 'editorElement'
-          'report', 'reportAll'
-          'extend', 'getParent', 'getAncestors',
-        ] # vimState have many properties, occupy DevTool console.
+         # vimState have many properties, occupy DevTool console.
+        excludeProperties: ['vimState', 'editorElement', 'extend']
         recursiveInspect: Base
 
 module.exports = OperationStack

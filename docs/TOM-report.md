@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode-plus version: 0.2.0  
-*generated at 2015-11-16T16:23:31.412Z*
+*generated at 2015-11-17T09:17:47.202Z*
 
 - [Base](#base)
   - [InsertMode](#insertmode--base)
@@ -972,10 +972,11 @@ vim-mode-plus version: 0.2.0
 - command: `vim-mode-plus:scroll`
 - ::complete: ```true```: **Overridden**
 - ::scrolloff: ```2```
+- ::cursorPixel: ```null```
 - ::getFirstVisibleScreenRow`()`
 - ::getLastVisibleScreenRow`()`
 - ::getLastScreenRow`()`
-- ::getPixelCursor`(which)`
+- ::getCursorPixel`()`
 
 ### ScrollCursor < Scroll
 - command: `vim-mode-plus:scroll-cursor`
@@ -1027,7 +1028,6 @@ vim-mode-plus version: 0.2.0
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>z s</kbd>
 - ::direction: ```'left'```
-- ::initialize`()`
 - ::execute`()`
 
 ### ScrollCursorToRight < ScrollCursorToLeft
