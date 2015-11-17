@@ -5,19 +5,21 @@ describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    getVimState (state, vim) ->
+    getVimState (state, vimEditor) ->
       vimState = state
       {editor, editorElement} = vimState
-      vimState.activate('reset')
-      {set, ensure, keystroke} = vim
+      {set, ensure, keystroke} = vimEditor
+
+  afterEach ->
+    vimState.activate('reset')
 
   describe "TextObject", ->
     beforeEach ->
       waitsForPromise ->
         atom.packages.activatePackage('language-coffee-script')
-      getVimState 'sample.coffee', (state, vim) ->
+      getVimState 'sample.coffee', (state, vimEditor) ->
         {editor, editorElement} = state
-        {set, ensure, keystroke} = vim
+        {set, ensure, keystroke} = vimEditor
     afterEach ->
       atom.packages.deactivatePackage('language-coffee-script')
 
