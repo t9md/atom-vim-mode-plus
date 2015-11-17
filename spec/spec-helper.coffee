@@ -28,21 +28,19 @@ getVimState = (args...) ->
     atom.packages.activatePackage(packageName)
 
   waitsForPromise ->
-    if file
-      file = atom.project.resolvePath(file)
+    file = atom.project.resolvePath(file) if file
     atom.workspace.open(file).then (e) ->
       editor = e
 
   runs ->
     pack = atom.packages.getActivePackage(packageName)
     main = pack.mainModule
-    {config} = pack.mainModule
     vimState = main.getEditorState(editor)
     {editorElement} = vimState
     editorElement.addEventListener 'keydown', (e) ->
       atom.keymaps.handleKeyboardEvent(e)
 
-    callback(vimState, new Vim(vimState))
+    callback(vimState, new VimEditor(vimState))
 
 getView = (model) ->
   atom.views.getView(model)
@@ -102,35 +100,31 @@ _keystroke = (keys, {element}) ->
 toArray = (obj, cond=null) ->
   if _.isArray(cond ? obj) then obj else [obj]
 
-class Vim
+class VimEditor
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
   set: (o={}) =>
-    if o.text?
-      @editor.setText(o.text)
+    {text, cursor, cursorBuffer, addCursor, register, selectedBufferRange, spy} = o
 
-    if o.cursor?
-      @editor.setCursorScreenPosition o.cursor
+    @editor.setText(text) if text?
+    @editor.setCursorScreenPosition(cursor) if cursor?
+    @editor.setCursorBufferPosition(cursorBuffer) if cursorBuffer?
 
-    if o.cursorBuffer?
-      @editor.setCursorBufferPosition o.cursorBuffer
+    if addCursor?
+      for point in toArray(addCursor, addCursor[0])
+        @editor.addCursorAtBufferPosition(point)
 
-    if o.addCursor?
-      for point in toArray(o.addCursor, o.addCursor[0])
-        @editor.addCursorAtBufferPosition point
-
-    if o.register?
-      if _.isObject(o.register)
-        for name, value of o.register
+    if register?
+      if _.isObject(register)
+        for name, value of register
           @vimState.register.set(name, value)
       else
-        @vimState.register.set '"', text: o.register
+        @vimState.register.set '"', text: register
 
-    if o.selectedBufferRange?
-      @editor.setSelectedBufferRange o.selectedBufferRange
+    @editor.setSelectedBufferRange(selectedBufferRange) if selectedBufferRange?
 
-    if o.spy?
+    if spy?
       # e.g.
       # spyOn(editor, 'getURI').andReturn('/Users/atom/known_value.txt')
       for s in toArray(o.spy)
@@ -269,6 +263,5 @@ class Vim
           when k.cmd?   then atom.commands.dispatch(k.cmd.target, k.cmd.name)
     if mocked
       unmockPlatform(element)
-
 
 module.exports = {getVimState, getView}
