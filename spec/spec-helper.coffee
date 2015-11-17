@@ -153,6 +153,10 @@ class VimEditor
       expect(s.getText() for s in @editor.getSelections()).toEqual(
         toArray(o.selectedText))
 
+    if o.selectedTextOrderd?
+      expect(s.getText() for s in @editor.getSelectionsOrderedByBufferPosition()).toEqual(
+        toArray(o.selectedTextOrderd))
+
     if o.cursor?
       expect(@editor.getCursorScreenPositions()).toEqual(
         toArray(o.cursor, o.cursor[0]))
