@@ -1,14 +1,15 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
-{Disposable, CompositeDisposable} = require 'atom'
+{CompositeDisposable} = require 'atom'
 settings = require './settings'
 
 packageScope = 'vim-mode-plus'
 getEditorState = null # set in Base.init()
 subscriptions = null
 
-addCommand = (name, fn) ->
-  atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
+run = (klass, properties={}) ->
+  vimState = getEditorState(atom.workspace.getActiveTextEditor())
+  vimState.operationStack.run(klass, properties)
 
 class Base
   complete: false
@@ -80,10 +81,7 @@ class Base
     subscriptions = new CompositeDisposable
     for __, klass of @getRegistory() when klass.isCommand()
       klass.registerCommands()
-
-    new Disposable ->
-      subscriptions.dispose()
-      subscriptions = null
+    subscriptions
 
   # Expected to be called by child class.
   operationKinds = [
@@ -111,31 +109,17 @@ class Base
     vim = packageScope
     cmd = @getCommandName()
     if @kind is 'TextObject'
-      commands["#{vim}:a-#{cmd}"] = => @run()
-      commands["#{vim}:inner-#{cmd}"] = => @run({inner: true})
+      commands["#{vim}:a-#{cmd}"] = => run(this)
+      commands["#{vim}:inner-#{cmd}"] = => run(this, {inner: true})
     else
-      commands["#{vim}:#{cmd}"] = => @run()
+      commands["#{vim}:#{cmd}"] = => run(this)
     commands
 
   @registerCommands: ->
     subscriptions.add atom.commands.add('atom-text-editor', @getCommands())
 
-  @run: (properties={}) ->
-    vimState = getEditorState(atom.workspace.getActiveTextEditor())
-    vimState.operationStack.run(this, properties)
-
   @getClass: (klassName) ->
     registory[klassName]
-
-  @getAncestors: ->
-    ancestors = []
-    ancestors.push (current=this)
-    while current = current.getParent()
-      ancestors.push current
-    ancestors
-
-  @getParent: ->
-    this.__super__?.constructor
 
 class OperationAbortedError extends Base
   @extend(false)

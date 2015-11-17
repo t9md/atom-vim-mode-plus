@@ -4,7 +4,6 @@ _ = require 'underscore-plus'
 Base = require './base'
 swrap = require './selection-wrapper'
 
-# FIXME Currently initally multi selected situation not supported.
 class VisualBlockwise extends Base
   @extend()
   complete: true

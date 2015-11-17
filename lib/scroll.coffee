@@ -5,6 +5,7 @@ class Scroll extends Base
   @extend()
   complete: true
   scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
+  cursorPixel: null
 
   getFirstVisibleScreenRow: ->
     @editorElement.getFirstVisibleScreenRow()
@@ -15,9 +16,9 @@ class Scroll extends Base
   getLastScreenRow: ->
     @editor.getLastScreenRow()
 
-  getPixelCursor: (which) -> # which is `top` or `left`
+  getCursorPixel: ->
     point = @editor.getCursorScreenPosition()
-    @editorElement.pixelPositionForScreenPosition(point)[which]
+    @editorElement.pixelPositionForScreenPosition(point)
 
 # ctrl-e scroll lines downwards
 class ScrollDown extends Scroll
@@ -69,8 +70,7 @@ class ScrollCursorToTop extends ScrollCursor
     @getLastVisibleScreenRow() isnt @getLastScreenRow()
 
   getScrollTop: ->
-    # console.log 'top', @getPixelCursor('top')
-    @getPixelCursor('top') - @getOffSetPixelHeight()
+    @getCursorPixel().top - @getOffSetPixelHeight()
 
 # zt
 class ScrollCursorToTopLeave extends ScrollCursorToTop
@@ -84,7 +84,7 @@ class ScrollCursorToBottom extends ScrollCursor
     @getFirstVisibleScreenRow() isnt 0
 
   getScrollTop: ->
-    @getPixelCursor('top') - (@editorElement.getHeight() - @getOffSetPixelHeight(1))
+    @getCursorPixel().top - (@editorElement.getHeight() - @getOffSetPixelHeight(1))
 
 # zb
 class ScrollCursorToBottomLeave extends ScrollCursorToBottom
@@ -98,7 +98,7 @@ class ScrollCursorToMiddle extends ScrollCursor
     true
 
   getScrollTop: ->
-    @getPixelCursor('top') - (@editorElement.getHeight() / 2)
+    @getCursorPixel().top - (@editorElement.getHeight() / 2)
 
 # zz
 class ScrollCursorToMiddleLeave extends ScrollCursorToMiddle
@@ -112,11 +112,8 @@ class ScrollCursorToLeft extends Scroll
   @extend()
   direction: 'left'
 
-  initialize: ->
-    @px = @getPixelCursor('left')
-
   execute: ->
-    @editorElement.setScrollLeft(@px)
+    @editorElement.setScrollLeft(@getCursorPixel().left)
 
 # ze
 class ScrollCursorToRight extends ScrollCursorToLeft
@@ -124,4 +121,4 @@ class ScrollCursorToRight extends ScrollCursorToLeft
   direction: 'right'
 
   execute: ->
-    @editorElement.setScrollRight(@px)
+    @editorElement.setScrollRight(@getCursorPixel().left)
