@@ -519,7 +519,9 @@ class InsertAtLastPosition extends ActivateInsertMode
   @extend()
   initialize: ->
     if (point = @vimState.getLastPositionInInsertMode())?
-      @editor.setCursorScreenPosition(point)
+      @editor.setCursorBufferPosition(point)
+      @editor.scrollToCursorPosition({center: true})
+
 
 class ActivateReplaceMode extends ActivateInsertMode
   @extend()
