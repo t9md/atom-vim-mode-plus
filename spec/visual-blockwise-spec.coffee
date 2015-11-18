@@ -334,7 +334,7 @@ describe "Visual Blockwise", ->
     ensureCharacterwiseWasRestored = (keystroke) ->
       ensure keystroke, mode: ['visual', 'characterwise']
       characterwiseState = preserveCharacterWise()
-      ensure [{ctrl: 'v'}], mode: ['visual', 'blockwise']
+      ensure {ctrl: 'v'}, mode: ['visual', 'blockwise']
       ensure 'v', characterwiseState
 
     describe "when selection is not reversed", ->

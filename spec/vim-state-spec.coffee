@@ -10,8 +10,10 @@ describe "VimState", ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      vimState.activate('reset')
       {set, ensure, keystroke} = vim
+
+  beforeEach ->
+    vimState.activate('reset')
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->
@@ -29,7 +31,7 @@ describe "VimState", ->
       expect(editorElement.component.isInputEnabled()).toBeTruthy()
 
     it "removes the mode classes from the editor", ->
-      expect(editorElement.classList.contains("normal-mode")).toBeTruthy()
+      ensure mode: 'normal'
       vimState.destroy()
       expect(editorElement.classList.contains("normal-mode")).toBeFalsy()
 
@@ -46,24 +48,26 @@ describe "VimState", ->
         ensure text: ''
 
     describe "when entering an operator", ->
-      beforeEach -> keystroke 'd'
+      beforeEach ->
+        keystroke 'd'
 
       describe "with an operator that can't be composed", ->
-        beforeEach -> keystroke 'x'
+        beforeEach ->
+          keystroke 'x'
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the escape keybinding", ->
-        beforeEach -> keystroke 'escape'
+        beforeEach ->
+          keystroke 'escape'
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the ctrl-c keybinding", ->
         beforeEach ->
-          keystroke [ctrl: 'c']
-          # keystroke [{platform: 'platform-darwin'}, {ctrl: 'c'}],
+          keystroke {ctrl: 'c'}
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
@@ -353,8 +357,8 @@ describe "VimState", ->
 
         describe "blockwise: ctrl-v twice", ->
           it "activating twice make editor return to normal mode ", ->
-            ensure [ctrl: 'v'], mode: ['visual', 'blockwise']
-            ensure [ctrl: 'v'],
+            ensure {ctrl: 'v'}, mode: ['visual', 'blockwise']
+            ensure {ctrl: 'v'},
               mode: 'normal'
               cursor: cursorPosition
 
