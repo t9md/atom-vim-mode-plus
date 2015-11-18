@@ -81,7 +81,7 @@ class ModeManager
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
 
-      @vimState.setLastPositionInInsertMode(@editor.getCursorBufferPosition())
+      @vimState.saveLastPositionInInsertMode(@editor.getCursorBufferPosition())
       # Adjust cursor position
       for c in @editor.getCursors() when not c.isAtBeginningOfLine()
         c.moveLeft()
