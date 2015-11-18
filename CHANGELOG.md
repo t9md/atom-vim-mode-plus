@@ -1,3 +1,6 @@
+# 0.4.0 WIP
+- Add spec for visual-blockwise to visual-characterwise shift
+
 # 0.3.0
 - FIX: #31 RepeatSearch(`n`) commands repeat last search regardless success or not.
 - No longer add commands per editorElement, commands are added on activate phase once.
