@@ -1,10 +1,11 @@
 # 0.4.0 WIP
 - Add spec for visual-blockwise to visual-characterwise shift
 - New: `^` mark which store last insert-mode position.
-- New: `gi` to start insert-mode with last-insert position(`^` mark).
+- New: `gi` to start insert-mode from last-insert position(`^` mark).
 - New: when count is specified `with-count` selecter is set on editorElement
 - New: when register is specified `with-register` selecter is set on editorElement
 - New: `N%` motion N is count. In 100L buffer, `50%` move cursor to 50L.
+- New: `gv` support all sumbmode(characterwise, linewise, blockwise).
 
 # 0.3.0
 - FIX: #31 RepeatSearch(`n`) commands repeat last search regardless success or not.
