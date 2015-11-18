@@ -3,6 +3,35 @@ swrap = require '../lib/selection-wrapper'
 
 describe "Visual Blockwise", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
+  textInitial = """
+    01234567890123456789
+    1-------------------
+    2----A---------B----
+    3----***********----
+    4----+++++++++++----
+    5----C---------D----
+    6-------------------
+    """
+
+  textAfterDeleted = """
+    01234567890123456789
+    1-------------------
+    2----
+    3----
+    4----
+    5----
+    6-------------------
+    """
+
+  blockTexts = [
+    '56789012345' # 0
+    '-----------' # 1
+    'A---------B' # 2
+    '***********' # 3
+    '+++++++++++' # 4
+    'C---------D' # 5
+    '-----------' # 6
+  ]
 
   selectBlockwise = ->
     set cursor: [2, 5]
@@ -14,14 +43,10 @@ describe "Visual Blockwise", ->
         [[4, 5], [4, 16]]
         [[5, 5], [5, 16]]
       ]
-      selectedText: [
-        'A---------B'
-        '***********'
-        '+++++++++++'
-        'C---------D'
-      ]
+      selectedText: blockTexts[2..5]
 
-  ensureBlockwiseSelection = (selections, o) ->
+  ensureBlockwiseSelection = (o) ->
+    selections = editor.getSelectionsOrderedByBufferPosition()
     if selections.length is 1
       first = last = selections[0]
     else
@@ -50,16 +75,7 @@ describe "Visual Blockwise", ->
       {set, ensure, keystroke} = vimEditor
 
     runs ->
-      set
-        text: """
-          01234567890123456789
-          1-------------------
-          2----A---------B----
-          3----***********----
-          4----+++++++++++----
-          5----C---------D----
-          6-------------------
-          """
+      set text: textInitial
 
   afterEach ->
     vimState.activate('reset')
@@ -68,110 +84,44 @@ describe "Visual Blockwise", ->
     beforeEach ->
       set cursor: [3, 5]
       ensure ['v10l', {ctrl: 'v'}],
-        selectedText: "***********"
+        selectedText: blockTexts[3]
         mode: ['visual', 'blockwise']
 
     it "add selection to down direction", ->
-      ensure 'j',
-        selectedText: [
-          '***********'
-          '+++++++++++'
-        ]
-      ensure 'j',
-        selectedText: [
-          '***********'
-          '+++++++++++'
-          'C---------D'
-        ]
+      ensure 'j', selectedText: blockTexts[3..4]
+      ensure 'j', selectedText: blockTexts[3..5]
 
     it "delete selection when blocwise is reversed", ->
-      ensure '3k',
-        selectedTextOrderd: [
-          '56789012345'
-          '-----------'
-          'A---------B'
-          '***********'
-        ]
-      ensure 'j',
-        selectedTextOrderd: [
-          '-----------'
-          'A---------B'
-          '***********'
-        ]
-      ensure '2j',
-        selectedTextOrderd: [
-          '***********'
-        ]
+      ensure '3k', selectedTextOrderd: blockTexts[0..3]
+      ensure 'j', selectedTextOrderd: blockTexts[1..3]
+      ensure '2j', selectedTextOrderd: blockTexts[3]
+
     it "keep tail row when reversed status changed", ->
-      ensure 'j',
-        selectedText: [
-          '***********'
-          '+++++++++++'
-        ]
-      ensure '2k',
-        selectedTextOrderd: [
-          'A---------B'
-          '***********'
-        ]
+      ensure 'j', selectedText: blockTexts[3..4]
+      ensure '2k', selectedTextOrderd: blockTexts[2..3]
 
   describe "k", ->
     beforeEach ->
       set cursor: [3, 5]
       ensure ['v10l', {ctrl: 'v'}],
-        selectedText: "***********"
+        selectedText: blockTexts[3]
         mode: ['visual', 'blockwise']
 
     it "add selection to up direction", ->
-      v = [
-        '56789012345'
-        '-----------'
-        'A---------B'
-        '***********'
-      ]
-      ensure 'k',
-        selectedTextOrderd: [
-          'A---------B'
-          '***********'
-        ]
-      ensure 'k',
-        selectedTextOrderd: [
-          '-----------'
-          'A---------B'
-          '***********'
-        ]
+      ensure 'k', selectedTextOrderd: blockTexts[2..3]
+      ensure 'k', selectedTextOrderd: blockTexts[1..3]
 
     it "delete selection when blocwise is reversed", ->
-      ensure '3j',
-        selectedTextOrderd: [
-          '***********'
-          '+++++++++++'
-          'C---------D'
-          '-----------'
-        ]
-      ensure 'k',
-        selectedTextOrderd: [
-          '***********'
-          '+++++++++++'
-          'C---------D'
-        ]
-      ensure '2k',
-        selectedTextOrderd: [
-          '***********'
-        ]
+      ensure '3j', selectedTextOrderd: blockTexts[3..6]
+      ensure 'k', selectedTextOrderd: blockTexts[3..5]
+      ensure '2k', selectedTextOrderd: blockTexts[3]
+
   describe "C", ->
     beforeEach ->
       selectBlockwise()
     it "change-to-last-character-of-line for each selection", ->
       ensure 'C',
-        text: """
-          01234567890123456789
-          1-------------------
-          2----
-          3----
-          4----
-          5----
-          6-------------------
-          """
+        text: textAfterDeleted
         cursor: [2, 5]
         mode: 'insert'
 
@@ -180,15 +130,7 @@ describe "Visual Blockwise", ->
       selectBlockwise()
     it "delete-to-last-character-of-line for each selection", ->
       ensure 'D',
-        text: """
-          01234567890123456789
-          1-------------------
-          2----
-          3----
-          4----
-          5----
-          6-------------------
-          """
+        text: textAfterDeleted
         cursor: [2, 4]
         mode: 'normal'
 
@@ -245,36 +187,19 @@ describe "Visual Blockwise", ->
 
     describe 'o', ->
       it "change blockwiseHead to opposite side and reverse selection", ->
-        selections = editor.getSelectionsOrderedByBufferPosition()
         keystroke 'o'
-        ensureBlockwiseSelection selections,
-          head: 'top', tail: 'bottom', reversed: true
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true
 
         keystroke 'o'
-        ensureBlockwiseSelection selections,
-          head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
     describe 'capital O', ->
       it "reverse each selection", ->
-        selections = editor.getSelectionsOrderedByBufferPosition()
         keystroke 'O'
-        ensureBlockwiseSelection selections,
-          head: 'bottom', tail: 'top', reversed: true
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: true
         keystroke 'O'
-        ensureBlockwiseSelection selections,
-          head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
 
   describe "shift from characterwise to blockwise", ->
-    beforeEach ->
-      set
-        text: """
-          01234567890123456789
-          1-------------------
-          2----A---------B----
-          3----***********----
-          4----+++++++++++----
-          5----C---------D----
-          6-------------------
-          """
     describe "when selection is not reversed", ->
       beforeEach ->
         set cursor: [2, 5]
@@ -291,8 +216,7 @@ describe "Visual Blockwise", ->
             '+'
             'C'
           ]
-        ensureBlockwiseSelection editor.getSelections(),
-          head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
 
       it 'case-2', ->
         ensure ['h3j', {ctrl: 'v'}],
@@ -303,8 +227,7 @@ describe "Visual Blockwise", ->
             '-+'
             '-C'
           ]
-        ensureBlockwiseSelection editor.getSelections(),
-          head: 'bottom', tail: 'top', reversed: true
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: true
 
       it 'case-3', ->
         ensure ['2h3j', {ctrl: 'v'}],
@@ -315,8 +238,7 @@ describe "Visual Blockwise", ->
             '--+'
             '--C'
           ]
-        ensureBlockwiseSelection editor.getSelections(),
-          head: 'bottom', tail: 'top', reversed: true
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: true
 
       it 'case-4', ->
         ensure ['l3j', {ctrl: 'v'}],
@@ -327,8 +249,7 @@ describe "Visual Blockwise", ->
             '++'
             'C-'
           ]
-        ensureBlockwiseSelection editor.getSelections(),
-          head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
       it 'case-5', ->
         ensure ['2l3j', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
@@ -338,8 +259,7 @@ describe "Visual Blockwise", ->
             '+++'
             'C--'
           ]
-        ensureBlockwiseSelection editor.getSelections(),
-          head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
 
     describe "when selection is reversed", ->
       beforeEach ->
@@ -357,8 +277,7 @@ describe "Visual Blockwise", ->
             '+'
             'C'
           ]
-        ensureBlockwiseSelection editor.getSelectionsOrderedByBufferPosition(),
-          head: 'top', tail: 'bottom', reversed: true
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true
 
       it 'case-2', ->
         ensure ['h3k', {ctrl: 'v'}],
@@ -369,8 +288,7 @@ describe "Visual Blockwise", ->
             '-+'
             '-C'
           ]
-        ensureBlockwiseSelection editor.getSelectionsOrderedByBufferPosition(),
-          head: 'top', tail: 'bottom', reversed: true
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true
 
       it 'case-3', ->
         ensure ['2h3k', {ctrl: 'v'}],
@@ -381,8 +299,7 @@ describe "Visual Blockwise", ->
             '--+'
             '--C'
           ]
-        ensureBlockwiseSelection editor.getSelectionsOrderedByBufferPosition(),
-          head: 'top', tail: 'bottom', reversed: true
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true
 
       it 'case-4', ->
         ensure ['l3k', {ctrl: 'v'}],
@@ -393,8 +310,7 @@ describe "Visual Blockwise", ->
             '++'
             'C-'
           ]
-        ensureBlockwiseSelection editor.getSelectionsOrderedByBufferPosition(),
-          head: 'top', tail: 'bottom', reversed: false
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: false
 
       it 'case-5', ->
         ensure ['2l3k', {ctrl: 'v'}],
@@ -405,5 +321,37 @@ describe "Visual Blockwise", ->
             '+++'
             'C--'
           ]
-        ensureBlockwiseSelection editor.getSelectionsOrderedByBufferPosition(),
-          head: 'top', tail: 'bottom', reversed: false
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: false
+
+  describe "shift from blockwise to characterwise", ->
+    preserveCharacterWise = ->
+      selectedTextInitial = editor.getSelectedText()
+      rangeInitial = editor.getSelectedBufferRange()
+      cursorInitial = editor.getCursorBufferPosition()
+      mode = [vimState.mode, vimState.submode]
+      {selectedTextInitial, rangeInitial, cursorInitial, mode}
+
+    ensureCharacterwiseWasRestored = (keystroke) ->
+      ensure keystroke, mode: ['visual', 'characterwise']
+      characterwiseState = preserveCharacterWise()
+      ensure [{ctrl: 'v'}], mode: ['visual', 'blockwise']
+      ensure 'v', characterwiseState
+
+    describe "when selection is not reversed", ->
+      beforeEach ->
+        set cursor: [2, 5]
+      it 'case-1', -> ensureCharacterwiseWasRestored('v')
+      it 'case-2', -> ensureCharacterwiseWasRestored('v3j')
+      it 'case-3', -> ensureCharacterwiseWasRestored('vh3j')
+      it 'case-4', -> ensureCharacterwiseWasRestored('v2h3j')
+      it 'case-5', -> ensureCharacterwiseWasRestored('vl3j')
+      it 'case-6', -> ensureCharacterwiseWasRestored('v2l3j')
+    describe "when selection is reversed", ->
+      beforeEach ->
+        set cursor: [5, 5]
+      it 'case-1', -> ensureCharacterwiseWasRestored('v')
+      it 'case-2', -> ensureCharacterwiseWasRestored('v3k')
+      it 'case-3', -> ensureCharacterwiseWasRestored('vh3k')
+      it 'case-4', -> ensureCharacterwiseWasRestored('v2h3k')
+      it 'case-5', -> ensureCharacterwiseWasRestored('vl3k')
+      it 'case-6', -> ensureCharacterwiseWasRestored('v2l3k')

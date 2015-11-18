@@ -1,5 +1,6 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
+{Range} = require 'atom'
 
 supportedModeClass = [
   'normal-mode'
@@ -182,8 +183,12 @@ class VimEditor
         toArray(o.selectedScreenRange, o.selectedScreenRange[0][0]))
 
     if o.selectedBufferRange?
-      expect(@editor.getSelectedBufferRanges()).toEqual(
-        toArray(o.selectedBufferRange, o.selectedBufferRange[0][0]))
+      switch
+        when o.selectedBufferRange instanceof Range
+          o.selectedBufferRange = [o.selectedBufferRange]
+        when (not o.selectedBufferRange[0] instanceof Range) or (not _.isArray(o.selectedBufferRange[0][0]))
+          o.selectedBufferRange = [o.selectedBufferRange]
+      expect(@editor.getSelectedBufferRanges()).toEqual(o.selectedBufferRange)
 
     if o.selectedBufferRangeStartRow?
       {start} = @editor.getSelectedBufferRange()
