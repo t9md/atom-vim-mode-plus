@@ -553,7 +553,6 @@ class MoveToMark extends Motion
   requireInput: true
   hoverText: ":round_pushpin:`"
   hoverIcon: ":move-to-mark:`"
-  # hoverChar: '`'
 
   initialize: ->
     @readInput()
@@ -575,7 +574,6 @@ class MoveToMarkLine extends MoveToMark
   linewise: true
   hoverText: ":round_pushpin:'"
   hoverIcon: ":move-to-mark:'"
-  # hoverChar: "'"
 
 # Search
 # -------------------------

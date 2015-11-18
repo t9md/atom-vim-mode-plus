@@ -1,8 +1,12 @@
 # Refactoring status: 100%
 globalState = require './global-state'
 settings = require './settings'
+{toggleClassByCondition} = require './utils'
 
 validNames = /[a-zA-Z*+%_"]/
+REGISTERS = /// (
+  ?: [a-zA-Z*+%_"]
+) ///
 
 # TODO: Vim support following registers.
 # x: complete, -: partially
@@ -17,13 +21,13 @@ validNames = /[a-zA-Z*+%_"]/
 #  [x] 9. The black hole register "_
 #  [ ] 10. Last search pattern register "/
 
-module.exports =
 class RegisterManager
   constructor: (@vimState) ->
+    {@editorElement} = @vimState
     @data = globalState.register
 
-  isValidName: (name) ->
-    validNames.test(name)
+  isValid: (name) ->
+    REGISTERS.test(name)
 
   get: (name) ->
     name ?= @getName()
@@ -58,7 +62,7 @@ class RegisterManager
       when 2 then [name, value] = args
 
     name ?= @getName()
-    return unless @isValidName(name)
+    return unless @isValid(name)
     name = settings.get('defaultRegister') if name is '"'
     value.type ?= @getCopyType(value.text)
 
@@ -90,12 +94,14 @@ class RegisterManager
 
   reset: ->
     @name = null
+    @updateEditorElement()
 
   getName: ->
     @name ? settings.get('defaultRegister')
 
   setName: ->
     @vimState.hover.add '"'
+    @updateEditorElement()
     @vimState.input.readInput {charsMax: 1},
       onConfirm: (@name) => @vimState.hover.add(@name)
       onCancel: => @vimState.hover.reset()
@@ -108,3 +114,8 @@ class RegisterManager
     else
       # [FIXME] should characterwise or line and character
       'character'
+
+  updateEditorElement: ->
+    toggleClassByCondition(@editorElement, 'with-register', @count?)
+
+module.exports = RegisterManager
