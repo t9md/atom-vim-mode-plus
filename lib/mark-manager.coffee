@@ -1,4 +1,4 @@
-REGISTERS = /// ^ (
+MARKS = /// ^ (
   ?: [a-z]
    | [`.^(){}]
 ) ///
@@ -11,7 +11,7 @@ class MarkManager
     @marks = {}
 
   isValid: (name) ->
-    REGISTERS.test(name)
+    MARKS.test(name)
 
   get: (name) ->
     return unless @isValid(name)
