@@ -186,7 +186,7 @@
 # -------------------------
 'atom-text-editor.vim-mode-plus.normal-mode':
   'i':      'vim-mode-plus:activate-insert-mode'
-  'g i':    'vim-mode-plus:insert-at-last-position'
+  'g i':    'vim-mode-plus:insert-at-last-insert'
   'R':      'vim-mode-plus:activate-replace-mode'
   'v':      'vim-mode-plus:activate-characterwise-visual-mode'
   'V':      'vim-mode-plus:activate-linewise-visual-mode'

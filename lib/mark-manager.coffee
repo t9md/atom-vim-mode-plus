@@ -1,5 +1,8 @@
-# Refactoring status: 100%
-module.exports =
+REGISTERS = /// ^ (
+  ?: [a-z]
+   | [`.^(){}]
+) ///
+
 class MarkManager
   marks: null
 
@@ -7,13 +10,18 @@ class MarkManager
     {@editor, @editorElement} = @vimState
     @marks = {}
 
+  isValid: (name) ->
+    REGISTERS.test(name)
+
   get: (name) ->
+    return unless @isValid(name)
     @marks[name]?.getStartBufferPosition()
 
   # [FIXME] Need to support Global mark with capital name [A-Z]
   set: (name, point) ->
-    # check to make sure name is in [a-z] or is `
-    if (96 <= name.charCodeAt(0) <= 122)
-      @marks[name] = @editor.markBufferPosition point,
-        invalidate: 'never',
-        persistent: false
+    return unless @isValid(name)
+    @marks[name] = @editor.markBufferPosition point,
+      invalidate: 'never',
+      persistent: false
+
+module.exports = MarkManager
