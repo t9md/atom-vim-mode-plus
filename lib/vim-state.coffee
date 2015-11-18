@@ -42,6 +42,7 @@ class VimState
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @flasher = new FlashManager(this)
+    @lastPositionInInsertMode = null
 
     # FIXME: Direct reference for config param name.
     # Handle with config onDidChange subscription?
@@ -60,6 +61,11 @@ class VimState
       @activate('insert')
     else
       @activate('normal')
+
+  setLastPositionInInsertMode: (@lastPositionInInsertMode) ->
+
+  getLastPositionInInsertMode: ->
+    @lastPositionInInsertMode
 
   destroy: ->
     return if @destroyed
