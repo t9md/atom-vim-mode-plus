@@ -515,13 +515,12 @@ class ActivateInsertMode extends Operator
     else
       @vimState.activate('insert')
 
-class InsertAtLastPosition extends ActivateInsertMode
+class InsertAtLastInsert extends ActivateInsertMode
   @extend()
   initialize: ->
-    if (point = @vimState.getLastPositionInInsertMode())?
+    if (point = @vimState.mark.get('^'))
       @editor.setCursorBufferPosition(point)
       @editor.scrollToCursorPosition({center: true})
-
 
 class ActivateReplaceMode extends ActivateInsertMode
   @extend()
