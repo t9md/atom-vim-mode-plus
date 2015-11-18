@@ -1,6 +1,6 @@
 # Refactoring status: 95%
 _ = require 'underscore-plus'
-{Range, CompositeDisposable, Disposable} = require 'atom'
+{Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 
 swrap = require './selection-wrapper'
 {eachSelection, toggleClassByCondition} = require './utils'
@@ -13,6 +13,7 @@ class ModeManager
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
+    @emitter = new Emitter
 
   eachSelection: (fn) ->
     eachSelection(@editor, fn)
@@ -24,6 +25,9 @@ class ModeManager
     else
       @mode is mode
 
+  onWillModeDeactivate: (fn) ->
+    @emitter.on 'on-will-mode-deactivate', fn
+
   # activate: Public
   #  Use this method to change mode, DONT use other direct method.
   activate: (mode, submode=null) ->
@@ -33,9 +37,13 @@ class ModeManager
     else if (mode is 'visual') and (@submode is submode)
       mode = 'normal'
       submode = null
+    else if (mode is 'visual') and (submode is 'previous')
+      submode = @restorePreviousSelection?() ? 'characterwise'
 
     # Deactivate old mode
-    @deactivator?.dispose() if (mode isnt @mode)
+    if (mode isnt @mode)
+      @emitter.emit('on-will-mode-deactivate', {@mode, @submode})
+      @deactivator?.dispose()
 
     # Activate
     @deactivator = switch mode
@@ -81,7 +89,6 @@ class ModeManager
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
 
-      @vimState.mark.set('^', @editor.getCursorBufferPosition())
       # Adjust cursor position
       for c in @editor.getCursors() when not c.isAtBeginningOfLine()
         c.moveLeft()
@@ -138,6 +145,14 @@ class ModeManager
 
     new Disposable =>
       @restoreCharacterwiseRange()
+
+      # Prepare function to restore selection by `gv`
+      properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
+      submode = @submode
+      @restorePreviousSelection = =>
+        swrap(@editor.getLastSelection()).selectByProperties(properties)
+        submode
+
       @eachSelection (s) ->
         swrap(s).resetProperties()
         s.cursor.moveLeft() unless (s.isEmpty() or s.isReversed())

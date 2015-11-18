@@ -48,6 +48,7 @@ module.exports =
       'activate-linewise-visual-mode': -> getState().activate('visual', 'linewise')
       'activate-characterwise-visual-mode': -> getState().activate('visual', 'characterwise')
       'activate-blockwise-visual-mode': -> getState().activate('visual', 'blockwise')
+      'activate-previous-visual-mode': -> getState().activate('visual', 'previous')
       'reset-normal-mode': -> getState().activate('reset')
       'set-count': (e) -> getState().count.set(e) # 0-9
       'set-register-name': -> getState().register.setName() # "

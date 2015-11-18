@@ -1,6 +1,6 @@
 MARKS = /// (
   ?: [a-z]
-   | [`.^(){}]
+   | [\[\]`.^(){}<>]
 ) ///
 
 class MarkManager
@@ -9,6 +9,11 @@ class MarkManager
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
     @marks = {}
+    subs = @vimState.subscriptions
+    subs.add @vimState.modeManager.onWillModeDeactivate ({mode, submode}) =>
+      switch mode
+        when 'insert'
+          @set('^', @editor.getCursorBufferPosition())
 
   isValid: (name) ->
     MARKS.test(name)
