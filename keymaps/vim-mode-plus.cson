@@ -184,6 +184,7 @@
 
 'atom-text-editor.vim-mode-plus.with-count:not(.insert-mode)':
   '0': 'vim-mode-plus:set-count'
+  '%': 'vim-mode-plus:move-to-line-by-percent'
 
 # normal
 # -------------------------

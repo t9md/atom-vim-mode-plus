@@ -795,6 +795,9 @@ describe "Motion", ->
           selectedText: "    2\n 3abc\n "
           cursor: [3, 1]
 
+  # [FIXME] need spec
+  describe "the N% keybinding", ->
+
   describe "the / keybinding", ->
     pane = null
 
