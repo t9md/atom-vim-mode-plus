@@ -58,10 +58,17 @@ class SelectionWrapper
       Range.fromPointWithDelta(point, 0, columnDelta)
 
   preserveCharacterwise: ->
-    @updateProperties
-      characterwise:
-        range: @selection.getBufferRange()
-        reversed: @selection.isReversed()
+    @updateProperties @detectCharacterwiseProperties()
+
+  detectCharacterwiseProperties: ->
+    characterwise:
+      range: @selection.getBufferRange()
+      reversed: @selection.isReversed()
+
+  selectByProperties: (properties) ->
+    {range, reversed} = properties.characterwise
+    @setBufferRange(range)
+    @setReversedState(reversed)
 
   restoreCharacterwise: ->
     {characterwise} = @getProperties()

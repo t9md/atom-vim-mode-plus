@@ -195,6 +195,7 @@
   'v':      'vim-mode-plus:activate-characterwise-visual-mode'
   'V':      'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
+  'g v':    'vim-mode-plus:activate-previous-visual-mode'
   'u':      'vim-mode-plus:undo'
   'ctrl-r': 'vim-mode-plus:redo'
   'O':      'vim-mode-plus:insert-above-with-newline'
@@ -210,7 +211,6 @@
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
   '"':      'vim-mode-plus:set-register-name'
-  'g v':    'vim-mode-plus:reselect-last-visual'
 
 # operator-pending, visual
 # -------------------------

@@ -1,4 +1,3 @@
-# Refactoring status: 100%
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
@@ -38,10 +37,12 @@ class VimState
     @subscriptions.add @editor.onDidDestroy =>
       @destroy()
 
+    @modeManager = new ModeManager(this)
     @count = new CountManager(this)
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @flasher = new FlashManager(this)
+    # @memory = {} # keep state date which I still can't find appropriate place.
 
     # FIXME: Direct reference for config param name.
     # Handle with config onDidChange subscription?
@@ -52,7 +53,6 @@ class VimState
     @input = new Input(this)
     @search = new Search(this)
     @operationStack = new OperationStack(this)
-    @modeManager = new ModeManager(this)
     @observeSelection()
 
     @editorElement.classList.add packageScope
@@ -60,6 +60,12 @@ class VimState
       @activate('insert')
     else
       @activate('normal')
+
+  # getMemory: (name) ->
+  #   @memory[name]
+  #
+  # setMemory: (name, value) ->
+  #   @memory[name] = value
 
   destroy: ->
     return if @destroyed
