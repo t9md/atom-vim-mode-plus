@@ -358,17 +358,25 @@ class MoveToFirstLine extends Motion
   getRow: ->
     if (count = @getCount()) then count - 1 else @getDefaultRow()
 
-  getDefaultRow: -> 0
+  getDefaultRow: ->
+    0
 
   moveCursor: (cursor) ->
     cursor.setBufferPosition [@getRow(), 0]
     cursor.moveToFirstCharacterOfLine()
+    cursor.autoscroll({center: true})
 
 # keymap: G
 class MoveToLastLine extends MoveToFirstLine
   @extend()
   getDefaultRow: ->
     @getLastRow()
+
+# keymap: N% e.g. 10%
+class MoveToLineByPercent extends MoveToFirstLine
+  @extend()
+  getRow: ->
+    Math.floor(@getLastRow() * (@getCount() / 100))
 
 class MoveToRelativeLine extends Motion
   @extend(false)
