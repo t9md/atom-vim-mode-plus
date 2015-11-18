@@ -288,13 +288,6 @@ class MoveToBeginningOfLine extends Motion
   @extend()
   defaultCount: null
 
-  initialize: ->
-    # 0 is special need to differenciate `10`, 0
-    if @getCount()?
-      # if true, it means preceeding number exist, so we should behave as `0`.
-      @vimState.count.set(0)
-      @abort()
-
   moveCursor: (cursor) ->
     cursor.moveToBeginningOfLine()
 
