@@ -62,7 +62,7 @@ class VimState
     else
       @activate('normal')
 
-  setLastPositionInInsertMode: (@lastPositionInInsertMode) ->
+  saveLastPositionInInsertMode: (@lastPositionInInsertMode) ->
 
   getLastPositionInInsertMode: ->
     @lastPositionInInsertMode
