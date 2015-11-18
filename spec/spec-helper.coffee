@@ -239,12 +239,7 @@ class VimEditor
     # Not support Object for keys to avoid ambiguity.
     element ?= @editorElement
     mocked = null
-    if _.isString(keys)
-      _keystroke(keys, {element})
-      return
-
-    unless _.isArray(keys)
-      throw new SpecError('Must not happen')
+    keys = [keys] unless _.isArray(keys)
 
     for k in keys
       if _.isString(k)
