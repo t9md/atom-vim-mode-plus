@@ -34,11 +34,12 @@ class ModeManager
     if mode is 'reset'
       @editor.clearSelections()
       mode = 'normal'
-    else if (mode is 'visual') and (@submode is submode)
-      mode = 'normal'
-      submode = null
-    else if (mode is 'visual') and (submode is 'previous')
-      submode = @restorePreviousSelection?() ? 'characterwise'
+    else if (mode is 'visual')
+      if submode is @submode
+        mode = 'normal'
+        submode = null
+      else if submode is 'previous'
+        submode = @restorePreviousSelection?() ? 'characterwise'
 
     # Deactivate old mode
     if (mode isnt @mode)
@@ -150,7 +151,9 @@ class ModeManager
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
       submode = @submode
       @restorePreviousSelection = =>
-        swrap(@editor.getLastSelection()).selectByProperties(properties)
+        selection = @editor.getLastSelection()
+        swrap(s).selectByProperties(properties)
+        @editor.scrollToScreenRange(s.getScreenRange(), {center: true})
         submode
 
       @eachSelection (s) ->

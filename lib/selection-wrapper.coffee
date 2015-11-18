@@ -70,6 +70,7 @@ class SelectionWrapper
     @setBufferRange(range)
     @setReversedState(reversed)
 
+
   restoreCharacterwise: ->
     {characterwise} = @getProperties()
     return unless characterwise
