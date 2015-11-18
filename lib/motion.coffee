@@ -371,7 +371,7 @@ class MoveToLastLine extends MoveToFirstLine
     @getLastRow()
 
 class MoveToRelativeLine extends Motion
-  @extend()
+  @extend(false)
   linewise: true
 
   moveCursor: (cursor) ->
