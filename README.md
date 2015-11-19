@@ -35,6 +35,7 @@ You can move between match with <kbd>tab</kbd> and <kbd>shift-tab</kdb>.
 ## Surround builtin
 
 Off course, you can repeat with `.`.
+
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/surround.gif)
 
 ## Visual block mode builtin.
