@@ -1,33 +1,31 @@
 # Refactoring status: 100%
+_ = require 'underscore-plus'
 
 class FlashManager
   timeoutID: null
-  marker: null
+  markers: null
 
   constructor: (@vimState) ->
     {@editor} = @vimState
 
   flash: ({range, klass, timeout}, fn=null) ->
+    range = [range] unless _.isArray(range)
+    return unless range.length
     @reset()
-
-    @marker = @editor.markBufferRange range,
-      invalidate: 'never',
-      persistent: false
-
+    markerOptions = {ivalidate: 'nerver', persistent: false}
+    @markers = (@editor.markBufferRange(r, markerOptions) for r in range)
     fn?()
-
-    @editor.decorateMarker @marker,
-      type: 'highlight'
-      class: klass
+    decorationOptions = {type: 'highlight', class: klass}
+    @editor.decorateMarker(m, decorationOptions) for m in @markers
 
     @timeoutID = setTimeout  =>
       @reset()
     , timeout
 
   reset: ->
-    @marker?.destroy()
+    m.destroy() for m in @markers ? []
     clearTimeout @timeoutID
-    {@marker, @timeoutID} = {}
+    {@markers, @timeoutID} = {}
 
   destroy: ->
     @reset()
