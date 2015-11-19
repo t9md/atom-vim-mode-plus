@@ -126,7 +126,10 @@ class BlockwiseSelect extends VisualBlockwise
       endColumn -= 1
 
     ranges = ([[row, startColumn], [row, endColumn]] for row in [start.row..end.row])
-    @editor.setSelectedScreenRanges(ranges, {reversed})
+    # If selection is single line we don't need to add selection to save other mult-selection
+    # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
+    unless selection.isSingleScreenLine()
+      @editor.setSelectedScreenRanges(ranges, {reversed})
     if wasReversed
       @updateProperties {head: @getTop(), tail: @getBottom()}
     else
