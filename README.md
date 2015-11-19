@@ -77,6 +77,14 @@ With showing cursor appropriately in charcterwise and blockwise mode(still curso
 
 ![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visualmode-submod-shift.gif)
 
+## increase/decrease number in visual-mode(characterwise, linewise, blockwise)
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/3c672ff1ec9c2ee6ad0567bcbbff5e3095dda9b8/img/vim-mode-plus/increase-in-visual-mode.gif)
+
+## `gv` to re-select previous visual area
+
+![gif](https://raw.githubusercontent.com/t9md/t9md/416d2692fc3bfec284824bc269458747242c6d53/img/vim-mode-plus/activate-previous-visual-mode.gif)
+
 # FAQ
 
 ### Why fork? why not directly contribute to official vim-mode.
