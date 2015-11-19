@@ -360,24 +360,36 @@ class Increase extends Operator
   step: 1
 
   execute: ->
-    pattern = new RegExp(settings.get('numberRegex'), 'g')
-    @editor.transact =>
-      unless _.any(@increaseNumber(c, pattern) for c in @editor.getCursors())
-        atom.beep()
+    pattern = ///#{settings.get('numberRegex')}///g
 
-  increaseNumber: (cursor, pattern) ->
-    success = null
-    scanRange = cursor.getCurrentLineBufferRange()
+    newRanges = []
+    @editor.transact =>
+      for c in @editor.getCursors()
+        scanRange = if @vimState.isMode('visual')
+          c.selection.getBufferRange()
+        else
+          c.getCurrentLineBufferRange()
+        ranges = @increaseNumber(c, scanRange, pattern)
+        if not @vimState.isMode('visual') and ranges.length
+          c.setBufferPosition ranges[0].end.translate([0, -1])
+        newRanges.push ranges
+
+    if (newRanges = _.flatten(newRanges)).length
+      @flash newRanges if settings.get('flashOnOperate')
+    else
+      atom.beep()
+
+  increaseNumber: (cursor, scanRange, pattern) ->
+    newRanges = []
     @editor.scanInBufferRange pattern, scanRange, ({matchText, range, stop, replace}) =>
-      unless range.end.isGreaterThan cursor.getBufferPosition()
-        return
-      number = parseInt(matchText, 10) + @step * @getCount()
-      newText = String(number)
-      replace newText
-      stop()
-      cursor.setBufferPosition(range.start.translate([0, newText.length-1]))
-      success = true
-    success
+      newText = String(parseInt(matchText, 10) + @step * @getCount())
+      if @vimState.isMode('visual')
+        newRanges.push replace(newText)
+      else
+        return unless range.end.isGreaterThan cursor.getBufferPosition()
+        newRanges.push replace(newText)
+        stop()
+    newRanges
 
 class Decrease extends Increase
   @extend()
