@@ -124,6 +124,8 @@
   # [FIXME] 'g s d ;' cause spec fail because of keymaping is not unique.
   # 'g s d ;': 'vim-mode-plus:delete-surround-any-pair'
   # 'g s c ;': 'vim-mode-plus:change-surround-any-pair'
+  'ctrl-a': 'vim-mode-plus:increase'
+  'ctrl-x': 'vim-mode-plus:decrease'
 
   'ctrl-w ctrl-h': 'window:focus-pane-on-left'
   'ctrl-w h':      'window:focus-pane-on-left'
@@ -208,8 +210,6 @@
   '.':      'vim-mode-plus:repeat'
   'ctrl-]': 'symbols-view:go-to-declaration'
   'ctrl-t': 'symbols-view:return-from-declaration'
-  'ctrl-a': 'vim-mode-plus:increase'
-  'ctrl-x': 'vim-mode-plus:decrease'
   '"':      'vim-mode-plus:set-register-name'
 
 # operator-pending, visual

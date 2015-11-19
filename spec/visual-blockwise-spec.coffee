@@ -32,6 +32,15 @@ describe "Visual Blockwise", ->
     'C---------D' # 5
     '-----------' # 6
   ]
+  lineTexts = [
+    '01234567890123456789' # 0
+    '1-------------------' # 1
+    '2----A---------B----' # 2
+    '3----***********----' # 3
+    '4----+++++++++++----' # 4
+    '5----C---------D----' # 5
+    '6-------------------' # 6
+  ]
 
   selectBlockwise = ->
     set cursor: [2, 5]
@@ -324,7 +333,7 @@ describe "Visual Blockwise", ->
         ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: false
 
   describe "shift from blockwise to characterwise", ->
-    preserveCharacterWise = ->
+    preserveSelection = ->
       selectedTextInitial = editor.getSelectedText()
       rangeInitial = editor.getSelectedBufferRange()
       cursorInitial = editor.getCursorBufferPosition()
@@ -333,7 +342,7 @@ describe "Visual Blockwise", ->
 
     ensureCharacterwiseWasRestored = (keystroke) ->
       ensure keystroke, mode: ['visual', 'characterwise']
-      characterwiseState = preserveCharacterWise()
+      characterwiseState = preserveSelection()
       ensure {ctrl: 'v'}, mode: ['visual', 'blockwise']
       ensure 'v', characterwiseState
 
@@ -355,3 +364,37 @@ describe "Visual Blockwise", ->
       it 'case-4', -> ensureCharacterwiseWasRestored('v2h3k')
       it 'case-5', -> ensureCharacterwiseWasRestored('vl3k')
       it 'case-6', -> ensureCharacterwiseWasRestored('v2l3k')
+
+  describe "gv feature", ->
+    preserveSelection = ->
+      selectedTextInitial = editor.getSelectedText()
+      rangeInitial = editor.getSelectedBufferRange()
+      cursorInitial = editor.getCursorBufferPosition()
+      mode = [vimState.mode, vimState.submode]
+      {selectedTextInitial, rangeInitial, cursorInitial, mode}
+
+    ensureRestored = (keystroke, spec) ->
+      ensure keystroke, spec
+      preserved = preserveSelection()
+      ensure ['escape', 'jj'], mode: 'normal', selectedText: ''
+      ensure 'gv', preserved
+
+    describe "linewise selection", ->
+      beforeEach ->
+        set cursor: [2, 0]
+      describe "selection is not reversed", ->
+        it 'restore previous selection', ->
+          ensureRestored 'Vj',
+            selectedText: """
+              2----A---------B----
+              3----***********----\n
+              """
+            mode: ['visual', 'linewise']
+      describe "selection is reversed", ->
+        it 'restore previous selection', ->
+          ensureRestored 'Vj',
+            selectedText: """
+              2----A---------B----
+              3----***********----\n
+              """
+            mode: ['visual', 'linewise']
