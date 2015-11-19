@@ -795,8 +795,17 @@ describe "Motion", ->
           selectedText: "    2\n 3abc\n "
           cursor: [3, 1]
 
-  # [FIXME] need spec
   describe "the N% keybinding", ->
+    beforeEach ->
+      set
+        text: [0..99].join("\n")
+        cursor: [0, 0]
+
+    describe "put cursor on line specified by percent", ->
+      it "50%", -> ensure '50%', cursor: [49, 0]
+      it "30%", -> ensure '30%', cursor: [29, 0]
+      it "100%", -> ensure '100%', cursor: [99, 0]
+      it "120%", -> ensure '120%', cursor: [99, 0]
 
   describe "the / keybinding", ->
     pane = null
