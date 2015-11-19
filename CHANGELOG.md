@@ -1,4 +1,4 @@
-# 0.4.0 WIP
+# 0.4.0
 - Add spec for visual-blockwise to visual-characterwise shift
 - New: `^` mark which store last insert-mode position.
 - New: `gi` to start insert-mode from last-insert position(`^` mark).
@@ -7,6 +7,7 @@
 - New: `N%` motion N is count. In 100L buffer, `50%` move cursor to 50L.
 - New: `gv` support all sumbmode(characterwise, linewise, blockwise).
 - New: `increase`, `decrease` support in visual-mode which greatly extends usage of these commands.
+- Tweak: don't clear multi-selection when from char-2-block if only selection is single line, this allow `cmd-d`, `ctrl-v`, `I`(or `A`) work.
 
 # 0.3.0
 - FIX: #31 RepeatSearch(`n`) commands repeat last search regardless success or not.
