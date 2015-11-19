@@ -1,3 +1,5 @@
+# 0.5.0 WIP
+
 # 0.4.0
 - Add spec for visual-blockwise to visual-characterwise shift
 - New: `^` mark which store last insert-mode position.
