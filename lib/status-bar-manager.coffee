@@ -2,13 +2,13 @@
 {Disposable, CompositeDisposable} = require 'atom'
 
 ContentsByMode =
-  'insert':               ["insert", "Insert"]
-  'insert.replace':       ["insert", "Replace"]
-  'normal':               ["normal", "Normal"]
-  'visual':               ["visual", "Visual"]
-  'visual.characterwise': ["visual", "Visual Chars"]
-  'visual.linewise':      ["visual", "Visual Line"]
-  'visual.blockwise':     ["visual", "Visual Block"]
+  'insert': ["insert", "Insert"]
+  'insert.replace': ["insert", "Replace"]
+  'normal': ["normal", "Normal"]
+  'visual': ["visual", "Visual"]
+  'visual.characterwise': ["visual", "Visual Char"]
+  'visual.linewise': ["visual", "Visual Line"]
+  'visual.blockwise': ["visual", "Visual Block"]
 
 module.exports =
 class StatusBarManager
