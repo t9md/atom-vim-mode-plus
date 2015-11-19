@@ -6,6 +6,7 @@
 - New: when register is specified `with-register` selecter is set on editorElement
 - New: `N%` motion N is count. In 100L buffer, `50%` move cursor to 50L.
 - New: `gv` support all sumbmode(characterwise, linewise, blockwise).
+- New: `increase`, `decrease` support in visual-mode which greatly extends usage of these commands.
 
 # 0.3.0
 - FIX: #31 RepeatSearch(`n`) commands repeat last search regardless success or not.
