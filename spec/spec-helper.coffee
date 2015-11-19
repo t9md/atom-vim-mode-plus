@@ -1,6 +1,6 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
-{Range} = require 'atom'
+{Range, Point} = require 'atom'
 
 supportedModeClass = [
   'normal-mode'
@@ -154,13 +154,20 @@ class VimEditor
       expect(s.getText() for s in @editor.getSelections()).toEqual(
         toArray(o.selectedText))
 
-    if o.selectedTextOrderd?
+    if o.selectedTextOrdered?
       expect(s.getText() for s in @editor.getSelectionsOrderedByBufferPosition()).toEqual(
-        toArray(o.selectedTextOrderd))
+        toArray(o.selectedTextOrdered))
 
     if o.cursor?
+      o.cursor = if o.cursor instanceof Point or not _.isArray(o.cursor[0])
+        [o.cursor]
+      else
+        o.cursor
       expect(@editor.getCursorScreenPositions()).toEqual(
-        toArray(o.cursor, o.cursor[0]))
+        toArray(o.cursor, o.cursor))
+
+    if o.cursors?
+      expect(@editor.getCursorScreenPositions()).toEqual(o.cursors)
 
     if o.cursorBuffer?
       expect(@editor.getCursorBufferPositions()).toEqual(
@@ -183,12 +190,17 @@ class VimEditor
         toArray(o.selectedScreenRange, o.selectedScreenRange[0][0]))
 
     if o.selectedBufferRange?
-      switch
-        when o.selectedBufferRange instanceof Range
-          o.selectedBufferRange = [o.selectedBufferRange]
-        when (not o.selectedBufferRange[0] instanceof Range) or (not _.isArray(o.selectedBufferRange[0][0]))
-          o.selectedBufferRange = [o.selectedBufferRange]
+      if (o.selectedBufferRange instanceof Range) or
+          (not (o.selectedBufferRange[0] instanceof Range)) and (not _.isArray(o.selectedBufferRange[0][0]))
+        o.selectedBufferRange = [o.selectedBufferRange]
       expect(@editor.getSelectedBufferRanges()).toEqual(o.selectedBufferRange)
+
+    if o.selectedBufferRangeOrdered?
+      if (o.selectedBufferRangeOrdered instanceof Range) or
+          (not (o.selectedBufferRangeOrdered[0] instanceof Range)) and (not _.isArray(o.selectedBufferRangeOrdered[0][0]))
+        o.selectedBufferRangeOrdered = [o.selectedBufferRangeOrdered]
+      actual = @editor.getSelectionsOrderedByBufferPosition().map (e) -> e.getBufferRange()
+      expect(actual).toEqual(o.selectedBufferRangeOrdered)
 
     if o.selectedBufferRangeStartRow?
       {start} = @editor.getSelectedBufferRange()

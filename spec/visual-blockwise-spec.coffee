@@ -32,15 +32,9 @@ describe "Visual Blockwise", ->
     'C---------D' # 5
     '-----------' # 6
   ]
-  lineTexts = [
-    '01234567890123456789' # 0
-    '1-------------------' # 1
-    '2----A---------B----' # 2
-    '3----***********----' # 3
-    '4----+++++++++++----' # 4
-    '5----C---------D----' # 5
-    '6-------------------' # 6
-  ]
+  lineTexts = textInitial.split("\n")
+  getTextForLines = (start, end) ->
+    lineTexts[start..end].join("\n") + "\n"
 
   selectBlockwise = ->
     set cursor: [2, 5]
@@ -101,13 +95,13 @@ describe "Visual Blockwise", ->
       ensure 'j', selectedText: blockTexts[3..5]
 
     it "delete selection when blocwise is reversed", ->
-      ensure '3k', selectedTextOrderd: blockTexts[0..3]
-      ensure 'j', selectedTextOrderd: blockTexts[1..3]
-      ensure '2j', selectedTextOrderd: blockTexts[3]
+      ensure '3k', selectedTextOrdered: blockTexts[0..3]
+      ensure 'j', selectedTextOrdered: blockTexts[1..3]
+      ensure '2j', selectedTextOrdered: blockTexts[3]
 
     it "keep tail row when reversed status changed", ->
       ensure 'j', selectedText: blockTexts[3..4]
-      ensure '2k', selectedTextOrderd: blockTexts[2..3]
+      ensure '2k', selectedTextOrdered: blockTexts[2..3]
 
   describe "k", ->
     beforeEach ->
@@ -117,13 +111,13 @@ describe "Visual Blockwise", ->
         mode: ['visual', 'blockwise']
 
     it "add selection to up direction", ->
-      ensure 'k', selectedTextOrderd: blockTexts[2..3]
-      ensure 'k', selectedTextOrderd: blockTexts[1..3]
+      ensure 'k', selectedTextOrdered: blockTexts[2..3]
+      ensure 'k', selectedTextOrdered: blockTexts[1..3]
 
     it "delete selection when blocwise is reversed", ->
-      ensure '3j', selectedTextOrderd: blockTexts[3..6]
-      ensure 'k', selectedTextOrderd: blockTexts[3..5]
-      ensure '2k', selectedTextOrderd: blockTexts[3]
+      ensure '3j', selectedTextOrdered: blockTexts[3..6]
+      ensure 'k', selectedTextOrdered: blockTexts[3..5]
+      ensure '2k', selectedTextOrdered: blockTexts[3]
 
   describe "C", ->
     beforeEach ->
@@ -219,7 +213,7 @@ describe "Visual Blockwise", ->
       it 'case-1', ->
         ensure ['3j', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             'A'
             '*'
             '+'
@@ -230,7 +224,7 @@ describe "Visual Blockwise", ->
       it 'case-2', ->
         ensure ['h3j', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             '-A'
             '-*'
             '-+'
@@ -241,7 +235,7 @@ describe "Visual Blockwise", ->
       it 'case-3', ->
         ensure ['2h3j', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             '--A'
             '--*'
             '--+'
@@ -252,7 +246,7 @@ describe "Visual Blockwise", ->
       it 'case-4', ->
         ensure ['l3j', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             'A-'
             '**'
             '++'
@@ -262,7 +256,7 @@ describe "Visual Blockwise", ->
       it 'case-5', ->
         ensure ['2l3j', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             'A--'
             '***'
             '+++'
@@ -280,7 +274,7 @@ describe "Visual Blockwise", ->
       it 'case-1', ->
         ensure ['3k', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             'A'
             '*'
             '+'
@@ -291,7 +285,7 @@ describe "Visual Blockwise", ->
       it 'case-2', ->
         ensure ['h3k', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             '-A'
             '-*'
             '-+'
@@ -302,7 +296,7 @@ describe "Visual Blockwise", ->
       it 'case-3', ->
         ensure ['2h3k', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             '--A'
             '--*'
             '--+'
@@ -313,7 +307,7 @@ describe "Visual Blockwise", ->
       it 'case-4', ->
         ensure ['l3k', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             'A-'
             '**'
             '++'
@@ -324,7 +318,7 @@ describe "Visual Blockwise", ->
       it 'case-5', ->
         ensure ['2l3k', {ctrl: 'v'}],
           mode: ['visual', 'blockwise']
-          selectedTextOrderd: [
+          selectedTextOrdered: [
             'A--'
             '***'
             '+++'
@@ -334,11 +328,11 @@ describe "Visual Blockwise", ->
 
   describe "shift from blockwise to characterwise", ->
     preserveSelection = ->
-      selectedTextInitial = editor.getSelectedText()
-      rangeInitial = editor.getSelectedBufferRange()
-      cursorInitial = editor.getCursorBufferPosition()
+      selectedText = editor.getSelectedText()
+      selectedBufferRange = editor.getSelectedBufferRange()
+      cursor = editor.getCursorBufferPosition()
       mode = [vimState.mode, vimState.submode]
-      {selectedTextInitial, rangeInitial, cursorInitial, mode}
+      {selectedText, selectedBufferRange, cursor, mode}
 
     ensureCharacterwiseWasRestored = (keystroke) ->
       ensure keystroke, mode: ['visual', 'characterwise']
@@ -365,13 +359,15 @@ describe "Visual Blockwise", ->
       it 'case-5', -> ensureCharacterwiseWasRestored('vl3k')
       it 'case-6', -> ensureCharacterwiseWasRestored('v2l3k')
 
+  # [FIXME] not appropriate put here, re-consider all spec file layout later.
   describe "gv feature", ->
     preserveSelection = ->
-      selectedTextInitial = editor.getSelectedText()
-      rangeInitial = editor.getSelectedBufferRange()
-      cursorInitial = editor.getCursorBufferPosition()
+      selections = editor.getSelectionsOrderedByBufferPosition()
+      selectedTextOrdered = (s.getText() for s in selections)
+      selectedBufferRangeOrdered = (s.getBufferRange() for s in selections)
+      cursors = (s.getHeadScreenPosition() for s in selections)
       mode = [vimState.mode, vimState.submode]
-      {selectedTextInitial, rangeInitial, cursorInitial, mode}
+      {selectedTextOrdered, selectedBufferRangeOrdered, cursors, mode}
 
     ensureRestored = (keystroke, spec) ->
       ensure keystroke, spec
@@ -385,16 +381,58 @@ describe "Visual Blockwise", ->
       describe "selection is not reversed", ->
         it 'restore previous selection', ->
           ensureRestored 'Vj',
-            selectedText: """
-              2----A---------B----
-              3----***********----\n
-              """
+            selectedText: getTextForLines(2, 3)
             mode: ['visual', 'linewise']
       describe "selection is reversed", ->
         it 'restore previous selection', ->
-          ensureRestored 'Vj',
-            selectedText: """
-              2----A---------B----
-              3----***********----\n
-              """
+          ensureRestored 'Vk',
+            selectedText: getTextForLines(1, 2)
             mode: ['visual', 'linewise']
+
+    describe "characterwise selection", ->
+      beforeEach ->
+        set cursor: [2, 0]
+      describe "selection is not reversed", ->
+        it 'restore previous selection', ->
+          ensureRestored 'vj',
+            selectedText: """
+            2----A---------B----
+            3
+            """
+            mode: ['visual', 'characterwise']
+      describe "selection is reversed", ->
+        it 'restore previous selection', ->
+          ensureRestored 'vk',
+            selectedText: """
+            1-------------------
+            2
+            """
+            mode: ['visual', 'characterwise']
+
+    describe "blockwise selection", ->
+      describe "selection is not reversed", ->
+        it 'restore previous selection case-1', ->
+          set cursor: [2, 5]
+          keystroke [{ctrl: 'v'}, '10l']
+          ensureRestored '3j',
+            selectedText: blockTexts[2..5]
+            mode: ['visual', 'blockwise']
+        it 'restore previous selection case-2', ->
+          set cursor: [5, 5]
+          keystroke [{ctrl: 'v'}, '10l']
+          ensureRestored '3k',
+            selectedTextOrdered: blockTexts[2..5]
+            mode: ['visual', 'blockwise']
+      describe "selection is reversed", ->
+        it 'restore previous selection case-1', ->
+          set cursor: [2, 15]
+          keystroke [{ctrl: 'v'}, '10h']
+          ensureRestored '3j',
+            selectedText: blockTexts[2..5]
+            mode: ['visual', 'blockwise']
+        it 'restore previous selection case-2', ->
+          set cursor: [5, 15]
+          keystroke [{ctrl: 'v'}, '10h']
+          ensureRestored '3k',
+            selectedTextOrdered: blockTexts[2..5]
+            mode: ['visual', 'blockwise']
