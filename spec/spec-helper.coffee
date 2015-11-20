@@ -18,32 +18,13 @@ class SpecError
   constructor: (@message) ->
     @name = 'SpecError'
 
-getVimState = (args...) ->
-  [editor, file, callback] = []
-  switch args.length
-    when 1 then [callback] = args
-    when 2 then [file, callback] = args
-
-  waitsForPromise ->
-    atom.packages.activatePackage(packageName)
-
-  waitsForPromise ->
-    file = atom.project.resolvePath(file) if file
-    atom.workspace.open(file).then (e) ->
-      editor = e
-
-  runs ->
-    pack = atom.packages.getActivePackage(packageName)
-    main = pack.mainModule
-    vimState = main.getEditorState(editor)
-    {editorElement} = vimState
-    editorElement.addEventListener 'keydown', (e) ->
-      atom.keymaps.handleKeyboardEvent(e)
-
-    callback(vimState, new VimEditor(vimState))
-
+# Utils
+# -------------------------
 getView = (model) ->
   atom.views.getView(model)
+
+dispatch = (target, command) ->
+  atom.commands.dispatch(target, command)
 
 mockPlatform = (editorElement, platform) ->
   wrapper = document.createElement('div')
@@ -99,6 +80,33 @@ _keystroke = (keys, {element}) ->
 toArray = (obj, cond=null) ->
   if _.isArray(cond ? obj) then obj else [obj]
 
+
+# Main
+# -------------------------
+getVimState = (args...) ->
+  [editor, file, callback] = []
+  switch args.length
+    when 1 then [callback] = args
+    when 2 then [file, callback] = args
+
+  waitsForPromise ->
+    atom.packages.activatePackage(packageName)
+
+  waitsForPromise ->
+    file = atom.project.resolvePath(file) if file
+    atom.workspace.open(file).then (e) ->
+      editor = e
+
+  runs ->
+    pack = atom.packages.getActivePackage(packageName)
+    main = pack.mainModule
+    vimState = main.getEditorState(editor)
+    {editorElement} = vimState
+    editorElement.addEventListener 'keydown', (e) ->
+      atom.keymaps.handleKeyboardEvent(e)
+
+    callback(vimState, new VimEditor(vimState))
+
 class VimEditor
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -112,69 +120,37 @@ class VimEditor
     'text', 'cursor', 'cursorBuffer', 'addCursor', 'addCursors', 'register'
     'selectedBufferRange'
   ]
+  # Public
   set: (options) =>
     @validateOptions(options, setOptionsOrdered, 'Invalid set options')
     for name in setOptionsOrdered when options[name]?
       method = 'set' + _.capitalize(_.camelize(name))
       this[method](options[name])
 
-  setText: (text) =>
+  setText: (text) ->
     @editor.setText(text)
 
-  setCursor: (point) =>
+  setCursor: (point) ->
     @editor.setCursorScreenPosition(point)
 
-  setCursorBuffer: (cursor) =>
+  setCursorBuffer: (cursor) ->
     @editor.setCursorBufferPosition(cursor)
 
-  setAddCursor: (point) =>
+  setAddCursor: (point) ->
     @editor.addCursorAtBufferPosition(point)
 
-  setAddCursors: (points) =>
+  setAddCursors: (points) ->
     @setAddCursor(point) for point in points
 
-  setRegister: (register) =>
+  setRegister: (register) ->
     if _.isObject(register)
       for name, value of register
         @vimState.register.set(name, value)
     else
       @vimState.register.set '"', text: register
 
-  setSelectedBufferRange: (range) =>
+  setSelectedBufferRange: (range) ->
     @editor.setSelectedBufferRange(range)
-
-  keystroke: (keys, {element}={}) =>
-    # keys must be String or Array
-    # Not support Object for keys to avoid ambiguity.
-    element ?= @editorElement
-    mocked = null
-    keys = [keys] unless _.isArray(keys)
-
-    for k in keys
-      if _.isString(k)
-        _keystroke(k, {element})
-      else
-        switch
-          when k.platform?
-            mockPlatform(element, k.platform)
-            mocked = true
-          when k.char?
-            chars =
-              # [FIXME] Cause insertText('escape'), useless.
-              if k.char in ['', 'escape']
-                toArray(k.char)
-              else
-                k.char.split('')
-            for c in chars
-              @vimState.input.view.editor.insertText(c)
-          when k.search?
-            {editor, editorElement} = @vimState.search.view
-            editor.insertText(k.search)
-            atom.commands.dispatch(editorElement, 'core:confirm')
-          when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
-          when k.raw?   then keydown k.raw, {raw: true, element}
-    if mocked
-      unmockPlatform(element)
 
   ensureOptionsOrdered = [
     'text', 'selectedText', 'selectedTextOrdered'
@@ -188,6 +164,7 @@ class VimEditor
     'scrollTop',
     'mode',
   ]
+  # Public
   ensure: (args...) =>
     switch args.length
       when 1 then [options] = args
@@ -290,7 +267,38 @@ class VimEditor
     for m in shouldNotContainClasses
       expect(@editorElement.classList.contains(m)).toBe(false)
 
-dispatch = (target, command) ->
-  atom.commands.dispatch(target, command)
+  # Public
+  keystroke: (keys, {element}={}) =>
+    # keys must be String or Array
+    # Not support Object for keys to avoid ambiguity.
+    element ?= @editorElement
+    mocked = null
+    keys = [keys] unless _.isArray(keys)
+
+    for k in keys
+      if _.isString(k)
+        _keystroke(k, {element})
+      else
+        switch
+          when k.platform?
+            mockPlatform(element, k.platform)
+            mocked = true
+          when k.char?
+            chars =
+              # [FIXME] Cause insertText('escape'), useless.
+              if k.char in ['', 'escape']
+                toArray(k.char)
+              else
+                k.char.split('')
+            for c in chars
+              @vimState.input.view.editor.insertText(c)
+          when k.search?
+            {editor, editorElement} = @vimState.search.view
+            editor.insertText(k.search)
+            atom.commands.dispatch(editorElement, 'core:confirm')
+          when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
+          when k.raw?   then keydown k.raw, {raw: true, element}
+    if mocked
+      unmockPlatform(element)
 
 module.exports = {getVimState, getView, dispatch}
