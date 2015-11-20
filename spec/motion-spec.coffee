@@ -1,5 +1,5 @@
 # Refactoring status: 70%
-{getVimState} = require './spec-helper'
+{getVimState, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
 
@@ -820,10 +820,7 @@ describe "Motion", ->
             def\n
           """
         cursor: [0, 0]
-        spy:
-          obj: atom.workspace
-          method: 'getActivePane'
-          return: pane
+      spyOn(atom.workspace, 'getActivePane').andReturn(pane)
 
       # clear search history
       vimState.searchHistory.clear()
@@ -833,7 +830,7 @@ describe "Motion", ->
       it "moves the cursor to the specified search pattern", ->
         ensure ['/', search: 'def'],
           cursor: [1, 0]
-          called: pane.activate
+        expect(pane.activate).toHaveBeenCalled()
 
       it "loops back around", ->
         set cursor: [3, 0]
@@ -965,6 +962,9 @@ describe "Motion", ->
 
     describe "using search history", ->
       inputEditor = null
+      ensureInputEditor = (command, {text}) ->
+        dispatch(inputEditor, command)
+        expect(inputEditor.getModel().getText()).toEqual(text)
 
       beforeEach ->
         ensure ['/', search: 'def'], cursor: [1, 0]
@@ -973,23 +973,17 @@ describe "Motion", ->
 
       it "allows searching history in the search field", ->
         _editor = inputEditor.getModel()
-        ensure ['/', cmd: {target: inputEditor, name: 'core:move-up'}],
-          text: {editor: _editor, value: 'abc'}
-        ensure [cmd: {target: inputEditor, name: 'core:move-up'}],
-          text: {editor: _editor, value: 'def'}
-        ensure [cmd: {target: inputEditor, name: 'core:move-up'}],
-          text: {editor: _editor, value: 'def'}
+        keystroke '/'
+        ensureInputEditor 'core:move-up', text: 'abc'
+        ensureInputEditor 'core:move-up', text: 'def'
+        ensureInputEditor 'core:move-up', text: 'def'
 
       it "resets the search field to empty when scrolling back", ->
-        _editor = inputEditor.getModel()
-        ensure ['/', cmd: {target: inputEditor, name: 'core:move-up'}],
-          text: {editor: _editor, value: 'abc'}
-        ensure [cmd: {target: inputEditor, name: 'core:move-up'}],
-          text: {editor: _editor, value: 'def'}
-        ensure [cmd: {target: inputEditor, name: 'core:move-down'}],
-          text: {editor: _editor, value: 'abc'}
-        ensure [cmd: {target: inputEditor, name: 'core:move-down'}],
-          text: {editor: _editor, value: ''}
+        keystroke '/'
+        ensureInputEditor 'core:move-up', text: 'abc'
+        ensureInputEditor 'core:move-up', text: 'def'
+        ensureInputEditor 'core:move-down', text: 'abc'
+        ensureInputEditor 'core:move-down', text: ''
 
   describe "the * keybinding", ->
     beforeEach ->
@@ -1121,37 +1115,34 @@ describe "Motion", ->
 
     describe "the H keybinding", ->
       it "moves the cursor to the non-blank-char on first row if visible", ->
-        set spy: obj: eel, method: 'getFirstVisibleScreenRow', return: 0
+        spyOn(eel, 'getFirstVisibleScreenRow').andReturn(0)
         ensure 'H', cursor: [0, 2]
 
       it "moves the cursor to the non-blank-char on first visible row plus scroll offset", ->
-        set spy: obj: eel, method: 'getFirstVisibleScreenRow', return: 2
+        spyOn(eel, 'getFirstVisibleScreenRow').andReturn(2)
         ensure 'H', cursor: [4, 2]
 
       it "respects counts", ->
-        set spy: obj: eel, method: 'getFirstVisibleScreenRow', return: 0
+        spyOn(eel, 'getFirstVisibleScreenRow').andReturn(0)
         ensure '4H', cursor: [3, 0]
 
     describe "the L keybinding", ->
       it "moves the cursor to non-blank-char on last row if visible", ->
-        set spy: obj: eel, method: 'getLastVisibleScreenRow', return: 9
+        spyOn(eel, 'getLastVisibleScreenRow').andReturn(9)
         ensure 'L', cursor: [9, 2]
 
       it "moves the cursor to the first visible row plus offset", ->
-        set spy: obj: eel, method: 'getLastVisibleScreenRow', return: 6
+        spyOn(eel, 'getLastVisibleScreenRow').andReturn(6)
         ensure 'L', cursor: [4, 2]
 
       it "respects counts", ->
-        set spy: obj: eel, method: 'getLastVisibleScreenRow', return: 9
-        ensure '3L', [8, 0]
+        spyOn(eel, 'getLastVisibleScreenRow').andReturn(9)
+        ensure '3L', cursor: [7, 0]
 
     describe "the M keybinding", ->
       beforeEach ->
-        set
-          spy: [
-            {obj: eel, method: 'getFirstVisibleScreenRow', return: 0},
-            {obj: editor, method: 'getRowsPerPage',  return: 10},
-          ]
+        spyOn(eel, 'getFirstVisibleScreenRow').andReturn(0)
+        spyOn(editor, 'getRowsPerPage').andReturn(10)
 
       it "moves the cursor to the non-blank-char of middle of screen", ->
         ensure 'M', cursor: [4, 2]

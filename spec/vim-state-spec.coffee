@@ -123,7 +123,7 @@ describe "VimState", ->
         advanceClock(100)
         ensure
           mode: ['visual', 'characterwise']
-          selectedbufferrange: [[0, 0], [0, 1]]
+          selectedBufferRange: [[0, 0], [0, 1]]
 
       it "handles the editor being destroyed shortly after selecting text", ->
         set selectedBufferRange: [[0, 0], [0, 3]]
@@ -166,11 +166,10 @@ describe "VimState", ->
         ensure 'dr',
           mode: 'normal'
         expect(vimState.operationStack.isEmpty()).toBe(true)
-        ensure 'd',
-          cmd:
-            target: vimState.input.view.editorElement
-            name: "core:cancel"
-          text: '012345\nabcdef'
+        target = vimState.input.view.editorElement
+        keystroke 'd'
+        atom.commands.dispatch(target, 'core:cancel')
+        ensure text: '012345\nabcdef'
 
   describe "insert-mode", ->
     beforeEach -> keystroke 'i'
