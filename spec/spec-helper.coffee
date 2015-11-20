@@ -1,6 +1,7 @@
 # Refactoring status: 70%
 _ = require 'underscore-plus'
 {Range, Point} = require 'atom'
+{inspect} = require 'util'
 
 supportedModeClass = [
   'normal-mode'
@@ -18,12 +19,10 @@ class SpecError
     @name = 'SpecError'
 
 getVimState = (args...) ->
-  [file, callback] = []
+  [editor, file, callback] = []
   switch args.length
     when 1 then [callback] = args
     when 2 then [file, callback] = args
-
-  editor = null
 
   waitsForPromise ->
     atom.packages.activatePackage(packageName)
@@ -93,10 +92,9 @@ _keystroke = (keys, {element}) ->
     keydown keys, {element}
   else
     for key in keys.split('')
-      if key.match(/[A-Z]/)
-        keydown key, {shift: true, element}
-      else
-        keydown key, {element}
+      event = {element}
+      event.shift = true if key.match(/[A-Z]/)
+      keydown key, event
 
 toArray = (obj, cond=null) ->
   if _.isArray(cond ? obj) then obj else [obj]
@@ -105,31 +103,53 @@ class VimEditor
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
 
-  set: (o={}) =>
-    {text, cursor, cursorBuffer, addCursor, register, selectedBufferRange, spy} = o
+  validOptions = [
+    'text', 'cursor', 'cursorBuffer', 'addCursor',
+    'register', 'selectedBufferRange', 'spy'
+  ]
+  validateOptions: (options) ->
+    invalidOptions = _.without(_.keys(options), validOptions...)
+    if invalidOptions.length
+      throw new SpecError("invalidOptions: #{inspect(invalidOptions)}")
 
-    @editor.setText(text) if text?
-    @editor.setCursorScreenPosition(cursor) if cursor?
-    @editor.setCursorBufferPosition(cursorBuffer) if cursorBuffer?
+  set: (options) =>
+    @validateOptions(options)
+    optionsOrdered = [
+      'text', 'cursor', 'cursorBuffer', 'addCursor', 'register'
+      'selectedBufferRange', 'spy'
+    ]
+    for name in optionsOrdered when options[name]?
+      method = _.capitalize(_.camelize(name))
+      this["set#{method}"](options[name])
 
-    if addCursor?
-      for point in toArray(addCursor, addCursor[0])
-        @editor.addCursorAtBufferPosition(point)
+  setText: (text) =>
+    @editor.setText(text)
 
-    if register?
-      if _.isObject(register)
-        for name, value of register
-          @vimState.register.set(name, value)
-      else
-        @vimState.register.set '"', text: register
+  setCursor: (cursor) =>
+    @editor.setCursorScreenPosition(cursor)
 
-    @editor.setSelectedBufferRange(selectedBufferRange) if selectedBufferRange?
+  setCursorBuffer: (cursor) =>
+    @editor.setCursorBufferPosition(cursor)
 
-    if spy?
-      # e.g.
-      # spyOn(editor, 'getURI').andReturn('/Users/atom/known_value.txt')
-      for s in toArray(o.spy)
-        spyOn(s.obj, s.method).andReturn(s.return)
+  setAddCursor: (cursors) =>
+    for point in toArray(cursors, cursors[0])
+      @editor.addCursorAtBufferPosition(point)
+
+  setRegister: (register) =>
+    if _.isObject(register)
+      for name, value of register
+        @vimState.register.set(name, value)
+    else
+      @vimState.register.set '"', text: register
+
+  setSelectedBufferRange: (range) =>
+    @editor.setSelectedBufferRange(range)
+
+  setSpy: (spy) ->
+    # e.g.
+    # spyOn(editor, 'getURI').andReturn('/Users/atom/known_value.txt')
+    for s in toArray(spy)
+      spyOn(s.obj, s.method).andReturn(s.return)
 
   ensure: (args...) =>
     [keys, o] = []
@@ -235,16 +255,6 @@ class VimEditor
       shouldNotContainClasses = _.difference(supportedModeClass, currentMode)
       for m in shouldNotContainClasses
         expect(@editorElement.classList.contains(m)).toBe(false)
-
-    if o.classListContains?
-      for klass in toArray(o.classListContains)
-        expect(@editorElement.classList.contains(klass)).toBe(true)
-        expect(@editorElement.classList.contains(klass)).toBe(true)
-
-    if o.classListNotContains?
-      for klass in toArray(o.classListNotContains)
-        expect(@editorElement.classList.contains(klass)).toBe(false)
-        expect(@editorElement.classList.contains(klass)).toBe(false)
 
   keystroke: (keys, {element}={}) =>
     # keys must be String or Array
