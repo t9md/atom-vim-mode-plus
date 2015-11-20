@@ -10,7 +10,7 @@ class MarkManager
     {@editor, @editorElement} = @vimState
     @marks = {}
     subs = @vimState.subscriptions
-    subs.add @vimState.modeManager.onWillModeDeactivate ({mode, submode}) =>
+    subs.add @vimState.modeManager.onWillDeactivateMode ({mode, submode}) =>
       switch mode
         when 'insert'
           @set('^', @editor.getCursorBufferPosition())
