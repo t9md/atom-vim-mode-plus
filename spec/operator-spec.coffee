@@ -354,7 +354,7 @@ describe "Operator", ->
         set
           text: "abcd\n1234\nABCD\n"
           cursorBuffer: [0, 1]
-          addCursor: [[1, 2], [2, 3]]
+          addCursors: [[1, 2], [2, 3]]
 
         ensure 'de',
           text: "a\n12\nABC"
@@ -364,7 +364,7 @@ describe "Operator", ->
         set
           text: "abcd\nabc\nabd"
           cursorBuffer: [0, 0]
-          addCursor: [[1, 0], [2, 0]]
+          addCursors: [[1, 0], [2, 0]]
 
         ensure ['dt', char: 'd'],
           text: "d\nabc\nd"
@@ -1528,7 +1528,7 @@ describe "Operator", ->
       set
         text: '123\nab45\ncd-67ef\nab-5\na-bcdef'
         cursorBuffer: [0, 0]
-        addCursor: [[1, 0], [2, 0], [3, 3], [4, 0]]
+        addCursors: [[1, 0], [2, 0], [3, 3], [4, 0]]
 
     describe "increasing numbers", ->
       it "increases the next number", ->
@@ -1570,7 +1570,7 @@ describe "Operator", ->
         set
           text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
           cursorBuffer: [0, 0]
-          addCursor: [[1, 0], [2, 0], [3, 3], [4, 0]]
+          addCursors: [[1, 0], [2, 0], [3, 3], [4, 0]]
         settings.set('numberRegex', '(?:\\B-)?[0-9]+')
         ensure [ctrl: 'a'],
           cursorBuffer: [[0, 2], [1, 3], [2, 5], [3, 3], [4, 0]]
@@ -1616,7 +1616,7 @@ describe "Operator", ->
         set
           text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
           cursorBuffer: [0, 0]
-          addCursor: [[1, 0], [2, 0], [3, 3], [4, 0]]
+          addCursors: [[1, 0], [2, 0], [3, 3], [4, 0]]
         settings.set('numberRegex', '(?:\\B-)?[0-9]+')
         ensure [ctrl: 'x'],
           text: '122\nab44\ncd -68ef\nab-4\na-bcdef'

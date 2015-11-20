@@ -20,28 +20,25 @@ describe "Scrolling", ->
       spyOn(editor, 'getLineHeightInPixels').andReturn(10)
       spyOn(editorElement, 'getScrollTop').andReturn(100)
       spyOn(editorElement, 'setScrollTop')
+      spyOn(editor, 'setCursorScreenPosition')
 
     describe "the ctrl-e keybinding", ->
       beforeEach ->
         spyOn(editor, 'getCursorScreenPosition').andReturn({row: 3, column: 0})
-        spyOn(editor, 'setCursorScreenPosition')
 
       it "moves the screen down by one and keeps cursor onscreen", ->
-        ensure [ctrl: 'e'], called: [
-            {func: editorElement.setScrollTop, with: 110},
-            {func: editor.setCursorScreenPosition, with: [4, 0]}
-          ]
+        keystroke {ctrl: 'e'}
+        expect(editorElement.setScrollTop).toHaveBeenCalledWith(110)
+        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([4, 0])
 
     describe "the ctrl-y keybinding", ->
       beforeEach ->
         spyOn(editor, 'getCursorScreenPosition').andReturn({row: 6, column: 0})
-        spyOn(editor, 'setCursorScreenPosition')
 
       it "moves the screen up by one and keeps the cursor onscreen", ->
-        ensure [ctrl: 'y'], called: [
-            {func: editorElement.setScrollTop, with: 90},
-            {func: editor.setCursorScreenPosition, with: [5, 0]}
-          ]
+        keystroke {ctrl: 'y'}
+        expect(editorElement.setScrollTop).toHaveBeenCalledWith(90)
+        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([5, 0])
 
   describe "scroll cursor keybindings", ->
     beforeEach ->

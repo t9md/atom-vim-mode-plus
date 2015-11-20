@@ -1,5 +1,5 @@
 # Refactoring status: 80%
-{getVimState} = require './spec-helper'
+{getVimState, dispatch} = require './spec-helper'
 
 describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -26,8 +26,8 @@ describe "TextObject", ->
     describe "when TextObject is excuted directly", ->
       it "select that TextObject", ->
         set cursor: [8, 7]
-        ensure [cmd: {target: editorElement, name: 'vim-mode-plus:inner-word'}],
-          selectedText: 'QuickSort'
+        dispatch(editorElement, 'vim-mode-plus:inner-word')
+        ensure selectedText: 'QuickSort'
 
   describe "Word", ->
     describe "inner-word", ->
