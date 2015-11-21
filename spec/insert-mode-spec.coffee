@@ -17,29 +17,31 @@ describe "Insert mode commands", ->
     beforeEach ->
       set
         text: """
-        12345
+          12345
 
-        abcd
-        efghi
-        """
+          abcd
+          efghi
+          """
         cursorBuffer: [[1, 0], [3, 0]]
       keystroke 'i'
 
     describe "the ctrl-y command", ->
       it "copies from the line above", ->
-        ensure {ctrl: 'y'}, text: """
-          12345
-          1
-          abcd
-          aefghi
-          """
+        ensure {ctrl: 'y'},
+          text: """
+            12345
+            1
+            abcd
+            aefghi
+            """
         editor.insertText ' '
-        ensure {ctrl: 'y'}, text: """
-          12345
-          1 3
-          abcd
-          a cefghi
-          """
+        ensure {ctrl: 'y'},
+          text: """
+            12345
+            1 3
+            abcd
+            a cefghi
+            """
 
       it "does nothing if there's nothing above the cursor", ->
         editor.insertText 'fill'
