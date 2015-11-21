@@ -80,6 +80,12 @@ _keystroke = (keys, {element}) ->
 toArray = (obj, cond=null) ->
   if _.isArray(cond ? obj) then obj else [obj]
 
+toArrayOfPoint = (obj) ->
+  if _.isArray(obj) and (_.isArray(obj[0]) or (obj[0] instanceof Point))
+    obj
+  else
+    [obj]
+
 # Main
 # -------------------------
 getVimState = (args...) ->
@@ -106,6 +112,21 @@ getVimState = (args...) ->
 
     callback(vimState, new VimEditor(vimState))
 
+class TextData
+  constructor: (@row) ->
+    @lines = @row.split("\n")
+
+  getLines: (lines, {chomp}={}) ->
+    chomp ?= false
+    text = (@lines[line] for line in lines).join("\n")
+    if chomp
+      text
+    else
+      text + "\n"
+
+  getRaw: ->
+    @row
+
 class VimEditor
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -122,6 +143,7 @@ class VimEditor
     'register', 'unnamedRegister',
     'selectedBufferRange'
   ]
+
   # Public
   set: (options) =>
     @validateOptions(options, setOptionsOrdered, 'Invalid set options')
@@ -133,31 +155,23 @@ class VimEditor
     @editor.setText(text)
 
   setCursor: (points) ->
-    if (points instanceof Point) or not _.isArray(points[0])
-      points = [points]
-
+    points = toArrayOfPoint(points)
     @editor.setCursorScreenPosition(points.shift())
     for point in points
       @editor.addCursorAtScreenPosition(point)
 
   setCursorBuffer: (points) ->
-    if (points instanceof Point) or not _.isArray(points[0])
-      points = [points]
-
+    points = toArrayOfPoint(points)
     @editor.setCursorBufferPosition(points.shift())
     for point in points
       @editor.addCursorAtBufferPosition(point)
 
   setAddCursor: (points) ->
-    if (points instanceof Point) or not _.isArray(points[0])
-      points = [points]
-    for point in points
+    for point in toArrayOfPoint(points)
       @editor.addCursorAtScreenPosition(point)
 
   setAddCursorBuffer: (points) ->
-    if (points instanceof Point) or not _.isArray(points[0])
-      points = [points]
-    for point in points
+    for point in toArrayOfPoint(points)
       @editor.addCursorAtBufferPosition(point)
 
   setRegister: (register) ->
@@ -320,4 +334,4 @@ class VimEditor
     if mocked
       unmockPlatform(element)
 
-module.exports = {getVimState, getView, dispatch}
+module.exports = {getVimState, getView, dispatch, TextData}

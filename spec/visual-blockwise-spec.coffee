@@ -1,4 +1,4 @@
-{getVimState} = require './spec-helper'
+{getVimState, TextData} = require './spec-helper'
 swrap = require '../lib/selection-wrapper'
 
 describe "Visual Blockwise", ->
@@ -32,9 +32,7 @@ describe "Visual Blockwise", ->
     'C---------D' # 5
     '-----------' # 6
   ]
-  lineTexts = textInitial.split("\n")
-  getTextForLines = (start, end) ->
-    lineTexts[start..end].join("\n") + "\n"
+  textData = new TextData(textInitial)
 
   selectBlockwise = ->
     set cursor: [2, 5]
@@ -381,12 +379,12 @@ describe "Visual Blockwise", ->
       describe "selection is not reversed", ->
         it 'restore previous selection', ->
           ensureRestored 'Vj',
-            selectedText: getTextForLines(2, 3)
+            selectedText: textData.getLines([2, 3])
             mode: ['visual', 'linewise']
       describe "selection is reversed", ->
         it 'restore previous selection', ->
           ensureRestored 'Vk',
-            selectedText: getTextForLines(1, 2)
+            selectedText: textData.getLines([1, 2])
             mode: ['visual', 'linewise']
 
     describe "characterwise selection", ->
