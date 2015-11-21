@@ -1,28 +1,27 @@
 # Refactoring status: 0%
+{getVimState, getView} = require './spec-helper'
+
 packageName = 'vim-mode-plus'
-describe "VimModePlus", ->
-  [editor, editorElement, workspaceElement] = []
+describe "vim-mode-plus", ->
+  [set, ensure, keystroke, editor, editorElement, vimState, workspaceElement] = []
 
   beforeEach ->
-    workspaceElement = atom.views.getView(atom.workspace)
+    getVimState (_vimState, vim) ->
+      vimState = _vimState
+      {editor, editorElement} = _vimState
+      {set, ensure, keystroke} = vim
 
-    waitsForPromise ->
-      atom.workspace.open()
-
-    waitsForPromise ->
-      atom.packages.activatePackage(packageName)
+    workspaceElement = getView(atom.workspace)
 
     waitsForPromise ->
       atom.packages.activatePackage('status-bar')
 
-    runs ->
-      editor = atom.workspace.getActiveTextEditor()
-      editorElement = atom.views.getView(editor)
+  afterEach ->
+    vimState.activate('reset')
 
   describe ".activate", ->
     it "puts the editor in normal-mode initially by default", ->
-      expect(editorElement.classList.contains('vim-mode-plus')).toBe(true)
-      expect(editorElement.classList.contains('normal-mode')).toBe(true)
+      ensure mode: 'normal'
 
     it "shows the current vim mode in the status bar", ->
       statusBarTile = null
@@ -32,20 +31,20 @@ describe "VimModePlus", ->
 
       runs ->
         expect(statusBarTile.textContent).toBe("Normal")
-        atom.commands.dispatch(editorElement, "vim-mode-plus:activate-insert-mode")
+        ensure 'i', mode: 'insert'
         expect(statusBarTile.textContent).toBe("Insert")
 
     it "doesn't register duplicate command listeners for editors", ->
-      editor.setText("12345")
-      editor.setCursorBufferPosition([0, 0])
+      set
+        text: '12345'
+        cursorBuffer: [0, 0]
 
       pane = atom.workspace.getActivePane()
       newPane = pane.splitRight()
       pane.removeItem(editor)
       newPane.addItem(editor)
 
-      atom.commands.dispatch(editorElement, "vim-mode-plus:move-right")
-      expect(editor.getCursorBufferPosition()).toEqual([0, 1])
+      ensure 'l', cursorBuffer: [0, 1]
 
   describe ".deactivate", ->
     it "removes the vim classes from the editor", ->
