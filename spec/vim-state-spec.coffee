@@ -342,24 +342,18 @@ describe "VimState", ->
       describe "activateVisualMode with same type puts the editor into normal mode", ->
         describe "characterwise: vv", ->
           it "activating twice make editor return to normal mode ", ->
-            ensure 'v',
-              mode: ['visual', 'characterwise']
-            ensure 'v', cursor: cursorPosition, mode: 'normal'
+            ensure 'v', mode: ['visual', 'characterwise']
+            ensure 'v', mode: 'normal', cursor: cursorPosition
 
         describe "linewise: VV", ->
           it "activating twice make editor return to normal mode ", ->
-            ensure 'V',
-              mode: ['visual', 'linewise']
-            ensure 'V',
-              mode: 'normal'
-              cursor: cursorPosition
+            ensure 'V', mode: ['visual', 'linewise']
+            ensure 'V', mode: 'normal', cursor: cursorPosition
 
         describe "blockwise: ctrl-v twice", ->
           it "activating twice make editor return to normal mode ", ->
             ensure {ctrl: 'v'}, mode: ['visual', 'blockwise']
-            ensure {ctrl: 'v'},
-              mode: 'normal'
-              cursor: cursorPosition
+            ensure {ctrl: 'v'}, mode: 'normal', cursor: cursorPosition
 
       describe "change submode within visualmode", ->
         beforeEach ->
@@ -370,7 +364,7 @@ describe "VimState", ->
         it "can change submode within visual mode", ->
           ensure 'v'        , mode: ['visual', 'characterwise']
           ensure 'V'        , mode: ['visual', 'linewise']
-          ensure [ctrl: 'v'], mode: ['visual', 'blockwise']
+          ensure {ctrl: 'v'}, mode: ['visual', 'blockwise']
           ensure 'v'        , mode: ['visual', 'characterwise']
 
         it "recover original range when shift from linewise to characterwise", ->
@@ -381,23 +375,14 @@ describe "VimState", ->
     describe "deactivating visual mode", ->
       beforeEach ->
         ensure 'escape', mode: 'normal'
-        set
-          text: "line one\nline two\nline three\n"
-          cursor: [0, 7]
+        set text: "line one\nline two\nline three\n", cursor: [0, 7]
       it "can put cursor at in visual char mode", ->
-        ensure 'v',
-          mode: ['visual', 'characterwise']
-          cursor: [0, 8]
+        ensure 'v', mode: ['visual', 'characterwise'], cursor: [0, 8]
       it "adjust cursor position 1 column left when deactivated", ->
-        ensure ['v', 'escape'],
-          mode: 'normal'
-          cursor: [0, 7]
+        ensure ['v', 'escape'], mode: 'normal', cursor: [0, 7]
       it "[CHANGED from vim-mode] can not select new line in characterwise visual mode", ->
-        ensure 'vll',
-          cursor: [0, 8]
-        ensure 'escape',
-          mode: 'normal'
-          cursor: [0, 7]
+        ensure 'vll', cursor: [0, 8]
+        ensure 'escape', mode: 'normal', cursor: [0, 7]
 
   describe "marks", ->
     beforeEach -> set text: "text in line 1\ntext in line 2\ntext in line 3"

@@ -77,11 +77,34 @@ _keystroke = (keys, {element}) ->
       event.shift = true if key.match(/[A-Z]/)
       keydown key, event
 
+isPoint = (obj) ->
+  if obj instanceof Point
+    true
+  else
+    obj.length is 2 and _.isNumber(obj[0]) and _.isNumber(obj[1])
+
+isRange = (obj) ->
+  if obj instanceof Range
+    true
+  else
+    _.all([
+      _.isArray(obj),
+      (obj.length is 2),
+      isPoint(obj[0]),
+      isPoint(obj[1])
+    ])
+
 toArray = (obj, cond=null) ->
   if _.isArray(cond ? obj) then obj else [obj]
 
 toArrayOfPoint = (obj) ->
-  if _.isArray(obj) and (_.isArray(obj[0]) or (obj[0] instanceof Point))
+  if _.isArray(obj) and isPoint(obj[0])
+    obj
+  else
+    [obj]
+
+toArrayOfRange = (obj) ->
+  if _.isArray(obj) and _.all(obj.map (e) -> isRange(e))
     obj
   else
     [obj]
@@ -140,7 +163,7 @@ class VimEditor
     'text',
     'cursor', 'cursorBuffer',
     'addCursor', 'addCursorBuffer'
-    'register', 'unnamedRegister',
+    'register',
     'selectedBufferRange'
   ]
 
@@ -178,19 +201,17 @@ class VimEditor
     for name, value of register
       @vimState.register.set(name, value)
 
-  setUnnamedRegister: (text) ->
-    @vimState.register.set '"', text: text
-
   setSelectedBufferRange: (range) ->
     @editor.setSelectedBufferRange(range)
 
   ensureOptionsOrdered = [
     'text',
     'selectedText', 'selectedTextOrdered'
-    'cursor', 'cursors', 'cursorBuffer', 'numCursors'
-    'register', 'unnamedRegister'
-    'selectedScreenRange', 'selectedBufferRange',
-    'selectedBufferRangeOrdered',
+    'cursor', 'cursorBuffer',
+    'numCursors'
+    'register',
+    'selectedScreenRange', 'selectedScreenRangeOrdered'
+    'selectedBufferRange', 'selectedBufferRangeOrdered'
     'selectionIsReversed',
     'scrollTop',
     'mode',
@@ -212,62 +233,53 @@ class VimEditor
   ensureText: (text) ->
     expect(@editor.getText()).toEqual(text)
 
-  ensureSelectedText: (text) ->
-    selections = @editor.getSelections()
-    texts = (s.getText() for s in selections)
-    expect(texts).toEqual(toArray(text))
+  ensureSelectedText: (text, ordered=false) ->
+    selections = if ordered
+      @editor.getSelectionsOrderedByBufferPosition()
+    else
+      @editor.getSelections()
+    actual = (s.getText() for s in selections)
+    expect(actual).toEqual(toArray(text))
 
   ensureSelectedTextOrdered: (text) ->
-    selections = @editor.getSelectionsOrderedByBufferPosition()
-    texts = (s.getText() for s in selections)
-    expect(texts).toEqual(toArray(text))
+    @ensureSelectedText(text, true)
 
-  ensureCursor: (cursor) ->
-    cursor = if cursor instanceof Point or not _.isArray(cursor[0])
-      [cursor]
-    else
-      cursor
-    points = @editor.getCursorScreenPositions()
-    expect(points).toEqual(toArray(cursor, cursor))
+  ensureCursor: (points) ->
+    actual = @editor.getCursorScreenPositions()
+    expect(actual).toEqual(toArrayOfPoint(points))
 
-  ensureCursors: (cursors) ->
-    points = @editor.getCursorScreenPositions()
-    expect(points).toEqual(cursors)
-
-  ensureCursorBuffer: (cursor) ->
-    points = @editor.getCursorBufferPositions()
-    expect(points).toEqual(toArray(cursor, cursor[0]))
+  ensureCursorBuffer: (points) ->
+    actual = @editor.getCursorBufferPositions()
+    expect(actual).toEqual(toArrayOfPoint(points))
 
   ensureRegister: (register) ->
-    for name, value of register
+    for name, ensure of register
       reg = @vimState.register.get(name)
-      for prop, _value of value
-        expect(reg[prop]).toEqual(_value)
-
-  ensureUnnamedRegister: (text) ->
-    expect(@vimState.register.get('"').text).toBe text
+      for property, _value of ensure
+        expect(reg[property]).toEqual(_value)
 
   ensureNumCursors: (number) ->
     expect(@editor.getCursors()).toHaveLength number
 
-  ensureSelectedScreenRange: (range) ->
-    actual = @editor.getSelectedScreenRanges()
-    expected = toArray(range, range[0][0])
-    expect(actual).toEqual(expected)
+  _ensureSelectedRangeBy: (range, ordered=false, fn) ->
+    selections = if ordered
+      @editor.getSelectionsOrderedByBufferPosition()
+    else
+      @editor.getSelections()
+    actual = (fn(s) for s in selections)
+    expect(actual).toEqual(toArrayOfRange(range))
 
-  ensureSelectedBufferRange: (range) ->
-    if (range instanceof Range) or
-        (not (range[0] instanceof Range)) and (not _.isArray(range[0][0]))
-      range = [range]
-    actual = @editor.getSelectedBufferRanges()
-    expect(actual).toEqual(range)
+  ensureSelectedScreenRange: (range, ordered=false) ->
+    @_ensureSelectedRangeBy range, ordered, (s) -> s.getScreenRange()
+
+  ensureSelectedScreenRangeOrdered: (range) ->
+    @ensureSelectedScreenRange(range, true)
+
+  ensureSelectedBufferRange: (range, ordered=false) ->
+    @_ensureSelectedRangeBy range, ordered, (s) -> s.getBufferRange()
 
   ensureSelectedBufferRangeOrdered: (range) ->
-    if (range instanceof Range) or
-        (not (range[0] instanceof Range)) and (not _.isArray(range[0][0]))
-      range = [range]
-    actual = @editor.getSelectionsOrderedByBufferPosition().map (e) -> e.getBufferRange()
-    expect(actual).toEqual(range)
+    @ensureSelectedBufferRange(range, true)
 
   ensureSelectionIsReversed: (reversed) ->
     actual = @editor.getLastSelection().isReversed()

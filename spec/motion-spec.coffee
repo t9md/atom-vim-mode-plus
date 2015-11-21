@@ -39,7 +39,7 @@ describe "Motion", ->
         it "selects the character to the left", ->
           ensure 'yh',
             cursor: [1, 0]
-            unnamedRegister: 'a'
+            register: '"': text: 'a'
 
     describe "the j keybinding", ->
       it "moves the cursor down, but not to the end of the last line", ->
@@ -221,12 +221,12 @@ describe "Motion", ->
       describe "within a word", ->
         it "selects to the end of the word", ->
           set cursor: [0, 0]
-          ensure 'yw', unnamedRegister: 'ab '
+          ensure 'yw', register: '"': text: 'ab '
 
       describe "between words", ->
         it "selects the whitespace", ->
           set cursor: [0, 2]
-          ensure 'yw', unnamedRegister: ' '
+          ensure 'yw', register: '"': text: ' '
 
   describe "the W keybinding", ->
     beforeEach ->
@@ -246,19 +246,19 @@ describe "Motion", ->
       describe "within a word", ->
         it "selects to the end of the whole word", ->
           set cursor: [0, 0]
-          ensure 'yW', unnamedRegister: 'cde1+- '
+          ensure 'yW', register: '"': text: 'cde1+- '
 
       it "continues past blank lines", ->
         set cursor: [2, 0]
         ensure 'dW',
           text: "cde1+- ab \n xyz\nzip"
-          unnamedRegister: "\n"
+          register: '"': text: "\n"
 
       it "doesn't go past the end of the file", ->
         set cursor: [3, 0]
         ensure 'dW',
           text: "cde1+- ab \n xyz\n\n"
-          unnamedRegister: 'zip'
+          register: '"': text: 'zip'
 
   describe "the e keybinding", ->
     beforeEach ->
@@ -279,12 +279,12 @@ describe "Motion", ->
       describe "within a word", ->
         it "selects to the end of the current word", ->
           set cursor: [0, 0]
-          ensure 'ye', unnamedRegister: 'ab'
+          ensure 'ye', register: '"': text: 'ab'
 
       describe "between words", ->
         it "selects to the end of the next word", ->
           set cursor: [0, 2]
-          ensure 'ye', unnamedRegister: ' cde1'
+          ensure 'ye', register: '"': text: ' cde1'
 
   describe "the E keybinding", ->
     beforeEach ->
@@ -305,17 +305,17 @@ describe "Motion", ->
       describe "within a word", ->
         it "selects to the end of the current word", ->
           set cursor: [0, 0]
-          ensure 'yE', unnamedRegister: 'ab'
+          ensure 'yE', register: '"': text: 'ab'
 
       describe "between words", ->
         it "selects to the end of the next word", ->
           set cursor: [0, 2]
-          ensure 'yE', unnamedRegister: '  cde1+-'
+          ensure 'yE', register: '"': text: '  cde1+-'
 
       describe "press more than once", ->
         it "selects to the end of the current word", ->
           set cursor: [0, 0]
-          ensure 'vEEy', unnamedRegister: 'ab  cde1+-'
+          ensure 'vEEy', register: '"': text: 'ab  cde1+-'
 
   describe "the } keybinding", ->
     beforeEach ->
@@ -332,7 +332,7 @@ describe "Motion", ->
 
     describe "as a selection", ->
       it 'selects to the end of the current paragraph', ->
-        ensure 'y}', unnamedRegister: "abcde\n"
+        ensure 'y}', register: '"': text: "abcde\n"
 
   describe "the { keybinding", ->
     beforeEach ->
@@ -350,7 +350,7 @@ describe "Motion", ->
     describe "as a selection", ->
       it 'selects to the beginning of the current paragraph', ->
         set cursor: [7, 0]
-        ensure 'y{', unnamedRegister: "\nzip\n"
+        ensure 'y{', register: '"': text: "\nzip\n"
 
   describe "the b keybinding", ->
     beforeEach ->
@@ -378,12 +378,12 @@ describe "Motion", ->
       describe "within a word", ->
         it "selects to the beginning of the current word", ->
           set cursor: [0, 2]
-          ensure 'yb', unnamedRegister: 'a', cursor: [0, 1]
+          ensure 'yb', cursor: [0, 1], register: '"': text: 'a'
 
       describe "between words", ->
         it "selects to the beginning of the last word", ->
           set cursor: [0, 4]
-          ensure 'yb', unnamedRegister: 'ab ', cursor: [0, 1]
+          ensure 'yb', cursor: [0, 1], register: '"': text: 'ab '
 
   describe "the B keybinding", ->
     beforeEach ->
@@ -409,11 +409,11 @@ describe "Motion", ->
     describe "as a selection", ->
       it "selects to the beginning of the whole word", ->
         set cursor: [1, 9]
-        ensure 'yB', unnamedRegister: 'xyz-12' # because cursor is on the `3`
+        ensure 'yB', register: '"': text: 'xyz-12' # because cursor is on the `3`
 
       it "doesn't go past the beginning of the file", ->
-        set cursor: [0, 0], unnamedRegister: 'abc'
-        ensure 'yB', unnamedRegister: 'abc'
+        set cursor: [0, 0], register: '"': text: 'abc'
+        ensure 'yB', register: '"': text: 'abc'
 
   describe "the ^ keybinding", ->
     beforeEach ->
