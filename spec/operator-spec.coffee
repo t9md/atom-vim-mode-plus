@@ -49,8 +49,7 @@ describe "Operator", ->
         beforeEach ->
           set
             text: "abc\n012345\n\nxyz"
-            cursor: [1, 4]
-            addCursor: [0, 1]
+            cursor: [[1, 4], [0, 1]]
 
         it "is undone as one operation", ->
           ensure 'x', text: "ac\n01235\n\nxyz"
@@ -230,7 +229,7 @@ describe "Operator", ->
 
       describe "with multiple cursors", ->
         beforeEach ->
-          set cursor: [1, 1], addCursor: [0, 0]
+          set cursor: [[1, 1], [0, 0]]
 
         it "is undone as one operation", ->
           ensure 'dlu',
@@ -353,8 +352,7 @@ describe "Operator", ->
       it "deletes each selection", ->
         set
           text: "abcd\n1234\nABCD\n"
-          cursorBuffer: [0, 1]
-          addCursors: [[1, 2], [2, 3]]
+          cursorBuffer: [[0, 1], [1, 2], [2, 3]]
 
         ensure 'de',
           text: "a\n12\nABC"
@@ -363,8 +361,7 @@ describe "Operator", ->
       it "doesn't delete empty selections", ->
         set
           text: "abcd\nabc\nabd"
-          cursorBuffer: [0, 0]
-          addCursors: [[1, 0], [2, 0]]
+          cursorBuffer: [[0, 0], [1, 0], [2, 0]]
 
         ensure ['dt', char: 'd'],
           text: "d\nabc\nd"
@@ -619,8 +616,7 @@ describe "Operator", ->
       it "moves each cursor and copies the last selection's text", ->
         set
           text: "  abcd\n  1234"
-          cursorBuffer: [0, 0]
-          addCursor: [1, 5]
+          cursorBuffer: [[0, 0], [1, 5]]
         ensure 'y^',
           unnamedRegister: '123'
           cursorBuffer: [[0, 0], [1, 2]]
@@ -756,8 +752,7 @@ describe "Operator", ->
       it "paste text for each cursors", ->
         set
           text: "12345\nabcde\nABCDE\nQWERT"
-          cursor: [1, 0]
-          addCursor: [2, 0]
+          cursor: [[1, 0], [2, 0]]
           unnamedRegister: 'ZZZ'
         ensure 'p',
           text: "12345\naZZZbcde\nAZZZBCDE\nQWERT"
@@ -1091,8 +1086,7 @@ describe "Operator", ->
     beforeEach ->
       set
         text: "12\n34\n\n"
-        cursorBuffer: [0, 0]
-        addCursor: [1, 0]
+        cursorBuffer: [[0, 0], [1, 0]]
 
     it "replaces a single character", ->
       ensure ['r', char: 'x'], text: 'x2\nx4\n\n'
@@ -1152,8 +1146,7 @@ describe "Operator", ->
     beforeEach ->
       set
         text: 'aBc\nXyZ'
-        cursorBuffer: [0, 0]
-        addCursor: [1, 0]
+        cursorBuffer: [[0, 0], [1, 0]]
 
     it 'toggles the case and moves right', ->
       ensure '~',
@@ -1440,8 +1433,7 @@ describe "Operator", ->
     beforeEach ->
       set
         text: '123\n4567'
-        cursorBuffer: [0, 0]
-        addCursor: [1, 0]
+        cursorBuffer: [[0, 0], [1, 0]]
 
     it "allows undoing an entire batch of typing", ->
       keystroke 'i'
@@ -1527,8 +1519,7 @@ describe "Operator", ->
       settings.set 'numberRegex', settings.config.numberRegex.default
       set
         text: '123\nab45\ncd-67ef\nab-5\na-bcdef'
-        cursorBuffer: [0, 0]
-        addCursors: [[1, 0], [2, 0], [3, 3], [4, 0]]
+        cursorBuffer: [[0, 0], [1, 0], [2, 0], [3, 3], [4, 0]]
 
     describe "increasing numbers", ->
       it "increases the next number", ->
@@ -1560,8 +1551,7 @@ describe "Operator", ->
       it "does nothing on an empty line", ->
         set
           text: '\n'
-          cursorBuffer: [0, 0]
-          addCursor: [1, 0]
+          cursorBuffer: [[0, 0], [1, 0]]
         ensure [ctrl: 'a'],
           cursorBuffer: [[0, 0], [1, 0]]
           text: '\n'
@@ -1569,8 +1559,7 @@ describe "Operator", ->
       it "honours the vim-mode-plus.numberRegex setting", ->
         set
           text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
-          cursorBuffer: [0, 0]
-          addCursors: [[1, 0], [2, 0], [3, 3], [4, 0]]
+          cursorBuffer: [[0, 0], [1, 0], [2, 0], [3, 3], [4, 0]]
         settings.set('numberRegex', '(?:\\B-)?[0-9]+')
         ensure [ctrl: 'a'],
           cursorBuffer: [[0, 2], [1, 3], [2, 5], [3, 3], [4, 0]]
@@ -1606,8 +1595,7 @@ describe "Operator", ->
       it "does nothing on an empty line", ->
         set
           text: '\n'
-          cursorBuffer: [0, 0]
-          addCursor: [1, 0]
+          cursorBuffer: [[0, 0], [1, 0]]
         ensure [ctrl: 'x'],
           text: '\n'
           cursorBuffer: [[0, 0], [1, 0]],
@@ -1615,8 +1603,7 @@ describe "Operator", ->
       it "honours the vim-mode-plus.numberRegex setting", ->
         set
           text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
-          cursorBuffer: [0, 0]
-          addCursors: [[1, 0], [2, 0], [3, 3], [4, 0]]
+          cursorBuffer: [[0, 0], [1, 0], [2, 0], [3, 3], [4, 0]]
         settings.set('numberRegex', '(?:\\B-)?[0-9]+')
         ensure [ctrl: 'x'],
           text: '122\nab44\ncd -68ef\nab-4\na-bcdef'
