@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
-vim-mode-plus version: 0.2.0  
-*generated at 2015-11-17T09:17:47.202Z*
+vim-mode-plus version: 0.4.0  
+*generated at 2015-11-21T17:29:46.297Z*
 
 - [Base](#base)
   - [InsertMode](#insertmode--base)
@@ -31,6 +31,7 @@ vim-mode-plus version: 0.2.0
       - [MoveToFirstCharacterOfLineUp](#movetofirstcharacteroflineup--movetofirstcharacterofline)
     - [MoveToFirstLine](#movetofirstline--motion)
       - [MoveToLastLine](#movetolastline--movetofirstline)
+      - [MoveToLineByPercent](#movetolinebypercent--movetofirstline)
     - [MoveToLastCharacterOfLine](#movetolastcharacterofline--motion)
     - [MoveToLastNonblankCharacterOfLineAndDown](#movetolastnonblankcharacteroflineanddown--motion)
     - [MoveToMark](#movetomark--motion)
@@ -72,6 +73,7 @@ vim-mode-plus version: 0.2.0
       - [InsertAfter](#insertafter--activateinsertmode)
       - [InsertAfterEndOfLine](#insertafterendofline--activateinsertmode)
       - [InsertAtBeginningOfLine](#insertatbeginningofline--activateinsertmode)
+      - [InsertAtLastInsert](#insertatlastinsert--activateinsertmode)
     - [Delete](#delete--operator)
       - [DeleteLeft](#deleteleft--delete)
       - [DeleteRight](#deleteright--delete)
@@ -313,7 +315,6 @@ vim-mode-plus version: 0.2.0
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>0</kbd>
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>home</kbd>
 - ::defaultCount: ```null```: **Overridden**
-- ::initialize`()`
 - ::moveCursor`(cursor)`
 
 ### MoveToEndOfWord < Motion
@@ -374,6 +375,12 @@ vim-mode-plus version: 0.2.0
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>G</kbd>
 - ::getDefaultRow`()`: **Overridden**
+
+### MoveToLineByPercent < MoveToFirstLine
+- command: `vim-mode-plus:move-to-line-by-percent`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.with-count:not(.insert-mode)`: <kbd>%</kbd>
+- ::getRow`()`: **Overridden**
 
 ### MoveToLastCharacterOfLine < Motion
 - command: `vim-mode-plus:move-to-last-character-of-line`
@@ -450,7 +457,6 @@ vim-mode-plus version: 0.2.0
 - ::moveCursor`(cursor)`
 
 ### MoveToRelativeLine < Motion
-- command: `vim-mode-plus:move-to-relative-line`
 - ::linewise: ```true```: **Overridden**
 - ::moveCursor`(cursor)`
 - ::getCount`()`: **Overridden**
@@ -698,6 +704,12 @@ vim-mode-plus version: 0.2.0
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>I</kbd>
 - ::execute`()`: `super`: **Overridden**
 
+### InsertAtLastInsert < ActivateInsertMode
+- command: `vim-mode-plus:insert-at-last-insert`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>g i</kbd>
+- ::initialize`()`
+
 ### Delete < Operator
 - command: `vim-mode-plus:delete`
   - keymaps
@@ -729,16 +741,16 @@ vim-mode-plus version: 0.2.0
 ### Increase < Operator
 - command: `vim-mode-plus:increase`
   - keymaps
-    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>ctrl-a</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>ctrl-a</kbd>
 - ::complete: ```true```: **Overridden**
 - ::step: ```1```
 - ::execute`()`
-- ::increaseNumber`(cursor, pattern)`
+- ::increaseNumber`(cursor, scanRange, pattern)`
 
 ### Decrease < Increase
 - command: `vim-mode-plus:decrease`
   - keymaps
-    - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>ctrl-x</kbd>
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>ctrl-x</kbd>
 - ::step: ```-1```: **Overridden**
 
 ### Indent < Operator
