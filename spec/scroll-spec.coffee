@@ -8,9 +8,11 @@ describe "Scrolling", ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      vimState.activate('reset')
       {set, ensure, keystroke} = vim
       jasmine.attachToDOM(editorElement)
+
+  afterEach ->
+    vimState.activate('reset')
 
   describe "scrolling keybindings", ->
     beforeEach ->

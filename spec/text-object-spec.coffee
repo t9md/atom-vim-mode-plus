@@ -40,7 +40,7 @@ describe "TextObject", ->
         ensure 'diw',
           text:     "12345  ABCDE"
           cursor:   [0, 6]
-          unnamedRegister: 'abcde'
+          register: '"': text: 'abcde'
           mode: 'normal'
 
       it "selects inside the current word in visual mode", ->
@@ -87,7 +87,7 @@ describe "TextObject", ->
         ensure 'daw',
           text: "12345 ABCDE"
           cursor: [0, 6]
-          unnamedRegister: "abcde "
+          register: '"': text: "abcde "
 
       it "selects from the start of the current word to the start of the next word in visual mode", ->
         ensure 'vaw', selectedScreenRange: [[0, 6], [0, 12]]
@@ -106,7 +106,7 @@ describe "TextObject", ->
         set text: "12(45 ab'de ABCDE", cursor: [0, 9]
 
       it "applies operators inside the current whole word in operator-pending mode", ->
-        ensure 'diW', text: "12(45  ABCDE", cursor: [0, 6], unnamedRegister: "ab'de"
+        ensure 'diW', text: "12(45  ABCDE", cursor: [0, 6], register: '"': text: "ab'de"
 
       it "selects inside the current whole word in visual mode", ->
         ensure 'viW', selectedScreenRange: [[0, 6], [0, 11]]
@@ -118,7 +118,7 @@ describe "TextObject", ->
         ensure 'daW',
           text: "12(45 ABCDE"
           cursor: [0, 6]
-          unnamedRegister: "ab'de "
+          register: '"': text: "ab'de "
           mode: 'normal'
 
       it "selects from the start of the current whole word to the start of the next whole word in visual mode", ->
@@ -562,7 +562,7 @@ describe "TextObject", ->
         ensure 'yip',
           text: "\nParagraph-1\nParagraph-1\nParagraph-1\n\n"
           cursor: [1, 0]
-          unnamedRegister: "Paragraph-1\nParagraph-1\nParagraph-1\n"
+          register: '"': text: "Paragraph-1\nParagraph-1\nParagraph-1\n"
 
       it "selects inside the current paragraph in visual mode", ->
         ensure 'vip',
@@ -577,7 +577,7 @@ describe "TextObject", ->
         ensure 'yap',
           text: "text\n\nParagraph-1\nParagraph-1\nParagraph-1\n\nmoretext"
           cursor: [2, 0]
-          unnamedRegister: "Paragraph-1\nParagraph-1\nParagraph-1\n\n"
+          register: '"': text: "Paragraph-1\nParagraph-1\nParagraph-1\n\n"
 
       it "selects around the current paragraph in visual mode", ->
         ensure 'vap',
@@ -789,7 +789,6 @@ describe "TextObject", ->
       it 'select current line without including last newline', ->
         set cursor: [0, 0]
         ensure 'vil', selectedText: 'This is'
-
       it 'also skip leading white space', ->
         set cursor: [1, 0]
         ensure 'vil', selectedText: 'multi line'
@@ -797,20 +796,18 @@ describe "TextObject", ->
       it 'select current line without including last newline as like `vil`', ->
         set cursor: [0, 0]
         ensure 'val', selectedText: 'This is'
-
       it 'wont skip leading white space not like `vil`', ->
         set cursor: [1, 0]
         ensure 'val', selectedText: '  multi line'
 
   describe 'Entire', ->
-    text = null
+    text = """
+      This is
+        multi line
+      text
+      """
     beforeEach ->
-      text = """
-        This is
-          multi line
-        text
-        """
-      set {text, cursor: [0, 0]}
+      set text: text, cursor: [0, 0]
     describe 'inner-entire', ->
       it 'select entire buffer', ->
         ensure 'escape', selectedText: ''

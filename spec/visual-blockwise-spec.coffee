@@ -363,9 +363,9 @@ describe "Visual Blockwise", ->
       selections = editor.getSelectionsOrderedByBufferPosition()
       selectedTextOrdered = (s.getText() for s in selections)
       selectedBufferRangeOrdered = (s.getBufferRange() for s in selections)
-      cursors = (s.getHeadScreenPosition() for s in selections)
+      cursor = (s.getHeadScreenPosition() for s in selections)
       mode = [vimState.mode, vimState.submode]
-      {selectedTextOrdered, selectedBufferRangeOrdered, cursors, mode}
+      {selectedTextOrdered, selectedBufferRangeOrdered, cursor, mode}
 
     ensureRestored = (keystroke, spec) ->
       ensure keystroke, spec
