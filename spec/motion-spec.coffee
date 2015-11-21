@@ -863,13 +863,16 @@ describe "Motion", ->
         ensure 'd', text: 'hree'
 
       it 'extends selection when repeating search in visual mode', ->
-        set text: 'line1\nline2\nline3'
-        ensure ['v/', search: 'line'],
-          selectedBufferRangeStartRow: 0
-          selectedBufferRangeEndRow: 1
+        set text: """
+          line1
+          line2
+          line3
+          """
+
+        ensure ['v/', {search: 'line'}],
+          selectedBufferRange: [[0, 0], [1, 1]]
         ensure 'n',
-          selectedBufferRangeStartRow: 0
-          selectedBufferRangeEndRow: 2
+          selectedBufferRange: [[0, 0], [2, 1]]
 
       describe "case sensitivity", ->
         beforeEach ->

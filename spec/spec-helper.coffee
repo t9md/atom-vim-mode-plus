@@ -185,14 +185,12 @@ class VimEditor
     @editor.setSelectedBufferRange(range)
 
   ensureOptionsOrdered = [
-    'text', 'selectedText', 'selectedTextOrdered'
+    'text',
+    'selectedText', 'selectedTextOrdered'
     'cursor', 'cursors', 'cursorBuffer', 'numCursors'
     'register', 'unnamedRegister'
-    'selectedScreenRange',
-    'selectedBufferRange',
+    'selectedScreenRange', 'selectedBufferRange',
     'selectedBufferRangeOrdered',
-    'selectedBufferRangeStartRow',
-    'selectedBufferRangeEndRow',
     'selectionIsReversed',
     'scrollTop',
     'mode',
@@ -270,14 +268,6 @@ class VimEditor
       range = [range]
     actual = @editor.getSelectionsOrderedByBufferPosition().map (e) -> e.getBufferRange()
     expect(actual).toEqual(range)
-
-  ensureSelectedBufferRangeStartRow: (row) ->
-    {start} = @editor.getSelectedBufferRange()
-    expect(start.row).toEqual row
-
-  ensureSelectedBufferRangeEndRow: (row) ->
-    {end} = @editor.getSelectedBufferRange()
-    expect(end.row).toEqual row
 
   ensureSelectionIsReversed: (reversed) ->
     actual = @editor.getLastSelection().isReversed()
