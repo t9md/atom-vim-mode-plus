@@ -26,7 +26,7 @@ class ModeManager
       @mode is mode
 
   onWillDeactivateMode: (fn) ->
-    @emitter.on 'on-will-deactivate-mode', fn
+    @emitter.on 'will-deactivate-mode', fn
 
   # activate: Public
   #  Use this method to change mode, DONT use other direct method.
@@ -43,7 +43,7 @@ class ModeManager
 
     # Deactivate old mode
     if (mode isnt @mode)
-      @emitter.emit('on-will-deactivate-mode', {@mode, @submode})
+      @emitter.emit('will-deactivate-mode', {@mode, @submode})
       @deactivator?.dispose()
 
     # Activate
