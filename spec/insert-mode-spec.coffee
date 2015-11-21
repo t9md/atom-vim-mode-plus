@@ -5,10 +5,13 @@ describe "Insert mode commands", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
-    getVimState (vimState, vim) ->
-      {editor, editorElement} = vimState
-      vimState.activate('reset')
+    getVimState (_vimState, vim) ->
+      vimState = _vimState
+      {editor, editorElement} = _vimState
       {set, ensure, keystroke} = vim
+
+  afterEach ->
+    vimState.activate('reset')
 
   describe "Copy from line above/below", ->
     beforeEach ->
@@ -24,14 +27,14 @@ describe "Insert mode commands", ->
 
     describe "the ctrl-y command", ->
       it "copies from the line above", ->
-        ensure [ctrl: 'y'], text: """
+        ensure {ctrl: 'y'}, text: """
           12345
           1
           abcd
           aefghi
           """
         editor.insertText ' '
-        ensure [ctrl: 'y'], text: """
+        ensure {ctrl: 'y'}, text: """
           12345
           1 3
           abcd
@@ -40,15 +43,39 @@ describe "Insert mode commands", ->
 
       it "does nothing if there's nothing above the cursor", ->
         editor.insertText 'fill'
-        ensure [ctrl: 'y'], text: '12345\nfill5\nabcd\nfillefghi'
-        ensure [ctrl: 'y'], text: '12345\nfill5\nabcd\nfillefghi'
+        ensure {ctrl: 'y'},
+          text: """
+            12345
+            fill5
+            abcd
+            fillefghi
+            """
+        ensure {ctrl: 'y'},
+          text: """
+            12345
+            fill5
+            abcd
+            fillefghi
+            """
 
       it "does nothing on the first line", ->
         set
           cursorBuffer: [[0, 2], [3, 2]]
         editor.insertText 'a'
-        ensure text: '12a345\n\nabcd\nefaghi'
-        ensure [ctrl: 'y'], text: '12a345\n\nabcd\nefadghi'
+        ensure
+          text: """
+            12a345
+
+            abcd
+            efaghi
+            """
+        ensure {ctrl: 'y'},
+          text: """
+            12a345
+
+            abcd
+            efadghi
+            """
 
     describe "the ctrl-e command", ->
       beforeEach ->
@@ -57,11 +84,35 @@ describe "Insert mode commands", ->
             'ctrl-e': 'vim-mode-plus:copy-from-line-below'
 
       it "copies from the line below", ->
-        ensure [ctrl: 'e'], text: '12345\na\nabcd\nefghi'
+        ensure {ctrl: 'e'},
+          text: """
+            12345
+            a
+            abcd
+            efghi
+            """
         editor.insertText ' '
-        ensure [ctrl: 'e'], text: '12345\na c\nabcd\n efghi'
+        ensure {ctrl: 'e'},
+          text: """
+            12345
+            a c
+            abcd
+             efghi
+            """
 
       it "does nothing if there's nothing below the cursor", ->
         editor.insertText 'foo'
-        ensure [ctrl: 'e'], text: '12345\nfood\nabcd\nfooefghi'
-        ensure [ctrl: 'e'], text: '12345\nfood\nabcd\nfooefghi'
+        ensure {ctrl: 'e'},
+          text: """
+            12345
+            food
+            abcd
+            fooefghi
+            """
+        ensure {ctrl: 'e'},
+          text: """
+            12345
+            food
+            abcd
+            fooefghi
+            """
