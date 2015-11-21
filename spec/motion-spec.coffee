@@ -1,17 +1,19 @@
 # Refactoring status: 70%
-{getVimState, dispatch} = require './spec-helper'
+{getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
 
 describe "Motion", ->
-  [set, ensure, keystroke, editor, editorElement, vimState, vim] = []
+  [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
-      vimState.activate('reset')
       {set, ensure, keystroke} = _vim
+
+  afterEach ->
+    vimState.activate('reset')
 
   describe "simple motions", ->
     beforeEach ->
@@ -36,8 +38,8 @@ describe "Motion", ->
       describe "as a selection", ->
         it "selects the character to the left", ->
           ensure 'yh',
-            unnamedRegister: 'a'
             cursor: [1, 0]
+            unnamedRegister: 'a'
 
     describe "the j keybinding", ->
       it "moves the cursor down, but not to the end of the last line", ->
@@ -81,20 +83,21 @@ describe "Motion", ->
 
         # [FIXME] the place of this spec is not appropriate.
         it "original visual line remains when jk across orignal selection", ->
+          text = new TextData """
+            line0
+            line1
+            line2\n
+            """
           set
-            text: """
-              line1
-              line2
-              line3\n
-              """
+            text: text.getRaw()
             cursor: [1, 1]
 
-          ensure 'V', selectedText: 'line2\n'
-          ensure 'j', selectedText: 'line2\nline3\n'
-          ensure 'k', selectedText: 'line2\n'
-          ensure 'k', selectedText: 'line1\nline2\n'
-          ensure 'j', selectedText: 'line2\n'
-          ensure 'j', selectedText: 'line2\nline3\n'
+          ensure 'V', selectedText: text.getLines([1])
+          ensure 'j', selectedText: text.getLines([1, 2])
+          ensure 'k', selectedText: text.getLines([1])
+          ensure 'k', selectedText: text.getLines([0, 1])
+          ensure 'j', selectedText: text.getLines([1])
+          ensure 'j', selectedText: text.getLines([1, 2])
 
     describe "the k keybinding", ->
       it "moves the cursor up, but not to the beginning of the first line", ->
@@ -120,19 +123,20 @@ describe "Motion", ->
             selectedText: "defg\n\nabcd"
 
     describe "jk in softwrap", ->
+      [text] = []
+
       beforeEach ->
         editor.setSoftWrapped(true)
         editor.setEditorWidthInChars(10)
         editor.setDefaultCharWidth(1)
-        set
-          text: """
-            1st line of buffer
-            2nd line of buffer, Very long line
-            3rd line of buffer
+        text = new TextData """
+          1st line of buffer
+          2nd line of buffer, Very long line
+          3rd line of buffer
 
-            5th line of buffer\n
-            """
-          cursor: [0, 0]
+          5th line of buffer\n
+          """
+        set text: text.getRaw(), cursor: [0, 0]
 
       describe "selection is not reversed", ->
         it "screen position and buffer position is different", ->
@@ -142,16 +146,17 @@ describe "Motion", ->
           ensure 'j', cursor: [4, 0], cursorBuffer: [1, 20]
 
         it "jk move selection buffer-line wise", ->
-          ensure 'V', selectedText: '1st line of buffer\n'
-          ensure 'j', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n'
-          ensure 'j', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n'
-          ensure 'j', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n\n'
-          ensure 'j', selectedText: "1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n\n5th line of buffer\n"
-          ensure 'k', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n\n'
-          ensure 'k', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n'
-          ensure 'k', selectedText: '1st line of buffer\n2nd line of buffer, Very long line\n'
-          ensure 'k', selectedText: '1st line of buffer\n'
-          ensure 'k', selectedText: '1st line of buffer\n' # do nothing
+          ensure 'V', selectedText: text.getLines([0..0])
+          ensure 'j', selectedText: text.getLines([0..1])
+          ensure 'j', selectedText: text.getLines([0..2])
+          ensure 'j', selectedText: text.getLines([0..3])
+          ensure 'j', selectedText: text.getLines([0..4])
+          ensure 'k', selectedText: text.getLines([0..3])
+          ensure 'k', selectedText: text.getLines([0..2])
+          ensure 'k', selectedText: text.getLines([0..1])
+          ensure 'k', selectedText: text.getLines([0..0])
+          ensure 'k', selectedText: text.getLines([0..0]) # do nothing
+
       describe "selection is reversed", ->
         it "screen position and buffer position is different", ->
           ensure 'j', cursor: [1, 0], cursorBuffer: [0, 9]
@@ -161,16 +166,16 @@ describe "Motion", ->
 
         it "jk move selection buffer-line wise", ->
           set cursorBuffer: [4, 0]
-          ensure 'V', selectedText: '5th line of buffer\n'
-          ensure 'k', selectedText: "\n5th line of buffer\n"
-          ensure 'k', selectedText: "3rd line of buffer\n\n5th line of buffer\n"
-          ensure 'k', selectedText: "2nd line of buffer, Very long line\n3rd line of buffer\n\n5th line of buffer\n"
-          ensure 'k', selectedText: "1st line of buffer\n2nd line of buffer, Very long line\n3rd line of buffer\n\n5th line of buffer\n"
-          ensure 'j', selectedText: "2nd line of buffer, Very long line\n3rd line of buffer\n\n5th line of buffer\n"
-          ensure 'j', selectedText: "3rd line of buffer\n\n5th line of buffer\n"
-          ensure 'j', selectedText: "\n5th line of buffer\n"
-          ensure 'j', selectedText: "5th line of buffer\n"
-          ensure 'j', selectedText: "5th line of buffer\n" # do nothing
+          ensure 'V', selectedText: text.getLines([4..4])
+          ensure 'k', selectedText: text.getLines([3..4])
+          ensure 'k', selectedText: text.getLines([2..4])
+          ensure 'k', selectedText: text.getLines([1..4])
+          ensure 'k', selectedText: text.getLines([0..4])
+          ensure 'j', selectedText: text.getLines([1..4])
+          ensure 'j', selectedText: text.getLines([2..4])
+          ensure 'j', selectedText: text.getLines([3..4])
+          ensure 'j', selectedText: text.getLines([4..4])
+          ensure 'j', selectedText: text.getLines([4..4]) # do nothing
 
     describe "the l keybinding", ->
       beforeEach ->
@@ -1270,16 +1275,24 @@ describe "Motion", ->
         text: 'bcabcabcabc\n'
 
   describe 'the V keybinding', ->
+    [text] = []
     beforeEach ->
+      text = new TextData """
+        01
+        002
+        0003
+        00004
+        000005\n
+        """
       set
-        text: "01\n002\n0003\n00004\n000005\n"
+        text: text.getRaw()
         cursor: [1, 1]
 
     it "selects down a line", ->
-      ensure 'Vjj', selectedText: "002\n0003\n00004\n"
+      ensure 'Vjj', selectedText: text.getLines([1..3])
 
     it "selects up a line", ->
-      ensure 'Vk', selectedText: "01\n002\n"
+      ensure 'Vk', selectedText: text.getLines([0..1])
 
   describe 'the ; and , keybindings', ->
     beforeEach ->
@@ -1436,8 +1449,9 @@ describe "Motion", ->
       ensure 'n', cursor: [0, 31]
 
   describe "scrolling screen and keeping cursor in the same screen position", ->
+    text = new TextData([0...80].join("\n"))
     beforeEach ->
-      editor.setText([0...80].join("\n"))
+      set text: text.getRaw()
       editorElement.setHeight(20 * 10)
       editorElement.style.lineHeight = "10px"
       atom.views.performDocumentPoll()
@@ -1454,26 +1468,26 @@ describe "Motion", ->
       it "selects on visual mode", ->
         set cursor: [42, 1]
         ensure ['v', ctrl: 'u'],
-          selectedText: [32..42].join("\n")
+          selectedText: text.getLines([32..42], chomp: true)
 
       it "selects on linewise mode", ->
         ensure ['V', ctrl: 'u'],
-          selectedText: [32..42].join("\n").concat("\n")
+          selectedText: text.getLines([32..42])
 
     describe "the ctrl-b keybinding", ->
       it "moves screen up one page", ->
-        ensure [ctrl: 'b'],
+        ensure {ctrl: 'b'},
           scrollTop: 200
           cursor: [22, 0]
 
       it "selects on visual mode", ->
         set cursor: [42, 1]
-        ensure ['v', ctrl: 'b'],
-          selectedText: [22..42].join("\n")
+        ensure ['v', {ctrl: 'b'}],
+          selectedText: text.getLines([22..42], chomp: true)
 
       it "selects on linewise mode", ->
-        ensure ['V', ctrl: 'b'],
-          selectedText: [22..42].join("\n").concat("\n")
+        ensure ['V', {ctrl: 'b'}],
+          selectedText: text.getLines([22..42])
 
     describe "the ctrl-d keybinding", ->
       it "moves the screen down by half screen size and keeps cursor onscreen", ->
@@ -1484,11 +1498,11 @@ describe "Motion", ->
       it "selects on visual mode", ->
         set cursor: [42, 1]
         ensure ['v', ctrl: 'd'],
-          selectedText: [42..52].join("\n").slice(1, -1)
+          selectedText: text.getLines([42..52], chomp: true).slice(1, -1)
 
       it "selects on linewise mode", ->
         ensure ['V', ctrl: 'd'],
-          selectedText: [42..52].join("\n").concat("\n")
+          selectedText: text.getLines([42..52])
 
     describe "the ctrl-f keybinding", ->
       it "moves screen down one page", ->
@@ -1499,8 +1513,8 @@ describe "Motion", ->
       it "selects on visual mode", ->
         set cursor: [42, 1]
         ensure ['v', ctrl: 'f'],
-          selectedText: [42..62].join("\n").slice(1, -1)
+          selectedText: text.getLines([42..62], chomp: true).slice(1, -1)
 
       it "selects on linewise mode", ->
         ensure ['V', ctrl: 'f'],
-          selectedText: [42..62].join("\n").concat("\n")
+          selectedText: text.getLines([42..62])

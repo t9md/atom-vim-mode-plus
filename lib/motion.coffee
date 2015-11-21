@@ -1,4 +1,5 @@
 # Refactoring status: 50%
+_ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
 globalState = require './global-state'
@@ -6,9 +7,6 @@ globalState = require './global-state'
 swrap = require './selection-wrapper'
 {Hover} = require './hover'
 {MatchList} = require './match'
-
-_ = require 'underscore-plus'
-
 settings = require './settings'
 {Search} = require './input'
 Base = require './base'
