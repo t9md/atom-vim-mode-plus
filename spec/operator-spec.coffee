@@ -9,8 +9,10 @@ describe "Operator", ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      vimState.activate('reset')
       {set, ensure, keystroke} = vim
+
+  afterEach ->
+    vimState.activate('reset')
 
   describe "cancelling operations", ->
     it "clear pending operation", ->
@@ -38,7 +40,6 @@ describe "Operator", ->
 
         it "deletes multiple characters with a count", ->
           ensure '2x', text: 'abc\n0123\n\nxyz', cursor: [1, 3], unnamedRegister: '45'
-
           set cursor: [0, 1]
           ensure '3x',
             text: 'a\n0123\n\nxyz'
@@ -166,11 +167,9 @@ describe "Operator", ->
     it "is repeatable", ->
       keystroke 'S'
       editor.insertText 'abc'
-      ensure 'escape',
-        text: '12345\nabc\nABCDE'
+      ensure 'escape', text: '12345\nabc\nABCDE'
       set cursor: [2, 3]
-      ensure '.',
-        text: '12345\nabc\nabc\n'
+      ensure '.', text: '12345\nabc\nabc\n'
 
     it "is undoable", ->
       keystroke 'S'
@@ -200,8 +199,7 @@ describe "Operator", ->
 
   describe "the d keybinding", ->
     it "enters operator-pending mode", ->
-      ensure 'd',
-        mode: 'operator-pending'
+      ensure 'd', mode: 'operator-pending'
 
     describe "when followed by a d", ->
       it "deletes the current line and exits operator-pending mode", ->
