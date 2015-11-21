@@ -17,12 +17,14 @@ class ModeManager
 
     @onDidActivateMode ({mode, submode}) =>
       @vimState.showCursors()
-      # Update selecter class
-      for mode in supportedModes
-        toggleClassByCondition(@editorElement, "#{mode}-mode", mode is @mode)
-      for submode in supportedSubModes
-        toggleClassByCondition(@editorElement, submode, submode is @submode)
+      @updateEditorElement()
       @vimState.statusBarManager.update(mode, submode)
+
+  updateEditorElement: ->
+    for mode in supportedModes
+      toggleClassByCondition(@editorElement, "#{mode}-mode", mode is @mode)
+    for submode in supportedSubModes
+      toggleClassByCondition(@editorElement, submode, submode is @submode)
 
   eachSelection: (fn) ->
     eachSelection(@editor, fn)
