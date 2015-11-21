@@ -15,6 +15,15 @@ class ModeManager
     {@editor, @editorElement} = @vimState
     @emitter = new Emitter
 
+    @onDidActivateMode ({mode, submode}) =>
+      @vimState.showCursors()
+      # Update selecter class
+      for mode in supportedModes
+        toggleClassByCondition(@editorElement, "#{mode}-mode", mode is @mode)
+      for submode in supportedSubModes
+        toggleClassByCondition(@editorElement, submode, submode is @submode)
+      @vimState.statusBarManager.update(mode, submode)
+
   eachSelection: (fn) ->
     eachSelection(@editor, fn)
 
@@ -27,6 +36,9 @@ class ModeManager
 
   onWillDeactivateMode: (fn) ->
     @emitter.on 'will-deactivate-mode', fn
+
+  onDidActivateMode: (fn) ->
+    @emitter.on 'did-activate-mode', fn
 
   # activate: Public
   #  Use this method to change mode, DONT use other direct method.
@@ -43,7 +55,7 @@ class ModeManager
 
     # Deactivate old mode
     if (mode isnt @mode)
-      @emitter.emit('will-deactivate-mode', {@mode, @submode})
+      @emitter.emit 'will-deactivate-mode', {@mode, @submode}
       @deactivator?.dispose()
 
     # Activate
@@ -55,15 +67,7 @@ class ModeManager
 
     # Now update mode variables and update CSS selectors.
     [@mode, @submode] = [mode, submode]
-    @vimState.showCursors()
-    @updateModeSelector()
-    @vimState.statusBarManager.update(mode, submode)
-
-  updateModeSelector: ->
-    for mode in supportedModes
-      toggleClassByCondition(@editorElement, "#{mode}-mode", mode is @mode)
-    for submode in supportedSubModes
-      toggleClassByCondition(@editorElement, submode, submode is @submode)
+    @emitter.emit 'did-activate-mode', {@mode, @submode}
 
   # Normal
   # -------------------------
