@@ -365,8 +365,7 @@ describe "VimState", ->
         beforeEach ->
           set
             text: "line one\nline two\nline three\n"
-            cursorBuffer: [0, 5]
-            addCursor: [2, 5]
+            cursorBuffer: [[0, 5], [2, 5]]
 
         it "can change submode within visual mode", ->
           ensure 'v'        , mode: ['visual', 'characterwise']

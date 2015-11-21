@@ -80,7 +80,6 @@ _keystroke = (keys, {element}) ->
 toArray = (obj, cond=null) ->
   if _.isArray(cond ? obj) then obj else [obj]
 
-
 # Main
 # -------------------------
 getVimState = (args...) ->
@@ -117,7 +116,9 @@ class VimEditor
       throw new SpecError("#{message}: #{inspect(invalidOptions)}")
 
   setOptionsOrdered = [
-    'text', 'cursor', 'cursorBuffer', 'addCursor', 'addCursors',
+    'text',
+    'cursor', 'cursorBuffer',
+    'addCursor', 'addCursorBuffer'
     'register', 'unnamedRegister',
     'selectedBufferRange'
   ]
@@ -131,24 +132,37 @@ class VimEditor
   setText: (text) ->
     @editor.setText(text)
 
-  setCursor: (point) ->
-    @editor.setCursorScreenPosition(point)
+  setCursor: (points) ->
+    if (points instanceof Point) or not _.isArray(points[0])
+      points = [points]
 
-  setCursorBuffer: (point) ->
-    @editor.setCursorBufferPosition(point)
+    @editor.setCursorScreenPosition(points.shift())
+    for point in points
+      @editor.addCursorAtScreenPosition(point)
 
-  setAddCursor: (point) ->
-    @editor.addCursorAtBufferPosition(point)
+  setCursorBuffer: (points) ->
+    if (points instanceof Point) or not _.isArray(points[0])
+      points = [points]
 
-  setAddCursors: (points) ->
-    @setAddCursor(point) for point in points
+    @editor.setCursorBufferPosition(points.shift())
+    for point in points
+      @editor.addCursorAtBufferPosition(point)
+
+  setAddCursor: (points) ->
+    if (points instanceof Point) or not _.isArray(points[0])
+      points = [points]
+    for point in points
+      @editor.addCursorAtScreenPosition(point)
+
+  setAddCursorBuffer: (points) ->
+    if (points instanceof Point) or not _.isArray(points[0])
+      points = [points]
+    for point in points
+      @editor.addCursorAtBufferPosition(point)
 
   setRegister: (register) ->
-    if _.isObject(register)
-      for name, value of register
-        @vimState.register.set(name, value)
-    else
-      @vimState.register.set '"', text: register
+    for name, value of register
+      @vimState.register.set(name, value)
 
   setUnnamedRegister: (text) ->
     @vimState.register.set '"', text: text
@@ -213,13 +227,10 @@ class VimEditor
     expect(points).toEqual(toArray(cursor, cursor[0]))
 
   ensureRegister: (register) ->
-    if _.isObject(register)
-      for name, value of register
-        reg = @vimState.register.get(name)
-        for prop, _value of value
-          expect(reg[prop]).toEqual(_value)
-    else
-      expect(@vimState.register.get('"').text).toBe register
+    for name, value of register
+      reg = @vimState.register.get(name)
+      for prop, _value of value
+        expect(reg[prop]).toEqual(_value)
 
   ensureUnnamedRegister: (text) ->
     expect(@vimState.register.get('"').text).toBe text

@@ -19,8 +19,7 @@ describe "Insert mode commands", ->
         abcd
         efghi
         """
-        cursorBuffer: [1, 0]
-        addCursor: [3, 0]
+        cursorBuffer: [[1, 0], [3, 0]]
       keystroke 'i'
 
     describe "the ctrl-y command", ->
@@ -46,8 +45,7 @@ describe "Insert mode commands", ->
 
       it "does nothing on the first line", ->
         set
-          cursorBuffer: [0, 2]
-          addCursor: [3, 2]
+          cursorBuffer: [[0, 2], [3, 2]]
         editor.insertText 'a'
         ensure text: '12a345\n\nabcd\nefaghi'
         ensure [ctrl: 'y'], text: '12a345\n\nabcd\nefadghi'
