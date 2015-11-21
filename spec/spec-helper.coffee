@@ -117,7 +117,8 @@ class VimEditor
       throw new SpecError("#{message}: #{inspect(invalidOptions)}")
 
   setOptionsOrdered = [
-    'text', 'cursor', 'cursorBuffer', 'addCursor', 'addCursors', 'register'
+    'text', 'cursor', 'cursorBuffer', 'addCursor', 'addCursors',
+    'register', 'unnamedRegister',
     'selectedBufferRange'
   ]
   # Public
@@ -133,8 +134,8 @@ class VimEditor
   setCursor: (point) ->
     @editor.setCursorScreenPosition(point)
 
-  setCursorBuffer: (cursor) ->
-    @editor.setCursorBufferPosition(cursor)
+  setCursorBuffer: (point) ->
+    @editor.setCursorBufferPosition(point)
 
   setAddCursor: (point) ->
     @editor.addCursorAtBufferPosition(point)
@@ -149,13 +150,17 @@ class VimEditor
     else
       @vimState.register.set '"', text: register
 
+  setUnnamedRegister: (text) ->
+    @vimState.register.set '"', text: text
+
   setSelectedBufferRange: (range) ->
     @editor.setSelectedBufferRange(range)
 
   ensureOptionsOrdered = [
     'text', 'selectedText', 'selectedTextOrdered'
-    'cursor', 'cursors', 'cursorBuffer'
-    'register', 'numCursors', 'selectedScreenRange',
+    'cursor', 'cursors', 'cursorBuffer', 'numCursors'
+    'register', 'unnamedRegister'
+    'selectedScreenRange',
     'selectedBufferRange',
     'selectedBufferRangeOrdered',
     'selectedBufferRangeStartRow',
@@ -215,6 +220,9 @@ class VimEditor
           expect(reg[prop]).toEqual(_value)
     else
       expect(@vimState.register.get('"').text).toBe register
+
+  ensureUnnamedRegister: (text) ->
+    expect(@vimState.register.get('"').text).toBe text
 
   ensureNumCursors: (number) ->
     expect(@editor.getCursors()).toHaveLength number

@@ -29,21 +29,21 @@ describe "Operator", ->
             cursor: [1, 4]
 
         it "deletes a character", ->
-          ensure 'x', text: 'abc\n01235\n\nxyz', cursor: [1, 4], register: '4'
-          ensure 'x', text: 'abc\n0123\n\nxyz' , cursor: [1, 3], register: '5'
-          ensure 'x', text: 'abc\n012\n\nxyz'  , cursor: [1, 2], register: '3'
-          ensure 'x', text: 'abc\n01\n\nxyz'   , cursor: [1, 1], register: '2'
-          ensure 'x', text: 'abc\n0\n\nxyz'    , cursor: [1, 0], register: '1'
-          ensure 'x', text: 'abc\n\n\nxyz'     , cursor: [1, 0], register: '0'
+          ensure 'x', text: 'abc\n01235\n\nxyz', cursor: [1, 4], unnamedRegister: '4'
+          ensure 'x', text: 'abc\n0123\n\nxyz' , cursor: [1, 3], unnamedRegister: '5'
+          ensure 'x', text: 'abc\n012\n\nxyz'  , cursor: [1, 2], unnamedRegister: '3'
+          ensure 'x', text: 'abc\n01\n\nxyz'   , cursor: [1, 1], unnamedRegister: '2'
+          ensure 'x', text: 'abc\n0\n\nxyz'    , cursor: [1, 0], unnamedRegister: '1'
+          ensure 'x', text: 'abc\n\n\nxyz'     , cursor: [1, 0], unnamedRegister: '0'
 
         it "deletes multiple characters with a count", ->
-          ensure '2x', text: 'abc\n0123\n\nxyz', cursor: [1, 3], register: '45'
+          ensure '2x', text: 'abc\n0123\n\nxyz', cursor: [1, 3], unnamedRegister: '45'
 
           set cursor: [0, 1]
           ensure '3x',
             text: 'a\n0123\n\nxyz'
             cursor: [0, 0]
-            register: 'bc'
+            unnamedRegister: 'bc'
 
       describe "with multiple cursors", ->
         beforeEach ->
@@ -63,19 +63,19 @@ describe "Operator", ->
 
         it "deletes a character", ->
           # copy of the earlier test because wrapLeftRightMotion should not affect it
-          ensure 'x', text: 'abc\n01235\n\nxyz', cursor: [1, 4], register: '4'
-          ensure 'x', text: 'abc\n0123\n\nxyz' , cursor: [1, 3], register: '5'
-          ensure 'x', text: 'abc\n012\n\nxyz'  , cursor: [1, 2], register: '3'
-          ensure 'x', text: 'abc\n01\n\nxyz'   , cursor: [1, 1], register: '2'
-          ensure 'x', text: 'abc\n0\n\nxyz'    , cursor: [1, 0], register: '1'
-          ensure 'x', text: 'abc\n\n\nxyz'     , cursor: [1, 0], register: '0'
+          ensure 'x', text: 'abc\n01235\n\nxyz', cursor: [1, 4], unnamedRegister: '4'
+          ensure 'x', text: 'abc\n0123\n\nxyz' , cursor: [1, 3], unnamedRegister: '5'
+          ensure 'x', text: 'abc\n012\n\nxyz'  , cursor: [1, 2], unnamedRegister: '3'
+          ensure 'x', text: 'abc\n01\n\nxyz'   , cursor: [1, 1], unnamedRegister: '2'
+          ensure 'x', text: 'abc\n0\n\nxyz'    , cursor: [1, 0], unnamedRegister: '1'
+          ensure 'x', text: 'abc\n\n\nxyz'     , cursor: [1, 0], unnamedRegister: '0'
 
         it "deletes multiple characters and newlines with a count", ->
           settings.set('wrapLeftRightMotion', true)
-          ensure '2x', text: 'abc\n0123\n\nxyz', cursor: [1, 3], register: '45'
+          ensure '2x', text: 'abc\n0123\n\nxyz', cursor: [1, 3], unnamedRegister: '45'
           set cursor: [0, 1]
-          ensure '3x', text: 'a0123\n\nxyz', cursor: [0, 1], register: 'bc\n'
-          ensure '7x', text: 'ayz', cursor: [0, 1], register: '0123\n\nx'
+          ensure '3x', text: 'a0123\n\nxyz', cursor: [0, 1], unnamedRegister: 'bc\n'
+          ensure '7x', text: 'ayz', cursor: [0, 1], unnamedRegister: '0123\n\nx'
 
     describe "on an empty line", ->
       beforeEach ->
@@ -95,11 +95,11 @@ describe "Operator", ->
         set text: "ab\n012345", cursor: [1, 2]
 
       it "deletes a character", ->
-        ensure 'X', text: 'ab\n02345', cursor: [1, 1], register: '1'
-        ensure 'X', text: 'ab\n2345', cursor: [1, 0], register: '0'
-        ensure 'X', text: 'ab\n2345', cursor: [1, 0], register: '0'
+        ensure 'X', text: 'ab\n02345', cursor: [1, 1], unnamedRegister: '1'
+        ensure 'X', text: 'ab\n2345', cursor: [1, 0], unnamedRegister: '0'
+        ensure 'X', text: 'ab\n2345', cursor: [1, 0], unnamedRegister: '0'
         settings.set('wrapLeftRightMotion', true)
-        ensure 'X', text: 'ab2345', cursor: [0, 2], register: '\n'
+        ensure 'X', text: 'ab2345', cursor: [0, 2], unnamedRegister: '\n'
 
     describe "on an empty line", ->
       beforeEach ->
@@ -124,7 +124,7 @@ describe "Operator", ->
         mode: 'insert'
         text: '02345'
         cursor: [0, 1]
-        register: '1'
+        unnamedRegister: '1'
 
     it "is repeatable", ->
       set cursor: [0, 0]
@@ -150,7 +150,7 @@ describe "Operator", ->
           mode: 'insert'
           text: '0345'
           cursor: [0, 1]
-          register: '12'
+          unnamedRegister: '12'
 
   describe "the S keybinding", ->
     beforeEach ->
@@ -210,7 +210,7 @@ describe "Operator", ->
         ensure 'dd',
           text: '12345\n\nABCDE'
           cursor: [1, 0]
-          register: 'abcde\n'
+          unnamedRegister: 'abcde\n'
           mode: 'normal'
 
       it "deletes the last line", ->
@@ -264,7 +264,7 @@ describe "Operator", ->
         ensure 'iw',
           text: "12345  ABCDE"
           cursor: [0, 6]
-          register: 'abcde'
+          unnamedRegister: 'abcde'
           mode: 'normal'
 
     describe "when followed by a j", ->
@@ -504,7 +504,7 @@ describe "Operator", ->
         ensure register: {'"': {type: 'linewise'}}
 
       it "saves the lines to the default register", ->
-        ensure register: {'"': {text: "012 345\nabc\n"}}
+        ensure unnamedRegister: "012 345\nabc\n"
 
       it "places the cursor at the beginning of the selection", ->
         ensure cursorBuffer: [0, 0]
@@ -514,7 +514,7 @@ describe "Operator", ->
         keystroke 'yy'
 
       it "saves the line to the default register", ->
-        ensure register: "012 345\n"
+        ensure unnamedRegister: "012 345\n"
 
       it "leaves the cursor at the starting position", ->
         ensure cursor: [0, 4]
@@ -530,7 +530,7 @@ describe "Operator", ->
         keystroke 'y2y'
 
       it "copies n lines, starting from the current", ->
-        ensure register: "012 345\nabc\n"
+        ensure unnamedRegister: "012 345\nabc\n"
 
       it "leaves the cursor at the starting position", ->
         ensure cursor: [0, 4]
@@ -551,14 +551,14 @@ describe "Operator", ->
         keystroke 'ye'
 
       it "saves the selected text to the default register", ->
-        ensure register: '345'
+        ensure unnamedRegister: '345'
 
       it "leaves the cursor at the starting position", ->
         ensure cursor: [0, 4]
 
       it "does not yank when motion fails", ->
         ensure ['yt', char: 'x'],
-          register: '345'
+          unnamedRegister: '345'
 
     describe "with a text object", ->
       it "moves the cursor to the beginning of the text object", ->
@@ -570,7 +570,7 @@ describe "Operator", ->
         keystroke 'yh'
 
       it "saves the left letter to the default register", ->
-        ensure register: ' '
+        ensure unnamedRegister: ' '
 
       it "moves the cursor position to the left", ->
         ensure cursor: [0, 3]
@@ -580,7 +580,7 @@ describe "Operator", ->
         keystroke 'yj'
 
       it "saves both full lines to the default register", ->
-        ensure register: "012 345\nabc\n"
+        ensure unnamedRegister: "012 345\nabc\n"
 
       it "leaves the cursor at the starting position", ->
         ensure cursor: [0, 4]
@@ -622,7 +622,7 @@ describe "Operator", ->
           cursorBuffer: [0, 0]
           addCursor: [1, 5]
         ensure 'y^',
-          register: '123'
+          unnamedRegister: '123'
           cursorBuffer: [[0, 0], [1, 2]]
 
   describe "the yy keybinding", ->
@@ -632,7 +632,7 @@ describe "Operator", ->
 
       it "copies the entire line and pastes it correctly", ->
         ensure 'yyp',
-          register: "exclamation!\n"
+          unnamedRegister: "exclamation!\n"
           text: "exclamation!\nexclamation!\n"
 
     describe "on a single line file with no newline", ->
@@ -641,12 +641,12 @@ describe "Operator", ->
 
       it "copies the entire line and pastes it correctly", ->
         ensure 'yyp',
-          register: "no newline!\n"
+          unnamedRegister: "no newline!\n"
           text: "no newline!\nno newline!"
 
       it "copies the entire line and pastes it respecting count and new lines", ->
         ensure 'yy2p',
-          register: "no newline!\n"
+          unnamedRegister: "no newline!\n"
           text: "no newline!\nno newline!\nno newline!"
 
   describe "the Y keybinding", ->
@@ -654,13 +654,13 @@ describe "Operator", ->
       set text: "012 345\nabc\n", cursor: [0, 4]
 
     it "saves the line to the default register", ->
-      ensure 'Y', register: "012 345\n", cursor: [0, 4]
+      ensure 'Y', unnamedRegister: "012 345\n", cursor: [0, 4]
 
   describe "the p keybinding", ->
     describe "with character contents", ->
       beforeEach ->
         set text: "012\n", cursor: [0, 0]
-        set register: '"': text: '345'
+        set unnamedRegister: '345'
         set register: 'a': text: 'a'
         atom.clipboard.write "clip"
 
@@ -742,7 +742,7 @@ describe "Operator", ->
         set
           text: "12345\nabcde\nABCDE\nQWERT"
           cursor: [1, 1]
-          register: '123'
+          unnamedRegister: '123'
         keystroke '2p'
 
       it "inserts the same line twice", ->
@@ -758,7 +758,7 @@ describe "Operator", ->
           text: "12345\nabcde\nABCDE\nQWERT"
           cursor: [1, 0]
           addCursor: [2, 0]
-          register: 'ZZZ'
+          unnamedRegister: 'ZZZ'
         ensure 'p',
           text: "12345\naZZZbcde\nAZZZBCDE\nQWERT"
           cursor: [[1, 3], [2, 3]]
@@ -770,27 +770,27 @@ describe "Operator", ->
           cursor: [0, 1]
       describe "with characterwise selection", ->
         it "replaces selection with charwise content", ->
-          set register: '"': text: "345"
+          set unnamedRegister: "345"
           ensure 'vp', text: "03452", cursor: [0, 3]
         it "replaces selection with linewise content", ->
-          set register: '"': text: "345\n"
+          set unnamedRegister: "345\n"
           ensure 'vp', text: "0\n345\n2", cursor: [1, 0]
 
       describe "with linewise selection", ->
         it "replaces selection with charwise content", ->
           set text: "012\nabc", cursor: [0, 1]
-          set register: '"': text: "345"
+          set unnamedRegister: "345"
           ensure 'Vp', text: "345\nabc", cursor: [0, 0]
         it "replaces selection with linewise content", ->
-          set register: '"': text: "345\n"
+          set unnamedRegister: "345\n"
           ensure 'Vp', text: "345\n", cursor: [0, 0]
 
   describe "the P keybinding", ->
     describe "with character contents", ->
       beforeEach ->
         set text: "012\n", cursor: [0, 0]
-        set register: '"': text: '345'
-        set register:   a: text: 'a'
+        set unnamedRegister: '345'
+        set register: a: text: 'a'
         keystroke 'P'
 
       it "inserts the contents of the default register above", ->
