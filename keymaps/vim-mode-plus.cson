@@ -126,6 +126,8 @@
   # 'g s c ;': 'vim-mode-plus:change-surround-any-pair'
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
+  'g ctrl-a': 'vim-mode-plus:increment-number' # experimental
+  'g ctrl-x': 'vim-mode-plus:decrement-number' # experimental
 
   'ctrl-w ctrl-h': 'window:focus-pane-on-left'
   'ctrl-w h':      'window:focus-pane-on-left'

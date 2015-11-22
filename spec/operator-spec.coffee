@@ -1727,6 +1727,112 @@ describe "Operator", ->
                 [[3, 2], [3, 5]],
               ]
 
+  describe "the 'g ctrl-a', 'g ctrl-x' increment-number, decrement-number", ->
+    describe "increment", ->
+      beforeEach ->
+        set
+          text: """
+            1 10 0
+            0 7 0
+            0 0 3
+            """
+          cursor: [0, 0]
+      it "use first number as base number case-1", ->
+        set text: "1 1 1", cursor: [0, 0]
+        ensure ['g', {ctrl: 'a'}, '$'], text: "1 2 3", mode: 'normal', cursor: [0, 0]
+      it "use first number as base number case-2", ->
+        set text: "99 1 1", cursor: [0, 0]
+        ensure ['g', {ctrl: 'a'}, '$'], text: "99 100 101", mode: 'normal', cursor: [0, 0]
+      it "can take count, and used as step to each increment", ->
+        set text: "5 0 0", cursor: [0, 0]
+        ensure ['5g', {ctrl: 'a'}, '$'], text: "5 10 15", mode: 'normal', cursor: [0, 0]
+      it "only increment number in target range", ->
+        set cursor: [1, 2]
+        ensure ['g', {ctrl: 'a'}, 'j'],
+          text: """
+            1 10 0
+            0 1 2
+            3 4 5
+            """
+          mode: 'normal'
+      it "works in characterwise visual-mode", ->
+        set cursor: [1, 2]
+        ensure ['vjg', {ctrl: 'a'}],
+          text: """
+            1 10 0
+            0 7 8
+            9 10 3
+            """
+          mode: 'normal'
+      it "works in blockwise visual-mode", ->
+        set cursor: [0, 2]
+        ensure [{ctrl: 'v'}, '2j$g', {ctrl: 'a'}],
+          text: """
+            1 10 11
+            0 12 13
+            0 14 15
+            """
+          mode: 'normal'
+      describe "point when finished and repeatable", ->
+        beforeEach ->
+          set text: "1 0 0 0 0", cursor: [0, 0]
+          ensure "v$", selectedText: '1 0 0 0 0'
+        it "put cursor on start position when finished and repeatable (case: selection is not reversed)", ->
+          ensure selectionIsReversed: false
+          ensure ['g', {ctrl: 'a'}], text: "1 2 3 4 5", cursor: [0, 0], mode: 'normal'
+          ensure '.', text: "6 7 8 9 10" , cursor: [0, 0]
+          ensure '.', text: "11 12 13 14 15" , cursor: [0, 0]
+        it "put cursor on start position when finished and repeatable (case: selection is reversed)", ->
+          ensure 'o', selectionIsReversed: true
+          ensure ['g', {ctrl: 'a'}], text: "1 2 3 4 5", cursor: [0, 0], mode: 'normal'
+          ensure '.', text: "6 7 8 9 10" , cursor: [0, 0]
+          ensure '.', text: "11 12 13 14 15" , cursor: [0, 0]
+    describe "decrement", ->
+      beforeEach ->
+        set
+          text: """
+            14 23 13
+            10 20 13
+            13 13 16
+            """
+          cursor: [0, 0]
+      it "use first number as base number case-1", ->
+        set text: "10 1 1"
+        ensure ['g', {ctrl: 'x'}, '$'], text: "10 9 8", mode: 'normal', cursor: [0, 0]
+      it "use first number as base number case-2", ->
+        set text: "99 1 1"
+        ensure ['g', {ctrl: 'x'}, '$'], text: "99 98 97", mode: 'normal', cursor: [0, 0]
+      it "can take count, and used as step to each increment", ->
+        set text: "5 0 0", cursor: [0, 0]
+        ensure ['5g', {ctrl: 'x'}, '$'], text: "5 0 -5", mode: 'normal', cursor: [0, 0]
+      it "only decrement number in target range", ->
+        set cursor: [1, 3]
+        ensure ['g', {ctrl: 'x'}, 'j'],
+          text: """
+            14 23 13
+            10 9 8
+            7 6 5
+            """
+          mode: 'normal'
+      it "works in characterwise visual-mode", ->
+        set cursor: [1, 3]
+        ensure ['vjlg', {ctrl: 'x'}],
+          text: """
+            14 23 13
+            10 20 19
+            18 17 16
+            """
+          mode: 'normal'
+      it "works in blockwise visual-mode", ->
+        set cursor: [0, 3]
+        ensure [{ctrl: 'v'}, '2jlg', {ctrl: 'x'}],
+          text: """
+            14 23 13
+            10 22 13
+            13 21 16
+            """
+          mode: 'normal'
+
   describe 'the R keybinding', ->
     beforeEach ->
       set
