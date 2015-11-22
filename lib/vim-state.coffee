@@ -34,6 +34,8 @@ class VimState
     @editorElement = atom.views.getView(@editor)
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
+    @operationSubscriptions = new CompositeDisposable
+
     @subscriptions.add @editor.onDidDestroy =>
       @destroy()
 
@@ -42,7 +44,6 @@ class VimState
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @flasher = new FlashManager(this)
-    # @memory = {} # keep state date which I still can't find appropriate place.
 
     # FIXME: Direct reference for config param name.
     # Handle with config onDidChange subscription?
@@ -61,16 +62,28 @@ class VimState
     else
       @activate('normal')
 
-  # getMemory: (name) ->
-  #   @memory[name]
-  #
-  # setMemory: (name, value) ->
-  #   @memory[name] = value
+  subscribe: (args...) ->
+    @operationSubscriptions.add args...
+
+  # Input subscriptions
+  # -------------------------
+  onDidChangeInput: (fn) -> @subscribe @input.onDidChange(fn)
+  onDidConfirmInput: (fn) -> @subscribe @input.onDidConfirm(fn)
+  onDidCancelInput: (fn) -> @subscribe @input.onDidCancel(fn)
+  onDidUnfocusInput: (fn) -> @subscribe @input.onDidUnfocus(fn)
+  onDidCommandInput: (fn) -> @subscribe @input.onDidCommand(fn)
+
+  onDidChangeSearch: (fn) -> @subscribe @search.onDidChange(fn)
+  onDidConfirmSearch: (fn) -> @subscribe @search.onDidConfirm(fn)
+  onDidCancelSearch: (fn) -> @subscribe @search.onDidCancel(fn)
+  onDidUnfocusSearch: (fn) -> @subscribe @search.onDidUnfocus(fn)
+  onDidCommandSearch: (fn) -> @subscribe @search.onDidCommand(fn)
 
   destroy: ->
     return if @destroyed
     @destroyed = true
     @subscriptions.dispose()
+    @operationSubscriptions.dispose()
 
     if @editor.isAlive()
       @activate('normal') # reset to base mdoe.
@@ -87,7 +100,7 @@ class VimState
       this[name]?.destroy?()
       this[name] = null
 
-    {@editor, @editorElement} = {}
+    {@editor, @editorElement, @subscriptions, @operationSubscriptions} = {}
     @emitter.emit 'did-destroy'
 
   observeSelection: ->
@@ -139,6 +152,8 @@ class VimState
     @searchHistory.reset()
     @hover.reset()
     @operationStack.clear()
+    @operationSubscriptions?.dispose()
+    @operationSubscriptions = new CompositeDisposable
 
   showCursors: ->
     return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))

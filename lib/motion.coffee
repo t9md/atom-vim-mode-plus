@@ -480,7 +480,7 @@ class Find extends Motion
   offset: 0
 
   initialize: ->
-    @readInput() unless @instanceof('RepeatFind')
+    @focusInput() unless @instanceof('RepeatFind')
 
   isBackwards: ->
     @backwards
@@ -561,7 +561,7 @@ class MoveToMark extends Motion
   hoverIcon: ":move-to-mark:`"
 
   initialize: ->
-    @readInput()
+    @focusInput()
 
   moveCursor: (cursor) ->
     markPosition = @vimState.mark.get(@input)
@@ -698,14 +698,19 @@ class Search extends SearchBase
   @extend()
   initialize: ->
     super
-    handlers = {@onConfirm, @onCancel, @onChange}
     if settings.get('incrementalSearch')
       @restoreEditorState = saveEditorState(@editor)
-      @subscriptions = new CompositeDisposable
-      @subscriptions.add @editorElement.onDidChangeScrollTop => @matches?.show()
-      @subscriptions.add @editorElement.onDidChangeScrollLeft => @matches?.show()
-      handlers.onCommand = @onCommand
-    @vimState.search.readInput {@backwards}, handlers
+      @subscribeScrollChange()
+      @onDidCommandSearch @onCommand
+
+    @onDidConfirmSearch @onConfirm
+    @onDidCancelSearch @onCancel
+    @onDidChangeSearch @onChange
+    @vimState.search.focus({@backwards})
+
+  subscribeScrollChange: ->
+    @subscribe @editorElement.onDidChangeScrollTop => @matches?.show()
+    @subscribe @editorElement.onDidChangeScrollLeft => @matches?.show()
 
   isRepeatLastSearch: (input) ->
     input in ['', (if @isBackwards() then '?' else '/')]
@@ -713,8 +718,6 @@ class Search extends SearchBase
   finish: ->
     if @isIncrementalSearch()
       @vimState.hoverSearchCounter.reset()
-    @subscriptions?.dispose()
-    @subscriptions = null
     super
 
   onConfirm: (@input) => # fat-arrow
