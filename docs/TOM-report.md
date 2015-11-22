@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode-plus version: 0.4.0  
-*generated at 2015-11-21T17:29:46.297Z*
+*generated at 2015-11-22T18:30:57.156Z*
 
 - [Base](#base)
   - [InsertMode](#insertmode--base)
@@ -80,6 +80,8 @@ vim-mode-plus version: 0.4.0
       - [DeleteToLastCharacterOfLine](#deletetolastcharacterofline--delete)
     - [Increase](#increase--operator)
       - [Decrease](#decrease--increase)
+    - [IncrementNumber](#incrementnumber--operator)
+      - [DecrementNumber](#decrementnumber--incrementnumber)
     - [Indent](#indent--operator)
       - [AutoIndent](#autoindent--indent)
       - [Outdent](#outdent--indent)
@@ -158,12 +160,23 @@ vim-mode-plus version: 0.4.0
 - ::recodable: ```false```
 - ::defaultCount: ```1```
 - ::requireInput: ```false```
+- ::onDidChangeInput`()`
+- ::onDidConfirmInput`()`
+- ::onDidCancelInput`()`
+- ::onDidUnfocusInput`()`
+- ::onDidCommandInput`()`
+- ::onDidChangeSearch`()`
+- ::onDidConfirmSearch`()`
+- ::onDidCancelSearch`()`
+- ::onDidUnfocusSearch`()`
+- ::onDidCommandSearch`()`
+- ::subscribe`()`
 - ::isComplete`()`
 - ::isRecordable`()`
 - ::abort`()`
 - ::getCount`()`
 - ::new`(klassName, properties)`
-- ::readInput`(_arg)`
+- ::focusInput`(_arg)`
 - ::instanceof`(klassName)`
 
 ### InsertMode < Base
@@ -582,6 +595,7 @@ vim-mode-plus version: 0.4.0
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>/</kbd>
 - ::initialize`()`: `super`: **Overridden**
+- ::subscribeScrollChange`()`
 - ::isRepeatLastSearch`(input)`
 - ::finish`()`: `super`: **Overridden**
 - ::onConfirm`(@input)`
@@ -753,6 +767,22 @@ vim-mode-plus version: 0.4.0
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>ctrl-x</kbd>
 - ::step: ```-1```: **Overridden**
 
+### IncrementNumber < Operator
+- command: `vim-mode-plus:increment-number`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g ctrl-a</kbd>
+- ::step: ```1```
+- ::baseNumber: ```null```
+- ::execute`()`
+- ::replaceNumber`(scanRange, pattern)`
+- ::getNewText`(text)`
+
+### DecrementNumber < IncrementNumber
+- command: `vim-mode-plus:decrement-number`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g ctrl-x</kbd>
+- ::step: ```-1```: **Overridden**
+
 ### Indent < Operator
 - command: `vim-mode-plus:indent`
   - keymaps
@@ -894,7 +924,6 @@ vim-mode-plus version: 0.4.0
 - ::hoverIcon: ```':surround:'```
 - ::requireInput: ```true```: **Overridden**
 - ::initialize`()`
-- ::getInputHandler`()`
 - ::onConfirm`(@input)`
 - ::getPair`(input)`
 - ::surround`(text, pair)`

@@ -41,6 +41,10 @@ class Developer
         'getClass', 'extend', 'getParent', 'getAncestors', 'kind', 'isCommand'
         'getRegistory', 'command'
         'init', 'getCommandName', 'getCommands', 'registerCommands',
+        'delegatesProperties',
+        'delegatesMethods',
+        'delegatesProperty',
+        'delegatesMethod',
       ]
       recursiveInspect: Base
 
