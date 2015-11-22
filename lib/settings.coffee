@@ -47,57 +47,57 @@ module.exports = new Settings 'vim-mode-plus',
     default: false
     description: "Don't move cursor after string transformation e.g Toggle, Surround"
   flashOnOperate:
-    order: 10
+    order: 9
     type: 'boolean'
     default: true
   flashOnOperateDuration:
-    order: 11
+    order: 10
     type: 'integer'
     default: 100
     description: "Duration(msec) for flash"
   flashOnSearch:
-    order: 12
+    order: 11
     type: 'boolean'
     default: true
   flashOnSearchDuration:
-    order: 13
+    order: 12
     type: 'integer'
     default: 300
     description: "Duration(msec) for search flash"
   flashScreenOnSearchHasNoMatch:
-    order: 14
+    order: 13
     type: 'boolean'
     default: true
   showHoverOnOperate:
-    order: 21
+    order: 14
     type: 'boolean'
     default: false
     description: "Show count, register and optional icon on hover overlay"
   showHoverOnOperateIcon:
-    order: 23
+    order: 15
     type: 'string'
     default: 'icon'
     enum: ['none', 'icon', 'emoji']
   showHoverSearchCounter:
-    order: 24
+    order: 16
     type: 'boolean'
     default: false
   showHoverSearchCounterDuration:
-    order: 25
+    order: 17
     type: 'integer'
     default: 700
     description: "Duration(msec) for hover search counter"
   debug:
-    order: 100
+    order: 18
     type: 'boolean'
     default: false
     description: "Show operationStack debug log on console"
   debugOutput:
-    order: 101
+    order: 19
     type: 'string'
     default: 'console'
     enum: ['console', 'file']
   debugOutputFilePath:
-    order: 102
+    order: 20
     type: 'string'
     default: ''
