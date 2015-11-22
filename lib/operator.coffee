@@ -3,6 +3,7 @@ _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
 {haveSomeSelection} = require './utils'
+swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
 
@@ -351,6 +352,9 @@ class Mark extends Operator
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
     @vimState.activate('normal')
 
+# [FIXME?]: inconsistent behavior from normal operator
+# Since its support visual-mode but not use @target and compose convension.
+# Maybe separating complete/in-complete version like IncreaseNow and Increase?
 class Increase extends Operator
   @extend()
   complete: true
@@ -389,6 +393,44 @@ class Increase extends Operator
     newRanges
 
 class Decrease extends Increase
+  @extend()
+  step: -1
+
+class IncrementNumber extends Operator
+  @extend()
+  step: 1
+  baseNumber: null
+
+  execute: ->
+    pattern = ///#{settings.get('numberRegex')}///g
+    newRanges = null
+    @target.select() unless @haveSomeSelection()
+    @editor.transact =>
+      newRanges = for s in @editor.getSelectionsOrderedByBufferPosition()
+        @replaceNumber(s.getBufferRange(), pattern)
+    if (newRanges = _.flatten(newRanges)).length
+      @flash newRanges if settings.get('flashOnOperate')
+    else
+      atom.beep()
+    # Reverseing selection put cursor on start position of selection.
+    # This allow increment/decrement works in same target range when repeated.
+    swrap.setReversedState(@editor, true)
+    @vimState.activate('normal')
+
+  replaceNumber: (scanRange, pattern) ->
+    newRanges = []
+    @editor.scanInBufferRange pattern, scanRange, ({matchText, replace}) =>
+      newRanges.push replace(@getNewText(matchText))
+    newRanges
+
+  getNewText: (text) ->
+    @baseNumber = if @baseNumber?
+      @baseNumber + @step * @getCount()
+    else
+      parseInt(text, 10)
+    String(@baseNumber)
+
+class DecrementNumber extends IncrementNumber
   @extend()
   step: -1
 

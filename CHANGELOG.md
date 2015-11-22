@@ -1,4 +1,6 @@
 # 0.5.0 WIP
+- FIX: spec bug, revealed by validating spec-helper's mini-DSL options.
+- New: introduce increment/decrement operation `g ctrl-a`, `g ctrl-x`.
 
 # 0.4.0
 - Add spec for visual-blockwise to visual-characterwise shift
