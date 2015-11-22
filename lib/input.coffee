@@ -6,11 +6,11 @@ packageScope = 'vim-mode-plus'
 searchScope = "#{packageScope}-search"
 
 class InputBase
-  onChange:  (fn) -> @emitter.on 'change', fn
-  onConfirm: (fn) -> @emitter.on 'confirm', fn
-  onCancel:  (fn) -> @emitter.on 'cancel', fn
-  onUnfocus: (fn) -> @emitter.on 'unfocus', fn
-  onCommand: (fn) -> @emitter.on 'command', fn
+  onDidChange:  (fn) -> @emitter.on 'did-change', fn
+  onDidConfirm: (fn) -> @emitter.on 'did-confirm', fn
+  onDidCancel:  (fn) -> @emitter.on 'did-cancel', fn
+  onDidUnfocus: (fn) -> @emitter.on 'did-unfocus', fn
+  onDidCommand: (fn) -> @emitter.on 'did-command', fn
 
   constructor: (@vimState) ->
     @emitter = new Emitter
@@ -32,27 +32,13 @@ class InputBase
       if @canConfirm()
         @confirm()
       else
-        @emitter.emit 'change', text
+        @emitter.emit 'did-change', text
 
   canConfirm: ->
     if @options?.charsMax
       @editor.getText().length >= @options.charsMax
     else
       false
-
-  readInput: (options, handlers={}) ->
-    @subs?.dispose()
-    @subs = new CompositeDisposable
-    {onConfirm, onCancel, onChange, onCommand} = handlers
-
-    @subs.add @onChange(onChange)   if onChange?
-    @subs.add @onConfirm(onConfirm) if onConfirm?
-    @subs.add @onCancel(onCancel)   if onCancel?
-    @subs.add @onCommand(onCommand) if onCommand?
-    @subs.add @onUnfocus =>
-      @subs.dispose()
-      @subs = null
-    @focus(options)
 
   focus: (@options={}) ->
     @finished = false
@@ -61,13 +47,13 @@ class InputBase
 
   unfocus: ->
     @finished = true
-    @emitter.emit 'unfocus'
+    @emitter.emit 'did-unfocus'
     atom.workspace.getActivePane().activate()
     @editor.setText ''
     @view.panel.hide()
 
   cancel: ->
-    @emitter.emit 'cancel'
+    @emitter.emit 'did-cancel'
     @unfocus()
 
   destroy: ->
@@ -79,7 +65,7 @@ class InputBase
 
   confirm: ->
     if (input = @editor.getText())?
-      @emitter.emit 'confirm', input
+      @emitter.emit 'did-confirm', input
       @unfocus()
     else
       @cancel()
@@ -136,10 +122,10 @@ class Search extends InputBase
     literalModeSupportCommands =
       "confirm":     => @confirm()
       "cancel":      => @cancel()
-      "visit-next":  => @emitter.emit('command', 'visit-next')
-      "visit-prev":  => @emitter.emit('command', 'visit-prev')
-      "scroll-next": => @emitter.emit('command', 'scroll-next')
-      "scroll-prev": => @emitter.emit('command', 'scroll-prev')
+      "visit-next":  => @emitter.emit('did-command', 'visit-next')
+      "visit-prev":  => @emitter.emit('did-command', 'visit-prev')
+      "scroll-next": => @emitter.emit('did-command', 'scroll-next')
+      "scroll-prev": => @emitter.emit('did-command', 'scroll-prev')
       "insert-wild-pattern": => @editor.insertText '.*?'
 
     prefix = "#{packageScope}:search"

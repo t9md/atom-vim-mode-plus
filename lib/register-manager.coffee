@@ -1,6 +1,7 @@
 # Refactoring status: 100%
 globalState = require './global-state'
 settings = require './settings'
+{CompositeDisposable} = require 'atom'
 {toggleClassByCondition} = require './utils'
 
 validNames = /[a-zA-Z*+%_"]/
@@ -102,9 +103,9 @@ class RegisterManager
   setName: ->
     @vimState.hover.add '"'
     @updateEditorElement()
-    @vimState.input.readInput {charsMax: 1},
-      onConfirm: (@name) => @vimState.hover.add(@name)
-      onCancel: => @vimState.hover.reset()
+    @vimState.onDidConfirmInput (@name) => @vimState.hover.add(@name)
+    @vimState.onDidCancelInput => @vimState.hover.reset()
+    @vimState.input.focus({charsMax: 1})
 
   getCopyType: (text) ->
     if text.lastIndexOf("\n") is text.length - 1

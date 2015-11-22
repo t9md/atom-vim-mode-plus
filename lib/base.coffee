@@ -1,6 +1,8 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
+Delegato = require 'delegato'
 {CompositeDisposable} = require 'atom'
+
 settings = require './settings'
 
 packageScope = 'vim-mode-plus'
@@ -11,11 +13,28 @@ run = (klass, properties={}) ->
   vimState = getEditorState(atom.workspace.getActiveTextEditor())
   vimState.operationStack.run(klass, properties)
 
+delegatingMethods = [
+  "onDidChangeInput"
+  "onDidConfirmInput"
+  "onDidCancelInput"
+  "onDidUnfocusInput"
+  "onDidCommandInput"
+  "onDidChangeSearch"
+  "onDidConfirmSearch"
+  "onDidCancelSearch"
+  "onDidUnfocusSearch"
+  "onDidCommandSearch"
+  "subscribe"
+]
+
 class Base
+  Delegato.includeInto(this)
   complete: false
   recodable: false
   defaultCount: 1
   requireInput: false
+
+  @delegatesMethods delegatingMethods..., toProperty: 'vimState'
 
   constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
@@ -54,15 +73,14 @@ class Base
     klass = Base.getClass(klassName)
     new klass(@vimState, properties)
 
-  readInput: ({charsMax}={}) ->
+  focusInput: ({charsMax}={}) ->
     charsMax ?= 1
-    @vimState.input.readInput {charsMax},
-      onConfirm: (input) =>
-        @input = input
-        @complete = true
-        @vimState.operationStack.process()
-      onCancel: =>
-        @vimState.operationStack.cancel()
+    @onDidConfirmInput (@input) =>
+      @complete = true
+      @vimState.operationStack.process()
+    @onDidCancelInput =>
+      @vimState.operationStack.cancel()
+    @vimState.input.focus({charsMax})
 
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)

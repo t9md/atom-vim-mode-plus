@@ -218,15 +218,12 @@ class Surround extends TransformString
 
   initialize: ->
     return unless @requireInput
-    @vimState.input.readInput {@charsMax}, @getInputHandler()
-
-  getInputHandler: ->
-    onConfirm: (input) => @onConfirm(input)
-    onChange:  (input) => @vimState.hover.add(input)
-    onCancel: => @vimState.operationStack.cancel()
+    @onDidConfirmInput (input) => @onConfirm(input)
+    @onDidChangeInput (input) => @vimState.hover.add(input)
+    @onDidCancelInput => @vimState.operationStack.cancel()
+    @vimState.input.focus({@charsMax})
 
   onConfirm: (@input) ->
-    @vimState.hover.add(input)
     @vimState.operationStack.process()
 
   getPair: (input) ->
@@ -348,7 +345,7 @@ class Mark extends Operator
   hoverIcon: ':mark:'
   requireInput: true
   initialize: ->
-    @readInput()
+    @focusInput()
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
@@ -710,7 +707,7 @@ class Replace extends Operator
   requireInput: true
 
   initialize: ->
-    @readInput()
+    @focusInput()
 
   isComplete: ->
     @input = "\n" if @input is ''

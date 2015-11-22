@@ -9,7 +9,7 @@ class InsertRegister extends InsertMode
   hoverText: '"'
   requireInput: true
   initialize: ->
-    @readInput()
+    @focusInput()
 
   execute: ->
     if text = @vimState.register.get(@input).text
