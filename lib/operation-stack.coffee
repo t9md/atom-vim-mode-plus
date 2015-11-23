@@ -2,10 +2,9 @@
 _ = require 'underscore-plus'
 
 Base = require './base'
-CurrentSelection = null
-Select = null
 {debug, withKeepingGoalColumn} = require './utils'
 settings = require './settings'
+{CurrentSelection, Select} = {}
 
 inspectInstance = null
 
@@ -13,37 +12,30 @@ class OperationStack
   constructor: (@vimState) ->
     @stack = []
     {@editor} = @vimState
+    Select ?= Base.getClass('Select')
+    CurrentSelection ?= Base.getClass('CurrentSelection')
 
   run: (klass, properties) ->
+    klass = Base.getClass(klass) if _.isString(klass)
     try
-      klass = Base.getClass(klass) if _.isString(klass)
       @push new klass(@vimState, properties)
+      @processing = true
+      @process()
     catch error
       throw error unless error.instanceof?('OperationAbortedError')
+    finally
+      @processing = false
 
   push: (op) ->
     if @isEmpty() and settings.get('debug')
-      if settings.get('debugOutput') is 'console'
-        console.clear()
+      console.clear() if settings.get('debugOutput') is 'console'
       debug "#=== Start at #{new Date().toISOString()}"
 
-    # Use implicit Select operator as operator.
     if @vimState.isMode('visual') and _.isFunction(op.select)
-      Select ?= Base.getClass('Select')
-      @pushToStack new Select(@vimState), message: "push IMPLICIT Operator.Select"
-
-    @pushToStack op, message: "push <#{op.constructor.name}>"
-
-    # Operate on implicit CurrentSelection TextObject.
+      @pushToStack new Select(@vimState)
+    @pushToStack op
     if @vimState.isMode('visual') and op.instanceof('Operator')
-      CurrentSelection ?= Base.getClass('CurrentSelection')
-      @pushToStack new CurrentSelection(@vimState), message: "push IMPLICIT Motion.CurrentSelection"
-
-    try
-      @processing = true
-      @process()
-    finally
-      @processing = false
+      @pushToStack new CurrentSelection(@vimState)
 
   isProcessing: ->
     @processing
@@ -102,8 +94,10 @@ class OperationStack
   peekTop: ->
     _.last @stack
 
-  pushToStack: (operation, {message}={}) ->
-    debug message if message?
+  pushToStack: (operation) ->
+    if settings.get('debug')
+      kind = operation.constructor.kind
+      debug "push <#{kind}.#{operation.constructor.name}>"
     @stack.push(operation)
 
   pop: ->
