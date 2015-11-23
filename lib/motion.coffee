@@ -110,15 +110,17 @@ class Motion extends Base
     if @editor.isFoldedAtBufferRow(row)
       @editor.unfoldBufferRow row
 
+# Used as operator's target in visual-mode.
+# Never be execute()ed as stand-alone motion
 class CurrentSelection extends Motion
-  @extend()
+  @extend(false)
   selectedRange: null
   initialize: ->
     @selectedRange = @editor.getSelectedBufferRange()
     @wasLinewise = @isLinewise()
 
+  # Never be called but put here for consistency
   execute: ->
-    @countTimes -> true
 
   select: ->
     # In visual mode, the current selections are already there.

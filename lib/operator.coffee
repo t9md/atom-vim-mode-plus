@@ -104,7 +104,7 @@ class Operator extends Base
           fn(s)
 
 class Select extends Operator
-  @extend()
+  @extend(false)
   execute: ->
     @target.select()
 
