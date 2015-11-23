@@ -1,5 +1,5 @@
 # Refactoring status: 80%
-{getVimState} = require './spec-helper'
+{getVimState, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "Operator", ->
@@ -1107,7 +1107,7 @@ describe "Operator", ->
     it "replaces a single character with a line break", ->
       inputEditorElement = vimState.input.view.editorElement
       keystroke 'r'
-      atom.commands.dispatch(inputEditorElement, 'core:confirm')
+      dispatch(inputEditorElement, 'core:confirm')
       ensure
         text: '\n2\n\n4\n\n'
         cursorBuffer: [[1, 0], [3, 0]]
@@ -1471,7 +1471,6 @@ describe "Operator", ->
         editor.moveRight()
         editor.insertText 'b\n'
         ensure 'escape', cursor: [1,  0]
-
         ensure '.',
           text: '(a)b\n(a)b\n'
           cursor: [2,  0]

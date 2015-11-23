@@ -105,6 +105,8 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
     which = if @after then 'end' else 'start'
     @eachSelection (s) ->
       s.cursor.setBufferPosition s.getBufferRange()[which]
+
+    # FIXME confirmChanges is not called when deactivate insert-mode.
     @new('ActivateInsertMode').execute()
 
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
