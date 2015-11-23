@@ -550,11 +550,11 @@ class ToggleLineComments extends Operator
 class ActivateInsertMode extends Operator
   @extend()
   complete: true
-  typedText: null
+  insertedText: null
   flashTarget: false
 
   initialize: ->
-    @vimState.setCheckpoint() unless @typedText?
+    @vimState.setCheckpoint() unless @insertedText?
 
   # This uses private APIs and may break if TextBuffer is refactored.
   # Package authors - copy and paste this code at your own risk.
@@ -567,15 +567,15 @@ class ActivateInsertMode extends Operator
 
   confirmChanges: (checkpoint) ->
     changes = @getChangesSinceCheckpoint(checkpoint)
-    @typedText = if (range = getInsertedRange(changes))?
+    @insertedText = if (range = getInsertedRange(changes))?
       @editor.getTextInBufferRange(range)
     else
       ""
 
   execute: ->
-    if @typedText?
-      return unless @typedText
-      @editor.insertText(@typedText, normalizeLineEndings: true, autoIndent: true)
+    if @insertedText?
+      return unless @insertedText
+      @editor.insertText(@insertedText, normalizeLineEndings: true, autoIndent: true)
       for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
         cursor.moveLeft()
     else
@@ -593,11 +593,11 @@ class ActivateReplaceMode extends ActivateInsertMode
   @extend()
 
   execute: ->
-    if @typedText?
-      return unless @typedText
+    if @insertedText?
+      return unless @insertedText
       @editor.transact =>
-        @editor.insertText(@typedText, normalizeLineEndings: true)
-        toDelete = @typedText.length - @countChars('\n', @typedText)
+        @editor.insertText(@insertedText, normalizeLineEndings: true)
+        toDelete = @insertedText.length - @countChars('\n', @insertedText)
         for selection in @editor.getSelections()
           count = toDelete
           selection.delete() while count-- and not selection.cursor.isAtEndOfLine()
@@ -637,10 +637,10 @@ class InsertAboveWithNewline extends ActivateInsertMode
       when 'below' then @editor.insertNewlineBelow()
     @editor.getLastCursor().skipLeadingWhitespace()
 
-    if @typedText?
+    if @insertedText?
       # We'll have captured the inserted newline, but we want to do that
       # over again by hand, or differing indentations will be wrong.
-      @typedText = @typedText.trimLeft()
+      @insertedText = @insertedText.trimLeft()
       super
     else
       @vimState.activate('insert')
@@ -660,7 +660,7 @@ class Change extends ActivateInsertMode
     @target.select()
     if @haveSomeSelection()
       @setTextToRegister @editor.getSelectedText()
-      if @target.isLinewise?() and not @typedText?
+      if @target.isLinewise?() and not @insertedText?
         for selection in @editor.getSelections()
           selection.insertText("\n", autoIndent: true)
           selection.cursor.moveLeft()
@@ -668,7 +668,7 @@ class Change extends ActivateInsertMode
         for selection in @editor.getSelections()
           selection.deleteSelectedText()
 
-    return super if @typedText?
+    return super if @insertedText?
 
     @vimState.activate('insert')
 
