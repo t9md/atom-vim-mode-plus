@@ -698,13 +698,16 @@ getInsertedRange = (changes) ->
   for change in changes when change.newRange?
     {oldRange, oldText, newRange, newText} = change
     if range?
+      # shrink range
       if oldText.length and range.containsRange(oldRange)
         extent = oldRange.getExtent()
-        extent.column = 0 if (oldRange.end.row isnt range.end.row)
+        extent.column = 0 unless (range.end.row is oldRange.end.row)
         range.end = range.end.translate(extent.negate())
+
+      # expand range
       if newText.length and range.containsPoint(newRange.start)
         extent = newRange.getExtent()
-        extent.column = 0 if (newRange.start.row isnt range.end.row)
+        extent.column = 0 unless (range.end.row is newRange.start.row)
         range.end = range.end.translate(extent)
     else
       # Since newRange is freezed, we need to copy() to un-freeze range.
