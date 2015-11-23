@@ -82,16 +82,15 @@ class ModeManager
   # -------------------------
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)
-    @setInsertionCheckpoint()
+    @setCheckpoint()
     replaceModeDeactivator = @activateReplaceMode() if (submode is 'replace')
 
     new Disposable =>
-      checkpoint = @getInsertionCheckpoint()
+      checkpoint = @getCheckpoint()
       @editor.groupChangesSinceCheckpoint(checkpoint)
-      changes = getChangesSinceCheckpoint(@editor.buffer, checkpoint)
-      @resetInsertionCheckpoint()
+      @resetCheckpoint()
       if (item = @vimState.operationStack.getRecorded()) and item.instanceof('ActivateInsertMode')
-        item.confirmChanges(changes)
+        item.confirmChanges(checkpoint)
 
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
@@ -124,14 +123,15 @@ class ModeManager
         range = s.insertText(char)
         s.cursor.moveLeft() unless range.isEmpty()
 
-  setInsertionCheckpoint: ->
-    @insertionCheckpoint ?= @editor.createCheckpoint()
+  setCheckpoint: ->
+    @checkpoint ?= @editor.createCheckpoint()
 
-  resetInsertionCheckpoint: ->
-    @insertionCheckpoint = null
+  getCheckpoint: ->
+    @checkpoint
 
-  getInsertionCheckpoint: ->
-    @insertionCheckpoint
+  resetCheckpoint: ->
+    @checkpoint = null
+
 
   # Visual
   # -------------------------
@@ -179,14 +179,5 @@ class ModeManager
         # in this case, we dont want to loose multi-cursor.
         unless @vimState.operationStack.isProcessing()
           @vimState.operationStack.run "BlockwiseRestoreCharacterwise"
-
-# This uses private APIs and may break if TextBuffer is refactored.
-# Package authors - copy and paste this code at your own risk.
-getChangesSinceCheckpoint = (buffer, checkpoint) ->
-  {history} = buffer
-  if (index = history.getCheckpointIndex(checkpoint))?
-    history.undoStack.slice(index)
-  else
-    []
 
 module.exports = ModeManager

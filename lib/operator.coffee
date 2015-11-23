@@ -553,9 +553,24 @@ class ActivateInsertMode extends Operator
   typedText: null
   flashTarget: false
 
-  confirmChanges: (changes) ->
-    bundler = new TransactionBundler(changes, @editor)
-    @typedText = bundler.buildInsertText()
+  initialize: ->
+    @vimState.setCheckpoint() unless @typedText?
+
+  # This uses private APIs and may break if TextBuffer is refactored.
+  # Package authors - copy and paste this code at your own risk.
+  getChangesSinceCheckpoint: (checkpoint) ->
+    {history} = @editor.getBuffer()
+    if (index = history.getCheckpointIndex(checkpoint))?
+      history.undoStack.slice(index)
+    else
+      []
+
+  confirmChanges: (checkpoint) ->
+    changes = @getChangesSinceCheckpoint(checkpoint)
+    @typedText = if (range = getInsertedRange(changes))?
+      @editor.getTextInBufferRange(range)
+    else
+      ""
 
   execute: ->
     if @typedText?
@@ -572,6 +587,7 @@ class InsertAtLastInsert extends ActivateInsertMode
     if (point = @vimState.mark.get('^'))
       @editor.setCursorBufferPosition(point)
       @editor.scrollToCursorPosition({center: true})
+    super
 
 class ActivateReplaceMode extends ActivateInsertMode
   @extend()
@@ -616,7 +632,6 @@ class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
   direction: 'above'
   execute: ->
-    @vimState.setInsertionCheckpoint() unless @typedText?
     switch @direction
       when 'above' then @editor.insertNewlineAbove()
       when 'below' then @editor.insertNewlineBelow()
@@ -640,10 +655,6 @@ class Change extends ActivateInsertMode
   complete: false
 
   execute: ->
-    # If we've typed, we're being repeated. If we're being repeated,
-    # undo transactions are already handled.
-    @vimState.setInsertionCheckpoint() unless @typedText?
-
     @target.setOptions? excludeWhitespace: true
 
     @target.select()
@@ -665,80 +676,40 @@ class Substitute extends Change
   @extend()
   initialize: ->
     @compose @new('MoveRight')
+    super
 
 class SubstituteLine extends Change
   @extend()
   initialize: ->
     @compose @new("MoveToRelativeLine")
+    super
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
   initialize: ->
     @compose @new('MoveToLastCharacterOfLine')
+    super
 
 # Takes a transaction and turns it into a string of what was typed.
 # This class is an implementation detail of ActivateInsertMode
-class TransactionBundler
-  constructor: (@changes, @editor) ->
-    @start = null
-    @end = null
-
-  buildInsertText: ->
-    @addChange(change) for change in @changes
-    if @start?
-      @editor.getTextInBufferRange [@start, @end]
+# Return final newRanges from changes
+getInsertedRange = (changes) ->
+  range = null
+  for change in changes when change.newRange?
+    {oldRange, oldText, newRange, newText} = change
+    if range?
+      if oldText.length and range.containsRange(oldRange)
+        extent = oldRange.getExtent()
+        extent.column = 0 if (oldRange.end.row isnt range.end.row)
+        range.end = range.end.translate(extent.negate())
+      if newText.length and range.containsPoint(newRange.start)
+        extent = newRange.getExtent()
+        extent.column = 0 if (newRange.start.row isnt range.end.row)
+        range.end = range.end.translate(extent)
     else
-      ""
-
-  addChange: (change) ->
-    return unless change.newRange?
-    if @isRemovingFromPrevious(change)
-      @subtractRange change.oldRange
-    if @isAddingWithinPrevious(change)
-      @addRange change.newRange
-
-  isAddingWithinPrevious: (change) ->
-    return false unless @isAdding(change)
-
-    return true if @start is null
-
-    @start.isLessThanOrEqual(change.newRange.start) and
-      @end.isGreaterThanOrEqual(change.newRange.start)
-
-  isRemovingFromPrevious: (change) ->
-    return false unless @isRemoving(change) and @start?
-
-    @start.isLessThanOrEqual(change.oldRange.start) and
-      @end.isGreaterThanOrEqual(change.oldRange.end)
-
-  isAdding: (change) ->
-    change.newText.length > 0
-
-  isRemoving: (change) ->
-    change.oldText.length > 0
-
-  addRange: (range) ->
-    if @start is null
-      {@start, @end} = range
-      return
-
-    rows = range.end.row - range.start.row
-
-    if (range.start.row is @end.row)
-      cols = range.end.column - range.start.column
-    else
-      cols = 0
-
-    @end = @end.translate [rows, cols]
-
-  subtractRange: (range) ->
-    rows = range.end.row - range.start.row
-
-    if (range.end.row is @end.row)
-      cols = range.end.column - range.start.column
-    else
-      cols = 0
-    @end = @end.translate [-rows, -cols]
+      # Since newRange is freezed, we need to copy() to un-freeze range.
+      range = newRange.copy() if (newText.length > 0)
+  range
 
 # Replace
 # -------------------------

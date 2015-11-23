@@ -19,8 +19,8 @@ FlashManager = require './flash-manager'
 packageScope = 'vim-mode-plus'
 
 # Mode handling is delegated to modeManager
-delegatingMethods = ['isMode', 'activate', 'setInsertionCheckpoint']
 delegatingProperties = ['mode', 'submode']
+delegatingMethods = ['isMode', 'activate', 'setCheckpoint']
 
 module.exports =
 class VimState
