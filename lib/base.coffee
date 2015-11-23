@@ -30,7 +30,7 @@ delegatingMethods = [
 class Base
   Delegato.includeInto(this)
   complete: false
-  recodable: false
+  recordable: false
   defaultCount: 1
   requireInput: false
 
@@ -59,7 +59,7 @@ class Base
       @complete
 
   isRecordable: ->
-    @recodable
+    @recordable
 
   abort: ->
     throw new OperationAbortedError('Aborted')

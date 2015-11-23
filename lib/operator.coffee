@@ -16,7 +16,7 @@ class OperatorError extends Base
 # -------------------------
 class Operator extends Base
   @extend(false)
-  recodable: true
+  recordable: true
   target: null
   flashTarget: true
 
@@ -334,7 +334,7 @@ class Join extends Operator
 class Repeat extends Operator
   @extend()
   complete: true
-  recodable: false
+  recordable: false
   execute: ->
     @editor.transact =>
       _.times @getCount(), =>
