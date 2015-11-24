@@ -1,5 +1,7 @@
 # 0.5.0 WIP
 - FIX: spec bug, revealed by validating spec-helper's mini-DSL options.
+- Improve: Lots of test spec refactored.
+- Improve: Refactoring TransactionBundler used in ActivateInsertMode.
 - New: introduce increment/decrement operation `g ctrl-a`, `g ctrl-x`.
 - FIX: incremental-search throw error: findFoldMarkers need explicit filter query object from Atom 1.3.0.
 

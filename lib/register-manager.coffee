@@ -6,7 +6,7 @@ settings = require './settings'
 
 validNames = /[a-zA-Z*+%_"]/
 REGISTERS = /// (
-  ?: [a-zA-Z*+%_"]
+  ?: [a-zA-Z*+%_".]
 ) ///
 
 # TODO: Vim support following registers.
@@ -44,6 +44,10 @@ class RegisterManager
       when '_' # Blackhole always returns nothing
         text = ''
         type = @getCopyType(text)
+      when '.' # retrieve last inserted text in insert-mode.
+        {text, type} = @data['.'] ? {}
+        text ?= ''
+        type ?= @getCopyType(text)
       else
         {text, type} = @data[name.toLowerCase()] ? {}
     {text, type}

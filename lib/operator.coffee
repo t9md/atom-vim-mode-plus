@@ -2,7 +2,7 @@
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
-{haveSomeSelection} = require './utils'
+{haveSomeSelection, countChar} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
@@ -338,7 +338,10 @@ class Repeat extends Operator
   execute: ->
     @editor.transact =>
       _.times @getCount(), =>
-        @vimState.operationStack.getRecorded()?.execute()
+        if op = @vimState.operationStack.getRecorded()
+          op.setRepeated(true)
+          op.execute()
+          # @vimState.operationStack.getRecorded()?.execute()
 
 class Mark extends Operator
   @extend()
@@ -541,179 +544,6 @@ class ToggleLineComments extends Operator
         s.toggleLineComments()
     @vimState.activate('normal')
 
-# Input
-# -------------------------
-# The operation for text entered in input mode. Broadly speaking, input
-# operators manage an undo transaction and set a @typingCompleted variable when
-# it's done. When the input operation is completed, the typingCompleted variable
-# tells the operation to repeat itself instead of enter insert mode.
-class ActivateInsertMode extends Operator
-  @extend()
-  complete: true
-  insertedText: null
-  flashTarget: false
-
-  initialize: ->
-    @vimState.setCheckpoint() unless @insertedText?
-
-  # This uses private APIs and may break if TextBuffer is refactored.
-  # Package authors - copy and paste this code at your own risk.
-  getChangesSinceCheckpoint: (checkpoint) ->
-    {history} = @editor.getBuffer()
-    if (index = history.getCheckpointIndex(checkpoint))?
-      history.undoStack.slice(index)
-    else
-      []
-
-  confirmChanges: (checkpoint) ->
-    changes = @getChangesSinceCheckpoint(checkpoint)
-    @insertedText = if (range = getInsertedRange(changes))?
-      @editor.getTextInBufferRange(range)
-    else
-      ""
-
-  execute: ->
-    if @insertedText?
-      return unless @insertedText
-      @editor.insertText(@insertedText, normalizeLineEndings: true, autoIndent: true)
-      for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
-        cursor.moveLeft()
-    else
-      @vimState.activate('insert')
-
-class InsertAtLastInsert extends ActivateInsertMode
-  @extend()
-  initialize: ->
-    if (point = @vimState.mark.get('^'))
-      @editor.setCursorBufferPosition(point)
-      @editor.scrollToCursorPosition({center: true})
-    super
-
-class ActivateReplaceMode extends ActivateInsertMode
-  @extend()
-
-  execute: ->
-    if @insertedText?
-      return unless @insertedText
-      @editor.transact =>
-        @editor.insertText(@insertedText, normalizeLineEndings: true)
-        toDelete = @insertedText.length - @countChars('\n', @insertedText)
-        for selection in @editor.getSelections()
-          count = toDelete
-          selection.delete() while count-- and not selection.cursor.isAtEndOfLine()
-        for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
-          cursor.moveLeft()
-    else
-      @vimState.activate('insert', 'replace')
-
-  countChars: (char, string) ->
-    string.split(char).length - 1
-
-class InsertAfter extends ActivateInsertMode
-  @extend()
-  execute: ->
-    @editor.moveRight() unless @editor.getLastCursor().isAtEndOfLine()
-    super
-
-class InsertAfterEndOfLine extends ActivateInsertMode
-  @extend()
-  execute: ->
-    @editor.moveToEndOfLine()
-    super
-
-class InsertAtBeginningOfLine extends ActivateInsertMode
-  @extend()
-  execute: ->
-    @editor.moveToFirstCharacterOfLine()
-    super
-
-# FIXME need support count
-class InsertAboveWithNewline extends ActivateInsertMode
-  @extend()
-  direction: 'above'
-  execute: ->
-    switch @direction
-      when 'above' then @editor.insertNewlineAbove()
-      when 'below' then @editor.insertNewlineBelow()
-    @editor.getLastCursor().skipLeadingWhitespace()
-
-    if @insertedText?
-      # We'll have captured the inserted newline, but we want to do that
-      # over again by hand, or differing indentations will be wrong.
-      @insertedText = @insertedText.trimLeft()
-      super
-    else
-      @vimState.activate('insert')
-
-class InsertBelowWithNewline extends InsertAboveWithNewline
-  @extend()
-  direction: 'below'
-
-# Delete the following motion and enter insert mode to replace it.
-class Change extends ActivateInsertMode
-  @extend()
-  complete: false
-
-  execute: ->
-    @target.setOptions? excludeWhitespace: true
-
-    @target.select()
-    if @haveSomeSelection()
-      @setTextToRegister @editor.getSelectedText()
-      if @target.isLinewise?() and not @insertedText?
-        for selection in @editor.getSelections()
-          selection.insertText("\n", autoIndent: true)
-          selection.cursor.moveLeft()
-      else
-        for selection in @editor.getSelections()
-          selection.deleteSelectedText()
-
-    return super if @insertedText?
-
-    @vimState.activate('insert')
-
-class Substitute extends Change
-  @extend()
-  initialize: ->
-    @compose @new('MoveRight')
-    super
-
-class SubstituteLine extends Change
-  @extend()
-  initialize: ->
-    @compose @new("MoveToRelativeLine")
-    super
-
-class ChangeToLastCharacterOfLine extends Change
-  @extend()
-  initialize: ->
-    @compose @new('MoveToLastCharacterOfLine')
-    super
-
-# Takes a transaction and turns it into a string of what was typed.
-# This class is an implementation detail of ActivateInsertMode
-# Return final newRanges from changes
-getInsertedRange = (changes) ->
-  range = null
-  for change in changes when change.newRange?
-    {oldRange, oldText, newRange, newText} = change
-    if range?
-      # shrink range
-      if oldText.length and range.containsRange(oldRange)
-        extent = oldRange.getExtent()
-        extent.column = 0 unless (range.end.row is oldRange.end.row)
-        range.end = range.end.translate(extent.negate())
-
-      # expand range
-      if newText.length and range.containsPoint(newRange.start)
-        extent = newRange.getExtent()
-        extent.column = 0 unless (range.end.row is newRange.start.row)
-        range.end = range.end.translate(extent)
-    else
-      # Since newRange is freezed, we need to copy() to un-freeze range.
-      range = newRange.copy() if (newText.length > 0)
-  range
-
 # Replace
 # -------------------------
 class Replace extends Operator
@@ -761,3 +591,141 @@ class Replace extends Operator
           @editor.moveToFirstCharacterOfLine()
 
     @vimState.activate('normal')
+
+# Input
+# -------------------------
+# The operation for text entered in insert-mode. Broadly speaking, input
+# operators manage an undo transaction and set a @typingCompleted variable when
+# it's done. When the input operation is completed, the typingCompleted variable
+# tells the operation to repeat itself instead of enter insert mode.
+class ActivateInsertMode extends Operator
+  @extend()
+  complete: true
+  insertedText: null
+  flashTarget: false
+
+  setCheckpoint: ->
+    @vimState.setCheckpoint()
+
+  confirmChanges: (@insertedText) ->
+
+  getText: ->
+    @insertedText
+
+  execute: ->
+    if @isRepeated()
+      return unless text = @getText()
+      @editor.insertText(text, normalizeLineEndings: true, autoIndent: true)
+      for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
+        cursor.moveLeft()
+    else
+      @setCheckpoint()
+      @vimState.activate('insert')
+
+class InsertAtLastInsert extends ActivateInsertMode
+  @extend()
+  initialize: ->
+    if (point = @vimState.mark.get('^'))
+      @editor.setCursorBufferPosition(point)
+      @editor.scrollToCursorPosition({center: true})
+
+class ActivateReplaceMode extends ActivateInsertMode
+  @extend()
+  execute: ->
+    if @isRepeated()
+      return unless text = @getText()
+      @editor.transact =>
+        @editor.insertText(text, normalizeLineEndings: true)
+        toDelete = text.length - countChar(text, '\n')
+        for selection in @editor.getSelections()
+          count = toDelete
+          selection.delete() while count-- and not selection.cursor.isAtEndOfLine()
+        for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
+          cursor.moveLeft()
+    else
+      @setCheckpoint()
+      @vimState.activate('insert', 'replace')
+
+class InsertAfter extends ActivateInsertMode
+  @extend()
+  execute: ->
+    @editor.moveRight() unless @editor.getLastCursor().isAtEndOfLine()
+    super
+
+class InsertAfterEndOfLine extends ActivateInsertMode
+  @extend()
+  execute: ->
+    @editor.moveToEndOfLine()
+    super
+
+class InsertAtBeginningOfLine extends ActivateInsertMode
+  @extend()
+  execute: ->
+    @editor.moveToFirstCharacterOfLine()
+    super
+
+# FIXME need support count
+class InsertAboveWithNewline extends ActivateInsertMode
+  @extend()
+  direction: 'above'
+
+  execute: ->
+    @setCheckpoint() unless @isRepeated()
+    switch @direction
+      when 'above' then @editor.insertNewlineAbove()
+      when 'below' then @editor.insertNewlineBelow()
+    @editor.getLastCursor().skipLeadingWhitespace()
+
+    if @isRepeated()
+      # We'll have captured the inserted newline, but we want to do that
+      # over again by hand, or differing indentations will be wrong.
+      @insertedText = @getText().trimLeft()
+      super
+    else
+      @vimState.activate('insert')
+
+class InsertBelowWithNewline extends InsertAboveWithNewline
+  @extend()
+  direction: 'below'
+
+# Delete the following motion and enter insert mode to replace it.
+class Change extends ActivateInsertMode
+  @extend()
+  complete: false
+
+  execute: ->
+    @setCheckpoint() unless @isRepeated()
+    @target.setOptions?(excludeWhitespace: true)
+
+    @target.select()
+    if @haveSomeSelection()
+      @setTextToRegister @editor.getSelectedText()
+      if @target.isLinewise?() and not @isRepeated()
+        for s in @editor.getSelections()
+          s.insertText("\n", autoIndent: true)
+          s.cursor.moveLeft()
+      else
+        s.deleteSelectedText() for s in @editor.getSelections()
+
+    if @isRepeated()
+      super
+    else
+      @vimState.activate('insert')
+
+class Substitute extends Change
+  @extend()
+  initialize: ->
+    @compose @new('MoveRight')
+    @setCheckpoint() unless @isRepeated()
+
+class SubstituteLine extends Change
+  @extend()
+  initialize: ->
+    @compose @new("MoveToRelativeLine")
+    @setCheckpoint() unless @isRepeated()
+
+class ChangeToLastCharacterOfLine extends Change
+  @extend()
+  initialize: ->
+    @compose @new('MoveToLastCharacterOfLine')
+    @setCheckpoint() unless @isRepeated()

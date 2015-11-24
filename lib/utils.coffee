@@ -108,6 +108,42 @@ toggleClassByCondition = (element, klass, condition) ->
   action = (if condition then 'add' else 'remove')
   element.classList[action](klass)
 
+# This uses private APIs and may break if TextBuffer is refactored.
+# Package authors - copy and paste this code at your own risk.
+getChangesSinceCheckpoint = (editor, checkpoint) ->
+  {history} = editor.getBuffer()
+  if (index = history.getCheckpointIndex(checkpoint))?
+    history.undoStack.slice(index)
+  else
+    []
+
+# Takes a transaction and turns it into a string of what was typed.
+# This class is an implementation detail of ActivateInsertMode
+# Return final newRanges from changes
+getNewTextRangeFromChanges = (changes) ->
+  range = null
+  for change in changes when change.newRange?
+    {oldRange, oldText, newRange, newText} = change
+    if range?
+      # shrink range
+      if oldText.length and range.containsRange(oldRange)
+        extent = oldRange.getExtent()
+        extent.column = 0 unless (range.end.row is oldRange.end.row)
+        range.end = range.end.translate(extent.negate())
+
+      # expand range
+      if newText.length and range.containsPoint(newRange.start)
+        extent = newRange.getExtent()
+        extent.column = 0 unless (range.end.row is newRange.start.row)
+        range.end = range.end.translate(extent)
+    else
+      # Since newRange is freezed, we need to copy() to un-freeze range.
+      range = newRange.copy() if (newText.length > 0)
+  range
+
+countChar = (string, char) ->
+  string.split(char).length - 1
+
 module.exports = {
   include
   debug
@@ -128,4 +164,7 @@ module.exports = {
   eachSelection
   withKeepingGoalColumn
   toggleClassByCondition
+  getChangesSinceCheckpoint
+  getNewTextRangeFromChanges
+  countChar
 }

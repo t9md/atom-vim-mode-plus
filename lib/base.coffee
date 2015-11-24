@@ -33,6 +33,7 @@ class Base
   recordable: false
   defaultCount: 1
   requireInput: false
+  repeated: false
 
   @delegatesMethods delegatingMethods..., toProperty: 'vimState'
 
@@ -60,6 +61,11 @@ class Base
 
   isRecordable: ->
     @recordable
+
+  isRepeated: ->
+    @repeated
+
+  setRepeated: (@repeated) ->
 
   abort: ->
     throw new OperationAbortedError('Aborted')

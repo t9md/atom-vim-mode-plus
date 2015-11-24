@@ -3,7 +3,10 @@ _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 
 swrap = require './selection-wrapper'
-{eachSelection, toggleClassByCondition} = require './utils'
+{
+  eachSelection, toggleClassByCondition
+  getChangesSinceCheckpoint, getNewTextRangeFromChanges
+} = require './utils'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
@@ -90,7 +93,12 @@ class ModeManager
       @editor.groupChangesSinceCheckpoint(checkpoint)
       @resetCheckpoint()
       if (item = @vimState.operationStack.getRecorded()) and item.instanceof('ActivateInsertMode')
-        item.confirmChanges(checkpoint)
+        changes = getChangesSinceCheckpoint(@editor, checkpoint)
+        text = @editor.getTextInBufferRange(getNewTextRangeFromChanges(changes) ? [])
+        item.confirmChanges(text)
+
+      # @editor.groupChangesSinceCheckpoint(checkpoint)
+      # @vimState.register.set('.', {text})
 
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
