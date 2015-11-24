@@ -34,7 +34,7 @@ getView = (model) ->
 saveEditorState = (editor) ->
   editorElement = getView(editor)
   scrollTop = editorElement.getScrollTop()
-  foldStartRows = editor.displayBuffer.findFoldMarkers().map (m) ->
+  foldStartRows = editor.displayBuffer.findFoldMarkers({}).map (m) ->
     editor.displayBuffer.foldForMarker(m).getStartRow()
   ->
     for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
