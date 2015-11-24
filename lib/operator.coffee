@@ -624,10 +624,11 @@ class ActivateInsertMode extends Operator
 
 class InsertAtLastInsert extends ActivateInsertMode
   @extend()
-  initialize: ->
+  execute: ->
     if (point = @vimState.mark.get('^'))
       @editor.setCursorBufferPosition(point)
       @editor.scrollToCursorPosition({center: true})
+    super
 
 class ActivateReplaceMode extends ActivateInsertMode
   @extend()
@@ -673,6 +674,7 @@ class InsertAboveWithNewline extends ActivateInsertMode
     # We'll have captured the inserted newline, but we want to do that
     # over again by hand, or differing indentations will be wrong.
     @insertedText = @getText().trimLeft() if @isRepeated()
+    super
 
   insertNewline: ->
     @editor.insertNewlineAbove()
