@@ -667,13 +667,12 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
 # FIXME need support count
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
-  direction: 'above'
+  insertNewline: ->
+    @editor.insertNewlineAbove()
 
   execute: ->
     @setCheckpoint() unless @isRepeated()
-    switch @direction
-      when 'above' then @editor.insertNewlineAbove()
-      when 'below' then @editor.insertNewlineBelow()
+    @insertNewline()
     @editor.getLastCursor().skipLeadingWhitespace()
 
     if @isRepeated()
@@ -686,7 +685,8 @@ class InsertAboveWithNewline extends ActivateInsertMode
 
 class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
-  direction: 'below'
+  insertNewline: ->
+    @editor.insertNewlineBelow()
 
 # Delete the following motion and enter insert mode to replace it.
 class Change extends ActivateInsertMode
@@ -696,7 +696,6 @@ class Change extends ActivateInsertMode
   execute: ->
     @setCheckpoint() unless @isRepeated()
     @target.setOptions?(excludeWhitespace: true)
-
     @target.select()
     if @haveSomeSelection()
       @setTextToRegister @editor.getSelectedText()
@@ -707,25 +706,19 @@ class Change extends ActivateInsertMode
       else
         s.deleteSelectedText() for s in @editor.getSelections()
 
-    if @isRepeated()
-      super
-    else
-      @vimState.activate('insert')
+    super
 
 class Substitute extends Change
   @extend()
   initialize: ->
     @compose @new('MoveRight')
-    @setCheckpoint() unless @isRepeated()
 
 class SubstituteLine extends Change
   @extend()
   initialize: ->
     @compose @new("MoveToRelativeLine")
-    @setCheckpoint() unless @isRepeated()
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
   initialize: ->
     @compose @new('MoveToLastCharacterOfLine')
-    @setCheckpoint() unless @isRepeated()
