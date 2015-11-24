@@ -667,28 +667,21 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
 # FIXME need support count
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
-  insertNewline: ->
-    @editor.insertNewlineAbove()
-
   execute: ->
     @setCheckpoint() unless @isRepeated()
     @insertNewline()
-    @editor.getLastCursor().skipLeadingWhitespace()
+    # We'll have captured the inserted newline, but we want to do that
+    # over again by hand, or differing indentations will be wrong.
+    @insertedText = @getText().trimLeft() if @isRepeated()
 
-    if @isRepeated()
-      # We'll have captured the inserted newline, but we want to do that
-      # over again by hand, or differing indentations will be wrong.
-      @insertedText = @getText().trimLeft()
-      super
-    else
-      @vimState.activate('insert')
+  insertNewline: ->
+    @editor.insertNewlineAbove()
 
 class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
   insertNewline: ->
     @editor.insertNewlineBelow()
 
-# Delete the following motion and enter insert mode to replace it.
 class Change extends ActivateInsertMode
   @extend()
   complete: false
