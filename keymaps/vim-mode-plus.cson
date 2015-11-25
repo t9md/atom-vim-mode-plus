@@ -30,6 +30,7 @@
 # Insert-replace
 # -------------------------
 'atom-text-editor.vim-mode-plus.insert-mode.replace':
+  'ctrl-h': 'vim-mode-plus:replace-mode-backspace'
   'backspace': 'vim-mode-plus:replace-mode-backspace'
 
 # except insert
