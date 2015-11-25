@@ -24,7 +24,7 @@
   'ctrl-y': 'vim-mode-plus:copy-from-line-above'
   # disabled for compatibility with the common binding for going to the end of the line
   # 'ctrl-e': 'vim-mode-plus:copy-from-line-below'
-
+  # 'ctrl-a': 'vim-mode-plus:insert-last-inserted'
   'ctrl-r': 'vim-mode-plus:insert-register'
 
 # Insert-replace
