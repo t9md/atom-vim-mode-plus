@@ -22,41 +22,47 @@ module.exports =
     @vimStates = new Map
 
     @registerViewProviders()
-    @subscriptions.add Base.init(@provideVimModePlus())
+    @subscribe Base.init(@provideVimModePlus())
     @registerCommands()
 
     if atom.inDevMode()
       developer = (new (require './developer'))
-      @subscriptions.add developer.init()
+      @subscribe developer.init()
 
-    @subscriptions.add atom.workspace.observeTextEditors (editor) =>
+    @subscribe atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini() or @vimStates.has(editor)
       vimState = new VimState(editor, @statusBarManager)
       @vimStates.set(editor, vimState)
       vimState.onDidDestroy =>
         @vimStates.delete(editor)
 
-    @subscriptions.add new Disposable =>
+    @subscribe new Disposable =>
       @vimStates.forEach (vimState) -> vimState.destroy()
 
+  subscribe: (args...) ->
+    @subscriptions.add args...
+
   registerCommands: ->
+    # all commands here is executed with context where 'this' binded to 'vimState'
+    vimStateCommands =
+      'activate-normal-mode': -> @activate('normal')
+      'activate-linewise-visual-mode': -> @activate('visual', 'linewise')
+      'activate-characterwise-visual-mode': -> @activate('visual', 'characterwise')
+      'activate-blockwise-visual-mode': -> @activate('visual', 'blockwise')
+      'activate-previous-visual-mode': -> @activate('visual', 'previous')
+      'reset-normal-mode': -> @activate('reset')
+      'set-count': (e) -> @count.set(e) # 0-9
+      'set-register-name': -> @register.setName() # "
+      'replace-mode-backspace': -> @modeManager.replaceModeBackspace()
+
     getState = =>
       @getEditorState(atom.workspace.getActiveTextEditor())
 
-    commands =
-      'activate-normal-mode': -> getState().activate('normal')
-      'activate-linewise-visual-mode': -> getState().activate('visual', 'linewise')
-      'activate-characterwise-visual-mode': -> getState().activate('visual', 'characterwise')
-      'activate-blockwise-visual-mode': -> getState().activate('visual', 'blockwise')
-      'activate-previous-visual-mode': -> getState().activate('visual', 'previous')
-      'reset-normal-mode': -> getState().activate('reset')
-      'set-count': (e) -> getState().count.set(e) # 0-9
-      'set-register-name': -> getState().register.setName() # "
-      'replace-mode-backspace': -> getState().modeManager.replaceModeBackspace()
-
     scope = 'atom-text-editor'
-    for name, fn of commands
-      @subscriptions.add atom.commands.add(scope, "#{packageScope}:#{name}", fn)
+    for name, fn of vimStateCommands
+      do (fn) =>
+        @subscribe atom.commands.add scope, "#{packageScope}:#{name}", (event) ->
+          fn.bind(getState())(event)
 
   registerViewProviders: ->
     atom.views.addViewProvider Hover, (model) ->
@@ -78,7 +84,7 @@ module.exports =
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)
     @statusBarManager.attach()
-    @subscriptions.add new Disposable =>
+    @subscribe new Disposable =>
       @statusBarManager.detach()
 
   provideVimModePlus: ->
