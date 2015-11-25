@@ -1979,7 +1979,7 @@ describe "Operator", ->
             """
           cursor: [0, 0]
           mode: 'normal'
-      it "repeate multiline text", ->
+      it "repeate multiline text case-1", ->
         ensure 'R', mode: ['insert', 'replace']
         editor.insertText "abc\ndef"
         ensure
@@ -1998,6 +1998,35 @@ describe "Operator", ->
             56789
             """
           cursor: [1, 2]
+          mode: 'normal'
+        ensure 'j.',
+          text: """
+            abc
+            def
+            56abc
+            def
+            """
+          cursor: [3, 2]
+          mode: 'normal'
+      it "repeate multiline text case-2", ->
+        ensure 'R', mode: ['insert', 'replace']
+        editor.insertText "abc\nd"
+        ensure
+          text: """
+            abc
+            d4
+            56789
+            """
+          cursor: [1, 1]
+        ensure 'escape', cursor: [1, 0], mode: 'normal'
+        ensure 'j.',
+          text: """
+          abc
+          d4
+          abc
+          d9
+          """
+          cursor: [3, 0]
           mode: 'normal'
 
   describe 'ReplaceWithRegister', ->
