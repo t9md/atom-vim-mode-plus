@@ -607,17 +607,27 @@ class ActivateInsertMode extends Operator
   setCheckpoint: ->
     @vimState.setCheckpoint()
 
-  confirmChanges: (@insertedText) ->
+  # confirmChanges: (@insertedText) ->
+  confirmChanges: (changes) ->
+    bundler = new TransactionBundler(changes, @editor)
+    @insertedText = bundler.buildInsertText()
+    console.log 'confirmed', @insertedText
 
   getText: ->
     @insertedText
 
+  # called when repeated
+  insertText: (selection, text) ->
+    selection.insertText(text, autoIndent: true)
+
   execute: ->
     if @isRepeated()
       return unless text = @getText()
-      @editor.insertText(text, normalizeLineEndings: true, autoIndent: true)
-      for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
-        cursor.moveLeft()
+      @editor.transact =>
+        for selection in @editor.getSelections()
+          {cursor} = selection
+          @insertText(selection, text)
+          cursor.moveLeft() unless cursor.isAtBeginningOfLine()
     else
       @setCheckpoint()
       @vimState.activate('insert')
@@ -634,18 +644,16 @@ class ActivateReplaceMode extends ActivateInsertMode
   @extend()
   execute: ->
     if @isRepeated()
-      return unless text = @getText()
-      @editor.transact =>
-        @editor.insertText(text, normalizeLineEndings: true)
-        toDelete = text.length - countChar(text, '\n')
-        for selection in @editor.getSelections()
-          count = toDelete
-          selection.delete() while count-- and not selection.cursor.isAtEndOfLine()
-        for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine()
-          cursor.moveLeft()
+      super
     else
       @setCheckpoint()
       @vimState.activate('insert', 'replace')
+
+  insertText: (selection, text) ->
+    for char in text when char isnt "\n"
+      break if selection.cursor.isAtEndOfLine()
+      selection.selectRight()
+    selection.insertText(text, autoIndent: false)
 
 class InsertAfter extends ActivateInsertMode
   @extend()
@@ -671,13 +679,15 @@ class InsertAboveWithNewline extends ActivateInsertMode
   execute: ->
     @setCheckpoint() unless @isRepeated()
     @insertNewline()
-    # We'll have captured the inserted newline, but we want to do that
-    # over again by hand, or differing indentations will be wrong.
-    @insertedText = @getText().trimLeft() if @isRepeated()
     super
 
   insertNewline: ->
     @editor.insertNewlineAbove()
+
+  insertText: (selection, text) ->
+    # We'll have captured the inserted newline, but we want to do that
+    # over again by hand, or differing indentations will be wrong.
+    selection.insertText(text.trimLeft(), autoIndent: true)
 
 class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
@@ -717,3 +727,66 @@ class ChangeToLastCharacterOfLine extends Change
   @extend()
   initialize: ->
     @compose @new('MoveToLastCharacterOfLine')
+
+class TransactionBundler
+  constructor: (@changes, @editor) ->
+    @start = null
+    @end = null
+
+  buildInsertText: ->
+    @addChange(change) for change in @changes
+    if @start?
+      @editor.getTextInBufferRange [@start, @end]
+    else
+      ""
+
+  addChange: (change) ->
+    return unless change.newRange?
+    if @isRemovingFromPrevious(change)
+      @subtractRange change.oldRange
+    if @isAddingWithinPrevious(change)
+      @addRange change.newRange
+
+  isAddingWithinPrevious: (change) ->
+    return false unless @isAdding(change)
+
+    return true if @start is null
+
+    @start.isLessThanOrEqual(change.newRange.start) and
+      @end.isGreaterThanOrEqual(change.newRange.start)
+
+  isRemovingFromPrevious: (change) ->
+    return false unless @isRemoving(change) and @start?
+
+    @start.isLessThanOrEqual(change.oldRange.start) and
+      @end.isGreaterThanOrEqual(change.oldRange.end)
+
+  isAdding: (change) ->
+    change.newText.length > 0
+
+  isRemoving: (change) ->
+    change.oldText.length > 0
+
+  addRange: (range) ->
+    if @start is null
+      {@start, @end} = range
+      return
+
+    rows = range.end.row - range.start.row
+
+    if (range.start.row is @end.row)
+      cols = range.end.column - range.start.column
+    else
+      cols = 0
+
+    @end = @end.translate [rows, cols]
+
+  subtractRange: (range) ->
+    rows = range.end.row - range.start.row
+
+    if (range.end.row is @end.row)
+      cols = range.end.column - range.start.column
+    else
+      cols = 0
+
+    @end = @end.translate [-rows, -cols]
