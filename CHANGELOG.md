@@ -1,9 +1,11 @@
-# 0.5.0 WIP
+# 0.5.0
 - FIX: spec bug, revealed by validating spec-helper's mini-DSL options.
 - Improve: Lots of test spec refactored.
 - Improve: Refactoring TransactionBundler used in ActivateInsertMode.
-- New: introduce increment/decrement operation `g ctrl-a`, `g ctrl-x`.
+- New: [Experimental] introduce increment/decrement operation `g ctrl-a`, `g ctrl-x`.
 - FIX: incremental-search throw error: findFoldMarkers need explicit filter query object from Atom 1.3.0.
+- New: [Experimental] new InsertLastInserted in insert-mode(ctrl-a in pure Vim).
+- New: keymap `ctrl-h` in replace-mode.
 
 # 0.4.0
 - Add spec for visual-blockwise to visual-characterwise shift
