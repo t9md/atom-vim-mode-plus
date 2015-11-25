@@ -95,7 +95,8 @@ class ModeManager
       if (item = @vimState.operationStack.getRecorded()) and item.instanceof('ActivateInsertMode')
         changes = getChangesSinceCheckpoint(@editor, checkpoint)
         text = @editor.getTextInBufferRange(getNewTextRangeFromChanges(changes) ? [])
-        item.confirmChanges(text)
+        item.confirmChanges(changes)
+        # item.confirmChanges(text)
 
       # @editor.groupChangesSinceCheckpoint(checkpoint)
       # @vimState.register.set('.', {text})
