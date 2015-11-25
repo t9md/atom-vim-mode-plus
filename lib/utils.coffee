@@ -120,26 +120,31 @@ getChangesSinceCheckpoint = (editor, checkpoint) ->
 # Takes a transaction and turns it into a string of what was typed.
 # This class is an implementation detail of ActivateInsertMode
 # Return final newRanges from changes
+distanceForRange = ({start, end}) ->
+  row = end.row - start.row
+  column = end.column - start.column
+  new Point(row, column)
+
 getNewTextRangeFromChanges = (changes) ->
-  range = null
+  finalRange = null
   for change in changes when change.newRange?
     {oldRange, oldText, newRange, newText} = change
-    if range?
-      # shrink range
-      if oldText.length and range.containsRange(oldRange)
-        extent = oldRange.getExtent()
-        extent.column = 0 unless (range.end.row is oldRange.end.row)
-        range.end = range.end.translate(extent.negate())
-
-      # expand range
-      if newText.length and range.containsPoint(newRange.start)
-        extent = newRange.getExtent()
-        extent.column = 0 unless (range.end.row is newRange.start.row)
-        range.end = range.end.translate(extent)
-    else
-      # Since newRange is freezed, we need to copy() to un-freeze range.
-      range = newRange.copy() if (newText.length > 0)
-  range
+    unless finalRange?
+      finalRange = newRange.copy()  if newText.length
+      continue
+    # shrink
+    if oldText.length and finalRange.containsRange(oldRange)
+      amount = oldRange
+      diff = distanceForRange(amount)
+      diff.column = 0 unless (amount.end.row is finalRange.end.row)
+      finalRange.end = finalRange.end.translate(diff.negate())
+    # extend
+    if newText.length and finalRange.containsPoint(newRange.start)
+      amount = newRange
+      diff = distanceForRange(amount)
+      diff.column = 0 unless (amount.start.row is finalRange.end.row)
+      finalRange.end = finalRange.end.translate(diff)
+  finalRange
 
 countChar = (string, char) ->
   string.split(char).length - 1
