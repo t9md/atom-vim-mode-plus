@@ -1,12 +1,13 @@
 # TOM(TextObject, Operator, Motion) report.
 
-vim-mode-plus version: 0.4.0  
-*generated at 2015-11-22T18:30:57.156Z*
+vim-mode-plus version: 0.5.0  
+*generated at 2015-11-25T16:32:52.486Z*
 
 - [Base](#base)
   - [InsertMode](#insertmode--base)
     - [CopyFromLineAbove](#copyfromlineabove--insertmode)
       - [CopyFromLineBelow](#copyfromlinebelow--copyfromlineabove)
+    - [InsertLastInserted](#insertlastinserted--insertmode)
     - [InsertRegister](#insertregister--insertmode)
   - [Misc](#misc--base)
     - [ReverseSelections](#reverseselections--misc)
@@ -157,9 +158,10 @@ vim-mode-plus version: 0.4.0
 
 ## Base
 - ::complete: ```false```
-- ::recodable: ```false```
+- ::recordable: ```false```
 - ::defaultCount: ```1```
 - ::requireInput: ```false```
+- ::repeated: ```false```
 - ::onDidChangeInput`()`
 - ::onDidConfirmInput`()`
 - ::onDidCancelInput`()`
@@ -173,6 +175,8 @@ vim-mode-plus version: 0.4.0
 - ::subscribe`()`
 - ::isComplete`()`
 - ::isRecordable`()`
+- ::isRepeated`()`
+- ::setRepeated`(@repeated)`
 - ::abort`()`
 - ::getCount`()`
 - ::new`(klassName, properties)`
@@ -193,6 +197,11 @@ vim-mode-plus version: 0.4.0
 ### CopyFromLineBelow < CopyFromLineAbove
 - command: `vim-mode-plus:copy-from-line-below`
 - ::rowTranslation: ```1```: **Overridden**
+
+### InsertLastInserted < InsertMode
+- command: `vim-mode-plus:insert-last-inserted`
+- ::complete: ```true```: **Overridden**
+- ::execute`()`
 
 ### InsertRegister < InsertMode
 - command: `vim-mode-plus:insert-register`
@@ -246,7 +255,6 @@ vim-mode-plus version: 0.4.0
 - ::unfoldAtCursorRow`(cursor)`
 
 ### CurrentSelection < Motion
-- command: `vim-mode-plus:current-selection`
 - ::selectedRange: ```null```
 - ::initialize`()`
 - ::execute`()`: **Overridden**
@@ -630,7 +638,7 @@ vim-mode-plus version: 0.4.0
 
 ### Operator < Base
 - ::constructor`()`: `super`: **Overridden**
-- ::recodable: ```true```: **Overridden**
+- ::recordable: ```true```: **Overridden**
 - ::target: ```null```
 - ::flashTarget: ```true```
 - ::haveSomeSelection`()`
@@ -649,17 +657,20 @@ vim-mode-plus version: 0.4.0
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>i</kbd>
 - ::complete: ```true```: **Overridden**
-- ::typedText: ```null```
+- ::insertedText: ```null```
 - ::flashTarget: ```false```: **Overridden**
-- ::confirmChanges`(changes)`
+- ::setCheckpoint`()`
+- ::confirmChanges`(@insertedText)`
+- ::getText`()`
+- ::insertText`(selection, text)`
 - ::execute`()`
 
 ### ActivateReplaceMode < ActivateInsertMode
 - command: `vim-mode-plus:activate-replace-mode`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>R</kbd>
-- ::execute`()`: **Overridden**
-- ::countChars`(char, string)`
+- ::execute`()`: `super`: **Overridden**
+- ::insertText`(selection, text)`: **Overridden**
 
 ### Change < ActivateInsertMode
 - command: `vim-mode-plus:change`
@@ -691,14 +702,15 @@ vim-mode-plus version: 0.4.0
 - command: `vim-mode-plus:insert-above-with-newline`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>O</kbd>
-- ::direction: ```'above'```
 - ::execute`()`: `super`: **Overridden**
+- ::insertNewline`()`
+- ::insertText`(selection, text)`: **Overridden**
 
 ### InsertBelowWithNewline < InsertAboveWithNewline
 - command: `vim-mode-plus:insert-below-with-newline`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>o</kbd>
-- ::direction: ```'below'```: **Overridden**
+- ::insertNewline`()`: **Overridden**
 
 ### InsertAfter < ActivateInsertMode
 - command: `vim-mode-plus:insert-after`
@@ -722,7 +734,7 @@ vim-mode-plus version: 0.4.0
 - command: `vim-mode-plus:insert-at-last-insert`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>g i</kbd>
-- ::initialize`()`
+- ::execute`()`: `super`: **Overridden**
 
 ### Delete < Operator
 - command: `vim-mode-plus:delete`
@@ -846,7 +858,7 @@ vim-mode-plus version: 0.4.0
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>.</kbd>
 - ::complete: ```true```: **Overridden**
-- ::recodable: ```false```: **Overridden**
+- ::recordable: ```false```: **Overridden**
 - ::execute`()`
 
 ### Replace < Operator
@@ -867,7 +879,6 @@ vim-mode-plus version: 0.4.0
 - ::execute`()`
 
 ### Select < Operator
-- command: `vim-mode-plus:select`
 - ::execute`()`
 
 ### ToggleLineComments < Operator
