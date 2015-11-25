@@ -1,3 +1,5 @@
+# 0.6.0 WIP
+
 # 0.5.0
 - FIX: spec bug, revealed by validating spec-helper's mini-DSL options.
 - Improve: Lots of test spec refactored.
