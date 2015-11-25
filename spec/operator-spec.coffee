@@ -1902,6 +1902,104 @@ describe "Operator", ->
       editor.insertText "\n"
       ensure 'escape', text: "12\n345\n67890"
 
+    describe "multiline situation", ->
+      textOriginal = """
+        01234
+        56789
+        """
+      beforeEach ->
+        set text: textOriginal, cursor: [0, 0]
+      it "replace character unless input isnt new line(\\n)", ->
+        ensure 'R', mode: ['insert', 'replace']
+        editor.insertText "a\nb\nc"
+        ensure
+          text: """
+            a
+            b
+            c34
+            56789
+            """
+          cursor: [2, 1]
+      it "handle backspace", ->
+        ensure 'R', mode: ['insert', 'replace']
+        set cursor: [0, 1]
+        editor.insertText "a\nb\nc"
+        ensure
+          text: """
+            0a
+            b
+            c4
+            56789
+            """
+          cursor: [2, 1]
+        ensure {raw: 'backspace'},
+          text: """
+            0a
+            b
+            34
+            56789
+            """
+          cursor: [2, 0]
+        ensure {raw: 'backspace'},
+          text: """
+            0a
+            b34
+            56789
+            """
+          cursor: [1, 1]
+        ensure {raw: 'backspace'},
+          text: """
+            0a
+            234
+            56789
+            """
+          cursor: [1, 0]
+        ensure {raw: 'backspace'},
+          text: """
+            0a234
+            56789
+            """
+          cursor: [0, 2]
+        ensure {raw: 'backspace'},
+          text: """
+            01234
+            56789
+            """
+          cursor: [0, 1]
+        ensure {raw: 'backspace'}, # do nothing
+          text: """
+            01234
+            56789
+            """
+          cursor: [0, 1]
+        ensure 'escape',
+          text: """
+            01234
+            56789
+            """
+          cursor: [0, 0]
+          mode: 'normal'
+      it "repeate multiline text", ->
+        ensure 'R', mode: ['insert', 'replace']
+        editor.insertText "abc\ndef"
+        ensure
+          text: """
+            abc
+            def
+            56789
+            """
+          cursor: [1, 3]
+        ensure 'escape', cursor: [1, 2], mode: 'normal'
+        ensure 'u', text: textOriginal
+        ensure '.',
+          text: """
+            abc
+            def
+            56789
+            """
+          cursor: [1, 2]
+          mode: 'normal'
+
   describe 'ReplaceWithRegister', ->
     originalText = null
     beforeEach ->
