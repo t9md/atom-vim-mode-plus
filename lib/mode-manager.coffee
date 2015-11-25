@@ -96,8 +96,7 @@ class ModeManager
         changes = getChangesSinceCheckpoint(@editor, checkpoint)
         text = @editor.getTextInBufferRange(getNewTextRangeFromChanges(changes) ? [])
         item.confirmChanges(text)
-
-      # @vimState.register.set('.', {text})
+        @vimState.register.set('.', {text})
 
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
