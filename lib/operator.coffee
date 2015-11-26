@@ -19,6 +19,7 @@ class Operator extends Base
   recordable: true
   target: null
   flashTarget: true
+  preCompose: null
 
   haveSomeSelection: ->
     haveSomeSelection(@editor.getSelections())
@@ -31,6 +32,7 @@ class Operator extends Base
 
   constructor: ->
     super
+    @compose @new(@preCompose) if @preCompose?
     #  To support, `dd`, `cc` and a like.
     if @isSameOperatorRepeated()
       @vimState.operationStack.run 'MoveToRelativeLine'
@@ -39,7 +41,7 @@ class Operator extends Base
   # target - TextObject or Motion to operate on.
   compose: (@target) ->
     unless _.isFunction(@target.select)
-      @vimState.emitter.emit('failed-to-compose')
+      @vimState.emitter.emit('did-fail-to-compose')
       message = "Failed to compose #{@constructor.name} with #{@target.constructor.name}"
       throw new OperatorError(message)
 
@@ -122,18 +124,15 @@ class Delete extends Operator
 
 class DeleteRight extends Delete
   @extend()
-  initialize: ->
-    @compose @new('MoveRight')
+  preCompose: 'MoveRight'
 
 class DeleteLeft extends Delete
   @extend()
-  initialize: ->
-    @compose @new('MoveLeft')
+  preCompose: 'MoveLeft'
 
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
-  initialize: ->
-    @compose @new('MoveToLastCharacterOfLine')
+  preCompose: 'MoveToLastCharacterOfLine'
 
 class TransformString extends Operator
   @extend(false)
@@ -170,8 +169,7 @@ class ToggleCaseAndMoveRight extends ToggleCase
   hoverText: null
   hoverIcon: null
   adjustCursor: false
-  initialize: ->
-    @compose @new('MoveRight')
+  preCompose: 'MoveRight'
 
 class UpperCase extends TransformString
   @extend()
@@ -240,9 +238,7 @@ class Surround extends TransformString
 
 class SurroundWord extends Surround
   @extend()
-  initialize: ->
-    super
-    @compose @new('Word')
+  preCompose: 'Word'
 
 class DeleteSurround extends Surround
   @extend()
@@ -263,9 +259,7 @@ class DeleteSurround extends Surround
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
   requireInput: false
-  initialize: ->
-    super
-    @compose @new("AnyPair", inclusive: true)
+  preCompose: 'AnyPair'
 
 class ChangeSurround extends DeleteSurround
   @extend()
@@ -319,8 +313,7 @@ class Yank extends Operator
 
 class YankLine extends Yank
   @extend()
-  initialize: ->
-    @compose @new('MoveToRelativeLine')
+  preCompose: 'MoveToRelativeLine'
 
 class Join extends Operator
   @extend()
@@ -708,18 +701,12 @@ class Change extends ActivateInsertMode
 
 class Substitute extends Change
   @extend()
-  initialize: ->
-    @compose @new('MoveRight')
-    super
+  preCompose: 'MoveRight'
 
 class SubstituteLine extends Change
   @extend()
-  initialize: ->
-    @compose @new("MoveToRelativeLine")
-    super
+  preCompose: 'MoveToRelativeLine'
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
-  initialize: ->
-    @compose @new('MoveToLastCharacterOfLine')
-    super
+  preCompose: 'MoveToLastCharacterOfLine'

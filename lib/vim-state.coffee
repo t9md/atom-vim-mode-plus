@@ -141,7 +141,7 @@ class VimState
       debouncedHandleSelectionChange()
 
   onDidFailToCompose: (fn) ->
-    @emitter.on('failed-to-compose', fn)
+    @emitter.on('did-fail-to-compose', fn)
 
   onDidDestroy: (fn) ->
     @emitter.on('did-destroy', fn)
