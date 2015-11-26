@@ -482,7 +482,7 @@ class Find extends Motion
   offset: 0
 
   initialize: ->
-    @focusInput() unless @instanceof('RepeatFind')
+    @focusInput() unless @isRepeated()
 
   isBackwards: ->
     @backwards
@@ -492,7 +492,7 @@ class Find extends Motion
     {start, end} = @editor.bufferRangeForBufferRow(cursorPoint.row)
 
     offset   = if @isBackwards() then @offset else -@offset
-    unOffset = -offset * @instanceof('RepeatFind')
+    unOffset = -offset * @isRepeated()
     if @isBackwards()
       scanRange = [start, cursorPoint.translate([0, unOffset])]
       method    = 'backwardsScanInBufferRange'
@@ -511,7 +511,7 @@ class Find extends Motion
   moveCursor: (cursor) ->
     if point = @find(cursor)
       cursor.setBufferPosition(point)
-    unless @instanceof('RepeatFind')
+    unless @isRepeated()
       globalState.currentFind = this
 
 # keymap: F
@@ -542,6 +542,8 @@ class TillBackwards extends Till
 
 class RepeatFind extends Find
   @extend()
+  repeated: true
+
   initialize: ->
     unless findObj = globalState.currentFind
       @abort()
