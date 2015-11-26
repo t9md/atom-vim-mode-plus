@@ -53,8 +53,9 @@ class Base
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
-    return false if (@requireInput and not @input)
-    if @target?
+    if (@requireInput and not @input)
+      false
+    else if @target?
       @target.isComplete()
     else
       @complete
@@ -65,7 +66,8 @@ class Base
   isRepeated: ->
     @repeated
 
-  setRepeated: (@repeated) ->
+  setRepeated: ->
+    @repeated = true
 
   abort: ->
     throw new OperationAbortedError('Aborted')
