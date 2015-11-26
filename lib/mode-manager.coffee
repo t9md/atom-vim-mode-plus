@@ -92,10 +92,6 @@ class ModeManager
         @vimState.register.set('.', {text})
         # grouping changes for undo checkpoint need to come later than
         @editor.groupChangesSinceCheckpoint(undo)
-      # else
-      #   throw "HOGE"
-      #   console.log item?.constructor.name
-      # @resetUndoCheckpoint()
 
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
