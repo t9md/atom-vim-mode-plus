@@ -3,7 +3,7 @@ _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 
 swrap = require './selection-wrapper'
-{eachSelection, toggleClassByCondition} = require './utils'
+{eachSelection, toggleClassByCondition, getNewTextRangeFromCheckpoint} = require './utils'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
@@ -78,9 +78,6 @@ class ModeManager
     @editorElement.component.setInputEnabled(false)
     new Disposable
 
-  {inspect} = require 'util'
-  p = (subject, args...) -> console.log subject, inspect(args...)
-
   # ActivateInsertMode
   # -------------------------
   activateInsertMode: (submode=null) ->
@@ -88,10 +85,17 @@ class ModeManager
     replaceModeDeactivator = @activateReplaceMode() if (submode is 'replace')
 
     new Disposable =>
-      if (item = @vimState.operationStack.getRecorded()) and item.instanceof('ActivateInsertMode')
-        @vimState.register.set('.', text: item.getInsertedText())
-      @editor.groupChangesSinceCheckpoint(@getUndoCheckpoint())
-      @resetUndoCheckpoint()
+      if (item = @vimState.operationStack.getRecorded()) and item.getCheckpoint?
+        {undo, insert} = item.getCheckpoint()
+        range = getNewTextRangeFromCheckpoint(@editor, insert)
+        text = @editor.getTextInBufferRange(range ? [])
+        @vimState.register.set('.', {text})
+        # grouping changes for undo checkpoint need to come later than
+        @editor.groupChangesSinceCheckpoint(undo)
+      # else
+      #   throw "HOGE"
+      #   console.log item?.constructor.name
+      # @resetUndoCheckpoint()
 
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null

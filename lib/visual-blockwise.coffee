@@ -84,22 +84,41 @@ class BlockwiseMoveUp extends BlockwiseMoveDown
 class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   @extend()
   delegateTo: 'DeleteToLastCharacterOfLine'
+
+  initialize: ->
+    @operator = @new(@delegateTo)
+
   execute: ->
     @eachSelection (s) ->
       s.cursor.setBufferPosition s.getBufferRange().start
     finalPoint = @getTop().cursor.getBufferPosition()
     @vimState.activate('normal')
-    @new(@delegateTo).execute()
+    @operator.execute()
     @editor.clearSelections()
     @editor.setCursorBufferPosition finalPoint
 
 class BlockwiseChangeToLastCharacterOfLine extends BlockwiseDeleteToLastCharacterOfLine
   @extend()
+  recordable: true
   delegateTo: 'ChangeToLastCharacterOfLine'
+
+  getCheckpoint: ->
+    @operator.getCheckpoint()
+
+  initialize: ->
+    @operator = @new(@delegateTo)
 
 class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
   @extend()
+  delegateTo: 'ActivateInsertMode'
+  recordable: true
   after: false
+
+  getCheckpoint: ->
+    @operator.getCheckpoint()
+
+  initialize: ->
+    @operator = @new(@delegateTo)
 
   execute: ->
     which = if @after then 'end' else 'start'
@@ -107,7 +126,7 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
       s.cursor.setBufferPosition s.getBufferRange()[which]
 
     # FIXME confirmChanges is not called when deactivate insert-mode.
-    @new('ActivateInsertMode').execute()
+    @operator.execute()
 
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
