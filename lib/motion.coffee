@@ -477,8 +477,7 @@ class Find extends Motion
   complete: false
   requireInput: true
   inclusive: true
-  hoverText: ':mag_right:'
-  hoverIcon: ':find:'
+  hover: icon: ':find:', emoji: ':mag_right:'
   offset: 0
 
   initialize: ->
@@ -518,8 +517,7 @@ class Find extends Motion
 class FindBackwards extends Find
   @extend()
   backwards: true
-  hoverText: ':mag:'
-  hoverIcon: ':find:'
+  hover: icon: ':find:',  emoji: ':mag:'
 
 # keymap: t
 class Till extends Find
@@ -561,8 +559,7 @@ class MoveToMark extends Motion
   @extend()
   complete: false
   requireInput: true
-  hoverText: ":round_pushpin:`"
-  hoverIcon: ":move-to-mark:`"
+  hover: icon: ":move-to-mark:`", emoji: ":round_pushpin:`"
 
   initialize: ->
     @focusInput()
@@ -582,8 +579,7 @@ class MoveToMark extends Motion
 class MoveToMarkLine extends MoveToMark
   @extend()
   linewise: true
-  hoverText: ":round_pushpin:'"
-  hoverIcon: ":move-to-mark:'"
+  hover: icon: ":move-to-mark:'", emoji: ":round_pushpin:'"
 
 # Search
 # -------------------------

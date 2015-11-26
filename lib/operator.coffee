@@ -112,8 +112,7 @@ class Select extends Operator
 
 class Delete extends Operator
   @extend()
-  hoverText: ':scissors:'
-  hoverIcon: ':delete:'
+  hover: icon: ':delete:', emoji: ':scissors:'
   flashTarget: false
   execute: ->
     @eachSelection (s) =>
@@ -153,8 +152,7 @@ class TransformString extends Operator
 
 class ToggleCase extends TransformString
   @extend()
-  hoverText: ':clap:'
-  hoverIcon: ':toggle-case:'
+  hover: icon: ':toggle-case:', emoji: ':clap:'
   toggleCase: (char) ->
     if (charLower = char.toLowerCase()) is char
       char.toUpperCase()
@@ -166,43 +164,37 @@ class ToggleCase extends TransformString
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
-  hoverText: null
-  hoverIcon: null
+  hover: null
   adjustCursor: false
   preCompose: 'MoveRight'
 
 class UpperCase extends TransformString
   @extend()
-  hoverText: ':point_up:'
-  hoverIcon: ':upper-case:'
+  hover: icon: ':upper-case:', emoji: ':point_up:'
   getNewText: (text) ->
     text.toUpperCase()
 
 class LowerCase extends TransformString
   @extend()
-  hoverText: ':point_down:'
-  hoverIcon: ':lower-case:'
+  hover: icon: ':lower-case:', emoji: ':point_down:'
   getNewText: (text) ->
     text.toLowerCase()
 
 class CamelCase extends TransformString
   @extend()
-  hoverText: ':camel:'
-  hoverIcon: ':camel-case:'
+  hover: icon: ':camel-case:', emoji: ':camel:'
   getNewText: (text) ->
     _.camelize text
 
 class SnakeCase extends TransformString
   @extend()
-  hoverText: ':snake:'
-  hoverIcon: ':snake-case:'
+  hover: icon: ':snake-case:', emoji: ':snake:'
   getNewText: (text) ->
     _.underscore text
 
 class DashCase extends TransformString
   @extend()
-  hoverText: ':dash:'
-  hoverIcon: ':dash-case:'
+  hover: icon: ':dash-case:', emoji: ':dash:'
   getNewText: (text) ->
     _.dasherize text
 
@@ -211,8 +203,7 @@ class Surround extends TransformString
   pairs: ['[]', '()', '{}', '<>']
   input: null
   charsMax: 1
-  hoverText: ':two_women_holding_hands:'
-  hoverIcon: ':surround:'
+  hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
   requireInput: true
 
   initialize: ->
@@ -300,8 +291,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
 class Yank extends Operator
   @extend()
-  hoverText: ':clipboard:'
-  hoverIcon: ':yank:'
+  hover: icon: ':yank:', emoji: ':clipboard:'
   execute: ->
     if @target.isLinewise?()
       points = (s.getBufferRange().start for s in @editor.getSelections())
@@ -338,8 +328,7 @@ class Repeat extends Operator
 
 class Mark extends Operator
   @extend()
-  hoverText: ':round_pushpin:'
-  hoverIcon: ':mark:'
+  hover: icon: ':mark:', emoji: ':round_pushpin:'
   requireInput: true
   initialize: ->
     @focusInput()
@@ -432,8 +421,7 @@ class DecrementNumber extends IncrementNumber
 
 class Indent extends Operator
   @extend()
-  hoverText: ':point_right:'
-  hoverIcon: ':indent:'
+  hover: icon: ':indent:', emoji: ':point_right:'
   execute: ->
     @eachSelection (s) =>
       startRow = s.getBufferRange().start.row
@@ -447,16 +435,13 @@ class Indent extends Operator
 
 class Outdent extends Indent
   @extend()
-  hoverText: ':point_left:'
-  hoverIcon: ':outdent:'
-
+  hover: icon: ':outdent:', emoji: ':point_left:'
   indent: (s) ->
     s.outdentSelectedRows()
 
 class AutoIndent extends Indent
   @extend()
-  hoverText: ':open_hands:'
-  hoverIcon: ':auto-indent:'
+  hover: icon: ':auto-indent:', emoji: ':open_hands:'
   indent: (s) ->
     s.autoIndentSelectedRows()
 
@@ -516,8 +501,7 @@ class PutAfter extends PutBefore
 
 class ReplaceWithRegister extends Operator
   @extend()
-  hoverText: ':pencil:'
-  hoverIcon: ':replace-with-register:'
+  hover: icon: ':replace-with-register:', emoji: ':pencil:'
   execute: ->
     @eachSelection (s) =>
       range = s.getBufferRange()
@@ -529,8 +513,7 @@ class ReplaceWithRegister extends Operator
 
 class ToggleLineComments extends Operator
   @extend()
-  hoverText: ':mute:'
-  hoverIcon: ':toggle-line-comment:'
+  hover: icon: ':toggle-line-comment:', emoji: ':mute:'
   execute: ->
     @withKeepingCursorPosition =>
       @eachSelection (s) ->
@@ -542,7 +525,8 @@ class ToggleLineComments extends Operator
 class Replace extends Operator
   @extend()
   input: null
-  hoverText: ':tractor:'
+  hover: icon: 'r', emoji: ':tractor:'
+
   requireInput: true
 
   initialize: ->
