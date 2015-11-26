@@ -3,10 +3,7 @@ _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 
 swrap = require './selection-wrapper'
-{
-  eachSelection, toggleClassByCondition
-  getChangesSinceCheckpoint, getNewTextRangeFromChanges
-} = require './utils'
+{eachSelection, toggleClassByCondition} = require './utils'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
@@ -81,22 +78,20 @@ class ModeManager
     @editorElement.component.setInputEnabled(false)
     new Disposable
 
+  {inspect} = require 'util'
+  p = (subject, args...) -> console.log subject, inspect(args...)
+
   # ActivateInsertMode
   # -------------------------
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)
-    @setCheckpoint()
     replaceModeDeactivator = @activateReplaceMode() if (submode is 'replace')
 
     new Disposable =>
-      checkpoint = @getCheckpoint()
-      @editor.groupChangesSinceCheckpoint(checkpoint)
-      @resetCheckpoint()
       if (item = @vimState.operationStack.getRecorded()) and item.instanceof('ActivateInsertMode')
-        changes = getChangesSinceCheckpoint(@editor, checkpoint)
-        text = @editor.getTextInBufferRange(getNewTextRangeFromChanges(changes) ? [])
-        item.confirmChanges(text)
-        @vimState.register.set('.', {text})
+        @vimState.register.set('.', text: item.getInsertedText())
+      @editor.groupChangesSinceCheckpoint(@getUndoCheckpoint())
+      @resetUndoCheckpoint()
 
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
@@ -129,15 +124,14 @@ class ModeManager
         range = s.insertText(char)
         s.cursor.moveLeft() unless range.isEmpty()
 
-  setCheckpoint: ->
-    @checkpoint ?= @editor.createCheckpoint()
+  setUndoCheckpoint: ->
+    @undoCheckpoint ?= @editor.createCheckpoint()
 
-  getCheckpoint: ->
-    @checkpoint
+  getUndoCheckpoint: ->
+    @undoCheckpoint
 
-  resetCheckpoint: ->
-    @checkpoint = null
-
+  resetUndoCheckpoint: ->
+    @undoCheckpoint = null
 
   # Visual
   # -------------------------

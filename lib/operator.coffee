@@ -2,7 +2,10 @@
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
-{haveSomeSelection, countChar} = require './utils'
+{
+  haveSomeSelection, countChar,
+  getChangesSinceCheckpoint, getNewTextRangeFromChanges
+} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
@@ -339,7 +342,7 @@ class Repeat extends Operator
     @editor.transact =>
       _.times @getCount(), =>
         if op = @vimState.operationStack.getRecorded()
-          op.setRepeated(true)
+          op.setRepeated()
           op.execute()
           # @vimState.operationStack.getRecorded()?.execute()
 
@@ -601,17 +604,28 @@ class Replace extends Operator
 class ActivateInsertMode extends Operator
   @extend()
   complete: true
-  insertedText: null
   flashTarget: false
+  checkpoint: null
+  submode: null
 
+  initialize: ->
+    @vimState.setUndoCheckpoint() unless @isRepeated()
+
+  # we have to manage two separate checkpoint for different purpose(timing is different)
+  # - one for undo(handled by modeManager)
+  # - one for preserve last inserted text
   setCheckpoint: ->
-    @vimState.setCheckpoint()
+    @checkpoint = @editor.createCheckpoint()
 
-  # confirmChanges: (@insertedText) ->
-  confirmChanges: (@insertedText) ->
+  getCheckPoint: ->
+    @checkpoint
+
+  getInsertedText: ->
+    changes = getChangesSinceCheckpoint(@editor, @getCheckPoint())
+    @editor.getTextInBufferRange(getNewTextRangeFromChanges(changes) ? [])
 
   getText: ->
-    @insertedText
+    @vimState.register.get('.').text
 
   # called when repeated
   insertText: (selection, text) ->
@@ -627,7 +641,7 @@ class ActivateInsertMode extends Operator
           cursor.moveLeft() unless cursor.isAtBeginningOfLine()
     else
       @setCheckpoint()
-      @vimState.activate('insert')
+      @vimState.activate('insert', @submode)
 
 class InsertAtLastInsert extends ActivateInsertMode
   @extend()
@@ -639,12 +653,7 @@ class InsertAtLastInsert extends ActivateInsertMode
 
 class ActivateReplaceMode extends ActivateInsertMode
   @extend()
-  execute: ->
-    if @isRepeated()
-      super
-    else
-      @setCheckpoint()
-      @vimState.activate('insert', 'replace')
+  submode: 'replace'
 
   insertText: (selection, text) ->
     for char in text when char isnt "\n"
@@ -674,7 +683,6 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
   execute: ->
-    @setCheckpoint() unless @isRepeated()
     @insertNewline()
     super
 
@@ -696,31 +704,30 @@ class Change extends ActivateInsertMode
   complete: false
 
   execute: ->
-    @setCheckpoint() unless @isRepeated()
     @target.setOptions?(excludeWhitespace: true)
     @target.select()
     if @haveSomeSelection()
       @setTextToRegister @editor.getSelectedText()
-      if @target.isLinewise?() and not @isRepeated()
-        for s in @editor.getSelections()
-          s.insertText("\n", autoIndent: true)
-          s.cursor.moveLeft()
-      else
-        s.deleteSelectedText() for s in @editor.getSelections()
-
+      text = if @target.isLinewise?() then "\n" else ""
+      for s in @editor.getSelections()
+        range = s.insertText(text, autoIndent: true)
+        s.cursor.moveLeft() unless range.isEmpty()
     super
 
 class Substitute extends Change
   @extend()
   initialize: ->
     @compose @new('MoveRight')
+    super
 
 class SubstituteLine extends Change
   @extend()
   initialize: ->
     @compose @new("MoveToRelativeLine")
+    super
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
   initialize: ->
     @compose @new('MoveToLastCharacterOfLine')
+    super
