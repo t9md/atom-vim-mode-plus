@@ -40,13 +40,10 @@ class Base
   constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
     if settings.get('showHoverOnOperate')
-      @vimState.hover.setPoint() if @hoverText?
-      hover =
-        switch settings.get('showHoverOnOperateIcon')
-          when 'emoji' then @hoverText if @hoverText?
-          when 'icon'  then @hoverIcon if @hoverIcon?
-          else null
-      @vimState.hover.add hover if hover?
+      if @hover?
+        @vimState.hover.setPoint()
+        if hover = @hover[settings.get('showHoverOnOperateIcon')]
+          @vimState.hover.add(hover)
     _.extend(this, properties)
     @initialize?()
 

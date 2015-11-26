@@ -6,7 +6,7 @@ class InsertMode extends Base
 
 class InsertRegister extends InsertMode
   @extend()
-  hoverText: '"'
+  hover: icon: '"', emoji: '"'
   requireInput: true
   initialize: ->
     @focusInput()
