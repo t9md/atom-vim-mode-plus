@@ -2,10 +2,7 @@
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
-{
-  haveSomeSelection, countChar,
-  getChangesSinceCheckpoint, getNewTextRangeFromChanges
-} = require './utils'
+{haveSomeSelection} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
@@ -609,20 +606,17 @@ class ActivateInsertMode extends Operator
   submode: null
 
   initialize: ->
-    @vimState.setUndoCheckpoint() unless @isRepeated()
+    @checkpoint = {}
+    @setCheckpoint('undo') unless @isRepeated()
 
   # we have to manage two separate checkpoint for different purpose(timing is different)
   # - one for undo(handled by modeManager)
   # - one for preserve last inserted text
-  setCheckpoint: ->
-    @checkpoint = @editor.createCheckpoint()
+  setCheckpoint: (kind) ->
+    @checkpoint[kind] = @editor.createCheckpoint()
 
-  getCheckPoint: ->
+  getCheckpoint: ->
     @checkpoint
-
-  getInsertedText: ->
-    changes = getChangesSinceCheckpoint(@editor, @getCheckPoint())
-    @editor.getTextInBufferRange(getNewTextRangeFromChanges(changes) ? [])
 
   getText: ->
     @vimState.register.get('.').text
@@ -640,7 +634,7 @@ class ActivateInsertMode extends Operator
           @insertText(selection, text)
           cursor.moveLeft() unless cursor.isAtBeginningOfLine()
     else
-      @setCheckpoint()
+      @setCheckpoint('insert')
       @vimState.activate('insert', @submode)
 
 class InsertAtLastInsert extends ActivateInsertMode
@@ -690,8 +684,6 @@ class InsertAboveWithNewline extends ActivateInsertMode
     @editor.insertNewlineAbove()
 
   insertText: (selection, text) ->
-    # We'll have captured the inserted newline, but we want to do that
-    # over again by hand, or differing indentations will be wrong.
     selection.insertText(text.trimLeft(), autoIndent: true)
 
 class InsertBelowWithNewline extends InsertAboveWithNewline

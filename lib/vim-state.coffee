@@ -20,7 +20,7 @@ packageScope = 'vim-mode-plus'
 
 # Mode handling is delegated to modeManager
 delegatingProperties = ['mode', 'submode']
-delegatingMethods = ['isMode', 'activate', 'setUndoCheckpoint']
+delegatingMethods = ['isMode', 'activate']
 
 module.exports =
 class VimState

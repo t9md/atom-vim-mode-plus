@@ -146,6 +146,10 @@ getNewTextRangeFromChanges = (changes) ->
       finalRange.end = finalRange.end.translate(diff)
   finalRange
 
+getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
+  changes = getChangesSinceCheckpoint(editor, checkpoint)
+  getNewTextRangeFromChanges(changes)
+
 countChar = (string, char) ->
   string.split(char).length - 1
 
@@ -169,7 +173,5 @@ module.exports = {
   eachSelection
   withKeepingGoalColumn
   toggleClassByCondition
-  getChangesSinceCheckpoint
-  getNewTextRangeFromChanges
-  countChar
+  getNewTextRangeFromCheckpoint
 }
