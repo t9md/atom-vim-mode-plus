@@ -1,4 +1,8 @@
-# 0.6.0 WIP
+# 0.6.0
+- FIX: incorrect cursor position when escaped from visual-linewise
+- Improve: operator.coffee is now more readable by power of @eachSelection abstracts final cursor position handling.
+- New: stayOnReplaceWithRegister, stayOnYank, stayOnIndent to stay same cursor position after operation finished.
+- Improve: InsertLastInserted is now accurate by refactoring ActivateInsertMode and its descendants.
 
 # 0.5.0
 - FIX: spec bug, revealed by validating spec-helper's mini-DSL options.
