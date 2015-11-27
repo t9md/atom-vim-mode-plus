@@ -18,6 +18,10 @@ class Motion extends Base
   linewise: false
   options: null
 
+  constructor: ->
+    super
+    @initialize?()
+
   setOptions: (@options) ->
 
   isLinewise: ->

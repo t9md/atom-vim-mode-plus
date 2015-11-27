@@ -8,6 +8,10 @@ class VisualBlockwise extends Base
   @extend()
   complete: true
 
+  constructor: ->
+    super
+    @initialize?()
+  
   initialize: ->
     # PlantTail
     unless @getTail()?

@@ -3,11 +3,15 @@ Base = require './base'
 
 class InsertMode extends Base
   @extend(false)
+  constructor: ->
+    super
+    @initialize?()
 
 class InsertRegister extends InsertMode
   @extend()
   hover: icon: '"', emoji: '"'
   requireInput: true
+
   initialize: ->
     @focusInput()
 

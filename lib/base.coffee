@@ -45,7 +45,6 @@ class Base
         if hover = @hover[settings.get('showHoverOnOperateIcon')]
           @vimState.hover.add(hover)
     _.extend(this, properties)
-    @initialize?()
 
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.

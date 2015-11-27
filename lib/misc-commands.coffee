@@ -7,6 +7,9 @@ swrap = require './selection-wrapper'
 class Misc extends Base
   @extend(false)
   complete: true
+  constructor: ->
+    super
+    @initialize?()
 
 class ReverseSelections extends Misc
   @extend()
