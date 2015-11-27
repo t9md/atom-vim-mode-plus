@@ -598,8 +598,8 @@ class ActivateInsertMode extends Operator
   # we have to manage two separate checkpoint for different purpose(timing is different)
   # - one for undo(handled by modeManager)
   # - one for preserve last inserted text
-  setCheckpoint: (kind) ->
-    @checkpoint[kind] = @editor.createCheckpoint()
+  setCheckpoint: (purpose) ->
+    @checkpoint[purpose] = @editor.createCheckpoint()
 
   getCheckpoint: ->
     @checkpoint
