@@ -505,8 +505,7 @@ class ReplaceWithRegister extends Operator
   execute: ->
     @eachSelection (s) =>
       range = s.getBufferRange()
-      newText = @vimState.register.get().text ? s.getText()
-      s.deleteSelectedText()
+      newText = @vimState.register.getText() ? s.getText()
       s.insertText(newText)
       s.cursor.setBufferPosition(range.start)
     @vimState.activate('normal')
@@ -596,7 +595,7 @@ class ActivateInsertMode extends Operator
     @checkpoint
 
   getText: ->
-    @vimState.register.get('.').text
+    @vimState.register.getText('.')
 
   # called when repeated
   insertText: (selection, text) ->

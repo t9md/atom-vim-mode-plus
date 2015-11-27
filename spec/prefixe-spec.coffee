@@ -125,12 +125,11 @@ describe "Prefixes", ->
 
     describe "the ctrl-r command in insert mode", ->
       beforeEach ->
-        set text: "02\n", cursor: [0, 0]
         set register: '"': text: '345'
         set register: 'a': text: 'abc'
         atom.clipboard.write "clip"
-        keystroke 'a'
-        editor.insertText '1'
+        set text: "012\n", cursor: [0, 2]
+        keystroke 'i'
 
       it "inserts contents of the unnamed register with \"", ->
         ensure [{ctrl: 'r'}, {char: '"'}], text: '013452\n'

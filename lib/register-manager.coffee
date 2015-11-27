@@ -24,11 +24,14 @@ REGISTERS = /// (
 
 class RegisterManager
   constructor: (@vimState) ->
-    {@editorElement} = @vimState
+    {@editor, @editorElement} = @vimState
     @data = globalState.register
 
   isValid: (name) ->
     REGISTERS.test(name)
+
+  getText: (name) ->
+    @get(name).text ? ''
 
   get: (name) ->
     name ?= @getName()
@@ -37,19 +40,13 @@ class RegisterManager
     switch name
       when '*', '+'
         text = atom.clipboard.read()
-        type = @getCopyType(text)
       when '%'
-        text = atom.workspace.getActiveTextEditor().getURI()
-        type = @getCopyType(text)
+        text = @editor.getURI()
       when '_' # Blackhole always returns nothing
         text = ''
-        type = @getCopyType(text)
-      when '.' # retrieve last inserted text in insert-mode.
-        {text, type} = @data['.'] ? {}
-        text ?= ''
-        type ?= @getCopyType(text)
       else
         {text, type} = @data[name.toLowerCase()] ? {}
+    type ?= @getCopyType(text ? '')
     {text, type}
 
   # Private: Sets the value of a given register.

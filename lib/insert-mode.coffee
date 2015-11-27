@@ -12,15 +12,13 @@ class InsertRegister extends InsertMode
     @focusInput()
 
   execute: ->
-    if text = @vimState.register.get(@input).text
-      @editor.insertText(text)
+    @editor.insertText @vimState.register.getText(@input)
 
 class InsertLastInserted extends InsertMode
   @extend()
   complete: true
   execute: ->
-    if text = @vimState.register.get('.').text
-      @editor.insertText(text)
+    @editor.insertText @vimState.register.getText('.')
 
 class CopyFromLineAbove extends InsertMode
   @extend()
