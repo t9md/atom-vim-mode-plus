@@ -37,6 +37,7 @@ class Operator extends Base
     if @isSameOperatorRepeated()
       @vimState.operationStack.run 'MoveToRelativeLine'
       @abort()
+    @initialize?()
 
   # target - TextObject or Motion to operate on.
   compose: (@target) ->
@@ -54,56 +55,63 @@ class Operator extends Base
     if text
       @vimState.register.set({text})
 
-  markCursorBufferPositions: ->
-    markerByCursor = new Map
-    markerOptions = {invalidate: 'never', persistent: false}
-    for cursor in @editor.getCursors()
-      point = cursor.getBufferPosition()
-      marker = @editor.markBufferPosition point, markerOptions
-      markerByCursor.set(cursor, marker)
-    markerByCursor
-
-  restoreMarkedCursorPositions: (markerByCursor) ->
-    for cursor in @editor.getCursors()
-      if marker = markerByCursor.get(cursor)
-        cursor.setBufferPosition(marker.getStartBufferPosition())
-    markerByCursor.forEach (marker, cursor) ->
-      marker.destroy()
-    markerByCursor.clear()
-
-  withKeepingCursorPosition: (fn) ->
-    markerByCursor = @markCursorBufferPositions()
-    fn()
-    @restoreMarkedCursorPositions(markerByCursor)
-
-  markSelections: ->
-    # [NOTE] selection.marker.copy() return undefined.
-    # So I explictly create marker from getBufferRange().
-    markerBySelections = {}
-    for selection in @editor.getSelections()
-      range = selection.getBufferRange()
-      marker = @editor.markBufferRange range,
-        invalidate: 'never',
-        persistent: false
-      markerBySelections[selection.id] = marker
-    markerBySelections
-
   flash: (range, fn=null) ->
-    options =
-      range: range
-      klass: 'vim-mode-plus-flash'
-      timeout: settings.get('flashOnOperateDuration')
-    @vimState.flasher.flash(options, fn)
+    if @flashTarget and settings.get('flashOnOperate')
+      options =
+        range: range
+        klass: 'vim-mode-plus-flash'
+        timeout: settings.get('flashOnOperateDuration')
+      @vimState.flasher.flash(options, fn)
+    else
+      fn()
+
+  preservePoints: ->
+    points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
+    (selection, i) ->
+      selection.cursor.setBufferPosition(points[i])
+
+  preservePointsAsMarker: ->
+    options = {invalidate: 'never', persistent: false}
+    markers = @editor.getCursorBufferPositions().map (point) =>
+      @editor.markBufferPosition point, options
+    (selection, i) ->
+      point = markers[i].getStartBufferPosition()
+      selection.cursor.setBufferPosition(point)
+
+  getRestoreCursorType: ->
+    switch
+      when not @restoreCursor?
+        null
+      when settings.get(@restoreCursor.config)
+          , (@target.isLinewise?() and @stayOnLinewise)
+        @restoreCursor.stay
+      else
+        @restoreCursor.default
 
   eachSelection: (fn) ->
-    @target.select() unless @haveSomeSelection()
+    select = =>
+      @target.select() unless @haveSomeSelection()
+    restoreCursor = @getRestoreCursorType()
+    switch restoreCursor
+      when 'point'
+        restore = @preservePoints()
+        select()
+      when 'marker'
+        restore = @preservePointsAsMarker()
+        select()
+      when 'start', 'firstChar'
+        select()
+        restore = @preservePoints()
+      else
+        select()
     return unless @haveSomeSelection()
+
     @editor.transact =>
-      for s in @editor.getSelections()
-        if @flashTarget and settings.get('flashOnOperate')
-          @flash s.getBufferRange(), -> fn(s)
-        else
-          fn(s)
+      for selection, i in @editor.getSelections()
+        @flash selection.getBufferRange(), -> fn(selection)
+        restore?(selection, i)
+        if restoreCursor is 'firstChar'
+          selection.cursor.moveToFirstCharacterOfLine()
 
 class Select extends Operator
   @extend(false)
@@ -135,20 +143,13 @@ class DeleteToLastCharacterOfLine extends Delete
 
 class TransformString extends Operator
   @extend(false)
-  adjustCursor: true
+  restoreCursor: default: 'start', stay: 'point', config: 'stayOnTransformString'
+  stayOnLinewise: true
 
-  # [FIXME] duplicate to Yank, need to consolidate as like adjustCursor().
   execute: ->
-    if @points?
-      points = @points
-    else if @target.isLinewise?() or settings.get('stayOnTransformString')
-      points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
     @eachSelection (s) =>
-      range = s.insertText @getNewText(s.getText())
-      if @adjustCursor
-        s.cursor.setBufferPosition(points?.shift() ? range.start)
+      s.insertText @getNewText(s.getText())
     @vimState.activate('normal')
-    @points = null
 
 class ToggleCase extends TransformString
   @extend()
@@ -164,8 +165,8 @@ class ToggleCase extends TransformString
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
+  restoreCursor: null
   hover: null
-  adjustCursor: false
   preCompose: 'MoveRight'
 
 class UpperCase extends TransformString
@@ -268,37 +269,32 @@ class ChangeSurround extends DeleteSurround
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
   charsMax: 1
+  preCompose: "AnyPair"
 
   initialize: ->
-    @compose @new("AnyPair", inclusive: true)
-    @preSelect()
+    @restore = @preservePoints()
+    @target.select()
     unless @haveSomeSelection()
       @vimState.reset()
       @abort()
     @vimState.hover.add(@editor.getSelectedText()[0])
     super
 
-  # FIXME very inperative implementation. find more generic and consistent approach.
-  # like preservePoints() and restorePoints().
-  preSelect: ->
-    if @target.isLinewise?() or settings.get('stayOnTransformString')
-      @points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-    @target.select()
-
   onConfirm: (@char) ->
+    # Clear pre-selected selection to start @eachSelection from non-selection.
+    @restore(s, i) for s, i in @editor.getSelections()
     @input = @char
     @vimState.operationStack.process()
 
 class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
+  restoreCursor: default: 'start', stay: 'point', config: 'stayOnYank'
+  stayOnLinewise: true
+
   execute: ->
-    if @target.isLinewise?()
-      points = (s.getBufferRange().start for s in @editor.getSelections())
     @eachSelection (s) =>
       @setTextToRegister s.getText() if s.isLastSelection()
-      point = points?.shift() ? s.getBufferRange().start
-      s.cursor.setBufferPosition point
     @vimState.activate('normal')
 
 class YankLine extends Yank
@@ -324,7 +320,6 @@ class Repeat extends Operator
         if op = @vimState.operationStack.getRecorded()
           op.setRepeated()
           op.execute()
-          # @vimState.operationStack.getRecorded()?.execute()
 
 class Mark extends Operator
   @extend()
@@ -422,12 +417,11 @@ class DecrementNumber extends IncrementNumber
 class Indent extends Operator
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
+  restoreCursor: default: 'firstChar', stay: 'point', config: 'stayOnIndent'
+
   execute: ->
     @eachSelection (s) =>
-      startRow = s.getBufferRange().start.row
       @indent(s)
-      s.cursor.setBufferPosition([startRow, 0])
-      s.cursor.moveToFirstCharacterOfLine()
     @vimState.activate('normal')
 
   indent: (s) ->
@@ -502,25 +496,25 @@ class PutAfter extends PutBefore
 class ReplaceWithRegister extends Operator
   @extend()
   hover: icon: ':replace-with-register:', emoji: ':pencil:'
+  restoreCursor: default: 'start', stay: 'point', config: 'stayOnReplaceWithRegister'
   execute: ->
     @eachSelection (s) =>
-      range = s.getBufferRange()
       newText = @vimState.register.getText() ? s.getText()
       s.insertText(newText)
-      s.cursor.setBufferPosition(range.start)
     @vimState.activate('normal')
 
 class ToggleLineComments extends Operator
   @extend()
   hover: icon: ':toggle-line-comment:', emoji: ':mute:'
+  restoreCursor: default: 'marker'
   execute: ->
-    @withKeepingCursorPosition =>
-      @eachSelection (s) ->
-        s.toggleLineComments()
+    @eachSelection (s) ->
+      s.toggleLineComments()
     @vimState.activate('normal')
 
 # Replace
 # -------------------------
+# [FIXME] need rewrite
 class Replace extends Operator
   @extend()
   input: null
