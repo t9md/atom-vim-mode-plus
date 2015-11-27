@@ -124,21 +124,12 @@ class ModeManager
         range = s.insertText(char)
         s.cursor.moveLeft() unless range.isEmpty()
 
-  setUndoCheckpoint: ->
-    @undoCheckpoint ?= @editor.createCheckpoint()
-
-  getUndoCheckpoint: ->
-    @undoCheckpoint
-
-  resetUndoCheckpoint: ->
-    @undoCheckpoint = null
-
   # Visual
   # -------------------------
   activateVisualMode: (submode) ->
     # If submode shift within visual mode, we first restore characterwise range
     if @submode?
-      @restoreCharacterwiseRange() unless @isMode('visual', 'characterwise')
+      @restoreCharacterwiseRange()
     else
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
     # Preserve characterwise range to restore afterward.
@@ -151,7 +142,7 @@ class ModeManager
       when 'blockwise' then @vimState.operationStack.run('BlockwiseSelect')
 
     new Disposable =>
-      @restoreCharacterwiseRange() unless @isMode('visual', 'characterwise')
+      @restoreCharacterwiseRange()
 
       # Prepare function to restore selection by `gv`
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
@@ -170,6 +161,8 @@ class ModeManager
         s.clear(autoscroll: false)
 
   restoreCharacterwiseRange: ->
+    return if @isMode('visual', 'characterwise')
+    
     switch @submode
       when 'linewise'
         @eachSelection (s) ->
