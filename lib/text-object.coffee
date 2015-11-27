@@ -17,6 +17,10 @@ class TextObject extends Base
   complete: true
   inner: false
 
+  constructor: ->
+    super
+    @initialize?()
+
   isInner: ->
     @inner
 

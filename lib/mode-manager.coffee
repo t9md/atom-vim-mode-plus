@@ -138,7 +138,7 @@ class ModeManager
   activateVisualMode: (submode) ->
     # If submode shift within visual mode, we first restore characterwise range
     if @submode?
-      @restoreCharacterwiseRange()
+      @restoreCharacterwiseRange() unless @isMode('visual', 'characterwise')
     else
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
     # Preserve characterwise range to restore afterward.
@@ -151,7 +151,7 @@ class ModeManager
       when 'blockwise' then @vimState.operationStack.run('BlockwiseSelect')
 
     new Disposable =>
-      @restoreCharacterwiseRange()
+      @restoreCharacterwiseRange() unless @isMode('visual', 'characterwise')
 
       # Prepare function to restore selection by `gv`
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
@@ -171,8 +171,6 @@ class ModeManager
 
   restoreCharacterwiseRange: ->
     switch @submode
-      when 'characterwise'
-        null # nothiing to do, but I want to be explicte.
       when 'linewise'
         @eachSelection (s) ->
           swrap(s).restoreCharacterwise() unless s.isEmpty()

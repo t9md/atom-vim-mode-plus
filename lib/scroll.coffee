@@ -6,6 +6,10 @@ class Scroll extends Base
   complete: true
   scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
   cursorPixel: null
+  
+  constructor: ->
+    super
+    @initialize?()
 
   getFirstVisibleScreenRow: ->
     @editorElement.getFirstVisibleScreenRow()
