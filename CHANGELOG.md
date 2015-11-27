@@ -1,3 +1,6 @@
+# 0.7.0 WIP
+- WIP
+
 # 0.6.0
 - FIX: incorrect cursor position when escaped from visual-linewise
 - Improve: operator.coffee is now more readable by power of @eachSelection abstracts final cursor position handling.
