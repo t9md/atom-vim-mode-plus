@@ -163,8 +163,10 @@ class ModeManager
         submode
 
       @eachSelection (s) ->
+        {cursor} = s
         swrap(s).resetProperties()
-        s.cursor.moveLeft() unless (s.isEmpty() or s.isReversed())
+        unless s.isReversed() or s.isEmpty() or cursor.isAtBeginningOfLine()
+          cursor.moveLeft()
         s.clear(autoscroll: false)
 
   restoreCharacterwiseRange: ->
