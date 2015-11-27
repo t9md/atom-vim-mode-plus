@@ -78,28 +78,31 @@ class Operator extends Base
       point = markers[i].getStartBufferPosition()
       selection.cursor.setBufferPosition(point)
 
-  getRestoreCursorType: ->
-    switch
-      when not @restoreCursor?
-        null
-      when settings.get(@restoreCursor.config)
-          , (@target.isLinewise?() and @stayOnLinewise)
-        @restoreCursor.stay
-      else
-        @restoreCursor.default
+  getCursorPositionInstruction: ->
+    return null unless @cursorPositionOnOperate?
+    {config, stayOnLinewise, stay, default: _default} = @cursorPositionOnOperate
+    if settings.get(config) or (@target.isLinewise?() and stayOnLinewise)
+      stay
+    else
+      _default
 
+  # restoreCursor would be set to one of following value,
+  #  point: original cursor position
+  #  marker: mark original cursor position
+  #  start: start point of selection after @target.select()
+  #  firstChar: first char of start line of selection after @target.select()
   eachSelection: (fn) ->
     select = =>
       @target.select() unless @haveSomeSelection()
-    restoreCursor = @getRestoreCursorType()
-    switch restoreCursor
-      when 'point'
+
+    switch instruction = @getCursorPositionInstruction()
+      when 'pointBeforeSelect'
         restore = @preservePoints()
         select()
-      when 'marker'
+      when 'pointBeforeSelectAsMarker'
         restore = @preservePointsAsMarker()
         select()
-      when 'start', 'firstChar'
+      when 'startPointOfSelection', 'firstCharacterOfStartLineOfSelection'
         select()
         restore = @preservePoints()
       else
@@ -110,7 +113,7 @@ class Operator extends Base
       for selection, i in @editor.getSelections()
         @flash selection.getBufferRange(), -> fn(selection)
         restore?(selection, i)
-        if restoreCursor is 'firstChar'
+        if instruction is 'firstCharacterOfStartLineOfSelection'
           selection.cursor.moveToFirstCharacterOfLine()
 
 class Select extends Operator
@@ -143,8 +146,11 @@ class DeleteToLastCharacterOfLine extends Delete
 
 class TransformString extends Operator
   @extend(false)
-  restoreCursor: default: 'start', stay: 'point', config: 'stayOnTransformString'
-  stayOnLinewise: true
+  cursorPositionOnOperate:
+    default: 'startPointOfSelection'
+    stay: 'pointBeforeSelect'
+    config: 'stayOnTransformString'
+    stayOnLinewise: true
 
   execute: ->
     @eachSelection (s) =>
@@ -165,7 +171,7 @@ class ToggleCase extends TransformString
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
-  restoreCursor: null
+  cursorPositionOnOperate: null
   hover: null
   preCompose: 'MoveRight'
 
@@ -289,8 +295,11 @@ class ChangeSurroundAnyPair extends ChangeSurround
 class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
-  restoreCursor: default: 'start', stay: 'point', config: 'stayOnYank'
-  stayOnLinewise: true
+  cursorPositionOnOperate:
+    default: 'startPointOfSelection'
+    stay: 'pointBeforeSelect'
+    config: 'stayOnYank'
+    stayOnLinewise: true
 
   execute: ->
     @eachSelection (s) =>
@@ -417,7 +426,10 @@ class DecrementNumber extends IncrementNumber
 class Indent extends Operator
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
-  restoreCursor: default: 'firstChar', stay: 'point', config: 'stayOnIndent'
+  cursorPositionOnOperate:
+    default: 'firstCharacterOfStartLineOfSelection'
+    stay: 'pointBeforeSelect'
+    config: 'stayOnIndent'
 
   execute: ->
     @eachSelection (s) =>
@@ -496,7 +508,10 @@ class PutAfter extends PutBefore
 class ReplaceWithRegister extends Operator
   @extend()
   hover: icon: ':replace-with-register:', emoji: ':pencil:'
-  restoreCursor: default: 'start', stay: 'point', config: 'stayOnReplaceWithRegister'
+  cursorPositionOnOperate:
+    default: 'startPointOfSelection'
+    stay: 'pointBeforeSelect'
+    config: 'stayOnReplaceWithRegister'
   execute: ->
     @eachSelection (s) =>
       newText = @vimState.register.getText() ? s.getText()
@@ -506,7 +521,8 @@ class ReplaceWithRegister extends Operator
 class ToggleLineComments extends Operator
   @extend()
   hover: icon: ':toggle-line-comment:', emoji: ':mute:'
-  restoreCursor: default: 'marker'
+  cursorPositionOnOperate:
+    default: 'pointBeforeSelectAsMarker'
   execute: ->
     @eachSelection (s) ->
       s.toggleLineComments()
