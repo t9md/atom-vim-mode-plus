@@ -30,6 +30,9 @@ class Operator extends Base
     else
       false
 
+  needFlash: ->
+    @flashTarget and settings.get('flashOnOperate') and not @instanceof('Select')
+
   constructor: ->
     super
     @compose @new(@preCompose) if @preCompose?
@@ -38,6 +41,27 @@ class Operator extends Base
       @vimState.operationStack.run 'MoveToRelativeLine'
       @abort()
     @initialize?()
+
+  observeSelectAction: ->
+    @onDidSelect =>
+      if @needFlash()
+        @flash @editor.getSelectedBufferRanges()
+
+    @onWillSelect =>
+      switch @getCursorPositionInstruction()
+        when 'pointBeforeSelect'
+          @finish = @preservePoints()
+        when 'pointBeforeSelectAsMarker'
+          @finish = @preservePointsAsMarker()
+        when 'startPointOfSelection'
+          @onDidSelect =>
+            @finish = @preservePoints()
+        when 'firstCharacterOfStartLineOfSelection'
+          @onDidSelect =>
+            restorePoints = @preservePoints()
+            @finish = (selection, i) ->
+              restorePoints(selection, i)
+              selection.cursor.moveToFirstCharacterOfLine()
 
   # target - TextObject or Motion to operate on.
   compose: (@target) ->
@@ -50,8 +74,10 @@ class Operator extends Base
       @target.onDidComposeBy(this)
 
   selectTarget: (force=false) ->
+    @observeSelectAction()
     @emitWillSelect()
     if @haveSomeSelection() and not force
+      @emitDidSelect()
       true
     else
       @target.select()
@@ -96,27 +122,14 @@ class Operator extends Base
   #  start: start point of selection after @target.select()
   #  firstChar: first char of start line of selection after @target.select()
   eachSelection: (fn) ->
-    switch instruction = @getCursorPositionInstruction()
-      when 'pointBeforeSelect'
-        restore = @preservePoints()
-        selected = @selectTarget()
-      when 'pointBeforeSelectAsMarker'
-        restore = @preservePointsAsMarker()
-        selected = @selectTarget()
-      when 'startPointOfSelection', 'firstCharacterOfStartLineOfSelection'
-        selected = @selectTarget()
-        restore = @preservePoints()
-      else
-        selected = @selectTarget()
-    return unless selected
-
+    # console.log 'in eachSelection'
+    return unless @selectTarget()
     @editor.transact =>
       for selection, i in @editor.getSelections()
-        @flash selection.getBufferRange()
         fn(selection)
-        restore?(selection, i)
-        if instruction is 'firstCharacterOfStartLineOfSelection'
-          selection.cursor.moveToFirstCharacterOfLine()
+        @finish?(selection, i)
+    # console.log 'out eachSelection'
+    # console.log '----------------'
 
 class Select extends Operator
   @extend(false)
@@ -281,7 +294,8 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   initialize: ->
     @restore = @preservePoints()
-    unless @selectTarget()
+    @target.select()
+    unless @haveSomeSelection()
       @vimState.reset()
       @abort()
     @vimState.hover.add(@editor.getSelectedText()[0])
