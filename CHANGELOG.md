@@ -1,5 +1,8 @@
 # 0.7.0 WIP
-- WIP
+- 
+
+# 0.6.1
+- FIX: Paste fail when flashOnOperate was disabled. #38
 
 # 0.6.0
 - FIX: incorrect cursor position when escaped from visual-linewise
