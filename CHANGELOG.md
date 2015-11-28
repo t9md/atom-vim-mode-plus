@@ -1,5 +1,5 @@
 # 0.7.0 WIP
-- 
+-
 
 # 0.6.1
 - FIX: Paste fail when flashOnOperate was disabled. #38
