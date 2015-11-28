@@ -89,10 +89,13 @@ class Base
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)
 
-  emitSelectEvent: ->
+  emitWillSelect: ->
+    @vimState.emitter.emit 'will-select'
+
+  emitDidSelect: ->
     @vimState.emitter.emit 'did-select'
 
-  emitChangeEvent = ->
+  emitChange = ->
     @vimState.emitter.emit 'did-change'
 
   # Class methods

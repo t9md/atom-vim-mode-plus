@@ -89,7 +89,9 @@ class Operator extends Base
   #  firstChar: first char of start line of selection after @target.select()
   eachSelection: (fn) ->
     select = =>
-      @target.select() unless @haveSomeSelection()
+      unless @haveSomeSelection()
+        @emitWillSelect()
+        @target.select()
 
     switch instruction = @getCursorPositionInstruction()
       when 'pointBeforeSelect'
@@ -116,6 +118,7 @@ class Operator extends Base
 class Select extends Operator
   @extend(false)
   execute: ->
+    @emitWillSelect()
     @target.select()
 
 class Delete extends Operator
@@ -276,6 +279,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   initialize: ->
     @restore = @preservePoints()
+    @emitWillSelect()
     @target.select()
     unless @haveSomeSelection()
       @vimState.reset()
@@ -390,7 +394,9 @@ class IncrementNumber extends Operator
   execute: ->
     pattern = ///#{settings.get('numberRegex')}///g
     newRanges = null
-    @target.select() unless @haveSomeSelection()
+    unless @haveSomeSelection()
+      @emitWillSelect()
+      @target.select()
     @editor.transact =>
       newRanges = for s in @editor.getSelectionsOrderedByBufferPosition()
         @replaceNumber(s.getBufferRange(), pattern)
@@ -547,6 +553,7 @@ class Replace extends Operator
 
     @editor.transact =>
       if @target?
+        @emitWillSelect()
         @target.select()
         if @haveSomeSelection()
           @editor.replaceSelectedText null, (text) =>
@@ -680,6 +687,7 @@ class Change extends ActivateInsertMode
 
   execute: ->
     @target.setOptions?(excludeWhitespace: true)
+    @emitWillSelect()
     @target.select()
     if @haveSomeSelection()
       @setTextToRegister @editor.getSelectedText()

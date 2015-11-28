@@ -146,6 +146,9 @@ class VimState
   onDidDestroy: (fn) ->
     @emitter.on('did-destroy', fn)
 
+  onWillSelect: (fn) ->
+    @emitter.on('will-select', fn)
+
   onDidSelect: (fn) ->
     @emitter.on('did-select', fn)
 
