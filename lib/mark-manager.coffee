@@ -9,11 +9,6 @@ class MarkManager
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
     @marks = {}
-    subs = @vimState.subscriptions
-    subs.add @vimState.modeManager.onWillDeactivateMode ({mode, submode}) =>
-      switch mode
-        when 'insert'
-          @set('^', @editor.getCursorBufferPosition())
 
   isValid: (name) ->
     MARKS.test(name)
@@ -25,6 +20,7 @@ class MarkManager
   # [FIXME] Need to support Global mark with capital name [A-Z]
   set: (name, point) ->
     return unless @isValid(name)
+    point = @editor.clipBufferPosition(point)
     @marks[name] = @editor.markBufferPosition point,
       invalidate: 'never',
       persistent: false
