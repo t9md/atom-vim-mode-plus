@@ -1,5 +1,5 @@
 # 0.7.0 WIP
--
+- FIX: hover didn't cleared when `;` is executed when there is no previous find command.
 
 # 0.6.1
 - FIX: Paste fail when flashOnOperate was disabled. #38
