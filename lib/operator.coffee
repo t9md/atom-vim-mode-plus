@@ -55,15 +55,11 @@ class Operator extends Base
     if text
       @vimState.register.set({text})
 
-  flash: (range, fn=null) ->
+  flash: (range) ->
     if @flashTarget and settings.get('flashOnOperate')
-      options =
-        range: range
-        klass: 'vim-mode-plus-flash'
+      @vimState.flasher.flash range,
+        class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnOperateDuration')
-      @vimState.flasher.flash(options, fn)
-    else
-      fn?()
 
   preservePoints: ->
     points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
@@ -111,7 +107,8 @@ class Operator extends Base
 
     @editor.transact =>
       for selection, i in @editor.getSelections()
-        @flash selection.getBufferRange(), -> fn(selection)
+        @flash selection.getBufferRange()
+        fn(selection)
         restore?(selection, i)
         if instruction is 'firstCharacterOfStartLineOfSelection'
           selection.cursor.moveToFirstCharacterOfLine()
@@ -365,7 +362,7 @@ class Increase extends Operator
         newRanges.push ranges
 
     if (newRanges = _.flatten(newRanges)).length
-      @flash newRanges if settings.get('flashOnOperate')
+      @flash newRanges
     else
       atom.beep()
 
@@ -398,7 +395,7 @@ class IncrementNumber extends Operator
       newRanges = for s in @editor.getSelectionsOrderedByBufferPosition()
         @replaceNumber(s.getBufferRange(), pattern)
     if (newRanges = _.flatten(newRanges)).length
-      @flash newRanges if settings.get('flashOnOperate')
+      @flash newRanges
     else
       atom.beep()
     # Reverseing selection put cursor on start position of selection.
