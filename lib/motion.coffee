@@ -49,9 +49,9 @@ class Motion extends Base
         else
           selection.modifySelection =>
             @moveCursor selection.cursor
-
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
+    @emitSelectEvent()
 
   selectInclusive: (selection) ->
     {cursor} = selection
@@ -133,6 +133,7 @@ class CurrentSelection extends Motion
       @selectCharacters()
       if @wasLinewise
         swrap(s).expandOverLine() for s in @editor.getSelections()
+    @emitSelectEvent()
 
   selectCharacters: ->
     extent = @selectedRange.getExtent()

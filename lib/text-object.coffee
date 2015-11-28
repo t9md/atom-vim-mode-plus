@@ -12,6 +12,8 @@ swrap = require './selection-wrapper'
   getLineTextToPoint
 } = require './utils'
 
+
+
 class TextObject extends Base
   @extend(false)
   complete: true
@@ -30,6 +32,7 @@ class TextObject extends Base
 
   eachSelection: (fn) ->
     fn(s) for s in @editor.getSelections()
+    @emitSelectEvent()
     return if @vimState.isMode('operator-pending')
     return if @vimState.isMode('visual', 'linewise')
     if @isLinewise()
@@ -396,4 +399,5 @@ class CurrentLine extends TextObject
 class Entire extends TextObject
   @extend()
   select: ->
-    @editor.selectAll()
+    @eachSelection (selection) =>
+      @editor.selectAll()
