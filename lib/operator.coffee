@@ -63,7 +63,7 @@ class Operator extends Base
         timeout: settings.get('flashOnOperateDuration')
       @vimState.flasher.flash(options, fn)
     else
-      fn()
+      fn?()
 
   preservePoints: ->
     points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
