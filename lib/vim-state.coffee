@@ -146,12 +146,19 @@ class VimState
   onDidDestroy: (fn) ->
     @emitter.on('did-destroy', fn)
 
+  onDidSelect: (fn) ->
+    @emitter.on('did-select', fn)
+
+  onDidChange: (fn) ->
+    @emitter.on('did-change', fn)
+
   reset: ->
     @count.reset()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
     @operationStack.clear()
+    # FIXME should move operationSubscriptions to operationStack?
     @operationSubscriptions?.dispose()
     @operationSubscriptions = new CompositeDisposable
 
