@@ -8,22 +8,22 @@ class FlashManager
   constructor: (@vimState) ->
     {@editor} = @vimState
 
-  flash: ({range, klass, timeout}, fn=null) ->
+  markerOptions = {ivalidate: 'nerver', persistent: false}
+  flash: (range, options) ->
+    @reset()
     range = [range] unless _.isArray(range)
     return unless range.length
-    @reset()
-    markerOptions = {ivalidate: 'nerver', persistent: false}
     @markers = (@editor.markBufferRange(r, markerOptions) for r in range)
-    fn?()
-    decorationOptions = {type: 'highlight', class: klass}
-    @editor.decorateMarker(m, decorationOptions) for m in @markers
-
+    decorationOptions = {type: 'highlight', class: options.class}
+    for m in @markers
+      @editor.decorateMarker(m, decorationOptions)
     @timeoutID = setTimeout  =>
       @reset()
-    , timeout
+    , options.timeout
 
   reset: ->
-    m.destroy() for m in @markers ? []
+    return unless @markers?
+    m.destroy() for m in @markers
     clearTimeout @timeoutID
     {@markers, @timeoutID} = {}
 
