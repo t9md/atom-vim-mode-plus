@@ -79,6 +79,11 @@ class VimState
   onDidUnfocusSearch: (fn) -> @subscribe @search.onDidUnfocus(fn)
   onDidCommandSearch: (fn) -> @subscribe @search.onDidCommand(fn)
 
+  # Select and text mutation(Change)
+  onWillSelect: (fn) -> @subscribe @emitter.on('will-select', fn)
+  onDidSelect: (fn) -> @subscribe @emitter.on('did-select', fn)
+  onDidChange: (fn) -> @subscribe @emitter.on('did-change', fn)
+
   destroy: ->
     return if @destroyed
     @destroyed = true
@@ -145,15 +150,6 @@ class VimState
 
   onDidDestroy: (fn) ->
     @emitter.on('did-destroy', fn)
-
-  onWillSelect: (fn) ->
-    @emitter.on('will-select', fn)
-
-  onDidSelect: (fn) ->
-    @emitter.on('did-select', fn)
-
-  onDidChange: (fn) ->
-    @emitter.on('did-change', fn)
 
   reset: ->
     @count.reset()

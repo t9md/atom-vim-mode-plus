@@ -49,6 +49,14 @@ class Operator extends Base
     if _.isFunction(@target.onDidComposeBy)
       @target.onDidComposeBy(this)
 
+  selectTarget: (force=false) ->
+    @emitWillSelect()
+    if @haveSomeSelection() and not force
+      true
+    else
+      @target.select()
+      @haveSomeSelection()
+
   setTextToRegister: (text) ->
     if @target?.isLinewise?() and not text.endsWith('\n')
       text += "\n"
@@ -88,24 +96,19 @@ class Operator extends Base
   #  start: start point of selection after @target.select()
   #  firstChar: first char of start line of selection after @target.select()
   eachSelection: (fn) ->
-    select = =>
-      unless @haveSomeSelection()
-        @emitWillSelect()
-        @target.select()
-
     switch instruction = @getCursorPositionInstruction()
       when 'pointBeforeSelect'
         restore = @preservePoints()
-        select()
+        selected = @selectTarget()
       when 'pointBeforeSelectAsMarker'
         restore = @preservePointsAsMarker()
-        select()
+        selected = @selectTarget()
       when 'startPointOfSelection', 'firstCharacterOfStartLineOfSelection'
-        select()
+        selected = @selectTarget()
         restore = @preservePoints()
       else
-        select()
-    return unless @haveSomeSelection()
+        selected = @selectTarget()
+    return unless selected
 
     @editor.transact =>
       for selection, i in @editor.getSelections()
@@ -118,8 +121,7 @@ class Operator extends Base
 class Select extends Operator
   @extend(false)
   execute: ->
-    @emitWillSelect()
-    @target.select()
+    @selectTarget(true)
 
 class Delete extends Operator
   @extend()
@@ -279,9 +281,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   initialize: ->
     @restore = @preservePoints()
-    @emitWillSelect()
-    @target.select()
-    unless @haveSomeSelection()
+    unless @selectTarget()
       @vimState.reset()
       @abort()
     @vimState.hover.add(@editor.getSelectedText()[0])
@@ -394,9 +394,7 @@ class IncrementNumber extends Operator
   execute: ->
     pattern = ///#{settings.get('numberRegex')}///g
     newRanges = null
-    unless @haveSomeSelection()
-      @emitWillSelect()
-      @target.select()
+    @selectTarget()
     @editor.transact =>
       newRanges = for s in @editor.getSelectionsOrderedByBufferPosition()
         @replaceNumber(s.getBufferRange(), pattern)
@@ -553,9 +551,7 @@ class Replace extends Operator
 
     @editor.transact =>
       if @target?
-        @emitWillSelect()
-        @target.select()
-        if @haveSomeSelection()
+        if @selectTarget()
           @editor.replaceSelectedText null, (text) =>
             text.replace(/./g, @input)
           for selection in @editor.getSelections()
@@ -687,9 +683,7 @@ class Change extends ActivateInsertMode
 
   execute: ->
     @target.setOptions?(excludeWhitespace: true)
-    @emitWillSelect()
-    @target.select()
-    if @haveSomeSelection()
+    if @selectTarget()
       @setTextToRegister @editor.getSelectedText()
       text = if @target.isLinewise?() then "\n" else ""
       for s in @editor.getSelections()
