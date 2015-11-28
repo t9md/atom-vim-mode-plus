@@ -89,9 +89,11 @@ class ModeManager
         {undo, insert} = item.getCheckpoint()
         range = getNewTextRangeFromCheckpoint(@editor, insert)
         text = @editor.getTextInBufferRange(range ? [])
-        @vimState.register.set('.', {text})
         # grouping changes for undo checkpoint need to come later than
         @editor.groupChangesSinceCheckpoint(undo)
+
+        @vimState.register.set('.', {text})
+        @vimState.mark.set('^', @editor.getCursorBufferPosition())
 
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
@@ -162,7 +164,6 @@ class ModeManager
 
   restoreCharacterwiseRange: ->
     return if @isMode('visual', 'characterwise')
-    
     switch @submode
       when 'linewise'
         @eachSelection (s) ->
