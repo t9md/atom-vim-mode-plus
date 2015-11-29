@@ -47,21 +47,27 @@ class Operator extends Base
       if @needFlash()
         @flash @editor.getSelectedBufferRanges()
 
-    @onWillSelect =>
-      switch @getCursorPositionInstruction()
-        when 'pointBeforeSelect'
+    return unless @finalPosition?
+    {config, stayOnLinewise, default: _default} = @finalPosition
+    instruction =
+      if settings.get(config) or (@target.isLinewise?() and stayOnLinewise)
+        'preSelect'
+      else
+        _default
+
+    switch instruction
+      when 'preSelect'
+        @onWillSelect =>
           @finish = @preservePoints()
-        when 'pointBeforeSelectAsMarker'
-          @finish = @preservePointsAsMarker()
-        when 'startPointOfSelection'
-          @onDidSelect =>
-            @finish = @preservePoints()
-        when 'firstCharacterOfStartLineOfSelection'
-          @onDidSelect =>
-            restorePoints = @preservePoints()
-            @finish = (selection, i) ->
-              restorePoints(selection, i)
-              selection.cursor.moveToFirstCharacterOfLine()
+      when 'preSelectAsMarker'
+        @onWillSelect =>
+          @finish = @preservePoints({asMaker: true})
+      when 'postSelect'
+        @onDidSelect =>
+          @finish = @preservePoints()
+      when 'postSelectThenFirstChar'
+        @onDidSelect =>
+          @finish = @preservePoints(moveToFirstChar: true)
 
   # target - TextObject or Motion to operate on.
   compose: (@target) ->
@@ -95,26 +101,22 @@ class Operator extends Base
         class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnOperateDuration')
 
-  preservePoints: ->
+  preservePoints: ({moveToFirstChar, asMarker}={}) ->
     points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-    (selection, i) ->
-      selection.cursor.setBufferPosition(points[i])
-
-  preservePointsAsMarker: ->
-    options = {invalidate: 'never', persistent: false}
-    markers = @editor.getCursorBufferPositions().map (point) =>
-      @editor.markBufferPosition point, options
-    (selection, i) ->
-      point = markers[i].getStartBufferPosition()
-      selection.cursor.setBufferPosition(point)
-
-  getCursorPositionInstruction: ->
-    return null unless @cursorPositionOnOperate?
-    {config, stayOnLinewise, stay, default: _default} = @cursorPositionOnOperate
-    if settings.get(config) or (@target.isLinewise?() and stayOnLinewise)
-      stay
+    if asMarker?
+      options = {invalidate: 'never', persistent: false}
+      markers = @editor.getCursorBufferPositions().map (point) =>
+        @editor.markBufferPosition point, options
+      ({cursor}, i) ->
+        point = markers[i].getStartBufferPosition()
+        cursor.setBufferPosition(point)
+    else if moveToFirstChar?
+      ({cursor}, i) ->
+        cursor.setBufferPosition(points[i])
+        cursor.moveToFirstCharacterOfLine()
     else
-      _default
+      ({cursor}, i) ->
+        cursor.setBufferPosition(points[i])
 
   # restoreCursor would be set to one of following value,
   #  point: original cursor position
@@ -122,14 +124,11 @@ class Operator extends Base
   #  start: start point of selection after @target.select()
   #  firstChar: first char of start line of selection after @target.select()
   eachSelection: (fn) ->
-    # console.log 'in eachSelection'
     return unless @selectTarget()
     @editor.transact =>
       for selection, i in @editor.getSelections()
         fn(selection)
         @finish?(selection, i)
-    # console.log 'out eachSelection'
-    # console.log '----------------'
 
 class Select extends Operator
   @extend(false)
@@ -161,9 +160,8 @@ class DeleteToLastCharacterOfLine extends Delete
 
 class TransformString extends Operator
   @extend(false)
-  cursorPositionOnOperate:
-    default: 'startPointOfSelection'
-    stay: 'pointBeforeSelect'
+  finalPosition:
+    default: 'postSelect'
     config: 'stayOnTransformString'
     stayOnLinewise: true
 
@@ -186,7 +184,7 @@ class ToggleCase extends TransformString
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
-  cursorPositionOnOperate: null
+  finalPosition: null
   hover: null
   preCompose: 'MoveRight'
 
@@ -310,9 +308,8 @@ class ChangeSurroundAnyPair extends ChangeSurround
 class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
-  cursorPositionOnOperate:
-    default: 'startPointOfSelection'
-    stay: 'pointBeforeSelect'
+  finalPosition:
+    default: 'postSelect'
     config: 'stayOnYank'
     stayOnLinewise: true
 
@@ -441,9 +438,8 @@ class DecrementNumber extends IncrementNumber
 class Indent extends Operator
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
-  cursorPositionOnOperate:
-    default: 'firstCharacterOfStartLineOfSelection'
-    stay: 'pointBeforeSelect'
+  finalPosition:
+    default: 'postSelectThenFirstChar'
     config: 'stayOnIndent'
 
   execute: ->
@@ -523,9 +519,8 @@ class PutAfter extends PutBefore
 class ReplaceWithRegister extends Operator
   @extend()
   hover: icon: ':replace-with-register:', emoji: ':pencil:'
-  cursorPositionOnOperate:
-    default: 'startPointOfSelection'
-    stay: 'pointBeforeSelect'
+  finalPosition:
+    default: 'postSelect'
     config: 'stayOnReplaceWithRegister'
   execute: ->
     @eachSelection (s) =>
@@ -536,8 +531,8 @@ class ReplaceWithRegister extends Operator
 class ToggleLineComments extends Operator
   @extend()
   hover: icon: ':toggle-line-comment:', emoji: ':mute:'
-  cursorPositionOnOperate:
-    default: 'pointBeforeSelectAsMarker'
+  finalPosition:
+    default: 'preSelectAsMarker'
   execute: ->
     @eachSelection (s) ->
       s.toggleLineComments()
