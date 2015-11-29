@@ -23,6 +23,14 @@ class Operator extends Base
   trackChange: false
   finalPosition: null
 
+  activate: (mode, submode) ->
+    @onDidOperationFinish =>
+      @vimState.activate(mode, submode)
+
+  setMarkerForChange: (range) ->
+    @vimState.mark.set('[', range.start)
+    @vimState.mark.set(']', range.end)
+
   haveSomeSelection: ->
     haveSomeSelection(@editor.getSelections())
 
@@ -59,24 +67,23 @@ class Operator extends Base
 
       @onDidOperationFinish =>
         if range = changeMarker?.getBufferRange()
-          @vimState.mark.set('[', range.start)
-          @vimState.mark.set(']', range.end)
+          @setMarkerForChange(range)
 
-    return unless @finalPosition?
-    {default: _default, stay, stayOnLinewise} = @finalPosition
-    config = if @instanceof('TransformString')
-      "stayOnTransformString"
-    else
-      "stayOn#{@constructor.name}"
+    if @finalPosition
+      {default: _default, stay, stayOnLinewise} = @finalPosition
+      config = if @instanceof('TransformString')
+        "stayOnTransformString"
+      else
+        "stayOn#{@constructor.name}"
 
-    if settings.get(config) or (stayOnLinewise and @target.isLinewise?())
-      # Stay, keep points BEFORE select and restore
-      @onWillSelect =>
-        @finish = @preservePoints(stay)
-    else
-      # Default, keep points after select
-      @onDidSelect =>
-        @finish = @preservePoints(_default)
+      if settings.get(config) or (stayOnLinewise and @target.isLinewise?())
+        # Stay, keep points BEFORE select and restore
+        @onWillSelect =>
+          @finish = @preservePoints(stay)
+      else
+        # Default, keep points after select
+        @onDidSelect =>
+          @finish = @preservePoints(_default)
 
   # target - TextObject or Motion to operate on.
   compose: (@target) ->
@@ -144,13 +151,14 @@ class Select extends Operator
 class Delete extends Operator
   @extend()
   hover: icon: ':delete:', emoji: ':scissors:'
+  trackChange: true
   flashTarget: false
   execute: ->
     @eachSelection (s) =>
       @setTextToRegister s.getText() if s.isLastSelection()
       s.deleteSelectedText()
       s.cursor.skipLeadingWhitespace() if @target.isLinewise?()
-    @vimState.activate('normal')
+    @activate('normal')
 
 class DeleteRight extends Delete
   @extend()
@@ -173,8 +181,7 @@ class TransformString extends Operator
   execute: ->
     @eachSelection (s) =>
       s.insertText @getNewText(s.getText())
-    @onDidOperationFinish =>
-      @vimState.activate('normal')
+    @activate('normal')
 
 class ToggleCase extends TransformString
   @extend()
@@ -321,8 +328,7 @@ class Yank extends Operator
   execute: ->
     @eachSelection (s) =>
       @setTextToRegister s.getText() if s.isLastSelection()
-    @onDidOperationFinish =>
-      @vimState.activate('normal')
+    @activate('normal')
 
 class YankLine extends Yank
   @extend()
@@ -335,7 +341,7 @@ class Join extends Operator
     @editor.transact =>
       _.times @getCount(), =>
         @editor.joinLines()
-    @vimState.activate('normal')
+    @activate('normal')
 
 class Repeat extends Operator
   @extend()
@@ -357,7 +363,7 @@ class Mark extends Operator
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
-    @vimState.activate('normal')
+    @activate('normal')
 
 # [FIXME?]: inconsistent behavior from normal operator
 # Since its support visual-mode but not use @target and compose convension.
@@ -422,7 +428,7 @@ class IncrementNumber extends Operator
     # Reverseing selection put cursor on start position of selection.
     # This allow increment/decrement works in same target range when repeated.
     swrap.setReversedState(@editor, true)
-    @vimState.activate('normal')
+    @activate('normal')
 
   replaceNumber: (scanRange, pattern) ->
     newRanges = []
@@ -444,13 +450,14 @@ class DecrementNumber extends IncrementNumber
 class Indent extends Operator
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
+  trackChange: true
   finalPosition:
     default: {moveToFirstChar: true}
 
   execute: ->
     @eachSelection (s) =>
       @indent(s)
-    @vimState.activate('normal')
+    @activate('normal')
 
   indent: (s) ->
     s.indentSelectedRows()
@@ -486,7 +493,7 @@ class PutBefore extends Operator
 
     @editor.transact =>
       paste(s, text) for s in @editor.getSelections()
-    @vimState.activate('normal')
+    @activate('normal')
 
   pasteLinewise: (selection, text) => # fat
     cursor = selection.cursor
@@ -505,6 +512,7 @@ class PutBefore extends Operator
       else
         selection.insertText("\n")
     range = selection.insertText(text)
+    @setMarkerForChange(range)
     @flash range
     cursor.setBufferPosition(range.start)
     cursor.moveToFirstCharacterOfLine()
@@ -514,6 +522,8 @@ class PutBefore extends Operator
     if @location is 'after' and selection.isEmpty()
       cursor.moveRight()
     range = selection.insertText(text)
+    @setMarkerForChange(range)
+
     @flash range
     cursor.setBufferPosition(range.end.translate([0, -1]))
 
@@ -524,22 +534,24 @@ class PutAfter extends PutBefore
 class ReplaceWithRegister extends Operator
   @extend()
   hover: icon: ':replace-with-register:', emoji: ':pencil:'
+  trackChange: true
   finalPosition: {}
   execute: ->
     @eachSelection (s) =>
       newText = @vimState.register.getText() ? s.getText()
       s.insertText(newText)
-    @vimState.activate('normal')
+    @activate('normal')
 
 class ToggleLineComments extends Operator
   @extend()
   hover: icon: ':toggle-line-comment:', emoji: ':mute:'
+  trackChange: true
   finalPosition:
     stay: {asMarker: true}
   execute: ->
     @eachSelection (s) ->
       s.toggleLineComments()
-    @vimState.activate('normal')
+    @activate('normal')
 
 # Replace
 # -------------------------
@@ -548,7 +560,7 @@ class Replace extends Operator
   @extend()
   input: null
   hover: icon: 'r', emoji: ':tractor:'
-
+  trackChange: true
   requireInput: true
 
   initialize: ->
@@ -588,7 +600,7 @@ class Replace extends Operator
             @editor.moveDown()
           @editor.moveToFirstCharacterOfLine()
 
-    @vimState.activate('normal')
+    @activate('normal')
 
 # Input
 # -------------------------
