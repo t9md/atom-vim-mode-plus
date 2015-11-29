@@ -12,8 +12,6 @@ swrap = require './selection-wrapper'
   getLineTextToPoint
 } = require './utils'
 
-
-
 class TextObject extends Base
   @extend(false)
   complete: true
