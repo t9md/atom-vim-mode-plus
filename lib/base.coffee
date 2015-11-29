@@ -27,6 +27,7 @@ delegatingMethods = [
   "onWillSelect"
   "onDidSelect"
   "onDidChange"
+  "onDidOperationFinish"
   "subscribe"
 ]
 
@@ -97,9 +98,6 @@ class Base
 
   emitDidSelect: ->
     @vimState.emitter.emit 'did-select'
-
-  emitChange = ->
-    @vimState.emitter.emit 'did-change'
 
   # Class methods
   # -------------------------

@@ -82,7 +82,7 @@ class VimState
   # Select and text mutation(Change)
   onWillSelect: (fn) -> @subscribe @emitter.on('will-select', fn)
   onDidSelect: (fn) -> @subscribe @emitter.on('did-select', fn)
-  onDidChange: (fn) -> @subscribe @emitter.on('did-change', fn)
+  onDidOperationFinish: (fn) -> @subscribe @emitter.on('did-operation-finish', fn)
 
   destroy: ->
     return if @destroyed
@@ -156,8 +156,7 @@ class VimState
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
-    @operationStack.clear()
-    # FIXME should move operationSubscriptions to operationStack?
+    @operationStack.reset()
     @operationSubscriptions?.dispose()
     @operationSubscriptions = new CompositeDisposable
 
