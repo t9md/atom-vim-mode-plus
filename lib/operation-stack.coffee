@@ -22,8 +22,9 @@ class OperationStack
       @processing = true
       @process()
     catch error
-      @vimState.reset()
-      throw error unless error.instanceof?('OperationAbortedError')
+      unless error.instanceof?('OperationAbortedError')
+        @vimState.reset()
+        throw error
     finally
       @processing = false
 
@@ -48,6 +49,8 @@ class OperationStack
       try
         op = @pop()
         debug "-> <#{@peekTop().constructor.name}>.compose(<#{op.constructor.name}>)"
+        unless @peekTop().compose?
+          console.log @peekTop()
         @peekTop().compose(op)
       catch error
         if error.instanceof?('OperatorError')
@@ -85,6 +88,7 @@ class OperationStack
     debug "#=== Canceled at #{new Date().toISOString()}\n"
 
   finish: ->
+    @vimState.emitter.emit 'did-operation-finish'
     if @vimState.isMode('normal') and @editor.getLastSelection().isEmpty()
       for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
         withKeepingGoalColumn c, (c) ->
@@ -104,7 +108,7 @@ class OperationStack
   pop: ->
     @stack.pop()
 
-  clear: ->
+  reset: ->
     @stack = []
 
   isEmpty: ->

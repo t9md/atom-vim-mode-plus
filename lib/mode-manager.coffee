@@ -94,6 +94,9 @@ class ModeManager
 
         @vimState.register.set('.', {text})
         @vimState.mark.set('^', @editor.getCursorBufferPosition())
+        if range
+          @vimState.mark.set('[', range.start)
+          @vimState.mark.set(']', range.end)
 
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null

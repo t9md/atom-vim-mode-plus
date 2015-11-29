@@ -20,6 +20,8 @@ class Operator extends Base
   target: null
   flashTarget: true
   preCompose: null
+  trackChange: false
+  finalPosition: null
 
   haveSomeSelection: ->
     haveSomeSelection(@editor.getSelections())
@@ -43,13 +45,29 @@ class Operator extends Base
     @initialize?()
 
   observeSelectAction: ->
-    @onDidSelect =>
-      if @needFlash()
+    if @needFlash()
+      @onDidSelect =>
         @flash @editor.getSelectedBufferRanges()
+
+    if @trackChange
+      changeMarker = null
+      @onDidSelect =>
+        return if (selection = @editor.getLastSelection()).isEmpty()
+        changeMarker = @editor.markBufferRange selection.getBufferRange(),
+          invalidate: 'never'
+          persistent: false
+
+      @onDidOperationFinish =>
+        if range = changeMarker?.getBufferRange()
+          @vimState.mark.set('[', range.start)
+          @vimState.mark.set(']', range.end)
 
     return unless @finalPosition?
     {default: _default, stay, stayOnLinewise} = @finalPosition
-    config = "stayOn#{@constructor.name}"
+    config = if @instanceof('TransformString')
+      "stayOnTransformString"
+    else
+      "stayOn#{@constructor.name}"
 
     if settings.get(config) or (stayOnLinewise and @target.isLinewise?())
       # Stay, keep points BEFORE select and restore
@@ -148,13 +166,15 @@ class DeleteToLastCharacterOfLine extends Delete
 
 class TransformString extends Operator
   @extend(false)
+  trackChange: true
   finalPosition:
     stayOnLinewise: true
 
   execute: ->
     @eachSelection (s) =>
       s.insertText @getNewText(s.getText())
-    @vimState.activate('normal')
+    @onDidOperationFinish =>
+      @vimState.activate('normal')
 
 class ToggleCase extends TransformString
   @extend()
@@ -294,13 +314,15 @@ class ChangeSurroundAnyPair extends ChangeSurround
 class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
+  trackChange: true
   finalPosition:
     stayOnLinewise: true
 
   execute: ->
     @eachSelection (s) =>
       @setTextToRegister s.getText() if s.isLastSelection()
-    @vimState.activate('normal')
+    @onDidOperationFinish =>
+      @vimState.activate('normal')
 
 class YankLine extends Yank
   @extend()

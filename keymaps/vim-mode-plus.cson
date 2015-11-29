@@ -201,6 +201,7 @@
   'V':      'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
   'g v':    'vim-mode-plus:activate-previous-visual-mode'
+  # 'g c':    'vim-mode-plus:select-latest-change'
   'u':      'vim-mode-plus:undo'
   'ctrl-r': 'vim-mode-plus:redo'
   'O':      'vim-mode-plus:insert-above-with-newline'
