@@ -72,9 +72,9 @@ class Redo extends Undo
       else
         disposable.dispose()
     fn()
-    if setToStart
+    if setToStart and start
       @editor.setCursorBufferPosition(start)
-    if needFlash
+    if needFlash and start and end
       disposable.dispose()
       @flash(new Range(start, end))
 
