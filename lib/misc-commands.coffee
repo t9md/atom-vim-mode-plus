@@ -4,12 +4,14 @@
 {Range} = require 'atom'
 Base = require './base'
 swrap = require './selection-wrapper'
+settings = require './settings'
 
 {isLinewiseRange} = require './utils'
 
 class Misc extends Base
   @extend(false)
   complete: true
+
   constructor: ->
     super
     @initialize?()
@@ -48,6 +50,35 @@ class Undo extends Misc
 
 class Redo extends Undo
   @extend()
+
+  flash: (range) ->
+    @vimState.flasher.flash range,
+      class: 'vim-mode-plus-flash'
+      timeout: settings.get('flashOnRedoDuration')
+
+  withFlash: (fn) ->
+    needFlash = settings.get('flashOnRedo')
+    setToStart = settings.get('setCursorToStartOfChangeOnRedo')
+    unless (needFlash or setToStart)
+      fn()
+      return
+
+    [start, end] = []
+    disposable = @editor.getBuffer().onDidChange ({newRange}) ->
+      start ?= newRange.start
+      # Update only end point
+      if needFlash
+        end = newRange.end
+      else
+        disposable.dispose()
+    fn()
+    if setToStart
+      @editor.setCursorBufferPosition(start)
+    if needFlash
+      disposable.dispose()
+      @flash(new Range(start, end))
+
   execute: ->
-    @editor.redo()
+    @withFlash =>
+      @editor.redo()
     @finish()
