@@ -12,7 +12,7 @@ class Settings
     atom.config.set "#{@scope}.#{param}", value
 
 module.exports = new Settings 'vim-mode-plus',
-  setCursorToStartOfChangeOnRedo:
+  setCursorToStartOfChangeOnUndoRedo:
     order: 1
     type: 'boolean'
     default: false
@@ -55,21 +55,11 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'boolean'
     default: false
     description: "Don't move cursor after Yank"
-  stayOnIndent:
-    order: 11
-    type: 'boolean'
-    default: false
-    description: "Don't move cursor after Indent"
-  stayOnToggleLineComments:
-    order: 13
-    type: 'boolean'
-    default: false
-    description: "Don't move cursor after ToggleLineComments"
-  flashOnRedo:
+  flashOnUndoRedo:
     order: 14
     type: 'boolean'
-    default: true
-  flashOnRedoDuration:
+    default: false
+  flashOnUndoRedoDuration:
     order: 15
     type: 'integer'
     default: 100

@@ -40,25 +40,14 @@ class SelectLatestChange extends Misc
 
 class Undo extends Misc
   @extend()
-  execute: ->
-    @editor.undo()
-    @finish()
-
-  finish: ->
-    s.clear() for s in @editor.getSelections()
-    @vimState.activate('normal')
-
-class Redo extends Undo
-  @extend()
-
   flash: (range) ->
     @vimState.flasher.flash range,
       class: 'vim-mode-plus-flash'
-      timeout: settings.get('flashOnRedoDuration')
+      timeout: settings.get('flashOnUndoRedoDuration')
 
   withFlash: (fn) ->
-    needFlash = settings.get('flashOnRedo')
-    setToStart = settings.get('setCursorToStartOfChangeOnRedo')
+    needFlash = settings.get('flashOnUndoRedo')
+    setToStart = settings.get('setCursorToStartOfChangeOnUndoRedo')
     unless (needFlash or setToStart)
       fn()
       return
@@ -78,6 +67,17 @@ class Redo extends Undo
       disposable.dispose()
       @flash(new Range(start, end))
 
+  execute: ->
+    @withFlash =>
+      @editor.undo()
+    @finish()
+
+  finish: ->
+    s.clear() for s in @editor.getSelections()
+    @vimState.activate('normal')
+
+class Redo extends Undo
+  @extend()
   execute: ->
     @withFlash =>
       @editor.redo()
