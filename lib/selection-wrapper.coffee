@@ -35,6 +35,10 @@ class SelectionWrapper
     range = @selection.getBufferRange()
     @setBufferRange range, {autoscroll: true, reversed}
 
+  getRowCount: ->
+    [startRow, endRow] = @selection.getBufferRowRange()
+    endRow - startRow + 1
+
   selectRowRange: (rowRange) ->
     {editor} = @selection
     [startRow, endRow] = rowRange
