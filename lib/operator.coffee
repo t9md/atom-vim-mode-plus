@@ -81,7 +81,7 @@ class Operator extends Base
         @onWillSelect =>
           @finish = @preservePoints(stay)
       else
-        # Default, keep points after select
+        # Default, keep points AFTER select
         @onDidSelect =>
           @finish = @preservePoints(_default)
 
@@ -230,6 +230,12 @@ class DashCase extends TransformString
   hover: icon: ':dash-case:', emoji: ':dash:'
   getNewText: (text) ->
     _.dasherize text
+
+class ReplaceWithRegister extends TransformString
+  @extend()
+  hover: icon: ':replace-with-register:', emoji: ':pencil:'
+  getNewText: (text) ->
+    @vimState.register.getText() ? text
 
 class Surround extends TransformString
   @extend()
@@ -530,17 +536,6 @@ class PutBefore extends Operator
 class PutAfter extends PutBefore
   @extend()
   location: 'after'
-
-class ReplaceWithRegister extends Operator
-  @extend()
-  hover: icon: ':replace-with-register:', emoji: ':pencil:'
-  trackChange: true
-  finalPosition: {}
-  execute: ->
-    @eachSelection (s) =>
-      newText = @vimState.register.getText() ? s.getText()
-      s.insertText(newText)
-    @activate('normal')
 
 class ToggleLineComments extends Operator
   @extend()
