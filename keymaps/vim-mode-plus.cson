@@ -105,6 +105,7 @@
   '<': 'vim-mode-plus:outdent'
   '=': 'vim-mode-plus:auto-indent'
   'J': 'vim-mode-plus:join'
+  'g J': 'vim-mode-plus:join-with-keeping-space'
   'y': 'vim-mode-plus:yank'
   'Y': 'vim-mode-plus:yank-line'
   'P': 'vim-mode-plus:put-before'

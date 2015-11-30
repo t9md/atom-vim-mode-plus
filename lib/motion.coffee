@@ -393,6 +393,13 @@ class MoveToRelativeLine extends Motion
 
   getCount: -> super - 1
 
+class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
+  @extend(false)
+  min: 0
+  getCount: ->
+    count = super
+    Math.max(@min, count)
+
 # Position cursor without scrolling., H, M, L
 # -------------------------
 # keymap: H

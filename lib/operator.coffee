@@ -180,8 +180,12 @@ class TransformString extends Operator
 
   execute: ->
     @eachSelection (s) =>
-      s.insertText @getNewText(s.getText())
+      @mutate(s)
     @activate('normal')
+
+  mutate: (s) ->
+    text = @getNewText(s.getText())
+    s.insertText(text)
 
 class ToggleCase extends TransformString
   @extend()
@@ -235,7 +239,39 @@ class ReplaceWithRegister extends TransformString
   @extend()
   hover: icon: ':replace-with-register:', emoji: ':pencil:'
   getNewText: (text) ->
-    @vimState.register.getText() ? text
+    @vimState.register.getText()
+
+class Indent extends TransformString
+  @extend()
+  hover: icon: ':indent:', emoji: ':point_right:'
+  finalPosition:
+    default: {moveToFirstChar: true}
+
+  mutate: (s) ->
+    @indent(s)
+
+  indent: (s) ->
+    s.indentSelectedRows()
+
+class Outdent extends Indent
+  @extend()
+  hover: icon: ':outdent:', emoji: ':point_left:'
+  indent: (s) ->
+    s.outdentSelectedRows()
+
+class AutoIndent extends Indent
+  @extend()
+  hover: icon: ':auto-indent:', emoji: ':open_hands:'
+  indent: (s) ->
+    s.autoIndentSelectedRows()
+
+class ToggleLineComments extends TransformString
+  @extend()
+  hover: icon: ':toggle-line-comment:', emoji: ':mute:'
+  finalPosition:
+    stay: {asMarker: true}
+  mutate: (s) ->
+    s.toggleLineComments()
 
 class Surround extends TransformString
   @extend()
@@ -340,6 +376,9 @@ class YankLine extends Yank
   @extend()
   preCompose: 'MoveToRelativeLine'
 
+# FIXME
+# Currently native editor.joinLines() is better for cursor position setting
+# So I use native methods for a meanwhile.
 class Join extends Operator
   @extend()
   complete: true
@@ -348,6 +387,45 @@ class Join extends Operator
       _.times @getCount(), =>
         @editor.joinLines()
     @activate('normal')
+
+class JoinWithKeepingSpace extends TransformString
+  @extend()
+  input: ''
+  trim: false
+  initialize: ->
+    @compose @new("MoveToRelativeLineWithMinimum", {min: 1})
+
+  mutate: (s) ->
+    [startRow, endRow] = s.getBufferRowRange()
+    swrap(s).expandOverLine()
+    rows = for row in [startRow..endRow]
+      text = @editor.lineTextForBufferRow(row)
+      if @trim and row isnt startRow
+        text.trimLeft()
+      else
+        text
+    s.insertText @join(rows) + "\n"
+
+  join: (rows) ->
+    rows.join(@input)
+
+class JoinByInput extends JoinWithKeepingSpace
+  @extend()
+  hover: icon: ':join:', emoji: 'TODO'
+  requireInput: true
+  input: null
+  trim: true
+  initialize: ->
+    @focusInput()
+
+  join: (rows) ->
+    rows.join(" #{@input} ")
+
+class JoinByInputWithKeepingSpace extends JoinByInput
+  @extend()
+  trim: false
+  join: (rows) ->
+    rows.join(@input)
 
 class Repeat extends Operator
   @extend()
@@ -453,33 +531,6 @@ class DecrementNumber extends IncrementNumber
   @extend()
   step: -1
 
-class Indent extends Operator
-  @extend()
-  hover: icon: ':indent:', emoji: ':point_right:'
-  trackChange: true
-  finalPosition:
-    default: {moveToFirstChar: true}
-
-  execute: ->
-    @eachSelection (s) =>
-      @indent(s)
-    @activate('normal')
-
-  indent: (s) ->
-    s.indentSelectedRows()
-
-class Outdent extends Indent
-  @extend()
-  hover: icon: ':outdent:', emoji: ':point_left:'
-  indent: (s) ->
-    s.outdentSelectedRows()
-
-class AutoIndent extends Indent
-  @extend()
-  hover: icon: ':auto-indent:', emoji: ':open_hands:'
-  indent: (s) ->
-    s.autoIndentSelectedRows()
-
 # Put
 # -------------------------
 class PutBefore extends Operator
@@ -536,17 +587,6 @@ class PutBefore extends Operator
 class PutAfter extends PutBefore
   @extend()
   location: 'after'
-
-class ToggleLineComments extends Operator
-  @extend()
-  hover: icon: ':toggle-line-comment:', emoji: ':mute:'
-  trackChange: true
-  finalPosition:
-    stay: {asMarker: true}
-  execute: ->
-    @eachSelection (s) ->
-      s.toggleLineComments()
-    @activate('normal')
 
 # Replace
 # -------------------------
