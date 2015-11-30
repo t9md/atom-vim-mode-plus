@@ -60,11 +60,6 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'boolean'
     default: false
     description: "Don't move cursor after Indent"
-  stayOnReplaceWithRegister:
-    order: 12
-    type: 'boolean'
-    default: false
-    description: "Don't move cursor after ReplaceWithRegister"
   stayOnToggleLineComments:
     order: 13
     type: 'boolean'
