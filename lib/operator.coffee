@@ -637,12 +637,8 @@ class Replace extends Operator
 
     @activate('normal')
 
-# Input
+# Insert entering operation
 # -------------------------
-# The operation for text entered in insert-mode. Broadly speaking, input
-# operators manage an undo transaction and set a @typingCompleted variable when
-# it's done. When the input operation is completed, the typingCompleted variable
-# tells the operation to repeat itself instead of enter insert mode.
 class ActivateInsertMode extends Operator
   @extend()
   complete: true
