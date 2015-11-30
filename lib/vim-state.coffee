@@ -34,7 +34,6 @@ class VimState
     @editorElement = atom.views.getView(@editor)
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
-    @operationSubscriptions = new CompositeDisposable
 
     @subscriptions.add @editor.onDidDestroy =>
       @destroy()
@@ -63,7 +62,7 @@ class VimState
       @activate('normal')
 
   subscribe: (args...) ->
-    @operationSubscriptions.add args...
+    @operationStack.subscribe args...
 
   # Input subscriptions
   # -------------------------
@@ -88,7 +87,6 @@ class VimState
     return if @destroyed
     @destroyed = true
     @subscriptions.dispose()
-    @operationSubscriptions.dispose()
 
     if @editor.isAlive()
       @activate('normal') # reset to base mdoe.
@@ -96,7 +94,7 @@ class VimState
       @editorElement.classList.remove packageScope, 'normal-mode'
 
     ivars = [
-      "hover", "hoverSearchCounter",
+      "hover", "hoverSearchCounter", "operationStack"
       "flasher", "searchHistory",
       "input", "search", "modeManager",
       "operationRecords"
@@ -105,7 +103,7 @@ class VimState
       this[name]?.destroy?()
       this[name] = null
 
-    {@editor, @editorElement, @subscriptions, @operationSubscriptions} = {}
+    {@editor, @editorElement, @subscriptions} = {}
     @emitter.emit 'did-destroy'
 
   observeSelection: ->
@@ -157,8 +155,6 @@ class VimState
     @searchHistory.reset()
     @hover.reset()
     @operationStack.reset()
-    @operationSubscriptions?.dispose()
-    @operationSubscriptions = new CompositeDisposable
 
   showCursors: ->
     return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))
