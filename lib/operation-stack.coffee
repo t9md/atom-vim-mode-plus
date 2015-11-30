@@ -1,6 +1,7 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
 
+{CompositeDisposable} = require 'atom'
 Base = require './base'
 {debug, withKeepingGoalColumn} = require './utils'
 settings = require './settings'
@@ -10,10 +11,13 @@ inspectInstance = null
 
 class OperationStack
   constructor: (@vimState) ->
-    @stack = []
     {@editor} = @vimState
     Select ?= Base.getClass('Select')
     CurrentSelection ?= Base.getClass('CurrentSelection')
+    @reset()
+
+  subscribe: (args...) ->
+    @subscriptions.add args...
 
   run: (klass, properties) ->
     klass = Base.getClass(klass) if _.isString(klass)
@@ -109,6 +113,12 @@ class OperationStack
 
   reset: ->
     @stack = []
+    @subscriptions?.dispose()
+    @subscriptions = new CompositeDisposable
+
+  destroy: ->
+    @subscriptions?.dispose()
+    {@stack, @subscriptions} = {}
 
   isEmpty: ->
     @stack.length is 0
