@@ -21,13 +21,12 @@ class Operator extends Base
   flashTarget: true
   preCompose: null
   trackChange: false
-  finalPosition: null
 
   activate: (mode, submode) ->
     @onDidOperationFinish =>
       @vimState.activate(mode, submode)
 
-  setMarkerForChange: (range) ->
+  setMarkForChange: (range) ->
     @vimState.mark.set('[', range.start)
     @vimState.mark.set(']', range.end)
 
@@ -42,6 +41,13 @@ class Operator extends Base
 
   needFlash: ->
     @flashTarget and settings.get('flashOnOperate') and not @instanceof('Select')
+
+  needStay: ->
+    param = if @instanceof('TransformString')
+      "stayOnTransformString"
+    else
+      "stayOn#{@constructor.name}"
+    settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
 
   constructor: ->
     super
@@ -67,23 +73,7 @@ class Operator extends Base
 
       @onDidOperationFinish =>
         if range = changeMarker?.getBufferRange()
-          @setMarkerForChange(range)
-
-    if @finalPosition
-      {default: _default, stay, stayOnLinewise} = @finalPosition
-      config = if @instanceof('TransformString')
-        "stayOnTransformString"
-      else
-        "stayOn#{@constructor.name}"
-
-      if settings.get(config) or (stayOnLinewise and @target.isLinewise?())
-        # Stay, keep points BEFORE select and restore
-        @onWillSelect =>
-          @finish = @preservePoints(stay)
-      else
-        # Default, keep points AFTER select
-        @onDidSelect =>
-          @finish = @preservePoints(_default)
+          @setMarkForChange(range)
 
   # target - TextObject or Motion to operate on.
   compose: (@target) ->
@@ -117,9 +107,8 @@ class Operator extends Base
         class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnOperateDuration')
 
-  preservePoints: ({moveToFirstChar, asMarker}={}) ->
+  preservePoints: ({asMarker}={}) ->
     points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-    moveToFirstChar ?= false
     asMarker ?= false
     if asMarker
       options = {invalidate: 'never', persistent: false}
@@ -128,20 +117,20 @@ class Operator extends Base
       ({cursor}, i) ->
         point = markers[i].getStartBufferPosition()
         cursor.setBufferPosition(point)
-    else if moveToFirstChar
-      ({cursor}, i) ->
-        cursor.setBufferPosition(points[i])
-        cursor.moveToFirstCharacterOfLine()
     else
       ({cursor}, i) ->
         cursor.setBufferPosition(points[i])
 
   eachSelection: (fn) ->
+    setPoint = null
+    if @needStay()
+      @onWillSelect => setPoint = @preservePoints(@stayOption)
+    else
+      @onDidSelect => setPoint = @preservePoints()
     return unless @selectTarget()
     @editor.transact =>
       for selection, i in @editor.getSelections()
-        fn(selection)
-        @finish?(selection, i)
+        fn(selection, setPoint.bind(this, selection, i))
 
 class Select extends Operator
   @extend(false)
@@ -175,17 +164,18 @@ class DeleteToLastCharacterOfLine extends Delete
 class TransformString extends Operator
   @extend(false)
   trackChange: true
-  finalPosition:
-    stayOnLinewise: true
+  stayOnLinewise: true
+  setPoint: true
 
   execute: ->
-    @eachSelection (s) =>
-      @mutate(s)
+    @eachSelection (s, setPoint) =>
+      @mutate(s, setPoint)
     @activate('normal')
 
-  mutate: (s) ->
+  mutate: (s, setPoint) ->
     text = @getNewText(s.getText())
     s.insertText(text)
+    setPoint() if @setPoint
 
 class ToggleCase extends TransformString
   @extend()
@@ -201,8 +191,8 @@ class ToggleCase extends TransformString
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
-  finalPosition: null
   hover: null
+  setPoint: false
   preCompose: 'MoveRight'
 
 class UpperCase extends TransformString
@@ -244,11 +234,13 @@ class ReplaceWithRegister extends TransformString
 class Indent extends TransformString
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
-  finalPosition:
-    default: {moveToFirstChar: true}
+  stayOnLinewise: false
 
-  mutate: (s) ->
+  mutate: (s, setPoint) ->
     @indent(s)
+    setPoint()
+    unless @needStay()
+      s.cursor.moveToFirstCharacterOfLine()
 
   indent: (s) ->
     s.indentSelectedRows()
@@ -268,10 +260,10 @@ class AutoIndent extends Indent
 class ToggleLineComments extends TransformString
   @extend()
   hover: icon: ':toggle-line-comment:', emoji: ':mute:'
-  finalPosition:
-    stay: {asMarker: true}
-  mutate: (s) ->
+  stayOption: {asMarker: true}
+  mutate: (s, setPoint) ->
     s.toggleLineComments()
+    setPoint()
 
 class Surround extends TransformString
   @extend()
@@ -364,12 +356,12 @@ class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
-  finalPosition:
-    stayOnLinewise: true
+  stayOnLinewise: true
 
   execute: ->
-    @eachSelection (s) =>
+    @eachSelection (s, setPoint) =>
       @setTextToRegister s.getText() if s.isLastSelection()
+      setPoint()
     @activate('normal')
 
 class YankLine extends Yank
@@ -411,7 +403,7 @@ class JoinWithKeepingSpace extends TransformString
 
 class JoinByInput extends JoinWithKeepingSpace
   @extend()
-  hover: icon: ':join:', emoji: 'TODO'
+  hover: icon: ':join:', emoji: ':dolls:'
   requireInput: true
   input: null
   trim: true
@@ -569,7 +561,7 @@ class PutBefore extends Operator
       else
         selection.insertText("\n")
     range = selection.insertText(text)
-    @setMarkerForChange(range)
+    @setMarkForChange(range)
     @flash range
     cursor.setBufferPosition(range.start)
     cursor.moveToFirstCharacterOfLine()
@@ -579,7 +571,7 @@ class PutBefore extends Operator
     if @location is 'after' and selection.isEmpty()
       cursor.moveRight()
     range = selection.insertText(text)
-    @setMarkerForChange(range)
+    @setMarkForChange(range)
 
     @flash range
     cursor.setBufferPosition(range.end.translate([0, -1]))
@@ -594,7 +586,7 @@ class PutAfter extends PutBefore
 class Replace extends Operator
   @extend()
   input: null
-  hover: icon: 'r', emoji: ':tractor:'
+  hover: icon: ':replace:', emoji: ':tractor:'
   trackChange: true
   requireInput: true
 
