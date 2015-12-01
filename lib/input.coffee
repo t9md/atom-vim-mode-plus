@@ -16,7 +16,7 @@ class InputBase
     @emitter = new Emitter
     @view = atom.views.getView(this)
     {@editor, @editorElement} = @view
-    @vimState.onDidFailToCompose =>
+    @vimState.onDidFailToSetTarget =>
       @cancel()
 
     atom.commands.add @editorElement,

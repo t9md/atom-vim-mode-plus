@@ -19,7 +19,6 @@ class Operator extends Base
   recordable: true
   target: null
   flashTarget: true
-  preCompose: null
   trackChange: false
 
   activate: (mode, submode) ->
@@ -51,7 +50,7 @@ class Operator extends Base
 
   constructor: ->
     super
-    @compose @new(@preCompose) if @preCompose?
+    @setTarget @new(@target) if @target?
     #  To support, `dd`, `cc` and a like.
     if @isSameOperatorRepeated()
       @vimState.operationStack.run 'MoveToRelativeLine'
@@ -76,10 +75,12 @@ class Operator extends Base
           @setMarkForChange(range)
 
   # target - TextObject or Motion to operate on.
-  compose: (@target) ->
+  setTarget: (@target) ->
     unless _.isFunction(@target.select)
-      @vimState.emitter.emit('did-fail-to-compose')
-      message = "Failed to compose #{@constructor.name} with #{@target.constructor.name}"
+      @vimState.emitter.emit('did-fail-to-set-target')
+      targetName = @target.constructor.name
+      operatorName = @constructor.name
+      message = "Failed to set '#{targetName}' as target for Operator '#{operatorName}'"
       throw new OperatorError(message)
 
     if _.isFunction(@target.onDidComposeBy)
@@ -151,15 +152,15 @@ class Delete extends Operator
 
 class DeleteRight extends Delete
   @extend()
-  preCompose: 'MoveRight'
+  target: 'MoveRight'
 
 class DeleteLeft extends Delete
   @extend()
-  preCompose: 'MoveLeft'
+  target: 'MoveLeft'
 
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
-  preCompose: 'MoveToLastCharacterOfLine'
+  target: 'MoveToLastCharacterOfLine'
 
 class TransformString extends Operator
   @extend(false)
@@ -193,7 +194,7 @@ class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
   hover: null
   setPoint: false
-  preCompose: 'MoveRight'
+  target: 'MoveRight'
 
 class UpperCase extends TransformString
   @extend()
@@ -296,7 +297,7 @@ class Surround extends TransformString
 
 class SurroundWord extends Surround
   @extend()
-  preCompose: 'Word'
+  target: 'Word'
 
 class DeleteSurround extends Surround
   @extend()
@@ -308,7 +309,7 @@ class DeleteSurround extends Surround
       pair: @getPair(@input)
       inclusive: true
       allowNextLine: @input in @pairChars
-    @compose(target)
+    @setTarget(target)
     @vimState.operationStack.process()
 
   getNewText: (text) ->
@@ -317,7 +318,7 @@ class DeleteSurround extends Surround
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
   requireInput: false
-  preCompose: 'AnyPair'
+  target: 'AnyPair'
 
 class ChangeSurround extends DeleteSurround
   @extend()
@@ -335,7 +336,7 @@ class ChangeSurround extends DeleteSurround
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
   charsMax: 1
-  preCompose: "AnyPair"
+  target: "AnyPair"
 
   initialize: ->
     @restore = @preservePoints()
@@ -366,7 +367,7 @@ class Yank extends Operator
 
 class YankLine extends Yank
   @extend()
-  preCompose: 'MoveToRelativeLine'
+  target: 'MoveToRelativeLine'
 
 # FIXME
 # Currently native editor.joinLines() is better for cursor position setting
@@ -385,7 +386,7 @@ class JoinWithKeepingSpace extends TransformString
   input: ''
   trim: false
   initialize: ->
-    @compose @new("MoveToRelativeLineWithMinimum", {min: 1})
+    @setTarget @new("MoveToRelativeLineWithMinimum", {min: 1})
 
   mutate: (s) ->
     [startRow, endRow] = s.getBufferRowRange()
@@ -442,7 +443,7 @@ class Mark extends Operator
     @activate('normal')
 
 # [FIXME?]: inconsistent behavior from normal operator
-# Since its support visual-mode but not use @target and compose convension.
+# Since its support visual-mode but not use setTarget() convension.
 # Maybe separating complete/in-complete version like IncreaseNow and Increase?
 class Increase extends Operator
   @extend()
@@ -740,12 +741,12 @@ class Change extends ActivateInsertMode
 
 class Substitute extends Change
   @extend()
-  preCompose: 'MoveRight'
+  target: 'MoveRight'
 
 class SubstituteLine extends Change
   @extend()
-  preCompose: 'MoveToRelativeLine'
+  target: 'MoveToRelativeLine'
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
-  preCompose: 'MoveToLastCharacterOfLine'
+  target: 'MoveToLastCharacterOfLine'

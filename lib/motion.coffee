@@ -152,16 +152,16 @@ class MoveLeft extends Motion
 
 class MoveRight extends Motion
   @extend()
-  composed: false
+  asTarget: false
 
   onDidComposeBy: (operation) ->
     # Don't save oeration to instance variable to avoid reference before I understand it correctly.
     # Also introspection need to support circular reference detection to stop infinit reflection loop.
     if operation.instanceof('Operator')
-      @composed = true
+      @asTarget = true
 
   isOperatorPending: ->
-    @vimState.isMode('operator-pending') or @composed
+    @vimState.isMode('operator-pending') or @asTarget
 
   moveCursor: (cursor) ->
     @countTimes =>

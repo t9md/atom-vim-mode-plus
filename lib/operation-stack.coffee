@@ -51,10 +51,10 @@ class OperationStack
     while @stack.length > 1
       try
         op = @pop()
-        debug "-> <#{@peekTop().constructor.name}>.compose(<#{op.constructor.name}>)"
-        unless @peekTop().compose?
+        debug "-> <#{@peekTop().constructor.name}>.setTarget(<#{op.constructor.name}>)"
+        unless @peekTop().setTarget?
           console.log @peekTop()
-        @peekTop().compose(op)
+        @peekTop().setTarget(op)
       catch error
         if error.instanceof?('OperatorError')
           debug error.message
