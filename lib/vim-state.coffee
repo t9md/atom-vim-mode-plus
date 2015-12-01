@@ -143,8 +143,8 @@ class VimState
       return if @operationStack.isProcessing()
       debouncedHandleSelectionChange()
 
-  onDidFailToCompose: (fn) ->
-    @emitter.on('did-fail-to-compose', fn)
+  onDidFailToSetTarget: (fn) ->
+    @emitter.on('did-fail-to-set-target', fn)
 
   onDidDestroy: (fn) ->
     @emitter.on('did-destroy', fn)
