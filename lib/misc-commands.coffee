@@ -55,17 +55,13 @@ class Undo extends Misc
     [start, end] = []
     disposable = @editor.getBuffer().onDidChange ({newRange}) ->
       start ?= newRange.start
-      # Update only end point
-      if needFlash
-        end = newRange.end
-      else
-        disposable.dispose()
+      end = newRange.end
     fn()
-    if setToStart and start
-      @editor.setCursorBufferPosition(start)
-    if needFlash and start and end
-      disposable.dispose()
-      @flash(new Range(start, end))
+    disposable.dispose()
+    if start and end
+      range = new Range(start, end)
+      @editor.setCursorBufferPosition(range.start) if setToStart
+      @flash(range) if needFlash
 
   execute: ->
     @withFlash =>
