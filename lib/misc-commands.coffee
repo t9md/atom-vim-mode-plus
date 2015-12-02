@@ -6,7 +6,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 settings = require './settings'
 
-{isLinewiseRange} = require './utils'
+{isLinewiseRange, mergeIntersectingRanges} = require './utils'
 
 class Misc extends Base
   @extend(false)
@@ -40,41 +40,47 @@ class SelectLatestChange extends Misc
 
 class Undo extends Misc
   @extend()
-  flash: (range) ->
+  flash: (range, options) ->
     @vimState.flasher.flash range,
-      class: 'vim-mode-plus-flash'
+      class: options.class
       timeout: settings.get('flashOnUndoRedoDuration')
 
-  withFlash: (fn) ->
-    needFlash = settings.get('flashOnUndoRedo')
-    setToStart = settings.get('setCursorToStartOfChangeOnUndoRedo')
-    unless (needFlash or setToStart)
-      fn()
-      return
-
-    [start, end] = []
+  withTrackChange: (fn) ->
+    ranges = []
     disposable = @editor.getBuffer().onDidChange ({newRange}) ->
-      start ?= newRange.start
-      end = newRange.end
+      ranges.push(newRange)
     fn()
     disposable.dispose()
-    if start and end
-      range = new Range(start, end)
-      @editor.setCursorBufferPosition(range.start) if setToStart
-      @flash(range) if needFlash
+    mergeIntersectingRanges(ranges)
 
   execute: ->
-    @withFlash =>
-      @editor.undo()
-    @finish()
+    ranges = @withTrackChange =>
+      @mutate()
+    if settings.get('flashOnUndoRedo')
+      for range in ranges
+        if range.isEmpty()
+          range = range.translate([0, 0], [0, 1])
+          unless @editor.getTextInBufferRange(range).match /\S+/
+            range = @editor.bufferRangeForBufferRow(range.start.row, includeNewline: true)
+          klass = 'vim-mode-plus-flash deleted'
+        else
+          klass = 'vim-mode-plus-flash'
+        @flash(range, class: klass)
 
-  finish: ->
-    s.clear() for s in @editor.getSelections()
+    if range = ranges[0]
+      @vimState.mark.set('[', range.start)
+      @vimState.mark.set(']', range.end)
+      if settings.get('setCursorToStartOfChangeOnUndoRedo')
+        @editor.setCursorBufferPosition(range.start)
+
+    for s in @editor.getSelections()
+      s.clear()
     @vimState.activate('normal')
+
+  mutate: ->
+    @editor.undo()
 
 class Redo extends Undo
   @extend()
-  execute: ->
-    @withFlash =>
-      @editor.redo()
-    @finish()
+  mutate: ->
+    @editor.redo()

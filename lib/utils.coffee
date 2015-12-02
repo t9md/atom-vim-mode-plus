@@ -153,6 +153,20 @@ getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
 countChar = (string, char) ->
   string.split(char).length - 1
 
+findIndex = (list, fn) ->
+  for e, i in list when fn(e)
+    return i
+  null
+
+mergeIntersectingRanges = (ranges) ->
+  result = []
+  for range, i in ranges
+    if index = findIndex(result, (r) -> r.intersectsWith(range))
+      result[index] = result[index].union(range)
+    else
+      result.push(range)
+  result
+
 module.exports = {
   include
   debug
@@ -174,4 +188,6 @@ module.exports = {
   withKeepingGoalColumn
   toggleClassByCondition
   getNewTextRangeFromCheckpoint
+  findIndex
+  mergeIntersectingRanges
 }
