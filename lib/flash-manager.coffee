@@ -5,7 +5,7 @@ class FlashManager
   constructor: (@vimState) ->
     {@editor} = @vimState
 
-  markerOptions = {ivalidate: 'nerver', persistent: false}
+  markerOptions = {ivalidate: 'never', persistent: false}
   flash: (range, options) ->
     range = [range] unless _.isArray(range)
     return unless range.length
