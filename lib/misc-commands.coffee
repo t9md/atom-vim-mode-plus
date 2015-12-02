@@ -70,8 +70,8 @@ class Undo extends Misc
         @saveRangeAsMarker(markersRemoved, oldRange) unless oldRange.isEmpty()
     @mutate()
     if settings.get('flashOnUndoRedo')
-      @flash(markersAdded, 'added', timeout)
       @flash(markersRemoved, 'removed', timeout)
+      @flash(markersAdded, 'added', timeout)
     disposable.dispose()
     fn(range) if range
 
