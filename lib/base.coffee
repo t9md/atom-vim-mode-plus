@@ -26,7 +26,6 @@ delegatingMethods = [
   "onDidCommandSearch"
   "onWillSelect"
   "onDidSelect"
-  "onDidChange"
   "onDidOperationFinish"
   "subscribe"
 ]
