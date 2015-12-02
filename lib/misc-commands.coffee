@@ -56,6 +56,13 @@ class Undo extends Misc
   execute: ->
     ranges = @withTrackChange =>
       @mutate()
+
+    if range = ranges[0]
+      @vimState.mark.set('[', range.start)
+      @vimState.mark.set(']', range.end)
+      if settings.get('setCursorToStartOfChangeOnUndoRedo')
+        @editor.setCursorBufferPosition(range.start)
+
     if settings.get('flashOnUndoRedo')
       for range in ranges
         if range.isEmpty()
@@ -66,12 +73,6 @@ class Undo extends Misc
         else
           klass = 'vim-mode-plus-flash'
         @flash(range, class: klass)
-
-    if range = ranges[0]
-      @vimState.mark.set('[', range.start)
-      @vimState.mark.set(']', range.end)
-      if settings.get('setCursorToStartOfChangeOnUndoRedo')
-        @editor.setCursorBufferPosition(range.start)
 
     for s in @editor.getSelections()
       s.clear()
