@@ -17,12 +17,6 @@ class FlashManager
       m.destroy() for m in markers
     , options.timeout
 
-  # reset: ->
-  #   return unless @markers?
-  #   m.destroy() for m in @markers
-  #   clearTimeout @timeoutID
-  #   {@markers, @timeoutID} = {}
-
   destroy: ->
     {@vimState, @editor} = {}
 
