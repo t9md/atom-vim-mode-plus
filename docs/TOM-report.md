@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
-vim-mode-plus version: 0.6.0  
-*generated at 2015-11-27T18:31:58.641Z*
+vim-mode-plus version: 0.7.0
+*generated at 2015-12-02T14:38:45.430Z*
 
 - [Base](#base)
   - [InsertMode](#insertmode--base)
@@ -11,6 +11,7 @@ vim-mode-plus version: 0.6.0
     - [InsertRegister](#insertregister--insertmode)
   - [Misc](#misc--base)
     - [ReverseSelections](#reverseselections--misc)
+    - [SelectLatestChange](#selectlatestchange--misc)
     - [Undo](#undo--misc)
       - [Redo](#redo--undo)
   - [Motion](#motion--base)
@@ -44,6 +45,7 @@ vim-mode-plus version: 0.6.0
     - [MoveToPreviousWholeWord](#movetopreviouswholeword--motion)
     - [MoveToPreviousWord](#movetopreviousword--motion)
     - [MoveToRelativeLine](#movetorelativeline--motion)
+      - [MoveToRelativeLineWithMinimum](#movetorelativelinewithminimum--movetorelativeline)
     - [MoveToTopOfScreen](#movetotopofscreen--motion)
       - [MoveToBottomOfScreen](#movetobottomofscreen--movetotopofscreen)
       - [MoveToMiddleOfScreen](#movetomiddleofscreen--movetotopofscreen)
@@ -83,22 +85,24 @@ vim-mode-plus version: 0.6.0
       - [Decrease](#decrease--increase)
     - [IncrementNumber](#incrementnumber--operator)
       - [DecrementNumber](#decrementnumber--incrementnumber)
-    - [Indent](#indent--operator)
-      - [AutoIndent](#autoindent--indent)
-      - [Outdent](#outdent--indent)
     - [Join](#join--operator)
     - [Mark](#mark--operator)
     - [PutBefore](#putbefore--operator)
       - [PutAfter](#putafter--putbefore)
     - [Repeat](#repeat--operator)
     - [Replace](#replace--operator)
-    - [ReplaceWithRegister](#replacewithregister--operator)
     - [Select](#select--operator)
-    - [ToggleLineComments](#togglelinecomments--operator)
     - [TransformString](#transformstring--operator)
       - [CamelCase](#camelcase--transformstring)
       - [DashCase](#dashcase--transformstring)
+      - [Indent](#indent--transformstring)
+        - [AutoIndent](#autoindent--indent)
+        - [Outdent](#outdent--indent)
+      - [JoinWithKeepingSpace](#joinwithkeepingspace--transformstring)
+        - [JoinByInput](#joinbyinput--joinwithkeepingspace)
+          - [JoinByInputWithKeepingSpace](#joinbyinputwithkeepingspace--joinbyinput)
       - [LowerCase](#lowercase--transformstring)
+      - [ReplaceWithRegister](#replacewithregister--transformstring)
       - [SnakeCase](#snakecase--transformstring)
       - [Surround](#surround--transformstring)
         - [DeleteSurround](#deletesurround--surround)
@@ -108,6 +112,7 @@ vim-mode-plus version: 0.6.0
         - [SurroundWord](#surroundword--surround)
       - [ToggleCase](#togglecase--transformstring)
         - [ToggleCaseAndMoveRight](#togglecaseandmoveright--togglecase)
+      - [ToggleLineComments](#togglelinecomments--transformstring)
       - [UpperCase](#uppercase--transformstring)
     - [Yank](#yank--operator)
       - [YankLine](#yankline--yank)
@@ -172,6 +177,10 @@ vim-mode-plus version: 0.6.0
 - ::onDidCancelSearch`()`
 - ::onDidUnfocusSearch`()`
 - ::onDidCommandSearch`()`
+- ::onWillSelect`()`
+- ::onDidSelect`()`
+- ::onDidChange`()`
+- ::onDidOperationFinish`()`
 - ::subscribe`()`
 - ::isComplete`()`
 - ::isRecordable`()`
@@ -182,6 +191,8 @@ vim-mode-plus version: 0.6.0
 - ::new`(klassName, properties)`
 - ::focusInput`(_arg)`
 - ::instanceof`(klassName)`
+- ::emitWillSelect`()`
+- ::emitDidSelect`()`
 
 ### InsertMode < Base
 - ::constructor`()`: `super`: **Overridden**
@@ -224,18 +235,26 @@ vim-mode-plus version: 0.6.0
     - `atom-text-editor.vim-mode-plus.visual-mode.blockwise`: <kbd>O</kbd>
 - ::execute`()`
 
+### SelectLatestChange < Misc
+- command: `vim-mode-plus:select-latest-change`
+- ::complete: ```true```: **Overridden**
+- ::execute`()`
+
 ### Undo < Misc
 - command: `vim-mode-plus:undo`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>u</kbd>
+- ::flash`(markers, klass, timeout)`
+- ::saveRangeAsMarker`(markers, range)`
+- ::mutateWithTrackingChanges`(fn)`
 - ::execute`()`
-- ::finish`()`
+- ::mutate`()`
 
 ### Redo < Undo
 - command: `vim-mode-plus:redo`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>ctrl-r</kbd>
-- ::execute`()`: **Overridden**
+- ::mutate`()`: **Overridden**
 
 ### Motion < Base
 - ::constructor`()`: `super`: **Overridden**
@@ -327,7 +346,7 @@ vim-mode-plus version: 0.6.0
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>l</kbd>
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>space</kbd>
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>right</kbd>
-- ::composed: ```false```
+- ::asTarget: ```false```
 - ::onDidComposeBy`(operation)`
 - ::isOperatorPending`()`
 - ::moveCursor`(cursor)`
@@ -481,6 +500,10 @@ vim-mode-plus version: 0.6.0
 - ::linewise: ```true```: **Overridden**
 - ::moveCursor`(cursor)`
 - ::getCount`()`: **Overridden**
+
+### MoveToRelativeLineWithMinimum < MoveToRelativeLine
+- ::min: ```0```
+- ::getCount`()`: `super`: **Overridden**
 
 ### MoveToTopOfScreen < Motion
 - command: `vim-mode-plus:move-to-top-of-screen`
@@ -641,15 +664,20 @@ vim-mode-plus version: 0.6.0
 - ::recordable: ```true```: **Overridden**
 - ::target: ```null```
 - ::flashTarget: ```true```
-- ::preCompose: ```null```
+- ::trackChange: ```false```
+- ::activate`(mode, submode)`
+- ::setMarkForChange`(range)`
 - ::haveSomeSelection`()`
 - ::isSameOperatorRepeated`()`
-- ::compose`(@target)`
+- ::needFlash`()`
+- ::needTrackChange`()`
+- ::needStay`()`
+- ::observeSelectAction`()`
+- ::setTarget`(@target)`
+- ::selectTarget`(force)`
 - ::setTextToRegister`(text)`
-- ::flash`(range, fn)`
-- ::preservePoints`()`
-- ::preservePointsAsMarker`()`
-- ::getCursorPositionInstruction`()`
+- ::flash`(range)`
+- ::preservePoints`(_arg)`
 - ::eachSelection`(fn)`
 
 ### ActivateInsertMode < Operator
@@ -661,10 +689,10 @@ vim-mode-plus version: 0.6.0
 - ::checkpoint: ```null```
 - ::submode: ```null```
 - ::initialize`()`
-- ::setCheckpoint`(kind)`
+- ::setCheckpoint`(purpose)`
 - ::getCheckpoint`()`
 - ::getText`()`
-- ::insertText`(selection, text)`
+- ::repeatInsert`(selection, text)`
 - ::execute`()`
 
 ### ActivateReplaceMode < ActivateInsertMode
@@ -672,7 +700,7 @@ vim-mode-plus version: 0.6.0
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>R</kbd>
 - ::submode: ```'replace'```: **Overridden**
-- ::insertText`(selection, text)`: **Overridden**
+- ::repeatInsert`(selection, text)`: **Overridden**
 
 ### Change < ActivateInsertMode
 - command: `vim-mode-plus:change`
@@ -686,19 +714,19 @@ vim-mode-plus version: 0.6.0
 - command: `vim-mode-plus:change-to-last-character-of-line`
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>C</kbd>
-- ::preCompose: ```'MoveToLastCharacterOfLine'```: **Overridden**
+- ::target: ```'MoveToLastCharacterOfLine'```: **Overridden**
 
 ### Substitute < Change
 - command: `vim-mode-plus:substitute`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>s</kbd>
-- ::preCompose: ```'MoveRight'```: **Overridden**
+- ::target: ```'MoveRight'```: **Overridden**
 
 ### SubstituteLine < Change
 - command: `vim-mode-plus:substitute-line`
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>S</kbd>
-- ::preCompose: ```'MoveToRelativeLine'```: **Overridden**
+- ::target: ```'MoveToRelativeLine'```: **Overridden**
 
 ### InsertAboveWithNewline < ActivateInsertMode
 - command: `vim-mode-plus:insert-above-with-newline`
@@ -706,7 +734,7 @@ vim-mode-plus version: 0.6.0
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>O</kbd>
 - ::execute`()`: `super`: **Overridden**
 - ::insertNewline`()`
-- ::insertText`(selection, text)`: **Overridden**
+- ::repeatInsert`(selection, text)`: **Overridden**
 
 ### InsertBelowWithNewline < InsertAboveWithNewline
 - command: `vim-mode-plus:insert-below-with-newline`
@@ -744,6 +772,7 @@ vim-mode-plus version: 0.6.0
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>d</kbd>
     - `atom-text-editor.vim-mode-plus.visual-mode`: <kbd>x</kbd>
 - ::hover: ```{ icon: ':delete:', emoji: ':scissors:' }```
+- ::trackChange: ```true```: **Overridden**
 - ::flashTarget: ```false```: **Overridden**
 - ::execute`()`
 
@@ -751,19 +780,19 @@ vim-mode-plus version: 0.6.0
 - command: `vim-mode-plus:delete-left`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>X</kbd>
-- ::preCompose: ```'MoveLeft'```: **Overridden**
+- ::target: ```'MoveLeft'```: **Overridden**
 
 ### DeleteRight < Delete
 - command: `vim-mode-plus:delete-right`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>x</kbd>
-- ::preCompose: ```'MoveRight'```: **Overridden**
+- ::target: ```'MoveRight'```: **Overridden**
 
 ### DeleteToLastCharacterOfLine < Delete
 - command: `vim-mode-plus:delete-to-last-character-of-line`
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>D</kbd>
-- ::preCompose: ```'MoveToLastCharacterOfLine'```: **Overridden**
+- ::target: ```'MoveToLastCharacterOfLine'```: **Overridden**
 
 ### Increase < Operator
 - command: `vim-mode-plus:increase`
@@ -796,31 +825,6 @@ vim-mode-plus version: 0.6.0
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g ctrl-x</kbd>
 - ::step: ```-1```: **Overridden**
 
-### Indent < Operator
-- command: `vim-mode-plus:indent`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>></kbd>
-- ::hover: ```{ icon: ':indent:', emoji: ':point_right:' }```
-- ::cursorPositionOnOperate: ```{ default: 'firstCharacterOfStartLineOfSelection',
-  stay: 'pointBeforeSelect',
-  config: 'stayOnIndent' }```
-- ::execute`()`
-- ::indent`(s)`
-
-### AutoIndent < Indent
-- command: `vim-mode-plus:auto-indent`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>=</kbd>
-- ::hover: ```{ icon: ':auto-indent:', emoji: ':open_hands:' }```: **Overridden**
-- ::indent`(s)`: **Overridden**
-
-### Outdent < Indent
-- command: `vim-mode-plus:outdent`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd><</kbd>
-- ::hover: ```{ icon: ':outdent:', emoji: ':point_left:' }```: **Overridden**
-- ::indent`(s)`: **Overridden**
-
 ### Join < Operator
 - command: `vim-mode-plus:join`
   - keymaps
@@ -846,6 +850,8 @@ vim-mode-plus version: 0.6.0
 - ::execute`()`
 - ::pasteLinewise`(selection, text)`
 - ::pasteCharacterwise`(selection, text)`
+- ::insertTextAbove`(selection, text)`
+- ::insertTextBelow`(selection, text)`
 
 ### PutAfter < PutBefore
 - command: `vim-mode-plus:put-after`
@@ -866,37 +872,22 @@ vim-mode-plus version: 0.6.0
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>r</kbd>
 - ::input: ```null```
-- ::hover: ```{ icon: 'r', emoji: ':tractor:' }```
+- ::hover: ```{ icon: ':replace:', emoji: ':tractor:' }```
+- ::trackChange: ```true```: **Overridden**
 - ::requireInput: ```true```: **Overridden**
 - ::initialize`()`
 - ::isComplete`()`: `super`: **Overridden**
 - ::execute`()`
 
-### ReplaceWithRegister < Operator
-- command: `vim-mode-plus:replace-with-register`
-- ::hover: ```{ icon: ':replace-with-register:', emoji: ':pencil:' }```
-- ::cursorPositionOnOperate: ```{ default: 'startPointOfSelection',
-  stay: 'pointBeforeSelect',
-  config: 'stayOnReplaceWithRegister' }```
-- ::execute`()`
-
 ### Select < Operator
 - ::execute`()`
 
-### ToggleLineComments < Operator
-- command: `vim-mode-plus:toggle-line-comments`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g /</kbd>
-- ::hover: ```{ icon: ':toggle-line-comment:', emoji: ':mute:' }```
-- ::cursorPositionOnOperate: ```{ default: 'pointBeforeSelectAsMarker' }```
-- ::execute`()`
-
 ### TransformString < Operator
-- ::cursorPositionOnOperate: ```{ default: 'startPointOfSelection',
-  stay: 'pointBeforeSelect',
-  config: 'stayOnTransformString',
-  stayOnLinewise: true }```
+- ::trackChange: ```true```: **Overridden**
+- ::stayOnLinewise: ```true```
+- ::setPoint: ```true```
 - ::execute`()`
+- ::mutate`(s, setPoint)`
 
 ### CamelCase < TransformString
 - command: `vim-mode-plus:camel-case`
@@ -912,12 +903,64 @@ vim-mode-plus version: 0.6.0
 - ::hover: ```{ icon: ':dash-case:', emoji: ':dash:' }```
 - ::getNewText`(text)`
 
+### Indent < TransformString
+- command: `vim-mode-plus:indent`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>></kbd>
+- ::hover: ```{ icon: ':indent:', emoji: ':point_right:' }```
+- ::stayOnLinewise: ```false```: **Overridden**
+- ::mutate`(s, setPoint)`: **Overridden**
+- ::indent`(s)`
+
+### AutoIndent < Indent
+- command: `vim-mode-plus:auto-indent`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>=</kbd>
+- ::hover: ```{ icon: ':auto-indent:', emoji: ':open_hands:' }```: **Overridden**
+- ::indent`(s)`: **Overridden**
+
+### Outdent < Indent
+- command: `vim-mode-plus:outdent`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd><</kbd>
+- ::hover: ```{ icon: ':outdent:', emoji: ':point_left:' }```: **Overridden**
+- ::indent`(s)`: **Overridden**
+
+### JoinWithKeepingSpace < TransformString
+- command: `vim-mode-plus:join-with-keeping-space`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g J</kbd>
+- ::input: ```''```
+- ::trim: ```false```
+- ::initialize`()`
+- ::mutate`(s)`: **Overridden**
+- ::join`(rows)`
+
+### JoinByInput < JoinWithKeepingSpace
+- command: `vim-mode-plus:join-by-input`
+- ::hover: ```{ icon: ':join:', emoji: ':dolls:' }```
+- ::requireInput: ```true```: **Overridden**
+- ::input: ```null```: **Overridden**
+- ::trim: ```true```: **Overridden**
+- ::initialize`()`: **Overridden**
+- ::join`(rows)`: **Overridden**
+
+### JoinByInputWithKeepingSpace < JoinByInput
+- command: `vim-mode-plus:join-by-input-with-keeping-space`
+- ::trim: ```false```: **Overridden**
+- ::join`(rows)`: **Overridden**
+
 ### LowerCase < TransformString
 - command: `vim-mode-plus:lower-case`
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g u</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>u</kbd>
 - ::hover: ```{ icon: ':lower-case:', emoji: ':point_down:' }```
+- ::getNewText`(text)`
+
+### ReplaceWithRegister < TransformString
+- command: `vim-mode-plus:replace-with-register`
+- ::hover: ```{ icon: ':replace-with-register:', emoji: ':pencil:' }```
 - ::getNewText`(text)`
 
 ### SnakeCase < TransformString
@@ -960,20 +1003,20 @@ vim-mode-plus version: 0.6.0
 ### ChangeSurroundAnyPair < ChangeSurround
 - command: `vim-mode-plus:change-surround-any-pair`
 - ::charsMax: ```1```: **Overridden**
-- ::preCompose: ```'AnyPair'```: **Overridden**
+- ::target: ```'AnyPair'```: **Overridden**
 - ::initialize`()`: `super`: **Overridden**
 - ::onConfirm`(@char)`: **Overridden**
 
 ### DeleteSurroundAnyPair < DeleteSurround
 - command: `vim-mode-plus:delete-surround-any-pair`
 - ::requireInput: ```false```: **Overridden**
-- ::preCompose: ```'AnyPair'```: **Overridden**
+- ::target: ```'AnyPair'```: **Overridden**
 
 ### SurroundWord < Surround
 - command: `vim-mode-plus:surround-word`
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g s w</kbd>
-- ::preCompose: ```'Word'```: **Overridden**
+- ::target: ```'Word'```: **Overridden**
 
 ### ToggleCase < TransformString
 - command: `vim-mode-plus:toggle-case`
@@ -988,9 +1031,17 @@ vim-mode-plus version: 0.6.0
 - command: `vim-mode-plus:toggle-case-and-move-right`
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>~</kbd>
-- ::cursorPositionOnOperate: ```null```: **Overridden**
 - ::hover: ```null```: **Overridden**
-- ::preCompose: ```'MoveRight'```: **Overridden**
+- ::setPoint: ```false```: **Overridden**
+- ::target: ```'MoveRight'```: **Overridden**
+
+### ToggleLineComments < TransformString
+- command: `vim-mode-plus:toggle-line-comments`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>g /</kbd>
+- ::hover: ```{ icon: ':toggle-line-comment:', emoji: ':mute:' }```
+- ::stayOption: ```{ asMarker: true }```
+- ::mutate`(s, setPoint)`: **Overridden**
 
 ### UpperCase < TransformString
 - command: `vim-mode-plus:upper-case`
@@ -1005,17 +1056,15 @@ vim-mode-plus version: 0.6.0
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>y</kbd>
 - ::hover: ```{ icon: ':yank:', emoji: ':clipboard:' }```
-- ::cursorPositionOnOperate: ```{ default: 'startPointOfSelection',
-  stay: 'pointBeforeSelect',
-  config: 'stayOnYank',
-  stayOnLinewise: true }```
+- ::trackChange: ```true```: **Overridden**
+- ::stayOnLinewise: ```true```
 - ::execute`()`
 
 ### YankLine < Yank
 - command: `vim-mode-plus:yank-line`
   - keymaps
     - `atom-text-editor.vim-mode-plus:not(.insert-mode)`: <kbd>Y</kbd>
-- ::preCompose: ```'MoveToRelativeLine'```: **Overridden**
+- ::target: ```'MoveToRelativeLine'```: **Overridden**
 
 ### OperatorError < Base
 - ::constructor`(@message)`: **Overridden**
