@@ -1,5 +1,16 @@
-# 0.7.0 WIP
-- FIX: hover didn't cleared when `;` is executed when there is no previous find command.
+# 0.7.0
+- FIX: hover didn't cleared when `;` was repeated without previous find.
+- Improve: Flasher.flash do simply flash removed callback args for simplicity.
+- New: Introduce onDidSelect, onWillSelect, onDidOperationFinish internal event system.
+- Improve: Now most of operation is child of TransformString class
+- Breaking: deprecated parameter 'stayOnIndent', 'stayOnReplaceWithRegister', merged to 'stayOnTransformString'
+- New: Introduce `g J`  join-with-keeping-space commands
+- New: Introduce JoinByInput, JoinByInputWithKeepingSpace(default no keymap) [experimental]
+- New: Option to put cursor start of change on Undo/Redo
+- New: Option to flash on Undo/Redo(green: addded, red: removed) by option flashOnUndoRedo
+- New: Support mark `[`, `]` which is updated on yank and change.
+- New: select-latest-change command select range from mark `[`, `]`) command(no keymap by default)
+- New: track change when insert-mode repeated.
 
 # 0.6.1
 - FIX: Paste fail when flashOnOperate was disabled. #38
