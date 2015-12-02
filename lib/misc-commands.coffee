@@ -6,7 +6,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 settings = require './settings'
 
-{isLinewiseRange, mergeIntersectingRanges} = require './utils'
+{isLinewiseRange} = require './utils'
 
 class Misc extends Base
   @extend(false)
@@ -40,39 +40,34 @@ class SelectLatestChange extends Misc
 
 class Undo extends Misc
   @extend()
-  flash: (range, options) ->
+
+  flash: (range, klass) ->
     @vimState.flasher.flash range,
-      class: options.class
+      class: "vim-mode-plus-flash #{klass}"
       timeout: settings.get('flashOnUndoRedoDuration')
 
-  withTrackChange: (fn) ->
-    ranges = []
-    disposable = @editor.getBuffer().onDidChange ({newRange}) ->
-      ranges.push(newRange)
-    fn()
+  mutateWithTrackingChanges: (fn) ->
+    range = null
+    disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) =>
+      range ?= newRange
+      range = range.union(newRange) if range.intersectsWith(newRange)
+
+      if settings.get('flashOnUndoRedo')
+        if not newRange.isEmpty()
+          @flash(newRange, 'added')
+        else if not oldRange.isEmpty()
+          range = Range.fromPointWithDelta(oldRange.start, 0, 1)
+          @flash(range, 'removed')
+    @mutate()
     disposable.dispose()
-    mergeIntersectingRanges(ranges)
+    fn(range) if range
 
   execute: ->
-    ranges = @withTrackChange =>
-      @mutate()
-
-    if range = ranges[0]
-      @vimState.mark.set('[', range.start)
-      @vimState.mark.set(']', range.end)
+    @mutateWithTrackingChanges ({start, end}) =>
+      @vimState.mark.set('[', start)
+      @vimState.mark.set(']', end)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
-        @editor.setCursorBufferPosition(range.start)
-
-    if settings.get('flashOnUndoRedo')
-      for range in ranges
-        if range.isEmpty()
-          range = range.translate([0, 0], [0, 1])
-          unless @editor.getTextInBufferRange(range).match /\S+/
-            range = @editor.bufferRangeForBufferRow(range.start.row, includeNewline: true)
-          klass = 'vim-mode-plus-flash deleted'
-        else
-          klass = 'vim-mode-plus-flash'
-        @flash(range, class: klass)
+        @editor.setCursorBufferPosition(start)
 
     for s in @editor.getSelections()
       s.clear()
