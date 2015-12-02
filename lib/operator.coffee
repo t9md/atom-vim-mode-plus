@@ -41,6 +41,9 @@ class Operator extends Base
   needFlash: ->
     @flashTarget and settings.get('flashOnOperate') and not @instanceof('Select')
 
+  needTrackChange: ->
+    @trackChange
+
   needStay: ->
     param = if @instanceof('TransformString')
       "stayOnTransformString"
@@ -50,6 +53,9 @@ class Operator extends Base
 
   constructor: ->
     super
+    # Guard when Repeated.
+    return if @instanceof("Repeat")
+
     @setTarget @new(@target) if @target?
     #  To support, `dd`, `cc` and a like.
     if @isSameOperatorRepeated()
@@ -62,17 +68,17 @@ class Operator extends Base
       @onDidSelect =>
         @flash @editor.getSelectedBufferRanges()
 
-    if @trackChange
+    if @needTrackChange()
       changeMarker = null
       @onDidSelect =>
-        return if (selection = @editor.getLastSelection()).isEmpty()
-        changeMarker = @editor.markBufferRange selection.getBufferRange(),
+        range = @editor.getSelectedBufferRange()
+        changeMarker = @editor.markBufferRange range,
           invalidate: 'never'
           persistent: false
 
       @onDidOperationFinish =>
-        if range = changeMarker?.getBufferRange()
-          @setMarkForChange(range)
+        if newRange = changeMarker.getBufferRange()
+          @setMarkForChange(newRange)
 
   # target - TextObject or Motion to operate on.
   setTarget: (@target) ->
@@ -535,47 +541,53 @@ class PutBefore extends Operator
     {text, type} = @vimState.register.get()
     return unless text
     text = _.multiplyString(text, @getCount())
-    paste = switch
-      when type is 'linewise', @vimState.isMode('visual', 'linewise')
-        @pasteLinewise
-      when 'character'
-        @pasteCharacterwise
+    isLinewise = type is 'linewise' or @vimState.isMode('visual', 'linewise')
 
     @editor.transact =>
-      paste(s, text) for s in @editor.getSelections()
+      for s in @editor.getSelections()
+        {cursor} = s
+        if isLinewise
+          newRange = @pasteLinewise(s, text)
+          cursor.setBufferPosition(newRange.start)
+          cursor.moveToFirstCharacterOfLine()
+        else
+          newRange = @pasteCharacterwise(s, text)
+          cursor.setBufferPosition(newRange.end.translate([0, -1]))
+        @setMarkForChange(newRange)
+        @flash newRange
     @activate('normal')
 
-  pasteLinewise: (selection, text) => # fat
-    cursor = selection.cursor
+  # Return newRange
+  pasteLinewise: (selection, text) ->
+    {cursor} = selection
     if selection.isEmpty()
-      if @location is 'before'
-        cursor.moveToBeginningOfLine()
-        selection.insertText("\n")
-        cursor.moveUp()
-      else
-        cursor.moveToEndOfLine()
-        selection.insertText("\n")
       text = text.replace(/\n$/, '')
+      if @location is 'before'
+        @insertTextAbove(selection, text)
+      else
+        @insertTextBelow(selection, text)
     else
       if @vimState.isMode('visual', 'linewise')
         text += '\n' unless text.endsWith('\n')
       else
         selection.insertText("\n")
-    range = selection.insertText(text)
-    @setMarkForChange(range)
-    @flash range
-    cursor.setBufferPosition(range.start)
-    cursor.moveToFirstCharacterOfLine()
+      selection.insertText(text)
 
-  pasteCharacterwise: (selection, text) => # fat
-    cursor = selection.cursor
+  pasteCharacterwise: (selection, text) ->
     if @location is 'after' and selection.isEmpty()
-      cursor.moveRight()
-    range = selection.insertText(text)
-    @setMarkForChange(range)
+      selection.cursor.moveRight()
+    selection.insertText(text)
 
-    @flash range
-    cursor.setBufferPosition(range.end.translate([0, -1]))
+  insertTextAbove: (selection, text) ->
+    selection.cursor.moveToBeginningOfLine()
+    selection.insertText("\n")
+    selection.cursor.moveUp()
+    selection.insertText(text)
+
+  insertTextBelow: (selection, text) ->
+    selection.cursor.moveToEndOfLine()
+    selection.insertText("\n")
+    selection.insertText(text)
 
 class PutAfter extends PutBefore
   @extend()
@@ -656,17 +668,19 @@ class ActivateInsertMode extends Operator
     @vimState.register.getText('.')
 
   # called when repeated
-  insertText: (selection, text) ->
+  repeatInsert: (selection, text) ->
     selection.insertText(text, autoIndent: true)
 
   execute: ->
     if @isRepeated()
       return unless text = @getText()
+      @flashTarget = @trackChange = true
+      @observeSelectAction()
+      @emitDidSelect()
       @editor.transact =>
-        for selection in @editor.getSelections()
-          {cursor} = selection
-          @insertText(selection, text)
-          cursor.moveLeft() unless cursor.isAtBeginningOfLine()
+        for s in @editor.getSelections()
+          @repeatInsert(s, text)
+          s.cursor.moveLeft() unless s.cursor.isAtBeginningOfLine()
     else
       @setCheckpoint('insert')
       @vimState.activate('insert', @submode)
@@ -683,7 +697,7 @@ class ActivateReplaceMode extends ActivateInsertMode
   @extend()
   submode: 'replace'
 
-  insertText: (selection, text) ->
+  repeatInsert: (selection, text) ->
     for char in text when char isnt "\n"
       break if selection.cursor.isAtEndOfLine()
       selection.selectRight()
@@ -717,7 +731,7 @@ class InsertAboveWithNewline extends ActivateInsertMode
   insertNewline: ->
     @editor.insertNewlineAbove()
 
-  insertText: (selection, text) ->
+  repeatInsert: (selection, text) ->
     selection.insertText(text.trimLeft(), autoIndent: true)
 
 class InsertBelowWithNewline extends InsertAboveWithNewline
