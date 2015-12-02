@@ -5,6 +5,7 @@
 Base = require './base'
 swrap = require './selection-wrapper'
 settings = require './settings'
+_ = require 'underscore-plus'
 
 {isLinewiseRange} = require './utils'
 
@@ -40,25 +41,37 @@ class SelectLatestChange extends Misc
 
 class Undo extends Misc
   @extend()
-
-  flash: (range, klass) ->
-    @vimState.flasher.flash range,
+  flash: (markers, klass, timeout) ->
+    options =
+      type: 'highlight'
       class: "vim-mode-plus-flash #{klass}"
-      timeout: settings.get('flashOnUndoRedoDuration')
+
+    for m in markers
+      @editor.decorateMarker(m, options)
+    setTimeout  ->
+      m.destroy() for m in markers
+    , timeout
+
+  saveRangeAsMarker: (markers, range) ->
+    if _.all(markers, (m) -> not m.getBufferRange().intersectsWith(range))
+      markers.push @editor.markBufferRange(range)
 
   mutateWithTrackingChanges: (fn) ->
     range = null
+    markersAdded = []
+    markersRemoved = []
+    timeout = settings.get('flashOnUndoRedoDuration')
     disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) =>
       range ?= newRange
       range = range.union(newRange) if range.intersectsWith(newRange)
 
       if settings.get('flashOnUndoRedo')
-        if not newRange.isEmpty()
-          @flash(newRange, 'added')
-        else if not oldRange.isEmpty()
-          range = Range.fromPointWithDelta(oldRange.start, 0, 1)
-          @flash(range, 'removed')
+        @saveRangeAsMarker(markersAdded, newRange) unless newRange.isEmpty()
+        @saveRangeAsMarker(markersRemoved, oldRange) unless oldRange.isEmpty()
     @mutate()
+    if settings.get('flashOnUndoRedo')
+      @flash(markersAdded, 'added', timeout)
+      @flash(markersRemoved, 'removed', timeout)
     disposable.dispose()
     fn(range) if range
 
