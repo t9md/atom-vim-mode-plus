@@ -1,13 +1,11 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
 Delegato = require 'delegato'
-{CompositeDisposable} = require 'atom'
 
 settings = require './settings'
 
 packageScope = 'vim-mode-plus'
 getEditorState = null # set in Base.init()
-subscriptions = null
 
 run = (klass, properties={}) ->
   vimState = getEditorState(atom.workspace.getActiveTextEditor())
@@ -101,18 +99,15 @@ class Base
   # Class methods
   # -------------------------
   @init: (service) ->
-    {getEditorState} = service
+    {getEditorState, subscriptions} = service
 
-    operations = [
+    require(lib) for lib in [
       './operator', './motion', './text-object',
       './insert-mode', './misc-commands', './scroll', './visual-blockwise'
     ]
-    require(lib) for lib in operations
 
-    subscriptions = new CompositeDisposable
     for __, klass of @getRegistory() when klass.isCommand()
-      klass.registerCommands()
-    subscriptions
+      subscriptions.add klass.registerCommands()
 
   # Expected to be called by child class.
   operationKinds = [
@@ -147,7 +142,7 @@ class Base
     commands
 
   @registerCommands: ->
-    subscriptions.add atom.commands.add('atom-text-editor', @getCommands())
+    atom.commands.add('atom-text-editor', @getCommands())
 
   @getClass: (klassName) ->
     registory[klassName]
