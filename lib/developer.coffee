@@ -36,10 +36,10 @@ class Developer
       args: [editor.getPath(), "+#{row+1}"]
 
   generateIntrospectionReport: ->
-    generateIntrospectionReport _.values(Base.getRegistory()),
+    generateIntrospectionReport _.values(Base.getRegistries()),
       excludeProperties: [
         'getClass', 'extend', 'getParent', 'getAncestors', 'kind', 'isCommand'
-        'getRegistory', 'command'
+        'getRegistries', 'command'
         'init', 'getCommandName', 'getCommands', 'registerCommands',
         'delegatesProperties',
         'delegatesMethods',

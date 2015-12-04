@@ -15,7 +15,7 @@ See also [What is Motion, TextObject, Operator](https://github.com/atom/vim-mode
 # What this folk project aiming to?
 
 Currently, each TOM(TextObject, Operator, Motion), do very different things, the behavior and responsibility of each TOM is not consistent.  
-This inconsistencies reduce flexibility and readablity of codebases, and it also making it difficult to introduce custom TOM.  
+This inconsistencies reduce flexibility and readability of codebases, and it also making it difficult to introduce custom TOM.  
 By taking over tasks currently handled on TOM by new OperationProcessor, each TOM's implementation could be very simplified and easier to maintain.  
 This project aiming to prove above idea by implementing working example.  
 
@@ -23,7 +23,7 @@ This project aiming to prove above idea by implementing working example.
 
 1. Improve readability by renaming without causing big internal change.
 2. Migrate each old TextObject, Operator, Motion(TOM for short) to new one.
-3. Introduce new OperationProcessor to process  new-TOM.
+3. Introduce new OperationProcessor to process new-TOM.
 
 # Terminology
 
