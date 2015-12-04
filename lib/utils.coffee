@@ -130,7 +130,7 @@ getNewTextRangeFromChanges = (changes) ->
   for change in changes when change.newRange?
     {oldRange, oldText, newRange, newText} = change
     unless finalRange?
-      finalRange = newRange.copy()  if newText.length
+      finalRange = newRange.copy() if newText.length
       continue
     # shrink
     if oldText.length and finalRange.containsRange(oldRange)
@@ -167,6 +167,9 @@ mergeIntersectingRanges = (ranges) ->
       result.push(range)
   result
 
+pointIsAtEndOfLine = (editor, point) ->
+  editor.bufferRangeForBufferRow(point.row).end.isEqual(point)
+
 module.exports = {
   include
   debug
@@ -190,4 +193,5 @@ module.exports = {
   getNewTextRangeFromCheckpoint
   findIndex
   mergeIntersectingRanges
+  pointIsAtEndOfLine
 }

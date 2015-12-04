@@ -137,10 +137,10 @@ atom-text-editor::shadow {
     background-color: @syntax-selection-flash-color;
   }
   .vim-mode-plus-flash.added .region {
-    background-color: @syntax-color-added;
+    background-color: fadeout(@syntax-color-added, 30%);
   }
   .vim-mode-plus-flash.removed .region {
-    background-color: @syntax-color-removed;
+    background-color: fadeout(@syntax-color-removed, 30%);
   }
   .vim-mode-plus-cursor-normal .region {
     background-color: @syntax-cursor-color;
