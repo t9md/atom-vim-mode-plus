@@ -114,15 +114,16 @@ sortByAncesstor = (list) ->
   compare = (v1, v2) ->
     a = v1.value[0]
     b = v2.value[0]
-    if (a is undefined) and (b is undefined) then  0
-    else if a is undefined then -1
-    else if b is undefined then 1
-    else if a < b then -1
-    else if a > b then 1
-    else
-      a = index: v1.index, value: v1.value[1..]
-      b = index: v2.index, value: v2.value[1..]
-      compare(a, b)
+    switch
+      when (a is undefined) and (b is undefined) then  0
+      when a is undefined then -1
+      when b is undefined then 1
+      when a < b then -1
+      when a > b then 1
+      else
+        a = index: v1.index, value: v1.value[1..]
+        b = index: v2.index, value: v2.value[1..]
+        compare(a, b)
 
   mapped.sort(compare).map((e) -> list[e.index])
 

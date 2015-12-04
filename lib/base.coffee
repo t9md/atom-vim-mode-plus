@@ -50,12 +50,13 @@ class Base
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
-    if (@requireInput and not @input)
-      false
-    else if @target?
-      @target.isComplete()
-    else
-      @complete
+    switch
+      when (@requireInput and not @input)
+        false
+      when @target?
+        @target.isComplete()
+      else
+        @complete
 
   isRecordable: ->
     @recordable
@@ -78,14 +79,14 @@ class Base
     klass = Base.getClass(klassName)
     new klass(@vimState, properties)
 
-  focusInput: ({charsMax}={}) ->
-    charsMax ?= 1
+  focusInput: (options={}) ->
+    options.charsMax ?= 1
     @onDidConfirmInput (@input) =>
       @complete = true
       @vimState.operationStack.process()
     @onDidCancelInput =>
       @vimState.operationStack.cancel()
-    @vimState.input.focus({charsMax})
+    @vimState.input.focus(options)
 
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)
@@ -106,23 +107,23 @@ class Base
       './insert-mode', './misc-commands', './scroll', './visual-blockwise'
     ]
 
-    for __, klass of @getRegistory() when klass.isCommand()
+    for __, klass of @getRegistries() when klass.isCommand()
       subscriptions.add klass.registerCommands()
 
   # Expected to be called by child class.
   operationKinds = [
     "TextObject", "Misc", "InsertMode", "Motion", "Operator", "Scroll", "VisualBlockwise"
   ]
-  registory = {Base}
+  registries = {Base}
   @extend: (@command=true) ->
-    if @name of registory
+    if @name of registries
       console.warn "Duplicate constructor #{@name}"
-    registory[@name] = this
+    registries[@name] = this
     # Used to determine klass is TextObject in @registerCommands()
-    this.kind = @name if @name in operationKinds
+    @kind = @name if @name in operationKinds
 
-  @getRegistory: ->
-    registory
+  @getRegistries: ->
+    registries
 
   @isCommand: ->
     @command
@@ -145,7 +146,7 @@ class Base
     atom.commands.add('atom-text-editor', @getCommands())
 
   @getClass: (klassName) ->
-    registory[klassName]
+    registries[klassName]
 
 class OperationAbortedError extends Base
   @extend(false)

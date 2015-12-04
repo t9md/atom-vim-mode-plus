@@ -21,7 +21,7 @@
   * `yw` - with a motion
   * `yy` - linewise
   * `y2y` - repeated linewise
-  * `"ayy` - supports registers (named a-z, A-Z for append, *, +, %, _)
+  * `"ayy` - supports registers (named a-z, A-Z for append, \*, +, %, \_)
   * `Y` - linewise
 * Indent/Outdent/Auto-indent
   * `vw>` - works in visual mode
