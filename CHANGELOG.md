@@ -1,3 +1,6 @@
+# 0.7.1
+- Improve cursor position on Undo/Redo when setCursorToStartOfChangeOnUndoRedo is enabled.
+
 # 0.7.0
 - FIX: hover didn't cleared when `;` was repeated without previous find.
 - Improve: Flasher.flash do simply flash removed callback args for simplicity.
