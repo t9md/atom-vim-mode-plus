@@ -22,7 +22,7 @@ module.exports =
     @vimStates = new Map
 
     @registerViewProviders()
-    @subscribe Base.init(@provideVimModePlus())
+    Base.init(@provideVimModePlus())
     @registerCommands()
 
     if atom.inDevMode()
@@ -88,5 +88,7 @@ module.exports =
       @statusBarManager.detach()
 
   provideVimModePlus: ->
+    Base: Base
+    subscriptions: @subscriptions
     getGlobalState: @getGlobalState.bind(this)
     getEditorState: @getEditorState.bind(this)
