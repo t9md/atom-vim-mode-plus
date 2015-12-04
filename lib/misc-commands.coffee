@@ -7,7 +7,7 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 _ = require 'underscore-plus'
 
-{isLinewiseRange} = require './utils'
+{isLinewiseRange, pointIsAtEndOfLine, mergeIntersectingRanges} = require './utils'
 
 class Misc extends Base
   @extend(false)
@@ -16,6 +16,10 @@ class Misc extends Base
   constructor: ->
     super
     @initialize?()
+
+  activate: (mode, submode) ->
+    @onDidOperationFinish =>
+      @vimState.activate(mode, submode)
 
 class ReverseSelections extends Misc
   @extend()
@@ -41,13 +45,14 @@ class SelectLatestChange extends Misc
 
 class Undo extends Misc
   @extend()
-  flash: (markers, klass, timeout) ->
+
+  flash: (ranges, klass, timeout) ->
     options =
       type: 'highlight'
       class: "vim-mode-plus-flash #{klass}"
 
-    for m in markers
-      @editor.decorateMarker(m, options)
+    markers = ranges.map (r) => @editor.markBufferRange(r)
+    @editor.decorateMarker(m, options) for m in markers
     setTimeout  ->
       m.destroy() for m in markers
     , timeout
@@ -56,24 +61,43 @@ class Undo extends Misc
     if _.all(markers, (m) -> not m.getBufferRange().intersectsWith(range))
       markers.push @editor.markBufferRange(range)
 
-  mutateWithTrackingChanges: (fn) ->
-    range = null
-    markersAdded = []
-    markersRemoved = []
-    timeout = settings.get('flashOnUndoRedoDuration')
-    disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) =>
-      range ?= newRange
-      range = range.union(newRange) if range.intersectsWith(newRange)
+  trimEndOfLineRange: (range) ->
+    {start} = range
+    if (start.column isnt 0) and pointIsAtEndOfLine(@editor, start)
+      range.traverse([+1, 0], [0, 0])
+    else
+      range
 
-      if settings.get('flashOnUndoRedo')
-        @saveRangeAsMarker(markersAdded, newRange) unless newRange.isEmpty()
-        @saveRangeAsMarker(markersRemoved, oldRange) unless oldRange.isEmpty()
+  mapToChangedRanges: (list, fn) ->
+    ranges = list.map (e) -> fn(e)
+    mergeIntersectingRanges(ranges).map (r) =>
+      @trimEndOfLineRange(r)
+
+  mutateWithTrackingChanges: (fn) ->
+    markersAdded = []
+    rangesRemoved = []
+
+    disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) =>
+      # To highlight(decorate) removed range, I don't want marker's auto-tracking-range-change feature.
+      # So here I simply use range for removal
+      rangesRemoved.push(oldRange) unless oldRange.isEmpty()
+      # For added range I want marker's auto-tracking-range-change feature.
+      @saveRangeAsMarker(markersAdded, newRange) unless newRange.isEmpty()
     @mutate()
-    if settings.get('flashOnUndoRedo')
-      @flash(markersRemoved, 'removed', timeout)
-      @flash(markersAdded, 'added', timeout)
     disposable.dispose()
-    fn(range) if range
+
+    # FIXME: this is still not completely accurate and heavy approach.
+    # To accurately track range updated, need to add/remove manually.
+    rangesAdded = @mapToChangedRanges markersAdded, (m) -> m.getBufferRange()
+    markersAdded.forEach (m) -> m.destroy()
+    rangesRemoved = @mapToChangedRanges rangesRemoved, (r) -> r
+
+    fn(range) if range = rangesAdded[0] ? _.last(rangesRemoved)
+    if settings.get('flashOnUndoRedo')
+      @onDidOperationFinish =>
+        timeout = settings.get('flashOnUndoRedoDuration')
+        @flash(rangesRemoved, 'removed', timeout)
+        @flash(rangesAdded, 'added', timeout)
 
   execute: ->
     @mutateWithTrackingChanges ({start, end}) =>
@@ -84,7 +108,7 @@ class Undo extends Misc
 
     for s in @editor.getSelections()
       s.clear()
-    @vimState.activate('normal')
+    @activate('normal')
 
   mutate: ->
     @editor.undo()
