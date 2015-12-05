@@ -704,6 +704,7 @@ class SearchBase extends Motion
 class Search extends SearchBase
   @extend()
   requireInput: true
+  confirmed: false
 
   initialize: ->
     super
@@ -716,6 +717,10 @@ class Search extends SearchBase
     @onDidCancelSearch @onCancel
     @onDidChangeSearch @onChange
     @vimState.search.focus({@backwards})
+
+  isComplete: ->
+    return false unless @confirmed
+    super
 
   subscribeScrollChange: ->
     @subscribe @editorElement.onDidChangeScrollTop => @matches?.show()
@@ -730,6 +735,7 @@ class Search extends SearchBase
     super
 
   onConfirm: (@input) => # fat-arrow
+    @confirmed = true
     if @isRepeatLastSearch(@input)
       unless @input = @vimState.searchHistory.get('prev')
         atom.beep()
