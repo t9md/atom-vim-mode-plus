@@ -95,32 +95,34 @@
 - FIX:￼ shift from visual-char2block incorrectly add extra selection when rows contain blank row.
 - FIX:￼ p and P didn't correct replace text in visual-linewise mode.
 
-## 0.1.5
+# 0.1.5
 - FIX: In softwrapped line, moveDown/moveUp fail in visual-linewise mode.
 
-## 0.1.4
+# 0.1.4
 - FIX: cursor not when activate visual-blockwise with one clumn selection.
 - FIX: move-down, move-up on visual-blockwise throw error when not have tail.
 - Revival once disabled text-object quote to select forwarding range.
 - New: TextObject.AnyQuote select any next AnyQuote within line.
 
-## 0.1.3
+# 0.1.3
 - Now all TextObject Pair can expand selection.
 - Fix TextObject AnyPair incorrectly expand selection when it fail to find pair.
 
-## 0.1.2
+# 0.1.2
 - Add default keymaps on incremental search element for arrow and tab keys.
 - FIX: debug feature was broken
 - FIX:#4 select area when TextObject is executed via command-pallate(was throw err).
 
-## 0.1.1
+# 0.1.1
 - 1st public release
 
-## 0.1.0
+# 0.1.0
 - 2015.9.21 rename vim-mode to vim-mode-plus
 
-## 0.0.0
+# 0.0.0
 - 2015.8.1 forked from vim-mode.
+
+---
 
 ## 0.57
 
