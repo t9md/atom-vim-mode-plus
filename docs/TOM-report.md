@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
-vim-mode-plus version: 0.7.0
-*generated at 2015-12-02T14:38:45.430Z*
+vim-mode-plus version: 0.7.1  
+*generated at 2015-12-05T05:10:32.332Z*
 
 - [Base](#base)
   - [InsertMode](#insertmode--base)
@@ -131,25 +131,63 @@ vim-mode-plus version: 0.7.0
       - [ScrollUp](#scrollup--scrolldown)
   - [TextObject](#textobject--base)
     - [CurrentLine](#currentline--textobject)
+      - [ACurrentLine](#acurrentline--currentline)
+      - [InnerCurrentLine](#innercurrentline--currentline)
     - [Entire](#entire--textobject)
+      - [AEntire](#aentire--entire)
+      - [InnerEntire](#innerentire--entire)
     - [Fold](#fold--textobject)
+      - [AFold](#afold--fold)
       - [Function](#function--fold)
+        - [AFunction](#afunction--function)
+        - [InnerFunction](#innerfunction--function)
+      - [InnerFold](#innerfold--fold)
     - [Pair](#pair--textobject)
       - [AngleBracket](#anglebracket--pair)
+        - [AAngleBracket](#aanglebracket--anglebracket)
+        - [InnerAngleBracket](#inneranglebracket--anglebracket)
       - [AnyPair](#anypair--pair)
+        - [AAnyPair](#aanypair--anypair)
         - [AnyQuote](#anyquote--anypair)
+          - [AAnyQuote](#aanyquote--anyquote)
+          - [InnerAnyQuote](#inneranyquote--anyquote)
+        - [InnerAnyPair](#inneranypair--anypair)
       - [BackTick](#backtick--pair)
+        - [ABackTick](#abacktick--backtick)
+        - [InnerBackTick](#innerbacktick--backtick)
       - [CurlyBracket](#curlybracket--pair)
+        - [ACurlyBracket](#acurlybracket--curlybracket)
+        - [InnerCurlyBracket](#innercurlybracket--curlybracket)
       - [DoubleQuote](#doublequote--pair)
+        - [ADoubleQuote](#adoublequote--doublequote)
+        - [InnerDoubleQuote](#innerdoublequote--doublequote)
       - [Parenthesis](#parenthesis--pair)
+        - [AParenthesis](#aparenthesis--parenthesis)
+        - [InnerParenthesis](#innerparenthesis--parenthesis)
       - [SingleQuote](#singlequote--pair)
+        - [ASingleQuote](#asinglequote--singlequote)
+        - [InnerSingleQuote](#innersinglequote--singlequote)
       - [SquareBracket](#squarebracket--pair)
+        - [ASquareBracket](#asquarebracket--squarebracket)
+        - [InnerSquareBracket](#innersquarebracket--squarebracket)
       - [Tag](#tag--pair)
+        - [ATag](#atag--tag)
+        - [InnerTag](#innertag--tag)
     - [Paragraph](#paragraph--textobject)
+      - [AParagraph](#aparagraph--paragraph)
       - [Comment](#comment--paragraph)
+        - [AComment](#acomment--comment)
+        - [InnerComment](#innercomment--comment)
       - [Indentation](#indentation--paragraph)
+        - [AIndentation](#aindentation--indentation)
+        - [InnerIndentation](#innerindentation--indentation)
+      - [InnerParagraph](#innerparagraph--paragraph)
     - [Word](#word--textobject)
+      - [AWord](#aword--word)
+      - [InnerWord](#innerword--word)
       - [WholeWord](#wholeword--word)
+        - [AWholeWord](#awholeword--wholeword)
+        - [InnerWholeWord](#innerwholeword--wholeword)
   - [VisualBlockwise](#visualblockwise--base)
     - [BlockwiseDeleteToLastCharacterOfLine](#blockwisedeletetolastcharacterofline--visualblockwise)
       - [BlockwiseChangeToLastCharacterOfLine](#blockwisechangetolastcharacterofline--blockwisedeletetolastcharacterofline)
@@ -162,11 +200,12 @@ vim-mode-plus version: 0.7.0
     - [BlockwiseSelect](#blockwiseselect--visualblockwise)
 
 ## Base
+- command: ``
 - ::complete: ```false```
 - ::recordable: ```false```
+- ::repeated: ```false```
 - ::defaultCount: ```1```
 - ::requireInput: ```false```
-- ::repeated: ```false```
 - ::onDidChangeInput`()`
 - ::onDidConfirmInput`()`
 - ::onDidCancelInput`()`
@@ -179,7 +218,6 @@ vim-mode-plus version: 0.7.0
 - ::onDidCommandSearch`()`
 - ::onWillSelect`()`
 - ::onDidSelect`()`
-- ::onDidChange`()`
 - ::onDidOperationFinish`()`
 - ::subscribe`()`
 - ::isComplete`()`
@@ -189,12 +227,13 @@ vim-mode-plus version: 0.7.0
 - ::abort`()`
 - ::getCount`()`
 - ::new`(klassName, properties)`
-- ::focusInput`(_arg)`
+- ::focusInput`(options)`
 - ::instanceof`(klassName)`
 - ::emitWillSelect`()`
 - ::emitDidSelect`()`
 
 ### InsertMode < Base
+- command: ``
 - ::constructor`()`: `super`: **Overridden**
 
 ### CopyFromLineAbove < InsertMode
@@ -225,8 +264,10 @@ vim-mode-plus version: 0.7.0
 - ::execute`()`
 
 ### Misc < Base
+- command: ``
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: ```true```: **Overridden**
+- ::activate`(mode, submode)`
 
 ### ReverseSelections < Misc
 - command: `vim-mode-plus:reverse-selections`
@@ -244,8 +285,10 @@ vim-mode-plus version: 0.7.0
 - command: `vim-mode-plus:undo`
   - keymaps
     - `atom-text-editor.vim-mode-plus.normal-mode`: <kbd>u</kbd>
-- ::flash`(markers, klass, timeout)`
+- ::flash`(ranges, klass, timeout)`
 - ::saveRangeAsMarker`(markers, range)`
+- ::trimEndOfLineRange`(range)`
+- ::mapToChangedRanges`(list, fn)`
 - ::mutateWithTrackingChanges`(fn)`
 - ::execute`()`
 - ::mutate`()`
@@ -257,6 +300,7 @@ vim-mode-plus version: 0.7.0
 - ::mutate`()`: **Overridden**
 
 ### Motion < Base
+- command: ``
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: ```true```: **Overridden**
 - ::inclusive: ```false```
@@ -277,6 +321,7 @@ vim-mode-plus version: 0.7.0
 - ::unfoldAtCursorRow`(cursor)`
 
 ### CurrentSelection < Motion
+- command: ``
 - ::selectedRange: ```null```
 - ::initialize`()`
 - ::execute`()`: **Overridden**
@@ -497,11 +542,13 @@ vim-mode-plus version: 0.7.0
 - ::moveCursor`(cursor)`
 
 ### MoveToRelativeLine < Motion
+- command: ``
 - ::linewise: ```true```: **Overridden**
 - ::moveCursor`(cursor)`
 - ::getCount`()`: **Overridden**
 
 ### MoveToRelativeLineWithMinimum < MoveToRelativeLine
+- command: ``
 - ::min: ```0```
 - ::getCount`()`: `super`: **Overridden**
 
@@ -579,6 +626,7 @@ vim-mode-plus version: 0.7.0
 - ::coefficient: ```-0.5```: **Overridden**
 
 ### SearchBase < Motion
+- command: ``
 - ::saveCurrentSearch: ```true```
 - ::complete: ```false```: **Overridden**
 - ::backwards: ```false```
@@ -657,9 +705,11 @@ vim-mode-plus version: 0.7.0
 - ::backwards: ```true```: **Overridden**
 
 ### OperationAbortedError < Base
+- command: ``
 - ::constructor`(@message)`: **Overridden**
 
 ### Operator < Base
+- command: ``
 - ::constructor`()`: `super`: **Overridden**
 - ::recordable: ```true```: **Overridden**
 - ::target: ```null```
@@ -880,9 +930,11 @@ vim-mode-plus version: 0.7.0
 - ::execute`()`
 
 ### Select < Operator
+- command: ``
 - ::execute`()`
 
 ### TransformString < Operator
+- command: ``
 - ::trackChange: ```true```: **Overridden**
 - ::stayOnLinewise: ```true```
 - ::setPoint: ```true```
@@ -1003,14 +1055,14 @@ vim-mode-plus version: 0.7.0
 ### ChangeSurroundAnyPair < ChangeSurround
 - command: `vim-mode-plus:change-surround-any-pair`
 - ::charsMax: ```1```: **Overridden**
-- ::target: ```'AnyPair'```: **Overridden**
+- ::target: ```'AAnyPair'```: **Overridden**
 - ::initialize`()`: `super`: **Overridden**
 - ::onConfirm`(@char)`: **Overridden**
 
 ### DeleteSurroundAnyPair < DeleteSurround
 - command: `vim-mode-plus:delete-surround-any-pair`
 - ::requireInput: ```false```: **Overridden**
-- ::target: ```'AnyPair'```: **Overridden**
+- ::target: ```'AAnyPair'```: **Overridden**
 
 ### SurroundWord < Surround
 - command: `vim-mode-plus:surround-word`
@@ -1067,6 +1119,7 @@ vim-mode-plus version: 0.7.0
 - ::target: ```'MoveToRelativeLine'```: **Overridden**
 
 ### OperatorError < Base
+- command: ``
 - ::constructor`(@message)`: **Overridden**
 
 ### Scroll < Base
@@ -1154,6 +1207,7 @@ vim-mode-plus version: 0.7.0
 - ::direction: ```'up'```: **Overridden**
 
 ### TextObject < Base
+- command: ``
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: ```true```: **Overridden**
 - ::inner: ```false```
@@ -1163,40 +1217,45 @@ vim-mode-plus version: 0.7.0
 - ::execute`()`
 
 ### CurrentLine < TextObject
+- command: ``
+- ::select`()`
+
+### ACurrentLine < CurrentLine
 - command: `vim-mode-plus:a-current-line`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a l</kbd>
+
+### InnerCurrentLine < CurrentLine
 - command: `vim-mode-plus:inner-current-line`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i l</kbd>
-- ::select`()`
 
 ### Entire < TextObject
+- command: ``
+- ::select`()`
+
+### AEntire < Entire
 - command: `vim-mode-plus:a-entire`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a e</kbd>
+
+### InnerEntire < Entire
 - command: `vim-mode-plus:inner-entire`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i e</kbd>
-- ::select`()`
 
 ### Fold < TextObject
-- command: `vim-mode-plus:a-fold`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a z</kbd>
-- command: `vim-mode-plus:inner-fold`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i z</kbd>
+- command: ``
 - ::getFoldRowRangeForBufferRow`(bufferRow)`
 - ::select`()`
 
+### AFold < Fold
+- command: `vim-mode-plus:a-fold`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a z</kbd>
+
 ### Function < Fold
-- command: `vim-mode-plus:a-function`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a f</kbd>
-- command: `vim-mode-plus:inner-function`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i f</kbd>
+- command: ``
 - ::indentScopedLanguages: ```[ 'python', 'coffee' ]```
 - ::omitingClosingCharLanguages: ```[ 'go' ]```
 - ::initialize`()`
@@ -1206,7 +1265,23 @@ vim-mode-plus version: 0.7.0
 - ::getFoldRowRangeForBufferRow`(bufferRow)`: **Overridden**
 - ::adjustRowRange`(startRow, endRow)`
 
+### AFunction < Function
+- command: `vim-mode-plus:a-function`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a f</kbd>
+
+### InnerFunction < Function
+- command: `vim-mode-plus:inner-function`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i f</kbd>
+
+### InnerFold < Fold
+- command: `vim-mode-plus:inner-fold`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i z</kbd>
+
 ### Pair < TextObject
+- command: ``
 - ::allowNextLine: ```false```
 - ::what: ```'enclosed'```
 - ::pair: ```null```
@@ -1219,23 +1294,23 @@ vim-mode-plus version: 0.7.0
 - ::select`()`
 
 ### AngleBracket < Pair
+- command: ``
+- ::pair: ```'<>'```: **Overridden**
+
+### AAngleBracket < AngleBracket
 - command: `vim-mode-plus:a-angle-bracket`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a <</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a ></kbd>
+
+### InnerAngleBracket < AngleBracket
 - command: `vim-mode-plus:inner-angle-bracket`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i <</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i ></kbd>
-- ::pair: ```'<>'```: **Overridden**
 
 ### AnyPair < Pair
-- command: `vim-mode-plus:a-any-pair`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a s</kbd>
-- command: `vim-mode-plus:inner-any-pair`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i s</kbd>
+- command: ``
 - ::what: ```'enclosed'```: **Overridden**
 - ::member: ```[ 'DoubleQuote',
   'SingleQuote',
@@ -1250,101 +1325,146 @@ vim-mode-plus version: 0.7.0
 - ::getNearestRange`(selection)`
 - ::select`()`: **Overridden**
 
+### AAnyPair < AnyPair
+- command: `vim-mode-plus:a-any-pair`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a s</kbd>
+
 ### AnyQuote < AnyPair
-- command: `vim-mode-plus:a-any-quote`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a q</kbd>
-- command: `vim-mode-plus:inner-any-quote`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i q</kbd>
+- command: ``
 - ::what: ```'next'```: **Overridden**
 - ::member: ```[ 'DoubleQuote', 'SingleQuote', 'BackTick' ]```: **Overridden**
 - ::getNearestRange`(selection)`: **Overridden**
 
+### AAnyQuote < AnyQuote
+- command: `vim-mode-plus:a-any-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a q</kbd>
+
+### InnerAnyQuote < AnyQuote
+- command: `vim-mode-plus:inner-any-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i q</kbd>
+
+### InnerAnyPair < AnyPair
+- command: `vim-mode-plus:inner-any-pair`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i s</kbd>
+
 ### BackTick < Pair
-- command: `vim-mode-plus:a-back-tick`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a \`</kbd>
-- command: `vim-mode-plus:inner-back-tick`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i \`</kbd>
+- command: ``
 - ::pair: ```'``'```: **Overridden**
 - ::what: ```'next'```: **Overridden**
 
+### ABackTick < BackTick
+- command: `vim-mode-plus:a-back-tick`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a \`</kbd>
+
+### InnerBackTick < BackTick
+- command: `vim-mode-plus:inner-back-tick`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i \`</kbd>
+
 ### CurlyBracket < Pair
+- command: ``
+- ::pair: ```'{}'```: **Overridden**
+- ::allowNextLine: ```true```: **Overridden**
+
+### ACurlyBracket < CurlyBracket
 - command: `vim-mode-plus:a-curly-bracket`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a {</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a }</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a B</kbd>
+
+### InnerCurlyBracket < CurlyBracket
 - command: `vim-mode-plus:inner-curly-bracket`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i {</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i }</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i B</kbd>
-- ::pair: ```'{}'```: **Overridden**
-- ::allowNextLine: ```true```: **Overridden**
 
 ### DoubleQuote < Pair
-- command: `vim-mode-plus:a-double-quote`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a "</kbd>
-- command: `vim-mode-plus:inner-double-quote`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i "</kbd>
+- command: ``
 - ::pair: ```'""'```: **Overridden**
 - ::what: ```'next'```: **Overridden**
 
+### ADoubleQuote < DoubleQuote
+- command: `vim-mode-plus:a-double-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a "</kbd>
+
+### InnerDoubleQuote < DoubleQuote
+- command: `vim-mode-plus:inner-double-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i "</kbd>
+
 ### Parenthesis < Pair
+- command: ``
+- ::pair: ```'()'```: **Overridden**
+- ::allowNextLine: ```true```: **Overridden**
+
+### AParenthesis < Parenthesis
 - command: `vim-mode-plus:a-parenthesis`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a (</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a )</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a b</kbd>
+
+### InnerParenthesis < Parenthesis
 - command: `vim-mode-plus:inner-parenthesis`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i (</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i )</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i b</kbd>
-- ::pair: ```'()'```: **Overridden**
-- ::allowNextLine: ```true```: **Overridden**
 
 ### SingleQuote < Pair
-- command: `vim-mode-plus:a-single-quote`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a '</kbd>
-- command: `vim-mode-plus:inner-single-quote`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i '</kbd>
+- command: ``
 - ::pair: ```'\'\''```: **Overridden**
 - ::what: ```'next'```: **Overridden**
 
+### ASingleQuote < SingleQuote
+- command: `vim-mode-plus:a-single-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a '</kbd>
+
+### InnerSingleQuote < SingleQuote
+- command: `vim-mode-plus:inner-single-quote`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i '</kbd>
+
 ### SquareBracket < Pair
+- command: ``
+- ::pair: ```'[]'```: **Overridden**
+- ::allowNextLine: ```true```: **Overridden**
+
+### ASquareBracket < SquareBracket
 - command: `vim-mode-plus:a-square-bracket`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a [</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a ]</kbd>
+
+### InnerSquareBracket < SquareBracket
 - command: `vim-mode-plus:inner-square-bracket`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i [</kbd>
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i ]</kbd>
-- ::pair: ```'[]'```: **Overridden**
-- ::allowNextLine: ```true```: **Overridden**
 
 ### Tag < Pair
+- command: ``
+- ::pair: ```'><'```: **Overridden**
+
+### ATag < Tag
 - command: `vim-mode-plus:a-tag`
+
+### InnerTag < Tag
 - command: `vim-mode-plus:inner-tag`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i t</kbd>
-- ::pair: ```'><'```: **Overridden**
 
 ### Paragraph < TextObject
-- command: `vim-mode-plus:a-paragraph`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a p</kbd>
-- command: `vim-mode-plus:inner-paragraph`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i p</kbd>
+- command: ``
 - ::getStartRow`(startRow, fn)`
 - ::getEndRow`(startRow, fn)`
 - ::getRange`(startRow)`
@@ -1353,46 +1473,76 @@ vim-mode-plus version: 0.7.0
 - ::selectInclusive`(selection)`
 - ::select`()`
 
+### AParagraph < Paragraph
+- command: `vim-mode-plus:a-paragraph`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a p</kbd>
+
 ### Comment < Paragraph
+- command: ``
+- ::selectInclusive`(selection)`: **Overridden**
+- ::getRange`(startRow)`: **Overridden**
+
+### AComment < Comment
 - command: `vim-mode-plus:a-comment`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a /</kbd>
+
+### InnerComment < Comment
 - command: `vim-mode-plus:inner-comment`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i /</kbd>
+
+### Indentation < Paragraph
+- command: ``
 - ::selectInclusive`(selection)`: **Overridden**
 - ::getRange`(startRow)`: **Overridden**
 
-### Indentation < Paragraph
+### AIndentation < Indentation
 - command: `vim-mode-plus:a-indentation`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a i</kbd>
+
+### InnerIndentation < Indentation
 - command: `vim-mode-plus:inner-indentation`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i i</kbd>
-- ::selectInclusive`(selection)`: **Overridden**
-- ::getRange`(startRow)`: **Overridden**
+
+### InnerParagraph < Paragraph
+- command: `vim-mode-plus:inner-paragraph`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i p</kbd>
 
 ### Word < TextObject
-- command: `vim-mode-plus:a-word`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a w</kbd>
-- command: `vim-mode-plus:inner-word`
-  - keymaps
-    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i w</kbd>
+- command: ``
 - ::select`()`
 - ::selectExclusive`(selection, wordRegex)`
 - ::selectInclusive`(selection)`
 
+### AWord < Word
+- command: `vim-mode-plus:a-word`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a w</kbd>
+
+### InnerWord < Word
+- command: `vim-mode-plus:inner-word`
+  - keymaps
+    - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i w</kbd>
+
 ### WholeWord < Word
+- command: ``
+- ::wordRegExp: ```/\S+/```
+- ::selectExclusive`(s, wordRegex)`: **Overridden**
+
+### AWholeWord < WholeWord
 - command: `vim-mode-plus:a-whole-word`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a W</kbd>
+
+### InnerWholeWord < WholeWord
 - command: `vim-mode-plus:inner-whole-word`
   - keymaps
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i W</kbd>
-- ::wordRegExp: ```/\S+/```
-- ::selectExclusive`(s, wordRegex)`: **Overridden**
 
 ### VisualBlockwise < Base
 - command: `vim-mode-plus:visual-blockwise`
@@ -1465,7 +1615,9 @@ vim-mode-plus version: 0.7.0
 - ::execute`()`
 
 ### BlockwiseRestoreCharacterwise < VisualBlockwise
+- command: ``
 - ::execute`()`
 
 ### BlockwiseSelect < VisualBlockwise
+- command: ``
 - ::execute`()`
