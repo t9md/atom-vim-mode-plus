@@ -431,6 +431,20 @@ class JoinByInputWithKeepingSpace extends JoinByInput
   join: (rows) ->
     rows.join(@input)
 
+class Split extends TransformString
+  @extend()
+  hover: icon: ':split:', emoji: ':hocho:'
+  requireInput: true
+  input: null
+  initialize: ->
+    @onDidChangeInput (input) =>
+      @vimState.hover.add(input[-1..])
+    @focusInput(charsMax: 10)
+
+  getNewText: (text) ->
+    regex = ///#{_.escapeRegExp(@input)}///g
+    text.split(regex).join("\n")
+
 class Repeat extends Operator
   @extend()
   requireTarget: false
