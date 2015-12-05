@@ -30,11 +30,11 @@ delegatingMethods = [
 
 class Base
   Delegato.includeInto(this)
-  complete: false
   recordable: false
   repeated: false
   defaultCount: 1
   requireInput: false
+  requireTarget: false
 
   @delegatesMethods delegatingMethods..., toProperty: 'vimState'
 
@@ -48,14 +48,15 @@ class Base
 
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
+
   isComplete: ->
-    switch
-      when (@requireInput and not @input)
-        false
-      when @target?
-        @target.isComplete()
-      else
-        @complete
+    if (@requireInput and not @input)
+      return false
+
+    if @requireTarget
+      @target?.isComplete()
+    else
+      true
 
   isRecordable: ->
     @recordable
@@ -80,7 +81,6 @@ class Base
   focusInput: (options={}) ->
     options.charsMax ?= 1
     @onDidConfirmInput (@input) =>
-      @complete = true
       @vimState.operationStack.process()
     @onDidCancelInput =>
       @vimState.operationStack.cancel()

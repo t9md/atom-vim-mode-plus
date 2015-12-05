@@ -20,13 +20,11 @@ class InsertRegister extends InsertMode
 
 class InsertLastInserted extends InsertMode
   @extend()
-  complete: true
   execute: ->
     @editor.insertText @vimState.register.getText('.')
 
 class CopyFromLineAbove extends InsertMode
   @extend()
-  complete: true
   rowTranslation: -1
 
   getTextInScreenRange: (range) ->

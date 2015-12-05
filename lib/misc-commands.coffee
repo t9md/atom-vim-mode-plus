@@ -11,8 +11,6 @@ _ = require 'underscore-plus'
 
 class Misc extends Base
   @extend(false)
-  complete: true
-
   constructor: ->
     super
     @initialize?()
@@ -32,8 +30,6 @@ class ReverseSelections extends Misc
 
 class SelectLatestChange extends Misc
   @extend()
-  complete: true
-
   execute: ->
     start = @vimState.mark.get('[')
     end = @vimState.mark.get(']')

@@ -13,7 +13,6 @@ Base = require './base'
 
 class Motion extends Base
   @extend(false)
-  complete: true
   inclusive: false
   linewise: false
   options: null
@@ -486,11 +485,10 @@ class ScrollHalfScreenUp extends ScrollHalfScreenDown
 class Find extends Motion
   @extend()
   backwards: false
-  complete: false
-  requireInput: true
   inclusive: true
   hover: icon: ':find:', emoji: ':mag_right:'
   offset: 0
+  requireInput: true
 
   initialize: ->
     @focusInput() unless @isRepeated()
@@ -557,7 +555,7 @@ class RepeatFind extends Find
   initialize: ->
     unless findObj = globalState.currentFind
       @abort()
-    {@offset, @backwards, @complete, @input} = findObj
+    {@offset, @backwards, @input} = findObj
 
 class RepeatFindReverse extends RepeatFind
   @extend()
@@ -569,7 +567,6 @@ class RepeatFindReverse extends RepeatFind
 # keymap: `
 class MoveToMark extends Motion
   @extend()
-  complete: false
   requireInput: true
   hover: icon: ":move-to-mark:`", emoji: ":round_pushpin:`"
 
@@ -598,7 +595,6 @@ class MoveToMarkLine extends MoveToMark
 class SearchBase extends Motion
   @extend(false)
   saveCurrentSearch: true
-  complete: false
   backwards: false
   escapeRegExp: false
 
@@ -707,6 +703,8 @@ class SearchBase extends Motion
 
 class Search extends SearchBase
   @extend()
+  requireInput: true
+
   initialize: ->
     super
     if settings.get('incrementalSearch')
@@ -735,7 +733,6 @@ class Search extends SearchBase
     if @isRepeatLastSearch(@input)
       unless @input = @vimState.searchHistory.get('prev')
         atom.beep()
-    @complete = true
     @vimState.operationStack.process()
     @finish()
 
@@ -774,7 +771,6 @@ class SearchBackwards extends Search
 class SearchCurrentWord extends SearchBase
   @extend()
   wordRegex: null
-  complete: true
 
   initialize: ->
     super
@@ -813,7 +809,6 @@ class SearchCurrentWordBackwards extends SearchCurrentWord
 
 class RepeatSearch extends SearchBase
   @extend()
-  complete: true
   saveCurrentSearch: false
 
   initialize: ->
@@ -835,7 +830,6 @@ AnyBracket = new RegExp(OpenBrackets.concat(CloseBrackets).map(_.escapeRegExp).j
 class BracketMatchingMotion extends SearchBase
   @extend()
   inclusive: true
-  complete: true
 
   searchForMatch: (startPosition, reverse, inCharacter, outCharacter) ->
     depth = 0
