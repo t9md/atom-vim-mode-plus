@@ -2,11 +2,10 @@
 Base = require './base'
 
 class Scroll extends Base
-  @extend()
-  complete: true
+  @extend(false)
   scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
   cursorPixel: null
-  
+
   constructor: ->
     super
     @initialize?()

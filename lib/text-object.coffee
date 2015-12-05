@@ -14,7 +14,6 @@ swrap = require './selection-wrapper'
 
 class TextObject extends Base
   @extend(false)
-  complete: true
   inner: false
 
   constructor: ->

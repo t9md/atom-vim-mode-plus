@@ -20,6 +20,7 @@ class Operator extends Base
   target: null
   flashTarget: true
   trackChange: false
+  requireTarget: true
 
   activate: (mode, submode) ->
     @onDidOperationFinish =>
@@ -381,7 +382,7 @@ class YankLine extends Yank
 # So I use native methods for a meanwhile.
 class Join extends Operator
   @extend()
-  complete: true
+  requireTarget: false
   execute: ->
     @editor.transact =>
       _.times @getCount(), =>
@@ -391,6 +392,7 @@ class Join extends Operator
 class JoinWithKeepingSpace extends TransformString
   @extend()
   input: ''
+  requireTarget: false
   trim: false
   initialize: ->
     @setTarget @new("MoveToRelativeLineWithMinimum", {min: 1})
@@ -411,12 +413,14 @@ class JoinWithKeepingSpace extends TransformString
 
 class JoinByInput extends JoinWithKeepingSpace
   @extend()
-  hover: icon: ':join:', emoji: ':dolls:'
+  hover: icon: ':join:', emoji: ':couple:'
   requireInput: true
   input: null
   trim: true
   initialize: ->
-    @focusInput()
+    @onDidChangeInput (input) =>
+      @vimState.hover.add(input[-1..])
+    @focusInput(charsMax: 10)
 
   join: (rows) ->
     rows.join(" #{@input} ")
@@ -429,7 +433,7 @@ class JoinByInputWithKeepingSpace extends JoinByInput
 
 class Repeat extends Operator
   @extend()
-  complete: true
+  requireTarget: false
   recordable: false
   execute: ->
     @editor.transact =>
@@ -442,6 +446,7 @@ class Mark extends Operator
   @extend()
   hover: icon: ':mark:', emoji: ':round_pushpin:'
   requireInput: true
+  requireTarget: false
   initialize: ->
     @focusInput()
 
@@ -454,7 +459,7 @@ class Mark extends Operator
 # Maybe separating complete/in-complete version like IncreaseNow and Increase?
 class Increase extends Operator
   @extend()
-  complete: true
+  requireTarget: false
   step: 1
 
   execute: ->
@@ -535,7 +540,7 @@ class DecrementNumber extends IncrementNumber
 # -------------------------
 class PutBefore extends Operator
   @extend()
-  complete: true
+  requireTarget: false
   location: 'before'
 
   execute: ->
@@ -603,6 +608,7 @@ class Replace extends Operator
   hover: icon: ':replace:', emoji: ':tractor:'
   trackChange: true
   requireInput: true
+  requireTarget: false
 
   initialize: ->
     @focusInput()
@@ -647,7 +653,7 @@ class Replace extends Operator
 # -------------------------
 class ActivateInsertMode extends Operator
   @extend()
-  complete: true
+  requireTarget: false
   flashTarget: false
   checkpoint: null
   submode: null
@@ -742,7 +748,7 @@ class InsertBelowWithNewline extends InsertAboveWithNewline
 
 class Change extends ActivateInsertMode
   @extend()
-  complete: false
+  requireTarget: true
   trackChange: true
 
   execute: ->

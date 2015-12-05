@@ -5,13 +5,11 @@ Base = require './base'
 swrap = require './selection-wrapper'
 
 class VisualBlockwise extends Base
-  @extend()
-  complete: true
-
+  @extend(false)
   constructor: ->
     super
     @initialize?()
-  
+
   initialize: ->
     # PlantTail
     unless @getTail()?
