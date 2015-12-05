@@ -40,7 +40,7 @@ class Developer
       excludeProperties: [
         'getClass', 'extend', 'getParent', 'getAncestors', 'kind', 'isCommand'
         'getRegistries', 'command'
-        'init', 'getCommandName', 'getCommands', 'registerCommands',
+        'init', 'getCommandName', 'registerCommands',
         'delegatesProperties',
         'delegatesMethods',
         'delegatesProperty',

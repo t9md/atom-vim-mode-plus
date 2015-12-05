@@ -214,7 +214,7 @@ getKeyBindings =  ->
 
 getCommandsFromClass = (klass) ->
   if klass.isCommand()
-    _.keys(klass.getCommands())
+    klass.getCommandName()
   else
     []
 

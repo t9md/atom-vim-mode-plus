@@ -324,7 +324,7 @@ class DeleteSurround extends Surround
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
   requireInput: false
-  target: 'AnyPair'
+  target: 'AAnyPair'
 
 class ChangeSurround extends DeleteSurround
   @extend()
@@ -342,7 +342,7 @@ class ChangeSurround extends DeleteSurround
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
   charsMax: 1
-  target: "AnyPair"
+  target: "AAnyPair"
 
   initialize: ->
     @restore = @preservePoints()
