@@ -743,6 +743,7 @@ class InsertBelowWithNewline extends InsertAboveWithNewline
 class Change extends ActivateInsertMode
   @extend()
   complete: false
+  trackChange: true
 
   execute: ->
     @target.setOptions?(excludeWhitespace: true)
