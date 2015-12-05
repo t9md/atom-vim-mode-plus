@@ -162,7 +162,6 @@ generateIntrospectionReport = (klasses, options) ->
 
   date = new Date().toISOString()
   content = [
-    '# TOM(TextObject, Operator, Motion) report.'
     "#{packageName} version: #{version}  \n*generated at #{date}*"
     toc
     body.join("\n\n")
