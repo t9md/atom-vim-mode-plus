@@ -25,9 +25,9 @@ class Operator extends Base
     @onDidOperationFinish =>
       @vimState.activate(mode, submode)
 
-  setMarkForChange: (range) ->
-    @vimState.mark.set('[', range.start)
-    @vimState.mark.set(']', range.end)
+  setMarkForChange: ({start, end}) ->
+    @vimState.mark.set('[', start)
+    @vimState.mark.set(']', end)
 
   haveSomeSelection: ->
     haveSomeSelection(@editor.getSelections())
@@ -39,7 +39,7 @@ class Operator extends Base
       false
 
   needFlash: ->
-    @flashTarget and settings.get('flashOnOperate') and not @instanceof('Select')
+    @flashTarget and settings.get('flashOnOperate')
 
   needTrackChange: ->
     @trackChange
@@ -141,6 +141,7 @@ class Operator extends Base
 
 class Select extends Operator
   @extend(false)
+  flashTarget: false
   execute: ->
     @selectTarget(true)
 
