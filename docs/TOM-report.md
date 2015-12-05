@@ -1,7 +1,7 @@
 # TOM(TextObject, Operator, Motion) report.
 
 vim-mode-plus version: 0.7.1  
-*generated at 2015-12-05T05:10:32.332Z*
+*generated at 2015-12-05T05:20:03.428Z*
 
 - [Base](#base)
   - [InsertMode](#insertmode--base)
@@ -200,7 +200,6 @@ vim-mode-plus version: 0.7.1
     - [BlockwiseSelect](#blockwiseselect--visualblockwise)
 
 ## Base
-- command: ``
 - ::complete: ```false```
 - ::recordable: ```false```
 - ::repeated: ```false```
@@ -233,7 +232,6 @@ vim-mode-plus version: 0.7.1
 - ::emitDidSelect`()`
 
 ### InsertMode < Base
-- command: ``
 - ::constructor`()`: `super`: **Overridden**
 
 ### CopyFromLineAbove < InsertMode
@@ -264,7 +262,6 @@ vim-mode-plus version: 0.7.1
 - ::execute`()`
 
 ### Misc < Base
-- command: ``
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: ```true```: **Overridden**
 - ::activate`(mode, submode)`
@@ -300,7 +297,6 @@ vim-mode-plus version: 0.7.1
 - ::mutate`()`: **Overridden**
 
 ### Motion < Base
-- command: ``
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: ```true```: **Overridden**
 - ::inclusive: ```false```
@@ -321,7 +317,6 @@ vim-mode-plus version: 0.7.1
 - ::unfoldAtCursorRow`(cursor)`
 
 ### CurrentSelection < Motion
-- command: ``
 - ::selectedRange: ```null```
 - ::initialize`()`
 - ::execute`()`: **Overridden**
@@ -542,13 +537,11 @@ vim-mode-plus version: 0.7.1
 - ::moveCursor`(cursor)`
 
 ### MoveToRelativeLine < Motion
-- command: ``
 - ::linewise: ```true```: **Overridden**
 - ::moveCursor`(cursor)`
 - ::getCount`()`: **Overridden**
 
 ### MoveToRelativeLineWithMinimum < MoveToRelativeLine
-- command: ``
 - ::min: ```0```
 - ::getCount`()`: `super`: **Overridden**
 
@@ -626,7 +619,6 @@ vim-mode-plus version: 0.7.1
 - ::coefficient: ```-0.5```: **Overridden**
 
 ### SearchBase < Motion
-- command: ``
 - ::saveCurrentSearch: ```true```
 - ::complete: ```false```: **Overridden**
 - ::backwards: ```false```
@@ -705,11 +697,9 @@ vim-mode-plus version: 0.7.1
 - ::backwards: ```true```: **Overridden**
 
 ### OperationAbortedError < Base
-- command: ``
 - ::constructor`(@message)`: **Overridden**
 
 ### Operator < Base
-- command: ``
 - ::constructor`()`: `super`: **Overridden**
 - ::recordable: ```true```: **Overridden**
 - ::target: ```null```
@@ -930,11 +920,9 @@ vim-mode-plus version: 0.7.1
 - ::execute`()`
 
 ### Select < Operator
-- command: ``
 - ::execute`()`
 
 ### TransformString < Operator
-- command: ``
 - ::trackChange: ```true```: **Overridden**
 - ::stayOnLinewise: ```true```
 - ::setPoint: ```true```
@@ -1119,7 +1107,6 @@ vim-mode-plus version: 0.7.1
 - ::target: ```'MoveToRelativeLine'```: **Overridden**
 
 ### OperatorError < Base
-- command: ``
 - ::constructor`(@message)`: **Overridden**
 
 ### Scroll < Base
@@ -1207,7 +1194,6 @@ vim-mode-plus version: 0.7.1
 - ::direction: ```'up'```: **Overridden**
 
 ### TextObject < Base
-- command: ``
 - ::constructor`()`: `super`: **Overridden**
 - ::complete: ```true```: **Overridden**
 - ::inner: ```false```
@@ -1217,7 +1203,6 @@ vim-mode-plus version: 0.7.1
 - ::execute`()`
 
 ### CurrentLine < TextObject
-- command: ``
 - ::select`()`
 
 ### ACurrentLine < CurrentLine
@@ -1231,7 +1216,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i l</kbd>
 
 ### Entire < TextObject
-- command: ``
 - ::select`()`
 
 ### AEntire < Entire
@@ -1245,7 +1229,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i e</kbd>
 
 ### Fold < TextObject
-- command: ``
 - ::getFoldRowRangeForBufferRow`(bufferRow)`
 - ::select`()`
 
@@ -1255,7 +1238,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a z</kbd>
 
 ### Function < Fold
-- command: ``
 - ::indentScopedLanguages: ```[ 'python', 'coffee' ]```
 - ::omitingClosingCharLanguages: ```[ 'go' ]```
 - ::initialize`()`
@@ -1281,7 +1263,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i z</kbd>
 
 ### Pair < TextObject
-- command: ``
 - ::allowNextLine: ```false```
 - ::what: ```'enclosed'```
 - ::pair: ```null```
@@ -1294,7 +1275,6 @@ vim-mode-plus version: 0.7.1
 - ::select`()`
 
 ### AngleBracket < Pair
-- command: ``
 - ::pair: ```'<>'```: **Overridden**
 
 ### AAngleBracket < AngleBracket
@@ -1310,7 +1290,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i ></kbd>
 
 ### AnyPair < Pair
-- command: ``
 - ::what: ```'enclosed'```: **Overridden**
 - ::member: ```[ 'DoubleQuote',
   'SingleQuote',
@@ -1331,7 +1310,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a s</kbd>
 
 ### AnyQuote < AnyPair
-- command: ``
 - ::what: ```'next'```: **Overridden**
 - ::member: ```[ 'DoubleQuote', 'SingleQuote', 'BackTick' ]```: **Overridden**
 - ::getNearestRange`(selection)`: **Overridden**
@@ -1352,7 +1330,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i s</kbd>
 
 ### BackTick < Pair
-- command: ``
 - ::pair: ```'``'```: **Overridden**
 - ::what: ```'next'```: **Overridden**
 
@@ -1367,7 +1344,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i \`</kbd>
 
 ### CurlyBracket < Pair
-- command: ``
 - ::pair: ```'{}'```: **Overridden**
 - ::allowNextLine: ```true```: **Overridden**
 
@@ -1386,7 +1362,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i B</kbd>
 
 ### DoubleQuote < Pair
-- command: ``
 - ::pair: ```'""'```: **Overridden**
 - ::what: ```'next'```: **Overridden**
 
@@ -1401,7 +1376,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i "</kbd>
 
 ### Parenthesis < Pair
-- command: ``
 - ::pair: ```'()'```: **Overridden**
 - ::allowNextLine: ```true```: **Overridden**
 
@@ -1420,7 +1394,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i b</kbd>
 
 ### SingleQuote < Pair
-- command: ``
 - ::pair: ```'\'\''```: **Overridden**
 - ::what: ```'next'```: **Overridden**
 
@@ -1435,7 +1408,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i '</kbd>
 
 ### SquareBracket < Pair
-- command: ``
 - ::pair: ```'[]'```: **Overridden**
 - ::allowNextLine: ```true```: **Overridden**
 
@@ -1452,7 +1424,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i ]</kbd>
 
 ### Tag < Pair
-- command: ``
 - ::pair: ```'><'```: **Overridden**
 
 ### ATag < Tag
@@ -1464,7 +1435,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i t</kbd>
 
 ### Paragraph < TextObject
-- command: ``
 - ::getStartRow`(startRow, fn)`
 - ::getEndRow`(startRow, fn)`
 - ::getRange`(startRow)`
@@ -1479,7 +1449,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>a p</kbd>
 
 ### Comment < Paragraph
-- command: ``
 - ::selectInclusive`(selection)`: **Overridden**
 - ::getRange`(startRow)`: **Overridden**
 
@@ -1494,7 +1463,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i /</kbd>
 
 ### Indentation < Paragraph
-- command: ``
 - ::selectInclusive`(selection)`: **Overridden**
 - ::getRange`(startRow)`: **Overridden**
 
@@ -1514,7 +1482,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i p</kbd>
 
 ### Word < TextObject
-- command: ``
 - ::select`()`
 - ::selectExclusive`(selection, wordRegex)`
 - ::selectInclusive`(selection)`
@@ -1530,7 +1497,6 @@ vim-mode-plus version: 0.7.1
     - `atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode`: <kbd>i w</kbd>
 
 ### WholeWord < Word
-- command: ``
 - ::wordRegExp: ```/\S+/```
 - ::selectExclusive`(s, wordRegex)`: **Overridden**
 
@@ -1615,9 +1581,7 @@ vim-mode-plus version: 0.7.1
 - ::execute`()`
 
 ### BlockwiseRestoreCharacterwise < VisualBlockwise
-- command: ``
 - ::execute`()`
 
 ### BlockwiseSelect < VisualBlockwise
-- command: ``
 - ::execute`()`
