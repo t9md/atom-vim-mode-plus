@@ -19,6 +19,8 @@ class TextObject extends Base
 
   constructor: ->
     super
+    if @constructor.name.startsWith('Inner')
+      @inner = true
     @initialize?()
 
   isInner: ->
@@ -39,11 +41,10 @@ class TextObject extends Base
   execute: ->
     @select()
 
-# Word
 # -------------------------
 # [FIXME] Need to be extendable.
 class Word extends TextObject
-  @extend()
+  @extend(false)
   select: ->
     @eachSelection (selection) =>
       wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
@@ -62,13 +63,25 @@ class Word extends TextObject
         selection.selectToBufferPosition range.end
         stop()
 
-class WholeWord extends Word
+class AWord extends Word
   @extend()
+
+class InnerWord extends Word
+  @extend()
+
+# -------------------------
+class WholeWord extends Word
+  @extend(false)
   wordRegExp: /\S+/
   selectExclusive: (s, wordRegex) ->
     swrap(s).setBufferRangeSafely s.cursor.getCurrentWordBufferRange({wordRegex})
 
-# Pair
+class AWholeWord extends WholeWord
+  @extend()
+
+class InnerWholeWord extends WholeWord
+  @extend()
+
 # -------------------------
 class Pair extends TextObject
   @extend(false)
@@ -169,8 +182,9 @@ class Pair extends TextObject
     @eachSelection (s) =>
       swrap(s).setBufferRangeSafely @getRange(s, @what)
 
+# -------------------------
 class AnyPair extends Pair
-  @extend()
+  @extend(false)
   what: 'enclosed'
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
@@ -195,8 +209,15 @@ class AnyPair extends Pair
     @eachSelection (s) =>
       swrap(s).setBufferRangeSafely @getNearestRange(s)
 
-class AnyQuote extends AnyPair
+class AAnyPair extends AnyPair
   @extend()
+
+class InnerAnyPair extends AnyPair
+  @extend()
+
+# -------------------------
+class AnyQuote extends AnyPair
+  @extend(false)
   what: 'next'
   member: ['DoubleQuote', 'SingleQuote', 'BackTick']
   getNearestRange: (selection) ->
@@ -204,50 +225,112 @@ class AnyQuote extends AnyPair
     # Pick range which end.colum is leftmost(mean, closed first)
     _.first(_.sortBy(ranges, (r) -> r.end.column)) if ranges.length
 
-class DoubleQuote extends Pair
+class AAnyQuote extends AnyQuote
   @extend()
+
+class InnerAnyQuote extends AnyQuote
+  @extend()
+
+# -------------------------
+class DoubleQuote extends Pair
+  @extend(false)
   pair: '""'
   what: 'next'
 
-class SingleQuote extends Pair
+class ADoubleQuote extends DoubleQuote
   @extend()
+
+class InnerDoubleQuote extends DoubleQuote
+  @extend()
+
+# -------------------------
+class SingleQuote extends Pair
+  @extend(false)
   pair: "''"
   what: 'next'
 
-class BackTick extends Pair
+class ASingleQuote extends SingleQuote
   @extend()
+
+class InnerSingleQuote extends SingleQuote
+  @extend()
+
+# -------------------------
+class BackTick extends Pair
+  @extend(false)
   pair: '``'
   what: 'next'
 
-class CurlyBracket extends Pair
+class ABackTick extends BackTick
   @extend()
+
+class InnerBackTick extends BackTick
+  @extend()
+
+# -------------------------
+class CurlyBracket extends Pair
+  @extend(false)
   pair: '{}'
   allowNextLine: true
 
-class SquareBracket extends Pair
+class ACurlyBracket extends CurlyBracket
   @extend()
+
+class InnerCurlyBracket extends CurlyBracket
+  @extend()
+
+# -------------------------
+class SquareBracket extends Pair
+  @extend(false)
   pair: '[]'
   allowNextLine: true
 
-class Parenthesis extends Pair
+class ASquareBracket extends SquareBracket
   @extend()
+
+class InnerSquareBracket extends SquareBracket
+  @extend()
+
+# -------------------------
+class Parenthesis extends Pair
+  @extend(false)
   pair: '()'
   allowNextLine: true
 
-class AngleBracket extends Pair
+class AParenthesis extends Parenthesis
   @extend()
+
+class InnerParenthesis extends Parenthesis
+  @extend()
+
+# -------------------------
+class AngleBracket extends Pair
+  @extend(false)
   pair: '<>'
 
+class AAngleBracket extends AngleBracket
+  @extend()
+
+class InnerAngleBracket extends AngleBracket
+  @extend()
+
+# -------------------------
 # [FIXME] See vim-mode#795
 class Tag extends Pair
-  @extend()
+  @extend(false)
   pair: '><'
+
+class ATag extends Tag
+  @extend()
+
+class InnerTag extends Tag
+  @extend()
 
 # Paragraph
 # -------------------------
 # In Vim world Paragraph is defined as consecutive (non-)blank-line.
 class Paragraph extends TextObject
-  @extend()
+  @extend(false)
 
   getStartRow: (startRow, fn) ->
     for row in [startRow..0] when fn(row)
@@ -293,8 +376,15 @@ class Paragraph extends TextObject
         else
           @selectInclusive(selection)
 
-class Comment extends Paragraph
+class AParagraph extends Paragraph
   @extend()
+
+class InnerParagraph extends Paragraph
+  @extend()
+
+# -------------------------
+class Comment extends Paragraph
+  @extend(false)
   selectInclusive: (selection) ->
     @selectParagraph(selection)
 
@@ -305,8 +395,15 @@ class Comment extends Paragraph
       @editor.isBufferRowCommented(row) in [false, undefined]
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
-class Indentation extends Paragraph
+class AComment extends Comment
   @extend()
+
+class InnerComment extends Comment
+  @extend()
+
+# -------------------------
+class Indentation extends Paragraph
+  @extend(false)
   selectInclusive: (selection) ->
     @selectParagraph(selection)
 
@@ -322,9 +419,16 @@ class Indentation extends Paragraph
         @editor.indentLevelForLine(text) < baseIndentLevel
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
 
+class AIndentation extends Indentation
+  @extend()
+
+class InnerIndentation extends Indentation
+  @extend()
+
+# -------------------------
 # TODO: make it extendable when repeated
 class Fold extends TextObject
-  @extend()
+  @extend(false)
   getFoldRowRangeForBufferRow: (bufferRow) ->
     for currentRow in [bufferRow..0] by -1
       [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
@@ -339,9 +443,16 @@ class Fold extends TextObject
       if rowRange = @getFoldRowRangeForBufferRow(row)
         swrap(selection).selectRowRange(rowRange)
 
+class AFold extends Fold
+  @extend()
+
+class InnerFold extends Fold
+  @extend()
+
+# -------------------------
 # NOTE: Function range determination is depending on fold.
 class Function extends Fold
-  @extend()
+  @extend(false)
 
   indentScopedLanguages: ['python', 'coffee']
   # FIXME: why go dont' fold closing '}' for function? this is dirty workaround.
@@ -385,8 +496,15 @@ class Function extends Fold
     endRow += 1 if (@language in @omitingClosingCharLanguages)
     [startRow, endRow]
 
-class CurrentLine extends TextObject
+class AFunction extends Function
   @extend()
+
+class InnerFunction extends Function
+  @extend()
+
+# -------------------------
+class CurrentLine extends TextObject
+  @extend(false)
   select: ->
     @eachSelection (selection) =>
       {cursor} = selection
@@ -394,8 +512,21 @@ class CurrentLine extends TextObject
       cursor.moveToFirstCharacterOfLine() if @isInner()
       selection.selectToEndOfLine()
 
-class Entire extends TextObject
+class ACurrentLine extends CurrentLine
   @extend()
+
+class InnerCurrentLine extends CurrentLine
+  @extend()
+
+# -------------------------
+class Entire extends TextObject
+  @extend(false)
   select: ->
     @eachSelection (selection) =>
       @editor.selectAll()
+
+class AEntire extends Entire
+  @extend()
+
+class InnerEntire extends Entire
+  @extend()

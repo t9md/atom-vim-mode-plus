@@ -32,19 +32,18 @@ class Base
   Delegato.includeInto(this)
   complete: false
   recordable: false
+  repeated: false
   defaultCount: 1
   requireInput: false
-  repeated: false
 
   @delegatesMethods delegatingMethods..., toProperty: 'vimState'
 
   constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
-    if settings.get('showHoverOnOperate')
-      if @hover?
-        @vimState.hover.setPoint()
-        if hover = @hover[settings.get('showHoverOnOperateIcon')]
-          @vimState.hover.add(hover)
+    if settings.get('showHoverOnOperate') and @hover?
+      @vimState.hover.setPoint()
+      if hover = @hover[settings.get('showHoverOnOperateIcon')]
+        @vimState.hover.add(hover)
     _.extend(this, properties)
 
   # Operation processor execute only when isComplete() return true.
@@ -72,8 +71,7 @@ class Base
 
   getCount: ->
     # Setting count as instance variable allows operation repeatable with same count.
-    @count ?= @vimState?.count.get() ? @defaultCount
-    @count
+    @count ?= @vimState.count.get() ? @defaultCount
 
   new: (klassName, properties={}) ->
     klass = Base.getClass(klassName)
@@ -106,21 +104,14 @@ class Base
       './operator', './motion', './text-object',
       './insert-mode', './misc-commands', './scroll', './visual-blockwise'
     ]
-
     for __, klass of @getRegistries() when klass.isCommand()
-      subscriptions.add klass.registerCommands()
+      subscriptions.add klass.registerCommand()
 
-  # Expected to be called by child class.
-  operationKinds = [
-    "TextObject", "Misc", "InsertMode", "Motion", "Operator", "Scroll", "VisualBlockwise"
-  ]
   registries = {Base}
   @extend: (@command=true) ->
     if @name of registries
       console.warn "Duplicate constructor #{@name}"
     registries[@name] = this
-    # Used to determine klass is TextObject in @registerCommands()
-    @kind = @name if @name in operationKinds
 
   @getRegistries: ->
     registries
@@ -129,21 +120,10 @@ class Base
     @command
 
   @getCommandName: ->
-    _.dasherize(@name)
+    packageScope + ':' + _.dasherize(@name)
 
-  @getCommands: ->
-    commands = {}
-    vim = packageScope
-    cmd = @getCommandName()
-    if @kind is 'TextObject'
-      commands["#{vim}:a-#{cmd}"] = => run(this)
-      commands["#{vim}:inner-#{cmd}"] = => run(this, {inner: true})
-    else
-      commands["#{vim}:#{cmd}"] = => run(this)
-    commands
-
-  @registerCommands: ->
-    atom.commands.add('atom-text-editor', @getCommands())
+  @registerCommand: ->
+    atom.commands.add('atom-text-editor', @getCommandName(), => run(this))
 
   @getClass: (klassName) ->
     registries[klassName]
