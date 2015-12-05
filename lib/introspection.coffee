@@ -213,10 +213,7 @@ getKeyBindings =  ->
   keymapsForVimModePlus
 
 getCommandFromClass = (klass) ->
-  if klass.isCommand()
-    klass.getCommandName()
-  else
-    []
+  if klass.isCommand() then klass.getCommandName() else null
 
 getKeyBindingForCommand = (command) ->
   results = null
