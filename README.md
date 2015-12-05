@@ -144,17 +144,9 @@ With showing cursor appropriately in charcterwise and blockwise mode(still curso
   - Spec is more easy to read by using mini DSL provided by spec helper.
   - Lots of minor bug fix which is not fixed in official vim-mode.
 
-[Surround]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#surround--transformstring
-[SnakeCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#snakecase--transformstring
-[CamelCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#camelcase--transformstring
-[DashCase]:https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md#dashcase--transformstring
+# Introspection report for operations
 
-# TOM-report
-
-- [TOM-report](https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md)
-
-Done by extending Base class, so each TOM and its instance can report itself.
-TOM: TextObject, Operator, Motion
+- [Operations](https://github.com/t9md/atom-vim-mode-plus/wiki/Operations)
 
 # Configuration
 
@@ -199,13 +191,6 @@ Here is my keymap as an example including keymaps for helper packages.
   # So you won't get lost where cursor is?
   'cmd-2': 'paner:split-down'  # I don't use ctrl-w s.
   'cmd-3': 'paner:split-right' # I don't use ctrl-w v.
-  'cmd-H': 'paner:very-left'   # ctrl-w H
-  'cmd-J': 'paner:very-bottom' # ctrl-w J
-  'cmd-K': 'paner:very-top'    # ctrl-w K
-  'cmd-L': 'paner:very-right'  # ctrl-w L
-
-'atom-workspace atom-text-editor:not([mini])':
-  'cmd-L': 'paner:very-right' # Need to overwrite here because it conflicts split-selection-into-line.
 
 # All mode except insert
 # -------------------------
@@ -277,18 +262,28 @@ Not exist in pure Vim, provides clip-board history you can pop yanked text until
 
 # References
 
-- [operator, the true power of Vim](http://whileimautomaton.net/2008/11/vimm3/operator) by kana.  
-True power of Vim is Operator and TextOjbect.
+- Vim official
+  - [motion](http://vimhelp.appspot.com/motion.txt.html)
+  - [operator](http://vimhelp.appspot.com/motion.txt.html#operator)
+  - [text-object](http://vimhelp.appspot.com/motion.txt.html#object-select)
+  - [change](http://vimhelp.appspot.com/change.txt.html)
+  - [marks](http://vimhelp.appspot.com/motion.txt.html#mark-motions)
+  - [scroll](http://vimhelp.appspot.com/scroll.txt.html)
+  - [search-commands](http://vimhelp.appspot.com/pattern.txt.html#search-commands)
 
-- [List of text-object as vim plugin](https://github.com/kana/vim-textobj-user/wiki)  
-vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line, and any-pair(super set of many pair text-obj)
+- Other
+  - [operator, the true power of Vim](http://whileimautomaton.net/2008/11/vimm3/operator) by kana.  
+  True power of Vim is Operator and TextOjbect.
+
+  - [List of text-object as vim plugin](https://github.com/kana/vim-textobj-user/wiki)  
+  vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line, and any-pair(super set of many pair text-obj)
 
 # TODO
 
 See [TODO Priority](https://github.com/t9md/atom-vim-mode-plus/issues/25).
 
 - [ ] Dont't do moveRight and moveLeft to adjust selection in `Motion::selectInclusive()` it complicate other motion. and prevent to stop at EOL in `l`, `$`
-- [ ] Don't use typeCheck function like `isOperator()`, `isYank()` any more. instead use `instantOf` for being explicit what it meant to.
+- [x] Don't use typeCheck function like `isOperator()`, `isYank()` any more. instead use `instantOf` for being explicit what it meant to.
 - [x] Don't depend on `atom.commands.onDidDispatch`, instead simply ensure cursor not put endOfLine **only for vim-mode-plus's command**.
 - [ ] Write spec for lots of UI effect. hover, search counter etc.
 - [ ] Write tutorial for new Operator, TextObjet.
@@ -297,14 +292,12 @@ See [TODO Priority](https://github.com/t9md/atom-vim-mode-plus/issues/25).
 - [x] When hover Icon disabled, icon position is not at original cursor position.
 - [x] Make independent showHoverCounter from showHover config parameter.
 - [x] Use single scope for custom selection property.
-- [ ] Change subscription link to use vimState as hub.
-  - [ ] Chang link from TOM-to-Input to vimState-to-Input and let vimState actively call TOM's function to inform event.
+- [x] Change subscription link to use vimState as hub.
 - [x] Improve Visual mode: complete cursor visualization and switch between submode.
   - [x] Shift between submode properly restoring column and reversed state.
   - [x] show cursor: characterwise
   - [x] show cursor: linewise(decided to not try to show cursor)
   - [x] show cursor: blockwise
-- [ ] Incorporate [paner](https://github.com/t9md/atom-paner) which improve, `ctrl-w`+`HJKLsv` actions. - [ ] Introduce new scope based motion by incorporating with [goto-scope](https://github.com/t9md/atom-goto-scope).
 - [x] Improve search and introduce incrementalSearch.
 - [x] Cancellation of operation on event subscription.
 - [x] Improve visual-block's line end selection and sync range between selections.
