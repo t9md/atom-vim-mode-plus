@@ -24,68 +24,6 @@ As you can see in commit history, this project is originally started by forking 
 - Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
 - Internal code base is very different. Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT** report vim-mode-plus's issue or PRs to official vim-mode.
 
-# GIFs
-
-## Incremental search
-
-You can move between match with <kbd>tab</kbd> and <kbd>shift-tab</kdb>.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/incremental-search.gif)
-
-## Surround builtin
-
-Off course, you can repeat with `.`.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/surround.gif)
-
-## Visual block mode builtin.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visual-blockwise-cursor.gif)
-
-## AnyPair TextObject
-
-Auto detect inner and a Pair, and expandable.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/46f808a31fb62f6d122062b969c03a2cb9196d23/img/vim-mode-plus/text-object-any-pair.gif)
-
-## Flash on operate
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/flashing-range.gif)
-
-##  Hover icon
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/hover-icon.gif)
-
-## Hover emoji
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/hover-emoji.gif)
-
-## ChangeSurroundAnyPair Operator
-
-Auto detect pair, and pre-select target range and show pair char which will be changed on hover.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/preselect-changed-surround.gif)
-
-## Flash matched word on SearchCurrentWord
-
-When search with `#`, `*`, show 'current/total' match on hover, and flash word under cursor.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/search-flash-and-counter.gif)
-
-## Submode shift in Visual mode.
-
-With showing cursor appropriately in charcterwise and blockwise mode(still cursor hidden in linewise).
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/59ce4757d9d11c8d913efc972b58c18345fdbf06/img/vim-mode-plus/visualmode-submod-shift.gif)
-
-## increase/decrease number in visual-mode.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/3c672ff1ec9c2ee6ad0567bcbbff5e3095dda9b8/img/vim-mode-plus/increase-in-visual-mode.gif)
-
-## `gv` to re-select previous visual area.
-
-![gif](https://raw.githubusercontent.com/t9md/t9md/416d2692fc3bfec284824bc269458747242c6d53/img/vim-mode-plus/activate-previous-visual-mode.gif)
-
 # FAQ
 
 ### Why fork? why not directly contribute to official vim-mode.
@@ -93,64 +31,15 @@ With showing cursor appropriately in charcterwise and blockwise mode(still curso
 - Changes are too big.
 - Some features are too experimental to merge official vim-mode.
 
-# New Features
+# Wiki
 
-- Operator
-  - [Surround][Surround]:
-    - Surround, DeleteSurround, ChangeSurround. It's repeatable with `.`.
-    - SurroundWord pre-targeted to inner-word.
-    - DeleteSurroundAnyPair: Delete surrounding pair of AnyPair TextObject. Auto-find surround char to delete.
-    - ChangeSurroundAnyPair: Change surrounding pair of AnyPair TextObject. Auto-find surround char to change.
-  - Common string transformation: [SnakeCase][SnakeCase], [CamelCase][CamelCase], [DashCase][DashCase].
-  - ToggleLineComments: Toggle comment for lines.
-  - ReplaceWithRegister: Replace with content of specified register.
-  - All target-requiring operator behave as linewise alias when repeated, e.g. `gugu`, `guu` `gUgU`, `gUU` and others.
-  - Options to keep cursor position in string transformation. e.g. Not move cursor in `gUU`, surround etc.
-- TextObject
-  - Indentation: Select consecutive lines with deeper indent level than current line's indent level.
-  - Entire: Entire buffer.
-  - CurrentLine: Useful when you do surround line.
-  - Fold:
-  - Comment: Consecutive commented lines.
-  - AnyPair. it select nearest pair(surround) from one of following pair.
-    - `'""', "''", "``", "{}", "<>", "><", "[]", "()"`.
-  - AnyQuote. it select nearest pair(surround) from one of following pair.
-    - `'""', "''", "``"`. Difference from AnyPair is it work within line and can select forwarding range out of cursor.
-  - Function: Select inner-function(body) or a-function.
-  - Pair family skip backslash escaped pair character.
-- Instant UI feedback
-  - Showing icon/emoji which represent current operation e.g. show :camel: in CamelCase operation.
-  - Show active counter on hover indicator like `10` when you do `10yy`.
-  - Show active register on hover indicator like `"a` when you do `"ayy`
-  - Flashing(highlighting) operation affected area(range) for yank, paste, toggle etc..
-  - Flashing found entry on Search and SearchCurrentWord.
-  - Show current/total hover counter on Search and SearchCurrentWord.
-- Incremental search.
-  - Auto scroll next matching entry as you type.
-  - `search-visit-next` and `vim-mode-plus:search-visit-prev` allow you quickly visit match. Mapped to `tab` and `shift-tab`.
-  - `ctrl-v` on search editor start literal input mode, next single char you input is skip keybinding on search editor(useful when you keymap normal key like `;` to `confirm()`).
-  - [Experimental] Disable default RegExp search by using space starting seach word 1st space removed on search.
-  - [Experimental] Scroll next/prev "page" of matching entry, "page" is not actual page, so scroll only match found area, useful to quick skim for match out of screen.  
-  - `search-insert-wild-pattern` insert `.*?` pattern to search area you can keymap this command as shortcut for semi-fuzzy search.
-- VisualMode improve
-  - Show cursor in visual-mode except linewise submode.
-  - Visual block mode except yank and paste.
-  - Columns are correctly remembered and restored when shift between submode: char-to-block, block-to-line, line-to-char etc.
-- Other
-  - Not expand folds when selection go across folded row. `l`, `h` expand fold.
-  - Expose visual-mode's submode to text-editor-element's css class to be used as selector.
-  - [Disabled temporarily] Show cursor(by using decoration) while waiting user input (e.g `m`, `"`).
-  - Developer friendly introspection report and real-time opration-stack monitoring(logged on console).
-  - Spec is more easy to read by using mini DSL provided by spec helper.
-  - Lots of minor bug fix which is not fixed in official vim-mode.
-
-# Introspection report for operations
-
-- [Operations](https://github.com/t9md/atom-vim-mode-plus/wiki/Operations)
+- [New Features](https://github.com/t9md/atom-vim-mode-plus/wiki/Features)
+- [Introspection report for operations](https://github.com/t9md/atom-vim-mode-plus/wiki/Operations) includes most of commands with keymap information.
+- [GIFs](https://github.com/t9md/atom-vim-mode-plus/wiki/GIFs) demostrate fancy features.
 
 # Configuration
 
-# Disable autocomplete-plus's auto suggestion in replace mode
+## Disable autocomplete-plus's auto suggestion in replace mode
 
 To disable auto suggestion for vim-mode-plus, set following value on autocomplete-plus setting.
 
@@ -174,7 +63,8 @@ If you want to directly edit `config.cson`, here is how it looks like.
 
 ## Keymap
 
-Some of the keymap is not set by default, consult [TOM-report](https://github.com/t9md/atom-vim-mode-plus/blob/master/docs/TOM-report.md), [keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson) for detail.  
+Some of the keymap is not set by default, consult [Operations](https://github.com/t9md/atom-vim-mode-plus/wiki/Operations)
+, [keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson) for detail.  
 
 Here is my keymap as an example including keymaps for helper packages.
 
