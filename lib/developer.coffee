@@ -38,9 +38,9 @@ class Developer
   generateIntrospectionReport: ->
     generateIntrospectionReport _.values(Base.getRegistries()),
       excludeProperties: [
-        'getClass', 'extend', 'getParent', 'getAncestors', 'kind', 'isCommand'
+        'getClass', 'extend', 'getParent', 'getAncestors', 'isCommand'
         'getRegistries', 'command'
-        'init', 'getCommandName', 'registerCommands',
+        'init', 'getCommandName', 'registerCommand',
         'delegatesProperties',
         'delegatesMethods',
         'delegatesProperty',

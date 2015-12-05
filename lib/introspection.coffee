@@ -102,7 +102,7 @@ report = (obj, options={}) ->
   {
     name: name
     ancesstorsNames: _.pluck(getAncestors(obj), 'name')
-    commands: getCommandsFromClass(obj)
+    command: getCommandFromClass(obj)
     instance: inspectObject(obj, options)
     prototype: inspectObject(obj, options, true)
   }
@@ -150,8 +150,8 @@ generateIntrospectionReport = (klasses, options) ->
     header = "##{_.multiplyString('#', ancesstors.length)} #{ancesstors.join(" < ")}"
     s = []
     s.push header
-    {commands, instance, prototype} = result
-    for command in commands
+    {command, instance, prototype} = result
+    if command?
       s.push "- command: `#{command}`"
       keymaps = getKeyBindingForCommand(command)
       s.push formatKeymaps(keymaps) if keymaps?
@@ -212,7 +212,7 @@ getKeyBindings =  ->
     (k for k in atom.keymaps.getKeyBindings() when k.source is keymapPath)
   keymapsForVimModePlus
 
-getCommandsFromClass = (klass) ->
+getCommandFromClass = (klass) ->
   if klass.isCommand()
     klass.getCommandName()
   else
