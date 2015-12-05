@@ -286,7 +286,11 @@ describe "Operator", ->
           ensure 'dj', text: '12345\n'
 
     describe "when followed by an k", ->
-      originalText = "12345\nabcde\nABCDE"
+      originalText = """
+        12345
+        abcde
+        ABCDE
+        """
 
       beforeEach ->
         set text: originalText
