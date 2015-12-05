@@ -441,6 +441,10 @@ class Split extends TransformString
       @vimState.hover.add(input[-1..])
     @focusInput(charsMax: 10)
 
+  isComplete: ->
+    @input = "\\n" if @input is ''
+    super
+
   getNewText: (text) ->
     regex = ///#{_.escapeRegExp(@input)}///g
     text.split(regex).join("\n")
