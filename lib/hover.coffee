@@ -6,15 +6,11 @@ settings = require './settings'
 
 class Hover
   lineHeight: null
-  visible: false
   point: null
 
   constructor: (@vimState, @param) ->
     @text = []
     @view = atom.views.getView(this)
-
-  isEnabled: ->
-    settings.get(@param)
 
   setPoint: (point=null) ->
     @point = point ? @vimState.editor.getCursorBufferPosition()
@@ -68,9 +64,6 @@ class HoverElement extends HTMLElement
     this
 
   show: (point) ->
-    unless @model.isEnabled()
-      return
-
     {editor} = @model.vimState
     unless @marker
       @createOverlay(point)
