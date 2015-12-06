@@ -723,14 +723,16 @@ class Search extends SearchBase
     super
 
   subscribeScrollChange: ->
-    @subscribe @editorElement.onDidChangeScrollTop => @matches?.show()
-    @subscribe @editorElement.onDidChangeScrollLeft => @matches?.show()
+    @subscribe @editorElement.onDidChangeScrollTop =>
+      @matches?.show()
+    @subscribe @editorElement.onDidChangeScrollLeft =>
+      @matches?.show()
 
   isRepeatLastSearch: (input) ->
     input in ['', (if @isBackwards() then '?' else '/')]
 
   finish: ->
-    if @isIncrementalSearch()
+    if @isIncrementalSearch() and settings.get('showHoverSearchCounter')
       @vimState.hoverSearchCounter.reset()
     super
 
@@ -753,7 +755,8 @@ class Search extends SearchBase
     @input = @updateEscapeRegExpOption(@input)
     return unless @isIncrementalSearch()
     @matches?.destroy()
-    @vimState.hoverSearchCounter.reset()
+    if settings.get('showHoverSearchCounter')
+      @vimState.hoverSearchCounter.reset()
     @matches = null
     unless @input is ''
       @moveCursor(c) for c in @editor.getCursors()
