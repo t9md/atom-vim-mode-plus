@@ -20,6 +20,10 @@ class Hover
     @setPoint(point) if point
     @view.show(@point)
 
+  replaceLastSection: (text, point) ->
+    @text.pop()
+    @add(text, point)
+
   withTimeout: (point, options) ->
     @reset()
     {text, timeout} = options

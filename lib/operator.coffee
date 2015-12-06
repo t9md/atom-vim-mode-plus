@@ -285,7 +285,7 @@ class Surround extends TransformString
   initialize: ->
     return unless @requireInput
     @onDidConfirmInput (input) => @onConfirm(input)
-    @onDidChangeInput (input) => @vimState.hover.add(input)
+    @onDidChangeInput (input) => @addHover(input)
     @onDidCancelInput => @vimState.operationStack.cancel()
     @vimState.input.focus({@charsMax})
 
@@ -352,7 +352,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
     unless @haveSomeSelection()
       @vimState.reset()
       @abort()
-    @vimState.hover.add(@editor.getSelectedText()[0])
+    @addHover(@editor.getSelectedText()[0])
     super
 
   onConfirm: (@char) ->
@@ -498,8 +498,7 @@ class JoinByInput extends JoinWithKeepingSpace
   input: null
   trim: true
   initialize: ->
-    @onDidChangeInput (input) =>
-      @vimState.hover.add(input[-1..])
+    super
     @focusInput(charsMax: 10)
 
   join: (rows) ->
@@ -516,9 +515,10 @@ class Split extends TransformString
   hover: icon: ':split:', emoji: ':hocho:'
   requireInput: true
   input: null
+
   initialize: ->
-    @onDidChangeInput (input) =>
-      @vimState.hover.add(input[-1..])
+    if not @vimState.isMode('visual')
+      @setTarget @new("MoveToRelativeLine", {min: 1})
     @focusInput(charsMax: 10)
 
   isComplete: ->
