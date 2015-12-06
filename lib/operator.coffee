@@ -361,6 +361,86 @@ class ChangeSurroundAnyPair extends ChangeSurround
     @input = @char
     @vimState.operationStack.process()
 
+# Performance effective than nantive editor:move-line-up/down
+class MoveLineUp extends TransformString
+  @extend()
+  direction: 'up'
+  execute: ->
+    @eachSelection (s, setPoint) =>
+      @mutate(s, setPoint)
+
+  isMovable: (s) ->
+    s.getBufferRange().start.row isnt 0
+
+  getRangeTranslationSpec: ->
+    [[-1, 0], [0, 0]]
+
+  setBufferRange: (s, range) ->
+    swrap(s).setBufferRange(range, {preserveFolds: true})
+
+  mutate: (s, setPoint) ->
+    return unless @isMovable(s)
+    reversed = s.isReversed()
+    translation = @getRangeTranslationSpec()
+    swrap(s).translate(translation, {preserveFolds: true})
+    rows = swrap(s).lineTextForBufferRows()
+    @rotateRows(rows)
+    range = s.insertText(rows.join("\n") + "\n")
+    range = range.translate(translation.reverse()...)
+    swrap(s).setBufferRange(range, {preserveFolds: true, reversed})
+    @editor.scrollToCursorPosition({center: true})
+
+  isLastRow: (row) ->
+    row is @editor.getBuffer().getLastRow()
+
+  rotateRows: (rows) ->
+    rows.push(rows.shift())
+
+class MoveLineDown extends MoveLineUp
+  @extend()
+  direction: 'down'
+  isMovable: (s) ->
+    not @isLastRow(s.getBufferRange().end.row)
+
+  rotateRows: (rows) ->
+    rows.unshift(rows.pop())
+
+  getRangeTranslationSpec: ->
+    [[0, 0], [1, 0]]
+
+# class DuplicateLineUp extends TransformString
+#   @extend()
+#   direction: 'up'
+#   execute: ->
+#     @eachSelection (s, setPoint) =>
+#       @mutate(s, setPoint)
+#
+#   mutate: (s, setPoint) ->
+#     rows = swrap(s).getRows().map (row) =>
+#       @editor.lineTextForBufferRow(row)
+#     switch @direction
+#       when 'up' then s.cursor.moveToBeginningOfLine()
+#       when 'down' then s.cursor.moveToBeginningOfLine()
+#         # body...
+#
+#     text = rows.join("\n") + "\n"
+#     s.insertText(text, select: true)
+
+  # insertTextAbove: (selection, text) ->
+  #   selection.cursor.moveToBeginningOfLine()
+  #   selection.insertText("\n")
+  #   selection.cursor.moveUp()
+  #   selection.insertText(text)
+  #
+  # insertTextBelow: (selection, text) ->
+  #   selection.cursor.moveToEndOfLine()
+  #   selection.insertText("\n")
+  #   selection.insertText(text)
+
+# class DuplicateLineDown extends DuplicateLineUp
+#   @extend()
+#   direction: 'down'
+
 class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'

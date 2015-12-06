@@ -35,6 +35,10 @@ class SelectionWrapper
     range = @selection.getBufferRange()
     @setBufferRange range, {autoscroll: true, reversed}
 
+  getRows: ->
+    [startRow, endRow] = @selection.getBufferRowRange()
+    [startRow..endRow]
+
   getRowCount: ->
     [startRow, endRow] = @selection.getBufferRowRange()
     endRow - startRow + 1
@@ -114,6 +118,16 @@ class SelectionWrapper
     originalText = @selection.getText()
     @selection.insertText(text)
     originalText
+
+  lineTextForBufferRows: (text) ->
+    {editor} = @selection
+    @getRows().map (row) ->
+      editor.lineTextForBufferRow(row)
+
+  translate: (translation, options) ->
+    range = @selection.getBufferRange()
+    range = range.translate(translation...)
+    @setBufferRange(range, options)
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
