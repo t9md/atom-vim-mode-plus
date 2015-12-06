@@ -40,15 +40,13 @@ class Base
 
   constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
-    if settings.get('showHoverOnOperate') and @hover?
-      @vimState.hover.setPoint()
-      if hover = @hover[settings.get('showHoverOnOperateIcon')]
-        @vimState.hover.add(hover)
+    @vimState.hover.setPoint()
+    if hover = @hover?[settings.get('showHoverOnOperateIcon')]
+      @addHover(hover)
     _.extend(this, properties)
 
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
-
   isComplete: ->
     if (@requireInput and not @input)
       return false
@@ -74,6 +72,14 @@ class Base
     # Setting count as instance variable allows operation repeatable with same count.
     @count ?= @vimState.count.get() ? @defaultCount
 
+  addHover: (text, {replace}={}) ->
+    if settings.get('showHoverOnOperate')
+      replace ?= false
+      if replace
+        @vimState.hover.replaceLastSection(text)
+      else
+        @vimState.hover.add(text)
+
   new: (klassName, properties={}) ->
     klass = Base.getClass(klassName)
     new klass(@vimState, properties)
@@ -82,6 +88,14 @@ class Base
     options.charsMax ?= 1
     @onDidConfirmInput (@input) =>
       @vimState.operationStack.process()
+
+    # From 2nd addHover, we replace last section of hover
+    # to sync content with input mini editor.
+    firstInput = true
+    @onDidChangeInput (input) =>
+      @addHover(input, replace: not firstInput)
+      firstInput = false
+
     @onDidCancelInput =>
       @vimState.operationStack.cancel()
     @vimState.input.focus(options)

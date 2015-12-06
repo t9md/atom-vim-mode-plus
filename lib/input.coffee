@@ -27,12 +27,9 @@ class InputBase
 
     @editor.onDidChange =>
       return if @finished
-      text = @editor.getText()
-      # If we can confirm, no need to inform change.
-      if @canConfirm()
-        @confirm()
-      else
-        @emitter.emit 'did-change', text
+      input = @editor.getText()
+      @emitter.emit 'did-change', input
+      @confirm() if @canConfirm()
 
   canConfirm: ->
     if @options?.charsMax
