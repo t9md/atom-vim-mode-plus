@@ -73,11 +73,19 @@ class SelectionWrapper
       range: @selection.getBufferRange()
       reversed: @selection.isReversed()
 
+  getHeadCharacterwisePoint: ->
+    unless characterwise = @getProperties().characterwise
+      return null
+    {range: {start, end}} = characterwise
+    if @selection.isReversed()
+      start
+    else
+      end
+
   selectByProperties: (properties) ->
     {range, reversed} = properties.characterwise
     @setBufferRange(range)
     @setReversedState(reversed)
-
 
   restoreCharacterwise: ->
     {characterwise} = @getProperties()
@@ -85,18 +93,18 @@ class SelectionWrapper
     {range: {start, end}, reversed} = characterwise
     rows = @selection.getBufferRowRange()
 
-    reversedChanged = (@selection.isReversed() isnt reversed) # reverse status changed
-    rows.reverse() if reversedChanged
+    # reversedChanged = (@selection.isReversed() isnt reversed) # reverse status changed
+    # rows.reverse() if reversedChanged
 
     [startRow, endRow] = rows
     start.row = startRow
     end.row = endRow
     range = new Range(start, end)
 
-    if reversedChanged
-      rangeTaranslation = [[0, +1], [0, -1]]
-      rangeTaranslation.reverse() if @selection.isReversed()
-      range = range.translate(rangeTaranslation...)
+    # if reversedChanged
+    #   rangeTaranslation = [[0, +1], [0, -1]]
+    #   rangeTaranslation.reverse() if @selection.isReversed()
+    #   range = range.translate(rangeTaranslation...)
 
     @setBufferRange(range)
     # [NOTE] Important! reset to null after restored.

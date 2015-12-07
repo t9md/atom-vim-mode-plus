@@ -133,6 +133,7 @@ class ModeManager
   # -------------------------
   activateVisualMode: (submode) ->
     # If submode shift within visual mode, we first restore characterwise range
+    # At this phase @submode is not yet updated to requested submode.
     if @submode?
       @restoreCharacterwiseRange()
     else
