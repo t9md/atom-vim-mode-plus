@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
-{haveSomeSelection, toggleClassByCondition} = require './utils'
+{haveSomeSelection, toggleClassByCondition, pointIsAtEndOfBuffer} = require './utils'
 swrap = require './selection-wrapper'
 
 OperationStack = require './operation-stack'
@@ -169,11 +169,14 @@ class VimState
           style.setProperty('left', "#{point.column}ch")
       else
         unless s.isReversed()
+          point = s.cursor.getBufferPosition()
           if s.cursor.isAtBeginningOfLine()
-            # In visual-mode, cursor colum 0 means whole line selected
-            # and in this case, cursor position is at [nextRow, 0]
-            # So I offset one row up by stylesheet.
-            style.setProperty('top', '-1.5em')
+            unless pointIsAtEndOfBuffer(@editor, point)
+              # @setBufferPosition(@editor.getEofBufferPosition())
+              # In visual-mode, cursor colum 0 means whole line selected
+              # and in this case, cursor position is at [nextRow, 0]
+              # So I offset one row up by stylesheet.
+              style.setProperty('top', '-1.5em')
           else
             style.setProperty('left', '-1ch')
 
