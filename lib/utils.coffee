@@ -170,6 +170,9 @@ mergeIntersectingRanges = (ranges) ->
 pointIsAtEndOfLine = (editor, point) ->
   editor.bufferRangeForBufferRow(point.row).end.isEqual(point)
 
+pointIsAtEndOfBuffer = (editor, point) ->
+  point.isEqual(editor.getEofBufferPosition())
+
 module.exports = {
   include
   debug
@@ -194,4 +197,5 @@ module.exports = {
   findIndex
   mergeIntersectingRanges
   pointIsAtEndOfLine
+  pointIsAtEndOfBuffer
 }
