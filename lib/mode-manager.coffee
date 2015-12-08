@@ -1,6 +1,7 @@
 # Refactoring status: 95%
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
+{BlockwiseSelect} = require './visual-blockwise'
 
 swrap = require './selection-wrapper'
 {eachSelection, toggleClassByCondition, getNewTextRangeFromCheckpoint} = require './utils'
@@ -145,7 +146,7 @@ class ModeManager
     # Update selection area to final submode.
     switch submode
       when 'linewise' then swrap(s).expandOverLine() for s in selections
-      when 'blockwise' then @vimState.operationStack.run('BlockwiseSelect')
+      when 'blockwise' then new BlockwiseSelect(@vimState).execute()
 
     new Disposable =>
       @restoreCharacterwiseRange()

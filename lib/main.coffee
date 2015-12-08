@@ -2,14 +2,13 @@ _ = require 'underscore-plus'
 
 {Disposable, CompositeDisposable} = require 'atom'
 
+Base = require './base'
 StatusBarManager = require './status-bar-manager'
 globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
 {Hover, HoverElement} = require './hover'
 {Input, InputElement, Search, SearchElement} = require './input'
-
-Base = require './base'
 
 packageScope = 'vim-mode-plus'
 
