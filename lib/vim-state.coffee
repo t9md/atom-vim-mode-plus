@@ -153,61 +153,45 @@ class VimState
     @hover.reset()
     @operationStack.reset()
 
-  # Don't show cursor if multiple cursors
-  # Since column position is different in each cursor and setting different offset to
-  # each cursor need further direct manipluation of cursorComponent I don't want to do it.
   updateCursorStyle: ->
-    @styleElement?.remove()
-    @styleElement = document.createElement 'style'
-    document.head.appendChild(@styleElement)
-    selection = @editor.getLastSelection()
-    if selection.isReversed()
-      selector = 'atom-text-editor.vim-mode-plus.visual-mode.linewise.reversed::shadow .cursor'
-      style = ""
-    else
-      selector = 'atom-text-editor.vim-mode-plus.visual-mode.linewise:not(.reversed)::shadow .cursor'
-      style = "top: -1.5em;"
+    cursorElements = @editorElement.shadowRoot.querySelectorAll('.cursor')
+    selections = @editor.getSelections()
+    for [s, el] in _.zip(selections, cursorElements) when el
+      {style} = el
+      if @submode is 'linewise'
+        unless s.isReversed()
+          style.setProperty('top', '-1.5em')
+        if point = swrap(s).getCharacterwiseHeadPosition()
+          style.setProperty('left', "#{point.column}ch")
+      else
+        unless s.isReversed()
+          if s.cursor.isAtBeginningOfLine()
+            # In visual-mode, cursor colum 0 means whole line selected
+            # and in this case, cursor position is at [nextRow, 0]
+            # So I offset one row up by stylesheet.
+            style.setProperty('top', '-1.5em')
+          else
+            style.setProperty('left', '-1ch')
 
-    if point = swrap(selection).getCharacterwiseHeadPosition()
-      leftOffset = point.column
-      # leftOffset -= 1 unless selection.isReversed()
-      style += " left: #{leftOffset}ch;"
+    new Disposable ->
+      for {style} in cursorElements
+        style.removeProperty('top')
+        style.removeProperty('left')
 
-    @styleElement.sheet.addRule(selector, style)
-
-  markerOptions = {ivalidate: 'never', persistent: false}
-  decorationOptions = {type: 'highlight', class: 'vim-mode-plus-cursor-normal'}
-  markersByCursor = new Map
-
-  showCursorMarkerForLinewise: (cursor) ->
-    {selection} = cursor
-    if point = swrap(selection).getCharacterwiseHeadPosition()
-      {row} = selection.getHeadBufferPosition()
-      point = new Point(row, point.column)
-      point = point.translate([-1, 0]) unless selection.isReversed()
-      range = Range.fromPointWithDelta(point, 0, 1)
-      marker = @editor.markBufferRange(range, markerOptions)
-      markersByCursor.set(cursor, marker)
-      @editor.decorateMarker marker, decorationOptions
-
+  cursorStyleDisposer = null
   showCursors: ->
-    markersByCursor.forEach (marker) -> marker.destroy()
-    markersByCursor.clear()
+    cursorStyleDisposer?.dispose()
+    cursorStyleDisposer = null
     return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))
     cursors = switch @submode
-      when 'linewise' then @editor.getCursors()
-      when 'characterwise' then @editor.getCursors()
+      when 'linewise', 'characterwise'
+        cursorStyleDisposer = @updateCursorStyle()
+        @editor.getCursors()
       when 'blockwise'
         @editor.getCursors().filter (c) -> swrap(c.selection).isBlockwiseHead()
 
-    for c in @editor.getCursors()
+    for c, i in @editor.getCursors()
       if c in cursors
-        if @submode is 'linewise'
-          if @editor.hasMultipleCursors()
-            @showCursorMarkerForLinewise(c)
-            continue
-          else
-            @updateCursorStyle()
         c.setVisible(true) unless c.isVisible()
         toggleClassByCondition(@editorElement, 'reversed', c.selection.isReversed())
       else

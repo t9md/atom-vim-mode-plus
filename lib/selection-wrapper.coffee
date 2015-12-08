@@ -70,7 +70,9 @@ class SelectionWrapper
     prop = @detectCharacterwiseProperties()
     {characterwise} = prop
     endPoint = if @selection.isReversed() then 'tail' else 'head'
-    characterwise[endPoint] = characterwise[endPoint].translate([0, -1])
+    point = characterwise[endPoint]
+    point = @selection.editor.clipBufferPosition(point.translate([0, -1]))
+    characterwise[endPoint] = point
     @setProperties prop
 
   detectCharacterwiseProperties: ->
