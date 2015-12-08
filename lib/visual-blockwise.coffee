@@ -13,7 +13,7 @@ class VisualBlockwise extends Base
   initialize: ->
     # PlantTail
     unless @getTail()?
-      @updateProperties {head: @getBottom(), tail: @getTop()}
+      @setProperties {head: @getBottom(), tail: @getTop()}
 
   eachSelection: (fn) ->
     for s in @editor.getSelections()
@@ -23,12 +23,12 @@ class VisualBlockwise extends Base
     _.times @getCount(), ->
       fn()
 
-  updateProperties: ({head, tail}) ->
+  setProperties: ({head, tail}) ->
     @eachSelection (s) ->
       prop = {}
       prop.head = (s is head) if head?
       prop.tail = (s is tail) if tail?
-      swrap(s).updateProperties(blockwise: prop)
+      swrap(s).setProperties(blockwise: prop)
 
   isSingleLine: ->
     @editor.getSelections().length is 1
@@ -57,7 +57,7 @@ class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
   execute: ->
     unless @isSingleLine()
-      @updateProperties {head: @getTail(), tail: @getHead()}
+      @setProperties {head: @getTail(), tail: @getHead()}
     @new('ReverseSelections').execute()
 
 class BlockwiseMoveDown extends VisualBlockwise
@@ -74,10 +74,11 @@ class BlockwiseMoveDown extends VisualBlockwise
     @countTimes =>
       if @isExpanding()
         @editor["addSelection#{@direction}"]()
-        swrap.setReversedState @editor, @getTail().isReversed()
+        selections = @editor.getSelections()
+        swrap.setReversedState selections, @getTail().isReversed()
       else
         @getHead().destroy()
-    @updateProperties {head: @getHead()}
+    @setProperties {head: @getHead(), tail: @getTail()}
 
 class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
@@ -154,9 +155,9 @@ class BlockwiseSelect extends VisualBlockwise
     unless selection.isSingleScreenLine()
       @editor.setSelectedScreenRanges(ranges, {reversed})
     if wasReversed
-      @updateProperties {head: @getTop(), tail: @getBottom()}
+      @setProperties {head: @getTop(), tail: @getBottom()}
     else
-      @updateProperties {head: @getBottom(), tail: @getTop()}
+      @setProperties {head: @getBottom(), tail: @getTop()}
     @eachSelection (s) ->
       s.destroy() if s.isEmpty()
 

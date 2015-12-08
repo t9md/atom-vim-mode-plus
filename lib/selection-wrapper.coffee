@@ -14,11 +14,6 @@ class SelectionWrapper
     prop[@scope] = newProp
     @selection.marker.setProperties prop
 
-  updateProperties: (newProp) ->
-    # @getProperties() get result of getProperties() which is safe to extend.
-    # So OK to directly extend.
-    @setProperties _.deepExtend(@getProperties(), newProp)
-
   resetProperties: ->
     @setProperties null
 
@@ -27,9 +22,15 @@ class SelectionWrapper
       @setBufferRange(range, {autoscroll: true})
 
   reverse: ->
-    {row, column} = @selection.getBufferRange().getExtent()
-    return if (row is 0) and (column is 1)
     @setReversedState(not @selection.isReversed())
+
+    {head, tail} = @getProperties().characterwise ? {}
+    if head? and tail?
+      @setProperties
+        characterwise:
+          head: tail,
+          tail: head,
+          reversed: @selection.isReversed()
 
   setReversedState: (reversed) ->
     range = @selection.getBufferRange()
@@ -66,47 +67,37 @@ class SelectionWrapper
       Range.fromPointWithDelta(point, 0, columnDelta)
 
   preserveCharacterwise: ->
-    @updateProperties @detectCharacterwiseProperties()
+    prop = @detectCharacterwiseProperties()
+    {characterwise} = prop
+    endPoint = if @selection.isReversed() then 'tail' else 'head'
+    characterwise[endPoint] = characterwise[endPoint].translate([0, -1])
+    @setProperties prop
 
   detectCharacterwiseProperties: ->
     characterwise:
-      range: @selection.getBufferRange()
+      head: @selection.getHeadBufferPosition()
+      tail: @selection.getTailBufferPosition()
       reversed: @selection.isReversed()
 
-  getHeadCharacterwisePoint: ->
-    unless characterwise = @getProperties().characterwise
-      return null
-    {range: {start, end}} = characterwise
-    if @selection.isReversed()
-      start
-    else
-      end
+  getCharacterwiseHeadPosition: ->
+    @getProperties().characterwise?.head
 
   selectByProperties: (properties) ->
-    {range, reversed} = properties.characterwise
-    @setBufferRange(range)
+    {head, tail, reversed} = properties.characterwise
+    # No problem if head is greater than tail, Range constructor swap start/end.
+    @setBufferRange([head, tail])
     @setReversedState(reversed)
 
   restoreCharacterwise: ->
-    {characterwise} = @getProperties()
-    return unless characterwise
-    {range: {start, end}, reversed} = characterwise
-    rows = @selection.getBufferRowRange()
-
-    # reversedChanged = (@selection.isReversed() isnt reversed) # reverse status changed
-    # rows.reverse() if reversedChanged
-
-    [startRow, endRow] = rows
-    start.row = startRow
-    end.row = endRow
-    range = new Range(start, end)
-
-    # if reversedChanged
-    #   rangeTaranslation = [[0, +1], [0, -1]]
-    #   rangeTaranslation.reverse() if @selection.isReversed()
-    #   range = range.translate(rangeTaranslation...)
-
-    @setBufferRange(range)
+    unless characterwise = @getProperties().characterwise
+      return
+    {head, tail, reversed} = characterwise
+    [start, end] = if @selection.isReversed()
+      [head, tail]
+    else
+      [tail, head]
+    [start.row, end.row] = @selection.getBufferRowRange()
+    @setBufferRange([start, end.translate([0, +1])])
     # [NOTE] Important! reset to null after restored.
     @resetProperties()
 
@@ -140,8 +131,12 @@ class SelectionWrapper
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
-swrap.setReversedState = (editor, reversed) ->
-  for s in editor.getSelections()
+swrap.setReversedState = (selections, reversed) ->
+  selections.forEach (s) ->
     swrap(s).setReversedState(reversed)
+
+swrap.reverse = (selections) ->
+  selections.forEach (s) ->
+    swrap(s).reverse()
 
 module.exports = swrap
