@@ -176,3 +176,5 @@ class BlockwiseRestoreCharacterwise extends VisualBlockwise
       endColumn += 1
     range = [[startRow, startColumn], [endRow, endColumn]]
     @editor.setSelectedBufferRange(range, {reversed})
+
+module.exports = {BlockwiseSelect}

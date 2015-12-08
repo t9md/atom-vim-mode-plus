@@ -154,10 +154,9 @@ class VimState
     @operationStack.reset()
 
   updateCursorStyle: ->
-    cursorElements = @editorElement.shadowRoot.querySelectorAll('.cursor')
     selections = @editor.getSelections()
-    for [s, el] in _.zip(selections, cursorElements) when el
-      {style} = el
+    cursorElements = @editorElement.shadowRoot.querySelectorAll('.cursor')
+    for [s, {style}] in _.zip(selections, cursorElements)
       if @submode is 'linewise'
         unless s.isReversed()
           style.setProperty('top', '-1.5em')
