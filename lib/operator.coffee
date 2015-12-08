@@ -1,4 +1,5 @@
 # Refactoring status: 80%
+LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
@@ -667,7 +668,7 @@ class PutBefore extends Operator
   pasteLinewise: (selection, text) ->
     {cursor} = selection
     if selection.isEmpty()
-      text = text.replace(/\n$/, '')
+      text = text.replace(LineEndingRegExp, '')
       if @location is 'before'
         @insertTextAbove(selection, text)
       else
