@@ -614,7 +614,7 @@ class IncrementNumber extends Operator
       atom.beep()
     # Reverseing selection put cursor on start position of selection.
     # This allow increment/decrement works in same target range when repeated.
-    swrap.setReversedState(@editor, true)
+    swrap.setReversedState(@editor.getSelections(), true)
     @activate('normal')
 
   replaceNumber: (scanRange, pattern) ->

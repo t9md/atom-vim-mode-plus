@@ -1,6 +1,6 @@
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
-{Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
+{Emitter, Disposable, CompositeDisposable, Range, Point} = require 'atom'
 
 {Hover} = require './hover'
 {Input, Search} = require './input'
@@ -153,12 +153,11 @@ class VimState
     @hover.reset()
     @operationStack.reset()
 
+  # Don't show cursor if multiple cursors
+  # Since column position is different in each cursor and setting different offset to
+  # each cursor need further direct manipluation of cursorComponent I don't want to do it.
   updateCursorStyle: ->
     @styleElement?.remove()
-    # Don't show cursor if multiple cursors
-    # Since column position is different in each cursor and setting different offset to
-    # each cursor need further direct manipluation of cursorComponent I don't want to do it.
-    return if @editor.hasMultipleCursors()
     @styleElement = document.createElement 'style'
     document.head.appendChild(@styleElement)
     selection = @editor.getLastSelection()
@@ -169,22 +168,42 @@ class VimState
       selector = 'atom-text-editor.vim-mode-plus.visual-mode.linewise:not(.reversed)::shadow .cursor'
       style = "top: -1.5em;"
 
-    if point = swrap(selection).getHeadCharacterwisePoint()
+    if point = swrap(selection).getCharacterwiseHeadPosition()
       leftOffset = point.column
-      leftOffset -= 1 unless selection.isReversed()
+      # leftOffset -= 1 unless selection.isReversed()
       style += " left: #{leftOffset}ch;"
 
     @styleElement.sheet.addRule(selector, style)
 
+  markerOptions = {ivalidate: 'never', persistent: false}
+  decorationOptions = {type: 'highlight', class: 'vim-mode-plus-cursor-normal'}
+  cursorMarker = null
+  showCursorMarkerForLinewise: ->
+    selection = @editor.getLastSelection()
+    if point = swrap(selection).getCharacterwiseHeadPosition()
+      {row} = selection.getHeadBufferPosition()
+      point = new Point(row, point.column)
+      point = point.translate([-1, 0]) unless selection.isReversed()
+      range = Range.fromPointWithDelta(point, 0, 1)
+      cursorMarker = @editor.markBufferRange(range, markerOptions)
+      @editor.decorateMarker cursorMarker, decorationOptions
+
   showCursors: ->
+    cursorMarker?.destroy()
     return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))
     cursors = switch @submode
-      when 'linewise' then @editor.getCursors()
+      when 'linewise'
+        if @editor.hasMultipleCursors()
+          []
+        else
+          # @updateCursorStyle()
+          @showCursorMarkerForLinewise()
+          []
+          # @editor.getCursors()
       when 'characterwise' then @editor.getCursors()
       when 'blockwise'
         @editor.getCursors().filter (c) -> swrap(c.selection).isBlockwiseHead()
 
-    @updateCursorStyle() if @submode is 'linewise'
 
     for c in @editor.getCursors()
       if c in cursors

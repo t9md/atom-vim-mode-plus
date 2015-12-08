@@ -22,11 +22,10 @@ class Misc extends Base
 class ReverseSelections extends Misc
   @extend()
   execute: ->
-    lastSelection = @editor.getLastSelection()
-    swrap(lastSelection).reverse()
-    reversed = lastSelection.isReversed()
-    for s in @editor.getSelections() when not s.isLastSelection()
-      swrap(s).setReversedState(reversed)
+    # FIXME? need to care
+    # not all selection reversed state is in-sync?
+    # In that case make it sync in operationStack::process.
+    swrap.reverse(@editor.getSelections())
 
 class SelectLatestChange extends Misc
   @extend()
