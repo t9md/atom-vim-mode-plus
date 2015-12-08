@@ -144,6 +144,8 @@ class Select extends Operator
   @extend(false)
   flashTarget: false
   execute: ->
+    # for s in @editor.getSelections()
+    #   swrap(s).preserveCharacterwise()
     @selectTarget(true)
 
 class Delete extends Operator
