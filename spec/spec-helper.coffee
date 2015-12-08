@@ -224,7 +224,7 @@ class VimEditor
     @validateOptions(options, ensureOptionsOrdered, 'Invalid ensure option')
     # Input
     unless _.isEmpty(keystroke)
-      @keystroke(keystroke, {element: @editorElement})
+      @keystroke(keystroke)
 
     for name in ensureOptionsOrdered when options[name]?
       method = 'ensure' + _.capitalize(_.camelize(name))
