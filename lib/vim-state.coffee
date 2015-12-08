@@ -177,36 +177,37 @@ class VimState
 
   markerOptions = {ivalidate: 'never', persistent: false}
   decorationOptions = {type: 'highlight', class: 'vim-mode-plus-cursor-normal'}
-  cursorMarker = null
-  showCursorMarkerForLinewise: ->
-    selection = @editor.getLastSelection()
+  markersByCursor = new Map
+
+  showCursorMarkerForLinewise: (cursor) ->
+    {selection} = cursor
     if point = swrap(selection).getCharacterwiseHeadPosition()
       {row} = selection.getHeadBufferPosition()
       point = new Point(row, point.column)
       point = point.translate([-1, 0]) unless selection.isReversed()
       range = Range.fromPointWithDelta(point, 0, 1)
-      cursorMarker = @editor.markBufferRange(range, markerOptions)
-      @editor.decorateMarker cursorMarker, decorationOptions
+      marker = @editor.markBufferRange(range, markerOptions)
+      markersByCursor.set(cursor, marker)
+      @editor.decorateMarker marker, decorationOptions
 
   showCursors: ->
-    cursorMarker?.destroy()
+    markersByCursor.forEach (marker) -> marker.destroy()
+    markersByCursor.clear()
     return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))
     cursors = switch @submode
-      when 'linewise'
-        if @editor.hasMultipleCursors()
-          []
-        else
-          # @updateCursorStyle()
-          @showCursorMarkerForLinewise()
-          []
-          # @editor.getCursors()
+      when 'linewise' then @editor.getCursors()
       when 'characterwise' then @editor.getCursors()
       when 'blockwise'
         @editor.getCursors().filter (c) -> swrap(c.selection).isBlockwiseHead()
 
-
     for c in @editor.getCursors()
       if c in cursors
+        if @submode is 'linewise'
+          if @editor.hasMultipleCursors()
+            @showCursorMarkerForLinewise(c)
+            continue
+          else
+            @updateCursorStyle()
         c.setVisible(true) unless c.isVisible()
         toggleClassByCondition(@editorElement, 'reversed', c.selection.isReversed())
       else
