@@ -10,6 +10,7 @@ swrap = require './selection-wrapper'
   rangeToEndOfFileFromPoint
   sortRanges
   getLineTextToPoint
+  characterAtPoint
 } = require './utils'
 
 class TextObject extends Base
@@ -163,8 +164,15 @@ class Pair extends TextObject
     from = selection.getHeadBufferPosition()
 
     # Be inner, include char under cursor.
-    from = from.translate([0, +1]) if selection.isEmpty()
-    from = from.translate([0, -1]) if what is 'next'
+    if (not selection.isEmpty() and not selection.isReversed())
+      from = from.translate([0, -1])
+
+    # In case cursor is on one of pair char, we adjust `from` point to be inclusive.
+    charAtCursor = characterAtPoint(@editor, from)
+    if charAtCursor in @pair
+      switch @getPairState(@pair, characterAtPoint(@editor, from), from)
+        when 'open' then from = from.translate([0, +1])
+        when 'close' then from = from.translate([0, -1])
 
     range  = @getPairRange(from, @pair, what)
     if range?.isEqual(rangeOrig)

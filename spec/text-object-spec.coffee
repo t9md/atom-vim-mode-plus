@@ -4,6 +4,11 @@
 describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
+  getCheckFunctionFor = (textObject) ->
+    (initialPoint, keystroke, options) ->
+      set cursor: initialPoint
+      ensure keystroke + textObject, options
+
   beforeEach ->
     getVimState (state, vimEditor) ->
       vimState = state
@@ -268,6 +273,19 @@ describe "TextObject", ->
         ensure 'di"',
           text: '" something in here and in "here" " and over here'
           cursor: [0, 39]
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('i"')
+        text = '-"+"-'
+        textFinal = '-""-'
+        selectedText = '+'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-double-quote", ->
       originalText = '" something in here and in "here" "'
       beforeEach ->
@@ -286,7 +304,19 @@ describe "TextObject", ->
           text: '" something in here and in "here'
           cursor: [0, 31]
           mode: 'normal'
-
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('a"')
+        text = '-"+"-'
+        textFinal = '--'
+        selectedText = '"+"'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
   describe "SingleQuote", ->
     describe "inner-single-quote", ->
       beforeEach ->
@@ -317,6 +347,19 @@ describe "TextObject", ->
         ensure "di'",
           text: "' something in here and in 'here' ' and over here"
           cursor: [0, 39]
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor("i'")
+        text = "-'+'-"
+        textFinal = "-''-"
+        selectedText = '+'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-single-quote", ->
       originalText = "' something in here and in 'here' '"
       beforeEach ->
@@ -334,7 +377,19 @@ describe "TextObject", ->
           text: "' something in here and in 'here"
           cursor: [0, 31]
           mode: 'normal'
-
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor("a'")
+        text = "-'+'-"
+        textFinal = "--"
+        selectedText = "'+'"
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
   describe "BackTick", ->
     originalText = "this is `sample` text."
     beforeEach ->
@@ -347,14 +402,39 @@ describe "TextObject", ->
       it "do nothing when pair range is not under cursor", ->
         set cursor: [0, 16]
         ensure "di`", text: originalText, cursor: [0, 16]
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('i`')
+        text = '-`+`-'
+        textFinal = '-``-'
+        selectedText = '+'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-back-tick", ->
       it "applies operators inner-area", ->
         ensure "da`", text: "this is  text.", cursor: [0, 8]
 
       it "do nothing when pair range is not under cursor", ->
         set cursor: [0, 16]
-        ensure "di`", text: originalText, cursor: [0, 16]
-
+        ensure "da`", text: originalText, cursor: [0, 16]
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor("a`")
+        text = "-`+`-"
+        textFinal = "--"
+        selectedText = "`+`"
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
   describe "CurlyBracket", ->
     describe "inner-curly-bracket", ->
       beforeEach ->
@@ -374,6 +454,19 @@ describe "TextObject", ->
           text: "{ something in here and in {} }"
           cursor: [0, 28]
 
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('i{')
+        text = '-{+}-'
+        textFinal = '-{}-'
+        selectedText = '+'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-curly-bracket", ->
       beforeEach ->
         set
@@ -392,6 +485,19 @@ describe "TextObject", ->
           text: "{ something in here and in  }"
           cursor: [0, 27]
           mode: 'normal'
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor("a{")
+        text = "-{+}-"
+        textFinal = "--"
+        selectedText = "{+}"
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
 
   describe "AngleBracket", ->
     describe "inner-angle-bracket", ->
@@ -410,6 +516,19 @@ describe "TextObject", ->
         ensure 'di<',
           text: "< something in here and in <> >"
           cursor: [0, 28]
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('i<')
+        text = '-<+>-'
+        textFinal = '-<>-'
+        selectedText = '+'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-angle-bracket", ->
       beforeEach ->
         set
@@ -428,6 +547,19 @@ describe "TextObject", ->
           text: "< something in here and in  >"
           cursor: [0, 27]
           mode: 'normal'
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor("a<")
+        text = "-<+>-"
+        textFinal = "--"
+        selectedText = "<+>"
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
 
   describe "Tag", ->
     describe "inner-tag", ->
@@ -449,6 +581,19 @@ describe "TextObject", ->
         ensure 'dit',
           text: "<something></something><again>"
           cursor: [0, 11]
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('it')
+        text = '->+<-'
+        textFinal = '-><-'
+        selectedText = '+'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
 
   describe "SquareBracket", ->
     describe "inner-square-bracket", ->
@@ -486,7 +631,32 @@ describe "TextObject", ->
           text: "[ something in here and in  ]"
           cursor: [0, 27]
           mode: 'normal'
-
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('i[')
+        text = '-[+]-'
+        textFinal = '-[]-'
+        selectedText = '+'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('a[')
+        text = '-[+]-'
+        textFinal = '--'
+        selectedText = '[+]'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
   describe "Parenthesis", ->
     describe "inner-parenthesis", ->
       beforeEach ->
@@ -532,6 +702,19 @@ describe "TextObject", ->
             [[0, 1],  [0, 6]]
             [[0, 13], [0, 20]]
           ]
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('i(')
+        text = '-(+)-'
+        textFinal = '-()-'
+        selectedText = '+'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
 
     describe "a-parenthesis", ->
       beforeEach ->
@@ -550,6 +733,19 @@ describe "TextObject", ->
         ensure 'da(',
           text: "( something in here and in  )"
           cursor: [0, 27]
+      describe "cursor is on the pair char", ->
+        check = getCheckFunctionFor('a(')
+        text = '-(+)-'
+        textFinal = '--'
+        selectedText = '(+)'
+        open = [0, 1]
+        close = [0, 3]
+        beforeEach ->
+          set {text}
+        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
+        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-4 visual", -> check close, 'v', {selectedText}
 
   describe "Paragraph", ->
     describe "inner-paragraph", ->
