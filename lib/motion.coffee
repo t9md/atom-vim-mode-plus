@@ -3,7 +3,10 @@ _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
 globalState = require './global-state'
-{saveEditorState, getVisibleBufferRange, withKeepingGoalColumn} = require './utils'
+{
+  saveEditorState, getVisibleBufferRange, withKeepingGoalColumn
+  cursorIsAtEndOfBuffer
+} = require './utils'
 swrap = require './selection-wrapper'
 {Hover} = require './hover'
 {MatchList} = require './match'
@@ -62,7 +65,8 @@ class Motion extends Base
 
     selection.modifySelection =>
       tailRange = swrap(selection).getTailRange()
-      unless selection.isReversed()
+      unless selection.isReversed() or
+         (cursorIsAtEndOfBuffer(@editor, cursor) and selection.isEmpty()) # become empty at EndOfBuffer
         withKeepingGoalColumn cursor, (c) ->
           c.moveLeft()
       @moveCursor(cursor)
