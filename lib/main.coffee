@@ -57,7 +57,7 @@ module.exports =
     getState = =>
       @getEditorState(atom.workspace.getActiveTextEditor())
 
-    scope = 'atom-text-editor'
+    scope = 'atom-text-editor:not([mini])'
     for name, fn of vimStateCommands
       do (fn) =>
         @subscribe atom.commands.add scope, "#{packageScope}:#{name}", (event) ->
