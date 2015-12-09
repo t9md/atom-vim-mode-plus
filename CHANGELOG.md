@@ -1,3 +1,5 @@
+# 0.X.X WIP
+
 # 0.8.0
 - New: provideVimModePlus service API now provide Base class and subscriptions.
 - Internal: Remove dynamic derivation for (a, inner) TextObject for consistency.
@@ -7,7 +9,7 @@
 - New experiment: Split operator to split selected line by string entered.
 - New experiment: Performance effective(in big buffer) version of move-line-up/down operator.
 - Internal: Remove direct referencing to settings parameter in hover instance.
-- Improve: hover can show input char even in onChar input operator like Surround.
+- Improve: hover can show input char even in oneChar input operator like Surround.
 - Improve: hover sync text when multi-char input text is deleted for operator like ChangeSurround. #42
 - New improve: [Experimental] Show cursor position in visual-linewise. #45
 - Improve: Change won't enter insert-mode if target object is not found like in case `ci(` failed.
