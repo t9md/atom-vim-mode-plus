@@ -176,6 +176,10 @@ pointIsAtEndOfBuffer = (editor, point) ->
 cursorIsAtEndOfBuffer = (editor, cursor) ->
   pointIsAtEndOfBuffer(editor, cursor.getBufferPosition())
 
+characterAtPoint = (editor, point) ->
+  range = Range.fromPointWithDelta(point, 0, 1)
+  char = editor.getTextInBufferRange(range)
+
 module.exports = {
   include
   debug
@@ -202,4 +206,5 @@ module.exports = {
   pointIsAtEndOfLine
   pointIsAtEndOfBuffer
   cursorIsAtEndOfBuffer
+  characterAtPoint
 }
