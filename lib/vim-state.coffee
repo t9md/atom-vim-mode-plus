@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, Search} = require './input'
 settings = require './settings'
-{haveSomeSelection, toggleClassByCondition, pointIsAtEndOfBuffer} = require './utils'
+{haveSomeSelection, toggleClassByCondition, cursorIsAtEndOfBuffer} = require './utils'
 swrap = require './selection-wrapper'
 
 OperationStack = require './operation-stack'
@@ -162,20 +162,24 @@ class VimState
     return unless ((cursorElements.length is selections.length) and cursorElements.length)
 
     for [s, {style}] in _.zip(selections, cursorElements)
+      {cursor} = s
       if @submode is 'linewise'
         unless s.isReversed()
-          style.setProperty('top', '-1.5em')
+          style.setProperty('top', '-1.5em') unless s.isEmpty()
         if point = swrap(s).getCharacterwiseHeadPosition()
           style.setProperty('left', "#{point.column}ch")
       else
         unless s.isReversed()
-          point = s.cursor.getBufferPosition()
-          if s.cursor.isAtBeginningOfLine()
-            unless pointIsAtEndOfBuffer(@editor, point)
-              # @setBufferPosition(@editor.getEofBufferPosition())
-              # In visual-mode, cursor colum 0 means whole line selected
-              # and in this case, cursor position is at [nextRow, 0]
-              # So I offset one row up by stylesheet.
+          if cursor.isAtBeginningOfLine()
+            # @setBufferPosition(@editor.getEofBufferPosition())
+            # In visual-mode, cursor colum 0 means whole line selected
+            # and in this case, cursor position is at [nextRow, 0]
+            # So I offset one row up by stylesheet.
+            if cursorIsAtEndOfBuffer(@editor, cursor)
+              # hide cursor, I can display cursor but its missleading.
+              # Because when you move cursor, EOB position not included as selection.
+              style.setProperty('left', '-2ch')
+            else
               style.setProperty('top', '-1.5em')
           else
             style.setProperty('left', '-1ch')
