@@ -854,12 +854,15 @@ class Change extends ActivateInsertMode
 
   execute: ->
     @target.setOptions?(excludeWhitespace: true)
-    if @selectTarget()
-      @setTextToRegister @editor.getSelectedText()
-      text = if @target.isLinewise?() then "\n" else ""
-      for s in @editor.getSelections()
-        range = s.insertText(text, autoIndent: true)
-        s.cursor.moveLeft() unless range.isEmpty()
+    unless @selectTarget()
+      @activate('normal')
+      return
+
+    @setTextToRegister @editor.getSelectedText()
+    text = if @target.isLinewise?() then "\n" else ""
+    for s in @editor.getSelections()
+      range = s.insertText(text, autoIndent: true)
+      s.cursor.moveLeft() unless range.isEmpty()
     super
 
 class Substitute extends Change
