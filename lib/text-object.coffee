@@ -168,9 +168,9 @@ class Pair extends TextObject
       from = from.translate([0, -1])
 
     # In case cursor is on one of pair char, we adjust `from` point to be inclusive.
-    charAtCursor = characterAtPoint(@editor, from)
-    if charAtCursor in @pair
-      switch @getPairState(@pair, characterAtPoint(@editor, from), from)
+    characterAtCursor = characterAtPoint(@editor, from)
+    if characterAtCursor in @pair
+      switch @getPairState(@pair, characterAtCursor, from)
         when 'open' then from = from.translate([0, +1])
         when 'close' then from = from.translate([0, -1])
 
