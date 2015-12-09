@@ -1,3 +1,21 @@
+# 0.8.0
+- New: provideVimModePlus service API now provide Base class and subscriptions.
+- Internal: Remove dynamic derivation for (a, inner) TextObject for consistency.
+- Doc: Most of sections are moved to vim-mode-plus Wiki and remove old documents.
+- Improve: Change operator properly update change marker(`[`, `]`)
+- Internal: Refine definition for what `isComplete()` is.
+- New experiment: Split operator to split selected line by string entered.
+- New experiment: Performance effective(in big buffer) version of move-line-up/down operator.
+- Internal: Remove direct referencing to settings parameter in hover instance.
+- Improve: hover can show input char even in onChar input operator like Surround.
+- Improve: hover sync text when multi-char input text is deleted for operator like ChangeSurround. #42
+- New improve: [Experimental] Show cursor position in visual-linewise. #45
+- Improve: Change won't enter insert-mode if target object is not found like in case `ci(` failed.
+- Improve: All Pair text-object properly select text-object in case char under cursor is closing pair. #48
+- FIX: Prevent vim-mode-plus's command become available in mini-editor. #50
+- FIX: `p`, `P` insert extra newline when line ending is CRLF #49.
+- FIX: `dd`, `dk` remove extra line when its executed last line of buffer. #43
+
 # 0.7.1
 - Improve cursor position on Undo/Redo when setCursorToStartOfChangeOnUndoRedo is enabled.
 
