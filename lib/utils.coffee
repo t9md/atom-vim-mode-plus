@@ -173,6 +173,9 @@ pointIsAtEndOfLine = (editor, point) ->
 pointIsAtEndOfBuffer = (editor, point) ->
   point.isEqual(editor.getEofBufferPosition())
 
+cursorIsAtEndOfBuffer = (editor, cursor) ->
+  pointIsAtEndOfBuffer(editor, cursor.getBufferPosition())
+
 module.exports = {
   include
   debug
@@ -198,4 +201,5 @@ module.exports = {
   mergeIntersectingRanges
   pointIsAtEndOfLine
   pointIsAtEndOfBuffer
+  cursorIsAtEndOfBuffer
 }
