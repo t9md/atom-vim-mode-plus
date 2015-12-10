@@ -119,6 +119,7 @@
   'g c':   'vim-mode-plus:camel-case'
   'g /':   'vim-mode-plus:toggle-line-comments'
   'g -':   'vim-mode-plus:dash-case'
+  # 'g _': 'vim-mode-plus:snake-case'
   'g s s': 'vim-mode-plus:surround'
   'g s w': 'vim-mode-plus:surround-word'
   'g s d': 'vim-mode-plus:delete-surround'
@@ -273,7 +274,6 @@
   'a (':  'vim-mode-plus:a-parenthesis'
   'a )':  'vim-mode-plus:a-parenthesis'
   'a b':  'vim-mode-plus:a-parenthesis'
-
 
   'i p':  'vim-mode-plus:inner-paragraph'
   'a p':  'vim-mode-plus:a-paragraph'
