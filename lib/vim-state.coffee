@@ -165,7 +165,9 @@ class VimState
       {cursor} = s
       if @submode is 'linewise'
         unless s.isReversed()
-          style.setProperty('top', '-1.5em') unless s.isEmpty()
+          {start, end} = s.getBufferRange()
+          unless start.row is end.row is @editor.getLastBufferRow()
+            style.setProperty('top', '-1.5em') unless s.isEmpty()
         if point = swrap(s).getCharacterwiseHeadPosition()
           style.setProperty('left', "#{point.column}ch")
       else
