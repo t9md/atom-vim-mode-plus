@@ -9,6 +9,7 @@ settings = require './settings'
 VimState = require './vim-state'
 {Hover, HoverElement} = require './hover'
 {Input, InputElement, Search, SearchElement} = require './input'
+ExMode = require './ex-mode'
 
 packageScope = 'vim-mode-plus'
 
@@ -42,6 +43,8 @@ module.exports =
     @subscriptions.add args...
 
   registerCommands: ->
+    commandScope = 'atom-text-editor:not([mini])'
+
     # all commands here is executed with context where 'this' binded to 'vimState'
     vimStateCommands =
       'activate-normal-mode': -> @activate('normal')
@@ -53,15 +56,18 @@ module.exports =
       'set-count': (e) -> @count.set(e) # 0-9
       'set-register-name': -> @register.setName() # "
       'replace-mode-backspace': -> @modeManager.replaceModeBackspace()
+      'show-ex:': -> @showEx()
 
     getState = =>
       @getEditorState(atom.workspace.getActiveTextEditor())
 
-    scope = 'atom-text-editor:not([mini])'
     for name, fn of vimStateCommands
       do (fn) =>
         @addCommand commandScope, name, (event) ->
           fn.bind(getState())(event)
+
+    @subscribe atom.commands.add commandScope, "#{packageScope}:ex-toggle", ->
+      ExMode.toggle(getState())
 
   addCommand: (scope, name, fn) ->
     @subscribe atom.commands.add scope, "#{packageScope}:#{name}", fn
