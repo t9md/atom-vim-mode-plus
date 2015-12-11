@@ -119,10 +119,10 @@ class VimState
       point = @editor.getLastCursor().getBufferPosition()
       tailRange = Range.fromPointWithDelta(point, 0, +1)
       selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) ->
+        handleSelectionChange()
         selection.setBufferRange(selection.getBufferRange().union(tailRange))
 
     handleMouseUp = ->
-      handleSelectionChange()
       selectionWatcher?.dispose()
       selectionWatcher = null
 

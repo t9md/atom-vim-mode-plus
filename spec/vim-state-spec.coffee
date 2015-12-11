@@ -119,8 +119,8 @@ describe "VimState", ->
       it "puts the editor into visual mode", ->
         ensure mode: 'normal'
 
+        advanceClock(200)
         atom.commands.dispatch(editorElement, "core:select-right")
-        advanceClock(100)
         ensure
           mode: ['visual', 'characterwise']
           selectedBufferRange: [[0, 0], [0, 1]]
