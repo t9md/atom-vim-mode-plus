@@ -104,7 +104,7 @@ class Motion extends Base
     cursor.moveToFirstCharacterOfLine()
 
   getLastRow: ->
-    @editor.getBuffer().getLastRow()
+    @editor.getLastBufferRow()
 
   getFirstVisibleScreenRow: ->
     @editorElement.getFirstVisibleScreenRow()
