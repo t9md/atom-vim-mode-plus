@@ -87,7 +87,18 @@ class Undo extends Misc
     markersAdded.forEach (m) -> m.destroy()
     rangesRemoved = @mapToChangedRanges rangesRemoved, (r) -> r
 
-    fn(range) if range = rangesAdded[0] ? _.last(rangesRemoved)
+    firstAdded = rangesAdded[0]
+    lastRemoved = _.last(rangesRemoved)
+    range =
+      if firstAdded? and lastRemoved?
+        if firstAdded.start.isLessThan(lastRemoved.start)
+          firstAdded
+        else
+          lastRemoved
+      else
+        firstAdded or lastRemoved
+
+    fn(range)
     if settings.get('flashOnUndoRedo')
       @onDidOperationFinish =>
         timeout = settings.get('flashOnUndoRedoDuration')
