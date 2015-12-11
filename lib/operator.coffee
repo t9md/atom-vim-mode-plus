@@ -860,9 +860,10 @@ class Change extends ActivateInsertMode
 
     @setTextToRegister @editor.getSelectedText()
     text = if @target.isLinewise?() then "\n" else ""
-    for s in @editor.getSelections()
-      range = s.insertText(text, autoIndent: true)
-      s.cursor.moveLeft() unless range.isEmpty()
+    @editor.transact =>
+      for s in @editor.getSelections()
+        range = s.insertText(text, autoIndent: true)
+        s.cursor.moveLeft() unless range.isEmpty()
     super
 
 class Substitute extends Change
