@@ -60,8 +60,11 @@ module.exports =
     scope = 'atom-text-editor:not([mini])'
     for name, fn of vimStateCommands
       do (fn) =>
-        @subscribe atom.commands.add scope, "#{packageScope}:#{name}", (event) ->
+        @addCommand commandScope, name, (event) ->
           fn.bind(getState())(event)
+
+  addCommand: (scope, name, fn) ->
+    @subscribe atom.commands.add scope, "#{packageScope}:#{name}", fn
 
   registerViewProviders: ->
     atom.views.addViewProvider Hover, (model) ->
