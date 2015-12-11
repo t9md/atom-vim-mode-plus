@@ -128,7 +128,7 @@ class VimState
 
     debouncedHandleSelectionChange = _.debounce(->
       handleSelectionChange() unless selectionWatcher?
-    , 100)
+    , 100, true)
 
     @editorElement.addEventListener 'mousedown', handleMouseDown
     @editorElement.addEventListener 'mouseup', handleMouseUp
@@ -171,7 +171,6 @@ class VimState
       else
         unless s.isReversed()
           if cursor.isAtBeginningOfLine()
-            # @setBufferPosition(@editor.getEofBufferPosition())
             # In visual-mode, cursor colum 0 means whole line selected
             # and in this case, cursor position is at [nextRow, 0]
             # So I offset one row up by stylesheet.
