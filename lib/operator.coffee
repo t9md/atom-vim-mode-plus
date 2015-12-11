@@ -308,7 +308,7 @@ class Surround extends TransformString
 
 class SurroundWord extends Surround
   @extend()
-  target: 'Word'
+  target: 'InnerWord'
 
 class DeleteSurround extends Surround
   @extend()
