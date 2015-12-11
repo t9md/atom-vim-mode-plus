@@ -1304,6 +1304,38 @@ describe "Operator", ->
         ensure 'j.',
           text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
 
+    describe 'map-surround', ->
+      beforeEach ->
+        set
+          text: """
+
+            apple
+            pairs tomato
+            orange
+            milk
+
+            """
+          cursorBuffer: [1, 0]
+
+        atom.keymaps.add "ms",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'm s': 'vim-mode-plus:map-surround'
+          'atom-text-editor.vim-mode-plus.visual-mode':
+            'm s':  'vim-mode-plus:map-surround'
+      it "surround text for each word in target case-1", ->
+        ensure ['ms', char: '(', 'ip'],
+          text: "\n(apple)\n(pairs) (tomato)\n(orange)\n(milk)\n"
+          cursor: [1, 0]
+      it "surround text for each word in target case-2", ->
+        set cursor: [2, 1]
+        ensure ['ms', char: '<', 'il'],
+          text: '\napple\n<pairs> <tomato>\norange\nmilk\n'
+          cursor: [2, 0]
+      it "surround text for each word in visual selection", ->
+        ensure ['vipms', char: '"'],
+          text: '\n"apple"\n"pairs" "tomato"\n"orange"\n"milk"\n'
+          cursor: [1, 0]
+
     describe 'delete surround', ->
       beforeEach ->
         set cursor: [1, 8]

@@ -310,6 +310,17 @@ class SurroundWord extends Surround
   @extend()
   target: 'InnerWord'
 
+class MapSurround extends Surround
+  @extend()
+  mapRegExp: /\w+/g
+  execute: ->
+    @eachSelection (s, setPoint) =>
+      scanRange = s.getBufferRange()
+      @editor.scanInBufferRange @mapRegExp, scanRange, ({matchText, replace}) =>
+        replace(@getNewText(matchText))
+      setPoint() if @setPoint
+    @activate('normal')
+
 class DeleteSurround extends Surround
   @extend()
   pairChars: ['[]', '()', '{}'].join('')
