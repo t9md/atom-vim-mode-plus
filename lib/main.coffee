@@ -9,7 +9,6 @@ settings = require './settings'
 VimState = require './vim-state'
 {Hover, HoverElement} = require './hover'
 {Input, InputElement, Search, SearchElement} = require './input'
-ExMode = require './ex-mode'
 
 packageScope = 'vim-mode-plus'
 
@@ -63,9 +62,6 @@ module.exports =
       do (fn) =>
         @addCommand scope, name, (event) ->
           fn.bind(getState())(event)
-
-    @subscribe atom.commands.add scope, "#{packageScope}:ex-toggle", ->
-      ExMode.toggle(getState())
 
   addCommand: (scope, name, fn) ->
     @subscribe atom.commands.add scope, "#{packageScope}:#{name}", fn
