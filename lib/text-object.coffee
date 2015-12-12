@@ -537,3 +537,19 @@ class AEntire extends Entire
 
 class InnerEntire extends Entire
   @extend()
+
+# -------------------------
+class LatestChange extends TextObject
+  @extend(false)
+  select: ->
+    @eachSelection (selection) =>
+      start = @vimState.mark.get('[')
+      end = @vimState.mark.get(']')
+      if start? and end?
+        selection.setBufferRange([start, end])
+
+class ALatestChange extends LatestChange
+  @extend()
+
+class InnerLatestChange extends LatestChange
+  @extend()

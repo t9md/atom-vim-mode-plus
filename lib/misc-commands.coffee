@@ -27,17 +27,6 @@ class ReverseSelections extends Misc
     # In that case make it sync in operationStack::process.
     swrap.reverse(@editor.getSelections())
 
-class SelectLatestChange extends Misc
-  @extend()
-  execute: ->
-    start = @vimState.mark.get('[')
-    end = @vimState.mark.get(']')
-    if start? and end?
-      range = new Range(start, end)
-      @editor.setSelectedBufferRange(range)
-      submode = if isLinewiseRange(range) then 'linewise' else 'characterwise'
-      @vimState.activate('visual', submode)
-
 class Undo extends Misc
   @extend()
 
