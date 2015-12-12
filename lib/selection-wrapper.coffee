@@ -130,6 +130,10 @@ class SelectionWrapper
     range = range.translate(translation...)
     @setBufferRange(range, options)
 
+  isSingleRow: ->
+    [startRow, endRow] = @selection.getBufferRowRange()
+    startRow is endRow
+
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
