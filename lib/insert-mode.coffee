@@ -32,11 +32,12 @@ class CopyFromLineAbove extends InsertMode
     @editor.getTextInBufferRange(bufferRange)
 
   execute: ->
+    lastRow = @editor.getLastBufferRow()
     @editor.transact =>
       for cursor in @editor.getCursors()
         {row, column} = cursor.getScreenPosition()
         row += @rowTranslation
-        continue if row < 0 # No line to copy from.
+        continue unless (0 <= row <= lastRow)
         range = [[row, column], [row, column+1]]
         cursor.selection.insertText @getTextInScreenRange(range)
 

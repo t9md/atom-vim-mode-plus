@@ -29,7 +29,7 @@ module.exports =
       @subscribe developer.init()
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
-      return if editor.isMini() or @vimStates.has(editor)
+      return if editor.isMini()
       vimState = new VimState(editor, @statusBarManager)
       @vimStates.set(editor, vimState)
       vimState.onDidDestroy =>
@@ -67,21 +67,13 @@ module.exports =
     @subscribe atom.commands.add scope, "#{packageScope}:#{name}", fn
 
   registerViewProviders: ->
-    atom.views.addViewProvider Hover, (model) ->
-      new HoverElement().initialize(model)
-    atom.views.addViewProvider Input, (model) ->
-      new InputElement().initialize(model)
-    atom.views.addViewProvider Search, (model) ->
-      new SearchElement().initialize(model)
+    addView = atom.views.addViewProvider.bind(atom.views)
+    addView Hover, (model) -> new HoverElement().initialize(model)
+    addView Input, (model) -> new InputElement().initialize(model)
+    addView Search, (model) -> new SearchElement().initialize(model)
 
   deactivate: ->
     @subscriptions.dispose()
-
-  getGlobalState: ->
-    globalState
-
-  getEditorState: (editor) ->
-    @vimStates.get(editor)
 
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)
@@ -89,8 +81,19 @@ module.exports =
     @subscribe new Disposable =>
       @statusBarManager.detach()
 
+  # Service API
+  # -------------------------
+  getSubscriptions: ->
+    @subscriptions
+
+  getGlobalState: ->
+    globalState
+
+  getEditorState: (editor) ->
+    @vimStates.get(editor)
+
   provideVimModePlus: ->
     Base: Base
-    subscriptions: @subscriptions
+    getSubscriptions: @getSubscriptions.bind(this)
     getGlobalState: @getGlobalState.bind(this)
     getEditorState: @getEditorState.bind(this)

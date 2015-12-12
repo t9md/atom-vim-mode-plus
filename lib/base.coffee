@@ -26,6 +26,7 @@ delegatingMethods = [
   "onDidSelect"
   "onDidOperationFinish"
   "subscribe"
+  "isMode"
 ]
 
 class Base
@@ -72,6 +73,10 @@ class Base
     # Setting count as instance variable allows operation repeatable with same count.
     @count ?= @vimState.count.get() ? @defaultCount
 
+  activateMode: (mode, submode) ->
+    @onDidOperationFinish =>
+      @vimState.activate(mode, submode)
+
   addHover: (text, {replace}={}) ->
     if settings.get('showHoverOnOperate')
       replace ?= false
@@ -112,7 +117,8 @@ class Base
   # Class methods
   # -------------------------
   @init: (service) ->
-    {getEditorState, subscriptions} = service
+    {getEditorState, getSubscriptions} = service
+    subscriptions = getSubscriptions()
 
     require(lib) for lib in [
       './operator', './motion', './text-object',

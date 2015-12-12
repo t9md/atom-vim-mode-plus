@@ -33,10 +33,10 @@ class TextObject extends Base
   eachSelection: (fn) ->
     fn(s) for s in @editor.getSelections()
     @emitDidSelect()
-    return if @vimState.isMode('operator-pending')
-    return if @vimState.isMode('visual', 'linewise')
+    return if @isMode('operator-pending')
+    return if @isMode('visual', 'linewise')
     if @isLinewise()
-      @vimState.activate('visual', 'linewise')
+      @activateMode('visual', 'linewise')
 
   execute: ->
     @select()
