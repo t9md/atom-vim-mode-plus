@@ -48,13 +48,13 @@ class Word extends TextObject
   select: ->
     @eachSelection (selection) =>
       wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
-      @selectExclusive(selection, wordRegex)
-      @selectInclusive(selection) unless @isInner()
+      @selectInner(selection, wordRegex)
+      @selectA(selection) unless @isInner()
 
-  selectExclusive: (selection, wordRegex=null) ->
+  selectInner: (selection, wordRegex=null) ->
     selection.selectWord()
 
-  selectInclusive: (selection) ->
+  selectA: (selection) ->
     scanRange = selection.cursor.getCurrentLineBufferRange()
     headPoint = selection.getHeadBufferPosition()
     scanRange.start = headPoint
@@ -73,7 +73,7 @@ class InnerWord extends Word
 class WholeWord extends Word
   @extend(false)
   wordRegExp: /\S+/
-  selectExclusive: (s, wordRegex) ->
+  selectInner: (s, wordRegex) ->
     swrap(s).setBufferRangeSafely s.cursor.getCurrentWordBufferRange({wordRegex})
 
 class AWholeWord extends WholeWord
@@ -347,31 +347,30 @@ class Paragraph extends TextObject
   getEndRow: (startRow, fn) ->
     lastRow = @editor.getLastBufferRow()
     for row in [startRow..lastRow] when fn(row)
-      return row
-    lastRow+1
+      return row-1
+    lastRow
 
   getRange: (startRow) ->
     startRowIsBlank = @editor.isBufferRowBlank(startRow)
     fn = (row) =>
       @editor.isBufferRowBlank(row) isnt startRowIsBlank
-    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
+    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
 
   selectParagraph: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
-    if startRow is endRow
+    if swrap(selection).isSingleRow()
       swrap(selection).setBufferRangeSafely @getRange(startRow)
-    else # have direction
-      if selection.isReversed()
-        if range = @getRange(startRow-1)
-          selection.selectToBufferPosition range.start
+    else
+      point = if selection.isReversed()
+        @getRange(startRow - 1)?.start
       else
-        if range = @getRange(endRow+1)
-          selection.selectToBufferPosition range.end
+        @getRange(endRow + 1)?.end
+      selection.selectToBufferPosition point if point?
 
-  selectExclusive: (selection) ->
+  selectInner: (selection) ->
     @selectParagraph(selection)
 
-  selectInclusive: (selection) ->
+  selectA: (selection) ->
     @selectParagraph(selection)
     @selectParagraph(selection)
 
@@ -379,9 +378,9 @@ class Paragraph extends TextObject
     @eachSelection (selection) =>
       _.times @getCount(), =>
         if @isInner()
-          @selectExclusive(selection)
+          @selectInner(selection)
         else
-          @selectInclusive(selection)
+          @selectA(selection)
 
 class AParagraph extends Paragraph
   @extend()
@@ -392,7 +391,7 @@ class InnerParagraph extends Paragraph
 # -------------------------
 class Comment extends Paragraph
   @extend(false)
-  selectInclusive: (selection) ->
+  selectA: (selection) ->
     @selectParagraph(selection)
 
   getRange: (startRow) ->
@@ -400,7 +399,7 @@ class Comment extends Paragraph
     fn = (row) =>
       return if (not @isInner() and @editor.isBufferRowBlank(row))
       @editor.isBufferRowCommented(row) in [false, undefined]
-    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
+    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
 
 class AComment extends Comment
   @extend()
@@ -411,7 +410,7 @@ class InnerComment extends Comment
 # -------------------------
 class Indentation extends Paragraph
   @extend(false)
-  selectInclusive: (selection) ->
+  selectA: (selection) ->
     @selectParagraph(selection)
 
   getRange: (startRow) ->
@@ -424,7 +423,7 @@ class Indentation extends Paragraph
       else
         text = @editor.lineTextForBufferRow(row)
         @editor.indentLevelForLine(text) < baseIndentLevel
-    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn), 0])
+    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
 
 class AIndentation extends Indentation
   @extend()
