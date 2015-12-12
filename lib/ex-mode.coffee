@@ -1,15 +1,6 @@
 _ = require 'underscore-plus'
 {SelectListView, $, $$} = require 'atom-space-pen-views'
-{match} = require 'fuzzaldrin'
-{filter} = require('fuzzaldrin')
-
-prefix = "ex-command"
-
-trimPrefix = (name) ->
-  name.replace(///^.*?:///, '')
-
-getEditor = ->
-  atom.workspace.getActiveTextEditor()
+fuzzaldrin = require 'fuzzaldrin'
 
 MAX_ITEMS = 5
 class ExMode extends SelectListView
@@ -17,13 +8,34 @@ class ExMode extends SelectListView
     view = new ExMode
     view.toggle(vimState)
 
+  @registerCommand: (name, fn) ->
+    @commands[name] = fn
+
+  @registerCommands: (commands) ->
+    @registerCommand(name, fn) for name, fn of commands
+
+  @init: ->
+    @commands = {}
+    @registerCommands
+      'w': ({editor}) ->
+        editor.save()
+      'wq': ({editor}) ->
+        editor.save()
+        atom.workspace.destroyActivePaneItemOrEmptyPane()
+      'move-to-line': (vimState, count) ->
+        vimState.count.set(count)
+        vimState.operationStack.run('MoveToFirstLine')
+      'move-to-line-by-percent': (vimState, count) ->
+        vimState.count.set(count)
+        vimState.operationStack.run('MoveToLineByPercent')
+
   initialize: ->
     @setMaxItems(MAX_ITEMS)
     super
     @addClass('vim-mode-plus.ex-mode')
 
   getFilterKey: ->
-    'displayName'
+    'name'
 
   cancelled: ->
     @hide()
@@ -43,42 +55,42 @@ class ExMode extends SelectListView
     @setItems(@getCommands())
     @focusFilterEditor()
 
-  vimCommands = [
-    "camel-case"
-    "dash-case"
-    "split"
-    "join-by-input"
-  ].map (e) -> "vim-mode-plus:#{e}"
+  hiddenCommands = ['move-to-line', 'move-to-line-by-percent']
   getCommands: ->
-    commands = atom.commands.findCommands(target: @editorElement).filter ({name}) ->
-      name.startsWith('ex-command:') or (name.startsWith('vim-mode-plus:') and name in vimCommands)
+    _.keys(@constructor.commands)
+      .filter (e) -> e not in hiddenCommands
+      .sort()
+      .map (e) -> {name: e}
 
-    commands.map ({name}) -> {name, displayName: trimPrefix(name)}
+  executeCommand: (name) ->
+    action = @constructor.commands[name]
+    action(@vimState, @count)
 
   hide: ->
     @panel?.hide()
 
-  populateList: ->
-    super
-    query = @getFilterQuery()
-    if query.length
-      if matched = query.match(/(\d+)(%)?$/)
-        [number, percent] = matched[1..2]
-        @count = Number(number)
-        item = if number? and not percent?
-          {name: 'move-to-line', displayName: 'move-to-line'}
-        else if number? and percent?
-          {name: 'move-to-line-by-percent', displayName: 'move-to-line-by-percent'}
-        @setError(null)
-        itemView = $(@viewForItem(item))
-        itemView.data('select-list-item', item)
-        @list.append(itemView)
-        @selectItemView(@list.find('li:first'))
+  # Use as command missing hook.
+  getEmptyMessage: (itemCount, filteredItemCount) ->
+    matched = @getFilterQuery().match(/(\d+)(%)?$/)
+    return unless matched
 
-  viewForItem: ({name, displayName}) ->
+    [number, percent] = matched[1..2]
+    @count = Number(number)
+    name = switch
+      when number? and percent? then 'move-to-line-by-percent'
+      when number? then 'move-to-line'
+    item = {name}
+
+    @setError(null)
+    itemView = $(@viewForItem(item))
+    itemView.data('select-list-item', item)
+    @list.append(itemView)
+    @selectItemView(@list.find('li:first'))
+
+  viewForItem: ({name}) ->
     # Style matched characters in search results
     filterQuery = @getFilterQuery()
-    matches = match(displayName, filterQuery)
+    matches = fuzzaldrin.match(name, filterQuery)
     $$ ->
       highlighter = (command, matches, offsetIndex) =>
         lastIndex = 0
@@ -100,18 +112,11 @@ class ExMode extends SelectListView
         @text command.substring(lastIndex)
 
       @li class: 'event', 'data-event-name': name, =>
-        @span title: name, -> highlighter(displayName, matches, 0)
+        @span title: name, -> highlighter(name, matches, 0)
 
   confirmed: ({name}) ->
     @cancel()
-    switch name
-      when 'move-to-line'
-        @vimState.count.set(@count)
-        @vimState.operationStack.run('MoveToFirstLine')
-      when 'move-to-line-by-percent'
-        @vimState.count.set(@count)
-        @vimState.operationStack.run('MoveToLineByPercent')
-      else
-        @editorElement.dispatchEvent(new CustomEvent(name, bubbles: true, cancelable: true))
+    @executeCommand(name)
 
+ExMode.init()
 module.exports = ExMode
