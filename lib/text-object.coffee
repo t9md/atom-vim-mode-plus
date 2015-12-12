@@ -26,6 +26,9 @@ class TextObject extends Base
   isInner: ->
     @inner
 
+  isA: ->
+    not @isInner()
+
   isLinewise: ->
     @editor.getSelections().every (s) ->
       isLinewiseRange(s.getBufferRange())
@@ -367,20 +370,11 @@ class Paragraph extends TextObject
         @getRange(endRow + 1)?.end
       selection.selectToBufferPosition point if point?
 
-  selectInner: (selection) ->
-    @selectParagraph(selection)
-
-  selectA: (selection) ->
-    @selectParagraph(selection)
-    @selectParagraph(selection)
-
   select: ->
     @eachSelection (selection) =>
       _.times @getCount(), =>
-        if @isInner()
-          @selectInner(selection)
-        else
-          @selectA(selection)
+        @selectParagraph(selection)
+        @selectParagraph(selection) if @instanceof('AParagraph')
 
 class AParagraph extends Paragraph
   @extend()
@@ -391,8 +385,6 @@ class InnerParagraph extends Paragraph
 # -------------------------
 class Comment extends Paragraph
   @extend(false)
-  selectA: (selection) ->
-    @selectParagraph(selection)
 
   getRange: (startRow) ->
     return unless @editor.isBufferRowCommented(startRow)
@@ -410,8 +402,6 @@ class InnerComment extends Comment
 # -------------------------
 class Indentation extends Paragraph
   @extend(false)
-  selectA: (selection) ->
-    @selectParagraph(selection)
 
   getRange: (startRow) ->
     return if @editor.isBufferRowBlank(startRow)
