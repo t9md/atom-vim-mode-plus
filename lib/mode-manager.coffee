@@ -45,6 +45,7 @@ class ModeManager
 
   # activate: Public
   #  Use this method to change mode, DONT use other direct method.
+  # -------------------------
   activate: (mode, submode=null) ->
     if mode is 'reset'
       @editor.clearSelections()

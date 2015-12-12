@@ -23,10 +23,6 @@ class Operator extends Base
   trackChange: false
   requireTarget: true
 
-  activate: (mode, submode) ->
-    @onDidOperationFinish =>
-      @vimState.activate(mode, submode)
-
   setMarkForChange: ({start, end}) ->
     @vimState.mark.set('[', start)
     @vimState.mark.set(']', end)
@@ -35,7 +31,7 @@ class Operator extends Base
     haveSomeSelection(@editor.getSelections())
 
   isSameOperatorRepeated: ->
-    if @vimState.isMode('operator-pending')
+    if @isMode('operator-pending')
       @vimState.operationStack.peekTop().constructor is @constructor
     else
       false
@@ -161,7 +157,7 @@ class Delete extends Operator
       @setTextToRegister s.getText() if s.isLastSelection()
       s.deleteSelectedText()
       s.cursor.skipLeadingWhitespace() if @target.isLinewise?()
-    @activate('normal')
+    @activateMode('normal')
 
 class DeleteRight extends Delete
   @extend()
@@ -184,7 +180,7 @@ class TransformString extends Operator
   execute: ->
     @eachSelection (s, setPoint) =>
       @mutate(s, setPoint)
-    @activate('normal')
+    @activateMode('normal')
 
   mutate: (s, setPoint) ->
     text = @getNewText(s.getText())
@@ -321,7 +317,7 @@ class MapSurround extends Surround
       @editor.scanInBufferRange @mapRegExp, scanRange, ({matchText, replace}) =>
         replace(@getNewText(matchText))
       setPoint() if @setPoint
-    @activate('normal')
+    @activateMode('normal')
 
 class DeleteSurround extends Surround
   @extend()
@@ -467,7 +463,7 @@ class Yank extends Operator
     @eachSelection (s, setPoint) =>
       @setTextToRegister s.getText() if s.isLastSelection()
       setPoint()
-    @activate('normal')
+    @activateMode('normal')
 
 class YankLine extends Yank
   @extend()
@@ -483,7 +479,7 @@ class Join extends Operator
     @editor.transact =>
       _.times @getCount(), =>
         @editor.joinLines()
-    @activate('normal')
+    @activateMode('normal')
 
 class JoinWithKeepingSpace extends TransformString
   @extend()
@@ -533,7 +529,7 @@ class Split extends TransformString
   input: null
 
   initialize: ->
-    if not @vimState.isMode('visual')
+    if not @isMode('visual')
       @setTarget @new("MoveToRelativeLine", {min: 1})
     @focusInput(charsMax: 10)
 
@@ -566,7 +562,7 @@ class Mark extends Operator
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
-    @activate('normal')
+    @activateMode('normal')
 
 # [FIXME?]: inconsistent behavior from normal operator
 # Since its support visual-mode but not use setTarget() convension.
@@ -582,12 +578,12 @@ class Increase extends Operator
     newRanges = []
     @editor.transact =>
       for c in @editor.getCursors()
-        scanRange = if @vimState.isMode('visual')
+        scanRange = if @isMode('visual')
           c.selection.getBufferRange()
         else
           c.getCurrentLineBufferRange()
         ranges = @increaseNumber(c, scanRange, pattern)
-        if not @vimState.isMode('visual') and ranges.length
+        if not @isMode('visual') and ranges.length
           c.setBufferPosition ranges[0].end.translate([0, -1])
         newRanges.push ranges
 
@@ -600,7 +596,7 @@ class Increase extends Operator
     newRanges = []
     @editor.scanInBufferRange pattern, scanRange, ({matchText, range, stop, replace}) =>
       newText = String(parseInt(matchText, 10) + @step * @getCount())
-      if @vimState.isMode('visual')
+      if @isMode('visual')
         newRanges.push replace(newText)
       else
         return unless range.end.isGreaterThan cursor.getBufferPosition()
@@ -631,7 +627,7 @@ class IncrementNumber extends Operator
     # Reverseing selection put cursor on start position of selection.
     # This allow increment/decrement works in same target range when repeated.
     swrap.setReversedState(@editor.getSelections(), true)
-    @activate('normal')
+    @activateMode('normal')
 
   replaceNumber: (scanRange, pattern) ->
     newRanges = []
@@ -661,7 +657,7 @@ class PutBefore extends Operator
     {text, type} = @vimState.register.get()
     return unless text
     text = _.multiplyString(text, @getCount())
-    isLinewise = type is 'linewise' or @vimState.isMode('visual', 'linewise')
+    isLinewise = type is 'linewise' or @isMode('visual', 'linewise')
 
     @editor.transact =>
       for s in @editor.getSelections()
@@ -675,7 +671,7 @@ class PutBefore extends Operator
           cursor.setBufferPosition(newRange.end.translate([0, -1]))
         @setMarkForChange(newRange)
         @flash newRange
-    @activate('normal')
+    @activateMode('normal')
 
   # Return newRange
   pasteLinewise: (selection, text) ->
@@ -687,7 +683,7 @@ class PutBefore extends Operator
       else
         @insertTextBelow(selection, text)
     else
-      if @vimState.isMode('visual', 'linewise')
+      if @isMode('visual', 'linewise')
         text += '\n' unless text.endsWith('\n')
       else
         selection.insertText("\n")
@@ -761,7 +757,7 @@ class Replace extends Operator
             @editor.moveDown()
           @editor.moveToFirstCharacterOfLine()
 
-    @activate('normal')
+    @activateMode('normal')
 
 # Insert entering operation
 # -------------------------
@@ -868,7 +864,7 @@ class Change extends ActivateInsertMode
   execute: ->
     @target.setOptions?(excludeWhitespace: true)
     unless @selectTarget()
-      @activate('normal')
+      @activateMode('normal')
       return
 
     @setTextToRegister @editor.getSelectedText()

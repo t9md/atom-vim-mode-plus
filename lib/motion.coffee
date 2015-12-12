@@ -27,14 +27,14 @@ class Motion extends Base
   setOptions: (@options) ->
 
   isLinewise: ->
-    if @vimState.isMode('visual')
-      @vimState.isMode('visual', 'linewise')
+    if @isMode('visual')
+      @isMode('visual', 'linewise')
     else
       @linewise
 
   isInclusive: ->
-    if @vimState.isMode('visual')
-      @vimState.isMode('visual', ['characterwise', 'blockwise'])
+    if @isMode('visual')
+      @isMode('visual', ['characterwise', 'blockwise'])
     else
       @inclusive
 
@@ -132,7 +132,7 @@ class CurrentSelection extends Motion
   select: ->
     # In visual mode, the current selections are already there.
     # If we're not in visual mode, we are repeating some operation and need to re-do the selections
-    unless @vimState.isMode('visual')
+    unless @isMode('visual')
       @selectCharacters()
       if @wasLinewise
         swrap(s).expandOverLine() for s in @editor.getSelections()
@@ -164,7 +164,7 @@ class MoveRight extends Motion
       @asTarget = true
 
   isOperatorPending: ->
-    @vimState.isMode('operator-pending') or @asTarget
+    @isMode('operator-pending') or @asTarget
 
   moveCursor: (cursor) ->
     @countTimes =>
@@ -192,7 +192,7 @@ class MoveUp extends Motion
     cursor.moveUp()
 
   moveCursor: (cursor) ->
-    isBufferRowWise = @editor.isSoftWrapped() and @vimState.isMode('visual', 'linewise')
+    isBufferRowWise = @editor.isSoftWrapped() and @isMode('visual', 'linewise')
     @countTimes =>
       return unless @isMovable(cursor)
       if isBufferRowWise
@@ -749,7 +749,7 @@ class Search extends SearchBase
     @finish()
 
   onCancel: => # fat-arrow
-    unless @vimState.isMode('visual') or @vimState.isMode('insert')
+    unless @isMode('visual') or @isMode('insert')
       @vimState.activate('reset')
     @restoreEditorState?()
     @vimState.reset()
