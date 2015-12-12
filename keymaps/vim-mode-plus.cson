@@ -296,6 +296,10 @@
   'i e':  'vim-mode-plus:inner-entire'
   'a e':  'vim-mode-plus:a-entire'
 
+  # [NOTE] subject to change in futur
+  'i c':  'vim-mode-plus:inner-latest-change'
+  'a c':  'vim-mode-plus:a-latest-change'
+
 # visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode':
