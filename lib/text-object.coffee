@@ -1,6 +1,6 @@
 # Refactoring status: 95%
 {Range} = require 'atom'
-_    = require 'underscore-plus'
+_ = require 'underscore-plus'
 
 Base = require './base'
 swrap = require './selection-wrapper'
@@ -31,8 +31,7 @@ class TextObject extends Base
   eachSelection: (fn) ->
     fn(s) for s in @editor.getSelections()
     @emitDidSelect()
-    return if @isMode('operator-pending')
-    return if @isMode('visual', 'linewise')
+    return if @isMode('operator-pending') or @isMode('visual', 'linewise')
     if @isLinewise()
       @activateMode('visual', 'linewise')
 
@@ -139,19 +138,29 @@ class Pair extends TextObject
         stop()
     found
 
+  findOpenPair: (pair, options) ->
+    options.which = 'open'
+    options.allowNextLine ?= @allowNextLine
+    @findPair(pair, options)
+
+  findClosePair: (pair, options) ->
+    options.which = 'close'
+    options.allowNextLine ?= @allowNextLine
+    @findPair(pair, options)
+
   getPairRange: (from, pair, what) ->
     range = null
     switch what
       when 'enclosed'
-        open  = @findPair pair, {from,       @allowNextLine, nest: 1, which: 'open'}
-        close = @findPair pair, {from: open, @allowNextLine, nest: 1, which: 'close'} if open?
+        open = @findOpenPair pair, {from: from, nest: 1}
+        close = @findClosePair pair, {from: open, nest: 1} if open?
       when 'next'
-        close = @findPair pair, {from,        @allowNextLine, nest: 0, which: 'close'}
-        open  = @findPair pair, {from: close, @allowNextLine, nest: 1, which: 'open'} if close?
+        close = @findClosePair pair, {from: from, nest: 0}
+        open = @findOpenPair pair, {from: close, nest: 1} if close?
       when 'previous' # FIXME but currently unused
-        open  = @findPair pair, {from,       @allowNextLine, nest: 0, which: 'open'}
-        close = @findPair pair, {from: open, @allowNextLine, nest: 1, which: 'close'} if open?
-    if open and close
+        open  = @findOpenPair pair, {from: from,  nest: 0}
+        close = @findClosePair pair, {from: open, nest: 1} if open?
+    if open? and close?
       range = new Range(open, close)
       range = range.translate([0, -1], [0, 1]) unless @isInner()
     range
@@ -444,7 +453,7 @@ class Function extends Fold
 
   indentScopedLanguages: ['python', 'coffee']
   # FIXME: why go dont' fold closing '}' for function? this is dirty workaround.
-  omitingClosingCharLanguages: ['go']
+  omittingClosingCharLanguages: ['go']
 
   initialize: ->
     @language = @editor.getGrammar().scopeName.replace(/^source\./, '')
@@ -479,9 +488,8 @@ class Function extends Fold
   adjustRowRange: (startRow, endRow) ->
     if @isInner()
       startRow += 1
-      unless @language in @indentScopedLanguages
-        endRow -= 1
-    endRow += 1 if (@language in @omitingClosingCharLanguages)
+      endRow -= 1 unless @language in @indentScopedLanguages
+    endRow += 1 if (@language in @omittingClosingCharLanguages)
     [startRow, endRow]
 
 class AFunction extends Function
