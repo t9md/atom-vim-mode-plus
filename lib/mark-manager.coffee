@@ -1,3 +1,5 @@
+{Range} = require 'atom'
+
 MARKS = /// (
   ?: [a-z]
    | [\[\]`.^(){}<>]
@@ -16,6 +18,13 @@ class MarkManager
   get: (name) ->
     return unless @isValid(name)
     @marks[name]?.getStartBufferPosition()
+
+  # Return range between marks
+  getRange: (startMark, endMark) ->
+    start = @get(startMark)
+    end = @get(endMark)
+    if start? and end?
+      new Range(start, end)
 
   # [FIXME] Need to support Global mark with capital name [A-Z]
   set: (name, point) ->

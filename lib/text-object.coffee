@@ -15,12 +15,10 @@ swrap = require './selection-wrapper'
 
 class TextObject extends Base
   @extend(false)
-  inner: false
 
   constructor: ->
+    @constructor::inner = @constructor.name.startsWith('Inner')
     super
-    if @constructor.name.startsWith('Inner')
-      @inner = true
     @initialize?()
 
   isInner: ->
@@ -96,10 +94,9 @@ class Pair extends TextObject
       text = getLineTextToPoint(@editor, point)
       state = @pairStateInString(text, openChar)
     else
-      state =
-        switch pair.indexOf(matchText[matchText.length-1])
-          when 0 then 'open'
-          when 1 then 'close'
+      state = switch pair.indexOf(matchText[matchText.length-1])
+        when 0 then 'open'
+        when 1 then 'close'
     state
 
   pairStateInString: (str, char) ->
@@ -126,18 +123,18 @@ class Pair extends TextObject
 
     found = null # We will search to fill this var.
     @editor[scanFunc] pattern, scanRange, (arg) =>
-      {matchText, range, stop} = arg
-      {start, end} = range
+      {matchText, range: {start, end}, stop} = arg
       return if @isEscapedCharAtPoint(start)
       return stop() if (not allowNextLine) and (from.row isnt start.row)
 
-      if which is 'close'
-        end = end.translate([0, -1])
-      if @getPairState(pair, matchText, start) is which
-        nest = Math.max(nest-1, 0)
+      end = end.translate([0, -1]) if which is 'close'
+
+      nest = if @getPairState(pair, matchText, start) is which
+        Math.max(nest - 1, 0)
       else
-        nest++
-      if nest is 0
+        nest + 1
+
+      unless nest
         found = end
         stop()
     found
@@ -177,11 +174,9 @@ class Pair extends TextObject
     range  = @getPairRange(from, @pair, what)
     if range?.isEqual(rangeOrig)
       # Since range was same area, retry to expand outer pair.
-      switch what
-        when 'enclosed', 'previous'
-          from = range.start.translate([0, -1])
-        when 'next'
-          from = range.end.translate([0, +1])
+      from = switch what
+        when 'enclosed', 'previous' then range.start.translate([0, -1])
+        when 'next' then range.end.translate([0, +1])
       range = @getPairRange(from, @pair, what)
     range
 
@@ -341,13 +336,13 @@ class Paragraph extends TextObject
 
   getStartRow: (startRow, fn) ->
     for row in [startRow..0] when fn(row)
-      return row+1
+      return row + 1
     0
 
   getEndRow: (startRow, fn) ->
     lastRow = @editor.getLastBufferRow()
     for row in [startRow..lastRow] when fn(row)
-      return row-1
+      return row - 1
     lastRow
 
   getRange: (startRow) ->
@@ -529,10 +524,8 @@ class LatestChange extends TextObject
   @extend(false)
   select: ->
     @eachSelection (selection) =>
-      start = @vimState.mark.get('[')
-      end = @vimState.mark.get(']')
-      if start? and end?
-        selection.setBufferRange([start, end])
+      if range = @vimState.mark.getRange('[', ']')
+        selection.setBufferRange(range)
 
 class ALatestChange extends LatestChange
   @extend()
