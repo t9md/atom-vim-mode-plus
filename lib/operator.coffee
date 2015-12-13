@@ -1,4 +1,4 @@
-# Refactoring status: 80%
+# Refactoring status: 100%
 LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
@@ -711,52 +711,32 @@ class PutAfter extends PutBefore
 
 # Replace
 # -------------------------
-# [FIXME] need rewrite
 class Replace extends Operator
   @extend()
   input: null
   hover: icon: ':replace:', emoji: ':tractor:'
+  flashTarget: false
   trackChange: true
   requireInput: true
   requireTarget: false
 
   initialize: ->
+    @setTarget @new('MoveRight') if @isMode('normal')
     @focusInput()
 
   isComplete: ->
     @input = "\n" if @input is ''
     super
 
+  shouldReplace: (text) ->
+    not (@target.instanceof('MoveRight') and (text.length isnt @getCount()))
+
   execute: ->
-    count = @getCount()
-
-    @editor.transact =>
-      if @target?
-        if @selectTarget()
-          @editor.replaceSelectedText null, (text) =>
-            text.replace(/./g, @input)
-          for selection in @editor.getSelections()
-            point = selection.getBufferRange().start
-            selection.setBufferRange(Range.fromPointWithDelta(point, 0, 0))
-      else
-        for cursor in @editor.getCursors()
-          pos = cursor.getBufferPosition()
-          currentRowLength = @editor.lineTextForBufferRow(pos.row).length
-          continue unless currentRowLength - pos.column >= count
-
-          _.times count, =>
-            point = cursor.getBufferPosition()
-            @editor.setTextInBufferRange(Range.fromPointWithDelta(point, 0, 1), @input)
-            cursor.moveRight()
-          cursor.setBufferPosition(pos)
-
-        # Special case: when replaced with a newline move to the start of the
-        # next row.
-        if @input is "\n"
-          _.times count, =>
-            @editor.moveDown()
-          @editor.moveToFirstCharacterOfLine()
-
+    @eachSelection (s, setPoint) =>
+      text = s.getText().replace(/./g, @input)
+      if @shouldReplace(text)
+        s.insertText(text, autoIndentNewline: true)
+      setPoint() unless @input is "\n"
     @activateMode('normal')
 
 # Insert entering operation
