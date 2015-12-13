@@ -112,3 +112,9 @@ class Redo extends Undo
   @extend()
   mutate: ->
     @editor.redo()
+
+class ToggleFold extends Misc
+  @extend()
+  execute: ->
+    row = @editor.getCursorBufferPosition().row
+    @editor.toggleFoldAtBufferRow row

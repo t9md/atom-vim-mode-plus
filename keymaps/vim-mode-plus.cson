@@ -86,6 +86,7 @@
   'z R': 'editor:unfold-all'
   'z c': 'editor:fold-current-row'
   'z o': 'editor:unfold-current-row'
+  'z a': 'vim-mode-plus:toggle-fold'
 
   'G':   'vim-mode-plus:move-to-last-line'
   'g g': 'vim-mode-plus:move-to-first-line'
