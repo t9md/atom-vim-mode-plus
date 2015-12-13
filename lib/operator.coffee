@@ -269,7 +269,7 @@ class AutoIndent extends Indent
 
 class ToggleLineComments extends TransformString
   @extend()
-  hover: icon: ':toggle-line-comment:', emoji: ':mute:'
+  hover: icon: ':toggle-line-comments:', emoji: ':mute:'
   stayOption: {asMarker: true}
   mutate: (s, setPoint) ->
     s.toggleLineComments()
