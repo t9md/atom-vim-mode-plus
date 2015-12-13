@@ -722,14 +722,11 @@ class Replace extends Operator
     @setTarget @new('MoveRight') if @isMode('normal')
     @focusInput()
 
-  shouldReplace: (text) ->
-    not (@target.instanceof('MoveRight') and (text.length isnt @getCount()))
-
   execute: ->
     @input = "\n" if @input is ''
     @eachSelection (s, setPoint) =>
       text = s.getText().replace(/./g, @input)
-      if @shouldReplace(text)
+      unless (@target.instanceof('MoveRight') and (text.length < @getCount()))
         s.insertText(text, autoIndentNewline: true)
       setPoint() unless @input is "\n"
     @activateMode('normal')

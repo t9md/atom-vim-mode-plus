@@ -1,4 +1,5 @@
 # 0.X.X WIP
+- Breaking: Rename `vim-mode-plus:split` to `vim-mode-plus:split-string` to avoid confusion.
 
 # 0.8.0
 - New: provideVimModePlus service API now provide Base class and subscriptions.
