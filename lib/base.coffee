@@ -49,7 +49,7 @@ class Base
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
-    if (@requireInput and not @input)
+    if (@requireInput and not @input?)
       return false
 
     if @requireTarget

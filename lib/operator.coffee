@@ -522,9 +522,10 @@ class JoinByInputWithKeepingSpace extends JoinByInput
   join: (rows) ->
     rows.join(@input)
 
-class Split extends TransformString
+# String suffix in name is to avoid confusion with 'split' window.
+class SplitString extends TransformString
   @extend()
-  hover: icon: ':split:', emoji: ':hocho:'
+  hover: icon: ':split-string:', emoji: ':hocho:'
   requireInput: true
   input: null
 
@@ -533,11 +534,8 @@ class Split extends TransformString
       @setTarget @new("MoveToRelativeLine", {min: 1})
     @focusInput(charsMax: 10)
 
-  isComplete: ->
-    @input = "\\n" if @input is ''
-    super
-
   getNewText: (text) ->
+    @input = "\\n" if @input is ''
     regex = ///#{_.escapeRegExp(@input)}///g
     text.split(regex).join("\n")
 
@@ -724,14 +722,11 @@ class Replace extends Operator
     @setTarget @new('MoveRight') if @isMode('normal')
     @focusInput()
 
-  isComplete: ->
-    @input = "\n" if @input is ''
-    super
-
   shouldReplace: (text) ->
     not (@target.instanceof('MoveRight') and (text.length isnt @getCount()))
 
   execute: ->
+    @input = "\n" if @input is ''
     @eachSelection (s, setPoint) =>
       text = s.getText().replace(/./g, @input)
       if @shouldReplace(text)
