@@ -44,13 +44,12 @@ class Motion extends Base
 
   select: ->
     for selection in @editor.getSelections()
-      switch
-        when @isInclusive(), @isLinewise()
-          @selectInclusive selection
-          swrap(selection).expandOverLine() if @isLinewise()
-        else
-          selection.modifySelection =>
-            @moveCursor selection.cursor
+      if @isInclusive() or @isLinewise()
+        @selectInclusive selection
+        swrap(selection).expandOverLine() if @isLinewise()
+      else
+        selection.modifySelection =>
+          @moveCursor selection.cursor
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
     @emitDidSelect()

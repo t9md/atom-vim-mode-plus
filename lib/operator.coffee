@@ -75,8 +75,8 @@ class Operator extends Base
           persistent: false
 
       @onDidOperationFinish =>
-        if newRange = changeMarker.getBufferRange()
-          @setMarkForChange(newRange)
+        if range = changeMarker.getBufferRange()
+          @setMarkForChange(range)
 
   # target - TextObject or Motion to operate on.
   setTarget: (@target) ->

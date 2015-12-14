@@ -113,10 +113,13 @@ class Pair extends TextObject
 
   findPair: (pair, options) ->
     {from, which, allowNextLine, nest} = options
-    [scanFunc, scanRange] =
-      switch which
-        when 'open' then ['backwardsScanInBufferRange', rangeToBeginningOfFileFromPoint(from)]
-        when 'close' then ['scanInBufferRange', rangeToEndOfFileFromPoint(from)]
+    switch which
+      when 'open'
+        scanFunc = 'backwardsScanInBufferRange'
+        scanRange = rangeToBeginningOfFileFromPoint(from)
+      when 'close'
+        scanFunc = 'scanInBufferRange'
+        scanRange = rangeToEndOfFileFromPoint(from)
     pairRegexp = pair.split('').map(_.escapeRegExp).join('|')
     pattern = ///#{pairRegexp}///g
 
@@ -176,9 +179,9 @@ class Pair extends TextObject
     # In case cursor is on one of pair char, we adjust `from` point to be inclusive.
     characterAtCursor = characterAtPoint(@editor, from)
     if characterAtCursor in @pair
-      switch @getPairState(@pair, characterAtCursor, from)
-        when 'open' then from = from.translate([0, +1])
-        when 'close' then from = from.translate([0, -1])
+      from = switch @getPairState(@pair, characterAtCursor, from)
+        when 'open' then from.translate([0, +1])
+        when 'close' then from.translate([0, -1])
 
     range  = @getPairRange(from, @pair, what)
     if range?.isEqual(rangeOrig)
