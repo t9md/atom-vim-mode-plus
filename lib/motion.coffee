@@ -529,6 +529,7 @@ class Find extends Motion
 # keymap: F
 class FindBackwards extends Find
   @extend()
+  inclusive: false
   backwards: true
   hover: icon: ':find:',  emoji: ':mag:'
 
@@ -549,6 +550,7 @@ class Till extends Find
 # keymap: T
 class TillBackwards extends Till
   @extend()
+  inclusive: false
   backwards: true
 
 class RepeatFind extends Find
