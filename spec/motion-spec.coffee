@@ -1231,6 +1231,10 @@ describe "Motion", ->
       set cursor: [0, 3]
       ensure ['d2f', char: 'a'], text: 'abcbc\n'
 
+    it "F behaves exclusively when composes with operator", ->
+      set cursor: [0, 3]
+      ensure ['dF', char: 'a'], text: 'abcabcabc\n'
+
   describe 'the t/T keybindings', ->
     beforeEach ->
       set
@@ -1274,6 +1278,16 @@ describe "Motion", ->
       set cursor: [0, 0]
       ensure ['dt', char: 'b'],
         text: 'bcabcabcabc\n'
+
+    it "T behaves exclusively when composes with operator", ->
+      set cursor: [0, 3]
+      ensure ['dT', char: 'b'],
+        text: 'ababcabcabc\n'
+
+    it "T don't delete character under cursor even when no movement happens", ->
+      set cursor: [0, 3]
+      ensure ['dT', char: 'c'],
+        text: 'abcabcabcabc\n'
 
   describe 'the V keybinding', ->
     [text] = []
