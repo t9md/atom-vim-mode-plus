@@ -521,9 +521,7 @@ describe "Motion", ->
 
       describe "as a selection", ->
         it "deletes the current and previous line", ->
-          ensure 'd-', text: "  abc\n"
-          # commented out because the column is wrong due to a bug in `k`; re-enable when `k` is fixed
-          #expect(editor.getCursorScreenPosition()).toEqual [0, 3]
+          ensure 'd-', text: "  abc\n", cursor: [0, 2]
 
     describe "from the first character of a line indented the same as the previous one", ->
       beforeEach ->
