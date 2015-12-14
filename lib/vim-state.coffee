@@ -111,24 +111,20 @@ class VimState
       switch
         when @isMode('visual') and (not someSelection) then @activate('normal')
         when @isMode('normal') and someSelection then @activate('visual', 'characterwise')
-      @showCursors()
 
     selectionWatcher = null
     handleMouseDown = =>
       selectionWatcher?.dispose()
       point = @editor.getLastCursor().getBufferPosition()
       tailRange = Range.fromPointWithDelta(point, 0, +1)
-      selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) ->
+      selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) =>
         handleSelectionChange()
         selection.setBufferRange(selection.getBufferRange().union(tailRange))
+        @showCursors()
 
     handleMouseUp = ->
       selectionWatcher?.dispose()
       selectionWatcher = null
-
-    debouncedHandleSelectionChange = _.debounce(->
-      handleSelectionChange() unless selectionWatcher?
-    , 100, true)
 
     @editorElement.addEventListener 'mousedown', handleMouseDown
     @editorElement.addEventListener 'mouseup', handleMouseUp
@@ -136,9 +132,9 @@ class VimState
       @editorElement.removeEventListener 'mousedown', handleMouseDown
       @editorElement.removeEventListener 'mouseup', handleMouseUp
 
-    @subscriptions.add @editor.onDidChangeSelectionRange =>
-      return if @operationStack.isProcessing()
-      debouncedHandleSelectionChange()
+    @subscriptions.add atom.commands.onDidDispatch ({target, type}) =>
+      if target is @editorElement and not type.startsWith('vim-mode-plus:')
+        handleSelectionChange() unless selectionWatcher?
 
   onDidFailToSetTarget: (fn) ->
     @emitter.on('did-fail-to-set-target', fn)
@@ -155,8 +151,7 @@ class VimState
 
   updateCursorStyle: ->
     selections = @editor.getSelections()
-    cursorElements = @editorElement.shadowRoot.querySelectorAll('.cursor')
-
+    cursorElements = @editorElement.shadowRoot.querySelectorAll('div.cursor')
     # [FIXME] Just for spec pass without error. In specmode
     # Its not proper way of avoiding spec error. but need time.
     return unless ((cursorElements.length is selections.length) and cursorElements.length)
