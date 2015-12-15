@@ -210,9 +210,14 @@ describe "Operator", ->
           register: '"': text: 'abcde\n'
           mode: 'normal'
 
-      it "deletes the last line", ->
-        set text: "12345\nabcde\nABCDE", cursor: [2, 1]
-        ensure 'dd', text: "12345\nabcde\n", cursor: [2, 0]
+      it "deletes the last line and always make non-blank-line last line", ->
+        set text: """
+          12345
+          abcde
+          ABCDE\n
+          """
+          , cursor: [2, 1]
+        ensure 'dd', text: "12345\nabcde\n", cursor: [1, 0]
 
       it "leaves the cursor on the first nonblank character", ->
         set text: '12345\n  abcde\n', cursor: [0, 4]

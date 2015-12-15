@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 globalState = require './global-state'
 {
   saveEditorState, getVisibleBufferRange, withKeepingGoalColumn
-  cursorIsAtEndOfBuffer
+  cursorIsAtEndOfBuffer, getEofBufferPosition
 } = require './utils'
 swrap = require './selection-wrapper'
 {Hover} = require './hover'
@@ -91,10 +91,11 @@ class Motion extends Base
     switch where
       when 'BOL' then cursor.isAtBeginningOfLine()
       when 'EOL' then cursor.isAtEndOfLine()
-      when 'BOF' then cursor.getBufferPosition().isEqual(Point.ZERO)
-      when 'EOF' then cursor.getBufferPosition().isEqual(@editor.getEofBufferPosition())
+      when 'EOF' then cursor.getBufferPosition().isEqual(@getEofBufferPosition())
       when 'FirstScreenRow'
         cursor.getScreenRow() is 0
+      when 'LastBufferRow'
+        cursor.getBufferRow() is @getLastRow()
       when 'LastScreenRow'
         cursor.getScreenRow() is @editor.getLastScreenRow()
 
@@ -102,8 +103,11 @@ class Motion extends Base
     cursor.moveToBeginningOfLine()
     cursor.moveToFirstCharacterOfLine()
 
+  getEofBufferPosition: ->
+    getEofBufferPosition(@editor)
+
   getLastRow: ->
-    @editor.getLastBufferRow()
+    @getEofBufferPosition().row
 
   getFirstVisibleScreenRow: ->
     @editorElement.getFirstVisibleScreenRow()
@@ -146,9 +150,12 @@ class CurrentSelection extends Motion
 
 class MoveLeft extends Motion
   @extend()
+  isMovable: (cursor) ->
+    not @at('BOL', cursor) or settings.get('wrapLeftRightMotion')
+
   moveCursor: (cursor) ->
     @countTimes =>
-      if not @at('BOL', cursor) or settings.get('wrapLeftRightMotion')
+      if @isMovable(cursor)
         @unfoldAtCursorRow(cursor)
         cursor.moveLeft()
 
@@ -165,6 +172,9 @@ class MoveRight extends Motion
   isOperatorPending: ->
     @isMode('operator-pending') or @asTarget
 
+  isMovable: (cursor) ->
+    not @at('EOL', cursor)
+
   moveCursor: (cursor) ->
     @countTimes =>
       wrapToNextLine = settings.get('wrapLeftRightMotion')
@@ -174,10 +184,11 @@ class MoveRight extends Motion
       if @isOperatorPending() and not @at('EOL', cursor)
         wrapToNextLine = false
 
-      unless @at('EOL', cursor)
+      if @isMovable(cursor)
         @unfoldAtCursorRow(cursor)
         cursor.moveRight()
-      cursor.moveRight() if wrapToNextLine and @at('EOL', cursor)
+      if @at('EOL', cursor) and wrapToNextLine and (not @at('EOF', cursor))
+        cursor.moveRight()
 
 class MoveUp extends Motion
   @extend()
@@ -206,7 +217,7 @@ class MoveDown extends MoveUp
   amount: +1
 
   isMovable: (cursor) ->
-    not @at('LastScreenRow', cursor)
+    not @at('LastScreenRow', cursor) and not @at('LastBufferRow', cursor)
 
   move: (cursor) ->
     cursor.moveDown()
@@ -239,7 +250,8 @@ class MoveToNextWord extends Motion
   moveCursor: (cursor) ->
     return if @at('EOF', cursor)
     @countTimes =>
-      if @at('EOL', cursor)
+      if @at('EOL', cursor) and not @at('EOF', cursor)
+        # console.log 'case-1'
         cursor.moveDown()
         cursor.moveToFirstCharacterOfLine()
       else
@@ -247,7 +259,10 @@ class MoveToNextWord extends Motion
         if next.isEqual(cursor.getBufferPosition())
           cursor.moveToEndOfWord()
         else
-          cursor.setBufferPosition(next)
+          if next.row is @getLastRow() + 1
+            cursor.moveToEndOfWord()
+          else
+            cursor.setBufferPosition(next)
 
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
@@ -383,7 +398,8 @@ class MoveToLastLine extends MoveToFirstLine
 class MoveToLineByPercent extends MoveToFirstLine
   @extend()
   getRow: ->
-    Math.floor(@getLastRow() * (@getCount() / 100))
+    percent = Math.min(100, @getCount())
+    Math.floor(@getLastRow() * (percent / 100))
 
 class MoveToRelativeLine extends Motion
   @extend(false)
