@@ -6,13 +6,13 @@
 - FIX: SurroundWord operator eat extra whitespace. #58
 - New: MapSurround operator to apply surround operation to each word in targeted area.
 - New: ToggleFold misc command to toggle fold at cursor row. Default keymap is `za`
-- FIX: F/T should be exclusive(not include char under cursor) when used as operator's target but was inclusive. #62
+- FIX: F/T should be exclusive(exclude char under cursor) when used as operator's target but was inclusive. #62
 - FIX: Add keymap `down`, `up` in visual-block-mode #64
 - Internal: Revival of once removed atom.commands.onDidDispatch observation to track selection change.
 - Improve: Accuracy improve for behavior when setCursorToStartOfChangeOnUndoRedo is enabled.
 - New: LatestChange text-object. Which area is defined between `[` and `]` marker.
 - Breaking: Rename `vim-mode-plus:split` to `vim-mode-plus:split-string` to avoid confusion.
-- Don't allow cursor past last newline char by vim-mode-plus's operation #56.
+- Don't allow cursor past last newline by vim-mode-plus's operation #56.
 
 # 0.8.0
 - New: provideVimModePlus service API now provide Base class and subscriptions.
