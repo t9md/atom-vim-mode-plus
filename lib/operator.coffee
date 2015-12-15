@@ -3,7 +3,7 @@ LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
-{haveSomeSelection} = require './utils'
+{haveSomeSelection, getEofBufferPosition} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
@@ -35,6 +35,7 @@ class Operator extends Base
       @vimState.operationStack.peekTop().constructor is @constructor
     else
       false
+
 
   needFlash: ->
     @flashTarget and settings.get('flashOnOperate')
@@ -152,10 +153,18 @@ class Delete extends Operator
   hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
   flashTarget: false
+
+  ensureCursorNotPastEOF: (s) ->
+    head = s.getHeadBufferPosition()
+    eof = getEofBufferPosition(@editor)
+    if head.isGreaterThan(eof)
+      s.cursor.setBufferPosition([eof.row, 0])
+
   execute: ->
     @eachSelection (s) =>
       @setTextToRegister s.getText() if s.isLastSelection()
       s.deleteSelectedText()
+      @ensureCursorNotPastEOF(s)
       s.cursor.skipLeadingWhitespace() if @target.isLinewise?()
     @activateMode('normal')
 

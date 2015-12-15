@@ -180,6 +180,20 @@ characterAtPoint = (editor, point) ->
   range = Range.fromPointWithDelta(point, 0, 1)
   char = editor.getTextInBufferRange(range)
 
+# Return Vim's EOF position rather than Atom's EOF position.
+# This function change meaning of EOF from native TextEditor::getEofBufferPosition()
+# Atom is special(strange) for cursor can past very last newline character.
+# Because of this, Atom's EOF position is [actualLastRow+1, 0] provided last-non-blank-row
+# ends with newline char.
+# But in Vim, curor can NOT past last newline. EOF is next position of very last character.
+getEofBufferPosition = (editor) ->
+  row = editor.getLastBufferRow()
+  if editor.bufferRangeForBufferRow(row).isEmpty()
+    point = editor.bufferRangeForBufferRow(row - 1).end
+    editor.clipBufferPosition(point)
+  else
+    editor.getEofBufferPosition()
+
 module.exports = {
   include
   debug
@@ -207,4 +221,5 @@ module.exports = {
   pointIsAtEndOfBuffer
   cursorIsAtEndOfBuffer
   characterAtPoint
+  getEofBufferPosition
 }
