@@ -12,6 +12,7 @@
 - Improve: Accuracy improve for behavior when setCursorToStartOfChangeOnUndoRedo is enabled.
 - New: LatestChange text-object. Which area is defined between `[` and `]` marker.
 - Breaking: Rename `vim-mode-plus:split` to `vim-mode-plus:split-string` to avoid confusion.
+- Don't allow cursor past last newline char by vim-mode-plus's operation #56.
 
 # 0.8.0
 - New: provideVimModePlus service API now provide Base class and subscriptions.
