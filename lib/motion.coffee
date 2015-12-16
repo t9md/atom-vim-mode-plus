@@ -95,7 +95,7 @@ class Motion extends Base
       when 'FirstScreenRow'
         cursor.getScreenRow() is 0
       when 'LastBufferRow'
-        cursor.getBufferRow() is @getLastRow()
+        cursor.getBufferRow() is @getLastBufferRow()
       when 'LastScreenRow'
         cursor.getScreenRow() is @editor.getLastScreenRow()
 
@@ -106,7 +106,7 @@ class Motion extends Base
   getEofBufferPosition: ->
     getEofBufferPosition(@editor)
 
-  getLastRow: ->
+  getLastBufferRow: ->
     @getEofBufferPosition().row
 
   getFirstVisibleScreenRow: ->
@@ -259,7 +259,7 @@ class MoveToNextWord extends Motion
         if next.isEqual(cursor.getBufferPosition())
           cursor.moveToEndOfWord()
         else
-          if next.row is @getLastRow() + 1
+          if next.row is @getLastBufferRow() + 1
             cursor.moveToEndOfWord()
           else
             cursor.setBufferPosition(next)
@@ -392,14 +392,14 @@ class MoveToFirstLine extends Motion
 class MoveToLastLine extends MoveToFirstLine
   @extend()
   getDefaultRow: ->
-    @getLastRow()
+    @getLastBufferRow()
 
 # keymap: N% e.g. 10%
 class MoveToLineByPercent extends MoveToFirstLine
   @extend()
   getRow: ->
     percent = Math.min(100, @getCount())
-    Math.floor(@getLastRow() * (percent / 100))
+    Math.floor(@getLastBufferRow() * (percent / 100))
 
 class MoveToRelativeLine extends Motion
   @extend(false)
@@ -443,7 +443,7 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
   @extend()
   getRow: ->
     row = @getLastVisibleScreenRow()
-    offset = if row is @getLastRow() then 0 else @scrolloff
+    offset = if row is @getLastBufferRow() then 0 else @scrolloff
     row - Math.max(@getCount(), offset)
 
 # keymap: M
