@@ -304,7 +304,7 @@ describe "Motion", ->
         ensure 'E', cursor: [0, 9]
         ensure 'E', cursor: [1, 3]
         ensure 'E', cursor: [3, 2]
-        ensure 'E', cursor: [4, 0]
+        ensure 'E', cursor: [3, 2]
 
     describe "as selection", ->
       describe "within a word", ->

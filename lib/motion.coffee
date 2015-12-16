@@ -97,7 +97,7 @@ class Motion extends Base
       when 'LastBufferRow'
         cursor.getBufferRow() is @getLastBufferRow()
       when 'LastScreenRow'
-        cursor.getScreenRow() is @editor.getLastScreenRow()
+        cursor.getScreenRow() is @getLastScreenRow()
 
   moveToFirstCharacterOfLine: (cursor) ->
     cursor.moveToBeginningOfLine()
@@ -106,8 +106,14 @@ class Motion extends Base
   getEofBufferPosition: ->
     getEofBufferPosition(@editor)
 
+  getEofScreenPosition: ->
+    @editor.screenPositionForBufferPosition(@getEofBufferPosition())
+
   getLastBufferRow: ->
     @getEofBufferPosition().row
+
+  getLastScreenRow: ->
+    @getEofScreenPosition().row
 
   getFirstVisibleScreenRow: ->
     @editorElement.getFirstVisibleScreenRow()
@@ -217,7 +223,7 @@ class MoveDown extends MoveUp
   amount: +1
 
   isMovable: (cursor) ->
-    not @at('LastScreenRow', cursor) and not @at('LastBufferRow', cursor)
+    not @at('LastScreenRow', cursor)
 
   move: (cursor) ->
     cursor.moveDown()
@@ -251,7 +257,6 @@ class MoveToNextWord extends Motion
     return if @at('EOF', cursor)
     @countTimes =>
       if @at('EOL', cursor) and not @at('EOF', cursor)
-        # console.log 'case-1'
         cursor.moveDown()
         cursor.moveToFirstCharacterOfLine()
       else
@@ -284,10 +289,10 @@ class MoveToEndOfWord extends Motion
       point = @getNext(cursor)
       if point.isEqual(cursor.getBufferPosition())
         cursor.moveRight()
-        if @at('EOL', cursor)
+        if @at('EOL', cursor) and not @at('EOF', cursor)
           cursor.moveDown()
           cursor.moveToBeginningOfLine()
-        point = @getNext(cursor)
+        point = Point.min(@getEofBufferPosition(), @getNext(cursor))
       cursor.setBufferPosition(point)
 
 class MoveToEndOfWholeWord extends MoveToEndOfWord
@@ -339,8 +344,9 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
   getCount: -> super - 1
 
   moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveDown()
+    @countTimes =>
+      unless @at('LastBufferRow', cursor)
+        cursor.moveDown()
     @skipTrailingWhitespace(cursor)
 
 # MoveToFirstCharacterOfLine faimily
@@ -362,8 +368,9 @@ class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
   linewise: true
   moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveDown()
+    @countTimes =>
+      unless @at('LastScreenRow', cursor)
+        cursor.moveDown()
     super
 
 class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
@@ -384,7 +391,7 @@ class MoveToFirstLine extends Motion
     0
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition [@getRow(), 0]
+    cursor.setScreenPosition [@getRow(), 0]
     cursor.moveToFirstCharacterOfLine()
     cursor.autoscroll({center: true})
 
@@ -392,14 +399,14 @@ class MoveToFirstLine extends Motion
 class MoveToLastLine extends MoveToFirstLine
   @extend()
   getDefaultRow: ->
-    @getLastBufferRow()
+    @getLastScreenRow()
 
 # keymap: N% e.g. 10%
 class MoveToLineByPercent extends MoveToFirstLine
   @extend()
   getRow: ->
     percent = Math.min(100, @getCount())
-    Math.floor(@getLastBufferRow() * (percent / 100))
+    Math.floor(@getLastScreenRow() * (percent / 100))
 
 class MoveToRelativeLine extends Motion
   @extend(false)
@@ -459,6 +466,9 @@ class MoveToMiddleOfScreen extends MoveToTopOfScreen
 # Full: ctrl-f, ctrl-b
 # -------------------------
 # [FIXME] count behave differently from original Vim.
+# [BUG] continous execution make cursor out of screen
+# This is maybe becauseof getRowsPerPage calculation is not accurate
+# Need to change approach to keep ratio of cursor row against scroll top.
 class ScrollFullScreenDown extends Motion
   @extend()
   coefficient: +1
@@ -481,7 +491,8 @@ class ScrollFullScreenDown extends Motion
 
   moveCursor: (cursor) ->
     row = Math.floor(@editor.getCursorScreenPosition().row + @rowsToScroll)
-    cursor.setScreenPosition([row, 0], autoscroll: false)
+    row = Math.min(@getLastScreenRow(), row)
+    cursor.setScreenPosition([row, 0] , autoscroll: false)
 
 # keymap: ctrl-b
 class ScrollFullScreenUp extends ScrollFullScreenDown
