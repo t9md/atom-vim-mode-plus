@@ -362,7 +362,7 @@ describe "Operator", ->
           cursorBuffer: [[0, 1], [1, 2], [2, 3]]
 
         ensure 'de',
-          text: "a\n12\nABC"
+          text: "a\n12\nABC\n"
           cursorBuffer: [[0, 0], [1, 1], [2, 2]]
 
       it "doesn't delete empty selections", ->
