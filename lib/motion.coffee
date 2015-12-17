@@ -81,6 +81,27 @@ class Motion extends Base
       options = {autoscroll: false, preserveFolds: true}
       selection.setBufferRange(newRange, options)
 
+  moveCursorUp: (cursor) ->
+    unless @at('FirstScreenRow', cursor)
+      cursor.moveUp()
+
+  moveCursorDown: (cursor) ->
+    unless @at('LastScreenRow', cursor)
+      cursor.moveDown()
+
+  getEolBufferPosition: (cursor) ->
+    cursor.getCurrentLineBufferRange().end
+
+  moveCursorRight: (cursor, allowWrap=false) ->
+    {row, column} = cursor.getScreenPosition()
+    column++
+    column++ if allowWrap and @getEolBufferPosition(cursor).isEqual([row, column])
+    point = Point.min([row, column], @getEofScreenPosition())
+    cursor.setScreenPosition point,
+      clip: 'forward',
+      wrapBeyondNewlines: allowWrap
+      wrapAtSoftNewlines: true
+
   # Utils
   # -------------------------
   countTimes: (fn) ->
@@ -126,6 +147,20 @@ class Motion extends Base
     if @editor.isFoldedAtBufferRow(row)
       @editor.unfoldBufferRow row
 
+  # Debuging purpose
+  # -------------------------
+  # [TODO] remove after dev finished
+  reportCursor: (subject, cursor) ->
+    EOL = cursor.getCurrentLineBufferRange().end
+    point = cursor.getBufferPosition()
+    console.log "#{subject}: c = #{point.toString()}, eol = #{EOL.toString()}"
+
+  withReporting: (subject, cursor, fn) ->
+    @reportCursor("#{subject}: before", cursor)
+    fn()
+    @reportCursor("#{subject}: after", cursor)
+    console.log '--------------------'
+
 # Used as operator's target in visual-mode.
 # Never be execute()ed as stand-alone motion
 class CurrentSelection extends Motion
@@ -167,53 +202,31 @@ class MoveLeft extends Motion
 
 class MoveRight extends Motion
   @extend()
-  asTarget: false
-
-  onDidComposeBy: (operation) ->
-    # Don't save oeration to instance variable to avoid reference before I understand it correctly.
-    # Also introspection need to support circular reference detection to stop infinit reflection loop.
-    if operation.instanceof('Operator')
-      @asTarget = true
-
-  isOperatorPending: ->
-    @isMode('operator-pending') or @asTarget
-
-  isMovable: (cursor) ->
-    not @at('EOL', cursor)
+  canWrapToNextLine: (cursor) ->
+    if @isAsTarget() and not @at('EOL', cursor)
+      false
+    else
+      settings.get('wrapLeftRightMotion')
 
   moveCursor: (cursor) ->
     @countTimes =>
-      wrapToNextLine = settings.get('wrapLeftRightMotion')
-
-      # when the motion is combined with an operator, we will only wrap to the next line
-      # if we are already at the end of the line (after the last character)
-      if @isOperatorPending() and not @at('EOL', cursor)
-        wrapToNextLine = false
-
-      if @isMovable(cursor)
-        @unfoldAtCursorRow(cursor)
-        cursor.moveRight()
-      if @at('EOL', cursor) and wrapToNextLine and (not @at('EOF', cursor))
-        cursor.moveRight()
+      @unfoldAtCursorRow(cursor)
+      @moveCursorRight(cursor, @canWrapToNextLine(cursor))
 
 class MoveUp extends Motion
   @extend()
   linewise: true
   amount: -1
 
-  isMovable: (cursor) ->
-    not @at('FirstScreenRow', cursor)
-
   move: (cursor) ->
-    cursor.moveUp()
+    @moveCursorUp(cursor)
 
   moveCursor: (cursor) ->
     isBufferRowWise = @editor.isSoftWrapped() and @isMode('visual', 'linewise')
     @countTimes =>
-      return unless @isMovable(cursor)
       if isBufferRowWise
-        point = cursor.getBufferPosition()
-        cursor.setBufferPosition(point.translate([@amount, 0]))
+        point = cursor.getBufferPosition().translate([@amount, 0])
+        cursor.setBufferPosition(point)
       else
         @move(cursor)
 
@@ -222,11 +235,8 @@ class MoveDown extends MoveUp
   linewise: true
   amount: +1
 
-  isMovable: (cursor) ->
-    not @at('LastScreenRow', cursor)
-
   move: (cursor) ->
-    cursor.moveDown()
+    @moveCursorDown(cursor)
 
 class MoveToPreviousWord extends Motion
   @extend()
@@ -360,8 +370,8 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
   linewise: true
   moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveUp()
+    @countTimes =>
+      @moveCursorUp(cursor)
     super
 
 class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
@@ -369,8 +379,7 @@ class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   linewise: true
   moveCursor: (cursor) ->
     @countTimes =>
-      unless @at('LastScreenRow', cursor)
-        cursor.moveDown()
+      @moveCursorDown(cursor)
     super
 
 class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
