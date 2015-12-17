@@ -81,6 +81,11 @@ class Motion extends Base
       options = {autoscroll: false, preserveFolds: true}
       selection.setBufferRange(newRange, options)
 
+  getEolBufferPosition: (cursor) ->
+    cursor.getCurrentLineBufferRange().end
+
+  # Cursor motion wrapper
+  # -------------------------
   moveCursorUp: (cursor) ->
     unless @at('FirstScreenRow', cursor)
       cursor.moveUp()
@@ -88,9 +93,6 @@ class Motion extends Base
   moveCursorDown: (cursor) ->
     unless @at('LastScreenRow', cursor)
       cursor.moveDown()
-
-  getEolBufferPosition: (cursor) ->
-    cursor.getCurrentLineBufferRange().end
 
   moveCursorRight: (cursor, allowWrap=false) ->
     {row, column} = cursor.getScreenPosition()
@@ -102,6 +104,10 @@ class Motion extends Base
       wrapBeyondNewlines: allowWrap
       wrapAtSoftNewlines: true
 
+  moveCursorLeft: (cursor, allowWrap=false) ->
+    if not cursor.isAtBeginningOfLine() or allowWrap
+      cursor.moveLeft()
+
   # Utils
   # -------------------------
   countTimes: (fn) ->
@@ -110,15 +116,11 @@ class Motion extends Base
 
   at: (where, cursor) ->
     switch where
-      when 'BOL' then cursor.isAtBeginningOfLine()
       when 'EOL' then cursor.isAtEndOfLine()
       when 'EOF' then cursor.getBufferPosition().isEqual(@getEofBufferPosition())
-      when 'FirstScreenRow'
-        cursor.getScreenRow() is 0
-      when 'LastBufferRow'
-        cursor.getBufferRow() is @getLastBufferRow()
-      when 'LastScreenRow'
-        cursor.getScreenRow() is @getLastScreenRow()
+      when 'FirstScreenRow' then cursor.getScreenRow() is 0
+      when 'LastBufferRow' then cursor.getBufferRow() is @getLastBufferRow()
+      when 'LastScreenRow' then cursor.getScreenRow() is @getLastScreenRow()
 
   moveToFirstCharacterOfLine: (cursor) ->
     cursor.moveToBeginningOfLine()
@@ -191,14 +193,9 @@ class CurrentSelection extends Motion
 
 class MoveLeft extends Motion
   @extend()
-  isMovable: (cursor) ->
-    not @at('BOL', cursor) or settings.get('wrapLeftRightMotion')
-
   moveCursor: (cursor) ->
     @countTimes =>
-      if @isMovable(cursor)
-        @unfoldAtCursorRow(cursor)
-        cursor.moveLeft()
+      @moveCursorLeft(cursor, settings.get('wrapLeftRightMotion'))
 
 class MoveRight extends Motion
   @extend()
