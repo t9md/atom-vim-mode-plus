@@ -87,9 +87,7 @@ class Operator extends Base
       operatorName = @constructor.name
       message = "Failed to set '#{targetName}' as target for Operator '#{operatorName}'"
       throw new OperatorError(message)
-
-    if _.isFunction(@target.onDidComposeBy)
-      @target.onDidComposeBy(this)
+    @target.setAsTarget()
 
   selectTarget: (force=false) ->
     @observeSelectAction()

@@ -36,6 +36,7 @@ class Base
   defaultCount: 1
   requireInput: false
   requireTarget: false
+  asTarget: false
 
   @delegatesMethods delegatingMethods..., toProperty: 'vimState'
 
@@ -65,6 +66,12 @@ class Base
 
   setRepeated: ->
     @repeated = true
+
+  setAsTarget: ->
+    @asTarget = true
+
+  isAsTarget: ->
+    @asTarget
 
   abort: ->
     throw new OperationAbortedError('Aborted')
