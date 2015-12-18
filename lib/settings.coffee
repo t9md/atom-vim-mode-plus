@@ -105,17 +105,3 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'integer'
     default: 700
     description: "Duration(msec) for hover search counter"
-  debug:
-    order: 25
-    type: 'boolean'
-    default: false
-    description: "Show operationStack debug log on console"
-  debugOutput:
-    order: 26
-    type: 'string'
-    default: 'console'
-    enum: ['console', 'file']
-  debugOutputFilePath:
-    order: 27
-    type: 'string'
-    default: ''

@@ -3,17 +3,20 @@ _ = require 'underscore-plus'
 
 {CompositeDisposable} = require 'atom'
 Base = require './base'
-{debug, withKeepingGoalColumn} = require './utils'
+{withKeepingGoalColumn} = require './utils'
 settings = require './settings'
-{CurrentSelection, Select} = {}
+{CurrentSelection} = require './motion'
+{Select} = require './operator'
 
 inspectInstance = null
+
+class OperationStackError
+  constructor: (@message) ->
+    @name = 'OperationStack Error'
 
 class OperationStack
   constructor: (@vimState) ->
     {@editor} = @vimState
-    Select ?= Base.getClass('Select')
-    CurrentSelection ?= Base.getClass('CurrentSelection')
     @reset()
 
   subscribe: (args...) ->
@@ -32,63 +35,46 @@ class OperationStack
       @processing = false
 
   push: (op) ->
-    if @isEmpty() and settings.get('debug')
-      console.clear() if settings.get('debugOutput') is 'console'
-      debug "#=== Start at #{new Date().toISOString()}"
-
     if @vimState.isMode('visual') and _.isFunction(op.select)
-      @pushToStack new Select(@vimState)
-    @pushToStack op
+      @stack.push(new Select(@vimState))
+    @stack.push(op)
     if @vimState.isMode('visual') and op.instanceof('Operator')
-      @pushToStack new CurrentSelection(@vimState)
+      @stack.push(new CurrentSelection(@vimState))
+
+  pop: ->
+    @stack.pop()
 
   isProcessing: ->
     @processing
 
   process: ->
-    debug '-> @process(): start'
+    if @stack.length > 2
+      throw new OperationStackError('Must not happen')
 
-    while @stack.length > 1
+    if @stack.length > 1
       try
         op = @pop()
-        debug "-> <#{@peekTop().constructor.name}>.setTarget(<#{op.constructor.name}>)"
-        unless @peekTop().setTarget?
-          console.log @peekTop()
         @peekTop().setTarget(op)
       catch error
         if error.instanceof?('OperatorError')
-          debug error.message
           @vimState.activate('reset')
-          return
         else
           throw error
 
     unless @peekTop().isComplete()
       if @vimState.isMode('normal') and @peekTop().instanceof?('Operator')
-        @inspect()
-        debug '-> @process(): activating: operator-pending-mode'
         @vimState.activate('operator-pending')
-      else
-        debug "-> @process(): return: not <#{@peekTop().constructor.name}>.isComplete()"
-        @inspect()
       return
 
-    @inspect()
-    debug '-> @pop()'
     op = @pop()
-    debug " -> <#{op.constructor.name}>.execute()"
     op.execute()
     @record(op) if op.isRecordable()
     @finish()
-    debug "#=== Finish at #{new Date().toISOString()}\n"
 
   cancel: ->
-    debug "Cancelled stack size: #{@stack.length}"
-    debug(op.constructor.name) for op in @pop()
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
       @vimState.activate('reset')
     @finish()
-    debug "#=== Canceled at #{new Date().toISOString()}\n"
 
   finish: ->
     @vimState.emitter.emit 'did-operation-finish'
@@ -101,15 +87,6 @@ class OperationStack
 
   peekTop: ->
     _.last @stack
-
-  pushToStack: (operation) ->
-    if settings.get('debug')
-      kind = operation.constructor.kind
-      debug "push <#{kind}.#{operation.constructor.name}>"
-    @stack.push(operation)
-
-  pop: ->
-    @stack.pop()
 
   reset: ->
     @stack = []
@@ -127,18 +104,5 @@ class OperationStack
 
   getRecorded: ->
     @recorded
-
-  inspect: ->
-    return unless settings.get('debug')
-    inspectInstance ?= (require './introspection').inspectInstance
-    debug "  [@stack] size: #{@stack.length}"
-    for op, i in @stack
-      debug "  <idx: #{i}>"
-      debug inspectInstance op,
-        indent: 2
-        colors: settings.get('debugOutput') is 'file'
-         # vimState have many properties, occupy DevTool console.
-        excludeProperties: ['vimState', 'editorElement', 'extend']
-        recursiveInspect: Base
 
 module.exports = OperationStack

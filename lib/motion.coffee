@@ -936,3 +936,5 @@ class BracketMatchingMotion extends SearchBase
 
     if matchPosition = @searchForMatch(startPosition, reverse, inCharacter, outCharacter)
       cursor.setBufferPosition(matchPosition)
+
+module.exports = {CurrentSelection}
