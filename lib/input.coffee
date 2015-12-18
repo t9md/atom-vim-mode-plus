@@ -110,6 +110,7 @@ class InputElement extends InputBaseElement
     @panel = atom.workspace.addBottomPanel(item: this, visible: false)
     this
 
+# [TODO] Differenciating literal-mode should be done by scope and scope based keymap.
 class Search extends InputBase
   constructor: ->
     super
