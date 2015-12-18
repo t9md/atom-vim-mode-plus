@@ -397,7 +397,7 @@ class MoveToFirstLine extends Motion
     0
 
   moveCursor: (cursor) ->
-    cursor.setScreenPosition [@getRow(), 0]
+    cursor.setBufferPosition [@getRow(), 0]
     cursor.moveToFirstCharacterOfLine()
     cursor.autoscroll({center: true})
 
