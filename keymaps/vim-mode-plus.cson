@@ -234,6 +234,7 @@
   'i W':  'vim-mode-plus:inner-whole-word'
   'a W':  'vim-mode-plus:a-whole-word'
 
+  # [FIXME?] overridden Vim's sentence text object
   'i s':  'vim-mode-plus:inner-any-pair'
   'a s':  'vim-mode-plus:a-any-pair'
 
