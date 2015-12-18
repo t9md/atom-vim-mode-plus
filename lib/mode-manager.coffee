@@ -17,9 +17,9 @@ class ModeManager
     @emitter = new Emitter
 
     @onDidActivateMode ({mode, submode}) =>
-      @vimState.showCursors()
       @updateEditorElement()
       @vimState.statusBarManager.update(mode, submode)
+      @vimState.showCursors()
 
   updateEditorElement: ->
     for mode in supportedModes
@@ -146,12 +146,15 @@ class ModeManager
 
     # Update selection area to final submode.
     switch submode
-      when 'linewise' then swrap(s).expandOverLine() for s in selections
-      when 'blockwise' then new BlockwiseSelect(@vimState).execute()
+      when 'linewise'
+        swrap.expandOverLine(selections)
+      when 'blockwise'
+        unless swrap(@editor.getLastSelection()).isLinewise()
+          new BlockwiseSelect(@vimState).execute()
 
     new Disposable =>
       @restoreCharacterwiseRange()
-
+      
       # Prepare function to restore selection by `gv`
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
       submode = @submode
@@ -164,12 +167,13 @@ class ModeManager
       @eachSelection (s) ->
         {cursor} = s
         swrap(s).resetProperties()
-        unless s.isReversed() or s.isEmpty() or cursor.isAtBeginningOfLine()
+        unless s.isReversed() or
+           s.isEmpty() or (not swrap(s).isLinewise() and cursor.isAtBeginningOfLine())
           cursor.moveLeft()
         s.clear(autoscroll: false)
 
   restoreCharacterwiseRange: ->
-    return if @isMode('visual', 'characterwise')
+    return if @submode is 'characterwise'
     switch @submode
       when 'linewise'
         @eachSelection (s) ->

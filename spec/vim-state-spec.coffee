@@ -384,6 +384,21 @@ describe "VimState", ->
         ensure 'vll', cursor: [0, 8]
         ensure 'escape', mode: 'normal', cursor: [0, 7]
 
+    describe "deactivating visual mode on blank line", ->
+      beforeEach ->
+        ensure 'escape', mode: 'normal'
+        set text: "\n\n\n", cursor: [1, 0]
+      it "v", ->
+        ensure 'v', mode: ['visual', 'characterwise'], cursor: [2, 0]
+        ensure 'escape', mode: 'normal', cursor: [1, 0]
+      it "V", ->
+        ensure 'V', mode: ['visual', 'linewise'], cursor: [2, 0]
+        ensure 'escape', mode: 'normal', cursor: [1, 0]
+      it "ctrl-v", ->
+        ensure {ctrl: 'v'}, mode: ['visual', 'blockwise'], cursor: [2, 0]
+        ensure 'escape', mode: 'normal', cursor: [1, 0]
+
+
   describe "marks", ->
     beforeEach -> set text: "text in line 1\ntext in line 2\ntext in line 3"
 

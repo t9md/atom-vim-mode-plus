@@ -1,5 +1,6 @@
 _ = require 'underscore-plus'
 {Range} = require 'atom'
+{isLinewiseRange} = require './utils'
 
 class SelectionWrapper
   scope: 'vim-mode-plus'
@@ -93,13 +94,19 @@ class SelectionWrapper
   restoreCharacterwise: ->
     unless characterwise = @getProperties().characterwise
       return
-    {head, tail, reversed} = characterwise
+    {head, tail} = characterwise
     [start, end] = if @selection.isReversed()
       [head, tail]
     else
       [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
-    @setBufferRange([start, end.translate([0, +1])])
+    @setBufferRange([start, end])
+    if @selection.isReversed()
+      @reverse()
+      @selection.selectRight()
+      @reverse()
+    else
+      @selection.selectRight()
     # [NOTE] Important! reset to null after restored.
     @resetProperties()
 
@@ -134,12 +141,19 @@ class SelectionWrapper
     [startRow, endRow] = @selection.getBufferRowRange()
     startRow is endRow
 
+  isLinewise: ->
+    isLinewiseRange(@selection.getBufferRange())
+
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
 swrap.setReversedState = (selections, reversed) ->
   selections.forEach (s) ->
     swrap(s).setReversedState(reversed)
+
+swrap.expandOverLine = (selections) ->
+  selections.forEach (s) ->
+    swrap(s).expandOverLine()
 
 swrap.reverse = (selections) ->
   selections.forEach (s) ->
