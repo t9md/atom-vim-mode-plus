@@ -154,7 +154,7 @@ class ModeManager
 
     new Disposable =>
       @restoreCharacterwiseRange()
-      
+
       # Prepare function to restore selection by `gv`
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
       submode = @submode
