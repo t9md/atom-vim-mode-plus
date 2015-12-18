@@ -15,8 +15,8 @@ As you can see in commit history, this project is originally started by forking 
 
 # Important Note
 
-- To use vim-mode-plus, you need to disable vim-mode first. You can't use both simultaneously.
-- Following packages for vim-mode won't work in vim-mode-plus. Why? Because service API name is different. It's easy to add support I believe. Please report to each project.
+- You need to disable vim-mode first. You can't use both simultaneously.
+- Following packages for vim-mode doesn't work in vim-mode-plus. Why? Because service API name is different. It's easy to add support I believe. Please report to each project.
   - [vim-mode-clipboard-plus](https://atom.io/packages/vim-mode-clipboard-plus)
   - [ex-mode](https://atom.io/packages/ex-mode)
   - [vim-surround](https://atom.io/packages/vim-surround): surround feature included vim-mode-plus, so you won't need this.

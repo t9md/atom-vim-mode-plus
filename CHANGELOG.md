@@ -1,3 +1,7 @@
+# 0.9.1
+- Further accuracy improve for cursor not past last newline #56.
+- BUG: V, escape on empty-line put cursor one-line down than expected row #70
+
 # 0.9.0
 - Improve: Tweak default add/change color of undo/redo operation.
 - FIX: Cursor visibility in `cmd-d` operation. #55
