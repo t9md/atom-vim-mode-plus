@@ -719,10 +719,10 @@ describe "Motion", ->
       describe "in normal mode", ->
         it "moves the cursor to the beginning of the first line", ->
           set cursor: [2, 0]
-          ensure 'gg', cursor: [0, 1]
+          ensure 'gg', cursor: [0, 0]
 
-        it "move to same position if its on first line and first char", ->
-          ensure 'gg', cursor: [0, 1]
+        it "moves to same position if its on first line and first char", ->
+          ensure 'gg', cursor: [0, 2]
 
       describe "in linewise visual mode", ->
         it "selects to the first line in the file", ->
@@ -755,8 +755,8 @@ describe "Motion", ->
         it "selects to a first character of specified line", ->
           set cursor: [2, 0]
           ensure 'v2gg',
-            selectedText: "2\n3"
-            cursor: [1, 1]
+            selectedText: " 2\n3"
+            cursor: [1, 0]
 
   describe "the g_ keybinding", ->
     beforeEach ->
@@ -779,29 +779,36 @@ describe "Motion", ->
     describe "as a selection", ->
       it "selects the current line excluding whitespace", ->
         set cursor: [1, 2]
-        ensure 'v2g_',
-          selectedText: "  2  \n 3abc"
+        ensure 'v2g_', selectedText: "  2  \n 3abc"
 
   describe "the G keybinding", ->
     beforeEach ->
       set
-        text: "1\n    2\n 3abc\n "
-        cursor: [0, 2]
+        text: "123\n    2\n 3abc\n"
+        cursor: [0, 1]
 
     describe "as a motion", ->
       it "moves the cursor to the last line after whitespace", ->
-        ensure 'G', cursor: [3, 0]
+        ensure 'G', cursor: [2, 1]
+
+      it "moves the cursor to the end of the line", ->
+        set text: "12345\nab\n", cursor: [0, 4]
+        ensure 'G', cursor: [1, 1]
 
     describe "as a repeated motion", ->
       it "moves the cursor to a specified line", ->
-        ensure '2G', cursor: [1, 4]
+        ensure '3G', cursor: [2, 1]
+
+      it "moves the cursor to a specified line with whitespace", ->
+        # atom forces the cursor to the start of the fake tabstop
+        ensure '2G', cursor: [1, 0]
 
     describe "as a selection", ->
       it "selects to the last line in the file", ->
-        set cursor: [1, 0]
+        set cursor: [1, 2]
         ensure 'vG',
-          selectedText: "    2\n 3abc\n "
-          cursor: [3, 1]
+          selectedText: "  2\n 3a"
+          cursor: [2, 3]
 
   describe "the N% keybinding", ->
     beforeEach ->
