@@ -78,11 +78,11 @@ class OperationStack
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
         throw new OperationStackError('Selection remains on normal-mode')
-      @ensureCursorNotAtEOL()
+      @ensureCursorsNotAtEOL()
     @vimState.showCursors()
     @vimState.reset()
 
-  ensureCursorNotAtEOL: ->
+  ensureCursorsNotAtEOL: ->
     for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
       withKeepingGoalColumn c, (c) ->
         c.moveLeft()
