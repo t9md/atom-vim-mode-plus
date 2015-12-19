@@ -5,10 +5,7 @@ _ = require 'underscore-plus'
 Base = require './base'
 {withKeepingGoalColumn} = require './utils'
 settings = require './settings'
-{CurrentSelection} = require './motion'
-{Select} = require './operator'
-
-inspectInstance = null
+{CurrentSelection, Select} = {}
 
 class OperationStackError
   constructor: (@message) ->
@@ -17,6 +14,8 @@ class OperationStackError
 class OperationStack
   constructor: (@vimState) ->
     {@editor} = @vimState
+    CurrentSelection ?= Base.getClass('CurrentSelection')
+    Select ?= Base.getClass('Select')
     @reset()
 
   subscribe: (args...) ->
@@ -25,7 +24,13 @@ class OperationStack
   run: (klass, properties) ->
     klass = Base.getClass(klass) if _.isString(klass)
     try
-      @push new klass(@vimState, properties)
+      op = new klass(@vimState, properties)
+      if @vimState.isMode('visual') and _.isFunction(op.select)
+        @stack.push(new Select(@vimState))
+      @stack.push(op)
+      if @vimState.isMode('visual') and op.instanceof('Operator')
+        @stack.push(new CurrentSelection(@vimState))
+
       @processing = true
       @process()
     catch error
@@ -34,16 +39,6 @@ class OperationStack
         throw error
     finally
       @processing = false
-
-  push: (op) ->
-    if @vimState.isMode('visual') and _.isFunction(op.select)
-      @stack.push(new Select(@vimState))
-    @stack.push(op)
-    if @vimState.isMode('visual') and op.instanceof('Operator')
-      @stack.push(new CurrentSelection(@vimState))
-
-  pop: ->
-    @stack.pop()
 
   isProcessing: ->
     @processing
@@ -54,7 +49,7 @@ class OperationStack
 
     if @stack.length > 1
       try
-        op = @pop()
+        op = @stack.pop()
         @peekTop().setTarget(op)
       catch error
         if error.instanceof?('OperatorError')
@@ -67,7 +62,7 @@ class OperationStack
       if @vimState.isMode('normal') and @peekTop().instanceof?('Operator')
         @vimState.activate('operator-pending')
     else
-      op = @pop()
+      op = @stack.pop()
       op.execute()
       @record(op) if op.isRecordable()
       @finish()

@@ -865,5 +865,3 @@ class SubstituteLine extends Change
 class ChangeToLastCharacterOfLine extends Change
   @extend()
   target: 'MoveToLastCharacterOfLine'
-
-module.exports = {Select}
