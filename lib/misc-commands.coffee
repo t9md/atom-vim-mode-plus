@@ -15,10 +15,6 @@ class Misc extends Base
     super
     @initialize?()
 
-  activate: (mode, submode) ->
-    @onDidOperationFinish =>
-      @vimState.activate(mode, submode)
-
 class ReverseSelections extends Misc
   @extend()
   execute: ->
@@ -103,7 +99,7 @@ class Undo extends Misc
 
     for s in @editor.getSelections()
       s.clear()
-    @activate('normal')
+    @activateMode('normal')
 
   mutate: ->
     @editor.undo()
