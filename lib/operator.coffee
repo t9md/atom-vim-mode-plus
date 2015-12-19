@@ -36,7 +36,6 @@ class Operator extends Base
     else
       false
 
-
   needFlash: ->
     @flashTarget and settings.get('flashOnOperate')
 
@@ -55,12 +54,13 @@ class Operator extends Base
     # Guard when Repeated.
     return if @instanceof("Repeat")
 
-    @setTarget @new(@target) if @target?
     #  To support, `dd`, `cc` and a like.
     if @isSameOperatorRepeated()
       @vimState.operationStack.run 'MoveToRelativeLine'
       @abort()
+
     @initialize?()
+    @setTarget @new(@target) if _.isString(@target)
 
   observeSelectAction: ->
     if @needFlash()
@@ -88,6 +88,7 @@ class Operator extends Base
       message = "Failed to set '#{targetName}' as target for Operator '#{operatorName}'"
       throw new OperatorError(message)
     @target.setAsTarget()
+    @emitDidSetTarget()
 
   selectTarget: (force=false) ->
     @observeSelectAction()
@@ -295,7 +296,11 @@ class Surround extends TransformString
     @onDidConfirmInput (input) => @onConfirm(input)
     @onDidChangeInput (input) => @addHover(input)
     @onDidCancelInput => @vimState.operationStack.cancel()
-    @vimState.input.focus({@charsMax})
+    if settings.get('readTargetFirstOnSurround') and @requireTarget
+      @onDidSetTarget =>
+        @vimState.input.focus({@charsMax})
+    else
+      @vimState.input.focus({@charsMax})
 
   onConfirm: (@input) ->
     @vimState.operationStack.process()
@@ -329,6 +334,7 @@ class MapSurround extends Surround
 class DeleteSurround extends Surround
   @extend()
   pairChars: ['[]', '()', '{}'].join('')
+  requireTarget: false
 
   onConfirm: (@input) ->
     # FIXME: dont manage allowNextLine independently. Each Pair text-object can handle by themselvs.
@@ -366,12 +372,13 @@ class ChangeSurroundAnyPair extends ChangeSurround
   target: "AAnyPair"
 
   initialize: ->
-    @restore = @preservePoints()
-    @target.select()
-    unless @haveSomeSelection()
-      @vimState.reset()
-      @abort()
-    @addHover(@editor.getSelectedText()[0])
+    @onDidSetTarget =>
+      @restore = @preservePoints()
+      @target.select()
+      unless @haveSomeSelection()
+        @vimState.reset()
+        @abort()
+      @addHover(@editor.getSelectedText()[0])
     super
 
   onConfirm: (@char) ->
