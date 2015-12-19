@@ -11,6 +11,7 @@ swrap = require './selection-wrapper'
   sortRanges
   getLineTextToPoint
   characterAtPoint
+  haveSomeSelection
 } = require './utils'
 
 class TextObject extends Base
@@ -31,9 +32,12 @@ class TextObject extends Base
   eachSelection: (fn) ->
     fn(s) for s in @editor.getSelections()
     @emitDidSelect()
-    return if @isMode('operator-pending') or @isMode('visual', 'linewise')
-    if @isLinewise()
+    return if @isMode('operator-pending')
+
+    if not @isMode('visual', 'linewise') and @isLinewise()
       @activateMode('visual', 'linewise')
+    else if not @isMode('visual', 'characterwise') and haveSomeSelection(@editor.getSelections())
+      @activateMode('visual', 'characterwise')
 
   execute: ->
     @select()
