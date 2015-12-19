@@ -1,3 +1,7 @@
+# WIP
+- Breaking: Remove default keymap of surround like `gss`, `gsw`, `gsd`, `gsc`.
+- Breaking: Surround take target before reading surround-char e.g. old: `ys(iw`, new: `ysiw(` #75
+
 # 0.9.1
 - Further accuracy improve for cursor not past last newline #56.
 - BUG: V, escape on empty-line put cursor one-line down than expected row #70

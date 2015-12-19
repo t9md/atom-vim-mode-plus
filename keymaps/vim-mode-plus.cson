@@ -121,13 +121,7 @@
   'g /':   'vim-mode-plus:toggle-line-comments'
   'g -':   'vim-mode-plus:dash-case'
   # 'g _': 'vim-mode-plus:snake-case'
-  'g s s': 'vim-mode-plus:surround'
-  'g s w': 'vim-mode-plus:surround-word'
-  'g s d': 'vim-mode-plus:delete-surround'
-  'g s c': 'vim-mode-plus:change-surround'
-  # [FIXME] 'g s d ;' cause spec fail because of keymaping is not unique.
-  # 'g s d ;': 'vim-mode-plus:delete-surround-any-pair'
-  # 'g s c ;': 'vim-mode-plus:change-surround-any-pair'
+
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
   'g ctrl-a': 'vim-mode-plus:increment-number' # experimental
@@ -218,6 +212,13 @@
   'ctrl-]': 'symbols-view:go-to-declaration'
   'ctrl-t': 'symbols-view:return-from-declaration'
   '"':      'vim-mode-plus:set-register-name'
+
+  # 'y s': 'vim-mode-plus:surround'
+  # 'y s w': 'vim-mode-plus:surround-word'
+  # 'd s': 'vim-mode-plus:delete-surround'
+  # 'c s': 'vim-mode-plus:change-surround'
+  # 'd s': 'vim-mode-plus:delete-surround-any-pair'
+  # 'c s': 'vim-mode-plus:change-surround-any-pair'
 
 # operator-pending, visual
 # -------------------------
