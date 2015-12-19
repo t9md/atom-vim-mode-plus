@@ -198,6 +198,10 @@ moveCursorLeftWithinLine = (cursor) ->
   unless cursor.isAtBeginningOfLine()
     cursor.moveLeft()
 
+moveCursorRightWithinLine = (cursor) ->
+  unless cursor.isAtEndOfLine()
+    cursor.moveRight()
+
 module.exports = {
   include
   debug
@@ -227,4 +231,5 @@ module.exports = {
   characterAtPoint
   getEofBufferPosition
   moveCursorLeftWithinLine
+  moveCursorRightWithinLine
 }
