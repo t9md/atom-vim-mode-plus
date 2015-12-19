@@ -30,7 +30,8 @@ class OperationStack
       @process()
     catch error
       @vimState.reset()
-      throw error unless error.instanceof?('OperationAbortedError')
+      unless error.instanceof?('OperationAbortedError')
+        throw error
     finally
       @processing = false
 
@@ -58,18 +59,18 @@ class OperationStack
       catch error
         if error.instanceof?('OperatorError')
           @vimState.activate('reset')
+          return
         else
           throw error
 
     unless @peekTop().isComplete()
       if @vimState.isMode('normal') and @peekTop().instanceof?('Operator')
         @vimState.activate('operator-pending')
-      return
-
-    op = @pop()
-    op.execute()
-    @record(op) if op.isRecordable()
-    @finish()
+    else
+      op = @pop()
+      op.execute()
+      @record(op) if op.isRecordable()
+      @finish()
 
   cancel: ->
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
