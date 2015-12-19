@@ -629,9 +629,8 @@ class IncrementNumber extends Operator
       @flash newRanges
     else
       atom.beep()
-    # Reverseing selection put cursor on start position of selection.
-    # This allow increment/decrement works in same target range when repeated.
-    swrap.setReversedState(@editor.getSelections(), true)
+    for s in @editor.getSelections()
+      s.cursor.setBufferPosition(s.getBufferRange().start)
     @activateMode('normal')
 
   replaceNumber: (scanRange, pattern) ->
