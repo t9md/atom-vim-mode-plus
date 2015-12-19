@@ -397,9 +397,7 @@ class MoveToFirstLine extends Motion
     0
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition [@getRow(), 0]
-    cursor.moveToFirstCharacterOfLine()
-    cursor.autoscroll({center: true})
+    cursor.setBufferPosition [@getRow(), cursor.getBufferColumn()]
 
 # keymap: G
 class MoveToLastLine extends MoveToFirstLine
