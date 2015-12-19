@@ -1821,12 +1821,10 @@ describe "Operator", ->
           ensure selectionIsReversed: false
           ensure ['g', {ctrl: 'a'}], text: "1 2 3 4 5", cursor: [0, 0], mode: 'normal'
           ensure '.', text: "6 7 8 9 10" , cursor: [0, 0]
-          ensure '.', text: "11 12 13 14 15" , cursor: [0, 0]
         it "put cursor on start position when finished and repeatable (case: selection is reversed)", ->
           ensure 'o', selectionIsReversed: true
           ensure ['g', {ctrl: 'a'}], text: "1 2 3 4 5", cursor: [0, 0], mode: 'normal'
           ensure '.', text: "6 7 8 9 10" , cursor: [0, 0]
-          ensure '.', text: "11 12 13 14 15" , cursor: [0, 0]
     describe "decrement", ->
       beforeEach ->
         set
