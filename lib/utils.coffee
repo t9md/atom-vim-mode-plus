@@ -194,6 +194,10 @@ getEofBufferPosition = (editor) ->
   else
     editor.getEofBufferPosition()
 
+moveCursorLeftWithinLine = (cursor) ->
+  unless cursor.isAtBeginningOfLine()
+    cursor.moveLeft()
+
 module.exports = {
   include
   debug
@@ -222,4 +226,5 @@ module.exports = {
   cursorIsAtEndOfBuffer
   characterAtPoint
   getEofBufferPosition
+  moveCursorLeftWithinLine
 }

@@ -375,7 +375,13 @@ describe "VimState", ->
     describe "deactivating visual mode", ->
       beforeEach ->
         ensure 'escape', mode: 'normal'
-        set text: "line one\nline two\nline three\n", cursor: [0, 7]
+        set
+          text: """
+            line one
+            line two
+            line three\n
+            """
+          cursor: [0, 7]
       it "can put cursor at in visual char mode", ->
         ensure 'v', mode: ['visual', 'characterwise'], cursor: [0, 8]
       it "adjust cursor position 1 column left when deactivated", ->
@@ -387,12 +393,26 @@ describe "VimState", ->
     describe "deactivating visual mode on blank line", ->
       beforeEach ->
         ensure 'escape', mode: 'normal'
-        set text: "\n\n\n", cursor: [1, 0]
-      it "v", ->
+        set
+          text: """
+            0: abc
+
+            2: abc
+            """
+          cursor: [1, 0]
+      it "v case-1", ->
         ensure 'v', mode: ['visual', 'characterwise'], cursor: [2, 0]
         ensure 'escape', mode: 'normal', cursor: [1, 0]
-      it "V", ->
+      it "v case-2 selection head is blank line", ->
+        set cursor: [0, 1]
+        ensure 'vj', mode: ['visual', 'characterwise'], cursor: [2, 0], selectedText: ": abc\n\n"
+        ensure 'escape', mode: 'normal', cursor: [1, 0]
+      it "V case-1", ->
         ensure 'V', mode: ['visual', 'linewise'], cursor: [2, 0]
+        ensure 'escape', mode: 'normal', cursor: [1, 0]
+      it "V case-2 selection head is blank line", ->
+        set cursor: [0, 1]
+        ensure 'Vj', mode: ['visual', 'linewise'], cursor: [2, 0], selectedText: "0: abc\n\n"
         ensure 'escape', mode: 'normal', cursor: [1, 0]
       it "ctrl-v", ->
         ensure {ctrl: 'v'}, mode: ['visual', 'blockwise'], cursor: [2, 0]
