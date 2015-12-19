@@ -64,6 +64,7 @@ class OperationStack
     else
       op = @stack.pop()
       op.execute()
+      @test = op
       @record(op) if op.isRecordable()
       @finish()
 
@@ -74,10 +75,14 @@ class OperationStack
 
   finish: ->
     @vimState.emitter.emit 'did-operation-finish'
-    if @vimState.isMode('normal') and @editor.getLastSelection().isEmpty()
+    if @vimState.isMode('normal')
+      unless @editor.getLastSelection().isEmpty()
+        throw new OperationStackError('Selection remains on normal-mode')
+
       for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
         withKeepingGoalColumn c, (c) ->
           c.moveLeft()
+
     @vimState.showCursors()
     @vimState.reset()
 
