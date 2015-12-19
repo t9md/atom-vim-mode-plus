@@ -168,8 +168,7 @@ class ModeManager
 
       @eachSelection (s) ->
         swrap(s).resetProperties()
-        unless (s.isReversed() or s.isEmpty())
-          s.selectLeft()
+        s.selectLeft() unless (s.isReversed() or s.isEmpty())
         s.clear(autoscroll: false)
 
   restoreCharacterwiseRange: ->

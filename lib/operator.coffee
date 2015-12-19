@@ -3,7 +3,10 @@ LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
-{haveSomeSelection, getEofBufferPosition} = require './utils'
+{
+  haveSomeSelection, getEofBufferPosition
+  moveCursorLeftWithinLine, moveCursorRightWithinLine
+} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
@@ -775,7 +778,7 @@ class ActivateInsertMode extends Operator
       @editor.transact =>
         for s in @editor.getSelections()
           @repeatInsert(s, text)
-          s.cursor.moveLeft() unless s.cursor.isAtBeginningOfLine()
+          moveCursorLeftWithinLine(s.cursor)
     else
       @setCheckpoint('insert')
       @vimState.activate('insert', @submode)
@@ -801,7 +804,8 @@ class ActivateReplaceMode extends ActivateInsertMode
 class InsertAfter extends ActivateInsertMode
   @extend()
   execute: ->
-    @editor.moveRight() unless @editor.getLastCursor().isAtEndOfLine()
+    for c in @editor.getCursors()
+      moveCursorRightWithinLine(c)
     super
 
 class InsertAfterEndOfLine extends ActivateInsertMode
