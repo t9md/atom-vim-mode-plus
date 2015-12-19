@@ -4,7 +4,10 @@ _ = require 'underscore-plus'
 {BlockwiseSelect} = require './visual-blockwise'
 
 swrap = require './selection-wrapper'
-{eachSelection, toggleClassByCondition, getNewTextRangeFromCheckpoint} = require './utils'
+{
+  eachSelection, toggleClassByCondition, getNewTextRangeFromCheckpoint
+  moveCursorLeftWithinLine
+} = require './utils'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
@@ -104,8 +107,7 @@ class ModeManager
       replaceModeDeactivator = null
 
       # Adjust cursor position
-      for c in @editor.getCursors() when not c.isAtBeginningOfLine()
-        c.moveLeft()
+      moveCursorLeftWithinLine(c) for c in @editor.getCursors()
 
   activateReplaceMode: ->
     @replacedCharsBySelection = {}
@@ -165,11 +167,9 @@ class ModeManager
         submode
 
       @eachSelection (s) ->
-        {cursor} = s
         swrap(s).resetProperties()
-        unless s.isReversed() or
-           s.isEmpty() or (not swrap(s).isLinewise() and cursor.isAtBeginningOfLine())
-          cursor.moveLeft()
+        unless (s.isReversed() or s.isEmpty())
+          s.selectLeft()
         s.clear(autoscroll: false)
 
   restoreCharacterwiseRange: ->
