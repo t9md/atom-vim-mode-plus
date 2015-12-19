@@ -55,11 +55,6 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'boolean'
     default: false
     description: "Don't move cursor after Yank"
-  readTargetFirstOnSurround:
-    order: 11
-    type: 'boolean'
-    default: false
-    description: "read target(TextObject or Motion) first on Surround"
   flashOnUndoRedo:
     order: 14
     type: 'boolean'

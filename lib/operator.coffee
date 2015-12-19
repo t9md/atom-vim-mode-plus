@@ -299,7 +299,7 @@ class Surround extends TransformString
     @onDidConfirmInput (input) => @onConfirm(input)
     @onDidChangeInput (input) => @addHover(input)
     @onDidCancelInput => @vimState.operationStack.cancel()
-    if settings.get('readTargetFirstOnSurround') and @requireTarget
+    if @requireTarget
       @onDidSetTarget =>
         @vimState.input.focus({@charsMax})
     else

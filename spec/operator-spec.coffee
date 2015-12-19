@@ -1296,14 +1296,19 @@ describe "Operator", ->
         cursorBuffer: [0, 0]
 
     describe 'surround', ->
+      beforeEach ->
+        atom.keymaps.add "surround-test",
+          'atom-text-editor.vim-mode-plus.normal-mode':
+            'y s': 'vim-mode-plus:surround'
+
       it "surround text object with ( and repeatable", ->
-        ensure ['gss', char: '(', 'iw'],
+        ensure ['ysiw', char: '('],
           text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]
         ensure 'j.',
           text: "(apple)\n(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
       it "surround text object with { and repeatable", ->
-        ensure ['gss', char: '{', 'iw'],
+        ensure ['ysiw', char: '{'],
           text: "{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]
         ensure 'j.',
@@ -1328,12 +1333,12 @@ describe "Operator", ->
           'atom-text-editor.vim-mode-plus.visual-mode':
             'm s':  'vim-mode-plus:map-surround'
       it "surround text for each word in target case-1", ->
-        ensure ['ms', char: '(', 'ip'],
+        ensure ['msip', char: '('],
           text: "\n(apple)\n(pairs) (tomato)\n(orange)\n(milk)\n"
           cursor: [1, 0]
       it "surround text for each word in target case-2", ->
         set cursor: [2, 1]
-        ensure ['ms', char: '<', 'il'],
+        ensure ['msil', char: '<'],
           text: '\napple\n<pairs> <tomato>\norange\nmilk\n'
           cursor: [2, 0]
       it "surround text for each word in visual selection", ->
@@ -1343,19 +1348,28 @@ describe "Operator", ->
 
     describe 'delete surround', ->
       beforeEach ->
+        atom.keymaps.add "surround-test",
+          'atom-text-editor.vim-mode-plus.normal-mode':
+            'd s': 'vim-mode-plus:delete-surround'
+
         set cursor: [1, 8]
+
       it "delete surrounded chars and repeatable", ->
-        ensure ['gsd', char: '['],
+        ensure ['ds', char: '['],
           text: "apple\npairs: brackets\npairs: [brackets]\n( multi\n  line )"
         ensure 'jl.',
           text: "apple\npairs: brackets\npairs: brackets\n( multi\n  line )"
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
-        ensure ['gsd', char: '('],
+        ensure ['ds', char: '('],
           text: "apple\npairs: [brackets]\npairs: [brackets]\n multi\n  line "
 
     describe 'change srurround', ->
       beforeEach ->
+        atom.keymaps.add "surround-test",
+          'atom-text-editor.vim-mode-plus.normal-mode':
+            'c s': 'vim-mode-plus:change-surround'
+
         set
           text: """
             (apple)
@@ -1365,7 +1379,7 @@ describe "Operator", ->
             """
           cursorBuffer: [0, 1]
       it "change surrounded chars and repeatable", ->
-        ensure ['gsc', char: '(['],
+        ensure ['cs', char: '(['],
           text: """
             [apple]
             (grape)
@@ -1380,14 +1394,14 @@ describe "Operator", ->
             {orange}
             """
       it "change surrounded chars", ->
-        ensure ['jjgsc', char: '<"'],
+        ensure ['jjcs', char: '<"'],
           text: """
             (apple)
             (grape)
             "lemmon"
             {orange}
             """
-        ensure ['jlgsc', char: '{!'],
+        ensure ['jlcs', char: '{!'],
           text: """
             (apple)
             (grape)
@@ -1396,14 +1410,19 @@ describe "Operator", ->
             """
 
     describe 'surround-word', ->
+      beforeEach ->
+        atom.keymaps.add "surround-test",
+          'atom-text-editor.vim-mode-plus.normal-mode':
+            'y s w': 'vim-mode-plus:surround-word'
+
       it "surround a word with ( and repeatable", ->
-        ensure ['gsw', char: '('],
+        ensure ['ysw', char: '('],
           text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]
         ensure 'j.',
           text: "(apple)\n(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
       it "surround a word with { and repeatable", ->
-        ensure ['gsw', char: '{'],
+        ensure ['ysw', char: '{'],
           text: "{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]
         ensure 'j.',
