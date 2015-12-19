@@ -24,6 +24,7 @@ delegatingMethods = [
   "onDidCommandSearch"
   "onWillSelect"
   "onDidSelect"
+  "onDidSetTarget"
   "onDidOperationFinish"
   "subscribe"
   "isMode"
@@ -120,6 +121,9 @@ class Base
 
   emitDidSelect: ->
     @vimState.emitter.emit 'did-select'
+
+  emitDidSetTarget: ->
+    @vimState.emitter.emit 'did-set-target'
 
   # Class methods
   # -------------------------

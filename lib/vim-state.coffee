@@ -78,6 +78,7 @@ class VimState
   # Select and text mutation(Change)
   onWillSelect: (fn) -> @subscribe @emitter.on('will-select', fn)
   onDidSelect: (fn) -> @subscribe @emitter.on('did-select', fn)
+  onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
   onDidOperationFinish: (fn) -> @subscribe @emitter.on('did-operation-finish', fn)
 
   destroy: ->
