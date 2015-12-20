@@ -2,7 +2,7 @@
 {getVimState, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "Operator", ->
+describe "Operator TransformString", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
@@ -96,6 +96,128 @@ describe "Operator", ->
     it "gugu downcase the line of text, won't move cursor", ->
       set cursorBuffer: [0, 1]
       ensure 'gugu', text: 'abc\nXyZ', cursor: [0, 1]
+
+  describe "the > keybinding", ->
+    beforeEach ->
+      set text: """
+        12345
+        abcde
+        ABCDE
+        """
+
+    describe "on the last line", ->
+      beforeEach ->
+        set cursor: [2, 0]
+
+      describe "when followed by a >", ->
+        it "indents the current line", ->
+          ensure '>>',
+            text: "12345\nabcde\n  ABCDE"
+            cursor: [2, 2]
+
+    describe "on the first line", ->
+      beforeEach ->
+        set cursor: [0, 0]
+
+      describe "when followed by a >", ->
+        it "indents the current line", ->
+          ensure '>>',
+            text: "  12345\nabcde\nABCDE"
+            cursor: [0, 2]
+
+      describe "when followed by a repeating >", ->
+        beforeEach ->
+          keystroke '3>>'
+
+        it "indents multiple lines at once", ->
+          ensure
+            text: "  12345\n  abcde\n  ABCDE"
+            cursor: [0, 2]
+
+        describe "undo behavior", ->
+          it "outdents all three lines", ->
+            ensure 'u', text: "12345\nabcde\nABCDE"
+
+    describe "in visual mode", ->
+      beforeEach ->
+        set cursor: [0, 0]
+        keystroke 'V>'
+
+      it "indents the current line and exits visual mode", ->
+        ensure
+          mode: 'normal'
+          text: "  12345\nabcde\nABCDE"
+          selectedBufferRange: [[0, 2], [0, 2]]
+
+      it "allows repeating the operation", ->
+        ensure '.', text: "    12345\nabcde\nABCDE"
+
+  describe "the < keybinding", ->
+    beforeEach ->
+      set text: "  12345\n  abcde\nABCDE", cursor: [0, 0]
+
+    describe "when followed by a <", ->
+      it "indents the current line", ->
+        ensure '<<',
+          text: "12345\n  abcde\nABCDE"
+          cursor: [0, 0]
+
+    describe "when followed by a repeating <", ->
+      beforeEach ->
+        keystroke '2<<'
+
+      it "indents multiple lines at once", ->
+        ensure
+          text: "12345\nabcde\nABCDE"
+          cursor: [0, 0]
+
+      describe "undo behavior", ->
+        it "indents both lines", ->
+          ensure 'u', text: "  12345\n  abcde\nABCDE"
+
+    describe "in visual mode", ->
+      it "indents the current line and exits visual mode", ->
+        ensure 'V<',
+          mode: 'normal'
+          text: "12345\n  abcde\nABCDE"
+          selectedBufferRange: [[0, 0], [0, 0]]
+
+  describe "the = keybinding", ->
+    oldGrammar = []
+
+    beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-javascript')
+
+      oldGrammar = editor.getGrammar()
+      set text: "foo\n  bar\n  baz", cursor: [1, 0]
+
+
+    describe "when used in a scope that supports auto-indent", ->
+      beforeEach ->
+        jsGrammar = atom.grammars.grammarForScopeName('source.js')
+        editor.setGrammar(jsGrammar)
+
+      afterEach ->
+        editor.setGrammar(oldGrammar)
+
+      describe "when followed by a =", ->
+        beforeEach ->
+          keystroke '=='
+
+        it "indents the current line", ->
+          expect(editor.indentationForBufferRow(1)).toBe 0
+
+      describe "when followed by a repeating =", ->
+        beforeEach ->
+          keystroke '2=='
+
+        it "autoindents multiple lines at once", ->
+          ensure text: "foo\nbar\nbaz", cursor: [1, 0]
+
+        describe "undo behavior", ->
+          it "indents both lines", ->
+            ensure 'u', text: "foo\n  bar\n  baz"
 
   describe 'CamelCase', ->
     beforeEach ->
