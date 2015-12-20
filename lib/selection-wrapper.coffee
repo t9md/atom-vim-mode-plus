@@ -22,6 +22,9 @@ class SelectionWrapper
     if range
       @setBufferRange(range, {autoscroll: true})
 
+  getBufferRange: ->
+    @selection.getBufferRange()
+
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
@@ -34,8 +37,7 @@ class SelectionWrapper
           reversed: @selection.isReversed()
 
   setReversedState: (reversed) ->
-    range = @selection.getBufferRange()
-    @setBufferRange range, {autoscroll: true, reversed}
+    @setBufferRange @getBufferRange(), {autoscroll: true, reversed}
 
   getRows: ->
     [startRow, endRow] = @selection.getBufferRowRange()
@@ -63,8 +65,7 @@ class SelectionWrapper
       @selection.editor.bufferRangeForBufferRow(row, includeNewline: true)
     else
       tail = @selection.getTailBufferPosition()
-      {editor} = @selection
-      tokenizedLine = editor.tokenizedLineForScreenRow(tail.row)
+      tokenizedLine = @selection.editor.tokenizedLineForScreenRow(tail.row)
       if @selection.isReversed()
         column = tail.column - 1
         clip = 'backward'
@@ -142,7 +143,7 @@ class SelectionWrapper
       editor.lineTextForBufferRow(row)
 
   translate: (translation, options) ->
-    range = @selection.getBufferRange()
+    range = @getBufferRange()
     range = range.translate(translation...)
     @setBufferRange(range, options)
 
@@ -151,7 +152,7 @@ class SelectionWrapper
     startRow is endRow
 
   isLinewise: ->
-    isLinewiseRange(@selection.getBufferRange())
+    isLinewiseRange(@getBufferRange())
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
