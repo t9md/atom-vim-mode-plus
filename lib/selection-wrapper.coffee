@@ -58,24 +58,25 @@ class SelectionWrapper
   expandOverLine: ->
     @selectRowRange @selection.getBufferRowRange()
 
+  getBufferRangeForTailRow: ->
+    [startRow, endRow] = @selection.getBufferRowRange()
+    row = if @selection.isReversed() then endRow else startRow
+    @selection.editor.bufferRangeForBufferRow(row, includeNewline: true)
+
   getTailRange: ->
-    if @isLinewise()
-      [startRow, endRow] = @selection.getBufferRowRange()
-      row = if @selection.isReversed() then endRow else startRow
-      @selection.editor.bufferRangeForBufferRow(row, includeNewline: true)
+    if (@isSingleRow() and @isLinewise())
+      @getBufferRangeForTailRow()
     else
       tail = @selection.getTailBufferPosition()
-      tokenizedLine = @selection.editor.tokenizedLineForScreenRow(tail.row)
+      {row, column} = tail
       if @selection.isReversed()
-        column = tail.column - 1
+        column -= 1
         clip = 'backward'
       else
-        column = tail.column + 1
+        column += 1
         clip = 'forward'
-
-      column = tokenizedLine.clipScreenColumn(column, {clip})
-      head = [tail.row, column]
-      new Range(tail, head)
+      range = new Range(tail, [row, column])
+      @selection.editor.clipScreenRange(range, {clip})
 
   preserveCharacterwise: ->
     prop = @detectCharacterwiseProperties()
