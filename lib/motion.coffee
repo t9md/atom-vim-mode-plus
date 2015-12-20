@@ -405,7 +405,7 @@ class MoveToFirstLine extends Motion
 class MoveToLastLine extends MoveToFirstLine
   @extend()
   getDefaultRow: ->
-    @getLastScreenRow()
+    @getLastBufferRow()
 
 # keymap: N% e.g. 10%
 class MoveToLineByPercent extends MoveToFirstLine
