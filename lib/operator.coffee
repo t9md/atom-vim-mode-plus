@@ -33,12 +33,6 @@ class Operator extends Base
   haveSomeSelection: ->
     haveSomeSelection(@editor.getSelections())
 
-  isSameOperatorRepeated: ->
-    if @isMode('operator-pending')
-      @vimState.operationStack.peekTop().constructor is @constructor
-    else
-      false
-
   needFlash: ->
     @flashTarget and settings.get('flashOnOperate')
 
@@ -56,11 +50,6 @@ class Operator extends Base
     super
     # Guard when Repeated.
     return if @instanceof("Repeat")
-
-    #  To support, `dd`, `cc` and a like.
-    if @isSameOperatorRepeated()
-      @vimState.operationStack.run 'MoveToRelativeLine'
-      @abort()
 
     @initialize?()
     @setTarget @new(@target) if _.isString(@target)
