@@ -432,39 +432,6 @@ class MoveLineDown extends MoveLineUp
   getRangeTranslationSpec: ->
     [[0, 0], [1, 0]]
 
-# class DuplicateLineUp extends TransformString
-#   @extend()
-#   direction: 'up'
-#   execute: ->
-#     @eachSelection (s, setPoint) =>
-#       @mutate(s, setPoint)
-#
-#   mutate: (s, setPoint) ->
-#     rows = swrap(s).getRows().map (row) =>
-#       @editor.lineTextForBufferRow(row)
-#     switch @direction
-#       when 'up' then s.cursor.moveToBeginningOfLine()
-#       when 'down' then s.cursor.moveToBeginningOfLine()
-#         # body...
-#
-#     text = rows.join("\n") + "\n"
-#     s.insertText(text, select: true)
-
-  # insertTextAbove: (selection, text) ->
-  #   selection.cursor.moveToBeginningOfLine()
-  #   selection.insertText("\n")
-  #   selection.cursor.moveUp()
-  #   selection.insertText(text)
-  #
-  # insertTextBelow: (selection, text) ->
-  #   selection.cursor.moveToEndOfLine()
-  #   selection.insertText("\n")
-  #   selection.insertText(text)
-
-# class DuplicateLineDown extends DuplicateLineUp
-#   @extend()
-#   direction: 'down'
-
 class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
