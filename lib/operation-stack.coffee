@@ -25,7 +25,7 @@ class OperationStack
     klass = Base.getClass(klass) if _.isString(klass)
     try
       #  To support, `dd`, `cc` and a like.
-      if @isSameOperatorRepeated(klass)
+      if @stack.length and (@peekTop().constructor is klass)
         klass = Base.getClass('MoveToRelativeLine')
       op = new klass(@vimState, properties)
       if @vimState.isMode('visual') and _.isFunction(op.select)
@@ -42,9 +42,6 @@ class OperationStack
         throw error
     finally
       @processing = false
-
-  isSameOperatorRepeated: (klass) ->
-    @vimState.isMode('operator-pending') and (@peekTop().constructor is klass)
 
   isProcessing: ->
     @processing
