@@ -63,7 +63,10 @@ class Motion extends Base
       selection.selectRight()
 
     selection.modifySelection =>
-      tailRange = swrap(selection).getTailRange()
+      tailRange = if @isLinewise()
+        swrap(selection).getBufferRangeForTailRow()
+      else
+        swrap(selection).getTailRange()
       unless selection.isReversed() or
          (cursorIsAtEndOfBuffer(@editor, cursor) and selection.isEmpty()) # become empty at EndOfBuffer
         withKeepingGoalColumn cursor, (c) ->
