@@ -1298,8 +1298,9 @@ describe "Operator", ->
     describe 'surround', ->
       beforeEach ->
         atom.keymaps.add "surround-test",
-          'atom-text-editor.vim-mode-plus.normal-mode':
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
             'y s': 'vim-mode-plus:surround'
+          , 100
 
       it "surround text object with ( and repeatable", ->
         ensure ['ysiw', char: '('],
@@ -1313,6 +1314,12 @@ describe "Operator", ->
           cursor: [0, 0]
         ensure 'j.',
           text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
+      it "surround linewise", ->
+        ensure ['ysys', char: '{'],
+          text: "{\napple\n}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
+          cursor: [0, 0]
+        ensure '3j.',
+          text: "{\napple\n}\n{\npairs: [brackets]\n}\npairs: [brackets]\n( multi\n  line )"
 
     describe 'map-surround', ->
       beforeEach ->
@@ -1351,7 +1358,6 @@ describe "Operator", ->
         atom.keymaps.add "surround-test",
           'atom-text-editor.vim-mode-plus.normal-mode':
             'd s': 'vim-mode-plus:delete-surround'
-
         set cursor: [1, 8]
 
       it "delete surrounded chars and repeatable", ->
@@ -1362,7 +1368,7 @@ describe "Operator", ->
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
         ensure ['ds', char: '('],
-          text: "apple\npairs: [brackets]\npairs: [brackets]\n multi\n  line "
+          text: "apple\npairs: [brackets]\npairs: [brackets]\nmulti\n line "
 
     describe 'change srurround', ->
       beforeEach ->
@@ -1462,7 +1468,7 @@ describe "Operator", ->
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
         ensure 'ds',
-          text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\n multi\n  line '
+          text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\nmulti\n line '
 
     describe 'change surround-any-pair', ->
       beforeEach ->

@@ -116,7 +116,8 @@ class Operator extends Base
         cursor.setBufferPosition(point)
     else
       ({cursor}, i) ->
-        cursor.setBufferPosition(points[i])
+        point = points[i]
+        cursor.setBufferPosition(point)
 
   eachSelection: (fn) ->
     setPoint = null
@@ -176,6 +177,7 @@ class TransformString extends Operator
   trackChange: true
   stayOnLinewise: true
   setPoint: true
+  autoIndent: false
 
   execute: ->
     @eachSelection (s, setPoint) =>
@@ -184,7 +186,7 @@ class TransformString extends Operator
 
   mutate: (s, setPoint) ->
     text = @getNewText(s.getText())
-    s.insertText(text)
+    s.insertText(text, {@autoIndent})
     setPoint() if @setPoint
 
 class ToggleCase extends TransformString
@@ -282,6 +284,7 @@ class Surround extends TransformString
   charsMax: 1
   hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
   requireInput: true
+  autoIndent: true
 
   initialize: ->
     return unless @requireInput
@@ -303,6 +306,9 @@ class Surround extends TransformString
 
   surround: (text, pair) ->
     [open, close] = pair.split('')
+    if LineEndingRegExp.test(text)
+      open += "\n"
+      close += "\n"
     open + text + close
 
   getNewText: (text) ->
