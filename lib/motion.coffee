@@ -64,29 +64,23 @@ class Motion extends Base
 
     # Selection maybe empty when Motion is used as target of Operator.
     if selection.isEmpty()
-      originallyEmpty = true
+      wasEmpty = true
       selection.selectRight()
 
-    selection.modifySelection =>
-      tailRange = if @isLinewise()
-        swrap(selection).getBufferRangeForTailRow()
-      else
-        swrap(selection).getTailRange()
-
+    swrap(selection).modifySelection @isLinewise(), (s) =>
       isAtAtomEof = cursor.getBufferPosition().isEqual(@editor.getEofBufferPosition())
-      unless selection.isReversed() or (isAtAtomEof and selection.isEmpty()) # become empty at EndOfBuffer
+      unless s.isReversed() or (isAtAtomEof and s.isEmpty()) # become empty at EndOfBuffer
         moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
       @moveCursor(cursor)
 
       # When motion is used as target of operator, return if motion movement not happend.
-      return if (selection.isEmpty() and originallyEmpty)
-
-      unless selection.isReversed()
-        unless (cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine())
-          moveCursorRight(cursor, {allowWrap: true, preserveGoalColumn: true})
-      newRange = selection.getBufferRange().union(tailRange)
-      options = {autoscroll: false, preserveFolds: true}
-      selection.setBufferRange(newRange, options)
+      if (s.isEmpty() and wasEmpty)
+        false
+      else
+        unless s.isReversed()
+          unless (cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine())
+            moveCursorRight(cursor, {allowWrap: true, preserveGoalColumn: true})
+        true
 
   # Cursor motion wrapper
   # -------------------------

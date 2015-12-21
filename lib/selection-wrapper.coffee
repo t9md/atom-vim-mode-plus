@@ -155,6 +155,18 @@ class SelectionWrapper
   isLinewise: ->
     isLinewiseRange(@getBufferRange())
 
+  # Modify selection with keeping tail range.
+  # if callback return falsy value, then skip tailrange merger.
+  modifySelection: (linewise, fn) ->
+    @selection.modifySelection =>
+      tailRange = if linewise
+        @getBufferRangeForTailRow()
+      else
+        @getTailRange()
+      if fn(@selection)
+        range = @getBufferRange().union(tailRange)
+        @setBufferRange(range, {preserveFolds: true})
+
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
