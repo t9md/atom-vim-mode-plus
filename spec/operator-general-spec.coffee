@@ -188,7 +188,11 @@ describe "Operator general", ->
           mode: 'normal'
 
     describe "when followed by a j", ->
-      originalText = "12345\nabcde\nABCDE\n"
+      originalText = """
+        12345
+        abcde
+        ABCDE\n
+        """
 
       beforeEach ->
         set text: originalText
@@ -197,11 +201,6 @@ describe "Operator general", ->
         it "deletes the next two lines", ->
           set cursor: [0, 0]
           ensure 'dj', text: 'ABCDE\n'
-
-      describe "on the end of the file", ->
-        it "deletes nothing", ->
-          set cursor: [4, 0]
-          ensure 'dj', text: originalText
 
       describe "on the middle of second line", ->
         it "deletes the last two lines", ->
