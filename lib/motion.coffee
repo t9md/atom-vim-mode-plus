@@ -65,6 +65,7 @@ class Motion extends Base
       wasEmpty = s.isEmpty()
       unless s.isReversed() or wasEmpty
         moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
+
       @moveCursor(cursor)
       # When motion is used as target of operator, return if motion movement not happend.
       if s.isEmpty() and wasEmpty
