@@ -68,8 +68,7 @@ class Motion extends Base
       selection.selectRight()
 
     swrap(selection).modifySelection @isLinewise(), (s) =>
-      isAtAtomEof = cursor.getBufferPosition().isEqual(@editor.getEofBufferPosition())
-      unless s.isReversed() or (isAtAtomEof and s.isEmpty()) # become empty at EndOfBuffer
+      unless s.isReversed()
         moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
       @moveCursor(cursor)
 
