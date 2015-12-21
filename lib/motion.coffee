@@ -61,24 +61,17 @@ class Motion extends Base
 
   selectInclusive: (selection) ->
     {cursor} = selection
-
-    # Selection maybe empty when Motion is used as target of Operator.
-    if selection.isEmpty()
-      wasEmpty = true
-      selection.selectRight()
-
     swrap(selection).modifySelection @isLinewise(), (s) =>
-      unless s.isReversed()
+      wasEmpty = s.isEmpty()
+      unless s.isReversed() or wasEmpty
         moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
       @moveCursor(cursor)
-
       # When motion is used as target of operator, return if motion movement not happend.
-      if (s.isEmpty() and wasEmpty)
+      if s.isEmpty() and wasEmpty
         false
       else
-        unless s.isReversed()
-          unless (cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine())
-            moveCursorRight(cursor, {allowWrap: true, preserveGoalColumn: true})
+        if not s.isReversed() and (not cursor.isAtEndOfLine() or cursor.isAtBeginningOfLine())
+          moveCursorRight(cursor, {allowWrap: true, preserveGoalColumn: true})
         true
 
   # Cursor motion wrapper
