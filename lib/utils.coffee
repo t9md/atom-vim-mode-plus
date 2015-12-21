@@ -186,17 +186,16 @@ getVimEofBufferPosition = (editor) ->
   else
     editor.getEofBufferPosition()
 
-pointIsAtEndOfBuffer = (editor, point) ->
+pointIsAtVimEndOfFile = (editor, point) ->
   getVimEofBufferPosition(editor).isEqual(point)
 
-getLastVimBufferRow = (editor) ->
+getVimLastBufferRow = (editor) ->
   getVimEofBufferPosition(editor).row
 
 getVimEofScreenPosition = (editor) ->
-  point = getVimEofBufferPosition(editor)
-  editor.screenPositionForBufferPosition(point)
+  editor.screenPositionForBufferPosition(getVimEofBufferPosition(editor))
 
-getLastVimScreenRow = (editor) ->
+getVimLastScreenRow = (editor) ->
   getVimEofScreenPosition(editor).row
 
 getFirstVisibleScreenRow = (editor) ->
@@ -257,12 +256,12 @@ module.exports = {
   findIndex
   mergeIntersectingRanges
   pointIsAtEndOfLine
-  pointIsAtEndOfBuffer
+  pointIsAtVimEndOfFile
   characterAtPoint
   getVimEofBufferPosition
   getVimEofScreenPosition
-  getLastVimBufferRow
-  getLastVimScreenRow
+  getVimLastBufferRow
+  getVimLastScreenRow
   moveCursorLeft
   moveCursorRight
   unfoldAtCursorRow
