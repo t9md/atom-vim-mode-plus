@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 
 {
   haveSomeSelection, getEofBufferPosition
-  moveCursorLeftWithinLine, moveCursorRightWithinLine
+  moveCursorLeft, moveCursorRight
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -747,7 +747,7 @@ class ActivateInsertMode extends Operator
       @editor.transact =>
         for s in @editor.getSelections()
           @repeatInsert(s, text)
-          moveCursorLeftWithinLine(s.cursor)
+          moveCursorLeft(s.cursor)
     else
       @setCheckpoint('insert')
       @vimState.activate('insert', @submode)
@@ -773,8 +773,7 @@ class ActivateReplaceMode extends ActivateInsertMode
 class InsertAfter extends ActivateInsertMode
   @extend()
   execute: ->
-    for c in @editor.getCursors()
-      moveCursorRightWithinLine(c)
+    moveCursorRight(c) for c in @editor.getCursors()
     super
 
 class InsertAfterEndOfLine extends ActivateInsertMode

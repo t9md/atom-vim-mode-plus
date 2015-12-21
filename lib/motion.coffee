@@ -1,12 +1,22 @@
-# Refactoring status: 50%
+# Refactoring status: 80%
 _ = require 'underscore-plus'
 {Point} = require 'atom'
 
 globalState = require './global-state'
 {
-  saveEditorState, getVisibleBufferRange, withKeepingGoalColumn
-  cursorIsAtEndOfBuffer, getEofBufferPosition
+  saveEditorState, getVisibleBufferRange
+  moveCursorLeft, moveCursorRight
+  getEofBufferPosition
+  getEofScreenPosition
+  unfoldAtCursorRow
+  pointIsAtEndOfLine
+  pointIsAtEndOfBuffer
+  getLastBufferRow
+  getLastScreenRow
+  getFirstVisibleScreenRow
+  getLastVisibleScreenRow
 } = require './utils'
+
 swrap = require './selection-wrapper'
 {MatchList} = require './match'
 settings = require './settings'
@@ -65,25 +75,21 @@ class Motion extends Base
         swrap(selection).getBufferRangeForTailRow()
       else
         swrap(selection).getTailRange()
-      unless selection.isReversed() or
-         (cursorIsAtEndOfBuffer(@editor, cursor) and selection.isEmpty()) # become empty at EndOfBuffer
-        withKeepingGoalColumn cursor, (c) ->
-          c.moveLeft()
+
+      isAtAtomEof = cursor.getBufferPosition().isEqual(@editor.getEofBufferPosition())
+      unless selection.isReversed() or (isAtAtomEof and selection.isEmpty()) # become empty at EndOfBuffer
+        moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
       @moveCursor(cursor)
 
       # When motion is used as target of operator, return if motion movement not happend.
       return if (selection.isEmpty() and originallyEmpty)
 
       unless selection.isReversed()
-        withKeepingGoalColumn cursor, (c) ->
-          unless (c.isAtEndOfLine() and not c.isAtBeginningOfLine())
-            c.moveRight()
+        unless (cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine())
+          moveCursorRight(cursor, {allowWrap: true, preserveGoalColumn: true})
       newRange = selection.getBufferRange().union(tailRange)
       options = {autoscroll: false, preserveFolds: true}
       selection.setBufferRange(newRange, options)
-
-  getEolBufferPosition: (cursor) ->
-    cursor.getCurrentLineBufferRange().end
 
   # Cursor motion wrapper
   # -------------------------
@@ -92,63 +98,34 @@ class Motion extends Base
       cursor.moveUp()
 
   moveCursorDown: (cursor) ->
-    unless @at('LastScreenRow', cursor)
+    if getLastScreenRow(@editor) isnt cursor.getScreenRow()
       cursor.moveDown()
 
   moveCursorRight: (cursor, allowWrap=false) ->
     {row, column} = cursor.getScreenPosition()
     column++
-    column++ if allowWrap and @getEolBufferPosition(cursor).isEqual([row, column])
-    point = Point.min([row, column], @getEofScreenPosition())
+    column++ if (allowWrap and pointIsAtEndOfLine(@editor, [row, column]))
+    point = Point.min([row, column], getEofScreenPosition(@editor))
     cursor.setScreenPosition point,
       clip: 'forward',
       wrapBeyondNewlines: allowWrap
       wrapAtSoftNewlines: true
 
-  moveCursorLeft: (cursor, allowWrap=false) ->
-    if not cursor.isAtBeginningOfLine() or allowWrap
-      cursor.moveLeft()
-
   # Utils
   # -------------------------
+  # Calling stop() in callback stop remaining processing.
   countTimes: (fn) ->
+    stopped = false
+    stop = -> stopped = true
     _.times @getCount(), ->
-      fn()
+      fn({stop}) unless stopped
 
   at: (where, cursor) ->
     switch where
-      when 'EOL' then cursor.isAtEndOfLine()
-      when 'EOF' then cursor.getBufferPosition().isEqual(@getEofBufferPosition())
+      when 'EOF' then pointIsAtEndOfBuffer(@editor, cursor.getBufferPosition())
       when 'FirstScreenRow' then cursor.getScreenRow() is 0
-      when 'LastBufferRow' then cursor.getBufferRow() is @getLastBufferRow()
-      when 'LastScreenRow' then cursor.getScreenRow() is @getLastScreenRow()
-
-  moveToFirstCharacterOfLine: (cursor) ->
-    cursor.moveToBeginningOfLine()
-    cursor.moveToFirstCharacterOfLine()
-
-  getEofBufferPosition: ->
-    getEofBufferPosition(@editor)
-
-  getEofScreenPosition: ->
-    @editor.screenPositionForBufferPosition(@getEofBufferPosition())
-
-  getLastBufferRow: ->
-    @getEofBufferPosition().row
-
-  getLastScreenRow: ->
-    @getEofScreenPosition().row
-
-  getFirstVisibleScreenRow: ->
-    @editorElement.getFirstVisibleScreenRow()
-
-  getLastVisibleScreenRow: ->
-    @editorElement.getLastVisibleScreenRow()
-
-  unfoldAtCursorRow: (cursor) ->
-    row = cursor.getBufferRow()
-    if @editor.isFoldedAtBufferRow(row)
-      @editor.unfoldBufferRow row
+      when 'LastBufferRow' then cursor.getBufferRow() is getLastBufferRow(@editor)
+      when 'LastScreenRow' then cursor.getScreenRow() is getLastScreenRow(@editor)
 
   # Debuging purpose
   # -------------------------
@@ -195,20 +172,21 @@ class CurrentSelection extends Motion
 class MoveLeft extends Motion
   @extend()
   moveCursor: (cursor) ->
-    @countTimes =>
-      @moveCursorLeft(cursor, settings.get('wrapLeftRightMotion'))
+    allowWrap = settings.get('wrapLeftRightMotion')
+    @countTimes ->
+      moveCursorLeft(cursor, {allowWrap})
 
 class MoveRight extends Motion
   @extend()
   canWrapToNextLine: (cursor) ->
-    if @isAsTarget() and not @at('EOL', cursor)
+    if @isAsTarget() and not cursor.isAtEndOfLine()
       false
     else
       settings.get('wrapLeftRightMotion')
 
   moveCursor: (cursor) ->
     @countTimes =>
-      @unfoldAtCursorRow(cursor)
+      unfoldAtCursorRow(cursor)
       @moveCursorRight(cursor, @canWrapToNextLine(cursor))
 
 class MoveUp extends Motion
@@ -264,7 +242,7 @@ class MoveToNextWord extends Motion
   moveCursor: (cursor) ->
     return if @at('EOF', cursor)
     @countTimes =>
-      if @at('EOL', cursor) and not @at('EOF', cursor)
+      if cursor.isAtEndOfLine() and not @at('EOF', cursor)
         cursor.moveDown()
         cursor.moveToFirstCharacterOfLine()
       else
@@ -272,7 +250,7 @@ class MoveToNextWord extends Motion
         if next.isEqual(cursor.getBufferPosition())
           cursor.moveToEndOfWord()
         else
-          if next.row is @getLastBufferRow() + 1
+          if next.row is getLastBufferRow(@editor) + 1
             cursor.moveToEndOfWord()
           else
             cursor.setBufferPosition(next)
@@ -297,10 +275,10 @@ class MoveToEndOfWord extends Motion
       point = @getNext(cursor)
       if point.isEqual(cursor.getBufferPosition())
         cursor.moveRight()
-        if @at('EOL', cursor) and not @at('EOF', cursor)
+        if cursor.isAtEndOfLine() and not @at('EOF', cursor)
           cursor.moveDown()
           cursor.moveToBeginningOfLine()
-        point = Point.min(@getEofBufferPosition(), @getNext(cursor))
+        point = Point.min(getEofBufferPosition(@editor), @getNext(cursor))
       cursor.setBufferPosition(point)
 
 class MoveToEndOfWholeWord extends MoveToEndOfWord
@@ -353,7 +331,7 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
 
   moveCursor: (cursor) ->
     @countTimes =>
-      unless @at('LastBufferRow', cursor)
+      if cursor.getBufferRow() isnt getLastBufferRow(@editor)
         cursor.moveDown()
     @skipTrailingWhitespace(cursor)
 
@@ -362,7 +340,8 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
 class MoveToFirstCharacterOfLine extends Motion
   @extend()
   moveCursor: (cursor) ->
-    @moveToFirstCharacterOfLine(cursor)
+    cursor.moveToBeginningOfLine()
+    cursor.moveToFirstCharacterOfLine()
 
 class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
@@ -406,14 +385,14 @@ class MoveToFirstLine extends Motion
 class MoveToLastLine extends MoveToFirstLine
   @extend()
   getDefaultRow: ->
-    @getLastBufferRow()
+    getLastBufferRow(@editor)
 
 # keymap: N% e.g. 10%
 class MoveToLineByPercent extends MoveToFirstLine
   @extend()
   getRow: ->
     percent = Math.min(100, @getCount())
-    Math.floor(@getLastScreenRow() * (percent / 100))
+    Math.floor(getLastScreenRow(@editor) * (percent / 100))
 
 class MoveToRelativeLine extends Motion
   @extend(false)
@@ -446,7 +425,7 @@ class MoveToTopOfScreen extends Motion
     cursor.moveToFirstCharacterOfLine()
 
   getRow: ->
-    row = @getFirstVisibleScreenRow()
+    row = getFirstVisibleScreenRow(@editor)
     offset = if row is 0 then 0 else @scrolloff
     row + Math.max(@getCount(), offset)
 
@@ -456,15 +435,15 @@ class MoveToTopOfScreen extends Motion
 class MoveToBottomOfScreen extends MoveToTopOfScreen
   @extend()
   getRow: ->
-    row = @getLastVisibleScreenRow()
-    offset = if row is @getLastBufferRow() then 0 else @scrolloff
+    row = getLastVisibleScreenRow(@editor)
+    offset = if row is getLastBufferRow(@editor) then 0 else @scrolloff
     row - Math.max(@getCount(), offset)
 
 # keymap: M
 class MoveToMiddleOfScreen extends MoveToTopOfScreen
   @extend()
   getRow: ->
-    row = @getFirstVisibleScreenRow()
+    row = getFirstVisibleScreenRow(@editor)
     offset = Math.floor(@editor.getRowsPerPage() / 2) - 1
     row + Math.max(offset, 0)
 
@@ -498,7 +477,7 @@ class ScrollFullScreenDown extends Motion
 
   moveCursor: (cursor) ->
     row = Math.floor(@editor.getCursorScreenPosition().row + @rowsToScroll)
-    row = Math.min(@getLastScreenRow(), row)
+    row = Math.min(getLastScreenRow(@editor), row)
     cursor.setScreenPosition([row, 0] , autoscroll: false)
 
 # keymap: ctrl-b
