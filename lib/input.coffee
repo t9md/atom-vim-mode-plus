@@ -111,7 +111,7 @@ class InputElement extends InputBaseElement
     this
 
 # [TODO] Differenciating literal-mode should be done by scope and scope based keymap.
-class Search extends InputBase
+class SearchInput extends InputBase
   constructor: ->
     super
     @options = {}
@@ -165,7 +165,7 @@ class Search extends InputBase
     @view.regexSearchStatus.classList.add 'btn-primary'
     super
 
-class SearchElement extends InputBaseElement
+class SearchInputElement extends InputBaseElement
   klass: "#{searchScope}-container"
 
   createdCallback: ->
@@ -195,16 +195,15 @@ class SearchElement extends InputBaseElement
     @panel = atom.workspace.addBottomPanel(item: this, visible: false)
     this
 
-
 InputElement = document.registerElement "#{packageScope}-input",
   prototype: InputElement.prototype
   extends: 'div',
 
-SearchElement = document.registerElement "#{packageScope}",
-  prototype: SearchElement.prototype
+SearchInputElement = document.registerElement "#{packageScope}-search-input",
+  prototype: SearchInputElement.prototype
   extends: 'div',
 
 module.exports = {
   Input, InputElement,
-  Search, SearchElement
+  SearchInput, SearchInputElement
 }

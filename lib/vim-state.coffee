@@ -3,7 +3,7 @@ _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range, Point} = require 'atom'
 
 {Hover} = require './hover'
-{Input, Search} = require './input'
+{Input, SearchInput} = require './input'
 settings = require './settings'
 {haveSomeSelection, toggleClassByCondition, cursorIsAtEndOfBuffer} = require './utils'
 swrap = require './selection-wrapper'
@@ -48,7 +48,7 @@ class VimState
 
     @searchHistory = new SearchHistoryManager(this)
     @input = new Input(this)
-    @search = new Search(this)
+    @search = new SearchInput(this)
     @operationStack = new OperationStack(this)
     @observeSelection()
 
