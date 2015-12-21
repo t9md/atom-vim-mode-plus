@@ -94,7 +94,7 @@ class Motion extends Base
   # Cursor motion wrapper
   # -------------------------
   moveCursorUp: (cursor) ->
-    unless @at('FirstScreenRow', cursor)
+    if cursor.getScreenRow() isnt 0
       cursor.moveUp()
 
   moveCursorDown: (cursor) ->
@@ -120,12 +120,8 @@ class Motion extends Base
     _.times @getCount(), ->
       fn({stop}) unless stopped
 
-  at: (where, cursor) ->
-    switch where
-      when 'EOF' then pointIsAtEndOfBuffer(@editor, cursor.getBufferPosition())
-      when 'FirstScreenRow' then cursor.getScreenRow() is 0
-      when 'LastBufferRow' then cursor.getBufferRow() is getLastBufferRow(@editor)
-      when 'LastScreenRow' then cursor.getScreenRow() is getLastScreenRow(@editor)
+  cursorIsAtEndOfFile: (cursor) ->
+    pointIsAtEndOfBuffer(@editor, cursor.getBufferPosition())
 
   # Debuging purpose
   # -------------------------
@@ -240,9 +236,9 @@ class MoveToNextWord extends Motion
       cursor.getBeginningOfNextWordBufferPosition(wordRegex: @wordRegex)
 
   moveCursor: (cursor) ->
-    return if @at('EOF', cursor)
+    return if @cursorIsAtEndOfFile(cursor)
     @countTimes =>
-      if cursor.isAtEndOfLine() and not @at('EOF', cursor)
+      if cursor.isAtEndOfLine() and not @cursorIsAtEndOfFile(cursor)
         cursor.moveDown()
         cursor.moveToFirstCharacterOfLine()
       else
@@ -275,7 +271,7 @@ class MoveToEndOfWord extends Motion
       point = @getNext(cursor)
       if point.isEqual(cursor.getBufferPosition())
         cursor.moveRight()
-        if cursor.isAtEndOfLine() and not @at('EOF', cursor)
+        if cursor.isAtEndOfLine() and not @cursorIsAtEndOfFile(cursor)
           cursor.moveDown()
           cursor.moveToBeginningOfLine()
         point = Point.min(getEofBufferPosition(@editor), @getNext(cursor))
