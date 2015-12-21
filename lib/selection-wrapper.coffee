@@ -63,7 +63,7 @@ class SelectionWrapper
     row = if @selection.isReversed() then endRow else startRow
     @selection.editor.bufferRangeForBufferRow(row, includeNewline: true)
 
-  getTailRange: ->
+  getTailBufferRange: ->
     if (@isSingleRow() and @isLinewise())
       @getBufferRangeForTailRow()
     else
@@ -162,7 +162,7 @@ class SelectionWrapper
       tailRange = if linewise
         @getBufferRangeForTailRow()
       else
-        @getTailRange()
+        @getTailBufferRange()
       if fn(@selection)
         range = @getBufferRange().union(tailRange)
         @setBufferRange(range, {preserveFolds: true})
