@@ -1,6 +1,6 @@
 # Refactoring status: 50%
 _ = require 'underscore-plus'
-{Point, Range, CompositeDisposable} = require 'atom'
+{Point} = require 'atom'
 
 globalState = require './global-state'
 {
@@ -8,10 +8,8 @@ globalState = require './global-state'
   cursorIsAtEndOfBuffer, getEofBufferPosition
 } = require './utils'
 swrap = require './selection-wrapper'
-{Hover} = require './hover'
 {MatchList} = require './match'
 settings = require './settings'
-{Search} = require './input'
 Base = require './base'
 
 class Motion extends Base

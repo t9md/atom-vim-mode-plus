@@ -8,7 +8,7 @@ globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
 {Hover, HoverElement} = require './hover'
-{Input, InputElement, Search, SearchElement} = require './input'
+{Input, InputElement, SearchInput, SearchInputElement} = require './input'
 
 packageScope = 'vim-mode-plus'
 
@@ -70,7 +70,7 @@ module.exports =
     addView = atom.views.addViewProvider.bind(atom.views)
     addView Hover, (model) -> new HoverElement().initialize(model)
     addView Input, (model) -> new InputElement().initialize(model)
-    addView Search, (model) -> new SearchElement().initialize(model)
+    addView SearchInput, (model) -> new SearchInputElement().initialize(model)
 
   deactivate: ->
     @subscriptions.dispose()
