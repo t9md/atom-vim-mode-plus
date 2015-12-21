@@ -3,7 +3,7 @@ _ = require 'underscore-plus'
 
 {CompositeDisposable} = require 'atom'
 Base = require './base'
-{withKeepingGoalColumn} = require './utils'
+{moveCursorLeft} = require './utils'
 settings = require './settings'
 {CurrentSelection, Select} = {}
 
@@ -81,14 +81,12 @@ class OperationStack
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
         throw new OperationStackError('Selection remains on normal-mode')
-      @ensureCursorsNotAtEOL()
+        
+      # Ensure Cursor is NOT at EndOfLine position
+      for c in @editor.getCursors() when c.isAtEndOfLine()
+        moveCursorLeft(c, {preserveGoalColumn: true})
     @vimState.showCursors()
     @vimState.reset()
-
-  ensureCursorsNotAtEOL: ->
-    for c in @editor.getCursors() when c.isAtEndOfLine() and not c.isAtBeginningOfLine()
-      withKeepingGoalColumn c, (c) ->
-        c.moveLeft()
 
   peekTop: ->
     _.last @stack

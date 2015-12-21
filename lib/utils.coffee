@@ -99,11 +99,6 @@ eachSelection = (editor, fn) ->
   for s in editor.getSelections()
     fn(s)
 
-withKeepingGoalColumn = (cursor, fn) ->
-  {goalColumn} = cursor
-  fn(cursor)
-  cursor.goalColumn = goalColumn if goalColumn
-
 toggleClassByCondition = (element, klass, condition) ->
   action = (if condition then 'add' else 'remove')
   element.classList[action](klass)
@@ -167,14 +162,12 @@ mergeIntersectingRanges = (ranges) ->
       result.push(range)
   result
 
+getEolBufferPositionForRow = (editor, row) ->
+  editor.bufferRangeForBufferRow(row).end
+
 pointIsAtEndOfLine = (editor, point) ->
-  editor.bufferRangeForBufferRow(point.row).end.isEqual(point)
-
-pointIsAtEndOfBuffer = (editor, point) ->
-  point.isEqual(editor.getEofBufferPosition())
-
-cursorIsAtEndOfBuffer = (editor, cursor) ->
-  pointIsAtEndOfBuffer(editor, cursor.getBufferPosition())
+  point = Point.fromObject(point)
+  getEolBufferPositionForRow(editor, point.row).isEqual(point)
 
 characterAtPoint = (editor, point) ->
   range = Range.fromPointWithDelta(point, 0, 1)
@@ -189,18 +182,57 @@ characterAtPoint = (editor, point) ->
 getEofBufferPosition = (editor) ->
   row = editor.getLastBufferRow()
   if editor.bufferRangeForBufferRow(row).isEmpty()
-    point = editor.bufferRangeForBufferRow(row - 1).end
-    editor.clipBufferPosition(point)
+    getEolBufferPositionForRow(editor, Math.max(0, row - 1))
   else
     editor.getEofBufferPosition()
 
-moveCursorLeftWithinLine = (cursor) ->
-  unless cursor.isAtBeginningOfLine()
-    cursor.moveLeft()
+pointIsAtEndOfBuffer = (editor, point) ->
+  getEofBufferPosition(editor).isEqual(point)
 
-moveCursorRightWithinLine = (cursor) ->
-  unless cursor.isAtEndOfLine()
-    cursor.moveRight()
+getLastBufferRow = (editor) ->
+  getEofBufferPosition(editor).row
+
+getEofScreenPosition = (editor) ->
+  point = getEofBufferPosition(editor)
+  editor.screenPositionForBufferPosition(point)
+
+getLastScreenRow = (editor) ->
+  getEofScreenPosition(editor).row
+
+getFirstVisibleScreenRow = (editor) ->
+  getView(editor).getFirstVisibleScreenRow()
+
+getLastVisibleScreenRow = (editor) ->
+  getView(editor).getLastVisibleScreenRow()
+
+# Cursor motion wrapper
+# -------------------------
+moveCursor = (cursor, preserveGoalColumn=false, fn) ->
+  {goalColumn} = cursor
+  fn(cursor)
+  if preserveGoalColumn and goalColumn
+    cursor.goalColumn = goalColumn
+
+# options:
+#   allowWrap: to controll allow wrap
+#   preserveGoalColumn: preserve original goalColumn
+moveCursorLeft = (cursor, options={}) ->
+  {allowWrap, preserveGoalColumn} = options
+  if not cursor.isAtBeginningOfLine() or allowWrap
+    moveCursor cursor, preserveGoalColumn, (c) ->
+      c.moveLeft()
+
+moveCursorRight = (cursor, options={}) ->
+  {allowWrap, preserveGoalColumn} = options
+  if not cursor.isAtEndOfLine() or allowWrap
+    moveCursor cursor, preserveGoalColumn, (c) ->
+      c.moveRight()
+
+unfoldAtCursorRow = (cursor) ->
+  {editor} = cursor
+  row = cursor.getBufferRow()
+  if editor.isFoldedAtBufferRow(row)
+    editor.unfoldBufferRow row
 
 module.exports = {
   include
@@ -220,16 +252,21 @@ module.exports = {
   selectVisibleBy
   getLineTextToPoint
   eachSelection
-  withKeepingGoalColumn
   toggleClassByCondition
   getNewTextRangeFromCheckpoint
   findIndex
   mergeIntersectingRanges
   pointIsAtEndOfLine
   pointIsAtEndOfBuffer
-  cursorIsAtEndOfBuffer
   characterAtPoint
   getEofBufferPosition
-  moveCursorLeftWithinLine
-  moveCursorRightWithinLine
+  getEofScreenPosition
+  getLastBufferRow
+  getLastScreenRow
+  moveCursorLeft
+  moveCursorRight
+  unfoldAtCursorRow
+  getEolBufferPositionForRow
+  getFirstVisibleScreenRow
+  getLastVisibleScreenRow
 }

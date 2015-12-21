@@ -6,7 +6,7 @@ _ = require 'underscore-plus'
 swrap = require './selection-wrapper'
 {
   eachSelection, toggleClassByCondition, getNewTextRangeFromCheckpoint
-  moveCursorLeftWithinLine
+  moveCursorLeft
 } = require './utils'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
@@ -106,8 +106,8 @@ class ModeManager
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
 
-      # Adjust cursor position
-      moveCursorLeftWithinLine(c) for c in @editor.getCursors()
+      # When escape from insert-mode, cursor move Left.
+      moveCursorLeft(c) for c in @editor.getCursors()
 
   activateReplaceMode: ->
     @replacedCharsBySelection = {}

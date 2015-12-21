@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, SearchInput} = require './input'
 settings = require './settings'
-{haveSomeSelection, toggleClassByCondition, cursorIsAtEndOfBuffer} = require './utils'
+{haveSomeSelection, toggleClassByCondition} = require './utils'
 swrap = require './selection-wrapper'
 
 OperationStack = require './operation-stack'
@@ -172,7 +172,8 @@ class VimState
             # In visual-mode, cursor colum 0 means whole line selected
             # and in this case, cursor position is at [nextRow, 0]
             # So I offset one row up by stylesheet.
-            if cursorIsAtEndOfBuffer(@editor, cursor)
+            isAtAtomEof = cursor.getBufferPosition().isEqual(@editor.getEofBufferPosition())
+            if isAtAtomEof and selection.isEmpty()
               # hide cursor, I can display cursor but its missleading.
               # Because when you move cursor, EOB position not included as selection.
               style.setProperty('left', '-2ch')
