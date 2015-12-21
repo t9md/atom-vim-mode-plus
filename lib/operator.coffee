@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 
 {
-  haveSomeSelection, getEofBufferPosition
+  haveSomeSelection, getVimEofBufferPosition
   moveCursorLeft, moveCursorRight
 } = require './utils'
 swrap = require './selection-wrapper'
@@ -148,7 +148,7 @@ class Delete extends Operator
 
   ensureCursorNotPastEOF: (s) ->
     head = s.getHeadBufferPosition()
-    eof = getEofBufferPosition(@editor)
+    eof = getVimEofBufferPosition(@editor)
     if head.isGreaterThan(eof)
       s.cursor.setBufferPosition([eof.row, 0])
 

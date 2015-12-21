@@ -179,7 +179,7 @@ characterAtPoint = (editor, point) ->
 # Because of this, Atom's EOF position is [actualLastRow+1, 0] provided last-non-blank-row
 # ends with newline char.
 # But in Vim, curor can NOT past last newline. EOF is next position of very last character.
-getEofBufferPosition = (editor) ->
+getVimEofBufferPosition = (editor) ->
   row = editor.getLastBufferRow()
   if editor.bufferRangeForBufferRow(row).isEmpty()
     getEolBufferPositionForRow(editor, Math.max(0, row - 1))
@@ -187,17 +187,17 @@ getEofBufferPosition = (editor) ->
     editor.getEofBufferPosition()
 
 pointIsAtEndOfBuffer = (editor, point) ->
-  getEofBufferPosition(editor).isEqual(point)
+  getVimEofBufferPosition(editor).isEqual(point)
 
-getLastBufferRow = (editor) ->
-  getEofBufferPosition(editor).row
+getLastVimBufferRow = (editor) ->
+  getVimEofBufferPosition(editor).row
 
-getEofScreenPosition = (editor) ->
-  point = getEofBufferPosition(editor)
+getVimEofScreenPosition = (editor) ->
+  point = getVimEofBufferPosition(editor)
   editor.screenPositionForBufferPosition(point)
 
-getLastScreenRow = (editor) ->
-  getEofScreenPosition(editor).row
+getLastVimScreenRow = (editor) ->
+  getVimEofScreenPosition(editor).row
 
 getFirstVisibleScreenRow = (editor) ->
   getView(editor).getFirstVisibleScreenRow()
@@ -259,10 +259,10 @@ module.exports = {
   pointIsAtEndOfLine
   pointIsAtEndOfBuffer
   characterAtPoint
-  getEofBufferPosition
-  getEofScreenPosition
-  getLastBufferRow
-  getLastScreenRow
+  getVimEofBufferPosition
+  getVimEofScreenPosition
+  getLastVimBufferRow
+  getLastVimScreenRow
   moveCursorLeft
   moveCursorRight
   unfoldAtCursorRow
