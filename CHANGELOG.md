@@ -1,6 +1,25 @@
-# WIP
+# 0.10.0 [CAUTION] Surround operation keystroke changed.
+- Breaking: Surround take target before reading surround-char #75
+  - ex-1: `ys` mapped to `vim-mode-plus:surround`
+    - old: `ys(iw`
+    - new: `ysiw(`
+  - ex-2: `ms` mapped to `vim-mode-plus:map-surround`
+    - old: `ms(ip`
+    - new: `msip(`
 - Breaking: Remove default keymap of surround like `gss`, `gsw`, `gsd`, `gsc`.
-- Breaking: Surround take target before reading surround-char e.g. old: `ys(iw`, new: `ysiw(` #75
+- FIX: `gg` and `G` should go to buffer line instead of screen line.
+- FIX: SelectLatestChange didn't correctly restore visual submode.
+- FIX: Increment, Decrement didn't clear selection on finished.
+- FIX: `v` , `escape` on empty-line put cursor one-line down in corner case #70
+- FIX: degradation, `G` should use bufferRow than screenRow.
+- Improve: `a` check cursor.isAtEndOfLine() for each cursor in multi-cursor.
+- Improve: When Surround target is linewise area, it insert line break char #78.
+- Internal: Cleanup selection, cursor adjustment for consistent moveCursor behavior in both normal and visual mode #73.
+- Internal: Remove debug feature for OperationStack #72
+- Internal: Now throw error when selection is not empty in normal-mode at operation finished to strictly catch unexpected operation result.
+- Internal: `dd`, `yy`, `gUgU` like sequential operation support now done in OperationStack.
+- Improve: Visual characterwise mode keep tailRange correctly when selection is indentation white spaces char. #79
+- Internal: Separate big spec files into small topic based spec file.
 
 # 0.9.1
 - Further accuracy improve for cursor not past last newline #56.
