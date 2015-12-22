@@ -1,3 +1,6 @@
+# 0.10.1
+- FIX: Critical degradation, when selection whole buffer with `cmd-a`, exception thrown.
+
 # 0.10.0 [CAUTION] Surround operation keystroke changed.
 - Breaking: Surround take target before reading surround-char #75
   - ex-1: `ys` mapped to `vim-mode-plus:surround`
