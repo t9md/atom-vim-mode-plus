@@ -60,6 +60,17 @@ class Motion extends Base
     @emitDidSelect()
 
   # Modify selection with keeping tailRange(= range under cursor in most case.).
+  # -------------------------
+  # * Consistency of moveCursor in both visual and normal modes
+  #  In visual mode and its selection is not reversed, cursor is selectRight()ed,
+  #  So we need to move cursor left before calling moveCursor() so that moveCursor
+  #   works consistently both normal and visual mode.
+  #
+  # * Why we need to allowWrap when moveCursorLeft/Right?
+  # When 'linewise' selection, cursor is at column '0' of NEXT line, so we need to moveLeft
+  # by wrapping, to put cursor on row which actually be selected(from UX point of view).
+  # This adjustment is important so that j, k works without special care in moveCursor.
+  #
   selectInclusive: (selection) ->
     {cursor} = selection
     selection.modifySelection =>
