@@ -84,7 +84,7 @@ class Motion extends Base
 
       @moveCursor(cursor)
 
-      # When motion is used as target of operator, return if motion movement not happend.
+      # In none-visual we don't merge tailRange into selection if no cursor movement is happened.
       if @isMode('visual') or not selection.isEmpty()
         if not selection.isReversed() and (not cursor.isAtEndOfLine() or cursor.isAtBeginningOfLine())
           moveCursorRight(cursor, {allowWrap: true, preserveGoalColumn: true})
