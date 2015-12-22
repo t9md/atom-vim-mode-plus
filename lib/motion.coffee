@@ -59,20 +59,26 @@ class Motion extends Base
     @editor.mergeIntersectingSelections()
     @emitDidSelect()
 
+  # Modify selection with keeping tailRange(= range under cursor in most case.).
   selectInclusive: (selection) ->
     {cursor} = selection
-    swrap(selection).modifySelection @isLinewise(), (s) =>
-      if @isMode('visual') and not s.isReversed()
+    selection.modifySelection =>
+      tailRange = if @isLinewise()
+        swrap(selection).getBufferRangeForTailRow()
+      else
+        swrap(selection).getTailBufferRange()
+
+      if @isMode('visual') and not selection.isReversed()
         moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
 
       @moveCursor(cursor)
+
       # When motion is used as target of operator, return if motion movement not happend.
-      if not @isMode('visual') and s.isEmpty()
-        false
-      else
-        if not s.isReversed() and (not cursor.isAtEndOfLine() or cursor.isAtBeginningOfLine())
+      if @isMode('visual') or not selection.isEmpty()
+        if not selection.isReversed() and (not cursor.isAtEndOfLine() or cursor.isAtBeginningOfLine())
           moveCursorRight(cursor, {allowWrap: true, preserveGoalColumn: true})
-        true
+        newRange = selection.getBufferRange().union(tailRange)
+        selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
 
   # Cursor motion wrapper
   # -------------------------
