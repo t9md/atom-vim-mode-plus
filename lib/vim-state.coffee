@@ -173,7 +173,7 @@ class VimState
             # and in this case, cursor position is at [nextRow, 0]
             # So I offset one row up by stylesheet.
             isAtAtomEof = cursor.getBufferPosition().isEqual(@editor.getEofBufferPosition())
-            if isAtAtomEof and selection.isEmpty()
+            if isAtAtomEof and s.isEmpty()
               # hide cursor, I can display cursor but its missleading.
               # Because when you move cursor, EOB position not included as selection.
               style.setProperty('left', '-2ch')
