@@ -37,8 +37,8 @@ class OperationStack
       @processing = true
       @process()
     catch error
+      @vimState.reset()
       unless error.instanceof?('OperationAbortedError')
-        @vimState.reset()
         throw error
     finally
       @processing = false
