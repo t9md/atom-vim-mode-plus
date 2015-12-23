@@ -1,3 +1,7 @@
+# 0.10.2
+- FIX: When buffer is soft-wrapped and in visual-characterwise mode, moving selection put cursor on incorrect position #81
+- FIX: `wrapLeftRightMotion` parameter is not respected in visual-mode and soft-wrapped buffer's normal-mode. #82
+
 # 0.10.1
 - FIX: Critical degradation, when selection whole buffer with `cmd-a`, exception thrown.
 
