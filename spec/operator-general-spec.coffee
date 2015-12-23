@@ -275,7 +275,11 @@ describe "Operator general", ->
     describe "with multiple cursors", ->
       it "deletes each selection", ->
         set
-          text: "abcd\n1234\nABCD\n"
+          text: """
+            abcd
+            1234
+            ABCD\n
+            """
           cursorBuffer: [[0, 1], [1, 2], [2, 3]]
 
         ensure 'de',

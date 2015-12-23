@@ -49,9 +49,16 @@ class Motion extends Base
 
   select: ->
     for selection in @editor.getSelections()
+      if @isMode('visual', 'linewise')
+        {goalColumn} = selection.cursor
+        swrap(selection).restoreCharacterwise()
+        selection.cursor.goalColumn = goalColumn if goalColumn
+
       if @isInclusive() or @isLinewise()
         @selectInclusive selection
-        swrap(selection).expandOverLine() if @isLinewise()
+        if @isLinewise()
+          swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
+          swrap(selection).expandOverLine()
       else
         selection.modifySelection =>
           @moveCursor selection.cursor
@@ -74,15 +81,14 @@ class Motion extends Base
   selectInclusive: (selection) ->
     {cursor} = selection
     selection.modifySelection =>
-      tailRange = if @isLinewise()
-        swrap(selection).getBufferRangeForTailRow()
-      else
-        swrap(selection).getTailBufferRange()
+      tailRange = swrap(selection).getTailBufferRange()
 
       if @isMode('visual') and not selection.isReversed()
         moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
 
       @moveCursor(cursor)
+      if @isMode('visual') and cursor.isAtEndOfLine()
+        moveCursorLeft(cursor, {preserveGoalColumn: true})
 
       # In none-visual we don't merge tailRange into selection if no cursor movement is happened.
       if @isMode('visual') or not selection.isEmpty()
