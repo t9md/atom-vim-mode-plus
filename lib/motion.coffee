@@ -101,16 +101,6 @@ class Motion extends Base
     if getVimLastScreenRow(@editor) isnt cursor.getScreenRow()
       cursor.moveDown()
 
-  moveCursorRight: (cursor, allowWrap=false) ->
-    {row, column} = cursor.getScreenPosition()
-    column++
-    column++ if (allowWrap and pointIsAtEndOfLine(@editor, [row, column]))
-    point = Point.min([row, column], getVimEofScreenPosition(@editor))
-    cursor.setScreenPosition point,
-      clip: 'forward',
-      wrapBeyondNewlines: allowWrap
-      wrapAtSoftNewlines: true
-
   # Utils
   # -------------------------
   # Calling stop() in callback stop remaining processing.
@@ -183,7 +173,10 @@ class MoveRight extends Motion
   moveCursor: (cursor) ->
     @countTimes =>
       unfoldAtCursorRow(cursor)
-      @moveCursorRight(cursor, @canWrapToNextLine(cursor))
+      allowWrap = @canWrapToNextLine(cursor)
+      moveCursorRight(cursor)
+      if cursor.isAtEndOfLine() and allowWrap and not @cursorIsAtVimEndOfFile(cursor)
+        moveCursorRight(cursor, {allowWrap})
 
 class MoveUp extends Motion
   @extend()
