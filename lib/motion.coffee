@@ -165,7 +165,7 @@ class MoveLeft extends Motion
 class MoveRight extends Motion
   @extend()
   canWrapToNextLine: (cursor) ->
-    if @isAsTarget() and not cursor.isAtEndOfLine()
+    if not @isMode('visual') and @isAsTarget() and not cursor.isAtEndOfLine()
       false
     else
       settings.get('wrapLeftRightMotion')
