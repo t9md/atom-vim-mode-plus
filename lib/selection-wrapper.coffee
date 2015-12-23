@@ -68,15 +68,14 @@ class SelectionWrapper
       @getBufferRangeForTailRow()
     else
       {editor} = @selection
-      [columnDelta, clip] = if @selection.isReversed()
-        [-1, 'backward']
-      else
-        [+1, 'forward']
 
-      tail = @selection.getTailScreenPosition()
-      point = tail.translate([0, columnDelta])
-      screenRange = editor.clipScreenRange(new Range(tail, point), {clip})
-      editor.bufferRangeForScreenRange(screenRange)
+      start = @selection.getTailScreenPosition()
+      end = if @selection.isReversed()
+        editor.clipScreenPosition(start.translate([0, -1]), {clip: 'backward'})
+      else
+        editor.clipScreenPosition(start.translate([0, +1]), {clip: 'forward'})
+
+      editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
     prop = @detectCharacterwiseProperties()
