@@ -80,6 +80,15 @@ describe "Motion Search", ->
         ensure ['V/', {search: 'ef'}],
           selectedText: "abc\ndef\n",
 
+      it 'not extend linwise selection if search matches on same line', ->
+        # settings.set 'incrementalSearch', true
+        set text: """
+          abc def
+          def\n
+          """
+        ensure ['V/', {search: 'ef'}],
+          selectedText: "abc def\n",
+
       describe "case sensitivity", ->
         beforeEach ->
           set
