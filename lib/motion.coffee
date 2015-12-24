@@ -58,7 +58,7 @@ class Motion extends Base
         @selectInclusive selection
         if @isLinewise()
           swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
-          swrap(selection).expandOverLine()
+          swrap(selection).expandOverLine({preserveGoalColumn: true})
       else
         selection.modifySelection =>
           @moveCursor selection.cursor

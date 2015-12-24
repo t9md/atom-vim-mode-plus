@@ -55,8 +55,13 @@ class SelectionWrapper
     @setBufferRange rangeStart.union(rangeEnd), {preserveFolds: true}
 
   # Native selection.expandOverLine is not aware of actual rowRange of selection.
-  expandOverLine: ->
+  expandOverLine: (options={}) ->
+    {preserveGoalColumn} = options
+    if preserveGoalColumn
+      {goalColumn} = @selection.cursor
+
     @selectRowRange @selection.getBufferRowRange()
+    @selection.cursor.goalColumn = goalColumn if goalColumn
 
   getBufferRangeForTailRow: ->
     [startRow, endRow] = @selection.getBufferRowRange()
@@ -68,7 +73,6 @@ class SelectionWrapper
       @getBufferRangeForTailRow()
     else
       {editor} = @selection
-
       start = @selection.getTailScreenPosition()
       end = if @selection.isReversed()
         editor.clipScreenPosition(start.translate([0, -1]), {clip: 'backward'})
