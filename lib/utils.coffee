@@ -92,8 +92,8 @@ selectVisibleBy = (editor, entries, fn) ->
   range = getVisibleBufferRange(editor)
   (e for e in entries when range.containsRange(fn(e)))
 
-getLineTextToPoint = (editor, point) ->
-  editor.lineTextForBufferRow(point.row)[0..point.column]
+getLineTextToPoint = (editor, {row, column}) ->
+  editor.lineTextForBufferRow(row)[0..column]
 
 eachSelection = (editor, fn) ->
   for s in editor.getSelections()

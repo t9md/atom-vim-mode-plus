@@ -5,11 +5,8 @@ _ = require 'underscore-plus'
 Base = require './base'
 swrap = require './selection-wrapper'
 {
-  rangeToBeginningOfFileFromPoint
-  rangeToEndOfFileFromPoint
-  sortRanges
-  getLineTextToPoint
-  characterAtPoint
+  rangeToBeginningOfFileFromPoint, rangeToEndOfFileFromPoint
+  sortRanges, getLineTextToPoint, characterAtPoint
 } = require './utils'
 
 class TextObject extends Base
@@ -23,8 +20,11 @@ class TextObject extends Base
   isInner: ->
     @inner
 
+  isA: ->
+    not @isInner()
+
   isLinewise: ->
-    swrap.detectVisualModeSubmode(@editor.getSelections()) is 'linewise'
+    swrap.detectVisualModeSubmode(@editor) is 'linewise'
 
   eachSelection: (fn) ->
     fn(s) for s in @editor.getSelections()
@@ -38,7 +38,7 @@ class Word extends TextObject
     @eachSelection (selection) =>
       wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
       @selectInner(selection, wordRegex)
-      @selectA(selection) unless @isInner()
+      @selectA(selection) if @isA()
 
   selectInner: (selection, wordRegex=null) ->
     selection.selectWord()
@@ -157,7 +157,7 @@ class Pair extends TextObject
         close = @findClosePair pair, {from: open, nest: 1} if open?
     if open? and close?
       range = new Range(open, close)
-      range = range.translate([0, -1], [0, 1]) unless @isInner()
+      range = range.translate([0, -1], [0, 1]) if @isA()
     range
 
   getRange: (selection, what=@what) ->
@@ -424,9 +424,9 @@ class Fold extends TextObject
   getFoldRowRangeForBufferRow: (bufferRow) ->
     for currentRow in [bufferRow..0] by -1
       [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
-      continue unless startRow? and startRow <= bufferRow <= endRow
-      startRow += 1 if @isInner()
-      return [startRow, endRow]
+      if startRow? and (startRow <= bufferRow <= endRow)
+        startRow += 1 if @isInner()
+        return [startRow, endRow]
 
   select: ->
     @eachSelection (selection) =>
@@ -525,10 +525,12 @@ class InnerEntire extends Entire
 # -------------------------
 class LatestChange extends TextObject
   @extend(false)
+  getRange: ->
+    @vimState.mark.getRange('[', ']')
+
   select: ->
     @eachSelection (selection) =>
-      if range = @vimState.mark.getRange('[', ']')
-        selection.setBufferRange(range)
+      swrap(selection).setBufferRangeSafely @getRange()
 
 class ALatestChange extends LatestChange
   @extend()
