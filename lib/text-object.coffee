@@ -33,9 +33,6 @@ class TextObject extends Base
     fn(s) for s in @editor.getSelections()
     @emitDidSelect()
 
-  execute: ->
-    @select()
-
 # -------------------------
 # [FIXME] Need to be extendable.
 class Word extends TextObject
