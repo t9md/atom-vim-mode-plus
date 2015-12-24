@@ -5,13 +5,11 @@ _ = require 'underscore-plus'
 Base = require './base'
 swrap = require './selection-wrapper'
 {
-  isLinewiseRange
   rangeToBeginningOfFileFromPoint
   rangeToEndOfFileFromPoint
   sortRanges
   getLineTextToPoint
   characterAtPoint
-  haveSomeSelection
 } = require './utils'
 
 class TextObject extends Base
@@ -26,8 +24,7 @@ class TextObject extends Base
     @inner
 
   isLinewise: ->
-    @editor.getSelections().every (s) ->
-      isLinewiseRange(s.getBufferRange())
+    swrap.detectVisualModeSubmode(@editor.getSelections()) is 'linewise'
 
   eachSelection: (fn) ->
     fn(s) for s in @editor.getSelections()
