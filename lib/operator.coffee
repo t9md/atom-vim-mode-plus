@@ -135,6 +135,9 @@ class Select extends Operator
   flashTarget: false
   execute: ->
     @selectTarget(true)
+    return if @isMode('operator-pending') or @isMode('visual', 'blockwise')
+    if submode = swrap.detectVisualModeSubmode(@editor.getSelections())
+      @activateMode('visual', submode) unless @isMode('visual', submode)
 
 class SelectLatestChange extends Select
   @extend()

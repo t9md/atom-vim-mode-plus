@@ -25,10 +25,11 @@ class OperationStack
     klass = Base.getClass(klass) if _.isString(klass)
     try
       #  To support, `dd`, `cc` and a like.
-      if @stack.length and (@peekTop().constructor is klass)
+      if not @isEmpty() and (@peekTop().constructor is klass)
         klass = Base.getClass('MoveToRelativeLine')
       op = new klass(@vimState, properties)
-      if @vimState.isMode('visual') and _.isFunction(op.select)
+      if (@vimState.isMode('visual') and _.isFunction(op.select)) or
+          (@isEmpty() and op.instanceof('TextObject')) # when TextObject invoked directly
         @stack.push(new Select(@vimState))
       @stack.push(op)
       if @vimState.isMode('visual') and op.instanceof('Operator')
@@ -81,7 +82,7 @@ class OperationStack
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
         throw new OperationStackError('Selection remains on normal-mode')
-        
+
       # Ensure Cursor is NOT at EndOfLine position
       for c in @editor.getCursors() when c.isAtEndOfLine()
         moveCursorLeft(c, {preserveGoalColumn: true})
