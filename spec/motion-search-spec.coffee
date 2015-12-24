@@ -79,8 +79,6 @@ describe "Motion Search", ->
       it 'searches to the correct column in visual linewise mode', ->
         ensure ['V/', {search: 'ef'}],
           selectedText: "abc\ndef\n",
-          selectedBufferRange: [[0, 0], [2, 0]],
-          cursor: [1, 1]
 
       describe "case sensitivity", ->
         beforeEach ->
