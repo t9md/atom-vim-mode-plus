@@ -80,8 +80,8 @@ describe "Motion Search", ->
         ensure ['V/', {search: 'ef'}],
           selectedText: "abc\ndef\n",
           characterwiseHead: [1, 1]
-          mode: ['visual', 'linewise']
           cursor: [2, 0]
+          mode: ['visual', 'linewise']
 
       it 'not extend linwise selection if search matches on same line', ->
         # settings.set 'incrementalSearch', true
