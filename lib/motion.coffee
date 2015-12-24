@@ -6,6 +6,7 @@ globalState = require './global-state'
 {
   saveEditorState, getVisibleBufferRange
   moveCursorLeft, moveCursorRight
+  moveCursorUp, moveCursorDown
   unfoldAtCursorRow
   pointIsAtEndOfLine,
   pointIsAtVimEndOfFile
@@ -97,16 +98,6 @@ class Motion extends Base
         newRange = selection.getBufferRange().union(tailRange)
         selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
 
-  # Cursor motion wrapper
-  # -------------------------
-  moveCursorUp: (cursor) ->
-    if cursor.getScreenRow() isnt 0
-      cursor.moveUp()
-
-  moveCursorDown: (cursor) ->
-    if getVimLastScreenRow(@editor) isnt cursor.getScreenRow()
-      cursor.moveDown()
-
   # Utils
   # -------------------------
   # Calling stop() in callback stop remaining processing.
@@ -190,7 +181,7 @@ class MoveUp extends Motion
   amount: -1
 
   move: (cursor) ->
-    @moveCursorUp(cursor)
+    moveCursorUp(cursor)
 
   moveCursor: (cursor) ->
     isBufferRowWise = @editor.isSoftWrapped() and @isMode('visual', 'linewise')
@@ -207,7 +198,7 @@ class MoveDown extends MoveUp
   amount: +1
 
   move: (cursor) ->
-    @moveCursorDown(cursor)
+    moveCursorDown(cursor)
 
 class MoveToPreviousWord extends Motion
   @extend()
@@ -342,16 +333,16 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
   linewise: true
   moveCursor: (cursor) ->
-    @countTimes =>
-      @moveCursorUp(cursor)
+    @countTimes ->
+      moveCursorUp(cursor)
     super
 
 class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
   linewise: true
   moveCursor: (cursor) ->
-    @countTimes =>
-      @moveCursorDown(cursor)
+    @countTimes ->
+      moveCursorDown(cursor)
     super
 
 class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
