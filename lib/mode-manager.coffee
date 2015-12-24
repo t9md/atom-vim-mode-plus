@@ -168,7 +168,9 @@ class ModeManager
 
       @eachSelection (s) ->
         swrap(s).resetProperties()
-        s.selectLeft() unless (s.isReversed() or s.isEmpty())
+        # `c`, `s` from visual-mode make selection empty
+        unless (s.isReversed() or s.isEmpty())
+          s.selectLeft()
         s.clear(autoscroll: false)
 
   restoreCharacterwiseRange: ->
