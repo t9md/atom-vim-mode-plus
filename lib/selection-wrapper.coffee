@@ -154,6 +154,12 @@ class SelectionWrapper
   isLinewise: ->
     isLinewiseRange(@getBufferRange())
 
+  detectVisualModeSubmode: ->
+    switch
+      when @isLinewise() then 'linewise'
+      when not @selection.isEmpty() then 'characterwise'
+      else null
+
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
@@ -168,5 +174,15 @@ swrap.expandOverLine = (selections) ->
 swrap.reverse = (selections) ->
   selections.forEach (s) ->
     swrap(s).reverse()
+
+swrap.detectVisualModeSubmode = (selections) ->
+  results = (swrap(s).detectVisualModeSubmode() for s in selections)
+
+  if results.every((r) -> r is 'linewise')
+    "linewise"
+  else if results.some((r) -> r is 'characterwise')
+    "characterwise"
+  else
+    null
 
 module.exports = swrap

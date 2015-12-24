@@ -98,7 +98,11 @@ describe "Operator ActivateInsertMode family", ->
 
   describe "the c keybinding", ->
     beforeEach ->
-      set text: "12345\nabcde\nABCDE"
+      set text: """
+        12345
+        abcde
+        ABCDE
+        """
 
     describe "when followed by a c", ->
       describe "with autoindent", ->
@@ -161,6 +165,18 @@ describe "Operator ActivateInsertMode family", ->
           mode: 'normal'
         ensure 'u', text: "12345\nabcde\nABCDE"
         ensure [ctrl: 'r'], text: "12345\nfg\nABCDE"
+
+      it "repeatable", ->
+        set cursor: [1, 1]
+        ensure 'ciw',
+          text: "12345\n\nABCDE"
+          cursor: [1, 0]
+          mode: 'insert'
+
+        ensure ['escape', 'j.'],
+          text: "12345\n\n"
+          cursor: [2, 0]
+          mode: 'normal'
 
     describe "when followed by a w", ->
       it "changes the word", ->
