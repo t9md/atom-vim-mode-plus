@@ -1,3 +1,8 @@
+# 0.11.0
+- FIX: #86 Repeating text-object targeted operation(e.g. `ciw` then `.`) incorrectly activate characterwise visual-mode.
+- FIX: Work around issue #85 issue vim-mode-plus with term2 package.
+- NEW: support characterwise movement in visual-linewise mode #74, #83.
+
 # 0.10.2
 - FIX: When buffer is soft-wrapped and in visual-characterwise mode, moving selection put cursor on incorrect position #81
 - FIX: `wrapLeftRightMotion` parameter is not respected in visual-mode and soft-wrapped buffer's normal-mode. #82
