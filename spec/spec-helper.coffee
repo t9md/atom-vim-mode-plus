@@ -2,6 +2,7 @@
 _ = require 'underscore-plus'
 {Range, Point} = require 'atom'
 {inspect} = require 'util'
+swrap = require '../lib/selection-wrapper'
 
 supportedModeClass = [
   'normal-mode'
@@ -213,6 +214,7 @@ class VimEditor
     'selectedScreenRange', 'selectedScreenRangeOrdered'
     'selectedBufferRange', 'selectedBufferRangeOrdered'
     'selectionIsReversed',
+    'characterwiseHead'
     'scrollTop',
     'mode',
   ]
@@ -284,6 +286,10 @@ class VimEditor
   ensureSelectionIsReversed: (reversed) ->
     actual = @editor.getLastSelection().isReversed()
     expect(actual).toBe(reversed)
+
+  ensureCharacterwiseHead: (points) ->
+    actual = (swrap(s).getCharacterwiseHeadPosition() for s in @editor.getSelections())
+    expect(actual).toEqual(toArrayOfPoint(points))
 
   ensureScrollTop: (scrollTop) ->
     actual = @editorElement.getScrollTop()

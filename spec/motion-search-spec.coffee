@@ -79,6 +79,9 @@ describe "Motion Search", ->
       it 'searches to the correct column in visual linewise mode', ->
         ensure ['V/', {search: 'ef'}],
           selectedText: "abc\ndef\n",
+          characterwiseHead: [1, 1]
+          mode: ['visual', 'linewise']
+          cursor: [2, 0]
 
       it 'not extend linwise selection if search matches on same line', ->
         # settings.set 'incrementalSearch', true
