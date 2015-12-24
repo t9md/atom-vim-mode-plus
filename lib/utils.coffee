@@ -206,7 +206,7 @@ getLastVisibleScreenRow = (editor) ->
 
 # Cursor motion wrapper
 # -------------------------
-moveCursor = (cursor, preserveGoalColumn=false, fn) ->
+moveCursor = (cursor, {preserveGoalColumn}, fn) ->
   {goalColumn} = cursor
   fn(cursor)
   if preserveGoalColumn and goalColumn
@@ -216,16 +216,28 @@ moveCursor = (cursor, preserveGoalColumn=false, fn) ->
 #   allowWrap: to controll allow wrap
 #   preserveGoalColumn: preserve original goalColumn
 moveCursorLeft = (cursor, options={}) ->
-  {allowWrap, preserveGoalColumn} = options
+  {allowWrap} = options
+  delete options.allowWrap
   if not cursor.isAtBeginningOfLine() or allowWrap
-    moveCursor cursor, preserveGoalColumn, (c) ->
+    moveCursor cursor, options, (c) ->
       c.moveLeft()
 
 moveCursorRight = (cursor, options={}) ->
-  {allowWrap, preserveGoalColumn} = options
+  {allowWrap} = options
+  delete options.allowWrap
   if not cursor.isAtEndOfLine() or allowWrap
-    moveCursor cursor, preserveGoalColumn, (c) ->
+    moveCursor cursor, options, (c) ->
       c.moveRight()
+
+moveCursorUp = (cursor, options={}) ->
+  unless cursor.getScreenRow() is 0
+    moveCursor cursor, options, (c) ->
+      cursor.moveUp()
+
+moveCursorDown = (cursor, options={}) ->
+  unless getVimLastScreenRow(cursor.editor) is cursor.getScreenRow()
+    moveCursor cursor, options, (c) ->
+      cursor.moveDown()
 
 unfoldAtCursorRow = (cursor) ->
   {editor} = cursor
@@ -264,6 +276,8 @@ module.exports = {
   getVimLastScreenRow
   moveCursorLeft
   moveCursorRight
+  moveCursorUp
+  moveCursorDown
   unfoldAtCursorRow
   getEolBufferPositionForRow
   getFirstVisibleScreenRow
