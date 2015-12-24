@@ -8,8 +8,9 @@ packageScope = 'vim-mode-plus'
 getEditorState = null # set in Base.init()
 
 run = (klass, properties={}) ->
-  vimState = getEditorState(atom.workspace.getActiveTextEditor())
-  vimState.operationStack.run(klass, properties)
+  if vimState = getEditorState(atom.workspace.getActiveTextEditor())
+    # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
+    vimState.operationStack.run(klass, properties)
 
 delegatingMethods = [
   "onDidChangeInput"
