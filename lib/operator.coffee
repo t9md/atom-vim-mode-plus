@@ -136,8 +136,9 @@ class Select extends Operator
   execute: ->
     @selectTarget(true)
     return if @isMode('operator-pending') or @isMode('visual', 'blockwise')
-    if submode = swrap.detectVisualModeSubmode(@editor.getSelections())
-      @activateMode('visual', submode) unless @isMode('visual', submode)
+    submode = swrap.detectVisualModeSubmode(@editor)
+    if submode? and not @isMode('visual', submode)
+      @activateMode('visual', submode)
 
 class SelectLatestChange extends Select
   @extend()

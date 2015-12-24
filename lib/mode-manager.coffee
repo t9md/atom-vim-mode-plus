@@ -149,7 +149,7 @@ class ModeManager
     # Update selection area to final submode.
     switch submode
       when 'linewise'
-        swrap.expandOverLine(selections)
+        swrap.expandOverLine(@editor)
       when 'blockwise'
         unless swrap(@editor.getLastSelection()).isLinewise()
           new BlockwiseSelect(@vimState).execute()

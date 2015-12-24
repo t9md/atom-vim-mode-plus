@@ -74,8 +74,7 @@ class BlockwiseMoveDown extends VisualBlockwise
     @countTimes =>
       if @isExpanding()
         @editor["addSelection#{@direction}"]()
-        selections = @editor.getSelections()
-        swrap.setReversedState selections, @getTail().isReversed()
+        swrap.setReversedState @editor, @getTail().isReversed()
       else
         @getHead().destroy()
     @setProperties {head: @getHead(), tail: @getTail()}

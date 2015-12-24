@@ -21,7 +21,7 @@ class ReverseSelections extends Misc
     # FIXME? need to care
     # not all selection reversed state is in-sync?
     # In that case make it sync in operationStack::process.
-    swrap.reverse(@editor.getSelections())
+    swrap.reverse(@editor)
 
 class Undo extends Misc
   @extend()

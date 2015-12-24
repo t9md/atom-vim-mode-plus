@@ -167,25 +167,26 @@ class SelectionWrapper
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
-swrap.setReversedState = (selections, reversed) ->
-  selections.forEach (s) ->
+swrap.setReversedState = (editor, reversed) ->
+  editor.getSelections().forEach (s) ->
     swrap(s).setReversedState(reversed)
 
-swrap.expandOverLine = (selections) ->
-  selections.forEach (s) ->
+swrap.expandOverLine = (editor) ->
+  editor.getSelections().forEach (s) ->
     swrap(s).expandOverLine()
 
-swrap.reverse = (selections) ->
-  selections.forEach (s) ->
+swrap.reverse = (editor) ->
+  editor.getSelections().forEach (s) ->
     swrap(s).reverse()
 
-swrap.detectVisualModeSubmode = (selections) ->
+swrap.detectVisualModeSubmode = (editor) ->
+  selections = editor.getSelections()
   results = (swrap(s).detectVisualModeSubmode() for s in selections)
 
   if results.every((r) -> r is 'linewise')
-    "linewise"
+    'linewise'
   else if results.some((r) -> r is 'characterwise')
-    "characterwise"
+    'characterwise'
   else
     null
 
