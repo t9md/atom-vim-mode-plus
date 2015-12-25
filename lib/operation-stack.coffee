@@ -7,10 +7,6 @@ Base = require './base'
 settings = require './settings'
 {CurrentSelection, Select} = {}
 
-class OperationStackError
-  constructor: (@message) ->
-    @name = 'OperationStack Error'
-
 class OperationStack
   constructor: (@vimState) ->
     {@editor} = @vimState
@@ -49,7 +45,7 @@ class OperationStack
 
   process: ->
     if @stack.length > 2
-      throw new OperationStackError('Must not happen')
+      throw new Error('Operation stack length exceeds 2')
 
     if @stack.length > 1
       try
@@ -81,7 +77,7 @@ class OperationStack
     @vimState.emitter.emit 'did-operation-finish'
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
-        throw new OperationStackError('Selection remains on normal-mode')
+        throw new Error('Selection is not empty in normal-mode')
 
       # Ensure Cursor is NOT at EndOfLine position
       for c in @editor.getCursors() when c.isAtEndOfLine()
