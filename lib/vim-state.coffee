@@ -150,46 +150,51 @@ class VimState
     @hover.reset()
     @operationStack.reset()
 
-  updateCursorStyle: ->
-    selections = @editor.getSelections()
+  getDomNodeForCursor: (cursor) ->
+    cursorsComponent = @editorElement.component.linesComponent.cursorsComponent
+    cursorsComponent.cursorNodesById[cursor.id]
 
-    cursorElements = @editorElement.shadowRoot.querySelectorAll('div.cursor')
-    # [FIXME] Just for spec pass without error. In specmode
-    # Its not proper way of avoiding spec error. but need time.
-    unless ((cursorElements.length is selections.length) and cursorElements.length)
-      return
+  updateStyleForCursor: (cursor) ->
+    domNode = @getDomNodeForCursor(cursor)
+    unless domNode
+      return (new Disposable)
 
-    for [s, {style}] in _.zip(selections, cursorElements)
-      {cursor} = s
-      if @submode is 'linewise'
-        unless s.isReversed()
-          style.setProperty('top', '-1.5em') unless s.isEmpty()
-        if point = swrap(s).getCharacterwiseHeadPosition()
-          style.setProperty('left', "#{point.column}ch")
-      else
-        unless s.isReversed()
-          style.setProperty('left', '-1ch')
+    {selection} = cursor
+    {style} = domNode
+    switch @submode
+      when 'linewise'
+        point = swrap(selection).getCharacterwiseHeadPosition()
+        style.setProperty('left', "#{point.column}ch") if point?
+        style.setProperty('top', '-1.5em') unless selection.isReversed()
+      when 'characterwise', 'blockwise'
+        unless selection.isReversed()
+          if cursor.isAtBeginningOfLine()
+            style.setProperty('top', '-1.5em')
+          else
+            style.setProperty('left', '-1ch')
 
     new Disposable ->
-      for {style} in cursorElements
-        style.removeProperty('top')
-        style.removeProperty('left')
+      style.removeProperty('top')
+      style.removeProperty('left')
 
   cursorStyleDisposer = null
   showCursors: ->
     cursorStyleDisposer?.dispose()
-    cursorStyleDisposer = null
+    cursorStyleDisposer = new CompositeDisposable
     return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))
-    cursors = switch @submode
-      when 'linewise', 'characterwise'
-        cursorStyleDisposer = @updateCursorStyle()
-        @editor.getCursors()
-      when 'blockwise'
-        @editor.getCursors().filter (c) -> swrap(c.selection).isBlockwiseHead()
 
-    toggleClassByCondition(@editorElement, 'reversed', @editor.getLastSelection().isReversed())
-    for c, i in @editor.getCursors()
-      if c in cursors
-        c.setVisible(true) unless c.isVisible()
+    cursors = @editor.getCursors()
+    cursorsToShow = if @submode is 'blockwise'
+      (cursor for cursor in cursors when swrap(cursor.selection).isBlockwiseHead())
+    else
+      cursors
+
+    for cursor in cursors
+      if cursor in cursorsToShow
+        cursor.setVisible(true) unless cursor.isVisible()
       else
-        c.setVisible(false)
+        cursor.setVisible(false) if cursor.isVisible()
+
+    @editorElement.component.updateSync()
+    for cursor in cursorsToShow
+      cursorStyleDisposer.add @updateStyleForCursor(cursor)
