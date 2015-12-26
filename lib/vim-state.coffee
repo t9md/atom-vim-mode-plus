@@ -152,35 +152,23 @@ class VimState
 
   updateCursorStyle: ->
     selections = @editor.getSelections()
+
     cursorElements = @editorElement.shadowRoot.querySelectorAll('div.cursor')
     # [FIXME] Just for spec pass without error. In specmode
     # Its not proper way of avoiding spec error. but need time.
-    return unless ((cursorElements.length is selections.length) and cursorElements.length)
+    unless ((cursorElements.length is selections.length) and cursorElements.length)
+      return
 
     for [s, {style}] in _.zip(selections, cursorElements)
       {cursor} = s
       if @submode is 'linewise'
         unless s.isReversed()
-          {start, end} = s.getBufferRange()
-          unless start.row is end.row is @editor.getLastBufferRow()
-            style.setProperty('top', '-1.5em') unless s.isEmpty()
+          style.setProperty('top', '-1.5em') unless s.isEmpty()
         if point = swrap(s).getCharacterwiseHeadPosition()
           style.setProperty('left', "#{point.column}ch")
       else
         unless s.isReversed()
-          if cursor.isAtBeginningOfLine()
-            # In visual-mode, cursor colum 0 means whole line selected
-            # and in this case, cursor position is at [nextRow, 0]
-            # So I offset one row up by stylesheet.
-            isAtAtomEof = cursor.getBufferPosition().isEqual(@editor.getEofBufferPosition())
-            if isAtAtomEof and s.isEmpty()
-              # hide cursor, I can display cursor but its missleading.
-              # Because when you move cursor, EOB position not included as selection.
-              style.setProperty('left', '-2ch')
-            else
-              style.setProperty('top', '-1.5em')
-          else
-            style.setProperty('left', '-1ch')
+          style.setProperty('left', '-1ch')
 
     new Disposable ->
       for {style} in cursorElements
@@ -199,9 +187,9 @@ class VimState
       when 'blockwise'
         @editor.getCursors().filter (c) -> swrap(c.selection).isBlockwiseHead()
 
+    toggleClassByCondition(@editorElement, 'reversed', @editor.getLastSelection().isReversed())
     for c, i in @editor.getCursors()
       if c in cursors
         c.setVisible(true) unless c.isVisible()
-        toggleClassByCondition(@editorElement, 'reversed', c.selection.isReversed())
       else
         c.setVisible(false)
