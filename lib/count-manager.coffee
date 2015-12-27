@@ -1,6 +1,6 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
-{getKeystrokeForEvent, toggleClassByCondition} = require './utils'
+{toggleClassByCondition} = require './utils'
 
 class CountManager
   count: null
@@ -8,8 +8,7 @@ class CountManager
   constructor: (@vimState) ->
     {@editorElement} = @vimState
 
-  set: (e) ->
-    num = if _.isNumber(e) then e else parseInt(getKeystrokeForEvent(e))
+  set: (num) ->
     @count ?= 0
     @count = (@count * 10) + num
     @vimState.hover.add num

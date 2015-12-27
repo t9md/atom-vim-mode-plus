@@ -50,9 +50,18 @@ module.exports =
       'activate-blockwise-visual-mode': -> @activate('visual', 'blockwise')
       'activate-previous-visual-mode': -> @activate('visual', 'previous')
       'reset-normal-mode': -> @activate('reset')
-      'set-count': (e) -> @count.set(e) # 0-9
       'set-register-name': -> @register.setName() # "
       'replace-mode-backspace': -> @modeManager.replaceModeBackspace()
+      'set-count-0': -> @count.set(0)
+      'set-count-1': -> @count.set(1)
+      'set-count-2': -> @count.set(2)
+      'set-count-3': -> @count.set(3)
+      'set-count-4': -> @count.set(4)
+      'set-count-5': -> @count.set(5)
+      'set-count-6': -> @count.set(6)
+      'set-count-7': -> @count.set(7)
+      'set-count-8': -> @count.set(8)
+      'set-count-9': -> @count.set(9)
 
     getState = =>
       @getEditorState(atom.workspace.getActiveTextEditor())

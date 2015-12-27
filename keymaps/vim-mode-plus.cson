@@ -174,18 +174,18 @@
 
   '%': 'vim-mode-plus:bracket-matching-motion'
 
-  '1': 'vim-mode-plus:set-count'
-  '2': 'vim-mode-plus:set-count'
-  '3': 'vim-mode-plus:set-count'
-  '4': 'vim-mode-plus:set-count'
-  '5': 'vim-mode-plus:set-count'
-  '6': 'vim-mode-plus:set-count'
-  '7': 'vim-mode-plus:set-count'
-  '8': 'vim-mode-plus:set-count'
-  '9': 'vim-mode-plus:set-count'
+  '1': 'vim-mode-plus:set-count-1'
+  '2': 'vim-mode-plus:set-count-2'
+  '3': 'vim-mode-plus:set-count-3'
+  '4': 'vim-mode-plus:set-count-4'
+  '5': 'vim-mode-plus:set-count-5'
+  '6': 'vim-mode-plus:set-count-6'
+  '7': 'vim-mode-plus:set-count-7'
+  '8': 'vim-mode-plus:set-count-8'
+  '9': 'vim-mode-plus:set-count-9'
 
 'atom-text-editor.vim-mode-plus.with-count:not(.insert-mode)':
-  '0': 'vim-mode-plus:set-count'
+  '0': 'vim-mode-plus:set-count-0'
   '%': 'vim-mode-plus:move-to-line-by-percent'
 
 # normal
