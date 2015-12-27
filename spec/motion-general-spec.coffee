@@ -16,13 +16,16 @@ describe "Motion general", ->
     vimState.activate('reset')
 
   describe "simple motions", ->
+    text = null
     beforeEach ->
+      text = new TextData """
+        12345
+        abcd
+        ABCDE\n
+        """
+
       set
-        text: """
-          12345
-          abcd
-          ABCDE
-          """
+        text: text.getRaw()
         cursor: [1, 1]
 
     describe "the h keybinding", ->
@@ -49,23 +52,24 @@ describe "Motion general", ->
       it "moves the cursor to the end of the line, not past it", ->
         set cursor: [0, 4]
         ensure 'j', cursor: [1, 3]
+
       it "remembers the column it was in after moving to shorter line", ->
         set cursor: [0, 4]
         ensure 'j', cursor: [1, 3]
         ensure 'j', cursor: [2, 4]
 
+      it "never go past last newline", ->
+        ensure '10j', cursor: [2, 1]
+
       describe "when visual mode", ->
         beforeEach ->
-          ensure 'v', cursor: [1, 2]
+          ensure 'v', cursor: [1, 2], selectedText: 'b'
 
         it "moves the cursor down", ->
-          ensure 'j', cursor: [2, 2]
+          ensure 'j', cursor: [2, 2], selectedText: "bcd\nAB"
 
         it "doesn't go over after the last line", ->
-          ensure 'j', cursor: [2, 2]
-
-        it "selects the text while moving", ->
-          ensure 'j', selectedText: "bcd\nAB"
+          ensure 'j', cursor: [2, 2], selectedText: "bcd\nAB"
 
         it "keep same column(goalColumn) even after across the empty line", ->
           keystroke 'escape'
@@ -77,9 +81,7 @@ describe "Motion general", ->
               """
             cursor: [0, 3]
           ensure 'v', cursor: [0, 4]
-          ensure 'jj',
-            cursor: [2, 4]
-            selectedText: "defg\n\nabcd"
+          ensure 'jj', cursor: [2, 4], selectedText: "defg\n\nabcd"
 
         # [FIXME] the place of this spec is not appropriate.
         it "original visual line remains when jk across orignal selection", ->
@@ -100,15 +102,21 @@ describe "Motion general", ->
           ensure 'j', selectedText: text.getLines([1, 2])
 
     describe "the k keybinding", ->
+      beforeEach ->
+        set cursor: [2, 1]
+
+      it "moves the cursor up", ->
+        ensure 'k', cursor: [1, 1]
+
+      it "moves the cursor up and remember column it was in", ->
+        set cursor: [2, 4]
+        ensure 'k', cursor: [1, 3]
+        ensure 'k', cursor: [0, 4]
+
       it "moves the cursor up, but not to the beginning of the first line", ->
-        ensure 'k', cursor: [0, 1]
-        ensure 'k', cursor: [0, 1]
+        ensure '10k', cursor: [0, 1]
 
       describe "when visual mode", ->
-        # If selection is initially reversed and not re-reversed, we wont adjust
-        # cursor's side position (left/right) within select() methods,
-        # So maintaining gloalColumn is not our job, it handled by atom's native way.
-        # But I put spec to be correspond to `j` motion.
         it "keep same column(goalColumn) even after across the empty line", ->
           set
             text: """
@@ -117,10 +125,8 @@ describe "Motion general", ->
               abcdefg
               """
             cursor: [2, 3]
-          ensure 'v', cursor: [2, 4]
-          ensure 'kk',
-            cursor: [0, 3]
-            selectedText: "defg\n\nabcd"
+          ensure 'v', cursor: [2, 4], selectedText: 'd'
+          ensure 'kk', cursor: [0, 3], selectedText: "defg\n\nabcd"
 
     describe "jk in softwrap", ->
       [text] = []

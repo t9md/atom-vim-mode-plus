@@ -180,9 +180,7 @@ describe "Operator ActivateInsertMode family", ->
 
     describe "when followed by a w", ->
       it "changes the word", ->
-        set
-          text: "word1 word2 word3"
-          cursorBuffer: [0, "word1 w".length]
+        set text: "word1 word2 word3", cursorBuffer: [0, 7]
         ensure ['cw', 'escape'], text: "word1 w word3"
 
     describe "when followed by a G", ->
