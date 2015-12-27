@@ -70,7 +70,8 @@ class CursorStyleManager
     return unless (@vimState.isMode('visual') and settings.get('showCursorInVisualMode'))
 
     cursors = @editor.getCursors()
-    cursorsToShow = if @vimState.submode is 'blockwise'
+    {submode} = @vimState
+    cursorsToShow = if submode is 'blockwise'
       (cursor for cursor in cursors when swrap(cursor.selection).isBlockwiseHead())
     else
       cursors
@@ -87,7 +88,6 @@ class CursorStyleManager
     # is available by component in sync to model.
     @editorElement.component.updateSync()
 
-    {submode} = @vimState
     for cursor in cursorsToShow
       @subscriptions.add setStyleOffset(cursor, {submode, @editor, @editorElement})
 
