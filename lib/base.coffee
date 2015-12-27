@@ -123,8 +123,8 @@ class Base
   emitDidSelect: ->
     @vimState.emitter.emit 'did-select'
 
-  emitDidSetTarget: ->
-    @vimState.emitter.emit 'did-set-target'
+  emitDidSetTarget: (operator) ->
+    @vimState.emitter.emit 'did-set-target', operator
 
   # Class methods
   # -------------------------

@@ -80,7 +80,7 @@ class Operator extends Base
       message = "Failed to set '#{targetName}' as target for Operator '#{operatorName}'"
       throw new OperatorError(message)
     @target.setAsTarget()
-    @emitDidSetTarget()
+    @emitDidSetTarget(this)
 
   selectTarget: (force=false) ->
     @observeSelectAction()
@@ -817,7 +817,6 @@ class Change extends ActivateInsertMode
   trackChange: true
 
   execute: ->
-    @target.setOptions?(excludeWhitespace: true)
     unless @selectTarget()
       @activateMode('normal')
       return
