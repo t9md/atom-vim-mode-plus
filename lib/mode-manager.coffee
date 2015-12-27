@@ -143,8 +143,7 @@ class ModeManager
     else
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
     # Preserve characterwise range to restore afterward.
-    selections = @editor.getSelections()
-    swrap(s).preserveCharacterwise() for s in selections
+    swrap(s).preserveCharacterwise() for s in @editor.getSelections()
 
     # Update selection area to final submode.
     switch submode
