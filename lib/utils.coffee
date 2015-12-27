@@ -189,6 +189,9 @@ getVimEofBufferPosition = (editor) ->
 pointIsAtVimEndOfFile = (editor, point) ->
   getVimEofBufferPosition(editor).isEqual(point)
 
+cursorIsAtVimEndOfFile = (cursor) ->
+  pointIsAtVimEndOfFile(cursor.editor, cursor.getBufferPosition())
+
 getVimLastBufferRow = (editor) ->
   getVimEofBufferPosition(editor).row
 
@@ -269,6 +272,7 @@ module.exports = {
   mergeIntersectingRanges
   pointIsAtEndOfLine
   pointIsAtVimEndOfFile
+  cursorIsAtVimEndOfFile
   characterAtPoint
   getVimEofBufferPosition
   getVimEofScreenPosition
