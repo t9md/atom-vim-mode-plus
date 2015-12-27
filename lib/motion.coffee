@@ -702,7 +702,7 @@ class SearchBase extends Motion
     input
 
   updateUI: (options) ->
-    @vimState.search.updateOptionSettings(options)
+    @vimState.searchInput.updateOptionSettings(options)
 
 class Search extends SearchBase
   @extend()
@@ -719,7 +719,7 @@ class Search extends SearchBase
     @onDidConfirmSearch @onConfirm
     @onDidCancelSearch @onCancel
     @onDidChangeSearch @onChange
-    @vimState.search.focus({@backwards})
+    @vimState.searchInput.focus({@backwards})
 
   isComplete: ->
     return false unless @confirmed

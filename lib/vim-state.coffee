@@ -17,17 +17,13 @@ SearchHistoryManager = require './search-history-manager'
 
 packageScope = 'vim-mode-plus'
 
-# Mode handling is delegated to modeManager
-delegatingProperties = ['mode', 'submode']
-delegatingMethods = ['isMode', 'activate']
-
 module.exports =
 class VimState
   Delegato.includeInto(this)
   destroyed: false
 
-  @delegatesProperty delegatingProperties..., toProperty: 'modeManager'
-  @delegatesMethods delegatingMethods..., toProperty: 'modeManager'
+  @delegatesProperty 'mode', 'submode', toProperty: 'modeManager'
+  @delegatesMethods 'isMode', 'activate', toProperty: 'modeManager'
 
   constructor: (@editor, @statusBarManager) ->
     @editorElement = atom.views.getView(@editor)
@@ -46,7 +42,7 @@ class VimState
 
     @searchHistory = new SearchHistoryManager(this)
     @input = new Input(this)
-    @search = new SearchInput(this)
+    @searchInput = new SearchInput(this)
     @operationStack = new OperationStack(this)
     @observeSelection()
 
@@ -67,11 +63,11 @@ class VimState
   onDidUnfocusInput: (fn) -> @subscribe @input.onDidUnfocus(fn)
   onDidCommandInput: (fn) -> @subscribe @input.onDidCommand(fn)
 
-  onDidChangeSearch: (fn) -> @subscribe @search.onDidChange(fn)
-  onDidConfirmSearch: (fn) -> @subscribe @search.onDidConfirm(fn)
-  onDidCancelSearch: (fn) -> @subscribe @search.onDidCancel(fn)
-  onDidUnfocusSearch: (fn) -> @subscribe @search.onDidUnfocus(fn)
-  onDidCommandSearch: (fn) -> @subscribe @search.onDidCommand(fn)
+  onDidChangeSearch: (fn) -> @subscribe @searchInput.onDidChange(fn)
+  onDidConfirmSearch: (fn) -> @subscribe @searchInput.onDidConfirm(fn)
+  onDidCancelSearch: (fn) -> @subscribe @searchInput.onDidCancel(fn)
+  onDidUnfocusSearch: (fn) -> @subscribe @searchInput.onDidUnfocus(fn)
+  onDidCommandSearch: (fn) -> @subscribe @searchInput.onDidCommand(fn)
 
   # Select and text mutation(Change)
   onWillSelect: (fn) -> @subscribe @emitter.on('will-select', fn)
@@ -149,6 +145,8 @@ class VimState
     @operationStack.reset()
 
 
+  # Display cursor in visual mode.
+  # ----------------------------------
   getDomNodeForCursor: (cursor) ->
     cursorsComponent = @editorElement.component.linesComponent.cursorsComponent
     cursorsComponent.cursorNodesById[cursor.id]
