@@ -14,9 +14,9 @@ MarkManager = require './mark-manager'
 ModeManager = require './mode-manager'
 RegisterManager = require './register-manager'
 SearchHistoryManager = require './search-history-manager'
+CursorStyleManager = require './cursor-style-manager'
 
 packageScope = 'vim-mode-plus'
-RowHeightInEm = 1.5
 
 module.exports =
 class VimState
@@ -45,6 +45,7 @@ class VimState
     @input = new Input(this)
     @searchInput = new SearchInput(this)
     @operationStack = new OperationStack(this)
+    @cursorStyleManager = new CursorStyleManager(this)
     @observeSelection()
 
     @editorElement.classList.add packageScope
@@ -88,7 +89,7 @@ class VimState
 
     ivars = [
       "hover", "hoverSearchCounter", "operationStack"
-      "searchHistory",
+      "searchHistory", "cursorStyleManager"
       "input", "search", "modeManager",
       "operationRecords"
     ]
@@ -145,75 +146,5 @@ class VimState
     @hover.reset()
     @operationStack.reset()
 
-  # Display cursor in visual mode.
-  # ----------------------------------
-  getDomNodeForCursor: (cursor) ->
-    cursorsComponent = @editorElement.component.linesComponent.cursorsComponent
-    cursorsComponent.cursorNodesById[cursor.id]
-
-  # Return cursor style top, left offset for **sowft-wrapped** line
-  # -------------------------
-  getOffsetForSelection: (selection) ->
-    bufferPoint = swrap(selection).getCharacterwiseHeadPosition()
-    screenPoint = @editor.screenPositionForBufferPosition(bufferPoint)
-    bufferRange = @editor.bufferRangeForBufferRow(bufferPoint.row)
-    screenRows = @editor.screenRangeForBufferRange(bufferRange).getRows()
-    rows = if selection.isReversed()
-      screenRows.indexOf(screenPoint.row)
-    else
-      -(screenRows.reverse().indexOf(screenPoint.row) + 1)
-    {top: rows * RowHeightInEm, left: screenPoint.column}
-
-  modifyStyleForCursor: (cursor) ->
-    domNode = @getDomNodeForCursor(cursor)
-    return (new Disposable) unless domNode
-
-    {selection} = cursor
-    {style} = domNode
-    switch @submode
-      when 'linewise'
-        if @editor.isSoftWrapped()
-          {left, top} = @getOffsetForSelection(selection)
-          style.setProperty('left', "#{left}ch") if left
-          style.setProperty('top', "#{top}em") if top
-        else
-          point = swrap(selection).getCharacterwiseHeadPosition()
-          style.setProperty('left', "#{point.column}ch") if point?
-          style.setProperty('top', "-#{RowHeightInEm}em") unless selection.isReversed()
-      when 'characterwise', 'blockwise'
-        unless selection.isReversed()
-          if cursor.isAtBeginningOfLine()
-            style.setProperty('top', "-#{RowHeightInEm}em")
-          else
-            style.setProperty('left', '-1ch')
-
-    new Disposable ->
-      style.removeProperty('top')
-      style.removeProperty('left')
-
-  cursorStyleDisposer = null
   refreshCursors: ->
-    cursorStyleDisposer?.dispose()
-    cursorStyleDisposer = new CompositeDisposable
-    return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))
-
-    cursors = @editor.getCursors()
-    cursorsToShow = if @submode is 'blockwise'
-      (cursor for cursor in cursors when swrap(cursor.selection).isBlockwiseHead())
-    else
-      cursors
-
-    for cursor in cursors
-      if cursor in cursorsToShow
-        cursor.setVisible(true) unless cursor.isVisible()
-      else
-        cursor.setVisible(false) if cursor.isVisible()
-
-    # [NOTE] In BlockwiseSelect we add selections(and corresponding cursors) in bluk.
-    # But corresponding cursorsComponent(HTML element) is added in sync.
-    # So to modify style of cursorsComponent, we have to make sure corresponding cursorsComponent
-    # is available by component in sync to model.
-    @editorElement.component.updateSync()
-
-    for cursor in cursorsToShow
-      cursorStyleDisposer.add @modifyStyleForCursor(cursor)
+    @cursorStyleManager.refresh()
