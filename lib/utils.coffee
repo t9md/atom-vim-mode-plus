@@ -248,6 +248,21 @@ unfoldAtCursorRow = (cursor) ->
   if editor.isFoldedAtBufferRow(row)
     editor.unfoldBufferRow row
 
+markerOptions = {ivalidate: 'never', persistent: false}
+flashRanges = (ranges, options) ->
+  ranges = [ranges] unless _.isArray(ranges)
+  return unless ranges.length
+
+  {editor} = options
+  markers = (editor.markBufferRange(r, markerOptions) for r in ranges)
+
+  decorationOptions = {type: 'highlight', class: options.class}
+  editor.decorateMarker(m, decorationOptions) for m in markers
+
+  setTimeout  ->
+    m.destroy() for m in markers
+  , options.timeout
+
 module.exports = {
   include
   debug
@@ -286,4 +301,5 @@ module.exports = {
   getEolBufferPositionForRow
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
+  flashRanges
 }

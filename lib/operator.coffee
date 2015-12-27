@@ -6,6 +6,7 @@ _ = require 'underscore-plus'
 {
   haveSomeSelection, getVimEofBufferPosition
   moveCursorLeft, moveCursorRight
+  flashRanges
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -93,14 +94,15 @@ class Operator extends Base
       @haveSomeSelection()
 
   setTextToRegister: (text) ->
-    if @target?.isLinewise?() and not text.endsWith('\n')
+    if @target.isLinewise?() and not text.endsWith('\n')
       text += "\n"
     if text
       @vimState.register.set({text})
 
-  flash: (range) ->
+  flash: (ranges) ->
     if @flashTarget and settings.get('flashOnOperate')
-      @vimState.flasher.flash range,
+      flashRanges ranges,
+        editor: @editor
         class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnOperateDuration')
 
