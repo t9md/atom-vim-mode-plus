@@ -121,7 +121,7 @@ class VimState
       selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) =>
         handleSelectionChange()
         selection.setBufferRange(selection.getBufferRange().union(tailRange))
-        @showCursors()
+        @refreshCursors()
 
     handleMouseUp = ->
       selectionWatcher?.dispose()
@@ -150,14 +150,14 @@ class VimState
     @hover.reset()
     @operationStack.reset()
 
+
   getDomNodeForCursor: (cursor) ->
     cursorsComponent = @editorElement.component.linesComponent.cursorsComponent
     cursorsComponent.cursorNodesById[cursor.id]
 
-  updateStyleForCursor: (cursor) ->
+  modifyStyleForCursor: (cursor) ->
     domNode = @getDomNodeForCursor(cursor)
-    unless domNode
-      return (new Disposable)
+    return (new Disposable) unless domNode
 
     {selection} = cursor
     {style} = domNode
@@ -178,7 +178,7 @@ class VimState
       style.removeProperty('left')
 
   cursorStyleDisposer = null
-  showCursors: ->
+  refreshCursors: ->
     cursorStyleDisposer?.dispose()
     cursorStyleDisposer = new CompositeDisposable
     return unless (@isMode('visual') and settings.get('showCursorInVisualMode'))
@@ -195,6 +195,11 @@ class VimState
       else
         cursor.setVisible(false) if cursor.isVisible()
 
+    # [NOTE] In BlockwiseSelect we add selections(and corresponding cursors) in bluk.
+    # But corresponding cursorsComponent(HTML element) is added in sync.
+    # So to modify style of cursorsComponent, we have to make sure corresponding cursorsComponent
+    # is available by component in sync to model.
     @editorElement.component.updateSync()
+
     for cursor in cursorsToShow
-      cursorStyleDisposer.add @updateStyleForCursor(cursor)
+      cursorStyleDisposer.add @modifyStyleForCursor(cursor)

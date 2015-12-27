@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 
 swrap = require './selection-wrapper'
 {
-  eachSelection, toggleClassByCondition, getNewTextRangeFromCheckpoint
+  toggleClassByCondition, getNewTextRangeFromCheckpoint
   moveCursorLeft
 } = require './utils'
 
@@ -22,7 +22,7 @@ class ModeManager
     @onDidActivateMode ({mode, submode}) =>
       @updateEditorElement()
       @vimState.statusBarManager.update(mode, submode)
-      @vimState.showCursors()
+      @vimState.refreshCursors()
 
   updateEditorElement: ->
     for mode in supportedModes
@@ -114,7 +114,7 @@ class ModeManager
     subs = new CompositeDisposable
     subs.add @editor.onWillInsertText ({text, cancel}) =>
       cancel()
-      @eachSelection (s) =>
+      @editor.getSelections().forEach (s) =>
         for char in text.split('') ? []
           if (char isnt "\n") and (not s.cursor.isAtEndOfLine())
             s.selectRight()
@@ -126,7 +126,7 @@ class ModeManager
     subs
 
   replaceModeBackspace: ->
-    @eachSelection (s) =>
+    @editor.getSelections().forEach (s) =>
       char = @replacedCharsBySelection[s.id]?.pop()
       if char? # char maybe empty char ''.
         s.selectLeft()
@@ -165,7 +165,7 @@ class ModeManager
         @editor.scrollToScreenRange(s.getScreenRange(), {center: true})
         submode
 
-      @eachSelection (s) ->
+      @editor.getSelections().forEach (s) ->
         swrap(s).resetProperties()
         # `c`, `s` from visual-mode make selection empty
         unless (s.isReversed() or s.isEmpty())
@@ -176,7 +176,7 @@ class ModeManager
     return if @submode is 'characterwise'
     switch @submode
       when 'linewise'
-        @eachSelection (s) ->
+        @editor.getSelections().forEach (s) ->
           swrap(s).restoreCharacterwise() unless s.isEmpty()
       when 'blockwise'
         # Many VisualBlockwise commands change mode in the middle of processing()
