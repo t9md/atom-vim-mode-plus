@@ -144,7 +144,6 @@ class VimState
     @hover.reset()
     @operationStack.reset()
 
-
   # Display cursor in visual mode.
   # ----------------------------------
   getDomNodeForCursor: (cursor) ->
