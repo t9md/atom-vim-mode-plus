@@ -501,7 +501,7 @@ class CurrentLine extends TextObject
       {cursor} = selection
       cursor.moveToBeginningOfLine()
       cursor.moveToFirstCharacterOfLine() if @isInner()
-      selection.selectToEndOfLine()
+      selection.selectToEndOfBufferLine()
 
 class ACurrentLine extends CurrentLine
   @extend()
