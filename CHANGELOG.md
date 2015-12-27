@@ -1,3 +1,16 @@
+# 0.12.0
+- Internal: cleanup cursor movement in `Motion::selectInclusive()` #87
+- Internal: remove flashManager class. move flashManager feature to utils.coffee.
+- Internal: spec-helper mini DSL now can check characterwiseHead in `V` scenario. #90
+- FIX: Stacktrace is not displayed for OperationStackError.
+- FIX: When shift from visual-blockwise to other modes, cursor marker get odd. #71
+- Breaking: remove `vim-mode-plus:set-count`, and provide distinct `vim-mode-plus:set-count-1` and alike #63
+- Improve: Accuracy improved for cursor movement in visual-linewise for `*`, `#`, `/`, `?` commands. #91
+- FIX: TextObject CurrentLine should work on bufferRow instead of screenRow #95
+- FIX: goalColumn is not respected in visual-line `j`, `k` on soft-wrapped line #96
+- FIX: visual-linewise cursor marker is incorrect in soft-wrapped line. #97
+- Internal: visual mode's cursor display functions are separated from vimState into cursorStyleManager #97
+
 # 0.11.0
 - FIX: #86 Repeating text-object targeted operation(e.g. `ciw` then `.`) incorrectly activate characterwise visual-mode.
 - FIX: Work around issue #85 issue vim-mode-plus with term2 package.
