@@ -100,10 +100,8 @@ class Motion extends Base
   # -------------------------
   # Calling stop() in callback stop remaining processing.
   countTimes: (fn) ->
-    stopped = false
-    stop = -> stopped = true
     _.times @getCount(), ->
-      fn({stop}) unless stopped
+      fn()
 
   # Debuging purpose
   # -------------------------
@@ -232,14 +230,14 @@ class MoveToNextWord extends Motion
         cursor.moveDown()
         cursor.moveToFirstCharacterOfLine()
       else
-        next = @getNext(cursor)
-        if next.isEqual(cursor.getBufferPosition())
+        point = @getNext(cursor)
+        if point.isEqual(cursor.getBufferPosition())
           cursor.moveToEndOfWord()
         else
-          if next.row is getVimLastBufferRow(@editor) + 1
+          if point.row is getVimLastBufferRow(@editor) + 1
             cursor.moveToEndOfWord()
           else
-            cursor.setBufferPosition(next)
+            cursor.setBufferPosition(point)
 
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
@@ -252,8 +250,7 @@ class MoveToEndOfWord extends Motion
 
   getNext: (cursor) ->
     point = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
-    if point.column > 0
-      point.column--
+    point.column -= 1 if point.column > 0
     point
 
   moveCursor: (cursor) ->
