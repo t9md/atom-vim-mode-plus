@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{selectVisibleBy, sortRanges, getIndex} = require './utils'
+{selectVisibleBy, sortRanges, getIndex, flashRanges} = require './utils'
 settings = require './settings'
 
 class MatchList
@@ -120,7 +120,8 @@ class Match
       @editor.unfoldBufferRow point.row
 
   flash: ({timeout}={}) ->
-    @vimState.flasher.flash @range,
+    flashRanges @range,
+      editor: @editor
       class: 'vim-mode-plus-flash'
       timeout: timeout ? settings.get('flashOnSearchDuration')
 

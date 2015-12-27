@@ -13,6 +13,7 @@ globalState = require './global-state'
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getVimEofBufferPosition, getVimEofScreenPosition
   getVimLastBufferRow, getVimLastScreenRow
+  flashRanges
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -612,7 +613,8 @@ class SearchBase extends Motion
     if @isBackwards() then -count else count - 1
 
   flash: (range, {timeout}={}) ->
-    @vimState.flasher.flash range,
+    flashRanges range,
+      editor: @editor
       class: 'vim-mode-plus-flash'
       timeout: timeout
 

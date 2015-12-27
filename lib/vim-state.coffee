@@ -14,7 +14,6 @@ MarkManager = require './mark-manager'
 ModeManager = require './mode-manager'
 RegisterManager = require './register-manager'
 SearchHistoryManager = require './search-history-manager'
-FlashManager = require './flash-manager'
 
 packageScope = 'vim-mode-plus'
 
@@ -42,7 +41,6 @@ class VimState
     @count = new CountManager(this)
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
-    @flasher = new FlashManager(this)
     @hover = new Hover(this)
     @hoverSearchCounter = new Hover(this)
 
@@ -93,7 +91,7 @@ class VimState
 
     ivars = [
       "hover", "hoverSearchCounter", "operationStack"
-      "flasher", "searchHistory",
+      "searchHistory",
       "input", "search", "modeManager",
       "operationRecords"
     ]
