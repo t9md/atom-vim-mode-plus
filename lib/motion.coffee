@@ -9,7 +9,7 @@ globalState = require './global-state'
   moveCursorUp, moveCursorDown
   unfoldAtCursorRow
   pointIsAtEndOfLine,
-  pointIsAtVimEndOfFile
+  cursorIsAtVimEndOfFile
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getVimEofBufferPosition, getVimEofScreenPosition
   getVimLastBufferRow, getVimLastScreenRow
@@ -105,9 +105,6 @@ class Motion extends Base
     _.times @getCount(), ->
       fn({stop}) unless stopped
 
-  cursorIsAtVimEndOfFile: (cursor) ->
-    pointIsAtVimEndOfFile(@editor, cursor.getBufferPosition())
-
   # Debuging purpose
   # -------------------------
   # [TODO] remove after dev finished
@@ -170,7 +167,7 @@ class MoveRight extends Motion
       unfoldAtCursorRow(cursor)
       allowWrap = @canWrapToNextLine(cursor)
       moveCursorRight(cursor)
-      if cursor.isAtEndOfLine() and allowWrap and not @cursorIsAtVimEndOfFile(cursor)
+      if cursor.isAtEndOfLine() and allowWrap and not cursorIsAtVimEndOfFile(cursor)
         moveCursorRight(cursor, {allowWrap})
 
 class MoveUp extends Motion
@@ -229,9 +226,9 @@ class MoveToNextWord extends Motion
       cursor.getBeginningOfNextWordBufferPosition(wordRegex: @wordRegex)
 
   moveCursor: (cursor) ->
-    return if @cursorIsAtVimEndOfFile(cursor)
+    return if cursorIsAtVimEndOfFile(cursor)
     @countTimes =>
-      if cursor.isAtEndOfLine() and not @cursorIsAtVimEndOfFile(cursor)
+      if cursor.isAtEndOfLine() and not cursorIsAtVimEndOfFile(cursor)
         cursor.moveDown()
         cursor.moveToFirstCharacterOfLine()
       else
@@ -264,7 +261,7 @@ class MoveToEndOfWord extends Motion
       point = @getNext(cursor)
       if point.isEqual(cursor.getBufferPosition())
         cursor.moveRight()
-        if cursor.isAtEndOfLine() and not @cursorIsAtVimEndOfFile(cursor)
+        if cursor.isAtEndOfLine() and not cursorIsAtVimEndOfFile(cursor)
           cursor.moveDown()
           cursor.moveToBeginningOfLine()
         point = Point.min(getVimEofBufferPosition(@editor), @getNext(cursor))
