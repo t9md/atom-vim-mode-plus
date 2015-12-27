@@ -25,6 +25,8 @@ getOffsetForSelection = (selection) ->
 
 setStyleOffset = (cursor, {submode, editor, editorElement}) ->
   domNode = getDomNode(editorElement, cursor)
+
+  # This guard is for test spec, not all spec have dom attached.
   return (new Disposable) unless domNode
 
   {selection} = cursor
