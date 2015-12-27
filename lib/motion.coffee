@@ -607,6 +607,9 @@ class SearchBase extends Motion
   isBackwards: ->
     @backwards
 
+  getInput: ->
+    @input
+
   # Not sure if I should support count but keep this for compatibility to official vim-mode.
   getCount: ->
     count = super
@@ -637,7 +640,7 @@ class SearchBase extends Motion
         @visit(current, null)
 
     if @isComplete()
-      @vimState.searchHistory.save(@input)
+      @vimState.searchHistory.save(@getInput())
       @finish()
 
   # If cursor is passed, it move actual move, otherwise
@@ -659,17 +662,26 @@ class SearchBase extends Motion
 
   scan: (cursor) ->
     ranges = []
-    return ranges if @input is ''
 
-    @editor.scan @getPattern(@input), ({range}) ->
+    # FIXME: ORDER MATTER
+    # In SearchCurrentWord, @getInput move cursor, which is necessary movement.
+    # So we need to call @getInput() BEFORE settin fromPoint
+    input = @getInput()
+    return ranges if input is ''
+
+    fromPoint = if @isMode('visual', 'linewise') and @isIncrementalSearch()
+      swrap(cursor.selection).getCharacterwiseHeadPosition()
+    else
+      cursor.getBufferPosition()
+
+    @editor.scan @getPattern(input), ({range}) ->
       ranges.push range
 
-    point = cursor.getBufferPosition()
     [pre, post] = _.partition ranges, ({start}) =>
       if @isBackwards()
-        start.isLessThan(point)
+        start.isLessThan(fromPoint)
       else
-        start.isLessThanOrEqual(point)
+        start.isLessThanOrEqual(fromPoint)
 
     post.concat(pre)
 
@@ -784,14 +796,15 @@ class SearchCurrentWord extends SearchBase
   @extend()
   wordRegex: null
 
-  initialize: ->
-    super
+  getInput: ->
+    return @input if @input?
+
     # FIXME: This must depend on the current language
     defaultIsKeyword = "[@a-zA-Z0-9_\-]+"
-    userIsKeyword = atom.config.get('vim-mode.iskeyword')
+    userIsKeyword = settings.get('iskeyword')
     @wordRegex = new RegExp(userIsKeyword or defaultIsKeyword)
-    unless @input = @getCurrentWord()
-      @abort()
+    # @getCurrentWord() have side effect(moving cursor), so don't call twice.
+    @input = @getCurrentWord()
 
   getPattern: (text) ->
     pattern = _.escapeRegExp(text)
