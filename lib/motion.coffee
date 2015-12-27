@@ -179,10 +179,15 @@ class MoveUp extends Motion
 
   moveCursor: (cursor) ->
     isBufferRowWise = @editor.isSoftWrapped() and @isMode('visual', 'linewise')
+    vimLastBufferRow = null
     @countTimes =>
       if isBufferRowWise
-        point = cursor.getBufferPosition().translate([@amount, 0])
-        cursor.setBufferPosition(point)
+        vimLastBufferRow ?= getVimLastBufferRow(@editor)
+        row = cursor.getBufferRow() + @amount
+        if row <= vimLastBufferRow
+          column = cursor.goalColumn or cursor.getBufferColumn()
+          cursor.setBufferPosition([row, column])
+          cursor.goalColumn = column
       else
         @move(cursor)
 
