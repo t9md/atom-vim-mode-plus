@@ -16,6 +16,7 @@ RegisterManager = require './register-manager'
 SearchHistoryManager = require './search-history-manager'
 
 packageScope = 'vim-mode-plus'
+RowHeightInEm = 1.5
 
 module.exports =
 class VimState
@@ -150,6 +151,19 @@ class VimState
     cursorsComponent = @editorElement.component.linesComponent.cursorsComponent
     cursorsComponent.cursorNodesById[cursor.id]
 
+  # Return cursor style top, left offset for **sowft-wrapped** line
+  # -------------------------
+  getOffsetForSelection: (selection) ->
+    bufferPoint = swrap(selection).getCharacterwiseHeadPosition()
+    screenPoint = @editor.screenPositionForBufferPosition(bufferPoint)
+    bufferRange = @editor.bufferRangeForBufferRow(bufferPoint.row)
+    screenRows = @editor.screenRangeForBufferRange(bufferRange).getRows()
+    rows = if selection.isReversed()
+      screenRows.indexOf(screenPoint.row)
+    else
+      -(screenRows.reverse().indexOf(screenPoint.row) + 1)
+    {top: rows * RowHeightInEm, left: screenPoint.column}
+
   modifyStyleForCursor: (cursor) ->
     domNode = @getDomNodeForCursor(cursor)
     return (new Disposable) unless domNode
@@ -158,13 +172,18 @@ class VimState
     {style} = domNode
     switch @submode
       when 'linewise'
-        point = swrap(selection).getCharacterwiseHeadPosition()
-        style.setProperty('left', "#{point.column}ch") if point?
-        style.setProperty('top', '-1.5em') unless selection.isReversed()
+        if @editor.isSoftWrapped()
+          {left, top} = @getOffsetForSelection(selection)
+          style.setProperty('left', "#{left}ch") if left
+          style.setProperty('top', "#{top}em") if top
+        else
+          point = swrap(selection).getCharacterwiseHeadPosition()
+          style.setProperty('left', "#{point.column}ch") if point?
+          style.setProperty('top', "-#{RowHeightInEm}em") unless selection.isReversed()
       when 'characterwise', 'blockwise'
         unless selection.isReversed()
           if cursor.isAtBeginningOfLine()
-            style.setProperty('top', '-1.5em')
+            style.setProperty('top', "-#{RowHeightInEm}em")
           else
             style.setProperty('left', '-1ch')
 
