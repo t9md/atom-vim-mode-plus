@@ -334,7 +334,7 @@ class VimEditor
             for c in chars
               @vimState.input.view.editor.insertText(c)
           when k.search?
-            {editor, editorElement} = @vimState.search.view
+            {editor, editorElement} = @vimState.searchInput.view
             editor.insertText(k.search)
             atom.commands.dispatch(editorElement, 'core:confirm')
           when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
