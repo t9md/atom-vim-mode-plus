@@ -361,7 +361,8 @@ class Paragraph extends TextObject
       swrap(selection).setBufferRangeSafely @getRange(startRow)
     else
       point = if selection.isReversed()
-        @getRange(startRow - 1)?.start
+        startRow = Math.max(0, startRow - 1)
+        @getRange(startRow)?.start
       else
         @getRange(endRow + 1)?.end
       selection.selectToBufferPosition point if point?
