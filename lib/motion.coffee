@@ -30,8 +30,6 @@ class Motion extends Base
     super
     @initialize?()
 
-  setOptions: (@options) ->
-
   isLinewise: ->
     if @isMode('visual')
       @isMode('visual', 'linewise')
@@ -217,10 +215,15 @@ class MoveToPreviousWholeWord extends Motion
 
 class MoveToNextWord extends Motion
   @extend()
+  excludeWhitespace: false
   wordRegex: null
 
+  initialize: ->
+    @onDidSetTarget (operator) =>
+      @excludeWhitespace = operator.constructor.name is 'Change'
+
   getNext: (cursor) ->
-    if @options?.excludeWhitespace
+    if @excludeWhitespace
       cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
     else
       cursor.getBeginningOfNextWordBufferPosition(wordRegex: @wordRegex)
