@@ -51,7 +51,6 @@ module.exports =
       'activate-previous-visual-mode': -> @activate('visual', 'previous')
       'reset-normal-mode': -> @activate('reset')
       'set-register-name': -> @register.setName() # "
-      'replace-mode-backspace': -> @modeManager.replaceModeBackspace()
       'set-count-0': -> @count.set(0)
       'set-count-1': -> @count.set(1)
       'set-count-2': -> @count.set(2)

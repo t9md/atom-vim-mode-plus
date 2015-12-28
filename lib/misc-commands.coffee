@@ -114,3 +114,14 @@ class ToggleFold extends Misc
   execute: ->
     row = @editor.getCursorBufferPosition().row
     @editor.toggleFoldAtBufferRow row
+
+class ReplaceModeBackspace extends Misc
+  @extend()
+  execute: ->
+    @editor.getSelections().forEach (selection) =>
+      # char might be empty.
+      char = @vimState.modeManager.getReplacedCharForSelection(selection)
+      if char?
+        selection.selectLeft()
+        unless selection.insertText(char).isEmpty()
+          selection.cursor.moveLeft()
