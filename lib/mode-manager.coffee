@@ -4,10 +4,7 @@ _ = require 'underscore-plus'
 {BlockwiseSelect} = require './visual-blockwise'
 
 swrap = require './selection-wrapper'
-{
-  toggleClassByCondition, getNewTextRangeFromCheckpoint
-  moveCursorLeft
-} = require './utils'
+{toggleClassByCondition, getNewTextRangeFromCheckpoint, moveCursorLeft} = require './utils'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
