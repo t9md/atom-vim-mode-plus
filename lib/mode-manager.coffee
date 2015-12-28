@@ -125,13 +125,8 @@ class ModeManager
       @replacedCharsBySelection = null
     subs
 
-  replaceModeBackspace: ->
-    @editor.getSelections().forEach (s) =>
-      char = @replacedCharsBySelection[s.id]?.pop()
-      if char? # char maybe empty char ''.
-        s.selectLeft()
-        range = s.insertText(char)
-        s.cursor.moveLeft() unless range.isEmpty()
+  getReplacedCharForSelection: (selection) ->
+    @replacedCharsBySelection[selection.id]?.pop()
 
   # Visual
   # -------------------------
