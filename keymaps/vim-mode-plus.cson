@@ -47,6 +47,9 @@
   'j':         'vim-mode-plus:move-down'
   'down':      'vim-mode-plus:move-down'
 
+  # 'g k': 'vim-mode-plus:move-up-to-non-blank'
+  # 'g j': 'vim-mode-plus:move-down-to-non-blank'
+
   'w':     'vim-mode-plus:move-to-next-word'
   'W':     'vim-mode-plus:move-to-next-whole-word'
   'e':     'vim-mode-plus:move-to-end-of-word'

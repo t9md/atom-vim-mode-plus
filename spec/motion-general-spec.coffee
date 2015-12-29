@@ -200,6 +200,65 @@ describe "Motion general", ->
           set text: "\n\n\n", cursor: [1, 0]
           ensure 'l', cursor: [1, 0]
 
+    describe "move-(up/down)-to-non-blank", ->
+      text = null
+      beforeEach ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'g k': 'vim-mode-plus:move-up-to-non-blank'
+            'g j': 'vim-mode-plus:move-down-to-non-blank'
+
+        text = new TextData """
+          0:        01234567890123456789
+          1: 345678901234567890123456789
+          2:                  0123456789
+          3:                  0123456789
+          4: 34567890         0123456789
+          5:                  0123456789
+          6: 34567890         0123456789
+          7:                  0123456789\n
+          """
+        set text: text.getRaw()
+
+      describe "move-up-to-non-blank", ->
+        beforeEach ->
+          set cursor: [6, 3]
+        it "moves up to first instance of non-blank-char with same column", ->
+          ensure 'gk', cursor: [4, 3]
+          ensure 'gk', cursor: [1, 3]
+        it "support count", ->
+          ensure '2gk', cursor: [1, 3]
+        it "won't move up if upper row is all blank", ->
+          ensure '10gk', cursor: [1, 3]
+        it "operate on linewise when composed with operator", ->
+          ensure 'dgk', text: text.getLines([0, 1, 2, 3, 7])
+        it "motion is not different from `k` when all upper row is non-blank", ->
+          set cursor: [6, 20]
+          ensure 'gk', cursor: [5, 20]
+          ensure 'gk', cursor: [4, 20]
+          ensure 'gk', cursor: [3, 20]
+          ensure 'gk', cursor: [2, 20]
+          ensure 'gk', cursor: [1, 20]
+
+      describe "move-down-to-non-blank", ->
+        beforeEach ->
+          set cursor: [1, 3]
+        it "moves down to first instance of non-blank-char with same column", ->
+          ensure 'gj', cursor: [4, 3]
+          ensure 'gj', cursor: [6, 3]
+        it "support count", ->
+          ensure '2gj', cursor: [6, 3]
+        it "won't move down if lower row is all blank", ->
+          ensure '10gj', cursor: [6, 3]
+        it "operate on linewise when composed with operator", ->
+          ensure 'dgj', text: text.getLines([0, 5, 6, 7])
+        it "motion is not different from `j` when all lower[] row is non-blank", ->
+          set cursor: [0, 20]
+          ensure 'gj', cursor: [1, 20]
+          ensure 'gj', cursor: [2, 20]
+          ensure 'gj', cursor: [3, 20]
+          ensure 'gj', cursor: [4, 20]
+
   describe "the w keybinding", ->
     beforeEach ->
       set
