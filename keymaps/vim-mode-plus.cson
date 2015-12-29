@@ -187,6 +187,11 @@
   '8': 'vim-mode-plus:set-count-8'
   '9': 'vim-mode-plus:set-count-9'
 
+  # '[ [': 'vim-mode-plus:move-to-previous-fold-start'
+  # '] [': 'vim-mode-plus:move-to-next-fold-start'
+  # '[ ]': 'vim-mode-plus:move-to-previous-fold-end'
+  # '] ]': 'vim-mode-plus:move-to-next-fold-end'
+
 'atom-text-editor.vim-mode-plus.with-count:not(.insert-mode)':
   '0': 'vim-mode-plus:set-count-0'
   '%': 'vim-mode-plus:move-to-line-by-percent'

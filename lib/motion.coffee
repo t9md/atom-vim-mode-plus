@@ -899,7 +899,7 @@ class MoveToPreviousFoldStart extends Motion
     vimLastBufferRow = getVimLastBufferRow(@editor)
     {languageMode} = @editor
     for row in [0..vimLastBufferRow]
-      [startRow, endRow] = languageMode.rowRangeForCodeFoldAtBufferRow(row) ? []
+      [startRow, endRow] = languageMode.rowRangeForFoldAtBufferRow(row) ? []
       continue unless startRow?
       result.push {start: startRow, end: endRow}
     result
@@ -916,7 +916,7 @@ class MoveToPreviousFoldStart extends Motion
 
   moveCursor: (cursor) ->
     @countTimes =>
-      if row = @detectRow(cursor, @direction)
+      if (row = @detectRow(cursor, @direction))?
         moveCursorToFirstCharacterForRow(cursor, row)
 
 class MoveToNextFoldStart extends MoveToPreviousFoldStart

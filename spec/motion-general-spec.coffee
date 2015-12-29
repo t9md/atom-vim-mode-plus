@@ -994,3 +994,67 @@ describe "Motion general", ->
 
     it "selects up a line", ->
       ensure 'Vk', selectedText: text.getLines([0..1])
+
+  describe 'MoveTo(Previous|Next)Fold(Start|End)', ->
+    beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-coffee-script')
+      getVimState 'sample.coffee', (state, vim) ->
+        {editor, editorElement} = state
+        {set, ensure, keystroke} = vim
+
+      runs ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            '[ [': 'vim-mode-plus:move-to-previous-fold-start'
+            '] [': 'vim-mode-plus:move-to-next-fold-start'
+            '[ ]': 'vim-mode-plus:move-to-previous-fold-end'
+            '] ]': 'vim-mode-plus:move-to-next-fold-end'
+
+    afterEach ->
+      atom.packages.deactivatePackage('language-coffee-script')
+
+    describe "MoveToPreviousFoldStart", ->
+      beforeEach ->
+        set cursor: [30, 0]
+      it "move to first char of previous fold start row", ->
+        ensure '[[', cursor: [22, 6]
+        ensure '[[', cursor: [20, 6]
+        ensure '[[', cursor: [18, 4]
+        ensure '[[', cursor: [9, 2]
+        ensure '[[', cursor: [8, 0]
+        ensure '[[', cursor: [6, 0]
+        ensure '[[', cursor: [0, 0]
+
+    describe "MoveToNextFoldStart", ->
+      beforeEach ->
+        set cursor: [0, 0]
+      it "move to first char of next fold start row", ->
+        ensure '][', cursor: [6, 0]
+        ensure '][', cursor: [8, 0]
+        ensure '][', cursor: [9, 2]
+        ensure '][', cursor: [18, 4]
+        ensure '][', cursor: [20, 6]
+        ensure '][', cursor: [22, 6]
+
+    describe "MoveToPrevisFoldEnd", ->
+      beforeEach ->
+        set cursor: [30, 0]
+      it "move to first char of previous fold end row", ->
+        ensure '[]', cursor: [28, 2]
+        ensure '[]', cursor: [25, 4]
+        ensure '[]', cursor: [23, 8]
+        ensure '[]', cursor: [21, 8]
+        ensure '[]', cursor: [7, 0]
+        ensure '[]', cursor: [2, 0]
+
+    describe "MoveToNextFoldEnd", ->
+      beforeEach ->
+        set cursor: [0, 0]
+      it "move to first char of next fold end row", ->
+        ensure ']]', cursor: [2, 0]
+        ensure ']]', cursor: [7, 0]
+        ensure ']]', cursor: [21, 8]
+        ensure ']]', cursor: [23, 8]
+        ensure ']]', cursor: [25, 4]
+        ensure ']]', cursor: [28, 2]
