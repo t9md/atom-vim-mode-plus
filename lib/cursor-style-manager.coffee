@@ -9,14 +9,15 @@ getDomNode = (editorElement, cursor) ->
   cursorsComponent = editorElement.component.linesComponent.cursorsComponent
   cursorsComponent.cursorNodesById[cursor.id]
 
-# Return cursor style top, left offset for **sowft-wrapped** line
-# -------------------------
+# Return cursor style offset(top, left)
+# ---------------------------------------
 getOffset = (submode, selection) ->
   {top, left} = {}
+  {cursor} = selection
   switch submode
     when 'characterwise', 'blockwise'
       unless selection.isReversed()
-        if selection.cursor.isAtBeginningOfLine()
+        if cursor.isAtBeginningOfLine()
           top = -RowHeightInEm
         else
           left = -1
@@ -34,8 +35,20 @@ getOffset = (submode, selection) ->
         top = rows * RowHeightInEm
         left = screenPoint.column
       else
-        top = -RowHeightInEm unless selection.isReversed()
-        left = bufferPoint.column
+        # In linwise selection, cursor isAtBeginningOfLine of next row of selected row.
+        # But there is one exception.
+        # When very last line is not end with newline("\n").
+        # select linewise by `V` put cursor at last char(=end of line).
+        # In this case, we minus(-) cursor's column to reset offset to column 0.
+        # But when `V` selection.isReversed() cursor is at column 0, so we don't have to reset offset.
+        left = 0
+        unless selection.isReversed()
+          if cursor.isAtBeginningOfLine()
+            top = -RowHeightInEm
+          else
+            # This is very special case when very last line is not end with newline("\n")
+            left -= cursor.getBufferColumn()
+        left += bufferPoint.column
   {top, left}
 
 setStyleOffset = (cursor, {submode, editor, editorElement}) ->
@@ -51,7 +64,6 @@ setStyleOffset = (cursor, {submode, editor, editorElement}) ->
   new Disposable ->
     style.removeProperty('top')
     style.removeProperty('left')
-
 
 # Display cursor in visual mode.
 # ----------------------------------
