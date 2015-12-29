@@ -15,6 +15,7 @@ globalState = require './global-state'
   getVimLastBufferRow, getVimLastScreenRow
   getValidVimRow
   flashRanges
+  moveCursorToFirstCharacterForRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -881,6 +882,54 @@ class RepeatSearchReverse extends RepeatSearch
   @extend()
   isBackwards: ->
     not @backwards
+
+class MoveToPreviousFoldStart extends Motion
+  @extend()
+  linewise: true
+  which: 'start'
+  direction: 'prev'
+
+  initialize: ->
+    rows = _.pluck(@getFoldRowRangeForRows(), @which)
+    @rows =  _.sortBy(_.uniq(rows), (r) -> r)
+    @rows.reverse() if @direction is 'prev'
+
+  getFoldRowRangeForRows: ->
+    result = []
+    vimLastBufferRow = getVimLastBufferRow(@editor)
+    {languageMode} = @editor
+    for row in [0..vimLastBufferRow]
+      [startRow, endRow] = languageMode.rowRangeForCodeFoldAtBufferRow(row) ? []
+      continue unless startRow?
+      result.push {start: startRow, end: endRow}
+    result
+
+  detectRow: (cursor, direction) ->
+    cursorRow = cursor.getBufferRow()
+    stopper = switch direction
+      when 'prev' then (row) -> row < cursorRow
+      when 'next' then (row) -> row > cursorRow
+
+    for row in @rows when stopper(row)
+      return row
+    null
+
+  moveCursor: (cursor) ->
+    @countTimes =>
+      if row = @detectRow(cursor, @direction)
+        moveCursorToFirstCharacterForRow(cursor, row)
+
+class MoveToNextFoldStart extends MoveToPreviousFoldStart
+  @extend()
+  direction: 'next'
+
+class MoveToPreviousFoldEnd extends MoveToPreviousFoldStart
+  @extend()
+  which: 'end'
+
+class MoveToNextFoldEnd extends MoveToPreviousFoldEnd
+  @extend()
+  direction: 'next'
 
 # keymap: %
 OpenBrackets = ['(', '{', '[']
