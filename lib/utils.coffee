@@ -263,6 +263,14 @@ flashRanges = (ranges, options) ->
     m.destroy() for m in markers
   , options.timeout
 
+# Return valid row from 0 to vimLastBufferRow
+getValidVimRow = (editor, row) ->
+  vimLastBufferRow = getVimLastBufferRow(editor)
+  switch
+    when (row < 0) then 0
+    when (row > vimLastBufferRow) then vimLastBufferRow
+    else row
+
 module.exports = {
   include
   debug
@@ -302,4 +310,5 @@ module.exports = {
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
   flashRanges
+  getValidVimRow
 }

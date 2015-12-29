@@ -13,6 +13,7 @@ globalState = require './global-state'
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getVimEofBufferPosition, getVimEofScreenPosition
   getVimLastBufferRow, getVimLastScreenRow
+  getValidVimRow
   flashRanges
 } = require './utils'
 
@@ -198,6 +199,36 @@ class MoveDown extends MoveUp
 
   move: (cursor) ->
     moveCursorDown(cursor)
+
+class MoveUpToNonBlank extends Motion
+  @extend()
+  linewise: true
+
+  getNewRow: (rows, column) ->
+    for row in rows
+      (char = @editor.lineTextForBufferRow(row)[column])
+      if char? and /\S/.test(char)
+        return row
+    null
+
+  getScanRows: (cursor) ->
+    startRow = getValidVimRow(@editor, cursor.getBufferRow() - 1)
+    endRow = 0
+    [startRow..endRow]
+
+  moveCursor: (cursor) ->
+    column = cursor.getBufferColumn()
+    @countTimes =>
+      scanRows = @getScanRows(cursor)
+      if newRow = @getNewRow(scanRows, column)
+        cursor.setBufferPosition([newRow, column])
+
+class MoveDownToNonBlank extends MoveUpToNonBlank
+  @extend()
+  getScanRows: (cursor) ->
+    startRow = getValidVimRow(@editor, cursor.getBufferRow() + 1)
+    endRow = getVimLastBufferRow(@editor)
+    [startRow..endRow]
 
 class MoveToPreviousWord extends Motion
   @extend()
