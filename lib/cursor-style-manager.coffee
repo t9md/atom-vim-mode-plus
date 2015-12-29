@@ -11,42 +11,42 @@ getDomNode = (editorElement, cursor) ->
 
 # Return cursor style top, left offset for **sowft-wrapped** line
 # -------------------------
-getOffsetForSelection = (selection) ->
-  {editor} = selection
-  bufferPoint = swrap(selection).getCharacterwiseHeadPosition()
-  screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
-  bufferRange = editor.bufferRangeForBufferRow(bufferPoint.row)
-  screenRows = editor.screenRangeForBufferRange(bufferRange).getRows()
-  rows = if selection.isReversed()
-    screenRows.indexOf(screenPoint.row)
-  else
-    -(screenRows.reverse().indexOf(screenPoint.row) + 1)
-  {top: rows * RowHeightInEm, left: screenPoint.column}
+getOffset = (submode, selection) ->
+  {top, left} = {}
+  switch submode
+    when 'characterwise', 'blockwise'
+      unless selection.isReversed()
+        if selection.cursor.isAtBeginningOfLine()
+          top = -RowHeightInEm
+        else
+          left = -1
+    when 'linewise'
+      {editor} = selection
+      bufferPoint = swrap(selection).getCharacterwiseHeadPosition()
+      if editor.isSoftWrapped()
+        screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
+        bufferRange = editor.bufferRangeForBufferRow(bufferPoint.row)
+        screenRows = editor.screenRangeForBufferRange(bufferRange).getRows()
+        rows = if selection.isReversed()
+          screenRows.indexOf(screenPoint.row)
+        else
+          -(screenRows.reverse().indexOf(screenPoint.row) + 1)
+        top = rows * RowHeightInEm
+        left = screenPoint.column
+      else
+        top = -RowHeightInEm unless selection.isReversed()
+        left = bufferPoint.column
+  {top, left}
 
 setStyleOffset = (cursor, {submode, editor, editorElement}) ->
   domNode = getDomNode(editorElement, cursor)
-
   # This guard is for test spec, not all spec have dom attached.
   return (new Disposable) unless domNode
 
-  {selection} = cursor
   {style} = domNode
-  switch submode
-    when 'linewise'
-      if editor.isSoftWrapped()
-        {left, top} = getOffsetForSelection(selection)
-        style.setProperty('left', "#{left}ch") if left
-        style.setProperty('top', "#{top}em") if top
-      else
-        {column} = swrap(selection).getCharacterwiseHeadPosition()
-        style.setProperty('left', "#{column}ch")
-        style.setProperty('top', "-#{RowHeightInEm}em") unless selection.isReversed()
-    when 'characterwise', 'blockwise'
-      unless selection.isReversed()
-        if cursor.isAtBeginningOfLine()
-          style.setProperty('top', "-#{RowHeightInEm}em")
-        else
-          style.setProperty('left', '-1ch')
+  {left, top} = getOffset(submode, cursor.selection)
+  style.setProperty('top', "#{top}em") if top?
+  style.setProperty('left', "#{left}ch") if left?
 
   new Disposable ->
     style.removeProperty('top')
