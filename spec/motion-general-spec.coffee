@@ -223,16 +223,16 @@ describe "Motion general", ->
       describe "move-up-to-non-blank", ->
         beforeEach ->
           set cursor: [6, 3]
-        it "moves up to first instance of non-blank-char with same column", ->
+        it "move up to first instance of non-blank-char of same column", ->
           ensure 'gk', cursor: [4, 3]
           ensure 'gk', cursor: [1, 3]
         it "support count", ->
           ensure '2gk', cursor: [1, 3]
-        it "won't move up if upper row is all blank", ->
+        it "won't move up if all upper row is blank", ->
           ensure '10gk', cursor: [1, 3]
         it "operate on linewise when composed with operator", ->
           ensure 'dgk', text: text.getLines([0, 1, 2, 3, 7])
-        it "motion is not different from `k` when all upper row is non-blank", ->
+        it "motion is not different from `k` when upper row is non-blank", ->
           set cursor: [6, 20]
           ensure 'gk', cursor: [5, 20]
           ensure 'gk', cursor: [4, 20]
@@ -243,16 +243,16 @@ describe "Motion general", ->
       describe "move-down-to-non-blank", ->
         beforeEach ->
           set cursor: [1, 3]
-        it "moves down to first instance of non-blank-char with same column", ->
+        it "move down to first instance of non-blank-char of same column", ->
           ensure 'gj', cursor: [4, 3]
           ensure 'gj', cursor: [6, 3]
         it "support count", ->
           ensure '2gj', cursor: [6, 3]
-        it "won't move down if lower row is all blank", ->
+        it "won't move down if all lower row is blank", ->
           ensure '10gj', cursor: [6, 3]
         it "operate on linewise when composed with operator", ->
           ensure 'dgj', text: text.getLines([0, 5, 6, 7])
-        it "motion is not different from `j` when all lower[] row is non-blank", ->
+        it "motion is not different from `j` when lower row is non-blank", ->
           set cursor: [0, 20]
           ensure 'gj', cursor: [1, 20]
           ensure 'gj', cursor: [2, 20]
