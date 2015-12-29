@@ -1,7 +1,7 @@
 # Refactoring status: 95%
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
-{BlockwiseSelect} = require './visual-blockwise'
+{BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 
 swrap = require './selection-wrapper'
 {toggleClassByCondition, getNewTextRangeFromCheckpoint, moveCursorLeft} = require './utils'
@@ -26,9 +26,6 @@ class ModeManager
       toggleClassByCondition(@editorElement, "#{mode}-mode", mode is @mode)
     for submode in supportedSubModes
       toggleClassByCondition(@editorElement, submode, submode is @submode)
-
-  eachSelection: (fn) ->
-    eachSelection(@editor, fn)
 
   isMode: (mode, submodes) ->
     if submodes?
@@ -160,7 +157,7 @@ class ModeManager
       @editor.getSelections().forEach (s) ->
         swrap(s).resetProperties()
         # `c`, `s` from visual-mode make selection empty
-        unless (s.isReversed() or s.isEmpty())
+        if (not s.isReversed() and not s.isEmpty())
           s.selectLeft()
         s.clear(autoscroll: false)
 
@@ -174,6 +171,6 @@ class ModeManager
         # Many VisualBlockwise commands change mode in the middle of processing()
         # in this case, we dont want to loose multi-cursor.
         unless @vimState.operationStack.isProcessing()
-          @vimState.operationStack.run "BlockwiseRestoreCharacterwise"
+          new BlockwiseRestoreCharacterwise(@vimState).execute()
 
 module.exports = ModeManager

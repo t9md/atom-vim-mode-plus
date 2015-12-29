@@ -691,6 +691,34 @@ describe "Operator general", ->
       it "leaves the cursor at the beginning of the selection", ->
         ensure ['r', char: 'x' ], cursorBuffer: [[0, 0], [1, 0]]
 
+    describe "when in visual-block mode", ->
+      textOriginal = """
+        0:2345
+        1: o11o
+        2: o22o
+        3: o33o
+        4: o44o\n
+        """
+      textReplaced = """
+        0:2345
+        1: oxxo
+        2: oxxo
+        3: oxxo
+        4: oxxo\n
+        """
+
+      beforeEach ->
+        set text: textOriginal, cursor: [1, 4]
+        ensure [{ctrl: 'v'}, 'l3j'],
+          mode: ['visual', 'blockwise']
+          selectedTextOrdered: ['11', '22', '33', '44'],
+
+      it "replaces each selection and put cursor on start of top selection", ->
+        ensure ['r', char: 'x'],
+          mode: 'normal'
+          text: textReplaced
+          cursor: [1, 4]
+
   describe 'the m keybinding', ->
     beforeEach ->
       set text: '12\n34\n56\n', cursorBuffer: [0, 1]
