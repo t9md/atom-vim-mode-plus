@@ -135,6 +135,7 @@ class Operator extends Base
 class Select extends Operator
   @extend(false)
   flashTarget: false
+  recordable: false
   execute: ->
     @selectTarget(true)
     return if @isMode('operator-pending') or @isMode('visual', 'blockwise')
