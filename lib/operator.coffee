@@ -715,6 +715,13 @@ class Replace extends Operator
       unless (@target.instanceof('MoveRight') and (text.length < @getCount()))
         s.insertText(text, autoIndentNewline: true)
       setPoint() unless @input is "\n"
+
+    # FIXME this is very imperative, handling in very lower level.
+    # find better place for operator in blockwise move works appropriately.
+    if @isMode('visual', 'blockwise')
+      top = @editor.getSelectionsOrderedByBufferPosition()[0]
+      s.destroy() for s in @editor.getSelections() when (s isnt top)
+
     @activateMode('normal')
 
 # Insert entering operation
