@@ -21,7 +21,7 @@ module.exports =
     @vimStates = new Map
 
     @registerViewProviders()
-    Base.init(@provideVimModePlus())
+    @subscriptions.add Base.init(@provideVimModePlus())
     @registerCommands()
 
     if atom.inDevMode()
@@ -91,9 +91,6 @@ module.exports =
 
   # Service API
   # -------------------------
-  getSubscriptions: ->
-    @subscriptions
-
   getGlobalState: ->
     globalState
 
@@ -102,6 +99,5 @@ module.exports =
 
   provideVimModePlus: ->
     Base: Base
-    getSubscriptions: @getSubscriptions.bind(this)
     getGlobalState: @getGlobalState.bind(this)
     getEditorState: @getEditorState.bind(this)
