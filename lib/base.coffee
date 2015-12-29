@@ -1,6 +1,7 @@
 # Refactoring status: 100%
 _ = require 'underscore-plus'
 Delegato = require 'delegato'
+{CompositeDisposable} = require 'atom'
 
 settings = require './settings'
 
@@ -129,15 +130,23 @@ class Base
   # Class methods
   # -------------------------
   @init: (service) ->
-    {getEditorState, getSubscriptions} = service
-    subscriptions = getSubscriptions()
+    {getEditorState} = service
+    @subscriptions = new CompositeDisposable()
 
     require(lib) for lib in [
       './operator', './motion', './text-object',
       './insert-mode', './misc-commands', './scroll', './visual-blockwise'
     ]
     for __, klass of @getRegistries() when klass.isCommand()
-      subscriptions.add klass.registerCommand()
+      @subscriptions.add klass.registerCommand()
+    @subscriptions
+
+  # For development easiness without reloading vim-mode-plus
+  @reset: ->
+    @subscriptions.dispose()
+    @subscriptions = new CompositeDisposable()
+    for __, klass of @getRegistries() when klass.isCommand()
+      @subscriptions.add klass.registerCommand()
 
   registries = {Base}
   @extend: (@command=true) ->
