@@ -1,3 +1,14 @@
+# 0.13.0
+- New: Motion move-(up|down)-to-non-blank to move up/down by skipping blank characters #101.
+- New: Motion move-to-(previous|next)-fold-(start|end) to move around code folds #102
+- FIX: TextObject Paragraph and its child class get called getRange with negative row number fix #99
+- FIX: When last line have no newline("\n") char, cursor marker shown at incorrect place #100
+- FIX: Select operator should not be repeatable, but was repeatable(that cause unexpected error).
+- FIX: When `r`(replace operator) in visual-blockwise mode cause `Selection is not empty in normal-mode` error #104
+- Internal: move ModeManager::replaceModeBackspace to Misc commands
+- Internal: Service API no longer expose vim-mode-plus's subscriptions
+- Internal: New `Base.reset()` class method to reload all commands to speed up development process.
+
 # 0.12.0
 - Internal: cleanup cursor movement in `Motion::selectInclusive()` #87
 - Internal: remove flashManager class. move flashManager feature to utils.coffee.
