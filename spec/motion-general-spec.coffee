@@ -1023,14 +1023,11 @@ describe "Motion general", ->
         ensure '[[', cursor: [18, 4]
         ensure '[[', cursor: [9, 2]
         ensure '[[', cursor: [8, 0]
-        ensure '[[', cursor: [6, 0]
-        ensure '[[', cursor: [0, 0]
 
     describe "MoveToNextFoldStart", ->
       beforeEach ->
         set cursor: [0, 0]
       it "move to first char of next fold start row", ->
-        ensure '][', cursor: [6, 0]
         ensure '][', cursor: [8, 0]
         ensure '][', cursor: [9, 2]
         ensure '][', cursor: [18, 4]
@@ -1045,15 +1042,11 @@ describe "Motion general", ->
         ensure '[]', cursor: [25, 4]
         ensure '[]', cursor: [23, 8]
         ensure '[]', cursor: [21, 8]
-        ensure '[]', cursor: [7, 0]
-        ensure '[]', cursor: [2, 0]
 
     describe "MoveToNextFoldEnd", ->
       beforeEach ->
         set cursor: [0, 0]
       it "move to first char of next fold end row", ->
-        ensure ']]', cursor: [2, 0]
-        ensure ']]', cursor: [7, 0]
         ensure ']]', cursor: [21, 8]
         ensure ']]', cursor: [23, 8]
         ensure ']]', cursor: [25, 4]
