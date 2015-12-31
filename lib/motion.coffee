@@ -15,7 +15,7 @@ globalState = require './global-state'
   getVimLastBufferRow, getVimLastScreenRow
   getValidVimRow
   flashRanges
-  moveCursorToFirstCharacterForRow
+  moveCursorToFirstCharacterAtRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -917,7 +917,7 @@ class MoveToPreviousFoldStart extends Motion
   moveCursor: (cursor) ->
     @countTimes =>
       if (row = @detectRow(cursor, @direction))?
-        moveCursorToFirstCharacterForRow(cursor, row)
+        moveCursorToFirstCharacterAtRow(cursor, row)
 
 class MoveToNextFoldStart extends MoveToPreviousFoldStart
   @extend()

@@ -242,7 +242,7 @@ moveCursorDown = (cursor, options={}) ->
     moveCursor cursor, options, (c) ->
       cursor.moveDown()
 
-moveCursorToFirstCharacterForRow = (cursor, row) ->
+moveCursorToFirstCharacterAtRow = (cursor, row) ->
   cursor.setBufferPosition([row, 0])
   cursor.moveToFirstCharacterOfLine()
 
@@ -315,5 +315,5 @@ module.exports = {
   getLastVisibleScreenRow
   flashRanges
   getValidVimRow
-  moveCursorToFirstCharacterForRow
+  moveCursorToFirstCharacterAtRow
 }
