@@ -230,3 +230,25 @@ atom-text-editor::shadow {
     background-color: @syntax-selection-color;
   }
 }
+
+// Maximize Pane
+atom-workspace.vim-mode-plus-pane-maximized {
+  .tab-bar {
+    display: none;
+  }
+  atom-pane-container {
+    position: relative;
+    atom-pane {
+      display: none;
+      &.active {
+        display: flex;
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 100;
+      }
+    }
+  }
+}

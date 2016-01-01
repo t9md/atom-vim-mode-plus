@@ -38,6 +38,11 @@ module.exports =
     @subscribe new Disposable =>
       @vimStates.forEach (vimState) -> vimState.destroy()
 
+    workspaceElement = atom.views.getView(atom.workspace)
+    @subscribe atom.workspace.onDidChangeActivePane ->
+      selector = 'vim-mode-plus-pane-maximized'
+      workspaceElement.classList.remove(selector)
+
   subscribe: (args...) ->
     @subscriptions.add args...
 
