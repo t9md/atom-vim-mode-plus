@@ -157,6 +157,10 @@
   'g t':           'pane:show-next-item'
   'g T':           'pane:show-previous-item'
 
+  # 'cmd-enter': 'vim-mode-plus:maximize-pane'
+  # or
+  # 'ctrl-w z': 'vim-mode-plus:maximize-pane'
+
   'm':  'vim-mode-plus:mark'
   '`':  'vim-mode-plus:move-to-mark'
   '\'': 'vim-mode-plus:move-to-mark-line'

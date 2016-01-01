@@ -125,3 +125,11 @@ class ReplaceModeBackspace extends Misc
         selection.selectLeft()
         unless selection.insertText(char).isEmpty()
           selection.cursor.moveLeft()
+
+class MaximizePane extends Misc
+  @extend()
+
+  execute: ->
+    selector = 'vim-mode-plus-pane-maximized'
+    workspaceElement = atom.views.getView(atom.workspace)
+    workspaceElement.classList.toggle(selector)
