@@ -20,7 +20,9 @@ class SelectionWrapper
 
   setBufferRangeSafely: (range) ->
     if range
-      @setBufferRange(range, {autoscroll: true})
+      @setBufferRange(range, {autoscroll: false})
+      if @selection.isLastSelection()
+        @selection.cursor.autoscroll()
 
   getBufferRange: ->
     @selection.getBufferRange()
