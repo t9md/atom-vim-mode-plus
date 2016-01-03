@@ -179,7 +179,7 @@
   'n': 'vim-mode-plus:repeat-search'
   'N': 'vim-mode-plus:repeat-search-reverse'
 
-  '%': 'vim-mode-plus:bracket-matching-motion'
+  '%': 'vim-mode-plus:move-to-pair'
 
   '1': 'vim-mode-plus:set-count-1'
   '2': 'vim-mode-plus:set-count-2'

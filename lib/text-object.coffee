@@ -6,7 +6,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 {
   rangeToBeginningOfFileFromPoint, rangeToEndOfFileFromPoint
-  sortRanges, getLineTextToPoint, characterAtPoint
+  sortRanges, countChar
 } = require './utils'
 
 class TextObject extends Base
@@ -75,27 +75,23 @@ class InnerWholeWord extends WholeWord
 class Pair extends TextObject
   @extend(false)
   allowNextLine: false
-  what: 'enclosed'
+  enclosed: true
   pair: null
 
   # Return 'open' or 'close'
-  getPairState: (pair, matchText, point) ->
-    [openChar, closeChar] = pair.split('')
+  {inspect} = require 'util'
+  getPairState: (pair, matchText, range) ->
+    [openChar, closeChar] = pairChars = pair.split('')
     if openChar is closeChar
-      text = getLineTextToPoint(@editor, point)
-      state = @pairStateInString(text, openChar)
+      @pairStateInBufferRange(range, openChar)
     else
-      state = switch pair.indexOf(matchText[matchText.length-1])
-        when 0 then 'open'
-        when 1 then 'close'
-    state
+      ['open', 'close'][pairChars.indexOf(matchText)]
 
-  pairStateInString: (str, char) ->
+  pairStateInBufferRange: (range, char) ->
+    {row, column} = range.end
+    text = @editor.lineTextForBufferRow(row)[0...column]
     pattern = ///[^\\]?#{_.escapeRegExp(char)}///
-    count = str.split(pattern).length - 1
-    switch count % 2
-      when 1 then 'open'
-      when 0 then 'close'
+    ['close', 'open'][(countChar(text, pattern) % 2)]
 
   # Take start point of matched range.
   escapeChar = '\\'
@@ -104,10 +100,11 @@ class Pair extends TextObject
     @editor.getTextInBufferRange(range) is escapeChar
 
   findPair: (pair, options) ->
-    {from, which, allowNextLine, nest} = options
+    {from, which, allowNextLine, enclosed} = options
     switch which
       when 'open'
         scanFunc = 'backwardsScanInBufferRange'
+        from = from.translate([0, +1])
         scanRange = rangeToBeginningOfFileFromPoint(from)
       when 'close'
         scanFunc = 'scanInBufferRange'
@@ -116,90 +113,104 @@ class Pair extends TextObject
     pattern = ///#{pairRegexp}///g
 
     found = null # We will search to fill this var.
-    @editor[scanFunc] pattern, scanRange, (arg) =>
-      {matchText, range: {start, end}, stop} = arg
-      return if @isEscapedCharAtPoint(start)
-      return stop() if (not allowNextLine) and (from.row isnt start.row)
+    state = {open: [], close: []}
 
-      end = end.translate([0, -1]) if which is 'close'
+    @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) =>
+      {start, end} = range
+      if (not allowNextLine) and (from.row isnt start.row)
+        return stop()
 
-      nest = if @getPairState(pair, matchText, start) is which
-        Math.max(nest - 1, 0)
+      if @isEscapedCharAtPoint(start)
+        return
+
+      pairState = @getPairState(pair, matchText, range)
+      [point, oppositeState] = switch pairState
+        when 'open' then [start, 'close']
+        when 'close' then [end, 'open']
+
+      if pairState is which
+        tmpFrom = state[oppositeState].pop()
       else
-        nest + 1
+        state[pairState].push(point)
 
-      unless nest
-        found = end
-        stop()
+      if (pairState is which) and (state.open.length is 0) and (state.close.length is 0)
+        if enclosed and tmpFrom?
+          # When checking enclosed state, we have to be exclude for end of Range.
+          tmpRange = new Range(tmpFrom, point).translate([0, 0], [0, -1])
+          unless tmpRange.containsPoint(from)
+            return
+        found = point
+        # @report {was: "fnd", which, pair, state, pairState, matchText}
+        return stop()
+      # @report {was: "cnt", which, pair, state, pairState, matchText}
     found
 
-  findOpenPair: (pair, options) ->
+  report: (status) ->
+    {was, which, pair, state, pairState, matchText} = status
+    pairChars = pair.split('')
+    searching = switch which
+      when 'open' then pairChars[0]
+      when 'close' then pairChars[1]
+    console.log {searching, was, matchText, pairState, state: inspect(state)}
+
+  findOpen: (pair, options) ->
     options.which = 'open'
     options.allowNextLine ?= @allowNextLine
     @findPair(pair, options)
 
-  findClosePair: (pair, options) ->
+  findClose: (pair, options) ->
     options.which = 'close'
     options.allowNextLine ?= @allowNextLine
     @findPair(pair, options)
 
-  getPairRange: (from, pair, what) ->
+  # Translate range to `a` or `inner`
+  translateRange: (range, pair, to) ->
+    [openLength, closeLength] = pair.split('').map((char) -> char.length)
+    translation = switch to
+      when 'a' then [[0, -openLength], [0, +closeLength]]
+      when 'inner' then [[0, +openLength], [0, -closeLength]]
+    range.translate(translation...)
+
+  getPairRange: (from, pair, enclosed) ->
     range = null
-    switch what
-      when 'enclosed'
-        open = @findOpenPair pair, {from: from, nest: 1}
-        close = @findClosePair pair, {from: open, nest: 1} if open?
-      when 'next'
-        close = @findClosePair pair, {from: from, nest: 0}
-        open = @findOpenPair pair, {from: close, nest: 1} if close?
-      when 'previous' # FIXME but currently unused
-        open  = @findOpenPair pair, {from: from,  nest: 0}
-        close = @findClosePair pair, {from: open, nest: 1} if open?
+    close = @findClose pair, {from: from, enclosed}
+    open = @findOpen pair, {from: close} if close?
+
     if open? and close?
       range = new Range(open, close)
-      range = range.translate([0, -1], [0, 1]) if @isA()
+      # range returned by @findOpen, @findClose is inclusive(=a) range.
+      range = @translateRange(range, pair, 'inner') if @isInner()
     range
 
-  getRange: (selection, what=@what) ->
-    rangeOrig = selection.getBufferRange()
+  getRange: (selection, {enclosed}={}) ->
+    originalRange = selection.getBufferRange()
     from = selection.getHeadBufferPosition()
 
-    # Be inner, include char under cursor.
+    # When selection is not empty, we have to start to search one column left
     if (not selection.isEmpty() and not selection.isReversed())
       from = from.translate([0, -1])
 
-    # In case cursor is on one of pair char, we adjust `from` point to be inclusive.
-    characterAtCursor = characterAtPoint(@editor, from)
-    if characterAtCursor in @pair
-      from = switch @getPairState(@pair, characterAtCursor, from)
-        when 'open' then from.translate([0, +1])
-        when 'close' then from.translate([0, -1])
-
-    range  = @getPairRange(from, @pair, what)
-    if range?.isEqual(rangeOrig)
-      # Since range was same area, retry to expand outer pair.
-      from = switch what
-        when 'enclosed', 'previous' then range.start.translate([0, -1])
-        when 'next' then range.end.translate([0, +1])
-      range = @getPairRange(from, @pair, what)
+    range = @getPairRange(from, @pair, enclosed)
+    if range?.isEqual(originalRange)
+      # When range was same, try to expand range
+      range = @translateRange(range, @pair, 'a') if @isInner()
+      range = @getPairRange(from: range.end, @pair, enclosed)
     range
 
   select: ->
     @eachSelection (s) =>
-      swrap(s).setBufferRangeSafely @getRange(s, @what)
+      swrap(s).setBufferRangeSafely @getRange(s, {@enclosed})
 
 # -------------------------
 class AnyPair extends Pair
   @extend(false)
-  what: 'enclosed'
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
     'CurlyBracket', 'AngleBracket', 'Tag', 'SquareBracket', 'Parenthesis'
   ]
 
   getRangeBy: (klass, selection) ->
-    # overwite default @what
-    @new(klass, {@inner}).getRange(selection, @what)
+    @new(klass, {@inner}).getRange(selection, {@enclosed})
 
   getRanges: (selection) ->
     ranges = []
@@ -224,7 +235,7 @@ class InnerAnyPair extends AnyPair
 # -------------------------
 class AnyQuote extends AnyPair
   @extend(false)
-  what: 'next'
+  enclosed: false
   member: ['DoubleQuote', 'SingleQuote', 'BackTick']
   getNearestRange: (selection) ->
     ranges = @getRanges(selection)
@@ -241,7 +252,7 @@ class InnerAnyQuote extends AnyQuote
 class DoubleQuote extends Pair
   @extend(false)
   pair: '""'
-  what: 'next'
+  enclosed: false
 
 class ADoubleQuote extends DoubleQuote
   @extend()
@@ -253,7 +264,7 @@ class InnerDoubleQuote extends DoubleQuote
 class SingleQuote extends Pair
   @extend(false)
   pair: "''"
-  what: 'next'
+  enclosed: false
 
 class ASingleQuote extends SingleQuote
   @extend()
@@ -265,7 +276,7 @@ class InnerSingleQuote extends SingleQuote
 class BackTick extends Pair
   @extend(false)
   pair: '``'
-  what: 'next'
+  enclosed: false
 
 class ABackTick extends BackTick
   @extend()

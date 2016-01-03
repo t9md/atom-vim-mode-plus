@@ -231,7 +231,6 @@ describe "TextObject", ->
         ensure 'diq', text: """--"" `def`  'efg'--"""
         ensure '.', text: """--"" ``  'efg'--"""
         ensure '.', text: """--"" ``  ''--"""
-        ensure '.'
       it "can select next quote", ->
         keystroke 'v'
         ensure 'iq', selectedText: 'abc'
@@ -261,7 +260,6 @@ describe "TextObject", ->
           text: '""here" " and over here'
           cursor: [0, 1]
 
-      # fit "[Changed Behavior?] won't apply if quote is not within string", ->
       it "skip non-string area and operate forwarding string whithin line", ->
         set cursor: [0, 29]
         ensure 'di"',

@@ -92,9 +92,6 @@ selectVisibleBy = (editor, entries, fn) ->
   range = getVisibleBufferRange(editor)
   (e for e in entries when range.containsRange(fn(e)))
 
-getLineTextToPoint = (editor, {row, column}) ->
-  editor.lineTextForBufferRow(row)[0..column]
-
 eachSelection = (editor, fn) ->
   for s in editor.getSelections()
     fn(s)
@@ -145,6 +142,7 @@ getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
   changes = getChangesSinceCheckpoint(editor, checkpoint)
   getNewTextRangeFromChanges(changes)
 
+# char can be regExp pattern
 countChar = (string, char) ->
   string.split(char).length - 1
 
@@ -291,7 +289,6 @@ module.exports = {
   getIndex
   getVisibleBufferRange
   selectVisibleBy
-  getLineTextToPoint
   eachSelection
   toggleClassByCondition
   getNewTextRangeFromCheckpoint
@@ -316,4 +313,5 @@ module.exports = {
   flashRanges
   getValidVimRow
   moveCursorToFirstCharacterAtRow
+  countChar
 }
