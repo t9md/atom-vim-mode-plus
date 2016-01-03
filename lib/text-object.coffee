@@ -162,14 +162,6 @@ class Pair extends TextObject
     options.allowNextLine ?= @allowNextLine
     @findPair(pair, options)
 
-  # Translate range to `a` or `inner`
-  translateRange: (range, pair, to) ->
-    [openLength, closeLength] = pair.map((char) -> char.length)
-    translation = switch to
-      when 'a' then [[0, -openLength], [0, +closeLength]]
-      when 'inner' then [[0, +openLength], [0, -closeLength]]
-    range.translate(translation...)
-
   getPairInfo: (from, pair, enclosed) ->
     pairInfo = null
 
