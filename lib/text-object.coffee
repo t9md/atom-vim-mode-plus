@@ -81,11 +81,11 @@ class Pair extends TextObject
   # Return 'open' or 'close'
   {inspect} = require 'util'
   getPairState: (pair, matchText, range) ->
-    [openChar, closeChar] = pairChars = pair.split('')
+    [openChar, closeChar] = pair
     if openChar is closeChar
       @pairStateInBufferRange(range, openChar)
     else
-      ['open', 'close'][pairChars.indexOf(matchText)]
+      ['open', 'close'][pair.indexOf(matchText)]
 
   pairStateInBufferRange: (range, char) ->
     {row, column} = range.end
@@ -109,7 +109,7 @@ class Pair extends TextObject
       when 'close'
         scanFunc = 'scanInBufferRange'
         scanRange = rangeToEndOfFileFromPoint(from)
-    pairRegexp = pair.split('').map(_.escapeRegExp).join('|')
+    pairRegexp = pair.map(_.escapeRegExp).join('|')
     pattern = ///#{pairRegexp}///g
 
     found = null # We will search to fill this var.
@@ -147,10 +147,9 @@ class Pair extends TextObject
 
   report: (status) ->
     {was, which, pair, state, pairState, matchText} = status
-    pairChars = pair.split('')
     searching = switch which
-      when 'open' then pairChars[0]
-      when 'close' then pairChars[1]
+      when 'open' then pair[0]
+      when 'close' then pair[1]
     console.log {searching, was, matchText, pairState, state: inspect(state)}
 
   findOpen: (pair, options) ->
@@ -165,7 +164,7 @@ class Pair extends TextObject
 
   # Translate range to `a` or `inner`
   translateRange: (range, pair, to) ->
-    [openLength, closeLength] = pair.split('').map((char) -> char.length)
+    [openLength, closeLength] = pair.map((char) -> char.length)
     translation = switch to
       when 'a' then [[0, -openLength], [0, +closeLength]]
       when 'inner' then [[0, +openLength], [0, -closeLength]]
@@ -251,7 +250,7 @@ class InnerAnyQuote extends AnyQuote
 # -------------------------
 class DoubleQuote extends Pair
   @extend(false)
-  pair: '""'
+  pair: ['"', '"']
   enclosed: false
 
 class ADoubleQuote extends DoubleQuote
@@ -263,7 +262,7 @@ class InnerDoubleQuote extends DoubleQuote
 # -------------------------
 class SingleQuote extends Pair
   @extend(false)
-  pair: "''"
+  pair: ["'", "'"]
   enclosed: false
 
 class ASingleQuote extends SingleQuote
@@ -275,7 +274,7 @@ class InnerSingleQuote extends SingleQuote
 # -------------------------
 class BackTick extends Pair
   @extend(false)
-  pair: '``'
+  pair: ['`', '`']
   enclosed: false
 
 class ABackTick extends BackTick
@@ -287,7 +286,7 @@ class InnerBackTick extends BackTick
 # -------------------------
 class CurlyBracket extends Pair
   @extend(false)
-  pair: '{}'
+  pair: ['{', '}']
   allowNextLine: true
 
 class ACurlyBracket extends CurlyBracket
@@ -299,7 +298,7 @@ class InnerCurlyBracket extends CurlyBracket
 # -------------------------
 class SquareBracket extends Pair
   @extend(false)
-  pair: '[]'
+  pair: ['[', ']']
   allowNextLine: true
 
 class ASquareBracket extends SquareBracket
@@ -311,7 +310,7 @@ class InnerSquareBracket extends SquareBracket
 # -------------------------
 class Parenthesis extends Pair
   @extend(false)
-  pair: '()'
+  pair: ['(', ')']
   allowNextLine: true
 
 class AParenthesis extends Parenthesis
@@ -323,7 +322,7 @@ class InnerParenthesis extends Parenthesis
 # -------------------------
 class AngleBracket extends Pair
   @extend(false)
-  pair: '<>'
+  pair: ['<', '>']
 
 class AAngleBracket extends AngleBracket
   @extend()
@@ -335,14 +334,13 @@ class InnerAngleBracket extends AngleBracket
 # [FIXME] See vim-mode#795
 class Tag extends Pair
   @extend(false)
-  pair: '><'
+  pair: ['>', '<']
 
 class ATag extends Tag
   @extend()
 
 class InnerTag extends Tag
   @extend()
-
 # Paragraph
 # -------------------------
 # In Vim world Paragraph is defined as consecutive (non-)blank-line.
