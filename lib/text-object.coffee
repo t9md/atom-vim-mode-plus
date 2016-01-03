@@ -104,7 +104,6 @@ class Pair extends TextObject
     switch which
       when 'open'
         scanFunc = 'backwardsScanInBufferRange'
-        from = from.translate([0, +1])
         scanRange = rangeToBeginningOfFileFromPoint(from)
       when 'close'
         scanFunc = 'scanInBufferRange'
@@ -135,11 +134,12 @@ class Pair extends TextObject
 
       if (pairState is which) and (state.open.length is 0) and (state.close.length is 0)
         if enclosed and tmpFrom?
+          # [FIXME] really need? better way?
           # When checking enclosed state, we have to be exclude for end of Range.
           tmpRange = new Range(tmpFrom, point).translate([0, 0], [0, -1])
           unless tmpRange.containsPoint(from)
             return
-        found = point
+        found = range
         # @report {was: "fnd", which, pair, state, pairState, matchText}
         return stop()
       # @report {was: "cnt", which, pair, state, pairState, matchText}
@@ -170,16 +170,18 @@ class Pair extends TextObject
       when 'inner' then [[0, +openLength], [0, -closeLength]]
     range.translate(translation...)
 
-  getPairRange: (from, pair, enclosed) ->
-    range = null
-    close = @findClose pair, {from: from, enclosed}
-    open = @findOpen pair, {from: close} if close?
+  getPairInfo: (from, pair, enclosed) ->
+    pairInfo = null
 
-    if open? and close?
-      range = new Range(open, close)
-      # range returned by @findOpen, @findClose is inclusive(=a) range.
-      range = @translateRange(range, pair, 'inner') if @isInner()
-    range
+    closeRange = @findClose pair, {from: from, enclosed}
+    openRange = @findOpen pair, {from: closeRange.end} if closeRange?
+
+    if openRange? and closeRange?
+      aRange = new Range(openRange.start, closeRange.end)
+      innerRange = new Range(openRange.end, closeRange.start)
+      targetRange = if @isInner() then innerRange else aRange
+      pairInfo = {openRange, closeRange, aRange, innerRange, targetRange}
+    pairInfo
 
   getRange: (selection, {enclosed}={}) ->
     originalRange = selection.getBufferRange()
@@ -189,12 +191,11 @@ class Pair extends TextObject
     if (not selection.isEmpty() and not selection.isReversed())
       from = from.translate([0, -1])
 
-    range = @getPairRange(from, @pair, enclosed)
-    if range?.isEqual(originalRange)
+    pairInfo = @getPairInfo(from, @pair, enclosed)
+    if pairInfo?.targetRange.isEqual(originalRange)
       # When range was same, try to expand range
-      range = @translateRange(range, @pair, 'a') if @isInner()
-      range = @getPairRange(from: range.end, @pair, enclosed)
-    range
+      pairInfo = @getPairInfo(from: pairInfo.aRange.end, @pair, enclosed)
+    pairInfo?.targetRange
 
   select: ->
     @eachSelection (s) =>
@@ -341,6 +342,7 @@ class ATag extends Tag
 
 class InnerTag extends Tag
   @extend()
+
 # Paragraph
 # -------------------------
 # In Vim world Paragraph is defined as consecutive (non-)blank-line.
