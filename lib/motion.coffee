@@ -938,14 +938,10 @@ class MoveToPair extends Motion
   inclusive: true
   member: ["Parenthesis", "CurlyBracket", "SquareBracket"]
 
-  getRanges: (cursor) ->
-    {selection} = cursor
-    options = {enclosed: false, @member}
-    @new("AAnyPair", options).getRanges(selection).filter ({start, end}) ->
-      cursor.getBufferRow() in [start.row, end.row]
-
   getRange: (cursor) ->
-    ranges = @getRanges(cursor)
+    ranges = @new("AAnyPair", {enclosed: false, @member}).getRanges(cursor.selection)
+    ranges.filter ({start, end}) ->
+      cursor.getBufferRow() in [start.row, end.row]
     return null if ranges.length is 0
 
     [enclosingRanges, forwardingRanges] = _.partition ranges, (range) ->
