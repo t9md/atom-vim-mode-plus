@@ -287,7 +287,12 @@ class ToggleLineComments extends TransformString
 
 class Surround extends TransformString
   @extend()
-  pairs: ['[]', '()', '{}', '<>']
+  pairs: [
+    ['[', ']']
+    ['(', ')']
+    ['{', '}']
+    ['<', '>']
+  ]
   input: null
   charsMax: 1
   hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
@@ -310,10 +315,10 @@ class Surround extends TransformString
 
   getPair: (input) ->
     pair = _.detect @pairs, (pair) -> input in pair
-    pair ?= input + input
+    pair ?= [input, input]
 
   surround: (text, pair) ->
-    [open, close] = pair.split('')
+    [open, close] = pair
     if LineEndingRegExp.test(text)
       open += "\n"
       close += "\n"
