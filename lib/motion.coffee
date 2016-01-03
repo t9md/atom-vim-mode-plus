@@ -942,10 +942,10 @@ class MoveToPair extends Motion
     ranges = @new("AAnyPair", {enclosed: false, @member}).getRanges(cursor.selection)
     ranges.filter ({start, end}) ->
       cursor.getBufferRow() in [start.row, end.row]
-    return null if ranges.length is 0
+    return null unless ranges.length
 
     [enclosingRanges, forwardingRanges] = _.partition ranges, (range) ->
-      # calling containsPoint exclusive(true to 2nd arg) make opening pair under
+      # Calling containsPoint exclusive(true to 2nd arg) make opening pair under
       # cursor is grouped to forwardingRanges
       range.containsPoint(cursor.getBufferPosition(), true)
     enclosingRange = _.last(sortRanges(enclosingRanges))
