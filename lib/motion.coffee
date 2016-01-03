@@ -16,6 +16,7 @@ globalState = require './global-state'
   getValidVimRow
   flashRanges
   moveCursorToFirstCharacterAtRow
+  sortRanges
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -932,70 +933,37 @@ class MoveToNextFoldEnd extends MoveToPreviousFoldEnd
   direction: 'next'
 
 # keymap: %
-OpenBrackets = ['(', '{', '[']
-CloseBrackets = [')', '}', ']']
-AnyBracket = new RegExp(OpenBrackets.concat(CloseBrackets).map(_.escapeRegExp).join("|"))
-
-# TODO: refactor.
-class BracketMatchingMotion extends SearchBase
+class MoveToPair extends Motion
   @extend()
   inclusive: true
+  member: ["Parenthesis", "CurlyBracket", "SquareBracket"]
 
-  searchForMatch: (startPosition, reverse, inCharacter, outCharacter) ->
-    depth = 0
-    point = startPosition.copy()
-    lineLength = @editor.lineTextForBufferRow(point.row).length
-    eofPosition = @editor.getEofBufferPosition().translate([0, 1])
-    increment = if reverse then -1 else 1
+  getRanges: (cursor) ->
+    {selection} = cursor
+    options = {enclosed: false, @member}
+    @new("AAnyPair", options).getRanges(selection).filter ({start, end}) ->
+      cursor.getBufferRow() in [start.row, end.row]
 
-    loop
-      character = @characterAt(point)
-      depth++ if character is inCharacter
-      depth-- if character is outCharacter
+  getRange: (cursor) ->
+    ranges = @getRanges(cursor)
+    return null if ranges.length is 0
 
-      return point if depth is 0
+    [enclosingRanges, forwardingRanges] = _.partition ranges, (range) ->
+      # calling containsPoint exclusive(true to 2nd arg) make opening pair under
+      # cursor is grouped to forwardingRanges
+      range.containsPoint(cursor.getBufferPosition(), true)
+    enclosingRange = _.last(sortRanges(enclosingRanges))
+    forwardingRanges = sortRanges(forwardingRanges)
 
-      point.column += increment
+    if enclosingRange
+      forwardingRanges = forwardingRanges.filter (range) ->
+        enclosingRange.containsRange(range)
 
-      return null if depth < 0
-      return null if point.isEqual([0, -1])
-      return null if point.isEqual(eofPosition)
-
-      if point.column < 0
-        point.row--
-        lineLength = @editor.lineTextForBufferRow(point.row).length
-        point.column = lineLength - 1
-      else if point.column >= lineLength
-        point.row++
-        lineLength = @editor.lineTextForBufferRow(point.row).length
-        point.column = 0
-
-  characterAt: (position) ->
-    @editor.getTextInBufferRange([position, position.translate([0, 1])])
-
-  getSearchData: (position) ->
-    character = @characterAt(position)
-    if (index = OpenBrackets.indexOf(character)) >= 0
-      [character, CloseBrackets[index], false]
-    else if (index = CloseBrackets.indexOf(character)) >= 0
-      [character, OpenBrackets[index], true]
-    else
-      []
+    forwardingRanges[0] or enclosingRange
 
   moveCursor: (cursor) ->
-    startPosition = cursor.getBufferPosition()
-
-    [inCharacter, outCharacter, reverse] = @getSearchData(startPosition)
-
-    unless inCharacter?
-      restOfLine = [startPosition, [startPosition.row, Infinity]]
-      @editor.scanInBufferRange AnyBracket, restOfLine, ({range, stop}) ->
-        startPosition = range.start
-        stop()
-
-    [inCharacter, outCharacter, reverse] = @getSearchData(startPosition)
-
-    return unless inCharacter?
-
-    if matchPosition = @searchForMatch(startPosition, reverse, inCharacter, outCharacter)
-      cursor.setBufferPosition(matchPosition)
+    if range = @getRange(cursor)
+      {start, end} = range.translate([0, 0], [0, -1])
+      cursorPoint = cursor.getBufferPosition()
+      point = if start.isLessThan(cursorPoint) then start else end
+      cursor.setBufferPosition(point)

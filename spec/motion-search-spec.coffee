@@ -320,6 +320,7 @@ describe "Motion Search", ->
             cursorBuffer: [1, 0]
           ensure '*', cursorBuffer: [3, 0]
 
+  # FIXME: No longer child of search so move to motion-general-spec.coffe?
   describe 'the % motion', ->
     beforeEach ->
       set
@@ -333,13 +334,13 @@ describe "Motion Search", ->
       set cursor: [0, 9]
       ensure '%', cursor: [0, 62]
 
-    it 'composes correctly with d', ->
+    it 'is behave inclusively when composed with operator', ->
       set cursor: [0, 9]
       ensure 'd%',
         text: "( ( ) )--\n"
 
     it 'moves correctly when composed with v going forward', ->
-      ensure 'vh%', cursor: [0, 7]
+      ensure 'v%', cursor: [0, 7], selectedText: '( ( ) )'
 
     it 'moves correctly when composed with v going backward', ->
       set cursor: [0, 5]
@@ -347,15 +348,11 @@ describe "Motion Search", ->
 
     it 'it moves appropriately to find the nearest matching action', ->
       set cursor: [0, 3]
-      ensure '%',
-        cursor: [0, 2]
-        text: "( ( ) )--{ text in here; and a function call(with parameters) }\n"
+      ensure '%', cursor: [0, 2]
 
     it 'it moves appropriately to find the nearest matching action', ->
       set cursor: [0, 26]
-      ensure '%',
-        cursor: [0, 60]
-        text: "( ( ) )--{ text in here; and a function call(with parameters) }\n"
+      ensure '%', cursor: [0, 60]
 
     it "finds matches across multiple lines", ->
       set
@@ -368,3 +365,91 @@ describe "Motion Search", ->
       ensure ['/', search: 'func'], cursor: [0, 31]
       ensure '%', cursor: [0, 60]
       ensure 'n', cursor: [0, 31]
+
+  # fdescribe 'move-to-pair', ->
+  #   simpleText = """
+  #     (  )
+  #     (
+  #       "parenthesis"
+  #     )
+  #     """
+  #   describe "simple behavior", ->
+  #     beforeEach ->
+  #       set text: simpleText
+  #
+  #     describe "when cursor is at opening pair", ->
+  #       it "single line: moves to closing pair", ->
+  #         set cursor: [0, 0]
+  #         ensure '%', cursor: [0, 3]
+  #       it "multi line: moves to closing pair", ->
+  #         set cursor: [1, 0]
+  #         ensure '%', cursor: [3, 0]
+  #     describe "when cursor is at closing pair", ->
+  #       it "single line: moves to opening pair", ->
+  #         set cursor: [0, 3]
+  #         ensure '%', cursor: [0, 0]
+  #       it "multi line: moves to opening pair", ->
+  #         set cursor: [3, 0]
+  #         ensure '%', cursor: [1, 0]
+  #     fdescribe "visual-mode", ->
+  #       describe "when cursor is at opening pair", ->
+  #         it "single line: moves to closing pair", ->
+  #           set cursor: [0, 0]
+  #           ensure 'v%', cursor: [0, 4], selectedText: "(  )"
+  #         it "multi line: moves to closing pair", ->
+  #           set cursor: [1, 0]
+  #           ensure 'v%', cursor: [3, 1], selectedText: '(\n  "parenthesis"\n)'
+  #     # fdescribe "when composed with operator", ->
+  #     #   describe "when cursor is at opening pair", ->
+  #     #     it "single line: moves to closing pair", ->
+  #     #       set cursor: [0, 0]
+  #     #       ensure 'v%', cursor: [0, 4], selectedText: "(  )"
+  #     #     it "multi line: moves to closing pair", ->
+  #     #       set cursor: [1, 0]
+  #     #       ensure 'v%', cursor: [3, 1], selectedText: '(\n  "parenthesis"\n)'
+  #
+  #
+  #
+  #   # beforeEach ->
+  #   #   set
+  #   #     text: "( ( ) )--{ text in here; and a function call(with parameters) }\n"
+  #   #     cursor: [0, 0]
+  #   #
+  #   # it 'matches the correct parenthesis', ->
+  #   #   ensure '%', cursor: [0, 6]
+  #   #
+  #   # it 'matches the correct brace', ->
+  #   #   set cursor: [0, 9]
+  #   #   ensure '%', cursor: [0, 62]
+  #   #
+  #   # it 'is behave inclusively when composed with operator', ->
+  #   #   set cursor: [0, 9]
+  #   #   ensure 'd%',
+  #   #     text: "( ( ) )--\n"
+  #   #
+  #   # it 'moves correctly when composed with v going forward', ->
+  #   #   ensure 'v%', cursor: [0, 7], selectedText: '( ( ) )'
+  #   #
+  #   # it 'moves correctly when composed with v going backward', ->
+  #   #   set cursor: [0, 5]
+  #   #   ensure 'v%', cursor: [0, 0]
+  #   #
+  #   # it 'it moves appropriately to find the nearest matching action', ->
+  #   #   set cursor: [0, 3]
+  #   #   ensure '%', cursor: [0, 2]
+  #   #
+  #   # it 'it moves appropriately to find the nearest matching action', ->
+  #   #   set cursor: [0, 26]
+  #   #   ensure '%', cursor: [0, 60]
+  #   #
+  #   # it "finds matches across multiple lines", ->
+  #   #   set
+  #   #     text: "...(\n...)"
+  #   #     cursor: [0, 0]
+  #   #   ensure '%',
+  #   #     cursor: [1, 3]
+  #   #
+  #   # it "does not affect search history", ->
+  #   #   ensure ['/', search: 'func'], cursor: [0, 31]
+  #   #   ensure '%', cursor: [0, 60]
+  #   #   ensure 'n', cursor: [0, 31]
