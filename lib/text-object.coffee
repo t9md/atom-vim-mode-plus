@@ -103,6 +103,7 @@ class Pair extends TextObject
     range = Range.fromPointWithDelta(point, 0, -1)
     @editor.getTextInBufferRange(range) is escapeChar
 
+  # options.enclosed is only used when which is 'close'
   findPair: (pair, options) ->
     {from, which, allowNextLine, enclosed} = options
     switch which
@@ -120,41 +121,22 @@ class Pair extends TextObject
 
     @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) =>
       {start, end} = range
-      if (not allowNextLine) and (from.row isnt start.row)
-        return stop()
-
-      if @isEscapedCharAtPoint(start)
-        return
+      return stop() if (not allowNextLine) and (from.row isnt start.row)
+      return if @isEscapedCharAtPoint(start)
 
       pairState = @getPairState(pair, matchText, range)
-      [point, oppositeState] = switch pairState
-        when 'open' then [start, 'close']
-        when 'close' then [end, 'open']
-
+      oppositeState = if pairState is 'open' then 'close' else 'open'
       if pairState is which
-        tmpFrom = state[oppositeState].pop()
+        openRange = state[oppositeState].pop()
       else
-        state[pairState].push(point)
+        state[pairState].push(range)
 
       if (pairState is which) and (state.open.length is 0) and (state.close.length is 0)
-        if enclosed and tmpFrom?
-          # [FIXME] really need? better way?
-          # When checking enclosed state, we have to be exclude for end of Range.
-          tmpRange = new Range(tmpFrom, point).translate([0, 0], [0, -1])
-          unless tmpRange.containsPoint(from)
-            return
+        if enclosed and openRange? and (which is 'close')
+          return unless new Range(openRange.start, range.end).containsPoint(from)
         found = range
-        # @report {was: "fnd", which, pair, state, pairState, matchText}
         return stop()
-      # @report {was: "cnt", which, pair, state, pairState, matchText}
     found
-
-  report: (status) ->
-    {was, which, pair, state, pairState, matchText} = status
-    searching = switch which
-      when 'open' then pair[0]
-      when 'close' then pair[1]
-    console.log {searching, was, matchText, pairState, state: inspect(state)}
 
   findOpen: (pair, options) ->
     options.which = 'open'
@@ -191,9 +173,10 @@ class Pair extends TextObject
       from = from.translate([0, -1])
 
     pairInfo = @getPairInfo(from, @pair, enclosed)
+    # When range was same, try to expand range
     if pairInfo?.targetRange.isEqual(originalRange)
-      # When range was same, try to expand range
-      pairInfo = @getPairInfo(from: pairInfo.aRange.end, @pair, enclosed)
+      from = pairInfo.aRange.end.translate([0, +1])
+      pairInfo = @getPairInfo(from, @pair, enclosed)
     pairInfo?.targetRange
 
   selectTextObject: (selection) ->
