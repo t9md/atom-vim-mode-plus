@@ -63,8 +63,8 @@ class OperationStack
         @vimState.activate('operator-pending')
     else
       op = @stack.pop()
+      @lastOperation = op # Used for better error message.
       op.execute()
-      @test = op
       @record(op) if op.isRecordable()
       @finish()
 
@@ -77,11 +77,16 @@ class OperationStack
     @vimState.emitter.emit 'did-operation-finish'
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
-        throw new Error('Selection is not empty in normal-mode')
+        operationName = @lastOperation.constructor.name
+        message = "Selection is not empty in normal-mode: #{operationName}"
+        if @lastOperation.target?
+          message += ", target= #{@lastOperation.target.constructor.name}"
+        throw new Error(message)
 
       # Ensure Cursor is NOT at EndOfLine position
       for c in @editor.getCursors() when c.isAtEndOfLine()
         moveCursorLeft(c, {preserveGoalColumn: true})
+    @lastOperation = null
     @vimState.refreshCursors()
     @vimState.reset()
 
