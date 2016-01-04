@@ -287,6 +287,27 @@ class MoveDownToEdge extends MoveUpToEdge
   direction: 'down'
 
 # -------------------------
+# [TODO] Really usefull?
+# In most case MoveToPreviousFoldStartWithSameIndent is better since it's skip
+# comments etc.. This motion tend to stop too much.
+class MoveUpToSameIndent extends MoveUpToNonBlank
+  @extend()
+  moveCursor: (cursor) ->
+    cursorRow = cursor.getBufferRow()
+    baseIndentLevel = getIndentLevelForBufferRow(@editor, cursorRow)
+    column = cursor.getBufferColumn()
+    @countTimes =>
+      newRow = _.detect @getScanRows(cursor), (row) =>
+        not @editor.isBufferRowBlank(row) and
+          getIndentLevelForBufferRow(@editor, row) is baseIndentLevel
+      if newRow?
+        cursor.setBufferPosition([newRow, column])
+
+class MoveDownToSameIndent extends MoveUpToSameIndent
+  @extend()
+  direction: 'down'
+
+# -------------------------
 class MoveToPreviousWord extends Motion
   @extend()
   moveCursor: (cursor) ->
