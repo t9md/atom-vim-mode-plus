@@ -17,6 +17,7 @@ globalState = require './global-state'
   flashRanges
   moveCursorToFirstCharacterAtRow
   sortRanges
+  getIndentLevelForBufferRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -959,19 +960,21 @@ class MoveToPreviousFoldStart extends Motion
       result.push {start: startRow, end: endRow}
     result
 
-  detectRow: (cursor, direction) ->
+  getScanRows: (cursor) ->
     cursorRow = cursor.getBufferRow()
-    stopper = switch direction
+    isValidRow = switch @direction
       when 'prev' then (row) -> row < cursorRow
       when 'next' then (row) -> row > cursorRow
+    @rows.filter(isValidRow)
 
-    for row in @rows when stopper(row)
+  detectRow: (cursor) ->
+    for row in @getScanRows(cursor)
       return row
     null
 
   moveCursor: (cursor) ->
     @countTimes =>
-      if (row = @detectRow(cursor, @direction))?
+      if (row = @detectRow(cursor))?
         moveCursorToFirstCharacterAtRow(cursor, row)
 
 class MoveToNextFoldStart extends MoveToPreviousFoldStart
@@ -980,22 +983,12 @@ class MoveToNextFoldStart extends MoveToPreviousFoldStart
 
 class MoveToPreviousFoldStartWithSameIndent extends MoveToPreviousFoldStart
   @extend()
-  getIndentLevelForRow: (row) ->
-    text = @editor.lineTextForBufferRow(row)
-    @editor.indentLevelForLine(text)
-
-  detectRow: (cursor, direction) ->
-    cursorRow = cursor.getBufferRow()
-    stopper = switch direction
-      when 'prev' then (row) -> row < cursorRow
-      when 'next' then (row) -> row > cursorRow
-
-    baseIndentLevel = @getIndentLevelForRow(cursorRow)
-    for row in @rows when stopper(row)
-      if @getIndentLevelForRow(row) is baseIndentLevel
+  detectRow: (cursor) ->
+    baseIndentLevel = getIndentLevelForBufferRow(@editor, cursor.getBufferRow())
+    for row in @getScanRows(cursor)
+      if getIndentLevelForBufferRow(@editor, row) is baseIndentLevel
         return row
     null
-
 
 class MoveToNextFoldStartWithSameIndent extends MoveToPreviousFoldStartWithSameIndent
   @extend()
