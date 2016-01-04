@@ -938,15 +938,15 @@ class MoveToPair extends Motion
   inclusive: true
   member: ["Parenthesis", "CurlyBracket", "SquareBracket"]
 
-  getRange: (cursor) ->
+  getPoint: (cursor) ->
     ranges = @new("AAnyPair", {enclosed: false, @member}).getRanges(cursor.selection)
     ranges.filter ({start, end}) ->
       cursor.getBufferRow() in [start.row, end.row]
     return null unless ranges.length
 
+    # Calling containsPoint exclusive(true to 2nd arg) make opening pair under
+    # cursor is grouped to forwardingRanges
     [enclosingRanges, forwardingRanges] = _.partition ranges, (range) ->
-      # Calling containsPoint exclusive(true to 2nd arg) make opening pair under
-      # cursor is grouped to forwardingRanges
       range.containsPoint(cursor.getBufferPosition(), true)
     enclosingRange = _.last(sortRanges(enclosingRanges))
     forwardingRanges = sortRanges(forwardingRanges)
@@ -955,11 +955,8 @@ class MoveToPair extends Motion
       forwardingRanges = forwardingRanges.filter (range) ->
         enclosingRange.containsRange(range)
 
-    forwardingRanges[0] or enclosingRange
+    forwardingRanges[0]?.end.translate([0, -1]) or enclosingRange?.start
 
   moveCursor: (cursor) ->
-    if range = @getRange(cursor)
-      {start, end} = range.translate([0, 0], [0, -1])
-      cursorPoint = cursor.getBufferPosition()
-      point = if start.isLessThan(cursorPoint) then start else end
+    if point = @getPoint(cursor)
       cursor.setBufferPosition(point)
