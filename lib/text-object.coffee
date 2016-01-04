@@ -27,24 +27,23 @@ class TextObject extends Base
   isLinewise: ->
     swrap.detectVisualModeSubmode(@editor) is 'linewise'
 
-  eachSelection: (fn) ->
-    for s in @editor.getSelections()
-      fn(s)
-      {start, end} = s.getBufferRange()
-      if swrap(s).detectVisualModeSubmode() is 'characterwise' and end.column is 0
+  select: ->
+    for selection in @editor.getSelections()
+      @selectTextObject(selection)
+      {start, end} = selection.getBufferRange()
+      if (end.column is 0) and swrap(selection).detectVisualModeSubmode() is 'characterwise'
         end = getEolBufferPositionForRow(@editor, end.row - 1)
-        swrap(s).setBufferRangeSafely([start, end])
+        swrap(selection).setBufferRangeSafely([start, end])
     @emitDidSelect()
 
 # -------------------------
 # [FIXME] Need to be extendable.
 class Word extends TextObject
   @extend(false)
-  select: ->
-    @eachSelection (selection) =>
-      wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
-      @selectInner(selection, wordRegex)
-      @selectA(selection) if @isA()
+  selectTextObject: (selection) ->
+    wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
+    @selectInner(selection, wordRegex)
+    @selectA(selection) if @isA()
 
   selectInner: (selection, wordRegex=null) ->
     selection.selectWord()
@@ -197,9 +196,8 @@ class Pair extends TextObject
       pairInfo = @getPairInfo(from: pairInfo.aRange.end, @pair, enclosed)
     pairInfo?.targetRange
 
-  select: ->
-    @eachSelection (s) =>
-      swrap(s).setBufferRangeSafely @getRange(s, {@enclosed})
+  selectTextObject: (selection) ->
+    swrap(selection).setBufferRangeSafely @getRange(selection, {@enclosed})
 
 # -------------------------
 class AnyPair extends Pair
@@ -222,9 +220,8 @@ class AnyPair extends Pair
     ranges = @getRanges(selection)
     _.last(sortRanges(ranges)) if ranges.length
 
-  select: ->
-    @eachSelection (s) =>
-      swrap(s).setBufferRangeSafely @getNearestRange(s)
+  selectTextObject: (selection) ->
+    swrap(selection).setBufferRangeSafely @getNearestRange(selection)
 
 class AAnyPair extends AnyPair
   @extend()
@@ -378,11 +375,10 @@ class Paragraph extends TextObject
         @getRange(endRow + 1)?.end
       selection.selectToBufferPosition point if point?
 
-  select: ->
-    @eachSelection (selection) =>
-      _.times @getCount(), =>
-        @selectParagraph(selection)
-        @selectParagraph(selection) if @instanceof('AParagraph')
+  selectTextObject: (selection) ->
+    _.times @getCount(), =>
+      @selectParagraph(selection)
+      @selectParagraph(selection) if @instanceof('AParagraph')
 
 class AParagraph extends Paragraph
   @extend()
@@ -440,12 +436,11 @@ class Fold extends TextObject
         startRow += 1 if @isInner()
         return [startRow, endRow]
 
-  select: ->
-    @eachSelection (selection) =>
-      [startRow, endRow] = selection.getBufferRowRange()
-      row = if selection.isReversed() then startRow else endRow
-      if rowRange = @getFoldRowRangeForBufferRow(row)
-        swrap(selection).selectRowRange(rowRange)
+  selectTextObject: (selection) ->
+    [startRow, endRow] = selection.getBufferRowRange()
+    row = if selection.isReversed() then startRow else endRow
+    if rowRange = @getFoldRowRangeForBufferRow(row)
+      swrap(selection).selectRowRange(rowRange)
 
 class AFold extends Fold
   @extend()
@@ -508,12 +503,11 @@ class InnerFunction extends Function
 # -------------------------
 class CurrentLine extends TextObject
   @extend(false)
-  select: ->
-    @eachSelection (selection) =>
-      {cursor} = selection
-      cursor.moveToBeginningOfLine()
-      cursor.moveToFirstCharacterOfLine() if @isInner()
-      selection.selectToEndOfBufferLine()
+  selectTextObject: (selection) ->
+    {cursor} = selection
+    cursor.moveToBeginningOfLine()
+    cursor.moveToFirstCharacterOfLine() if @isInner()
+    selection.selectToEndOfBufferLine()
 
 class ACurrentLine extends CurrentLine
   @extend()
@@ -524,9 +518,8 @@ class InnerCurrentLine extends CurrentLine
 # -------------------------
 class Entire extends TextObject
   @extend(false)
-  select: ->
-    @eachSelection (selection) =>
-      @editor.selectAll()
+  selectTextObject: (selection) ->
+    @editor.selectAll()
 
 class AEntire extends Entire
   @extend()
@@ -540,9 +533,8 @@ class LatestChange extends TextObject
   getRange: ->
     @vimState.mark.getRange('[', ']')
 
-  select: ->
-    @eachSelection (selection) =>
-      swrap(selection).setBufferRangeSafely @getRange()
+  selectTextObject: (selection) ->
+    swrap(selection).setBufferRangeSafely @getRange()
 
 class ALatestChange extends LatestChange
   @extend()
