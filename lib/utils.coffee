@@ -299,6 +299,10 @@ getTextToPoint = (editor, {row, column}, {exclusive}={}) ->
   else
     editor.lineTextForBufferRow(row)[0..column]
 
+getIndentLevelForBufferRow = (editor, row) ->
+  text = editor.lineTextForBufferRow(row)
+  editor.indentLevelForLine(text)
+
 module.exports = {
   include
   debug
@@ -343,4 +347,5 @@ module.exports = {
   pick
   clipScreenPositionForBufferPosition
   getTextToPoint
+  getIndentLevelForBufferRow
 }
