@@ -978,6 +978,29 @@ class MoveToNextFoldStart extends MoveToPreviousFoldStart
   @extend()
   direction: 'next'
 
+class MoveToPreviousFoldStartWithSameIndent extends MoveToPreviousFoldStart
+  @extend()
+  getIndentLevelForRow: (row) ->
+    text = @editor.lineTextForBufferRow(row)
+    @editor.indentLevelForLine(text)
+
+  detectRow: (cursor, direction) ->
+    cursorRow = cursor.getBufferRow()
+    stopper = switch direction
+      when 'prev' then (row) -> row < cursorRow
+      when 'next' then (row) -> row > cursorRow
+
+    baseIndentLevel = @getIndentLevelForRow(cursorRow)
+    for row in @rows when stopper(row)
+      if @getIndentLevelForRow(row) is baseIndentLevel
+        return row
+    null
+
+
+class MoveToNextFoldStartWithSameIndent extends MoveToPreviousFoldStartWithSameIndent
+  @extend()
+  direction: 'next'
+
 class MoveToPreviousFoldEnd extends MoveToPreviousFoldStart
   @extend()
   which: 'end'
