@@ -8,6 +8,7 @@ swrap = require './selection-wrapper'
   rangeToBeginningOfFileFromPoint, rangeToEndOfFileFromPoint
   sortRanges, countChar, pointIsAtEndOfLine, getEolBufferPositionForRow
   getTextToPoint
+  getIndentLevelForBufferRow
 } = require './utils'
 
 class TextObject extends Base
@@ -388,14 +389,12 @@ class Indentation extends Paragraph
 
   getRange: (startRow) ->
     return if @editor.isBufferRowBlank(startRow)
-    text = @editor.lineTextForBufferRow(startRow)
-    baseIndentLevel = @editor.indentLevelForLine(text)
+    baseIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
     fn = (row) =>
       if @editor.isBufferRowBlank(row)
         @isInner()
       else
-        text = @editor.lineTextForBufferRow(row)
-        @editor.indentLevelForLine(text) < baseIndentLevel
+        getIndentLevelForBufferRow(@editor, row) < baseIndentLevel
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
 
 class AIndentation extends Indentation
