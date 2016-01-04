@@ -273,6 +273,14 @@ getValidVimRow = (editor, row) ->
     when (row > vimLastBufferRow) then vimLastBufferRow
     else row
 
+# Compensate lack of ternaly operator
+# e.g. pick(['one', 'two'], true) get 'one'
+pick = (choice, boolean) ->
+  if boolean
+    choice[0]
+  else
+    choice[1]
+
 module.exports = {
   include
   debug
@@ -314,4 +322,5 @@ module.exports = {
   getValidVimRow
   moveCursorToFirstCharacterAtRow
   countChar
+  pick
 }
