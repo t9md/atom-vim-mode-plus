@@ -50,6 +50,9 @@
   # 'g k': 'vim-mode-plus:move-up-to-non-blank'
   # 'g j': 'vim-mode-plus:move-down-to-non-blank'
 
+  # 'ctrl-cmd-k': 'vim-mode-plus:move-up-to-edge'
+  # 'ctrl-cmd-j': 'vim-mode-plus:move-down-to-edge'
+
   'w':     'vim-mode-plus:move-to-next-word'
   'W':     'vim-mode-plus:move-to-next-whole-word'
   'e':     'vim-mode-plus:move-to-end-of-word'

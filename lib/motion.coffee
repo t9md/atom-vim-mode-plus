@@ -202,6 +202,8 @@ class MoveDown extends MoveUp
   move: (cursor) ->
     moveCursorDown(cursor)
 
+# TODO: Support softwrapped row
+# -------------------------
 class MoveUpToNonBlank extends Motion
   @extend()
   linewise: true
@@ -237,6 +239,53 @@ class MoveDownToNonBlank extends MoveUpToNonBlank
   @extend()
   direction: 'down'
 
+# Move down/up to edgeRow.
+# -------------------------
+# What is edgeRow?
+# - edgeColumn:
+#  (char at column is nonBlank) or (char at both next and previous column is NonBlank)
+#  In other word, even if that column is blank, unless it is part of 2 consequtive blank, its edgeColumn.
+# - edgeRow:
+#  edgeColumn row where (next or previous) row is NonEdgeColumn row(=border)
+class MoveUpToEdge extends MoveUpToNonBlank
+  @extend()
+  direction: 'up'
+  isMovableColumn: (row, column) ->
+    @isEdgeRow(row, column)
+
+  isEdgeRow: (row, column) ->
+    if @isEdgeColumn(row, column)
+      if row in [0, getVimLastBufferRow(@editor)]
+        true
+      else
+        @isNonEdgeColumn(row - 1, column) or @isNonEdgeColumn(row + 1, column)
+    else
+      false
+
+  isNonEdgeColumn: (row, column) ->
+    not @isEdgeColumn(row, column)
+
+  isValidEdgeColumn: (row, column) ->
+    text = @editor.lineTextForBufferRow(row)
+    if (match = text.match(/\S/g))?
+      [firstChar, ..., lastChar] = match
+      text.indexOf(firstChar) <= column <= text.lastIndexOf(lastChar)
+    else
+      false
+
+  isEdgeColumn: (row, column) ->
+    if @isNonBlankColumn(row, column)
+      true
+    else if @isValidEdgeColumn(row,  column)
+      @isNonBlankColumn(row, column - 1) and @isNonBlankColumn(row, column + 1)
+    else
+      false
+
+class MoveDownToEdge extends MoveUpToEdge
+  @extend()
+  direction: 'down'
+
+# -------------------------
 class MoveToPreviousWord extends Motion
   @extend()
   moveCursor: (cursor) ->
