@@ -6,7 +6,8 @@ Base = require './base'
 swrap = require './selection-wrapper'
 {
   rangeToBeginningOfFileFromPoint, rangeToEndOfFileFromPoint
-  sortRanges, countChar
+  sortRanges, countChar, pointIsAtEndOfLine, getEolBufferPositionForRow
+  getTextToPoint
 } = require './utils'
 
 class TextObject extends Base
@@ -27,7 +28,12 @@ class TextObject extends Base
     swrap.detectVisualModeSubmode(@editor) is 'linewise'
 
   eachSelection: (fn) ->
-    fn(s) for s in @editor.getSelections()
+    for s in @editor.getSelections()
+      fn(s)
+      {start, end} = s.getBufferRange()
+      if swrap(s).detectVisualModeSubmode() is 'characterwise' and end.column is 0
+        end = getEolBufferPositionForRow(@editor, end.row - 1)
+        swrap(s).setBufferRangeSafely([start, end])
     @emitDidSelect()
 
 # -------------------------
@@ -88,8 +94,7 @@ class Pair extends TextObject
       ['open', 'close'][pair.indexOf(matchText)]
 
   pairStateInBufferRange: (range, char) ->
-    {row, column} = range.end
-    text = @editor.lineTextForBufferRow(row)[0...column]
+    text = getTextToPoint(@editor, range.end)
     pattern = ///[^\\]?#{_.escapeRegExp(char)}///
     ['close', 'open'][(countChar(text, pattern) % 2)]
 
@@ -170,7 +175,10 @@ class Pair extends TextObject
 
     if openRange? and closeRange?
       aRange = new Range(openRange.start, closeRange.end)
-      innerRange = new Range(openRange.end, closeRange.start)
+      [innerStart, innerEnd] = [openRange.end, closeRange.start]
+      innerStart = [innerStart.row + 1, 0] if pointIsAtEndOfLine(@editor, innerStart)
+      innerEnd = [innerEnd.row, 0] if getTextToPoint(@editor, innerEnd).match(/^\s*$/)
+      innerRange = new Range(innerStart, innerEnd)
       targetRange = if @isInner() then innerRange else aRange
       pairInfo = {openRange, closeRange, aRange, innerRange, targetRange}
     pairInfo

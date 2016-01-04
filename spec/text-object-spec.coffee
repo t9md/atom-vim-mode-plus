@@ -186,7 +186,7 @@ describe "TextObject", ->
         ensure 'is', selectedText: """1s-1e"""
         ensure 'is', selectedText: """2s(1s-1e)2e"""
         ensure 'is', selectedText: """3s\n----"2s(1s-1e)2e"\n---3e"""
-        ensure 'is', selectedText: """4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e\n"""
+        ensure 'is', selectedText: """4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e"""
     describe "a-any-pair", ->
       it "applies operators any a-pair and repeatable", ->
         ensure 'das',
