@@ -84,7 +84,6 @@ class Pair extends TextObject
   pair: null
 
   # Return 'open' or 'close'
-  {inspect} = require 'util'
   getPairState: (pair, matchText, range) ->
     [openChar, closeChar] = pair
     if openChar is closeChar
@@ -194,10 +193,7 @@ class AnyPair extends Pair
     @new(klass, {@inner}).getRange(selection, {@enclosed})
 
   getRanges: (selection) ->
-    ranges = []
-    for klass in @member when (range = @getRangeBy(klass, selection))
-      ranges.push range
-    ranges
+    (range for klass in @member when (range = @getRangeBy(klass, selection)))
 
   getNearestRange: (selection) ->
     ranges = @getRanges(selection)
