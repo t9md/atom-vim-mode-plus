@@ -205,32 +205,37 @@ class MoveDown extends MoveUp
 class MoveUpToNonBlank extends Motion
   @extend()
   linewise: true
-
-  getNewRow: (rows, column) ->
-    for row in rows
-      (char = @editor.lineTextForBufferRow(row)[column])
-      if char? and /\S/.test(char)
-        return row
-    null
-
-  getScanRows: (cursor) ->
-    startRow = getValidVimRow(@editor, cursor.getBufferRow() - 1)
-    endRow = 0
-    [startRow..endRow]
+  direction: 'up'
 
   moveCursor: (cursor) ->
     column = cursor.getBufferColumn()
     @countTimes =>
-      scanRows = @getScanRows(cursor)
-      if newRow = @getNewRow(scanRows, column)
+      newRow = _.detect @getScanRows(cursor), (row) => @isMovableColumn(row, column)
+      if newRow?
         cursor.setBufferPosition([newRow, column])
+
+  getScanRows: (cursor) ->
+    cursorRow = cursor.getBufferRow()
+    [startRow, endRow] = switch @direction
+      when 'up' then [cursorRow - 1, 0]
+      when 'down' then [cursorRow + 1, getVimLastBufferRow(@editor)]
+    [getValidVimRow(@editor, startRow)..endRow]
+
+  isMovableColumn: (row, column) ->
+    @isNonBlankColumn(row, column)
+
+  isBlankColumn: (row, column) ->
+    if (text = @editor.lineTextForBufferRow(row)[column])?
+      /\s/.test(text)
+    else
+      true
+
+  isNonBlankColumn: (row, column) ->
+    not @isBlankColumn(row, column)
 
 class MoveDownToNonBlank extends MoveUpToNonBlank
   @extend()
-  getScanRows: (cursor) ->
-    startRow = getValidVimRow(@editor, cursor.getBufferRow() + 1)
-    endRow = getVimLastBufferRow(@editor)
-    [startRow..endRow]
+  direction: 'down'
 
 class MoveToPreviousWord extends Motion
   @extend()
