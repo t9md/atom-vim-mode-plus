@@ -281,6 +281,24 @@ pick = (choice, boolean) ->
   else
     choice[1]
 
+# special {translate} option is used to translate AFTER converting to
+# screenPosition
+# Since translate in bufferPosition is abondoned when converted to screenPosition.
+clipScreenPositionForBufferPosition = (editor, bufferPosition, options) ->
+  screenPosition = editor.screenPositionForBufferPosition(bufferPosition)
+  {translate} = options
+  delete options.translate
+  screenPosition = screenPosition.translate(translate) if translate
+  editor.clipScreenPosition(screenPosition, options)
+
+# By default not include column
+getTextToPoint = (editor, {row, column}, {exclusive}={}) ->
+  exclusive ?= true
+  if exclusive
+    editor.lineTextForBufferRow(row)[0...column]
+  else
+    editor.lineTextForBufferRow(row)[0..column]
+
 module.exports = {
   include
   debug
@@ -323,4 +341,6 @@ module.exports = {
   moveCursorToFirstCharacterAtRow
   countChar
   pick
+  clipScreenPositionForBufferPosition
+  getTextToPoint
 }
