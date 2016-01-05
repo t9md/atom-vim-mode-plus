@@ -325,7 +325,6 @@ class MoveToPreviousWholeWord extends MoveToPreviousWord
   @extend()
   wordRegex: /^\s*$|\S+/
 
-# TODO: Cleanup
 class MoveToNextWord extends Motion
   @extend()
   wordRegex: null
@@ -334,12 +333,21 @@ class MoveToNextWord extends Motion
     @onDidSetTarget (operator) =>
       @usedByChange = operator.constructor.name is 'Change'
 
-  getNext: (cursor, options) ->
+  getPoint: (cursor, options) ->
     point = cursor.getBeginningOfNextWordBufferPosition(options)
     if cursor.getBufferPosition().isEqual(point) or
         (point.row > getVimLastBufferRow(@editor))
       point = cursor.getEndOfCurrentWordBufferPosition(options)
     point
+
+  getPointForChange: (cursor, {wordRegex, allowNextLine}) ->
+    if isAllWhiteSpace(getTextAtCursor(cursor))
+      point = cursor.getBeginningOfNextWordBufferPosition({wordRegex})
+      unless allowNextLine
+        point = Point.min(point, getEolBufferPositionForCursor(cursor))
+      point
+    else
+      cursor.getEndOfCurrentWordBufferPosition()
 
   textToEndOfLineIsAllWhiteSpace: (cursor) ->
     textToEOL = getTextFromPointToEOL(@editor, cursor.getBufferPosition())
@@ -347,19 +355,12 @@ class MoveToNextWord extends Motion
 
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
-    wasAtEOL = false
+    allowNextLine = false
     @countTimes =>
       if @usedByChange
-        if isAllWhiteSpace(getTextAtCursor(cursor))
-          point = cursor.getBeginningOfNextWordBufferPosition({@wordRegex})
-          eol = getEolBufferPositionForCursor(cursor)
-          if point.isGreaterThanOrEqual(eol) and (not wasAtEOL)
-            wasAtEOL = true
-            point = eol
-        else
-          point = cursor.getEndOfCurrentWordBufferPosition()
+        point = @getPointForChange(cursor, {@wordRegex, allowNextLine})
         cursor.setBufferPosition(point)
-        return
+        allowNextLine = cursor.isAtEndOfLine()
       else
         # [FIXME] This is workaround for Atom's Cursor::isInsideWord() return `true`
         # when text from cursor to EOL is all white space
@@ -367,7 +368,7 @@ class MoveToNextWord extends Motion
           cursor.moveDown()
           cursor.moveToFirstCharacterOfLine()
         else
-          cursor.setBufferPosition @getNext(cursor, {@wordRegex})
+          cursor.setBufferPosition @getPoint(cursor, {@wordRegex})
 
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
