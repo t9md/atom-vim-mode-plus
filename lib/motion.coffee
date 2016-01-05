@@ -244,33 +244,27 @@ class MoveDownToNonBlank extends MoveUpToNonBlank
   @extend()
   direction: 'down'
 
-# Move down/up to edgeRow.
+# Move down/up to Edge
 # -------------------------
-# What is edgeRow?
-# - edgeColumn:
-#  (char at column is nonBlank) or (char at both next and previous column is NonBlank)
-#  In other word, even if that column is blank, unless it is part of 2 consequtive blank, its edgeColumn.
-# - edgeRow:
-#  edgeColumn row where (next or previous) row is NonEdgeColumn row(=border)
 class MoveUpToEdge extends MoveUpToNonBlank
   @extend()
   direction: 'up'
   isMovableColumn: (row, column) ->
-    @isEdgeRow(row, column)
-
-  isEdgeRow: (row, column) ->
-    if @isEdgeColumn(row, column)
+    if @isStoppableColumn(row, column)
+      # first and last row is always edge.
       if row in [0, getVimLastBufferRow(@editor)]
         true
       else
-        @isNonEdgeColumn(row - 1, column) or @isNonEdgeColumn(row + 1, column)
+        # If one of next/prev row is not stoppable, it's Edge!
+        stoppableAtNextRow = @isStoppableColumn(row + 1, column)
+        stoppableAtPrevRow = @isStoppableColumn(row - 1, column)
+        (not stoppableAtNextRow) or (not stoppableAtPrevRow)
     else
       false
 
-  isNonEdgeColumn: (row, column) ->
-    not @isEdgeColumn(row, column)
-
-  isValidEdgeColumn: (row, column) ->
+  # To avoid stopping on indentation or trailing whitespace,
+  # we exclude leading and trailing whitespace from stoppable column.
+  isValidStoppableColumn: (row, column) ->
     text = @editor.lineTextForBufferRow(row)
     if (match = text.match(/\S/g))?
       [firstChar, ..., lastChar] = match
@@ -278,10 +272,11 @@ class MoveUpToEdge extends MoveUpToNonBlank
     else
       false
 
-  isEdgeColumn: (row, column) ->
+  isStoppableColumn: (row, column) ->
     if @isNonBlankColumn(row, column)
       true
-    else if @isValidEdgeColumn(row,  column)
+    else if @isValidStoppableColumn(row,  column)
+      # If right or left column is not blank, we can stop.
       @isNonBlankColumn(row, column - 1) and @isNonBlankColumn(row, column + 1)
     else
       false
