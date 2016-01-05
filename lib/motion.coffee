@@ -310,18 +310,16 @@ class MoveDownToSameIndent extends MoveUpToSameIndent
 # -------------------------
 class MoveToPreviousWord extends Motion
   @extend()
-  moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveToBeginningOfWord()
-
-class MoveToPreviousWholeWord extends Motion
-  @extend()
-  wordRegex: /^\s*$|\S+/
+  wordRegex: null
 
   moveCursor: (cursor) ->
     @countTimes =>
       point = cursor.getBeginningOfCurrentWordBufferPosition({@wordRegex})
       cursor.setBufferPosition(point)
+
+class MoveToPreviousWholeWord extends MoveToPreviousWord
+  @extend()
+  wordRegex: /^\s*$|\S+/
 
 class MoveToNextWord extends Motion
   @extend()
@@ -332,27 +330,28 @@ class MoveToNextWord extends Motion
     @onDidSetTarget (operator) =>
       @excludeWhitespace = operator.constructor.name is 'Change'
 
-  getNext: (cursor) ->
+  getNext: (cursor, options) ->
     if @excludeWhitespace
-      cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
+      cursor.getEndOfCurrentWordBufferPosition(options)
     else
-      cursor.getBeginningOfNextWordBufferPosition(wordRegex: @wordRegex)
+      cursorPoint = cursor.getBufferPosition()
+      vimLastRow = getVimLastBufferRow(@editor)
+
+      point = cursor.getBeginningOfNextWordBufferPosition(options)
+      if point.isEqual(cursorPoint) or (point.row > vimLastRow)
+        point = cursor.getEndOfCurrentWordBufferPosition(options)
+      point
 
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
     @countTimes =>
       if cursor.isAtEndOfLine() and not cursorIsAtVimEndOfFile(cursor)
+        # [FIXME] This is workarounding Atom's Cursor::isInsideWord()
+        # return `true` when cursor is at EOL
         cursor.moveDown()
         cursor.moveToFirstCharacterOfLine()
       else
-        point = @getNext(cursor)
-        if point.isEqual(cursor.getBufferPosition())
-          cursor.moveToEndOfWord()
-        else
-          if point.row is getVimLastBufferRow(@editor) + 1
-            cursor.moveToEndOfWord()
-          else
-            cursor.setBufferPosition(point)
+        cursor.setBufferPosition @getNext(cursor, {@wordRegex})
 
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
@@ -362,9 +361,8 @@ class MoveToEndOfWord extends Motion
   @extend()
   wordRegex: null
   inclusive: true
-
   getNext: (cursor) ->
-    point = cursor.getEndOfCurrentWordBufferPosition(wordRegex: @wordRegex)
+    point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
     point.column -= 1 if point.column > 0
     point
 
