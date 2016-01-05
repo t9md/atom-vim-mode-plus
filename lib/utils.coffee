@@ -163,6 +163,9 @@ mergeIntersectingRanges = (ranges) ->
 getEolBufferPositionForRow = (editor, row) ->
   editor.bufferRangeForBufferRow(row).end
 
+getEolBufferPositionForCursor = (cursor) ->
+  getEolBufferPositionForRow(cursor.editor, cursor.getBufferRow())
+
 pointIsAtEndOfLine = (editor, point) ->
   point = Point.fromObject(point)
   getEolBufferPositionForRow(editor, point.row).isEqual(point)
@@ -170,6 +173,11 @@ pointIsAtEndOfLine = (editor, point) ->
 characterAtPoint = (editor, point) ->
   range = Range.fromPointWithDelta(point, 0, 1)
   char = editor.getTextInBufferRange(range)
+
+getTextAtCursor = (cursor) ->
+  {editor} = cursor
+  bufferRange = editor.bufferRangeForScreenRange(cursor.getScreenRange())
+  editor.getTextInBufferRange(bufferRange)
 
 # Return Vim's EOF position rather than Atom's EOF position.
 # This function change meaning of EOF from native TextEditor::getEofBufferPosition()
@@ -299,9 +307,19 @@ getTextToPoint = (editor, {row, column}, {exclusive}={}) ->
   else
     editor.lineTextForBufferRow(row)[0..column]
 
+getTextFromPointToEOL = (editor, {row, column}, {exclusive}={}) ->
+  exclusive ?= false
+  start = column
+  start += 1 if exclusive
+  editor.lineTextForBufferRow(row)[start..]
+
 getIndentLevelForBufferRow = (editor, row) ->
   text = editor.lineTextForBufferRow(row)
   editor.indentLevelForLine(text)
+
+WhiteSpaceRegExp = /^\s*$/
+isAllWhiteSpace = (text) ->
+  WhiteSpaceRegExp.test(text)
 
 module.exports = {
   include
@@ -338,6 +356,7 @@ module.exports = {
   moveCursorDown
   unfoldAtCursorRow
   getEolBufferPositionForRow
+  getEolBufferPositionForCursor
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
   flashRanges
@@ -347,5 +366,8 @@ module.exports = {
   pick
   clipScreenPositionForBufferPosition
   getTextToPoint
+  getTextFromPointToEOL
   getIndentLevelForBufferRow
+  isAllWhiteSpace
+  getTextAtCursor
 }

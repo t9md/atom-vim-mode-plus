@@ -287,6 +287,37 @@ describe "Motion general", ->
         set text: 'abc', cursor: [0, 0]
         ensure 'w', cursor: [0, 2]
 
+      it "moves the cursor to beginning of the next word of next line when all remaining text is white space.", ->
+        set text: "012   \n  234", cursor: [0, 3]
+        ensure 'w', cursor: [1, 2]
+
+      it "moves the cursor to beginning of the next word of next line when cursor is at EOL.", ->
+        set text: "\n  234", cursor: [0, 0]
+        ensure 'w', cursor: [1, 2]
+
+    describe "when used by Change operator", ->
+      beforeEach ->
+        set text: "  var1 = 1\n  var2 = 2\n"
+
+      describe "when cursor is on word", ->
+        it "not eat whitespace", ->
+          set cursor: [0, 3]
+          ensure 'cw', text: "  v = 1\n  var2 = 2\n", cursor: [0, 3]
+
+      describe "when cursor is on white space", ->
+        it "only eat white space", ->
+          set cursor: [0, 0]
+          ensure 'cw', text: "var1 = 1\n  var2 = 2\n", cursor: [0, 0]
+
+      describe "when text to EOL is all white space", ->
+        it "wont eat new line character", ->
+          set text: "abc  \ndef\n", cursor: [0, 3]
+          ensure 'cw', text: "abc\ndef\n", cursor: [0, 3]
+
+        it "cant eat new line when count is specified", ->
+          set text: "\n\n\n\n\nline6\n", cursor: [0, 0]
+          ensure '5cw', text: "\nline6\n", cursor: [0, 0]
+
     describe "as a selection", ->
       describe "within a word", ->
         it "selects to the end of the word", ->
@@ -311,6 +342,38 @@ describe "Motion general", ->
         ensure 'W', cursor: [1, 1]
         ensure 'W', cursor: [2, 0]
         ensure 'W', cursor: [3, 0]
+
+      it "moves the cursor to beginning of the next word of next line when all remaining text is white space.", ->
+        set text: "012   \n  234", cursor: [0, 3]
+        ensure 'W', cursor: [1, 2]
+
+      it "moves the cursor to beginning of the next word of next line when cursor is at EOL.", ->
+        set text: "\n  234", cursor: [0, 0]
+        ensure 'W', cursor: [1, 2]
+
+    # This spec is redundant since W(MoveToNextWholeWord) is child of w(MoveToNextWord).
+    describe "when used by Change operator", ->
+      beforeEach ->
+        set text: "  var1 = 1\n  var2 = 2\n"
+
+      describe "when cursor is on word", ->
+        it "not eat whitespace", ->
+          set cursor: [0, 3]
+          ensure 'cW', text: "  v = 1\n  var2 = 2\n", cursor: [0, 3]
+
+      describe "when cursor is on white space", ->
+        it "only eat white space", ->
+          set cursor: [0, 0]
+          ensure 'cW', text: "var1 = 1\n  var2 = 2\n", cursor: [0, 0]
+
+      describe "when text to EOL is all white space", ->
+        it "wont eat new line character", ->
+          set text: "abc  \ndef\n", cursor: [0, 3]
+          ensure 'cW', text: "abc\ndef\n", cursor: [0, 3]
+
+        it "cant eat new line when count is specified", ->
+          set text: "\n\n\n\n\nline6\n", cursor: [0, 0]
+          ensure '5cW', text: "\nline6\n", cursor: [0, 0]
 
     describe "as a selection", ->
       describe "within a word", ->
