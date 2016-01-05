@@ -18,6 +18,10 @@ globalState = require './global-state'
   moveCursorToFirstCharacterAtRow
   sortRanges
   getIndentLevelForBufferRow
+  getTextFromPointToEOL
+  isAllWhiteSpace
+  getTextAtCursor
+  getEolBufferPositionForCursor
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -321,37 +325,49 @@ class MoveToPreviousWholeWord extends MoveToPreviousWord
   @extend()
   wordRegex: /^\s*$|\S+/
 
+# TODO: Cleanup
 class MoveToNextWord extends Motion
   @extend()
-  excludeWhitespace: false
   wordRegex: null
 
   initialize: ->
     @onDidSetTarget (operator) =>
-      @excludeWhitespace = operator.constructor.name is 'Change'
+      @usedByChange = operator.constructor.name is 'Change'
 
   getNext: (cursor, options) ->
-    if @excludeWhitespace
-      cursor.getEndOfCurrentWordBufferPosition(options)
-    else
-      cursorPoint = cursor.getBufferPosition()
-      vimLastRow = getVimLastBufferRow(@editor)
+    point = cursor.getBeginningOfNextWordBufferPosition(options)
+    if cursor.getBufferPosition().isEqual(point) or
+        (point.row > getVimLastBufferRow(@editor))
+      point = cursor.getEndOfCurrentWordBufferPosition(options)
+    point
 
-      point = cursor.getBeginningOfNextWordBufferPosition(options)
-      if point.isEqual(cursorPoint) or (point.row > vimLastRow)
-        point = cursor.getEndOfCurrentWordBufferPosition(options)
-      point
+  textToEndOfLineIsAllWhiteSpace: (cursor) ->
+    textToEOL = getTextFromPointToEOL(@editor, cursor.getBufferPosition())
+    isAllWhiteSpace(textToEOL)
 
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
+    wasAtEOL = false
     @countTimes =>
-      if cursor.isAtEndOfLine() and not cursorIsAtVimEndOfFile(cursor)
-        # [FIXME] This is workarounding Atom's Cursor::isInsideWord()
-        # return `true` when cursor is at EOL
-        cursor.moveDown()
-        cursor.moveToFirstCharacterOfLine()
+      if @usedByChange
+        if isAllWhiteSpace(getTextAtCursor(cursor))
+          point = cursor.getBeginningOfNextWordBufferPosition({@wordRegex})
+          eol = getEolBufferPositionForCursor(cursor)
+          if point.isGreaterThanOrEqual(eol) and (not wasAtEOL)
+            wasAtEOL = true
+            point = eol
+        else
+          point = cursor.getEndOfCurrentWordBufferPosition()
+        cursor.setBufferPosition(point)
+        return
       else
-        cursor.setBufferPosition @getNext(cursor, {@wordRegex})
+        # [FIXME] This is workaround for Atom's Cursor::isInsideWord() return `true`
+        # when text from cursor to EOL is all white space
+        if @textToEndOfLineIsAllWhiteSpace(cursor) and not cursorIsAtVimEndOfFile(cursor)
+          cursor.moveDown()
+          cursor.moveToFirstCharacterOfLine()
+        else
+          cursor.setBufferPosition @getNext(cursor, {@wordRegex})
 
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
