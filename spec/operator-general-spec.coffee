@@ -243,7 +243,7 @@ describe "Operator general", ->
               """
             cursor: [2, 0]
         it "deletes both lines", ->
-          ensure 'dk', text: "a\nb\n", cursor: [1, 1]
+          ensure 'dk', text: "a\nb\n", cursor: [1, 0]
 
       # [TODO] write more generic operator test. #119
       # This is general behavior of all operator.
