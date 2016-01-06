@@ -412,9 +412,6 @@ class MoveLineUp extends TransformString
   getRangeTranslationSpec: ->
     [[-1, 0], [0, 0]]
 
-  setBufferRange: (s, range) ->
-    swrap(s).setBufferRange(range, {preserveFolds: true})
-
   mutate: (s, setPoint) ->
     return unless @isMovable(s)
     reversed = s.isReversed()
