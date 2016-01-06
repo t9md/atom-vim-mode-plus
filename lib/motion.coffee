@@ -88,10 +88,10 @@ class Motion extends Base
   selectInclusive: (selection) ->
     {cursor} = selection
     moveLeft = ({allowWrap}={}) ->
-      moveCursorLeft(cursor, {allowWrap, preserveFolds: true, preserveGoalColumn: true})
+      moveCursorLeft(cursor, {allowWrap, preserveGoalColumn: true})
 
     moveRight = ({allowWrap}={}) ->
-      moveCursorRight(cursor, {allowWrap, preserveFolds: true, preserveGoalColumn: true})
+      moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
 
     mergeTailRange = (tailRange) ->
       newRange = selection.getBufferRange().union(tailRange)
