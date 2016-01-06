@@ -39,7 +39,7 @@ class SelectionWrapper
           reversed: @selection.isReversed()
 
   setReversedState: (reversed) ->
-    @setBufferRange @getBufferRange(), {autoscroll: true, reversed}
+    @setBufferRange @getBufferRange(), {autoscroll: true, reversed, preserveFolds: true}
 
   getRows: ->
     [startRow, endRow] = @selection.getBufferRowRange()
