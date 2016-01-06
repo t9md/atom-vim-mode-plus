@@ -22,6 +22,8 @@ globalState = require './global-state'
   isAllWhiteSpace
   getTextAtCursor
   getEolBufferPositionForCursor
+  cursorIsOnWhiteSpace
+  moveCursorToNextNonWhitespace
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -336,7 +338,7 @@ class MoveToNextWord extends Motion
     point
 
   getPointForChange: (cursor, {wordRegex, allowNextLine}) ->
-    if isAllWhiteSpace(getTextAtCursor(cursor))
+    if cursorIsOnWhiteSpace(cursor)
       point = cursor.getBeginningOfNextWordBufferPosition({wordRegex})
       unless allowNextLine
         point = Point.min(point, getEolBufferPositionForCursor(cursor))
@@ -373,21 +375,21 @@ class MoveToEndOfWord extends Motion
   @extend()
   wordRegex: null
   inclusive: true
-  getNext: (cursor) ->
-    point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
-    point.column -= 1 if point.column > 0
-    point
+
+  moveToNextEndOfWord: (cursor) ->
+    moveCursorToNextNonWhitespace(cursor)
+    point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex}).translate([0, -1])
+    point = Point.min(point, getVimEofBufferPosition(@editor))
+    cursor.setBufferPosition(point)
 
   moveCursor: (cursor) ->
     @countTimes =>
-      point = @getNext(cursor)
-      if point.isEqual(cursor.getBufferPosition())
+      originalPoint = cursor.getBufferPosition()
+      @moveToNextEndOfWord(cursor)
+      if originalPoint.isEqual(cursor.getBufferPosition())
+        # Retry from right column if cursor was already on EndOfWord
         cursor.moveRight()
-        if cursor.isAtEndOfLine() and not cursorIsAtVimEndOfFile(cursor)
-          cursor.moveDown()
-          cursor.moveToBeginningOfLine()
-        point = Point.min(getVimEofBufferPosition(@editor), @getNext(cursor))
-      cursor.setBufferPosition(point)
+        @moveToNextEndOfWord(cursor)
 
 class MoveToEndOfWholeWord extends MoveToEndOfWord
   @extend()

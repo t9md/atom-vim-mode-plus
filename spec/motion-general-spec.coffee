@@ -408,6 +408,14 @@ describe "Motion general", ->
         ensure 'e', cursor: [1, 3]
         ensure 'e', cursor: [3, 2]
 
+      it "skips whitespace until EOF", ->
+        set
+          text: "012\n\n\n012\n\n"
+          cursor: [0, 0]
+        ensure 'e', cursor: [0, 2]
+        ensure 'e', cursor: [3, 2]
+        ensure 'e', cursor: [4, 0]
+
     describe "as selection", ->
       describe "within a word", ->
         it "selects to the end of the current word", ->
