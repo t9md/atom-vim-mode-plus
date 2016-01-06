@@ -79,7 +79,7 @@ class SelectionWrapper
       end = if @selection.isReversed()
         editor.clipScreenPosition(start.translate([0, -1]), {clip: 'backward'})
       else
-        editor.clipScreenPosition(start.translate([0, +1]), {clip: 'forward'})
+        editor.clipScreenPosition(start.translate([0, +1]), {clip: 'forward', wrapBeyondNewlines: true})
 
       editor.bufferRangeForScreenRange([start, end])
 
