@@ -97,32 +97,28 @@ class Motion extends Base
       newRange = selection.getBufferRange().union(tailRange)
       selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
 
-    # We selectRight()ed in visual-mode, so normalize cursor position for being
-    # consitent to normal mode
-    selectLeft = ->
-      moveLeft(allowWrap: true) unless selection.isReversed()
-
     ensureCursorIsNotAtEndOfLine = ->
       moveLeft() if cursor.isAtEndOfLine()
 
-    selectRight = ->
-      moveRight(allowWrap: cursorIsAtEmptyRow(cursor))
-
+    tailRange = swrap(selection).getTailBufferRange()
     selection.modifySelection =>
-      selectLeft() if @isMode('visual')
-      tailRange = swrap(selection).getTailBufferRange()
-      originalPoint = cursor.getBufferPosition()
       @moveCursor(cursor)
       ensureCursorIsNotAtEndOfLine() if @isMode('visual')
       # When mode isnt 'visual' selection.isEmpty() at this point means no movement happened.
       return if not @isMode('visual') and selection.isEmpty()
-      selectRight() unless selection.isReversed()
       mergeTailRange(tailRange)
+      unless selection.isReversed()
+        moveRight(allowWrap: cursorIsAtEmptyRow(cursor))
 
   switchCharacterwise: (selection, fn) ->
     {cursor} = selection
     if @isMode('visual', 'linewise')
       swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
+    # We selectRight()ed in visual-mode, so normalize cursor position for being
+    # consitent to normal mode
+    if @isMode('visual') and not selection.isReversed()
+      selection.modifySelection ->
+        moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
     fn()
     if @isLinewise()
       if @isMode('visual', 'linewise')
