@@ -179,6 +179,16 @@ getTextAtCursor = (cursor) ->
   bufferRange = editor.bufferRangeForScreenRange(cursor.getScreenRange())
   editor.getTextInBufferRange(bufferRange)
 
+cursorIsOnWhiteSpace = (cursor) ->
+  isAllWhiteSpace(getTextAtCursor(cursor))
+
+# return true is moved
+moveCursorToNextNonWhitespace = (cursor) ->
+  originalPoint = cursor.getBufferPosition()
+  while cursorIsOnWhiteSpace(cursor) and (not cursorIsAtVimEndOfFile(cursor))
+    cursor.moveRight()
+  not originalPoint.isEqual(cursor.getBufferPosition())
+
 # Return Vim's EOF position rather than Atom's EOF position.
 # This function change meaning of EOF from native TextEditor::getEofBufferPosition()
 # Atom is special(strange) for cursor can past very last newline character.
@@ -370,4 +380,6 @@ module.exports = {
   getIndentLevelForBufferRow
   isAllWhiteSpace
   getTextAtCursor
+  cursorIsOnWhiteSpace
+  moveCursorToNextNonWhitespace
 }
