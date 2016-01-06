@@ -232,6 +232,19 @@ describe "Operator general", ->
           set cursor: [1, 2]
           ensure 'dk', text: 'ABCDE'
 
+      describe "when cursor is on blank line", ->
+        beforeEach ->
+          set
+            text: """
+              a
+
+
+              b\n
+              """
+            cursor: [2, 0]
+        it "deletes both lines", ->
+          ensure 'dk', text: "a\nb\n", cursor: [1, 1]
+
     describe "when followed by a G", ->
       beforeEach ->
         originalText = "12345\nabcde\nABCDE"
