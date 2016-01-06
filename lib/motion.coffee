@@ -99,7 +99,7 @@ class Motion extends Base
 
     # We selectRight()ed in visual-mode, so normalize cursor position for being
     # consitent to normal mode
-    normalizeCursorPosition = ->
+    selectLeft = ->
       moveLeft(allowWrap: true) unless selection.isReversed()
 
     ensureCursorIsNotAtEndOfLine = ->
@@ -109,7 +109,7 @@ class Motion extends Base
       moveRight(allowWrap: cursorIsAtEmptyRow(cursor))
 
     selection.modifySelection =>
-      normalizeCursorPosition() if @isMode('visual')
+      selectLeft() if @isMode('visual')
       tailRange = swrap(selection).getTailBufferRange()
       originalPoint = cursor.getBufferPosition()
       @moveCursor(cursor)
