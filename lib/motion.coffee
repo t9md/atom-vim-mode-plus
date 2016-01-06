@@ -24,6 +24,7 @@ globalState = require './global-state'
   getEolBufferPositionForCursor
   cursorIsOnWhiteSpace
   moveCursorToNextNonWhitespace
+  cursorIsAtEmptyRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -36,9 +37,12 @@ class Motion extends Base
   inclusive: false
   linewise: false
   options: null
+  operator: null
 
   constructor: ->
     super
+    @onDidSetTarget (operator) =>
+      @operator = operator
     @initialize?()
 
   isLinewise: ->
@@ -59,19 +63,13 @@ class Motion extends Base
 
   select: ->
     for selection in @editor.getSelections()
-      if @isMode('visual', 'linewise')
-        {goalColumn} = selection.cursor
-        swrap(selection).restoreCharacterwise()
-        selection.cursor.goalColumn = goalColumn if goalColumn
-
       if @isInclusive() or @isLinewise()
-        @selectInclusive selection
-        if @isLinewise()
-          swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
-          swrap(selection).expandOverLine({preserveGoalColumn: true})
+        @switchCharacterwise selection, =>
+          @selectInclusive selection
       else
         selection.modifySelection =>
           @moveCursor selection.cursor
+
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
     @emitDidSelect()
@@ -87,25 +85,49 @@ class Motion extends Base
   # When 'linewise' selection, cursor is at column '0' of NEXT line, so we need to moveLeft
   # by wrapping, to put cursor on row which actually be selected(from UX point of view).
   # This adjustment is important so that j, k works without special care in moveCursor.
-  #
   selectInclusive: (selection) ->
     {cursor} = selection
+    moveLeft = ({allowWrap}={}) ->
+      moveCursorLeft(cursor, {allowWrap, preserveFolds: true, preserveGoalColumn: true})
+
+    moveRight = ({allowWrap}={}) ->
+      moveCursorRight(cursor, {allowWrap, preserveFolds: true, preserveGoalColumn: true})
+
+    mergeTailRange = (tailRange) ->
+      newRange = selection.getBufferRange().union(tailRange)
+      selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
+
+    # We selectRight()ed in visual-mode, so normalize cursor position for being
+    # consitent to normal mode
+    normalizeCursorPosition = ->
+      moveLeft(allowWrap: true) unless selection.isReversed()
+
+    ensureCursorIsNotAtEndOfLine = ->
+      moveLeft() if cursor.isAtEndOfLine()
+
+    selectRight = ->
+      moveRight(allowWrap: cursorIsAtEmptyRow(cursor))
+
     selection.modifySelection =>
+      normalizeCursorPosition() if @isMode('visual')
       tailRange = swrap(selection).getTailBufferRange()
-
-      if @isMode('visual') and not selection.isReversed()
-        moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
-
+      originalPoint = cursor.getBufferPosition()
       @moveCursor(cursor)
-      if @isMode('visual') and cursor.isAtEndOfLine()
-        moveCursorLeft(cursor, {preserveGoalColumn: true})
+      ensureCursorIsNotAtEndOfLine() if @isMode('visual')
+      # When mode isnt 'visual' selection.isEmpty() at this point means no movement happened.
+      return if not @isMode('visual') and selection.isEmpty()
+      selectRight() unless selection.isReversed()
+      mergeTailRange(tailRange)
 
-      # In none-visual we don't merge tailRange into selection if no cursor movement is happened.
-      if @isMode('visual') or not selection.isEmpty()
-        if not selection.isReversed() and (not cursor.isAtEndOfLine() or cursor.isAtBeginningOfLine())
-          moveCursorRight(cursor, {allowWrap: true, preserveGoalColumn: true})
-        newRange = selection.getBufferRange().union(tailRange)
-        selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
+  switchCharacterwise: (selection, fn) ->
+    {cursor} = selection
+    if @isMode('visual', 'linewise')
+      swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
+    fn()
+    if @isLinewise()
+      if @isMode('visual', 'linewise')
+        swrap(selection).preserveCharacterwise()
+      swrap(selection).expandOverLine(preserveGoalColumn: true)
 
   # Utils
   # -------------------------
@@ -117,16 +139,23 @@ class Motion extends Base
   # Debuging purpose
   # -------------------------
   # [TODO] remove after dev finished
-  reportCursor: (subject, cursor) ->
-    EOL = cursor.getCurrentLineBufferRange().end
-    point = cursor.getBufferPosition()
-    console.log "#{subject}: c = #{point.toString()}, eol = #{EOL.toString()}"
+  reportSelection: (subject, selection) ->
+    console.log subject, selection.getBufferRange().toString()
 
-  withReporting: (subject, cursor, fn) ->
-    @reportCursor("#{subject}: before", cursor)
+  reportOperator: ->
+    operatorName = @operator?.constructor.name
+    targetName = @constructor.name
+    console.log "Operator = #{operatorName}, target = #{targetName}"
+
+  reportCursor: (subject, cursor) ->
+    console.log subject, cursor.getBufferPosition().toString()
+
+  withReportCursor: (cursor, fn) ->
+    cursorBefore = cursor.getBufferPosition()
     fn()
-    @reportCursor("#{subject}: after", cursor)
-    console.log '--------------------'
+    cursorAfter = cursor.getBufferPosition()
+    unless cursorBefore.isEqual(cursorAfter)
+      console.log "Changed: #{cursorBefore.toString()} -> #{cursorAfter.toString()}"
 
 # Used as operator's target in visual-mode.
 # Never be execute()ed as stand-alone motion
@@ -326,10 +355,6 @@ class MoveToNextWord extends Motion
   @extend()
   wordRegex: null
 
-  initialize: ->
-    @onDidSetTarget (operator) =>
-      @usedByChange = operator.constructor.name is 'Change'
-
   getPoint: (cursor, options) ->
     point = cursor.getBeginningOfNextWordBufferPosition(options)
     if cursor.getBufferPosition().isEqual(point) or
@@ -354,7 +379,7 @@ class MoveToNextWord extends Motion
     return if cursorIsAtVimEndOfFile(cursor)
     allowNextLine = false
     @countTimes =>
-      if @usedByChange
+      if @operator?.directInstanceof('Change')
         point = @getPointForChange(cursor, {@wordRegex, allowNextLine})
         cursor.setBufferPosition(point)
         allowNextLine = cursor.isAtEndOfLine()

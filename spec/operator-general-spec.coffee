@@ -207,6 +207,19 @@ describe "Operator general", ->
           set cursor: [1, 2]
           ensure 'dj', text: '12345\n'
 
+      describe "when cursor is on blank line", ->
+        beforeEach ->
+          set
+            text: """
+              a
+
+
+              b\n
+              """
+            cursor: [1, 0]
+        it "deletes both lines", ->
+          ensure 'dj', text: "a\nb\n", cursor: [1, 0]
+
     describe "when followed by an k", ->
       originalText = """
         12345
@@ -248,7 +261,7 @@ describe "Operator general", ->
       # [TODO] write more generic operator test. #119
       # This is general behavior of all operator.
       # When it cant move, its target selection should be empty so nothing happen.
-      describe "when it can't move", ->
+      xdescribe "when it can't move", ->
         textOriginal = "a\nb\n"
         cursorOriginal = [0, 0]
         it "deletes delete nothing", ->
