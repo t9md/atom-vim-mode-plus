@@ -80,7 +80,6 @@ class SelectionWrapper
         editor.clipScreenPosition(start.translate([0, -1]), {clip: 'backward'})
       else
         editor.clipScreenPosition(start.translate([0, +1]), {clip: 'forward', wrapBeyondNewlines: true})
-
       editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
@@ -107,7 +106,10 @@ class SelectionWrapper
     @setBufferRange([head, tail])
     @setReversedState(reversed)
 
-  restoreCharacterwise: ->
+  restoreCharacterwise: (options={}) ->
+    {preserveGoalColumn} = options
+    {goalColumn} = @selection.cursor if preserveGoalColumn
+
     unless characterwise = @getProperties().characterwise
       return
     {head, tail} = characterwise
@@ -125,6 +127,8 @@ class SelectionWrapper
       @selection.selectRight()
     # [NOTE] Important! reset to null after restored.
     @resetProperties()
+    @selection.cursor.goalColumn = goalColumn if goalColumn
+
 
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->

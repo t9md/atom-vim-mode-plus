@@ -208,6 +208,9 @@ pointIsAtVimEndOfFile = (editor, point) ->
 cursorIsAtVimEndOfFile = (cursor) ->
   pointIsAtVimEndOfFile(cursor.editor, cursor.getBufferPosition())
 
+cursorIsAtEmptyRow = (cursor) ->
+  cursor.isAtBeginningOfLine() and cursor.isAtEndOfLine()
+
 getVimLastBufferRow = (editor) ->
   getVimEofBufferPosition(editor).row
 
@@ -382,4 +385,5 @@ module.exports = {
   getTextAtCursor
   cursorIsOnWhiteSpace
   moveCursorToNextNonWhitespace
+  cursorIsAtEmptyRow
 }

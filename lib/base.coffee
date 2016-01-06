@@ -124,6 +124,9 @@ class Base
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)
 
+  directInstanceof: (klassName) ->
+    this.constructor is Base.getClass(klassName)
+
   emitWillSelect: ->
     @vimState.emitter.emit 'will-select'
 
