@@ -116,7 +116,7 @@ class SelectionWrapper
     else
       [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
-    @setBufferRange([start, end])
+    @setBufferRange([start, end], {preserveFolds: true})
     if @selection.isReversed()
       @reverse()
       @selection.selectRight()
