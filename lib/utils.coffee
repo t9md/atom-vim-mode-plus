@@ -295,7 +295,9 @@ getValidVimRow = (editor, row) ->
     else row
 
 # Compensate lack of ternaly operator
-# e.g. pick(['one', 'two'], true) get 'one'
+# e.g.
+#  pick(['1st', '2nd'], true)  # => '1st'
+#  pick(['1st', '2nd'], false) # => '2nd'
 pick = (choice, boolean) ->
   if boolean
     choice[0]
