@@ -83,13 +83,11 @@ class SelectionWrapper
       editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
-    prop = @detectCharacterwiseProperties()
-    {characterwise} = prop
+    {characterwise} = @detectCharacterwiseProperties()
     endPoint = if @selection.isReversed() then 'tail' else 'head'
-    point = characterwise[endPoint]
-    point = @selection.editor.clipBufferPosition(point.translate([0, -1]))
-    characterwise[endPoint] = point
-    @setProperties prop
+    point = characterwise[endPoint].translate([0, -1])
+    characterwise[endPoint] = @selection.editor.clipBufferPosition(point)
+    @setProperties {characterwise}
 
   detectCharacterwiseProperties: ->
     characterwise:
