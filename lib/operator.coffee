@@ -527,6 +527,15 @@ class SplitString extends TransformString
     regex = ///#{_.escapeRegExp(@input)}///g
     text.split(regex).join("\n")
 
+class Reverse extends TransformString
+  @extend()
+  mutate: (s, setPoint) ->
+    swrap(s).expandOverLine()
+    textForRows = swrap(s).lineTextForBufferRows()
+    newText = textForRows.reverse().join("\n") + "\n"
+    s.insertText(newText)
+    setPoint()
+
 class Repeat extends Operator
   @extend()
   requireTarget: false

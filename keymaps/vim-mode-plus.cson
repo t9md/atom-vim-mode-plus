@@ -121,6 +121,7 @@
   'g /':   'vim-mode-plus:toggle-line-comments'
   'g -':   'vim-mode-plus:dash-case'
   # 'g _': 'vim-mode-plus:snake-case'
+  # 'g r':   'vim-mode-plus:reverse'
 
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
