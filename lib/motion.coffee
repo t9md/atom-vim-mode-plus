@@ -62,29 +62,27 @@ class Motion extends Base
 
   select: ->
     for selection in @editor.getSelections()
+      # {cursor} = selection
       if @isInclusive() or @isLinewise()
         @normalizeVisualModeCursorPosition(selection) if @isMode('visual')
         @selectInclusively(selection)
-        @selectLine(selection) if @isLinewise()
+        if @isLinewise()
+          swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
+          swrap(selection).expandOverLine(preserveGoalColumn: true)
       else
         selection.modifySelection =>
-          @moveCursor selection.cursor
+          @moveCursor(selection.cursor)
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
     @emitDidSelect()
 
-  selectLine: (selection) ->
-    if @isMode('visual', 'linewise')
-      swrap(selection).preserveCharacterwise()
-    swrap(selection).expandOverLine(preserveGoalColumn: true)
-
-  # Modify selection with keeping tailRange(= range under cursor in most case.).
+  # Modify selection inclusively
   # -------------------------
   # * Why we need to allowWrap when moveCursorLeft/Right?
-  # When 'linewise' selection, cursor is at column '0' of NEXT line, so we need to moveLeft
-  # by wrapping, to put cursor on row which actually be selected(from UX point of view).
-  # This adjustment is important so that j, k works without special care in moveCursor.
+  #  When 'linewise' selection, cursor is at column '0' of NEXT line, so we need to moveLeft
+  #  by wrapping, to put cursor on row which actually be selected(from UX point of view).
+  #  This adjustment is important so that j, k works without special care in moveCursor.
   selectInclusively: (selection) ->
     {cursor} = selection
     selection.modifySelection =>
@@ -94,26 +92,25 @@ class Motion extends Base
         moveCursorLeft(cursor)
 
       # When mode isnt 'visual' selection.isEmpty() at this point means no movement happened.
-      return if not @isMode('visual') and selection.isEmpty()
+      if selection.isEmpty() and (not @isMode('visual'))
+        return
+
       unless selection.isReversed()
         allowWrap = cursorIsAtEmptyRow(cursor)
         moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
-      # Finally merge tailRange(= under cursor range where you start selection)
+      # Merge tailRange(= under cursor range where you start selection) into selection
       newRange = selection.getBufferRange().union(tailRange)
       selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
 
-  # Normalize visual-mode specific cursor position before/after modifySelection
-  # The purpose of this normalization is callbacked function,
-  # moveCursor works consistently both normal and visual mode.
+  # Normalize visual-mode cursor position
+  # The purpose for this is @moveCursor works consistently in both normal and visual mode.
   normalizeVisualModeCursorPosition: (selection) ->
-    {cursor} = selection
-    {submode} = @vimState
-    if submode is 'linewise'
+    if @isMode('visual', 'linewise')
       swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
     # We selectRight()ed in visual-mode, so reset this effect here.
     unless selection.isReversed()
       selection.modifySelection ->
-        moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
+        moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
   # Utils
   # -------------------------
@@ -201,7 +198,6 @@ class MoveDown extends MoveUp
   move: (cursor) ->
     moveCursorDown(cursor)
 
-# TODO: Support softwrapped row
 # -------------------------
 class MoveUpToNonBlank extends Motion
   @extend()
@@ -217,10 +213,12 @@ class MoveUpToNonBlank extends Motion
 
   getScanRows: (cursor) ->
     cursorRow = cursor.getBufferRow()
-    [startRow, endRow] = switch @direction
-      when 'up' then [cursorRow - 1, 0]
-      when 'down' then [cursorRow + 1, getVimLastBufferRow(@editor)]
-    [getValidVimRow(@editor, startRow)..endRow]
+    validRow = getValidVimRow.bind(null, @editor)
+    switch @direction
+      when 'up'
+        [validRow(cursorRow - 1)..0]
+      when 'down'
+        [validRow(cursorRow + 1)..getVimLastBufferRow(@editor)]
 
   isMovableColumn: (row, column) ->
     @isNonBlankColumn(row, column)
