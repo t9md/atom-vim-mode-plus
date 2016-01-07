@@ -10,10 +10,12 @@
 - New: MoveTo(Previous|Next)FoldStartWithSameIndent. to skip different indentation row.
 - Internal: commands for speedup development.
 - FIX: `e`, `E` should skip blank line #117.
+- FIX: `w`, `W` moved to endOfWord instead of beginningOfWord when cursor is trailing white space.
 - FIX: `dk` not delete blank line if cursor is at blank row #118.
 - FIX: `j`, `k` in visual-linewise should not expand folds, but was expanded #120.
 - Internal: Refactor `Motion::selectInclusive()` now almost finished!
 - New: Base.commandPrefix class variable is used as command name prefix(for user's custom command use).
+- New: Operator.Reverse to reverse selected lines.
 
 # 0.13.0
 - New: Motion move-(up|down)-to-non-blank to move up/down by skipping blank characters #101.
