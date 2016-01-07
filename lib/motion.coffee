@@ -122,7 +122,6 @@ class Motion extends Base
       fn()
 
 # Used as operator's target in visual-mode.
-# Never be execute()ed as stand-alone motion
 class CurrentSelection extends Motion
   @extend(false)
   selectedRange: null
@@ -130,8 +129,8 @@ class CurrentSelection extends Motion
     @selectedRange = @editor.getSelectedBufferRange()
     @wasLinewise = @isLinewise()
 
-  # Never be called but put here for consistency
   execute: ->
+    throw new Error("#{@constructor.name} should not be executed")
 
   select: ->
     # In visual mode, the current selections are already there.
@@ -139,7 +138,7 @@ class CurrentSelection extends Motion
     unless @isMode('visual')
       @selectCharacters()
       if @wasLinewise
-        swrap(s).expandOverLine() for s in @editor.getSelections()
+        swrap.expandOverLine(@editor)
     @emitDidSelect()
 
   selectCharacters: ->
