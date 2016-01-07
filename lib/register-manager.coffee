@@ -118,6 +118,6 @@ class RegisterManager
       'character'
 
   updateEditorElement: ->
-    toggleClassByCondition(@editorElement, 'with-register', @count?)
+    toggleClassByCondition(@editorElement, 'with-register', @name?)
 
 module.exports = RegisterManager
