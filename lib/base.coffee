@@ -4,8 +4,6 @@ Delegato = require 'delegato'
 {CompositeDisposable} = require 'atom'
 
 settings = require './settings'
-
-packageScope = 'vim-mode-plus'
 getEditorState = null # set in Base.init()
 
 run = (klass, properties={}) ->
@@ -41,6 +39,7 @@ class Base
   requireTarget: false
   operator: null
   asTarget: false
+  @commandPrefix: 'vim-mode-plus'
 
   @delegatesMethods delegatingMethods..., toProperty: 'vimState'
 
@@ -169,7 +168,7 @@ class Base
     @command
 
   @getCommandName: ->
-    packageScope + ':' + _.dasherize(@name)
+    @commandPrefix + ':' + _.dasherize(@name)
 
   @registerCommand: ->
     atom.commands.add('atom-text-editor', @getCommandName(), => run(this))
