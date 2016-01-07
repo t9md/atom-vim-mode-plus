@@ -194,9 +194,6 @@
   # 'ctrl-cmd-k': 'vim-mode-plus:move-up-to-edge'
   # 'ctrl-cmd-j': 'vim-mode-plus:move-down-to-edge'
 
-  # '(': 'vim-mode-plus:move-up-to-same-indent'
-  # ')': 'vim-mode-plus:move-down-to-same-indent'
-
   # '[ [': 'vim-mode-plus:move-to-previous-fold-start'
   # '] [': 'vim-mode-plus:move-to-next-fold-start'
   # '[ ]': 'vim-mode-plus:move-to-previous-fold-end'
