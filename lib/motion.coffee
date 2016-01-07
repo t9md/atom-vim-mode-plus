@@ -64,7 +64,7 @@ class Motion extends Base
   select: ->
     for selection in @editor.getSelections()
       if @isInclusive() or @isLinewise()
-        @normalizeVisualMode(selection) if @isMode('visual')
+        @normalizeVisualModeCursorPosition(selection) if @isMode('visual')
         @selectInclusively(selection)
         @selectLine(selection) if @isLinewise()
       else
@@ -106,7 +106,7 @@ class Motion extends Base
   # Normalize visual-mode specific cursor position before/after modifySelection
   # The purpose of this normalization is callbacked function,
   # moveCursor works consistently both normal and visual mode.
-  normalizeVisualMode: (selection) ->
+  normalizeVisualModeCursorPosition: (selection) ->
     {cursor} = selection
     {submode} = @vimState
     if submode is 'linewise'
@@ -118,31 +118,9 @@ class Motion extends Base
 
   # Utils
   # -------------------------
-  # Calling stop() in callback stop remaining processing.
   countTimes: (fn) ->
     _.times @getCount(), ->
       fn()
-
-  # Debuging purpose
-  # -------------------------
-  # [TODO] remove after dev finished
-  reportSelection: (subject, selection) ->
-    console.log subject, selection.getBufferRange().toString()
-
-  reportOperator: ->
-    operatorName = @operator?.constructor.name
-    targetName = @constructor.name
-    console.log "Operator = #{operatorName}, target = #{targetName}"
-
-  reportCursor: (subject, cursor) ->
-    console.log subject, cursor.getBufferPosition().toString()
-
-  withReportCursor: (cursor, fn) ->
-    cursorBefore = cursor.getBufferPosition()
-    fn()
-    cursorAfter = cursor.getBufferPosition()
-    unless cursorBefore.isEqual(cursorAfter)
-      console.log "Changed: #{cursorBefore.toString()} -> #{cursorAfter.toString()}"
 
 # Used as operator's target in visual-mode.
 # Never be execute()ed as stand-alone motion

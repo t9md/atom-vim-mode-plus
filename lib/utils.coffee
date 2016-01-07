@@ -336,6 +336,21 @@ WhiteSpaceRegExp = /^\s*$/
 isAllWhiteSpace = (text) ->
   WhiteSpaceRegExp.test(text)
 
+# Debugging purpose
+# -------------------------
+reportSelection = (subject, selection) ->
+  console.log subject, selection.getBufferRange().toString()
+
+reportCursor = (subject, cursor) ->
+  console.log subject, cursor.getBufferPosition().toString()
+
+withTrackingCursorPositionChange = (cursor, fn) ->
+  cursorBefore = cursor.getBufferPosition()
+  fn()
+  cursorAfter = cursor.getBufferPosition()
+  unless cursorBefore.isEqual(cursorAfter)
+    console.log "Changed: #{cursorBefore.toString()} -> #{cursorAfter.toString()}"
+
 module.exports = {
   include
   debug
@@ -388,4 +403,9 @@ module.exports = {
   cursorIsOnWhiteSpace
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow
+
+  # Debugging
+  reportSelection,
+  reportCursor
+  withTrackingCursorPositionChange
 }
