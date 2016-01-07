@@ -77,8 +77,6 @@ Why I don't builtin these feature? Its because it take time and some feature is 
 
 - [cursor-history](https://atom.io/packages/cursor-history)
 provides <kbd>c-i</kbd>, <kbd>c-o</kbd> to go/back cursor position history.
-- [paner](https://atom.io/packages/paner)
-provides <kbd>C-w x</kbd>, <kbd>C-w J,K,H,L</kbd> to move pane, swap pane item.
 - [open-this](https://atom.io/packages/open-this)
 provides <kbd>gf</kbd> to open file under cursor.
 - [clip-history](https://atom.io/packages/clip-history)
