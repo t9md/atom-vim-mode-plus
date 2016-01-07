@@ -17,6 +17,7 @@ class TextObject extends Base
   constructor: ->
     @constructor::inner = @constructor.name.startsWith('Inner')
     super
+    @onDidSetTarget (@operator) => @operator
     @initialize?()
 
   isInner: ->

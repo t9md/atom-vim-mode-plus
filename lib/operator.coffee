@@ -80,7 +80,6 @@ class Operator extends Base
       operatorName = @constructor.name
       message = "Failed to set '#{targetName}' as target for Operator '#{operatorName}'"
       throw new OperatorError(message)
-    @target.setAsTarget()
     @emitDidSetTarget(this)
 
   selectTarget: (force=false) ->
