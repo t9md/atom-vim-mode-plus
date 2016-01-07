@@ -64,8 +64,9 @@ class Motion extends Base
   select: ->
     for selection in @editor.getSelections()
       if @isInclusive() or @isLinewise()
-        @switchCharacterwise selection, =>
-          @selectInclusive selection
+        @normalizeVisualMode(selection) if @isMode('visual')
+        @selectInclusively(selection)
+        @selectLine(selection) if @isLinewise()
       else
         selection.modifySelection =>
           @moveCursor selection.cursor
@@ -74,56 +75,46 @@ class Motion extends Base
     @editor.mergeIntersectingSelections()
     @emitDidSelect()
 
+  selectLine: (selection) ->
+    if @isMode('visual', 'linewise')
+      swrap(selection).preserveCharacterwise()
+    swrap(selection).expandOverLine(preserveGoalColumn: true)
+
   # Modify selection with keeping tailRange(= range under cursor in most case.).
   # -------------------------
-  # * Consistency of moveCursor in both visual and normal modes
-  #  In visual mode and its selection is not reversed, cursor is selectRight()ed,
-  #  So we need to move cursor left before calling moveCursor() so that moveCursor
-  #   works consistently both normal and visual mode.
-  #
   # * Why we need to allowWrap when moveCursorLeft/Right?
   # When 'linewise' selection, cursor is at column '0' of NEXT line, so we need to moveLeft
   # by wrapping, to put cursor on row which actually be selected(from UX point of view).
   # This adjustment is important so that j, k works without special care in moveCursor.
-  selectInclusive: (selection) ->
+  selectInclusively: (selection) ->
     {cursor} = selection
-    moveLeft = ({allowWrap}={}) ->
-      moveCursorLeft(cursor, {allowWrap, preserveGoalColumn: true})
+    selection.modifySelection =>
+      tailRange = swrap(selection).getTailBufferRange()
+      @moveCursor(cursor)
+      if @isMode('visual') and cursor.isAtEndOfLine()
+        moveCursorLeft(cursor)
 
-    moveRight = ({allowWrap}={}) ->
-      moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
-
-    mergeTailRange = (tailRange) ->
+      # When mode isnt 'visual' selection.isEmpty() at this point means no movement happened.
+      return if not @isMode('visual') and selection.isEmpty()
+      unless selection.isReversed()
+        allowWrap = cursorIsAtEmptyRow(cursor)
+        moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
+      # Finally merge tailRange(= under cursor range where you start selection)
       newRange = selection.getBufferRange().union(tailRange)
       selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
 
-    ensureCursorIsNotAtEndOfLine = ->
-      moveLeft() if cursor.isAtEndOfLine()
-
-    tailRange = swrap(selection).getTailBufferRange()
-    selection.modifySelection =>
-      @moveCursor(cursor)
-      ensureCursorIsNotAtEndOfLine() if @isMode('visual')
-      # When mode isnt 'visual' selection.isEmpty() at this point means no movement happened.
-      return if not @isMode('visual') and selection.isEmpty()
-      mergeTailRange(tailRange)
-      unless selection.isReversed()
-        moveRight(allowWrap: cursorIsAtEmptyRow(cursor))
-
-  switchCharacterwise: (selection, fn) ->
+  # Normalize visual-mode specific cursor position before/after modifySelection
+  # The purpose of this normalization is callbacked function,
+  # moveCursor works consistently both normal and visual mode.
+  normalizeVisualMode: (selection) ->
     {cursor} = selection
-    if @isMode('visual', 'linewise')
+    {submode} = @vimState
+    if submode is 'linewise'
       swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
-    # We selectRight()ed in visual-mode, so normalize cursor position for being
-    # consitent to normal mode
-    if @isMode('visual') and not selection.isReversed()
+    # We selectRight()ed in visual-mode, so reset this effect here.
+    unless selection.isReversed()
       selection.modifySelection ->
         moveCursorLeft(cursor, {allowWrap: true, preserveGoalColumn: true})
-    fn()
-    if @isLinewise()
-      if @isMode('visual', 'linewise')
-        swrap(selection).preserveCharacterwise()
-      swrap(selection).expandOverLine(preserveGoalColumn: true)
 
   # Utils
   # -------------------------
@@ -685,7 +676,7 @@ class Till extends Find
   find: ->
     @point = super
 
-  selectInclusive: (selection) ->
+  selectInclusively: (selection) ->
     super
     if selection.isEmpty() and (@point? and not @backwards)
       selection.modifySelection ->
