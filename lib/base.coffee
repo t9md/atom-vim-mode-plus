@@ -39,6 +39,7 @@ class Base
   defaultCount: 1
   requireInput: false
   requireTarget: false
+  operator: null
   asTarget: false
 
   @delegatesMethods delegatingMethods..., toProperty: 'vimState'
@@ -70,11 +71,9 @@ class Base
   setRepeated: ->
     @repeated = true
 
-  setAsTarget: ->
-    @asTarget = true
-
-  isAsTarget: ->
-    @asTarget
+  # Intended to be used by TextObject or Motion
+  isAsOperatorTarget: ->
+    @operator? and this isnt @operator
 
   abort: ->
     throw new OperationAbortedError('Aborted')
