@@ -336,6 +336,22 @@ WhiteSpaceRegExp = /^\s*$/
 isAllWhiteSpace = (text) ->
   WhiteSpaceRegExp.test(text)
 
+getCodeFoldRowRanges = (editor) ->
+  {languageMode} = editor
+  rowRanges = [0..editor.getLastBufferRow()].map (row) ->
+    languageMode.rowRangeForCodeFoldAtBufferRow(row)
+  rowRanges.filter (rowRange) ->
+    rowRange? and rowRange[0]? and rowRange[1]?
+
+getCodeFoldRowRangesContainesForRow = (editor, bufferRow) ->
+  getCodeFoldRowRanges(editor).filter ([startRow, endRow]) ->
+    startRow < bufferRow <= endRow
+
+  # for [startRow, endRow] in rowRanges
+  #   # continue if (startRow? and endRow)
+  #   console.log "??", [startRow, endRow]
+  # rowRanges
+
 # Debugging purpose
 # -------------------------
 reportSelection = (subject, selection) ->
@@ -403,6 +419,8 @@ module.exports = {
   cursorIsOnWhiteSpace
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow
+  getCodeFoldRowRanges
+  getCodeFoldRowRangesContainesForRow
 
   # Debugging
   reportSelection,

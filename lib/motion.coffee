@@ -25,6 +25,7 @@ globalState = require './global-state'
   cursorIsOnWhiteSpace
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow
+  getCodeFoldRowRanges
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -949,18 +950,9 @@ class MoveToPreviousFoldStart extends Motion
 
   getFoldRow: (which) ->
     index = if which is 'start' then 0 else 1
-    rows = @getFoldRowRanges().map (rowRange) ->
+    rows = getCodeFoldRowRanges(@editor).map (rowRange) ->
       rowRange[index]
     _.sortBy(_.uniq(rows), (row) -> row)
-
-  getFoldRowRanges: ->
-    result = []
-    vimLastBufferRow = getVimLastBufferRow(@editor)
-    {languageMode} = @editor
-    (for row in [0..vimLastBufferRow]
-      [startRow, endRow] = languageMode.rowRangeForCodeFoldAtBufferRow(row) ? []
-      continue unless (startRow? and endRow?)
-      [startRow, endRow])
 
   getScanRows: (cursor) ->
     cursorRow = cursor.getBufferRow()
