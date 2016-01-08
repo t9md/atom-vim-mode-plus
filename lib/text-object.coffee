@@ -9,6 +9,7 @@ swrap = require './selection-wrapper'
   sortRanges, countChar, pointIsAtEndOfLine, getEolBufferPositionForRow
   getTextToPoint
   getIndentLevelForBufferRow
+  getCodeFoldRowRangesContainesForRow
 } = require './utils'
 
 class TextObject extends Base
@@ -405,20 +406,34 @@ class InnerIndentation extends Indentation
   @extend()
 
 # -------------------------
-# TODO: make it extendable when repeated
 class Fold extends TextObject
   @extend(false)
-  getFoldRowRangeForBufferRow: (bufferRow) ->
-    for currentRow in [bufferRow..0] by -1
-      [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
-      if startRow? and (startRow <= bufferRow <= endRow)
-        startRow += 1 if @isInner()
-        return [startRow, endRow]
+
+  shouldExcludeEndRow: (rowRange) ->
+    return false unless @isInner()
+    [startRow, endRow] = rowRange
+    getIndentLevelForBufferRow(@editor, startRow) is getIndentLevelForBufferRow(@editor, endRow)
+
+  adjustRowRange: (rowRange) ->
+    [startRow, endRow] = rowRange
+    endRow -= 1 if @shouldExcludeEndRow(rowRange)
+    startRow += 1 if @isInner()
+    [startRow, endRow]
+
+  getFoldRowRangesContainsForRow: (row) ->
+    getCodeFoldRowRangesContainesForRow(@editor, row)?.reverse()
 
   selectTextObject: (selection) ->
-    [startRow, endRow] = selection.getBufferRowRange()
-    row = if selection.isReversed() then startRow else endRow
-    if rowRange = @getFoldRowRangeForBufferRow(row)
+    originalRowRange = selection.getBufferRowRange()
+    fromRow = selection.getBufferRange().start.row
+    rowRanges = @getFoldRowRangesContainsForRow(fromRow)
+    return unless rowRanges
+
+    if (rowRange = rowRanges.shift())?
+      rowRange = @adjustRowRange(rowRange)
+      if _.isEqual(originalRowRange, rowRange) and (rowRange = rowRanges.shift())?
+        rowRange = @adjustRowRange(rowRange)
+    if rowRange?
       swrap(selection).selectRowRange(rowRange)
 
 class AFold extends Fold
@@ -440,37 +455,29 @@ class Function extends Fold
     @language = @editor.getGrammar().scopeName.replace(/^source\./, '')
 
   getScopesForRow: (row) ->
-    tokenizedLine = @editor.displayBuffer.tokenizedBuffer.tokenizedLineForRow(row)
-    for tag in tokenizedLine.tags when tag < 0 and (tag % 2 is -1)
+    tokenizedLines = @editor.displayBuffer.getTokenizedLines()
+    for tag in tokenizedLines[row].tags when tag < 0 and (tag % 2 is -1)
       atom.grammars.scopeForId(tag)
 
   isFunctionScope: (scope) ->
-    regex = if @language in ['go']
-      /^entity.name.function/
-    else
-      /^meta.function/
-    regex.test(scope)
+    switch @language
+      when 'go' then /^entity.name.function/.test(scope)
+      else /^meta.function/.test(scope)
 
   isIncludeFunctionScopeForRow: (row) ->
     for scope in @getScopesForRow(row) when @isFunctionScope(scope)
       return true
     null
 
-  # Greatly depending on fold, and what range is folded is vary from languages.
-  # So we need to adjust endRow based on scope.
-  getFoldRowRangeForBufferRow: (bufferRow) ->
-    for currentRow in [bufferRow..0] by -1
-      [startRow, endRow] = @editor.languageMode.rowRangeForCodeFoldAtBufferRow(currentRow) ? []
-      unless startRow? and (startRow <= bufferRow <= endRow) and @isIncludeFunctionScopeForRow(startRow)
-        continue
-      return @adjustRowRange(startRow, endRow)
-    null
+  getFoldRowRangesContainsForRow: (row) ->
+    if rowRanges = super(row)
+      rowRanges.filter (rowRange) =>
+        @isIncludeFunctionScopeForRow(rowRange[0])
 
-  adjustRowRange: (startRow, endRow) ->
-    if @isInner()
-      startRow += 1
-      endRow -= 1 unless @language in @indentScopedLanguages
-    endRow += 1 if (@language in @omittingClosingCharLanguages)
+  adjustRowRange: (rowRange) ->
+    [startRow, endRow] = super
+    if @isA() and (@language in @omittingClosingCharLanguages)
+      endRow += 1
     [startRow, endRow]
 
 class AFunction extends Function
