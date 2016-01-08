@@ -1,3 +1,6 @@
+# 0.14.1
+- Fix: `I` doesn't go to first char if already there. #122.
+
 # 0.14.0
 - New: Misc.Maximize-pane command from my `paner` package.
 - Fix: Selecting big text object(its range is not fit in one screen) lost cursor marker #109.
