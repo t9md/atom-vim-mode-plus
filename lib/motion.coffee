@@ -944,19 +944,23 @@ class MoveToPreviousFoldStart extends Motion
   direction: 'prev'
 
   initialize: ->
-    rows = _.pluck(@getFoldRowRanges(), @which)
-    @rows =  _.sortBy(_.uniq(rows), (r) -> r)
+    @rows = @getFoldRow(@which)
     @rows.reverse() if @direction is 'prev'
+
+  getFoldRow: (which) ->
+    index = if which is 'start' then 0 else 1
+    rows = @getFoldRowRanges().map (rowRange) ->
+      rowRange[index]
+    _.sortBy(_.uniq(rows), (row) -> row)
 
   getFoldRowRanges: ->
     result = []
     vimLastBufferRow = getVimLastBufferRow(@editor)
     {languageMode} = @editor
-    for row in [0..vimLastBufferRow]
+    (for row in [0..vimLastBufferRow]
       [startRow, endRow] = languageMode.rowRangeForCodeFoldAtBufferRow(row) ? []
       continue unless (startRow? and endRow?)
-      result.push {start: startRow, end: endRow}
-    result
+      [startRow, endRow])
 
   getScanRows: (cursor) ->
     cursorRow = cursor.getBufferRow()
