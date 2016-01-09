@@ -859,20 +859,23 @@ describe "TextObject", ->
 
       it 'select fold row range except start row', ->
         set cursor: [13, 0]
-        ensure 'viz', selectedBufferRange: rangeForLine(10, 25)
+        ensure 'viz', selectedBufferRange: rangeForRows(10, 25)
 
       it 'select fold row range except start row', ->
         set cursor: [19, 0]
-        ensure 'viz', selectedBufferRange: rangeForLine(19, 23)
+        ensure 'viz', selectedBufferRange: rangeForRows(19, 23)
 
+      # it 'can expand selection', ->
+      #   set cursor: [23, 0]
+      #   ensure 'viz', selectedBufferRange: [[19, 0], [24, 0]]
     describe 'a-fold', ->
       it 'select fold row range', ->
         set cursor: [13, 0]
-        ensure 'vaz', selectedBufferRange: rangeForLine(9, 25)
+        ensure 'vaz', selectedBufferRange: rangeForRows(9, 25)
 
       it 'select fold row range', ->
         set cursor: [19, 0]
-        ensure 'vaz', selectedBufferRange: rangeForLine(18, 23)
+        ensure 'vaz', selectedBufferRange: rangeForRows(18, 23)
 
   # Although following test picks specific language, other langauages are alsoe supported.
   describe 'Function', ->
