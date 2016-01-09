@@ -856,7 +856,6 @@ describe "TextObject", ->
       atom.packages.deactivatePackage('language-coffee-script')
 
     describe 'inner-fold', ->
-
       it 'select fold row range except start row', ->
         set cursor: [13, 0]
         ensure 'viz', selectedBufferRange: rangeForRows(10, 25)
@@ -865,9 +864,25 @@ describe "TextObject", ->
         set cursor: [19, 0]
         ensure 'viz', selectedBufferRange: rangeForRows(19, 23)
 
-      # it 'can expand selection', ->
-      #   set cursor: [23, 0]
-      #   ensure 'viz', selectedBufferRange: [[19, 0], [24, 0]]
+      it 'can expand selection', ->
+        set cursor: [23, 0]
+        keystroke 'v'
+        ensure 'iz', selectedBufferRange: rangeForRows(23, 23)
+        ensure 'iz', selectedBufferRange: rangeForRows(19, 23)
+        ensure 'iz', selectedBufferRange: rangeForRows(10, 25)
+        ensure 'iz', selectedBufferRange: rangeForRows(9, 28)
+
+      describe 'when start of selection is on fold start row', ->
+        it 'select outer fold(skip)', ->
+          set cursor: [20, 7]
+          ensure 'viz', selectedBufferRange: rangeForRows(19, 23)
+
+      describe 'when endRow of selection is greater than fold end row', ->
+        it "doesn't care just search based on startRow and adjust selection", ->
+          set cursor: [20, 0]
+          ensure 'VG', selectedBufferRange: rangeForRows(20, 30)
+          ensure 'iz', selectedBufferRange: rangeForRows(19, 23)
+
     describe 'a-fold', ->
       it 'select fold row range', ->
         set cursor: [13, 0]
@@ -876,6 +891,25 @@ describe "TextObject", ->
       it 'select fold row range', ->
         set cursor: [19, 0]
         ensure 'vaz', selectedBufferRange: rangeForRows(18, 23)
+
+      it 'can expand selection', ->
+        set cursor: [23, 0]
+        keystroke 'v'
+        ensure 'az', selectedBufferRange: rangeForRows(22, 23)
+        ensure 'az', selectedBufferRange: rangeForRows(18, 23)
+        ensure 'az', selectedBufferRange: rangeForRows(9, 25)
+        ensure 'az', selectedBufferRange: rangeForRows(8, 28)
+
+      describe 'when start of selection is on fold start row', ->
+        it 'select outer fold(skip)', ->
+          set cursor: [20, 7]
+          ensure 'vaz', selectedBufferRange: rangeForRows(18, 23)
+
+      describe 'when endRow of selection is greater than fold end row', ->
+        it "doesn't care just search based on startRow and adjust selection", ->
+          set cursor: [20, 0]
+          ensure 'VG', selectedBufferRange: rangeForRows(20, 30)
+          ensure 'az', selectedBufferRange: rangeForRows(18, 23)
 
   # Although following test picks specific language, other langauages are alsoe supported.
   describe 'Function', ->
