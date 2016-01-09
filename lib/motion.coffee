@@ -26,6 +26,8 @@ globalState = require './global-state'
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow
   getCodeFoldRowRanges
+  isIncludeFunctionScopeForRow
+  getScopesForBufferRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -994,6 +996,19 @@ class MoveToNextFoldEnd extends MoveToPreviousFoldEnd
   @extend()
   direction: 'next'
 
+# -------------------------
+class MoveToPreviousFunction extends MoveToPreviousFoldStart
+  @extend()
+  direction: 'prev'
+  detectRow: (cursor) ->
+    _.detect @getScanRows(cursor), (row) =>
+      isIncludeFunctionScopeForRow(@editor, row)
+
+class MoveToNextFunction extends MoveToPreviousFunction
+  @extend()
+  direction: 'next'
+
+# -------------------------
 # keymap: %
 class MoveToPair extends Motion
   @extend()
