@@ -347,7 +347,6 @@ describe "Operator ActivateInsertMode family", ->
           cursor: [1, 2]
           mode: 'insert'
 
-
       it "repeats always as insert at the first character of the line", ->
         set cursor: [0, 2]
         keystroke 'I'
@@ -358,6 +357,41 @@ describe "Operator ActivateInsertMode family", ->
           text: "abc11\n  abc22\n"
           cursor: [1, 4]
           mode: 'normal'
+
+  describe "InsertAtPreviousFoldStart and Next", ->
+    beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-coffee-script')
+      getVimState 'sample.coffee', (state, vim) ->
+        {editor, editorElement} = state
+        {set, ensure, keystroke} = vim
+
+      runs ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus.normal-mode':
+            'g [': 'vim-mode-plus:insert-at-previous-fold-start'
+            'g ]': 'vim-mode-plus:insert-at-next-fold-start'
+
+    afterEach ->
+      atom.packages.deactivatePackage('language-coffee-script')
+
+    describe "when cursor is not at fold start row", ->
+      beforeEach ->
+        set cursor: [16, 0]
+      it "insert at previous fold start row", ->
+        ensure 'g[', cursor: [9, 2], mode: 'insert'
+      it "insert at next fold start row", ->
+        ensure 'g]', cursor: [18, 4], mode: 'insert'
+
+    describe "when cursor is at fold start row", ->
+      # Nothing special when cursor is at fold start row,
+      # only for test scenario throughness.
+      beforeEach ->
+        set cursor: [20, 6]
+      it "insert at previous fold start row", ->
+        ensure 'g[', cursor: [18, 4], mode: 'insert'
+      it "insert at next fold start row", ->
+        ensure 'g]', cursor: [22, 6], mode: 'insert'
 
   describe "the i keybinding", ->
     beforeEach ->
