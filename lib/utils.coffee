@@ -371,20 +371,27 @@ getBufferRangeForRowRange = (editor, rowRange) ->
 
 getScopesForBufferRow = (editor, row) ->
   tokenizedLines = editor.displayBuffer.getTokenizedLines()
-  for tag in tokenizedLines[row].tags when tag < 0 and (tag % 2 is -1)
+  # [FIXME] Bug of upstream?
+  # Sometime tokenizedLines length is less than last buffer row.
+  # So tokenizedLine is not accessible even if valid row.
+  # In that case I simply return empty Array.
+  return [] unless tokenizedLine = tokenizedLines[row]
+
+  for tag in tokenizedLine.tags when tag < 0 and (tag % 2 is -1)
     atom.grammars.scopeForId(tag)
 
+# [FIXME] very rough state, need improvement.
 isFunctionScope = (editor, scope) ->
   {scopeName} = editor.getGrammar()
   switch scopeName
     when 'source.go'
-      /^entity.name.function/.test(scope)
+      /^entity\.name\.function/.test(scope)
     else
-      /^meta.function/.test(scope)
+      /^meta\.function\./.test(scope)
 
 isIncludeFunctionScopeForRow = (editor, row) ->
   scopes = getScopesForBufferRow(editor, row)
-  _.detect scopes, (scope) ->
+  scopes.some (scope) ->
     isFunctionScope(editor, scope)
 
 # Debugging purpose
