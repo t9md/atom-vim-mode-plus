@@ -816,9 +816,14 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
 
 class InsertAtPreviousFoldStart extends ActivateInsertMode
   @extend()
+  motion: 'MoveToPreviousFoldStart'
   execute: ->
-    @new('MoveToPreviousFoldStart').execute()
+    @new(@motion).execute()
     super
+
+class InsertAtNextFoldStart extends InsertAtPreviousFoldStart
+  @extend()
+  motion: 'MoveToNextFoldStart'
 
 # FIXME need support count
 class InsertAboveWithNewline extends ActivateInsertMode
