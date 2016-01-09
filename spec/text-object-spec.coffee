@@ -843,6 +843,9 @@ describe "TextObject", ->
           selectedBufferRange: [[10, 0], [27, 0]]
 
   describe 'Fold', ->
+    rangeForRows = (startRow, endRow) ->
+      [[startRow, 0], [endRow + 1, 0]]
+
     beforeEach ->
       waitsForPromise ->
         atom.packages.activatePackage('language-coffee-script')
@@ -853,21 +856,23 @@ describe "TextObject", ->
       atom.packages.deactivatePackage('language-coffee-script')
 
     describe 'inner-fold', ->
+
       it 'select fold row range except start row', ->
         set cursor: [13, 0]
-        ensure 'viz', selectedBufferRange: [[10, 0], [26, 0]]
+        ensure 'viz', selectedBufferRange: rangeForLine(10, 25)
 
       it 'select fold row range except start row', ->
         set cursor: [19, 0]
-        ensure 'viz', selectedBufferRange: [[19, 0], [24, 0]]
+        ensure 'viz', selectedBufferRange: rangeForLine(19, 23)
+
     describe 'a-fold', ->
       it 'select fold row range', ->
         set cursor: [13, 0]
-        ensure 'vaz', selectedBufferRange: [[9, 0], [26, 0]]
+        ensure 'vaz', selectedBufferRange: rangeForLine(9, 25)
 
       it 'select fold row range', ->
         set cursor: [19, 0]
-        ensure 'vaz', selectedBufferRange: [[18, 0], [24, 0]]
+        ensure 'vaz', selectedBufferRange: rangeForLine(18, 23)
 
   # Although following test picks specific language, other langauages are alsoe supported.
   describe 'Function', ->
