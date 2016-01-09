@@ -337,11 +337,11 @@ isAllWhiteSpace = (text) ->
   WhiteSpaceRegExp.test(text)
 
 getCodeFoldRowRanges = (editor) ->
-  {languageMode} = editor
-  rowRanges = [0..editor.getLastBufferRow()].map (row) ->
-    languageMode.rowRangeForCodeFoldAtBufferRow(row)
-  rowRanges.filter (rowRange) ->
-    rowRange? and rowRange[0]? and rowRange[1]?
+  [0..editor.getLastBufferRow()]
+    .map (row) ->
+      editor.languageMode.rowRangeForCodeFoldAtBufferRow(row)
+    .filter (rowRange) ->
+      rowRange? and rowRange[0]? and rowRange[1]?
 
 # * `exclusive` to exclude startRow to determine inclusion.
 getCodeFoldRowRangesContainesForRow = (editor, bufferRow, exclusive=false) ->
