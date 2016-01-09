@@ -343,14 +343,18 @@ getCodeFoldRowRanges = (editor) ->
   rowRanges.filter (rowRange) ->
     rowRange? and rowRange[0]? and rowRange[1]?
 
-getCodeFoldRowRangesContainesForRow = (editor, bufferRow) ->
+# * `exclusive` to exclude startRow to determine inclusion.
+getCodeFoldRowRangesContainesForRow = (editor, bufferRow, exclusive=false) ->
   getCodeFoldRowRanges(editor).filter ([startRow, endRow]) ->
-    startRow < bufferRow <= endRow
+    if exclusive
+      startRow < bufferRow <= endRow
+    else
+      startRow <= bufferRow <= endRow
 
-  # for [startRow, endRow] in rowRanges
-  #   # continue if (startRow? and endRow)
-  #   console.log "??", [startRow, endRow]
-  # rowRanges
+getBufferRangeForRowRange = (editor, rowRange) ->
+  [rangeStart, rangeEnd] = rowRange.map (row) ->
+    editor.bufferRangeForBufferRow(row, includeNewline: true)
+  rangeStart.union(rangeEnd)
 
 # Debugging purpose
 # -------------------------
@@ -421,6 +425,7 @@ module.exports = {
   cursorIsAtEmptyRow
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow
+  getBufferRangeForRowRange
 
   # Debugging
   reportSelection,

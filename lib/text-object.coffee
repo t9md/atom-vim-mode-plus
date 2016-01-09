@@ -10,6 +10,7 @@ swrap = require './selection-wrapper'
   getTextToPoint
   getIndentLevelForBufferRow
   getCodeFoldRowRangesContainesForRow
+  getBufferRangeForRowRange
 } = require './utils'
 
 class TextObject extends Base
@@ -409,30 +410,30 @@ class InnerIndentation extends Indentation
 class Fold extends TextObject
   @extend(false)
 
-  shouldExcludeEndRow: (rowRange) ->
-    return false unless @isInner()
+  adjustInnerRowRange: (rowRange) ->
     [startRow, endRow] = rowRange
-    getIndentLevelForBufferRow(@editor, startRow) is getIndentLevelForBufferRow(@editor, endRow)
+    
+    startRowIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
+    endRowIndentLevel = getIndentLevelForBufferRow(@editor, endRow)
 
-  adjustRowRange: (rowRange) ->
-    [startRow, endRow] = rowRange
-    endRow -= 1 if @shouldExcludeEndRow(rowRange)
-    startRow += 1 if @isInner()
+    if (startRowIndentLevel is endRowIndentLevel)
+      endRow -= 1
+    startRow += 1
     [startRow, endRow]
 
   getFoldRowRangesContainsForRow: (row) ->
-    getCodeFoldRowRangesContainesForRow(@editor, row)?.reverse()
+    getCodeFoldRowRangesContainesForRow(@editor, row, true)?.reverse()
 
   selectTextObject: (selection) ->
-    originalRowRange = selection.getBufferRowRange()
-    fromRow = selection.getBufferRange().start.row
+    originalRange = selection.getBufferRange()
+    fromRow = originalRange.start.row
     rowRanges = @getFoldRowRangesContainsForRow(fromRow)
     return unless rowRanges
 
     if (rowRange = rowRanges.shift())?
-      rowRange = @adjustRowRange(rowRange)
-      if _.isEqual(originalRowRange, rowRange) and (rowRange = rowRanges.shift())?
-        rowRange = @adjustRowRange(rowRange)
+      rowRange = @adjustInnerRowRange(rowRange) if @isInner()
+      if getBufferRangeForRowRange(@editor, rowRange).isEqual(originalRange)
+        rowRange = @adjustInnerRowRange(rowRange) if (rowRange = rowRanges.shift())
     if rowRange?
       swrap(selection).selectRowRange(rowRange)
 
