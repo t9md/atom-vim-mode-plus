@@ -856,15 +856,15 @@ describe "TextObject", ->
       atom.packages.deactivatePackage('language-coffee-script')
 
     describe 'inner-fold', ->
-      it 'select fold row range except start row', ->
+      it "select inner range of fold", ->
         set cursor: [13, 0]
         ensure 'viz', selectedBufferRange: rangeForRows(10, 25)
 
-      it 'select fold row range except start row', ->
+      it "select inner range of fold", ->
         set cursor: [19, 0]
         ensure 'viz', selectedBufferRange: rangeForRows(19, 23)
 
-      it 'can expand selection', ->
+      it "can expand selection", ->
         set cursor: [23, 0]
         keystroke 'v'
         ensure 'iz', selectedBufferRange: rangeForRows(23, 23)
@@ -872,16 +872,31 @@ describe "TextObject", ->
         ensure 'iz', selectedBufferRange: rangeForRows(10, 25)
         ensure 'iz', selectedBufferRange: rangeForRows(9, 28)
 
-      describe 'when start of selection is on fold start row', ->
+      describe "when startRow of selection is on fold startRow", ->
         it 'select outer fold(skip)', ->
           set cursor: [20, 7]
           ensure 'viz', selectedBufferRange: rangeForRows(19, 23)
 
-      describe 'when endRow of selection is greater than fold end row', ->
-        it "doesn't care just search based on startRow and adjust selection", ->
+      describe "when endRow of selection exceeds fold endRow", ->
+        it "doesn't matter, select fold based on startRow of selection", ->
           set cursor: [20, 0]
           ensure 'VG', selectedBufferRange: rangeForRows(20, 30)
           ensure 'iz', selectedBufferRange: rangeForRows(19, 23)
+
+      describe "when indent level of fold startRow and endRow is same", ->
+        beforeEach ->
+          waitsForPromise ->
+            atom.packages.activatePackage('language-javascript')
+          getVimState 'sample.js', (state, vimEditor) ->
+            {editor, editorElement} = state
+            {set, ensure, keystroke} = vimEditor
+        afterEach ->
+          atom.packages.deactivatePackage('language-javascript')
+
+        it "doesn't select fold endRow", ->
+          set cursor: [5, 0]
+          ensure 'viz', selectedBufferRange: rangeForRows(5, 6)
+          ensure 'az', selectedBufferRange: rangeForRows(4, 7)
 
     describe 'a-fold', ->
       it 'select fold row range', ->
@@ -900,13 +915,13 @@ describe "TextObject", ->
         ensure 'az', selectedBufferRange: rangeForRows(9, 25)
         ensure 'az', selectedBufferRange: rangeForRows(8, 28)
 
-      describe 'when start of selection is on fold start row', ->
+      describe "when startRow of selection is on fold startRow", ->
         it 'select outer fold(skip)', ->
           set cursor: [20, 7]
           ensure 'vaz', selectedBufferRange: rangeForRows(18, 23)
 
-      describe 'when endRow of selection is greater than fold end row', ->
-        it "doesn't care just search based on startRow and adjust selection", ->
+      describe "when endRow of selection exceeds fold endRow", ->
+        it "doesn't matter, select fold based on startRow of selection", ->
           set cursor: [20, 0]
           ensure 'VG', selectedBufferRange: rangeForRows(20, 30)
           ensure 'az', selectedBufferRange: rangeForRows(18, 23)
