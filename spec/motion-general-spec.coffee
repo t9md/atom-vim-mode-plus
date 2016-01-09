@@ -259,6 +259,57 @@ describe "Motion general", ->
           ensure 'gj', cursor: [3, 20]
           ensure 'gj', cursor: [4, 20]
 
+    describe "move-(up/down)-to-edge", ->
+      text = null
+      beforeEach ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'g k': 'vim-mode-plus:move-up-to-edge'
+            'g j': 'vim-mode-plus:move-down-to-edge'
+
+        text = new TextData """
+          0:  4 67  01234567890123456789
+          1:         1234567890123456789
+          2:    6 890         0123456789
+          3:    6 890         0123456789
+          4:   56 890         0123456789
+          5:                  0123456789
+          6:                  0123456789
+          7:  4 67            0123456789\n
+          """
+        set text: text.getRaw(), cursor: [4, 3]
+
+      it "desn't move if it can't find edge", ->
+        ensure 'gk', cursor: [4, 3]
+        ensure 'gj', cursor: [4, 3]
+      it "move to non-blank-char on both first and last row", ->
+        set cursor: [4, 4]
+        ensure 'gk', cursor: [0, 4]
+        ensure 'gj', cursor: [7, 4]
+      it "move to white space char when both side column is non-blank char", ->
+        set cursor: [4, 5]
+        ensure 'gk', cursor: [0, 5]
+        ensure 'gj', cursor: [4, 5]
+        ensure 'gj', cursor: [7, 5]
+      it "only stops on row one of [first row, last row, up-or-down-row is blank] case-1", ->
+        set cursor: [4, 6]
+        ensure 'gk', cursor: [2, 6]
+        ensure 'gk', cursor: [0, 6]
+        ensure 'gj', cursor: [2, 6]
+        ensure 'gj', cursor: [4, 6]
+        ensure 'gj', cursor: [7, 6]
+      it "only stops on row one of [first row, last row, up-or-down-row is blank] case-2", ->
+        set cursor: [4, 7]
+        ensure 'gk', cursor: [2, 7]
+        ensure 'gk', cursor: [0, 7]
+        ensure 'gj', cursor: [2, 7]
+        ensure 'gj', cursor: [4, 7]
+        ensure 'gj', cursor: [7, 7]
+      it "support count", ->
+        set cursor: [4, 6]
+        ensure '2gk', cursor: [0, 6]
+        ensure '3gj', cursor: [7, 6]
+
   describe "the w keybinding", ->
     beforeEach ->
       set
