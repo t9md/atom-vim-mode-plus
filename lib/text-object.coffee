@@ -410,16 +410,11 @@ class InnerIndentation extends Indentation
 class Fold extends TextObject
   @extend(false)
 
-  adjustRowRange: (rowRange) ->
-    return rowRange unless @isInner()
-
-    [startRow, endRow] = rowRange
-
+  adjustRowRange: ([startRow, endRow]) ->
+    return [startRow, endRow] unless @isInner()
     startRowIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
     endRowIndentLevel = getIndentLevelForBufferRow(@editor, endRow)
-
-    if (startRowIndentLevel is endRowIndentLevel)
-      endRow -= 1
+    endRow -= 1 if (startRowIndentLevel is endRowIndentLevel)
     startRow += 1
     [startRow, endRow]
 
