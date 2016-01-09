@@ -814,6 +814,12 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
     @editor.moveToFirstCharacterOfLine()
     super
 
+class InsertAtPreviousFoldStart extends ActivateInsertMode
+  @extend()
+  execute: ->
+    @new('MoveToPreviousFoldStart').execute()
+    super
+
 # FIXME need support count
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
