@@ -962,9 +962,7 @@ class MoveToPreviousFoldStart extends Motion
     @rows.filter(isValidRow)
 
   detectRow: (cursor) ->
-    for row in @getScanRows(cursor)
-      return row
-    null
+    @getScanRows(cursor)[0]
 
   moveCursor: (cursor) ->
     @countTimes =>
