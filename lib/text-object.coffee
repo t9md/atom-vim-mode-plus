@@ -410,9 +410,11 @@ class InnerIndentation extends Indentation
 class Fold extends TextObject
   @extend(false)
 
-  adjustInnerRowRange: (rowRange) ->
+  adjustRowRange: (rowRange) ->
+    return rowRange unless @isInner()
+
     [startRow, endRow] = rowRange
-    
+
     startRowIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
     endRowIndentLevel = getIndentLevelForBufferRow(@editor, endRow)
 
@@ -425,15 +427,15 @@ class Fold extends TextObject
     getCodeFoldRowRangesContainesForRow(@editor, row, true)?.reverse()
 
   selectTextObject: (selection) ->
-    originalRange = selection.getBufferRange()
-    fromRow = originalRange.start.row
-    rowRanges = @getFoldRowRangesContainsForRow(fromRow)
-    return unless rowRanges
+    range = selection.getBufferRange()
+    rowRanges = @getFoldRowRangesContainsForRow(range.start.row)
+    return unless rowRanges?
 
     if (rowRange = rowRanges.shift())?
-      rowRange = @adjustInnerRowRange(rowRange) if @isInner()
-      if getBufferRangeForRowRange(@editor, rowRange).isEqual(originalRange)
-        rowRange = @adjustInnerRowRange(rowRange) if (rowRange = rowRanges.shift())
+      rowRange = @adjustRowRange(rowRange)
+      targetRange = getBufferRangeForRowRange(@editor, rowRange)
+      if targetRange.isEqual(range) and rowRanges.length
+        rowRange = @adjustRowRange(rowRanges.shift())
     if rowRange?
       swrap(selection).selectRowRange(rowRange)
 
