@@ -226,6 +226,19 @@ getFirstVisibleScreenRow = (editor) ->
 getLastVisibleScreenRow = (editor) ->
   getView(editor).getLastVisibleScreenRow()
 
+getFirstCharacterColumForBufferRow = (editor, row) ->
+  text = editor.lineTextForBufferRow(row)
+  if (column = text.search(/\S/)) >= 0
+    column
+  else
+    null
+
+cursorIsAtFirstCharacter = (cursor) ->
+  {editor} = cursor
+  column = cursor.getBufferColumn()
+  firstCharColumn = getFirstCharacterColumForBufferRow(editor, cursor.getBufferRow())
+  firstCharColumn? and column is firstCharColumn
+
 # Cursor motion wrapper
 # -------------------------
 moveCursor = (cursor, {preserveGoalColumn}, fn) ->
@@ -426,6 +439,8 @@ module.exports = {
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
+  getFirstCharacterColumForBufferRow
+  cursorIsAtFirstCharacter
 
   # Debugging
   reportSelection,
