@@ -11,6 +11,7 @@ swrap = require './selection-wrapper'
   getIndentLevelForBufferRow
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
+  isIncludeFunctionScopeForRow
 } = require './utils'
 
 class TextObject extends Base
@@ -452,25 +453,10 @@ class Function extends Fold
   initialize: ->
     @language = @editor.getGrammar().scopeName.replace(/^source\./, '')
 
-  getScopesForRow: (row) ->
-    tokenizedLines = @editor.displayBuffer.getTokenizedLines()
-    for tag in tokenizedLines[row].tags when tag < 0 and (tag % 2 is -1)
-      atom.grammars.scopeForId(tag)
-
-  isFunctionScope: (scope) ->
-    switch @language
-      when 'go' then /^entity.name.function/.test(scope)
-      else /^meta.function/.test(scope)
-
-  isIncludeFunctionScopeForRow: (row) ->
-    for scope in @getScopesForRow(row) when @isFunctionScope(scope)
-      return true
-    null
-
   getFoldRowRangesContainsForRow: (row) ->
-    if rowRanges = super(row)
-      rowRanges.filter (rowRange) =>
-        @isIncludeFunctionScopeForRow(rowRange[0])
+    rowRanges = super(row)
+    rowRanges?.filter (rowRange) =>
+      isIncludeFunctionScopeForRow(@editor, rowRange[0])
 
   adjustRowRange: (rowRange) ->
     [startRow, endRow] = super

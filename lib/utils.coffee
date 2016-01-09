@@ -369,6 +369,24 @@ getBufferRangeForRowRange = (editor, rowRange) ->
     editor.bufferRangeForBufferRow(row, includeNewline: true)
   rangeStart.union(rangeEnd)
 
+getScopesForBufferRow = (editor, row) ->
+  tokenizedLines = editor.displayBuffer.getTokenizedLines()
+  for tag in tokenizedLines[row].tags when tag < 0 and (tag % 2 is -1)
+    atom.grammars.scopeForId(tag)
+
+isFunctionScope = (editor, scope) ->
+  {scopeName} = editor.getGrammar()
+  switch scopeName
+    when 'source.go'
+      /^entity.name.function/.test(scope)
+    else
+      /^meta.function/.test(scope)
+
+isIncludeFunctionScopeForRow = (editor, row) ->
+  scopes = getScopesForBufferRow(editor, row)
+  _.detect scopes, (scope) ->
+    isFunctionScope(editor, scope)
+
 # Debugging purpose
 # -------------------------
 reportSelection = (subject, selection) ->
@@ -441,6 +459,9 @@ module.exports = {
   getBufferRangeForRowRange
   getFirstCharacterColumForBufferRow
   cursorIsAtFirstCharacter
+  getScopesForBufferRow
+  isFunctionScope
+  isIncludeFunctionScopeForRow
 
   # Debugging
   reportSelection,
