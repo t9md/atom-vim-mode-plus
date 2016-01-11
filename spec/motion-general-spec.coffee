@@ -1175,49 +1175,86 @@ describe "Motion general", ->
         ensure ']]', cursor: [28, 2]
 
   describe 'MoveTo(Previous|Next)String', ->
-    pack = 'language-coffee-script'
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
           'g s': 'vim-mode-plus:move-to-next-string'
           'g S': 'vim-mode-plus:move-to-previous-string'
 
-      waitsForPromise ->
-        atom.packages.activatePackage(pack)
+    describe 'editor for softTab', ->
+      pack = 'language-coffee-script'
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage(pack)
 
-      runs ->
-        set grammar: 'source.coffee'
+        runs ->
+          set
+            text: """
+            disposable?.dispose()
+            disposable = atom.commands.add 'atom-workspace',
+              'check-up': -> fun('backward')
+              'check-down': -> fun('forward')
+            \n
+            """
+            grammar: 'source.coffee'
 
-      set
-        text: """
-        disposable?.dispose()
-        disposable = atom.commands.add 'atom-workspace',
-          'check-up': -> fun('backward')
-          'check-down': -> fun('forward')
-        \n
-        """
+      afterEach ->
+        atom.packages.deactivatePackage(pack)
 
-    afterEach ->
-      atom.packages.deactivatePackage(pack)
+      it "move to next string", ->
+        set cursor: [0, 0]
+        ensure 'gs', cursor: [1, 31]
+        ensure 'gs', cursor: [2, 2]
+        ensure 'gs', cursor: [2, 21]
+        ensure 'gs', cursor: [3, 2]
+        ensure 'gs', cursor: [3, 23]
+      it "move to previous string", ->
+        set cursor: [4, 0]
+        ensure 'gS', cursor: [3, 23]
+        ensure 'gS', cursor: [3, 2]
+        ensure 'gS', cursor: [2, 21]
+        ensure 'gS', cursor: [2, 2]
+        ensure 'gS', cursor: [1, 31]
+      it "support count", ->
+        set cursor: [0, 0]
+        ensure '3gs', cursor: [2, 21]
+        ensure '3gS', cursor: [1, 31]
 
-    it "move to next start of string forward", ->
-      set cursor: [0, 0]
-      ensure 'gs', cursor: [1, 31]
-      ensure 'gs', cursor: [2, 2]
-      ensure 'gs', cursor: [2, 21]
-      ensure 'gs', cursor: [3, 2]
-      ensure 'gs', cursor: [3, 23]
-    it "move to next start of string backward", ->
-      set cursor: [4, 0]
-      ensure 'gS', cursor: [3, 23]
-      ensure 'gS', cursor: [3, 2]
-      ensure 'gS', cursor: [2, 21]
-      ensure 'gS', cursor: [2, 2]
-      ensure 'gS', cursor: [1, 31]
-    it "support count", ->
-      set cursor: [0, 0]
-      ensure '3gs', cursor: [2, 21]
-      ensure '3gS', cursor: [1, 31]
+    describe 'editor for hardTab', ->
+      pack = 'language-go'
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage(pack)
+
+        getVimState 'sample.go', (state, vimEditor) ->
+          {editor, editorElement} = state
+          {set, ensure, keystroke} = vimEditor
+
+      afterEach ->
+        atom.packages.deactivatePackage(pack)
+
+      it "move to next string", ->
+        set cursor: [0, 0]
+        ensure 'gs', cursor: [2, 7]
+        ensure 'gs', cursor: [3, 7]
+        ensure 'gs', cursor: [8, 8]
+        ensure 'gs', cursor: [9, 8]
+        ensure 'gs', cursor: [11, 20]
+        ensure 'gs', cursor: [12, 15]
+        ensure 'gs', cursor: [13, 15]
+        ensure 'gs', cursor: [15, 15]
+        ensure 'gs', cursor: [16, 15]
+      it "move to previous string", ->
+        set cursor: [18, 0]
+        ensure 'gS', cursor: [16, 15]
+        ensure 'gS', cursor: [15, 15]
+        ensure 'gS', cursor: [13, 15]
+        ensure 'gS', cursor: [12, 15]
+        ensure 'gS', cursor: [11, 20]
+        ensure 'gS', cursor: [9, 8]
+        ensure 'gS', cursor: [8, 8]
+        ensure 'gS', cursor: [3, 7]
+        ensure 'gS', cursor: [2, 7]
 
   describe 'MoveTo(Previous|Next)Number', ->
     pack = 'language-coffee-script'
@@ -1246,7 +1283,7 @@ describe "Motion general", ->
     afterEach ->
       atom.packages.deactivatePackage(pack)
 
-    it "move to next number forward", ->
+    it "move to next number", ->
       set cursor: [0, 0]
       ensure 'gn', cursor: [0, 7]
       ensure 'gn', cursor: [1, 8]
@@ -1255,7 +1292,7 @@ describe "Motion general", ->
       ensure 'gn', cursor: [3, 7]
       ensure 'gn', cursor: [4, 9]
       ensure 'gn', cursor: [4, 12]
-    it "move to next number backward", ->
+    it "move to previous number", ->
       set cursor: [5, 0]
       ensure 'gN', cursor: [4, 12]
       ensure 'gN', cursor: [4, 9]
