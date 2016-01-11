@@ -225,5 +225,6 @@ getKeyBindingForCommand = (command) ->
 
 module.exports = {
   generateIntrospectionReport
+  getKeyBindingForCommand
   inspectInstance
 }
