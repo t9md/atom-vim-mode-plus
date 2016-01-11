@@ -390,13 +390,13 @@ scanForScopeStart = (editor, fromPoint, direction, fn) ->
     when 'forward' then ({position}) -> position.isGreaterThan(fromPoint)
     when 'backward' then ({position}) -> position.isLessThan(fromPoint)
 
-  for row in scanRows when tokenizeLine = getTokenizedLineForRow(editor, row)
+  for row in scanRows when tokenizedLine = getTokenizedLineForRow(editor, row)
 
     column = 0
     results = []
 
-    tokenIterator = tokenizeLine.getTokenIterator()
-    for tag in tokenizeLine.tags
+    tokenIterator = tokenizedLine.getTokenIterator()
+    for tag in tokenizedLine.tags
       tokenIterator.next()
       if tag > 0
         length = switch
