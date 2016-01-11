@@ -202,6 +202,9 @@
   # '(': 'vim-mode-plus:move-to-previous-fold-start-with-same-indent'
   # ')': 'vim-mode-plus:move-to-next-fold-start-with-same-indent'
 
+  # 'g s': 'vim-mode-plus:move-to-next-string'
+  # 'g S': 'vim-mode-plus:move-to-previous-string'
+
 'atom-text-editor.vim-mode-plus.with-count:not(.insert-mode)':
   '0': 'vim-mode-plus:set-count-0'
   '%': 'vim-mode-plus:move-to-line-by-percent'

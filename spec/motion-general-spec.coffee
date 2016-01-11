@@ -1173,3 +1173,46 @@ describe "Motion general", ->
         ensure ']]', cursor: [23, 8]
         ensure ']]', cursor: [25, 4]
         ensure ']]', cursor: [28, 2]
+
+  describe 'MoveTo(Previous|Next)String', ->
+    pack = 'language-coffee-script'
+    scope = 'source.coffee'
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g s': 'vim-mode-plus:move-to-next-string'
+          'g S': 'vim-mode-plus:move-to-previous-string'
+
+      waitsForPromise ->
+        atom.packages.activatePackage(pack)
+
+      set
+        text: """
+        disposable?.dispose()
+        disposable = atom.commands.add 'atom-workspace',
+          'check-up': -> fun('backward')
+          'check-down': -> fun('forward')
+        \n
+        """
+
+      runs ->
+        grammar = atom.grammars.grammarForScopeName(scope)
+        editor.setGrammar(grammar)
+
+    afterEach ->
+      atom.packages.deactivatePackage(pack)
+
+    it "move to next start of string forward", ->
+      set cursor: [0, 0]
+      ensure 'gs', cursor: [1, 31]
+      ensure 'gs', cursor: [2, 2]
+      ensure 'gs', cursor: [2, 21]
+      ensure 'gs', cursor: [3, 2]
+      ensure 'gs', cursor: [3, 23]
+    it "move to next start of string backward", ->
+      set cursor: [4, 0]
+      ensure 'gS', cursor: [3, 23]
+      ensure 'gS', cursor: [3, 2]
+      ensure 'gS', cursor: [2, 21]
+      ensure 'gS', cursor: [2, 2]
+      ensure 'gS', cursor: [1, 31]
