@@ -4,7 +4,7 @@ path = require 'path'
 {Emitter, Disposable, BufferedProcess, CompositeDisposable} = require 'atom'
 
 Base = require './base'
-{generateIntrospectionReport} = require './introspection'
+{generateIntrospectionReport, getKeyBindingForCommand} = require './introspection'
 settings = require './settings'
 {debug} = require './utils'
 
@@ -18,6 +18,7 @@ class Developer
       'toggle-debug': => @toggleDebug()
       'open-in-vim': => @openInVim()
       'generate-introspection-report': => @generateIntrospectionReport()
+      'report-commands-have-no-default-keymap': => @reportCommandsHaveNoDefaultKeymap()
       'toggle-dev-environment': => @toggleDevEnvironment()
 
     subscriptions = new CompositeDisposable
@@ -44,6 +45,17 @@ class Developer
   toggleDebug: ->
     settings.set('debug', not settings.get('debug'))
     console.log "#{settings.scope} debug:", settings.get('debug')
+
+  reportCommandsHaveNoDefaultKeymap: ->
+    packPath = atom.packages.resolvePackagePath('vim-mode-plus')
+    path.join(packPath, "keymaps", )
+
+    commandNames = (klass.getCommandName() for __, klass of Base.getRegistries() when klass.isCommand())
+    commandNames = commandNames.filter (commandName) ->
+      not getKeyBindingForCommand(commandName)
+
+    atom.workspace.open().then (editor) ->
+      editor.setText commandNames.join("\n")
 
   openInVim: ->
     editor = atom.workspace.getActiveTextEditor()
