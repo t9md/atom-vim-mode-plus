@@ -399,11 +399,10 @@ scanForScopeStart = (editor, fromPoint, direction, fn) ->
     for tag in tokenizedLine.tags
       tokenIterator.next()
       if tag > 0
-        length = switch
+        column += switch
           when tokenIterator.isHardTab() then 1
           when tokenIterator.isSoftWrapIndentation() then 0
           else tag
-        column += length
       else if (tag % 2 is -1)
         scope = atom.grammars.scopeForId(tag)
         position = new Point(row, column)
