@@ -1200,7 +1200,7 @@ describe "Motion general", ->
     afterEach ->
       atom.packages.deactivatePackage(pack)
 
-    fit "move to next start of string forward", ->
+    it "move to next start of string forward", ->
       set cursor: [0, 0]
       ensure 'gs', cursor: [1, 31]
       ensure 'gs', cursor: [2, 2]
@@ -1218,3 +1218,53 @@ describe "Motion general", ->
       set cursor: [0, 0]
       ensure '3gs', cursor: [2, 21]
       ensure '3gS', cursor: [1, 31]
+
+  describe 'MoveTo(Previous|Next)Number', ->
+    pack = 'language-coffee-script'
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g n': 'vim-mode-plus:move-to-next-number'
+          'g N': 'vim-mode-plus:move-to-previous-number'
+
+      waitsForPromise ->
+        atom.packages.activatePackage(pack)
+
+      runs ->
+        set grammar: 'source.coffee'
+
+      set
+        text: """
+        num1 = 1
+        arr1 = [1, 101, 1001]
+        arr2 = ["1", "2", "3"]
+        num2 = 2
+        fun("1", 2, 3)
+        \n
+        """
+
+    afterEach ->
+      atom.packages.deactivatePackage(pack)
+
+    it "move to next number forward", ->
+      set cursor: [0, 0]
+      ensure 'gn', cursor: [0, 7]
+      ensure 'gn', cursor: [1, 8]
+      ensure 'gn', cursor: [1, 11]
+      ensure 'gn', cursor: [1, 16]
+      ensure 'gn', cursor: [3, 7]
+      ensure 'gn', cursor: [4, 9]
+      ensure 'gn', cursor: [4, 12]
+    it "move to next number backward", ->
+      set cursor: [5, 0]
+      ensure 'gN', cursor: [4, 12]
+      ensure 'gN', cursor: [4, 9]
+      ensure 'gN', cursor: [3, 7]
+      ensure 'gN', cursor: [1, 16]
+      ensure 'gN', cursor: [1, 11]
+      ensure 'gN', cursor: [1, 8]
+      ensure 'gN', cursor: [0, 7]
+    it "support count", ->
+      set cursor: [0, 0]
+      ensure '5gn', cursor: [3, 7]
+      ensure '3gN', cursor: [1, 8]
