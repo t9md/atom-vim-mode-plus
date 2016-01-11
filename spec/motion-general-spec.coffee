@@ -1216,3 +1216,7 @@ describe "Motion general", ->
       ensure 'gS', cursor: [2, 21]
       ensure 'gS', cursor: [2, 2]
       ensure 'gS', cursor: [1, 31]
+    it "support count", ->
+      set cursor: [0, 0]
+      ensure '3gs', cursor: [2, 21]
+      ensure '3gS', cursor: [1, 31]
