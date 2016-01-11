@@ -54,7 +54,7 @@ class ScrollUp extends ScrollDown
 # Scroll without Cursor Position change.
 # -------------------------
 class ScrollCursor extends Scroll
-  @extend()
+  @extend(false)
   execute: ->
     @moveToFirstCharacterOfLine?()
     if @isScrollable()
