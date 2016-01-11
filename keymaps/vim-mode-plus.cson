@@ -204,6 +204,9 @@
 
   # 'g s': 'vim-mode-plus:move-to-next-string'
   # 'g S': 'vim-mode-plus:move-to-previous-string'
+  
+  # 'g n': 'vim-mode-plus:move-to-next-number'
+  # 'g N': 'vim-mode-plus:move-to-previous-number'
 
 'atom-text-editor.vim-mode-plus.with-count:not(.insert-mode)':
   '0': 'vim-mode-plus:set-count-0'

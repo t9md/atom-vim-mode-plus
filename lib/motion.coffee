@@ -1032,6 +1032,14 @@ class MoveToNextString extends MoveToPreviousString
   @extend()
   direction: 'forward'
 
+class MoveToPreviousNumber extends MoveToPositionByScope
+  @extend()
+  direction: 'backward'
+  scope: 'constant.numeric'
+
+class MoveToNextNumber extends MoveToPreviousNumber
+  @extend()
+  direction: 'forward'
 # -------------------------
 # keymap: %
 class MoveToPair extends Motion
