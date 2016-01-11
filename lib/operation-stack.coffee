@@ -77,11 +77,14 @@ class OperationStack
     @vimState.emitter.emit 'did-operation-finish'
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
-        operationName = @lastOperation.constructor.name
-        message = "Selection is not empty in normal-mode: #{operationName}"
-        if @lastOperation.target?
-          message += ", target= #{@lastOperation.target.constructor.name}"
-        throw new Error(message)
+        if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
+          operationName = @lastOperation.constructor.name
+          message = "Selection is not empty in normal-mode: #{operationName}"
+          if @lastOperation.target?
+            message += ", target= #{@lastOperation.target.constructor.name}"
+          throw new Error(message)
+        else
+          @editor.clearSelections()
 
       # Ensure Cursor is NOT at EndOfLine position
       for c in @editor.getCursors() when c.isAtEndOfLine()
