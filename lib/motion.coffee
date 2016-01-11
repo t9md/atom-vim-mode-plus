@@ -27,6 +27,7 @@ globalState = require './global-state'
   cursorIsAtEmptyRow
   getCodeFoldRowRanges
   isIncludeFunctionScopeForRow
+  detectScopeStartPositionByScope
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -939,6 +940,8 @@ class RepeatSearchReverse extends RepeatSearch
   isBackwards: ->
     not @backwards
 
+# Fold
+# -------------------------
 class MoveToPreviousFoldStart extends Motion
   @extend()
   linewise: true
@@ -1006,6 +1009,28 @@ class MoveToPreviousFunction extends MoveToPreviousFoldStart
 class MoveToNextFunction extends MoveToPreviousFunction
   @extend()
   direction: 'next'
+
+# Scope based
+# -------------------------
+class MoveToPositionByScope extends Motion
+  @extend(false)
+  direction: 'backward'
+  scope: '.'
+
+  moveCursor: (cursor) ->
+    @countTimes =>
+      from = cursor.getBufferPosition()
+      if point = detectScopeStartPositionByScope(@editor, from, @direction, @scope)
+        cursor.setBufferPosition(point)
+
+class MoveToPreviousString extends MoveToPositionByScope
+  @extend()
+  direction: 'backward'
+  scope: 'string.begin'
+
+class MoveToNextString extends MoveToPreviousString
+  @extend()
+  direction: 'forward'
 
 # -------------------------
 # keymap: %

@@ -369,19 +369,60 @@ getBufferRangeForRowRange = (editor, rowRange) ->
     editor.bufferRangeForBufferRow(row, includeNewline: true)
   rangeStart.union(rangeEnd)
 
-getTokenizedLines = (editor) ->
-  editor.displayBuffer.getTokenizedLines()
+getTokenizedLineForRow = (editor, row) ->
+  editor.displayBuffer.tokenizedBuffer.tokenizedLineForRow(row)
 
 getScopesForTokenizedLine = (line) ->
   for tag in line.tags when tag < 0 and (tag % 2 is -1)
     atom.grammars.scopeForId(tag)
+
+scanForScopeStart = (editor, fromPoint, direction, fn) ->
+  fromPoint = Point.fromObject(fromPoint)
+  scanRows = switch direction
+    when 'forward' then [(fromPoint.row)..editor.getLastBufferRow()]
+    when 'backward' then [(fromPoint.row)..0]
+
+  continueScan = true
+  stop = ->
+    continueScan = false
+
+  isValidToken = switch direction
+    when 'forward' then ({position}) -> position.isGreaterThan(fromPoint)
+    when 'backward' then ({position}) -> position.isLessThan(fromPoint)
+
+  for row in scanRows when tags = getTokenizedLineForRow(editor, row)?.tags
+    column = 0
+    results = []
+
+    for tag in tags
+      if tag > 0
+        column += tag
+      else if (tag % 2 is -1)
+        scope = atom.grammars.scopeForId(tag)
+        position = new Point(row, column)
+        results.push {scope, position, stop}
+
+    results = results.filter(isValidToken)
+    results.reverse() if direction is 'backward'
+    for result in results
+      fn(result)
+      return unless continueScan
+    return unless continueScan
+
+detectScopeStartPositionByScope = (editor, fromPoint, direction, scope) ->
+  point = null
+  scanForScopeStart editor, fromPoint, direction, (info) ->
+    if info.scope.search(scope) >= 0
+      info.stop()
+      point = info.position
+  point
 
 isIncludeFunctionScopeForRow = (editor, row) ->
   # [FIXME] Bug of upstream?
   # Sometime tokenizedLines length is less than last buffer row.
   # So tokenizedLine is not accessible even if valid row.
   # In that case I simply return empty Array.
-  if tokenizedLine = getTokenizedLines(editor)[row]
+  if tokenizedLine = getTokenizedLineForRow(editor, row)
     getScopesForTokenizedLine(tokenizedLine).some (scope) ->
       isFunctionScope(editor, scope)
   else
@@ -468,9 +509,12 @@ module.exports = {
   getBufferRangeForRowRange
   getFirstCharacterColumForBufferRow
   cursorIsAtFirstCharacter
-  getTokenizedLines
   isFunctionScope
   isIncludeFunctionScopeForRow
+  getTokenizedLineForRow
+  getScopesForTokenizedLine
+  scanForScopeStart
+  detectScopeStartPositionByScope
 
   # Debugging
   reportSelection,
