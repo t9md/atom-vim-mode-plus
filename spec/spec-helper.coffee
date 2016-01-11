@@ -162,6 +162,7 @@ class VimEditor
 
   setOptionsOrdered = [
     'text',
+    'grammar',
     'cursor', 'cursorBuffer',
     'addCursor', 'addCursorBuffer'
     'register',
@@ -177,6 +178,9 @@ class VimEditor
 
   setText: (text) ->
     @editor.setText(text)
+
+  setGrammar: (scope) ->
+    @editor.setGrammar(atom.grammars.grammarForScopeName(scope))
 
   setCursor: (points) ->
     points = toArrayOfPoint(points)
