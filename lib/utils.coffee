@@ -390,13 +390,20 @@ scanForScopeStart = (editor, fromPoint, direction, fn) ->
     when 'forward' then ({position}) -> position.isGreaterThan(fromPoint)
     when 'backward' then ({position}) -> position.isLessThan(fromPoint)
 
-  for row in scanRows when tags = getTokenizedLineForRow(editor, row)?.tags
+  for row in scanRows when tokenizeLine = getTokenizedLineForRow(editor, row)
+
     column = 0
     results = []
 
-    for tag in tags
+    tokenIterator = tokenizeLine.getTokenIterator()
+    for tag in tokenizeLine.tags
+      tokenIterator.next()
       if tag > 0
-        column += tag
+        length = switch
+          when tokenIterator.isHardTab() then 1
+          when tokenIterator.isSoftWrapIndentation() then 0
+          else tag
+        column += length
       else if (tag % 2 is -1)
         scope = atom.grammars.scopeForId(tag)
         position = new Point(row, column)
