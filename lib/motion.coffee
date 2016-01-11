@@ -27,7 +27,6 @@ globalState = require './global-state'
   cursorIsAtEmptyRow
   getCodeFoldRowRanges
   isIncludeFunctionScopeForRow
-  getScopesForBufferRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
