@@ -454,7 +454,7 @@ class Function extends Fold
     @language = @editor.getGrammar().scopeName.replace(/^source\./, '')
 
   getFoldRowRangesContainsForRow: (row) ->
-    rowRanges = super(row)
+    rowRanges = getCodeFoldRowRangesContainesForRow(@editor, row)?.reverse()
     rowRanges?.filter (rowRange) =>
       isIncludeFunctionScopeForRow(@editor, rowRange[0])
 
