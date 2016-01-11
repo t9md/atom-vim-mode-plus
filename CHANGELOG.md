@@ -1,3 +1,14 @@
+# 0.15.0
+
+- Improve, New: TextObjet.Fold can expand when repeated!
+- Improve: Spec for TextObject.Fold, Motion.MoveUpToEdge
+- New: `insert-at-previous-fold-start`, `insert-at-next-fold-start`
+- New: `move-to-position-by-scope` as parent class of every scope based motion.
+- New: `move-to-next-string`, `move-to-previous-string`
+- New: `move-to-next-number`, `move-to-previous-number`
+- Internal: Reporting command in dev-mode which report commands which have no default keymap.
+- FIX: Disable strict check of non-empty selection in normal-mode at the timing of operation finished. #123.
+
 # 0.14.1
 - Fix: `I` doesn't go to first char if already there. #122.
 
