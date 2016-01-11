@@ -1176,7 +1176,6 @@ describe "Motion general", ->
 
   describe 'MoveTo(Previous|Next)String', ->
     pack = 'language-coffee-script'
-    scope = 'source.coffee'
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
@@ -1185,6 +1184,9 @@ describe "Motion general", ->
 
       waitsForPromise ->
         atom.packages.activatePackage(pack)
+
+      runs ->
+        set grammar: 'source.coffee'
 
       set
         text: """
@@ -1195,14 +1197,10 @@ describe "Motion general", ->
         \n
         """
 
-      runs ->
-        grammar = atom.grammars.grammarForScopeName(scope)
-        editor.setGrammar(grammar)
-
     afterEach ->
       atom.packages.deactivatePackage(pack)
 
-    it "move to next start of string forward", ->
+    fit "move to next start of string forward", ->
       set cursor: [0, 0]
       ensure 'gs', cursor: [1, 31]
       ensure 'gs', cursor: [2, 2]
