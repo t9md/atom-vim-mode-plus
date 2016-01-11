@@ -105,3 +105,8 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'integer'
     default: 700
     description: "Duration(msec) for hover search counter"
+  throwErrorOnNonEmptySelectionInNormalMode:
+    order: 101
+    type: 'boolean'
+    default: false
+    description: "[Dev use] Throw error when non-empty selection was remained on normal-mode at the timing of operation finished"
