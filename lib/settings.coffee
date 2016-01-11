@@ -109,4 +109,4 @@ module.exports = new Settings 'vim-mode-plus',
     order: 101
     type: 'boolean'
     default: false
-    description: "[Dev use] Throw error when non-empty selection was remained on normal-mode at the timing of operation finished"
+    description: "[Dev use] Throw error when non-empty selection was remained in normal-mode at the timing of operation finished"
