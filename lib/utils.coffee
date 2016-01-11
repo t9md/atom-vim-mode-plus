@@ -369,16 +369,23 @@ getBufferRangeForRowRange = (editor, rowRange) ->
     editor.bufferRangeForBufferRow(row, includeNewline: true)
   rangeStart.union(rangeEnd)
 
-getScopesForBufferRow = (editor, row) ->
-  tokenizedLines = editor.displayBuffer.getTokenizedLines()
+getTokenizedLines = (editor) ->
+  editor.displayBuffer.getTokenizedLines()
+
+getScopesForTokenizedLine = (line) ->
+  for tag in line.tags when tag < 0 and (tag % 2 is -1)
+    atom.grammars.scopeForId(tag)
+
+isIncludeFunctionScopeForRow = (editor, row) ->
   # [FIXME] Bug of upstream?
   # Sometime tokenizedLines length is less than last buffer row.
   # So tokenizedLine is not accessible even if valid row.
   # In that case I simply return empty Array.
-  return [] unless tokenizedLine = tokenizedLines[row]
-
-  for tag in tokenizedLine.tags when tag < 0 and (tag % 2 is -1)
-    atom.grammars.scopeForId(tag)
+  if tokenizedLine = getTokenizedLines(editor)[row]
+    getScopesForTokenizedLine(tokenizedLine).some (scope) ->
+      isFunctionScope(editor, scope)
+  else
+    false
 
 # [FIXME] very rough state, need improvement.
 isFunctionScope = (editor, scope) ->
@@ -388,11 +395,6 @@ isFunctionScope = (editor, scope) ->
       /^entity\.name\.function/.test(scope)
     else
       /^meta\.function\./.test(scope)
-
-isIncludeFunctionScopeForRow = (editor, row) ->
-  scopes = getScopesForBufferRow(editor, row)
-  scopes.some (scope) ->
-    isFunctionScope(editor, scope)
 
 # Debugging purpose
 # -------------------------
@@ -466,7 +468,7 @@ module.exports = {
   getBufferRangeForRowRange
   getFirstCharacterColumForBufferRow
   cursorIsAtFirstCharacter
-  getScopesForBufferRow
+  getTokenizedLines
   isFunctionScope
   isIncludeFunctionScopeForRow
 
