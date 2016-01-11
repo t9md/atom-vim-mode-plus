@@ -313,13 +313,13 @@ class InnerAngleBracket extends AngleBracket
   @extend()
 
 # -------------------------
-# [FIXME] See vim-mode#795
+# [TODO] See vim-mode#795
 class Tag extends Pair
   @extend(false)
   pair: ['>', '<']
 
-class ATag extends Tag
-  @extend()
+# class ATag extends Tag
+#   @extend()
 
 class InnerTag extends Tag
   @extend()
