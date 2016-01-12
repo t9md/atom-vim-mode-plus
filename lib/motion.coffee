@@ -13,7 +13,7 @@ globalState = require './global-state'
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getVimEofBufferPosition, getVimEofScreenPosition
   getVimLastBufferRow, getVimLastScreenRow
-  getValidVimRow
+  getValidVimBufferRow
   flashRanges
   moveCursorToFirstCharacterAtRow
   sortRanges
@@ -216,7 +216,7 @@ class MoveUpToNonBlank extends Motion
 
   getScanRows: (cursor) ->
     cursorRow = cursor.getBufferRow()
-    validRow = getValidVimRow.bind(null, @editor)
+    validRow = getValidVimBufferRow.bind(null, @editor)
     switch @direction
       when 'up'
         [validRow(cursorRow - 1)..0]
