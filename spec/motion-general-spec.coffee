@@ -252,6 +252,35 @@ describe "Motion general", ->
           ensure 'gj', cursor: [4, 20]
           ensure 'gj', cursor: [5, 20]
 
+        describe 'editor for hardTab', ->
+          pack = 'language-go'
+          beforeEach ->
+            waitsForPromise ->
+              atom.packages.activatePackage(pack)
+
+            getVimState 'sample.go', (state, vimEditor) ->
+              {editor, editorElement} = state
+              {set, ensure, keystroke} = vimEditor
+
+            runs ->
+              set cursor: [8, 2]
+              # In hardTab indent bufferPosition is not same as screenPosition
+              ensure cursorBuffer: [8, 1]
+
+          afterEach ->
+            atom.packages.deactivatePackage(pack)
+
+          it "move up/down to non-blank-char of same *screen* column", ->
+            ensure 'gj', cursor: [9, 2]
+            ensure 'gj', cursor: [11, 2]
+            ensure 'gj', cursor: [14, 2]
+            ensure 'gj', cursor: [17, 2]
+
+            ensure 'gk', cursor: [14, 2]
+            ensure 'gk', cursor: [11, 2]
+            ensure 'gk', cursor: [9, 2]
+            ensure 'gk', cursor: [8, 2]
+
     describe "move-(up/down)-to-edge", ->
       text = null
       beforeEach ->
@@ -302,6 +331,47 @@ describe "Motion general", ->
         set cursor: [4, 6]
         ensure '2gk', cursor: [0, 6]
         ensure '3gj', cursor: [7, 6]
+
+      describe 'editor for hardTab', ->
+        pack = 'language-go'
+        beforeEach ->
+          waitsForPromise ->
+            atom.packages.activatePackage(pack)
+
+          getVimState 'sample.go', (state, vimEditor) ->
+            {editor, editorElement} = state
+            {set, ensure, keystroke} = vimEditor
+
+          runs ->
+            set cursor: [8, 2]
+            # In hardTab indent bufferPosition is not same as screenPosition
+            ensure cursorBuffer: [8, 1]
+
+        afterEach ->
+          atom.packages.deactivatePackage(pack)
+
+        it "move up/down to next edge of same *screen* column", ->
+          ensure 'gk', cursor: [5, 2]
+          ensure 'gk', cursor: [3, 2]
+          ensure 'gk', cursor: [2, 2]
+          ensure 'gk', cursor: [0, 2]
+
+          ensure 'gj', cursor: [2, 2]
+          ensure 'gj', cursor: [3, 2]
+          ensure 'gj', cursor: [5, 2]
+          ensure 'gj', cursor: [9, 2]
+          ensure 'gj', cursor: [11, 2]
+          ensure 'gj', cursor: [14, 2]
+          ensure 'gj', cursor: [17, 2]
+
+          ensure 'gk', cursor: [14, 2]
+          ensure 'gk', cursor: [11, 2]
+          ensure 'gk', cursor: [9, 2]
+          ensure 'gk', cursor: [5, 2]
+          ensure 'gk', cursor: [3, 2]
+          ensure 'gk', cursor: [2, 2]
+          ensure 'gk', cursor: [0, 2]
+
 
   describe "the w keybinding", ->
     beforeEach ->
