@@ -259,6 +259,7 @@ class MoveUpToEdge extends MoveUpToNonBlank
 
   # To avoid stopping on indentation or trailing whitespace,
   # we exclude leading and trailing whitespace from stoppable column.
+  # [FIXME] This approach is not accurate for hardTab buffer like golang.
   isValidStoppableColumn: (row, column) ->
     text = @editor.lineTextForBufferRow(row)
     if (match = text.match(/\S/g))?
@@ -1045,7 +1046,7 @@ class MoveToNextNumber extends MoveToPreviousNumber
 class MoveToPair extends Motion
   @extend()
   inclusive: true
-  member: ["Parenthesis", "CurlyBracket", "SquareBracket"]
+  member: ['Parenthesis', 'CurlyBracket', 'SquareBracket']
 
   getPoint: (cursor) ->
     ranges = @new("AAnyPair", {enclosed: false, @member}).getRanges(cursor.selection)
