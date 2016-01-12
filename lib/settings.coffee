@@ -73,35 +73,41 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'integer'
     default: 100
     description: "Duration(msec) for flash"
-  flashOnSearch:
+  flashOnOperateBlacklist:
     order: 18
+    type: 'array'
+    items: type: 'string'
+    default: []
+    description: 'comma separated list of operator class name to disable flash e.g. "Yank, AutoIndent"'
+  flashOnSearch:
+    order: 19
     type: 'boolean'
     default: true
   flashOnSearchDuration:
-    order: 19
+    order: 20
     type: 'integer'
     default: 300
     description: "Duration(msec) for search flash"
   flashScreenOnSearchHasNoMatch:
-    order: 20
+    order: 21
     type: 'boolean'
     default: true
   showHoverOnOperate:
-    order: 21
+    order: 22
     type: 'boolean'
     default: false
     description: "Show count, register and optional icon on hover overlay"
   showHoverOnOperateIcon:
-    order: 22
+    order: 23
     type: 'string'
     default: 'icon'
     enum: ['none', 'icon', 'emoji']
   showHoverSearchCounter:
-    order: 23
+    order: 24
     type: 'boolean'
     default: false
   showHoverSearchCounterDuration:
-    order: 24
+    order: 25
     type: 'integer'
     default: 700
     description: "Duration(msec) for hover search counter"
