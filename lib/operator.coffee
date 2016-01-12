@@ -35,7 +35,8 @@ class Operator extends Base
     haveSomeSelection(@editor.getSelections())
 
   needFlash: ->
-    @flashTarget and settings.get('flashOnOperate')
+    @flashTarget and settings.get('flashOnOperate') and
+      not (@constructor.name in settings.get('flashOnOperateBlacklist'))
 
   needTrackChange: ->
     @trackChange
@@ -179,6 +180,7 @@ class DeleteToLastCharacterOfLine extends Delete
   @extend()
   target: 'MoveToLastCharacterOfLine'
 
+# -------------------------
 class TransformString extends Operator
   @extend(false)
   trackChange: true
@@ -196,6 +198,7 @@ class TransformString extends Operator
     s.insertText(text, {@autoIndent})
     setPoint() if @setPoint
 
+# -------------------------
 class ToggleCase extends TransformString
   @extend()
   hover: icon: ':toggle-case:', emoji: ':clap:'
