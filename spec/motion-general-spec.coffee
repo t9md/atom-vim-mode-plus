@@ -220,44 +220,37 @@ describe "Motion general", ->
           """
         set text: text.getRaw()
 
-      describe "move-up-to-non-blank", ->
+      describe "move-up/down-to-non-blank", ->
         beforeEach ->
-          set cursor: [6, 3]
-        it "move up to first instance of non-blank-char of same column", ->
+          set cursor: [5, 3]
+        it "move up/down to non-blank-char of same column", ->
           ensure 'gk', cursor: [4, 3]
           ensure 'gk', cursor: [1, 3]
+          ensure 'gj', cursor: [4, 3]
+          ensure 'gj', cursor: [6, 3]
         it "support count", ->
           ensure '2gk', cursor: [1, 3]
+          ensure '2gj', cursor: [6, 3]
         it "won't move up if all upper row is blank", ->
           ensure '10gk', cursor: [1, 3]
-        it "operate on linewise when composed with operator", ->
+          ensure '10gj', cursor: [6, 3]
+        it "operate on linewise when composed with operator case-up", ->
+          set cursor: [6, 3]
           ensure 'dgk', text: text.getLines([0, 1, 2, 3, 7])
-        it "motion is not different from `k` when upper row is non-blank", ->
+        it "operate on linewise when composed with operator case-down", ->
+          set cursor: [4, 3]
+          ensure 'dgj', text: text.getLines([0, 1, 2, 3, 7])
+        it "motion is not different from `k`, `j` when all up/down row is non-blank", ->
           set cursor: [6, 20]
           ensure 'gk', cursor: [5, 20]
           ensure 'gk', cursor: [4, 20]
           ensure 'gk', cursor: [3, 20]
           ensure 'gk', cursor: [2, 20]
           ensure 'gk', cursor: [1, 20]
-
-      describe "move-down-to-non-blank", ->
-        beforeEach ->
-          set cursor: [1, 3]
-        it "move down to first instance of non-blank-char of same column", ->
-          ensure 'gj', cursor: [4, 3]
-          ensure 'gj', cursor: [6, 3]
-        it "support count", ->
-          ensure '2gj', cursor: [6, 3]
-        it "won't move down if all lower row is blank", ->
-          ensure '10gj', cursor: [6, 3]
-        it "operate on linewise when composed with operator", ->
-          ensure 'dgj', text: text.getLines([0, 5, 6, 7])
-        it "motion is not different from `j` when lower row is non-blank", ->
-          set cursor: [0, 20]
-          ensure 'gj', cursor: [1, 20]
           ensure 'gj', cursor: [2, 20]
           ensure 'gj', cursor: [3, 20]
           ensure 'gj', cursor: [4, 20]
+          ensure 'gj', cursor: [5, 20]
 
     describe "move-(up/down)-to-edge", ->
       text = null
