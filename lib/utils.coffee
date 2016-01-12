@@ -300,11 +300,19 @@ flashRanges = (ranges, options) ->
   , options.timeout
 
 # Return valid row from 0 to vimLastBufferRow
-getValidVimRow = (editor, row) ->
+getValidVimBufferRow = (editor, row) ->
   vimLastBufferRow = getVimLastBufferRow(editor)
   switch
     when (row < 0) then 0
     when (row > vimLastBufferRow) then vimLastBufferRow
+    else row
+
+# Return valid row from 0 to vimLastScreenRow
+getValidVimScreenRow = (editor, row) ->
+  vimLastScreenRow = getVimLastScreenRow(editor)
+  switch
+    when (row < 0) then 0
+    when (row > vimLastScreenRow) then vimLastScreenRow
     else row
 
 # Compensate lack of ternaly operator
@@ -496,7 +504,8 @@ module.exports = {
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
   flashRanges
-  getValidVimRow
+  getValidVimBufferRow
+  getValidVimScreenRow
   moveCursorToFirstCharacterAtRow
   countChar
   pick
