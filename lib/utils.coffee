@@ -47,11 +47,11 @@ getKeystrokeForEvent = (event) ->
 
 keystrokeToCharCode =
   backspace: 8
-  tab:       9
-  enter:     13
-  escape:    27
-  space:     32
-  delete:    127
+  tab: 9
+  enter: 13
+  escape: 27
+  space: 32
+  delete: 127
 
 getCharacterForEvent = (event) ->
   keystroke = getKeystrokeForEvent(event)
@@ -391,7 +391,6 @@ scanForScopeStart = (editor, fromPoint, direction, fn) ->
     when 'backward' then ({position}) -> position.isLessThan(fromPoint)
 
   for row in scanRows when tokenizedLine = getTokenizedLineForRow(editor, row)
-
     column = 0
     results = []
 

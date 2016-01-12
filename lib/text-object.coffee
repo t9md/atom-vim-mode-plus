@@ -42,18 +42,21 @@ class TextObject extends Base
     @emitDidSelect()
 
 # -------------------------
-# [FIXME] Need to be extendable.
+# [FIXME] make it expandable
 class Word extends TextObject
   @extend(false)
   selectTextObject: (selection) ->
     wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
-    @selectInner(selection, wordRegex)
-    @selectA(selection) if @isA()
+    if @isInner()
+      @selectInner(selection, wordRegex)
+    else
+      @selectA(selection, wordRegex)
 
   selectInner: (selection, wordRegex=null) ->
     selection.selectWord()
 
-  selectA: (selection) ->
+  selectA: (selection, wordRegex=null) ->
+    @selectInner(selection, wordRegex)
     scanRange = selection.cursor.getCurrentLineBufferRange()
     headPoint = selection.getHeadBufferPosition()
     scanRange.start = headPoint
@@ -446,8 +449,7 @@ class InnerFold extends Fold
 class Function extends Fold
   @extend(false)
 
-  indentScopedLanguages: ['python', 'coffee']
-  # FIXME: why go dont' fold closing '}' for function? this is dirty workaround.
+  # Some language don't include closing `}` into fold.
   omittingClosingCharLanguages: ['go']
 
   initialize: ->
