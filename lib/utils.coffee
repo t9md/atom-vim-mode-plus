@@ -170,13 +170,22 @@ pointIsAtEndOfLine = (editor, point) ->
   point = Point.fromObject(point)
   getEolBufferPositionForRow(editor, point.row).isEqual(point)
 
-characterAtPoint = (editor, point) ->
+characterAtBufferPosition = (editor, point) ->
   range = Range.fromPointWithDelta(point, 0, 1)
-  char = editor.getTextInBufferRange(range)
+  editor.getTextInBufferRange(range)
+
+characterAtScreenPosition = (editor, point) ->
+  screenRange = Range.fromPointWithDelta(point, 0, 1)
+  range = editor.bufferRangeForScreenRange(screenRange)
+  editor.getTextInBufferRange(range)
 
 getTextAtCursor = (cursor) ->
   {editor} = cursor
   bufferRange = editor.bufferRangeForScreenRange(cursor.getScreenRange())
+  editor.getTextInBufferRange(bufferRange)
+
+getTextInScreenRange = (editor, screenRange) ->
+  bufferRange = editor.bufferRangeForScreenRange(screenRange)
   editor.getTextInBufferRange(bufferRange)
 
 cursorIsOnWhiteSpace = (cursor) ->
@@ -489,7 +498,8 @@ module.exports = {
   pointIsAtEndOfLine
   pointIsAtVimEndOfFile
   cursorIsAtVimEndOfFile
-  characterAtPoint
+  characterAtBufferPosition
+  characterAtScreenPosition
   getVimEofBufferPosition
   getVimEofScreenPosition
   getVimLastBufferRow
@@ -515,6 +525,7 @@ module.exports = {
   getIndentLevelForBufferRow
   isAllWhiteSpace
   getTextAtCursor
+  getTextInScreenRange
   cursorIsOnWhiteSpace
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow

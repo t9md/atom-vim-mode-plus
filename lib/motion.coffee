@@ -13,7 +13,8 @@ globalState = require './global-state'
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getVimEofBufferPosition, getVimEofScreenPosition
   getVimLastBufferRow, getVimLastScreenRow
-  getValidVimBufferRow
+  getValidVimScreenRow
+  characterAtScreenPosition
   flashRanges
   moveCursorToFirstCharacterAtRow
   sortRanges
@@ -28,6 +29,7 @@ globalState = require './global-state'
   getCodeFoldRowRanges
   isIncludeFunctionScopeForRow
   detectScopeStartPositionByScope
+  getTextInScreenRange
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -208,32 +210,32 @@ class MoveUpToNonBlank extends Motion
   direction: 'up'
 
   moveCursor: (cursor) ->
-    column = cursor.getBufferColumn()
+    column = cursor.getScreenColumn()
     @countTimes =>
-      newRow = _.detect @getScanRows(cursor), (row) => @isMovableColumn(row, column)
+      newRow = _.detect @getScanRows(cursor), (row) =>
+        @isMovablePoint(new Point(row, column))
       if newRow?
-        cursor.setBufferPosition([newRow, column])
+        cursor.setScreenPosition([newRow, column])
 
   getScanRows: (cursor) ->
-    cursorRow = cursor.getBufferRow()
-    validRow = getValidVimBufferRow.bind(null, @editor)
+    cursorRow = cursor.getScreenRow()
+    validRow = getValidVimScreenRow.bind(null, @editor)
     switch @direction
-      when 'up'
-        [validRow(cursorRow - 1)..0]
-      when 'down'
-        [validRow(cursorRow + 1)..getVimLastBufferRow(@editor)]
+      when 'up' then [validRow(cursorRow - 1)..0]
+      when 'down' then [validRow(cursorRow + 1)..getVimLastScreenRow(@editor)]
 
-  isMovableColumn: (row, column) ->
-    @isNonBlankColumn(row, column)
+  isMovablePoint: (point) ->
+    @isNonBlankPoint(point)
 
-  isBlankColumn: (row, column) ->
-    if (text = @editor.lineTextForBufferRow(row)[column])?
-      /\s/.test(text)
+  isBlankPoint: (point) ->
+    char = characterAtScreenPosition(@editor, point)
+    if (char.length > 0)
+      /\s/.test(char)
     else
       true
 
-  isNonBlankColumn: (row, column) ->
-    not @isBlankColumn(row, column)
+  isNonBlankPoint: (point) ->
+    not @isBlankPoint(point)
 
 class MoveDownToNonBlank extends MoveUpToNonBlank
   @extend()
@@ -244,36 +246,39 @@ class MoveDownToNonBlank extends MoveUpToNonBlank
 class MoveUpToEdge extends MoveUpToNonBlank
   @extend()
   direction: 'up'
-  isMovableColumn: (row, column) ->
-    if @isStoppableColumn(row, column)
+  isMovablePoint: (point) ->
+    if @isStoppablePoint(point)
       # first and last row is always edge.
-      if row in [0, getVimLastBufferRow(@editor)]
+      if point.row in [0, getVimLastScreenRow(@editor)]
         true
       else
-        # If one of next/prev row is not stoppable, it's Edge!
-        stoppableAtNextRow = @isStoppableColumn(row + 1, column)
-        stoppableAtPrevRow = @isStoppableColumn(row - 1, column)
-        (not stoppableAtNextRow) or (not stoppableAtPrevRow)
+        # If one of above/blow row is not stoppable, it's Edge!
+        above = point.translate([-1, 0])
+        below = point.translate([+1, 0])
+        (not @isStoppablePoint(above)) or (not @isStoppablePoint(below))
     else
       false
 
   # To avoid stopping on indentation or trailing whitespace,
   # we exclude leading and trailing whitespace from stoppable column.
-  # [FIXME] This approach is not accurate for hardTab buffer like golang.
-  isValidStoppableColumn: (row, column) ->
-    text = @editor.lineTextForBufferRow(row)
+  isValidStoppablePoint: (point) ->
+    {row, column} = point
+    text = getTextInScreenRange(@editor, [[row, 0], [row, Infinity]])
+    softTabText = _.multiplyString(' ', @editor.getTabLength())
+    text = text.replace(/\t/g, softTabText)
     if (match = text.match(/\S/g))?
       [firstChar, ..., lastChar] = match
       text.indexOf(firstChar) <= column <= text.lastIndexOf(lastChar)
     else
       false
 
-  isStoppableColumn: (row, column) ->
-    if @isNonBlankColumn(row, column)
+  isStoppablePoint: (point) ->
+    if @isNonBlankPoint(point)
       true
-    else if @isValidStoppableColumn(row,  column)
-      # If right or left column is not blank, we can stop.
-      @isNonBlankColumn(row, column - 1) and @isNonBlankColumn(row, column + 1)
+    else if @isValidStoppablePoint(point)
+      left = point.translate([0, -1])
+      right = point.translate([0, +1])
+      @isNonBlankPoint(left) and @isNonBlankPoint(right)
     else
       false
 
