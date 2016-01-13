@@ -67,7 +67,6 @@ class Motion extends Base
 
   select: ->
     for selection in @editor.getSelections()
-      # {cursor} = selection
       if @isInclusive() or @isLinewise()
         @normalizeVisualModeCursorPosition(selection) if @isMode('visual')
         @selectInclusively(selection)
