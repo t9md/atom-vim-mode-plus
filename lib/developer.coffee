@@ -68,9 +68,9 @@ class Developer
     generateIntrospectionReport _.values(Base.getRegistries()),
       excludeProperties: [
         'getClass', 'extend', 'getParent', 'getAncestors', 'isCommand'
-        'getRegistries', 'command'
+        'getRegistries', 'command', 'reset'
         'init', 'getCommandName', 'registerCommand',
-        'delegatesProperties',
+        'delegatesProperties', 'subscriptions', 'commandPrefix'
         'delegatesMethods',
         'delegatesProperty',
         'delegatesMethod',

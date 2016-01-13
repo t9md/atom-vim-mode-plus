@@ -132,6 +132,7 @@ class Operator extends Base
       for selection, i in @editor.getSelections()
         fn(selection, setPoint.bind(this, selection, i))
 
+# -------------------------
 class Select extends Operator
   @extend(false)
   flashTarget: false
@@ -148,6 +149,7 @@ class SelectLatestChange extends Select
   @extend()
   target: 'ALatestChange'
 
+# -------------------------
 class Delete extends Operator
   @extend()
   hover: icon: ':delete:', emoji: ':scissors:'
@@ -253,6 +255,7 @@ class ReplaceWithRegister extends TransformString
   getNewText: (text) ->
     @vimState.register.getText()
 
+# -------------------------
 class Indent extends TransformString
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
@@ -279,6 +282,7 @@ class AutoIndent extends Indent
   indent: (s) ->
     s.autoIndentSelectedRows()
 
+# -------------------------
 class ToggleLineComments extends TransformString
   @extend()
   hover: icon: ':toggle-line-comments:', emoji: ':mute:'
@@ -287,6 +291,7 @@ class ToggleLineComments extends TransformString
     s.toggleLineComments()
     setPoint()
 
+# -------------------------
 class Surround extends TransformString
   @extend()
   pairs: [
@@ -400,6 +405,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
     @input = @char
     @vimState.operationStack.process()
 
+# -------------------------
 # Performance effective than nantive editor:move-line-up/down
 class MoveLineUp extends TransformString
   @extend()
@@ -444,6 +450,7 @@ class MoveLineDown extends MoveLineUp
   getRangeTranslationSpec: ->
     [[0, 0], [1, 0]]
 
+# -------------------------
 class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
@@ -460,6 +467,7 @@ class YankLine extends Yank
   @extend()
   target: 'MoveToRelativeLine'
 
+# -------------------------
 # FIXME
 # Currently native editor.joinLines() is better for cursor position setting
 # So I use native methods for a meanwhile.
@@ -513,6 +521,7 @@ class JoinByInputWithKeepingSpace extends JoinByInput
   join: (rows) ->
     rows.join(@input)
 
+# -------------------------
 # String suffix in name is to avoid confusion with 'split' window.
 class SplitString extends TransformString
   @extend()
@@ -539,6 +548,7 @@ class Reverse extends TransformString
     s.insertText(newText)
     setPoint()
 
+# -------------------------
 class Repeat extends Operator
   @extend()
   requireTarget: false
@@ -550,6 +560,7 @@ class Repeat extends Operator
           op.setRepeated()
           op.execute()
 
+# -------------------------
 class Mark extends Operator
   @extend()
   hover: icon: ':mark:', emoji: ':round_pushpin:'
@@ -562,6 +573,7 @@ class Mark extends Operator
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
     @activateMode('normal')
 
+# -------------------------
 # [FIXME?]: inconsistent behavior from normal operator
 # Since its support visual-mode but not use setTarget() convension.
 # Maybe separating complete/in-complete version like IncreaseNow and Increase?
@@ -606,6 +618,7 @@ class Decrease extends Increase
   @extend()
   step: -1
 
+# -------------------------
 class IncrementNumber extends Operator
   @extend()
   step: 1
