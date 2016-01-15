@@ -384,3 +384,9 @@
   # 'space': 'vim-mode-plus:search-insert-wild-pattern'
   # 'ctrl-f': 'vim-mode-plus:search-scroll-next'
   # 'ctrl-b': 'vim-mode-plus:search-scroll-prev'
+  
+# Tree-view navigation
+# -------------------------
+'.tree-view':
+  'g g': 'core:move-to-top'
+  'shift-g': 'core:move-to-bottom'
