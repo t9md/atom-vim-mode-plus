@@ -30,6 +30,7 @@ globalState = require './global-state'
   isIncludeFunctionScopeForRow
   detectScopeStartPositionByScope
   getTextInScreenRange
+  getBufferRows
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -370,15 +371,32 @@ class MoveToEndOfWholeWord extends MoveToEndOfWord
 
 class MoveToNextParagraph extends Motion
   @extend()
-  moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveToBeginningOfNextParagraph()
+  direction: 'next'
 
-class MoveToPreviousParagraph extends Motion
-  @extend()
+  getPoint: (cursor) ->
+    inSection = not @editor.isBufferRowBlank(cursor.getBufferRow())
+    startRow = cursor.getBufferRow()
+    rows = getBufferRows(@editor, {startRow, @direction, includeStartRow: false})
+    for row in rows
+      if @editor.isBufferRowBlank(row)
+        return [row, 0] if inSection
+      else
+        inSection = true
+
+    switch @direction
+      when 'previous' then [0, 0]
+      when 'next' then getVimEofBufferPosition(@editor)
+
   moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveToBeginningOfPreviousParagraph()
+    @countTimes =>
+      cursor.setBufferPosition @getPoint(cursor)
+
+class MoveToPreviousParagraph extends MoveToNextParagraph
+  @extend()
+  direction: 'previous'
+  moveCursor: (cursor) ->
+    @countTimes =>
+      cursor.setBufferPosition @getPoint(cursor)
 
 class MoveToBeginningOfLine extends Motion
   @extend()

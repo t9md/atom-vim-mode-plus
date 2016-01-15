@@ -198,6 +198,15 @@ moveCursorToNextNonWhitespace = (cursor) ->
     cursor.moveRight()
   not originalPoint.isEqual(cursor.getBufferPosition())
 
+getBufferRows = (editor, {startRow, direction, includeStartRow}) ->
+  unless includeStartRow
+    startRow += (if direction is 'next' then +1 else -1)
+
+  endRow = switch direction
+    when 'previous' then 0
+    when 'next' then getVimLastBufferRow(editor)
+  [getValidVimBufferRow(editor, startRow)..endRow]
+
 # Return Vim's EOF position rather than Atom's EOF position.
 # This function change meaning of EOF from native TextEditor::getEofBufferPosition()
 # Atom is special(strange) for cursor can past very last newline character.
@@ -540,6 +549,7 @@ module.exports = {
   getScopesForTokenizedLine
   scanForScopeStart
   detectScopeStartPositionByScope
+  getBufferRows
 
   # Debugging
   reportSelection,

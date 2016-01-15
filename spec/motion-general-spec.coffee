@@ -572,40 +572,57 @@ describe "Motion general", ->
           set cursor: [0, 0]
           ensure 'vEEy', register: '"': text: 'ab  cde1+-'
 
-  describe "the } keybinding", ->
+  describe "the {,} keybinding", ->
     beforeEach ->
       set
-        text: "abcde\n\nfghij\nhijk\n  xyz  \n\nzip\n\n  \nthe end"
+        text: """
+
+
+
+        3: paragraph-1
+        4: paragraph-1
+
+
+
+        8: paragraph-2
+
+
+
+        12: paragraph-3
+        13: paragraph-3
+
+
+        16: paragprah-4\n
+        """
         cursor: [0, 0]
 
     describe "as a motion", ->
       it "moves the cursor to the end of the paragraph", ->
-        ensure '}', cursor: [1, 0]
+        set cursor: [0, 0]
         ensure '}', cursor: [5, 0]
-        ensure '}', cursor: [7, 0]
-        ensure '}', cursor: [9, 6]
+        ensure '}', cursor: [9, 0]
+        ensure '}', cursor: [14, 0]
+        ensure '{', cursor: [11, 0]
+        ensure '{', cursor: [7, 0]
+        ensure '{', cursor: [2, 0]
+
+      it "support count", ->
+        set cursor: [0, 0]
+        ensure '3}', cursor: [14, 0]
+        ensure '3{', cursor: [2, 0]
+
+      it "can move start of buffer or end of buffer at maximum", ->
+        set cursor: [0, 0]
+        ensure '10}', cursor: [16, 14]
+        ensure '10{', cursor: [0, 0]
 
     describe "as a selection", ->
       it 'selects to the end of the current paragraph', ->
-        ensure 'y}', register: '"': text: "abcde\n"
-
-  describe "the { keybinding", ->
-    beforeEach ->
-      set
-        text: "abcde\n\nfghij\nhijk\n  xyz  \n\nzip\n\n  \nthe end"
-        cursor: [9, 0]
-
-    describe "as a motion", ->
-      it "moves the cursor to the beginning of the paragraph", ->
-        ensure '{', cursor: [7, 0]
-        ensure '{', cursor: [5, 0]
-        ensure '{', cursor: [1, 0]
-        ensure '{', cursor: [0, 0]
-
-    describe "as a selection", ->
-      it 'selects to the beginning of the current paragraph', ->
-        set cursor: [7, 0]
-        ensure 'y{', register: '"': text: "\nzip\n"
+        set cursor: [3, 3]
+        ensure 'y}', register: '"': text: "paragraph-1\n4: paragraph-1\n"
+      it 'selects to the end of the current paragraph', ->
+        set cursor: [4, 3]
+        ensure 'y{', register: '"': text: "\n3: paragraph-1\n4: "
 
   describe "the b keybinding", ->
     beforeEach ->
