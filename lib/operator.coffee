@@ -53,24 +53,25 @@ class Operator extends Base
     @initialize?()
     @setTarget @new(@target) if _.isString(@target)
 
+  markSelectedBufferRange: ->
+    @editor.markBufferRange @editor.getSelectedBufferRange(),
+      invalidate: 'never'
+      persistent: false
+
   observeSelectAction: ->
     if @needFlash()
       @onDidSelect =>
         @flash @editor.getSelectedBufferRanges()
 
     if @needTrackChange()
-      changeMarker = null
+      marker = null
       @onDidSelect =>
-        range = @editor.getSelectedBufferRange()
-        changeMarker = @editor.markBufferRange range,
-          invalidate: 'never'
-          persistent: false
+        marker = @markSelectedBufferRange()
 
       @onDidOperationFinish =>
-        if range = changeMarker.getBufferRange()
-          @setMarkForChange(range)
+        @setMarkForChange(range) if (range = marker.getBufferRange())
 
-  # target - TextObject or Motion to operate on.
+  # @target - TextObject or Motion to operate on.
   setTarget: (@target) ->
     unless _.isFunction(@target.select)
       @vimState.emitter.emit('did-fail-to-set-target')
