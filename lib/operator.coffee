@@ -80,15 +80,12 @@ class Operator extends Base
       throw new OperatorError(message)
     @emitDidSetTarget(this)
 
-  selectTarget: (force=false) ->
+  selectTarget: ->
     @observeSelectAction()
     @emitWillSelect()
-    if haveSomeSelection(@editor) and not force
-      @emitDidSelect()
-      true
-    else
-      @target.select()
-      haveSomeSelection(@editor)
+    @target.select()
+    @emitDidSelect()
+    haveSomeSelection(@editor)
 
   setTextToRegister: (text) ->
     if @target.isLinewise?() and not text.endsWith('\n')
@@ -135,7 +132,7 @@ class Select extends Operator
   flashTarget: false
   recordable: false
   execute: ->
-    @selectTarget(true)
+    @selectTarget()
     return if @isMode('operator-pending') or @isMode('visual', 'blockwise')
     if @target.isAllowSubmodeChange?()
       submode = swrap.detectVisualModeSubmode(@editor)
