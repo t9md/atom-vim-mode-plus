@@ -151,18 +151,17 @@ class Delete extends Operator
   trackChange: true
   flashTarget: false
 
-  ensureCursorNotPastVimEOF: (s) ->
-    head = s.getHeadBufferPosition()
-    eof = getVimEofBufferPosition(@editor)
-    if head.isGreaterThan(eof)
-      s.cursor.setBufferPosition([eof.row, 0])
-
   execute: ->
-    @eachSelection (s) =>
-      @setTextToRegister s.getText() if s.isLastSelection()
-      s.deleteSelectedText()
-      @ensureCursorNotPastVimEOF(s)
-      s.cursor.skipLeadingWhitespace() if @target.isLinewise?()
+    @eachSelection (selection) =>
+      {cursor} = selection
+      @setTextToRegister(selection.getText()) if selection.isLastSelection()
+      selection.deleteSelectedText()
+
+      vimEof = getVimEofBufferPosition(@editor)
+      if cursor.getBufferPosition().isGreaterThan(vimEof)
+        cursor.setBufferPosition([vimEof.row, 0])
+
+      cursor.skipLeadingWhitespace() if @target.isLinewise?()
     @activateMode('normal')
 
 class DeleteRight extends Delete
