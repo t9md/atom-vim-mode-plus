@@ -80,7 +80,7 @@ class Motion extends Base
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
-    @emitDidSelect()
+    # @emitDidSelect()
 
   # Modify selection inclusively
   # -------------------------
@@ -126,29 +126,29 @@ class Motion extends Base
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
   @extend(false)
-  selectedRange: null
-  initialize: ->
-    @selectedRange = @editor.getSelectedBufferRange()
-    @wasLinewise = @isLinewise() # Cache it in case repeated.
+  selectionExtent: null
 
   execute: ->
     throw new Error("#{@constructor.name} should not be executed")
 
   select: ->
-    # If we're not in vissual mode, it means we are repeated last operation.
-    # In this case we re-do the selection.
-    unless @isMode('visual')
-      @selectCharacters()
-      if @wasLinewise
-        swrap.expandOverLine(@editor)
-    @emitDidSelect()
+    if @isMode('visual')
+      # Preserve extent to be able to replay when repeated.
+      @selectionExtent = @editor.getSelectedBufferRange().getExtent()
+      @wasLinewise = @isLinewise() # Cache it in case repeated.
+    else
+      # If we're not in visual mode, it means we are repeated last operation.
+      # In this case we re-do the selection.
+      @replaySelection()
 
-  selectCharacters: ->
-    extent = @selectedRange.getExtent()
+  # FIXME: This function is not necessary if selectInclusively() is consistent.
+  # After refactoring of selectInclusively(), this function will be deleted.
+  replaySelection: ->
     for selection in @editor.getSelections()
       {start} = selection.getBufferRange()
-      end = start.traverse(extent)
+      end = start.traverse(@selectionExtent)
       selection.setBufferRange([start, end])
+    swrap.expandOverLine(@editor) if @wasLinewise
 
 class MoveLeft extends Motion
   @extend()

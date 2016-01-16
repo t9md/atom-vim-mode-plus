@@ -47,7 +47,6 @@ class TextObject extends Base
       if (end.column is 0) and swrap(selection).detectVisualModeSubmode() is 'characterwise'
         end = getEolBufferPositionForRow(@editor, end.row - 1)
         swrap(selection).setBufferRangeSafely([start, end])
-    @emitDidSelect()
 
 # -------------------------
 # [FIXME] make it expandable
@@ -520,5 +519,6 @@ class LatestChange extends TextObject
 class ALatestChange extends LatestChange
   @extend()
 
+# No diff from ALatestChange
 class InnerLatestChange extends LatestChange
   @extend()
