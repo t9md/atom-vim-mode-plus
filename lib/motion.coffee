@@ -129,14 +129,14 @@ class CurrentSelection extends Motion
   selectedRange: null
   initialize: ->
     @selectedRange = @editor.getSelectedBufferRange()
-    @wasLinewise = @isLinewise()
+    @wasLinewise = @isLinewise() # Cache it in case repeated.
 
   execute: ->
     throw new Error("#{@constructor.name} should not be executed")
 
   select: ->
-    # In visual mode, the current selections are already there.
-    # If we're not in visual mode, we are repeating some operation and need to re-do the selections
+    # If we're not in vissual mode, it means we are repeated last operation.
+    # In this case we re-do the selection.
     unless @isMode('visual')
       @selectCharacters()
       if @wasLinewise
