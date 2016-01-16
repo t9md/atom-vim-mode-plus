@@ -776,10 +776,10 @@ class ActivateInsertMode extends Operator
   execute: ->
     if @isRepeated()
       return unless text = @getText()
-      unless @instanceof('Change') # Don't select twice!
+      unless @instanceof('Change')
         @flashTarget = @trackChange = true
-        @setTarget @new('NullMotion')
-        @selectTarget()
+        @observeSelectAction()
+        @emitDidSelect()
       @editor.transact =>
         for s in @editor.getSelections()
           @repeatInsert(s, text)
@@ -825,16 +825,26 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
     @editor.moveToFirstCharacterOfLine()
     super
 
-class InsertAtPreviousFoldStart extends ActivateInsertMode
+class InsertByMotion extends ActivateInsertMode
   @extend()
-  motion: 'MoveToPreviousFoldStart'
+  requireTarget: true
   execute: ->
-    @new(@motion).execute()
+    if @target.instanceof('Motion')
+      @target.execute()
+    if @instanceof('InsertAfterByMotion')
+      moveCursorRight(c) for c in @editor.getCursors()
     super
+
+class InsertAfterByMotion extends InsertByMotion
+  @extend()
+
+class InsertAtPreviousFoldStart extends InsertByMotion
+  @extend()
+  target: 'MoveToPreviousFoldStart'
 
 class InsertAtNextFoldStart extends InsertAtPreviousFoldStart
   @extend()
-  motion: 'MoveToNextFoldStart'
+  target: 'MoveToNextFoldStart'
 
 # FIXME need support count
 class InsertAboveWithNewline extends ActivateInsertMode
