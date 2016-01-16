@@ -259,7 +259,7 @@ class MoveUpToEdge extends MoveUpToNonBlank
       if point.row in [0, getVimLastScreenRow(@editor)]
         true
       else
-        # If one of above/blow row is not stoppable, it's Edge!
+        # If one of above/below row is not stoppable, it's Edge!
         above = point.translate([-1, 0])
         below = point.translate([+1, 0])
         (not @isStoppablePoint(above)) or (not @isStoppablePoint(below))
