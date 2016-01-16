@@ -69,8 +69,8 @@ rangeToBeginningOfFileFromPoint = (point) ->
 rangeToEndOfFileFromPoint = (point) ->
   new Range(point, Point.INFINITY)
 
-haveSomeSelection = (selections) ->
-  selections.some((s) -> not s.isEmpty())
+haveSomeSelection = (editor) ->
+  editor.getSelections().some((s) -> not s.isEmpty())
 
 sortRanges = (ranges) ->
   ranges.sort((a, b) -> a.compare(b))
