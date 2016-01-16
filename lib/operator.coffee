@@ -151,7 +151,7 @@ class Delete extends Operator
   trackChange: true
   flashTarget: false
 
-  ensureCursorNotPastEOF: (s) ->
+  ensureCursorNotPastVimEOF: (s) ->
     head = s.getHeadBufferPosition()
     eof = getVimEofBufferPosition(@editor)
     if head.isGreaterThan(eof)
@@ -161,7 +161,7 @@ class Delete extends Operator
     @eachSelection (s) =>
       @setTextToRegister s.getText() if s.isLastSelection()
       s.deleteSelectedText()
-      @ensureCursorNotPastEOF(s)
+      @ensureCursorNotPastVimEOF(s)
       s.cursor.skipLeadingWhitespace() if @target.isLinewise?()
     @activateMode('normal')
 
@@ -777,9 +777,10 @@ class ActivateInsertMode extends Operator
   execute: ->
     if @isRepeated()
       return unless text = @getText()
-      @flashTarget = @trackChange = true
-      @observeSelectAction()
-      @emitDidSelect()
+      unless @instanceof('Change') # Don't select twice!
+        @flashTarget = @trackChange = true
+        @setTarget @new('NullMotion')
+        @selectTarget()
       @editor.transact =>
         for s in @editor.getSelections()
           @repeatInsert(s, text)
