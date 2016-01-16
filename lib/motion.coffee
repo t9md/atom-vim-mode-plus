@@ -80,7 +80,6 @@ class Motion extends Base
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
-    # @emitDidSelect()
 
   # Modify selection inclusively
   # -------------------------
