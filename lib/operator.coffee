@@ -140,7 +140,7 @@ class Select extends Operator
   execute: ->
     @selectTarget(true)
     return if @isMode('operator-pending') or @isMode('visual', 'blockwise')
-    if @target.instanceof('TextObject')
+    if @target.isAllowSubmodeChange?()
       submode = swrap.detectVisualModeSubmode(@editor)
       if submode? and not @isMode('visual', submode)
         @activateMode('visual', submode)
