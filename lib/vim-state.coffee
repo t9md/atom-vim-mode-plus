@@ -104,10 +104,11 @@ class VimState
     handleSelectionChange = =>
       return unless @editor?
       return if @operationStack.isProcessing()
-      someSelection = haveSomeSelection(@editor.getSelections())
-      switch
-        when @isMode('visual') and (not someSelection) then @activate('normal')
-        when @isMode('normal') and someSelection then @activate('visual', 'characterwise')
+
+      if haveSomeSelection(@editor)
+        @activate('visual', 'characterwise') if @isMode('normal')
+      else
+        @activate('normal') if @isMode('visual')
 
     selectionWatcher = null
     handleMouseDown = =>

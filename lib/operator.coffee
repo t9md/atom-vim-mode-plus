@@ -31,9 +31,6 @@ class Operator extends Base
     @vimState.mark.set('[', start)
     @vimState.mark.set(']', end)
 
-  haveSomeSelection: ->
-    haveSomeSelection(@editor.getSelections())
-
   needFlash: ->
     @flashTarget and settings.get('flashOnOperate') and
       not (@constructor.name in settings.get('flashOnOperateBlacklist'))
@@ -86,12 +83,12 @@ class Operator extends Base
   selectTarget: (force=false) ->
     @observeSelectAction()
     @emitWillSelect()
-    if @haveSomeSelection() and not force
+    if haveSomeSelection(@editor) and not force
       @emitDidSelect()
       true
     else
       @target.select()
-      @haveSomeSelection()
+      haveSomeSelection(@editor)
 
   setTextToRegister: (text) ->
     if @target.isLinewise?() and not text.endsWith('\n')
@@ -393,7 +390,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
     @onDidSetTarget =>
       @restore = @preservePoints()
       @target.select()
-      unless @haveSomeSelection()
+      unless haveSomeSelection(@editor)
         @vimState.reset()
         @abort()
       @addHover(@editor.getSelectedText()[0])
