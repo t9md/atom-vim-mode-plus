@@ -16,6 +16,7 @@ swrap = require './selection-wrapper'
 
 class TextObject extends Base
   @extend(false)
+  allowSubmodeChange: true
 
   constructor: ->
     @constructor::inner = @constructor.name.startsWith('Inner')
@@ -29,8 +30,15 @@ class TextObject extends Base
   isA: ->
     not @isInner()
 
+  isAllowSubmodeChange: ->
+    @allowSubmodeChange
+
   isLinewise: ->
-    swrap.detectVisualModeSubmode(@editor) is 'linewise'
+    submode = if @isAllowSubmodeChange()
+      swrap.detectVisualModeSubmode(@editor)
+    else
+      @vimState.submode
+    submode is 'linewise'
 
   select: ->
     for selection in @editor.getSelections()
@@ -88,6 +96,7 @@ class InnerWholeWord extends WholeWord
 class Pair extends TextObject
   @extend(false)
   allowNextLine: false
+  allowSubmodeChange: false
   enclosed: true
   pair: null
 
