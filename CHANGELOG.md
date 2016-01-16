@@ -1,5 +1,11 @@
-# 0.15.0
+# 0.16.0
+- Fix: Don't change submode from `characterwise` to `linewise` automatically #131.
+- Internal: new `TextObject::allowSubmodeChange` property control automatic submode shift from selected range.
+- New, Fix: As part of fix from Atom v1.4.0 change, Paragraph motion was completely rewritten, now more compatible behavior to pure Vim.
+- New: Configuration parameter `flashOnOperateBlacklist` allow disable flash for specific operation.
+- Improve: Now `move-to-blank`, `move-to-edge` works correctly for hardTab language buffer like golang.
 
+# 0.15.0
 - Improve, New: TextObjet.Fold can expand when repeated!
 - Improve: Spec for TextObject.Fold, Motion.MoveUpToEdge
 - New: `insert-at-previous-fold-start`, `insert-at-next-fold-start`
