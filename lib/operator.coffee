@@ -757,35 +757,45 @@ class ActivateInsertMode extends Operator
   flashTarget: false
   checkpoint: null
   submode: null
+  supportInsertionCount: true
+
+  withAddedBufferRangeFromCheckpoint: (purpose, fn) ->
+    range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint(purpose))
+    fn(range) if range?
+
+  repeatInsertCountTimes: (count) ->
+    @withAddedBufferRangeFromCheckpoint 'undo', (range) =>
+      text = @editor.getTextInBufferRange(range)
+      _.times count, =>
+        for selection in @editor.getSelections()
+          selection.insertText(text, autoIndent: true)
 
   observeWillDeactivateMode: ->
-    disposable = @vimState.modeManager.onWillDeactivateMode ({mode}) =>
+    # Need to preserve here since count is reset on operationStack::process finished()
+    count = @getCount() - 1
+    disposable = @vimState.modeManager.preemptWillDeactivateMode ({mode}) =>
       return unless mode is 'insert'
       disposable.dispose()
 
       @vimState.mark.set('^', @editor.getCursorBufferPosition())
-
-  observeDidDeactivateMode: ->
-    disposable = @vimState.modeManager.preemptDidDeactivateMode ({mode}) =>
-      return unless mode is 'insert'
-      disposable.dispose()
-
-      {undo, insert} = @getCheckpoint()
       text = ''
-      if (range = getNewTextRangeFromCheckpoint(@editor, insert))?
+      @withAddedBufferRangeFromCheckpoint 'insert', (range) =>
+        # Marker can track following extra insert incase count specified
         @setMarkForChange(range)
         text = @editor.getTextInBufferRange(range)
-      @vimState.register.set('.', {text})
+        @saveInsertedText(text)
+        @vimState.register.set('.', {text})
 
-      # grouping changes for undo checkpoint need to come later
-      @editor.groupChangesSinceCheckpoint(undo)
+      if @supportInsertionCount and count > 0
+        @repeatInsertCountTimes(count)
 
+      # grouping changes for undo checkpoint need to come last
+      @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
 
   initialize: ->
     @checkpoint = {}
     @setCheckpoint('undo') unless @isRepeated()
     @observeWillDeactivateMode()
-    @observeDidDeactivateMode()
 
   # we have to manage two separate checkpoint for different purpose(timing is different)
   # - one for undo(handled by modeManager)
@@ -793,11 +803,13 @@ class ActivateInsertMode extends Operator
   setCheckpoint: (purpose) ->
     @checkpoint[purpose] = @editor.createCheckpoint()
 
-  getCheckpoint: ->
-    @checkpoint
+  getCheckpoint: (purpose) ->
+    @checkpoint[purpose]
 
-  getText: ->
-    @vimState.register.getText('.')
+  saveInsertedText: (@insertedText) -> @insertedText
+
+  getInsertedText: ->
+    @insertedText ? ''
 
   # called when repeated
   repeatInsert: (selection, text) ->
@@ -805,7 +817,7 @@ class ActivateInsertMode extends Operator
 
   execute: ->
     if @isRepeated()
-      return unless text = @getText()
+      return unless text = @getInsertedText()
       unless @instanceof('Change')
         @flashTarget = @trackChange = true
         @observeSelectAction()
@@ -817,19 +829,6 @@ class ActivateInsertMode extends Operator
     else
       @setCheckpoint('insert')
       @vimState.activate('insert', @submode)
-
-  # repeate:
-  #   repeat = (@getCount() - 1)
-  #   disposable = @vimState.modeManager.onDidDeactivateMode ({mode}) =>
-  #     return unless mode is 'insert'
-  #     disposable.dispose()
-  #     text = @getText()
-  #     @editor.transact =>
-  #       _.times repeat, =>
-  #         for selection in @editor.getSelections()
-  #           @insertNewline()
-  #           @repeatInsert(selection, text)
-  #           moveCursorLeft(selection.cursor)
 
 class InsertAtLastInsert extends ActivateInsertMode
   @extend()
@@ -911,6 +910,7 @@ class Change extends ActivateInsertMode
   @extend()
   requireTarget: true
   trackChange: true
+  supportInsertionCount: false
 
   execute: ->
     unless @selectTarget()

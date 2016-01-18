@@ -37,8 +37,8 @@ class ModeManager
   onWillActivateMode: (fn) -> @emitter.on 'will-activate-mode', fn
   onDidActivateMode: (fn) -> @emitter.on 'did-activate-mode', fn
   onWillDeactivateMode: (fn) -> @emitter.on 'will-deactivate-mode', fn
+  preemptWillDeactivateMode: (fn) -> @emitter.on 'will-deactivate-mode', fn
   onDidDeactivateMode: (fn) -> @emitter.on 'did-deactivate-mode', fn
-  preemptDidDeactivateMode: (fn) -> @emitter.on 'did-deactivate-mode', fn
 
   # activate: Public
   #  Use this method to change mode, DONT use other direct method.
