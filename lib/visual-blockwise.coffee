@@ -104,9 +104,6 @@ class BlockwiseChangeToLastCharacterOfLine extends BlockwiseDeleteToLastCharacte
   recordable: true
   delegateTo: 'ChangeToLastCharacterOfLine'
 
-  getCheckpoint: ->
-    @operator.getCheckpoint()
-
   initialize: ->
     @operator = @new(@delegateTo)
 
@@ -115,9 +112,6 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
   delegateTo: 'ActivateInsertMode'
   recordable: true
   after: false
-
-  getCheckpoint: ->
-    @operator.getCheckpoint()
 
   initialize: ->
     @operator = @new(@delegateTo)
