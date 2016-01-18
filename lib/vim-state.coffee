@@ -57,7 +57,7 @@ class VimState
   subscribe: (args...) ->
     @operationStack.subscribe args...
 
-  # Input subscriptions
+  # All subscriptions here is celared on each operation finished.
   # -------------------------
   onDidChangeInput: (fn) -> @subscribe @input.onDidChange(fn)
   onDidConfirmInput: (fn) -> @subscribe @input.onDidConfirm(fn)
@@ -76,6 +76,12 @@ class VimState
   onDidSelect: (fn) -> @subscribe @emitter.on('did-select', fn)
   onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
   onDidOperationFinish: (fn) -> @subscribe @emitter.on('did-operation-finish', fn)
+
+  # Mode, and submode change handled on modeManager
+  onWillActivateMode: (fn) -> @subscribe @modeManager.onWillActivateMode(fn)
+  onDidActivateMode: (fn) -> @subscribe @modeManager.onDidActivateMode(fn)
+  onWillDeactivateMode: (fn) -> @subscribe @modeManager.onWillDeactivateMode(fn)
+  onDidDeactivateMode: (fn) -> @subscribe @modeManager.onDidDeactivateMode(fn)
 
   destroy: ->
     return if @destroyed
