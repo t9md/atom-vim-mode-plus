@@ -1,4 +1,5 @@
-# Refactoring status: 100%
+# Libraries
+# -------------------------
 LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
@@ -12,6 +13,7 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
 
+# -------------------------
 class OperatorError extends Base
   @extend(false)
   constructor: (@message) ->
@@ -81,6 +83,8 @@ class Operator extends Base
       throw new OperatorError(message)
     @emitDidSetTarget(this)
 
+  # Return true unless all selection is empty.
+  # -------------------------
   selectTarget: ->
     @observeSelectAction()
     @emitWillSelect()
@@ -863,7 +867,7 @@ class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
   insertNewline: ->
     @editor.insertNewlineBelow()
-
+# -------------------------
 class Change extends ActivateInsertMode
   @extend()
   requireTarget: true
@@ -875,11 +879,12 @@ class Change extends ActivateInsertMode
       return
 
     @setTextToRegister @editor.getSelectedText()
-    text = if @target.isLinewise?() then "\n" else ""
+    text = ''
+    text += "\n" if @target.isLinewise?()
     @editor.transact =>
-      for s in @editor.getSelections()
-        range = s.insertText(text, autoIndent: true)
-        s.cursor.moveLeft() unless range.isEmpty()
+      for selection in @editor.getSelections()
+        range = selection.insertText(text, autoIndent: true)
+        selection.cursor.moveLeft() unless range.isEmpty()
     super
 
 class Substitute extends Change
