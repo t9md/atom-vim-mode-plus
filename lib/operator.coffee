@@ -7,7 +7,7 @@ _ = require 'underscore-plus'
 {
   haveSomeSelection, getVimEofBufferPosition
   moveCursorLeft, moveCursorRight
-  flashRanges
+  flashRanges, getNewTextRangeFromCheckpoint
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -52,6 +52,7 @@ class Operator extends Base
     # Guard when Repeated.
     return if @instanceof("Repeat")
 
+    # [important] intialized is not called when Repeated
     @initialize?()
     @setTarget @new(@target) if _.isString(@target)
 
@@ -757,9 +758,34 @@ class ActivateInsertMode extends Operator
   checkpoint: null
   submode: null
 
+  observeWillDeactivateMode: ->
+    disposable = @vimState.modeManager.onWillDeactivateMode ({mode}) =>
+      return unless mode is 'insert'
+      disposable.dispose()
+
+      @vimState.mark.set('^', @editor.getCursorBufferPosition())
+
+  observeDidDeactivateMode: ->
+    disposable = @vimState.modeManager.preemptDidDeactivateMode ({mode}) =>
+      return unless mode is 'insert'
+      disposable.dispose()
+
+      {undo, insert} = @getCheckpoint()
+      text = ''
+      if (range = getNewTextRangeFromCheckpoint(@editor, insert))?
+        @setMarkForChange(range)
+        text = @editor.getTextInBufferRange(range)
+      @vimState.register.set('.', {text})
+
+      # grouping changes for undo checkpoint need to come later
+      @editor.groupChangesSinceCheckpoint(undo)
+
+
   initialize: ->
     @checkpoint = {}
     @setCheckpoint('undo') unless @isRepeated()
+    @observeWillDeactivateMode()
+    @observeDidDeactivateMode()
 
   # we have to manage two separate checkpoint for different purpose(timing is different)
   # - one for undo(handled by modeManager)
@@ -791,6 +817,19 @@ class ActivateInsertMode extends Operator
     else
       @setCheckpoint('insert')
       @vimState.activate('insert', @submode)
+
+  # repeate:
+  #   repeat = (@getCount() - 1)
+  #   disposable = @vimState.modeManager.onDidDeactivateMode ({mode}) =>
+  #     return unless mode is 'insert'
+  #     disposable.dispose()
+  #     text = @getText()
+  #     @editor.transact =>
+  #       _.times repeat, =>
+  #         for selection in @editor.getSelections()
+  #           @insertNewline()
+  #           @repeatInsert(selection, text)
+  #           moveCursorLeft(selection.cursor)
 
 class InsertAtLastInsert extends ActivateInsertMode
   @extend()

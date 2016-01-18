@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 
 swrap = require './selection-wrapper'
-{toggleClassByCondition, getNewTextRangeFromCheckpoint, moveCursorLeft} = require './utils'
+{toggleClassByCondition, moveCursorLeft} = require './utils'
 
 supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
 supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
@@ -38,6 +38,7 @@ class ModeManager
   onDidActivateMode: (fn) -> @emitter.on 'did-activate-mode', fn
   onWillDeactivateMode: (fn) -> @emitter.on 'will-deactivate-mode', fn
   onDidDeactivateMode: (fn) -> @emitter.on 'did-deactivate-mode', fn
+  preemptDidDeactivateMode: (fn) -> @emitter.on 'did-deactivate-mode', fn
 
   # activate: Public
   #  Use this method to change mode, DONT use other direct method.
@@ -85,22 +86,8 @@ class ModeManager
     replaceModeDeactivator = @activateReplaceMode() if (submode is 'replace')
 
     new Disposable =>
-      if (item = @vimState.operationStack.getRecorded()) and item.getCheckpoint?
-        {undo, insert} = item.getCheckpoint()
-        range = getNewTextRangeFromCheckpoint(@editor, insert)
-        text = @editor.getTextInBufferRange(range ? [])
-        # grouping changes for undo checkpoint need to come later than
-        @editor.groupChangesSinceCheckpoint(undo)
-
-        @vimState.register.set('.', {text})
-        @vimState.mark.set('^', @editor.getCursorBufferPosition())
-        if range
-          @vimState.mark.set('[', range.start)
-          @vimState.mark.set(']', range.end)
-
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
-
       # When escape from insert-mode, cursor move Left.
       moveCursorLeft(c) for c in @editor.getCursors()
 
