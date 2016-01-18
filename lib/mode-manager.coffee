@@ -34,16 +34,16 @@ class ModeManager
     else
       @mode is mode
 
-  onWillDeactivateMode: (fn) ->
-    @emitter.on 'will-deactivate-mode', fn
-
-  onDidActivateMode: (fn) ->
-    @emitter.on 'did-activate-mode', fn
+  onWillActivateMode: (fn) -> @emitter.on 'will-activate-mode', fn
+  onDidActivateMode: (fn) -> @emitter.on 'did-activate-mode', fn
+  onWillDeactivateMode: (fn) -> @emitter.on 'will-deactivate-mode', fn
+  onDidDeactivateMode: (fn) -> @emitter.on 'did-deactivate-mode', fn
 
   # activate: Public
   #  Use this method to change mode, DONT use other direct method.
   # -------------------------
   activate: (mode, submode=null) ->
+    @emitter.emit 'will-activate-mode', {mode, submode}
     if mode is 'reset'
       @editor.clearSelections()
       mode = 'normal'
@@ -58,6 +58,7 @@ class ModeManager
     if (mode isnt @mode)
       @emitter.emit 'will-deactivate-mode', {@mode, @submode}
       @deactivator?.dispose()
+      @emitter.emit 'did-deactivate-mode', {@mode, @submode}
 
     # Activate
     @deactivator = switch mode

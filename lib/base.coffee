@@ -28,6 +28,10 @@ delegatingMethods = [
   "onDidOperationFinish"
   "subscribe"
   "isMode"
+  "onWillActivateMode"
+  "onDidActivateMode"
+  "onWillDeactivateMode"
+  "onDidDeactivateMode"
 ]
 
 class Base
