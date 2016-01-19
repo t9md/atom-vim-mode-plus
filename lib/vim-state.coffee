@@ -77,12 +77,6 @@ class VimState
   onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
   onDidOperationFinish: (fn) -> @subscribe @emitter.on('did-operation-finish', fn)
 
-  # Mode, and submode change handled on modeManager
-  onWillActivateMode: (fn) -> @subscribe @modeManager.onWillActivateMode(fn)
-  onDidActivateMode: (fn) -> @subscribe @modeManager.onDidActivateMode(fn)
-  onWillDeactivateMode: (fn) -> @subscribe @modeManager.onWillDeactivateMode(fn)
-  onDidDeactivateMode: (fn) -> @subscribe @modeManager.onDidDeactivateMode(fn)
-
   destroy: ->
     return if @destroyed
     @destroyed = true
