@@ -337,6 +337,10 @@ class SurroundWord extends Surround
   @extend()
   target: 'InnerWord'
 
+class SurroundSmartWord extends Surround
+  @extend()
+  target: 'InnerSmartWord'
+
 class MapSurround extends Surround
   @extend()
   mapRegExp: /\w+/g
