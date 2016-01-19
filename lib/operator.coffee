@@ -248,6 +248,18 @@ class DashCase extends TransformString
   getNewText: (text) ->
     _.dasherize text
 
+class EncodeUriComponent extends TransformString
+  @extend()
+  hover: icon: 'encodeURI', emoji: 'encodeURI'
+  getNewText: (text) ->
+    encodeURIComponent(text)
+
+class DecodeUriComponent extends TransformString
+  @extend()
+  hover: icon: 'decodeURI', emoji: 'decodeURI'
+  getNewText: (text) ->
+    decodeURIComponent(text)
+
 class ReplaceWithRegister extends TransformString
   @extend()
   hover: icon: ':replace-with-register:', emoji: ':pencil:'
@@ -266,6 +278,8 @@ class TransformStringByInput extends TransformString
     'u': "LowerCase"
     'U': "UpperCase"
     '~': "ToggleCase"
+    '%': "EncodeUriComponent"
+    '@': "DecodeUriComponent" # FIXME for better nemonic
 
   initialize: ->
     @onDidSetTarget =>
