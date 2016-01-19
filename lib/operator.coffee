@@ -763,31 +763,23 @@ class ActivateInsertMode extends Operator
     range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint(purpose))
     fn(range) if range?
 
-  repeatInsertCountTimes: (count) ->
-    @withAddedBufferRangeFromCheckpoint 'undo', (range) =>
-      text = @editor.getTextInBufferRange(range)
-      _.times count, =>
-        for selection in @editor.getSelections()
-          selection.insertText(text, autoIndent: true)
-
   observeWillDeactivateMode: ->
-    # Need to preserve here since count is reset on operationStack::process finished()
-    count = @getCount() - 1
     disposable = @vimState.modeManager.preemptWillDeactivateMode ({mode}) =>
       return unless mode is 'insert'
       disposable.dispose()
 
       @vimState.mark.set('^', @editor.getCursorBufferPosition())
       text = ''
-      @withAddedBufferRangeFromCheckpoint 'insert', (range) =>
-        # Marker can track following extra insert incase count specified
-        @setMarkForChange(range)
+      if (range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint('insert')))?
+        @setMarkForChange(range) # Marker can track following extra insertion incase count specified
         text = @editor.getTextInBufferRange(range)
-        @saveInsertedText(text)
-        @vimState.register.set('.', {text})
+      @saveInsertedText(text)
+      @vimState.register.set('.', {text})
 
-      if @supportInsertionCount and count > 0
-        @repeatInsertCountTimes(count)
+      _.times @getInsertionCount(), =>
+        text = @textByOperator + @getInsertedText()
+        for selection in @editor.getSelections()
+          selection.insertText(text, autoIndent: true)
 
       # grouping changes for undo checkpoint need to come last
       @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
@@ -815,6 +807,10 @@ class ActivateInsertMode extends Operator
   repeatInsert: (selection, text) ->
     selection.insertText(text, autoIndent: true)
 
+  getInsertionCount: ->
+    @insertionCount ?= if @supportInsertionCount then (@getCount() - 1) else 0
+    @insertionCount
+
   execute: ->
     if @isRepeated()
       return unless text = @getInsertedText()
@@ -827,6 +823,9 @@ class ActivateInsertMode extends Operator
           @repeatInsert(s, text)
           moveCursorLeft(s.cursor)
     else
+      if @getInsertionCount() > 0
+        range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint('undo'))
+        @textByOperator = if range? then @editor.getTextInBufferRange(range) else ''
       @setCheckpoint('insert')
       @vimState.activate('insert', @submode)
 
@@ -888,7 +887,6 @@ class InsertAtNextFoldStart extends InsertAtPreviousFoldStart
   @extend()
   target: 'MoveToNextFoldStart'
 
-# FIXME need support count
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
   execute: ->
