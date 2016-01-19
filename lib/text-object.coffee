@@ -92,6 +92,20 @@ class InnerWholeWord extends WholeWord
   @extend()
 
 # -------------------------
+# Just include _, -
+class SmartWord extends Word
+  @extend(false)
+  wordRegExp: /[\w-]+/
+  selectInner: (s, wordRegex) ->
+    swrap(s).setBufferRangeSafely s.cursor.getCurrentWordBufferRange({wordRegex})
+
+class ASmartWord extends SmartWord
+  @extend()
+
+class InnerSmartWord extends SmartWord
+  @extend()
+
+# -------------------------
 class Pair extends TextObject
   @extend(false)
   allowNextLine: false

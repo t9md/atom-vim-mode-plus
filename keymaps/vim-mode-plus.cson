@@ -262,6 +262,9 @@
   'i W':  'vim-mode-plus:inner-whole-word'
   'a W':  'vim-mode-plus:a-whole-word'
 
+  # 'i w':  'vim-mode-plus:inner-smart-word'
+  # 'a w':  'vim-mode-plus:a-smart-word'
+
   # [FIXME?] overridden Vim's sentence text object
   'i s':  'vim-mode-plus:inner-any-pair'
   'a s':  'vim-mode-plus:a-any-pair'
