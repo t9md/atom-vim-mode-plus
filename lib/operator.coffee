@@ -296,6 +296,51 @@ class TransformSmartWordByInput extends TransformStringByInput
   target: "InnerSmartWord"
 
 # -------------------------
+class TransformStringBySelectList extends TransformString
+  @extend()
+  requireInput: true
+  requireTarget: true
+  selectListItems: [
+    "CamelCase"
+    "DashCase"
+    "SnakeCase"
+    "LowerCase"
+    "UpperCase"
+    "ToggleCase"
+    "EncodeUriComponent"
+    "DecodeUriComponent"
+  ]
+
+  focusSelectList: (items) ->
+    items = items.map (e) -> {name: e}
+    @vimState.setSelecListItems(items)
+    atom.commands.dispatch(@editorElement, 'vim-mode-plus-ex-mode:open')
+
+  initialize: ->
+    @vimState.onDidSelectListConfirm (item) =>
+      @input = item.name
+      @vimState.operationStack.process()
+
+    @onDidSetTarget =>
+      @focusSelectList(@selectListItems)
+
+  getNewText: (text) ->
+    operationName = @input
+    if operationName
+      operation = @new operationName
+      operation.getNewText(text)
+    else
+      text
+
+class TransformWordBySelectList extends TransformStringBySelectList
+  @extend()
+  target: "InnerWord"
+
+class TransformSmartWordBySelectList extends TransformStringBySelectList
+  @extend()
+  target: "InnerSmartWord"
+
+# -------------------------
 class ReplaceWithRegister extends TransformString
   @extend()
   hover: icon: ':replace-with-register:', emoji: ':pencil:'
