@@ -254,6 +254,39 @@ class ReplaceWithRegister extends TransformString
   getNewText: (text) ->
     @vimState.register.getText()
 
+class TransformStringByInput extends TransformString
+  @extend()
+  requireInput: true
+  requireTarget: true
+
+  transformingTable:
+    'c': "CamelCase"
+    '-': "DashCase"
+    '_': "SnakeCase"
+    'u': "LowerCase"
+    'U': "UpperCase"
+    '~': "ToggleCase"
+
+  initialize: ->
+    @onDidSetTarget =>
+      @focusInput()
+
+  getNewText: (text) ->
+    operationName = @transformingTable[@input]
+    if operationName
+      operation = @new operationName
+      operation.getNewText(text)
+    else
+      text
+
+class TransformWordByInput extends TransformStringByInput
+  @extend()
+  target: "InnerWord"
+
+class TransformSmartWordByInput extends TransformStringByInput
+  @extend()
+  target: "InnerSmartWord"
+
 # -------------------------
 class Indent extends TransformString
   @extend()
