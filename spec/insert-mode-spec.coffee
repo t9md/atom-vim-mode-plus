@@ -118,3 +118,57 @@ describe "Insert mode commands", ->
             abcd
             fooefghi
             """
+
+    describe "InsertLastInserted", ->
+      ensureInsertLastInserted = (key, options) ->
+        {insert, text, finalText} = options
+        keystroke key
+        editor.insertText(insert)
+        ensure "escape", text: text
+        ensure ["GI", {ctrl: 'a'}], text: finalText
+
+      beforeEach ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus.insert-mode':
+            'ctrl-a': 'vim-mode-plus:insert-last-inserted'
+
+        initialText = """
+          abc
+          def\n
+          """
+        set text: "", cursor: [0, 0]
+        keystroke 'i'
+        editor.insertText(initialText)
+        ensure ["escape", 'gg'], text: initialText, cursor: [0, 0]
+
+      it "case-i: single-line", ->
+        ensureInsertLastInserted 'i',
+          insert: 'xxx'
+          text: "xxxabc\ndef\n"
+          finalText: "xxxabc\nxxxdef\n"
+      it "case-o: single-line", ->
+        ensureInsertLastInserted 'o',
+          insert: 'xxx'
+          text: "abc\nxxx\ndef\n"
+          finalText: "abc\nxxx\nxxxdef\n"
+      it "case-O: single-line", ->
+        ensureInsertLastInserted 'O',
+          insert: 'xxx'
+          text: "xxx\nabc\ndef\n"
+          finalText: "xxx\nabc\nxxxdef\n"
+
+      it "case-i: multi-line", ->
+        ensureInsertLastInserted 'i',
+          insert: 'xxx\nyyy\n'
+          text: "xxx\nyyy\nabc\ndef\n"
+          finalText: "xxx\nyyy\nabc\nxxx\nyyy\ndef\n"
+      it "case-o: multi-line", ->
+        ensureInsertLastInserted 'o',
+          insert: 'xxx\nyyy\n'
+          text: "abc\nxxx\nyyy\n\ndef\n"
+          finalText: "abc\nxxx\nyyy\n\nxxx\nyyy\ndef\n"
+      it "case-O: multi-line", ->
+        ensureInsertLastInserted 'O',
+          insert: 'xxx\nyyy\n'
+          text: "xxx\nyyy\n\nabc\ndef\n"
+          finalText: "xxx\nyyy\n\nabc\nxxx\nyyy\ndef\n"

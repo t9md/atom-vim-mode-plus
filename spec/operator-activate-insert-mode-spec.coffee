@@ -476,3 +476,50 @@ describe "Operator ActivateInsertMode family", ->
       ensure '.',
         text: "abcabc"
         cursor: [0, 5]
+
+  describe 'preserve inserted text', ->
+    beforeEach ->
+      set
+        text: "\n\n"
+        cursorBuffer: [0, 0]
+
+    describe "save inserted text to '.' register", ->
+      ensureDotRegister = (key, {text}) ->
+        keystroke key
+        editor.insertText(text)
+        ensure "escape", register: '.': text: text
+      it "[case-i]", -> ensureDotRegister 'i', text: 'abc'
+      it "[case-o]", -> ensureDotRegister 'o', text: 'abc'
+      it "[case-c]", -> ensureDotRegister 'c', text: 'abc'
+      it "[case-C]", -> ensureDotRegister 'C', text: 'abc'
+      it "[case-s]", -> ensureDotRegister 's', text: 'abc'
+
+  describe 'specify insertion count', ->
+    ensureInsertionCount = (key, {insert, text, cursor}) ->
+      keystroke key
+      editor.insertText(insert)
+      ensure "escape", text: text, cursor: cursor
+
+    beforeEach ->
+      initialText = "*\n*\n"
+      set text: "", cursor: [0, 0]
+      keystroke 'i'
+      editor.insertText(initialText)
+      ensure ["escape", 'gg'], text: initialText, cursor: [0, 0]
+
+    describe "repeat insertion count times", ->
+      it "[case-i]", -> ensureInsertionCount '3i', insert: '=', text: "===*\n*\n", cursor: [0, 2]
+      it "[case-o]", -> ensureInsertionCount '3o', insert: '=', text: "*\n=\n=\n=\n*\n", cursor: [3, 0]
+      it "[case-O]", -> ensureInsertionCount '3O', insert: '=', text: "=\n=\n=\n*\n*\n", cursor: [2, 0]
+
+      describe "children of Change operation won't repeate insertion count times", ->
+        beforeEach ->
+          set text: "", cursor: [0, 0]
+          keystroke 'i'
+          editor.insertText('*')
+          ensure ["escape", 'gg'], text: '*', cursor: [0, 0]
+
+        it "[case-c]", -> ensureInsertionCount '3cw', insert: '=', text: "=", cursor: [0, 0]
+        it "[case-C]", -> ensureInsertionCount '3C', insert: '=', text: "=", cursor: [0, 0]
+        it "[case-s]", -> ensureInsertionCount '3s', insert: '=', text: "=", cursor: [0, 0]
+        it "[case-S]", -> ensureInsertionCount '3S', insert: '=', text: "=\n", cursor: [0, 0]
