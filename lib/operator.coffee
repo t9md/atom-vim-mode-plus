@@ -260,12 +260,6 @@ class DecodeUriComponent extends TransformString
   getNewText: (text) ->
     decodeURIComponent(text)
 
-class ReplaceWithRegister extends TransformString
-  @extend()
-  hover: icon: ':replace-with-register:', emoji: ':pencil:'
-  getNewText: (text) ->
-    @vimState.register.getText()
-
 class TransformStringByInput extends TransformString
   @extend()
   requireInput: true
@@ -300,6 +294,13 @@ class TransformWordByInput extends TransformStringByInput
 class TransformSmartWordByInput extends TransformStringByInput
   @extend()
   target: "InnerSmartWord"
+
+# -------------------------
+class ReplaceWithRegister extends TransformString
+  @extend()
+  hover: icon: ':replace-with-register:', emoji: ':pencil:'
+  getNewText: (text) ->
+    @vimState.register.getText()
 
 # -------------------------
 class Indent extends TransformString
