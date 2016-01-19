@@ -296,7 +296,7 @@ class TransformSmartWordByInput extends TransformStringByInput
   target: "InnerSmartWord"
 
 # -------------------------
-class TransformStringBySelectList extends TransformString
+class TransformStringBySelectList extends Operator
   @extend()
   requireInput: true
   requireTarget: true
@@ -309,6 +309,12 @@ class TransformStringBySelectList extends TransformString
     "ToggleCase"
     "EncodeUriComponent"
     "DecodeUriComponent"
+    "JoinByInput"
+    "JoinWithKeepingSpace"
+    "Reverse"
+    "SplitString"
+    "Surround"
+    "MapSurround"
   ]
 
   focusSelectList: (items) ->
@@ -317,20 +323,18 @@ class TransformStringBySelectList extends TransformString
     atom.commands.dispatch(@editorElement, 'vim-mode-plus-ex-mode:open')
 
   initialize: ->
-    @vimState.onDidSelectListConfirm (item) =>
-      @input = item.name
-      @vimState.operationStack.process()
-
     @onDidSetTarget =>
       @focusSelectList(@selectListItems)
 
-  getNewText: (text) ->
-    operationName = @input
-    if operationName
-      operation = @new operationName
-      operation.getNewText(text)
-    else
-      text
+    @vimState.onDidSelectListConfirm (item) =>
+      transformer = item.name
+      if transformer
+        # FIXME cleanup require, implement operationStack::replace()?
+        @vimState.reset()
+        @vimState.operationStack.run(transformer, {target: @target.constructor.name})
+
+  execute: ->
+    # NEVER be executed
 
 class TransformWordBySelectList extends TransformStringBySelectList
   @extend()
