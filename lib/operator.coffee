@@ -306,7 +306,7 @@ class TransformStringBySelectList extends Operator
       @vimState.operationStack.run(transformer.name, {target: @target.constructor.name})
 
   execute: ->
-    # NEVER be executed
+    # NEVER be executed since operationStack is replaced with selected transformer
 
 class TransformWordBySelectList extends TransformStringBySelectList
   @extend()
