@@ -3,6 +3,7 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
+BufferedProcess = null
 
 {
   haveSomeSelection, getVimEofBufferPosition
@@ -267,10 +268,52 @@ class DecodeUriComponent extends TransformString
     decodeURIComponent(text)
 
 # -------------------------
+class TranformStringByExternalCommand extends TransformString
+  @extend(false)
+  requireInput: true
+  command: '' # e.g. command: 'sort'
+  args: [] # e.g args: ['-rn']
+
+  initialize: ->
+    unless BufferedProcess?
+      {BufferedProcess} = require 'atom'
+    @results = []
+    @exitCount = @runCount = 0
+
+    @onDidSetTarget =>
+      @restore = @preservePoints()
+      @target.select()
+      for selection, i in @editor.getSelections()
+        @runExternalCommand(selection.getText())
+        @restore(selection, i)
+
+  runExternalCommand: (stdin) ->
+    runCount = @runCount++
+    stdout = (output) =>
+      @results[runCount] = output
+
+    exit = (code) =>
+      @exitCount++
+      if @exitCount is @runCount
+        @input = @results
+        @vimState.operationStack.process()
+
+    bufferedprocess = new BufferedProcess({@command, @args, stdout, exit})
+    bufferedprocess.process.stdin.write(stdin)
+    bufferedprocess.process.stdin.end()
+
+  getNewText: (text) ->
+    # Return stdout of external command in order
+    @input.shift() ? text
+
+# -------------------------
 class TransformStringBySelectList extends Operator
   @extend()
   requireInput: true
   requireTarget: true
+  # Member of transformers can be either of
+  # - Operation class name: e.g 'CamelCase'
+  # - Operation class itself: e.g. CamelCase
   transformers: [
     'CamelCase'
     'DashCase'
@@ -292,10 +335,10 @@ class TransformStringBySelectList extends Operator
   ]
 
   getItems: ->
-    @transformers.map (name) ->
-      name = name
-      displayName = _.humanizeEventName(_.dasherize(name)).replace(/\bUri\b/, 'URI')
-      {name, displayName}
+    @transformers.map (klass) ->
+      className = if _.isString(klass) then klass else klass.name
+      displayName = _.humanizeEventName(_.dasherize(className)).replace(/\bUri\b/, 'URI')
+      {name: klass, displayName}
 
   initialize: ->
     @onDidSetTarget =>
