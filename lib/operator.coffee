@@ -248,6 +248,11 @@ class DashCase extends TransformString
   getNewText: (text) ->
     _.dasherize text
 
+class TitleCase extends TransformString
+  @extend()
+  getNewText: (text) ->
+    _.humanizeEventName(_.dasherize(text))
+
 class EncodeUriComponent extends TransformString
   @extend()
   hover: icon: 'encodeURI', emoji: 'encodeURI'
@@ -300,38 +305,36 @@ class TransformStringBySelectList extends Operator
   @extend()
   requireInput: true
   requireTarget: true
-  selectListItems: [
-    "CamelCase"
-    "DashCase"
-    "SnakeCase"
-    "LowerCase"
-    "UpperCase"
-    "ToggleCase"
-    "EncodeUriComponent"
-    "DecodeUriComponent"
-    "JoinByInput"
-    "JoinWithKeepingSpace"
-    "Reverse"
-    "SplitString"
-    "Surround"
-    "MapSurround"
+  transformers: [
+    {name: 'CamelCase', displayName: 'Camel Case'}
+    {name: 'DashCase', displayName: 'Dash Case'}
+    {name: 'SnakeCase', displayName: 'Snake Case'}
+    {name: 'LowerCase', displayName: 'Lower Case'}
+    {name: 'UpperCase', displayName: 'Upper Case'}
+    {name: 'ToggleCase', displayName: 'Toggle Case'}
+    {name: 'EncodeUriComponent', displayName: 'Encode URI Component'}
+    {name: 'DecodeUriComponent', displayName: 'Decode URI Component'}
+    {name: 'JoinByInput', displayName: 'Join By Input'}
+    {name: 'JoinWithKeepingSpace', displayName: 'Join With Keeping Space'}
+    {name: 'Reverse', displayName: 'Reverse'}
+    {name: 'SplitString', displayName: 'Split String'}
+    {name: 'Surround', displayName: 'Surround'}
+    {name: 'MapSurround', displayName: 'Map Surround'}
+    {name: 'TitleCase', displayName: 'Title Case'}
   ]
 
   focusSelectList: (items) ->
-    items = items.map (e) -> {name: e}
     @vimState.setSelecListItems(items)
     atom.commands.dispatch(@editorElement, 'vim-mode-plus-ex-mode:open')
 
   initialize: ->
     @onDidSetTarget =>
-      @focusSelectList(@selectListItems)
+      @focusSelectList(@transformers)
 
-    @vimState.onDidSelectListConfirm (item) =>
-      transformer = item.name
-      if transformer
-        # FIXME cleanup require, implement operationStack::replace()?
-        @vimState.reset()
-        @vimState.operationStack.run(transformer, {target: @target.constructor.name})
+    @vimState.onDidSelectListConfirm (transformer) =>
+      # FIXME cleanup require, implement operationStack::replace()?
+      @vimState.reset()
+      @vimState.operationStack.run(transformer.name, {target: @target.constructor.name})
 
   execute: ->
     # NEVER be executed
