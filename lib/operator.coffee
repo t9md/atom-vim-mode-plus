@@ -335,11 +335,15 @@ class TransformStringBySelectList extends Operator
     'IncrementNumber'
     'DecrementNumber'
   ]
+  displayNameTable: {
+    'EncodeUriComponent': 'Encode URI Component'
+    'DecodeUriComponent': 'Decode URI Component'
+  }
 
   getItems: ->
-    @transformers.map (klass) ->
+    @transformers.map (klass) =>
       className = if _.isString(klass) then klass else klass.name
-      displayName = _.humanizeEventName(_.dasherize(className)).replace(/\bUri\b/, 'URI')
+      displayName = @displayNameTable[className] ? _.humanizeEventName(_.dasherize(className))
       {name: klass, displayName}
 
   initialize: ->
