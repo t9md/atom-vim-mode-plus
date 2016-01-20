@@ -281,11 +281,13 @@ class TransformStringByExternalCommand extends TransformString
     @exitCount = @runCount = 0
 
     @onDidSetTarget =>
-      @restore = @preservePoints()
-      @target.select()
+      unless @isMode('visual')
+        @restore = @preservePoints()
+        @target.select()
+
       for selection, i in @editor.getSelections()
         @runExternalCommand(selection.getText())
-        @restore(selection, i)
+        @restore?(selection, i)
 
   runExternalCommand: (stdin) ->
     runCount = @runCount++
