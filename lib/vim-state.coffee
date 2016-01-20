@@ -77,13 +77,9 @@ class VimState
   onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
   onDidOperationFinish: (fn) -> @subscribe @emitter.on('did-operation-finish', fn)
 
-  onDidSelectListConfirm: (fn) -> @subscribe @emitter.on('did-select-list-confirm', fn)
-
-  setSelecListItems: (@selectListItems) ->
-    @selectListItems
-
-  getSelecListItems: ->
-    @selectListItems
+  # Select list view
+  onDidConfirmSelectList: (fn) -> @subscribe @emitter.on('did-confirm-select-list', fn)
+  onDidCancelSelectList: (fn) -> @subscribe @emitter.on('did-cancel-select-list', fn)
 
   destroy: ->
     return if @destroyed
@@ -150,7 +146,6 @@ class VimState
 
   reset: ->
     @count.reset()
-    @selectListItems = null
     @register.reset()
     @searchHistory.reset()
     @hover.reset()

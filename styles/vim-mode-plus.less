@@ -232,6 +232,7 @@ atom-text-editor::shadow {
 }
 
 // Maximize Pane
+// =========================
 atom-workspace.vim-mode-plus-pane-maximized {
   .tab-bar {
     display: none;
@@ -250,5 +251,14 @@ atom-workspace.vim-mode-plus-pane-maximized {
         z-index: 100;
       }
     }
+  }
+}
+
+// SelectList Highlight matched text
+// =========================
+.vim-mode-plus-select-list .list-group {
+  .character-match {
+    color: @text-color-highlight;
+    font-weight: bold;
   }
 }
