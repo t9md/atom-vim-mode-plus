@@ -4,6 +4,7 @@ Delegato = require 'delegato'
 {CompositeDisposable} = require 'atom'
 
 settings = require './settings'
+selectList = require './select-list'
 getEditorState = null # set in Base.init()
 
 run = (klass, properties={}) ->
@@ -102,6 +103,12 @@ class Base
   new: (klassName, properties={}) ->
     klass = Base.getClass(klassName)
     new klass(@vimState, properties)
+
+  focusSelectList: (options={}) ->
+    @vimState.onDidCancelSelectList =>
+      @vimState.operationStack.cancel()
+
+    selectList.show(@vimState, options)
 
   focusInput: (options={}) ->
     options.charsMax ?= 1

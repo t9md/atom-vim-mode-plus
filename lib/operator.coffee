@@ -248,6 +248,11 @@ class DashCase extends TransformString
   getNewText: (text) ->
     _.dasherize text
 
+class TitleCase extends TransformString
+  @extend()
+  getNewText: (text) ->
+    _.humanizeEventName(_.dasherize(text))
+
 class EncodeUriComponent extends TransformString
   @extend()
   hover: icon: 'encodeURI', emoji: 'encodeURI'
@@ -292,6 +297,54 @@ class TransformWordByInput extends TransformStringByInput
   target: "InnerWord"
 
 class TransformSmartWordByInput extends TransformStringByInput
+  @extend()
+  target: "InnerSmartWord"
+
+# -------------------------
+class TransformStringBySelectList extends Operator
+  @extend()
+  requireInput: true
+  requireTarget: true
+  transformers: [
+    'CamelCase'
+    'DashCase'
+    'SnakeCase'
+    'LowerCase'
+    'UpperCase'
+    'ToggleCase'
+    'EncodeUriComponent'
+    'DecodeUriComponent'
+    'JoinByInput'
+    'JoinWithKeepingSpace'
+    'Reverse'
+    'SplitString'
+    'Surround'
+    'MapSurround'
+    'TitleCase'
+  ]
+
+  getItems: ->
+    @transformers.map (name) ->
+      name = name
+      displayName = _.humanizeEventName(_.dasherize(name)).replace(/\bUri\b/, 'URI')
+      {name, displayName}
+
+  initialize: ->
+    @onDidSetTarget =>
+      @focusSelectList({items: @getItems()})
+
+    @vimState.onDidConfirmSelectList (transformer) =>
+      @vimState.reset()
+      @vimState.operationStack.run(transformer.name, {target: @target.constructor.name})
+
+  execute: ->
+    # NEVER be executed
+
+class TransformWordBySelectList extends TransformStringBySelectList
+  @extend()
+  target: "InnerWord"
+
+class TransformSmartWordBySelectList extends TransformStringBySelectList
   @extend()
   target: "InnerSmartWord"
 
