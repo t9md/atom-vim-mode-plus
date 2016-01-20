@@ -1,7 +1,18 @@
+# 0.17.0
+- New: InsertByMotion can insert after move, and repeatable.
+- New: Support insert count e.g `10iabc`, `10oabc`.
+- Spec: #137 dot register, insertion count,  insert-last-inserted
+- New: TextObject.SmartWord which is just include dash(-) char into `\w`
+- New: SurroundSmartWord is pre-targeting InnerSmartWord
+- New: Operator EncodeUriComponent, DecodeUriComponent
+- New: Operator TitleCase
+- New: #139 support SelectList UI
+- New: #138, #139 Operator TransformStringBySelectList transform string by choice
+
 # 0.16.0
 - Fix: Don't change submode from `characterwise` to `linewise` automatically #131.
 - Internal: new `TextObject::allowSubmodeChange` property control automatic submode shift from selected range.
-- New, Fix: As part of fix from Atom v1.4.0 change, Paragraph motion was completely rewritten, now more compatible behavior to pure Vim.
+- New: Fix: As part of fix from Atom v1.4.0 change, Paragraph motion was completely rewritten, now more compatible behavior to pure Vim.
 - New: Configuration parameter `flashOnOperateBlacklist` allow disable flash for specific operation.
 - Improve: Now `move-to-blank`, `move-to-edge` works correctly for hardTab language buffer like golang.
 
