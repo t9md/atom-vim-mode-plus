@@ -306,33 +306,34 @@ class TransformStringBySelectList extends Operator
   requireInput: true
   requireTarget: true
   transformers: [
-    {name: 'CamelCase', displayName: 'Camel Case'}
-    {name: 'DashCase', displayName: 'Dash Case'}
-    {name: 'SnakeCase', displayName: 'Snake Case'}
-    {name: 'LowerCase', displayName: 'Lower Case'}
-    {name: 'UpperCase', displayName: 'Upper Case'}
-    {name: 'ToggleCase', displayName: 'Toggle Case'}
-    {name: 'EncodeUriComponent', displayName: 'Encode URI Component'}
-    {name: 'DecodeUriComponent', displayName: 'Decode URI Component'}
-    {name: 'JoinByInput', displayName: 'Join By Input'}
-    {name: 'JoinWithKeepingSpace', displayName: 'Join With Keeping Space'}
-    {name: 'Reverse', displayName: 'Reverse'}
-    {name: 'SplitString', displayName: 'Split String'}
-    {name: 'Surround', displayName: 'Surround'}
-    {name: 'MapSurround', displayName: 'Map Surround'}
-    {name: 'TitleCase', displayName: 'Title Case'}
+    'CamelCase'
+    'DashCase'
+    'SnakeCase'
+    'LowerCase'
+    'UpperCase'
+    'ToggleCase'
+    'EncodeUriComponent'
+    'DecodeUriComponent'
+    'JoinByInput'
+    'JoinWithKeepingSpace'
+    'Reverse'
+    'SplitString'
+    'Surround'
+    'MapSurround'
+    'TitleCase'
   ]
 
-  focusSelectList: (items) ->
-    @vimState.setSelecListItems(items)
-    atom.commands.dispatch(@editorElement, 'vim-mode-plus-ex-mode:open')
+  getItems: ->
+    @transformers.map (name) ->
+      name = name
+      displayName = _.humanizeEventName(_.dasherize(name)).replace(/\bUri\b/, 'URI')
+      {name, displayName}
 
   initialize: ->
     @onDidSetTarget =>
-      @focusSelectList(@transformers)
+      @focusSelectList({items: @getItems()})
 
-    @vimState.onDidSelectListConfirm (transformer) =>
-      # FIXME cleanup require, implement operationStack::replace()?
+    @vimState.onDidConfirmSelectList (transformer) =>
       @vimState.reset()
       @vimState.operationStack.run(transformer.name, {target: @target.constructor.name})
 
