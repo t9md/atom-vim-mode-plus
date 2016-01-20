@@ -57,11 +57,11 @@ If you want to directly edit `config.cson`, here it is.
 
 # Wiki
 
-- [New Features](https://github.com/t9md/atom-vim-mode-plus/wiki/Features)
-- [Introspection report for operations](https://github.com/t9md/atom-vim-mode-plus/wiki/Operations) includes most of commands with keymap information.
-- [GIFs](https://github.com/t9md/atom-vim-mode-plus/wiki/GIFs) demostrate fancy features.
+- [Operations](https://github.com/t9md/atom-vim-mode-plus/wiki/Operations) includes most of commands with keymap information.
+- [GIFs](https://github.com/t9md/atom-vim-mode-plus/wiki/GIFs) demonstrates fancy features.
 - [Keymap example](https://github.com/t9md/atom-vim-mode-plus/wiki/Keymap-example).
-- [Extend vmp by adding your own Motion, TextObject, Operator](https://github.com/t9md/atom-vim-mode-plus/wiki/Extend-vmp-by-adding-your-own-Motion-TextObject-Operator)
+- [Extend vmp in init file](https://github.com/t9md/atom-vim-mode-plus/wiki/Extend-vmp-in-init-file)
+- [Create vmp plugin](https://github.com/t9md/atom-vim-mode-plus/wiki/Create-vmp-plugin)
 
 ## Keymap
 
