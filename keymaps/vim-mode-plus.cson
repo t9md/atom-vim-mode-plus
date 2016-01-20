@@ -122,6 +122,7 @@
   'g -':   'vim-mode-plus:dash-case'
   # 'g _': 'vim-mode-plus:snake-case'
   # 'g r':   'vim-mode-plus:reverse'
+  # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
 
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
