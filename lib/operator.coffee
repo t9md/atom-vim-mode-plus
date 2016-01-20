@@ -199,6 +199,7 @@ class TransformString extends Operator
     s.insertText(text, {@autoIndent})
     setPoint() if @setPoint
 
+# String Transformer
 # -------------------------
 class ToggleCase extends TransformString
   @extend()
@@ -264,41 +265,6 @@ class DecodeUriComponent extends TransformString
   hover: icon: 'decodeURI', emoji: 'decodeURI'
   getNewText: (text) ->
     decodeURIComponent(text)
-
-class TransformStringByInput extends TransformString
-  @extend()
-  requireInput: true
-  requireTarget: true
-
-  transformingTable:
-    'c': "CamelCase"
-    '-': "DashCase"
-    '_': "SnakeCase"
-    'u': "LowerCase"
-    'U': "UpperCase"
-    '~': "ToggleCase"
-    '%': "EncodeUriComponent"
-    '@': "DecodeUriComponent" # FIXME for better nemonic
-
-  initialize: ->
-    @onDidSetTarget =>
-      @focusInput()
-
-  getNewText: (text) ->
-    operationName = @transformingTable[@input]
-    if operationName
-      operation = @new operationName
-      operation.getNewText(text)
-    else
-      text
-
-class TransformWordByInput extends TransformStringByInput
-  @extend()
-  target: "InnerWord"
-
-class TransformSmartWordByInput extends TransformStringByInput
-  @extend()
-  target: "InnerSmartWord"
 
 # -------------------------
 class TransformStringBySelectList extends Operator
