@@ -268,7 +268,7 @@ class DecodeUriComponent extends TransformString
     decodeURIComponent(text)
 
 # -------------------------
-class TranformStringByExternalCommand extends TransformString
+class TransformStringByExternalCommand extends TransformString
   @extend(false)
   requireInput: true
   command: '' # e.g. command: 'sort'
