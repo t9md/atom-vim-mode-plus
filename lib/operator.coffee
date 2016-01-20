@@ -287,6 +287,8 @@ class TransformStringBySelectList extends Operator
     'Surround'
     'MapSurround'
     'TitleCase'
+    'IncrementNumber'
+    'DecrementNumber'
   ]
 
   getItems: ->
