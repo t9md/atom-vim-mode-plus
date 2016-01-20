@@ -8,7 +8,7 @@ class SelectList extends SelectListView
     @addClass('vim-mode-plus-select-list')
 
   getFilterKey: ->
-    'name'
+    'displayName'
 
   cancelled: ->
     @vimState.emitter.emit 'did-cancel-select-list'
