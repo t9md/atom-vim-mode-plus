@@ -572,9 +572,6 @@ class MoveLineUp extends TransformString
     swrap(selection).setBufferRange(range, {preserveFolds: true, reversed})
     @editor.scrollToCursorPosition({center: true})
 
-  isLastRow: (row) ->
-    row is @editor.getBuffer().getLastRow()
-
   rotateRows: (rows) ->
     rows.push(rows.shift())
 
@@ -582,7 +579,8 @@ class MoveLineDown extends MoveLineUp
   @extend()
   direction: 'down'
   isMovable: (selection) ->
-    not @isLastRow(selection.getBufferRange().end.row)
+    endRow = selection.getBufferRange().end.row
+    endRow < @editor.getBuffer().getLastRow()
 
   rotateRows: (rows) ->
     rows.unshift(rows.pop())
@@ -670,7 +668,7 @@ class SplitString extends TransformString
   input: null
 
   initialize: ->
-    if not @isMode('visual')
+    unless @isMode('visual')
       @setTarget @new("MoveToRelativeLine", {min: 1})
     @focusInput(charsMax: 10)
 
@@ -696,9 +694,9 @@ class Repeat extends Operator
   execute: ->
     @editor.transact =>
       _.times @getCount(), =>
-        if op = @vimState.operationStack.getRecorded()
-          op.setRepeated()
-          op.execute()
+        if operation = @vimState.operationStack.getRecorded()
+          operation.setRepeated()
+          operation.execute()
 
 # -------------------------
 class Mark extends Operator
@@ -836,7 +834,7 @@ class PutBefore extends Operator
         @insertTextBelow(selection, text)
     else
       if @isMode('visual', 'linewise')
-        text += '\n' unless text.endsWith('\n')
+        text += "\n" unless text.endsWith("\n")
       else
         selection.insertText("\n")
       selection.insertText(text)
@@ -903,25 +901,22 @@ class ActivateInsertMode extends Operator
   submode: null
   supportInsertionCount: true
 
-  withAddedBufferRangeFromCheckpoint: (purpose, fn) ->
-    range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint(purpose))
-    fn(range) if range?
-
   observeWillDeactivateMode: ->
     disposable = @vimState.modeManager.preemptWillDeactivateMode ({mode}) =>
       return unless mode is 'insert'
       disposable.dispose()
 
       @vimState.mark.set('^', @editor.getCursorBufferPosition())
-      text = ''
       if (range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint('insert')))?
         @setMarkForChange(range) # Marker can track following extra insertion incase count specified
-        text = @editor.getTextInBufferRange(range)
-      @saveInsertedText(text)
-      @vimState.register.set('.', {text})
+        textByUserInput = @editor.getTextInBufferRange(range)
+      else
+        textByUserInput = ''
+      @saveInsertedText(textByUserInput)
+      @vimState.register.set('.', {text: textByUserInput})
 
       _.times @getInsertionCount(), =>
-        text = @textByOperator + @getInsertedText()
+        text = @textByOperator + textByUserInput
         for selection in @editor.getSelections()
           selection.insertText(text, autoIndent: true)
 
@@ -986,7 +981,7 @@ class ActivateReplaceMode extends ActivateInsertMode
   submode: 'replace'
 
   repeatInsert: (selection, text) ->
-    for char in text when char isnt "\n"
+    for char in text when (char isnt "\n")
       break if selection.cursor.isAtEndOfLine()
       selection.selectRight()
     selection.insertText(text, autoIndent: false)
@@ -1060,12 +1055,11 @@ class Change extends ActivateInsertMode
       return
 
     @setTextToRegister @editor.getSelectedText()
-    text = ''
-    text += "\n" if @target.isLinewise?()
+    text = if @target.isLinewise?() then "\n" else ''
     @editor.transact =>
       for selection in @editor.getSelections()
-        range = selection.insertText(text, autoIndent: true)
-        selection.cursor.moveLeft() unless range.isEmpty()
+        selection.insertText(text, autoIndent: true)
+        selection.cursor.moveLeft() if text is "\n"
     super
 
 class Substitute extends Change
