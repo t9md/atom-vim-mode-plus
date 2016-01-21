@@ -275,34 +275,45 @@ class TransformStringByExternalCommand extends TransformString
   args: [] # e.g args: ['-rn']
 
   initialize: ->
-    unless BufferedProcess?
-      {BufferedProcess} = require 'atom'
+    BufferedProcess ?= require('atom').BufferedProcess
     @results = []
-    @exitCount = @runCount = 0
+    @processFinished = 0
 
     @onDidSetTarget =>
       unless @isMode('visual')
         @restore = @preservePoints()
         @target.select()
 
-      for selection, i in @editor.getSelections()
-        @runExternalCommand(selection.getText())
-        @restore?(selection, i)
+      selections = @editor.getSelections()
+      numberOfProcess = selections.length
+      for selection, index in selections
+        @runExternalCommand {
+          command: @command
+          args: @args
+          stdout: @onStdout(index)
+          exit: @onExit(numberOfProcess)
+          stdin: selection.getText()
+        }
+        @restore?(selection, index)
 
-  runExternalCommand: (stdin) ->
-    runCount = @runCount++
-    stdout = (output) =>
-      @results[runCount] = output
+  onStdout: (index) ->
+    (output) =>
+      @results[index] = output
 
-    exit = (code) =>
-      @exitCount++
-      if @exitCount is @runCount
+  onExit: (numOfProcess) ->
+    (code) =>
+      @processFinished++
+      if @processFinished is numOfProcess
         @input = @results
         @vimState.operationStack.process()
 
-    bufferedprocess = new BufferedProcess({@command, @args, stdout, exit})
-    bufferedprocess.process.stdin.write(stdin)
-    bufferedprocess.process.stdin.end()
+  runExternalCommand: (options) ->
+    {stdin} = options
+    delete options.stdin
+    bufferedProcess = new BufferedProcess(options)
+    if stdin
+      bufferedProcess.process.stdin.write(stdin)
+      bufferedProcess.process.stdin.end()
 
   getNewText: (text) ->
     # Return stdout of external command in order
