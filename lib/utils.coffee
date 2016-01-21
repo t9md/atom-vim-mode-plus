@@ -70,7 +70,7 @@ rangeToEndOfFileFromPoint = (point) ->
   new Range(point, Point.INFINITY)
 
 haveSomeSelection = (editor) ->
-  editor.getSelections().some((s) -> not s.isEmpty())
+  editor.getSelections().some((selection) -> not selection.isEmpty())
 
 sortRanges = (ranges) ->
   ranges.sort((a, b) -> a.compare(b))
@@ -93,8 +93,8 @@ selectVisibleBy = (editor, entries, fn) ->
   (e for e in entries when range.containsRange(fn(e)))
 
 eachSelection = (editor, fn) ->
-  for s in editor.getSelections()
-    fn(s)
+  for selection in editor.getSelections()
+    fn(selection)
 
 toggleClassByCondition = (element, klass, condition) ->
   action = (if condition then 'add' else 'remove')
@@ -272,24 +272,24 @@ moveCursorLeft = (cursor, options={}) ->
   {allowWrap} = options
   delete options.allowWrap
   if not cursor.isAtBeginningOfLine() or allowWrap
-    moveCursor cursor, options, (c) ->
-      c.moveLeft()
+    moveCursor cursor, options, (cursor) ->
+      cursor.moveLeft()
 
 moveCursorRight = (cursor, options={}) ->
   {allowWrap} = options
   delete options.allowWrap
   if not cursor.isAtEndOfLine() or allowWrap
-    moveCursor cursor, options, (c) ->
-      c.moveRight()
+    moveCursor cursor, options, (cursor) ->
+      cursor.moveRight()
 
 moveCursorUp = (cursor, options={}) ->
   unless cursor.getScreenRow() is 0
-    moveCursor cursor, options, (c) ->
+    moveCursor cursor, options, (cursor) ->
       cursor.moveUp()
 
 moveCursorDown = (cursor, options={}) ->
   unless getVimLastScreenRow(cursor.editor) is cursor.getScreenRow()
-    moveCursor cursor, options, (c) ->
+    moveCursor cursor, options, (cursor) ->
       cursor.moveDown()
 
 moveCursorToFirstCharacterAtRow = (cursor, row) ->

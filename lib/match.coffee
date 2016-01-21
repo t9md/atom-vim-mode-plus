@@ -127,8 +127,8 @@ class Match
 
   show: ->
     klass  = 'vim-mode-plus-search-match'
-    if s = @getClassList().join(' ')
-      klass += " " + s
+    if str = @getClassList().join(' ')
+      klass += " " + str
     @marker = @editor.markBufferRange @range,
       invalidate: 'never'
       persistent: false

@@ -1,6 +1,7 @@
 # Libraries
 # -------------------------
 LineEndingRegExp = /(?:\n|\r\n)$/
+
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable} = require 'atom'
 BufferedProcess = null
@@ -191,13 +192,13 @@ class TransformString extends Operator
   autoIndent: false
 
   execute: ->
-    @eachSelection (s, setPoint) =>
-      @mutate(s, setPoint)
+    @eachSelection (selection, setPoint) =>
+      @mutate(selection, setPoint)
     @activateMode('normal')
 
-  mutate: (s, setPoint) ->
-    text = @getNewText(s.getText())
-    s.insertText(text, {@autoIndent})
+  mutate: (selection, setPoint) ->
+    text = @getNewText(selection.getText())
+    selection.insertText(text, {@autoIndent})
     setPoint() if @setPoint
 
 # String Transformer
@@ -395,34 +396,34 @@ class Indent extends TransformString
   hover: icon: ':indent:', emoji: ':point_right:'
   stayOnLinewise: false
 
-  mutate: (s, setPoint) ->
-    @indent(s)
+  mutate: (selection, setPoint) ->
+    @indent(selection)
     setPoint()
     unless @needStay()
-      s.cursor.moveToFirstCharacterOfLine()
+      selection.cursor.moveToFirstCharacterOfLine()
 
-  indent: (s) ->
-    s.indentSelectedRows()
+  indent: (selection) ->
+    selection.indentSelectedRows()
 
 class Outdent extends Indent
   @extend()
   hover: icon: ':outdent:', emoji: ':point_left:'
-  indent: (s) ->
-    s.outdentSelectedRows()
+  indent: (selection) ->
+    selection.outdentSelectedRows()
 
 class AutoIndent extends Indent
   @extend()
   hover: icon: ':auto-indent:', emoji: ':open_hands:'
-  indent: (s) ->
-    s.autoIndentSelectedRows()
+  indent: (selection) ->
+    selection.autoIndentSelectedRows()
 
 # -------------------------
 class ToggleLineComments extends TransformString
   @extend()
   hover: icon: ':toggle-line-comments:', emoji: ':mute:'
   stayOption: {asMarker: true}
-  mutate: (s, setPoint) ->
-    s.toggleLineComments()
+  mutate: (selection, setPoint) ->
+    selection.toggleLineComments()
     setPoint()
 
 # -------------------------
@@ -481,8 +482,8 @@ class MapSurround extends Surround
   @extend()
   mapRegExp: /\w+/g
   execute: ->
-    @eachSelection (s, setPoint) =>
-      scanRange = s.getBufferRange()
+    @eachSelection (selection, setPoint) =>
+      scanRange = selection.getBufferRange()
       @editor.scanInBufferRange @mapRegExp, scanRange, ({matchText, replace}) =>
         replace(@getNewText(matchText))
       setPoint() if @setPoint
@@ -540,7 +541,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   onConfirm: (@char) ->
     # Clear pre-selected selection to start @eachSelection from non-selection.
-    @restore(s, i) for s, i in @editor.getSelections()
+    @restore(selection, i) for selection, i in @editor.getSelections()
     @input = @char
     @vimState.operationStack.process()
 
@@ -550,25 +551,25 @@ class MoveLineUp extends TransformString
   @extend()
   direction: 'up'
   execute: ->
-    @eachSelection (s, setPoint) =>
-      @mutate(s, setPoint)
+    @eachSelection (selection, setPoint) =>
+      @mutate(selection, setPoint)
 
-  isMovable: (s) ->
-    s.getBufferRange().start.row isnt 0
+  isMovable: (selection) ->
+    selection.getBufferRange().start.row isnt 0
 
   getRangeTranslationSpec: ->
     [[-1, 0], [0, 0]]
 
-  mutate: (s, setPoint) ->
-    return unless @isMovable(s)
-    reversed = s.isReversed()
+  mutate: (selection, setPoint) ->
+    return unless @isMovable(selection)
+    reversed = selection.isReversed()
     translation = @getRangeTranslationSpec()
-    swrap(s).translate(translation, {preserveFolds: true})
-    rows = swrap(s).lineTextForBufferRows()
+    swrap(selection).translate(translation, {preserveFolds: true})
+    rows = swrap(selection).lineTextForBufferRows()
     @rotateRows(rows)
-    range = s.insertText(rows.join("\n") + "\n")
+    range = selection.insertText(rows.join("\n") + "\n")
     range = range.translate(translation.reverse()...)
-    swrap(s).setBufferRange(range, {preserveFolds: true, reversed})
+    swrap(selection).setBufferRange(range, {preserveFolds: true, reversed})
     @editor.scrollToCursorPosition({center: true})
 
   isLastRow: (row) ->
@@ -580,8 +581,8 @@ class MoveLineUp extends TransformString
 class MoveLineDown extends MoveLineUp
   @extend()
   direction: 'down'
-  isMovable: (s) ->
-    not @isLastRow(s.getBufferRange().end.row)
+  isMovable: (selection) ->
+    not @isLastRow(selection.getBufferRange().end.row)
 
   rotateRows: (rows) ->
     rows.unshift(rows.pop())
@@ -597,8 +598,8 @@ class Yank extends Operator
   stayOnLinewise: true
 
   execute: ->
-    @eachSelection (s, setPoint) =>
-      @setTextToRegister s.getText() if s.isLastSelection()
+    @eachSelection (selection, setPoint) =>
+      @setTextToRegister selection.getText() if selection.isLastSelection()
       setPoint()
     @activateMode('normal')
 
@@ -627,16 +628,16 @@ class JoinWithKeepingSpace extends TransformString
   initialize: ->
     @setTarget @new("MoveToRelativeLineWithMinimum", {min: 1})
 
-  mutate: (s) ->
-    [startRow, endRow] = s.getBufferRowRange()
-    swrap(s).expandOverLine()
+  mutate: (selection) ->
+    [startRow, endRow] = selection.getBufferRowRange()
+    swrap(selection).expandOverLine()
     rows = for row in [startRow..endRow]
       text = @editor.lineTextForBufferRow(row)
       if @trim and row isnt startRow
         text.trimLeft()
       else
         text
-    s.insertText @join(rows) + "\n"
+    selection.insertText @join(rows) + "\n"
 
   join: (rows) ->
     rows.join(@input)
@@ -680,11 +681,11 @@ class SplitString extends TransformString
 
 class Reverse extends TransformString
   @extend()
-  mutate: (s, setPoint) ->
-    swrap(s).expandOverLine()
-    textForRows = swrap(s).lineTextForBufferRows()
+  mutate: (selection, setPoint) ->
+    swrap(selection).expandOverLine()
+    textForRows = swrap(selection).lineTextForBufferRows()
     newText = textForRows.reverse().join("\n") + "\n"
-    s.insertText(newText)
+    selection.insertText(newText)
     setPoint()
 
 # -------------------------
@@ -726,14 +727,14 @@ class Increase extends Operator
 
     newRanges = []
     @editor.transact =>
-      for c in @editor.getCursors()
+      for cursor in @editor.getCursors()
         scanRange = if @isMode('visual')
-          c.selection.getBufferRange()
+          cursor.selection.getBufferRange()
         else
-          c.getCurrentLineBufferRange()
-        ranges = @increaseNumber(c, scanRange, pattern)
+          cursor.getCurrentLineBufferRange()
+        ranges = @increaseNumber(cursor, scanRange, pattern)
         if not @isMode('visual') and ranges.length
-          c.setBufferPosition ranges[0].end.translate([0, -1])
+          cursor.setBufferPosition ranges[0].end.translate([0, -1])
         newRanges.push ranges
 
     if (newRanges = _.flatten(newRanges)).length
@@ -769,14 +770,14 @@ class IncrementNumber extends Operator
     newRanges = null
     @selectTarget()
     @editor.transact =>
-      newRanges = for s in @editor.getSelectionsOrderedByBufferPosition()
-        @replaceNumber(s.getBufferRange(), pattern)
+      newRanges = for selection in @editor.getSelectionsOrderedByBufferPosition()
+        @replaceNumber(selection.getBufferRange(), pattern)
     if (newRanges = _.flatten(newRanges)).length
       @flash newRanges
     else
       atom.beep()
-    for s in @editor.getSelections()
-      s.cursor.setBufferPosition(s.getBufferRange().start)
+    for selection in @editor.getSelections()
+      selection.cursor.setBufferPosition(selection.getBufferRange().start)
     @activateMode('normal')
 
   replaceNumber: (scanRange, pattern) ->
@@ -811,14 +812,14 @@ class PutBefore extends Operator
     isLinewise = type is 'linewise' or @isMode('visual', 'linewise')
 
     @editor.transact =>
-      for s in @editor.getSelections()
-        {cursor} = s
+      for selection in @editor.getSelections()
+        {cursor} = selection
         if isLinewise
-          newRange = @pasteLinewise(s, text)
+          newRange = @pasteLinewise(selection, text)
           cursor.setBufferPosition(newRange.start)
           cursor.moveToFirstCharacterOfLine()
         else
-          newRange = @pasteCharacterwise(s, text)
+          newRange = @pasteCharacterwise(selection, text)
           cursor.setBufferPosition(newRange.end.translate([0, -1]))
         @setMarkForChange(newRange)
         @flash newRange
@@ -877,17 +878,18 @@ class Replace extends Operator
 
   execute: ->
     @input = "\n" if @input is ''
-    @eachSelection (s, setPoint) =>
-      text = s.getText().replace(/./g, @input)
+    @eachSelection (selection, setPoint) =>
+      text = selection.getText().replace(/./g, @input)
       unless (@target.instanceof('MoveRight') and (text.length < @getCount()))
-        s.insertText(text, autoIndentNewline: true)
+        selection.insertText(text, autoIndentNewline: true)
       setPoint() unless @input is "\n"
 
     # FIXME this is very imperative, handling in very lower level.
     # find better place for operator in blockwise move works appropriately.
     if @isMode('visual', 'blockwise')
       top = @editor.getSelectionsOrderedByBufferPosition()[0]
-      s.destroy() for s in @editor.getSelections() when (s isnt top)
+      for selection in @editor.getSelections() when (selection isnt top)
+        selection.destroy()
 
     @activateMode('normal')
 
@@ -961,9 +963,9 @@ class ActivateInsertMode extends Operator
         @observeSelectAction()
         @emitDidSelect()
       @editor.transact =>
-        for s in @editor.getSelections()
-          @repeatInsert(s, text)
-          moveCursorLeft(s.cursor)
+        for selection in @editor.getSelections()
+          @repeatInsert(selection, text)
+          moveCursorLeft(selection.cursor)
     else
       if @getInsertionCount() > 0
         range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint('undo'))
@@ -992,7 +994,7 @@ class ActivateReplaceMode extends ActivateInsertMode
 class InsertAfter extends ActivateInsertMode
   @extend()
   execute: ->
-    moveCursorRight(c) for c in @editor.getCursors()
+    moveCursorRight(cursor) for cursor in @editor.getCursors()
     super
 
 class InsertAfterEndOfLine extends ActivateInsertMode
@@ -1015,7 +1017,7 @@ class InsertByMotion extends ActivateInsertMode
     if @target.instanceof('Motion')
       @target.execute()
     if @instanceof('InsertAfterByMotion')
-      moveCursorRight(c) for c in @editor.getCursors()
+      moveCursorRight(cursor) for cursor in @editor.getCursors()
     super
 
 class InsertAfterByMotion extends InsertByMotion

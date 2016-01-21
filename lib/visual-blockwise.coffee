@@ -16,19 +16,19 @@ class VisualBlockwise extends Base
       @setProperties {head: @getBottom(), tail: @getTop()}
 
   eachSelection: (fn) ->
-    for s in @editor.getSelections()
-      fn(s)
+    for selection in @editor.getSelections()
+      fn(selection)
 
   countTimes: (fn) ->
     _.times @getCount(), ->
       fn()
 
   setProperties: ({head, tail}) ->
-    @eachSelection (s) ->
+    @eachSelection (selection) ->
       prop = {}
-      prop.head = (s is head) if head?
-      prop.tail = (s is tail) if tail?
-      swrap(s).setProperties(blockwise: prop)
+      prop.head = (selection is head) if head?
+      prop.tail = (selection is tail) if tail?
+      swrap(selection).setProperties(blockwise: prop)
 
   isSingleLine: ->
     @editor.getSelections().length is 1
@@ -46,7 +46,8 @@ class VisualBlockwise extends Base
     if @isReversed() then @getTop() else @getBottom()
 
   getTail: ->
-    _.detect @editor.getSelections(), (s) -> swrap(s).isBlockwiseTail()
+    _.detect @editor.getSelections(), (selection) ->
+      swrap(selection).isBlockwiseTail()
 
   getBufferRowRange: ->
     startRow = @getTop().getBufferRowRange()[0]
@@ -91,8 +92,8 @@ class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
     @operator = @new(@delegateTo)
 
   execute: ->
-    @eachSelection (s) ->
-      s.cursor.setBufferPosition s.getBufferRange().start
+    @eachSelection (selection) ->
+      selection.cursor.setBufferPosition(selection.getBufferRange().start)
     finalPoint = @getTop().cursor.getBufferPosition()
     @vimState.activate('normal')
     @operator.execute()
@@ -118,8 +119,9 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
 
   execute: ->
     which = if @after then 'end' else 'start'
-    @eachSelection (s) ->
-      s.cursor.setBufferPosition s.getBufferRange()[which]
+    @eachSelection (selection) ->
+      point = selection.getBufferRange()[which]
+      selection.cursor.setBufferPosition(point)
 
     # FIXME confirmChanges is not called when deactivate insert-mode.
     @operator.execute()
@@ -151,8 +153,8 @@ class BlockwiseSelect extends VisualBlockwise
       @setProperties {head: @getTop(), tail: @getBottom()}
     else
       @setProperties {head: @getBottom(), tail: @getTop()}
-    @eachSelection (s) ->
-      s.destroy() if s.isEmpty()
+    @eachSelection (selection) ->
+      selection.destroy() if selection.isEmpty()
 
 class BlockwiseRestoreCharacterwise extends VisualBlockwise
   @extend(false)

@@ -82,8 +82,9 @@ class InnerWord extends Word
 class WholeWord extends Word
   @extend(false)
   wordRegExp: /\S+/
-  selectInner: (s, wordRegex) ->
-    swrap(s).setBufferRangeSafely s.cursor.getCurrentWordBufferRange({wordRegex})
+  selectInner: (selection, wordRegex) ->
+    range = selection.cursor.getCurrentWordBufferRange({wordRegex})
+    swrap(selection).setBufferRangeSafely range
 
 class AWholeWord extends WholeWord
   @extend()
@@ -96,8 +97,9 @@ class InnerWholeWord extends WholeWord
 class SmartWord extends Word
   @extend(false)
   wordRegExp: /[\w-]+/
-  selectInner: (s, wordRegex) ->
-    swrap(s).setBufferRangeSafely s.cursor.getCurrentWordBufferRange({wordRegex})
+  selectInner: (selection, wordRegex) ->
+    range = selection.cursor.getCurrentWordBufferRange({wordRegex})
+    swrap(selection).setBufferRangeSafely range
 
 class ASmartWord extends SmartWord
   @extend()

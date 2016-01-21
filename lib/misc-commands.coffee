@@ -97,8 +97,8 @@ class Undo extends Misc
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
         @editor.setCursorBufferPosition(start)
 
-    for s in @editor.getSelections()
-      s.clear()
+    for selection in @editor.getSelections()
+      selection.clear()
     @activateMode('normal')
 
   mutate: ->
