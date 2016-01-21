@@ -1058,8 +1058,8 @@ class Change extends ActivateInsertMode
     text = if @target.isLinewise?() then "\n" else ''
     @editor.transact =>
       for selection in @editor.getSelections()
-        selection.insertText(text, autoIndent: true)
-        selection.cursor.moveLeft() if text is "\n"
+        range = selection.insertText(text, autoIndent: true)
+        selection.cursor.moveLeft() unless range.isEmpty()
     super
 
 class Substitute extends Change
