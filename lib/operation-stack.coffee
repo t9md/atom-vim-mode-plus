@@ -19,16 +19,18 @@ class OperationStack
 
   run: (klass, properties) ->
     klass = Base.getClass(klass) if _.isString(klass)
+    unless klass
+      throw new Error("Invalid operation, can't run.")
     try
       #  To support, `dd`, `cc` and a like.
-      if not @isEmpty() and (@peekTop().constructor is klass)
+      if (@peekTop()?.constructor is klass)
         klass = Base.getClass('MoveToRelativeLine')
-      op = new klass(@vimState, properties)
-      if (@vimState.isMode('visual') and _.isFunction(op.select)) or
-          (@isEmpty() and op.instanceof('TextObject')) # when TextObject invoked directly
+      operation = new klass(@vimState, properties)
+      if (@vimState.isMode('visual') and _.isFunction(operation.select)) or
+          (@isEmpty() and operation.instanceof('TextObject')) # when TextObject invoked directly
         @stack.push(new Select(@vimState))
-      @stack.push(op)
-      if @vimState.isMode('visual') and op.instanceof('Operator')
+      @stack.push(operation)
+      if @vimState.isMode('visual') and operation.instanceof('Operator')
         @stack.push(new CurrentSelection(@vimState))
 
       @processing = true
@@ -49,8 +51,8 @@ class OperationStack
 
     if @stack.length > 1
       try
-        op = @stack.pop()
-        @peekTop().setTarget(op)
+        operation = @stack.pop()
+        @peekTop().setTarget(operation)
       catch error
         if error.instanceof?('OperatorError')
           @vimState.activate('reset')
@@ -62,10 +64,10 @@ class OperationStack
       if @vimState.isMode('normal') and @peekTop().instanceof?('Operator')
         @vimState.activate('operator-pending')
     else
-      op = @stack.pop()
-      @lastOperation = op # Used for better error message.
-      op.execute()
-      @record(op) if op.isRecordable()
+      operation = @stack.pop()
+      @lastOperation = operation # Used for better error message.
+      operation.execute()
+      @record(operation) if operation.isRecordable()
       @finish()
 
   cancel: ->
