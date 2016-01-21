@@ -898,7 +898,7 @@ class Search extends SearchBase
       @vimState.hoverSearchCounter.reset()
     @matches = null
     unless @input is ''
-      @moveCursor(c) for c in @editor.getCursors()
+      @moveCursor(cursor) for cursor in @editor.getCursors()
 
   onCommand: (command) => # fat-arrow
     [action, args...] = command.split('-')

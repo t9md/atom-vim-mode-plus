@@ -89,19 +89,19 @@ class ModeManager
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
       # When escape from insert-mode, cursor move Left.
-      moveCursorLeft(c) for c in @editor.getCursors()
+      moveCursorLeft(cursor) for cursor in @editor.getCursors()
 
   activateReplaceMode: ->
     @replacedCharsBySelection = {}
     subs = new CompositeDisposable
     subs.add @editor.onWillInsertText ({text, cancel}) =>
       cancel()
-      @editor.getSelections().forEach (s) =>
+      @editor.getSelections().forEach (selection) =>
         for char in text.split('') ? []
-          if (char isnt "\n") and (not s.cursor.isAtEndOfLine())
-            s.selectRight()
-          @replacedCharsBySelection[s.id] ?= []
-          @replacedCharsBySelection[s.id].push(swrap(s).replace(char))
+          if (char isnt "\n") and (not selection.cursor.isAtEndOfLine())
+            selection.selectRight()
+          @replacedCharsBySelection[selection.id] ?= []
+          @replacedCharsBySelection[selection.id].push(swrap(selection).replace(char))
 
     subs.add new Disposable =>
       @replacedCharsBySelection = null
@@ -120,7 +120,8 @@ class ModeManager
     else
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
     # Preserve characterwise range to restore afterward.
-    swrap(s).preserveCharacterwise() for s in @editor.getSelections()
+    for selection in @editor.getSelections()
+      swrap(selection).preserveCharacterwise()
 
     # Update selection area to final submode.
     switch submode
@@ -138,23 +139,23 @@ class ModeManager
       submode = @submode
       @restorePreviousSelection = =>
         selection = @editor.getLastSelection()
-        swrap(s).selectByProperties(properties)
-        @editor.scrollToScreenRange(s.getScreenRange(), {center: true})
+        swrap(selection).selectByProperties(properties)
+        @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
         submode
 
-      @editor.getSelections().forEach (s) ->
-        swrap(s).resetProperties()
-        # `c`, `s` from visual-mode make selection empty
-        if (not s.isReversed() and not s.isEmpty())
-          s.selectLeft()
-        s.clear(autoscroll: false)
+      @editor.getSelections().forEach (selection) ->
+        swrap(selection).resetProperties()
+        # `vc`, `vs` make selection empty
+        if (not selection.isReversed() and not selection.isEmpty())
+          selection.selectLeft()
+        selection.clear(autoscroll: false)
 
   restoreCharacterwiseRange: ->
     return if @submode is 'characterwise'
     switch @submode
       when 'linewise'
-        @editor.getSelections().forEach (s) ->
-          swrap(s).restoreCharacterwise() unless s.isEmpty()
+        @editor.getSelections().forEach (selection) ->
+          swrap(selection).restoreCharacterwise() unless selection.isEmpty()
       when 'blockwise'
         # Many VisualBlockwise commands change mode in the middle of processing()
         # in this case, we dont want to loose multi-cursor.

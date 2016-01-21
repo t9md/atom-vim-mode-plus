@@ -87,8 +87,8 @@ class OperationStack
           @editor.clearSelections()
 
       # Ensure Cursor is NOT at EndOfLine position
-      for c in @editor.getCursors() when c.isAtEndOfLine()
-        moveCursorLeft(c, {preserveGoalColumn: true})
+      for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
+        moveCursorLeft(cursor, {preserveGoalColumn: true})
     @lastOperation = null
     @vimState.refreshCursors()
     @vimState.reset()
