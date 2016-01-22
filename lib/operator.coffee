@@ -106,11 +106,14 @@ class Operator extends Base
     @emitDidSelect()
     haveSomeSelection(@editor)
 
-  setTextToRegister: (text) ->
+  setTextToRegisterForSelection: (selection) ->
+    @setTextToRegister(selection.getText(), selection)
+
+  setTextToRegister: (text, selection) ->
     if @target.isLinewise?() and not text.endsWith('\n')
       text += "\n"
     if text
-      @vimState.register.set({text})
+      @vimState.register.set({text, selection})
 
   flash: (ranges) ->
     if @flashTarget and settings.get('flashOnOperate')
@@ -152,7 +155,7 @@ class Delete extends Operator
   execute: ->
     @eachSelection (selection) =>
       {cursor} = selection
-      @setTextToRegister(selection.getText()) if selection.isLastSelection()
+      @setTextToRegisterForSelection(selection)
       selection.deleteSelectedText()
 
       vimEof = getVimEofBufferPosition(@editor)
@@ -590,7 +593,7 @@ class Yank extends Operator
 
   execute: ->
     @eachSelection (selection) =>
-      @setTextToRegister selection.getText() if selection.isLastSelection()
+      @setTextToRegisterForSelection(selection)
       @restorePoint(selection)
     @activateMode('normal')
 
@@ -797,14 +800,15 @@ class PutBefore extends Operator
   location: 'before'
 
   execute: ->
-    {text, type} = @vimState.register.get()
-    return unless text
-    text = _.multiplyString(text, @getCount())
-    isLinewise = type is 'linewise' or @isMode('visual', 'linewise')
-
     @editor.transact =>
       for selection in @editor.getSelections()
         {cursor} = selection
+
+        {text, type} = @vimState.register.get(null, selection)
+        break unless text
+        text = _.multiplyString(text, @getCount())
+        isLinewise = type is 'linewise' or @isMode('visual', 'linewise')
+
         if isLinewise
           newRange = @pasteLinewise(selection, text)
           cursor.setBufferPosition(newRange.start)
@@ -1047,10 +1051,10 @@ class Change extends ActivateInsertMode
       @activateMode('normal')
       return
 
-    @setTextToRegister @editor.getSelectedText()
     text = if @target.isLinewise?() then "\n" else ''
     @editor.transact =>
       for selection in @editor.getSelections()
+        @setTextToRegisterForSelection(selection)
         range = selection.insertText(text, autoIndent: true)
         selection.cursor.moveLeft() unless range.isEmpty()
     super
