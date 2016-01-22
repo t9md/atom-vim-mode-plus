@@ -196,10 +196,11 @@ class TransformString extends Operator
 # -------------------------
 class ToggleCase extends TransformString
   @extend()
-  @displayName: 'Toggle ~'
+  displayName: 'Toggle ~'
   hover: icon: ':toggle-case:', emoji: ':clap:'
   toggleCase: (char) ->
-    if (charLower = char.toLowerCase()) is char
+    charLower = cahr.toLowerCase()
+    if charLower is char
       char.toUpperCase()
     else
       charLower
@@ -215,55 +216,55 @@ class ToggleCaseAndMoveRight extends ToggleCase
 
 class UpperCase extends TransformString
   @extend()
-  @displayName: 'Upper'
+  displayName: 'Upper'
   hover: icon: ':upper-case:', emoji: ':point_up:'
   getNewText: (text) ->
     text.toUpperCase()
 
 class LowerCase extends TransformString
   @extend()
-  @displayName: 'Lower'
+  displayName: 'Lower'
   hover: icon: ':lower-case:', emoji: ':point_down:'
   getNewText: (text) ->
     text.toLowerCase()
 
 class CamelCase extends TransformString
   @extend()
-  @displayName: 'Camelize'
+  displayName: 'Camelize'
   hover: icon: ':camel-case:', emoji: ':camel:'
   getNewText: (text) ->
-    _.camelize text
+    _.camelize(text)
 
 class SnakeCase extends TransformString
   @extend()
-  @displayName: 'Underscore _'
+  displayName: 'Underscore _'
   hover: icon: ':snake-case:', emoji: ':snake:'
   getNewText: (text) ->
-    _.underscore text
+    _.underscore(text)
 
 class DashCase extends TransformString
   @extend()
-  @displayName: 'Dasherize -'
+  displayName: 'Dasherize -'
   hover: icon: ':dash-case:', emoji: ':dash:'
   getNewText: (text) ->
-    _.dasherize text
+    _.dasherize(text)
 
 class TitleCase extends TransformString
   @extend()
-  @displayName: 'Titlize'
+  displayName: 'Titlize'
   getNewText: (text) ->
     _.humanizeEventName(_.dasherize(text))
 
 class EncodeUriComponent extends TransformString
   @extend()
-  @displayName: 'Encode URI Component %'
+  displayName: 'Encode URI Component %'
   hover: icon: 'encodeURI', emoji: 'encodeURI'
   getNewText: (text) ->
     encodeURIComponent(text)
 
 class DecodeUriComponent extends TransformString
   @extend()
-  @displayName: 'Decode URI Component %%'
+  displayName: 'Decode URI Component %%'
   hover: icon: 'decodeURI', emoji: 'decodeURI'
   getNewText: (text) ->
     decodeURIComponent(text)
@@ -353,7 +354,8 @@ class TransformStringBySelectList extends Operator
   getItems: ->
     @transformers.map (klass) ->
       klass = Base.getClass(klass) if _.isString(klass)
-      displayName = klass.displayName ? _.humanizeEventName(_.dasherize(klass.name))
+      displayName = klass::displayName if klass::hasOwnProperty('displayName')
+      displayName ?= _.humanizeEventName(_.dasherize(klass.name))
       {name: klass, displayName}
 
   initialize: ->
@@ -420,7 +422,7 @@ class ToggleLineComments extends TransformString
 # -------------------------
 class Surround extends TransformString
   @extend()
-  @displayName: "Surround ()"
+  displayName: "Surround ()"
   pairs: [
     ['[', ']']
     ['(', ')']
@@ -750,7 +752,7 @@ class Decrease extends Increase
 # -------------------------
 class IncrementNumber extends Operator
   @extend()
-  @displayName: 'Increment ++'
+  displayName: 'Increment ++'
   step: 1
   baseNumber: null
 
@@ -784,7 +786,7 @@ class IncrementNumber extends Operator
 
 class DecrementNumber extends IncrementNumber
   @extend()
-  @displayName: 'Decrement --'
+  displayName: 'Decrement --'
   step: -1
 
 # Put
