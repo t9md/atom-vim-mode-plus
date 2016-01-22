@@ -260,7 +260,9 @@ class VimEditor
 
   ensureRegister: (register) ->
     for name, ensure of register
-      reg = @vimState.register.get(name)
+      {selection} = ensure
+      delete ensure.selection
+      reg = @vimState.register.get(name, selection)
       for property, _value of ensure
         expect(reg[property]).toEqual(_value)
 
