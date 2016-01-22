@@ -91,15 +91,23 @@ class VimState
       @editorElement.component?.setInputEnabled(true)
       @editorElement.classList.remove packageScope, 'normal-mode'
 
-    ivars = [
-      "hover", "hoverSearchCounter", "operationStack"
-      "searchHistory", "cursorStyleManager"
-      "input", "search", "modeManager",
-      "operationRecords"
-    ]
-    for ivar in ivars
-      this[name]?.destroy?()
-      this[name] = null
+    @hover?.destroy?()
+    @hoverSearchCounter?.destroy?()
+    @operationStack?.destroy?()
+    @searchHistory?.destroy?()
+    @cursorStyleManager?.destroy?()
+    @input?.destroy?()
+    @search?.destroy?()
+    @modeManager?.destroy?()
+    @operationRecords?.destroy?()
+    @register?.destroy?
+
+    {
+      @hover, @hoverSearchCounter, @operationStack,
+      @searchHistory, @cursorStyleManager
+      @input, @search, @modeManager, @operationRecords
+      @register
+    } = {}
 
     {@editor, @editorElement, @subscriptions} = {}
     @emitter.emit 'did-destroy'
