@@ -16,7 +16,10 @@ class InsertRegister extends InsertMode
     @focusInput()
 
   execute: ->
-    @editor.insertText @vimState.register.getText(@input)
+    @editor.transact =>
+      for selection in @editor.getSelections()
+        text = @vimState.register.getText(@input, selection)
+        selection.insertText text
 
 class InsertLastInserted extends InsertMode
   @extend()

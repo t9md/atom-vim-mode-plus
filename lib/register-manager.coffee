@@ -4,7 +4,6 @@ settings = require './settings'
 {CompositeDisposable} = require 'atom'
 {toggleClassByCondition} = require './utils'
 
-validNames = /[a-zA-Z*+%_"]/
 REGISTERS = /// (
   ?: [a-zA-Z*+%_".]
 ) ///
@@ -24,26 +23,44 @@ REGISTERS = /// (
 
 class RegisterManager
   constructor: (@vimState) ->
+    @subscriptions = new CompositeDisposable
     {@editor, @editorElement} = @vimState
     @data = globalState.register
+    @clipboardBySelection = new Map
 
   isValid: (name) ->
     REGISTERS.test(name)
 
-  getText: (name) ->
-    @get(name).text ? ''
+  cleanup: (editor) ->
+    # If selection length is different OR all all selection is identical
+    # We clear perSelectionClipboard
+    selections = editor.getSelections()
+    if (@clipboardBySelection.size isnt selections.length) or
+      selections.some((selection) => not @clipboardBySelection.has(selection))
+        @clipboardBySelection.clear()
 
-  get: (name) ->
+  getText: (name, selection) ->
+    @get(name, selection).text ? ''
+
+  readClipboard: (selection=null) ->
+    if selection?
+      text = @clipboardBySelection.get(selection)
+    text ? atom.clipboard.read()
+
+  writeClipboard: (selection=null, text) ->
+    if not selection? or selection.isLastSelection()
+      atom.clipboard.write(text)
+    @clipboardBySelection.set(selection, text) if selection?
+
+  get: (name, selection) ->
+    @cleanup(selection.editor) if selection?
     name ?= @getName()
     name = settings.get('defaultRegister') if name is '"'
 
     switch name
-      when '*', '+'
-        text = atom.clipboard.read()
-      when '%'
-        text = @editor.getURI()
-      when '_' # Blackhole always returns nothing
-        text = ''
+      when '*', '+' then text = @readClipboard(selection)
+      when '%' then text = @editor.getURI()
+      when '_' then text = '' # Blackhole always returns nothing
       else
         {text, type} = @data[name.toLowerCase()] ? {}
     type ?= @getCopyType(text ? '')
@@ -68,11 +85,11 @@ class RegisterManager
     name = settings.get('defaultRegister') if name is '"'
     value.type ?= @getCopyType(value.text)
 
+    selection = value.selection
+    delete value.selection
     switch name
-      when '*', '+'
-        atom.clipboard.write(value.text)
-      when '_', '%'
-        null
+      when '*', '+' then @writeClipboard(selection, value.text)
+      when '_', '%' then null
       else
         if /^[A-Z]$/.test(name)
           @append(name.toLowerCase(), value)
