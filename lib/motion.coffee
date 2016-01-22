@@ -880,7 +880,7 @@ class Search extends SearchBase
     if @isRepeatLastSearch(@input)
       unless @input = @vimState.searchHistory.get('prev')
         atom.beep()
-    @vimState.operationStack.process()
+    @processOperation()
     @finish()
 
   onCancel: => # fat-arrow
