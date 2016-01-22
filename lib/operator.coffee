@@ -199,7 +199,7 @@ class ToggleCase extends TransformString
   displayName: 'Toggle ~'
   hover: icon: ':toggle-case:', emoji: ':clap:'
   toggleCase: (char) ->
-    charLower = cahr.toLowerCase()
+    charLower = char.toLowerCase()
     if charLower is char
       char.toUpperCase()
     else
