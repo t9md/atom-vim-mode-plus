@@ -53,7 +53,9 @@ class RegisterManager
 
   writeClipboard: (selection=null, text) ->
     if selection?.editor.hasMultipleCursors() and not @clipboardBySelection.has(selection)
-      disposable = selection.onDidDestroy(=> @subscriptionBySelection.delete(selection))
+      disposable = selection.onDidDestroy =>
+        @subscriptionBySelection.delete(selection)
+        @clipboardBySelection.delete(selection)
       @subscriptionBySelection.set(selection, disposable)
 
     if (selection is null) or selection.isLastSelection()
