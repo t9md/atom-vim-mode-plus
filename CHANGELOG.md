@@ -1,3 +1,13 @@
+# 0.18.0
+- New: TranformStringByExternalCommand #140
+- Doc: Update old wiki link in Readme
+- Improve: Use more accessible displayName for `TransformStringBySelectList`
+- Internal: No longer use short variable name like `c` for cursor, `s` for selection .
+- Internal: Refactoring. extract restorePoint logic from Operator::eachSelection method.
+- Internal: Provide wrapper function `Base.processOperation()`, `Base.cancelOperation()` to controll operationStack.
+- New: #142 Support per selection clipboard for `Change`, `Delete`, `Yank` operation.
+- Fix: #141, For `Change` operation, if target is TextObject, it auto-detect target's wise(linewise, characterwise)
+
 # 0.17.0
 - New: InsertByMotion can insert after move, and repeatable.
 - New: Support insert count e.g `10iabc`, `10oabc`.
