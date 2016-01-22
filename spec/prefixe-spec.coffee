@@ -147,3 +147,78 @@ describe "Prefixes", ->
           text: '012\n'
           mode: 'insert'
           cursor: [0, 2]
+
+    describe "per selection clipboard", ->
+      ensurePerSelectionRegister = (texts...) ->
+        for selection, i in editor.getSelections()
+          ensure register: '*': {text: texts[i], selection: selection}
+
+      beforeEach ->
+        settings.set 'useClipboardAsDefaultRegister', true
+        set
+          text: """
+            012:
+            abc:
+            def:\n
+            """
+          cursor: [[0, 1], [1, 1], [2, 1]]
+
+      describe "on selection destroye", ->
+        it "remove corresponding subscriptin and clipboard entry", ->
+          {clipboardBySelection, subscriptionBySelection} = vimState.register
+          expect(clipboardBySelection.size).toBe(0)
+          expect(subscriptionBySelection.size).toBe(0)
+
+          keystroke "yiw"
+          ensurePerSelectionRegister('012', 'abc', 'def')
+
+          expect(clipboardBySelection.size).toBe(3)
+          expect(subscriptionBySelection.size).toBe(3)
+          selection.destroy() for selection in editor.getSelections()
+          expect(clipboardBySelection.size).toBe(0)
+          expect(subscriptionBySelection.size).toBe(0)
+
+      describe "Yank", ->
+        it "save text to per selection register", ->
+          keystroke "yiw"
+          ensurePerSelectionRegister('012', 'abc', 'def')
+
+      describe "Delete family", ->
+        it "d", ->
+          ensure "diw", text: ":\n:\n:\n"
+          ensurePerSelectionRegister('012', 'abc', 'def')
+        it "x", ->
+          ensure "x", text: "02:\nac:\ndf:\n"
+          ensurePerSelectionRegister('1', 'b', 'e')
+        it "X", ->
+          ensure "X", text: "12:\nbc:\nef:\n"
+          ensurePerSelectionRegister('0', 'a', 'd')
+        it "D", ->
+          ensure "D", text: "0\na\nd\n"
+          ensurePerSelectionRegister('12:', 'bc:', 'ef:')
+
+      describe "Put family", ->
+        it "p paste text from per selection register", ->
+          ensure "yiw$p",
+            text: """
+              012:012
+              abc:abc
+              def:def\n
+              """
+        it "P paste text from per selection register", ->
+          ensure "yiw$P",
+            text: """
+              012012:
+              abcabc:
+              defdef:\n
+              """
+      describe "ctrl-r in insert mode", ->
+        it "insert from per selection registe", ->
+          ensure "diw", text: ":\n:\n:\n"
+          ensure 'a', mode: 'insert'
+          ensure [{ctrl: 'r'}, {char: '"'}],
+            text: """
+              :012
+              :abc
+              :def\n
+              """
