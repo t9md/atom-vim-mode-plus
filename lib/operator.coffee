@@ -1052,7 +1052,11 @@ class Change extends ActivateInsertMode
       return
 
     text = ''
-    text = "\n" if swrap.detectVisualModeSubmode(@editor) is 'linewise'
+    if @target.instanceof('TextObject')
+      text = "\n" if (swrap.detectVisualModeSubmode(@editor) is 'linewise')
+    else
+      text = "\n" if @target.isLinewise?()
+
     @editor.transact =>
       for selection in @editor.getSelections()
         @setTextToRegisterForSelection(selection)
