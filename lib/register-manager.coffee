@@ -46,14 +46,13 @@ class RegisterManager
     @get(name, selection).text ? ''
 
   readClipboard: (selection=null) ->
-    if selection? and selection.editor.hasMultipleCursors() and
-        @clipboardBySelection.has(selection)
+    if selection?.editor.hasMultipleCursors() and @clipboardBySelection.has(selection)
       @clipboardBySelection.get(selection)
     else
       atom.clipboard.read()
 
   writeClipboard: (selection=null, text) ->
-    unless @clipboardBySelection.has(selection)
+    if selection?.editor.hasMultipleCursors() and not @clipboardBySelection.has(selection)
       disposable = selection.onDidDestroy(=> @subscriptionBySelection.delete(selection))
       @subscriptionBySelection.set(selection, disposable)
 
