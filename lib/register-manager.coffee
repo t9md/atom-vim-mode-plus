@@ -23,37 +23,45 @@ REGISTERS = /// (
 
 class RegisterManager
   constructor: (@vimState) ->
-    @subscriptions = new CompositeDisposable
     {@editor, @editorElement} = @vimState
     @data = globalState.register
+    @subscriptionBySelection = new Map
     @clipboardBySelection = new Map
 
-  isValid: (name) ->
-    REGISTERS.test(name)
+  reset: ->
+    @name = null
+    @updateEditorElement()
 
-  cleanup: (editor) ->
-    # If selection length is different OR all all selection is identical
-    # We clear perSelectionClipboard
-    selections = editor.getSelections()
-    if (@clipboardBySelection.size isnt selections.length) or
-      selections.some((selection) => not @clipboardBySelection.has(selection))
-        @clipboardBySelection.clear()
+  destroy: ->
+    @subscriptionBySelection.forEach (disposable) ->
+      disposable.dispose()
+    @subscriptionBySelection.clear()
+    @clipboardBySelection.clear()
+    {@subscriptionBySelection, @clipboardBySelection} = {}
+
+  isValidName: (name) ->
+    REGISTERS.test(name)
 
   getText: (name, selection) ->
     @get(name, selection).text ? ''
 
   readClipboard: (selection=null) ->
-    if selection?
-      text = @clipboardBySelection.get(selection)
-    text ? atom.clipboard.read()
+    if selection? and selection.editor.hasMultipleCursors() and
+        @clipboardBySelection.has(selection)
+      @clipboardBySelection.get(selection)
+    else
+      atom.clipboard.read()
 
   writeClipboard: (selection=null, text) ->
-    if not selection? or selection.isLastSelection()
+    unless @clipboardBySelection.has(selection)
+      disposable = selection.onDidDestroy(=> @subscriptionBySelection.delete(selection))
+      @subscriptionBySelection.set(selection, disposable)
+
+    if (selection is null) or selection.isLastSelection()
       atom.clipboard.write(text)
     @clipboardBySelection.set(selection, text) if selection?
 
   get: (name, selection) ->
-    @cleanup(selection.editor) if selection?
     name ?= @getName()
     name = settings.get('defaultRegister') if name is '"'
 
@@ -81,7 +89,7 @@ class RegisterManager
       when 2 then [name, value] = args
 
     name ?= @getName()
-    return unless @isValid(name)
+    return unless @isValidName(name)
     name = settings.get('defaultRegister') if name is '"'
     value.type ?= @getCopyType(value.text)
 
@@ -110,10 +118,6 @@ class RegisterManager
       if value.type isnt 'linewise'
         value.text += '\n'
     register.text += value.text
-
-  reset: ->
-    @name = null
-    @updateEditorElement()
 
   getName: ->
     @name ? settings.get('defaultRegister')
