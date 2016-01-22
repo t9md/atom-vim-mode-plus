@@ -483,6 +483,16 @@ withTrackingCursorPositionChange = (cursor, fn) ->
   unless cursorBefore.isEqual(cursorAfter)
     console.log "Changed: #{cursorBefore.toString()} -> #{cursorAfter.toString()}"
 
+# Return function to restore original start position.
+preserveSelectionStartPoints = (editor) ->
+  rangeBySelection = new Map
+  for selection in editor.getSelections()
+    rangeBySelection.set(selection, selection.getBufferRange())
+
+  (selection) ->
+    point = rangeBySelection.get(selection).start
+    selection.cursor.setBufferPosition(point)
+
 module.exports = {
   include
   debug
@@ -550,6 +560,7 @@ module.exports = {
   scanForScopeStart
   detectScopeStartPositionByScope
   getBufferRows
+  preserveSelectionStartPoints
 
   # Debugging
   reportSelection,

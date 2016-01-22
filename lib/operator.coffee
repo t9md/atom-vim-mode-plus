@@ -10,6 +10,7 @@ BufferedProcess = null
   haveSomeSelection, getVimEofBufferPosition
   moveCursorLeft, moveCursorRight
   flashRanges, getNewTextRangeFromCheckpoint
+  preserveSelectionStartPoints
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -42,6 +43,9 @@ class Operator extends Base
   needTrackChange: ->
     @trackChange
 
+  # [FIXME]
+  # For TextObject isLinewise result is changed before / after select.
+  # This mean @needStay return value change depending on when you call.
   needStay: ->
     param = if @instanceof('TransformString')
       "stayOnTransformString"
@@ -64,6 +68,13 @@ class Operator extends Base
       persistent: false
 
   observeSelectAction: ->
+    if @needStay()
+      @onWillSelect =>
+        @restorePoint = preserveSelectionStartPoints(@editor)
+    else
+      @onDidSelect =>
+        @restorePoint = preserveSelectionStartPoints(@editor)
+
     if @needFlash()
       @onDidSelect =>
         @flash @editor.getSelectedBufferRanges()
@@ -108,31 +119,11 @@ class Operator extends Base
         class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnOperateDuration')
 
-  preservePoints: ({asMarker}={}) ->
-    points = _.pluck(@editor.getSelectedBufferRanges(), 'start')
-    asMarker ?= false
-    if asMarker
-      options = {invalidate: 'never', persistent: false}
-      markers = @editor.getCursorBufferPositions().map (point) =>
-        @editor.markBufferPosition point, options
-      ({cursor}, i) ->
-        point = markers[i].getStartBufferPosition()
-        cursor.setBufferPosition(point)
-    else
-      ({cursor}, i) ->
-        point = points[i]
-        cursor.setBufferPosition(point)
-
   eachSelection: (fn) ->
-    setPoint = null
-    if @needStay()
-      @onWillSelect => setPoint = @preservePoints(@stayOption)
-    else
-      @onDidSelect => setPoint = @preservePoints()
     return unless @selectTarget()
     @editor.transact =>
-      for selection, i in @editor.getSelections()
-        fn(selection, setPoint.bind(this, selection, i))
+      for selection in @editor.getSelections()
+        fn(selection)
 
 # -------------------------
 class Select extends Operator
@@ -192,14 +183,14 @@ class TransformString extends Operator
   autoIndent: false
 
   execute: ->
-    @eachSelection (selection, setPoint) =>
-      @mutate(selection, setPoint)
+    @eachSelection (selection) =>
+      @mutate(selection)
     @activateMode('normal')
 
-  mutate: (selection, setPoint) ->
+  mutate: (selection) ->
     text = @getNewText(selection.getText())
     selection.insertText(text, {@autoIndent})
-    setPoint() if @setPoint
+    @restorePoint(selection) if @setPoint
 
 # String Transformer
 # -------------------------
@@ -291,8 +282,9 @@ class TransformStringByExternalCommand extends TransformString
     @processFinished = 0
 
     @onDidSetTarget =>
+      restorePoint = null
       unless @isMode('visual')
-        @restore = @preservePoints()
+        restorePoint = preserveSelectionStartPoints(@editor)
         @target.select()
 
       selections = @editor.getSelections()
@@ -305,7 +297,7 @@ class TransformStringByExternalCommand extends TransformString
           exit: @onExit(numberOfProcess)
           stdin: selection.getText()
         }
-        @restore?(selection, index)
+        restorePoint?(selection)
 
   onStdout: (index) ->
     (output) =>
@@ -396,9 +388,9 @@ class Indent extends TransformString
   hover: icon: ':indent:', emoji: ':point_right:'
   stayOnLinewise: false
 
-  mutate: (selection, setPoint) ->
+  mutate: (selection) ->
     @indent(selection)
-    setPoint()
+    @restorePoint(selection)
     unless @needStay()
       selection.cursor.moveToFirstCharacterOfLine()
 
@@ -421,10 +413,9 @@ class AutoIndent extends Indent
 class ToggleLineComments extends TransformString
   @extend()
   hover: icon: ':toggle-line-comments:', emoji: ':mute:'
-  stayOption: {asMarker: true}
-  mutate: (selection, setPoint) ->
+  mutate: (selection) ->
     selection.toggleLineComments()
-    setPoint()
+    @restorePoint(selection)
 
 # -------------------------
 class Surround extends TransformString
@@ -482,11 +473,11 @@ class MapSurround extends Surround
   @extend()
   mapRegExp: /\w+/g
   execute: ->
-    @eachSelection (selection, setPoint) =>
+    @eachSelection (selection) =>
       scanRange = selection.getBufferRange()
       @editor.scanInBufferRange @mapRegExp, scanRange, ({matchText, replace}) =>
         replace(@getNewText(matchText))
-      setPoint() if @setPoint
+      @restorePoint(selection) if @setPoint
     @activateMode('normal')
 
 class DeleteSurround extends Surround
@@ -531,7 +522,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   initialize: ->
     @onDidSetTarget =>
-      @restore = @preservePoints()
+      @restore = preserveSelectionStartPoints(@editor)
       @target.select()
       unless haveSomeSelection(@editor)
         @vimState.reset()
@@ -541,7 +532,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   onConfirm: (@char) ->
     # Clear pre-selected selection to start @eachSelection from non-selection.
-    @restore(selection, i) for selection, i in @editor.getSelections()
+    @restore(selection) for selection in @editor.getSelections()
     @input = @char
     @vimState.operationStack.process()
 
@@ -551,8 +542,8 @@ class MoveLineUp extends TransformString
   @extend()
   direction: 'up'
   execute: ->
-    @eachSelection (selection, setPoint) =>
-      @mutate(selection, setPoint)
+    @eachSelection (selection) =>
+      @mutate(selection)
 
   isMovable: (selection) ->
     selection.getBufferRange().start.row isnt 0
@@ -560,7 +551,7 @@ class MoveLineUp extends TransformString
   getRangeTranslationSpec: ->
     [[-1, 0], [0, 0]]
 
-  mutate: (selection, setPoint) ->
+  mutate: (selection) ->
     return unless @isMovable(selection)
     reversed = selection.isReversed()
     translation = @getRangeTranslationSpec()
@@ -596,9 +587,9 @@ class Yank extends Operator
   stayOnLinewise: true
 
   execute: ->
-    @eachSelection (selection, setPoint) =>
+    @eachSelection (selection) =>
       @setTextToRegister selection.getText() if selection.isLastSelection()
-      setPoint()
+      @restorePoint(selection)
     @activateMode('normal')
 
 class YankLine extends Yank
@@ -679,12 +670,12 @@ class SplitString extends TransformString
 
 class Reverse extends TransformString
   @extend()
-  mutate: (selection, setPoint) ->
+  mutate: (selection) ->
     swrap(selection).expandOverLine()
     textForRows = swrap(selection).lineTextForBufferRows()
     newText = textForRows.reverse().join("\n") + "\n"
     selection.insertText(newText)
-    setPoint()
+    @restorePoint(selection)
 
 # -------------------------
 class Repeat extends Operator
@@ -876,11 +867,11 @@ class Replace extends Operator
 
   execute: ->
     @input = "\n" if @input is ''
-    @eachSelection (selection, setPoint) =>
+    @eachSelection (selection) =>
       text = selection.getText().replace(/./g, @input)
       unless (@target.instanceof('MoveRight') and (text.length < @getCount()))
         selection.insertText(text, autoIndentNewline: true)
-      setPoint() unless @input is "\n"
+      @restorePoint(selection) unless @input is "\n"
 
     # FIXME this is very imperative, handling in very lower level.
     # find better place for operator in blockwise move works appropriately.
