@@ -309,7 +309,7 @@ class TransformStringByExternalCommand extends TransformString
       @processFinished++
       if @processFinished is numOfProcess
         @input = @results
-        @vimState.operationStack.process()
+        @processOperation()
 
   runExternalCommand: (options) ->
     {stdin} = options
@@ -439,7 +439,7 @@ class Surround extends TransformString
     return unless @requireInput
     @onDidConfirmInput (input) => @onConfirm(input)
     @onDidChangeInput (input) => @addHover(input)
-    @onDidCancelInput => @vimState.operationStack.cancel()
+    @onDidCancelInput => @cancelOperation()
     if @requireTarget
       @onDidSetTarget =>
         @vimState.input.focus({@charsMax})
@@ -447,7 +447,7 @@ class Surround extends TransformString
       @vimState.input.focus({@charsMax})
 
   onConfirm: (@input) ->
-    @vimState.operationStack.process()
+    @processOperation()
 
   getPair: (input) ->
     pair = _.detect @pairs, (pair) -> input in pair
@@ -494,7 +494,7 @@ class DeleteSurround extends Surround
       inclusive: true
       allowNextLine: @input in @pairChars
     @setTarget(target)
-    @vimState.operationStack.process()
+    @processOperation()
 
   getNewText: (text) ->
     text[1...-1]
@@ -536,7 +536,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
     # Clear pre-selected selection to start @eachSelection from non-selection.
     @restore(selection) for selection in @editor.getSelections()
     @input = @char
-    @vimState.operationStack.process()
+    @processOperation()
 
 # -------------------------
 # Performance effective than nantive editor:move-line-up/down

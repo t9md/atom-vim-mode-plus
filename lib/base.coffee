@@ -105,16 +105,22 @@ class Base
     klass = Base.getClass(klassName)
     new klass(@vimState, properties)
 
+  cancelOperation: ->
+    @vimState.operationStack.cancel()
+
+  processOperation: ->
+    @vimState.operationStack.process()
+
   focusSelectList: (options={}) ->
     @vimState.onDidCancelSelectList =>
-      @vimState.operationStack.cancel()
+      @cancelOperation()
 
     selectList.show(@vimState, options)
 
   focusInput: (options={}) ->
     options.charsMax ?= 1
     @onDidConfirmInput (@input) =>
-      @vimState.operationStack.process()
+      @processOperation()
 
     # From 2nd addHover, we replace last section of hover
     # to sync content with input mini editor.
@@ -124,7 +130,8 @@ class Base
       firstInput = false
 
     @onDidCancelInput =>
-      @vimState.operationStack.cancel()
+      @cancelOperation()
+
     @vimState.input.focus(options)
 
   instanceof: (klassName) ->
