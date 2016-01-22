@@ -12,7 +12,7 @@ run = (klass, properties={}) ->
     # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
     vimState.operationStack.run(klass, properties)
 
-delegatingMethods = [
+vimStateMethods = [
   "onDidChangeInput"
   "onDidConfirmInput"
   "onDidCancelInput"
@@ -40,9 +40,10 @@ class Base
   requireTarget: false
   operator: null
   asTarget: false
+  context: {}
   @commandPrefix: 'vim-mode-plus'
 
-  @delegatesMethods delegatingMethods..., toProperty: 'vimState'
+  @delegatesMethods vimStateMethods..., toProperty: 'vimState'
 
   constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
@@ -164,9 +165,12 @@ class Base
 
   registries = {Base}
   @extend: (@command=true) ->
-    if @name of registries and (not @suppressWarning)
+    if (@name of registries) and (not @suppressWarning)
       console.warn "Duplicate constructor #{@name}"
     registries[@name] = this
+
+  @getClass: (klassName) ->
+    registries[klassName]
 
   @getRegistries: ->
     registries
@@ -179,9 +183,6 @@ class Base
 
   @registerCommand: ->
     atom.commands.add('atom-text-editor', @getCommandName(), => run(this))
-
-  @getClass: (klassName) ->
-    registries[klassName]
 
 class OperationAbortedError extends Base
   @extend(false)
