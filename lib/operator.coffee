@@ -1051,7 +1051,8 @@ class Change extends ActivateInsertMode
       @activateMode('normal')
       return
 
-    text = if @target.isLinewise?() then "\n" else ''
+    text = ''
+    text = "\n" if swrap.detectVisualModeSubmode(@editor) is 'linewise'
     @editor.transact =>
       for selection in @editor.getSelections()
         @setTextToRegisterForSelection(selection)
