@@ -294,14 +294,20 @@ class TransformStringByExternalCommand extends TransformString
       selections = @editor.getSelections()
       numberOfProcess = selections.length
       for selection, index in selections
-        @runExternalCommand {
-          command: @command
-          args: @args
-          stdout: @onStdout(index)
-          exit: @onExit(numberOfProcess)
-          stdin: selection.getText()
-        }
-        restorePoint?(selection)
+        {command, args} = @getCommand(selection) ? {}
+        if command? and args?
+          @runExternalCommand {
+            command: command
+            args: args
+            stdout: @onStdout(index)
+            exit: @onExit(numberOfProcess)
+            stdin: selection.getText()
+          }
+          restorePoint?(selection)
+
+  # For easily extend by vmp plugin.
+  getCommand: (selection) ->
+    {@command, @args}
 
   onStdout: (index) ->
     (output) =>
