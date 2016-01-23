@@ -69,22 +69,22 @@ class Operator extends Base
 
   observeSelectAction: ->
     if @needStay()
-      @onWillSelect =>
+      @onWillSelectTarget =>
         @restorePoint = preserveSelectionStartPoints(@editor)
     else
-      @onDidSelect =>
+      @onDidSelectTarget =>
         @restorePoint = preserveSelectionStartPoints(@editor)
 
     if @needFlash()
-      @onDidSelect =>
+      @onDidSelectTarget =>
         @flash @editor.getSelectedBufferRanges()
 
     if @needTrackChange()
       marker = null
-      @onDidSelect =>
+      @onDidSelectTarget =>
         marker = @markSelectedBufferRange()
 
-      @onDidOperationFinish =>
+      @onDidFinishOperation =>
         @setMarkForChange(range) if (range = marker.getBufferRange())
 
   # @target - TextObject or Motion to operate on.
@@ -101,9 +101,9 @@ class Operator extends Base
   # -------------------------
   selectTarget: ->
     @observeSelectAction()
-    @emitWillSelect()
+    @emitWillSelectTarget()
     @target.select()
-    @emitDidSelect()
+    @emitDidSelectTarget()
     haveSomeSelection(@editor)
 
   setTextToRegisterForSelection: (selection) ->
@@ -959,7 +959,7 @@ class ActivateInsertMode extends Operator
       unless @instanceof('Change')
         @flashTarget = @trackChange = true
         @observeSelectAction()
-        @emitDidSelect()
+        @emitDidSelectTarget()
       @editor.transact =>
         for selection in @editor.getSelections()
           @repeatInsert(selection, text)

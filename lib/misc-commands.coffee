@@ -85,7 +85,7 @@ class Undo extends Misc
 
     fn(range) if range?
     if settings.get('flashOnUndoRedo')
-      @onDidOperationFinish =>
+      @onDidFinishOperation =>
         timeout = settings.get('flashOnUndoRedoDuration')
         @flash(rangesRemoved, 'removed', timeout)
         @flash(rangesAdded, 'added', timeout)
