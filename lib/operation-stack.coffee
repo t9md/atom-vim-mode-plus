@@ -76,7 +76,7 @@ class OperationStack
     @finish()
 
   finish: ->
-    @vimState.emitter.emit 'did-operation-finish'
+    @vimState.emitter.emit 'did-finish-operation'
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
         if settings.get('throwErrorOnNonEmptySelectionInNormalMode')

@@ -23,10 +23,10 @@ vimStateMethods = [
   "onDidCancelSearch"
   "onDidUnfocusSearch"
   "onDidCommandSearch"
-  "onWillSelect"
-  "onDidSelect"
+  "onWillSelectTarget"
+  "onDidSelectTarget"
   "onDidSetTarget"
-  "onDidOperationFinish"
+  "onDidFinishOperation"
   "subscribe"
   "isMode"
 ]
@@ -90,7 +90,7 @@ class Base
     @vimState.count.get()?
 
   activateMode: (mode, submode) ->
-    @onDidOperationFinish =>
+    @onDidFinishOperation =>
       @vimState.activate(mode, submode)
 
   addHover: (text, {replace}={}) ->
@@ -140,11 +140,11 @@ class Base
   directInstanceof: (klassName) ->
     this.constructor is Base.getClass(klassName)
 
-  emitWillSelect: ->
-    @vimState.emitter.emit 'will-select'
+  emitWillSelectTarget: ->
+    @vimState.emitter.emit 'will-select-target'
 
-  emitDidSelect: ->
-    @vimState.emitter.emit 'did-select'
+  emitDidSelectTarget: ->
+    @vimState.emitter.emit 'did-select-target'
 
   emitDidSetTarget: (operator) ->
     @vimState.emitter.emit 'did-set-target', operator

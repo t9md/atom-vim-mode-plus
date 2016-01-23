@@ -72,10 +72,10 @@ class VimState
   onDidCommandSearch: (fn) -> @subscribe @searchInput.onDidCommand(fn)
 
   # Select and text mutation(Change)
-  onWillSelect: (fn) -> @subscribe @emitter.on('will-select', fn)
-  onDidSelect: (fn) -> @subscribe @emitter.on('did-select', fn)
+  onWillSelectTarget: (fn) -> @subscribe @emitter.on('will-select-target', fn)
+  onDidSelectTarget: (fn) -> @subscribe @emitter.on('did-select-target', fn)
   onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
-  onDidOperationFinish: (fn) -> @subscribe @emitter.on('did-operation-finish', fn)
+  onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
 
   # Select list view
   onDidConfirmSelectList: (fn) -> @subscribe @emitter.on('did-confirm-select-list', fn)
