@@ -27,6 +27,8 @@ vimStateMethods = [
   "onDidSelectTarget"
   "onDidSetTarget"
   "onDidFinishOperation"
+  "onWillExecuteOperation"
+  "onDidExecuteOperation"
   "subscribe"
   "isMode"
 ]

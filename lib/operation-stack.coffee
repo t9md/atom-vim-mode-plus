@@ -66,7 +66,9 @@ class OperationStack
     else
       operation = @stack.pop()
       @lastOperation = operation # Used for better error message.
+      @vimState.emitter.emit 'will-execute-operation', operation
       operation.execute()
+      @vimState.emitter.emit 'did-execute-operation', operation
       @record(operation) if operation.isRecordable()
       @finish()
 
