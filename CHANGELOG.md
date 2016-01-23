@@ -1,3 +1,10 @@
+# 0.18.1
+- Internal: Fix naming inconsistency
+- New: Provide `getCommand`, `getStdin`, `getStdout` as hook for `TranformStringByExternalCommand`
+- Improve: Error handling for `TranformStringByExternalCommand`.
+- New: `TransformString::getNewText` pass selection as 2nd args.
+- New: #143, suspend/unsuspend execution of operation to make async method involved operation repeatable.
+
 # 0.18.0
 - New: TranformStringByExternalCommand #140
 - Doc: Update old wiki link in Readme
