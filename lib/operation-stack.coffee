@@ -64,13 +64,15 @@ class OperationStack
       if @vimState.isMode('normal') and @peekTop().instanceof?('Operator')
         @vimState.activate('operator-pending')
     else
-      operation = @stack.pop()
-      @lastOperation = operation # Used for better error message.
-      @vimState.emitter.emit 'will-execute-operation', operation
-      operation.execute()
-      @vimState.emitter.emit 'did-execute-operation', operation
-      @record(operation) if operation.isRecordable()
-      @finish()
+      @operation = @stack.pop()
+      @execute()
+
+  execute: ->
+    @vimState.emitter.emit 'will-execute-operation', @operation
+    @operation.execute()
+    @vimState.emitter.emit 'did-execute-operation', @operation
+    @record(@operation) if @operation.isRecordable()
+    @finish()
 
   cancel: ->
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
@@ -82,10 +84,10 @@ class OperationStack
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
         if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
-          operationName = @lastOperation.constructor.name
+          operationName = @operation.constructor.name
           message = "Selection is not empty in normal-mode: #{operationName}"
-          if @lastOperation.target?
-            message += ", target= #{@lastOperation.target.constructor.name}"
+          if @operation.target?
+            message += ", target= #{@operation.target.constructor.name}"
           throw new Error(message)
         else
           @editor.clearSelections()
@@ -93,7 +95,7 @@ class OperationStack
       # Ensure Cursor is NOT at EndOfLine position
       for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
         moveCursorLeft(cursor, {preserveGoalColumn: true})
-    @lastOperation = null
+    @operation = null
     @vimState.refreshCursors()
     @vimState.reset()
 
