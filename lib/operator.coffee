@@ -301,13 +301,17 @@ class TransformStringByExternalCommand extends TransformString
             args: args
             stdout: @onStdout(index)
             exit: @onExit(numberOfProcess)
-            stdin: selection.getText()
+            stdin: @getStdin(selection)
           }
           restorePoint?(selection)
 
   # For easily extend by vmp plugin.
   getCommand: (selection) ->
     {@command, @args}
+
+  # For easily extend by vmp plugin.
+  getStdin: (selection) ->
+    selection.getText()
 
   onStdout: (index) ->
     (output) =>
@@ -324,6 +328,14 @@ class TransformStringByExternalCommand extends TransformString
     {stdin} = options
     delete options.stdin
     bufferedProcess = new BufferedProcess(options)
+    bufferedProcess.onWillThrowError ({error, handle}) =>
+      # Suppress command not found error intentionally.
+      if error.code is 'ENOENT' and error.syscall.indexOf('spawn') is 0
+        commandName = @constructor.getCommandName()
+        console.log "#{commandName}: Failed to spawn command #{error.path}."
+      @cancelOperation()
+      handle()
+
     if stdin
       bufferedProcess.process.stdin.write(stdin)
       bufferedProcess.process.stdin.end()
