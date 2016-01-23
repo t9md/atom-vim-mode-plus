@@ -65,11 +65,21 @@ class OperationStack
         @vimState.activate('operator-pending')
     else
       @operation = @stack.pop()
+      @vimState.emitter.emit 'will-execute-operation', @operation
       @execute()
 
+  suspendExecute: ->
+    @executionSuspended = true
+
+  unsuspendExecute: ->
+    @executionSuspended = false
+
+  isExecuteSuspended: ->
+    @executionSuspended
+
   execute: ->
-    @vimState.emitter.emit 'will-execute-operation', @operation
     @operation.execute()
+    return if @isExecuteSuspended()
     @vimState.emitter.emit 'did-execute-operation', @operation
     @record(@operation) if @operation.isRecordable()
     @finish()
@@ -104,6 +114,7 @@ class OperationStack
 
   reset: ->
     @stack = []
+    @executionSuspended = false
     @subscriptions?.dispose()
     @subscriptions = new CompositeDisposable
 
