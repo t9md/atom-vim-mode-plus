@@ -283,8 +283,10 @@ class TransformStringByExternalCommand extends TransformString
     @onDidFinishOperation =>
       @collected = false
 
-    @collect()
-    super
+    unless @collected
+      @collect()
+    else
+      super
 
   collect: ->
     return if @collected
