@@ -3,8 +3,7 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
 
 _ = require 'underscore-plus'
-{Point, Range, CompositeDisposable} = require 'atom'
-BufferedProcess = null
+{Point, Range, CompositeDisposable, BufferedProcess} = require 'atom'
 
 {
   haveSomeSelection, getVimEofBufferPosition
@@ -191,7 +190,7 @@ class TransformString extends Operator
     @activateMode('normal')
 
   mutate: (selection) ->
-    text = @getNewText(selection.getText())
+    text = @getNewText(selection.getText(), selection)
     selection.insertText(text, {@autoIndent})
     @restorePoint(selection) if @setPoint
 
@@ -275,54 +274,44 @@ class DecodeUriComponent extends TransformString
 # -------------------------
 class TransformStringByExternalCommand extends TransformString
   @extend(false)
-  requireInput: true
   autoIndent: true
   command: '' # e.g. command: 'sort'
   args: [] # e.g args: ['-rn']
+  stdoutBySelection: null
 
-  initialize: ->
-    BufferedProcess ?= require('atom').BufferedProcess
-    @results = []
-    @processFinished = 0
+  execute: ->
+    @onDidFinishOperation =>
+      @collected = false
 
-    @onDidSetTarget =>
-      restorePoint = null
-      unless @isMode('visual')
-        restorePoint = preserveSelectionStartPoints(@editor)
-        @target.select()
+    @collectResults()
+    super
 
-      selections = @editor.getSelections()
-      numberOfProcess = selections.length
-      for selection, index in selections
-        {command, args} = @getCommand(selection) ? {}
-        if command? and args?
-          @runExternalCommand {
-            command: command
-            args: args
-            stdout: @onStdout(index)
-            exit: @onExit(numberOfProcess)
-            stdin: @getStdin(selection)
-          }
+  collectResults: ->
+    return if @collected
+    @collected = true
+    @suspendExecuteOperation()
+
+    @stdoutBySelection = new Map
+    restorePoint = null
+    unless @isMode('visual')
+      restorePoint = preserveSelectionStartPoints(@editor)
+      @target.select()
+
+    running = finished = 0
+    for selection in @editor.getSelections()
+      running++
+      {command, args} = @getCommand(selection) ? {}
+      if command? and args?
+        do (selection) =>
+          stdin = @getStdin(selection)
+          stdout = (output) =>
+            @stdoutBySelection.set(selection, output)
+          exit = (code) =>
+            finished++
+            @unsuspendExecuteOperation() if (running is finished)
+
+          @runExternalCommand {command, args, stdout, exit, stdin}
           restorePoint?(selection)
-
-  # For easily extend by vmp plugin.
-  getCommand: (selection) ->
-    {@command, @args}
-
-  # For easily extend by vmp plugin.
-  getStdin: (selection) ->
-    selection.getText()
-
-  onStdout: (index) ->
-    (output) =>
-      @results[index] = output
-
-  onExit: (numOfProcess) ->
-    (code) =>
-      @processFinished++
-      if @processFinished is numOfProcess
-        @input = @results
-        @processOperation()
 
   runExternalCommand: (options) ->
     {stdin} = options
@@ -340,9 +329,20 @@ class TransformStringByExternalCommand extends TransformString
       bufferedProcess.process.stdin.write(stdin)
       bufferedProcess.process.stdin.end()
 
-  getNewText: (text) ->
-    # Return stdout of external command in order
-    @input.shift() ? text
+  getNewText: (text, selection) ->
+    @getStdout(selection) ? text
+
+  # For easily extend by vmp plugin.
+  getCommand: (selection) ->
+    {@command, @args}
+
+  # For easily extend by vmp plugin.
+  getStdin: (selection) ->
+    selection.getText()
+
+  # For easily extend by vmp plugin.
+  getStdout: (selection) ->
+    @stdoutBySelection.get(selection)
 
 # -------------------------
 class TransformStringBySelectList extends Operator
@@ -370,6 +370,7 @@ class TransformStringBySelectList extends Operator
     'LowerCase'
     'UpperCase'
     'ToggleCase'
+    'SortNumerical'
   ]
 
   getItems: ->
