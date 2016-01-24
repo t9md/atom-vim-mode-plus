@@ -372,7 +372,6 @@ class TransformStringBySelectList extends Operator
     'LowerCase'
     'UpperCase'
     'ToggleCase'
-    'SortNumerical'
   ]
 
   getItems: ->
