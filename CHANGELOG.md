@@ -1,3 +1,6 @@
+# 0.18.2
+- Bug: `TransformStringBySelectList` fail because of un-registered `SortNumerical` member left by development.
+
 # 0.18.1
 - Internal: Fix naming inconsistency
 - New: Provide `getCommand`, `getStdin`, `getStdout` as hook for `TranformStringByExternalCommand`
