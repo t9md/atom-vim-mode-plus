@@ -566,6 +566,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 class MoveLineUp extends TransformString
   @extend()
   direction: 'up'
+  flashTarget: false
   execute: ->
     @eachSelection (selection) =>
       @mutate(selection)
@@ -589,17 +590,20 @@ class MoveLineUp extends TransformString
     @editor.scrollToCursorPosition({center: true})
 
   rotateRows: (rows) ->
-    rows.push(rows.shift())
+    switch @direction
+      when 'up' then rows.push(rows.shift())
+      when 'down' then rows.unshift(rows.pop())
 
 class MoveLineDown extends MoveLineUp
   @extend()
   direction: 'down'
   isMovable: (selection) ->
+    # Extend last buffer line if selection end is last buffer row
     endRow = selection.getBufferRange().end.row
-    endRow < @editor.getBuffer().getLastRow()
-
-  rotateRows: (rows) ->
-    rows.unshift(rows.pop())
+    if endRow >= @editor.getBuffer().getLastRow()
+      range = [[endRow, 0], [endRow, 0]]
+      @editor.setTextInBufferRange(range, "\n")
+    true
 
   getRangeTranslationSpec: ->
     [[0, 0], [1, 0]]
