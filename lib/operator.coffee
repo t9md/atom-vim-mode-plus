@@ -572,10 +572,21 @@ class MoveLineUp extends TransformString
       @mutate(selection)
 
   isMovable: (selection) ->
-    selection.getBufferRange().start.row isnt 0
+    switch @direction
+      when 'up'
+        selection.getBufferRange().start.row isnt 0
+      when 'down'
+        # Extend last buffer line if selection end is last buffer row
+        endRow = selection.getBufferRange().end.row
+        if endRow >= @editor.getBuffer().getLastRow()
+          range = [[endRow, 0], [endRow, 0]]
+          @editor.setTextInBufferRange(range, "\n")
+        true
 
   getRangeTranslationSpec: ->
-    [[-1, 0], [0, 0]]
+    switch @direction
+      when 'up' then [[-1, 0], [0, 0]]
+      when 'down' then [[0, 0], [1, 0]]
 
   mutate: (selection) ->
     return unless @isMovable(selection)
@@ -597,16 +608,6 @@ class MoveLineUp extends TransformString
 class MoveLineDown extends MoveLineUp
   @extend()
   direction: 'down'
-  isMovable: (selection) ->
-    # Extend last buffer line if selection end is last buffer row
-    endRow = selection.getBufferRange().end.row
-    if endRow >= @editor.getBuffer().getLastRow()
-      range = [[endRow, 0], [endRow, 0]]
-      @editor.setTextInBufferRange(range, "\n")
-    true
-
-  getRangeTranslationSpec: ->
-    [[0, 0], [1, 0]]
 
 # -------------------------
 class Yank extends Operator
