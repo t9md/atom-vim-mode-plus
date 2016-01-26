@@ -36,11 +36,13 @@ class OperationStack
       @processing = true
       @process()
     catch error
-      @vimState.reset()
-      unless error.instanceof?('OperationAbortedError')
-        throw error
-    finally
-      @processing = false
+      @handleError(error)
+
+  handleError: (error) ->
+    @vimState.reset()
+    @processing = false
+    unless error.instanceof?('OperationAbortedError')
+      throw error
 
   isProcessing: ->
     @processing
@@ -68,21 +70,14 @@ class OperationStack
       @vimState.emitter.emit 'will-execute-operation', @operation
       @execute()
 
-  suspendExecute: ->
-    @executionSuspended = true
-
-  unsuspendExecute: ->
-    @executionSuspended = false
-
-  isExecuteSuspended: ->
-    @executionSuspended
-
   execute: ->
-    @operation.execute()
-    return if @isExecuteSuspended()
-    @vimState.emitter.emit 'did-execute-operation', @operation
-    @record(@operation) if @operation.isRecordable()
-    @finish()
+    execution = @operation.execute()
+    if execution instanceof Promise
+      onResolve = @finish.bind(this)
+      onReject = @handleError.bind(this)
+      execution.then(onResolve).catch(onReject)
+    else
+      @finish()
 
   cancel: ->
     unless @vimState.isMode('visual') or @vimState.isMode('insert')
@@ -90,6 +85,7 @@ class OperationStack
     @finish()
 
   finish: ->
+    @record(@operation) if @operation?.isRecordable()
     @vimState.emitter.emit 'did-finish-operation'
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
@@ -108,13 +104,13 @@ class OperationStack
     @operation = null
     @vimState.refreshCursors()
     @vimState.reset()
+    @processing = false
 
   peekTop: ->
     _.last @stack
 
   reset: ->
     @stack = []
-    @executionSuspended = false
     @subscriptions?.dispose()
     @subscriptions = new CompositeDisposable
 

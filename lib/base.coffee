@@ -27,8 +27,6 @@ vimStateMethods = [
   "onDidSelectTarget"
   "onDidSetTarget"
   "onDidFinishOperation"
-  "onWillExecuteOperation"
-  "onDidExecuteOperation"
   "subscribe"
   "isMode"
 ]
@@ -110,13 +108,6 @@ class Base
   cancelOperation: ->
     @vimState.operationStack.cancel()
 
-  suspendExecuteOperation: ->
-    @vimState.operationStack.suspendExecute()
-
-  unsuspendExecuteOperation: ->
-    @vimState.operationStack.unsuspendExecute()
-    @vimState.operationStack.execute()
-
   processOperation: ->
     @vimState.operationStack.process()
 
@@ -157,6 +148,9 @@ class Base
 
   emitDidSetTarget: (operator) ->
     @vimState.emitter.emit 'did-set-target', operator
+
+  emitDidExecuteAsync: ->
+    @vimState.emitter.emit 'did-execute-async'
 
   # Class methods
   # -------------------------

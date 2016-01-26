@@ -77,8 +77,6 @@ class VimState
   onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
 
   # Event for operation execution life cycle.
-  onWillExecuteOperation: (fn) -> @subscribe @emitter.on('will-execute-operation', fn)
-  onDidExecuteOperation: (fn) -> @subscribe @emitter.on('did-execute-operation', fn)
   onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
 
   # Select list view

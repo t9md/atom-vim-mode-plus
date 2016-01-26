@@ -280,19 +280,12 @@ class TransformStringByExternalCommand extends TransformString
   stdoutBySelection: null
 
   execute: ->
-    @onDidFinishOperation =>
-      @collected = false
-
-    unless @collected
-      @collect()
-    else
+    new Promise (resolve) =>
+      @collect(resolve)
+    .then =>
       super
 
-  collect: ->
-    return if @collected
-    @collected = true
-    @suspendExecuteOperation()
-
+  collect: (resolve) ->
     @stdoutBySelection = new Map
     restorePoint = null
     unless @isMode('visual')
@@ -308,9 +301,9 @@ class TransformStringByExternalCommand extends TransformString
           stdin = @getStdin(selection)
           stdout = (output) =>
             @stdoutBySelection.set(selection, output)
-          exit = (code) =>
+          exit = (code) ->
             finished++
-            @unsuspendExecuteOperation() if (running is finished)
+            resolve() if (running is finished)
 
           @runExternalCommand {command, args, stdout, exit, stdin}
           restorePoint?(selection)
@@ -712,6 +705,7 @@ class Repeat extends Operator
   @extend()
   requireTarget: false
   recordable: false
+
   execute: ->
     @editor.transact =>
       _.times @getCount(), =>
