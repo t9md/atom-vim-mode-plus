@@ -74,8 +74,7 @@ class InputBaseElement extends HTMLElement
 
   buildElements: ->
     @appendChild(
-      @atomTextEditor
-        as: "editorElement"
+      @editorElement = @atomTextEditor
         classList: ['editor', @klass]
         attribute: {mini: ''}
     )
@@ -169,7 +168,8 @@ class SearchInputElement extends InputBaseElement
   klass: "#{searchScope}-container"
   buildElements: ->
     @appendChild(
-      @optionsContainer = @div(classList: ['options-container'])
+      @optionsContainer = @div
+        classList: ['options-container']
     ).appendChild(
       @regexSearchStatus = @span
         classList: ['inline-block-tight', 'btn', 'btn-primary']
@@ -177,7 +177,8 @@ class SearchInputElement extends InputBaseElement
     )
 
     @appendChild(
-      @editorContainer = @div(classList: ['editor-container'])
+      @editorContainer = @div
+        classList: ['editor-container']
     ).appendChild(
       @editorElement = @atomTextEditor
         classList: ['editor', searchScope]
