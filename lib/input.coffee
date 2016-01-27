@@ -25,8 +25,7 @@ class InputBase
 
     @editor.onDidChange =>
       return if @finished
-      input = @editor.getText()
-      @emitter.emit 'did-change', input
+      @emitter.emit 'did-change', @editor.getText()
       @confirm() if @canConfirm()
 
   canConfirm: ->
@@ -169,7 +168,6 @@ class SearchInput extends InputBase
 
 class SearchInputElement extends InputBaseElement
   klass: "#{searchScope}-container"
-
   buildElements: ->
     @appendChild(
       @div
@@ -193,8 +191,6 @@ class SearchInputElement extends InputBaseElement
           attribute: {mini: ''}
       )
     )
-
-
 
 InputElement = document.registerElement "#{packageScope}-input",
   prototype: InputElement.prototype
