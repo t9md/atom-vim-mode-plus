@@ -1,5 +1,5 @@
 {Emitter, CompositeDisposable} = require 'atom'
-{getCharacterForEvent} = require './utils'
+{getCharacterForEvent, toggleClassByCondition} = require './utils'
 packageScope = 'vim-mode-plus'
 searchScope = "#{packageScope}-search"
 
@@ -67,26 +67,41 @@ class InputBaseElement extends HTMLElement
 
   createdCallback: ->
     @className = @klass
-    @editorElement = @createElement 'atom-text-editor',
-      classList: ['editor', @klass]
-      attribute: {mini: ''}
-
+    @buildElements()
     @editor = @editorElement.getModel()
     @editor.setMini(true)
-
-    @appendChild @editorElement
     @panel = atom.workspace.addBottomPanel(item: this, visible: false)
     this
+
+  buildElements: ->
+    @appendChild(
+      @atomTextEditor
+        as: "editorElement"
+        classList: ['editor', @klass]
+        attribute: {mini: ''}
+    )
 
   initialize: (@model) ->
     this
 
-  createElement: (element, {classList, textContent, attribute}) ->
+  div: (params) ->
+    @createElement 'div', params
+
+  span: (params) ->
+    @createElement 'div', params
+
+  atomTextEditor: (params) ->
+    @createElement 'atom-text-editor', params
+
+  createElement: (element, params) ->
+    {classList, textContent, attribute, as} = params
     element = document.createElement element
-    element.classList.add classList...
-    element.textContent = textContent
+
+    element.classList.add classList... if classList?
+    element.textContent = textContent if textContent?
     for name, value of attribute ? {}
       element.setAttribute(name, value)
+    this[as] = element if as?
     element
 
   destroy: ->
@@ -141,10 +156,7 @@ class SearchInput extends InputBase
     @literalCharMode = true
 
   updateOptionSettings: ({escapeRegExp}={}) ->
-    if escapeRegExp
-      @view.regexSearchStatus.classList.remove 'btn-primary'
-    else
-      @view.regexSearchStatus.classList.add 'btn-primary'
+    toggleClassByCondition(@view.regexSearchStatus, 'btn-primary', not escapeRegExp)
 
   focus: ({backwards}) ->
     @editorElement.classList.add('backwards') if backwards
@@ -158,31 +170,31 @@ class SearchInput extends InputBase
 class SearchInputElement extends InputBaseElement
   klass: "#{searchScope}-container"
 
-  createdCallback: ->
-    @className = @klass
-    @editorElement = @createElement 'atom-text-editor',
-      classList: ['editor', searchScope]
-      attribute: {mini: ''}
-    @editor = @editorElement.getModel()
-    @editor.setMini(true)
+  buildElements: ->
+    @appendChild(
+      @div
+        as: 'optionsContainer'
+        classList: ['options-container']
+      .appendChild(
+        @span
+          as: "regexSearchStatus"
+          classList: ['inline-block-tight', 'btn', 'btn-primary']
+          textContent: '.*'
+      )
+    )
+    @appendChild(
+      @div
+        as: "editorContainer"
+        classList: ['editor-container']
+      .appendChild(
+        @atomTextEditor
+          as: "editorElement"
+          classList: ['editor', searchScope]
+          attribute: {mini: ''}
+      )
+    )
 
-    @editorContainer = @createElement 'div', classList: ['editor-container']
-    @editorContainer.appendChild @editorElement
 
-    @optionsContainer = @createElement 'div', classList: ['options-container']
-
-    @regexSearchStatus = @createElement 'span',
-      classList: ['inline-block-tight', 'btn', 'btn-primary']
-      textContent: '.*'
-
-    @optionsContainer.appendChild @regexSearchStatus
-    @container = @createElement 'div', classList: ['container']
-
-    @appendChild @optionsContainer
-    @appendChild @editorContainer
-
-    @panel = atom.workspace.addBottomPanel(item: this, visible: false)
-    this
 
 InputElement = document.registerElement "#{packageScope}-input",
   prototype: InputElement.prototype
