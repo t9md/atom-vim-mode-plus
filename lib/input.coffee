@@ -93,14 +93,13 @@ class InputBaseElement extends HTMLElement
     @createElement 'atom-text-editor', params
 
   createElement: (element, params) ->
-    {classList, textContent, attribute, as} = params
+    {classList, textContent, attribute} = params
     element = document.createElement element
 
     element.classList.add classList... if classList?
     element.textContent = textContent if textContent?
     for name, value of attribute ? {}
       element.setAttribute(name, value)
-    this[as] = element if as?
     element
 
   destroy: ->
