@@ -149,9 +149,6 @@ class Base
   emitDidSetTarget: (operator) ->
     @vimState.emitter.emit 'did-set-target', operator
 
-  emitDidExecuteAsync: ->
-    @vimState.emitter.emit 'did-execute-async'
-
   # Class methods
   # -------------------------
   @init: (service) ->

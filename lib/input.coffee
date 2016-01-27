@@ -1,14 +1,12 @@
-# Refactoring status: 100%
-{Emitter} = require 'atom'
-{CompositeDisposable} = require 'atom'
+{Emitter, CompositeDisposable} = require 'atom'
 {getCharacterForEvent} = require './utils'
 packageScope = 'vim-mode-plus'
 searchScope = "#{packageScope}-search"
 
 class InputBase
-  onDidChange:  (fn) -> @emitter.on 'did-change', fn
+  onDidChange: (fn) -> @emitter.on 'did-change', fn
   onDidConfirm: (fn) -> @emitter.on 'did-confirm', fn
-  onDidCancel:  (fn) -> @emitter.on 'did-cancel', fn
+  onDidCancel: (fn) -> @emitter.on 'did-cancel', fn
   onDidUnfocus: (fn) -> @emitter.on 'did-unfocus', fn
   onDidCommand: (fn) -> @emitter.on 'did-command', fn
 
@@ -21,8 +19,8 @@ class InputBase
 
     atom.commands.add @editorElement,
       'core:confirm': => @confirm()
-      'core:cancel':  => @cancel()
-      'blur':         => @cancel() unless @finished
+      'core:cancel': => @cancel()
+      'blur': => @cancel() unless @finished
       'vim-mode-plus:input-cancel': => @cancel()
 
     @editor.onDidChange =>
@@ -54,11 +52,8 @@ class InputBase
     @unfocus()
 
   destroy: ->
-    @vimState = null
     @view.destroy()
-
-    @editor = null
-    @editorElement = null
+    {@vimState, @editor, @editorElement} = {}
 
   confirm: ->
     if (input = @editor.getText())?
@@ -72,12 +67,13 @@ class InputBaseElement extends HTMLElement
 
   createdCallback: ->
     @className = @klass
-    @editorElement = document.createElement 'atom-text-editor'
-    @editorElement.classList.add('editor')
-    @editorElement.classList.add @klass
-    @editorElement.setAttribute('mini', '')
+    @editorElement = @createElement 'atom-text-editor',
+      classList: ['editor', @klass]
+      attribute: {mini: ''}
+
     @editor = @editorElement.getModel()
     @editor.setMini(true)
+
     @appendChild @editorElement
     @panel = atom.workspace.addBottomPanel(item: this, visible: false)
     this
@@ -85,30 +81,24 @@ class InputBaseElement extends HTMLElement
   initialize: (@model) ->
     this
 
+  createElement: (element, {classList, textContent, attribute}) ->
+    element = document.createElement element
+    element.classList.add classList...
+    element.textContent = textContent
+    for name, value of attribute ? {}
+      element.setAttribute(name, value)
+    element
+
   destroy: ->
-    @model = null
     @editor.destroy()
-    @editor = null
     @panel.destroy()
-    @panel = null
-    @editorElement = null
+    {@model, @editor, @panel, @editorElement} = {}
     @remove()
 
 class Input extends InputBase
 
 class InputElement extends InputBaseElement
   klass: "#{packageScope}-input"
-  createdCallback: ->
-    super
-    @editorElement = document.createElement 'atom-text-editor'
-    @editorElement.classList.add('editor')
-    @editorElement.classList.add @klass
-    @editorElement.setAttribute('mini', '')
-    @editor = @editorElement.getModel()
-    @editor.setMini(true)
-    @appendChild @editorElement
-    @panel = atom.workspace.addBottomPanel(item: this, visible: false)
-    this
 
 # [TODO] Differenciating literal-mode should be done by scope and scope based keymap.
 class SearchInput extends InputBase
@@ -118,10 +108,10 @@ class SearchInput extends InputBase
     {@searchHistory} = @vimState
 
     literalModeSupportCommands =
-      "confirm":     => @confirm()
-      "cancel":      => @cancel()
-      "visit-next":  => @emitter.emit('did-command', 'visit-next')
-      "visit-prev":  => @emitter.emit('did-command', 'visit-prev')
+      "confirm": => @confirm()
+      "cancel": => @cancel()
+      "visit-next": => @emitter.emit('did-command', 'visit-next')
+      "visit-prev": => @emitter.emit('did-command', 'visit-prev')
       "scroll-next": => @emitter.emit('did-command', 'scroll-next')
       "scroll-prev": => @emitter.emit('did-command', 'scroll-prev')
       "insert-wild-pattern": => @editor.insertText '.*?'
@@ -141,7 +131,7 @@ class SearchInput extends InputBase
     atom.commands.add @editorElement,
       "vim-mode-plus:search-set-literal-char": => @setLiteralChar()
       "vim-mode-plus:search-set-cursor-word": => @setCursorWord()
-      'core:move-up':   => @editor.setText @searchHistory.get('prev')
+      'core:move-up': => @editor.setText @searchHistory.get('prev')
       'core:move-down': => @editor.setText @searchHistory.get('next')
 
   setCursorWord: ->
@@ -170,25 +160,24 @@ class SearchInputElement extends InputBaseElement
 
   createdCallback: ->
     @className = @klass
-    @editorElement = document.createElement 'atom-text-editor'
-    @editorElement.classList.add('editor')
-    @editorElement.classList.add "#{searchScope}"
-    @editorElement.setAttribute('mini', '')
+    @editorElement = @createElement 'atom-text-editor',
+      classList: ['editor', searchScope]
+      attribute: {mini: ''}
     @editor = @editorElement.getModel()
     @editor.setMini(true)
 
-    @editorContainer = document.createElement 'div'
-    @editorContainer.className = 'editor-container'
+    @editorContainer = @createElement 'div', classList: ['editor-container']
     @editorContainer.appendChild @editorElement
 
-    @optionsContainer = document.createElement 'div'
-    @optionsContainer.className = 'options-container'
-    @regexSearchStatus = document.createElement 'span'
-    @regexSearchStatus.classList.add 'inline-block-tight', 'btn', 'btn-primary'
-    @regexSearchStatus.textContent = '.*'
+    @optionsContainer = @createElement 'div', classList: ['options-container']
+
+    @regexSearchStatus = @createElement 'span',
+      classList: ['inline-block-tight', 'btn', 'btn-primary']
+      textContent: '.*'
+
     @optionsContainer.appendChild @regexSearchStatus
-    @container = document.createElement 'div'
-    @container.className = 'container'
+    @container = @createElement 'div', classList: ['container']
+
     @appendChild @optionsContainer
     @appendChild @editorContainer
 
