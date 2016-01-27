@@ -170,26 +170,19 @@ class SearchInputElement extends InputBaseElement
   klass: "#{searchScope}-container"
   buildElements: ->
     @appendChild(
-      @div
-        as: 'optionsContainer'
-        classList: ['options-container']
-      .appendChild(
-        @span
-          as: "regexSearchStatus"
-          classList: ['inline-block-tight', 'btn', 'btn-primary']
-          textContent: '.*'
-      )
+      @optionsContainer = @div(classList: ['options-container'])
+    ).appendChild(
+      @regexSearchStatus = @span
+        classList: ['inline-block-tight', 'btn', 'btn-primary']
+        textContent: '.*'
     )
+
     @appendChild(
-      @div
-        as: "editorContainer"
-        classList: ['editor-container']
-      .appendChild(
-        @atomTextEditor
-          as: "editorElement"
-          classList: ['editor', searchScope]
-          attribute: {mini: ''}
-      )
+      @editorContainer = @div(classList: ['editor-container'])
+    ).appendChild(
+      @editorElement = @atomTextEditor
+        classList: ['editor', searchScope]
+        attribute: {mini: ''}
     )
 
 InputElement = document.registerElement "#{packageScope}-input",
