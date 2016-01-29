@@ -18,7 +18,7 @@ class StatusBarManager
 
   constructor: ->
     (@container = @div(classList: ['inline-block']))
-      .appendChild(@element = @div(id: @prefix))
+    .appendChild(@element = @div(id: @prefix))
 
   initialize: (@statusBar) ->
 
