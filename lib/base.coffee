@@ -81,13 +81,13 @@ class Base
 
   getCount: ->
     # Setting count as instance variable allows operation repeatable with same count.
-    @count ?= @vimState.count.get() ? @defaultCount
+    @count ?= @vimState.getCount() ? @defaultCount
 
   isDefaultCount: ->
     @getCount() is @defaultCount
 
   isCountSpecified: ->
-    @vimState.count.get()?
+    @vimState.hasCount()
 
   activateMode: (mode, submode) ->
     @onDidFinishOperation =>

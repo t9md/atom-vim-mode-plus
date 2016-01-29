@@ -149,14 +149,6 @@ class CurrentSelection extends Motion
       selection.setBufferRange([start, end])
     swrap.expandOverLine(@editor) if @wasLinewise
 
-# Do nothing.
-# Used from operator when change tracking is required for empty selection.
-# Created for code consistency in Operator::selectTarget()
-class NullMotion extends Motion
-  @extend(false)
-  select: ->
-  execute: ->
-
 class MoveLeft extends Motion
   @extend()
   moveCursor: (cursor) ->
