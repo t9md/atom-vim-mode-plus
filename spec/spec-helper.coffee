@@ -70,7 +70,7 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
   dispatchKeyboardEvent(element, 'keyup', eventArgs...)
 
 _keystroke = (keys, event) ->
-  if keys is 'escape'
+  if keys in ['escape', 'backspace']
     keydown keys, event
   else
     for key in keys.split('')
