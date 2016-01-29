@@ -1,3 +1,9 @@
+# 0.19.0
+- Breaking: Remove `move-line-up`, `move-line-down`, it is externalized as `move-selected-text` plugin package #145.
+- New: `Operator::execute()` now can do asynchronous operation(can return instance of Promise). #146.
+- Internal: Consolidate `counter-manager.coffe` into vimState.
+- Improve: Several refactoring. spec-helper keystroke now support `waitsForFinish` to wait operationFinish for asynchronous operation.
+
 # 0.18.2
 - Bug: `TransformStringBySelectList` fail because of un-registered `SortNumerical` member left by development.
 
