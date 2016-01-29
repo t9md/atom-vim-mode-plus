@@ -69,12 +69,11 @@ keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
       element.value += key
   dispatchKeyboardEvent(element, 'keyup', eventArgs...)
 
-_keystroke = (keys, {element}) ->
+_keystroke = (keys, event) ->
   if keys is 'escape'
-    keydown keys, {element}
+    keydown keys, event
   else
     for key in keys.split('')
-      event = {element}
       event.shift = true if key.match(/[A-Z]/)
       keydown key, event
 
@@ -352,8 +351,8 @@ class VimEditor
             {editor, editorElement} = @vimState.searchInput.view
             editor.insertText(k.search)
             atom.commands.dispatch(editorElement, 'core:confirm')
-          when k.ctrl?  then keydown k.ctrl, {ctrl: true, element}
-          when k.raw?   then keydown k.raw, {raw: true, element}
+          when k.ctrl? then _keystroke(k.ctrl, {ctrl: true, element})
+          when k.raw? then _keystroke(k.raw, {raw: true, element})
     if mocked
       unmockPlatform(element)
 
