@@ -555,54 +555,6 @@ class ChangeSurroundAnyPair extends ChangeSurround
     @processOperation()
 
 # -------------------------
-# Performance effective than nantive editor:move-line-up/down
-class MoveLineUp extends TransformString
-  @extend()
-  direction: 'up'
-  flashTarget: false
-  execute: ->
-    @eachSelection (selection) =>
-      @mutate(selection)
-
-  isMovable: (selection) ->
-    switch @direction
-      when 'up'
-        selection.getBufferRange().start.row isnt 0
-      when 'down'
-        # Extend last buffer line if selection end is last buffer row
-        endRow = selection.getBufferRange().end.row
-        if endRow >= @editor.getBuffer().getLastRow()
-          range = [[endRow, 0], [endRow, 0]]
-          @editor.setTextInBufferRange(range, "\n")
-        true
-
-  getRangeTranslationSpec: ->
-    switch @direction
-      when 'up' then [[-1, 0], [0, 0]]
-      when 'down' then [[0, 0], [1, 0]]
-
-  mutate: (selection) ->
-    return unless @isMovable(selection)
-    reversed = selection.isReversed()
-    translation = @getRangeTranslationSpec()
-    swrap(selection).translate(translation, {preserveFolds: true})
-    rows = swrap(selection).lineTextForBufferRows()
-    @rotateRows(rows)
-    range = selection.insertText(rows.join("\n") + "\n")
-    range = range.translate(translation.reverse()...)
-    swrap(selection).setBufferRange(range, {preserveFolds: true, reversed})
-    @editor.scrollToCursorPosition({center: true})
-
-  rotateRows: (rows) ->
-    switch @direction
-      when 'up' then rows.push(rows.shift())
-      when 'down' then rows.unshift(rows.pop())
-
-class MoveLineDown extends MoveLineUp
-  @extend()
-  direction: 'down'
-
-# -------------------------
 class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
