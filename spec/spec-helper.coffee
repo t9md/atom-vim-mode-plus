@@ -74,7 +74,7 @@ _keystroke = (keys, event) ->
     keydown keys, event
   else
     for key in keys.split('')
-      event.shift = true if key.match(/[A-Z]/)
+      event.shift = key.match(/[A-Z]/)
       keydown key, event
 
 isPoint = (obj) ->
