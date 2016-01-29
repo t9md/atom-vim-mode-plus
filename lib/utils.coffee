@@ -507,9 +507,10 @@ ElementBuilder =
   atomTextEditor: (params) ->
     @createElement 'atom-text-editor', params
 
-  createElement: (element, {classList, textContent, attribute}) ->
+  createElement: (element, {classList, textContent, id, attribute}) ->
     element = document.createElement element
 
+    element.id = id if id?
     element.classList.add classList... if classList?
     element.textContent = textContent if textContent?
     for name, value of attribute ? {}

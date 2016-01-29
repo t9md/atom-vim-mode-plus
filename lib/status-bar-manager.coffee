@@ -1,5 +1,6 @@
 # Refactoring status: 80%
 {Disposable, CompositeDisposable} = require 'atom'
+{ElementBuilder} = require './utils'
 
 ContentsByMode =
   'insert': ["insert", "Insert"]
@@ -12,21 +13,21 @@ ContentsByMode =
 
 module.exports =
 class StatusBarManager
-  constructor: ->
-    @element = document.createElement("div")
-    @prefix = @element.id = 'status-bar-vim-mode-plus'
+  ElementBuilder.includeInto(this)
+  prefix: 'status-bar-vim-mode-plus'
 
-    @container = document.createElement("div")
-    @container.className = "inline-block"
-    @container.appendChild(@element)
+  constructor: ->
+    (@container = @div(classList: ['inline-block']))
+      .appendChild(@element = @div(id: @prefix))
 
   initialize: (@statusBar) ->
 
   update: (mode, submode) ->
-    mode += ".#{submode}" if submode?
-    if newContents = ContentsByMode[mode]
-      [klass, text] = newContents
-      @element.className = "#{@prefix}-#{klass}"
+    modeString = mode
+    modeString += "." + submode if submode?
+    if newContents = ContentsByMode[modeString]
+      [className, text] = newContents
+      @element.className = "#{@prefix}-#{className}"
       @element.textContent = text
 
   # Private

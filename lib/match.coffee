@@ -93,12 +93,11 @@ class Match
 
   getClassList: ->
     # first and last is exclusive, prioritize 'first'.
-    last = (not @first) and @last
-    [
-      @first   and 'first',
-      last     and 'last',
-      @current and 'current'
-    ].filter (e) -> e
+    classes = []
+    classes.push('first') if @first
+    classes.push('last') if (not @first and @last)
+    classes.push('current') if @current
+    classes
 
   isFirst: -> @first
   isLast: -> @last
@@ -126,15 +125,15 @@ class Match
       timeout: timeout ? settings.get('flashOnSearchDuration')
 
   show: ->
-    klass  = 'vim-mode-plus-search-match'
-    if str = @getClassList().join(' ')
-      klass += " " + str
+    classes = ['vim-mode-plus-search-match'].concat(@getClassList()...)
+
     @marker = @editor.markBufferRange @range,
       invalidate: 'never'
       persistent: false
+
     @editor.decorateMarker @marker,
       type: 'highlight'
-      class: klass
+      class: classes.join(" ")
 
   reset: ->
     @marker?.destroy()

@@ -315,7 +315,16 @@ class VimEditor
       expect(@editorElement.classList.contains(m)).toBe(false)
 
   # Public
-  keystroke: (keys, {element}={}) =>
+  keystroke: (keys, options={}) =>
+    {element} = options
+    if options.waitsForFinish
+      finished = false
+      @vimState.onDidFinishOperation -> finished = true
+      delete options.waitsForFinish
+      @keystroke(keys, options)
+      waitsFor -> finished
+      return
+
     # keys must be String or Array
     # Not support Object for keys to avoid ambiguity.
     element ?= @editorElement

@@ -9,7 +9,6 @@ settings = require './settings'
 swrap = require './selection-wrapper'
 
 OperationStack = require './operation-stack'
-CountManager = require './count-manager'
 MarkManager = require './mark-manager'
 ModeManager = require './mode-manager'
 RegisterManager = require './register-manager'
@@ -35,7 +34,7 @@ class VimState
       @destroy()
 
     @modeManager = new ModeManager(this)
-    @count = new CountManager(this)
+    @count = null
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @hover = new Hover(this)
@@ -56,6 +55,27 @@ class VimState
 
   subscribe: (args...) ->
     @operationStack.subscribe args...
+
+  # Count
+  # -------------------------
+  getCount: ->
+    @count
+
+  hasCount: ->
+    @count?
+
+  setCount: (number) ->
+    @count ?= 0
+    @count = (@count * 10) + number
+    @hover.add number
+    @updateEditorElement()
+
+  resetCount: ->
+    @count = null
+    @updateEditorElement()
+
+  updateEditorElement: (kind) ->
+    toggleClassByCondition(@editorElement, 'with-count', @hasCount())
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
@@ -83,6 +103,11 @@ class VimState
   onDidConfirmSelectList: (fn) -> @subscribe @emitter.on('did-confirm-select-list', fn)
   onDidCancelSelectList: (fn) -> @subscribe @emitter.on('did-cancel-select-list', fn)
 
+  # Events
+  # -------------------------
+  onDidFailToSetTarget: (fn) -> @emitter.on('did-fail-to-set-target', fn)
+  onDidDestroy: (fn) -> @emitter.on('did-destroy', fn)
+
   destroy: ->
     return if @destroyed
     @destroyed = true
@@ -107,11 +132,10 @@ class VimState
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
-      @input, @search, @modeManager, @operationRecords
-      @register
+      @input, @search, @modeManager, @operationRecords, @register
+      @count
+      @editor, @editorElement, @subscriptions,
     } = {}
-
-    {@editor, @editorElement, @subscriptions} = {}
     @emitter.emit 'did-destroy'
 
   observeSelection: ->
@@ -148,14 +172,8 @@ class VimState
       if target is @editorElement and not type.startsWith('vim-mode-plus:')
         handleSelectionChange() unless selectionWatcher?
 
-  onDidFailToSetTarget: (fn) ->
-    @emitter.on('did-fail-to-set-target', fn)
-
-  onDidDestroy: (fn) ->
-    @emitter.on('did-destroy', fn)
-
   reset: ->
-    @count.reset()
+    @resetCount()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
