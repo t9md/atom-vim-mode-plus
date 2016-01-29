@@ -493,6 +493,29 @@ preserveSelectionStartPoints = (editor) ->
     point = rangeBySelection.get(selection).start
     selection.cursor.setBufferPosition(point)
 
+ElementBuilder =
+  includeInto: (target) ->
+    for name, value of this when name isnt "includeInto"
+      target::[name] = value.bind(this)
+
+  div: (params) ->
+    @createElement 'div', params
+
+  span: (params) ->
+    @createElement 'div', params
+
+  atomTextEditor: (params) ->
+    @createElement 'atom-text-editor', params
+
+  createElement: (element, {classList, textContent, attribute}) ->
+    element = document.createElement element
+
+    element.classList.add classList... if classList?
+    element.textContent = textContent if textContent?
+    for name, value of attribute ? {}
+      element.setAttribute(name, value)
+    element
+
 module.exports = {
   include
   debug
@@ -561,6 +584,7 @@ module.exports = {
   detectScopeStartPositionByScope
   getBufferRows
   preserveSelectionStartPoints
+  ElementBuilder
 
   # Debugging
   reportSelection,

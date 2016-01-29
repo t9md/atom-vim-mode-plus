@@ -1,8 +1,10 @@
 {Emitter, CompositeDisposable} = require 'atom'
-{getCharacterForEvent, toggleClassByCondition} = require './utils'
+{getCharacterForEvent, toggleClassByCondition, ElementBuilder} = require './utils'
 packageScope = 'vim-mode-plus'
 searchScope = "#{packageScope}-search"
 
+# InputBase, InputElementBase
+# -------------------------
 class InputBase
   onDidChange: (fn) -> @emitter.on 'did-change', fn
   onDidConfirm: (fn) -> @emitter.on 'did-confirm', fn
@@ -61,9 +63,10 @@ class InputBase
     else
       @cancel()
 
-class InputBaseElement extends HTMLElement
-  klass: null
 
+class InputElementBase extends HTMLElement
+  ElementBuilder.includeInto(this)
+  klass: null
   createdCallback: ->
     @className = @klass
     @buildElements()
@@ -82,36 +85,25 @@ class InputBaseElement extends HTMLElement
   initialize: (@model) ->
     this
 
-  div: (params) ->
-    @createElement 'div', params
-
-  span: (params) ->
-    @createElement 'div', params
-
-  atomTextEditor: (params) ->
-    @createElement 'atom-text-editor', params
-
-  createElement: (element, params) ->
-    {classList, textContent, attribute} = params
-    element = document.createElement element
-
-    element.classList.add classList... if classList?
-    element.textContent = textContent if textContent?
-    for name, value of attribute ? {}
-      element.setAttribute(name, value)
-    element
-
   destroy: ->
     @editor.destroy()
     @panel.destroy()
     {@model, @editor, @panel, @editorElement} = {}
     @remove()
 
+# Input
+# -------------------------
 class Input extends InputBase
 
-class InputElement extends InputBaseElement
+class InputElement extends InputElementBase
   klass: "#{packageScope}-input"
 
+InputElement = document.registerElement "#{packageScope}-input",
+  prototype: InputElement.prototype
+  extends: 'div',
+
+# SearchInput
+# -------------------------
 # [TODO] Differenciating literal-mode should be done by scope and scope based keymap.
 class SearchInput extends InputBase
   constructor: ->
@@ -164,7 +156,7 @@ class SearchInput extends InputBase
     @view.regexSearchStatus.classList.add 'btn-primary'
     super
 
-class SearchInputElement extends InputBaseElement
+class SearchInputElement extends InputElementBase
   klass: "#{searchScope}-container"
   buildElements: ->
     @appendChild(
@@ -184,10 +176,6 @@ class SearchInputElement extends InputBaseElement
         classList: ['editor', searchScope]
         attribute: {mini: ''}
     )
-
-InputElement = document.registerElement "#{packageScope}-input",
-  prototype: InputElement.prototype
-  extends: 'div',
 
 SearchInputElement = document.registerElement "#{packageScope}-search-input",
   prototype: SearchInputElement.prototype
