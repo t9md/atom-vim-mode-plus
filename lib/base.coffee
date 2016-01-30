@@ -42,6 +42,7 @@ class Base
   asTarget: false
   context: {}
   @commandPrefix: 'vim-mode-plus'
+  @commandScope: 'atom-text-editor'
 
   @delegatesMethods vimStateMethods..., toProperty: 'vimState'
 
@@ -188,8 +189,11 @@ class Base
   @getCommandName: ->
     @commandPrefix + ':' + _.dasherize(@name)
 
+  @getCommandScope: ->
+    @commandScope
+
   @registerCommand: ->
-    atom.commands.add('atom-text-editor', @getCommandName(), => run(this))
+    atom.commands.add(@getCommandScope(), @getCommandName(), => run(this))
 
 class OperationAbortedError extends Base
   @extend(false)
