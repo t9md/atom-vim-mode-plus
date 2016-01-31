@@ -90,6 +90,10 @@ class Base
   isCountSpecified: ->
     @vimState.hasCount()
 
+  countTimes: (fn) ->
+    _.times @getCount(), ->
+      fn()
+
   activateMode: (mode, submode) ->
     @onDidFinishOperation =>
       @vimState.activate(mode, submode)

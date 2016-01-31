@@ -116,12 +116,6 @@ class Motion extends Base
       selection.modifySelection ->
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
-  # Utils
-  # -------------------------
-  countTimes: (fn) ->
-    _.times @getCount(), ->
-      fn()
-
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
   @extend(false)
