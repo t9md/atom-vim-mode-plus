@@ -145,7 +145,7 @@ class SelectionWrapper
     @selection.insertText(text)
     originalText
 
-  lineTextForBufferRows: (text) ->
+  lineTextForBufferRows: ->
     {editor} = @selection
     @getRows().map (row) ->
       editor.lineTextForBufferRow(row)
@@ -167,6 +167,12 @@ class SelectionWrapper
       when @isLinewise() then 'linewise'
       when not @selection.isEmpty() then 'characterwise'
       else null
+
+  switchToLinewise: (fn) ->
+    @preserveCharacterwise()
+    @expandOverLine(preserveGoalColumn: true)
+    fn()
+    @restoreCharacterwise()
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
