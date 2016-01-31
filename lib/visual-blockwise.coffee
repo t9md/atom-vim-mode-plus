@@ -19,10 +19,6 @@ class VisualBlockwise extends Base
     for selection in @editor.getSelections()
       fn(selection)
 
-  countTimes: (fn) ->
-    _.times @getCount(), ->
-      fn()
-
   setProperties: ({head, tail}) ->
     @eachSelection (selection) ->
       prop = {}
