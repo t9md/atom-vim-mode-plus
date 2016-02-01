@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, SearchInput} = require './input'
 settings = require './settings'
-{haveSomeSelection, toggleClassByCondition} = require './utils'
+{haveSomeSelection} = require './utils'
 swrap = require './selection-wrapper'
 
 OperationStack = require './operation-stack'
@@ -75,7 +75,7 @@ class VimState
     @updateEditorElement()
 
   updateEditorElement: (kind) ->
-    toggleClassByCondition(@editorElement, 'with-count', @hasCount())
+    @editorElement.classList.toggle('with-count', @hasCount())
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------

@@ -1,5 +1,5 @@
 {Emitter, CompositeDisposable} = require 'atom'
-{getCharacterForEvent, toggleClassByCondition, ElementBuilder} = require './utils'
+{getCharacterForEvent, ElementBuilder} = require './utils'
 packageScope = 'vim-mode-plus'
 searchScope = "#{packageScope}-search"
 
@@ -145,7 +145,7 @@ class SearchInput extends InputBase
     @literalCharMode = true
 
   updateOptionSettings: ({escapeRegExp}={}) ->
-    toggleClassByCondition(@view.regexSearchStatus, 'btn-primary', not escapeRegExp)
+    @view.regexSearchStatus.classList.toggle('btn-primary', not escapeRegExp)
 
   focus: ({backwards}) ->
     @editorElement.classList.add('backwards') if backwards
