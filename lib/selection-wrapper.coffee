@@ -150,10 +150,9 @@ class SelectionWrapper
     @getRows().map (row) ->
       editor.lineTextForBufferRow(row)
 
-  translate: (translation, options) ->
-    range = @getBufferRange()
-    range = range.translate(translation...)
-    @setBufferRange(range, options)
+  translate: (startDelta, endDelta=startDelta, options) ->
+    newRange = @getBufferRange().translate(startDelta, endDelta)
+    @setBufferRange(newRange, options)
 
   isSingleRow: ->
     [startRow, endRow] = @selection.getBufferRowRange()
