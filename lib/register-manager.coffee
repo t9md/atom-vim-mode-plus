@@ -2,7 +2,6 @@
 globalState = require './global-state'
 settings = require './settings'
 {CompositeDisposable} = require 'atom'
-{toggleClassByCondition} = require './utils'
 
 REGISTERS = /// (
   ?: [a-zA-Z*+%_".]
@@ -140,6 +139,6 @@ class RegisterManager
       'character'
 
   updateEditorElement: ->
-    toggleClassByCondition(@editorElement, 'with-register', @name?)
+    @editorElement.classList.toggle('with-register', @name?)
 
 module.exports = RegisterManager

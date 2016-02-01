@@ -4,10 +4,7 @@ _ = require 'underscore-plus'
 {BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
 
 swrap = require './selection-wrapper'
-{toggleClassByCondition, moveCursorLeft} = require './utils'
-
-supportedModes = ['normal', 'insert', 'visual', 'operator-pending']
-supportedSubModes = ['characterwise', 'linewise', 'blockwise', 'replace']
+{moveCursorLeft} = require './utils'
 
 class ModeManager
   mode: 'insert' # Native atom is not modal editor and its default is 'insert'
@@ -22,10 +19,10 @@ class ModeManager
       @vimState.refreshCursors()
 
   updateEditorElement: ->
-    for mode in supportedModes
-      toggleClassByCondition(@editorElement, "#{mode}-mode", mode is @mode)
-    for submode in supportedSubModes
-      toggleClassByCondition(@editorElement, submode, submode is @submode)
+    for mode in ['normal', 'insert', 'visual', 'operator-pending']
+      @editorElement.classList.toggle("#{mode}-mode", mode is @mode)
+    for submode in ['characterwise', 'linewise', 'blockwise', 'replace']
+      @editorElement.classList.toggle(submode, submode is @submode)
 
   isMode: (mode, submodes) ->
     if submodes?
