@@ -1,3 +1,10 @@
+# 0.19.1
+- Internal: Allow Operation specific command scope #147.
+- Internal: New `swrawp::switchToLinewise()` util to switch selection temporarily.
+- Internal: Now `countTime()` is Base methods.
+- Internal: Remove `toggleClassByCondition()` utils. Instead, use native `classList.toggle()`.
+- Internal: `swrap::translate()` function arguments was inconsistent with wrapping `Range::translate()` function.
+
 # 0.19.0
 - Breaking: Remove `move-line-up`, `move-line-down`, it is externalized as `move-selected-text` plugin package #145.
 - New: `Operator::execute()` now can do asynchronous operation(can return instance of Promise). #146.
