@@ -3,6 +3,10 @@ _ = require 'underscore-plus'
 
 Base = require './base'
 swrap = require './selection-wrapper'
+{
+  getFirstSelectionOrderedByBufferPosition
+  getLastSelectionOrderedByBufferPosition
+} = require './utils'
 
 class VisualBlockwise extends Base
   @extend(false)
@@ -30,10 +34,10 @@ class VisualBlockwise extends Base
     @editor.getSelections().length is 1
 
   getTop: ->
-    @editor.getSelectionsOrderedByBufferPosition()[0]
+    getFirstSelectionOrderedByBufferPosition(@editor)
 
   getBottom: ->
-    _.last @editor.getSelectionsOrderedByBufferPosition()
+    getLastSelectionOrderedByBufferPosition(@editor)
 
   isReversed: ->
     (not @isSingleLine()) and @getTail() is @getBottom()
@@ -115,28 +119,6 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
   whichSide: 'end'
-
-class BlockwiseSelect extends VisualBlockwise
-  @extend(false)
-  execute: ->
-    selection = @editor.getLastSelection()
-    wasReversed = reversed = selection.isReversed()
-    range = selection.getScreenRange()
-    if range.start.column >= range.end.column
-      reversed = not reversed
-      range = range.translate([0, 1], [0, -1])
-
-    {start, end} = range
-    ranges = [start.row..end.row].map (row) -> [[row, start.column], [row, end.column]]
-    # If selection is single line we don't need to add selection.
-    # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
-    @editor.setSelectedScreenRanges(ranges, {reversed}) unless selection.isSingleScreenLine()
-    if wasReversed
-      @setProperties {head: @getTop(), tail: @getBottom()}
-    else
-      @setProperties {head: @getBottom(), tail: @getTop()}
-    @eachSelection (selection) ->
-      selection.destroy() if selection.isEmpty()
 
 class BlockwiseRestoreCharacterwise extends VisualBlockwise
   @extend(false)
