@@ -1,6 +1,10 @@
 _ = require 'underscore-plus'
 {Range} = require 'atom'
-{isLinewiseRange} = require './utils'
+{
+  isLinewiseRange
+  getFirstSelectionOrderedByBufferPosition
+  getLastSelectionOrderedByBufferPosition
+} = require './utils'
 
 class SelectionWrapper
   scope: 'vim-mode-plus'
@@ -176,21 +180,52 @@ class SelectionWrapper
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
+swrap.selectBlockwise = (editor) ->
+  lastSelection = editor.getLastSelection()
+  wasReversed = reversed = lastSelection.isReversed()
+  range = lastSelection.getScreenRange()
+  if range.start.column >= range.end.column
+    reversed = not reversed
+    range = range.translate([0, 1], [0, -1])
+
+  {start, end} = range
+  ranges = [start.row..end.row].map (row) ->
+    [[row, start.column], [row, end.column]]
+  # If selection is single line we don't need to add selection.
+  # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
+  unless lastSelection.isSingleScreenLine()
+    editor.setSelectedScreenRanges(ranges, {reversed})
+
+  [headSelection, tailSelection] = if wasReversed
+    [getFirstSelectionOrderedByBufferPosition(editor), getLastSelectionOrderedByBufferPosition(editor)]
+  else
+    [getLastSelectionOrderedByBufferPosition(editor), getFirstSelectionOrderedByBufferPosition(editor)]
+
+  for selection in editor.getSelections()
+    if selection.isEmpty()
+      selection.destroy()
+      continue
+
+    swrap(selection).setProperties
+      blockwise:
+        head: (selection is headSelection)
+        tail: (selection is tailSelection)
+
 swrap.setReversedState = (editor, reversed) ->
-  editor.getSelections().forEach (s) ->
-    swrap(s).setReversedState(reversed)
+  editor.getSelections().forEach (selection) ->
+    swrap(selection).setReversedState(reversed)
 
 swrap.expandOverLine = (editor) ->
-  editor.getSelections().forEach (s) ->
-    swrap(s).expandOverLine()
+  editor.getSelections().forEach (selection) ->
+    swrap(selection).expandOverLine()
 
 swrap.reverse = (editor) ->
-  editor.getSelections().forEach (s) ->
-    swrap(s).reverse()
+  editor.getSelections().forEach (selection) ->
+    swrap(selection).reverse()
 
 swrap.detectVisualModeSubmode = (editor) ->
   selections = editor.getSelections()
-  results = (swrap(s).detectVisualModeSubmode() for s in selections)
+  results = (swrap(selection).detectVisualModeSubmode() for selection in selections)
 
   if results.every((r) -> r is 'linewise')
     'linewise'

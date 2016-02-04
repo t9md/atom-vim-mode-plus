@@ -464,6 +464,12 @@ isFunctionScope = (editor, scope) ->
     else
       /^meta\.function\./.test(scope)
 
+getFirstSelectionOrderedByBufferPosition = (editor) ->
+  editor.getSelectionsOrderedByBufferPosition()[0]
+
+getLastSelectionOrderedByBufferPosition = (editor) ->
+  _.last editor.getSelectionsOrderedByBufferPosition()
+
 # Debugging purpose
 # -------------------------
 reportSelection = (subject, selection) ->
@@ -581,6 +587,8 @@ module.exports = {
   getBufferRows
   preserveSelectionStartPoints
   ElementBuilder
+  getFirstSelectionOrderedByBufferPosition
+  getLastSelectionOrderedByBufferPosition
 
   # Debugging
   reportSelection,
