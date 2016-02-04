@@ -1,8 +1,7 @@
 # Refactoring status: 95%
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
-{BlockwiseSelect, BlockwiseRestoreCharacterwise} = require './visual-blockwise'
-
+{Base, BlockwiseSelect, BlockwiseRestoreCharacterwise} = {}
 swrap = require './selection-wrapper'
 {moveCursorLeft} = require './utils'
 
@@ -10,6 +9,8 @@ class ModeManager
   mode: 'insert' # Native atom is not modal editor and its default is 'insert'
 
   constructor: (@vimState) ->
+    unless Base
+      {BlockwiseSelect, BlockwiseRestoreCharacterwise} = (require './base').getRegistries()
     {@editor, @editorElement} = @vimState
     @emitter = new Emitter
 
