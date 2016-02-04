@@ -59,18 +59,20 @@ class BlockwiseOtherEnd extends VisualBlockwise
 
 class BlockwiseMoveDown extends VisualBlockwise
   @extend()
-  direction: 'Below'
+  direction: 'down'
 
   isExpanding: ->
     return true if @isSingleLine()
     switch @direction
-      when 'Below' then not @isReversed()
-      when 'Above' then @isReversed()
+      when 'down' then not @isReversed()
+      when 'up' then @isReversed()
 
   execute: ->
     @countTimes =>
       if @isExpanding()
-        @editor["addSelection#{@direction}"]()
+        switch @direction
+          when 'down' then @editor.addSelectionBelow()
+          when 'up' then @editor.addSelectionAbove()
         swrap.setReversedState @editor, @getTail().isReversed()
       else
         @getHead().destroy()
@@ -78,73 +80,57 @@ class BlockwiseMoveDown extends VisualBlockwise
 
 class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
-  direction: 'Above'
+  direction: 'up'
 
 class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   @extend()
   delegateTo: 'DeleteToLastCharacterOfLine'
-
-  initialize: ->
-    @operator = @new(@delegateTo)
+  recordable: true
 
   execute: ->
     @eachSelection (selection) ->
       selection.cursor.setBufferPosition(selection.getBufferRange().start)
-    finalPoint = @getTop().cursor.getBufferPosition()
+    point = @getTop().cursor.getBufferPosition()
     @vimState.activate('normal')
-    @operator.execute()
+    @new(@delegateTo).execute()
     @editor.clearSelections()
-    @editor.setCursorBufferPosition finalPoint
+    @editor.setCursorBufferPosition(point)
 
 class BlockwiseChangeToLastCharacterOfLine extends BlockwiseDeleteToLastCharacterOfLine
   @extend()
-  recordable: true
   delegateTo: 'ChangeToLastCharacterOfLine'
-
-  initialize: ->
-    @operator = @new(@delegateTo)
 
 class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
   @extend()
   delegateTo: 'ActivateInsertMode'
   recordable: true
-  after: false
-
-  initialize: ->
-    @operator = @new(@delegateTo)
+  whichSide: 'start'
 
   execute: ->
-    which = if @after then 'end' else 'start'
-    @eachSelection (selection) ->
-      point = selection.getBufferRange()[which]
+    @eachSelection (selection) =>
+      point = selection.getBufferRange()[@whichSide]
       selection.cursor.setBufferPosition(point)
-
-    # FIXME confirmChanges is not called when deactivate insert-mode.
-    @operator.execute()
+    @new(@delegateTo).execute()
 
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
-  after: true
+  whichSide: 'end'
 
 class BlockwiseSelect extends VisualBlockwise
   @extend(false)
   execute: ->
     selection = @editor.getLastSelection()
     wasReversed = reversed = selection.isReversed()
-    {start, end} = selection.getScreenRange()
-    startColumn = start.column
-    endColumn = end.column
-
-    if startColumn >= endColumn
+    range = selection.getScreenRange()
+    if range.start.column >= range.end.column
       reversed = not reversed
-      startColumn += 1
-      endColumn -= 1
+      range = range.translate([0, 1], [0, -1])
 
-    ranges = ([[row, startColumn], [row, endColumn]] for row in [start.row..end.row])
-    # If selection is single line we don't need to add selection to save other mult-selection
+    {start, end} = range
+    ranges = [start.row..end.row].map (row) -> [[row, start.column], [row, end.column]]
+    # If selection is single line we don't need to add selection.
     # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
-    unless selection.isSingleScreenLine()
-      @editor.setSelectedScreenRanges(ranges, {reversed})
+    @editor.setSelectedScreenRanges(ranges, {reversed}) unless selection.isSingleScreenLine()
     if wasReversed
       @setProperties {head: @getTop(), tail: @getBottom()}
     else
@@ -167,5 +153,3 @@ class BlockwiseRestoreCharacterwise extends VisualBlockwise
       endColumn += 1
     range = [[startRow, startColumn], [endRow, endColumn]]
     @editor.setSelectedBufferRange(range, {reversed})
-
-module.exports = {BlockwiseSelect, BlockwiseRestoreCharacterwise}
