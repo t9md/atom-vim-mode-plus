@@ -470,6 +470,9 @@ getFirstSelectionOrderedByBufferPosition = (editor) ->
 getLastSelectionOrderedByBufferPosition = (editor) ->
   _.last editor.getSelectionsOrderedByBufferPosition()
 
+sortComparable = (collection) ->
+  collection.sort (a, b) -> a.compare(b)
+
 # Debugging purpose
 # -------------------------
 reportSelection = (subject, selection) ->
@@ -589,6 +592,7 @@ module.exports = {
   ElementBuilder
   getFirstSelectionOrderedByBufferPosition
   getLastSelectionOrderedByBufferPosition
+  sortComparable
 
   # Debugging
   reportSelection,
