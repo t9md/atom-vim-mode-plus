@@ -6,7 +6,7 @@ class BlockwiseSelection
   constructor: (selection) ->
     {@editor} = selection
     @initialize(selection)
-    @setProperties {head: @getBottom(), tail: @getTop()} unless @hasTail()
+    @updateProperties()
 
   initialize: (selection) ->
     @selections = [selection]
@@ -33,18 +33,18 @@ class BlockwiseSelection
         else
           @selections.push(selection)
       sortComparable(@selections) # sorted in-place
+    @updateProperties(reversed: wasReversed)
 
-    if wasReversed
-      @setProperties {head: @getTop(), tail: @getBottom()}
-    else
-      @setProperties {head: @getBottom(), tail: @getTop()}
+  updateProperties: ({reversed}={}) ->
+    [head, tail] = switch (reversed ? @isReversed())
+      when true then [@getTop(), @getBottom()]
+      when false then [@getBottom(), @getTop()]
 
-  setProperties: ({head, tail}={}) ->
     for selection in @selections
       swrap(selection).setProperties
         blockwise:
-          head: selection is (head ? @getHead())
-          tail: selection is (tail ? @getTail())
+          head: selection is head
+          tail: selection is tail
 
   isSingleLine: ->
     @selections.length is 1
@@ -68,8 +68,8 @@ class BlockwiseSelection
   hasTail: ->
     @getTail()?
 
-  otherEnd: ->
-    @setProperties {head: @getTail(), tail: @getHead()}
+  reverse: ->
+    @updateProperties(reversed: not @isReversed())
 
   getBufferRowRange: ->
     startRow = @getTop().getBufferRowRange()[0]
@@ -101,7 +101,7 @@ class BlockwiseSelection
       # FIXME: Since removed selection is always head
       # I can update head property automatically
       @removeSelection(@getHead())
-    @setProperties()
+    @updateProperties()
 
   addSelection: (direction) ->
     @selections.push switch direction

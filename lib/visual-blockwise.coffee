@@ -12,7 +12,7 @@ class BlockwiseOtherEnd extends VisualBlockwise
   execute: ->
     for blockwiseSelection in @vimState.getBlockwiseSelections()
       unless blockwiseSelection.isSingleLine()
-        blockwiseSelection.otherEnd()
+        blockwiseSelection.reverse()
     @new('ReverseSelections').execute()
 
 class BlockwiseMoveDown extends VisualBlockwise
