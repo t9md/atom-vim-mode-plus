@@ -45,6 +45,7 @@ class VimState
     @searchInput = new SearchInput(this)
     @operationStack = new OperationStack(this)
     @cursorStyleManager = new CursorStyleManager(this)
+    @blockwiseSelections = []
     @observeSelection()
 
     @editorElement.classList.add packageScope
@@ -55,6 +56,17 @@ class VimState
 
   subscribe: (args...) ->
     @operationStack.subscribe args...
+
+  # BlockwiseSelections
+  # -------------------------
+  getBlockwiseSelections: ->
+    @blockwiseSelections
+
+  clearBlockwiseSelections: ->
+    @blockwiseSelections = []
+
+  addBlockwiseSelection: (blockwiseSelection) ->
+    @blockwiseSelections.push(blockwiseSelection)
 
   # Count
   # -------------------------

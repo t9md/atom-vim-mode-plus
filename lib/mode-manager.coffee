@@ -3,6 +3,7 @@ _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 Base = require './base'
 BlockwiseRestoreCharacterwise = null
+BlockwiseSelection = require './blockwise-selection'
 swrap = require './selection-wrapper'
 {moveCursorLeft} = require './utils'
 
@@ -128,10 +129,12 @@ class ModeManager
       when 'blockwise'
         unless swrap(@editor.getLastSelection()).isLinewise()
           for selection in @editor.getSelections()
-            swrap(selection).selectBlockwise()
+            blockwiseSelection = new BlockwiseSelection(selection)
+            @vimState.addBlockwiseSelection(blockwiseSelection)
 
     new Disposable =>
       @restoreCharacterwiseRange()
+      @vimState.blockwiseSelections = []
 
       # Prepare function to restore selection by `gv`
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
