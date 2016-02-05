@@ -4,24 +4,24 @@ _ = require 'underscore-plus'
 Base = require './base'
 swrap = require './selection-wrapper'
 {
+  sortComparable
   getFirstSelectionOrderedByBufferPosition
   getLastSelectionOrderedByBufferPosition
 } = require './utils'
 
-class VisualBlockwise extends Base
-  @extend(false)
-  constructor: ->
-    super
-    @initialize?()
-
-  initialize: ->
-    # PlantTail
-    unless @getTail()?
+class BlockwiseSelection
+  constructor: (@selections) ->
+    unless @hasTail()
       @setProperties {head: @getBottom(), tail: @getTop()}
 
   eachSelection: (fn) ->
-    for selection in @editor.getSelections()
+    for selection in @selections
       fn(selection)
+
+  updateProperties: ({head, tail}={}) ->
+    head ?= @getHead()
+    tail ?= @getTail()
+    @setProperties {head, tail}
 
   setProperties: ({head, tail}) ->
     @eachSelection (selection) ->
@@ -31,13 +31,13 @@ class VisualBlockwise extends Base
       swrap(selection).setProperties(blockwise: prop)
 
   isSingleLine: ->
-    @editor.getSelections().length is 1
+    @selections.length is 1
 
   getTop: ->
-    getFirstSelectionOrderedByBufferPosition(@editor)
+    sortComparable(@selections)[0]
 
   getBottom: ->
-    getLastSelectionOrderedByBufferPosition(@editor)
+    _.last(sortComparable(@selections))
 
   isReversed: ->
     (not @isSingleLine()) and @getTail() is @getBottom()
@@ -46,41 +46,102 @@ class VisualBlockwise extends Base
     if @isReversed() then @getTop() else @getBottom()
 
   getTail: ->
-    _.detect @editor.getSelections(), (selection) ->
+    _.detect @selections, (selection) ->
       swrap(selection).isBlockwiseTail()
+
+  hasTail: ->
+    @getTail()?
+
+  otherEnd: ->
+    @setProperties {head: @getTail(), tail: @getHead()}
 
   getBufferRowRange: ->
     startRow = @getTop().getBufferRowRange()[0]
     endRow = @getBottom().getBufferRowRange()[0]
     [startRow, endRow]
 
+  setBufferPosition: (point) ->
+    head = @getHead()
+    for selection in @selections.slice() when selection isnt head
+      @removeSelection(selection)
+    head.cursor.setBufferPosition(point)
+
+  modifySelection: (direction) ->
+    isExpanding = =>
+      return true if @isSingleLine()
+      switch direction
+        when 'down' then not @isReversed()
+        when 'up' then @isReversed()
+
+    if isExpanding()
+      @addSelection(direction)
+    else
+      @removeSelection(@getHead())
+
+    @updateProperties()
+
+  addSelection: (direction) ->
+    switch direction
+      when 'up' then @addSelectionAbove()
+      when 'down' then @addSelectionBelow()
+    {editor} = @selections[0]
+    @selections.push(editor.getLastSelection())
+
+    tailSelection = @getTail()
+    swrap.setReversedState(tailSelection.editor, tailSelection.isReversed())
+
+  removeSelection: (selection) ->
+    _.remove(@selections, selection)
+    selection.destroy()
+
+  getLastSelection: ->
+    @selections[0].editor.getLastSelection()
+
+  addSelectionBelow: ->
+    @getBottom().addSelectionBelow()
+    @getLastSelection()
+
+  addSelectionAbove: ->
+    @getTop().addSelectionAbove()
+    @getLastSelection()
+
+  restoreCharacterwise: ->
+    reversed = @isReversed()
+    head = @getHead()
+    headIsReversed = head.isReversed()
+    [startRow, endRow] = @getBufferRowRange()
+    {start: {column: startColumn}, end: {column: endColumn}} = head.getBufferRange()
+    if reversed isnt headIsReversed
+      [startColumn, endColumn] = [endColumn, startColumn]
+      startColumn -= 1
+      endColumn += 1
+    range = [[startRow, startColumn], [endRow, endColumn]]
+
+    {editor} =  @selections[0]
+    editor.setSelectedBufferRange(range, {reversed})
+
+class VisualBlockwise extends Base
+  eachBlockwiseSelection: (fn) ->
+    selections = @editor.getSelections()
+    blockwiseSelection = new BlockwiseSelection(selections)
+    fn(blockwiseSelection)
+
 class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
   execute: ->
-    unless @isSingleLine()
-      @setProperties {head: @getTail(), tail: @getHead()}
+    @eachBlockwiseSelection (blockwiseSelection) ->
+      unless blockwiseSelection.isSingleLine()
+        blockwiseSelection.otherEnd()
     @new('ReverseSelections').execute()
 
 class BlockwiseMoveDown extends VisualBlockwise
   @extend()
   direction: 'down'
 
-  isExpanding: ->
-    return true if @isSingleLine()
-    switch @direction
-      when 'down' then not @isReversed()
-      when 'up' then @isReversed()
-
   execute: ->
-    @countTimes =>
-      if @isExpanding()
-        switch @direction
-          when 'down' then @editor.addSelectionBelow()
-          when 'up' then @editor.addSelectionAbove()
-        swrap.setReversedState @editor, @getTail().isReversed()
-      else
-        @getHead().destroy()
-    @setProperties {head: @getHead(), tail: @getTail()}
+    @eachBlockwiseSelection (blockwiseSelection) =>
+      @countTimes =>
+        blockwiseSelection.modifySelection(@direction)
 
 class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
@@ -92,13 +153,20 @@ class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   recordable: true
 
   execute: ->
-    @eachSelection (selection) ->
-      selection.cursor.setBufferPosition(selection.getBufferRange().start)
-    point = @getTop().cursor.getBufferPosition()
-    @vimState.activate('normal')
+    pointByBlockwiseSelection = new Map
+
+    @eachBlockwiseSelection (blockwiseSelection) ->
+      blockwiseSelection.eachSelection (selection) ->
+        {start} = selection.getBufferRange()
+        selection.cursor.setBufferPosition(start)
+
+      point = blockwiseSelection.getTop().getHeadBufferPosition()
+      pointByBlockwiseSelection.set(blockwiseSelection, point)
+
     @new(@delegateTo).execute()
-    @editor.clearSelections()
-    @editor.setCursorBufferPosition(point)
+
+    pointByBlockwiseSelection.forEach (point, blockwiseSelection) ->
+      blockwiseSelection.setBufferPosition(point)
 
 class BlockwiseChangeToLastCharacterOfLine extends BlockwiseDeleteToLastCharacterOfLine
   @extend()
@@ -111,7 +179,7 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
   whichSide: 'start'
 
   execute: ->
-    @eachSelection (selection) =>
+    for selection in @editor.getSelections()
       point = selection.getBufferRange()[@whichSide]
       selection.cursor.setBufferPosition(point)
     @new(@delegateTo).execute()
@@ -122,16 +190,6 @@ class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
 
 class BlockwiseRestoreCharacterwise extends VisualBlockwise
   @extend(false)
-
   execute: ->
-    reversed = @isReversed()
-    head = @getHead()
-    headIsReversed = head.isReversed()
-    [startRow, endRow] = @getBufferRowRange()
-    {start: {column: startColumn}, end: {column: endColumn}} = head.getBufferRange()
-    if reversed isnt headIsReversed
-      [startColumn, endColumn] = [endColumn, startColumn]
-      startColumn -= 1
-      endColumn += 1
-    range = [[startRow, startColumn], [endRow, endColumn]]
-    @editor.setSelectedBufferRange(range, {reversed})
+    @eachBlockwiseSelection (blockwiseSelection) ->
+      blockwiseSelection.restoreCharacterwise()

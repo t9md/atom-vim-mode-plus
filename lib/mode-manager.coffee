@@ -127,7 +127,8 @@ class ModeManager
         swrap.expandOverLine(@editor)
       when 'blockwise'
         unless swrap(@editor.getLastSelection()).isLinewise()
-          swrap(selection).selectBlockwise() for selection in @editor.getSelections()
+          for selection in @editor.getSelections()
+            swrap(selection).selectBlockwise()
 
     new Disposable =>
       @restoreCharacterwiseRange()
