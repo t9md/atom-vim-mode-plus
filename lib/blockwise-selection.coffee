@@ -3,26 +3,48 @@ swrap = require './selection-wrapper'
 {sortComparable} = require './utils'
 
 class BlockwiseSelection
-  constructor: (@vimState, @selections) ->
-    {@editor, @editorElement} = @vimState
-    unless @hasTail()
+  constructor: (selection) ->
+    {@editor} = selection
+    @initialize(selection)
+    @setProperties {head: @getBottom(), tail: @getTop()} unless @hasTail()
+
+  initialize: (selection) ->
+    @selections = [selection]
+    wasReversed = reversed = selection.isReversed()
+
+    # If selection is single line we don't need to add selection.
+    # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
+    unless selection.isSingleScreenLine()
+      range = selection.getScreenRange()
+      if range.start.column >= range.end.column
+        reversed = not reversed
+        range = range.translate([0, 1], [0, -1])
+
+      {start, end} = range
+      ranges = [start.row..end.row].map (row) ->
+        [[row, start.column], [row, end.column]]
+
+      selection.setBufferRange(ranges.shift(), {reversed})
+      newSelections = ranges.map (range) =>
+        @editor.addSelectionForScreenRange(range, {reversed})
+      for selection in newSelections
+        if selection.isEmpty()
+          selection.destroy()
+        else
+          @selections.push(selection)
+      sortComparable(@selections) # sorted in-place
+
+    if wasReversed
+      @setProperties {head: @getTop(), tail: @getBottom()}
+    else
       @setProperties {head: @getBottom(), tail: @getTop()}
 
-  eachSelection: (fn) ->
+  setProperties: ({head, tail}={}) ->
     for selection in @selections
-      fn(selection)
-
-  updateProperties: ({head, tail}={}) ->
-    head ?= @getHead()
-    tail ?= @getTail()
-    @setProperties {head, tail}
-
-  setProperties: ({head, tail}) ->
-    @eachSelection (selection) ->
-      prop = {}
-      prop.head = (selection is head) if head?
-      prop.tail = (selection is tail) if tail?
-      swrap(selection).setProperties(blockwise: prop)
+      swrap(selection).setProperties
+        blockwise:
+          head: selection is (head ? @getHead())
+          tail: selection is (tail ? @getTail())
 
   isSingleLine: ->
     @selections.length is 1
@@ -60,7 +82,13 @@ class BlockwiseSelection
       @removeSelection(selection)
     head.cursor.setBufferPosition(point)
 
-  modifySelection: (direction) ->
+  # which must be 'start' or 'end'
+  setPositionForSelections: (which) ->
+    for selection in @selections
+      point = selection.getBufferRange()[which]
+      selection.cursor.setBufferPosition(point)
+
+  moveSelection: (direction) ->
     isExpanding = =>
       return true if @isSingleLine()
       switch direction
@@ -70,15 +98,15 @@ class BlockwiseSelection
     if isExpanding()
       @addSelection(direction)
     else
+      # FIXME: Since removed selection is always head
+      # I can update head property automatically
       @removeSelection(@getHead())
-
-    @updateProperties()
+    @setProperties()
 
   addSelection: (direction) ->
     @selections.push switch direction
       when 'up' then @addSelectionAbove()
       when 'down' then @addSelectionBelow()
-
     swrap.setReversedState(@editor, @getTail().isReversed())
 
   removeSelection: (selection) ->

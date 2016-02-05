@@ -2,15 +2,15 @@ Base = require './base'
 BlockwiseSelection = require './blockwise-selection'
 
 class VisualBlockwise extends Base
-  eachBlockwiseSelection: (fn) ->
-    selections = @editor.getSelections()
-    blockwiseSelection = new BlockwiseSelection(@vimState, selections)
-    fn(blockwiseSelection)
+  @extend(false)
+  constructor: ->
+    super
+    @initialize?()
 
 class BlockwiseOtherEnd extends VisualBlockwise
   @extend()
   execute: ->
-    @eachBlockwiseSelection (blockwiseSelection) ->
+    for blockwiseSelection in @vimState.getBlockwiseSelections()
       unless blockwiseSelection.isSingleLine()
         blockwiseSelection.otherEnd()
     @new('ReverseSelections').execute()
@@ -20,9 +20,9 @@ class BlockwiseMoveDown extends VisualBlockwise
   direction: 'down'
 
   execute: ->
-    @eachBlockwiseSelection (blockwiseSelection) =>
+    for blockwiseSelection in @vimState.getBlockwiseSelections()
       @countTimes =>
-        blockwiseSelection.modifySelection(@direction)
+        blockwiseSelection.moveSelection(@direction)
 
 class BlockwiseMoveUp extends BlockwiseMoveDown
   @extend()
@@ -36,10 +36,8 @@ class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
   execute: ->
     pointByBlockwiseSelection = new Map
 
-    @eachBlockwiseSelection (blockwiseSelection) ->
-      blockwiseSelection.eachSelection (selection) ->
-        {start} = selection.getBufferRange()
-        selection.cursor.setBufferPosition(start)
+    for blockwiseSelection in @vimState.getBlockwiseSelections()
+      blockwiseSelection.setPositionForSelections('start')
 
       point = blockwiseSelection.getTop().getHeadBufferPosition()
       pointByBlockwiseSelection.set(blockwiseSelection, point)
@@ -58,20 +56,19 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
   @extend()
   delegateTo: 'ActivateInsertMode'
   recordable: true
-  whichSide: 'start'
+  which: 'start'
 
   execute: ->
-    for selection in @editor.getSelections()
-      point = selection.getBufferRange()[@whichSide]
-      selection.cursor.setBufferPosition(point)
+    for blockwiseSelection in @vimState.getBlockwiseSelections()
+      blockwiseSelection.setPositionForSelections(@which)
     @new(@delegateTo).execute()
 
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
-  whichSide: 'end'
+  which: 'end'
 
 class BlockwiseRestoreCharacterwise extends VisualBlockwise
   @extend(false)
   execute: ->
-    @eachBlockwiseSelection (blockwiseSelection) ->
+    for blockwiseSelection in @vimState.getBlockwiseSelections()
       blockwiseSelection.restoreCharacterwise()

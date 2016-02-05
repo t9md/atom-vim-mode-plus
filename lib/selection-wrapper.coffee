@@ -178,41 +178,6 @@ class SelectionWrapper
     fn()
     @restoreCharacterwise()
 
-  selectBlockwise: ->
-    {editor} = @selection
-    selections = [@selection]
-    wasReversed = reversed = @selection.isReversed()
-
-    # If selection is single line we don't need to add selection.
-    # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
-    unless @selection.isSingleScreenLine()
-      range = @selection.getScreenRange()
-      if range.start.column >= range.end.column
-        reversed = not reversed
-        range = range.translate([0, 1], [0, -1])
-
-      {start, end} = range
-      ranges = [start.row..end.row].map (row) ->
-        [[row, start.column], [row, end.column]]
-
-      @selection.setBufferRange(ranges.shift(), {reversed})
-      newSelections = ranges.map (range) ->
-        editor.addSelectionForScreenRange(range, {reversed})
-      selections.push(newSelections...)
-      sortComparable(selections) # sorted in-place
-      selections.reverse() if wasReversed
-
-    [headSelection, tailSelection] = [_.last(selections), selections[0]]
-
-    for selection in selections
-      if selection.isEmpty()
-        selection.destroy()
-      else
-        swrap(selection).setProperties
-          blockwise:
-            head: (selection is headSelection)
-            tail: (selection is tailSelection)
-
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
