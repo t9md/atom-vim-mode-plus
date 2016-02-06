@@ -72,3 +72,4 @@ class BlockwiseRestoreCharacterwise extends VisualBlockwise
   execute: ->
     for blockwiseSelection in @vimState.getBlockwiseSelections()
       blockwiseSelection.restoreCharacterwise()
+    @vimState.clearBlockwiseSelections()

@@ -1,11 +1,6 @@
 _ = require 'underscore-plus'
 {Range} = require 'atom'
-{
-  isLinewiseRange
-  getFirstSelectionOrderedByBufferPosition
-  getLastSelectionOrderedByBufferPosition
-  sortComparable
-} = require './utils'
+{isLinewiseRange} = require './utils'
 
 class SelectionWrapper
   scope: 'vim-mode-plus'

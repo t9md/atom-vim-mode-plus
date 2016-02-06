@@ -134,7 +134,7 @@ class ModeManager
 
     new Disposable =>
       @restoreCharacterwiseRange()
-      @vimState.blockwiseSelections = []
+      @vimState.clearBlockwiseSelections()
 
       # Prepare function to restore selection by `gv`
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
