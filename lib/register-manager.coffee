@@ -1,7 +1,6 @@
 # Refactoring status: 100%
 globalState = require './global-state'
 settings = require './settings'
-{CompositeDisposable} = require 'atom'
 
 REGISTERS = /// (
   ?: [a-zA-Z*+%_".]
