@@ -1,3 +1,4 @@
+{Range} = require 'atom'
 _ = require 'underscore-plus'
 
 swrap = require './selection-wrapper'
@@ -82,6 +83,18 @@ class BlockwiseSelection
     for selection in @selections.slice() when selection isnt head
       @removeSelection(selection)
     head.cursor.setBufferPosition(point)
+
+  setBufferRange: (range, options={}) ->
+    head = @getHead()
+    for selection in @selections.slice() when selection isnt head
+      @removeSelection(selection)
+    head.setBufferRange(range)
+    @initialize(head)
+
+  getBufferRange: ->
+    topRange = @getTop().getBufferRange()
+    bottomRange = @getBottom().getBufferRange()
+    new Range(topRange.start, bottomRange.end)
 
   # which must be 'start' or 'end'
   setPositionForSelections: (which) ->
