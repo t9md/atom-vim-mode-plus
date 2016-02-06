@@ -33,7 +33,6 @@ class BlockwiseSelection
         else
           @selections.push(selection)
     @updateProperties(reversed: wasReversed)
-    console.log 'initialized reversed state = ', wasReversed, @isReversed()
 
   updateProperties: ({reversed}={}) ->
     reversed ?= @isReversed()
@@ -98,40 +97,28 @@ class BlockwiseSelection
         when 'up' then @isReversed()
 
     if isExpanding()
-      @addSelection(direction)
+      switch direction
+        when 'up'
+          @getTop().addSelectionAbove()
+          @selections.unshift(selection = @editor.getLastSelection())
+        when 'down'
+          @getBottom().addSelectionBelow()
+          @selections.push(selection = @editor.getLastSelection())
+      swrap(selection).setReversedState(@getTail().isReversed())
     else
       @removeSelection(@getHead())
     @updateProperties()
-
-  addSelection: (direction) ->
-    switch direction
-      when 'up'
-        selection = @addSelectionAbove()
-        @selections.unshift(selection)
-      when 'down'
-        selection = @addSelectionBelow()
-        @selections.push(selection)
-    swrap(selection).setReversedState(@getTail().isReversed())
 
   removeSelection: (selection) ->
     _.remove(@selections, selection)
     selection.destroy()
 
-  addSelectionBelow: ->
-    @getBottom().addSelectionBelow()
-    @editor.getLastSelection()
-
-  addSelectionAbove: ->
-    @getTop().addSelectionAbove()
-    @editor.getLastSelection()
-
   restoreCharacterwise: ->
     reversed = @isReversed()
     head = @getHead()
-    headIsReversed = head.isReversed()
     [startRow, endRow] = @getBufferRowRange()
     {start, end} = head.getBufferRange()
-    range = if reversed isnt headIsReversed
+    range = if @isReversed() isnt head.isReversed()
       [[startRow, end.column - 1], [endRow, start.column + 1]]
     else
       [[startRow, start.column], [endRow, end.column]]

@@ -2,7 +2,6 @@
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 Base = require './base'
-BlockwiseRestoreCharacterwise = null
 BlockwiseSelection = require './blockwise-selection'
 swrap = require './selection-wrapper'
 {moveCursorLeft} = require './utils'
@@ -12,7 +11,6 @@ class ModeManager
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
-    BlockwiseRestoreCharacterwise ?= Base.getClass('BlockwiseRestoreCharacterwise')
     @emitter = new Emitter
 
     @onDidActivateMode ({mode, submode}) =>
@@ -129,8 +127,7 @@ class ModeManager
       when 'blockwise'
         unless swrap(@editor.getLastSelection()).isLinewise()
           for selection in @editor.getSelections()
-            blockwiseSelection = new BlockwiseSelection(selection)
-            @vimState.addBlockwiseSelection(blockwiseSelection)
+            @vimState.addBlockwiseSelection(new BlockwiseSelection(selection))
 
     new Disposable =>
       @restoreCharacterwiseRange()
@@ -162,6 +159,8 @@ class ModeManager
         # Many VisualBlockwise commands change mode in the middle of processing()
         # in this case, we dont want to loose multi-cursor.
         unless @vimState.operationStack.isProcessing()
-          new BlockwiseRestoreCharacterwise(@vimState).execute()
+          for blockwiseSelection in @vimState.getBlockwiseSelections()
+            blockwiseSelection.restoreCharacterwise()
+          @vimState.clearBlockwiseSelections()
 
 module.exports = ModeManager

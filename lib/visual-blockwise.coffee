@@ -66,10 +66,3 @@ class BlockwiseInsertAtBeginningOfLine extends VisualBlockwise
 class BlockwiseInsertAfterEndOfLine extends BlockwiseInsertAtBeginningOfLine
   @extend()
   which: 'end'
-
-class BlockwiseRestoreCharacterwise extends VisualBlockwise
-  @extend(false)
-  execute: ->
-    for blockwiseSelection in @vimState.getBlockwiseSelections()
-      blockwiseSelection.restoreCharacterwise()
-    @vimState.clearBlockwiseSelections()
