@@ -464,12 +464,6 @@ isFunctionScope = (editor, scope) ->
     else
       /^meta\.function\./.test(scope)
 
-getFirstSelectionOrderedByBufferPosition = (editor) ->
-  editor.getSelectionsOrderedByBufferPosition()[0]
-
-getLastSelectionOrderedByBufferPosition = (editor) ->
-  _.last editor.getSelectionsOrderedByBufferPosition()
-
 sortComparable = (collection) ->
   collection.sort (a, b) -> a.compare(b)
 
@@ -590,8 +584,6 @@ module.exports = {
   getBufferRows
   preserveSelectionStartPoints
   ElementBuilder
-  getFirstSelectionOrderedByBufferPosition
-  getLastSelectionOrderedByBufferPosition
   sortComparable
 
   # Debugging

@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
+
 swrap = require './selection-wrapper'
-{sortComparable} = require './utils'
 
 class BlockwiseSelection
   constructor: (selection) ->
@@ -32,13 +32,15 @@ class BlockwiseSelection
           selection.destroy()
         else
           @selections.push(selection)
-      sortComparable(@selections) # sorted in-place
     @updateProperties(reversed: wasReversed)
+    console.log 'initialized reversed state = ', wasReversed, @isReversed()
 
   updateProperties: ({reversed}={}) ->
-    [head, tail] = switch (reversed ? @isReversed())
-      when true then [@getTop(), @getBottom()]
-      when false then [@getBottom(), @getTop()]
+    reversed ?= @isReversed()
+    [head, tail] = if reversed
+      [@getTop(), @getBottom()]
+    else
+      [@getBottom(), @getTop()]
 
     for selection in @selections
       swrap(selection).setProperties
@@ -50,10 +52,10 @@ class BlockwiseSelection
     @selections.length is 1
 
   getTop: ->
-    sortComparable(@selections)[0]
+    @selections[0]
 
   getBottom: ->
-    _.last(sortComparable(@selections))
+    _.last(@selections)
 
   isReversed: ->
     (not @isSingleLine()) and @getTail() is @getBottom()
@@ -98,44 +100,45 @@ class BlockwiseSelection
     if isExpanding()
       @addSelection(direction)
     else
-      # FIXME: Since removed selection is always head
-      # I can update head property automatically
       @removeSelection(@getHead())
     @updateProperties()
 
   addSelection: (direction) ->
-    @selections.push switch direction
-      when 'up' then @addSelectionAbove()
-      when 'down' then @addSelectionBelow()
-    swrap.setReversedState(@editor, @getTail().isReversed())
+    switch direction
+      when 'up'
+        selection = @addSelectionAbove()
+        @selections.unshift(selection)
+      when 'down'
+        selection = @addSelectionBelow()
+        @selections.push(selection)
+    swrap(selection).setReversedState(@getTail().isReversed())
 
   removeSelection: (selection) ->
     _.remove(@selections, selection)
     selection.destroy()
 
-  getLastSelection: ->
-    @editor.getLastSelection()
-
   addSelectionBelow: ->
     @getBottom().addSelectionBelow()
-    @getLastSelection()
+    @editor.getLastSelection()
 
   addSelectionAbove: ->
     @getTop().addSelectionAbove()
-    @getLastSelection()
+    @editor.getLastSelection()
 
   restoreCharacterwise: ->
     reversed = @isReversed()
     head = @getHead()
     headIsReversed = head.isReversed()
     [startRow, endRow] = @getBufferRowRange()
-    {start: {column: startColumn}, end: {column: endColumn}} = head.getBufferRange()
-    if reversed isnt headIsReversed
-      [startColumn, endColumn] = [endColumn, startColumn]
-      startColumn -= 1
-      endColumn += 1
-    range = [[startRow, startColumn], [endRow, endColumn]]
+    {start, end} = head.getBufferRange()
+    range = if reversed isnt headIsReversed
+      [[startRow, end.column - 1], [endRow, start.column + 1]]
+    else
+      [[startRow, start.column], [endRow, end.column]]
+    head.setBufferRange(range, {reversed})
+    swrap(head).resetProperties()
 
-    @editor.setSelectedBufferRange(range, {reversed})
+    for selection in @selections.slice() when selection isnt head
+      selection.destroy()
 
 module.exports = BlockwiseSelection
