@@ -28,6 +28,11 @@ class ModeManager
       @vimState.refreshCursors()
 
   updateEditorElement: ->
+    # temporary solution to fix https://github.com/t9md/atom-vim-mode-plus/issues/148
+    # change the type of .hidden-input to 'password' will disable IME
+    inputElement = @editorElement.rootElement.querySelector('.hidden-input')
+    inputElement.type = if @mode is 'insert' then '' else 'password'
+    
     for mode in ['normal', 'insert', 'visual', 'operator-pending']
       @editorElement.classList.toggle("#{mode}-mode", mode is @mode)
     for submode in ['characterwise', 'linewise', 'blockwise', 'replace']
