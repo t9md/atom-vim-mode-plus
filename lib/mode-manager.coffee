@@ -5,6 +5,7 @@ Base = require './base'
 BlockwiseSelection = require './blockwise-selection'
 swrap = require './selection-wrapper'
 {moveCursorLeft} = require './utils'
+settings = require './settings'
 
 class ModeManager
   mode: 'insert' # Native atom is not modal editor and its default is 'insert'
@@ -15,6 +16,14 @@ class ModeManager
 
     @onDidActivateMode ({mode, submode}) =>
       @updateEditorElement()
+
+      if settings.get('disableInputMethodExceptInsertMode')
+        @hiddenInputElement ?= @editorElement.component.hiddenInputComponent.getDomNode()
+        if mode is 'insert'
+          @hiddenInputElement.removeAttribute('type')
+        else
+          @hiddenInputElement.setAttribute('type', 'password')
+
       @vimState.statusBarManager.update(mode, submode)
       @vimState.refreshCursors()
 
