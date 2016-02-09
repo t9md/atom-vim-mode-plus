@@ -20,11 +20,33 @@ class Developer
       'generate-introspection-report': => @generateIntrospectionReport()
       'report-commands-have-no-default-keymap': => @reportCommandsHaveNoDefaultKeymap()
       'toggle-dev-environment': => @toggleDevEnvironment()
+      'reload-packages': => @reloadPackages()
 
     subscriptions = new CompositeDisposable
     for name, fn of commands
       subscriptions.add @addCommand(name, fn)
     subscriptions
+
+  reloadPackages: ->
+    packages = settings.get('devReloadPackages') ? []
+    packages.push('vim-mode-plus')
+    for packName in packages
+      pack = atom.packages.getLoadedPackage(packName)
+
+      if pack?
+        console.log "deactivating #{packName}"
+        atom.packages.deactivatePackage(packName)
+        atom.packages.unloadPackage(packName)
+
+        packPath = pack.path
+        Object.keys(require.cache)
+          .filter (p) ->
+            p.indexOf(packPath + path.sep) is 0
+          .forEach (p) ->
+            delete require.cache[p]
+
+        atom.packages.loadPackage(packName)
+        atom.packages.activatePackage(packName)
 
   toggleDevEnvironment: ->
     return unless editor = atom.workspace.getActiveTextEditor()
