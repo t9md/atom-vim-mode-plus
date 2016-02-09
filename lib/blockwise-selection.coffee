@@ -7,7 +7,6 @@ class BlockwiseSelection
   constructor: (selection) ->
     {@editor} = selection
     @initialize(selection)
-    @updateProperties()
 
   initialize: (selection) ->
     @selections = [selection]
@@ -33,14 +32,12 @@ class BlockwiseSelection
           selection.destroy()
         else
           @selections.push(selection)
-    @updateProperties(reversed: wasReversed)
+    @updateProperties()
+    @reverse() if wasReversed
 
-  updateProperties: ({reversed}={}) ->
-    reversed ?= @isReversed()
-    [head, tail] = if reversed
-      [@getTop(), @getBottom()]
-    else
-      [@getBottom(), @getTop()]
+  updateProperties: ->
+    head = @getHead()
+    tail = @getTail()
 
     for selection in @selections
       swrap(selection).setProperties
@@ -67,7 +64,11 @@ class BlockwiseSelection
     if @isReversed() then @getBottom() else @getTop()
 
   reverse: ->
-    @updateProperties(reversed: not @isReversed())
+    return if @isSingleLine()
+    head = @getHead()
+    tail = @getTail()
+    swrap(head).setProperties(blockwise: head: false, tail: true)
+    swrap(tail).setProperties(blockwise: head: true, tail: false)
 
   getBufferRowRange: ->
     startRow = @getTop().getBufferRowRange()[0]
