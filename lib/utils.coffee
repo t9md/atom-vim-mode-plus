@@ -494,11 +494,12 @@ preserveSelectionStartPoints = (editor) ->
 
 # Reloadable registerElement
 registerElement = (name, options) ->
-  Element = document.createElement(name)
+  element = document.createElement(name)
   # if constructor is HTMLElement, we haven't registerd yet
-  if Element.constructor is HTMLElement
+  if element.constructor is HTMLElement
     Element = document.registerElement(name, options)
   else
+    Element = element.constructor
     Element.prototype = options.prototype if options.prototype?
   Element
 
