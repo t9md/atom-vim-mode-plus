@@ -58,17 +58,13 @@ class BlockwiseSelection
     _.last(@selections)
 
   isReversed: ->
-    (not @isSingleLine()) and @getTail() is @getBottom()
+    if @isSingleLine() then false else swrap(@getBottom()).isBlockwiseTail()
 
   getHead: ->
     if @isReversed() then @getTop() else @getBottom()
 
   getTail: ->
-    _.detect @selections, (selection) ->
-      swrap(selection).isBlockwiseTail()
-
-  hasTail: ->
-    @getTail()?
+    if @isReversed() then @getBottom() else @getTop()
 
   reverse: ->
     @updateProperties(reversed: not @isReversed())
