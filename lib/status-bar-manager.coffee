@@ -17,7 +17,7 @@ class StatusBarManager
   prefix: 'status-bar-vim-mode-plus'
 
   constructor: ->
-    (@container = @div(classList: ['inline-block']))
+    (@container = @div(id: "#{@prefix}-container", classList: ['inline-block']))
     .appendChild(@element = @div(id: @prefix))
 
   initialize: (@statusBar) ->
