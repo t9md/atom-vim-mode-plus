@@ -2,6 +2,7 @@
 emoji = require 'emoji-images'
 
 emojiFolder = 'atom://vim-mode-plus/node_modules/emoji-images/pngs'
+{registerElement} = require './utils'
 settings = require './settings'
 
 class Hover
@@ -113,9 +114,8 @@ class HoverElement extends HTMLElement
     {@model, @lineHeight} = {}
     @remove()
 
-HoverElement = document.registerElement 'vim-mode-plus-hover',
+HoverElement = registerElement "vim-mode-plus-hover",
   prototype: HoverElement.prototype
-  extends:   'div'
 
 module.exports = {
   Hover, HoverElement

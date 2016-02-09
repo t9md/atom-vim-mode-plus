@@ -492,6 +492,16 @@ preserveSelectionStartPoints = (editor) ->
     point = rangeBySelection.get(selection).start
     selection.cursor.setBufferPosition(point)
 
+# Reloadable registerElement
+registerElement = (name, options) ->
+  Element = document.createElement(name)
+  # if constructor is HTMLElement, we haven't registerd yet
+  if Element.constructor is HTMLElement
+    Element = document.registerElement(name, options)
+  else
+    Element.prototype = options.prototype if options.prototype?
+  Element
+
 ElementBuilder =
   includeInto: (target) ->
     for name, value of this when name isnt "includeInto"
@@ -501,7 +511,7 @@ ElementBuilder =
     @createElement 'div', params
 
   span: (params) ->
-    @createElement 'div', params
+    @createElement 'span', params
 
   atomTextEditor: (params) ->
     @createElement 'atom-text-editor', params
@@ -584,6 +594,7 @@ module.exports = {
   getBufferRows
   preserveSelectionStartPoints
   ElementBuilder
+  registerElement
   sortComparable
 
   # Debugging

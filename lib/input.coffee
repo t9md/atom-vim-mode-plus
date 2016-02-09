@@ -1,5 +1,5 @@
 {Emitter, CompositeDisposable} = require 'atom'
-{getCharacterForEvent, ElementBuilder} = require './utils'
+{registerElement, getCharacterForEvent, ElementBuilder} = require './utils'
 packageScope = 'vim-mode-plus'
 searchScope = "#{packageScope}-search"
 
@@ -63,7 +63,6 @@ class InputBase
     else
       @cancel()
 
-
 class InputElementBase extends HTMLElement
   ElementBuilder.includeInto(this)
   klass: null
@@ -98,9 +97,8 @@ class Input extends InputBase
 class InputElement extends InputElementBase
   klass: "#{packageScope}-input"
 
-InputElement = document.registerElement "#{packageScope}-input",
+InputElement = registerElement "#{packageScope}-input",
   prototype: InputElement.prototype
-  extends: 'div',
 
 # SearchInput
 # -------------------------
@@ -177,9 +175,9 @@ class SearchInputElement extends InputElementBase
         attribute: {mini: ''}
     )
 
-SearchInputElement = document.registerElement "#{packageScope}-search-input",
+
+SearchInputElement = registerElement "#{packageScope}-search-input",
   prototype: SearchInputElement.prototype
-  extends: 'div',
 
 module.exports = {
   Input, InputElement,
