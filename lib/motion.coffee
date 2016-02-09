@@ -322,6 +322,7 @@ class MoveToNextWord extends Motion
     allowNextLine = false
     @countTimes =>
       if @operator?.directInstanceof('Change')
+      # if @operator?.constructor.name in ['Change', 'Delete']
         point = @getPointForChange(cursor, {@wordRegex, allowNextLine})
         cursor.setBufferPosition(point)
         allowNextLine = cursor.isAtEndOfLine()
