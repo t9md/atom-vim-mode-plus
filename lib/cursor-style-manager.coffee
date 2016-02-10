@@ -3,6 +3,8 @@
 settings = require './settings'
 swrap = require './selection-wrapper'
 
+lineHeight = null
+
 getDomNode = (editorElement, cursor) ->
   cursorsComponent = editorElement.component.linesComponent.cursorsComponent
   cursorsComponent.cursorNodesById[cursor.id]
@@ -12,12 +14,11 @@ getDomNode = (editorElement, cursor) ->
 getOffset = (submode, selection) ->
   {top, left} = {}
   {cursor} = selection
-  RowHeightInEm = atom.config.get('editor.lineHeight')
   switch submode
     when 'characterwise', 'blockwise'
       unless selection.isReversed()
         if cursor.isAtBeginningOfLine()
-          top = -RowHeightInEm
+          top = -lineHeight
         else
           left = -1
     when 'linewise'
@@ -31,7 +32,7 @@ getOffset = (submode, selection) ->
           screenRows.indexOf(screenPoint.row)
         else
           -(screenRows.reverse().indexOf(screenPoint.row) + 1)
-        top = rows * RowHeightInEm
+        top = rows * lineHeight
         left = screenPoint.column
       else
         # In linwise selection, cursor isAtBeginningOfLine of next row of selected row.
@@ -43,7 +44,7 @@ getOffset = (submode, selection) ->
         left = 0
         unless selection.isReversed()
           if cursor.isAtBeginningOfLine()
-            top = -RowHeightInEm
+            top = -lineHeight
           else
             # This is very special case when very last line is not end with newline("\n")
             left -= cursor.getBufferColumn()
@@ -69,14 +70,17 @@ setStyleOffset = (cursor, {submode, editor, editorElement}) ->
 class CursorStyleManager
   constructor: (@vimState) ->
     {@editorElement, @editor} = @vimState
-    @subscriptions = new CompositeDisposable
+    @lineHeightObserver = atom.config.observe 'editor.lineHeight', (newValue) =>
+      lineHeight = newValue
+      @refresh()
 
   destroy: ->
     @subscriptions.dispose()
-    {@subscriptions} = {}
+    @lineHeightObserver.dispose()
+    {@subscriptions, @lineHeightObserver} = {}
 
   refresh: ->
-    @subscriptions.dispose()
+    @subscriptions?.dispose()
     @subscriptions = new CompositeDisposable
     return unless (@vimState.isMode('visual') and settings.get('showCursorInVisualMode'))
 
