@@ -13,6 +13,7 @@ packageScope = 'vim-mode-plus'
 class Developer
   init: ->
     @devEnvironmentByBuffer = new Map
+    @reloadSubscriptionByBuffer = new Map
 
     commands =
       'toggle-debug': => @toggleDebug()
@@ -21,6 +22,7 @@ class Developer
       'report-commands-have-no-default-keymap': => @reportCommandsHaveNoDefaultKeymap()
       'toggle-dev-environment': => @toggleDevEnvironment()
       'reload-packages': => @reloadPackages()
+      'toggle-reload-packages-on-save': => @toggleReloadPackagesOnSave()
 
     subscriptions = new CompositeDisposable
     for name, fn of commands
@@ -47,6 +49,21 @@ class Developer
 
         atom.packages.loadPackage(packName)
         atom.packages.activatePackage(packName)
+
+  toggleReloadPackagesOnSave: ->
+    return unless editor = atom.workspace.getActiveTextEditor()
+    buffer = editor.getBuffer()
+    fileName = path.basename(editor.getPath())
+
+    if subscription = @reloadSubscriptionByBuffer.get(buffer)
+      subscription.dispose()
+      @reloadSubscriptionByBuffer.delete(buffer)
+      console.log "disposed reloadPackagesOnSave for #{fileName}"
+    else
+      @reloadSubscriptionByBuffer.set buffer, buffer.onDidSave =>
+        console.clear()
+        @reloadPackages()
+      console.log "activated reloadPackagesOnSave for #{fileName}"
 
   toggleDevEnvironment: ->
     return unless editor = atom.workspace.getActiveTextEditor()
