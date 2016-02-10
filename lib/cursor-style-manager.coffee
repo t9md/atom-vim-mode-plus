@@ -3,8 +3,6 @@
 settings = require './settings'
 swrap = require './selection-wrapper'
 
-RowHeightInEm = atom.config.get('editor.lineHeight')
-
 getDomNode = (editorElement, cursor) ->
   cursorsComponent = editorElement.component.linesComponent.cursorsComponent
   cursorsComponent.cursorNodesById[cursor.id]
@@ -14,6 +12,7 @@ getDomNode = (editorElement, cursor) ->
 getOffset = (submode, selection) ->
   {top, left} = {}
   {cursor} = selection
+  RowHeightInEm = atom.config.get('editor.lineHeight')
   switch submode
     when 'characterwise', 'blockwise'
       unless selection.isReversed()
