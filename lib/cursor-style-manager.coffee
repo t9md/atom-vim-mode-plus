@@ -3,7 +3,7 @@
 settings = require './settings'
 swrap = require './selection-wrapper'
 
-RowHeightInEm = 1.5
+RowHeightInEm = atom.config.get('editor.lineHeight')
 
 getDomNode = (editorElement, cursor) ->
   cursorsComponent = editorElement.component.linesComponent.cursorsComponent
