@@ -299,6 +299,7 @@ unfoldAtCursorRow = (cursor) ->
     editor.unfoldBufferRow row
 
 markerOptions = {ivalidate: 'never', persistent: false}
+# Return markers
 flashRanges = (ranges, options) ->
   ranges = [ranges] unless _.isArray(ranges)
   return unless ranges.length
@@ -312,6 +313,7 @@ flashRanges = (ranges, options) ->
   setTimeout  ->
     m.destroy() for m in markers
   , options.timeout
+  markers
 
 # Return valid row from 0 to vimLastBufferRow
 getValidVimBufferRow = (editor, row) ->
