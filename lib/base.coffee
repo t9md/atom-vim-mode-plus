@@ -75,7 +75,7 @@ class Base
 
   # Intended to be used by TextObject or Motion
   isAsOperatorTarget: ->
-    @operator? and this isnt @operator
+    @operator? and not @operator.instanceof('Select')
 
   abort: ->
     throw new OperationAbortedError('Aborted')
@@ -91,8 +91,8 @@ class Base
     @vimState.hasCount()
 
   countTimes: (fn) ->
-    _.times @getCount(), ->
-      fn()
+    _.times @getCount(), (num) ->
+      fn(num)
 
   activateMode: (mode, submode) ->
     @onDidFinishOperation =>
