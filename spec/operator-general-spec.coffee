@@ -160,12 +160,9 @@ describe "Operator general", ->
     describe "when followed by a w", ->
       it "deletes the next word until the end of the line and exits operator-pending mode", ->
         set text: 'abcd efg\nabc', cursor: [0, 5]
-
-        # Incompatibility with VIM. In vim, `w` behaves differently as an
-        # operator than as a motion; it stops at the end of a linie.
         ensure 'dw',
-          text: 'abcd abc'
-          cursor: [0, 5]
+          text: "abcd \nabc"
+          cursor: [0, 4]
           mode: 'normal'
 
       it "deletes to the beginning of the next word", ->
