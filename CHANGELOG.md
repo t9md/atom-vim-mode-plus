@@ -1,3 +1,15 @@
+# 0.20.0
+- Fix: Search flash no longer flash multiple word simultaneously. #153
+- Fix: `flashOnSearch` configuration parameter was not checked on flash. - @crshd
+- Fix: `dw`, `dW` don't go beyond EOL on last movement in single transaction.  #150
+- Fix: Respect and observe `editor.lineHeight` and refresh cursorStyle on change #154. - @crshd, @t9md
+- Internal: New dev-mode command `toggle-reload-packages-on-save` to reload vmp on buffer save.
+- Internal: New dev-mode command `reload-packages` to reload vmp and vmp plugins
+- Internal: Making vmp package hot reload-able to make development easier.
+- New: Provide css id for status-bar container so that user can hide vmp status information completely #152
+- New: New options to disable Input Method(IME) except insert-mode #148.
+- Improve: Full-support for multiple blockwise selections, each blockwise selection is kept as vimState.blockwiseSelections.
+
 # 0.19.1
 - Internal: Allow Operation specific command scope #147.
 - Internal: New `swrawp::switchToLinewise()` util to switch selection temporarily.
