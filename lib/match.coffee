@@ -119,10 +119,11 @@ class Match
       @editor.unfoldBufferRow point.row
 
   flash: ({timeout}={}) ->
-    flashRanges @range,
-      editor: @editor
-      class: 'vim-mode-plus-flash'
-      timeout: timeout ? settings.get('flashOnSearchDuration')
+    if settings.get('flashOnSearch')
+      flashRanges @range,
+        editor: @editor
+        class: 'vim-mode-plus-flash'
+        timeout: timeout ? settings.get('flashOnSearchDuration')
 
   show: ->
     classes = ['vim-mode-plus-search-match'].concat(@getClassList()...)
