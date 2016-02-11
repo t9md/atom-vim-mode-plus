@@ -317,7 +317,6 @@ class MoveToNextWord extends Motion
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
 
     @countTimes (num) =>
-      num++
       isLastCount = (num is lastCount)
       bufferRow = cursor.getBufferRow()
       if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
