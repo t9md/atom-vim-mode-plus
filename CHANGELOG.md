@@ -6,9 +6,9 @@
 - Internal: New dev-mode command `toggle-reload-packages-on-save` to reload vmp on buffer save.
 - Internal: New dev-mode command `reload-packages` to reload vmp and vmp plugins
 - Internal: Making vmp package hot reload-able to make development easier.
-- New: Provide css id for status-bar container so that user can hide vmp status information completely #152
+- New: Provide css id for status-bar container so that user can hide status information completely #152
 - New: New options to disable Input Method(IME) except insert-mode #148.
-- Improve: Full-support for multiple blockwise selections, each blockwise selection is kept as vimState.blockwiseSelections.
+- Improve: Full-support for multiple blockwise selections, each blockwise selections are kept in vimState.blockwiseSelections.
 
 # 0.19.1
 - Internal: Allow Operation specific command scope #147.
