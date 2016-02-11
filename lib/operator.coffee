@@ -154,6 +154,7 @@ class Delete extends Operator
   execute: ->
     @eachSelection (selection) =>
       {cursor} = selection
+      wasLinewise = swrap(selection).isLinewise()
       @setTextToRegisterForSelection(selection)
       selection.deleteSelectedText()
 
@@ -161,7 +162,7 @@ class Delete extends Operator
       if cursor.getBufferPosition().isGreaterThan(vimEof)
         cursor.setBufferPosition([vimEof.row, 0])
 
-      cursor.skipLeadingWhitespace() if @target.isLinewise?()
+      cursor.skipLeadingWhitespace() if wasLinewise
     @activateMode('normal')
 
 class DeleteRight extends Delete
@@ -1023,7 +1024,7 @@ class Change extends ActivateInsertMode
       return
 
     text = ''
-    if @target.instanceof('TextObject')
+    if @target.instanceof('TextObject') or @target.instanceof('Motion')
       text = "\n" if (swrap.detectVisualModeSubmode(@editor) is 'linewise')
     else
       text = "\n" if @target.isLinewise?()

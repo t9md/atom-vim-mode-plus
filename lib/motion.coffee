@@ -298,11 +298,8 @@ class MoveToNextWord extends Motion
   @extend()
   wordRegex: null
 
-  getPoint: (cursor, {isLastCount, wasCursorIsOnWhiteSpace}={}) ->
-    point = if @operator?.directInstanceof('Change') and (not wasCursorIsOnWhiteSpace) and isLastCount
-      cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
-    else
-      cursor.getBeginningOfNextWordBufferPosition({@wordRegex})
+  getPoint: (cursor) ->
+    point = cursor.getBeginningOfNextWordBufferPosition({@wordRegex})
     if cursor.getBufferPosition().isEqual(point) or
         (point.row > getVimLastBufferRow(@editor))
       point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
@@ -317,24 +314,28 @@ class MoveToNextWord extends Motion
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
     lastCount = @getCount()
-    wasCursorIsOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
+    wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
 
     @countTimes (num) =>
       num++
       isLastCount = (num is lastCount)
-
       bufferRow = cursor.getBufferRow()
-      # wasAtEndOfLine = cursor.isAtEndOfLine()
-      if @textToEndOfLineIsAllWhiteSpace(cursor) and not cursorIsAtVimEndOfFile(cursor)
+      if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
         cursor.moveDown()
-        cursor.moveToBeginningOfLine()
-        cursor.skipLeadingWhitespace()
       else
-        cursor.setBufferPosition @getPoint(cursor, {isLastCount, wasCursorIsOnWhiteSpace})
+        if @textToEndOfLineIsAllWhiteSpace(cursor) and not cursorIsAtVimEndOfFile(cursor)
+          cursor.moveDown()
+          cursor.moveToBeginningOfLine()
+          cursor.skipLeadingWhitespace()
+        else
+          point = if @operator?.directInstanceof('Change') and (not wasOnWhiteSpace) and isLastCount
+            cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
+          else
+            @getPoint(cursor)
+          cursor.setBufferPosition(point)
 
-      if @isAsOperatorTarget() and isLastCount and
-          (cursor.getBufferRow() > bufferRow)
-        cursor.setBufferPosition([bufferRow, Infinity])
+        if @isAsOperatorTarget() and isLastCount and (cursor.getBufferRow() > bufferRow)
+          cursor.setBufferPosition([bufferRow, Infinity])
 
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()

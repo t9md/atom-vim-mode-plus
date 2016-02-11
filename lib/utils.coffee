@@ -187,7 +187,7 @@ getTextInScreenRange = (editor, screenRange) ->
 cursorIsOnWhiteSpace = (cursor) ->
   isAllWhiteSpace(getTextAtCursor(cursor))
 
-# return true is moved
+# return true if moved
 moveCursorToNextNonWhitespace = (cursor) ->
   originalPoint = cursor.getBufferPosition()
   while cursorIsOnWhiteSpace(cursor) and (not cursorIsAtVimEndOfFile(cursor))
