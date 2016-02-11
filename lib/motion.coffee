@@ -300,8 +300,8 @@ class MoveToNextWord extends Motion
 
   getPoint: (cursor) ->
     point = cursor.getBeginningOfNextWordBufferPosition({@wordRegex})
-    if cursor.getBufferPosition().isEqual(point) or
-        (point.row > getVimLastBufferRow(@editor))
+    cursorPoint = cursor.getBufferPosition()
+    if point.isEqual(cursorPoint) or (point.row > getVimLastBufferRow(@editor))
       point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
     point
 
