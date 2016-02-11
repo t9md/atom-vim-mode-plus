@@ -1,6 +1,7 @@
 # Refactoring status: 80%
 {getVimState, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
+{inspect} = require 'util'
 
 describe "Operator ActivateInsertMode family", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -68,7 +69,7 @@ describe "Operator ActivateInsertMode family", ->
       editor.insertText 'abc'
       ensure 'escape', text: '12345\nabc\nABCDE'
       set cursor: [2, 3]
-      ensure '.', text: '12345\nabc\nabc\n'
+      ensure '.', text: '12345\nabc\nabc'
 
     it "is undoable", ->
       keystroke 'S'
@@ -107,7 +108,7 @@ describe "Operator ActivateInsertMode family", ->
     describe "when followed by a c", ->
       describe "with autoindent", ->
         beforeEach ->
-          set text: "12345\n  abcde\nABCDE"
+          set text: "12345\n  abcde\nABCDE\n"
           set cursor: [1, 1]
           spyOn(editor, 'shouldAutoIndent').andReturn(true)
           spyOn(editor, 'autoIndentBufferRow').andCallFake (line) ->
@@ -117,28 +118,28 @@ describe "Operator ActivateInsertMode family", ->
         it "deletes the current line and enters insert mode", ->
           set cursor: [1, 1]
           ensure 'cc',
-            text: "12345\n  \nABCDE"
+            text: "12345\n  \nABCDE\n"
             cursor: [1, 2]
             mode: 'insert'
 
         it "is repeatable", ->
           keystroke 'cc'
           editor.insertText("abc")
-          ensure 'escape', text: "12345\n  abc\nABCDE"
+          ensure 'escape', text: "12345\n  abc\nABCDE\n"
           set cursor: [2, 3]
           ensure '.', text: "12345\n  abc\n  abc\n"
 
         it "is undoable", ->
           keystroke 'cc'
           editor.insertText("abc")
-          ensure 'escape', text: "12345\n  abc\nABCDE"
-          ensure 'u', text: "12345\n  abcde\nABCDE", selectedText: ''
+          ensure 'escape', text: "12345\n  abc\nABCDE\n"
+          ensure 'u', text: "12345\n  abcde\nABCDE\n", selectedText: ''
 
       describe "when the cursor is on the last line", ->
         it "deletes the line's content and enters insert mode on the last line", ->
           set cursor: [2, 1]
           ensure 'cc',
-            text: "12345\nabcde\n\n"
+            text: "12345\nabcde\n"
             cursor: [2, 0]
             mode: 'insert'
 
@@ -146,7 +147,7 @@ describe "Operator ActivateInsertMode family", ->
         it "deletes the line's content and enters insert mode", ->
           set text: "12345", cursor: [0, 2]
           ensure 'cc',
-            text: "\n"
+            text: ""
             cursor: [0, 0]
             mode: 'insert'
 
@@ -185,7 +186,7 @@ describe "Operator ActivateInsertMode family", ->
 
     describe "when followed by a G", ->
       beforeEach ->
-        originalText = "12345\nabcde\nABCDE"
+        originalText = "12345\nabcde\nABCDE\n"
         set text: originalText
 
       describe "on the beginning of the second line", ->
@@ -522,4 +523,4 @@ describe "Operator ActivateInsertMode family", ->
         it "[case-c]", -> ensureInsertionCount '3cw', insert: '=', text: "=", cursor: [0, 0]
         it "[case-C]", -> ensureInsertionCount '3C', insert: '=', text: "=", cursor: [0, 0]
         it "[case-s]", -> ensureInsertionCount '3s', insert: '=', text: "=", cursor: [0, 0]
-        it "[case-S]", -> ensureInsertionCount '3S', insert: '=', text: "=\n", cursor: [0, 0]
+        it "[case-S]", -> ensureInsertionCount '3S', insert: '=', text: "=", cursor: [0, 0]
