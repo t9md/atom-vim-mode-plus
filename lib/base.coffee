@@ -92,7 +92,7 @@ class Base
 
   countTimes: (fn) ->
     _.times @getCount(), (num) ->
-      fn(num)
+      fn(num+1)
 
   activateMode: (mode, submode) ->
     @onDidFinishOperation =>
