@@ -10,18 +10,16 @@ VimState = require './vim-state'
 {Hover, HoverElement} = require './hover'
 {Input, InputElement, SearchInput, SearchInputElement} = require './input'
 
-packageScope = 'vim-mode-plus'
-
 module.exports =
   config: settings.config
 
   activate: (state) ->
     @subscriptions = new CompositeDisposable
     @statusBarManager = new StatusBarManager
-    @vimStates = new Map
+    @vimStatesByEditor = new Map
 
     @registerViewProviders()
-    @subscriptions.add Base.init(@provideVimModePlus())
+    @subscribe Base.init(@provideVimModePlus())
     @registerCommands()
 
     if atom.inDevMode()
@@ -31,17 +29,20 @@ module.exports =
     @subscribe atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini()
       vimState = new VimState(editor, @statusBarManager)
-      @vimStates.set(editor, vimState)
-      vimState.onDidDestroy =>
-        @vimStates.delete(editor)
-
-    @subscribe new Disposable =>
-      @vimStates.forEach (vimState) -> vimState.destroy()
+      @vimStatesByEditor.set(editor, vimState)
+      @subscribe editor.onDidDestroy =>
+        vimState.destroy()
+        @vimStatesByEditor.delete(editor)
 
     workspaceElement = atom.views.getView(atom.workspace)
     @subscribe atom.workspace.onDidChangeActivePane ->
       selector = 'vim-mode-plus-pane-maximized'
       workspaceElement.classList.remove(selector)
+
+  deactivate: ->
+    @subscriptions.dispose()
+    @vimStatesByEditor.forEach (vimState) ->
+      vimState.destroy()
 
   subscribe: (args...) ->
     @subscriptions.add args...
@@ -67,26 +68,17 @@ module.exports =
       'set-count-8': -> @setCount(8)
       'set-count-9': -> @setCount(9)
 
-    getState = =>
-      @getEditorState(atom.workspace.getActiveTextEditor())
-
     scope = 'atom-text-editor:not([mini])'
     for name, fn of vimStateCommands
       do (fn) =>
-        @addCommand scope, name, (event) ->
-          fn.bind(getState())(event)
-
-  addCommand: (scope, name, fn) ->
-    @subscribe atom.commands.add scope, "#{packageScope}:#{name}", fn
+        @subscribe atom.commands.add scope, "vim-mode-plus:#{name}", (event) =>
+          fn.call(@getEditorState(event.target.getModel()))
 
   registerViewProviders: ->
     addView = atom.views.addViewProvider.bind(atom.views)
     addView Hover, (model) -> new HoverElement().initialize(model)
     addView Input, (model) -> new InputElement().initialize(model)
     addView SearchInput, (model) -> new SearchInputElement().initialize(model)
-
-  deactivate: ->
-    @subscriptions.dispose()
 
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)
@@ -100,7 +92,7 @@ module.exports =
     globalState
 
   getEditorState: (editor) ->
-    @vimStates.get(editor)
+    @vimStatesByEditor.get(editor)
 
   provideVimModePlus: ->
     Base: Base
