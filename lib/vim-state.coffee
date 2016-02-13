@@ -29,10 +29,6 @@ class VimState
     @editorElement = atom.views.getView(@editor)
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
-
-    @subscriptions.add @editor.onDidDestroy =>
-      @destroy()
-
     @modeManager = new ModeManager(this)
     @count = null
     @mark = new MarkManager(this)
