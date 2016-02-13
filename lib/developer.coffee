@@ -108,8 +108,8 @@ class Developer
       excludeProperties: [
         'getClass', 'extend', 'getParent', 'getAncestors', 'isCommand'
         'getRegistries', 'command', 'reset'
-        'init', 'getCommandName', 'registerCommand',
-        'delegatesProperties', 'subscriptions', 'commandPrefix'
+        'init', 'getCommandName', 'getCommandScope', 'registerCommand',
+        'delegatesProperties', 'subscriptions', 'commandPrefix', 'commandScope'
         'delegatesMethods',
         'delegatesProperty',
         'delegatesMethod',

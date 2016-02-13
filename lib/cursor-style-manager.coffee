@@ -13,7 +13,7 @@ getDomNode = (editorElement, cursor) ->
 # ---------------------------------------
 getOffset = (submode, selection) ->
   {top, left} = {}
-  {cursor} = selection
+  {cursor, editor} = selection
   switch submode
     when 'characterwise', 'blockwise'
       unless selection.isReversed()
@@ -22,7 +22,6 @@ getOffset = (submode, selection) ->
         else
           left = -1
     when 'linewise'
-      {editor} = selection
       bufferPoint = swrap(selection).getCharacterwiseHeadPosition()
       if editor.isSoftWrapped()
         screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
@@ -51,7 +50,7 @@ getOffset = (submode, selection) ->
         left += bufferPoint.column
   {top, left}
 
-setStyleOffset = (cursor, {submode, editor, editorElement}) ->
+setStyleOffset = (cursor, {submode, editorElement}) ->
   domNode = getDomNode(editorElement, cursor)
   # This guard is for test spec, not all spec have dom attached.
   return (new Disposable) unless domNode
@@ -102,6 +101,6 @@ class CursorStyleManager
     @editorElement.component.updateSync()
 
     for cursor in cursorsToShow
-      @subscriptions.add setStyleOffset(cursor, {submode, @editor, @editorElement})
+      @subscriptions.add setStyleOffset(cursor, {submode, @editorElement})
 
 module.exports = CursorStyleManager
