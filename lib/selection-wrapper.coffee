@@ -32,11 +32,7 @@ class SelectionWrapper
 
     {head, tail} = @getProperties().characterwise ? {}
     if head? and tail?
-      @setProperties
-        characterwise:
-          head: tail,
-          tail: head,
-          reversed: @selection.isReversed()
+      @setProperties characterwise: head: tail, tail: head
 
   setReversedState: (reversed) ->
     @setBufferRange @getBufferRange(), {autoscroll: true, reversed, preserveFolds: true}
@@ -93,16 +89,15 @@ class SelectionWrapper
     characterwise:
       head: @selection.getHeadBufferPosition()
       tail: @selection.getTailBufferPosition()
-      reversed: @selection.isReversed()
 
   getCharacterwiseHeadPosition: ->
     @getProperties().characterwise?.head
 
   selectByProperties: (properties) ->
-    {head, tail, reversed} = properties.characterwise
+    {head, tail} = properties.characterwise
     # No problem if head is greater than tail, Range constructor swap start/end.
-    @setBufferRange([head, tail])
-    @setReversedState(reversed)
+    @setBufferRange([tail, head])
+    @setReversedState(true) if head.isLessThan(tail)
 
   restoreCharacterwise: (options={}) ->
     {preserveGoalColumn} = options
