@@ -4,22 +4,31 @@ emoji = require 'emoji-images'
 emojiFolder = 'atom://vim-mode-plus/node_modules/emoji-images/pngs'
 {registerElement} = require './utils'
 settings = require './settings'
+swrap = require './selection-wrapper'
 
 class Hover
   lineHeight: null
   point: null
 
   constructor: (@vimState, @param) ->
+    {@editor, @editorElement} = @vimState
     @text = []
     @view = atom.views.getView(this)
 
-  setPoint: (point=null) ->
-    @point = point ? @vimState.editor.getCursorBufferPosition()
+  setPoint: ->
+    @point = if @vimState.isMode('visual', 'linewise')
+      swrap(@editor.getLastSelection()).getCharacterwiseHeadPosition()
+    else
+      @editor.getCursorBufferPosition()
 
-  add: (text, point) ->
+  getPoint: ->
+    unless @point?
+      @setPoint()
+    @point
+
+  add: (text) ->
     @text.push text
-    @setPoint(point) if point
-    @view.show(@point)
+    @view.show(@getPoint())
 
   replaceLastSection: (text, point) ->
     @text.pop()
