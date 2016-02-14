@@ -1,4 +1,3 @@
-# Refactoring status: 100%
 emoji = require 'emoji-images'
 
 emojiFolder = 'atom://vim-mode-plus/node_modules/emoji-images/pngs'
@@ -20,15 +19,11 @@ class Hover
       swrap(@editor.getLastSelection()).getCharacterwiseHeadPosition()
     else
       @editor.getCursorBufferPosition()
-
-  getPoint: ->
-    unless @point?
-      @setPoint()
     @point
 
-  add: (text) ->
+  add: (text, point) ->
     @text.push text
-    @view.show(@getPoint())
+    @view.show(point ? @setPoint())
 
   replaceLastSection: (text, point) ->
     @text.pop()
