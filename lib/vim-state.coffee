@@ -1,12 +1,16 @@
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range, Point} = require 'atom'
+{basename} = require 'path'
 
 {Hover} = require './hover'
 {Input, SearchInput} = require './input'
 settings = require './settings'
-{haveSomeSelection} = require './utils'
+{
+  haveSomeSelection, getVisibleEditors, getVisibleBufferRange, flashRanges
+} = require './utils'
 swrap = require './selection-wrapper'
+globalState = require './global-state'
 
 OperationStack = require './operation-stack'
 MarkManager = require './mark-manager'
@@ -17,6 +21,7 @@ CursorStyleManager = require './cursor-style-manager'
 
 packageScope = 'vim-mode-plus'
 
+objectID = 0
 module.exports =
 class VimState
   Delegato.includeInto(this)
@@ -25,7 +30,8 @@ class VimState
   @delegatesProperty 'mode', 'submode', toProperty: 'modeManager'
   @delegatesMethods 'isMode', 'activate', toProperty: 'modeManager'
 
-  constructor: (@editor, @statusBarManager) ->
+  constructor: (@main, @editor, @statusBarManager) ->
+    @id = ++objectID
     @editorElement = atom.views.getView(@editor)
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
@@ -43,6 +49,12 @@ class VimState
     @cursorStyleManager = new CursorStyleManager(this)
     @blockwiseSelections = []
     @observeSelection()
+
+    @highlightSearchSubscriptions = new CompositeDisposable
+    @highlightSearchSubscriptions.add @editorElement.onDidChangeScrollTop =>
+      @refreshHighlightSearch('scrolling-refresh')
+    # @highlightSearchSubscriptions.add @editorElement.onDidChangeScrollLeft =>
+    #   @refreshHighlightSearch()
 
     @editorElement.classList.add packageScope
     if settings.get('startInInsertMode')
@@ -136,13 +148,16 @@ class VimState
     @modeManager?.destroy?()
     @operationRecords?.destroy?()
     @register?.destroy?
-
+    @clearHighlightSearch('destroy')
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
       @input, @search, @modeManager, @operationRecords, @register
       @count
       @editor, @editorElement, @subscriptions,
+
+      @highlightSearchPattern, @highlightMarkersByEditor
+      @highlightSearchSubscriptions
     } = {}
     @emitter.emit 'did-destroy'
 
@@ -189,3 +204,36 @@ class VimState
 
   refreshCursors: ->
     @cursorStyleManager.refresh()
+
+  # highlightSearch
+  # -------------------------
+  clearHighlightSearch: (reason) ->
+    console.log "#{@id}: cleared! [#{reason}] #{basename(@editor.getPath())}"
+    for marker in @highlightSearchMarkers ? []
+      marker.destroy()
+    {@highlightSearchMarkers}
+
+  highlightSearch: (pattern, scanRange, reason) ->
+    console.log "#{@id}: highlighting! [#{reason}] #{basename(@editor.getPath())}"
+    ranges = []
+    @editor.scanInBufferRange pattern, scanRange, ({range}) ->
+      ranges.push(range)
+    options = {@editor, type: 'highlight', class: 'vim-mode-plus-search-highlight'}
+    @highlightSearchMarkers = flashRanges(ranges, options)
+    # console.log @highlightSearchMarkers
+    # console.log "#{@id}: range length is #{ranges.length}"
+
+  refreshHighlightSearch: (reason) ->
+    @clearHighlightSearch(reason)
+    if settings.get('highlightSearch') and globalState.searchPattern?
+      if @editor in getVisibleEditors()
+        scanRange = getVisibleBufferRange(@editor)
+        if scanRange
+          @highlightSearch(globalState.searchPattern, scanRange, reason)
+        else
+          # console.log "#{@id}: NOT attached!!!! #{basename(@editor.getPath())}"
+          disposable = @editorElement.onDidAttach =>
+            disposable.dispose()
+            scanRange = getVisibleBufferRange(@editor)
+            # console.log "#{@id}: so attached!!!! #{basename(@editor.getPath())}, #{scanRange.toString()}"
+            @highlightSearch(globalState.searchPattern, scanRange, reason)
