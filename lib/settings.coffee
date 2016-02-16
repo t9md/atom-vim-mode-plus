@@ -11,6 +11,12 @@ class Settings
   set: (param, value) ->
     atom.config.set "#{@scope}.#{param}", value
 
+  toggle: (param) ->
+    @set(param, not @get(param))
+
+  observe: (param, fn) ->
+    atom.config.observe "#{@scope}.#{param}", fn
+
 module.exports = new Settings 'vim-mode-plus',
   setCursorToStartOfChangeOnUndoRedo:
     order: 1
@@ -41,17 +47,21 @@ module.exports = new Settings 'vim-mode-plus',
     order: 7
     type: 'boolean'
     default: false
-  incrementalSearch:
+  highlightSearch:
     order: 8
     type: 'boolean'
     default: false
-  stayOnTransformString:
+  incrementalSearch:
     order: 9
+    type: 'boolean'
+    default: false
+  stayOnTransformString:
+    order: 10
     type: 'boolean'
     default: false
     description: "Don't move cursor after TransformString e.g Toggle, Surround"
   stayOnYank:
-    order: 10
+    order: 11
     type: 'boolean'
     default: false
     description: "Don't move cursor after Yank"

@@ -2,5 +2,6 @@
 module.exports =
   searchHistory: []
   currentSearch: {}
+  searchPattern: null
   currentFind: null
   register: {}

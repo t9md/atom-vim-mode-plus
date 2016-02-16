@@ -230,6 +230,12 @@ atom-text-editor::shadow {
   .vim-mode-plus-search-match.current .region {
     background-color: @syntax-selection-color;
   }
+  .vim-mode-plus-search-highlight .region {
+    .vim-mode-plus.round-box;
+    background-color: transparent;
+    border: 1px solid fadeout(@syntax-result-marker-color, 70%);
+    background-color: @syntax-selection-color;
+  }
 }
 
 // Maximize Pane

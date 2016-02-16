@@ -83,14 +83,22 @@ getIndex = (index, list) ->
   if (index >= 0) then index else (list.length + index)
 
 getVisibleBufferRange = (editor) ->
-  [startRow, endRow] = getView(editor).getVisibleRowRange().map (row) ->
-    editor.bufferRowForScreenRow row
+  [startRow, endRow] = getView(editor).getVisibleRowRange()
+  unless (startRow? and endRow?)
+    console.log 'startRow is = ', startRow
+    console.log "EERRR"
+    return null
+  startRow = editor.bufferRowForScreenRow(startRow)
+  endRow = editor.bufferRowForScreenRow(endRow)
   new Range([startRow, 0], [endRow, Infinity])
 
-# NOTE: depending on getVisibleRowRange
 selectVisibleBy = (editor, entries, fn) ->
   range = getVisibleBufferRange(editor)
   (e for e in entries when range.containsRange(fn(e)))
+
+getVisibleEditors = ->
+  for pane in atom.workspace.getPanes() when editor = pane.getActiveEditor()
+    editor
 
 eachSelection = (editor, fn) ->
   for selection in editor.getSelections()
@@ -302,7 +310,7 @@ markerOptions = {ivalidate: 'never', persistent: false}
 # Return markers
 flashRanges = (ranges, options) ->
   ranges = [ranges] unless _.isArray(ranges)
-  return unless ranges.length
+  return null unless ranges.length
 
   {editor} = options
   markers = (editor.markBufferRange(r, markerOptions) for r in ranges)
@@ -310,9 +318,10 @@ flashRanges = (ranges, options) ->
   decorationOptions = {type: 'highlight', class: options.class}
   editor.decorateMarker(m, decorationOptions) for m in markers
 
-  setTimeout  ->
-    m.destroy() for m in markers
-  , options.timeout
+  if options.timeout?
+    setTimeout  ->
+      m.destroy() for m in markers
+    , options.timeout
   markers
 
 # Return valid row from 0 to vimLastBufferRow
@@ -545,6 +554,7 @@ module.exports = {
   getIndex
   getVisibleBufferRange
   selectVisibleBy
+  getVisibleEditors
   eachSelection
   getNewTextRangeFromCheckpoint
   findIndex
