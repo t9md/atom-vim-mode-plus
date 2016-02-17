@@ -33,10 +33,10 @@ module.exports =
       return if editor.isMini()
       vimState = new VimState(this, editor, @statusBarManager)
       @vimStatesByEditor.set(editor, vimState)
-      editor.onDidDestroy =>
+      @subscribe editor.onDidDestroy =>
         vimState.destroy()
         @vimStatesByEditor.delete(editor)
-      editor.onDidStopChanging =>
+      @subscribe editor.onDidStopChanging =>
         @getEditorState(editor)?.refreshHighlightSearch()
 
     workspaceElement = atom.views.getView(atom.workspace)
