@@ -40,18 +40,16 @@ module.exports =
         @getEditorState(editor)?.refreshHighlightSearch()
 
     workspaceElement = atom.views.getView(atom.workspace)
-    # [FIXME] use onDidStopChangingActivePaneItem
-    @subscribe atom.workspace.onDidChangeActivePane ->
+    @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
       selector = 'vim-mode-plus-pane-maximized'
       workspaceElement.classList.remove(selector)
+
+      if atom.workspace.isTextEditor?(item)
+        @getEditorState(item)?.refreshHighlightSearch()
 
     @onDidSetHighlightSearchPattern =>
       for editor in getVisibleEditors()
         @getEditorState(editor).refreshHighlightSearch()
-
-    @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
-      if atom.workspace.isTextEditor(item)
-        @getEditorState(item)?.refreshHighlightSearch()
 
     @subscribe settings.observe 'highlightSearch', =>
       for editor in getVisibleEditors()
