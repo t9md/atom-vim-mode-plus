@@ -18,11 +18,12 @@ class ModeManager
       @updateEditorElement()
 
       if settings.get('disableInputMethodExceptInsertMode')
-        @hiddenInputElement ?= @editorElement.component.hiddenInputComponent.getDomNode()
-        if mode is 'insert'
-          @hiddenInputElement.removeAttribute('type')
-        else
-          @hiddenInputElement.setAttribute('type', 'password')
+        # [FIXME] See #98.
+        if @hiddenInputElement ?= @editorElement.component?.hiddenInputComponent.getDomNode()
+          if mode is 'insert'
+            @hiddenInputElement.removeAttribute('type')
+          else
+            @hiddenInputElement.setAttribute('type', 'password')
 
       @vimState.statusBarManager.update(mode, submode)
       @vimState.refreshCursors()
@@ -82,7 +83,9 @@ class ModeManager
   # -------------------------
   activateNormalMode: ->
     @vimState.reset()
-    @editorElement.component.setInputEnabled(false)
+    # [FIXME] activateNormalMode is also used for reseting editor state when deactivated.
+    # In this case component is not necessary avaiable see #98.
+    @editorElement.component?.setInputEnabled(false)
     new Disposable
 
   # ActivateInsertMode
