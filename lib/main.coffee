@@ -33,10 +33,10 @@ module.exports =
       return if editor.isMini()
       vimState = new VimState(this, editor, @statusBarManager)
       @vimStatesByEditor.set(editor, vimState)
-      @subscribe editor.onDidDestroy =>
+      editor.onDidDestroy =>
         vimState.destroy()
         @vimStatesByEditor.delete(editor)
-      @subscribe editor.onDidStopChanging =>
+      editor.onDidStopChanging =>
         @getEditorState(editor)?.refreshHighlightSearch()
 
     workspaceElement = atom.views.getView(atom.workspace)
@@ -48,15 +48,17 @@ module.exports =
         @getEditorState(item)?.refreshHighlightSearch()
 
     @onDidSetHighlightSearchPattern =>
-      for editor in getVisibleEditors()
-        @getEditorState(editor).refreshHighlightSearch()
+      @refreshHighlightSearchForVisibleEditors()
 
     @subscribe settings.observe 'highlightSearch', =>
-      for editor in getVisibleEditors()
-        @getEditorState(editor).refreshHighlightSearch()
+      @refreshHighlightSearchForVisibleEditors()
 
   onDidSetHighlightSearchPattern: (fn) -> @emitter.on('did-set-highlight-search-pattern', fn)
   emitDidSetHighlightSearchPattern: (fn) -> @emitter.emit('did-set-highlight-search-pattern')
+
+  refreshHighlightSearchForVisibleEditors: ->
+    for editor in getVisibleEditors()
+      @getEditorState(editor).refreshHighlightSearch()
 
   deactivate: ->
     @subscriptions.dispose()
