@@ -75,6 +75,7 @@ module.exports =
       'vim-mode-plus:clear-highlight-search': =>
         for editor in getVisibleEditors()
           @getEditorState(editor).clearHighlightSearch()
+        globalState.highlightSearchPattern = null
 
       'vim-mode-plus:toggle-highlight-search': ->
         settings.toggle('highlightSearch')
