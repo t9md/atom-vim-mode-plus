@@ -141,7 +141,7 @@ class VimState
     @modeManager?.destroy?()
     @operationRecords?.destroy?()
     @register?.destroy?
-    @clearHighlightSearch('destroy')
+    @clearHighlightSearch()
     @highlightSearchSubscription?.dispose()
     {
       @hover, @hoverSearchCounter, @operationStack,
