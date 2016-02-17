@@ -83,8 +83,7 @@ class ModeManager
   # -------------------------
   activateNormalMode: ->
     @vimState.reset()
-    # [FIXME] activateNormalMode is also used for reseting editor state when deactivated.
-    # In this case component is not necessary avaiable see #98.
+    # [FIXME] Component is not necessary avaiable see #98.
     @editorElement.component?.setInputEnabled(false)
     new Disposable
 
