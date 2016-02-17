@@ -19,7 +19,6 @@ CursorStyleManager = require './cursor-style-manager'
 
 packageScope = 'vim-mode-plus'
 
-objectID = 0
 module.exports =
 class VimState
   Delegato.includeInto(this)
@@ -29,7 +28,6 @@ class VimState
   @delegatesMethods 'isMode', 'activate', toProperty: 'modeManager'
 
   constructor: (@main, @editor, @statusBarManager) ->
-    @id = ++objectID
     @editorElement = atom.views.getView(@editor)
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
