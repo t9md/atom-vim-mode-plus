@@ -6,7 +6,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, SearchInput} = require './input'
 settings = require './settings'
-{haveSomeSelection, flashRanges, getVisibleBufferRange} = require './utils'
+{haveSomeSelection, highlightRanges, getVisibleBufferRange} = require './utils'
 swrap = require './selection-wrapper'
 globalState = require './global-state'
 
@@ -214,7 +214,7 @@ class VimState
     @editor.scanInBufferRange pattern, scanRange, ({range}) ->
       ranges.push(range)
 
-    flashRanges ranges,
+    highlightRanges ranges,
       editor: @editor
       class: 'vim-mode-plus-highlight-search'
 
