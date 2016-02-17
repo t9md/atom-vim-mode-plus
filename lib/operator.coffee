@@ -116,8 +116,7 @@ class Operator extends Base
 
   flash: (ranges) ->
     if @flashTarget and settings.get('flashOnOperate')
-      highlightRanges ranges,
-        editor: @editor
+      highlightRanges @editor, ranges,
         class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnOperateDuration')
 

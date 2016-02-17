@@ -727,9 +727,8 @@ class SearchBase extends Motion
     count = super
     if @isBackwards() then -count else count - 1
 
-  flash: (range, {timeout}={}) ->
-    highlightRanges range,
-      editor: @editor
+  flash: (range, {timeout}) ->
+    highlightRanges @editor, range,
       class: 'vim-mode-plus-flash'
       timeout: timeout
 
