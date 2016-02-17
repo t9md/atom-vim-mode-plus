@@ -220,15 +220,16 @@ atom-text-editor::shadow {
   .vim-mode-plus-search-match .region {
     .vim-mode-plus.round-box;
     background-color: transparent;
-    border: 2px solid @syntax-result-marker-color;
+    border: 1px solid @syntax-result-marker-color;
   }
   .vim-mode-plus-search-match.first .region {
-    border: 2px solid @syntax-color-renamed;
+    border: 1px solid @syntax-color-renamed;
   }
   .vim-mode-plus-search-match.last .region {
-    border: 2px solid @syntax-color-removed;
+    border: 1px solid @syntax-color-removed;
   }
   .vim-mode-plus-search-match.current .region {
+    border-width: 2px;
     background-color: @syntax-selection-color;
   }
   .vim-mode-plus-highlight-search .region {

@@ -6,9 +6,7 @@ _ = require 'underscore-plus'
 {Hover} = require './hover'
 {Input, SearchInput} = require './input'
 settings = require './settings'
-{
-  haveSomeSelection, withVisibleBufferRange, flashRanges
-} = require './utils'
+{haveSomeSelection, flashRanges, getVisibleBufferRange} = require './utils'
 swrap = require './selection-wrapper'
 globalState = require './global-state'
 
@@ -50,7 +48,8 @@ class VimState
     @blockwiseSelections = []
     @observeSelection()
 
-    @highlightSearchSubscriptions = new CompositeDisposable
+    @highlightSearchSubscription = @editorElement.onDidChangeScrollTop =>
+      @refreshHighlightSearch()
 
     @editorElement.classList.add packageScope
     if settings.get('startInInsertMode')
@@ -145,14 +144,14 @@ class VimState
     @operationRecords?.destroy?()
     @register?.destroy?
     @clearHighlightSearch('destroy')
-    @highlightSearchSubscriptions?.dispose()
+    @highlightSearchSubscription?.dispose()
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
       @input, @search, @modeManager, @operationRecords, @register
       @count
       @editor, @editorElement, @subscriptions,
-      @highlightSearchSubscriptions
+      @highlightSearchSubscription
     } = {}
     @emitter.emit 'did-destroy'
 
@@ -209,21 +208,21 @@ class VimState
 
   highlightSearch: ->
     return unless (settings.get('highlightSearch') and globalState.highlightSearchPattern?)
+    scanRange = getVisibleBufferRange(@editor)
+    pattern = globalState.highlightSearchPattern
+    ranges = []
+    @editor.scanInBufferRange pattern, scanRange, ({range}) ->
+      ranges.push(range)
 
-    highlight = (scanRange) =>
-      pattern = globalState.highlightSearchPattern
-      ranges = []
-      @editor.scanInBufferRange pattern, scanRange, ({range}) ->
-        ranges.push(range)
-
-      flashRanges ranges,
-        editor: @editor
-        type: 'highlight'
-        class: 'vim-mode-plus-highlight-search'
-
-    withVisibleBufferRange @editor, (range) =>
-      @highlightSearchMarkers = highlight(range)
+    flashRanges ranges,
+      editor: @editor
+      class: 'vim-mode-plus-highlight-search'
 
   refreshHighlightSearch: ->
+    # NOTE: endRow become undefined if @editorElement is not yet attached.
+    # e.g. Beging called immediately after open file.
+    [startRow, endRow] = @editorElement.getVisibleRowRange()
+    return unless (startRow? and endRow?)
+
     @clearHighlightSearch()
-    @highlightSearch()
+    @highlightSearchMarkers = @highlightSearch()

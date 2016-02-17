@@ -86,8 +86,7 @@ withVisibleBufferRange = (editor, fn) ->
   if range = getVisibleBufferRange(editor)
     fn(range)
   else
-    editorElement = getView(editor)
-    disposable = editorElement.onDidAttach ->
+    disposable = getView(editor).onDidAttach ->
       disposable.dispose()
       range = getVisibleBufferRange(editor)
       fn(range)

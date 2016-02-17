@@ -7,7 +7,7 @@
   "private": true,
   "repository": "https://github.com/t9md/atom-vim-mode-plus",
   "engines": {
-    "atom": ">=1.1.0"
+    "atom": ">=1.4.0"
   },
   "dependencies": {
     "atom-space-pen-views": "^2.1.1",
