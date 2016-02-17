@@ -119,6 +119,7 @@ atom-text-editor.vim-mode-plus.operator-pending-mode.is-focused
 // =========================
 atom-text-editor::shadow {
   .vim-mode-plus-flash .region {
+    z-index: 100;
     background-color: @syntax-selection-flash-color;
   }
   .vim-mode-plus-flash.added .region {
@@ -230,9 +231,8 @@ atom-text-editor::shadow {
   .vim-mode-plus-search-match.current .region {
     background-color: @syntax-selection-color;
   }
-  .vim-mode-plus-search-highlight .region {
+  .vim-mode-plus-highlight-search .region {
     .vim-mode-plus.round-box;
-    background-color: transparent;
     border: 1px solid fadeout(@syntax-result-marker-color, 70%);
     background-color: @syntax-selection-color;
   }

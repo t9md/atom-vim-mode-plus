@@ -9,14 +9,28 @@ settings = require './settings'
 {debug} = require './utils'
 
 packageScope = 'vim-mode-plus'
+getEditorState = null
 
 class Developer
-  init: ->
+  init: (service) ->
+    {getEditorState} = service
     @devEnvironmentByBuffer = new Map
     @reloadSubscriptionByBuffer = new Map
 
     commands =
       'toggle-debug': => @toggleDebug()
+
+      # TODO remove once finished #158
+      'debug-highlight-search': ->
+        globalState = require './global-state'
+        editor = atom.workspace.getActiveTextEditor()
+        vimState = getEditorState(editor)
+        console.log 'highlightSearchPattern', globalState.highlightSearchPattern
+        console.log "vimState's id is #{vimState.id}"
+        console.log "hlmarkers are"
+        vimState.highlightSearchMarkers.forEach (marker) ->
+          console.log marker.getBufferRange().toString()
+
       'open-in-vim': => @openInVim()
       'generate-introspection-report': => @generateIntrospectionReport()
       'report-commands-have-no-default-keymap': => @reportCommandsHaveNoDefaultKeymap()
