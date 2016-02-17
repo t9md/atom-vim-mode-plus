@@ -752,11 +752,10 @@ class SearchBase extends Motion
         @visit(current, null)
 
     if @isComplete()
-      input = @getInput()
-      unless input is ''
-        @vimState.searchHistory.save(@getInput())
-        globalState.searchPattern = @getPattern(@getInput())
-        @vimState.main.emitDidSetSearchPattern()
+      if input = @getInput()
+        @vimState.searchHistory.save(input)
+        globalState.highlightSearchPattern = @getPattern(input)
+        @vimState.main.emitDidSetHighlightSearchPattern()
       @finish()
 
   # If cursor is passed, it move actual move, otherwise

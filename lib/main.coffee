@@ -27,7 +27,7 @@ module.exports =
 
     if atom.inDevMode()
       developer = (new (require './developer'))
-      @subscribe developer.init()
+      @subscribe developer.init(@provideVimModePlus())
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini()
@@ -36,26 +36,28 @@ module.exports =
       @subscribe editor.onDidDestroy =>
         vimState.destroy()
         @vimStatesByEditor.delete(editor)
+      @subscribe editor.onDidStopChanging =>
+        @getEditorState(editor).refreshHighlightSearch()
 
     workspaceElement = atom.views.getView(atom.workspace)
     @subscribe atom.workspace.onDidChangeActivePane ->
       selector = 'vim-mode-plus-pane-maximized'
       workspaceElement.classList.remove(selector)
 
-    @onDidSetSearchPattern =>
+    @onDidSetHighlightSearchPattern =>
       for editor in getVisibleEditors()
-        @getEditorState(editor).refreshHighlightSearch('searchPattern-set')
+        @getEditorState(editor).refreshHighlightSearch()
 
-    @subscribe atom.workspace.onDidChangeActivePaneItem (item) =>
-      if item?.getText? # Check if instance of TextEditor
-        @getEditorState(item).refreshHighlightSearch('did change active Pane')
+    @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
+      if atom.workspace.isTextEditor(item)
+        @getEditorState(item).refreshHighlightSearch?()
 
     @subscribe settings.observe 'highlightSearch', =>
       for editor in getVisibleEditors()
-        @getEditorState(editor).refreshHighlightSearch('config change')
+        @getEditorState(editor).refreshHighlightSearch()
 
-  onDidSetSearchPattern: (fn) -> @emitter.on('did-set-search-pattern', fn)
-  emitDidSetSearchPattern: (fn) -> @emitter.emit('did-set-search-pattern')
+  onDidSetHighlightSearchPattern: (fn) -> @emitter.on('did-set-highlight-search-pattern', fn)
+  emitDidSetHighlightSearchPattern: (fn) -> @emitter.emit('did-set-highlight-search-pattern')
 
   deactivate: ->
     @subscriptions.dispose()

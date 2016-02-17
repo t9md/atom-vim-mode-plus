@@ -82,12 +82,19 @@ getIndex = (index, list) ->
   index = index % list.length
   if (index >= 0) then index else (list.length + index)
 
+withVisibleBufferRange = (editor, fn) ->
+  if range = getVisibleBufferRange(editor)
+    fn(range)
+  else
+    editorElement = getView(editor)
+    disposable = editorElement.onDidAttach ->
+      disposable.dispose()
+      range = getVisibleBufferRange(editor)
+      fn(range)
+
 getVisibleBufferRange = (editor) ->
   [startRow, endRow] = getView(editor).getVisibleRowRange()
-  unless (startRow? and endRow?)
-    console.log 'startRow is = ', startRow
-    console.log "EERRR"
-    return null
+  return null unless (startRow? and endRow?)
   startRow = editor.bufferRowForScreenRow(startRow)
   endRow = editor.bufferRowForScreenRow(endRow)
   new Range([startRow, 0], [endRow, Infinity])
@@ -553,6 +560,7 @@ module.exports = {
   sortRanges
   getIndex
   getVisibleBufferRange
+  withVisibleBufferRange
   selectVisibleBy
   getVisibleEditors
   eachSelection

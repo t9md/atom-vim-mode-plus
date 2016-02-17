@@ -7,7 +7,7 @@ _ = require 'underscore-plus'
 {Input, SearchInput} = require './input'
 settings = require './settings'
 {
-  haveSomeSelection, getVisibleEditors, getVisibleBufferRange, flashRanges
+  haveSomeSelection, withVisibleBufferRange, flashRanges
 } = require './utils'
 swrap = require './selection-wrapper'
 globalState = require './global-state'
@@ -51,10 +51,6 @@ class VimState
     @observeSelection()
 
     @highlightSearchSubscriptions = new CompositeDisposable
-    @highlightSearchSubscriptions.add @editorElement.onDidChangeScrollTop =>
-      @refreshHighlightSearch('scrolling-refresh')
-    # @highlightSearchSubscriptions.add @editorElement.onDidChangeScrollLeft =>
-    #   @refreshHighlightSearch()
 
     @editorElement.classList.add packageScope
     if settings.get('startInInsertMode')
@@ -149,14 +145,13 @@ class VimState
     @operationRecords?.destroy?()
     @register?.destroy?
     @clearHighlightSearch('destroy')
+    @highlightSearchSubscriptions?.dispose()
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
       @input, @search, @modeManager, @operationRecords, @register
       @count
       @editor, @editorElement, @subscriptions,
-
-      @highlightSearchPattern, @highlightMarkersByEditor
       @highlightSearchSubscriptions
     } = {}
     @emitter.emit 'did-destroy'
@@ -207,33 +202,28 @@ class VimState
 
   # highlightSearch
   # -------------------------
-  clearHighlightSearch: (reason) ->
-    console.log "#{@id}: cleared! [#{reason}] #{basename(@editor.getPath())}"
+  clearHighlightSearch: ->
     for marker in @highlightSearchMarkers ? []
       marker.destroy()
-    {@highlightSearchMarkers}
+    {@highlightSearchMarkers} = {}
 
-  highlightSearch: (pattern, scanRange, reason) ->
-    console.log "#{@id}: highlighting! [#{reason}] #{basename(@editor.getPath())}"
-    ranges = []
-    @editor.scanInBufferRange pattern, scanRange, ({range}) ->
-      ranges.push(range)
-    options = {@editor, type: 'highlight', class: 'vim-mode-plus-search-highlight'}
-    @highlightSearchMarkers = flashRanges(ranges, options)
-    # console.log @highlightSearchMarkers
-    # console.log "#{@id}: range length is #{ranges.length}"
+  highlightSearch: ->
+    return unless (settings.get('highlightSearch') and globalState.highlightSearchPattern?)
 
-  refreshHighlightSearch: (reason) ->
-    @clearHighlightSearch(reason)
-    if settings.get('highlightSearch') and globalState.searchPattern?
-      if @editor in getVisibleEditors()
-        scanRange = getVisibleBufferRange(@editor)
-        if scanRange
-          @highlightSearch(globalState.searchPattern, scanRange, reason)
-        else
-          # console.log "#{@id}: NOT attached!!!! #{basename(@editor.getPath())}"
-          disposable = @editorElement.onDidAttach =>
-            disposable.dispose()
-            scanRange = getVisibleBufferRange(@editor)
-            # console.log "#{@id}: so attached!!!! #{basename(@editor.getPath())}, #{scanRange.toString()}"
-            @highlightSearch(globalState.searchPattern, scanRange, reason)
+    highlight = (scanRange) =>
+      pattern = globalState.highlightSearchPattern
+      ranges = []
+      @editor.scanInBufferRange pattern, scanRange, ({range}) ->
+        ranges.push(range)
+
+      flashRanges ranges,
+        editor: @editor
+        type: 'highlight'
+        class: 'vim-mode-plus-highlight-search'
+
+    withVisibleBufferRange @editor, (range) =>
+      @highlightSearchMarkers = highlight(range)
+
+  refreshHighlightSearch: ->
+    @clearHighlightSearch()
+    @highlightSearch()
