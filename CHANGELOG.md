@@ -1,3 +1,12 @@
+# 0.21.0
+- Fix: Bump up engines version to atom 1.4.0 above.
+- Fix: In visual-linewise, position of hover indicator was incorrect.
+- New: highlight last search pattern across all buffer. #158
+  - `highlightSearch` config parameter to enable/disable.
+  - `vim-mode-plus:toggle-highlight-search`: to toggle `highlightSearch` config value.
+  - `vim-mode-plus:clear-highlight-search`: one-time clearing for highlightSearch. equivalent to `:nohlsearch` in pure Vim.
+- Fix: Guard for case when editorElement.component is not available #98
+
 # 0.20.0
 - Fix: Search flash no longer flash multiple word simultaneously. #153
 - Fix: `flashOnSearch` configuration parameter was not checked on flash. - @crshd
