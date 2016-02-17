@@ -83,15 +83,16 @@ class BlockwiseSelection
 
   setBufferRange: (range, options={}) ->
     head = @getHead()
-    for selection in @selections.slice() when selection isnt head
-      @removeSelection(selection)
-    head.setBufferRange(range)
+    @setHeadBufferRange(range, options)
     @initialize(head)
 
   getBufferRange: ->
-    topRange = @getTop().getBufferRange()
-    bottomRange = @getBottom().getBufferRange()
-    new Range(topRange.start, bottomRange.end)
+    start = @getHead().getHeadBufferPosition()
+    end = @getTail().getTailBufferPosition()
+    if @isReversed() is @getHead().isReversed()
+      new Range(start, end)
+    else
+      new Range(start, end).translate([0, -1], [0, +1])
 
   # which must be 'start' or 'end'
   setPositionForSelections: (which) ->
@@ -123,19 +124,13 @@ class BlockwiseSelection
     _.remove(@selections, selection)
     selection.destroy()
 
-  restoreCharacterwise: ->
-    reversed = @isReversed()
+  setHeadBufferRange: (range, options) ->
     head = @getHead()
-    [startRow, endRow] = @getBufferRowRange()
-    {start, end} = head.getBufferRange()
-    range = if @isReversed() isnt head.isReversed()
-      [[startRow, end.column - 1], [endRow, start.column + 1]]
-    else
-      [[startRow, start.column], [endRow, end.column]]
-    head.setBufferRange(range, {reversed})
-    swrap(head).resetProperties()
+    for selection in @selections.slice() when (selection isnt head)
+      @removeSelection(selection)
+    head.setBufferRange(range, options)
 
-    for selection in @selections.slice() when selection isnt head
-      selection.destroy()
+  restoreCharacterwise: ->
+    @setHeadBufferRange(@getBufferRange(), reversed: @isReversed())
 
 module.exports = BlockwiseSelection
