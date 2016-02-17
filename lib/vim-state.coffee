@@ -214,8 +214,7 @@ class VimState
     @editor.scanInBufferRange pattern, scanRange, ({range}) ->
       ranges.push(range)
 
-    highlightRanges ranges,
-      editor: @editor
+    highlightRanges @editor, ranges,
       class: 'vim-mode-plus-highlight-search'
 
   refreshHighlightSearch: ->

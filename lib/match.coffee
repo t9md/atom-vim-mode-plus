@@ -123,8 +123,7 @@ class Match
   flash: ->
     markersForFlash?[0]?.destroy()
     if settings.get('flashOnSearch')
-      markersForFlash = highlightRanges @range,
-        editor: @editor
+      markersForFlash = highlightRanges @editor, @range,
         class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnSearchDuration')
 

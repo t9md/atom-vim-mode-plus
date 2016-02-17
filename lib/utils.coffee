@@ -314,11 +314,10 @@ unfoldAtCursorRow = (cursor) ->
 
 markerOptions = {ivalidate: 'never', persistent: false}
 # Return markers
-highlightRanges = (ranges, options) ->
+highlightRanges = (editor, ranges, options) ->
   ranges = [ranges] unless _.isArray(ranges)
   return null unless ranges.length
 
-  {editor} = options
   markers = (editor.markBufferRange(r, markerOptions) for r in ranges)
 
   decorationOptions = {type: 'highlight', class: options.class}
