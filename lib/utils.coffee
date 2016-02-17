@@ -314,7 +314,7 @@ unfoldAtCursorRow = (cursor) ->
 
 markerOptions = {ivalidate: 'never', persistent: false}
 # Return markers
-flashRanges = (ranges, options) ->
+highlightRanges = (ranges, options) ->
   ranges = [ranges] unless _.isArray(ranges)
   return null unless ranges.length
 
@@ -584,7 +584,7 @@ module.exports = {
   getEolBufferPositionForCursor
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
-  flashRanges
+  highlightRanges
   getValidVimBufferRow
   getValidVimScreenRow
   moveCursorToFirstCharacterAtRow

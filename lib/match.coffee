@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{selectVisibleBy, sortRanges, getIndex, flashRanges} = require './utils'
+{selectVisibleBy, sortRanges, getIndex, highlightRanges} = require './utils'
 settings = require './settings'
 
 class MatchList
@@ -123,7 +123,7 @@ class Match
   flash: ->
     markersForFlash?[0]?.destroy()
     if settings.get('flashOnSearch')
-      markersForFlash = flashRanges @range,
+      markersForFlash = highlightRanges @range,
         editor: @editor
         class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnSearchDuration')

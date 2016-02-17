@@ -15,7 +15,7 @@ globalState = require './global-state'
   getVimLastBufferRow, getVimLastScreenRow
   getValidVimScreenRow
   characterAtScreenPosition
-  flashRanges
+  highlightRanges
   moveCursorToFirstCharacterAtRow
   sortRanges
   getIndentLevelForBufferRow
@@ -728,7 +728,7 @@ class SearchBase extends Motion
     if @isBackwards() then -count else count - 1
 
   flash: (range, {timeout}={}) ->
-    flashRanges range,
+    highlightRanges range,
       editor: @editor
       class: 'vim-mode-plus-flash'
       timeout: timeout

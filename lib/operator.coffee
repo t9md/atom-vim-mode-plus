@@ -8,7 +8,7 @@ _ = require 'underscore-plus'
 {
   haveSomeSelection, getVimEofBufferPosition
   moveCursorLeft, moveCursorRight
-  flashRanges, getNewTextRangeFromCheckpoint
+  highlightRanges, getNewTextRangeFromCheckpoint
   preserveSelectionStartPoints
 } = require './utils'
 swrap = require './selection-wrapper'
@@ -116,7 +116,7 @@ class Operator extends Base
 
   flash: (ranges) ->
     if @flashTarget and settings.get('flashOnOperate')
-      flashRanges ranges,
+      highlightRanges ranges,
         editor: @editor
         class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnOperateDuration')
