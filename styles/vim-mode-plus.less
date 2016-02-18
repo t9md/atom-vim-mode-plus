@@ -119,8 +119,8 @@ atom-text-editor.vim-mode-plus.operator-pending-mode.is-focused
 // =========================
 atom-text-editor::shadow {
   .vim-mode-plus-flash .region {
-    z-index: 100;
-    background-color: @syntax-selection-flash-color;
+    z-index: 1;
+    background-color: fadeout(@syntax-selection-flash-color, 50%);
   }
   .vim-mode-plus-flash.added .region {
     background-color: fadeout(darken(@syntax-color-added, 10%), 50%);
