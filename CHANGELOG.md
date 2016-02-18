@@ -1,3 +1,8 @@
+# 0.21.1
+- Internal: cleanup blockwiseSelection.
+- Fix: #158 When highlight cleared, it should not highlighted again on refreshing event(scroll, switch pane).
+- Fix: #158 Maker default flash color transparent(fadeout 50%) to not hide overlapping text when text color is same as flash color.
+
 # 0.21.0
 - Fix: Bump up engines version to atom 1.4.0 above.
 - Fix: In visual-linewise, position of hover indicator was incorrect.
