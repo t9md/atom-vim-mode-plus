@@ -563,6 +563,7 @@ class Yank extends Operator
 
   execute: ->
     @eachSelection (selection) =>
+      # We need to preserve selection before selection cleared by @restorePoint()
       if selection.isLastSelection() and @isMode('visual')
         @vimState.modeManager.preservePreviousSelection(selection)
       @setTextToRegisterForSelection(selection)
