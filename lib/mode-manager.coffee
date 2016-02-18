@@ -144,14 +144,8 @@ class ModeManager
       @restoreCharacterwiseRange()
       @vimState.clearBlockwiseSelections()
 
-      # Prepare function to restore selection by `gv`
-      properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
-      submode = @submode
-      @restorePreviousSelection = =>
-        selection = @editor.getLastSelection()
-        swrap(selection).selectByProperties(properties)
-        @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
-        submode
+      unless (selection = @editor.getLastSelection()).isEmpty()
+        @preservePreviousSelection(selection)
 
       @editor.getSelections().forEach (selection) ->
         swrap(selection).resetProperties()
@@ -159,6 +153,16 @@ class ModeManager
         if (not selection.isReversed() and not selection.isEmpty())
           selection.selectLeft()
         selection.clear(autoscroll: false)
+
+  # Prepare function to restore selection by `gv`
+  preservePreviousSelection: (selection) ->
+    properties = swrap(selection).detectCharacterwiseProperties()
+    submode = @submode
+    @restorePreviousSelection = =>
+      selection = @editor.getLastSelection()
+      swrap(selection).selectByProperties(properties)
+      @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
+      submode
 
   restoreCharacterwiseRange: ->
     return if @submode is 'characterwise'
