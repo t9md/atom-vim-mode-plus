@@ -1,3 +1,7 @@
+# 0.21.2
+- Fix: #161 `gv` not re-select last selection after Yank in visual-mode.
+- Fix: #163 occasional `Uncaught TypeError: event.target.getModel is not a function` when executing vmp commands.
+
 # 0.21.1
 - Internal: cleanup blockwiseSelection.
 - Fix: #158 When highlight cleared, it should not highlighted again on refreshing event(scroll, switch pane).
