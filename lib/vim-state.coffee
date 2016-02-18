@@ -202,10 +202,9 @@ class VimState
   clearHighlightSearch: ->
     for marker in @highlightSearchMarkers ? []
       marker.destroy()
-    {@highlightSearchMarkers} = {}
+    @highlightSearchMarkers = null
 
   highlightSearch: ->
-    return unless (settings.get('highlightSearch') and globalState.highlightSearchPattern?)
     scanRange = getVisibleBufferRange(@editor)
     pattern = globalState.highlightSearchPattern
     ranges = []
@@ -221,5 +220,6 @@ class VimState
     [startRow, endRow] = @editorElement.getVisibleRowRange()
     return unless (startRow? and endRow?)
 
-    @clearHighlightSearch()
-    @highlightSearchMarkers = @highlightSearch()
+    @clearHighlightSearch() if @highlightSearchMarkers
+    if settings.get('highlightSearch') and globalState.highlightSearchPattern?
+      @highlightSearchMarkers = @highlightSearch()
