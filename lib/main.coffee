@@ -105,8 +105,8 @@ module.exports =
     for name, fn of commands
       do (fn) =>
         @subscribe atom.commands.add scope, "vim-mode-plus:#{name}", (event) =>
-          # FIXME In some situation getModel() is not available. So need guard #163.
-          fn.call(@getEditorState(editor)) if editor = event.target.getModel?()
+          if editor = atom.workspace.getActiveTextEditor()
+            fn.call(@getEditorState(editor))
 
   registerViewProviders: ->
     addView = atom.views.addViewProvider.bind(atom.views)
