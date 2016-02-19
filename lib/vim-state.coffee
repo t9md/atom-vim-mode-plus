@@ -63,6 +63,10 @@ class VimState
   getBlockwiseSelections: ->
     @blockwiseSelections
 
+  getBlockwiseSelectionsOrderedByBufferPosition: ->
+    @getBlockwiseSelections().sort (a, b) ->
+      a.getTop().compare(b.getTop())
+
   clearBlockwiseSelections: ->
     @blockwiseSelections = []
 
