@@ -176,6 +176,6 @@ class ModeManager
         unless @vimState.operationStack.isProcessing()
           for blockwiseSelection in @vimState.getBlockwiseSelections()
             blockwiseSelection.restoreCharacterwise()
-          @vimState.clearBlockwiseSelections()
+        @vimState.clearBlockwiseSelections()
 
 module.exports = ModeManager
