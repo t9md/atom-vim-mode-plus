@@ -81,15 +81,22 @@ class BlockwiseSelection
       @removeSelection(selection)
     head.cursor.setBufferPosition(point)
 
-  setBufferRange: (range, options={}) ->
+  headReversedStateIsInSync: ->
+    @isReversed() is @getHead().isReversed()
+
+  setBufferRange: (range) ->
     head = @getHead()
-    @setHeadBufferRange(range, options)
+    reversed = if @headReversedStateIsInSync()
+      head.isReversed()
+    else
+      not head.isReversed()
+    @setHeadBufferRange(range, {reversed})
     @initialize(head)
 
   getBufferRange: ->
     start = @getHead().getHeadBufferPosition()
     end = @getTail().getTailBufferPosition()
-    if @isReversed() is @getHead().isReversed()
+    if @headReversedStateIsInSync()
       new Range(start, end)
     else
       new Range(start, end).translate([0, -1], [0, +1])
