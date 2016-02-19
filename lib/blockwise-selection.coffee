@@ -48,6 +48,10 @@ class BlockwiseSelection
   isSingleLine: ->
     @selections.length is 1
 
+  getHeight: ->
+    [startRow, endRow] = @getBufferRowRange()
+    (endRow - startRow) + 1
+
   getTop: ->
     @selections[0]
 
