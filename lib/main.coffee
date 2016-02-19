@@ -36,12 +36,13 @@ module.exports =
 
       editorSubscriptions = new CompositeDisposable
       editorSubscriptions.add editor.onDidDestroy =>
-        editorSubscriptions.dispose()
+        @unsubscribe(editorSubscriptions)
         vimState.destroy()
         @vimStatesByEditor.delete(editor)
 
       editorSubscriptions.add editor.onDidStopChanging ->
         vimState.refreshHighlightSearch()
+      @subscribe(editorSubscriptions)
 
     workspaceElement = atom.views.getView(atom.workspace)
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
@@ -76,8 +77,12 @@ module.exports =
     @vimStatesByEditor.forEach (vimState) ->
       vimState.destroy()
 
-  subscribe: (args...) ->
-    @subscriptions.add args...
+  subscribe: (arg) ->
+    @subscriptions.add arg
+
+  unsubscribe: (arg) ->
+    arg.dispose?()
+    @subscriptions.remove arg
 
   registerCommands: ->
     @subscribe atom.commands.add 'atom-text-editor:not([mini])',
