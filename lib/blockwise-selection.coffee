@@ -1,6 +1,7 @@
 {Range} = require 'atom'
 _ = require 'underscore-plus'
 
+{sortRanges} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
@@ -81,12 +82,19 @@ class BlockwiseSelection
 
   setBufferPosition: (point) ->
     head = @getHead()
-    for selection in @selections.slice() when selection isnt head
-      @removeSelection(selection)
+    @clearSelections(except: head)
     head.cursor.setBufferPosition(point)
 
   headReversedStateIsInSync: ->
     @isReversed() is @getHead().isReversed()
+
+  setSelectedBufferRanges: (ranges, {reversed}) ->
+    sortRanges(ranges)
+    range = ranges.shift()
+    @setHeadBufferRange(range, {reversed})
+    for range in ranges
+      @selections.push @editor.addSelectionForScreenRange(range, {reversed})
+    @updateProperties()
 
   setBufferRange: (range) ->
     head = @getHead()
@@ -131,14 +139,18 @@ class BlockwiseSelection
       @removeSelection(@getHead())
     @updateProperties()
 
+  clearSelections: ({except}={}) ->
+    for selection in @selections.slice() when (selection isnt except)
+      @removeSelection(selection)
+
   removeSelection: (selection) ->
     _.remove(@selections, selection)
     selection.destroy()
 
   setHeadBufferRange: (range, options) ->
     head = @getHead()
-    for selection in @selections.slice() when (selection isnt head)
-      @removeSelection(selection)
+    @clearSelections(except: @getHead())
+    swrap(head).resetProperties()
     head.setBufferRange(range, options)
 
   restoreCharacterwise: ->
