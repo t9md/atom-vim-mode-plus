@@ -112,8 +112,12 @@ class Motion extends Base
   normalizeVisualModeCursorPosition: (selection) ->
     if @isMode('visual', 'linewise')
       swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
+
     # We selectRight()ed in visual-mode, so reset this effect here.
-    unless selection.isReversed()
+    # For selection.isEmpty() guard, selection possibily become in case selection is
+    # cleared without calling vimState.modeManager.activate().
+    # e.g. BlockwiseDeleteToLastCharacterOfLine
+    unless selection.isReversed() or selection.isEmpty()
       selection.modifySelection ->
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 

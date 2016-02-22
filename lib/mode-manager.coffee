@@ -142,7 +142,6 @@ class ModeManager
 
     new Disposable =>
       @restoreCharacterwiseRange()
-      @vimState.clearBlockwiseSelections()
 
       unless (selection = @editor.getLastSelection()).isEmpty()
         @preservePreviousSelection(selection)
@@ -171,10 +170,10 @@ class ModeManager
         @editor.getSelections().forEach (selection) ->
           swrap(selection).restoreCharacterwise() unless selection.isEmpty()
       when 'blockwise'
-        # Many VisualBlockwise commands change mode in the middle of processing()
-        # in this case, we dont want to loose multi-cursor.
-        unless @vimState.operationStack.isProcessing()
-          for blockwiseSelection in @vimState.getBlockwiseSelections()
+        for blockwiseSelection in @vimState.getBlockwiseSelections()
+          # When all selection is empty, we don't want to loose multi-cursor
+          # by restoreing characterwise range.
+          unless blockwiseSelection.selections.every((selection) -> selection.isEmpty())
             blockwiseSelection.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
 
