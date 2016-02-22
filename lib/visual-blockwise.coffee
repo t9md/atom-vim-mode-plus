@@ -37,11 +37,8 @@ class BlockwiseDeleteToLastCharacterOfLine extends VisualBlockwise
 
     for bs in @vimState.getBlockwiseSelections()
       bs.setPositionForSelections('start')
+      pointByBlockwiseSelection.set(bs, bs.getTop().getHeadBufferPosition())
 
-      point = bs.getTop().getHeadBufferPosition()
-      pointByBlockwiseSelection.set(bs, point)
-
-    @vimState.activate('normal')
     @new(@delegateTo).execute()
 
     pointByBlockwiseSelection.forEach (point, bs) ->
