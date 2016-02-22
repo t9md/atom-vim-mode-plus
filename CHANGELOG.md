@@ -1,9 +1,10 @@
-# WIP
+# 0.21.3
 - Fix: subscription leak for highlightSearch #158
 - Improve: blockwiseSelection, `getHeight()`, `setSelectedBufferRanges()`.
 - New: `vimState.getBlockwiseSelections()`
 - Fix: Hover place was incorrect when visual-blockwise and its selection is reversed.
 - Internal: Avoid mode change within visual-blockwise and remove dirty `operation.isProcessing()` guard in `modeManager::restoreCharacterwise()`
+- Fix: `MoveToFirstCharacterOfLineDown` and `Up` shold work as buffer-positoin-wise. #166
 
 # 0.21.2
 - Fix: #161 `gv` not re-select last selection after Yank in visual-mode.
