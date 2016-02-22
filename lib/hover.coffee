@@ -15,11 +15,13 @@ class Hover
     @view = atom.views.getView(this)
 
   setPoint: ->
-    @point = if @vimState.isMode('visual', 'linewise')
-      swrap(@editor.getLastSelection()).getCharacterwiseHeadPosition()
-    else
-      @editor.getCursorBufferPosition()
-    @point
+    switch
+      when @vimState.isMode('visual', 'linewise')
+        swrap(@editor.getLastSelection()).getCharacterwiseHeadPosition()
+      when @vimState.isMode('visual', 'blockwise')
+        @vimState.getLastBlockwiseSelections().getHead().getHeadBufferPosition()
+      else
+        @editor.getCursorBufferPosition()
 
   add: (text, point) ->
     @text.push text
