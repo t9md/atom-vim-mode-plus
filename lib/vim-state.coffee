@@ -63,6 +63,9 @@ class VimState
   getBlockwiseSelections: ->
     @blockwiseSelections
 
+  getLastBlockwiseSelections: ->
+    _.last(@blockwiseSelections)
+
   getBlockwiseSelectionsOrderedByBufferPosition: ->
     @getBlockwiseSelections().sort (a, b) ->
       a.getTop().compare(b.getTop())
