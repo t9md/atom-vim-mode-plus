@@ -1,3 +1,10 @@
+# WIP
+- Fix: subscription leak for highlightSearch #158
+- Improve: blockwiseSelection, `getHeight()`, `setSelectedBufferRanges()`.
+- New: `vimState.getBlockwiseSelections()`
+- Fix: Hover place was incorrect when visual-blockwise and its selection is reversed.
+- Internal: Avoid mode change within visual-blockwise and remove dirty `operation.isProcessing()` guard in `modeManager::restoreCharacterwise()`
+
 # 0.21.2
 - Fix: #161 `gv` not re-select last selection after Yank in visual-mode.
 - Fix: #163 occasional `Uncaught TypeError: event.target.getModel is not a function` when executing vmp commands.
