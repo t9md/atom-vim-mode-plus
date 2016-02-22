@@ -304,9 +304,15 @@ moveCursorDown = (cursor, options={}) ->
 
 # FIXME
 moveCursorDownBuffer = (cursor) ->
-  unless getVimLastBufferRow(cursor.editor) is cursor.getBufferRow()
-    point = cursor.getBufferPosition()
+  point = cursor.getBufferPosition()
+  unless getVimLastBufferRow(cursor.editor) is point.row
     cursor.setBufferPosition(point.translate([+1, 0]))
+
+# FIXME
+moveCursorUpBuffer = (cursor) ->
+  point = cursor.getBufferPosition()
+  unless point.row is 0
+    cursor.setBufferPosition(point.translate([-1, 0]))
 
 moveCursorToFirstCharacterAtRow = (cursor, row) ->
   cursor.setBufferPosition([row, 0])
@@ -622,6 +628,7 @@ module.exports = {
   registerElement
   sortComparable
   moveCursorDownBuffer
+  moveCursorUpBuffer
 
   # Debugging
   reportSelection,

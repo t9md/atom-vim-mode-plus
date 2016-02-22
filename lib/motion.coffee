@@ -8,6 +8,7 @@ globalState = require './global-state'
   moveCursorLeft, moveCursorRight
   moveCursorUp, moveCursorDown
   moveCursorDownBuffer
+  moveCursorUpBuffer
   unfoldAtCursorRow
   pointIsAtEndOfLine,
   cursorIsAtVimEndOfFile
@@ -449,7 +450,7 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   linewise: true
   moveCursor: (cursor) ->
     @countTimes ->
-      moveCursorUp(cursor)
+      moveCursorUpBuffer(cursor)
     super
 
 class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
