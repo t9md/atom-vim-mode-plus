@@ -289,24 +289,28 @@ describe "Operator TransformString", ->
             'y s': 'vim-mode-plus:surround'
           , 100
 
-      it "surround text object with ( and repeatable", ->
-        ensure ['ysiw', char: '('],
+      it "surround text object with ) and repeatable", ->
+        ensure ['ysiw', char: ')'],
           text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]
         ensure 'j.',
           text: "(apple)\n(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
-      it "surround text object with { and repeatable", ->
-        ensure ['ysiw', char: '{'],
+      it "surround text object with } and repeatable", ->
+        ensure ['ysiw', char: '}'],
           text: "{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]
         ensure 'j.',
           text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
       it "surround linewise", ->
-        ensure ['ysys', char: '{'],
+        ensure ['ysys', char: '}'],
           text: "{\napple\n}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]
         ensure '3j.',
           text: "{\napple\n}\n{\npairs: [brackets]\n}\npairs: [brackets]\n( multi\n  line )"
+      it "surround text object with ( and space", ->
+        ensure ['ysiw', char: '('],
+          text: "( apple )\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
+          cursor: [0, 0]
 
     describe 'map-surround', ->
       beforeEach ->
@@ -327,12 +331,12 @@ describe "Operator TransformString", ->
           'atom-text-editor.vim-mode-plus.visual-mode':
             'm s':  'vim-mode-plus:map-surround'
       it "surround text for each word in target case-1", ->
-        ensure ['msip', char: '('],
+        ensure ['msip', char: ')'],
           text: "\n(apple)\n(pairs) (tomato)\n(orange)\n(milk)\n"
           cursor: [1, 0]
       it "surround text for each word in target case-2", ->
         set cursor: [2, 1]
-        ensure ['msil', char: '<'],
+        ensure ['msil', char: '>'],
           text: '\napple\n<pairs> <tomato>\norange\nmilk\n'
           cursor: [2, 0]
       it "surround text for each word in visual selection", ->
@@ -348,14 +352,26 @@ describe "Operator TransformString", ->
         set cursor: [1, 8]
 
       it "delete surrounded chars and repeatable", ->
-        ensure ['ds', char: '['],
+        ensure ['ds', char: ']'],
           text: "apple\npairs: brackets\npairs: [brackets]\n( multi\n  line )"
         ensure 'jl.',
           text: "apple\npairs: brackets\npairs: brackets\n( multi\n  line )"
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
-        ensure ['ds', char: '('],
+        ensure ['ds', char: ')'],
           text: "apple\npairs: [brackets]\npairs: [brackets]\nmulti\n line "
+      it "delete surrounded chars and spaces", ->
+        set
+          text: """
+            apple
+            pairs: [   brackets   ]
+            pairs: [   brackets   ]
+            ( multi
+              line )
+            """
+          cursor: [1, 8]
+        ensure ['ds', char: '['],
+          text: "apple\npairs: brackets\npairs: [   brackets   ]\n( multi\n  line )"
 
     describe 'change srurround', ->
       beforeEach ->
@@ -372,7 +388,7 @@ describe "Operator TransformString", ->
             """
           cursorBuffer: [0, 1]
       it "change surrounded chars and repeatable", ->
-        ensure ['cs', char: '(['],
+        ensure ['cs', char: ')]'],
           text: """
             [apple]
             (grape)
@@ -387,19 +403,43 @@ describe "Operator TransformString", ->
             {orange}
             """
       it "change surrounded chars", ->
-        ensure ['jjcs', char: '<"'],
+        ensure ['jjcs', char: '>"'],
           text: """
             (apple)
             (grape)
             "lemmon"
             {orange}
             """
-        ensure ['jlcs', char: '{!'],
+        ensure ['jlcs', char: '}!'],
           text: """
             (apple)
             (grape)
             "lemmon"
             !orange!
+            """
+      it "change surrounded chars and add space", ->
+        ensure ['cs', char: ')['],
+          text: """
+            [ apple ]
+            (grape)
+            <lemmon>
+            {orange}
+            """
+      it "remove surrounded space", ->
+        set
+          text: """
+            (   apple   )
+            (grape)
+            <lemmon>
+            {orange}
+            """
+          cursorBuffer: [0, 1]
+        ensure ['cs', char: '()'],
+          text: """
+            (apple)
+            (grape)
+            <lemmon>
+            {orange}
             """
 
     describe 'surround-word', ->
@@ -408,14 +448,14 @@ describe "Operator TransformString", ->
           'atom-text-editor.vim-mode-plus.normal-mode':
             'y s w': 'vim-mode-plus:surround-word'
 
-      it "surround a word with ( and repeatable", ->
-        ensure ['ysw', char: '('],
+      it "surround a word with ) and repeatable", ->
+        ensure ['ysw', char: ')'],
           text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]
         ensure 'j.',
           text: "(apple)\n(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
-      it "surround a word with { and repeatable", ->
-        ensure ['ysw', char: '{'],
+      it "surround a word with } and repeatable", ->
+        ensure ['ysw', char: '}'],
           text: "{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]
         ensure 'j.',
@@ -457,6 +497,19 @@ describe "Operator TransformString", ->
         ensure 'ds',
           text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\nmulti\n line '
 
+      it "delete surrounded any pair found and spaces", ->
+        set
+          text: """
+            apple
+            (pairs: [   brackets   ])
+            {pairs "s" [   brackets   ]}
+            ( multi
+              line )
+            """
+          cursor: [1, 9]
+        ensure 'ds',
+          text: 'apple\n(pairs:    brackets   )\n{pairs "s" [   brackets   ]}\n( multi\n  line )'
+
     describe 'change surround-any-pair', ->
       beforeEach ->
         set
@@ -473,12 +526,15 @@ describe "Operator TransformString", ->
             'c s': 'vim-mode-plus:change-surround-any-pair'
 
       it "change any surrounded pair found and repeatable", ->
-        ensure ['cs', char: '<'],
+        ensure ['cs', char: '>'],
           text: "<apple>\n(grape)\n<lemmon>\n{orange}"
         ensure 'j.',
           text: "<apple>\n<grape>\n<lemmon>\n{orange}"
         ensure 'jj.',
           text: "<apple>\n<grape>\n<lemmon>\n<orange>"
+      it "change any surrounded pair found and space", ->
+        ensure ['cs', char: '<'],
+          text: "< apple >\n(grape)\n<lemmon>\n{orange}"
 
   describe 'ReplaceWithRegister', ->
     originalText = null

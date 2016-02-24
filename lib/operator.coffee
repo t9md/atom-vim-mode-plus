@@ -465,9 +465,17 @@ class Surround extends TransformString
   onConfirm: (@input) ->
     @processOperation()
 
-  getPair: (input) ->
+  getPair: (input, withSpace = false) ->
     pair = _.detect @pairs, (pair) -> input in pair
     pair ?= [input, input]
+    if withSpace
+      [pair[0] + ' ', ' ' + pair[1]]
+    else
+      pair
+
+  isWithSpace: (input) ->
+    pair = _.detect @pairs, (pair) -> input in pair
+    pair?[0] is input
 
   surround: (text, pair) ->
     [open, close] = pair
@@ -477,7 +485,7 @@ class Surround extends TransformString
     open + text + close
 
   getNewText: (text) ->
-    @surround text, @getPair(@input)
+    @surround text, @getPair(@input, @isWithSpace(@input))
 
 class SurroundWord extends Surround
   @extend()
@@ -513,7 +521,8 @@ class DeleteSurround extends Surround
     @processOperation()
 
   getNewText: (text) ->
-    text[1...-1]
+    newText = text[1...-1]
+    if @isWithSpace(@input) then newText.trim() else newText
 
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
@@ -531,7 +540,7 @@ class ChangeSurround extends DeleteSurround
     super(from)
 
   getNewText: (text) ->
-    @surround super(text), @getPair(@char)
+    @surround super(text), @getPair(@char, @isWithSpace(@char))
 
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
