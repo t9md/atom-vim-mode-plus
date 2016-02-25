@@ -224,11 +224,11 @@ getBufferRows = (editor, {startRow, direction, includeStartRow}) ->
 # ends with newline char.
 # But in Vim, curor can NOT past last newline. EOF is next position of very last character.
 getVimEofBufferPosition = (editor) ->
-  row = editor.getLastBufferRow()
-  if editor.bufferRangeForBufferRow(row).isEmpty()
-    getEolBufferPositionForRow(editor, Math.max(0, row - 1))
+  eof = editor.getEofBufferPosition()
+  if eof.column is 0
+    getEolBufferPositionForRow(editor, Math.max(0, eof.row - 1))
   else
-    editor.getEofBufferPosition()
+    eof
 
 pointIsAtVimEndOfFile = (editor, point) ->
   getVimEofBufferPosition(editor).isEqual(point)
