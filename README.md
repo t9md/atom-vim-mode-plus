@@ -26,7 +26,7 @@ As you can see in commit history, this project is originally started by forking 
 
 # FAQ
 
-### Why fork? why not directly contribute to official vim-mode.
+### Why fork? why not directly contribute to official vim-mode?
 
 - Changes are too big.
 - Some features are too experimental to merge official vim-mode.
