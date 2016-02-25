@@ -39,62 +39,68 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'string'
     default: '-?[0-9]+'
     description: 'Used to find number in ctrl-a/ctrl-x. To ignore "-"(minus) char in string like "identifier-1" use "(?:\\B-)?[0-9]+"'
-  showCursorInVisualMode:
+  addSpaceOnSurroundChars:
     order: 6
+    type: 'array'
+    items: type: 'string'
+    default: []
+    description: 'comma separated list of character, which add additional space inside when surround.'
+  showCursorInVisualMode:
+    order: 7
     type: 'boolean'
     default: true
   useSmartcaseForSearch:
-    order: 7
-    type: 'boolean'
-    default: false
-  highlightSearch:
     order: 8
     type: 'boolean'
     default: false
-  incrementalSearch:
+  highlightSearch:
     order: 9
     type: 'boolean'
     default: false
-  stayOnTransformString:
+  incrementalSearch:
     order: 10
+    type: 'boolean'
+    default: false
+  stayOnTransformString:
+    order: 11
     type: 'boolean'
     default: false
     description: "Don't move cursor after TransformString e.g Toggle, Surround"
   stayOnYank:
-    order: 11
+    order: 12
     type: 'boolean'
     default: false
     description: "Don't move cursor after Yank"
   flashOnUndoRedo:
-    order: 14
+    order: 15
     type: 'boolean'
     default: false
   flashOnUndoRedoDuration:
-    order: 15
+    order: 16
     type: 'integer'
     default: 100
     description: "Duration(msec) for flash"
   flashOnOperate:
-    order: 16
+    order: 17
     type: 'boolean'
     default: true
   flashOnOperateDuration:
-    order: 17
+    order: 18
     type: 'integer'
     default: 100
     description: "Duration(msec) for flash"
   flashOnOperateBlacklist:
-    order: 18
+    order: 19
     type: 'array'
     items: type: 'string'
     default: []
     description: 'comma separated list of operator class name to disable flash e.g. "Yank, AutoIndent"'
   flashOnSearch:
-    order: 19
+    order: 20
     type: 'boolean'
     default: true
   flashOnSearchDuration:
-    order: 20
+    order: 21
     type: 'integer'
     default: 300
     description: "Duration(msec) for search flash"
