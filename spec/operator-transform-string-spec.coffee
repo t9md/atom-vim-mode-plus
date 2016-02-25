@@ -308,6 +308,20 @@ describe "Operator TransformString", ->
         ensure '3j.',
           text: "{\napple\n}\n{\npairs: [brackets]\n}\npairs: [brackets]\n( multi\n  line )"
 
+      describe 'addSpaceOnSurroundChars setting', ->
+        beforeEach ->
+          set
+            text: "apple\norange\nlemmon"
+            cursorBuffer: [0, 0]
+
+        it "add additional space inside pair char when surround", ->
+          settings.set('addSpaceOnSurroundChars', ['(', '{', '['])
+          ensure ['ysiw', char: '('], text: "( apple )\norange\nlemmon"
+          keystroke 'j'
+          ensure ['ysiw', char: '{'], text: "( apple )\n{ orange }\nlemmon"
+          keystroke 'j'
+          ensure ['ysiw', char: '['], text: "( apple )\n{ orange }\n[ lemmon ]"
+
     describe 'map-surround', ->
       beforeEach ->
         set
@@ -355,7 +369,16 @@ describe "Operator TransformString", ->
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
         ensure ['ds', char: '('],
-          text: "apple\npairs: [brackets]\npairs: [brackets]\nmulti\n line "
+          text: "apple\npairs: [brackets]\npairs: [brackets]\nmulti\n  line"
+      it "delete surrounded chars and trim padding spaces", ->
+        set
+          text: """
+            ( apple )
+            {  orange   }\n
+            """
+          cursor: [0, 0]
+        ensure ['ds', char: '('], text: "apple\n{  orange   }\n"
+        ensure ['jds', char: '{'], text: "apple\norange\n"
 
     describe 'change srurround', ->
       beforeEach ->
@@ -455,7 +478,7 @@ describe "Operator TransformString", ->
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
         ensure 'ds',
-          text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\nmulti\n line '
+          text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\nmulti\n  line'
 
     describe 'change surround-any-pair', ->
       beforeEach ->

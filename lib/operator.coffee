@@ -474,7 +474,11 @@ class Surround extends TransformString
     if LineEndingRegExp.test(text)
       open += "\n"
       close += "\n"
-    open + text + close
+
+    if @input in settings.get('addSpaceOnSurroundChars')
+      open + ' ' + text + ' ' + close
+    else
+      open + text + close
 
   getNewText: (text) ->
     @surround text, @getPair(@input)
@@ -513,7 +517,7 @@ class DeleteSurround extends Surround
     @processOperation()
 
   getNewText: (text) ->
-    text[1...-1]
+    text[1...-1].trim()
 
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
