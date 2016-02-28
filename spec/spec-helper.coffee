@@ -355,6 +355,7 @@ class VimEditor
             editor.insertText(k.search)
             atom.commands.dispatch(editorElement, 'core:confirm')
           when k.ctrl? then _keystroke(k.ctrl, {ctrl: true, element})
+          when k.cmd? then _keystroke(k.cmd, {meta: true, element})
           when k.raw? then _keystroke(k.raw, {raw: true, element})
     if mocked
       unmockPlatform(element)
