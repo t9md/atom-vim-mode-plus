@@ -40,6 +40,10 @@ class InputBase
     @finished = false
     @view.panel.show()
     @editorElement.focus()
+    # Cancel on tab switch
+    disposable = atom.workspace.onDidChangeActivePaneItem =>
+      disposable.dispose()
+      @cancel() unless @finished
 
   unfocus: ->
     @finished = true
