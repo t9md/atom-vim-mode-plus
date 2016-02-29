@@ -92,13 +92,12 @@ class CursorStyleManager
     # But corresponding cursorsComponent(HTML element) is added in sync.
     # So to modify style of cursorsComponent, we have to make sure corresponding cursorsComponent
     # is available by component in sync to model.
-    @editorElement.component.updateSync() if submode is 'blockwise'
+    @editorElement.component.updateSync()
 
     # [FIXME] In spec mode, we skip here since not all spec have dom attached.
     return if isSpecMode
 
-    for cursor in cursorsToShow
-      cursorNode = getCursorNode(@editorElement, cursor)
+    for cursor in cursorsToShow when cursorNode = getCursorNode(@editorElement, cursor)
       @subscriptions.add setStyle(cursorNode.style, getOffset(submode, cursor))
 
 module.exports = CursorStyleManager

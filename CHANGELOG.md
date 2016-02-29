@@ -1,9 +1,12 @@
+# 0.22.1
+- Fix: Quick fix for degradation for issue cursorDOM node is not exits #178
+
 # 0.22.0
 - New: Add space when surround if input char is in `charactersToAddSpaceOnSurround`. #171
 - Improve: Cancel search when tab was switched in the middle of searching.
 - Internal: cmd keystroke support for spec helper
 - Improve: Warn user when useShadowDOM disabled #177
-- Fix: Prevent ReplaceModeBackspace is invoked except from replace-mode #175 
+- Fix: Prevent ReplaceModeBackspace is invoked except from replace-mode #175
 
 # 0.21.3
 - Fix: subscription leak for highlightSearch #158
