@@ -116,6 +116,7 @@ class ToggleFold extends Misc
     @editor.toggleFoldAtBufferRow row
 
 class ReplaceModeBackspace extends Misc
+  @commandScope: 'atom-text-editor.vim-mode-plus.insert-mode.replace'
   @extend()
   execute: ->
     @editor.getSelections().forEach (selection) =>
