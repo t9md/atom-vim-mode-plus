@@ -308,14 +308,14 @@ describe "Operator TransformString", ->
         ensure '3j.',
           text: "{\napple\n}\n{\npairs: [brackets]\n}\npairs: [brackets]\n( multi\n  line )"
 
-      describe 'addSpaceOnSurroundChars setting', ->
+      describe 'charactersToAddSpaceOnSurround setting', ->
         beforeEach ->
           set
             text: "apple\norange\nlemmon"
             cursorBuffer: [0, 0]
 
         it "add additional space inside pair char when surround", ->
-          settings.set('addSpaceOnSurroundChars', ['(', '{', '['])
+          settings.set('charactersToAddSpaceOnSurround', ['(', '{', '['])
           ensure ['ysiw', char: '('], text: "( apple )\norange\nlemmon"
           keystroke 'j'
           ensure ['ysiw', char: '{'], text: "( apple )\n{ orange }\nlemmon"

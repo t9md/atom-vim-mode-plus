@@ -475,7 +475,8 @@ class Surround extends TransformString
       open += "\n"
       close += "\n"
 
-    if @input in settings.get('addSpaceOnSurroundChars')
+    # if @input in settings.get('charactersToAddSpaceOnSurround')
+    if @input in settings.get('charactersToAddSpaceOnSurround')
       open + ' ' + text + ' ' + close
     else
       open + text + close
