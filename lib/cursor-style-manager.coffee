@@ -2,18 +2,19 @@
 
 settings = require './settings'
 swrap = require './selection-wrapper'
+isSpecMode = atom.inSpecMode()
 
 lineHeight = null
 
-getDomNode = (editorElement, cursor) ->
+getCursorNode = (editorElement, cursor) ->
   cursorsComponent = editorElement.component.linesComponent.cursorsComponent
   cursorsComponent.cursorNodesById[cursor.id]
 
 # Return cursor style offset(top, left)
 # ---------------------------------------
-getOffset = (submode, selection) ->
+getOffset = (submode, cursor) ->
   {top, left} = {}
-  {cursor, editor} = selection
+  {selection, editor} = cursor
   switch submode
     when 'characterwise', 'blockwise'
       unless selection.isReversed()
@@ -50,16 +51,9 @@ getOffset = (submode, selection) ->
         left += bufferPoint.column
   {top, left}
 
-setStyleOffset = (cursor, {submode, editorElement}) ->
-  domNode = getDomNode(editorElement, cursor)
-  # This guard is for test spec, not all spec have dom attached.
-  return (new Disposable) unless domNode
-
-  {style} = domNode
-  {left, top} = getOffset(submode, cursor.selection)
+setStyle = (style, {top, left}) ->
   style.setProperty('top', "#{top}em") if top?
   style.setProperty('left', "#{left}ch") if left?
-
   new Disposable ->
     style.removeProperty('top')
     style.removeProperty('left')
@@ -74,11 +68,12 @@ class CursorStyleManager
       @refresh()
 
   destroy: ->
-    @subscriptions.dispose()
+    @subscriptions?.dispose()
     @lineHeightObserver.dispose()
     {@subscriptions, @lineHeightObserver} = {}
 
   refresh: ->
+    return if isSpecMode
     {submode} = @vimState
     @subscriptions?.dispose()
     @subscriptions = new CompositeDisposable
@@ -86,8 +81,10 @@ class CursorStyleManager
 
     cursors = cursorsToShow = @editor.getCursors()
     if submode is 'blockwise'
-      cursorsToShow = @vimState.blockwiseSelections.map (bs) -> bs.getHead().cursor
+      cursorsToShow = @vimState.getBlockwiseSelections.map (bs) -> bs.getHead().cursor
+    @subscriptions.add(@updateCursorStyle({submode, cursors, cursorsToShow})...)
 
+  updateCursorStyle: ({submode, cursors, cursorsToShow}) ->
     for cursor in cursors
       if cursor in cursorsToShow
         cursor.setVisible(true) unless cursor.isVisible()
@@ -98,9 +95,11 @@ class CursorStyleManager
     # But corresponding cursorsComponent(HTML element) is added in sync.
     # So to modify style of cursorsComponent, we have to make sure corresponding cursorsComponent
     # is available by component in sync to model.
-    @editorElement.component.updateSync()
+    if submode is 'blockwise'
+      @editorElement.component.updateSync()
 
-    for cursor in cursorsToShow
-      @subscriptions.add setStyleOffset(cursor, {submode, @editorElement})
+    cursorsToShow.map (cursor) =>
+      cursorNode = getCursorNode(@editorElement, cursor)
+      setStyle(cursorNode.style, getOffset(submode, cursor))
 
 module.exports = CursorStyleManager
