@@ -61,6 +61,15 @@ module.exports =
       else
         @clearHighlightSearchForEditors()
 
+    unless atom.config.get('editor.useShadowDOM')
+      message = """
+      vim-mode-plus:
+      - ShadowDOM disabled.
+      - You must enable `editor.useShadowDOM` from setting-view to use this package.
+      - Restart require after change setting.
+      """
+      atom.notifications.addWarning message, dismissable: true
+
   onDidSetHighlightSearchPattern: (fn) -> @emitter.on('did-set-highlight-search-pattern', fn)
   emitDidSetHighlightSearchPattern: (fn) -> @emitter.emit('did-set-highlight-search-pattern')
 
