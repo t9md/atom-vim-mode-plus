@@ -1,7 +1,7 @@
 {Range} = require 'atom'
 _ = require 'underscore-plus'
 
-{sortRanges} = require './utils'
+{sortRanges, getBufferRows} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
@@ -15,8 +15,8 @@ class BlockwiseSelection
 
     # If selection is single line we don't need to add selection.
     # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
-    unless selection.isSingleScreenLine()
-      range = selection.getScreenRange()
+    unless swrap(selection).isSingleRow()
+      range = selection.getBufferRange()
       if range.start.column >= range.end.column
         reversed = not reversed
         range = range.translate([0, 1], [0, -1])
@@ -27,7 +27,7 @@ class BlockwiseSelection
 
       selection.setBufferRange(ranges.shift(), {reversed})
       newSelections = ranges.map (range) =>
-        @editor.addSelectionForScreenRange(range, {reversed})
+        @editor.addSelectionForBufferRange(range, {reversed})
       for selection in newSelections
         if selection.isEmpty()
           selection.destroy()
@@ -93,7 +93,7 @@ class BlockwiseSelection
     range = ranges.shift()
     @setHeadBufferRange(range, {reversed})
     for range in ranges
-      @selections.push @editor.addSelectionForScreenRange(range, {reversed})
+      @selections.push @editor.addSelectionForBufferRange(range, {reversed})
     @updateProperties()
 
   setBufferRange: (range) ->
@@ -119,6 +119,24 @@ class BlockwiseSelection
       point = selection.getBufferRange()[which]
       selection.cursor.setBufferPosition(point)
 
+  # Return max column in all selections
+  getGoalColumn: ->
+    columns = (selection.getBufferRange().end.column for selection in @selections)
+    Math.max(columns...)
+
+  addSelection: (baseSelection, direction) ->
+    {start, end} = baseSelection.getBufferRange()
+    _direction = switch direction
+      when 'up' then 'previous'
+      when 'down' then 'next'
+    options = {startRow: end.row, direction: _direction, includeStartRow: false}
+    for row in getBufferRows(@editor, options)
+      range = [[row, start.column], [row, @getGoalColumn()]]
+      unless (clippedRange = @editor.clipBufferRange(range)).isEmpty()
+        reversed = @getTail().isReversed()
+        return @editor.addSelectionForBufferRange(range, {reversed})
+    null
+
   moveSelection: (direction) ->
     isExpanding = =>
       return true if @isSingleLine()
@@ -129,12 +147,11 @@ class BlockwiseSelection
     if isExpanding()
       switch direction
         when 'up'
-          @getTop().addSelectionAbove()
-          @selections.unshift(selection = @editor.getLastSelection())
+          if selection = @addSelection(@getTop(), direction)
+            @selections.unshift(selection)
         when 'down'
-          @getBottom().addSelectionBelow()
-          @selections.push(selection = @editor.getLastSelection())
-      swrap(selection).setReversedState(@getTail().isReversed())
+          if selection = @addSelection(@getBottom(), direction)
+            @selections.push(selection)
     else
       @removeSelection(@getHead())
     @updateProperties()
