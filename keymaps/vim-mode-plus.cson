@@ -354,9 +354,6 @@
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
 
-  # 'ctrl-k': 'vim-mode-plus:move-line-up'
-  # 'ctrl-j': 'vim-mode-plus:move-line-down'
-
 # visual-blockwise
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.blockwise':
