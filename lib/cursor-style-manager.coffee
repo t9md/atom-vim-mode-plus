@@ -11,22 +11,22 @@ getCursorNode = (editorElement, cursor) ->
 
 # Return cursor style offset(top, left)
 # ---------------------------------------
-getOffset = (submode, cursor) ->
+getOffset = (submode, cursor, isSoftWrapped) ->
   {selection, editor} = cursor
   traversal = new Point(0, 0)
   switch submode
     when 'characterwise', 'blockwise'
-      if (not selection.isReversed()) and (not cursor.isAtBeginningOfLine())
+      if not selection.isReversed() and not cursor.isAtBeginningOfLine()
         traversal.column -= 1
     when 'linewise'
       bufferPoint = swrap(selection).getCharacterwiseHeadPosition()
 
-      traversal = if editor.isSoftWrapped()
+      traversal = if isSoftWrapped
         screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
         screenPoint.traversalFrom(cursor.getScreenPosition())
       else
         bufferPoint.traversalFrom(cursor.getBufferPosition())
-  if (not selection.isReversed()) and cursor.isAtBeginningOfLine()
+  if not selection.isReversed() and cursor.isAtBeginningOfLine()
     traversal.row = -1
   traversal
 
@@ -76,8 +76,8 @@ class CursorStyleManager
 
     # [FIXME] In spec mode, we skip here since not all spec have dom attached.
     return if isSpecMode
-
+    isSoftWrapped = @editor.isSoftWrapped()
     for cursor in cursorsToShow when cursorNode = getCursorNode(@editorElement, cursor)
-      @subscriptions.add setStyle(cursorNode.style, getOffset(submode, cursor))
+      @subscriptions.add setStyle(cursorNode.style, getOffset(submode, cursor, isSoftWrapped))
 
 module.exports = CursorStyleManager
