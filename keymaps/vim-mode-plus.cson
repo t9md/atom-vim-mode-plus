@@ -354,6 +354,9 @@
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
 
+  # 'p': 'vim-mode-plus:swap-with-register'
+  # 'P': 'vim-mode-plus:swap-with-register'
+
 # visual-blockwise
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.blockwise':
