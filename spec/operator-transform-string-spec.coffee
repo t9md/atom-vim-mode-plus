@@ -547,6 +547,58 @@ describe "Operator TransformString", ->
         mode: 'normal'
         text: originalText.replace('parenthesis', 'A register')
 
+  describe 'SwapWithRegister', ->
+    originalText = null
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g p': 'vim-mode-plus:swap-with-register'
+
+      originalText = """
+      abc def 'aaa'
+      here (111)
+      here (222)
+      """
+      set
+        text: originalText
+        cursor: [0, 9]
+
+      set register: '"': text: 'default register', type: 'character'
+      set register: 'a': text: 'A register', type: 'character'
+
+    it "swap selection with regisgter's content", ->
+      ensure 'viw', selectedText: 'aaa'
+      ensure 'gp',
+        mode: 'normal'
+        text: originalText.replace('aaa', 'default register')
+        register: '"': text: 'aaa'
+
+    it "swap text object with regisgter's content", ->
+      set cursor: [1, 6]
+      ensure 'gpi(',
+        mode: 'normal'
+        text: originalText.replace('111', 'default register')
+        register: '"': text: '111'
+
+    it "can repeat", ->
+      set cursor: [1, 6]
+      updatedText = """
+        abc def 'aaa'
+        here (default register)
+        here (111)
+        """
+      ensure 'gpi(j.',
+        mode: 'normal'
+        text: updatedText
+        register: '"': text: '222'
+
+    it "can use specified register to swap with", ->
+      set cursor: [1, 6]
+      ensure ['"', char: 'a', 'gpi('],
+        mode: 'normal'
+        text: originalText.replace('111', 'A register')
+        register: 'a': text: '111'
+
   describe 'ToggleLineComments', ->
     [oldGrammar, originalText] = []
     beforeEach ->
