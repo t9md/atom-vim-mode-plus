@@ -1,4 +1,4 @@
-{Disposable, CompositeDisposable} = require 'atom'
+{Point, Disposable, CompositeDisposable} = require 'atom'
 
 settings = require './settings'
 swrap = require './selection-wrapper'
@@ -12,47 +12,27 @@ getCursorNode = (editorElement, cursor) ->
 # Return cursor style offset(top, left)
 # ---------------------------------------
 getOffset = (submode, cursor) ->
-  {top, left} = {}
   {selection, editor} = cursor
+  traversal = new Point(0, 0)
   switch submode
     when 'characterwise', 'blockwise'
-      unless selection.isReversed()
-        if cursor.isAtBeginningOfLine()
-          top = -lineHeight
-        else
-          left = -1
+      if (not selection.isReversed()) and (not cursor.isAtBeginningOfLine())
+        traversal.column -= 1
     when 'linewise'
       bufferPoint = swrap(selection).getCharacterwiseHeadPosition()
-      if editor.isSoftWrapped()
-        screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
-        bufferRange = editor.bufferRangeForBufferRow(bufferPoint.row)
-        screenRows = editor.screenRangeForBufferRange(bufferRange).getRows()
-        rows = if selection.isReversed()
-          screenRows.indexOf(screenPoint.row)
-        else
-          -(screenRows.reverse().indexOf(screenPoint.row) + 1)
-        top = rows * lineHeight
-        left = screenPoint.column
-      else
-        # In linwise selection, cursor isAtBeginningOfLine of next row of selected row.
-        # But there is one exception.
-        # When very last line is not end with newline("\n").
-        # select linewise by `V` put cursor at last char(=end of line).
-        # In this case, we minus(-) cursor's column to reset offset to column 0.
-        # But when `V` selection.isReversed() cursor is at column 0, so we don't have to reset offset.
-        left = 0
-        unless selection.isReversed()
-          if cursor.isAtBeginningOfLine()
-            top = -lineHeight
-          else
-            # This is very special case when very last line is not end with newline("\n")
-            left -= cursor.getBufferColumn()
-        left += bufferPoint.column
-  {top, left}
 
-setStyle = (style, {top, left}) ->
-  style.setProperty('top', "#{top}em") if top?
-  style.setProperty('left', "#{left}ch") if left?
+      traversal = if editor.isSoftWrapped()
+        screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
+        screenPoint.traversalFrom(cursor.getScreenPosition())
+      else
+        bufferPoint.traversalFrom(cursor.getBufferPosition())
+  if (not selection.isReversed()) and cursor.isAtBeginningOfLine()
+    traversal.row = -1
+  traversal
+
+setStyle = (style, {row, column}) ->
+  style.setProperty('top', "#{row * lineHeight}em") unless row is 0
+  style.setProperty('left', "#{column}ch") unless column is 0
   new Disposable ->
     style.removeProperty('top')
     style.removeProperty('left')
