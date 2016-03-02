@@ -332,15 +332,15 @@
   'i f':  'vim-mode-plus:inner-function'
   'a f':  'vim-mode-plus:a-function'
 
-  'i l':  'vim-mode-plus:inner-current-line'
-  'a l':  'vim-mode-plus:a-current-line'
+  'i l': 'vim-mode-plus:inner-current-line'
+  'a l': 'vim-mode-plus:a-current-line'
 
-  'i e':  'vim-mode-plus:inner-entire'
-  'a e':  'vim-mode-plus:a-entire'
+  'i e': 'vim-mode-plus:inner-entire'
+  'a e': 'vim-mode-plus:a-entire'
 
   # [NOTE] subject to change in futur
-  'i c':  'vim-mode-plus:inner-latest-change'
-  'a c':  'vim-mode-plus:a-latest-change'
+  'i c': 'vim-mode-plus:inner-latest-change'
+  'a c': 'vim-mode-plus:a-latest-change'
 
 # visual
 # -------------------------
@@ -353,6 +353,7 @@
   'v': 'vim-mode-plus:activate-characterwise-visual-mode'
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
+
   # 'ctrl-k': 'vim-mode-plus:move-line-up'
   # 'ctrl-j': 'vim-mode-plus:move-line-down'
 
