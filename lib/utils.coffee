@@ -217,6 +217,20 @@ getBufferRows = (editor, {startRow, direction, includeStartRow}) ->
     when 'next' then getVimLastBufferRow(editor)
   [getValidVimBufferRow(editor, startRow)..endRow]
 
+getBufferRows = (editor, {startRow, direction, includeStartRow}) ->
+  switch direction
+    when 'previous'
+      unless includeStartRow
+        return [] if startRow is 0
+        startRow -= 1 if startRow > 0
+      [startRow..0]
+    when 'next'
+      vimLastBufferRow = getVimLastBufferRow(editor)
+      unless includeStartRow
+        return [] if startRow is vimLastBufferRow
+        startRow += 1 if startRow < vimLastBufferRow
+      [startRow..vimLastBufferRow]
+
 # Return Vim's EOF position rather than Atom's EOF position.
 # This function change meaning of EOF from native TextEditor::getEofBufferPosition()
 # Atom is special(strange) for cursor can past very last newline character.

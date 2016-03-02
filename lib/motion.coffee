@@ -94,9 +94,21 @@ class Motion extends Base
     {cursor} = selection
     selection.modifySelection =>
       tailRange = swrap(selection).getTailBufferRange()
+      if @isMode('visual', 'blockwise')
+        originalPoint = cursor.getBufferPosition()
+
       @moveCursor(cursor)
+
+      if @isMode('visual', 'blockwise')
+        currentPoint = cursor.getBufferPosition()
+        if originalPoint.row isnt currentPoint.row
+          column = if currentPoint.isGreaterThan(originalPoint)
+            Infinity
+          else
+            0
+          cursor.setBufferPosition([originalPoint.row, column])
       if @isMode('visual') and cursor.isAtEndOfLine()
-        moveCursorLeft(cursor)
+        moveCursorLeft(cursor, {preserveGoalColumn: true})
 
       # When mode isnt 'visual' selection.isEmpty() at this point means no movement happened.
       if selection.isEmpty() and (not @isMode('visual'))
