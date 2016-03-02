@@ -400,6 +400,14 @@ class ReplaceWithRegister extends TransformString
   getNewText: (text) ->
     @vimState.register.getText()
 
+# Save text to register before replace
+class SwapWithRegister extends TransformString
+  @extend()
+  getNewText: (text, selection) ->
+    newText = @vimState.register.getText()
+    @setTextToRegister(text, selection)
+    newText
+
 # -------------------------
 class Indent extends TransformString
   @extend()
