@@ -110,9 +110,9 @@ describe "Motion Search", ->
           ensure ['/', search: 'AbC\\c'], cursor: [1, 0]
           ensure 'n', cursor: [2, 0]
 
-        describe "when useIgnoreCaseForSearch is enabled", ->
+        describe "when ignoreCaseForSearch is enabled", ->
           beforeEach ->
-            settings.set 'useIgnoreCaseForSearch', true
+            settings.set 'ignoreCaseForSearch', true
 
           it "ignore case when search [case-1]", ->
             ensure ['/', search: 'abc'], cursor: [1, 0]
@@ -130,13 +130,13 @@ describe "Motion Search", ->
             ensure ['/', search: 'ABC'], cursor: [2, 0]
             ensure 'n', cursor: [2, 0]
 
-          it "ignore case when searh term NOT includes A-Z regardress of `useIgnoreCaseForSearch`", ->
-            settings.set 'useIgnoreCaseForSearch', false # default
+          it "ignore case when searh term NOT includes A-Z regardress of `ignoreCaseForSearch`", ->
+            settings.set 'ignoreCaseForSearch', false # default
             ensure ['/', search: 'abc'], cursor: [1, 0]
             ensure 'n', cursor: [2, 0]
 
-          it "ignore case when searh term NOT includes A-Z regardress of `useIgnoreCaseForSearch`", ->
-            settings.set 'useIgnoreCaseForSearch', true # default
+          it "ignore case when searh term NOT includes A-Z regardress of `ignoreCaseForSearch`", ->
+            settings.set 'ignoreCaseForSearch', true # default
             ensure ['/', search: 'abc'], cursor: [1, 0]
             ensure 'n', cursor: [2, 0]
 
@@ -298,7 +298,7 @@ describe "Motion Search", ->
             cursorBuffer: [3, 0]
           ensure '*', cursorBuffer: [3, 0]
 
-    describe "useIgnoreCaseForSearchCurrentWord", ->
+    describe "ignoreCaseForSearchCurrentWord", ->
       beforeEach ->
         set
           text: """
@@ -314,7 +314,7 @@ describe "Motion Search", ->
         ensure 'n', cursorBuffer: [0, 0]
 
       it "ignore case to find matching word", ->
-        settings.set 'useIgnoreCaseForSearchCurrentWord', true
+        settings.set 'ignoreCaseForSearchCurrentWord', true
         ensure '*', cursorBuffer: [1, 0]
         ensure 'n', cursorBuffer: [2, 0]
         ensure 'n', cursorBuffer: [3, 0]
