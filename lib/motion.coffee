@@ -735,6 +735,12 @@ class SearchBase extends Motion
     unless @instanceof('RepeatSearch')
       globalState.currentSearch = this
 
+  isCaseSensitive: (term) ->
+    switch @getCaseSensitivity()
+      when 'smartcase' then term.search('[A-Z]') isnt -1
+      when 'insensitive' then false
+      when 'sensitive' then true
+
   isBackwards: ->
     @backwards
 
@@ -819,14 +825,7 @@ class SearchBase extends Motion
     post.concat(pre)
 
   getPattern: (term) ->
-    modifiers = 'g'
-    ignoreCase =
-      if settings.get('useSmartcaseForSearch')
-        if term.match('[A-Z]') then false else true
-      else
-        settings.get('ignoreCaseForSearch')
-
-    modifiers += 'i' if ignoreCase
+    modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
 
     # FIXME this prevent search \\c itself.
     # DONT thinklessly mimic pure Vim. Instead, provide ignorecase button and shortcut.
@@ -873,6 +872,14 @@ class Search extends SearchBase
   isComplete: ->
     return false unless @confirmed
     super
+
+  getCaseSensitivity: ->
+    if settings.get('useSmartcaseForSearch')
+      'smartcase'
+    else if settings.get('ignoreCaseForSearch')
+      'insensitive'
+    else
+      'sensitive'
 
   subscribeScrollChange: ->
     @subscribe @editorElement.onDidChangeScrollTop =>
@@ -938,9 +945,16 @@ class SearchCurrentWord extends SearchBase
       @getCurrentWord(new RegExp(settings.get('iskeyword') ? IsKeywordDefault))
     )
 
+  getCaseSensitivity: ->
+    if settings.get('useSmartcaseForSearchCurrentWord')
+      'smartcase'
+    else if settings.get('ignoreCaseForSearchCurrentWord')
+      'insensitive'
+    else
+      'sensitive'
+
   getPattern: (term) ->
-    modifiers = 'g'
-    modifiers += 'i' if settings.get('ignoreCaseForSearchCurrentWord')
+    modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
     pattern = _.escapeRegExp(term)
     pattern = if /\W/.test(term) then "#{pattern}\\b" else "\\b#{pattern}\\b"
     new RegExp(pattern, modifiers)
@@ -972,7 +986,7 @@ class RepeatSearch extends SearchBase
   initialize: ->
     unless search = globalState.currentSearch
       @abort()
-    {@input, @backwards, @getPattern} = search
+    {@input, @backwards, @getPattern, @getCaseSensitivity} = search
 
 class RepeatSearchReverse extends RepeatSearch
   @extend()
