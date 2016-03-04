@@ -1,3 +1,11 @@
+# 0.23.0
+- Fix: setHover error. Guard when `vimState::getBlockwiseSelections()` is empty.
+- Fix: `ctrl-v` then `j` throws error "Cannot read property 'getHead' of undefined" #179
+- New: `SwapWithRegister` operator to complement `v_p` and `v_P` in pure Vim #180. keymap is disabled by default.
+- Internal: Greatly simplify cursor offset calculation by using `Point::traveralFrom()`
+- Fix: visual-blockwise `j`, `k` always work bufferRow-wise and never past BOL and EOL #10.
+- New: new config options `ignoreCaseForSearch`, `ignoreCaseForSearchCurrentWord`, `useSmartcaseForSearchCurrentWord` #181
+
 # 0.22.1
 - Fix: Quick fix for degradation for issue cursorDOM node is not exits #178
 
