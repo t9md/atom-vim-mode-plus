@@ -41,6 +41,8 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
 
+IsKeywordDefault = "[@a-zA-Z0-9_\-]+"
+
 class Motion extends Base
   @extend(false)
   inclusive: false
@@ -926,17 +928,12 @@ class SearchBackwards extends Search
 
 class SearchCurrentWord extends SearchBase
   @extend()
-  wordRegex: null
 
   getInput: ->
-    return @input if @input?
-
-    # FIXME: This must depend on the current language
-    defaultIsKeyword = "[@a-zA-Z0-9_\-]+"
-    userIsKeyword = settings.get('iskeyword')
-    @wordRegex = new RegExp(userIsKeyword or defaultIsKeyword)
-    # @getCurrentWord() have side effect(moving cursor), so don't call twice.
-    @input = @getCurrentWord()
+    @input ?= (
+      # [FIXME] @getCurrentWord() have side effect(moving cursor), so don't call twice.
+      @getCurrentWord(new RegExp(settings.get('iskeyword') ? IsKeywordDefault))
+    )
 
   getPattern: (text) ->
     pattern = _.escapeRegExp(text)
@@ -944,15 +941,15 @@ class SearchCurrentWord extends SearchBase
     new RegExp(pattern, 'gi') # always case insensitive.
 
   # FIXME: Should not move cursor.
-  getCurrentWord: ->
+  getCurrentWord: (wordRegex) ->
     cursor = @editor.getLastCursor()
     rowStart = cursor.getBufferRow()
-    range = cursor.getCurrentWordBufferRange({@wordRegex})
+    range = cursor.getCurrentWordBufferRange({wordRegex})
     if range.end.isEqual(cursor.getBufferPosition())
-      point = cursor.getBeginningOfNextWordBufferPosition({@wordRegex})
+      point = cursor.getBeginningOfNextWordBufferPosition({wordRegex})
       if point.row is rowStart
         cursor.setBufferPosition(point)
-        range = cursor.getCurrentWordBufferRange({@wordRegex})
+        range = cursor.getCurrentWordBufferRange({wordRegex})
 
     if range.isEmpty()
       ''
