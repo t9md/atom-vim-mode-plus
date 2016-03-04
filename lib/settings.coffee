@@ -1,4 +1,3 @@
-# Refactoring status: 100%
 class Settings
   constructor: (@scope, @config) ->
 
@@ -44,15 +43,25 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'array'
     items: type: 'string'
     default: []
-    description: 'comma separated list of character, which add additional space inside when surround.'
+    description: 'Comma separated list of character, which add additional space inside when surround.'
   showCursorInVisualMode:
     order: 7
     type: 'boolean'
     default: true
+  ignoreCaseForSearch:
+    order: 7
+    type: 'boolean'
+    default: false
   useSmartcaseForSearch:
     order: 8
     type: 'boolean'
     default: false
+    description: 'When enabled, `useIgnoreCaseForSearch` value is simply ignored'
+  ignoreCaseForSearchCurrentWord:
+    order: 8
+    type: 'boolean'
+    default: false
+    description: 'Used in `*` and `#`. `useSmartcaseForSearch` is not used'
   highlightSearch:
     order: 9
     type: 'boolean'

@@ -1,7 +1,7 @@
 # Refactoring status: 100%
 module.exports =
   searchHistory: []
-  currentSearch: {}
+  currentSearch: null
   highlightSearchPattern: null
   currentFind: null
   register: {}

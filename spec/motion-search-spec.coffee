@@ -31,7 +31,7 @@ describe "Motion Search", ->
 
       # clear search history
       vimState.searchHistory.clear()
-      globalState.currentSearch = {}
+      globalState.currentSearch = null
 
     describe "as a motion", ->
       it "moves the cursor to the specified search pattern", ->
@@ -110,15 +110,35 @@ describe "Motion Search", ->
           ensure ['/', search: 'AbC\\c'], cursor: [1, 0]
           ensure 'n', cursor: [2, 0]
 
-        it "uses case insensitive search if useSmartcaseForSearch is true and searching lowercase", ->
-          settings.set 'useSmartcaseForSearch', true
-          ensure ['/', search: 'abc'], cursor: [1, 0]
-          ensure 'n', cursor: [2, 0]
+        describe "when useIgnoreCaseForSearch is enabled", ->
+          beforeEach ->
+            settings.set 'useIgnoreCaseForSearch', true
 
-        it "uses case sensitive search if useSmartcaseForSearch is true and searching uppercase", ->
-          settings.set 'useSmartcaseForSearch', true
-          ensure ['/', search: 'ABC'], cursor: [2, 0]
-          ensure 'n', cursor: [2, 0]
+          it "ignore case when search [case-1]", ->
+            ensure ['/', search: 'abc'], cursor: [1, 0]
+            ensure 'n', cursor: [2, 0]
+
+          it "ignore case when search [case-2]", ->
+            ensure ['/', search: 'ABC'], cursor: [1, 0]
+            ensure 'n', cursor: [2, 0]
+
+        describe "when useSmartcaseForSearch is enabled", ->
+          beforeEach ->
+            settings.set 'useSmartcaseForSearch', true
+
+          it "ignore case when searh term includes A-Z", ->
+            ensure ['/', search: 'ABC'], cursor: [2, 0]
+            ensure 'n', cursor: [2, 0]
+
+          it "ignore case when searh term NOT includes A-Z regardress of `useIgnoreCaseForSearch`", ->
+            settings.set 'useIgnoreCaseForSearch', false # default
+            ensure ['/', search: 'abc'], cursor: [1, 0]
+            ensure 'n', cursor: [2, 0]
+
+          it "ignore case when searh term NOT includes A-Z regardress of `useIgnoreCaseForSearch`", ->
+            settings.set 'useIgnoreCaseForSearch', true # default
+            ensure ['/', search: 'abc'], cursor: [1, 0]
+            ensure 'n', cursor: [2, 0]
 
       describe "repeating", ->
         it "does nothing with no search history", ->
@@ -277,6 +297,28 @@ describe "Motion Search", ->
             text: "abc\n@def\nabc\n "
             cursorBuffer: [3, 0]
           ensure '*', cursorBuffer: [3, 0]
+
+    describe "useIgnoreCaseForSearchCurrentWord", ->
+      beforeEach ->
+        set
+          text: """
+          abc
+          ABC
+          abC
+          abc
+          """
+          cursor: [0, 0]
+
+      it "when disabled(= default), ignore case to find matching word", ->
+        ensure '*', cursorBuffer: [3, 0]
+        ensure 'n', cursorBuffer: [0, 0]
+
+      it "ignore case to find matching word", ->
+        settings.set 'useIgnoreCaseForSearchCurrentWord', true
+        ensure '*', cursorBuffer: [1, 0]
+        ensure 'n', cursorBuffer: [2, 0]
+        ensure 'n', cursorBuffer: [3, 0]
+        ensure 'n', cursorBuffer: [0, 0]
 
   describe "the hash keybinding", ->
     describe "as a motion", ->

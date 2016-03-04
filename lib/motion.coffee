@@ -728,13 +728,12 @@ class MoveToMarkLine extends MoveToMark
 # -------------------------
 class SearchBase extends Motion
   @extend(false)
-  saveCurrentSearch: true
   backwards: false
   escapeRegExp: false
 
   initialize: ->
-    if @saveCurrentSearch
-      globalState.currentSearch.backwards = @backwards
+    unless @instanceof('RepeatSearch')
+      globalState.currentSearch = this
 
   isBackwards: ->
     @backwards
@@ -799,7 +798,7 @@ class SearchBase extends Motion
 
     # FIXME: ORDER MATTER
     # In SearchCurrentWord, @getInput move cursor, which is necessary movement.
-    # So we need to call @getInput() BEFORE settin fromPoint
+    # So we need to call @getInput() BEFORE setting fromPoint
     input = @getInput()
     return ranges if input is ''
 
@@ -820,24 +819,28 @@ class SearchBase extends Motion
     post.concat(pre)
 
   getPattern: (term) ->
-    modifiers = {'g': true}
+    modifiers = 'g'
+    ignoreCase =
+      if settings.get('useSmartcaseForSearch')
+        if term.match('[A-Z]') then false else true
+      else
+        settings.get('ignoreCaseForSearch')
 
-    if not term.match('[A-Z]') and settings.get('useSmartcaseForSearch')
-      modifiers['i'] = true
+    modifiers += 'i' if ignoreCase
 
+    # FIXME this prevent search \\c itself.
+    # DONT thinklessly mimic pure Vim. Instead, provide ignorecase button and shortcut.
     if term.indexOf('\\c') >= 0
       term = term.replace('\\c', '')
-      modifiers['i'] = true
-
-    modFlags = Object.keys(modifiers).join('')
+      modifiers += 'i' unless 'i' in modifiers
 
     if @escapeRegExp
-      new RegExp(_.escapeRegExp(term), modFlags)
+      new RegExp(_.escapeRegExp(term), modifiers)
     else
       try
-        new RegExp(term, modFlags)
+        new RegExp(term, modifiers)
       catch
-        new RegExp(_.escapeRegExp(term), modFlags)
+        new RegExp(_.escapeRegExp(term), modifiers)
 
   # NOTE: trim first space if it is.
   # experimental if search word start with ' ' we switch escape mode.
@@ -935,10 +938,12 @@ class SearchCurrentWord extends SearchBase
       @getCurrentWord(new RegExp(settings.get('iskeyword') ? IsKeywordDefault))
     )
 
-  getPattern: (text) ->
-    pattern = _.escapeRegExp(text)
-    pattern = if /\W/.test(text) then "#{pattern}\\b" else "\\b#{pattern}\\b"
-    new RegExp(pattern, 'gi') # always case insensitive.
+  getPattern: (term) ->
+    modifiers = 'g'
+    modifiers += 'i' if settings.get('ignoreCaseForSearchCurrentWord')
+    pattern = _.escapeRegExp(term)
+    pattern = if /\W/.test(term) then "#{pattern}\\b" else "\\b#{pattern}\\b"
+    new RegExp(pattern, modifiers)
 
   # FIXME: Should not move cursor.
   getCurrentWord: (wordRegex) ->
@@ -963,12 +968,11 @@ class SearchCurrentWordBackwards extends SearchCurrentWord
 
 class RepeatSearch extends SearchBase
   @extend()
-  saveCurrentSearch: false
 
   initialize: ->
-    super
-    @input = @vimState.searchHistory.get('prev')
-    @backwards = globalState.currentSearch.backwards
+    unless search = globalState.currentSearch
+      @abort()
+    {@input, @backwards, @getPattern} = search
 
 class RepeatSearchReverse extends RepeatSearch
   @extend()
