@@ -609,15 +609,15 @@ describe "Operator general", ->
     describe "with a selection", ->
       beforeEach ->
         set
-          text: '012'
+          text: '012\n'
           cursor: [0, 1]
       describe "with characterwise selection", ->
         it "replaces selection with charwise content", ->
           set register: '"': text: "345"
-          ensure 'vp', text: "03452", cursor: [0, 3]
+          ensure 'vp', text: "03452\n", cursor: [0, 3]
         it "replaces selection with linewise content", ->
           set register: '"': text: "345\n"
-          ensure 'vp', text: "0\n345\n2", cursor: [1, 0]
+          ensure 'vp', text: "0\n345\n2\n", cursor: [1, 0]
 
       describe "with linewise selection", ->
         it "replaces selection with charwise content", ->
