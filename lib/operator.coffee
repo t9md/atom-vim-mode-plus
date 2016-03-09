@@ -803,24 +803,29 @@ class PutBefore extends Operator
 
     if @selectPastedText# and haveSomeSelection(@editor)
       submode = swrap.detectVisualModeSubmode(@editor)
-      console.log submode
-      @activateMode('visual', submode)
+      unless @isMode('visual', submode)
+        @activateMode('visual', submode)
     else
       @activateMode('normal')
 
-  paste: (selection, text, {select, linewise}) ->
+  paste: (selection, text, {linewise, select}) ->
     {cursor} = selection
     select ?= false
     linewise ?= false
     if linewise
       newRange = @pasteLinewise(selection, text)
-      unless select
-        cursor.setBufferPosition(newRange.start)
+      adjustCursor = (range) ->
+        cursor.setBufferPosition(range.start)
         cursor.moveToFirstCharacterOfLine()
     else
-      newRange = @pasteCharacterwise(selection, text, {select})
-      unless select
-        cursor.setBufferPosition(newRange.end.translate([0, -1]))
+      newRange = @pasteCharacterwise(selection, text)
+      adjustCursor = (range) ->
+        cursor.setBufferPosition(range.end.translate([0, -1]))
+
+    if select
+      selection.setBufferRange(newRange)
+    else
+      adjustCursor(newRange)
     newRange
 
   # Return newRange
@@ -855,6 +860,14 @@ class PutBefore extends Operator
 class PutAfter extends PutBefore
   @extend()
   location: 'after'
+
+class PutBeforeAndSelect extends PutBefore
+  @extend()
+  selectPastedText: true
+
+class PutAfterAndSelect extends PutAfter
+  @extend()
+  selectPastedText: true
 
 # Replace
 # -------------------------
