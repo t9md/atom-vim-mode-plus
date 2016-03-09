@@ -654,32 +654,37 @@ describe "Operator general", ->
           """
         cursor: [1, 0]
     describe "in visual-mode", ->
-      it "paste and select: [selection:linewise, register:linewise]", ->
-        set register: '"': text: 'AAA\n'
-        ensure 'Vgp', text: "111\nAAA\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
-      it "paste and select: [selection:charwise, register:linewise]", ->
-        set register: '"': text: 'AAA\n'
-        ensure 'vgP', text: "111\n\nAAA\n22\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
-      it "paste and select: [selection:linewise, register:charwise]", ->
-        set register: '"': text: 'AAA'
-        ensure 'Vgp', text: "111\nAAA\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
-      it "paste and select: [selection:charwise, register:charwise]", ->
-        set register: '"': text: 'AAA'
-        ensure 'vgP', text: "111\nAAA22\n333\n", selectedText: "AAA", mode: ['visual', 'characterwise']
+      describe "linewise register", ->
+        beforeEach ->
+          set register: '"': text: "AAA\n"
+        it "paste and select: [selection:linewise]", ->
+          ensure 'Vgp', text: "111\nAAA\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
+        it "paste and select: [selection:charwise, register:linewise]", ->
+          ensure 'vgP', text: "111\n\nAAA\n22\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
+
+      describe "characterwise register", ->
+        beforeEach ->
+          set register: '"': text: "AAA"
+        it "paste and select: [selection:linewise, register:charwise]", ->
+          ensure 'Vgp', text: "111\nAAA\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
+        it "paste and select: [selection:charwise, register:charwise]", ->
+          ensure 'vgP', text: "111\nAAA22\n333\n", selectedText: "AAA", mode: ['visual', 'characterwise']
 
     describe "in normal", ->
-      it "putAfter and select: [register:linewise]", ->
-        set register: '"': text: 'AAA\n'
-        ensure 'gp', text: "111\n222\nAAA\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
-      it "putAfter and select: [register:characterwise]", ->
-        set register: '"': text: 'AAA'
-        ensure 'gp', text: "111\n2AAA22\n333\n", selectedText: "AAA", mode: ['visual', 'characterwise']
-      it "putBefore and select: [register:linewise]", ->
-        set register: '"': text: 'AAA\n'
-        ensure 'gP', text: "111\nAAA\n222\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
-      it "putAfter and select: [register:linewise]", ->
-        set register: '"': text: 'AAA'
-        ensure 'gP', text: "111\nAAA222\n333\n", selectedText: "AAA", mode: ['visual', 'characterwise']
+      describe "linewise register", ->
+        beforeEach ->
+          set register: '"': text: "AAA\n"
+        it "putAfter and select", ->
+          ensure 'gp', text: "111\n222\nAAA\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
+        it "putBefore and select", ->
+          ensure 'gP', text: "111\nAAA\n222\n333\n", selectedText: "AAA\n", mode: ['visual', 'linewise']
+      describe "characterwise register", ->
+        beforeEach ->
+          set register: '"': text: "AAA"
+        it "putAfter and select", ->
+          ensure 'gp', text: "111\n2AAA22\n333\n", selectedText: "AAA", mode: ['visual', 'characterwise']
+        it "putAfter and select", ->
+          ensure 'gP', text: "111\nAAA222\n333\n", selectedText: "AAA", mode: ['visual', 'characterwise']
 
   describe "the J keybinding", ->
     beforeEach ->
