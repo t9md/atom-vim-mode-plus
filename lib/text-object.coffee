@@ -115,13 +115,17 @@ class Pair extends TextObject
   enclosed: true
   pair: null
 
+  getPattern: ->
+    pairRegexp = @pair.map(_.escapeRegExp).join('|')
+    ///#{pairRegexp}///g
+
   # Return 'open' or 'close'
-  getPairState: (pair, matchText, range) ->
-    [openChar, closeChar] = pair
+  getPairState: (matchText, range) ->
+    [openChar, closeChar] = @pair
     if openChar is closeChar
       @pairStateInBufferRange(range, openChar)
     else
-      ['open', 'close'][pair.indexOf(matchText)]
+      ['open', 'close'][@pair.indexOf(matchText)]
 
   pairStateInBufferRange: (range, char) ->
     text = getTextToPoint(@editor, range.end)
@@ -135,8 +139,7 @@ class Pair extends TextObject
     @editor.getTextInBufferRange(range) is escapeChar
 
   # options.enclosed is only used when which is 'close'
-  findPair: (pair, options) ->
-    {from, which, allowNextLine, enclosed} = options
+  findPair: (which, from, pattern) ->
     switch which
       when 'open'
         scanFunc = 'backwardsScanInBufferRange'
@@ -144,18 +147,16 @@ class Pair extends TextObject
       when 'close'
         scanFunc = 'scanInBufferRange'
         scanRange = rangeToEndOfFileFromPoint(from)
-    pairRegexp = pair.map(_.escapeRegExp).join('|')
-    pattern = ///#{pairRegexp}///g
 
     found = null # We will search to fill this var.
     state = {open: [], close: []}
 
     @editor[scanFunc] pattern, scanRange, ({matchText, range, stop}) =>
       {start, end} = range
-      return stop() if (not allowNextLine) and (from.row isnt start.row)
+      return stop() if (not @allowNextLine) and (from.row isnt start.row)
       return if @isEscapedCharAtPoint(start)
 
-      pairState = @getPairState(pair, matchText, range)
+      pairState = @getPairState(matchText, range)
       oppositeState = if pairState is 'open' then 'close' else 'open'
       if pairState is which
         openRange = state[oppositeState].pop()
@@ -163,27 +164,17 @@ class Pair extends TextObject
         state[pairState].push(range)
 
       if (pairState is which) and (state.open.length is 0) and (state.close.length is 0)
-        if enclosed and openRange? and (which is 'close')
+        if @enclosed and openRange? and (which is 'close')
           return unless new Range(openRange.start, range.end).containsPoint(from)
         found = range
         return stop()
     found
 
-  findOpen: (pair, options) ->
-    options.which = 'open'
-    options.allowNextLine ?= @allowNextLine
-    @findPair(pair, options)
-
-  findClose: (pair, options) ->
-    options.which = 'close'
-    options.allowNextLine ?= @allowNextLine
-    @findPair(pair, options)
-
-  getPairInfo: (from, pair, enclosed) ->
+  getPairInfo: (from) ->
     pairInfo = null
-
-    closeRange = @findClose pair, {from: from, enclosed}
-    openRange = @findOpen pair, {from: closeRange.end} if closeRange?
+    pattern = @getPattern()
+    closeRange = @findPair 'close', from, pattern
+    openRange = @findPair 'open', closeRange.end, pattern if closeRange?
 
     if openRange? and closeRange?
       aRange = new Range(openRange.start, closeRange.end)
@@ -195,7 +186,8 @@ class Pair extends TextObject
       pairInfo = {openRange, closeRange, aRange, innerRange, targetRange}
     pairInfo
 
-  getRange: (selection, {enclosed}={}) ->
+  # Allow override @enclosed by 2nd argument.
+  getRange: (selection, @enclosed=@enclosed) ->
     originalRange = selection.getBufferRange()
     from = selection.getHeadBufferPosition()
 
@@ -203,15 +195,15 @@ class Pair extends TextObject
     if (not selection.isEmpty() and not selection.isReversed())
       from = from.translate([0, -1])
 
-    pairInfo = @getPairInfo(from, @pair, enclosed)
+    pairInfo = @getPairInfo(from)
     # When range was same, try to expand range
     if pairInfo?.targetRange.isEqual(originalRange)
       from = pairInfo.aRange.end.translate([0, +1])
-      pairInfo = @getPairInfo(from, @pair, enclosed)
+      pairInfo = @getPairInfo(from)
     pairInfo?.targetRange
 
   selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely @getRange(selection, {@enclosed})
+    swrap(selection).setBufferRangeSafely @getRange(selection)
 
 # -------------------------
 class AnyPair extends Pair
@@ -222,7 +214,7 @@ class AnyPair extends Pair
   ]
 
   getRangeBy: (klass, selection) ->
-    @new(klass, {@inner}).getRange(selection, {@enclosed})
+    @new(klass, {@inner}).getRange(selection, @enclosed)
 
   getRanges: (selection) ->
     (range for klass in @member when (range = @getRangeBy(klass, selection)))
@@ -292,6 +284,7 @@ class ABackTick extends BackTick
 class InnerBackTick extends BackTick
   @extend()
 
+# Pair expands multi-lines
 # -------------------------
 class CurlyBracket extends Pair
   @extend(false)
