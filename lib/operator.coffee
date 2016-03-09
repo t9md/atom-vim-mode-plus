@@ -10,6 +10,7 @@ _ = require 'underscore-plus'
   moveCursorLeft, moveCursorRight
   highlightRanges, getNewTextRangeFromCheckpoint
   preserveSelectionStartPoints
+  isEndsWithNewLineForBufferRow
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -794,31 +795,54 @@ class PutBefore extends Operator
         {text, type} = @vimState.register.get(null, selection)
         break unless text
         text = _.multiplyString(text, @getCount())
-        isLinewise = type is 'linewise' or @isMode('visual', 'linewise')
-
-        if isLinewise
-          newRange = @pasteLinewise(selection, text)
-          cursor.setBufferPosition(newRange.start)
-          cursor.moveToFirstCharacterOfLine()
-        else
-          newRange = @pasteCharacterwise(selection, text)
-          cursor.setBufferPosition(newRange.end.translate([0, -1]))
+        newRange = @paste selection, text,
+          linewise: (type is 'linewise') or @isMode('visual', 'linewise')
+          select: @selectPastedText
         @setMarkForChange(newRange)
         @flash newRange
-    @activateMode('normal')
+
+    if @selectPastedText# and haveSomeSelection(@editor)
+      submode = swrap.detectVisualModeSubmode(@editor)
+      console.log submode
+      @activateMode('visual', submode)
+    else
+      @activateMode('normal')
+
+  paste: (selection, text, {select, linewise}) ->
+    {cursor} = selection
+    select ?= false
+    linewise ?= false
+    if linewise
+      newRange = @pasteLinewise(selection, text)
+      unless select
+        cursor.setBufferPosition(newRange.start)
+        cursor.moveToFirstCharacterOfLine()
+    else
+      newRange = @pasteCharacterwise(selection, text, {select})
+      unless select
+        cursor.setBufferPosition(newRange.end.translate([0, -1]))
+    newRange
 
   # Return newRange
   pasteLinewise: (selection, text) ->
     {cursor} = selection
+    text += "\n" unless text.endsWith("\n")
     if selection.isEmpty()
-      text = text.replace(LineEndingRegExp, '')
-      if @location is 'before'
-        @insertTextAbove(selection, text)
-      else
-        @insertTextBelow(selection, text)
+      row = cursor.getBufferRow()
+      switch @location
+        when 'before'
+          range = [[row, 0], [row, 0]]
+        when 'after'
+          unless isEndsWithNewLineForBufferRow(@editor, row)
+            text = text.replace(LineEndingRegExp, '')
+          cursor.moveToEndOfLine()
+          {end} = selection.insertText("\n")
+          range = @editor.bufferRangeForBufferRow(end.row, {includeNewline: true})
+      @editor.setTextInBufferRange(range, text)
     else
       if @isMode('visual', 'linewise')
-        text += "\n" unless text.endsWith("\n")
+        unless selection.getBufferRange().end.column is 0
+          text = text.replace(LineEndingRegExp, '')
       else
         selection.insertText("\n")
       selection.insertText(text)
@@ -826,17 +850,6 @@ class PutBefore extends Operator
   pasteCharacterwise: (selection, text) ->
     if @location is 'after' and selection.isEmpty()
       selection.cursor.moveRight()
-    selection.insertText(text)
-
-  insertTextAbove: (selection, text) ->
-    selection.cursor.moveToBeginningOfLine()
-    selection.insertText("\n")
-    selection.cursor.moveUp()
-    selection.insertText(text)
-
-  insertTextBelow: (selection, text) ->
-    selection.cursor.moveToEndOfLine()
-    selection.insertText("\n")
     selection.insertText(text)
 
 class PutAfter extends PutBefore

@@ -63,6 +63,10 @@ getCharacterForEvent = (event) ->
 isLinewiseRange = (range) ->
   (not range.isEmpty()) and (range.start.column is 0) and (range.end.column is 0)
 
+isEndsWithNewLineForBufferRow = (editor, row) ->
+  {start, end} = editor.bufferRangeForBufferRow(row, {includeNewline: true})
+  end.isGreaterThan(start) and end.column is 0
+
 rangeToBeginningOfFileFromPoint = (point) ->
   new Range(Point.ZERO, point)
 
@@ -578,6 +582,7 @@ module.exports = {
   getKeystrokeForEvent
   getCharacterForEvent
   isLinewiseRange
+  isEndsWithNewLineForBufferRow
   rangeToBeginningOfFileFromPoint
   rangeToEndOfFileFromPoint
   haveSomeSelection
