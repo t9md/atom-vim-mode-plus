@@ -1101,7 +1101,7 @@ class MoveToPair extends Motion
   member: ['Parenthesis', 'CurlyBracket', 'SquareBracket']
 
   getPoint: (cursor) ->
-    ranges = @new("AAnyPair", {enclosed: false, @member}).getRanges(cursor.selection)
+    ranges = @new("AAnyPair", {allowForwarding: true, @member}).getRanges(cursor.selection)
     ranges = ranges.filter(({start, end}) -> cursor.getBufferRow() in [start.row, end.row])
     return null unless ranges.length
     # Calling containsPoint exclusive(true to 2nd arg) make opening pair under

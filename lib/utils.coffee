@@ -67,17 +67,14 @@ isEndsWithNewLineForBufferRow = (editor, row) ->
   {start, end} = editor.bufferRangeForBufferRow(row, {includeNewline: true})
   end.isGreaterThan(start) and end.column is 0
 
-rangeToBeginningOfFileFromPoint = (point) ->
-  new Range(Point.ZERO, point)
-
-rangeToEndOfFileFromPoint = (point) ->
-  new Range(point, Point.INFINITY)
-
 haveSomeSelection = (editor) ->
   editor.getSelections().some((selection) -> not selection.isEmpty())
 
 sortRanges = (ranges) ->
   ranges.sort((a, b) -> a.compare(b))
+
+sortRangesByEnd = (ranges, fn) ->
+  ranges.sort((a, b) -> a.end.compare(b.end))
 
 # return adjusted index fit whitin length
 # return -1 if list is empty.
@@ -583,10 +580,9 @@ module.exports = {
   getCharacterForEvent
   isLinewiseRange
   isEndsWithNewLineForBufferRow
-  rangeToBeginningOfFileFromPoint
-  rangeToEndOfFileFromPoint
   haveSomeSelection
   sortRanges
+  sortRangesByEnd
   getIndex
   getVisibleBufferRange
   withVisibleBufferRange

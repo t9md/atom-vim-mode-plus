@@ -305,7 +305,18 @@
   'a <':  'vim-mode-plus:a-angle-bracket'
   'a >':  'vim-mode-plus:a-angle-bracket'
 
+  # allow-forwarding family
+  # 'i }':  'vim-mode-plus:inner-curly-bracket-allow-forwarding'
+  # 'a }':  'vim-mode-plus:a-curly-bracket-allow-forwarding'
+  # 'i >':  'vim-mode-plus:inner-angle-bracket-allow-forwarding'
+  # 'a >':  'vim-mode-plus:a-angle-bracket-allow-forwarding'
+  # 'i ]':  'vim-mode-plus:inner-square-bracket-allow-forwarding'
+  # 'a ]':  'vim-mode-plus:a-square-bracket-allow-forwarding'
+  # 'i )':  'vim-mode-plus:inner-parenthesis-allow-forwarding'
+  # 'a )':  'vim-mode-plus:a-parenthesis-allow-forwarding'
+
   'i t':  'vim-mode-plus:inner-tag'
+  'a t':  'vim-mode-plus:a-tag'
 
   'i [':  'vim-mode-plus:inner-square-bracket'
   'i ]':  'vim-mode-plus:inner-square-bracket'
