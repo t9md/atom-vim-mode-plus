@@ -652,7 +652,7 @@ describe "TextObject", ->
         111]00{555}
         """
     describe "inner", ->
-      ffit "select forwarding range within enclosed range(if exists)", ->
+      it "select forwarding range within enclosed range(if exists)", ->
         set cursor: [2, 0]
         keystroke 'v'
         ensure ';', selectedText: "222"
@@ -666,7 +666,13 @@ describe "TextObject", ->
         ensure ':', selectedText: '"222"'
         ensure ':', selectedText: "{333}"
         ensure ':', selectedText: "(\n444()444\n)"
-        ensure ':', selectedText: "()"
+        ensure ':', selectedText: """
+        [11
+        11"222"11{333}11(
+        444()444
+        )
+        111]
+        """
 
   xdescribe "Tag", ->
     describe "inner-tag", ->
