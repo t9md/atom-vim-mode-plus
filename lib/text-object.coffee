@@ -248,7 +248,7 @@ class AnyPairAllowForwarding extends AnyPair
   @extend(false)
   allowForwarding: true
   allowNextLine: false
-  skipEmptyPair: true
+  skipEmptyPair: false
   getNearestRange: (selection) ->
     ranges = @getRanges(selection)
     from = selection.cursor.getBufferPosition()
