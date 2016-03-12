@@ -491,7 +491,6 @@ describe "TextObject", ->
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
         it "case-3 visual", -> check open, 'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
-
   describe "AngleBracket", ->
     describe "inner-angle-bracket", ->
       beforeEach ->
@@ -553,6 +552,133 @@ describe "TextObject", ->
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
         it "case-3 visual", -> check open, 'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
+
+  describe "AllowForwarding family", ->
+    beforeEach ->
+      atom.keymaps.add "text",
+        'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
+          'i }':  'vim-mode-plus:inner-curly-bracket-allow-forwarding'
+          'i >':  'vim-mode-plus:inner-angle-bracket-allow-forwarding'
+          'i ]':  'vim-mode-plus:inner-square-bracket-allow-forwarding'
+          'i )':  'vim-mode-plus:inner-parenthesis-allow-forwarding'
+
+          'a }':  'vim-mode-plus:a-curly-bracket-allow-forwarding'
+          'a >':  'vim-mode-plus:a-angle-bracket-allow-forwarding'
+          'a ]':  'vim-mode-plus:a-square-bracket-allow-forwarding'
+          'a )':  'vim-mode-plus:a-parenthesis-allow-forwarding'
+
+      set
+        text: """
+        __{000}__
+        __<111>__
+        __[222]__
+        __(333)__
+        """
+    describe "inner", ->
+      it "select forwarding range", ->
+        set cursor: [0, 0]; ensure ['escape', 'vi}'], selectedText: "000"
+        set cursor: [1, 0]; ensure ['escape', 'vi>'], selectedText: "111"
+        set cursor: [2, 0]; ensure ['escape', 'vi]'], selectedText: "222"
+        set cursor: [3, 0]; ensure ['escape', 'vi)'], selectedText: "333"
+    describe "a", ->
+      it "select forwarding range", ->
+        set cursor: [0, 0]; ensure ['escape', 'va}'], selectedText: "{000}"
+        set cursor: [1, 0]; ensure ['escape', 'va>'], selectedText: "<111>"
+        set cursor: [2, 0]; ensure ['escape', 'va]'], selectedText: "[222]"
+        set cursor: [3, 0]; ensure ['escape', 'va)'], selectedText: "(333)"
+    describe "multi line text", ->
+      [textOneInner, textOneA] = []
+      beforeEach ->
+        set
+          text: """
+          000
+          000{11
+          111{22}
+          111
+          111}
+          """
+        textOneInner = """
+          11
+          111{22}
+          111
+          111
+          """
+        textOneA = """
+          {11
+          111{22}
+          111
+          111}
+          """
+      describe "forwarding inner", ->
+        it "select forwarding range", ->
+          set cursor: [1, 0]; ensure "vi}", selectedText: textOneInner
+        it "select forwarding range", ->
+          set cursor: [2, 0]; ensure "vi}", selectedText: "22"
+        it "[case-1] no forwarding open pair, fail to find", ->
+          set cursor: [0, 0]; ensure "vi}", selectedText: '0', cursor: [0, 1]
+        it "[case-2] no forwarding open pair, select enclosed", ->
+          set cursor: [1, 4]; ensure "vi}", selectedText: textOneInner
+        it "[case-3] no forwarding open pair, select enclosed", ->
+          set cursor: [3, 0]; ensure "vi}", selectedText: textOneInner
+        it "[case-3] no forwarding open pair, select enclosed", ->
+          set cursor: [4, 0]; ensure "vi}", selectedText: textOneInner
+      describe "forwarding a", ->
+        it "select forwarding range", ->
+          set cursor: [1, 0]; ensure "va}", selectedText: textOneA
+        it "select forwarding range", ->
+          set cursor: [2, 0]; ensure "va}", selectedText: "{22}"
+        it "[case-1] no forwarding open pair, fail to find", ->
+          set cursor: [0, 0]; ensure "va}", selectedText: '0', cursor: [0, 1]
+        it "[case-2] no forwarding open pair, select enclosed", ->
+          set cursor: [1, 4]; ensure "va}", selectedText: textOneA
+        it "[case-3] no forwarding open pair, select enclosed", ->
+          set cursor: [3, 0]; ensure "va}", selectedText: textOneA
+        it "[case-3] no forwarding open pair, select enclosed", ->
+          set cursor: [4, 0]; ensure "va}", selectedText: textOneA
+
+  describe "AnyPairAllowForwarding", ->
+    beforeEach ->
+      atom.keymaps.add "text",
+        'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
+          ";": 'vim-mode-plus:inner-any-pair-allow-forwarding'
+          ":": 'vim-mode-plus:a-any-pair-allow-forwarding'
+
+      set text: """
+        00
+        00[11
+        11"222"11{333}11(
+        444()444
+        )
+        111]00{555}
+        """
+    describe "inner", ->
+      it "select forwarding range within enclosed range(if exists) and skip empty pair", ->
+        set cursor: [2, 0]
+        keystroke 'v'
+        ensure ';', selectedText: "222"
+        ensure ';', selectedText: "333"
+        ensure ';', selectedText: "444()444\n"
+        ensure ';', selectedText: """
+          11
+          11"222"11{333}11(
+          444()444
+          )
+          111
+          """
+    describe "a", ->
+      it "select forwarding range within enclosed range(if exists) and skip empty pair", ->
+        set cursor: [2, 0]
+        keystroke 'v'
+        ensure ':', selectedText: '"222"'
+        ensure ':', selectedText: "{333}"
+        ensure ':', selectedText: "(\n444()444\n)"
+        ensure ':', selectedText: """
+          [11
+          11"222"11{333}11(
+          444()444
+          )
+          111]
+          """
 
   xdescribe "Tag", ->
     describe "inner-tag", ->
