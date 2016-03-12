@@ -423,46 +423,113 @@ describe "Motion Search", ->
 
   # FIXME: No longer child of search so move to motion-general-spec.coffe?
   describe 'the % motion', ->
-    beforeEach ->
-      set
-        text: "( ( ) )--{ text in here; and a function call(with parameters) }\n"
-        cursor: [0, 0]
+    describe "Parenthesis", ->
+      beforeEach ->
+        set text: "(___)"
+      describe "as operator target", ->
+        beforeEach ->
+          set text: "(_(_)_)"
+        it 'behave inclusively when is at open pair', ->
+          set cursor: [0, 2]
+          ensure 'd%', text: "(__)"
+        it 'behave inclusively when is at open pair', ->
+          set cursor: [0, 4]
+          ensure 'd%', text: "(__)"
+      describe "cursor is at pair char", ->
+        it "cursor is at open pair, it move to closing pair", ->
+          set cursor: [0, 0]
+          ensure '%', cursor: [0, 4]
+          ensure '%', cursor: [0, 0]
+        it "cursor is at close pair, it move to open pair", ->
+          set cursor: [0, 4]
+          ensure '%', cursor: [0, 0]
+          ensure '%', cursor: [0, 4]
+      describe "cursor is enclosed by pair", ->
+        beforeEach ->
+          set
+            text: "(___)",
+            cursor: [0, 2]
+        it "move to open pair", ->
+          ensure '%', cursor: [0, 0]
+      describe "cursor is bofore open pair", ->
+        beforeEach ->
+          set
+            text: "__(___)",
+            cursor: [0, 0]
+        it "move to open pair", ->
+          ensure '%', cursor: [0, 6]
+      describe "cursor is after close pair", ->
+        beforeEach ->
+          set
+            text: "__(___)__",
+            cursor: [0, 7]
+        it "fail to move", ->
+          ensure '%', cursor: [0, 7]
+      describe "multi line", ->
+        beforeEach ->
+          set
+            text: """
+            ___
+            ___(__
+            ___
+            ___)
+            """
+        describe "when open and close pair is not at cursor line", ->
+          it "fail to move", ->
+            set cursor: [0, 0]
+            ensure '%', cursor: [0, 0]
+          it "fail to move", ->
+            set cursor: [2, 0]
+            ensure '%', cursor: [2, 0]
+        describe "when open pair is forwarding to cursor in same row", ->
+          it "move to closing pair", ->
+            set cursor: [1, 0]
+            ensure '%', cursor: [3, 3]
+        describe "when cursor position is greater than open pair", ->
+          it "fail to move", ->
+            set cursor: [1, 4]
+            ensure '%', cursor: [1, 4]
+        describe "when close pair is forwarding to cursor in same row", ->
+          it "move to closing pair", ->
+            set cursor: [3, 0]
+            ensure '%', cursor: [1, 3]
 
-    it 'matches the correct parenthesis', ->
-      ensure '%', cursor: [0, 6]
+    describe "CurlyBracket", ->
+      beforeEach ->
+        set text: "{___}"
+      it "cursor is at open pair, it move to closing pair", ->
+        set cursor: [0, 0]
+        ensure '%', cursor: [0, 4]
+        ensure '%', cursor: [0, 0]
+      it "cursor is at close pair, it move to open pair", ->
+        set cursor: [0, 4]
+        ensure '%', cursor: [0, 0]
+        ensure '%', cursor: [0, 4]
 
-    it 'matches the correct brace', ->
-      set cursor: [0, 9]
-      ensure '%', cursor: [0, 62]
+    describe "SquareBracket", ->
+      beforeEach ->
+        set text: "[___]"
+      it "cursor is at open pair, it move to closing pair", ->
+        set cursor: [0, 0]
+        ensure '%', cursor: [0, 4]
+        ensure '%', cursor: [0, 0]
+      it "cursor is at close pair, it move to open pair", ->
+        set cursor: [0, 4]
+        ensure '%', cursor: [0, 0]
+        ensure '%', cursor: [0, 4]
 
-    it 'is behave inclusively when composed with operator', ->
-      set cursor: [0, 9]
-      ensure 'd%',
-        text: "( ( ) )--\n"
-
-    it 'moves correctly when composed with v going forward', ->
-      ensure 'v%', cursor: [0, 7], selectedText: '( ( ) )'
-
-    it 'moves correctly when composed with v going backward', ->
-      set cursor: [0, 5]
-      ensure 'v%', cursor: [0, 0]
-
-    it 'it moves appropriately to find the nearest matching action', ->
-      set cursor: [0, 3]
-      ensure '%', cursor: [0, 2]
-
-    it 'it moves appropriately to find the nearest matching action', ->
-      set cursor: [0, 26]
-      ensure '%', cursor: [0, 60]
-
-    it "finds matches across multiple lines", ->
-      set
-        text: "...(\n...)"
-        cursor: [0, 0]
-      ensure '%',
-        cursor: [1, 3]
-
-    it "does not affect search history", ->
-      ensure ['/', search: 'func'], cursor: [0, 31]
-      ensure '%', cursor: [0, 60]
-      ensure 'n', cursor: [0, 31]
+    describe "complex situation", ->
+      beforeEach ->
+        set
+          text: """
+          (_____)__{__[___]__}
+          _
+          """
+      it 'move to closing pair which open pair come first', ->
+        set cursor: [0, 7]
+        ensure '%', cursor: [0, 19]
+        set cursor: [0, 10]
+        ensure '%', cursor: [0, 16]
+      it 'enclosing pair is prioritized over forwarding range', ->
+        set cursor: [0, 2]
+        ensure '%', cursor: [0, 0]
