@@ -317,6 +317,15 @@ describe "TextObject", ->
           text: "' something in here and in 'here' ' and over here"
           cursor: [0, 9]
 
+      it "applies operators inside the current string with backslash", ->
+        set
+          text: "'some-key-here\\': 'here-is-the-val' # comment here"
+          cursor: [0, 2]
+
+        ensure "di'",
+          text: "'': 'here-is-the-val' # comment here"
+          cursor: [0, 1]
+
       it "applies operators inside the current string in operator-pending mode", ->
         ensure "di'",
           text: "''here' ' and over here"
