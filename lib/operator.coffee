@@ -135,10 +135,14 @@ class Select extends Operator
   execute: ->
     @selectTarget()
     return if @isMode('operator-pending') or @isMode('visual', 'blockwise')
-    if @target.isAllowSubmodeChange?()
+    unless @isMode('visual')
       submode = swrap.detectVisualModeSubmode(@editor)
-      if submode? and not @isMode('visual', submode)
-        @activateMode('visual', submode)
+      @activateMode('visual', submode)
+    else
+      if @target.isAllowSubmodeChange?()
+        submode = swrap.detectVisualModeSubmode(@editor)
+        if submode? and not @isMode('visual', submode)
+          @activateMode('visual', submode)
 
 class SelectLatestChange extends Select
   @extend()
@@ -1060,10 +1064,7 @@ class Change extends ActivateInsertMode
   supportInsertionCount: false
 
   execute: ->
-    unless @selectTarget()
-      @activateMode('normal')
-      return
-
+    @selectTarget()
     text = ''
     if @target.instanceof('TextObject') or @target.instanceof('Motion')
       text = "\n" if (swrap.detectVisualModeSubmode(@editor) is 'linewise')
