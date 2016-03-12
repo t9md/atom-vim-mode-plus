@@ -112,10 +112,6 @@ class Pair extends TextObject
   allowNextLine: false
   allowSubmodeChange: false
   pair: null
-  constructor: ->
-    @constructor::allowForwarding ?= @constructor.name.endsWith('AllowForwarding')
-    super
-
   getPattern: ->
     [open, close] = @pair
     if open is close
@@ -342,9 +338,11 @@ class InnerCurlyBracket extends CurlyBracket
 
 class ACurlyBracketAllowForwarding extends CurlyBracket
   @extend()
+  allowForwarding: true
 
 class InnerCurlyBracketAllowForwarding extends CurlyBracket
   @extend()
+  allowForwarding: true
 
 # -------------------------
 class SquareBracket extends Pair
@@ -360,9 +358,11 @@ class InnerSquareBracket extends SquareBracket
 
 class ASquareBracketAllowForwarding extends SquareBracket
   @extend()
+  allowForwarding: true
 
 class InnerSquareBracketAllowForwarding extends SquareBracket
   @extend()
+  allowForwarding: true
 
 # -------------------------
 class Parenthesis extends Pair
@@ -378,9 +378,11 @@ class InnerParenthesis extends Parenthesis
 
 class AParenthesisAllowForwarding extends Parenthesis
   @extend()
+  allowForwarding: true
 
 class InnerParenthesisAllowForwarding extends Parenthesis
   @extend()
+  allowForwarding: true
 
 # -------------------------
 class AngleBracket extends Pair
@@ -395,9 +397,11 @@ class InnerAngleBracket extends AngleBracket
 
 class AAngleBracketAllowForwarding extends AngleBracket
   @extend()
+  allowForwarding: true
 
 class InnerAngleBracketAllowForwarding extends AngleBracket
   @extend()
+  allowForwarding: true
 
 # -------------------------
 # [TODO] WORKING: sSee vim-mode#795
