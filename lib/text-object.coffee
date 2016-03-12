@@ -125,10 +125,9 @@ class Pair extends TextObject
       when 2
         @pairStateInBufferRange(range, matchText)
       when 3
-        if match[1]
-          'open'
-        else if match[2]
-          'close'
+        switch
+          when match[1] then 'open'
+          when match[2] then 'close'
 
   pairStateInBufferRange: (range, char) ->
     text = getTextToPoint(@editor, range.end)
@@ -136,10 +135,10 @@ class Pair extends TextObject
     ['close', 'open'][(countChar(text, pattern) % 2)]
 
   shouldStopScan: (which, from, range) ->
-    if from.row isnt range.start.row
-      not @allowNextLine
-    else
+    if @allowNextLine
       false
+    else
+      from.row isnt range.start.row
 
   # Take start point of matched range.
   escapeChar = '\\'
@@ -257,6 +256,9 @@ class AnyPairAllowForwarding extends AnyPair
     enclosingRange = _.last(sortRanges(enclosingRanges))
     forwardingRanges = sortRanges(forwardingRanges)
 
+    # When enclosingRange is exists,
+    # We don't go across enclosingRange.end.
+    # So choose from ranges contained in enclosingRange.
     if enclosingRange
       forwardingRanges = forwardingRanges.filter (range) ->
         enclosingRange.containsRange(range)
@@ -409,24 +411,15 @@ class Tag extends Pair
   @extend(false)
   allowNextLine: true
   allowForwarding: true
-  shouldStopScan: (which, from, range) ->
-    if which is 'close'
-      from.row isnt range.start.row
-    else
-      false
-
   getPattern: ->
-    # /(<(\/?))([^\s>]+)[\s>]/g
     /(<(\/?))([^\s>]+)[^>]*>/g
 
   getPairState: ({match, matchText}) ->
-    slash = match[2]
-    tagName = match[3]
-    state = if slash is ''
+    [__, __, slash, tagName] = match
+    if slash is ''
       'open'
     else
       'close'
-    state
 
 class ATag extends Tag
   @extend()
