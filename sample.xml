@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<wildfire>
+<version>2.0</version>
+<file_info>
+    <sha1>9640a4d47ede6a0f5cbf3618bd5812b75a386b7f</sha1>
+    <sha256>79ae7fa301ff452a0147c4072ebaa89e755461f2b4803a1fef30db9e157e243a</sha256>
+    <md5>c21cdead06ae1e433c8c1d7f6fb3f52d</md5>
+    <filetype>Microsoft Word 97 - 2003 Document</filetype>
+    <size>43008</size>
+    <malware>no</malware>
+</file_info>
+<task_info>
+<report>
+
+  <version>3.0</version>
+
+  <platform>101</platform>
+  <software>DOC/CDF Static Analyzer</software>
+  <sha256>79ae7fa301ff452a0147c4072ebaa89e755461f2b4803a1fef30db9e157e243a</sha256>
+  <md5>c21cdead<span>abc</span>06ae1e433c8c1d7f6fb3f52d</md5>
+  <malware>suspicious</malware>
+  <summary>
+    <entry details="Malicious documents are often crafted by hand and, as a result, may contain malformed metadata. A document created by a Microsoft Office application will have well-formed metadata unless the file has been manually modified or corrupted." id="207" score="0.1">CDF document has invalid metadata</entry>
+    <entry details="The CDF document format includes a directory structure for organizing content streams. Documents with an unusual number of directories may be malicious." id="208" score="0.1">CDF document has unusual number of directories</entry>
+  </summary>
+</report>
+<report>
+  <version>3.0</version>
+  <platform>2</platform>
+  <software>Windows XP, Adobe Reader 9.4.0, Flash 10, Office 2007</software>
+  <sha256>79ae7fa301ff452a0147c4072ebaa89e755461f2b4803a1fef30db9e157e243a</sha256>
+  <md5>c21cdead06ae1e433c8c1d7f6fb3f52d</md5>
+  <size>43008</size>
+  <malware>no</malware>
+  <summary>
+    <entry details="The Windows folder contains the core components of the Windows operating system. Malware often modifies the contents of this folder to manipulate the system, establish persistence, and avoid detection." id="32" score="0.0">Created a file in the Windows folder</entry>
+    <entry details="Legitimate software creates or modifies files to preserve data across system restarts. Malware may create or modify files to deliver malicious payloads or maintain persistence on a system." id="3" score="0.0">Created or modified a file</entry>
+    <entry details="The Windows Registry houses system configuration settings and options, including information about installed applications, services, and drivers. Malware often modifies registry data to establish persistence on the system and avoid detection." id="13" score="0.0">Modified the Windows Registry</entry>
+  </summary>
+  <evidence>
+    <file/>
+    <registry/>
+    <process/>
+    <mutex/>
+  </evidence>
+  <timeline>
+    <entry seq="1">Created Process C:\Program Files\Microsoft Office\Office12\WINWORD.EXE</entry>
+    <entry seq="2">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Word\Resiliency\StartupItems\n12 to value NULL</entry>
+    <entry seq="3">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Common\LanguageResources\EnabledLanguages\1033 to value Off</entry>
+    <entry seq="4">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Common\LanguageResources\EnabledLanguages\1033 to value On</entry>
+    <entry seq="5">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002119210000000000000000F01FEC\Usage\WORDFiles to value 1199767614</entry>
+    <entry seq="6">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002119210000000000000000F01FEC\Usage\ProductFiles to value 1199767580</entry>
+    <entry seq="7">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002119210000000000000000F01FEC\Usage\ProductFiles to value 1199767581</entry>
+    <entry seq="8">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\AppData to value C:\Documents and Settings\Administrator\Application Data</entry>
+    <entry seq="9">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\Common AppData to value C:\Documents and Settings\All Users\Application Data</entry>
+    <entry seq="10">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Word\MTTT to value NULL</entry>
+    <entry seq="11">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002119210000000000000000F01FEC\Usage\EXCELFiles to value 1199767629</entry>
+    <entry seq="12">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Word\Resiliency\StartupItems\*22 to value NULL</entry>
+    <entry seq="13">Created file C:\Documents and Settings\Administrator\Application Data\Microsoft\Templates\~$Normal.dotm</entry>
+    <entry seq="14">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\Desktop to value C:\Documents and Settings\Administrator\Desktop</entry>
+    <entry seq="15">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2\{5424727b-91a4-11e2-9388-806d6172696f}\BaseClass to value Drive</entry>
+    <entry seq="16">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2\{4bf5404a-da64-11e4-81dd-806d6172696f}\BaseClass to value Drive</entry>
+    <entry seq="17">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2\{54247278-91a4-11e2-9388-806d6172696f}\BaseClass to value Drive</entry>
+    <entry seq="18">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\Personal to value C:\Documents and Settings\Administrator\My Documents</entry>
+    <entry seq="19">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\Common Documents to value C:\Documents and Settings\All Users\Documents</entry>
+    <entry seq="20">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\Common Desktop to value C:\Documents and Settings\All Users\Desktop</entry>
+    <entry seq="21">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\Cache to value C:\Documents and Settings\Administrator\Local Settings\Temporary Internet Files</entry>
+    <entry seq="22">Created file C:\Documents and Settings\Administrator\Local Settings\Temporary Internet Files\Content.Word\~WRS{A2D61502-88C5-462B-8BFF-9E1915E1DED5}.tmp</entry>
+    <entry seq="23">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\Local AppData to value C:\Documents and Settings\Administrator\Local Settings\Application Data</entry>
+    <entry seq="24">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="25">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="26">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="27">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="28">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="29">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="30">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="31">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="32">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Common\Licensing\0638C49DBB8B4CD1B191051E8F325736 to value NULL</entry>
+    <entry seq="33">Set key \REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Word\Resiliency\StartupItems\|42 to value NULL</entry>
+    <entry seq="34">Created file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFAE5C.tmp</entry>
+    <entry seq="35">Deleted file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFAE5C.tmp</entry>
+    <entry seq="36">Created file c:\documents and settings\administrator\~$wr_smpl.doc</entry>
+    <entry seq="37">Created file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFBF4B.tmp</entry>
+    <entry seq="38">Deleted file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFBF4B.tmp</entry>
+    <entry seq="39">Created file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFBFCE.tmp</entry>
+    <entry seq="40">Deleted file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFBFCE.tmp</entry>
+    <entry seq="41">Created file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFC073.tmp</entry>
+    <entry seq="42">Deleted file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFC073.tmp</entry>
+    <entry seq="43">Created file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFC109.tmp</entry>
+    <entry seq="44">Deleted file C:\Documents and Settings\Administrator\Local Settings\Temp\~DFC109.tmp</entry>
+    <entry seq="45">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002109E60090400000000000F01FEC\Usage\ProductNonBootFilesIntl_1033 to value 1199767565</entry>
+    <entry seq="46">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002109E60090400000000000F01FEC\Usage\ProductNonBootFilesIntl_1033 to value 1199767566</entry>
+    <entry seq="47">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002109E60090400000000000F01FEC\Usage\ProductNonBootFilesIntl_1033 to value 1199767567</entry>
+  </timeline>
+  <network/>
+  <process_tree>
+    <process name="WINWORD.EXE" pid="1876" text="C:\Program Files\Microsoft Office\Office12\WINWORD.EXE"/>
+  </process_tree>
+  <process_list>
+    <process command="C:\Program Files\Microsoft Office\Office12\WINWORD.EXE" name="WINWORD.EXE" pid="1876">
+      <process_activity/>
+      <registry>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\12.0\Word\Resiliency\StartupItems"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\12.0\Common\LanguageResources\EnabledLanguages"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Common\LanguageResources" subkey="EnabledLanguages"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\12.0\Common\Migration\Office"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\12.0\Common\Migration\Word"/>
+        <Create key="HKEY_LOCAL_MACHINE" subkey="Software\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002119210000000000000000F01FEC\Usage"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"/>
+        <Create key="HKEY_LOCAL_MACHINE" subkey="Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"/>
+        <Create key="HKEY_LOCAL_MACHINE" subkey="Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2\{5424727b-91a4-11e2-9388-806d6172696f}\"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2\{4bf5404a-da64-11e4-81dd-806d6172696f}\"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2\{54247278-91a4-11e2-9388-806d6172696f}\"/>
+        <Create key="HKEY_LOCAL_MACHINE" subkey="System\CurrentControlSet\Control\DeviceClasses"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Common" subkey="Licensing"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\12.0\Registration"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Registration" subkey="PLACEHOL-6F699A\{91120000-0012-0000-0000-0000000FF1CE}"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\12.0\Common"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\Common\Offline"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\Common\Offline" subkey="Files"/>
+        <Create key="HKEY_LOCAL_MACHINE" subkey="Software\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002109E60090400000000000F01FEC\Usage"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Word\Resiliency\StartupItems" subkey="n12"/>
+        <Set data="Off" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Common\LanguageResources\EnabledLanguages" subkey="1033"/>
+        <Set data="On" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Common\LanguageResources\EnabledLanguages" subkey="1033"/>
+        <Set data="1199767614" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002119210000000000000000F01FEC\Usage" subkey="WORDFiles"/>
+        <Set data="1199767580" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002119210000000000000000F01FEC\Usage" subkey="ProductFiles"/>
+        <Set data="1199767581" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002119210000000000000000F01FEC\Usage" subkey="ProductFiles"/>
+        <Set data="C:\Documents and Settings\Administrator\Application Data" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" subkey="AppData"/>
+        <Set data="C:\Documents and Settings\All Users\Application Data" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" subkey="Common AppData"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Word" subkey="MTTT"/>
+        <Set data="1199767629" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002119210000000000000000F01FEC\Usage" subkey="EXCELFiles"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Word\Resiliency\StartupItems" subkey="*22"/>
+        <Set data="C:\Documents and Settings\Administrator\Desktop" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" subkey="Desktop"/>
+        <Set data="Drive" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2\{5424727b-91a4-11e2-9388-806d6172696f}" subkey="BaseClass"/>
+        <Set data="Drive" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2\{4bf5404a-da64-11e4-81dd-806d6172696f}" subkey="BaseClass"/>
+        <Set data="Drive" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2\{54247278-91a4-11e2-9388-806d6172696f}" subkey="BaseClass"/>
+        <Set data="C:\Documents and Settings\Administrator\My Documents" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" subkey="Personal"/>
+        <Set data="C:\Documents and Settings\All Users\Documents" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" subkey="Common Documents"/>
+        <Set data="C:\Documents and Settings\All Users\Desktop" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" subkey="Common Desktop"/>
+        <Set data="C:\Documents and Settings\Administrator\Local Settings\Temporary Internet Files" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" subkey="Cache"/>
+        <Set data="C:\Documents and Settings\Administrator\Local Settings\Application Data" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" subkey="Local AppData"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Common\Licensing" subkey="0638C49DBB8B4CD1B191051E8F325736"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-2052111302-1214440339-682003330-500\Software\Microsoft\Office\12.0\Word\Resiliency\StartupItems" subkey="|42"/>
+        <Set data="1199767565" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002109E60090400000000000F01FEC\Usage" subkey="ProductNonBootFilesIntl_1033"/>
+        <Set data="1199767566" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002109E60090400000000000F01FEC\Usage" subkey="ProductNonBootFilesIntl_1033"/>
+        <Set data="1199767567" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00002109E60090400000000000F01FEC\Usage" subkey="ProductNonBootFilesIntl_1033"/>
+      </registry>
+      <file>
+        <Create md5="288125a6f7f04544929ab806eb1dbb46" name="C:\Documents and Settings\Administrator\Application Data\Microsoft\Templates\~$Normal.dotm" sha1="5852bf731cdde7f4f9c0403eba415809a5480d19" sha256="5b861d71f3ab43d1eebe44734bca2ddb04d97a4469170d4f697d2d247c672d04" size="162" type="unknown"/>
+        <Create md5="5d4d94ee7e06bbb0af9584119797b23a" name="C:\Documents and Settings\Administrator\Local Settings\Temporary Internet Files\Content.Word\~WRS{A2D61502-88C5-462B-8BFF-9E1915E1DED5}.tmp" sha1="dbb111419c704f116efa8e72471dd83e86e49677" sha256="4826c0d860af884d3343ca6460b0006a7a2ce7dbccc4d743208585d997cc5fd1" size="1024" type="unknown"/>
+        <Create md5="bf619eac0cdf3f68d496ea9344137e8b" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFAE5C.tmp" sha1="5c3eb80066420002bc3dcc7ca4ab6efad7ed4ae5" sha256="076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560" size="512" type="unknown"/>
+        <Create md5="N/A" name="c:\documents and settings\administrator\~$wr_smpl.doc" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Create md5="N/A" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFBF4B.tmp" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Create md5="N/A" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFBFCE.tmp" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Create md5="N/A" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFC073.tmp" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Create md5="N/A" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFC109.tmp" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Delete md5="bf619eac0cdf3f68d496ea9344137e8b" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFAE5C.tmp" sha1="5c3eb80066420002bc3dcc7ca4ab6efad7ed4ae5" sha256="076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560" size="512" type="unknown"/>
+        <Delete md5="N/A" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFBF4B.tmp" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Delete md5="N/A" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFBFCE.tmp" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Delete md5="N/A" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFC073.tmp" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Delete md5="N/A" name="C:\Documents and Settings\Administrator\Local Settings\Temp\~DFC109.tmp" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+      </file>
+      <service/>
+      <mutex>
+        <CreateMutex name="&lt;NULL&gt;"/>
+      </mutex>
+      <java_api/>
+    </process>
+  </process_list>
+</report>
+<report>
+  <version>3.0</version>
+  <platform>5</platform>
+  <software>Windows 7 x64 SP1, Adobe Reader 11, Flash 11, Office 2010</software>
+  <sha256>79ae7fa301ff452a0147c4072ebaa89e755461f2b4803a1fef30db9e157e243a</sha256>
+  <md5>c21cdead06ae1e433c8c1d7f6fb3f52d</md5>
+  <size>43008</size>
+  <malware>no</malware>
+  <summary>
+    <entry details="Modern browsers provide a variety of security controls that are effective at mitigating or preventing malicious activity. Malware often modifies the settings for these controls to subvert a system's built-in security measures." id="16" score="0.0">Modified Internet Explorer security settings</entry>
+    <entry details="The Windows folder contains the core components of the Windows operating system. Malware often modifies the contents of this folder to manipulate the system, establish persistence, and avoid detection." id="32" score="0.0">Created a file in the Windows folder</entry>
+    <entry details="The Windows system folder contains configuration files and executables that control the underlying functions of the system. Malware often modifies the contents of this folder to manipulate the system, establish persistence, and avoid detection." id="2" score="0.0">Created or modified a file in the Windows system folder</entry>
+    <entry details="Legitimate software creates or modifies files to preserve data across system restarts. Malware may create or modify files to deliver malicious payloads or maintain persistence on a system." id="3" score="0.0">Created or modified a file</entry>
+    <entry details="The Windows Registry houses system configuration settings and options, including information about installed applications, services, and drivers. Malware often modifies registry data to establish persistence on the system and avoid detection." id="13" score="0.0">Modified the Windows Registry</entry>
+  </summary>
+  <evidence>
+    <file/>
+    <registry>
+      <entry behavior_id="16" value="0">\REGISTRY\USER\&lt;USER-GUID&gt;\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\UNCAsIntranet</entry>
+      <entry behavior_id="16" value="1">\REGISTRY\USER\&lt;USER-GUID&gt;\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\AutoDetect</entry>
+    </registry>
+    <process/>
+    <mutex/>
+  </evidence>
+  <timeline>
+    <entry seq="1">Created Process C:\Program Files (x86)\Microsoft Office\Office14\WINWORD.EXE</entry>
+    <entry seq="2">Created file C:\Users\Administrator\AppData\Local\Temp\CVR6306.tmp</entry>
+    <entry seq="3">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="4">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word\Resiliency\StartupItems\&amp;&gt;1 to value NULL</entry>
+    <entry seq="5">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\LanguageResources\EnabledLanguages\1033 to value Off</entry>
+    <entry seq="6">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\LanguageResources\EnabledLanguages\1033 to value On</entry>
+    <entry seq="7">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage\WORDFiles to value 1199767573</entry>
+    <entry seq="8">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage\ProductFiles to value 1199767612</entry>
+    <entry seq="9">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage\ProductFiles to value 1199767613</entry>
+    <entry seq="10">Created mutex Global\552FFA80-3393-423d-8671-7BA046BB5906</entry>
+    <entry seq="11">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word\MTTT to value NULL</entry>
+    <entry seq="12">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="13">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="14">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="15">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="16">Created mutex &lt;NULL&gt;</entry>
+    <entry seq="17">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word\Resiliency\StartupItems\&gt;1 to value NULL</entry>
+    <entry seq="18">Created file C:\Users\Administrator\AppData\Roaming\Microsoft\Templates\~$Normal.dotm</entry>
+    <entry seq="19">Created file C:\Users\Administrator\AppData\Local\Microsoft\Windows\Temporary Internet Files\Content.Word\~WRS{631EFD99-A654-4FF4-AE0F-70D6532C455F}.tmp</entry>
+    <entry seq="20">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\UNCAsIntranet to value 0</entry>
+    <entry seq="21">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\AutoDetect to value 1</entry>
+    <entry seq="22">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\UNCAsIntranet to value 0</entry>
+    <entry seq="23">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\AutoDetect to value 1</entry>
+    <entry seq="24">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word\Resiliency\StartupItems\i?1 to value NULL</entry>
+    <entry seq="25">Created file C:\Users\Administrator\AppData\Local\Temp\\~DFBFF8DA179CF234B4.TMP</entry>
+    <entry seq="26">Deleted file C:\Users\Administrator\AppData\Local\Temp\\~DFBFF8DA179CF234B4.TMP</entry>
+    <entry seq="27">Created file C:\Users\Administrator\~$wr_smpl.doc</entry>
+    <entry seq="28">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage\ProductFiles to value 1199767614</entry>
+    <entry seq="29">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage\ProductFiles to value 1199767615</entry>
+    <entry seq="30">Created file C:\Users\Administrator\AppData\Local\Temp\\~DF3B06BADC0E9FB3C3.TMP</entry>
+    <entry seq="31">Deleted file C:\Users\Administrator\AppData\Local\Temp\\~DF3B06BADC0E9FB3C3.TMP</entry>
+    <entry seq="32">Created file C:\Users\Administrator\AppData\Local\Temp\\~DF2A061EC7924B3588.TMP</entry>
+    <entry seq="33">Deleted file C:\Users\Administrator\AppData\Local\Temp\\~DF2A061EC7924B3588.TMP</entry>
+    <entry seq="34">Created file C:\Users\Administrator\AppData\Local\Temp\\~DF2B5CDA2013A66A4B.TMP</entry>
+    <entry seq="35">Deleted file C:\Users\Administrator\AppData\Local\Temp\\~DF2B5CDA2013A66A4B.TMP</entry>
+    <entry seq="36">Created file C:\Users\Administrator\AppData\Local\Temp\\~DFFE31FDCF2F387ADE.TMP</entry>
+    <entry seq="37">Deleted file C:\Users\Administrator\AppData\Local\Temp\\~DFFE31FDCF2F387ADE.TMP</entry>
+    <entry seq="38">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word\Security\Trusted Documents\LastPurgeTime to value 24152571</entry>
+    <entry seq="39">Set key \REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\Toolbars\Settings\Microsoft Word to value NULL</entry>
+    <entry seq="40">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004109E60090400000000000F01FEC\Usage\ProductNonBootFilesIntl_1033 to value 1199767553</entry>
+    <entry seq="41">Set key \REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004109E60090400000000000F01FEC\Usage\ProductNonBootFilesIntl_1033 to value 1199767554</entry>
+  </timeline>
+  <network/>
+  <process_tree>
+    <process name="WINWORD.EXE" pid="1432" text="C:\Program Files (x86)\Microsoft Office\Office14\WINWORD.EXE"/>
+  </process_tree>
+  <process_list>
+    <process command="C:\Program Files (x86)\Microsoft Office\Office14\WINWORD.EXE" name="WINWORD.EXE" pid="1432">
+      <process_activity/>
+      <registry>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\14.0\Word\Resiliency\StartupItems"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\14.0\Common\LanguageResources\EnabledLanguages"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\LanguageResources" subkey="EnabledLanguages"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\14.0\Common\Migration\Office"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\14.0\Common\Migration\Word"/>
+        <Create key="HKEY_LOCAL_MACHINE" subkey="Software\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common" subkey="LCCache\Themes"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\LCCache\Themes" subkey="1033\"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common" subkey="LCCache\WordDocParts"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\LCCache\WordDocParts" subkey="1033\"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common" subkey="LCCache\SmartArt"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\LCCache\SmartArt" subkey="1033\"/>
+        <Create key="HKEY_CURRENT_USER" subkey="Software\Microsoft\Office\Common\Offline"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\Common\Offline" subkey="Files"/>
+        <Create key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\Toolbars" subkey="Settings"/>
+        <Create key="HKEY_LOCAL_MACHINE" subkey="Software\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004109E60090400000000000F01FEC\Usage"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word\Resiliency\StartupItems" subkey="&amp;&gt;1"/>
+        <Set data="Off" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\LanguageResources\EnabledLanguages" subkey="1033"/>
+        <Set data="On" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\LanguageResources\EnabledLanguages" subkey="1033"/>
+        <Set data="1199767573" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage" subkey="WORDFiles"/>
+        <Set data="1199767612" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage" subkey="ProductFiles"/>
+        <Set data="1199767613" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage" subkey="ProductFiles"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word" subkey="MTTT"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word\Resiliency\StartupItems" subkey="&gt;1"/>
+        <Set data="0" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap" subkey="UNCAsIntranet"/>
+        <Set data="1" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap" subkey="AutoDetect"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word\Resiliency\StartupItems" subkey="i?1"/>
+        <Set data="1199767614" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage" subkey="ProductFiles"/>
+        <Set data="1199767615" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004119110000000000000000F01FEC\Usage" subkey="ProductFiles"/>
+        <Set data="24152571" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Word\Security\Trusted Documents" subkey="LastPurgeTime"/>
+        <Set data="NULL" key="\REGISTRY\USER\S-1-5-21-3141258405-581381896-389432370-500\Software\Microsoft\Office\14.0\Common\Toolbars\Settings" subkey="Microsoft Word"/>
+        <Set data="1199767553" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004109E60090400000000000F01FEC\Usage" subkey="ProductNonBootFilesIntl_1033"/>
+        <Set data="1199767554" key="\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\00004109E60090400000000000F01FEC\Usage" subkey="ProductNonBootFilesIntl_1033"/>
+      </registry>
+      <file>
+        <Create md5="N/A" name="C:\Users\Administrator\AppData\Local\Temp\CVR6306.tmp" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Create md5="50fade607f6b3b39edfc059279018235" name="C:\Users\Administrator\AppData\Roaming\Microsoft\Templates\~$Normal.dotm" sha1="5ef6a57801af53a79ad2b2c47c1100cd64674d62" sha256="8adf7d3b16adeee1555caa023d8adca935fe79985a058897a8e53e95de04f249" size="162" type="unknown"/>
+        <Create md5="5d4d94ee7e06bbb0af9584119797b23a" name="C:\Users\Administrator\AppData\Local\Microsoft\Windows\Temporary Internet Files\Content.Word\~WRS{631EFD99-A654-4FF4-AE0F-70D6532C455F}.tmp" sha1="dbb111419c704f116efa8e72471dd83e86e49677" sha256="4826c0d860af884d3343ca6460b0006a7a2ce7dbccc4d743208585d997cc5fd1" size="1024" type="unknown"/>
+        <Create md5="bf619eac0cdf3f68d496ea9344137e8b" name="C:\Users\Administrator\AppData\Local\Temp\\~DFBFF8DA179CF234B4.TMP" sha1="5c3eb80066420002bc3dcc7ca4ab6efad7ed4ae5" sha256="076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560" size="512" type="unknown"/>
+        <Create md5="03297f948cdcb2668d1fb46244395847" name="C:\Users\Administrator\~$wr_smpl.doc" sha1="a5e65d96686ca26c90377e23a60663d44b311944" sha256="f996932880fc8aff027b0a598f43dc80d22c818fd53ee55420a5bd2ef415049c" size="162" type="unknown"/>
+        <Create md5="N/A" name="C:\Users\Administrator\AppData\Local\Temp\\~DF3B06BADC0E9FB3C3.TMP" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Create md5="N/A" name="C:\Users\Administrator\AppData\Local\Temp\\~DF2A061EC7924B3588.TMP" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Create md5="N/A" name="C:\Users\Administrator\AppData\Local\Temp\\~DF2B5CDA2013A66A4B.TMP" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Create md5="N/A" name="C:\Users\Administrator\AppData\Local\Temp\\~DFFE31FDCF2F387ADE.TMP" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Delete md5="bf619eac0cdf3f68d496ea9344137e8b" name="C:\Users\Administrator\AppData\Local\Temp\\~DFBFF8DA179CF234B4.TMP" sha1="5c3eb80066420002bc3dcc7ca4ab6efad7ed4ae5" sha256="076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560" size="512" type="unknown"/>
+        <Delete md5="N/A" name="C:\Users\Administrator\AppData\Local\Temp\\~DF3B06BADC0E9FB3C3.TMP" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Delete md5="N/A" name="C:\Users\Administrator\AppData\Local\Temp\\~DF2A061EC7924B3588.TMP" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Delete md5="N/A" name="C:\Users\Administrator\AppData\Local\Temp\\~DF2B5CDA2013A66A4B.TMP" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+        <Delete md5="N/A" name="C:\Users\Administrator\AppData\Local\Temp\\~DFFE31FDCF2F387ADE.TMP" sha1="N/A" sha256="N/A" size="N/A" type="N/A"/>
+      </file>
+      <service/>
+      <mutex>
+        <CreateMutex name="&lt;NULL&gt;"/>
+        <CreateMutex name="Global\552FFA80-3393-423d-8671-7BA046BB5906"/>
+      </mutex>
+      <java_api/>
+    </process>
+  </process_list>
+</report>
+</task_info>
+</wildfire>
