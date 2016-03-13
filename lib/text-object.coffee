@@ -145,7 +145,7 @@ class Pair extends TextObject
     bs = backSlashPattern
     pattern = new RegExp("[^#{bs}]#{bs}")
     scanRange = [[point.row, 0], point]
-    @editor.backwardsScanInBufferRange pattern, scanRange, ({matchText, range, stop}) =>
+    @editor.backwardsScanInBufferRange pattern, scanRange, ({matchText, range, stop}) ->
       if range.end.isEqual(point)
         stop()
         found = true
@@ -470,7 +470,7 @@ class Tag extends Pair
   getTagStartPoint: (from) ->
     tagRange = null
     scanRange = @editor.bufferRangeForBufferRow(from.row)
-    @editor.scanInBufferRange tagPattern, scanRange, ({range, stop}) =>
+    @editor.scanInBufferRange tagPattern, scanRange, ({range, stop}) ->
       if range.containsPoint(from, true)
         tagRange = range
         stop()
