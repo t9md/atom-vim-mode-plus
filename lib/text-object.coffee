@@ -134,12 +134,6 @@ class Pair extends TextObject
     pattern = ///[^\\]?#{_.escapeRegExp(char)}///
     ['close', 'open'][(countChar(text, pattern) % 2)]
 
-  shouldStopScan: (which, from, range) ->
-    if @allowNextLine
-      false
-    else
-      from.row isnt range.start.row
-
   # Take start point of matched range.
   escapeChar = '\\'
   isEscapedCharAtPoint: (point) ->
@@ -150,7 +144,8 @@ class Pair extends TextObject
     {from, pattern, scanFunc, scanRange} = options
     @editor[scanFunc] pattern, scanRange, (event) =>
       {matchText, range, stop} = event
-      return stop() if @shouldStopScan(which, from, range)
+      unless @allowNextLine or (from.row is range.start.row)
+        return stop()
       return if @isEscapedCharAtPoint(range.start)
       fn(event)
 
@@ -438,7 +433,6 @@ class Tag extends Pair
     scanRange = new Range([0, 0], from)
     stack = []
     found = null
-    which = 'open'
     @findPair 'open', {from, pattern, scanFunc, scanRange}, (event) =>
       {matchText, range, stop} = event
       [pairState, tagName] = @getPairState(event)
