@@ -1,5 +1,5 @@
 # Refactoring status: 80%
-{getVimState, dispatch} = require './spec-helper'
+{getVimState, dispatch, TextData} = require './spec-helper'
 
 describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -707,35 +707,162 @@ describe "TextObject", ->
         """
 
   describe "Tag", ->
+    [ensureSelectedText] = []
+    ensureSelectedText = (start, keystroke, selectedText) ->
+      set cursor: start
+      ensure keystroke, {selectedText}
+
     describe "inner-tag", ->
-      beforeEach ->
-        set
-          text: "<something>here</something><again>"
-          cursor: [0, 5]
-
-      it "applies only if in the value of a tag", ->
-        ensure 'dit',
-          text: "<something></something><again>"
-          cursor: [0, 11]
-
-      it "applies operators inside the current word in operator-pending mode", ->
-        set cursor: [0, 13]
-        ensure 'dit',
-          text: "<something></something><again>"
-          cursor: [0, 11]
-      xdescribe "cursor is on the pair char", ->
+      describe "pricisely select inner", ->
         check = getCheckFunctionFor('it')
-        text = '->+<-'
-        textFinal = '-><-'
-        selectedText = '+'
-        open = [0, 1]
-        close = [0, 3]
+        text = "<abc>  <title>TITLE</title> </abc>"
+        deletedText = "<abc>  <title></title> </abc>"
+        selectedText = "TITLE"
+        innerABC = "  <title>TITLE</title> "
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
-        it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
-        it "case-3 visual", -> check open, 'v', {selectedText}
-        it "case-4 visual", -> check close, 'v', {selectedText}
+        # Select
+        it "[1] forwarding", -> check [0, 5], 'v', {selectedText}
+        it "[2] openTag leftmost", -> check [0, 7], 'v', {selectedText}
+        it "[3] openTag rightmost", -> check [0, 13], 'v', {selectedText}
+        it "[4] Inner text", -> check [0, 16], 'v', {selectedText}
+        it "[5] closeTag leftmost", -> check [0, 19], 'v', {selectedText}
+        it "[6] closeTag rightmost", -> check [0, 26], 'v', {selectedText}
+        it "[7] right of closeTag", -> check [0, 27], 'v', {selectedText: innerABC}
+
+        # Delete
+        it "[8] forwarding", -> check [0, 5], 'd', {text: deletedText}
+        it "[9] openTag leftmost", -> check [0, 7], 'd', {text: deletedText}
+        it "[10] openTag rightmost", -> check [0, 13], 'd', {text: deletedText}
+        it "[11] Inner text", -> check [0, 16], 'd', {text: deletedText}
+        it "[12] closeTag leftmost", -> check [0, 19], 'd', {text: deletedText}
+        it "[13] closeTag rightmost", -> check [0, 26], 'd', {text: deletedText}
+        it "[14] right of closeTag", -> check [0, 27], 'd', {text: "<abc></abc>"}
+
+      describe "expansion and deletion", ->
+        beforeEach ->
+          htmlLikeText = """
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+          __<meta charset="UTF-8" />
+          __<title>Document</title>
+          </head>
+          <body>
+          __<div>
+          ____<div>
+          ______<div>
+          ________<p><a>
+          ______</div>
+          ____</div>
+          __</div>
+          </body>
+          </html>\n
+          """
+          set text: htmlLikeText
+        it "can expand selection when repeated", ->
+          set cursor: [9, 0]
+          ensure 'vit', selectedText: """
+            \n________<p><a>
+            ______
+            """
+          ensure 'it', selectedText: """
+            \n______<div>
+            ________<p><a>
+            ______</div>
+            ____
+            """
+          ensure 'it', selectedText: """
+            \n____<div>
+            ______<div>
+            ________<p><a>
+            ______</div>
+            ____</div>
+            __
+            """
+          ensure 'it', selectedText: """
+            \n__<div>
+            ____<div>
+            ______<div>
+            ________<p><a>
+            ______</div>
+            ____</div>
+            __</div>\n
+            """
+          ensure 'it', selectedText: """
+            \n<head>
+            __<meta charset="UTF-8" />
+            __<title>Document</title>
+            </head>
+            <body>
+            __<div>
+            ____<div>
+            ______<div>
+            ________<p><a>
+            ______</div>
+            ____</div>
+            __</div>
+            </body>\n
+            """
+        it 'delete inner-tag and repatable', ->
+          set cursor: [9, 0]
+          ensure "dit", text: """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            __<meta charset="UTF-8" />
+            __<title>Document</title>
+            </head>
+            <body>
+            __<div>
+            ____<div>
+            ______<div></div>
+            ____</div>
+            __</div>
+            </body>
+            </html>\n
+            """
+          ensure "3.", text: """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            __<meta charset="UTF-8" />
+            __<title>Document</title>
+            </head>
+            <body></body>
+            </html>\n
+            """
+          ensure ".", text: """
+            <!DOCTYPE html>
+            <html lang="en"></html>\n
+            """
+
+    describe "a-tag", ->
+      describe "pricisely select a", ->
+        check = getCheckFunctionFor('at')
+        text = "<abc>  <title>TITLE</title> </abc>"
+        deletedText = "<abc>   </abc>"
+        selectedText = "<title>TITLE</title>"
+        aABC = "<abc>  <title>TITLE</title> </abc>"
+        beforeEach ->
+          set {text}
+        # Select
+        it "[1] forwarding", -> check [0, 5], 'v', {selectedText}
+        it "[2] openTag leftmost", -> check [0, 7], 'v', {selectedText}
+        it "[3] openTag rightmost", -> check [0, 13], 'v', {selectedText}
+        it "[4] Inner text", -> check [0, 16], 'v', {selectedText}
+        it "[5] closeTag leftmost", -> check [0, 19], 'v', {selectedText}
+        it "[6] closeTag rightmost", -> check [0, 26], 'v', {selectedText}
+        it "[7] right of closeTag", -> check [0, 27], 'v', {selectedText: aABC}
+
+        # Delete
+        it "[8] forwarding", -> check [0, 5], 'd', {text: deletedText}
+        it "[9] openTag leftmost", -> check [0, 7], 'd', {text: deletedText}
+        it "[10] openTag rightmost", -> check [0, 13], 'd', {text: deletedText}
+        it "[11] Inner text", -> check [0, 16], 'd', {text: deletedText}
+        it "[12] closeTag leftmost", -> check [0, 19], 'd', {text: deletedText}
+        it "[13] closeTag rightmost", -> check [0, 26], 'd', {text: deletedText}
+        it "[14] right of closeTag", -> check [0, 27], 'd', {text: ""}
 
   describe "SquareBracket", ->
     describe "inner-square-bracket", ->

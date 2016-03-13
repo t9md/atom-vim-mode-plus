@@ -1,5 +1,5 @@
 # Refactoring status: 95%
-{Range} = require 'atom'
+{Range, Point} = require 'atom'
 _ = require 'underscore-plus'
 
 Base = require './base'
@@ -42,10 +42,6 @@ class TextObject extends Base
   select: ->
     for selection in @editor.getSelections()
       @selectTextObject(selection)
-      {start, end} = selection.getBufferRange()
-      if (end.column is 0) and swrap(selection).detectVisualModeSubmode() is 'characterwise'
-        end = getEolBufferPositionForRow(@editor, end.row - 1)
-        swrap(selection).setBufferRangeSafely([start, end])
 
 # -------------------------
 # [FIXME] make it expandable
@@ -111,6 +107,7 @@ class Pair extends TextObject
   @extend(false)
   allowNextLine: false
   allowSubmodeChange: false
+  adjustInnerRange: true
   pair: null
   getPattern: ->
     [open, close] = @pair
@@ -186,10 +183,10 @@ class Pair extends TextObject
     stack = []
     found = null
     @findPair 'close', {from, pattern, scanFunc, scanRange}, (event) =>
-      {matchText, range, stop} = event
+      {range, stop} = event
       pairState = @getPairState(event)
       if pairState is 'open'
-        stack.push({pairState, matchText, range})
+        stack.push({pairState, range})
       else
         entry = stack.pop()
         if stack.length is 0
@@ -213,8 +210,20 @@ class Pair extends TextObject
 
     aRange = new Range(openRange.start, closeRange.end)
     [innerStart, innerEnd] = [openRange.end, closeRange.start]
-    innerStart = [innerStart.row + 1, 0] if pointIsAtEndOfLine(@editor, innerStart)
-    innerEnd = [innerEnd.row, 0] if getTextToPoint(@editor, innerEnd).match(/^\s*$/)
+    if @adjustInnerRange
+      # Dirty work to feel natural for human, to behave compatible with pure Vim.
+      # Where this adjustment appear is in following situation.
+      # op-1: `ci{` replace only 2nd line
+      # op-2: `di{` delete only 2nd line.
+      # text:
+      #  {
+      #    aaa
+      #  }
+      innerStart = new Point(innerStart.row + 1, 0) if pointIsAtEndOfLine(@editor, innerStart)
+      innerEnd = new Point(innerEnd.row, 0) if getTextToPoint(@editor, innerEnd).match(/^\s*$/)
+      if (innerEnd.column is 0) and (innerStart.column isnt 0)
+        innerEnd = new Point(innerEnd.row - 1, Infinity)
+
     innerRange = new Range(innerStart, innerEnd)
     targetRange = if @isInner() then innerRange else aRange
     if @skipEmptyPair and innerRange.isEmpty()
@@ -222,12 +231,24 @@ class Pair extends TextObject
     else
       {openRange, closeRange, aRange, innerRange, targetRange}
 
+  getPointToSearchFrom: (selection, searchFrom) ->
+    switch searchFrom
+      when 'head'
+        point = selection.getHeadBufferPosition()
+        # When selection is not empty, we have to start to search one column left
+        if (not selection.isEmpty()) and (not selection.isReversed()) and (point.column > 0)
+          point = @editor.clipScreenPosition(point.translate([0, -1]), {clip: 'backward'})
+        point
+      when 'start'
+        selection.getBufferRange().start
+
   # Allow override @allowForwarding by 2nd argument.
-  getRange: (selection, @allowForwarding=@allowForwarding) ->
+  getRange: (selection, options={}) ->
+    {allowForwarding, searchFrom} = options
+    searchFrom ?= 'head'
+    @allowForwarding = allowForwarding if allowForwarding?
     originalRange = selection.getBufferRange()
-    from = selection.getTailBufferPosition()
-    # from = selection.getHeadBufferPosition()
-    pairInfo = @getPairInfo(from)
+    pairInfo = @getPairInfo(@getPointToSearchFrom(selection, searchFrom))
     # When range was same, try to expand range
     if pairInfo?.targetRange.isEqual(originalRange)
       pairInfo = @getPairInfo(pairInfo.aRange.end)
@@ -247,7 +268,7 @@ class AnyPair extends Pair
   ]
 
   getRangeBy: (klass, selection) ->
-    @new(klass, {@inner, @skipEmptyPair}).getRange(selection, @allowForwarding)
+    @new(klass, {@inner, @skipEmptyPair}).getRange(selection, {@allowForwarding, @searchFrom})
 
   getRanges: (selection) ->
     (range for klass in @member when (range = @getRangeBy(klass, selection)))
@@ -271,6 +292,7 @@ class AnyPairAllowForwarding extends AnyPair
   allowForwarding: true
   allowNextLine: false
   skipEmptyPair: false
+  searchFrom: 'start'
   getNearestRange: (selection) ->
     ranges = @getRanges(selection)
     from = selection.cursor.getBufferPosition()
@@ -433,6 +455,8 @@ tagPattern = /(<(\/?))([^\s>]+)[^>]*>/g
 class Tag extends Pair
   @extend(false)
   allowNextLine: true
+  allowForwarding: true
+  adjustInnerRange: false
   getPattern: ->
     tagPattern
 
@@ -452,16 +476,13 @@ class Tag extends Pair
         stop()
     tagRange?.start ? from
 
-  findLastIndex: (stack, fn) ->
-    return -1 if stack.length is 0
+  findTagState: (stack, tagState) ->
+    return null if stack.length is 0
     for i in [(stack.length - 1)..0]
-      if fn(stack[i])
-        return i
-    -1
-
-  findLastIndexOfTagState: (stack, tagState) ->
-    @findLastIndex stack, (entry) ->
-      entry.tagState is tagState
+      entry = stack[i]
+      if entry.tagState is tagState
+        return entry
+    null
 
   findOpen: (from,  pattern) ->
     scanFunc = 'backwardsScanInBufferRange'
@@ -469,14 +490,14 @@ class Tag extends Pair
     stack = []
     found = null
     @findPair 'open', {from, pattern, scanFunc, scanRange}, (event) =>
-      {matchText, range, stop} = event
+      {range, stop} = event
       [pairState, tagName] = @getPairState(event)
       if pairState is 'close'
         tagState = pairState + tagName
         stack.push({tagState, range})
       else
-        if (index = @findLastIndexOfTagState(stack, "close#{tagName}")) >= 0
-          stack = stack[0...index]
+        if entry = @findTagState(stack, "close#{tagName}")
+          stack = stack[0...stack.indexOf(entry)]
         if stack.length is 0
           found = range
       stop() if found?
@@ -495,14 +516,17 @@ class Tag extends Pair
         tagState = pairState + tagName
         stack.push({tagState, range})
       else
-        if (index = @findLastIndexOfTagState(stack, "open#{tagName}")) >= 0
-          stack = stack[0...index]
+        if entry = @findTagState(stack, "open#{tagName}")
+          stack = stack[0...stack.indexOf(entry)]
         else
           # I'm very torelant for orphan tag like 'br', 'hr', or unclosed tag.
           stack = []
         if stack.length is 0
           if (openStart = entry?.range.start)
-            return if openStart.row > from.row
+            if @allowForwarding
+              return if openStart.row > from.row
+            else
+              return if openStart.isGreaterThan(from)
           found = range
       stop() if found?
     found
