@@ -139,8 +139,8 @@ getVimState = (args...) ->
     callback(vimState, new VimEditor(vimState))
 
 class TextData
-  constructor: (@row) ->
-    @lines = @row.split("\n")
+  constructor: (@rawData) ->
+    @lines = @rawData.split("\n")
 
   getLines: (lines, {chomp}={}) ->
     chomp ?= false
@@ -151,7 +151,7 @@ class TextData
       text + "\n"
 
   getRaw: ->
-    @row
+    @rawData
 
 class VimEditor
   constructor: (@vimState) ->
