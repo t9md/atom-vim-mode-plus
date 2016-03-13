@@ -199,7 +199,7 @@ class Pair extends TextObject
             else
               return if openStart.isGreaterThan(from)
           found = range
-          return stop()
+      stop() if found?
     found
 
   getPairInfo: (from) ->
@@ -226,6 +226,7 @@ class Pair extends TextObject
   getRange: (selection, @allowForwarding=@allowForwarding) ->
     originalRange = selection.getBufferRange()
     from = selection.getTailBufferPosition()
+    # from = selection.getHeadBufferPosition()
     pairInfo = @getPairInfo(from)
     # When range was same, try to expand range
     if pairInfo?.targetRange.isEqual(originalRange)
@@ -442,6 +443,26 @@ class Tag extends Pair
     else
       ['close', tagName]
 
+  getTagStartPoint: (from) ->
+    tagRange = null
+    scanRange = @editor.bufferRangeForBufferRow(from.row)
+    @editor.scanInBufferRange tagPattern, scanRange, ({range, stop}) =>
+      if range.containsPoint(from, true)
+        tagRange = range
+        stop()
+    tagRange?.start ? from
+
+  findLastIndex: (stack, fn) ->
+    return -1 if stack.length is 0
+    for i in [(stack.length - 1)..0]
+      if fn(stack[i])
+        return i
+    -1
+
+  findLastIndexOfTagState: (stack, tagState) ->
+    @findLastIndex stack, (entry) ->
+      entry.tagState is tagState
+
   findOpen: (from,  pattern) ->
     scanFunc = 'backwardsScanInBufferRange'
     scanRange = new Range([0, 0], from)
@@ -451,24 +472,15 @@ class Tag extends Pair
       {matchText, range, stop} = event
       [pairState, tagName] = @getPairState(event)
       if pairState is 'close'
-        stack.push({pairState: pairState + tagName, range})
+        tagState = pairState + tagName
+        stack.push({tagState, range})
       else
-        if entry = _.detect(stack, (entry) -> entry.pairState is "close#{tagName}")
-          stack = stack[0...stack.indexOf(entry)]
+        if (index = @findLastIndexOfTagState(stack, "close#{tagName}")) >= 0
+          stack = stack[0...index]
         if stack.length is 0
           found = range
       stop() if found?
-
     found
-
-  getTagStartPoint: (from) ->
-    tagRange = null
-    scanRange = @editor.bufferRangeForBufferRow(from.row)
-    @editor.scanInBufferRange tagPattern, scanRange, ({range, stop}) =>
-      if range.containsPoint(from, true)
-        tagRange = range
-        stop()
-    tagRange?.start ? from
 
   findClose: (from,  pattern) ->
     scanFunc = 'scanInBufferRange'
@@ -480,18 +492,19 @@ class Tag extends Pair
       {range, stop} = event
       [pairState, tagName] = @getPairState(event)
       if pairState is 'open'
-        stack.push({pairState: 'open' + tagName, range})
+        tagState = pairState + tagName
+        stack.push({tagState, range})
       else
-        if entry = _.detect(stack, (entry) -> entry.pairState is "open#{tagName}")
-          stack = stack[0...stack.indexOf(entry)]
+        if (index = @findLastIndexOfTagState(stack, "open#{tagName}")) >= 0
+          stack = stack[0...index]
         else
+          # I'm very torelant for orphan tag like 'br', 'hr', or unclosed tag.
           stack = []
         if stack.length is 0
           if (openStart = entry?.range.start)
             return if openStart.row > from.row
           found = range
       stop() if found?
-
     found
 
 class ATag extends Tag
