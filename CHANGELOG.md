@@ -1,12 +1,13 @@
-# WIP
+# 0.24.0
 - Fix: Inconsistency for changed area for `P`, `p`. And respect original newline on EOF.
 - New: `PutAfterAndSelect` and `PutBeforeAndSelect` to paste and select #184
-- New: Very immature implementation of `innerTag` and `aTag` text object.
 - New: allow-forwarding text-object #188
 - Spec: Improve test coverage for `%` motion
 - Improve: Fix several minor bug for `%` motion.
 - Improve: Fix several minor bug for pair text-object.
 - Fix: Now `c` can enter insert mode even if target is empty. #189
+- Fix: Don't treat double backslash \\ as escape char in TextObject.Pair family #191
+- New: `innerTag` and `aTag` text object. #84
 
 # 0.23.0
 - Fix: setHover error. Guard when `vimState::getBlockwiseSelections()` is empty.
