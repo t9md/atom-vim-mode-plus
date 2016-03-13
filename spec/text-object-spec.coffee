@@ -317,14 +317,37 @@ describe "TextObject", ->
           text: "' something in here and in 'here' ' and over here"
           cursor: [0, 9]
 
-      it "applies operators inside the current string with backslash", ->
-        set
-          text: "'some-key-here\\': 'here-is-the-val' # comment here"
-          cursor: [0, 2]
+      describe "don't treat literal backslash(double backslash) as escape char", ->
+        beforeEach ->
+          set
+            text: "'some-key-here\\\\': 'here-is-the-val'"
+        it "case-1", ->
+          set cursor: [0, 2]
+          ensure "di'",
+            text: "'': 'here-is-the-val'"
+            cursor: [0, 1]
 
-        ensure "di'",
-          text: "'': 'here-is-the-val' # comment here"
-          cursor: [0, 1]
+        it "case-2", ->
+          set cursor: [0, 19]
+          ensure "di'",
+            text: "'some-key-here\\\\': ''"
+            cursor: [0, 20]
+
+      describe "treat backslash(single backslash) as escape char", ->
+        beforeEach ->
+          set
+            text: "'some-key-here\\'': 'here-is-the-val'"
+
+        it "case-1", ->
+          set cursor: [0, 2]
+          ensure "di'",
+            text: "'': 'here-is-the-val'"
+            cursor: [0, 1]
+        it "case-2", ->
+          set cursor: [0, 17]
+          ensure "di'",
+            text: "'some-key-here\\'': ''"
+            cursor: [0, 20]
 
       it "applies operators inside the current string in operator-pending mode", ->
         ensure "di'",
@@ -801,8 +824,12 @@ describe "TextObject", ->
         ensure 'vi(', selectedText: 'editor.getScrollTop()'
 
       it "skip escaped pair case-1", ->
-        set text: 'expect(editor.g\\(etScrollTp())', cursor: [0, 7]
+        set text: 'expect(editor.g\\(etScrollTp())', cursor: [0, 20]
         ensure 'vi(', selectedText: 'editor.g\\(etScrollTp()'
+
+      it "dont skip literal backslash", ->
+        set text: 'expect(editor.g\\\\(etScrollTp())', cursor: [0, 20]
+        ensure 'vi(', selectedText: 'etScrollTp()'
 
       it "skip escaped pair case-2", ->
         set text: 'expect(editor.getSc\\)rollTp())', cursor: [0, 7]

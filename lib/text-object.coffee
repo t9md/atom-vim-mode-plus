@@ -129,16 +129,30 @@ class Pair extends TextObject
           when match[1] then 'open'
           when match[2] then 'close'
 
+  backSlashPattern = _.escapeRegExp('\\')
   pairStateInBufferRange: (range, char) ->
     text = getTextToPoint(@editor, range.end)
-    pattern = ///[^\\]?#{_.escapeRegExp(char)}///
+    escapedChar = _.escapeRegExp(char)
+    bs = backSlashPattern
+    patterns = [
+      "#{bs}#{bs}#{escapedChar}"
+      "[^#{bs}]?#{escapedChar}"
+    ]
+    pattern = new RegExp(patterns.join('|'))
     ['close', 'open'][(countChar(text, pattern) % 2)]
 
   # Take start point of matched range.
-  escapeChar = '\\'
   isEscapedCharAtPoint: (point) ->
-    range = Range.fromPointWithDelta(point, 0, -1)
-    @editor.getTextInBufferRange(range) is escapeChar
+    found = false
+
+    bs = backSlashPattern
+    pattern = new RegExp("[^#{bs}]#{bs}")
+    scanRange = [[point.row, 0], point]
+    @editor.backwardsScanInBufferRange pattern, scanRange, ({matchText, range, stop}) =>
+      if range.end.isEqual(point)
+        stop()
+        found = true
+    found
 
   findPair: (which, options, fn) ->
     {from, pattern, scanFunc, scanRange} = options
