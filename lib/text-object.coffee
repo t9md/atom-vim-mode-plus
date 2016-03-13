@@ -419,12 +419,12 @@ class InnerAngleBracketAllowForwarding extends AngleBracket
   allowForwarding: true
 
 # -------------------------
+tagPattern = /(<(\/?))([^\s>]+)[^>]*>/g
 class Tag extends Pair
   @extend(false)
   allowNextLine: true
-  allowForwarding: true
   getPattern: ->
-    /(<(\/?))([^\s>]+)[^>]*>/g
+    tagPattern
 
   getPairState: ({match, matchText}) ->
     [__, __, slash, tagName] = match
@@ -443,11 +443,9 @@ class Tag extends Pair
       {matchText, range, stop} = event
       [pairState, tagName] = @getPairState(event)
       if pairState is 'close'
-        stack.push({pairState, tagName, range})
+        stack.push({pairState: pairState + tagName, range})
       else
-        entry = _.detect stack, (entry) ->
-          (entry.pairState is 'close') and (entry.tagName is tagName)
-        if entry?
+        if entry = _.detect(stack, (entry) -> entry.pairState is "close#{tagName}")
           stack = stack[0...stack.indexOf(entry)]
         if stack.length is 0
           found = range
@@ -455,17 +453,13 @@ class Tag extends Pair
 
     found
 
-  scanTagsForRow: (row) ->
-    scanRange = @editor.bufferRangeForBufferRow(row)
-    pattern = /(<(\/?))([^\s>]+)[^>]*>/g
-    ranges = []
-    @editor.scanInBufferRange pattern, scanRange, ({range, matchText}) =>
-      ranges.push range
-    ranges
-
   getTagStartPoint: (from) ->
-    tagRange = _.detect @scanTagsForRow(from.row), (range) ->
-      range.containsPoint(from, true)
+    tagRange = null
+    scanRange = @editor.bufferRangeForBufferRow(from.row)
+    @editor.scanInBufferRange tagPattern, scanRange, ({range, stop}) =>
+      if range.containsPoint(from, true)
+        tagRange = range
+        stop()
     tagRange?.start ? from
 
   findClose: (from,  pattern) ->
@@ -475,26 +469,18 @@ class Tag extends Pair
     stack = []
     found = null
     @findPair 'close', {from, pattern, scanFunc, scanRange}, (event) =>
-      {matchText, range, stop} = event
+      {range, stop} = event
       [pairState, tagName] = @getPairState(event)
       if pairState is 'open'
-        # if range.end.isGreaterThan(from)
-        stack.push({pairState, tagName, range})
+        stack.push({pairState: 'open' + tagName, range})
       else
-        entry = _.detect stack, (entry) ->
-          (entry.pairState is 'open') and (entry.tagName is tagName)
-        if entry?
+        if entry = _.detect(stack, (entry) -> entry.pairState is "open#{tagName}")
           stack = stack[0...stack.indexOf(entry)]
         else
           stack = []
         if stack.length is 0
-          # if range.start.isLessThan(from) and not range.containsPoint(from, true)
-          #   return
           if (openStart = entry?.range.start)
-            if @allowForwarding
-              return if openStart.row > from.row
-            else
-              return if openStart.isGreaterThan(from)
+            return if openStart.row > from.row
           found = range
       stop() if found?
 
