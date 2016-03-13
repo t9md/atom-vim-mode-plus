@@ -674,17 +674,14 @@ describe "TextObject", ->
         111]
         """
 
-  xdescribe "Tag", ->
+  describe "Tag", ->
     describe "inner-tag", ->
       beforeEach ->
         set
           text: "<something>here</something><again>"
           cursor: [0, 5]
 
-      # [FIXME] original official vim-mode support this, but its also affect other
-      # TextObject like i( I don't like original behavior.
-      # So I disabled, but for HTML tags, there is some space to improve.
-      xit "applies only if in the value of a tag", ->
+      it "applies only if in the value of a tag", ->
         ensure 'dit',
           text: "<something></something><again>"
           cursor: [0, 11]
@@ -694,7 +691,7 @@ describe "TextObject", ->
         ensure 'dit',
           text: "<something></something><again>"
           cursor: [0, 11]
-      describe "cursor is on the pair char", ->
+      xdescribe "cursor is on the pair char", ->
         check = getCheckFunctionFor('it')
         text = '->+<-'
         textFinal = '-><-'

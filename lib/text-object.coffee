@@ -146,22 +146,45 @@ class Pair extends TextObject
     range = Range.fromPointWithDelta(point, 0, -1)
     @editor.getTextInBufferRange(range) is escapeChar
 
-  findPair: (which, options) ->
+  findPair: (which, options, fn) ->
     {from, pattern, scanFunc, scanRange} = options
-    found = null # We will search to fill this.
-    stack = []
     @editor[scanFunc] pattern, scanRange, (event) =>
       {matchText, range, stop} = event
       return stop() if @shouldStopScan(which, from, range)
       return if @isEscapedCharAtPoint(range.start)
+      fn(event)
 
+  findOpen: (from,  pattern) ->
+    scanFunc = 'backwardsScanInBufferRange'
+    scanRange = new Range([0, 0], from)
+    stack = []
+    found = null
+    @findPair 'open', {from, pattern, scanFunc, scanRange}, (event) =>
+      {matchText, range, stop} = event
       pairState = @getPairState(event)
-      if pairState isnt which
+      if pairState is 'close'
+        stack.push({pairState, matchText, range})
+      else
+        stack.pop()
+        if stack.length is 0
+          found = range
+      stop() if found?
+    found
+
+  findClose: (from,  pattern) ->
+    scanFunc = 'scanInBufferRange'
+    scanRange = new Range(from, @editor.buffer.getEndPosition())
+    stack = []
+    found = null
+    @findPair 'close', {from, pattern, scanFunc, scanRange}, (event) =>
+      {matchText, range, stop} = event
+      pairState = @getPairState(event)
+      if pairState is 'open'
         stack.push({pairState, matchText, range})
       else
         entry = stack.pop()
         if stack.length is 0
-          if which is 'close' and (openStart = entry?.range.start)
+          if (openStart = entry?.range.start)
             if @allowForwarding
               return if openStart.row > from.row
             else
@@ -169,16 +192,6 @@ class Pair extends TextObject
           found = range
           return stop()
     found
-
-  findOpen: (from,  pattern) ->
-    scanFunc = 'backwardsScanInBufferRange'
-    scanRange = new Range([0, 0], from)
-    @findPair 'open', {from, pattern, scanFunc, scanRange}
-
-  findClose: (from,  pattern) ->
-    scanFunc = 'scanInBufferRange'
-    scanRange = new Range(from, @editor.buffer.getEndPosition())
-    @findPair 'close', {from, pattern, scanFunc, scanRange}
 
   getPairInfo: (from) ->
     pairInfo = null
@@ -406,7 +419,6 @@ class InnerAngleBracketAllowForwarding extends AngleBracket
   allowForwarding: true
 
 # -------------------------
-# [TODO] WORKING: sSee vim-mode#795
 class Tag extends Pair
   @extend(false)
   allowNextLine: true
@@ -417,9 +429,76 @@ class Tag extends Pair
   getPairState: ({match, matchText}) ->
     [__, __, slash, tagName] = match
     if slash is ''
-      'open'
+      ['open', tagName]
     else
-      'close'
+      ['close', tagName]
+
+  findOpen: (from,  pattern) ->
+    scanFunc = 'backwardsScanInBufferRange'
+    scanRange = new Range([0, 0], from)
+    stack = []
+    found = null
+    which = 'open'
+    @findPair 'open', {from, pattern, scanFunc, scanRange}, (event) =>
+      {matchText, range, stop} = event
+      [pairState, tagName] = @getPairState(event)
+      if pairState is 'close'
+        stack.push({pairState, tagName, range})
+      else
+        entry = _.detect stack, (entry) ->
+          (entry.pairState is 'close') and (entry.tagName is tagName)
+        if entry?
+          stack = stack[0...stack.indexOf(entry)]
+        if stack.length is 0
+          found = range
+      stop() if found?
+
+    found
+
+  scanTagsForRow: (row) ->
+    scanRange = @editor.bufferRangeForBufferRow(row)
+    pattern = /(<(\/?))([^\s>]+)[^>]*>/g
+    ranges = []
+    @editor.scanInBufferRange pattern, scanRange, ({range, matchText}) =>
+      ranges.push range
+    ranges
+
+  getTagStartPoint: (from) ->
+    tagRange = _.detect @scanTagsForRow(from.row), (range) ->
+      range.containsPoint(from, true)
+    tagRange?.start ? from
+
+  findClose: (from,  pattern) ->
+    scanFunc = 'scanInBufferRange'
+    from = @getTagStartPoint(from)
+    scanRange = new Range(from, @editor.buffer.getEndPosition())
+    stack = []
+    found = null
+    @findPair 'close', {from, pattern, scanFunc, scanRange}, (event) =>
+      {matchText, range, stop} = event
+      [pairState, tagName] = @getPairState(event)
+      if pairState is 'open'
+        # if range.end.isGreaterThan(from)
+        stack.push({pairState, tagName, range})
+      else
+        entry = _.detect stack, (entry) ->
+          (entry.pairState is 'open') and (entry.tagName is tagName)
+        if entry?
+          stack = stack[0...stack.indexOf(entry)]
+        else
+          stack = []
+        if stack.length is 0
+          # if range.start.isLessThan(from) and not range.containsPoint(from, true)
+          #   return
+          if (openStart = entry?.range.start)
+            if @allowForwarding
+              return if openStart.row > from.row
+            else
+              return if openStart.isGreaterThan(from)
+          found = range
+      stop() if found?
+
+    found
 
 class ATag extends Tag
   @extend()
