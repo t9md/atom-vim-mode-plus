@@ -538,6 +538,10 @@ class DeleteSurroundAnyPair extends DeleteSurround
   requireInput: false
   target: 'AAnyPair'
 
+class DeleteSurroundAnyPairAllowForwarding extends DeleteSurroundAnyPair
+  @extend()
+  target: 'AAnyPairAllowForwarding'
+
 class ChangeSurround extends DeleteSurround
   @extend()
   charsMax: 2
@@ -571,6 +575,10 @@ class ChangeSurroundAnyPair extends ChangeSurround
     @restore(selection) for selection in @editor.getSelections()
     @input = @char
     @processOperation()
+
+class ChangeSurroundAnyPairAllowForwarding extends ChangeSurroundAnyPair
+  @extend()
+  target: "AAnyPairAllowForwarding"
 
 # -------------------------
 class Yank extends Operator

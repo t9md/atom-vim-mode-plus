@@ -252,10 +252,15 @@
 
   # 'y s': 'vim-mode-plus:surround'
   # 'y s w': 'vim-mode-plus:surround-word'
+
   # 'd s': 'vim-mode-plus:delete-surround'
-  # 'c s': 'vim-mode-plus:change-surround'
   # 'd s': 'vim-mode-plus:delete-surround-any-pair'
+  # 'd s': 'vim-mode-plus:delete-surround-any-pair-allow-forwarding'
+
+  # 'c s': 'vim-mode-plus:change-surround'
   # 'c s': 'vim-mode-plus:change-surround-any-pair'
+  # 'c s': 'vim-mode-plus:change-surround-any-pair-allow-forwarding'
+
   # 'y m s':  'vim-mode-plus:map-surround'
 
 # operator-pending, visual

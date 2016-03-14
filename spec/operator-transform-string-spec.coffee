@@ -444,7 +444,7 @@ describe "Operator TransformString", ->
         ensure 'j.',
           text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
 
-    describe 'delete surround-any-pair', ->
+    describe 'delete-surround-any-pair', ->
       beforeEach ->
         set
           text: """
@@ -480,7 +480,33 @@ describe "Operator TransformString", ->
         ensure 'ds',
           text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\nmulti\n  line'
 
-    describe 'change surround-any-pair', ->
+    describe 'delete-surround-any-pair-allow-forwarding', ->
+      beforeEach ->
+        settings.set('stayOnTransformString', true)
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'd s': 'vim-mode-plus:delete-surround-any-pair-allow-forwarding'
+      it "[1] single line", ->
+        set
+          cursor: [0, 0]
+          text: """
+          ___(inner)
+          ___(inner)
+          """
+        ensure 'ds',
+          text: """
+          ___inner
+          ___(inner)
+          """
+          cursor: [0, 0]
+        ensure 'j.',
+          text: """
+          ___inner
+          ___inner
+          """
+          cursor: [1, 0]
+
+    describe 'change-surround-any-pair', ->
       beforeEach ->
         set
           text: """
@@ -496,12 +522,35 @@ describe "Operator TransformString", ->
             'c s': 'vim-mode-plus:change-surround-any-pair'
 
       it "change any surrounded pair found and repeatable", ->
+        ensure ['cs', char: '<'], text: "<apple>\n(grape)\n<lemmon>\n{orange}"
+        ensure 'j.', text: "<apple>\n<grape>\n<lemmon>\n{orange}"
+        ensure 'jj.', text: "<apple>\n<grape>\n<lemmon>\n<orange>"
+
+    describe 'change-surround-any-pair-allow-forwarding', ->
+      beforeEach ->
+        settings.set('stayOnTransformString', true)
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'c s': 'vim-mode-plus:change-surround-any-pair-allow-forwarding'
+      it "[1] single line", ->
+        set
+          cursor: [0, 0]
+          text: """
+          ___(inner)
+          ___(inner)
+          """
         ensure ['cs', char: '<'],
-          text: "<apple>\n(grape)\n<lemmon>\n{orange}"
+          text: """
+          ___<inner>
+          ___(inner)
+          """
+          cursor: [0, 0]
         ensure 'j.',
-          text: "<apple>\n<grape>\n<lemmon>\n{orange}"
-        ensure 'jj.',
-          text: "<apple>\n<grape>\n<lemmon>\n<orange>"
+          text: """
+          ___<inner>
+          ___<inner>
+          """
+          cursor: [1, 0]
 
   describe 'ReplaceWithRegister', ->
     originalText = null
