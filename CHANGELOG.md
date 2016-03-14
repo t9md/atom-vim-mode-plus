@@ -1,3 +1,8 @@
+# 0.25.0
+- Improve: #192 Keep original visible area as much as possible when scrolling by `n`, `N`, `/`, `?` to avoid mental context switching
+- New: delete/change-any-pair-allow-forwarding. More powerful version of existing `change-surround-any-pair` and `delete-surround-any-pair` #194
+- Improve: #195 keep code layout when `surround`, `delete-surround`, `change-surround`. former implementation mechanically `trim()` white space of inner string.
+
 # 0.24.0
 - Fix: Inconsistency for changed area for `P`, `p`. And respect original newline on EOF.
 - New: `PutAfterAndSelect` and `PutBeforeAndSelect` to paste and select #184
