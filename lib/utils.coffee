@@ -513,14 +513,13 @@ sortComparable = (collection) ->
 # Scroll to bufferPosition with minimum amount to keep original visible area.
 # If target position won't fit within onePageUp or onePageDown, it center target point.
 smartScrollToBufferPosition = (editor, point) ->
-  pointIsOutOfScreen = (editor, point) ->
-    target = editor.pixelPositionForBufferPosition(point).top
-    rows = editor.getRowsPerPage() - 1
-    editorAreaHeight = editor.getLineHeightInPixels() * rows
-    onePageUp = editor.getScrollTop() - editorAreaHeight # No need to limit to min=0
-    onePageDown = editor.getScrollBottom() + editorAreaHeight
-    (onePageDown < target) or (target < onePageUp)
-  center = pointIsOutOfScreen(editor, point)
+  editorElement = getView(editor)
+  editorAreaHeight = editor.getLineHeightInPixels() * (editor.getRowsPerPage() - 1)
+  onePageUp = editorElement.getScrollTop() - editorAreaHeight # No need to limit to min=0
+  onePageDown = editorElement.getScrollBottom() + editorAreaHeight
+  target = editorElement.pixelPositionForBufferPosition(point).top
+  
+  center = (onePageDown < target) or (target < onePageUp)
   editor.scrollToBufferPosition(point, {center})
 
 # Debugging purpose
