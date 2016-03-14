@@ -52,6 +52,9 @@ class InputBase
     @editor.setText ''
     @view.panel.hide()
 
+  isVisible: ->
+    @view.panel.isVisible()
+
   cancel: ->
     @emitter.emit 'did-cancel'
     @unfocus()
