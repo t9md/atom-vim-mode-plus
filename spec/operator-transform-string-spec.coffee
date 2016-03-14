@@ -369,7 +369,7 @@ describe "Operator TransformString", ->
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
         ensure ['ds', char: '('],
-          text: "apple\npairs: [brackets]\npairs: [brackets]\nmulti\n  line"
+          text: "apple\npairs: [brackets]\npairs: [brackets]\n multi\n  line "
       it "delete surrounded chars and trim padding spaces", ->
         set
           text: """
@@ -379,6 +379,22 @@ describe "Operator TransformString", ->
           cursor: [0, 0]
         ensure ['ds', char: '('], text: "apple\n{  orange   }\n"
         ensure ['jds', char: '{'], text: "apple\norange\n"
+      it "delete surrounded for multi-line but dont affect code layout", ->
+        set
+          cursor: [0, 34]
+          text: """
+            highlightRanges @editor, range, {
+              timeout: timeout
+              hello: world
+            }
+            """
+        ensure ['ds', char: '{'],
+          text: [
+              "highlightRanges @editor, range, "
+              "  timeout: timeout"
+              "  hello: world"
+              ""
+            ].join("\n")
 
     describe 'change srurround', ->
       beforeEach ->
@@ -423,6 +439,23 @@ describe "Operator TransformString", ->
             (grape)
             "lemmon"
             !orange!
+            """
+
+      it "change surrounded for multi-line but dont affect code layout", ->
+        set
+          cursor: [0, 34]
+          text: """
+            highlightRanges @editor, range, {
+              timeout: timeout
+              hello: world
+            }
+            """
+        ensure ['cs', char: '{('],
+          text: """
+            highlightRanges @editor, range, (
+              timeout: timeout
+              hello: world
+            )
             """
 
     describe 'surround-word', ->
@@ -478,7 +511,7 @@ describe "Operator TransformString", ->
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
         ensure 'ds',
-          text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\nmulti\n  line'
+          text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\n multi\n  line '
 
     describe 'delete-surround-any-pair-allow-forwarding', ->
       beforeEach ->

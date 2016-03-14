@@ -462,7 +462,7 @@ class Surround extends TransformString
   charsMax: 1
   hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
   requireInput: true
-  autoIndent: true
+  autoIndent: false
 
   initialize: ->
     return unless @requireInput
@@ -485,11 +485,15 @@ class Surround extends TransformString
   surround: (text, pair) ->
     [open, close] = pair
     if LineEndingRegExp.test(text)
+      @autoIndent = true # [FIXME]
       open += "\n"
       close += "\n"
 
-    # if @input in settings.get('charactersToAddSpaceOnSurround')
-    if @input in settings.get('charactersToAddSpaceOnSurround')
+    SpaceSurroundedRegExp = /^\s([\s|\S]+)\s$/
+    isSurroundedBySpace = (text) ->
+      SpaceSurroundedRegExp.test(text)
+
+    if @input in settings.get('charactersToAddSpaceOnSurround') and not isSurroundedBySpace(text)
       open + ' ' + text + ' ' + close
     else
       open + text + close
@@ -525,13 +529,19 @@ class DeleteSurround extends Surround
     # FIXME: dont manage allowNextLine independently. Each Pair text-object can handle by themselvs.
     target = @new 'Pair',
       pair: @getPair(@input)
-      inclusive: true
+      inner: false
       allowNextLine: @input in @pairChars
     @setTarget(target)
     @processOperation()
 
   getNewText: (text) ->
-    text[1...-1].trim()
+    isSingleLine = (text) ->
+      text.split(/\n|\r\n/).length is 1
+    text = text[1...-1]
+    if isSingleLine(text)
+      text.trim()
+    else
+      text
 
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
@@ -553,7 +563,8 @@ class ChangeSurround extends DeleteSurround
     super(from)
 
   getNewText: (text) ->
-    @surround super(text), @getPair(@char)
+    [open, close] = @getPair(@char)
+    open + text[1...-1] + close
 
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
