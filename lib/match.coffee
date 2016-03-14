@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
   sortRanges
   getIndex
   highlightRanges
-  scrollToBufferPosition
+  smartScrollToBufferPosition
 } = require './utils'
 settings = require './settings'
 
@@ -120,7 +120,7 @@ class Match
 
   visit: ->
     point = @getStartPoint()
-    scrollToBufferPosition(@editor, point)
+    smartScrollToBufferPosition(@editor, point)
     if @editor.isFoldedAtBufferRow(point.row)
       @editor.unfoldBufferRow point.row
 

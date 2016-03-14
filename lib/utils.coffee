@@ -512,7 +512,7 @@ sortComparable = (collection) ->
 
 # Scroll to bufferPosition with minimum amount to keep original visible area.
 # If target position won't fit within onePageUp or onePageDown, it center target point.
-scrollToBufferPosition = (editor, point) ->
+smartScrollToBufferPosition = (editor, point) ->
   pointIsOutOfScreen = (editor, point) ->
     target = editor.pixelPositionForBufferPosition(point).top
     rows = editor.getRowsPerPage() - 1
@@ -655,7 +655,7 @@ module.exports = {
   ElementBuilder
   registerElement
   sortComparable
-  scrollToBufferPosition
+  smartScrollToBufferPosition
   moveCursorDownBuffer
   moveCursorUpBuffer
 
