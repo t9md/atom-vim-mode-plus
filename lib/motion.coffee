@@ -790,7 +790,7 @@ class SearchBase extends Motion
       match.flash() unless @isIncrementalSearch()
       timeout = settings.get('showHoverSearchCounterDuration')
       @matches.showHover({timeout})
-      cursor.setBufferPosition(match.getStartPoint())
+      cursor.setBufferPosition(match.getStartPoint(), {autoscroll: false})
     else
       @matches.show()
       @matches.showHover(timeout: null)

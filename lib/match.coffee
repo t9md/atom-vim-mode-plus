@@ -1,5 +1,11 @@
 _ = require 'underscore-plus'
-{selectVisibleBy, sortRanges, getIndex, highlightRanges} = require './utils'
+{
+  selectVisibleBy
+  sortRanges
+  getIndex
+  highlightRanges
+  scrollToBufferPosition
+} = require './utils'
 settings = require './settings'
 
 class MatchList
@@ -114,7 +120,7 @@ class Match
 
   visit: ->
     point = @getStartPoint()
-    @editor.scrollToBufferPosition(point, center: true)
+    scrollToBufferPosition(@editor, point)
     if @editor.isFoldedAtBufferRow(point.row)
       @editor.unfoldBufferRow point.row
 

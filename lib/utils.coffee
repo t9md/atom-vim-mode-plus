@@ -510,6 +510,19 @@ isFunctionScope = (editor, scope) ->
 sortComparable = (collection) ->
   collection.sort (a, b) -> a.compare(b)
 
+# Scroll to bufferPosition with minimum amount to keep original visible area.
+# If target position won't fit within onePageUp or onePageDown, it center target point.
+scrollToBufferPosition = (editor, point) ->
+  pointIsOutOfScreen = (editor, point) ->
+    target = editor.pixelPositionForBufferPosition(point).top
+    rows = editor.getRowsPerPage() - 1
+    editorAreaHeight = editor.getLineHeightInPixels() * rows
+    onePageUp = editor.getScrollTop() - editorAreaHeight # No need to limit to min=0
+    onePageDown = editor.getScrollBottom() + editorAreaHeight
+    (onePageDown < target) or (target < onePageUp)
+  center = pointIsOutOfScreen(editor, point)
+  editor.scrollToBufferPosition(point, {center})
+
 # Debugging purpose
 # -------------------------
 reportSelection = (subject, selection) ->
@@ -642,6 +655,7 @@ module.exports = {
   ElementBuilder
   registerElement
   sortComparable
+  scrollToBufferPosition
   moveCursorDownBuffer
   moveCursorUpBuffer
 
