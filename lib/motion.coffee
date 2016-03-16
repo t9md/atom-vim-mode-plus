@@ -731,10 +731,6 @@ class SearchBase extends Motion
   backwards: false
   escapeRegExp: false
 
-  initialize: ->
-    unless @instanceof('RepeatSearch')
-      globalState.currentSearch = this
-
   isCaseSensitive: (term) ->
     switch @getCaseSensitivity()
       when 'smartcase' then term.search('[A-Z]') isnt -1
@@ -777,6 +773,7 @@ class SearchBase extends Motion
 
     if @isComplete()
       if input = @getInput()
+        globalState.currentSearch = this
         @vimState.searchHistory.save(input)
         globalState.highlightSearchPattern = @getPattern(input)
         @vimState.main.emitDidSetHighlightSearchPattern()
@@ -858,7 +855,6 @@ class Search extends SearchBase
   confirmed: false
 
   initialize: ->
-    super
     if settings.get('incrementalSearch')
       @restoreEditorState = saveEditorState(@editor)
       @subscribeScrollChange()
