@@ -724,37 +724,3 @@ class ALatestChange extends LatestChange
 # No diff from ALatestChange
 class InnerLatestChange extends LatestChange
   @extend()
-
-# -------------------------
-class Argument extends TextObject
-  @extend(false)
-  findArgumentRange: (from) ->
-    found = null
-    pattern = /([{\(\[ ])?(\w+,?\s?)/g
-    scanRange = @editor.bufferRangeForBufferRow(from.row)
-    @editor.scanInBufferRange pattern, scanRange, (event) ->
-      {range, stop, match, matchText} = event
-      if range.end.isGreaterThan(from)
-        found = if match[1]?
-          range.translate([0, match[1].length], [0, 0])
-        else
-          range
-        stop()
-    found
-
-  getRange: (selection) ->
-    {cursor} = selection
-    originalRange = selection.getBufferRange()
-    if range = @findArgumentRange(cursor.getBufferPosition())
-      if range.isEqual(originalRange)
-        range = @findArgumentRange(range.end)#.translate([0, +1]))
-    range
-
-  selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely @getRange(selection)
-
-class AArgument extends Argument
-  @extend()
-
-class InnerArgument extends Argument
-  @extend()
