@@ -60,8 +60,8 @@ getCharacterForEvent = (event) ->
   else
     keystroke
 
-isLinewiseRange = (range) ->
-  (not range.isEmpty()) and (range.start.column is 0) and (range.end.column is 0)
+isLinewiseRange = ({start, end}) ->
+  (start.row isnt end.row) and (start.column is end.column is 0)
 
 isEndsWithNewLineForBufferRow = (editor, row) ->
   {start, end} = editor.bufferRangeForBufferRow(row, {includeNewline: true})
@@ -214,15 +214,6 @@ moveCursorToNextNonWhitespace = (cursor) ->
   not originalPoint.isEqual(cursor.getBufferPosition())
 
 getBufferRows = (editor, {startRow, direction, includeStartRow}) ->
-  unless includeStartRow
-    startRow += (if direction is 'next' then +1 else -1)
-
-  endRow = switch direction
-    when 'previous' then 0
-    when 'next' then getVimLastBufferRow(editor)
-  [getValidVimBufferRow(editor, startRow)..endRow]
-
-getBufferRows = (editor, {startRow, direction, includeStartRow}) ->
   switch direction
     when 'previous'
       unless includeStartRow
@@ -341,7 +332,7 @@ unfoldAtCursorRow = (cursor) ->
   {editor} = cursor
   row = cursor.getBufferRow()
   if editor.isFoldedAtBufferRow(row)
-    editor.unfoldBufferRow row
+    editor.unfoldBufferRow(row)
 
 markerOptions = {ivalidate: 'never', persistent: false}
 # Return markers
@@ -354,10 +345,11 @@ highlightRanges = (editor, ranges, options) ->
   decorationOptions = {type: 'highlight', class: options.class}
   editor.decorateMarker(m, decorationOptions) for m in markers
 
-  if options.timeout?
+  {timeout} = options
+  if timeout?
     setTimeout  ->
-      m.destroy() for m in markers
-    , options.timeout
+      marker.destroy() for marker in markers
+    , timeout
   markers
 
 # Return valid row from 0 to vimLastBufferRow
