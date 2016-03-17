@@ -1,6 +1,3 @@
-# The commands defined in this file is processed by operationStack.
-# The commands which is not well fit to one of Motion, TextObject, Operator
-#  goes here.
 {Range} = require 'atom'
 Base = require './base'
 swrap = require './selection-wrapper'
