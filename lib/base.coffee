@@ -1,11 +1,10 @@
-# Refactoring status: 100%
 _ = require 'underscore-plus'
 Delegato = require 'delegato'
 {CompositeDisposable} = require 'atom'
 
 settings = require './settings'
 selectList = require './select-list'
-getEditorState = null # set in Base.init()
+getEditorState = null # set by Base.init()
 
 run = (klass, properties={}) ->
   if vimState = getEditorState(atom.workspace.getActiveTextEditor())
@@ -27,23 +26,13 @@ vimStateMethods = [
   "onDidSelectTarget"
   "onDidSetTarget"
   "onDidFinishOperation"
+  "onDidCancelSelectList"
   "subscribe"
   "isMode"
 ]
 
 class Base
   Delegato.includeInto(this)
-  recordable: false
-  repeated: false
-  defaultCount: 1
-  requireInput: false
-  requireTarget: false
-  operator: null
-  asTarget: false
-  context: {}
-  @commandPrefix: 'vim-mode-plus'
-  @commandScope: 'atom-text-editor'
-
   @delegatesMethods vimStateMethods..., toProperty: 'vimState'
 
   constructor: (@vimState, properties) ->
@@ -56,40 +45,58 @@ class Base
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
-    if (@requireInput and not @input?)
-      return false
-
-    if @requireTarget
-      @target?.isComplete()
+    if (@isRequireInput() and not @hasInput())
+      false
+    else if @isRequireTarget()
+      @getTarget()?.isComplete()
     else
       true
 
-  isRecordable: ->
-    @recordable
+  target: null
+  hasTarget: -> @target?
+  getTarget: -> @target
 
-  isRepeated: ->
-    @repeated
+  requireTarget: false
+  isRequireTarget: -> @requireTarget
 
-  setRepeated: ->
-    @repeated = true
+  requireInput: false
+  isRequireInput: -> @requireInput
+
+  recordable: false
+  isRecordable: -> @recordable
+
+  repeated: false
+  isRepeated: -> @repeated
+  setRepeated: -> @repeated = true
 
   # Intended to be used by TextObject or Motion
+  operator: null
+  hasOperator: -> @operator?
+  getOperator: -> @operator
   isAsOperatorTarget: ->
-    @operator? and not @operator.instanceof('Select')
+    @hasOperator() and not @getOperator().instanceof('Select')
 
   abort: ->
     throw new OperationAbortedError('Aborted')
 
+  # Count
+  # -------------------------
+  defaultCount: 1
+  getDefaultCount: ->
+    @defaultCount
+
   getCount: ->
     # Setting count as instance variable allows operation repeatable with same count.
-    @count ?= @vimState.getCount() ? @defaultCount
+    @count ?= @vimState.getCount() ? @getDefaultCount()
 
   isDefaultCount: ->
-    @getCount() is @defaultCount
+    @getCount() is @getDefaultCount()
 
   isCountSpecified: ->
     @vimState.hasCount()
 
+  # Misc
+  # -------------------------
   countTimes: (fn) ->
     _.times @getCount(), (num) ->
       fn(num+1)
@@ -117,10 +124,14 @@ class Base
     @vimState.operationStack.process()
 
   focusSelectList: (options={}) ->
-    @vimState.onDidCancelSelectList =>
+    @onDidCancelSelectList =>
       @cancelOperation()
 
     selectList.show(@vimState, options)
+
+  input: null
+  hasInput: -> @input?
+  getInput: -> @input
 
   focusInput: (options={}) ->
     options.charsMax ?= 1
@@ -181,8 +192,8 @@ class Base
       console.warn "Duplicate constructor #{@name}"
     registries[@name] = this
 
-  @getClass: (klassName) ->
-    registries[klassName]
+  @getClass: (name) ->
+    registries[name]
 
   @getRegistries: ->
     registries
@@ -190,9 +201,11 @@ class Base
   @isCommand: ->
     @command
 
+  @commandPrefix: 'vim-mode-plus'
   @getCommandName: ->
     @commandPrefix + ':' + _.dasherize(@name)
 
+  @commandScope: 'atom-text-editor'
   @getCommandScope: ->
     @commandScope
 

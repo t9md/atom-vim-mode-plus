@@ -111,6 +111,10 @@ eachSelection = (editor, fn) ->
   for selection in editor.getSelections()
     fn(selection)
 
+eachCursor = (editor, fn) ->
+  for cursor in editor.getCursors()
+    fn(cursor)
+
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.
 getChangesSinceCheckpoint = (editor, checkpoint) ->
@@ -518,7 +522,7 @@ smartScrollToBufferPosition = (editor, point) ->
   onePageUp = editorElement.getScrollTop() - editorAreaHeight # No need to limit to min=0
   onePageDown = editorElement.getScrollBottom() + editorAreaHeight
   target = editorElement.pixelPositionForBufferPosition(point).top
-  
+
   center = (onePageDown < target) or (target < onePageUp)
   editor.scrollToBufferPosition(point, {center})
 
@@ -601,6 +605,7 @@ module.exports = {
   selectVisibleBy
   getVisibleEditors
   eachSelection
+  eachCursor
   getNewTextRangeFromCheckpoint
   findIndex
   mergeIntersectingRanges

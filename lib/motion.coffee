@@ -740,9 +740,6 @@ class SearchBase extends Motion
   isBackwards: ->
     @backwards
 
-  getInput: ->
-    @input
-
   # Not sure if I should support count but keep this for compatibility to official vim-mode.
   getCount: ->
     count = super
