@@ -7,7 +7,12 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 _ = require 'underscore-plus'
 
-{isLinewiseRange, pointIsAtEndOfLine, mergeIntersectingRanges} = require './utils'
+{
+  isLinewiseRange
+  pointIsAtEndOfLine
+  mergeIntersectingRanges
+  highlightRanges
+} = require './utils'
 
 class Misc extends Base
   @extend(false)
@@ -26,16 +31,10 @@ class ReverseSelections extends Misc
 class Undo extends Misc
   @extend()
 
-  flash: (ranges, klass, timeout) ->
-    options =
-      type: 'highlight'
+  flashRanges: (ranges, klass, timeout) ->
+    highlightRanges @editor, ranges,
       class: "vim-mode-plus-flash #{klass}"
-
-    markers = ranges.map (r) => @editor.markBufferRange(r)
-    @editor.decorateMarker(m, options) for m in markers
-    setTimeout  ->
-      m.destroy() for m in markers
-    , timeout
+      timeout: timeout
 
   saveRangeAsMarker: (markers, range) ->
     if _.all(markers, (m) -> not m.getBufferRange().intersectsWith(range))
@@ -87,8 +86,8 @@ class Undo extends Misc
     if settings.get('flashOnUndoRedo')
       @onDidFinishOperation =>
         timeout = settings.get('flashOnUndoRedoDuration')
-        @flash(rangesRemoved, 'removed', timeout)
-        @flash(rangesAdded, 'added', timeout)
+        @flashRanges(rangesRemoved, 'removed', timeout)
+        @flashRanges(rangesAdded, 'added', timeout)
 
   execute: ->
     @mutateWithTrackingChanges ({start, end}) =>
@@ -112,8 +111,8 @@ class Redo extends Undo
 class ToggleFold extends Misc
   @extend()
   execute: ->
-    row = @editor.getCursorBufferPosition().row
-    @editor.toggleFoldAtBufferRow row
+    point = @editor.getCursorBufferPosition()
+    @editor.toggleFoldAtBufferRow(point.row)
 
 class ReplaceModeBackspace extends Misc
   @commandScope: 'atom-text-editor.vim-mode-plus.insert-mode.replace'
@@ -129,7 +128,6 @@ class ReplaceModeBackspace extends Misc
 
 class MaximizePane extends Misc
   @extend()
-
   execute: ->
     selector = 'vim-mode-plus-pane-maximized'
     workspaceElement = atom.views.getView(atom.workspace)
