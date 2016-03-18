@@ -68,7 +68,8 @@ isEndsWithNewLineForBufferRow = (editor, row) ->
   end.isGreaterThan(start) and end.column is 0
 
 haveSomeSelection = (editor) ->
-  editor.getSelections().some((selection) -> not selection.isEmpty())
+  editor.getSelections().some (selection) ->
+    not selection.isEmpty()
 
 sortRanges = (ranges) ->
   ranges.sort((a, b) -> a.compare(b))
@@ -79,9 +80,15 @@ sortRangesByEnd = (ranges, fn) ->
 # return adjusted index fit whitin length
 # return -1 if list is empty.
 getIndex = (index, list) ->
-  return -1 unless list.length
-  index = index % list.length
-  if (index >= 0) then index else (list.length + index)
+  length = list.length
+  if length is 0
+    -1
+  else
+    index = index % length
+    if index >= 0
+      index
+    else
+      length + index
 
 withVisibleBufferRange = (editor, fn) ->
   if range = getVisibleBufferRange(editor)
@@ -330,10 +337,13 @@ highlightRanges = (editor, ranges, options) ->
   ranges = [ranges] unless _.isArray(ranges)
   return null unless ranges.length
 
-  markers = (editor.markBufferRange(r, markerOptions) for r in ranges)
+  markers = ranges.map (range) ->
+    editor.markBufferRange(range, markerOptions)
 
-  decorationOptions = {type: 'highlight', class: options.class}
-  editor.decorateMarker(m, decorationOptions) for m in markers
+  for marker in markers
+    editor.decorateMarker marker,
+      type: 'highlight'
+      class: options.class
 
   {timeout} = options
   if timeout?
@@ -357,16 +367,6 @@ getValidVimScreenRow = (editor, row) ->
     when (row < 0) then 0
     when (row > vimLastScreenRow) then vimLastScreenRow
     else row
-
-# Compensate lack of ternaly operator
-# e.g.
-#  pick(['1st', '2nd'], true)  # => '1st'
-#  pick(['1st', '2nd'], false) # => '2nd'
-pick = (choice, boolean) ->
-  if boolean
-    choice[0]
-  else
-    choice[1]
 
 # special {translate} option is used to translate AFTER converting to
 # screenPosition
@@ -584,7 +584,6 @@ module.exports = {
   getIndex
   getVisibleBufferRange
   withVisibleBufferRange
-  selectVisibleBy
   getVisibleEditors
   eachSelection
   eachCursor
@@ -613,7 +612,6 @@ module.exports = {
   getValidVimScreenRow
   moveCursorToFirstCharacterAtRow
   countChar
-  pick
   clipScreenPositionForBufferPosition
   getTextToPoint
   getTextFromPointToEOL

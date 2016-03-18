@@ -28,11 +28,6 @@ class ReverseSelections extends Misc
 class Undo extends Misc
   @extend()
 
-  flashRanges: (ranges, klass, timeout) ->
-    highlightRanges @editor, ranges,
-      class: "vim-mode-plus-flash #{klass}"
-      timeout: timeout
-
   saveRangeAsMarker: (markers, range) ->
     if _.all(markers, (m) -> not m.getBufferRange().intersectsWith(range))
       markers.push @editor.markBufferRange(range)
@@ -83,8 +78,13 @@ class Undo extends Misc
     if settings.get('flashOnUndoRedo')
       @onDidFinishOperation =>
         timeout = settings.get('flashOnUndoRedoDuration')
-        @flashRanges(rangesRemoved, 'removed', timeout)
-        @flashRanges(rangesAdded, 'added', timeout)
+        highlightRanges @editor, rangesRemoved,
+          class: "vim-mode-plus-flash removed"
+          timeout: timeout
+
+        highlightRanges @editor, rangesAdded,
+          class: "vim-mode-plus-flash added"
+          timeout: timeout
 
   execute: ->
     @mutateWithTrackingChanges ({start, end}) =>

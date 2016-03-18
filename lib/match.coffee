@@ -2,7 +2,6 @@ _ = require 'underscore-plus'
 {
   sortRanges
   getIndex
-  unfoldAtBufferRow
   highlightRanges
   smartScrollToBufferPosition
   getVisibleBufferRange
@@ -99,8 +98,8 @@ class Match
 
   visit: ->
     point = @getStartPoint()
-    smartScrollToBufferPosition(@editor, point)
     @editor.unfoldBufferRow(point.row)
+    smartScrollToBufferPosition(@editor, point)
 
   # Flash only single match at the given moment.
   markersForFlash = null
@@ -124,7 +123,6 @@ class Match
 
   reset: ->
     @marker?.destroy()
-    @marker = null
 
   destroy: ->
     @reset()

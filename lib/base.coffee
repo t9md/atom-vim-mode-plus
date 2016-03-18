@@ -143,7 +143,7 @@ class Base
     # to sync content with input mini editor.
     replace = false
     @onDidChangeInput (input) =>
-      @addHover(input, replace)
+      @addHover(input, {replace})
       replace = true
 
     @onDidCancelInput =>

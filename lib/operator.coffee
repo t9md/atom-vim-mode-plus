@@ -37,15 +37,17 @@ class Operator extends Base
     @vimState.mark.set(']', end)
 
   needFlash: ->
-    @flashTarget and settings.get('flashOnOperate') and
+    if @flashTarget and settings.get('flashOnOperate')
       not (@constructor.name in settings.get('flashOnOperateBlacklist'))
+    else
+      false
 
   needTrackChange: ->
     @trackChange
 
   # [FIXME]
-  # For TextObject isLinewise result is changed before / after select.
-  # This mean @needStay return value change depending on when you call.
+  # For TextObject, isLinewise result is changed before / after select.
+  # This mean return value may change depending on when you call.
   needStay: ->
     param = if @instanceof('TransformString')
       "stayOnTransformString"
