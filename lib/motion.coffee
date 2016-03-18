@@ -919,10 +919,6 @@ class Search extends SearchBase
     switch action
       when 'visit'
         @visit @matches.get(args...)
-      when 'scroll'
-        # arg is 'next' or 'prev'
-        @matches.scroll(args[0])
-        @visit @matches.get()
 
 class SearchBackwards extends Search
   @extend()

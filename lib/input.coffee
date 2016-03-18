@@ -121,8 +121,6 @@ class SearchInput extends InputBase
       "cancel": => @cancel()
       "visit-next": => @emitter.emit('did-command', 'visit-next')
       "visit-prev": => @emitter.emit('did-command', 'visit-prev')
-      "scroll-next": => @emitter.emit('did-command', 'scroll-next')
-      "scroll-prev": => @emitter.emit('did-command', 'scroll-prev')
       "insert-wild-pattern": => @editor.insertText '.*?'
 
     prefix = "#{packageScope}:search"

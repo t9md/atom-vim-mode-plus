@@ -413,5 +413,3 @@
   # '[': 'vim-mode-plus:search-visit-prev'
   # ']': 'vim-mode-plus:search-visit-next'
   # 'space': 'vim-mode-plus:search-insert-wild-pattern'
-  # 'ctrl-f': 'vim-mode-plus:search-scroll-next'
-  # 'ctrl-b': 'vim-mode-plus:search-scroll-prev'

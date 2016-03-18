@@ -50,27 +50,6 @@ class MatchList
     @entries.filter (match) ->
       range.intersectsWith(match.range)
 
-  getOffSetPixelHeight: (lineDelta=0) ->
-    scrolloff = 2
-    @editor.getLineHeightInPixels() * (2 + lineDelta)
-
-  # make prev entry of first visible entry to bottom of screen
-  scroll: (direction) ->
-    switch direction
-      when 'next'
-        return if (match = _.last(@getVisible())).isLast()
-        step = +1
-        offsetPixel = @getOffSetPixelHeight()
-      when 'prev'
-        return if (match = _.first(@getVisible())).isFirst()
-        step = -1
-        offsetPixel = (@editorElement.getHeight() - @getOffSetPixelHeight(1))
-
-    @setIndex (@entries.indexOf(match) + step)
-    point = @editor.screenPositionForBufferPosition match.getStartPoint()
-    scrollTop = @editorElement.pixelPositionForScreenPosition(point).top
-    @editor.setScrollTop (scrollTop -= offsetPixel)
-
   show: ->
     @reset()
     for match in @getVisible()
@@ -108,10 +87,6 @@ class Match
     classes.push('last') if (not @first and @last)
     classes.push('current') if @current
     classes
-
-  isFirst: -> @first
-  isLast: -> @last
-  isCurrent: -> @current
 
   compare: (other) ->
     @range.compare(other.range)
