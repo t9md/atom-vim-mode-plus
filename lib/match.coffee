@@ -1,10 +1,11 @@
 _ = require 'underscore-plus'
 {
-  selectVisibleBy
   sortRanges
   getIndex
+  unfoldAtBufferRow
   highlightRanges
   smartScrollToBufferPosition
+  getVisibleBufferRange
 } = require './utils'
 settings = require './settings'
 
@@ -22,12 +23,12 @@ class MatchList
     ranges = sortRanges(ranges)
     @index = ranges.indexOf(current)
 
-    [first, others..., last] = ranges
-    for range in ranges
-      @entries.push new Match @vimState, range,
-        first: range is first
-        last: range is last
-        current: range is current
+    @entries = ranges.map (range) =>
+      new Match(@vimState, range)
+
+    [first, others..., last] = @entries
+    first.first = true
+    last?.last = true
 
   isEmpty: ->
     @entries.length is 0
@@ -45,8 +46,9 @@ class MatchList
     match
 
   getVisible: ->
-    selectVisibleBy @editor, @entries, (m) ->
-      m.range
+    range = getVisibleBufferRange(@editor)
+    @entries.filter (match) ->
+      range.intersectsWith(match.range)
 
   getOffSetPixelHeight: (lineDelta=0) ->
     scrolloff = 2
@@ -71,14 +73,16 @@ class MatchList
 
   show: ->
     @reset()
-    for m in @getVisible()
-      m.show()
+    for match in @getVisible()
+      match.show()
 
   reset: ->
-    m.reset() for m in @entries
+    for match in @entries
+      match.reset()
 
   destroy: ->
-    m.destroy() for m in @entries
+    for match in @entries
+      match.destroy()
     {@entries, @index, @editor} = {}
 
   showHover: ({timeout}) ->
@@ -94,7 +98,7 @@ class Match
   last: false
   current: false
 
-  constructor: (@vimState, @range, {@first, @last, @current}) ->
+  constructor: (@vimState, @range) ->
     {@editor} = @vimState
 
   getClassList: ->
@@ -121,8 +125,7 @@ class Match
   visit: ->
     point = @getStartPoint()
     smartScrollToBufferPosition(@editor, point)
-    if @editor.isFoldedAtBufferRow(point.row)
-      @editor.unfoldBufferRow point.row
+    @editor.unfoldBufferRow(point.row)
 
   # Flash only single match at the given moment.
   markersForFlash = null
@@ -149,7 +152,7 @@ class Match
     @marker = null
 
   destroy: ->
-    @marker?.destroy()
+    @reset()
     {@marker, @vimState, @range, @editor, @first, @last, @current} = {}
 
 module.exports = {MatchList}

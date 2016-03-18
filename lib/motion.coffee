@@ -9,7 +9,6 @@ globalState = require './global-state'
   moveCursorUp, moveCursorDown
   moveCursorDownBuffer
   moveCursorUpBuffer
-  unfoldAtCursorRow
   pointIsAtEndOfLine,
   cursorIsAtVimEndOfFile
   getFirstVisibleScreenRow, getLastVisibleScreenRow
@@ -181,7 +180,7 @@ class MoveRight extends Motion
 
   moveCursor: (cursor) ->
     @countTimes =>
-      unfoldAtCursorRow(cursor)
+      @editor.unfoldBufferRow(cursor.getBufferRow())
       allowWrap = @canWrapToNextLine(cursor)
       moveCursorRight(cursor)
       if cursor.isAtEndOfLine() and allowWrap and not cursorIsAtVimEndOfFile(cursor)

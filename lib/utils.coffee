@@ -99,10 +99,6 @@ getVisibleBufferRange = (editor) ->
   endRow = editor.bufferRowForScreenRow(endRow)
   new Range([startRow, 0], [endRow, Infinity])
 
-selectVisibleBy = (editor, entries, fn) ->
-  range = getVisibleBufferRange(editor)
-  (e for e in entries when range.containsRange(fn(e)))
-
 getVisibleEditors = ->
   for pane in atom.workspace.getPanes() when editor = pane.getActiveEditor()
     editor
@@ -327,12 +323,6 @@ moveCursorUpBuffer = (cursor) ->
 moveCursorToFirstCharacterAtRow = (cursor, row) ->
   cursor.setBufferPosition([row, 0])
   cursor.moveToFirstCharacterOfLine()
-
-unfoldAtCursorRow = (cursor) ->
-  {editor} = cursor
-  row = cursor.getBufferRow()
-  if editor.isFoldedAtBufferRow(row)
-    editor.unfoldBufferRow(row)
 
 markerOptions = {ivalidate: 'never', persistent: false}
 # Return markers
@@ -614,7 +604,6 @@ module.exports = {
   moveCursorRight
   moveCursorUp
   moveCursorDown
-  unfoldAtCursorRow
   getEolBufferPositionForRow
   getEolBufferPositionForCursor
   getFirstVisibleScreenRow

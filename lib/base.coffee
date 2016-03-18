@@ -90,7 +90,8 @@ class Base
     @count ?= @vimState.getCount() ? @getDefaultCount()
 
   isDefaultCount: ->
-    @getCount() is @getDefaultCount()
+    # Don't call getCount() since its has side-effect to update @count to cache.
+    @count is @getDefaultCount()
 
   isCountSpecified: ->
     @vimState.hasCount()
@@ -113,8 +114,8 @@ class Base
       else
         @vimState.hover.add(text)
 
-  new: (klassName, properties={}) ->
-    klass = Base.getClass(klassName)
+  new: (name, properties={}) ->
+    klass = Base.getClass(name)
     new klass(@vimState, properties)
 
   cancelOperation: ->
@@ -140,10 +141,10 @@ class Base
 
     # From 2nd addHover, we replace last section of hover
     # to sync content with input mini editor.
-    firstInput = true
+    replace = false
     @onDidChangeInput (input) =>
-      @addHover(input, replace: not firstInput)
-      firstInput = false
+      @addHover(input, replace)
+      replace = true
 
     @onDidCancelInput =>
       @cancelOperation()
@@ -188,9 +189,12 @@ class Base
 
   registries = {Base}
   @extend: (@command=true) ->
-    if (@name of registries) and (not @suppressWarning)
+    if @hasClassInRegistries(@name) and (not @suppressWarning)
       console.warn "Duplicate constructor #{@name}"
     registries[@name] = this
+
+  @hasClassInRegistries: (name) ->
+    name of registries
 
   @getClass: (name) ->
     registries[name]
