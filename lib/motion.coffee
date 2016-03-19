@@ -728,7 +728,19 @@ class MoveToMarkLine extends MoveToMark
 class SearchBase extends Motion
   @extend(false)
   backwards: false
-  escapeRegExp: false
+  useRegexp: true
+  configScope: null
+
+  # Not sure if I should support count but keep this for compatibility to official vim-mode.
+  getCount: ->
+    count = super
+    if @isBackwards()
+      -count
+    else
+      count - 1
+
+  isBackwards: ->
+    @backwards
 
   isCaseSensitive: (term) ->
     switch @getCaseSensitivity()
@@ -736,18 +748,13 @@ class SearchBase extends Motion
       when 'insensitive' then false
       when 'sensitive' then true
 
-  isBackwards: ->
-    @backwards
-
-  # Not sure if I should support count but keep this for compatibility to official vim-mode.
-  getCount: ->
-    count = super
-    if @isBackwards() then -count else count - 1
-
-  flash: (range, {timeout}) ->
-    highlightRanges @editor, range,
-      class: 'vim-mode-plus-flash'
-      timeout: timeout
+  getCaseSensitivity: ->
+    if settings.get("useSmartcaseFor#{@configScope}")
+      'smartcase'
+    else if settings.get("ignoreCaseFor#{@configScope}")
+      'insensitive'
+    else
+      'sensitive'
 
   finish: ->
     @matches?.destroy()
@@ -758,7 +765,9 @@ class SearchBase extends Motion
     if @matches.isEmpty()
       unless @input is ''
         if settings.get('flashScreenOnSearchHasNoMatch')
-          @flash getVisibleBufferRange(@editor), timeout: 100 # screen beep.
+          highlightRanges @editor, getVisibleBufferRange(@editor),
+            class: 'vim-mode-plus-flash'
+            timeout: 100
         atom.beep()
     else
       current = @matches.get()
@@ -780,7 +789,7 @@ class SearchBase extends Motion
   visit: (match, cursor=null) ->
     match.visit()
     if cursor
-      match.flash() unless @isIncrementalSearch()
+      match.flash() unless @isIncrementalSearch?()
       timeout = settings.get('showHoverSearchCounterDuration')
       @matches.showHover({timeout})
       cursor.setBufferPosition(match.getStartPoint(), {autoscroll: false})
@@ -788,9 +797,6 @@ class SearchBase extends Motion
       @matches.show()
       @matches.showHover(timeout: null)
       match.flash()
-
-  isIncrementalSearch: ->
-    settings.get('incrementalSearch') and @instanceof('Search')
 
   scan: (cursor) ->
     ranges = []
@@ -801,10 +807,11 @@ class SearchBase extends Motion
     input = @getInput()
     return ranges if input is ''
 
-    fromPoint = if @isMode('visual', 'linewise') and @isIncrementalSearch()
+    fromPoint = if @isMode('visual', 'linewise') and @isIncrementalSearch?()
       swrap(cursor.selection).getCharacterwiseHeadPosition()
     else
       cursor.getBufferPosition()
+    # console.log fromPoint.toString()
 
     @editor.scan @getPattern(input), ({range}) ->
       ranges.push range
@@ -826,20 +833,23 @@ class SearchBase extends Motion
       term = term.replace('\\c', '')
       modifiers += 'i' unless 'i' in modifiers
 
-    if @escapeRegExp
-      new RegExp(_.escapeRegExp(term), modifiers)
-    else
+    if @useRegexp
       try
         new RegExp(term, modifiers)
       catch
         new RegExp(_.escapeRegExp(term), modifiers)
+    else
+      new RegExp(_.escapeRegExp(term), modifiers)
 
   # NOTE: trim first space if it is.
   # experimental if search word start with ' ' we switch escape mode.
   updateEscapeRegExpOption: (input) ->
-    if @escapeRegExp = /^ /.test(input)
+    @useRegexp = if /^ /.test(input)
       input = input.replace(/^ /, '')
-    @updateUI {@escapeRegExp}
+      false
+    else
+      true
+    @updateUI {@useRegexp}
     input
 
   updateUI: (options) ->
@@ -847,37 +857,30 @@ class SearchBase extends Motion
 
 class Search extends SearchBase
   @extend()
+  configScope: "Search"
   requireInput: true
   confirmed: false
+
+  isIncrementalSearch: ->
+    settings.get('incrementalSearch')
 
   initialize: ->
     if settings.get('incrementalSearch')
       @restoreEditorState = saveEditorState(@editor)
-      @subscribeScrollChange()
+      @subscribe @editorElement.onDidChangeScrollTop => @matches?.show()
+      @subscribe @editorElement.onDidChangeScrollLeft => @matches?.show()
+
       @onDidCommandSearch @onCommand
 
     @onDidConfirmSearch @onConfirm
     @onDidCancelSearch @onCancel
     @onDidChangeSearch @onChange
+
     @vimState.searchInput.focus({@backwards})
 
   isComplete: ->
     return false unless @confirmed
     super
-
-  getCaseSensitivity: ->
-    if settings.get('useSmartcaseForSearch')
-      'smartcase'
-    else if settings.get('ignoreCaseForSearch')
-      'insensitive'
-    else
-      'sensitive'
-
-  subscribeScrollChange: ->
-    @subscribe @editorElement.onDidChangeScrollTop =>
-      @matches?.show()
-    @subscribe @editorElement.onDidChangeScrollLeft =>
-      @matches?.show()
 
   isRepeatLastSearch: (input) ->
     input in ['', (if @isBackwards() then '?' else '/')]
@@ -913,12 +916,11 @@ class Search extends SearchBase
       @moveCursor(cursor) for cursor in @editor.getCursors()
 
   onCommand: (command) => # fat-arrow
-    [action, args...] = command.split('-')
     return unless @input
     return if @matches.isEmpty()
-    switch action
-      when 'visit'
-        @visit @matches.get(args...)
+    switch command
+      when 'visit-next' then @visit(@matches.get('next'))
+      when 'visit-prev' then @visit(@matches.get('prev'))
 
 class SearchBackwards extends Search
   @extend()
@@ -926,20 +928,13 @@ class SearchBackwards extends Search
 
 class SearchCurrentWord extends SearchBase
   @extend()
+  configScope: "SearchCurrentWord"
 
   getInput: ->
     @input ?= (
       # [FIXME] @getCurrentWord() have side effect(moving cursor), so don't call twice.
       @getCurrentWord(new RegExp(settings.get('iskeyword') ? IsKeywordDefault))
     )
-
-  getCaseSensitivity: ->
-    if settings.get('useSmartcaseForSearchCurrentWord')
-      'smartcase'
-    else if settings.get('ignoreCaseForSearchCurrentWord')
-      'insensitive'
-    else
-      'sensitive'
 
   getPattern: (term) ->
     modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
@@ -974,7 +969,7 @@ class RepeatSearch extends SearchBase
   initialize: ->
     unless search = globalState.currentSearch
       @abort()
-    {@input, @backwards, @getPattern, @getCaseSensitivity} = search
+    {@input, @backwards, @getPattern, @getCaseSensitivity, @configScope} = search
 
 class RepeatSearchReverse extends RepeatSearch
   @extend()

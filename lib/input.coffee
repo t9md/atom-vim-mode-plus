@@ -139,8 +139,8 @@ class SearchInput extends InputBase
       @literalModeDeactivator.add @editor.onDidChange =>
         @literalModeDeactivator.dispose()
 
-  updateOptionSettings: ({escapeRegExp}={}) ->
-    @view.regexSearchStatus.classList.toggle('btn-primary', not escapeRegExp)
+  updateOptionSettings: ({useRegexp}={}) ->
+    @view.regexSearchStatus.classList.toggle('btn-primary', useRegexp)
 
   focus: ({backwards}) ->
     @editorElement.classList.add('backwards') if backwards
