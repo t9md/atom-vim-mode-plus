@@ -622,7 +622,7 @@ class Join extends Operator
   requireTarget: false
   execute: ->
     @editor.transact =>
-      _.times @getCount(), =>
+      @countTimes =>
         @editor.joinLines()
     @activateMode('normal')
 
@@ -702,7 +702,7 @@ class Repeat extends Operator
 
   execute: ->
     @editor.transact =>
-      _.times @getCount(), =>
+      @countTimes =>
         if operation = @vimState.operationStack.getRecorded()
           operation.setRepeated()
           operation.execute()

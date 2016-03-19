@@ -1,4 +1,3 @@
-# Refactoring status: 100%
 _ = require 'underscore-plus'
 
 {CompositeDisposable} = require 'atom'

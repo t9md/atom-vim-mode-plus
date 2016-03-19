@@ -1,4 +1,4 @@
-{Emitter, CompositeDisposable} = require 'atom'
+{Emitter, Disposable, CompositeDisposable} = require 'atom'
 {registerElement, getCharacterForEvent, ElementBuilder} = require './utils'
 packageScope = 'vim-mode-plus'
 searchScope = "#{packageScope}-search"
@@ -27,14 +27,10 @@ class InputBase
 
     @editor.onDidChange =>
       return if @finished
-      @emitter.emit 'did-change', @editor.getText()
-      @confirm() if @canConfirm()
-
-  canConfirm: ->
-    if @options?.charsMax
-      @editor.getText().length >= @options.charsMax
-    else
-      false
+      text = @editor.getText()
+      @emitter.emit 'did-change', text
+      if (charsMax = @options?.charsMax) and text.length >= @options.charsMax
+        @confirm()
 
   focus: (@options={}) ->
     @finished = false
@@ -59,16 +55,13 @@ class InputBase
     @emitter.emit 'did-cancel'
     @unfocus()
 
+  confirm: ->
+    @emitter.emit 'did-confirm', @editor.getText()
+    @unfocus()
+
   destroy: ->
     @view.destroy()
     {@vimState, @editor, @editorElement} = {}
-
-  confirm: ->
-    if (input = @editor.getText())?
-      @emitter.emit 'did-confirm', input
-      @unfocus()
-    else
-      @cancel()
 
 class InputElementBase extends HTMLElement
   ElementBuilder.includeInto(this)
@@ -109,34 +102,19 @@ InputElement = registerElement "#{packageScope}-input",
 
 # SearchInput
 # -------------------------
-# [TODO] Differenciating literal-mode should be done by scope and scope based keymap.
 class SearchInput extends InputBase
   constructor: ->
     super
     @options = {}
     {@searchHistory} = @vimState
 
-    literalModeSupportCommands =
-      "confirm": => @confirm()
-      "cancel": => @cancel()
-      "visit-next": => @emitter.emit('did-command', 'visit-next')
-      "visit-prev": => @emitter.emit('did-command', 'visit-prev')
-      "insert-wild-pattern": => @editor.insertText '.*?'
-
-    prefix = "#{packageScope}:search"
-    commands = {}
-    for command, fn of literalModeSupportCommands
-      do (fn) =>
-        commands["#{prefix}-#{command}"] = (event) =>
-          if @literalCharMode
-            @editor.insertText getCharacterForEvent(event)
-            @literalCharMode = false
-          else
-            fn()
-
-    atom.commands.add @editorElement, commands
     atom.commands.add @editorElement,
-      "vim-mode-plus:search-set-literal-char": => @setLiteralChar()
+      "vim-mode-plus:search-confirm": => @confirm()
+      "vim-mode-plus:search-cancel": => @cancel()
+      "vim-mode-plus:search-visit-next": => @emitter.emit('did-command', 'visit-next')
+      "vim-mode-plus:search-visit-prev": => @emitter.emit('did-command', 'visit-prev')
+      "vim-mode-plus:search-insert-wild-pattern": => @editor.insertText('.*?')
+      "vim-mode-plus:search-activate-literal-mode": => @activateLiteralMode()
       "vim-mode-plus:search-set-cursor-word": => @setCursorWord()
       'core:move-up': => @editor.setText @searchHistory.get('prev')
       'core:move-down': => @editor.setText @searchHistory.get('next')
@@ -144,8 +122,22 @@ class SearchInput extends InputBase
   setCursorWord: ->
     @editor.setText @vimState.editor.getWordUnderCursor()
 
-  setLiteralChar: ->
-    @literalCharMode = true
+  isLiteralMode: ->
+    @editorElement.classList.contains('literal-mode')
+
+  activateLiteralMode: ->
+    if @isLiteralMode()
+      @literalModeDeactivator?.dispose()
+    else
+      @literalModeDeactivator = new CompositeDisposable()
+      @editorElement.classList.add('literal-mode')
+
+      @literalModeDeactivator.add new Disposable =>
+        @editorElement.classList.remove('literal-mode')
+        @literalModeDeactivator = null
+
+      @literalModeDeactivator.add @editor.onDidChange =>
+        @literalModeDeactivator.dispose()
 
   updateOptionSettings: ({escapeRegExp}={}) ->
     @view.regexSearchStatus.classList.toggle('btn-primary', not escapeRegExp)
