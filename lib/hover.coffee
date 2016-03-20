@@ -63,6 +63,9 @@ class Hover
     @view.reset()
     {@timeoutID, @point} = {}
 
+  isVisible: ->
+    @view.isVisible()
+
   destroy: ->
     {@param, @vimState} = {}
     @view.destroy()
@@ -75,30 +78,31 @@ class HoverElement extends HTMLElement
   initialize: (@model) ->
     this
 
+  isVisible: ->
+    @marker?
+
   show: (point) ->
     {editor} = @model.vimState
     unless @marker
-      @createOverlay(point)
+      @marker = @createOverlay(point ? editor.getCursorBufferPosition())
       @lineHeight = editor.getLineHeightInPixels()
       @setIconSize(@lineHeight)
 
-    # [FIXME] now investigationg overlay position become wrong
-    # randomly happen.
-    # console.log  @marker.getBufferRange().toString()
+    # [FIXME] overlay position become wrong randomly happen.
     @style.marginTop = (@lineHeight * -2.2) + 'px'
     if text = @model.getText(@lineHeight)
       @innerHTML = text
 
   createOverlay: (point) ->
     {editor} = @model.vimState
-    point ?= editor.getCursorBufferPosition()
-    @marker = editor.markBufferPosition point,
+    marker = editor.markBufferPosition point,
       invalidate: "never",
       persistent: false
 
-    decoration = editor.decorateMarker @marker,
+    decoration = editor.decorateMarker marker,
       type: 'overlay'
       item: this
+    marker
 
   setIconSize: (size) ->
     @styleElement?.remove()

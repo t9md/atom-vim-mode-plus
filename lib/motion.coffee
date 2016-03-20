@@ -821,7 +821,6 @@ class SearchBase extends Motion
         start.isLessThan(fromPoint)
       else
         start.isLessThanOrEqual(fromPoint)
-
     post.concat(pre)
 
   getPattern: (term) ->
@@ -841,20 +840,6 @@ class SearchBase extends Motion
     else
       new RegExp(_.escapeRegExp(term), modifiers)
 
-  # NOTE: trim first space if it is.
-  # experimental if search word start with ' ' we switch escape mode.
-  updateEscapeRegExpOption: (input) ->
-    @useRegexp = if /^ /.test(input)
-      input = input.replace(/^ /, '')
-      false
-    else
-      true
-    @updateUI {@useRegexp}
-    input
-
-  updateUI: (options) ->
-    @vimState.searchInput.updateOptionSettings(options)
-
 class Search extends SearchBase
   @extend()
   configScope: "Search"
@@ -865,62 +850,63 @@ class Search extends SearchBase
     settings.get('incrementalSearch')
 
   initialize: ->
-    if settings.get('incrementalSearch')
-      @restoreEditorState = saveEditorState(@editor)
-      @subscribe @editorElement.onDidChangeScrollTop => @matches?.show()
-      @subscribe @editorElement.onDidChangeScrollLeft => @matches?.show()
+    @setIncrementalSearch() if @isIncrementalSearch()
 
-      @onDidCommandSearch @onCommand
+    @onDidConfirmSearch (@input) =>
+      @confirmed = true
+      unless @isIncrementalSearch()
+        searchChar = if @isBackwards() then '?' else '/'
+        if @input in ['', searchChar]
+          @input = @vimState.searchHistory.get('prev')
+          atom.beep() unless @input
+      @processOperation()
 
-    @onDidConfirmSearch @onConfirm
-    @onDidCancelSearch @onCancel
-    @onDidChangeSearch @onChange
+    @onDidCancelSearch =>
+      unless @isMode('visual') or @isMode('insert')
+        @vimState.activate('reset')
+      @restoreEditorState?()
+      @vimState.reset()
+      @finish()
+
+    @onDidChangeSearch (@input) =>
+      # If input starts with space, remove first space and disable useRegexp.
+      if @input.startsWith(' ')
+        @useRegexp = false
+        @input = input.replace(/^ /, '')
+      else
+        @useRegexp = true
+      @vimState.searchInput.updateOptionSettings({@useRegexp})
+
+      return unless @isIncrementalSearch()
+      @matches?.destroy()
+      @matches = null
+      if settings.get('showHoverSearchCounter')
+        @vimState.hoverSearchCounter.reset()
+      if @input
+        @moveCursor(cursor) for cursor in @editor.getCursors()
 
     @vimState.searchInput.focus({@backwards})
+
+  setIncrementalSearch: ->
+    @restoreEditorState = saveEditorState(@editor)
+    @subscribe @editorElement.onDidChangeScrollTop => @matches?.show()
+    @subscribe @editorElement.onDidChangeScrollLeft => @matches?.show()
+
+    @onDidCommandSearch (command) =>
+      return unless @input
+      return if @matches.isEmpty()
+      switch command
+        when 'visit-next' then @visit(@matches.get('next'))
+        when 'visit-prev' then @visit(@matches.get('prev'))
 
   isComplete: ->
     return false unless @confirmed
     super
 
-  isRepeatLastSearch: (input) ->
-    input in ['', (if @isBackwards() then '?' else '/')]
-
   finish: ->
     if @isIncrementalSearch() and settings.get('showHoverSearchCounter')
       @vimState.hoverSearchCounter.reset()
     super
-
-  onConfirm: (@input) => # fat-arrow
-    @confirmed = true
-    if @isRepeatLastSearch(@input)
-      unless @input = @vimState.searchHistory.get('prev')
-        atom.beep()
-    @processOperation()
-    @finish()
-
-  onCancel: => # fat-arrow
-    unless @isMode('visual') or @isMode('insert')
-      @vimState.activate('reset')
-    @restoreEditorState?()
-    @vimState.reset()
-    @finish()
-
-  onChange: (@input) => # fat-arrow
-    @input = @updateEscapeRegExpOption(@input)
-    return unless @isIncrementalSearch()
-    @matches?.destroy()
-    if settings.get('showHoverSearchCounter')
-      @vimState.hoverSearchCounter.reset()
-    @matches = null
-    unless @input is ''
-      @moveCursor(cursor) for cursor in @editor.getCursors()
-
-  onCommand: (command) => # fat-arrow
-    return unless @input
-    return if @matches.isEmpty()
-    switch command
-      when 'visit-next' then @visit(@matches.get('next'))
-      when 'visit-prev' then @visit(@matches.get('prev'))
 
 class SearchBackwards extends Search
   @extend()
