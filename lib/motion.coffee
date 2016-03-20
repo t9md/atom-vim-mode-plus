@@ -1,4 +1,3 @@
-# Refactoring status: 80%
 _ = require 'underscore-plus'
 {Point} = require 'atom'
 
@@ -33,6 +32,7 @@ globalState = require './global-state'
   getTextInScreenRange
   getBufferRows
   getFirstCharacterColumForScreenRow
+  getIndex
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -733,11 +733,11 @@ class SearchBase extends Motion
 
   # Not sure if I should support count but keep this for compatibility to official vim-mode.
   getCount: ->
-    count = super
+    count = super - 1
     if @isBackwards()
       -count
     else
-      count - 1
+      count
 
   isBackwards: ->
     @backwards
@@ -761,90 +761,60 @@ class SearchBase extends Motion
     @matches = null
 
   moveCursor: (cursor) ->
-    @matches ?= new MatchList(@vimState, @scan(cursor), @getCount())
+    # console.log "moving!"
+    @matches ?= @scan(cursor)
     if @matches.isEmpty()
-      unless @input is ''
-        if settings.get('flashScreenOnSearchHasNoMatch')
-          highlightRanges @editor, getVisibleBufferRange(@editor),
-            class: 'vim-mode-plus-flash'
-            timeout: 100
-        atom.beep()
+      @flashScreen() unless @input is ''
     else
-      current = @matches.get()
-      if @isComplete()
-        @visit(current, cursor)
-      else
-        @visit(current, null)
+      @matches.scrollToCurrent()
+      # @matches.refresh()
+      @matches.flashCurrent() unless @isIncrementalSearch?()
+      @matches.showHover(timeout: settings.get('showHoverSearchCounterDuration'))
+      point = @matches.getCurrentStartPosition()
+      cursor.setBufferPosition(point, {autoscroll: false})
 
-    if @isComplete()
-      if input = @getInput()
-        globalState.currentSearch = this
-        @vimState.searchHistory.save(input)
-        globalState.highlightSearchPattern = @getPattern(input)
-        @vimState.main.emitDidSetHighlightSearchPattern()
-      @finish()
-
-  # If cursor is passed, it move actual move, otherwise
-  # just visit matched point with decorate other matching.
-  visit: (match, cursor=null) ->
-    match.visit()
-    if cursor
-      match.flash() unless @isIncrementalSearch?()
-      timeout = settings.get('showHoverSearchCounterDuration')
-      @matches.showHover({timeout})
-      cursor.setBufferPosition(match.getStartPoint(), {autoscroll: false})
-    else
-      @matches.show()
-      @matches.showHover(timeout: null)
-      match.flash()
+    if input = @getInput()
+      globalState.currentSearch = this
+      @vimState.searchHistory.save(input)
+      globalState.highlightSearchPattern = @getPattern(input)
+      @vimState.main.emitDidSetHighlightSearchPattern()
+    @finish()
 
   scan: (cursor) ->
+    index = 0
     ranges = []
 
-    # FIXME: ORDER MATTER
+    # NOTE: ORDER MATTER
     # In SearchCurrentWord, @getInput move cursor, which is necessary movement.
     # So we need to call @getInput() BEFORE setting fromPoint
-    input = @getInput()
-    return ranges if input is ''
-
-    fromPoint = if @isMode('visual', 'linewise') and @isIncrementalSearch?()
-      swrap(cursor.selection).getCharacterwiseHeadPosition()
-    else
-      cursor.getBufferPosition()
-    # console.log fromPoint.toString()
-
-    @editor.scan @getPattern(input), ({range}) ->
-      ranges.push range
-
-    [pre, post] = _.partition ranges, ({start}) =>
-      if @isBackwards()
-        start.isLessThan(fromPoint)
+    if input = @getInput()
+      fromPoint = if @isMode('visual', 'linewise') and @isIncrementalSearch?()
+        swrap(cursor.selection).getCharacterwiseHeadPosition()
       else
-        start.isLessThanOrEqual(fromPoint)
-    post.concat(pre)
+        cursor.getBufferPosition()
 
-  getPattern: (term) ->
-    modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
+      @editor.scan @getPattern(input), ({range}) ->
+        ranges.push range
 
-    # FIXME this prevent search \\c itself.
-    # DONT thinklessly mimic pure Vim. Instead, provide ignorecase button and shortcut.
-    if term.indexOf('\\c') >= 0
-      term = term.replace('\\c', '')
-      modifiers += 'i' unless 'i' in modifiers
+      if @isBackwards()
+        reversed = ranges.slice().reverse()
+        current = _.detect(reversed, ({start}) -> start.isLessThan(fromPoint))
+        current ?= _.last(ranges)
+      else
+        current = _.detect(ranges, ({start}) -> start.isGreaterThan(fromPoint))
+        current ?= ranges[0]
 
-    if @useRegexp
-      try
-        new RegExp(term, modifiers)
-      catch
-        new RegExp(_.escapeRegExp(term), modifiers)
-    else
-      new RegExp(_.escapeRegExp(term), modifiers)
+      index = ranges.indexOf(current)
+      index = getIndex(index + @getCount(), ranges)
 
+    new MatchList(@vimState, ranges, index)
+
+# /, ?
+# -------------------------
 class Search extends SearchBase
   @extend()
   configScope: "Search"
   requireInput: true
-  confirmed: false
 
   isIncrementalSearch: ->
     settings.get('incrementalSearch')
@@ -853,7 +823,6 @@ class Search extends SearchBase
     @setIncrementalSearch() if @isIncrementalSearch()
 
     @onDidConfirmSearch (@input) =>
-      @confirmed = true
       unless @isIncrementalSearch()
         searchChar = if @isBackwards() then '?' else '/'
         if @input in ['', searchChar]
@@ -877,49 +846,86 @@ class Search extends SearchBase
         @useRegexp = true
       @vimState.searchInput.updateOptionSettings({@useRegexp})
 
-      return unless @isIncrementalSearch()
-      @matches?.destroy()
-      @matches = null
-      if settings.get('showHoverSearchCounter')
-        @vimState.hoverSearchCounter.reset()
-      if @input
-        @moveCursor(cursor) for cursor in @editor.getCursors()
-
+      @visitCursors() if @isIncrementalSearch()
     @vimState.searchInput.focus({@backwards})
 
   setIncrementalSearch: ->
     @restoreEditorState = saveEditorState(@editor)
-    @subscribe @editorElement.onDidChangeScrollTop => @matches?.show()
-    @subscribe @editorElement.onDidChangeScrollLeft => @matches?.show()
+    @subscribe @editorElement.onDidChangeScrollTop => @matches?.refresh()
+    @subscribe @editorElement.onDidChangeScrollLeft => @matches?.refresh()
 
     @onDidCommandSearch (command) =>
       return unless @input
       return if @matches.isEmpty()
       switch command
-        when 'visit-next' then @visit(@matches.get('next'))
-        when 'visit-prev' then @visit(@matches.get('prev'))
-
-  isComplete: ->
-    return false unless @confirmed
-    super
+        when 'visit-next' then @matches.visit('next')
+        when 'visit-prev' then @matches.visit('prev')
 
   finish: ->
     if @isIncrementalSearch() and settings.get('showHoverSearchCounter')
       @vimState.hoverSearchCounter.reset()
     super
 
+  flashScreen: ->
+    if settings.get('flashScreenOnSearchHasNoMatch')
+      highlightRanges @editor, getVisibleBufferRange(@editor),
+        class: 'vim-mode-plus-flash'
+        timeout: 100
+    atom.beep()
+
+  visitCursors: ->
+    @matches?.destroy()
+    @matches = null
+    if settings.get('showHoverSearchCounter')
+      @vimState.hoverSearchCounter.reset()
+    if @input
+      @visitCursor(cursor) for cursor in @editor.getCursors()
+
+  # Scroll to cursor position without changing position.
+  # used by incrementalSearch
+  visitCursor: (cursor) ->
+    # console.log "visiting!"
+    @matches ?= @scan(cursor)
+    if @matches.isEmpty()
+      @flashScreen() unless @input is ''
+    else
+      @matches.visit()
+
+  getPattern: (term) ->
+    modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
+
+    # FIXME this prevent search \\c itself.
+    # DONT thinklessly mimic pure Vim. Instead, provide ignorecase button and shortcut.
+    if term.indexOf('\\c') >= 0
+      term = term.replace('\\c', '')
+      modifiers += 'i' unless 'i' in modifiers
+
+    if @useRegexp
+      try
+        new RegExp(term, modifiers)
+      catch
+        new RegExp(_.escapeRegExp(term), modifiers)
+    else
+      new RegExp(_.escapeRegExp(term), modifiers)
+
 class SearchBackwards extends Search
   @extend()
   backwards: true
 
+# *, #
+# -------------------------
 class SearchCurrentWord extends SearchBase
   @extend()
   configScope: "SearchCurrentWord"
 
   getInput: ->
     @input ?= (
-      # [FIXME] @getCurrentWord() have side effect(moving cursor), so don't call twice.
-      @getCurrentWord(new RegExp(settings.get('iskeyword') ? IsKeywordDefault))
+      wordRange = @getCurrentWordBufferRange()
+      if wordRange?
+        @editor.setCursorBufferPosition(wordRange.start)
+        @editor.getTextInBufferRange(wordRange)
+      else
+        ''
     )
 
   getPattern: (term) ->
@@ -928,22 +934,17 @@ class SearchCurrentWord extends SearchBase
     pattern = if /\W/.test(term) then "#{pattern}\\b" else "\\b#{pattern}\\b"
     new RegExp(pattern, modifiers)
 
-  # FIXME: Should not move cursor.
-  getCurrentWord: (wordRegex) ->
-    cursor = @editor.getLastCursor()
-    rowStart = cursor.getBufferRow()
-    range = cursor.getCurrentWordBufferRange({wordRegex})
-    if range.end.isEqual(cursor.getBufferPosition())
-      point = cursor.getBeginningOfNextWordBufferPosition({wordRegex})
-      if point.row is rowStart
-        cursor.setBufferPosition(point)
-        range = cursor.getCurrentWordBufferRange({wordRegex})
+  getCurrentWordBufferRange: ->
+    wordRange = null
+    cursorPosition = @editor.getCursorBufferPosition()
+    scanRange = @editor.bufferRangeForBufferRow(cursorPosition.row)
+    pattern = new RegExp(settings.get('iskeyword') ? IsKeywordDefault, 'g')
 
-    if range.isEmpty()
-      ''
-    else
-      cursor.setBufferPosition(range.start)
-      @editor.getTextInBufferRange(range)
+    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
+      if range.end.isGreaterThan(cursorPosition)
+        wordRange = range
+        stop()
+    wordRange
 
 class SearchCurrentWordBackwards extends SearchCurrentWord
   @extend()

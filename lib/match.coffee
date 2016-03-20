@@ -12,16 +12,10 @@ class MatchList
   index: null
   entries: null
 
-  constructor: (@vimState, ranges, index) ->
-    {@editor, @editorElement} = @vimState
+  constructor: (@vimState, ranges, @index) ->
+    {@editor} = @vimState
     @entries = []
     return unless ranges.length
-
-    # ranges are initially not sorted, so we sort and adjust index here.
-    current = ranges[getIndex(index, ranges)]
-    ranges = sortRanges(ranges)
-    @index = ranges.indexOf(current)
-
     @entries = ranges.map (range) =>
       new Match(@vimState, range)
 
@@ -44,12 +38,28 @@ class MatchList
     match.current = true
     match
 
+  flashCurrent: ->
+    @get().flash()
+
+  scrollToCurrent: ->
+    @get().visit()
+
+  visit: (direction=null) ->
+    @get(direction)
+    @scrollToCurrent()
+    @refresh()
+    @flashCurrent()
+    @showHover(timeout: null)
+
+  getCurrentStartPosition: ->
+    @get().getStartPoint()
+
   getVisible: ->
     range = getVisibleBufferRange(@editor)
     @entries.filter (match) ->
       range.intersectsWith(match.range)
 
-  show: ->
+  refresh: ->
     @reset()
     for match in @getVisible()
       match.show()
