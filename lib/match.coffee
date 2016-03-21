@@ -12,6 +12,25 @@ class MatchList
   index: null
   entries: null
 
+  @fromScan: (vimState, {fromPoint, pattern, direction, countOffset}) ->
+    {editor} = vimState
+    index = 0
+    ranges = []
+    editor.scan pattern, ({range}) ->
+      ranges.push range
+
+    if direction is 'backward'
+      reversed = ranges.slice().reverse()
+      current = _.detect(reversed, ({start}) -> start.isLessThan(fromPoint))
+      current ?= _.last(ranges)
+    else if direction is 'forward'
+      current = _.detect(ranges, ({start}) -> start.isGreaterThan(fromPoint))
+      current ?= ranges[0]
+
+    index = ranges.indexOf(current)
+    index = getIndex(index + countOffset, ranges)
+    new this(vimState, ranges, index)
+
   constructor: (@vimState, ranges, @index) ->
     {@editor} = @vimState
     @entries = []

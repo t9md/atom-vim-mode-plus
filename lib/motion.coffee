@@ -32,7 +32,6 @@ globalState = require './global-state'
   getTextInScreenRange
   getBufferRows
   getFirstCharacterColumForScreenRow
-  getIndex
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -734,10 +733,8 @@ class SearchBase extends Motion
   # Not sure if I should support count but keep this for compatibility to official vim-mode.
   getCount: ->
     count = super - 1
-    if @isBackwards()
-      -count
-    else
-      count
+    count = -count if @isBackwards()
+    count
 
   isBackwards: ->
     @backwards
@@ -769,9 +766,14 @@ class SearchBase extends Motion
 
   moveCursor: (cursor) ->
     # console.log "moving!"
-    @matches ?= @scan(cursor)
+    input = @getInput()
+    if input is ''
+      @finish()
+      return
+
+    @matches ?= @getMatchList(cursor, input)
     if @matches.isEmpty()
-      @flashScreen() unless @input is ''
+      @flashScreen()
     else
       @matches.scrollToCurrent()
       # @matches.refresh()
@@ -780,41 +782,24 @@ class SearchBase extends Motion
       point = @matches.getCurrentStartPosition()
       cursor.setBufferPosition(point, {autoscroll: false})
 
-    if input = @getInput()
-      globalState.currentSearch = this
-      @vimState.searchHistory.save(input)
-      globalState.highlightSearchPattern = @getPattern(input)
-      @vimState.main.emitDidSetHighlightSearchPattern()
+    globalState.currentSearch = this
+    @vimState.searchHistory.save(input)
+    globalState.highlightSearchPattern = @getPattern(input)
+    @vimState.main.emitDidSetHighlightSearchPattern()
     @finish()
 
-  scan: (cursor) ->
-    index = 0
-    ranges = []
+  getFromPoint: (cursor) ->
+    if @isMode('visual', 'linewise') and @isIncrementalSearch?()
+      swrap(cursor.selection).getCharacterwiseHeadPosition()
+    else
+      cursor.getBufferPosition()
 
-    # NOTE: ORDER MATTER
-    # In SearchCurrentWord, @getInput move cursor, which is necessary movement.
-    # So we need to call @getInput() BEFORE setting fromPoint
-    if input = @getInput()
-      fromPoint = if @isMode('visual', 'linewise') and @isIncrementalSearch?()
-        swrap(cursor.selection).getCharacterwiseHeadPosition()
-      else
-        cursor.getBufferPosition()
-
-      @editor.scan @getPattern(input), ({range}) ->
-        ranges.push range
-
-      if @isBackwards()
-        reversed = ranges.slice().reverse()
-        current = _.detect(reversed, ({start}) -> start.isLessThan(fromPoint))
-        current ?= _.last(ranges)
-      else
-        current = _.detect(ranges, ({start}) -> start.isGreaterThan(fromPoint))
-        current ?= ranges[0]
-
-      index = ranges.indexOf(current)
-      index = getIndex(index + @getCount(), ranges)
-
-    new MatchList(@vimState, ranges, index)
+  getMatchList: (cursor, input) ->
+    MatchList.fromScan @vimState,
+      fromPoint: @getFromPoint(cursor)
+      pattern: @getPattern(input)
+      direction: (if @isBackwards() then 'backward' else 'forward')
+      countOffset: @getCount()
 
 # /, ?
 # -------------------------
@@ -885,9 +870,11 @@ class Search extends SearchBase
   # used by incrementalSearch
   visitCursor: (cursor) ->
     # console.log "visiting!"
-    @matches ?= @scan(cursor)
+    input = @getInput()
+    return if input is ''
+    @matches ?= @getMatchList(cursor, input)
     if @matches.isEmpty()
-      @flashScreen() unless @input is ''
+      @flashScreen()
     else
       @matches.visit()
 
