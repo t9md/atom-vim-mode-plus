@@ -1,3 +1,6 @@
+# 0.26.1
+- Fix: `n`, `N` in different editor cause `flashScreen` is not function.
+
 # 0.26.0
 - Breaking: Remove scroll among search matched feature #201
 - Breaking: Literal input mode in Search input field is now achieved by standard selector-specific keymap.
