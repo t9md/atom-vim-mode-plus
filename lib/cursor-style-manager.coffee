@@ -20,6 +20,11 @@ getOffset = (submode, cursor, isSoftWrapped) ->
         traversal.column -= 1
     when 'linewise'
       bufferPoint = swrap(selection).getCharacterwiseHeadPosition()
+      # FIXME need to update original getCharacterwiseHeadPosition?
+      # to reflect outer vmp command modify linewise selection?
+      [startRow, endRow] = selection.getBufferRowRange()
+      if selection.isReversed()
+        bufferPoint.row = startRow
 
       traversal = if isSoftWrapped
         screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
