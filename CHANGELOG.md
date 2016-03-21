@@ -1,3 +1,14 @@
+# 0.26.0
+- Breaking: Remove scroll among search matched feature #201
+- Breaking: Literal input mode in Search input field is now achieved by standard selector-specific keymap.
+ User who used this feature in older version need to update keymap selector to `atom-text-editor.vim-mode-plus-search:not(.literal-mode)`.
+ See example in [wiki/Keymap-example](https://github.com/t9md/atom-vim-mode-plus/wiki/Keymap-example)
+- Internal: cleanup `Search`, `SearchCurrentWord`.
+- Fix: Use new pane split feature from Atom v1.6.0 #204
+- Support: set minimum engines to 1.6.0 above #204
+- Breaking: Remove semi-broken `disableInputMethodExceptInsertMode` setting #205
+- Fix: `o` after `Vjj` then `cmd-shift-d` display cursor incorrect position(cosmetic). #202
+
 # 0.25.0
 - Improve: #192 Keep original visible area as much as possible when scrolling by `n`, `N`, `/`, `?` to avoid mental context switching
 - New: delete/change-any-pair-allow-forwarding. More powerful version of existing `change-surround-any-pair` and `delete-surround-any-pair` #194
