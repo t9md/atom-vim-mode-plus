@@ -142,11 +142,6 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'integer'
     default: 700
     description: "Duration(msec) for hover search counter"
-  disableInputMethodExceptInsertMode:
-    order: 30
-    type: 'boolean'
-    default: false
-    description: 'Automatically disable IME except insert-mode'
   throwErrorOnNonEmptySelectionInNormalMode:
     order: 100
     type: 'boolean'

@@ -16,15 +16,6 @@ class ModeManager
 
     @onDidActivateMode ({mode, submode}) =>
       @updateEditorElement()
-
-      if settings.get('disableInputMethodExceptInsertMode')
-        # [FIXME] See #98.
-        if @hiddenInputElement ?= @editorElement.component?.hiddenInputComponent.getDomNode()
-          if mode is 'insert'
-            @hiddenInputElement.removeAttribute('type')
-          else
-            @hiddenInputElement.setAttribute('type', 'password')
-
       @vimState.statusBarManager.update(mode, submode)
       @vimState.refreshCursors()
 
