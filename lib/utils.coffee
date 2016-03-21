@@ -113,7 +113,7 @@ eachSelection = (editor, fn) ->
 
 # This uses private APIs and may break if TextBuffer is refactored.
 # Package authors - copy and paste this code at your own risk.
-getChangesSinceCheckpoint = (editor, checkpoint) ->
+getUndoStackSinceCheckpoint = (editor, checkpoint) ->
   {history} = editor.getBuffer()
   if (index = history.getCheckpointIndex(checkpoint))?
     history.undoStack.slice(index)
@@ -128,30 +128,39 @@ distanceForRange = ({start, end}) ->
   column = end.column - start.column
   new Point(row, column)
 
-getNewTextRangeFromChanges = (changes) ->
+getNewTextRangeFromUndoStack = (stack) ->
   finalRange = null
-  for change in changes when change.newRange?
-    {oldRange, oldText, newRange, newText} = change
-    unless finalRange?
-      finalRange = newRange.copy() if newText.length
-      continue
-    # shrink
-    if oldText.length and finalRange.containsRange(oldRange)
-      amount = oldRange
-      diff = distanceForRange(amount)
-      diff.column = 0 unless (amount.end.row is finalRange.end.row)
-      finalRange.end = finalRange.end.translate(diff.negate())
-    # extend
-    if newText.length and finalRange.containsPoint(newRange.start)
-      amount = newRange
-      diff = distanceForRange(amount)
-      diff.column = 0 unless (amount.start.row is finalRange.end.row)
-      finalRange.end = finalRange.end.translate(diff)
+  for patch in stack when patch.getChanges?
+    for change in patch.getChanges()
+      {oldStart, oldExtent, oldText, newStart, newExtent, newText} = change
+      oldRange = new Range(
+        [oldStart.row, oldStart.column],
+        [oldStart.row + oldExtent.row, oldStart.column + oldExtent.column]
+      )
+      newRange = new Range(
+        [newStart.row, newStart.column],
+        [newStart.row + newExtent.row, newStart.column + newExtent.column]
+      )
+      unless finalRange?
+        finalRange = newRange if newText.length
+        continue
+      # shrink
+      if oldText.length and finalRange.containsRange(oldRange)
+        amount = oldRange
+        diff = distanceForRange(amount)
+        diff.column = 0 unless (amount.end.row is finalRange.end.row)
+        finalRange.end = finalRange.end.translate(diff.negate())
+      # extend
+      if newText.length and finalRange.containsPoint(newRange.start)
+        amount = newRange
+        diff = distanceForRange(amount)
+        diff.column = 0 unless (amount.start.row is finalRange.end.row)
+        finalRange.end = finalRange.end.translate(diff)
   finalRange
 
 getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
-  changes = getChangesSinceCheckpoint(editor, checkpoint)
-  getNewTextRangeFromChanges(changes)
+  stack = getUndoStackSinceCheckpoint(editor, checkpoint)
+  getNewTextRangeFromUndoStack(stack)
 
 # char can be regExp pattern
 countChar = (string, char) ->
