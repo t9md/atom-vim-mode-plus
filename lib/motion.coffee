@@ -760,6 +760,13 @@ class SearchBase extends Motion
     @matches?.destroy()
     @matches = null
 
+  flashScreen: ->
+    if settings.get('flashScreenOnSearchHasNoMatch')
+      highlightRanges @editor, getVisibleBufferRange(@editor),
+        class: 'vim-mode-plus-flash'
+        timeout: 100
+    atom.beep()
+
   moveCursor: (cursor) ->
     # console.log "moving!"
     @matches ?= @scan(cursor)
@@ -865,13 +872,6 @@ class Search extends SearchBase
     if @isIncrementalSearch() and settings.get('showHoverSearchCounter')
       @vimState.hoverSearchCounter.reset()
     super
-
-  flashScreen: ->
-    if settings.get('flashScreenOnSearchHasNoMatch')
-      highlightRanges @editor, getVisibleBufferRange(@editor),
-        class: 'vim-mode-plus-flash'
-        timeout: 100
-    atom.beep()
 
   visitCursors: ->
     @matches?.destroy()
