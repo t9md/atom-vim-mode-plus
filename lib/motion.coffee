@@ -754,6 +754,8 @@ class SearchBase extends Motion
       'sensitive'
 
   finish: ->
+    if @isIncrementalSearch?() and settings.get('showHoverSearchCounter')
+      @vimState.hoverSearchCounter.reset()
     @matches?.destroy()
     @matches = null
 
@@ -853,30 +855,22 @@ class Search extends SearchBase
         when 'visit-next' then @matches.visit('next')
         when 'visit-prev' then @matches.visit('prev')
 
-  finish: ->
-    if @isIncrementalSearch() and settings.get('showHoverSearchCounter')
-      @vimState.hoverSearchCounter.reset()
-    super
-
   visitCursors: ->
+    visitCursor = (cursor) =>
+      @matches ?= @getMatchList(cursor, input)
+      if @matches.isEmpty()
+        @flashScreen()
+      else
+        @matches.visit()
+
     @matches?.destroy()
     @matches = null
     if settings.get('showHoverSearchCounter')
       @vimState.hoverSearchCounter.reset()
-    if @input
-      @visitCursor(cursor) for cursor in @editor.getCursors()
 
-  # Scroll to cursor position without changing position.
-  # used by incrementalSearch
-  visitCursor: (cursor) ->
-    # console.log "visiting!"
     input = @getInput()
-    return if input is ''
-    @matches ?= @getMatchList(cursor, input)
-    if @matches.isEmpty()
-      @flashScreen()
-    else
-      @matches.visit()
+    if input isnt ''
+      visitCursor(cursor) for cursor in @editor.getCursors()
 
   getPattern: (term) ->
     modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
