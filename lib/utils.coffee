@@ -1,6 +1,8 @@
 # Refactoring status: 100%
 fs = require 'fs-plus'
+semver = require 'semver'
 settings = require './settings'
+
 {Range, Point} = require 'atom'
 _ = require 'underscore-plus'
 
@@ -118,15 +120,6 @@ eachCursor = (editor, fn) ->
   for cursor in editor.getCursors()
     fn(cursor)
 
-# This uses private APIs and may break if TextBuffer is refactored.
-# Package authors - copy and paste this code at your own risk.
-getChangesSinceCheckpoint = (editor, checkpoint) ->
-  {history} = editor.getBuffer()
-  if (index = history.getCheckpointIndex(checkpoint))?
-    history.undoStack.slice(index)
-  else
-    []
-
 # Takes a transaction and turns it into a string of what was typed.
 # This class is an implementation detail of ActivateInsertMode
 # Return final newRanges from changes
@@ -156,9 +149,34 @@ getNewTextRangeFromChanges = (changes) ->
       finalRange.end = finalRange.end.translate(diff)
   finalRange
 
+getNewTextRangeFromPaches = (patches) ->
+  if (change = Patch.compose(patches).getChanges().shift())?
+    newStart = Point.fromObject(change.newStart)
+    new Range(newStart, newStart.traverse(change.newExtent))
+  else
+    null
+
+Patch = null
+IsSupportPatch = semver.satisfies(atom.appVersion, '>=1.7.0-beta0')
+
 getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
-  changes = getChangesSinceCheckpoint(editor, checkpoint)
-  getNewTextRangeFromChanges(changes)
+  {history} = editor.getBuffer()
+  if (index = history.getCheckpointIndex(checkpoint))?
+    changes = history.undoStack.slice(index)
+
+  return null unless changes
+
+  if IsSupportPatch and (not Patch?)
+    for change in changes when change.constructor.name is 'Patch'
+      Patch = change.constructor
+      break
+
+  if IsSupportPatch
+    changes = changes.filter (change) -> change instanceof Patch
+    getNewTextRangeFromPaches(changes)
+  else
+    changes = changes.filter (change) -> change.newText?
+    getNewTextRangeFromChanges(changes)
 
 # char can be regExp pattern
 countChar = (string, char) ->
