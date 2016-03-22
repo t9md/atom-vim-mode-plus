@@ -6,14 +6,12 @@ _ = require 'underscore-plus'
   smartScrollToBufferPosition
   getVisibleBufferRange
 } = require './utils'
-settings = require './settings'
 
 class MatchList
   index: null
   entries: null
 
-  @fromScan: (vimState, {fromPoint, pattern, direction, countOffset}) ->
-    {editor} = vimState
+  @fromScan: (editor, {fromPoint, pattern, direction, countOffset}) ->
     index = 0
     ranges = []
     editor.scan pattern, ({range}) ->
@@ -29,14 +27,13 @@ class MatchList
 
     index = ranges.indexOf(current)
     index = getIndex(index + countOffset, ranges)
-    new this(vimState, ranges, index)
+    new this(editor, ranges, index)
 
-  constructor: (@vimState, ranges, @index) ->
-    {@editor} = @vimState
+  constructor: (@editor, ranges, @index) ->
     @entries = []
     return unless ranges.length
     @entries = ranges.map (range) =>
-      new Match(@vimState, range)
+      new Match(@editor, range)
 
     [first, others..., last] = @entries
     first.first = true
@@ -56,19 +53,6 @@ class MatchList
     match = @entries[@index]
     match.current = true
     match
-
-  flashCurrent: ->
-    @get().flash()
-
-  scrollToCurrent: ->
-    @get().visit()
-
-  visit: (direction=null) ->
-    @get(direction)
-    @scrollToCurrent()
-    @refresh()
-    @flashCurrent()
-    @showHover(timeout: null)
 
   getCurrentStartPosition: ->
     @get().getStartPoint()
@@ -92,21 +76,15 @@ class MatchList
       match.destroy()
     {@entries, @index, @editor} = {}
 
-  showHover: ({timeout}) ->
-    current = @get()
-    if settings.get('showHoverSearchCounter')
-      @vimState.hoverSearchCounter.withTimeout current.range.start,
-        text: "#{@index + 1}/#{@entries.length}"
-        classList: current.getClassList()
-        timeout: timeout
+  getCounterText: ->
+    "#{@index + 1}/#{@entries.length}"
 
 class Match
   first: false
   last: false
   current: false
 
-  constructor: (@vimState, @range) ->
-    {@editor} = @vimState
+  constructor: (@editor, @range) ->
 
   getClassList: ->
     # first and last is exclusive, prioritize 'first'.
@@ -125,19 +103,18 @@ class Match
   getStartPoint: ->
     @range.start
 
-  visit: ->
+  scrollToStartPoint: ->
     point = @getStartPoint()
     @editor.unfoldBufferRow(point.row)
     smartScrollToBufferPosition(@editor, point)
 
   # Flash only single match at the given moment.
   markersForFlash = null
-  flash: ->
+  flash: (options) ->
     markersForFlash?[0]?.destroy()
-    if settings.get('flashOnSearch')
-      markersForFlash = highlightRanges @editor, @range,
-        class: 'vim-mode-plus-flash'
-        timeout: settings.get('flashOnSearchDuration')
+    markersForFlash = highlightRanges @editor, @range,
+      class: options.class
+      timeout: options.timeout
 
   show: ->
     classes = ['vim-mode-plus-search-match'].concat(@getClassList()...)
@@ -155,6 +132,6 @@ class Match
 
   destroy: ->
     @reset()
-    {@marker, @vimState, @range, @editor, @first, @last, @current} = {}
+    {@marker, @range, @editor, @first, @last, @current} = {}
 
 module.exports = {MatchList}

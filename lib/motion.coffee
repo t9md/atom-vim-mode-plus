@@ -777,10 +777,10 @@ class SearchBase extends Motion
     if @matches.isEmpty()
       @flashScreen()
     else
-      @matches.scrollToCurrent()
-      # @matches.refresh()
-      @matches.flashCurrent() unless @isIncrementalSearch?()
-      @matches.showHover(timeout: settings.get('showHoverSearchCounterDuration'))
+      @visitMatch "current",
+        timeout: settings.get('showHoverSearchCounterDuration')
+        landing: true
+
       point = @matches.getCurrentStartPosition()
       cursor.setBufferPosition(point, {autoscroll: false})
 
@@ -797,11 +797,35 @@ class SearchBase extends Motion
       cursor.getBufferPosition()
 
   getMatchList: (cursor, input) ->
-    MatchList.fromScan @vimState,
+    MatchList.fromScan @editor,
       fromPoint: @getFromPoint(cursor)
       pattern: @getPattern(input)
       direction: (if @isBackwards() then 'backward' else 'forward')
       countOffset: @getCount()
+
+  visitMatch: (direction=null, options={}) ->
+    {timeout, landing} = options
+    landing ?= false
+    match = @matches.get(direction)
+    match.scrollToStartPoint()
+
+    flashOptions =
+      class: 'vim-mode-plus-flash'
+      timeout: settings.get('flashOnSearchDuration')
+
+    if landing
+      if settings.get('flashOnSearch') and not @isIncrementalSearch?()
+        match.flash(flashOptions)
+    else
+      @matches.refresh()
+      if settings.get('flashOnSearch')
+        match.flash(flashOptions)
+
+    if settings.get('showHoverSearchCounter')
+      @vimState.hoverSearchCounter.withTimeout match.getStartPoint(),
+        text: @matches.getCounterText()
+        classList: match.getClassList()
+        timeout: timeout
 
 # /, ?
 # -------------------------
@@ -852,8 +876,8 @@ class Search extends SearchBase
       return unless @input
       return if @matches.isEmpty()
       switch command
-        when 'visit-next' then @matches.visit('next')
-        when 'visit-prev' then @matches.visit('prev')
+        when 'visit-next' then @visitMatch('next')
+        when 'visit-prev' then @visitMatch('prev')
 
   visitCursors: ->
     visitCursor = (cursor) =>
@@ -861,7 +885,7 @@ class Search extends SearchBase
       if @matches.isEmpty()
         @flashScreen()
       else
-        @matches.visit()
+        @visitMatch()
 
     @matches?.destroy()
     @matches = null
