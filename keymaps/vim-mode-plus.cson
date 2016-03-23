@@ -48,10 +48,13 @@
   'down':      'vim-mode-plus:move-down'
 
   'w':     'vim-mode-plus:move-to-next-word'
+  # 'w':     'vim-mode-plus:move-to-next-alphanumeric-word'
   'W':     'vim-mode-plus:move-to-next-whole-word'
   'e':     'vim-mode-plus:move-to-end-of-word'
+  # 'e': 'vim-mode-plus:move-to-end-of-alphanumeric-word'
   'E':     'vim-mode-plus:move-to-end-of-whole-word'
   'b':     'vim-mode-plus:move-to-previous-word'
+  # 'b':     'vim-mode-plus:move-to-previous-alphanumeric-word'
   'B':     'vim-mode-plus:move-to-previous-whole-word'
   '}':     'vim-mode-plus:move-to-next-paragraph'
   '{':     'vim-mode-plus:move-to-previous-paragraph'

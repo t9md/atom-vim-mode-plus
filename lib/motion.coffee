@@ -291,6 +291,7 @@ class MoveDownToEdge extends MoveUpToEdge
   @extend()
   direction: 'down'
 
+# Previous word family
 # -------------------------
 class MoveToPreviousWord extends Motion
   @extend()
@@ -305,6 +306,13 @@ class MoveToPreviousWholeWord extends MoveToPreviousWord
   @extend()
   wordRegex: /^\s*$|\S+/
 
+# Experimental
+class MoveToPreviousAlphanumericWord extends MoveToPreviousWord
+  @extend()
+  wordRegex: /\w+/
+
+# Next word family
+# -------------------------
 class MoveToNextWord extends Motion
   @extend()
   wordRegex: null
@@ -347,10 +355,17 @@ class MoveToNextWord extends Motion
         if @isAsOperatorTarget() and isLastCount and (cursor.getBufferRow() > bufferRow)
           cursor.setBufferPosition([bufferRow, Infinity])
 
+# Experimental
+class MoveToNextAlphanumericWord extends MoveToNextWord
+  @extend()
+  wordRegex: /\w+/
+
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
   wordRegex: /^\s*$|\S+/
 
+# End word family
+# -------------------------
 class MoveToEndOfWord extends Motion
   @extend()
   wordRegex: null
@@ -375,6 +390,11 @@ class MoveToEndOfWholeWord extends MoveToEndOfWord
   @extend()
   wordRegex: /\S+/
 
+class MoveToEndOfAlphanumericWord extends MoveToEndOfWord
+  @extend()
+  wordRegex: /\w+/
+  
+# -------------------------
 class MoveToNextParagraph extends Motion
   @extend()
   direction: 'next'
