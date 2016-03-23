@@ -73,6 +73,7 @@ class Base
   operator: null
   hasOperator: -> @operator?
   getOperator: -> @operator
+  setOperator: (@operator) -> @operator
   isAsOperatorTarget: ->
     @hasOperator() and not @getOperator().instanceof('Select')
 

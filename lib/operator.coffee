@@ -97,6 +97,7 @@ class Operator extends Base
       operatorName = @constructor.name
       message = "Failed to set '#{targetName}' as target for Operator '#{operatorName}'"
       throw new OperatorError(message)
+    @target.setOperator(this)
     @emitDidSetTarget(this)
 
   # Return true unless all selection is empty.
@@ -933,7 +934,7 @@ class ActivateInsertMode extends Operator
   requireTarget: false
   flashTarget: false
   checkpoint: null
-  submode: null
+  finalSubmode: null
   supportInsertionCount: true
 
   observeWillDeactivateMode: ->
@@ -1001,7 +1002,7 @@ class ActivateInsertMode extends Operator
         range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint('undo'))
         @textByOperator = if range? then @editor.getTextInBufferRange(range) else ''
       @setCheckpoint('insert')
-      @vimState.activate('insert', @submode)
+      @vimState.activate('insert', @finalSubmode)
 
 class InsertAtLastInsert extends ActivateInsertMode
   @extend()
@@ -1013,7 +1014,7 @@ class InsertAtLastInsert extends ActivateInsertMode
 
 class ActivateReplaceMode extends ActivateInsertMode
   @extend()
-  submode: 'replace'
+  finalSubmode: 'replace'
 
   repeatInsert: (selection, text) ->
     for char in text when (char isnt "\n")

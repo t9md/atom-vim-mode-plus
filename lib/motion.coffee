@@ -41,11 +41,9 @@ class Motion extends Base
   @extend(false)
   inclusive: false
   linewise: false
-  operator: null
 
   constructor: ->
     super
-    @onDidSetTarget (@operator) => @operator
     @initialize?()
 
   isLinewise: ->
@@ -340,7 +338,7 @@ class MoveToNextWord extends Motion
           cursor.moveToBeginningOfLine()
           cursor.skipLeadingWhitespace()
         else
-          point = if @operator?.directInstanceof('Change') and (not wasOnWhiteSpace) and isLastCount
+          point = if @getOperator()?.directInstanceof('Change') and (not wasOnWhiteSpace) and isLastCount
             cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
           else
             @getPoint(cursor)
@@ -402,9 +400,6 @@ class MoveToNextParagraph extends Motion
 class MoveToPreviousParagraph extends MoveToNextParagraph
   @extend()
   direction: 'previous'
-  moveCursor: (cursor) ->
-    @countTimes =>
-      cursor.setBufferPosition @getPoint(cursor)
 
 class MoveToBeginningOfLine extends Motion
   @extend()

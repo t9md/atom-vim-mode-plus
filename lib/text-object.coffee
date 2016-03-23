@@ -20,7 +20,6 @@ class TextObject extends Base
   constructor: ->
     @constructor::inner = @constructor.name.startsWith('Inner')
     super
-    @onDidSetTarget (@operator) => @operator
     @initialize?()
 
   isInner: ->
@@ -33,11 +32,10 @@ class TextObject extends Base
     @allowSubmodeChange
 
   isLinewise: ->
-    submode = if @isAllowSubmodeChange()
-      swrap.detectVisualModeSubmode(@editor)
+    if @isAllowSubmodeChange()
+      swrap.detectVisualModeSubmode(@editor) is 'linewise'
     else
-      @vimState.submode
-    submode is 'linewise'
+      @vimState.submode is 'linewise'
 
   select: ->
     for selection in @editor.getSelections()
@@ -234,13 +232,13 @@ class Pair extends TextObject
   getPointToSearchFrom: (selection, searchFrom) ->
     switch searchFrom
       when 'head'
-        point = selection.getHeadBufferPosition()
+        point = swrap(selection).getBufferPositionFor('head')
         # When selection is not empty, we have to start to search one column left
         if (not selection.isEmpty()) and (not selection.isReversed()) and (point.column > 0)
           point = @editor.clipScreenPosition(point.translate([0, -1]), {clip: 'backward'})
         point
       when 'start'
-        selection.getBufferRange().start
+        swrap(selection).getBufferPositionFor('start')
 
   # Allow override @allowForwarding by 2nd argument.
   getRange: (selection, options={}) ->

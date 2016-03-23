@@ -27,6 +27,18 @@ class SelectionWrapper
   getBufferRange: ->
     @selection.getBufferRange()
 
+  getStartBufferPosition: -> @selection.getBufferRange().start
+  getEndBufferPosition: -> @selection.getBufferRange().end
+  getHeadBufferPosition: -> @selection.getHeadBufferPosition()
+  getTailBufferPosition: -> @selection.getTailBufferPosition()
+
+  getBufferPositionFor: (which) ->
+    switch which
+      when 'start' then @getStartBufferPosition()
+      when 'end' then @getEndBufferPosition()
+      when 'head' then @getHeadBufferPosition()
+      when 'tail' then @getTailBufferPosition()
+
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
