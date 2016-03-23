@@ -207,7 +207,10 @@ class Base
     name of registries
 
   @getClass: (name) ->
-    registries[name]
+    if klass = registries[name]
+      klass
+    else
+      throw new Error("class '#{name}' not found")
 
   @getRegistries: ->
     registries

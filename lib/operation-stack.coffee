@@ -12,7 +12,6 @@ class OperationStack
 
     CurrentSelection ?= Base.getClass('CurrentSelection')
     Select ?= Base.getClass('Select')
-    @currentSelection = new (Base.getClass('Select'))(@vimState)
 
     # [Experimental] Cache for performance
     @currentSelection = new CurrentSelection(@vimState)
@@ -25,8 +24,6 @@ class OperationStack
 
   run: (klass, properties) ->
     klass = Base.getClass(klass) if _.isString(klass)
-    unless klass
-      throw new Error("Invalid operation, can't run.")
     try
       #  To support, `dd`, `cc` and a like.
       if (@peekTop()?.constructor is klass)
@@ -76,11 +73,10 @@ class OperationStack
           throw error
 
     unless @peekTop().isComplete()
-      if @vimState.isMode('normal') and @peekTop().isOperator?()
+      if @vimState.isMode('normal') and @peekTop().isOperator()
         @vimState.activate('operator-pending')
     else
       @operation = @stack.pop()
-      @vimState.emitter.emit 'will-execute-operation', @operation
       @execute()
 
   execute: ->
@@ -105,7 +101,7 @@ class OperationStack
         if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
           operationName = @operation.constructor.name
           message = "Selection is not empty in normal-mode: #{operationName}"
-          if @operation.target?
+          if @operation.hasTarget()
             message += ", target= #{@operation.getTarget().constructor.name}"
           throw new Error(message)
         else
