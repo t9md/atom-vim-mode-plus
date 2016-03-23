@@ -106,7 +106,7 @@ class OperationStack
           operationName = @operation.constructor.name
           message = "Selection is not empty in normal-mode: #{operationName}"
           if @operation.target?
-            message += ", target= #{@operation.target.constructor.name}"
+            message += ", target= #{@operation.getTarget().constructor.name}"
           throw new Error(message)
         else
           @editor.clearSelections()
