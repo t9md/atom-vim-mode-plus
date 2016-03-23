@@ -128,6 +128,7 @@ distanceForRange = ({start, end}) ->
   column = end.column - start.column
   new Point(row, column)
 
+# [TODO] Remove this code once I updated minimum Atom version to >=1.7.0
 getNewTextRangeFromChanges = (changes) ->
   finalRange = null
   for change in changes when change.newRange?
@@ -150,15 +151,16 @@ getNewTextRangeFromChanges = (changes) ->
   finalRange
 
 getNewTextRangeFromPaches = (patches) ->
-  if (change = Patch.compose(patches).getChanges().shift())?
-    newStart = Point.fromObject(change.newStart)
-    new Range(newStart, newStart.traverse(change.newExtent))
+  if (patch = Patch.compose(patches).getChanges().shift())?
+    newStart = Point.fromObject(patch.newStart)
+    new Range(newStart, newStart.traverse(patch.newExtent))
   else
     null
 
 Patch = null
 IsSupportPatch = semver.satisfies(atom.appVersion, '>=1.7.0-beta0')
 
+# [TODO] Remove version check code once I updated minimum Atom version to >=1.7.0
 getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
   {history} = editor.getBuffer()
   if (index = history.getCheckpointIndex(checkpoint))?
