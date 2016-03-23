@@ -25,7 +25,7 @@ globalState = require './global-state'
   cursorIsAtEmptyRow
   getCodeFoldRowRanges
   isIncludeFunctionScopeForRow
-  detectScopeStartPositionByScope
+  detectScopeStartPositionForScope
   getTextInScreenRange
   getBufferRows
   getFirstCharacterColumForBufferRow
@@ -728,9 +728,10 @@ class MoveToMark extends Motion
     @focusInput()
 
   moveCursor: (cursor) ->
-    markPosition = @vimState.mark.get(@input)
+    input = @getInput()
+    markPosition = @vimState.mark.get(input)
 
-    if @input is '`' # double '`' pressed
+    if input is '`' # double '`' pressed
       markPosition ?= [0, 0] # if markPosition not set, go to the beginning of the file
       @vimState.mark.set('`', cursor.getBufferPosition())
 
@@ -1070,7 +1071,7 @@ class MoveToPositionByScope extends Motion
   moveCursor: (cursor) ->
     @countTimes =>
       from = cursor.getBufferPosition()
-      if point = detectScopeStartPositionByScope(@editor, from, @direction, @scope)
+      if point = detectScopeStartPositionForScope(@editor, from, @direction, @scope)
         cursor.setBufferPosition(point)
 
 class MoveToPreviousString extends MoveToPositionByScope

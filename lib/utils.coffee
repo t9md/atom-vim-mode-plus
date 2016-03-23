@@ -485,7 +485,7 @@ scanForScopeStart = (editor, fromPoint, direction, fn) ->
       return unless continueScan
     return unless continueScan
 
-detectScopeStartPositionByScope = (editor, fromPoint, direction, scope) ->
+detectScopeStartPositionForScope = (editor, fromPoint, direction, scope) ->
   point = null
   scanForScopeStart editor, fromPoint, direction, (info) ->
     if info.scope.search(scope) >= 0
@@ -652,7 +652,7 @@ module.exports = {
   getTokenizedLineForRow
   getScopesForTokenizedLine
   scanForScopeStart
-  detectScopeStartPositionByScope
+  detectScopeStartPositionForScope
   getBufferRows
   preserveSelectionStartPoints
   ElementBuilder
