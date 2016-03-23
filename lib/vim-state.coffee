@@ -94,8 +94,10 @@ class VimState
     @count = null
     @updateEditorElement()
 
-  updateEditorElement: (kind) ->
+  updateEditorElement: ->
     @editorElement.classList.toggle('with-count', @hasCount())
+    @editorElement.classList.toggle('with-register', @register.hasName())
+
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
