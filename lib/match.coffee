@@ -1,6 +1,5 @@
 _ = require 'underscore-plus'
 {
-  sortRanges
   getIndex
   highlightRanges
   smartScrollToBufferPosition

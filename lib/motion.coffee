@@ -8,7 +8,6 @@ globalState = require './global-state'
   moveCursorUp, moveCursorDown
   moveCursorDownBuffer
   moveCursorUpBuffer
-  pointIsAtEndOfLine,
   cursorIsAtVimEndOfFile
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getVimEofBufferPosition, getVimEofScreenPosition
@@ -21,8 +20,6 @@ globalState = require './global-state'
   getIndentLevelForBufferRow
   getTextFromPointToEOL
   isAllWhiteSpace
-  getTextAtCursor
-  getEolBufferPositionForCursor
   cursorIsOnWhiteSpace
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow
@@ -31,7 +28,6 @@ globalState = require './global-state'
   detectScopeStartPositionByScope
   getTextInScreenRange
   getBufferRows
-  getFirstCharacterColumForScreenRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -45,7 +41,6 @@ class Motion extends Base
   @extend(false)
   inclusive: false
   linewise: false
-  options: null
   operator: null
 
   constructor: ->
@@ -730,7 +725,6 @@ class SearchBase extends Motion
   useRegexp: true
   configScope: null
 
-  # Not sure if I should support count but keep this for compatibility to official vim-mode.
   getCount: ->
     count = super - 1
     count = -count if @isBackwards()
@@ -760,10 +754,9 @@ class SearchBase extends Motion
     @matches = null
 
   flashScreen: ->
-    if settings.get('flashScreenOnSearchHasNoMatch')
-      highlightRanges @editor, getVisibleBufferRange(@editor),
-        class: 'vim-mode-plus-flash'
-        timeout: 100
+    highlightRanges @editor, getVisibleBufferRange(@editor),
+      class: 'vim-mode-plus-flash'
+      timeout: 100
     atom.beep()
 
   moveCursor: (cursor) ->
@@ -775,7 +768,7 @@ class SearchBase extends Motion
 
     @matches ?= @getMatchList(cursor, input)
     if @matches.isEmpty()
-      @flashScreen()
+      @flashScreen() if settings.get('flashScreenOnSearchHasNoMatch')
     else
       @visitMatch "current",
         timeout: settings.get('showHoverSearchCounterDuration')
@@ -883,14 +876,13 @@ class Search extends SearchBase
     visitCursor = (cursor) =>
       @matches ?= @getMatchList(cursor, input)
       if @matches.isEmpty()
-        @flashScreen()
+        @flashScreen() if settings.get('flashScreenOnSearchHasNoMatch')
       else
         @visitMatch()
 
     @matches?.destroy()
     @matches = null
-    if settings.get('showHoverSearchCounter')
-      @vimState.hoverSearchCounter.reset()
+    @vimState.hoverSearchCounter.reset() if settings.get('showHoverSearchCounter')
 
     input = @getInput()
     if input isnt ''
@@ -923,6 +915,7 @@ class SearchCurrentWord extends SearchBase
   @extend()
   configScope: "SearchCurrentWord"
 
+  # NOTE: have side-effect. moving cursor to start of current word.
   getInput: ->
     @input ?= (
       wordRange = @getCurrentWordBufferRange()
@@ -936,8 +929,10 @@ class SearchCurrentWord extends SearchBase
   getPattern: (term) ->
     modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
     pattern = _.escapeRegExp(term)
-    pattern = if /\W/.test(term) then "#{pattern}\\b" else "\\b#{pattern}\\b"
-    new RegExp(pattern, modifiers)
+    if /\W/.test(term)
+      new RegExp("#{pattern}\\b", modifiers)
+    else
+      new RegExp("\\b#{pattern}\\b", modifiers)
 
   getCurrentWordBufferRange: ->
     wordRange = null
