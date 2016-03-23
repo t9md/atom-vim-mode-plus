@@ -9,8 +9,15 @@ settings = require './settings'
 class OperationStack
   constructor: (@vimState) ->
     {@editor} = @vimState
+
     CurrentSelection ?= Base.getClass('CurrentSelection')
     Select ?= Base.getClass('Select')
+    @currentSelection = new (Base.getClass('Select'))(@vimState)
+
+    # [Experimental] Cache for performance
+    @currentSelection = new CurrentSelection(@vimState)
+    @select = new Select(@vimState)
+
     @reset()
 
   subscribe: (args...) ->
@@ -24,14 +31,20 @@ class OperationStack
       #  To support, `dd`, `cc` and a like.
       if (@peekTop()?.constructor is klass)
         klass = Base.getClass('MoveToRelativeLine')
-      operation = new klass(@vimState, properties)
-      if (@vimState.isMode('visual') and _.isFunction(operation.select)) or
-          (@isEmpty() and operation.instanceof('TextObject')) # when TextObject invoked directly
-        @stack.push(new Select(@vimState))
-      @stack.push(operation)
-      if @vimState.isMode('visual') and operation.instanceof('Operator')
-        @stack.push(new CurrentSelection(@vimState))
 
+      operation = new klass(@vimState, properties)
+
+      if @vimState.isMode('visual')
+        switch
+          when operation.instanceof('Operator')
+            operation.setTarget(@currentSelection)
+          when operation.instanceof('Motion'), operation.instanceof('TextObject')
+            operation = @select.setTarget(operation)
+      else if @isEmpty() and operation.instanceof('TextObject')
+        # when TextObject invoked directly
+        operation = @select.setTarget(operation)
+
+      @stack.push(operation)
       @processing = true
       @process()
     catch error

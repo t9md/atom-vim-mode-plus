@@ -99,6 +99,7 @@ class Operator extends Base
       throw new OperatorError(message)
     @target.setOperator(this)
     @emitDidSetTarget(this)
+    this
 
   # Return true unless all selection is empty.
   # -------------------------
