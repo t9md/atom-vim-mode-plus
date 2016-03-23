@@ -292,13 +292,13 @@ getFirstCharacterColumForBufferRow = (editor, row) ->
   if (column = text.search(/\S/)) >= 0
     column
   else
-    null
+    0
 
 cursorIsAtFirstCharacter = (cursor) ->
   {editor} = cursor
   column = cursor.getBufferColumn()
   firstCharColumn = getFirstCharacterColumForBufferRow(editor, cursor.getBufferRow())
-  firstCharColumn? and column is firstCharColumn
+  column is firstCharColumn
 
 # Cursor motion wrapper
 # -------------------------

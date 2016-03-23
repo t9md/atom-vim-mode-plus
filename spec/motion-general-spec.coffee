@@ -1116,21 +1116,21 @@ describe "Motion general", ->
 
     describe "the L keybinding", ->
       it "moves the cursor to non-blank-char on last row if visible", ->
-        spyOn(eel, 'getLastVisibleScreenRow').andReturn(9)
+        spyOn(editor, 'getLastVisibleScreenRow').andReturn(9)
         ensure 'L', cursor: [9, 2]
 
       it "moves the cursor to the first visible row plus offset", ->
-        spyOn(eel, 'getLastVisibleScreenRow').andReturn(6)
+        spyOn(editor, 'getLastVisibleScreenRow').andReturn(7)
         ensure 'L', cursor: [4, 2]
 
       it "respects counts", ->
-        spyOn(eel, 'getLastVisibleScreenRow').andReturn(9)
+        spyOn(editor, 'getLastVisibleScreenRow').andReturn(9)
         ensure '3L', cursor: [7, 0]
 
     describe "the M keybinding", ->
       beforeEach ->
         spyOn(eel, 'getFirstVisibleScreenRow').andReturn(0)
-        spyOn(editor, 'getRowsPerPage').andReturn(10)
+        spyOn(editor, 'getLastVisibleScreenRow').andReturn(10)
 
       it "moves the cursor to the non-blank-char of middle of screen", ->
         ensure 'M', cursor: [4, 2]

@@ -28,6 +28,7 @@ globalState = require './global-state'
   detectScopeStartPositionByScope
   getTextInScreenRange
   getBufferRows
+  getFirstCharacterColumForBufferRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -392,20 +393,21 @@ class MoveToEndOfAlphanumericWord extends MoveToEndOfWord
   @extend()
   wordRegex: /\w+/
 
+# Paragraph
 # -------------------------
 class MoveToNextParagraph extends Motion
   @extend()
   direction: 'next'
 
   getPoint: (cursor) ->
-    inSection = not @editor.isBufferRowBlank(cursor.getBufferRow())
-    startRow = cursor.getBufferRow()
-    rows = getBufferRows(@editor, {startRow, @direction, includeStartRow: false})
+    cursorRow = cursor.getBufferRow()
+    isAtNonBlankRow = not @editor.isBufferRowBlank(cursorRow)
+    rows = getBufferRows(@editor, {startRow: cursorRow, @direction, includeStartRow: false})
     for row in rows
       if @editor.isBufferRowBlank(row)
-        return [row, 0] if inSection
+        return [row, 0] if isAtNonBlankRow
       else
-        inSection = true
+        isAtNonBlankRow = true
 
     switch @direction
       when 'previous' then [0, 0]
@@ -413,12 +415,13 @@ class MoveToNextParagraph extends Motion
 
   moveCursor: (cursor) ->
     @countTimes =>
-      cursor.setBufferPosition @getPoint(cursor)
+      cursor.setBufferPosition(@getPoint(cursor))
 
 class MoveToPreviousParagraph extends MoveToNextParagraph
   @extend()
   direction: 'previous'
 
+# -------------------------
 class MoveToBeginningOfLine extends Motion
   @extend()
   defaultCount: null
@@ -438,24 +441,21 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
   @extend()
   inclusive: true
 
-  # moves cursor to the last non-whitespace character on the line
-  # similar to skipLeadingWhitespace() in atom's cursor.coffee
-  skipTrailingWhitespace: (cursor) ->
-    position = cursor.getBufferPosition()
-    scanRange = cursor.getCurrentLineBufferRange()
-    startOfTrailingWhitespace = [scanRange.end.row, scanRange.end.column - 1]
-    @editor.scanInBufferRange /[ \t]+$/, scanRange, ({range}) ->
-      startOfTrailingWhitespace = range.start
-      startOfTrailingWhitespace.column -= 1
-    cursor.setBufferPosition(startOfTrailingWhitespace)
+  getCount: ->
+    super - 1
 
-  getCount: -> super - 1
+  getPoint: (cursor) ->
+    row = cursor.getBufferRow() + @getCount()
+    row = Math.min(row, getVimLastBufferRow(@editor))
+    scanRange = @editor.bufferRangeForBufferRow(row, includeNewline: true)
+    point = null
+    # [NOTE] this scan would never be fail, so valid point is always returend.
+    @editor.scanInBufferRange /\s*$/, scanRange, ({range, matchText}) ->
+      point = range.start
+    point.translate([0, -1])
 
   moveCursor: (cursor) ->
-    @countTimes =>
-      if cursor.getBufferRow() isnt getVimLastBufferRow(@editor)
-        cursor.moveDown()
-    @skipTrailingWhitespace(cursor)
+    cursor.setBufferPosition(@getPoint(cursor))
 
 # MoveToFirstCharacterOfLine faimily
 # ------------------------------------
@@ -520,11 +520,15 @@ class MoveToRelativeLine extends Motion
   @extend(false)
   linewise: true
 
-  moveCursor: (cursor) ->
-    newRow = cursor.getBufferRow() + @getCount()
-    cursor.setBufferPosition [newRow, 0]
+  getCount: ->
+    super - 1
 
-  getCount: -> super - 1
+  getPoint: (cursor) ->
+    row = cursor.getBufferRow() + @getCount()
+    [row, 0]
+
+  moveCursor: (cursor) ->
+    cursor.setBufferPosition(@getPoint(cursor))
 
 class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
   @extend(false)
@@ -542,32 +546,42 @@ class MoveToTopOfScreen extends Motion
   scrolloff: 2
   defaultCount: 0
 
+  getCount: ->
+    super - 1
+
   moveCursor: (cursor) ->
     cursor.setScreenPosition([@getRow(), 0])
     cursor.moveToFirstCharacterOfLine()
 
   getRow: ->
     row = getFirstVisibleScreenRow(@editor)
-    offset = if row is 0 then 0 else @scrolloff
+    offset = @scrolloff
+    offset = 0 if (row is 0)
     row + Math.max(@getCount(), offset)
-
-  getCount: -> super - 1
-
-# keymap: L
-class MoveToBottomOfScreen extends MoveToTopOfScreen
-  @extend()
-  getRow: ->
-    row = getLastVisibleScreenRow(@editor)
-    offset = if row is getVimLastBufferRow(@editor) then 0 else @scrolloff
-    row - Math.max(@getCount(), offset)
 
 # keymap: M
 class MoveToMiddleOfScreen extends MoveToTopOfScreen
   @extend()
   getRow: ->
-    row = getFirstVisibleScreenRow(@editor)
-    offset = Math.floor(@editor.getRowsPerPage() / 2) - 1
-    row + Math.max(offset, 0)
+    startRow = getFirstVisibleScreenRow(@editor)
+    vimLastScreenRow = getVimLastScreenRow(@editor)
+    endRow = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
+    startRow + Math.floor((endRow - startRow) / 2)
+
+# keymap: L
+class MoveToBottomOfScreen extends MoveToTopOfScreen
+  @extend()
+  getRow: ->
+    # [FIXME]
+    # At least Atom v1.6.0, there are two implementation of getLastVisibleScreenRow()
+    # editor.getLastVisibleScreenRow() and editorElement.getLastVisibleScreenRow()
+    # Those two methods return different value, editor's one is corrent.
+    # So I intentionally use editor.getLastScreenRow here.
+    vimLastScreenRow = getVimLastScreenRow(@editor)
+    row = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
+    offset = @scrolloff + 1
+    offset = 0 if (row is vimLastScreenRow)
+    row - Math.max(@getCount(), offset)
 
 # Scrolling
 # Half: ctrl-d, ctrl-u
