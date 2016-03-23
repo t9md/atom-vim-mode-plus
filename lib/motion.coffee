@@ -291,27 +291,7 @@ class MoveDownToEdge extends MoveUpToEdge
   @extend()
   direction: 'down'
 
-# Previous word family
-# -------------------------
-class MoveToPreviousWord extends Motion
-  @extend()
-  wordRegex: null
-
-  moveCursor: (cursor) ->
-    @countTimes =>
-      point = cursor.getBeginningOfCurrentWordBufferPosition({@wordRegex})
-      cursor.setBufferPosition(point)
-
-class MoveToPreviousWholeWord extends MoveToPreviousWord
-  @extend()
-  wordRegex: /^\s*$|\S+/
-
-# Experimental
-class MoveToPreviousAlphanumericWord extends MoveToPreviousWord
-  @extend()
-  wordRegex: /\w+/
-
-# Next word family
+# word
 # -------------------------
 class MoveToNextWord extends Motion
   @extend()
@@ -355,17 +335,15 @@ class MoveToNextWord extends Motion
         if @isAsOperatorTarget() and isLastCount and (cursor.getBufferRow() > bufferRow)
           cursor.setBufferPosition([bufferRow, Infinity])
 
-# Experimental
-class MoveToNextAlphanumericWord extends MoveToNextWord
+class MoveToPreviousWord extends Motion
   @extend()
-  wordRegex: /\w+/
+  wordRegex: null
 
-class MoveToNextWholeWord extends MoveToNextWord
-  @extend()
-  wordRegex: /^\s*$|\S+/
+  moveCursor: (cursor) ->
+    @countTimes =>
+      point = cursor.getBeginningOfCurrentWordBufferPosition({@wordRegex})
+      cursor.setBufferPosition(point)
 
-# End word family
-# -------------------------
 class MoveToEndOfWord extends Motion
   @extend()
   wordRegex: null
@@ -386,14 +364,34 @@ class MoveToEndOfWord extends Motion
         cursor.moveRight()
         @moveToNextEndOfWord(cursor)
 
+# Whole word
+# -------------------------
+class MoveToNextWholeWord extends MoveToNextWord
+  @extend()
+  wordRegex: /^\s*$|\S+/
+
+class MoveToPreviousWholeWord extends MoveToPreviousWord
+  @extend()
+  wordRegex: /^\s*$|\S+/
+
 class MoveToEndOfWholeWord extends MoveToEndOfWord
   @extend()
   wordRegex: /\S+/
 
+# Alphanumeric word [Experimental]
+# -------------------------
+class MoveToNextAlphanumericWord extends MoveToNextWord
+  @extend()
+  wordRegex: /\w+/
+
+class MoveToPreviousAlphanumericWord extends MoveToPreviousWord
+  @extend()
+  wordRegex: /\w+/
+
 class MoveToEndOfAlphanumericWord extends MoveToEndOfWord
   @extend()
   wordRegex: /\w+/
-  
+
 # -------------------------
 class MoveToNextParagraph extends Motion
   @extend()
