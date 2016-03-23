@@ -33,18 +33,19 @@ class OperationStack
         klass = Base.getClass('MoveToRelativeLine')
 
       operation = new klass(@vimState, properties)
-
       if @vimState.isMode('visual')
         switch
-          when operation.instanceof('Operator')
+          when operation.isOperator()
             operation.setTarget(@currentSelection)
-          when operation.instanceof('Motion'), operation.instanceof('TextObject')
+          when operation.isMotion(), operation.isTextObject()
             operation = @select.setTarget(operation)
-      else if @isEmpty() and operation.instanceof('TextObject')
+        @stack.push(operation)
+      else if @isEmpty() and operation.isTextObject()
         # when TextObject invoked directly
-        operation = @select.setTarget(operation)
+        @stack.push(@select.setTarget(operation))
+      else
+        @stack.push(operation)
 
-      @stack.push(operation)
       @processing = true
       @process()
     catch error
@@ -75,7 +76,7 @@ class OperationStack
           throw error
 
     unless @peekTop().isComplete()
-      if @vimState.isMode('normal') and @peekTop().instanceof?('Operator')
+      if @vimState.isMode('normal') and @peekTop().isOperator?()
         @vimState.activate('operator-pending')
     else
       @operation = @stack.pop()

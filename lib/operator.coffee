@@ -1046,7 +1046,7 @@ class InsertByMotion extends ActivateInsertMode
   @extend()
   requireTarget: true
   execute: ->
-    if @target.instanceof('Motion')
+    if @target.isMotion()
       @target.execute()
     if @instanceof('InsertAfterByMotion')
       moveCursorRight(cursor) for cursor in @editor.getCursors()
@@ -1089,7 +1089,7 @@ class Change extends ActivateInsertMode
   execute: ->
     @selectTarget()
     text = ''
-    if @target.instanceof('TextObject') or @target.instanceof('Motion')
+    if @target.isTextObject() or @target.isMotion()
       text = "\n" if (swrap.detectVisualModeSubmode(@editor) is 'linewise')
     else
       text = "\n" if @target.isLinewise?()

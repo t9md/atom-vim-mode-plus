@@ -155,6 +155,15 @@ class Base
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)
 
+  isOperator: ->
+    @instanceof('Operator')
+
+  isMotion: ->
+    @instanceof('Motion')
+
+  isTextObject: ->
+    @instanceof('TextObject')
+
   directInstanceof: (klassName) ->
     this.constructor is Base.getClass(klassName)
 
