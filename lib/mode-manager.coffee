@@ -51,12 +51,13 @@ class ModeManager
       when 'visual' then @activateVisualMode(submode)
       when 'operator-pending' then new Disposable # Nothing to do.
 
-    # Now update mode variables and update CSS selectors.
+    # Remove OLD mode, submode CSS class
     @editorElement.classList.remove("#{@mode}-mode")
     @editorElement.classList.remove(@submode)
 
     [@mode, @submode] = [mode, submode]
 
+    # Add NEW mode, submode CSS class
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
 
