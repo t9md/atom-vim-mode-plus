@@ -51,7 +51,6 @@ class OperationStack
 
   handleError: (error) ->
     @vimState.reset()
-    @processing = false
     unless error.instanceof?('OperationAbortedError')
       throw error
 
@@ -73,12 +72,12 @@ class OperationStack
         else
           throw error
 
-    unless @peekTop().isComplete()
-      if @vimState.isMode('normal') and @peekTop().isOperator()
-        @vimState.activate('operator-pending')
-    else
+    if @peekTop().isComplete()
       @operation = @stack.pop()
       @execute()
+    else
+      if @vimState.isMode('normal') and @peekTop().isOperator()
+        @vimState.activate('operator-pending')
 
   execute: ->
     execution = @operation.execute()
@@ -100,27 +99,23 @@ class OperationStack
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
         if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
-          operationName = @operation.constructor.name
-          message = "Selection is not empty in normal-mode: #{operationName}"
-          if @operation.hasTarget()
-            message += ", target= #{@operation.getTarget().constructor.name}"
-          throw new Error(message)
+          throw new Error("Selection is not empty in normal-mode: #{@operation.toString()}")
         else
           @editor.clearSelections()
 
       # Ensure Cursor is NOT at EndOfLine position
       for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
         moveCursorLeft(cursor, {preserveGoalColumn: true})
-    @operation = null
     @vimState.refreshCursors()
     @vimState.reset()
-    @processing = false
 
   peekTop: ->
     _.last @stack
 
   reset: ->
     @stack = []
+    @operation = null
+    @processing = false
     @subscriptions?.dispose()
     @subscriptions = new CompositeDisposable
 

@@ -167,6 +167,13 @@ class Base
   directInstanceof: (klassName) ->
     this.constructor is Base.getClass(klassName)
 
+  toString: ->
+    str = @operation.constructor.name
+    if @hasTarget()
+      targetName = @getTarget().constructor.name if @hasTarget()
+      str += ", target=#{targetName}"
+    str
+
   emitWillSelectTarget: ->
     @vimState.emitter.emit 'will-select-target'
 
