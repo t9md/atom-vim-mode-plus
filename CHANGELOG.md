@@ -1,3 +1,14 @@
+# 0.27.0
+- Internal: Refactoring many parts(Search, MatchList, ModeManager, OperationStack) #200
+- Improve: Support upcoming Atom 1.7+ text-buffer change #206, #203
+- New: New Motion for alphaNumeric word family #207
+  - MoveToNextAlphanumericWord for `w`
+  - MoveToPreviousAlphanumericWord for `b`
+  - MoveToEndOfAlphanumericWord for `e`
+- Fix: Tweak L(MoveToBottomOfScreen) motion don't cause scroll.
+- Internal: Reuse Select, CurrentSelection instance, hope improve #162
+- Internal: Introduce Sugar methods on Base.prototype for instanceof check
+
 # 0.26.1
 - Fix: `n`, `N` in different editor cause `flashScreen` is not function.
 
