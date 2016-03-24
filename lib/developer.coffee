@@ -159,7 +159,7 @@ class Developer
       for name, klass of Base.getRegistries() when klass.isCommand()
         kind = getAncestors(klass).map((k) -> k.name)[-2..-2][0]
         commandName = klass.getCommandName()
-        description = klass.getDesctiption()
+        description = klass.getDesctiption()?.replace(/\n/g, '<br/>')
 
         keymap = null
         if keymaps = getKeyBindingForCommand(commandName)
