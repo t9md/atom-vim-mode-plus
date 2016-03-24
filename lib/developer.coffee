@@ -11,20 +11,6 @@ settings = require './settings'
 packageScope = 'vim-mode-plus'
 getEditorState = null
 
-# Borrowed from underscore-plus
-modifierKeyMap =
-  cmd: '\u2318'
-  ctrl: '\u2303'
-  alt: '\u2325'
-  option: '\u2325'
-  shift: '\u21e7'
-  enter: '\u23ce'
-  left: '\u2190'
-  right: '\u2192'
-  up: '\u2191'
-  down: '\u2193'
-
-
 getParent = (obj) ->
   obj.__super__?.constructor
 
@@ -126,30 +112,47 @@ class Developer
     settings.set('debug', not settings.get('debug'))
     console.log "#{settings.scope} debug:", settings.get('debug')
 
+  # Borrowed from underscore-plus
+  modifierKeyMap =
+    cmd: '\u2318'
+    "ctrl-": '\u2303'
+    alt: '\u2325'
+    option: '\u2325'
+    enter: '\u23ce'
+    left: '\u2190'
+    right: '\u2192'
+    up: '\u2191'
+    down: '\u2193'
+    backspace: 'BS'
+    space: 'SPC'
+
+  # [NOTE] Order is important. I depend on chrome's "keep object order".
+  selectorMap =
+    "atom-text-editor.vim-mode-plus": ''
+    ".operator-pending-mode": 'o'
+    ".visual-mode.characterwise": 'vC'
+    ".visual-mode.blockwise": 'vB'
+    ".visual-mode.linewise": 'vL'
+    ".visual-mode": 'v'
+    ".insert-mode.replace": 'iR'
+    ".insert-mode": 'i'
+    ".normal-mode": 'n'
+    ".with-count": '#'
+
   getCommandSpecs: ->
     compactSelector = (selector) ->
+      pattern = ///(#{_.keys(selectorMap).map(_.escapeRegExp).join('|')})///g
       selector.split(/,\s*/g).map (scope) ->
         scope
-          .replace(/atom-text-editor\.vim-mode-plus/, '')
           .replace(/:not\((.*)\)/, '!$1')
-          .replace(/\.normal-mode/, 'n')
-          .replace(/\.visual-mode\.blockwise/, 'vB')
-          .replace(/\.visual-mode\.linewise/, 'vL')
-          .replace(/\.visual-mode\.characterwise/, 'vC')
-          .replace(/\.visual-mode/, 'v')
-          .replace(/\.insert-mode\.replace/, 'iR')
-          .replace(/\.insert-mode/, 'i')
-          .replace(/\.operator-pending-mode/, 'o')
+          .replace(pattern, (s) -> selectorMap[s])
       .join(",")
 
-
     compactKeystrokes = (keystrokes) ->
+      pattern = ///(#{_.keys(modifierKeyMap).map(_.escapeRegExp).join('|')})///
       keystrokes
         .replace(/(`|_)/g, '\\$1')
-        .replace(/ctrl-/, modifierKeyMap["ctrl"])
-        .replace(/down|up|left|right|enter|cmd|option/, (s) -> modifierKeyMap[s])
-        .replace('backspace', 'BS')
-        .replace('space', 'SPC')
+        .replace(pattern, (s) -> modifierKeyMap[s])
         .replace(/\s+/, '')
 
     commands = (
@@ -164,8 +167,6 @@ class Developer
             "`#{compactSelector(selector)}` <kbd>#{compactKeystrokes(keystrokes)}</kbd>"
           .join("<br/>")
 
-        # keystrokes<kbd>#{keystrokes}</kbd>"
-
         {name, commandName, kind, description, keymap}
     )
     commands
@@ -174,8 +175,7 @@ class Developer
   generateSummaryTableForCommandSpecs: (specs, {header}={}) ->
     grouped = _.groupBy(specs, 'kind')
     str = ""
-    for kind in kinds
-      specs = grouped[kind]
+    for kind in kinds when specs = grouped[kind]
 
       report = [
         "## #{kind}"
@@ -196,17 +196,22 @@ class Developer
 
   generateCommandSummaryTable: ->
     header = """
-    # Description
+    # Keymap selector abbreviations
 
-    - `!i`: :not(.insert-mode)
-    - `i`: insert-mode
-    - `o`: operator-pending-mode
-    - `n`: normal-mode
-    - `v`: visual-mode
-    - `vB`: visual-mode.blockwise
-    - `vL`: visual-mode.linewise
-    - `vC`: visual-mode.characterwise
-    - `iR`: insert-mode.replace
+    In this document, following abbreviations are used for shortness.
+
+    | Abbrev | Selector                     | Description             |
+    |:-------|:-----------------------------|:------------------------|
+    | `!i`   | `:not(.insert-mode)`         | except insert-mode      |
+    | `i`    | `.insert-mode`               |                         |
+    | `o`    | `.operator-pending-mode`     |                         |
+    | `n`    | `.normal-mode`               |                         |
+    | `v`    | `.visual-mode`               |                         |
+    | `vB`   | `.visual-mode.blockwise`     |                         |
+    | `vL`   | `.visual-mode.linewise`      |                         |
+    | `vC`   | `.visual-mode.characterwise` |                         |
+    | `iR`   | `.insert-mode.replace`       |                         |
+    | `#`    | `.with-count`                | when count is specified |
 
     """
     @generateSummaryTableForCommandSpecs(@getCommandSpecs(), {header})
