@@ -25,14 +25,16 @@ class OperationStack
   composeOperation: (operation) ->
     {mode} = @vimState
     switch
-      when operation.isOperator() and (mode is 'visual')
-        operation.setTarget(@currentSelection)
-      when operation.isTextObject() and (mode in ['visual', 'normal'])
-        @select.setTarget(operation)
-      when operation.isMotion() and (mode is 'visual')
-        @select.setTarget(operation)
-      else
-        operation
+      when operation.isOperator()
+        if (mode is 'visual') and operation.isRequireTarget()
+          operation = operation.setTarget(@currentSelection)
+      when operation.isTextObject()
+        if mode in ['visual', 'normal']
+          operation = @select.setTarget(operation)
+      when operation.isMotion()
+        if (mode is 'visual')
+          operation = @select.setTarget(operation)
+    operation
 
   run: (klass, properties) ->
     klass = Base.getClass(klass) if _.isString(klass)

@@ -25,6 +25,13 @@ class ReverseSelections extends Misc
     # In that case make it sync in operationStack::process.
     swrap.reverse(@editor)
 
+class BlockwiseOtherEnd extends ReverseSelections
+  @extend()
+  execute: ->
+    for bs in @vimState.getBlockwiseSelections() when not bs.isSingleLine()
+      bs.reverse()
+    super
+
 class Undo extends Misc
   @extend()
 

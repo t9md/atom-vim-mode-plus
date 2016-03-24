@@ -376,16 +376,10 @@
 # visual-blockwise
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.blockwise':
-  'o':      'vim-mode-plus:blockwise-other-end',
-  'O':      'vim-mode-plus:reverse-selections',
-  'j':      'vim-mode-plus:blockwise-move-down'
-  'down':   'vim-mode-plus:blockwise-move-down'
-  'k':      'vim-mode-plus:blockwise-move-up'
-  'up':      'vim-mode-plus:blockwise-move-up'
-  'D':      'vim-mode-plus:blockwise-delete-to-last-character-of-line',
-  'C':      'vim-mode-plus:blockwise-change-to-last-character-of-line',
-  'I':      'vim-mode-plus:blockwise-insert-at-beginning-of-line'
-  'A':      'vim-mode-plus:blockwise-insert-after-end-of-line',
+  'o': 'vim-mode-plus:blockwise-other-end',
+  'O': 'vim-mode-plus:reverse-selections',
+  'I': 'vim-mode-plus:insert-at-start-of-selection'
+  'A': 'vim-mode-plus:insert-at-end-of-selection'
 
 # Input mini editor e.g. mark, surround.
 # -------------------------

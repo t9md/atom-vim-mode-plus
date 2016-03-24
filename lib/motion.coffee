@@ -182,7 +182,15 @@ class MoveRight extends Motion
 class MoveUp extends Motion
   @extend()
   linewise: true
+  direction: 'up'
   amount: -1
+
+  select: ->
+    if @isMode('visual', 'blockwise')
+      @vimState.getBlockwiseSelections().forEach (bs) =>
+        @countTimes => bs.moveSelection(@direction)
+    else
+      super
 
   move: (cursor) ->
     moveCursorUp(cursor)
@@ -204,7 +212,9 @@ class MoveUp extends Motion
 class MoveDown extends MoveUp
   @extend()
   linewise: true
+  direction: 'down'
   amount: +1
+
 
   move: (cursor) ->
     moveCursorDown(cursor)
