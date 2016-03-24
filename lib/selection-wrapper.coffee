@@ -39,6 +39,10 @@ class SelectionWrapper
       when 'head' then @getHeadBufferPosition()
       when 'tail' then @getTailBufferPosition()
 
+  setBufferPositionTo: (which) ->
+    point = @getBufferPositionFor(which)
+    @selection.cursor.setBufferPosition(point)
+
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
