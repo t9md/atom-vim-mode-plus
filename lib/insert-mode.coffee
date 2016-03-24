@@ -24,14 +24,20 @@ class InsertRegister extends InsertMode
 
 class InsertLastInserted extends InsertMode
   @extend()
-  @description: "Insert text inserted in latest insert-mode. Equivalent to *i_CTRL-A* of pure Vim"
+  @description: """
+  Insert text inserted in latest insert-mode.
+  Equivalent to *i_CTRL-A* of pure Vim
+  """
   execute: ->
     text = @vimState.register.getText('.')
     @editor.insertText(text)
 
 class CopyFromLineAbove extends InsertMode
   @extend()
-  @description: "Insert character of same-column of above line. Equivalent to *i_CTRL-Y* of pure Vim"
+  @description: """
+  Insert character of same-column of above line.
+  Equivalent to *i_CTRL-Y* of pure Vim
+  """
   rowDelta: -1
 
   getTargetRange: (cursor, translation) ->
@@ -48,5 +54,8 @@ class CopyFromLineAbove extends InsertMode
 
 class CopyFromLineBelow extends CopyFromLineAbove
   @extend()
-  @description: "Insert character of same-column of above line. Equivalent to *i_CTRL-E* of pure Vim"
+  @description: """
+  Insert character of same-column of above line.
+  Equivalent to *i_CTRL-E* of pure Vim
+  """
   rowDelta: +1
