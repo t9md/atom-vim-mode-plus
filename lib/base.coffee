@@ -168,7 +168,7 @@ class Base
     this.constructor is Base.getClass(klassName)
 
   toString: ->
-    str = @operation.constructor.name
+    str = @constructor.name
     if @hasTarget()
       targetName = @getTarget().constructor.name if @hasTarget()
       str += ", target=#{targetName}"
