@@ -57,6 +57,7 @@ If you want to directly edit `config.cson`, here it is.
 
 # Wiki
 
+- [Commands](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands) summary of vmp's commands with keymap.
 - [Operations](https://github.com/t9md/atom-vim-mode-plus/wiki/Operations) includes most of commands with keymap information.
 - [GIFs](https://github.com/t9md/atom-vim-mode-plus/wiki/GIFs) demonstrates fancy features.
 - [Keymap example](https://github.com/t9md/atom-vim-mode-plus/wiki/Keymap-example).
@@ -67,7 +68,7 @@ If you want to directly edit `config.cson`, here it is.
 
 Some of the keymap is not set by default, check following link for reference.
 
-- [Operations](https://github.com/t9md/atom-vim-mode-plus/wiki/Operations)
+- [Commands](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands) summary of vmp's commands with keymap.
 - [keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson)
 - [Keymap example](https://github.com/t9md/atom-vim-mode-plus/wiki/Keymap-example)
 - [Commands which have no default keymap](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands-which-have-no-default-keymap)
