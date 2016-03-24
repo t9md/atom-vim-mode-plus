@@ -14,17 +14,6 @@ class ModeManager
     {@editor, @editorElement} = @vimState
     @emitter = new Emitter
 
-    @onDidActivateMode ({mode, submode}) =>
-      @updateEditorElement()
-      @vimState.statusBarManager.update(mode, submode)
-      @vimState.refreshCursors()
-
-  updateEditorElement: ->
-    for mode in ['normal', 'insert', 'visual', 'operator-pending']
-      @editorElement.classList.toggle("#{mode}-mode", mode is @mode)
-    for submode in ['characterwise', 'linewise', 'blockwise', 'replace']
-      @editorElement.classList.toggle(submode, submode is @submode)
-
   isMode: (mode, submodes) ->
     if submodes?
       submodes = [submodes] unless _.isArray(submodes)
@@ -46,18 +35,14 @@ class ModeManager
     if mode is 'reset'
       @editor.clearSelections()
       mode = 'normal'
-    else if (mode is 'visual')
+    else if mode is 'visual'
       if submode is @submode
         mode = 'normal'
         submode = null
       else if submode is 'previous'
         submode = @restorePreviousSelection?() ? 'characterwise'
 
-    # Deactivate old mode
-    if (mode isnt @mode)
-      @emitter.emit 'will-deactivate-mode', {@mode, @submode}
-      @deactivator?.dispose()
-      @emitter.emit 'did-deactivate-mode', {@mode, @submode}
+    @deactivate() if (mode isnt @mode)
 
     # Activate
     @deactivator = switch mode
@@ -67,8 +52,22 @@ class ModeManager
       when 'operator-pending' then new Disposable # Nothing to do.
 
     # Now update mode variables and update CSS selectors.
+    @editorElement.classList.remove("#{@mode}-mode")
+    @editorElement.classList.remove(@submode)
+
     [@mode, @submode] = [mode, submode]
+
+    @editorElement.classList.add("#{@mode}-mode")
+    @editorElement.classList.add(@submode) if @submode?
+
+    @vimState.statusBarManager.update(@mode, @submode)
+    @vimState.refreshCursors()
     @emitter.emit 'did-activate-mode', {@mode, @submode}
+
+  deactivate: ->
+    @emitter.emit 'will-deactivate-mode', {@mode, @submode}
+    @deactivator?.dispose()
+    @emitter.emit 'did-deactivate-mode', {@mode, @submode}
 
   # Normal
   # -------------------------
