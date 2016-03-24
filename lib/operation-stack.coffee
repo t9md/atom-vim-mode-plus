@@ -22,6 +22,20 @@ class OperationStack
   subscribe: (args...) ->
     @subscriptions.add args...
 
+  composeOperation: (operation) ->
+    {mode} = @vimState
+    switch
+      when operation.isOperator()
+        if (mode is 'visual')
+          operation = operation.setTarget(@currentSelection)
+      when operation.isTextObject()
+        if (mode in ['visual', 'normal'])
+          operation = @select.setTarget(operation)
+      when operation.isMotion()
+        if (mode is 'visual')
+          operation = @select.setTarget(operation)
+    operation
+
   run: (klass, properties) ->
     klass = Base.getClass(klass) if _.isString(klass)
     try
@@ -29,20 +43,7 @@ class OperationStack
       if (@peekTop()?.constructor is klass)
         klass = Base.getClass('MoveToRelativeLine')
 
-      operation = new klass(@vimState, properties)
-      if @vimState.isMode('visual')
-        switch
-          when operation.isOperator()
-            operation.setTarget(@currentSelection)
-          when operation.isMotion(), operation.isTextObject()
-            operation = @select.setTarget(operation)
-        @stack.push(operation)
-      else if @isEmpty() and operation.isTextObject()
-        # when TextObject invoked directly
-        @stack.push(@select.setTarget(operation))
-      else
-        @stack.push(operation)
-
+      @stack.push @composeOperation(new klass(@vimState, properties))
       @processing = true
       @process()
     catch error
@@ -89,7 +90,7 @@ class OperationStack
       @finish()
 
   cancel: ->
-    unless @vimState.isMode('visual') or @vimState.isMode('insert')
+    if @vimState.mode not in ['visual', 'insert']
       @vimState.activate('reset')
     @finish()
 
