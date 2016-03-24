@@ -122,9 +122,23 @@ describe "Visual Blockwise", ->
       selectBlockwise()
     it "change-to-last-character-of-line for each selection", ->
       ensure 'C',
-        text: textAfterDeleted
-        cursor: [2, 5]
         mode: 'insert'
+        cursor: [[2, 5], [3, 5], [4, 5], [5, 5] ]
+        text: textAfterDeleted
+
+      editor.insertText("!!!")
+      ensure
+        mode: 'insert'
+        cursor: [[2, 8], [3, 8], [4, 8], [5, 8]]
+        text: """
+          01234567890123456789
+          1-------------------
+          2----!!!
+          3----!!!
+          4----!!!
+          5----!!!
+          6-------------------
+          """
 
   describe "D", ->
     beforeEach ->

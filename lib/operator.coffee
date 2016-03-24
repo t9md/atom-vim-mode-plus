@@ -185,6 +185,22 @@ class DeleteLeft extends Delete
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
   target: 'MoveToLastCharacterOfLine'
+  initialize: ->
+    if @isVisualBlockwise = @isMode('visual', 'blockwise')
+      @requireTarget = false
+
+  execute: ->
+    if @isVisualBlockwise
+      pointByBlockwiseSelection = new Map
+      @vimState.getBlockwiseSelections().forEach (bs) ->
+        bs.setPositionForSelections('start')
+        pointByBlockwiseSelection.set(bs, bs.getTop().getHeadBufferPosition())
+
+    super
+
+    if @isVisualBlockwise
+      pointByBlockwiseSelection.forEach (point, bs) ->
+        bs.setBufferPosition(point)
 
 # -------------------------
 class TransformString extends Operator
@@ -930,7 +946,6 @@ class Replace extends Operator
   flashTarget: false
   trackChange: true
   requireInput: true
-  requireTarget: false
 
   initialize: ->
     @setTarget @new('MoveRight') if @isMode('normal')
@@ -1038,6 +1053,19 @@ class InsertAtLastInsert extends ActivateInsertMode
       @editor.scrollToCursorPosition({center: true})
     super
 
+class InsertAtStartOfSelection extends ActivateInsertMode
+  @extend()
+  which: 'start'
+  execute: ->
+    if @isMode('visual', 'blockwise')
+      @vimState.getBlockwiseSelections().forEach (bs) =>
+        bs.setPositionForSelections(@which)
+    super
+
+class InsertAtEndOfSelection extends InsertAtStartOfSelection
+  @extend()
+  which: 'end'
+
 class ActivateReplaceMode extends ActivateInsertMode
   @extend()
   finalSubmode: 'replace'
@@ -1141,3 +1169,14 @@ class SubstituteLine extends Change
 class ChangeToLastCharacterOfLine extends Change
   @extend()
   target: 'MoveToLastCharacterOfLine'
+
+  initialize: ->
+    if @isVisualBlockwise = @isMode('visual', 'blockwise')
+      @requireTarget = false
+    super
+
+  execute: ->
+    if @isVisualBlockwise
+      @vimState.getBlockwiseSelections().forEach (bs) ->
+        bs.setPositionForSelections('start')
+    super
