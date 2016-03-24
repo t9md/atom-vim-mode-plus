@@ -11,6 +11,16 @@ settings = require './settings'
 packageScope = 'vim-mode-plus'
 getEditorState = null
 
+getParent = (obj) ->
+  obj.__super__?.constructor
+
+getAncestors = (obj) ->
+  ancestors = []
+  ancestors.push (current=obj)
+  while current = getParent(current)
+    ancestors.push current
+  ancestors
+
 class Developer
   init: (service) ->
     {getEditorState} = service
@@ -101,14 +111,27 @@ class Developer
 
   reportCommandsHaveNoDefaultKeymap: ->
     packPath = atom.packages.resolvePackagePath('vim-mode-plus')
-    path.join(packPath, "keymaps", )
+    commands = (
+      for name, klass of Base.getRegistries() when klass.isCommand()
+        kind = getAncestors(klass).map((k) -> k.name)[-2..-2][0]
+        commandName = klass.getCommandName()
+        description = klass.getDesctiption()
+        {name, commandName, kind, description}
+    )
+    commandsHaveNoKeymap = commands.filter (command) ->
+      not getKeyBindingForCommand(command.commandName)
 
-    commandNames = (klass.getCommandName() for __, klass of Base.getRegistries() when klass.isCommand())
-    commandNames = commandNames.filter (commandName) ->
-      not getKeyBindingForCommand(commandName)
+    report = [
+      "| Kind | Command | Description |"
+      "|:-----|:--------|:------------|"
+    ]
+    for {commandName, kind, description} in commandsHaveNoKeymap
+      commandName = commandName.replace(/vim-mode-plus:/, '')
+      description ?= ""
+      report.push "| #{kind} | #{commandName} | #{description} |"
 
     atom.workspace.open().then (editor) ->
-      editor.setText commandNames.join("\n")
+      editor.setText report.join("\n")
 
   openInVim: ->
     editor = atom.workspace.getActiveTextEditor()
@@ -122,6 +145,7 @@ class Developer
       excludeProperties: [
         'getClass', 'extend', 'getParent', 'getAncestors', 'isCommand'
         'getRegistries', 'command', 'reset'
+        'getDesctiption', 'description'
         'init', 'getCommandName', 'getCommandScope', 'registerCommand',
         'delegatesProperties', 'subscriptions', 'commandPrefix', 'commandScope'
         'delegatesMethods',

@@ -95,9 +95,11 @@ class SmartWord extends Word
     swrap(selection).setBufferRangeSafely range
 
 class ASmartWord extends SmartWord
+  @description: "A word that consists of alphanumeric chars(`/[A-Za-z0-9_]/`) and hyphen `-`"
   @extend()
 
 class InnerSmartWord extends SmartWord
+  @description: "Currently No diff from `a-smart-word`"
   @extend()
 
 # -------------------------
@@ -287,6 +289,7 @@ class InnerAnyPair extends AnyPair
 # -------------------------
 class AnyPairAllowForwarding extends AnyPair
   @extend(false)
+  @description: "Range surrounded by auto-detected paired chars from enclosed and forwarding area"
   allowForwarding: true
   allowNextLine: false
   skipEmptyPair: false

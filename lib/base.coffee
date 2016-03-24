@@ -230,6 +230,13 @@ class Base
   @getCommandScope: ->
     @commandScope
 
+  @description
+  @getDesctiption: ->
+    if @hasOwnProperty("description")
+      @description
+    else
+      null
+
   @registerCommand: ->
     atom.commands.add(@getCommandScope(), @getCommandName(), => run(this))
 

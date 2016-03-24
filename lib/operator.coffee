@@ -150,6 +150,7 @@ class Select extends Operator
 
 class SelectLatestChange extends Select
   @extend()
+  @description: "Select latest yanked or changed range"
   target: 'ALatestChange'
 
 # -------------------------
@@ -248,6 +249,7 @@ class CamelCase extends TransformString
 
 class SnakeCase extends TransformString
   @extend()
+  @description: "CamelCase -> camel_case"
   displayName: 'Underscore _'
   hover: icon: ':snake-case:', emoji: ':snake:'
   getNewText: (text) ->
@@ -262,12 +264,14 @@ class DashCase extends TransformString
 
 class TitleCase extends TransformString
   @extend()
+  @description: "CamelCase -> Camel Case"
   displayName: 'Titlize'
   getNewText: (text) ->
     _.humanizeEventName(_.dasherize(text))
 
 class EncodeUriComponent extends TransformString
   @extend()
+  @description: "URI encode string"
   displayName: 'Encode URI Component %'
   hover: icon: 'encodeURI', emoji: 'encodeURI'
   getNewText: (text) ->
@@ -275,6 +279,7 @@ class EncodeUriComponent extends TransformString
 
 class DecodeUriComponent extends TransformString
   @extend()
+  @description: "Decode URL encoded string"
   displayName: 'Decode URI Component %%'
   hover: icon: 'decodeURI', emoji: 'decodeURI'
   getNewText: (text) ->
@@ -351,6 +356,7 @@ class TransformStringByExternalCommand extends TransformString
 # -------------------------
 class TransformStringBySelectList extends Operator
   @extend()
+  @description: "Transform string by specified oprator selected from select-list"
   requireInput: true
   requireTarget: true
   # Member of transformers can be either of
@@ -400,11 +406,13 @@ class TransformWordBySelectList extends TransformStringBySelectList
 
 class TransformSmartWordBySelectList extends TransformStringBySelectList
   @extend()
+  @description: "Transform InnerSmartWord by `transform-string-by-select-list`"
   target: "InnerSmartWord"
 
 # -------------------------
 class ReplaceWithRegister extends TransformString
   @extend()
+  @description: "Replace target with specified register value"
   hover: icon: ':replace-with-register:', emoji: ':pencil:'
   getNewText: (text) ->
     @vimState.register.getText()
@@ -412,6 +420,7 @@ class ReplaceWithRegister extends TransformString
 # Save text to register before replace
 class SwapWithRegister extends TransformString
   @extend()
+  @description: "Swap register value with target"
   getNewText: (text, selection) ->
     newText = @vimState.register.getText()
     @setTextToRegister(text, selection)
@@ -455,6 +464,7 @@ class ToggleLineComments extends TransformString
 # -------------------------
 class Surround extends TransformString
   @extend()
+  @description: "Surround target by specified character like `(`, `[`, `\"`"
   displayName: "Surround ()"
   pairs: [
     ['[', ']']
@@ -507,14 +517,17 @@ class Surround extends TransformString
 
 class SurroundWord extends Surround
   @extend()
+  @description: "Surround **word**"
   target: 'InnerWord'
 
 class SurroundSmartWord extends Surround
   @extend()
+  @description: "Surround **smart-word**"
   target: 'InnerSmartWord'
 
 class MapSurround extends Surround
   @extend()
+  @description: "Surround each word(/\w+/) within target"
   mapRegExp: /\w+/g
   execute: ->
     @eachSelection (selection) =>
@@ -526,6 +539,7 @@ class MapSurround extends Surround
 
 class DeleteSurround extends Surround
   @extend()
+  @description: "Delete specified surround character like `(`, `[`, `\"`"
   pairChars: ['[]', '()', '{}'].join('')
   requireTarget: false
 
@@ -549,15 +563,18 @@ class DeleteSurround extends Surround
 
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
+  @description: "Delete surround character by auto-detect paired char from cursor enclosed pair"
   requireInput: false
   target: 'AAnyPair'
 
 class DeleteSurroundAnyPairAllowForwarding extends DeleteSurroundAnyPair
   @extend()
+  @description: "Delete surround character by auto-detect paired char from cursor enclosed pair and forwarding pair within same line"
   target: 'AAnyPairAllowForwarding'
 
 class ChangeSurround extends DeleteSurround
   @extend()
+  @description: "Change surround character, specify both from and to pair char"
   charsMax: 2
   char: null
 
@@ -572,6 +589,7 @@ class ChangeSurround extends DeleteSurround
 
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
+  @description: "Change surround character, from char is auto-detected"
   charsMax: 1
   target: "AAnyPair"
 
@@ -593,6 +611,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
 class ChangeSurroundAnyPairAllowForwarding extends ChangeSurroundAnyPair
   @extend()
+  @description: "Change surround character, from char is auto-detected from enclosed and forwarding area"
   target: "AAnyPairAllowForwarding"
 
 # -------------------------
@@ -652,6 +671,7 @@ class JoinWithKeepingSpace extends TransformString
 
 class JoinByInput extends JoinWithKeepingSpace
   @extend()
+  @description: "Transform multi-line to single-line by with specified separator character"
   hover: icon: ':join:', emoji: ':couple:'
   requireInput: true
   input: null
@@ -664,6 +684,7 @@ class JoinByInput extends JoinWithKeepingSpace
     rows.join(" #{@input} ")
 
 class JoinByInputWithKeepingSpace extends JoinByInput
+  @description: "Join lines without padding space between each line"
   @extend()
   trim: false
   join: (rows) ->
@@ -673,6 +694,7 @@ class JoinByInputWithKeepingSpace extends JoinByInput
 # String suffix in name is to avoid confusion with 'split' window.
 class SplitString extends TransformString
   @extend()
+  @description: "Split single-line into multi-line by splitting specified separator chars"
   hover: icon: ':split-string:', emoji: ':hocho:'
   requireInput: true
   input: null
@@ -689,6 +711,7 @@ class SplitString extends TransformString
 
 class Reverse extends TransformString
   @extend()
+  @description: "Reverse lines(e.g reverse selected three line)"
   mutate: (selection) ->
     swrap(selection).expandOverLine()
     textForRows = swrap(selection).lineTextForBufferRows()
@@ -890,10 +913,12 @@ class PutAfter extends PutBefore
 
 class PutBeforeAndSelect extends PutBefore
   @extend()
+  @description: "Paste before then select"
   selectPastedText: true
 
 class PutAfterAndSelect extends PutAfter
   @extend()
+  @description: "Paste after then select"
   selectPastedText: true
 
 # Replace
@@ -1044,6 +1069,7 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
 
 class InsertByMotion extends ActivateInsertMode
   @extend()
+  @description: "Move by specified motion then enter insert-mode(`i`)"
   requireTarget: true
   execute: ->
     if @target.isMotion()
@@ -1053,14 +1079,17 @@ class InsertByMotion extends ActivateInsertMode
     super
 
 class InsertAfterByMotion extends InsertByMotion
+  @description: "Move by specified motion then enter insert-mode(`a`)"
   @extend()
 
 class InsertAtPreviousFoldStart extends InsertByMotion
   @extend()
+  @description: "Move to previous fold start then enter insert-mode"
   target: 'MoveToPreviousFoldStart'
 
 class InsertAtNextFoldStart extends InsertAtPreviousFoldStart
   @extend()
+  @description: "Move to next fold start then enter insert-mode"
   target: 'MoveToNextFoldStart'
 
 class InsertAboveWithNewline extends ActivateInsertMode

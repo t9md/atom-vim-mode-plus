@@ -212,6 +212,7 @@ class MoveDown extends MoveUp
 # -------------------------
 class MoveUpToNonBlank extends Motion
   @extend()
+  @description: "Move cursor up to non-blank char at same-column"
   linewise: true
   direction: 'up'
 
@@ -245,6 +246,7 @@ class MoveUpToNonBlank extends Motion
 
 class MoveDownToNonBlank extends MoveUpToNonBlank
   @extend()
+  @description: "Move cursor down to non-blank char at same-column"
   direction: 'down'
 
 # Move down/up to Edge
@@ -252,6 +254,7 @@ class MoveDownToNonBlank extends MoveUpToNonBlank
 class MoveUpToEdge extends MoveUpToNonBlank
   @extend()
   direction: 'up'
+  @description: "Move cursor up to **edge** char at same-column"
   isMovablePoint: (point) ->
     if @isStoppablePoint(point)
       # first and last row is always edge.
@@ -290,6 +293,7 @@ class MoveUpToEdge extends MoveUpToNonBlank
 
 class MoveDownToEdge extends MoveUpToEdge
   @extend()
+  @description: "Move cursor down to **edge** char at same-column"
   direction: 'down'
 
 # word
@@ -383,14 +387,17 @@ class MoveToEndOfWholeWord extends MoveToEndOfWord
 # -------------------------
 class MoveToNextAlphanumericWord extends MoveToNextWord
   @extend()
+  @description: "Move to next alphanumeric(`/\w+/`) word"
   wordRegex: /\w+/
 
 class MoveToPreviousAlphanumericWord extends MoveToPreviousWord
   @extend()
+  @description: "Move to previous alphanumeric(`/\w+/`) word"
   wordRegex: /\w+/
 
 class MoveToEndOfAlphanumericWord extends MoveToEndOfWord
   @extend()
+  @description: "Move to end of alphanumeric(`/\w+/`) word"
   wordRegex: /\w+/
 
 # Paragraph
@@ -995,6 +1002,7 @@ class RepeatSearchReverse extends RepeatSearch
 # -------------------------
 class MoveToPreviousFoldStart extends Motion
   @extend()
+  @description: "Move to previous fold start"
   linewise: true
   which: 'start'
   direction: 'prev'
@@ -1026,10 +1034,12 @@ class MoveToPreviousFoldStart extends Motion
 
 class MoveToNextFoldStart extends MoveToPreviousFoldStart
   @extend()
+  @description: "Move to next fold start"
   direction: 'next'
 
 class MoveToPreviousFoldStartWithSameIndent extends MoveToPreviousFoldStart
   @extend()
+  @description: "Move to previous same-indented fold start"
   detectRow: (cursor) ->
     baseIndentLevel = getIndentLevelForBufferRow(@editor, cursor.getBufferRow())
     for row in @getScanRows(cursor)
@@ -1039,19 +1049,23 @@ class MoveToPreviousFoldStartWithSameIndent extends MoveToPreviousFoldStart
 
 class MoveToNextFoldStartWithSameIndent extends MoveToPreviousFoldStartWithSameIndent
   @extend()
+  @description: "Move to next same-indented fold start"
   direction: 'next'
 
 class MoveToPreviousFoldEnd extends MoveToPreviousFoldStart
   @extend()
+  @description: "Move to previous fold end"
   which: 'end'
 
 class MoveToNextFoldEnd extends MoveToPreviousFoldEnd
   @extend()
+  @description: "Move to next fold end"
   direction: 'next'
 
 # -------------------------
 class MoveToPreviousFunction extends MoveToPreviousFoldStart
   @extend()
+  @description: "Move to previous function"
   direction: 'prev'
   detectRow: (cursor) ->
     _.detect @getScanRows(cursor), (row) =>
@@ -1059,6 +1073,7 @@ class MoveToPreviousFunction extends MoveToPreviousFoldStart
 
 class MoveToNextFunction extends MoveToPreviousFunction
   @extend()
+  @description: "Move to next function"
   direction: 'next'
 
 # Scope based
@@ -1076,20 +1091,24 @@ class MoveToPositionByScope extends Motion
 
 class MoveToPreviousString extends MoveToPositionByScope
   @extend()
+  @description: "Move to previous string(searched by `string.begin` scope)"
   direction: 'backward'
   scope: 'string.begin'
 
 class MoveToNextString extends MoveToPreviousString
   @extend()
+  @description: "Move to next string(searched by `string.begin` scope)"
   direction: 'forward'
 
 class MoveToPreviousNumber extends MoveToPositionByScope
   @extend()
   direction: 'backward'
+  @description: "Move to previous number(searched by `constant.numeric` scope)"
   scope: 'constant.numeric'
 
 class MoveToNextNumber extends MoveToPreviousNumber
   @extend()
+  @description: "Move to next number(searched by `constant.numeric` scope)"
   direction: 'forward'
 # -------------------------
 # keymap: %
