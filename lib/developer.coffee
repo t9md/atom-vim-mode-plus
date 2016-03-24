@@ -43,7 +43,10 @@ class Developer
 
       'open-in-vim': => @openInVim()
       'generate-introspection-report': => @generateIntrospectionReport()
-      'report-commands-have-no-default-keymap': => @reportCommandsHaveNoDefaultKeymap()
+      'generate-command-summary-table-for-commands-have-no-default-keymap': =>
+        @generateCommandSummaryTableForCommandsHaveNoDefaultKeymap()
+      'generate-command-summary-table': =>
+        @generateCommandSummaryTable()
       'toggle-dev-environment': => @toggleDevEnvironment()
       'reload-packages': => @reloadPackages()
       'toggle-reload-packages-on-save': => @toggleReloadPackagesOnSave()
@@ -109,29 +112,105 @@ class Developer
     settings.set('debug', not settings.get('debug'))
     console.log "#{settings.scope} debug:", settings.get('debug')
 
-  reportCommandsHaveNoDefaultKeymap: ->
-    packPath = atom.packages.resolvePackagePath('vim-mode-plus')
+  getCommandSpecs: ->
+    compactSelector = (selector) ->
+      selector.split(/,\s*/g).map (scope) ->
+        scope
+          .replace(/atom-text-editor\.vim-mode-plus/, '')
+          .replace(/:not\((.*)\)/, '!$1')
+          .replace(/\.normal-mode/, 'n')
+          .replace(/\.visual-mode\.blockwise/, 'vB')
+          .replace(/\.visual-mode\.linewise/, 'vL')
+          .replace(/\.visual-mode\.characterwise/, 'vC')
+          .replace(/\.visual-mode/, 'v')
+          .replace(/\.insert-mode\.replace/, 'iR')
+          .replace(/\.insert-mode/, 'i')
+          .replace(/\.operator-pending-mode/, 'o')
+      .join(",")
+
+    modifierKeyMap =
+      cmd: '\u2318'
+      ctrl: '\u2303'
+      alt: '\u2325'
+      option: '\u2325'
+      shift: '\u21e7'
+      enter: '\u23ce'
+      left: '\u2190'
+      right: '\u2192'
+      up: '\u2191'
+      down: '\u2193'
+
+    compactKeystrokes = (keystrokes) ->
+      keystrokes
+        .replace(/(`|_)/g, '\\$1')
+        .replace(/ctrl-/, modifierKeyMap["ctrl"])
+        .replace(/down|up|left|right|enter|cmd|option/, (s) -> modifierKeyMap[s])
+        .replace('backspace', 'BS')
+        .replace('space', 'SPC')
+        .replace(/\s+/, '')
+
     commands = (
       for name, klass of Base.getRegistries() when klass.isCommand()
         kind = getAncestors(klass).map((k) -> k.name)[-2..-2][0]
         commandName = klass.getCommandName()
         description = klass.getDesctiption()
-        {name, commandName, kind, description}
-    )
-    commandsHaveNoKeymap = commands.filter (command) ->
-      not getKeyBindingForCommand(command.commandName)
 
-    report = [
-      "| Kind | Command | Description |"
-      "|:-----|:--------|:------------|"
-    ]
-    for {commandName, kind, description} in commandsHaveNoKeymap
-      commandName = commandName.replace(/vim-mode-plus:/, '')
-      description ?= ""
-      report.push "| #{kind} | #{commandName} | #{description} |"
+        keymap = null
+        if keymaps = getKeyBindingForCommand(commandName)
+          keymap = keymaps.map ({keystrokes, selector}) ->
+            "`#{compactSelector(selector)}` <kbd>#{compactKeystrokes(keystrokes)}</kbd>"
+          .join("<br/>")
+
+        # keystrokes<kbd>#{keystrokes}</kbd>"
+
+        {name, commandName, kind, description, keymap}
+    )
+    commands
+
+  kinds = ["Operator", "Motion", "TextObject", "InsertMode", "Misc", "Scroll", "VisualBlockwise"]
+  generateSummaryTableForCommandSpecs: (specs, {header}={}) ->
+    grouped = _.groupBy(specs, 'kind')
+    str = ""
+    for kind in kinds
+      specs = grouped[kind]
+
+      report = [
+        "## #{kind}"
+        ""
+        "| Keymap | Command | Description |"
+        "|:-------|:--------|:------------|"
+      ]
+      for {keymap, commandName, description} in specs
+        commandName = commandName.replace(/vim-mode-plus:/, '')
+        description ?= ""
+        keymap ?= ""
+        report.push "| #{keymap} | `#{commandName}` | #{description} |"
+      str += report.join("\n") + "\n\n"
 
     atom.workspace.open().then (editor) ->
-      editor.setText report.join("\n")
+      editor.insertText(header + "\n") if header?
+      editor.insertText(str)
+
+  generateCommandSummaryTable: ->
+    header = """
+    # Description
+
+    - `!i`: :not(.insert-mode)
+    - `i`: insert-mode
+    - `o`: operator-pending-mode
+    - `n`: normal-mode
+    - `v`: visual-mode
+    - `vB`: visual-mode.blockwise
+    - `vL`: visual-mode.linewise
+    - `vC`: visual-mode.characterwise
+    - `iR`: insert-mode.replace
+
+    """
+    @generateSummaryTableForCommandSpecs(@getCommandSpecs(), {header})
+
+  generateCommandSummaryTableForCommandsHaveNoDefaultKeymap: ->
+    commands = @getCommandSpecs().filter (command) -> not getKeyBindingForCommand(command.commandName)
+    @generateSummaryTableForCommandSpecs(commands)
 
   openInVim: ->
     editor = atom.workspace.getActiveTextEditor()
