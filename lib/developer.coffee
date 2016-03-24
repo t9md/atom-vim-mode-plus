@@ -11,6 +11,20 @@ settings = require './settings'
 packageScope = 'vim-mode-plus'
 getEditorState = null
 
+# Borrowed from underscore-plus
+modifierKeyMap =
+  cmd: '\u2318'
+  ctrl: '\u2303'
+  alt: '\u2325'
+  option: '\u2325'
+  shift: '\u21e7'
+  enter: '\u23ce'
+  left: '\u2190'
+  right: '\u2192'
+  up: '\u2191'
+  down: '\u2193'
+
+
 getParent = (obj) ->
   obj.__super__?.constructor
 
@@ -128,17 +142,6 @@ class Developer
           .replace(/\.operator-pending-mode/, 'o')
       .join(",")
 
-    modifierKeyMap =
-      cmd: '\u2318'
-      ctrl: '\u2303'
-      alt: '\u2325'
-      option: '\u2325'
-      shift: '\u21e7'
-      enter: '\u23ce'
-      left: '\u2190'
-      right: '\u2192'
-      up: '\u2191'
-      down: '\u2193'
 
     compactKeystrokes = (keystrokes) ->
       keystrokes

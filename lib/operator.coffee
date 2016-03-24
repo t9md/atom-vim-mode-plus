@@ -527,7 +527,7 @@ class SurroundSmartWord extends Surround
 
 class MapSurround extends Surround
   @extend()
-  @description: "Surround each word(/\w+/) within target"
+  @description: "Surround each word(`/\w+/`) within target"
   mapRegExp: /\w+/g
   execute: ->
     @eachSelection (selection) =>
