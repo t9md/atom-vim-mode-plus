@@ -173,4 +173,7 @@ class BlockwiseSelection
   restoreCharacterwise: ->
     @setHeadBufferRange(@getBufferRange(), reversed: @isReversed())
 
+  getSelections: ->
+    @selections
+
 module.exports = BlockwiseSelection
