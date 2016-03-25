@@ -1,21 +1,12 @@
 util = require 'util'
 _ = require 'underscore-plus'
 Base = require './base'
+{getParent, getAncestors, getKeyBindingForCommand} = require './utils'
 
 packageName = 'vim-mode-plus'
 
 extractBetween = (str, s1, s2) ->
   str.substring(str.indexOf(s1)+1, str.lastIndexOf(s2))
-
-getParent = (obj) ->
-  obj.__super__?.constructor
-
-getAncestors = (obj) ->
-  ancestors = []
-  ancestors.push (current=obj)
-  while current = getParent(current)
-    ancestors.push current
-  ancestors
 
 inspectFunction = (fn, name) ->
   # Calling super in the overridden constructor() function.
@@ -152,7 +143,7 @@ generateIntrospectionReport = (klasses, options) ->
     {command, instance, prototype} = result
     if command?
       s.push "- command: `#{command}`"
-      keymaps = getKeyBindingForCommand(command)
+      keymaps = getKeyBindingForCommand(command, packageName: 'vim-mode-plus')
       s.push formatKeymaps(keymaps) if keymaps?
 
     s.push instance if instance?
@@ -198,32 +189,10 @@ inspectInstance = (obj, options={}) ->
   ].filter (e) -> e
   .join('\n').split('\n').map((e) -> indent + e).join('\n')
 
-getPackage = ->
-  atom.packages.getActivePackage(packageName)
-
-keymapsForVimModePlus = null
-getKeyBindings =  ->
-  return keymapsForVimModePlus if keymapsForVimModePlus?
-
-  keymapPath = getPackage().getKeymapPaths().pop()
-  keymapsForVimModePlus =
-    (k for k in atom.keymaps.getKeyBindings() when k.source is keymapPath)
-  keymapsForVimModePlus
-
 getCommandFromClass = (klass) ->
   if klass.isCommand() then klass.getCommandName() else null
 
-getKeyBindingForCommand = (command) ->
-  results = null
-  for keymap in getKeyBindings() when keymap.command is command
-    {keystrokes, selector} = keymap
-    keystrokes = keystrokes.replace(/shift-/, '')
-    results ?= []
-    results.push {keystrokes, selector}
-  results
-
 module.exports = {
   generateIntrospectionReport
-  getKeyBindingForCommand
   inspectInstance
 }

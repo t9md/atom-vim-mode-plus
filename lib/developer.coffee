@@ -3,22 +3,12 @@ path = require 'path'
 {Emitter, Disposable, BufferedProcess, CompositeDisposable} = require 'atom'
 
 Base = require './base'
-{generateIntrospectionReport, getKeyBindingForCommand} = require './introspection'
+{generateIntrospectionReport} = require './introspection'
 settings = require './settings'
-{debug} = require './utils'
+{debug, getParent, getAncestors, getKeyBindingForCommand} = require './utils'
 
 packageScope = 'vim-mode-plus'
 getEditorState = null
-
-getParent = (obj) ->
-  obj.__super__?.constructor
-
-getAncestors = (obj) ->
-  ancestors = []
-  ancestors.push (current=obj)
-  while current = getParent(current)
-    ancestors.push current
-  ancestors
 
 class Developer
   init: (service) ->
@@ -161,7 +151,7 @@ class Developer
         description = klass.getDesctiption()?.replace(/\n/g, '<br/>')
 
         keymap = null
-        if keymaps = getKeyBindingForCommand(commandName)
+        if keymaps = getKeyBindingForCommand(commandName, packageName: "vim-mode-plus")
           keymap = keymaps.map ({keystrokes, selector}) ->
             "`#{compactSelector(selector)}` <kbd>#{compactKeystrokes(keystrokes)}</kbd>"
           .join("<br/>")
@@ -216,7 +206,7 @@ class Developer
     @generateSummaryTableForCommandSpecs(@getCommandSpecs(), {header})
 
   generateCommandSummaryTableForCommandsHaveNoDefaultKeymap: ->
-    commands = @getCommandSpecs().filter (command) -> not getKeyBindingForCommand(command.commandName)
+    commands = @getCommandSpecs().filter (command) -> not getKeyBindingForCommand(command.commandName, packageName: 'vim-mode-plus')
     @generateSummaryTableForCommandSpecs(commands)
 
   openInVim: ->

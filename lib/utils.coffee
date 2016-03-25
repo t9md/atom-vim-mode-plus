@@ -5,6 +5,29 @@ settings = require './settings'
 {Range, Point} = require 'atom'
 _ = require 'underscore-plus'
 
+getParent = (obj) ->
+  obj.__super__?.constructor
+
+getAncestors = (obj) ->
+  ancestors = []
+  ancestors.push (current=obj)
+  while current = getParent(current)
+    ancestors.push current
+  ancestors
+
+getKeyBindingForCommand = (command, {packageName}) ->
+  results = null
+  keymaps = atom.keymaps.getKeyBindings()
+  if packageName?
+    keymapPath = atom.packages.getActivePackage(packageName).getKeymapPaths().pop()
+    keymaps = keymaps.filter ({source}) -> source is keymapPath
+
+  for keymap in keymaps when keymap.command is command
+    {keystrokes, selector} = keymap
+    keystrokes = keystrokes.replace(/shift-/, '')
+    (results ?= []).push({keystrokes, selector})
+  results
+
 # Include module(object which normaly provides set of methods) to klass
 include = (klass, module) ->
   for key, value of module
@@ -588,6 +611,9 @@ ElementBuilder =
     element
 
 module.exports = {
+  getParent
+  getAncestors
+  getKeyBindingForCommand
   include
   debug
   getNonBlankCharPositionForRow
