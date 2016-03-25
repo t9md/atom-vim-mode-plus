@@ -1,4 +1,3 @@
-# Refactoring status: 100%
 fs = require 'fs-plus'
 semver = require 'semver'
 settings = require './settings'

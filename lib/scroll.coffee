@@ -1,4 +1,3 @@
-# Refactoring status: 100%
 Base = require './base'
 
 class Scroll extends Base

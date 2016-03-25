@@ -1,4 +1,3 @@
-# Refactoring status: 95%
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 Base = require './base'

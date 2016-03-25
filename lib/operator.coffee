@@ -1,5 +1,3 @@
-# Libraries
-# -------------------------
 LineEndingRegExp = /(?:\n|\r\n)$/
 
 _ = require 'underscore-plus'

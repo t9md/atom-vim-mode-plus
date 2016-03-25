@@ -1,4 +1,3 @@
-# Refactoring status: 80%
 {Disposable, CompositeDisposable} = require 'atom'
 {ElementBuilder} = require './utils'
 

@@ -1,4 +1,3 @@
-# Refactoring status: 100%
 module.exports =
   searchHistory: []
   currentSearch: null

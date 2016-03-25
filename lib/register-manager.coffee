@@ -1,4 +1,3 @@
-# Refactoring status: 100%
 globalState = require './global-state'
 settings = require './settings'
 

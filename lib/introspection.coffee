@@ -1,4 +1,3 @@
-# Refactoring status: N/A
 util = require 'util'
 _ = require 'underscore-plus'
 Base = require './base'

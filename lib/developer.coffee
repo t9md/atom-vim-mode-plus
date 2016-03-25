@@ -1,4 +1,3 @@
-# Refactoring status: N/A
 _ = require 'underscore-plus'
 path = require 'path'
 {Emitter, Disposable, BufferedProcess, CompositeDisposable} = require 'atom'
