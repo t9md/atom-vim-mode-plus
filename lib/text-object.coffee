@@ -17,7 +17,7 @@ class TextObject extends Base
   allowSubmodeChange: true
 
   constructor: ->
-    @constructor::inner = @constructor.name.startsWith('Inner')
+    @constructor::inner = @getName().startsWith('Inner')
     super
     @initialize?()
 

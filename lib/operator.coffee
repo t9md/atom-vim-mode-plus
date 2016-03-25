@@ -36,7 +36,7 @@ class Operator extends Base
 
   needFlash: ->
     if @flashTarget and settings.get('flashOnOperate')
-      not (@constructor.name in settings.get('flashOnOperateBlacklist'))
+      @getName() not in settings.get('flashOnOperateBlacklist')
     else
       false
 
@@ -50,7 +50,7 @@ class Operator extends Base
     param = if @instanceof('TransformString')
       "stayOnTransformString"
     else
-      "stayOn#{@constructor.name}"
+      "stayOn#{@getName()}"
     settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
 
   constructor: ->
@@ -91,10 +91,7 @@ class Operator extends Base
   setTarget: (@target) ->
     unless _.isFunction(@target.select)
       @vimState.emitter.emit('did-fail-to-set-target')
-      targetName = @target.constructor.name
-      operatorName = @constructor.name
-      message = "Failed to set '#{targetName}' as target for Operator '#{operatorName}'"
-      throw new OperatorError(message)
+      throw new OperatorError("#{@getName()} cannot set #{@target.getName()} as target")
     @target.setOperator(this)
     @emitDidSetTarget(this)
     this

@@ -135,7 +135,7 @@ class CurrentSelection extends Motion
   selectionExtent: null
 
   execute: ->
-    throw new Error("#{@constructor.name} should not be executed")
+    throw new Error("#{@getName()} should not be executed")
 
   select: ->
     if @isMode('visual')

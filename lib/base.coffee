@@ -166,8 +166,11 @@ class Base
   directInstanceof: (klassName) ->
     this.constructor is Base.getClass(klassName)
 
+  getName: ->
+    @constructor.name
+
   toString: ->
-    str = @constructor.name
+    str = @getName()
     str += ", target=#{@getTarget().toString()}" if @hasTarget()
     str
 
