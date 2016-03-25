@@ -196,6 +196,7 @@ getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
       break
 
   if IsSupportPatch
+    return null unless Patch?
     changes = changes.filter (change) -> change instanceof Patch
     getNewTextRangeFromPaches(changes)
   else
