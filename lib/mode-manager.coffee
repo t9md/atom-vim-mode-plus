@@ -2,7 +2,6 @@
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 Base = require './base'
-BlockwiseSelection = require './blockwise-selection'
 swrap = require './selection-wrapper'
 {moveCursorLeft} = require './utils'
 settings = require './settings'
@@ -112,9 +111,9 @@ class ModeManager
   # Visual
   # -------------------------
   activateVisualMode: (submode) ->
-    # If submode shift within visual mode, we first restore characterwise range
-    # At this phase @submode is not yet updated to requested submode.
     if @submode?
+      # If submode shift within visual mode, we first restore characterwise range
+      # At this phase @submode is not yet updated to requested submode.
       @restoreCharacterwiseRange()
     else
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
@@ -129,7 +128,7 @@ class ModeManager
       when 'blockwise'
         unless swrap(@editor.getLastSelection()).isLinewise()
           for selection in @editor.getSelections()
-            @vimState.addBlockwiseSelection(new BlockwiseSelection(selection))
+            @vimState.addBlockwiseSelectionFromSelection(selection)
 
     new Disposable =>
       @restoreCharacterwiseRange()
