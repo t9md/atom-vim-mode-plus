@@ -1,3 +1,10 @@
+# 0.28.0
+- Internal: Each command class can answer its description.
+- Internal: Generate summary table for all commands.
+- Internal: Remove VisualBlockwise class #210.
+- Improve: `c` on visual-blockwise now keep multi-cursors.
+- Fix: null guard in case Patch is not yet available for >=Atom v1.7.0-beta0
+
 # 0.27.0
 - Internal: Refactoring many parts(Search, MatchList, ModeManager, OperationStack) #200
 - Improve: Support upcoming Atom 1.7+ text-buffer change #206, #203
