@@ -77,7 +77,7 @@ class Operator extends Base
 
     if @needFlash()
       @onDidSelectTarget =>
-        @flash @editor.getSelectedBufferRanges()
+        @flash(@editor.getSelectedBufferRanges())
 
     if @needTrackChange()
       marker = null
@@ -115,10 +115,9 @@ class Operator extends Base
       @vimState.register.set({text, selection})
 
   flash: (ranges) ->
-    if @flashTarget and settings.get('flashOnOperate')
-      highlightRanges @editor, ranges,
-        class: 'vim-mode-plus-flash'
-        timeout: settings.get('flashOnOperateDuration')
+    highlightRanges @editor, ranges,
+      class: 'vim-mode-plus-flash'
+      timeout: settings.get('flashOnOperateDuration')
 
   eachSelection: (fn) ->
     return unless @selectTarget()
@@ -781,7 +780,7 @@ class Increase extends Operator
         newRanges.push ranges
 
     if (newRanges = _.flatten(newRanges)).length
-      @flash newRanges
+      @flash(newRanges) if @needFlash()
     else
       atom.beep()
 
@@ -816,7 +815,7 @@ class IncrementNumber extends Operator
       newRanges = for selection in @editor.getSelectionsOrderedByBufferPosition()
         @replaceNumber(selection.getBufferRange(), pattern)
     if (newRanges = _.flatten(newRanges)).length
-      @flash newRanges
+      @flash(newRanges) if @needFlash()
     else
       atom.beep()
     for selection in @editor.getSelections()
@@ -860,7 +859,7 @@ class PutBefore extends Operator
           linewise: (type is 'linewise') or @isMode('visual', 'linewise')
           select: @selectPastedText
         @setMarkForChange(newRange)
-        @flash newRange
+        @flash(newRanges) if @needFlash()
 
     if @selectPastedText# and haveSomeSelection(@editor)
       submode = swrap.detectVisualModeSubmode(@editor)
