@@ -109,8 +109,7 @@ class Base
 
   addHover: (text, {replace}={}) ->
     if settings.get('showHoverOnOperate')
-      replace ?= false
-      if replace
+      if replace ?= false
         @vimState.hover.replaceLastSection(text)
       else
         @vimState.hover.add(text)
@@ -169,9 +168,7 @@ class Base
 
   toString: ->
     str = @constructor.name
-    if @hasTarget()
-      targetName = @getTarget().constructor.name if @hasTarget()
-      str += ", target=#{targetName}"
+    str += ", target=#{@getTarget().toString()}" if @hasTarget()
     str
 
   emitWillSelectTarget: ->

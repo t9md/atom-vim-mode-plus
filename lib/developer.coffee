@@ -160,7 +160,7 @@ class Developer
     )
     commands
 
-  kinds = ["Operator", "Motion", "TextObject", "InsertMode", "Misc", "Scroll", "VisualBlockwise"]
+  kinds = ["Operator", "Motion", "TextObject", "InsertMode", "MiscCommand", "Scroll", "VisualBlockwise"]
   generateSummaryTableForCommandSpecs: (specs, {header}={}) ->
     grouped = _.groupBy(specs, 'kind')
     str = ""

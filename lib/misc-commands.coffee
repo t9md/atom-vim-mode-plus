@@ -11,13 +11,13 @@ _ = require 'underscore-plus'
   highlightRanges
 } = require './utils'
 
-class Misc extends Base
+class MiscCommand extends Base
   @extend(false)
   constructor: ->
     super
     @initialize?()
 
-class ReverseSelections extends Misc
+class ReverseSelections extends MiscCommand
   @extend()
   execute: ->
     # FIXME? need to care
@@ -32,7 +32,7 @@ class BlockwiseOtherEnd extends ReverseSelections
       bs.reverse()
     super
 
-class Undo extends Misc
+class Undo extends MiscCommand
   @extend()
 
   saveRangeAsMarker: (markers, range) ->
@@ -112,13 +112,13 @@ class Redo extends Undo
   mutate: ->
     @editor.redo()
 
-class ToggleFold extends Misc
+class ToggleFold extends MiscCommand
   @extend()
   execute: ->
     point = @editor.getCursorBufferPosition()
     @editor.toggleFoldAtBufferRow(point.row)
 
-class ReplaceModeBackspace extends Misc
+class ReplaceModeBackspace extends MiscCommand
   @commandScope: 'atom-text-editor.vim-mode-plus.insert-mode.replace'
   @extend()
   execute: ->
@@ -130,7 +130,7 @@ class ReplaceModeBackspace extends Misc
         unless selection.insertText(char).isEmpty()
           selection.cursor.moveLeft()
 
-class MaximizePane extends Misc
+class MaximizePane extends MiscCommand
   @extend()
   execute: ->
     selector = 'vim-mode-plus-pane-maximized'
