@@ -859,7 +859,7 @@ class PutBefore extends Operator
           linewise: (type is 'linewise') or @isMode('visual', 'linewise')
           select: @selectPastedText
         @setMarkForChange(newRange)
-        @flash(newRanges) if @needFlash()
+        @flash(newRange) if @needFlash()
 
     if @selectPastedText# and haveSomeSelection(@editor)
       submode = swrap.detectVisualModeSubmode(@editor)
