@@ -78,7 +78,7 @@ class Base
     @hasOperator() and not @getOperator().instanceof('Select')
 
   abort: ->
-    throw new OperationAbortedError('Aborted')
+    throw new OperationAbortedError()
 
   # Count
   # -------------------------

@@ -62,45 +62,41 @@ class OperationStack
     if @stack.length > 2
       throw new Error('Operation stack must not exceeds 2 length')
 
-    if @stack.length > 1
-      try
-        operation = @stack.pop()
-        @peekTop().setTarget(operation)
-      catch error
-        if error.instanceof?('OperatorError')
-          @vimState.activate('reset')
-          return
-        else
-          throw error
+    try
+      @reduce()
+      if @peekTop().isComplete()
+        @execute(@stack.pop())
+      else
+        if @vimState.isMode('normal') and @peekTop().isOperator()
+          @vimState.activate('operator-pending')
+    catch error
+      if error.instanceof?('OperatorError')
+        @vimState.activate('reset')
+        return
+      else
+        throw error
 
-    if @peekTop().isComplete()
-      @operation = @stack.pop()
-      @execute()
-    else
-      if @vimState.isMode('normal') and @peekTop().isOperator()
-        @vimState.activate('operator-pending')
-
-  execute: ->
-    execution = @operation.execute()
+  execute: (operation) ->
+    execution = operation.execute()
     if execution instanceof Promise
-      onResolve = @finish.bind(this)
+      onResolve = @finish.bind(this, [operation])
       onReject = @handleError.bind(this)
       execution.then(onResolve).catch(onReject)
     else
-      @finish()
+      @finish(operation)
 
   cancel: ->
     if @vimState.mode not in ['visual', 'insert']
       @vimState.activate('reset')
     @finish()
 
-  finish: ->
-    @record(@operation) if @operation?.isRecordable()
+  finish: (operation) ->
+    @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit 'did-finish-operation'
     if @vimState.isMode('normal')
       unless @editor.getLastSelection().isEmpty()
         if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
-          throw new Error("Selection is not empty in normal-mode: #{@operation.toString()}")
+          throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
         else
           @editor.clearSelections()
 
@@ -113,9 +109,14 @@ class OperationStack
   peekTop: ->
     _.last @stack
 
+  reduce: ->
+    until @stack.length is 1
+      operation = @stack.pop()
+      _.last(@stack).setTarget(operation)
+
   reset: ->
     @stack = []
-    @operation = null
+    # @operation = null
     @processing = false
     @subscriptions?.dispose()
     @subscriptions = new CompositeDisposable
