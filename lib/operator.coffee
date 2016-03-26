@@ -29,6 +29,8 @@ class Operator extends Base
   flashTarget: true
   trackChange: false
   requireTarget: true
+  finalMode: "normal"
+  finalSubmode: null
 
   setMarkForChange: ({start, end}) ->
     @vimState.mark.set('[', start)
@@ -119,11 +121,16 @@ class Operator extends Base
       class: 'vim-mode-plus-flash'
       timeout: settings.get('flashOnOperateDuration')
 
-  eachSelection: (fn) ->
+  mutateSelections: (fn) ->
     return unless @selectTarget()
     @editor.transact =>
       for selection in @editor.getSelections()
         fn(selection)
+
+  execute: ->
+    @mutateSelections (selection) =>
+      @mutateSelection(selection)
+    @activateMode(@finalMode, @finalSubmode)
 
 # -------------------------
 class Select extends Operator
@@ -154,19 +161,16 @@ class Delete extends Operator
   trackChange: true
   flashTarget: false
 
-  execute: ->
-    @eachSelection (selection) =>
-      {cursor} = selection
-      wasLinewise = swrap(selection).isLinewise()
-      @setTextToRegisterForSelection(selection)
-      selection.deleteSelectedText()
+  mutateSelection: (selection) =>
+    {cursor} = selection
+    wasLinewise = swrap(selection).isLinewise()
+    @setTextToRegisterForSelection(selection)
+    selection.deleteSelectedText()
 
-      vimEof = getVimEofBufferPosition(@editor)
-      if cursor.getBufferPosition().isGreaterThan(vimEof)
-        cursor.setBufferPosition([vimEof.row, 0])
-
-      cursor.skipLeadingWhitespace() if wasLinewise
-    @activateMode('normal')
+    vimEof = getVimEofBufferPosition(@editor)
+    if cursor.getBufferPosition().isGreaterThan(vimEof)
+      cursor.setBufferPosition([vimEof.row, 0])
+    cursor.skipLeadingWhitespace() if wasLinewise
 
 class DeleteRight extends Delete
   @extend()
@@ -204,12 +208,7 @@ class TransformString extends Operator
   setPoint: true
   autoIndent: false
 
-  execute: ->
-    @eachSelection (selection) =>
-      @mutate(selection)
-    @activateMode('normal')
-
-  mutate: (selection) ->
+  mutateSelection: (selection) ->
     text = @getNewText(selection.getText(), selection)
     selection.insertText(text, {@autoIndent})
     @restorePoint(selection) if @setPoint
@@ -442,7 +441,7 @@ class Indent extends TransformString
   hover: icon: ':indent:', emoji: ':point_right:'
   stayOnLinewise: false
 
-  mutate: (selection) ->
+  mutateSelection: (selection) ->
     @indent(selection)
     @restorePoint(selection)
     unless @needStay()
@@ -467,7 +466,7 @@ class AutoIndent extends Indent
 class ToggleLineComments extends TransformString
   @extend()
   hover: icon: ':toggle-line-comments:', emoji: ':mute:'
-  mutate: (selection) ->
+  mutateSelection: (selection) ->
     selection.toggleLineComments()
     @restorePoint(selection)
 
@@ -539,13 +538,12 @@ class MapSurround extends Surround
   @extend()
   @description: "Surround each word(`/\w+/`) within target"
   mapRegExp: /\w+/g
-  execute: ->
-    @eachSelection (selection) =>
-      scanRange = selection.getBufferRange()
-      @editor.scanInBufferRange @mapRegExp, scanRange, ({matchText, replace}) =>
-        replace(@getNewText(matchText))
-      @restorePoint(selection) if @setPoint
-    @activateMode('normal')
+
+  mutateSelection: (selection) ->
+    scanRange = selection.getBufferRange()
+    @editor.scanInBufferRange @mapRegExp, scanRange, ({matchText, replace}) =>
+      replace(@getNewText(matchText))
+    @restorePoint(selection) if @setPoint
 
 class DeleteSurround extends Surround
   @extend()
@@ -614,7 +612,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
     super
 
   onConfirm: (@char) ->
-    # Clear pre-selected selection to start @eachSelection from non-selection.
+    # Clear pre-selected selection to start mutation non-selection.
     @restore(selection) for selection in @editor.getSelections()
     @input = @char
     @processOperation()
@@ -631,14 +629,12 @@ class Yank extends Operator
   trackChange: true
   stayOnLinewise: true
 
-  execute: ->
-    @eachSelection (selection) =>
-      # We need to preserve selection before selection cleared by @restorePoint()
-      if selection.isLastSelection() and @isMode('visual')
-        @vimState.modeManager.preservePreviousSelection(selection)
-      @setTextToRegisterForSelection(selection)
-      @restorePoint(selection)
-    @activateMode('normal')
+  mutateSelection: (selection) ->
+    # We need to preserve selection before selection cleared by @restorePoint()
+    if selection.isLastSelection() and @isMode('visual')
+      @vimState.modeManager.preservePreviousSelection(selection)
+    @setTextToRegisterForSelection(selection)
+    @restorePoint(selection)
 
 class YankLine extends Yank
   @extend()
@@ -665,7 +661,7 @@ class JoinWithKeepingSpace extends TransformString
   initialize: ->
     @setTarget @new("MoveToRelativeLineWithMinimum", {min: 1})
 
-  mutate: (selection) ->
+  mutateSelection: (selection) ->
     [startRow, endRow] = selection.getBufferRowRange()
     swrap(selection).expandOverLine()
     rows = for row in [startRow..endRow]
@@ -722,7 +718,7 @@ class SplitString extends TransformString
 class Reverse extends TransformString
   @extend()
   @description: "Reverse lines(e.g reverse selected three line)"
-  mutate: (selection) ->
+  mutateSelection: (selection) ->
     swrap(selection).expandOverLine()
     textForRows = swrap(selection).lineTextForBufferRows()
     newText = textForRows.reverse().join("\n") + "\n"
@@ -945,9 +941,14 @@ class Replace extends Operator
     @setTarget @new('MoveRight') if @isMode('normal')
     @focusInput()
 
+  getInput: ->
+    input = super
+    input = "\n" if input is ''
+    input
+
   execute: ->
-    @input = "\n" if @input is ''
-    @eachSelection (selection) =>
+    @input = @getInput()
+    @mutateSelections (selection) =>
       text = selection.getText().replace(/./g, @input)
       unless (@target.instanceof('MoveRight') and (text.length < @getCount()))
         selection.insertText(text, autoIndentNewline: true)

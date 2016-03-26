@@ -761,7 +761,7 @@ describe "Motion general", ->
         ensure 'j', cursor: [2, 9]
 
     describe "as a selection", ->
-      it "selects to the beginning of the lines", ->
+      it "selects to the end of the lines", ->
         ensure 'd$',
           text: "  ab\n\n1234567890"
           cursor: [0, 3]
