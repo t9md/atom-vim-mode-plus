@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 Base = require './base'
 {moveCursorLeft} = require './utils'
 settings = require './settings'
-{CurrentSelection, Select} = {}
+{CurrentSelection, Select, MoveToRelativeLine} = {}
 
 class OperationStack
   constructor: (@vimState) ->
@@ -12,6 +12,7 @@ class OperationStack
 
     CurrentSelection ?= Base.getClass('CurrentSelection')
     Select ?= Base.getClass('Select')
+    MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
 
     # [Experimental] Cache for performance
     @currentSelection = new CurrentSelection(@vimState)
@@ -39,12 +40,11 @@ class OperationStack
   run: (klass, properties) ->
     klass = Base.getClass(klass) if _.isString(klass)
     try
-      #  To support, `dd`, `cc` and a like.
-      if (@peekTop()?.constructor is klass)
-        klass = Base.getClass('MoveToRelativeLine')
+      # When identical operator repeated, it set target to MoveToRelativeLine.
+      #  e.g. `dd`, `cc`, `gUgU`
+      klass = MoveToRelativeLine if (@peekTop()?.constructor is klass)
 
       @stack.push @composeOperation(new klass(@vimState, properties))
-      @processing = true
       @process()
     catch error
       @handleError(error)
@@ -58,8 +58,9 @@ class OperationStack
     @processing
 
   process: ->
+    @processing = true
     if @stack.length > 2
-      throw new Error('Operation stack length exceeds 2')
+      throw new Error('Operation stack must not exceeds 2 length')
 
     if @stack.length > 1
       try
