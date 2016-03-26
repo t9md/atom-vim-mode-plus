@@ -116,7 +116,6 @@ class OperationStack
 
   reset: ->
     @stack = []
-    # @operation = null
     @processing = false
     @subscriptions?.dispose()
     @subscriptions = new CompositeDisposable
