@@ -315,35 +315,28 @@ class MoveToNextWord extends Motion
   getPoint: (cursor) ->
     cursorPoint = cursor.getBufferPosition()
     pattern = @wordRegex ? cursor.wordRegExp()
+    scanRange = [[cursorPoint.row, 0], @vimEof]
     point = null
-    @scanWordRange cursorPoint, pattern, ({stop, range}) ->
-      {start, end} = range
-      if end.isGreaterThan(cursorPoint)
-        point = end
-        if start.isGreaterThan(cursorPoint)
-          point = start
-          stop()
-    if point?
-      Point.min(point, @vimEof)
-    else
-      cursorPoint
+    @editor.scanInBufferRange pattern, scanRange, ({stop, range}) ->
+      if range.end.isGreaterThan(cursorPoint)
+        point = range.end
+      if range.start.isGreaterThan(cursorPoint)
+        point = range.start
+        stop()
+    point ? cursorPoint
 
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
-    # cache
-    @vimEof = getVimEofBufferPosition(@editor)
+    @vimEof = getVimEofBufferPosition(@editor) # cache
     lastCount = @getCount()
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
     @countTimes (num) =>
-      isLastCount = (num is lastCount)
-      # cursorPoint = cursor.getBufferPosition()
       cursorRow = cursor.getBufferRow()
-
       if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
         point = [cursorRow+1, 0]
       else
         point = @getPoint(cursor)
-        if isLastCount and @isAsOperatorTarget()
+        if (num is lastCount) and @isAsOperatorTarget()
           if @getOperator().getName() is 'Change' and (not wasOnWhiteSpace)
             point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
           else if (point.row > cursorRow)
