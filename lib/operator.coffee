@@ -947,12 +947,12 @@ class Replace extends Operator
     input
 
   execute: ->
-    @input = @getInput()
+    input = @getInput()
     @mutateSelections (selection) =>
-      text = selection.getText().replace(/./g, @input)
+      text = selection.getText().replace(/./g, input)
       unless (@target.instanceof('MoveRight') and (text.length < @getCount()))
         selection.insertText(text, autoIndentNewline: true)
-      @restorePoint(selection) unless @input is "\n"
+      @restorePoint(selection) unless input is "\n"
 
     # FIXME this is very imperative, handling in very lower level.
     # find better place for operator in blockwise move works appropriately.
