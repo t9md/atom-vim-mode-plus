@@ -1,14 +1,13 @@
 {ElementBuilder} = require './utils'
 
-# [NOTE] Order is important. I depend on chrome's "keep object order".
 modeToContent =
   "normal": "Normal"
+  'insert': "Insert"
+  'insert.replace': "Replace"
+  'visual': "Visual"
   "visual.characterwise": "Visual Char"
   "visual.linewise": "Visual Line"
   'visual.blockwise': "Visual Block"
-  'visual': "Visual"
-  'insert.replace': "Replace"
-  'insert': "Insert"
 
 module.exports =
 class StatusBarManager

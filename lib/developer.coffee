@@ -115,17 +115,16 @@ class Developer
     backspace: 'BS'
     space: 'SPC'
 
-  # [NOTE] Order is important. I depend on chrome's "keep object order".
   selectorMap =
     "atom-text-editor.vim-mode-plus": ''
-    ".operator-pending-mode": 'o'
-    ".visual-mode.characterwise": 'vC'
-    ".visual-mode.blockwise": 'vB'
-    ".visual-mode.linewise": 'vL'
-    ".visual-mode": 'v'
-    ".insert-mode.replace": 'iR'
-    ".insert-mode": 'i'
     ".normal-mode": 'n'
+    ".insert-mode": 'i'
+    ".replace": 'R'
+    ".visual-mode": 'v'
+    ".characterwise": 'C'
+    ".blockwise": 'B'
+    ".linewise": 'L'
+    ".operator-pending-mode": 'o'
     ".with-count": '#'
 
   getCommandSpecs: ->

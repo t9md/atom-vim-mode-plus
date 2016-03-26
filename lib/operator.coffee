@@ -25,7 +25,6 @@ class OperatorError extends Base
 class Operator extends Base
   @extend(false)
   recordable: true
-  target: null
   flashTarget: true
   trackChange: false
   requireTarget: true
