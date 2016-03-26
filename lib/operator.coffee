@@ -20,7 +20,6 @@ class OperatorError extends Base
   constructor: (@message) ->
     @name = 'Operator Error'
 
-# General Operator
 # -------------------------
 class Operator extends Base
   @extend(false)
@@ -121,10 +120,9 @@ class Operator extends Base
       timeout: settings.get('flashOnOperateDuration')
 
   mutateSelections: (fn) ->
-    return unless @selectTarget()
-    @editor.transact =>
-      for selection in @editor.getSelections()
-        fn(selection)
+    if @selectTarget()
+      @editor.transact =>
+        fn(selection) for selection in @editor.getSelections()
 
   execute: ->
     @mutateSelections (selection) =>
@@ -139,7 +137,7 @@ class Select extends Operator
   execute: ->
     @selectTarget()
     return if @isMode('operator-pending') or @isMode('visual', 'blockwise')
-    unless @isMode('visual')
+    if not @isMode('visual')
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateMode('visual', submode)
     else
@@ -366,7 +364,6 @@ class TransformStringBySelectList extends Operator
   @extend()
   @description: "Transform string by specified oprator selected from select-list"
   requireInput: true
-  requireTarget: true
   # Member of transformers can be either of
   # - Operation class name: e.g 'CamelCase'
   # - Operation class itself: e.g. CamelCase
@@ -552,11 +549,10 @@ class DeleteSurround extends Surround
 
   onConfirm: (@input) ->
     # FIXME: dont manage allowNextLine independently. Each Pair text-object can handle by themselvs.
-    target = @new 'Pair',
+    @setTarget @new 'Pair',
       pair: @getPair(@input)
       inner: false
-      allowNextLine: @input in @pairChars
-    @setTarget(target)
+      allowNextLine: (@input in @pairChars)
     @processOperation()
 
   getNewText: (text) ->
@@ -856,7 +852,7 @@ class PutBefore extends Operator
         @setMarkForChange(newRange)
         @flash(newRange) if @needFlash()
 
-    if @selectPastedText# and haveSomeSelection(@editor)
+    if @selectPastedText
       submode = swrap.detectVisualModeSubmode(@editor)
       unless @isMode('visual', submode)
         @activateMode('visual', submode)
@@ -937,7 +933,7 @@ class Replace extends Operator
   requireInput: true
 
   initialize: ->
-    @setTarget @new('MoveRight') if @isMode('normal')
+    @setTarget(@new('MoveRight')) if @isMode('normal')
     @focusInput()
 
   getInput: ->
