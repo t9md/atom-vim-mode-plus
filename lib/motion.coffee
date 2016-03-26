@@ -313,42 +313,47 @@ class MoveToNextWord extends Motion
   wordRegex: null
 
   getPoint: (cursor) ->
-    point = cursor.getBeginningOfNextWordBufferPosition({@wordRegex})
     cursorPoint = cursor.getBufferPosition()
-    if point.isEqual(cursorPoint) or (point.row > getVimLastBufferRow(@editor))
-      point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
-    point
+    pattern = @wordRegex ? cursor.wordRegExp()
+    point = null
+    @scanWordRange cursorPoint, pattern, ({stop, range}) ->
+      {start, end} = range
+      if end.isGreaterThan(cursorPoint)
+        point = end
+        if start.isGreaterThan(cursorPoint)
+          point = start
+          stop()
+    if point?
+      Point.min(point, @vimEof)
+    else
+      cursorPoint
 
-  # [FIXME] This is workaround for Atom's Cursor::isInsideWord() return `true`
-  # when text from cursor to EOL is all white space
-  textToEndOfLineIsAllWhiteSpace: (cursor) ->
-    textToEOL = getTextFromPointToEOL(@editor, cursor.getBufferPosition())
-    isAllWhiteSpace(textToEOL)
+  scanWordRange: (from, pattern, fn) ->
+    scanRange = [[from.row, 0], @editor.getEofBufferPosition()]
+    @editor.scanInBufferRange pattern, scanRange, (event) ->
+      fn(event)
 
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
+    # cache
+    @vimEof = getVimEofBufferPosition(@editor)
     lastCount = @getCount()
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
-
     @countTimes (num) =>
       isLastCount = (num is lastCount)
-      bufferRow = cursor.getBufferRow()
-      if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
-        cursor.moveDown()
-      else
-        if @textToEndOfLineIsAllWhiteSpace(cursor) and not cursorIsAtVimEndOfFile(cursor)
-          cursor.moveDown()
-          cursor.moveToBeginningOfLine()
-          cursor.skipLeadingWhitespace()
-        else
-          point = if @getOperator()?.directInstanceof('Change') and (not wasOnWhiteSpace) and isLastCount
-            cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
-          else
-            @getPoint(cursor)
-          cursor.setBufferPosition(point)
+      # cursorPoint = cursor.getBufferPosition()
+      cursorRow = cursor.getBufferRow()
 
-        if @isAsOperatorTarget() and isLastCount and (cursor.getBufferRow() > bufferRow)
-          cursor.setBufferPosition([bufferRow, Infinity])
+      if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
+        point = [cursorRow+1, 0]
+      else
+        point = @getPoint(cursor)
+        if isLastCount and @isAsOperatorTarget()
+          if @getOperator().getName() is 'Change' and (not wasOnWhiteSpace)
+            point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
+          else if (point.row > cursorRow)
+            point = [cursorRow, Infinity]
+      cursor.setBufferPosition(point)
 
 class MoveToPreviousWord extends Motion
   @extend()
@@ -383,7 +388,7 @@ class MoveToEndOfWord extends Motion
 # -------------------------
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
-  wordRegex: /^\s*$|\S+/
+  wordRegex: /^\s*$|\S+/g
 
 class MoveToPreviousWholeWord extends MoveToPreviousWord
   @extend()
@@ -398,7 +403,7 @@ class MoveToEndOfWholeWord extends MoveToEndOfWord
 class MoveToNextAlphanumericWord extends MoveToNextWord
   @extend()
   @description: "Move to next alphanumeric(`/\w+/`) word"
-  wordRegex: /\w+/
+  wordRegex: /\w+/g
 
 class MoveToPreviousAlphanumericWord extends MoveToPreviousWord
   @extend()
