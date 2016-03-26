@@ -1,4 +1,3 @@
-# Refactoring status: 0%
 {getVimState, getView} = require './spec-helper'
 
 packageName = 'vim-mode-plus'

@@ -1,4 +1,3 @@
-# Refactoring status: 80%
 {getVimState, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
 {inspect} = require 'util'

@@ -1,4 +1,3 @@
-# Refactoring status: 70%
 {getVimState} = require './spec-helper'
 settings = require '../lib/settings'
 

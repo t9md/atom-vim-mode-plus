@@ -1,4 +1,3 @@
-# Refactoring status: 70%
 {getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'

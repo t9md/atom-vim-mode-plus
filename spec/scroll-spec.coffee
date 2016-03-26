@@ -1,4 +1,3 @@
-# Refactoring status: 5%
 {getVimState} = require './spec-helper'
 
 describe "Scrolling", ->

@@ -1,4 +1,3 @@
-# Refactoring status: 80%
 {getVimState} = require './spec-helper'
 
 describe "Insert mode commands", ->

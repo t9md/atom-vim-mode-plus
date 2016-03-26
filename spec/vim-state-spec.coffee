@@ -1,4 +1,3 @@
-# Refactoring status: 70%
 _ = require 'underscore-plus'
 {getVimState} = require './spec-helper'
 settings = require '../lib/settings'

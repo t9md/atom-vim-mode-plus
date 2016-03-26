@@ -1,4 +1,3 @@
-# Refactoring status: 80%
 {getVimState, dispatch, TextData} = require './spec-helper'
 
 describe "TextObject", ->
