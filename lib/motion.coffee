@@ -328,11 +328,6 @@ class MoveToNextWord extends Motion
     else
       cursorPoint
 
-  scanWordRange: (from, pattern, fn) ->
-    scanRange = [[from.row, 0], @editor.getEofBufferPosition()]
-    @editor.scanInBufferRange pattern, scanRange, (event) ->
-      fn(event)
-
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
     # cache
