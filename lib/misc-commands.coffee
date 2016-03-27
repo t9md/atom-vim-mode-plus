@@ -28,7 +28,7 @@ class ReverseSelections extends MiscCommand
 class BlockwiseOtherEnd extends ReverseSelections
   @extend()
   execute: ->
-    bs.reverse() for bs in @vimState.getBlockwiseSelections()
+    bs.reverse() for bs in @getBlockwiseSelections()
     super
 
 class Undo extends MiscCommand

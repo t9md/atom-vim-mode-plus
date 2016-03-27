@@ -103,7 +103,7 @@ class OperationStack
       # Ensure Cursor is NOT at EndOfLine position
       for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
         moveCursorLeft(cursor, {preserveGoalColumn: true})
-    @vimState.refreshCursors()
+    @vimState.updateCursorsVisibility()
     @vimState.reset()
 
   peekTop: ->

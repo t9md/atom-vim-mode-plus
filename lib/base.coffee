@@ -3,13 +3,8 @@ Delegato = require 'delegato'
 {CompositeDisposable} = require 'atom'
 
 settings = require './settings'
-selectList = require './select-list'
+selectList = null # delay
 getEditorState = null # set by Base.init()
-
-run = (klass, properties={}) ->
-  if vimState = getEditorState(atom.workspace.getActiveTextEditor())
-    # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
-    vimState.operationStack.run(klass, properties)
 
 vimStateMethods = [
   "onDidChangeInput"
@@ -29,6 +24,8 @@ vimStateMethods = [
   "onDidCancelSelectList"
   "subscribe"
   "isMode"
+  "hasCount"
+  "getBlockwiseSelections"
 ]
 
 class Base
@@ -94,9 +91,6 @@ class Base
     # Don't call getCount() since its has side-effect to update @count to cache.
     @count is @getDefaultCount()
 
-  isCountSpecified: ->
-    @vimState.hasCount()
-
   # Misc
   # -------------------------
   countTimes: (fn) ->
@@ -109,7 +103,7 @@ class Base
 
   addHover: (text, {replace}={}) ->
     if settings.get('showHoverOnOperate')
-      if replace ?= false
+      if replace ? false
         @vimState.hover.replaceLastSection(text)
       else
         @vimState.hover.add(text)
@@ -127,7 +121,7 @@ class Base
   focusSelectList: (options={}) ->
     @onDidCancelSelectList =>
       @cancelOperation()
-
+    selectList ?= require './select-list'
     selectList.show(@vimState, options)
 
   input: null
@@ -238,7 +232,12 @@ class Base
       null
 
   @registerCommand: ->
-    atom.commands.add(@getCommandScope(), @getCommandName(), => run(this))
+    atom.commands.add(@getCommandScope(), @getCommandName(), => @run())
+
+  @run: ->
+    if vimState = getEditorState(atom.workspace.getActiveTextEditor())
+      # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
+      vimState.operationStack.run(this)
 
 class OperationAbortedError extends Base
   @extend(false)

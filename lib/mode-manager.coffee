@@ -60,7 +60,7 @@ class ModeManager
     @editorElement.classList.add(@submode) if @submode?
 
     @vimState.statusBarManager.update(@mode, @submode)
-    @vimState.refreshCursors()
+    @vimState.updateCursorsVisibility()
     @emitter.emit 'did-activate-mode', {@mode, @submode}
 
   deactivate: ->

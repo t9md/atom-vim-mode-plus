@@ -1,7 +1,6 @@
 Delegato = require 'delegato'
 _ = require 'underscore-plus'
-{Emitter, Disposable, CompositeDisposable, Range, Point} = require 'atom'
-{basename} = require 'path'
+{Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
 settings = require './settings'
 globalState = require './global-state'
@@ -16,7 +15,7 @@ ModeManager = require './mode-manager'
 RegisterManager = require './register-manager'
 SearchHistoryManager = require './search-history-manager'
 CursorStyleManager = require './cursor-style-manager'
-BlockwiseSelection = require './blockwise-selection'
+BlockwiseSelection = null # delay
 
 packageScope = 'vim-mode-plus'
 
@@ -75,6 +74,7 @@ class VimState
     @blockwiseSelections = []
 
   addBlockwiseSelectionFromSelection: (selection) ->
+    BlockwiseSelection ?= require './blockwise-selection'
     @blockwiseSelections.push(new BlockwiseSelection(selection))
 
   # Count
@@ -181,7 +181,7 @@ class VimState
       selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) =>
         handleSelectionChange()
         selection.setBufferRange(selection.getBufferRange().union(tailRange))
-        @refreshCursors()
+        @updateCursorsVisibility()
 
     handleMouseUp = ->
       selectionWatcher?.dispose()
@@ -204,7 +204,7 @@ class VimState
     @hover.reset()
     @operationStack.reset()
 
-  refreshCursors: ->
+  updateCursorsVisibility: ->
     @cursorStyleManager.refresh()
 
   # highlightSearch

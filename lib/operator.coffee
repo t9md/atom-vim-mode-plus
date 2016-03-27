@@ -187,7 +187,7 @@ class DeleteToLastCharacterOfLine extends Delete
   execute: ->
     if @isVisualBlockwise
       pointByBlockwiseSelection = new Map
-      @vimState.getBlockwiseSelections().forEach (bs) ->
+      @getBlockwiseSelections().forEach (bs) ->
         bs.setPositionForSelections('start')
         pointByBlockwiseSelection.set(bs, bs.getTop().getHeadBufferPosition())
 
@@ -1048,7 +1048,7 @@ class InsertAtStartOfSelection extends ActivateInsertMode
   which: 'start'
   execute: ->
     if @isMode('visual', 'blockwise')
-      @vimState.getBlockwiseSelections().forEach (bs) =>
+      @getBlockwiseSelections().forEach (bs) =>
         bs.setPositionForSelections(@which)
     super
 
@@ -1167,6 +1167,6 @@ class ChangeToLastCharacterOfLine extends Change
 
   execute: ->
     if @isVisualBlockwise
-      @vimState.getBlockwiseSelections().forEach (bs) ->
+      @getBlockwiseSelections().forEach (bs) ->
         bs.setPositionForSelections('start')
     super

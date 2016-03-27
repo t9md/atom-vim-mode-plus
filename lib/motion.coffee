@@ -187,7 +187,7 @@ class MoveUp extends Motion
 
   select: ->
     if @isMode('visual', 'blockwise')
-      @vimState.getBlockwiseSelections().forEach (bs) =>
+      @getBlockwiseSelections().forEach (bs) =>
         @countTimes => bs.moveSelection(@direction)
     else
       super
