@@ -403,13 +403,13 @@ class MoveToNextParagraph extends Motion
 
   getPoint: (cursor) ->
     cursorRow = cursor.getBufferRow()
-    isAtNonBlankRow = not @editor.isBufferRowBlank(cursorRow)
-    rows = getBufferRows(@editor, {startRow: cursorRow, @direction, includeStartRow: false})
-    for row in rows
+    wasAtNonBlankRow = not @editor.isBufferRowBlank(cursorRow)
+    options = {startRow: cursorRow, @direction, includeStartRow: false}
+    for row in getBufferRows(@editor, options)
       if @editor.isBufferRowBlank(row)
-        return [row, 0] if isAtNonBlankRow
+        return [row, 0] if wasAtNonBlankRow
       else
-        isAtNonBlankRow = true
+        wasAtNonBlankRow = true
 
     switch @direction
       when 'previous' then [0, 0]
@@ -535,9 +535,9 @@ class MoveToRelativeLine extends Motion
 class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
   @extend(false)
   min: 0
+
   getCount: ->
-    count = super
-    Math.max(@min, count)
+    Math.max(@min, super)
 
 # Position cursor without scrolling., H, M, L
 # -------------------------
@@ -603,14 +603,14 @@ class ScrollFullScreenDown extends Motion
     @newScrollTop = @editorElement.getScrollTop() + amountInPixel
 
   scroll: ->
-    @editorElement.setScrollTop @newScrollTop
+    @editorElement.setScrollTop(@newScrollTop)
 
   select: ->
-    super()
+    super
     @scroll()
 
   execute: ->
-    super()
+    super
     @scroll()
 
   moveCursor: (cursor) ->
@@ -654,18 +654,18 @@ class Find extends Motion
     cursorPoint = cursor.getBufferPosition()
     {start, end} = @editor.bufferRangeForBufferRow(cursorPoint.row)
 
-    offset   = if @isBackwards() then @offset else -@offset
+    offset = if @isBackwards() then @offset else -@offset
     unOffset = -offset * @isRepeated()
     if @isBackwards()
       scanRange = [start, cursorPoint.translate([0, unOffset])]
-      method    = 'backwardsScanInBufferRange'
+      method = 'backwardsScanInBufferRange'
     else
       scanRange = [cursorPoint.translate([0, 1 + unOffset]), end]
-      method    = 'scanInBufferRange'
+      method = 'scanInBufferRange'
 
-    points   = []
+    points = []
     @editor[method] ///#{_.escapeRegExp(@input)}///g, scanRange, ({range}) ->
-      points.push range.start
+      points.push(range.start)
     points[@getCount()]?.translate([0, offset])
 
   getCount: ->
@@ -682,7 +682,7 @@ class FindBackwards extends Find
   @extend()
   inclusive: false
   backwards: true
-  hover: icon: ':find:',  emoji: ':mag:'
+  hover: icon: ':find:', emoji: ':mag:'
 
 # keymap: t
 class Till extends Find

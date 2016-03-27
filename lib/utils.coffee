@@ -286,6 +286,9 @@ getVimEofBufferPosition = (editor) ->
   else
     eof
 
+getVimEofScreenPosition = (editor) ->
+  editor.screenPositionForBufferPosition(getVimEofBufferPosition(editor))
+
 pointIsAtVimEndOfFile = (editor, point) ->
   getVimEofBufferPosition(editor).isEqual(point)
 
@@ -297,9 +300,6 @@ cursorIsAtEmptyRow = (cursor) ->
 
 getVimLastBufferRow = (editor) ->
   getVimEofBufferPosition(editor).row
-
-getVimEofScreenPosition = (editor) ->
-  editor.screenPositionForBufferPosition(getVimEofBufferPosition(editor))
 
 getVimLastScreenRow = (editor) ->
   getVimEofScreenPosition(editor).row
