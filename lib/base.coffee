@@ -94,8 +94,10 @@ class Base
   # Misc
   # -------------------------
   countTimes: (fn) ->
-    _.times @getCount(), (num) ->
-      fn(num+1)
+    count = @getCount()
+    _.times count, (i) ->
+      isFinal = (num = i + 1) is count
+      fn(num,  isFinal)
 
   activateMode: (mode, submode) ->
     @onDidFinishOperation =>
@@ -156,9 +158,6 @@ class Base
 
   isTextObject: ->
     @instanceof('TextObject')
-
-  directInstanceof: (klassName) ->
-    this.constructor is Base.getClass(klassName)
 
   getName: ->
     @constructor.name

@@ -330,13 +330,13 @@ class MoveToNextWord extends Motion
     @vimEof = getVimEofBufferPosition(@editor) # cache
     lastCount = @getCount()
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
-    @countTimes (num) =>
+    @countTimes (num, isFinal) =>
       cursorRow = cursor.getBufferRow()
       if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
         point = [cursorRow+1, 0]
       else
         point = @getPoint(cursor)
-        if (num is lastCount) and @isAsOperatorTarget()
+        if isFinal and @isAsOperatorTarget()
           if @getOperator().getName() is 'Change' and (not wasOnWhiteSpace)
             point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
           else if (point.row > cursorRow)
