@@ -10,7 +10,7 @@ globalState = require './global-state'
   moveCursorUpBuffer
   cursorIsAtVimEndOfFile
   getFirstVisibleScreenRow, getLastVisibleScreenRow
-  getVimEofBufferPosition, getVimEofScreenPosition
+  getVimEofBufferPosition
   getVimLastBufferRow, getVimLastScreenRow
   getValidVimScreenRow
   characterAtScreenPosition
@@ -18,8 +18,6 @@ globalState = require './global-state'
   moveCursorToFirstCharacterAtRow
   sortRanges
   getIndentLevelForBufferRow
-  getTextFromPointToEOL
-  isAllWhiteSpace
   cursorIsOnWhiteSpace
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow
@@ -28,7 +26,6 @@ globalState = require './global-state'
   detectScopeStartPositionForScope
   getTextInScreenRange
   getBufferRows
-  getFirstCharacterColumForBufferRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -89,18 +86,16 @@ class Motion extends Base
     selection.modifySelection =>
       tailRange = swrap(selection).getTailBufferRange()
       if @isMode('visual', 'blockwise')
-        originalPoint = cursor.getBufferPosition()
+        rowBefore = cursor.getBufferRow()
+        @moveCursor(cursor)
+        rowAfter = cursor.getBufferRow()
+        if rowAfter isnt rowBefore
+          cursor.setBufferPosition(
+            [rowBefore, (if rowAfter < rowBefore then 0 else Infinity)]
+          )
+      else
+        @moveCursor(cursor)
 
-      @moveCursor(cursor)
-
-      if @isMode('visual', 'blockwise')
-        currentPoint = cursor.getBufferPosition()
-        if originalPoint.row isnt currentPoint.row
-          column = if currentPoint.isGreaterThan(originalPoint)
-            Infinity
-          else
-            0
-          cursor.setBufferPosition([originalPoint.row, column])
       if @isMode('visual') and cursor.isAtEndOfLine()
         moveCursorLeft(cursor, {preserveGoalColumn: true})
 
@@ -183,7 +178,6 @@ class MoveUp extends Motion
   @extend()
   linewise: true
   direction: 'up'
-  amount: -1
 
   select: ->
     if @isMode('visual', 'blockwise')
@@ -201,7 +195,8 @@ class MoveUp extends Motion
     @countTimes =>
       if isBufferRowWise
         vimLastBufferRow ?= getVimLastBufferRow(@editor)
-        row = cursor.getBufferRow() + @amount
+        amount = if @direction is 'up' then -1 else + 1
+        row = cursor.getBufferRow() + amount
         if row <= vimLastBufferRow
           column = cursor.goalColumn or cursor.getBufferColumn()
           cursor.setBufferPosition([row, column])
@@ -213,8 +208,6 @@ class MoveDown extends MoveUp
   @extend()
   linewise: true
   direction: 'down'
-  amount: +1
-
 
   move: (cursor) ->
     moveCursorDown(cursor)
@@ -229,10 +222,9 @@ class MoveUpToNonBlank extends Motion
   moveCursor: (cursor) ->
     column = cursor.getScreenColumn()
     @countTimes =>
-      newRow = _.detect @getScanRows(cursor), (row) =>
-        @isMovablePoint(new Point(row, column))
-      if newRow?
-        cursor.setScreenPosition([newRow, column])
+      for row in @getScanRows(cursor) when @isMovablePoint(new Point(row, column))
+        cursor.setScreenPosition([row, column])
+        break
 
   getScanRows: (cursor) ->
     cursorRow = cursor.getScreenRow()

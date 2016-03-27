@@ -187,11 +187,11 @@ class VimState
       selectionWatcher?.dispose()
       selectionWatcher = null
 
-    @editorElement.addEventListener 'mousedown', handleMouseDown
-    @editorElement.addEventListener 'mouseup', handleMouseUp
+    @editorElement.addEventListener('mousedown', handleMouseDown)
+    @editorElement.addEventListener('mouseup', handleMouseUp)
     @subscriptions.add new Disposable =>
-      @editorElement.removeEventListener 'mousedown', handleMouseDown
-      @editorElement.removeEventListener 'mouseup', handleMouseUp
+      @editorElement.removeEventListener('mousedown', handleMouseDown)
+      @editorElement.removeEventListener('mouseup', handleMouseUp)
 
     @subscriptions.add atom.commands.onDidDispatch ({target, type}) =>
       if target is @editorElement and not type.startsWith('vim-mode-plus:')

@@ -9,7 +9,6 @@ settings = require './settings'
 class OperationStack
   constructor: (@vimState) ->
     {@editor} = @vimState
-
     CurrentSelection ?= Base.getClass('CurrentSelection')
     Select ?= Base.getClass('Select')
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
@@ -17,7 +16,6 @@ class OperationStack
     # [Experimental] Cache for performance
     @currentSelection = new CurrentSelection(@vimState)
     @select = new Select(@vimState)
-
     @reset()
 
   subscribe: (args...) ->
