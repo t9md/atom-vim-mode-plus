@@ -43,7 +43,6 @@ class Hover
         @reset()
       , timeout
 
-  iconRegexp = /^:.*:$/
   getText: (lineHeight) ->
     unless @text.length
       return null
