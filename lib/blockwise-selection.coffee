@@ -1,7 +1,7 @@
 {Range} = require 'atom'
 _ = require 'underscore-plus'
 
-{sortRanges, getBufferRows, logGoalColumnForSelection} = require './utils'
+{sortRanges, getBufferRows} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
@@ -18,6 +18,8 @@ class BlockwiseSelection
     # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
     unless swrap(selection).isSingleRow()
       range = selection.getBufferRange()
+      if range.end.column is 0
+        range.end.row = range.end.row - 1
       if @goalColumn? and not wasReversed
         range.end.column = @goalColumn + 1
 
@@ -114,6 +116,11 @@ class BlockwiseSelection
   getBufferRange: ->
     start = @getHead().getHeadBufferPosition()
     end = @getTail().getTailBufferPosition()
+    if @isReversed()
+      end.row += 1 if end.column is 0
+    else
+      start.row += 1 if start.column is 0
+
     if @isSingleLine() or @headReversedStateIsInSync()
       new Range(start, end)
     else
@@ -174,9 +181,15 @@ class BlockwiseSelection
 
   setHeadBufferRange: (range, options) ->
     head = @getHead()
-    @clearSelections(except: @getHead())
-    swrap(head).resetProperties()
+    @clearSelections(except: head)
+    {goalColumn} = head.cursor
+    # When reversed state of selection change, goalColumn is cleared.
+    # But here for blockwise, I want to keep goalColumn unchanged.
+    # This behavior is not identical to pure Vim I know.
+    # But I believe this is more unnoisy and less confusion while moving
+    # cursor in visual-block mode.
     head.setBufferRange(range, options)
+    head.cursor.goalColumn ?= goalColumn if goalColumn?
 
   restoreCharacterwise: ->
     @setHeadBufferRange(@getBufferRange(), reversed: @isReversed())

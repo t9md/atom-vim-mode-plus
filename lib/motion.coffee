@@ -26,8 +26,6 @@ globalState = require './global-state'
   detectScopeStartPositionForScope
   getTextInScreenRange
   getBufferRows
-  logGoalColumnForSelection
-  reportSelection
 } = require './utils'
 
 swrap = require './selection-wrapper'

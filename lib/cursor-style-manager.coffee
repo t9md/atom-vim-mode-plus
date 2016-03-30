@@ -31,7 +31,7 @@ getOffset = (submode, cursor, isSoftWrapped) ->
         screenPoint.traversalFrom(cursor.getScreenPosition())
       else
         bufferPoint.traversalFrom(cursor.getBufferPosition())
-  if not selection.isReversed() and cursor.isAtBeginningOfLine()
+  if not selection.isReversed() and cursor.isAtBeginningOfLine() and submode isnt 'blockwise'
     traversal.row = -1
   traversal
 
