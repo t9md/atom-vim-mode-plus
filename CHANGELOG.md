@@ -1,3 +1,12 @@
+# 0.29.0
+- Improve: cleanup `operation-stack.coffee`
+- Internal: New convention. use `Operator::mutateSelection`
+- Improve: Reduce complexity for MoveToNextWord #200
+- Internal: improve Base::countTimes pass isLast as 2nd arg
+- Fix: For `$` motion with count now correctly move to end of line of Nth line blow.
+- Improve: Now support all motion in `visual-blockwise` #213
+- Internal: Remove many visual-blockwise special code #213
+
 # 0.28.0
 - Internal: Each command class can answer its description.
 - Internal: Generate summary table for all commands.
