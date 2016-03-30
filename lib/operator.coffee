@@ -188,6 +188,7 @@ class DeleteToLastCharacterOfLine extends Delete
     if @isVisualBlockwise
       pointByBlockwiseSelection = new Map
       @getBlockwiseSelections().forEach (bs) ->
+        bs.removeEmptySelections()
         bs.setPositionForSelections('start')
         pointByBlockwiseSelection.set(bs, bs.getTop().getHeadBufferPosition())
 
@@ -1049,6 +1050,7 @@ class InsertAtStartOfSelection extends ActivateInsertMode
   execute: ->
     if @isMode('visual', 'blockwise')
       @getBlockwiseSelections().forEach (bs) =>
+        bs.removeEmptySelections()
         bs.setPositionForSelections(@which)
     super
 
@@ -1168,5 +1170,6 @@ class ChangeToLastCharacterOfLine extends Change
   execute: ->
     if @isVisualBlockwise
       @getBlockwiseSelections().forEach (bs) ->
+        bs.removeEmptySelections()
         bs.setPositionForSelections('start')
     super

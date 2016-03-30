@@ -88,19 +88,25 @@ class OperationStack
       @vimState.activate('reset')
     @finish()
 
-  finish: (operation) ->
+  ensureAllSelectionsAreEmpty: ->
+    unless @editor.getLastSelection().isEmpty()
+      if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
+        throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
+      else
+        @editor.clearSelections()
+
+  ensureAllCursorsAreNotAtEndOfLine: ->
+    for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
+      # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
+      moveCursorLeft(cursor, {preserveGoalColumn: true})
+
+  finish: (operation=null) ->
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit 'did-finish-operation'
     if @vimState.isMode('normal')
-      unless @editor.getLastSelection().isEmpty()
-        if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
-          throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
-        else
-          @editor.clearSelections()
+      @ensureAllSelectionsAreEmpty()
+      @ensureAllCursorsAreNotAtEndOfLine()
 
-      # Ensure Cursor is NOT at EndOfLine position
-      for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
-        moveCursorLeft(cursor, {preserveGoalColumn: true})
     @vimState.updateCursorsVisibility()
     @vimState.reset()
 

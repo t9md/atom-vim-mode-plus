@@ -12,7 +12,7 @@ globalState = require './global-state'
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getVimEofBufferPosition
   getVimLastBufferRow, getVimLastScreenRow
-  getValidVimScreenRow
+  getValidVimScreenRow, getValidVimBufferRow
   characterAtScreenPosition
   highlightRanges
   moveCursorToFirstCharacterAtRow
@@ -50,6 +50,9 @@ class Motion extends Base
     else
       @linewise
 
+  isBlockwise: ->
+    @isMode('visual', 'blockwise')
+
   isInclusive: ->
     if @isMode('visual')
       @isMode('visual', ['characterwise', 'blockwise'])
@@ -61,19 +64,29 @@ class Motion extends Base
       @moveCursor(cursor)
 
   select: ->
+    @normalizeVisualModeCursorPositions() if @isMode('visual')
+
     for selection in @editor.getSelections()
       if @isInclusive() or @isLinewise()
-        @normalizeVisualModeCursorPosition(selection) if @isMode('visual')
         @selectInclusively(selection)
-        if @isLinewise()
-          swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
-          swrap(selection).expandOverLine(preserveGoalColumn: true)
       else
         selection.modifySelection =>
           @moveCursor(selection.cursor)
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
+
+    for selection in @editor.getSelections()
+      switch
+        when @isLinewise() then @selectLinewise(selection)
+        when @isBlockwise() then @selectBlockwise(selection)
+
+  selectLinewise: (selection) ->
+    swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
+    swrap(selection).expandOverLine(preserveGoalColumn: true)
+
+  selectBlockwise: (selection) ->
+    @vimState.addBlockwiseSelectionFromSelection(selection)
 
   # Modify selection inclusively
   # -------------------------
@@ -83,45 +96,42 @@ class Motion extends Base
   #  This adjustment is important so that j, k works without special care in moveCursor.
   selectInclusively: (selection) ->
     {cursor} = selection
+    originalPoint = cursor.getBufferPosition()
+    tailRange = swrap(selection).getTailBufferRange()
     selection.modifySelection =>
-      tailRange = swrap(selection).getTailBufferRange()
-      if @isMode('visual', 'blockwise')
-        rowBefore = cursor.getBufferRow()
-        @moveCursor(cursor)
-        rowAfter = cursor.getBufferRow()
-        if rowAfter isnt rowBefore
-          cursor.setBufferPosition(
-            [rowBefore, (if rowAfter < rowBefore then 0 else Infinity)]
-          )
+      @moveCursor(cursor)
+
+      if @isMode('visual')
+        if cursor.isAtEndOfLine()
+          # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
+          moveCursorLeft(cursor, {preserveGoalColumn: true})
       else
-        @moveCursor(cursor)
-
-      if @isMode('visual') and cursor.isAtEndOfLine()
-        moveCursorLeft(cursor, {preserveGoalColumn: true})
-
-      # When mode isnt 'visual' selection.isEmpty() at this point means no movement happened.
-      if selection.isEmpty() and (not @isMode('visual'))
-        return
+        # Return since not movement was happend, nothing to do left.
+        return if cursor.getBufferPosition().isEqual(originalPoint)
 
       unless selection.isReversed()
+        # When cursor is at empty row, we allow to wrap to next line
+        # since when we `v`, w have to select line.
         allowWrap = cursorIsAtEmptyRow(cursor)
+        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT: -> NECESSARY
         moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
+
       # Merge tailRange(= under cursor range where you start selection) into selection
       newRange = selection.getBufferRange().union(tailRange)
       selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
 
   # Normalize visual-mode cursor position
   # The purpose for this is @moveCursor works consistently in both normal and visual mode.
-  normalizeVisualModeCursorPosition: (selection) ->
-    if @isMode('visual', 'linewise')
-      swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
-
+  normalizeVisualModeCursorPositions: ->
+    @vimState.modeManager.restoreCharacterwiseRange()
     # We selectRight()ed in visual-mode, so reset this effect here.
     # For selection.isEmpty() guard, selection possibily become in case selection is
     # cleared without calling vimState.modeManager.activate().
     # e.g. BlockwiseDeleteToLastCharacterOfLine
-    unless selection.isReversed() or selection.isEmpty()
+    for selection in @editor.getSelections()
+      continue if (selection.isReversed() or selection.isEmpty())
       selection.modifySelection ->
+        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
 # Used as operator's target in visual-mode.
@@ -178,13 +188,6 @@ class MoveUp extends Motion
   @extend()
   linewise: true
   direction: 'up'
-
-  select: ->
-    if @isMode('visual', 'blockwise')
-      @getBlockwiseSelections().forEach (bs) =>
-        @countTimes => bs.moveSelection(@direction)
-    else
-      super
 
   move: (cursor) ->
     moveCursorUp(cursor)
@@ -434,10 +437,16 @@ class MoveToBeginningOfLine extends Motion
 class MoveToLastCharacterOfLine extends Motion
   @extend()
 
+  getCount: ->
+    super - 1
+
+  getPoint: (cursor) ->
+    row = getValidVimBufferRow(@editor, cursor.getBufferRow() + @getCount())
+    [row, Infinity]
+
   moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveToEndOfLine()
-      cursor.goalColumn = Infinity
+    cursor.setBufferPosition(@getPoint(cursor))
+    cursor.goalColumn = Infinity
 
 class MoveToLastNonblankCharacterOfLineAndDown extends Motion
   @extend()

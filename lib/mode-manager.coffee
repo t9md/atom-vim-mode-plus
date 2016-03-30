@@ -139,6 +139,7 @@ class ModeManager
         swrap(selection).resetProperties()
         # `vc`, `vs` make selection empty
         if (not selection.isReversed() and not selection.isEmpty())
+          # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
           selection.selectLeft()
         selection.clear(autoscroll: false)
 

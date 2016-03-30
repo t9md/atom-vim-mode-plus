@@ -337,26 +337,27 @@ moveCursor = (cursor, {preserveGoalColumn}, fn) ->
 moveCursorLeft = (cursor, options={}) ->
   {allowWrap} = options
   delete options.allowWrap
+
   if not cursor.isAtBeginningOfLine() or allowWrap
-    moveCursor cursor, options, (cursor) ->
-      cursor.moveLeft()
+    move = (cursor) -> cursor.moveLeft()
+    moveCursor(cursor, options, move)
 
 moveCursorRight = (cursor, options={}) ->
   {allowWrap} = options
   delete options.allowWrap
   if not cursor.isAtEndOfLine() or allowWrap
-    moveCursor cursor, options, (cursor) ->
-      cursor.moveRight()
+    move = (cursor) -> cursor.moveRight()
+    moveCursor(cursor, options, move)
 
 moveCursorUp = (cursor, options={}) ->
   unless cursor.getScreenRow() is 0
-    moveCursor cursor, options, (cursor) ->
-      cursor.moveUp()
+    move = (cursor) -> cursor.moveUp()
+    moveCursor(cursor, options, move)
 
 moveCursorDown = (cursor, options={}) ->
   unless getVimLastScreenRow(cursor.editor) is cursor.getScreenRow()
-    moveCursor cursor, options, (cursor) ->
-      cursor.moveDown()
+    move = (cursor) -> cursor.moveDown()
+    moveCursor(cursor, options, move)
 
 # FIXME
 moveCursorDownBuffer = (cursor) ->
@@ -553,6 +554,9 @@ smartScrollToBufferPosition = (editor, point) ->
 
 # Debugging purpose
 # -------------------------
+logGoalColumnForSelection = (subject, selection) ->
+  console.log "#{subject}: goalColumn = ", selection.cursor.goalColumn
+
 reportSelection = (subject, selection) ->
   console.log subject, selection.getBufferRange().toString()
 
@@ -692,4 +696,5 @@ module.exports = {
   reportSelection,
   reportCursor
   withTrackingCursorPositionChange
+  logGoalColumnForSelection
 }
