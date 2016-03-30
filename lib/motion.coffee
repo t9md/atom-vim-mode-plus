@@ -12,7 +12,7 @@ globalState = require './global-state'
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getVimEofBufferPosition
   getVimLastBufferRow, getVimLastScreenRow
-  getValidVimScreenRow
+  getValidVimScreenRow, getValidVimBufferRow
   characterAtScreenPosition
   highlightRanges
   moveCursorToFirstCharacterAtRow
@@ -27,6 +27,7 @@ globalState = require './global-state'
   getTextInScreenRange
   getBufferRows
   logGoalColumnForSelection
+  reportSelection
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -83,8 +84,10 @@ class Motion extends Base
         when @isBlockwise() then @selectBlockwise(selection)
 
   selectLinewise: (selection) ->
+    reportSelection('selectLinewise before:', selection)
     swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
     swrap(selection).expandOverLine(preserveGoalColumn: true)
+    reportSelection('selectLinewise after:', selection)
 
   selectBlockwise: (selection) ->
     @vimState.addBlockwiseSelectionFromSelection(selection)
@@ -97,27 +100,39 @@ class Motion extends Base
   #  This adjustment is important so that j, k works without special care in moveCursor.
   selectInclusively: (selection) ->
     {cursor} = selection
-    logGoalColumnForSelection("before selectInclusively",selection)
+    originalPoint = cursor.getBufferPosition()
+
+    reportSelection('selectInclusively before:', selection)
+    logGoalColumnForSelection("before selectInclusively", selection)
+
+    tailRange = swrap(selection).getTailBufferRange()
     selection.modifySelection =>
-      tailRange = swrap(selection).getTailBufferRange()
       @moveCursor(cursor)
+      reportSelection('selectInclusively after MoveCursor:', selection)
 
-      if @isMode('visual') and cursor.isAtEndOfLine()
-        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
-        moveCursorLeft(cursor, {preserveGoalColumn: true})
-
-      # When mode isnt 'visual' selection.isEmpty() at this point means no movement happened.
-      if selection.isEmpty() and (not @isMode('visual'))
-        return
+      if @isMode('visual')
+        if cursor.isAtEndOfLine()
+          # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
+          moveCursorLeft(cursor, {preserveGoalColumn: true})
+          reportSelection('selectInclusively moveLeft', selection)
+      else
+        # Return since not movement was happend, nothing to do left.
+        return if cursor.getBufferPosition().isEqual(originalPoint)
 
       unless selection.isReversed()
+        # When cursor is at empty row, we allow to wrap to next line
+        # since when we `v`, w have to select line.
         allowWrap = cursorIsAtEmptyRow(cursor)
-        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
+        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT: -> NECESSARY
         moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
+        reportSelection('selectInclusively moveRight', selection)
+
       # Merge tailRange(= under cursor range where you start selection) into selection
       newRange = selection.getBufferRange().union(tailRange)
       selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
-      logGoalColumnForSelection("after selectInclusively",selection)
+
+    logGoalColumnForSelection("after selectInclusively", selection)
+    reportSelection('selectInclusively after:', selection)
 
   # Normalize visual-mode cursor position
   # The purpose for this is @moveCursor works consistently in both normal and visual mode.
@@ -129,9 +144,12 @@ class Motion extends Base
     # e.g. BlockwiseDeleteToLastCharacterOfLine
     for selection in @editor.getSelections()
       continue if (selection.isReversed() or selection.isEmpty())
+      reportSelection('normalize before:', selection)
       selection.modifySelection ->
         # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
+        reportSelection('normalize moveLeft', selection)
+      reportSelection('normalize after:', selection)
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
@@ -436,10 +454,16 @@ class MoveToBeginningOfLine extends Motion
 class MoveToLastCharacterOfLine extends Motion
   @extend()
 
+  getCount: ->
+    super - 1
+
+  getPoint: (cursor) ->
+    row = getValidVimBufferRow(@editor, cursor.getBufferRow() + @getCount())
+    [row, Infinity]
+
   moveCursor: (cursor) ->
-    @countTimes ->
-      cursor.moveToEndOfLine()
-      cursor.goalColumn = Infinity
+    cursor.setBufferPosition(@getPoint(cursor))
+    cursor.goalColumn = Infinity
 
 class MoveToLastNonblankCharacterOfLineAndDown extends Motion
   @extend()

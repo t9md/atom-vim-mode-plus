@@ -750,15 +750,21 @@ describe "Motion general", ->
         ensure '$', cursor: [1, 0]
 
     describe "as a motion", ->
-      beforeEach -> keystroke '$'
-
       # FIXME: See atom/vim-mode#2
       it "moves the cursor to the end of the line", ->
         ensure '$', cursor: [0, 6]
 
+      it "set goalColumn Infinity", ->
+        expect(editor.getLastCursor().goalColumn).toBe(null)
+        ensure '$', cursor: [0, 6]
+        expect(editor.getLastCursor().goalColumn).toBe(Infinity)
+
       it "should remain in the last column when moving down", ->
         ensure '$j', cursor: [1, 0]
         ensure 'j', cursor: [2, 9]
+
+      it "support count", ->
+        ensure '3$', cursor: [2, 9]
 
     describe "as a selection", ->
       it "selects to the end of the lines", ->
