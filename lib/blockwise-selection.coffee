@@ -10,6 +10,7 @@ class BlockwiseSelection
     @initialize(selection)
 
   initialize: (selection) ->
+    {@goalColumn} = selection.cursor
     @selections = [selection]
     wasReversed = reversed = selection.isReversed()
 
@@ -45,6 +46,10 @@ class BlockwiseSelection
         blockwise:
           head: selection is head
           tail: selection is tail
+
+    if @goalColumn?
+      for selection in @selections
+        selection.cursor.goalColumn = @goalColumn
 
   isSingleLine: ->
     @selections.length is 1
@@ -119,10 +124,8 @@ class BlockwiseSelection
       point = selection.getBufferRange()[which]
       selection.cursor.setBufferPosition(point)
 
-  # Return max column in all selections
   getGoalColumn: ->
-    columns = (selection.getBufferRange().end.column for selection in @selections)
-    Math.max(columns...)
+    @getGoalColumn ? @getHead().getHeadBufferPosition().column
 
   addSelection: (baseSelection, direction) ->
     {start, end} = baseSelection.getBufferRange()

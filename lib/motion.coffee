@@ -26,6 +26,7 @@ globalState = require './global-state'
   detectScopeStartPositionForScope
   getTextInScreenRange
   getBufferRows
+  logGoalColumnForSelection
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -61,6 +62,9 @@ class Motion extends Base
       @moveCursor(cursor)
 
   select: ->
+    if @isMode('visual', 'blockwise')
+      @vimState.modeManager.restoreCharacterwiseRange()
+
     for selection in @editor.getSelections()
       if @isInclusive() or @isLinewise()
         @normalizeVisualModeCursorPosition(selection) if @isMode('visual')
@@ -68,6 +72,8 @@ class Motion extends Base
         if @isLinewise()
           swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
           swrap(selection).expandOverLine(preserveGoalColumn: true)
+        if @isMode('visual', 'blockwise')
+          @vimState.addBlockwiseSelectionFromSelection(selection)
       else
         selection.modifySelection =>
           @moveCursor(selection.cursor)
@@ -85,18 +91,10 @@ class Motion extends Base
     {cursor} = selection
     selection.modifySelection =>
       tailRange = swrap(selection).getTailBufferRange()
-      if @isMode('visual', 'blockwise')
-        rowBefore = cursor.getBufferRow()
-        @moveCursor(cursor)
-        rowAfter = cursor.getBufferRow()
-        if rowAfter isnt rowBefore
-          cursor.setBufferPosition(
-            [rowBefore, (if rowAfter < rowBefore then 0 else Infinity)]
-          )
-      else
-        @moveCursor(cursor)
+      @moveCursor(cursor)
 
       if @isMode('visual') and cursor.isAtEndOfLine()
+        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorLeft(cursor, {preserveGoalColumn: true})
 
       # When mode isnt 'visual' selection.isEmpty() at this point means no movement happened.
@@ -105,6 +103,7 @@ class Motion extends Base
 
       unless selection.isReversed()
         allowWrap = cursorIsAtEmptyRow(cursor)
+        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
       # Merge tailRange(= under cursor range where you start selection) into selection
       newRange = selection.getBufferRange().union(tailRange)
@@ -122,6 +121,7 @@ class Motion extends Base
     # e.g. BlockwiseDeleteToLastCharacterOfLine
     unless selection.isReversed() or selection.isEmpty()
       selection.modifySelection ->
+        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
 # Used as operator's target in visual-mode.
@@ -178,13 +178,6 @@ class MoveUp extends Motion
   @extend()
   linewise: true
   direction: 'up'
-
-  select: ->
-    if @isMode('visual', 'blockwise')
-      @getBlockwiseSelections().forEach (bs) =>
-        @countTimes => bs.moveSelection(@direction)
-    else
-      super
 
   move: (cursor) ->
     moveCursorUp(cursor)
