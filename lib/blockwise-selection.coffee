@@ -10,7 +10,6 @@ class BlockwiseSelection
     @initialize(selection)
 
   initialize: (selection) ->
-    logGoalColumnForSelection("start initialize", selection)
     {@goalColumn} = selection.cursor
     @selections = [selection]
     wasReversed = reversed = selection.isReversed()
@@ -19,28 +18,22 @@ class BlockwiseSelection
     # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
     unless swrap(selection).isSingleRow()
       range = selection.getBufferRange()
+      if @goalColumn? and not wasReversed
+        range.end.column = @goalColumn + 1
+
       if range.start.column >= range.end.column
         reversed = not reversed
         range = range.translate([0, 1], [0, -1])
 
       {start, end} = range
-      # endColumn = @goalColumn ? end.column
-      endColumn = end.column
       ranges = [start.row..end.row].map (row) ->
-        [[row, start.column], [row, endColumn]]
+        [[row, start.column], [row, end.column]]
 
       selection.setBufferRange(ranges.shift(), {reversed})
-      newSelections = ranges.map (range) =>
-        @editor.addSelectionForBufferRange(range, {reversed})
-      for selection in newSelections
-        if selection.isEmpty()
-          selection.destroy()
-        else
-          @selections.push(selection)
+      for range in ranges
+        @selections.push(@editor.addSelectionForBufferRange(range, {reversed}))
     @updateProperties()
     @reverse() if wasReversed
-    # for selection in @selections
-    #   logGoalColumnForSelection("finish initialize", selection)
 
   updateProperties: ->
     head = @getHead()
@@ -70,7 +63,10 @@ class BlockwiseSelection
     _.last(@selections)
 
   isReversed: ->
-    if @isSingleLine() then false else swrap(@getBottom()).isBlockwiseTail()
+    if @isSingleLine()
+      @getTop().isReversed()
+    else
+      swrap(@getBottom()).isBlockwiseTail()
 
   getHead: ->
     if @isReversed() then @getTop() else @getBottom()
@@ -118,7 +114,7 @@ class BlockwiseSelection
   getBufferRange: ->
     start = @getHead().getHeadBufferPosition()
     end = @getTail().getTailBufferPosition()
-    if @headReversedStateIsInSync()
+    if @isSingleLine() or @headReversedStateIsInSync()
       new Range(start, end)
     else
       new Range(start, end).translate([0, -1], [0, +1])
@@ -130,7 +126,7 @@ class BlockwiseSelection
       selection.cursor.setBufferPosition(point)
 
   getGoalColumn: ->
-    @getGoalColumn ? @getHead().getHeadBufferPosition().column
+    @goalColumn ? @getHead().getHeadBufferPosition().column
 
   addSelection: (baseSelection, direction) ->
     {start, end} = baseSelection.getBufferRange()
@@ -166,6 +162,10 @@ class BlockwiseSelection
 
   clearSelections: ({except}={}) ->
     for selection in @selections.slice() when (selection isnt except)
+      @removeSelection(selection)
+
+  removeEmptySelections: ->
+    for selection in @selections.slice() when selection.isEmpty()
       @removeSelection(selection)
 
   removeSelection: (selection) ->

@@ -84,10 +84,8 @@ class Motion extends Base
         when @isBlockwise() then @selectBlockwise(selection)
 
   selectLinewise: (selection) ->
-    reportSelection('selectLinewise before:', selection)
     swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
     swrap(selection).expandOverLine(preserveGoalColumn: true)
-    reportSelection('selectLinewise after:', selection)
 
   selectBlockwise: (selection) ->
     @vimState.addBlockwiseSelectionFromSelection(selection)
@@ -101,20 +99,14 @@ class Motion extends Base
   selectInclusively: (selection) ->
     {cursor} = selection
     originalPoint = cursor.getBufferPosition()
-
-    reportSelection('selectInclusively before:', selection)
-    logGoalColumnForSelection("before selectInclusively", selection)
-
     tailRange = swrap(selection).getTailBufferRange()
     selection.modifySelection =>
       @moveCursor(cursor)
-      reportSelection('selectInclusively after MoveCursor:', selection)
 
       if @isMode('visual')
         if cursor.isAtEndOfLine()
           # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
           moveCursorLeft(cursor, {preserveGoalColumn: true})
-          reportSelection('selectInclusively moveLeft', selection)
       else
         # Return since not movement was happend, nothing to do left.
         return if cursor.getBufferPosition().isEqual(originalPoint)
@@ -125,14 +117,10 @@ class Motion extends Base
         allowWrap = cursorIsAtEmptyRow(cursor)
         # [FIXME] SCATTERED_CURSOR_ADJUSTMENT: -> NECESSARY
         moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
-        reportSelection('selectInclusively moveRight', selection)
 
       # Merge tailRange(= under cursor range where you start selection) into selection
       newRange = selection.getBufferRange().union(tailRange)
       selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
-
-    logGoalColumnForSelection("after selectInclusively", selection)
-    reportSelection('selectInclusively after:', selection)
 
   # Normalize visual-mode cursor position
   # The purpose for this is @moveCursor works consistently in both normal and visual mode.
@@ -144,12 +132,9 @@ class Motion extends Base
     # e.g. BlockwiseDeleteToLastCharacterOfLine
     for selection in @editor.getSelections()
       continue if (selection.isReversed() or selection.isEmpty())
-      reportSelection('normalize before:', selection)
       selection.modifySelection ->
         # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
-        reportSelection('normalize moveLeft', selection)
-      reportSelection('normalize after:', selection)
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
