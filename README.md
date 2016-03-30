@@ -22,7 +22,7 @@ As you can see in commit history, this project is originally started by forking 
   - [vim-surround](https://atom.io/packages/vim-surround): surround feature included vim-mode-plus, so you won't need this.
   - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block): (my package) builtin to vim-mode-plus with better integration.
 - Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
-- Internal code base is very different. Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT** report vim-mode-plus's issue or PRs to official vim-mode.
+- Internal code base is very different. Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT report vim-mode-plus's issue or PRs to official vim-mode.**
 
 # FAQ
 
@@ -31,9 +31,15 @@ As you can see in commit history, this project is originally started by forking 
 - Changes are too big.
 - Some features are too experimental to merge official vim-mode.
 
+### In visual-block mode, some motion make editor slow, freeze.
+
+Not freezing, its just VERY slow.  
+You can workaround to disable some keymap. See [#214](https://github.com/t9md/atom-vim-mode-plus/issues/214).
+
 ### ex-mode?
 
-- Currently not. Refer [#52](https://github.com/t9md/atom-vim-mode-plus/issues/52).
+- Very immature package [vim-mode-plus-ex-mode](https://atom.io/packages/vim-mode-plus-ex-mode) is exists.
+- My thought for ex-mode is [here #52](https://github.com/t9md/atom-vim-mode-plus/issues/52).
 
 ### Want to suppress autocomplete-plus's auto suggestion except insert-mode.
 
@@ -63,6 +69,7 @@ If you want to directly edit `config.cson`, here it is.
 - [Keymap example](https://github.com/t9md/atom-vim-mode-plus/wiki/Keymap-example).
 - [Extend vmp in init file](https://github.com/t9md/atom-vim-mode-plus/wiki/Extend-vmp-in-init-file)
 - [Create vmp plugin](https://github.com/t9md/atom-vim-mode-plus/wiki/Create-vmp-plugin)
+- [List of vmp plugins](ttps://github.com/t9md/atom-vim-mode-plus/wiki/List-of-vmp-plugins)
 
 ## Keymap
 
@@ -75,8 +82,10 @@ Some of the keymap is not set by default, check following link for reference.
 
 # Helper packages
 
-Here is the list of my packages which provide more vim-like experience.  
-Why I don't builtin these feature? Its because it take time and some feature is useful for non-vim user.
+- [List of vmp plugins](ttps://github.com/t9md/atom-vim-mode-plus/wiki/List-of-vmp-plugins)
+
+Below is list of my packages which provide more vim-like experience.  
+Why I don't builtin these feature? Because it take more time and some feature is useful for non-vim user.
 
 - [cursor-history](https://atom.io/packages/cursor-history)
 provides <kbd>c-i</kbd>, <kbd>c-o</kbd> to go/back cursor position history.
