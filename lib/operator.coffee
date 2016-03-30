@@ -196,7 +196,7 @@ class DeleteToLastCharacterOfLine extends Delete
 
     if @isVisualBlockwise
       pointByBlockwiseSelection.forEach (point, bs) ->
-        bs.setBufferPosition(point)
+        bs.setHeadBufferPosition(point)
 
 # -------------------------
 class TransformString extends Operator
