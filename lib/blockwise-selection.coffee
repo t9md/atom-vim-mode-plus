@@ -1,7 +1,7 @@
 {Range} = require 'atom'
 _ = require 'underscore-plus'
 
-{sortRanges, getBufferRows} = require './utils'
+{sortRanges, getBufferRows, logGoalColumnForSelection} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
@@ -10,6 +10,7 @@ class BlockwiseSelection
     @initialize(selection)
 
   initialize: (selection) ->
+    logGoalColumnForSelection("start initialize", selection)
     {@goalColumn} = selection.cursor
     @selections = [selection]
     wasReversed = reversed = selection.isReversed()
@@ -23,8 +24,10 @@ class BlockwiseSelection
         range = range.translate([0, 1], [0, -1])
 
       {start, end} = range
+      # endColumn = @goalColumn ? end.column
+      endColumn = end.column
       ranges = [start.row..end.row].map (row) ->
-        [[row, start.column], [row, end.column]]
+        [[row, start.column], [row, endColumn]]
 
       selection.setBufferRange(ranges.shift(), {reversed})
       newSelections = ranges.map (range) =>
@@ -36,6 +39,8 @@ class BlockwiseSelection
           @selections.push(selection)
     @updateProperties()
     @reverse() if wasReversed
+    # for selection in @selections
+    #   logGoalColumnForSelection("finish initialize", selection)
 
   updateProperties: ->
     head = @getHead()

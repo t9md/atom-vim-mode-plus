@@ -51,6 +51,9 @@ class Motion extends Base
     else
       @linewise
 
+  isBlockwise: ->
+    @isMode('visual', 'blockwise')
+
   isInclusive: ->
     if @isMode('visual')
       @isMode('visual', ['characterwise', 'blockwise'])
@@ -62,24 +65,29 @@ class Motion extends Base
       @moveCursor(cursor)
 
   select: ->
-    if @isMode('visual', 'blockwise')
-      @vimState.modeManager.restoreCharacterwiseRange()
+    @normalizeVisualModeCursorPositions() if @isMode('visual')
 
     for selection in @editor.getSelections()
       if @isInclusive() or @isLinewise()
-        @normalizeVisualModeCursorPosition(selection) if @isMode('visual')
         @selectInclusively(selection)
-        if @isLinewise()
-          swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
-          swrap(selection).expandOverLine(preserveGoalColumn: true)
-        if @isMode('visual', 'blockwise')
-          @vimState.addBlockwiseSelectionFromSelection(selection)
       else
         selection.modifySelection =>
           @moveCursor(selection.cursor)
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
+
+    for selection in @editor.getSelections()
+      switch
+        when @isLinewise() then @selectLinewise(selection)
+        when @isBlockwise() then @selectBlockwise(selection)
+
+  selectLinewise: (selection) ->
+    swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
+    swrap(selection).expandOverLine(preserveGoalColumn: true)
+
+  selectBlockwise: (selection) ->
+    @vimState.addBlockwiseSelectionFromSelection(selection)
 
   # Modify selection inclusively
   # -------------------------
@@ -89,6 +97,7 @@ class Motion extends Base
   #  This adjustment is important so that j, k works without special care in moveCursor.
   selectInclusively: (selection) ->
     {cursor} = selection
+    logGoalColumnForSelection("before selectInclusively",selection)
     selection.modifySelection =>
       tailRange = swrap(selection).getTailBufferRange()
       @moveCursor(cursor)
@@ -108,18 +117,18 @@ class Motion extends Base
       # Merge tailRange(= under cursor range where you start selection) into selection
       newRange = selection.getBufferRange().union(tailRange)
       selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
+      logGoalColumnForSelection("after selectInclusively",selection)
 
   # Normalize visual-mode cursor position
   # The purpose for this is @moveCursor works consistently in both normal and visual mode.
-  normalizeVisualModeCursorPosition: (selection) ->
-    if @isMode('visual', 'linewise')
-      swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
-
+  normalizeVisualModeCursorPositions: ->
+    @vimState.modeManager.restoreCharacterwiseRange()
     # We selectRight()ed in visual-mode, so reset this effect here.
     # For selection.isEmpty() guard, selection possibily become in case selection is
     # cleared without calling vimState.modeManager.activate().
     # e.g. BlockwiseDeleteToLastCharacterOfLine
-    unless selection.isReversed() or selection.isEmpty()
+    for selection in @editor.getSelections()
+      continue if (selection.isReversed() or selection.isEmpty())
       selection.modifySelection ->
         # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
