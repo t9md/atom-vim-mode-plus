@@ -20,8 +20,12 @@ class BlockwiseSelection
       range = selection.getBufferRange()
       if range.end.column is 0
         range.end.row = range.end.row - 1
-      if @goalColumn? and not wasReversed
-        range.end.column = @goalColumn + 1
+
+      if @goalColumn?
+        if wasReversed
+          range.start.column = @goalColumn
+        else
+          range.end.column = @goalColumn + 1
 
       if range.start.column >= range.end.column
         reversed = not reversed
@@ -107,17 +111,18 @@ class BlockwiseSelection
     @initialize(head)
 
   getBufferRange: ->
-    start = @getHead().getHeadBufferPosition()
-    end = @getTail().getTailBufferPosition()
+    head = @getHead().getHeadBufferPosition()
+    tail = @getTail().getTailBufferPosition()
+
     if @isReversed()
-      end.row += 1 if end.column is 0
+      tail.row += 1 if tail.column is 0
     else
-      start.row += 1 if start.column is 0
+      head.row += 1 if head.column is 0
 
     if @isSingleLine() or @headReversedStateIsInSync()
-      new Range(start, end)
+      new Range(head, tail)
     else
-      new Range(start, end).translate([0, -1], [0, +1])
+      new Range(head, tail).translate([0, -1], [0, +1])
 
   # which must be 'start' or 'end'
   setPositionForSelections: (which) ->
