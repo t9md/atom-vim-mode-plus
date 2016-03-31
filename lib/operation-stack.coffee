@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
 
-{CompositeDisposable} = require 'atom'
+{Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
 {moveCursorLeft} = require './utils'
 settings = require './settings'
@@ -8,7 +8,7 @@ settings = require './settings'
 
 class OperationStack
   constructor: (@vimState) ->
-    {@editor} = @vimState
+    {@editor, @editorElement} = @vimState
     CurrentSelection ?= Base.getClass('CurrentSelection')
     Select ?= Base.getClass('Select')
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
@@ -36,6 +36,12 @@ class OperationStack
     operation
 
   run: (klass, properties) ->
+    # Temporary set while command is running
+    scope = klass.getCommandNameWithoutPrefix()
+    @editorElement.classList.add(scope)
+    @subscribe new Disposable =>
+      @editorElement.classList.remove(scope)
+
     klass = Base.getClass(klass) if _.isString(klass)
     try
       # When identical operator repeated, it set target to MoveToRelativeLine.

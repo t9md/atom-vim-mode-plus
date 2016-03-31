@@ -219,6 +219,9 @@ class Base
   @getCommandName: ->
     @commandPrefix + ':' + _.dasherize(@name)
 
+  @getCommandNameWithoutPrefix: ->
+    _.dasherize(@name)
+
   @commandScope: 'atom-text-editor'
   @getCommandScope: ->
     @commandScope
