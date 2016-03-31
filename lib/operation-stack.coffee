@@ -37,10 +37,14 @@ class OperationStack
 
   run: (klass, properties) ->
     # Temporary set while command is running
-    scope = klass.getCommandNameWithoutPrefix()
-    @editorElement.classList.add(scope)
-    @subscribe new Disposable =>
-      @editorElement.classList.remove(scope)
+    if scope = klass.getCommandNameWithoutPrefix?()
+      # [NOTE]
+      # adding/removing 'replace' css class conflicts with `insert-mode.replace` mode.
+      # Activated with `R`. So simply make `replace` as exeption.
+      unless scope is 'replace'
+        @editorElement.classList.add(scope)
+        @subscribe new Disposable =>
+          @editorElement.classList.remove(scope)
 
     klass = Base.getClass(klass) if _.isString(klass)
     try
