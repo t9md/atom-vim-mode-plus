@@ -117,7 +117,7 @@ atom-text-editor.vim-mode-plus.operator-pending-mode.is-focused
 
 // Flash ranges e.g. flashing yanked range.
 // =========================
-atom-text-editor::shadow {
+atom-text-editor, atom-text-editor::shadow {
   .vim-mode-plus-flash .region {
     z-index: 1;
     background-color: fadeout(@syntax-selection-flash-color, 50%);
@@ -216,7 +216,8 @@ atom-text-editor[mini].vim-mode-plus-search {
     border-radius: @component-border-radius;
   }
 }
-atom-text-editor::shadow {
+
+atom-text-editor, atom-text-editor::shadow {
   .vim-mode-plus-search-match .region {
     .vim-mode-plus.round-box;
     background-color: transparent;
