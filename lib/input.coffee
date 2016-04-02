@@ -19,12 +19,6 @@ class InputBase
     @vimState.onDidFailToSetTarget =>
       @cancel()
 
-    atom.commands.add @editorElement,
-      'core:confirm': => @confirm()
-      'core:cancel': => @cancel()
-      'blur': => @cancel() unless @finished
-      'vim-mode-plus:input-cancel': => @cancel()
-
     @editor.onDidChange =>
       return if @finished
       text = @editor.getText()
@@ -32,16 +26,25 @@ class InputBase
       if (charsMax = @options?.charsMax) and text.length >= @options.charsMax
         @confirm()
 
+  handleEvents: ->
+    atom.commands.add @editorElement,
+      'core:confirm': => @confirm()
+      'core:cancel': => @cancel()
+      'blur': => @cancel() unless @finished
+      'vim-mode-plus:input-cancel': => @cancel()
+
   focus: (@options={}) ->
     @finished = false
     @view.panel.show()
     @editorElement.focus()
+    @commandSubscriptions = @handleEvents()
     # Cancel on tab switch
     disposable = atom.workspace.onDidChangeActivePaneItem =>
       disposable.dispose()
       @cancel() unless @finished
 
   unfocus: ->
+    @commandSubscriptions?.dispose()
     @finished = true
     @emitter.emit 'did-unfocus'
     atom.workspace.getActivePane().activate()
