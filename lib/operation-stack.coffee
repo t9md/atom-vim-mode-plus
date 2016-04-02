@@ -36,16 +36,6 @@ class OperationStack
     operation
 
   run: (klass, properties) ->
-    # Temporary set while command is running
-    if scope = klass.getCommandNameWithoutPrefix?()
-      # [NOTE]
-      # adding/removing 'replace' css class conflicts with `insert-mode.replace` mode.
-      # Activated with `R`. So simply make `replace` as exeption.
-      unless scope is 'replace'
-        @editorElement.classList.add(scope)
-        @subscribe new Disposable =>
-          @editorElement.classList.remove(scope)
-
     klass = Base.getClass(klass) if _.isString(klass)
     try
       # When identical operator repeated, it set target to MoveToRelativeLine.
@@ -77,6 +67,13 @@ class OperationStack
       else
         if @vimState.isMode('normal') and @peekTop().isOperator()
           @vimState.activate('operator-pending')
+
+        # Temporary set while command is running
+        if scope = @peekTop().constructor.getCommandNameWithoutPrefix?()
+          scope += "-pending"
+          @editorElement.classList.add(scope)
+          @subscribe new Disposable =>
+            @editorElement.classList.remove(scope)
     catch error
       if error.instanceof?('OperatorError')
         @vimState.activate('reset')
@@ -121,12 +118,12 @@ class OperationStack
     @vimState.reset()
 
   peekTop: ->
-    _.last @stack
+    _.last(@stack)
 
   reduce: ->
-    until @stack.length is 1
+    until @stack.length < 2
       operation = @stack.pop()
-      _.last(@stack).setTarget(operation)
+      @peekTop().setTarget(operation)
 
   reset: ->
     @stack = []
