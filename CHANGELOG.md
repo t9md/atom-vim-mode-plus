@@ -1,3 +1,7 @@
+# 0.30.0
+- Fix: No longer necessary to set `editor.useShadowDOM` enabled to use vmp #218
+- New: [Experimental] Set `yank-pending`, `delete-pending` scope for granular keymap setting #215.
+
 # 0.29.0
 - Improve: cleanup `operation-stack.coffee`
 - Internal: New convention. use `Operator::mutateSelection`
