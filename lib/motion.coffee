@@ -128,11 +128,11 @@ class Motion extends Base
     # For selection.isEmpty() guard, selection possibily become in case selection is
     # cleared without calling vimState.modeManager.activate().
     # e.g. BlockwiseDeleteToLastCharacterOfLine
-    for selection in @editor.getSelections()
-      continue if (selection.isReversed() or selection.isEmpty())
-      selection.modifySelection ->
-        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
-        moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
+    @editor.getSelections().forEach (selection) ->
+      if not (selection.isReversed() or selection.isEmpty())
+        selection.modifySelection ->
+          # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
+          moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
