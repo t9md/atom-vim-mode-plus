@@ -50,6 +50,8 @@ module.exports =
       workspaceElement.classList.remove(selector)
 
       if atom.workspace.isTextEditor?(item)
+        # Still there is possibility editor is destroyed and don't have corresponding
+        # vimState #196.
         @getEditorState(item)?.refreshHighlightSearch()
 
     @onDidSetHighlightSearchPattern =>
