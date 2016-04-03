@@ -50,7 +50,7 @@ module.exports =
       workspaceElement.classList.remove(selector)
 
       if atom.workspace.isTextEditor?(item)
-        @getEditorState(item).refreshHighlightSearch()
+        @getEditorState(item)?.refreshHighlightSearch()
 
     @onDidSetHighlightSearchPattern =>
       @refreshHighlightSearchForVisibleEditors()
