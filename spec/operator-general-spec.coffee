@@ -743,7 +743,7 @@ describe "Operator general", ->
         mode: ['visual', 'characterwise']
 
     it "replaces a single character with a line break", ->
-      inputEditorElement = vimState.input.view.editorElement
+      inputEditorElement = vimState.input.editorElement
       keystroke 'r'
       dispatch(inputEditorElement, 'core:confirm')
       ensure

@@ -8,7 +8,6 @@ globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
 {Hover, HoverElement} = require './hover'
-{Input, InputElement, SearchInput, SearchInputElement} = require './input'
 {getVisibleEditors} = require './utils'
 
 module.exports =
@@ -128,8 +127,6 @@ module.exports =
   registerViewProviders: ->
     addView = atom.views.addViewProvider.bind(atom.views)
     addView Hover, (model) -> new HoverElement().initialize(model)
-    addView Input, (model) -> new InputElement().initialize(model)
-    addView SearchInput, (model) -> new SearchInputElement().initialize(model)
 
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)

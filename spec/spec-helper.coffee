@@ -348,9 +348,9 @@ class VimEditor
               else
                 k.char.split('')
             for c in chars
-              @vimState.input.view.editor.insertText(c)
+              @vimState.input.editor.insertText(c)
           when k.search?
-            {editor, editorElement} = @vimState.searchInput.view
+            {editor, editorElement} = @vimState.searchInput
             editor.insertText(k.search)
             atom.commands.dispatch(editorElement, 'core:confirm')
           when k.ctrl? then _keystroke(k.ctrl, {ctrl: true, element})

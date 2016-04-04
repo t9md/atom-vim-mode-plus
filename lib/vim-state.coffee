@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 settings = require './settings'
 globalState = require './global-state'
 {Hover} = require './hover'
-{Input, SearchInput} = require './input'
+{InputElement, SearchInputElement} = require './input'
 {haveSomeSelection, highlightRanges, getVisibleBufferRange} = require './utils'
 swrap = require './selection-wrapper'
 
@@ -39,8 +39,8 @@ class VimState
     @hoverSearchCounter = new Hover(this)
 
     @searchHistory = new SearchHistoryManager(this)
-    @input = new Input(this)
-    @searchInput = new SearchInput(this)
+    @input = new InputElement().initialize(this)
+    @searchInput = new SearchInputElement().initialize(this)
     @operationStack = new OperationStack(this)
     @cursorStyleManager = new CursorStyleManager(this)
     @blockwiseSelections = []

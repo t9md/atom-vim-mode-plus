@@ -165,7 +165,7 @@ describe "VimState", ->
         ensure 'dr',
           mode: 'normal'
         expect(vimState.operationStack.isEmpty()).toBe(true)
-        target = vimState.input.view.editorElement
+        target = vimState.input.editorElement
         keystroke 'd'
         atom.commands.dispatch(target, 'core:cancel')
         ensure text: '012345\nabcdef'

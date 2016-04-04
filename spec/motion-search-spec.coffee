@@ -215,10 +215,9 @@ describe "Motion Search", ->
       beforeEach ->
         ensure ['/', search: 'def'], cursor: [1, 0]
         ensure ['/', search: 'abc'], cursor: [2, 0]
-        inputEditor = vimState.searchInput.view.editorElement
+        inputEditor = vimState.searchInput.editorElement
 
       it "allows searching history in the search field", ->
-        _editor = inputEditor.getModel()
         keystroke '/'
         ensureInputEditor 'core:move-up', text: 'abc'
         ensureInputEditor 'core:move-up', text: 'def'
