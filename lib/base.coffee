@@ -184,7 +184,7 @@ class Base
 
     require(lib) for lib in [
       './operator', './motion', './text-object',
-      './insert-mode', './misc-commands', './scroll'
+      './insert-mode', './misc-commands'
     ]
     for __, klass of @getRegistries() when klass.isCommand()
       @subscriptions.add klass.registerCommand()
