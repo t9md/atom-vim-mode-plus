@@ -136,14 +136,11 @@ class MaximizePane extends MiscCommand
     workspaceElement = atom.views.getView(atom.workspace)
     workspaceElement.classList.toggle(selector)
 
-class Scroll extends Base
+# [FIXME] Name Scroll is misleading, AdjustVisibleArea is more explicit.
+class Scroll extends MiscCommand
   @extend(false)
   scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
   cursorPixel: null
-
-  constructor: ->
-    super
-    @initialize?()
 
   getFirstVisibleScreenRow: ->
     @editorElement.getFirstVisibleScreenRow()
@@ -248,7 +245,6 @@ class ScrollCursorToMiddleLeave extends ScrollCursorToMiddle
 # zs
 class ScrollCursorToLeft extends Scroll
   @extend()
-  direction: 'left'
 
   execute: ->
     @editorElement.setScrollLeft(@getCursorPixel().left)
@@ -256,7 +252,6 @@ class ScrollCursorToLeft extends Scroll
 # ze
 class ScrollCursorToRight extends ScrollCursorToLeft
   @extend()
-  direction: 'right'
 
   execute: ->
     @editorElement.setScrollRight(@getCursorPixel().left)
