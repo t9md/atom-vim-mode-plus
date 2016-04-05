@@ -64,7 +64,7 @@ class Motion extends Base
       @moveCursor(cursor)
 
   select: ->
-    @normalizeVisualModeCursorPositions() if @isMode('visual')
+    @vimState.modeManager.normalizeSelections() if @isMode('visual')
 
     for selection in @editor.getSelections()
       if @isInclusive() or @isLinewise()
@@ -118,21 +118,6 @@ class Motion extends Base
         moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
 
       swrap(selection).mergeBufferRange(tailRange, {preserveFolds: true})
-
-  # Normalize visual-mode cursor position
-  # The purpose for this is @moveCursor works consistently in both normal and visual mode.
-  normalizeVisualModeCursorPositions: ->
-    @vimState.modeManager.restoreCharacterwiseRange()
-    # We selectRight()ed in visual-mode, so reset this effect here.
-    # For selection.isEmpty() guard, selection possibily become in case selection is
-    # cleared without calling vimState.modeManager.activate().
-    # e.g. BlockwiseDeleteToLastCharacterOfLine
-    @editor.getSelections().forEach (selection) ->
-      swrap(selection).preserveCharacterwise()
-      if not (selection.isReversed() or selection.isEmpty())
-        selection.modifySelection ->
-          # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
-          moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion

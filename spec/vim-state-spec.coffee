@@ -392,7 +392,8 @@ describe "VimState", ->
           ensure 'j', selectedText: text.getLines([0..2]), characterwiseHead: [2, 6], mode: ['visual', 'linewise']
           ensure 'v', selectedText: text.getLines([0..2], chomp: true), characterwiseHead: [2, 6], mode: ['visual', 'characterwise']
           ensure 'j', selectedText: text.getLines([0..3], chomp: true), cursor: [3, 11], mode: ['visual', 'characterwise']
-          ensure 'j', selectedText: text.getLines([0..4], chomp: true), cursor: [4, 16], mode: ['visual', 'characterwise']
+          ensure 'v', cursor: [3, 10], mode: 'normal'
+          ensure 'j', cursor: [4, 15], mode: 'normal'
 
     describe "deactivating visual mode", ->
       beforeEach ->

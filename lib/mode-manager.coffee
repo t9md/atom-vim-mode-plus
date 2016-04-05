@@ -129,16 +129,8 @@ class ModeManager
             @vimState.addBlockwiseSelectionFromSelection(selection)
 
     new Disposable =>
-      @restoreCharacterwiseRange()
-
-      unless (selection = @editor.getLastSelection()).isEmpty()
-        @preservePreviousSelection(selection)
-
-      @editor.getSelections().forEach (selection) ->
-        # `vc`, `vs` make selection empty
-        if (not selection.isReversed() and not selection.isEmpty())
-          # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
-          selection.selectLeft()
+      @normalizeSelections(preserve: true)
+      for selection in @editor.getSelections()
         selection.clear(autoscroll: false)
 
   # Prepare function to restore selection by `gv`
@@ -166,5 +158,20 @@ class ModeManager
 
     @editor.getSelections().forEach (selection) ->
       swrap(selection).resetProperties()
+
+  normalizeSelections: (options={}) ->
+    @restoreCharacterwiseRange()
+    if options.preserve
+      unless (selection = @editor.getLastSelection()).isEmpty()
+        @preservePreviousSelection(selection)
+
+    # We selectRight()ed in visual-mode, so reset this effect here.
+    @editor.getSelections().forEach (selection) ->
+      swrap(selection).preserveCharacterwise()
+      # `vc`, `vs` make selection empty
+      unless (selection.isReversed() or selection.isEmpty())
+        selection.modifySelection ->
+          # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
+          moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
 module.exports = ModeManager
