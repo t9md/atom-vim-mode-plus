@@ -219,6 +219,7 @@ class Developer
     generateIntrospectionReport _.values(Base.getRegistries()),
       excludeProperties: [
         'run'
+        'getCommandNameWithoutPrefix'
         'getClass', 'extend', 'getParent', 'getAncestors', 'isCommand'
         'getRegistries', 'command', 'reset'
         'getDesctiption', 'description'

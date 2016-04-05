@@ -60,7 +60,7 @@ excludeProperties = ['__super__']
 
 inspectObject = (obj, options={}, prototype=false) ->
   excludeList = excludeProperties.concat (options.excludeProperties ? [])
-  options.depth ?= 0
+  options.depth ?= 1
   prefix = '@'
   if prototype
     obj = obj.prototype
