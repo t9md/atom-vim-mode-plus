@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{getVimState} = require './spec-helper'
+{getVimState, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "VimState", ->
@@ -371,6 +371,29 @@ describe "VimState", ->
           ensure 'V', selectedText: ["line one\n", "line three\n"]
           ensure 'v', selectedText: ["one", "three"]
 
+      describe "keep goalColum when submode change in visual-mode", ->
+        text = null
+        beforeEach ->
+          text = new TextData """
+          0_34567890ABCDEF
+          1_34567890
+          2_34567
+          3_34567890A
+          4_34567890ABCDEF\n
+          """
+          set
+            text: text.getRaw()
+            cursor: [0, 0]
+
+        it "keep goalColumn when shift linewise to characterwise", ->
+          ensure 'V', selectedText: text.getLines([0]), characterwiseHead: [0, 0], mode: ['visual', 'linewise']
+          ensure '$', selectedText: text.getLines([0]), characterwiseHead: [0, 15], mode: ['visual', 'linewise']
+          ensure 'j', selectedText: text.getLines([0, 1]), characterwiseHead: [1, 9], mode: ['visual', 'linewise']
+          ensure 'j', selectedText: text.getLines([0..2]), characterwiseHead: [2, 6], mode: ['visual', 'linewise']
+          ensure 'v', selectedText: text.getLines([0..2], chomp: true), characterwiseHead: [2, 6], mode: ['visual', 'characterwise']
+          ensure 'j', selectedText: text.getLines([0..3], chomp: true), cursor: [3, 11], mode: ['visual', 'characterwise']
+          ensure 'j', selectedText: text.getLines([0..4], chomp: true), cursor: [4, 16], mode: ['visual', 'characterwise']
+
     describe "deactivating visual mode", ->
       beforeEach ->
         ensure 'escape', mode: 'normal'
@@ -416,7 +439,6 @@ describe "VimState", ->
       it "ctrl-v", ->
         ensure {ctrl: 'v'}, mode: ['visual', 'blockwise'], cursor: [2, 0]
         ensure 'escape', mode: 'normal', cursor: [1, 0]
-
 
   describe "marks", ->
     beforeEach -> set text: "text in line 1\ntext in line 2\ntext in line 3"

@@ -135,7 +135,6 @@ class ModeManager
         @preservePreviousSelection(selection)
 
       @editor.getSelections().forEach (selection) ->
-        swrap(selection).resetProperties()
         # `vc`, `vs` make selection empty
         if (not selection.isReversed() and not selection.isEmpty())
           # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
@@ -153,11 +152,10 @@ class ModeManager
       submode
 
   restoreCharacterwiseRange: ->
-    return if @submode is 'characterwise'
     switch @submode
       when 'linewise'
-        @editor.getSelections().forEach (selection) ->
-          swrap(selection).restoreCharacterwise() unless selection.isEmpty()
+        for selection in @editor.getSelections() when not selection.isEmpty()
+          swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
       when 'blockwise'
         for blockwiseSelection in @vimState.getBlockwiseSelections()
           # When all selection is empty, we don't want to loose multi-cursor
@@ -165,5 +163,8 @@ class ModeManager
           unless blockwiseSelection.selections.every((selection) -> selection.isEmpty())
             blockwiseSelection.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
+
+    @editor.getSelections().forEach (selection) ->
+      swrap(selection).resetProperties()
 
 module.exports = ModeManager

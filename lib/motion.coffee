@@ -128,6 +128,7 @@ class Motion extends Base
     # cleared without calling vimState.modeManager.activate().
     # e.g. BlockwiseDeleteToLastCharacterOfLine
     @editor.getSelections().forEach (selection) ->
+      swrap(selection).preserveCharacterwise()
       if not (selection.isReversed() or selection.isEmpty())
         selection.modifySelection ->
           # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
