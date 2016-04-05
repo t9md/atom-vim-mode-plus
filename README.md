@@ -28,13 +28,13 @@ As you can see in commit history, this project is originally started by forking 
 
 ### Why fork? why not directly contribute to official vim-mode?
 
-- Changes are too big.
-- Some features are too experimental to merge official vim-mode.
+- Changes are [too big](https://github.com/t9md/atom-vim-mode-plus/graphs/contributors).
+- I felt many features are too experimental to merge to official vim-mode.
 
 ### In visual-block mode, some motion make editor slow, freeze.
 
 Not freezing, its just VERY slow.  
-You can workaround to disable some keymap. See [#214](https://github.com/t9md/atom-vim-mode-plus/issues/214).
+You can workaround by disabling some keymap. See [#214](https://github.com/t9md/atom-vim-mode-plus/issues/214).
 
 ### ex-mode?
 
