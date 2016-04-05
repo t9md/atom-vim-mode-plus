@@ -398,6 +398,23 @@ class MoveToEndOfAlphanumericWord extends MoveToEndOfWord
   @description: "Move to end of alphanumeric(`/\w+/`) word"
   wordRegex: /\w+/
 
+# Alphanumeric word [Experimental]
+# -------------------------
+class MoveToNextSmartWord extends MoveToNextWord
+  @extend()
+  @description: "Move to next smart word (`/[\w-]+/`) word"
+  wordRegex: /[\w-]+/g
+
+class MoveToPreviousSmartWord extends MoveToPreviousWord
+  @extend()
+  @description: "Move to previous smart word (`/[\w-]+/`) word"
+  wordRegex: /[\w-]+/
+
+class MoveToEndOfSmartWord extends MoveToEndOfWord
+  @extend()
+  @description: "Move to end of smart word (`/[\w-]+/`) word"
+  wordRegex: /[\w-]+/
+
 # Paragraph
 # -------------------------
 class MoveToNextParagraph extends Motion
