@@ -1,3 +1,12 @@
+# 0.31.0:
+- Fix: Guard for calling `refreshHighlightSearch` against destroyed editor #196
+- Internal: Quit model, view separation for `Input` and `SearchInput`
+- Rename: `misc-commands.coffee` to `misc-command.coffee`
+- Internal: move `scroll.coffee` code to `misc-command.coffee`
+- New: add `SmartWord` based motions(`MoveToNextSmartWord`, `MoveToPreviousSmartWord`, `MoveToEndOfSmartWord`)
+- Fix: `goalColumn` incorrectly reset on `vL` mode. #220
+- Improve: keep `goalColumn` in `vL` to `vC`, `vC` to `n`.
+
 # 0.30.0
 - Fix: No longer necessary to set `editor.useShadowDOM` enabled to use vmp #218
 - New: [Experimental] Set `yank-pending`, `delete-pending` scope for granular keymap setting #215.
