@@ -339,25 +339,25 @@ moveCursorLeft = (cursor, options={}) ->
   delete options.allowWrap
 
   if not cursor.isAtBeginningOfLine() or allowWrap
-    move = (cursor) -> cursor.moveLeft()
-    moveCursor(cursor, options, move)
+    motion = (cursor) -> cursor.moveLeft()
+    moveCursor(cursor, options, motion)
 
 moveCursorRight = (cursor, options={}) ->
   {allowWrap} = options
   delete options.allowWrap
   if not cursor.isAtEndOfLine() or allowWrap
-    move = (cursor) -> cursor.moveRight()
-    moveCursor(cursor, options, move)
+    motion = (cursor) -> cursor.moveRight()
+    moveCursor(cursor, options, motion)
 
 moveCursorUp = (cursor, options={}) ->
   unless cursor.getScreenRow() is 0
-    move = (cursor) -> cursor.moveUp()
-    moveCursor(cursor, options, move)
+    motion = (cursor) -> cursor.moveUp()
+    moveCursor(cursor, options, motion)
 
 moveCursorDown = (cursor, options={}) ->
   unless getVimLastScreenRow(cursor.editor) is cursor.getScreenRow()
-    move = (cursor) -> cursor.moveDown()
-    moveCursor(cursor, options, move)
+    motion = (cursor) -> cursor.moveDown()
+    moveCursor(cursor, options, motion)
 
 # FIXME
 moveCursorDownBuffer = (cursor) ->
