@@ -47,7 +47,6 @@ class ModeManager
       when 'normal' then @activateNormalMode()
       when 'insert' then @activateInsertMode(submode)
       when 'visual' then @activateVisualMode(submode)
-      when 'operator-pending' then new Disposable # Nothing to do.
 
     # Remove OLD mode, submode CSS class
     @editorElement.classList.remove("#{@mode}-mode")

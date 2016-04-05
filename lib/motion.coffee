@@ -97,6 +97,7 @@ class Motion extends Base
   selectInclusively: (selection) ->
     {cursor} = selection
     originalPoint = cursor.getBufferPosition()
+    # save tailRange(range under cursor) before we start to modify selection
     tailRange = swrap(selection).getTailBufferRange()
     selection.modifySelection =>
       @moveCursor(cursor)
@@ -116,9 +117,7 @@ class Motion extends Base
         # [FIXME] SCATTERED_CURSOR_ADJUSTMENT: -> NECESSARY
         moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
 
-      # Merge tailRange(= under cursor range where you start selection) into selection
-      newRange = selection.getBufferRange().union(tailRange)
-      selection.setBufferRange(newRange, {autoscroll: false, preserveFolds: true})
+      swrap(selection).mergeBufferRange(tailRange, {preserveFolds: true})
 
   # Normalize visual-mode cursor position
   # The purpose for this is @moveCursor works consistently in both normal and visual mode.

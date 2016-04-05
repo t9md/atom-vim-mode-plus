@@ -43,6 +43,9 @@ class SelectionWrapper
     point = @getBufferPositionFor(which)
     @selection.cursor.setBufferPosition(point)
 
+  mergeBufferRange: (range, option) ->
+    @setBufferRange(@getBufferRange().union(range), option)
+
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
@@ -137,7 +140,6 @@ class SelectionWrapper
     # [NOTE] Important! reset to null after restored.
     @resetProperties()
     @selection.cursor.goalColumn = goalColumn if goalColumn
-
 
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->
