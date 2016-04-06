@@ -1,4 +1,12 @@
-# 0.31.0:
+# 0.32.0:
+- Improve: Further coverage of `gv` support. Not yet complete but much better.
+- Improve: Respect `stayOnYank`, `stanOnOperate` on `visual-mode` #221
+- Fix: `TransformStringByExternalCommand` throw error on `OperationStack::finish` because of incorrect argument.
+- Fix: Correctly unfocus input mini editor when `SurroundAnyPair` can't find(detect) pair chars..
+- Internal: Update charactewrise selection properties in `visual-mode` selection modification by Motion, TextObject.
+- Improve: Don't flash in `visual-mode` even if `flashOnOperate` have enabled.
+
+# 0.31.0:                   
 - Fix: Guard for calling `refreshHighlightSearch` against destroyed editor #196
 - Internal: Quit model, view separation for `Input` and `SearchInput`
 - Rename: `misc-commands.coffee` to `misc-command.coffee`
