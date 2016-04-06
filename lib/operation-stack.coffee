@@ -84,7 +84,7 @@ class OperationStack
   execute: (operation) ->
     execution = operation.execute()
     if execution instanceof Promise
-      onResolve = @finish.bind(this, [operation])
+      onResolve = @finish.bind(this, operation)
       onReject = @handleError.bind(this)
       execution.then(onResolve).catch(onReject)
     else
