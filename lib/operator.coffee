@@ -7,7 +7,6 @@ _ = require 'underscore-plus'
   haveSomeSelection, getVimEofBufferPosition
   moveCursorLeft, moveCursorRight
   highlightRanges, getNewTextRangeFromCheckpoint
-  preserveSelectionStartPoints
   isEndsWithNewLineForBufferRow
 } = require './utils'
 swrap = require './selection-wrapper'
@@ -617,7 +616,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   initialize: ->
     @onDidSetTarget =>
-      @restore = preserveSelectionStartPoints(@editor)
+      swrap.preserveCharacterwise(@editor)
       @target.select()
       unless haveSomeSelection(@editor)
         @vimState.input.cancel()
@@ -627,7 +626,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   onConfirm: (@char) ->
     # Clear pre-selected selection to start mutation non-selection.
-    @restore(selection) for selection in @editor.getSelections()
+    @restorePoint(selection) for selection in @editor.getSelections()
     @input = @char
     @processOperation()
 

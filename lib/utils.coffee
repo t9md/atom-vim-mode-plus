@@ -570,16 +570,6 @@ withTrackingCursorPositionChange = (cursor, fn) ->
   unless cursorBefore.isEqual(cursorAfter)
     console.log "Changed: #{cursorBefore.toString()} -> #{cursorAfter.toString()}"
 
-# Return function to restore original start position.
-preserveSelectionStartPoints = (editor) ->
-  rangeBySelection = new Map
-  for selection in editor.getSelections()
-    rangeBySelection.set(selection, selection.getBufferRange())
-
-  (selection) ->
-    point = rangeBySelection.get(selection).start
-    selection.cursor.setBufferPosition(point)
-
 # Reloadable registerElement
 registerElement = (name, options) ->
   element = document.createElement(name)
@@ -684,7 +674,6 @@ module.exports = {
   scanForScopeStart
   detectScopeStartPositionForScope
   getBufferRows
-  preserveSelectionStartPoints
   ElementBuilder
   registerElement
   sortComparable

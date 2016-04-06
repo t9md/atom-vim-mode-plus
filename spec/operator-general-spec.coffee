@@ -1,4 +1,4 @@
-{getVimState, dispatch} = require './spec-helper'
+{getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "Operator general", ->
@@ -467,6 +467,35 @@ describe "Operator general", ->
         ensure 'y^',
           register: '"': text: '123'
           cursorBuffer: [[0, 0], [1, 2]]
+
+    describe "stayOnYank setting", ->
+      text = null
+      beforeEach ->
+        settings.set('stayOnYank', true)
+
+        text = new TextData """
+          0_234567
+          1_234567
+          2_234567
+
+          4_234567\n
+          """
+        set text: text.getRaw(), cursor: [1, 2]
+
+      it "don't move cursor after yank from normal-mode", ->
+        ensure "yip", cursorBuffer: [1, 2], register: '"': text: text.getLines([0..2])
+        ensure "jyy", cursorBuffer: [2, 2], register: '"': text: text.getLines([2])
+        ensure "k.", cursorBuffer: [1, 2], register: '"': text: text.getLines([1])
+
+      it "don't move cursor after yank from visual-linewise", ->
+        ensure "Vy", cursorBuffer: [1, 2], register: '"': text: text.getLines([1])
+        ensure "Vjy", cursorBuffer: [2, 2], register: '"': text: text.getLines([1..2])
+
+      it "don't move cursor after yank from visual-characterwise", ->
+        ensure "vlly", cursorBuffer: [1, 4], register: '"': text: "234"
+        ensure "vhhy", cursorBuffer: [1, 2], register: '"': text: "234"
+        ensure "vjy", cursorBuffer: [2, 2], register: '"': text: "234567\n2_2"
+        ensure "v2ky", cursorBuffer: [0, 2], register: '"': text: "234567\n1_234567\n2_2"
 
   describe "the yy keybinding", ->
     describe "on a single line file", ->
