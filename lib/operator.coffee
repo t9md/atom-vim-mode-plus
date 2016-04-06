@@ -50,7 +50,10 @@ class Operator extends Base
       "stayOnTransformString"
     else
       "stayOn#{@getName()}"
-    settings.get(param) or (@stayOnLinewise and @target.isLinewise?() and not @isMode('visual', 'linewise'))
+    if @isMode('visual', 'linewise')
+      settings.get(param)
+    else
+      settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
 
   constructor: ->
     super
