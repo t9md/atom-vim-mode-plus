@@ -9,6 +9,9 @@ class BlockwiseSelection
     {@editor} = selection
     @initialize(selection)
 
+  isBlockwise: ->
+    true
+
   initialize: (selection) ->
     {@goalColumn} = selection.cursor
     @selections = [selection]
@@ -101,29 +104,6 @@ class BlockwiseSelection
       @selections.push @editor.addSelectionForBufferRange(range, {reversed})
     @updateProperties()
 
-  setBufferRange: (range) ->
-    head = @getHead()
-    reversed = if @headReversedStateIsInSync()
-      head.isReversed()
-    else
-      not head.isReversed()
-    @setHeadBufferRange(range, {reversed})
-    @initialize(head)
-
-  getBufferRange: ->
-    head = @getHead().getHeadBufferPosition()
-    tail = @getTail().getTailBufferPosition()
-
-    if @isReversed()
-      tail.row += 1 if tail.column is 0
-    else
-      head.row += 1 if head.column is 0
-
-    if @isSingleLine() or @headReversedStateIsInSync()
-      new Range(head, tail)
-    else
-      new Range(head, tail).translate([0, -1], [0, +1])
-
   # which must be 'start' or 'end'
   setPositionForSelections: (which) ->
     for selection in @selections
@@ -159,8 +139,30 @@ class BlockwiseSelection
     head.setBufferRange(range, options)
     head.cursor.goalColumn ?= goalColumn if goalColumn?
 
+  getCharacterwiseProperties: ->
+    head = @getHead().getHeadBufferPosition()
+    tail = @getTail().getTailBufferPosition()
+
+    if @isReversed()
+      [start, end] = [head, tail]
+    else
+      [start, end] = [tail, head]
+    end.row += 1 if end.column is 0
+
+    unless (@isSingleLine() or @headReversedStateIsInSync())
+      start.column -= 1
+      end.column += 1
+
+    characterwise: {head, tail}
+
+  # [FIXME] duplicate codes with setHeadBufferRange
   restoreCharacterwise: ->
-    @setHeadBufferRange(@getBufferRange(), reversed: @isReversed())
+    characterwiseProperties = @getCharacterwiseProperties()
+    head = @getHead()
+    @clearSelections(except: head)
+    {goalColumn} = head.cursor
+    swrap(head).selectByProperties(characterwiseProperties)
+    head.cursor.goalColumn ?= goalColumn if goalColumn?
 
   getSelections: ->
     @selections

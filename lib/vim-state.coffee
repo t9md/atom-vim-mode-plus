@@ -63,7 +63,7 @@ class VimState
   getBlockwiseSelections: ->
     @blockwiseSelections
 
-  getLastBlockwiseSelections: ->
+  getLastBlockwiseSelection: ->
     _.last(@blockwiseSelections)
 
   getBlockwiseSelectionsOrderedByBufferPosition: ->

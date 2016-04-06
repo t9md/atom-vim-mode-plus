@@ -115,6 +115,7 @@ class ModeManager
       @restoreCharacterwiseRange()
     else
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
+
     # Preserve characterwise range to restore afterward.
     for selection in @editor.getSelections()
       swrap(selection).preserveCharacterwise()
@@ -135,7 +136,10 @@ class ModeManager
 
   # Prepare function to restore selection by `gv`
   preservePreviousSelection: (selection) ->
-    properties = swrap(selection).detectCharacterwiseProperties()
+    properties = if selection.isBlockwise?()
+      selection.getCharacterwiseProperties()
+    else
+      swrap(selection).detectCharacterwiseProperties()
     submode = @submode
     @restorePreviousSelection = =>
       selection = @editor.getLastSelection()

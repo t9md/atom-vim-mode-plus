@@ -125,6 +125,14 @@ class Operator extends Base
         fn(selection) for selection in @editor.getSelections()
 
   execute: ->
+    # We need to preserve selection before selection is cleared as a result of mutation.
+    if @isMode('visual')
+      lastSelection = if @isMode('visual', 'blockwise')
+        @vimState.getLastBlockwiseSelection()
+      else
+        @editor.getLastSelection()
+      @vimState.modeManager.preservePreviousSelection(lastSelection)
+
     @mutateSelections (selection) =>
       @mutateSelection(selection)
     @activateMode(@finalMode, @finalSubmode)
@@ -626,9 +634,6 @@ class Yank extends Operator
   stayOnLinewise: true
 
   mutateSelection: (selection) ->
-    # We need to preserve selection before selection cleared by @restorePoint()
-    if selection.isLastSelection() and @isMode('visual')
-      @vimState.modeManager.preservePreviousSelection(selection)
     @setTextToRegisterForSelection(selection)
     @restorePoint(selection)
 
