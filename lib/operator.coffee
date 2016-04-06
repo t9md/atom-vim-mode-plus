@@ -328,9 +328,7 @@ class TransformStringByExternalCommand extends TransformString
     @stdoutBySelection = new Map
     restorePoint = null
     unless @isMode('visual')
-      # swrap(selection).preserveCharacterwise() for selection in @editor.getSelections()
-
-      restorePoint = preserveSelectionStartPoints(@editor)
+      swrap.preserveCharacterwise(@editor)
       @target.select()
 
     running = finished = 0
@@ -347,7 +345,7 @@ class TransformStringByExternalCommand extends TransformString
             resolve() if (running is finished)
 
           @runExternalCommand {command, args, stdout, exit, stdin}
-          restorePoint?(selection)
+          @restorePoint(selection) unless @isMode('visual')
 
   runExternalCommand: (options) ->
     {stdin} = options
@@ -622,7 +620,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
       @restore = preserveSelectionStartPoints(@editor)
       @target.select()
       unless haveSomeSelection(@editor)
-        @vimState.reset()
+        @vimState.input.cancel()
         @abort()
       @addHover(@editor.getSelectedText()[0])
     super
