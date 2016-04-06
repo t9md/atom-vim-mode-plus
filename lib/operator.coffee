@@ -34,7 +34,7 @@ class Operator extends Base
     @vimState.mark.set(']', end)
 
   needFlash: ->
-    if @flashTarget and settings.get('flashOnOperate')
+    if not @isMode('visual') and @flashTarget and settings.get('flashOnOperate')
       @getName() not in settings.get('flashOnOperateBlacklist')
     else
       false
