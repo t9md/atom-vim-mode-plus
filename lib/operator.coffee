@@ -51,7 +51,7 @@ class Operator extends Base
       "stayOnTransformString"
     else
       "stayOn#{@getName()}"
-    settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
+    settings.get(param) or (@stayOnLinewise and @target.isLinewise?() and not @isMode('visual', 'linewise'))
 
   constructor: ->
     super
@@ -69,13 +69,19 @@ class Operator extends Base
 
   restorePoint: (selection) ->
     # [FIXME] WIP: set to 'head' on needStay
-    swrap(selection).setBufferPositionFromProperty('start')
+    if @wasNeedStay # [FIXME]
+      if @isMode('visual', 'blockwise')
+        swrap(selection).setBufferPositionFromProperty('start')
+      else
+        swrap(selection).setBufferPositionFromProperty('head')
+    else
+      swrap(selection).setBufferPositionFromProperty('start')
 
   observeSelectAction: ->
     unless @instanceof('Select')
-      if @needStay() # [FIXME] WIP
-        # unless @isMode('visual')
-        @onWillSelectTarget => swrap.preserveCharacterwise(@editor)
+      if @wasNeedStay = @needStay() # [FIXME] WIP
+        unless @isMode('visual', ['characterwise', 'linewise'])
+          @onWillSelectTarget => swrap.preserveCharacterwise(@editor)
       else
         @onDidSelectTarget => swrap.preserveCharacterwise(@editor)
 

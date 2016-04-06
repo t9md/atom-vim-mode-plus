@@ -76,13 +76,15 @@ class Motion extends Base
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
+    # Update characterwise properties on each movement.
+    swrap(selection).preserveCharacterwise() if @isMode('visual')
+
     for selection in @editor.getSelections()
       switch
         when @isLinewise() then @selectLinewise(selection)
         when @isBlockwise() then @selectBlockwise(selection)
 
   selectLinewise: (selection) ->
-    swrap(selection).preserveCharacterwise() if @isMode('visual', 'linewise')
     swrap(selection).expandOverLine(preserveGoalColumn: true)
 
   selectBlockwise: (selection) ->
