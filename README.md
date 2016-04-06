@@ -2,16 +2,30 @@
 
 vim-mode improved.
 
-# Whats this?
-
-Started as fork project at 2015.8.1, originally for doing some refactoring experiment.  
-After doing lots of refactoring, I started to add new feature.  
-So I decided to release this package to get feedback from broad user.  
-
 # Thanks
 
 My work is greatly owing to former achievement done by original vim-mode developers and many of its contributors.  
 As you can see in commit history, this project is originally started by forking official [vim-mode](https://github.com/atom/vim-mode).  
+The great design to achieve Vim operation by composing operator with target(motion, text-object) on top of operationStack is still lives in vim-mode-plus now.  
+I don't think I can find this idea by myself from nothing.  
+Sincerely, I feel I couldn't do anything without original vim-mode.  
+
+# Whats this?
+
+Fork of [vim-mode](https://github.com/atom/vim-mode). Started at 2015.8.1.
+
+- Many bug fixes.
+- Refactoring: Rewritten almost every lines of codes.
+- Highlight search
+- visual-blockwise built-in
+- Incremental search by `incrementalSearch` setting(disabled by default).
+- Cursor visible in all visual-mode(characterwise, blockwise, linewise).
+- Stay same cursor position after operate(e.g `y`, `gU`) by `stayOnYank`, `stayOnOperate` setting.(disabled by default)
+- Lots of new motion like `move-up-to-edge`, `move-down-to-edge`.(No keymap by default)
+- Surround built-in. Powerful AnyPair family(`change-surround-any-pair` operator, `inner-any-pair` text-object) to detect pair automatically.
+- Set cursor position to start of change on undo or redo by enabling `setCursorToStartOfChangeOnUndoRedo`(disabled by default. Atom's default is end of change).
+- Allow super granular keymap only effective when specific operation is pending like `yank-pending`, `delete-pending`. [#215](https://github.com/t9md/atom-vim-mode-plus/issues/215)
+- And more...
 
 # Important Note
 
