@@ -39,8 +39,25 @@ class SelectionWrapper
       when 'head' then @getHeadBufferPosition()
       when 'tail' then @getTailBufferPosition()
 
+  getBufferPositionFromPropertyFor: (which) ->
+    {head, tail} = @getProperties().characterwise
+    if head.isGreaterThanOrEqual(tail)
+      [start, end] = [tail, head]
+    else
+      [start, end] = [head, tail]
+
+    switch which
+      when 'start' then start
+      when 'end' then end
+      when 'head' then head
+      when 'tail' then tail
+
   setBufferPositionTo: (which) ->
     point = @getBufferPositionFor(which)
+    @selection.cursor.setBufferPosition(point)
+
+  setBufferPositionFromProperty: (which) ->
+    point = @getBufferPositionFromPropertyFor(which)
     @selection.cursor.setBufferPosition(point)
 
   mergeBufferRange: (range, option) ->
@@ -100,8 +117,11 @@ class SelectionWrapper
   preserveCharacterwise: ->
     {characterwise} = @detectCharacterwiseProperties()
     endPoint = if @selection.isReversed() then 'tail' else 'head'
-    point = characterwise[endPoint].translate([0, -1])
-    characterwise[endPoint] = @selection.editor.clipBufferPosition(point)
+    unless characterwise.head.isEqual(characterwise.tail)
+      # In case selection is empty, I don't want to translate end position
+      # [FIXME] Check if removing this translation logic can simplify code?
+      point = characterwise[endPoint].translate([0, -1])
+      characterwise[endPoint] = @selection.editor.clipBufferPosition(point)
     @setProperties {characterwise}
 
   detectCharacterwiseProperties: ->
@@ -188,6 +208,10 @@ class SelectionWrapper
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
+
+swrap.preserveCharacterwise = (editor) ->
+  editor.getSelections().forEach (selection) ->
+    swrap(selection).preserveCharacterwise()
 
 swrap.setReversedState = (editor, reversed) ->
   editor.getSelections().forEach (selection) ->

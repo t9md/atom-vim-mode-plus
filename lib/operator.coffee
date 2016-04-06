@@ -67,13 +67,17 @@ class Operator extends Base
       invalidate: 'never'
       persistent: false
 
+  restorePoint: (selection) ->
+    # [FIXME] WIP: set to 'head' on needStay
+    swrap(selection).setBufferPositionFromProperty('start')
+
   observeSelectAction: ->
-    if @needStay()
-      @onWillSelectTarget =>
-        @restorePoint = preserveSelectionStartPoints(@editor)
-    else
-      @onDidSelectTarget =>
-        @restorePoint = preserveSelectionStartPoints(@editor)
+    unless @instanceof('Select')
+      if @needStay() # [FIXME] WIP
+        # unless @isMode('visual')
+        @onWillSelectTarget => swrap.preserveCharacterwise(@editor)
+      else
+        @onDidSelectTarget => swrap.preserveCharacterwise(@editor)
 
     if @needFlash()
       @onDidSelectTarget =>
@@ -318,6 +322,8 @@ class TransformStringByExternalCommand extends TransformString
     @stdoutBySelection = new Map
     restorePoint = null
     unless @isMode('visual')
+      # swrap(selection).preserveCharacterwise() for selection in @editor.getSelections()
+
       restorePoint = preserveSelectionStartPoints(@editor)
       @target.select()
 
