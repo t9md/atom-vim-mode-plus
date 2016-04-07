@@ -1,3 +1,6 @@
+# 0.32.1:
+- Fix: Uncaught error on `y`, `gU` etc.. in `vB` when `stayOnYank`, `stayOnOperator` enabled #221.
+
 # 0.32.0:
 - Improve: Further coverage of `gv` support. Not yet complete but much better.
 - Improve: Respect `stayOnYank`, `stanOnOperate` on `visual-mode` #221

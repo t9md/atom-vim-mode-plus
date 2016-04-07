@@ -78,7 +78,7 @@ class Motion extends Base
 
     # Update characterwise properties on each movement.
     @updateSelectionProperties() if @isMode('visual')
-    
+
     switch
       when @isLinewise() then @vimState.selectLinewise()
       when @isBlockwise() then @vimState.selectBlockwise()
