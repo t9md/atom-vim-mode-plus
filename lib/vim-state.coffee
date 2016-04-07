@@ -32,7 +32,6 @@ class VimState
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
     @modeManager = new ModeManager(this)
-    @count = null
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @hover = new Hover(this)
@@ -81,16 +80,16 @@ class VimState
     for selection in @editor.getSelections()
       @addBlockwiseSelectionFromSelection(selection)
 
+  # Other
+  # -------------------------
   selectLinewise: ->
     swrap.expandOverLine(@editor, preserveGoalColumn: true)
 
   # Count
   # -------------------------
-  getCount: ->
-    @count
-
-  hasCount: ->
-    @count?
+  count: null
+  hasCount: -> @count?
+  getCount: -> @count
 
   setCount: (number) ->
     @count ?= 0
