@@ -77,6 +77,8 @@ class Operator extends Base
       swrap(selection).setBufferPositionTo('start', fromProperty: true)
 
   observeSelectAction: ->
+    # Select operator is used only in visual-mode.
+    # visual-mode selection modification should be handled by Motion::select(), TextObject::select()
     unless @instanceof('Select')
       if @wasNeedStay = @needStay() # [FIXME] dirty cache
         unless @isMode('visual')

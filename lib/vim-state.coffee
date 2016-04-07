@@ -79,6 +79,7 @@ class VimState
   selectBlockwise: ->
     for selection in @editor.getSelections()
       @addBlockwiseSelectionFromSelection(selection)
+    @updateSelectionProperties()
 
   # Other
   # -------------------------

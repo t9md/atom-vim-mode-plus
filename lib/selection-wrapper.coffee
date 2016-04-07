@@ -12,7 +12,7 @@ class SelectionWrapper
 
   setProperties: (newProp) ->
     prop = {}
-    prop[@scope] = newProp
+    prop[@scope] = _.extend(@getProperties(), newProp)
     @selection.marker.setProperties prop
 
   resetProperties: ->
@@ -107,19 +107,18 @@ class SelectionWrapper
       editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
-    {characterwise} = @detectCharacterwiseProperties()
+    properties = @detectCharacterwiseProperties()
     endPoint = if @selection.isReversed() then 'tail' else 'head'
-    unless characterwise.head.isEqual(characterwise.tail)
+    unless properties.head.isEqual(properties.tail)
       # In case selection is empty, I don't want to translate end position
       # [FIXME] Check if removing this translation logic can simplify code?
-      point = characterwise[endPoint].translate([0, -1])
-      characterwise[endPoint] = @selection.editor.clipBufferPosition(point)
-    @setProperties {characterwise}
+      point = properties[endPoint].translate([0, -1])
+      properties[endPoint] = @selection.editor.clipBufferPosition(point)
+    @setProperties {characterwise: properties}
 
   detectCharacterwiseProperties: ->
-    characterwise:
-      head: @selection.getHeadBufferPosition()
-      tail: @selection.getTailBufferPosition()
+    head: @selection.getHeadBufferPosition()
+    tail: @selection.getTailBufferPosition()
 
   getCharacterwiseHeadPosition: ->
     @getProperties().characterwise?.head

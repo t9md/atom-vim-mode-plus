@@ -124,8 +124,7 @@ class ModeManager
       when 'linewise'
         @vimState.selectLinewise()
       when 'blockwise'
-        unless swrap(@editor.getLastSelection()).isLinewise()
-          @vimState.selectBlockwise()
+        @vimState.selectBlockwise() unless swrap(@editor.getLastSelection()).isLinewise()
 
     new Disposable =>
       @normalizeSelections(preservePreviousSelection: true)
@@ -141,7 +140,7 @@ class ModeManager
     submode = @submode
     @restorePreviousSelection = =>
       selection = @editor.getLastSelection()
-      swrap(selection).selectByProperties(properties)
+      swrap(selection).selectByProperties({characterwise: properties})
       @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
       submode
 

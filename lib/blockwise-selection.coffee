@@ -152,16 +152,15 @@ class BlockwiseSelection
     unless (@isSingleLine() or @headReversedStateIsInSync())
       start.column -= 1
       end.column += 1
-
-    characterwise: {head, tail}
+    {head, tail}
 
   # [FIXME] duplicate codes with setHeadBufferRange
   restoreCharacterwise: ->
-    characterwiseProperties = @getCharacterwiseProperties()
+    properties = {characterwise: @getCharacterwiseProperties()}
     head = @getHead()
     @clearSelections(except: head)
     {goalColumn} = head.cursor
-    swrap(head).selectByProperties(characterwiseProperties)
+    swrap(head).selectByProperties(properties)
     head.cursor.goalColumn ?= goalColumn if goalColumn?
 
   getSelections: ->
