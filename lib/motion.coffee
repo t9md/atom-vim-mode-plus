@@ -118,28 +118,19 @@ class Motion extends Base
 class CurrentSelection extends Motion
   @extend(false)
   selectionExtent: null
+  inclusive: true
 
   execute: ->
     throw new Error("#{@getName()} should not be executed")
 
-  select: ->
+  moveCursor: (cursor) ->
     if @isMode('visual')
       # Preserve extent to be able to replay when repeated.
       @selectionExtent = @editor.getSelectedBufferRange().getExtent()
-      @wasLinewise = @isLinewise() # Cache it in case repeated.
+      @linewise = @isLinewise() # Cache it in case repeated.
     else
-      # If we're not in visual mode, it means we are repeated last operation.
-      # In this case we re-do the selection.
-      @replaySelection()
-
-  # FIXME: This function is not necessary if selectInclusively() is consistent.
-  # After refactoring of selectInclusively(), this function will be deleted.
-  replaySelection: ->
-    for selection in @editor.getSelections()
-      {start} = selection.getBufferRange()
-      end = start.traverse(@selectionExtent)
-      selection.setBufferRange([start, end])
-    swrap.expandOverLine(@editor) if @wasLinewise
+      point = cursor.getBufferPosition().traverse(@selectionExtent)
+      cursor.setBufferPosition(point)
 
 class MoveLeft extends Motion
   @extend()
@@ -701,8 +692,7 @@ class Till extends Find
   selectInclusively: (selection) ->
     super
     if selection.isEmpty() and (@point? and not @backwards)
-      selection.modifySelection ->
-        selection.cursor.moveRight()
+      selection.selectRight()
 
 # keymap: T
 class TillBackwards extends Till

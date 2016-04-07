@@ -3,20 +3,16 @@ _ = require 'underscore-plus'
 {isLinewiseRange} = require './utils'
 
 class SelectionWrapper
-  scope: 'vim-mode-plus'
-
   constructor: (@selection) ->
 
   getProperties: ->
-    @selection.marker.getProperties()[@scope] ? {}
+    @selection.marker.getProperties()['vim-mode-plus'] ? {}
 
   setProperties: (newProp) ->
-    prop = {}
-    prop[@scope] = _.extend(@getProperties(), newProp)
-    @selection.marker.setProperties prop
+    @selection.marker.setProperties({"vim-mode-plus": _.extend(@getProperties(), newProp)})
 
   resetProperties: ->
-    @setProperties null
+    @selection.marker.setProperties({"vim-mode-plus": null})
 
   setBufferRangeSafely: (range) ->
     if range
@@ -26,7 +22,6 @@ class SelectionWrapper
 
   getBufferRange: ->
     @selection.getBufferRange()
-
 
   getBufferPositionFor: (which, {fromProperty}={}) ->
     fromProperty ?= false
@@ -108,8 +103,8 @@ class SelectionWrapper
 
   preserveCharacterwise: ->
     properties = @detectCharacterwiseProperties()
-    endPoint = if @selection.isReversed() then 'tail' else 'head'
-    unless properties.head.isEqual(properties.tail)
+    unless @selection.isEmpty()
+      endPoint = if @selection.isReversed() then 'tail' else 'head'
       # In case selection is empty, I don't want to translate end position
       # [FIXME] Check if removing this translation logic can simplify code?
       point = properties[endPoint].translate([0, -1])
@@ -135,11 +130,12 @@ class SelectionWrapper
 
     unless characterwise = @getProperties().characterwise
       return
+
     {head, tail} = characterwise
-    [start, end] = if @selection.isReversed()
-      [head, tail]
+    if @selection.isReversed()
+      [start, end] = [head, tail]
     else
-      [tail, head]
+      [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
     @setBufferRange([start, end], {preserveFolds: true})
     if @selection.isReversed()

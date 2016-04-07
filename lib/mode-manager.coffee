@@ -112,7 +112,7 @@ class ModeManager
     if @submode?
       # If submode shift within visual mode, we first restore characterwise range
       # At this phase @submode is not yet updated to requested submode.
-      @restoreCharacterwiseRange()
+      @selectCharacterwise()
     else
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
 
@@ -144,7 +144,7 @@ class ModeManager
       @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
       submode
 
-  restoreCharacterwiseRange: ->
+  selectCharacterwise: ->
     switch @submode
       when 'linewise'
         for selection in @editor.getSelections() when not selection.isEmpty()
@@ -161,14 +161,12 @@ class ModeManager
       swrap(selection).resetProperties()
 
   normalizeSelections: ({preservePreviousSelection}={}) ->
-    @restoreCharacterwiseRange()
-    preservePreviousSelection ?= false
-    if preservePreviousSelection
-      unless (selection = @editor.getLastSelection()).isEmpty()
-        @preservePreviousSelection(selection)
+    @selectCharacterwise()
+    if preservePreviousSelection and not @editor.getLastSelection().isEmpty()
+      @preservePreviousSelection(@editor.getLastSelection())
 
     # We selectRight()ed in visual-mode, so reset this effect here.
-    @editor.getSelections().forEach (selection) ->
+    for selection in @editor.getSelections()
       # `vc`, `vs` make selection empty
       unless (selection.isReversed() or selection.isEmpty())
         selection.modifySelection ->
