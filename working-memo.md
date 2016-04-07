@@ -1,3 +1,10 @@
+- We selectRight on `v`
+- So we have to normalize escape from `v`
+  - selectLeft from end of bufferRanges
+- When moving selection with motion, we have to normalize `visual-mode` cursor position, so that motion don't have to care for `visual-mode` cursor position specially. Then we revert selection's wise(`lineiwse`, `blockwise`) based on original submode.
+- `charactewrise` submode is **base** mode of visual-mode. Whenever we switch to different submode within visual-mode, we first revert to `charactewrise` range.
+- When we shift from `V` to `v`, we have to revert
+
 prevent moveRight from moving across EOL in visual-mode,
 its very inconsitent.
 - I'm ok to if mouse click can put cursor at EOL, its out-of-scoep of vim-mode-plus.
