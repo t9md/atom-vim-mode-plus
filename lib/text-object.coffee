@@ -39,7 +39,8 @@ class TextObject extends Base
   select: ->
     for selection in @editor.getSelections()
       @selectTextObject(selection)
-      swrap(selection).preserveCharacterwise() if @isMode('visual')
+      
+    @updateSelectionProperties() if @isMode('visual')
 
 # -------------------------
 # [FIXME] make it expandable

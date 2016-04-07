@@ -20,31 +20,26 @@ class SelectionWrapper
 
   setBufferRangeSafely: (range) ->
     if range
-      @setBufferRange(range, {autoscroll: false})
+      @setBufferRange(range)
       if @selection.isLastSelection()
         @selection.cursor.autoscroll()
 
   getBufferRange: ->
     @selection.getBufferRange()
 
-  getStartBufferPosition: -> @selection.getBufferRange().start
-  getEndBufferPosition: -> @selection.getBufferRange().end
-  getHeadBufferPosition: -> @selection.getHeadBufferPosition()
-  getTailBufferPosition: -> @selection.getTailBufferPosition()
 
-  getBufferPositionFor: (which) ->
-    switch which
-      when 'start' then @getStartBufferPosition()
-      when 'end' then @getEndBufferPosition()
-      when 'head' then @getHeadBufferPosition()
-      when 'tail' then @getTailBufferPosition()
-
-  getBufferPositionFromPropertyFor: (which) ->
-    {head, tail} = @getProperties().characterwise
-    if head.isGreaterThanOrEqual(tail)
-      [start, end] = [tail, head]
+  getBufferPositionFor: (which, {fromProperty}={}) ->
+    fromProperty ?= false
+    if fromProperty
+      {head, tail} = @getProperties().characterwise
+      if head.isGreaterThanOrEqual(tail)
+        [start, end] = [tail, head]
+      else
+        [start, end] = [head, tail]
     else
-      [start, end] = [head, tail]
+      {start, end} = @selection.getBufferRange()
+      head = @selection.getHeadBufferPosition()
+      tail = @selection.getTailBufferPosition()
 
     switch which
       when 'start' then start
@@ -52,12 +47,9 @@ class SelectionWrapper
       when 'head' then head
       when 'tail' then tail
 
-  setBufferPositionTo: (which) ->
-    point = @getBufferPositionFor(which)
-    @selection.cursor.setBufferPosition(point)
-
-  setBufferPositionFromProperty: (which) ->
-    point = @getBufferPositionFromPropertyFor(which)
+  # options: {fromProperty}
+  setBufferPositionTo: (which, options) ->
+    point = @getBufferPositionFor(which, options)
     @selection.cursor.setBufferPosition(point)
 
   mergeBufferRange: (range, option) ->
@@ -200,26 +192,16 @@ class SelectionWrapper
       when not @selection.isEmpty() then 'characterwise'
       else null
 
-  switchToLinewise: (fn) ->
-    @preserveCharacterwise()
-    @expandOverLine(preserveGoalColumn: true)
-    fn()
-    @restoreCharacterwise()
-
 swrap = (selection) ->
   new SelectionWrapper(selection)
-
-swrap.preserveCharacterwise = (editor) ->
-  editor.getSelections().forEach (selection) ->
-    swrap(selection).preserveCharacterwise()
 
 swrap.setReversedState = (editor, reversed) ->
   editor.getSelections().forEach (selection) ->
     swrap(selection).setReversedState(reversed)
 
-swrap.expandOverLine = (editor) ->
+swrap.expandOverLine = (editor, options) ->
   editor.getSelections().forEach (selection) ->
-    swrap(selection).expandOverLine()
+    swrap(selection).expandOverLine(options)
 
 swrap.reverse = (editor) ->
   editor.getSelections().forEach (selection) ->

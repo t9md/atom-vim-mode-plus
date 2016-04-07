@@ -117,20 +117,18 @@ class ModeManager
       @editor.selectRight() if @editor.getLastSelection().isEmpty()
 
     # Preserve characterwise range to restore afterward.
-    for selection in @editor.getSelections()
-      swrap(selection).preserveCharacterwise()
+    @vimState.updateSelectionProperties()
 
     # Update selection area to final submode.
     switch submode
       when 'linewise'
-        swrap.expandOverLine(@editor)
+        @vimState.selectLinewise()
       when 'blockwise'
         unless swrap(@editor.getLastSelection()).isLinewise()
-          for selection in @editor.getSelections()
-            @vimState.addBlockwiseSelectionFromSelection(selection)
+          @vimState.selectBlockwise()
 
     new Disposable =>
-      @normalizeSelections(preserve: true)
+      @normalizeSelections(preservePreviousSelection: true)
       for selection in @editor.getSelections()
         selection.clear(autoscroll: false)
 
@@ -163,15 +161,15 @@ class ModeManager
     @editor.getSelections().forEach (selection) ->
       swrap(selection).resetProperties()
 
-  normalizeSelections: (options={}) ->
+  normalizeSelections: ({preservePreviousSelection}={}) ->
     @restoreCharacterwiseRange()
-    if options.preserve
+    preservePreviousSelection ?= false
+    if preservePreviousSelection
       unless (selection = @editor.getLastSelection()).isEmpty()
         @preservePreviousSelection(selection)
 
     # We selectRight()ed in visual-mode, so reset this effect here.
     @editor.getSelections().forEach (selection) ->
-      swrap(selection).preserveCharacterwise()
       # `vc`, `vs` make selection empty
       unless (selection.isReversed() or selection.isEmpty())
         selection.modifySelection ->

@@ -72,17 +72,17 @@ class Operator extends Base
 
   restorePoint: (selection) ->
     if @wasNeedStay
-      swrap(selection).setBufferPositionFromProperty('head')
+      swrap(selection).setBufferPositionTo('head', fromProperty: true)
     else
-      swrap(selection).setBufferPositionFromProperty('start')
+      swrap(selection).setBufferPositionTo('start', fromProperty: true)
 
   observeSelectAction: ->
     unless @instanceof('Select')
       if @wasNeedStay = @needStay() # [FIXME] dirty cache
         unless @isMode('visual')
-          @onWillSelectTarget => swrap.preserveCharacterwise(@editor)
+          @onWillSelectTarget => @updateSelectionProperties()
       else
-        @onDidSelectTarget => swrap.preserveCharacterwise(@editor)
+        @onDidSelectTarget => @updateSelectionProperties()
 
     if @needFlash()
       @onDidSelectTarget =>
@@ -327,7 +327,7 @@ class TransformStringByExternalCommand extends TransformString
     @stdoutBySelection = new Map
     restorePoint = null
     unless @isMode('visual')
-      swrap.preserveCharacterwise(@editor)
+      @updateSelectionProperties()
       @target.select()
 
     running = finished = 0
@@ -616,7 +616,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   initialize: ->
     @onDidSetTarget =>
-      swrap.preserveCharacterwise(@editor)
+      @updateSelectionProperties()
       @target.select()
       unless haveSomeSelection(@editor)
         @vimState.input.cancel()

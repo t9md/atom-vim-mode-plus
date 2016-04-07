@@ -77,6 +77,13 @@ class VimState
     BlockwiseSelection ?= require './blockwise-selection'
     @blockwiseSelections.push(new BlockwiseSelection(selection))
 
+  selectBlockwise: ->
+    for selection in @editor.getSelections()
+      @addBlockwiseSelectionFromSelection(selection)
+
+  selectLinewise: ->
+    swrap.expandOverLine(@editor, preserveGoalColumn: true)
+
   # Count
   # -------------------------
   getCount: ->
@@ -206,6 +213,10 @@ class VimState
 
   updateCursorsVisibility: ->
     @cursorStyleManager.refresh()
+
+  updateSelectionProperties: ->
+    for selection in @editor.getSelections()
+      swrap(selection).preserveCharacterwise(@editor)
 
   # highlightSearch
   # -------------------------

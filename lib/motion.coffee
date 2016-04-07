@@ -77,18 +77,11 @@ class Motion extends Base
     @editor.mergeIntersectingSelections()
 
     # Update characterwise properties on each movement.
-    swrap(selection).preserveCharacterwise() if @isMode('visual')
+    @updateSelectionProperties() if @isMode('visual')
 
-    for selection in @editor.getSelections()
-      switch
-        when @isLinewise() then @selectLinewise(selection)
-        when @isBlockwise() then @selectBlockwise(selection)
-
-  selectLinewise: (selection) ->
-    swrap(selection).expandOverLine(preserveGoalColumn: true)
-
-  selectBlockwise: (selection) ->
-    @vimState.addBlockwiseSelectionFromSelection(selection)
+    switch
+      when @isLinewise() then @vimState.selectLinewise()
+      when @isBlockwise() then @vimState.selectBlockwise()
 
   # Modify selection inclusively
   # -------------------------
