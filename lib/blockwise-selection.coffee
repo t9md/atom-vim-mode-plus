@@ -70,23 +70,23 @@ class BlockwiseSelection
 
   getHead: ->
     if @isReversed()
-      @getTop()
+      @getTopSelection()
     else
-      @getBottom()
+      @getBottomSelection()
 
   getTail: ->
     if @isReversed()
-      @getBottom()
+      @getBottomSelection()
     else
-      @getTop()
+      @getTopSelection()
 
   getBufferRowRange: ->
-    startRow = @getTop().getBufferRowRange()[0]
-    endRow = @getBottom().getBufferRowRange()[0]
+    startRow = @getTopSelection().getBufferRowRange()[0]
+    endRow = @getBottomSelection().getBufferRowRange()[0]
     [startRow, endRow]
 
   headReversedStateIsInSync: ->
-    @isReversed() is @getHead().isReversed()
+    @isReversed() is @getHeadSelection().isReversed()
 
   # [NOTE] Used by plugin package vmp:move-selected-text
   setSelectedBufferRanges: (ranges, {reversed}) ->
@@ -108,7 +108,7 @@ class BlockwiseSelection
       @removeSelection(selection)
 
   setHeadBufferPosition: (point) ->
-    head = @getHead()
+    head = @getHeadSelection()
     @clearSelections(except: head)
     head.cursor.setBufferPosition(point)
 
@@ -121,7 +121,7 @@ class BlockwiseSelection
     selection.destroy()
 
   setHeadBufferRange: (range, options) ->
-    head = @getHead()
+    head = @getHeadSelection()
     @clearSelections(except: head)
     {goalColumn} = head.cursor
     # When reversed state of selection change, goalColumn is cleared.
@@ -133,8 +133,8 @@ class BlockwiseSelection
     head.cursor.goalColumn ?= goalColumn if goalColumn?
 
   getCharacterwiseProperties: ->
-    head = @getHead().getHeadBufferPosition()
-    tail = @getTail().getTailBufferPosition()
+    head = @getHeadSelection().getHeadBufferPosition()
+    tail = @getTailSelection().getTailBufferPosition()
 
     if @isReversed()
       [start, end] = [head, tail]
@@ -150,7 +150,7 @@ class BlockwiseSelection
   # [FIXME] duplicate codes with setHeadBufferRange
   restoreCharacterwise: ->
     properties = {characterwise: @getCharacterwiseProperties()}
-    head = @getHead()
+    head = @getHeadSelection()
     @clearSelections(except: head)
     {goalColumn} = head.cursor
     swrap(head).selectByProperties(properties)

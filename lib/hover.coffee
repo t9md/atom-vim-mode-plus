@@ -20,7 +20,7 @@ class Hover
         swrap(@editor.getLastSelection()).getCharacterwiseHeadPosition()
       when @vimState.isMode('visual', 'blockwise')
         # FIXME #179
-        @vimState.getLastBlockwiseSelection()?.getHead().getHeadBufferPosition()
+        @vimState.getLastBlockwiseSelection()?.getHeadSelection().getHeadBufferPosition()
       else
         @editor.getCursorBufferPosition()
 

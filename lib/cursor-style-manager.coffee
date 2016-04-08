@@ -64,7 +64,7 @@ class CursorStyleManager
 
     cursors = cursorsToShow = @editor.getCursors()
     if submode is 'blockwise'
-      cursorsToShow = @vimState.getBlockwiseSelections().map (bs) -> bs.getHead().cursor
+      cursorsToShow = @vimState.getBlockwiseSelections().map (bs) -> bs.getHeadSelection().cursor
 
     # update visibility
     for cursor in cursors
