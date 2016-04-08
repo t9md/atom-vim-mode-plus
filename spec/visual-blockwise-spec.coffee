@@ -56,15 +56,16 @@ describe "Visual Blockwise", ->
     head = switch o.head
       when 'top' then first
       when 'bottom' then last
-    expect(swrap(head).isBlockwiseHead()).toBe true
+    bs = vimState.getLastBlockwiseSelection()
+    expect(bs.getHead()).toBe head
     tail = switch o.tail
       when 'top' then first
       when 'bottom' then last
-    expect(swrap(tail).isBlockwiseTail()).toBe true
+    expect(bs.getTail()).toBe tail
 
     for s in others
-      expect(swrap(s).isBlockwiseHead()).toBe false
-      expect(swrap(s).isBlockwiseHead()).toBe false
+      expect(bs.getHead()).not.toBe s
+      expect(bs.getTail()).not.toBe s
     if o.reversed?
       for s in selections
         expect(s.isReversed()).toBe o.reversed

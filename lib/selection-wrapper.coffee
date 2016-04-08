@@ -81,7 +81,7 @@ class SelectionWrapper
     if preserveGoalColumn
       {goalColumn} = @selection.cursor
 
-    @selectRowRange @selection.getBufferRowRange()
+    @selectRowRange(@selection.getBufferRowRange())
     @selection.cursor.goalColumn = goalColumn if goalColumn
 
   getBufferRangeForTailRow: ->
@@ -152,12 +152,6 @@ class SelectionWrapper
   setBufferRange: (range, options={}) ->
     options.autoscroll ?= false
     @selection.setBufferRange(range, options)
-
-  isBlockwiseHead: ->
-    @getProperties().blockwise?.head
-
-  isBlockwiseTail: ->
-    @getProperties().blockwise?.tail
 
   # Return original text
   replace: (text) ->

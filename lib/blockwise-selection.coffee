@@ -41,19 +41,19 @@ class BlockwiseSelection
       selection.setBufferRange(ranges.shift(), {reversed})
       for range in ranges
         @selections.push(@editor.addSelectionForBufferRange(range, {reversed}))
-    @updateProperties()
     @reverse() if wasReversed
+    @updateGoalColumn()
 
-  updateProperties: ->
-    head = @getHead()
-    tail = @getTail()
+  reversed: false
+  isReversed: ->
+    @reversed
+  reverse: ->
+    @reversed = not @reversed
 
-    for selection in @selections
-      selection.cursor.goalColumn = @goalColumn if @goalColumn?
-      swrap(selection).setProperties
-        blockwise:
-          head: selection is head
-          tail: selection is tail
+  updateGoalColumn: ->
+    if @goalColumn?
+      for selection in @selections
+        selection.cursor.goalColumn = @goalColumn
 
   isSingleLine: ->
     @selections.length is 1
@@ -62,30 +62,23 @@ class BlockwiseSelection
     [startRow, endRow] = @getBufferRowRange()
     (endRow - startRow) + 1
 
-  getTop: ->
+  getTopSelection: ->
     @selections[0]
 
-  getBottom: ->
+  getBottomSelection: ->
     _.last(@selections)
 
-  isReversed: ->
-    if @isSingleLine()
-      @getTop().isReversed()
-    else
-      swrap(@getBottom()).isBlockwiseTail()
-
   getHead: ->
-    if @isReversed() then @getTop() else @getBottom()
+    if @isReversed()
+      @getTop()
+    else
+      @getBottom()
 
   getTail: ->
-    if @isReversed() then @getBottom() else @getTop()
-
-  reverse: ->
-    return if @isSingleLine()
-    head = @getHead()
-    tail = @getTail()
-    swrap(head).setProperties(blockwise: head: false, tail: true)
-    swrap(tail).setProperties(blockwise: head: true, tail: false)
+    if @isReversed()
+      @getBottom()
+    else
+      @getTop()
 
   getBufferRowRange: ->
     startRow = @getTop().getBufferRowRange()[0]
@@ -95,14 +88,14 @@ class BlockwiseSelection
   headReversedStateIsInSync: ->
     @isReversed() is @getHead().isReversed()
 
-  # [NOTE] sused by plugin package vmp:move-selected-text
+  # [NOTE] Used by plugin package vmp:move-selected-text
   setSelectedBufferRanges: (ranges, {reversed}) ->
     sortRanges(ranges)
     range = ranges.shift()
     @setHeadBufferRange(range, {reversed})
     for range in ranges
       @selections.push @editor.addSelectionForBufferRange(range, {reversed})
-    @updateProperties()
+    @updateGoalColumn()
 
   # which must be 'start' or 'end'
   setPositionForSelections: (which) ->
