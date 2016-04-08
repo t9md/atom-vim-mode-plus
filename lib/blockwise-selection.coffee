@@ -5,9 +5,17 @@ _ = require 'underscore-plus'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
+  editor: null
+  selections: null
+  goalColumn: null
+  reversed: false
+
   constructor: (selection) ->
     {@editor} = selection
     @initialize(selection)
+
+  getSelections: ->
+    @selections
 
   isBlockwise: ->
     true
@@ -44,7 +52,6 @@ class BlockwiseSelection
     @reverse() if wasReversed
     @updateGoalColumn()
 
-  reversed: false
   isReversed: ->
     @reversed
   reverse: ->
@@ -55,7 +62,7 @@ class BlockwiseSelection
       for selection in @selections
         selection.cursor.goalColumn = @goalColumn
 
-  isSingleLine: ->
+  isSingleRow: ->
     @selections.length is 1
 
   getHeight: ->
@@ -79,6 +86,12 @@ class BlockwiseSelection
       @getEndSelection()
     else
       @getStartSelection()
+
+  getHeadBufferPosition: ->
+    @getHeadSelection().getHeadBufferPosition()
+
+  getTailBufferPosition: ->
+    @getTailSelection().getTailBufferPosition()
 
   getBufferRowRange: ->
     startRow = @getStartSelection().getBufferRowRange()[0]
@@ -133,8 +146,8 @@ class BlockwiseSelection
     head.cursor.goalColumn ?= goalColumn if goalColumn?
 
   getCharacterwiseProperties: ->
-    head = @getHeadSelection().getHeadBufferPosition()
-    tail = @getTailSelection().getTailBufferPosition()
+    head = @getHeadBufferPosition()
+    tail = @getTailBufferPosition()
 
     if @isReversed()
       [start, end] = [head, tail]
@@ -142,7 +155,7 @@ class BlockwiseSelection
       [start, end] = [tail, head]
     end.row += 1 if end.column is 0
 
-    unless (@isSingleLine() or @headReversedStateIsInSync())
+    unless (@isSingleRow() or @headReversedStateIsInSync())
       start.column -= 1
       end.column += 1
     {head, tail}
@@ -155,8 +168,5 @@ class BlockwiseSelection
     {goalColumn} = head.cursor
     swrap(head).selectByProperties(properties)
     head.cursor.goalColumn ?= goalColumn if goalColumn?
-
-  getSelections: ->
-    @selections
 
 module.exports = BlockwiseSelection
