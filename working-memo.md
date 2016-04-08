@@ -25,6 +25,21 @@ So we can't use selection property to transform `vB` to `vC`.
 So we let blockwise transform itself to characterwise.
 We can do it via `BlockwiseSelection::restoreCharacterwise()`.
 
+# Experiment
+
+If we enhance selection property to have following information, we can get code more simpler.
+- noralized cursor position
+- blockwised range
+- linewised range
+
+When we modify selection with motion, we have to **normalize** `v` mode cursor position.
+This normalization allow us all Motion work properly in `v` mode without special care for `v` mode.
+
+Normalization procedure is..
+  - Transform selected range from `vL`, `vB` to `vC` if not already in `vC`
+  - Move end position of selection's bufferRange to left.(Since we selectRighted in `v`))
+
+After modification of selection finished, we revert selection's `wise` to original one(`blockwise`, `linewise`).
 ------------------------------------------
 
 prevent moveRight from moving across EOL in visual-mode,
