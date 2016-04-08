@@ -209,7 +209,7 @@ class DeleteToLastCharacterOfLine extends Delete
       @getBlockwiseSelections().forEach (bs) ->
         bs.removeEmptySelections()
         bs.setPositionForSelections('start')
-        pointByBlockwiseSelection.set(bs, bs.getTopSelection().getHeadBufferPosition())
+        pointByBlockwiseSelection.set(bs, bs.getStartSelection().getHeadBufferPosition())
 
     super
 
