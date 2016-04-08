@@ -62,19 +62,19 @@ class BlockwiseSelection
     [startRow, endRow] = @getBufferRowRange()
     (endRow - startRow) + 1
 
-  getTop: ->
+  getTopSelection: ->
     @selections[0]
 
-  getBottom: ->
+  getBottomSelection: ->
     _.last(@selections)
 
-  getHead: ->
+  getHeadSelection: ->
     if @isReversed()
       @getTopSelection()
     else
       @getBottomSelection()
 
-  getTail: ->
+  getTailSelection: ->
     if @isReversed()
       @getBottomSelection()
     else
