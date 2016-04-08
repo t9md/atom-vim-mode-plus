@@ -140,7 +140,7 @@ class ModeManager
     submode = @submode
     @restorePreviousSelection = =>
       selection = @editor.getLastSelection()
-      swrap(selection).selectByProperties({characterwise: properties})
+      swrap(selection).selectByProperties(properties)
       @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
       submode
 
@@ -166,11 +166,11 @@ class ModeManager
       @preservePreviousSelection(@editor.getLastSelection())
 
     # We selectRight()ed in visual-mode, so reset this effect here.
-    for selection in @editor.getSelections()
-      # `vc`, `vs` make selection empty
-      unless (selection.isReversed() or selection.isEmpty())
-        selection.modifySelection ->
-          # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
-          moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
+    # `vc`, `vs` make selection empty.
+    selections = @editor.getSelections()
+    for selection in selections when not (selection.isReversed() or selection.isEmpty())
+      selection.modifySelection ->
+        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
+        moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
 module.exports = ModeManager

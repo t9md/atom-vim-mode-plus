@@ -8,8 +8,8 @@ class SelectionWrapper
   getProperties: ->
     @selection.marker.getProperties()['vim-mode-plus'] ? {}
 
-  setProperties: (newProp) ->
-    @selection.marker.setProperties({"vim-mode-plus": _.extend(@getProperties(), newProp)})
+  setProperties: (prop) ->
+    @selection.marker.setProperties({"vim-mode-plus": prop})
 
   resetProperties: ->
     @selection.marker.setProperties({"vim-mode-plus": null})
@@ -26,7 +26,7 @@ class SelectionWrapper
   getBufferPositionFor: (which, {fromProperty}={}) ->
     fromProperty ?= false
     if fromProperty
-      {head, tail} = @getProperties().characterwise
+      {head, tail} = @getProperties()
       if head.isGreaterThanOrEqual(tail)
         [start, end] = [tail, head]
       else
@@ -53,9 +53,9 @@ class SelectionWrapper
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
-    {head, tail} = @getProperties().characterwise ? {}
+    {head, tail} = @getProperties()
     if head? and tail?
-      @setProperties characterwise: head: tail, tail: head
+      @setProperties(head: tail, tail: head)
 
   setReversedState: (reversed) ->
     @setBufferRange @getBufferRange(), {autoscroll: true, reversed, preserveFolds: true}
@@ -109,17 +109,16 @@ class SelectionWrapper
       # [FIXME] Check if removing this translation logic can simplify code?
       point = properties[endPoint].translate([0, -1])
       properties[endPoint] = @selection.editor.clipBufferPosition(point)
-    @setProperties {characterwise: properties}
+    @setProperties(properties)
 
   detectCharacterwiseProperties: ->
     head: @selection.getHeadBufferPosition()
     tail: @selection.getTailBufferPosition()
 
   getCharacterwiseHeadPosition: ->
-    @getProperties().characterwise?.head
+    @getProperties().head
 
-  selectByProperties: (properties) ->
-    {head, tail} = properties.characterwise
+  selectByProperties: ({head, tail}) ->
     # No problem if head is greater than tail, Range constructor swap start/end.
     @setBufferRange([tail, head])
     @setReversedState(head.isLessThan(tail))
@@ -128,10 +127,9 @@ class SelectionWrapper
     {preserveGoalColumn} = options
     {goalColumn} = @selection.cursor if preserveGoalColumn
 
-    unless characterwise = @getProperties().characterwise
-      return
+    {head, tail} = @getProperties()
+    return unless head? and tail?
 
-    {head, tail} = characterwise
     if @selection.isReversed()
       [start, end] = [head, tail]
     else

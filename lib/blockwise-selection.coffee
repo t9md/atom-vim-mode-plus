@@ -162,7 +162,7 @@ class BlockwiseSelection
 
   # [FIXME] duplicate codes with setHeadBufferRange
   restoreCharacterwise: ->
-    properties = {characterwise: @getCharacterwiseProperties()}
+    properties = @getCharacterwiseProperties()
     head = @getHeadSelection()
     @clearSelections(except: head)
     {goalColumn} = head.cursor
