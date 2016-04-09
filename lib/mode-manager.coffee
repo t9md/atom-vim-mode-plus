@@ -7,6 +7,18 @@ settings = require './settings'
 
 class ModeManager
   mode: 'insert' # Native atom is not modal editor and its default is 'insert'
+  submode: null
+
+  vimState: null
+  editor: null
+  editorElement: null
+
+  emitter: null
+  deactivator: null
+
+  replacedCharsBySelection: null
+  previousSelectionProperties: null
+  previousVisualModeSubmode: null
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -30,28 +42,22 @@ class ModeManager
   # -------------------------
   activate: (mode, submode=null) ->
     @emitter.emit 'will-activate-mode', {mode, submode}
-    if mode is 'visual'
-      if submode is @submode
-        mode = 'normal'
-        submode = null
-      else if submode is 'previous'
-        submode = @restorePreviousSelection?() ? 'characterwise'
+
+    if (mode is 'visual') and (submode is @submode)
+      [mode, submode] = ['normal', null]
 
     @deactivate() if (mode isnt @mode)
 
-    # Activate
     @deactivator = switch mode
       when 'normal' then @activateNormalMode()
       when 'insert' then @activateInsertMode(submode)
       when 'visual' then @activateVisualMode(submode)
 
-    # Remove OLD mode, submode CSS class
     @editorElement.classList.remove("#{@mode}-mode")
     @editorElement.classList.remove(@submode)
 
     [@mode, @submode] = [mode, submode]
 
-    # Add NEW mode, submode CSS class
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
 
@@ -134,12 +140,13 @@ class ModeManager
       selection.getCharacterwiseProperties()
     else
       swrap(selection).detectCharacterwiseProperties()
-    submode = @submode
-    @restorePreviousSelection = =>
-      selection = @editor.getLastSelection()
-      swrap(selection).selectByProperties(properties)
-      @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
-      submode
+    @previousSelectionProperties = properties
+    @previousVisualModeSubmode = @submode
+
+  getPreviousSelectionInfo: ->
+    properties = @previousSelectionProperties
+    submode = @previousVisualModeSubmode
+    {properties, submode}
 
   selectCharacterwise: ->
     switch @submode

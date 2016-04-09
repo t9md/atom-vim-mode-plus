@@ -170,6 +170,21 @@ class SelectLatestChange extends Select
   @description: "Select latest yanked or changed range"
   target: 'ALatestChange'
 
+class SelectPreviousSelection extends Operator
+  @extend()
+  requireTarget: false
+  recordable: false
+
+  @description: "Select last selected visual area in current buffer"
+  execute: ->
+    {properties, submode} = @vimState.modeManager.getPreviousSelectionInfo()
+    return unless properties? and submode?
+
+    selection = @editor.getLastSelection()
+    swrap(selection).selectByProperties(properties)
+    @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
+    @activateMode('visual', submode)
+
 # -------------------------
 class Delete extends Operator
   @extend()

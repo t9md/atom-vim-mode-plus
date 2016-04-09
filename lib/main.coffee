@@ -103,7 +103,6 @@ module.exports =
       'activate-linewise-visual-mode': -> @activate('visual', 'linewise')
       'activate-characterwise-visual-mode': -> @activate('visual', 'characterwise')
       'activate-blockwise-visual-mode': -> @activate('visual', 'blockwise')
-      'activate-previous-visual-mode': -> @activate('visual', 'previous')
       'reset-normal-mode': -> @resetNormalMode()
       'set-register-name': -> @register.setName() # "
       'set-count-0': -> @setCount(0)
