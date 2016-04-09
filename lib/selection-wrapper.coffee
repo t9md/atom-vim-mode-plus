@@ -23,6 +23,16 @@ class SelectionWrapper
   getBufferRange: ->
     @selection.getBufferRange()
 
+  getNormalizedBufferPosition: ->
+    point = @selection.getHeadBufferPosition()
+    editor = @selection.editor
+    if @isForwarding()
+      screenPoint = editor.screenPositionForBufferPosition(point)
+      point = editor.bufferPositionForScreenPosition screenPoint.translate([0, -1]),
+        clip: 'backward'
+        wrapBeyondNewlines: true
+    point
+
   getBufferPositionFor: (which, {fromProperty}={}) ->
     fromProperty ?= false
     if fromProperty
