@@ -125,3 +125,13 @@ Not exist in pure Vim, provides clip-board history you can pop yanked text until
 
   - [List of text-object as vim plugin](https://github.com/kana/vim-textobj-user/wiki)  
   vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line, and any-pair(super set of many pair text-obj)
+
+# Commit emoji convention
+
+- :memo: Add comment or doc
+- :gift: New feature.
+- :bug: Bug fix
+- :bomb: Breaking compatibility.
+- :white_check_mark: Write test.
+- :fire: Remove something.
+- :beer: I'm happy like reduced code complexity.
