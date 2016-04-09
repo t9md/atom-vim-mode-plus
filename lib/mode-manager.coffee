@@ -111,18 +111,15 @@ class ModeManager
 
   # Visual
   # -------------------------
+  # At this point @submode is not yet updated to final submode.
   activateVisualMode: (submode) ->
     if @submode?
-      # If submode shift within visual mode, we first restore characterwise range
-      # At this phase @submode is not yet updated to requested submode.
       @selectCharacterwise()
-    else
-      @editor.selectRight() if @editor.getLastSelection().isEmpty()
+    else if @editor.getLastSelection().isEmpty()
+      @editor.selectRight()
 
-    # Preserve characterwise range to restore afterward.
     @vimState.updateSelectionProperties()
 
-    # Update selection area to final submode.
     switch submode
       when 'linewise'
         @vimState.selectLinewise()
@@ -131,8 +128,7 @@ class ModeManager
 
     new Disposable =>
       @normalizeSelections(preservePreviousSelection: true)
-      for selection in @editor.getSelections()
-        selection.clear(autoscroll: false)
+      selection.clear(autoscroll: false) for selection in @editor.getSelections()
 
   # Prepare function to restore selection by `gv`
   preservePreviousSelection: (selection) ->
@@ -154,11 +150,10 @@ class ModeManager
         for selection in @editor.getSelections() when not selection.isEmpty()
           swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
       when 'blockwise'
-        for blockwiseSelection in @vimState.getBlockwiseSelections()
-          # When all selection is empty, we don't want to loose multi-cursor
-          # by restoreing characterwise range.
-          unless blockwiseSelection.selections.every((selection) -> selection.isEmpty())
-            blockwiseSelection.restoreCharacterwise()
+        # When all selection is empty, we don't want to loose multi-cursor
+        # by restoreing characterwise range.
+        for bs in @vimState.getBlockwiseSelections() when not bs.isEmpty()
+          bs.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
 
     @editor.getSelections().forEach (selection) ->

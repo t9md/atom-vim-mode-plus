@@ -20,6 +20,10 @@ class BlockwiseSelection
   isBlockwise: ->
     true
 
+  isEmpty: ->
+    @getSelections().every (selection) ->
+      selection.isEmpty()
+
   initialize: (selection) ->
     {@goalColumn} = selection.cursor
     @selections = [selection]
