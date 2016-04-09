@@ -58,7 +58,7 @@ class BlockwiseSelection
 
   isReversed: ->
     @reversed
-    
+
   reverse: ->
     @reversed = not @reversed
 
@@ -167,6 +167,10 @@ class BlockwiseSelection
 
   # [FIXME] duplicate codes with setHeadBufferRange
   restoreCharacterwise: ->
+    # When all selection is empty, we don't want to loose multi-cursor
+    # by restoreing characterwise range.
+    return if @isEmpty()
+
     properties = @getCharacterwiseProperties()
     head = @getHeadSelection()
     @clearSelections(except: head)

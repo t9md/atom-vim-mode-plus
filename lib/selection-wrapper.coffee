@@ -95,10 +95,10 @@ class SelectionWrapper
     else
       {editor} = @selection
       start = @selection.getTailScreenPosition()
-      end = if @selection.isReversed()
-        editor.clipScreenPosition(start.translate([0, -1]), {clip: 'backward'})
+      if @selection.isReversed()
+        end = editor.clipScreenPosition(start.translate([0, -1]), {clip: 'backward'})
       else
-        editor.clipScreenPosition(start.translate([0, +1]), {clip: 'forward', wrapBeyondNewlines: true})
+        end = editor.clipScreenPosition(start.translate([0, +1]), {clip: 'forward', wrapBeyondNewlines: true})
       editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
@@ -123,6 +123,13 @@ class SelectionWrapper
     @setBufferRange([tail, head])
     @setReversedState(head.isLessThan(tail))
 
+  # Equivalent to
+  # "not (selection.isReversed() or selection.isEmpty())"
+  isForwarding: ->
+    head = @selection.getHeadBufferPosition()
+    tail = @selection.getTailBufferPosition()
+    head.isGreaterThan(tail)
+
   restoreCharacterwise: (options={}) ->
     {preserveGoalColumn} = options
     {goalColumn} = @selection.cursor if preserveGoalColumn
@@ -135,14 +142,14 @@ class SelectionWrapper
     else
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
+
+    editor = @selection.editor
+    screenPoint = editor.screenPositionForBufferPosition(end)
+    end = editor.bufferPositionForScreenPosition screenPoint.translate([0, +1]),
+      clip: 'forward'
+      wrapBeyondNewlines: true
+
     @setBufferRange([start, end], {preserveFolds: true})
-    if @selection.isReversed()
-      @reverse()
-      @selection.selectRight()
-      @reverse()
-    else
-      @selection.selectRight()
-    # [NOTE] Important! reset to null after restored.
     @resetProperties()
     @selection.cursor.goalColumn = goalColumn if goalColumn
 
@@ -193,6 +200,10 @@ swrap.expandOverLine = (editor, options) ->
 swrap.reverse = (editor) ->
   editor.getSelections().forEach (selection) ->
     swrap(selection).reverse()
+
+swrap.resetProperties = (editor) ->
+  editor.getSelections().forEach (selection) ->
+    swrap(selection).resetProperties()
 
 swrap.detectVisualModeSubmode = (editor) ->
   selections = editor.getSelections()

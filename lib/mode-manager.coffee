@@ -26,8 +26,7 @@ class ModeManager
 
   isMode: (mode, submodes) ->
     if submodes?
-      submodes = [submodes] unless _.isArray(submodes)
-      (@mode is mode) and (@submode in submodes)
+      (@mode is mode) and (@submode in [].concat(submodes))
     else
       @mode is mode
 
@@ -82,7 +81,7 @@ class ModeManager
   # -------------------------
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)
-    replaceModeDeactivator = @activateReplaceMode() if (submode is 'replace')
+    replaceModeDeactivator = @activateReplaceMode() if submode is 'replace'
 
     new Disposable =>
       replaceModeDeactivator?.dispose()
@@ -130,7 +129,6 @@ class ModeManager
       @normalizeSelections(preservePreviousSelection: true)
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
 
-  # Prepare function to restore selection by `gv`
   preservePreviousSelection: (selection) ->
     properties = if selection.isBlockwise?()
       selection.getCharacterwiseProperties()
@@ -150,14 +148,11 @@ class ModeManager
         for selection in @editor.getSelections() when not selection.isEmpty()
           swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
       when 'blockwise'
-        # When all selection is empty, we don't want to loose multi-cursor
-        # by restoreing characterwise range.
-        for bs in @vimState.getBlockwiseSelections() when not bs.isEmpty()
+        for bs in @vimState.getBlockwiseSelections()
           bs.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
 
-    @editor.getSelections().forEach (selection) ->
-      swrap(selection).resetProperties()
+    swrap.resetProperties(@editor)
 
   normalizeSelections: ({preservePreviousSelection}={}) ->
     @selectCharacterwise()
@@ -167,7 +162,7 @@ class ModeManager
     # We selectRight()ed in visual-mode, so reset this effect here.
     # `vc`, `vs` make selection empty.
     selections = @editor.getSelections()
-    for selection in selections when not (selection.isReversed() or selection.isEmpty())
+    for selection in selections when swrap(selection).isForwarding()
       selection.modifySelection ->
         # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
