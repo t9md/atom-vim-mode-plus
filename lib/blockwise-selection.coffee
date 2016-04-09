@@ -58,6 +58,7 @@ class BlockwiseSelection
 
   isReversed: ->
     @reversed
+    
   reverse: ->
     @reversed = not @reversed
 
