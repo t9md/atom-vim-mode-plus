@@ -30,10 +30,7 @@ class ModeManager
   # -------------------------
   activate: (mode, submode=null) ->
     @emitter.emit 'will-activate-mode', {mode, submode}
-    if mode is 'reset'
-      @editor.clearSelections()
-      mode = 'normal'
-    else if mode is 'visual'
+    if mode is 'visual'
       if submode is @submode
         mode = 'normal'
         submode = null

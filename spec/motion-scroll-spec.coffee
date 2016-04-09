@@ -22,7 +22,7 @@ describe "Motion Scroll", ->
       jasmine.attachToDOM(editorElement)
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "the ctrl-u keybinding", ->
     it "moves the screen down by half screen size and keeps cursor onscreen", ->

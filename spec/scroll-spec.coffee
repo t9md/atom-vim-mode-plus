@@ -11,7 +11,7 @@ describe "Scrolling", ->
       jasmine.attachToDOM(editorElement)
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "scrolling keybindings", ->
     beforeEach ->

@@ -12,7 +12,7 @@ describe "Motion Find", ->
       {set, ensure, keystroke} = _vim
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe 'the f/F keybindings', ->
     beforeEach ->

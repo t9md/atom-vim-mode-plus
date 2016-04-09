@@ -15,7 +15,7 @@ describe "TextObject", ->
       {set, ensure, keystroke} = vimEditor
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "TextObject", ->
     beforeEach ->

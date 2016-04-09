@@ -11,7 +11,7 @@ describe "Operator TransformString", ->
       {set, ensure, keystroke} = vim
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe 'the ~ keybinding', ->
     beforeEach ->

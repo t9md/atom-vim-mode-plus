@@ -12,7 +12,7 @@ describe "Operator ActivateInsertMode family", ->
       {set, ensure, keystroke} = vim
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "the s keybinding", ->
     beforeEach ->

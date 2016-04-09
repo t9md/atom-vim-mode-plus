@@ -12,7 +12,7 @@ describe "Motion Search", ->
       {set, ensure, keystroke} = _vim
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "the / keybinding", ->
     pane = null

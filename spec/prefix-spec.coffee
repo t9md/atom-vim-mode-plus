@@ -11,7 +11,7 @@ describe "Prefixes", ->
       {set, ensure, keystroke} = vim
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "Repeat", ->
     describe "with operations", ->

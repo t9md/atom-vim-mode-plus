@@ -12,7 +12,7 @@ describe "VimState", ->
       {set, ensure, keystroke} = vim
 
   beforeEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->

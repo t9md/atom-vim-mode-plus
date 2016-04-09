@@ -80,7 +80,7 @@ describe "Visual Blockwise", ->
       set text: textInitial
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "j", ->
     beforeEach ->

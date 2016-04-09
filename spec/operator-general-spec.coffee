@@ -11,7 +11,7 @@ describe "Operator general", ->
       {set, ensure, keystroke} = vim
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "cancelling operations", ->
     it "clear pending operation", ->

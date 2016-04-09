@@ -869,7 +869,7 @@ class Search extends SearchBase
 
     @onDidCancelSearch =>
       unless @isMode('visual') or @isMode('insert')
-        @vimState.activate('reset')
+        @vimState.resetNormalMode()
       @restoreEditorState?()
       @vimState.reset()
       @finish()

@@ -204,6 +204,10 @@ class VimState
       if target is @editorElement and not type.startsWith('vim-mode-plus:')
         handleSelectionChange() unless selectionWatcher?
 
+  resetNormalMode: ->
+    @editor.clearSelections()
+    @activate('normal')
+
   reset: ->
     @resetCount()
     @register.reset()

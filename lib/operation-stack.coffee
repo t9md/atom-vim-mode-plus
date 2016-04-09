@@ -76,7 +76,7 @@ class OperationStack
             @editorElement.classList.remove(scope)
     catch error
       if error.instanceof?('OperatorError')
-        @vimState.activate('reset')
+        @vimState.resetNormalMode()
         return
       else
         throw error
@@ -92,7 +92,7 @@ class OperationStack
 
   cancel: ->
     if @vimState.mode not in ['visual', 'insert']
-      @vimState.activate('reset')
+      @vimState.resetNormalMode()
     @finish()
 
   ensureAllSelectionsAreEmpty: ->

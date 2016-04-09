@@ -12,7 +12,7 @@ describe "Motion general", ->
       {set, ensure, keystroke} = _vim
 
   afterEach ->
-    vimState.activate('reset')
+    vimState.resetNormalMode()
 
   describe "simple motions", ->
     text = null
