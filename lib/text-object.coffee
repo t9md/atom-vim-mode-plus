@@ -59,10 +59,10 @@ class Word extends TextObject
       @wordRegExp ? selection.cursor.wordRegExp({includeNonWordCharacters})
 
   selectTextObject: (selection) ->
-    range = @getRange(selection, @getPattern(selection))
-    swrap(selection).setBufferRangeSafely(range)
+    swrap(selection).setBufferRangeSafely(@getRange(selection))
 
-  getRange: (selection, pattern) ->
+  getRange: (selection) ->
+    pattern = @getPattern(selection)
     from = swrap(selection).getNormalizedBufferPosition()
     start = getStartPositionForPattern(@editor, from, pattern)
     end = getEndPositionForPattern(@editor, from, pattern)
