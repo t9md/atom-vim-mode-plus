@@ -252,6 +252,14 @@ getTextInScreenRange = (editor, screenRange) ->
 cursorIsOnWhiteSpace = (cursor) ->
   isAllWhiteSpace(getTextAtCursor(cursor))
 
+# [FIXME]
+pointIsOnWhiteSpace = (editor, point) ->
+  character = characterAtBufferPosition(editor, point)
+  if character is ''
+    false
+  else
+    isAllWhiteSpace(character)
+
 # return true if moved
 moveCursorToNextNonWhitespace = (cursor) ->
   originalPoint = cursor.getBufferPosition()
@@ -537,6 +545,35 @@ isFunctionScope = (editor, scope) ->
     else
       /^meta\.function\./.test(scope)
 
+getStartPositionForPattern = (editor, from, pattern) ->
+  scanRange = [[from.row, 0], from]
+  point = null
+  editor.backwardsScanInBufferRange pattern, scanRange, ({range, matchText, stop}) ->
+    if range.end.isGreaterThanOrEqual(from)
+      point = range.start
+      stop()
+  point
+
+getEndPositionForPattern = (editor, from, pattern) ->
+  scanRange = [from, [from.row, Infinity]]
+  point = null
+  editor.scanInBufferRange pattern, scanRange, ({range, matchText, stop}) ->
+    if range.start.isLessThanOrEqual(from)
+      point = range.end
+      stop()
+  point
+
+# borrowed from Cursor::isBetweenWordAndNonWord
+pointIsBetweenWordAndNonWord = (editor, point, scope) ->
+  point = Point.fromObject(point)
+  return false if point.colum is 0 or pointIsAtEndOfLine(editor, point)
+  {row, column} = point
+  range = [[row, column - 1], [row, column + 1]]
+  [before, after] = editor.getTextInBufferRange(range)
+  return false if /\s/.test(before) or /\s/.test(after)
+  nonWordCharacters = atom.config.get('editor.nonWordCharacters', {scope}).split('')
+  _.contains(nonWordCharacters, before) isnt _.contains(nonWordCharacters, after)
+
 sortComparable = (collection) ->
   collection.sort (a, b) -> a.compare(b)
 
@@ -660,6 +697,7 @@ module.exports = {
   getTextAtCursor
   getTextInScreenRange
   cursorIsOnWhiteSpace
+  pointIsOnWhiteSpace
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow
   getCodeFoldRowRanges
@@ -668,6 +706,9 @@ module.exports = {
   getFirstCharacterColumForBufferRow
   cursorIsAtFirstCharacter
   isFunctionScope
+  getStartPositionForPattern
+  getEndPositionForPattern
+  pointIsBetweenWordAndNonWord
   isIncludeFunctionScopeForRow
   getTokenizedLineForRow
   getScopesForTokenizedLine

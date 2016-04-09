@@ -10,6 +10,10 @@ swrap = require './selection-wrapper'
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
   isIncludeFunctionScopeForRow
+  pointIsOnWhiteSpace
+  pointIsBetweenWordAndNonWord
+  getStartPositionForPattern
+  getEndPositionForPattern
 } = require './utils'
 
 class TextObject extends Base
@@ -39,32 +43,39 @@ class TextObject extends Base
   select: ->
     for selection in @editor.getSelections()
       @selectTextObject(selection)
-      
     @updateSelectionProperties() if @isMode('visual')
 
 # -------------------------
-# [FIXME] make it expandable
 class Word extends TextObject
   @extend(false)
-  selectTextObject: (selection) ->
-    wordRegex = @wordRegExp ? selection.cursor.wordRegExp()
-    if @isInner()
-      @selectInner(selection, wordRegex)
+
+  getPattern: (selection) ->
+    point = swrap(selection).getNormalizedBufferPosition()
+    if pointIsOnWhiteSpace(@editor, point)
+      /[\t ]*/g
     else
-      @selectA(selection, wordRegex)
+      scope = selection.cursor.getScopeDescriptor()
+      includeNonWordCharacters = not pointIsBetweenWordAndNonWord(@editor, point, scope)
+      @wordRegExp ? selection.cursor.wordRegExp({includeNonWordCharacters})
 
-  selectInner: (selection, wordRegex=null) ->
-    selection.selectWord()
+  selectTextObject: (selection) ->
+    range = @getRange(selection, @getPattern(selection))
+    swrap(selection).setBufferRangeSafely(range)
 
-  selectA: (selection, wordRegex=null) ->
-    @selectInner(selection, wordRegex)
-    scanRange = selection.cursor.getCurrentLineBufferRange()
-    headPoint = selection.getHeadBufferPosition()
-    scanRange.start = headPoint
-    @editor.scanInBufferRange /\s+/, scanRange, ({range, stop}) ->
-      if headPoint.isEqual(range.start)
-        selection.selectToBufferPosition range.end
-        stop()
+  getRange: (selection, pattern) ->
+    from = swrap(selection).getNormalizedBufferPosition()
+    start = getStartPositionForPattern(@editor, from, pattern)
+    end = getEndPositionForPattern(@editor, from, pattern)
+
+    start ?= from
+    end ?= from
+    if @isA() and endOfSpace = getEndPositionForPattern(@editor, end, /\s+/)
+      end = endOfSpace
+
+    unless start.isEqual(end)
+      new Range(start, end)
+    else
+      null
 
 class AWord extends Word
   @extend()
@@ -76,9 +87,6 @@ class InnerWord extends Word
 class WholeWord extends Word
   @extend(false)
   wordRegExp: /\S+/
-  selectInner: (selection, wordRegex) ->
-    range = selection.cursor.getCurrentWordBufferRange({wordRegex})
-    swrap(selection).setBufferRangeSafely range
 
 class AWholeWord extends WholeWord
   @extend()
@@ -91,9 +99,6 @@ class InnerWholeWord extends WholeWord
 class SmartWord extends Word
   @extend(false)
   wordRegExp: /[\w-]+/
-  selectInner: (selection, wordRegex) ->
-    range = selection.cursor.getCurrentWordBufferRange({wordRegex})
-    swrap(selection).setBufferRangeSafely range
 
 class ASmartWord extends SmartWord
   @description: "A word that consists of alphanumeric chars(`/[A-Za-z0-9_]/`) and hyphen `-`"
