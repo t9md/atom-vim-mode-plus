@@ -95,7 +95,7 @@ class OperationStack
       @vimState.resetNormalMode()
     @finish()
 
-  ensureAllSelectionsAreEmpty: ->
+  ensureAllSelectionsAreEmpty: (operation) ->
     unless @editor.getLastSelection().isEmpty()
       if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
         throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
@@ -111,7 +111,7 @@ class OperationStack
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit 'did-finish-operation'
     if @vimState.isMode('normal')
-      @ensureAllSelectionsAreEmpty()
+      @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()
 
     @vimState.updateCursorsVisibility()
