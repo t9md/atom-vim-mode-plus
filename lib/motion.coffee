@@ -793,6 +793,14 @@ class SearchBase extends Motion
       timeout: 100
     atom.beep()
 
+  getPoint: (cursor) ->
+    input = @getInput()
+    @matches ?= @getMatchList(cursor, input)
+    if @matches.isEmpty()
+      null
+    else
+      @matches.getCurrentStartPosition()
+
   moveCursor: (cursor) ->
     # console.log "moving!"
     input = @getInput()
@@ -800,16 +808,13 @@ class SearchBase extends Motion
       @finish()
       return
 
-    @matches ?= @getMatchList(cursor, input)
-    if @matches.isEmpty()
-      @flashScreen() if settings.get('flashScreenOnSearchHasNoMatch')
-    else
+    if point = @getPoint(cursor)
       @visitMatch "current",
         timeout: settings.get('showHoverSearchCounterDuration')
         landing: true
-
-      point = @matches.getCurrentStartPosition()
       cursor.setBufferPosition(point, {autoscroll: false})
+    else
+      @flashScreen() if settings.get('flashScreenOnSearchHasNoMatch')
 
     globalState.currentSearch = this
     @vimState.searchHistory.save(input)
