@@ -349,6 +349,22 @@ getFirstCharacterColumForBufferRow = (editor, row) ->
   else
     0
 
+getFirstCharacterPositionForBufferRow = (editor, row) ->
+  from = [row, 0]
+  getEndPositionForPattern(editor, from, /\s*/, containedOnly: true)
+
+# [FIXME] Fix naming, this return bufferPosition
+getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
+  start = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
+  end = [screenRow, Infinity]
+  scanRange = editor.bufferRangeForScreenRange([start, end])
+
+  point = null
+  editor.scanInBufferRange /\S/, scanRange, ({range, stop}) ->
+    point = range.start
+    stop()
+  point ? scanRange.start
+
 cursorIsAtFirstCharacter = (cursor) ->
   {editor} = cursor
   column = cursor.getBufferColumn()
@@ -730,6 +746,8 @@ module.exports = {
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
   getFirstCharacterColumForBufferRow
+  getFirstCharacterPositionForBufferRow
+  getFirstCharacterBufferPositionForScreenRow
   cursorIsAtFirstCharacter
   isFunctionScope
   getStartPositionForPattern

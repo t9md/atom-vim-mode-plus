@@ -26,7 +26,9 @@ globalState = require './global-state'
   detectScopeStartPositionForScope
   getTextInScreenRange
   getBufferRows
-  getEndPositionForPattern
+  getStartPositionForPattern
+  getFirstCharacterPositionForBufferRow
+  getFirstCharacterBufferPositionForScreenRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -59,6 +61,12 @@ class Motion extends Base
       @isMode('visual', ['characterwise', 'blockwise'])
     else
       @inclusive
+
+  setBufferPositionSafely: (cursor, point) ->
+    cursor.setBufferPosition(point) if point?
+
+  setScreenPositionSafely: (cursor, point) ->
+    cursor.setScreenPosition(point) if point?
 
   execute: ->
     @editor.moveCursors (cursor) =>
@@ -197,8 +205,7 @@ class MoveUpToEdge extends Motion
 
   moveCursor: (cursor) ->
     @countTimes =>
-      if point = @getPoint(cursor)
-        cursor.setScreenPosition(point)
+      @setScreenPositionSafely(cursor, @getPoint(cursor))
 
   getPoint: (cursor) ->
     column = cursor.getScreenColumn()
@@ -438,30 +445,25 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
   getCount: ->
     super - 1
 
+  moveCursor: (cursor) ->
+    cursor.setBufferPosition(@getPoint(cursor))
+
   getPoint: (cursor) ->
     row = cursor.getBufferRow() + @getCount()
     row = Math.min(row, getVimLastBufferRow(@editor))
-    scanRange = @editor.bufferRangeForBufferRow(row, includeNewline: true)
-    point = null
-    # [NOTE] this scan would never be fail, so valid point is always returend.
-    @editor.scanInBufferRange /\s*$/, scanRange, ({range, matchText}) ->
-      point = range.start
-    point.translate([0, -1])
-
-  moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint(cursor))
+    from = new Point(row, Infinity)
+    point = getStartPositionForPattern(@editor, from, /\s*$/)
+    (point ? from).translate([0, -1])
 
 # MoveToFirstCharacterOfLine faimily
 # ------------------------------------
 class MoveToFirstCharacterOfLine extends Motion
   @extend()
-  getPoint: (cursor) ->
-    from = [cursor.getBufferRow(), 0]
-    getEndPositionForPattern(@editor, from, /\s*/, containedOnly: true)
-
   moveCursor: (cursor) ->
-    if point = @getPoint(cursor)
-      cursor.setBufferPosition(point)
+    @setBufferPositionSafely(cursor, @getPoint(cursor))
+
+  getPoint: (cursor) ->
+    getFirstCharacterPositionForBufferRow(@editor, cursor.getBufferRow())
 
 class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
@@ -490,16 +492,18 @@ class MoveToFirstLine extends Motion
   linewise: true
   defaultCount: null
 
+  moveCursor: (cursor) ->
+    cursor.setBufferPosition(@getPoint(cursor))
+    cursor.autoscroll({center: true})
+
+  getPoint: (cursor) ->
+    getFirstCharacterPositionForBufferRow(@editor, @getRow())
+
   getRow: ->
     if (count = @getCount()) then count - 1 else @getDefaultRow()
 
   getDefaultRow: ->
     0
-
-  moveCursor: (cursor) ->
-    cursor.setBufferPosition [@getRow(), 0]
-    cursor.moveToFirstCharacterOfLine()
-    cursor.autoscroll({center: true})
 
 # keymap: G
 class MoveToLastLine extends MoveToFirstLine
@@ -518,15 +522,15 @@ class MoveToRelativeLine extends Motion
   @extend(false)
   linewise: true
 
+  moveCursor: (cursor) ->
+    cursor.setBufferPosition(@getPoint(cursor))
+
   getCount: ->
     super - 1
 
   getPoint: (cursor) ->
     row = cursor.getBufferRow() + @getCount()
     [row, 0]
-
-  moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint(cursor))
 
 class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
   @extend(false)
@@ -548,8 +552,10 @@ class MoveToTopOfScreen extends Motion
     super - 1
 
   moveCursor: (cursor) ->
-    cursor.setScreenPosition([@getRow(), 0])
-    cursor.moveToFirstCharacterOfLine()
+    cursor.setBufferPosition(@getPoint(cursor))
+
+  getPoint: (cursor) ->
+    getFirstCharacterBufferPositionForScreenRow(@editor, @getRow())
 
   getRow: ->
     row = getFirstVisibleScreenRow(@editor)
@@ -646,7 +652,7 @@ class Find extends Motion
   isBackwards: ->
     @backwards
 
-  find: (cursor) ->
+  getPoint: (cursor) ->
     cursorPoint = cursor.getBufferPosition()
     {start, end} = @editor.bufferRangeForBufferRow(cursorPoint.row)
 
@@ -668,8 +674,7 @@ class Find extends Motion
     super - 1
 
   moveCursor: (cursor) ->
-    if point = @find(cursor)
-      cursor.setBufferPosition(point)
+    @setBufferPositionSafely(cursor, @getPoint(cursor))
     unless @isRepeated()
       globalState.currentFind = this
 
@@ -685,7 +690,7 @@ class Till extends Find
   @extend()
   offset: 1
 
-  find: ->
+  getPoint: ->
     @point = super
 
   selectInclusively: (selection) ->
@@ -724,17 +729,21 @@ class MoveToMark extends Motion
   initialize: ->
     @focusInput()
 
-  moveCursor: (cursor) ->
+  getPoint: (cursor) ->
     input = @getInput()
-    markPosition = @vimState.mark.get(input)
+    point = null
 
+    point = @vimState.mark.get(input)
     if input is '`' # double '`' pressed
-      markPosition ?= [0, 0] # if markPosition not set, go to the beginning of the file
+      point ?= [0, 0] # if mark was not set, go to the beginning of the file
       @vimState.mark.set('`', cursor.getBufferPosition())
 
-    if markPosition?
-      cursor.setBufferPosition(markPosition)
-      cursor.moveToFirstCharacterOfLine() if @linewise
+    if point? and @linewise
+      point = getFirstCharacterPositionForBufferRow(@editor, point.row)
+    point
+
+  moveCursor: (cursor) ->
+    @setBufferPositionSafely(cursor, @getPoint(cursor))
 
 # keymap: '
 class MoveToMarkLine extends MoveToMark
@@ -1073,11 +1082,13 @@ class MoveToPositionByScope extends Motion
   direction: 'backward'
   scope: '.'
 
+  getPoint: (cursor) ->
+    from = cursor.getBufferPosition()
+    detectScopeStartPositionForScope(@editor, from, @direction, @scope)
+
   moveCursor: (cursor) ->
     @countTimes =>
-      from = cursor.getBufferPosition()
-      if point = detectScopeStartPositionForScope(@editor, from, @direction, @scope)
-        cursor.setBufferPosition(point)
+      @setBufferPositionSafely(cursor, @getPoint(cursor))
 
 class MoveToPreviousString extends MoveToPositionByScope
   @extend()
@@ -1100,12 +1111,16 @@ class MoveToNextNumber extends MoveToPreviousNumber
   @extend()
   @description: "Move to next number(searched by `constant.numeric` scope)"
   direction: 'forward'
+
 # -------------------------
 # keymap: %
 class MoveToPair extends Motion
   @extend()
   inclusive: true
   member: ['Parenthesis', 'CurlyBracket', 'SquareBracket']
+
+  moveCursor: (cursor) ->
+    @setBufferPositionSafely(cursor, @getPoint(cursor))
 
   getPoint: (cursor) ->
     ranges = @new("AAnyPair", {allowForwarding: true, @member}).getRanges(cursor.selection)
@@ -1130,7 +1145,3 @@ class MoveToPair extends Motion
         enclosingRange.containsRange(range)
 
     forwardingRanges[0]?.end.translate([0, -1]) or enclosingRange?.start
-
-  moveCursor: (cursor) ->
-    if point = @getPoint(cursor)
-      cursor.setBufferPosition(point)
