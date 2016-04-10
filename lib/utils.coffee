@@ -260,6 +260,30 @@ pointIsOnWhiteSpace = (editor, point) ->
   else
     isAllWhiteSpace(character)
 
+getWordRegExpForPointWithCursor = (cursor, point) ->
+  options = {}
+  if pointIsBetweenWordAndNonWord(cursor.editor, point, cursor.getScopeDescriptor())
+    options.includeNonWordCharacters = false
+  cursor.wordRegExp(options)
+
+# borrowed from Cursor::isBetweenWordAndNonWord
+pointIsBetweenWordAndNonWord = (editor, point, scope) ->
+  point = Point.fromObject(point)
+  {row, column} = point
+  return false if (column is 0) or (pointIsAtEndOfLine(editor, point))
+  range = [[row, column - 1], [row, column + 1]]
+  [before, after] = editor.getTextInBufferRange(range)
+  if /\s/.test(before) or /\s/.test(after)
+    false
+  else
+    nonWordCharacters = atom.config.get('editor.nonWordCharacters', {scope}).split('')
+    _.contains(nonWordCharacters, before) isnt _.contains(nonWordCharacters, after)
+
+pointIsSurroundedByWhitespace = (editor, point) ->
+  {row, column} = Point.fromObject(point)
+  range = [[row, column - 1], [row, column + 1]]
+  /^\s+$/.test editor.getTextInBufferRange(range)
+
 # return true if moved
 moveCursorToNextNonWhitespace = (cursor) ->
   originalPoint = cursor.getBufferPosition()
@@ -545,34 +569,33 @@ isFunctionScope = (editor, scope) ->
     else
       /^meta\.function\./.test(scope)
 
-getStartPositionForPattern = (editor, from, pattern) ->
+getStartPositionForPattern = (editor, from, pattern, options={}) ->
+  from = Point.fromObject(from)
+  containedOnly = options.containedOnly ? false
   scanRange = [[from.row, 0], from]
   point = null
   editor.backwardsScanInBufferRange pattern, scanRange, ({range, matchText, stop}) ->
-    if range.end.isGreaterThanOrEqual(from)
+    # Ignore 'empty line' matches between '\r' and '\n'
+    return if matchText is '' and range.start.column isnt 0
+
+    if (not containedOnly) or range.end.isGreaterThanOrEqual(from)
       point = range.start
       stop()
   point
 
-getEndPositionForPattern = (editor, from, pattern) ->
+getEndPositionForPattern = (editor, from, pattern, options={}) ->
+  from = Point.fromObject(from)
+  containedOnly = options.containedOnly ? false
   scanRange = [from, [from.row, Infinity]]
   point = null
   editor.scanInBufferRange pattern, scanRange, ({range, matchText, stop}) ->
-    if range.start.isLessThanOrEqual(from)
+    # Ignore 'empty line' matches between '\r' and '\n'
+    return if matchText is '' and range.start.column isnt 0
+
+    if (not containedOnly) or range.start.isLessThanOrEqual(from)
       point = range.end
       stop()
   point
-
-# borrowed from Cursor::isBetweenWordAndNonWord
-pointIsBetweenWordAndNonWord = (editor, point, scope) ->
-  point = Point.fromObject(point)
-  return false if point.colum is 0 or pointIsAtEndOfLine(editor, point)
-  {row, column} = point
-  range = [[row, column - 1], [row, column + 1]]
-  [before, after] = editor.getTextInBufferRange(range)
-  return false if /\s/.test(before) or /\s/.test(after)
-  nonWordCharacters = atom.config.get('editor.nonWordCharacters', {scope}).split('')
-  _.contains(nonWordCharacters, before) isnt _.contains(nonWordCharacters, after)
 
 sortComparable = (collection) ->
   collection.sort (a, b) -> a.compare(b)
@@ -698,6 +721,9 @@ module.exports = {
   getTextInScreenRange
   cursorIsOnWhiteSpace
   pointIsOnWhiteSpace
+  getWordRegExpForPointWithCursor
+  pointIsBetweenWordAndNonWord
+  pointIsSurroundedByWhitespace
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow
   getCodeFoldRowRanges
@@ -708,7 +734,6 @@ module.exports = {
   isFunctionScope
   getStartPositionForPattern
   getEndPositionForPattern
-  pointIsBetweenWordAndNonWord
   isIncludeFunctionScopeForRow
   getTokenizedLineForRow
   getScopesForTokenizedLine

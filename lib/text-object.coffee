@@ -10,8 +10,8 @@ swrap = require './selection-wrapper'
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
   isIncludeFunctionScopeForRow
-  pointIsOnWhiteSpace
-  pointIsBetweenWordAndNonWord
+  pointIsSurroundedByWhitespace
+  getWordRegExpForPointWithCursor
   getStartPositionForPattern
   getEndPositionForPattern
 } = require './utils'
@@ -51,12 +51,10 @@ class Word extends TextObject
 
   getPattern: (selection) ->
     point = swrap(selection).getNormalizedBufferPosition()
-    if pointIsOnWhiteSpace(@editor, point)
-      /[\t ]*/g
+    if pointIsSurroundedByWhitespace(@editor, point)
+      /[\t ]*/
     else
-      scope = selection.cursor.getScopeDescriptor()
-      includeNonWordCharacters = not pointIsBetweenWordAndNonWord(@editor, point, scope)
-      @wordRegExp ? selection.cursor.wordRegExp({includeNonWordCharacters})
+      @wordRegExp ? getWordRegExpForPointWithCursor(selection.cursor, point)
 
   selectTextObject: (selection) ->
     swrap(selection).setBufferRangeSafely(@getRange(selection))
@@ -64,12 +62,13 @@ class Word extends TextObject
   getRange: (selection) ->
     pattern = @getPattern(selection)
     from = swrap(selection).getNormalizedBufferPosition()
-    start = getStartPositionForPattern(@editor, from, pattern)
-    end = getEndPositionForPattern(@editor, from, pattern)
+    options = containedOnly: true
+    start = getStartPositionForPattern(@editor, from, pattern, options)
+    end = getEndPositionForPattern(@editor, from, pattern, options)
 
     start ?= from
     end ?= from
-    if @isA() and endOfSpace = getEndPositionForPattern(@editor, end, /\s+/)
+    if @isA() and endOfSpace = getEndPositionForPattern(@editor, end, /\s+/, options)
       end = endOfSpace
 
     unless start.isEqual(end)
@@ -240,11 +239,7 @@ class Pair extends TextObject
   getPointToSearchFrom: (selection, searchFrom) ->
     switch searchFrom
       when 'head'
-        point = swrap(selection).getBufferPositionFor('head')
-        # When selection is not empty, we have to start to search one column left
-        if (not selection.isEmpty()) and (not selection.isReversed()) and (point.column > 0)
-          point = @editor.clipScreenPosition(point.translate([0, -1]), {clip: 'backward'})
-        point
+        swrap(selection).getNormalizedBufferPosition()
       when 'start'
         swrap(selection).getBufferPositionFor('start')
 

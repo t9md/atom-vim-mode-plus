@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{Range} = require 'atom'
+{Range, Disposable} = require 'atom'
 {isLinewiseRange} = require './utils'
 
 class SelectionWrapper
@@ -32,6 +32,18 @@ class SelectionWrapper
         clip: 'backward'
         wrapBeyondNewlines: true
     point
+
+  # Return function to dispose(=revert) normalization.
+  normalizeBufferPosition: ->
+    head = @selection.getHeadBufferPosition()
+    point = @getNormalizedBufferPosition()
+    @selection.modifySelection =>
+      @selection.cursor.setBufferPosition(point)
+
+    new Disposable =>
+      unless head.isEqual(point)
+        @selection.modifySelection =>
+          @selection.cursor.setBufferPosition(head)
 
   getBufferPositionFor: (which, {fromProperty}={}) ->
     fromProperty ?= false

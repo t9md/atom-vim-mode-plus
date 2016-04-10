@@ -26,6 +26,7 @@ globalState = require './global-state'
   detectScopeStartPositionForScope
   getTextInScreenRange
   getBufferRows
+  getEndPositionForPattern
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -194,11 +195,14 @@ class MoveUpToNonBlank extends Motion
   direction: 'up'
 
   moveCursor: (cursor) ->
-    column = cursor.getScreenColumn()
     @countTimes =>
-      for row in @getScanRows(cursor) when @isMovablePoint(new Point(row, column))
-        cursor.setScreenPosition([row, column])
-        break
+      cursor.setScreenPosition(point) if point = @getPoint(cursor)
+
+  getPoint: (cursor) ->
+    column = cursor.getScreenColumn()
+    for row in @getScanRows(cursor)
+      if @isMovablePoint(point = new Point(row, column))
+        return point
 
   getScanRows: (cursor) ->
     cursorRow = cursor.getScreenRow()
@@ -392,6 +396,10 @@ class MoveToNextParagraph extends Motion
   @extend()
   direction: 'next'
 
+  moveCursor: (cursor) ->
+    @countTimes =>
+      cursor.setBufferPosition(@getPoint(cursor))
+
   getPoint: (cursor) ->
     cursorRow = cursor.getBufferRow()
     wasAtNonBlankRow = not @editor.isBufferRowBlank(cursorRow)
@@ -406,10 +414,6 @@ class MoveToNextParagraph extends Motion
       when 'previous' then [0, 0]
       when 'next' then getVimEofBufferPosition(@editor)
 
-  moveCursor: (cursor) ->
-    @countTimes =>
-      cursor.setBufferPosition(@getPoint(cursor))
-
 class MoveToPreviousParagraph extends MoveToNextParagraph
   @extend()
   direction: 'previous'
@@ -419,8 +423,11 @@ class MoveToBeginningOfLine extends Motion
   @extend()
   defaultCount: null
 
+  getPoint: (cursor) ->
+    new Point(cursor.getBufferRow(), 0)
+
   moveCursor: (cursor) ->
-    cursor.moveToBeginningOfLine()
+    cursor.setBufferPosition(@getPoint(cursor))
 
 class MoveToLastCharacterOfLine extends Motion
   @extend()
@@ -430,7 +437,7 @@ class MoveToLastCharacterOfLine extends Motion
 
   getPoint: (cursor) ->
     row = getValidVimBufferRow(@editor, cursor.getBufferRow() + @getCount())
-    [row, Infinity]
+    new Point(row, Infinity)
 
   moveCursor: (cursor) ->
     cursor.setBufferPosition(@getPoint(cursor))
@@ -460,9 +467,13 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
 # ------------------------------------
 class MoveToFirstCharacterOfLine extends Motion
   @extend()
+  getPoint: (cursor) ->
+    from = [cursor.getBufferRow(), 0]
+    getEndPositionForPattern(@editor, from, /\s*/, containedOnly: true)
+
   moveCursor: (cursor) ->
-    cursor.moveToBeginningOfLine()
-    cursor.moveToFirstCharacterOfLine()
+    if point = @getPoint(cursor)
+      cursor.setBufferPosition(point)
 
 class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
