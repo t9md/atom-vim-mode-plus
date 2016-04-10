@@ -187,16 +187,18 @@ class MoveDown extends MoveUp
   move: (cursor) ->
     moveCursorDown(cursor)
 
+# Move down/up to Edge
 # -------------------------
-class MoveUpToNonBlank extends Motion
+class MoveUpToEdge extends Motion
   @extend()
-  @description: "Move cursor up to non-blank char at same-column"
   linewise: true
   direction: 'up'
+  @description: "Move cursor up to **edge** char at same-column"
 
   moveCursor: (cursor) ->
     @countTimes =>
-      cursor.setScreenPosition(point) if point = @getPoint(cursor)
+      if point = @getPoint(cursor)
+        cursor.setScreenPosition(point)
 
   getPoint: (cursor) ->
     column = cursor.getScreenColumn()
@@ -211,30 +213,6 @@ class MoveUpToNonBlank extends Motion
       when 'up' then [validRow(cursorRow - 1)..0]
       when 'down' then [validRow(cursorRow + 1)..getVimLastScreenRow(@editor)]
 
-  isMovablePoint: (point) ->
-    @isNonBlankPoint(point)
-
-  isBlankPoint: (point) ->
-    char = characterAtScreenPosition(@editor, point)
-    if (char.length > 0)
-      /\s/.test(char)
-    else
-      true
-
-  isNonBlankPoint: (point) ->
-    not @isBlankPoint(point)
-
-class MoveDownToNonBlank extends MoveUpToNonBlank
-  @extend()
-  @description: "Move cursor down to non-blank char at same-column"
-  direction: 'down'
-
-# Move down/up to Edge
-# -------------------------
-class MoveUpToEdge extends MoveUpToNonBlank
-  @extend()
-  direction: 'up'
-  @description: "Move cursor up to **edge** char at same-column"
   isMovablePoint: (point) ->
     if @isStoppablePoint(point)
       # first and last row is always edge.
@@ -270,6 +248,16 @@ class MoveUpToEdge extends MoveUpToNonBlank
       @isNonBlankPoint(left) and @isNonBlankPoint(right)
     else
       false
+
+  isBlankPoint: (point) ->
+    char = characterAtScreenPosition(@editor, point)
+    if (char.length > 0)
+      /\s/.test(char)
+    else
+      true
+
+  isNonBlankPoint: (point) ->
+    not @isBlankPoint(point)
 
 class MoveDownToEdge extends MoveUpToEdge
   @extend()
