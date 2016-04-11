@@ -87,7 +87,8 @@ class ModeManager
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
       # When escape from insert-mode, cursor move Left.
-      moveCursorLeft(cursor) for cursor in @editor.getCursors()
+      for cursor in @editor.getCursors()
+        moveCursorLeft(cursor, {needSpecialCareToPreventWrapLine: true})
 
   activateReplaceMode: ->
     @replacedCharsBySelection = {}
