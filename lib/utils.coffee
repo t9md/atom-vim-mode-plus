@@ -379,12 +379,27 @@ moveCursor = (cursor, {preserveGoalColumn}, fn) ->
   if preserveGoalColumn and goalColumn
     cursor.goalColumn = goalColumn
 
+# Workaround issue for t9md/vim-mode-plus#226 and atom/atom#3174
+# I cannot depend cursor's column since its claim 0 and clipping emmulation don't
+# return wrapped line, but It actually wrap, so I need to do very dirty work to
+# predict wrap huristically.
+needSpecialCareToPreventWrapLine = (cursor) ->
+  {row, column} = cursor.getBufferPosition()
+  if atom.config.get('editor.softTabs')
+    tabLength = atom.config.get('editor.tabLength')
+    if 0 < column < tabLength
+      text = cursor.editor.getTextInBufferRange([[row, 0], [row, tabLength]])
+      /^\s+$/.test(text)
+    else
+      false
+
 # options:
 #   allowWrap: to controll allow wrap
 #   preserveGoalColumn: preserve original goalColumn
 moveCursorLeft = (cursor, options={}) ->
   {allowWrap} = options
   delete options.allowWrap
+  return if needSpecialCareToPreventWrapLine(cursor)
 
   if not cursor.isAtBeginningOfLine() or allowWrap
     motion = (cursor) -> cursor.moveLeft()
