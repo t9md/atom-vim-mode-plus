@@ -1,3 +1,15 @@
+# 0.33.0:
+- Support: set minimum engines to 1.7.0 above.
+- Internal: Cleanup blockwise-selection.
+- Internal: Now modeManager::activate take only true mode(no longer handle `reset`, `previous` as former version).
+- Breaking: Rename `activate-previous-visual-mode` to `select-previous-selection`
+- Experiment: Trying to not depend on atom's Selection::selectWord. #225
+- Experiment: Trying being independent from atom's imperative cursor motion. #225
+- Breaking: #224 remove Move(Up|Down)ToNonBlank
+- Fix: Don't move cursor up when inserting single white space at column 0 #226
+- Fix: To support Atom v1.7.0, polyfill for TextBuffer::history.getChangesSinceCheckPoint #229
+- Fix: `cc`, `S` ignore auto indent on Atom v1.7.0 #231
+
 # 0.32.1:
 - Fix: Uncaught error on `y`, `gU` etc.. in `vB` when `stayOnYank`, `stayOnOperator` enabled #221.
 
