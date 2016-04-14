@@ -142,66 +142,50 @@ eachCursor = (editor, fn) ->
   for cursor in editor.getCursors()
     fn(cursor)
 
-# Takes a transaction and turns it into a string of what was typed.
-# This class is an implementation detail of ActivateInsertMode
-# Return final newRanges from changes
-distanceForRange = ({start, end}) ->
-  row = end.row - start.row
-  column = end.column - start.column
-  new Point(row, column)
-
-# [TODO] Remove this code once I updated minimum Atom version to >=1.7.0
-getNewTextRangeFromChanges = (changes) ->
-  finalRange = null
-  for change in changes when change.newRange?
-    {oldRange, oldText, newRange, newText} = change
-    unless finalRange?
-      finalRange = newRange.copy() if newText.length
-      continue
-    # shrink
-    if oldText.length and finalRange.containsRange(oldRange)
-      amount = oldRange
-      diff = distanceForRange(amount)
-      diff.column = 0 unless (amount.end.row is finalRange.end.row)
-      finalRange.end = finalRange.end.translate(diff.negate())
-    # extend
-    if newText.length and finalRange.containsPoint(newRange.start)
-      amount = newRange
-      diff = distanceForRange(amount)
-      diff.column = 0 unless (amount.start.row is finalRange.end.row)
-      finalRange.end = finalRange.end.translate(diff)
-  finalRange
-
-getNewTextRangeFromPaches = (patches) ->
-  if (patch = Patch.compose(patches).getChanges().shift())?
-    newStart = Point.fromObject(patch.newStart)
-    new Range(newStart, newStart.traverse(patch.newExtent))
-  else
-    null
-
 Patch = null
-IsSupportPatch = semver.satisfies(atom.appVersion, '>=1.7.0-beta0')
+# [FIXME] Polyfills: Remove after atom/text-buffer is updated
+poliyFillsTextBufferHistory = (history) ->
+  History = history.constructor
+  History::getChangesSinceCheckpoint = (checkpointId) ->
+    checkpointIndex = null
+    patchesSinceCheckpoint = []
 
-# [TODO] Remove version check code once I updated minimum Atom version to >=1.7.0
+    for entry, i in @undoStack by -1
+      break if checkpointIndex?
+
+      switch entry.constructor.name
+        when 'Checkpoint'
+          if entry.id is checkpointId
+            checkpointIndex = i
+        when 'Transaction'
+          Patch ?= entry.patch.constructor
+          patchesSinceCheckpoint.unshift(entry.patch)
+        when 'Patch'
+          Patch ?= entry.constructor
+          patchesSinceCheckpoint.unshift(entry)
+        else
+          throw new Error("Unexpected undo stack entry type: #{entry.constructor.name}")
+
+    if checkpointIndex?
+      Patch?.compose(patchesSinceCheckpoint)
+    else
+      null
+
+normalizePatchChanges = (changes) ->
+  changes.map (change) ->
+    start: Point.fromObject(change.newStart)
+    oldExtent: Point.fromObject(change.oldExtent)
+    newExtent: Point.fromObject(change.newExtent)
+    newText: change.newText
+
 getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
   {history} = editor.getBuffer()
-  if (index = history.getCheckpointIndex(checkpoint))?
-    changes = history.undoStack.slice(index)
-
-  return null unless changes
-
-  if IsSupportPatch and (not Patch?)
-    for change in changes when change.constructor.name is 'Patch'
-      Patch = change.constructor
-      break
-
-  if IsSupportPatch
-    return null unless Patch?
-    changes = changes.filter (change) -> change instanceof Patch
-    getNewTextRangeFromPaches(changes)
-  else
-    changes = changes.filter (change) -> change.newText?
-    getNewTextRangeFromChanges(changes)
+  range = null
+  if patch = history.getChangesSinceCheckpoint(checkpoint)
+    # Ignore multi change for for multi-cursor insertion
+    if change = normalizePatchChanges(patch.getChanges()).shift()
+      range = new Range(change.start, change.start.traverse(change.newExtent))
+  range
 
 # char can be regExp pattern
 countChar = (string, char) ->
@@ -780,6 +764,8 @@ module.exports = {
   smartScrollToBufferPosition
   moveCursorDownBuffer
   moveCursorUpBuffer
+
+  poliyFillsTextBufferHistory
 
   # Debugging
   reportSelection,
