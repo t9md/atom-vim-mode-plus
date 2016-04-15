@@ -144,7 +144,7 @@ eachCursor = (editor, fn) ->
 
 Patch = null
 # [FIXME] Polyfills: Remove after atom/text-buffer is updated
-poliyFillsTextBufferHistory = (history) ->
+poliyFillsToTextBufferHistory = (history) ->
   History = history.constructor
   History::getChangesSinceCheckpoint = (checkpointId) ->
     checkpointIndex = null
@@ -765,7 +765,7 @@ module.exports = {
   moveCursorDownBuffer
   moveCursorUpBuffer
 
-  poliyFillsTextBufferHistory
+  poliyFillsToTextBufferHistory
 
   # Debugging
   reportSelection,
