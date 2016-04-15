@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 Base = require './base'
 swrap = require './selection-wrapper'
 {
-  sortRanges, sortRangesByEnd, countChar, pointIsAtEndOfLine,
+  sortRanges, sortRangesByEndPosition, countChar, pointIsAtEndOfLine,
   getTextToPoint
   getIndentLevelForBufferRow
   getCodeFoldRowRangesContainesForRow

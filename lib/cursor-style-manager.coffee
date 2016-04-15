@@ -77,7 +77,7 @@ class CursorStyleManager
     # But corresponding cursorsComponent(HTML element) is added in sync.
     # So to modify style of cursorsComponent, we have to make sure corresponding cursorsComponent
     # is available by component in sync to model.
-    @editorElement.component.updateSync()
+    @editorElement.component.updateSync() if submode is 'blockwise'
 
     # [FIXME] In spec mode, we skip here since not all spec have dom attached.
     return if isSpecMode

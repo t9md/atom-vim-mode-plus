@@ -2,7 +2,7 @@ fs = require 'fs-plus'
 semver = require 'semver'
 settings = require './settings'
 
-{Range, Point} = require 'atom'
+{Disposable, Range, Point} = require 'atom'
 _ = require 'underscore-plus'
 
 getParent = (obj) ->
@@ -43,13 +43,6 @@ debug = (message) ->
       filePath = fs.normalize settings.get('debugOutputFilePath')
       if fs.existsSync(filePath)
         fs.appendFileSync filePath, message
-
-getNonBlankCharPositionForRow = (editor, row) ->
-  scanRange = editor.bufferRangeForBufferRow(row)
-  point = null
-  editor.scanInBufferRange /^[ \t]*/, scanRange, ({range}) ->
-    point = range.end.translate([0, +1])
-  point
 
 getView = (model) ->
   atom.views.getView(model)
@@ -98,7 +91,7 @@ haveSomeSelection = (editor) ->
 sortRanges = (ranges) ->
   ranges.sort((a, b) -> a.compare(b))
 
-sortRangesByEnd = (ranges, fn) ->
+sortRangesByEndPosition = (ranges, fn) ->
   ranges.sort((a, b) -> a.end.compare(b.end))
 
 # return adjusted index fit whitin length
@@ -182,7 +175,7 @@ getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
   {history} = editor.getBuffer()
   range = null
   if patch = history.getChangesSinceCheckpoint(checkpoint)
-    # Ignore multi change for for multi-cursor insertion
+    # Take only first chage, ignore change by multi-cursor.
     if change = normalizePatchChanges(patch.getChanges()).shift()
       range = new Range(change.start, change.start.traverse(change.newExtent))
   range
@@ -208,16 +201,9 @@ mergeIntersectingRanges = (ranges) ->
 getEolBufferPositionForRow = (editor, row) ->
   editor.bufferRangeForBufferRow(row).end
 
-getEolBufferPositionForCursor = (cursor) ->
-  getEolBufferPositionForRow(cursor.editor, cursor.getBufferRow())
-
 pointIsAtEndOfLine = (editor, point) ->
   point = Point.fromObject(point)
   getEolBufferPositionForRow(editor, point.row).isEqual(point)
-
-characterAtBufferPosition = (editor, point) ->
-  range = Range.fromPointWithDelta(point, 0, 1)
-  editor.getTextInBufferRange(range)
 
 characterAtScreenPosition = (editor, point) ->
   screenRange = Range.fromPointWithDelta(point, 0, 1)
@@ -235,14 +221,6 @@ getTextInScreenRange = (editor, screenRange) ->
 
 cursorIsOnWhiteSpace = (cursor) ->
   isAllWhiteSpace(getTextAtCursor(cursor))
-
-# [FIXME]
-pointIsOnWhiteSpace = (editor, point) ->
-  character = characterAtBufferPosition(editor, point)
-  if character is ''
-    false
-  else
-    isAllWhiteSpace(character)
 
 getWordRegExpForPointWithCursor = (cursor, point) ->
   options = {}
@@ -297,10 +275,10 @@ getBufferRows = (editor, {startRow, direction, includeStartRow}) ->
 # But in Vim, curor can NOT past last newline. EOF is next position of very last character.
 getVimEofBufferPosition = (editor) ->
   eof = editor.getEofBufferPosition()
-  if eof.column is 0
-    getEolBufferPositionForRow(editor, Math.max(0, eof.row - 1))
-  else
+  if (eof.row is 0) or (eof.column > 0)
     eof
+  else
+    getEolBufferPositionForRow(editor, eof.row - 1)
 
 getVimEofScreenPosition = (editor) ->
   editor.screenPositionForBufferPosition(getVimEofBufferPosition(editor))
@@ -337,7 +315,6 @@ getFirstCharacterPositionForBufferRow = (editor, row) ->
   from = [row, 0]
   getEndPositionForPattern(editor, from, /\s*/, containedOnly: true) or from
 
-# [FIXME] Fix naming, this return bufferPosition
 getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
   start = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
   end = [screenRow, Infinity]
@@ -687,7 +664,6 @@ module.exports = {
   getKeyBindingForCommand
   include
   debug
-  getNonBlankCharPositionForRow
   getView
   saveEditorState
   getKeystrokeForEvent
@@ -696,7 +672,7 @@ module.exports = {
   isEndsWithNewLineForBufferRow
   haveSomeSelection
   sortRanges
-  sortRangesByEnd
+  sortRangesByEndPosition
   getIndex
   getVisibleBufferRange
   withVisibleBufferRange
@@ -709,7 +685,6 @@ module.exports = {
   pointIsAtEndOfLine
   pointIsAtVimEndOfFile
   cursorIsAtVimEndOfFile
-  characterAtBufferPosition
   characterAtScreenPosition
   getVimEofBufferPosition
   getVimEofScreenPosition
@@ -720,7 +695,6 @@ module.exports = {
   moveCursorUp
   moveCursorDown
   getEolBufferPositionForRow
-  getEolBufferPositionForCursor
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
   highlightRanges
@@ -736,7 +710,6 @@ module.exports = {
   getTextAtCursor
   getTextInScreenRange
   cursorIsOnWhiteSpace
-  pointIsOnWhiteSpace
   getWordRegExpForPointWithCursor
   pointIsBetweenWordAndNonWord
   pointIsSurroundedByWhitespace
