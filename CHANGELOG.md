@@ -1,3 +1,7 @@
+# 0.33.1:
+- Fix: `gg`, `GG` throw error when destination row was blank line. #233
+- Fix: Critical bug TextBuffer.history pollyfilled multiple times because of incorrect guard #229 
+
 # 0.33.0:
 - Support: set minimum engines to 1.7.0 above.
 - Internal: Cleanup blockwise-selection.
