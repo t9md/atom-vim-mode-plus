@@ -335,7 +335,7 @@ getFirstCharacterColumForBufferRow = (editor, row) ->
 
 getFirstCharacterPositionForBufferRow = (editor, row) ->
   from = [row, 0]
-  getEndPositionForPattern(editor, from, /\s*/, containedOnly: true)
+  getEndPositionForPattern(editor, from, /\s*/, containedOnly: true) or from
 
 # [FIXME] Fix naming, this return bufferPosition
 getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
