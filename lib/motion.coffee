@@ -392,21 +392,22 @@ class MoveToNextParagraph extends Motion
   direction: 'next'
 
   moveCursor: (cursor) ->
+    point = cursor.getBufferPosition()
     @countTimes =>
-      cursor.setBufferPosition(@getPoint(cursor))
+      point = @getPoint(point)
+    cursor.setBufferPosition(point)
 
-  getPoint: (cursor) ->
-    cursorRow = cursor.getBufferRow()
-    wasAtNonBlankRow = not @editor.isBufferRowBlank(cursorRow)
-    options = {startRow: cursorRow, @direction, includeStartRow: false}
+  getPoint: (fromPoint) ->
+    wasAtNonBlankRow = not @editor.isBufferRowBlank(fromPoint.row)
+    options = {startRow: fromPoint.row, @direction, includeStartRow: false}
     for row in getBufferRows(@editor, options)
       if @editor.isBufferRowBlank(row)
-        return [row, 0] if wasAtNonBlankRow
+        return new Point(row, 0) if wasAtNonBlankRow
       else
         wasAtNonBlankRow = true
 
     switch @direction
-      when 'previous' then [0, 0]
+      when 'previous' then new Point(0, 0)
       when 'next' then getVimEofBufferPosition(@editor)
 
 class MoveToPreviousParagraph extends MoveToNextParagraph
@@ -418,11 +419,12 @@ class MoveToBeginningOfLine extends Motion
   @extend()
   defaultCount: null
 
-  getPoint: (cursor) ->
-    new Point(cursor.getBufferRow(), 0)
+  getPoint: ({row}) ->
+    new Point(row, 0)
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint(cursor))
+    point = @getPoint(cursor.getBufferPosition())
+    cursor.setBufferPosition(point)
 
 class MoveToLastCharacterOfLine extends Motion
   @extend()
@@ -430,12 +432,13 @@ class MoveToLastCharacterOfLine extends Motion
   getCount: ->
     super - 1
 
-  getPoint: (cursor) ->
-    row = getValidVimBufferRow(@editor, cursor.getBufferRow() + @getCount())
+  getPoint: ({row}) ->
+    row = getValidVimBufferRow(@editor, row + @getCount())
     new Point(row, Infinity)
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint(cursor))
+    point = @getPoint(cursor.getBufferPosition())
+    cursor.setBufferPosition(point)
     cursor.goalColumn = Infinity
 
 class MoveToLastNonblankCharacterOfLineAndDown extends Motion
@@ -446,11 +449,11 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
     super - 1
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint(cursor))
+    point = @getPoint(cursor.getBufferPosition())
+    cursor.setBufferPosition(point)
 
-  getPoint: (cursor) ->
-    row = cursor.getBufferRow() + @getCount()
-    row = Math.min(row, getVimLastBufferRow(@editor))
+  getPoint: ({row}) ->
+    row = Math.min(row + @getCount(), getVimLastBufferRow(@editor))
     from = new Point(row, Infinity)
     point = getStartPositionForPattern(@editor, from, /\s*$/)
     (point ? from).translate([0, -1])
@@ -493,10 +496,10 @@ class MoveToFirstLine extends Motion
   defaultCount: null
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint(cursor))
+    cursor.setBufferPosition(@getPoint())
     cursor.autoscroll({center: true})
 
-  getPoint: (cursor) ->
+  getPoint: ->
     getFirstCharacterPositionForBufferRow(@editor, @getRow())
 
   getRow: ->
@@ -523,14 +526,14 @@ class MoveToRelativeLine extends Motion
   linewise: true
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint(cursor))
+    point = @getPoint(cursor.getBufferPosition())
+    cursor.setBufferPosition(point)
 
   getCount: ->
     super - 1
 
-  getPoint: (cursor) ->
-    row = cursor.getBufferRow() + @getCount()
-    [row, 0]
+  getPoint: ({row}) ->
+    [row + @getCount(), 0]
 
 class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
   @extend(false)
@@ -552,9 +555,9 @@ class MoveToTopOfScreen extends Motion
     super - 1
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint(cursor))
+    cursor.setBufferPosition(@getPoint())
 
-  getPoint: (cursor) ->
+  getPoint: ->
     getFirstCharacterBufferPositionForScreenRow(@editor, @getRow())
 
   getRow: ->
