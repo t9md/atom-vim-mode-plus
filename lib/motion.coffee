@@ -295,7 +295,7 @@ class MoveToNextWord extends Motion
     @vimEof = getVimEofBufferPosition(@editor) # cache
     lastCount = @getCount()
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
-    @countTimes (num, isFinal) =>
+    @countTimes ({isFinal}) =>
       cursorRow = cursor.getBufferRow()
       if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
         point = [cursorRow+1, 0]
@@ -652,17 +652,16 @@ class Find extends Motion
   isBackwards: ->
     @backwards
 
-  getPoint: (cursor) ->
-    cursorPoint = cursor.getBufferPosition()
-    {start, end} = @editor.bufferRangeForBufferRow(cursorPoint.row)
+  getPoint: (fromPoint) ->
+    {start, end} = @editor.bufferRangeForBufferRow(fromPoint.row)
 
     offset = if @isBackwards() then @offset else -@offset
     unOffset = -offset * @isRepeated()
     if @isBackwards()
-      scanRange = [start, cursorPoint.translate([0, unOffset])]
+      scanRange = [start, fromPoint.translate([0, unOffset])]
       method = 'backwardsScanInBufferRange'
     else
-      scanRange = [cursorPoint.translate([0, 1 + unOffset]), end]
+      scanRange = [fromPoint.translate([0, 1 + unOffset]), end]
       method = 'scanInBufferRange'
 
     points = []
@@ -674,7 +673,8 @@ class Find extends Motion
     super - 1
 
   moveCursor: (cursor) ->
-    @setBufferPositionSafely(cursor, @getPoint(cursor))
+    point = @getPoint(cursor.getBufferPosition())
+    @setBufferPositionSafely(cursor, point)
     unless @isRepeated()
       globalState.currentFind = this
 
@@ -729,21 +729,22 @@ class MoveToMark extends Motion
   initialize: ->
     @focusInput()
 
-  getPoint: (cursor) ->
+  getPoint: (fromPoint) ->
     input = @getInput()
     point = null
 
     point = @vimState.mark.get(input)
     if input is '`' # double '`' pressed
       point ?= [0, 0] # if mark was not set, go to the beginning of the file
-      @vimState.mark.set('`', cursor.getBufferPosition())
+      @vimState.mark.set('`', fromPoint)
 
     if point? and @linewise
       point = getFirstCharacterPositionForBufferRow(@editor, point.row)
     point
 
   moveCursor: (cursor) ->
-    @setBufferPositionSafely(cursor, @getPoint(cursor))
+    point = cursor.getBufferPosition()
+    @setBufferPositionSafely(cursor, @getPoint(point))
 
 # keymap: '
 class MoveToMarkLine extends MoveToMark
@@ -1092,11 +1093,12 @@ class MoveToPositionByScope extends Motion
 
   moveCursor: (cursor) ->
     point = cursor.getBufferPosition()
-    finalPoint = null
-    @countTimes =>
-      if point? and (point = @getPoint(point))
-        finalPoint = point
-    @setBufferPositionSafely(cursor, finalPoint)
+    @countTimes ({stop}) =>
+      if (newPoint = @getPoint(point))
+        point = newPoint
+      else
+        stop()
+    @setBufferPositionSafely(cursor, point)
 
 class MoveToPreviousString extends MoveToPositionByScope
   @extend()

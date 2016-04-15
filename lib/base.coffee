@@ -95,10 +95,15 @@ class Base
   # Misc
   # -------------------------
   countTimes: (fn) ->
-    count = @getCount()
-    _.times count, (i) ->
-      isFinal = (num = i + 1) is count
-      fn(num,  isFinal)
+    return if (last = @getCount()) < 1
+
+    stopped = false
+    stop = ->
+      stopped = true
+    for count in [1..last]
+      isFinal = count is last
+      fn({count, isFinal, stop})
+      break if stopped
 
   activateMode: (mode, submode) ->
     @onDidFinishOperation =>
