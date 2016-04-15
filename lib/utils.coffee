@@ -135,9 +135,9 @@ eachCursor = (editor, fn) ->
   for cursor in editor.getCursors()
     fn(cursor)
 
-Patch = null
 # [FIXME] Polyfills: Remove after atom/text-buffer is updated
 poliyFillsToTextBufferHistory = (history) ->
+  Patch = null
   History = history.constructor
   History::getChangesSinceCheckpoint = (checkpointId) ->
     checkpointIndex = null
@@ -163,6 +163,8 @@ poliyFillsToTextBufferHistory = (history) ->
       Patch?.compose(patchesSinceCheckpoint)
     else
       null
+  new Disposable ->
+    delete History::getChangesSinceCheckpoint
 
 normalizePatchChanges = (changes) ->
   changes.map (change) ->
