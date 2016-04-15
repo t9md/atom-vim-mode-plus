@@ -163,8 +163,6 @@ poliyFillsToTextBufferHistory = (history) ->
       Patch?.compose(patchesSinceCheckpoint)
     else
       null
-  new Disposable ->
-    delete History::getChangesSinceCheckpoint
 
 normalizePatchChanges = (changes) ->
   changes.map (change) ->

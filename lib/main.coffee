@@ -31,7 +31,7 @@ module.exports =
     @subscribe atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini()
       unless (history = editor.getBuffer().history).getChangesSinceCheckpoint?
-        @subscribe(poliyFillsToTextBufferHistory(history))
+        poliyFillsToTextBufferHistory(history)
 
       vimState = new VimState(this, editor, @statusBarManager)
       @vimStatesByEditor.set(editor, vimState)
