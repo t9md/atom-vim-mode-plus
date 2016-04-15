@@ -204,21 +204,24 @@ class MoveUpToEdge extends Motion
   @description: "Move cursor up to **edge** char at same-column"
 
   moveCursor: (cursor) ->
-    @countTimes =>
-      @setScreenPositionSafely(cursor, @getPoint(cursor))
+    point = cursor.getScreenPosition()
+    @countTimes ({stop}) =>
+      if (newPoint = @getPoint(point))
+        point = newPoint
+      else
+        stop()
+    @setScreenPositionSafely(cursor, point)
 
-  getPoint: (cursor) ->
-    column = cursor.getScreenColumn()
-    for row in @getScanRows(cursor)
-      if @isMovablePoint(point = new Point(row, column))
+  getPoint: (fromPoint) ->
+    for row in @getScanRows(fromPoint)
+      if @isMovablePoint(point = new Point(row, fromPoint.column))
         return point
 
-  getScanRows: (cursor) ->
-    cursorRow = cursor.getScreenRow()
+  getScanRows: ({row}) ->
     validRow = getValidVimScreenRow.bind(null, @editor)
     switch @direction
-      when 'up' then [validRow(cursorRow - 1)..0]
-      when 'down' then [validRow(cursorRow + 1)..getVimLastScreenRow(@editor)]
+      when 'up' then [validRow(row - 1)..0]
+      when 'down' then [validRow(row + 1)..getVimLastScreenRow(@editor)]
 
   isMovablePoint: (point) ->
     if @isStoppablePoint(point)
@@ -489,7 +492,6 @@ class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
   defaultCount: 0
   getCount: -> super - 1
 
-# keymap: gg
 class MoveToFirstLine extends Motion
   @extend()
   linewise: true
