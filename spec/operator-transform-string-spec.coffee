@@ -151,7 +151,7 @@ describe "Operator TransformString", ->
       it "allows repeating the operation", ->
         ensure '.', text: "    12345\nabcde\nABCDE"
 
-    fdescribe "in visual mode and stayOnTransformString enabled", ->
+    describe "in visual mode and stayOnTransformString enabled", ->
       beforeEach ->
         settings.set('stayOnTransformString', true)
         set cursor: [0, 0]
@@ -165,7 +165,7 @@ describe "Operator TransformString", ->
             abcde
           ABCDE
           """
-      it "can repeat operation", ->
+      it "when repeated, operate on same range when cursor was not moved", ->
         ensure 'vj>',
           mode: 'normal'
           cursor: [1, 0]
@@ -182,6 +182,19 @@ describe "Operator TransformString", ->
               abcde
           ABCDE
           """
+      it "when repeated, operate on relative range from cursor position with same extent when cursor was moved", ->
+        ensure 'vj>',
+          mode: 'normal'
+          cursor: [1, 0]
+          text: """
+            12345
+            abcde
+          ABCDE
+          """
+        ensure 'l.',
+          mode: 'normal'
+          cursor: [1, 2]
+          text: "  12345\n    abcde\n  ABCDE"
 
   describe "the < keybinding", ->
     beforeEach ->

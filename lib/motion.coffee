@@ -127,19 +127,43 @@ class Motion extends Base
 class CurrentSelection extends Motion
   @extend(false)
   selectionExtent: null
+  pointBySelection: null
   inclusive: true
+
+  initialize: ->
+    @pointInfoByCursor = new Map
 
   execute: ->
     throw new Error("#{@getName()} should not be executed")
 
   moveCursor: (cursor) ->
     if @isMode('visual')
-      # Preserve extent to be able to replay when repeated.
+      # * Purpose of pointInfoByCursor? see #235 for detail.
+      # When stayOnTransformString is enabled, cursor pos is not set on start of
+      # of selected range.
+      # But I want following behavior, so need to preserve position info.
+      #  1. `vj>.` -> indent same two rows regardless of current cursor's row.
+      #  2. `vj>j.` -> indent two rows from cursor's row.
       @selectionExtent = @editor.getSelectedBufferRange().getExtent()
       @linewise = @isLinewise() # Cache it in case repeated.
+      startOfSelection = cursor.selection.getBufferRange().start
+      @onDidFinishOperation =>
+        cursorPosition = cursor.getBufferPosition()
+        atEOL = cursor.isAtEndOfLine()
+        @pointInfoByCursor.set(cursor, {startOfSelection, cursorPosition, atEOL})
     else
-      point = cursor.getBufferPosition().traverse(@selectionExtent)
-      cursor.setBufferPosition(point)
+      point = cursor.getBufferPosition()
+      cursor.setBufferPosition(point.traverse(@selectionExtent))
+
+  select: ->
+    if @isMode('visual')
+      super
+    else
+      for cursor in @editor.getCursors() when pointInfo = @pointInfoByCursor.get(cursor)
+        {cursorPosition, startOfSelection, atEOL} = pointInfo
+        if atEOL or cursorPosition.isEqual(cursor.getBufferPosition())
+          cursor.setBufferPosition(startOfSelection)
+      super
 
 class MoveLeft extends Motion
   @extend()
