@@ -151,6 +151,38 @@ describe "Operator TransformString", ->
       it "allows repeating the operation", ->
         ensure '.', text: "    12345\nabcde\nABCDE"
 
+    fdescribe "in visual mode and stayOnTransformString enabled", ->
+      beforeEach ->
+        settings.set('stayOnTransformString', true)
+        set cursor: [0, 0]
+
+      it "indents the currrent selection and exits visual mode", ->
+        ensure 'vj>',
+          mode: 'normal'
+          cursor: [1, 0]
+          text: """
+            12345
+            abcde
+          ABCDE
+          """
+      it "can repeat operation", ->
+        ensure 'vj>',
+          mode: 'normal'
+          cursor: [1, 0]
+          text: """
+            12345
+            abcde
+          ABCDE
+          """
+        ensure '.',
+          mode: 'normal'
+          cursor: [1, 0]
+          text: """
+              12345
+              abcde
+          ABCDE
+          """
+
   describe "the < keybinding", ->
     beforeEach ->
       set text: "  12345\n  abcde\nABCDE", cursor: [0, 0]
