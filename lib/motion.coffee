@@ -1093,8 +1093,8 @@ class MoveToPositionByScope extends Motion
   direction: 'backward'
   scope: '.'
 
-  getPoint: (from) ->
-    detectScopeStartPositionForScope(@editor, from, @direction, @scope)
+  getPoint: (fromPoint) ->
+    detectScopeStartPositionForScope(@editor, fromPoint, @direction, @scope)
 
   moveCursor: (cursor) ->
     point = cursor.getBufferPosition()
