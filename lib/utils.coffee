@@ -205,11 +205,6 @@ pointIsAtEndOfLine = (editor, point) ->
   point = Point.fromObject(point)
   getEolBufferPositionForRow(editor, point.row).isEqual(point)
 
-characterAtScreenPosition = (editor, point) ->
-  screenRange = Range.fromPointWithDelta(point, 0, 1)
-  range = editor.bufferRangeForScreenRange(screenRange)
-  editor.getTextInBufferRange(range)
-
 getTextAtCursor = (cursor) ->
   {editor} = cursor
   bufferRange = editor.bufferRangeForScreenRange(cursor.getScreenRange())
@@ -685,7 +680,6 @@ module.exports = {
   pointIsAtEndOfLine
   pointIsAtVimEndOfFile
   cursorIsAtVimEndOfFile
-  characterAtScreenPosition
   getVimEofBufferPosition
   getVimEofScreenPosition
   getVimLastBufferRow

@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{Point} = require 'atom'
+{Point, Range} = require 'atom'
 
 globalState = require './global-state'
 {
@@ -13,7 +13,6 @@ globalState = require './global-state'
   getVimEofBufferPosition
   getVimLastBufferRow, getVimLastScreenRow
   getValidVimScreenRow, getValidVimBufferRow
-  characterAtScreenPosition
   highlightRanges
   moveCursorToFirstCharacterAtRow
   sortRanges
@@ -260,10 +259,21 @@ class MoveUpToEdge extends Motion
     else
       false
 
-  # To avoid stopping on indentation or trailing whitespace,
-  # we exclude leading and trailing whitespace from stoppable column.
-  isValidStoppablePoint: (point) ->
-    {row, column} = point
+  getTextInScreenRange: (screenRange) ->
+    screenRange = Range.fromObject(screenRange)
+    start = @bufferPositionForScreenPosition(screenRange.start)
+    end = @bufferPositionForScreenPosition(screenRange.end)
+    @editor.getTextInBufferRange([start, end])
+
+  bufferPositionForScreenPosition: (screenPosition) ->
+    row = @editor.bufferRowForScreenRow(screenPosition.row)
+    column = @editor.displayBuffer
+      .tokenizedLineForScreenRow(screenPosition.row)
+      .bufferColumnForScreenColumn(screenPosition.column)
+    new Point(row, column)
+
+  # Avoid stopping on leading and trailing whitespace,
+  isValidStoppablePoint: ({row, column}) ->
     text = getTextInScreenRange(@editor, [[row, 0], [row, Infinity]])
     softTabText = _.multiplyString(' ', @editor.getTabLength())
     text = text.replace(/\t/g, softTabText)
@@ -283,15 +293,11 @@ class MoveUpToEdge extends Motion
     else
       false
 
-  isBlankPoint: (point) ->
-    char = characterAtScreenPosition(@editor, point)
-    if (char.length > 0)
-      /\s/.test(char)
-    else
-      true
-
   isNonBlankPoint: (point) ->
-    not @isBlankPoint(point)
+    screenRange = Range.fromPointWithDelta(point, 0, 1)
+    # char = @getTextInScreenRange(screenRange)
+    char = getTextInScreenRange(@editor, screenRange)
+    char? and /\S/.test(char)
 
 class MoveDownToEdge extends MoveUpToEdge
   @extend()
