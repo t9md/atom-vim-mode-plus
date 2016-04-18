@@ -151,12 +151,6 @@ screenPositionForBufferPositionWithoutClip = (editor, bufferPosition) ->
     .screenColumnForBufferColumn(column)
   new Point(screenRow, screenColumn)
 
-getTextInScreenRangeWithoutClip = (editor, screenRange) ->
-  screenRange = Range.fromObject(screenRange)
-  start = bufferPositionForScreenPositionWithoutClip(editor, screenRange.start)
-  end = bufferPositionForScreenPositionWithoutClip(editor, screenRange.end)
-  editor.getTextInBufferRange([start, end])
-
 # [FIXME] Polyfills: Remove after atom/text-buffer is updated
 poliyFillsToTextBufferHistory = (history) ->
   Patch = null
@@ -698,7 +692,6 @@ module.exports = {
   eachCursor
   bufferPositionForScreenPositionWithoutClip
   screenPositionForBufferPositionWithoutClip
-  getTextInScreenRangeWithoutClip
   getNewTextRangeFromCheckpoint
   findIndex
   mergeIntersectingRanges
