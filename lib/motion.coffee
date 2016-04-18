@@ -23,11 +23,13 @@ globalState = require './global-state'
   getCodeFoldRowRanges
   isIncludeFunctionScopeForRow
   detectScopeStartPositionForScope
-  getTextInScreenRange
   getBufferRows
   getStartPositionForPattern
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
+  bufferPositionForScreenPositionWithoutClip
+  screenPositionForBufferPositionWithoutClip
+  getTextInScreenRangeWithoutClip
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -220,6 +222,9 @@ class MoveDown extends MoveUp
 
 # Move down/up to Edge
 # -------------------------
+# See t9md/atom-vim-mode-plus#236
+# At least v1.7.0. bufferPosition and screenPosition cannot convert accurately
+# when row is folded.
 class MoveUpToEdge extends Motion
   @extend()
   linewise: true
@@ -227,13 +232,14 @@ class MoveUpToEdge extends Motion
   @description: "Move cursor up to **edge** char at same-column"
 
   moveCursor: (cursor) ->
-    point = cursor.getScreenPosition()
+    point = screenPositionForBufferPositionWithoutClip(@editor, cursor.getBufferPosition())
     @countTimes ({stop}) =>
       if (newPoint = @getPoint(point))
         point = newPoint
       else
         stop()
-    @setScreenPositionSafely(cursor, point)
+    point = bufferPositionForScreenPositionWithoutClip(@editor, point)
+    @setBufferPositionSafely(cursor, point)
 
   getPoint: (fromPoint) ->
     for row in @getScanRows(fromPoint)
@@ -259,22 +265,9 @@ class MoveUpToEdge extends Motion
     else
       false
 
-  getTextInScreenRange: (screenRange) ->
-    screenRange = Range.fromObject(screenRange)
-    start = @bufferPositionForScreenPosition(screenRange.start)
-    end = @bufferPositionForScreenPosition(screenRange.end)
-    @editor.getTextInBufferRange([start, end])
-
-  bufferPositionForScreenPosition: (screenPosition) ->
-    row = @editor.bufferRowForScreenRow(screenPosition.row)
-    column = @editor.displayBuffer
-      .tokenizedLineForScreenRow(screenPosition.row)
-      .bufferColumnForScreenColumn(screenPosition.column)
-    new Point(row, column)
-
   # Avoid stopping on leading and trailing whitespace,
   isValidStoppablePoint: ({row, column}) ->
-    text = getTextInScreenRange(@editor, [[row, 0], [row, Infinity]])
+    text = getTextInScreenRangeWithoutClip(@editor, [[row, 0], [row, Infinity]])
     softTabText = _.multiplyString(' ', @editor.getTabLength())
     text = text.replace(/\t/g, softTabText)
     if (match = text.match(/\S/g))?
@@ -295,8 +288,7 @@ class MoveUpToEdge extends Motion
 
   isNonBlankPoint: (point) ->
     screenRange = Range.fromPointWithDelta(point, 0, 1)
-    # char = @getTextInScreenRange(screenRange)
-    char = getTextInScreenRange(@editor, screenRange)
+    char = getTextInScreenRangeWithoutClip(@editor, screenRange)
     char? and /\S/.test(char)
 
 class MoveDownToEdge extends MoveUpToEdge
@@ -838,7 +830,6 @@ class SearchBase extends Motion
       @matches.getCurrentStartPosition()
 
   moveCursor: (cursor) ->
-    # console.log "moving!"
     input = @getInput()
     if input is ''
       @finish()
