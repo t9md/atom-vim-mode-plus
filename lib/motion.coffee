@@ -439,7 +439,6 @@ class MoveToPreviousParagraph extends MoveToNextParagraph
 # -------------------------
 class MoveToBeginningOfLine extends Motion
   @extend()
-  defaultCount: null
 
   getPoint: ({row}) ->
     new Point(row, 0)
@@ -447,6 +446,18 @@ class MoveToBeginningOfLine extends Motion
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
     cursor.setBufferPosition(point)
+
+class MoveToColumn extends Motion
+  @extend()
+  getCount: ->
+    super - 1
+
+  getPoint: ({row}) ->
+    new Point(row, @getCount())
+
+  moveCursor: (cursor) ->
+    point = @getPoint(cursor.getScreenPosition())
+    cursor.setScreenPosition(point)
 
 class MoveToLastCharacterOfLine extends Motion
   @extend()

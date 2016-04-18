@@ -657,6 +657,22 @@ describe "Motion general", ->
       it 'selects to the first column of the line', ->
         ensure 'd0', text: 'cde', cursor: [0, 0]
 
+  describe "the | keybinding", ->
+    beforeEach ->
+      set text: "  abcde", cursor: [0, 4]
+
+    describe "as a motion", ->
+      it "moves the cursor to the number column", ->
+        ensure '|', cursor: [0, 0]
+        ensure '1|', cursor: [0, 0]
+        ensure '3|', cursor: [0, 2]
+        ensure '4|', cursor: [0, 3]
+
+    describe "as operator's target", ->
+      it 'behave exclusively', ->
+        set cursor: [0, 0]
+        ensure 'd4|', text: 'bcde', cursor: [0, 0]
+
   describe "the $ keybinding", ->
     beforeEach ->
       set

@@ -59,6 +59,7 @@
   '}':     'vim-mode-plus:move-to-next-paragraph'
   '{':     'vim-mode-plus:move-to-previous-paragraph'
   '0':     'vim-mode-plus:move-to-beginning-of-line'
+  '|':     'vim-mode-plus:move-to-column'
   'home':  'vim-mode-plus:move-to-beginning-of-line'
   '^':     'vim-mode-plus:move-to-first-character-of-line'
   '_':     'vim-mode-plus:move-to-first-character-of-line-and-down'
