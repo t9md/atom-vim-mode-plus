@@ -170,39 +170,26 @@ class VimState
     } = {}
     @emitter.emit 'did-destroy'
 
-  observeSelection: ->
-    handleSelectionChange = =>
-      return unless @editor?
-      return if @operationStack.isProcessing()
+  checkSelection: (event) =>
+    return unless @editor?
+    return if @operationStack.isProcessing()
 
-      if haveSomeSelection(@editor)
-        @activate('visual', 'characterwise') if @isMode('normal')
-      else
-        @activate('normal') if @isMode('visual')
-
-    selectionWatcher = null
-    handleMouseDown = =>
-      selectionWatcher?.dispose()
-      point = @editor.getLastCursor().getBufferPosition()
-      tailRange = Range.fromPointWithDelta(point, 0, +1)
-      selectionWatcher = @editor.onDidChangeSelectionRange ({selection}) =>
-        handleSelectionChange()
-        selection.setBufferRange(selection.getBufferRange().union(tailRange))
+    if haveSomeSelection(@editor)
+      if @isMode('visual')
         @updateCursorsVisibility()
+      else
+        @activate('visual', 'characterwise')
+    else
+      @activate('normal') if @isMode('visual')
 
-    handleMouseUp = ->
-      selectionWatcher?.dispose()
-      selectionWatcher = null
-
-    @editorElement.addEventListener('mousedown', handleMouseDown)
-    @editorElement.addEventListener('mouseup', handleMouseUp)
+  observeSelection: ->
+    @editorElement.addEventListener('mouseup', @checkSelection)
     @subscriptions.add new Disposable =>
-      @editorElement.removeEventListener('mousedown', handleMouseDown)
-      @editorElement.removeEventListener('mouseup', handleMouseUp)
+      @editorElement.removeEventListener('mouseup', @checkSelection)
 
     @subscriptions.add atom.commands.onDidDispatch ({target, type}) =>
       if target is @editorElement and not type.startsWith('vim-mode-plus:')
-        handleSelectionChange() unless selectionWatcher?
+        @checkSelection()
 
   resetNormalMode: ->
     @editor.clearSelections()
