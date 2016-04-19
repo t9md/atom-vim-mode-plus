@@ -115,7 +115,6 @@ class ModeManager
   activateVisualMode: (submode) ->
     if @submode?
       @selectCharacterwise()
-      # swrap.resetProperties(@editor)
     else if @editor.getLastSelection().isEmpty()
       @editor.selectRight()
 
@@ -153,8 +152,6 @@ class ModeManager
         for bs in @vimState.getBlockwiseSelections()
           bs.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
-
-    # swrap.resetProperties(@editor)
 
   normalizeSelections: ({preservePreviousSelection}={}) ->
     @selectCharacterwise()
