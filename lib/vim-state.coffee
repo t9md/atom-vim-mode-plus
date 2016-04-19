@@ -2,6 +2,9 @@ Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
+{inspect} = require 'util'
+p = (args...) -> console.log inspect(args...)
+
 settings = require './settings'
 globalState = require './global-state'
 {Hover} = require './hover'
@@ -175,10 +178,11 @@ class VimState
     return if @operationStack.isProcessing()
 
     if haveSomeSelection(@editor)
-      if @isMode('visual')
+      submode = swrap.detectVisualModeSubmode(@editor)
+      if @isMode('visual', submode)
         @updateCursorsVisibility()
       else
-        @activate('visual', 'characterwise')
+        @activate('visual', submode)
     else
       @activate('normal') if @isMode('visual')
 
@@ -187,9 +191,19 @@ class VimState
     @subscriptions.add new Disposable =>
       @editorElement.removeEventListener('mouseup', @checkSelection)
 
-    @subscriptions.add atom.commands.onDidDispatch ({target, type}) =>
-      if target is @editorElement and not type.startsWith('vim-mode-plus:')
-        @checkSelection()
+    isInteresting = ({target, type}) =>
+      if @mode is 'insert'
+        false
+      else
+        target is @editorElement and not type.startsWith('vim-mode-plus:')
+
+    @subscriptions.add atom.commands.onWillDispatch (event) =>
+      if isInteresting(event)
+        for selection in @editor.getSelections()
+          swrap(selection).preserveCharacterwise()
+
+    @subscriptions.add atom.commands.onDidDispatch (event) =>
+      @checkSelection() if isInteresting(event)
 
   resetNormalMode: ->
     @editor.clearSelections()
@@ -205,9 +219,15 @@ class VimState
   updateCursorsVisibility: ->
     @cursorStyleManager.refresh()
 
-  updateSelectionProperties: ->
-    for selection in @editor.getSelections()
-      swrap(selection).preserveCharacterwise(@editor)
+  updateSelectionProperties: ({force}={}) ->
+    force ?= true
+    selections = @editor.getSelections()
+    unless force
+      selections = selections.filter (selection) ->
+        not swrap(selection).getCharacterwiseHeadPosition()?
+
+    for selection in selections
+      swrap(selection).preserveCharacterwise()
 
   # highlightSearch
   # -------------------------
