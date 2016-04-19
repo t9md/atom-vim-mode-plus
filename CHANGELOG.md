@@ -1,3 +1,10 @@
+# 0.35.0:
+- Internal: Gradually making motion into pure point calculator #225
+- Improve: Operate on same range on `.` repeat even if `stayOnTransformString` was enabled #235
+- New: MoveToColumn motion. Default keymap is `|`. #230
+- Improve: `dblclick` correctly activate visual mode, simplify mouse event observer. #228
+- Improve: Better integration with Atom's native commands(e.g `cmd-l`) #239
+
 # 0.34.0:
 - Fix: `gg`, `GG` throw error when destination row was blank line. #233
 - Fix: Critical bug TextBuffer.history pollyfilled multiple times because of incorrect guard #229
