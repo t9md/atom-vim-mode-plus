@@ -5,16 +5,17 @@ emojiFolder = 'atom://vim-mode-plus/node_modules/emoji-images/pngs'
 settings = require './settings'
 swrap = require './selection-wrapper'
 
-class Hover
-  lineHeight: null
-  point: null
-
-  constructor: (@vimState, @param) ->
-    {@editor, @editorElement} = @vimState
+class Hover extends HTMLElement
+  createdCallback: ->
+    @className = 'vim-mode-plus-hover'
     @text = []
-    @view = atom.views.getView(this)
+    this
 
-  setPoint: ->
+  initialize: (@vimState) ->
+    {@editor, @editorElement} = @vimState
+    this
+
+  getPoint: ->
     switch
       when @vimState.isMode('visual', 'linewise')
         swrap(@editor.getLastSelection()).getCharacterwiseHeadPosition()
@@ -24,81 +25,50 @@ class Hover
       else
         @editor.getCursorBufferPosition()
 
-  add: (text, point) ->
-    @text.push text
-    @view.show(point ? @setPoint())
+  add: (text, point=@getPoint()) ->
+    @text.push(text)
+    @show(point)
 
-  replaceLastSection: (text, point) ->
+  replaceLastSection: (text) ->
     @text.pop()
-    @add(text, point)
+    @add(text)
+
+  convertText: (text, lineHeight) ->
+    text = String(text)
+    if settings.get('showHoverOnOperateIcon') is 'emoji'
+      emoji(text, emojiFolder, lineHeight)
+    else
+      text.replace /:(.*?):/g, (s, m) ->
+        "<span class='icon icon-#{m}'></span>"
+
+  show: (point) ->
+    unless @marker?
+      @marker = @createOverlay(point)
+      @lineHeight = @editor.getLineHeightInPixels()
+      @setIconSize(@lineHeight)
+      @style.marginTop = (@lineHeight * -2.2) + 'px'
+
+    if @text.length
+      @innerHTML = @text.map (text) =>
+        @convertText(text, @lineHeight)
+      .join('')
 
   withTimeout: (point, options) ->
     @reset()
-    {text, timeout} = options
     if options.classList.length
-      @view.classList.add(options.classList...)
-    @add(text, point)
-    if timeout?
+      @classList.add(options.classList...)
+    @add(options.text, point)
+    if options.timeout?
       @timeoutID = setTimeout  =>
         @reset()
-      , timeout
-
-  getText: (lineHeight) ->
-    unless @text.length
-      return null
-
-    @text.map (text) ->
-      text = String(text)
-      if settings.get('showHoverOnOperateIcon') is 'emoji'
-        emoji(String(text), emojiFolder, lineHeight)
-      else
-        text.replace /:(.*?):/g, (s, m) ->
-          "<span class='icon icon-#{m}'></span>"
-    .join('')
-
-  reset: ->
-    @text = []
-    clearTimeout @timeoutID
-    @view.reset()
-    {@timeoutID, @point} = {}
-
-  isVisible: ->
-    @view.isVisible()
-
-  destroy: ->
-    {@param, @vimState} = {}
-    @view.destroy()
-
-class HoverElement extends HTMLElement
-  createdCallback: ->
-    @className = 'vim-mode-plus-hover'
-    this
-
-  initialize: (@model) ->
-    this
-
-  isVisible: ->
-    @marker?
-
-  show: (point) ->
-    {editor} = @model.vimState
-    unless @marker
-      @marker = @createOverlay(point ? editor.getCursorBufferPosition())
-      @lineHeight = editor.getLineHeightInPixels()
-      @setIconSize(@lineHeight)
-
-    # [FIXME] overlay position become wrong randomly happen.
-    @style.marginTop = (@lineHeight * -2.2) + 'px'
-    if text = @model.getText(@lineHeight)
-      @innerHTML = text
+      , options.timeout
 
   createOverlay: (point) ->
-    {editor} = @model.vimState
-    marker = editor.markBufferPosition point,
+    marker = @editor.markBufferPosition point,
       invalidate: "never",
       persistent: false
 
-    decoration = editor.decorateMarker marker,
+    decoration = @editor.decorateMarker marker,
       type: 'overlay'
       item: this
     marker
@@ -112,21 +82,29 @@ class HoverElement extends HTMLElement
     style = "font-size: #{size}; width: #{size}; hegith: #{size};"
     @styleElement.sheet.addRule(selector, style)
 
+  isVisible: ->
+    @marker?
+
   reset: ->
+    @text = []
+    clearTimeout @timeoutID
     @className = 'vim-mode-plus-hover'
     @textContent = ''
     @marker?.destroy()
     @styleElement?.remove()
-    {@marker, @lineHeight} = {}
+    {
+      @marker, @lineHeight
+      @timeoutID, @styleElement
+    } = {}
 
   destroy: ->
-    @marker?.destroy()
-    {@model, @lineHeight} = {}
+    @reset()
+    {@vimState, @lineHeight} = {}
     @remove()
 
 HoverElement = registerElement "vim-mode-plus-hover",
-  prototype: HoverElement.prototype
+  prototype: Hover.prototype
 
 module.exports = {
-  Hover, HoverElement
+  HoverElement
 }

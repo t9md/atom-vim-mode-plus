@@ -40,8 +40,8 @@ class Base
 
   constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
-    @vimState.hover.setPoint()
-    if hover = @hover?[settings.get('showHoverOnOperateIcon')]
+    hover = @hover?[settings.get('showHoverOnOperateIcon')]
+    if hover? and settings.get('showHoverOnOperate')
       @addHover(hover)
     _.extend(this, properties)
 
@@ -115,11 +115,10 @@ class Base
       @vimState.activate(mode, submode)
 
   addHover: (text, {replace}={}) ->
-    if settings.get('showHoverOnOperate')
-      if replace ? false
-        @vimState.hover.replaceLastSection(text)
-      else
-        @vimState.hover.add(text)
+    if replace ? false
+      @vimState.hover.replaceLastSection(text)
+    else
+      @vimState.hover.add(text)
 
   new: (name, properties={}) ->
     klass = Base.getClass(name)

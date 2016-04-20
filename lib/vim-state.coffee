@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 globalState = require './global-state'
-{Hover} = require './hover'
+{HoverElement} = require './hover'
 {InputElement, SearchInputElement} = require './input'
 {haveSomeSelection, highlightRanges, getVisibleBufferRange} = require './utils'
 swrap = require './selection-wrapper'
@@ -34,11 +34,12 @@ class VimState
     @modeManager = new ModeManager(this)
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
-    @hover = new Hover(this)
-    @hoverSearchCounter = new Hover(this)
 
+    @hover = new HoverElement().initialize(this)
+    @hoverSearchCounter = new HoverElement().initialize(this)
     @searchHistory = new SearchHistoryManager(this)
     @input = new InputElement().initialize(this)
+
     @searchInput = new SearchInputElement().initialize(this)
     @operationStack = new OperationStack(this)
     @cursorStyleManager = new CursorStyleManager(this)
@@ -132,7 +133,7 @@ class VimState
   # Select list view
   onDidConfirmSelectList: (fn) -> @subscribe @emitter.on('did-confirm-select-list', fn)
   onDidCancelSelectList: (fn) -> @subscribe @emitter.on('did-cancel-select-list', fn)
-  
+
   # Events
   # -------------------------
   onDidFailToSetTarget: (fn) -> @emitter.on('did-fail-to-set-target', fn)

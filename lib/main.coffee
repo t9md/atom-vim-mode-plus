@@ -7,7 +7,6 @@ StatusBarManager = require './status-bar-manager'
 globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
-{Hover, HoverElement} = require './hover'
 {getVisibleEditors, poliyFillsToTextBufferHistory} = require './utils'
 
 module.exports =
@@ -19,7 +18,6 @@ module.exports =
     @vimStatesByEditor = new Map
     @emitter = new Emitter
 
-    @registerViewProviders()
     @subscribe Base.init(@provideVimModePlus())
     @registerCommands()
     @registerVimStateCommands()
@@ -125,10 +123,6 @@ module.exports =
         @subscribe atom.commands.add scope, "vim-mode-plus:#{name}", (event) =>
           if editor = atom.workspace.getActiveTextEditor()
             fn.call(@getEditorState(editor))
-
-  registerViewProviders: ->
-    addView = atom.views.addViewProvider.bind(atom.views)
-    addView Hover, (model) -> new HoverElement().initialize(model)
 
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)
