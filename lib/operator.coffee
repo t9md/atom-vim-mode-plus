@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable, BufferedProcess} = require 'atom'
 
 {
-  haveSomeSelection, getVimEofBufferPosition
+  haveSomeSelection
   moveCursorLeft, moveCursorRight
   highlightRanges, getNewTextRangeFromCheckpoint
   isEndsWithNewLineForBufferRow
@@ -174,7 +174,6 @@ class SelectPreviousSelection extends Operator
   @extend()
   requireTarget: false
   recordable: false
-
   @description: "Select last selected visual area in current buffer"
   execute: ->
     {properties, submode} = @vimState.modeManager.getPreviousSelectionInfo()
@@ -439,6 +438,7 @@ class TransformStringBySelectList extends Operator
 
   execute: ->
     # NEVER be executed since operationStack is replaced with selected transformer
+    throw new Error("#{@getName()} should not be executed")
 
 class TransformWordBySelectList extends TransformStringBySelectList
   @extend()
@@ -471,27 +471,23 @@ class Indent extends TransformString
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
   stayOnLinewise: false
+  indentFunction: "indentSelectedRows"
 
   mutateSelection: (selection) ->
-    @indent(selection)
+    selection[@indentFunction]()
     @restorePoint(selection)
     unless @needStay()
       selection.cursor.moveToFirstCharacterOfLine()
 
-  indent: (selection) ->
-    selection.indentSelectedRows()
-
 class Outdent extends Indent
   @extend()
   hover: icon: ':outdent:', emoji: ':point_left:'
-  indent: (selection) ->
-    selection.outdentSelectedRows()
+  indentFunction: "outdentSelectedRows"
 
 class AutoIndent extends Indent
   @extend()
   hover: icon: ':auto-indent:', emoji: ':open_hands:'
-  indent: (selection) ->
-    selection.autoIndentSelectedRows()
+  indentFunction: "autoIndentSelectedRows"
 
 # -------------------------
 class ToggleLineComments extends TransformString
@@ -671,14 +667,20 @@ class YankLine extends Yank
 # FIXME
 # Currently native editor.joinLines() is better for cursor position setting
 # So I use native methods for a meanwhile.
-class Join extends Operator
+class Join extends TransformString
   @extend()
-  requireTarget: false
-  execute: ->
-    @editor.transact =>
-      @countTimes =>
-        @editor.joinLines()
-    @activateMode('normal')
+  target: "MoveToRelativeLine"
+  flashTarget: false
+
+  needStay: -> false
+
+  mutateSelection: (selection) ->
+    if swrap(selection).isLinewise()
+      range = selection.getBufferRange()
+      selection.setBufferRange(range.translate([0, 0], [-1, Infinity]))
+    selection.joinLines()
+    end = selection.getBufferRange().end
+    selection.cursor.setBufferPosition(end.translate([0, -1]))
 
 class JoinWithKeepingSpace extends TransformString
   @extend()
@@ -766,6 +768,7 @@ class Repeat extends Operator
           operation.execute()
 
 # -------------------------
+# [FIXME] this is not operator
 class Mark extends Operator
   @extend()
   hover: icon: ':mark:', emoji: ':round_pushpin:'
