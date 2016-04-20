@@ -1,3 +1,6 @@
+# 0.35.1:
+- Fix: Ignore `mouseup` event handling on `insert` mode #240
+
 # 0.35.0:
 - Internal: Gradually making motion into pure point calculator #225
 - Improve: Operate on same range on `.` repeat even if `stayOnTransformString` was enabled #235
