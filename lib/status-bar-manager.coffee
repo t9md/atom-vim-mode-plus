@@ -7,7 +7,7 @@ modeToContent =
   'visual': "Visual"
   "visual.characterwise": "Visual Char"
   "visual.linewise": "Visual Line"
-  'visual.blockwise': "Visual Block"
+  "visual.blockwise": "Visual Block"
 
 module.exports =
 class StatusBarManager

@@ -10,8 +10,6 @@ globalState = require './global-state'
   moveCursorUpBuffer
   cursorIsAtVimEndOfFile
   getFirstVisibleScreenRow, getLastVisibleScreenRow
-  getVimEofBufferPosition
-  getVimLastBufferRow, getVimLastScreenRow
   getValidVimScreenRow, getValidVimBufferRow
   highlightRanges
   moveCursorToFirstCharacterAtRow
@@ -200,7 +198,7 @@ class MoveUp extends Motion
     vimLastBufferRow = null
     @countTimes =>
       if isBufferRowWise
-        vimLastBufferRow ?= getVimLastBufferRow(@editor)
+        vimLastBufferRow ?= @getVimLastBufferRow()
         amount = if @direction is 'up' then -1 else + 1
         row = cursor.getBufferRow() + amount
         if row <= vimLastBufferRow
@@ -247,12 +245,12 @@ class MoveUpToEdge extends Motion
     validRow = getValidVimScreenRow.bind(null, @editor)
     switch @direction
       when 'up' then [validRow(row - 1)..0]
-      when 'down' then [validRow(row + 1)..getVimLastScreenRow(@editor)]
+      when 'down' then [validRow(row + 1)..@getVimLastScreenRow()]
 
   isMovablePoint: (point) ->
     if @isStoppablePoint(point)
       # first and last row is always edge.
-      if point.row in [0, getVimLastScreenRow(@editor)]
+      if point.row in [0, @getVimLastScreenRow()]
         true
       else
         # If one of above/below row is not stoppable, it's Edge!
@@ -302,7 +300,7 @@ class MoveToNextWord extends Motion
   getPoint: (cursor) ->
     cursorPoint = cursor.getBufferPosition()
     pattern = @wordRegex ? cursor.wordRegExp()
-    scanRange = [[cursorPoint.row, 0], @vimEof]
+    scanRange = [[cursorPoint.row, 0], @getVimEofBufferPosition()]
     point = null
     @editor.scanInBufferRange pattern, scanRange, ({stop, range}) ->
       if range.end.isGreaterThan(cursorPoint)
@@ -314,7 +312,6 @@ class MoveToNextWord extends Motion
 
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
-    @vimEof = getVimEofBufferPosition(@editor) # cache
     lastCount = @getCount()
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
     @countTimes ({isFinal}) =>
@@ -347,7 +344,7 @@ class MoveToEndOfWord extends Motion
   moveToNextEndOfWord: (cursor) ->
     moveCursorToNextNonWhitespace(cursor)
     point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex}).translate([0, -1])
-    point = Point.min(point, getVimEofBufferPosition(@editor))
+    point = Point.min(point, @getVimEofBufferPosition())
     cursor.setBufferPosition(point)
 
   moveCursor: (cursor) ->
@@ -430,7 +427,7 @@ class MoveToNextParagraph extends Motion
 
     switch @direction
       when 'previous' then new Point(0, 0)
-      when 'next' then getVimEofBufferPosition(@editor)
+      when 'next' then @getVimEofBufferPosition()
 
 class MoveToPreviousParagraph extends MoveToNextParagraph
   @extend()
@@ -486,7 +483,7 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
     cursor.setBufferPosition(point)
 
   getPoint: ({row}) ->
-    row = Math.min(row + @getCount(), getVimLastBufferRow(@editor))
+    row = Math.min(row + @getCount(), @getVimLastBufferRow())
     from = new Point(row, Infinity)
     point = getStartPositionForPattern(@editor, from, /\s*$/)
     (point ? from).translate([0, -1])
@@ -544,14 +541,14 @@ class MoveToFirstLine extends Motion
 class MoveToLastLine extends MoveToFirstLine
   @extend()
   getDefaultRow: ->
-    getVimLastBufferRow(@editor)
+    @getVimLastBufferRow()
 
 # keymap: N% e.g. 10%
 class MoveToLineByPercent extends MoveToFirstLine
   @extend()
   getRow: ->
     percent = Math.min(100, @getCount())
-    Math.floor(getVimLastScreenRow(@editor) * (percent / 100))
+    Math.floor(@getVimLastScreenRow() * (percent / 100))
 
 class MoveToRelativeLine extends Motion
   @extend(false)
@@ -603,7 +600,7 @@ class MoveToMiddleOfScreen extends MoveToTopOfScreen
   @extend()
   getRow: ->
     startRow = getFirstVisibleScreenRow(@editor)
-    vimLastScreenRow = getVimLastScreenRow(@editor)
+    vimLastScreenRow = @getVimLastScreenRow()
     endRow = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
     startRow + Math.floor((endRow - startRow) / 2)
 
@@ -616,7 +613,7 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
     # editor.getLastVisibleScreenRow() and editorElement.getLastVisibleScreenRow()
     # Those two methods return different value, editor's one is corrent.
     # So I intentionally use editor.getLastScreenRow here.
-    vimLastScreenRow = getVimLastScreenRow(@editor)
+    vimLastScreenRow = @getVimLastScreenRow()
     row = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
     offset = @scrolloff + 1
     offset = 0 if (row is vimLastScreenRow)
@@ -652,7 +649,7 @@ class ScrollFullScreenDown extends Motion
 
   moveCursor: (cursor) ->
     row = Math.floor(@editor.getCursorScreenPosition().row + @rowsToScroll)
-    row = Math.min(getVimLastScreenRow(@editor), row)
+    row = Math.min(@getVimLastScreenRow(), row)
     cursor.setScreenPosition([row, 0] , autoscroll: false)
 
 # keymap: ctrl-b

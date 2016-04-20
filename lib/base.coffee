@@ -1,6 +1,11 @@
 _ = require 'underscore-plus'
 Delegato = require 'delegato'
 {CompositeDisposable} = require 'atom'
+{
+  getVimEofBufferPosition
+  getVimLastBufferRow
+  getVimLastScreenRow
+} = require './utils'
 
 settings = require './settings'
 selectList = null # delay
@@ -152,6 +157,15 @@ class Base
       @cancelOperation()
 
     @vimState.input.focus(options)
+
+  getVimEofBufferPosition: ->
+    getVimEofBufferPosition(@editor)
+
+  getVimLastBufferRow: ->
+    getVimLastBufferRow(@editor)
+
+  getVimLastScreenRow: ->
+    getVimLastScreenRow(@editor)
 
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)

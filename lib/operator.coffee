@@ -198,7 +198,7 @@ class Delete extends Operator
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
 
-    vimEof = getVimEofBufferPosition(@editor)
+    vimEof = @getVimEofBufferPosition()
     if cursor.getBufferPosition().isGreaterThan(vimEof)
       cursor.setBufferPosition([vimEof.row, 0])
     cursor.skipLeadingWhitespace() if wasLinewise

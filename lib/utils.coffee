@@ -1,5 +1,4 @@
 fs = require 'fs-plus'
-semver = require 'semver'
 settings = require './settings'
 
 {Disposable, Range, Point} = require 'atom'
@@ -116,6 +115,8 @@ withVisibleBufferRange = (editor, fn) ->
       range = getVisibleBufferRange(editor)
       fn(range)
 
+# NOTE: endRow become undefined if @editorElement is not yet attached.
+# e.g. Beging called immediately after open file.
 getVisibleBufferRange = (editor) ->
   [startRow, endRow] = getView(editor).getVisibleRowRange()
   return null unless (startRow? and endRow?)

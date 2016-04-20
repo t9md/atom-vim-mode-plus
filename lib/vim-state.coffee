@@ -2,9 +2,6 @@ Delegato = require 'delegato'
 _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
-{inspect} = require 'util'
-p = (args...) -> console.log inspect(args...)
-
 settings = require './settings'
 globalState = require './global-state'
 {Hover} = require './hover'
@@ -135,7 +132,7 @@ class VimState
   # Select list view
   onDidConfirmSelectList: (fn) -> @subscribe @emitter.on('did-confirm-select-list', fn)
   onDidCancelSelectList: (fn) -> @subscribe @emitter.on('did-cancel-select-list', fn)
-
+  
   # Events
   # -------------------------
   onDidFailToSetTarget: (fn) -> @emitter.on('did-fail-to-set-target', fn)
@@ -149,7 +146,7 @@ class VimState
     if @editor.isAlive()
       @activate('normal') # reset to base mdoe.
       @editorElement.component?.setInputEnabled(true)
-      @editorElement.classList.remove packageScope, 'normal-mode'
+      @editorElement.classList.remove(packageScope, 'normal-mode')
 
     @hover?.destroy?()
     @hoverSearchCounter?.destroy?()
@@ -222,9 +219,8 @@ class VimState
     @cursorStyleManager.refresh()
 
   updateSelectionProperties: ({force}={}) ->
-    force ?= true
     selections = @editor.getSelections()
-    unless force
+    unless (force ? true)
       selections = selections.filter (selection) ->
         not swrap(selection).getCharacterwiseHeadPosition()?
 
@@ -238,22 +234,15 @@ class VimState
       marker.destroy()
     @highlightSearchMarkers = null
 
-  highlightSearch: ->
-    scanRange = getVisibleBufferRange(@editor)
-    pattern = globalState.highlightSearchPattern
+  highlightSearch: (pattern, scanRange) ->
     ranges = []
     @editor.scanInBufferRange pattern, scanRange, ({range}) ->
       ranges.push(range)
-
-    highlightRanges @editor, ranges,
-      class: 'vim-mode-plus-highlight-search'
+    highlightRanges(@editor, ranges, {class: 'vim-mode-plus-highlight-search'})
 
   refreshHighlightSearch: ->
-    # NOTE: endRow become undefined if @editorElement is not yet attached.
-    # e.g. Beging called immediately after open file.
     [startRow, endRow] = @editorElement.getVisibleRowRange()
-    return unless (startRow? and endRow?)
-
-    @clearHighlightSearch() if @highlightSearchMarkers
-    if settings.get('highlightSearch') and globalState.highlightSearchPattern?
-      @highlightSearchMarkers = @highlightSearch()
+    return unless scanRange = getVisibleBufferRange(@editor)
+    @clearHighlightSearch()
+    if settings.get('highlightSearch') and (pattern = globalState.highlightSearchPattern)?
+      @highlightSearchMarkers = @highlightSearch(pattern, scanRange)
