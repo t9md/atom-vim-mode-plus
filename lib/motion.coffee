@@ -850,7 +850,9 @@ class SearchBase extends Motion
 
     globalState.currentSearch = this
     @vimState.searchHistory.save(input)
-    globalState.highlightSearchPattern = @getPattern(input)
+    pattern = @getPattern(input)
+    globalState.highlightSearchPattern = pattern
+    globalState.lastSearchPattern = pattern
     @vimState.main.emitDidSetHighlightSearchPattern()
     @finish()
 

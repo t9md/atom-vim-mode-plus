@@ -3,6 +3,7 @@ _ = require 'underscore-plus'
 
 Base = require './base'
 swrap = require './selection-wrapper'
+globalState = require './global-state'
 {
   sortRanges, sortRangesByEndPosition, countChar, pointIsAtEndOfLine,
   getTextToPoint
@@ -726,3 +727,46 @@ class ALatestChange extends LatestChange
 # No diff from ALatestChange
 class InnerLatestChange extends LatestChange
   @extend()
+
+# -------------------------
+class SearchMatchForward extends TextObject
+  @extend()
+
+  getRange: (selection) ->
+    unless pattern = globalState.lastSearchPattern
+      return null
+
+    point = selection.getBufferRange().end
+    scanRange = [point.row, @getVimEofBufferPosition()]
+    found = null
+    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
+      if range.end.isGreaterThan(point)
+        found = range
+        stop()
+    found
+
+  selectTextObject: (selection) ->
+    return unless range = @getRange(selection)
+
+    if selection.isEmpty()
+      reversed = @backward
+      swrap(selection).setBufferRange(range, {reversed})
+    else
+      swrap(selection).mergeBufferRange(range)
+
+class SearchMatchBackward extends SearchMatchForward
+  @extend()
+  backward: true
+
+  getRange: (selection) ->
+    unless pattern = globalState.lastSearchPattern
+      return null
+
+    point = selection.getBufferRange().start
+    scanRange = [[point.row, Infinity], [0, 0]]
+    found = null
+    @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
+      if range.start.isLessThan(point)
+        found = range
+        stop()
+    found
