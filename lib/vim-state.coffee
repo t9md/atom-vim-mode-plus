@@ -173,37 +173,39 @@ class VimState
     } = {}
     @emitter.emit 'did-destroy'
 
-  checkSelection: (event) =>
-    return unless @editor?
-    return if @operationStack.isProcessing()
-
-    if haveSomeSelection(@editor)
-      submode = swrap.detectVisualModeSubmode(@editor)
-      if @isMode('visual', submode)
-        @updateCursorsVisibility()
-      else
-        @activate('visual', submode)
-    else
-      @activate('normal') if @isMode('visual')
-
   observeSelection: ->
-    @editorElement.addEventListener('mouseup', @checkSelection)
-    @subscriptions.add new Disposable =>
-      @editorElement.removeEventListener('mouseup', @checkSelection)
-
-    isInteresting = ({target, type}) =>
+    isInterestingEvent = ({target, type}) =>
       if @mode is 'insert'
         false
       else
-        target is @editorElement and not type.startsWith('vim-mode-plus:')
+        @editor? and target is @editorElement and not type.startsWith('vim-mode-plus:')
 
-    @subscriptions.add atom.commands.onWillDispatch (event) =>
-      if isInteresting(event)
-        for selection in @editor.getSelections()
-          swrap(selection).preserveCharacterwise()
+    onInterestingEvent = (fn) ->
+      (event) -> fn() if isInterestingEvent(event)
 
-    @subscriptions.add atom.commands.onDidDispatch (event) =>
-      @checkSelection() if isInteresting(event)
+    _checkSelection = =>
+      return if @operationStack.isProcessing()
+      if haveSomeSelection(@editor)
+        submode = swrap.detectVisualModeSubmode(@editor)
+        if @isMode('visual', submode)
+          @updateCursorsVisibility()
+        else
+          @activate('visual', submode)
+      else
+        @activate('normal') if @isMode('visual')
+
+    _preserveCharacterwise = =>
+      for selection in @editor.getSelections()
+        swrap(selection).preserveCharacterwise()
+
+    checkSelection = onInterestingEvent(_checkSelection)
+    preserveCharacterwise = onInterestingEvent(_preserveCharacterwise)
+
+    @editorElement.addEventListener('mouseup', checkSelection)
+    @subscriptions.add new Disposable =>
+      @editorElement.removeEventListener('mouseup', checkSelection)
+    @subscriptions.add atom.commands.onWillDispatch(preserveCharacterwise)
+    @subscriptions.add atom.commands.onDidDispatch(checkSelection)
 
   resetNormalMode: ->
     @editor.clearSelections()
