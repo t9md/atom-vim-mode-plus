@@ -751,6 +751,7 @@ class SearchMatchForward extends TextObject
     if selection.isEmpty()
       reversed = @backward
       swrap(selection).setBufferRange(range, {reversed})
+      selection.cursor.autoscroll()
     else
       swrap(selection).mergeBufferRange(range)
 
