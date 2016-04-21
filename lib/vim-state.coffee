@@ -245,5 +245,5 @@ class VimState
     [startRow, endRow] = @editorElement.getVisibleRowRange()
     return unless scanRange = getVisibleBufferRange(@editor)
     @clearHighlightSearch()
-    if settings.get('highlightSearch') and (pattern = globalState.highlightSearchPattern)?
-      @highlightSearchMarkers = @highlightSearch(pattern, scanRange)
+    if settings.get('highlightSearch') and @main.highlightSearchPattern?
+      @highlightSearchMarkers = @highlightSearch(@main.highlightSearchPattern, scanRange)

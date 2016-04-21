@@ -17,6 +17,7 @@ module.exports =
     @statusBarManager = new StatusBarManager
     @vimStatesByEditor = new Map
     @emitter = new Emitter
+    @highlightSearchPattern = null
 
     @subscribe Base.init(@provideVimModePlus())
     @registerCommands()
@@ -54,7 +55,8 @@ module.exports =
         # vimState #196.
         @getEditorState(item)?.refreshHighlightSearch()
 
-    @onDidSetHighlightSearchPattern =>
+    @onDidSetLastSearchPattern =>
+      @highlightSearchPattern = globalState.lastSearchPattern
       @refreshHighlightSearchForVisibleEditors()
 
     @subscribe settings.observe 'highlightSearch', (newValue) =>
@@ -63,8 +65,8 @@ module.exports =
       else
         @clearHighlightSearchForEditors()
 
-  onDidSetHighlightSearchPattern: (fn) -> @emitter.on('did-set-highlight-search-pattern', fn)
-  emitDidSetHighlightSearchPattern: (fn) -> @emitter.emit('did-set-highlight-search-pattern')
+  onDidSetLastSearchPattern: (fn) -> @emitter.on('did-set-last-search-pattern', fn)
+  emitDidSetLastSearchPattern: (fn) -> @emitter.emit('did-set-last-search-pattern')
 
   refreshHighlightSearchForVisibleEditors: ->
     for editor in getVisibleEditors()
@@ -92,7 +94,7 @@ module.exports =
       'vim-mode-plus:clear-highlight-search': =>
         # Clear all editor's highlight so that we won't see remaining highlight on tab changed.
         @clearHighlightSearchForEditors()
-        globalState.highlightSearchPattern = null
+        @highlightSearchPattern = null
 
       'vim-mode-plus:toggle-highlight-search': ->
         settings.toggle('highlightSearch')
