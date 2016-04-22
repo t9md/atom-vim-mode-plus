@@ -35,5 +35,9 @@
   },
   "devDependencies": {
     "coffeelint": "^1.10.1"
+  },
+  "scripts": {
+    "test": "apm test",
+    "watch": "fswatch -0 spec lib | xargs -0 -n1 -I{} apm test"
   }
 }
