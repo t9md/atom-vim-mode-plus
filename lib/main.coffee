@@ -45,15 +45,15 @@ module.exports =
         vimState.refreshHighlightSearch()
       @subscribe(editorSubscriptions)
 
-    workspaceElement = atom.views.getView(atom.workspace)
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
-      selector = 'vim-mode-plus-pane-maximized'
-      workspaceElement.classList.remove(selector)
-
       if atom.workspace.isTextEditor?(item)
         # Still there is possibility editor is destroyed and don't have corresponding
         # vimState #196.
         @getEditorState(item)?.refreshHighlightSearch()
+
+    workspaceElement = atom.views.getView(atom.workspace)
+    @subscribe atom.workspace.onDidChangeActivePane ->
+      workspaceElement.classList.remove('vim-mode-plus-pane-maximized')
 
     @onDidSetLastSearchPattern =>
       @highlightSearchPattern = globalState.lastSearchPattern
