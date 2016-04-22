@@ -1,4 +1,5 @@
 {getVimState, dispatch, TextData} = require './spec-helper'
+globalState = require '../lib/global-state'
 
 describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -1345,3 +1346,139 @@ describe "TextObject", ->
         ensure 'vae', selectedText: text
         ensure 'escape', selectedText: ''
         ensure 'jjvae', selectedText: text
+
+  describe 'SearchMatchForward, SearchBackwards', ->
+    text = """
+      0 xxx
+      1 abc xxx
+      2   xxx yyy
+      3 xxx abc
+      4 abc\n
+      """
+    beforeEach ->
+      set text: text, cursor: [0, 0]
+      ensure ['/', search: 'abc'], cursor: [1, 2], mode: 'normal'
+      expect(globalState.lastSearchPattern).toEqual /abc/g
+
+    describe 'gn from normal mode', ->
+      it 'select ranges matches to last search pattern and extend selection', ->
+        ensure 'gn',
+          cursor: [1, 5]
+          mode: ['visual', 'characterwise']
+          selectionIsReversed: false
+          selectedText: 'abc'
+        ensure 'gn',
+          selectionIsReversed: false
+          mode: ['visual', 'characterwise']
+          selectedText: """
+            abc xxx
+            2   xxx yyy
+            3 xxx abc
+            """
+        ensure 'gn',
+          selectionIsReversed: false
+          mode: ['visual', 'characterwise']
+          selectedText: """
+            abc xxx
+            2   xxx yyy
+            3 xxx abc
+            4 abc
+            """
+        ensure 'gn', # Do nothing
+          selectionIsReversed: false
+          mode: ['visual', 'characterwise']
+          selectedText: """
+            abc xxx
+            2   xxx yyy
+            3 xxx abc
+            4 abc
+            """
+    describe 'gN from normal mode', ->
+      beforeEach ->
+        set cursor: [4, 3]
+      it 'select ranges matches to last search pattern and extend selection', ->
+        ensure 'gN',
+          cursor: [4, 2]
+          mode: ['visual', 'characterwise']
+          selectionIsReversed: true
+          selectedText: 'abc'
+        ensure 'gN',
+          selectionIsReversed: true
+          mode: ['visual', 'characterwise']
+          selectedText: """
+            abc
+            4 abc
+            """
+        ensure 'gN',
+          selectionIsReversed: true
+          mode: ['visual', 'characterwise']
+          selectedText: """
+            abc xxx
+            2   xxx yyy
+            3 xxx abc
+            4 abc
+            """
+        ensure 'gN', # Do nothing
+          selectionIsReversed: true
+          mode: ['visual', 'characterwise']
+          selectedText: """
+            abc xxx
+            2   xxx yyy
+            3 xxx abc
+            4 abc
+            """
+    describe 'as operator target', ->
+      it 'delete next occurence of last sarch pattern', ->
+        ensure 'dgn',
+          cursor: [1, 2]
+          mode: 'normal'
+          text: """
+            0 xxx
+            1  xxx
+            2   xxx yyy
+            3 xxx abc
+            4 abc\n
+            """
+        ensure '.',
+          cursor: [3, 5]
+          mode: 'normal'
+          text: """
+            0 xxx
+            1  xxx
+            2   xxx yyy
+            3 xxx_
+            4 abc\n
+            """.replace('_', ' ') # To prevent trailing space remved on save.
+        ensure '.',
+          cursor: [4, 1]
+          mode: 'normal'
+          text: """
+            0 xxx
+            1  xxx
+            2   xxx yyy
+            3 xxx_
+            4 \n
+            """.replace('_', ' ') # To prevent trailing space remved on save.
+      it 'change next occurence of last sarch pattern', ->
+        ensure 'cgn',
+          cursor: [1, 2]
+          mode: 'insert'
+          text: """
+            0 xxx
+            1  xxx
+            2   xxx yyy
+            3 xxx abc
+            4 abc\n
+            """
+        keystroke 'escape'
+        set cursor: [4, 0]
+        ensure 'cgN',
+          cursor: [3, 6]
+          mode: 'insert'
+          text: """
+            0 xxx
+            1  xxx
+            2   xxx yyy
+            3 xxx_
+            4 abc\n
+            """.replace('_', ' ') # To prevent trailing space remved on save.
