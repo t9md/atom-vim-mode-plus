@@ -993,6 +993,27 @@ class Replace extends Operator
 
     @activateMode('normal')
 
+class AddSelection extends Operator
+  @extend()
+
+  # word
+  execute: ->
+    word = @editor.getSelectedText() or @editor.getWordUnderCursor()
+    return if word is ''
+    return unless @selectTarget()
+
+    ranges = []
+    pattern = ///#{_.escapeRegExp(word)}///g
+    for selection in @editor.getSelections()
+      scanRange = selection.getBufferRange()
+      @editor.scanInBufferRange pattern, scanRange, ({range}) ->
+        ranges.push(range)
+
+    if ranges.length
+      @editor.setSelectedBufferRanges(ranges)
+      unless @isMode('visual', 'characterwise')
+        @activateMode('visual', 'characterwise')
+
 # Insert entering operation
 # -------------------------
 class ActivateInsertMode extends Operator
