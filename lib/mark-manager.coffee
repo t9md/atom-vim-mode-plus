@@ -26,6 +26,11 @@ class MarkManager
     if start? and end?
       new Range(start, end)
 
+  setRange: (startMark, endMark, range) ->
+    {start, end} = Range.fromObject(range)
+    @set(startMark, start)
+    @set(endMark, end)
+
   # [FIXME] Need to support Global mark with capital name [A-Z]
   set: (name, point) ->
     return unless @isValid(name)
