@@ -211,7 +211,7 @@ class VimState
     @editor.clearSelections()
     @activate('normal')
     @resetRangeMarkers() if settings.get('clearRangeMarkerOnResetNormalMode')
-    @clearHighlightSearch() if settings.get('clearHighlightSearchOnResetNormalMode')
+    @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
 
   reset: ->
     @resetCount()
