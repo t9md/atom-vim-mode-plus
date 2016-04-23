@@ -8,6 +8,9 @@ class SelectionWrapper
   getProperties: ->
     @selection.marker.getProperties()['vim-mode-plus'] ? {}
 
+  hasProperties: ->
+    @selection.marker.getProperties()['vim-mode-plus']?
+
   setProperties: (prop) ->
     @selection.marker.setProperties({"vim-mode-plus": prop})
 
@@ -47,7 +50,7 @@ class SelectionWrapper
 
   getBufferPositionFor: (which, {fromProperty}={}) ->
     fromProperty ?= false
-    if fromProperty
+    if fromProperty and @hasProperties()
       {head, tail} = @getProperties()
       if head.isGreaterThanOrEqual(tail)
         [start, end] = [tail, head]

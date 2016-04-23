@@ -780,3 +780,11 @@ class PreviousSelection extends TextObject
   select: ->
     return unless range = @vimState.mark.getRange('<', '>')
     @editor.getLastSelection().setBufferRange(range)
+
+class MarkedRange extends TextObject
+  @extend()
+  backward: true
+
+  select: ->
+    ranges = @vimState.getRangeMarkers().map((m) -> m.getBufferRange())
+    @editor.setSelectedBufferRanges(ranges)

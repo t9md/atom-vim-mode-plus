@@ -34,6 +34,7 @@ class VimState
     @modeManager = new ModeManager(this)
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
+    @rangeMarkers = []
 
     @hover = new HoverElement().initialize(this)
     @hoverSearchCounter = new HoverElement().initialize(this)
@@ -106,7 +107,7 @@ class VimState
   updateEditorElement: ->
     @editorElement.classList.toggle('with-count', @hasCount())
     @editorElement.classList.toggle('with-register', @register.hasName())
-
+    @editorElement.classList.toggle('with-range-marker', @rangeMarkers.length)
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
@@ -145,7 +146,8 @@ class VimState
     @subscriptions.dispose()
 
     if @editor.isAlive()
-      @activate('normal') # reset to base mdoe.
+      @resetNormalMode()
+      @reset()
       @editorElement.component?.setInputEnabled(true)
       @editorElement.classList.remove(packageScope, 'normal-mode')
 
@@ -165,7 +167,7 @@ class VimState
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
       @input, @search, @modeManager, @operationRecords, @register
-      @count
+      @count, @rangeMarkers
       @editor, @editorElement, @subscriptions,
       @highlightSearchSubscription
     } = {}
@@ -208,6 +210,7 @@ class VimState
   resetNormalMode: ->
     @editor.clearSelections()
     @activate('normal')
+    @resetRangeMarkers()
 
   reset: ->
     @resetCount()
@@ -247,3 +250,17 @@ class VimState
     @clearHighlightSearch()
     if settings.get('highlightSearch') and @main.highlightSearchPattern?
       @highlightSearchMarkers = @highlightSearch(@main.highlightSearchPattern, scanRange)
+
+  # rangeMarkers for narrowRange
+  # -------------------------
+  addRangeMarkers: (markers) ->
+    @rangeMarkers.push(markers...)
+    @updateEditorElement()
+
+  getRangeMarkers: (markers) ->
+    @rangeMarkers
+
+  resetRangeMarkers: (markers) ->
+    marker.destroy() for marker in @rangeMarkers
+    @rangeMarkers = []
+    @updateEditorElement()

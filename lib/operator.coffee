@@ -46,6 +46,8 @@ class Operator extends Base
   # For TextObject, isLinewise result is changed before / after select.
   # This mean return value may change depending on when you call.
   needStay: ->
+    return true if @keepCursorPosition
+
     param = if @instanceof('TransformString')
       "stayOnTransformString"
     else
@@ -996,7 +998,6 @@ class Replace extends Operator
 class AddSelection extends Operator
   @extend()
 
-  # word
   execute: ->
     word = @editor.getSelectedText() or @editor.getWordUnderCursor()
     return if word is ''
@@ -1013,6 +1014,26 @@ class AddSelection extends Operator
       @editor.setSelectedBufferRanges(ranges)
       unless @isMode('visual', 'characterwise')
         @activateMode('visual', 'characterwise')
+
+class AddSelectionToRangeMarker extends AddSelection
+  @extend()
+  target: "MarkedRange"
+  flashTarget: false
+
+  execute: ->
+    super
+    @vimState.resetRangeMarkers()
+
+class MarkRange extends Operator
+  @extend()
+  flashTarget: false
+  keepCursorPosition: true
+
+  options = class: 'vim-mode-plus-range-marker'
+  mutateSelection: (selection) ->
+    marker = highlightRanges(@editor, selection.getBufferRange(), options)
+    @vimState.addRangeMarkers(marker)
+    @restorePoint(selection)
 
 # Insert entering operation
 # -------------------------

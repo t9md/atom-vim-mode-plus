@@ -115,6 +115,7 @@
   'Y': 'vim-mode-plus:yank-line'
   'P': 'vim-mode-plus:put-before'
   'p': 'vim-mode-plus:put-after'
+
   # 'g P': 'vim-mode-plus:put-before-and-select'
   # 'g p': 'vim-mode-plus:put-after-and-select'
 
@@ -129,6 +130,7 @@
   # 'g _': 'vim-mode-plus:snake-case'
   # 'g r':   'vim-mode-plus:reverse'
   # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
+  # 'm r': 'vim-mode-plus:mark-range'
 
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
@@ -220,6 +222,9 @@
 'atom-text-editor.vim-mode-plus.with-count:not(.insert-mode)':
   '0': 'vim-mode-plus:set-count-0'
   '%': 'vim-mode-plus:move-to-line-by-percent'
+
+'atom-text-editor.vim-mode-plus.with-range-marker:not(.insert-mode)':
+  'cmd-d': 'vim-mode-plus:add-selection-to-range-marker'
 
 # normal
 # -------------------------
@@ -358,6 +363,7 @@
   'i c': 'vim-mode-plus:inner-latest-change'
   'a c': 'vim-mode-plus:a-latest-change'
   'g v': 'vim-mode-plus:previous-selection'
+  'i r': 'vim-mode-plus:marked-range'
 
 # visual
 # -------------------------
