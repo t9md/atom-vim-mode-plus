@@ -115,11 +115,10 @@ class BlockwiseSelection
       @selections.push @editor.addSelectionForBufferRange(range, {reversed})
     @updateGoalColumn()
 
-  # which must be 'start' or 'end'
+  # which must one of ['start', 'end', 'head', 'tail']
   setPositionForSelections: (which) ->
     for selection in @selections
-      point = selection.getBufferRange()[which]
-      selection.cursor.setBufferPosition(point)
+      swrap(selection).setBufferPositionTo(which)
 
   clearSelections: ({except}={}) ->
     for selection in @selections.slice() when (selection isnt except)
