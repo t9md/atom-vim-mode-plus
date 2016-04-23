@@ -165,6 +165,15 @@ class BlockwiseSelection
       end.column += 1
     {head, tail}
 
+  getBufferRange: ->
+    if @headReversedStateIsInSync()
+      start = @getStartSelection.getBufferrange().start
+      end = @getEndSelection.getBufferrange().end
+    else
+      start = @getStartSelection.getBufferrange().end.translate([0, -1])
+      end = @getEndSelection.getBufferrange().start.translate([0, +1])
+    {start, end}
+
   # [FIXME] duplicate codes with setHeadBufferRange
   restoreCharacterwise: ->
     # When all selection is empty, we don't want to loose multi-cursor
