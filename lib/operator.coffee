@@ -1111,31 +1111,6 @@ class ActivateInsertMode extends Operator
       @setCheckpoint('insert')
       @vimState.activate('insert', @finalSubmode)
 
-class InsertAtLastInsert extends ActivateInsertMode
-  @extend()
-  execute: ->
-    if (point = @vimState.mark.get('^'))
-      @editor.setCursorBufferPosition(point)
-      @editor.scrollToCursorPosition({center: true})
-    super
-
-class InsertAtStartOfSelection extends ActivateInsertMode
-  @extend()
-  which: 'start'
-  execute: ->
-    if @isMode('visual', 'blockwise')
-      @getBlockwiseSelections().forEach (bs) =>
-        bs.removeEmptySelections()
-        bs.setPositionForSelections(@which)
-    else
-      for selection in @editor.getSelections()
-        swrap(selection).setBufferPositionTo('start')
-    super
-
-class InsertAtEndOfSelection extends InsertAtStartOfSelection
-  @extend()
-  which: 'end'
-
 class ActivateReplaceMode extends ActivateInsertMode
   @extend()
   finalSubmode: 'replace'
@@ -1165,30 +1140,13 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
     @editor.moveToFirstCharacterOfLine()
     super
 
-class InsertByMotion extends ActivateInsertMode
+class InsertAtLastInsert extends ActivateInsertMode
   @extend()
-  @description: "Move by specified motion then enter insert-mode(`i`)"
-  requireTarget: true
   execute: ->
-    if @target.isMotion()
-      @target.execute()
-    if @instanceof('InsertAfterByMotion')
-      moveCursorRight(cursor) for cursor in @editor.getCursors()
+    if (point = @vimState.mark.get('^'))
+      @editor.setCursorBufferPosition(point)
+      @editor.scrollToCursorPosition({center: true})
     super
-
-class InsertAfterByMotion extends InsertByMotion
-  @description: "Move by specified motion then enter insert-mode(`a`)"
-  @extend()
-
-class InsertAtPreviousFoldStart extends InsertByMotion
-  @extend()
-  @description: "Move to previous fold start then enter insert-mode"
-  target: 'MoveToPreviousFoldStart'
-
-class InsertAtNextFoldStart extends InsertAtPreviousFoldStart
-  @extend()
-  @description: "Move to next fold start then enter insert-mode"
-  target: 'MoveToNextFoldStart'
 
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
@@ -1206,6 +1164,58 @@ class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
   insertNewline: ->
     @editor.insertNewlineBelow()
+
+# Advanced Insertion
+# -------------------------
+class InsertByTarget extends ActivateInsertMode
+  @extend(false)
+  requireTarget: true
+  which: null # one of ['start', 'end', 'head', 'tail']
+  execute: ->
+    @selectTarget()
+    if @isMode('visual', 'blockwise')
+      @getBlockwiseSelections().forEach (bs) =>
+        bs.removeEmptySelections()
+        bs.setPositionForSelections(@which)
+    else
+      for selection in @editor.getSelections()
+        swrap(selection).setBufferPositionTo(@which)
+    super
+
+class InsertAtStartOfTarget extends InsertByTarget
+  @extend()
+  which: 'start'
+
+# Alias for backward compatibility
+class InsertAtStartOfSelection extends InsertAtStartOfTarget
+  @extend()
+
+class InsertAtEndOfTarget extends InsertByTarget
+  @extend()
+  which: 'end'
+
+# Alias for backward compatibility
+class InsertAtEndOfSelection extends InsertAtEndOfTarget
+  @extend()
+
+class InsertAtHeadOfTarget extends InsertByTarget
+  @extend()
+  which: 'head'
+
+class InsertAtTailOfTarget extends InsertByTarget
+  @extend()
+  which: 'tail'
+
+class InsertAtPreviousFoldStart extends InsertAtHeadOfTarget
+  @extend()
+  @description: "Move to previous fold start then enter insert-mode"
+  target: 'MoveToPreviousFoldStart'
+
+class InsertAtNextFoldStart extends InsertAtHeadOfTarget
+  @extend()
+  @description: "Move to next fold start then enter insert-mode"
+  target: 'MoveToNextFoldStart'
+
 # -------------------------
 class Change extends ActivateInsertMode
   @extend()
