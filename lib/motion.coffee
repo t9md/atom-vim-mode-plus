@@ -1040,7 +1040,7 @@ class RepeatSearchReverse extends RepeatSearch
 class MoveToPreviousFoldStart extends Motion
   @extend()
   @description: "Move to previous fold start"
-  linewise: true
+  linewise: false
   which: 'start'
   direction: 'prev'
 
