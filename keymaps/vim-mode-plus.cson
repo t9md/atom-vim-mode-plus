@@ -231,8 +231,13 @@
 'atom-text-editor.vim-mode-plus.normal-mode':
   'i':      'vim-mode-plus:activate-insert-mode'
   'g i':    'vim-mode-plus:insert-at-last-insert'
+
+  # 'g I': 'vim-mode-plus:insert-at-start-of-target'
+  # 'g A': 'vim-mode-plus:insert-at-end-of-target'
+
   # 'g [':    'vim-mode-plus:insert-at-previous-fold-start'
   # 'g ]':    'vim-mode-plus:insert-at-next-fold-start'
+
   'R':      'vim-mode-plus:activate-replace-mode'
   'v':      'vim-mode-plus:activate-characterwise-visual-mode'
   'V':      'vim-mode-plus:activate-linewise-visual-mode'
@@ -376,6 +381,11 @@
   'v': 'vim-mode-plus:activate-characterwise-visual-mode'
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
+
+  # 'g I': 'vim-mode-plus:insert-at-start-of-target'
+  # 'I': 'vim-mode-plus:insert-at-start-of-target'
+  # 'g A': 'vim-mode-plus:insert-at-end-of-target'
+  # 'A': 'vim-mode-plus:insert-at-end-of-target'
 
   # 'p': 'vim-mode-plus:swap-with-register'
   # 'P': 'vim-mode-plus:swap-with-register'
