@@ -787,4 +787,5 @@ class MarkedRange extends TextObject
 
   select: ->
     ranges = @vimState.getRangeMarkers().map((m) -> m.getBufferRange())
-    @editor.setSelectedBufferRanges(ranges)
+    if ranges.length
+      @editor.setSelectedBufferRanges(ranges)

@@ -1022,11 +1022,10 @@ class AddSelectionToRangeMarker extends AddSelection
 
   execute: ->
     super
-    @vimState.resetRangeMarkers()
+    @vimState.clearRangeMarkers()
 
 class MarkRange extends Operator
   @extend()
-  flashTarget: false
   keepCursorPosition: true
 
   options = class: 'vim-mode-plus-range-marker'
