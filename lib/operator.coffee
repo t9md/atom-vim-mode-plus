@@ -1020,10 +1020,6 @@ class AddSelectionToRangeMarker extends AddSelection
   target: "MarkedRange"
   flashTarget: false
 
-  execute: ->
-    super
-    @vimState.clearRangeMarkers()
-
 class MarkRange extends Operator
   @extend()
   keepCursorPosition: true
