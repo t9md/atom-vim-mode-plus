@@ -1127,6 +1127,9 @@ class InsertAtStartOfSelection extends ActivateInsertMode
       @getBlockwiseSelections().forEach (bs) =>
         bs.removeEmptySelections()
         bs.setPositionForSelections(@which)
+    else
+      for selection in @editor.getSelections()
+        swrap(selection).setBufferPositionTo('start')
     super
 
 class InsertAtEndOfSelection extends InsertAtStartOfSelection
