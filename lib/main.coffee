@@ -77,6 +77,10 @@ module.exports =
       @getEditorState(editor).clearHighlightSearch()
     @highlightSearchPattern = null
 
+  clearRangeMarkerForEditors: ->
+    for editor in atom.workspace.getTextEditors()
+      @getEditorState(editor).clearRangeMarkers()
+
   deactivate: ->
     @subscriptions.dispose()
     @vimStatesByEditor.forEach (vimState) ->
@@ -95,6 +99,8 @@ module.exports =
       # Clear all editor's highlight so that we won't see remaining highlight on tab changed.
       'vim-mode-plus:clear-highlight-search': => @clearHighlightSearchForEditors()
       'vim-mode-plus:toggle-highlight-search': -> settings.toggle('highlightSearch')
+
+      'vim-mode-plus:clear-range-marker': => @clearRangeMarkerForEditors()
 
   registerVimStateCommands: ->
     # all commands here is executed with context where 'this' binded to 'vimState'

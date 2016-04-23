@@ -210,7 +210,7 @@ class VimState
   resetNormalMode: ->
     @editor.clearSelections()
     @activate('normal')
-    @resetRangeMarkers() if settings.get('clearRangeMarkerOnResetNormalMode')
+    @main.clearRangeMarkerForEditors() if settings.get('clearRangeMarkerOnResetNormalMode')
     @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
 
   reset: ->
@@ -261,7 +261,7 @@ class VimState
   getRangeMarkers: (markers) ->
     @rangeMarkers
 
-  resetRangeMarkers: (markers) ->
+  clearRangeMarkers: ->
     marker.destroy() for marker in @rangeMarkers
     @rangeMarkers = []
     @updateEditorElement()
