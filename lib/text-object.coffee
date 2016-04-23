@@ -771,3 +771,11 @@ class SearchMatchBackward extends SearchMatchForward
         found = range
         stop()
     found
+
+class PreviousSelection extends TextObject
+  @extend()
+  backward: true
+
+  select: ->
+    return unless range = @vimState.mark.getRange('<', '>')
+    @editor.getLastSelection().setBufferRange(range)
