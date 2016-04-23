@@ -224,7 +224,7 @@
   '%': 'vim-mode-plus:move-to-line-by-percent'
 
 'atom-text-editor.vim-mode-plus.with-range-marker:not(.insert-mode)':
-  'cmd-d': 'vim-mode-plus:add-selection-to-range-marker'
+  'cmd-d': 'vim-mode-plus:select-all-in-range-marker'
   'ctrl-cmd-g': 'vim-mode-plus:marked-range'
 
 # normal

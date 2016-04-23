@@ -999,7 +999,8 @@ class AddSelection extends Operator
   @extend()
 
   execute: ->
-    word = @editor.getSelectedText() or @editor.getWordUnderCursor()
+    @editor.getLastSelection().selectWord()
+    word = @editor.getSelectedText()
     return if word is ''
     return unless @selectTarget()
 
@@ -1015,7 +1016,7 @@ class AddSelection extends Operator
       unless @isMode('visual', 'characterwise')
         @activateMode('visual', 'characterwise')
 
-class AddSelectionToRangeMarker extends AddSelection
+class SelectAllInRangeMarker extends AddSelection
   @extend()
   target: "MarkedRange"
   flashTarget: false
