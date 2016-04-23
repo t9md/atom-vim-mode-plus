@@ -772,6 +772,7 @@ class SearchMatchBackward extends SearchMatchForward
         stop()
     found
 
+# [FIXME] Currently vB range is treated as vC range, how I should do?
 class PreviousSelection extends TextObject
   @extend()
   backward: true
