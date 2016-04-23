@@ -38,14 +38,22 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'string'
     default: '-?[0-9]+'
     description: 'Used to find number in ctrl-a/ctrl-x. To ignore "-"(minus) char in string like "identifier-1" use "(?:\\B-)?[0-9]+"'
-  charactersToAddSpaceOnSurround:
+  clearHighlightSearchOnResetNormalMode:
     order: 6
+    type: 'boolean'
+    default: false
+  clearRangeMarkerOnResetNormalMode:
+    order: 7
+    type: 'boolean'
+    default: false
+  charactersToAddSpaceOnSurround:
+    order: 8
     type: 'array'
     items: type: 'string'
     default: []
     description: 'Comma separated list of character, which add additional space inside when surround.'
   showCursorInVisualMode:
-    order: 7
+    order: 9
     type: 'boolean'
     default: true
   ignoreCaseForSearch:
