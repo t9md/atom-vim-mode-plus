@@ -34,7 +34,6 @@ describe "Range Marker", ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
           'g m': 'vim-mode-plus:mark-range'
-
       set
         text: """
         ooo xxx ooo
@@ -69,6 +68,7 @@ describe "Range Marker", ->
           ooo xxx ooo
           xxx ooo xxx\n
           """
+
     describe "select-all-in-range-marker", ->
       it "select all instance of cursor word only within marked range", ->
         keystroke('gmip}}j.') # Mark 2 inner-word and 1 inner-paragraph
