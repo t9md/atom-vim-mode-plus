@@ -42,10 +42,12 @@ module.exports = new Settings 'vim-mode-plus',
     order: 6
     type: 'boolean'
     default: false
+    description: 'Clear highlightSearch on `escape` in normal-mode'
   clearRangeMarkerOnResetNormalMode:
     order: 7
     type: 'boolean'
     default: false
+    description: 'Clear rangeMarker on `escape` in normal-mode'
   charactersToAddSpaceOnSurround:
     order: 8
     type: 'array'
