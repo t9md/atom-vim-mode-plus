@@ -98,16 +98,14 @@ class VimState
     @count ?= 0
     @count = (@count * 10) + number
     @hover.add number
-    @updateEditorElement()
+    @updateEditorElement(className: 'with-count', @hasCount())
 
   resetCount: ->
     @count = null
-    @updateEditorElement()
+    @updateEditorElement(className: 'with-count', @hasCount())
 
-  updateEditorElement: ->
-    @editorElement.classList.toggle('with-count', @hasCount())
-    @editorElement.classList.toggle('with-register', @register.hasName())
-    @editorElement.classList.toggle('with-range-marker', @rangeMarkers.length)
+  updateEditorElement: ({className}, bool) ->
+    @editorElement.classList.toggle(className, bool)
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
@@ -262,7 +260,7 @@ class VimState
   # -------------------------
   addRangeMarkers: (markers) ->
     @rangeMarkers.push(markers...)
-    @updateEditorElement()
+    @updateEditorElement(className: 'with-range-marker', @hasRangeMarkers())
 
   hasRangeMarkers: ->
     @rangeMarkers.length > 0
@@ -273,4 +271,4 @@ class VimState
   clearRangeMarkers: ->
     marker.destroy() for marker in @rangeMarkers
     @rangeMarkers = []
-    @updateEditorElement()
+    @updateEditorElement(className: 'with-range-marker', @hasRangeMarkers())
