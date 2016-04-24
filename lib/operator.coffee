@@ -770,20 +770,6 @@ class Repeat extends Operator
           operation.execute()
 
 # -------------------------
-# [FIXME] this is not operator
-class Mark extends Operator
-  @extend()
-  hover: icon: ':mark:', emoji: ':round_pushpin:'
-  requireInput: true
-  requireTarget: false
-  initialize: ->
-    @focusInput()
-
-  execute: ->
-    @vimState.mark.set(@input, @editor.getCursorBufferPosition())
-    @activateMode('normal')
-
-# -------------------------
 # [FIXME?]: inconsistent behavior from normal operator
 # Since its support visual-mode but not use setTarget() convension.
 # Maybe separating complete/in-complete version like IncreaseNow and Increase?

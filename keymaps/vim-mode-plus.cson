@@ -171,7 +171,7 @@
   # or
   # 'ctrl-w z': 'vim-mode-plus:maximize-pane'
 
-  'm':  'vim-mode-plus:mark'
+  'm':  'vim-mode-plus:set-mark-name'
   '`':  'vim-mode-plus:move-to-mark'
   '\'': 'vim-mode-plus:move-to-mark-line'
 
@@ -404,6 +404,34 @@
 'atom-text-editor.vim-mode-plus-input':
   'ctrl-c': 'vim-mode-plus:input-cancel'
   'ctrl-[': 'vim-mode-plus:input-cancel'
+
+'atom-text-editor.vim-mode-plus.normal-mode.mark-waiting, atom-text-editor.vim-mode-plus.visual-mode.mark-waiting':
+  'a': 'vim-mode-plus:set-mark-a'
+  'b': 'vim-mode-plus:set-mark-b'
+  'c': 'vim-mode-plus:set-mark-c'
+  'd': 'vim-mode-plus:set-mark-d'
+  'e': 'vim-mode-plus:set-mark-e'
+  'f': 'vim-mode-plus:set-mark-f'
+  'g': 'vim-mode-plus:set-mark-g'
+  'h': 'vim-mode-plus:set-mark-h'
+  'i': 'vim-mode-plus:set-mark-i'
+  'j': 'vim-mode-plus:set-mark-j'
+  'k': 'vim-mode-plus:set-mark-k'
+  'l': 'vim-mode-plus:set-mark-l'
+  'm': 'vim-mode-plus:set-mark-m'
+  'n': 'vim-mode-plus:set-mark-n'
+  'o': 'vim-mode-plus:set-mark-o'
+  'p': 'vim-mode-plus:set-mark-p'
+  'q': 'vim-mode-plus:set-mark-q'
+  'r': 'vim-mode-plus:set-mark-r'
+  's': 'vim-mode-plus:set-mark-s'
+  't': 'vim-mode-plus:set-mark-t'
+  'u': 'vim-mode-plus:set-mark-u'
+  'v': 'vim-mode-plus:set-mark-v'
+  'w': 'vim-mode-plus:set-mark-w'
+  'x': 'vim-mode-plus:set-mark-x'
+  'y': 'vim-mode-plus:set-mark-y'
+  'z': 'vim-mode-plus:set-mark-z'
 
 # Search mini editor
 # -------------------------

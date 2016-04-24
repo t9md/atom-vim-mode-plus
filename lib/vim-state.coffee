@@ -104,8 +104,22 @@ class VimState
     @count = null
     @toggleClassList('with-count', @hasCount())
 
+  # Mark
+  # -------------------------
+  setMark: (name) ->
+    @mark.set(name, @editor.getCursorBufferPosition())
+    @resetMark()
+
+  setMarkName: ->
+    @toggleClassList('mark-waiting', true)
+
+  resetMark: ->
+    @toggleClassList('mark-waiting', false)
+
+  # -------------------------
   toggleClassList: (className, bool) ->
     @editorElement.classList.toggle(className, bool)
+
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
@@ -213,6 +227,7 @@ class VimState
 
   reset: ->
     @resetCount()
+    @resetMark()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()

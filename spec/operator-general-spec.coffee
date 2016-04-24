@@ -832,7 +832,7 @@ describe "Operator general", ->
       set text: '12\n34\n56\n', cursorBuffer: [0, 1]
 
     it 'marks a position', ->
-      keystroke ['m', char: 'a']
+      keystroke 'ma'
       expect(vimState.mark.get('a')).toEqual [0, 1]
 
   describe 'the R keybinding', ->

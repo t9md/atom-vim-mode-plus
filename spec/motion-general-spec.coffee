@@ -1083,31 +1083,31 @@ describe "Motion general", ->
 
     it 'moves to the beginning of the line of a mark', ->
       set cursor: [1, 1]
-      keystroke ['m', char: 'a']
+      keystroke 'ma'
       set cursor: [0, 0]
       ensure ["'", char: 'a'], cursor: [1, 4]
 
     it 'moves literally to a mark', ->
       set cursorBuffer: [1, 1]
-      keystroke ['m', char: 'a']
+      keystroke 'ma'
       set cursorBuffer: [0, 0]
       ensure ['`', char: 'a'], cursorBuffer: [1, 1]
 
     it 'deletes to a mark by line', ->
       set cursorBuffer: [1, 5]
-      keystroke ['m', char: 'a']
+      keystroke 'ma'
       set cursorBuffer: [0, 0]
       ensure ["d'", char: 'a'], text: '56\n'
 
     it 'deletes before to a mark literally', ->
       set cursorBuffer: [1, 5]
-      keystroke ['m', char: 'a']
+      keystroke 'ma'
       set cursorBuffer: [0, 1]
       ensure ['d`', char: 'a'], text: ' 4\n56\n'
 
     it 'deletes after to a mark literally', ->
       set cursorBuffer: [1, 5]
-      keystroke ['m', char: 'a']
+      keystroke 'ma'
       set cursorBuffer: [2, 1]
       ensure ['d`', char: 'a'], text: '  12\n    36\n'
 
