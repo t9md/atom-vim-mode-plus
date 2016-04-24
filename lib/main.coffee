@@ -122,7 +122,7 @@ module.exports =
       'set-count-8': -> @setCount(8)
       'set-count-9': -> @setCount(9)
 
-      'set-mark-name': -> @setMarkName()
+      # 'set-mark-name': -> @setMarkName()
       'set-mark-a': -> @setMark('a')
       'set-mark-b': -> @setMark('b')
       'set-mark-c': -> @setMark('c')

@@ -108,13 +108,13 @@ class VimState
   # -------------------------
   setMark: (name) ->
     @mark.set(name, @editor.getCursorBufferPosition())
-    @resetMark()
+    # @resetMark()
 
-  setMarkName: ->
-    @toggleClassList('mark-waiting', true)
+  # setMarkName: ->
+  #   @toggleClassList('mark-waiting', true)
 
-  resetMark: ->
-    @toggleClassList('mark-waiting', false)
+  # resetMark: ->
+  #   @toggleClassList('mark-waiting', false)
 
   # -------------------------
   toggleClassList: (className, bool) ->
@@ -227,7 +227,7 @@ class VimState
 
   reset: ->
     @resetCount()
-    @resetMark()
+    # @resetMark()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
