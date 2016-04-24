@@ -1,3 +1,19 @@
+# 0.36.0:
+- Internal: Eliminate view/model separation for Hover and HoverElement.
+- New: `SearchMatchForward`(`gn`), `SearchMatchBackward`(`gN`) text-object. #241
+- Fix: Don't clear maximized state when active item changed in same pane #244
+- New: AddSelection operator #245
+- Dev: add `npm run watch`
+- New: Preserve `<`, `>` mark for visual start and end.
+- New: PreviousSelection text-object vB still not supported #246
+- New: MarkRange operator and MarkedRange text-object #249
+- New: Config option to clear HighlightSearch and RangeMarker on `escape` in normal-mode. #250
+- Improve: Support `InsertAtStartOfSelection` from vC mode, no longer need to enter vB only for insert at start of selection.
+- Breaking: MoveTo(Previous/Next)FoldStart no longer linewise motion.
+- New: General insertion operator `MotionByTarget`
+- New Experimental new Operator `SetCursorsToStartOfTarget` and MarkedRange precomposed version.
+- Internal: Do editorElement className update manually.
+
 # 0.35.1:
 - Fix: Ignore `mouseup` event handling on `insert` mode #240
 
