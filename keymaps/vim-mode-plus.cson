@@ -130,7 +130,7 @@
   # 'g _': 'vim-mode-plus:snake-case'
   # 'g r':   'vim-mode-plus:reverse'
   # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
-  # 'm r': 'vim-mode-plus:mark-range'
+  # 'g m': 'vim-mode-plus:mark-range'
 
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
