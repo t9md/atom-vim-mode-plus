@@ -239,6 +239,12 @@ class VimState
       marker.destroy()
     @highlightSearchMarkers = null
 
+  hasHighlightSearch: ->
+    @highlightSearchMarkers?
+
+  getHighlightSearch: ->
+    @highlightSearchMarkers
+
   highlightSearch: (pattern, scanRange) ->
     ranges = []
     @editor.scanInBufferRange pattern, scanRange, ({range}) ->
@@ -257,6 +263,9 @@ class VimState
   addRangeMarkers: (markers) ->
     @rangeMarkers.push(markers...)
     @updateEditorElement()
+
+  hasRangeMarkers: ->
+    @rangeMarkers.length > 0
 
   getRangeMarkers: (markers) ->
     @rangeMarkers
