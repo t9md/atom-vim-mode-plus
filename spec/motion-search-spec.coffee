@@ -1,4 +1,4 @@
-{getVimState, dispatch, TextData} = require './spec-helper'
+{getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
 
@@ -229,6 +229,49 @@ describe "Motion Search", ->
         ensureInputEditor 'core:move-up', text: 'def'
         ensureInputEditor 'core:move-down', text: 'abc'
         ensureInputEditor 'core:move-down', text: ''
+
+    describe "highlightSearch", ->
+      textForMarker = (marker) ->
+        editor.getTextInBufferRange(marker.getBufferRange())
+
+      ensureHightlightSearch = (options) ->
+        markers = vimState.getHighlightSearch()
+        if options.length?
+          expect(markers).toHaveLength(options.length)
+
+        if options.text?
+          text = markers.map (marker) -> textForMarker(marker)
+          expect(text).toEqual(options.text)
+
+        if options.mode?
+          ensure {mode: options.mode}
+
+      beforeEach ->
+        jasmine.attachToDOM(getView(atom.workspace))
+        settings.set('highlightSearch', true)
+        expect(vimState.hasHighlightSearch()).toBe(false)
+        ensure ['/', search: 'def'], cursor: [1, 0]
+
+      describe "clearHighlightSearch command", ->
+        it "clear highlightSearch marker", ->
+          ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
+          dispatch(editorElement, 'vim-mode-plus:clear-highlight-search')
+          expect(vimState.hasHighlightSearch()).toBe(false)
+
+      describe "clearHighlightSearchOnResetNormalMode", ->
+        describe "default setting", ->
+          it "it won't clear highlightSearch", ->
+            ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
+            dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
+            ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
+
+        describe "when enabled", ->
+          it "it clear highlightSearch on reset-normal-mode", ->
+            settings.set('clearHighlightSearchOnResetNormalMode', true)
+            ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
+            dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
+            expect(vimState.hasHighlightSearch()).toBe(false)
+            ensure mode: 'normal'
 
   describe "the * keybinding", ->
     beforeEach ->
