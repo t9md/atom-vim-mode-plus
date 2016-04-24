@@ -27,7 +27,7 @@ class RegisterManager
 
   reset: ->
     @name = null
-    @vimState.updateEditorElement(className: 'with-register', @hasName())
+    @vimState.toggleClassList('with-register', @hasName())
 
   destroy: ->
     @subscriptionBySelection.forEach (disposable) ->
@@ -126,7 +126,7 @@ class RegisterManager
   setName: ->
     @vimState.hover.add '"'
     @vimState.onDidConfirmInput (@name) =>
-      @vimState.updateEditorElement(className: 'with-register', @hasName())
+      @vimState.toggleClassList('with-register', @hasName())
       @vimState.hover.add(@name)
     @vimState.onDidCancelInput => @vimState.hover.reset()
     @vimState.input.focus({charsMax: 1})
