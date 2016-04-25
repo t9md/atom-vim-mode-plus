@@ -134,6 +134,7 @@ class CurrentSelection extends Motion
     throw new Error("#{@getName()} should not be executed")
 
   moveCursor: (cursor) ->
+    # [FIXME] support replay blockiwise selection. e.g. `r` in vB
     if @isMode('visual')
       # * Purpose of pointInfoByCursor? see #235 for detail.
       # When stayOnTransformString is enabled, cursor pos is not set on start of

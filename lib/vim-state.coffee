@@ -211,7 +211,10 @@ class VimState
       if @mode is 'insert'
         false
       else
-        @editor? and target is @editorElement and not type.startsWith('vim-mode-plus:')
+        @editor? and
+          target is @editorElement and
+          not @isMode('visual', 'blockwise') and
+          not type.startsWith('vim-mode-plus:')
 
     onInterestingEvent = (fn) ->
       (event) -> fn() if isInterestingEvent(event)
