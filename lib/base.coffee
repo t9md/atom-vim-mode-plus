@@ -253,10 +253,11 @@ class Base
       null
 
   @registerCommand: ->
-    atom.commands.add(@getCommandScope(), @getCommandName(), => @run())
+    atom.commands.add(@getCommandScope(), @getCommandName(), (event) => @run(event))
 
-  @run: ->
+  @run: (event) ->
     if vimState = getEditorState(atom.workspace.getActiveTextEditor())
+      vimState.domEvent = event
       # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
       vimState.operationStack.run(this)
 
