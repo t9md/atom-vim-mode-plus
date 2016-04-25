@@ -106,20 +106,40 @@ class VimState
 
   # Mark
   # -------------------------
-  setMark: (name) ->
-    @mark.set(name, @editor.getCursorBufferPosition())
-    # @resetMark()
+  startCharInput: (@charInputAction) ->
+    @inputCharSubscriptions = new CompositeDisposable()
+    @inputCharSubscriptions.add @swapClassName('vim-mode-plus-input-char-waiting')
+    @inputCharSubscriptions.add atom.commands.add @editorElement,
+      'core:cancel': => @resetCharInput()
 
-  # setMarkName: ->
-  #   @toggleClassList('mark-waiting', true)
+  setInputChar: (char) ->
+    switch @charInputAction
+      when 'save-mark' then @saveMark(char)
+      when 'move-to-mark' then @moveToMark(char)
+      when 'move-to-mark-line' then @moveToMarkLine(char)
+    @resetCharInput()
 
-  # resetMark: ->
-  #   @toggleClassList('mark-waiting', false)
+  resetCharInput: ->
+    @inputCharSubscriptions?.dispose()
+
+  saveMark: (char) ->
+    @mark.set(char, @editor.getCursorBufferPosition())
+
+  moveToMark: (char) ->
+    @operationStack.run("MoveToMark", input: char)
+
+  moveToMarkLine: (char) ->
+    @operationStack.run("MoveToMarkLine", input: char)
 
   # -------------------------
   toggleClassList: (className, bool) ->
     @editorElement.classList.toggle(className, bool)
 
+  swapClassName: (className) ->
+    oldClassName = @editorElement.className
+    @editorElement.className = className
+    new Disposable =>
+      @editorElement.className = oldClassName
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
@@ -181,6 +201,7 @@ class VimState
       @input, @search, @modeManager, @operationRecords, @register
       @count, @rangeMarkers
       @editor, @editorElement, @subscriptions,
+      @inputCharSubscriptions
       @highlightSearchSubscription
     } = {}
     @emitter.emit 'did-destroy'
@@ -227,7 +248,7 @@ class VimState
 
   reset: ->
     @resetCount()
-    # @resetMark()
+    @resetCharInput()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()

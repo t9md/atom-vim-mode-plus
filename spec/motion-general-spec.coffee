@@ -1085,37 +1085,37 @@ describe "Motion general", ->
       set cursor: [1, 1]
       keystroke 'ma'
       set cursor: [0, 0]
-      ensure ["'", char: 'a'], cursor: [1, 4]
+      ensure "'a", cursor: [1, 4]
 
     it 'moves literally to a mark', ->
       set cursorBuffer: [1, 1]
       keystroke 'ma'
       set cursorBuffer: [0, 0]
-      ensure ['`', char: 'a'], cursorBuffer: [1, 1]
+      ensure '`a', cursorBuffer: [1, 1]
 
     it 'deletes to a mark by line', ->
       set cursorBuffer: [1, 5]
       keystroke 'ma'
       set cursorBuffer: [0, 0]
-      ensure ["d'", char: 'a'], text: '56\n'
+      ensure "d'a", text: '56\n'
 
     it 'deletes before to a mark literally', ->
       set cursorBuffer: [1, 5]
       keystroke 'ma'
       set cursorBuffer: [0, 1]
-      ensure ['d`', char: 'a'], text: ' 4\n56\n'
+      ensure 'd`a', text: ' 4\n56\n'
 
     it 'deletes after to a mark literally', ->
       set cursorBuffer: [1, 5]
       keystroke 'ma'
       set cursorBuffer: [2, 1]
-      ensure ['d`', char: 'a'], text: '  12\n    36\n'
+      ensure 'd`a', text: '  12\n    36\n'
 
     it 'moves back to previous', ->
       set cursorBuffer: [1, 5]
-      keystroke ['`', char: '`']
+      keystroke '``'
       set cursorBuffer: [2, 1]
-      ensure ['`', char: '`'], cursorBuffer: [1, 5]
+      ensure '``', cursorBuffer: [1, 5]
 
   describe 'the V keybinding', ->
     [text] = []

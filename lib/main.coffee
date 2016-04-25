@@ -122,33 +122,14 @@ module.exports =
       'set-count-8': -> @setCount(8)
       'set-count-9': -> @setCount(9)
 
-      # 'set-mark-name': -> @setMarkName()
-      'set-mark-a': -> @setMark('a')
-      'set-mark-b': -> @setMark('b')
-      'set-mark-c': -> @setMark('c')
-      'set-mark-d': -> @setMark('d')
-      'set-mark-e': -> @setMark('e')
-      'set-mark-f': -> @setMark('f')
-      'set-mark-g': -> @setMark('g')
-      'set-mark-h': -> @setMark('h')
-      'set-mark-i': -> @setMark('i')
-      'set-mark-j': -> @setMark('j')
-      'set-mark-k': -> @setMark('k')
-      'set-mark-l': -> @setMark('l')
-      'set-mark-m': -> @setMark('m')
-      'set-mark-n': -> @setMark('n')
-      'set-mark-o': -> @setMark('o')
-      'set-mark-p': -> @setMark('p')
-      'set-mark-q': -> @setMark('q')
-      'set-mark-r': -> @setMark('r')
-      'set-mark-s': -> @setMark('s')
-      'set-mark-t': -> @setMark('t')
-      'set-mark-u': -> @setMark('u')
-      'set-mark-v': -> @setMark('v')
-      'set-mark-w': -> @setMark('w')
-      'set-mark-x': -> @setMark('x')
-      'set-mark-y': -> @setMark('y')
-      'set-mark-z': -> @setMark('z')
+      'start-save-mark': -> @startCharInput("save-mark")
+      'start-move-to-mark': -> @startCharInput("move-to-mark")
+      'start-move-to-mark-line': -> @startCharInput("move-to-mark-line")
+
+    chars = 'abcdefghijklmnopqrstuvwxyz[]`.^()`{}<>'.split('')
+    for char in chars
+      do (char) ->
+        commands["set-input-char-#{char}"] = -> @setInputChar(char)
 
     scope = 'atom-text-editor:not([mini])'
     for name, fn of commands

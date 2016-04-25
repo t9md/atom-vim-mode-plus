@@ -754,13 +754,8 @@ class RepeatFindReverse extends RepeatFind
 # -------------------------
 # keymap: `
 class MoveToMark extends Motion
-  @extend()
-  requireInput: true
-  hover: icon: ":move-to-mark:`", emoji: ":round_pushpin:`"
-
-  initialize: ->
-    @focusInput()
-
+  @extend(false)
+  input: null # set when instatntiated via vimState::moveToMark()
   getPoint: (fromPoint) ->
     input = @getInput()
     point = null
@@ -782,7 +777,6 @@ class MoveToMark extends Motion
 class MoveToMarkLine extends MoveToMark
   @extend()
   linewise: true
-  hover: icon: ":move-to-mark:'", emoji: ":round_pushpin:'"
 
 # Search
 # -------------------------

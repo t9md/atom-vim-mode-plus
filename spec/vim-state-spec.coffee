@@ -448,16 +448,16 @@ describe "VimState", ->
       set cursor: [1, 1]
       keystroke 'mt'
       set cursor: [2, 2]
-      ensure ['`', char: 't'], cursor: [1, 1]
+      ensure '`t', cursor: [1, 1]
 
     it "real (tracking) marking functionality", ->
       set cursor: [2, 2]
       keystroke 'mq'
       set cursor: [1, 2]
-      ensure ['o', 'escape', '`', char: 'q'], cursor: [3, 2]
+      ensure ['o', 'escape', '`q'], cursor: [3, 2]
 
     it "real (tracking) marking functionality", ->
       set cursor: [2, 2]
       keystroke 'mq'
       set cursor: [1, 2]
-      ensure ['dd', 'escape', '`', char: 'q'], cursor: [1, 2]
+      ensure ['dd', 'escape', '`q'], cursor: [1, 2]
