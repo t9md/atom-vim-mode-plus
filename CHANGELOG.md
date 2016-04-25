@@ -1,3 +1,9 @@
+# 0.37.0:
+- Fix: #252, #254 No longer use input mini editor for single char input for mark
+- Internal: make command event accessible via vimState while running command
+- Improve: If hide option is set on Input::focus() it don't add Panel
+- Fix: #253 fix `r` in vB
+
 # 0.36.0:
 - Internal: Eliminate view/model separation for Hover and HoverElement.
 - New: `SearchMatchForward`(`gn`), `SearchMatchBackward`(`gN`) text-object. #241
