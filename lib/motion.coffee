@@ -679,7 +679,7 @@ class Find extends Motion
   requireInput: true
 
   initialize: ->
-    @focusInput() unless @isComplete()
+    @focusInput(hide: true) unless @isComplete()
 
   isBackwards: ->
     @backwards

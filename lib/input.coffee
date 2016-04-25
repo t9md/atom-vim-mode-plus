@@ -28,8 +28,6 @@ class Input extends HTMLElement
       @emitter.emit 'did-change', text
       if (charsMax = @options?.charsMax) and text.length >= @options.charsMax
         @confirm()
-
-    @panel = atom.workspace.addBottomPanel(item: this, visible: false)
     this
 
   buildElements: ->
@@ -46,7 +44,7 @@ class Input extends HTMLElement
 
   destroy: ->
     @editor.destroy()
-    @panel.destroy()
+    @panel?.destroy()
     {@editor, @panel, @editorElement, @vimState} = {}
     @remove()
 
@@ -59,7 +57,13 @@ class Input extends HTMLElement
 
   focus: (@options={}) ->
     @finished = false
-    @panel.show()
+    if @options.hide?
+      unless @mounted
+        @vimState.editorElement.parentElement.appendChild(this)
+        @mounted = true
+    else
+      @panel ?= atom.workspace.addBottomPanel(item: this, visible: false)
+      @panel.show()
     @editorElement.focus()
     @commandSubscriptions = @handleEvents()
     # Cancel on tab switch
@@ -73,10 +77,10 @@ class Input extends HTMLElement
     @emitter.emit 'did-unfocus'
     atom.workspace.getActivePane().activate()
     @editor.setText ''
-    @panel.hide()
+    @panel?.hide()
 
   isVisible: ->
-    @panel.isVisible()
+    @panel?.isVisible()
 
   cancel: ->
     @emitter.emit 'did-cancel'
