@@ -23,6 +23,7 @@ globalState = require './global-state'
   detectScopeStartPositionForScope
   getBufferRows
   getStartPositionForPattern
+  getEndPositionForPattern
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   getTextInScreenRange
@@ -32,8 +33,6 @@ swrap = require './selection-wrapper'
 {MatchList} = require './match'
 settings = require './settings'
 Base = require './base'
-
-IsKeywordDefault = "[@a-zA-Z0-9_\-]+"
 
 class Motion extends Base
   @extend(false)
@@ -1002,15 +1001,14 @@ class SearchCurrentWord extends SearchBase
       new RegExp("\\b#{pattern}\\b", modifiers)
 
   getCurrentWordBufferRange: ->
-    wordRange = null
-    cursorPosition = @editor.getCursorBufferPosition()
-    scanRange = @editor.bufferRangeForBufferRow(cursorPosition.row)
-    pattern = new RegExp(settings.get('iskeyword') ? IsKeywordDefault, 'g')
-
-    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
-      if range.end.isGreaterThan(cursorPosition)
-        wordRange = range
-        stop()
+    cursor = @editor.getLastCursor()
+    originalPoint = cursor.getBufferPosition()
+    fromPoint = getEndPositionForPattern(@editor, originalPoint, /\s*/, containsOnly: true)
+    cursor.setBufferPosition(fromPoint) if fromPoint?
+    options = {}
+    options.includeNonWordCharacters = false if cursor.isBetweenWordAndNonWord()
+    wordRange = cursor.getCurrentWordBufferRange(options)
+    cursor.setBufferPosition(originalPoint) if fromPoint?
     wordRange
 
 class SearchCurrentWordBackwards extends SearchCurrentWord

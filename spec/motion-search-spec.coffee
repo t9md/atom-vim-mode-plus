@@ -296,16 +296,25 @@ describe "Motion Search", ->
       describe "with words that contain 'non-word' characters", ->
         it "moves cursor to next occurence of word under cursor", ->
           set
-            text: "abc\n@def\nabc\n@def\n"
+            text: """
+            abc
+            @def
+            abc
+            @def\n
+            """
             cursorBuffer: [1, 0]
           ensure '*', cursorBuffer: [3, 0]
 
         it "doesn't move cursor unless next match has exact word ending", ->
           set
-            text: "abc\n@def\nabc\n@def1\n"
+            text: """
+            abc
+            @def
+            abc
+            @def1\n
+            """
             cursorBuffer: [1, 1]
-          # this is because of the default isKeyword value of vim-mode-plus that includes @
-          ensure '*', cursorBuffer: [1, 0]
+          ensure '*', cursorBuffer: [1, 1]
 
         # FIXME: This behavior is different from the one found in
         # vim. This is because the word boundary match in Javascript
