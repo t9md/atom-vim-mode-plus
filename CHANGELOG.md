@@ -1,3 +1,6 @@
+# 0.37.1:
+- Fix: #258 `f`, `F` fail after paneItem change then back to original paneItem.
+
 # 0.37.0:
 - Fix: #252, #254 No longer use input mini editor for single char input for mark
 - Internal: make command event accessible via vimState while running command
