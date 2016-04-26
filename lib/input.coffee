@@ -59,7 +59,7 @@ class Input extends HTMLElement
     @finished = false
     if @options.hide?
       unless @mounted
-        @vimState.editorElement.parentElement.appendChild(this)
+        @vimState.editorElement.parentNode.parentNode.appendChild(this)
         @mounted = true
     else
       @panel ?= atom.workspace.addBottomPanel(item: this, visible: false)
