@@ -207,6 +207,7 @@ class Delete extends Operator
 class DeleteRight extends Delete
   @extend()
   target: 'MoveRight'
+  hover: null
 
 class DeleteLeft extends Delete
   @extend()

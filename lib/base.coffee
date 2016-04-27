@@ -40,10 +40,11 @@ class Base
 
   constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
-    hover = @hover?[settings.get('showHoverOnOperateIcon')]
-    if hover? and settings.get('showHoverOnOperate')
-      @addHover(hover)
     _.extend(this, properties)
+    if settings.get('showHoverOnOperate')
+      hover = @hover?[settings.get('showHoverOnOperateIcon')]
+      if hover? and not @isComplete()
+        @addHover(hover)
 
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
@@ -51,7 +52,10 @@ class Base
     if (@isRequireInput() and not @hasInput())
       false
     else if @isRequireTarget()
-      @getTarget()?.isComplete()
+      # When this function is called in Base::constructor
+      # tagert is still string like `MoveToRight`, in this case isComplete
+      # is not available.
+      @getTarget()?.isComplete?()
     else
       true
 
