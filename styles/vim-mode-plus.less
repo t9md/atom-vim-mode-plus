@@ -247,10 +247,7 @@ atom-text-editor, atom-text-editor::shadow {
 
 // Maximize Pane
 // =========================
-atom-workspace.vim-mode-plus-pane-maximized {
-  .tab-bar {
-    display: none;
-  }
+.vim-mode-plus-maximize-pane() {
   atom-pane-container {
     position: relative;
     atom-pane {
@@ -265,6 +262,19 @@ atom-workspace.vim-mode-plus-pane-maximized {
         z-index: 100;
       }
     }
+  }
+}
+
+.hide-tab-bar() {
+  .tab-bar {
+    display: none;
+  }
+}
+
+atom-workspace.vim-mode-plus-pane-maximized {
+  .vim-mode-plus-maximize-pane();
+  &.hide-tab-bar {
+    .hide-tab-bar()
   }
 }
 

@@ -37,6 +37,7 @@ module.exports =
 
       editorSubscriptions = new CompositeDisposable
       editorSubscriptions.add editor.onDidDestroy =>
+        editorSubscriptions.dispose()
         @unsubscribe(editorSubscriptions)
         vimState.destroy()
         @vimStatesByEditor.delete(editor)
@@ -51,9 +52,9 @@ module.exports =
         # vimState #196.
         @getEditorState(item)?.refreshHighlightSearch()
 
-    workspaceElement = atom.views.getView(atom.workspace)
+    workspaceClassList = atom.views.getView(atom.workspace).classList
     @subscribe atom.workspace.onDidChangeActivePane ->
-      workspaceElement.classList.remove('vim-mode-plus-pane-maximized')
+      workspaceClassList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
 
     @onDidSetLastSearchPattern =>
       @highlightSearchPattern = globalState.lastSearchPattern
@@ -90,7 +91,6 @@ module.exports =
     @subscriptions.add arg
 
   unsubscribe: (arg) ->
-    arg.dispose?()
     @subscriptions.remove arg
 
   registerCommands: ->
@@ -99,8 +99,19 @@ module.exports =
       # Clear all editor's highlight so that we won't see remaining highlight on tab changed.
       'vim-mode-plus:clear-highlight-search': => @clearHighlightSearchForEditors()
       'vim-mode-plus:toggle-highlight-search': -> settings.toggle('highlightSearch')
-
       'vim-mode-plus:clear-range-marker': => @clearRangeMarkerForEditors()
+
+    @subscribe atom.commands.add 'atom-workspace',
+      'vim-mode-plus:maximize-pane': => @maximizePane()
+
+  maximizePane: ->
+    selector = 'vim-mode-plus-pane-maximized'
+    classList = atom.views.getView(atom.workspace).classList
+    classList.toggle(selector)
+    if classList.contains(selector)
+      classList.add('hide-tab-bar') if settings.get('hideTabBarOnMaximizePane')
+    else
+      classList.remove('hide-tab-bar')
 
   registerVimStateCommands: ->
     # all commands here is executed with context where 'this' binded to 'vimState'

@@ -129,13 +129,6 @@ class ReplaceModeBackspace extends MiscCommand
         unless selection.insertText(char).isEmpty()
           selection.cursor.moveLeft()
 
-class MaximizePane extends MiscCommand
-  @extend()
-  execute: ->
-    selector = 'vim-mode-plus-pane-maximized'
-    workspaceElement = atom.views.getView(atom.workspace)
-    workspaceElement.classList.toggle(selector)
-
 # [FIXME] Name Scroll is misleading, AdjustVisibleArea is more explicit.
 class Scroll extends MiscCommand
   @extend(false)

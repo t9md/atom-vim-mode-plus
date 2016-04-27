@@ -152,6 +152,10 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'integer'
     default: 700
     description: "Duration(msec) for hover search counter"
+  hideTabBarOnMaximizePane:
+    order: 30
+    type: 'boolean'
+    default: true
   throwErrorOnNonEmptySelectionInNormalMode:
     order: 100
     type: 'boolean'

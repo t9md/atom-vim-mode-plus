@@ -1,3 +1,11 @@
+# workspace
+# -------------------------
+# To maximize none-editor paneItem e.g. setting-view
+'atom-workspace:not(.editor)':
+  # conflicts insert-mode ctrl-w and ctr-w in mini editor, so comment out by default
+  # 'ctrl-w z': 'vim-mode-plus:maximize-pane'
+  'cmd-enter': 'vim-mode-plus:maximize-pane'
+
 # all
 # -------------------------
 'atom-text-editor.vim-mode-plus':
@@ -160,16 +168,15 @@
   'ctrl-w ctrl-s': 'pane:split-down-and-copy-active-item'
   'ctrl-w s':      'pane:split-down-and-copy-active-item'
 
+  'ctrl-w z': 'vim-mode-plus:maximize-pane'
+  'cmd-enter': 'vim-mode-plus:maximize-pane'
+
   'ctrl-w ctrl-c': 'pane:close'
   'ctrl-w c':      'pane:close'
   'ctrl-w ctrl-q': 'core:close'
   'ctrl-w q':      'core:close'
   'g t':           'pane:show-next-item'
   'g T':           'pane:show-previous-item'
-
-  # 'cmd-enter': 'vim-mode-plus:maximize-pane'
-  # or
-  # 'ctrl-w z': 'vim-mode-plus:maximize-pane'
 
   'f': 'vim-mode-plus:find'
   'F': 'vim-mode-plus:find-backwards'
