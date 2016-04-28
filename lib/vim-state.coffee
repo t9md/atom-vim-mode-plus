@@ -287,7 +287,7 @@ class VimState
     @editor.scanInBufferRange pattern, scanRange, ({range}) ->
       ranges.push(range)
     markers = highlightRanges @editor, ranges,
-      invalidate: 'never'
+      invalidate: 'inside'
       class: 'vim-mode-plus-highlight-search'
     markers
 
