@@ -4,7 +4,7 @@
 - Fix: Make `MoveToMark` executable from command-pallate #252, #254.
 - Improve: highlightSearch no longer extend highlight marker even when character inserted at intersecting tail.
 - Improve: #262 Now `maximize-pane` can maximize none-editor paneItem such as setting-view, markdown-preview.
-- Breaking: #262 `maximize-pane` is mapped `cmd-enter`(for mac user) by default.
+- Breaking: #262 `maximize-pane` is mapped from `ctrl-w z`(for all) and `cmd-enter`(for mac) by default.
 - New: #262 New config `hideTabBarOnMaximizePane`(enabled by default). Disabling it keep tab-bar when maximized.
 - Fix: #258 `f` command occasionally throw error, so I simply revert to former code which use panel to attach hidden mini-editor.
 
