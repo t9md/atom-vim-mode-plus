@@ -412,14 +412,15 @@ moveCursorToFirstCharacterAtRow = (cursor, row) ->
   cursor.setBufferPosition([row, 0])
   cursor.moveToFirstCharacterOfLine()
 
-markerOptions = {ivalidate: 'never', persistent: false}
 # Return markers
 highlightRanges = (editor, ranges, options) ->
   ranges = [ranges] unless _.isArray(ranges)
   return null unless ranges.length
 
+  invalidate = options.invalidate ? 'never'
+  persistent = options.persistent ? false
   markers = ranges.map (range) ->
-    editor.markBufferRange(range, markerOptions)
+    editor.markBufferRange(range, {invalidate, persistent})
 
   for marker in markers
     editor.decorateMarker marker,

@@ -286,7 +286,10 @@ class VimState
     ranges = []
     @editor.scanInBufferRange pattern, scanRange, ({range}) ->
       ranges.push(range)
-    highlightRanges(@editor, ranges, {class: 'vim-mode-plus-highlight-search'})
+    markers = highlightRanges(@editor, ranges, options)
+      invalidate: 'never'
+      class: 'vim-mode-plus-highlight-search'
+    markers
 
   refreshHighlightSearch: ->
     [startRow, endRow] = @editorElement.getVisibleRowRange()
