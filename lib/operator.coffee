@@ -986,7 +986,8 @@ class AddSelection extends Operator
   @extend()
 
   execute: ->
-    @editor.getLastSelection().selectWord()
+    lastSelection = @editor.getLastSelection()
+    lastSelection.selectWord() if lastSelection.isEmpty()
     word = @editor.getSelectedText()
     return if word is ''
     return unless @selectTarget()
@@ -1005,6 +1006,7 @@ class AddSelection extends Operator
 
 class SelectAllInRangeMarker extends AddSelection
   @extend()
+  requireTarget: false
   target: "MarkedRange"
   flashTarget: false
 

@@ -47,7 +47,7 @@ module.exports =
       @subscribe(editorSubscriptions)
 
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
-      if atom.workspace.isTextEditor?(item)
+      if atom.workspace.isTextEditor(item)
         # Still there is possibility editor is destroyed and don't have corresponding
         # vimState #196.
         @getEditorState(item)?.refreshHighlightSearch()
