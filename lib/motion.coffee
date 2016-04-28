@@ -679,7 +679,7 @@ class Find extends Motion
   requireInput: true
 
   initialize: ->
-    @focusInput(hide: true) unless @isComplete()
+    @focusInput() unless @isComplete()
 
   isBackwards: ->
     @backwards
@@ -759,7 +759,7 @@ class MoveToMark extends Motion
   hover: icon: ":move-to-mark:`", emoji: ":round_pushpin:`"
 
   initialize: ->
-    @focusInput(hide: true) unless @isComplete()
+    @focusInput() unless @isComplete()
 
   input: null # set when instatntiated via vimState::moveToMark()
   getPoint: (fromPoint) ->
@@ -1007,15 +1007,23 @@ class SearchCurrentWord extends SearchBase
     else
       new RegExp("\\b#{pattern}\\b", modifiers)
 
+  getNextNonWhiteSpacePoint: (from) ->
+    point = null
+    scanRange = [from, [from.row, Infinity]]
+    @editor.scanInBufferRange /\S/, scanRange, ({range, stop}) ->
+      point = range.start
+    point
+
   getCurrentWordBufferRange: ->
     cursor = @editor.getLastCursor()
     originalPoint = cursor.getBufferPosition()
-    fromPoint = getEndPositionForPattern(@editor, originalPoint, /\s*/, containsOnly: true)
-    cursor.setBufferPosition(fromPoint) if fromPoint?
+    fromPoint = @getNextNonWhiteSpacePoint(originalPoint)
+    return unless fromPoint
+    cursor.setBufferPosition(fromPoint)
     options = {}
     options.includeNonWordCharacters = false if cursor.isBetweenWordAndNonWord()
     wordRange = cursor.getCurrentWordBufferRange(options)
-    cursor.setBufferPosition(originalPoint) if fromPoint?
+    cursor.setBufferPosition(originalPoint)
     wordRange
 
 class SearchCurrentWordBackwards extends SearchCurrentWord
