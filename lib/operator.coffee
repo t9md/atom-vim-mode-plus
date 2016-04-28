@@ -987,13 +987,17 @@ class AddSelection extends Operator
 
   execute: ->
     lastSelection = @editor.getLastSelection()
-    lastSelection.selectWord() if lastSelection.isEmpty()
+    lastSelection.selectWord() unless @isMode('visual')
     word = @editor.getSelectedText()
     return if word is ''
     return unless @selectTarget()
 
     ranges = []
-    pattern = ///#{_.escapeRegExp(word)}///g
+    pattern = if @isMode('visual')
+      ///#{_.escapeRegExp(word)}///g
+    else
+      ///\b#{_.escapeRegExp(word)}\b///g
+
     for selection in @editor.getSelections()
       scanRange = selection.getBufferRange()
       @editor.scanInBufferRange pattern, scanRange, ({range}) ->
