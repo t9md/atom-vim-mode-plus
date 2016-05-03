@@ -666,6 +666,10 @@ class YankLine extends Yank
   @extend()
   target: 'MoveToRelativeLine'
 
+class YankToLastCharacterOfLine extends Yank
+  @extend()
+  target: 'MoveToLastCharacterOfLine'
+
 # -------------------------
 # FIXME
 # Currently native editor.joinLines() is better for cursor position setting
