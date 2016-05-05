@@ -136,22 +136,6 @@ eachCursor = (editor, fn) ->
   for cursor in editor.getCursors()
     fn(cursor)
 
-bufferPositionForScreenPositionWithoutClip = (editor, screenPosition) ->
-  {row, column} = Point.fromObject(screenPosition)
-  bufferRow = editor.bufferRowForScreenRow(row)
-  bufferColumn = editor.displayBuffer
-    .tokenizedLineForScreenRow(row)
-    .bufferColumnForScreenColumn(column)
-  new Point(bufferRow, bufferColumn)
-
-screenPositionForBufferPositionWithoutClip = (editor, bufferPosition) ->
-  {row, column} = Point.fromObject(bufferPosition)
-  screenRow = editor.screenRowForBufferRow(row)
-  screenColumn = editor.displayBuffer
-    .tokenizedLineForScreenRow(row)
-    .screenColumnForBufferColumn(column)
-  new Point(screenRow, screenColumn)
-
 # [FIXME] Polyfills: Remove after atom/text-buffer is updated
 poliyFillsToTextBufferHistory = (history) ->
   Patch = null
@@ -692,8 +676,6 @@ module.exports = {
   getVisibleEditors
   eachSelection
   eachCursor
-  bufferPositionForScreenPositionWithoutClip
-  screenPositionForBufferPositionWithoutClip
   getNewTextRangeFromCheckpoint
   findIndex
   mergeIntersectingRanges
