@@ -36,13 +36,12 @@ class SelectionWrapper
 
   getNormalizedBufferPosition: ->
     point = @selection.getHeadBufferPosition()
-    editor = @selection.editor
     if @isForwarding()
-      screenPoint = editor.screenPositionForBufferPosition(point)
-      point = editor.bufferPositionForScreenPosition screenPoint.translate([0, -1]),
-        clip: 'backward'
-        wrapBeyondNewlines: true
-    point
+      {editor} = @selection
+      screenPoint = editor.screenPositionForBufferPosition(point).translate([0, -1])
+      editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'backward')
+    else
+      point
 
   # Return function to dispose(=revert) normalization.
   normalizeBufferPosition: ->
@@ -129,9 +128,9 @@ class SelectionWrapper
       {editor} = @selection
       start = @selection.getTailScreenPosition()
       if @selection.isReversed()
-        end = editor.clipScreenPosition(start.translate([0, -1]), {clip: 'backward'})
+        end = editor.clipScreenPosition(start.translate([0, -1]), clipDirection: 'backward')
       else
-        end = editor.clipScreenPosition(start.translate([0, +1]), {clip: 'forward', wrapBeyondNewlines: true})
+        end = editor.clipScreenPosition(start.translate([0, +1]), clipDirection: 'forward')
       editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
@@ -177,10 +176,8 @@ class SelectionWrapper
     [start.row, end.row] = @selection.getBufferRowRange()
 
     editor = @selection.editor
-    screenPoint = editor.screenPositionForBufferPosition(end)
-    end = editor.bufferPositionForScreenPosition screenPoint.translate([0, +1]),
-      clip: 'forward'
-      wrapBeyondNewlines: true
+    screenPoint = editor.screenPositionForBufferPosition(end).translate([0, 1])
+    end = editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'forward')
 
     @setBufferRange([start, end], {preserveFolds: true})
     @resetProperties()
