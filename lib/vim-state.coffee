@@ -291,10 +291,23 @@ class VimState
       class: 'vim-mode-plus-highlight-search'
     markers
 
+  shouldSuppressHighlightSearch: ->
+    scopes = settings.get('highlightSearchExcludeScopes')
+    classes = scopes.map (scope) -> scope.split('.')
+
+    for classNames in classes
+      containsCount = 0
+      for className in classNames
+        containsCount += 1 if @editorElement.classList.contains(className)
+      return true if containsCount is classNames.length
+    false
+
   refreshHighlightSearch: ->
     [startRow, endRow] = @editorElement.getVisibleRowRange()
     return unless scanRange = getVisibleBufferRange(@editor)
     @clearHighlightSearch()
+    return if @shouldSuppressHighlightSearch()
+
     if settings.get('highlightSearch') and @main.highlightSearchPattern?
       @highlightSearchMarkers = @highlightSearch(@main.highlightSearchPattern, scanRange)
 
