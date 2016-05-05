@@ -2,20 +2,28 @@ _ = require 'underscore-plus'
 {Range, Disposable} = require 'atom'
 {isLinewiseRange} = require './utils'
 
+propertyStorage = null
+
 class SelectionWrapper
+  @init: ->
+    propertyStorage = new Map()
+    new Disposable ->
+      propertyStorage.clear()
+      propertyStorage = null
+
   constructor: (@selection) ->
 
-  getProperties: ->
-    @selection.marker.getProperties()['vim-mode-plus'] ? {}
-
   hasProperties: ->
-    @selection.marker.getProperties()['vim-mode-plus']?
+    propertyStorage.has(@selection)
+
+  getProperties: ->
+    propertyStorage.get(@selection) ? {}
 
   setProperties: (prop) ->
-    @selection.marker.setProperties({"vim-mode-plus": prop})
+    propertyStorage.set(@selection, prop)
 
   resetProperties: ->
-    @selection.marker.setProperties({"vim-mode-plus": null})
+    propertyStorage?.delete(@selection)
 
   setBufferRangeSafely: (range) ->
     if range
@@ -213,6 +221,9 @@ class SelectionWrapper
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
+
+swrap.init = ->
+  SelectionWrapper.init()
 
 swrap.setReversedState = (editor, reversed) ->
   editor.getSelections().forEach (selection) ->
