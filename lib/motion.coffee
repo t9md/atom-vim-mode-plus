@@ -316,7 +316,11 @@ class MoveToNextWord extends Motion
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
     @countTimes ({isFinal}) =>
       cursorRow = cursor.getBufferRow()
-      if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
+      cursorColumn = cursor.getBufferColumn()
+      lastLetterPos = cursor \
+          .getCurrentLineBufferRange({includeNewline:false}) \
+          .end.column
+      if cursorIsAtEmptyRow(cursor) and (not @isAsOperatorTarget())
         point = [cursorRow+1, 0]
       else
         point = @getPoint(cursor)
@@ -325,6 +329,9 @@ class MoveToNextWord extends Motion
             point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
           else if (point.row > cursorRow)
             point = [cursorRow, Infinity]
+        else if cursor.isAtEndOfLine() or ((cursorRow == point.row) \
+            and (cursorColumn >= lastLetterPos - 1))
+          point = [cursorRow+1, cursorColumn]
       cursor.setBufferPosition(point)
 
 class MoveToPreviousWord extends Motion
