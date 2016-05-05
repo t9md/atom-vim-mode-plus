@@ -50,12 +50,12 @@ getView = (model) ->
 saveEditorState = (editor) ->
   editorElement = getView(editor)
   scrollTop = editorElement.getScrollTop()
-  foldStartRows = editor.displayBuffer.findFoldMarkers({}).map (m) ->
-    editor.displayBuffer.foldForMarker(m).getStartRow()
+  foldMarkers = editor.displayLayer.findFoldMarkers({})
+  foldStartRows = foldMarkers.map (m) -> m.getStartPosition().row
   ->
     for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
-      editor.foldBufferRow row
-    editorElement.setScrollTop scrollTop
+      editor.foldBufferRow(row)
+    editorElement.setScrollTop(scrollTop)
 
 getKeystrokeForEvent = (event) ->
   keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
