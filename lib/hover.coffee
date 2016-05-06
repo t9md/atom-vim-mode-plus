@@ -64,8 +64,7 @@ class Hover extends HTMLElement
       , options.timeout
 
   createOverlay: (point) ->
-    marker = @editor.markBufferPosition(point, invalidate: "never")
-
+    marker = @editor.markBufferPosition(point)
     decoration = @editor.decorateMarker marker,
       type: 'overlay'
       item: this

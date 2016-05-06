@@ -407,18 +407,16 @@ highlightRanges = (editor, ranges, options) ->
   ranges = [ranges] unless _.isArray(ranges)
   return null unless ranges.length
 
-  markers = ranges.map (range) ->
-    editor.markBufferRange(range, invalidate: options.invalidate ? 'never')
+  invalidate = options.invalidate ? 'never'
+  markers = (editor.markBufferRange(range, {invalidate}) for range in ranges)
 
-  for marker in markers
-    editor.decorateMarker marker,
-      type: 'highlight'
-      class: options.class
+  decorateOptions = {type: 'highlight', class: options.class}
+  editor.decorateMarker(marker, decorateOptions) for marker in markers
 
   {timeout} = options
   if timeout?
-    setTimeout  ->
-      marker.destroy() for marker in markers
+    setTimeout ->
+      _.invoke(markers, 'destroy')
     , timeout
   markers
 

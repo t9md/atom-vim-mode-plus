@@ -67,9 +67,6 @@ class Operator extends Base
     @initialize?()
     @setTarget @new(@target) if _.isString(@target)
 
-  markSelectedBufferRange: ->
-    @editor.markBufferRange(@editor.getSelectedBufferRange(), invalidate: 'never')
-
   restorePoint: (selection) ->
     if @wasNeedStay
       swrap(selection).setBufferPositionTo('head', fromProperty: true)
@@ -93,7 +90,7 @@ class Operator extends Base
     if @needTrackChange()
       marker = null
       @onDidSelectTarget =>
-        marker = @markSelectedBufferRange()
+        marker = @editor.markBufferRange(@editor.getSelectedBufferRange())
 
       @onDidFinishOperation =>
         @setMarkForChange(range) if (range = marker.getBufferRange())
@@ -1031,9 +1028,9 @@ class MarkRange extends Operator
   @extend()
   keepCursorPosition: true
 
-  options = class: 'vim-mode-plus-range-marker'
   mutateSelection: (selection) ->
-    marker = highlightRanges(@editor, selection.getBufferRange(), options)
+    range = selection.getBufferRange()
+    marker = highlightRanges(@editor, range, class: 'vim-mode-plus-range-marker')
     @vimState.addRangeMarkers(marker)
     @restorePoint(selection)
 
