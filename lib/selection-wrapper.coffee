@@ -4,6 +4,14 @@ _ = require 'underscore-plus'
 
 propertyStorage = null
 
+getClipOptions = (editor, direction) ->
+  if editor.displayLayer?
+    {clipDirection: direction}
+  else
+    switch direction
+      when 'backward' then {clip: direction}
+      when 'forward' then {clip: direction, wrapBeyondNewlines: true}
+
 class SelectionWrapper
   @init: ->
     propertyStorage = new Map()
@@ -36,13 +44,13 @@ class SelectionWrapper
 
   getNormalizedBufferPosition: ->
     point = @selection.getHeadBufferPosition()
-    editor = @selection.editor
     if @isForwarding()
-      screenPoint = editor.screenPositionForBufferPosition(point)
-      point = editor.bufferPositionForScreenPosition screenPoint.translate([0, -1]),
-        clip: 'backward'
-        wrapBeyondNewlines: true
-    point
+      {editor} = @selection
+      screenPoint = editor.screenPositionForBufferPosition(point).translate([0, -1])
+      options = getClipOptions(editor, 'backward')
+      editor.bufferPositionForScreenPosition(screenPoint, options)
+    else
+      point
 
   # Return function to dispose(=revert) normalization.
   normalizeBufferPosition: ->
@@ -128,10 +136,13 @@ class SelectionWrapper
     else
       {editor} = @selection
       start = @selection.getTailScreenPosition()
-      if @selection.isReversed()
-        end = editor.clipScreenPosition(start.translate([0, -1]), {clip: 'backward'})
+      end = if @selection.isReversed()
+        options = getClipOptions(editor, 'backward')
+        editor.clipScreenPosition(start.translate([0, -1]), options)
       else
-        end = editor.clipScreenPosition(start.translate([0, +1]), {clip: 'forward', wrapBeyondNewlines: true})
+        options = getClipOptions(editor, 'forward')
+        editor.clipScreenPosition(start.translate([0, +1]), options)
+
       editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
@@ -177,10 +188,9 @@ class SelectionWrapper
     [start.row, end.row] = @selection.getBufferRowRange()
 
     editor = @selection.editor
-    screenPoint = editor.screenPositionForBufferPosition(end)
-    end = editor.bufferPositionForScreenPosition screenPoint.translate([0, +1]),
-      clip: 'forward'
-      wrapBeyondNewlines: true
+    screenPoint = editor.screenPositionForBufferPosition(end).translate([0, 1])
+    options = getClipOptions(editor, 'forward')
+    end = editor.bufferPositionForScreenPosition(screenPoint, options)
 
     @setBufferRange([start, end], {preserveFolds: true})
     @resetProperties()

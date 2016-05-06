@@ -47,15 +47,21 @@ getView = (model) ->
   atom.views.getView(model)
 
 # Return function to restore editor's scrollTop and fold state.
+
+getAllFoldMarkers = (editor) ->
+  # [TODO] REMOVE-on=displayLayer-is-out
+  finder = editor.displayLayer ? editor.displayBuffer
+  finder.findFoldMarkers({})
+
 saveEditorState = (editor) ->
   editorElement = getView(editor)
   scrollTop = editorElement.getScrollTop()
-  foldStartRows = editor.displayBuffer.findFoldMarkers({}).map (m) ->
-    editor.displayBuffer.foldForMarker(m).getStartRow()
+
+  foldStartRows = getAllFoldMarkers(editor).map (m) -> m.getStartPosition().row
   ->
     for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
-      editor.foldBufferRow row
-    editorElement.setScrollTop scrollTop
+      editor.foldBufferRow(row)
+    editorElement.setScrollTop(scrollTop)
 
 getKeystrokeForEvent = (event) ->
   keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
@@ -135,22 +141,6 @@ eachSelection = (editor, fn) ->
 eachCursor = (editor, fn) ->
   for cursor in editor.getCursors()
     fn(cursor)
-
-bufferPositionForScreenPositionWithoutClip = (editor, screenPosition) ->
-  {row, column} = Point.fromObject(screenPosition)
-  bufferRow = editor.bufferRowForScreenRow(row)
-  bufferColumn = editor.displayBuffer
-    .tokenizedLineForScreenRow(row)
-    .bufferColumnForScreenColumn(column)
-  new Point(bufferRow, bufferColumn)
-
-screenPositionForBufferPositionWithoutClip = (editor, bufferPosition) ->
-  {row, column} = Point.fromObject(bufferPosition)
-  screenRow = editor.screenRowForBufferRow(row)
-  screenColumn = editor.displayBuffer
-    .tokenizedLineForScreenRow(row)
-    .screenColumnForBufferColumn(column)
-  new Point(screenRow, screenColumn)
 
 # [FIXME] Polyfills: Remove after atom/text-buffer is updated
 poliyFillsToTextBufferHistory = (history) ->
@@ -418,19 +408,15 @@ highlightRanges = (editor, ranges, options) ->
   return null unless ranges.length
 
   invalidate = options.invalidate ? 'never'
-  persistent = options.persistent ? false
-  markers = ranges.map (range) ->
-    editor.markBufferRange(range, {invalidate, persistent})
+  markers = (editor.markBufferRange(range, {invalidate}) for range in ranges)
 
-  for marker in markers
-    editor.decorateMarker marker,
-      type: 'highlight'
-      class: options.class
+  decorateOptions = {type: 'highlight', class: options.class}
+  editor.decorateMarker(marker, decorateOptions) for marker in markers
 
   {timeout} = options
   if timeout?
-    setTimeout  ->
-      marker.destroy() for marker in markers
+    setTimeout ->
+      _.invoke(markers, 'destroy')
     , timeout
   markers
 
@@ -503,7 +489,9 @@ getBufferRangeForRowRange = (editor, rowRange) ->
   rangeStart.union(rangeEnd)
 
 getTokenizedLineForRow = (editor, row) ->
-  editor.displayBuffer.tokenizedBuffer.tokenizedLineForRow(row)
+  # [TODO] REMOVE-on=displayLayer-is-out
+  tokenizedBuffer = editor.tokenizedBuffer ? editor.displayBuffer.tokenizedBuffer
+  tokenizedBuffer.tokenizedLineForRow(row)
 
 getScopesForTokenizedLine = (line) ->
   for tag in line.tags when tag < 0 and (tag % 2 is -1)
@@ -530,15 +518,22 @@ scanForScopeStart = (editor, fromPoint, direction, fn) ->
     tokenIterator = tokenizedLine.getTokenIterator()
     for tag in tokenizedLine.tags
       tokenIterator.next()
-      if tag > 0
-        column += switch
-          when tokenIterator.isHardTab() then 1
-          when tokenIterator.isSoftWrapIndentation() then 0
-          else tag
-      else if (tag % 2 is -1)
+      if tag < 0 # Negative: start/stop token
         scope = atom.grammars.scopeForId(tag)
-        position = new Point(row, column)
-        results.push {scope, position, stop}
+        if (tag % 2) is 0 # Even: scope stop
+          null
+        else # Odd: scope start
+          position = new Point(row, column)
+          results.push {scope, position, stop}
+      else
+        # [TODO] REMOVE-on=displayLayer-is-out
+        if tokenIterator.isHardTab?
+          column += switch
+            when tokenIterator.isHardTab() then 1
+            when tokenIterator.isSoftWrapIndentation() then 0
+            else tag
+        else
+          column += tag
 
     results = results.filter(isValidToken)
     results.reverse() if direction is 'backward'
@@ -692,8 +687,6 @@ module.exports = {
   getVisibleEditors
   eachSelection
   eachCursor
-  bufferPositionForScreenPositionWithoutClip
-  screenPositionForBufferPositionWithoutClip
   getNewTextRangeFromCheckpoint
   findIndex
   mergeIntersectingRanges

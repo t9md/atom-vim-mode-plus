@@ -34,9 +34,6 @@ class MarkManager
   # [FIXME] Need to support Global mark with capital name [A-Z]
   set: (name, point) ->
     return unless @isValid(name)
-    point = @editor.clipBufferPosition(point)
-    @marks[name] = @editor.markBufferPosition point,
-      invalidate: 'never',
-      persistent: false
+    @marks[name] = @editor.markBufferPosition(@editor.clipBufferPosition(point))
 
 module.exports = MarkManager
