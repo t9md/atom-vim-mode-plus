@@ -65,7 +65,7 @@ class Hover extends HTMLElement
 
   createOverlay: (point) ->
     marker = @editor.markBufferPosition point,
-      invalidate: "never",
+      invalidate: "never"
       persistent: false
 
     decoration = @editor.decorateMarker marker,

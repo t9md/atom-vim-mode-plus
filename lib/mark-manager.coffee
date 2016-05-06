@@ -36,7 +36,7 @@ class MarkManager
     return unless @isValid(name)
     point = @editor.clipBufferPosition(point)
     @marks[name] = @editor.markBufferPosition point,
-      invalidate: 'never',
+      invalidate: 'never'
       persistent: false
 
 module.exports = MarkManager
