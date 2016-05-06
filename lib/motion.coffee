@@ -329,7 +329,7 @@ class MoveToNextWord extends Motion
             point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
           else if (point.row > cursorRow)
             point = [cursorRow, Infinity]
-        else if cursor.isAtEndOfLine() or ((cursorRow == point.row) \
+        else if cursor.isAtEndOfLine() or ((cursorRow is point.row) \
             and (cursorColumn >= lastLetterPos - 1))
           point = [cursorRow+1, cursorColumn]
       cursor.setBufferPosition(point)
