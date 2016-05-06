@@ -408,9 +408,7 @@ highlightRanges = (editor, ranges, options) ->
   return null unless ranges.length
 
   markers = ranges.map (range) ->
-    editor.markBufferRange range,
-      invalidate: options.invalidate ? 'never'
-      persistent: options.persistent ? false
+    editor.markBufferRange(range, invalidate: options.invalidate ? 'never')
 
   for marker in markers
     editor.decorateMarker marker,

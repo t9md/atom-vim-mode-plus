@@ -68,9 +68,7 @@ class Operator extends Base
     @setTarget @new(@target) if _.isString(@target)
 
   markSelectedBufferRange: ->
-    @editor.markBufferRange @editor.getSelectedBufferRange(),
-      invalidate: 'never'
-      persistent: false
+    @editor.markBufferRange(@editor.getSelectedBufferRange(), invalidate: 'never')
 
   restorePoint: (selection) ->
     if @wasNeedStay

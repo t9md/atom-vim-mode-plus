@@ -118,9 +118,7 @@ class Match
   show: ->
     classes = ['vim-mode-plus-search-match'].concat(@getClassList()...)
 
-    @marker = @editor.markBufferRange @range,
-      invalidate: 'never'
-      persistent: false
+    @marker = @editor.markBufferRange(@range, invalidate: 'never')
 
     @editor.decorateMarker @marker,
       type: 'highlight'

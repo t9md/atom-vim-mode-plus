@@ -4,6 +4,14 @@ _ = require 'underscore-plus'
 
 propertyStorage = null
 
+getClipOptions = (editor, direction) ->
+  if editor.displayLayer?
+    {clipDirection: direction}
+  else
+    switch direction
+      when 'backward' then {clip: direction}
+      when 'forward' then {clip: direction, wrapBeyondNewlines: true}
+
 class SelectionWrapper
   @init: ->
     propertyStorage = new Map()
@@ -39,7 +47,8 @@ class SelectionWrapper
     if @isForwarding()
       {editor} = @selection
       screenPoint = editor.screenPositionForBufferPosition(point).translate([0, -1])
-      editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'backward')
+      options = getClipOptions(editor, 'backward')
+      editor.bufferPositionForScreenPosition(screenPoint, options)
     else
       point
 
@@ -127,10 +136,13 @@ class SelectionWrapper
     else
       {editor} = @selection
       start = @selection.getTailScreenPosition()
-      if @selection.isReversed()
-        end = editor.clipScreenPosition(start.translate([0, -1]), clipDirection: 'backward')
+      end = if @selection.isReversed()
+        options = getClipOptions(editor, 'backward')
+        editor.clipScreenPosition(start.translate([0, -1]), options)
       else
-        end = editor.clipScreenPosition(start.translate([0, +1]), clipDirection: 'forward')
+        options = getClipOptions(editor, 'forward')
+        editor.clipScreenPosition(start.translate([0, +1]), options)
+
       editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
@@ -177,7 +189,8 @@ class SelectionWrapper
 
     editor = @selection.editor
     screenPoint = editor.screenPositionForBufferPosition(end).translate([0, 1])
-    end = editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'forward')
+    options = getClipOptions(editor, 'forward')
+    end = editor.bufferPositionForScreenPosition(screenPoint, options)
 
     @setBufferRange([start, end], {preserveFolds: true})
     @resetProperties()
