@@ -50,7 +50,12 @@ getView = (model) ->
 saveEditorState = (editor) ->
   editorElement = getView(editor)
   scrollTop = editorElement.getScrollTop()
-  foldMarkers = editor.displayLayer.findFoldMarkers({})
+
+  if editor.displayLayer?
+    foldMarkers = editor.displayLayer.findFoldMarkers({})
+  else
+    foldMarkers = editor.displayBuffer.findFoldMarkers({})
+
   foldStartRows = foldMarkers.map (m) -> m.getStartPosition().row
   ->
     for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
@@ -401,10 +406,10 @@ highlightRanges = (editor, ranges, options) ->
   ranges = [ranges] unless _.isArray(ranges)
   return null unless ranges.length
 
-  invalidate = options.invalidate ? 'never'
-  persistent = options.persistent ? false
   markers = ranges.map (range) ->
-    editor.markBufferRange(range, {invalidate, persistent})
+    editor.markBufferRange range,
+      invalidate: options.invalidate ? 'never'
+      persistent: options.persistent ? false
 
   for marker in markers
     editor.decorateMarker marker,
@@ -487,7 +492,11 @@ getBufferRangeForRowRange = (editor, rowRange) ->
   rangeStart.union(rangeEnd)
 
 getTokenizedLineForRow = (editor, row) ->
-  editor.displayBuffer.tokenizedBuffer.tokenizedLineForRow(row)
+  if editor.tokenizedBuffer?
+    editor.tokenizedBuffer.tokenizedLineForRow(row)
+  else
+    # [TODO] Remove this when min engine update to 1.9.0
+    editor.displayBuffer.tokenizedBuffer.tokenizedLineForRow(row)
 
 getScopesForTokenizedLine = (line) ->
   for tag in line.tags when tag < 0 and (tag % 2 is -1)
@@ -514,15 +523,22 @@ scanForScopeStart = (editor, fromPoint, direction, fn) ->
     tokenIterator = tokenizedLine.getTokenIterator()
     for tag in tokenizedLine.tags
       tokenIterator.next()
-      if tag > 0
-        column += switch
-          when tokenIterator.isHardTab() then 1
-          when tokenIterator.isSoftWrapIndentation() then 0
-          else tag
-      else if (tag % 2 is -1)
+      if tag < 0 # Negative: start/stop token
         scope = atom.grammars.scopeForId(tag)
-        position = new Point(row, column)
-        results.push {scope, position, stop}
+        if (tag % 2) is 0 # Even: scope stop
+          null
+        else # Odd: scope start
+          position = new Point(row, column)
+          results.push {scope, position, stop}
+      else
+        # [TODO] Remove this when engine updated to >=1.9
+        if tokenIterator.isHardTab?
+          column += switch
+            when tokenIterator.isHardTab() then 1
+            when tokenIterator.isSoftWrapIndentation() then 0
+            else tag
+        else
+          column += tag
 
     results = results.filter(isValidToken)
     results.reverse() if direction is 'backward'
