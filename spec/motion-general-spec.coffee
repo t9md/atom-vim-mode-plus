@@ -148,7 +148,11 @@ describe "Motion general", ->
           ensure 'j', cursor: [1, 0], cursorBuffer: [0, 9]
           ensure 'j', cursor: [2, 0], cursorBuffer: [1, 0]
           ensure 'j', cursor: [3, 0], cursorBuffer: [1, 9]
-          ensure 'j', cursor: [4, 0], cursorBuffer: [1, 20]
+          # [FIXME] should remove in near future
+          unless editor.displayLayer?
+            ensure 'j', cursor: [4, 0], cursorBuffer: [1, 20]
+          else
+            ensure 'j', cursor: [4, 0], cursorBuffer: [1, 12]
 
         it "jk move selection buffer-line wise", ->
           ensure 'V', selectedText: text.getLines([0..0])
@@ -167,7 +171,11 @@ describe "Motion general", ->
           ensure 'j', cursor: [1, 0], cursorBuffer: [0, 9]
           ensure 'j', cursor: [2, 0], cursorBuffer: [1, 0]
           ensure 'j', cursor: [3, 0], cursorBuffer: [1, 9]
-          ensure 'j', cursor: [4, 0], cursorBuffer: [1, 20]
+          # [FIXME] should remove in near future
+          unless editor.displayLayer?
+            ensure 'j', cursor: [4, 0], cursorBuffer: [1, 20]
+          else
+            ensure 'j', cursor: [4, 0], cursorBuffer: [1, 12]
 
         it "jk move selection buffer-line wise", ->
           set cursorBuffer: [4, 0]
