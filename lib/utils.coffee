@@ -47,16 +47,17 @@ getView = (model) ->
   atom.views.getView(model)
 
 # Return function to restore editor's scrollTop and fold state.
+
+getAllFoldMarkers = (editor) ->
+  # [TODO] REMOVE-on=displayLayer-is-out
+  finder = editor.displayLayer ? editor.displayBuffer
+  finder.findFoldMarkers({})
+
 saveEditorState = (editor) ->
   editorElement = getView(editor)
   scrollTop = editorElement.getScrollTop()
 
-  if editor.displayLayer?
-    foldMarkers = editor.displayLayer.findFoldMarkers({})
-  else
-    foldMarkers = editor.displayBuffer.findFoldMarkers({})
-
-  foldStartRows = foldMarkers.map (m) -> m.getStartPosition().row
+  foldStartRows = getAllFoldMarkers(editor).map (m) -> m.getStartPosition().row
   ->
     for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
       editor.foldBufferRow(row)
@@ -492,11 +493,9 @@ getBufferRangeForRowRange = (editor, rowRange) ->
   rangeStart.union(rangeEnd)
 
 getTokenizedLineForRow = (editor, row) ->
-  if editor.tokenizedBuffer?
-    editor.tokenizedBuffer.tokenizedLineForRow(row)
-  else
-    # [TODO] Remove this when min engine update to 1.9.0
-    editor.displayBuffer.tokenizedBuffer.tokenizedLineForRow(row)
+  # [TODO] REMOVE-on=displayLayer-is-out
+  tokenizedBuffer = editor.tokenizedBuffer ? editor.displayBuffer.tokenizedBuffer
+  tokenizedBuffer.tokenizedLineForRow(row)
 
 getScopesForTokenizedLine = (line) ->
   for tag in line.tags when tag < 0 and (tag % 2 is -1)
@@ -531,7 +530,7 @@ scanForScopeStart = (editor, fromPoint, direction, fn) ->
           position = new Point(row, column)
           results.push {scope, position, stop}
       else
-        # [TODO] Remove this when engine updated to >=1.9
+        # [TODO] REMOVE-on=displayLayer-is-out
         if tokenIterator.isHardTab?
           column += switch
             when tokenIterator.isHardTab() then 1
