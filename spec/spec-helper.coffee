@@ -306,7 +306,6 @@ class VimEditor
     for k in keys
       if _.isString(k)
         _keystroke(k, {target})
-        continue
       else
         switch
           when k.platform?
