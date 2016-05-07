@@ -300,19 +300,25 @@ class MoveToNextWord extends Motion
   getPoint: (cursor) ->
     cursorPoint = cursor.getBufferPosition()
     pattern = @wordRegex ? cursor.wordRegExp()
-    scanRange = [[cursorPoint.row, 0], @getVimEofBufferPosition()]
-    point = null
-    @editor.scanInBufferRange pattern, scanRange, ({stop, range}) ->
-      if range.end.isGreaterThan(cursorPoint)
-        point = range.end
+    scanRange = [cursorPoint, @getVimEofBufferPosition()]
+
+    wordRange = null
+    found = false
+    @editor.scanInBufferRange pattern, scanRange, ({range, matchText, stop}) ->
+      wordRange = range
+      # Ignore 'empty line' matches between '\r' and '\n'
+      return if matchText is '' and range.start.column isnt 0
       if range.start.isGreaterThan(cursorPoint)
-        point = range.start
+        found = true
         stop()
-    point ? cursorPoint
+
+    if found
+      wordRange.start
+    else
+      wordRange?.end ? cursorPoint
 
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
-    lastCount = @getCount()
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
     @countTimes ({isFinal}) =>
       cursorRow = cursor.getBufferRow()

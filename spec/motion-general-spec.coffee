@@ -298,16 +298,15 @@ describe "Motion general", ->
           ensure 'gk', cursor: [2, 2]
           ensure 'gk', cursor: [0, 2]
 
-
   describe "the w keybinding", ->
-    beforeEach ->
-      set
-        text: """
-          ab cde1+-
-           xyz
+    baseText = """
+      ab cde1+-
+       xyz
 
-          zip
-          """
+      zip
+      """
+    beforeEach ->
+      set text: baseText
 
     describe "as a motion", ->
       beforeEach ->
@@ -334,6 +333,25 @@ describe "Motion general", ->
       it "moves the cursor to beginning of the next word of next line when cursor is at EOL.", ->
         set text: "\n  234", cursor: [0, 0]
         ensure 'w', cursor: [1, 2]
+
+      # [FIXME] improve spec to loop same section with different text
+      describe "for CRLF buffer", ->
+        beforeEach ->
+          set text: baseText.replace(/\n/g, "\r\n")
+
+        describe "as a motion", ->
+          beforeEach ->
+            set cursor: [0, 0]
+
+          it "moves the cursor to the beginning of the next word", ->
+            ensure 'w', cursor: [0, 3]
+            ensure 'w', cursor: [0, 7]
+            ensure 'w', cursor: [1, 1]
+            ensure 'w', cursor: [2, 0]
+            ensure 'w', cursor: [3, 0]
+            ensure 'w', cursor: [3, 2]
+            # When the cursor gets to the EOF, it should stay there.
+            ensure 'w', cursor: [3, 2]
 
     describe "when used by Change operator", ->
       beforeEach ->
