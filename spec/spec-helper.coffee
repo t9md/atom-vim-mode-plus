@@ -13,7 +13,6 @@ supportedModeClass = [
   'characterwise'
 ]
 
-packageName = 'vim-mode-plus'
 class SpecError
   constructor: (@message) ->
     @name = 'SpecError'
@@ -34,50 +33,25 @@ mockPlatform = (editorElement, platform) ->
 unmockPlatform = (editorElement) ->
   editorElement.parentNode.removeChild(editorElement)
 
-dispatchKeyboardEvent = (target, eventArgs...) ->
-  e = document.createEvent('KeyboardEvent')
-  e.initKeyboardEvent(eventArgs...)
-  # 0 is the default, and it's valid ASCII, but it's wrong.
-  if e.keyCode is 0
-    Object.defineProperty(e, 'keyCode', get: -> undefined)
-  target.dispatchEvent e
+KeymapManager = null
+buildKeydownEvent = (key, options) ->
+  KeymapManager ?= atom.keymaps.constructor
+  KeymapManager.buildKeydownEvent(key, options)
 
-dispatchTextEvent = (target, eventArgs...) ->
-  e = document.createEvent('TextEvent')
-  e.initTextEvent(eventArgs...)
-  target.dispatchEvent e
-
-keydown = (key, {element, ctrl, shift, alt, meta, raw}={}) ->
-  unless key is 'escape' or raw?
-    key = "U+#{key.charCodeAt(0).toString(16)}"
-  element ?= document.activeElement
-  eventArgs = [
-    false, # bubbles
-    true, # cancelable
-    null, # view
-    key,  # key
-    0,    # location
-    ctrl, alt, shift, meta
-  ]
-
-  canceled = not dispatchKeyboardEvent(element, 'keydown', eventArgs...)
-  # [FIXME] I think I can remove keypress event dispatch.
-  dispatchKeyboardEvent(element, 'keypress', eventArgs...)
-  unless canceled
-    if dispatchTextEvent(element, 'textInput', eventArgs...)
-      element.value += key
-  dispatchKeyboardEvent(element, 'keyup', eventArgs...)
+keydown = (key, options) ->
+  event = buildKeydownEvent(key, options)
+  atom.keymaps.handleKeyboardEvent(event)
 
 _keystroke = (keys, event) ->
   if keys in ['escape', 'backspace']
-    keydown keys, event
+    keydown(keys, event)
   else
     for key in keys.split('')
       if key.match(/[A-Z]/)
         event.shift = true
       else
         delete event.shift
-      keydown key, event
+      keydown(key, event)
 
 isPoint = (obj) ->
   if obj instanceof Point
@@ -120,21 +94,15 @@ getVimState = (args...) ->
     when 2 then [file, callback] = args
 
   waitsForPromise ->
-    atom.packages.activatePackage(packageName)
+    atom.packages.activatePackage('vim-mode-plus')
 
   waitsForPromise ->
     file = atom.project.resolvePath(file) if file
-    atom.workspace.open(file).then (e) ->
-      editor = e
+    atom.workspace.open(file).then (e) -> editor = e
 
   runs ->
-    pack = atom.packages.getActivePackage(packageName)
-    main = pack.mainModule
+    main = atom.packages.getActivePackage('vim-mode-plus').mainModule
     vimState = main.getEditorState(editor)
-    {editorElement} = vimState
-    editorElement.addEventListener 'keydown', (e) ->
-      atom.keymaps.handleKeyboardEvent(e)
-
     callback(vimState, new VimEditor(vimState))
 
 class TextData
@@ -316,8 +284,11 @@ class VimEditor
       expect(@editorElement.classList.contains(m)).toBe(false)
 
   # Public
+  # options
+  # - waitsForFinish
   keystroke: (keys, options={}) =>
-    {element} = options
+    # {element} = options
+    # console.log element
     if options.waitsForFinish
       finished = false
       @vimState.onDidFinishOperation -> finished = true
@@ -328,17 +299,18 @@ class VimEditor
 
     # keys must be String or Array
     # Not support Object for keys to avoid ambiguity.
-    element ?= @editorElement
+    target = @editorElement
     mocked = null
     keys = [keys] unless _.isArray(keys)
 
     for k in keys
       if _.isString(k)
-        _keystroke(k, {element})
+        _keystroke(k, {target})
+        continue
       else
         switch
           when k.platform?
-            mockPlatform(element, k.platform)
+            mockPlatform(target, k.platform)
             mocked = true
           when k.char?
             chars =
@@ -353,10 +325,9 @@ class VimEditor
             {editor, editorElement} = @vimState.searchInput
             editor.insertText(k.search)
             atom.commands.dispatch(editorElement, 'core:confirm')
-          when k.ctrl? then _keystroke(k.ctrl, {ctrl: true, element})
-          when k.cmd? then _keystroke(k.cmd, {meta: true, element})
-          when k.raw? then _keystroke(k.raw, {raw: true, element})
-    if mocked
-      unmockPlatform(element)
+          when k.ctrl? then _keystroke(k.ctrl, {ctrl: true, target})
+          when k.cmd? then _keystroke(k.cmd, {meta: true, target})
+          when k.raw? then _keystroke(k.raw, {raw: true, target})
+    unmockPlatform(target) if mocked
 
 module.exports = {getVimState, getView, dispatch, TextData}
