@@ -83,7 +83,7 @@ If you want to directly edit `config.cson`, here it is.
 - [Keymap example](https://github.com/t9md/atom-vim-mode-plus/wiki/Keymap-example).
 - [Extend vmp in init file](https://github.com/t9md/atom-vim-mode-plus/wiki/Extend-vmp-in-init-file)
 - [Create vmp plugin](https://github.com/t9md/atom-vim-mode-plus/wiki/Create-vmp-plugin)
-- [List of vmp plugins](ttps://github.com/t9md/atom-vim-mode-plus/wiki/List-of-vmp-plugins)
+- [List of vmp plugins](https://github.com/t9md/atom-vim-mode-plus/wiki/List-of-vmp-plugins)
 
 ## Keymap
 
@@ -96,7 +96,7 @@ Some of the keymap is not set by default, check following link for reference.
 
 # Helper packages
 
-- [List of vmp plugins](ttps://github.com/t9md/atom-vim-mode-plus/wiki/List-of-vmp-plugins)
+- [List of vmp plugins](https://github.com/t9md/atom-vim-mode-plus/wiki/List-of-vmp-plugins)
 
 Below is list of my packages which provide more vim-like experience.  
 Why I don't builtin these feature? Because it take more time and some feature is useful for non-vim user.
