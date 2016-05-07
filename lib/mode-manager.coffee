@@ -87,8 +87,9 @@ class ModeManager
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
       # When escape from insert-mode, cursor move Left.
+      needSpecialCareToPreventWrapLine = atom.config.get('editor.atomicSoftTabs') ? true
       for cursor in @editor.getCursors()
-        moveCursorLeft(cursor, {needSpecialCareToPreventWrapLine: true})
+        moveCursorLeft(cursor, {needSpecialCareToPreventWrapLine})
 
   activateReplaceMode: ->
     @replacedCharsBySelection = {}
