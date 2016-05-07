@@ -1,3 +1,13 @@
+# 0.39.0:
+- Improve: Now selectAllInRangeMarker can pick word from visual selection.
+- Improve: selectAllInRangeMarker can switch regex's word boundary option \b based if in visual-mode.
+- New: Motion YankToLastCharacterOfLine for user who don't like default `Y` include newline #265.
+- New: New setting option to suppress highlightSearch for certain scopes
+- Improve: No longer use custom marker property since it's deprecated in v1.9.0 #242
+- Improve: Use display-layer methods #242
+- Improve: Use clipDirection instead of clip for screenPosition clipping #242
+- Fix: `w` now can move to next line in CRLF file #267
+
 # 0.38.0:
 - Improve: #259 `*`, `#` now pick search word under cursor in the same manner where selection.selectWord() pick word.
 - Breaking: #259 Remove hidden `vim-mode-plus.iskeyword` configuration option.
