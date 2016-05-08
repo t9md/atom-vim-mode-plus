@@ -1,3 +1,4 @@
+# SPEC_MIGRATION: P1 DONE #270
 {getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
@@ -61,7 +62,7 @@ describe "Motion Search", ->
 
       it 'works with selection in visual mode', ->
         set text: 'one two three'
-        ensure ['v/', search: 'th'], cursor: [0, 9]
+        ensure ['v /', search: 'th'], cursor: [0, 9]
         ensure 'd', text: 'hree'
 
       it 'extends selection when repeating search in visual mode', ->
@@ -71,13 +72,13 @@ describe "Motion Search", ->
           line3
           """
 
-        ensure ['v/', {search: 'line'}],
+        ensure ['v /', {search: 'line'}],
           selectedBufferRange: [[0, 0], [1, 1]]
         ensure 'n',
           selectedBufferRange: [[0, 0], [2, 1]]
 
       it 'searches to the correct column in visual linewise mode', ->
-        ensure ['V/', {search: 'ef'}],
+        ensure ['V /', {search: 'ef'}],
           selectedText: "abc\ndef\n",
           characterwiseHead: [1, 1]
           cursor: [2, 0]
@@ -89,7 +90,7 @@ describe "Motion Search", ->
           abc def
           def\n
           """
-        ensure ['V/', {search: 'ef'}],
+        ensure ['V /', {search: 'ef'}],
           selectedText: "abc def\n",
 
       describe "case sensitivity", ->
@@ -169,10 +170,10 @@ describe "Motion Search", ->
 
       describe "composing", ->
         it "composes with operators", ->
-          ensure ['d/', search: 'def'], text: "def\nabc\ndef\n"
+          ensure ['d /', search: 'def'], text: "def\nabc\ndef\n"
 
         it "repeats correctly with operators", ->
-          ensure ['d/', search: 'def', '.'],
+          ensure ['d /', search: 'def', '.'],
             text: "def\n"
 
     describe "when reversed as ?", ->
@@ -482,10 +483,10 @@ describe "Motion Search", ->
           set text: "(_(_)_)"
         it 'behave inclusively when is at open pair', ->
           set cursor: [0, 2]
-          ensure 'd%', text: "(__)"
+          ensure 'd %', text: "(__)"
         it 'behave inclusively when is at open pair', ->
           set cursor: [0, 4]
-          ensure 'd%', text: "(__)"
+          ensure 'd %', text: "(__)"
       describe "cursor is at pair char", ->
         it "cursor is at open pair, it move to closing pair", ->
           set cursor: [0, 0]
