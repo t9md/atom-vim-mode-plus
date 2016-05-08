@@ -1,8 +1,9 @@
+# SPEC_MIGRATION: P2 DONE #270
 {getVimState, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
 {inspect} = require 'util'
 
-describe "Operator ActivateInsertMode family", ->
+ffdescribe "Operator ActivateInsertMode family", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
@@ -27,7 +28,7 @@ describe "Operator ActivateInsertMode family", ->
 
     it "is repeatable", ->
       set cursor: [0, 0]
-      keystroke '3s'
+      keystroke '3 s'
       editor.insertText 'ab'
       ensure 'escape', text: 'ab345'
       set cursor: [0, 2]
@@ -35,14 +36,14 @@ describe "Operator ActivateInsertMode family", ->
 
     it "is undoable", ->
       set cursor: [0, 0]
-      keystroke '3s'
+      keystroke '3 s'
       editor.insertText 'ab'
       ensure 'escape', text: 'ab345'
       ensure 'u', text: '012345', selectedText: ''
 
     describe "in visual mode", ->
       beforeEach ->
-        keystroke 'vls'
+        keystroke 'v l s'
 
       it "deletes the selected characters and enters insert mode", ->
         ensure
@@ -92,7 +93,7 @@ describe "Operator ActivateInsertMode family", ->
       # Should be here, but I commented out before I have confidence.
       # ensure 'kS', text: '\n'
       # Folowing line include Bug ibelieve.
-      ensure 'kS', text: '\n12345'
+      ensure 'k S', text: '\n12345'
     # Can't be tested without setting grammar of test buffer
     xit "respects indentation", ->
 
@@ -116,20 +117,20 @@ describe "Operator ActivateInsertMode family", ->
 
         it "deletes the current line and enters insert mode", ->
           set cursor: [1, 1]
-          ensure 'cc',
+          ensure 'c c',
             text: "12345\n  \nABCDE\n"
             cursor: [1, 2]
             mode: 'insert'
 
         it "is repeatable", ->
-          keystroke 'cc'
+          keystroke 'c c'
           editor.insertText("abc")
           ensure 'escape', text: "12345\n  abc\nABCDE\n"
           set cursor: [2, 3]
           ensure '.', text: "12345\n  abc\n  abc\n"
 
         it "is undoable", ->
-          keystroke 'cc'
+          keystroke 'c c'
           editor.insertText("abc")
           ensure 'escape', text: "12345\n  abc\nABCDE\n"
           ensure 'u', text: "12345\n  abcde\nABCDE\n", selectedText: ''
@@ -137,7 +138,7 @@ describe "Operator ActivateInsertMode family", ->
       describe "when the cursor is on the last line", ->
         it "deletes the line's content and enters insert mode on the last line", ->
           set cursor: [2, 1]
-          ensure 'cc',
+          ensure 'c c',
             text: "12345\nabcde\n"
             cursor: [2, 0]
             mode: 'insert'
@@ -145,7 +146,7 @@ describe "Operator ActivateInsertMode family", ->
       describe "when the cursor is on the only line", ->
         it "deletes the line's content and enters insert mode", ->
           set text: "12345", cursor: [0, 2]
-          ensure 'cc',
+          ensure 'c c',
             text: ""
             cursor: [0, 0]
             mode: 'insert'
@@ -153,7 +154,7 @@ describe "Operator ActivateInsertMode family", ->
     describe "when followed by i w", ->
       it "undo's and redo's completely", ->
         set cursor: [1, 1]
-        ensure 'ciw',
+        ensure 'c i w',
           text: "12345\n\nABCDE"
           cursor: [1, 0]
           mode: 'insert'
@@ -164,16 +165,16 @@ describe "Operator ActivateInsertMode family", ->
           text: "12345\nfg\nABCDE"
           mode: 'normal'
         ensure 'u', text: "12345\nabcde\nABCDE"
-        ensure [ctrl: 'r'], text: "12345\nfg\nABCDE"
+        ensure 'ctrl-r', text: "12345\nfg\nABCDE"
 
       it "repeatable", ->
         set cursor: [1, 1]
-        ensure 'ciw',
+        ensure 'c i w',
           text: "12345\n\nABCDE"
           cursor: [1, 0]
           mode: 'insert'
 
-        ensure ['escape', 'j.'],
+        ensure 'escape j .',
           text: "12345\n\n"
           cursor: [2, 0]
           mode: 'normal'
@@ -181,7 +182,7 @@ describe "Operator ActivateInsertMode family", ->
     describe "when followed by a w", ->
       it "changes the word", ->
         set text: "word1 word2 word3", cursorBuffer: [0, 7]
-        ensure ['cw', 'escape'], text: "word1 w word3"
+        ensure 'c w escape', text: "word1 w word3"
 
     describe "when followed by a G", ->
       beforeEach ->
@@ -191,12 +192,12 @@ describe "Operator ActivateInsertMode family", ->
       describe "on the beginning of the second line", ->
         it "deletes the bottom two lines", ->
           set cursor: [1, 0]
-          ensure ['cG', 'escape'], text: '12345\n\n'
+          ensure 'c G escape', text: '12345\n\n'
 
       describe "on the middle of the second line", ->
         it "deletes the bottom two lines", ->
           set cursor: [1, 2]
-          ensure ['cG', 'escape'], text: '12345\n\n'
+          ensure 'c G escape', text: '12345\n\n'
 
     describe "when followed by a goto line G", ->
       beforeEach ->
@@ -205,12 +206,12 @@ describe "Operator ActivateInsertMode family", ->
       describe "on the beginning of the second line", ->
         it "deletes all the text on the line", ->
           set cursor: [1, 0]
-          ensure ['c2G', 'escape'], text: '12345\n\nABCDE'
+          ensure 'c 2 G escape', text: '12345\n\nABCDE'
 
       describe "on the middle of the second line", ->
         it "deletes all the text on the line", ->
           set cursor: [1, 2]
-          ensure ['c2G', 'escape'], text: '12345\n\nABCDE'
+          ensure 'c 2 G escape', text: '12345\n\nABCDE'
 
   describe "the C keybinding", ->
     beforeEach ->
@@ -379,9 +380,9 @@ describe "Operator ActivateInsertMode family", ->
       beforeEach ->
         set cursor: [16, 0]
       it "insert at previous fold start row", ->
-        ensure 'g[', cursor: [9, 2], mode: 'insert'
+        ensure 'g [', cursor: [9, 2], mode: 'insert'
       it "insert at next fold start row", ->
-        ensure 'g]', cursor: [18, 4], mode: 'insert'
+        ensure 'g ]', cursor: [18, 4], mode: 'insert'
 
     describe "when cursor is at fold start row", ->
       # Nothing special when cursor is at fold start row,
@@ -389,9 +390,9 @@ describe "Operator ActivateInsertMode family", ->
       beforeEach ->
         set cursor: [20, 6]
       it "insert at previous fold start row", ->
-        ensure 'g[', cursor: [18, 4], mode: 'insert'
+        ensure 'g [', cursor: [18, 4], mode: 'insert'
       it "insert at next fold start row", ->
-        ensure 'g]', cursor: [22, 6], mode: 'insert'
+        ensure 'g ]', cursor: [22, 6], mode: 'insert'
 
   describe "the i keybinding", ->
     beforeEach ->
@@ -505,21 +506,21 @@ describe "Operator ActivateInsertMode family", ->
       set text: "", cursor: [0, 0]
       keystroke 'i'
       editor.insertText(initialText)
-      ensure ["escape", 'gg'], text: initialText, cursor: [0, 0]
+      ensure "escape g g", text: initialText, cursor: [0, 0]
 
     describe "repeat insertion count times", ->
-      it "[case-i]", -> ensureInsertionCount '3i', insert: '=', text: "===*\n*\n", cursor: [0, 2]
-      it "[case-o]", -> ensureInsertionCount '3o', insert: '=', text: "*\n=\n=\n=\n*\n", cursor: [3, 0]
-      it "[case-O]", -> ensureInsertionCount '3O', insert: '=', text: "=\n=\n=\n*\n*\n", cursor: [2, 0]
+      it "[case-i]", -> ensureInsertionCount '3 i', insert: '=', text: "===*\n*\n", cursor: [0, 2]
+      it "[case-o]", -> ensureInsertionCount '3 o', insert: '=', text: "*\n=\n=\n=\n*\n", cursor: [3, 0]
+      it "[case-O]", -> ensureInsertionCount '3 O', insert: '=', text: "=\n=\n=\n*\n*\n", cursor: [2, 0]
 
       describe "children of Change operation won't repeate insertion count times", ->
         beforeEach ->
           set text: "", cursor: [0, 0]
           keystroke 'i'
           editor.insertText('*')
-          ensure ["escape", 'gg'], text: '*', cursor: [0, 0]
+          ensure 'escape g g', text: '*', cursor: [0, 0]
 
-        it "[case-c]", -> ensureInsertionCount '3cw', insert: '=', text: "=", cursor: [0, 0]
-        it "[case-C]", -> ensureInsertionCount '3C', insert: '=', text: "=", cursor: [0, 0]
-        it "[case-s]", -> ensureInsertionCount '3s', insert: '=', text: "=", cursor: [0, 0]
-        it "[case-S]", -> ensureInsertionCount '3S', insert: '=', text: "=", cursor: [0, 0]
+        it "[case-c]", -> ensureInsertionCount '3 c w', insert: '=', text: "=", cursor: [0, 0]
+        it "[case-C]", -> ensureInsertionCount '3 C', insert: '=', text: "=", cursor: [0, 0]
+        it "[case-s]", -> ensureInsertionCount '3 s', insert: '=', text: "=", cursor: [0, 0]
+        it "[case-S]", -> ensureInsertionCount '3 S', insert: '=', text: "=", cursor: [0, 0]
