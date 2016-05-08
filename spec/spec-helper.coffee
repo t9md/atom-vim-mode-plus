@@ -1,3 +1,5 @@
+SPEC_ENSURE_LEVEL = 0
+# -------------------------
 _ = require 'underscore-plus'
 {Range, Point} = require 'atom'
 {inspect} = require 'util'
@@ -361,13 +363,15 @@ class VimEditor
         else
           # OLD style
           # "ensure 'hh'" comes here
-          # throw new Error('OLD STYLE USED')
-          # console.log "OLD STYLE USED"
+          if SPEC_ENSURE_LEVEL >= 1
+            throw new Error('OLD STYLE USED')
+            console.log "OLD STYLE USED"
 
           _keystroke(k, {target})
       else
-        # throw new Error('OLD STYLE USED')
-        # console.log "OLD STYLE USED"
+        if SPEC_ENSURE_LEVEL >= 2
+          throw new Error('OLD STYLE USED')
+          console.log "OLD STYLE USED"
         switch
           when k.platform?
             mockPlatform(target, k.platform)
