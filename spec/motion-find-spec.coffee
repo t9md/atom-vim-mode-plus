@@ -1,3 +1,4 @@
+# SPEC_MIGRATION: P1 DONE #270
 {getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
@@ -28,31 +29,31 @@ describe "Motion Find", ->
       ensure ['F', char: 'a'], cursor: [0, 0]
 
     it 'respects count forward', ->
-      ensure ['2f', char: 'a'], cursor: [0, 6]
+      ensure ['2 f', char: 'a'], cursor: [0, 6]
 
     it 'respects count backward', ->
       cursor: [0, 6]
-      ensure ['2F', char: 'a'], cursor: [0, 0]
+      ensure ['2 F', char: 'a'], cursor: [0, 0]
 
     it "doesn't move if the character specified isn't found", ->
       ensure ['f', char: 'd'], cursor: [0, 0]
 
     it "doesn't move if there aren't the specified count of the specified character", ->
-      ensure ['10f', char: 'a'], cursor: [0, 0]
+      ensure ['1 0 f', char: 'a'], cursor: [0, 0]
       # a bug was making this behaviour depend on the count
-      ensure ['11f', char: 'a'], cursor: [0, 0]
+      ensure ['1 1 f', char: 'a'], cursor: [0, 0]
       # and backwards now
       set cursor: [0, 6]
-      ensure ['10F', char: 'a'], cursor: [0, 6]
-      ensure ['11F', char: 'a'], cursor: [0, 6]
+      ensure ['1 0 F', char: 'a'], cursor: [0, 6]
+      ensure ['1 1 F', char: 'a'], cursor: [0, 6]
 
     it "composes with d", ->
       set cursor: [0, 3]
-      ensure ['d2f', char: 'a'], text: 'abcbc\n'
+      ensure ['d 2 f', char: 'a'], text: 'abcbc\n'
 
     it "F behaves exclusively when composes with operator", ->
       set cursor: [0, 3]
-      ensure ['dF', char: 'a'], text: 'abcabcabc\n'
+      ensure ['d F', char: 'a'], text: 'abcabcabc\n'
 
   describe 'the t/T keybindings', ->
     beforeEach ->
@@ -70,42 +71,42 @@ describe "Motion Find", ->
       ensure ['T', char: 'a'], cursor: [0, 1]
 
     it 'respects count forward', ->
-      ensure ['2t', char: 'a'], cursor: [0, 5]
+      ensure ['2 t', char: 'a'], cursor: [0, 5]
 
     it 'respects count backward', ->
       set cursor: [0, 6]
-      ensure ['2T', char: 'a'], cursor: [0, 1]
+      ensure ['2 T', char: 'a'], cursor: [0, 1]
 
     it "doesn't move if the character specified isn't found", ->
       ensure ['t', char: 'd'], cursor: [0, 0]
 
     it "doesn't move if there aren't the specified count of the specified character", ->
-      ensure ['10t', char: 'd'], cursor: [0, 0]
+      ensure ['1 0 t', char: 'd'], cursor: [0, 0]
       # a bug was making this behaviour depend on the count
-      ensure ['11t', char: 'a'], cursor: [0, 0]
+      ensure ['1 1 t', char: 'a'], cursor: [0, 0]
       # and backwards now
       set cursor: [0, 6]
-      ensure ['10T', char: 'a'], cursor: [0, 6]
-      ensure ['11T', char: 'a'], cursor: [0, 6]
+      ensure ['1 0 T', char: 'a'], cursor: [0, 6]
+      ensure ['1 1 T', char: 'a'], cursor: [0, 6]
 
     it "composes with d", ->
       set cursor: [0, 3]
-      ensure ['d2t', char: 'b'],
+      ensure ['d 2 t', char: 'b'],
         text: 'abcbcabc\n'
 
     it "selects character under cursor even when no movement happens", ->
       set cursor: [0, 0]
-      ensure ['dt', char: 'b'],
+      ensure ['d t', char: 'b'],
         text: 'bcabcabcabc\n'
 
     it "T behaves exclusively when composes with operator", ->
       set cursor: [0, 3]
-      ensure ['dT', char: 'b'],
+      ensure ['d T', char: 'b'],
         text: 'ababcabcabc\n'
 
     it "T don't delete character under cursor even when no movement happens", ->
       set cursor: [0, 3]
-      ensure ['dT', char: 'c'],
+      ensure ['d T', char: 'c'],
         text: 'abcabcabcabc\n'
 
   describe 'the ; and , keybindings', ->
@@ -172,12 +173,12 @@ describe "Motion Find", ->
     it "repeat with count in same direction", ->
       set cursor: [0, 0]
       ensure ['f', char: 'c'], cursor: [0, 2]
-      ensure '2;', cursor: [0, 8]
+      ensure '2 ;', cursor: [0, 8]
 
     it "repeat with count in reverse direction", ->
       set cursor: [0, 6]
       ensure ['f', char: 'c'], cursor: [0, 8]
-      ensure '2,', cursor: [0, 2]
+      ensure '2 ,', cursor: [0, 2]
 
     it "shares the most recent find/till command with other editors", ->
       getVimState (otherVimState, other) ->
