@@ -3,7 +3,7 @@
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
 
-fdescribe "Motion Scroll", ->
+describe "Motion Scroll", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
   text = new TextData([0...80].join("\n"))
 
