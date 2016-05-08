@@ -1,3 +1,4 @@
+# SPEC_MIGRATION: P1 DONE #270
 {getVimState} = require './spec-helper'
 settings = require '../lib/settings'
 
@@ -19,24 +20,24 @@ describe "Prefixes", ->
         set text: "123456789abc", cursor: [0, 0]
 
       it "repeats N times", ->
-        ensure '3x', text: '456789abc'
+        ensure '3 x', text: '456789abc'
 
       it "repeats NN times", ->
-        ensure '10x', text: 'bc'
+        ensure '1 0 x', text: 'bc'
 
     describe "with motions", ->
       beforeEach ->
         set text: 'one two three', cursor: [0, 0]
 
       it "repeats N times", ->
-        ensure 'd2w', text: 'three'
+        ensure 'd 2 w', text: 'three'
 
     describe "in visual mode", ->
       beforeEach ->
         set text: 'one two three', cursor: [0, 0]
 
       it "repeats movements in visual mode", ->
-        ensure 'v2w', cursor: [0, 9]
+        ensure 'v 2 w', cursor: [0, 9]
 
   describe "Register", ->
     describe "the a register", ->
@@ -131,18 +132,18 @@ describe "Prefixes", ->
         keystroke 'i'
 
       it "inserts contents of the unnamed register with \"", ->
-        ensure [{ctrl: 'r'}, {char: '"'}], text: '013452\n'
+        ensure ['ctrl-r', {char: '"'}], text: '013452\n'
 
       describe "when useClipboardAsDefaultRegister enabled", ->
         it "inserts contents from clipboard with \"", ->
           settings.set 'useClipboardAsDefaultRegister', true
-          ensure [{ctrl: 'r'}, {char: '"'}], text: '01clip2\n'
+          ensure ['ctrl-r', {char: '"'}], text: '01clip2\n'
 
       it "inserts contents of the 'a' register", ->
-        ensure [{ctrl: 'r'}, {char: 'a'}], text: '01abc2\n'
+        ensure ['ctrl-r', {char: 'a'}], text: '01abc2\n'
 
       it "is cancelled with the escape key", ->
-        ensure [{ctrl: 'r'}, {char: 'escape'}],
+        ensure ['ctrl-r', {char: 'escape'}],
           text: '012\n'
           mode: 'insert'
           cursor: [0, 2]
@@ -168,7 +169,7 @@ describe "Prefixes", ->
           expect(clipboardBySelection.size).toBe(0)
           expect(subscriptionBySelection.size).toBe(0)
 
-          keystroke "yiw"
+          keystroke "y i w"
           ensurePerSelectionRegister('012', 'abc', 'def')
 
           expect(clipboardBySelection.size).toBe(3)
@@ -179,12 +180,12 @@ describe "Prefixes", ->
 
       describe "Yank", ->
         it "save text to per selection register", ->
-          keystroke "yiw"
+          keystroke "y i w"
           ensurePerSelectionRegister('012', 'abc', 'def')
 
       describe "Delete family", ->
         it "d", ->
-          ensure "diw", text: ":\n:\n:\n"
+          ensure "d i w", text: ":\n:\n:\n"
           ensurePerSelectionRegister('012', 'abc', 'def')
         it "x", ->
           ensure "x", text: "02:\nac:\ndf:\n"
@@ -198,14 +199,14 @@ describe "Prefixes", ->
 
       describe "Put family", ->
         it "p paste text from per selection register", ->
-          ensure "yiw$p",
+          ensure "y i w $ p",
             text: """
               012:012
               abc:abc
               def:def\n
               """
         it "P paste text from per selection register", ->
-          ensure "yiw$P",
+          ensure "y i w $ P",
             text: """
               012012:
               abcabc:
@@ -213,9 +214,9 @@ describe "Prefixes", ->
               """
       describe "ctrl-r in insert mode", ->
         it "insert from per selection registe", ->
-          ensure "diw", text: ":\n:\n:\n"
+          ensure "d i w", text: ":\n:\n:\n"
           ensure 'a', mode: 'insert'
-          ensure [{ctrl: 'r'}, {char: '"'}],
+          ensure ['ctrl-r', {char: '"'}],
             text: """
               :012
               :abc
