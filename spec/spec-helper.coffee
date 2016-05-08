@@ -355,7 +355,7 @@ class VimEditor
 
     for k in keys
       if _.isString(k)
-        specialKeystroke = ['enter', 'escape']
+        specialKeystroke = ['enter', 'escape', 'backspace']
         if k.length is 1 or (' ' in k) or (k in specialKeystroke) or k.match(/ctrl-.*/)
           # NEW style
           # "ensure 'h h'" comes here
