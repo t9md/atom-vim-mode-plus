@@ -278,6 +278,11 @@ class LowerCase extends TransformString
   getNewText: (text) ->
     text.toLowerCase()
 
+class SplitCharacter extends TransformString
+  @extend()
+  getNewText: (text) ->
+    text.split('').join(' ')
+
 class CamelCase extends TransformString
   @extend()
   displayName: 'Camelize'
