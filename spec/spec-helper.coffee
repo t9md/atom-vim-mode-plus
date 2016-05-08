@@ -354,7 +354,7 @@ class VimEditor
     for k in keys
       if _.isString(k)
         specialKeystroke = ['enter', 'escape']
-        if k.length is 1 or (' ' in k) or (k in specialKeystroke)
+        if k.length is 1 or (' ' in k) or (k in specialKeystroke) or k.match(/ctrl-.*/)
           # NEW style
           # "ensure 'h h'" comes here
           newKeystroke(k, target)
@@ -366,6 +366,8 @@ class VimEditor
 
           _keystroke(k, {target})
       else
+        # throw new Error('OLD STYLE USED')
+        # console.log "OLD STYLE USED"
         switch
           when k.platform?
             mockPlatform(target, k.platform)
