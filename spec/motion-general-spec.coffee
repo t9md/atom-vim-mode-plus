@@ -1,3 +1,4 @@
+# SPEC_MIGRATION: DONE #270
 {getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
@@ -35,11 +36,11 @@ describe "Motion general", ->
 
         it "moves the cursor to the previous line if wrapLeftRightMotion is true", ->
           settings.set('wrapLeftRightMotion', true)
-          ensure 'hh', cursor: [0, 4]
+          ensure 'h h', cursor: [0, 4]
 
       describe "as a selection", ->
         it "selects the character to the left", ->
-          ensure 'yh',
+          ensure 'y h',
             cursor: [1, 0]
             register: '"': text: 'a'
 
@@ -58,7 +59,7 @@ describe "Motion general", ->
         ensure 'j', cursor: [2, 4]
 
       it "never go past last newline", ->
-        ensure '10j', cursor: [2, 1]
+        ensure '1 0 j', cursor: [2, 1]
 
       describe "when visual mode", ->
         beforeEach ->
@@ -80,7 +81,7 @@ describe "Motion general", ->
               """
             cursor: [0, 3]
           ensure 'v', cursor: [0, 4]
-          ensure 'jj', cursor: [2, 4], selectedText: "defg\n\nabcd"
+          ensure 'j j', cursor: [2, 4], selectedText: "defg\n\nabcd"
 
         # [FIXME] the place of this spec is not appropriate.
         it "original visual line remains when jk across orignal selection", ->
@@ -113,7 +114,7 @@ describe "Motion general", ->
         ensure 'k', cursor: [0, 4]
 
       it "moves the cursor up, but not to the beginning of the first line", ->
-        ensure '10k', cursor: [0, 1]
+        ensure '1 0 k', cursor: [0, 1]
 
       describe "when visual mode", ->
         it "keep same column(goalColumn) even after across the empty line", ->
@@ -125,7 +126,7 @@ describe "Motion general", ->
               """
             cursor: [2, 3]
           ensure 'v', cursor: [2, 4], selectedText: 'd'
-          ensure 'kk', cursor: [0, 3], selectedText: "defg\n\nabcd"
+          ensure 'k k', cursor: [0, 3], selectedText: "defg\n\nabcd"
 
     describe "jk in softwrap", ->
       [text] = []
@@ -200,7 +201,7 @@ describe "Motion general", ->
 
       it "moves the cursor to the next line if wrapLeftRightMotion is true", ->
         settings.set('wrapLeftRightMotion', true)
-        ensure 'll', cursor: [2, 0]
+        ensure 'l l', cursor: [2, 0]
 
       describe "on a blank line", ->
         it "doesn't move the cursor", ->
@@ -228,35 +229,35 @@ describe "Motion general", ->
         set text: text.getRaw(), cursor: [4, 3]
 
       it "desn't move if it can't find edge", ->
-        ensure 'gk', cursor: [4, 3]
-        ensure 'gj', cursor: [4, 3]
+        ensure 'g k', cursor: [4, 3]
+        ensure 'g j', cursor: [4, 3]
       it "move to non-blank-char on both first and last row", ->
         set cursor: [4, 4]
-        ensure 'gk', cursor: [0, 4]
-        ensure 'gj', cursor: [7, 4]
+        ensure 'g k', cursor: [0, 4]
+        ensure 'g j', cursor: [7, 4]
       it "move to white space char when both side column is non-blank char", ->
         set cursor: [4, 5]
-        ensure 'gk', cursor: [0, 5]
-        ensure 'gj', cursor: [4, 5]
-        ensure 'gj', cursor: [7, 5]
+        ensure 'g k', cursor: [0, 5]
+        ensure 'g j', cursor: [4, 5]
+        ensure 'g j', cursor: [7, 5]
       it "only stops on row one of [first row, last row, up-or-down-row is blank] case-1", ->
         set cursor: [4, 6]
-        ensure 'gk', cursor: [2, 6]
-        ensure 'gk', cursor: [0, 6]
-        ensure 'gj', cursor: [2, 6]
-        ensure 'gj', cursor: [4, 6]
-        ensure 'gj', cursor: [7, 6]
+        ensure 'g k', cursor: [2, 6]
+        ensure 'g k', cursor: [0, 6]
+        ensure 'g j', cursor: [2, 6]
+        ensure 'g j', cursor: [4, 6]
+        ensure 'g j', cursor: [7, 6]
       it "only stops on row one of [first row, last row, up-or-down-row is blank] case-2", ->
         set cursor: [4, 7]
-        ensure 'gk', cursor: [2, 7]
-        ensure 'gk', cursor: [0, 7]
-        ensure 'gj', cursor: [2, 7]
-        ensure 'gj', cursor: [4, 7]
-        ensure 'gj', cursor: [7, 7]
+        ensure 'g k', cursor: [2, 7]
+        ensure 'g k', cursor: [0, 7]
+        ensure 'g j', cursor: [2, 7]
+        ensure 'g j', cursor: [4, 7]
+        ensure 'g j', cursor: [7, 7]
       it "support count", ->
         set cursor: [4, 6]
-        ensure '2gk', cursor: [0, 6]
-        ensure '3gj', cursor: [7, 6]
+        ensure '2 g k', cursor: [0, 6]
+        ensure '3 g j', cursor: [7, 6]
 
       describe 'editor for hardTab', ->
         pack = 'language-go'
@@ -277,26 +278,26 @@ describe "Motion general", ->
           atom.packages.deactivatePackage(pack)
 
         it "move up/down to next edge of same *screen* column", ->
-          ensure 'gk', cursor: [5, 2]
-          ensure 'gk', cursor: [3, 2]
-          ensure 'gk', cursor: [2, 2]
-          ensure 'gk', cursor: [0, 2]
+          ensure 'g k', cursor: [5, 2]
+          ensure 'g k', cursor: [3, 2]
+          ensure 'g k', cursor: [2, 2]
+          ensure 'g k', cursor: [0, 2]
 
-          ensure 'gj', cursor: [2, 2]
-          ensure 'gj', cursor: [3, 2]
-          ensure 'gj', cursor: [5, 2]
-          ensure 'gj', cursor: [9, 2]
-          ensure 'gj', cursor: [11, 2]
-          ensure 'gj', cursor: [14, 2]
-          ensure 'gj', cursor: [17, 2]
+          ensure 'g j', cursor: [2, 2]
+          ensure 'g j', cursor: [3, 2]
+          ensure 'g j', cursor: [5, 2]
+          ensure 'g j', cursor: [9, 2]
+          ensure 'g j', cursor: [11, 2]
+          ensure 'g j', cursor: [14, 2]
+          ensure 'g j', cursor: [17, 2]
 
-          ensure 'gk', cursor: [14, 2]
-          ensure 'gk', cursor: [11, 2]
-          ensure 'gk', cursor: [9, 2]
-          ensure 'gk', cursor: [5, 2]
-          ensure 'gk', cursor: [3, 2]
-          ensure 'gk', cursor: [2, 2]
-          ensure 'gk', cursor: [0, 2]
+          ensure 'g k', cursor: [14, 2]
+          ensure 'g k', cursor: [11, 2]
+          ensure 'g k', cursor: [9, 2]
+          ensure 'g k', cursor: [5, 2]
+          ensure 'g k', cursor: [3, 2]
+          ensure 'g k', cursor: [2, 2]
+          ensure 'g k', cursor: [0, 2]
 
   describe "the w keybinding", ->
     baseText = """
@@ -360,32 +361,36 @@ describe "Motion general", ->
       describe "when cursor is on word", ->
         it "not eat whitespace", ->
           set cursor: [0, 3]
-          ensure 'cw', text: "  v = 1\n  var2 = 2\n", cursor: [0, 3]
+          ensure 'c w',
+            text: "  v = 1\n  var2 = 2\n"
+            cursor: [0, 3]
 
       describe "when cursor is on white space", ->
         it "only eat white space", ->
           set cursor: [0, 0]
-          ensure 'cw', text: "var1 = 1\n  var2 = 2\n", cursor: [0, 0]
+          ensure 'c w',
+            text: "var1 = 1\n  var2 = 2\n"
+            cursor: [0, 0]
 
       describe "when text to EOL is all white space", ->
         it "wont eat new line character", ->
           set text: "abc  \ndef\n", cursor: [0, 3]
-          ensure 'cw', text: "abc\ndef\n", cursor: [0, 3]
+          ensure 'c w', text: "abc\ndef\n", cursor: [0, 3]
 
         it "cant eat new line when count is specified", ->
           set text: "\n\n\n\n\nline6\n", cursor: [0, 0]
-          ensure '5cw', text: "\nline6\n", cursor: [0, 0]
+          ensure '5 c w', text: "\nline6\n", cursor: [0, 0]
 
     describe "as a selection", ->
       describe "within a word", ->
         it "selects to the end of the word", ->
           set cursor: [0, 0]
-          ensure 'yw', register: '"': text: 'ab '
+          ensure 'y w', register: '"': text: 'ab '
 
       describe "between words", ->
         it "selects the whitespace", ->
           set cursor: [0, 2]
-          ensure 'yw', register: '"': text: ' '
+          ensure 'y w', register: '"': text: ' '
 
   describe "the W keybinding", ->
     beforeEach ->
@@ -417,37 +422,37 @@ describe "Motion general", ->
       describe "when cursor is on word", ->
         it "not eat whitespace", ->
           set cursor: [0, 3]
-          ensure 'cW', text: "  v = 1\n  var2 = 2\n", cursor: [0, 3]
+          ensure 'c W', text: "  v = 1\n  var2 = 2\n", cursor: [0, 3]
 
       describe "when cursor is on white space", ->
         it "only eat white space", ->
           set cursor: [0, 0]
-          ensure 'cW', text: "var1 = 1\n  var2 = 2\n", cursor: [0, 0]
+          ensure 'c W', text: "var1 = 1\n  var2 = 2\n", cursor: [0, 0]
 
       describe "when text to EOL is all white space", ->
         it "wont eat new line character", ->
           set text: "abc  \ndef\n", cursor: [0, 3]
-          ensure 'cW', text: "abc\ndef\n", cursor: [0, 3]
+          ensure 'c W', text: "abc\ndef\n", cursor: [0, 3]
 
         it "cant eat new line when count is specified", ->
           set text: "\n\n\n\n\nline6\n", cursor: [0, 0]
-          ensure '5cW', text: "\nline6\n", cursor: [0, 0]
+          ensure '5 c W', text: "\nline6\n", cursor: [0, 0]
 
     describe "as a selection", ->
       describe "within a word", ->
         it "selects to the end of the whole word", ->
           set cursor: [0, 0]
-          ensure 'yW', register: '"': text: 'cde1+- '
+          ensure 'y W', register: '"': text: 'cde1+- '
 
       it "continues past blank lines", ->
         set cursor: [2, 0]
-        ensure 'dW',
+        ensure 'd W',
           text: "cde1+- ab \n xyz\nzip"
           register: '"': text: "\n"
 
       it "doesn't go past the end of the file", ->
         set cursor: [3, 0]
-        ensure 'dW',
+        ensure 'd W',
           text: "cde1+- ab \n xyz\n\n"
           register: '"': text: 'zip'
 
@@ -478,12 +483,12 @@ describe "Motion general", ->
       describe "within a word", ->
         it "selects to the end of the current word", ->
           set cursor: [0, 0]
-          ensure 'ye', register: '"': text: 'ab'
+          ensure 'y e', register: '"': text: 'ab'
 
       describe "between words", ->
         it "selects to the end of the next word", ->
           set cursor: [0, 2]
-          ensure 'ye', register: '"': text: ' cde1'
+          ensure 'y e', register: '"': text: ' cde1'
 
   describe "the E keybinding", ->
     beforeEach ->
@@ -504,17 +509,17 @@ describe "Motion general", ->
       describe "within a word", ->
         it "selects to the end of the current word", ->
           set cursor: [0, 0]
-          ensure 'yE', register: '"': text: 'ab'
+          ensure 'y E', register: '"': text: 'ab'
 
       describe "between words", ->
         it "selects to the end of the next word", ->
           set cursor: [0, 2]
-          ensure 'yE', register: '"': text: '  cde1+-'
+          ensure 'y E', register: '"': text: '  cde1+-'
 
       describe "press more than once", ->
         it "selects to the end of the current word", ->
           set cursor: [0, 0]
-          ensure 'vEEy', register: '"': text: 'ab  cde1+-'
+          ensure 'v E E y', register: '"': text: 'ab  cde1+-'
 
   describe "the {,} keybinding", ->
     beforeEach ->
@@ -552,21 +557,21 @@ describe "Motion general", ->
 
       it "support count", ->
         set cursor: [0, 0]
-        ensure '3}', cursor: [14, 0]
-        ensure '3{', cursor: [2, 0]
+        ensure '3 }', cursor: [14, 0]
+        ensure '3 {', cursor: [2, 0]
 
       it "can move start of buffer or end of buffer at maximum", ->
         set cursor: [0, 0]
-        ensure '10}', cursor: [16, 14]
-        ensure '10{', cursor: [0, 0]
+        ensure '1 0 }', cursor: [16, 14]
+        ensure '1 0 {', cursor: [0, 0]
 
     describe "as a selection", ->
       it 'selects to the end of the current paragraph', ->
         set cursor: [3, 3]
-        ensure 'y}', register: '"': text: "paragraph-1\n4: paragraph-1\n"
+        ensure 'y }', register: '"': text: "paragraph-1\n4: paragraph-1\n"
       it 'selects to the end of the current paragraph', ->
         set cursor: [4, 3]
-        ensure 'y{', register: '"': text: "\n3: paragraph-1\n4: "
+        ensure 'y {', register: '"': text: "\n3: paragraph-1\n4: "
 
   describe "the b keybinding", ->
     beforeEach ->
@@ -594,12 +599,12 @@ describe "Motion general", ->
       describe "within a word", ->
         it "selects to the beginning of the current word", ->
           set cursor: [0, 2]
-          ensure 'yb', cursor: [0, 1], register: '"': text: 'a'
+          ensure 'y b', cursor: [0, 1], register: '"': text: 'a'
 
       describe "between words", ->
         it "selects to the beginning of the last word", ->
           set cursor: [0, 4]
-          ensure 'yb', cursor: [0, 1], register: '"': text: 'ab '
+          ensure 'y b', cursor: [0, 1], register: '"': text: 'ab '
 
   describe "the B keybinding", ->
     beforeEach ->
@@ -625,11 +630,11 @@ describe "Motion general", ->
     describe "as a selection", ->
       it "selects to the beginning of the whole word", ->
         set cursor: [1, 9]
-        ensure 'yB', register: '"': text: 'xyz-12' # because cursor is on the `3`
+        ensure 'y B', register: '"': text: 'xyz-12' # because cursor is on the `3`
 
       it "doesn't go past the beginning of the file", ->
         set cursor: [0, 0], register: '"': text: 'abc'
-        ensure 'yB', register: '"': text: 'abc'
+        ensure 'y B', register: '"': text: 'abc'
 
   describe "the ^ keybinding", ->
     beforeEach ->
@@ -645,7 +650,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it 'selects to the first character of the line', ->
-          ensure 'd^', text: 'abcde', cursor: [0, 0]
+          ensure 'd ^', text: 'abcde', cursor: [0, 0]
 
     describe "from the first character of the line", ->
       beforeEach ->
@@ -657,7 +662,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it "does nothing", ->
-          ensure 'd^', text: '  abcde', cursor: [0, 2]
+          ensure 'd ^', text: '  abcde', cursor: [0, 2]
 
     describe "from the middle of a word", ->
       beforeEach ->
@@ -669,7 +674,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it 'selects to the first character of the line', ->
-          ensure 'd^', text: '  cde', cursor: [0, 2],
+          ensure 'd ^', text: '  cde', cursor: [0, 2],
 
   describe "the 0 keybinding", ->
     beforeEach ->
@@ -681,7 +686,7 @@ describe "Motion general", ->
 
     describe "as a selection", ->
       it 'selects to the first column of the line', ->
-        ensure 'd0', text: 'cde', cursor: [0, 0]
+        ensure 'd 0', text: 'cde', cursor: [0, 0]
 
   describe "the | keybinding", ->
     beforeEach ->
@@ -690,14 +695,14 @@ describe "Motion general", ->
     describe "as a motion", ->
       it "moves the cursor to the number column", ->
         ensure '|', cursor: [0, 0]
-        ensure '1|', cursor: [0, 0]
-        ensure '3|', cursor: [0, 2]
-        ensure '4|', cursor: [0, 3]
+        ensure '1 |', cursor: [0, 0]
+        ensure '3 |', cursor: [0, 2]
+        ensure '4 |', cursor: [0, 3]
 
     describe "as operator's target", ->
       it 'behave exclusively', ->
         set cursor: [0, 0]
-        ensure 'd4|', text: 'bcde', cursor: [0, 0]
+        ensure 'd 4 |', text: 'bcde', cursor: [0, 0]
 
   describe "the $ keybinding", ->
     beforeEach ->
@@ -721,15 +726,15 @@ describe "Motion general", ->
         expect(editor.getLastCursor().goalColumn).toBe(Infinity)
 
       it "should remain in the last column when moving down", ->
-        ensure '$j', cursor: [1, 0]
+        ensure '$ j', cursor: [1, 0]
         ensure 'j', cursor: [2, 9]
 
       it "support count", ->
-        ensure '3$', cursor: [2, 9]
+        ensure '3 $', cursor: [2, 9]
 
     describe "as a selection", ->
       it "selects to the end of the lines", ->
-        ensure 'd$',
+        ensure 'd $',
           text: "  ab\n\n1234567890"
           cursor: [0, 3]
 
@@ -759,7 +764,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it "deletes the current and previous line", ->
-          ensure 'd-', text: "  abc\n", cursor: [0, 2]
+          ensure 'd -', text: "  abc\n", cursor: [0, 2]
 
     describe "from the first character of a line indented the same as the previous one", ->
       beforeEach ->
@@ -771,7 +776,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it "selects to the first character of the previous line (directly above)", ->
-          ensure 'd-', text: "abcdefg\n"
+          ensure 'd -', text: "abcdefg\n"
           # commented out because the column is wrong due to a bug in `k`; re-enable when `k` is fixed
           #expect(editor.getCursorScreenPosition()).toEqual [0, 2]
 
@@ -785,7 +790,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it "selects to the first character of the previous line", ->
-          ensure 'd-', text: "abcdefg\n"
+          ensure 'd -', text: "abcdefg\n"
           # commented out because the column is wrong due to a bug in `k`; re-enable when `k` is fixed
           #expect(editor.getCursorScreenPosition()).toEqual [0, 0]
 
@@ -797,11 +802,11 @@ describe "Motion general", ->
 
       describe "as a motion", ->
         it "moves the cursor to the first character of that many lines previous", ->
-          ensure '3-', cursor: [1, 0]
+          ensure '3 -', cursor: [1, 0]
 
       describe "as a selection", ->
         it "deletes the current line plus that many previous lines", ->
-          ensure 'd3-',
+          ensure 'd 3 -',
             text: "1\n6\n",
             cursor: [1, 0],
 
@@ -819,7 +824,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it "deletes the current and next line", ->
-          ensure 'd+', text: "  abc\n"
+          ensure 'd +', text: "  abc\n"
           # commented out because the column is wrong due to a bug in `j`; re-enable when `j` is fixed
           #expect(editor.getCursorScreenPosition()).toEqual [0, 3]
 
@@ -832,7 +837,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it "selects to the first character of the next line (directly below)", ->
-          ensure 'd+', text: "abcdefg\n"
+          ensure 'd +', text: "abcdefg\n"
           # commented out because the column is wrong due to a bug in `j`; re-enable when `j` is fixed
           #expect(editor.getCursorScreenPosition()).toEqual [0, 2]
 
@@ -845,7 +850,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it "selects to the first character of the next line", ->
-          ensure 'd+',
+          ensure 'd +',
             text: "abcdefg\n"
             cursor: [0, 0]
 
@@ -857,11 +862,11 @@ describe "Motion general", ->
 
       describe "as a motion", ->
         it "moves the cursor to the first character of that many lines following", ->
-          ensure '3+', cursor: [4, 0]
+          ensure '3 +', cursor: [4, 0]
 
       describe "as a selection", ->
         it "deletes the current line plus that many following lines", ->
-          ensure 'd3+',
+          ensure 'd 3 +',
             text: "1\n6\n"
             cursor: [1, 0]
 
@@ -878,7 +883,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it "deletes the current line", ->
-          ensure 'd_',
+          ensure 'd _',
             text: "  abc\nabcdefg\n"
             cursor: [1, 0]
 
@@ -890,17 +895,16 @@ describe "Motion general", ->
 
       describe "as a motion", ->
         it "moves the cursor to the first character of that many lines following", ->
-          ensure '3_', cursor: [3, 0]
+          ensure '3 _', cursor: [3, 0]
 
       describe "as a selection", ->
         it "deletes the current line plus that many following lines", ->
-          ensure 'd3_',
+          ensure 'd 3 _',
             text: "1\n5\n6\n"
             cursor: [1, 0]
 
   describe "the enter keybinding", ->
     # [FIXME] Dirty test, whats this!?
-    keydownCodeForEnter = '\r' # 'enter' does not work
     startingText = "  abc\n  abc\nabcdefg\n"
 
     describe "from the middle of a line", ->
@@ -917,7 +921,7 @@ describe "Motion general", ->
           set
             text: startingText
             cursor: startingCursorPosition
-          ensure keydownCodeForEnter,
+          ensure 'enter',
             cursor: referenceCursorPosition
 
       describe "as a selection", ->
@@ -927,14 +931,14 @@ describe "Motion general", ->
             text: startingText
             cursor: startingCursorPosition
 
-          keystroke 'd+'
+          keystroke 'd +'
           referenceText = editor.getText()
           referenceCursorPosition = editor.getCursorScreenPosition()
 
           set
             text: startingText
             cursor: startingCursorPosition
-          ensure ['d', keydownCodeForEnter],
+          ensure 'd enter',
             text: referenceText
             cursor: referenceCursorPosition
 
@@ -952,15 +956,15 @@ describe "Motion general", ->
       describe "in normal mode", ->
         it "moves the cursor to the beginning of the first line", ->
           set cursor: [2, 0]
-          ensure 'gg', cursor: [0, 1]
+          ensure 'g g', cursor: [0, 1]
 
         it "move to same position if its on first line and first char", ->
-          ensure 'gg', cursor: [0, 1]
+          ensure 'g g', cursor: [0, 1]
 
       describe "in linewise visual mode", ->
         it "selects to the first line in the file", ->
           set cursor: [1, 0]
-          ensure 'Vgg',
+          ensure 'V g g',
             selectedText: " 1abc\n 2\n"
             cursor: [0, 0]
 
@@ -968,26 +972,26 @@ describe "Motion general", ->
         beforeEach ->
           set cursor: [1, 1]
         it "selects to the first line in the file", ->
-          ensure 'vgg',
+          ensure 'v g g',
             selectedText: "1abc\n 2"
             cursor: [0, 1]
 
     describe "when count specified", ->
       describe "in normal mode", ->
         it "moves the cursor to first char of a specified line", ->
-          ensure '2gg', cursor: [1, 1]
+          ensure '2 g g', cursor: [1, 1]
 
       describe "in linewise visual motion", ->
         it "selects to a specified line", ->
           set cursor: [2, 0]
-          ensure 'V2gg',
+          ensure 'V 2 g g',
             selectedText: " 2\n3\n"
             cursor: [1, 0]
 
       describe "in characterwise visual motion", ->
         it "selects to a first character of specified line", ->
           set cursor: [2, 0]
-          ensure 'v2gg',
+          ensure 'v 2 g g',
             selectedText: "2\n3"
             cursor: [1, 1]
 
@@ -998,21 +1002,21 @@ describe "Motion general", ->
     describe "as a motion", ->
       it "moves the cursor to the last nonblank character", ->
         set cursor: [1, 0]
-        ensure 'g_', cursor: [1, 4]
+        ensure 'g _', cursor: [1, 4]
 
       it "will move the cursor to the beginning of the line if necessary", ->
         set cursor: [0, 2]
-        ensure 'g_', cursor: [0, 0]
+        ensure 'g _', cursor: [0, 0]
 
     describe "as a repeated motion", ->
       it "moves the cursor downward and outward", ->
         set cursor: [0, 0]
-        ensure '2g_', cursor: [1, 4]
+        ensure '2 g _', cursor: [1, 4]
 
     describe "as a selection", ->
       it "selects the current line excluding whitespace", ->
         set cursor: [1, 2]
-        ensure 'v2g_',
+        ensure 'v 2 g _',
           selectedText: "  2  \n 3abc"
 
   describe "the G keybinding", ->
@@ -1027,12 +1031,12 @@ describe "Motion general", ->
 
     describe "as a repeated motion", ->
       it "moves the cursor to a specified line", ->
-        ensure '2G', cursor: [1, 4]
+        ensure '2 G', cursor: [1, 4]
 
     describe "as a selection", ->
       it "selects to the last line in the file", ->
         set cursor: [1, 0]
-        ensure 'vG',
+        ensure 'v G',
           selectedText: "    2\n 3abc\n "
           cursor: [3, 1]
 
@@ -1043,10 +1047,10 @@ describe "Motion general", ->
         cursor: [0, 0]
 
     describe "put cursor on line specified by percent", ->
-      it "50%", -> ensure '50%', cursor: [49, 0]
-      it "30%", -> ensure '30%', cursor: [29, 0]
-      it "100%", -> ensure '100%', cursor: [99, 0]
-      it "120%", -> ensure '120%', cursor: [99, 0]
+      it "50%", -> ensure '5 0 %', cursor: [49, 0]
+      it "30%", -> ensure '3 0 %', cursor: [29, 0]
+      it "100%", -> ensure '1 0 0 %', cursor: [99, 0]
+      it "120%", -> ensure '1 2 0 %', cursor: [99, 0]
 
   describe "the H, M, L keybinding", ->
     [eel] = []
@@ -1078,7 +1082,7 @@ describe "Motion general", ->
 
       it "respects counts", ->
         spyOn(eel, 'getFirstVisibleScreenRow').andReturn(0)
-        ensure '4H', cursor: [3, 0]
+        ensure '4 H', cursor: [3, 0]
 
     describe "the L keybinding", ->
       it "moves the cursor to non-blank-char on last row if visible", ->
@@ -1091,7 +1095,7 @@ describe "Motion general", ->
 
       it "respects counts", ->
         spyOn(editor, 'getLastVisibleScreenRow').andReturn(9)
-        ensure '3L', cursor: [7, 0]
+        ensure '3 L', cursor: [7, 0]
 
     describe "the M keybinding", ->
       beforeEach ->
@@ -1109,39 +1113,39 @@ describe "Motion general", ->
 
     it 'moves to the beginning of the line of a mark', ->
       set cursor: [1, 1]
-      keystroke 'ma'
+      keystroke 'm a'
       set cursor: [0, 0]
-      ensure "'a", cursor: [1, 4]
+      ensure "' a", cursor: [1, 4]
 
     it 'moves literally to a mark', ->
       set cursorBuffer: [1, 1]
-      keystroke 'ma'
+      keystroke 'm a'
       set cursorBuffer: [0, 0]
-      ensure '`a', cursorBuffer: [1, 1]
+      ensure '` a', cursorBuffer: [1, 1]
 
     it 'deletes to a mark by line', ->
       set cursorBuffer: [1, 5]
-      keystroke 'ma'
+      keystroke 'm a'
       set cursorBuffer: [0, 0]
-      ensure "d'a", text: '56\n'
+      ensure "d ' a", text: '56\n'
 
     it 'deletes before to a mark literally', ->
       set cursorBuffer: [1, 5]
-      keystroke 'ma'
+      keystroke 'm a'
       set cursorBuffer: [0, 1]
-      ensure 'd`a', text: ' 4\n56\n'
+      ensure 'd ` a', text: ' 4\n56\n'
 
     it 'deletes after to a mark literally', ->
       set cursorBuffer: [1, 5]
-      keystroke 'ma'
+      keystroke 'm a'
       set cursorBuffer: [2, 1]
-      ensure 'd`a', text: '  12\n    36\n'
+      ensure 'd ` a', text: '  12\n    36\n'
 
     it 'moves back to previous', ->
       set cursorBuffer: [1, 5]
-      keystroke '``'
+      keystroke '` `'
       set cursorBuffer: [2, 1]
-      ensure '``', cursorBuffer: [1, 5]
+      ensure '` `', cursorBuffer: [1, 5]
 
   describe 'the V keybinding', ->
     [text] = []
@@ -1158,10 +1162,10 @@ describe "Motion general", ->
         cursor: [1, 1]
 
     it "selects down a line", ->
-      ensure 'Vjj', selectedText: text.getLines([1..3])
+      ensure 'V j j', selectedText: text.getLines([1..3])
 
     it "selects up a line", ->
-      ensure 'Vk', selectedText: text.getLines([0..1])
+      ensure 'V k', selectedText: text.getLines([0..1])
 
   describe 'MoveTo(Previous|Next)Fold(Start|End)', ->
     beforeEach ->
@@ -1186,39 +1190,39 @@ describe "Motion general", ->
       beforeEach ->
         set cursor: [30, 0]
       it "move to first char of previous fold start row", ->
-        ensure '[[', cursor: [22, 6]
-        ensure '[[', cursor: [20, 6]
-        ensure '[[', cursor: [18, 4]
-        ensure '[[', cursor: [9, 2]
-        ensure '[[', cursor: [8, 0]
+        ensure '[ [', cursor: [22, 6]
+        ensure '[ [', cursor: [20, 6]
+        ensure '[ [', cursor: [18, 4]
+        ensure '[ [', cursor: [9, 2]
+        ensure '[ [', cursor: [8, 0]
 
     describe "MoveToNextFoldStart", ->
       beforeEach ->
         set cursor: [0, 0]
       it "move to first char of next fold start row", ->
-        ensure '][', cursor: [8, 0]
-        ensure '][', cursor: [9, 2]
-        ensure '][', cursor: [18, 4]
-        ensure '][', cursor: [20, 6]
-        ensure '][', cursor: [22, 6]
+        ensure '] [', cursor: [8, 0]
+        ensure '] [', cursor: [9, 2]
+        ensure '] [', cursor: [18, 4]
+        ensure '] [', cursor: [20, 6]
+        ensure '] [', cursor: [22, 6]
 
     describe "MoveToPrevisFoldEnd", ->
       beforeEach ->
         set cursor: [30, 0]
       it "move to first char of previous fold end row", ->
-        ensure '[]', cursor: [28, 2]
-        ensure '[]', cursor: [25, 4]
-        ensure '[]', cursor: [23, 8]
-        ensure '[]', cursor: [21, 8]
+        ensure '[ ]', cursor: [28, 2]
+        ensure '[ ]', cursor: [25, 4]
+        ensure '[ ]', cursor: [23, 8]
+        ensure '[ ]', cursor: [21, 8]
 
     describe "MoveToNextFoldEnd", ->
       beforeEach ->
         set cursor: [0, 0]
       it "move to first char of next fold end row", ->
-        ensure ']]', cursor: [21, 8]
-        ensure ']]', cursor: [23, 8]
-        ensure ']]', cursor: [25, 4]
-        ensure ']]', cursor: [28, 2]
+        ensure '] ]', cursor: [21, 8]
+        ensure '] ]', cursor: [23, 8]
+        ensure '] ]', cursor: [25, 4]
+        ensure '] ]', cursor: [28, 2]
 
   describe 'MoveTo(Previous|Next)String', ->
     beforeEach ->
@@ -1249,22 +1253,22 @@ describe "Motion general", ->
 
       it "move to next string", ->
         set cursor: [0, 0]
-        ensure 'gs', cursor: [1, 31]
-        ensure 'gs', cursor: [2, 2]
-        ensure 'gs', cursor: [2, 21]
-        ensure 'gs', cursor: [3, 2]
-        ensure 'gs', cursor: [3, 23]
+        ensure 'g s', cursor: [1, 31]
+        ensure 'g s', cursor: [2, 2]
+        ensure 'g s', cursor: [2, 21]
+        ensure 'g s', cursor: [3, 2]
+        ensure 'g s', cursor: [3, 23]
       it "move to previous string", ->
         set cursor: [4, 0]
-        ensure 'gS', cursor: [3, 23]
-        ensure 'gS', cursor: [3, 2]
-        ensure 'gS', cursor: [2, 21]
-        ensure 'gS', cursor: [2, 2]
-        ensure 'gS', cursor: [1, 31]
+        ensure 'g S', cursor: [3, 23]
+        ensure 'g S', cursor: [3, 2]
+        ensure 'g S', cursor: [2, 21]
+        ensure 'g S', cursor: [2, 2]
+        ensure 'g S', cursor: [1, 31]
       it "support count", ->
         set cursor: [0, 0]
-        ensure '3gs', cursor: [2, 21]
-        ensure '3gS', cursor: [1, 31]
+        ensure '3 g s', cursor: [2, 21]
+        ensure '3 g S', cursor: [1, 31]
 
     describe 'editor for hardTab', ->
       pack = 'language-go'
@@ -1281,26 +1285,26 @@ describe "Motion general", ->
 
       it "move to next string", ->
         set cursor: [0, 0]
-        ensure 'gs', cursor: [2, 7]
-        ensure 'gs', cursor: [3, 7]
-        ensure 'gs', cursor: [8, 8]
-        ensure 'gs', cursor: [9, 8]
-        ensure 'gs', cursor: [11, 20]
-        ensure 'gs', cursor: [12, 15]
-        ensure 'gs', cursor: [13, 15]
-        ensure 'gs', cursor: [15, 15]
-        ensure 'gs', cursor: [16, 15]
+        ensure 'g s', cursor: [2, 7]
+        ensure 'g s', cursor: [3, 7]
+        ensure 'g s', cursor: [8, 8]
+        ensure 'g s', cursor: [9, 8]
+        ensure 'g s', cursor: [11, 20]
+        ensure 'g s', cursor: [12, 15]
+        ensure 'g s', cursor: [13, 15]
+        ensure 'g s', cursor: [15, 15]
+        ensure 'g s', cursor: [16, 15]
       it "move to previous string", ->
         set cursor: [18, 0]
-        ensure 'gS', cursor: [16, 15]
-        ensure 'gS', cursor: [15, 15]
-        ensure 'gS', cursor: [13, 15]
-        ensure 'gS', cursor: [12, 15]
-        ensure 'gS', cursor: [11, 20]
-        ensure 'gS', cursor: [9, 8]
-        ensure 'gS', cursor: [8, 8]
-        ensure 'gS', cursor: [3, 7]
-        ensure 'gS', cursor: [2, 7]
+        ensure 'g S', cursor: [16, 15]
+        ensure 'g S', cursor: [15, 15]
+        ensure 'g S', cursor: [13, 15]
+        ensure 'g S', cursor: [12, 15]
+        ensure 'g S', cursor: [11, 20]
+        ensure 'g S', cursor: [9, 8]
+        ensure 'g S', cursor: [8, 8]
+        ensure 'g S', cursor: [3, 7]
+        ensure 'g S', cursor: [2, 7]
 
   describe 'MoveTo(Previous|Next)Number', ->
     pack = 'language-coffee-script'
@@ -1331,23 +1335,23 @@ describe "Motion general", ->
 
     it "move to next number", ->
       set cursor: [0, 0]
-      ensure 'gn', cursor: [0, 7]
-      ensure 'gn', cursor: [1, 8]
-      ensure 'gn', cursor: [1, 11]
-      ensure 'gn', cursor: [1, 16]
-      ensure 'gn', cursor: [3, 7]
-      ensure 'gn', cursor: [4, 9]
-      ensure 'gn', cursor: [4, 12]
+      ensure 'g n', cursor: [0, 7]
+      ensure 'g n', cursor: [1, 8]
+      ensure 'g n', cursor: [1, 11]
+      ensure 'g n', cursor: [1, 16]
+      ensure 'g n', cursor: [3, 7]
+      ensure 'g n', cursor: [4, 9]
+      ensure 'g n', cursor: [4, 12]
     it "move to previous number", ->
       set cursor: [5, 0]
-      ensure 'gN', cursor: [4, 12]
-      ensure 'gN', cursor: [4, 9]
-      ensure 'gN', cursor: [3, 7]
-      ensure 'gN', cursor: [1, 16]
-      ensure 'gN', cursor: [1, 11]
-      ensure 'gN', cursor: [1, 8]
-      ensure 'gN', cursor: [0, 7]
+      ensure 'g N', cursor: [4, 12]
+      ensure 'g N', cursor: [4, 9]
+      ensure 'g N', cursor: [3, 7]
+      ensure 'g N', cursor: [1, 16]
+      ensure 'g N', cursor: [1, 11]
+      ensure 'g N', cursor: [1, 8]
+      ensure 'g N', cursor: [0, 7]
     it "support count", ->
       set cursor: [0, 0]
-      ensure '5gn', cursor: [3, 7]
-      ensure '3gN', cursor: [1, 8]
+      ensure '5 g n', cursor: [3, 7]
+      ensure '3 g N', cursor: [1, 8]

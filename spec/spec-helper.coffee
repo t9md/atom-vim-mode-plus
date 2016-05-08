@@ -3,6 +3,9 @@ _ = require 'underscore-plus'
 {inspect} = require 'util'
 swrap = require '../lib/selection-wrapper'
 
+KeymapManager = atom.keymaps.constructor
+{normalizeKeystrokes} = require(atom.config.resourcePath + "/node_modules/atom-keymap/lib/helpers")
+
 supportedModeClass = [
   'normal-mode'
   'visual-mode'
@@ -33,10 +36,55 @@ mockPlatform = (editorElement, platform) ->
 unmockPlatform = (editorElement) ->
   editorElement.parentNode.removeChild(editorElement)
 
-KeymapManager = null
 buildKeydownEvent = (key, options) ->
-  KeymapManager ?= atom.keymaps.constructor
   KeymapManager.buildKeydownEvent(key, options)
+
+buildKeydownEventFromKeystroke = (keystroke, target) ->
+  modifier = ['ctrl', 'alt', 'shift', 'cmd']
+  parts = if keystroke is '-'
+    ['-']
+  else
+    keystroke.split('-')
+
+  options = {target}
+  key = null
+  for part in parts
+    if part in modifier
+      options[part] = true
+    else
+      key = part
+  key = ' ' if key is 'space'
+  buildKeydownEvent(key, options)
+
+getHiddenInputElementForEditor = (editor) ->
+  editorElement = atom.views.getView(editor)
+  editorElement.component.hiddenInputComponent.getDomNode()
+
+# FIX orignal characterForKeyboardEvent(it can't handle 'space')
+characterForKeyboardEvent = (event) ->
+  unless event.ctrlKey or event.altKey or event.metaKey
+    if key = atom.keymaps.keystrokeForKeyboardEvent(event)
+      key = ' ' if key is 'space'
+      key = key[key.length - 1] if key.startsWith('shift-')
+      key if key.length is 1
+
+# --[START] I want to use this in future
+newKeydown = (key, target) ->
+  target ?= document.activeElement
+  event = buildKeydownEventFromKeystroke(key, target)
+  atom.keymaps.handleKeyboardEvent(event)
+
+  # if not event.defaultPrevented and key isnt 'DUMMY'
+  #   editor = atom.workspace.getActiveTextEditor()
+  #   target = getHiddenInputElementForEditor(editor)
+  #   char = ' ' if key is 'space'
+  #   char ?= characterForKeyboardEvent(event)
+  #   target.dispatchEvent(buildTextInputEvent(char)) if char?
+
+newKeystroke = (keystrokes, target) ->
+  for key in normalizeKeystrokes(keystrokes).split(/\s+/)
+    newKeydown(key, target)
+# --[END] I want to use this in future
 
 keydown = (key, options) ->
   event = buildKeydownEvent(key, options)
@@ -305,7 +353,18 @@ class VimEditor
 
     for k in keys
       if _.isString(k)
-        _keystroke(k, {target})
+        specialKeystroke = ['enter', 'escape']
+        if k.length is 1 or (' ' in k) or (k in specialKeystroke)
+          # NEW style
+          # "ensure 'h h'" comes here
+          newKeystroke(k, target)
+        else
+          # OLD style
+          # "ensure 'hh'" comes here
+          # throw new Error('OLD STYLE USED')
+          # console.log "OLD STYLE USED"
+
+          _keystroke(k, {target})
       else
         switch
           when k.platform?

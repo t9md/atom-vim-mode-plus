@@ -54,10 +54,8 @@ describe "Scrolling", ->
       spyOn(editorElement, 'pixelPositionForScreenPosition').andReturn({top: 1000, left: 0})
 
     describe "the z<CR> keybinding", ->
-      keydownCodeForEnter = '\r'
-
       it "moves the screen to position cursor at the top of the window and moves cursor to first non-blank in the line", ->
-        keystroke ['z', keydownCodeForEnter]
+        keystroke 'z enter'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(960)
         expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
 
