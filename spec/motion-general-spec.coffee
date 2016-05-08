@@ -1,4 +1,4 @@
-# SPEC_MIGRATION: DONE #270
+# SPEC_MIGRATION: P1 DONE #270
 {getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
