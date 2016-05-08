@@ -1,3 +1,4 @@
+# SPEC_MIGRATION: P2 DONE #270
 {getVimState, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
 
@@ -22,28 +23,28 @@ describe "Operator Increase", ->
     describe "increasing numbers", ->
       describe "normal-mode", ->
         it "increases the next number", ->
-          ensure {ctrl: 'a'},
+          ensure 'ctrl-a',
             text: '124\nab46\ncd-66ef\nab-4\na-bcdef'
             cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 3], [4, 0]]
 
         it "repeats with .", ->
-          ensure [{ctrl: 'a'}, '.'],
+          ensure 'ctrl-a .',
             text: '125\nab47\ncd-65ef\nab-3\na-bcdef'
             cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 3], [4, 0]]
 
         it "can have a count", ->
-          ensure ['5', {ctrl: 'a'}],
+          ensure '5 ctrl-a',
             cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 2], [4, 0]]
             text: '128\nab50\ncd-62ef\nab0\na-bcdef'
 
         it "can make a negative number positive, change number of digits", ->
-          ensure ['99', {ctrl: 'a'}],
+          ensure '9 9 ctrl-a',
             text: '222\nab144\ncd32ef\nab94\na-bcdef'
             cursorBuffer: [[0, 2], [1, 4], [2, 3], [3, 3], [4, 0]]
 
         it "does nothing when cursor is after the number", ->
           set cursorBuffer: [2, 5]
-          ensure {ctrl: 'a'},
+          ensure 'ctrl-a',
             text: '123\nab45\ncd-67ef\nab-5\na-bcdef'
             cursorBuffer: [[2, 5]]
 
@@ -51,7 +52,7 @@ describe "Operator Increase", ->
           set
             text: '\n'
             cursorBuffer: [[0, 0], [1, 0]]
-          ensure {ctrl: 'a'},
+          ensure 'ctrl-a',
             text: '\n'
             cursorBuffer: [[0, 0], [1, 0]]
 
@@ -60,7 +61,7 @@ describe "Operator Increase", ->
             text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
             cursorBuffer: [[0, 0], [1, 0], [2, 0], [3, 3], [4, 0]]
           settings.set('numberRegex', '(?:\\B-)?[0-9]+')
-          ensure {ctrl: 'a'},
+          ensure 'ctrl-a',
             cursorBuffer: [[0, 2], [1, 3], [2, 5], [3, 3], [4, 0]]
             text: '124\nab46\ncd -66ef\nab-6\na-bcdef'
       describe "visual-mode", ->
@@ -74,7 +75,7 @@ describe "Operator Increase", ->
               """
         it "increase number in characterwise selected range", ->
           set cursor: [0, 2]
-          ensure ["v2j", {ctrl: 'a'}],
+          ensure 'v 2 j ctrl-a',
             text: """
               1 3 4
               2 3 4
@@ -85,7 +86,7 @@ describe "Operator Increase", ->
             cursor: [2, 3]
         it "increase number in characterwise selected range when multiple cursors", ->
           set cursor: [0, 2], addCursor: [2, 2]
-          ensure ["v10", {ctrl: 'a'}],
+          ensure 'v 1 0 ctrl-a',
             text: """
               1 12 3
               1 2 3
@@ -99,7 +100,7 @@ describe "Operator Increase", ->
               ]
         it "increase number in linewise selected range", ->
           set cursor: [0, 0]
-          ensure ["V2j", {ctrl: 'a'}],
+          ensure 'V 2 j ctrl-a',
             text: """
               2 3 4
               2 3 4
@@ -110,7 +111,7 @@ describe "Operator Increase", ->
             cursor: [3, 0]
         it "increase number in blockwise selected range", ->
           set cursor: [1, 2]
-          ensure [{ctrl: 'v'}, '2l2j', {ctrl: 'a'}],
+          ensure 'ctrl-v 2 l 2 j ctrl-a',
             text: """
               1 2 3
               1 3 4
@@ -126,28 +127,28 @@ describe "Operator Increase", ->
     describe "decreasing numbers", ->
       describe "normal-mode", ->
         it "decreases the next number", ->
-          ensure {ctrl: 'x'},
+          ensure 'ctrl-x',
             text: '122\nab44\ncd-68ef\nab-6\na-bcdef'
             cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 3], [4, 0]]
 
         it "repeats with .", ->
-          ensure [{ctrl: 'x'}, '.'],
+          ensure 'ctrl-x .',
             text: '121\nab43\ncd-69ef\nab-7\na-bcdef'
             cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 3], [4, 0]]
 
         it "can have a count", ->
-          ensure ['5', {ctrl: 'x'}],
+          ensure '5 ctrl-x',
             text: '118\nab40\ncd-72ef\nab-10\na-bcdef'
             cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 4], [4, 0]]
 
         it "can make a positive number negative, change number of digits", ->
-          ensure ['99', {ctrl: 'x'}],
+          ensure '9 9 ctrl-x',
             text: '24\nab-54\ncd-166ef\nab-104\na-bcdef'
             cursorBuffer: [[0, 1], [1, 4], [2, 5], [3, 5], [4, 0]]
 
         it "does nothing when cursor is after the number", ->
           set cursorBuffer: [2, 5]
-          ensure {ctrl: 'x'},
+          ensure 'ctrl-x',
             text: '123\nab45\ncd-67ef\nab-5\na-bcdef'
             cursorBuffer: [[2, 5]]
 
@@ -155,7 +156,7 @@ describe "Operator Increase", ->
           set
             text: '\n'
             cursorBuffer: [[0, 0], [1, 0]]
-          ensure {ctrl: 'x'},
+          ensure 'ctrl-x',
             text: '\n'
             cursorBuffer: [[0, 0], [1, 0]],
 
@@ -164,7 +165,7 @@ describe "Operator Increase", ->
             text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
             cursorBuffer: [[0, 0], [1, 0], [2, 0], [3, 3], [4, 0]]
           settings.set('numberRegex', '(?:\\B-)?[0-9]+')
-          ensure {ctrl: 'x'},
+          ensure 'ctrl-x',
             text: '122\nab44\ncd -68ef\nab-4\na-bcdef'
             cursorBuffer: [[0, 2], [1, 3], [2, 5], [3, 3], [4, 0]]
       describe "visual-mode", ->
@@ -178,7 +179,7 @@ describe "Operator Increase", ->
               """
         it "decrease number in characterwise selected range", ->
           set cursor: [0, 2]
-          ensure ["v2j", {ctrl: 'x'}],
+          ensure 'v 2 j ctrl-x',
             text: """
               1 1 2
               0 1 2
@@ -189,7 +190,7 @@ describe "Operator Increase", ->
             cursor: [2, 3]
         it "decrease number in characterwise selected range when multiple cursors", ->
           set cursor: [0, 2], addCursor: [2, 2]
-          ensure ["v5", {ctrl: 'x'}],
+          ensure 'v 5 ctrl-x',
             text: """
               1 -3 3
               1 2 3
@@ -203,7 +204,7 @@ describe "Operator Increase", ->
               ]
         it "decrease number in linewise selected range", ->
           set cursor: [0, 0]
-          ensure ["V2j", {ctrl: 'x'}],
+          ensure 'V 2 j ctrl-x',
             text: """
               0 1 2
               0 1 2
@@ -214,7 +215,7 @@ describe "Operator Increase", ->
             cursor: [3, 0]
         it "decrease number in blockwise selected rage", ->
           set cursor: [1, 2]
-          ensure [{ctrl: 'v'}, '2l2j', {ctrl: 'x'}],
+          ensure 'ctrl-v 2 l 2 j ctrl-x',
             text: """
               1 2 3
               1 1 2
@@ -240,16 +241,16 @@ describe "Operator Increase", ->
           cursor: [0, 0]
       it "use first number as base number case-1", ->
         set text: "1 1 1", cursor: [0, 0]
-        ensure ['g', {ctrl: 'a'}, '$'], text: "1 2 3", mode: 'normal', cursor: [0, 0]
+        ensure 'g ctrl-a $', text: "1 2 3", mode: 'normal', cursor: [0, 0]
       it "use first number as base number case-2", ->
         set text: "99 1 1", cursor: [0, 0]
-        ensure ['g', {ctrl: 'a'}, '$'], text: "99 100 101", mode: 'normal', cursor: [0, 0]
+        ensure 'g ctrl-a $', text: "99 100 101", mode: 'normal', cursor: [0, 0]
       it "can take count, and used as step to each increment", ->
         set text: "5 0 0", cursor: [0, 0]
-        ensure ['5g', {ctrl: 'a'}, '$'], text: "5 10 15", mode: 'normal', cursor: [0, 0]
+        ensure '5 g ctrl-a $', text: "5 10 15", mode: 'normal', cursor: [0, 0]
       it "only increment number in target range", ->
         set cursor: [1, 2]
-        ensure ['g', {ctrl: 'a'}, 'j'],
+        ensure 'g ctrl-a j',
           text: """
             1 10 0
             0 1 2
@@ -258,7 +259,7 @@ describe "Operator Increase", ->
           mode: 'normal'
       it "works in characterwise visual-mode", ->
         set cursor: [1, 2]
-        ensure ['vjg', {ctrl: 'a'}],
+        ensure 'v j g ctrl-a',
           text: """
             1 10 0
             0 7 8
@@ -267,7 +268,7 @@ describe "Operator Increase", ->
           mode: 'normal'
       it "works in blockwise visual-mode", ->
         set cursor: [0, 2]
-        ensure [{ctrl: 'v'}, '2j$g', {ctrl: 'a'}],
+        ensure 'ctrl-v 2 j $ g ctrl-a',
           text: """
             1 10 11
             0 12 13
@@ -277,14 +278,14 @@ describe "Operator Increase", ->
       describe "point when finished and repeatable", ->
         beforeEach ->
           set text: "1 0 0 0 0", cursor: [0, 0]
-          ensure "v$", selectedText: '1 0 0 0 0'
+          ensure "v $", selectedText: '1 0 0 0 0'
         it "put cursor on start position when finished and repeatable (case: selection is not reversed)", ->
           ensure selectionIsReversed: false
-          ensure ['g', {ctrl: 'a'}], text: "1 2 3 4 5", cursor: [0, 0], mode: 'normal'
+          ensure 'g ctrl-a', text: "1 2 3 4 5", cursor: [0, 0], mode: 'normal'
           ensure '.', text: "6 7 8 9 10" , cursor: [0, 0]
         it "put cursor on start position when finished and repeatable (case: selection is reversed)", ->
           ensure 'o', selectionIsReversed: true
-          ensure ['g', {ctrl: 'a'}], text: "1 2 3 4 5", cursor: [0, 0], mode: 'normal'
+          ensure 'g ctrl-a', text: "1 2 3 4 5", cursor: [0, 0], mode: 'normal'
           ensure '.', text: "6 7 8 9 10" , cursor: [0, 0]
     describe "decrement", ->
       beforeEach ->
@@ -297,16 +298,16 @@ describe "Operator Increase", ->
           cursor: [0, 0]
       it "use first number as base number case-1", ->
         set text: "10 1 1"
-        ensure ['g', {ctrl: 'x'}, '$'], text: "10 9 8", mode: 'normal', cursor: [0, 0]
+        ensure 'g ctrl-x $', text: "10 9 8", mode: 'normal', cursor: [0, 0]
       it "use first number as base number case-2", ->
         set text: "99 1 1"
-        ensure ['g', {ctrl: 'x'}, '$'], text: "99 98 97", mode: 'normal', cursor: [0, 0]
+        ensure 'g ctrl-x $', text: "99 98 97", mode: 'normal', cursor: [0, 0]
       it "can take count, and used as step to each increment", ->
         set text: "5 0 0", cursor: [0, 0]
-        ensure ['5g', {ctrl: 'x'}, '$'], text: "5 0 -5", mode: 'normal', cursor: [0, 0]
+        ensure '5 g ctrl-x $', text: "5 0 -5", mode: 'normal', cursor: [0, 0]
       it "only decrement number in target range", ->
         set cursor: [1, 3]
-        ensure ['g', {ctrl: 'x'}, 'j'],
+        ensure 'g ctrl-x j',
           text: """
             14 23 13
             10 9 8
@@ -315,7 +316,7 @@ describe "Operator Increase", ->
           mode: 'normal'
       it "works in characterwise visual-mode", ->
         set cursor: [1, 3]
-        ensure ['vjlg', {ctrl: 'x'}],
+        ensure 'v j l g ctrl-x',
           text: """
             14 23 13
             10 20 19
@@ -324,7 +325,7 @@ describe "Operator Increase", ->
           mode: 'normal'
       it "works in blockwise visual-mode", ->
         set cursor: [0, 3]
-        ensure [{ctrl: 'v'}, '2jlg', {ctrl: 'x'}],
+        ensure 'ctrl-v 2 j l g ctrl-x',
           text: """
             14 23 13
             10 22 13
