@@ -1,6 +1,6 @@
 # SPEC_MIGRATION: P1 DONE #270
 _ = require 'underscore-plus'
-{getVimState, TextData} = require './spec-helper'
+{getVimState, TextData, mockPlatform} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "VimState", ->
@@ -198,8 +198,9 @@ describe "VimState", ->
         mode: 'normal'
 
     it "puts the editor into normal mode when <ctrl-c> is pressed", ->
-      ensure [{platform: 'platform-darwin'}, 'ctrl-c'],
-        mode: 'normal'
+      mock = mockPlatform(editorElement, 'platform-darwin')
+      ensure 'ctrl-c', mode: 'normal'
+      mock.dispose()
 
   describe "replace-mode", ->
     describe "with content", ->
@@ -228,8 +229,9 @@ describe "VimState", ->
         mode: 'normal'
 
     it "puts the editor into normal mode when <ctrl-c> is pressed", ->
-      ensure [{platform: 'platform-darwin'}, 'R ctrl-c'],
-        mode: 'normal'
+      mock = mockPlatform(editorElement, 'platform-darwin')
+      ensure 'R ctrl-c', mode: 'normal'
+      mock.dispose()
 
   describe "visual-mode", ->
     beforeEach ->
