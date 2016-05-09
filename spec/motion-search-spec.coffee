@@ -72,25 +72,24 @@ describe "Motion Search", ->
           line3
           """
 
-        ensure ['v /', {search: 'line'}],
+        ensure ['v /', search: 'line'],
           selectedBufferRange: [[0, 0], [1, 1]]
         ensure 'n',
           selectedBufferRange: [[0, 0], [2, 1]]
 
       it 'searches to the correct column in visual linewise mode', ->
-        ensure ['V /', {search: 'ef'}],
+        ensure ['V /', search: 'ef'],
           selectedText: "abc\ndef\n",
           characterwiseHead: [1, 1]
           cursor: [2, 0]
           mode: ['visual', 'linewise']
 
       it 'not extend linwise selection if search matches on same line', ->
-        # settings.set 'incrementalSearch', true
         set text: """
           abc def
           def\n
           """
-        ensure ['V /', {search: 'ef'}],
+        ensure ['V /', search: 'ef'],
           selectedText: "abc def\n",
 
       describe "case sensitivity", ->

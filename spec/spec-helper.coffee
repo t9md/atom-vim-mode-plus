@@ -1,5 +1,3 @@
-SPEC_ENSURE_LEVEL = 1
-# -------------------------
 _ = require 'underscore-plus'
 {Range, Point, Disposable} = require 'atom'
 {inspect} = require 'util'
@@ -365,10 +363,7 @@ class VimEditor
       else
         switch
           when k.input?
-            if k.input is 'escape'
-              atom.commands.dispatch(@vimState.input.editorElement, 'core:cancel')
-            else
-              @vimState.input.editor.insertText(k.input)
+            @vimState.input.editor.insertText(k.input)
           when k.search?
             @vimState.searchInput.editor.insertText(k.search)
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')
