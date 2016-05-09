@@ -1,3 +1,4 @@
+# SPEC_MIGRATION: P2 DONE #270
 {getVimState} = require './spec-helper'
 
 describe "Scrolling", ->
@@ -28,7 +29,7 @@ describe "Scrolling", ->
         spyOn(editor, 'getCursorScreenPosition').andReturn({row: 3, column: 0})
 
       it "moves the screen down by one and keeps cursor onscreen", ->
-        keystroke {ctrl: 'e'}
+        keystroke 'ctrl-e'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(110)
         expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([4, 0])
 
@@ -37,7 +38,7 @@ describe "Scrolling", ->
         spyOn(editor, 'getCursorScreenPosition').andReturn({row: 6, column: 0})
 
       it "moves the screen up by one and keeps the cursor onscreen", ->
-        keystroke {ctrl: 'y'}
+        keystroke 'ctrl-y'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(90)
         expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([5, 0])
 
@@ -61,31 +62,31 @@ describe "Scrolling", ->
 
     describe "the zt keybinding", ->
       it "moves the screen to position cursor at the top of the window and leave cursor in the same column", ->
-        keystroke 'zt'
+        keystroke 'z t'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(960)
         expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
 
     describe "the z. keybinding", ->
       it "moves the screen to position cursor at the center of the window and moves cursor to first non-blank in the line", ->
-        keystroke 'z.'
+        keystroke 'z .'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(900)
         expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
 
     describe "the zz keybinding", ->
       it "moves the screen to position cursor at the center of the window and leave cursor in the same column", ->
-        keystroke 'zz'
+        keystroke 'z z'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(900)
         expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
 
     describe "the z- keybinding", ->
       it "moves the screen to position cursor at the bottom of the window and moves cursor to first non-blank in the line", ->
-        keystroke 'z-'
+        keystroke 'z -'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(860)
         expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
 
     describe "the zb keybinding", ->
       it "moves the screen to position cursor at the bottom of the window and leave cursor in the same column", ->
-        keystroke 'zb'
+        keystroke 'z b'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(860)
         expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
 
@@ -105,7 +106,7 @@ describe "Scrolling", ->
     describe "the zs keybinding", ->
       zsPos = (pos) ->
         editor.setCursorBufferPosition([0, pos])
-        keystroke 'zs'
+        keystroke 'z s'
         editorElement.getScrollLeft()
 
       startPosition = NaN
@@ -148,7 +149,7 @@ describe "Scrolling", ->
     describe "the ze keybinding", ->
       zePos = (pos) ->
         editor.setCursorBufferPosition([0, pos])
-        keystroke 'ze'
+        keystroke 'z e'
         editorElement.getScrollLeft()
 
       startPosition = NaN
