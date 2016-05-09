@@ -58,6 +58,17 @@ buildKeydownEventFromKeystroke = (keystroke, target) ->
   key = ' ' if key is 'space'
   buildKeydownEvent(key, options)
 
+buildTextInputEvent = (key) ->
+  eventArgs = [
+    true # bubbles
+    true # cancelable
+    window # view
+    key  # key char
+  ]
+  event = document.createEvent('TextEvent')
+  event.initTextEvent("textInput", eventArgs...)
+  event
+
 getHiddenInputElementForEditor = (editor) ->
   editorElement = atom.views.getView(editor)
   editorElement.component.hiddenInputComponent.getDomNode()
@@ -76,7 +87,7 @@ newKeydown = (key, target) ->
   event = buildKeydownEventFromKeystroke(key, target)
   atom.keymaps.handleKeyboardEvent(event)
 
-  # if not event.defaultPrevented and key isnt 'DUMMY'
+  # unless event.defaultPrevented
   #   editor = atom.workspace.getActiveTextEditor()
   #   target = getHiddenInputElementForEditor(editor)
   #   char = ' ' if key is 'space'
