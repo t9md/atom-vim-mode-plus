@@ -1,7 +1,7 @@
 SPEC_ENSURE_LEVEL = 1
 # -------------------------
 _ = require 'underscore-plus'
-{Range, Point} = require 'atom'
+{Range, Point, Disposable} = require 'atom'
 {inspect} = require 'util'
 swrap = require '../lib/selection-wrapper'
 
@@ -34,6 +34,8 @@ mockPlatform = (editorElement, platform) ->
   wrapper = document.createElement('div')
   wrapper.className = platform
   wrapper.appendChild(editorElement)
+  new Disposable ->
+    editorElement.parentNode.removeChild(editorElement)
 
 unmockPlatform = (editorElement) ->
   editorElement.parentNode.removeChild(editorElement)
@@ -348,8 +350,6 @@ class VimEditor
   # options
   # - waitsForFinish
   keystroke: (keys, options={}) =>
-    # {element} = options
-    # console.log element
     if options.waitsForFinish
       finished = false
       @vimState.onDidFinishOperation -> finished = true
@@ -361,48 +361,26 @@ class VimEditor
     # keys must be String or Array
     # Not support Object for keys to avoid ambiguity.
     target = @editorElement
-    mocked = null
-    keys = [keys] unless _.isArray(keys)
+    mockDisposable = null
 
-    for k in keys
+    for k in toArray(keys)
       if _.isString(k)
-        specialKeystroke = ['enter', 'escape', 'backspace']
-        if k.length is 1 or (' ' in k) or (k in specialKeystroke) or k.match(/ctrl-.*/)
-          # NEW style
-          # "ensure 'h h'" comes here
-          newKeystroke(k, target)
-        else
-          # OLD style
-          # "ensure 'hh'" comes here
-          if SPEC_ENSURE_LEVEL >= 1
-            throw new Error('OLD STYLE USED')
-            console.log "OLD STYLE USED"
-
-          _keystroke(k, {target})
+        newKeystroke(k, target)
       else
-        if SPEC_ENSURE_LEVEL >= 2
-          throw new Error('OLD STYLE USED')
-          console.log "OLD STYLE USED"
         switch
           when k.platform?
-            mockPlatform(target, k.platform)
-            mocked = true
-          when k.char?
-            chars =
-              # [FIXME] Cause insertText('escape'), useless.
-              if k.char in ['', 'escape']
-                toArray(k.char)
-              else
-                k.char.split('')
-            for c in chars
-              @vimState.input.editor.insertText(c)
+            mockDisposable = mockPlatform(target, k.platform)
+          when k.input?
+            if k.input is 'escape'
+              atom.commands.dispatch(@vimState.input.editorElement, 'core:cancel')
+            else
+              @vimState.input.editor.insertText(k.input)
           when k.search?
-            {editor, editorElement} = @vimState.searchInput
-            editor.insertText(k.search)
-            atom.commands.dispatch(editorElement, 'core:confirm')
-          when k.ctrl? then _keystroke(k.ctrl, {ctrl: true, target})
-          when k.cmd? then _keystroke(k.cmd, {meta: true, target})
-          when k.raw? then _keystroke(k.raw, {raw: true, target})
-    unmockPlatform(target) if mocked
+            @vimState.searchInput.editor.insertText(k.search)
+            atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')
+          else
+            newKeystroke(k, target)
+    mockDisposable?.dispose()
+    mockDisposable = null
 
-module.exports = {getVimState, getView, dispatch, TextData}
+module.exports = {getVimState, getView, dispatch, TextData, mockPlatform}
