@@ -1,4 +1,3 @@
-# SPEC_MIGRATION: P2 DONE #270
 {getVimState, getView} = require './spec-helper'
 
 packageName = 'vim-mode-plus'

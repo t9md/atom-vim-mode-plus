@@ -1,4 +1,3 @@
-# SPEC_MIGRATION: P1 DONE #270
 _ = require 'underscore-plus'
 {getVimState, TextData, withMockPlatform} = require './spec-helper'
 settings = require '../lib/settings'

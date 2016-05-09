@@ -1,4 +1,3 @@
-# SPEC_MIGRATION: P1 DONE #270
 {getVimState, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
 

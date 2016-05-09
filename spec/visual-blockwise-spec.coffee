@@ -1,4 +1,3 @@
-# SPEC_MIGRATION: P2 DONE #270
 {getVimState, TextData} = require './spec-helper'
 swrap = require '../lib/selection-wrapper'
 

@@ -1,4 +1,3 @@
-# SPEC_MIGRATION: P2 DONE #270
 {getVimState} = require './spec-helper'
 
 describe "Scrolling", ->
