@@ -1,4 +1,4 @@
-SPEC_ENSURE_LEVEL = 0
+SPEC_ENSURE_LEVEL = 1
 # -------------------------
 _ = require 'underscore-plus'
 {Range, Point} = require 'atom'
