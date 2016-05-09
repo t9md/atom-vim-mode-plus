@@ -129,7 +129,7 @@ describe "Prefixes", ->
         set register: 'a': text: 'abc'
         atom.clipboard.write "clip"
         set text: "012\n", cursor: [0, 2]
-        keystroke 'i'
+        ensure 'i', mode: 'insert'
 
       it "inserts contents of the unnamed register with \"", ->
         ensure ['ctrl-r', {char: '"'}], text: '013452\n'
