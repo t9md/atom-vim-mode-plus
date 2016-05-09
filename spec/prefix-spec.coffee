@@ -132,18 +132,18 @@ describe "Prefixes", ->
         ensure 'i', mode: 'insert'
 
       it "inserts contents of the unnamed register with \"", ->
-        ensure ['ctrl-r', {char: '"'}], text: '013452\n'
+        ensure ['ctrl-r', input: '"'], text: '013452\n'
 
       describe "when useClipboardAsDefaultRegister enabled", ->
         it "inserts contents from clipboard with \"", ->
           settings.set 'useClipboardAsDefaultRegister', true
-          ensure ['ctrl-r', {char: '"'}], text: '01clip2\n'
+          ensure ['ctrl-r', input: '"'], text: '01clip2\n'
 
       it "inserts contents of the 'a' register", ->
-        ensure ['ctrl-r', {char: 'a'}], text: '01abc2\n'
+        ensure ['ctrl-r', input: 'a'], text: '01abc2\n'
 
       it "is cancelled with the escape key", ->
-        ensure ['ctrl-r', {char: 'escape'}],
+        ensure ['ctrl-r', input: 'escape'],
           text: '012\n'
           mode: 'insert'
           cursor: [0, 2]
@@ -216,7 +216,7 @@ describe "Prefixes", ->
         it "insert from per selection registe", ->
           ensure "d i w", text: ":\n:\n:\n"
           ensure 'a', mode: 'insert'
-          ensure ['ctrl-r', {char: '"'}],
+          ensure ['ctrl-r', input: '"'],
             text: """
               :012
               :abc

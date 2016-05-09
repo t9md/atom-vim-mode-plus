@@ -301,7 +301,7 @@ describe "Operator general", ->
           set text: "test (xyz)", cursor: [0, 6]
 
         it "deletes until the closing parenthesis", ->
-          ensure ['y y d t', char: ')'],
+          ensure ['y y d t', input: ')'],
             text: 'test ()'
             cursor: [0, 6]
 
@@ -324,7 +324,7 @@ describe "Operator general", ->
           text: "abcd\nabc\nabd"
           cursorBuffer: [[0, 0], [1, 0], [2, 0]]
 
-        ensure ['d t', char: 'd'],
+        ensure ['d t', input: 'd'],
           text: "d\nabc\nd"
           cursorBuffer: [[0, 0], [1, 0], [2, 0]]
 
@@ -382,13 +382,13 @@ describe "Operator general", ->
 
     describe "with a register", ->
       beforeEach ->
-        keystroke ['"', char: 'a', 'y y']
+        keystroke ['"', input: 'a', 'y y']
 
       it "saves the line to the a register", ->
         ensure register: a: text: "012 345\n"
 
       it "appends the line to the A register", ->
-        ensure ['"', char: 'A', 'y y'],
+        ensure ['"', input: 'A', 'y y'],
           register: a: text: "012 345\n012 345\n"
 
     describe "with a forward motion", ->
@@ -402,7 +402,7 @@ describe "Operator general", ->
         ensure cursor: [0, 4]
 
       it "does not yank when motion fails", ->
-        ensure ['y t', char: 'x'],
+        ensure ['y t', input: 'x'],
           register: '"': text: '345'
 
     describe "with a text object", ->
@@ -558,7 +558,7 @@ describe "Operator general", ->
 
       describe "from a specified register", ->
         beforeEach ->
-          keystroke ['"', char: 'a', 'p']
+          keystroke ['"', input: 'a', 'p']
 
         it "inserts the contents of the 'a' register", ->
           ensure text: "0a12\n", cursor: [0, 1]
@@ -755,7 +755,7 @@ describe "Operator general", ->
         cursorBuffer: [[0, 0], [1, 0]]
 
     it "replaces a single character", ->
-      ensure ['r', char: 'x'], text: 'x2\nx4\n\n'
+      ensure ['r', input: 'x'], text: 'x2\nx4\n\n'
 
     it "does nothing when cancelled", ->
       ensure 'r',
@@ -781,24 +781,24 @@ describe "Operator general", ->
         cursorBuffer: [[1, 0], [3, 0]]
 
     it "composes properly with motions", ->
-      ensure ['2 r', char: 'x'], text: 'xx\nxx\n\n'
+      ensure ['2 r', input: 'x'], text: 'xx\nxx\n\n'
 
     it "does nothing on an empty line", ->
       set cursorBuffer: [2, 0]
-      ensure ['r', char: 'x'], text: '12\n34\n\n'
+      ensure ['r', input: 'x'], text: '12\n34\n\n'
 
     it "does nothing if asked to replace more characters than there are on a line", ->
-      ensure ['3 r', char: 'x'], text: '12\n34\n\n'
+      ensure ['3 r', input: 'x'], text: '12\n34\n\n'
 
     describe "when in visual mode", ->
       beforeEach ->
         keystroke 'v e'
 
       it "replaces the entire selection with the given character", ->
-        ensure ['r', char: 'x'], text: 'xx\nxx\n\n'
+        ensure ['r', input: 'x'], text: 'xx\nxx\n\n'
 
       it "leaves the cursor at the beginning of the selection", ->
-        ensure ['r', char: 'x' ], cursorBuffer: [[0, 0], [1, 0]]
+        ensure ['r', input: 'x' ], cursorBuffer: [[0, 0], [1, 0]]
 
     describe "when in visual-block mode", ->
       textOriginal = """
@@ -823,7 +823,7 @@ describe "Operator general", ->
           selectedTextOrdered: ['11', '22', '33', '44'],
 
       it "replaces each selection and put cursor on start of top selection", ->
-        ensure ['r', char: 'x'],
+        ensure ['r', input: 'x'],
           mode: 'normal'
           text: textReplaced
           cursor: [1, 4]

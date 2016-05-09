@@ -22,38 +22,38 @@ describe "Motion Find", ->
         cursor: [0, 0]
 
     it 'moves to the first specified character it finds', ->
-      ensure ['f', char: 'c'], cursor: [0, 2]
+      ensure ['f', input: 'c'], cursor: [0, 2]
 
     it 'moves backwards to the first specified character it finds', ->
       set cursor: [0, 2]
-      ensure ['F', char: 'a'], cursor: [0, 0]
+      ensure ['F', input: 'a'], cursor: [0, 0]
 
     it 'respects count forward', ->
-      ensure ['2 f', char: 'a'], cursor: [0, 6]
+      ensure ['2 f', input: 'a'], cursor: [0, 6]
 
     it 'respects count backward', ->
       cursor: [0, 6]
-      ensure ['2 F', char: 'a'], cursor: [0, 0]
+      ensure ['2 F', input: 'a'], cursor: [0, 0]
 
     it "doesn't move if the character specified isn't found", ->
-      ensure ['f', char: 'd'], cursor: [0, 0]
+      ensure ['f', input: 'd'], cursor: [0, 0]
 
     it "doesn't move if there aren't the specified count of the specified character", ->
-      ensure ['1 0 f', char: 'a'], cursor: [0, 0]
+      ensure ['1 0 f', input: 'a'], cursor: [0, 0]
       # a bug was making this behaviour depend on the count
-      ensure ['1 1 f', char: 'a'], cursor: [0, 0]
+      ensure ['1 1 f', input: 'a'], cursor: [0, 0]
       # and backwards now
       set cursor: [0, 6]
-      ensure ['1 0 F', char: 'a'], cursor: [0, 6]
-      ensure ['1 1 F', char: 'a'], cursor: [0, 6]
+      ensure ['1 0 F', input: 'a'], cursor: [0, 6]
+      ensure ['1 1 F', input: 'a'], cursor: [0, 6]
 
     it "composes with d", ->
       set cursor: [0, 3]
-      ensure ['d 2 f', char: 'a'], text: 'abcbc\n'
+      ensure ['d 2 f', input: 'a'], text: 'abcbc\n'
 
     it "F behaves exclusively when composes with operator", ->
       set cursor: [0, 3]
-      ensure ['d F', char: 'a'], text: 'abcabcabc\n'
+      ensure ['d F', input: 'a'], text: 'abcabcabc\n'
 
   describe 'the t/T keybindings', ->
     beforeEach ->
@@ -62,51 +62,51 @@ describe "Motion Find", ->
         cursor: [0, 0]
 
     it 'moves to the character previous to the first specified character it finds', ->
-      ensure ['t', char: 'a'], cursor: [0, 2]
+      ensure ['t', input: 'a'], cursor: [0, 2]
       # or stays put when it's already there
-      ensure ['t', char: 'a'], cursor: [0, 2]
+      ensure ['t', input: 'a'], cursor: [0, 2]
 
     it 'moves backwards to the character after the first specified character it finds', ->
       set cursor: [0, 2]
-      ensure ['T', char: 'a'], cursor: [0, 1]
+      ensure ['T', input: 'a'], cursor: [0, 1]
 
     it 'respects count forward', ->
-      ensure ['2 t', char: 'a'], cursor: [0, 5]
+      ensure ['2 t', input: 'a'], cursor: [0, 5]
 
     it 'respects count backward', ->
       set cursor: [0, 6]
-      ensure ['2 T', char: 'a'], cursor: [0, 1]
+      ensure ['2 T', input: 'a'], cursor: [0, 1]
 
     it "doesn't move if the character specified isn't found", ->
-      ensure ['t', char: 'd'], cursor: [0, 0]
+      ensure ['t', input: 'd'], cursor: [0, 0]
 
     it "doesn't move if there aren't the specified count of the specified character", ->
-      ensure ['1 0 t', char: 'd'], cursor: [0, 0]
+      ensure ['1 0 t', input: 'd'], cursor: [0, 0]
       # a bug was making this behaviour depend on the count
-      ensure ['1 1 t', char: 'a'], cursor: [0, 0]
+      ensure ['1 1 t', input: 'a'], cursor: [0, 0]
       # and backwards now
       set cursor: [0, 6]
-      ensure ['1 0 T', char: 'a'], cursor: [0, 6]
-      ensure ['1 1 T', char: 'a'], cursor: [0, 6]
+      ensure ['1 0 T', input: 'a'], cursor: [0, 6]
+      ensure ['1 1 T', input: 'a'], cursor: [0, 6]
 
     it "composes with d", ->
       set cursor: [0, 3]
-      ensure ['d 2 t', char: 'b'],
+      ensure ['d 2 t', input: 'b'],
         text: 'abcbcabc\n'
 
     it "selects character under cursor even when no movement happens", ->
       set cursor: [0, 0]
-      ensure ['d t', char: 'b'],
+      ensure ['d t', input: 'b'],
         text: 'bcabcabcabc\n'
 
     it "T behaves exclusively when composes with operator", ->
       set cursor: [0, 3]
-      ensure ['d T', char: 'b'],
+      ensure ['d T', input: 'b'],
         text: 'ababcabcabc\n'
 
     it "T don't delete character under cursor even when no movement happens", ->
       set cursor: [0, 3]
-      ensure ['d T', char: 'c'],
+      ensure ['d T', input: 'c'],
         text: 'abcabcabcabc\n'
 
   describe 'the ; and , keybindings', ->
@@ -116,68 +116,68 @@ describe "Motion Find", ->
         cursor: [0, 0]
 
     it "repeat f in same direction", ->
-      ensure ['f', char: 'c'], cursor: [0, 2]
+      ensure ['f', input: 'c'], cursor: [0, 2]
       ensure ';', cursor: [0, 5]
       ensure ';', cursor: [0, 8]
 
     it "repeat F in same direction", ->
       set cursor: [0, 10]
-      ensure ['F', char: 'c'], cursor: [0, 8]
+      ensure ['F', input: 'c'], cursor: [0, 8]
       ensure ';', cursor: [0, 5]
       ensure ';', cursor: [0, 2]
 
     it "repeat f in opposite direction", ->
       set cursor: [0, 6]
-      ensure ['f', char: 'c'], cursor: [0, 8]
+      ensure ['f', input: 'c'], cursor: [0, 8]
       ensure ',', cursor: [0, 5]
       ensure ',', cursor: [0, 2]
 
     it "repeat F in opposite direction", ->
       set cursor: [0, 4]
-      ensure ['F', char: 'c'], cursor: [0, 2]
+      ensure ['F', input: 'c'], cursor: [0, 2]
       ensure ',', cursor: [0, 5]
       ensure ',', cursor: [0, 8]
 
     it "alternate repeat f in same direction and reverse", ->
-      ensure ['f', char: 'c'], cursor: [0, 2]
+      ensure ['f', input: 'c'], cursor: [0, 2]
       ensure ';', cursor: [0, 5]
       ensure ',', cursor: [0, 2]
 
     it "alternate repeat F in same direction and reverse", ->
       set cursor: [0, 10]
-      ensure ['F', char: 'c'], cursor: [0, 8]
+      ensure ['F', input: 'c'], cursor: [0, 8]
       ensure ';', cursor: [0, 5]
       ensure ',', cursor: [0, 8]
 
     it "repeat t in same direction", ->
-      ensure ['t', char: 'c'], cursor: [0, 1]
+      ensure ['t', input: 'c'], cursor: [0, 1]
       ensure ';', cursor: [0, 4]
 
     it "repeat T in same direction", ->
       set cursor: [0, 10]
-      ensure ['T', char: 'c'], cursor: [0, 9]
+      ensure ['T', input: 'c'], cursor: [0, 9]
       ensure ';', cursor: [0, 6]
 
     it "repeat t in opposite direction first, and then reverse", ->
       set cursor: [0, 3]
-      ensure ['t', char: 'c'], cursor: [0, 4]
+      ensure ['t', input: 'c'], cursor: [0, 4]
       ensure ',', cursor: [0, 3]
       ensure ';', cursor: [0, 4]
 
     it "repeat T in opposite direction first, and then reverse", ->
       set cursor: [0, 4]
-      ensure ['T', char: 'c'], cursor: [0, 3]
+      ensure ['T', input: 'c'], cursor: [0, 3]
       ensure ',', cursor: [0, 4]
       ensure ';', cursor: [0, 3]
 
     it "repeat with count in same direction", ->
       set cursor: [0, 0]
-      ensure ['f', char: 'c'], cursor: [0, 2]
+      ensure ['f', input: 'c'], cursor: [0, 2]
       ensure '2 ;', cursor: [0, 8]
 
     it "repeat with count in reverse direction", ->
       set cursor: [0, 6]
-      ensure ['f', char: 'c'], cursor: [0, 8]
+      ensure ['f', input: 'c'], cursor: [0, 8]
       ensure '2 ,', cursor: [0, 2]
 
     it "shares the most recent find/till command with other editors", ->
@@ -195,7 +195,7 @@ describe "Motion Find", ->
         pane.activateItem(editor)
 
         # by default keyDown and such go in the usual editor
-        ensure ['f', char: 'b'], cursor: [0, 2]
+        ensure ['f', input: 'b'], cursor: [0, 2]
         other.ensure cursor: [0, 0]
 
         # replay same find in the other editor
@@ -205,7 +205,7 @@ describe "Motion Find", ->
         other.ensure cursor: [0, 4]
 
         # do a till in the other editor
-        other.keystroke ['t', char: 'r']
+        other.keystroke ['t', input: 'r']
         ensure cursor: [0, 2]
         other.ensure cursor: [0, 5]
 
