@@ -30,15 +30,12 @@ getView = (model) ->
 dispatch = (target, command) ->
   atom.commands.dispatch(target, command)
 
-mockPlatform = (editorElement, platform) ->
+withMockPlatform = (target, platform, fn) ->
   wrapper = document.createElement('div')
   wrapper.className = platform
-  wrapper.appendChild(editorElement)
-  new Disposable ->
-    editorElement.parentNode.removeChild(editorElement)
-
-unmockPlatform = (editorElement) ->
-  editorElement.parentNode.removeChild(editorElement)
+  wrapper.appendChild(target)
+  fn()
+  target.parentNode.removeChild(target)
 
 buildKeydownEvent = (key, options) ->
   KeymapManager.buildKeydownEvent(key, options)
@@ -361,15 +358,12 @@ class VimEditor
     # keys must be String or Array
     # Not support Object for keys to avoid ambiguity.
     target = @editorElement
-    mockDisposable = null
 
     for k in toArray(keys)
       if _.isString(k)
         newKeystroke(k, target)
       else
         switch
-          when k.platform?
-            mockDisposable = mockPlatform(target, k.platform)
           when k.input?
             if k.input is 'escape'
               atom.commands.dispatch(@vimState.input.editorElement, 'core:cancel')
@@ -380,7 +374,5 @@ class VimEditor
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')
           else
             newKeystroke(k, target)
-    mockDisposable?.dispose()
-    mockDisposable = null
 
-module.exports = {getVimState, getView, dispatch, TextData, mockPlatform}
+module.exports = {getVimState, getView, dispatch, TextData, withMockPlatform}
