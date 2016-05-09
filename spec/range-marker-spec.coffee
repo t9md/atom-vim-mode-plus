@@ -1,3 +1,4 @@
+# SPEC_MIGRATION: P2 DONE #270
 {getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
@@ -50,14 +51,14 @@ describe "Range Marker", ->
 
     describe "basic behavior", ->
       it "MarkRange add range marker", ->
-        keystroke('gmiw')
+        keystroke('g m i w')
         ensureRangeMarker length: 1, text: ['ooo']
-        keystroke('j.')
+        keystroke('j .')
         ensureRangeMarker length: 2, text: ['ooo', 'xxx']
       it "marked range can use as target of operator by `i r`", ->
-        keystroke('gmiwj.2jgmip') # Mark 2 inner-word and 1 inner-paragraph
+        keystroke('g m i w j . 2 j g m i p') # Mark 2 inner-word and 1 inner-paragraph
         ensureRangeMarker length: 3, text: ['ooo', 'xxx', "ooo xxx ooo\nxxx ooo xxx\n"]
-        ensure 'gUir',
+        ensure 'g U i r',
           text: """
           OOO xxx ooo
           XXX ooo xxx
@@ -71,14 +72,14 @@ describe "Range Marker", ->
 
     describe "select-all-in-range-marker", ->
       it "select all instance of cursor word only within marked range", ->
-        keystroke('gmip}}j.') # Mark 2 inner-word and 1 inner-paragraph
+        keystroke('g m i p } } j .') # Mark 2 inner-word and 1 inner-paragraph
         paragraphText = "ooo xxx ooo\nxxx ooo xxx\n"
         ensureRangeMarker length: 2, text: [paragraphText, paragraphText]
         dispatch(editorElement, 'vim-mode-plus:select-all-in-range-marker')
         expect(editor.getSelections()).toHaveLength(6)
         keystroke 'c'
         editor.insertText '!!!'
-        ensure 'gUir',
+        ensure 'g U i r',
           text: """
           !!! xxx !!!
           xxx !!! xxx
@@ -92,7 +93,7 @@ describe "Range Marker", ->
 
     describe "clearRangeMarkers command", ->
       it "clear rangeMarkers", ->
-        keystroke('gmiw')
+        keystroke('g m i w')
         ensureRangeMarker length: 1, text: ['ooo']
         dispatch(editorElement, 'vim-mode-plus:clear-range-marker')
         expect(vimState.hasRangeMarkers()).toBe(false)
@@ -100,7 +101,7 @@ describe "Range Marker", ->
     describe "clearRangeMarkerOnResetNormalMode", ->
       describe "default setting", ->
         it "it won't clear rangeMarker", ->
-          keystroke('gmiw')
+          keystroke('g m i w')
           ensureRangeMarker length: 1, text: ['ooo']
           dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
           ensureRangeMarker length: 1, text: ['ooo']
@@ -108,7 +109,7 @@ describe "Range Marker", ->
       describe "when enabled", ->
         it "it clear rangeMarker on reset-normal-mode", ->
           settings.set('clearRangeMarkerOnResetNormalMode', true)
-          keystroke('gmiw')
+          keystroke('g m i w')
           ensureRangeMarker length: 1, text: ['ooo']
           dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
           expect(vimState.hasRangeMarkers()).toBe(false)
