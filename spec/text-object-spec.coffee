@@ -1,3 +1,4 @@
+# SPEC_MIGRATION: P1 DONE #270
 {getVimState, dispatch, TextData} = require './spec-helper'
 globalState = require '../lib/global-state'
 
@@ -7,7 +8,7 @@ describe "TextObject", ->
   getCheckFunctionFor = (textObject) ->
     (initialPoint, keystroke, options) ->
       set cursor: initialPoint
-      ensure keystroke + textObject, options
+      ensure "#{keystroke} #{textObject}", options
 
   beforeEach ->
     getVimState (state, vimEditor) ->
@@ -42,19 +43,19 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators inside the current word in operator-pending mode", ->
-        ensure 'diw',
+        ensure 'd i w',
           text:     "12345  ABCDE"
           cursor:   [0, 6]
           register: '"': text: 'abcde'
           mode: 'normal'
 
       it "selects inside the current word in visual mode", ->
-        ensure 'viw',
+        ensure 'v i w',
           selectedScreenRange: [[0, 6], [0, 11]]
 
       it "works with multiple cursors", ->
         set addCursor: [0, 1]
-        ensure 'viw',
+        ensure 'v i w',
           selectedBufferRange: [
             [[0, 6], [0, 11]]
             [[0, 0], [0, 5]]
@@ -67,10 +68,10 @@ describe "TextObject", ->
             cursor: [0, 4]
 
         it "change inside word", ->
-          ensure 'ciw', text: "abc()", mode: "insert"
+          ensure 'c i w', text: "abc()", mode: "insert"
 
         it "delete inside word", ->
-          ensure 'diw', text: "abc()", mode: "normal"
+          ensure 'd i w', text: "abc()", mode: "normal"
 
       describe "cursor's next char is NonWordCharacter", ->
         beforeEach ->
@@ -79,31 +80,31 @@ describe "TextObject", ->
             cursor: [0, 6]
 
         it "change inside word", ->
-          ensure 'ciw', text: "abc()", mode: "insert"
+          ensure 'c i w', text: "abc()", mode: "insert"
 
         it "delete inside word", ->
-          ensure 'diw', text: "abc()", mode: "normal"
+          ensure 'd i w', text: "abc()", mode: "normal"
 
     describe "a-word", ->
       beforeEach ->
         set text: "12345 abcde ABCDE", cursor: [0, 9]
 
       it "applies operators from the start of the current word to the start of the next word in operator-pending mode", ->
-        ensure 'daw',
+        ensure 'd a w',
           text: "12345 ABCDE"
           cursor: [0, 6]
           register: '"': text: "abcde "
 
       it "selects from the start of the current word to the start of the next word in visual mode", ->
-        ensure 'vaw', selectedScreenRange: [[0, 6], [0, 12]]
+        ensure 'v a w', selectedScreenRange: [[0, 6], [0, 12]]
 
       it "doesn't span newlines", ->
         set text: "12345\nabcde ABCDE", cursor: [0, 3]
-        ensure 'vaw', selectedBufferRange: [[0, 0], [0, 5]]
+        ensure 'v a w', selectedBufferRange: [[0, 0], [0, 5]]
 
       it "doesn't span special characters", ->
         set text: "1(345\nabcde ABCDE", cursor: [0, 3]
-        ensure 'vaw', selectedBufferRange: [[0, 2], [0, 5]]
+        ensure 'v a w', selectedBufferRange: [[0, 2], [0, 5]]
 
   describe "WholeWord", ->
     describe "inner-whole-word", ->
@@ -111,27 +112,27 @@ describe "TextObject", ->
         set text: "12(45 ab'de ABCDE", cursor: [0, 9]
 
       it "applies operators inside the current whole word in operator-pending mode", ->
-        ensure 'diW', text: "12(45  ABCDE", cursor: [0, 6], register: '"': text: "ab'de"
+        ensure 'd i W', text: "12(45  ABCDE", cursor: [0, 6], register: '"': text: "ab'de"
 
       it "selects inside the current whole word in visual mode", ->
-        ensure 'viW', selectedScreenRange: [[0, 6], [0, 11]]
+        ensure 'v i W', selectedScreenRange: [[0, 6], [0, 11]]
     describe "a-whole-word", ->
       beforeEach ->
         set text: "12(45 ab'de ABCDE", cursor: [0, 9]
 
       it "applies operators from the start of the current whole word to the start of the next whole word in operator-pending mode", ->
-        ensure 'daW',
+        ensure 'd a W',
           text: "12(45 ABCDE"
           cursor: [0, 6]
           register: '"': text: "ab'de "
           mode: 'normal'
 
       it "selects from the start of the current whole word to the start of the next whole word in visual mode", ->
-        ensure 'vaW', selectedScreenRange: [[0, 6], [0, 12]]
+        ensure 'v a W', selectedScreenRange: [[0, 6], [0, 12]]
 
       it "doesn't span newlines", ->
         set text: "12(45\nab'de ABCDE", cursor: [0, 4]
-        ensure 'vaW', selectedBufferRange: [[0, 0], [0, 5]]
+        ensure 'v a W', selectedBufferRange: [[0, 0], [0, 5]]
 
   describe "AnyPair", ->
     {simpleText, complexText} = {}
@@ -157,7 +158,7 @@ describe "TextObject", ->
         cursor: [0, 7]
     describe "inner-any-pair", ->
       it "applies operators any inner-pair and repeatable", ->
-        ensure 'dis',
+        ensure 'd i s',
           text: """
             .... "" ....
             .... 'abc' ....
@@ -167,7 +168,7 @@ describe "TextObject", ->
             .... [abc] ....
             .... (abc) ....
             """
-        ensure 'j.j.j.j.j.j.j.',
+        ensure 'j . j . j . j . j . j . j .',
           text: """
             .... "" ....
             .... '' ....
@@ -180,13 +181,13 @@ describe "TextObject", ->
       it "can expand selection", ->
         set text: complexText, cursor: [2, 8]
         keystroke 'v'
-        ensure 'is', selectedText: """1s-1e"""
-        ensure 'is', selectedText: """2s(1s-1e)2e"""
-        ensure 'is', selectedText: """3s\n----"2s(1s-1e)2e"\n---3e"""
-        ensure 'is', selectedText: """4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e"""
+        ensure 'i s', selectedText: """1s-1e"""
+        ensure 'i s', selectedText: """2s(1s-1e)2e"""
+        ensure 'i s', selectedText: """3s\n----"2s(1s-1e)2e"\n---3e"""
+        ensure 'i s', selectedText: """4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e"""
     describe "a-any-pair", ->
       it "applies operators any a-pair and repeatable", ->
-        ensure 'das',
+        ensure 'd a s',
           text: """
             ....  ....
             .... 'abc' ....
@@ -196,7 +197,7 @@ describe "TextObject", ->
             .... [abc] ....
             .... (abc) ....
             """
-        ensure 'j.j.j.j.j.j.j.',
+        ensure 'j . j . j . j . j . j . j .',
           text: """
             ....  ....
             ....  ....
@@ -209,10 +210,10 @@ describe "TextObject", ->
       it "can expand selection", ->
         set text: complexText, cursor: [2, 8]
         keystroke 'v'
-        ensure 'as', selectedText: """(1s-1e)"""
-        ensure 'as', selectedText: """\"2s(1s-1e)2e\""""
-        ensure 'as', selectedText: """{3s\n----"2s(1s-1e)2e"\n---3e}"""
-        ensure 'as', selectedText: """[4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e\n]"""
+        ensure 'a s', selectedText: """(1s-1e)"""
+        ensure 'a s', selectedText: """\"2s(1s-1e)2e\""""
+        ensure 'a s', selectedText: """{3s\n----"2s(1s-1e)2e"\n---3e}"""
+        ensure 'a s', selectedText: """[4s\n--{3s\n----"2s(1s-1e)2e"\n---3e}-4e\n]"""
 
   describe "AnyQuote", ->
     beforeEach ->
@@ -223,25 +224,25 @@ describe "TextObject", ->
         cursor: [0, 0]
     describe "inner-any-quote", ->
       it "applies operators any inner-pair and repeatable", ->
-        ensure 'diq', text: """--"" `def`  'efg'--"""
+        ensure 'd i q', text: """--"" `def`  'efg'--"""
         ensure '.', text: """--"" ``  'efg'--"""
         ensure '.', text: """--"" ``  ''--"""
       it "can select next quote", ->
         keystroke 'v'
-        ensure 'iq', selectedText: 'abc'
-        ensure 'iq', selectedText: 'def'
-        ensure 'iq', selectedText: 'efg'
+        ensure 'i q', selectedText: 'abc'
+        ensure 'i q', selectedText: 'def'
+        ensure 'i q', selectedText: 'efg'
     describe "a-any-quote", ->
       it "applies operators any a-quote and repeatable", ->
-        ensure 'daq', text: """-- `def`  'efg'--"""
+        ensure 'd a q', text: """-- `def`  'efg'--"""
         ensure '.'  , text: """--   'efg'--"""
         ensure '.'  , text: """--   --"""
         ensure '.'
       it "can select next quote", ->
         keystroke 'v'
-        ensure 'aq', selectedText: '"abc"'
-        ensure 'aq', selectedText: '`def`'
-        ensure 'aq', selectedText: "'efg'"
+        ensure 'a q', selectedText: '"abc"'
+        ensure 'a q', selectedText: '`def`'
+        ensure 'a q', selectedText: "'efg'"
 
   describe "DoubleQuote", ->
     describe "inner-double-quote", ->
@@ -251,23 +252,23 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators inside the current string in operator-pending mode", ->
-        ensure 'di"',
+        ensure 'd i "',
           text: '""here" " and over here'
           cursor: [0, 1]
 
       it "skip non-string area and operate forwarding string whithin line", ->
         set cursor: [0, 29]
-        ensure 'di"',
+        ensure 'd i "',
           text: '" something in here and in "here"" and over here'
           cursor: [0, 33]
 
       it "makes no change if past the last string on a line", ->
         set cursor: [0, 39]
-        ensure 'di"',
+        ensure 'd i "',
           text: '" something in here and in "here" " and over here'
           cursor: [0, 39]
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor('i"')
+        check = getCheckFunctionFor('i "')
         text = '-"+"-'
         textFinal = '-""-'
         selectedText = '+'
@@ -285,7 +286,7 @@ describe "TextObject", ->
         set text: originalText, cursor: [0, 9]
 
       it "applies operators around the current double quotes in operator-pending mode", ->
-        ensure 'da"',
+        ensure 'd a "',
           text: 'here" "'
           cursor: [0, 0]
           mode: 'normal'
@@ -293,12 +294,12 @@ describe "TextObject", ->
       # it "[Changed Behavior] wont applies if its not within string", ->
       it "skip non-string area and operate forwarding string whithin line", ->
         set cursor: [0, 29]
-        ensure 'da"',
+        ensure 'd a "',
           text: '" something in here and in "here'
           cursor: [0, 31]
           mode: 'normal'
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor('a"')
+        check = getCheckFunctionFor('a "')
         text = '-"+"-'
         textFinal = '--'
         selectedText = '"+"'
@@ -323,13 +324,13 @@ describe "TextObject", ->
             text: "'some-key-here\\\\': 'here-is-the-val'"
         it "case-1", ->
           set cursor: [0, 2]
-          ensure "di'",
+          ensure "d i '",
             text: "'': 'here-is-the-val'"
             cursor: [0, 1]
 
         it "case-2", ->
           set cursor: [0, 19]
-          ensure "di'",
+          ensure "d i '",
             text: "'some-key-here\\\\': ''"
             cursor: [0, 20]
 
@@ -340,17 +341,17 @@ describe "TextObject", ->
 
         it "case-1", ->
           set cursor: [0, 2]
-          ensure "di'",
+          ensure "d i '",
             text: "'': 'here-is-the-val'"
             cursor: [0, 1]
         it "case-2", ->
           set cursor: [0, 17]
-          ensure "di'",
+          ensure "d i '",
             text: "'some-key-here\\'': ''"
             cursor: [0, 20]
 
       it "applies operators inside the current string in operator-pending mode", ->
-        ensure "di'",
+        ensure "d i '",
           text: "''here' ' and over here"
           cursor: [0, 1]
 
@@ -363,17 +364,17 @@ describe "TextObject", ->
       # it "[Changed behavior] applies operators inside area between quote", ->
       it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
         set cursor: [0, 26]
-        ensure "di'",
+        ensure "d i '",
           text: "''here' ' and over here"
           cursor: [0, 1]
 
       it "makes no change if past the last string on a line", ->
         set cursor: [0, 39]
-        ensure "di'",
+        ensure "d i '",
           text: "' something in here and in 'here' ' and over here"
           cursor: [0, 39]
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor("i'")
+        check = getCheckFunctionFor("i '")
         text = "-'+'-"
         textFinal = "-''-"
         selectedText = '+'
@@ -391,19 +392,19 @@ describe "TextObject", ->
         set text: originalText, cursor: [0, 9]
 
       it "applies operators around the current single quotes in operator-pending mode", ->
-        ensure "da'",
+        ensure "d a '",
           text: "here' '"
           cursor: [0, 0]
           mode: 'normal'
 
       it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
         set cursor: [0, 29]
-        ensure "da'",
+        ensure "d a '",
           text: "' something in here and in 'here"
           cursor: [0, 31]
           mode: 'normal'
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor("a'")
+        check = getCheckFunctionFor("a '")
         text = "-'+'-"
         textFinal = "--"
         selectedText = "'+'"
@@ -422,13 +423,13 @@ describe "TextObject", ->
 
     describe "inner-back-tick", ->
       it "applies operators inner-area", ->
-        ensure "di`", text: "this is `` text.", cursor: [0, 9]
+        ensure "d i `", text: "this is `` text.", cursor: [0, 9]
 
       it "do nothing when pair range is not under cursor", ->
         set cursor: [0, 16]
-        ensure "di`", text: originalText, cursor: [0, 16]
+        ensure "d i `", text: originalText, cursor: [0, 16]
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor('i`')
+        check = getCheckFunctionFor('i `')
         text = '-`+`-'
         textFinal = '-``-'
         selectedText = '+'
@@ -442,13 +443,13 @@ describe "TextObject", ->
         it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-back-tick", ->
       it "applies operators inner-area", ->
-        ensure "da`", text: "this is  text.", cursor: [0, 8]
+        ensure "d a `", text: "this is  text.", cursor: [0, 8]
 
       it "do nothing when pair range is not under cursor", ->
         set cursor: [0, 16]
-        ensure "da`", text: originalText, cursor: [0, 16]
+        ensure "d a `", text: originalText, cursor: [0, 16]
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor("a`")
+        check = getCheckFunctionFor("a `")
         text = "-`+`-"
         textFinal = "--"
         selectedText = "`+`"
@@ -468,19 +469,19 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators to inner-area in operator-pending mode", ->
-        ensure 'di{',
+        ensure 'd i {',
           text: "{}"
           cursor: [0, 1]
 
       it "applies operators to inner-area in operator-pending mode (second test)", ->
         set
           cursor: [0, 29]
-        ensure 'di{',
+        ensure 'd i {',
           text: "{ something in here and in {} }"
           cursor: [0, 28]
 
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor('i{')
+        check = getCheckFunctionFor('i {')
         text = '-{+}-'
         textFinal = '-{}-'
         selectedText = '+'
@@ -499,19 +500,19 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators to a-area in operator-pending mode", ->
-        ensure 'da{',
+        ensure 'd a {',
           text: ''
           cursor: [0, 0]
           mode: 'normal'
 
       it "applies operators to a-area in operator-pending mode (second test)", ->
         set cursor: [0, 29]
-        ensure 'da{',
+        ensure 'd a {',
           text: "{ something in here and in  }"
           cursor: [0, 27]
           mode: 'normal'
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor("a{")
+        check = getCheckFunctionFor("a {")
         text = "-{+}-"
         textFinal = "--"
         selectedText = "{+}"
@@ -531,17 +532,17 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators inside the current word in operator-pending mode", ->
-        ensure 'di<',
+        ensure 'd i <',
           text: "<>"
           cursor: [0, 1]
 
       it "applies operators inside the current word in operator-pending mode (second test)", ->
         set cursor: [0, 29]
-        ensure 'di<',
+        ensure 'd i <',
           text: "< something in here and in <> >"
           cursor: [0, 28]
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor('i<')
+        check = getCheckFunctionFor('i <')
         text = '-<+>-'
         textFinal = '-<>-'
         selectedText = '+'
@@ -560,19 +561,19 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators around the current angle brackets in operator-pending mode", ->
-        ensure 'da<',
+        ensure 'd a <',
           text: ''
           cursor: [0, 0]
           mode: 'normal'
 
       it "applies operators around the current angle brackets in operator-pending mode (second test)", ->
         set cursor: [0, 29]
-        ensure 'da<',
+        ensure 'd a <',
           text: "< something in here and in  >"
           cursor: [0, 27]
           mode: 'normal'
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor("a<")
+        check = getCheckFunctionFor("a <")
         text = "-<+>-"
         textFinal = "--"
         selectedText = "<+>"
@@ -608,16 +609,16 @@ describe "TextObject", ->
         """
     describe "inner", ->
       it "select forwarding range", ->
-        set cursor: [0, 0]; ensure ['escape', 'vi}'], selectedText: "000"
-        set cursor: [1, 0]; ensure ['escape', 'vi>'], selectedText: "111"
-        set cursor: [2, 0]; ensure ['escape', 'vi]'], selectedText: "222"
-        set cursor: [3, 0]; ensure ['escape', 'vi)'], selectedText: "333"
+        set cursor: [0, 0]; ensure 'escape v i }', selectedText: "000"
+        set cursor: [1, 0]; ensure 'escape v i >', selectedText: "111"
+        set cursor: [2, 0]; ensure 'escape v i ]', selectedText: "222"
+        set cursor: [3, 0]; ensure 'escape v i )', selectedText: "333"
     describe "a", ->
       it "select forwarding range", ->
-        set cursor: [0, 0]; ensure ['escape', 'va}'], selectedText: "{000}"
-        set cursor: [1, 0]; ensure ['escape', 'va>'], selectedText: "<111>"
-        set cursor: [2, 0]; ensure ['escape', 'va]'], selectedText: "[222]"
-        set cursor: [3, 0]; ensure ['escape', 'va)'], selectedText: "(333)"
+        set cursor: [0, 0]; ensure 'escape v a }', selectedText: "{000}"
+        set cursor: [1, 0]; ensure 'escape v a >', selectedText: "<111>"
+        set cursor: [2, 0]; ensure 'escape v a ]', selectedText: "[222]"
+        set cursor: [3, 0]; ensure 'escape v a )', selectedText: "(333)"
     describe "multi line text", ->
       [textOneInner, textOneA] = []
       beforeEach ->
@@ -643,30 +644,30 @@ describe "TextObject", ->
           """
       describe "forwarding inner", ->
         it "select forwarding range", ->
-          set cursor: [1, 0]; ensure "vi}", selectedText: textOneInner
+          set cursor: [1, 0]; ensure "v i }", selectedText: textOneInner
         it "select forwarding range", ->
-          set cursor: [2, 0]; ensure "vi}", selectedText: "22"
+          set cursor: [2, 0]; ensure "v i }", selectedText: "22"
         it "[case-1] no forwarding open pair, fail to find", ->
-          set cursor: [0, 0]; ensure "vi}", selectedText: '0', cursor: [0, 1]
+          set cursor: [0, 0]; ensure "v i }", selectedText: '0', cursor: [0, 1]
         it "[case-2] no forwarding open pair, select enclosed", ->
-          set cursor: [1, 4]; ensure "vi}", selectedText: textOneInner
+          set cursor: [1, 4]; ensure "v i }", selectedText: textOneInner
         it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [3, 0]; ensure "vi}", selectedText: textOneInner
+          set cursor: [3, 0]; ensure "v i }", selectedText: textOneInner
         it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [4, 0]; ensure "vi}", selectedText: textOneInner
+          set cursor: [4, 0]; ensure "v i }", selectedText: textOneInner
       describe "forwarding a", ->
         it "select forwarding range", ->
-          set cursor: [1, 0]; ensure "va}", selectedText: textOneA
+          set cursor: [1, 0]; ensure "v a }", selectedText: textOneA
         it "select forwarding range", ->
-          set cursor: [2, 0]; ensure "va}", selectedText: "{22}"
+          set cursor: [2, 0]; ensure "v a }", selectedText: "{22}"
         it "[case-1] no forwarding open pair, fail to find", ->
-          set cursor: [0, 0]; ensure "va}", selectedText: '0', cursor: [0, 1]
+          set cursor: [0, 0]; ensure "v a }", selectedText: '0', cursor: [0, 1]
         it "[case-2] no forwarding open pair, select enclosed", ->
-          set cursor: [1, 4]; ensure "va}", selectedText: textOneA
+          set cursor: [1, 4]; ensure "v a }", selectedText: textOneA
         it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [3, 0]; ensure "va}", selectedText: textOneA
+          set cursor: [3, 0]; ensure "v a }", selectedText: textOneA
         it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [4, 0]; ensure "va}", selectedText: textOneA
+          set cursor: [4, 0]; ensure "v a }", selectedText: textOneA
 
   describe "AnyPairAllowForwarding", ->
     beforeEach ->
@@ -714,7 +715,7 @@ describe "TextObject", ->
 
     describe "inner-tag", ->
       describe "pricisely select inner", ->
-        check = getCheckFunctionFor('it')
+        check = getCheckFunctionFor('i t')
         text = "<abc>  <title>TITLE</title> </abc>"
         deletedText = "<abc>  <title></title> </abc>"
         selectedText = "TITLE"
@@ -762,17 +763,17 @@ describe "TextObject", ->
           set text: htmlLikeText
         it "can expand selection when repeated", ->
           set cursor: [9, 0]
-          ensure 'vit', selectedText: """
+          ensure 'v i t', selectedText: """
             \n________<p><a>
             ______
             """
-          ensure 'it', selectedText: """
+          ensure 'i t', selectedText: """
             \n______<div>
             ________<p><a>
             ______</div>
             ____
             """
-          ensure 'it', selectedText: """
+          ensure 'i t', selectedText: """
             \n____<div>
             ______<div>
             ________<p><a>
@@ -780,7 +781,7 @@ describe "TextObject", ->
             ____</div>
             __
             """
-          ensure 'it', selectedText: """
+          ensure 'i t', selectedText: """
             \n__<div>
             ____<div>
             ______<div>
@@ -789,7 +790,7 @@ describe "TextObject", ->
             ____</div>
             __</div>\n
             """
-          ensure 'it', selectedText: """
+          ensure 'i t', selectedText: """
             \n<head>
             __<meta charset="UTF-8" />
             __<title>Document</title>
@@ -806,7 +807,7 @@ describe "TextObject", ->
             """
         it 'delete inner-tag and repatable', ->
           set cursor: [9, 0]
-          ensure "dit", text: """
+          ensure "d i t", text: """
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -822,7 +823,7 @@ describe "TextObject", ->
             </body>
             </html>\n
             """
-          ensure "3.", text: """
+          ensure "3 .", text: """
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -839,7 +840,7 @@ describe "TextObject", ->
 
     describe "a-tag", ->
       describe "pricisely select a", ->
-        check = getCheckFunctionFor('at')
+        check = getCheckFunctionFor('a t')
         text = "<abc>  <title>TITLE</title> </abc>"
         deletedText = "<abc>   </abc>"
         selectedText = "<title>TITLE</title>"
@@ -872,14 +873,14 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators inside the current word in operator-pending mode", ->
-        ensure 'di[',
+        ensure 'd i [',
           text: "[]"
           cursor: [0, 1]
 
       it "applies operators inside the current word in operator-pending mode (second test)", ->
         set
           cursor: [0, 29]
-        ensure 'di[',
+        ensure 'd i [',
           text: "[ something in here and in [] ]"
           cursor: [0, 28]
     describe "a-square-bracket", ->
@@ -889,19 +890,19 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators around the current square brackets in operator-pending mode", ->
-        ensure 'da[',
+        ensure 'd a [',
           text: ''
           cursor: [0, 0]
           mode: 'normal'
 
       it "applies operators around the current square brackets in operator-pending mode (second test)", ->
         set cursor: [0, 29]
-        ensure 'da[',
+        ensure 'd a [',
           text: "[ something in here and in  ]"
           cursor: [0, 27]
           mode: 'normal'
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor('i[')
+        check = getCheckFunctionFor('i [')
         text = '-[+]-'
         textFinal = '-[]-'
         selectedText = '+'
@@ -914,7 +915,7 @@ describe "TextObject", ->
         it "case-3 visual", -> check open, 'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor('a[')
+        check = getCheckFunctionFor('a [')
         text = '-[+]-'
         textFinal = '--'
         selectedText = '[+]'
@@ -934,13 +935,13 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators inside the current word in operator-pending mode", ->
-        ensure 'di(',
+        ensure 'd i (',
           text: "()"
           cursor: [0, 1]
 
       it "applies operators inside the current word in operator-pending mode (second test)", ->
         set cursor: [0, 29]
-        ensure 'di(',
+        ensure 'd i (',
           text: "( something in here and in () )"
           cursor: [0, 28]
 
@@ -948,35 +949,35 @@ describe "TextObject", ->
         set
           text: 'expect(editor.getScrollTop())'
           cursor: [0, 7]
-        ensure 'vi(', selectedText: 'editor.getScrollTop()'
+        ensure 'v i (', selectedText: 'editor.getScrollTop()'
 
       it "skip escaped pair case-1", ->
         set text: 'expect(editor.g\\(etScrollTp())', cursor: [0, 20]
-        ensure 'vi(', selectedText: 'editor.g\\(etScrollTp()'
+        ensure 'v i (', selectedText: 'editor.g\\(etScrollTp()'
 
       it "dont skip literal backslash", ->
         set text: 'expect(editor.g\\\\(etScrollTp())', cursor: [0, 20]
-        ensure 'vi(', selectedText: 'etScrollTp()'
+        ensure 'v i (', selectedText: 'etScrollTp()'
 
       it "skip escaped pair case-2", ->
         set text: 'expect(editor.getSc\\)rollTp())', cursor: [0, 7]
-        ensure 'vi(', selectedText: 'editor.getSc\\)rollTp()'
+        ensure 'v i (', selectedText: 'editor.getSc\\)rollTp()'
 
       it "skip escaped pair case-3", ->
         set text: 'expect(editor.ge\\(tSc\\)rollTp())', cursor: [0, 7]
-        ensure 'vi(', selectedText: 'editor.ge\\(tSc\\)rollTp()'
+        ensure 'v i (', selectedText: 'editor.ge\\(tSc\\)rollTp()'
 
       it "works with multiple cursors", ->
         set
           text: "( a b ) cde ( f g h ) ijk"
           cursor: [[0, 2], [0, 18]]
-        ensure 'vi(',
+        ensure 'v i (',
           selectedBufferRange: [
             [[0, 1],  [0, 6]]
             [[0, 13], [0, 20]]
           ]
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor('i(')
+        check = getCheckFunctionFor('i (')
         text = '-(+)-'
         textFinal = '-()-'
         selectedText = '+'
@@ -996,18 +997,18 @@ describe "TextObject", ->
           cursor: [0, 9]
 
       it "applies operators around the current parentheses in operator-pending mode", ->
-        ensure 'da(',
+        ensure 'd a (',
           text: ''
           cursor: [0, 0]
           mode: 'normal'
 
       it "applies operators around the current parentheses in operator-pending mode (second test)", ->
         set cursor: [0, 29]
-        ensure 'da(',
+        ensure 'd a (',
           text: "( something in here and in  )"
           cursor: [0, 27]
       describe "cursor is on the pair char", ->
-        check = getCheckFunctionFor('a(')
+        check = getCheckFunctionFor('a (')
         text = '-(+)-'
         textFinal = '--'
         selectedText = '(+)'
@@ -1028,13 +1029,13 @@ describe "TextObject", ->
           cursor: [2, 2]
 
       it "applies operators inside the current paragraph in operator-pending mode", ->
-        ensure 'yip',
+        ensure 'y i p',
           text: "\nParagraph-1\nParagraph-1\nParagraph-1\n\n"
           cursor: [1, 0]
           register: '"': text: "Paragraph-1\nParagraph-1\nParagraph-1\n"
 
       it "selects inside the current paragraph in visual mode", ->
-        ensure 'vip',
+        ensure 'v i p',
           selectedScreenRange: [[1, 0], [4, 0]]
     describe "a-paragraph", ->
       beforeEach ->
@@ -1043,13 +1044,13 @@ describe "TextObject", ->
           cursor: [3, 2]
 
       it "applies operators around the current paragraph in operator-pending mode", ->
-        ensure 'yap',
+        ensure 'y a p',
           text: "text\n\nParagraph-1\nParagraph-1\nParagraph-1\n\nmoretext"
           cursor: [2, 0]
           register: '"': text: "Paragraph-1\nParagraph-1\nParagraph-1\n\n"
 
       it "selects around the current paragraph in visual mode", ->
-        ensure 'vap',
+        ensure 'v a p',
           selectedScreenRange: [[2, 0], [6, 0]]
 
   describe 'Comment', ->
@@ -1065,25 +1066,25 @@ describe "TextObject", ->
     describe 'inner-comment', ->
       it 'select inside comment block', ->
         set cursor: [0, 0]
-        ensure 'vi/',
+        ensure 'v i /',
           selectedText: '# This\n# is\n# Comment\n'
           selectedBufferRange: [[0, 0], [3, 0]]
 
       it 'select one line comment', ->
         set cursor: [4, 0]
-        ensure 'vi/',
+        ensure 'v i /',
           selectedText: '# One line comment\n'
           selectedBufferRange: [[4, 0], [5, 0]]
 
       it 'not select non-comment line', ->
         set cursor: [6, 0]
-        ensure 'vi/',
+        ensure 'v i /',
           selectedText: '# Comment\n# border\n'
           selectedBufferRange: [[6, 0], [8, 0]]
     describe 'a-comment', ->
       it 'include blank line when selecting comment', ->
         set cursor: [0, 0]
-        ensure 'va/',
+        ensure 'v a /',
           selectedText: """
           # This
           # is
@@ -1109,12 +1110,12 @@ describe "TextObject", ->
     describe 'inner-indentation', ->
       it 'select lines with deeper indent-level', ->
         set cursor: [12, 0]
-        ensure 'vii',
+        ensure 'v i i',
           selectedBufferRange: [[12, 0], [15, 0]]
     describe 'a-indentation', ->
       it 'wont stop on blank line when selecting indent', ->
         set cursor: [12, 0]
-        ensure 'vai',
+        ensure 'v a i',
           selectedBufferRange: [[10, 0], [27, 0]]
 
   describe 'Fold', ->
@@ -1133,30 +1134,30 @@ describe "TextObject", ->
     describe 'inner-fold', ->
       it "select inner range of fold", ->
         set cursor: [13, 0]
-        ensure 'viz', selectedBufferRange: rangeForRows(10, 25)
+        ensure 'v i z', selectedBufferRange: rangeForRows(10, 25)
 
       it "select inner range of fold", ->
         set cursor: [19, 0]
-        ensure 'viz', selectedBufferRange: rangeForRows(19, 23)
+        ensure 'v i z', selectedBufferRange: rangeForRows(19, 23)
 
       it "can expand selection", ->
         set cursor: [23, 0]
         keystroke 'v'
-        ensure 'iz', selectedBufferRange: rangeForRows(23, 23)
-        ensure 'iz', selectedBufferRange: rangeForRows(19, 23)
-        ensure 'iz', selectedBufferRange: rangeForRows(10, 25)
-        ensure 'iz', selectedBufferRange: rangeForRows(9, 28)
+        ensure 'i z', selectedBufferRange: rangeForRows(23, 23)
+        ensure 'i z', selectedBufferRange: rangeForRows(19, 23)
+        ensure 'i z', selectedBufferRange: rangeForRows(10, 25)
+        ensure 'i z', selectedBufferRange: rangeForRows(9, 28)
 
       describe "when startRow of selection is on fold startRow", ->
         it 'select outer fold(skip)', ->
           set cursor: [20, 7]
-          ensure 'viz', selectedBufferRange: rangeForRows(19, 23)
+          ensure 'v i z', selectedBufferRange: rangeForRows(19, 23)
 
       describe "when endRow of selection exceeds fold endRow", ->
         it "doesn't matter, select fold based on startRow of selection", ->
           set cursor: [20, 0]
-          ensure 'VG', selectedBufferRange: rangeForRows(20, 30)
-          ensure 'iz', selectedBufferRange: rangeForRows(19, 23)
+          ensure 'V G', selectedBufferRange: rangeForRows(20, 30)
+          ensure 'i z', selectedBufferRange: rangeForRows(19, 23)
 
       describe "when indent level of fold startRow and endRow is same", ->
         beforeEach ->
@@ -1170,36 +1171,36 @@ describe "TextObject", ->
 
         it "doesn't select fold endRow", ->
           set cursor: [5, 0]
-          ensure 'viz', selectedBufferRange: rangeForRows(5, 6)
-          ensure 'az', selectedBufferRange: rangeForRows(4, 7)
+          ensure 'v i z', selectedBufferRange: rangeForRows(5, 6)
+          ensure 'a z', selectedBufferRange: rangeForRows(4, 7)
 
     describe 'a-fold', ->
       it 'select fold row range', ->
         set cursor: [13, 0]
-        ensure 'vaz', selectedBufferRange: rangeForRows(9, 25)
+        ensure 'v a z', selectedBufferRange: rangeForRows(9, 25)
 
       it 'select fold row range', ->
         set cursor: [19, 0]
-        ensure 'vaz', selectedBufferRange: rangeForRows(18, 23)
+        ensure 'v a z', selectedBufferRange: rangeForRows(18, 23)
 
       it 'can expand selection', ->
         set cursor: [23, 0]
         keystroke 'v'
-        ensure 'az', selectedBufferRange: rangeForRows(22, 23)
-        ensure 'az', selectedBufferRange: rangeForRows(18, 23)
-        ensure 'az', selectedBufferRange: rangeForRows(9, 25)
-        ensure 'az', selectedBufferRange: rangeForRows(8, 28)
+        ensure 'a z', selectedBufferRange: rangeForRows(22, 23)
+        ensure 'a z', selectedBufferRange: rangeForRows(18, 23)
+        ensure 'a z', selectedBufferRange: rangeForRows(9, 25)
+        ensure 'a z', selectedBufferRange: rangeForRows(8, 28)
 
       describe "when startRow of selection is on fold startRow", ->
         it 'select outer fold(skip)', ->
           set cursor: [20, 7]
-          ensure 'vaz', selectedBufferRange: rangeForRows(18, 23)
+          ensure 'v a z', selectedBufferRange: rangeForRows(18, 23)
 
       describe "when endRow of selection exceeds fold endRow", ->
         it "doesn't matter, select fold based on startRow of selection", ->
           set cursor: [20, 0]
-          ensure 'VG', selectedBufferRange: rangeForRows(20, 30)
-          ensure 'az', selectedBufferRange: rangeForRows(18, 23)
+          ensure 'V G', selectedBufferRange: rangeForRows(20, 30)
+          ensure 'a z', selectedBufferRange: rangeForRows(18, 23)
 
   # Although following test picks specific language, other langauages are alsoe supported.
   describe 'Function', ->
@@ -1231,11 +1232,11 @@ describe "TextObject", ->
 
       describe 'inner-function for coffee', ->
         it 'select except start row', ->
-          ensure 'vif', selectedBufferRange: [[3, 0], [6, 0]]
+          ensure 'v i f', selectedBufferRange: [[3, 0], [6, 0]]
 
       describe 'a-function for coffee', ->
         it 'select function', ->
-          ensure 'vaf', selectedBufferRange: [[2, 0], [6, 0]]
+          ensure 'v a f', selectedBufferRange: [[2, 0], [6, 0]]
 
     describe 'ruby', ->
       pack = 'language-ruby'
@@ -1264,10 +1265,10 @@ describe "TextObject", ->
 
       describe 'inner-function for ruby', ->
         it 'select except start row', ->
-          ensure 'vif', selectedBufferRange: [[3, 0], [6, 0]]
+          ensure 'v i f', selectedBufferRange: [[3, 0], [6, 0]]
       describe 'a-function for ruby', ->
         it 'select function', ->
-          ensure 'vaf', selectedBufferRange: [[2, 0], [7, 0]]
+          ensure 'v a f', selectedBufferRange: [[2, 0], [7, 0]]
 
     describe 'go', ->
       pack = 'language-go'
@@ -1296,11 +1297,11 @@ describe "TextObject", ->
 
       describe 'inner-function for go', ->
         it 'select except start row', ->
-          ensure 'vif', selectedBufferRange: [[3, 0], [6, 0]]
+          ensure 'v i f', selectedBufferRange: [[3, 0], [6, 0]]
 
       describe 'a-function for go', ->
         it 'select function', ->
-          ensure 'vaf', selectedBufferRange: [[2, 0], [7, 0]]
+          ensure 'v a f', selectedBufferRange: [[2, 0], [7, 0]]
 
   describe 'CurrentLine', ->
     beforeEach ->
@@ -1314,17 +1315,17 @@ describe "TextObject", ->
     describe 'inner-current-line', ->
       it 'select current line without including last newline', ->
         set cursor: [0, 0]
-        ensure 'vil', selectedText: 'This is'
+        ensure 'v i l', selectedText: 'This is'
       it 'also skip leading white space', ->
         set cursor: [1, 0]
-        ensure 'vil', selectedText: 'multi line'
+        ensure 'v i l', selectedText: 'multi line'
     describe 'a-current-line', ->
       it 'select current line without including last newline as like `vil`', ->
         set cursor: [0, 0]
-        ensure 'val', selectedText: 'This is'
+        ensure 'v a l', selectedText: 'This is'
       it 'wont skip leading white space not like `vil`', ->
         set cursor: [1, 0]
-        ensure 'val', selectedText: '  multi line'
+        ensure 'v a l', selectedText: '  multi line'
 
   describe 'Entire', ->
     text = """
@@ -1337,15 +1338,15 @@ describe "TextObject", ->
     describe 'inner-entire', ->
       it 'select entire buffer', ->
         ensure 'escape', selectedText: ''
-        ensure 'vie', selectedText: text
+        ensure 'v i e', selectedText: text
         ensure 'escape', selectedText: ''
-        ensure 'jjvie', selectedText: text
+        ensure 'j j v i e', selectedText: text
     describe 'a-entire', ->
       it 'select entire buffer', ->
         ensure 'escape', selectedText: ''
-        ensure 'vae', selectedText: text
+        ensure 'v a e', selectedText: text
         ensure 'escape', selectedText: ''
-        ensure 'jjvae', selectedText: text
+        ensure 'j j v a e', selectedText: text
 
   describe 'SearchMatchForward, SearchBackwards', ->
     text = """
@@ -1362,12 +1363,12 @@ describe "TextObject", ->
 
     describe 'gn from normal mode', ->
       it 'select ranges matches to last search pattern and extend selection', ->
-        ensure 'gn',
+        ensure 'g n',
           cursor: [1, 5]
           mode: ['visual', 'characterwise']
           selectionIsReversed: false
           selectedText: 'abc'
-        ensure 'gn',
+        ensure 'g n',
           selectionIsReversed: false
           mode: ['visual', 'characterwise']
           selectedText: """
@@ -1375,7 +1376,7 @@ describe "TextObject", ->
             2   xxx yyy
             3 xxx abc
             """
-        ensure 'gn',
+        ensure 'g n',
           selectionIsReversed: false
           mode: ['visual', 'characterwise']
           selectedText: """
@@ -1384,7 +1385,7 @@ describe "TextObject", ->
             3 xxx abc
             4 abc
             """
-        ensure 'gn', # Do nothing
+        ensure 'g n', # Do nothing
           selectionIsReversed: false
           mode: ['visual', 'characterwise']
           selectedText: """
@@ -1397,19 +1398,19 @@ describe "TextObject", ->
       beforeEach ->
         set cursor: [4, 3]
       it 'select ranges matches to last search pattern and extend selection', ->
-        ensure 'gN',
+        ensure 'g N',
           cursor: [4, 2]
           mode: ['visual', 'characterwise']
           selectionIsReversed: true
           selectedText: 'abc'
-        ensure 'gN',
+        ensure 'g N',
           selectionIsReversed: true
           mode: ['visual', 'characterwise']
           selectedText: """
             abc
             4 abc
             """
-        ensure 'gN',
+        ensure 'g N',
           selectionIsReversed: true
           mode: ['visual', 'characterwise']
           selectedText: """
@@ -1418,7 +1419,7 @@ describe "TextObject", ->
             3 xxx abc
             4 abc
             """
-        ensure 'gN', # Do nothing
+        ensure 'g N', # Do nothing
           selectionIsReversed: true
           mode: ['visual', 'characterwise']
           selectedText: """
@@ -1429,7 +1430,7 @@ describe "TextObject", ->
             """
     describe 'as operator target', ->
       it 'delete next occurence of last search pattern', ->
-        ensure 'dgn',
+        ensure 'd g n',
           cursor: [1, 2]
           mode: 'normal'
           text: """
@@ -1460,7 +1461,7 @@ describe "TextObject", ->
             4 \n
             """.replace('_', ' ') # To prevent trailing space remved on save.
       it 'change next occurence of last search pattern', ->
-        ensure 'cgn',
+        ensure 'c g n',
           cursor: [1, 2]
           mode: 'insert'
           text: """
@@ -1472,7 +1473,7 @@ describe "TextObject", ->
             """
         keystroke 'escape'
         set cursor: [4, 0]
-        ensure 'cgN',
+        ensure 'c g N',
           cursor: [3, 6]
           mode: 'insert'
           text: """
