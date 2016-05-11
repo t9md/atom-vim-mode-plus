@@ -613,6 +613,16 @@ smartScrollToBufferPosition = (editor, point) ->
   center = (onePageDown < target) or (target < onePageUp)
   editor.scrollToBufferPosition(point, {center})
 
+matchScopes = (editorElement, scopes) ->
+  classes = scopes.map (scope) -> scope.split('.')
+
+  for classNames in classes
+    containsCount = 0
+    for className in classNames
+      containsCount += 1 if editorElement.classList.contains(className)
+    return true if containsCount is classNames.length
+  false
+
 # Debugging purpose
 # -------------------------
 logGoalColumnForSelection = (subject, selection) ->
@@ -742,6 +752,7 @@ module.exports = {
   registerElement
   sortComparable
   smartScrollToBufferPosition
+  matchScopes
   moveCursorDownBuffer
   moveCursorUpBuffer
 

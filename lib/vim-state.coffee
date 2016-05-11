@@ -6,7 +6,7 @@ settings = require './settings'
 globalState = require './global-state'
 {HoverElement} = require './hover'
 {InputElement, SearchInputElement} = require './input'
-{haveSomeSelection, highlightRanges, getVisibleBufferRange} = require './utils'
+{haveSomeSelection, highlightRanges, getVisibleBufferRange, matchScopes} = require './utils'
 swrap = require './selection-wrapper'
 
 OperationStack = require './operation-stack'
@@ -51,7 +51,7 @@ class VimState
       @refreshHighlightSearch()
 
     @editorElement.classList.add packageScope
-    if settings.get('startInInsertMode')
+    if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
       @activate('insert')
     else
       @activate('normal')
@@ -291,22 +291,11 @@ class VimState
       class: 'vim-mode-plus-highlight-search'
     markers
 
-  shouldSuppressHighlightSearch: ->
-    scopes = settings.get('highlightSearchExcludeScopes')
-    classes = scopes.map (scope) -> scope.split('.')
-
-    for classNames in classes
-      containsCount = 0
-      for className in classNames
-        containsCount += 1 if @editorElement.classList.contains(className)
-      return true if containsCount is classNames.length
-    false
-
   refreshHighlightSearch: ->
     [startRow, endRow] = @editorElement.getVisibleRowRange()
     return unless scanRange = getVisibleBufferRange(@editor)
     @clearHighlightSearch()
-    return if @shouldSuppressHighlightSearch()
+    return if matchScopes(@editorElement, settings.get('highlightSearchExcludeScopes'))
 
     if settings.get('highlightSearch') and @main.highlightSearchPattern?
       @highlightSearchMarkers = @highlightSearch(@main.highlightSearchPattern, scanRange)
