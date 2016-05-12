@@ -1059,10 +1059,10 @@ class MoveToPreviousFoldStart extends Motion
   direction: 'prev'
 
   initialize: ->
-    @rows = @getFoldRow(@which)
+    @rows = @getFoldRows(@which)
     @rows.reverse() if @direction is 'prev'
 
-  getFoldRow: (which) ->
+  getFoldRows: (which) ->
     index = if which is 'start' then 0 else 1
     rows = getCodeFoldRowRanges(@editor).map (rowRange) ->
       rowRange[index]
