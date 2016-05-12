@@ -278,7 +278,8 @@ class LowerCase extends TransformString
   getNewText: (text) ->
     text.toLowerCase()
 
-class SplitCharacter extends TransformString
+# DUP meaning with SplitString need consolidate.
+class SplitByCharacter extends TransformString
   @extend()
   getNewText: (text) ->
     text.split('').join(' ')
