@@ -1,3 +1,7 @@
+# 0.40.0:
+- Improve: Test spec now support more concise keystroke syntax and all spec rewritten to use new keystroke #270
+- New: add experimental `startInInsertModeScopes` configuration to selectively start in `insert-mode` for specified scopes.
+
 # 0.39.0:
 - Improve: Now selectAllInRangeMarker can pick word from visual selection.
 - Improve: selectAllInRangeMarker can switch regex's word boundary option \b based if in visual-mode.
