@@ -15,31 +15,36 @@ describe "Scrolling", ->
 
   describe "scrolling keybindings", ->
     beforeEach ->
-      editor.setText("1\n2\n3\n4\n5\n6\n7\n8\n9\n10")
-      spyOn(editorElement, 'getFirstVisibleScreenRow').andReturn(2)
-      spyOn(editorElement, 'getLastVisibleScreenRow').andReturn(8)
-      spyOn(editor, 'getLineHeightInPixels').andReturn(10)
-      spyOn(editorElement, 'getScrollTop').andReturn(100)
-      spyOn(editorElement, 'setScrollTop')
-      spyOn(editor, 'setCursorScreenPosition')
+      set
+        cursor: [1, 2]
+        text: """
+          100
+          200
+          300
+          400
+          500
+          600
+          700
+          800
+          900
+          1000
+        """
+      editorElement.setHeight(editorElement.getHeight() * 4 / 10)
+      expect(editor.getVisibleRowRange()).toEqual [0, 4]
 
-    describe "the ctrl-e keybinding", ->
-      beforeEach ->
-        spyOn(editor, 'getCursorScreenPosition').andReturn({row: 3, column: 0})
+    describe "the ctrl-e and ctrl-y keybindings", ->
+      it "moves the screen up and down by one and keeps cursor onscreen", ->
+        ensure 'ctrl-e', cursor: [2, 2]
+        expect(editor.getFirstVisibleScreenRow()).toBe 1
+        expect(editor.getLastVisibleScreenRow()).toBe 5
 
-      it "moves the screen down by one and keeps cursor onscreen", ->
-        keystroke 'ctrl-e'
-        expect(editorElement.setScrollTop).toHaveBeenCalledWith(110)
-        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([4, 0])
+        ensure '2 ctrl-e', cursor: [4, 2]
+        expect(editor.getFirstVisibleScreenRow()).toBe 3
+        expect(editor.getLastVisibleScreenRow()).toBe 7
 
-    describe "the ctrl-y keybinding", ->
-      beforeEach ->
-        spyOn(editor, 'getCursorScreenPosition').andReturn({row: 6, column: 0})
-
-      it "moves the screen up by one and keeps the cursor onscreen", ->
-        keystroke 'ctrl-y'
-        expect(editorElement.setScrollTop).toHaveBeenCalledWith(90)
-        expect(editor.setCursorScreenPosition).toHaveBeenCalledWith([5, 0])
+        ensure '2 ctrl-y', cursor: [2, 2]
+        expect(editor.getFirstVisibleScreenRow()).toBe 1
+        expect(editor.getLastVisibleScreenRow()).toBe 5
 
   describe "scroll cursor keybindings", ->
     beforeEach ->

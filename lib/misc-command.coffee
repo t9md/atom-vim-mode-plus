@@ -151,30 +151,34 @@ class Scroll extends MiscCommand
 # ctrl-e scroll lines downwards
 class ScrollDown extends Scroll
   @extend()
-  direction: 'down'
 
   execute: ->
-    amountInPixel = @editor.getLineHeightInPixels() * @getCount()
-    scrollTop = @editorElement.getScrollTop()
-    switch @direction
-      when 'down' then scrollTop += amountInPixel
-      when 'up'   then scrollTop -= amountInPixel
-    @editorElement.setScrollTop scrollTop
-    @keepCursorOnScreen?()
+    count = @getCount()
+    oldFirstRow = @editor.getFirstVisibleScreenRow()
+    @editor.setFirstVisibleScreenRow(oldFirstRow + count)
+    newFirstRow = @editor.getFirstVisibleScreenRow()
 
-  keepCursorOnScreen: ->
+    margin = @editor.getVerticalScrollMargin()
     {row, column} = @editor.getCursorScreenPosition()
-    newRow =
-      if row < (rowMin = @getFirstVisibleScreenRow() + @scrolloff)
-        rowMin
-      else if row > (rowMax = @getLastVisibleScreenRow() - (@scrolloff + 1))
-        rowMax
-    @editor.setCursorScreenPosition [newRow, column] if newRow?
+    if row < (newFirstRow + margin)
+      newPoint = [[row + count], column]
+      @editor.setCursorScreenPosition(newPoint, autoscroll: false)
 
 # ctrl-y scroll lines upwards
-class ScrollUp extends ScrollDown
+class ScrollUp extends Scroll
   @extend()
-  direction: 'up'
+
+  execute: ->
+    count = @getCount()
+    oldFirstRow = @editor.getFirstVisibleScreenRow()
+    @editor.setFirstVisibleScreenRow(oldFirstRow - count)
+    newLastRow = @editor.getLastVisibleScreenRow()
+
+    margin = @editor.getVerticalScrollMargin()
+    {row, column} = @editor.getCursorScreenPosition()
+    if row >= (newLastRow - margin)
+      newPoint = [[row - count], column]
+      @editor.setCursorScreenPosition(newPoint, autoscroll: false)
 
 # Scroll without Cursor Position change.
 # -------------------------
