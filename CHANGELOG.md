@@ -1,3 +1,7 @@
+# 0.40.1:
+- Breaking: Rename `split-character` to `split-by-character`.
+- Fix: `ctrl-y`, `ctrl-e`. Just follow original vim-mode fix. #275
+
 # 0.40.0:
 - Improve: Test spec now support more concise keystroke syntax and all spec rewritten to use new keystroke #270
 - New: add experimental `startInInsertModeScopes` configuration to selectively start in `insert-mode` for specified scopes.
