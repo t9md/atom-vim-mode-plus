@@ -37,7 +37,7 @@ class MarkManager
 
     if @marks[name]
       marker = @marks[name]
-      marker.destroy();
+      marker.destroy()
       @marks[name] = null
 
     @marks[name] = @editor.markBufferPosition(@editor.clipBufferPosition(point))
