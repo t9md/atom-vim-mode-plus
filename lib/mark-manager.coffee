@@ -34,6 +34,18 @@ class MarkManager
   # [FIXME] Need to support Global mark with capital name [A-Z]
   set: (name, point) ->
     return unless @isValid(name)
+
+    if @marks[name]
+      marker = @marks[name]
+      marker.destroy()
+      @marks[name] = null
+
     @marks[name] = @editor.markBufferPosition(@editor.clipBufferPosition(point))
+    @decorate(name)
+
+  decorate: (name) ->
+    marker = @marks[name]
+    @editor.decorateMarker(marker, type: "line-number", class: "vim-mode-plus-marker-gutter")
+    @editor.decorateMarker(marker, type: "line-number", class: "vim-mode-plus-marker-gutter-" + name)
 
 module.exports = MarkManager
