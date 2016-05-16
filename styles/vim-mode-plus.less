@@ -286,3 +286,65 @@ atom-workspace.vim-mode-plus-pane-maximized {
     font-weight: bold;
   }
 }
+
+// Marker colors
+// =========================
+
+.gutter-highlight(@color) {
+  border-left: 2px solid @color !important;
+  // background-color: @color !important;
+  color: @color !important;
+}
+
+atom-text-editor::shadow .gutter .vim-mode-plus-marker-gutter {
+  @candy-red: #FF3155;
+  @candy-blue: #209fd3;
+  @candy-orange: #FFAF42;
+  @candy-yellow: #FFED5E;
+  @candy-green: #49F770;
+  @candy-purple: #BF00FF;
+
+  &.vim-mode-plus-marker-gutter-f, &.vim-mode-plus-marker-gutter-F,
+  &.vim-mode-plus-marker-gutter-k, &.vim-mode-plus-marker-gutter-K,
+  &.vim-mode-plus-marker-gutter-p, &.vim-mode-plus-marker-gutter-P,
+  &.vim-mode-plus-marker-gutter-u, &.vim-mode-plus-marker-gutter-U {
+    .gutter-highlight(@candy-red);
+  }
+
+  &.vim-mode-plus-marker-gutter-b, &.vim-mode-plus-marker-gutter-B,
+  &.vim-mode-plus-marker-gutter-g, &.vim-mode-plus-marker-gutter-G,
+  &.vim-mode-plus-marker-gutter-l, &.vim-mode-plus-marker-gutter-L,
+  &.vim-mode-plus-marker-gutter-q, &.vim-mode-plus-marker-gutter-Q,
+  &.vim-mode-plus-marker-gutter-v, &.vim-mode-plus-marker-gutter-V {
+    .gutter-highlight(@candy-blue);
+  }
+
+  &.vim-mode-plus-marker-gutter-c, &.vim-mode-plus-marker-gutter-C,
+  &.vim-mode-plus-marker-gutter-h, &.vim-mode-plus-marker-gutter-H,
+  &.vim-mode-plus-marker-gutter-m, &.vim-mode-plus-marker-gutter-M,
+  &.vim-mode-plus-marker-gutter-r, &.vim-mode-plus-marker-gutter-R,
+  &.vim-mode-plus-marker-gutter-w, &.vim-mode-plus-marker-gutter-W {
+    .gutter-highlight(@candy-orange);
+  }
+
+  &.vim-mode-plus-marker-gutter-d, &.vim-mode-plus-marker-gutter-D,
+  &.vim-mode-plus-marker-gutter-i, &.vim-mode-plus-marker-gutter-I,
+  &.vim-mode-plus-marker-gutter-n, &.vim-mode-plus-marker-gutter-N,
+  &.vim-mode-plus-marker-gutter-s, &.vim-mode-plus-marker-gutter-S,
+  &.vim-mode-plus-marker-gutter-x, &.vim-mode-plus-marker-gutter-X {
+    .gutter-highlight(@candy-yellow);
+  }
+
+  &.vim-mode-plus-marker-gutter-e, &.vim-mode-plus-marker-gutter-E,
+  &.vim-mode-plus-marker-gutter-j, &.vim-mode-plus-marker-gutter-J,
+  &.vim-mode-plus-marker-gutter-o, &.vim-mode-plus-marker-gutter-O,
+  &.vim-mode-plus-marker-gutter-t, &.vim-mode-plus-marker-gutter-T,
+  &.vim-mode-plus-marker-gutter-y, &.vim-mode-plus-marker-gutter-Y {
+    .gutter-highlight(@candy-green);
+  }
+
+  &.vim-mode-plus-marker-gutter-a, &.vim-mode-plus-marker-gutter-A,
+  &.vim-mode-plus-marker-gutter-z, &.vim-mode-plus-marker-gutter-Z {
+    .gutter-highlight(@candy-purple);
+  }
+}
