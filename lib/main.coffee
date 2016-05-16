@@ -47,6 +47,7 @@ module.exports =
       editorSubscriptions.add editor.onDidStopChanging ->
         vimState.refreshHighlightSearch()
       @subscribe(editorSubscriptions)
+      @emitter.emit('did-add-vim-state', vimState)
 
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
       if atom.workspace.isTextEditor(item)
@@ -70,6 +71,20 @@ module.exports =
 
   onDidSetLastSearchPattern: (fn) -> @emitter.on('did-set-last-search-pattern', fn)
   emitDidSetLastSearchPattern: (fn) -> @emitter.emit('did-set-last-search-pattern')
+
+  # * `fn` {Function} to be called when vimState instance was created.
+  #  Usage:
+  #   onDidAddVimState (vimState) -> do something..
+  # Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
+  onDidAddVimState: (fn) -> @emitter.on('did-add-vim-state', fn)
+
+  # * `fn` {Function} to be called with all current and future vimState
+  #  Usage:
+  #   observeVimStates (vimState) -> do something..
+  # Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
+  observeVimStates: (fn) ->
+    @vimStatesByEditor.forEach(fn)
+    @onDidAddVimState(fn)
 
   refreshHighlightSearchForVisibleEditors: ->
     for editor in getVisibleEditors()
@@ -169,3 +184,5 @@ module.exports =
     Base: Base
     getGlobalState: @getGlobalState.bind(this)
     getEditorState: @getEditorState.bind(this)
+    observeVimStates: @observeVimStates.bind(this)
+    onDidAddVimState: @onDidAddVimState.bind(this)

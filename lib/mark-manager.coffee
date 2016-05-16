@@ -34,6 +34,8 @@ class MarkManager
   # [FIXME] Need to support Global mark with capital name [A-Z]
   set: (name, point) ->
     return unless @isValid(name)
-    @marks[name] = @editor.markBufferPosition(@editor.clipBufferPosition(point))
+    bufferPosition = @editor.clipBufferPosition(point)
+    @marks[name] = @editor.markBufferPosition(bufferPosition)
+    @vimState.emitter.emit('did-set-mark', {name, bufferPosition})
 
 module.exports = MarkManager

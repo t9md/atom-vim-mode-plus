@@ -172,6 +172,15 @@ class VimState
   onDidFailToSetTarget: (fn) -> @emitter.on('did-fail-to-set-target', fn)
   onDidDestroy: (fn) -> @emitter.on('did-destroy', fn)
 
+  # * `fn` {Function} to be called when mark was set.
+  #   * `name` Name of mark such as 'a'.
+  #   * `bufferPosition`: buferPosition where mark was set.
+  # Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
+  #
+  #  Usage:
+  #   onDidSetMark ({name, bufferPosition}) -> do something..
+  onDidSetMark: (fn) -> @emitter.on('did-set-mark', fn)
+
   destroy: ->
     return if @destroyed
     @destroyed = true
