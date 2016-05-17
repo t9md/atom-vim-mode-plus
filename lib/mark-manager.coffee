@@ -36,6 +36,7 @@ class MarkManager
     return unless @isValid(name)
     bufferPosition = @editor.clipBufferPosition(point)
     @marks[name] = @editor.markBufferPosition(bufferPosition)
-    @vimState.emitter.emit('did-set-mark', {name, bufferPosition})
+    event = {name, bufferPosition, @editor}
+    @vimState.emitter.emit('did-set-mark', event)
 
 module.exports = MarkManager

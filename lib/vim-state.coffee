@@ -174,7 +174,8 @@ class VimState
 
   # * `fn` {Function} to be called when mark was set.
   #   * `name` Name of mark such as 'a'.
-  #   * `bufferPosition`: buferPosition where mark was set.
+  #   * `bufferPosition`: bufferPosition where mark was set.
+  #   * `editor`: editor where mark was set.
   # Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
   #
   #  Usage:
