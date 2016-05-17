@@ -1,3 +1,6 @@
+# 0.41.0:
+- New: Add service `observeVimStates`, `onDidAddVimState` and `vimState::onDidSetMark` #276
+
 # 0.40.1:
 - Breaking: Rename `split-character` to `split-by-character`.
 - Fix: `ctrl-y`, `ctrl-e`. Just follow original vim-mode fix. #275
