@@ -141,20 +141,36 @@ describe "Operator general", ->
         ensure 'd d', text: "  abcde\n", cursor: [0, 2]
 
     describe "undo behavior", ->
+      originalText = "12345\nabcde\nABCDE\nQWERT"
       beforeEach ->
-        set text: "12345\nabcde\nABCDE\nQWERT", cursor: [1, 1]
+
+        set text: originalText, cursor: [1, 1]
 
       it "undoes both lines", ->
-        ensure 'd 2 d u', text: "12345\nabcde\nABCDE\nQWERT", selectedText: ''
+        ensure 'd 2 d u', text: originalText, selectedText: ''
 
       describe "with multiple cursors", ->
         beforeEach ->
           set cursor: [[1, 1], [0, 0]]
 
-        it "is undone as one operation", ->
-          ensure 'd l u',
-            text: "12345\nabcde\nABCDE\nQWERT"
-            selectedText: ['', '']
+        describe "setCursorToStartOfChangeOnUndoRedo is true(default)", ->
+          # [FIXME] Should keep cursor?. so guranularity is not perfect in multi-cursors
+          # And ensure set position to start.
+          it "is undone as one operation and clear cursors", ->
+            ensure 'd l u',
+              text: "12345\nabcde\nABCDE\nQWERT"
+              selectedText: ['']
+              numCursors: 1
+
+        describe "setCursorToStartOfChangeOnUndoRedo is false", ->
+          beforeEach ->
+            settings.set('setCursorToStartOfChangeOnUndoRedo', false)
+
+          it "is undone as one operation", ->
+            ensure 'd l u',
+              text: "12345\nabcde\nABCDE\nQWERT"
+              selectedText: ['', '']
+              numCursors: 2
 
     describe "when followed by a w", ->
       it "deletes the next word until the end of the line and exits operator-pending mode", ->

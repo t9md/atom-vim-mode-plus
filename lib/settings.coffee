@@ -20,7 +20,7 @@ module.exports = new Settings 'vim-mode-plus',
   setCursorToStartOfChangeOnUndoRedo:
     order: 1
     type: 'boolean'
-    default: false  # TODO: change 'true' after evaluation.
+    default: true
   useClipboardAsDefaultRegister:
     order: 2
     type: 'boolean'
@@ -111,7 +111,7 @@ module.exports = new Settings 'vim-mode-plus',
   flashOnUndoRedo:
     order: 20
     type: 'boolean'
-    default: false
+    default: true
   flashOnUndoRedoDuration:
     order: 21
     type: 'integer'
