@@ -334,8 +334,24 @@ class CompactSpaces extends TransformString
   @extend()
   @description: "Compact multiple spaces to single space"
   displayName: 'Compact space'
+  mutateSelection: (selection) ->
+    # Special care for commented row on linewise target.
+    # When selection is linewise range, skip mutation for commented row.
+    if swrap(selection).isLinewise()
+      text = ''
+      for row in swrap(selection).getRows()
+        lineText = @editor.getTextInBufferRange(@editor.bufferRangeForBufferRow(row, includeNewline: true))
+        if @editor.languageMode.isLineCommentedAtBufferRow(row)
+          text += lineText
+        else
+          text += @getNewText(lineText)
+    else
+      text = @getNewText(selection.getText(), selection)
+    selection.insertText(text, {@autoIndent})
+    @restorePoint(selection) if @setPoint
+
   getNewText: (text) ->
-    if isAllWhiteSpace(text)
+    if text.match(/^[ ]+$/gm)
       ' '
     else
       text.replace /^(\s*)(.*?)(\s*)$/gm, (m, leading, middle, trailing) ->
