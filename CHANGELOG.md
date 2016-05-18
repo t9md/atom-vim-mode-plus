@@ -1,3 +1,9 @@
+# 0.42.0:
+- Change Default: `setCursorToStartOfChangeOnUndoRedo` is now enabled by default.
+- Change Default: `flashOnUndoRedo` is now enabled by default.
+- Cleanup: Remove `pollyFillsToTextBufferHistory` since supported engine is already `>=1.7.0`.
+- Cleanup: Remove workaround for AutoIndent of single "\n" since v1.7.2 Atom-core includes this fix. #231
+
 # 0.41.0:
 - New: Add service `observeVimStates`, `onDidAddVimState` and `vimState::onDidSetMark` #276
 
