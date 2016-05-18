@@ -8,6 +8,7 @@ _ = require 'underscore-plus'
   moveCursorLeft, moveCursorRight
   highlightRanges, getNewTextRangeFromCheckpoint
   isEndsWithNewLineForBufferRow
+  isAllWhiteSpace
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -328,6 +329,17 @@ class DecodeUriComponent extends TransformString
   hover: icon: 'decodeURI', emoji: 'decodeURI'
   getNewText: (text) ->
     decodeURIComponent(text)
+
+class CompactSpaces extends TransformString
+  @extend()
+  @description: "Compact multiple spaces to single space"
+  displayName: 'Compact space'
+  getNewText: (text) ->
+    if isAllWhiteSpace(text)
+      ' '
+    else
+      text.replace /^(\s*)(.*?)(\s*)$/gm, (m, leading, middle, trailing) ->
+        leading + middle.split(/\s+/).join(' ') + trailing
 
 # -------------------------
 class TransformStringByExternalCommand extends TransformString

@@ -3,6 +3,7 @@
 - Change Default: `flashOnUndoRedo` is now enabled by default.
 - Cleanup: Remove `pollyFillsToTextBufferHistory` since supported engine is already `>=1.7.0`.
 - Cleanup: Remove workaround for AutoIndent of single "\n" since v1.7.2 Atom-core includes this fix. #231
+- New: CompactSpaces operator(`g space` by default). To compacts multiple space to single space, not touch leading, trailing spaces #279.
 
 # 0.41.0:
 - New: Add service `observeVimStates`, `onDidAddVimState` and `vimState::onDidSetMark` #276
