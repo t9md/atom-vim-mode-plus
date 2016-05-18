@@ -8,7 +8,7 @@ globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
 swrap = require './selection-wrapper'
-{getVisibleEditors, poliyFillsToTextBufferHistory} = require './utils'
+{getVisibleEditors} = require './utils'
 
 module.exports =
   config: settings.config
@@ -31,9 +31,6 @@ module.exports =
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini()
-      unless (history = editor.getBuffer().history).getChangesSinceCheckpoint?
-        poliyFillsToTextBufferHistory(history)
-
       vimState = new VimState(this, editor, @statusBarManager)
       @vimStatesByEditor.set(editor, vimState)
 

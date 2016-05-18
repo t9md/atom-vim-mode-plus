@@ -142,35 +142,6 @@ eachCursor = (editor, fn) ->
   for cursor in editor.getCursors()
     fn(cursor)
 
-# [FIXME] Polyfills: Remove after atom/text-buffer is updated
-poliyFillsToTextBufferHistory = (history) ->
-  Patch = null
-  History = history.constructor
-  History::getChangesSinceCheckpoint = (checkpointId) ->
-    checkpointIndex = null
-    patchesSinceCheckpoint = []
-
-    for entry, i in @undoStack by -1
-      break if checkpointIndex?
-
-      switch entry.constructor.name
-        when 'Checkpoint'
-          if entry.id is checkpointId
-            checkpointIndex = i
-        when 'Transaction'
-          Patch ?= entry.patch.constructor
-          patchesSinceCheckpoint.unshift(entry.patch)
-        when 'Patch'
-          Patch ?= entry.constructor
-          patchesSinceCheckpoint.unshift(entry)
-        else
-          throw new Error("Unexpected undo stack entry type: #{entry.constructor.name}")
-
-    if checkpointIndex?
-      Patch?.compose(patchesSinceCheckpoint)
-    else
-      null
-
 normalizePatchChanges = (changes) ->
   changes.map (change) ->
     start: Point.fromObject(change.newStart)
@@ -755,8 +726,6 @@ module.exports = {
   matchScopes
   moveCursorDownBuffer
   moveCursorUpBuffer
-
-  poliyFillsToTextBufferHistory
 
   # Debugging
   reportSelection,

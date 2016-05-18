@@ -1229,12 +1229,6 @@ class Change extends ActivateInsertMode
   trackChange: true
   supportInsertionCount: false
 
-  # [FIXME] #231 workaround until Selection::insertText("\n", {autoIndent: true}) auto-indent again.
-  getAutoIndentedTextForNewLine: (selection, text) ->
-    range = selection.getBufferRange()
-    desiredIndentLevel = @editor.languageMode.suggestedIndentForLineAtBufferRow(range.start.row, text)
-    @editor.buildIndentString(desiredIndentLevel) + text
-
   execute: ->
     @selectTarget()
     text = ''
@@ -1246,7 +1240,6 @@ class Change extends ActivateInsertMode
     @editor.transact =>
       for selection in @editor.getSelections()
         @setTextToRegisterForSelection(selection)
-        text = @getAutoIndentedTextForNewLine(selection, text) if text is "\n"
         range = selection.insertText(text, autoIndent: true)
         selection.cursor.moveLeft() unless range.isEmpty()
     super
