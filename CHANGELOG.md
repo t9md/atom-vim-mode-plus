@@ -1,4 +1,4 @@
-# 0.42.0:
+# 0.42.0: Big release not for feature, but because default setting change.
 - Change Default: `setCursorToStartOfChangeOnUndoRedo` is now enabled by default.
 - Change Default: `flashOnUndoRedo` is now enabled by default.
 - Cleanup: Remove `pollyFillsToTextBufferHistory` since supported engine is already `>=1.7.0`.
