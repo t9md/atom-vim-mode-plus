@@ -40,6 +40,9 @@ class ModeManager
   #  Use this method to change mode, DONT use other direct method.
   # -------------------------
   activate: (mode, submode=null) ->
+    # Avoid odd state(=visual-mode but selection is empty)
+    return if (mode is 'visual') and @editor.isEmpty()
+
     @emitter.emit 'will-activate-mode', {mode, submode}
 
     if (mode is 'visual') and (submode is @submode)
