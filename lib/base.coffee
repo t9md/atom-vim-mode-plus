@@ -107,8 +107,7 @@ class Base
     return if (last = @getCount()) < 1
 
     stopped = false
-    stop = ->
-      stopped = true
+    stop = -> stopped = true
     for count in [1..last]
       isFinal = count is last
       fn({count, isFinal, stop})
@@ -205,10 +204,11 @@ class Base
     {getEditorState} = service
     @subscriptions = new CompositeDisposable()
 
-    require(lib) for lib in [
+    [
       './operator', './motion', './text-object',
       './insert-mode', './misc-command'
-    ]
+    ].forEach(require)
+
     for __, klass of @getRegistries() when klass.isCommand()
       @subscriptions.add klass.registerCommand()
     @subscriptions
@@ -227,7 +227,7 @@ class Base
     registries[@name] = this
 
   @getClass: (name) ->
-    if klass = registries[name]
+    if (klass = registries[name])?
       klass
     else
       throw new Error("class '#{name}' not found")

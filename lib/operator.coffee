@@ -30,12 +30,11 @@ class Operator extends Base
   finalMode: "normal"
   finalSubmode: null
 
-  setMarkForChange: ({start, end}) ->
-    @vimState.mark.set('[', start)
-    @vimState.mark.set(']', end)
+  setMarkForChange: (range) ->
+    @vimState.mark.setRange('[', ']', range)
 
   needFlash: ->
-    if not @isMode('visual') and @flashTarget and settings.get('flashOnOperate')
+    if @flashTarget and (not @isMode('visual')) and settings.get('flashOnOperate')
       @getName() not in settings.get('flashOnOperateBlacklist')
     else
       false
@@ -66,7 +65,7 @@ class Operator extends Base
 
     # [important] intialized is not called when Repeated
     @initialize?()
-    @setTarget @new(@target) if _.isString(@target)
+    @setTarget(@new(@target)) if _.isString(@target)
 
   restorePoint: (selection) ->
     if @wasNeedStay
@@ -118,10 +117,8 @@ class Operator extends Base
     @setTextToRegister(selection.getText(), selection)
 
   setTextToRegister: (text, selection) ->
-    if @target.isLinewise?() and not text.endsWith('\n')
-      text += "\n"
-    if text
-      @vimState.register.set({text, selection})
+    text += "\n" if (@target.isLinewise?() and (not text.endsWith('\n')))
+    @vimState.register.set({text, selection}) if text
 
   flash: (ranges) ->
     highlightRanges @editor, ranges,
@@ -129,9 +126,9 @@ class Operator extends Base
       timeout: settings.get('flashOnOperateDuration')
 
   mutateSelections: (fn) ->
-    if @selectTarget()
-      @editor.transact =>
-        fn(selection) for selection in @editor.getSelections()
+    return unless @selectTarget()
+    @editor.transact =>
+      fn(selection) for selection in @editor.getSelections()
 
   execute: ->
     # We need to preserve selection before selection is cleared as a result of mutation.
@@ -142,8 +139,7 @@ class Operator extends Base
         @editor.getLastSelection()
       @vimState.modeManager.preservePreviousSelection(lastSelection)
 
-    @mutateSelections (selection) =>
-      @mutateSelection(selection)
+    @mutateSelections (selection) => @mutateSelection(selection)
     @activateMode(@finalMode, @finalSubmode)
 
 # -------------------------
@@ -154,14 +150,11 @@ class Select extends Operator
   execute: ->
     @selectTarget()
     return if @isMode('operator-pending') or @isMode('visual', 'blockwise')
-    if not @isMode('visual')
-      submode = swrap.detectVisualModeSubmode(@editor)
+    return if @isMode('visual') and (not @target.isAllowSubmodeChange?())
+
+    submode = swrap.detectVisualModeSubmode(@editor)
+    if submode? and not @isMode('visual', submode)
       @activateMode('visual', submode)
-    else
-      if @target.isAllowSubmodeChange?()
-        submode = swrap.detectVisualModeSubmode(@editor)
-        if submode? and not @isMode('visual', submode)
-          @activateMode('visual', submode)
 
 class SelectLatestChange extends Select
   @extend()
@@ -343,6 +336,7 @@ class CompactSpaces extends TransformString
     if text.match(/^[ ]+$/)
       ' '
     else
+      # Don't compact for leading and trailing white spaces.
       text.replace /^(\s*)(.*?)(\s*)$/gm, (m, leading, middle, trailing) ->
         leading + middle.split(/[ \t]+/).join(' ') + trailing
 
@@ -550,7 +544,7 @@ class Surround extends TransformString
     @processOperation()
 
   getPair: (input) ->
-    pair = _.detect @pairs, (pair) -> input in pair
+    pair = _.detect(@pairs, (pair) -> input in pair)
     pair ?= [input, input]
 
   surround: (text, pair) ->

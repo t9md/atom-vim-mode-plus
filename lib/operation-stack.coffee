@@ -13,7 +13,7 @@ class OperationStack
     Select ?= Base.getClass('Select')
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
 
-    # [Experimental] Cache for performance
+    # Cache for performance
     @currentSelection = new CurrentSelection(@vimState)
     @select = new Select(@vimState)
     @reset()
@@ -40,9 +40,10 @@ class OperationStack
     try
       # When identical operator repeated, it set target to MoveToRelativeLine.
       #  e.g. `dd`, `cc`, `gUgU`
-      klass = MoveToRelativeLine if (@peekTop()?.constructor is klass)
-
-      @stack.push @composeOperation(new klass(@vimState, properties))
+      if (@peekTop()?.constructor is klass)
+        klass = MoveToRelativeLine
+      operation = new klass(@vimState, properties)
+      @stack.push(@composeOperation(operation))
       @process()
     catch error
       @handleError(error)
@@ -77,16 +78,17 @@ class OperationStack
     catch error
       if error.instanceof?('OperatorError')
         @vimState.resetNormalMode()
-        return
       else
         throw error
 
   execute: (operation) ->
     execution = operation.execute()
     if execution instanceof Promise
-      onResolve = @finish.bind(this, operation)
-      onReject = @handleError.bind(this)
-      execution.then(onResolve).catch(onReject)
+      finish = => @finish(operation)
+      handleError = => @handleError()
+      execution
+        .then(finish)
+        .catch(handleError)
     else
       @finish(operation)
 
@@ -109,7 +111,7 @@ class OperationStack
 
   finish: (operation=null) ->
     @record(operation) if operation?.isRecordable()
-    @vimState.emitter.emit 'did-finish-operation'
+    @vimState.emitter.emit('did-finish-operation')
     if @vimState.isMode('normal')
       @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()

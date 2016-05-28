@@ -7,7 +7,6 @@ StatusBarManager = require './status-bar-manager'
 globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
-swrap = require './selection-wrapper'
 {getVisibleEditors} = require './utils'
 
 module.exports =
@@ -21,7 +20,6 @@ module.exports =
     @highlightSearchPattern = null
 
     @subscribe Base.init(@provideVimModePlus())
-    @subscribe swrap.init()
     @registerCommands()
     @registerVimStateCommands()
 

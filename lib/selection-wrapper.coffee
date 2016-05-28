@@ -2,7 +2,7 @@ _ = require 'underscore-plus'
 {Range, Disposable} = require 'atom'
 {isLinewiseRange} = require './utils'
 
-propertyStorage = null
+propertyStore = new Map
 
 getClipOptions = (editor, direction) ->
   if editor.displayLayer?
@@ -13,25 +13,12 @@ getClipOptions = (editor, direction) ->
       when 'forward' then {clip: direction, wrapBeyondNewlines: true}
 
 class SelectionWrapper
-  @init: ->
-    propertyStorage = new Map()
-    new Disposable ->
-      propertyStorage.clear()
-      propertyStorage = null
-
   constructor: (@selection) ->
 
-  hasProperties: ->
-    propertyStorage.has(@selection)
-
-  getProperties: ->
-    propertyStorage.get(@selection) ? {}
-
-  setProperties: (prop) ->
-    propertyStorage.set(@selection, prop)
-
-  resetProperties: ->
-    propertyStorage?.delete(@selection)
+  hasProperties: -> propertyStore.has(@selection)
+  getProperties: -> propertyStore.get(@selection) ? {}
+  setProperties: (prop) -> propertyStore.set(@selection, prop)
+  resetProperties: -> propertyStore?.delete(@selection)
 
   setBufferRangeSafely: (range) ->
     if range
@@ -99,22 +86,22 @@ class SelectionWrapper
       @setProperties(head: tail, tail: head)
 
   setReversedState: (reversed) ->
-    @setBufferRange @getBufferRange(), {autoscroll: true, reversed, preserveFolds: true}
+    options = {autoscroll: true, reversed, preserveFolds: true}
+    @setBufferRange(@getBufferRange(), options)
 
   getRows: ->
     [startRow, endRow] = @selection.getBufferRowRange()
     [startRow..endRow]
 
   getRowCount: ->
-    [startRow, endRow] = @selection.getBufferRowRange()
-    endRow - startRow + 1
+    @getRows().length
 
   selectRowRange: (rowRange) ->
     {editor} = @selection
     [startRow, endRow] = rowRange
     rangeStart = editor.bufferRangeForBufferRow(startRow, includeNewline: true)
     rangeEnd = editor.bufferRangeForBufferRow(endRow, includeNewline: true)
-    @setBufferRange rangeStart.union(rangeEnd), {preserveFolds: true}
+    @setBufferRange(rangeStart.union(rangeEnd), preserveFolds: true)
 
   # Native selection.expandOverLine is not aware of actual rowRange of selection.
   expandOverLine: (options={}) ->
@@ -231,9 +218,6 @@ class SelectionWrapper
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
-
-swrap.init = ->
-  SelectionWrapper.init()
 
 swrap.setReversedState = (editor, reversed) ->
   editor.getSelections().forEach (selection) ->

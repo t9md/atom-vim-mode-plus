@@ -24,8 +24,8 @@ class VimState
   Delegato.includeInto(this)
   destroyed: false
 
-  @delegatesProperty 'mode', 'submode', toProperty: 'modeManager'
-  @delegatesMethods 'isMode', 'activate', toProperty: 'modeManager'
+  @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
+  @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
 
   constructor: (@main, @editor, @statusBarManager) ->
     @editorElement = atom.views.getView(@editor)
@@ -39,9 +39,10 @@ class VimState
     @hover = new HoverElement().initialize(this)
     @hoverSearchCounter = new HoverElement().initialize(this)
     @searchHistory = new SearchHistoryManager(this)
-    @input = new InputElement().initialize(this)
 
+    @input = new InputElement().initialize(this)
     @searchInput = new SearchInputElement().initialize(this)
+
     @operationStack = new OperationStack(this)
     @cursorStyleManager = new CursorStyleManager(this)
     @blockwiseSelections = []
@@ -50,7 +51,7 @@ class VimState
     @highlightSearchSubscription = @editorElement.onDidChangeScrollTop =>
       @refreshHighlightSearch()
 
-    @editorElement.classList.add packageScope
+    @editorElement.classList.add(packageScope)
     if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
       @activate('insert')
     else
@@ -97,7 +98,7 @@ class VimState
   setCount: (number) ->
     @count ?= 0
     @count = (@count * 10) + number
-    @hover.add number
+    @hover.add(number)
     @toggleClassList('with-count', @hasCount())
 
   resetCount: ->
@@ -114,22 +115,16 @@ class VimState
 
   setInputChar: (char) ->
     switch @charInputAction
-      when 'save-mark' then @saveMark(char)
-      when 'move-to-mark' then @moveToMark(char)
-      when 'move-to-mark-line' then @moveToMarkLine(char)
+      when 'save-mark'
+        @mark.set(char, @editor.getCursorBufferPosition())
+      when 'move-to-mark'
+        @operationStack.run("MoveToMark", input: char)
+      when 'move-to-mark-line'
+        @operationStack.run("MoveToMarkLine", input: char)
     @resetCharInput()
 
   resetCharInput: ->
     @inputCharSubscriptions?.dispose()
-
-  saveMark: (char) ->
-    @mark.set(char, @editor.getCursorBufferPosition())
-
-  moveToMark: (char) ->
-    @operationStack.run("MoveToMark", input: char)
-
-  moveToMarkLine: (char) ->
-    @operationStack.run("MoveToMarkLine", input: char)
 
   # -------------------------
   toggleClassList: (className, bool) ->

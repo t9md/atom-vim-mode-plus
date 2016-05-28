@@ -86,7 +86,7 @@ isLinewiseRange = ({start, end}) ->
   (start.row isnt end.row) and (start.column is end.column is 0)
 
 isEndsWithNewLineForBufferRow = (editor, row) ->
-  {start, end} = editor.bufferRangeForBufferRow(row, {includeNewline: true})
+  {start, end} = editor.bufferRangeForBufferRow(row, includeNewline: true)
   end.isGreaterThan(start) and end.column is 0
 
 haveSomeSelection = (editor) ->
