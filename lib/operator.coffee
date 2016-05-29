@@ -293,6 +293,14 @@ class SnakeCase extends TransformString
   getNewText: (text) ->
     _.underscore(text)
 
+class PascalCase extends TransformString
+  @extend()
+  @description: "PascalCase -> pascal_case"
+  displayName: 'Pascalize'
+  hover: icon: ':pascal-case:', emoji: ':triangular_ruler:'
+  getNewText: (text) ->
+    _.capitalize(_.camelize(text))
+
 class DashCase extends TransformString
   @extend()
   displayName: 'Dasherize -'
