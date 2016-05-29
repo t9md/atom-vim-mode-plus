@@ -239,10 +239,8 @@ class Pair extends TextObject
 
   getPointToSearchFrom: (selection, searchFrom) ->
     switch searchFrom
-      when 'head'
-        swrap(selection).getNormalizedBufferPosition()
-      when 'start'
-        swrap(selection).getBufferPositionFor('start')
+      when 'head' then swrap(selection).getNormalizedBufferPosition()
+      when 'start' then swrap(selection).getBufferPositionFor('start')
 
   # Allow override @allowForwarding by 2nd argument.
   getRange: (selection, options={}) ->
@@ -257,7 +255,7 @@ class Pair extends TextObject
     pairInfo?.targetRange
 
   selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely @getRange(selection)
+    swrap(selection).setBufferRangeSafely(@getRange(selection))
 
 # -------------------------
 class AnyPair extends Pair
@@ -719,7 +717,7 @@ class LatestChange extends TextObject
     @vimState.mark.getRange('[', ']')
 
   selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely @getRange()
+    swrap(selection).setBufferRangeSafely(@getRange())
 
 class ALatestChange extends LatestChange
   @extend()
