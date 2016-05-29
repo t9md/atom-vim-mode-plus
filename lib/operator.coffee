@@ -295,7 +295,7 @@ class SnakeCase extends TransformString
 
 class PascalCase extends TransformString
   @extend()
-  @description: "PascalCase -> pascal_case"
+  @description: "text_before -> TextAfter"
   displayName: 'Pascalize'
   hover: icon: ':pascal-case:', emoji: ':triangular_ruler:'
   getNewText: (text) ->

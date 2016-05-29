@@ -303,19 +303,13 @@ describe "Operator TransformString", ->
       set
         text: 'vim-mode\natom-text-editor\n'
         cursorBuffer: [0, 0]
-      atom.keymaps.add "g^",
-        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g ^': 'vim-mode-plus:pascal-case'
 
-    it "PascalCase text and not move cursor", ->
-      ensure 'g ^ $', text: 'VimMode\natom-text-editor\n', cursor: [0, 0]
-      ensure 'j g ^ $', text: 'VimMode\nAtomTextEditor\n', cursor: [1, 0]
+    it "transform text by motion and repeatable", ->
+      ensure 'g C $', text: 'VimMode\natom-text-editor\n', cursor: [0, 0]
+      ensure 'j .', text: 'VimMode\nAtomTextEditor\n', cursor: [1, 0]
 
-    it "PascalCase selected text", ->
-      ensure 'V j g ^', text: 'VimMode\nAtomTextEditor\n', cursor: [0, 0]
-
-    it "g^g^ PascalCase the line of text, won't move cursor", ->
-      ensure 'l g ^ g ^', text: 'VimMode\natom-text-editor\n', cursor: [0, 1]
+    it "repeating twice works on current-line", ->
+      ensure 'g C g C', text: 'VimMode\natom-text-editor\n', cursor: [0, 0]
 
   describe 'DashCase', ->
     beforeEach ->
