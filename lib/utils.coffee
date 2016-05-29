@@ -9,9 +9,11 @@ getParent = (obj) ->
 
 getAncestors = (obj) ->
   ancestors = []
-  ancestors.push (current=obj)
-  while current = getParent(current)
-    ancestors.push current
+  current = obj
+  loop
+    ancestors.push(current)
+    current = getParent(current)
+    break unless current
   ancestors
 
 getKeyBindingForCommand = (command, {packageName}) ->
@@ -19,7 +21,7 @@ getKeyBindingForCommand = (command, {packageName}) ->
   keymaps = atom.keymaps.getKeyBindings()
   if packageName?
     keymapPath = atom.packages.getActivePackage(packageName).getKeymapPaths().pop()
-    keymaps = keymaps.filter ({source}) -> source is keymapPath
+    keymaps = keymaps.filter(({source}) -> source is keymapPath)
 
   for keymap in keymaps when keymap.command is command
     {keystrokes, selector} = keymap
@@ -47,17 +49,13 @@ getView = (model) ->
   atom.views.getView(model)
 
 # Return function to restore editor's scrollTop and fold state.
-
-getAllFoldMarkers = (editor) ->
-  # [TODO] REMOVE-on=displayLayer-is-out
-  finder = editor.displayLayer ? editor.displayBuffer
-  finder.findFoldMarkers({})
-
 saveEditorState = (editor) ->
   editorElement = getView(editor)
   scrollTop = editorElement.getScrollTop()
 
-  foldStartRows = getAllFoldMarkers(editor).map (m) -> m.getStartPosition().row
+  # [TODO] REMOVE-on=displayLayer-is-out
+  foldFinder = editor.displayLayer ? editor.displayBuffer
+  foldStartRows = foldFinder.findFoldMarkers({}).map (m) -> m.getStartPosition().row
   ->
     for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
       editor.foldBufferRow(row)
@@ -87,7 +85,7 @@ isLinewiseRange = ({start, end}) ->
 
 isEndsWithNewLineForBufferRow = (editor, row) ->
   {start, end} = editor.bufferRangeForBufferRow(row, includeNewline: true)
-  end.isGreaterThan(start) and end.column is 0
+  (not start.isEqual(end)) and end.column is 0
 
 haveSomeSelection = (editor) ->
   editor.getSelections().some (selection) ->
@@ -99,7 +97,7 @@ sortRanges = (ranges) ->
 sortRangesByEndPosition = (ranges, fn) ->
   ranges.sort((a, b) -> a.end.compare(b.end))
 
-# return adjusted index fit whitin length
+# Return adjusted index fit whitin given list's length
 # return -1 if list is empty.
 getIndex = (index, list) ->
   length = list.length
@@ -133,14 +131,6 @@ getVisibleBufferRange = (editor) ->
 getVisibleEditors = ->
   for pane in atom.workspace.getPanes() when editor = pane.getActiveEditor()
     editor
-
-eachSelection = (editor, fn) ->
-  for selection in editor.getSelections()
-    fn(selection)
-
-eachCursor = (editor, fn) ->
-  for cursor in editor.getCursors()
-    fn(cursor)
 
 normalizePatchChanges = (changes) ->
   changes.map (change) ->
@@ -176,14 +166,14 @@ mergeIntersectingRanges = (ranges) ->
       result.push(range)
   result
 
-getEolBufferPositionForRow = (editor, row) ->
+getEolForBufferRow = (editor, row) ->
   editor.bufferRangeForBufferRow(row).end
 
 pointIsAtEndOfLine = (editor, point) ->
   point = Point.fromObject(point)
-  getEolBufferPositionForRow(editor, point.row).isEqual(point)
+  getEolForBufferRow(editor, point.row).isEqual(point)
 
-getTextAtCursor = (cursor) ->
+getCharacterAtCursor = (cursor) ->
   {editor} = cursor
   bufferRange = editor.bufferRangeForScreenRange(cursor.getScreenRange())
   editor.getTextInBufferRange(bufferRange)
@@ -193,7 +183,7 @@ getTextInScreenRange = (editor, screenRange) ->
   editor.getTextInBufferRange(bufferRange)
 
 cursorIsOnWhiteSpace = (cursor) ->
-  isAllWhiteSpace(getTextAtCursor(cursor))
+  isAllWhiteSpace(getCharacterAtCursor(cursor))
 
 getWordRegExpForPointWithCursor = (cursor, point) ->
   options = {}
@@ -251,7 +241,7 @@ getVimEofBufferPosition = (editor) ->
   if (eof.row is 0) or (eof.column > 0)
     eof
   else
-    getEolBufferPositionForRow(editor, eof.row - 1)
+    getEolForBufferRow(editor, eof.row - 1)
 
 getVimEofScreenPosition = (editor) ->
   editor.screenPositionForBufferPosition(getVimEofBufferPosition(editor))
@@ -263,7 +253,9 @@ cursorIsAtVimEndOfFile = (cursor) ->
   pointIsAtVimEndOfFile(cursor.editor, cursor.getBufferPosition())
 
 cursorIsAtEmptyRow = (cursor) ->
-  cursor.isAtBeginningOfLine() and cursor.isAtEndOfLine()
+  row = cursor.getBufferRow()
+  {start, end} = cursor.editor.bufferRangeForBufferRow(row)
+  (start.column is 0) and (end.column is 0)
 
 getVimLastBufferRow = (editor) ->
   getVimEofBufferPosition(editor).row
@@ -310,7 +302,7 @@ cursorIsAtFirstCharacter = (cursor) ->
 moveCursor = (cursor, {preserveGoalColumn}, fn) ->
   {goalColumn} = cursor
   fn(cursor)
-  if preserveGoalColumn and goalColumn
+  if preserveGoalColumn and goalColumn?
     cursor.goalColumn = goalColumn
 
 # Workaround issue for t9md/vim-mode-plus#226 and atom/atom#3174
@@ -386,9 +378,8 @@ highlightRanges = (editor, ranges, options) ->
 
   {timeout} = options
   if timeout?
-    setTimeout ->
-      _.invoke(markers, 'destroy')
-    , timeout
+    destroyMarkers = -> _.invoke(markers, 'destroy')
+    setTimeout(destroyMarkers, timeout)
   markers
 
 # Return valid row from 0 to vimLastBufferRow
@@ -424,12 +415,6 @@ getTextToPoint = (editor, {row, column}, {exclusive}={}) ->
     editor.lineTextForBufferRow(row)[0...column]
   else
     editor.lineTextForBufferRow(row)[0..column]
-
-getTextFromPointToEOL = (editor, {row, column}, {exclusive}={}) ->
-  exclusive ?= false
-  start = column
-  start += 1 if exclusive
-  editor.lineTextForBufferRow(row)[start..]
 
 getIndentLevelForBufferRow = (editor, row) ->
   text = editor.lineTextForBufferRow(row)
@@ -666,8 +651,6 @@ module.exports = {
   getVisibleBufferRange
   withVisibleBufferRange
   getVisibleEditors
-  eachSelection
-  eachCursor
   getNewTextRangeFromCheckpoint
   findIndex
   mergeIntersectingRanges
@@ -682,7 +665,7 @@ module.exports = {
   moveCursorRight
   moveCursorUp
   moveCursorDown
-  getEolBufferPositionForRow
+  getEolForBufferRow
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
   highlightRanges
@@ -692,10 +675,9 @@ module.exports = {
   countChar
   clipScreenPositionForBufferPosition
   getTextToPoint
-  getTextFromPointToEOL
   getIndentLevelForBufferRow
   isAllWhiteSpace
-  getTextAtCursor
+  getCharacterAtCursor
   getTextInScreenRange
   cursorIsOnWhiteSpace
   getWordRegExpForPointWithCursor

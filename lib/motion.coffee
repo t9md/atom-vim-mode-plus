@@ -107,7 +107,7 @@ class Motion extends Base
           # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
           moveCursorLeft(cursor, {preserveGoalColumn: true})
       else
-        # Return since not movement was happend, nothing to do left.
+        # Return here because no movement was happend, nothing to do.
         return if cursor.getBufferPosition().isEqual(originalPoint)
 
       unless selection.isReversed()
