@@ -1,8 +1,8 @@
 # 0.43.0:
-Fix: Don't throw error when `vr` in empty buffer by avoiding odd state(=visual-mode but selection is empty) #282
-Improve: Refactoring
-New: Operator.PascalCase by @raroman, default keymap is `gC`. pascase-case works like `pascal-case to PascalCase`.
-Improve: `D` in visual-mode should delete whole line #284
+- Fix: Don't throw error when `vr` in empty buffer by avoiding odd state(=visual-mode but selection is empty) #282
+- Improve: Refactoring
+- New: Operator.PascalCase by @raroman, default keymap is `gC`. pascase-case works like `pascal-case to PascalCase`.
+- Improve: `D` in visual-mode should delete whole line #284
 
 # 0.42.0: Big release not for feature, but because default setting change.
 - Change Default: `setCursorToStartOfChangeOnUndoRedo` is now enabled by default.
