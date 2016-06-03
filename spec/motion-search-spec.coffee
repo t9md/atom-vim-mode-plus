@@ -583,3 +583,35 @@ describe "Motion Search", ->
       it 'enclosing pair is prioritized over forwarding range', ->
         set cursor: [0, 2]
         ensure '%', cursor: [0, 0]
+
+    describe "complex situation with html tag", ->
+      beforeEach ->
+        set
+          text: """
+          <div>
+            <span>
+              some text
+            </span>
+          </div>
+          """
+      it 'when cursor is on AngleBracket(<, >), it moves to opposite AngleBracket', ->
+        set cursor: [0, 0]
+        ensure '%', cursor: [0, 4]
+        ensure '%', cursor: [0, 0]
+      it 'can find forwarding range of AngleBracket', ->
+        set cursor: [1, 0]
+        ensure '%', cursor: [1, 7]
+        ensure '%', cursor: [1, 2]
+      it 'move to pair tag only when cursor is on open or close tag but not on AngleBracket(<, >)', ->
+        set cursor: [0, 0]; ensure '%', cursor: [0, 4] # on '<' of <div>
+        set cursor: [0, 1]; ensure '%', cursor: [4, 1]
+        set cursor: [0, 2]; ensure '%', cursor: [4, 1]
+        set cursor: [0, 3]; ensure '%', cursor: [4, 1]
+        set cursor: [0, 4]; ensure '%', cursor: [0, 0] # on '>' of <div>
+
+        set cursor: [4, 0]; ensure '%', cursor: [4, 5] # on '<' of </div>
+        set cursor: [4, 1]; ensure '%', cursor: [0, 1]
+        set cursor: [4, 2]; ensure '%', cursor: [0, 1]
+        set cursor: [4, 3]; ensure '%', cursor: [0, 1]
+        set cursor: [4, 4]; ensure '%', cursor: [0, 1]
+        set cursor: [4, 5]; ensure '%', cursor: [4, 0] # on '>' of </div>

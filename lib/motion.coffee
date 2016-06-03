@@ -1173,20 +1173,33 @@ class MoveToNextNumber extends MoveToPreviousNumber
 class MoveToPair extends Motion
   @extend()
   inclusive: true
-  member: ['Parenthesis', 'CurlyBracket', 'SquareBracket']
+  member: ['Parenthesis', 'CurlyBracket', 'SquareBracket', 'AngleBracket']
 
   moveCursor: (cursor) ->
     @setBufferPositionSafely(cursor, @getPoint(cursor))
 
   getPoint: (cursor) ->
-    ranges = @new("AAnyPair", {allowForwarding: true, @member}).getRanges(cursor.selection)
     cursorPosition = cursor.getBufferPosition()
     cursorRow = cursorPosition.row
+
+    getPointForTag = =>
+      p = cursorPosition
+      pairInfo = @new("ATag").getPairInfo(p)
+      return null unless pairInfo?
+      {openRange, closeRange} = pairInfo
+      openRange = openRange.translate([0, +1], [0, -1])
+      closeRange = closeRange.translate([0, +1], [0, -1])
+      return closeRange.start if openRange.containsPoint(p) and (not p.isEqual(openRange.end))
+      return openRange.start if closeRange.containsPoint(p) and (not p.isEqual(closeRange.end))
+
+    point = getPointForTag()
+    return point if point?
+
+    ranges = @new("AAnyPair", {allowForwarding: true, @member}).getRanges(cursor.selection)
     ranges = ranges.filter ({start, end}) ->
-      if (cursorRow is start.row) and start.isGreaterThanOrEqual(cursorPosition)
-        return true
-      if (cursorRow is end.row) and end.isGreaterThanOrEqual(cursorPosition)
-        return true
+      p = cursorPosition
+      (p.row is start.row) and start.isGreaterThanOrEqual(p) or
+        (p.row is end.row) and end.isGreaterThanOrEqual(p)
 
     return null unless ranges.length
     # Calling containsPoint exclusive(pass true as 2nd arg) make opening pair under
