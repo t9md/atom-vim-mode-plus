@@ -223,6 +223,13 @@ class DeleteToLastCharacterOfLine extends Delete
       pointByBlockwiseSelection.forEach (point, bs) ->
         bs.setHeadBufferPosition(point)
 
+class DeleteLine extends Delete
+  @extend()
+  @commandScope: 'atom-text-editor.vim-mode-plus.visual-mode'
+  mutateSelection: (selection) ->
+    swrap(selection).expandOverLine()
+    super
+
 # -------------------------
 class TransformString extends Operator
   @extend(false)

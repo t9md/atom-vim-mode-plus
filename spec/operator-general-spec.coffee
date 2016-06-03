@@ -345,12 +345,21 @@ describe "Operator general", ->
 
   describe "the D keybinding", ->
     beforeEach ->
-      editor.getBuffer().setText("012\n")
-      set cursor: [0, 1]
-      keystroke 'D'
+      set
+        text: """
+        0000
+        1111
+        2222
+        3333
+        """
+        cursor: [0, 1]
 
     it "deletes the contents until the end of the line", ->
-      ensure text: "0\n"
+      ensure 'D', text: "0\n1111\n2222\n3333"
+
+    it "in visual-mode, it delete whole line", ->
+      ensure 'v D', text: "1111\n2222\n3333"
+      ensure "v j D", text: "3333"
 
   describe "the y keybinding", ->
     beforeEach ->
