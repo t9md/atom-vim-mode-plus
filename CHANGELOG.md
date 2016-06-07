@@ -1,3 +1,7 @@
+# 0.44.0:
+- New: Improve % motion, support HTML Tag, and AngleBracket #285
+- Fix: `Uncaught TypeError: history.getChangesSinceCheckpoint is not a function` #288
+
 # 0.43.0:
 - Fix: Don't throw error when `vr` in empty buffer by avoiding odd state(=visual-mode but selection is empty) #282
 - Improve: Refactoring
