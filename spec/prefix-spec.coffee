@@ -223,3 +223,16 @@ describe "Prefixes", ->
               :abc
               :def\n
               """
+
+  describe "Count modifier", ->
+    beforeEach ->
+      set
+        text: "000 111 222 333 444 555 666 777 888 999"
+        cursor: [0, 0]
+
+    it "repeat operator", ->
+      ensure '3 d w', text: "333 444 555 666 777 888 999"
+    it "repeat motion", ->
+      ensure 'd 2 w', text: "222 333 444 555 666 777 888 999"
+    xit "repeat operator and motion respectively", ->
+      ensure '3 d 2 w', text: "666 777 888 999"
