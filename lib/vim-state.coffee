@@ -91,9 +91,23 @@ class VimState
 
   # Count
   # -------------------------
+  # keystroke `3d2w` delete 6(3*2) words
+  #  Each time, operation instantiated(new Operation), count are preserved.
+  #  pushed to @counts, then while operation executed, operation::getCount()
+  #  call vimState::getCount which return multiplied value for each of preserved counts.
   count: null
+  counts: []
   hasCount: -> @count?
-  getCount: -> @count
+  preserveCount: ->
+    if @hasCount()
+      @counts.push(@count)
+      @count = null
+
+  getCount: ->
+    if @counts.length > 0
+      @counts.reduce (a, b) -> a * b
+    else
+      null
 
   setCount: (number) ->
     @count ?= 0
@@ -103,6 +117,7 @@ class VimState
 
   resetCount: ->
     @count = null
+    @counts = []
     @toggleClassList('with-count', @hasCount())
 
   # Mark

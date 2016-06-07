@@ -32,6 +32,7 @@ vimStateMethods = [
   "hasCount"
   "getBlockwiseSelections"
   "updateSelectionProperties"
+  "preserveCount"
 ]
 
 class Base
@@ -40,6 +41,7 @@ class Base
 
   constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
+    @preserveCount()
     _.extend(this, properties)
     if settings.get('showHoverOnOperate')
       hover = @hover?[settings.get('showHoverOnOperateIcon')]

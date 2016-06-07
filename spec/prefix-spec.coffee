@@ -234,5 +234,5 @@ describe "Prefixes", ->
       ensure '3 d w', text: "333 444 555 666 777 888 999"
     it "repeat motion", ->
       ensure 'd 2 w', text: "222 333 444 555 666 777 888 999"
-    xit "repeat operator and motion respectively", ->
+    it "repeat operator and motion respectively", ->
       ensure '3 d 2 w', text: "666 777 888 999"
