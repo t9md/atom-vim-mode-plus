@@ -140,9 +140,8 @@ normalizePatchChanges = (changes) ->
     newText: change.newText
 
 getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
-  {history} = editor.getBuffer()
   range = null
-  if patch = history.getChangesSinceCheckpoint(checkpoint)
+  if patch = editor.getBuffer().history?.getChangesSinceCheckpoint(checkpoint)
     # Take only first chage, ignore change by multi-cursor.
     if change = normalizePatchChanges(patch.getChanges()).shift()
       range = new Range(change.start, change.start.traverse(change.newExtent))
