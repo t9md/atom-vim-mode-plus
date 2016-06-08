@@ -1,3 +1,6 @@
+# 0.44.1:
+- Fix: `ctrl-y`, `ctrl-e`, throw error, and not worked properly, latent bug of vmp become obvious from Atom 1.9.0-beta0
+
 # 0.44.0:
 - New: Improve % motion, support HTML Tag, and AngleBracket #285
 - Fix: `Uncaught TypeError: history.getChangesSinceCheckpoint is not a function` #288

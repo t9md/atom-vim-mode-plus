@@ -161,7 +161,7 @@ class ScrollDown extends Scroll
     margin = @editor.getVerticalScrollMargin()
     {row, column} = @editor.getCursorScreenPosition()
     if row < (newFirstRow + margin)
-      newPoint = [[row + count], column]
+      newPoint = [row + count, column]
       @editor.setCursorScreenPosition(newPoint, autoscroll: false)
 
 # ctrl-y scroll lines upwards
@@ -177,7 +177,7 @@ class ScrollUp extends Scroll
     margin = @editor.getVerticalScrollMargin()
     {row, column} = @editor.getCursorScreenPosition()
     if row >= (newLastRow - margin)
-      newPoint = [[row - count], column]
+      newPoint = [row - count, column]
       @editor.setCursorScreenPosition(newPoint, autoscroll: false)
 
 # Scroll without Cursor Position change.
