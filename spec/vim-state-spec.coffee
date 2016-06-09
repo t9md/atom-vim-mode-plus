@@ -170,6 +170,20 @@ describe "VimState", ->
         atom.commands.dispatch(target, 'core:cancel')
         ensure text: '012345\nabcdef'
 
+  describe "activate-normal-mode-once command", ->
+    beforeEach ->
+      set
+        text: """
+        0 23456
+        1 23456
+        """
+        cursor: [[0, 0], [1, 2]]
+      ensure 'i', mode: 'insert', cursor: [[0, 0], [1, 2]]
+
+    it "activate normal mode without moving cursors left, then back to insert-mode once some command executed", ->
+      ensure 'ctrl-o', cursor: [[0, 0], [1, 2]], mode: 'normal'
+      ensure 'l', cursor: [[0, 1], [1, 3]], mode: 'insert'
+
   describe "insert-mode", ->
     beforeEach -> keystroke 'i'
 
@@ -199,6 +213,8 @@ describe "VimState", ->
     it "puts the editor into normal mode when <ctrl-c> is pressed", ->
       withMockPlatform editorElement, 'platform-darwin' , ->
         ensure 'ctrl-c', mode: 'normal'
+
+  describe "insert-mode", ->
 
   describe "replace-mode", ->
     describe "with content", ->

@@ -3,6 +3,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 settings = require './settings'
 _ = require 'underscore-plus'
+{moveCursorRight} = require './utils'
 
 {
   isLinewiseRange
@@ -252,3 +253,19 @@ class ScrollCursorToRight extends ScrollCursorToLeft
 
   execute: ->
     @editorElement.setScrollRight(@getCursorPixel().left)
+
+class ActivateNormalModeOnce extends MiscCommand
+  @extend()
+  @commandScope: 'atom-text-editor.vim-mode-plus.insert-mode'
+  thisCommandName: @getCommandName()
+
+  execute: ->
+    # cursorsToMoveRight = (cursor for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine())
+    cursorsToMoveRight = @editor.getCursors().filter (cursor) -> not cursor.isAtBeginningOfLine()
+    @vimState.activate('normal')
+    moveCursorRight(cursor) for cursor in cursorsToMoveRight
+    disposable = atom.commands.onDidDispatch ({type}) =>
+      return if type is @thisCommandName
+      disposable.dispose()
+      disposable = null
+      @vimState.activate('insert')

@@ -34,6 +34,7 @@
   # 'ctrl-e': 'vim-mode-plus:copy-from-line-below'
   # 'ctrl-a': 'vim-mode-plus:insert-last-inserted'
   'ctrl-r': 'vim-mode-plus:insert-register'
+  'ctrl-o': 'vim-mode-plus:activate-normal-mode-once'
 
 # Insert-replace
 # -------------------------
