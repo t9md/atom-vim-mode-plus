@@ -1,5 +1,6 @@
 # 0.44.1:
 - Fix: `ctrl-y`, `ctrl-e`, throw error, and not worked properly, latent bug of vmp become obvious from Atom 1.9.0-beta0
+- Improve: Now `3d2w` delete 6(3x2) words instead of 32 words in previous version. #289
 
 # 0.44.0:
 - New: Improve % motion, support HTML Tag, and AngleBracket #285
