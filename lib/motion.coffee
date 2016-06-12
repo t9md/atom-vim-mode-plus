@@ -133,16 +133,23 @@ class CurrentSelection extends Motion
     throw new Error("#{@getName()} should not be executed")
 
   moveCursor: (cursor) ->
-    # [FIXME] support replay blockiwise selection. e.g. `r` in vB
     if @isMode('visual')
+      if @isBlockwise()
+        @isBlockwise = -> true
+        {start, end} = cursor.selection.getBufferRange()
+        [head, tail] = if cursor.selection.isReversed() then [start, end] else [end, start]
+        @selectionExtent = new Point(head.row - tail.row, head.column - tail.column)
+      else
+        @selectionExtent = @editor.getSelectedBufferRange().getExtent()
+
+      @linewise = @isLinewise() # Cache it in case repeated.
+
       # * Purpose of pointInfoByCursor? see #235 for detail.
       # When stayOnTransformString is enabled, cursor pos is not set on start of
       # of selected range.
       # But I want following behavior, so need to preserve position info.
       #  1. `vj>.` -> indent same two rows regardless of current cursor's row.
       #  2. `vj>j.` -> indent two rows from cursor's row.
-      @selectionExtent = @editor.getSelectedBufferRange().getExtent()
-      @linewise = @isLinewise() # Cache it in case repeated.
       startOfSelection = cursor.selection.getBufferRange().start
       @onDidFinishOperation =>
         cursorPosition = cursor.getBufferPosition()
@@ -150,7 +157,10 @@ class CurrentSelection extends Motion
         @pointInfoByCursor.set(cursor, {startOfSelection, cursorPosition, atEOL})
     else
       point = cursor.getBufferPosition()
-      cursor.setBufferPosition(point.traverse(@selectionExtent))
+      if @isBlockwise()
+        cursor.setBufferPosition(point.translate(@selectionExtent))
+      else
+        cursor.setBufferPosition(point.traverse(@selectionExtent))
 
   select: ->
     if @isMode('visual')

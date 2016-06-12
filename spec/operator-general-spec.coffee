@@ -839,6 +839,13 @@ describe "Operator general", ->
         3: oxxo
         4: oxxo\n
         """
+      textRepeated = """
+        0:2345
+        xx oxxo
+        xx oxxo
+        xx oxxo
+        xx oxxo\n
+        """
 
       beforeEach ->
         set text: textOriginal, cursor: [1, 4]
@@ -851,6 +858,11 @@ describe "Operator general", ->
           mode: 'normal'
           text: textReplaced
           cursor: [1, 4]
+        set cursor: [1, 0]
+        ensure '.',
+          mode: 'normal'
+          text: textRepeated
+          cursor: [1, 0]
 
   describe 'the m keybinding', ->
     beforeEach ->

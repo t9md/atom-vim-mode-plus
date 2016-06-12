@@ -996,7 +996,6 @@ class Replace extends Operator
     input
 
   execute: ->
-    console.log 'target', @getTarget().toString()
     input = @getInput()
     @mutateSelections (selection) =>
       text = selection.getText().replace(/./g, input)
@@ -1011,7 +1010,7 @@ class Replace extends Operator
 
     # FIXME this is very imperative, handling in very lower level.
     # find better place for operator in blockwise move works appropriately.
-    if @isMode('visual', 'blockwise')
+    if @getTarget().isBlockwise()
       top = @editor.getSelectionsOrderedByBufferPosition()[0]
       for selection in @editor.getSelections() when (selection isnt top)
         selection.destroy()
