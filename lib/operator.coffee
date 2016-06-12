@@ -897,7 +897,6 @@ class PutBefore extends Operator
     @editor.transact =>
       for selection in @editor.getSelections()
         {cursor} = selection
-
         {text, type} = @vimState.register.get(null, selection)
         break unless text
         text = _.multiplyString(text, @getCount())
@@ -997,12 +996,18 @@ class Replace extends Operator
     input
 
   execute: ->
+    console.log 'target', @getTarget().toString()
     input = @getInput()
     @mutateSelections (selection) =>
       text = selection.getText().replace(/./g, input)
-      unless (@target.instanceof('MoveRight') and (text.length < @getCount()))
+      insertText = (text) ->
         selection.insertText(text, autoIndentNewline: true)
-      @restorePoint(selection) unless input is "\n"
+      if @target.instanceof('MoveRight')
+        insertText(text) if text.length >= @getCount()
+      else
+        insertText(text)
+
+      @restorePoint(selection) unless (input is "\n")
 
     # FIXME this is very imperative, handling in very lower level.
     # find better place for operator in blockwise move works appropriately.

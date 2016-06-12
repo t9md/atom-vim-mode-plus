@@ -214,8 +214,6 @@ describe "VimState", ->
       withMockPlatform editorElement, 'platform-darwin' , ->
         ensure 'ctrl-c', mode: 'normal'
 
-  describe "insert-mode", ->
-
   describe "replace-mode", ->
     describe "with content", ->
       beforeEach -> set text: "012345\n\nabcdef"

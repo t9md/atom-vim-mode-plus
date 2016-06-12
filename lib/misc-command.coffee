@@ -260,7 +260,6 @@ class ActivateNormalModeOnce extends MiscCommand
   thisCommandName: @getCommandName()
 
   execute: ->
-    # cursorsToMoveRight = (cursor for cursor in @editor.getCursors() when not cursor.isAtBeginningOfLine())
     cursorsToMoveRight = @editor.getCursors().filter (cursor) -> not cursor.isAtBeginningOfLine()
     @vimState.activate('normal')
     moveCursorRight(cursor) for cursor in cursorsToMoveRight

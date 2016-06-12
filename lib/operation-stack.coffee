@@ -14,7 +14,7 @@ class OperationStack
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
 
     # Cache for performance
-    @currentSelection = new CurrentSelection(@vimState)
+    # @currentSelection = new CurrentSelection(@vimState)
     @select = new Select(@vimState)
     @reset()
 
@@ -26,7 +26,7 @@ class OperationStack
     switch
       when operation.isOperator()
         if (mode is 'visual') and operation.isRequireTarget()
-          operation = operation.setTarget(@currentSelection)
+          operation = operation.setTarget(new CurrentSelection(@vimState))
       when operation.isTextObject()
         if mode in ['visual', 'normal']
           operation = @select.setTarget(operation)

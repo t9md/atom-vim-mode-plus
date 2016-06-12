@@ -8,7 +8,7 @@ Delegato = require 'delegato'
 } = require './utils'
 
 settings = require './settings'
-selectList = null # delay
+selectList = null
 getEditorState = null # set by Base.init()
 
 vimStateMethods = [
@@ -37,7 +37,7 @@ vimStateMethods = [
 
 class Base
   Delegato.includeInto(this)
-  @delegatesMethods vimStateMethods..., toProperty: 'vimState'
+  @delegatesMethods(vimStateMethods..., toProperty: 'vimState')
 
   constructor: (@vimState, properties) ->
     {@editor, @editorElement} = @vimState
@@ -96,11 +96,9 @@ class Base
     @defaultCount
 
   getCount: ->
-    # Setting count as instance variable allows operation repeatable with same count.
     @count ?= @vimState.getCount() ? @getDefaultCount()
 
   isDefaultCount: ->
-    # Don't call getCount() since its has side-effect to update @count to cache.
     @count is @getDefaultCount()
 
   # Misc
@@ -192,13 +190,13 @@ class Base
     str
 
   emitWillSelectTarget: ->
-    @vimState.emitter.emit 'will-select-target'
+    @vimState.emitter.emit('will-select-target')
 
   emitDidSelectTarget: ->
-    @vimState.emitter.emit 'did-select-target'
+    @vimState.emitter.emit('did-select-target')
 
   emitDidSetTarget: (operator) ->
-    @vimState.emitter.emit 'did-set-target', operator
+    @vimState.emitter.emit('did-set-target', operator)
 
   # Class methods
   # -------------------------
@@ -212,7 +210,7 @@ class Base
     ].forEach(require)
 
     for __, klass of @getRegistries() when klass.isCommand()
-      @subscriptions.add klass.registerCommand()
+      @subscriptions.add(klass.registerCommand())
     @subscriptions
 
   # For development easiness without reloading vim-mode-plus
@@ -220,12 +218,12 @@ class Base
     @subscriptions.dispose()
     @subscriptions = new CompositeDisposable()
     for __, klass of @getRegistries() when klass.isCommand()
-      @subscriptions.add klass.registerCommand()
+      @subscriptions.add(klass.registerCommand())
 
   registries = {Base}
   @extend: (@command=true) ->
     if (name of registries) and (not @suppressWarning)
-      console.warn "Duplicate constructor #{@name}"
+      console.warn("Duplicate constructor #{@name}")
     registries[@name] = this
 
   @getClass: (name) ->
@@ -251,7 +249,6 @@ class Base
   @getCommandScope: ->
     @commandScope
 
-  @description
   @getDesctiption: ->
     if @hasOwnProperty("description")
       @description
