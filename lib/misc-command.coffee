@@ -21,10 +21,10 @@ class MiscCommand extends Base
 class ReverseSelections extends MiscCommand
   @extend()
   execute: ->
-    # FIXME? need to care
-    # not all selection reversed state is in-sync?
-    # In that case make it sync in operationStack::process.
-    swrap.reverse(@editor)
+    # Reverse only selection which reversed state is in-sync to last selection.
+    reversed = @editor.getLastSelection().isReversed()
+    for selection in @editor.getSelections() when selection.isReversed() is reversed
+      swrap(selection).reverse()
 
 class BlockwiseOtherEnd extends ReverseSelections
   @extend()
@@ -94,11 +94,10 @@ class Undo extends MiscCommand
           timeout: timeout
 
   execute: ->
-    @mutateWithTrackingChanges ({start, end}) =>
-      @vimState.mark.set('[', start)
-      @vimState.mark.set(']', end)
+    @mutateWithTrackingChanges (range) =>
+      @vimState.mark.setRange('[', ']', range)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
-        @editor.setCursorBufferPosition(start)
+        @editor.setCursorBufferPosition(range.start)
 
     for selection in @editor.getSelections()
       selection.clear()
