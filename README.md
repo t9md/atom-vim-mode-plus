@@ -85,8 +85,8 @@ If you want to directly edit `config.cson`, here it is.
 
 ## Keymap
 
-vim-mode-plus have many advanced, experimental feature but most of it is not set keymap by default.  
-If you want to use full power of vim-mode-plus, see and experiment each keymap, command by yourself.  
+vim-mode-plus have many advanced, experimental feature but most of it have no default keymap.  
+If you want to use full power of vim-mode-plus, see and experiment each keymap, command in following links.  
 
 - [Commands](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands) summary of vmp's commands with keymap.
 - [default keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson)
