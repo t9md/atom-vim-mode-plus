@@ -30,11 +30,11 @@ class ModeManager
     else
       @mode is mode
 
-  onWillActivateMode: (fn) -> @emitter.on 'will-activate-mode', fn
-  onDidActivateMode: (fn) -> @emitter.on 'did-activate-mode', fn
-  onWillDeactivateMode: (fn) -> @emitter.on 'will-deactivate-mode', fn
-  preemptWillDeactivateMode: (fn) -> @emitter.on 'will-deactivate-mode', fn
-  onDidDeactivateMode: (fn) -> @emitter.on 'did-deactivate-mode', fn
+  onWillActivateMode: (fn) -> @emitter.on('will-activate-mode', fn)
+  onDidActivateMode: (fn) -> @emitter.on('did-activate-mode', fn)
+  onWillDeactivateMode: (fn) -> @emitter.on('will-deactivate-mode', fn)
+  preemptWillDeactivateMode: (fn) -> @emitter.on('will-deactivate-mode', fn)
+  onDidDeactivateMode: (fn) -> @emitter.on('did-deactivate-mode', fn)
 
   # activate: Public
   #  Use this method to change mode, DONT use other direct method.
@@ -43,7 +43,7 @@ class ModeManager
     # Avoid odd state(=visual-mode but selection is empty)
     return if (mode is 'visual') and @editor.isEmpty()
 
-    @emitter.emit 'will-activate-mode', {mode, submode}
+    @emitter.emit('will-activate-mode', {mode, submode})
 
     if (mode is 'visual') and (submode is @submode)
       [mode, submode] = ['normal', null]
@@ -65,12 +65,12 @@ class ModeManager
 
     @vimState.statusBarManager.update(@mode, @submode)
     @vimState.updateCursorsVisibility()
-    @emitter.emit 'did-activate-mode', {@mode, @submode}
+    @emitter.emit('did-activate-mode', {@mode, @submode})
 
   deactivate: ->
-    @emitter.emit 'will-deactivate-mode', {@mode, @submode}
+    @emitter.emit('will-deactivate-mode', {@mode, @submode})
     @deactivator?.dispose()
-    @emitter.emit 'did-deactivate-mode', {@mode, @submode}
+    @emitter.emit('did-deactivate-mode', {@mode, @submode})
 
   # Normal
   # -------------------------
