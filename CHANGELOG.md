@@ -1,3 +1,9 @@
+# 0.46.0:
+- cosmetic change, my preference about parenthesis has changed.
+- Improve: reversing selection by `o` in visual-mode make reversed state sync to lastSelection in multi-selection situation.
+- Fix: `ctrl-f`, `ctrl-b`, `ctrl-d`, `ctrl-u`. Just follow the way of vim-mode's fix. It was better than vmp's.
+- Doc: Make "disable vim-mode first" instruction standout since not small amount of user reporting issue by enabling both!
+
 # 0.45.0:
 - Fix; `.` repeat collectedly replay vB range. #261
 - New: Support `activate-normal-mode-once command` #281 suggested by @wangxiexe

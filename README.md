@@ -2,7 +2,7 @@
 
 vim-mode improved.
 
-# Important Note
+# Important
 
 - **vim-mode-plus is replacement of vim-mode, you must disable vim-mode first to use vim-mode-plus**.
 - You don't need following packages for vim-mode since it's built-in to vim-mode-plus.
