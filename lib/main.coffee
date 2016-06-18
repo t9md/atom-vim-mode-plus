@@ -19,13 +19,14 @@ module.exports =
     @emitter = new Emitter
     @highlightSearchPattern = null
 
-    @subscribe Base.init(@provideVimModePlus())
+    service = @provideVimModePlus()
+    @subscribe(Base.init(service))
     @registerCommands()
     @registerVimStateCommands()
 
     if atom.inDevMode()
       developer = (new (require './developer'))
-      @subscribe developer.init(@provideVimModePlus())
+      @subscribe(developer.init(service))
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini()
@@ -100,10 +101,10 @@ module.exports =
       vimState.destroy()
 
   subscribe: (arg) ->
-    @subscriptions.add arg
+    @subscriptions.add(arg)
 
   unsubscribe: (arg) ->
-    @subscriptions.remove arg
+    @subscriptions.remove(arg)
 
   registerCommands: ->
     @subscribe atom.commands.add 'atom-text-editor:not([mini])',
