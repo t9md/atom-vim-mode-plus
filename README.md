@@ -2,6 +2,15 @@
 
 vim-mode improved.
 
+# Important Note
+
+- **vim-mode-plus is replacement of vim-mode, you must disable vim-mode first to use vim-mode-plus**.
+- You don't need following packages for vim-mode since it's built-in to vim-mode-plus.
+  - [vim-surround](https://atom.io/packages/vim-surround)
+  - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block)
+- Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
+- Internal code base is very different. Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT report vim-mode-plus's issue or PRs to official vim-mode.**
+
 # Thanks
 
 My work is greatly owing to former achievement done by original vim-mode developers and many of its contributors.  
@@ -26,17 +35,6 @@ Fork of [vim-mode](https://github.com/atom/vim-mode). Started at 2015.8.1.
 - Set cursor position to start of change on undo or redo by enabling `setCursorToStartOfChangeOnUndoRedo`(disabled by default. Atom's default is end of change).
 - Allow super granular keymap only effective when specific operation is pending like `yank-pending`, `delete-pending`. [#215](https://github.com/t9md/atom-vim-mode-plus/issues/215)
 - And more...
-
-# Important Note
-
-- You need to disable vim-mode first. You can't use both simultaneously.
-- Following packages for vim-mode doesn't work in vim-mode-plus. Why? Because service API name is different. It's easy to add support I believe. Please report to each project.
-  - [vim-mode-clipboard-plus](https://atom.io/packages/vim-mode-clipboard-plus)
-  - [ex-mode](https://atom.io/packages/ex-mode)
-  - [vim-surround](https://atom.io/packages/vim-surround): surround feature included vim-mode-plus, so you won't need this.
-  - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block): (my package) builtin to vim-mode-plus with better integration.
-- Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
-- Internal code base is very different. Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT report vim-mode-plus's issue or PRs to official vim-mode.**
 
 # FAQ
 
@@ -87,12 +85,13 @@ If you want to directly edit `config.cson`, here it is.
 
 ## Keymap
 
-Some of the keymap is not set by default, check following link for reference.
+vim-mode-plus have many advanced, experimental feature but most of it is not set keymap by default.  
+If you want to use full power of vim-mode-plus, see and experiment each keymap, command by yourself.  
 
 - [Commands](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands) summary of vmp's commands with keymap.
-- [keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson)
-- [Keymap example](https://github.com/t9md/atom-vim-mode-plus/wiki/Keymap-example)
+- [default keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson)
 - [Commands which have no default keymap](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands-which-have-no-default-keymap)
+- [my dotfiles](https://github.com/t9md/dotfiles)
 
 # Helper packages
 
