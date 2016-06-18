@@ -182,7 +182,7 @@ class MoveLeft extends Motion
 class MoveRight extends Motion
   @extend()
   canWrapToNextLine: (cursor) ->
-    if not @isMode('visual') and @isAsOperatorTarget() and not cursor.isAtEndOfLine()
+    if @isAsOperatorTarget() and not cursor.isAtEndOfLine()
       false
     else
       settings.get('wrapLeftRightMotion')
@@ -640,20 +640,17 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
 # Full: ctrl-f, ctrl-b
 # -------------------------
 # [FIXME] count behave differently from original Vim.
-# [BUG] continous execution make cursor out of screen
-# This is maybe becauseof getRowsPerPage calculation is not accurate
-# Need to change approach to keep ratio of cursor row against scroll top.
 class ScrollFullScreenDown extends Motion
   @extend()
-  coefficient: +1
+  amountOfPage: +1
 
   initialize: ->
-    @rowsToScroll = @editor.getRowsPerPage() * @coefficient
-    amountInPixel = @rowsToScroll * @editor.getLineHeightInPixels()
-    @newScrollTop = @editorElement.getScrollTop() + amountInPixel
+    amountOfRows = Math.ceil(@amountOfPage * @editor.getRowsPerPage() * @getCount())
+    @cursorRow = @editor.getCursorScreenPosition().row + amountOfRows
+    @newTopRow = @editor.getFirstVisibleScreenRow() + amountOfRows
 
   scroll: ->
-    @editorElement.setScrollTop(@newScrollTop)
+    @editor.setFirstVisibleScreenRow(@newTopRow)
 
   select: ->
     super
@@ -664,24 +661,23 @@ class ScrollFullScreenDown extends Motion
     @scroll()
 
   moveCursor: (cursor) ->
-    row = Math.floor(@editor.getCursorScreenPosition().row + @rowsToScroll)
-    row = Math.min(@getVimLastScreenRow(), row)
-    cursor.setScreenPosition([row, 0] , autoscroll: false)
+    point = new Point(@cursorRow, 0)
+    cursor.setScreenPosition(point, autoscroll: false)
 
 # keymap: ctrl-b
 class ScrollFullScreenUp extends ScrollFullScreenDown
   @extend()
-  coefficient: -1
+  amountOfPage: -1
 
 # keymap: ctrl-d
 class ScrollHalfScreenDown extends ScrollFullScreenDown
   @extend()
-  coefficient: +1 / 2
+  amountOfPage: +1 / 2
 
 # keymap: ctrl-u
 class ScrollHalfScreenUp extends ScrollHalfScreenDown
   @extend()
-  coefficient: -1 / 2
+  amountOfPage: -1 / 2
 
 # Find
 # -------------------------

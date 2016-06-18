@@ -2,9 +2,9 @@
 settings = require '../lib/settings'
 globalState = require '../lib/global-state'
 
-describe "Motion Scroll", ->
+fdescribe "Motion Scroll", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
-  text = new TextData([0...80].join("\n"))
+  text = new TextData([0...100].join("\n"))
 
   beforeEach ->
     getVimState (state, _vim) ->
@@ -13,13 +13,13 @@ describe "Motion Scroll", ->
       {set, ensure, keystroke} = _vim
 
     runs ->
+      jasmine.attachToDOM(editorElement)
       set text: text.getRaw()
       editorElement.setHeight(20 * 10)
       editorElement.style.lineHeight = "10px"
       atom.views.performDocumentPoll()
       editorElement.setScrollTop(40 * 10)
       editor.setCursorBufferPosition([42, 0])
-      jasmine.attachToDOM(editorElement)
 
   afterEach ->
     vimState.resetNormalMode()
@@ -37,7 +37,7 @@ describe "Motion Scroll", ->
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-u',
-        selectedText: text.getLines([32..42])
+        selectedText: text.getLines([33..42])
 
   describe "the ctrl-b keybinding", ->
     it "moves screen up one page", ->
@@ -52,7 +52,7 @@ describe "Motion Scroll", ->
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-b',
-        selectedText: text.getLines([22..42])
+        selectedText: text.getLines([23..42])
 
   describe "the ctrl-d keybinding", ->
     it "moves the screen down by half screen size and keeps cursor onscreen", ->
@@ -67,7 +67,7 @@ describe "Motion Scroll", ->
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-d',
-        selectedText: text.getLines([42..52])
+        selectedText: text.getLines([42..53])
 
   describe "the ctrl-f keybinding", ->
     it "moves screen down one page", ->
@@ -82,4 +82,4 @@ describe "Motion Scroll", ->
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-f',
-        selectedText: text.getLines([42..62])
+        selectedText: text.getLines([42..63])
