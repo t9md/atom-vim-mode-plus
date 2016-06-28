@@ -343,6 +343,7 @@ class MoveToNextWord extends Motion
             point = [cursorRow, Infinity]
       cursor.setBufferPosition(point)
 
+# b
 class MoveToPreviousWord extends Motion
   @extend()
   wordRegex: null
