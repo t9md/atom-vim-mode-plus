@@ -1056,17 +1056,28 @@ describe "TextObject", ->
     beforeEach ->
       waitsForPromise ->
         atom.packages.activatePackage('language-coffee-script')
-      getVimState 'sample.coffee', (state, vim) ->
-        {editor, editorElement} = state
-        {set, ensure, keystroke} = vim
+      runs ->
+        set
+          grammar: 'source.coffee'
+          text: """
+          ###
+          multiline comment
+          ###
+
+          # One line comment
+
+          # Comment
+          # border
+          class QuickSort
+          """
     afterEach ->
       atom.packages.deactivatePackage('language-coffee-script')
 
     describe 'inner-comment', ->
-      it 'select inside comment block', ->
+      it 'select inner comment block', ->
         set cursor: [0, 0]
         ensure 'v i /',
-          selectedText: '# This\n# is\n# Comment\n'
+          selectedText: '###\nmultiline comment\n###\n'
           selectedBufferRange: [[0, 0], [3, 0]]
 
       it 'select one line comment', ->
@@ -1085,9 +1096,9 @@ describe "TextObject", ->
         set cursor: [0, 0]
         ensure 'v a /',
           selectedText: """
-          # This
-          # is
-          # Comment
+          ###
+          multiline comment
+          ###
 
           # One line comment
 
