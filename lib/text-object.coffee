@@ -588,21 +588,12 @@ class InnerParagraph extends Paragraph
 class Comment extends Paragraph
   @extend(false)
 
-  getRowRangeForCommentAtBufferRow: (row) ->
-    @editor.languageMode.rowRangeForCommentAtBufferRow(row)
-
-  # [FIXME]
-  # workaround for @editor.isBufferRowCommented don't care of multi-line
-  # comment syntax. If row was blank, it not return true even if that line was
-  # part of multi-line comment.
   isBufferRowCommented: (row) ->
     if @editor.isBufferRowCommented(row)
       true
     else
-      if @editor.isBufferRowBlank(row)
-        @getRowRangeForCommentAtBufferRow(row)?
-      else
-        false
+      @editor.isBufferRowBlank(row) and
+        @editor.languageMode.rowRangeForCommentAtBufferRow(row)?
 
   getRange: (startRow) ->
     return unless @isBufferRowCommented(startRow)
@@ -610,10 +601,7 @@ class Comment extends Paragraph
       if @isBufferRowCommented(row)
         false
       else
-        if @isA() and @editor.isBufferRowBlank(row)
-          false
-        else
-          true
+        not (@editor.isBufferRowBlank(row) and @isA())
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
 
 class AComment extends Comment
