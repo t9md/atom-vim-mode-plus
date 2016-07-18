@@ -1,3 +1,7 @@
+# 0.47.0:
+- Fix: TextObject a-paragraph did not select trailing blank rows for one-line non-blank paragraph #309
+- Breaking: Simplify TextObject comment. now `a /` and `i /` works identically #311
+
 # 0.46.0:
 - cosmetic change, my preference about parenthesis has changed.
 - Improve: reversing selection by `o` in visual-mode make reversed state sync to lastSelection in multi-selection situation.
