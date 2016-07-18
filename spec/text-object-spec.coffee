@@ -1091,21 +1091,6 @@ describe "TextObject", ->
         ensure 'v i /',
           selectedText: '# Comment\n# border\n'
           selectedBufferRange: [[6, 0], [8, 0]]
-    describe 'a-comment', ->
-      it 'include blank line when selecting comment', ->
-        set cursor: [0, 0]
-        ensure 'v a /',
-          selectedText: """
-          ###
-          multiline comment
-          ###
-
-          # One line comment
-
-          # Comment
-          # border\n
-          """
-          selectedBufferRange: [[0, 0], [8, 0]]
 
   describe 'Indentation', ->
     beforeEach ->

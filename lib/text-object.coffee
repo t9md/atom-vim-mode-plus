@@ -585,24 +585,20 @@ class InnerParagraph extends Paragraph
   @extend()
 
 # -------------------------
-class Comment extends Paragraph
+class Comment extends TextObject
   @extend(false)
 
-  isBufferRowCommented: (row) ->
-    if @editor.isBufferRowCommented(row)
-      true
-    else
-      @editor.isBufferRowBlank(row) and
-        @editor.languageMode.rowRangeForCommentAtBufferRow(row)?
+  selectTextObject: (selection) ->
+    row = selection.getBufferRange().start.row
+    if rowRange = @getRowRangeForCommentAtBufferRow(row)
+      swrap(selection).selectRowRange(rowRange)
 
-  getRange: (startRow) ->
-    return unless @isBufferRowCommented(startRow)
-    fn = (row) =>
-      if @isBufferRowCommented(row)
-        false
-      else
-        not (@editor.isBufferRowBlank(row) and @isA())
-    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
+  getRowRangeForCommentAtBufferRow: (row) ->
+    switch
+      when rowRange = @editor.languageMode.rowRangeForCommentAtBufferRow(row)
+        rowRange
+      when @editor.isBufferRowCommented(row)
+        [row, row]
 
 class AComment extends Comment
   @extend()
