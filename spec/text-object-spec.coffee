@@ -1021,36 +1021,55 @@ describe "TextObject", ->
         it "case-4 visual", -> check close, 'v', {selectedText}
 
   describe "Paragraph", ->
+    text = null
+    beforeEach ->
+      text = new TextData """
+
+        1: P-1
+
+        3: P-2
+        4: P-2
+
+
+        7: P-3
+        8: P-3
+        9: P-3
+
+
+        """
+      set
+        cursor: [1, 0]
+        text: text.getRaw()
+
     describe "inner-paragraph", ->
-      beforeEach ->
-        set
-          text: "\nParagraph-1\nParagraph-1\nParagraph-1\n\n"
-          cursor: [2, 2]
-
-      it "applies operators inside the current paragraph in operator-pending mode", ->
+      it "select consequtive blank rows", ->
+        set cursor: [0, 0]; ensure 'v i p', selectedText: text.getLines([0])
+        set cursor: [2, 0]; ensure 'v i p', selectedText: text.getLines([2])
+        set cursor: [5, 0]; ensure 'v i p', selectedText: text.getLines([5..6])
+      it "select consequtive non-blank rows", ->
+        set cursor: [1, 0]; ensure 'v i p', selectedText: text.getLines([1])
+        set cursor: [3, 0]; ensure 'v i p', selectedText: text.getLines([3..4])
+        set cursor: [7, 0]; ensure 'v i p', selectedText: text.getLines([7..9])
+      it "operate on inner paragraph", ->
+        set cursor: [7, 0]
         ensure 'y i p',
-          text: "\nParagraph-1\nParagraph-1\nParagraph-1\n\n"
-          cursor: [1, 0]
-          register: '"': text: "Paragraph-1\nParagraph-1\nParagraph-1\n"
+          cursor: [7, 0]
+          register: '"': text: text.getLines([7, 8, 9])
 
-      it "selects inside the current paragraph in visual mode", ->
-        ensure 'v i p',
-          selectedScreenRange: [[1, 0], [4, 0]]
     describe "a-paragraph", ->
-      beforeEach ->
-        set
-          text: "text\n\nParagraph-1\nParagraph-1\nParagraph-1\n\nmoretext"
-          cursor: [3, 2]
-
-      it "applies operators around the current paragraph in operator-pending mode", ->
+      it "select two paragraph as one operation", ->
+        set cursor: [0, 0]; ensure 'v a p', selectedText: text.getLines([0, 1])
+        set cursor: [2, 0]; ensure 'v a p', selectedText: text.getLines([2..4])
+        set cursor: [5, 0]; ensure 'v a p', selectedText: text.getLines([5..9])
+      it "select two paragraph as one operation", ->
+        set cursor: [1, 0]; ensure 'v a p', selectedText: text.getLines([1..2])
+        set cursor: [3, 0]; ensure 'v a p', selectedText: text.getLines([3..6])
+        set cursor: [7, 0]; ensure 'v a p', selectedText: text.getLines([7..10])
+      it "operate on a paragraph", ->
+        set cursor: [3, 0]
         ensure 'y a p',
-          text: "text\n\nParagraph-1\nParagraph-1\nParagraph-1\n\nmoretext"
-          cursor: [2, 0]
-          register: '"': text: "Paragraph-1\nParagraph-1\nParagraph-1\n\n"
-
-      it "selects around the current paragraph in visual mode", ->
-        ensure 'v a p',
-          selectedScreenRange: [[2, 0], [6, 0]]
+          cursor: [3, 0]
+          register: '"': text: text.getLines([3..6])
 
   describe 'Comment', ->
     beforeEach ->

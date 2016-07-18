@@ -563,9 +563,10 @@ class Paragraph extends TextObject
     fn = (row) -> isBlank(row) is wasBlank
     new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
 
-  selectParagraph: (selection) ->
+  selectParagraph: (selection, {firstTime}) ->
     [startRow, endRow] = selection.getBufferRowRange()
-    if swrap(selection).isSingleRow()
+
+    if firstTime and not @isMode('visual', 'linewise')
       swrap(selection).setBufferRangeSafely @getRange(startRow)
     else
       point = if selection.isReversed()
@@ -575,9 +576,11 @@ class Paragraph extends TextObject
       selection.selectToBufferPosition point if point?
 
   selectTextObject: (selection) ->
+    firstTime = true
     _.times @getCount(), =>
-      @selectParagraph(selection)
-      @selectParagraph(selection) if @instanceof('AParagraph')
+      @selectParagraph(selection, {firstTime})
+      firstTime = false
+      @selectParagraph(selection, {firstTime}) if @instanceof('AParagraph')
 
 class AParagraph extends Paragraph
   @extend()
