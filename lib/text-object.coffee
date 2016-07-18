@@ -585,6 +585,26 @@ class InnerParagraph extends Paragraph
   @extend()
 
 # -------------------------
+class Indentation extends Paragraph
+  @extend(false)
+
+  getRange: (startRow) ->
+    return if @editor.isBufferRowBlank(startRow)
+    baseIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
+    fn = (row) =>
+      if @editor.isBufferRowBlank(row)
+        @isInner()
+      else
+        getIndentLevelForBufferRow(@editor, row) < baseIndentLevel
+    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
+
+class AIndentation extends Indentation
+  @extend()
+
+class InnerIndentation extends Indentation
+  @extend()
+
+# -------------------------
 class Comment extends TextObject
   @extend(false)
 
@@ -604,26 +624,6 @@ class AComment extends Comment
   @extend()
 
 class InnerComment extends Comment
-  @extend()
-
-# -------------------------
-class Indentation extends Paragraph
-  @extend(false)
-
-  getRange: (startRow) ->
-    return if @editor.isBufferRowBlank(startRow)
-    baseIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
-    fn = (row) =>
-      if @editor.isBufferRowBlank(row)
-        @isInner()
-      else
-        getIndentLevelForBufferRow(@editor, row) < baseIndentLevel
-    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
-
-class AIndentation extends Indentation
-  @extend()
-
-class InnerIndentation extends Indentation
   @extend()
 
 # -------------------------
