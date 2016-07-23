@@ -109,6 +109,17 @@ class Operator extends Base
   selectTarget: ->
     @observeSelectAction()
     @emitWillSelectTarget()
+
+    switch @vimState.getForceOperatorWise()
+      when 'characterwise'
+        if @target.linewise
+          @target.linewise = false
+          @target.inclusive = false
+        else
+          @target.inclusive = not @target.inclusive
+      when 'linewise'
+        @target.linewise = true
+
     @target.select()
     @emitDidSelectTarget()
     haveSomeSelection(@editor)

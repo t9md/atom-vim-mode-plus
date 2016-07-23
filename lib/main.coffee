@@ -135,6 +135,8 @@ module.exports =
       'activate-blockwise-visual-mode': -> @activate('visual', 'blockwise')
       'reset-normal-mode': -> @resetNormalMode()
       'set-register-name': -> @register.setName() # "
+      'force-operator-characterwise': -> @setForceOperatorWise('characterwise')
+      'force-operator-linewise': -> @setForceOperatorWise('linewise')
       'set-count-0': -> @setCount(0)
       'set-count-1': -> @setCount(1)
       'set-count-2': -> @setCount(2)

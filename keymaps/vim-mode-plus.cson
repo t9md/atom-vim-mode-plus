@@ -322,6 +322,12 @@
 
   # 'y m s':  'vim-mode-plus:map-surround'
 
+# operator-pending
+# -------------------------
+'atom-text-editor.vim-mode-plus.operator-pending-mode':
+  'v': 'vim-mode-plus:force-operator-characterwise'
+  'V': 'vim-mode-plus:force-operator-linewise'
+
 # operator-pending, visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':

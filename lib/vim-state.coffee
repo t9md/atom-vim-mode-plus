@@ -89,6 +89,11 @@ class VimState
   selectLinewise: ->
     swrap.expandOverLine(@editor, preserveGoalColumn: true)
 
+  forceOperatorWise: null
+  setForceOperatorWise: (@forceOperatorWise) ->
+  getForceOperatorWise: -> @forceOperatorWise
+  resetForceOperatorWise: -> @setForceOperatorWise(null)
+
   # Count
   # -------------------------
   # keystroke `3d2w` delete 6(3*2) words
@@ -272,6 +277,7 @@ class VimState
   reset: ->
     @resetCount()
     @resetCharInput()
+    @resetForceOperatorWise()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
