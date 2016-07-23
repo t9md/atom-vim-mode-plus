@@ -1,3 +1,6 @@
+# 0.48.0:
+- Improve: New command `vim-mode-plus:force-operator-characterwise`, `vim-mode-plus:force-operator-linewise` to change original wise(linewise/charactewise) and toggle exclusiveness #313
+
 # 0.47.0:
 - Fix: TextObject a-paragraph did not select trailing blank rows for one-line non-blank paragraph #309
 - Breaking: Simplify TextObject comment. now `a /` and `i /` works identically #311
