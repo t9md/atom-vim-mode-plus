@@ -104,13 +104,8 @@ class Operator extends Base
     @emitDidSetTarget(this)
     this
 
-  # Return true unless all selection is empty.
-  # -------------------------
-  selectTarget: ->
-    @observeSelectAction()
-    @emitWillSelectTarget()
-
-    switch @vimState.getForceOperatorWise()
+  forceWise: (wise) ->
+    switch wise
       when 'characterwise'
         if @target.linewise
           @target.linewise = false
@@ -120,6 +115,13 @@ class Operator extends Base
       when 'linewise'
         @target.linewise = true
 
+  # Return true unless all selection is empty.
+  # -------------------------
+  selectTarget: ->
+    @observeSelectAction()
+    @emitWillSelectTarget()
+    if @isMode('operator-pending') and wise = @vimState.getForceOperatorWise()
+      @forceWise(wise)
     @target.select()
     @emitDidSelectTarget()
     haveSomeSelection(@editor)
