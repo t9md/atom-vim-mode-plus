@@ -14,7 +14,6 @@ class OperationStack
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
 
     # Cache for performance
-    # @currentSelection = new CurrentSelection(@vimState)
     @select = new Select(@vimState)
     @reset()
 
