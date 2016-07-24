@@ -327,7 +327,12 @@ describe "Motion general", ->
         ensure 'w', cursor: [0, 2]
 
       it "moves the cursor to beginning of the next word of next line when all remaining text is white space.", ->
-        set text: "012   \n  234", cursor: [0, 3]
+        set
+          text_: """
+            012___
+              234
+            """
+          cursor: [0, 3]
         ensure 'w', cursor: [1, 2]
 
       it "moves the cursor to beginning of the next word of next line when cursor is at EOL.", ->
@@ -355,26 +360,46 @@ describe "Motion general", ->
 
     describe "when used by Change operator", ->
       beforeEach ->
-        set text: "  var1 = 1\n  var2 = 2\n"
+        set
+          text_: """
+          __var1 = 1
+          __var2 = 2\n
+          """
 
       describe "when cursor is on word", ->
         it "not eat whitespace", ->
           set cursor: [0, 3]
           ensure 'c w',
-            text: "  v = 1\n  var2 = 2\n"
+            text_: """
+            __v = 1
+            __var2 = 2\n
+            """
             cursor: [0, 3]
 
       describe "when cursor is on white space", ->
         it "only eat white space", ->
           set cursor: [0, 0]
           ensure 'c w',
-            text: "var1 = 1\n  var2 = 2\n"
+            text_: """
+            var1 = 1
+            __var2 = 2\n
+            """
             cursor: [0, 0]
 
       describe "when text to EOL is all white space", ->
         it "wont eat new line character", ->
-          set text: "abc  \ndef\n", cursor: [0, 3]
-          ensure 'c w', text: "abc\ndef\n", cursor: [0, 3]
+          set
+            text_: """
+            abc__
+            def\n
+            """
+            cursor: [0, 3]
+          ensure 'c w',
+            text: """
+            abc
+            def\n
+            """
+            cursor: [0, 3]
 
         it "cant eat new line when count is specified", ->
           set text: "\n\n\n\n\nline6\n", cursor: [0, 0]
@@ -406,27 +431,51 @@ describe "Motion general", ->
         ensure 'W', cursor: [3, 0]
 
       it "moves the cursor to beginning of the next word of next line when all remaining text is white space.", ->
-        set text: "012   \n  234", cursor: [0, 3]
+        set
+          text_: """
+            012___
+            __234
+            """
+          cursor: [0, 3]
         ensure 'W', cursor: [1, 2]
 
       it "moves the cursor to beginning of the next word of next line when cursor is at EOL.", ->
-        set text: "\n  234", cursor: [0, 0]
+        set
+          text_: """
+
+          __234
+          """
+          cursor: [0, 0]
         ensure 'W', cursor: [1, 2]
 
     # This spec is redundant since W(MoveToNextWholeWord) is child of w(MoveToNextWord).
     describe "when used by Change operator", ->
       beforeEach ->
-        set text: "  var1 = 1\n  var2 = 2\n"
+        set
+          text_: """
+            __var1 = 1
+            __var2 = 2\n
+            """
 
       describe "when cursor is on word", ->
         it "not eat whitespace", ->
           set cursor: [0, 3]
-          ensure 'c W', text: "  v = 1\n  var2 = 2\n", cursor: [0, 3]
+          ensure 'c W',
+            text_: """
+              __v = 1
+              __var2 = 2\n
+              """
+            cursor: [0, 3]
 
       describe "when cursor is on white space", ->
         it "only eat white space", ->
           set cursor: [0, 0]
-          ensure 'c W', text: "var1 = 1\n  var2 = 2\n", cursor: [0, 0]
+          ensure 'c W',
+            text_: """
+              var1 = 1
+              __var2 = 2\n
+              """
+            cursor: [0, 0]
 
       describe "when text to EOL is all white space", ->
         it "wont eat new line character", ->
@@ -446,18 +495,30 @@ describe "Motion general", ->
       it "continues past blank lines", ->
         set cursor: [2, 0]
         ensure 'd W',
-          text: "cde1+- ab \n xyz\nzip"
+          text_: """
+          cde1+- ab_
+          _xyz
+          zip
+          """
           register: '"': text: "\n"
 
       it "doesn't go past the end of the file", ->
         set cursor: [3, 0]
         ensure 'd W',
-          text: "cde1+- ab \n xyz\n\n"
+          text_: """
+          cde1+- ab_
+          _xyz\n\n
+          """
           register: '"': text: 'zip'
 
   describe "the e keybinding", ->
     beforeEach ->
-      set text: "ab cde1+- \n xyz\n\nzip"
+      set text_: """
+      ab cde1+-_
+      _xyz
+
+      zip
+      """
 
     describe "as a motion", ->
       beforeEach ->
@@ -491,7 +552,12 @@ describe "Motion general", ->
 
   describe "the E keybinding", ->
     beforeEach ->
-      set text: "ab  cde1+- \n xyz \n\nzip\n"
+      set text_: """
+      ab  cde1+-_
+      _xyz_
+
+      zip\n
+      """
 
     describe "as a motion", ->
       beforeEach ->
@@ -790,8 +856,6 @@ describe "Motion general", ->
       describe "as a selection", ->
         it "selects to the first character of the previous line", ->
           ensure 'd -', text: "abcdefg\n"
-          # commented out because the column is wrong due to a bug in `k`; re-enable when `k` is fixed
-          #expect(editor.getCursorScreenPosition()).toEqual [0, 0]
 
     describe "with a count", ->
       beforeEach ->
@@ -811,7 +875,11 @@ describe "Motion general", ->
 
   describe "the + keybinding", ->
     beforeEach ->
-      set text: "  abc\n  abc\nabcdefg\n"
+      set text_: """
+      __abc
+      __abc
+      abcdefg\n
+      """
 
     describe "from the middle of a line", ->
       beforeEach ->
@@ -824,8 +892,6 @@ describe "Motion general", ->
       describe "as a selection", ->
         it "deletes the current and next line", ->
           ensure 'd +', text: "  abc\n"
-          # commented out because the column is wrong due to a bug in `j`; re-enable when `j` is fixed
-          #expect(editor.getCursorScreenPosition()).toEqual [0, 3]
 
     describe "from the first character of a line indented the same as the next one", ->
       beforeEach -> set cursor: [0, 2]
@@ -837,8 +903,6 @@ describe "Motion general", ->
       describe "as a selection", ->
         it "selects to the first character of the next line (directly below)", ->
           ensure 'd +', text: "abcdefg\n"
-          # commented out because the column is wrong due to a bug in `j`; re-enable when `j` is fixed
-          #expect(editor.getCursorScreenPosition()).toEqual [0, 2]
 
     describe "from the beginning of a line followed by an indented line", ->
       beforeEach -> set cursor: [0, 0]
@@ -871,7 +935,11 @@ describe "Motion general", ->
 
   describe "the _ keybinding", ->
     beforeEach ->
-      set text: "  abc\n  abc\nabcdefg\n"
+      set text_: """
+        __abc
+        __abc
+        abcdefg\n
+        """
 
     describe "from the middle of a line", ->
       beforeEach -> set cursor: [1, 3]
@@ -883,7 +951,10 @@ describe "Motion general", ->
       describe "as a selection", ->
         it "deletes the current line", ->
           ensure 'd _',
-            text: "  abc\nabcdefg\n"
+            text_: """
+            __abc
+            abcdefg\n
+            """
             cursor: [1, 0]
 
     describe "with a count", ->
@@ -996,7 +1067,12 @@ describe "Motion general", ->
 
   describe "the g_ keybinding", ->
     beforeEach ->
-      set text: "1  \n    2  \n 3abc\n "
+      set text_: """
+        1__
+            2__
+         3abc
+        _
+        """
 
     describe "as a motion", ->
       it "moves the cursor to the last nonblank character", ->
@@ -1021,7 +1097,12 @@ describe "Motion general", ->
   describe "the G keybinding", ->
     beforeEach ->
       set
-        text: "1\n    2\n 3abc\n "
+        text_: """
+        1
+        ____2
+        _3abc
+        _
+        """
         cursor: [0, 2]
 
     describe "as a motion", ->
