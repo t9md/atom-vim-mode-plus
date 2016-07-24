@@ -1,3 +1,6 @@
+# 0.49.0:
+- Improve, Breaking: #314 Allow `move-up-to-edge` and `move-down-to-edge` stops at first or last row even if it char was blank.
+
 # 0.48.0:
 - Improve: New command `vim-mode-plus:force-operator-characterwise`, `vim-mode-plus:force-operator-linewise` to change original wise(linewise/charactewise) and toggle exclusiveness #313
 
