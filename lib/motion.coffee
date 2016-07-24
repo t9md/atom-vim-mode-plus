@@ -282,7 +282,9 @@ class MoveUpToEdge extends Motion
       false
 
   isStoppablePoint: (point) ->
-    if @isNonBlankPoint(point)
+    if point.row in [0, @getVimLastScreenRow()]
+      true
+    else if @isNonBlankPoint(point)
       true
     else if @isValidStoppablePoint(point)
       left = point.translate([0, -1])

@@ -227,9 +227,9 @@ describe "Motion general", ->
           """
         set text: text.getRaw(), cursor: [4, 3]
 
-      it "desn't move if it can't find edge", ->
-        ensure 'g k', cursor: [4, 3]
-        ensure 'g j', cursor: [4, 3]
+      it "move first-row or last-row even if it's blank char", ->
+        ensure 'g k', cursor: [0, 3]
+        ensure 'g j', cursor: [7, 3]
       it "move to non-blank-char on both first and last row", ->
         set cursor: [4, 4]
         ensure 'g k', cursor: [0, 4]
