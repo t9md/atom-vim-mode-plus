@@ -134,10 +134,10 @@ describe "Operator general", ->
           set cursor: [0, 9]
           ensure "d v b",
             cursor: [0, 6]
-            text: """
+            text_: """
             012345_
             ABCDEF EFG
-            """.replace(/_/g, ' ')
+            """
         it "operate exclusively for inclusive target", ->
           set cursor: [0, 0]
           ensure "d v e",

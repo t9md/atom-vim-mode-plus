@@ -344,22 +344,22 @@ describe "Operator TransformString", ->
           text: 'var0 = 0; var10 = 10'
       it "don't apply compaction for leading and trailing space", ->
         set
-          text: """
+          text_: """
           ___var0   =   0; var10   =   10___
           ___var1   =   1; var11   =   11___
           ___var2   =   2; var12   =   12___
 
           ___var4   =   4; var14   =   14___
-          """.replace(/_/g, ' ')
+          """
           cursor: [0, 0]
         ensure 'g space i p',
-          text: """
+          text_: """
           ___var0 = 0; var10 = 10___
           ___var1 = 1; var11 = 11___
           ___var2 = 2; var12 = 12___
 
           ___var4   =   4; var14   =   14___
-          """.replace(/_/g, ' ')
+          """
       it "but it compact spaces when target all text is spaces", ->
         set
           text: '01234    90'

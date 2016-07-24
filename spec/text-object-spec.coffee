@@ -1457,13 +1457,13 @@ describe "TextObject", ->
         ensure '.',
           cursor: [3, 5]
           mode: 'normal'
-          text: """
+          text_: """
             0 xxx
             1  xxx
             2   xxx yyy
             3 xxx_
             4 abc\n
-            """.replace('_', ' ') # To prevent trailing space remved on save.
+            """
         ensure '.',
           cursor: [4, 1]
           mode: 'normal'
@@ -1473,7 +1473,7 @@ describe "TextObject", ->
             2   xxx yyy
             3 xxx_
             4 \n
-            """.replace('_', ' ') # To prevent trailing space remved on save.
+            """
       it 'change next occurence of last search pattern', ->
         ensure 'c g n',
           cursor: [1, 2]
@@ -1490,10 +1490,10 @@ describe "TextObject", ->
         ensure 'c g N',
           cursor: [3, 6]
           mode: 'insert'
-          text: """
+          text_: """
             0 xxx
             1  xxx
             2   xxx yyy
             3 xxx_
             4 abc\n
-            """.replace('_', ' ') # To prevent trailing space remved on save.
+            """

@@ -189,6 +189,7 @@ class VimEditor
 
   setOptionsOrdered = [
     'text',
+    'text_',
     'grammar',
     'cursor', 'cursorBuffer',
     'addCursor', 'addCursorBuffer'
@@ -205,6 +206,9 @@ class VimEditor
 
   setText: (text) ->
     @editor.setText(text)
+
+  setText_: (text) ->
+    @setText(text.replace(/_/g, ' '))
 
   setGrammar: (scope) ->
     @editor.setGrammar(atom.grammars.grammarForScopeName(scope))
@@ -238,6 +242,7 @@ class VimEditor
 
   ensureOptionsOrdered = [
     'text',
+    'text_',
     'selectedText', 'selectedTextOrdered'
     'cursor', 'cursorBuffer',
     'numCursors'
@@ -263,8 +268,10 @@ class VimEditor
       method = 'ensure' + _.capitalize(_.camelize(name))
       this[method](options[name])
 
-  ensureText: (text) ->
-    expect(@editor.getText()).toEqual(text)
+  ensureText: (text) -> expect(@editor.getText()).toEqual(text)
+
+  ensureText_: (text) ->
+    @ensureText(text.replace(/_/g, ' '))
 
   ensureSelectedText: (text, ordered=false) ->
     selections = if ordered
