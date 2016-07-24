@@ -1467,7 +1467,7 @@ describe "TextObject", ->
         ensure '.',
           cursor: [4, 1]
           mode: 'normal'
-          text: """
+          text_: """
             0 xxx
             1  xxx
             2   xxx yyy
