@@ -1,3 +1,6 @@
+# 0.49.1:
+- Fix: Invoking text-object command directly from insert-mode cause uncaught exception #318.
+
 # 0.49.0:
 - Improve, Breaking: #314 Allow `move-up-to-edge` and `move-down-to-edge` stops at first or last row even if it char was blank.
 
