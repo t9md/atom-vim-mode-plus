@@ -53,9 +53,7 @@ saveEditorState = (editor) ->
   editorElement = getView(editor)
   scrollTop = editorElement.getScrollTop()
 
-  # [TODO] REMOVE-on=displayLayer-is-out
-  foldFinder = editor.displayLayer ? editor.displayBuffer
-  foldStartRows = foldFinder.findFoldMarkers({}).map (m) -> m.getStartPosition().row
+  foldStartRows = editor.displayLayer.findFoldMarkers({}).map (m) -> m.getStartPosition().row
   ->
     for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
       editor.foldBufferRow(row)
@@ -444,9 +442,7 @@ getBufferRangeForRowRange = (editor, rowRange) ->
   rangeStart.union(rangeEnd)
 
 getTokenizedLineForRow = (editor, row) ->
-  # [TODO] REMOVE-on=displayLayer-is-out
-  tokenizedBuffer = editor.tokenizedBuffer ? editor.displayBuffer.tokenizedBuffer
-  tokenizedBuffer.tokenizedLineForRow(row)
+  editor.tokenizedBuffer.tokenizedLineForRow(row)
 
 getScopesForTokenizedLine = (line) ->
   for tag in line.tags when tag < 0 and (tag % 2 is -1)
@@ -481,14 +477,7 @@ scanForScopeStart = (editor, fromPoint, direction, fn) ->
           position = new Point(row, column)
           results.push {scope, position, stop}
       else
-        # [TODO] REMOVE-on=displayLayer-is-out
-        if tokenIterator.isHardTab?
-          column += switch
-            when tokenIterator.isHardTab() then 1
-            when tokenIterator.isSoftWrapIndentation() then 0
-            else tag
-        else
-          column += tag
+        column += tag
 
     results = results.filter(isValidToken)
     results.reverse() if direction is 'backward'
