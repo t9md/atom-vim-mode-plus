@@ -106,6 +106,8 @@ provides <kbd>c-i</kbd>, <kbd>c-o</kbd> to go/back cursor position history.
 provides <kbd>gf</kbd> to open file under cursor.
 - [clip-history](https://atom.io/packages/clip-history)
 Not exist in pure Vim, provides clip-board history you can pop yanked text until you get result you want.
+- [choose-pane](https://atom.io/packages/choose-pane)
+Not exist in pure Vim, provide keyboard navigation of between panes/panels by choosing it by label.
 
 # References
 

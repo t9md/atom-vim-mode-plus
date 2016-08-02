@@ -1,3 +1,7 @@
+# 0.50.0:
+- Fix: Deprecation warning introduced by new editor.displayLayer #319.
+- Support: set minimum engines to 1.9.0 above.
+
 # 0.49.1:
 - Fix: Invoking text-object command directly from insert-mode cause uncaught exception #318.
 
