@@ -17,10 +17,6 @@ class Settings
     atom.config.observe "#{@scope}.#{param}", fn
 
 module.exports = new Settings 'vim-mode-plus',
-  setCursorToStartOfChangeOnUndoRedo:
-    order: 1
-    type: 'boolean'
-    default: true
   useClipboardAsDefaultRegister:
     order: 2
     type: 'boolean'
@@ -166,6 +162,10 @@ module.exports = new Settings 'vim-mode-plus',
     description: "Duration(msec) for hover search counter"
   hideTabBarOnMaximizePane:
     order: 32
+    type: 'boolean'
+    default: true
+  createUndoCheckpointWhenLeavingInsert:
+    order: 33
     type: 'boolean'
     default: true
   throwErrorOnNonEmptySelectionInNormalMode:

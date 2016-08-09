@@ -1113,7 +1113,8 @@ class ActivateInsertMode extends Operator
           selection.insertText(text, autoIndent: true)
 
       # grouping changes for undo checkpoint need to come last
-      @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
+      if settings.get('createUndoCheckpointWhenLeavingInsert')
+        @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
 
   initialize: ->
     @checkpoint = {}
