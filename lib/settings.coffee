@@ -23,6 +23,9 @@ module.exports = new Settings 'vim-mode-plus',
   setCursorToStartOfChangeOnUndoRedo:
     type: 'boolean'
     default: true
+  groupChangesWhenLeavingInsertMode:
+    type: 'boolean'
+    default: true
   useClipboardAsDefaultRegister:
     type: 'boolean'
     default: false
