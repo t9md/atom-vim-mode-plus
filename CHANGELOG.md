@@ -1,3 +1,8 @@
+# 0.51.0:
+- New: `groupChangesWhenLeavingInsertMode` setting to control whether bundle changes or not when leaving insert-mode #323.
+When disabled, changes are not bundled and user can undo more granular level(smaller steps). Default is `true`(same as pure Vim).
+- Mention `paner` in helper packages section of README.md since revived!
+
 # 0.50.0:
 - Fix: Deprecation warning introduced by new editor.displayLayer #319.
 - Support: set minimum engines to 1.9.0 above.
