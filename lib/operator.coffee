@@ -13,12 +13,7 @@ _ = require 'underscore-plus'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
-
-# -------------------------
-class OperatorError extends Base
-  @extend(false)
-  constructor: (@message) ->
-    @name = 'Operator Error'
+{OperatorError} = require './errors'
 
 # -------------------------
 class Operator extends Base
