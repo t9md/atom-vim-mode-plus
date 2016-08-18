@@ -6,6 +6,11 @@ Base = require './base'
 settings = require './settings'
 {CurrentSelection, Select, MoveToRelativeLine} = {}
 
+
+class OperationStackError extends Error
+  constructor: ({@message}) ->
+    @name = @constructor.name
+
 class OperationStack
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -77,6 +82,8 @@ class OperationStack
     catch error
       if error.instanceof?('OperatorError')
         @vimState.resetNormalMode()
+      else if error instanceof OperationStackError
+        @vimState.resetNormalMode()
       else
         throw error
 
@@ -124,6 +131,8 @@ class OperationStack
   reduce: ->
     until @stack.length < 2
       operation = @stack.pop()
+      unless @peekTop().setTarget?
+        throw new OperationStackError("The top operation in operation stack is not operator!")
       @peekTop().setTarget(operation)
 
   reset: ->
