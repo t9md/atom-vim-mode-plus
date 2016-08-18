@@ -16,10 +16,6 @@ supportedModeClass = [
   'characterwise'
 ]
 
-class SpecError
-  constructor: (@message) ->
-    @name = 'SpecError'
-
 # Utils
 # -------------------------
 getView = (model) ->
@@ -185,7 +181,7 @@ class VimEditor
   validateOptions: (options, validOptions, message) ->
     invalidOptions = _.without(_.keys(options), validOptions...)
     if invalidOptions.length
-      throw new SpecError("#{message}: #{inspect(invalidOptions)}")
+      throw new Error("#{message}: #{inspect(invalidOptions)}")
 
   setOptionsOrdered = [
     'text',
