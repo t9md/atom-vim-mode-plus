@@ -264,5 +264,6 @@ class Base
       vimState.domEvent = event
       # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
       vimState.operationStack.run(this)
+    event.stopPropagation()
 
 module.exports = Base
