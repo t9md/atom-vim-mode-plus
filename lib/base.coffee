@@ -257,14 +257,13 @@ class Base
       null
 
   @registerCommand: ->
-    atom.commands.add(@getCommandScope(), @getCommandName(), (event) => @run(event))
-
-  @run: (event) ->
-    vimState = getEditorState(event.target.getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
-    if vimState?
-      vimState.domEvent = event
-      # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
-      vimState.operationStack.run(this)
-    event.stopPropagation()
+    klass = this
+    atom.commands.add @getCommandScope(), @getCommandName(), (event) ->
+      vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
+      if vimState?
+        vimState.domEvent = event
+        # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
+        vimState.operationStack.run(klass)
+      event.stopPropagation()
 
 module.exports = Base
