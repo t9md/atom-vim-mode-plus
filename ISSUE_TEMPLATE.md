@@ -1,1 +1,3 @@
-Good Luck!
+- [ ] I need version info(`atom --version`)
+- [ ] Restarting Atom itself solve your problem?
+- [ ] Your issue is keybinding related then [Read this before open](https://github.com/t9md/atom-vim-mode-plus/wiki/IssueReport#some-keybinding-not-working).
