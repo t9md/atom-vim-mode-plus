@@ -586,11 +586,20 @@ describe "Operator general", ->
           text: "no newline!\nno newline!\nno newline!"
 
   describe "the Y keybinding", ->
+    text = """
+    012 345
+    abc\n
+    """
     beforeEach ->
-      set text: "012 345\nabc\n", cursor: [0, 4]
+      set
+        text: text
+        cursor: [0, 4]
 
     it "saves the line to the default register", ->
       ensure 'Y', cursor: [0, 4], register: '"': text: "012 345\n"
+
+    it "yank the whole lines to the default register", ->
+      ensure 'v j Y', cursor: [0, 0], register: '"': text: text
 
   describe "the p keybinding", ->
     describe "with character contents", ->

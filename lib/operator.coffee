@@ -701,6 +701,12 @@ class YankLine extends Yank
   @extend()
   target: 'MoveToRelativeLine'
 
+  mutateSelection: (selection) ->
+    if @isMode('visual')
+      swrap(selection).expandOverLine()
+      swrap(selection).preserveCharacterwise()
+    super
+
 class YankToLastCharacterOfLine extends Yank
   @extend()
   target: 'MoveToLastCharacterOfLine'
