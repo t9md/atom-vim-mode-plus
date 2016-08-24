@@ -222,7 +222,7 @@ class Developer
 
 class DevEnvironment
   constructor: (@editor) ->
-    @editorElement = atom.views.getView(@editor)
+    @editorElement = @editor.element
     @emitter = new Emitter
     fileName = path.basename(@editor.getPath())
     @disposable = @editor.onDidSave =>

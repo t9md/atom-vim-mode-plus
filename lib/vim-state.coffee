@@ -28,7 +28,7 @@ class VimState
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
 
   constructor: (@main, @editor, @statusBarManager) ->
-    @editorElement = atom.views.getView(@editor)
+    @editorElement = @editor.element
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
     @modeManager = new ModeManager(this)

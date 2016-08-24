@@ -50,7 +50,7 @@ getView = (model) ->
 
 # Return function to restore editor's scrollTop and fold state.
 saveEditorState = (editor) ->
-  editorElement = getView(editor)
+  editorElement = editor.element
   scrollTop = editorElement.getScrollTop()
 
   foldStartRows = editor.displayLayer.findFoldMarkers({}).map (m) -> m.getStartPosition().row
@@ -112,7 +112,7 @@ withVisibleBufferRange = (editor, fn) ->
   if range = getVisibleBufferRange(editor)
     fn(range)
   else
-    disposable = getView(editor).onDidAttach ->
+    disposable = editor.element.onDidAttach ->
       disposable.dispose()
       range = getVisibleBufferRange(editor)
       fn(range)
@@ -120,7 +120,7 @@ withVisibleBufferRange = (editor, fn) ->
 # NOTE: endRow become undefined if @editorElement is not yet attached.
 # e.g. Beging called immediately after open file.
 getVisibleBufferRange = (editor) ->
-  [startRow, endRow] = getView(editor).getVisibleRowRange()
+  [startRow, endRow] = editor.element.getVisibleRowRange()
   return null unless (startRow? and endRow?)
   startRow = editor.bufferRowForScreenRow(startRow)
   endRow = editor.bufferRowForScreenRow(endRow)
@@ -261,10 +261,10 @@ getVimLastScreenRow = (editor) ->
   getVimEofScreenPosition(editor).row
 
 getFirstVisibleScreenRow = (editor) ->
-  getView(editor).getFirstVisibleScreenRow()
+  editor.element.getFirstVisibleScreenRow()
 
 getLastVisibleScreenRow = (editor) ->
-  getView(editor).getLastVisibleScreenRow()
+  editor.element.getLastVisibleScreenRow()
 
 getFirstCharacterColumForBufferRow = (editor, row) ->
   text = editor.lineTextForBufferRow(row)

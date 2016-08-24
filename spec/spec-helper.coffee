@@ -63,8 +63,7 @@ buildTextInputEvent = (key) ->
   event
 
 getHiddenInputElementForEditor = (editor) ->
-  editorElement = atom.views.getView(editor)
-  editorElement.component.hiddenInputComponent.getDomNode()
+  editor.element.component.hiddenInputComponent.getDomNode()
 
 # FIX orignal characterForKeyboardEvent(it can't handle 'space')
 characterForKeyboardEvent = (event) ->
