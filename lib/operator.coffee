@@ -551,6 +551,7 @@ class Surround extends TransformString
     ['{', '}']
     ['<', '>']
   ]
+  spaceSurroundedRegExp: /^\s([\s|\S]+)\s$/
   input: null
   charsMax: 1
   hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
@@ -582,17 +583,16 @@ class Surround extends TransformString
       open += "\n"
       close += "\n"
 
-    SpaceSurroundedRegExp = /^\s([\s|\S]+)\s$/
-    isSurroundedBySpace = (text) ->
-      SpaceSurroundedRegExp.test(text)
-
-    if @input in settings.get('charactersToAddSpaceOnSurround') and not isSurroundedBySpace(text)
+    if @input in settings.get('charactersToAddSpaceOnSurround') and not @isSurroundedBySpace(text)
       open + ' ' + text + ' ' + close
     else
       open + text + close
 
   getNewText: (text) ->
     @surround text, @getPair(@input)
+
+  isSurroundedBySpace: (text) ->
+    @spaceSurroundedRegExp.test(text)
 
 class SurroundWord extends Surround
   @extend()
@@ -662,7 +662,13 @@ class ChangeSurround extends DeleteSurround
 
   getNewText: (text) ->
     [open, close] = @getPair(@char)
-    open + text[1...-1] + close
+    bodyText = text[1...-1]
+    bodyText = bodyText.trim() if @input in settings.get('charactersToAddSpaceOnSurround')
+    if @char in settings.get('charactersToAddSpaceOnSurround') and not @isSurroundedBySpace(bodyText)
+      open + ' ' + bodyText + ' ' + close
+    else
+      open + bodyText + close
+
 
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
