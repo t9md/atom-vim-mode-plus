@@ -494,7 +494,7 @@ describe "Operator TransformString", ->
               ""
             ].join("\n")
 
-    describe 'change srurround', ->
+    describe 'change surround', ->
       beforeEach ->
         atom.keymaps.add "surround-test",
           'atom-text-editor.vim-mode-plus.normal-mode':
@@ -555,6 +555,21 @@ describe "Operator TransformString", ->
               hello: world
             )
             """
+
+      describe 'charactersToAddSpaceOnSurround setting', ->
+        beforeEach ->
+          set
+            text: "(  apple  )"
+            cursorBuffer: [0, 0]
+
+        it "add or remove additional space inside pair char when change surround", ->
+          settings.set('charactersToAddSpaceOnSurround', ['(', '{', '['])
+          ensure ['c s', input: '({'], text: "{ apple }"
+          ensure ['c s', input: '}{'], text: "{ apple }"
+          ensure ['c s', input: '{}'], text: "{apple}"
+          ensure ['c s', input: '{{'], text: "{ apple }"
+          ensure ['c s', input: '{{'], text: "{ apple }"
+          ensure ['c s', input: '})'], text: "( apple )"
 
     describe 'surround-word', ->
       beforeEach ->
