@@ -650,7 +650,7 @@ class ChangeSurround extends DeleteSurround
 
   onConfirm: (input) ->
     return unless input
-    {from, @char} = input.split('')
+    [from, @char] = input.split('')
     super(from)
 
   getNewText: (text) ->
