@@ -567,6 +567,13 @@ matchScopes = (editorElement, scopes) ->
     return true if containsCount is classNames.length
   false
 
+spaceSurroundedRegExp = /^\s+([\s|\S]+)\s+$/
+isSurroundedBySpace = (text) ->
+  spaceSurroundedRegExp.test(text)
+
+isSingleLine = (text) ->
+  text.split(/\n|\r\n/).length is 1
+
 # Debugging purpose
 # -------------------------
 logGoalColumnForSelection = (subject, selection) ->
@@ -696,6 +703,8 @@ module.exports = {
   matchScopes
   moveCursorDownBuffer
   moveCursorUpBuffer
+  isSurroundedBySpace
+  isSingleLine
 
   # Debugging
   reportSelection,

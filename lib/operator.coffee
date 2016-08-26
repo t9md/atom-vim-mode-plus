@@ -9,6 +9,7 @@ _ = require 'underscore-plus'
   highlightRanges, getNewTextRangeFromCheckpoint
   isEndsWithNewLineForBufferRow
   isAllWhiteSpace
+  isSingleLine
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -567,27 +568,26 @@ class Surround extends TransformString
   onConfirm: (@input) ->
     @processOperation()
 
-  getPair: (input) ->
-    pair = _.detect(@pairs, (pair) -> input in pair)
-    pair ?= [input, input]
+  getPair: (char) ->
+    pair = _.detect(@pairs, (pair) -> char in pair)
+    pair ?= [char, char]
 
-  surround: (text, pair) ->
-    [open, close] = pair
-    if LineEndingRegExp.test(text)
+  surround: (text, char, options={}) ->
+    {keepLayout} = options
+    keepLayout ?= false
+    [open, close] = @getPair(char)
+    if (not keepLayout) and LineEndingRegExp.test(text)
       @autoIndent = true # [FIXME]
       open += "\n"
       close += "\n"
 
-    if @input in settings.get('charactersToAddSpaceOnSurround') and not @isSurroundedBySpace(text)
+    if char in settings.get('charactersToAddSpaceOnSurround') and isSingleLine(text)
       open + ' ' + text + ' ' + close
     else
       open + text + close
 
   getNewText: (text) ->
-    @surround text, @getPair(@input)
-
-  isSurroundedBySpace: (text) ->
-    @spaceSurroundedRegExp.test(text)
+    @surround(text, @input)
 
 class SurroundWord extends Surround
   @extend()
@@ -625,8 +625,6 @@ class DeleteSurround extends Surround
     @processOperation()
 
   getNewText: (text) ->
-    isSingleLine = (text) ->
-      text.split(/\n|\r\n/).length is 1
     text = text[1...-1]
     if isSingleLine(text)
       text.trim()
@@ -652,18 +650,12 @@ class ChangeSurround extends DeleteSurround
 
   onConfirm: (input) ->
     return unless input
-    [from, @char] = input.split('')
+    {from, @char} = input.split('')
     super(from)
 
   getNewText: (text) ->
-    [open, close] = @getPair(@char)
-    bodyText = text[1...-1]
-    bodyText = bodyText.trim() if @input in settings.get('charactersToAddSpaceOnSurround')
-    if @char in settings.get('charactersToAddSpaceOnSurround') and not @isSurroundedBySpace(bodyText)
-      open + ' ' + bodyText + ' ' + close
-    else
-      open + bodyText + close
-
+    text = super # Delete surround
+    @surround(text, @char, keepLayout: true)
 
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
