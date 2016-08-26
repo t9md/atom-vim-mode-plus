@@ -16,14 +16,14 @@ class Hover extends HTMLElement
     this
 
   getPoint: ->
-    switch
-      when @vimState.isMode('visual', 'linewise')
-        swrap(@editor.getLastSelection()).getCharacterwiseHeadPosition()
-      when @vimState.isMode('visual', 'blockwise')
+    if @editor.getLastSelection().isEmpty()
+      @editor.getCursorBufferPosition()
+    else
+      if @vimState.isMode('visual', 'blockwise')
         # FIXME #179
         @vimState.getLastBlockwiseSelection()?.getHeadSelection().getHeadBufferPosition()
       else
-        @editor.getCursorBufferPosition()
+        swrap(@editor.getLastSelection()).getCharacterwiseHeadPosition()
 
   add: (text, point=@getPoint()) ->
     @text.push(text)
