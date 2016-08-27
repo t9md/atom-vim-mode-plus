@@ -664,7 +664,7 @@ class ScrollFullScreenDown extends Motion
     @scroll()
 
   moveCursor: (cursor) ->
-    point = new Point(@cursorRow, 0)
+    point = [getValidVimScreenRow(@editor, @cursorRow), 0]
     cursor.setScreenPosition(point, autoscroll: false)
 
 # keymap: ctrl-b
