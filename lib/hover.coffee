@@ -20,7 +20,7 @@ class Hover extends HTMLElement
       # FIXME #179
       @vimState.getLastBlockwiseSelection()?.getHeadSelection().getHeadBufferPosition()
     else
-      swrap(@editor.getLastSelection()).getBufferPositionFor('head', fromProperty: true)
+      swrap(@editor.getLastSelection()).getBufferPositionFor('head', fromProperty: true, allowFallBack: true)
 
   add: (text, point=@getPoint()) ->
     @text.push(text)

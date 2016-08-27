@@ -42,9 +42,14 @@ class SelectionWrapper
         @selection.modifySelection =>
           @selection.cursor.setBufferPosition(head)
 
-  getBufferPositionFor: (which, {fromProperty}={}) ->
+  getBufferPositionFor: (which, {fromProperty, allowFallBack}={}) ->
     fromProperty ?= false
-    if fromProperty and @hasProperties()
+    allowFallBack ?= false
+
+    if fromProperty and (not @hasProperties()) and allowFallBack
+      fromProperty = false
+
+    if fromProperty
       {head, tail} = @getProperties()
       if head.isGreaterThanOrEqual(tail)
         [start, end] = [tail, head]
@@ -103,14 +108,27 @@ class SelectionWrapper
     @selectRowRange(@selection.getBufferRowRange())
     @selection.cursor.goalColumn = goalColumn if goalColumn
 
-  getBufferRangeForTailRow: ->
+  getRowFor: (where) ->
     [startRow, endRow] = @selection.getBufferRowRange()
-    row = if @selection.isReversed() then endRow else startRow
-    @selection.editor.bufferRangeForBufferRow(row, includeNewline: true)
+    unless @selection.isReversed()
+      [headRow, tailRow] = [startRow, endRow]
+    else
+      [headRow, tailRow] = [endRow, startRow]
+
+    switch where
+      when 'start' then startRow
+      when 'end' then endRow
+      when 'head' then headRow
+      when 'tail' then tailRow
+
+  getHeadRow: -> @getRowFor('head')
+  getTailRow: -> @getRowFor('tail')
+  getStartRow: -> @getRowFor('start')
+  getEndRow: -> @getRowFor('end')
 
   getTailBufferRange: ->
     if (@isSingleRow() and @isLinewise())
-      @getBufferRangeForTailRow()
+      @selection.editor.bufferRangeForBufferRow(@getTailRow(), includeNewline: true)
     else
       {editor} = @selection
       start = @selection.getTailScreenPosition()
