@@ -24,6 +24,23 @@ module.exports =
     @registerCommands()
     @registerVimStateCommands()
 
+    warnAndDisablePackage = ->
+      message = """
+      vim-mode-plus is automatically disabled because vim-mode is enabled.__
+      To use vim-mode-plus
+      **Disable vim-mode first then manally enable vim-mode-plus**.__
+      """.replace(/_/g, ' ')
+      atom.notifications.addWarning(message, dismissable: true)
+      atom.packages.disablePackage('vim-mode-plus')
+
+    if atom.packages.isPackageActive('vim-mode')
+      warnAndDisablePackage()
+    else
+      disposable = atom.packages.onDidActivatePackage (pack) ->
+        if pack.name is 'vim-mode'
+          disposable.dispose()
+          warnAndDisablePackage()
+
     if atom.inDevMode()
       developer = (new (require './developer'))
       @subscribe(developer.init(service))
