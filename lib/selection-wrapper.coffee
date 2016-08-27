@@ -89,10 +89,10 @@ class SelectionWrapper
 
   selectRowRange: (rowRange) ->
     {editor} = @selection
-    [startRow, endRow] = rowRange
-    rangeStart = editor.bufferRangeForBufferRow(startRow, includeNewline: true)
-    rangeEnd = editor.bufferRangeForBufferRow(endRow, includeNewline: true)
-    @setBufferRange(rangeStart.union(rangeEnd), preserveFolds: true)
+    [startRange, endRange] = rowRange.map (row) ->
+      editor.bufferRangeForBufferRow(row, includeNewline: true)
+    range = startRange.union(endRange)
+    @setBufferRange(range, preserveFolds: true)
 
   # Native selection.expandOverLine is not aware of actual rowRange of selection.
   expandOverLine: (options={}) ->
