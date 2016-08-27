@@ -10,7 +10,7 @@ class SelectionWrapper
   hasProperties: -> propertyStore.has(@selection)
   getProperties: -> propertyStore.get(@selection) ? {}
   setProperties: (prop) -> propertyStore.set(@selection, prop)
-  resetProperties: -> propertyStore?.delete(@selection)
+  resetProperties: -> propertyStore.delete(@selection)
 
   setBufferRangeSafely: (range) ->
     if range
