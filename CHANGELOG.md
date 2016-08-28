@@ -1,3 +1,6 @@
+# 0.53.0:
+- Fix: Command is dispatched to different(incorrect) editor instead of editor which fired original event. #338
+
 # 0.52.0:
 - Doc: Update links in README.md
 - Improve: Suppress error when motion is pushed to operation stack when previous motion had not finished. #327
