@@ -573,8 +573,7 @@ class Surround extends TransformString
     pair ?= [char, char]
 
   surround: (text, char, options={}) ->
-    {keepLayout} = options
-    keepLayout ?= false
+    keepLayout = options.keepLayout ? false
     [open, close] = @getPair(char)
     if (not keepLayout) and LineEndingRegExp.test(text)
       @autoIndent = true # [FIXME]
@@ -654,8 +653,8 @@ class ChangeSurround extends DeleteSurround
     super(from)
 
   getNewText: (text) ->
-    text = super # Delete surround
-    @surround(text, @char, keepLayout: true)
+    innerText = super # Delete surround
+    @surround(innerText, @char, keepLayout: true)
 
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
