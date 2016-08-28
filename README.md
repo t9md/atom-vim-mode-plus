@@ -42,6 +42,8 @@ Fork of [vim-mode](https://github.com/atom/vim-mode). Started at 2015.8.1.
 
 # FAQ
 
+Search [Q&A](https://github.com/t9md/atom-vim-mode-plus/issues?utf8=%E2%9C%93&q=label%3AQ%26A) label on issues.
+
 ### Why fork? why not directly contribute to official vim-mode?
 
 - Changes are [too big](https://github.com/t9md/atom-vim-mode-plus/graphs/contributors).
