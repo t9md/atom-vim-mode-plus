@@ -342,3 +342,9 @@ class VimState
     marker.destroy() for marker in @rangeMarkers
     @rangeMarkers = []
     @toggleClassList('with-range-marker', @hasRangeMarkers())
+
+  pushSearchHistory: (input) ->
+    @searchHistory.save(input)
+
+  getSearchHistoryItem: (prev) ->
+    @searchHistory.get(prev)
