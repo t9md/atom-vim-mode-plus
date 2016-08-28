@@ -1,3 +1,15 @@
+# 0.52.0:
+- Doc: Update links in README.md
+- Improve: Suppress error when motion is pushed to operation stack when previous motion had not finished. #327
+- Internal: Consolidate vmp specific error class. Avoid inappropriate class inheritance.
+- Improve: Prevent unnecessary propagation of event for all vmp commands.
+- Doc: Add ISSUE_TEMPLATE.md.
+- New: `Y` in visual-mode yank whole line #330.
+- Improve, Breaking: `Surround` and `ChangeSurround` trim() white spaces of inner text before surround #331. by @ypresto
+- Improve: `ctrl-f` no longer put cursor to EOF instead of vimEOF.
+- Improve: Accuracy improved for the position where hover shows up, so `ChangeSurroundAnyPair` shows hover on original cursor position.
+- Improve: Notification warning when user enabled both vim-mode and vim-mode-plus #335.
+
 # 0.51.0:
 - New: `groupChangesWhenLeavingInsertMode` setting to control whether bundle changes or not when leaving insert-mode #323.
 When disabled, changes are not bundled and user can undo more granular level(smaller steps). Default is `true`(same as pure Vim).
