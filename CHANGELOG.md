@@ -1,3 +1,6 @@
+# 0.53.1:
+- Improve, Breaking: When autocomplete's popup is active, `escape` in `insert-mode` no longer escape insert-mode. #339
+
 # 0.53.0:
 - Fix: Command is dispatched to different(incorrect) editor instead of editor which fired original event. #338
 
