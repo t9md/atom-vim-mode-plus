@@ -171,11 +171,17 @@ module.exports =
         commands["set-input-char-#{char}"] = -> @setInputChar(char)
 
     getEditorState = @getEditorState.bind(this)
-    for name, fn of commands
-      do (fn) =>
-        commandName = "vim-mode-plus:#{name}"
-        @subscribe atom.commands.add 'atom-text-editor:not([mini])', commandName, ->
-          fn.call(getEditorState(@getModel()))
+
+    bindToVimState = (oldCommands) ->
+      newCommands = {}
+      for name, fn of oldCommands
+        do (fn) ->
+          newCommands["vim-mode-plus:#{name}"] = (event) ->
+            event.stopPropagation()
+            fn.call(getEditorState(@getModel()), event)
+      newCommands
+
+    @subscribe atom.commands.add('atom-text-editor:not([mini])', bindToVimState(commands))
 
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)
