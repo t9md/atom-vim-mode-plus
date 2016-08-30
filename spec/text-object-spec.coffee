@@ -587,7 +587,7 @@ describe "TextObject", ->
 
   describe "AllowForwarding family", ->
     beforeEach ->
-      atom.keymaps.add "text",
+      atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
           'i }':  'vim-mode-plus:inner-curly-bracket-allow-forwarding'
           'i >':  'vim-mode-plus:inner-angle-bracket-allow-forwarding'
