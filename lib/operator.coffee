@@ -347,6 +347,13 @@ class DecodeUriComponent extends TransformString
   getNewText: (text) ->
     decodeURIComponent(text)
 
+class TrimString extends TransformString
+  @extend()
+  @description: "trim() string"
+  displayName: 'Trim string'
+  getNewText: (text) ->
+    text.trim()
+
 class CompactSpaces extends TransformString
   @extend()
   @description: "Compact multiple spaces to single space"

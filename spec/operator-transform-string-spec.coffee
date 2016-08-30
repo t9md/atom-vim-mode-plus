@@ -367,6 +367,57 @@ describe "Operator TransformString", ->
         ensure 'g space w',
           text: '01234 90'
 
+  describe 'TrimString', ->
+    beforeEach ->
+      set
+        text: " text = @getNewText( selection.getText(), selection )  "
+        cursor: [0, 42]
+
+    describe "basic behavior", ->
+      it "trim string for a-line text object", ->
+        set
+          text_: """
+          ___abc___
+          ___def___
+          """
+          cursor: [0, 0]
+        ensure 'g | a l',
+          text_: """
+          abc
+          ___def___
+          """
+        ensure 'j .',
+          text_: """
+          abc
+          def
+          """
+      it "trim string for inner-parenthesis text object", ->
+        set
+          text_: """
+          (  abc  )
+          (  def  )
+          """
+          cursor: [0, 0]
+        ensure 'g | i (',
+          text_: """
+          (abc)
+          (  def  )
+          """
+        ensure 'j .',
+          text_: """
+          (abc)
+          (def)
+          """
+      it "trim string for inner-any-pair text object", ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
+            'i ;':  'vim-mode-plus:inner-any-pair'
+
+        set text_: "( [ {  abc  } ] )", cursor: [0, 8]
+        ensure 'g | i ;', text_: "( [ {abc} ] )"
+        ensure '2 h .', text_: "( [{abc}] )"
+        ensure '2 h .', text_: "([{abc}])"
+
   describe 'surround', ->
     beforeEach ->
       set
