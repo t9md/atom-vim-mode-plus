@@ -477,7 +477,8 @@ class TransformStringBySelectList extends Operator
   initialize: ->
     @vimState.onDidConfirmSelectList (transformer) =>
       @vimState.reset()
-      @vimState.operationStack.run(transformer.name)
+      target = @target?.constructor.name
+      @vimState.operationStack.run(transformer.name, {target})
     @focusSelectList({items: @getItems()})
 
   execute: ->
