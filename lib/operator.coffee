@@ -246,6 +246,13 @@ class TransformString extends Operator
   stayOnLinewise: true
   setPoint: true
   autoIndent: false
+  @transformers: []
+
+  @registerToSelectList: ->
+    @transformers.push(this)
+
+  getTransformers: ->
+    @constructor.transformers
 
   mutateSelection: (selection) ->
     text = @getNewText(selection.getText(), selection)
@@ -256,6 +263,7 @@ class TransformString extends Operator
 # -------------------------
 class ToggleCase extends TransformString
   @extend()
+  @registerToSelectList()
   displayName: 'Toggle ~'
   hover: icon: ':toggle-case:', emoji: ':clap:'
   toggleCase: (char) ->
@@ -270,12 +278,14 @@ class ToggleCase extends TransformString
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
+  @registerToSelectList()
   hover: null
   setPoint: false
   target: 'MoveRight'
 
 class UpperCase extends TransformString
   @extend()
+  @registerToSelectList()
   displayName: 'Upper'
   hover: icon: ':upper-case:', emoji: ':point_up:'
   getNewText: (text) ->
@@ -283,6 +293,7 @@ class UpperCase extends TransformString
 
 class LowerCase extends TransformString
   @extend()
+  @registerToSelectList()
   displayName: 'Lower'
   hover: icon: ':lower-case:', emoji: ':point_down:'
   getNewText: (text) ->
@@ -291,11 +302,13 @@ class LowerCase extends TransformString
 # DUP meaning with SplitString need consolidate.
 class SplitByCharacter extends TransformString
   @extend()
+  @registerToSelectList()
   getNewText: (text) ->
     text.split('').join(' ')
 
 class CamelCase extends TransformString
   @extend()
+  @registerToSelectList()
   displayName: 'Camelize'
   hover: icon: ':camel-case:', emoji: ':camel:'
   getNewText: (text) ->
@@ -303,6 +316,7 @@ class CamelCase extends TransformString
 
 class SnakeCase extends TransformString
   @extend()
+  @registerToSelectList()
   @description: "CamelCase -> camel_case"
   displayName: 'Underscore _'
   hover: icon: ':snake-case:', emoji: ':snake:'
@@ -311,6 +325,7 @@ class SnakeCase extends TransformString
 
 class PascalCase extends TransformString
   @extend()
+  @registerToSelectList()
   @description: "text_before -> TextAfter"
   displayName: 'Pascalize'
   hover: icon: ':pascal-case:', emoji: ':triangular_ruler:'
@@ -319,6 +334,7 @@ class PascalCase extends TransformString
 
 class DashCase extends TransformString
   @extend()
+  @registerToSelectList()
   displayName: 'Dasherize -'
   hover: icon: ':dash-case:', emoji: ':dash:'
   getNewText: (text) ->
@@ -326,6 +342,7 @@ class DashCase extends TransformString
 
 class TitleCase extends TransformString
   @extend()
+  @registerToSelectList()
   @description: "CamelCase -> Camel Case"
   displayName: 'Titlize'
   getNewText: (text) ->
@@ -333,6 +350,7 @@ class TitleCase extends TransformString
 
 class EncodeUriComponent extends TransformString
   @extend()
+  @registerToSelectList()
   @description: "URI encode string"
   displayName: 'Encode URI Component %'
   hover: icon: 'encodeURI', emoji: 'encodeURI'
@@ -341,6 +359,7 @@ class EncodeUriComponent extends TransformString
 
 class DecodeUriComponent extends TransformString
   @extend()
+  @registerToSelectList()
   @description: "Decode URL encoded string"
   displayName: 'Decode URI Component %%'
   hover: icon: 'decodeURI', emoji: 'decodeURI'
@@ -349,6 +368,7 @@ class DecodeUriComponent extends TransformString
 
 class TrimString extends TransformString
   @extend()
+  @registerToSelectList()
   @description: "trim() string"
   displayName: 'Trim string'
   getNewText: (text) ->
@@ -356,6 +376,7 @@ class TrimString extends TransformString
 
 class CompactSpaces extends TransformString
   @extend()
+  @registerToSelectList()
   @description: "Compact multiple spaces to single space"
   displayName: 'Compact space'
   mutateSelection: (selection) ->
@@ -440,35 +461,13 @@ class TransformStringByExternalCommand extends TransformString
     @stdoutBySelection.get(selection)
 
 # -------------------------
-class TransformStringBySelectList extends Operator
+class TransformStringBySelectList extends TransformString
   @extend()
   @description: "Transform string by specified oprator selected from select-list"
   requireInput: true
-  # Member of transformers can be either of
-  # - Operation class name: e.g 'CamelCase'
-  # - Operation class itself: e.g. CamelCase
-  transformers: [
-    'CamelCase'
-    'DashCase'
-    'SnakeCase'
-    'TitleCase'
-    'EncodeUriComponent'
-    'DecodeUriComponent'
-    'Reverse'
-    'Surround'
-    'MapSurround'
-    'IncrementNumber'
-    'DecrementNumber'
-    'JoinByInput'
-    'JoinWithKeepingSpace'
-    'SplitString'
-    'LowerCase'
-    'UpperCase'
-    'ToggleCase'
-  ]
 
   getItems: ->
-    @transformers.map (klass) ->
+    @getTransformers().map (klass) ->
       klass = Base.getClass(klass) if _.isString(klass)
       displayName = klass::displayName if klass::hasOwnProperty('displayName')
       displayName ?= _.humanizeEventName(_.dasherize(klass.name))
@@ -735,6 +734,7 @@ class Join extends TransformString
 
 class JoinWithKeepingSpace extends TransformString
   @extend()
+  @registerToSelectList()
   input: ''
   requireTarget: false
   trim: false
@@ -757,6 +757,7 @@ class JoinWithKeepingSpace extends TransformString
 
 class JoinByInput extends JoinWithKeepingSpace
   @extend()
+  @registerToSelectList()
   @description: "Transform multi-line to single-line by with specified separator character"
   hover: icon: ':join:', emoji: ':couple:'
   requireInput: true
@@ -772,6 +773,7 @@ class JoinByInput extends JoinWithKeepingSpace
 class JoinByInputWithKeepingSpace extends JoinByInput
   @description: "Join lines without padding space between each line"
   @extend()
+  @registerToSelectList()
   trim: false
   join: (rows) ->
     rows.join(@input)
@@ -780,6 +782,7 @@ class JoinByInputWithKeepingSpace extends JoinByInput
 # String suffix in name is to avoid confusion with 'split' window.
 class SplitString extends TransformString
   @extend()
+  @registerToSelectList()
   @description: "Split single-line into multi-line by splitting specified separator chars"
   hover: icon: ':split-string:', emoji: ':hocho:'
   requireInput: true
@@ -797,6 +800,7 @@ class SplitString extends TransformString
 
 class Reverse extends TransformString
   @extend()
+  @registerToSelectList()
   @description: "Reverse lines(e.g reverse selected three line)"
   mutateSelection: (selection) ->
     swrap(selection).expandOverLine()
