@@ -953,12 +953,17 @@ class Search extends SearchBase
     @subscribe @editorElement.onDidChangeScrollTop => @matches?.refresh()
     @subscribe @editorElement.onDidChangeScrollLeft => @matches?.refresh()
 
+    # command is 'visit-next' or 'visit-prev'
     @onDidCommandSearch (command) =>
       return unless @input
       return if @matches.isEmpty()
-      switch command
-        when 'visit-next' then @visitMatch('next')
-        when 'visit-prev' then @visitMatch('prev')
+
+      direction = command.split('-')[1]
+      if @isBackwards() and settings.get('incrementalSearchVisitDirection') is 'relative'
+        direction = switch direction
+          when 'next' then 'prev'
+          when 'prev' then 'next'
+      @visitMatch(direction)
 
   visitCursors: ->
     visitCursor = (cursor) =>

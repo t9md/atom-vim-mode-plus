@@ -1,4 +1,3 @@
-_ = require 'underscore-plus'
 {
   getIndex
   highlightRanges
@@ -17,11 +16,15 @@ class MatchList
       ranges.push range
 
     if direction is 'backward'
-      reversed = ranges.slice().reverse()
-      current = _.detect(reversed, ({start}) -> start.isLessThan(fromPoint))
-      current ?= _.last(ranges)
+      for range in ranges by -1 when range.start.isLessThan(fromPoint)
+        current = range
+        break
+      current ?= ranges.slice(-1)[0] # last
+
     else if direction is 'forward'
-      current = _.detect(ranges, ({start}) -> start.isGreaterThan(fromPoint))
+      for range in ranges when range.start.isGreaterThan(fromPoint)
+        current = range
+        break
       current ?= ranges[0]
 
     index = ranges.indexOf(current)

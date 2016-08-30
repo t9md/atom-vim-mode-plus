@@ -87,6 +87,11 @@ module.exports = new Settings 'vim-mode-plus',
   incrementalSearch:
     type: 'boolean'
     default: false
+  incrementalSearchVisitDirection:
+    type: 'string'
+    default: 'absolute'
+    enum: ['absolute', 'relative']
+    description: "Whether 'visit-next'(tab) and 'visit-prev'(shift-tab) depends on search direction('/' or '?')"
   stayOnTransformString:
     type: 'boolean'
     default: false
