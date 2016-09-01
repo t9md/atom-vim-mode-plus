@@ -10,6 +10,7 @@ _ = require 'underscore-plus'
   isEndsWithNewLineForBufferRow
   isAllWhiteSpace
   isSingleLine
+  getCharacterAtCursor
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -1040,20 +1041,36 @@ class Replace extends Operator
 
 class AddSelection extends Operator
   @extend()
+  selectedText: null
+
+  initialize: ->
+    if @selectedText = @editor.getSelectedText()
+      # When invoked from visual-mode, ensure start from 'normal' mode.
+      @vimState.activate('normal') unless @isMode('normal')
+
+  isNonWordCharacters: (char, scope) ->
+    char in atom.config.get('editor.nonWordCharacters', {scope})
 
   execute: ->
     lastSelection = @editor.getLastSelection()
-    lastSelection.selectWord() unless @isMode('visual')
-    word = @editor.getSelectedText()
-    return if word is ''
+    cursor = lastSelection.cursor
+
+    pattern = null
+    if @selectedText
+      pattern = ///#{_.escapeRegExp(@selectedText)}///g
+    else
+      char = getCharacterAtCursor(cursor)
+      scope = cursor.getScopeDescriptor().getScopesArray()
+      if @isNonWordCharacters(char, scope)
+        pattern = ///#{_.escapeRegExp(char)}///g
+      else
+        lastSelection.selectWord()
+        word = lastSelection.getText()
+        pattern = ///\b#{_.escapeRegExp(word)}\b///g
+
     return unless @selectTarget()
 
     ranges = []
-    pattern = if @isMode('visual')
-      ///#{_.escapeRegExp(word)}///g
-    else
-      ///\b#{_.escapeRegExp(word)}\b///g
-
     for selection in @editor.getSelections()
       scanRange = selection.getBufferRange()
       @editor.scanInBufferRange pattern, scanRange, ({range}) ->
@@ -1061,8 +1078,7 @@ class AddSelection extends Operator
 
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
-      unless @isMode('visual', 'characterwise')
-        @activateMode('visual', 'characterwise')
+      @activateMode('visual', 'characterwise') unless @isMode('visual', 'characterwise')
 
 class SelectAllInRangeMarker extends AddSelection
   @extend()
