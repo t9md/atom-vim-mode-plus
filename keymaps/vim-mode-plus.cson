@@ -139,6 +139,7 @@
   'g -': 'vim-mode-plus:dash-case'
   'g space': 'vim-mode-plus:compact-spaces'
   'g |': 'vim-mode-plus:trim-string'
+  'g cmd-d': 'vim-mode-plus:add-selection'
   # 'g _': 'vim-mode-plus:snake-case'
   # 'g r':   'vim-mode-plus:reverse'
   # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
