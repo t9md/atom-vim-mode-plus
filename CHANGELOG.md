@@ -1,5 +1,17 @@
-# 0.53.1:
+# 0.54.0:
 - Improve, Breaking: When autocomplete's popup is active, `escape` in `insert-mode` no longer escape insert-mode. #339
+- New: `TrimString` operator 'g |' for default keymap. #341
+- Improve, Breaking: #342 `TransformStringBySelectList` no longer ask target first. Instead ask target last as in normal operator.
+- Internal: Let each operator register itself to select-list
+- New, Experimental: `incrementalSearchVisitDirection` config option #343
+  - Default `absolute`, if `relative`, `visit-next`(tab) follows to search direction(`/` or `?`).
+- Improve: Now user can invoke `add-selection` from `visual` mode #340.
+- New: Add default keymap `g cmd-d` to `vim-mode-plus:add-selection`.
+- Improve, Breaking: Rename `RangeMarker` family operator, text-object to fix naming inconsistency. #346
+  - Operator: `MarkRange` to `CreateRangeMarker`
+  - TextObject: `MarkedRange` to `RangeMarker`
+- Fix: In case vimState is not available(not sure why), cancel execution of operation. #347
+- New: Add keymap to make `I` and `A` is available in all visual submode(was available in `visual-block` only in previous version) #348
 
 # 0.53.0:
 - Fix: Command is dispatched to different(incorrect) editor instead of editor which fired original event. #338
