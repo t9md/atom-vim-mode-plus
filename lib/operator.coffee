@@ -241,19 +241,19 @@ class DeleteLine extends Delete
     super
 
 # -------------------------
+transformerRegistry = []
 class TransformString extends Operator
   @extend(false)
   trackChange: true
   stayOnLinewise: true
   setPoint: true
   autoIndent: false
-  @transformers: []
 
   @registerToSelectList: ->
-    @transformers.push(this)
+    transformerRegistry.push(this)
 
   getTransformers: ->
-    @constructor.transformers
+    transformerRegistry
 
   mutateSelection: (selection) ->
     text = @getNewText(selection.getText(), selection)

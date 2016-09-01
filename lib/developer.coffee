@@ -173,7 +173,7 @@ class Developer
 
   generateCommandSummaryTable: ->
     header = """
-    # Keymap selector abbreviations
+    ## Keymap selector abbreviations
 
     In this document, following abbreviations are used for shortness.
 
