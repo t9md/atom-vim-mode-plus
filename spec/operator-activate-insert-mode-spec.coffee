@@ -358,6 +358,59 @@ describe "Operator ActivateInsertMode family", ->
           cursor: [1, 4]
           mode: 'normal'
 
+    describe "in visual-characterwise mode", ->
+      beforeEach ->
+        set text: "012 456 890"
+
+      describe "selection is not reversed", ->
+        beforeEach ->
+          set cursor: [0, 4]
+          ensure "v l l", selectedText: "456", selectionIsReversed: false
+
+        it "insert at start of selection", ->
+          ensure "I", cursor: [0, 4], mode: "insert"
+        it "insert at end of selection", ->
+          ensure "A", cursor: [0, 7], mode: "insert"
+
+      describe "selection is reversed", ->
+        beforeEach ->
+          set cursor: [0, 6]
+          ensure "v h h", selectedText: "456", selectionIsReversed: true
+
+        it "insert at start of selection", ->
+          ensure "I", cursor: [0, 4], mode: "insert"
+        it "insert at end of selection", ->
+          ensure "A", cursor: [0, 7], mode: "insert"
+
+    describe "in visual-linewise mode", ->
+      beforeEach ->
+        set
+          text: """
+          0: 3456 890
+          1: 3456 890
+          2: 3456 890
+          3: 3456 890
+          """
+      describe "selection is not reversed", ->
+        beforeEach ->
+          set cursor: [1, 3]
+          ensure "V j", selectedText: "1: 3456 890\n2: 3456 890\n", selectionIsReversed: false
+
+        it "insert at start of selection", ->
+          ensure "I", cursor: [1, 0], mode: "insert"
+        it "insert at end of selection", ->
+          ensure "A", cursor: [3, 0], mode: "insert"
+
+      describe "selection is reversed", ->
+        beforeEach ->
+          set cursor: [2, 3]
+          ensure "V k", selectedText: "1: 3456 890\n2: 3456 890\n", selectionIsReversed: true
+
+        it "insert at start of selection", ->
+          ensure "I", cursor: [1, 0], mode: "insert"
+        it "insert at end of selection", ->
+          ensure "A", cursor: [3, 0], mode: "insert"
+
   describe "InsertAtPreviousFoldStart and Next", ->
     beforeEach ->
       waitsForPromise ->

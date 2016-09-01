@@ -442,10 +442,8 @@
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
 
-  # 'g I': 'vim-mode-plus:insert-at-start-of-target'
-  # 'I': 'vim-mode-plus:insert-at-start-of-target'
-  # 'g A': 'vim-mode-plus:insert-at-end-of-target'
-  # 'A': 'vim-mode-plus:insert-at-end-of-target'
+  'I': 'vim-mode-plus:insert-at-start-of-selection'
+  'A': 'vim-mode-plus:insert-at-end-of-selection'
 
   # 'p': 'vim-mode-plus:swap-with-register'
   # 'P': 'vim-mode-plus:swap-with-register'
@@ -455,8 +453,6 @@
 'atom-text-editor.vim-mode-plus.visual-mode.blockwise':
   'o': 'vim-mode-plus:blockwise-other-end',
   'O': 'vim-mode-plus:reverse-selections',
-  'I': 'vim-mode-plus:insert-at-start-of-selection'
-  'A': 'vim-mode-plus:insert-at-end-of-selection'
   'D': 'vim-mode-plus:delete-to-last-character-of-line' # To avoid overridden by delete-line in visual-mode
 
 # Input mini editor e.g. mark, surround.
