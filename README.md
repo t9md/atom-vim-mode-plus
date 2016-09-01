@@ -1,3 +1,22 @@
+<!-- TOC START min:1 max:3 link:true update:true -->
+- [vim-mode-plus](#vim-mode-plus)
+- [Important](#important)
+- [Thanks](#thanks)
+- [Issue report](#issue-report)
+- [Whats this?](#whats-this)
+- [FAQ](#faq)
+    - [Why fork? why not directly contribute to official vim-mode?](#why-fork-why-not-directly-contribute-to-official-vim-mode)
+    - [In visual-block mode, some motion make editor slow, freeze.](#in-visual-block-mode-some-motion-make-editor-slow-freeze)
+    - [ex-mode?](#ex-mode)
+    - [Want to suppress autocomplete-plus's auto suggestion except insert-mode.](#want-to-suppress-autocomplete-pluss-auto-suggestion-except-insert-mode)
+- [Wiki](#wiki)
+  - [Keymap](#keymap)
+- [Helper packages](#helper-packages)
+- [References](#references)
+- [Commit emoji convention](#commit-emoji-convention)
+
+<!-- TOC END -->
+
 # vim-mode-plus [![Build Status](https://travis-ci.org/t9md/atom-vim-mode-plus.svg)](https://travis-ci.org/t9md/atom-vim-mode-plus)
 
 vim-mode improved.
