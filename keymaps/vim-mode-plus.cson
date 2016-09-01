@@ -142,7 +142,7 @@
   # 'g _': 'vim-mode-plus:snake-case'
   # 'g r':   'vim-mode-plus:reverse'
   # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
-  # 'g m': 'vim-mode-plus:mark-range'
+  # 'g m': 'vim-mode-plus:create-range-marker'
 
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
@@ -276,7 +276,7 @@
 
 'atom-text-editor.vim-mode-plus.with-range-marker:not(.insert-mode)':
   'cmd-d': 'vim-mode-plus:select-all-in-range-marker'
-  'ctrl-cmd-g': 'vim-mode-plus:marked-range'
+  'ctrl-cmd-g': 'vim-mode-plus:range-marker'
 
 # normal
 # -------------------------
@@ -426,7 +426,7 @@
   'i c': 'vim-mode-plus:inner-latest-change'
   'a c': 'vim-mode-plus:a-latest-change'
   'g v': 'vim-mode-plus:previous-selection'
-  'i r': 'vim-mode-plus:marked-range'
+  'i r': 'vim-mode-plus:range-marker'
 
 # visual
 # -------------------------

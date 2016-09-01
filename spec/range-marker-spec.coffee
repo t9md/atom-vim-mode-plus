@@ -14,7 +14,7 @@ describe "Range Marker", ->
   afterEach ->
     vimState.resetNormalMode()
 
-  describe "MarkRange operator", ->
+  describe "CreateRangeMarker operator", ->
     textForMarker = (marker) ->
       editor.getTextInBufferRange(marker.getBufferRange())
 
@@ -33,7 +33,7 @@ describe "Range Marker", ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g m': 'vim-mode-plus:mark-range'
+          'g m': 'vim-mode-plus:create-range-marker'
       set
         text: """
         ooo xxx ooo
@@ -49,7 +49,7 @@ describe "Range Marker", ->
       expect(vimState.hasRangeMarkers()).toBe(false)
 
     describe "basic behavior", ->
-      it "MarkRange add range marker", ->
+      it "create-range-marker create range marker", ->
         keystroke('g m i w')
         ensureRangeMarker length: 1, text: ['ooo']
         keystroke('j .')

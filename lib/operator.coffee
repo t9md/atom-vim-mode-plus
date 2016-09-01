@@ -1083,7 +1083,7 @@ class AddSelection extends Operator
 class SelectAllInRangeMarker extends AddSelection
   @extend()
   requireTarget: false
-  target: "MarkedRange"
+  target: "RangeMarker"
   flashTarget: false
 
 class SetCursorsToStartOfTarget extends Operator
@@ -1092,12 +1092,12 @@ class SetCursorsToStartOfTarget extends Operator
   mutateSelection: (selection) ->
     swrap(selection).setBufferPositionTo('start')
 
-class SetCursorsToStartOfMarkedRange extends SetCursorsToStartOfTarget
+class SetCursorsToStartOfRangeMarker extends SetCursorsToStartOfTarget
   @extend()
   flashTarget: false
-  target: "MarkedRange"
+  target: "RangeMarker"
 
-class MarkRange extends Operator
+class CreateRangeMarker extends Operator
   @extend()
   keepCursorPosition: true
 
