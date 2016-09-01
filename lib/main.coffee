@@ -178,7 +178,8 @@ module.exports =
         do (fn) ->
           newCommands["vim-mode-plus:#{name}"] = (event) ->
             event.stopPropagation()
-            fn.call(getEditorState(@getModel()), event)
+            if vimState = getEditorState(@getModel())
+              fn.call(vimState, event)
       newCommands
 
     @subscribe atom.commands.add('atom-text-editor:not([mini])', bindToVimState(commands))
