@@ -171,9 +171,7 @@ pointIsAtEndOfLine = (editor, point) ->
   getEolForBufferRow(editor, point.row).isEqual(point)
 
 getCharacterAtCursor = (cursor) ->
-  {editor} = cursor
-  bufferRange = editor.bufferRangeForScreenRange(cursor.getScreenRange())
-  editor.getTextInBufferRange(bufferRange)
+  getTextInScreenRange(cursor.editor, cursor.getScreenRange())
 
 getTextInScreenRange = (editor, screenRange) ->
   bufferRange = editor.bufferRangeForScreenRange(screenRange)
