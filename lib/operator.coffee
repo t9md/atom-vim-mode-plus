@@ -155,6 +155,26 @@ class Operator extends Base
     @mutateSelections (selection) => @mutateSelection(selection)
     @activateMode(@finalMode, @finalSubmode)
 
+  getWordPattern: ->
+    if @hasRegisterName()
+      ///#{_.escapeRegExp(@getRegisterValueAsText())}///g
+    else
+      getPatternForCursorWord(@editor.getLastCursor())
+
+  registerSelectOccurrence: (fn) ->
+    [scanRanges, pattern] = []
+    @onWillSelectTarget =>
+      if @isMode('visual')
+        scanRanges = @editor.getSelectedBufferRanges()
+        @vimState.modeManager.deactivate() # clear selection
+      pattern = fn()
+
+    @onDidSelectTarget =>
+      scanRanges ?= @editor.getSelectedBufferRanges()
+      ranges = scanInRanges(@editor, pattern, scanRanges)
+      if ranges.length
+        @editor.setSelectedBufferRanges(ranges)
+
 # -------------------------
 class Select extends Operator
   @extend(false)
@@ -1049,21 +1069,12 @@ class Replace extends Operator
 
 class AddSelection extends Operator
   @extend()
-  @description: "Add selection on each matching word within target range"
-
-  getWordPattern: ->
-    if @hasRegisterName()
-      ///#{_.escapeRegExp(@getRegisterValueAsText())}///g
-    else
-      getPatternForCursorWord(@editor.getLastCursor())
+  @description: "Add selection onto each matching word within target range"
+  wordPattern: null
 
   execute: ->
-    @wordPattern ?= @getWordPattern()
-    @onDidSelectTarget =>
-      scanRanges = @editor.getSelectedBufferRanges()
-      ranges = scanInRanges(@editor, @wordPattern, scanRanges)
-      if ranges.length
-        @editor.setSelectedBufferRanges(ranges)
+    @registerSelectOccurrence =>
+      @wordPattern ?= @getWordPattern()
 
     if @selectTarget() and not @isMode('visual', 'characterwise')
       @activateMode('visual', 'characterwise')
@@ -1303,21 +1314,12 @@ class Change extends ActivateInsertMode
 
 class ChangeOccurrence extends Change
   @extend()
+  @description: "Change all matching word within target range"
   wordPattern: null
 
-  getWordPattern: ->
-    if @hasRegisterName()
-      ///#{_.escapeRegExp(@getRegisterValueAsText())}///g
-    else
-      getPatternForCursorWord(@editor.getLastCursor())
-
   execute: ->
-    @wordPattern ?= @getWordPattern()
-    @onDidSelectTarget =>
-      scanRanges = @editor.getSelectedBufferRanges()
-      ranges = scanInRanges(@editor, @wordPattern, scanRanges)
-      if ranges.length
-        @editor.setSelectedBufferRanges(ranges)
+    @registerSelectOccurrence =>
+      @wordPattern ?= @getWordPattern()
     super
 
 class Substitute extends Change

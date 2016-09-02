@@ -68,9 +68,10 @@ class ModeManager
     @emitter.emit('did-activate-mode', {@mode, @submode})
 
   deactivate: ->
-    @emitter.emit('will-deactivate-mode', {@mode, @submode})
-    @deactivator?.dispose()
-    @emitter.emit('did-deactivate-mode', {@mode, @submode})
+    unless @deactivator?.disposed
+      @emitter.emit('will-deactivate-mode', {@mode, @submode})
+      @deactivator?.dispose()
+      @emitter.emit('did-deactivate-mode', {@mode, @submode})
 
   # Normal
   # -------------------------
