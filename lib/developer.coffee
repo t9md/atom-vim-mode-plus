@@ -18,13 +18,9 @@ class Developer
 
     commands =
       'toggle-debug': => @toggleDebug()
-
       'open-in-vim': => @openInVim()
       'generate-introspection-report': => @generateIntrospectionReport()
-      'generate-command-summary-table-for-commands-have-no-default-keymap': =>
-        @generateCommandSummaryTableForCommandsHaveNoDefaultKeymap()
-      'generate-command-summary-table': =>
-        @generateCommandSummaryTable()
+      'generate-command-summary-table': => @generateCommandSummaryTable()
       'toggle-dev-environment': => @toggleDevEnvironment()
       'reload-packages': => @reloadPackages()
       'toggle-reload-packages-on-save': => @toggleReloadPackagesOnSave()
@@ -92,7 +88,8 @@ class Developer
 
   # Borrowed from underscore-plus
   modifierKeyMap =
-    cmd: '\u2318'
+    "ctrl-cmd-": '\u2303\u2318'
+    "cmd-": '\u2318'
     "ctrl-": '\u2303'
     alt: '\u2325'
     option: '\u2325'
@@ -115,6 +112,7 @@ class Developer
     ".linewise": 'L'
     ".operator-pending-mode": 'o'
     ".with-count": '#'
+    ".with-range-marker": '%'
 
   getCommandSpecs: ->
     compactSelector = (selector) ->
@@ -126,10 +124,14 @@ class Developer
       .join(",")
 
     compactKeystrokes = (keystrokes) ->
-      pattern = ///(#{_.keys(modifierKeyMap).map(_.escapeRegExp).join('|')})///
+      specialChars = '\\`*_{}[]()#+-.!'
+      specialCharsRegexp = ///#{specialChars.split('').map(_.escapeRegExp).join('|')}///g
+      modifierKeyRegexp = ///(#{_.keys(modifierKeyMap).map(_.escapeRegExp).join('|')})///
       keystrokes
-        .replace(/(`|_)/g, '\\$1')
-        .replace(pattern, (s) -> modifierKeyMap[s])
+        # .replace(/(`|_)/g, '\\$1')
+        .replace(modifierKeyRegexp, (s) -> modifierKeyMap[s])
+        .replace(///(#{specialCharsRegexp})///g, "\\$1")
+        .replace(/\|/g, '&#124;')
         .replace(/\s+/, '')
 
     commands = (
@@ -141,14 +143,14 @@ class Developer
         keymap = null
         if keymaps = getKeyBindingForCommand(commandName, packageName: "vim-mode-plus")
           keymap = keymaps.map ({keystrokes, selector}) ->
-            "`#{compactSelector(selector)}` <kbd>#{compactKeystrokes(keystrokes)}</kbd>"
+            "`#{compactSelector(selector)}` <code>#{compactKeystrokes(keystrokes)}</code>"
           .join("<br/>")
 
         {name, commandName, kind, description, keymap}
     )
     commands
 
-  kinds = ["Operator", "Motion", "TextObject", "InsertMode", "MiscCommand", "Scroll", "VisualBlockwise"]
+  kinds = ["Operator", "Motion", "TextObject", "InsertMode", "MiscCommand", "Scroll"]
   generateSummaryTableForCommandSpecs: (specs, {header}={}) ->
     grouped = _.groupBy(specs, 'kind')
     str = ""
@@ -177,25 +179,22 @@ class Developer
 
     In this document, following abbreviations are used for shortness.
 
-    | Abbrev | Selector                     | Description             |
-    |:-------|:-----------------------------|:------------------------|
-    | `!i`   | `:not(.insert-mode)`         | except insert-mode      |
-    | `i`    | `.insert-mode`               |                         |
-    | `o`    | `.operator-pending-mode`     |                         |
-    | `n`    | `.normal-mode`               |                         |
-    | `v`    | `.visual-mode`               |                         |
-    | `vB`   | `.visual-mode.blockwise`     |                         |
-    | `vL`   | `.visual-mode.linewise`      |                         |
-    | `vC`   | `.visual-mode.characterwise` |                         |
-    | `iR`   | `.insert-mode.replace`       |                         |
-    | `#`    | `.with-count`                | when count is specified |
+    | Abbrev | Selector                     | Description                 |
+    |:-------|:-----------------------------|:----------------------------|
+    | `!i`   | `:not(.insert-mode)`         | except insert-mode          |
+    | `i`    | `.insert-mode`               |                             |
+    | `o`    | `.operator-pending-mode`     |                             |
+    | `n`    | `.normal-mode`               |                             |
+    | `v`    | `.visual-mode`               |                             |
+    | `vB`   | `.visual-mode.blockwise`     |                             |
+    | `vL`   | `.visual-mode.linewise`      |                             |
+    | `vC`   | `.visual-mode.characterwise` |                             |
+    | `iR`   | `.insert-mode.replace`       |                             |
+    | `#`    | `.with-count`                | when count is specified     |
+    | `%`    | `.with-range-marker`         | when range-marker is exists |
 
     """
     @generateSummaryTableForCommandSpecs(@getCommandSpecs(), {header})
-
-  generateCommandSummaryTableForCommandsHaveNoDefaultKeymap: ->
-    commands = @getCommandSpecs().filter (command) -> not getKeyBindingForCommand(command.commandName, packageName: 'vim-mode-plus')
-    @generateSummaryTableForCommandSpecs(commands)
 
   openInVim: ->
     editor = atom.workspace.getActiveTextEditor()

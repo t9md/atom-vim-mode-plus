@@ -265,6 +265,7 @@ class TransformString extends Operator
 class ToggleCase extends TransformString
   @extend()
   @registerToSelectList()
+  @description: "`Hello World` -> `hELLO wORLD`"
   displayName: 'Toggle ~'
   hover: icon: ':toggle-case:', emoji: ':clap:'
   toggleCase: (char) ->
@@ -287,16 +288,18 @@ class ToggleCaseAndMoveRight extends ToggleCase
 class UpperCase extends TransformString
   @extend()
   @registerToSelectList()
-  displayName: 'Upper'
+  @description: "`Hello World` -> `HELLO WORLD`"
   hover: icon: ':upper-case:', emoji: ':point_up:'
+  displayName: 'Upper'
   getNewText: (text) ->
     text.toUpperCase()
 
 class LowerCase extends TransformString
   @extend()
   @registerToSelectList()
-  displayName: 'Lower'
+  @description: "`Hello World` -> `hello world`"
   hover: icon: ':lower-case:', emoji: ':point_down:'
+  displayName: 'Lower'
   getNewText: (text) ->
     text.toLowerCase()
 
@@ -311,6 +314,7 @@ class CamelCase extends TransformString
   @extend()
   @registerToSelectList()
   displayName: 'Camelize'
+  @description: "`hello-world` -> `helloWorld`"
   hover: icon: ':camel-case:', emoji: ':camel:'
   getNewText: (text) ->
     _.camelize(text)
@@ -318,7 +322,7 @@ class CamelCase extends TransformString
 class SnakeCase extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "CamelCase -> camel_case"
+  @description: "`HelloWorld` -> `hello_world`"
   displayName: 'Underscore _'
   hover: icon: ':snake-case:', emoji: ':snake:'
   getNewText: (text) ->
@@ -327,7 +331,7 @@ class SnakeCase extends TransformString
 class PascalCase extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "text_before -> TextAfter"
+  @description: "`hello_world` -> `HelloWorld`"
   displayName: 'Pascalize'
   hover: icon: ':pascal-case:', emoji: ':triangular_ruler:'
   getNewText: (text) ->
@@ -337,6 +341,7 @@ class DashCase extends TransformString
   @extend()
   @registerToSelectList()
   displayName: 'Dasherize -'
+  @description: "HelloWorld -> hello-world"
   hover: icon: ':dash-case:', emoji: ':dash:'
   getNewText: (text) ->
     _.dasherize(text)
@@ -344,7 +349,7 @@ class DashCase extends TransformString
 class TitleCase extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "CamelCase -> Camel Case"
+  @description: "`HelloWorld` -> `Hello World`"
   displayName: 'Titlize'
   getNewText: (text) ->
     _.humanizeEventName(_.dasherize(text))
@@ -352,7 +357,7 @@ class TitleCase extends TransformString
 class EncodeUriComponent extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "URI encode string"
+  @description: "`Hello World` -> `Hello%20World`"
   displayName: 'Encode URI Component %'
   hover: icon: 'encodeURI', emoji: 'encodeURI'
   getNewText: (text) ->
@@ -361,7 +366,7 @@ class EncodeUriComponent extends TransformString
 class DecodeUriComponent extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "Decode URL encoded string"
+  @description: "`Hello%20World` -> `Hello World`"
   displayName: 'Decode URI Component %%'
   hover: icon: 'decodeURI', emoji: 'decodeURI'
   getNewText: (text) ->
@@ -370,7 +375,7 @@ class DecodeUriComponent extends TransformString
 class TrimString extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "trim() string"
+  @description: "` hello ` -> `hello`"
   displayName: 'Trim string'
   getNewText: (text) ->
     text.trim()
@@ -378,7 +383,7 @@ class TrimString extends TransformString
 class CompactSpaces extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "Compact multiple spaces to single space"
+  @description: "`  a    b    c` -> `a b c`"
   displayName: 'Compact space'
   mutateSelection: (selection) ->
     text = @getNewText(selection.getText(), selection)
@@ -464,7 +469,7 @@ class TransformStringByExternalCommand extends TransformString
 # -------------------------
 class TransformStringBySelectList extends TransformString
   @extend()
-  @description: "Transform string by specified oprator selected from select-list"
+  @description: "Interactively choose string transformation operator from select-list"
   requireInput: true
 
   getItems: ->
@@ -1041,6 +1046,7 @@ class Replace extends Operator
 
 class AddSelection extends Operator
   @extend()
+  @description: "Add selection on each matching word within target range"
   selectedText: null
 
   initialize: ->
