@@ -572,6 +572,27 @@ isSurroundedBySpace = (text) ->
 isSingleLine = (text) ->
   text.split(/\n|\r\n/).length is 1
 
+isNonWordCharacter = (char, scope) ->
+  char in atom.config.get('editor.nonWordCharacters', {scope})
+
+getPatternForCursorWord = (cursor) ->
+  char = getCharacterAtCursor(cursor)
+  scope = cursor.getScopeDescriptor().getScopesArray()
+  if isNonWordCharacter(char, scope)
+    ///#{_.escapeRegExp(char)}///g
+  else
+    cursor.selection.selectWord()
+    word = cursor.selection.getText()
+    ///\b#{_.escapeRegExp(word)}\b///g
+
+scanInSelections = (editor, pattern) ->
+  ranges = []
+  for selection in editor.getSelections()
+    scanRange = selection.getBufferRange()
+    editor.scanInBufferRange pattern, scanRange, ({range}) ->
+      ranges.push(range)
+  ranges
+
 # Debugging purpose
 # -------------------------
 logGoalColumnForSelection = (subject, selection) ->
@@ -703,6 +724,9 @@ module.exports = {
   moveCursorUpBuffer
   isSurroundedBySpace
   isSingleLine
+  isNonWordCharacter
+  getPatternForCursorWord
+  scanInSelections
 
   # Debugging
   reportSelection,

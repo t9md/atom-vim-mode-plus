@@ -10,6 +10,9 @@ _ = require 'underscore-plus'
   isEndsWithNewLineForBufferRow
   isAllWhiteSpace
   isSingleLine
+  isNonWordCharacter
+  getPatternForCursorWord
+  scanInSelections
   getCharacterAtCursor
 } = require './utils'
 swrap = require './selection-wrapper'
@@ -1054,34 +1057,14 @@ class AddSelection extends Operator
       # When invoked from visual-mode, ensure start from 'normal' mode.
       @vimState.activate('normal') unless @isMode('normal')
 
-  isNonWordCharacters: (char, scope) ->
-    char in atom.config.get('editor.nonWordCharacters', {scope})
-
   execute: ->
-    lastSelection = @editor.getLastSelection()
-    cursor = lastSelection.cursor
-
-    pattern = null
-    if @selectedText
-      pattern = ///#{_.escapeRegExp(@selectedText)}///g
+    pattern = if @selectedText
+      ///#{_.escapeRegExp(@selectedText)}///g
     else
-      char = getCharacterAtCursor(cursor)
-      scope = cursor.getScopeDescriptor().getScopesArray()
-      if @isNonWordCharacters(char, scope)
-        pattern = ///#{_.escapeRegExp(char)}///g
-      else
-        lastSelection.selectWord()
-        word = lastSelection.getText()
-        pattern = ///\b#{_.escapeRegExp(word)}\b///g
+      getPatternForCursorWord(@editor.getLastCursor())
 
     return unless @selectTarget()
-
-    ranges = []
-    for selection in @editor.getSelections()
-      scanRange = selection.getBufferRange()
-      @editor.scanInBufferRange pattern, scanRange, ({range}) ->
-        ranges.push(range)
-
+    ranges = scanInSelections(@editor, pattern)
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
       @activateMode('visual', 'characterwise') unless @isMode('visual', 'characterwise')
@@ -1316,6 +1299,28 @@ class Change extends ActivateInsertMode
         @setTextToRegisterForSelection(selection)
         range = selection.insertText(text, autoIndent: true)
         selection.cursor.moveLeft() unless range.isEmpty()
+    super
+
+class ChangeOcurrence extends Change
+  @extend()
+  wordPattern: null
+
+  initialize: ->
+    if @selectedText = @editor.getSelectedText()
+      # When invoked from visual-mode, ensure start from 'normal' mode.
+      @vimState.activate('normal') unless @isMode('normal')
+    super
+
+  execute: ->
+    pattern = if @selectedText
+      ///#{_.escapeRegExp(@selectedText)}///g
+    else
+      @wordPattern ?= getPatternForCursorWord(@editor.getLastCursor())
+
+    @onDidSelectTarget =>
+      ranges = scanInSelections(@editor, pattern)
+      if ranges.length
+        @editor.setSelectedBufferRanges(ranges)
     super
 
 class Substitute extends Change
