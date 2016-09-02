@@ -1303,7 +1303,7 @@ class Change extends ActivateInsertMode
         selection.cursor.moveLeft() unless range.isEmpty()
     super
 
-class ChangeOcurrence extends Change
+class ChangeOccurrence extends Change
   @extend()
   wordPattern: null
   scanRanges: null
