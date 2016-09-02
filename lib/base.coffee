@@ -92,6 +92,7 @@ class Base
 
   # Count
   # -------------------------
+  count: null
   defaultCount: 1
   getDefaultCount: ->
     @defaultCount
@@ -101,6 +102,22 @@ class Base
 
   isDefaultCount: ->
     @count is @getDefaultCount()
+
+  # Register
+  # -------------------------
+  register: null
+  getRegisterName: ->
+    @vimState.register.getName()
+    text = @vimState.register.getText(@getInput(), selection)
+
+  getRegisterValueAsText: (name=null, selection) ->
+    @vimState.register.getText(name, selection)
+
+  isDefaultRegisterName: ->
+    @vimState.register.isDefaultName()
+
+  hasRegisterName: ->
+    @vimState.register.hasName()
 
   # Misc
   # -------------------------

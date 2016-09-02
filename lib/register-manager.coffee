@@ -120,6 +120,9 @@ class RegisterManager
   getName: ->
     @name ? settings.get('defaultRegister')
 
+  isDefaultName: ->
+    @getName() is settings.get('defaultRegister')
+
   hasName: ->
     @name?
 

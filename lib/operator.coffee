@@ -1306,29 +1306,18 @@ class Change extends ActivateInsertMode
 class ChangeOccurrence extends Change
   @extend()
   wordPattern: null
-  scanRanges: null
-  wasVisualLinewise: false
 
-  initialize: ->
-    if @isMode('visual') and not @isMode('visual', 'linewise')
-      @wordPattern = ///#{_.escapeRegExp(@editor.getSelectedText())}///g
-      @vimState.activate('normal') unless @isMode('normal')
-    super
+  getWordPattern: ->
+    if @hasRegisterName()
+      ///#{_.escapeRegExp(@getRegisterValueAsText())}///g
+    else
+      getPatternForCursorWord(@editor.getLastCursor())
 
   execute: ->
-    if @isMode('visual', 'linewise') or @wasVisualLinewise
-      # When repeated with `.`, I want to use target range from current range.
-      @wasVisualLinewise = true
-      @scanRanges = @editor.getSelectedBufferRanges()
-      @vimState.modeManager.normalizeSelections(preservePreviousSelection: true)
-      @editor.clearSelections(autoscroll: false)
-
-    @scanRanges = null if @isRepeated() and not @wasVisualLinewise
-
-    @wordPattern ?= getPatternForCursorWord(@editor.getLastCursor())
+    @wordPattern ?= @getWordPattern()
     @onDidSelectTarget =>
-      @scanRanges ?= @editor.getSelectedBufferRanges()
-      ranges = scanInRanges(@editor, @wordPattern, @scanRanges)
+      scanRanges = @editor.getSelectedBufferRanges()
+      ranges = scanInRanges(@editor, @wordPattern, scanRanges)
       if ranges.length
         @editor.setSelectedBufferRanges(ranges)
     super
