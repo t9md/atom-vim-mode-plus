@@ -12,7 +12,7 @@ _ = require 'underscore-plus'
   isSingleLine
   isNonWordCharacter
   getPatternForCursorWord
-  scanInSelections
+  scanInRanges
   getCharacterAtCursor
 } = require './utils'
 swrap = require './selection-wrapper'
@@ -1064,7 +1064,8 @@ class AddSelection extends Operator
       getPatternForCursorWord(@editor.getLastCursor())
 
     return unless @selectTarget()
-    ranges = scanInSelections(@editor, pattern)
+
+    ranges = scanInRanges(@editor, pattern, @editor.getSelectedBufferRanges())
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
       @activateMode('visual', 'characterwise') unless @isMode('visual', 'characterwise')
@@ -1304,21 +1305,29 @@ class Change extends ActivateInsertMode
 class ChangeOcurrence extends Change
   @extend()
   wordPattern: null
+  scanRanges: null
+  wasVisualLinewise: false
 
   initialize: ->
-    if @selectedText = @editor.getSelectedText()
-      # When invoked from visual-mode, ensure start from 'normal' mode.
+    if @isMode('visual') and not @isMode('visual', 'linewise')
+      @wordPattern = ///#{_.escapeRegExp(@editor.getSelectedText())}///g
       @vimState.activate('normal') unless @isMode('normal')
     super
 
   execute: ->
-    pattern = if @selectedText
-      ///#{_.escapeRegExp(@selectedText)}///g
-    else
-      @wordPattern ?= getPatternForCursorWord(@editor.getLastCursor())
+    if @isMode('visual', 'linewise') or @wasVisualLinewise
+      # When repeated with `.`, I want to use target range from current range.
+      @wasVisualLinewise = true
+      @scanRanges = @editor.getSelectedBufferRanges()
+      @vimState.modeManager.normalizeSelections(preservePreviousSelection: true)
+      @editor.clearSelections(autoscroll: false)
 
+    @scanRanges = null if @isRepeated() and not @wasVisualLinewise
+
+    @wordPattern ?= getPatternForCursorWord(@editor.getLastCursor())
     @onDidSelectTarget =>
-      ranges = scanInSelections(@editor, pattern)
+      @scanRanges ?= @editor.getSelectedBufferRanges()
+      ranges = scanInRanges(@editor, @wordPattern, @scanRanges)
       if ranges.length
         @editor.setSelectedBufferRanges(ranges)
     super

@@ -585,10 +585,9 @@ getPatternForCursorWord = (cursor) ->
     word = cursor.selection.getText()
     ///\b#{_.escapeRegExp(word)}\b///g
 
-scanInSelections = (editor, pattern) ->
+scanInRanges = (editor, pattern, scanRanges) ->
   ranges = []
-  for selection in editor.getSelections()
-    scanRange = selection.getBufferRange()
+  for scanRange in scanRanges
     editor.scanInBufferRange pattern, scanRange, ({range}) ->
       ranges.push(range)
   ranges
@@ -726,7 +725,7 @@ module.exports = {
   isSingleLine
   isNonWordCharacter
   getPatternForCursorWord
-  scanInSelections
+  scanInRanges
 
   # Debugging
   reportSelection,
