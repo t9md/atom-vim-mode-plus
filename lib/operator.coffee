@@ -1050,25 +1050,23 @@ class Replace extends Operator
 class AddSelection extends Operator
   @extend()
   @description: "Add selection on each matching word within target range"
-  selectedText: null
 
-  initialize: ->
-    if @selectedText = @editor.getSelectedText()
-      # When invoked from visual-mode, ensure start from 'normal' mode.
-      @vimState.activate('normal') unless @isMode('normal')
-
-  execute: ->
-    pattern = if @selectedText
-      ///#{_.escapeRegExp(@selectedText)}///g
+  getWordPattern: ->
+    if @hasRegisterName()
+      ///#{_.escapeRegExp(@getRegisterValueAsText())}///g
     else
       getPatternForCursorWord(@editor.getLastCursor())
 
-    return unless @selectTarget()
+  execute: ->
+    @wordPattern ?= @getWordPattern()
+    @onDidSelectTarget =>
+      scanRanges = @editor.getSelectedBufferRanges()
+      ranges = scanInRanges(@editor, @wordPattern, scanRanges)
+      if ranges.length
+        @editor.setSelectedBufferRanges(ranges)
 
-    ranges = scanInRanges(@editor, pattern, @editor.getSelectedBufferRanges())
-    if ranges.length
-      @editor.setSelectedBufferRanges(ranges)
-      @activateMode('visual', 'characterwise') unless @isMode('visual', 'characterwise')
+    if @selectTarget() and not @isMode('visual', 'characterwise')
+      @activateMode('visual', 'characterwise')
 
 class SelectAllInRangeMarker extends AddSelection
   @extend()
