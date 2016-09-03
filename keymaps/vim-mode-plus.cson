@@ -15,7 +15,7 @@
 
 # all except normal
 # -------------------------
-'atom-text-editor.vim-mode-plus:not(.normal-mode):not(.autocomplete-active)':
+'atom-text-editor.vim-mode-plus:not(.normal-mode)':
   'escape': 'vim-mode-plus:activate-normal-mode'
   'ctrl-[': 'vim-mode-plus:activate-normal-mode'
 
