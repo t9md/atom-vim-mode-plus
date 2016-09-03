@@ -953,17 +953,23 @@ class Search extends SearchBase
     @subscribe @editorElement.onDidChangeScrollTop => @matches?.refresh()
     @subscribe @editorElement.onDidChangeScrollLeft => @matches?.refresh()
 
-    # command is 'visit-next' or 'visit-prev'
     @onDidCommandSearch (command) =>
       return unless @input
       return if @matches.isEmpty()
-
-      direction = command.split('-')[1]
-      if @isBackwards() and settings.get('incrementalSearchVisitDirection') is 'relative'
-        direction = switch direction
-          when 'next' then 'prev'
-          when 'prev' then 'next'
-      @visitMatch(direction)
+      console.log command
+      switch command.name
+        when 'visit'
+          direction = command.direction
+          if @isBackwards() and settings.get('incrementalSearchVisitDirection') is 'relative'
+            direction = switch direction
+              when 'next' then 'prev'
+              when 'prev' then 'next'
+          @visitMatch(direction)
+        when 'run'
+          wordPattern = @matches.pattern # preserve before cancel
+          console.log '!!', command.operation, wordPattern
+          @vimState.searchInput.cancel()
+          @vimState.operationStack.run(command.operation, {wordPattern})
 
   visitCursors: ->
     visitCursor = (cursor) =>

@@ -8,6 +8,7 @@
 class MatchList
   index: null
   entries: null
+  pattern: null
 
   @fromScan: (editor, {fromPoint, pattern, direction, countOffset}) ->
     index = 0
@@ -29,9 +30,9 @@ class MatchList
 
     index = ranges.indexOf(current)
     index = getIndex(index + countOffset, ranges)
-    new this(editor, ranges, index)
+    new this(editor, ranges, index, pattern)
 
-  constructor: (@editor, ranges, @index) ->
+  constructor: (@editor, ranges, @index, @pattern) ->
     @entries = []
     return unless ranges.length
     @entries = ranges.map (range) =>
@@ -40,6 +41,9 @@ class MatchList
     [first, others..., last] = @entries
     first.first = true
     last?.last = true
+
+  getPattern: ->
+    @pattern
 
   isEmpty: ->
     @entries.length is 0

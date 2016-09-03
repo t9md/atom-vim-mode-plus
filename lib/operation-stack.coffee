@@ -35,7 +35,7 @@ class OperationStack
           operation = @select.setTarget(operation)
     operation
 
-  run: (klass, properties) ->
+  run: (klass, properties={}) ->
     klass = Base.getClass(klass) if _.isString(klass)
     try
       # When identical operator repeated, it set target to MoveToRelativeLine.
