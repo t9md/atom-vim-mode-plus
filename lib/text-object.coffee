@@ -719,6 +719,10 @@ class AEntire extends Entire
 class InnerEntire extends Entire
   @extend()
 
+# Alias as accessible name
+class All extends Entire
+  @extend(false)
+
 # -------------------------
 class LatestChange extends TextObject
   @extend(false)
