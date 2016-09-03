@@ -1081,8 +1081,12 @@ class AddSelection extends Operator
 
 class SelectAllInRangeMarker extends AddSelection
   @extend()
-  requireTarget: false
   target: "RangeMarker"
+  flashTarget: false
+
+class AddSelectionAll extends AddSelection
+  @extend()
+  target: "All"
   flashTarget: false
 
 class SetCursorsToStartOfTarget extends Operator
@@ -1321,6 +1325,10 @@ class ChangeOccurrence extends Change
     @registerSelectOccurrence =>
       @wordPattern ?= @getWordPattern()
     super
+
+class ChangeOccurrenceAll extends ChangeOccurrence
+  @extend()
+  target: "All"
 
 class Substitute extends Change
   @extend()
