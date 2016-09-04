@@ -878,11 +878,21 @@ class SearchBase extends Motion
       cursor.getBufferPosition()
 
   getMatchList: (cursor, input) ->
+    isSelectionScan = false
+    isSelectionScan = if @isMode('visual') and @isIncrementalSearch?()
+      switch @vimState.submode
+        when 'blockwise' then not @vimState.getLastBlockwiseSelection().isSingleRow?()
+        when 'linewise' then true
+        when 'characterwise' then not swrap(@editor.getLastSelection()).isSingleRow()
+
+    scanRanges = @editor.getSelectedBufferRanges() if isSelectionScan
+
     MatchList.fromScan @editor,
       fromPoint: @getFromPoint(cursor)
       pattern: @getPattern(input)
       direction: (if @isBackwards() then 'backward' else 'forward')
       countOffset: @getCount()
+      scanRanges: scanRanges ? []
 
   visitMatch: (direction=null, options={}) ->
     {timeout, landing} = options
@@ -956,7 +966,6 @@ class Search extends SearchBase
     @onDidCommandSearch (command) =>
       return unless @input
       return if @matches.isEmpty()
-      console.log command
       switch command.name
         when 'visit'
           direction = command.direction
@@ -967,7 +976,6 @@ class Search extends SearchBase
           @visitMatch(direction)
         when 'run'
           wordPattern = @matches.pattern # preserve before cancel
-          console.log '!!', command.operation, wordPattern
           @vimState.searchInput.cancel()
           @vimState.operationStack.run(command.operation, {wordPattern})
 

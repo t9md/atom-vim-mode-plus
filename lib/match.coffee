@@ -3,6 +3,7 @@
   highlightRanges
   smartScrollToBufferPosition
   getVisibleBufferRange
+  scanInRanges
 } = require './utils'
 
 class MatchList
@@ -10,11 +11,14 @@ class MatchList
   entries: null
   pattern: null
 
-  @fromScan: (editor, {fromPoint, pattern, direction, countOffset}) ->
+  @fromScan: (editor, {fromPoint, pattern, direction, countOffset, scanRanges}) ->
     index = 0
-    ranges = []
-    editor.scan pattern, ({range}) ->
-      ranges.push range
+    if scanRanges.length
+      ranges = scanInRanges(editor, pattern, scanRanges)
+    else
+      ranges = []
+      editor.scan pattern, ({range}) ->
+        ranges.push(range)
 
     if direction is 'backward'
       for range in ranges by -1 when range.start.isLessThan(fromPoint)
