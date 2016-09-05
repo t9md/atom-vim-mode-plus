@@ -1,3 +1,6 @@
+# 0.54.1:
+- Breaking: Revert change introduced in 0.54.0(Was not good). insert-mode escape return to normal-mode regardless os autocomplet popup #339.
+
 # 0.54.0:
 - Improve, Breaking: When autocomplete's popup is active, `escape` in `insert-mode` no longer escape insert-mode. #339
 - New: `TrimString` operator 'g |' for default keymap. #341
