@@ -879,7 +879,7 @@ class SearchBase extends Motion
       cursor.getBufferPosition()
 
   getMatchList: (cursor, input) ->
-    if @isMode('visual') and @editorElement.classList.contains('selection-only-mode')
+    if @isMode('visual') and @isIncrementalSearch?() and @editorElement.classList.contains('selection-only-mode')
       scanRanges = @editor.getSelectedBufferRanges()
     else
       scanRanges = []
