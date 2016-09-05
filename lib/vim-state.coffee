@@ -89,10 +89,11 @@ class VimState
   selectLinewise: ->
     swrap.expandOverLine(@editor, preserveGoalColumn: true)
 
-  forceOperatorWise: null
-  setForceOperatorWise: (@forceOperatorWise) ->
-  getForceOperatorWise: -> @forceOperatorWise
-  resetForceOperatorWise: -> @setForceOperatorWise(null)
+  operatorModifier: {}
+  setOperatorModifier: (key, value) ->
+    @operatorModifier[key] = value
+  getOperatorModifier: (key) -> @operatorModifier[key]
+  resetOperatorModifier: -> @operatorModifier = {}
 
   # Count
   # -------------------------
@@ -147,7 +148,7 @@ class VimState
     @inputCharSubscriptions?.dispose()
 
   # -------------------------
-  toggleClassList: (className, bool) ->
+  toggleClassList: (className, bool=undefined) ->
     @editorElement.classList.toggle(className, bool)
 
   swapClassName: (className) ->
@@ -271,13 +272,13 @@ class VimState
   resetNormalMode: ->
     @editor.clearSelections()
     @activate('normal')
-    @main.clearRangeMarkerForEditors() if settings.get('clearRangeMarkerOnResetNormalMode')
+    @clearRangeMarkers() if settings.get('clearRangeMarkerOnResetNormalMode')
     @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
 
   reset: ->
     @resetCount()
     @resetCharInput()
-    @resetForceOperatorWise()
+    @resetOperatorModifier()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()

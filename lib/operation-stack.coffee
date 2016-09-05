@@ -3,6 +3,7 @@ _ = require 'underscore-plus'
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
 {moveCursorLeft} = require './utils'
+swrap = require './selection-wrapper'
 settings = require './settings'
 {CurrentSelection, Select, MoveToRelativeLine} = {}
 {OperationStackError, OperatorError, OperationAbortedError} = require './errors'
@@ -112,12 +113,22 @@ class OperationStack
       # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
       moveCursorLeft(cursor, {preserveGoalColumn: true})
 
+  hasMultiLineSelection: ->
+    switch @vimState.submode
+      when 'blockwise'
+        not @vimState.getLastBlockwiseSelection().isSingleRow?()
+      when 'linewise', 'characterwise'
+        not swrap(@editor.getLastSelection()).isSingleRow()
+
   finish: (operation=null) ->
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
-    if @vimState.isMode('normal')
-      @ensureAllSelectionsAreEmpty(operation)
-      @ensureAllCursorsAreNotAtEndOfLine()
+    switch
+      when @vimState.isMode('normal')
+        @ensureAllSelectionsAreEmpty(operation)
+        @ensureAllCursorsAreNotAtEndOfLine()
+      when @vimState.isMode('visual')
+        @vimState.toggleClassList('selection-only-mode', @hasMultiLineSelection())
 
     @vimState.updateCursorsVisibility()
     @vimState.reset()

@@ -279,6 +279,10 @@
   'cmd-d': 'vim-mode-plus:select-all-in-range-marker'
   'ctrl-cmd-g': 'vim-mode-plus:range-marker'
 
+'atom-text-editor.vim-mode-plus.visual-mode.selection-only-mode':
+  'ctrl-cmd-c': 'vim-mode-plus:change-occurrence'
+  'cmd-d': 'vim-mode-plus:add-selection'
+
 # normal
 # -------------------------
 'atom-text-editor.vim-mode-plus.normal-mode':
@@ -327,8 +331,9 @@
 # operator-pending
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode':
-  'v': 'vim-mode-plus:force-operator-characterwise'
-  'V': 'vim-mode-plus:force-operator-linewise'
+  'v': 'vim-mode-plus:operator-modifier-characterwise'
+  'V': 'vim-mode-plus:operator-modifier-linewise'
+  'o': 'vim-mode-plus:operator-modifier-occurrence'
 
 # operator-pending, visual
 # -------------------------

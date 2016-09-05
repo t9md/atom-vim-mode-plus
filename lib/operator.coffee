@@ -1,4 +1,5 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
+{inspect} = require 'util'
 
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable, BufferedProcess} = require 'atom'
@@ -11,7 +12,7 @@ _ = require 'underscore-plus'
   isAllWhiteSpace
   isSingleLine
   isNonWordCharacter
-  getPatternForCursorWord
+  getCurrentWordBufferRange
   scanInRanges
   getCharacterAtCursor
 } = require './utils'
@@ -29,6 +30,8 @@ class Operator extends Base
   requireTarget: true
   finalMode: "normal"
   finalSubmode: null
+  withOccurrence: false
+  patternForOccurence: null
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
@@ -68,10 +71,21 @@ class Operator extends Base
     @setTarget(@new(@target)) if _.isString(@target)
 
   restorePoint: (selection) ->
+    if @isWithOccurrence()
+      return # [TODO] support restore
+
     if @wasNeedStay
-      swrap(selection).setBufferPositionTo('head', fromProperty: true)
+      which = 'head'
     else
-      swrap(selection).setBufferPositionTo('start', fromProperty: true)
+      which = 'start'
+    if swrap(selection).getProperties().head?
+      swrap(selection).setBufferPositionTo(which, fromProperty: true)
+
+  # [debug]
+  reportSelectionProperties: (subject) ->
+    console.log "#{subject} ============ "
+    for selection in @editor.getSelections()
+      console.log selection.id, inspect(swrap(selection).getProperties())
 
   observeSelectAction: ->
     # Select operator is used only in visual-mode.
@@ -79,21 +93,41 @@ class Operator extends Base
     unless @instanceof('Select')
       if @wasNeedStay = @needStay() # [FIXME] dirty cache
         unless @isMode('visual')
-          @onWillSelectTarget => @updateSelectionProperties()
+          @onWillSelectTarget =>
+            @updateSelectionProperties()
+            # @reportSelectionProperties('before')
       else
-        @onDidSelectTarget => @updateSelectionProperties()
+        @onDidSelectTarget =>
+          @updateSelectionProperties()
+          # @reportSelectionProperties('before')
 
-    if @needFlash()
+    if @isWithOccurrence()
+      @withOccurrence = true
+
+      scanRanges = null
+      @onWillSelectTarget =>
+        if @isMode('visual')
+          scanRanges = @editor.getSelectedBufferRanges()
+          @vimState.modeManager.deactivate() # clear selection
+        @patternForOccurence ?= @getPatternForOccurrence(scanRanges)
+
       @onDidSelectTarget =>
-        @flash(@editor.getSelectedBufferRanges())
+        scanRanges ?= @editor.getSelectedBufferRanges()
+        ranges = scanInRanges(@editor, @patternForOccurence, scanRanges)
+        if ranges.length
+          @editor.setSelectedBufferRanges(ranges)
+        else
+          @editor.clearSelections() # FIXME
 
-    if @needTrackChange()
-      marker = null
-      @onDidSelectTarget =>
-        marker = @editor.markBufferRange(@editor.getSelectedBufferRange())
+    markerForTrackChange = null
+    @onDidSelectTarget =>
+      @flash(@editor.getSelectedBufferRanges()) if @needFlash()
+      if @needTrackChange()
+        markerForTrackChange = @editor.markBufferRange(@editor.getSelectedBufferRange())
 
-      @onDidFinishOperation =>
-        @setMarkForChange(range) if (range = marker.getBufferRange())
+    @onDidFinishOperation =>
+      if markerForTrackChange?
+        @setMarkForChange(range) if (range = markerForTrackChange.getBufferRange())
 
   # @target - TextObject or Motion to operate on.
   setTarget: (@target) ->
@@ -115,13 +149,18 @@ class Operator extends Base
       when 'linewise'
         @target.linewise = true
 
+  isWithOccurrence: ->
+    @vimState.getOperatorModifier('occurence') or @withOccurrence
+
   # Return true unless all selection is empty.
   # -------------------------
   selectTarget: ->
     @observeSelectAction()
-    @emitWillSelectTarget()
-    if @isMode('operator-pending') and wise = @vimState.getForceOperatorWise()
+
+    if @isMode('operator-pending') and wise = @vimState.getOperatorModifier('wise')
       @forceWise(wise)
+    @emitWillSelectTarget()
+
     @target.select()
     @emitDidSelectTarget()
     haveSomeSelection(@editor)
@@ -155,25 +194,39 @@ class Operator extends Base
     @mutateSelections (selection) => @mutateSelection(selection)
     @activateMode(@finalMode, @finalSubmode)
 
-  getWordPattern: ->
+  getPatternForOccurrence: (scanRanges) ->
     if @hasRegisterName()
       ///#{_.escapeRegExp(@getRegisterValueAsText())}///g
     else
-      getPatternForCursorWord(@editor.getLastCursor())
+      cursor = @editor.getLastCursor()
+      char = getCharacterAtCursor(cursor)
+      scope = cursor.getScopeDescriptor().getScopesArray()
+      if isNonWordCharacter(char, scope)
+        ///#{_.escapeRegExp(char)}///g
+      else
+        cursorWordRange = getCurrentWordBufferRange(cursor)
+        if scanRanges?.length
+          lastRangeIndex = scanRanges.length - 1
+          scanRanges[lastRangeIndex] = scanRanges[lastRangeIndex].union(cursorWordRange)
+        cursorWord = @editor.getTextInBufferRange(cursorWordRange)
+        ///\b#{_.escapeRegExp(cursorWord)}\b///g
 
-  registerSelectOccurrence: (fn) ->
-    [scanRanges, pattern] = []
+  registerSelectOccurrence: ->
+    scanRanges = null
     @onWillSelectTarget =>
       if @isMode('visual')
         scanRanges = @editor.getSelectedBufferRanges()
-        @vimState.modeManager.deactivate() # clear selection
-      pattern = fn()
+        @vimState.modeManager.deactivate() # clear selection to normalize cursor position.
+      @patternForOccurence ?= @getPatternForOccurrence(scanRanges)
 
     @onDidSelectTarget =>
       scanRanges ?= @editor.getSelectedBufferRanges()
-      ranges = scanInRanges(@editor, pattern, scanRanges)
+      ranges = scanInRanges(@editor, @patternForOccurence, scanRanges)
       if ranges.length
+        swrap(@editor.getLastSelection()).resetProperties() # [FIXME] need for linewise cmd-d
         @editor.setSelectedBufferRanges(ranges)
+      else
+        @editor.clearSelections() # FIXME
 
 # -------------------------
 class Select extends Operator
@@ -1070,14 +1123,13 @@ class Replace extends Operator
 class AddSelection extends Operator
   @extend()
   @description: "Add selection onto each matching word within target range"
-  wordPattern: null
+  withOccurrence: true
 
   execute: ->
-    @registerSelectOccurrence =>
-      @wordPattern ?= @getWordPattern()
-
-    if @selectTarget() and not @isMode('visual', 'characterwise')
-      @activateMode('visual', 'characterwise')
+    if @selectTarget()
+      unless @isMode('visual', 'characterwise')
+        swrap.resetProperties(@editor)
+        @activateMode('visual', 'characterwise')
 
 class SelectAllInRangeMarker extends AddSelection
   @extend()
@@ -1103,6 +1155,7 @@ class SetCursorsToStartOfRangeMarker extends SetCursorsToStartOfTarget
 class CreateRangeMarker extends Operator
   @extend()
   keepCursorPosition: true
+  flashTarget: false
 
   mutateSelection: (selection) ->
     range = selection.getBufferRange()
@@ -1319,12 +1372,7 @@ class Change extends ActivateInsertMode
 class ChangeOccurrence extends Change
   @extend()
   @description: "Change all matching word within target range"
-  wordPattern: null
-
-  execute: ->
-    @registerSelectOccurrence =>
-      @wordPattern ?= @getWordPattern()
-    super
+  withOccurrence: true
 
 class ChangeOccurrenceAll extends ChangeOccurrence
   @extend()

@@ -27,6 +27,7 @@ globalState = require './global-state'
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   getTextInScreenRange
+  haveSomeSelection
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -878,14 +879,10 @@ class SearchBase extends Motion
       cursor.getBufferPosition()
 
   getMatchList: (cursor, input) ->
-    isSelectionScan = false
-    isSelectionScan = if @isMode('visual') and @isIncrementalSearch?()
-      switch @vimState.submode
-        when 'blockwise' then not @vimState.getLastBlockwiseSelection().isSingleRow?()
-        when 'linewise' then true
-        when 'characterwise' then not swrap(@editor.getLastSelection()).isSingleRow()
-
-    scanRanges = @editor.getSelectedBufferRanges() if isSelectionScan
+    if @isMode('visual') and @editorElement.classList.contains('selection-only-mode')
+      scanRanges = @editor.getSelectedBufferRanges()
+    else
+      scanRanges = []
 
     MatchList.fromScan @editor,
       fromPoint: @getFromPoint(cursor)
@@ -975,9 +972,9 @@ class Search extends SearchBase
               when 'prev' then 'next'
           @visitMatch(direction)
         when 'run'
-          wordPattern = @matches.pattern # preserve before cancel
+          patternForOccurence = @matches.pattern # preserve before cancel
           @vimState.searchInput.cancel()
-          @vimState.operationStack.run(command.operation, {wordPattern})
+          @vimState.operationStack.run(command.operation, {patternForOccurence})
 
   visitCursors: ->
     visitCursor = (cursor) =>

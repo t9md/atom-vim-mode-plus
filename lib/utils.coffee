@@ -575,15 +575,15 @@ isSingleLine = (text) ->
 isNonWordCharacter = (char, scope) ->
   char in atom.config.get('editor.nonWordCharacters', {scope})
 
-getPatternForCursorWord = (cursor) ->
-  char = getCharacterAtCursor(cursor)
-  scope = cursor.getScopeDescriptor().getScopesArray()
-  if isNonWordCharacter(char, scope)
-    ///#{_.escapeRegExp(char)}///g
-  else
-    cursor.selection.selectWord()
-    word = cursor.selection.getText()
-    ///\b#{_.escapeRegExp(word)}\b///g
+getCurrentWordBufferRange = (cursor) ->
+  # [FIXME] Copy from selection.selectWord() and modify
+  # Original selectWord() modify existing selection
+  # But I only want to get range without modifying selection.
+  options = {}
+  options.wordRegex = /[\t ]*/ if cursor.isSurroundedByWhitespace()
+  if cursor.isBetweenWordAndNonWord()
+    options.includeNonWordCharacters = false
+  cursor.getCurrentWordBufferRange(options)
 
 scanInRanges = (editor, pattern, scanRanges) ->
   ranges = []
@@ -724,7 +724,7 @@ module.exports = {
   isSurroundedBySpace
   isSingleLine
   isNonWordCharacter
-  getPatternForCursorWord
+  getCurrentWordBufferRange
   scanInRanges
 
   # Debugging
