@@ -794,7 +794,6 @@ class PreviousSelection extends TextObject
 
 class RangeMarker extends TextObject
   @extend()
-  backward: true
 
   select: ->
     ranges = @vimState.getRangeMarkers().map((m) -> m.getBufferRange())
