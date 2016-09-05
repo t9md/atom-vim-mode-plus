@@ -71,15 +71,15 @@ class Operator extends Base
     @setTarget(@new(@target)) if _.isString(@target)
 
   restorePoint: (selection) ->
-    if @isWithOccurrence()
-      return # [TODO] support restore
-
-    if @wasNeedStay
-      which = 'head'
-    else
-      which = 'start'
+    which = if @wasNeedStay then 'head' else 'start'
     if swrap(selection).getProperties().head?
-      swrap(selection).setBufferPositionTo(which, fromProperty: true)
+      @onDidFinishOperation =>
+        # Deffer restoring cursor point.
+        # restorePoint is processed one by one, so immediately updating cursorPosition result in intersecting range with other selection
+        # when intersecting selection is destroyed, cursor is moved automatically.
+        swrap(selection).setBufferPositionTo(which, fromProperty: true)
+    else
+      selection.destroy()
 
   # [debug]
   reportSelectionProperties: (subject) ->
