@@ -148,7 +148,7 @@ class SearchInput extends Input
     this
 
   setCursorWord: ->
-    @editor.setText @vimState.editor.getWordUnderCursor()
+    @editor.setText(@vimState.editor.getWordUnderCursor())
 
   activateLiteralMode: ->
     if @editorElement.classList.contains('literal-mode')
