@@ -610,6 +610,11 @@ withTrackingCursorPositionChange = (cursor, fn) ->
   unless cursorBefore.isEqual(cursorAfter)
     console.log "Changed: #{cursorBefore.toString()} -> #{cursorAfter.toString()}"
 
+isRangeContainsSomePoint = (range, points, {exclusive}={}) ->
+  exclusive ?= false
+  points.some (point) ->
+    range.containsPoint(point, exclusive)
+
 # Reloadable registerElement
 registerElement = (name, options) ->
   element = document.createElement(name)
@@ -726,6 +731,7 @@ module.exports = {
   isNonWordCharacter
   getCurrentWordBufferRange
   scanInRanges
+  isRangeContainsSomePoint
 
   # Debugging
   reportSelection,

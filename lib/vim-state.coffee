@@ -6,7 +6,13 @@ settings = require './settings'
 globalState = require './global-state'
 {HoverElement} = require './hover'
 {InputElement, SearchInputElement} = require './input'
-{haveSomeSelection, highlightRanges, getVisibleBufferRange, matchScopes} = require './utils'
+{
+  haveSomeSelection
+  highlightRanges
+  getVisibleBufferRange
+  matchScopes
+  isRangeContainsSomePoint
+} = require './utils'
 swrap = require './selection-wrapper'
 
 OperationStack = require './operation-stack'
@@ -339,17 +345,15 @@ class VimState
     @rangeMarkers
 
   getRangeMarkerBufferRanges: ({cursorContainedOnly}={}) ->
-    ranges = @rangeMarkers.map (marker) -> marker.getBufferRange()
+    ranges = @rangeMarkers.map (marker) ->
+      marker.getBufferRange()
 
     unless (cursorContainedOnly ? false)
       ranges
     else
-      someCursorIsContained = (range) =>
-        exclusive = true
-        @editor.getCursorBufferPositions().some (cursorPoint) ->
-          range.containsPoint(cursorPoint, exclusive)
-
-      ranges.filter(someCursorIsContained)
+      points = @editor.getCursorBufferPositions()
+      ranges.filter (range) ->
+        isRangeContainsSomePoint(range, points, exclusive: true)
 
   clearRangeMarkers: ->
     marker.destroy() for marker in @rangeMarkers
