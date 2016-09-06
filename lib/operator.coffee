@@ -31,6 +31,7 @@ class Operator extends Base
   finalMode: "normal"
   finalSubmode: null
   withOccurrence: false
+  forceWise: null
   patternForOccurence: null
 
   setMarkForChange: (range) ->
@@ -73,7 +74,7 @@ class Operator extends Base
   restorePoint: (selection) ->
     which = if @wasNeedStay then 'head' else 'start'
     if swrap(selection).getProperties().head?
-      @onDidFinishOperation =>
+      @onDidFinishOperation ->
         # Deffer restoring cursor point.
         # restorePoint is processed one by one, so immediately updating cursorPosition result in intersecting range with other selection
         # when intersecting selection is destroyed, cursor is moved automatically.
@@ -102,8 +103,6 @@ class Operator extends Base
           # @reportSelectionProperties('before')
 
     if @isWithOccurrence()
-      @withOccurrence = true
-
       scanRanges = null
       @onWillSelectTarget =>
         if @isMode('visual')
@@ -129,16 +128,25 @@ class Operator extends Base
       if markerForTrackChange?
         @setMarkForChange(range) if (range = markerForTrackChange.getBufferRange())
 
+  # called by operationStack
+  setOperatorModifier: ({occurence, wise}) ->
+    if occurence? and @withOccurrence isnt occurence
+      @withOccurrence = occurence
+
+    if wise? and @forceWise isnt wise
+      @forceWise = wise
+
   # @target - TextObject or Motion to operate on.
   setTarget: (@target) ->
     unless _.isFunction(@target.select)
       @vimState.emitter.emit('did-fail-to-set-target')
       throw new OperatorError("#{@getName()} cannot set #{@target.getName()} as target")
     @target.setOperator(this)
+    @overrideTargetWise(@forceWise) if @forceWise?
     @emitDidSetTarget(this)
     this
 
-  forceWise: (wise) ->
+  overrideTargetWise: (wise) ->
     switch wise
       when 'characterwise'
         if @target.linewise
@@ -150,15 +158,16 @@ class Operator extends Base
         @target.linewise = true
 
   isWithOccurrence: ->
-    @vimState.getOperatorModifier('occurence') or @withOccurrence
+    @withOccurrence
+
+  hasForceWise: ->
+    @forceWise?
 
   # Return true unless all selection is empty.
   # -------------------------
   selectTarget: ->
     @observeSelectAction()
 
-    if @isMode('operator-pending') and wise = @vimState.getOperatorModifier('wise')
-      @forceWise(wise)
     @emitWillSelectTarget()
 
     @target.select()
@@ -1131,6 +1140,7 @@ class AddSelection extends Operator
         swrap.resetProperties(@editor)
         @activateMode('visual', 'characterwise')
 
+# [FIXME] deperecate once spec is updated
 class SelectAllInRangeMarker extends AddSelection
   @extend()
   target: "RangeMarker"
