@@ -1,5 +1,4 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
-{inspect} = require 'util'
 
 _ = require 'underscore-plus'
 {Point, Range, CompositeDisposable, BufferedProcess} = require 'atom'
