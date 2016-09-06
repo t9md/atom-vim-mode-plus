@@ -89,11 +89,8 @@ class VimState
   selectLinewise: ->
     swrap.expandOverLine(@editor, preserveGoalColumn: true)
 
-  operatorModifier: {}
-  setOperatorModifier: (key, value) ->
-    @operatorModifier[key] = value
-  getOperatorModifier: (key) -> @operatorModifier[key]
-  resetOperatorModifier: -> @operatorModifier = {}
+  setOperatorModifier: (modifier) ->
+    @operationStack.setOperatorModifier(modifier)
 
   # Count
   # -------------------------
@@ -220,6 +217,7 @@ class VimState
     @operationRecords?.destroy?()
     @register?.destroy?
     @clearHighlightSearch()
+    @clearRangeMarkers()
     @highlightSearchSubscription?.dispose()
     {
       @hover, @hoverSearchCounter, @operationStack,
@@ -269,16 +267,17 @@ class VimState
     @subscriptions.add atom.commands.onWillDispatch(preserveCharacterwise)
     @subscriptions.add atom.commands.onDidDispatch(checkSelection)
 
-  resetNormalMode: ->
+  resetNormalMode: ({userInvocation}={}) ->
+    if userInvocation ? false
+      unless @editor.hasMultipleCursors()
+        @clearRangeMarkers() if settings.get('clearRangeMarkerOnResetNormalMode')
+        @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
     @editor.clearSelections()
     @activate('normal')
-    @clearRangeMarkers() if settings.get('clearRangeMarkerOnResetNormalMode')
-    @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
 
   reset: ->
     @resetCount()
     @resetCharInput()
-    @resetOperatorModifier()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
@@ -338,6 +337,19 @@ class VimState
 
   getRangeMarkers: (markers) ->
     @rangeMarkers
+
+  getRangeMarkerBufferRanges: ({cursorContainedOnly}={}) ->
+    ranges = @rangeMarkers.map (marker) -> marker.getBufferRange()
+
+    unless (cursorContainedOnly ? false)
+      ranges
+    else
+      someCursorIsContained = (range) =>
+        exclusive = true
+        @editor.getCursorBufferPositions().some (cursorPoint) ->
+          range.containsPoint(cursorPoint, exclusive)
+
+      ranges.filter(someCursorIsContained)
 
   clearRangeMarkers: ->
     marker.destroy() for marker in @rangeMarkers
