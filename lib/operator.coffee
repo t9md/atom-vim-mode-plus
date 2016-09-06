@@ -86,12 +86,6 @@ class Operator extends Base
     else
       restore()
 
-  # [debug]
-  reportSelectionProperties: (subject) ->
-    console.log "#{subject} ============ "
-    for selection in @editor.getSelections()
-      console.log selection.id, inspect(swrap(selection).getProperties())
-
   observeSelectAction: ->
     # Select operator is used only in visual-mode.
     # visual-mode selection modification should be handled by Motion::select(), TextObject::select()
@@ -100,11 +94,9 @@ class Operator extends Base
         unless @isMode('visual')
           @onWillSelectTarget =>
             @updateSelectionProperties()
-            # @reportSelectionProperties('before')
       else
         @onDidSelectTarget =>
           @updateSelectionProperties()
-          # @reportSelectionProperties('before')
 
     if @isWithOccurrence()
       scanRanges = null
