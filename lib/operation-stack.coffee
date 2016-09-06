@@ -110,13 +110,6 @@ class OperationStack
       # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
       moveCursorLeft(cursor, {preserveGoalColumn: true})
 
-  hasMultiLineSelection: ->
-    switch @vimState.submode
-      when 'blockwise'
-        not @vimState.getLastBlockwiseSelection().isSingleRow?()
-      when 'linewise', 'characterwise'
-        not swrap(@editor.getLastSelection()).isSingleRow()
-
   finish: (operation=null) ->
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
@@ -124,10 +117,7 @@ class OperationStack
       when @vimState.isMode('normal')
         @ensureAllSelectionsAreEmpty(operation)
         @ensureAllCursorsAreNotAtEndOfLine()
-        @vimState.toggleClassList('selection-only-mode', false)
-      when @vimState.isMode('visual')
-        @vimState.toggleClassList('selection-only-mode', @hasMultiLineSelection())
-
+    @vimState.modeManager.updateSelectionOnlyMode()
     @vimState.updateCursorsVisibility()
     @vimState.reset()
 

@@ -175,4 +175,22 @@ class ModeManager
         # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
+  # SelectionOnly
+  # -------------------------
+  hasMultiLineSelection: ->
+    if @isMode('visual', 'blockwise')
+      not @vimState.getLastBlockwiseSelection().isSingleRow?()
+    else
+      not swrap(@editor.getLastSelection()).isSingleRow()
+
+  updateSelectionOnlyMode: ->
+    if @isMode('visual')
+      isSelectionOnly = @hasMultiLineSelection()
+    else
+      isSelectionOnly = false
+    @editorElement.classList.toggle('selection-only', isSelectionOnly)
+
+  isSelectionOnlyMode: ->
+    @editorElement.classList.contains('selection-only')
+
 module.exports = ModeManager

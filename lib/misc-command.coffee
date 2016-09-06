@@ -273,4 +273,4 @@ class ToggleSelectionOnlyMode extends MiscCommand
   @commandScope: 'atom-text-editor.vim-mode-plus.visual-mode'
 
   execute: ->
-    @vimState.toggleClassList('selection-only-mode')
+    @vimState.toggleClassList('selection-only')
