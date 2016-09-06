@@ -878,11 +878,18 @@ class SearchBase extends Motion
     else
       cursor.getBufferPosition()
 
+  isSearchInSelection: ->
+    @isIncrementalSearch?() and @editorElement.classList.contains('selection-only-mode')
+
   getMatchList: (cursor, input) ->
-    if @isMode('visual') and @isIncrementalSearch?() and @editorElement.classList.contains('selection-only-mode')
+    scanRanges = []
+    if @isSearchInSelection()
       scanRanges = @editor.getSelectedBufferRanges()
-    else
-      scanRanges = []
+    else if @vimState.hasRangeMarkers()
+      ranges = @vimState.getRangeMarkerBufferRanges()
+      cursorPoint = @getFromPoint(cursor)
+      if ranges.some((range) -> range.containsPoint(cursorPoint, true))
+        scanRanges = ranges
 
     MatchList.fromScan @editor,
       fromPoint: @getFromPoint(cursor)
