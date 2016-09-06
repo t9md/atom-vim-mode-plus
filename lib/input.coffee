@@ -132,12 +132,12 @@ class SearchInput extends Input
     atom.commands.add @editorElement, @stopPropagation(
       "search-confirm": => @confirm()
       "search-cancel": => @cancel()
+
       "search-visit-next": => @emitter.emit('did-command', name: 'visit', direction: 'next')
       "search-visit-prev": => @emitter.emit('did-command', name: 'visit', direction: 'prev')
-      "add-selection": => @emitter.emit('did-command', name: 'run', operation: 'AddSelection')
-      "add-selection-all": => @emitter.emit('did-command', name: 'run', operation: 'AddSelectionAll')
-      "change-occurrence": => @emitter.emit('did-command', name: 'run', operation: 'ChangeOccurrence')
-      "change-occurrence-all": => @emitter.emit('did-command', name: 'run', operation: 'ChangeOccurrenceAll')
+      "select-occurrence-from-search": => @emitter.emit('did-command', name: 'run', operation: 'SelectOccurrence')
+      "change-occurrence-from-search": => @emitter.emit('did-command', name: 'run', operation: 'ChangeOccurrence')
+
       "search-insert-wild-pattern": => @editor.insertText('.*?')
       "search-activate-literal-mode": => @activateLiteralMode()
       "search-set-cursor-word": => @setCursorWord()

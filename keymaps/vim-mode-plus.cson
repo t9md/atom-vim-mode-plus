@@ -479,6 +479,9 @@
   'shift-tab': 'vim-mode-plus:search-visit-prev'
   'tab': 'vim-mode-plus:search-visit-next'
 
+  'cmd-c': 'vim-mode-plus:change-occurrence-from-search'
+  'cmd-d': 'vim-mode-plus:select-occurrence-from-search'
+
 # If you want to map normal char to special operation.
 # Use `not(.literal-mode)` selector like below.
 # When you hit `ctrl-v`, it activate literal-mode.

@@ -808,6 +808,7 @@ class SearchBase extends Motion
   backwards: false
   useRegexp: true
   configScope: null
+  scanRangeType: 'all' # One of  in ['all', 'selection', 'range-marker']
 
   getCount: ->
     count = super - 1
@@ -885,11 +886,14 @@ class SearchBase extends Motion
     scanRanges = []
     if @isSearchInSelection()
       scanRanges = @editor.getSelectedBufferRanges()
+      @scanRangeType = 'selection'
     else if @vimState.hasRangeMarkers()
       ranges = @vimState.getRangeMarkerBufferRanges()
       cursorPoint = @getFromPoint(cursor)
-      if ranges.some((range) -> range.containsPoint(cursorPoint, true))
+      if ranges.some((range) -> range.containsPoint(cursorPoint))
         scanRanges = ranges
+        @scanRangeType = 'range-marker'
+      else
 
     MatchList.fromScan @editor,
       fromPoint: @getFromPoint(cursor)
@@ -962,6 +966,9 @@ class Search extends SearchBase
       @visitCursors() if @isIncrementalSearch()
     @vimState.searchInput.focus({@backwards})
 
+  getScanRangeType: ->
+    @scanRangeType
+
   setIncrementalSearch: ->
     @restoreEditorState = saveEditorState(@editor)
     @subscribe @editorElement.onDidChangeScrollTop => @matches?.refresh()
@@ -980,8 +987,10 @@ class Search extends SearchBase
           @visitMatch(direction)
         when 'run'
           patternForOccurence = @matches.pattern # preserve before cancel
+          operation = command.operation
+          operation += 'InARangeMarker' if @getScanRangeType() is 'range-marker'
           @vimState.searchInput.cancel()
-          @vimState.operationStack.run(command.operation, {patternForOccurence})
+          @vimState.operationStack.run(operation, {patternForOccurence})
 
   visitCursors: ->
     visitCursor = (cursor) =>
