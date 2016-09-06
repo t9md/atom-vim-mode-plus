@@ -1,3 +1,5 @@
+# 0.55.0: WIP in preparation
+
 # 0.54.1:
 - Breaking: Revert change introduced in 0.54.0(Was not good). insert-mode escape return to normal-mode regardless os autocomplet popup #339.
 
