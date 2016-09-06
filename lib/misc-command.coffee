@@ -267,10 +267,3 @@ class ActivateNormalModeOnce extends MiscCommand
       disposable.dispose()
       disposable = null
       @vimState.activate('insert')
-
-class ToggleSelectionOnlyMode extends MiscCommand
-  @extend()
-  @commandScope: 'atom-text-editor.vim-mode-plus.visual-mode'
-
-  execute: ->
-    @vimState.toggleClassList('selection-only')
