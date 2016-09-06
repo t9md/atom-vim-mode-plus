@@ -73,14 +73,18 @@ class Operator extends Base
 
   restorePoint: (selection) ->
     which = if @wasNeedStay then 'head' else 'start'
-    if swrap(selection).getProperties().head?
-      @onDidFinishOperation ->
+    restore = -> swrap(selection).setBufferPositionTo(which, fromProperty: true)
+
+    if @isWithOccurrence()
+      if swrap(selection).getProperties().head?
         # Deffer restoring cursor point.
         # restorePoint is processed one by one, so immediately updating cursorPosition result in intersecting range with other selection
         # when intersecting selection is destroyed, cursor is moved automatically.
-        swrap(selection).setBufferPositionTo(which, fromProperty: true)
+        @onDidFinishOperation -> restore()
+      else
+        selection.destroy()
     else
-      selection.destroy()
+      restore()
 
   # [debug]
   reportSelectionProperties: (subject) ->
