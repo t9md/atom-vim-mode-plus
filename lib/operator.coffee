@@ -98,16 +98,16 @@ class Operator extends Base
           @updateSelectionProperties()
 
     if @isWithOccurrence()
-      scanRanges = null
+      [scanRanges, patternForOccurence] = []
       @onWillSelectTarget =>
         if @isMode('visual')
           scanRanges = @editor.getSelectedBufferRanges()
           @vimState.modeManager.deactivate() # clear selection
-        @patternForOccurence ?= @getPatternForOccurrence(scanRanges)
+        patternForOccurence = @getPatternForOccurrence(scanRanges)
 
       @onDidSelectTarget =>
         scanRanges ?= @editor.getSelectedBufferRanges()
-        ranges = scanInRanges(@editor, @patternForOccurence, scanRanges)
+        ranges = scanInRanges(@editor, patternForOccurence, scanRanges)
         if ranges.length
           @editor.setSelectedBufferRanges(ranges)
         else
@@ -127,6 +127,7 @@ class Operator extends Base
   setOperatorModifier: ({occurence, wise}) ->
     if occurence? and @withOccurrence isnt occurence
       @withOccurrence = occurence
+      # @addHover(':occurence:')
 
     if wise? and @forceWise isnt wise
       @forceWise = wise
