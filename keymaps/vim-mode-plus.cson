@@ -139,7 +139,7 @@
   'g -': 'vim-mode-plus:dash-case'
   'g space': 'vim-mode-plus:compact-spaces'
   'g |': 'vim-mode-plus:trim-string'
-  'g cmd-d': 'vim-mode-plus:add-selection'
+  'g cmd-d': 'vim-mode-plus:select-occurrence'
   # 'g _': 'vim-mode-plus:snake-case'
   # 'g r':   'vim-mode-plus:reverse'
   # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
@@ -276,12 +276,12 @@
   '%': 'vim-mode-plus:move-to-line-by-percent'
 
 'atom-text-editor.vim-mode-plus.with-range-marker:not(.insert-mode)':
-  'cmd-d': 'vim-mode-plus:add-selection'
+  'cmd-d': 'vim-mode-plus:select-occurrence-in-a-range-marker'
   'ctrl-cmd-g': 'vim-mode-plus:a-range-marker'
 
 'atom-text-editor.vim-mode-plus.visual-mode.selection-only-mode':
   'ctrl-cmd-c': 'vim-mode-plus:change-occurrence'
-  'cmd-d': 'vim-mode-plus:add-selection'
+  'cmd-d': 'vim-mode-plus:select-occurrence'
 
 # normal
 # -------------------------
