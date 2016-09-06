@@ -353,7 +353,7 @@ class VimState
     else
       points = @editor.getCursorBufferPositions()
       ranges.filter (range) ->
-        isRangeContainsSomePoint(range, points, exclusive: true)
+        isRangeContainsSomePoint(range, points, exclusive: false)
 
   clearRangeMarkers: ->
     marker.destroy() for marker in @rangeMarkers

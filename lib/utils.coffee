@@ -592,6 +592,11 @@ scanInRanges = (editor, pattern, scanRanges) ->
       ranges.push(range)
   ranges
 
+isRangeContainsSomePoint = (range, points, {exclusive}={}) ->
+  exclusive ?= false
+  points.some (point) ->
+    range.containsPoint(point, exclusive)
+
 # Debugging purpose
 # -------------------------
 logGoalColumnForSelection = (subject, selection) ->
@@ -609,11 +614,6 @@ withTrackingCursorPositionChange = (cursor, fn) ->
   cursorAfter = cursor.getBufferPosition()
   unless cursorBefore.isEqual(cursorAfter)
     console.log "Changed: #{cursorBefore.toString()} -> #{cursorAfter.toString()}"
-
-isRangeContainsSomePoint = (range, points, {exclusive}={}) ->
-  exclusive ?= false
-  points.some (point) ->
-    range.containsPoint(point, exclusive)
 
 # Reloadable registerElement
 registerElement = (name, options) ->

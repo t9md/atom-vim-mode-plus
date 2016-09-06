@@ -835,6 +835,8 @@ class SearchBase extends Motion
   finish: ->
     if @isIncrementalSearch?() and settings.get('showHoverSearchCounter')
       @vimState.hoverSearchCounter.reset()
+    @scanRanges = null
+    @scanRangeType = 'all'
     @matches?.destroy()
     @matches = null
 
@@ -882,25 +884,29 @@ class SearchBase extends Motion
   isSearchInSelection: ->
     @isIncrementalSearch?() and @editorElement.classList.contains('selection-only-mode')
 
-  getMatchList: (cursor, input) ->
-    scanRanges = []
+  getScanRangesFromPoint: (fromPoint) ->
+    return @scanRanges if @scanRanges?
+
     if @isSearchInSelection()
-      scanRanges = @editor.getSelectedBufferRanges()
+      @scanRanges = @editor.getSelectedBufferRanges()
       @scanRangeType = 'selection'
     else if @vimState.hasRangeMarkers()
       ranges = @vimState.getRangeMarkerBufferRanges()
-      cursorPoint = @getFromPoint(cursor)
-      if ranges.some((range) -> range.containsPoint(cursorPoint))
-        scanRanges = ranges
+      if ranges.some((range) -> range.containsPoint(fromPoint))
+        @scanRanges = ranges
         @scanRangeType = 'range-marker'
-      else
+
+    @scanRanges ?= []
+
+  getMatchList: (cursor, input) ->
+    cursorPoint = @getFromPoint(cursor)
 
     MatchList.fromScan @editor,
-      fromPoint: @getFromPoint(cursor)
+      fromPoint: cursorPoint
       pattern: @getPattern(input)
       direction: (if @isBackwards() then 'backward' else 'forward')
       countOffset: @getCount()
-      scanRanges: scanRanges ? []
+      scanRanges: @getScanRangesFromPoint(cursorPoint)
 
   visitMatch: (direction=null, options={}) ->
     {timeout, landing} = options
