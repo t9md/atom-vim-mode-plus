@@ -1133,7 +1133,7 @@ class Replace extends Operator
 
     @activateMode('normal')
 
-class AddSelection extends Operator
+class SelectOccurrence extends Operator
   @extend()
   @description: "Add selection onto each matching word within target range"
   withOccurrence: true
@@ -1144,13 +1144,12 @@ class AddSelection extends Operator
         swrap.resetProperties(@editor)
         @activateMode('visual', 'characterwise')
 
-# [FIXME] deperecate once spec is updated
-class SelectAllInRangeMarker extends AddSelection
+class SelectOccurrenceInARangeMarker extends SelectOccurrence
   @extend()
-  target: "RangeMarker"
+  target: "ARangeMarker"
   flashTarget: false
 
-class AddSelectionAll extends AddSelection
+class SelectOccurrenceInAll extends SelectOccurrence
   @extend()
   target: "All"
   flashTarget: false
@@ -1387,6 +1386,10 @@ class ChangeOccurrence extends Change
   @extend()
   @description: "Change all matching word within target range"
   withOccurrence: true
+
+class ChangeOccurrenceInARangeMarker extends ChangeOccurrence
+  @extend()
+  target: "ARangeMarker"
 
 class ChangeOccurrenceAll extends ChangeOccurrence
   @extend()

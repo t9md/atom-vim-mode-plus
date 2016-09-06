@@ -86,12 +86,12 @@ describe "Range Marker", ->
             xxx ooo xxx\n
             """
 
-    describe "select-all-in-range-marker", ->
+    describe "select-occurrence-in-a-range-marker", ->
       it "select all instance of cursor word only within marked range", ->
         keystroke('g m i p } } j .') # Mark 2 inner-word and 1 inner-paragraph
         paragraphText = "ooo xxx ooo\nxxx ooo xxx\n"
         ensureRangeMarker length: 2, text: [paragraphText, paragraphText]
-        dispatch(editorElement, 'vim-mode-plus:select-all-in-range-marker')
+        dispatch(editorElement, 'vim-mode-plus:select-occurrence-in-a-range-marker')
         expect(editor.getSelections()).toHaveLength(6)
         keystroke 'c'
         editor.insertText '!!!'
