@@ -793,9 +793,20 @@ class PreviousSelection extends TextObject
     @editor.getLastSelection().setBufferRange(range)
 
 class RangeMarker extends TextObject
-  @extend()
+  @extend(false)
 
   select: ->
-    ranges = @vimState.getRangeMarkers().map((m) -> m.getBufferRange())
+    options = {}
+    options.cursorContainedOnly = true if @isInner()
+
+    ranges = @vimState.getRangeMarkerBufferRanges(options)
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
+
+class ARangeMarker extends RangeMarker
+  @description: "range of rangeMarker where cursor is included"
+  @extend()
+
+class InnerRangeMarker extends RangeMarker
+  @description: "range of all rangeMarker of this buffer"
+  @extend()

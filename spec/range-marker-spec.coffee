@@ -54,10 +54,10 @@ describe "Range Marker", ->
         ensureRangeMarker length: 1, text: ['ooo']
         keystroke('j .')
         ensureRangeMarker length: 2, text: ['ooo', 'xxx']
-      it "marked range can use as target of operator by `i r`", ->
+      it "marked range can use as target of operator by `a r`", ->
         keystroke('g m i w j . 2 j g m i p') # Mark 2 inner-word and 1 inner-paragraph
         ensureRangeMarker length: 3, text: ['ooo', 'xxx', "ooo xxx ooo\nxxx ooo xxx\n"]
-        ensure 'g U i r',
+        ensure 'g U a r',
           text: """
           OOO xxx ooo
           XXX ooo xxx
@@ -78,7 +78,7 @@ describe "Range Marker", ->
         expect(editor.getSelections()).toHaveLength(6)
         keystroke 'c'
         editor.insertText '!!!'
-        ensure 'g U i r',
+        ensure 'g U a r',
           text: """
           !!! xxx !!!
           xxx !!! xxx

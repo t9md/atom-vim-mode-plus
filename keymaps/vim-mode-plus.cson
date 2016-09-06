@@ -276,8 +276,8 @@
   '%': 'vim-mode-plus:move-to-line-by-percent'
 
 'atom-text-editor.vim-mode-plus.with-range-marker:not(.insert-mode)':
-  'cmd-d': 'vim-mode-plus:select-all-in-range-marker'
-  'ctrl-cmd-g': 'vim-mode-plus:range-marker'
+  'cmd-d': 'vim-mode-plus:add-selection'
+  'ctrl-cmd-g': 'vim-mode-plus:a-range-marker'
 
 'atom-text-editor.vim-mode-plus.visual-mode.selection-only-mode':
   'ctrl-cmd-c': 'vim-mode-plus:change-occurrence'
@@ -432,7 +432,9 @@
   'i c': 'vim-mode-plus:inner-latest-change'
   'a c': 'vim-mode-plus:a-latest-change'
   'g v': 'vim-mode-plus:previous-selection'
-  'i r': 'vim-mode-plus:range-marker'
+
+  'i r': 'vim-mode-plus:inner-range-marker'
+  'a r': 'vim-mode-plus:a-range-marker'
 
 # visual
 # -------------------------
