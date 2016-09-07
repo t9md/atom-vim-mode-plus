@@ -479,6 +479,7 @@
   'shift-tab': 'vim-mode-plus:search-visit-prev'
   'tab': 'vim-mode-plus:search-visit-next'
 
+'.platform-darwin atom-text-editor.vim-mode-plus-search':
   'cmd-c': 'vim-mode-plus:change-occurrence-from-search'
   'cmd-d': 'vim-mode-plus:select-occurrence-from-search'
 

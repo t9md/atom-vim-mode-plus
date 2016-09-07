@@ -32,6 +32,7 @@ class Operator extends Base
   withOccurrence: false
   forceWise: null
   patternForOccurence: null
+  resetPatternForOccurence: true
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
@@ -98,20 +99,21 @@ class Operator extends Base
           @updateSelectionProperties()
 
     if @isWithOccurrence()
-      [scanRanges, patternForOccurence] = []
+      scanRanges = null
       @onWillSelectTarget =>
         if @isMode('visual')
           scanRanges = @editor.getSelectedBufferRanges()
           @vimState.modeManager.deactivate() # clear selection
-        patternForOccurence = @getPatternForOccurrence(scanRanges)
+        @patternForOccurence ?= @getPatternForOccurrence(scanRanges)
 
       @onDidSelectTarget =>
         scanRanges ?= @editor.getSelectedBufferRanges()
-        ranges = scanInRanges(@editor, patternForOccurence, scanRanges)
+        ranges = scanInRanges(@editor, @patternForOccurence, scanRanges)
         if ranges.length
           @editor.setSelectedBufferRanges(ranges)
         else
-          @editor.clearSelections() # FIXME
+          @editor.clearSelections() # FIXME when occurrence not found.
+      @patternForOccurence = null if @resetPatternForOccurence
 
     markerForTrackChange = null
     @onDidSelectTarget =>
@@ -215,23 +217,6 @@ class Operator extends Base
           scanRanges[lastRangeIndex] = scanRanges[lastRangeIndex].union(cursorWordRange)
         cursorWord = @editor.getTextInBufferRange(cursorWordRange)
         ///\b#{_.escapeRegExp(cursorWord)}\b///g
-
-  registerSelectOccurrence: ->
-    scanRanges = null
-    @onWillSelectTarget =>
-      if @isMode('visual')
-        scanRanges = @editor.getSelectedBufferRanges()
-        @vimState.modeManager.deactivate() # clear selection to normalize cursor position.
-      @patternForOccurence ?= @getPatternForOccurrence(scanRanges)
-
-    @onDidSelectTarget =>
-      scanRanges ?= @editor.getSelectedBufferRanges()
-      ranges = scanInRanges(@editor, @patternForOccurence, scanRanges)
-      if ranges.length
-        swrap(@editor.getLastSelection()).resetProperties() # [FIXME] need for linewise cmd-d
-        @editor.setSelectedBufferRanges(ranges)
-      else
-        @editor.clearSelections() # FIXME
 
 # -------------------------
 class Select extends Operator
