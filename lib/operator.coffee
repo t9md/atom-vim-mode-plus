@@ -104,7 +104,13 @@ class Operator extends Base
         if @isMode('visual')
           scanRanges = @editor.getSelectedBufferRanges()
           @vimState.modeManager.deactivate() # clear selection
-        @patternForOccurence ?= @getPatternForOccurrence(scanRanges)
+
+        unless @patternForOccurence
+          {pattern, bufferRange} = @getPatternAndBufferRangeForOccurrence()
+          @patternForOccurence = pattern
+          if scanRanges?.length
+            lastRangeIndex = scanRanges.length - 1
+            scanRanges[lastRangeIndex] = scanRanges[lastRangeIndex].union(bufferRange)
 
       @onDidSelectTarget =>
         scanRanges ?= @editor.getSelectedBufferRanges()
@@ -202,22 +208,22 @@ class Operator extends Base
     @mutateSelections (selection) => @mutateSelection(selection)
     @activateMode(@finalMode, @finalSubmode)
 
-  getPatternForOccurrence: (scanRanges) ->
+  # Return {pattern, bufferRange},
+  #   - Mandatory: pattern
+  #   - Optional: bufferRange
+  getPatternAndBufferRangeForOccurrence: (scanRanges) ->
     if @hasRegisterName()
-      ///#{_.escapeRegExp(@getRegisterValueAsText())}///g
+      {pattern: ///#{_.escapeRegExp(@getRegisterValueAsText())}///g }
     else
       cursor = @editor.getLastCursor()
       char = getCharacterAtCursor(cursor)
       scope = cursor.getScopeDescriptor().getScopesArray()
       if isNonWordCharacter(char, scope)
-        ///#{_.escapeRegExp(char)}///g
+        {pattern: ///#{_.escapeRegExp(char)}///g }
       else
-        cursorWordRange = getCurrentWordBufferRange(cursor)
-        if scanRanges?.length
-          lastRangeIndex = scanRanges.length - 1
-          scanRanges[lastRangeIndex] = scanRanges[lastRangeIndex].union(cursorWordRange)
-        cursorWord = @editor.getTextInBufferRange(cursorWordRange)
-        ///\b#{_.escapeRegExp(cursorWord)}\b///g
+        bufferRange = getCurrentWordBufferRange(cursor)
+        cursorWord = @editor.getTextInBufferRange(bufferRange)
+        {pattern: ///\b#{_.escapeRegExp(cursorWord)}\b///g, bufferRange}
 
 # -------------------------
 class Select extends Operator
