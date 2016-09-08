@@ -10,8 +10,9 @@ _ = require 'underscore-plus'
   isEndsWithNewLineForBufferRow
   isAllWhiteSpace
   isSingleLine
-  isNonWordCharacter
   getCurrentWordBufferRange
+  getBufferRangeForPatternFromPoint
+  cursorIsOnWhiteSpace
   scanInRanges
   getCharacterAtCursor
 } = require './utils'
@@ -117,7 +118,10 @@ class Operator extends Base
         if ranges.length
           @editor.setSelectedBufferRanges(ranges)
         else
+          # [FIXME]
           @restorePoint(selection) for selection in @editor.getSelections()
+          @editor.clearSelections() unless @isMode('visual')
+          @cancelOperation()
           @abort()
 
     markerForTrackChange = null
@@ -211,17 +215,31 @@ class Operator extends Base
   #   - Optional: bufferRange
   getPatternAndBufferRangeForOccurrence: (scanRanges) ->
     if @hasRegisterName()
-      {pattern: ///#{_.escapeRegExp(@getRegisterValueAsText())}///g }
-    else
-      cursor = @editor.getLastCursor()
-      char = getCharacterAtCursor(cursor)
-      scope = cursor.getScopeDescriptor().getScopesArray()
-      if isNonWordCharacter(char, scope)
-        {pattern: ///#{_.escapeRegExp(char)}///g }
-      else
-        bufferRange = getCurrentWordBufferRange(cursor)
+      return {pattern: ///#{_.escapeRegExp(@getRegisterValueAsText())}///g }
+
+    cursor = @editor.getLastCursor()
+    char = getCharacterAtCursor(cursor)
+    scope = cursor.getScopeDescriptor().getScopesArray()
+    nonWordCharacters = atom.config.get('editor.nonWordCharacters', {scope})
+
+    if char in nonWordCharacters
+      return {pattern:  ///#{_.escapeRegExp(char)}///g }
+
+    if cursorIsOnWhiteSpace(cursor)
+      # When cursor is at just before whit space(| position in text below)
+      #   aaa| bbb
+      # Atom's native cursor.getCurrentWordBufferRange() return range for aaa text.
+      # This is not very intuitive in Vim's cursor representation.
+      # So here we return range of single or multiple white spaces.
+      point = cursor.getBufferPosition()
+      bufferRange = getBufferRangeForPatternFromPoint(@editor, point, /[ \t]*/)
+      if bufferRange?
         cursorWord = @editor.getTextInBufferRange(bufferRange)
-        {pattern: ///\b#{_.escapeRegExp(cursorWord)}\b///g, bufferRange}
+        return {pattern: ///#{_.escapeRegExp(cursorWord)}///g, bufferRange}
+
+    bufferRange = getCurrentWordBufferRange(cursor)
+    cursorWord = @editor.getTextInBufferRange(bufferRange)
+    {pattern: ///\b#{_.escapeRegExp(cursorWord)}\b///g, bufferRange}
 
 # -------------------------
 class Select extends Operator

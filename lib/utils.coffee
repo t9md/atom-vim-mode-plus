@@ -540,6 +540,11 @@ getEndPositionForPattern = (editor, from, pattern, options={}) ->
       stop()
   point
 
+getBufferRangeForPatternFromPoint = (editor, fromPoint, pattern) ->
+  end = getEndPositionForPattern(editor, fromPoint, pattern, containedOnly: true)
+  start = getStartPositionForPattern(editor, end, pattern, containedOnly: true) if end?
+  new Range(start, end) if start?
+
 sortComparable = (collection) ->
   collection.sort (a, b) -> a.compare(b)
 
@@ -571,9 +576,6 @@ isSurroundedBySpace = (text) ->
 
 isSingleLine = (text) ->
   text.split(/\n|\r\n/).length is 1
-
-isNonWordCharacter = (char, scope) ->
-  char in atom.config.get('editor.nonWordCharacters', {scope})
 
 getCurrentWordBufferRange = (cursor) ->
   # [FIXME] Copy from selection.selectWord() and modify
@@ -721,6 +723,7 @@ module.exports = {
   getBufferRows
   ElementBuilder
   registerElement
+  getBufferRangeForPatternFromPoint
   sortComparable
   smartScrollToBufferPosition
   matchScopes
@@ -728,7 +731,6 @@ module.exports = {
   moveCursorUpBuffer
   isSurroundedBySpace
   isSingleLine
-  isNonWordCharacter
   getCurrentWordBufferRange
   scanInRanges
   isRangeContainsSomePoint
