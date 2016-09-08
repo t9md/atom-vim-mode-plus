@@ -172,7 +172,8 @@ describe "Operator modifier", ->
           OOO: xxx: |||: xxx: OOO:
           XXX: |||: OOO: OOO:
           """
-    describe     "select-occurrence", ->
+
+    describe "select-occurrence", ->
       beforeEach ->
         set
           text: """
@@ -183,20 +184,20 @@ describe "Operator modifier", ->
           xxx: |||: ooo:
 
           """
-      describe "what the cursor-word is using select-occurrence operator", ->
-        describe "cursor is at normal word", ->
+      describe "what the cursor-word", ->
+        describe "cursor is at normal word [by select-occurrence]", ->
           it "pick word but not pick partially matched one and re-use cached cursor-word on repeat", ->
             set cursor: [0, 0]
             ensure "g cmd-d o i p", selectedText: ['ooo', 'ooo']
             ensure "escape escape 2 j .", selectedText: ['ooo', 'ooo', 'ooo']
             ensure "escape escape 2 j .", selectedText: 'ooo'
-        describe "cursor is at nonWordCharacters", ->
+        describe "cursor is at nonWordCharacters [by select-occurrence]", ->
           it "select that char only", ->
             set cursor: [0, 3]
             ensure "g cmd-d o i p", selectedText: [':', ':', ':']
             ensure "escape escape 2 j .", -> selectedText: [':', ':', ':', ':', ':']
             ensure "escape escape 2 j .", -> selectedText: [':', ':', ':']
-        describe "cursor is at single white space", ->
+        describe "cursor is at single white space [by delete]", ->
           it "pick single white space only", ->
             set
               text: """
@@ -209,7 +210,7 @@ describe "Operator modifier", ->
               ooooooooo
               ooooooooo
               """
-        describe "cursor is at sequnce of space", ->
+        describe "cursor is at sequnce of space [by delete]", ->
           it "select sequnce of white spaces including partially mached one", ->
             set
               cursor: [0, 3]
