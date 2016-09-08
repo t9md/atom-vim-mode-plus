@@ -316,3 +316,46 @@ describe "Operator modifier", ->
             hello xxx: |||: xxx: 3333:
             hello |||: ooo: ooo:
             """
+
+    describe "from visual mode", ->
+      describe "visual characterwise", ->
+        it "change occurrence in narrowed selection", ->
+          keystroke 'v j /'
+          searchEditor.insertText('o+')
+          withMockPlatform searchEditorElement, 'platform-darwin' , ->
+            rawKeystroke 'cmd-d', document.activeElement
+            ensure 'U',
+              text: """
+              OOO: xxx: OOO: 0000
+              1: ooo: 22: ooo:
+              ooo: xxx: |||: xxx: 3333:
+              444: |||: ooo: ooo:
+              """
+      describe "visual linewise", ->
+        it "change occurrence in narrowed selection", ->
+          keystroke 'V j /'
+          searchEditor.insertText('o+')
+          withMockPlatform searchEditorElement, 'platform-darwin' , ->
+            rawKeystroke 'cmd-d', document.activeElement
+            ensure 'U',
+              text: """
+              OOO: xxx: OOO: 0000
+              1: OOO: 22: OOO:
+              ooo: xxx: |||: xxx: 3333:
+              444: |||: ooo: ooo:
+              """
+      describe "visual blockwise", ->
+        it "change occurrence in narrowed selection", ->
+          set cursor: [0, 5]
+          keystroke 'ctrl-v 2 j 1 0 l /'
+          searchEditor.insertText('o+')
+
+          withMockPlatform searchEditorElement, 'platform-darwin' , ->
+            rawKeystroke 'cmd-d', document.activeElement
+            ensure 'U',
+              text: """
+              ooo: xxx: OOO: 0000
+              1: ooO: 22: OOO:
+              ooo: xxx: |||: xxx: 3333:
+              444: |||: ooo: ooo:
+              """
