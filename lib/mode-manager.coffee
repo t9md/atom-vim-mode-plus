@@ -180,7 +180,7 @@ class ModeManager
         # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
         moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
 
-  # SelectionOnly
+  # Narrow to selection
   # -------------------------
   hasMultiLineSelection: ->
     if @isMode('visual', 'blockwise')
@@ -188,14 +188,11 @@ class ModeManager
     else
       not swrap(@editor.getLastSelection()).isSingleRow()
 
-  updateSelectionOnlyMode: ->
-    if @isMode('visual')
-      isSelectionOnly = @hasMultiLineSelection()
-    else
-      isSelectionOnly = false
-    @editorElement.classList.toggle('selection-only', isSelectionOnly)
+  updateNarrowedState: ->
+    isNarrowed = @isMode('visual') and @hasMultiLineSelection()
+    @editorElement.classList.toggle('is-narrowed', isNarrowed)
 
-  isSelectionOnlyMode: ->
-    @editorElement.classList.contains('selection-only')
+  isNarrowed: ->
+    @editorElement.classList.contains('is-narrowed')
 
 module.exports = ModeManager

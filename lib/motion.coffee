@@ -882,7 +882,7 @@ class SearchBase extends Motion
       cursor.getBufferPosition()
 
   isSearchInSelection: ->
-    @isIncrementalSearch?() and @vimState.modeManager.isSelectionOnlyMode()
+    @isIncrementalSearch?() and @vimState.modeManager.isNarrowed()
 
   getScanRangesFromPoint: (fromPoint) ->
     return @scanRanges if @scanRanges?

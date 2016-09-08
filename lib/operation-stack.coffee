@@ -116,7 +116,7 @@ class OperationStack
     if @vimState.isMode('normal')
       @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()
-    @vimState.modeManager.updateSelectionOnlyMode()
+    @vimState.modeManager.updateNarrowedState()
     @vimState.updateCursorsVisibility()
     @vimState.reset()
 

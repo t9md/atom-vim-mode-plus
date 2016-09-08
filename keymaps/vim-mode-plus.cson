@@ -279,7 +279,7 @@
   'cmd-d': 'vim-mode-plus:select-occurrence-in-a-range-marker'
   'ctrl-cmd-g': 'vim-mode-plus:a-range-marker'
 
-'atom-text-editor.vim-mode-plus.visual-mode.selection-only':
+'atom-text-editor.vim-mode-plus.visual-mode.is-narrowed':
   'ctrl-cmd-c': 'vim-mode-plus:change-occurrence'
   'cmd-d': 'vim-mode-plus:select-occurrence'
 
