@@ -439,7 +439,6 @@
 # visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode':
-  '.': 'vim-mode-plus:repeat'
   'x': 'vim-mode-plus:delete'
   's': 'vim-mode-plus:change'
   'o': 'vim-mode-plus:reverse-selections'
