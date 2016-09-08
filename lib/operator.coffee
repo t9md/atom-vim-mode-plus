@@ -112,8 +112,9 @@ class Operator extends Base
         if ranges.length
           @editor.setSelectedBufferRanges(ranges)
         else
-          @editor.clearSelections() # FIXME when occurrence not found.
-      @patternForOccurence = null if @resetPatternForOccurence
+          @restorePoint(selection) for selection in @editor.getSelections()
+          @abort()
+        @patternForOccurence = null if @resetPatternForOccurence
 
     markerForTrackChange = null
     @onDidSelectTarget =>
