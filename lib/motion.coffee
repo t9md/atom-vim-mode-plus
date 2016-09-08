@@ -995,6 +995,7 @@ class Search extends SearchBase
           patternForOccurence = @matches.pattern # preserve before cancel
           operation = command.operation
           operation += 'InARangeMarker' if @getScanRangeType() is 'range-marker'
+          @vimState.searchHistory.save(@input)
           @vimState.searchInput.cancel()
           @vimState.operationStack.run(operation, {patternForOccurence})
 
