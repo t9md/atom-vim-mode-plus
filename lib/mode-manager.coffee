@@ -158,12 +158,17 @@ class ModeManager
           bs.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
 
-  normalizeSelections: ({preservePreviousSelection}={}) ->
+  normalizeSelections: ({preservePreviousSelection, resetProperties}={}) ->
+    preservePreviousSelection ?= false
+    resetProperties ?= true
+
     if preservePreviousSelection
       range = @editor.getLastSelection().getBufferRange()
       @vimState.mark.setRange('<', '>', range)
     @selectCharacterwise()
-    swrap.resetProperties(@editor)
+
+    swrap.resetProperties(@editor) if resetProperties
+
     if preservePreviousSelection and not @editor.getLastSelection().isEmpty()
       @preservePreviousSelection(@editor.getLastSelection())
 
