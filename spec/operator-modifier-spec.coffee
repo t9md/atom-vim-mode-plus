@@ -1,4 +1,4 @@
-{getVimState, dispatch, TextData} = require './spec-helper'
+{getVimState, dispatch, TextData, getView, withMockPlatform, rawKeystroke} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "Operator modifier", ->
@@ -223,3 +223,96 @@ describe "Operator modifier", ->
               oooooo ooo
                ooo ooo ooo  ooo
               """
+
+  describe "from visual-mode.is-narrowed", ->
+    beforeEach ->
+      set
+        text: """
+        ooo: xxx: ooo:
+        |||: ooo: xxx: ooo:
+        ooo: xxx: |||: xxx: ooo:
+        xxx: |||: ooo: ooo:
+        """
+        cursor: [0, 0]
+
+    describe "[from visual.characterwise] select-occurrence then uppercase", ->
+      it "pick cursor-word from vC range and include word if start position of that word is in selecion", ->
+        ensure "v 2 j cmd-d U",
+          text: """
+          OOO: xxx: OOO:
+          |||: OOO: xxx: OOO:
+          OOO: xxx: |||: xxx: ooo:
+          xxx: |||: ooo: ooo:
+          """
+          numCursors: 5
+    describe "[from visual.linewise] select-occurrence then uppercase", ->
+      it "pick cursor-word from vL range", ->
+        ensure "5 l V 2 j cmd-d U",
+          text: """
+          ooo: XXX: ooo:
+          |||: ooo: XXX: ooo:
+          ooo: XXX: |||: XXX: ooo:
+          xxx: |||: ooo: ooo:
+          """
+          numCursors: 4
+    describe "[from visual.blockwise] select-occurrence then uppercase", ->
+      it "pick cursor-word from vB range", ->
+        ensure "W ctrl-v 2 j $ h cmd-d U",
+          text: """
+          ooo: xxx: OOO:
+          |||: OOO: xxx: OOO:
+          ooo: xxx: |||: xxx: OOO:
+          xxx: |||: ooo: ooo:
+          """
+          numCursors: 4
+      it "pick cursor-word from vB range", ->
+        ensure "ctrl-v 7 l 2 j o cmd-d U",
+          text: """
+          OOO: xxx: ooo:
+          |||: OOO: xxx: ooo:
+          OOO: xxx: |||: xxx: ooo:
+          xxx: |||: ooo: ooo:
+          """
+          numCursors: 3
+
+  describe "from incremental search", ->
+    [searchEditor, searchEditorElement] = []
+
+    beforeEach ->
+      searchEditor = vimState.searchInput.editor
+      searchEditorElement = searchEditor.element
+      jasmine.attachToDOM(getView(atom.workspace))
+      settings.set('incrementalSearch', true)
+      set
+        text: """
+        ooo: xxx: ooo: 0000
+        1: ooo: 22: ooo:
+        ooo: xxx: |||: xxx: 3333:
+        444: |||: ooo: ooo:
+        """
+        cursor: [0, 0]
+
+    describe "from normal mode", ->
+      it "select occurrence by pattern in search-input", ->
+        keystroke '/'
+        searchEditor.insertText('\\d{3,4}')
+        withMockPlatform searchEditorElement, 'platform-darwin' , ->
+          rawKeystroke 'cmd-d', document.activeElement
+          ensure 'i e',
+            selectedText: ['0000', '3333', '444']
+            mode: ['visual', 'characterwise']
+
+      it "change occurrence by pattern in search-input", ->
+        keystroke '/'
+        searchEditor.insertText('^\\w+:')
+        withMockPlatform searchEditorElement, 'platform-darwin' , ->
+          rawKeystroke 'cmd-c', document.activeElement
+          ensure 'i e', mode: 'insert'
+          editor.insertText('hello')
+          ensure
+            text: """
+            hello xxx: ooo: 0000
+            hello ooo: 22: ooo:
+            hello xxx: |||: xxx: 3333:
+            hello |||: ooo: ooo:
+            """
