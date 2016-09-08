@@ -114,45 +114,6 @@ describe "Operator general", ->
         settings.set('wrapLeftRightMotion', true)
         ensure 'X', text: "012345\nabcdef", cursor: [0, 5]
 
-  describe "force operator's wise commands", ->
-    beforeEach ->
-      set
-        text: """
-        012345 789
-        ABCDEF EFG
-        """
-    describe "force-operator-characterwise", ->
-      describe "when target is linewise", ->
-        it "operate characterwisely and exclusively", ->
-          set cursor: [0, 1]
-          ensure "d v j",
-            text: """
-            0BCDEF EFG
-            """
-      describe "when target is characterwise", ->
-        it "operate inclusively for exclusive target", ->
-          set cursor: [0, 9]
-          ensure "d v b",
-            cursor: [0, 6]
-            text_: """
-            012345_
-            ABCDEF EFG
-            """
-        it "operate exclusively for inclusive target", ->
-          set cursor: [0, 0]
-          ensure "d v e",
-            cursor: [0, 0]
-            text: """
-            5 789
-            ABCDEF EFG
-            """
-    describe "force-operator-linewise", ->
-      it "operate linewisely for characterwise target", ->
-        set cursor: [0, 1]
-        ensure ['d V /', search: 'DEF'],
-          cursor: [0, 0]
-          text: ""
-
   describe "the d keybinding", ->
     it "enters operator-pending mode", ->
       ensure 'd', mode: 'operator-pending'
