@@ -73,38 +73,14 @@ characterForKeyboardEvent = (event) ->
       key = key[key.length - 1] if key.startsWith('shift-')
       key if key.length is 1
 
-# --[START] I want to use this in future
-newKeydown = (key, target) ->
+keydown = (key, target) ->
   target ?= document.activeElement
   event = buildKeydownEventFromKeystroke(key, target)
   atom.keymaps.handleKeyboardEvent(event)
 
-  # unless event.defaultPrevented
-  #   editor = atom.workspace.getActiveTextEditor()
-  #   target = getHiddenInputElementForEditor(editor)
-  #   char = ' ' if key is 'space'
-  #   char ?= characterForKeyboardEvent(event)
-  #   target.dispatchEvent(buildTextInputEvent(char)) if char?
-
-newKeystroke = (keystrokes, target) ->
+rawKeystroke = (keystrokes, target) ->
   for key in normalizeKeystrokes(keystrokes).split(/\s+/)
-    newKeydown(key, target)
-# --[END] I want to use this in future
-
-keydown = (key, options) ->
-  event = buildKeydownEvent(key, options)
-  atom.keymaps.handleKeyboardEvent(event)
-
-_keystroke = (keys, event) ->
-  if keys in ['escape', 'backspace']
-    keydown(keys, event)
-  else
-    for key in keys.split('')
-      if key.match(/[A-Z]/)
-        event.shift = true
-      else
-        delete event.shift
-      keydown(key, event)
+    keydown(key, target)
 
 isPoint = (obj) ->
   if obj instanceof Point
@@ -361,7 +337,7 @@ class VimEditor
 
     for k in toArray(keys)
       if _.isString(k)
-        newKeystroke(k, target)
+        rawKeystroke(k, target)
       else
         switch
           when k.input?
@@ -370,6 +346,6 @@ class VimEditor
             @vimState.searchInput.editor.insertText(k.search)
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')
           else
-            newKeystroke(k, target)
+            rawKeystroke(k, target)
 
-module.exports = {getVimState, getView, dispatch, TextData, withMockPlatform}
+module.exports = {getVimState, getView, dispatch, TextData, withMockPlatform, rawKeystroke}
