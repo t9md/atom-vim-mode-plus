@@ -996,8 +996,7 @@ class Search extends SearchBase
           operation = command.operation
           operation += 'InARangeMarker' if @getScanRangeType() is 'range-marker'
           @vimState.searchInput.cancel()
-          options = {patternForOccurence, resetPatternForOccurence: false}
-          @vimState.operationStack.run(operation, options)
+          @vimState.operationStack.run(operation, {patternForOccurence})
 
   visitCursors: ->
     visitCursor = (cursor) =>

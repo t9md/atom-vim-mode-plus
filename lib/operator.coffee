@@ -32,7 +32,6 @@ class Operator extends Base
   withOccurrence: false
   forceWise: null
   patternForOccurence: null
-  resetPatternForOccurence: true
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
@@ -120,7 +119,6 @@ class Operator extends Base
         else
           @restorePoint(selection) for selection in @editor.getSelections()
           @abort()
-        @patternForOccurence = null if @resetPatternForOccurence
 
     markerForTrackChange = null
     @onDidSelectTarget =>
