@@ -365,7 +365,7 @@ describe "Operator modifier", ->
       beforeEach ->
         atom.keymaps.add "create-range-marker",
           'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            'g m': 'vim-mode-plus:create-range-marker'
+            'm': 'vim-mode-plus:create-range-marker'
 
         set
           text: """
@@ -380,7 +380,7 @@ describe "Operator modifier", ->
           [[0, 0], [2, 0]]
           [[3, 0], [4, 0]]
         ]
-        ensure 'V j g m G V g m',
+        ensure 'V j m G m m',
           rangeMarkerBufferRange: rangeMarkerBufferRange
       describe "from inside of range-marker", ->
         it "select occurrence in all range-marker", ->
