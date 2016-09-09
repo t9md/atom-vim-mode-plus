@@ -427,3 +427,89 @@ describe "Operator modifier", ->
               xxx: |||: ooo: ooo:\n
               """
               rangeMarkerBufferRange: rangeMarkerBufferRange
+
+    describe "demonstrate range-marker's practical scenario", ->
+      [oldGrammar] = []
+      afterEach ->
+        editor.setGrammar(oldGrammar)
+
+      beforeEach ->
+        atom.keymaps.add "create-range-marker",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'm': 'vim-mode-plus:toggle-range-marker'
+
+        waitsForPromise ->
+          atom.packages.activatePackage('language-coffee-script')
+
+        runs ->
+          oldGrammar = editor.getGrammar()
+          editor.setGrammar(atom.grammars.grammarForScopeName('source.coffee'))
+
+        set text: """
+            constructor: (@main, @editor, @statusBarManager) ->
+              @editorElement = @editor.element
+              @emitter = new Emitter
+              @subscriptions = new CompositeDisposable
+              @modeManager = new ModeManager(this)
+              @mark = new MarkManager(this)
+              @register = new RegisterManager(this)
+              @rangeMarkers = []
+
+              @highlightSearchSubscription = @editorElement.onDidChangeScrollTop =>
+                @refreshHighlightSearch()
+
+              @operationStack = new OperationStack(this)
+              @cursorStyleManager = new CursorStyleManager(this)
+
+            anotherFunc: ->
+              @hello = []
+            """
+
+      it 'change all assignment("=") of current-function to "?="', ->
+        set cursor: [0, 0]
+        ensure ['j f', input: '='], cursor: [1, 17]
+        selectOccurrence =
+
+        withMockPlatform searchEditorElement, 'platform-darwin' , ->
+          keystroke [
+            'g cmd-d' # select-occurrence
+            'i f'     # inner-function-text-object
+            'm'       # toggle-range-marker
+            'escape'  # clear-multi-cursor
+          ].join(" ")
+
+          textsInBufferRange = vimState.getRangeMarkerBufferRanges().map (range) ->
+            editor.getTextInBufferRange(range)
+          textsInBufferRangeIsAllEqualChar = textsInBufferRange.every((text) -> text is '=')
+          expect(textsInBufferRangeIsAllEqualChar).toBe(true)
+          expect(vimState.getRangeMarkers()).toHaveLength(11)
+
+          keystroke '2 l' # to move to out-side of range-mrker
+          ensure ['/', search: '=>'], cursor: [9, 69]
+          keystroke "m" # clear rangeMarker at cursor which is = sign part of fat arrow.
+          expect(vimState.getRangeMarkers()).toHaveLength(10)
+          keystroke [
+            'ctrl-cmd-g' # convert-range-marker-to-selection
+            'I'          # Insert at start of selection
+          ]
+          editor.insertText('?')
+          ensure 'escape',
+            text: """
+            constructor: (@main, @editor, @statusBarManager) ->
+              @editorElement ?= @editor.element
+              @emitter ?= new Emitter
+              @subscriptions ?= new CompositeDisposable
+              @modeManager ?= new ModeManager(this)
+              @mark ?= new MarkManager(this)
+              @register ?= new RegisterManager(this)
+              @rangeMarkers ?= []
+
+              @highlightSearchSubscription ?= @editorElement.onDidChangeScrollTop =>
+                @refreshHighlightSearch()
+
+              @operationStack ?= new OperationStack(this)
+              @cursorStyleManager ?= new CursorStyleManager(this)
+
+            anotherFunc: ->
+              @hello = []
+            """
