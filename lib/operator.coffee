@@ -88,12 +88,9 @@ class Operator extends Base
     # visual-mode selection modification should be handled by Motion::select(), TextObject::select()
     unless @instanceof('Select')
       if @wasNeedStay = @needStay() # [FIXME] dirty cache
-        unless @isMode('visual')
-          @onWillSelectTarget =>
-            @updateSelectionProperties()
+        @onWillSelectTarget => @updateSelectionProperties() unless @isMode('visual')
       else
-        @onDidSelectTarget =>
-          @updateSelectionProperties()
+        @onDidSelectTarget => @updateSelectionProperties()
 
     if @isWithOccurrence()
       scanRanges = null
@@ -135,7 +132,6 @@ class Operator extends Base
   setOperatorModifier: ({occurence, wise}) ->
     if occurence? and @withOccurrence isnt occurence
       @withOccurrence = occurence
-      # @addHover(':occurence:')
 
     if wise? and @forceWise isnt wise
       @forceWise = wise
@@ -1200,7 +1196,7 @@ class ToggleRangeMarker extends CreateRangeMarker
       @vimState.removeRangeMarker(rangeMarkerToRemove)
       @abort()
 
-class ToggleRangeMarkerAtCursor extends ToggleRangeMarker
+class ToggleRangeMarkerOnInnerWord extends ToggleRangeMarker
   @extend()
   target: 'InnerWord'
 

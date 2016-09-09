@@ -27,7 +27,6 @@ globalState = require './global-state'
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   getTextInScreenRange
-  haveSomeSelection
 } = require './utils'
 
 swrap = require './selection-wrapper'

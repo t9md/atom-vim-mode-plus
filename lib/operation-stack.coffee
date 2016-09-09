@@ -3,7 +3,6 @@ _ = require 'underscore-plus'
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
 {moveCursorLeft} = require './utils'
-swrap = require './selection-wrapper'
 settings = require './settings'
 {CurrentSelection, Select, MoveToRelativeLine} = {}
 {OperationStackError, OperatorError, OperationAbortedError} = require './errors'
