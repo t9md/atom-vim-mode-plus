@@ -475,3 +475,70 @@ describe "VimState", ->
       keystroke 'm q'
       set cursor: [1, 2]
       ensure 'd d escape ` q', cursor: [1, 2]
+
+  describe "is-narrowed attribute", ->
+    ensureNormalModeState = ->
+      ensure "escape",
+        mode: 'normal'
+        selectedText: ''
+        selectionIsNarrowed: false
+    beforeEach ->
+      set
+        text: """
+        1:-----
+        2:-----
+        3:-----
+        4:-----
+        """
+        cursor: [0, 0]
+
+    describe "normal-mode", ->
+      it "is not narrowed", ->
+        ensure
+          mode: ['normal']
+          selectionIsNarrowed: false
+    describe "visual-mode.characterwise", ->
+      it "[single row] is narrowed", ->
+        ensure 'v $',
+          selectedText: '1:-----'
+          mode: ['visual', 'characterwise']
+          selectionIsNarrowed: false
+        ensureNormalModeState()
+      it "[multi-row] is narrowed", ->
+        ensure 'v j',
+          selectedText: """
+          1:-----
+          2
+          """
+          mode: ['visual', 'characterwise']
+          selectionIsNarrowed: true
+        ensureNormalModeState()
+    describe "visual-mode.linewise", ->
+      it "[single row] is narrowed", ->
+        ensure 'V',
+          selectedText: "1:-----\n"
+          mode: ['visual', 'linewise']
+          selectionIsNarrowed: false
+        ensureNormalModeState()
+      it "[multi-row] is narrowed", ->
+        ensure 'V j',
+          selectedText: """
+          1:-----
+          2:-----\n
+          """
+          mode: ['visual', 'linewise']
+          selectionIsNarrowed: true
+        ensureNormalModeState()
+    describe "visual-mode.blockwise", ->
+      it "[single row] is narrowed", ->
+        ensure 'ctrl-v l',
+          selectedText: "1:"
+          mode: ['visual', 'blockwise']
+          selectionIsNarrowed: false
+        ensureNormalModeState()
+      it "[multi-row] is narrowed", ->
+        ensure 'ctrl-v l j',
+          selectedText: ["1:", "2:"]
+          mode: ['visual', 'blockwise']
+          selectionIsNarrowed: true
+        ensureNormalModeState()
