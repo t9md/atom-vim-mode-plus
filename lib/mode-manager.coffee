@@ -33,7 +33,7 @@ class ModeManager
   onWillActivateMode: (fn) -> @emitter.on('will-activate-mode', fn)
   onDidActivateMode: (fn) -> @emitter.on('did-activate-mode', fn)
   onWillDeactivateMode: (fn) -> @emitter.on('will-deactivate-mode', fn)
-  preemptWillDeactivateMode: (fn) -> @emitter.on('will-deactivate-mode', fn)
+  preemptWillDeactivateMode: (fn) -> @emitter.preempt('will-deactivate-mode', fn)
   onDidDeactivateMode: (fn) -> @emitter.on('did-deactivate-mode', fn)
 
   # activate: Public
@@ -161,7 +161,7 @@ class ModeManager
           bs.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
 
-  normalizeSelections: ({preservePreviousSelection}) ->
+  normalizeSelections: ({preservePreviousSelection}={}) ->
     preservePreviousSelection ?= false
 
     if preservePreviousSelection
