@@ -1179,6 +1179,37 @@ class CreateRangeMarker extends Operator
     @vimState.addRangeMarkers(marker)
     @restorePoint(selection)
 
+class ToggleRangeMarkerAtCursor extends CreateRangeMarker
+  @extend()
+  target: 'InnerWord'
+
+  getRangeMarkerAtCursor: ->
+    point = @editor.getCursorBufferPosition()
+
+    containsPoint = (rangeMarker, point) ->
+      rangeMarker.getBufferRange().containsPoint(point, exclusive)
+
+    exclusive = false
+    for rangeMarker in @vimState.getRangeMarkers() when containsPoint(rangeMarker, point)
+      return rangeMarker
+
+  execute: ->
+    rangeMarker = @getRangeMarkerAtCursor()
+    if rangeMarker?
+      rangeMarker.destroy()
+      @vimState.removeRangeMarker(rangeMarker)
+    else
+      super
+
+class ConvertRangeMarkerToSelection extends Select
+  @extend()
+  flashTarget: false
+  target: "ARangeMarker"
+  execute: ->
+    super
+    @vimState.clearRangeMarkers()
+
+
 # Insert entering operation
 # -------------------------
 class ActivateInsertMode extends Operator

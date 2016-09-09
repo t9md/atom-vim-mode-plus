@@ -336,6 +336,13 @@ class VimState
   # -------------------------
   addRangeMarkers: (markers) ->
     @rangeMarkers.push(markers...)
+    @updateHasRangeMarkerState()
+
+  removeRangeMarker: (rangeMarker) ->
+    _.remove(@rangeMarkers, rangeMarker)
+    @updateHasRangeMarkerState()
+
+  updateHasRangeMarkerState: ->
     @toggleClassList('with-range-marker', @hasRangeMarkers())
 
   hasRangeMarkers: ->
@@ -355,7 +362,12 @@ class VimState
       ranges.filter (range) ->
         isRangeContainsSomePoint(range, points, exclusive: false)
 
+  eachRangeMarkers: (fn) ->
+    for rangeMarker in @getRangeMarkers()
+      fn(rangeMarker)
+
   clearRangeMarkers: ->
-    marker.destroy() for marker in @rangeMarkers
+    @eachRangeMarkers (rangeMarker) ->
+      rangeMarker.destroy()
     @rangeMarkers = []
     @toggleClassList('with-range-marker', @hasRangeMarkers())
