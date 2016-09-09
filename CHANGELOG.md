@@ -1,4 +1,49 @@
 # 0.55.0: WIP in preparation
+- Internal: Avoid curcular referencing for string transformers store.
+- Doc: Update docstring of many operator for better command report for vmp wiki.
+- Breaking, Improve: `AddSelection` no longer get word from visual-mode #351
+- New: Add `All` TextObject as alias of Entire. #352
+- New: `range-marker` is now `inner-range-marker` and `a-range-marker` as like other text-object
+  - `inner-range-marker`: range-marker where cursor is contained [experiment].
+  - `a-range-marker`: all range-marker in buffer.
+- Improve?, Breaking?: Change range-marker style as-if selection #357
+- Improve, Rename: Cleanup operator-modifier mechanism. Renamed command #357
+  - `v`: `force-operator-characterwise` to `operator-modifier-characterwise`
+  - `V`: `force-operator-linewise` to `operator-modifier-linewise`
+  'o': `operator-modifier-occurrence`
+- New: occurrence operator-modifier #357
+  - `o` in `operator-pending-mode`
+  - As like `v`, `V` modifier force wise of operator
+  - `o` modifier re-select cursor-word from target range.
+  - For example `c i p` change whole paragraph, `c o i p` change occurrence of cursor word in paragraph.
+  - This modifier is available for all operator.
+  - `select-occurrence`, `map-surround` is created based on this `occurrence` modifier.
+- New: Narrowed selection mode #357
+  - `is-narrow` state is automatically activated/deactivated based on current selection range.
+  - `is-narrow` is activated only in `visual-mode`
+  - If selection is multi-line: `is-narrow`. CSS class is available for scoped keymap or style modification.
+  - If selection is single-line: not `is-narrow`. No CSS class in editorElement
+  - In `is-narrow` state, incsearch(`/`, `?`) works on selected range.
+  - Available shortcut in `visual-mode.is-narrow` scope.
+    - `ctrl-cmd-c`: `change-occurrence` to change occurrence of cursor word.
+    - `cmd-d`: `select-occurrence` to select occurrence of cursor word.
+- New: RangeMarker changes
+  - New command: `toggle-range-marker`, remove or add range-marker
+  - New command: `toggle-range-marker-on-inner-word` `inner-word` pre-targeted version
+  - New command: `convert-range-marker-to-selection` add selection on all range-marker and remove range-marker after select.
+- New: IncrementalSearch specific `/`, `?` special feature #357
+  - Automatically determine ranges to scan in following order
+    - If selection exists and it's `is-narrow`ed, search works on range of that selection.
+    - If range-marker exists and cursor position is within range-marker, search works on ranges of all range-marker in buffer.
+    - If none of above match search from whole buffer(this is existing behvior)
+  - Direct command from search-input mini editor.
+    - `cmd-c`: `change-occurrence-from-search` to change occurrence of search pattern matched.
+    - `cmd-d`: `select-occurrence-from-search` to select occurrence of search pattern matched.
+- Rename: `add-selection` to `select-occurrence`
+- Improve: `reset-normal-mode` clear hlsearch and range-marker more thoughtfully. No longer clear in following situation.
+  - Internal invocation of `vimState.resetNormalMode()`.
+  - When having multiple cursor.
+- Internal: Define `Base::initialize` to be eliminate uncertainty of super calll in child class. #361
 
 # 0.54.1:
 - Breaking: Revert change introduced in 0.54.0(Was not good). insert-mode escape return to normal-mode regardless os autocomplet popup #339.
