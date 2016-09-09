@@ -71,7 +71,7 @@ class Operator extends Base
     @initialize()
     @setTarget(@new(@target)) if _.isString(@target)
 
-  restorePoint: (selection) ->
+  restorePoint: (selection, fn) ->
     which = if @wasNeedStay then 'head' else 'start'
     if swrap(selection).getProperties().head?
       # Deffer restoring cursor point.
@@ -79,6 +79,7 @@ class Operator extends Base
       # when intersecting selection is destroyed, cursor is moved automatically.
       @onDidFinishOperation ->
         swrap(selection).setBufferPositionTo(which, fromProperty: true)
+        fn?(selection)
     else
       selection.destroy()
 
@@ -613,9 +614,10 @@ class Indent extends TransformString
 
   mutateSelection: (selection) ->
     selection[@indentFunction]()
-    @restorePoint(selection)
     unless @needStay()
-      selection.cursor.moveToFirstCharacterOfLine()
+      fn = (selection) ->
+        selection.cursor.moveToFirstCharacterOfLine()
+    @restorePoint(selection, fn)
 
 class Outdent extends Indent
   @extend()
