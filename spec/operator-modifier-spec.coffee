@@ -359,3 +359,71 @@ describe "Operator modifier", ->
               ooo: xxx: |||: xxx: 3333:
               444: |||: ooo: ooo:
               """
+
+    describe "range-marker is exists", ->
+      rangeMarkerBufferRange = null
+      beforeEach ->
+        atom.keymaps.add "create-range-marker",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'g m': 'vim-mode-plus:create-range-marker'
+
+        set
+          text: """
+          ooo: xxx: ooo:
+          |||: ooo: xxx: ooo:
+          ooo: xxx: |||: xxx: ooo:
+          xxx: |||: ooo: ooo:\n
+          """
+          cursor: [0, 0]
+
+        rangeMarkerBufferRange = [
+          [[0, 0], [2, 0]]
+          [[3, 0], [4, 0]]
+        ]
+        ensure 'V j g m G V g m',
+          rangeMarkerBufferRange: rangeMarkerBufferRange
+      describe "from inside of range-marker", ->
+        it "select occurrence in all range-marker", ->
+          set cursor: [0, 0]
+          keystroke '/'
+          searchEditor.insertText('xxx')
+          withMockPlatform searchEditorElement, 'platform-darwin' , ->
+            rawKeystroke 'cmd-d', document.activeElement
+            ensure 'U',
+              text: """
+              ooo: XXX: ooo:
+              |||: ooo: XXX: ooo:
+              ooo: xxx: |||: xxx: ooo:
+              XXX: |||: ooo: ooo:\n
+              """
+              rangeMarkerBufferRange: rangeMarkerBufferRange
+      describe "from outside of range-marker", ->
+        it "demand opertor target", ->
+          set cursor: [2, 1] # outside of range-marker
+          keystroke '/'
+          searchEditor.insertText('xxx')
+          withMockPlatform searchEditorElement, 'platform-darwin' , ->
+            rawKeystroke 'cmd-d', document.activeElement
+            ensure 'i e U',
+              text: """
+              ooo: XXX: ooo:
+              |||: ooo: XXX: ooo:
+              ooo: XXX: |||: XXX: ooo:
+              XXX: |||: ooo: ooo:\n
+              """
+              rangeMarkerBufferRange: rangeMarkerBufferRange
+      describe "selection is prioritized over range-marker", ->
+        it "select all occurrence in selection", ->
+          set cursor: [0, 0]
+          keystroke 'V 2 j /'
+          searchEditor.insertText('xxx')
+          withMockPlatform searchEditorElement, 'platform-darwin' , ->
+            rawKeystroke 'cmd-d', document.activeElement
+            ensure 'U',
+              text: """
+              ooo: XXX: ooo:
+              |||: ooo: XXX: ooo:
+              ooo: XXX: |||: XXX: ooo:
+              xxx: |||: ooo: ooo:\n
+              """
+              rangeMarkerBufferRange: rangeMarkerBufferRange

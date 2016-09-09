@@ -221,6 +221,7 @@ class VimEditor
     'selectedScreenRange', 'selectedScreenRangeOrdered'
     'selectedBufferRange', 'selectedBufferRangeOrdered'
     'selectionIsReversed',
+    'rangeMarkerBufferRange'
     'characterwiseHead'
     'scrollTop',
     'mode',
@@ -301,6 +302,10 @@ class VimEditor
   ensureSelectionIsReversed: (reversed) ->
     actual = @editor.getLastSelection().isReversed()
     expect(actual).toBe(reversed)
+
+  ensureRangeMarkerBufferRange: (range) ->
+    actual = @vimState.getRangeMarkerBufferRanges()
+    expect(actual).toEqual(toArrayOfRange(range))
 
   ensureCharacterwiseHead: (points) ->
     actual = (swrap(s).getCharacterwiseHeadPosition() for s in @editor.getSelections())
