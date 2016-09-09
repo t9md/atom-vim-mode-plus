@@ -105,7 +105,7 @@ class Operator extends Base
         unless @patternForOccurence
           {pattern, bufferRange} = @getPatternAndBufferRangeForOccurrence()
           @patternForOccurence = pattern
-          if scanRanges?.length and not @isMode('visual', 'blockwise')
+          if scanRanges?.length and bufferRange? and not @isMode('visual', 'blockwise') 
             lastRangeIndex = scanRanges.length - 1
             scanRanges[lastRangeIndex] = scanRanges[lastRangeIndex].union(bufferRange)
 
