@@ -49,6 +49,9 @@ class Base
       if hover? and not @isComplete()
         @addHover(hover)
 
+  # Template
+  initialize: ->
+
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->

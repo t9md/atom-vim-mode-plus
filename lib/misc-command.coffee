@@ -16,7 +16,7 @@ class MiscCommand extends Base
   @extend(false)
   constructor: ->
     super
-    @initialize?()
+    @initialize()
 
 class ReverseSelections extends MiscCommand
   @extend()

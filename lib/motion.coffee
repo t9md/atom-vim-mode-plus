@@ -42,7 +42,7 @@ class Motion extends Base
 
   constructor: ->
     super
-    @initialize?()
+    @initialize()
 
   isLinewise: ->
     if @isMode('visual')
@@ -128,6 +128,7 @@ class CurrentSelection extends Motion
   inclusive: true
 
   initialize: ->
+    super
     @pointInfoByCursor = new Map
 
   execute: ->
@@ -649,6 +650,7 @@ class ScrollFullScreenDown extends Motion
   amountOfPage: +1
 
   initialize: ->
+    super
     amountOfRows = Math.ceil(@amountOfPage * @editor.getRowsPerPage() * @getCount())
     @cursorRow = @editor.getCursorScreenPosition().row + amountOfRows
     @newTopRow = @editor.getFirstVisibleScreenRow() + amountOfRows
@@ -695,6 +697,7 @@ class Find extends Motion
   requireInput: true
 
   initialize: ->
+    super
     @focusInput() unless @isComplete()
 
   isBackwards: ->
@@ -757,6 +760,7 @@ class RepeatFind extends Find
   repeated: true
 
   initialize: ->
+    super
     unless findObj = globalState.currentFind
       @abort()
     {@offset, @backwards, @input} = findObj
@@ -775,6 +779,7 @@ class MoveToMark extends Motion
   hover: icon: ":move-to-mark:`", emoji: ":round_pushpin:`"
 
   initialize: ->
+    super
     @focusInput() unless @isComplete()
 
   input: null # set when instatntiated via vimState::moveToMark()
@@ -943,6 +948,7 @@ class Search extends SearchBase
     settings.get('incrementalSearch')
 
   initialize: ->
+    super
     @setIncrementalSearch() if @isIncrementalSearch()
 
     @onDidConfirmSearch (@input) =>
@@ -977,8 +983,9 @@ class Search extends SearchBase
 
   setIncrementalSearch: ->
     @restoreEditorState = saveEditorState(@editor)
-    @subscribe @editorElement.onDidChangeScrollTop => @matches?.refresh()
-    @subscribe @editorElement.onDidChangeScrollLeft => @matches?.refresh()
+    refresh = => @matches?.refresh()
+    @subscribe @editorElement.onDidChangeScrollTop(refresh)
+    @subscribe @editorElement.onDidChangeScrollLeft(refresh)
 
     @onDidCommandSearch (command) =>
       return unless @input
@@ -1088,6 +1095,7 @@ class RepeatSearch extends SearchBase
   @extend()
 
   initialize: ->
+    super
     unless search = globalState.currentSearch
       @abort()
     {@input, @backwards, @getPattern, @getCaseSensitivity, @configScope} = search
@@ -1107,6 +1115,7 @@ class MoveToPreviousFoldStart extends Motion
   direction: 'prev'
 
   initialize: ->
+    super
     @rows = @getFoldRows(@which)
     @rows.reverse() if @direction is 'prev'
 

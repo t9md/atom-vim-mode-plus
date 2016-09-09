@@ -24,7 +24,7 @@ class TextObject extends Base
   constructor: ->
     @constructor::inner = @getName().startsWith('Inner')
     super
-    @initialize?()
+    @initialize()
 
   isInner: ->
     @inner
@@ -673,6 +673,7 @@ class Function extends Fold
   omittingClosingCharLanguages: ['go']
 
   initialize: ->
+    super
     @language = @editor.getGrammar().scopeName.replace(/^source\./, '')
 
   getFoldRowRangesContainsForRow: (row) ->

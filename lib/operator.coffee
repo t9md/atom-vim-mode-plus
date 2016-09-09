@@ -68,7 +68,7 @@ class Operator extends Base
     return if @instanceof("Repeat")
 
     # [important] intialized is not called when Repeated
-    @initialize?()
+    @initialize()
     @setTarget(@new(@target)) if _.isString(@target)
 
   restorePoint: (selection) ->
@@ -305,6 +305,7 @@ class DeleteToLastCharacterOfLine extends Delete
   @extend()
   target: 'MoveToLastCharacterOfLine'
   initialize: ->
+    super
     if @isVisualBlockwise = @isMode('visual', 'blockwise')
       @requireTarget = false
 
@@ -569,6 +570,8 @@ class TransformStringBySelectList extends TransformString
       {name: klass, displayName}
 
   initialize: ->
+    super
+
     @vimState.onDidConfirmSelectList (transformer) =>
       @vimState.reset()
       target = @target?.constructor.name
@@ -655,6 +658,8 @@ class Surround extends TransformString
   autoIndent: false
 
   initialize: ->
+    super
+
     return unless @requireInput
     @onDidConfirmInput (input) => @onConfirm(input)
     @onDidChangeInput (input) => @addHover(input)
@@ -884,6 +889,7 @@ class SplitString extends TransformString
   input: null
 
   initialize: ->
+    super
     unless @isMode('visual')
       @setTarget @new("MoveToRelativeLine", {min: 1})
     @focusInput(charsMax: 10)
@@ -1103,6 +1109,7 @@ class Replace extends Operator
   requireInput: true
 
   initialize: ->
+    super
     @setTarget(@new('MoveRight')) if @isMode('normal')
     @focusInput()
 
@@ -1210,6 +1217,7 @@ class ActivateInsertMode extends Operator
         @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
 
   initialize: ->
+    super
     @checkpoint = {}
     @setCheckpoint('undo') unless @isRepeated()
     @observeWillDeactivateMode()
