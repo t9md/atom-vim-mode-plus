@@ -73,18 +73,14 @@ class Operator extends Base
 
   restorePoint: (selection) ->
     which = if @wasNeedStay then 'head' else 'start'
-    restore = -> swrap(selection).setBufferPositionTo(which, fromProperty: true)
-
-    if @isWithOccurrence()
-      if swrap(selection).getProperties().head?
-        # Deffer restoring cursor point.
-        # restorePoint is processed one by one, so immediately updating cursorPosition result in intersecting range with other selection
-        # when intersecting selection is destroyed, cursor is moved automatically.
-        @onDidFinishOperation -> restore()
-      else
-        selection.destroy()
+    if swrap(selection).getProperties().head?
+      # Deffer restoring cursor point.
+      # restorePoint is processed one by one, so immediately updating cursorPosition result in intersecting range with other selection
+      # when intersecting selection is destroyed, cursor is moved automatically.
+      @onDidFinishOperation ->
+        swrap(selection).setBufferPositionTo(which, fromProperty: true)
     else
-      restore()
+      selection.destroy()
 
   observeSelectAction: ->
     # Select operator is used only in visual-mode.
@@ -213,7 +209,7 @@ class Operator extends Base
   # Return {pattern, bufferRange},
   #   - Mandatory: pattern
   #   - Optional: bufferRange
-  getPatternAndBufferRangeForOccurrence: (scanRanges) ->
+  getPatternAndBufferRangeForOccurrence: ->
     if @hasRegisterName()
       return {pattern: ///#{_.escapeRegExp(@getRegisterValueAsText())}///g }
 

@@ -113,6 +113,7 @@ class OperationStack
   finish: (operation=null) ->
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
+    
     if @vimState.isMode('normal')
       @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()
