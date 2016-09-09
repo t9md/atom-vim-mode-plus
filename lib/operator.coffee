@@ -71,17 +71,20 @@ class Operator extends Base
     @initialize()
     @setTarget(@new(@target)) if _.isString(@target)
 
-  restorePoint: (selection, fn) ->
+  restorePoint: (selection) ->
     which = if @wasNeedStay then 'head' else 'start'
-    if swrap(selection).getProperties().head?
-      # Deffer restoring cursor point.
-      # restorePoint is processed one by one, so immediately updating cursorPosition result in intersecting range with other selection
-      # when intersecting selection is destroyed, cursor is moved automatically.
-      @onDidFinishOperation ->
-        swrap(selection).setBufferPositionTo(which, fromProperty: true)
-        fn?(selection)
+    restore = -> swrap(selection).setBufferPositionTo(which, fromProperty: true)
+
+    if @isWithOccurrence()
+      if swrap(selection).getProperties().head?
+        # Deffer restoring cursor point.
+        # restorePoint is processed one by one, so immediately updating cursorPosition result in intersecting range with other selection
+        # when intersecting selection is destroyed, cursor is moved automatically.
+        @onDidFinishOperation -> restore()
+      else
+        selection.destroy()
     else
-      selection.destroy()
+      restore()
 
   observeSelectAction: ->
     # Select operator is used only in visual-mode.
@@ -610,10 +613,9 @@ class Indent extends TransformString
 
   mutateSelection: (selection) ->
     selection[@indentFunction]()
+    @restorePoint(selection)
     unless @needStay()
-      fn = (selection) ->
-        selection.cursor.moveToFirstCharacterOfLine()
-    @restorePoint(selection, fn)
+      selection.cursor.moveToFirstCharacterOfLine()
 
 class Outdent extends Indent
   @extend()
@@ -1122,7 +1124,6 @@ class Replace extends Operator
         insertText(text) if text.length >= @getCount()
       else
         insertText(text)
-
       @restorePoint(selection) unless (input is "\n")
 
     # FIXME this is very imperative, handling in very lower level.
