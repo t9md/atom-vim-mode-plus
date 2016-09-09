@@ -63,7 +63,6 @@ class ModeManager
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
 
-    @updateNarrowedState()
     @vimState.statusBarManager.update(@mode, @submode)
     @vimState.updateCursorsVisibility()
     @emitter.emit('did-activate-mode', {@mode, @submode})
@@ -132,9 +131,12 @@ class ModeManager
       when 'blockwise'
         @vimState.selectBlockwise() unless swrap(@editor.getLastSelection()).isLinewise()
 
+    @updateNarrowedState()
+
     new Disposable =>
       @normalizeSelections(preservePreviousSelection: true)
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
+      @updateNarrowedState(false)
 
   preservePreviousSelection: (selection) ->
     properties = if selection.isBlockwise?()
@@ -185,13 +187,13 @@ class ModeManager
   # -------------------------
   hasMultiLineSelection: ->
     if @isMode('visual', 'blockwise')
-      not @vimState.getLastBlockwiseSelection().isSingleRow?()
+      # [FIXME] why I need null guard here
+      not @vimState.getLastBlockwiseSelection()?.isSingleRow()
     else
       not swrap(@editor.getLastSelection()).isSingleRow()
 
-  updateNarrowedState: ->
-    isNarrowed = @isMode('visual') and @hasMultiLineSelection()
-    @editorElement.classList.toggle('is-narrowed', isNarrowed)
+  updateNarrowedState: (value=null) ->
+    @editorElement.classList.toggle('is-narrowed', value ? @hasMultiLineSelection())
 
   isNarrowed: ->
     @editorElement.classList.contains('is-narrowed')
