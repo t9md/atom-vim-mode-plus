@@ -727,7 +727,6 @@ class Find extends Motion
     @setBufferPositionSafely(cursor, point)
     unless @isRepeated()
       globalState.currentFind = this
-    # @editor.getCursorBufferPosition().toString()
 
 # keymap: F
 class FindBackwards extends Find
@@ -1051,7 +1050,6 @@ class SearchBackwards extends Search
 class SearchCurrentLine extends Search
   @extend()
   quiet: true
-  # updateSearchHistory: false
   getScanRanges: ->
     [@editor.getLastCursor().getCurrentLineBufferRange()]
 
