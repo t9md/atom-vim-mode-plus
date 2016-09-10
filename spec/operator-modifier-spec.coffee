@@ -382,7 +382,7 @@ describe "Operator modifier", ->
         ]
         ensure 'V j m G m m',
           rangeMarkerBufferRange: rangeMarkerBufferRange
-      describe "from inside of range-marker", ->
+      describe "when no selection is exists", ->
         it "select occurrence in all range-marker", ->
           set cursor: [0, 0]
           keystroke '/'
@@ -394,21 +394,6 @@ describe "Operator modifier", ->
               ooo: XXX: ooo:
               |||: ooo: XXX: ooo:
               ooo: xxx: |||: xxx: ooo:
-              XXX: |||: ooo: ooo:\n
-              """
-              rangeMarkerBufferRange: rangeMarkerBufferRange
-      describe "from outside of range-marker", ->
-        it "demand opertor target", ->
-          set cursor: [2, 1] # outside of range-marker
-          keystroke '/'
-          searchEditor.insertText('xxx')
-          withMockPlatform searchEditorElement, 'platform-darwin' , ->
-            rawKeystroke 'cmd-d', document.activeElement
-            ensure 'i e U',
-              text: """
-              ooo: XXX: ooo:
-              |||: ooo: XXX: ooo:
-              ooo: XXX: |||: XXX: ooo:
               XXX: |||: ooo: ooo:\n
               """
               rangeMarkerBufferRange: rangeMarkerBufferRange
