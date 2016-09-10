@@ -306,7 +306,7 @@ describe "Operator modifier", ->
         keystroke '/'
         searchEditor.insertText('^\\w+:')
         withMockPlatform searchEditorElement, 'platform-darwin' , ->
-          rawKeystroke 'cmd-c', document.activeElement
+          rawKeystroke 'ctrl-cmd-c', document.activeElement
           ensure 'i e', mode: 'insert'
           editor.insertText('hello')
           ensure
