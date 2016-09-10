@@ -1,4 +1,4 @@
-# 0.55.0: WIP in preparation
+# 0.55.0:
 - Internal: Avoid curcular referencing for string transformers store.
 - Doc: Update docstring of many operator for better command report for vmp wiki.
 - Breaking, Improve: `AddSelection` no longer get word from visual-mode #351
@@ -26,7 +26,7 @@
   - `convert-range-marker-to-selection`: add selection on all range-marker and remove range-marker after select.
 - New: IncrementalSearch specific `/`, `?` special feature #357
   - Direct command from search-input mini editor.
-    - `cmd-c`: `change-occurrence-from-search` to change occurrence of search pattern matched.
+    - `ctrl-cmd-c`: `change-occurrence-from-search` to change occurrence of search pattern matched.
     - `cmd-d`: `select-occurrence-from-search` to select occurrence of search pattern matched.
     - When above command is applied operator target is autmatically set in following priority.
       1. In `visual-mode` use current selection as target.
