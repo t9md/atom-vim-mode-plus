@@ -2,7 +2,7 @@
 - Internal: Avoid curcular referencing for string transformers store.
 - Doc: Update docstring of many operator for better command report for vmp wiki.
 - Breaking, Improve: `AddSelection` no longer get word from visual-mode #351
-- New: Add `All` TextObject as alias of Entire. #352
+- New: `All` TextObject as alias of `Entire`. #352
 - New: `range-marker` is now `inner-range-marker` and `a-range-marker` as like other text-object
   - `inner-range-marker`: range-marker where cursor is contained [experiment].
   - `a-range-marker`: all range-marker in buffer.
@@ -10,12 +10,12 @@
 - Improve, Rename: Cleanup operator-modifier mechanism. Renamed command #357
   - `v`: `force-operator-characterwise` to `operator-modifier-characterwise`
   - `V`: `force-operator-linewise` to `operator-modifier-linewise`
-  'o': `operator-modifier-occurrence`
-- New: occurrence operator-modifier #357
+- New: Occurrence operator-modifier #357
   - `o` in `operator-pending-mode`
-  - As like `v`, `V` modifier force wise of operator
+  - As like `v` or `V` modifier force the wise of operator.
   - `o` modifier re-select cursor-word from target range.
-  - For example `c i p` change whole paragraph, `c o i p` change occurrence of cursor word in paragraph.
+    - e.g. `gUoip` upper case all occurrence of cursor-word in paragraph
+    - e.g. `c i p` change whole paragraph, `c o i p` change occurrence of cursor word in paragraph.
   - This modifier is available for all operator.
   - `select-occurrence`, `map-surround` is created based on this `occurrence` modifier.
 - New: Narrowed selection mode #357
