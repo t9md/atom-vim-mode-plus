@@ -4,6 +4,7 @@ vim-mode improved.
 
 <!-- TOC START min:1 max:3 link:true update:true -->
 - [vim-mode-plus](#vim-mode-plus)
+- [What's new in v0.55.0](#whats-new-in-v0550)
 - [Important](#important)
 - [Thanks](#thanks)
 - [Issue report](#issue-report)
@@ -22,6 +23,12 @@ vim-mode improved.
 - [Commit emoji convention](#commit-emoji-convention)
 
 <!-- TOC END -->
+
+# What's new in v0.55.0
+
+v0.55.0 is big release which introduce serveral new features.  
+- [WhatsNew v0.55.0](https://github.com/t9md/atom-vim-mode-plus/wiki/WhatsNew-v0.55.0)
+- [CHANGELOG.md](https://github.com/t9md/atom-vim-mode-plus/blob/master/CHANGELOG.md#0550)
 
 # Important
 
