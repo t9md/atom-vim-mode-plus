@@ -1355,13 +1355,8 @@ class InsertByTarget extends ActivateInsertMode
   which: null # one of ['start', 'end', 'head', 'tail']
   execute: ->
     @selectTarget()
-    if @isMode('visual', 'blockwise')
-      @getBlockwiseSelections().forEach (bs) =>
-        bs.removeEmptySelections()
-        bs.setPositionForSelections(@which)
-    else
-      for selection in @editor.getSelections()
-        swrap(selection).setBufferPositionTo(@which)
+    for selection in @editor.getSelections()
+      swrap(selection).setBufferPositionTo(@which)
     super
 
 class InsertAtStartOfTarget extends InsertByTarget
@@ -1375,6 +1370,14 @@ class InsertAtStartOfSelection extends InsertAtStartOfTarget
 class InsertAtEndOfTarget extends InsertByTarget
   @extend()
   which: 'end'
+
+class InsertAtStartOfOccurrence extends InsertAtStartOfTarget
+  @extend()
+  withOccurrence: true
+
+class InsertAtEndOfOccurrence extends InsertAtEndOfTarget
+  @extend()
+  withOccurrence: true
 
 # Alias for backward compatibility
 class InsertAtEndOfSelection extends InsertAtEndOfTarget
