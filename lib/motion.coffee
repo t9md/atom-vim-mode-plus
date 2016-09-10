@@ -760,10 +760,10 @@ class RepeatFind extends Find
   repeated: true
 
   initialize: ->
-    super
     unless findObj = globalState.currentFind
       @abort()
     {@offset, @backwards, @input} = findObj
+    super
 
 class RepeatFindReverse extends RepeatFind
   @extend()
