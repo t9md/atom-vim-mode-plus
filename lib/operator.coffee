@@ -1176,7 +1176,10 @@ class CreateRangeMarker extends Operator
     range = selection.getBufferRange()
     marker = highlightRanges(@editor, range, class: 'vim-mode-plus-range-marker')
     @vimState.addRangeMarkers(marker)
-    @restorePoint(selection)
+    if selection.isLastSelection()
+      @restorePoint(selection)
+    else
+      selection.destroy()
 
 class ToggleRangeMarker extends CreateRangeMarker
   @extend()
@@ -1191,10 +1194,10 @@ class ToggleRangeMarker extends CreateRangeMarker
       return rangeMarker
 
   initialize: ->
-    rangeMarkerToRemove = @getRangeMarkerAtCursor()
-    if rangeMarkerToRemove?
-      rangeMarkerToRemove.destroy()
-      @vimState.removeRangeMarker(rangeMarkerToRemove)
+    rangeMarker = @getRangeMarkerAtCursor()
+    if rangeMarker?
+      rangeMarker.destroy()
+      @vimState.removeRangeMarker(rangeMarker)
       @abort()
 
 class ToggleRangeMarkerOnInnerWord extends ToggleRangeMarker

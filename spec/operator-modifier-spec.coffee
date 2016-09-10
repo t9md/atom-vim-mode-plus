@@ -460,7 +460,6 @@ describe "Operator modifier", ->
             'g cmd-d' # select-occurrence
             'i f'     # inner-function-text-object
             'm'       # toggle-range-marker
-            'escape'  # clear-multi-cursor
           ].join(" ")
 
           textsInBufferRange = vimState.getRangeMarkerBufferRanges().map (range) ->
