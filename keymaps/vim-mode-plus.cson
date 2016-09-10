@@ -283,6 +283,10 @@
   'ctrl-cmd-c': 'vim-mode-plus:change-occurrence'
   'cmd-d': 'vim-mode-plus:select-occurrence'
 
+'.platform-darwin atom-text-editor.vim-mode-plus-search':
+  'ctrl-cmd-c': 'vim-mode-plus:change-occurrence-from-search'
+  'cmd-d': 'vim-mode-plus:select-occurrence-from-search'
+
 # normal
 # -------------------------
 'atom-text-editor.vim-mode-plus.normal-mode':
@@ -477,10 +481,6 @@
   'ctrl-[': 'vim-mode-plus:search-cancel'
   'shift-tab': 'vim-mode-plus:search-visit-prev'
   'tab': 'vim-mode-plus:search-visit-next'
-
-'.platform-darwin atom-text-editor.vim-mode-plus-search':
-  'ctrl-cmd-c': 'vim-mode-plus:change-occurrence-from-search'
-  'cmd-d': 'vim-mode-plus:select-occurrence-from-search'
 
 # If you want to map normal char to special operation.
 # Use `not(.literal-mode)` selector like below.
