@@ -367,7 +367,6 @@ class ToggleCase extends TransformString
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
-  @registerToSelectList()
   hover: null
   setPoint: false
   target: 'MoveRight'
@@ -1413,6 +1412,20 @@ class InsertAtNextFoldStart extends InsertAtHeadOfTarget
   @extend()
   @description: "Move to next fold start then enter insert-mode"
   target: 'MoveToNextFoldStart'
+
+class InsertAtStartOfSearchCurrentLine extends InsertAtEndOfTarget
+  @extend()
+  defaultLandingPoint: 'start'
+  initialize: ->
+    super
+    @setTarget @new 'SearchCurrentLine',
+      updateSearchHistory: false
+      defaultLandingPoint: @defaultLandingPoint
+      quiet: true
+
+class InsertAtEndOfSearchCurrentLine extends InsertAtStartOfSearchCurrentLine
+  @extend()
+  defaultLandingPoint: 'end'
 
 # -------------------------
 class Change extends ActivateInsertMode

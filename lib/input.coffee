@@ -131,6 +131,8 @@ class SearchInput extends Input
 
     atom.commands.add @editorElement, @stopPropagation(
       "search-confirm": => @confirm()
+      "search-land-to-start": => @confirm()
+      "search-land-to-end": => @confirm('end')
       "search-cancel": => @cancel()
 
       "search-visit-next": => @emitter.emit('did-command', name: 'visit', direction: 'next')
@@ -146,6 +148,11 @@ class SearchInput extends Input
     )
 
     this
+
+  confirm: (landingPoint=null) ->
+    searchConfirmEvent = {input: @editor.getText(), landingPoint}
+    @emitter.emit 'did-confirm', searchConfirmEvent
+    @unfocus()
 
   setCursorWord: ->
     @editor.setText(@vimState.editor.getWordUnderCursor())

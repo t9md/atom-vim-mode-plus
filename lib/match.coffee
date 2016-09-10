@@ -67,6 +67,9 @@ class MatchList
   getCurrentStartPosition: ->
     @get().getStartPoint()
 
+  getCurrentEndPosition: ->
+    @get().getEndPoint()
+
   getVisible: ->
     range = getVisibleBufferRange(@editor)
     @entries.filter (match) ->
@@ -112,6 +115,9 @@ class Match
 
   getStartPoint: ->
     @range.start
+
+  getEndPoint: ->
+    @range.end
 
   scrollToStartPoint: ->
     point = @getStartPoint()
