@@ -142,6 +142,7 @@
   'g cmd-d': 'vim-mode-plus:select-occurrence'
   # 'g _': 'vim-mode-plus:snake-case'
   # 'g r':   'vim-mode-plus:reverse'
+  # 'g s':   'vim-mode-plus:sort'
   # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
   # 'g m': 'vim-mode-plus:toggle-range-marker'
 

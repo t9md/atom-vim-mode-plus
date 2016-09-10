@@ -896,16 +896,29 @@ class SplitString extends TransformString
     regex = ///#{_.escapeRegExp(@input)}///g
     text.split(regex).join("\n")
 
-class Reverse extends TransformString
-  @extend()
-  @registerToSelectList()
-  @description: "Reverse lines(e.g reverse selected three line)"
+class ChangeOrder extends TransformString
+  @extend(false)
   mutateSelection: (selection) ->
     swrap(selection).expandOverLine()
     textForRows = swrap(selection).lineTextForBufferRows()
-    newText = textForRows.reverse().join("\n") + "\n"
+    rows = @getNewRows(textForRows)
+    newText = rows.join("\n") + "\n"
     selection.insertText(newText)
     @restorePoint(selection)
+
+class Reverse extends ChangeOrder
+  @extend()
+  @registerToSelectList()
+  @description: "Reverse lines(e.g reverse selected three line)"
+  getNewRows: (rows) ->
+    rows.reverse()
+
+class Sort extends ChangeOrder
+  @extend()
+  @registerToSelectList()
+  @description: "Sort lines alphabetically"
+  getNewRows: (rows) ->
+    rows.sort()
 
 # -------------------------
 class Repeat extends Operator
