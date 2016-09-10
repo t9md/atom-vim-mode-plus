@@ -797,17 +797,12 @@ class RangeMarker extends TextObject
   @extend(false)
 
   select: ->
-    options = {}
-    options.cursorContainedOnly = true if @isInner()
-
-    ranges = @vimState.getRangeMarkerBufferRanges(options)
+    ranges = @vimState.getRangeMarkerBufferRanges()
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
 
 class ARangeMarker extends RangeMarker
-  @description: "range of rangeMarker where cursor is included"
   @extend()
 
 class InnerRangeMarker extends RangeMarker
-  @description: "range of all rangeMarker of this buffer"
   @extend()
