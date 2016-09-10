@@ -55,22 +55,7 @@ describe "Range Marker", ->
           ensureRangeMarker length: 1, text: ['ooo']
           keystroke('j .')
           ensureRangeMarker length: 2, text: ['ooo', 'xxx']
-      describe "inner-range-marker", ->
-        it "apply operator only to cursor contained range-marker", ->
-          keystroke('g m i w j . 2 j g m i p') # Mark 2 inner-word and 1 inner-paragraph
-          ensureRangeMarker length: 3, text: ['ooo', 'xxx', "ooo xxx ooo\nxxx ooo xxx\n"]
-          ensure 'g U i r',
-            text: """
-            ooo xxx ooo
-            xxx ooo xxx
-
-            OOO XXX OOO
-            XXX OOO XXX
-
-            ooo xxx ooo
-            xxx ooo xxx\n
-            """
-      describe "a-range-marker", ->
+      describe "[No behavior diff currently] inner-range-marker and a-range-marker", ->
         it "apply operator to across all range-markers", ->
           keystroke('g m i w j . 2 j g m i p') # Mark 2 inner-word and 1 inner-paragraph
           ensureRangeMarker length: 3, text: ['ooo', 'xxx', "ooo xxx ooo\nxxx ooo xxx\n"]
