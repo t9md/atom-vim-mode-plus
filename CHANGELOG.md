@@ -1,3 +1,9 @@
+# 0.56.0:
+- New: Operator `insert-at-start-of-occurrence`, `insert-at-end-of-occurrence` to start insert at occurrence.
+- New: Operator `sort` #365
+- New: Motion `search-current-line`, `search-current-line-backwards` #366
+- Fix: `f`, `F`, `t`, `T` was broken, no longer focus input on repeat by `;` or `,` #367
+
 # 0.55.0:
 - Internal: Avoid curcular referencing for string transformers store.
 - Doc: Update docstring of many operator for better command report for vmp wiki.
