@@ -1403,7 +1403,6 @@ class Change extends ActivateInsertMode
   @extend()
   requireTarget: true
   trackChange: true
-  flashTarget: true
   supportInsertionCount: false
 
   execute: ->
