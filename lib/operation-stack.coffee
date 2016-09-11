@@ -61,6 +61,9 @@ class OperationStack
     try
       @reduce()
       if @peekTop().isComplete()
+        if settings.get('debug')
+          top = @peekTop()
+          console.log  [top.getName(), top.target?.getName()]
         @execute(@stack.pop())
       else
         if @vimState.isMode('normal') and @peekTop().isOperator()
@@ -112,7 +115,7 @@ class OperationStack
   finish: (operation=null) ->
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
-    
+
     if @vimState.isMode('normal')
       @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()

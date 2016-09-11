@@ -1,6 +1,5 @@
 _ = require 'underscore-plus'
 {Range, Disposable} = require 'atom'
-{isLinewiseRange} = require './utils'
 
 propertyStore = new Map
 
@@ -214,13 +213,16 @@ class SelectionWrapper
     startRow is endRow
 
   isLinewise: ->
-    isLinewiseRange(@getBufferRange())
+    {start, end} = @getBufferRange()
+    (start.row isnt end.row) and (start.column is end.column is 0)
 
   detectVisualModeSubmode: ->
-    switch
-      when @isLinewise() then 'linewise'
-      when not @selection.isEmpty() then 'characterwise'
-      else null
+    if @selection.isEmpty()
+      null
+    else if @isLinewise()
+      'linewise'
+    else
+      'characterwise'
 
 swrap = (selection) ->
   new SelectionWrapper(selection)

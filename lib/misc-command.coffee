@@ -6,7 +6,6 @@ _ = require 'underscore-plus'
 {moveCursorRight} = require './utils'
 
 {
-  isLinewiseRange
   pointIsAtEndOfLine
   mergeIntersectingRanges
   highlightRanges

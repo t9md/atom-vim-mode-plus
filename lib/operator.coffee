@@ -34,12 +34,14 @@ class Operator extends Base
   withOccurrence: false
   forceWise: null
   patternForOccurence: null
+  keepCursorPosition: false
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
 
   needFlash: ->
-    if @flashTarget and (not @isMode('visual')) and settings.get('flashOnOperate')
+    return false if @isMode('visual')
+    if @flashTarget and settings.get('flashOnOperate')
       @getName() not in settings.get('flashOnOperateBlacklist')
     else
       false
@@ -53,10 +55,10 @@ class Operator extends Base
   needStay: ->
     return true if @keepCursorPosition
 
-    param = if @instanceof('TransformString')
-      "stayOnTransformString"
+    if @instanceof('TransformString')
+      param = "stayOnTransformString"
     else
-      "stayOn#{@getName()}"
+      param = "stayOn#{@getName()}"
 
     if @isMode('visual', 'linewise')
       settings.get(param)
@@ -147,7 +149,7 @@ class Operator extends Base
       @vimState.emitter.emit('did-fail-to-set-target')
       throw new OperatorError("#{@getName()} cannot set #{@target.getName()} as target")
     @target.setOperator(this)
-    @overrideTargetWise(@forceWise) if @forceWise?
+    @overrideTargetWise(@forceWise) if @hasForceWise()
     @emitDidSetTarget(this)
     this
 
@@ -238,18 +240,21 @@ class Operator extends Base
     {pattern: ///\b#{_.escapeRegExp(cursorWord)}\b///g, bufferRange}
 
 # -------------------------
+# When text-object is invoked from normal or viusal-mode, operation would be
+#  => Select operator with target=text-object
+# When motion is invoked from visual-mode, operation would be
+#  => Select operator with target=motion)
 class Select extends Operator
   @extend(false)
   flashTarget: false
   recordable: false
   execute: ->
     @selectTarget()
-    return if @isMode('operator-pending') or @isMode('visual', 'blockwise')
-    return if @isMode('visual') and (not @target.isAllowSubmodeChange?())
-
-    submode = swrap.detectVisualModeSubmode(@editor)
-    if submode? and not @isMode('visual', submode)
-      @activateMode('visual', submode)
+    if @isMode('visual') and (not @target.isAllowSubmodeChange?())
+      return
+    else
+      submode = swrap.detectVisualModeSubmode(@editor)
+      @activateModeIfNecessary('visual', submode)
 
 class SelectLatestChange extends Select
   @extend()
@@ -528,7 +533,6 @@ class TransformStringByExternalCommand extends TransformString
       # Suppress command not found error intentionally.
       if error.code is 'ENOENT' and error.syscall.indexOf('spawn') is 0
         commandName = @constructor.getCommandName()
-        console.log "#{commandName}: Failed to spawn command #{error.path}."
       @cancelOperation()
       handle()
 
@@ -996,7 +1000,7 @@ class IncrementNumber extends Operator
       atom.beep()
     for selection in @editor.getSelections()
       selection.cursor.setBufferPosition(selection.getBufferRange().start)
-    @activateMode('normal')
+    @activateModeIfNecessary('normal')
 
   replaceNumber: (scanRange, pattern) ->
     newRanges = []
@@ -1037,9 +1041,7 @@ class PutBefore extends Operator
         @flash(newRange) if @needFlash()
 
     if @selectPastedText
-      submode = swrap.detectVisualModeSubmode(@editor)
-      unless @isMode('visual', submode)
-        @activateMode('visual', submode)
+      @activateModeIfNecessary('visual', swrap.detectVisualModeSubmode(@editor))
     else
       @activateMode('normal')
 

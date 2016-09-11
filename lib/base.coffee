@@ -138,6 +138,10 @@ class Base
     @onDidFinishOperation =>
       @vimState.activate(mode, submode)
 
+  activateModeIfNecessary: (mode, submode) ->
+    unless @vimState.isMode(mode, submode)
+      @activateMode(mode, submode)
+
   addHover: (text, {replace}={}) ->
     if replace ? false
       @vimState.hover.replaceLastSection(text)
