@@ -6,7 +6,7 @@ packageScope = 'vim-mode-plus'
 # -------------------------
 class Input extends HTMLElement
   ElementBuilder.includeInto(this)
-  klass: "#{packageScope}-input"
+  klass: "vim-mode-plus-input"
 
   onDidChange: (fn) -> @emitter.on 'did-change', fn
   onDidConfirm: (fn) -> @emitter.on 'did-confirm', fn
@@ -32,11 +32,10 @@ class Input extends HTMLElement
     this
 
   buildElements: ->
-    @appendChild(
-      @editorElement = @atomTextEditor
-        classList: ['editor', @klass]
-        attribute: {mini: ''}
-    )
+    @innerHTML = """
+    <atom-text-editor mini class='editor vim-mode-plus-input'></atom-text-editor>
+    """
+    @editorElement = @firstElementChild
 
   initialize: (@vimState) ->
     @vimState.onDidFailToSetTarget =>
@@ -70,46 +69,40 @@ class Input extends HTMLElement
   unfocus: ->
     @commandSubscriptions?.dispose()
     @finished = true
-    @emitter.emit 'did-unfocus'
     atom.workspace.getActivePane().activate()
     @editor.setText ''
     @panel?.hide()
+    @emitter.emit('did-unfocus')
 
   isVisible: ->
     @panel?.isVisible()
 
   cancel: ->
-    @emitter.emit 'did-cancel'
+    @emitter.emit('did-cancel')
     @unfocus()
 
   confirm: ->
-    @emitter.emit 'did-confirm', @editor.getText()
+    @emitter.emit('did-confirm', @editor.getText())
     @unfocus()
 
 # SearchInput
 # -------------------------
-searchScope = "vim-mode-plus-search"
 class SearchInput extends Input
-  klass: "#{searchScope}-container"
+  klass: "vim-mode-plus-search-container"
+  literalModeDeactivator: null
 
   buildElements: ->
-    @appendChild(
-      @optionsContainer = @div
-        classList: ['options-container']
-    ).appendChild(
-      @regexSearchStatus = @span
-        classList: ['inline-block-tight', 'btn', 'btn-primary']
-        textContent: '.*'
-    )
-
-    @appendChild(
-      @editorContainer = @div
-        classList: ['editor-container']
-    ).appendChild(
-      @editorElement = @atomTextEditor
-        classList: ['editor', searchScope]
-        attribute: {mini: ''}
-    )
+    @innerHTML = """
+    <div class='options-container'>
+      <span class='inline-block-tight btn btn-primary'>.*</span>
+    </div>
+    <div class='editor-container'>
+      <atom-text-editor mini class='editor vim-mode-plus-search'></atom-text-editor>
+    </div>
+    """
+    [@optionsContainer, @editorContainer] = @getElementsByTagName('div')
+    @regexSearchStatus = @optionsContainer.firstElementChild
+    @editorElement = @editorContainer.firstElementChild
 
   stopPropagation: (oldCommands) ->
     newCommands = {}
@@ -127,7 +120,6 @@ class SearchInput extends Input
   initialize: (@vimState) ->
     super
     @options = {}
-    {@searchHistory} = @vimState
 
     atom.commands.add @editorElement, @stopPropagation(
       "search-confirm": => @confirm()
@@ -143,23 +135,22 @@ class SearchInput extends Input
       "search-insert-wild-pattern": => @editor.insertText('.*?')
       "search-activate-literal-mode": => @activateLiteralMode()
       "search-set-cursor-word": => @setCursorWord()
-      'core:move-up': => @editor.setText @searchHistory.get('prev')
-      'core:move-down': => @editor.setText @searchHistory.get('next')
+      'core:move-up': => @editor.setText @vimState.searchHistory.get('prev')
+      'core:move-down': => @editor.setText @vimState.searchHistory.get('next')
     )
-
     this
 
   confirm: (landingPoint=null) ->
     searchConfirmEvent = {input: @editor.getText(), landingPoint}
-    @emitter.emit 'did-confirm', searchConfirmEvent
+    @emitter.emit('did-confirm', searchConfirmEvent)
     @unfocus()
 
   setCursorWord: ->
-    @editor.setText(@vimState.editor.getWordUnderCursor())
+    @editor.insertText(@vimState.editor.getWordUnderCursor())
 
   activateLiteralMode: ->
-    if @editorElement.classList.contains('literal-mode')
-      @literalModeDeactivator?.dispose()
+    if @literalModeDeactivator?
+      @literalModeDeactivator.dispose()
     else
       @literalModeDeactivator = new CompositeDisposable()
       @editorElement.classList.add('literal-mode')
@@ -167,9 +158,6 @@ class SearchInput extends Input
       @literalModeDeactivator.add new Disposable =>
         @editorElement.classList.remove('literal-mode')
         @literalModeDeactivator = null
-
-      @literalModeDeactivator.add @editor.onDidChange =>
-        @literalModeDeactivator.dispose()
 
   updateOptionSettings: ({useRegexp}={}) ->
     @regexSearchStatus.classList.toggle('btn-primary', useRegexp)
@@ -181,6 +169,7 @@ class SearchInput extends Input
   unfocus: ->
     @editorElement.classList.remove('backwards')
     @regexSearchStatus.classList.add 'btn-primary'
+    @literalModeDeactivator?.dispose()
     super
 
 InputElement = registerElement 'vim-mode-plus-input',
