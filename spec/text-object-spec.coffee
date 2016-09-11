@@ -88,11 +88,18 @@ describe "TextObject", ->
       beforeEach ->
         set text: "12345 abcde ABCDE", cursor: [0, 9]
 
-      it "applies operators from the start of the current word to the start of the next word in operator-pending mode", ->
+      it "select current-word and trailing white space", ->
         ensure 'd a w',
           text: "12345 ABCDE"
           cursor: [0, 6]
           register: '"': text: "abcde "
+
+      it "select current-word and leading white space in case trailing white space wasn't there", ->
+        set cursor: [0, 15]
+        ensure 'd a w',
+          text: "12345 abcde"
+          cursor: [0, 10]
+          register: '"': text: " ABCDE"
 
       it "selects from the start of the current word to the start of the next word in visual mode", ->
         ensure 'v a w', selectedScreenRange: [[0, 6], [0, 12]]
@@ -119,12 +126,19 @@ describe "TextObject", ->
       beforeEach ->
         set text: "12(45 ab'de ABCDE", cursor: [0, 9]
 
-      it "applies operators from the start of the current whole word to the start of the next whole word in operator-pending mode", ->
+      it "select whole-word and trailing white space", ->
         ensure 'd a W',
           text: "12(45 ABCDE"
           cursor: [0, 6]
           register: '"': text: "ab'de "
           mode: 'normal'
+
+      it "select whole-word and leading white space in case trailing white space wasn't there", ->
+        set cursor: [0, 15]
+        ensure 'd a w',
+          text: "12(45 ab'de"
+          cursor: [0, 10]
+          register: '"': text: " ABCDE"
 
       it "selects from the start of the current whole word to the start of the next whole word in visual mode", ->
         ensure 'v a W', selectedScreenRange: [[0, 6], [0, 12]]

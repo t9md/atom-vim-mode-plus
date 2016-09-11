@@ -69,8 +69,11 @@ class Word extends TextObject
 
     start ?= from
     end ?= from
-    if @isA() and endOfSpace = getEndPositionForPattern(@editor, end, /\s+/, options)
-      end = endOfSpace
+    if @isA()
+      if endOfSpace = getEndPositionForPattern(@editor, end, /\s+/, options)
+        end = endOfSpace
+      else if startOfSpace = getStartPositionForPattern(@editor, start, /\s+/, options)
+        start = startOfSpace
 
     unless start.isEqual(end)
       new Range(start, end)
