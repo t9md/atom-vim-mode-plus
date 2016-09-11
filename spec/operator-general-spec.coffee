@@ -584,6 +584,23 @@ describe "Operator general", ->
         it "positions cursor correctly", ->
           ensure text: "012345\n", cursor: [0, 5]
 
+      describe "paste to empty line", ->
+        it "paste content to that empty line", ->
+          set
+            text: """
+            1st
+
+            3rd
+            """
+            cursor: [1, 0]
+            register: '"': text: '2nd'
+          ensure 'p',
+            text: """
+            1st
+            2nd
+            3rd
+            """
+
       describe "when useClipboardAsDefaultRegister enabled", ->
         it "inserts contents from clipboard", ->
           settings.set 'useClipboardAsDefaultRegister', true

@@ -1087,7 +1087,7 @@ class PutBefore extends Operator
       selection.insertText(text)
 
   pasteCharacterwise: (selection, text) ->
-    if @location is 'after' and selection.isEmpty()
+    if @location is 'after' and selection.isEmpty() and not selection.cursor.isAtEndOfLine()
       selection.cursor.moveRight()
     selection.insertText(text)
 
