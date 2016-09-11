@@ -13,6 +13,7 @@ _ = require 'underscore-plus'
   getCurrentWordBufferRange
   getBufferRangeForPatternFromPoint
   cursorIsOnWhiteSpace
+  cursorIsAtEmptyRow
   scanInRanges
   getCharacterAtCursor
 } = require './utils'
@@ -1087,7 +1088,7 @@ class PutBefore extends Operator
       selection.insertText(text)
 
   pasteCharacterwise: (selection, text) ->
-    if @location is 'after' and selection.isEmpty() and not selection.cursor.isAtEndOfLine()
+    if @location is 'after' and selection.isEmpty() and not cursorIsAtEmptyRow(selection.cursor)
       selection.cursor.moveRight()
     selection.insertText(text)
 
