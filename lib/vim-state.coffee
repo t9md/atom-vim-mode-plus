@@ -338,6 +338,10 @@ class VimState
     @rangeMarkers.push(markers...)
     @updateHasRangeMarkerState()
 
+  addRangeMarkersForRanges: (ranges) ->
+    markers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-range-marker')
+    @addRangeMarkers(markers)
+
   removeRangeMarker: (rangeMarker) ->
     _.remove(@rangeMarkers, rangeMarker)
     @updateHasRangeMarkerState()

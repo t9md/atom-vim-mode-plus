@@ -134,10 +134,10 @@ class Operator extends Base
 
   # called by operationStack
   setOperatorModifier: ({occurence, wise}) ->
-    if occurence? and @withOccurrence isnt occurence
+    if occurence?
       @withOccurrence = occurence
 
-    if wise? and @forceWise isnt wise
+    if wise?
       @forceWise = wise
 
   # @target - TextObject or Motion to operate on.
@@ -171,9 +171,7 @@ class Operator extends Base
   # -------------------------
   selectTarget: ->
     @observeSelectAction()
-
     @emitWillSelectTarget()
-
     @target.select()
     @emitDidSelectTarget()
     haveSomeSelection(@editor)
@@ -1186,9 +1184,7 @@ class CreateRangeMarker extends Operator
   flashTarget: false
 
   mutateSelection: (selection) ->
-    range = selection.getBufferRange()
-    marker = highlightRanges(@editor, range, class: 'vim-mode-plus-range-marker')
-    @vimState.addRangeMarkers(marker)
+    @vimState.addRangeMarkersForRanges([selection.getBufferRange()])
     if selection.isLastSelection()
       @restorePoint(selection)
     else
