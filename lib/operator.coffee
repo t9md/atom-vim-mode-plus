@@ -313,14 +313,12 @@ class SelectOccurrenceInAll extends SelectOccurrence
   @extend()
   target: "All"
 
-class ConvertRangeMarkerToSelection extends Select
+class SelectRangeMarker extends Select
   @extend()
-  flashTarget: false
   target: "ARangeMarker"
   execute: ->
     super
     @vimState.clearRangeMarkers()
-
 
 # Range Marker
 # =========================

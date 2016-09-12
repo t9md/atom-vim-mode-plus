@@ -473,7 +473,7 @@ describe "Operator modifier", ->
           keystroke "m" # clear rangeMarker at cursor which is = sign part of fat arrow.
           expect(vimState.getRangeMarkers()).toHaveLength(10)
           keystroke [
-            'ctrl-cmd-g' # convert-range-marker-to-selection
+            'ctrl-cmd-g' # select-range-marker
             'I'          # Insert at start of selection
           ]
           editor.insertText('?')
