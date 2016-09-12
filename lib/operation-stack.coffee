@@ -60,21 +60,20 @@ class OperationStack
 
     try
       @reduce()
-      if @peekTop().isComplete()
+      topOperation = @peekTop()
+
+      if topOperation.isComplete()
         if settings.get('debug')
-          top = @peekTop()
-          console.log  [top.getName(), top.target?.getName()]
+          console.log  [topOperation.getName(), topOperation.target?.getName()]
         @execute(@stack.pop())
       else
-        if @vimState.isMode('normal') and @peekTop().isOperator()
+        if @vimState.isMode('normal') and topOperation.isOperator()
           @vimState.activate('operator-pending')
+          @addToClassList('with-occurrence') if topOperation.isWithOccurrence()
 
         # Temporary set while command is running
-        if scope = @peekTop().constructor.getCommandNameWithoutPrefix?()
-          scope += "-pending"
-          @editorElement.classList.add(scope)
-          @subscribe new Disposable =>
-            @editorElement.classList.remove(scope)
+        if commandName = topOperation.constructor.getCommandNameWithoutPrefix?()
+          @addToClassList(commandName + "-pending")
     catch error
       switch
         when error instanceof OperatorError
@@ -83,6 +82,11 @@ class OperationStack
           @vimState.resetNormalMode()
         else
           throw error
+
+  addToClassList: (className) ->
+    @editorElement.classList.add(className)
+    @subscribe new Disposable =>
+      @editorElement.classList.remove(className)
 
   execute: (operation) ->
     execution = operation.execute()
