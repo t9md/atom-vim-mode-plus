@@ -1,6 +1,6 @@
 {ElementBuilder} = require './utils'
 
-modeToContent =
+modeStringToContent =
   "normal": "Normal"
   'insert': "Insert"
   'insert.replace': "Replace"
@@ -8,6 +8,7 @@ modeToContent =
   "visual.characterwise": "Visual Char"
   "visual.linewise": "Visual Line"
   "visual.blockwise": "Visual Block"
+  "operator-pending": "Operator Pending"
 
 module.exports =
 class StatusBarManager
@@ -24,7 +25,7 @@ class StatusBarManager
     modeString = mode
     modeString += "." + submode if submode?
     @element.className = "#{@prefix}-#{mode}"
-    @element.textContent = modeToContent[modeString]
+    @element.textContent = modeStringToContent[modeString]
 
   attach: ->
     @tile = @statusBar.addRightTile(item: @container, priority: 20)
