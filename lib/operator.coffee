@@ -1,6 +1,6 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
-
 _ = require 'underscore-plus'
+globalState = require './global-state'
 {Point, Range, CompositeDisposable, BufferedProcess} = require 'atom'
 
 {
@@ -187,19 +187,25 @@ class Operator extends Base
       class: 'vim-mode-plus-flash'
       timeout: settings.get('flashOnOperateDuration')
 
+  updatePreviousSelection: ->
+    if @isMode('visual', 'blockwise')
+      properties = @vimState.getLastBlockwiseSelection().getCharacterwiseProperties()
+    else
+      lastSelection = @editor.getLastSelection()
+      properties = swrap(lastSelection).detectCharacterwiseProperties()
+
+    submode = @vimState.submode
+    globalState.previousSelection = {properties, submode}
+
   execute: ->
     # We need to preserve selection before selection is cleared as a result of mutation.
-    if @isMode('visual')
-      if @isMode('visual', 'blockwise')
-        lastSelection = @vimState.getLastBlockwiseSelection()
-      else
-        lastSelection = @editor.getLastSelection()
-      @vimState.modeManager.preservePreviousSelection(lastSelection)
+    @updatePreviousSelection() if @isMode('visual')
 
     if @selectTarget()
       @editor.transact =>
         for selection in @editor.getSelections()
           @mutateSelection(selection)
+
     @activateMode(@finalMode, @finalSubmode)
 
   # Return {pattern, bufferRange},
@@ -278,34 +284,10 @@ class SelectLatestChange extends Select
 class SelectPreviousSelection extends Select
   @extend()
   target: "PreviousSelection"
-  # requireTarget: false
-  # recordable: false
-  @description: "Select last selected visual area in current buffer"
   execute: ->
-    console.log 'helo'
-    super
-  #   {properties, submode} = @vimState.modeManager.getPreviousSelectionInfo()
-  #   return unless properties? and submode?
-  #
-  #   selection = @editor.getLastSelection()
-  #   swrap(selection).selectByProperties(properties)
-  #   @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
-  #   @activateMode('visual', submode)
-
-# [FIXME] should be child of select with target=PrevoiusSelection
-# class SelectPreviousSelection extends Operator
-#   @extend()
-#   requireTarget: false
-#   recordable: false
-#   @description: "Select last selected visual area in current buffer"
-#   execute: ->
-#     {properties, submode} = @vimState.modeManager.getPreviousSelectionInfo()
-#     return unless properties? and submode?
-#
-#     selection = @editor.getLastSelection()
-#     swrap(selection).selectByProperties(properties)
-#     @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
-#     @activateMode('visual', submode)
+    @selectTarget()
+    if @target.submode?
+      @activateModeIfNecessary('visual', @target.submode)
 
 class SelectOccurrence extends Select
   @extend()

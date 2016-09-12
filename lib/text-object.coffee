@@ -787,13 +787,16 @@ class SearchMatchBackward extends SearchMatchForward
         stop()
     found
 
-# [FIXME] Currently vB range is treated as vC range, how I should do?
+# [Limitation: won't fix]: Selected range is not submode aware. always characterwise.
+# So even if original selection was vL or vB, selected range by this text-object
+# is always vC range.
 class PreviousSelection extends TextObject
   @extend()
-
   select: ->
-    return unless range = @vimState.mark.getRange('<', '>')
-    @editor.getLastSelection().setBufferRange(range)
+    {properties, @submode} = globalState.previousSelection
+    if properties? and @submode?
+      selection = @editor.getLastSelection()
+      swrap(selection).selectByProperties(properties)
 
 class RangeMarker extends TextObject
   @extend(false)

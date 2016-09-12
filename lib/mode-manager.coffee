@@ -1,5 +1,6 @@
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
+globalState = require './global-state'
 Base = require './base'
 swrap = require './selection-wrapper'
 {moveCursorLeft} = require './utils'
@@ -17,8 +18,6 @@ class ModeManager
   deactivator: null
 
   replacedCharsBySelection: null
-  previousSelectionProperties: null
-  previousVisualModeSubmode: null
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -146,19 +145,6 @@ class ModeManager
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
       @updateNarrowedState(false)
 
-  preservePreviousSelection: (selection) ->
-    properties = if selection.isBlockwise?()
-      selection.getCharacterwiseProperties()
-    else
-      swrap(selection).detectCharacterwiseProperties()
-    @previousSelectionProperties = properties
-    @previousVisualModeSubmode = @submode
-
-  getPreviousSelectionInfo: ->
-    properties = @previousSelectionProperties
-    submode = @previousVisualModeSubmode
-    {properties, submode}
-
   selectCharacterwise: ->
     switch @submode
       when 'linewise'
@@ -179,8 +165,13 @@ class ModeManager
 
     swrap.clearProperties(@editor)
 
+    # Here we save previous selection range as characterwise range.
+    # even if original submode was blockwise. since we @selectCharacterwise() to
+    # restore characterwise range. above code.
     if preservePreviousSelection and not @editor.getLastSelection().isEmpty()
-      @preservePreviousSelection(@editor.getLastSelection())
+      lastSelection = @editor.getLastSelection()
+      properties = swrap(lastSelection).detectCharacterwiseProperties()
+      globalState.previousSelection = {properties, @submode}
 
     # We selectRight()ed in visual-mode, so reset this effect here.
     # `vc`, `vs` make selection empty.

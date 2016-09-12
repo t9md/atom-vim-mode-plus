@@ -21,7 +21,7 @@ ModeManager = require './mode-manager'
 RegisterManager = require './register-manager'
 SearchHistoryManager = require './search-history-manager'
 CursorStyleManager = require './cursor-style-manager'
-BlockwiseSelection = null # delay
+BlockwiseSelection = require './blockwise-selection'
 
 packageScope = 'vim-mode-plus'
 
@@ -81,13 +81,9 @@ class VimState
   clearBlockwiseSelections: ->
     @blockwiseSelections = []
 
-  addBlockwiseSelectionFromSelection: (selection) ->
-    BlockwiseSelection ?= require './blockwise-selection'
-    @blockwiseSelections.push(new BlockwiseSelection(selection))
-
   selectBlockwise: ->
     for selection in @editor.getSelections()
-      @addBlockwiseSelectionFromSelection(selection)
+      @blockwiseSelections.push(new BlockwiseSelection(selection))
     @updateSelectionProperties()
 
   # Other
