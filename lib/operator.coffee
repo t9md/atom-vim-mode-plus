@@ -34,7 +34,6 @@ class Operator extends Base
   withOccurrence: false
   forceWise: null
   patternForOccurence: null
-  keepCursorPosition: false
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
@@ -46,24 +45,20 @@ class Operator extends Base
     else
       false
 
-  needTrackChange: ->
-    @trackChange
-
   # [FIXME]
   # For TextObject, isLinewise result is changed before / after select.
   # This mean return value may change depending on when you call.
   needStay: ->
-    return true if @keepCursorPosition
+    @wasNeedStay ?= do =>
+      if @instanceof('TransformString')
+        param = "stayOnTransformString"
+      else
+        param = "stayOn#{@getName()}"
 
-    if @instanceof('TransformString')
-      param = "stayOnTransformString"
-    else
-      param = "stayOn#{@getName()}"
-
-    if @isMode('visual', 'linewise')
-      settings.get(param)
-    else
-      settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
+      if @isMode('visual', 'linewise')
+        settings.get(param)
+      else
+        settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
 
   constructor: ->
     super
@@ -75,7 +70,7 @@ class Operator extends Base
     @setTarget(@new(@target)) if _.isString(@target)
 
   restorePoint: (selection) ->
-    which = if @wasNeedStay then 'head' else 'start'
+    which = if @needStay() then 'head' else 'start'
     restore = ->
       swrap(selection).setBufferPositionTo(which, fromProperty: true)
 
@@ -94,7 +89,7 @@ class Operator extends Base
     # Select operator is used only in visual-mode.
     # visual-mode selection modification should be handled by Motion::select(), TextObject::select()
     unless @instanceof('Select')
-      if @wasNeedStay = @needStay() # [FIXME] dirty cache
+      if @needStay()
         @onWillSelectTarget => @updateSelectionProperties() unless @isMode('visual')
       else
         @onDidSelectTarget => @updateSelectionProperties()
@@ -128,7 +123,7 @@ class Operator extends Base
     markerForTrackChange = null
     @onDidSelectTarget =>
       @flash(@editor.getSelectedBufferRanges()) if @needFlash()
-      if @needTrackChange()
+      if @trackChange
         markerForTrackChange = @editor.markBufferRange(@editor.getSelectedBufferRange())
 
     @onDidFinishOperation =>
@@ -137,8 +132,9 @@ class Operator extends Base
 
   # called by operationStack
   setOperatorModifier: ({occurence, wise}) ->
-    if occurence?
+    if occurence? and occurence isnt @withOccurrence
       @withOccurrence = occurence
+      @vimState.operationStack.addToClassList('with-occurrence')
 
     if wise?
       @forceWise = wise
@@ -191,21 +187,19 @@ class Operator extends Base
       class: 'vim-mode-plus-flash'
       timeout: settings.get('flashOnOperateDuration')
 
-  mutateSelections: (fn) ->
-    return unless @selectTarget()
-    @editor.transact =>
-      fn(selection) for selection in @editor.getSelections()
-
   execute: ->
     # We need to preserve selection before selection is cleared as a result of mutation.
     if @isMode('visual')
-      lastSelection = if @isMode('visual', 'blockwise')
-        @vimState.getLastBlockwiseSelection()
+      if @isMode('visual', 'blockwise')
+        lastSelection = @vimState.getLastBlockwiseSelection()
       else
-        @editor.getLastSelection()
+        lastSelection = @editor.getLastSelection()
       @vimState.modeManager.preservePreviousSelection(lastSelection)
 
-    @mutateSelections (selection) => @mutateSelection(selection)
+    if @selectTarget()
+      @editor.transact =>
+        for selection in @editor.getSelections()
+          @mutateSelection(selection)
     @activateMode(@finalMode, @finalSubmode)
 
   # Return {pattern, bufferRange},
@@ -238,7 +232,6 @@ class Operator extends Base
     bufferRange = getCurrentWordBufferRange(cursor)
     cursorWord = @editor.getTextInBufferRange(bufferRange)
     {pattern: ///\b#{_.escapeRegExp(cursorWord)}\b///g, bufferRange}
-
 
 # Repeat
 # =========================
@@ -282,20 +275,37 @@ class SelectLatestChange extends Select
   @description: "Select latest yanked or changed range"
   target: 'ALatestChange'
 
-# [FIXME] should be child of select with target=PrevoiusSelection
-class SelectPreviousSelection extends Operator
+class SelectPreviousSelection extends Select
   @extend()
-  requireTarget: false
-  recordable: false
+  target: "PreviousSelection"
+  # requireTarget: false
+  # recordable: false
   @description: "Select last selected visual area in current buffer"
   execute: ->
-    {properties, submode} = @vimState.modeManager.getPreviousSelectionInfo()
-    return unless properties? and submode?
+    console.log 'helo'
+    super
+  #   {properties, submode} = @vimState.modeManager.getPreviousSelectionInfo()
+  #   return unless properties? and submode?
+  #
+  #   selection = @editor.getLastSelection()
+  #   swrap(selection).selectByProperties(properties)
+  #   @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
+  #   @activateMode('visual', submode)
 
-    selection = @editor.getLastSelection()
-    swrap(selection).selectByProperties(properties)
-    @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
-    @activateMode('visual', submode)
+# [FIXME] should be child of select with target=PrevoiusSelection
+# class SelectPreviousSelection extends Operator
+#   @extend()
+#   requireTarget: false
+#   recordable: false
+#   @description: "Select last selected visual area in current buffer"
+#   execute: ->
+#     {properties, submode} = @vimState.modeManager.getPreviousSelectionInfo()
+#     return unless properties? and submode?
+#
+#     selection = @editor.getLastSelection()
+#     swrap(selection).selectByProperties(properties)
+#     @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
+#     @activateMode('visual', submode)
 
 class SelectOccurrence extends Select
   @extend()
@@ -325,15 +335,11 @@ class SelectRangeMarker extends Select
 # =========================
 class CreateRangeMarker extends Operator
   @extend()
-  keepCursorPosition: true
   flashTarget: false
 
   mutateSelection: (selection) ->
     @vimState.addRangeMarkersForRanges([selection.getBufferRange()])
-    if selection.isLastSelection()
-      @restorePoint(selection)
-    else
-      selection.destroy()
+    @restorePoint(selection)
 
 class ToggleRangeMarker extends CreateRangeMarker
   @extend()
@@ -1205,15 +1211,17 @@ class Replace extends Operator
 
   execute: ->
     input = @getInput()
-    @mutateSelections (selection) =>
-      text = selection.getText().replace(/./g, input)
-      insertText = (text) ->
-        selection.insertText(text, autoIndentNewline: true)
-      if @target.instanceof('MoveRight')
-        insertText(text) if text.length >= @getCount()
-      else
-        insertText(text)
-      @restorePoint(selection) unless (input is "\n")
+    return unless @selectTarget()
+    @editor.transact =>
+      for selection in @editor.getSelections()
+        text = selection.getText().replace(/./g, input)
+        insertText = (text) ->
+          selection.insertText(text, autoIndentNewline: true)
+        if @target.instanceof('MoveRight')
+          insertText(text) if text.length >= @getCount()
+        else
+          insertText(text)
+        @restorePoint(selection) unless (input is "\n")
 
     # FIXME this is very imperative, handling in very lower level.
     # find better place for operator in blockwise move works appropriately.
