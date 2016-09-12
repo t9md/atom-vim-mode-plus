@@ -790,7 +790,6 @@ class SearchMatchBackward extends SearchMatchForward
 # [FIXME] Currently vB range is treated as vC range, how I should do?
 class PreviousSelection extends TextObject
   @extend()
-  backward: true
 
   select: ->
     return unless range = @vimState.mark.getRange('<', '>')
