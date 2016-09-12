@@ -301,9 +301,10 @@ class SelectOccurrence extends Select
   @extend()
   @description: "Add selection onto each matching word within target range"
   withOccurrence: true
-  esecute: ->
+  initialize: ->
+    # FIXME don't trying to do everytin in event
     @onDidSelectTarget =>
-      @updateSelectionProperties()
+      swrap.resetProperties(@editor)
 
 class SelectOccurrenceInARangeMarker extends SelectOccurrence
   @extend()
