@@ -250,11 +250,16 @@ class Select extends Operator
   recordable: false
   execute: ->
     @selectTarget()
-    if @isMode('visual') and (not @target.isAllowSubmodeChange?())
-      return
-    else
+    if @isWithOccurrence()
+      @updateSelectionProperties()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
+    else
+      if @isMode('visual') and (not @target.isAllowSubmodeChange?())
+        return
+      else
+        submode = swrap.detectVisualModeSubmode(@editor)
+        @activateModeIfNecessary('visual', submode)
 
 class SelectLatestChange extends Select
   @extend()
@@ -1150,26 +1155,18 @@ class Replace extends Operator
 
     @activateMode('normal')
 
-class SelectOccurrence extends Operator
+class SelectOccurrence extends Select
   @extend()
   @description: "Add selection onto each matching word within target range"
   withOccurrence: true
 
-  execute: ->
-    if @selectTarget()
-      unless @isMode('visual', 'characterwise')
-        swrap.resetProperties(@editor)
-        @activateMode('visual', 'characterwise')
-
 class SelectOccurrenceInARangeMarker extends SelectOccurrence
   @extend()
   target: "ARangeMarker"
-  flashTarget: false
 
 class SelectOccurrenceInAll extends SelectOccurrence
   @extend()
   target: "All"
-  flashTarget: false
 
 class SetCursorsToStartOfTarget extends Operator
   @extend()
