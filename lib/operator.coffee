@@ -239,33 +239,35 @@ class Operator extends Base
     cursorWord = @editor.getTextInBufferRange(bufferRange)
     {pattern: ///\b#{_.escapeRegExp(cursorWord)}\b///g, bufferRange}
 
-# -------------------------
+# Select
 # When text-object is invoked from normal or viusal-mode, operation would be
 #  => Select operator with target=text-object
 # When motion is invoked from visual-mode, operation would be
 #  => Select operator with target=motion)
+# ================================
 class Select extends Operator
   @extend(false)
   flashTarget: false
   recordable: false
+
+  canChangeMode: ->
+    if @isMode('visual')
+      @isWithOccurrence() or @target.isAllowSubmodeChange?()
+    else
+      true
+
   execute: ->
     @selectTarget()
-    if @isWithOccurrence()
-      @updateSelectionProperties()
+    if canChangeMode()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
-    else
-      if @isMode('visual') and (not @target.isAllowSubmodeChange?())
-        return
-      else
-        submode = swrap.detectVisualModeSubmode(@editor)
-        @activateModeIfNecessary('visual', submode)
 
 class SelectLatestChange extends Select
   @extend()
   @description: "Select latest yanked or changed range"
   target: 'ALatestChange'
 
+# [FIXME] should be child of select with target=PrevoiusSelection
 class SelectPreviousSelection extends Operator
   @extend()
   requireTarget: false
@@ -280,7 +282,24 @@ class SelectPreviousSelection extends Operator
     @editor.scrollToScreenRange(selection.getScreenRange(), {center: true})
     @activateMode('visual', submode)
 
-# -------------------------
+class SelectOccurrence extends Select
+  @extend()
+  @description: "Add selection onto each matching word within target range"
+  withOccurrence: true
+  esecute: ->
+    @onDidSelectTarget =>
+      @updateSelectionProperties()
+
+class SelectOccurrenceInARangeMarker extends SelectOccurrence
+  @extend()
+  target: "ARangeMarker"
+
+class SelectOccurrenceInAll extends SelectOccurrence
+  @extend()
+  target: "All"
+
+# Delete
+# ================================
 class Delete extends Operator
   @extend()
   hover: icon: ':delete:', emoji: ':scissors:'
@@ -336,7 +355,8 @@ class DeleteLine extends Delete
     swrap(selection).expandOverLine()
     super
 
-# -------------------------
+# TransformString
+# ================================
 transformerRegistry = []
 class TransformString extends Operator
   @extend(false)
@@ -644,6 +664,7 @@ class ToggleLineComments extends TransformString
     selection.toggleLineComments()
     @restorePoint(selection)
 
+# Surround
 # -------------------------
 class Surround extends TransformString
   @extend()
@@ -793,6 +814,7 @@ class ChangeSurroundAnyPairAllowForwarding extends ChangeSurroundAnyPair
   @description: "Change surround character, from char is auto-detected from enclosed and forwarding area"
   target: "AAnyPairAllowForwarding"
 
+# Yank
 # -------------------------
 class Yank extends Operator
   @extend()
@@ -1154,19 +1176,6 @@ class Replace extends Operator
         selection.destroy()
 
     @activateMode('normal')
-
-class SelectOccurrence extends Select
-  @extend()
-  @description: "Add selection onto each matching word within target range"
-  withOccurrence: true
-
-class SelectOccurrenceInARangeMarker extends SelectOccurrence
-  @extend()
-  target: "ARangeMarker"
-
-class SelectOccurrenceInAll extends SelectOccurrence
-  @extend()
-  target: "All"
 
 class SetCursorsToStartOfTarget extends Operator
   @extend()
