@@ -60,19 +60,19 @@ class OperationStack
 
     try
       @reduce()
-      topOperation = @peekTop()
+      top = @peekTop()
 
-      if topOperation.isComplete()
+      if top.isComplete()
         if settings.get('debug')
-          console.log  [topOperation.getName(), topOperation.target?.getName()]
+          console.log  [top.getName(), top.target?.getName()]
         @execute(@stack.pop())
       else
-        if @vimState.isMode('normal') and topOperation.isOperator()
+        if @vimState.isMode('normal') and top.isOperator()
           @vimState.activate('operator-pending')
-          @addToClassList('with-occurrence') if topOperation.isWithOccurrence()
+          @addToClassList('with-occurrence') if top.isWithOccurrence()
 
         # Temporary set while command is running
-        if commandName = topOperation.constructor.getCommandNameWithoutPrefix?()
+        if commandName = top.constructor.getCommandNameWithoutPrefix?()
           @addToClassList(commandName + "-pending")
     catch error
       switch
