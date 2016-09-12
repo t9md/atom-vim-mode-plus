@@ -30,6 +30,8 @@ class ModeManager
     else
       @mode is mode
 
+  # Event
+  # -------------------------
   onWillActivateMode: (fn) -> @emitter.on('will-activate-mode', fn)
   onDidActivateMode: (fn) -> @emitter.on('did-activate-mode', fn)
   onWillDeactivateMode: (fn) -> @emitter.on('will-deactivate-mode', fn)
@@ -52,6 +54,7 @@ class ModeManager
 
     @deactivator = switch mode
       when 'normal' then @activateNormalMode()
+      when 'operator-pending' then @activateOperatorPendingMode()
       when 'insert' then @activateInsertMode(submode)
       when 'visual' then @activateVisualMode(submode)
 
@@ -81,7 +84,12 @@ class ModeManager
     @editorElement.component?.setInputEnabled(false)
     new Disposable
 
-  # ActivateInsertMode
+  # Operator Pending
+  # -------------------------
+  activateOperatorPendingMode: ->
+    new Disposable
+
+  # Insert
   # -------------------------
   activateInsertMode: (submode=null) ->
     @editorElement.component.setInputEnabled(true)
