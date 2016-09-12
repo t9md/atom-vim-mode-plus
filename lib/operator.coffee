@@ -239,6 +239,21 @@ class Operator extends Base
     cursorWord = @editor.getTextInBufferRange(bufferRange)
     {pattern: ///\b#{_.escapeRegExp(cursorWord)}\b///g, bufferRange}
 
+
+# Repeat
+# =========================
+class Repeat extends Operator
+  @extend()
+  requireTarget: false
+  recordable: false
+
+  execute: ->
+    @editor.transact =>
+      @countTimes =>
+        if operation = @vimState.operationStack.getRecorded()
+          operation.setRepeated()
+          operation.execute()
+
 # Select
 # When text-object is invoked from normal or viusal-mode, operation would be
 #  => Select operator with target=text-object
@@ -258,7 +273,7 @@ class Select extends Operator
 
   execute: ->
     @selectTarget()
-    if canChangeMode()
+    if @canChangeMode()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
 
@@ -297,6 +312,52 @@ class SelectOccurrenceInARangeMarker extends SelectOccurrence
 class SelectOccurrenceInAll extends SelectOccurrence
   @extend()
   target: "All"
+
+class ConvertRangeMarkerToSelection extends Select
+  @extend()
+  flashTarget: false
+  target: "ARangeMarker"
+  execute: ->
+    super
+    @vimState.clearRangeMarkers()
+
+
+# Range Marker
+# =========================
+class CreateRangeMarker extends Operator
+  @extend()
+  keepCursorPosition: true
+  flashTarget: false
+
+  mutateSelection: (selection) ->
+    @vimState.addRangeMarkersForRanges([selection.getBufferRange()])
+    if selection.isLastSelection()
+      @restorePoint(selection)
+    else
+      selection.destroy()
+
+class ToggleRangeMarker extends CreateRangeMarker
+  @extend()
+  getRangeMarkerAtCursor: ->
+    point = @editor.getCursorBufferPosition()
+
+    containsPoint = (rangeMarker, point) ->
+      rangeMarker.getBufferRange().containsPoint(point, exclusive)
+
+    exclusive = false
+    for rangeMarker in @vimState.getRangeMarkers() when containsPoint(rangeMarker, point)
+      return rangeMarker
+
+  initialize: ->
+    rangeMarker = @getRangeMarkerAtCursor()
+    if rangeMarker?
+      rangeMarker.destroy()
+      @vimState.removeRangeMarker(rangeMarker)
+      @abort()
+
+class ToggleRangeMarkerOnInnerWord extends ToggleRangeMarker
+  @extend()
+  target: 'InnerWord'
 
 # Delete
 # ================================
@@ -355,6 +416,32 @@ class DeleteLine extends Delete
     swrap(selection).expandOverLine()
     super
 
+# Yank
+# =========================
+class Yank extends Operator
+  @extend()
+  hover: icon: ':yank:', emoji: ':clipboard:'
+  trackChange: true
+  stayOnLinewise: true
+
+  mutateSelection: (selection) ->
+    @setTextToRegisterForSelection(selection)
+    @restorePoint(selection)
+
+class YankLine extends Yank
+  @extend()
+  target: 'MoveToRelativeLine'
+
+  mutateSelection: (selection) ->
+    if @isMode('visual')
+      swrap(selection).expandOverLine()
+      swrap(selection).preserveCharacterwise()
+    super
+
+class YankToLastCharacterOfLine extends Yank
+  @extend()
+  target: 'MoveToLastCharacterOfLine'
+
 # TransformString
 # ================================
 transformerRegistry = []
@@ -376,8 +463,6 @@ class TransformString extends Operator
     selection.insertText(text, {@autoIndent})
     @restorePoint(selection) if @setPoint
 
-# String Transformer
-# -------------------------
 class ToggleCase extends TransformString
   @extend()
   @registerToSelectList()
@@ -633,6 +718,7 @@ class SwapWithRegister extends TransformString
     @setTextToRegister(text, selection)
     newText
 
+# Indent < TransformString
 # -------------------------
 class Indent extends TransformString
   @extend()
@@ -664,7 +750,7 @@ class ToggleLineComments extends TransformString
     selection.toggleLineComments()
     @restorePoint(selection)
 
-# Surround
+# Surround < TransformString
 # -------------------------
 class Surround extends TransformString
   @extend()
@@ -814,32 +900,7 @@ class ChangeSurroundAnyPairAllowForwarding extends ChangeSurroundAnyPair
   @description: "Change surround character, from char is auto-detected from enclosed and forwarding area"
   target: "AAnyPairAllowForwarding"
 
-# Yank
-# -------------------------
-class Yank extends Operator
-  @extend()
-  hover: icon: ':yank:', emoji: ':clipboard:'
-  trackChange: true
-  stayOnLinewise: true
-
-  mutateSelection: (selection) ->
-    @setTextToRegisterForSelection(selection)
-    @restorePoint(selection)
-
-class YankLine extends Yank
-  @extend()
-  target: 'MoveToRelativeLine'
-
-  mutateSelection: (selection) ->
-    if @isMode('visual')
-      swrap(selection).expandOverLine()
-      swrap(selection).preserveCharacterwise()
-    super
-
-class YankToLastCharacterOfLine extends Yank
-  @extend()
-  target: 'MoveToLastCharacterOfLine'
-
+# Join < TransformString
 # -------------------------
 # FIXME
 # Currently native editor.joinLines() is better for cursor position setting
@@ -949,19 +1010,6 @@ class Sort extends ChangeOrder
   @description: "Sort lines alphabetically"
   getNewRows: (rows) ->
     rows.sort()
-
-# -------------------------
-class Repeat extends Operator
-  @extend()
-  requireTarget: false
-  recordable: false
-
-  execute: ->
-    @editor.transact =>
-      @countTimes =>
-        if operation = @vimState.operationStack.getRecorded()
-          operation.setRepeated()
-          operation.execute()
 
 # -------------------------
 # [FIXME?]: inconsistent behavior from normal operator
@@ -1187,50 +1235,6 @@ class SetCursorsToStartOfRangeMarker extends SetCursorsToStartOfTarget
   @extend()
   flashTarget: false
   target: "RangeMarker"
-
-class CreateRangeMarker extends Operator
-  @extend()
-  keepCursorPosition: true
-  flashTarget: false
-
-  mutateSelection: (selection) ->
-    @vimState.addRangeMarkersForRanges([selection.getBufferRange()])
-    if selection.isLastSelection()
-      @restorePoint(selection)
-    else
-      selection.destroy()
-
-class ToggleRangeMarker extends CreateRangeMarker
-  @extend()
-  getRangeMarkerAtCursor: ->
-    point = @editor.getCursorBufferPosition()
-
-    containsPoint = (rangeMarker, point) ->
-      rangeMarker.getBufferRange().containsPoint(point, exclusive)
-
-    exclusive = false
-    for rangeMarker in @vimState.getRangeMarkers() when containsPoint(rangeMarker, point)
-      return rangeMarker
-
-  initialize: ->
-    rangeMarker = @getRangeMarkerAtCursor()
-    if rangeMarker?
-      rangeMarker.destroy()
-      @vimState.removeRangeMarker(rangeMarker)
-      @abort()
-
-class ToggleRangeMarkerOnInnerWord extends ToggleRangeMarker
-  @extend()
-  target: 'InnerWord'
-
-class ConvertRangeMarkerToSelection extends Select
-  @extend()
-  flashTarget: false
-  target: "ARangeMarker"
-  execute: ->
-    super
-    @vimState.clearRangeMarkers()
-
 
 # Insert entering operation
 # -------------------------
