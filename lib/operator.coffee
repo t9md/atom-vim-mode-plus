@@ -533,6 +533,7 @@ class TransformStringByExternalCommand extends TransformString
       # Suppress command not found error intentionally.
       if error.code is 'ENOENT' and error.syscall.indexOf('spawn') is 0
         commandName = @constructor.getCommandName()
+        console.log "#{commandName}: Failed to spawn command #{error.path}."
       @cancelOperation()
       handle()
 
