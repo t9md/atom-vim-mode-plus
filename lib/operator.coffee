@@ -25,15 +25,21 @@ Base = require './base'
 # -------------------------
 class Operator extends Base
   @extend(false)
+  requireTarget: true
   recordable: true
+
+  forceWise: null
+  withOccurrence: false
+
+  patternForOccurence: null
+
+  stayAtSamePosition: null
   flashTarget: true
   trackChange: false
-  requireTarget: true
+
   finalMode: "normal"
   finalSubmode: null
-  withOccurrence: false
-  forceWise: null
-  patternForOccurence: null
+
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
@@ -49,7 +55,7 @@ class Operator extends Base
   # For TextObject, isLinewise result is changed before / after select.
   # This mean return value may change depending on when you call.
   needStay: ->
-    @wasNeedStay ?= do =>
+    @stayAtSamePosition ?= do =>
       if @instanceof('TransformString')
         param = "stayOnTransformString"
       else
@@ -77,8 +83,9 @@ class Operator extends Base
     if swrap(selection).getProperties().head?
       if @isWithOccurrence()
         # Deffer restoring cursor point.
-        # restorePoint is processed one by one, so immediately updating cursorPosition result in intersecting range with other selection
-        # when intersecting selection is destroyed, cursor is moved automatically.
+        # restorePoint is processed one by one, so immediately updating cursorPosition result in
+        # intersecting to other selection which is still not restored.
+        # When intersecting selection is destroyed, cursor got involved moved automatically.
         @onDidFinishOperation -> restore()
       else
         restore()
@@ -140,25 +147,26 @@ class Operator extends Base
       @forceWise = wise
 
   # @target - TextObject or Motion to operate on.
-  setTarget: (@target) ->
-    unless _.isFunction(@target.select)
+  setTarget: (target) ->
+    unless _.isFunction(target.select)
       @vimState.emitter.emit('did-fail-to-set-target')
-      throw new OperatorError("#{@getName()} cannot set #{@target.getName()} as target")
+      throw new OperatorError("#{@getName()} cannot set #{target?.getName?()} as target")
+    @target = target
     @target.setOperator(this)
-    @overrideTargetWise(@forceWise) if @hasForceWise()
+    @modifyTargetWise(@target, @forceWise) if @hasForceWise()
     @emitDidSetTarget(this)
     this
 
-  overrideTargetWise: (wise) ->
+  modifyTargetWise: (target, wise) ->
     switch wise
       when 'characterwise'
-        if @target.linewise
-          @target.linewise = false
-          @target.inclusive = false
+        if target.linewise
+          target.linewise = false
+          target.inclusive = false
         else
-          @target.inclusive = not @target.inclusive
+          target.inclusive = not target.inclusive
       when 'linewise'
-        @target.linewise = true
+        target.linewise = true
 
   isWithOccurrence: ->
     @withOccurrence
@@ -167,7 +175,6 @@ class Operator extends Base
     @forceWise?
 
   # Return true unless all selection is empty.
-  # -------------------------
   selectTarget: ->
     @observeSelectAction()
     @emitWillSelectTarget()
@@ -318,9 +325,10 @@ class SelectRangeMarker extends Select
 class CreateRangeMarker extends Operator
   @extend()
   flashTarget: false
+  stayAtSamePosition: true
 
   mutateSelection: (selection) ->
-    @vimState.addRangeMarkersForRanges([selection.getBufferRange()])
+    @vimState.addRangeMarkersForRanges(selection.getBufferRange())
     @restorePoint(selection)
 
 class ToggleRangeMarker extends CreateRangeMarker
