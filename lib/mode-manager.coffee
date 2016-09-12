@@ -177,7 +177,7 @@ class ModeManager
       @vimState.mark.setRange('<', '>', range)
     @selectCharacterwise()
 
-    swrap.resetProperties(@editor)
+    swrap.clearProperties(@editor)
 
     if preservePreviousSelection and not @editor.getLastSelection().isEmpty()
       @preservePreviousSelection(@editor.getLastSelection())

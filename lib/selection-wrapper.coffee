@@ -9,7 +9,7 @@ class SelectionWrapper
   hasProperties: -> propertyStore.has(@selection)
   getProperties: -> propertyStore.get(@selection) ? {}
   setProperties: (prop) -> propertyStore.set(@selection, prop)
-  resetProperties: -> propertyStore.delete(@selection)
+  clearProperties: -> propertyStore.delete(@selection)
 
   setBufferRangeSafely: (range) ->
     if range
@@ -185,7 +185,7 @@ class SelectionWrapper
     end = editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'forward')
 
     @setBufferRange([start, end], {preserveFolds: true})
-    @resetProperties()
+    @clearProperties()
     @selection.cursor.goalColumn = goalColumn if goalColumn
 
   # Only for setting autoscroll option to false by default
@@ -239,9 +239,9 @@ swrap.reverse = (editor) ->
   editor.getSelections().forEach (selection) ->
     swrap(selection).reverse()
 
-swrap.resetProperties = (editor) ->
+swrap.clearProperties = (editor) ->
   editor.getSelections().forEach (selection) ->
-    swrap(selection).resetProperties()
+    swrap(selection).clearProperties()
 
 swrap.detectVisualModeSubmode = (editor) ->
   selections = editor.getSelections()

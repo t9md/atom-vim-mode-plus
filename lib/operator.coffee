@@ -314,7 +314,7 @@ class SelectOccurrence extends Select
   initialize: ->
     # FIXME don't trying to do everytin in event
     @onDidSelectTarget =>
-      swrap.resetProperties(@editor)
+      swrap.clearProperties(@editor)
 
 class SelectOccurrenceInARangeMarker extends SelectOccurrence
   @extend()
