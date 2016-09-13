@@ -37,6 +37,7 @@ class Operator extends Base
 
   finalMode: "normal"
   finalSubmode: null
+  pointBySelection: null
 
   # [FIXME]
   # For TextObject, isLinewise result is changed before / after select.
@@ -199,41 +200,56 @@ class Operator extends Base
   execute: ->
     # We need to preserve selection before selection is cleared as a result of mutation.
     @updatePreviousSelection() if @isMode('visual')
-
     # Mutation phase
     if @selectTarget()
       @editor.transact =>
         @mutateSelection(selection) for selection in @editor.getSelections()
 
     # Cursor position placement [same as before OR start of original selection]
+
     if @needStay()
       # same as before
       for selection in @editor.getSelections()
-        if swrap(selection).getProperties().head?
-          swrap(selection).setBufferPositionTo('head', fromProperty: true)
+        if @isRestorableCursorPositionForSelection(selection)
+          @restoreCursorPositionForSelection(selection)
         else
           selection.destroy()
     else
       # start of original selection
-      @restoreStartOfSelections()
+      @restoreCursorPositions()
 
-    @startOfSelections = null
-    @onDidRestoreCursorPosition?() # FIXME
+    @pointBySelection = null
+    @onDidRestoreCursorPositions?() # FIXME
     @activateMode(@finalMode, @finalSubmode)
 
   # Return true unless all selection is empty.
   selectTarget: ->
     @observeSelectTarget()
-    if @isMode('visual')
-      @startOfSelections = @saveStartOfSelections()
+    @pointBySelection = new Map
+    wasVisual = @isMode('visual')
+    if wasVisual
+      if @needStay()
+        for selection in @editor.getSelections()
+          head = swrap(selection).getBufferPositionFor('head', fromProperty: true)
+          # console.log 'visual and stay', head.toString()
+          @requestRestoreCursorPosition(selection, head)
+        # @requestRestoreCursorPositions('head')
+      else
+        @requestRestoreCursorPositions('start')
+    else
+      if @needStay()
+        unless @instanceof('Select')
+          @requestRestoreCursorPositions('head')
+      else
+        null
 
-    if not @instanceof('Select') and @needStay()
-      unless @isMode('visual')
-        @updateSelectionProperties() # [FIXME] don't store to swrap, explicitly store and clear
-        console.log 'update prop on will-select-target'
+        # @updateSelectionProperties() # [FIXME] don't store to swrap, explicitly store and clear
+        # console.log 'update prop on will-select-target'
+
     @emitWillSelectTarget()
     @target.select()
-    @startOfSelections ?= @saveStartOfSelections()
+    if not wasVisual and not @needStay()
+      @requestRestoreCursorPositions('start')
 
     @flashIfNecessary(@editor.getSelectedBufferRanges())
     @trackChangeIfNecessary()
@@ -251,27 +267,47 @@ class Operator extends Base
     submode = @vimState.submode
     globalState.previousSelection = {properties, submode}
 
-  # Save and restore start of selection.
-  @startOfSelections: null
-  saveStartOfSelections: ->
-    pointBySelection = new Map
+  requestRestoreCursorPosition: (selection, point) ->
+    console.log 'requested', point.toString()
+    @pointBySelection.set(selection, point)
+
+  requestRestoreCursorPositions: (which) ->
     for selection in @editor.getSelections()
-      point = selection.getBufferRange().start
-      pointBySelection.set(selection, point)
-    pointBySelection
+      if which is 'start'
+        point = selection.getBufferRange().start
+      else if 'head'
+        point = swrap(selection).detectCharacterwiseProperties().head
+        # point = selection.getHeadBufferPosition()
+        console.log 'head', point.toString()
+      @requestRestoreCursorPosition(selection, point)
 
-  restoreStartOfSelections: ->
-    selectionIsNotFound = (selection) =>
-      not @startOfSelections.has(selection)
+  isRestorableCursorPositionForSelection: (selection) ->
+    @pointBySelection.has(selection)
 
-    # strict. in vB mode, vB range is reselected on @target.selection
+  restoreCursorPositionForSelection: (selection) ->
+    if point = @pointBySelection.get(selection)
+      console.log 'restore', point.toString()
+      selection.cursor.setBufferPosition(point)
+
+  restoreCursorPositions: ->
+    # Strict. in vB mode, vB range is reselected on @target.selection
     # so selection.id is change in that case we won't restore.
     selections = @editor.getSelections()
-    return if selections.some(selectionIsNotFound)
+    return if selections.some (selection) =>
+      not @pointBySelection.has(selection)
 
     for selection in selections
-      point = @startOfSelections.get(selection)
+      point = @pointBySelection.get(selection)
       selection.cursor.setBufferPosition(point)
+
+    @pointBySelection.clear()
+    @pointBySelection = null
+
+  cancelRestoreCursorPositions: (selection=null) ->
+    if selection?
+      @pointBySelection.delete(selection)
+    else
+      @pointBySelection.clear()
 
 # Repeat
 # =========================
@@ -400,7 +436,7 @@ class Delete extends Operator
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
 
-  onDidRestoreCursorPosition: ->
+  onDidRestoreCursorPositions: ->
     return unless @wasLinewise
     vimEof = @getVimEofBufferPosition()
     for selection in @editor.getSelections()
@@ -408,13 +444,13 @@ class Delete extends Operator
       if cursor.getBufferPosition().isGreaterThan(vimEof)
         cursor.setBufferPosition([vimEof.row, 0])
 
-      if @needStay()
-        head = swrap(selection).getBufferPositionFor('head', fromProperty: true)
-        start = swrap(selection).getBufferPositionFor('start', fromProperty: true)
-        cursor.setBufferPosition([start.row, head.column])
-        cursor.goalColumn = head.column
-      else
-        cursor.skipLeadingWhitespace()
+      # if @needStay()
+      #   head = swrap(selection).getBufferPositionFor('head', fromProperty: true)
+      #   start = swrap(selection).getBufferPositionFor('start', fromProperty: true)
+      #   cursor.setBufferPosition([start.row, head.column])
+      #   cursor.goalColumn = head.column
+      # else
+      cursor.skipLeadingWhitespace()
 
 class DeleteRight extends Delete
   @extend()

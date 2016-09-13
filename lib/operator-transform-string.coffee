@@ -51,7 +51,7 @@ class ToggleCaseAndMoveRight extends ToggleCase
   hover: null
   stayAtSamePosition: false
   target: 'MoveRight'
-  restoreStartOfSelections: ->
+  restoreCursorPositions: ->
     # [FIXME] just for do nothing
 
 class UpperCase extends TransformString
@@ -181,7 +181,7 @@ class TransformStringByExternalCommand extends TransformString
   collect: (resolve) ->
     @stdoutBySelection = new Map
     unless @isMode('visual')
-      @updateSelectionProperties()
+      @updateSelectionProperties() # [FIXME]
       @target.select()
 
     running = finished = 0
@@ -293,7 +293,7 @@ class Indent extends TransformString
   stayOnLinewise: false
   indentFunction: "indentSelectedRows"
 
-  onDidRestoreCursorPosition: ->
+  onDidRestoreCursorPositions: ->
     unless @needStay()
       for cursor in @editor.getCursors()
         cursor.moveToFirstCharacterOfLine()
@@ -441,11 +441,11 @@ class ChangeSurroundAnyPair extends ChangeSurround
   charsMax: 1
   target: "AAnyPair"
   cursorPositions: null
-  restoreCursorPositions: null
+  _restoreCursorPositions: null
 
   initialize: ->
     @onDidSetTarget =>
-      @restoreCursorPositions = saveCursorPositions(@editor)
+      @_restoreCursorPositions = saveCursorPositions(@editor)
       @target.select()
       unless haveSomeSelection(@editor)
         @vimState.input.cancel()
@@ -455,8 +455,8 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   onConfirm: (@char) ->
     # Clear pre-selected selection to start mutation from non-selection.
-    @restoreCursorPositions()
-    @restoreCursorPositions = null
+    @_restoreCursorPositions()
+    @_restoreCursorPositions = null
     @input = @char
     @processOperation()
 

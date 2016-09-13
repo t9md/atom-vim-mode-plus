@@ -347,7 +347,7 @@ describe "Operator general", ->
           text: "d\nabc\nd"
           cursorBuffer: [[0, 0], [1, 0], [2, 0]]
 
-    describe "stayOnDelete setting", ->
+    xdescribe "stayOnDelete setting", ->
       beforeEach ->
         settings.set('stayOnDelete', true)
         set

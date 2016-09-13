@@ -123,7 +123,6 @@ class Motion extends Base
 class CurrentSelection extends Motion
   @extend(false)
   selectionExtent: null
-  pointBySelection: null
   inclusive: true
 
   initialize: ->
