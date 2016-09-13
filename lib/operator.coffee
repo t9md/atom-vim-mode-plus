@@ -390,14 +390,13 @@ class DeleteToLastCharacterOfLine extends Delete
   @extend()
   target: 'MoveToLastCharacterOfLine'
   initialize: ->
-    @isVisualBlockwise = @isMode('visual', 'blockwise')
-    if @isVisualBlockwise
+    if @isVisualBlockwise = @isMode('visual', 'blockwise')
       @requireTarget = false
     super
 
   execute: ->
+    # Ensure all selections to un-reversed
     if @isVisualBlockwise
-      # Ensure all selections is un-reversed to start deletion from start of selection.
       swrap.setReversedState(@editor, false)
 
     super
@@ -656,6 +655,7 @@ class Replace extends Operator
 
     @activateMode('normal')
 
+# [SHOULD remove?]
 class SetCursorsToStartOfTarget extends Operator
   @extend()
   flashTarget: false

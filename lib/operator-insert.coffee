@@ -262,8 +262,7 @@ class ChangeToLastCharacterOfLine extends Change
     super
 
   execute: ->
+    # Ensure all selections to un-reversed
     if @isVisualBlockwise
-      @getBlockwiseSelections().forEach (bs) ->
-        bs.removeEmptySelections()
-        bs.setPositionForSelections('start')
+      swrap.setReversedState(@editor, false)
     super
