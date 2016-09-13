@@ -115,26 +115,31 @@ describe "Operator general", ->
         ensure 'X', text: "012345\nabcdef", cursor: [0, 5]
 
   describe "the d keybinding", ->
+    beforeEach ->
+      set
+        text: """
+          12345
+          abcde
+
+          ABCDE\n
+          """
+        cursor: [1, 1]
+
     it "enters operator-pending mode", ->
       ensure 'd', mode: 'operator-pending'
 
     describe "when followed by a d", ->
       it "deletes the current line and exits operator-pending mode", ->
-        set text: "12345\nabcde\n\nABCDE", cursor: [1, 1]
+        set cursor: [1, 1]
         ensure 'd d',
-          text: '12345\n\nABCDE'
+          text: "12345\n\nABCDE\n"
           cursor: [1, 0]
           register: '"': text: 'abcde\n'
           mode: 'normal'
 
       it "deletes the last line and always make non-blank-line last line", ->
-        set text: """
-          12345
-          abcde
-          ABCDE\n
-          """
-          , cursor: [2, 1]
-        ensure 'd d', text: "12345\nabcde\n", cursor: [1, 0]
+        set cursor: [2, 0]
+        ensure '2 d d', text: "12345\nabcde\n", cursor: [1, 0]
 
       it "leaves the cursor on the first nonblank character", ->
         set text: '12345\n  abcde\n', cursor: [0, 4]
@@ -143,7 +148,6 @@ describe "Operator general", ->
     describe "undo behavior", ->
       originalText = "12345\nabcde\nABCDE\nQWERT"
       beforeEach ->
-
         set text: originalText, cursor: [1, 1]
 
       it "undoes both lines", ->
@@ -342,6 +346,32 @@ describe "Operator general", ->
         ensure ['d t', input: 'd'],
           text: "d\nabc\nd"
           cursorBuffer: [[0, 0], [1, 0], [2, 0]]
+
+    describe "stayOnDelete setting", ->
+      beforeEach ->
+        settings.set('stayOnDelete', true)
+        set
+          text: """
+              0000
+            1111
+          2222
+            3333
+              4444\n
+          """
+          cursor: [0, 5]
+
+      describe "target range is linewise range", ->
+        it "keep original column after delete and keep goalColumn", ->
+          ensure "d d", cursor: [0, 5], text: "  1111\n2222\n  3333\n    4444\n"
+          ensure "d d", cursor: [0, 3], text: "2222\n  3333\n    4444\n"
+          ensure "j", cursor: [1, 5], text: "2222\n  3333\n    4444\n"
+          ensure ".", cursor: [1, 5], text: "2222\n    4444\n"
+
+        it "v_D also keep original column after delete and keep goalColumn", ->
+          ensure "v D", cursor: [0, 5], text: "  1111\n2222\n  3333\n    4444\n"
+          ensure "v D", cursor: [0, 3], text: "2222\n  3333\n    4444\n"
+          ensure "j", cursor: [1, 5], text: "2222\n  3333\n    4444\n"
+          ensure "v D", cursor: [1, 5], text: "2222\n    4444\n"
 
   describe "the D keybinding", ->
     beforeEach ->

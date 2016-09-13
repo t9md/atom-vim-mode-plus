@@ -100,6 +100,10 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'boolean'
     default: false
     description: "Don't move cursor after Yank"
+  stayOnDelete:
+    type: 'boolean'
+    default: false
+    description: "Don't move cursor after Delete"
   flashOnUndoRedo:
     type: 'boolean'
     default: true

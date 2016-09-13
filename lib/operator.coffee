@@ -57,7 +57,9 @@ class Operator extends Base
   needStay: ->
     @stayAtSamePosition ?= do =>
       if @instanceof('TransformString')
-        param = "stayOnTransformString"
+        param = 'stayOnTransformString'
+      else if @instanceof('Delete')
+        param = 'stayOnDelete'
       else
         param = "stayOn#{@getName()}"
 
@@ -367,11 +369,17 @@ class Delete extends Operator
     wasLinewise = swrap(selection).isLinewise()
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
-
     vimEof = @getVimEofBufferPosition()
     if cursor.getBufferPosition().isGreaterThan(vimEof)
       cursor.setBufferPosition([vimEof.row, 0])
-    cursor.skipLeadingWhitespace() if wasLinewise
+
+    if wasLinewise
+      if @needStay()
+        headPosition = swrap(selection).getBufferPositionFor('head', fromProperty: true)
+        cursor.setBufferPosition([cursor.getBufferRow(), headPosition.column])
+        cursor.goalColumn = headPosition.column
+      else
+        cursor.skipLeadingWhitespace()
 
 class DeleteRight extends Delete
   @extend()
