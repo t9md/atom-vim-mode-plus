@@ -394,23 +394,22 @@ class DeleteToLastCharacterOfLine extends Delete
   @extend()
   target: 'MoveToLastCharacterOfLine'
   initialize: ->
-    super
-    if @isVisualBlockwise = @isMode('visual', 'blockwise')
+    @isVisualBlockwise = @isMode('visual', 'blockwise')
+    if @isVisualBlockwise
       @requireTarget = false
+    super
 
   execute: ->
     if @isVisualBlockwise
-      pointByBlockwiseSelection = new Map
-      @getBlockwiseSelections().forEach (bs) ->
-        bs.removeEmptySelections()
-        bs.setPositionForSelections('start')
-        pointByBlockwiseSelection.set(bs, bs.getStartSelection().getHeadBufferPosition())
+      # Ensure all selections is un-reversed to start deletion from start of selection.
+      swrap.setReversedState(@editor, false)
 
     super
 
     if @isVisualBlockwise
-      pointByBlockwiseSelection.forEach (point, bs) ->
-        bs.setHeadBufferPosition(point)
+      @getBlockwiseSelections().forEach (blockwiseSelection) ->
+        startPosition = blockwiseSelection.getStartBufferPosition()
+        blockwiseSelection.setHeadBufferPosition(startPosition)
 
 class DeleteLine extends Delete
   @extend()

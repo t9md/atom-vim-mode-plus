@@ -98,6 +98,12 @@ class BlockwiseSelection
   getTailBufferPosition: ->
     @getTailSelection().getTailBufferPosition()
 
+  getStartBufferPosition: ->
+    @getStartSelection().getBufferRange().start
+
+  getEndBufferPosition: ->
+    @getStartSelection().getBufferRange().end
+
   getBufferRowRange: ->
     startRow = @getStartSelection().getBufferRowRange()[0]
     endRow = @getEndSelection().getBufferRowRange()[0]
