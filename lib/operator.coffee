@@ -294,6 +294,14 @@ class SelectPreviousSelection extends Select
     if @target.submode?
       @activateModeIfNecessary('visual', @target.submode)
 
+class SelectRangeMarker extends Select
+  @extend()
+  @description: "Select range-marker and clear all range-marker. It's like convert each range-marker to selection"
+  target: "ARangeMarker"
+  execute: ->
+    super
+    @vimState.clearRangeMarkers()
+
 class SelectOccurrence extends Select
   @extend()
   @description: "Add selection onto each matching word within target range"
@@ -306,17 +314,6 @@ class SelectOccurrence extends Select
 class SelectOccurrenceInARangeMarker extends SelectOccurrence
   @extend()
   target: "ARangeMarker"
-
-class SelectOccurrenceInAll extends SelectOccurrence
-  @extend()
-  target: "All"
-
-class SelectRangeMarker extends Select
-  @extend()
-  target: "ARangeMarker"
-  execute: ->
-    super
-    @vimState.clearRangeMarkers()
 
 # Range Marker
 # =========================

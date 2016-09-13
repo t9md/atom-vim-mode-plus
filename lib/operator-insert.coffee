@@ -240,10 +240,6 @@ class ChangeOccurrenceInARangeMarker extends ChangeOccurrence
   @extend()
   target: "ARangeMarker"
 
-class ChangeOccurrenceAll extends ChangeOccurrence
-  @extend()
-  target: "All"
-
 class Substitute extends Change
   @extend()
   target: 'MoveRight'
