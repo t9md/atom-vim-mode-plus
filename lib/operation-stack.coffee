@@ -120,10 +120,6 @@ class OperationStack
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
 
-    # FIXME
-    if operation?.isRecordable() and operation.isOperator()
-      operation._restoreStartOfSelections = null
-
     if @vimState.isMode('normal')
       @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()

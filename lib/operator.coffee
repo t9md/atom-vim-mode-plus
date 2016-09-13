@@ -122,16 +122,6 @@ class Operator extends Base
           @cancelOperation()
           @abort()
 
-    markerForTrackChange = null
-    @onDidSelectTarget =>
-      @flash(@editor.getSelectedBufferRanges()) if @needFlash()
-      if @trackChange
-        markerForTrackChange = @editor.markBufferRange(@editor.getSelectedBufferRange())
-
-    @onDidFinishOperation =>
-      if markerForTrackChange?
-        @setMarkForChange(range) if (range = markerForTrackChange.getBufferRange())
-
   # called by operationStack
   setOperatorModifier: ({occurence, wise}) ->
     if occurence? and occurence isnt @withOccurrence
@@ -169,27 +159,25 @@ class Operator extends Base
   hasForceWise: ->
     @forceWise?
 
+  trackChangeIfNecessary: ->
+    if @trackChange
+      changeMarker = @editor.markBufferRange(@editor.getSelectedBufferRange())
+      @onDidFinishOperation =>
+        @setMarkForChange(changeMarker.getBufferRange())
+
   # Return true unless all selection is empty.
   selectTarget: ->
-    # console.log "------- selectTarget begin #{@getName()}"
-
     @observeSelectTarget()
     @saveStartOfSelections() if @isMode('visual')
-    # console.log "  - will-calling @emitWillSelectTarget"
+
     @emitWillSelectTarget()
-    # console.log "  - did-calling @emitWillSelectTarget"
-    # console.log '------pre sel'
-    # p @editor.getSelectedText()
-    # console.log 'before sel ids', @editor.getSelections().map (s) -> s.id
     @target.select()
-    # console.log 'after sel ids', @editor.getSelections().map (s) -> s.id
-    # console.log '------post sel'
-    # p @editor.getSelectedText()
     @saveStartOfSelections() unless @_restoreStartOfSelections?
-    # console.log "  - will-calling @emitDidSelectTarget"
+
+    @flashIfNecessary(@editor.getSelectedBufferRanges())
+    @trackChangeIfNecessary()
+
     @emitDidSelectTarget()
-    # console.log "  - did-calling @emitDidSelectTarget"
-    # console.log "------- selectTarget finish #{@getName()}"
     haveSomeSelection(@editor)
 
   setTextToRegisterForSelection: (selection) ->
@@ -199,10 +187,11 @@ class Operator extends Base
     text += "\n" if (@target.isLinewise?() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
 
-  flash: (ranges) ->
-    highlightRanges @editor, ranges,
-      class: 'vim-mode-plus-flash'
-      timeout: settings.get('flashOnOperateDuration')
+  flashIfNecessary: (ranges) ->
+    if @needFlash()
+      highlightRanges @editor, ranges,
+        class: 'vim-mode-plus-flash'
+        timeout: settings.get('flashOnOperateDuration')
 
   updatePreviousSelection: ->
     if @isMode('visual', 'blockwise')
@@ -500,7 +489,7 @@ class Increase extends Operator
         newRanges.push ranges
 
     if (newRanges = _.flatten(newRanges)).length
-      @flash(newRanges) if @needFlash()
+      @flashIfNecessary(newRanges)
     else
       atom.beep()
 
@@ -535,7 +524,7 @@ class IncrementNumber extends Operator
       newRanges = for selection in @editor.getSelectionsOrderedByBufferPosition()
         @replaceNumber(selection.getBufferRange(), pattern)
     if (newRanges = _.flatten(newRanges)).length
-      @flash(newRanges) if @needFlash()
+      @flashIfNecessary(newRanges)
     else
       atom.beep()
     for selection in @editor.getSelections()
@@ -578,7 +567,7 @@ class PutBefore extends Operator
           linewise: (type is 'linewise') or @isMode('visual', 'linewise')
           select: @selectPastedText
         @setMarkForChange(newRange)
-        @flash(newRange) if @needFlash()
+        @flashIfNecessary(newRange)
 
     if @selectPastedText
       @activateModeIfNecessary('visual', swrap.detectVisualModeSubmode(@editor))
