@@ -230,7 +230,8 @@ class Base
     @subscriptions = new CompositeDisposable()
 
     [
-      './operator', './motion', './text-object',
+      './operator', './operator-insert', './operator-transform-string',
+      './motion', './text-object',
       './insert-mode', './misc-command'
     ].forEach(require)
 
