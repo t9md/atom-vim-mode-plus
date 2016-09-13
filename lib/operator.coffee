@@ -65,7 +65,7 @@ class Operator extends Base
     return if @isMode('visual')
     return unless @flashTarget
     return unless settings.get('flashOnOperate')
-    return @getName() in settings.get('flashOnOperateBlacklist')
+    return if @getName() in settings.get('flashOnOperateBlacklist')
 
     highlightRanges @editor, ranges,
       class: 'vim-mode-plus-flash'
