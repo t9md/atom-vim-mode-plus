@@ -384,7 +384,12 @@ class Delete extends Operator
   wasLinewise: null
 
   initialize: ->
+    super
     @wasLinewise = null
+    if @instanceof('DeleteLine')
+      @wasLinewise = true
+    else if @isMode('visual') and not @isMode('visual', 'linewise')
+      @stayAtSamePosition = false
 
   mutateSelection: (selection) =>
     {cursor} = selection
@@ -401,12 +406,12 @@ class Delete extends Operator
         cursor.setBufferPosition([vimEof.row, 0])
 
       if @needStay()
-        headPosition = swrap(selection).getBufferPositionFor('head', fromProperty: true)
-        cursor.setBufferPosition([cursor.getBufferRow(), headPosition.column])
-        cursor.goalColumn = headPosition.column
+        head = swrap(selection).getBufferPositionFor('head', fromProperty: true)
+        start = swrap(selection).getBufferPositionFor('start', fromProperty: true)
+        cursor.setBufferPosition([start.row, head.column])
+        cursor.goalColumn = head.column
       else
         cursor.skipLeadingWhitespace()
-
 
 class DeleteRight extends Delete
   @extend()
