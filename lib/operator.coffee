@@ -681,15 +681,3 @@ class Replace extends Operator
         selection.destroy()
 
     @activateMode('normal')
-
-# [SHOULD remove?]
-class SetCursorsToStartOfTarget extends Operator
-  @extend()
-  flashTarget: false
-  mutateSelection: (selection) ->
-    swrap(selection).setBufferPositionTo('start')
-
-class SetCursorsToStartOfRangeMarker extends SetCursorsToStartOfTarget
-  @extend()
-  flashTarget: false
-  target: "RangeMarker"
