@@ -26,7 +26,6 @@ vimStateMethods = [
   "onWillSelectTarget"
   "onDidSelectTarget"
   "onDidSetTarget"
-  "onDidRestoreStartOfSelections"
   "onDidFinishOperation"
   "onDidCancelSelectList"
   "subscribe"
@@ -223,9 +222,6 @@ class Base
 
   emitDidSetTarget: (operator) ->
     @vimState.emitter.emit('did-set-target', operator)
-
-  emitDidRestoreStartOfSelections: ->
-    @vimState.emitter.emit('did-restore-start-of-selections')
 
   # Class methods
   # -------------------------

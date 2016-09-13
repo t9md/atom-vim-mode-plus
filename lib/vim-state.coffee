@@ -175,9 +175,6 @@ class VimState
   onDidSelectTarget: (fn) -> @subscribe @emitter.on('did-select-target', fn)
   onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
 
-  # [TEMPROARY]
-  onDidRestoreStartOfSelections: (fn) -> @subscribe @emitter.on('did-restore-start-of-selections', fn)
-
   # Event for operation execution life cycle.
   onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
 

@@ -159,12 +159,6 @@ class Operator extends Base
   hasForceWise: ->
     @forceWise?
 
-  trackChangeIfNecessary: ->
-    if @trackChange
-      changeMarker = @editor.markBufferRange(@editor.getSelectedBufferRange())
-      @onDidFinishOperation =>
-        @setMarkForChange(changeMarker.getBufferRange())
-
   # Return true unless all selection is empty.
   selectTarget: ->
     @observeSelectTarget()
@@ -193,6 +187,12 @@ class Operator extends Base
         class: 'vim-mode-plus-flash'
         timeout: settings.get('flashOnOperateDuration')
 
+  trackChangeIfNecessary: ->
+    if @trackChange
+      changeMarker = @editor.markBufferRange(@editor.getSelectedBufferRange())
+      @onDidFinishOperation =>
+        @setMarkForChange(changeMarker.getBufferRange())
+
   updatePreviousSelection: ->
     if @isMode('visual', 'blockwise')
       properties = @vimState.getLastBlockwiseSelection().getCharacterwiseProperties()
@@ -208,22 +208,26 @@ class Operator extends Base
     # We need to preserve selection before selection is cleared as a result of mutation.
     @updatePreviousSelection() if @isMode('visual')
 
+    # Mutation phase
     if @selectTarget()
       @editor.transact =>
         for selection in @editor.getSelections()
           @mutateSelection(selection)
 
+    # Cursor position placement [same as before OR start of original selection]
     if @needStay()
+      # save as before
       for selection in @editor.getSelections()
         if swrap(selection).getProperties().head?
           swrap(selection).setBufferPositionTo('head', fromProperty: true)
         else
           selection.destroy()
     else
+      # start of original selection
       @restoreStartOfSelections()
 
     @clearStartOfSelections()
-    @onDidRestoreCursorPosition?()
+    @onDidRestoreCursorPosition?() # FIXME
     @activateMode(@finalMode, @finalSubmode)
 
   @_restoreStartOfSelections: null
@@ -234,7 +238,6 @@ class Operator extends Base
   restoreStartOfSelections: ->
     @_restoreStartOfSelections()
     @clearStartOfSelections()
-    @emitDidRestoreStartOfSelections()
 
   clearStartOfSelections: ->
     @_restoreStartOfSelections = null
