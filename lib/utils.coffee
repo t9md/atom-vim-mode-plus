@@ -70,25 +70,6 @@ saveCursorPositions = (editor) ->
       point = points.get(cursor)
       cursor.setBufferPosition(point)
 
-# Return function
-# Which function set selection.cursor to stored start position, yes selection is cleard
-saveStartOfSelections = (editor) ->
-  points = new Map
-  for selection in editor.getSelections()
-    point = selection.getBufferRange().start
-    points.set(selection, point)
-  ->
-    selectionIsNotFound = (selection) ->
-      not points.has(selection)
-
-    # strict. in vB mode, vB range is reselected on @target.selection
-    # so selection.id is change in that case we won't restore.
-    return if editor.getSelections().some(selectionIsNotFound)
-
-    for selection in editor.getSelections()
-      point = points.get(selection)
-      selection.cursor.setBufferPosition(point)
-
 getKeystrokeForEvent = (event) ->
   keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
   atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
@@ -693,7 +674,6 @@ module.exports = {
   getView
   saveEditorState
   saveCursorPositions
-  saveStartOfSelections
   getKeystrokeForEvent
   getCharacterForEvent
   isLinewiseRange

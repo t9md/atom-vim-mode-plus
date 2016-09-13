@@ -12,7 +12,6 @@ p = (args...) -> console.log inspect(args...)
   getBufferRangeForPatternFromPoint
   cursorIsOnWhiteSpace
   cursorIsAtEmptyRow
-  saveStartOfSelections
   scanInRanges
   getCharacterAtCursor
 } = require './utils'
@@ -39,16 +38,6 @@ class Operator extends Base
   finalMode: "normal"
   finalSubmode: null
 
-  setMarkForChange: (range) ->
-    @vimState.mark.setRange('[', ']', range)
-
-  needFlash: ->
-    return false if @isMode('visual')
-    if @flashTarget and settings.get('flashOnOperate')
-      @getName() not in settings.get('flashOnOperateBlacklist')
-    else
-      false
-
   # [FIXME]
   # For TextObject, isLinewise result is changed before / after select.
   # This mean return value may change depending on when you call.
@@ -66,6 +55,29 @@ class Operator extends Base
       else
         settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
 
+  isWithOccurrence: ->
+    @withOccurrence
+
+  setMarkForChange: (range) ->
+    @vimState.mark.setRange('[', ']', range)
+
+  flashIfNecessary: (ranges) ->
+    return if @isMode('visual')
+    return unless @flashTarget
+    return unless settings.get('flashOnOperate')
+    return @getName() in settings.get('flashOnOperateBlacklist')
+
+    highlightRanges @editor, ranges,
+      class: 'vim-mode-plus-flash'
+      timeout: settings.get('flashOnOperateDuration')
+
+  trackChangeIfNecessary: ->
+    return unless @trackChange
+
+    changeMarker = @editor.markBufferRange(@editor.getSelectedBufferRange())
+    @onDidFinishOperation =>
+      @setMarkForChange(changeMarker.getBufferRange())
+
   constructor: ->
     super
     # Guard when Repeated.
@@ -75,6 +87,17 @@ class Operator extends Base
     @initialize()
     @setTarget(@new(@target)) if _.isString(@target)
 
+  # @target - TextObject or Motion to operate on.
+  setTarget: (target) ->
+    unless _.isFunction(target.select)
+      @vimState.emitter.emit('did-fail-to-set-target')
+      throw new OperatorError("#{@getName()} cannot set #{target?.getName?()} as target")
+    @target = target
+    @target.setOperator(this)
+    @modifyTargetWiseIfNecessary()
+    @emitDidSetTarget(this)
+    this
+
   # [FIXME]
   oldRestorePoint: (selection) ->
     return unless @needStay()
@@ -83,6 +106,28 @@ class Operator extends Base
     else
       selection.destroy()
 
+  # called by operationStack
+  setOperatorModifier: ({occurence, wise}) ->
+    if occurence? and occurence isnt @withOccurrence
+      @withOccurrence = occurence
+      @vimState.operationStack.addToClassList('with-occurrence')
+
+    if wise?
+      @forceWise = wise
+
+  modifyTargetWiseIfNecessary: ->
+    return unless @forceWise?
+
+    switch @forceWise
+      when 'characterwise'
+        if @target.linewise
+          @target.linewise = false
+          @target.inclusive = false
+        else
+          @target.inclusive = not @target.inclusive
+      when 'linewise'
+        @target.linewise = true
+
   # now only for occurence
   observeSelectTarget: ->
     if @isWithOccurrence()
@@ -90,7 +135,7 @@ class Operator extends Base
       @onWillSelectTarget =>
         if @isMode('visual')
           scanRanges = @editor.getSelectedBufferRanges()
-          @vimState.modeManager.deactivate() # clear selection
+          @vimState.modeManager.deactivate() # clear selection FIXME
           console.log 'deactivate on will-select-target'
 
         unless @patternForOccurence
@@ -112,129 +157,12 @@ class Operator extends Base
           @cancelOperation()
           @abort()
 
-  # called by operationStack
-  setOperatorModifier: ({occurence, wise}) ->
-    if occurence? and occurence isnt @withOccurrence
-      @withOccurrence = occurence
-      @vimState.operationStack.addToClassList('with-occurrence')
-
-    if wise?
-      @forceWise = wise
-
-  # @target - TextObject or Motion to operate on.
-  setTarget: (target) ->
-    unless _.isFunction(target.select)
-      @vimState.emitter.emit('did-fail-to-set-target')
-      throw new OperatorError("#{@getName()} cannot set #{target?.getName?()} as target")
-    @target = target
-    @target.setOperator(this)
-    @modifyTargetWise(@target, @forceWise) if @hasForceWise()
-    @emitDidSetTarget(this)
-    this
-
-  modifyTargetWise: (target, wise) ->
-    switch wise
-      when 'characterwise'
-        if target.linewise
-          target.linewise = false
-          target.inclusive = false
-        else
-          target.inclusive = not target.inclusive
-      when 'linewise'
-        target.linewise = true
-
-  isWithOccurrence: ->
-    @withOccurrence
-
-  hasForceWise: ->
-    @forceWise?
-
-  # Return true unless all selection is empty.
-  selectTarget: ->
-    @observeSelectTarget()
-    @saveStartOfSelections() if @isMode('visual')
-
-    if not @instanceof('Select') and @needStay()
-      unless @isMode('visual')
-        @updateSelectionProperties()
-        console.log 'update prop on will-select-target'
-    @emitWillSelectTarget()
-    @target.select()
-    @saveStartOfSelections() unless @_restoreStartOfSelections?
-
-    @flashIfNecessary(@editor.getSelectedBufferRanges())
-    @trackChangeIfNecessary()
-
-    @emitDidSelectTarget()
-    haveSomeSelection(@editor)
-
   setTextToRegisterForSelection: (selection) ->
     @setTextToRegister(selection.getText(), selection)
 
   setTextToRegister: (text, selection) ->
     text += "\n" if (@target.isLinewise?() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
-
-  flashIfNecessary: (ranges) ->
-    if @needFlash()
-      highlightRanges @editor, ranges,
-        class: 'vim-mode-plus-flash'
-        timeout: settings.get('flashOnOperateDuration')
-
-  trackChangeIfNecessary: ->
-    if @trackChange
-      changeMarker = @editor.markBufferRange(@editor.getSelectedBufferRange())
-      @onDidFinishOperation =>
-        @setMarkForChange(changeMarker.getBufferRange())
-
-  updatePreviousSelection: ->
-    if @isMode('visual', 'blockwise')
-      properties = @vimState.getLastBlockwiseSelection().getCharacterwiseProperties()
-    else
-      lastSelection = @editor.getLastSelection()
-      properties = swrap(lastSelection).detectCharacterwiseProperties()
-
-    submode = @vimState.submode
-    globalState.previousSelection = {properties, submode}
-
-  # Main
-  execute: ->
-    # We need to preserve selection before selection is cleared as a result of mutation.
-    @updatePreviousSelection() if @isMode('visual')
-
-    # Mutation phase
-    if @selectTarget()
-      @editor.transact =>
-        for selection in @editor.getSelections()
-          @mutateSelection(selection)
-
-    # Cursor position placement [same as before OR start of original selection]
-    if @needStay()
-      # save as before
-      for selection in @editor.getSelections()
-        if swrap(selection).getProperties().head?
-          swrap(selection).setBufferPositionTo('head', fromProperty: true)
-        else
-          selection.destroy()
-    else
-      # start of original selection
-      @restoreStartOfSelections()
-
-    @clearStartOfSelections()
-    @onDidRestoreCursorPosition?() # FIXME
-    @activateMode(@finalMode, @finalSubmode)
-
-  @_restoreStartOfSelections: null
-
-  saveStartOfSelections: ->
-    @_restoreStartOfSelections = saveStartOfSelections(@editor)
-
-  restoreStartOfSelections: ->
-    @_restoreStartOfSelections()
-    @clearStartOfSelections()
-
-  clearStartOfSelections: ->
-    @_restoreStartOfSelections = null
 
   # Return {pattern, bufferRange},
   #   - Mandatory: pattern
@@ -266,6 +194,84 @@ class Operator extends Base
     bufferRange = getCurrentWordBufferRange(cursor)
     cursorWord = @editor.getTextInBufferRange(bufferRange)
     {pattern: ///\b#{_.escapeRegExp(cursorWord)}\b///g, bufferRange}
+
+  # Main
+  execute: ->
+    # We need to preserve selection before selection is cleared as a result of mutation.
+    @updatePreviousSelection() if @isMode('visual')
+
+    # Mutation phase
+    if @selectTarget()
+      @editor.transact =>
+        @mutateSelection(selection) for selection in @editor.getSelections()
+
+    # Cursor position placement [same as before OR start of original selection]
+    if @needStay()
+      # same as before
+      for selection in @editor.getSelections()
+        if swrap(selection).getProperties().head?
+          swrap(selection).setBufferPositionTo('head', fromProperty: true)
+        else
+          selection.destroy()
+    else
+      # start of original selection
+      @restoreStartOfSelections()
+
+    @startOfSelections = null
+    @onDidRestoreCursorPosition?() # FIXME
+    @activateMode(@finalMode, @finalSubmode)
+
+  # Return true unless all selection is empty.
+  selectTarget: ->
+    @observeSelectTarget()
+    if @isMode('visual')
+      @startOfSelections = @saveStartOfSelections()
+
+    if not @instanceof('Select') and @needStay()
+      unless @isMode('visual')
+        @updateSelectionProperties() # [FIXME] don't store to swrap, explicitly store and clear
+        console.log 'update prop on will-select-target'
+    @emitWillSelectTarget()
+    @target.select()
+    @startOfSelections ?= @saveStartOfSelections()
+
+    @flashIfNecessary(@editor.getSelectedBufferRanges())
+    @trackChangeIfNecessary()
+
+    @emitDidSelectTarget()
+    haveSomeSelection(@editor)
+
+  updatePreviousSelection: ->
+    if @isMode('visual', 'blockwise')
+      properties = @vimState.getLastBlockwiseSelection().getCharacterwiseProperties()
+    else
+      lastSelection = @editor.getLastSelection()
+      properties = swrap(lastSelection).detectCharacterwiseProperties()
+
+    submode = @vimState.submode
+    globalState.previousSelection = {properties, submode}
+
+  # Save and restore start of selection.
+  @startOfSelections: null
+  saveStartOfSelections: ->
+    pointBySelection = new Map
+    for selection in @editor.getSelections()
+      point = selection.getBufferRange().start
+      pointBySelection.set(selection, point)
+    pointBySelection
+
+  restoreStartOfSelections: ->
+    selectionIsNotFound = (selection) =>
+      not @startOfSelections.has(selection)
+
+    # strict. in vB mode, vB range is reselected on @target.selection
+    # so selection.id is change in that case we won't restore.
+    selections = @editor.getSelections()
+    return if selections.some(selectionIsNotFound)
+
+    for selection in selections
+      point = @startOfSelections.get(selection)
+      selection.cursor.setBufferPosition(point)
 
 # Repeat
 # =========================
