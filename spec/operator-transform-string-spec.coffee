@@ -480,7 +480,7 @@ describe "Operator TransformString", ->
             keystroke 'j'
             ensure ['y s i w', input: ']'], text: "(apple)\n{orange}\n[lemmon]"
 
-    describe 'map-surround', ->
+    xdescribe 'map-surround', ->
       beforeEach ->
         set
           text: """

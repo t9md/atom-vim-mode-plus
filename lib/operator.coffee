@@ -2,6 +2,8 @@ LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 globalState = require './global-state'
 
+{inspect} = require 'util'
+p = (args...) -> console.log inspect(args...)
 {
   haveSomeSelection
   highlightRanges
@@ -10,6 +12,7 @@ globalState = require './global-state'
   getBufferRangeForPatternFromPoint
   cursorIsOnWhiteSpace
   cursorIsAtEmptyRow
+  saveStartOfSelections
   scanInRanges
   getCharacterAtCursor
 } = require './utils'
@@ -35,7 +38,6 @@ class Operator extends Base
 
   finalMode: "normal"
   finalSubmode: null
-
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
@@ -73,31 +75,25 @@ class Operator extends Base
     @initialize()
     @setTarget(@new(@target)) if _.isString(@target)
 
-  restorePoint: (selection) ->
-    which = if @needStay() then 'head' else 'start'
-    restore = ->
-      swrap(selection).setBufferPositionTo(which, fromProperty: true)
-
+  # [FIXME]
+  oldRestorePoint: (selection) ->
+    return unless @needStay()
     if swrap(selection).getProperties().head?
-      if @isWithOccurrence()
-        # Deffer restoring cursor point.
-        # restorePoint is processed one by one, so immediately updating cursorPosition result in
-        # intersecting to other selection which is still not restored.
-        # When intersecting selection is destroyed, cursor got involved moved automatically.
-        @onDidFinishOperation -> restore()
-      else
-        restore()
+      swrap(selection).setBufferPositionTo('head', fromProperty: true)
     else
       selection.destroy()
 
-  observeSelectAction: ->
-    # Select operator is used only in visual-mode.
-    # visual-mode selection modification should be handled by Motion::select(), TextObject::select()
+  observeSelectTarget: ->
     unless @instanceof('Select')
       if @needStay()
-        @onWillSelectTarget => @updateSelectionProperties() unless @isMode('visual')
-      else
-        @onDidSelectTarget => @updateSelectionProperties()
+        @onWillSelectTarget =>
+          unless @isMode('visual')
+            @updateSelectionProperties()
+            console.log 'update prop on will-select-target'
+      # else
+      #   @onDidSelectTarget =>
+      #     console.log 'update prop on did-select-target'
+      #     @updateSelectionProperties()
 
     if @isWithOccurrence()
       scanRanges = null
@@ -105,6 +101,7 @@ class Operator extends Base
         if @isMode('visual')
           scanRanges = @editor.getSelectedBufferRanges()
           @vimState.modeManager.deactivate() # clear selection
+          console.log 'deactivate on will-select-target'
 
         unless @patternForOccurence
           {pattern, bufferRange} = @getPatternAndBufferRangeForOccurrence()
@@ -120,7 +117,7 @@ class Operator extends Base
           @editor.setSelectedBufferRanges(ranges)
         else
           # [FIXME]
-          @restorePoint(selection) for selection in @editor.getSelections()
+          @oldRestorePoint(selection) for selection in @editor.getSelections()
           @editor.clearSelections() unless @isMode('visual')
           @cancelOperation()
           @abort()
@@ -174,10 +171,25 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    @observeSelectAction()
+    # console.log "------- selectTarget begin #{@getName()}"
+
+    @observeSelectTarget()
+    @saveStartOfSelections() if @isMode('visual')
+    # console.log "  - will-calling @emitWillSelectTarget"
     @emitWillSelectTarget()
+    # console.log "  - did-calling @emitWillSelectTarget"
+    # console.log '------pre sel'
+    # p @editor.getSelectedText()
+    # console.log 'before sel ids', @editor.getSelections().map (s) -> s.id
     @target.select()
+    # console.log 'after sel ids', @editor.getSelections().map (s) -> s.id
+    # console.log '------post sel'
+    # p @editor.getSelectedText()
+    @saveStartOfSelections() unless @_restoreStartOfSelections?
+    # console.log "  - will-calling @emitDidSelectTarget"
     @emitDidSelectTarget()
+    # console.log "  - did-calling @emitDidSelectTarget"
+    # console.log "------- selectTarget finish #{@getName()}"
     haveSomeSelection(@editor)
 
   setTextToRegisterForSelection: (selection) ->
@@ -202,6 +214,7 @@ class Operator extends Base
     submode = @vimState.submode
     globalState.previousSelection = {properties, submode}
 
+  # Main
   execute: ->
     # We need to preserve selection before selection is cleared as a result of mutation.
     @updatePreviousSelection() if @isMode('visual')
@@ -211,7 +224,31 @@ class Operator extends Base
         for selection in @editor.getSelections()
           @mutateSelection(selection)
 
+    if @needStay()
+      for selection in @editor.getSelections()
+        if swrap(selection).getProperties().head?
+          swrap(selection).setBufferPositionTo('head', fromProperty: true)
+        else
+          selection.destroy()
+    else
+      @restoreStartOfSelections()
+
+    @clearStartOfSelections()
+    @onDidRestoreCursorPosition?()
     @activateMode(@finalMode, @finalSubmode)
+
+  @_restoreStartOfSelections: null
+
+  saveStartOfSelections: ->
+    @_restoreStartOfSelections = saveStartOfSelections(@editor)
+
+  restoreStartOfSelections: ->
+    @_restoreStartOfSelections()
+    @clearStartOfSelections()
+    @emitDidRestoreStartOfSelections()
+
+  clearStartOfSelections: ->
+    @_restoreStartOfSelections = null
 
   # Return {pattern, bufferRange},
   #   - Mandatory: pattern
@@ -324,7 +361,6 @@ class CreateRangeMarker extends Operator
 
   mutateSelection: (selection) ->
     @vimState.addRangeMarkersForRanges(selection.getBufferRange())
-    @restorePoint(selection)
 
 class ToggleRangeMarker extends CreateRangeMarker
   @extend()
@@ -356,23 +392,32 @@ class Delete extends Operator
   hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
   flashTarget: false
+  wasLinewise: null
+
+  initialize: ->
+    @wasLinewise = null
 
   mutateSelection: (selection) =>
     {cursor} = selection
-    wasLinewise = swrap(selection).isLinewise()
+    @wasLinewise ?= swrap(selection).isLinewise()
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
-    vimEof = @getVimEofBufferPosition()
-    if cursor.getBufferPosition().isGreaterThan(vimEof)
-      cursor.setBufferPosition([vimEof.row, 0])
 
-    if wasLinewise
+  onDidRestoreCursorPosition: ->
+    return unless @wasLinewise
+    vimEof = @getVimEofBufferPosition()
+    for selection in @editor.getSelections()
+      {cursor} = selection
+      if cursor.getBufferPosition().isGreaterThan(vimEof)
+        cursor.setBufferPosition([vimEof.row, 0])
+
       if @needStay()
         headPosition = swrap(selection).getBufferPositionFor('head', fromProperty: true)
         cursor.setBufferPosition([cursor.getBufferRow(), headPosition.column])
         cursor.goalColumn = headPosition.column
       else
         cursor.skipLeadingWhitespace()
+
 
 class DeleteRight extends Delete
   @extend()
@@ -386,19 +431,14 @@ class DeleteLeft extends Delete
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
   target: 'MoveToLastCharacterOfLine'
-  initialize: ->
-    if @isVisualBlockwise = @isMode('visual', 'blockwise')
-      @requireTarget = false
-    super
-
   execute: ->
     # Ensure all selections to un-reversed
-    if @isVisualBlockwise
+    if isBlockwise = @isMode('visual', 'blockwise')
       swrap.setReversedState(@editor, false)
 
     super
 
-    if @isVisualBlockwise
+    if isBlockwise
       @getBlockwiseSelections().forEach (blockwiseSelection) ->
         startPosition = blockwiseSelection.getStartBufferPosition()
         blockwiseSelection.setHeadBufferPosition(startPosition)
@@ -420,16 +460,15 @@ class Yank extends Operator
 
   mutateSelection: (selection) ->
     @setTextToRegisterForSelection(selection)
-    @restorePoint(selection)
 
 class YankLine extends Yank
   @extend()
   target: 'MoveToRelativeLine'
 
-  mutateSelection: (selection) ->
+  execute: ->
     if @isMode('visual')
-      swrap(selection).expandOverLine()
-      swrap(selection).preserveCharacterwise()
+      unless @isMode('visual', 'linewise')
+        @vimState.modeManager.activate('visual', 'linewise')
     super
 
 class YankToLastCharacterOfLine extends Yank
@@ -634,14 +673,14 @@ class Replace extends Operator
     return unless @selectTarget()
     @editor.transact =>
       for selection in @editor.getSelections()
-        text = selection.getText().replace(/./g, input)
-        insertText = (text) ->
-          selection.insertText(text, autoIndentNewline: true)
-        if @target.instanceof('MoveRight')
-          insertText(text) if text.length >= @getCount()
-        else
-          insertText(text)
-        @restorePoint(selection) unless (input is "\n")
+        text = selection.getText()
+        if @target.instanceof('MoveRight') and text.length isnt @getCount()
+          continue
+
+        newText = text.replace(/./g, input)
+        newRange = selection.insertText(newText, autoIndentNewline: true)
+        if input isnt "\n"
+          selection.cursor.setBufferPosition(newRange.start)
 
     # FIXME this is very imperative, handling in very lower level.
     # find better place for operator in blockwise move works appropriately.

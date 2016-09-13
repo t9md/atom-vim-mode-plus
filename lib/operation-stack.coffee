@@ -22,7 +22,7 @@ class OperationStack
     {mode} = @vimState
     switch
       when operation.isOperator()
-        if (mode is 'visual') and operation.isRequireTarget()
+        if (mode is 'visual') and not operation.hasTarget() # don't want to override target
           operation = operation.setTarget(new CurrentSelection(@vimState))
       when operation.isTextObject()
         unless mode is 'operator-pending'
@@ -119,6 +119,10 @@ class OperationStack
   finish: (operation=null) ->
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
+
+    # FIXME
+    if operation?.isRecordable() and operation.isOperator()
+      operation._restoreStartOfSelections = null
 
     if @vimState.isMode('normal')
       @ensureAllSelectionsAreEmpty(operation)

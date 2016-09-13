@@ -2,7 +2,11 @@ LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {BufferedProcess} = require 'atom'
 
-{haveSomeSelection, isSingleLine} = require './utils'
+{
+  haveSomeSelection
+  isSingleLine
+  saveCursorPositions
+} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
@@ -15,7 +19,6 @@ class TransformString extends Operator
   @extend(false)
   trackChange: true
   stayOnLinewise: true
-  setPoint: true
   autoIndent: false
 
   @registerToSelectList: ->
@@ -24,7 +27,6 @@ class TransformString extends Operator
   mutateSelection: (selection) ->
     text = @getNewText(selection.getText(), selection)
     selection.insertText(text, {@autoIndent})
-    @restorePoint(selection) if @setPoint
 
 class ToggleCase extends TransformString
   @extend()
@@ -32,6 +34,8 @@ class ToggleCase extends TransformString
   @description: "`Hello World` -> `hELLO wORLD`"
   displayName: 'Toggle ~'
   hover: icon: ':toggle-case:', emoji: ':clap:'
+  stayAtSamePosition: true
+
   toggleCase: (char) ->
     charLower = char.toLowerCase()
     if charLower is char
@@ -40,13 +44,15 @@ class ToggleCase extends TransformString
       charLower
 
   getNewText: (text) ->
-    text.split('').map(@toggleCase).join('')
+    text.split('').map(@toggleCase.bind(this)).join('')
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
   hover: null
-  setPoint: false
+  stayAtSamePosition: false
   target: 'MoveRight'
+  restoreStartOfSelections: ->
+    # [FIXME] just for do nothing
 
 class UpperCase extends TransformString
   @extend()
@@ -54,6 +60,7 @@ class UpperCase extends TransformString
   @description: "`Hello World` -> `HELLO WORLD`"
   hover: icon: ':upper-case:', emoji: ':point_up:'
   displayName: 'Upper'
+  stayAtSamePosition: true
   getNewText: (text) ->
     text.toUpperCase()
 
@@ -63,6 +70,7 @@ class LowerCase extends TransformString
   @description: "`Hello World` -> `hello world`"
   hover: icon: ':lower-case:', emoji: ':point_down:'
   displayName: 'Lower'
+  stayAtSamePosition: true
   getNewText: (text) ->
     text.toLowerCase()
 
@@ -148,11 +156,6 @@ class CompactSpaces extends TransformString
   @registerToSelectList()
   @description: "`  a    b    c` -> `a b c`"
   displayName: 'Compact space'
-  mutateSelection: (selection) ->
-    text = @getNewText(selection.getText(), selection)
-    selection.insertText(text, {@autoIndent})
-    @restorePoint(selection) if @setPoint
-
   getNewText: (text) ->
     if text.match(/^[ ]+$/)
       ' '
@@ -177,7 +180,6 @@ class TransformStringByExternalCommand extends TransformString
 
   collect: (resolve) ->
     @stdoutBySelection = new Map
-    restorePoint = null
     unless @isMode('visual')
       @updateSelectionProperties()
       @target.select()
@@ -196,7 +198,7 @@ class TransformStringByExternalCommand extends TransformString
             resolve() if (running is finished)
 
           @runExternalCommand {command, args, stdout, exit, stdin}
-          @restorePoint(selection) unless @isMode('visual')
+          @oldRestorePoint(selection) unless @isMode('visual')
 
   runExternalCommand: (options) ->
     {stdin} = options
@@ -291,11 +293,13 @@ class Indent extends TransformString
   stayOnLinewise: false
   indentFunction: "indentSelectedRows"
 
+  initialize: ->
+    @onDidRestoreStartOfSelections =>
+      for cursor in @editor.getCursors()
+        cursor.moveToFirstCharacterOfLine()
+
   mutateSelection: (selection) ->
     selection[@indentFunction]()
-    @restorePoint(selection)
-    unless @needStay()
-      selection.cursor.moveToFirstCharacterOfLine()
 
 class Outdent extends Indent
   @extend()
@@ -312,7 +316,6 @@ class ToggleLineComments extends TransformString
   hover: icon: ':toggle-line-comments:', emoji: ':mute:'
   mutateSelection: (selection) ->
     selection.toggleLineComments()
-    @restorePoint(selection)
 
 # Surround < TransformString
 # -------------------------
@@ -382,13 +385,8 @@ class SurroundSmartWord extends Surround
 class MapSurround extends Surround
   @extend()
   @description: "Surround each word(`/\w+/`) within target"
-  mapRegExp: /\w+/g
-
-  mutateSelection: (selection) ->
-    scanRange = selection.getBufferRange()
-    @editor.scanInBufferRange @mapRegExp, scanRange, ({matchText, replace}) =>
-      replace(@getNewText(matchText))
-    @restorePoint(selection) if @setPoint
+  withOccurrence: true
+  patternForOccurence: /\w+/g
 
 class DeleteSurround extends Surround
   @extend()
@@ -442,10 +440,12 @@ class ChangeSurroundAnyPair extends ChangeSurround
   @description: "Change surround character, from char is auto-detected"
   charsMax: 1
   target: "AAnyPair"
+  cursorPositions: null
+  restoreCursorPositions: null
 
   initialize: ->
     @onDidSetTarget =>
-      @updateSelectionProperties()
+      @restoreCursorPositions = saveCursorPositions(@editor)
       @target.select()
       unless haveSomeSelection(@editor)
         @vimState.input.cancel()
@@ -454,8 +454,9 @@ class ChangeSurroundAnyPair extends ChangeSurround
     super
 
   onConfirm: (@char) ->
-    # Clear pre-selected selection to start mutation non-selection.
-    @restorePoint(selection) for selection in @editor.getSelections()
+    # Clear pre-selected selection to start mutation from non-selection.
+    @restoreCursorPositions()
+    @restoreCursorPositions = null
     @input = @char
     @processOperation()
 
@@ -559,7 +560,6 @@ class ChangeOrder extends TransformString
     rows = @getNewRows(textForRows)
     newText = rows.join("\n") + "\n"
     selection.insertText(newText)
-    @restorePoint(selection)
 
 class Reverse extends ChangeOrder
   @extend()

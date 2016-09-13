@@ -74,7 +74,7 @@ class ActivateInsertMode extends Operator
       return unless text = @getInsertedText()
       unless @instanceof('Change')
         @flashTarget = @trackChange = true
-        @observeSelectAction()
+        @observeSelectTarget()
         @emitDidSelectTarget()
       @editor.transact =>
         for selection in @editor.getSelections()
@@ -252,13 +252,8 @@ class ChangeToLastCharacterOfLine extends Change
   @extend()
   target: 'MoveToLastCharacterOfLine'
 
-  initialize: ->
-    if @isVisualBlockwise = @isMode('visual', 'blockwise')
-      @requireTarget = false
-    super
-
   execute: ->
     # Ensure all selections to un-reversed
-    if @isVisualBlockwise
+    if @isMode('visual', 'blockwise')
       swrap.setReversedState(@editor, false)
     super

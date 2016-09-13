@@ -23,6 +23,16 @@ describe "Visual Blockwise", ->
     6-------------------
     """
 
+  textAfterInserted = """
+    01234567890123456789
+    1-------------------
+    2----!!!
+    3----!!!
+    4----!!!
+    5----!!!
+    6-------------------
+    """
+
   blockTexts = [
     '56789012345' # 0
     '-----------' # 1
@@ -32,11 +42,24 @@ describe "Visual Blockwise", ->
     'C---------D' # 5
     '-----------' # 6
   ]
+
   textData = new TextData(textInitial)
 
   selectBlockwise = ->
     set cursor: [2, 5]
     ensure 'v 3 j 1 0 l ctrl-v',
+      mode: ['visual', 'blockwise']
+      selectedBufferRange: [
+        [[2, 5], [2, 16]]
+        [[3, 5], [3, 16]]
+        [[4, 5], [4, 16]]
+        [[5, 5], [5, 16]]
+      ]
+      selectedText: blockTexts[2..5]
+
+  selectBlockwiseReversely = ->
+    set cursor: [2, 15]
+    ensure 'v 3 j 1 0 h ctrl-v',
       mode: ['visual', 'blockwise']
       selectedBufferRange: [
         [[2, 5], [2, 16]]
@@ -118,37 +141,40 @@ describe "Visual Blockwise", ->
       ensure 'k', selectedTextOrdered: blockTexts[3..5]
       ensure '2 k', selectedTextOrdered: blockTexts[3]
 
+  # FIXME add C, D spec for selectBlockwiseReversely() situation
   describe "C", ->
-    beforeEach ->
-      selectBlockwise()
-    it "change-to-last-character-of-line for each selection", ->
+    ensureChange = ->
       ensure 'C',
         mode: 'insert'
         cursor: [[2, 5], [3, 5], [4, 5], [5, 5] ]
         text: textAfterDeleted
-
       editor.insertText("!!!")
       ensure
         mode: 'insert'
         cursor: [[2, 8], [3, 8], [4, 8], [5, 8]]
-        text: """
-          01234567890123456789
-          1-------------------
-          2----!!!
-          3----!!!
-          4----!!!
-          5----!!!
-          6-------------------
-          """
+        text: textAfterInserted
+
+    it "change-to-last-character-of-line for each selection", ->
+      selectBlockwise()
+      ensureChange()
+
+    it "[selection reversed] change-to-last-character-of-line for each selection", ->
+      selectBlockwiseReversely()
+      ensureChange()
 
   describe "D", ->
-    beforeEach ->
-      selectBlockwise()
-    it "delete-to-last-character-of-line for each selection", ->
+    ensureDelete = ->
       ensure 'D',
         text: textAfterDeleted
         cursor: [2, 4]
         mode: 'normal'
+
+    it "delete-to-last-character-of-line for each selection", ->
+      selectBlockwise()
+      ensureDelete()
+    it "[selection reversed] delete-to-last-character-of-line for each selection", ->
+      selectBlockwiseReversely()
+      ensureDelete()
 
   describe "I", ->
     beforeEach ->
