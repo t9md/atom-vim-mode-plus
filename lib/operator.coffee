@@ -83,18 +83,8 @@ class Operator extends Base
     else
       selection.destroy()
 
+  # now only for occurence
   observeSelectTarget: ->
-    unless @instanceof('Select')
-      if @needStay()
-        @onWillSelectTarget =>
-          unless @isMode('visual')
-            @updateSelectionProperties()
-            console.log 'update prop on will-select-target'
-      # else
-      #   @onDidSelectTarget =>
-      #     console.log 'update prop on did-select-target'
-      #     @updateSelectionProperties()
-
     if @isWithOccurrence()
       scanRanges = null
       @onWillSelectTarget =>
@@ -164,6 +154,10 @@ class Operator extends Base
     @observeSelectTarget()
     @saveStartOfSelections() if @isMode('visual')
 
+    if not @instanceof('Select') and @needStay()
+      unless @isMode('visual')
+        @updateSelectionProperties()
+        console.log 'update prop on will-select-target'
     @emitWillSelectTarget()
     @target.select()
     @saveStartOfSelections() unless @_restoreStartOfSelections?
