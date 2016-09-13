@@ -1,28 +1,12 @@
-LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
-globalState = require './global-state'
-{Point, Range, CompositeDisposable, BufferedProcess} = require 'atom'
 
 {
-  haveSomeSelection
   moveCursorLeft, moveCursorRight
-  highlightRanges, getNewTextRangeFromCheckpoint
-  isEndsWithNewLineForBufferRow
-  isAllWhiteSpace
-  isSingleLine
-  getCurrentWordBufferRange
-  getBufferRangeForPatternFromPoint
-  cursorIsOnWhiteSpace
-  cursorIsAtEmptyRow
-  scanInRanges
-  getCharacterAtCursor
+  getNewTextRangeFromCheckpoint
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
-Base = require './base'
-{OperatorError} = require './errors'
-
-Operator = Base.getClass('Operator')
+Operator = require('./base').getClass('Operator')
 
 # Insert entering operation
 # -------------------------

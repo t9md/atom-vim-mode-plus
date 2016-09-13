@@ -1,15 +1,11 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 globalState = require './global-state'
-{Point, Range, CompositeDisposable, BufferedProcess} = require 'atom'
 
 {
   haveSomeSelection
-  moveCursorLeft, moveCursorRight
-  highlightRanges, getNewTextRangeFromCheckpoint
+  highlightRanges
   isEndsWithNewLineForBufferRow
-  isAllWhiteSpace
-  isSingleLine
   getCurrentWordBufferRange
   getBufferRangeForPatternFromPoint
   cursorIsOnWhiteSpace

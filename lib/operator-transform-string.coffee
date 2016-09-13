@@ -1,27 +1,11 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
-globalState = require './global-state'
-{Point, Range, CompositeDisposable, BufferedProcess} = require 'atom'
+{BufferedProcess} = require 'atom'
 
-{
-  haveSomeSelection
-  moveCursorLeft, moveCursorRight
-  highlightRanges, getNewTextRangeFromCheckpoint
-  isEndsWithNewLineForBufferRow
-  isAllWhiteSpace
-  isSingleLine
-  getCurrentWordBufferRange
-  getBufferRangeForPatternFromPoint
-  cursorIsOnWhiteSpace
-  cursorIsAtEmptyRow
-  scanInRanges
-  getCharacterAtCursor
-} = require './utils'
+{haveSomeSelection, isSingleLine} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
-{OperatorError} = require './errors'
-
 Operator = Base.getClass('Operator')
 
 # TransformString
@@ -36,9 +20,6 @@ class TransformString extends Operator
 
   @registerToSelectList: ->
     transformerRegistry.push(this)
-
-  getTransformers: ->
-    transformerRegistry
 
   mutateSelection: (selection) ->
     text = @getNewText(selection.getText(), selection)
@@ -249,16 +230,18 @@ class TransformStringByExternalCommand extends TransformString
     @stdoutBySelection.get(selection)
 
 # -------------------------
+selectListItems = null
 class TransformStringBySelectList extends TransformString
   @extend()
   @description: "Interactively choose string transformation operator from select-list"
   requireInput: true
 
   getItems: ->
-    @getTransformers().map (klass) ->
-      klass = Base.getClass(klass) if _.isString(klass)
-      displayName = klass::displayName if klass::hasOwnProperty('displayName')
-      displayName ?= _.humanizeEventName(_.dasherize(klass.name))
+    selectListItems ?= transformerRegistry.map (klass) ->
+      if klass::hasOwnProperty('displayName')
+        displayName = klass::displayName
+      else
+        displayName = _.humanizeEventName(_.dasherize(klass.name))
       {name: klass, displayName}
 
   initialize: ->
@@ -324,7 +307,6 @@ class AutoIndent extends Indent
   hover: icon: ':auto-indent:', emoji: ':open_hands:'
   indentFunction: "autoIndentSelectedRows"
 
-# -------------------------
 class ToggleLineComments extends TransformString
   @extend()
   hover: icon: ':toggle-line-comments:', emoji: ':mute:'
