@@ -227,29 +227,28 @@ class Operator extends Base
     @observeSelectTarget()
     @pointBySelection = new Map
     wasVisual = @isMode('visual')
-    if wasVisual
-      if @needStay()
-        for selection in @editor.getSelections()
-          head = swrap(selection).getBufferPositionFor('head', fromProperty: true)
-          # console.log 'visual and stay', head.toString()
-          @requestRestoreCursorPosition(selection, head)
-        # @requestRestoreCursorPositions('head')
-      else
-        @requestRestoreCursorPositions('start')
-    else
-      if @needStay()
-        unless @instanceof('Select')
-          @requestRestoreCursorPositions('head')
-      else
-        null
 
-        # @updateSelectionProperties() # [FIXME] don't store to swrap, explicitly store and clear
-        # console.log 'update prop on will-select-target'
+    saveCursorsToRestoreAfterSelect = null
+    if @needStay()
+      if wasVisual
+        console.log 'case-1'
+        @requestRestoreCursorPositions('head', fromProperty: true, allowFallback: true) # visual-stay
+      else
+        console.log 'case-2'
+        @requestRestoreCursorPositions('head') unless @instanceof('Select') # stay
+    else
+      if wasVisual
+        console.log 'case-3'
+        @requestRestoreCursorPositions('start') # visual-notStay
+      else
+        console.log 'case-4'
+        # normal-mode
+        saveCursorsToRestoreAfterSelect = =>
+          @requestRestoreCursorPositions('start')
 
     @emitWillSelectTarget()
     @target.select()
-    if not wasVisual and not @needStay()
-      @requestRestoreCursorPositions('start')
+    saveCursorsToRestoreAfterSelect?()
 
     @flashIfNecessary(@editor.getSelectedBufferRanges())
     @trackChangeIfNecessary()
@@ -268,17 +267,12 @@ class Operator extends Base
     globalState.previousSelection = {properties, submode}
 
   requestRestoreCursorPosition: (selection, point) ->
-    console.log 'requested', point.toString()
+    # console.log 'requested', point.toString()
     @pointBySelection.set(selection, point)
 
-  requestRestoreCursorPositions: (which) ->
+  requestRestoreCursorPositions: (which, options={}) ->
     for selection in @editor.getSelections()
-      if which is 'start'
-        point = selection.getBufferRange().start
-      else if 'head'
-        point = swrap(selection).detectCharacterwiseProperties().head
-        # point = selection.getHeadBufferPosition()
-        console.log 'head', point.toString()
+      point = swrap(selection).getBufferPositionFor(which, options)
       @requestRestoreCursorPosition(selection, point)
 
   isRestorableCursorPositionForSelection: (selection) ->
@@ -286,7 +280,7 @@ class Operator extends Base
 
   restoreCursorPositionForSelection: (selection) ->
     if point = @pointBySelection.get(selection)
-      console.log 'restore', point.toString()
+      # console.log 'restore', point.toString()
       selection.cursor.setBufferPosition(point)
 
   restoreCursorPositions: ->
