@@ -1,5 +1,6 @@
 _ = require 'underscore-plus'
 path = require 'path'
+fs = require 'fs-plus'
 {Emitter, Disposable, BufferedProcess, CompositeDisposable} = require 'atom'
 
 Base = require './base'
@@ -22,6 +23,7 @@ class Developer
       'generate-introspection-report': => @generateIntrospectionReport()
       'generate-command-summary-table': => @generateCommandSummaryTable()
       'toggle-dev-environment': => @toggleDevEnvironment()
+      'clear-debug-output': => @clearDebugOutput()
       'reload-packages': => @reloadPackages()
       'toggle-reload-packages-on-save': => @toggleReloadPackagesOnSave()
 
@@ -81,6 +83,13 @@ class Developer
 
   addCommand: (name, fn) ->
     atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
+
+  clearDebugOutput: (name, fn) ->
+    filePath = fs.normalize(settings.get('debugOutputFilePath'))
+    options = {searchAllPanes: true, activatePane: false}
+    atom.workspace.open(filePath, options).then (editor) ->
+      editor.setText('')
+      editor.save()
 
   toggleDebug: ->
     settings.set('debug', not settings.get('debug'))
