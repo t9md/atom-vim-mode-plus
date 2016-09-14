@@ -205,20 +205,7 @@ class Operator extends Base
       @editor.transact =>
         @mutateSelection(selection) for selection in @editor.getSelections()
 
-    # Cursor position placement [same as before OR start of original selection]
-
-    if @needStay()
-      # same as before
-      for selection in @editor.getSelections()
-        if @isRestorableCursorPositionForSelection(selection)
-          @restoreCursorPositionForSelection(selection)
-        else
-          selection.destroy()
-    else
-      # start of original selection
-      @restoreCursorPositions()
-
-    @pointBySelection = null
+    @restoreCursorPositions()
     @onDidRestoreCursorPositions?() # FIXME
     @activateMode(@finalMode, @finalSubmode)
 
@@ -249,11 +236,10 @@ class Operator extends Base
     @emitWillSelectTarget()
     @target.select()
     saveCursorsToRestoreAfterSelect?()
-
+    @emitDidSelectTarget()
     @flashIfNecessary(@editor.getSelectedBufferRanges())
     @trackChangeIfNecessary()
 
-    @emitDidSelectTarget()
     haveSomeSelection(@editor)
 
   updatePreviousSelection: ->
