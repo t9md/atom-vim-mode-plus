@@ -34,7 +34,6 @@ class ToggleCase extends TransformString
   @description: "`Hello World` -> `hELLO wORLD`"
   displayName: 'Toggle ~'
   hover: icon: ':toggle-case:', emoji: ':clap:'
-  stayAtSamePosition: true
 
   toggleCase: (char) ->
     charLower = char.toLowerCase()
@@ -49,10 +48,9 @@ class ToggleCase extends TransformString
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
   hover: null
-  stayAtSamePosition: false
+  flashTarget: false
+  restorePositions: false
   target: 'MoveRight'
-  restoreCursorPositions: ->
-    # [FIXME] just for do nothing
 
 class UpperCase extends TransformString
   @extend()
@@ -60,7 +58,6 @@ class UpperCase extends TransformString
   @description: "`Hello World` -> `HELLO WORLD`"
   hover: icon: ':upper-case:', emoji: ':point_up:'
   displayName: 'Upper'
-  stayAtSamePosition: true
   getNewText: (text) ->
     text.toUpperCase()
 
@@ -70,7 +67,6 @@ class LowerCase extends TransformString
   @description: "`Hello World` -> `hello world`"
   hover: icon: ':lower-case:', emoji: ':point_down:'
   displayName: 'Lower'
-  stayAtSamePosition: true
   getNewText: (text) ->
     text.toLowerCase()
 
@@ -474,8 +470,7 @@ class Join extends TransformString
   @extend()
   target: "MoveToRelativeLine"
   flashTarget: false
-
-  needStay: -> false
+  restorePositions: false
 
   mutateSelection: (selection) ->
     if swrap(selection).isLinewise()

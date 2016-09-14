@@ -31,7 +31,9 @@ class Operator extends Base
 
   patternForOccurence: null
 
+  stayOnLinewise: false
   stayAtSamePosition: null
+  restorePositions: true
   flashTarget: true
   trackChange: false
 
@@ -205,7 +207,7 @@ class Operator extends Base
       @editor.transact =>
         @mutateSelection(selection) for selection in @editor.getSelections()
 
-    @restoreCursorPositions()
+    @restoreCursorPositions() if @restorePositions
     @onDidRestoreCursorPositions?() # FIXME
     @activateMode(@finalMode, @finalSubmode)
 
