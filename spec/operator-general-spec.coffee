@@ -132,18 +132,34 @@ describe "Operator general", ->
       it "deletes the current line and exits operator-pending mode", ->
         set cursor: [1, 1]
         ensure 'd d',
-          text: "12345\n\nABCDE\n"
+          text: """
+            12345
+
+            ABCDE\n
+            """
           cursor: [1, 0]
-          register: '"': text: 'abcde\n'
+          register: '"': text: "abcde\n"
           mode: 'normal'
 
       it "deletes the last line and always make non-blank-line last line", ->
         set cursor: [2, 0]
-        ensure '2 d d', text: "12345\nabcde\n", cursor: [1, 0]
+        ensure '2 d d',
+          text: """
+            12345
+            abcde\n
+            """,
+          cursor: [1, 0]
 
       it "leaves the cursor on the first nonblank character", ->
-        set text: '12345\n  abcde\n', cursor: [0, 4]
-        ensure 'd d', text: "  abcde\n", cursor: [0, 2]
+        set
+          text: """
+          12345
+            abcde\n
+          """
+          cursor: [0, 4]
+        ensure 'd d',
+          text: "  abcde\n"
+          cursor: [0, 2]
 
     describe "undo behavior", ->
       originalText = "12345\nabcde\nABCDE\nQWERT"
@@ -162,7 +178,7 @@ describe "Operator general", ->
           # And ensure set position to start.
           it "is undone as one operation and clear cursors", ->
             ensure 'd l u',
-              text: "12345\nabcde\nABCDE\nQWERT"
+              text: originalText
               selectedText: ['']
               numCursors: 1
 
@@ -172,7 +188,7 @@ describe "Operator general", ->
 
           it "is undone as one operation", ->
             ensure 'd l u',
-              text: "12345\nabcde\nABCDE\nQWERT"
+              text: originalText
               selectedText: ['', '']
               numCursors: 2
 
@@ -347,31 +363,97 @@ describe "Operator general", ->
           text: "d\nabc\nd"
           cursorBuffer: [[0, 0], [1, 0], [2, 0]]
 
-    xdescribe "stayOnDelete setting", ->
+    describe "stayOnDelete setting", ->
       beforeEach ->
         settings.set('stayOnDelete', true)
         set
-          text: """
-              0000
-            1111
-          2222
-            3333
-              4444\n
+          text_: """
+          ___3333
+          __2222
+          _1111
+          __2222
+          ___3333\n
           """
-          cursor: [0, 5]
+          cursor: [0, 3]
+          # "___3333\n__2222\n1111\n__2222\n___3333"
 
       describe "target range is linewise range", ->
-        it "keep original column after delete and keep goalColumn", ->
-          ensure "d d", cursor: [0, 5], text: "  1111\n2222\n  3333\n    4444\n"
-          ensure "d d", cursor: [0, 3], text: "2222\n  3333\n    4444\n"
-          ensure "j", cursor: [1, 5], text: "2222\n  3333\n    4444\n"
-          ensure ".", cursor: [1, 5], text: "2222\n    4444\n"
+        it "keep original column after delete", ->
+          ensure "d d", cursor: [0, 3], text_: "__2222\n_1111\n__2222\n___3333\n"
+          ensure ".", cursor: [0, 3], text_: "_1111\n__2222\n___3333\n"
+          ensure ".", cursor: [0, 3], text_: "__2222\n___3333\n"
+          ensure ".", cursor: [0, 3], text_: "___3333\n"
 
-        it "v_D also keep original column after delete and keep goalColumn", ->
-          ensure "v D", cursor: [0, 5], text: "  1111\n2222\n  3333\n    4444\n"
-          ensure "v D", cursor: [0, 3], text: "2222\n  3333\n    4444\n"
-          ensure "j", cursor: [1, 5], text: "2222\n  3333\n    4444\n"
-          ensure "v D", cursor: [1, 5], text: "2222\n    4444\n"
+        it "v_D also keep original column after delete", ->
+          ensure "v 2 j D", cursor: [0, 3], text_: "__2222\n___3333\n"
+
+      describe "target range is text object", ->
+        describe "target is indent", ->
+          indentText = """
+          0000000000000000
+            22222222222222
+            22222222222222
+            22222222222222
+          0000000000000000\n
+          """
+          textData = new TextData(indentText)
+          beforeEach ->
+            set
+              text: textData.getRaw()
+
+          it "[from top] keep column", ->
+            set cursor: [1, 10]
+            ensure 'd i i', cursor: [1, 10], text: textData.getLines([0, 4])
+          it "[from middle] keep column", ->
+            set cursor: [2, 10]
+            ensure 'd i i', cursor: [1, 10], text: textData.getLines([0, 4])
+          it "[from bottom] keep column", ->
+            set cursor: [3, 10]
+            ensure 'd i i', cursor: [1, 10], text: textData.getLines([0, 4])
+
+        describe "target is paragraph", ->
+          paragraphText = """
+            p1---------------
+            p1---------------
+            p1---------------
+
+            p2---------------
+            p2---------------
+            p2---------------
+
+            p3---------------
+            p3---------------
+            p3---------------\n
+            """
+
+          textData = new TextData(paragraphText)
+          P1 = [0, 1, 2]
+          B1 = 3
+          P2 = [4, 5, 6]
+          B2 = 7
+          P3 = [8, 9, 10]
+          B3 = 11
+
+          beforeEach ->
+            set
+              text: textData.getRaw()
+
+          it "set cursor to start of deletion after delete [from bottom of paragraph]", ->
+            set cursor: [0, 0]
+            ensure 'd i p', cursor: [0, 0], text: textData.getLines([B1..B3], chomp: true)
+            ensure 'j .', cursor: [1, 0], text: textData.getLines([B1, B2, P3..., B3], chomp: true)
+            ensure 'j .', cursor: [1, 0], text: textData.getLines([B1, B2, B3], chomp: true)
+          it "set cursor to start of deletion after delete [from middle of paragraph]", ->
+            set cursor: [1, 0]
+            ensure 'd i p', cursor: [0, 0], text: textData.getLines([B1..B3], chomp: true)
+            ensure '2 j .', cursor: [1, 0], text: textData.getLines([B1, B2, P3..., B3], chomp: true)
+            ensure '2 j .', cursor: [1, 0], text: textData.getLines([B1, B2, B3], chomp: true)
+          it "set cursor to start of deletion after delete [from bottom of paragraph]", ->
+            set cursor: [1, 0]
+            ensure 'd i p', cursor: [0, 0], text: textData.getLines([B1..B3], chomp: true)
+            ensure '3 j .', cursor: [1, 0], text: textData.getLines([B1, B2, P3..., B3], chomp: true)
+            ensure '3 j .', cursor: [1, 0], text: textData.getLines([B1, B2, B3], chomp: true)
+
 
   describe "the D keybinding", ->
     beforeEach ->
@@ -828,7 +910,7 @@ describe "Operator general", ->
     it "composes with motions", ->
       ensure 'd d 2 .', text: "78"
 
-  describe "the r keybinding", ->
+  fdescribe "the r keybinding", ->
     beforeEach ->
       set
         text: "12\n34\n\n"

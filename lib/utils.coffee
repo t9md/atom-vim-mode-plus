@@ -630,6 +630,25 @@ withTrackingCursorPositionChange = (cursor, fn) ->
   unless cursorBefore.isEqual(cursorAfter)
     console.log "Changed: #{cursorBefore.toString()} -> #{cursorAfter.toString()}"
 
+selectedRanges = (editor) ->
+  editor.getSelectedBufferRanges().map(toString).join("\n")
+
+selectedRange = (editor) ->
+  editor.getSelectedBufferRange().toString()
+
+{inspect} = require 'util'
+
+selectedText = (editor) ->
+  editor.getSelectedBufferRanges()
+    .map (range) ->
+      editor.getTextInBufferRange(range)
+      # inspect(editor.getTextInBufferRange(range))
+    .join("\n")
+
+toString = (obj) ->
+  if _.isFunction(obj.toString)
+    obj.toString()
+
 # Reloadable registerElement
 registerElement = (name, options) ->
   element = document.createElement(name)
@@ -755,4 +774,9 @@ module.exports = {
   reportCursor
   withTrackingCursorPositionChange
   logGoalColumnForSelection
+
+  selectedRanges
+  selectedRange
+  selectedText
+  toString
 }

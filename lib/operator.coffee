@@ -1,5 +1,6 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
+{Point, Range} = require 'atom'
 globalState = require './global-state'
 
 {inspect} = require 'util'
@@ -14,6 +15,12 @@ p = (args...) -> console.log inspect(args...)
   cursorIsAtEmptyRow
   scanInRanges
   getCharacterAtCursor
+
+  selectedRanges
+  selectedRange
+  selectedText
+  toString
+  debug
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -221,23 +228,30 @@ class Operator extends Base
     if @needStay()
       if wasVisual
         console.log 'case-1'
-        @requestRestoreCursorPositions('head', fromProperty: true, allowFallback: true) # visual-stay
+        @saveCursorPositions('head', fromProperty: true, allowFallback: true) # visual-stay
       else
         console.log 'case-2'
-        @requestRestoreCursorPositions('head') unless @instanceof('Select') # stay
+        @saveCursorPositions('head') unless @instanceof('Select') # stay
     else
       if wasVisual
         console.log 'case-3'
-        @requestRestoreCursorPositions('start') # visual-notStay
+        @saveCursorPositions('start') # visual-notStay
       else
         console.log 'case-4'
         # normal-mode
         saveCursorsToRestoreAfterSelect = =>
-          @requestRestoreCursorPositions('start')
+          @saveCursorPositions('start')
 
     @emitWillSelectTarget()
     @target.select()
     saveCursorsToRestoreAfterSelect?()
+
+    # # === debug
+    # debug '# ---------- start'
+    # debug selectedRange(@editor)
+    # debug selectedText(@editor)
+    # debug '# ---------- end'
+
     @emitDidSelectTarget()
     @flashIfNecessary(@editor.getSelectedBufferRanges())
     @trackChangeIfNecessary()
@@ -254,38 +268,42 @@ class Operator extends Base
     submode = @vimState.submode
     globalState.previousSelection = {properties, submode}
 
-  requestRestoreCursorPosition: (selection, point) ->
+  saveCursorPosition: (selection, point) ->
     # console.log 'requested', point.toString()
     @pointBySelection.set(selection, point)
 
-  requestRestoreCursorPositions: (which, options={}) ->
+  saveCursorPositions: (which, options={}) ->
     for selection in @editor.getSelections()
       point = swrap(selection).getBufferPositionFor(which, options)
-      @requestRestoreCursorPosition(selection, point)
+      @saveCursorPosition(selection, point)
 
-  isRestorableCursorPositionForSelection: (selection) ->
-    @pointBySelection.has(selection)
-
-  restoreCursorPositionForSelection: (selection) ->
-    if point = @pointBySelection.get(selection)
-      # console.log 'restore', point.toString()
-      selection.cursor.setBufferPosition(point)
+  updateRestorePointsBy: (fn) ->
+    @pointBySelection.forEach (point, selection) =>
+      @pointBySelection.set(selection, fn(selection, point))
 
   restoreCursorPositions: ->
-    # Strict. in vB mode, vB range is reselected on @target.selection
-    # so selection.id is change in that case we won't restore.
     selections = @editor.getSelections()
-    return if selections.some (selection) =>
-      not @pointBySelection.has(selection)
+
+    selectionHasEntry = (selection) => @pointBySelection.has(selection)
+    strictMode = not @isWithOccurrence()
+
+    unless @isWithOccurrence()
+      # unless occurence-mode we go strict mode.
+      # in vB mode, vB range is reselected on @target.selection
+      # so selection.id is change in that case we won't restore.
+      return unless selections.every(selectionHasEntry)
 
     for selection in selections
-      point = @pointBySelection.get(selection)
-      selection.cursor.setBufferPosition(point)
+      if point = @pointBySelection.get(selection)
+        selection.cursor.setBufferPosition(point)
+      else
+        # only when occurence-mode can reach here.
+        selection.destroy()
 
     @pointBySelection.clear()
     @pointBySelection = null
 
-  cancelRestoreCursorPositions: (selection=null) ->
+  removeSavedCursorPosition: (selection=null) ->
     if selection?
       @pointBySelection.delete(selection)
     else
@@ -391,6 +409,12 @@ class ToggleRangeMarker extends CreateRangeMarker
       @vimState.removeRangeMarker(rangeMarker)
       @abort()
 
+  execute: ->
+    if rangeMarker = @getRangeMarkerAtCursor()
+      rangeMarker.destroy()
+    else
+      super
+
 class ToggleRangeMarkerOnInnerWord extends ToggleRangeMarker
   @extend()
   target: 'InnerWord'
@@ -404,35 +428,32 @@ class Delete extends Operator
   flashTarget: false
   wasLinewise: null
 
-  initialize: ->
+  execute: ->
+    @onDidSelectTarget =>
+      wasLinewise = @target.isLinewise()
+      if @needStay()
+        isCharacterwise = @vimState.isMode('visual', 'characterwise')
+        @updateRestorePointsBy (selection, point) ->
+          start = selection.getBufferRange().start
+          if isCharacterwise
+            start
+          else
+            new Point(start.row, point.column)
     super
-    @wasLinewise = null
-    if @instanceof('DeleteLine')
-      @wasLinewise = true
-    else if @isMode('visual') and not @isMode('visual', 'linewise')
-      @stayAtSamePosition = false
 
   mutateSelection: (selection) =>
-    {cursor} = selection
-    @wasLinewise ?= swrap(selection).isLinewise()
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
 
   onDidRestoreCursorPositions: ->
     return unless @wasLinewise
+
     vimEof = @getVimEofBufferPosition()
-    for selection in @editor.getSelections()
-      {cursor} = selection
+    for cursor in @editor.getCursors()
+      # Ensure cursor never exceeds VimEOF
       if cursor.getBufferPosition().isGreaterThan(vimEof)
         cursor.setBufferPosition([vimEof.row, 0])
-
-      # if @needStay()
-      #   head = swrap(selection).getBufferPositionFor('head', fromProperty: true)
-      #   start = swrap(selection).getBufferPositionFor('start', fromProperty: true)
-      #   cursor.setBufferPosition([start.row, head.column])
-      #   cursor.goalColumn = head.column
-      # else
-      cursor.skipLeadingWhitespace()
+      cursor.skipLeadingWhitespace() unless @needStay()
 
 class DeleteRight extends Delete
   @extend()
