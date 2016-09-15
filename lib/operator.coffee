@@ -405,12 +405,11 @@ class ToggleRangeMarker extends CreateRangeMarker
     for rangeMarker in @vimState.getRangeMarkers() when containsPoint(rangeMarker, point)
       return rangeMarker
 
-  execute: ->
+  initialize: ->
     if rangeMarker = @getRangeMarkerAtCursor()
       rangeMarker.destroy()
       @vimState.removeRangeMarker(rangeMarker)
-    else
-      super
+      @abort()
 
 class ToggleRangeMarkerOnInnerWord extends ToggleRangeMarker
   @extend()

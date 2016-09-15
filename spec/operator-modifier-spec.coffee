@@ -444,7 +444,6 @@ describe "Operator modifier", ->
       it 'change all assignment("=") of current-function to "?="', ->
         set cursor: [0, 0]
         ensure ['j f', input: '='], cursor: [1, 17]
-        selectOccurrence =
 
         withMockPlatform searchEditorElement, 'platform-darwin' , ->
           keystroke [

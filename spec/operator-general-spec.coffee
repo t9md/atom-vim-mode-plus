@@ -910,7 +910,7 @@ describe "Operator general", ->
     it "composes with motions", ->
       ensure 'd d 2 .', text: "78"
 
-  fdescribe "the r keybinding", ->
+  describe "the r keybinding", ->
     beforeEach ->
       set
         text: "12\n34\n\n"
