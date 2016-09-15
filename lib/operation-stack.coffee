@@ -33,17 +33,34 @@ class OperationStack
     operation
 
   run: (klass, properties={}) ->
-    klass = Base.getClass(klass) if _.isString(klass)
     try
-      # When identical operator repeated, it set target to MoveToRelativeLine.
-      #  e.g. `dd`, `cc`, `gUgU`
-      if (@peekTop()?.constructor is klass)
-        klass = MoveToRelativeLine
-      operation = new klass(@vimState, properties)
-      @stack.push(@composeOperation(operation))
+      switch type = typeof(klass)
+        when 'string', 'function'
+          @vimState.preserveCount()
+          klass = Base.getClass(klass) if type is 'string'
+          # When identical operator repeated, it set target to MoveToRelativeLine.
+          #  e.g. `dd`, `cc`, `gUgU`
+          klass = MoveToRelativeLine if (@peekTop()?.constructor is klass)
+          operation = @composeOperation(new klass(@vimState, properties))
+        when 'object'
+          operation = klass
+        else
+          throw new Error('Unsupported type of operation')
+
+      @stack.push(operation)
       @process()
     catch error
       @handleError(error)
+
+  runRecorded: ->
+    if operation = @getRecorded()
+      operation.setRepeated()
+      if @vimState.hasCount()
+        @vimState.preserveCount()
+        count = @vimState.getCount()
+        operation.count = count
+        operation.target.count = count
+      @run(operation)
 
   handleError: (error) ->
     @vimState.reset()

@@ -151,6 +151,7 @@ module.exports =
       'operator-modifier-characterwise': -> @setOperatorModifier(wise: 'characterwise')
       'operator-modifier-linewise': -> @setOperatorModifier(wise: 'linewise')
       'operator-modifier-occurrence': -> @setOperatorModifier(occurence: true)
+      'repeat': -> @reapatRecordedOperation()
       'set-count-0': -> @setCount(0)
       'set-count-1': -> @setCount(1)
       'set-count-2': -> @setCount(2)

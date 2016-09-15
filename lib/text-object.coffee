@@ -42,8 +42,9 @@ class TextObject extends Base
       @vimState.submode is 'linewise'
 
   select: ->
-    for selection in @editor.getSelections()
-      @selectTextObject(selection)
+    @countTimes =>
+      for selection in @editor.getSelections()
+        @selectTextObject(selection)
     @updateSelectionProperties() if @isMode('visual')
 
 # -------------------------

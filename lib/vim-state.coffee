@@ -103,6 +103,8 @@ class VimState
   count: null
   counts: []
   hasCount: -> @count?
+
+  # FIXME: unnecessary complexity?
   preserveCount: ->
     if @hasCount()
       @counts.push(@count)
@@ -328,6 +330,11 @@ class VimState
     if settings.get('highlightSearch') and @main.highlightSearchPattern?
       @highlightSearchMarkers = @highlightSearch(@main.highlightSearchPattern, scanRange)
 
+  # Repeat
+  # -------------------------
+  reapatRecordedOperation: ->
+    @operationStack.runRecorded()
+
   # rangeMarkers for narrowRange
   # -------------------------
   addRangeMarkers: (markers) ->
@@ -341,6 +348,12 @@ class VimState
   removeRangeMarker: (rangeMarker) ->
     _.remove(@rangeMarkers, rangeMarker)
     @updateHasRangeMarkerState()
+
+  getRangeMarkerAtBufferPosition: (point) ->
+    exclusive = false
+    for rangeMarker in @getRangeMarkers()
+      if rangeMarker.getBufferRange().containsPoint(point, exclusive)
+        return rangeMarker
 
   updateHasRangeMarkerState: ->
     @toggleClassList('with-range-marker', @hasRangeMarkers())

@@ -90,10 +90,6 @@ class Operator extends Base
 
   constructor: ->
     super
-    # Guard when Repeated.
-    return if @instanceof("Repeat")
-
-    # [important] intialized is not called when Repeated
     @initialize()
     @setTarget(@new(@target)) if _.isString(@target)
 
@@ -309,20 +305,6 @@ class Operator extends Base
     else
       @pointBySelection.clear()
 
-# Repeat
-# =========================
-class Repeat extends Operator
-  @extend()
-  requireTarget: false
-  recordable: false
-
-  execute: ->
-    @editor.transact =>
-      @countTimes =>
-        if operation = @vimState.operationStack.getRecorded()
-          operation.setRepeated()
-          operation.execute()
-
 # Select
 # When text-object is invoked from normal or viusal-mode, operation would be
 #  => Select operator with target=text-object
@@ -392,24 +374,21 @@ class CreateRangeMarker extends Operator
 
 class ToggleRangeMarker extends CreateRangeMarker
   @extend()
+  rangeMarkerToRemove: null
 
-  getRangeMarkerAtCursor: ->
-    return unless @vimState.hasRangeMarkers()
-
+  isComplete: ->
     point = @editor.getCursorBufferPosition()
+    if @rangeMarkerToRemove = @vimState.getRangeMarkerAtBufferPosition(point)
+      true
+    else
+      super
 
-    containsPoint = (rangeMarker, point) ->
-      rangeMarker.getBufferRange().containsPoint(point, exclusive)
-
-    exclusive = false
-    for rangeMarker in @vimState.getRangeMarkers() when containsPoint(rangeMarker, point)
-      return rangeMarker
-
-  initialize: ->
-    if rangeMarker = @getRangeMarkerAtCursor()
-      rangeMarker.destroy()
-      @vimState.removeRangeMarker(rangeMarker)
-      @abort()
+  execute: ->
+    if @rangeMarkerToRemove
+      @rangeMarkerToRemove.destroy()
+      @vimState.removeRangeMarker(@rangeMarkerToRemove)
+    else
+      super
 
 class ToggleRangeMarkerOnInnerWord extends ToggleRangeMarker
   @extend()
