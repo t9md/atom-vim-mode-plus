@@ -392,7 +392,10 @@ class CreateRangeMarker extends Operator
 
 class ToggleRangeMarker extends CreateRangeMarker
   @extend()
+
   getRangeMarkerAtCursor: ->
+    return unless @vimState.hasRangeMarkers()
+    
     point = @editor.getCursorBufferPosition()
 
     containsPoint = (rangeMarker, point) ->
