@@ -171,11 +171,11 @@ class VimState
   onDidCommandSearch: (fn) -> @subscribe @searchInput.onDidCommand(fn)
 
   # Select and text mutation(Change)
+  onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
   onWillSelectTarget: (fn) -> @subscribe @emitter.on('will-select-target', fn)
   onDidSelectTarget: (fn) -> @subscribe @emitter.on('did-select-target', fn)
-  onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
+  onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
 
-  # Event for operation execution life cycle.
   onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
 
   # Select list view

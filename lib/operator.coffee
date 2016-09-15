@@ -302,6 +302,7 @@ class Operator extends Base
 
     @pointBySelection.clear()
     @pointBySelection = null
+    @emitDidRestoreCursorPositions() # not called on early return [FIXME?]
 
   removeSavedCursorPosition: (selection=null) ->
     if selection?
@@ -395,7 +396,7 @@ class ToggleRangeMarker extends CreateRangeMarker
 
   getRangeMarkerAtCursor: ->
     return unless @vimState.hasRangeMarkers()
-    
+
     point = @editor.getCursorBufferPosition()
 
     containsPoint = (rangeMarker, point) ->

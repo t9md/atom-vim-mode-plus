@@ -23,10 +23,14 @@ vimStateMethods = [
   "onDidCancelSearch"
   "onDidUnfocusSearch"
   "onDidCommandSearch"
+
+  "onDidSetTarget"
   "onWillSelectTarget"
   "onDidSelectTarget"
-  "onDidSetTarget"
+  "onDidRestoreCursorPositions"
+
   "onDidFinishOperation"
+
   "onDidCancelSelectList"
   "subscribe"
   "isMode"
@@ -222,6 +226,9 @@ class Base
 
   emitDidSetTarget: (operator) ->
     @vimState.emitter.emit('did-set-target', operator)
+
+  emitDidRestoreCursorPositions: ->
+    @vimState.emitter.emit('did-restore-cursor-positions')
 
   # Class methods
   # -------------------------
