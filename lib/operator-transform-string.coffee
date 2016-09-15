@@ -285,10 +285,12 @@ class Indent extends TransformString
   stayOnLinewise: false
   indentFunction: "indentSelectedRows"
 
-  onDidRestoreCursorPositions: ->
-    unless @needStay()
-      for cursor in @editor.getCursors()
-        cursor.moveToFirstCharacterOfLine()
+  execute: ->
+    @onDidRestoreCursorPositions =>
+      unless @needStay()
+        for cursor in @editor.getCursors()
+          cursor.moveToFirstCharacterOfLine()
+    super
 
   mutateSelection: (selection) ->
     selection[@indentFunction]()

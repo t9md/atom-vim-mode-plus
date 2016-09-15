@@ -215,7 +215,6 @@ class Operator extends Base
         @mutateSelection(selection) for selection in @editor.getSelections()
 
     @restoreCursorPositions() if @restorePositions
-    @onDidRestoreCursorPositions?() # FIXME
     @activateMode(@finalMode, @finalSubmode)
 
   # Return true unless all selection is empty.
@@ -427,6 +426,7 @@ class Delete extends Operator
   wasLinewise: null
 
   execute: ->
+    wasLinewise = null
     @onDidSelectTarget =>
       wasLinewise = @target.isLinewise()
       if @needStay()
@@ -437,21 +437,23 @@ class Delete extends Operator
             start
           else
             new Point(start.row, point.column)
+
+    @onDidRestoreCursorPositions =>
+      return unless wasLinewise
+      vimEof = @getVimEofBufferPosition()
+      for cursor in @editor.getCursors()
+        # Ensure cursor never exceeds VimEOF
+        if cursor.getBufferPosition().isGreaterThan(vimEof)
+          cursor.setBufferPosition([vimEof.row, 0])
+        cursor.skipLeadingWhitespace() unless @needStay()
+
     super
+
 
   mutateSelection: (selection) =>
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
 
-  onDidRestoreCursorPositions: ->
-    return unless @wasLinewise
-
-    vimEof = @getVimEofBufferPosition()
-    for cursor in @editor.getCursors()
-      # Ensure cursor never exceeds VimEOF
-      if cursor.getBufferPosition().isGreaterThan(vimEof)
-        cursor.setBufferPosition([vimEof.row, 0])
-      cursor.skipLeadingWhitespace() unless @needStay()
 
 class DeleteRight extends Delete
   @extend()
