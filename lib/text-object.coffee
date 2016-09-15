@@ -580,6 +580,7 @@ class Paragraph extends TextObject
       selection.selectToBufferPosition point if point?
 
   selectTextObject: (selection) ->
+    # FIXME: don't manage count on each child
     firstTime = true
     _.times @getCount(), =>
       @selectParagraph(selection, {firstTime})
