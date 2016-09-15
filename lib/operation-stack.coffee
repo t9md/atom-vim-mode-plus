@@ -63,8 +63,7 @@ class OperationStack
       top = @peekTop()
 
       if top.isComplete()
-        if settings.get('debug')
-          console.log  [top.getName(), top.target?.getName()]
+        # debug  [top.getName(), top.target?.getName()]
         @execute(@stack.pop())
       else
         if @vimState.isMode('normal') and top.isOperator()
