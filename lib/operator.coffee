@@ -402,16 +402,10 @@ class ToggleRangeMarker extends CreateRangeMarker
     for rangeMarker in @vimState.getRangeMarkers() when containsPoint(rangeMarker, point)
       return rangeMarker
 
-  initialize: ->
-    rangeMarker = @getRangeMarkerAtCursor()
-    if rangeMarker?
-      rangeMarker.destroy()
-      @vimState.removeRangeMarker(rangeMarker)
-      @abort()
-
   execute: ->
     if rangeMarker = @getRangeMarkerAtCursor()
       rangeMarker.destroy()
+      @vimState.removeRangeMarker(rangeMarker)
     else
       super
 
