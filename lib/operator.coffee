@@ -210,7 +210,6 @@ class Operator extends Base
     @pointBySelection = new Map
     wasVisual = @isMode('visual')
 
-    saveCursorsToRestoreAfterSelect = null
     if @needStay()
       if wasVisual
         console.log 'case-1'
@@ -225,12 +224,11 @@ class Operator extends Base
       else
         console.log 'case-4'
         # normal-mode
-        saveCursorsToRestoreAfterSelect = =>
+        @preemptDidSelectTarget =>
           @saveCursorPositions('start')
 
     @emitWillSelectTarget()
     @target.select()
-    saveCursorsToRestoreAfterSelect?()
 
     # # === debug
     # debug '# ---------- start'

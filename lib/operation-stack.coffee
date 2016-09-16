@@ -188,10 +188,7 @@ class OperationStack
 
   getCount: ->
     if @hasCount()
-      console.log @count
-      v = (@count['normal'] ? 1) * (@count['operator-pending'] ? 1)
-      console.log 'getCount', v
-      v
+      (@count['normal'] ? 1) * (@count['operator-pending'] ? 1)
     else
       null
 
