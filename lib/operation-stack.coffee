@@ -36,7 +36,6 @@ class OperationStack
     try
       switch type = typeof(klass)
         when 'string', 'function'
-          @vimState.preserveCount()
           klass = Base.getClass(klass) if type is 'string'
           # When identical operator repeated, it set target to MoveToRelativeLine.
           #  e.g. `dd`, `cc`, `gUgU`
@@ -44,7 +43,7 @@ class OperationStack
           operation = @composeOperation(new klass(@vimState, properties))
         when 'object' # . repeat case
           operation = klass
-          console.log operation.getName()
+          # console.log operation.getName()
         else
           throw new Error('Unsupported type of operation')
 
@@ -57,10 +56,9 @@ class OperationStack
     if operation = @getRecorded()
       operation.setRepeated()
       if @vimState.hasCount()
-        @vimState.preserveCount()
         count = @vimState.getCount()
         operation.count = count
-        operation.target.count = count
+        operation.target?.count = count # Some opeartor have no target like ctrl-a(increase).
       @run(operation)
 
   handleError: (error) ->

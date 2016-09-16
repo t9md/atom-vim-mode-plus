@@ -96,35 +96,33 @@ class VimState
 
   # Count
   # -------------------------
-  # keystroke `3d2w` delete 6(3*2) words
-  #  Each time, operation instantiated(new Operation), count are preserved.
-  #  pushed to @counts, then while operation executed, operation::getCount()
-  #  call vimState::getCount which return multiplied value for each of preserved counts.
-  count: null
-  counts: []
-  hasCount: -> @count?
+  # keystroke `3d2w` delete 6(3*2) words.
+  #  2nd number(2 in this case) is always enterd in operator-pending-mode.
+  #  So count have two timing to be entered. that's why here we manage counter by mode.
+  count: {}
 
-  # FIXME: unnecessary complexity?
-  preserveCount: ->
-    if @hasCount()
-      @counts.push(@count)
-      @count = null
+  hasCount: ->
+    @count['normal']? or @count['operator-pending']?
 
   getCount: ->
-    if @counts.length > 0
-      @counts.reduce (a, b) -> a * b
+    if @hasCount()
+      (@count['normal'] ? 1) * (@count['operator-pending'] ? 1)
     else
       null
 
   setCount: (number) ->
-    @count ?= 0
-    @count = (@count * 10) + number
+    if @mode is 'operator-pending'
+      mode = @mode
+    else
+      mode = 'normal'
+
+    @count[mode] ?= 0
+    @count[mode] = (@count[mode] * 10) + number
     @hover.add(number)
     @toggleClassList('with-count', @hasCount())
 
   resetCount: ->
-    @count = null
-    @counts = []
+    @count = {}
     @toggleClassList('with-count', @hasCount())
 
   # Mark

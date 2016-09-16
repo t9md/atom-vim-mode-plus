@@ -37,7 +37,6 @@ vimStateMethods = [
   "hasCount"
   "getBlockwiseSelections"
   "updateSelectionProperties"
-  "preserveCount"
 ]
 
 class Base
