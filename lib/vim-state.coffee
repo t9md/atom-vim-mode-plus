@@ -32,6 +32,7 @@ class VimState
 
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
+  @delegatesMethods('getCount', 'setCount', 'hasCount', toProperty: 'operationStack')
 
   constructor: (@main, @editor, @statusBarManager) ->
     @editorElement = @editor.element
@@ -93,37 +94,6 @@ class VimState
 
   setOperatorModifier: (modifier) ->
     @operationStack.setOperatorModifier(modifier)
-
-  # Count
-  # -------------------------
-  # keystroke `3d2w` delete 6(3*2) words.
-  #  2nd number(2 in this case) is always enterd in operator-pending-mode.
-  #  So count have two timing to be entered. that's why here we manage counter by mode.
-  count: {}
-
-  hasCount: ->
-    @count['normal']? or @count['operator-pending']?
-
-  getCount: ->
-    if @hasCount()
-      (@count['normal'] ? 1) * (@count['operator-pending'] ? 1)
-    else
-      null
-
-  setCount: (number) ->
-    if @mode is 'operator-pending'
-      mode = @mode
-    else
-      mode = 'normal'
-
-    @count[mode] ?= 0
-    @count[mode] = (@count[mode] * 10) + number
-    @hover.add(number)
-    @toggleClassList('with-count', @hasCount())
-
-  resetCount: ->
-    @count = {}
-    @toggleClassList('with-count', @hasCount())
 
   # Mark
   # -------------------------
@@ -278,7 +248,6 @@ class VimState
     @activate('normal')
 
   reset: ->
-    @resetCount()
     @resetCharInput()
     @register.reset()
     @searchHistory.reset()

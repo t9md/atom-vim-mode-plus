@@ -55,8 +55,8 @@ class OperationStack
   runRecorded: ->
     if operation = @getRecorded()
       operation.setRepeated()
-      if @vimState.hasCount()
-        count = @vimState.getCount()
+      if @hasCount()
+        count = @getCount()
         operation.count = count
         operation.target?.count = count # Some opeartor have no target like ctrl-a(increase).
       @run(operation)
@@ -154,6 +154,7 @@ class OperationStack
       @peekTop().setTarget(operation)
 
   reset: ->
+    @resetCount()
     @stack = []
     @processing = false
     @subscriptions?.dispose()
@@ -176,5 +177,36 @@ class OperationStack
     # So either of @stack[0] or @peekTop() is OK.
     if @vimState.isMode('operator-pending')
       @stack[0].setOperatorModifier(modifier)
+
+  # Count
+  # -------------------------
+  # keystroke `3d2w` delete 6(3*2) words.
+  #  2nd number(2 in this case) is always enterd in operator-pending-mode.
+  #  So count have two timing to be entered. that's why here we manage counter by mode.
+  hasCount: ->
+    @count['normal']? or @count['operator-pending']?
+
+  getCount: ->
+    if @hasCount()
+      console.log @count
+      v = (@count['normal'] ? 1) * (@count['operator-pending'] ? 1)
+      console.log 'getCount', v
+      v
+    else
+      null
+
+  setCount: (number) ->
+    if @vimState.mode is 'operator-pending'
+      mode = @vimState.mode
+    else
+      mode = 'normal'
+    @count[mode] ?= 0
+    @count[mode] = (@count[mode] * 10) + number
+    @vimState.hover.add(number)
+    @vimState.toggleClassList('with-count', true)
+
+  resetCount: ->
+    @count = {}
+    @vimState.toggleClassList('with-count', false)
 
 module.exports = OperationStack

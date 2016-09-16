@@ -34,7 +34,6 @@ vimStateMethods = [
   "onDidCancelSelectList"
   "subscribe"
   "isMode"
-  "hasCount"
   "getBlockwiseSelections"
   "updateSelectionProperties"
 ]
