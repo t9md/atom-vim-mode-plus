@@ -165,35 +165,39 @@ class TransformStringByExternalCommand extends TransformString
   stdoutBySelection: null
 
   execute: ->
-    new Promise (resolve) =>
-      @collect(resolve)
-    .then =>
-      super
+    # We need to preserve selection before selection is cleared as a result of mutation.
+    @updatePreviousSelection() if @isMode('visual')
+    # Mutation phase
+    if @selectTarget()
+      new Promise (resolve) =>
+        @collect(resolve)
+      .then =>
+        for selection in @editor.getSelections()
+          text = @getNewText(selection.getText(), selection)
+          selection.insertText(text, {@autoIndent})
+        @restoreCursorPositions() if @restorePositions
+        @activateMode(@finalMode, @finalSubmode)
 
   collect: (resolve) ->
     @stdoutBySelection = new Map
-    unless @isMode('visual')
-      @updateSelectionProperties() # [FIXME]
-      @target.select()
-
-    running = finished = 0
+    processRunning = processFinished = 0
     for selection in @editor.getSelections()
-      running++
       {command, args} = @getCommand(selection) ? {}
-      if command? and args?
-        do (selection) =>
-          stdin = @getStdin(selection)
-          stdout = (output) =>
-            @stdoutBySelection.set(selection, output)
-          exit = (code) ->
-            finished++
-            resolve() if (running is finished)
-
-          @runExternalCommand {command, args, stdout, exit, stdin}
-          @oldRestorePoint(selection) unless @isMode('visual')
+      return unless (command? and args?)
+      processRunning++
+      do (selection) =>
+        stdin = @getStdin(selection)
+        stdout = (output) =>
+          @stdoutBySelection.set(selection, output)
+        exit = (code) ->
+          processFinished++
+          if (processRunning is processFinished)
+            console.log 'resolving'
+            resolve()
+        @runExternalCommand {command, args, stdout, exit, stdin}
 
   runExternalCommand: (options) ->
-    {stdin} = options
+    stdin = options.stdin
     delete options.stdin
     bufferedProcess = new BufferedProcess(options)
     bufferedProcess.onWillThrowError ({error, handle}) =>
@@ -201,8 +205,8 @@ class TransformStringByExternalCommand extends TransformString
       if error.code is 'ENOENT' and error.syscall.indexOf('spawn') is 0
         commandName = @constructor.getCommandName()
         console.log "#{commandName}: Failed to spawn command #{error.path}."
+        handle()
       @cancelOperation()
-      handle()
 
     if stdin
       bufferedProcess.process.stdin.write(stdin)

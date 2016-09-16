@@ -44,8 +44,6 @@ class Operator extends Base
   flashTarget: true
   trackChange: false
 
-  finalMode: "normal"
-  finalSubmode: null
   pointBySelection: null
 
   # [FIXME]
@@ -104,14 +102,6 @@ class Operator extends Base
     @emitDidSetTarget(this)
     this
 
-  # [FIXME]
-  oldRestorePoint: (selection) ->
-    return unless @needStay()
-    if swrap(selection).getProperties().head?
-      swrap(selection).setBufferPositionTo('head', fromProperty: true)
-    else
-      selection.destroy()
-
   # called by operationStack
   setOperatorModifier: ({occurence, wise}) ->
     if occurence? and occurence isnt @withOccurrence
@@ -157,11 +147,9 @@ class Operator extends Base
         if ranges.length
           @editor.setSelectedBufferRanges(ranges)
         else
-          # [FIXME]
-          @oldRestorePoint(selection) for selection in @editor.getSelections()
-          @editor.clearSelections() unless @isMode('visual')
-          @cancelOperation()
-          @abort()
+          # Resotoring cursor position also clear selection
+          # Clearing selection is important here to prevent unwanted mutation.
+          @restoreCursorPositions()
 
   setTextToRegisterForSelection: (selection) ->
     @setTextToRegister(selection.getText(), selection)
@@ -208,10 +196,13 @@ class Operator extends Base
     # Mutation phase
     if @selectTarget()
       @editor.transact =>
-        @mutateSelection(selection) for selection in @editor.getSelections()
+        for selection in @editor.getSelections()
+          @mutateSelection(selection)
+      @restoreCursorPositions() if @restorePositions
 
-    @restoreCursorPositions() if @restorePositions
-    @activateMode(@finalMode, @finalSubmode)
+    # Even though we fail to select target and fail to mutate,
+    # we have to return to normal-mode from operator-pending or visual
+    @activateMode('normal')
 
   # Return true unless all selection is empty.
   selectTarget: ->
@@ -277,6 +268,7 @@ class Operator extends Base
       @pointBySelection.set(selection, fn(selection, point))
 
   restoreCursorPositions: ->
+    # console.log 'restoring'
     selections = @editor.getSelections()
 
     selectionHasEntry = (selection) => @pointBySelection.has(selection)

@@ -42,8 +42,9 @@ class OperationStack
           #  e.g. `dd`, `cc`, `gUgU`
           klass = MoveToRelativeLine if (@peekTop()?.constructor is klass)
           operation = @composeOperation(new klass(@vimState, properties))
-        when 'object'
+        when 'object' # . repeat case
           operation = klass
+          console.log operation.getName()
         else
           throw new Error('Unsupported type of operation')
 
@@ -80,7 +81,7 @@ class OperationStack
       top = @peekTop()
 
       if top.isComplete()
-        # debug  [top.getName(), top.target?.getName()]
+        # console.log [top.getName(), top.target?.getName()]
         @execute(@stack.pop())
       else
         if @vimState.isMode('normal') and top.isOperator()
