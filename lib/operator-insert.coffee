@@ -74,7 +74,6 @@ class ActivateInsertMode extends Operator
       return unless text = @getInsertedText()
       unless @instanceof('Change')
         @flashTarget = @trackChange = true
-        @observeSelectTarget()
         @emitDidSelectTarget()
       @editor.transact =>
         for selection in @editor.getSelections()
@@ -217,6 +216,7 @@ class Change extends ActivateInsertMode
   supportInsertionCount: false
 
   execute: ->
+    console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
     @selectTarget()
     text = ''
     if @target.isTextObject() or @target.isMotion()

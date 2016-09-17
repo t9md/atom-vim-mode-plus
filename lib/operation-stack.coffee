@@ -59,7 +59,10 @@ class OperationStack
         count = @getCount()
         operation.count = count
         operation.target?.count = count # Some opeartor have no target like ctrl-a(increase).
-      @run(operation)
+
+      # [FIXME] Degradation, this `transact` should not be necessary
+      @editor.transact =>
+        @run(operation)
 
   handleError: (error) ->
     @vimState.reset()
