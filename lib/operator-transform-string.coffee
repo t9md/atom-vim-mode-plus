@@ -191,9 +191,7 @@ class TransformStringByExternalCommand extends TransformString
           @stdoutBySelection.set(selection, output)
         exit = (code) ->
           processFinished++
-          if (processRunning is processFinished)
-            console.log 'resolving'
-            resolve()
+          resolve() if (processRunning is processFinished)
         @runExternalCommand {command, args, stdout, exit, stdin}
 
   runExternalCommand: (options) ->
