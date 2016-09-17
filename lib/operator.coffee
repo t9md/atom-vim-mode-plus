@@ -189,7 +189,8 @@ class Operator extends Base
       # Restoring cursor position also clear selection
       # Unless clearing selection, we mutate original selection(e.g. paragraph) rather than occurrence.
       console.log "Fail to select occurrence"
-      @restoreCursorPositions()
+      # @restoreCursorPositions()
+      @editor.clearSelections()
       return false
 
   # Return true unless all selection is empty.

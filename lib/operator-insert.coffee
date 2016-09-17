@@ -221,7 +221,11 @@ class Change extends ActivateInsertMode
 
   execute: ->
     # console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
-    @selectTarget()
+    selected = @selectTarget()
+    if @isWithOccurrence() and not selected
+      @vimState.activate('normal')
+      return
+
     text = ''
     if @target.isTextObject() or @target.isMotion()
       text = "\n" if (swrap.detectVisualModeSubmode(@editor) is 'linewise')

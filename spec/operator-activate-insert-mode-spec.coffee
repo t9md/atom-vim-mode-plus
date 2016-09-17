@@ -479,6 +479,7 @@ describe "Operator ActivateInsertMode family", ->
       ensure 'escape', text: "abc123\nabc4567"
       editor.addSelectionBelow()
       ensure '.',      text: "ababcc123\nababcc4567"
+      editor.addSelectionBelow()
       ensure '.',      text: "abababccc123\nabababccc4567"
 
     describe 'with nonlinear input', ->
