@@ -40,7 +40,6 @@ module.exports = new Settings 'vim-mode-plus',
   clearMultipleCursorsOnEscapeInsertMode:
     type: 'boolean'
     default: true
-    description: 'when tStart in insert-mode whan editorElement matches scope'
   wrapLeftRightMotion:
     type: 'boolean'
     default: false
