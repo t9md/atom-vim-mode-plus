@@ -9,14 +9,10 @@ p = (args...) -> console.log inspect(args...)
   haveSomeSelection
   highlightRanges
   isEndsWithNewLineForBufferRow
-  getCurrentWordBufferRange
-  getBufferRangeForPatternFromPoint
-  cursorIsOnWhiteSpace
+  getCurrentWordBufferRangeAndKind
   cursorIsAtEmptyRow
   scanInRanges
-  getCharacterAtCursor
 
-  selectedRanges
   selectedRange
   selectedText
   toString
@@ -94,7 +90,7 @@ class Operator extends Base
   # @target - TextObject or Motion to operate on.
   setTarget: (target) ->
     unless _.isFunction(target.select)
-      @vimState.emitter.emit('did-fail-to-set-target')
+      @emitDidFailToSetTarget()
       throw new OperatorError("#{@getName()} cannot set #{target?.getName?()} as target")
     @target = target
     @target.setOperator(this)
@@ -124,6 +120,15 @@ class Operator extends Base
       when 'linewise'
         @target.linewise = true
 
+  getPatternForOccurrence: ->
+    if @hasRegisterName()
+      pattern = _.escapeRegExp(@getRegisterValueAsText())
+    else
+      {range, kind} = getCurrentWordBufferRangeAndKind(@editor.getLastCursor())
+      pattern = _.escapeRegExp(@editor.getTextInBufferRange(range))
+      pattern = "\\b#{pattern}\\b" if kind is 'word'
+    new RegExp(pattern, 'g')
+
   # now only for occurence
   observeSelectTarget: ->
     if @isWithOccurrence()
@@ -134,12 +139,11 @@ class Operator extends Base
           @vimState.modeManager.deactivate() # clear selection FIXME
           console.log 'deactivate on will-select-target'
 
-        unless @patternForOccurence
-          {pattern, bufferRange} = @getPatternAndBufferRangeForOccurrence()
-          @patternForOccurence = pattern
-          if scanRanges?.length and bufferRange? and not @isMode('visual', 'blockwise')
-            lastRangeIndex = scanRanges.length - 1
-            scanRanges[lastRangeIndex] = scanRanges[lastRangeIndex].union(bufferRange)
+          unless @isMode('visual', 'blockwise') # extend scanRange to include cursorWord
+            range = getCurrentWordBufferRangeAndKind(@editor.getLastCursor()).range
+            scanRanges.push(scanRanges.pop().union(range))
+
+        @patternForOccurence ?= @getPatternForOccurrence()
 
       @onDidSelectTarget =>
         scanRanges ?= @editor.getSelectedBufferRanges()
@@ -158,40 +162,9 @@ class Operator extends Base
     text += "\n" if (@target.isLinewise?() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
 
-  # Return {pattern, bufferRange},
-  #   - Mandatory: pattern
-  #   - Optional: bufferRange
-  getPatternAndBufferRangeForOccurrence: ->
-    if @hasRegisterName()
-      return {pattern: ///#{_.escapeRegExp(@getRegisterValueAsText())}///g }
-
-    cursor = @editor.getLastCursor()
-    char = getCharacterAtCursor(cursor)
-    scope = cursor.getScopeDescriptor().getScopesArray()
-    nonWordCharacters = atom.config.get('editor.nonWordCharacters', {scope})
-
-    if char in nonWordCharacters
-      return {pattern:  ///#{_.escapeRegExp(char)}///g }
-
-    if cursorIsOnWhiteSpace(cursor)
-      # When cursor is at just before whit space(| position in text below)
-      #   aaa| bbb
-      # Atom's native cursor.getCurrentWordBufferRange() return range for aaa text.
-      # This is not very intuitive in Vim's cursor representation.
-      # So here we return range of single or multiple white spaces.
-      point = cursor.getBufferPosition()
-      bufferRange = getBufferRangeForPatternFromPoint(@editor, point, /[ \t]*/)
-      if bufferRange?
-        cursorWord = @editor.getTextInBufferRange(bufferRange)
-        return {pattern: ///#{_.escapeRegExp(cursorWord)}///g, bufferRange}
-
-    bufferRange = getCurrentWordBufferRange(cursor)
-    cursorWord = @editor.getTextInBufferRange(bufferRange)
-    {pattern: ///\b#{_.escapeRegExp(cursorWord)}\b///g, bufferRange}
-
   # Main
   execute: ->
-    # We need to preserve selection before selection is cleared as a result of mutation.
+    # We need to preserve selections before selection is cleared as a result of mutation.
     @updatePreviousSelection() if @isMode('visual')
     # Mutation phase
     if @selectTarget()

@@ -191,6 +191,17 @@ getTextInScreenRange = (editor, screenRange) ->
 cursorIsOnWhiteSpace = (cursor) ->
   isAllWhiteSpace(getCharacterAtCursor(cursor))
 
+getNonWordCharactersForCursor = (cursor) ->
+  # Atom 1.11.0-beta5 have this experimental method.
+  if cursor.getNonWordCharacters?
+    cursor.getNonWordCharacters()
+  else
+    scope = cursor.getScopeDescriptor().getScopesArray()
+    atom.config.get('editor.nonWordCharacters', {scope})
+
+cursorIsOnNonWordCharacter = (cursor) ->
+  getCharacterAtCursor(cursor) in getNonWordCharactersForCursor(cursor)
+
 getWordRegExpForPointWithCursor = (cursor, point) ->
   options = {}
   if pointIsBetweenWordAndNonWord(cursor.editor, point, cursor.getScopeDescriptor())
@@ -590,15 +601,26 @@ isSurroundedBySpace = (text) ->
 isSingleLine = (text) ->
   text.split(/\n|\r\n/).length is 1
 
-getCurrentWordBufferRange = (cursor) ->
-  # [FIXME] Copy from selection.selectWord() and modify
-  # Original selectWord() modify existing selection
-  # But I only want to get range without modifying selection.
+# Return bufferRange and kind ['white-space', 'non-word', 'word']
+#
+# This function modify wordRegex so that it feel NATURAL in Vim's normal mode.
+# In normal-mode, cursor is ractangle(not pipe(|) char).
+# Cursor is like ON word rather than BETWEEN word.
+# The modification is tailord like this
+#   - ON white-space: Includs only white-spaces.
+#   - ON non-word: Includs only non word char(=excludes normal word char).
+getCurrentWordBufferRangeAndKind = (cursor) ->
   options = {}
-  options.wordRegex = /[\t ]*/ if cursor.isSurroundedByWhitespace()
-  if cursor.isBetweenWordAndNonWord()
-    options.includeNonWordCharacters = false
-  cursor.getCurrentWordBufferRange(options)
+  if cursorIsOnWhiteSpace(cursor)
+    kind = 'white-space'
+    options.wordRegex = /[\t ]+/
+  else if cursorIsOnNonWordCharacter(cursor)
+    nonWordCharacters = _.escapeRegExp(getNonWordCharactersForCursor(cursor))
+    options.wordRegex = ///[#{nonWordCharacters}]+///
+  else
+    kind = 'word'
+  range = cursor.getCurrentWordBufferRange(options)
+  {range, kind}
 
 scanInRanges = (editor, pattern, scanRanges) ->
   ranges = []
@@ -765,7 +787,7 @@ module.exports = {
   moveCursorUpBuffer
   isSurroundedBySpace
   isSingleLine
-  getCurrentWordBufferRange
+  getCurrentWordBufferRangeAndKind
   scanInRanges
   isRangeContainsSomePoint
 
