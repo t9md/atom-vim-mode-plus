@@ -97,6 +97,10 @@ class ModeManager
     new Disposable =>
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
+
+      if settings.get('clearMultipleCursorsOnEscapeInsertMode')
+        @editor.clearSelections()
+
       # When escape from insert-mode, cursor move Left.
       needSpecialCareToPreventWrapLine = atom.config.get('editor.atomicSoftTabs') ? true
       for cursor in @editor.getCursors()
