@@ -7,7 +7,7 @@ class SelectionWrapper
   constructor: (@selection) ->
 
   hasProperties: ->
-    console.log 'hasProperties', @selection.id
+    # console.log 'hasProperties', @selection.id
     propertyStore.has(@selection)
   getProperties: -> propertyStore.get(@selection) ? {}
   setProperties: (prop) ->

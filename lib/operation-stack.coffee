@@ -40,7 +40,7 @@ class OperationStack
     console.log "= run start: #{hasProperty}"
 
   run: (klass, properties={}) ->
-    @reportSelectionProperties()
+    # @reportSelectionProperties()
     try
       switch type = typeof(klass)
         when 'string', 'function'

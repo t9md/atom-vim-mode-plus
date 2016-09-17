@@ -181,7 +181,6 @@ class Operator extends Base
     @patternForOccurence ?= @getPatternForOccurrence()
 
   selectOccurrence: ->
-    console.log "CALLED!"
     @scanRangesForOccurrence ?= @editor.getSelectedBufferRanges()
     ranges = scanInRanges(@editor, @patternForOccurence, @scanRangesForOccurrence)
     if ranges.length
