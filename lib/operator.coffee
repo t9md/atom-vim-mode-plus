@@ -21,9 +21,9 @@ p = (args...) -> console.log inspect(args...)
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
+CursorPositionManager = require './cursor-position-manager'
 {OperatorError} = require './errors'
 
-# -------------------------
 class Operator extends Base
   @extend(false)
   requireTarget: true
@@ -39,8 +39,6 @@ class Operator extends Base
   restorePositions: true
   flashTarget: true
   trackChange: false
-
-  pointBySelection: null
 
   # [FIXME]
   # For TextObject, isLinewise result is changed before / after select.
@@ -147,7 +145,7 @@ class Operator extends Base
   # Main
   execute: ->
     # We need to preserve selections before selection is cleared as a result of mutation.
-    @updatePreviousSelection() if @isMode('visual')
+    @updatePreviousSelectionIfVisualMode()
     # Mutation phase
     console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
     if @selectTarget()
@@ -201,7 +199,9 @@ class Operator extends Base
 
     haveSomeSelection(@editor)
 
-  updatePreviousSelection: ->
+  updatePreviousSelectionIfVisualMode: ->
+    return unless @isMode('visual')
+
     if @isMode('visual', 'blockwise')
       properties = @vimState.getLastBlockwiseSelection().getCharacterwiseProperties()
     else
@@ -211,60 +211,27 @@ class Operator extends Base
     submode = @vimState.submode
     globalState.previousSelection = {properties, submode}
 
-  saveCursorPositions: (which, options={}) ->
-    for selection in @editor.getSelections()
-      point = swrap(selection).getBufferPositionFor(which, options)
-      @pointBySelection.set(selection, point)
-
   saveCursorPositionsToRestore: ->
-    @pointBySelection = new Map
+    @cursorPositionManager = new CursorPositionManager(@editor)
     wasVisual = @isMode('visual')
 
     if @needStay() and wasVisual
       console.log 'case-1'
-      @saveCursorPositions('head', fromProperty: true, allowFallback: true) # visual-stay
+      @cursorPositionManager.save('head', fromProperty: true, allowFallback: true) # visual-stay
 
     else if @needStay() and not wasVisual
       console.log 'case-2'
-      @saveCursorPositions('head') unless @instanceof('Select') # stay
+      @cursorPositionManager.save('head') unless @instanceof('Select') # stay
 
     else
       console.log 'case-3'
-      @preemptDidSelectTarget => @saveCursorPositions('start')
-
-  updateRestorePointsBy: (fn) ->
-    @pointBySelection.forEach (point, selection) =>
-      @pointBySelection.set(selection, fn(selection, point))
+      @preemptDidSelectTarget =>
+        @cursorPositionManager.save('start')
 
   restoreCursorPositions: ->
-    # console.log 'restoring'
-    selections = @editor.getSelections()
-
-    selectionHasEntry = (selection) => @pointBySelection.has(selection)
-    strictMode = not @isWithOccurrence()
-
-    unless @isWithOccurrence()
-      # unless occurence-mode we go strict mode.
-      # in vB mode, vB range is reselected on @target.selection
-      # so selection.id is change in that case we won't restore.
-      return unless selections.every(selectionHasEntry)
-
-    for selection in selections
-      if point = @pointBySelection.get(selection)
-        selection.cursor.setBufferPosition(point)
-      else
-        # only when occurence-mode can reach here.
-        selection.destroy()
-
-    @pointBySelection.clear()
-    @pointBySelection = null
+    @cursorPositionManager.restore(strict: not @isWithOccurrence())
+    @cursorPositionManager = null
     @emitDidRestoreCursorPositions() # not called on early return [FIXME?]
-
-  removeSavedCursorPosition: (selection=null) ->
-    if selection?
-      @pointBySelection.delete(selection)
-    else
-      @pointBySelection.clear()
 
 # Select
 # When text-object is invoked from normal or viusal-mode, operation would be
@@ -370,7 +337,7 @@ class Delete extends Operator
       wasLinewise = @target.isLinewise()
       if @needStay()
         isCharacterwise = @vimState.isMode('visual', 'characterwise')
-        @updateRestorePointsBy (selection, point) ->
+        @cursorPositionManager.updateBy (selection, point) ->
           start = selection.getBufferRange().start
           if isCharacterwise
             start
