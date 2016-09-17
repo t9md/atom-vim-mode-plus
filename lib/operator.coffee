@@ -4,7 +4,6 @@ _ = require 'underscore-plus'
 globalState = require './global-state'
 
 {inspect} = require 'util'
-p = (args...) -> console.log inspect(args...)
 {
   haveSomeSelection
   highlightRanges
@@ -85,7 +84,7 @@ class Operator extends Base
     @initialize()
     @setTarget(@new(@target)) if _.isString(@target)
 
-  # @target - TextObject or Motion to operate on.
+  # target is TextObject or Motion to operate on.
   setTarget: (target) ->
     unless _.isFunction(target.select)
       @emitDidFailToSetTarget()
@@ -147,7 +146,7 @@ class Operator extends Base
     # We need to preserve selections before selection is cleared as a result of mutation.
     @updatePreviousSelectionIfVisualMode()
     # Mutation phase
-    console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
+    # console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
     if @selectTarget()
       @editor.transact =>
         for selection in @editor.getSelections()
@@ -160,39 +159,46 @@ class Operator extends Base
     # we have to return to normal-mode from operator-pending or visual
     @activateMode('normal')
 
+  capturePatternForOccurrence: ->
+    @scanRangesForOccurrence = null
+
+    if @isMode('visual')
+      scanRanges = @editor.getSelectedBufferRanges()
+      @vimState.modeManager.deactivate() # clear selection FIXME
+      console.log 'deactivate on will-select-target'
+
+      unless @isMode('visual', 'blockwise') # extend scanRange to include cursorWord
+        # BUG dont extend if register value is specified
+        range = getCurrentWordBufferRangeAndKind(@editor.getLastCursor()).range
+        newRange = scanRanges.pop().union(range)
+        scanRanges.push(newRange)
+      @scanRangesForOccurrence = scanRanges
+    @patternForOccurence ?= @getPatternForOccurrence()
+
+  selectOccurrence: ->
+    @scanRangesForOccurrence ?= @editor.getSelectedBufferRanges()
+    ranges = scanInRanges(@editor, @patternForOccurence, @scanRangesForOccurrence)
+    if ranges.length
+      @editor.setSelectedBufferRanges(ranges)
+    else
+      # Restoring cursor position also clear selection
+      # Unless clearing selection, we mutate original selection(e.g. paragraph) rather than occurrence.
+      console.log "Fail to select occurrence"
+      @restoreCursorPositions()
+      return false
+
   # Return true unless all selection is empty.
   selectTarget: ->
     @saveCursorPositionsToRestore()
     @emitWillSelectTarget()
     if @isWithOccurrence()
-      scanRanges = null
-      if @isMode('visual')
-        scanRanges = @editor.getSelectedBufferRanges()
-        @vimState.modeManager.deactivate() # clear selection FIXME
-        console.log 'deactivate on will-select-target'
+      @capturePatternForOccurrence()
+      @target.select()
+      @selectOccurrence()
+    else
+      @target.select()
 
-        unless @isMode('visual', 'blockwise') # extend scanRange to include cursorWord
-          # BUG dont extend if register value is specified
-          range = getCurrentWordBufferRangeAndKind(@editor.getLastCursor()).range
-          scanRanges.push(scanRanges.pop().union(range))
-
-      @patternForOccurence ?= @getPatternForOccurrence()
-
-    @target.select()
-    # @debug()
-
-    if @isWithOccurrence()
-      scanRanges ?= @editor.getSelectedBufferRanges()
-      ranges = scanInRanges(@editor, @patternForOccurence, scanRanges)
-      if ranges.length
-        @editor.setSelectedBufferRanges(ranges)
-      else
-        # Restoring cursor position also clear selection
-        # Unless clearing selection, we mutate original selection(e.g. paragraph) rather than occurrence.
-        console.log "Fail to select occurrence"
-        @restoreCursorPositions()
-        return false
-
+    @selectOccurrence() if @isWithOccurrence()
     @emitDidSelectTarget()
     @flashIfNecessary(@editor.getSelectedBufferRanges())
     @trackChangeIfNecessary()
@@ -216,15 +222,15 @@ class Operator extends Base
     wasVisual = @isMode('visual')
 
     if @needStay() and wasVisual
-      console.log 'case-1'
+      # console.log 'case-1'
       @cursorPositionManager.save('head', fromProperty: true, allowFallback: true) # visual-stay
 
     else if @needStay() and not wasVisual
-      console.log 'case-2'
+      # console.log 'case-2'
       @cursorPositionManager.save('head') unless @instanceof('Select') # stay
 
     else
-      console.log 'case-3'
+      # console.log 'case-3'
       @preemptDidSelectTarget =>
         @cursorPositionManager.save('start')
 
@@ -282,6 +288,7 @@ class SelectOccurrence extends Select
   @description: "Add selection onto each matching word within target range"
   withOccurrence: true
   initialize: ->
+    console.log 'mode!', @vimState.mode
     # FIXME don't trying to do everytin in event
     @onDidSelectTarget =>
       swrap.clearProperties(@editor)
@@ -357,7 +364,6 @@ class Delete extends Operator
   mutateSelection: (selection) =>
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
-
 
 class DeleteRight extends Delete
   @extend()
