@@ -1,5 +1,6 @@
 _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
+Select = null
 
 globalState = require './global-state'
 {
@@ -69,7 +70,8 @@ class Motion extends Base
       @moveCursor(cursor)
 
   select: ->
-    @vimState.modeManager.normalizeSelections() if @isMode('visual')
+    if @isMode('visual')
+      @vimState.modeManager.normalizeSelections()
 
     for selection in @editor.getSelections()
       if @isInclusive() or @isLinewise()
@@ -82,7 +84,12 @@ class Motion extends Base
     @editor.mergeIntersectingSelections()
 
     # Update characterwise properties on each movement.
-    @updateSelectionProperties() if @isMode('visual')
+    if @isMode('visual')
+      Select ?= Base.getClass('Select')
+      unless @getOperator() instanceof Select
+        console.log "= updating: #{@getOperator()?.toString()}"
+      # console.log "= updating: #{@toString()}"
+      @updateSelectionProperties()
 
     switch
       when @isLinewise() then @vimState.selectLinewise()

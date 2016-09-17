@@ -216,7 +216,7 @@ class Change extends ActivateInsertMode
   supportInsertionCount: false
 
   execute: ->
-    console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
+    # console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
     @selectTarget()
     text = ''
     if @target.isTextObject() or @target.isMotion()

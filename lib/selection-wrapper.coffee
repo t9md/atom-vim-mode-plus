@@ -6,9 +6,13 @@ propertyStore = new Map
 class SelectionWrapper
   constructor: (@selection) ->
 
-  hasProperties: -> propertyStore.has(@selection)
+  hasProperties: ->
+    console.log 'hasProperties', @selection.id
+    propertyStore.has(@selection)
   getProperties: -> propertyStore.get(@selection) ? {}
-  setProperties: (prop) -> propertyStore.set(@selection, prop)
+  setProperties: (prop) ->
+    # console.log 'setProp', @selection.id
+    propertyStore.set(@selection, prop)
   clearProperties: -> propertyStore.delete(@selection)
 
   setBufferRangeSafely: (range) ->
@@ -139,6 +143,8 @@ class SelectionWrapper
       editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
+    basename = require('path').basename
+    # console.log "PRESERVING", basename(@selection.editor.getPath())
     properties = @detectCharacterwiseProperties()
     unless @selection.isEmpty()
       endPoint = if @selection.isReversed() then 'tail' else 'head'
