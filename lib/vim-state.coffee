@@ -144,6 +144,7 @@ class VimState
   onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
   onWillSelectTarget: (fn) -> @subscribe @emitter.on('will-select-target', fn)
   onDidSelectTarget: (fn) -> @subscribe @emitter.on('did-select-target', fn)
+  preemptWillSelectTarget: (fn) -> @subscribe @emitter.preempt('will-select-target', fn)
   preemptDidSelectTarget: (fn) -> @subscribe @emitter.preempt('did-select-target', fn)
   onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
 

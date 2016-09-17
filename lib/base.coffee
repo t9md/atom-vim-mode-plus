@@ -27,6 +27,7 @@ vimStateMethods = [
   "onDidSetTarget"
   "onWillSelectTarget"
   "onDidSelectTarget"
+  "preemptWillSelectTarget"
   "preemptDidSelectTarget"
   "onDidRestoreCursorPositions"
 

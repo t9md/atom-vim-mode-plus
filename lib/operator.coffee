@@ -151,8 +151,8 @@ class Operator extends Base
         if ranges.length
           @editor.setSelectedBufferRanges(ranges)
         else
-          # Resotoring cursor position also clear selection
-          # Clearing selection is important here to prevent unwanted mutation.
+          # Restoring cursor position also clear selection
+          # Unless clearing selection, we mutate original selection(e.g. paragraph) rather than occurrence.
           @restoreCursorPositions()
 
   setTextToRegisterForSelection: (selection) ->
