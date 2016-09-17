@@ -90,7 +90,7 @@ describe "Operator modifier", ->
         editor.insertText('!!!')
         ensure "escape",
           mode: 'normal'
-          numCursors: 8
+          numCursors: 1
           text: """
 
           !!!: xxx: !!!:
