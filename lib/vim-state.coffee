@@ -238,7 +238,12 @@ class VimState
     @editorElement.addEventListener('mouseup', checkSelection)
     @subscriptions.add new Disposable =>
       @editorElement.removeEventListener('mouseup', checkSelection)
-    @subscriptions.add atom.commands.onWillDispatch(preserveCharacterwise)
+
+    # [FIXME]
+    # Hover position get wired when focus-change between more than two pane.
+    # commenting out is far better than introducing Buggy behavior.
+    # @subscriptions.add atom.commands.onWillDispatch(preserveCharacterwise)
+
     @subscriptions.add atom.commands.onDidDispatch(checkSelection)
 
   resetNormalMode: ({userInvocation}={}) ->
