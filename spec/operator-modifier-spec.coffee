@@ -106,7 +106,7 @@ describe "Operator modifier", ->
           """
         ensure "} j .",
           mode: 'normal'
-          numCursors: 8
+          numCursors: 1
           text: """
 
           !!!: xxx: !!!:
