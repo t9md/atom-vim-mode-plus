@@ -228,6 +228,9 @@ class Base
   emitDidRestoreCursorPositions: ->
     @vimState.emitter.emit('did-restore-cursor-positions')
 
+  emitDidFailToSetTarget: ->
+    @vimState.emitter.emit('did-fail-to-set-target')
+
   # Class methods
   # -------------------------
   @init: (service) ->
