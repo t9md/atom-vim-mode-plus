@@ -449,7 +449,10 @@ describe "Operator ActivateInsertMode family", ->
   describe "the i keybinding", ->
     beforeEach ->
       set
-        text: '123\n4567'
+        text: """
+          123
+          4567
+          """
         cursorBuffer: [[0, 0], [1, 0]]
 
     it "allows undoing an entire batch of typing", ->
@@ -460,6 +463,7 @@ describe "Operator ActivateInsertMode family", ->
       ensure 'escape', text: "abc123\nabc4567"
 
       keystroke 'i'
+      editor.addSelectionBelow()
       editor.insertText "d"
       editor.insertText "e"
       editor.insertText "f"
@@ -473,6 +477,7 @@ describe "Operator ActivateInsertMode family", ->
       editor.backspace()
       editor.backspace()
       ensure 'escape', text: "abc123\nabc4567"
+      editor.addSelectionBelow()
       ensure '.',      text: "ababcc123\nababcc4567"
       ensure '.',      text: "abababccc123\nabababccc4567"
 

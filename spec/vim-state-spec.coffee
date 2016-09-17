@@ -177,12 +177,12 @@ describe "VimState", ->
         0 23456
         1 23456
         """
-        cursor: [[0, 0], [1, 2]]
-      ensure 'i', mode: 'insert', cursor: [[0, 0], [1, 2]]
+        cursor: [0, 2]
+      ensure 'i', mode: 'insert', cursor: [0, 2]
 
     it "activate normal mode without moving cursors left, then back to insert-mode once some command executed", ->
-      ensure 'ctrl-o', cursor: [[0, 0], [1, 2]], mode: 'normal'
-      ensure 'l', cursor: [[0, 1], [1, 3]], mode: 'insert'
+      ensure 'ctrl-o', cursor: [0, 2], mode: 'normal'
+      ensure 'l', cursor: [0, 3], mode: 'insert'
 
   describe "insert-mode", ->
     beforeEach -> keystroke 'i'
