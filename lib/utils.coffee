@@ -34,12 +34,12 @@ include = (klass, module) ->
   for key, value of module
     klass::[key] = value
 
-debug = (message) ->
+debug = (message...) ->
   return unless settings.get('debug')
   message += "\n"
   switch settings.get('debugOutput')
     when 'console'
-      console.log message
+      console.log message...
     when 'file'
       filePath = fs.normalize settings.get('debugOutputFilePath')
       if fs.existsSync(filePath)
