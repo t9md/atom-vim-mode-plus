@@ -210,22 +210,17 @@ class Operator extends Base
     @pointBySelection = new Map
     wasVisual = @isMode('visual')
 
-    if @needStay()
-      if wasVisual
-        console.log 'case-1'
-        @saveCursorPositions('head', fromProperty: true, allowFallback: true) # visual-stay
-      else
-        console.log 'case-2'
-        @saveCursorPositions('head') unless @instanceof('Select') # stay
+    if @needStay() and wasVisual
+      console.log 'case-1'
+      @saveCursorPositions('head', fromProperty: true, allowFallback: true) # visual-stay
+
+    else if @needStay() and not wasVisual
+      console.log 'case-2'
+      @saveCursorPositions('head') unless @instanceof('Select') # stay
+
     else
-      if wasVisual
-        console.log 'case-3'
-        @saveCursorPositions('start') # visual-notStay
-      else
-        console.log 'case-4'
-        # normal-mode
-        @preemptDidSelectTarget =>
-          @saveCursorPositions('start')
+      console.log 'case-3'
+      @preemptDidSelectTarget => @saveCursorPositions('start')
 
     @emitWillSelectTarget()
     @target.select()
