@@ -82,6 +82,11 @@ class Operator extends Base
   constructor: ->
     super
     @initialize()
+
+    #[FIXME] ensure call @setTarget on NG case.
+    # OK: new Select(@vimState).setTarget(operation)
+    # NG: new Select(@vimState, target: operation}
+
     @setTarget(@new(@target)) if _.isString(@target)
 
   # target is TextObject or Motion to operate on.
@@ -176,6 +181,7 @@ class Operator extends Base
     @patternForOccurence ?= @getPatternForOccurrence()
 
   selectOccurrence: ->
+    console.log "CALLED!"
     @scanRangesForOccurrence ?= @editor.getSelectedBufferRanges()
     ranges = scanInRanges(@editor, @patternForOccurence, @scanRangesForOccurrence)
     if ranges.length
@@ -194,15 +200,15 @@ class Operator extends Base
     if @isWithOccurrence()
       @capturePatternForOccurrence()
       @target.select()
-      @selectOccurrence()
+      if haveSomeSelection(@editor)
+        @selectOccurrence()
     else
       @target.select()
 
-    @selectOccurrence() if @isWithOccurrence()
-    @emitDidSelectTarget()
-    @flashIfNecessary(@editor.getSelectedBufferRanges())
-    @trackChangeIfNecessary()
-
+    if haveSomeSelection(@editor)
+      @emitDidSelectTarget()
+      @flashIfNecessary(@editor.getSelectedBufferRanges())
+      @trackChangeIfNecessary()
     haveSomeSelection(@editor)
 
   updatePreviousSelectionIfVisualMode: ->
@@ -222,15 +228,15 @@ class Operator extends Base
     wasVisual = @isMode('visual')
 
     if @needStay() and wasVisual
-      # console.log 'case-1'
+      console.log 'case-1'
       @cursorPositionManager.save('head', fromProperty: true, allowFallback: true) # visual-stay
 
     else if @needStay() and not wasVisual
-      # console.log 'case-2'
+      console.log 'case-2'
       @cursorPositionManager.save('head') unless @instanceof('Select') # stay
 
     else
-      # console.log 'case-3'
+      console.log 'case-3'
       @preemptDidSelectTarget =>
         @cursorPositionManager.save('start')
 

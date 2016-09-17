@@ -7,6 +7,8 @@ settings = require './settings'
 {CurrentSelection, Select, MoveToRelativeLine} = {}
 {OperationStackError, OperatorError, OperationAbortedError} = require './errors'
 
+swrap = require './selection-wrapper'
+
 class OperationStack
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -26,13 +28,19 @@ class OperationStack
           operation = operation.setTarget(new CurrentSelection(@vimState))
       when operation.isTextObject()
         unless mode is 'operator-pending'
-          operation = new Select(@vimState, target: operation)
+          operation = new Select(@vimState).setTarget(operation)
       when operation.isMotion()
         if (mode is 'visual')
-          operation = new Select(@vimState, target: operation)
+          operation = new Select(@vimState).setTarget(operation)
     operation
 
+  reportSelectionProperties: ->
+    lastSelection = @editor.getLastSelection()
+    hasProperty = swrap(lastSelection).hasProperties()
+    console.log "= run start: #{hasProperty}"
+
   run: (klass, properties={}) ->
+    @reportSelectionProperties()
     try
       switch type = typeof(klass)
         when 'string', 'function'
@@ -82,7 +90,7 @@ class OperationStack
       top = @peekTop()
 
       if top.isComplete()
-        # console.log [top.getName(), top.target?.getName()]
+        # console.log "execute #{top.toString()}"
         @execute(@stack.pop())
       else
         if @vimState.isMode('normal') and top.isOperator()
