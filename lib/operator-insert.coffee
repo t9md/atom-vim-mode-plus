@@ -79,6 +79,10 @@ class ActivateInsertMode extends Operator
         for selection in @editor.getSelections()
           @repeatInsert(selection, text)
           moveCursorLeft(selection.cursor)
+
+      if settings.get('clearMultipleCursorsOnEscapeInsertMode')
+        @editor.clearSelections()
+
     else
       if @getInsertionCount() > 0
         range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint('undo'))
@@ -224,11 +228,14 @@ class Change extends ActivateInsertMode
     else
       text = "\n" if @target.isLinewise?()
 
+
     @editor.transact =>
       for selection in @editor.getSelections()
         @setTextToRegisterForSelection(selection)
         range = selection.insertText(text, autoIndent: true)
         selection.cursor.moveLeft() unless range.isEmpty()
+    # FIXME calling super on OUTSIDE of editor.transact.
+    # That's why repeatRecorded() need transact.wrap
     super
 
 class ChangeOccurrence extends Change
