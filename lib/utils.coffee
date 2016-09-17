@@ -610,16 +610,19 @@ isSingleLine = (text) ->
 #   - ON white-space: Includs only white-spaces.
 #   - ON non-word: Includs only non word char(=excludes normal word char).
 getCurrentWordBufferRangeAndKind = (cursor) ->
-  options = {}
   if cursorIsOnWhiteSpace(cursor)
     kind = 'white-space'
-    options.wordRegex = /[\t ]+/
+    source = "[\t ]+"
   else if cursorIsOnNonWordCharacter(cursor)
+    kind = 'non-word'
     nonWordCharacters = _.escapeRegExp(getNonWordCharactersForCursor(cursor))
-    options.wordRegex = ///[#{nonWordCharacters}]+///
+    source = "[#{nonWordCharacters}]+"
   else
     kind = 'word'
-  range = cursor.getCurrentWordBufferRange(options)
+    nonWordCharacters = _.escapeRegExp(getNonWordCharactersForCursor(cursor))
+    source = "^[\t ]*$|[^\\s#{nonWordCharacters}]+"
+  wordRegex = new RegExp(source)
+  range = cursor.getCurrentWordBufferRange({wordRegex})
   {range, kind}
 
 scanInRanges = (editor, pattern, scanRanges) ->

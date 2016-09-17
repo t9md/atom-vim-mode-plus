@@ -125,8 +125,9 @@ class Operator extends Base
       pattern = _.escapeRegExp(@getRegisterValueAsText())
     else
       {range, kind} = getCurrentWordBufferRangeAndKind(@editor.getLastCursor())
-      pattern = _.escapeRegExp(@editor.getTextInBufferRange(range))
-      pattern = "\\b#{pattern}\\b" if kind is 'word'
+      cursorWord = @editor.getTextInBufferRange(range)
+      pattern = _.escapeRegExp(cursorWord)
+      pattern = "\\b" + pattern + "\\b" if kind is 'word'
     new RegExp(pattern, 'g')
 
   setTextToRegisterForSelection: (selection) ->
