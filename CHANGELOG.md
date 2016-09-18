@@ -1,3 +1,23 @@
+# 0.57.0:
+- Fix: `a-word` and `a-whole-word` now select leading white-space when trailing space was not exist #355
+- Fix: Paste(`p`) non-linewise text to empty line now insert text to same line, not next-line like previous version. #359.
+- New: When `o` modifier is used in `operator-pending-mode`, `with-occurrence` css scope is set to provide keymap scope.
+- New: Now `Operator Pending` status is shown on status-bar.
+- Internal, Improve: `Operator.coffee` is split out into three files and overhauled greatly #370.
+- New: Stay preference support for `Delete`, and `StayOnDelete` config options control this behavior.
+- Breaking: Removed `SetCursorsToStartOfTarget`, `SetCursorsToStartOfRangeMarker` since not used.
+- Improve: `.` repeat is no longer depend `Repeat` wrapper operation. Simply replayed recorded operation by operationStack.
+- Breaking, New: `clearMultipleCursorsOnEscapeInsertMode` config option with `true` by default.
+- Breaking, Experimental, New: Default keymap only available in `o` modifier is specified. #379
+  - To change occur in `inner-paragraph`: Can type `c o p`, instead of `c o i p`
+  - To change occur in `a-function`: Can type `c o f`, instead of `c o a f`
+  - To change occur in `a-range-marker`: Can type `c o r`, instead of `c o a r`
+  - To change occur in `inner-current-line`: Can type `c o l`, instead of `c o i l`
+  - To change occur in `a-fold`: Can type `c o z`, instead of `c o a z`
+  - Off course: you can do with operator other than `c`. e.g. `d o f`, `g U o z`.
+- Breaking, Degradation, Improve: To fix stale selection properties, I disabled special support for outer-vmp command which create selection.
+  - When outer-vmp command create selection and enter `visual-mode`, original cursor position is no longer preserved. e.g. `cmd-l`.
+
 # 0.56.0:
 - New: Operator `insert-at-start-of-occurrence`, `insert-at-end-of-occurrence` to start insert at occurrence.
 - New: Operator `sort` #365
