@@ -341,6 +341,16 @@
   'V': 'vim-mode-plus:operator-modifier-linewise'
   'o': 'vim-mode-plus:operator-modifier-occurrence'
 
+# operator-pending.with-occurrence
+# [Experimental]
+# -------------------------
+'atom-text-editor.vim-mode-plus.operator-pending-mode.with-occurrence':
+  'p': 'vim-mode-plus:inner-paragraph'
+  'r': 'vim-mode-plus:a-range-marker'
+  'f': 'vim-mode-plus:a-function'
+  'l': 'vim-mode-plus:inner-current-line'
+  'z': 'vim-mode-plus:a-fold'
+
 # operator-pending, visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
