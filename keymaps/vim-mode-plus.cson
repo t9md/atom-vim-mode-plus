@@ -86,21 +86,6 @@
   'ctrl-e': 'vim-mode-plus:scroll-down'
   'ctrl-y': 'vim-mode-plus:scroll-up'
 
-  'z enter': 'vim-mode-plus:scroll-cursor-to-top'
-  'z t': 'vim-mode-plus:scroll-cursor-to-top-leave'
-  'z .': 'vim-mode-plus:scroll-cursor-to-middle'
-  'z z': 'vim-mode-plus:scroll-cursor-to-middle-leave'
-  'z -': 'vim-mode-plus:scroll-cursor-to-bottom'
-  'z b': 'vim-mode-plus:scroll-cursor-to-bottom-leave'
-  'z s': 'vim-mode-plus:scroll-cursor-to-left'
-  'z e': 'vim-mode-plus:scroll-cursor-to-right'
-
-  'z M': 'editor:fold-all'
-  'z R': 'editor:unfold-all'
-  'z c': 'editor:fold-current-row'
-  'z o': 'editor:unfold-current-row'
-  'z a': 'vim-mode-plus:toggle-fold'
-
   'G': 'vim-mode-plus:move-to-last-line'
   'g g': 'vim-mode-plus:move-to-first-line'
   'H': 'vim-mode-plus:move-to-top-of-screen'
@@ -231,6 +216,22 @@
 
   # 'g n': 'vim-mode-plus:move-to-next-number'
   # 'g N': 'vim-mode-plus:move-to-previous-number'
+
+'atom-text-editor.vim-mode-plus:not(.insert-mode):not(.operator-pending-mode)':
+  'z enter': 'vim-mode-plus:scroll-cursor-to-top'
+  'z t': 'vim-mode-plus:scroll-cursor-to-top-leave'
+  'z .': 'vim-mode-plus:scroll-cursor-to-middle'
+  'z z': 'vim-mode-plus:scroll-cursor-to-middle-leave'
+  'z -': 'vim-mode-plus:scroll-cursor-to-bottom'
+  'z b': 'vim-mode-plus:scroll-cursor-to-bottom-leave'
+  'z s': 'vim-mode-plus:scroll-cursor-to-left'
+  'z e': 'vim-mode-plus:scroll-cursor-to-right'
+
+  'z M': 'editor:fold-all'
+  'z R': 'editor:unfold-all'
+  'z c': 'editor:fold-current-row'
+  'z o': 'editor:unfold-current-row'
+  'z a': 'vim-mode-plus:toggle-fold'
 
 'atom-text-editor.vim-mode-plus-input-char-waiting':
   'a': 'vim-mode-plus:set-input-char-a'
