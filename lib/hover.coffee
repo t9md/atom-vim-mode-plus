@@ -26,7 +26,7 @@ class Hover extends HTMLElement
     @text.push(text)
     @show(point)
 
-  replaceLastSection: (text) ->
+  replaceLastSection: (text, point) ->
     @text.pop()
     @add(text)
 

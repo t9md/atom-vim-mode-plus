@@ -7,6 +7,7 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
 Operator = Base.getClass('Operator')
+CursorPositionManager = require './cursor-position-manager'
 
 # TransformString
 # ================================
@@ -436,23 +437,24 @@ class ChangeSurroundAnyPair extends ChangeSurround
   @description: "Change surround character, from char is auto-detected"
   charsMax: 1
   target: "AAnyPair"
-  cursorPositions: null
-  _restoreCursorPositions: null
 
   initialize: ->
     @onDidSetTarget =>
-      @_restoreCursorPositions = saveCursorPositions(@editor)
+      @preSelectPositions = new CursorPositionManager(@editor)
+      @preSelectPositions.save('head')
+      hoverPosition = @editor.getCursorBufferPosition()
+
       @target.select()
       unless haveSomeSelection(@editor)
         @vimState.input.cancel()
         @abort()
-      @addHover(@editor.getSelectedText()[0])
+      @addHover(@editor.getSelectedText()[0], {}, hoverPosition)
     super
 
   onConfirm: (@char) ->
     # Clear pre-selected selection to start mutation from non-selection.
-    @_restoreCursorPositions()
-    @_restoreCursorPositions = null
+    @preSelectPositions.restore()
+    @preSelectPositions = null
     @input = @char
     @processOperation()
 

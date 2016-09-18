@@ -145,11 +145,11 @@ class Base
     unless @vimState.isMode(mode, submode)
       @activateMode(mode, submode)
 
-  addHover: (text, {replace}={}) ->
+  addHover: (text, {replace}={}, point=null) ->
     if replace ? false
-      @vimState.hover.replaceLastSection(text)
+      @vimState.hover.replaceLastSection(text, point)
     else
-      @vimState.hover.add(text)
+      @vimState.hover.add(text, point)
 
   new: (name, properties={}) ->
     klass = Base.getClass(name)

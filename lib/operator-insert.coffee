@@ -220,7 +220,6 @@ class Change extends ActivateInsertMode
   supportInsertionCount: false
 
   execute: ->
-    console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
     if @isRepeated()
       @flashTarget = true
 
