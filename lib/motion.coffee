@@ -654,26 +654,25 @@ class ScrollFullScreenDown extends Motion
   @extend()
   amountOfPage: +1
 
-  initialize: ->
-    super
+  calculateScrollRow: ->
     amountOfRows = Math.ceil(@amountOfPage * @editor.getRowsPerPage() * @getCount())
     @cursorRow = @editor.getCursorScreenPosition().row + amountOfRows
     @newTopRow = @editor.getFirstVisibleScreenRow() + amountOfRows
 
-  scroll: ->
-    @editor.setFirstVisibleScreenRow(@newTopRow)
-
   select: ->
+    @calculateScrollRow()
     super
-    @scroll()
 
   execute: ->
+    @calculateScrollRow()
     super
-    @scroll()
+    @editor.setFirstVisibleScreenRow(@newTopRow)
 
   moveCursor: (cursor) ->
     point = [getValidVimScreenRow(@editor, @cursorRow), 0]
     cursor.setScreenPosition(point, autoscroll: false)
+
+    @editor.setFirstVisibleScreenRow(@newTopRow)
 
 # keymap: ctrl-b
 class ScrollFullScreenUp extends ScrollFullScreenDown

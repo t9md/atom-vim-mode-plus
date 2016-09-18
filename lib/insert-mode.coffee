@@ -14,6 +14,7 @@ class InsertRegister extends InsertMode
   requireInput: true
 
   initialize: ->
+    super
     @focusInput()
 
   execute: ->

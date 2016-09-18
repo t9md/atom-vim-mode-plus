@@ -303,8 +303,7 @@ class SelectOccurrence extends Select
   @description: "Add selection onto each matching word within target range"
   withOccurrence: true
   initialize: ->
-    console.log 'mode!', @vimState.mode
-    # FIXME don't trying to do everytin in event
+    super
     @onDidSelectTarget =>
       swrap.clearProperties(@editor)
 
