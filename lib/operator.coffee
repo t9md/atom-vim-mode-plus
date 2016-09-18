@@ -234,20 +234,19 @@ class Operator extends Base
 
   saveCursorPositionsToRestore: ->
     @cursorPositionManager = new CursorPositionManager(@editor)
-    wasVisual = @isMode('visual')
+    stay = @needStay()
+    visual = @isMode('visual')
 
-    if @needStay() and wasVisual
-      debug '    case-1: head fromProperty'
-      @cursorPositionManager.save('head', fromProperty: true, allowFallback: true) # visual-stay
-      return
-
-    else if @needStay() and not wasVisual
-      debug '    case-2: head actual'
-      @cursorPositionManager.save('head') unless @instanceof('Select') # stay
-      return
-    else
-      debug '    case-3: start of selected target'
-      => @cursorPositionManager.save('start')
+    switch
+      when stay and visual
+        @cursorPositionManager.save('head', fromProperty: true, allowFallback: true)
+      when stay and (not visual)
+        @cursorPositionManager.save('head') unless @instanceof('Select')
+      when (not stay) and visual
+        @cursorPositionManager.save('start')
+      when (not stay) and (not visual)
+        =>
+          @cursorPositionManager.save('start')
 
   restoreCursorPositions: ->
     @cursorPositionManager.restore(strict: not @isWithOccurrence())

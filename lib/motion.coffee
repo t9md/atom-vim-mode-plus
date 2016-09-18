@@ -28,6 +28,8 @@ globalState = require './global-state'
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   getTextInScreenRange
+
+  debug
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -87,7 +89,7 @@ class Motion extends Base
     if @isMode('visual')
       Select ?= Base.getClass('Select')
       unless @getOperator() instanceof Select
-        console.log "= updating: #{@getOperator()?.toString()}"
+        debug "= updating: #{@getOperator()?.toString()}"
       # console.log "= updating: #{@toString()}"
       @updateSelectionProperties()
 
