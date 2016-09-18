@@ -252,7 +252,7 @@ class Operator extends Base
   restoreCursorPositions: ->
     @cursorPositionManager.restore(strict: not @isWithOccurrence())
     @cursorPositionManager = null
-    @emitDidRestoreCursorPositions() # not called on early return [FIXME?]
+    @emitDidRestoreCursorPositions()
 
 # Select
 # When text-object is invoked from normal or viusal-mode, operation would be
