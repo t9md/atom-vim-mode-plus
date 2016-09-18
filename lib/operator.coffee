@@ -239,9 +239,11 @@ class Operator extends Base
 
     switch
       when stay and visual
-        @cursorPositionManager.save('head', fromProperty: true, allowFallback: true)
+        options = {fromProperty: true, allowFallback: true, useMarker: @useMarkerForStay ? false}
+        @cursorPositionManager.save('head', options)
       when stay and (not visual)
-        @cursorPositionManager.save('head') unless @instanceof('Select')
+        options = {useMarker: @useMarkerForStay ? false}
+        @cursorPositionManager.save('head', options) unless @instanceof('Select')
       when (not stay) and visual
         @cursorPositionManager.save('start')
       when (not stay) and (not visual)
