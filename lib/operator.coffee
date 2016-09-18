@@ -129,7 +129,8 @@ class Operator extends Base
       {range, kind} = getCurrentWordBufferRangeAndKind(@editor.getLastCursor())
       cursorWord = @editor.getTextInBufferRange(range)
       pattern = _.escapeRegExp(cursorWord)
-      pattern = "\\b" + pattern + "\\b" if kind is 'word'
+      if kind is 'word'
+        pattern = "\\b" + pattern + "\\b"
     new RegExp(pattern, 'g')
 
   setTextToRegisterForSelection: (selection) ->
@@ -151,59 +152,67 @@ class Operator extends Base
     # We need to preserve selections before selection is cleared as a result of mutation.
     @updatePreviousSelectionIfVisualMode()
     # Mutation phase
-    # console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
+    debug "  operator-execute", @toString()
     if @selectTarget()
+      debug "    selectTarget[=success]"
       @editor.transact =>
         for selection in @editor.getSelections()
           @mutateSelection(selection)
       @restoreCursorPositions() if @restorePositions
     else
-      console.log "did fail to select target"
+      debug "    selectTarget[=fail]"
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
     @activateMode('normal')
 
-  capturePatternForOccurrence: ->
-    @scanRangesForOccurrence = null
+  selectOccurrence: (fn) ->
+    scanRanges = null
+    cursorPositionManager = new CursorPositionManager(@editor)
 
+    # Capture Pattern For Occurrence
     if @isMode('visual')
       scanRanges = @editor.getSelectedBufferRanges()
       @vimState.modeManager.deactivate() # clear selection FIXME
-      console.log 'deactivate on will-select-target'
+      debug "    deactivate on will-select-target"
 
       unless @isMode('visual', 'blockwise') # extend scanRange to include cursorWord
         # BUG dont extend if register value is specified
         range = getCurrentWordBufferRangeAndKind(@editor.getLastCursor()).range
         newRange = scanRanges.pop().union(range)
         scanRanges.push(newRange)
-      @scanRangesForOccurrence = scanRanges
+
+    cursorPositionManager.save('head')
     @patternForOccurence ?= @getPatternForOccurrence()
 
-  selectOccurrence: ->
-    @scanRangesForOccurrence ?= @editor.getSelectedBufferRanges()
-    ranges = scanInRanges(@editor, @patternForOccurence, @scanRangesForOccurrence)
-    if ranges.length
+    fn()
+
+    # Select Occurrence
+    ranges = scanInRanges(@editor, @patternForOccurence, scanRanges ? @editor.getSelectedBufferRanges())
+    if (success = ranges.length > 0)
       @editor.setSelectedBufferRanges(ranges)
+      cursorPositionManager.destroy()
     else
-      # Restoring cursor position also clear selection
-      # Unless clearing selection, we mutate original selection(e.g. paragraph) rather than occurrence.
-      console.log "Fail to select occurrence"
-      # @restoreCursorPositions()
-      @editor.clearSelections()
-      return false
+      # Restoring cursor position also clear selection. Require to avoid unwanted mutation.
+      cursorPositionManager.restore()
+
+    if settings.get('debug')
+      status = success and 'success' or 'fail'
+      debug "    selectOccurrence[=#{status}]"
+
+    status
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    @saveCursorPositionsToRestore()
-    @emitWillSelectTarget()
+    saveAfterSelect = @saveCursorPositionsToRestore()
+    selectTarget = =>
+      @target.select()
+      saveAfterSelect?()
+
     if @isWithOccurrence()
-      @capturePatternForOccurrence()
-      @target.select()
-      if haveSomeSelection(@editor)
-        @selectOccurrence()
+      @selectOccurrence -> selectTarget()
     else
-      @target.select()
+      selectTarget()
 
     if haveSomeSelection(@editor)
       @emitDidSelectTarget()
@@ -228,17 +237,17 @@ class Operator extends Base
     wasVisual = @isMode('visual')
 
     if @needStay() and wasVisual
-      console.log 'case-1'
+      debug '    case-1: head fromProperty'
       @cursorPositionManager.save('head', fromProperty: true, allowFallback: true) # visual-stay
+      return
 
     else if @needStay() and not wasVisual
-      console.log 'case-2'
+      debug '    case-2: head actual'
       @cursorPositionManager.save('head') unless @instanceof('Select') # stay
-
+      return
     else
-      console.log 'case-3'
-      @preemptDidSelectTarget =>
-        @cursorPositionManager.save('start')
+      debug '    case-3: start of selected target'
+      => @cursorPositionManager.save('start')
 
   restoreCursorPositions: ->
     @cursorPositionManager.restore(strict: not @isWithOccurrence())

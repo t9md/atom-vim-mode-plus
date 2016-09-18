@@ -17,6 +17,7 @@ class CursorPositionManager
       @pointsBySelection.set(selection, fn(selection, point))
 
   restore: ({strict}={}) ->
+    strict ?= true
     selections = @editor.getSelections()
 
     # unless occurence-mode we go strict mode.

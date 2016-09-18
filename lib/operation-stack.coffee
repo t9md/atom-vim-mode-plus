@@ -6,8 +6,9 @@ Base = require './base'
 settings = require './settings'
 {CurrentSelection, Select, MoveToRelativeLine} = {}
 {OperationStackError, OperatorError, OperationAbortedError} = require './errors'
-
 swrap = require './selection-wrapper'
+
+{debug} = require './utils'
 
 class OperationStack
   constructor: (@vimState) ->
@@ -34,13 +35,12 @@ class OperationStack
           operation = new Select(@vimState).setTarget(operation)
     operation
 
-  reportSelectionProperties: ->
-    lastSelection = @editor.getLastSelection()
-    hasProperty = swrap(lastSelection).hasProperties()
-    console.log "= run start: #{hasProperty}"
+  hasSelectionProperty: ->
+    swrap(@editor.getLastSelection()).hasProperties()
 
   run: (klass, properties={}) ->
-    # @reportSelectionProperties()
+    if settings.get('debug')
+      debug 'run-start:', @hasSelectionProperty()
     try
       switch type = typeof(klass)
         when 'string', 'function'
@@ -90,7 +90,7 @@ class OperationStack
       top = @peekTop()
 
       if top.isComplete()
-        # console.log "execute #{top.toString()}"
+        debug "will-execute:", top.toString()
         @execute(@stack.pop())
       else
         if @vimState.isMode('normal') and top.isOperator()
@@ -143,6 +143,10 @@ class OperationStack
       moveCursorLeft(cursor, {preserveGoalColumn: true})
 
   finish: (operation=null) ->
+    if operation?
+      debug 'finish-operation:', operation.toString(0), @hasSelectionProperty()
+    else
+      debug 'finish-operation: operation=null'
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
 
@@ -153,6 +157,7 @@ class OperationStack
       @vimState.modeManager.updateNarrowedState()
     @vimState.updateCursorsVisibility()
     @vimState.reset()
+    debug '---------------'
 
   peekTop: ->
     _.last(@stack)

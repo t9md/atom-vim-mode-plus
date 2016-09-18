@@ -220,7 +220,10 @@ class Change extends ActivateInsertMode
   supportInsertionCount: false
 
   execute: ->
-    # console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
+    console.log "== Execution start #{@getName()}:#{@getTarget()?.getName()}"
+    if @isRepeated()
+      @flashTarget = true
+
     selected = @selectTarget()
     if @isWithOccurrence() and not selected
       @vimState.activate('normal')
@@ -231,7 +234,6 @@ class Change extends ActivateInsertMode
       text = "\n" if (swrap.detectVisualModeSubmode(@editor) is 'linewise')
     else
       text = "\n" if @target.isLinewise?()
-
 
     @editor.transact =>
       for selection in @editor.getSelections()

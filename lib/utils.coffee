@@ -34,16 +34,18 @@ include = (klass, module) ->
   for key, value of module
     klass::[key] = value
 
-debug = (message...) ->
+debug = (messages...) ->
   return unless settings.get('debug')
-  message += "\n"
+  # messages += "\n"
+  # console.log messages
   switch settings.get('debugOutput')
     when 'console'
-      console.log message...
+      # console.log "HEY!"
+      console.log messages...
     when 'file'
       filePath = fs.normalize settings.get('debugOutputFilePath')
       if fs.existsSync(filePath)
-        fs.appendFileSync filePath, message
+        fs.appendFileSync filePath, messages
 
 getView = (model) ->
   atom.views.getView(model)
