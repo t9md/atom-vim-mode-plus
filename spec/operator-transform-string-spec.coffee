@@ -159,7 +159,7 @@ describe "Operator TransformString", ->
       it "indents the currrent selection and exits visual mode", ->
         ensure 'v j >',
           mode: 'normal'
-          cursor: [1, 0]
+          cursor: [1, 2]
           text: """
             12345
             abcde
@@ -168,7 +168,7 @@ describe "Operator TransformString", ->
       it "when repeated, operate on same range when cursor was not moved", ->
         ensure 'v j >',
           mode: 'normal'
-          cursor: [1, 0]
+          cursor: [1, 2]
           text: """
             12345
             abcde
@@ -176,7 +176,7 @@ describe "Operator TransformString", ->
           """
         ensure '.',
           mode: 'normal'
-          cursor: [1, 0]
+          cursor: [1, 4]
           text: """
               12345
               abcde
@@ -185,7 +185,7 @@ describe "Operator TransformString", ->
       it "when repeated, operate on relative range from cursor position with same extent when cursor was moved", ->
         ensure 'v j >',
           mode: 'normal'
-          cursor: [1, 0]
+          cursor: [1, 2]
           text: """
             12345
             abcde
@@ -193,8 +193,12 @@ describe "Operator TransformString", ->
           """
         ensure 'l .',
           mode: 'normal'
-          cursor: [1, 2]
-          text: "  12345\n    abcde\n  ABCDE"
+          cursor: [1, 5]
+          text_: """
+          __12345
+          ____abcde
+          __ABCDE
+          """
 
   describe "the < keybinding", ->
     beforeEach ->
