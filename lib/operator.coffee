@@ -239,19 +239,27 @@ class Operator extends Base
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
 
-    if @needStay()
-      @cursorPositionManager.restore(strict: not @isWithOccurrence())
-      @cursorPositionManager = null
+    for selection in @editor.getSelections() when mutation = @mutations.getMutationForSelection(selection)
+      if @isWithOccurrence() and mutation.createdAt is 'did-select'
+        selection.destroy()
+        continue
 
-    else
-      for selection in @editor.getSelections() when mutation = @mutations.getMutationForSelection(selection)
-        if @isWithOccurrence() and mutation.createdAt is 'did-select'
-          selection.destroy()
-          continue
+      if @needStay()
+        point = @cursorPositionManager.getPointForSelection(selection)
+        range = mutation.marker.getBufferRange()
+        if range.isEmpty()
+          tailOfMutation = range.end
+        else
+          tailOfMutation = range.end.translate([0, -1])
 
+        point = Point.min(tailOfMutation, point)
+        selection.cursor.setBufferPosition(point)
+      else
         if range = mutation.checkPoint['did-select']
           selection.cursor.setBufferPosition(range.start)
 
+    @cursorPositionManager?.destroy()
+    @cursorPositionManager = null
     @emitDidRestoreCursorPositions()
 
 # Select
@@ -354,16 +362,20 @@ class Delete extends Operator
 
   execute: ->
     wasLinewise = null
+    pointsBySelectiion = new Map
+    # FIXME
     @onDidSelectTarget =>
       wasLinewise = @target.isLinewise()
       if @needStay()
         isCharacterwise = @vimState.isMode('visual', 'characterwise')
-        @cursorPositionManager.updateBy (selection, point) ->
+        @cursorPositionManager.updateBy (selection, point) =>
           start = selection.getBufferRange().start
-          if isCharacterwise
+          if isCharacterwise or swrap.detectVisualModeSubmode(@editor) is 'characterwise'
             start
           else
-            new Point(start.row, point.column)
+            point = new Point(start.row, point.column)
+            pointsBySelectiion.set(selection, point)
+            point
 
     @onDidRestoreCursorPositions =>
       return unless wasLinewise
@@ -372,7 +384,11 @@ class Delete extends Operator
         # Ensure cursor never exceeds VimEOF
         if cursor.getBufferPosition().isGreaterThan(vimEof)
           cursor.setBufferPosition([vimEof.row, 0])
-        cursor.skipLeadingWhitespace() unless @needStay()
+        if @needStay()
+          if point = pointsBySelectiion.get(cursor.selection)
+            cursor.setBufferPosition(point)
+        else
+          cursor.skipLeadingWhitespace()
     super
 
   mutateSelection: (selection) =>
