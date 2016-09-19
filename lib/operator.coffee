@@ -79,10 +79,13 @@ class Operator extends Base
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      ranges = @mutations.getMarkerBufferRanges()
-      highlightRanges @editor, ranges,
-        class: 'vim-mode-plus-flash'
-        timeout: settings.get('flashOnOperateDuration')
+      ranges = @mutations.getMarkerBufferRanges().filter (range) ->
+        not range.isEmpty()
+
+      if ranges.length
+        highlightRanges @editor, ranges,
+          class: 'vim-mode-plus-flash'
+          timeout: settings.get('flashOnOperateDuration')
 
   trackChangeIfNecessary: ->
     return unless @trackChange
