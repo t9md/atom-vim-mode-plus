@@ -176,7 +176,7 @@ class TransformStringByExternalCommand extends TransformString
         for selection in @editor.getSelections()
           text = @getNewText(selection.getText(), selection)
           selection.insertText(text, {@autoIndent})
-        @restoreCursorPositions() if @restorePositions
+        @restoreCursorPositionsIfNecessary()
         @activateMode(@finalMode, @finalSubmode)
 
   collect: (resolve) ->

@@ -21,6 +21,7 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
 CursorPositionManager = require './cursor-position-manager'
+MutationTracker = require './mutation-tracker'
 {OperatorError} = require './errors'
 
 class Operator extends Base
@@ -35,6 +36,7 @@ class Operator extends Base
 
   stayOnLinewise: false
   stayAtSamePosition: null
+  useMarkerForStay: false
   restorePositions: true
   flashTarget: true
   trackChange: false
@@ -72,21 +74,28 @@ class Operator extends Base
       class: 'vim-mode-plus-flash'
       timeout: settings.get('flashOnOperateDuration')
 
+  flashChangeIfNecessary: ->
+    return if @isMode('visual')
+    return unless @flashTarget
+    return unless settings.get('flashOnOperate')
+    return if @getName() in settings.get('flashOnOperateBlacklist')
+
+    @onDidFinishOperation =>
+      ranges = @mutations.getMarkerBufferRanges()
+      highlightRanges @editor, ranges,
+        class: 'vim-mode-plus-flash'
+        timeout: settings.get('flashOnOperateDuration')
+
   trackChangeIfNecessary: ->
     return unless @trackChange
 
-    changeMarker = @editor.markBufferRange(@editor.getSelectedBufferRange())
     @onDidFinishOperation =>
-      @setMarkForChange(changeMarker.getBufferRange())
+      if marker = @mutations.getMutationForSelection(@editor.getLastSelection()).marker
+        @setMarkForChange(marker.getBufferRange())
 
   constructor: ->
     super
     @initialize()
-
-    #[FIXME] ensure call @setTarget on NG case.
-    # OK: new Select(@vimState).setTarget(operation)
-    # NG: new Select(@vimState, target: operation}
-
     @setTarget(@new(@target)) if _.isString(@target)
 
   # target is TextObject or Motion to operate on.
@@ -158,7 +167,7 @@ class Operator extends Base
       @editor.transact =>
         for selection in @editor.getSelections()
           @mutateSelection(selection)
-      @restoreCursorPositions() if @restorePositions
+      @restoreCursorPositionsIfNecessary()
     else
       debug "    selectTarget[=fail]"
 
@@ -204,19 +213,22 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    saveAfterSelect = @saveCursorPositionsToRestore()
-    selectTarget = =>
-      @target.select()
-      saveAfterSelect?()
+    @saveCursorPositionsToRestoreIfNecessary()
+
+    @mutations = new MutationTracker(@vimState)
+    @mutations.setCheckPoint('will-select')
+    @emitWillSelectTarget()
 
     if @isWithOccurrence()
-      @selectOccurrence -> selectTarget()
+      @selectOccurrence =>
+        @target.select()
     else
-      selectTarget()
+      @target.select()
 
     if haveSomeSelection(@editor)
+      @mutations.setCheckPoint('did-select')
       @emitDidSelectTarget()
-      @flashIfNecessary(@editor.getSelectedBufferRanges())
+      @flashChangeIfNecessary()
       @trackChangeIfNecessary()
     haveSomeSelection(@editor)
 
@@ -232,27 +244,34 @@ class Operator extends Base
     submode = @vimState.submode
     globalState.previousSelection = {properties, submode}
 
-  saveCursorPositionsToRestore: ->
+  saveCursorPositionsToRestoreIfNecessary: ->
+    return unless @needStay()
+
     @cursorPositionManager = new CursorPositionManager(@editor)
-    stay = @needStay()
-    visual = @isMode('visual')
+    options = {useMarker: @useMarkerForStay}
 
-    switch
-      when stay and visual
-        options = {fromProperty: true, allowFallback: true, useMarker: @useMarkerForStay ? false}
-        @cursorPositionManager.save('head', options)
-      when stay and (not visual)
-        options = {useMarker: @useMarkerForStay ? false}
-        @cursorPositionManager.save('head', options) unless @instanceof('Select')
-      when (not stay) and visual
-        @cursorPositionManager.save('start')
-      when (not stay) and (not visual)
-        =>
-          @cursorPositionManager.save('start')
+    if @isMode('visual')
+      _.extend(options, {fromProperty: true, allowFallback: true})
+      @cursorPositionManager.save('head', options)
+    else
+      @cursorPositionManager.save('head', options) unless @instanceof('Select')
 
-  restoreCursorPositions: ->
-    @cursorPositionManager.restore(strict: not @isWithOccurrence())
-    @cursorPositionManager = null
+  restoreCursorPositionsIfNecessary: ->
+    return unless @restorePositions
+
+    if @needStay()
+      @cursorPositionManager.restore(strict: not @isWithOccurrence())
+      @cursorPositionManager = null
+
+    else
+      for selection in @editor.getSelections() when mutation = @mutations.getMutationForSelection(selection)
+        if @isWithOccurrence() and mutation.createdAt is 'did-select'
+          selection.destroy()
+          continue
+
+        if range = mutation.checkPoint['did-select']
+          selection.cursor.setBufferPosition(range.start)
+
     @emitDidRestoreCursorPositions()
 
 # Select
@@ -396,6 +415,7 @@ class DeleteToLastCharacterOfLine extends Delete
     # Ensure all selections to un-reversed
     if isBlockwise = @isMode('visual', 'blockwise')
       swrap.setReversedState(@editor, false)
+      @restorePositions = false
 
     super
 

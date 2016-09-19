@@ -12,6 +12,8 @@ globalState = require './global-state'
   getVisibleBufferRange
   matchScopes
   isRangeContainsSomePoint
+
+  debug
 } = require './utils'
 swrap = require './selection-wrapper'
 
@@ -42,7 +44,7 @@ class VimState
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @rangeMarkers = []
-
+    @markerLayer = @editor.addMarkerLayer()
     @hover = new HoverElement().initialize(this)
     @hoverSearchCounter = new HoverElement().initialize(this)
     @searchHistory = new SearchHistoryManager(this)
@@ -256,6 +258,11 @@ class VimState
 
   reset: ->
     @resetCharInput()
+    for marker in @markerLayer.getMarkers()
+      marker.destroy()
+
+    debug('marker length', @markerLayer.getMarkers().length)
+
     @register.reset()
     @searchHistory.reset()
     @hover.reset()

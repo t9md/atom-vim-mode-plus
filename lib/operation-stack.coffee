@@ -39,6 +39,7 @@ class OperationStack
     swrap(@editor.getLastSelection()).hasProperties()
 
   run: (klass, properties={}) ->
+    # @reportAliveMakerLength('run')
     if settings.get('debug')
       debug 'run-start:', @hasSelectionProperty()
     try
@@ -142,11 +143,18 @@ class OperationStack
       # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
       moveCursorLeft(cursor, {preserveGoalColumn: true})
 
+  reportAliveMakerLength: (subject) ->
+    length = @vimState.markerLayer.getMarkers().length
+    console.log "#{subject}:", length
+    # alives = @editor.findMarkers().filter (marker) -> not marker.isDestroyed()
+    # console.log "#{subject}:", alives.length
+
   finish: (operation=null) ->
-    if operation?
-      debug 'finish-operation:', operation.toString(0), @hasSelectionProperty()
-    else
-      debug 'finish-operation: operation=null'
+
+    # if operation?
+    #   debug 'finish-operation:', operation.toString(0), @hasSelectionProperty()
+    # else
+    #   debug 'finish-operation: operation=null'
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
 
@@ -158,6 +166,7 @@ class OperationStack
     @vimState.updateCursorsVisibility()
     @vimState.reset()
     debug '---------------'
+    # @reportAliveMakerLength('fin')
 
   peekTop: ->
     _.last(@stack)
