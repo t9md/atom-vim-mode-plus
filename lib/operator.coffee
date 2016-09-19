@@ -161,6 +161,9 @@ class Operator extends Base
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
     @activateMode('normal')
+    @onDidFinishOperation =>
+      @mutations.destroy()
+      @mutations = null
 
   selectOccurrence: (fn) ->
     scanRanges = null
@@ -191,12 +194,18 @@ class Operator extends Base
       # Restoring cursor position also clear selection. Require to avoid unwanted mutation.
       cursorPositionManager.restore()
 
+  trackMutation: (checkPoint) ->
+    unless @mutations?
+      options =
+        stay: @needStay()
+        isSelect: @instanceof('Select')
+        useMarker: @useMarkerForStay
+      @mutations = new MutationTracker(@vimState, options)
+    @mutations.setCheckPoint(checkPoint)
+
   # Return true unless all selection is empty.
   selectTarget: ->
-    @saveCursorPositionsToRestoreIfNecessary()
-
-    @mutations = new MutationTracker(@vimState)
-    @mutations.setCheckPoint('will-select')
+    @trackMutation('will-select')
     @emitWillSelectTarget()
 
     if @isWithOccurrence()
@@ -206,7 +215,7 @@ class Operator extends Base
       @target.select()
 
     if haveSomeSelection(@editor)
-      @mutations.setCheckPoint('did-select')
+      @trackMutation('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
@@ -224,42 +233,9 @@ class Operator extends Base
     submode = @vimState.submode
     globalState.previousSelection = {properties, submode}
 
-  saveCursorPositionsToRestoreIfNecessary: ->
-    return unless @needStay()
-
-    @cursorPositionManager = new CursorPositionManager(@editor)
-    options = {useMarker: @useMarkerForStay}
-
-    if @isMode('visual')
-      _.extend(options, {fromProperty: true, allowFallback: true})
-      @cursorPositionManager.save('head', options)
-    else
-      @cursorPositionManager.save('head', options) unless @instanceof('Select')
-
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
-
-    for selection in @editor.getSelections() when mutation = @mutations.getMutationForSelection(selection)
-      if @isWithOccurrence() and mutation.createdAt is 'did-select'
-        selection.destroy()
-        continue
-
-      if @needStay()
-        point = @cursorPositionManager.getPointForSelection(selection)
-        range = mutation.marker.getBufferRange()
-        if range.isEmpty()
-          tailOfMutation = range.end
-        else
-          tailOfMutation = range.end.translate([0, -1])
-
-        point = Point.min(tailOfMutation, point)
-        selection.cursor.setBufferPosition(point)
-      else
-        if range = mutation.checkPoint['did-select']
-          selection.cursor.setBufferPosition(range.start)
-
-    @cursorPositionManager?.destroy()
-    @cursorPositionManager = null
+    @mutations.restoreCursorPositions(strict: @isWithOccurrence())
     @emitDidRestoreCursorPositions()
 
 # Select

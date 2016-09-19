@@ -33,17 +33,17 @@ class CursorPositionManager
     return if strict and selections.some(selectionNotFound)
 
     for selection in selections
-      if @pointsBySelection.has(selection)
-        @restoreForSelection(selection)
+      if point = @pointsBySelection.get(selection)
+        unless point instanceof Point
+          marker = point
+          point = marker.getHeadBufferPosition()
+          marker.destroy()
+        selection.cursor.setBufferPosition(point)
       else
         # only when none-strict mode can reach here
         selection.destroy()
 
     @destroy()
-
-  restoreForSelection: (selection) ->
-    if point = @getPointForSelection(selection)
-      selection.cursor.setBufferPosition(point)
 
   getPointForSelection: (selection) ->
     point = null
@@ -55,5 +55,8 @@ class CursorPositionManager
     point
 
   destroy: ->
+    @pointsBySelection.forEach (point) ->
+      point.destroy() unless point instanceof Point
+
     @pointsBySelection.clear()
     [@pointsBySelection, @editor] = []
