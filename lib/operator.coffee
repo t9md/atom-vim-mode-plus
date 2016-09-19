@@ -64,21 +64,19 @@ class Operator extends Base
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
 
+  needFlash: ->
+    if @flashTarget and not @isMode('visual')
+      settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
+
   flashIfNecessary: (ranges) ->
-    return if @isMode('visual')
-    return unless @flashTarget
-    return unless settings.get('flashOnOperate')
-    return if @getName() in settings.get('flashOnOperateBlacklist')
+    return unless @needFlash()
 
     highlightRanges @editor, ranges,
       class: 'vim-mode-plus-flash'
       timeout: settings.get('flashOnOperateDuration')
 
   flashChangeIfNecessary: ->
-    return if @isMode('visual')
-    return unless @flashTarget
-    return unless settings.get('flashOnOperate')
-    return if @getName() in settings.get('flashOnOperateBlacklist')
+    return unless @needFlash()
 
     @onDidFinishOperation =>
       ranges = @mutations.getMarkerBufferRanges()
@@ -149,27 +147,16 @@ class Operator extends Base
     text += "\n" if (@target.isLinewise?() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
 
-  debug: ->
-    # === debug
-    debug('# ---------- start')
-    debug(selectedRange(@editor))
-    debug(selectedText(@editor))
-    debug('# ---------- end')
-
   # Main
   execute: ->
     # We need to preserve selections before selection is cleared as a result of mutation.
     @updatePreviousSelectionIfVisualMode()
     # Mutation phase
-    debug "  operator-execute", @toString()
     if @selectTarget()
-      debug "    selectTarget[=success]"
       @editor.transact =>
         for selection in @editor.getSelections()
           @mutateSelection(selection)
       @restoreCursorPositionsIfNecessary()
-    else
-      debug "    selectTarget[=fail]"
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
@@ -183,7 +170,6 @@ class Operator extends Base
     if @isMode('visual')
       scanRanges = @editor.getSelectedBufferRanges()
       @vimState.modeManager.deactivate() # clear selection FIXME
-      debug "    deactivate on will-select-target"
 
       unless @isMode('visual', 'blockwise') # extend scanRange to include cursorWord
         # BUG dont extend if register value is specified
@@ -204,12 +190,6 @@ class Operator extends Base
     else
       # Restoring cursor position also clear selection. Require to avoid unwanted mutation.
       cursorPositionManager.restore()
-
-    if settings.get('debug')
-      status = success and 'success' or 'fail'
-      debug "    selectOccurrence[=#{status}]"
-
-    status
 
   # Return true unless all selection is empty.
   selectTarget: ->

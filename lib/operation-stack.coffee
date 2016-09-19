@@ -150,7 +150,6 @@ class OperationStack
     # console.log "#{subject}:", alives.length
 
   finish: (operation=null) ->
-
     # if operation?
     #   debug 'finish-operation:', operation.toString(0), @hasSelectionProperty()
     # else
