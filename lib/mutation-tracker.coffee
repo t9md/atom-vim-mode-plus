@@ -66,7 +66,8 @@ class MutationTracker
   getMarkerBufferRanges: ->
     ranges = []
     @mutationsBySelection.forEach (mutation, selection) ->
-      ranges.push(mutation.marker.getBufferRange())
+      if range = mutation.marker?.getBufferRange()
+        ranges.push(range)
     ranges
 
   destroy: ->
