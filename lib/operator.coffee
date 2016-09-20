@@ -9,6 +9,7 @@ globalState = require './global-state'
   highlightRanges
   isEndsWithNewLineForBufferRow
   getCurrentWordBufferRangeAndKind
+  getValidVimBufferRow
   cursorIsAtEmptyRow
   scanInRanges
 
@@ -228,7 +229,10 @@ class Operator extends Base
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
-    options = {strict: @isWithOccurrence(), clipToMutationEnd: @clipToMutationEndOnStay}
+    options =
+      strict: @isWithOccurrence()
+      clipToMutationEnd: @clipToMutationEndOnStay
+      isBlockwise: @target?.isBlockwise?()
     @mutations.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
 
@@ -337,13 +341,12 @@ class Delete extends Operator
         vimEof = @getVimEofBufferPosition()
         for cursor in @editor.getCursors()
           # Ensure cursor never exceeds VimEOF
-          if cursor.getBufferPosition().isGreaterThan(vimEof)
-            cursor.setBufferPosition([vimEof.row, 0])
-
+          row = getValidVimBufferRow(@editor, cursor.getBufferRow())
           if @needStay()
             point = @mutations.pointsBySelection.get(cursor.selection)
-            cursor.setBufferPosition([cursor.getBufferRow(), point.column])
+            cursor.setBufferPosition([row, point.column])
           else
+            cursor.setBufferPosition([row, 0])
             cursor.skipLeadingWhitespace()
     super
 
@@ -367,14 +370,7 @@ class DeleteToLastCharacterOfLine extends Delete
     # Ensure all selections to un-reversed
     if isBlockwise = @isMode('visual', 'blockwise')
       swrap.setReversedState(@editor, false)
-      @restorePositions = false
-
     super
-
-    if isBlockwise
-      @getBlockwiseSelections().forEach (blockwiseSelection) ->
-        startPosition = blockwiseSelection.getStartBufferPosition()
-        blockwiseSelection.setHeadBufferPosition(startPosition)
 
 class DeleteLine extends Delete
   @extend()
@@ -601,25 +597,13 @@ class Replace extends Operator
     input = "\n" if input is ''
     input
 
-  execute: ->
+  mutateSelection: (selection) ->
     input = @getInput()
-    return unless @selectTarget()
-    @editor.transact =>
-      for selection in @editor.getSelections()
-        text = selection.getText()
-        if @target.instanceof('MoveRight') and text.length isnt @getCount()
-          continue
+    text = selection.getText()
+    if @target.instanceof('MoveRight') and text.length isnt @getCount()
+      return
 
-        newText = text.replace(/./g, input)
-        newRange = selection.insertText(newText, autoIndentNewline: true)
-        if input isnt "\n"
-          selection.cursor.setBufferPosition(newRange.start)
-
-    # FIXME this is very imperative, handling in very lower level.
-    # find better place for operator in blockwise move works appropriately.
-    if @getTarget().isBlockwise()
-      top = @editor.getSelectionsOrderedByBufferPosition()[0]
-      for selection in @editor.getSelections() when (selection isnt top)
-        selection.destroy()
-
-    @activateMode('normal')
+    newText = text.replace(/./g, input)
+    newRange = selection.insertText(newText, autoIndentNewline: true)
+    if input is "\n"
+      @restorePositions = false

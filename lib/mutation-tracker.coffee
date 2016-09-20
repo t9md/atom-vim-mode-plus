@@ -97,11 +97,31 @@ class MutationTracker
       if range = mutation.checkPoint['did-select']
         range.start
 
-  restoreCursorPositions: ({strict, clipToMutationEnd}) ->
-    for selection in @editor.getSelections() when mutation = @getMutationForSelection(selection)
-      if strict and mutation.createdAt is 'did-select'
-        selection.destroy()
-        continue
+  restoreCursorPositions: ({strict, clipToMutationEnd, isBlockwise}) ->
+    if isBlockwise
+      # [FIXME] why I need this direct manupilation?
+      # Because there's bug that blockwise selecction is not addes to each
+      # bsInstance.selection. Need investigation.
+      points = []
+      @mutationsBySelection.forEach (mutation, selection) ->
+        points.push(mutation.checkPoint['will-select']?.start)
+      points = points.sort (a, b) -> a.compare(b)
+      points = points.filter (point) -> point?
+      # console.log points
+      if @vimState.isMode('visual', 'blockwise')
+        if point = points[0]
+          @vimState.getLastBlockwiseSelection().setHeadBufferPosition(point)
+      else
+        if point = points[0]
+          @editor.setCursorBufferPosition(point)
+        else
+          for selection in @editor.getSelections()
+            selection.destroy() unless selection.isLastSelection()
+    else
+      for selection in @editor.getSelections() when mutation = @getMutationForSelection(selection)
+        if strict and mutation.createdAt is 'did-select'
+          selection.destroy()
+          continue
 
-      if point = @getRestorePointForMutation(mutation, {clipToMutationEnd})
-        selection.cursor.setBufferPosition(point)
+        if point = @getRestorePointForMutation(mutation, {clipToMutationEnd})
+          selection.cursor.setBufferPosition(point)

@@ -121,6 +121,9 @@ class BlockwiseSelection
       @selections.push @editor.addSelectionForBufferRange(range, {reversed})
     @updateGoalColumn()
 
+  sortSelections: ->
+    @selections?.sort (a, b) -> a.compare(b)
+
   # which must one of ['start', 'end', 'head', 'tail']
   setPositionForSelections: (which) ->
     for selection in @selections
