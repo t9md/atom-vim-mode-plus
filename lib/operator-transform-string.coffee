@@ -321,8 +321,8 @@ class Indent extends TransformString
   clipToMutationEndOnStay: false
 
   execute: ->
-    @onDidRestoreCursorPositions =>
-      unless @needStay()
+    unless @needStay()
+      @onDidRestoreCursorPositions =>
         for cursor in @editor.getCursors()
           cursor.moveToFirstCharacterOfLine()
     super

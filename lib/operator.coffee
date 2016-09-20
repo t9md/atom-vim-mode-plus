@@ -34,6 +34,7 @@ class Operator extends Base
   withOccurrence: false
 
   patternForOccurence: null
+  mtrack: null
 
   stayOnLinewise: false
   stayAtSamePosition: null
@@ -81,7 +82,7 @@ class Operator extends Base
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      ranges = @mutations.getMarkerBufferRanges().filter (range) ->
+      ranges = @mtrack.getMarkerBufferRanges().filter (range) ->
         not range.isEmpty()
 
       if ranges.length
@@ -93,7 +94,7 @@ class Operator extends Base
     return unless @trackChange
 
     @onDidFinishOperation =>
-      if marker = @mutations.getMutationForSelection(@editor.getLastSelection()).marker
+      if marker = @mtrack.getMutationForSelection(@editor.getLastSelection()).marker
         @setMarkForChange(marker.getBufferRange())
 
   constructor: ->
@@ -167,8 +168,8 @@ class Operator extends Base
     # we have to return to normal-mode from operator-pending or visual
     @activateMode('normal')
     @onDidFinishOperation =>
-      @mutations.destroy()
-      @mutations = null
+      @mtrack.destroy()
+      @mtrack = null
 
   selectOccurrence: (fn) ->
     scanRanges = null
@@ -201,12 +202,12 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    @mutations = new MutationTracker @vimState,
+    @mtrack = new MutationTracker @vimState,
       stay: @needStay()
       isSelect: @instanceof('Select')
       useMarker: @useMarkerForStay
 
-    @mutations.setCheckPoint('will-select')
+    @mtrack.setCheckPoint('will-select')
 
     @emitWillSelectTarget()
 
@@ -217,7 +218,7 @@ class Operator extends Base
       @target.select()
 
     if haveSomeSelection(@editor)
-      @mutations.setCheckPoint('did-select')
+      @mtrack.setCheckPoint('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
@@ -233,7 +234,7 @@ class Operator extends Base
       strict: @isWithOccurrence()
       clipToMutationEnd: @clipToMutationEndOnStay
       isBlockwise: @target?.isBlockwise?()
-    @mutations.restoreCursorPositions(options)
+    @mtrack.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
 
 # Select
@@ -338,12 +339,10 @@ class Delete extends Operator
       return unless @target.isLinewise()
 
       @onDidRestoreCursorPositions =>
-        vimEof = @getVimEofBufferPosition()
         for cursor in @editor.getCursors()
-          # Ensure cursor never exceeds VimEOF
           row = getValidVimBufferRow(@editor, cursor.getBufferRow())
           if @needStay()
-            point = @mutations.pointsBySelection.get(cursor.selection)
+            point = @mtrack.pointsBySelection.get(cursor.selection)
             cursor.setBufferPosition([row, point.column])
           else
             cursor.setBufferPosition([row, 0])
