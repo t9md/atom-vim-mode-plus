@@ -576,34 +576,3 @@ class PutAfterAndSelect extends PutAfter
   @extend()
   @description: "Paste after then select"
   selectPastedText: true
-
-# Replace
-# -------------------------
-class Replace extends Operator
-  @extend()
-  input: null
-  hover: icon: ':replace:', emoji: ':tractor:'
-  flashTarget: false
-  trackChange: true
-  requireInput: true
-
-  initialize: ->
-    super
-    @setTarget(@new('MoveRight')) if @isMode('normal')
-    @focusInput()
-
-  getInput: ->
-    input = super
-    input = "\n" if input is ''
-    input
-
-  mutateSelection: (selection) ->
-    input = @getInput()
-    text = selection.getText()
-    if @target.instanceof('MoveRight') and text.length isnt @getCount()
-      return
-
-    newText = text.replace(/./g, input)
-    newRange = selection.insertText(newText, autoIndentNewline: true)
-    if input is "\n"
-      @restorePositions = false

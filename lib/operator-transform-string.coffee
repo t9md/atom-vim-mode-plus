@@ -67,6 +67,36 @@ class LowerCase extends TransformString
   getNewText: (text) ->
     text.toLowerCase()
 
+# Replace
+# -------------------------
+class Replace extends TransformString
+  @extend()
+  input: null
+  hover: icon: ':replace:', emoji: ':tractor:'
+  requireInput: true
+
+  initialize: ->
+    super
+    @focusInput()
+
+  getInput: ->
+    super or "\n"
+
+  mutateSelection: (selection) ->
+    input = @getInput()
+    @restorePositions = input isnt "\n"
+    text = selection.getText().replace(/./g, input)
+    selection.insertText(text, autoIndentNewline: true)
+
+class ReplaceAndMoveRight extends Replace
+  @extend()
+  target: "MoveRight"
+
+  mutateSelection: (selection) ->
+    if selection.getText().length is @getCount()
+      super
+
+# -------------------------
 # DUP meaning with SplitString need consolidate.
 class SplitByCharacter extends TransformString
   @extend()
