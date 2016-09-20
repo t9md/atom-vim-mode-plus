@@ -36,6 +36,7 @@ class Operator extends Base
 
   stayOnLinewise: false
   stayAtSamePosition: null
+  clipToMutationEndOnStay: true
   useMarkerForStay: false
   restorePositions: true
   flashTarget: true
@@ -197,18 +198,16 @@ class Operator extends Base
       # Restoring cursor position also clear selection. Require to avoid unwanted mutation.
       cursorPositionManager.restore()
 
-  trackMutation: (checkPoint) ->
-    unless @mutations?
-      options =
-        stay: @needStay()
-        isSelect: @instanceof('Select')
-        useMarker: @useMarkerForStay
-      @mutations = new MutationTracker(@vimState, options)
-    @mutations.setCheckPoint(checkPoint)
-
   # Return true unless all selection is empty.
   selectTarget: ->
-    @trackMutation('will-select')
+    @mutations = new MutationTracker @vimState,
+      stay: @needStay()
+      isSelect: @instanceof('Select')
+      useMarker: @useMarkerForStay
+      clipToMutationEnd: @clipToMutationEndOnStay
+
+    @mutations.setCheckPoint('will-select')
+
     @emitWillSelectTarget()
 
     if @isWithOccurrence()
@@ -218,7 +217,7 @@ class Operator extends Base
       @target.select()
 
     if haveSomeSelection(@editor)
-      @trackMutation('did-select')
+      @mutations.setCheckPoint('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
@@ -226,15 +225,7 @@ class Operator extends Base
 
   updatePreviousSelectionIfVisualMode: ->
     return unless @isMode('visual')
-
-    if @isMode('visual', 'blockwise')
-      properties = @vimState.getLastBlockwiseSelection().getCharacterwiseProperties()
-    else
-      lastSelection = @editor.getLastSelection()
-      properties = swrap(lastSelection).detectCharacterwiseProperties()
-
-    submode = @vimState.submode
-    globalState.previousSelection = {properties, submode}
+    @vimState.updatePreviousSelection()
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
@@ -345,16 +336,17 @@ class Delete extends Operator
     # FIXME
     @onDidSelectTarget =>
       wasLinewise = @target.isLinewise()
-      if @needStay()
-        isCharacterwise = @vimState.isMode('visual', 'characterwise')
-        @cursorPositionManager.updateBy (selection, point) =>
-          start = selection.getBufferRange().start
-          if isCharacterwise or swrap.detectVisualModeSubmode(@editor) is 'characterwise'
-            start
-          else
-            point = new Point(start.row, point.column)
-            pointsBySelectiion.set(selection, point)
-            point
+      return
+      # if @needStay()
+      #   isCharacterwise = @vimState.isMode('visual', 'characterwise')
+      #   @cursorPositionManager.updateBy (selection, point) =>
+      #     start = selection.getBufferRange().start
+      #     if isCharacterwise or swrap.detectVisualModeSubmode(@editor) is 'characterwise'
+      #       start
+      #     else
+      #       point = new Point(start.row, point.column)
+      #       pointsBySelectiion.set(selection, point)
+      #       point
 
     @onDidRestoreCursorPositions =>
       return unless wasLinewise

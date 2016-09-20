@@ -288,6 +288,7 @@ class Indent extends TransformString
   stayOnLinewise: false
   useMarkerForStay: true
   indentFunction: "indentSelectedRows"
+  clipToMutationEndOnStay: false
 
   execute: ->
     @onDidRestoreCursorPositions =>

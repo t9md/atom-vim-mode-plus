@@ -356,6 +356,14 @@ class VimState
       ranges.filter (range) ->
         isRangeContainsSomePoint(range, points, exclusive: false)
 
+  updatePreviousSelection: ->
+    if @isMode('visual', 'blockwise')
+      properties = @getLastBlockwiseSelection().getCharacterwiseProperties()
+    else
+      properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
+
+    globalState.previousSelection = {properties, @submode}
+
   eachRangeMarkers: (fn) ->
     for rangeMarker in @getRangeMarkers()
       fn(rangeMarker)

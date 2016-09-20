@@ -6,13 +6,9 @@ propertyStore = new Map
 class SelectionWrapper
   constructor: (@selection) ->
 
-  hasProperties: ->
-    # console.log 'hasProperties', @selection.id
-    propertyStore.has(@selection)
+  hasProperties: -> propertyStore.has(@selection)
   getProperties: -> propertyStore.get(@selection) ? {}
-  setProperties: (prop) ->
-    # console.log 'setProp', @selection.id
-    propertyStore.set(@selection, prop)
+  setProperties: (prop) -> propertyStore.set(@selection, prop)
   clearProperties: -> propertyStore.delete(@selection)
 
   setBufferRangeSafely: (range) ->

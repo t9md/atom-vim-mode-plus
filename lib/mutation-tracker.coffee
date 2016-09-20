@@ -1,6 +1,4 @@
 {Point} = require 'atom'
-_ = require 'underscore-plus'
-
 swrap = require './selection-wrapper'
 
 # keep mutation snapshot necessary for Operator processing.
@@ -13,23 +11,32 @@ swrap = require './selection-wrapper'
 #    'string' representing when marker was created.
 #  checkPoint: {}
 #    key is checkpoint, value is bufferRange for marker at that checkpoint
+#  selection:
+#    Selection beeing tracked
 module.exports =
 class MutationTracker
   editor: null
   mutationsBySelection: null
+  pointsBySelection: null
 
   constructor: (@vimState, options={}) ->
     {@editor, @markerLayer} = @vimState
-    {@stay, @useMarker, @isSelect} = options
+    {@stay, @useMarker, @isSelect, @clipToMutationEnd} = options
     @mutationsBySelection = new Map
+    @pointsBySelection = new Map
+
+    if @stay
+      for selection in @editor.getSelections()
+        point = @getInitialPointForSelection(selection)
+        if @useMarker
+          point = @markerLayer.markBufferPosition(point, invalidate: 'never')
+        @pointsBySelection.set(selection, point)
 
   getInitialPointForSelection: (selection) ->
-    options = {@useMarker}
     if @vimState.isMode('visual')
-      _.extend(options, {fromProperty: true, allowFallback: true})
-      swrap(selection).getBufferPositionFor('head', options)
+      swrap(selection).getBufferPositionFor('head', fromProperty: true, allowFallback: true)
     else
-      swrap(selection).getBufferPositionFor('head', options) unless @isSelect
+      swrap(selection).getBufferPositionFor('head') unless @isSelect
 
   # mutation information is created even if selection.isEmpty()
   # So we can filter selection by when it was created.
@@ -39,8 +46,8 @@ class MutationTracker
   createMutation: (selection, checkPoint) ->
     mutation =
       createdAt: checkPoint
+      selection: selection
       checkPoint: {}
-      point: @getInitialPointForSelection(selection) if @stay
     @mutationsBySelection.set(selection, mutation)
 
   setCheckPoint: (checkPoint) ->
@@ -51,9 +58,7 @@ class MutationTracker
       mutation = @mutationsBySelection.get(selection)
       unless selection.isEmpty()
         mutation.marker ?= @markerLayer.markBufferRange(selection.getBufferRange(), invalidate: 'never')
-        range = mutation.marker.getBufferRange()
-        mutation.checkPoint[checkPoint] = range
-        mutation.point ?= range.start
+        mutation.checkPoint[checkPoint] = mutation.marker.getBufferRange()
 
   getMutationForSelection: (selection) ->
     @mutationsBySelection.get(selection)
@@ -66,18 +71,31 @@ class MutationTracker
 
   destroy: ->
     return if @destroyed
-    @mutationsBySelection.forEach (mutation) ->
-      mutation.marker?.destroy()
+    @mutationsBySelection.forEach (mutation) -> mutation.marker?.destroy()
     @mutationsBySelection.clear()
-    [@mutationsBySelection, @editor] = []
+    @pointsBySelection.clear()
+
+    {@mutationsBySelection, @pointsBySelection, @editor} = {}
     @destroyed = true
 
-  getMutationEndForMutation: (mutation) ->
-    range = mutation.marker.getBufferRange()
-    if range.isEmpty()
-      range.end
+  getRestorePointForMutation: (mutation) ->
+    if @stay
+      if point = @pointsBySelection.get(mutation.selection)
+        unless point instanceof Point
+          point = point.getHeadBufferPosition()
+
+        if @clipToMutationEnd
+          range = mutation.marker.getBufferRange()
+          if range.isEmpty()
+            mutationEnd = range.end
+          else
+            mutationEnd = range.end.translate([0, -1])
+          Point.min(mutationEnd, point)
+        else
+          point
     else
-      range.end.translate([0, -1])
+      if range = mutation.checkPoint['did-select']
+        range.start
 
   restoreCursorPositions: ({strict}) ->
     for selection in @editor.getSelections() when mutation = @getMutationForSelection(selection)
@@ -85,10 +103,5 @@ class MutationTracker
         selection.destroy()
         continue
 
-      if point = mutation.point
-        if @stay
-          point = Point.min(@getMutationEndForMutation(mutation), point)
+      if point = @getRestorePointForMutation(mutation)
         selection.cursor.setBufferPosition(point)
-        # else
-        #   if range = mutation.checkPoint['did-select']
-        #     selection.cursor.setBufferPosition(range.start)

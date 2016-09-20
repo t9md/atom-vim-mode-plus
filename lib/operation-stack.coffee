@@ -52,7 +52,6 @@ class OperationStack
           operation = @composeOperation(new klass(@vimState, properties))
         when 'object' # . repeat case
           operation = klass
-          # console.log operation.getName()
         else
           throw new Error('Unsupported type of operation')
 
@@ -146,8 +145,6 @@ class OperationStack
   reportAliveMakerLength: (subject) ->
     length = @vimState.markerLayer.getMarkers().length
     console.log "#{subject}:", length
-    # alives = @editor.findMarkers().filter (marker) -> not marker.isDestroyed()
-    # console.log "#{subject}:", alives.length
 
   finish: (operation=null) ->
     # if operation?

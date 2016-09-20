@@ -90,7 +90,6 @@ class Motion extends Base
       Select ?= Base.getClass('Select')
       unless @getOperator() instanceof Select
         debug "= updating: #{@getOperator()?.toString()}"
-      # console.log "= updating: #{@toString()}"
       @updateSelectionProperties()
 
     switch
@@ -152,18 +151,6 @@ class CurrentSelection extends Motion
         @selectionExtent = @editor.getSelectedBufferRange().getExtent()
 
       @linewise = @isLinewise() # Cache it in case repeated.
-
-      # * Purpose of pointInfoByCursor? see #235 for detail.
-      # When stayOnTransformString is enabled, cursor pos is not set on start of
-      # of selected range.
-      # But I want following behavior, so need to preserve position info.
-      #  1. `vj>.` -> indent same two rows regardless of current cursor's row.
-      #  2. `vj>j.` -> indent two rows from cursor's row.
-      startOfSelection = cursor.selection.getBufferRange().start
-      @onDidFinishOperation =>
-        cursorPosition = cursor.getBufferPosition()
-        atEOL = cursor.isAtEndOfLine()
-        @pointInfoByCursor.set(cursor, {startOfSelection, cursorPosition, atEOL})
     else
       point = cursor.getBufferPosition()
       if @isBlockwise()
@@ -180,6 +167,19 @@ class CurrentSelection extends Motion
         if atEOL or cursorPosition.isEqual(cursor.getBufferPosition())
           cursor.setBufferPosition(startOfSelection)
       super
+
+    # * Purpose of pointInfoByCursor? see #235 for detail.
+    # When stayOnTransformString is enabled, cursor pos is not set on start of
+    # of selected range.
+    # But I want following behavior, so need to preserve position info.
+    #  1. `vj>.` -> indent same two rows regardless of current cursor's row.
+    #  2. `vj>j.` -> indent two rows from cursor's row.
+    for cursor in @editor.getCursors()
+      startOfSelection = cursor.selection.getBufferRange().start
+      @onDidFinishOperation =>
+        cursorPosition = cursor.getBufferPosition()
+        atEOL = cursor.isAtEndOfLine()
+        @pointInfoByCursor.set(cursor, {startOfSelection, cursorPosition, atEOL})
 
 class MoveLeft extends Motion
   @extend()

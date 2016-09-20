@@ -36,11 +36,8 @@ include = (klass, module) ->
 
 debug = (messages...) ->
   return unless settings.get('debug')
-  # messages += "\n"
-  # console.log messages
   switch settings.get('debugOutput')
     when 'console'
-      # console.log "HEY!"
       console.log messages...
     when 'file'
       filePath = fs.normalize settings.get('debugOutputFilePath')
