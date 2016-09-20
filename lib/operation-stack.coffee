@@ -95,7 +95,8 @@ class OperationStack
       else
         if @vimState.isMode('normal') and top.isOperator()
           @vimState.activate('operator-pending')
-          @addToClassList('with-occurrence') if top.isWithOccurrence()
+          if top.isWithOccurrence()
+            top.setOperatorModifier(occurence: true)
 
         # Temporary set while command is running
         if commandName = top.constructor.getCommandNameWithoutPrefix?()

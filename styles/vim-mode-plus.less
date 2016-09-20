@@ -216,6 +216,9 @@ atom-text-editor[mini].vim-mode-plus-search {
     box-sizing: border-box;
     border-radius: @component-border-radius;
   }
+  &.solid-box {
+    box-sizing: border-box;
+  }
 }
 
 atom-text-editor, atom-text-editor::shadow {
@@ -241,6 +244,13 @@ atom-text-editor, atom-text-editor::shadow {
   }
   .vim-mode-plus-range-marker .region {
     background-color: darken(@syntax-selection-color, 4%);
+  }
+  .vim-mode-plus-occurrence-match .region {
+    .vim-mode-plus.solid-box;
+    // border: 1.5px none @syntax-result-marker-color-selected;
+    // background-color: lighten(@syntax-selection-color, 5%);
+    border: 1.5px none @syntax-color-modified;
+    border-style: none none dotted none;
   }
 }
 

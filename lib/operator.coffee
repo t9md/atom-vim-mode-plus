@@ -1,6 +1,6 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
-{Point, Range} = require 'atom'
+{Point, Range, Disposable} = require 'atom'
 globalState = require './global-state'
 
 {inspect} = require 'util'
@@ -12,6 +12,7 @@ globalState = require './global-state'
   getValidVimBufferRow
   cursorIsAtEmptyRow
   scanInRanges
+  getVisibleBufferRange
 
   selectedRange
   selectedText
@@ -115,12 +116,24 @@ class Operator extends Base
 
   # called by operationStack
   setOperatorModifier: ({occurence, wise}) ->
-    if occurence? and occurence isnt @withOccurrence
+    if occurence
       @withOccurrence = occurence
       @vimState.operationStack.addToClassList('with-occurrence')
+      @subscribe(@highlightOccurrence())
 
     if wise?
       @forceWise = wise
+
+  highlightOccurrence: ->
+    pattern = @getPatternForOccurrence()
+    scanRanges = [getVisibleBufferRange(@editor)]
+    ranges = scanInRanges(@editor, pattern, scanRanges)
+
+    if ranges.length
+      markers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')
+
+    new Disposable ->
+      marker.destroy() for marker in markers ? []
 
   modifyTargetWiseIfNecessary: ->
     return unless @forceWise?

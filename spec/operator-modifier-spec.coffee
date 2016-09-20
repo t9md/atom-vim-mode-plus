@@ -10,6 +10,9 @@ describe "Operator modifier", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = vim
 
+    runs ->
+      jasmine.attachToDOM(editorElement)
+
   afterEach ->
     vimState.resetNormalMode()
 
