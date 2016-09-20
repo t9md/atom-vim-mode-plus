@@ -486,6 +486,8 @@ describe "Operator TransformString", ->
 
     describe 'map-surround', ->
       beforeEach ->
+        jasmine.attachToDOM(editorElement)
+
         set
           text: """
 

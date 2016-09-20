@@ -125,7 +125,7 @@ class Operator extends Base
       @forceWise = wise
 
   highlightOccurrence: ->
-    pattern = @getPatternForOccurrence()
+    pattern = @patternForOccurence ? @getPatternForOccurrence()
     scanRanges = [getVisibleBufferRange(@editor)]
     ranges = scanInRanges(@editor, pattern, scanRanges)
 
