@@ -21,7 +21,7 @@ class MutationTracker
 
   constructor: (@vimState, options={}) ->
     {@editor, @markerLayer} = @vimState
-    {@stay, @useMarker, @isSelect, @clipToMutationEnd} = options
+    {@stay, @useMarker, @isSelect} = options
     @mutationsBySelection = new Map
     @pointsBySelection = new Map
 
@@ -78,13 +78,13 @@ class MutationTracker
     {@mutationsBySelection, @pointsBySelection, @editor} = {}
     @destroyed = true
 
-  getRestorePointForMutation: (mutation) ->
+  getRestorePointForMutation: (mutation, {clipToMutationEnd}={}) ->
     if @stay
       if point = @pointsBySelection.get(mutation.selection)
         unless point instanceof Point
           point = point.getHeadBufferPosition()
 
-        if @clipToMutationEnd
+        if clipToMutationEnd
           range = mutation.marker.getBufferRange()
           if range.isEmpty()
             mutationEnd = range.end
@@ -97,11 +97,11 @@ class MutationTracker
       if range = mutation.checkPoint['did-select']
         range.start
 
-  restoreCursorPositions: ({strict}) ->
+  restoreCursorPositions: ({strict, clipToMutationEnd}) ->
     for selection in @editor.getSelections() when mutation = @getMutationForSelection(selection)
       if strict and mutation.createdAt is 'did-select'
         selection.destroy()
         continue
 
-      if point = @getRestorePointForMutation(mutation)
+      if point = @getRestorePointForMutation(mutation, {clipToMutationEnd})
         selection.cursor.setBufferPosition(point)

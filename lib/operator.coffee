@@ -204,7 +204,6 @@ class Operator extends Base
       stay: @needStay()
       isSelect: @instanceof('Select')
       useMarker: @useMarkerForStay
-      clipToMutationEnd: @clipToMutationEndOnStay
 
     @mutations.setCheckPoint('will-select')
 
@@ -229,7 +228,8 @@ class Operator extends Base
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
-    @mutations.restoreCursorPositions(strict: @isWithOccurrence())
+    options = {strict: @isWithOccurrence(), clipToMutationEnd: @clipToMutationEndOnStay}
+    @mutations.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
 
 # Select
@@ -328,38 +328,23 @@ class Delete extends Operator
   hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
   flashTarget: false
-  wasLinewise: null
 
   execute: ->
-    wasLinewise = null
-    pointsBySelectiion = new Map
-    # FIXME
     @onDidSelectTarget =>
-      wasLinewise = @target.isLinewise()
-      return
-      # if @needStay()
-      #   isCharacterwise = @vimState.isMode('visual', 'characterwise')
-      #   @cursorPositionManager.updateBy (selection, point) =>
-      #     start = selection.getBufferRange().start
-      #     if isCharacterwise or swrap.detectVisualModeSubmode(@editor) is 'characterwise'
-      #       start
-      #     else
-      #       point = new Point(start.row, point.column)
-      #       pointsBySelectiion.set(selection, point)
-      #       point
+      return unless @target.isLinewise()
 
-    @onDidRestoreCursorPositions =>
-      return unless wasLinewise
-      vimEof = @getVimEofBufferPosition()
-      for cursor in @editor.getCursors()
-        # Ensure cursor never exceeds VimEOF
-        if cursor.getBufferPosition().isGreaterThan(vimEof)
-          cursor.setBufferPosition([vimEof.row, 0])
-        if @needStay()
-          if point = pointsBySelectiion.get(cursor.selection)
-            cursor.setBufferPosition(point)
-        else
-          cursor.skipLeadingWhitespace()
+      @onDidRestoreCursorPositions =>
+        vimEof = @getVimEofBufferPosition()
+        for cursor in @editor.getCursors()
+          # Ensure cursor never exceeds VimEOF
+          if cursor.getBufferPosition().isGreaterThan(vimEof)
+            cursor.setBufferPosition([vimEof.row, 0])
+
+          if @needStay()
+            point = @mutations.pointsBySelection.get(cursor.selection)
+            cursor.setBufferPosition([cursor.getBufferRow(), point.column])
+          else
+            cursor.skipLeadingWhitespace()
     super
 
   mutateSelection: (selection) =>
@@ -394,8 +379,8 @@ class DeleteToLastCharacterOfLine extends Delete
 class DeleteLine extends Delete
   @extend()
   @commandScope: 'atom-text-editor.vim-mode-plus.visual-mode'
-  mutateSelection: (selection) ->
-    swrap(selection).expandOverLine()
+  execute: ->
+    @vimState.activate('visual', 'linewise')
     super
 
 # Yank
