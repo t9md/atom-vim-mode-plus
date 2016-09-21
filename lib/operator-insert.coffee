@@ -176,6 +176,16 @@ class InsertAtEndOfOccurrence extends InsertAtEndOfTarget
   @extend()
   withOccurrence: true
 
+class InsertAtStartOfOccurrenceInAFunctionOrInnerParagraph extends InsertAtStartOfTarget
+  @extend()
+  target: "AFunctionOrInnerParagraph"
+  withOccurrence: true
+
+class InsertAtEndOfOccurrenceInAFunctionOrInnerParagraph extends InsertAtEndOfTarget
+  @extend()
+  target: "AFunctionOrInnerParagraph"
+  withOccurrence: true
+
 # Alias for backward compatibility
 class InsertAtEndOfSelection extends InsertAtEndOfTarget
   @extend()
