@@ -279,21 +279,21 @@ describe "Motion Search", ->
         cursorBuffer: [0, 0]
 
     describe "as a motion", ->
-      it "moves cursor to next occurence of word under cursor", ->
+      it "moves cursor to next occurrence of word under cursor", ->
         ensure '*', cursorBuffer: [2, 0]
 
       it "repeats with the n key", ->
         ensure '*', cursorBuffer: [2, 0]
         ensure 'n', cursorBuffer: [0, 0]
 
-      it "doesn't move cursor unless next occurence is the exact word (no partial matches)", ->
+      it "doesn't move cursor unless next occurrence is the exact word (no partial matches)", ->
         set
           text: "abc\ndef\nghiabc\njkl\nabcdef"
           cursorBuffer: [0, 0]
         ensure '*', cursorBuffer: [0, 0]
 
       describe "with words that contain 'non-word' characters", ->
-        it "moves cursor to next occurence of word under cursor", ->
+        it "moves cursor to next occurrence of word under cursor", ->
           set
             text: """
             abc
@@ -390,7 +390,7 @@ describe "Motion Search", ->
 
   describe "the hash keybinding", ->
     describe "as a motion", ->
-      it "moves cursor to previous occurence of word under cursor", ->
+      it "moves cursor to previous occurrence of word under cursor", ->
         set
           text: "abc\n@def\nabc\ndef\n"
           cursorBuffer: [2, 1]
@@ -404,14 +404,14 @@ describe "Motion Search", ->
         ensure 'n', cursorBuffer: [4, 0]
         ensure 'n', cursorBuffer: [2, 0]
 
-      it "doesn't move cursor unless next occurence is the exact word (no partial matches)", ->
+      it "doesn't move cursor unless next occurrence is the exact word (no partial matches)", ->
         set
           text: "abc\ndef\nghiabc\njkl\nabcdef"
           cursorBuffer: [0, 0]
         ensure '#', cursorBuffer: [0, 0]
 
       describe "with words that containt 'non-word' characters", ->
-        it "moves cursor to next occurence of word under cursor", ->
+        it "moves cursor to next occurrence of word under cursor", ->
           set
             text: "abc\n@def\nabc\n@def\n"
             cursorBuffer: [3, 0]

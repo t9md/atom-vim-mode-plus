@@ -1457,7 +1457,7 @@ describe "TextObject", ->
             4 abc
             """
     describe 'as operator target', ->
-      it 'delete next occurence of last search pattern', ->
+      it 'delete next occurrence of last search pattern', ->
         ensure 'd g n',
           cursor: [1, 2]
           mode: 'normal'
@@ -1488,7 +1488,7 @@ describe "TextObject", ->
             3 xxx_
             4 \n
             """
-      it 'change next occurence of last search pattern', ->
+      it 'change next occurrence of last search pattern', ->
         ensure 'c g n',
           cursor: [1, 2]
           mode: 'insert'

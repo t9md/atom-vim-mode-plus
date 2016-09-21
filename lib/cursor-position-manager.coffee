@@ -26,7 +26,7 @@ class CursorPositionManager
     strict ?= true
     selections = @editor.getSelections()
 
-    # unless occurence-mode we go strict mode.
+    # unless occurrence-mode we go strict mode.
     # in vB mode, vB range is reselected on @target.selection
     # so selection.id is change in that case we won't restore.
     selectionNotFound = (selection) => not @pointsBySelection.has(selection)
