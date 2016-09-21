@@ -55,10 +55,11 @@ class TextObject extends Base
 # -------------------------
 class Word extends TextObject
   @extend(false)
+  allowEmpty: true
 
   getPattern: (selection) ->
     point = swrap(selection).getNormalizedBufferPosition()
-    if pointIsSurroundedByWhitespace(@editor, point)
+    if pointIsSurroundedByWhitespace(@editor, point) and @allowEmpty
       /[\t ]*/
     else
       @wordRegExp ? getWordRegExpForPointWithCursor(selection.cursor, point)
@@ -68,6 +69,8 @@ class Word extends TextObject
 
   getRange: (selection) ->
     pattern = @getPattern(selection)
+    return unless pattern
+
     from = swrap(selection).getNormalizedBufferPosition()
     options = containedOnly: true
     start = getStartPositionForPattern(@editor, from, pattern, options)
@@ -115,6 +118,17 @@ class ASmartWord extends SmartWord
 
 class InnerSmartWord extends SmartWord
   @description: "Currently No diff from `a-smart-word`"
+  @extend()
+
+# -------------------------
+class NonEmptySmartWord extends SmartWord
+  @extend(false)
+  allowEmpty: false
+
+class ANonEmptySmartWord extends NonEmptySmartWord
+  @extend()
+
+class InnerNonEmptySmartWord extends NonEmptySmartWord
   @extend()
 
 # -------------------------
@@ -847,3 +861,28 @@ class UnionTextObject extends TextObject
 class AFunctionOrInnerParagraph extends UnionTextObject
   @extend()
   member: ['AFunction', 'InnerParagraph']
+
+class SomeTextObject extends TextObject
+  @extend(false)
+  member: []
+  memberOptoins: {}
+
+  getRangeBy: (klass, selection) ->
+    @new(klass, @memberOptoins).getRange(selection)
+
+  getRanges: (selection) ->
+    (range for klass in @member when (range = @getRangeBy(klass, selection)))
+
+  getNearestRange: (selection) ->
+    ranges = @getRanges(selection)
+    _.last(sortRanges(ranges)) if ranges.length
+
+  selectTextObject: (selection) ->
+    swrap(selection).setBufferRangeSafely @getNearestRange(selection)
+
+class InnerNonEmptySmartWordOrInnerParenthesis extends SomeTextObject
+  @extend()
+  member: [
+    "InnerNonEmptySmartWord"
+    "InnerParenthesis"
+  ]
