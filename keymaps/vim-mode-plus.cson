@@ -357,9 +357,11 @@
 'atom-text-editor.vim-mode-plus.normal-mode.occurrence-pending':
   'i': 'vim-mode-plus:insert-at-start-of-occurrence-in-a-function-or-inner-paragraph'
   'a': 'vim-mode-plus:insert-at-end-of-occurrence-in-a-function-or-inner-paragraph'
-  'I': 'vim-mode-plus:insert-at-start-of-occurrence'
-  'A': 'vim-mode-plus:insert-at-end-of-occurrence'
-  'v': 'vim-mode-plus:select-occurrence'
+  'C': 'vim-mode-plus:change-occurrence-in-a-function-or-inner-paragraph'
+  'D': 'vim-mode-plus:delete-occurrence-in-a-function-or-inner-paragraph'
+  'v': 'vim-mode-plus:select-occurrence-in-a-function-or-inner-paragraph'
+  # 'I': 'vim-mode-plus:insert-at-start-of-occurrence'
+  # 'A': 'vim-mode-plus:insert-at-end-of-occurrence'
 
 # operator-pending, visual
 # -------------------------

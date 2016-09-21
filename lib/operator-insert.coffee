@@ -258,6 +258,10 @@ class ChangeOccurrence extends Change
   @description: "Change all matching word within target range"
   withOccurrence: true
 
+class ChangeOccurrenceInAFunctionOrInnerParagraph extends ChangeOccurrence
+  @extend()
+  target: 'AFunctionOrInnerParagraph'
+
 class ChangeOccurrenceInARangeMarker extends ChangeOccurrence
   @extend()
   target: "ARangeMarker"

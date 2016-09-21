@@ -282,6 +282,10 @@ class SelectOccurrenceInARangeMarker extends SelectOccurrence
   @extend()
   target: "ARangeMarker"
 
+class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
+  @extend()
+  target: "AFunctionOrInnerParagraph"
+
 # Range Marker
 # =========================
 class CreateRangeMarker extends Operator
@@ -365,6 +369,11 @@ class DeleteLine extends Delete
   execute: ->
     @vimState.activate('visual', 'linewise')
     super
+
+class DeleteOccurrenceInAFunctionOrInnerParagraph extends Delete
+  @extend()
+  withOccurrence: true
+  target: "AFunctionOrInnerParagraph"
 
 # Yank
 # =========================
