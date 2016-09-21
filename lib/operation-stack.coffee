@@ -2,13 +2,13 @@ _ = require 'underscore-plus'
 
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
-{moveCursorLeft} = require './utils'
+{moveCursorLeft, getVisibleBufferRange} = require './utils'
 settings = require './settings'
 {CurrentSelection, Select, MoveToRelativeLine} = {}
 {OperationStackError, OperatorError, OperationAbortedError} = require './errors'
 swrap = require './selection-wrapper'
 
-{debug} = require './utils'
+{debug, getWordPatternAtCursor, scanInRanges, highlightRanges} = require './utils'
 
 class OperationStack
   constructor: (@vimState) ->
@@ -56,6 +56,7 @@ class OperationStack
           throw new Error('Unsupported type of operation')
 
       @stack.push(operation)
+      @vimState.emitter.emit('did-push-operation', operation)
       @process()
     catch error
       @handleError(error)
@@ -96,7 +97,7 @@ class OperationStack
         if @vimState.isMode('normal') and top.isOperator()
           @vimState.activate('operator-pending')
           if top.isWithOccurrence()
-            top.setOperatorModifier(occurence: true)
+            @setOperatorModifier(occurrence: true)
 
         # Temporary set while command is running
         if commandName = top.constructor.getCommandNameWithoutPrefix?()
@@ -194,11 +195,22 @@ class OperationStack
   getRecorded: ->
     @recorded
 
-  setOperatorModifier: (modifier) ->
+  setOperatorModifier: (modifiers) ->
+    console.log 'setOperatorModifier', @vimState.mode
+    unless @vimState.isMode('operator-pending')
+      throw new Error('WHY!')
+
     # In operator-pending-mode, stack length is always 1 and its' operator.
     # So either of @stack[0] or @peekTop() is OK.
-    if @vimState.isMode('operator-pending')
-      @stack[0].setOperatorModifier(modifier)
+    {occurrence, wise} = modifiers
+
+    operator = @stack[0]
+    operator.withOccurrence = occurrence if occurrence?
+    operator.forceWise = wise if wise?
+
+    if occurrence
+      @addToClassList('with-occurrence')
+      @highlightOccurrence()
 
   # Count
   # -------------------------
@@ -227,5 +239,16 @@ class OperationStack
   resetCount: ->
     @count = {}
     @vimState.toggleClassList('with-count', false)
+
+  highlightOccurrence: ->
+    pattern = getWordPatternAtCursor(@editor.getLastCursor())
+    scanRanges = [getVisibleBufferRange(@editor)]
+    ranges = scanInRanges(@editor, pattern, scanRanges)
+
+    if ranges.length
+      markers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')
+
+    @subscribe new Disposable ->
+      marker.destroy() for marker in markers ? []
 
 module.exports = OperationStack

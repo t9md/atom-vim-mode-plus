@@ -38,6 +38,7 @@ vimStateMethods = [
   "isMode"
   "getBlockwiseSelections"
   "updateSelectionProperties"
+  "hasRegisterName"
 ]
 
 class Base
@@ -121,9 +122,6 @@ class Base
 
   isDefaultRegisterName: ->
     @vimState.register.isDefaultName()
-
-  hasRegisterName: ->
-    @vimState.register.hasName()
 
   # Misc
   # -------------------------

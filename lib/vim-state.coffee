@@ -94,9 +94,6 @@ class VimState
   selectLinewise: ->
     swrap.expandOverLine(@editor, preserveGoalColumn: true)
 
-  setOperatorModifier: (modifier) ->
-    @operationStack.setOperatorModifier(modifier)
-
   # Mark
   # -------------------------
   startCharInput: (@charInputAction) ->
@@ -151,6 +148,7 @@ class VimState
   onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
 
   onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
+  onDidPushOperation: (fn) -> @subscribe @emitter.on('did-push-operation', fn)
 
   # Select list view
   onDidConfirmSelectList: (fn) -> @subscribe @emitter.on('did-confirm-select-list', fn)
@@ -373,3 +371,17 @@ class VimState
       rangeMarker.destroy()
     @rangeMarkers = []
     @toggleClassList('with-range-marker', @hasRangeMarkers())
+
+  # Occurrence request for next operation
+  # -------------------------
+  hasRegisterName: ->
+    @register.hasName()
+
+  setOccurrenceForNextOperation: ->
+    @onDidPushOperation (operation) =>
+      console.log "PUSHED", operation.getName()
+      if operation.isOperator()
+        console.log "SET!"
+        @operationStack.setOperatorModifier(occurrence: true)
+
+    @operationStack.highlightOccurrence()

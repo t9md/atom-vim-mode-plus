@@ -624,6 +624,15 @@ getCurrentWordBufferRangeAndKind = (cursor) ->
   range = cursor.getCurrentWordBufferRange({wordRegex})
   {range, kind}
 
+getWordPatternAtCursor = (cursor) ->
+  editor = cursor.editor
+  {range, kind} = getCurrentWordBufferRangeAndKind(cursor)
+  cursorWord = editor.getTextInBufferRange(range)
+  pattern = _.escapeRegExp(cursorWord)
+  if kind is 'word'
+    pattern = "\\b" + pattern + "\\b"
+  new RegExp(pattern, 'g')
+
 scanInRanges = (editor, pattern, scanRanges) ->
   ranges = []
   for scanRange in scanRanges
@@ -790,6 +799,7 @@ module.exports = {
   isSurroundedBySpace
   isSingleLine
   getCurrentWordBufferRangeAndKind
+  getWordPatternAtCursor
   scanInRanges
   isRangeContainsSomePoint
 

@@ -9,6 +9,7 @@ globalState = require './global-state'
   highlightRanges
   isEndsWithNewLineForBufferRow
   getCurrentWordBufferRangeAndKind
+  getWordPatternAtCursor
   getValidVimBufferRow
   cursorIsAtEmptyRow
   scanInRanges
@@ -114,27 +115,6 @@ class Operator extends Base
     @emitDidSetTarget(this)
     this
 
-  # called by operationStack
-  setOperatorModifier: ({occurence, wise}) ->
-    if occurence
-      @withOccurrence = occurence
-      @vimState.operationStack.addToClassList('with-occurrence')
-      @subscribe(@highlightOccurrence())
-
-    if wise?
-      @forceWise = wise
-
-  highlightOccurrence: ->
-    pattern = @patternForOccurence ? @getPatternForOccurrence()
-    scanRanges = [getVisibleBufferRange(@editor)]
-    ranges = scanInRanges(@editor, pattern, scanRanges)
-
-    if ranges.length
-      markers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')
-
-    new Disposable ->
-      marker.destroy() for marker in markers ? []
-
   modifyTargetWiseIfNecessary: ->
     return unless @forceWise?
 
@@ -150,14 +130,9 @@ class Operator extends Base
 
   getPatternForOccurrence: ->
     if @hasRegisterName()
-      pattern = _.escapeRegExp(@getRegisterValueAsText())
+      _.escapeRegExp(@getRegisterValueAsText())
     else
-      {range, kind} = getCurrentWordBufferRangeAndKind(@editor.getLastCursor())
-      cursorWord = @editor.getTextInBufferRange(range)
-      pattern = _.escapeRegExp(cursorWord)
-      if kind is 'word'
-        pattern = "\\b" + pattern + "\\b"
-    new RegExp(pattern, 'g')
+      getWordPatternAtCursor(@editor.getLastCursor())
 
   setTextToRegisterForSelection: (selection) ->
     @setTextToRegister(selection.getText(), selection)
