@@ -458,9 +458,9 @@ getCodeFoldRowRangesContainesForRow = (editor, bufferRow, exclusive=false) ->
       startRow <= bufferRow <= endRow
 
 getBufferRangeForRowRange = (editor, rowRange) ->
-  [rangeStart, rangeEnd] = rowRange.map (row) ->
+  [startRange, endRange] = rowRange.map (row) ->
     editor.bufferRangeForBufferRow(row, includeNewline: true)
-  rangeStart.union(rangeEnd)
+  startRange.union(endRange)
 
 getTokenizedLineForRow = (editor, row) ->
   editor.tokenizedBuffer.tokenizedLineForRow(row)
