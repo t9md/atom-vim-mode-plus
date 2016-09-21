@@ -342,8 +342,7 @@
   'V': 'vim-mode-plus:operator-modifier-linewise'
   'o': 'vim-mode-plus:operator-modifier-occurrence'
 
-# operator-pending.with-occurrence
-# [Experimental]
+# operator-pending.with-occurrence [Experimental]
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode.with-occurrence':
   'p': 'vim-mode-plus:inner-paragraph'
@@ -351,6 +350,12 @@
   'f': 'vim-mode-plus:a-function'
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
+
+# normal.occurrence-pending [Experimental]
+# -------------------------
+'atom-text-editor.vim-mode-plus.normal-mode.occurrence-pending':
+  'i': 'vim-mode-plus:insert-at-start-of-occurrence'
+  'a': 'vim-mode-plus:insert-at-end-of-occurrence'
 
 # operator-pending, visual
 # -------------------------

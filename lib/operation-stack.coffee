@@ -196,21 +196,20 @@ class OperationStack
     @recorded
 
   setOperatorModifier: (modifiers) ->
-    console.log 'setOperatorModifier', @vimState.mode
-    unless @vimState.isMode('operator-pending')
-      throw new Error('WHY!')
-
+    # console.log '  -- [start] setOperatorModifier', @vimState.mode
+    
     # In operator-pending-mode, stack length is always 1 and its' operator.
     # So either of @stack[0] or @peekTop() is OK.
-    {occurrence, wise} = modifiers
-
     operator = @stack[0]
+
+    {occurrence, wise} = modifiers
     operator.withOccurrence = occurrence if occurrence?
     operator.forceWise = wise if wise?
 
     if occurrence
       @addToClassList('with-occurrence')
-      @highlightOccurrence()
+      @highlightOccurrenceIfNecessary()
+    # console.log '  -- [end] setOperatorModifier'
 
   # Count
   # -------------------------
@@ -240,15 +239,26 @@ class OperationStack
     @count = {}
     @vimState.toggleClassList('with-count', false)
 
-  highlightOccurrence: ->
+  occurrenceMarkers: null
+  hasOccurrenceMarkers: ->
+    @occurrenceMarkers?
+
+  highlightOccurrenceIfNecessary: ->
+    if @hasOccurrenceMarkers()
+      console.log 'already highlighted so return'
+      return
+    else
+      console.log 'ya I\'ll highlight'
+
     pattern = getWordPatternAtCursor(@editor.getLastCursor())
     scanRanges = [getVisibleBufferRange(@editor)]
     ranges = scanInRanges(@editor, pattern, scanRanges)
 
     if ranges.length
-      markers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')
+      @occurrenceMarkers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')
 
-    @subscribe new Disposable ->
-      marker.destroy() for marker in markers ? []
+    @subscribe new Disposable =>
+      marker.destroy() for marker in @occurrenceMarkers
+      @occurrenceMarkers = null
 
 module.exports = OperationStack

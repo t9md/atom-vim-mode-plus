@@ -378,10 +378,14 @@ class VimState
     @register.hasName()
 
   setOccurrenceForNextOperation: ->
+    scope = "occurrence-pending"
+
     @onDidPushOperation (operation) =>
-      console.log "PUSHED", operation.getName()
+      console.log "pushed", operation.getName(), 'isOperator? =', operation.isOperator()
+      @toggleClassList(scope, false)
       if operation.isOperator()
-        console.log "SET!"
+        console.log '-- [boocked] setOperatorModifier'
         @operationStack.setOperatorModifier(occurrence: true)
 
-    @operationStack.highlightOccurrence()
+    @toggleClassList(scope, true)
+    @operationStack.highlightOccurrenceIfNecessary()
