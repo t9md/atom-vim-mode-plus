@@ -783,12 +783,12 @@ class MoveToMark extends Motion
   @extend()
   requireInput: true
   hover: icon: ":move-to-mark:`", emoji: ":round_pushpin:`"
+  input: null # set when instatntiated via vimState::moveToMark()
 
   initialize: ->
     super
     @focusInput() unless @isComplete()
 
-  input: null # set when instatntiated via vimState::moveToMark()
   getPoint: (fromPoint) ->
     input = @getInput()
     point = null
