@@ -354,8 +354,8 @@
 # normal.occurrence-pending [Experimental]
 # -------------------------
 'atom-text-editor.vim-mode-plus.normal-mode.occurrence-pending':
-  'i': 'vim-mode-plus:insert-at-start-of-occurrence'
-  'a': 'vim-mode-plus:insert-at-end-of-occurrence'
+  'I': 'vim-mode-plus:insert-at-start-of-occurrence'
+  'A': 'vim-mode-plus:insert-at-end-of-occurrence'
 
 # operator-pending, visual
 # -------------------------

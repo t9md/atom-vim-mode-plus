@@ -379,13 +379,22 @@ class VimState
 
   setOccurrenceForNextOperation: ->
     scope = "occurrence-pending"
+    patternForOccurence = null
+    if @isMode('visual')
+      if text = @editor.getSelectedText()
+        patternForOccurence = new RegExp(_.escapeRegExp(text), 'g')
+      @activate('normal')
 
     @onDidPushOperation (operation) =>
       console.log "pushed", operation.getName(), 'isOperator? =', operation.isOperator()
-      @toggleClassList(scope, false)
       if operation.isOperator()
+        operation.patternForOccurence = patternForOccurence if patternForOccurence?
         console.log '-- [boocked] setOperatorModifier'
         @operationStack.setOperatorModifier(occurrence: true)
 
+    @subscribe new Disposable =>
+      @toggleClassList(scope, false)
+
+
     @toggleClassList(scope, true)
-    @operationStack.highlightOccurrenceIfNecessary()
+    @operationStack.highlightOccurrenceIfNecessary(patternForOccurence)

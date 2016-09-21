@@ -196,8 +196,8 @@ class OperationStack
     @recorded
 
   setOperatorModifier: (modifiers) ->
-    # console.log '  -- [start] setOperatorModifier', @vimState.mode
-    
+    console.log '  -- [start] setOperatorModifier', @vimState.mode
+
     # In operator-pending-mode, stack length is always 1 and its' operator.
     # So either of @stack[0] or @peekTop() is OK.
     operator = @stack[0]
@@ -209,7 +209,7 @@ class OperationStack
     if occurrence
       @addToClassList('with-occurrence')
       @highlightOccurrenceIfNecessary()
-    # console.log '  -- [end] setOperatorModifier'
+    console.log '  -- [end] setOperatorModifier'
 
   # Count
   # -------------------------
@@ -243,14 +243,15 @@ class OperationStack
   hasOccurrenceMarkers: ->
     @occurrenceMarkers?
 
-  highlightOccurrenceIfNecessary: ->
+  highlightOccurrenceIfNecessary: (pattern=null) ->
+    console.log 'PT', pattern
     if @hasOccurrenceMarkers()
       console.log 'already highlighted so return'
       return
     else
       console.log 'ya I\'ll highlight'
 
-    pattern = getWordPatternAtCursor(@editor.getLastCursor())
+    pattern ?= getWordPatternAtCursor(@editor.getLastCursor())
     scanRanges = [getVisibleBufferRange(@editor)]
     ranges = scanInRanges(@editor, pattern, scanRanges)
 
