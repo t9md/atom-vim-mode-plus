@@ -464,6 +464,9 @@
   'i r': 'vim-mode-plus:inner-range-marker'
   'a r': 'vim-mode-plus:a-range-marker'
 
+  'i v': 'vim-mode-plus:inner-visible-area'
+  'a v': 'vim-mode-plus:a-visible-area'
+
 # visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode':

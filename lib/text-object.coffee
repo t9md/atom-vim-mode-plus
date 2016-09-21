@@ -20,6 +20,7 @@ globalState = require './global-state'
   getWordRegExpForPointWithCursor
   getStartPositionForPattern
   getEndPositionForPattern
+  getVisibleBufferRange
 } = require './utils'
 
 class TextObject extends Base
@@ -839,6 +840,28 @@ class ARangeMarker extends RangeMarker
 class InnerRangeMarker extends RangeMarker
   @extend()
 
+# -------------------------
+class VisibleArea extends TextObject # 822 to 863
+  @extend(false)
+
+  getRange: (selection) ->
+    range = getVisibleBufferRange(selection.editor)
+    # [BUG?] Need translate to shilnk top and bottom to fit actual row.
+    # The reason I need -2 at bottom is because of status bar?
+    range.translate([+1, 0], [-3, 0])
+
+  selectTextObject: (selection) ->
+    range = @getRange(selection)
+    console.log range.toString()
+    swrap(selection).setBufferRangeSafely(range)
+
+class AVisibleArea extends VisibleArea
+  @extend()
+
+class InnerVisibleArea extends VisibleArea
+  @extend()
+
+# -------------------------
 # [TODO] This class expects member have "getRange = (selection) ->" method
 class UnionTextObject extends TextObject
   @extend(false)
@@ -862,6 +885,7 @@ class AFunctionOrInnerParagraph extends UnionTextObject
   @extend()
   member: ['AFunction', 'InnerParagraph']
 
+# -------------------------
 class SomeTextObject extends TextObject
   @extend(false)
   member: []
