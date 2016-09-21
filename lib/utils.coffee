@@ -42,7 +42,7 @@ debug = (messages...) ->
     when 'file'
       filePath = fs.normalize settings.get('debugOutputFilePath')
       if fs.existsSync(filePath)
-        fs.appendFileSync filePath, messages
+        fs.appendFileSync filePath, messages + "\n"
 
 getView = (model) ->
   atom.views.getView(model)
