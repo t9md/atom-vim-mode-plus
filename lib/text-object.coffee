@@ -1,6 +1,11 @@
 {Range, Point} = require 'atom'
 _ = require 'underscore-plus'
 
+# [TODO] Need overhaul
+#  - [ ] must have getRange(selection) ->
+#  - [ ] Remove selectTextObject?
+#  - [ ] Make expandable by selection.getBufferRange().union(@getRange(selection))
+#  - [ ] Count support(priority low)?
 Base = require './base'
 swrap = require './selection-wrapper'
 globalState = require './global-state'
@@ -561,7 +566,10 @@ class Paragraph extends TextObject
       return row - 1
     lastRow
 
-  getRange: (startRow) ->
+  getRange: (selection) ->
+    @getRangeFromRow(selection.getBufferRange().start.row)
+
+  getRangeFromRow: (startRow) ->
     isBlank = @editor.isBufferRowBlank.bind(@editor)
     wasBlank = isBlank(startRow)
     fn = (row) -> isBlank(row) is wasBlank
@@ -571,12 +579,12 @@ class Paragraph extends TextObject
     [startRow, endRow] = selection.getBufferRowRange()
 
     if firstTime and not @isMode('visual', 'linewise')
-      swrap(selection).setBufferRangeSafely @getRange(startRow)
-    else
+      swrap(selection).setBufferRangeSafely @getRange(selection)
+    else if not @instanceof('Indentation')
       point = if selection.isReversed()
-        @getRange(startRow - 1)?.start
+        @getRangeFromRow(startRow - 1)?.start
       else
-        @getRange(endRow + 1)?.end
+        @getRangeFromRow(endRow + 1)?.end
       selection.selectToBufferPosition point if point?
 
   selectTextObject: (selection) ->
@@ -597,8 +605,8 @@ class InnerParagraph extends Paragraph
 class Indentation extends Paragraph
   @extend(false)
 
-  getRange: (startRow) ->
-    return if @editor.isBufferRowBlank(startRow)
+  getRange: (selection) ->
+    startRow = selection.getBufferRange().start.row
     baseIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
     fn = (row) =>
       if @editor.isBufferRowBlank(row)
@@ -650,18 +658,21 @@ class Fold extends TextObject
   getFoldRowRangesContainsForRow: (row) ->
     getCodeFoldRowRangesContainesForRow(@editor, row, true)?.reverse()
 
-  selectTextObject: (selection) ->
+  getRange: (selection) ->
     range = selection.getBufferRange()
     rowRanges = @getFoldRowRangesContainsForRow(range.start.row)
-    return unless rowRanges?
+    return unless rowRanges.length
 
     if (rowRange = rowRanges.shift())?
       rowRange = @adjustRowRange(rowRange)
       targetRange = getBufferRangeForRowRange(@editor, rowRange)
       if targetRange.isEqual(range) and rowRanges.length
         rowRange = @adjustRowRange(rowRanges.shift())
-    if rowRange?
-      swrap(selection).selectRowRange(rowRange)
+
+    getBufferRangeForRowRange(@editor, rowRange)
+
+  selectTextObject: (selection) ->
+    swrap(selection).setBufferRangeSafely(@getRange(selection))
 
 class AFold extends Fold
   @extend()
@@ -813,3 +824,26 @@ class ARangeMarker extends RangeMarker
 
 class InnerRangeMarker extends RangeMarker
   @extend()
+
+# [TODO] This class expects member have "getRange = (selection) ->" method
+class UnionTextObject extends TextObject
+  @extend(false)
+  member: []
+
+  getUnionRange: (selection) ->
+    unionRange = null
+    for member in @member when range = @new(member).getRange(selection)
+      console.log [member, range?.toString()]
+      if unionRange?
+        unionRange = unionRange.union(range)
+      else
+        unionRange = range
+    unionRange
+
+  selectTextObject: (selection) ->
+    range = @getUnionRange(selection)
+    swrap(selection).setBufferRangeSafely(range)
+
+class AFunctionOrInnerParagraph extends UnionTextObject
+  @extend()
+  member: ['AFunction', 'InnerParagraph']
