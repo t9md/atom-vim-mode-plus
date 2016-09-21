@@ -131,6 +131,7 @@ class SearchInput extends Input
       "search-visit-prev": => @emitter.emit('did-command', name: 'visit', direction: 'prev')
       "select-occurrence-from-search": => @emitter.emit('did-command', name: 'run', operation: 'SelectOccurrence')
       "change-occurrence-from-search": => @emitter.emit('did-command', name: 'run', operation: 'ChangeOccurrence')
+      "set-occurrence-for-next-operation-from-search": => @emitter.emit('did-command', name: 'set-occurrence-for-next-operation')
 
       "search-insert-wild-pattern": => @editor.insertText('.*?')
       "search-activate-literal-mode": => @activateLiteralMode()

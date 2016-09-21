@@ -377,12 +377,10 @@ class VimState
   hasRegisterName: ->
     @register.hasName()
 
-  setOccurrenceForNextOperation: ->
+  setOccurrenceForNextOperation: (patternForOccurence=null) ->
     scope = "occurrence-pending"
-    patternForOccurence = null
-    if @isMode('visual')
-      if text = @editor.getSelectedText()
-        patternForOccurence = new RegExp(_.escapeRegExp(text), 'g')
+    if not patternForOccurence? and @isMode('visual') and text = @editor.getSelectedText()
+      patternForOccurence = new RegExp(_.escapeRegExp(text), 'g')
       @activate('normal')
 
     @onDidPushOperation (operation) =>
