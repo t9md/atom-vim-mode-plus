@@ -288,6 +288,7 @@
 '.platform-darwin atom-text-editor.vim-mode-plus-search':
   'ctrl-cmd-c': 'vim-mode-plus:change-occurrence-from-search'
   'cmd-d': 'vim-mode-plus:select-occurrence-from-search'
+  'cmd-o': 'vim-mode-plus:set-occurrence-for-next-operation-from-search'
 
 # normal
 # -------------------------
@@ -354,8 +355,9 @@
 # normal.occurrence-pending [Experimental]
 # -------------------------
 'atom-text-editor.vim-mode-plus.normal-mode.occurrence-pending':
-  'I': 'vim-mode-plus:insert-at-start-of-occurrence'
-  'A': 'vim-mode-plus:insert-at-end-of-occurrence'
+  'i': 'vim-mode-plus:insert-at-start-of-occurrence'
+  'a': 'vim-mode-plus:insert-at-end-of-occurrence'
+  'v': 'vim-mode-plus:select-occurrence'
 
 # operator-pending, visual
 # -------------------------
