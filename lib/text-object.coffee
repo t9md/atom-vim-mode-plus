@@ -48,10 +48,23 @@ class TextObject extends Base
       @vimState.submode is 'linewise'
 
   select: ->
+    canSelect = true
+    stopSelection = ->
+      canSelect = false
+
     @countTimes =>
-      for selection in @editor.getSelections()
-        @selectTextObject(selection)
+      for selection in @editor.getSelections() when canSelect
+        @selectTextObject(selection, stopSelection)
+    @editor.mergeIntersectingSelections()
     @updateSelectionProperties() if @isMode('visual')
+
+  selectTextObject: (selection, stopSelection) ->
+    range = @getRange(selection, stopSelection)
+    swrap(selection).setBufferRangeSafely(range)
+
+  getRange: ->
+    # I want to
+    # throw new Error('text-object must respond to range by getRange()!')
 
 # -------------------------
 class Word extends TextObject
@@ -64,9 +77,6 @@ class Word extends TextObject
       /[\t ]*/
     else
       @wordRegExp ? getWordRegExpForPointWithCursor(selection.cursor, point)
-
-  selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely(@getRange(selection))
 
   getRange: (selection) ->
     pattern = @getPattern(selection)
@@ -278,9 +288,6 @@ class Pair extends TextObject
       pairInfo = @getPairInfo(pairInfo.aRange.end)
     pairInfo?.targetRange
 
-  selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely(@getRange(selection))
-
 # -------------------------
 class AnyPair extends Pair
   @extend(false)
@@ -297,12 +304,9 @@ class AnyPair extends Pair
   getRanges: (selection) ->
     (range for klass in @member when (range = @getRangeBy(klass, selection)))
 
-  getNearestRange: (selection) ->
+  getRange: (selection) ->
     ranges = @getRanges(selection)
     _.last(sortRanges(ranges)) if ranges.length
-
-  selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely @getNearestRange(selection)
 
 class AAnyPair extends AnyPair
   @extend()
@@ -318,7 +322,7 @@ class AnyPairAllowForwarding extends AnyPair
   allowNextLine: false
   skipEmptyPair: false
   searchFrom: 'start'
-  getNearestRange: (selection) ->
+  getRange: (selection) ->
     ranges = @getRanges(selection)
     from = selection.cursor.getBufferPosition()
     [forwardingRanges, enclosingRanges] = _.partition ranges, (range) ->
@@ -346,7 +350,7 @@ class AnyQuote extends AnyPair
   @extend(false)
   allowForwarding: true
   member: ['DoubleQuote', 'SingleQuote', 'BackTick']
-  getNearestRange: (selection) ->
+  getRange: (selection) ->
     ranges = @getRanges(selection)
     # Pick range which end.colum is leftmost(mean, closed first)
     _.first(_.sortBy(ranges, (r) -> r.end.column)) if ranges.length
@@ -640,10 +644,10 @@ class InnerIndentation extends Indentation
 class Comment extends TextObject
   @extend(false)
 
-  selectTextObject: (selection) ->
+  getRange: (selection) ->
     row = selection.getBufferRange().start.row
     if rowRange = @getRowRangeForCommentAtBufferRow(row)
-      swrap(selection).selectRowRange(rowRange)
+      getBufferRangeForRowRange(selection.editor, rowRange)
 
   getRowRangeForCommentAtBufferRow: (row) ->
     switch
@@ -686,9 +690,6 @@ class Fold extends TextObject
 
     getBufferRangeForRowRange(@editor, rowRange)
 
-  selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely(@getRange(selection))
-
 class AFold extends Fold
   @extend()
 
@@ -727,11 +728,24 @@ class InnerFunction extends Function
 # -------------------------
 class CurrentLine extends TextObject
   @extend(false)
-  selectTextObject: (selection) ->
+  getRange: (selection) ->
     {cursor} = selection
-    cursor.moveToBeginningOfLine()
-    cursor.moveToFirstCharacterOfLine() if @isInner()
-    selection.selectToEndOfBufferLine()
+    if @isA()
+      cursor.getCurrentLineBufferRange()
+    else
+      scanRange = cursor.getCurrentLineBufferRange()
+      pattern = /\S/
+      [start, end] = []
+      @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
+        end = range.end
+        stop()
+
+      @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
+        start = range.start
+        stop()
+
+      if start and end
+        new Range(start, end)
 
 class ACurrentLine extends CurrentLine
   @extend()
@@ -742,8 +756,9 @@ class InnerCurrentLine extends CurrentLine
 # -------------------------
 class Entire extends TextObject
   @extend(false)
-  selectTextObject: (selection) ->
-    @editor.selectAll()
+  getRange: (selection, stopSelection) ->
+    stopSelection()
+    @editor.buffer.getRange()
 
 class AEntire extends Entire
   @extend()
@@ -760,9 +775,6 @@ class LatestChange extends TextObject
   @extend(false)
   getRange: ->
     @vimState.mark.getRange('[', ']')
-
-  selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely(@getRange())
 
 class ALatestChange extends LatestChange
   @extend()
@@ -850,10 +862,6 @@ class VisibleArea extends TextObject # 822 to 863
     # The reason I need -2 at bottom is because of status bar?
     range.translate([+1, 0], [-3, 0])
 
-  selectTextObject: (selection) ->
-    range = @getRange(selection)
-    swrap(selection).setBufferRangeSafely(range)
-
 class AVisibleArea extends VisibleArea
   @extend()
 
@@ -875,10 +883,6 @@ class UnionTextObject extends TextObject
         unionRange = range
     unionRange
 
-  selectTextObject: (selection) ->
-    range = @getUnionRange(selection)
-    swrap(selection).setBufferRangeSafely(range)
-
 class AFunctionOrInnerParagraph extends UnionTextObject
   @extend()
   member: ['AFunction', 'InnerParagraph']
@@ -895,12 +899,9 @@ class SomeTextObject extends TextObject
   getRanges: (selection) ->
     (range for klass in @member when (range = @getRangeBy(klass, selection)))
 
-  getNearestRange: (selection) ->
+  getRange: (selection) ->
     ranges = @getRanges(selection)
     _.last(sortRanges(ranges)) if ranges.length
-
-  selectTextObject: (selection) ->
-    swrap(selection).setBufferRangeSafely @getNearestRange(selection)
 
 class InnerNonEmptySmartWordOrInnerParenthesis extends SomeTextObject
   @extend()
