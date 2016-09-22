@@ -34,7 +34,7 @@ class VimState
 
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
-  @delegatesMethods('getCount', 'setCount', 'hasCount', toProperty: 'operationStack')
+  @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', toProperty: 'operationStack')
 
   constructor: (@main, @editor, @statusBarManager) ->
     @editorElement = @editor.element
@@ -65,9 +65,6 @@ class VimState
       @activate('insert')
     else
       @activate('normal')
-
-  subscribe: (args...) ->
-    @operationStack.subscribe args...
 
   # BlockwiseSelections
   # -------------------------
@@ -383,8 +380,9 @@ class VimState
       patternForOccurence = new RegExp(_.escapeRegExp(text), 'g')
       @activate('normal')
 
-    @onDidPushOperation (operation) =>
-      console.log "pushed", operation.getName(), 'isOperator? =', operation.isOperator()
+    disposable = @onDidPushOperation (operation) =>
+      disposable.dispose()
+      console.log "!!!!pushed", operation.getName(), 'isOperator? =', operation.isOperator()
       if operation.isOperator()
         operation.patternForOccurence = patternForOccurence if patternForOccurence?
         console.log '-- [boocked] setOperatorModifier'
@@ -392,7 +390,6 @@ class VimState
 
     @subscribe new Disposable =>
       @toggleClassList(scope, false)
-
 
     @toggleClassList(scope, true)
     @operationStack.highlightOccurrenceIfNecessary(patternForOccurence)

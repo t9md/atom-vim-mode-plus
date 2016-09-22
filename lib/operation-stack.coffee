@@ -30,8 +30,10 @@ class OperationStack
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
     @reset()
 
-  subscribe: (args...) ->
-    @subscriptions.add args...
+  # Return handler
+  subscribe: (handler) ->
+    @subscriptions.add(handler)
+    handler # DONT REMOVE
 
   composeOperation: (operation) ->
     {mode} = @vimState
