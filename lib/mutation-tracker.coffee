@@ -21,22 +21,25 @@ class MutationTracker
 
   constructor: (@vimState, options={}) ->
     {@editor, @markerLayer} = @vimState
-    {@stay, @useMarker, @isSelect} = options
+    {@stay} = options
     @mutationsBySelection = new Map
     @pointsBySelection = new Map
 
     if @stay
       for selection in @editor.getSelections()
-        point = @getInitialPointForSelection(selection)
-        if @useMarker
-          point = @markerLayer.markBufferPosition(point, invalidate: 'never')
-        @pointsBySelection.set(selection, point)
+        @saveInitialPointForSelection(selection, options)
+
+  saveInitialPointForSelection: (selection, {useMarker, isSelect}) ->
+    if @vimState.isMode('visual')
+      point = swrap(selection).getBufferPositionFor('head', fromProperty: true, allowFallback: true)
+    else
+      point = swrap(selection).getBufferPositionFor('head') unless isSelect
+    if useMarker
+      point = @markerLayer.markBufferPosition(point, invalidate: 'never')
+    @pointsBySelection.set(selection, point)
 
   getInitialPointForSelection: (selection) ->
-    if @vimState.isMode('visual')
-      swrap(selection).getBufferPositionFor('head', fromProperty: true, allowFallback: true)
-    else
-      swrap(selection).getBufferPositionFor('head') unless @isSelect
+    @pointsBySelection.get(selection)
 
   # mutation information is created even if selection.isEmpty()
   # So we can filter selection by when it was created.

@@ -84,13 +84,9 @@ class Operator extends Base
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      ranges = @mtrack.getMarkerBufferRanges().filter (range) ->
-        not range.isEmpty()
-
+      ranges = @mtrack.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
       if ranges.length
-        highlightRanges @editor, ranges,
-          class: 'vim-mode-plus-flash'
-          timeout: settings.get('flashOnOperateDuration')
+        @flashIfNecessary(ranges)
 
   trackChangeIfNecessary: ->
     return unless @trackChange
@@ -194,7 +190,6 @@ class Operator extends Base
       stay: @needStay()
       isSelect: @instanceof('Select')
       useMarker: @useMarkerForStay
-
     @mtrack.setCheckPoint('will-select')
 
     @emitWillSelectTarget()
@@ -332,18 +327,21 @@ class Delete extends Operator
 
       @onDidRestoreCursorPositions =>
         for cursor in @editor.getCursors()
-          row = getValidVimBufferRow(@editor, cursor.getBufferRow())
-          if @needStay()
-            point = @mtrack.pointsBySelection.get(cursor.selection)
-            cursor.setBufferPosition([row, point.column])
-          else
-            cursor.setBufferPosition([row, 0])
-            cursor.skipLeadingWhitespace()
+          @adjustCursor(cursor)
     super
 
   mutateSelection: (selection) =>
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
+
+  adjustCursor: (cursor) ->
+    row = getValidVimBufferRow(@editor, cursor.getBufferRow())
+    if @needStay()
+      point = @mtrack.getInitialPointForSelection(cursor.selection)
+      cursor.setBufferPosition([row, point.column])
+    else
+      cursor.setBufferPosition([row, 0])
+      cursor.skipLeadingWhitespace()
 
 class DeleteRight extends Delete
   @extend()
@@ -359,7 +357,7 @@ class DeleteToLastCharacterOfLine extends Delete
   target: 'MoveToLastCharacterOfLine'
   execute: ->
     # Ensure all selections to un-reversed
-    if isBlockwise = @isMode('visual', 'blockwise')
+    if @isMode('visual', 'blockwise')
       swrap.setReversedState(@editor, false)
     super
 

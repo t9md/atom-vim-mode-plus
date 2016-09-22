@@ -40,7 +40,7 @@ class ToggleCase extends TransformString
       charLower
 
   getNewText: (text) ->
-    text.split('').map(@toggleCase.bind(this)).join('')
+    text.replace(/./g, @toggleCase.bind(this))
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
@@ -84,7 +84,7 @@ class Replace extends TransformString
 
   mutateSelection: (selection) ->
     input = @getInput()
-    @restorePositions = input isnt "\n"
+    @restorePositions = false if input is "\n"
     text = selection.getText().replace(/./g, input)
     selection.insertText(text, autoIndentNewline: true)
 
@@ -245,16 +245,9 @@ class TransformStringByExternalCommand extends TransformString
     @getStdout(selection) ? text
 
   # For easily extend by vmp plugin.
-  getCommand: (selection) ->
-    {@command, @args}
-
-  # For easily extend by vmp plugin.
-  getStdin: (selection) ->
-    selection.getText()
-
-  # For easily extend by vmp plugin.
-  getStdout: (selection) ->
-    @stdoutBySelection.get(selection)
+  getCommand: (selection) -> {@command, @args}
+  getStdin: (selection) -> selection.getText()
+  getStdout: (selection) -> @stdoutBySelection.get(selection)
 
 # -------------------------
 selectListItems = null
@@ -317,28 +310,28 @@ class Indent extends TransformString
   hover: icon: ':indent:', emoji: ':point_right:'
   stayOnLinewise: false
   useMarkerForStay: true
-  indentFunction: "indentSelectedRows"
   clipToMutationEndOnStay: false
 
   execute: ->
     unless @needStay()
       @onDidRestoreCursorPositions =>
-        for cursor in @editor.getCursors()
-          cursor.moveToFirstCharacterOfLine()
+        @editor.moveToFirstCharacterOfLine()
     super
 
   mutateSelection: (selection) ->
-    selection[@indentFunction]()
+    selection.indentSelectedRows()
 
 class Outdent extends Indent
   @extend()
   hover: icon: ':outdent:', emoji: ':point_left:'
-  indentFunction: "outdentSelectedRows"
+  mutateSelection: (selection) ->
+    selection.outdentSelectedRows()
 
 class AutoIndent extends Indent
   @extend()
   hover: icon: ':auto-indent:', emoji: ':open_hands:'
-  indentFunction: "autoIndentSelectedRows"
+  mutateSelection: (selection) ->
+    selection.autoIndentSelectedRows()
 
 class ToggleLineComments extends TransformString
   @extend()
@@ -353,16 +346,15 @@ class Surround extends TransformString
   @extend()
   @description: "Surround target by specified character like `(`, `[`, `\"`"
   displayName: "Surround ()"
+  hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
   pairs: [
     ['[', ']']
     ['(', ')']
     ['{', '}']
     ['<', '>']
   ]
-  spaceSurroundedRegExp: /^\s([\s|\S]+)\s$/
   input: null
   charsMax: 1
-  hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
   requireInput: true
   autoIndent: false
 
