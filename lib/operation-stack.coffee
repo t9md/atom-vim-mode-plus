@@ -10,6 +10,18 @@ swrap = require './selection-wrapper'
 
 {debug, getWordPatternAtCursor, scanInRanges, highlightRanges} = require './utils'
 
+
+# opration life in operationStack
+# 1. run
+#    instantiated by new
+#    composed with implicit Operator.Select or Motion.CurrentSelection if necessary
+#    push composed opration to stack
+# 2. process
+#    reduce stack by
+#     pop operation and set it as target of new stack top(which should be operator).
+#    check if remaining top of stack is executable by calling isComplete()
+#    if executable, then pop stack then execute(poppedOperation)
+#    if not executable, enter "operator-pending-mode"
 class OperationStack
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -81,6 +93,10 @@ class OperationStack
   isProcessing: ->
     @processing
 
+  updateOccurrenceView: ->
+    @addToClassList('with-occurrence')
+    @highlightOccurrenceIfNecessary()
+
   process: ->
     @processing = true
     if @stack.length > 2
@@ -96,8 +112,7 @@ class OperationStack
       else
         if @vimState.isMode('normal') and top.isOperator()
           @vimState.activate('operator-pending')
-          if top.isWithOccurrence()
-            @setOperatorModifier(occurrence: true)
+          @updateOccurrenceView() if top.isOccurrence()
 
         # Temporary set while command is running
         if commandName = top.constructor.getCommandNameWithoutPrefix?()
@@ -169,6 +184,9 @@ class OperationStack
   peekTop: ->
     _.last(@stack)
 
+  peekBottom: ->
+    @stack[0]
+
   reduce: ->
     until @stack.length < 2
       operation = @stack.pop()
@@ -197,18 +215,13 @@ class OperationStack
 
   setOperatorModifier: (modifiers) ->
     console.log '  -- [start] setOperatorModifier', @vimState.mode
-
     # In operator-pending-mode, stack length is always 1 and its' operator.
-    # So either of @stack[0] or @peekTop() is OK.
-    operator = @stack[0]
-
-    {occurrence, wise} = modifiers
-    operator.withOccurrence = occurrence if occurrence?
-    operator.forceWise = wise if wise?
-
-    if occurrence
-      @addToClassList('with-occurrence')
-      @highlightOccurrenceIfNecessary()
+    # So either of @peekTop() or @peekBottom() is OK
+    operator = @peekBottom()
+    for name, value of modifiers when name in ['occurrence', 'wise']
+      operator[name] = value
+      if name is "occurrence" and value
+        @updateOccurrenceView()
     console.log '  -- [end] setOperatorModifier'
 
   # Count

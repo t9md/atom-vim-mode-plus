@@ -21,9 +21,9 @@ class TransformString extends Operator
   @registerToSelectList: ->
     transformerRegistry.push(this)
 
-  mutateSelection: (selection) ->
-    text = @getNewText(selection.getText(), selection)
-    selection.insertText(text, {@autoIndent})
+  mutateSelection: (selection, stopMutation) ->
+    if text = @getNewText(selection.getText(), selection, stopMutation)
+      selection.insertText(text, {@autoIndent})
 
 class ToggleCase extends TransformString
   @extend()
@@ -407,7 +407,7 @@ class SurroundSmartWord extends Surround
 class MapSurround extends Surround
   @extend()
   @description: "Surround each word(`/\w+/`) within target"
-  withOccurrence: true
+  occurrence: true
   patternForOccurence: /\w+/g
 
 class DeleteSurround extends Surround

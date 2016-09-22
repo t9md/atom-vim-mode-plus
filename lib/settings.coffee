@@ -99,6 +99,10 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'boolean'
     default: false
     description: "Don't move cursor after TransformString e.g Toggle, Surround"
+  # stayOnIncrease:
+  #   type: 'boolean'
+  #   default: false
+  #   description: "Don't move cursor after Increase/Decrease `ctrl-a` or `ctrl-x`"
   stayOnYank:
     type: 'boolean'
     default: false

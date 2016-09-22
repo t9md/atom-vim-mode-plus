@@ -32,8 +32,8 @@ class Operator extends Base
   requireTarget: true
   recordable: true
 
-  forceWise: null
-  withOccurrence: false
+  wise: null
+  occurrence: false
 
   patternForOccurence: null
   mtrack: null
@@ -43,6 +43,7 @@ class Operator extends Base
   clipToMutationEndOnStay: true
   useMarkerForStay: false
   restorePositions: true
+  restorePositionsToMutationEnd: false
   flashTarget: true
   trackChange: false
 
@@ -51,7 +52,9 @@ class Operator extends Base
   # This mean return value may change depending on when you call.
   needStay: ->
     @stayAtSamePosition ?= do =>
-      if @instanceof('TransformString')
+      if @instanceof('Increase')
+        param = 'stayOnIncrease'
+      else if @instanceof('TransformString')
         param = 'stayOnTransformString'
       else if @instanceof('Delete')
         param = 'stayOnDelete'
@@ -63,8 +66,8 @@ class Operator extends Base
       else
         settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
 
-  isWithOccurrence: ->
-    @withOccurrence
+  isOccurrence: ->
+    @occurrence
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
@@ -112,9 +115,9 @@ class Operator extends Base
     this
 
   modifyTargetWiseIfNecessary: ->
-    return unless @forceWise?
+    return unless @wise?
 
-    switch @forceWise
+    switch @wise
       when 'characterwise'
         if @target.linewise
           @target.linewise = false
@@ -142,18 +145,20 @@ class Operator extends Base
     # We need to preserve selections before selection is cleared as a result of mutation.
     @updatePreviousSelectionIfVisualMode()
     # Mutation phase
+    canMutate = true
+    stopMutation = -> canMutate = false
     if @selectTarget()
       @editor.transact =>
-        for selection in @editor.getSelections()
-          @mutateSelection(selection)
+        for selection in @editor.getSelections() when canMutate
+          @mutateSelection(selection, stopMutation)
       @restoreCursorPositionsIfNecessary()
+      @onDidFinishOperation =>
+        @mtrack.destroy()
+        @mtrack = null
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
     @activateMode('normal')
-    @onDidFinishOperation =>
-      @mtrack.destroy()
-      @mtrack = null
 
   selectOccurrence: (fn) ->
     scanRanges = null
@@ -162,7 +167,10 @@ class Operator extends Base
     # Capture Pattern For Occurrence
     if @isMode('visual')
       scanRanges = @editor.getSelectedBufferRanges()
-      @vimState.modeManager.deactivate() # clear selection FIXME
+      # FIXME should not clear selection, clearing here means, when target is CurrentSelection,
+      # To say simply clearing here breaks `.` repeat capability.
+      # its get emptySelection that result in `.` repeat works on empty seleccion.
+      @vimState.modeManager.deactivate()
 
       unless @isMode('visual', 'blockwise') # extend scanRange to include cursorWord
         # BUG dont extend if register value is specified
@@ -194,7 +202,7 @@ class Operator extends Base
 
     @emitWillSelectTarget()
 
-    if @isWithOccurrence()
+    if @isOccurrence()
       @selectOccurrence =>
         @target.select()
     else
@@ -214,9 +222,10 @@ class Operator extends Base
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
     options =
-      strict: @isWithOccurrence()
+      strict: @isOccurrence()
       clipToMutationEnd: @clipToMutationEndOnStay
       isBlockwise: @target?.isBlockwise?()
+      mutationEnd: @restorePositionsToMutationEnd
     @mtrack.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
 
@@ -233,7 +242,7 @@ class Select extends Operator
 
   canChangeMode: ->
     if @isMode('visual')
-      @isWithOccurrence() or @target.isAllowSubmodeChange?()
+      @isOccurrence() or @target.isAllowSubmodeChange?()
     else
       true
 
@@ -267,7 +276,7 @@ class SelectRangeMarker extends Select
 class SelectOccurrence extends Select
   @extend()
   @description: "Add selection onto each matching word within target range"
-  withOccurrence: true
+  occurrence: true
   initialize: ->
     super
     @onDidSelectTarget =>
@@ -323,16 +332,17 @@ class Delete extends Operator
 
   execute: ->
     @onDidSelectTarget =>
-      return unless @target.isLinewise()
-
-      @onDidRestoreCursorPositions =>
-        for cursor in @editor.getCursors()
-          @adjustCursor(cursor)
+      @requestAdjustCursorPositions() if @target.isLinewise()
     super
 
   mutateSelection: (selection) =>
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
+
+  requestAdjustCursorPositions: ->
+    @onDidRestoreCursorPositions =>
+      for cursor in @editor.getCursors()
+        @adjustCursor(cursor)
 
   adjustCursor: (cursor) ->
     row = getValidVimBufferRow(@editor, cursor.getBufferRow())
@@ -370,7 +380,7 @@ class DeleteLine extends Delete
 
 class DeleteOccurrenceInAFunctionOrInnerParagraph extends Delete
   @extend()
-  withOccurrence: true
+  occurrence: true
   target: "AFunctionOrInnerParagraph"
 
 # Yank

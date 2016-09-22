@@ -16,7 +16,13 @@ describe "Operator Increase", ->
   describe "the ctrl-a/ctrl-x keybindings", ->
     beforeEach ->
       set
-        text: '123\nab45\ncd-67ef\nab-5\na-bcdef'
+        text: """
+        123
+        ab45
+        cd-67ef
+        ab-5
+        a-bcdef
+        """
         cursorBuffer: [[0, 0], [1, 0], [2, 0], [3, 3], [4, 0]]
 
     describe "increasing numbers", ->

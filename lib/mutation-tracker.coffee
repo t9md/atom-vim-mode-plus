@@ -25,9 +25,8 @@ class MutationTracker
     @mutationsBySelection = new Map
     @pointsBySelection = new Map
 
-    if @stay
-      for selection in @editor.getSelections()
-        @saveInitialPointForSelection(selection, options)
+    for selection in @editor.getSelections()
+      @saveInitialPointForSelection(selection, options)
 
   saveInitialPointForSelection: (selection, {useMarker, isSelect}) ->
     if @vimState.isMode('visual')
@@ -73,6 +72,13 @@ class MutationTracker
         ranges.push(range)
     ranges
 
+  getMutationEndForMutation: (mutation) ->
+    range = mutation.marker.getBufferRange()
+    if range.isEmpty()
+      range.end
+    else
+      range.end.translate([0, -1])
+
   destroy: ->
     return if @destroyed
     @mutationsBySelection.forEach (mutation) -> mutation.marker?.destroy()
@@ -82,26 +88,24 @@ class MutationTracker
     {@mutationsBySelection, @pointsBySelection, @editor} = {}
     @destroyed = true
 
-  getRestorePointForMutation: (mutation, {clipToMutationEnd}={}) ->
+  getRestorePointForMutation: (mutation, {clipToMutationEnd, mutationEnd}={}) ->
     if @stay
       if point = @pointsBySelection.get(mutation.selection)
         unless point instanceof Point
           point = point.getHeadBufferPosition()
 
         if clipToMutationEnd
-          range = mutation.marker.getBufferRange()
-          if range.isEmpty()
-            mutationEnd = range.end
-          else
-            mutationEnd = range.end.translate([0, -1])
-          Point.min(mutationEnd, point)
+          Point.min(@getMutationEndForMutation(mutation), point)
         else
           point
     else
-      if range = mutation.checkPoint['did-select']
-        range.start
+      if mutationEnd
+        @getMutationEndForMutation(mutation)
+      else
+        if range = mutation.checkPoint['did-select']
+          range.start
 
-  restoreCursorPositions: ({strict, clipToMutationEnd, isBlockwise}) ->
+  restoreCursorPositions: ({strict, clipToMutationEnd, isBlockwise, mutationEnd}) ->
     if isBlockwise
       # [FIXME] why I need this direct manupilation?
       # Because there's bug that blockwise selecction is not addes to each
@@ -127,5 +131,5 @@ class MutationTracker
           selection.destroy()
           continue
 
-        if point = @getRestorePointForMutation(mutation, {clipToMutationEnd})
+        if point = @getRestorePointForMutation(mutation, {clipToMutationEnd, mutationEnd})
           selection.cursor.setBufferPosition(point)
