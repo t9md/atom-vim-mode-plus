@@ -617,11 +617,18 @@ class MoveToTopOfScreen extends Motion
   getPoint: ->
     getFirstCharacterBufferPositionForScreenRow(@editor, @getRow())
 
+  getScrolloff: ->
+    if @isAsOperatorTarget()
+      0
+    else
+      @scrolloff
+
   getRow: ->
     row = getFirstVisibleScreenRow(@editor)
-    offset = @scrolloff
+    offset = @getScrolloff()
     offset = 0 if (row is 0)
-    row + Math.max(@getCount(), offset)
+    offset = Math.max(@getCount(), offset)
+    row + offset
 
 # keymap: M
 class MoveToMiddleOfScreen extends MoveToTopOfScreen
@@ -643,9 +650,10 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
     # So I intentionally use editor.getLastScreenRow here.
     vimLastScreenRow = @getVimLastScreenRow()
     row = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
-    offset = @scrolloff + 1
-    offset = 0 if (row is vimLastScreenRow)
-    row - Math.max(@getCount(), offset)
+    offset = @getScrolloff() + 1
+    offset = 0 if row is vimLastScreenRow
+    offset = Math.max(@getCount(), offset)
+    row - offset
 
 # Scrolling
 # Half: ctrl-d, ctrl-u
