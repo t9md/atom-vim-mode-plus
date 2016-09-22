@@ -382,10 +382,8 @@ class VimState
 
     disposable = @onDidPushOperation (operation) =>
       disposable.dispose()
-      console.log "!!!!pushed", operation.getName(), 'isOperator? =', operation.isOperator()
       if operation.isOperator()
         operation.patternForOccurence = patternForOccurence if patternForOccurence?
-        console.log '-- [boocked] setOperatorModifier'
         @operationStack.setOperatorModifier(occurrence: true)
 
     @subscribe new Disposable =>

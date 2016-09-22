@@ -115,7 +115,6 @@ class MutationTracker
         points.push(mutation.checkPoint['will-select']?.start)
       points = points.sort (a, b) -> a.compare(b)
       points = points.filter (point) -> point?
-      # console.log points
       if @vimState.isMode('visual', 'blockwise')
         if point = points[0]
           @vimState.getLastBlockwiseSelection().setHeadBufferPosition(point)

@@ -852,7 +852,6 @@ class VisibleArea extends TextObject # 822 to 863
 
   selectTextObject: (selection) ->
     range = @getRange(selection)
-    console.log range.toString()
     swrap(selection).setBufferRangeSafely(range)
 
 class AVisibleArea extends VisibleArea
@@ -870,7 +869,6 @@ class UnionTextObject extends TextObject
   getUnionRange: (selection) ->
     unionRange = null
     for member in @member when range = @new(member).getRange(selection)
-      console.log [member, range?.toString()]
       if unionRange?
         unionRange = unionRange.union(range)
       else

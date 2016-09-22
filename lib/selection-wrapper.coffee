@@ -140,7 +140,6 @@ class SelectionWrapper
 
   preserveCharacterwise: ->
     basename = require('path').basename
-    # console.log "PRESERVING", basename(@selection.editor.getPath())
     properties = @detectCharacterwiseProperties()
     unless @selection.isEmpty()
       endPoint = if @selection.isReversed() then 'tail' else 'head'
