@@ -98,7 +98,7 @@ class OperationStack
   updateOccurrenceView: ->
     @addToClassList('with-occurrence')
     unless @hasOccurrenceMarkers()
-      @highlightOccurrence()
+      @highlightOccurrence(@peekTop().patternForOccurence)
       @clearOccurrenceMarkersOnReset()
 
   process: ->

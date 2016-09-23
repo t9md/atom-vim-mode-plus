@@ -190,6 +190,7 @@ class VimState
     @clearHighlightSearch()
     @clearRangeMarkers()
     @highlightSearchSubscription?.dispose()
+    @presetOccurrenceSubscription?.dispose()
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
@@ -198,6 +199,7 @@ class VimState
       @editor, @editorElement, @subscriptions,
       @inputCharSubscriptions
       @highlightSearchSubscription
+      @presetOccurrenceSubscription
     } = {}
     @emitter.emit 'did-destroy'
 
@@ -245,12 +247,17 @@ class VimState
 
   resetNormalMode: ({userInvocation}={}) ->
     if userInvocation ? false
-      unless @editor.hasMultipleCursors()
-        @clearRangeMarkers() if settings.get('clearRangeMarkerOnResetNormalMode')
-        @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
-        @deactivatePresetOccurrenceMode() if @hasPresetOccurrence()
+      console.log @hasPresetOccurrence()
+      if @editor.hasMultipleCursors()
+        @editor.clearSelections()
+      else if @hasRangeMarkers() and settings.get('clearRangeMarkerOnResetNormalMode')
+        @clearRangeMarkers()
+      else if @hasPresetOccurrence()
+        @resetPresetOccurrence()
 
-    @editor.clearSelections()
+      @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
+    else
+      @editor.clearSelections()
     @activate('normal')
 
   reset: ->
@@ -374,16 +381,15 @@ class VimState
   # Occurrence request for next operation
   # -------------------------
   hasPresetOccurrence: ->
-    @presetOccurrenceDeactivator?
+    @presetOccurrenceSubscription?
 
-  deactivatePresetOccurrenceMode: (clearMarkers=true) ->
-    @presetOccurrenceDeactivator?.dispose()
-    @presetOccurrenceDeactivator = null
-
+  resetPresetOccurrence: ({clearMarkers}={}) ->
+    @presetOccurrenceSubscription?.dispose()
+    @presetOccurrenceSubscription = null
     @editorElement.classList.remove("occurrence-preset")
-    @operationStack.clearOccurrenceMarkers() if clearMarkers
+    if clearMarkers ? true
+      @operationStack.clearOccurrenceMarkers()
 
-  presetOccurrenceDeactivator: null
   presetOccurrence: (pattern=null) ->
     if not pattern? and @isMode('visual') and text = @editor.getSelectedText()
       pattern = new RegExp(_.escapeRegExp(text), 'g')
@@ -391,15 +397,14 @@ class VimState
 
     pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
 
-    @editorElement.classList.add("occurrence-preset")
+    @resetPresetOccurrence()
 
-    @presetOccurrenceDeactivator = @emitter.on 'did-push-operation', (operation) =>
+    @presetOccurrenceSubscription = @emitter.on 'did-push-operation', (operation) =>
       if operation.isOperator() and operation.canAcceptPresetOccurrence()
-        @deactivatePresetOccurrenceMode(false)
+        @resetPresetOccurrence(clearMarkers: false)
         @operationStack.clearOccurrenceMarkersOnReset()
         operation.patternForOccurence = pattern
         operation.occurrence = true
 
-    # refresh
-    @operationStack.clearOccurrenceMarkers()
+    @editorElement.classList.add("occurrence-preset")
     @operationStack.highlightOccurrence(pattern)
