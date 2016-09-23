@@ -12,6 +12,7 @@ globalState = require './global-state'
   getVisibleBufferRange
   matchScopes
   isRangeContainsSomePoint
+  getWordPatternAtCursor
 
   debug
 } = require './utils'
@@ -247,6 +248,8 @@ class VimState
       unless @editor.hasMultipleCursors()
         @clearRangeMarkers() if settings.get('clearRangeMarkerOnResetNormalMode')
         @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
+        @deactivatePresetOccurrenceMode() if @hasPresetOccurrence()
+
     @editor.clearSelections()
     @activate('normal')
 
@@ -370,23 +373,32 @@ class VimState
 
   # Occurrence request for next operation
   # -------------------------
+  hasPresetOccurrence: ->
+    @presetOccurrenceDeactivator?
+
+  deactivatePresetOccurrenceMode: (clearMarkers=true) ->
+    @presetOccurrenceDeactivator?.dispose()
+    @presetOccurrenceDeactivator = null
+
+    @editorElement.classList.remove("occurrence-preset")
+    @operationStack.clearOccurrenceMarkers() if clearMarkers
+
+  presetOccurrenceDeactivator: null
   presetOccurrence: (pattern=null) ->
     if not pattern? and @isMode('visual') and text = @editor.getSelectedText()
       pattern = new RegExp(_.escapeRegExp(text), 'g')
       @activate('normal')
 
+    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
+
     @editorElement.classList.add("occurrence-preset")
 
-    disposable = null
-    presetOccurrenceIfPossible = (operation) =>
+    @presetOccurrenceDeactivator = @emitter.on 'did-push-operation', (operation) =>
       if operation.isOperator() and operation.canAcceptPresetOccurrence()
-        disposable.dispose()
-        @editorElement.classList.remove("occurrence-preset")
+        @deactivatePresetOccurrenceMode(false)
+        @operationStack.clearOccurrenceMarkersOnReset()
         operation.patternForOccurence = pattern
         operation.occurrence = true
-        @operationStack.clearOccurrenceMarkersOnReset()
-
-    disposable = @emitter.on('did-push-operation', presetOccurrenceIfPossible)
 
     # refresh
     @operationStack.clearOccurrenceMarkers()
