@@ -247,7 +247,6 @@ class VimState
 
   resetNormalMode: ({userInvocation}={}) ->
     if userInvocation ? false
-      console.log @hasPresetOccurrence()
       if @editor.hasMultipleCursors()
         @editor.clearSelections()
       else if @hasRangeMarkers() and settings.get('clearRangeMarkerOnResetNormalMode')
@@ -383,28 +382,37 @@ class VimState
   hasPresetOccurrence: ->
     @presetOccurrenceSubscription?
 
-  resetPresetOccurrence: ({clearMarkers}={}) ->
+  resetPresetOccurrence: ({clearMarkers, clearPattern}={}) ->
     @presetOccurrenceSubscription?.dispose()
     @presetOccurrenceSubscription = null
     @editorElement.classList.remove("occurrence-preset")
+    if clearPattern ? true
+      @presetPatternForOccurence = null
     if clearMarkers ? true
       @operationStack.clearOccurrenceMarkers()
 
+  presetPatternForOccurence: null
   presetOccurrence: (pattern=null) ->
     if not pattern? and @isMode('visual') and text = @editor.getSelectedText()
       pattern = new RegExp(_.escapeRegExp(text), 'g')
       @activate('normal')
-
     pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
 
-    @resetPresetOccurrence()
+    if @presetPatternForOccurence?
+      newSource = [@presetPatternForOccurence.source, pattern.source].join("|")
+      @presetPatternForOccurence = new RegExp(newSource, 'g')
+    else
+      @presetPatternForOccurence = pattern
+    console.log @presetPatternForOccurence.source
+
+    @resetPresetOccurrence({clearPattern: false})
 
     @presetOccurrenceSubscription = @emitter.on 'did-push-operation', (operation) =>
       if operation.isOperator() and operation.canAcceptPresetOccurrence()
-        @resetPresetOccurrence(clearMarkers: false)
         @operationStack.clearOccurrenceMarkersOnReset()
-        operation.patternForOccurence = pattern
+        operation.patternForOccurence = @presetPatternForOccurence
         operation.occurrence = true
+        @resetPresetOccurrence(clearMarkers: false)
 
     @editorElement.classList.add("occurrence-preset")
-    @operationStack.highlightOccurrence(pattern)
+    @operationStack.highlightOccurrence(@presetPatternForOccurence)

@@ -275,7 +275,7 @@ class SelectRangeMarker extends Select
     super
     @vimState.clearRangeMarkers()
 
-class SelectOccurrence extends Select
+class SelectOccurrence extends Operator
   @extend()
   @description: "Add selection onto each matching word within target range"
   occurrence: true
@@ -283,6 +283,14 @@ class SelectOccurrence extends Select
     super
     @onDidSelectTarget =>
       swrap.clearProperties(@editor)
+
+  execute: ->
+    if @selectTarget()
+      submode = swrap.detectVisualModeSubmode(@editor)
+      @activateModeIfNecessary('visual', submode)
+      @onDidFinishOperation =>
+        @mtrack.destroy()
+        @mtrack = null
 
 class SelectOccurrenceInARangeMarker extends SelectOccurrence
   @extend()
