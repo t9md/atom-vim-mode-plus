@@ -333,6 +333,55 @@ class ToggleRangeMarkerOnInnerWord extends ToggleRangeMarker
   @extend()
   target: 'InnerWord'
 
+# Preset Occurrence
+# =========================
+class PresetOccurrence extends Operator
+  @extend()
+  flashTarget: false
+  requireTarget: false
+  stayAtSamePosition: true
+  acceptPresetOccurrence: false
+  presetPatternForOccurence: null
+  captureCursorWord: true
+
+  buildPatternForOccurence: ->
+    source = @vimState.getPresetOccurrencePatterns()
+      .map (pattern) -> pattern.source
+      .join('|')
+    new RegExp(source, 'g')
+
+  execute: ->
+    {operationStack} = @vimState
+
+    if @captureCursorWord
+      if @isMode('visual') and text = @editor.getSelectedText()
+        pattern = new RegExp(_.escapeRegExp(text), 'g')
+      pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
+
+      if marker = operationStack.getOccurenceMarkerAtPoint(@editor.getCursorBufferPosition())
+        operationStack.removeOccurenceMarker(marker)
+        return
+
+    if pattern?
+      @vimState.savePresetOccurrencePattern(pattern)
+
+    patternForOccurence = @buildPatternForOccurence()
+    console.log patternForOccurence
+
+    @vimState.resetPresetOccurrence({clearPattern: false})
+
+    @vimState.presetOccurrenceSubscription = @vimState.emitter.on 'did-push-operation', (operation) =>
+      if operation.isOperator() and operation.canAcceptPresetOccurrence()
+        operationStack.clearOccurrenceMarkersOnReset()
+        operation.patternForOccurence = patternForOccurence
+        operation.occurrence = true
+        @vimState.resetPresetOccurrence(clearMarkers: false)
+
+    @editorElement.classList.add("occurrence-preset")
+    operationStack.highlightOccurrence(patternForOccurence)
+
+    @activateMode('normal')
+
 # Delete
 # ================================
 class Delete extends Operator

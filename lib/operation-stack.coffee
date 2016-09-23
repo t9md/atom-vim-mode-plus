@@ -256,6 +256,16 @@ class OperationStack
   hasOccurrenceMarkers: ->
     @occurrenceMarkers?
 
+  getOccurenceMarkerAtPoint: (point) ->
+    exclusive = false
+    for marker in @occurrenceMarkers ? []
+      if marker.getBufferRange().containsPoint(point, exclusive)
+        return marker
+
+  removeOccurenceMarker: (marker) ->
+    marker.destroy()
+    _.remove(@occurrenceMarkers ? [], marker)
+
   clearOccurrenceMarkers: ->
     marker.destroy() for marker in @occurrenceMarkers ? []
     @occurrenceMarkers = null

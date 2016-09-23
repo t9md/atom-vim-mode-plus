@@ -382,37 +382,25 @@ class VimState
   hasPresetOccurrence: ->
     @presetOccurrenceSubscription?
 
+  presetOccurrencePatterns: null
+  getPresetOccurrencePatterns: ->
+    @presetOccurrencePatterns
+
+  savePresetOccurrencePattern: (pattern) ->
+    @presetOccurrencePatterns ?= []
+    @presetOccurrencePatterns.push(pattern)
+
+  removePresetOccurrencePattern: (removePattern) ->
+    newPatterns = @presetOccurrencePatterns.filter (pattern) ->
+      console.log [pattern.source, removePattern.source]
+      pattern.source isnt removePattern.source
+    @presetOccurrencePatterns = newPatterns
+
   resetPresetOccurrence: ({clearMarkers, clearPattern}={}) ->
     @presetOccurrenceSubscription?.dispose()
     @presetOccurrenceSubscription = null
     @editorElement.classList.remove("occurrence-preset")
     if clearPattern ? true
-      @presetPatternForOccurence = null
+      @presetOccurrencePatterns = null
     if clearMarkers ? true
       @operationStack.clearOccurrenceMarkers()
-
-  presetPatternForOccurence: null
-  presetOccurrence: (pattern=null) ->
-    if not pattern? and @isMode('visual') and text = @editor.getSelectedText()
-      pattern = new RegExp(_.escapeRegExp(text), 'g')
-      @activate('normal')
-    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
-
-    if @presetPatternForOccurence?
-      newSource = [@presetPatternForOccurence.source, pattern.source].join("|")
-      @presetPatternForOccurence = new RegExp(newSource, 'g')
-    else
-      @presetPatternForOccurence = pattern
-    console.log @presetPatternForOccurence.source
-
-    @resetPresetOccurrence({clearPattern: false})
-
-    @presetOccurrenceSubscription = @emitter.on 'did-push-operation', (operation) =>
-      if operation.isOperator() and operation.canAcceptPresetOccurrence()
-        @operationStack.clearOccurrenceMarkersOnReset()
-        operation.patternForOccurence = @presetPatternForOccurence
-        operation.occurrence = true
-        @resetPresetOccurrence(clearMarkers: false)
-
-    @editorElement.classList.add("occurrence-preset")
-    @operationStack.highlightOccurrence(@presetPatternForOccurence)
