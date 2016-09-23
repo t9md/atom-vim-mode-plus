@@ -31,8 +31,8 @@ class OperationStack
     @reset()
 
   # Return handler
-  subscribe: (handler) ->
-    @subscriptions.add(handler)
+  subscribe: (handler, subscribe=true) ->
+    @subscriptions.add(handler) if subscribe
     handler # DONT REMOVE
 
   composeOperation: (operation) ->

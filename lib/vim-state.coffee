@@ -124,32 +124,32 @@ class VimState
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
-  onDidChangeInput: (fn) -> @subscribe @input.onDidChange(fn)
-  onDidConfirmInput: (fn) -> @subscribe @input.onDidConfirm(fn)
-  onDidCancelInput: (fn) -> @subscribe @input.onDidCancel(fn)
-  onDidUnfocusInput: (fn) -> @subscribe @input.onDidUnfocus(fn)
-  onDidCommandInput: (fn) -> @subscribe @input.onDidCommand(fn)
+  onDidChangeInput: (fn, subscribe) -> @subscribe(@input.onDidChange(fn), subscribe)
+  onDidConfirmInput: (fn, subscribe) -> @subscribe(@input.onDidConfirm(fn), subscribe)
+  onDidCancelInput: (fn, subscribe) -> @subscribe(@input.onDidCancel(fn), subscribe)
+  onDidUnfocusInput: (fn, subscribe) -> @subscribe(@input.onDidUnfocus(fn), subscribe)
+  onDidCommandInput: (fn, subscribe) -> @subscribe(@input.onDidCommand(fn), subscribe)
 
-  onDidChangeSearch: (fn) -> @subscribe @searchInput.onDidChange(fn)
-  onDidConfirmSearch: (fn) -> @subscribe @searchInput.onDidConfirm(fn)
-  onDidCancelSearch: (fn) -> @subscribe @searchInput.onDidCancel(fn)
-  onDidUnfocusSearch: (fn) -> @subscribe @searchInput.onDidUnfocus(fn)
-  onDidCommandSearch: (fn) -> @subscribe @searchInput.onDidCommand(fn)
+  onDidChangeSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidChange(fn), subscribe)
+  onDidConfirmSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidConfirm(fn), subscribe)
+  onDidCancelSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidCancel(fn), subscribe)
+  onDidUnfocusSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidUnfocus(fn), subscribe)
+  onDidCommandSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidCommand(fn), subscribe)
 
   # Select and text mutation(Change)
-  onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
-  onWillSelectTarget: (fn) -> @subscribe @emitter.on('will-select-target', fn)
-  onDidSelectTarget: (fn) -> @subscribe @emitter.on('did-select-target', fn)
-  preemptWillSelectTarget: (fn) -> @subscribe @emitter.preempt('will-select-target', fn)
-  preemptDidSelectTarget: (fn) -> @subscribe @emitter.preempt('did-select-target', fn)
-  onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
+  onDidSetTarget: (fn, subscribe) -> @subscribe(@emitter.on('did-set-target', fn), subscribe)
+  onWillSelectTarget: (fn, subscribe) -> @subscribe(@emitter.on('will-select-target', fn), subscribe)
+  onDidSelectTarget: (fn, subscribe) -> @subscribe(@emitter.on('did-select-target', fn), subscribe)
+  preemptWillSelectTarget: (fn, subscribe) -> @subscribe(@emitter.preempt('will-select-target', fn), subscribe)
+  preemptDidSelectTarget: (fn, subscribe) -> @subscribe(@emitter.preempt('did-select-target', fn), subscribe)
+  onDidRestoreCursorPositions: (fn, subscribe) -> @subscribe(@emitter.on('did-restore-cursor-positions', fn), subscribe)
 
-  onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
-  onDidPushOperation: (fn) -> @subscribe @emitter.on('did-push-operation', fn)
+  onDidFinishOperation: (fn, subscribe) -> @subscribe(@emitter.on('did-finish-operation', fn), subscribe)
+  onDidPushOperation: (fn, subscribe) -> @subscribe(@emitter.on('did-push-operation', fn), subscribe)
 
   # Select list view
-  onDidConfirmSelectList: (fn) -> @subscribe @emitter.on('did-confirm-select-list', fn)
-  onDidCancelSelectList: (fn) -> @subscribe @emitter.on('did-cancel-select-list', fn)
+  onDidConfirmSelectList: (fn, subscribe) -> @subscribe(@emitter.on('did-confirm-select-list', fn), subscribe)
+  onDidCancelSelectList: (fn, subscribe) -> @subscribe(@emitter.on('did-cancel-select-list', fn), subscribe)
 
   # Events
   # -------------------------
