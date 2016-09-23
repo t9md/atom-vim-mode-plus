@@ -294,6 +294,17 @@ getFirstCharacterColumForBufferRow = (editor, row) ->
   else
     0
 
+getBufferRangeWithExcludeSurroundingWhiteSpaces = (editor, row) ->
+  scanRange = editor.bufferRangeForBufferRow(row)
+  pattern = /\S/
+  [start, end] = []
+  editor.scanInBufferRange pattern, scanRange, ({range}) -> start = range.start
+  if start
+    editor.backwardsScanInBufferRange pattern, scanRange, ({range}) -> end = range.end
+    new Range(start, end)
+  else
+    scanRange
+
 getFirstCharacterPositionForBufferRow = (editor, row) ->
   from = [row, 0]
   getEndPositionForPattern(editor, from, /\s*/, containedOnly: true) or from
@@ -776,6 +787,7 @@ module.exports = {
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
   getFirstCharacterColumForBufferRow
+  getBufferRangeWithExcludeSurroundingWhiteSpaces
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   cursorIsAtFirstCharacter

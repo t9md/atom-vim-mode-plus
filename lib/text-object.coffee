@@ -21,6 +21,7 @@ globalState = require './global-state'
   getStartPositionForPattern
   getEndPositionForPattern
   getVisibleBufferRange
+  getBufferRangeWithExcludeSurroundingWhiteSpaces
 } = require './utils'
 
 class TextObject extends Base
@@ -646,15 +647,11 @@ class Comment extends TextObject
 
   getRange: (selection) ->
     row = selection.getBufferRange().start.row
-    if rowRange = @getRowRangeForCommentAtBufferRow(row)
-      getBufferRangeForRowRange(selection.editor, rowRange)
+    rowRange = @editor.languageMode.rowRangeForCommentAtBufferRow(row)
+    rowRange ?= [row, row] if @editor.isBufferRowCommented(row)
 
-  getRowRangeForCommentAtBufferRow: (row) ->
-    switch
-      when rowRange = @editor.languageMode.rowRangeForCommentAtBufferRow(row)
-        rowRange
-      when @editor.isBufferRowCommented(row)
-        [row, row]
+    if rowRange
+      getBufferRangeForRowRange(selection.editor, rowRange)
 
 class AComment extends Comment
   @extend()
@@ -733,19 +730,7 @@ class CurrentLine extends TextObject
     if @isA()
       cursor.getCurrentLineBufferRange()
     else
-      scanRange = cursor.getCurrentLineBufferRange()
-      pattern = /\S/
-      [start, end] = []
-      @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
-        end = range.end
-        stop()
-
-      @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
-        start = range.start
-        stop()
-
-      if start and end
-        new Range(start, end)
+      getBufferRangeWithExcludeSurroundingWhiteSpaces(@editor, cursor.getBufferRow())
 
 class ACurrentLine extends CurrentLine
   @extend()
@@ -791,11 +776,11 @@ class SearchMatchForward extends TextObject
     unless pattern = globalState.lastSearchPattern
       return null
 
-    point = selection.getBufferRange().end
-    scanRange = [point.row, @getVimEofBufferPosition()]
+    scanStart = selection.getBufferRange().end
+    scanRange = [[scanStart.row, 0], @getVimEofBufferPosition()]
     found = null
     @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
-      if range.end.isGreaterThan(point)
+      if range.end.isGreaterThan(scanStart)
         found = range
         stop()
     found
@@ -818,11 +803,11 @@ class SearchMatchBackward extends SearchMatchForward
     unless pattern = globalState.lastSearchPattern
       return null
 
-    point = selection.getBufferRange().start
-    scanRange = [[point.row, Infinity], [0, 0]]
+    scanStart = selection.getBufferRange().start
+    scanRange = [[scanStart.row, Infinity], [0, 0]]
     found = null
     @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
-      if range.start.isLessThan(point)
+      if range.start.isLessThan(scanStart)
         found = range
         stop()
     found
