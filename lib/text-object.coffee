@@ -841,7 +841,7 @@ class UnionTextObject extends TextObject
   @extend(false)
   member: []
 
-  getUnionRange: (selection) ->
+  getRange: (selection) ->
     unionRange = null
     for member in @member when range = @new(member).getRange(selection)
       if unionRange?
