@@ -303,7 +303,6 @@ class AnyPairAllowForwarding extends AnyPair
   @extend(false)
   @description: "Range surrounded by auto-detected paired chars from enclosed and forwarding area"
   allowForwarding: true
-  allowNextLine: false
   skipEmptyPair: false
   searchFrom: 'start'
   getRange: (selection) ->
