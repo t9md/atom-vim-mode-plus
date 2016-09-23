@@ -836,8 +836,8 @@ class AVisibleArea extends VisibleArea
 class InnerVisibleArea extends VisibleArea
   @extend()
 
+# Meta text object
 # -------------------------
-# [TODO] This class expects member have "getRange = (selection) ->" method
 class UnionTextObject extends TextObject
   @extend(false)
   member: []
@@ -856,6 +856,7 @@ class AFunctionOrInnerParagraph extends UnionTextObject
   member: ['AFunction', 'InnerParagraph']
 
 # -------------------------
+# Not used currently
 class TextObjectFirstFound extends TextObject
   @extend(false)
   member: []
@@ -870,10 +871,3 @@ class TextObjectFirstFound extends TextObject
   getRange: (selection) ->
     for member in @member when range = @getRangeBy(member, selection)
       return range
-
-class InnerAnyPairOrInnerSmartWord extends TextObjectFirstFound
-  @extend()
-  member: [
-    "InnerAnyPair"
-    "InnerSmartWord"
-  ]
