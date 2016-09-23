@@ -21,6 +21,7 @@ globalState = require './global-state'
   getStartPositionForPattern
   getEndPositionForPattern
   getVisibleBufferRange
+  getCurrentWordBufferRangeAndKind
   getBufferRangeWithExcludeSurroundingWhiteSpaces
 } = require './utils'
 
@@ -72,34 +73,25 @@ class Word extends TextObject
   @extend(false)
   allowEmpty: true
 
-  getPattern: (selection) ->
-    point = swrap(selection).getNormalizedBufferPosition()
-    if pointIsSurroundedByWhitespace(@editor, point) and @allowEmpty
-      /[\t ]*/
-    else
-      @wordRegExp ? getWordRegExpForPointWithCursor(selection.cursor, point)
+  select: ->
+    @vimState.modeManager.normalizeSelections()
+    super
 
   getRange: (selection) ->
-    pattern = @getPattern(selection)
-    return unless pattern
+    {range, kind} = getCurrentWordBufferRangeAndKind(selection.cursor, {@wordRegex})
+    if @isA() and kind is 'word'
+      range = @expandRangeToWhiteSpaces(range)
+    range
 
-    from = swrap(selection).getNormalizedBufferPosition()
-    options = containedOnly: true
-    start = getStartPositionForPattern(@editor, from, pattern, options)
-    end = getEndPositionForPattern(@editor, from, pattern, options)
+  expandRangeToWhiteSpaces: (range) ->
+    if newEnd = getEndPositionForPattern(@editor, range.end, /\s+/, containedOnly: true)
+      return new Range(range.start, newEnd)
 
-    start ?= from
-    end ?= from
-    if @isA()
-      if endOfSpace = getEndPositionForPattern(@editor, end, /\s+/, options)
-        end = endOfSpace
-      else if startOfSpace = getStartPositionForPattern(@editor, start, /\s+/, options)
-        start = startOfSpace
+    if newStart = getStartPositionForPattern(@editor, range.start, /\s+/, containedOnly: true)
+      # To comform with pure vim, expand as long as it's not indent(white spaces starting with column 0).
+      return new Range(newStart, range.end) unless newStart.column is 0
 
-    unless start.isEqual(end)
-      new Range(start, end)
-    else
-      null
+    range # return original range as fallback
 
 class AWord extends Word
   @extend()
@@ -110,7 +102,7 @@ class InnerWord extends Word
 # -------------------------
 class WholeWord extends Word
   @extend(false)
-  wordRegExp: /\S+/
+  wordRegex: /\S+/
 
 class AWholeWord extends WholeWord
   @extend()
@@ -122,7 +114,7 @@ class InnerWholeWord extends WholeWord
 # Just include _, -
 class SmartWord extends Word
   @extend(false)
-  wordRegExp: /[\w-]+/
+  wordRegex: /[\w-]+/
 
 class ASmartWord extends SmartWord
   @description: "A word that consists of alphanumeric chars(`/[A-Za-z0-9_]/`) and hyphen `-`"

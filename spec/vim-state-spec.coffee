@@ -247,7 +247,9 @@ describe "VimState", ->
   describe "visual-mode", ->
     beforeEach ->
       set
-        text: "one two three"
+        text: """
+        one two three
+        """
         cursorBuffer: [0, 4]
       keystroke 'v'
 
@@ -293,31 +295,13 @@ describe "VimState", ->
 
     describe "the o keybinding", ->
       it "reversed each selection", ->
-        set addCursor: [0, Infinity]
+        set addCursor: [0, 12]
         ensure 'i w',
-          selectedBufferRange: [
-            [[0, 4], [0, 7]],
-            [[0, 8], [0, 13]]
-          ]
-          cursorBuffer: [
-            [0, 7]
-            [0, 13]
-          ]
-
+          selectedText: ["two", "three"]
+          selectionIsReversed: false
         ensure 'o',
-          selectedBufferRange: [
-            [[0, 4], [0, 7]],
-            [[0, 8], [0, 13]]
-          ]
-          cursorBuffer: [
-            [0, 4]
-            [0, 8]
-          ]
+          selectionIsReversed: true
 
-      # [FIXME]
-      # Current spec is based on actual behavior.
-      # I disabled temporarily because simply passing this test is non-sence.
-      # I need re-think, how spec would be.
       xit "harmonizes selection directions", ->
         set cursorBuffer: [0, 0]
         keystroke 'e e'

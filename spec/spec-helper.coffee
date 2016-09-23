@@ -300,8 +300,9 @@ class VimEditor
     @ensureSelectedBufferRange(range, true)
 
   ensureSelectionIsReversed: (reversed) ->
-    actual = @editor.getLastSelection().isReversed()
-    expect(actual).toBe(reversed)
+    for selection in @editor.getSelections()
+      actual = selection.isReversed()
+      expect(actual).toBe(reversed)
 
   ensureRangeMarkerBufferRange: (range) ->
     actual = @vimState.getRangeMarkerBufferRanges()
