@@ -181,9 +181,10 @@ class Operator extends Base
     @patternForOccurence ?= @getPatternForOccurrence()
 
     fn()
-    options = {includeIntersects: true, exclusiveIntersects: wasVisual}
+
     scanRanges ?= @editor.getSelectedBufferRanges()
-    ranges = scanInRanges(@editor, @patternForOccurence, scanRanges)
+    options = {includeIntersects: true, exclusiveIntersects: wasVisual}
+    ranges = scanInRanges(@editor, @patternForOccurence, scanRanges, options)
 
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
