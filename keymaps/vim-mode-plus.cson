@@ -98,6 +98,8 @@
   'C': 'vim-mode-plus:change-to-last-character-of-line'
   'S': 'vim-mode-plus:substitute-line'
   'r': 'vim-mode-plus:replace'
+  'g o': 'vim-mode-plus:preset-occurrence'
+
   # '_': 'vim-mode-plus:replace-with-register'
   'I': 'vim-mode-plus:insert-at-beginning-of-line'
   '>': 'vim-mode-plus:indent'
@@ -352,9 +354,9 @@
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
 
-# normal.occurrence-pending [Experimental] bulk-edit mode-like
+# normal.occurrence-preset [Experimental] bulk-edit mode-like
 # -------------------------
-# 'atom-text-editor.vim-mode-plus.normal-mode.occurrence-pending':
+# 'atom-text-editor.vim-mode-plus.normal-mode.occurrence-preset':
   # 'I': 'vim-mode-plus:insert-at-start-of-occurrence'
   # 'A': 'vim-mode-plus:insert-at-end-of-occurrence'
   # 'C': 'vim-mode-plus:change-occurrence'

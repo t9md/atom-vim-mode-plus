@@ -1029,7 +1029,7 @@ class Search extends SearchBase
           # since cancellation includes vimState.reset()
           pattern = @matches.pattern
           @vimState.searchInput.cancel()
-          @vimState.setOccurrenceForNextOperation(pattern)
+          @vimState.presetOccurrence(pattern)
 
   visitCursors: ->
     visitCursor = (cursor) =>

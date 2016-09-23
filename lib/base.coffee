@@ -38,7 +38,6 @@ vimStateMethods = [
   "isMode"
   "getBlockwiseSelections"
   "updateSelectionProperties"
-  "hasRegisterName"
 ]
 
 class Base

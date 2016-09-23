@@ -31,8 +31,8 @@ class OperationStack
     @reset()
 
   # Return handler
-  subscribe: (handler, subscribe=true) ->
-    @subscriptions.add(handler) if subscribe
+  subscribe: (handler) ->
+    @subscriptions.add(handler)
     handler # DONT REMOVE
 
   composeOperation: (operation) ->
@@ -97,7 +97,9 @@ class OperationStack
 
   updateOccurrenceView: ->
     @addToClassList('with-occurrence')
-    @highlightOccurrenceIfNecessary()
+    unless @hasOccurrenceMarkers()
+      @highlightOccurrence()
+      @clearOccurrenceMarkersOnReset()
 
   process: ->
     @processing = true
@@ -166,10 +168,6 @@ class OperationStack
     console.log "#{subject}:", length
 
   finish: (operation=null) ->
-    # if operation?
-    #   debug 'finish-operation:', operation.toString(0), @hasSelectionProperty()
-    # else
-    #   debug 'finish-operation: operation=null'
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
 
@@ -222,6 +220,8 @@ class OperationStack
     for name, value of modifiers when name in ['occurrence', 'wise']
       operator[name] = value
       if name is "occurrence" and value
+        operator.patternForOccurence = null
+        @clearOccurrenceMarkers()
         @updateOccurrenceView()
 
   # Count
@@ -256,17 +256,21 @@ class OperationStack
   hasOccurrenceMarkers: ->
     @occurrenceMarkers?
 
-  highlightOccurrenceIfNecessary: (pattern=null) ->
-    return if @hasOccurrenceMarkers()
+  clearOccurrenceMarkers: ->
+    marker.destroy() for marker in @occurrenceMarkers ? []
+    @occurrenceMarkers = null
+
+  clearOccurrenceMarkersOnReset: ->
+    @subscribe new Disposable =>
+      @clearOccurrenceMarkers()
+
+  highlightOccurrence: (pattern=null) ->
     pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
     scanRanges = [getVisibleBufferRange(@editor)]
-    ranges = scanInRanges(@editor, pattern, scanRanges)
-
-    if ranges.length
-      @occurrenceMarkers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')
-
-    @subscribe new Disposable =>
-      marker.destroy() for marker in @occurrenceMarkers
-      @occurrenceMarkers = null
+    @occurrenceMarkers = highlightRanges(
+      @editor,
+      scanInRanges(@editor, pattern, scanRanges),
+      class: 'vim-mode-plus-occurrence-match'
+    )
 
 module.exports = OperationStack

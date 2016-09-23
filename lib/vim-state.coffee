@@ -124,28 +124,27 @@ class VimState
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
-  onDidChangeInput: (fn, subscribe) -> @subscribe(@input.onDidChange(fn), subscribe)
-  onDidConfirmInput: (fn, subscribe) -> @subscribe(@input.onDidConfirm(fn), subscribe)
-  onDidCancelInput: (fn, subscribe) -> @subscribe(@input.onDidCancel(fn), subscribe)
-  onDidUnfocusInput: (fn, subscribe) -> @subscribe(@input.onDidUnfocus(fn), subscribe)
-  onDidCommandInput: (fn, subscribe) -> @subscribe(@input.onDidCommand(fn), subscribe)
+  onDidChangeInput: (fn) -> @subscribe @input.onDidChange(fn)
+  onDidConfirmInput: (fn) -> @subscribe @input.onDidConfirm(fn)
+  onDidCancelInput: (fn) -> @subscribe @input.onDidCancel(fn)
+  onDidUnfocusInput: (fn) -> @subscribe @input.onDidUnfocus(fn)
+  onDidCommandInput: (fn) -> @subscribe @input.onDidCommand(fn)
 
-  onDidChangeSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidChange(fn), subscribe)
-  onDidConfirmSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidConfirm(fn), subscribe)
-  onDidCancelSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidCancel(fn), subscribe)
-  onDidUnfocusSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidUnfocus(fn), subscribe)
-  onDidCommandSearch: (fn, subscribe) -> @subscribe(@searchInput.onDidCommand(fn), subscribe)
+  onDidChangeSearch: (fn) -> @subscribe @searchInput.onDidChange(fn)
+  onDidConfirmSearch: (fn) -> @subscribe @searchInput.onDidConfirm(fn)
+  onDidCancelSearch: (fn) -> @subscribe @searchInput.onDidCancel(fn)
+  onDidUnfocusSearch: (fn) -> @subscribe @searchInput.onDidUnfocus(fn)
+  onDidCommandSearch: (fn) -> @subscribe @searchInput.onDidCommand(fn)
 
   # Select and text mutation(Change)
-  onDidSetTarget: (fn, subscribe) -> @subscribe(@emitter.on('did-set-target', fn), subscribe)
-  onWillSelectTarget: (fn, subscribe) -> @subscribe(@emitter.on('will-select-target', fn), subscribe)
-  onDidSelectTarget: (fn, subscribe) -> @subscribe(@emitter.on('did-select-target', fn), subscribe)
-  preemptWillSelectTarget: (fn, subscribe) -> @subscribe(@emitter.preempt('will-select-target', fn), subscribe)
-  preemptDidSelectTarget: (fn, subscribe) -> @subscribe(@emitter.preempt('did-select-target', fn), subscribe)
-  onDidRestoreCursorPositions: (fn, subscribe) -> @subscribe(@emitter.on('did-restore-cursor-positions', fn), subscribe)
+  onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
+  onWillSelectTarget: (fn) -> @subscribe @emitter.on('will-select-target', fn)
+  onDidSelectTarget: (fn) -> @subscribe @emitter.on('did-select-target', fn)
+  preemptWillSelectTarget: (fn) -> @subscribe @emitter.preempt('will-select-target', fn)
+  preemptDidSelectTarget: (fn) -> @subscribe @emitter.preempt('did-select-target', fn)
+  onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
 
-  onDidFinishOperation: (fn, subscribe) -> @subscribe(@emitter.on('did-finish-operation', fn), subscribe)
-  onDidPushOperation: (fn, subscribe) -> @subscribe(@emitter.on('did-push-operation', fn), subscribe)
+  onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
 
   # Select list view
   onDidConfirmSelectList: (fn, subscribe) -> @subscribe(@emitter.on('did-confirm-select-list', fn), subscribe)
@@ -371,23 +370,24 @@ class VimState
 
   # Occurrence request for next operation
   # -------------------------
-  hasRegisterName: ->
-    @register.hasName()
-
-  setOccurrenceForNextOperation: (patternForOccurence=null) ->
-    scope = "occurrence-pending"
-    if not patternForOccurence? and @isMode('visual') and text = @editor.getSelectedText()
-      patternForOccurence = new RegExp(_.escapeRegExp(text), 'g')
+  presetOccurrence: (pattern=null) ->
+    if not pattern? and @isMode('visual') and text = @editor.getSelectedText()
+      pattern = new RegExp(_.escapeRegExp(text), 'g')
       @activate('normal')
 
-    disposable = @onDidPushOperation (operation) =>
-      disposable.dispose()
-      if operation.isOperator()
-        operation.patternForOccurence = patternForOccurence if patternForOccurence?
-        @operationStack.setOperatorModifier(occurrence: true)
+    @editorElement.classList.add("occurrence-preset")
 
-    @subscribe new Disposable =>
-      @toggleClassList(scope, false)
+    disposable = null
+    presetOccurrenceIfPossible = (operation) =>
+      if operation.isOperator() and operation.canAcceptPresetOccurrence()
+        disposable.dispose()
+        @editorElement.classList.remove("occurrence-preset")
+        operation.patternForOccurence = pattern
+        operation.occurrence = true
+        @operationStack.clearOccurrenceMarkersOnReset()
 
-    @toggleClassList(scope, true)
-    @operationStack.highlightOccurrenceIfNecessary(patternForOccurence)
+    disposable = @emitter.on('did-push-operation', presetOccurrenceIfPossible)
+
+    # refresh
+    @operationStack.clearOccurrenceMarkers()
+    @operationStack.highlightOccurrence(pattern)

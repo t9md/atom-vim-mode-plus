@@ -46,6 +46,7 @@ class Operator extends Base
   restorePositionsToMutationEnd: false
   flashTarget: true
   trackChange: false
+  acceptPresetOccurrence: true
 
   # [FIXME]
   # For TextObject, isLinewise result is changed before / after select.
@@ -68,6 +69,9 @@ class Operator extends Base
 
   isOccurrence: ->
     @occurrence
+
+  canAcceptPresetOccurrence: ->
+    @acceptPresetOccurrence
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
@@ -128,7 +132,7 @@ class Operator extends Base
         @target.linewise = true
 
   getPatternForOccurrence: ->
-    if @hasRegisterName()
+    if @vimState.register.hasName()
       _.escapeRegExp(@getRegisterValueAsText())
     else
       getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
@@ -239,6 +243,7 @@ class Select extends Operator
   @extend(false)
   flashTarget: false
   recordable: false
+  acceptPresetOccurrence: false
 
   canChangeMode: ->
     if @isMode('visual')
@@ -296,6 +301,7 @@ class CreateRangeMarker extends Operator
   @extend()
   flashTarget: false
   stayAtSamePosition: true
+  acceptPresetOccurrence: false
 
   mutateSelection: (selection) ->
     @vimState.addRangeMarkersForRanges(selection.getBufferRange())
