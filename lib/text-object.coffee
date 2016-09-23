@@ -71,7 +71,6 @@ class TextObject extends Base
 # -------------------------
 class Word extends TextObject
   @extend(false)
-  allowEmpty: true
 
   select: ->
     @vimState.modeManager.normalizeSelections()
@@ -122,17 +121,6 @@ class ASmartWord extends SmartWord
 
 class InnerSmartWord extends SmartWord
   @description: "Currently No diff from `a-smart-word`"
-  @extend()
-
-# -------------------------
-class NonEmptySmartWord extends SmartWord
-  @extend(false)
-  allowEmpty: false
-
-class ANonEmptySmartWord extends NonEmptySmartWord
-  @extend()
-
-class InnerNonEmptySmartWord extends NonEmptySmartWord
   @extend()
 
 # -------------------------
@@ -285,6 +273,7 @@ class Pair extends TextObject
 class AnyPair extends Pair
   @extend(false)
   allowForwarding: false
+  allowNextLine: null
   skipEmptyPair: false
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
@@ -292,7 +281,9 @@ class AnyPair extends Pair
   ]
 
   getRangeBy: (klass, selection) ->
-    @new(klass, {@inner, @skipEmptyPair}).getRange(selection, {@allowForwarding, @searchFrom})
+    options = {@inner, @skipEmptyPair}
+    options.allowNextLine = @allowNextLine if @allowNextLine?
+    @new(klass, options).getRange(selection, {@allowForwarding, @searchFrom})
 
   getRanges: (selection) ->
     (range for klass in @member when (range = @getRangeBy(klass, selection)))
@@ -865,10 +856,10 @@ class AFunctionOrInnerParagraph extends UnionTextObject
   member: ['AFunction', 'InnerParagraph']
 
 # -------------------------
-class SomeTextObject extends TextObject
+class TextObjectFirstFound extends TextObject
   @extend(false)
   member: []
-  memberOptoins: {}
+  memberOptoins: {allowNextLine: false}
 
   getRangeBy: (klass, selection) ->
     @new(klass, @memberOptoins).getRange(selection)
@@ -877,12 +868,12 @@ class SomeTextObject extends TextObject
     (range for klass in @member when (range = @getRangeBy(klass, selection)))
 
   getRange: (selection) ->
-    ranges = @getRanges(selection)
-    _.last(sortRanges(ranges)) if ranges.length
+    for member in @member when range = @getRangeBy(member, selection)
+      return range
 
-class InnerNonEmptySmartWordOrInnerParenthesis extends SomeTextObject
+class InnerAnyPairOrInnerSmartWord extends TextObjectFirstFound
   @extend()
   member: [
-    "InnerNonEmptySmartWord"
-    "InnerParenthesis"
+    "InnerAnyPair"
+    "InnerSmartWord"
   ]
