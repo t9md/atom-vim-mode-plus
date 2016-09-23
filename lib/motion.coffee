@@ -1024,7 +1024,7 @@ class Search extends SearchBase
           @vimState.searchHistory.save(@input)
           @vimState.searchInput.cancel()
           @vimState.operationStack.run(command.operation, options)
-        when 'set-occurrence-for-next-operation'
+        when 'preset-occurrence'
           # Order is important: we have to call AFTER cancel() otherwise occur markers are immediately reset.
           # since cancellation includes vimState.reset()
           pattern = @matches.pattern

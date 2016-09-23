@@ -290,7 +290,7 @@
 '.platform-darwin atom-text-editor.vim-mode-plus-search':
   'ctrl-cmd-c': 'vim-mode-plus:change-occurrence-from-search'
   'cmd-d': 'vim-mode-plus:select-occurrence-from-search'
-  'cmd-o': 'vim-mode-plus:set-occurrence-for-next-operation-from-search'
+  'cmd-o': 'vim-mode-plus:preset-occurrence-from-search'
 
 # normal
 # -------------------------
