@@ -169,27 +169,23 @@ class Operator extends Base
     cursorPositionManager = new CursorPositionManager(@editor)
 
     # Capture Pattern For Occurrence
-    if @isMode('visual')
+    wasVisual = @isMode('visual')
+    if wasVisual
       scanRanges = @editor.getSelectedBufferRanges()
       # FIXME should not clear selection, clearing here means, when target is CurrentSelection,
       # To say simply clearing here breaks `.` repeat capability.
       # its get emptySelection that result in `.` repeat works on empty seleccion.
       @vimState.modeManager.deactivate()
 
-      unless @isMode('visual', 'blockwise') # extend scanRange to include cursorWord
-        # BUG dont extend if register value is specified
-        range = getCurrentWordBufferRangeAndKind(@editor.getLastCursor(), singleNonWordChar: true).range
-        newRange = scanRanges.pop().union(range)
-        scanRanges.push(newRange)
-
     cursorPositionManager.save('head')
     @patternForOccurence ?= @getPatternForOccurrence()
 
     fn()
+    options = {includeIntersects: true, exclusiveIntersects: wasVisual}
+    scanRanges ?= @editor.getSelectedBufferRanges(),
+    ranges = scanInRanges(@editor, @patternForOccurence, scanRanges)
 
-    # Select Occurrence
-    ranges = scanInRanges(@editor, @patternForOccurence, scanRanges ? @editor.getSelectedBufferRanges())
-    if (success = ranges.length > 0)
+    if ranges.length
       @editor.setSelectedBufferRanges(ranges)
       cursorPositionManager.destroy()
     else

@@ -654,11 +654,31 @@ getWordPatternAtCursor = (cursor, options={}) ->
     pattern = "\\b" + pattern + "\\b"
   new RegExp(pattern, 'g')
 
-scanInRanges = (editor, pattern, scanRanges) ->
+scanInRanges = (editor, pattern, scanRanges, {includeIntersects, exclusiveIntersects}={}) ->
+  if includeIntersects
+    originalScanRanges = scanRanges.slice()
+
+    # We need to scan each whole row to find intersects.
+    scanRanges = scanRanges.map ({start, end}) ->
+      endRow = end.row
+      # when linewise, end row is at column 0 of NEXT line
+      # So need adjust to actually selected row in same way as Seleciton::getBufferRowRange()
+      if end.column is 0
+        endRow = Math.max(start.row, end.row - 1)
+      new Range([start.row, 0], [endRow, Infinity])
+
+    isIntersects = ({range, scanRange}) ->
+      # exclusiveIntersects set true in visual-mode
+      scanRange.intersectsWith(range, exclusiveIntersects)
+
   ranges = []
-  for scanRange in scanRanges
+  for scanRange, i in scanRanges
     editor.scanInBufferRange pattern, scanRange, ({range}) ->
-      ranges.push(range)
+      if includeIntersects
+        if isIntersects({range, scanRange: originalScanRanges[i]})
+          ranges.push(range)
+      else
+        ranges.push(range)
   ranges
 
 isRangeContainsSomePoint = (range, points, {exclusive}={}) ->

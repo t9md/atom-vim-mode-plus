@@ -176,6 +176,18 @@ describe "Operator modifier", ->
           XXX: |||: OOO: OOO:
           """
 
+    describe "auto extend target range to include occurrence", ->
+      textOriginal = "This text have 3 instance of 'text' in the whole text.\n"
+      textFinal = textOriginal.replace(/text/g, '')
+
+      beforeEach ->
+        set text: textOriginal
+
+      it "[from start of 1st]", -> set cursor: [0, 5]; ensure 'd o $', text: textFinal
+      it "[from middle of 1st]", -> set cursor: [0, 7]; ensure 'd o $', text: textFinal
+      it "[from end of last]", -> set cursor: [0, 52]; ensure 'd o 0', text: textFinal
+      it "[from middle of last]", -> set cursor: [0, 51]; ensure 'd o 0', text: textFinal
+
     describe "select-occurrence", ->
       beforeEach ->
         set
@@ -354,7 +366,7 @@ describe "Operator modifier", ->
             ensure 'U',
               text: """
               ooo: xxx: OOO: 0000
-              1: ooO: 22: OOO:
+              1: OOO: 22: OOO:
               ooo: xxx: |||: xxx: 3333:
               444: |||: ooo: ooo:
               """
