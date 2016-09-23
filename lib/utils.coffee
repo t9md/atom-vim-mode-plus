@@ -619,14 +619,18 @@ isSingleLine = (text) ->
 # The modification is tailord like this
 #   - ON white-space: Includs only white-spaces.
 #   - ON non-word: Includs only non word char(=excludes normal word char).
-getCurrentWordBufferRangeAndKind = (cursor) ->
+getCurrentWordBufferRangeAndKind = (cursor, {singleNonWordChar}={}) ->
+  singleNonWordChar ?= false
   if cursorIsOnWhiteSpace(cursor)
     kind = 'white-space'
     source = "[\t ]+"
   else if cursorIsOnNonWordCharacter(cursor)
     kind = 'non-word'
-    nonWordCharacters = _.escapeRegExp(getNonWordCharactersForCursor(cursor))
-    source = "[#{nonWordCharacters}]+"
+    if singleNonWordChar
+      source = _.escapeRegExp(getCharacterAtCursor(cursor))
+    else
+      nonWordCharacters = _.escapeRegExp(getNonWordCharactersForCursor(cursor))
+      source = "[#{nonWordCharacters}]+"
   else
     kind = 'word'
     nonWordCharacters = _.escapeRegExp(getNonWordCharactersForCursor(cursor))
@@ -635,9 +639,9 @@ getCurrentWordBufferRangeAndKind = (cursor) ->
   range = cursor.getCurrentWordBufferRange({wordRegex})
   {range, kind}
 
-getWordPatternAtCursor = (cursor) ->
+getWordPatternAtCursor = (cursor, options={}) ->
   editor = cursor.editor
-  {range, kind} = getCurrentWordBufferRangeAndKind(cursor)
+  {range, kind} = getCurrentWordBufferRangeAndKind(cursor, options)
   cursorWord = editor.getTextInBufferRange(range)
   pattern = _.escapeRegExp(cursorWord)
   if kind is 'word'

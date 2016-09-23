@@ -131,7 +131,7 @@ class Operator extends Base
     if @hasRegisterName()
       _.escapeRegExp(@getRegisterValueAsText())
     else
-      getWordPatternAtCursor(@editor.getLastCursor())
+      getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
 
   setTextToRegisterForSelection: (selection) ->
     @setTextToRegister(selection.getText(), selection)
@@ -174,7 +174,7 @@ class Operator extends Base
 
       unless @isMode('visual', 'blockwise') # extend scanRange to include cursorWord
         # BUG dont extend if register value is specified
-        range = getCurrentWordBufferRangeAndKind(@editor.getLastCursor()).range
+        range = getCurrentWordBufferRangeAndKind(@editor.getLastCursor(), singleNonWordChar: true).range
         newRange = scanRanges.pop().union(range)
         scanRanges.push(newRange)
 

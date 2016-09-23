@@ -258,7 +258,7 @@ class OperationStack
 
   highlightOccurrenceIfNecessary: (pattern=null) ->
     return if @hasOccurrenceMarkers()
-    pattern ?= getWordPatternAtCursor(@editor.getLastCursor())
+    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
     scanRanges = [getVisibleBufferRange(@editor)]
     ranges = scanInRanges(@editor, pattern, scanRanges)
 
