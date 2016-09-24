@@ -18,14 +18,17 @@ class OccurrenceManager
     @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, options)
 
     @onDidResetPatterns(@clearMarkers.bind(this))
+    @markerLayer.onDidUpdate(@updateView.bind(this))
 
   onDidResetPatterns: (fn) ->
     @emitter.on('did-reset-patterns', fn)
 
   # Main
-  reset: () ->
-    @editorElement.classList.remove("occurrence-preset")
+  reset: ->
     @resetPatterns()
+
+  updateView: ->
+    @editorElement.classList.toggle("occurrence-preset", @hasMarkers())
 
   destroy: ->
     @decorationLayer.destroy()
@@ -47,9 +50,6 @@ class OccurrenceManager
   addMarker: (pattern=null) ->
     pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
     @patterns.push(pattern)
-
-    unless @editorElement.classList.contains("occurrence-preset")
-      @editorElement.classList.add("occurrence-preset")
     @addMarkersForPattern(pattern)
 
   addMarkersForPattern: (pattern) ->

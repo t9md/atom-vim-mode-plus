@@ -73,7 +73,6 @@ class OperationStack
 
       if operation.isOperator() and operation.canAcceptPresetOccurrence()
         if @occurrence.hasPatterns()
-          @editorElement.classList.remove("occurrence-preset")
           operation.occurrence = true
 
       @process()

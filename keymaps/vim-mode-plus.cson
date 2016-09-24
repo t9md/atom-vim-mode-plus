@@ -354,23 +354,6 @@
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
 
-# normal.occurrence-preset [Experimental] bulk-edit mode-like
-# -------------------------
-# 'atom-text-editor.vim-mode-plus.normal-mode.occurrence-preset':
-  # 'I': 'vim-mode-plus:insert-at-start-of-occurrence'
-  # 'A': 'vim-mode-plus:insert-at-end-of-occurrence'
-  # 'C': 'vim-mode-plus:change-occurrence'
-  # 'D': 'vim-mode-plus:delete-occurrence'
-
-  # 'I': 'vim-mode-plus:insert-at-start-of-occurrence-in-a-function-or-inner-paragraph'
-  # 'A': 'vim-mode-plus:insert-at-end-of-occurrence-in-a-function-or-inner-paragraph'
-  # 'C': 'vim-mode-plus:change-occurrence-in-a-function-or-inner-paragraph'
-  # 'D': 'vim-mode-plus:delete-occurrence-in-a-function-or-inner-paragraph'
-
-  # 'v': 'vim-mode-plus:select-occurrence-in-a-function-or-inner-paragraph'
-  # 'I': 'vim-mode-plus:insert-at-start-of-occurrence'
-  # 'A': 'vim-mode-plus:insert-at-end-of-occurrence'
-
 # operator-pending, visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
