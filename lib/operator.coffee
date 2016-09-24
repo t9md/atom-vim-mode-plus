@@ -165,7 +165,7 @@ class Operator extends Base
     # we have to return to normal-mode from operator-pending or visual
     @activateMode('normal')
 
-  selectOccurrence: (fn) ->
+  reselectOccurrence: (fn) ->
     scanRanges = null
     cursorPositionManager = new CursorPositionManager(@editor)
 
@@ -212,7 +212,7 @@ class Operator extends Base
     @emitWillSelectTarget()
 
     if @isOccurrence()
-      @selectOccurrence =>
+      @reselectOccurrence =>
         @target.select()
     else
       @target.select()
