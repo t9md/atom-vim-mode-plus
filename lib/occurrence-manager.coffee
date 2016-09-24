@@ -1,72 +1,84 @@
-{
-  scanInRanges
-  getWordPatternAtCursor
-  highlightRanges
-  getVisibleBufferRange
-} = require './utils'
+{Emitter, CompositeDisposable} = require 'atom'
+
+{getWordPatternAtCursor} = require './utils'
 
 module.exports =
 class OccurrenceManager
-  patterns: []
-  markers: []
+  patterns: null
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
+    @disposables = new CompositeDisposable
+    @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
+    @emitter = new Emitter
+    @patterns = []
+
+    @markerLayer = @editor.addMarkerLayer()
+    options = {type: 'highlight', class: 'vim-mode-plus-occurrence-match'}
+    @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, options)
+
+    @onDidResetPatterns(@clearMarkers.bind(this))
+
+  onDidResetPatterns: (fn) ->
+    @emitter.on('did-reset-patterns', fn)
 
   # Main
-  reset: ({clearMarkers, clearPatterns}={}) ->
+  reset: () ->
     @editorElement.classList.remove("occurrence-preset")
-    if clearPatterns ? true
-      @resetPatterns()
-    if clearMarkers ? true
-      @clearMarkers()
+    @resetPatterns()
 
-  highlight: (pattern=null) ->
-    @clearMarkers()
-    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
-    ranges = scanInRanges(@editor, pattern, [getVisibleBufferRange(@editor)])
-    @markers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')
+  destroy: ->
+    @decorationLayer.destroy()
+    @disposables.dispose()
+    @markerLayer.destroy()
 
   # Patterns
-  hasPatterns: -> @patterns.length > 0
-  getPatterns: -> @patterns
-  resetPatterns: -> @patterns = []
+  hasPatterns: ->
+    @patterns.length > 0
+
+  resetPatterns: ->
+    @patterns = []
+    @emitter.emit('did-reset-patterns')
 
   buildPattern: ->
-    source = @pattern.map((pattern) -> pattern.source).join('|')
+    source = @patterns.map((pattern) -> pattern.source).join('|')
     new RegExp(source, 'g')
 
-  savePattern: (pattern) ->
+  addMarker: (pattern=null) ->
+    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
     @patterns.push(pattern)
 
-    @editorElement.classList.add("occurrence-preset")
-    @highlight(@buildPattern())
+    unless @editorElement.classList.contains("occurrence-preset")
+      @editorElement.classList.add("occurrence-preset")
+    @addMarkersForPattern(pattern)
 
-  removePattern: (removePattern) ->
-    @patterns = @patterns.filter (pattern) -> pattern.source isnt removePattern.source
+  addMarkersForPattern: (pattern) ->
+    ranges = []
+    @editor.scan pattern, ({range}) -> ranges.push(range)
+    for range in ranges
+      @markerLayer.markBufferRange(range, invalidate: 'never')
 
   # Markers
   # -------------------------
   hasMarkers: ->
-    @markers.length > 0
+    @markerLayer.getMarkerCount() > 0
 
   # Return occurrence markers intersecting given ranges
   getMarkersIntersectsWithRanges: (ranges, exclusive=false) ->
-    # exclusive set true in visual-mode??? check utils, scanInRanges
-    @markers.filter (marker) ->
-      ranges.some (range) ->
+    # findmarkers()'s intersectsBufferRange param have no exclusive cotntroll
+    # So I need extra check to filter out unwanted marker.
+    # But basically I should prefer findMarker since It's fast than iterating
+    # whole markers manually.
+    results = []
+    for range in ranges
+      markers = @markerLayer.findMarkers(intersectsBufferRange: range).filter (marker) ->
         range.intersectsWith(marker.getBufferRange(), exclusive)
+      results.push(markers...)
+    results
 
   getMarkerAtPoint: (point) ->
-    exclusive = false
-    for marker in @markers
-      if marker.getBufferRange().containsPoint(point, exclusive)
-        return marker
-
-  removeMarker: (marker) ->
-    marker.destroy()
-    _.remove(@markers, marker)
+    @markerLayer.findMarkers(containsBufferPosition: point)[0]
 
   clearMarkers: ->
-    marker.destroy() for marker in @markers
-    @markers = []
+    for marker in @markerLayer.getMarkers()
+      marker.destroy()

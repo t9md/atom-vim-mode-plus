@@ -164,7 +164,6 @@ class Operator extends Base
     cursorPositionManager = new CursorPositionManager(@editor)
     {occurrence} = @vimState
 
-    # Capture Pattern For Occurrence
     wasVisual = @isMode('visual')
     if wasVisual
       scanRanges = @editor.getSelectedBufferRanges()
@@ -174,19 +173,19 @@ class Operator extends Base
       @vimState.modeManager.deactivate()
 
     cursorPositionManager.save('head')
-    @patternForOccurence ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
+    unless occurrence.hasMarkers()
+      occurrence.addMarker(@patternForOccurence)
+    @patternForOccurence ?= occurrence.buildPattern() # save for repeat.
 
     fn()
-
-    unless occurrence.hasMarkers()
-      occurrence.highlight(@patternForOccurence)
 
     if occurrence.hasMarkers()
       scanRanges ?= @editor.getSelectedBufferRanges()
       scanRanges = scanRanges.map (range) -> shrinkRangeEndToBeforeNewLine(range)
       markers = occurrence.getMarkersIntersectsWithRanges(scanRanges, wasVisual)
       ranges = markers.map (marker) -> marker.getBufferRange()
-      occurrence.clearMarkers()
+      # We got ranges to select, so good-by occurrence by reset()
+      occurrence.reset()
 
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
@@ -345,14 +344,14 @@ class PresetOccurrence extends Operator
   acceptPresetOccurrence: false
 
   execute: ->
-    if marker = @vimState.getOccurenceMarkerAtPoint(@editor.getCursorBufferPosition())
-      @vimState.removeOccurenceMarker(marker)
+    if marker = @vimState.occurrence.getMarkerAtPoint(@editor.getCursorBufferPosition())
+      marker.destroy()
     else
       if @isMode('visual') and text = @editor.getSelectedText()
         pattern = new RegExp(_.escapeRegExp(text), 'g')
       pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
 
-      @vimState.savePresetOccurrencePattern(pattern)
+      @vimState.occurrence.addMarker(pattern)
       @activateMode('normal')
 
 # Delete

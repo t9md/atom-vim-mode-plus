@@ -72,7 +72,9 @@ class OperationStack
       @stack.push(operation)
 
       if operation.isOperator() and operation.canAcceptPresetOccurrence()
-        @applyPresetOccurrence(operation) if @occurrence.hasPatterns()
+        if @occurrence.hasPatterns()
+          @editorElement.classList.remove("occurrence-preset")
+          operation.occurrence = true
 
       @process()
     catch error
@@ -113,7 +115,10 @@ class OperationStack
       else
         if @vimState.isMode('normal') and top.isOperator()
           @vimState.activate('operator-pending')
-          @updateOccurrenceView() if top.isOccurrence()
+          if top.isOccurrence()
+            @addToClassList('with-occurrence')
+            unless @occurrence.hasMarkers()
+              @occurrence.addMarker(top.patternForOccurence)
 
         # Temporary set while command is running
         if commandName = top.constructor.getCommandNameWithoutPrefix?()
@@ -210,7 +215,6 @@ class OperationStack
     @recorded
 
   # This is method is called only by user explicitly by `o` e.g. `c o i p`, `d v j`.
-  # When user manually type `o`, we reset pre-setted patternForOccurence even if it's exists.
   setOperatorModifier: (modifiers) ->
     # In operator-pending-mode, stack length is always 1 and its' operator.
     # So either of @peekTop() or @peekBottom() is OK
@@ -218,9 +222,9 @@ class OperationStack
     for name, value of modifiers when name in ['occurrence', 'wise']
       operator[name] = value
       if name is "occurrence" and value
-        operator.patternForOccurence = null # reset
-        @occurrence.clearMarkers()
-        @updateOccurrenceView()
+        @addToClassList('with-occurrence')
+        @occurrence.resetPatterns()
+        @occurrence.addMarker()
 
   # Count
   # -------------------------
@@ -249,17 +253,5 @@ class OperationStack
   resetCount: ->
     @count = {}
     @vimState.toggleClassList('with-count', false)
-
-  # Occurrence
-  # -------------------------
-  updateOccurrenceView: ->
-    @addToClassList('with-occurrence')
-    unless @occurrence.hasMarkers()
-      @occurrence.highlight(@peekTop().patternForOccurence)
-
-  applyPresetOccurrence: (operator) ->
-    operator.patternForOccurence = @occurrence.buildPattern()
-    operator.occurrence = true
-    @occurrence.reset(clearMarkers: false)
 
 module.exports = OperationStack

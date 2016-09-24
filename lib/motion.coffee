@@ -1024,8 +1024,8 @@ class Search extends SearchBase
           @vimState.searchHistory.save(@input)
           @vimState.searchInput.cancel()
           @vimState.operationStack.run(command.operation, options)
-        when 'save-preset-occurrence-pattern-from-search'
-          @vimState.savePresetOccurrencePattern(@matches.pattern)
+        when 'add-occurrence-marker'
+          @vimState.occurrence.addMarker(@matches.pattern)
           @vimState.searchInput.cancel()
 
   visitCursors: ->

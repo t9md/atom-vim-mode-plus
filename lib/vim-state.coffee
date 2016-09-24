@@ -178,7 +178,6 @@ class VimState
       @editorElement.component?.setInputEnabled(true)
       @editorElement.classList.remove(packageScope, 'normal-mode')
 
-    @occurrence.reset()
     @hover?.destroy?()
     @hoverSearchCounter?.destroy?()
     @operationStack?.destroy?()
