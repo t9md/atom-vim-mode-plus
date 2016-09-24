@@ -8,7 +8,7 @@ settings = require './settings'
 {OperationStackError, OperatorError, OperationAbortedError} = require './errors'
 swrap = require './selection-wrapper'
 
-{debug, getWordPatternAtCursor, scanInRanges, highlightRanges} = require './utils'
+{debug} = require './utils'
 
 
 # opration life in operationStack
@@ -97,9 +97,9 @@ class OperationStack
 
   updateOccurrenceView: ->
     @addToClassList('with-occurrence')
-    unless @hasOccurrenceMarkers()
-      @highlightOccurrence(@peekTop().patternForOccurence)
-      @clearOccurrenceMarkersOnReset()
+    unless @vimState.hasOccurrenceMarkers()
+      @vimState.highlightOccurrence(@peekTop().patternForOccurence)
+      @vimState.clearOccurrenceMarkersOnReset()
 
   process: ->
     @processing = true
@@ -178,7 +178,6 @@ class OperationStack
       @vimState.modeManager.updateNarrowedState()
     @vimState.updateCursorsVisibility()
     @vimState.reset()
-    debug '---------------'
     # @reportAliveMakerLength('fin')
 
   peekTop: ->
@@ -213,6 +212,8 @@ class OperationStack
   getRecorded: ->
     @recorded
 
+  # This is method is called only by user explicitly by `o` e.g. `c o i p`, `d v j`.
+  # When user manually type `o`, we reset pre-setted patternForOccurence even if it's exists.
   setOperatorModifier: (modifiers) ->
     # In operator-pending-mode, stack length is always 1 and its' operator.
     # So either of @peekTop() or @peekBottom() is OK
@@ -220,8 +221,8 @@ class OperationStack
     for name, value of modifiers when name in ['occurrence', 'wise']
       operator[name] = value
       if name is "occurrence" and value
-        operator.patternForOccurence = null
-        @clearOccurrenceMarkers()
+        operator.patternForOccurence = null # reset
+        @vimState.clearOccurrenceMarkers()
         @updateOccurrenceView()
 
   # Count
@@ -251,51 +252,5 @@ class OperationStack
   resetCount: ->
     @count = {}
     @vimState.toggleClassList('with-count', false)
-
-  occurrenceMarkers: null
-  hasOccurrenceMarkers: ->
-    @occurrenceMarkers?
-
-  getOccurrenceMarkers: ->
-    @occurrenceMarkers ? []
-
-  getOccurrenceMarkersIntersectsRanges: (ranges) ->
-    isIntersectsWithRanges = (markerRange, ranges) ->
-      ranges.some (range) ->
-        # exclusive set true in visual-mode??? check utils, scanInRanges
-        range.intersectsWith(markerRange, exclusive=false)
-
-    markers = []
-    for marker in @getOccurrenceMarkers()
-      if isIntersectsWithRanges(marker.getBufferRange(), ranges)
-        markers.push(marker)
-    markers
-
-  getOccurenceMarkerAtPoint: (point) ->
-    exclusive = false
-    for marker in @occurrenceMarkers ? []
-      if marker.getBufferRange().containsPoint(point, exclusive)
-        return marker
-
-  removeOccurenceMarker: (marker) ->
-    marker.destroy()
-    _.remove(@occurrenceMarkers ? [], marker)
-
-  clearOccurrenceMarkers: ->
-    marker.destroy() for marker in @occurrenceMarkers ? []
-    @occurrenceMarkers = null
-
-  clearOccurrenceMarkersOnReset: ->
-    @subscribe new Disposable =>
-      @clearOccurrenceMarkers()
-
-  highlightOccurrence: (pattern=null) ->
-    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
-    scanRanges = [getVisibleBufferRange(@editor)]
-    @occurrenceMarkers = highlightRanges(
-      @editor,
-      scanInRanges(@editor, pattern, scanRanges),
-      class: 'vim-mode-plus-occurrence-match'
-    )
 
 module.exports = OperationStack

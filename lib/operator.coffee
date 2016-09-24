@@ -184,11 +184,11 @@ class Operator extends Base
     fn()
 
     scanRanges ?= @editor.getSelectedBufferRanges()
-    {operationStack} = @vimState
-    if operationStack.hasOccurrenceMarkers()
+    if @vimState.hasOccurrenceMarkers()
+      console.log "HERE?"
       scanRanges = scanRanges.map (scanRange) ->
         adjustRangeToRowRange(scanRange, endOnly: true)
-      markers = operationStack.getOccurrenceMarkersIntersectsRanges(scanRanges)
+      markers = @vimState.getOccurrenceMarkersIntersectsWithRanges(scanRanges)
       ranges = markers.map (marker) -> marker.getBufferRange()
     else
       options = {includeIntersects: true, exclusiveIntersects: wasVisual}
@@ -359,15 +359,13 @@ class PresetOccurrence extends Operator
     new RegExp(source, 'g')
 
   execute: ->
-    {operationStack} = @vimState
-
     if @captureCursorWord
       if @isMode('visual') and text = @editor.getSelectedText()
         pattern = new RegExp(_.escapeRegExp(text), 'g')
       pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
 
-      if marker = operationStack.getOccurenceMarkerAtPoint(@editor.getCursorBufferPosition())
-        operationStack.removeOccurenceMarker(marker)
+      if marker = @vimState.getOccurenceMarkerAtPoint(@editor.getCursorBufferPosition())
+        @vimState.removeOccurenceMarker(marker)
         return
 
     if pattern?
@@ -380,13 +378,13 @@ class PresetOccurrence extends Operator
 
     @vimState.presetOccurrenceSubscription = @vimState.emitter.on 'did-push-operation', (operation) =>
       if operation.isOperator() and operation.canAcceptPresetOccurrence()
-        operationStack.clearOccurrenceMarkersOnReset()
+        @vimState.clearOccurrenceMarkersOnReset()
         operation.patternForOccurence = patternForOccurence
         operation.occurrence = true
         @vimState.resetPresetOccurrence(clearMarkers: false)
 
     @editorElement.classList.add("occurrence-preset")
-    operationStack.highlightOccurrence(patternForOccurence)
+    @vimState.highlightOccurrence(patternForOccurence)
 
     @activateMode('normal')
 

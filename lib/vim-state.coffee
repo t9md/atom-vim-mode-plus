@@ -13,6 +13,7 @@ globalState = require './global-state'
   matchScopes
   isRangeContainsSomePoint
   getWordPatternAtCursor
+  scanInRanges
 
   debug
 } = require './utils'
@@ -45,6 +46,7 @@ class VimState
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @rangeMarkers = []
+    @presetOccurrencePatterns = []
     @markerLayer = @editor.addMarkerLayer()
     @hover = new HoverElement().initialize(this)
     @hoverSearchCounter = new HoverElement().initialize(this)
@@ -200,6 +202,7 @@ class VimState
       @inputCharSubscriptions
       @highlightSearchSubscription
       @presetOccurrenceSubscription
+      @presetOccurrencePatterns
     } = {}
     @emitter.emit 'did-destroy'
 
@@ -380,14 +383,12 @@ class VimState
   # Occurrence request for next operation
   # -------------------------
   hasPresetOccurrence: ->
-    @presetOccurrenceSubscription?
+    @presetOccurrencePatterns.length > 0
 
-  presetOccurrencePatterns: null
   getPresetOccurrencePatterns: ->
     @presetOccurrencePatterns
 
   savePresetOccurrencePattern: (pattern) ->
-    @presetOccurrencePatterns ?= []
     @presetOccurrencePatterns.push(pattern)
 
   removePresetOccurrencePattern: (removePattern) ->
@@ -400,6 +401,48 @@ class VimState
     @presetOccurrenceSubscription = null
     @editorElement.classList.remove("occurrence-preset")
     if clearPattern ? true
-      @presetOccurrencePatterns = null
+      @presetOccurrencePatterns = []
     if clearMarkers ? true
-      @operationStack.clearOccurrenceMarkers()
+      @clearOccurrenceMarkers()
+
+  # Occurrence Marker management
+  # -------------------------
+  occurrenceMarkers: []
+  hasOccurrenceMarkers: ->
+    @occurrenceMarkers.length > 0
+
+  getOccurrenceMarkers: ->
+    @occurrenceMarkers
+
+  getOccurrenceMarkersIntersectsWithRanges: (ranges) ->
+    isIntersects = (markerRange, ranges) ->
+      ranges.some (range) ->
+        # exclusive set true in visual-mode??? check utils, scanInRanges
+        range.intersectsWith(markerRange, exclusive=false)
+
+    @occurrenceMarkers.filter (marker) ->
+      isIntersects(marker.getBufferRange(), ranges)
+
+  getOccurenceMarkerAtPoint: (point) ->
+    exclusive = false
+    for marker in @occurrenceMarkers
+      if marker.getBufferRange().containsPoint(point, exclusive)
+        return marker
+
+  removeOccurenceMarker: (marker) ->
+    marker.destroy()
+    _.remove(@occurrenceMarkers, marker)
+
+  clearOccurrenceMarkers: ->
+    marker.destroy() for marker in @occurrenceMarkers
+    @occurrenceMarkers = []
+
+  clearOccurrenceMarkersOnReset: ->
+    @subscribe new Disposable =>
+      @clearOccurrenceMarkers()
+
+  highlightOccurrence: (pattern=null) ->
+    console.log "called"
+    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
+    ranges = scanInRanges(@editor, pattern, [getVisibleBufferRange(@editor)])
+    @occurrenceMarkers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')
