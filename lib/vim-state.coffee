@@ -392,7 +392,6 @@ class VimState
 
   removePresetOccurrencePattern: (removePattern) ->
     newPatterns = @presetOccurrencePatterns.filter (pattern) ->
-      console.log [pattern.source, removePattern.source]
       pattern.source isnt removePattern.source
     @presetOccurrencePatterns = newPatterns
 

@@ -14,6 +14,7 @@ globalState = require './global-state'
   cursorIsAtEmptyRow
   scanInRanges
   getVisibleBufferRange
+  adjustRangeToRowRange
 
   selectedRange
   selectedText
@@ -185,6 +186,8 @@ class Operator extends Base
     scanRanges ?= @editor.getSelectedBufferRanges()
     {operationStack} = @vimState
     if operationStack.hasOccurrenceMarkers()
+      scanRanges = scanRanges.map (scanRange) ->
+        adjustRangeToRowRange(scanRange, endOnly: true)
       markers = operationStack.getOccurrenceMarkersIntersectsRanges(scanRanges)
       ranges = markers.map (marker) -> marker.getBufferRange()
     else
