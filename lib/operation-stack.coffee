@@ -256,12 +256,10 @@ class OperationStack
     @addToClassList('with-occurrence')
     unless @vimState.hasOccurrenceMarkers()
       @vimState.highlightOccurrence(@peekTop().patternForOccurence)
-      @vimState.clearOccurrenceMarkersOnReset()
 
   applyPresetOccurrence: (operator) ->
     operator.patternForOccurence = @vimState.buildPatternForOccurence()
     operator.occurrence = true
     @vimState.resetPresetOccurrence(clearMarkers: false)
-    @vimState.clearOccurrenceMarkersOnReset()
 
 module.exports = OperationStack

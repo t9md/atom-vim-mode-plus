@@ -665,6 +665,16 @@ adjustRangeToRowRange = ({start, end}, options={}) ->
   else
     new Range([start.row, 0], [endRow, Infinity])
 
+# When range is linewise range, range end have column 0 of NEXT row.
+# Which is very unintuitive and unwanted result.
+shrinkRangeEndToBeforeNewLine = (range) ->
+  {start, end} = range
+  if end.column is 0
+    endRow = Math.max(start.row, end.row - 1)
+    new Range(start, [endRow, Infinity])
+  else
+    range
+
 scanInRanges = (editor, pattern, scanRanges, {includeIntersects, exclusiveIntersects}={}) ->
   if includeIntersects
     originalScanRanges = scanRanges.slice()
@@ -847,6 +857,7 @@ module.exports = {
   getCurrentWordBufferRangeAndKind
   getWordPatternAtCursor
   adjustRangeToRowRange
+  shrinkRangeEndToBeforeNewLine
   scanInRanges
   isRangeContainsSomePoint
 

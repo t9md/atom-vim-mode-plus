@@ -10,6 +10,8 @@ describe "Range Marker", ->
       vimState = state
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = _vim
+    runs ->
+      jasmine.attachToDOM(editorElement)
 
   afterEach ->
     vimState.resetNormalMode()

@@ -429,9 +429,8 @@ class VimState
     @occurrenceMarkers.length > 0
 
   # Return occurrence markers intersecting given ranges
-  getOccurrenceMarkersIntersectsWithRanges: (ranges) ->
+  getOccurrenceMarkersIntersectsWithRanges: (ranges, exclusive=false) ->
     # exclusive set true in visual-mode??? check utils, scanInRanges
-    exclusive = false
     @occurrenceMarkers.filter (marker) ->
       ranges.some (range) ->
         range.intersectsWith(marker.getBufferRange(), exclusive)
@@ -449,7 +448,3 @@ class VimState
   clearOccurrenceMarkers: ->
     marker.destroy() for marker in @occurrenceMarkers
     @occurrenceMarkers = []
-
-  clearOccurrenceMarkersOnReset: ->
-    @subscribe new Disposable =>
-      @clearOccurrenceMarkers()
