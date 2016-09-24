@@ -183,8 +183,13 @@ class Operator extends Base
     fn()
 
     scanRanges ?= @editor.getSelectedBufferRanges()
-    options = {includeIntersects: true, exclusiveIntersects: wasVisual}
-    ranges = scanInRanges(@editor, @patternForOccurence, scanRanges, options)
+    {operationStack} = @vimState
+    if operationStack.hasOccurrenceMarkers()
+      markers = operationStack.getOccurrenceMarkersIntersectsRanges(scanRanges)
+      ranges = markers.map (marker) -> marker.getBufferRange()
+    else
+      options = {includeIntersects: true, exclusiveIntersects: wasVisual}
+      ranges = scanInRanges(@editor, @patternForOccurence, scanRanges, options)
 
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)

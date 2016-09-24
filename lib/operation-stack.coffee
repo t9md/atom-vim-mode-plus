@@ -256,6 +256,21 @@ class OperationStack
   hasOccurrenceMarkers: ->
     @occurrenceMarkers?
 
+  getOccurrenceMarkers: ->
+    @occurrenceMarkers ? []
+
+  getOccurrenceMarkersIntersectsRanges: (ranges) ->
+    isIntersectsWithRanges = (markerRange, ranges) ->
+      ranges.some (range) ->
+        # exclusive set true in visual-mode??? check utils, scanInRanges
+        range.intersectsWith(markerRange, exclusive=false)
+
+    markers = []
+    for marker in @getOccurrenceMarkers()
+      if isIntersectsWithRanges(marker.getBufferRange(), ranges)
+        markers.push(marker)
+    markers
+
   getOccurenceMarkerAtPoint: (point) ->
     exclusive = false
     for marker in @occurrenceMarkers ? []
