@@ -24,7 +24,7 @@ swrap = require './selection-wrapper'
 #    if not executable, enter "operator-pending-mode"
 class OperationStack
   constructor: (@vimState) ->
-    {@editor, @editorElement} = @vimState
+    {@editor, @editorElement, @occurrence} = @vimState
     CurrentSelection ?= Base.getClass('CurrentSelection')
     Select ?= Base.getClass('Select')
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
@@ -72,7 +72,7 @@ class OperationStack
       @stack.push(operation)
 
       if operation.isOperator() and operation.canAcceptPresetOccurrence()
-        @applyPresetOccurrence(operation) if @vimState.hasPresetOccurrence()
+        @applyPresetOccurrence(operation) if @occurrence.hasPatterns()
 
       @process()
     catch error
@@ -219,7 +219,7 @@ class OperationStack
       operator[name] = value
       if name is "occurrence" and value
         operator.patternForOccurence = null # reset
-        @vimState.clearOccurrenceMarkers()
+        @occurrence.clearMarkers()
         @updateOccurrenceView()
 
   # Count
@@ -254,12 +254,12 @@ class OperationStack
   # -------------------------
   updateOccurrenceView: ->
     @addToClassList('with-occurrence')
-    unless @vimState.hasOccurrenceMarkers()
-      @vimState.highlightOccurrence(@peekTop().patternForOccurence)
+    unless @occurrence.hasMarkers()
+      @occurrence.highlight(@peekTop().patternForOccurence)
 
   applyPresetOccurrence: (operator) ->
-    operator.patternForOccurence = @vimState.buildPatternForOccurence()
+    operator.patternForOccurence = @occurrence.buildPattern()
     operator.occurrence = true
-    @vimState.resetPresetOccurrence(clearMarkers: false)
+    @occurrence.reset(clearMarkers: false)
 
 module.exports = OperationStack

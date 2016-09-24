@@ -162,6 +162,7 @@ class Operator extends Base
   reselectOccurrence: (fn) ->
     scanRanges = null
     cursorPositionManager = new CursorPositionManager(@editor)
+    {occurrence} = @vimState
 
     # Capture Pattern For Occurrence
     wasVisual = @isMode('visual')
@@ -177,15 +178,15 @@ class Operator extends Base
 
     fn()
 
-    unless @vimState.hasOccurrenceMarkers()
-      @vimState.highlightOccurrence(@patternForOccurence)
+    unless occurrence.hasMarkers()
+      occurrence.highlight(@patternForOccurence)
 
-    if @vimState.hasOccurrenceMarkers()
+    if occurrence.hasMarkers()
       scanRanges ?= @editor.getSelectedBufferRanges()
       scanRanges = scanRanges.map (range) -> shrinkRangeEndToBeforeNewLine(range)
-      markers = @vimState.getOccurrenceMarkersIntersectsWithRanges(scanRanges, wasVisual)
+      markers = occurrence.getMarkersIntersectsWithRanges(scanRanges, wasVisual)
       ranges = markers.map (marker) -> marker.getBufferRange()
-      @vimState.clearOccurrenceMarkers()
+      occurrence.clearMarkers()
 
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
