@@ -192,7 +192,6 @@ class VimState
     @clearHighlightSearch()
     @clearRangeMarkers()
     @highlightSearchSubscription?.dispose()
-    @presetOccurrenceSubscription?.dispose()
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
@@ -201,7 +200,6 @@ class VimState
       @editor, @editorElement, @subscriptions,
       @inputCharSubscriptions
       @highlightSearchSubscription
-      @presetOccurrenceSubscription
       @presetOccurrencePatterns
     } = {}
     @emitter.emit 'did-destroy'
@@ -380,30 +378,49 @@ class VimState
     @rangeMarkers = []
     @toggleClassList('with-range-marker', @hasRangeMarkers())
 
-  # Occurrence request for next operation
+  # Preset Occurrence
+  # -------------------------
+
+  # core functionalities
   # -------------------------
   hasPresetOccurrence: ->
     @presetOccurrencePatterns.length > 0
 
+  resetPresetOccurrence: ({clearMarkers, clearPattern}={}) ->
+    @editorElement.classList.remove("occurrence-preset")
+    if clearPattern ? true
+      @clearPresetOccurrencePatterns()
+    if clearMarkers ? true
+      @clearOccurrenceMarkers()
+
+  highlightOccurrence: (pattern=null) ->
+    @clearOccurrenceMarkers()
+    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
+    ranges = scanInRanges(@editor, pattern, [getVisibleBufferRange(@editor)])
+    @occurrenceMarkers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')
+
+  # Patterns
+  clearPresetOccurrencePatterns: ->
+    @presetOccurrencePatterns = []
+
   getPresetOccurrencePatterns: ->
     @presetOccurrencePatterns
+
+  buildPatternForOccurence: ->
+    source = @presetOccurrencePatterns
+      .map (pattern) -> pattern.source
+      .join('|')
+    new RegExp(source, 'g')
 
   savePresetOccurrencePattern: (pattern) ->
     @presetOccurrencePatterns.push(pattern)
 
-  removePresetOccurrencePattern: (removePattern) ->
-    newPatterns = @presetOccurrencePatterns.filter (pattern) ->
-      pattern.source isnt removePattern.source
-    @presetOccurrencePatterns = newPatterns
+    @editorElement.classList.add("occurrence-preset")
+    @highlightOccurrence(@buildPatternForOccurence())
 
-  resetPresetOccurrence: ({clearMarkers, clearPattern}={}) ->
-    @presetOccurrenceSubscription?.dispose()
-    @presetOccurrenceSubscription = null
-    @editorElement.classList.remove("occurrence-preset")
-    if clearPattern ? true
-      @presetOccurrencePatterns = []
-    if clearMarkers ? true
-      @clearOccurrenceMarkers()
+  removePresetOccurrencePattern: (removePattern) ->
+    @presetOccurrencePatterns = @presetOccurrencePatterns.filter (pattern) ->
+      pattern.source isnt removePattern.source
 
   # Occurrence Marker management
   # -------------------------
@@ -411,17 +428,13 @@ class VimState
   hasOccurrenceMarkers: ->
     @occurrenceMarkers.length > 0
 
-  getOccurrenceMarkers: ->
-    @occurrenceMarkers
-
+  # Return occurrence markers intersecting given ranges
   getOccurrenceMarkersIntersectsWithRanges: (ranges) ->
-    isIntersects = (markerRange, ranges) ->
-      ranges.some (range) ->
-        # exclusive set true in visual-mode??? check utils, scanInRanges
-        range.intersectsWith(markerRange, exclusive=false)
-
+    # exclusive set true in visual-mode??? check utils, scanInRanges
+    exclusive = false
     @occurrenceMarkers.filter (marker) ->
-      isIntersects(marker.getBufferRange(), ranges)
+      ranges.some (range) ->
+        range.intersectsWith(marker.getBufferRange(), exclusive)
 
   getOccurenceMarkerAtPoint: (point) ->
     exclusive = false
@@ -440,9 +453,3 @@ class VimState
   clearOccurrenceMarkersOnReset: ->
     @subscribe new Disposable =>
       @clearOccurrenceMarkers()
-
-  highlightOccurrence: (pattern=null) ->
-    console.log "called"
-    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
-    ranges = scanInRanges(@editor, pattern, [getVisibleBufferRange(@editor)])
-    @occurrenceMarkers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-occurrence-match')

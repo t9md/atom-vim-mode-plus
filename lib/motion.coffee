@@ -1019,21 +1019,14 @@ class Search extends SearchBase
               when 'prev' then 'next'
           @visitMatch(direction)
         when 'run'
-          pattern = @matches.pattern
-          operation = command.operation
-
-          switch operation
-            when 'PresetOccurrence'
-              options = {captureCursorWord: false}
-              @vimState.savePresetOccurrencePattern(pattern)
-            else
-              options = {patternForOccurence: pattern} # preserve before cancel
-              options.target = 'ARangeMarker' if @vimState.hasRangeMarkers()
-              @vimState.searchHistory.save(@input)
-
+          options = {patternForOccurence: @matches.pattern} # preserve before cancel
+          options.target = 'ARangeMarker' if @vimState.hasRangeMarkers()
+          @vimState.searchHistory.save(@input)
           @vimState.searchInput.cancel()
-          @vimState.operationStack.run(operation, options)
-
+          @vimState.operationStack.run(command.operation, options)
+        when 'save-preset-occurrence-pattern-from-search'
+          @vimState.savePresetOccurrencePattern(@matches.pattern)
+          @vimState.searchInput.cancel()
 
   visitCursors: ->
     visitCursor = (cursor) =>

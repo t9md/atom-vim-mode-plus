@@ -70,7 +70,10 @@ class OperationStack
           throw new Error('Unsupported type of operation')
 
       @stack.push(operation)
-      @vimState.emitter.emit('did-push-operation', operation)
+
+      if operation.isOperator() and operation.canAcceptPresetOccurrence()
+        @applyPresetOccurrence(operation) if @vimState.hasPresetOccurrence()
+
       @process()
     catch error
       @handleError(error)
@@ -94,12 +97,6 @@ class OperationStack
 
   isProcessing: ->
     @processing
-
-  updateOccurrenceView: ->
-    @addToClassList('with-occurrence')
-    unless @vimState.hasOccurrenceMarkers()
-      @vimState.highlightOccurrence(@peekTop().patternForOccurence)
-      @vimState.clearOccurrenceMarkersOnReset()
 
   process: ->
     @processing = true
@@ -252,5 +249,19 @@ class OperationStack
   resetCount: ->
     @count = {}
     @vimState.toggleClassList('with-count', false)
+
+  # Occurrence
+  # -------------------------
+  updateOccurrenceView: ->
+    @addToClassList('with-occurrence')
+    unless @vimState.hasOccurrenceMarkers()
+      @vimState.highlightOccurrence(@peekTop().patternForOccurence)
+      @vimState.clearOccurrenceMarkersOnReset()
+
+  applyPresetOccurrence: (operator) ->
+    operator.patternForOccurence = @vimState.buildPatternForOccurence()
+    operator.occurrence = true
+    @vimState.resetPresetOccurrence(clearMarkers: false)
+    @vimState.clearOccurrenceMarkersOnReset()
 
 module.exports = OperationStack

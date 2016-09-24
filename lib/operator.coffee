@@ -185,7 +185,6 @@ class Operator extends Base
 
     scanRanges ?= @editor.getSelectedBufferRanges()
     if @vimState.hasOccurrenceMarkers()
-      console.log "HERE?"
       scanRanges = scanRanges.map (scanRange) ->
         adjustRangeToRowRange(scanRange, endOnly: true)
       markers = @vimState.getOccurrenceMarkersIntersectsWithRanges(scanRanges)
@@ -352,12 +351,6 @@ class PresetOccurrence extends Operator
   presetPatternForOccurence: null
   captureCursorWord: true
 
-  buildPatternForOccurence: ->
-    source = @vimState.getPresetOccurrencePatterns()
-      .map (pattern) -> pattern.source
-      .join('|')
-    new RegExp(source, 'g')
-
   execute: ->
     if @captureCursorWord
       if @isMode('visual') and text = @editor.getSelectedText()
@@ -368,23 +361,7 @@ class PresetOccurrence extends Operator
         @vimState.removeOccurenceMarker(marker)
         return
 
-    if pattern?
       @vimState.savePresetOccurrencePattern(pattern)
-
-    patternForOccurence = @buildPatternForOccurence()
-    console.log patternForOccurence
-
-    @vimState.resetPresetOccurrence({clearPattern: false})
-
-    @vimState.presetOccurrenceSubscription = @vimState.emitter.on 'did-push-operation', (operation) =>
-      if operation.isOperator() and operation.canAcceptPresetOccurrence()
-        @vimState.clearOccurrenceMarkersOnReset()
-        operation.patternForOccurence = patternForOccurence
-        operation.occurrence = true
-        @vimState.resetPresetOccurrence(clearMarkers: false)
-
-    @editorElement.classList.add("occurrence-preset")
-    @vimState.highlightOccurrence(patternForOccurence)
 
     @activateMode('normal')
 
