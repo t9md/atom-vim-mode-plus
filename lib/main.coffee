@@ -37,7 +37,7 @@ module.exports =
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini()
-      vimState = new VimState(this, editor, @statusBarManager)
+      vimState = new VimState(this, editor, @statusBarManager, globalState)
       @vimStatesByEditor.set(editor, vimState)
 
       editorSubscriptions = new CompositeDisposable
@@ -63,7 +63,7 @@ module.exports =
       workspaceClassList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
 
     @onDidSetLastSearchPattern =>
-      @highlightSearchPattern = globalState.lastSearchPattern
+      @highlightSearchPattern = globalState.get('lastSearchPattern')
       @refreshHighlightSearchForVisibleEditors()
 
     @subscribe settings.observe 'highlightSearch', (newValue) =>

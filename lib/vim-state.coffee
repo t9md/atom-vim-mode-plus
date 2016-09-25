@@ -3,7 +3,6 @@ _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
 settings = require './settings'
-globalState = require './global-state'
 {HoverElement} = require './hover'
 {InputElement, SearchInputElement} = require './input'
 {
@@ -38,7 +37,7 @@ class VimState
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
   @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', toProperty: 'operationStack')
 
-  constructor: (@main, @editor, @statusBarManager) ->
+  constructor: (@main, @editor, @statusBarManager, @globalState) ->
     @editorElement = @editor.element
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
@@ -331,7 +330,7 @@ class VimState
     else
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
 
-    globalState.previousSelection = {properties, @submode}
+    @globalState.set('previousSelection', {properties, @submode})
 
   eachRangeMarkers: (fn) ->
     for rangeMarker in @getRangeMarkers()

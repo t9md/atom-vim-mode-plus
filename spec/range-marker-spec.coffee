@@ -1,6 +1,5 @@
 {getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
-globalState = require '../lib/global-state'
 
 describe "Range Marker", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []

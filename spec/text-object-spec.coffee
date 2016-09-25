@@ -1,5 +1,4 @@
 {getVimState, dispatch, TextData} = require './spec-helper'
-globalState = require '../lib/global-state'
 
 describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -1387,7 +1386,7 @@ describe "TextObject", ->
     beforeEach ->
       set text: text, cursor: [0, 0]
       ensure ['/', search: 'abc'], cursor: [1, 2], mode: 'normal'
-      expect(globalState.lastSearchPattern).toEqual /abc/g
+      expect(globalState.get('lastSearchPattern')).toEqual /abc/g
 
     describe 'gn from normal mode', ->
       it 'select ranges matches to last search pattern and extend selection', ->

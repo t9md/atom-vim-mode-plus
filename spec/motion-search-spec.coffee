@@ -1,6 +1,5 @@
 {getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
-globalState = require '../lib/global-state'
 
 describe "Motion Search", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -31,7 +30,7 @@ describe "Motion Search", ->
 
       # clear search history
       vimState.searchHistory.clear()
-      globalState.currentSearch = null
+      vimState.globalState.set('currentSearch', null)
 
     describe "as a motion", ->
       it "moves the cursor to the specified search pattern", ->

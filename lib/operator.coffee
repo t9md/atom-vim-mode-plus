@@ -1,7 +1,6 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {Point, Range, Disposable} = require 'atom'
-globalState = require './global-state'
 
 {inspect} = require 'util'
 {

@@ -1,6 +1,5 @@
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
-globalState = require './global-state'
 Base = require './base'
 swrap = require './selection-wrapper'
 {moveCursorLeft} = require './utils'
@@ -175,7 +174,7 @@ class ModeManager
     if preservePreviousSelection and not @editor.getLastSelection().isEmpty()
       lastSelection = @editor.getLastSelection()
       properties = swrap(lastSelection).detectCharacterwiseProperties()
-      globalState.previousSelection = {properties, @submode}
+      @vimState.globalState.set('previousSelection', {properties, @submode})
 
     # We selectRight()ed in visual-mode, so reset this effect here.
     # `vc`, `vs` make selection empty.

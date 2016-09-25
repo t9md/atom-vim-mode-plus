@@ -2,7 +2,6 @@ _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
 Select = null
 
-globalState = require './global-state'
 {
   saveEditorState, getVisibleBufferRange
   moveCursorLeft, moveCursorRight
@@ -741,7 +740,7 @@ class Find extends Motion
     point = @getPoint(cursor.getBufferPosition())
     @setBufferPositionSafely(cursor, point)
     unless @isRepeated()
-      globalState.currentFind = this
+      @globalState.set('currentFind', this)
 
 # keymap: F
 class FindBackwards extends Find
@@ -774,7 +773,7 @@ class RepeatFind extends Find
   repeated: true
 
   initialize: ->
-    unless findObj = globalState.currentFind
+    unless findObj = @globalState.get('currentFind')
       @abort()
     {@offset, @backwards, @input} = findObj
     super
@@ -911,11 +910,11 @@ class SearchBase extends Motion
       @flashScreen() if @getVisualEffectFor('flashScreenOnSearchHasNoMatch')
 
     if @needToUpdateSearchHistory()
-      globalState.currentSearch = this
+      @globalState.set('currentSearch', this)
       @vimState.searchHistory.save(input)
 
     unless @isQuiet()
-      globalState.lastSearchPattern = @getPattern(input)
+      @globalState.set('lastSearchPattern', @getPattern(input))
       @vimState.main.emitDidSetLastSearchPattern()
     @finish()
 
@@ -1128,7 +1127,7 @@ class RepeatSearch extends SearchBase
 
   initialize: ->
     super
-    unless search = globalState.currentSearch
+    unless search = @globalState.get('currentSearch')
       @abort()
     {@input, @backwards, @getPattern, @getCaseSensitivity, @configScope, @quiet} = search
 

@@ -1,6 +1,5 @@
 {getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
-globalState = require '../lib/global-state'
 
 describe "Motion Scroll", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []

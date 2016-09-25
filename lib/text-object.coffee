@@ -8,7 +8,6 @@ _ = require 'underscore-plus'
 #  - [ ] Count support(priority low)?
 Base = require './base'
 swrap = require './selection-wrapper'
-globalState = require './global-state'
 {
   sortRanges, sortRangesByEndPosition, countChar, pointIsAtEndOfLine,
   getTextToPoint
@@ -755,7 +754,7 @@ class SearchMatchForward extends TextObject
   @extend()
 
   getRange: (selection) ->
-    unless pattern = globalState.lastSearchPattern
+    unless pattern = @globalState.get('lastSearchPattern')
       return null
 
     scanStart = selection.getBufferRange().end
@@ -782,7 +781,7 @@ class SearchMatchBackward extends SearchMatchForward
   backward: true
 
   getRange: (selection) ->
-    unless pattern = globalState.lastSearchPattern
+    unless pattern = @globalState.get('lastSearchPattern')
       return null
 
     scanStart = selection.getBufferRange().start
@@ -800,7 +799,7 @@ class SearchMatchBackward extends SearchMatchForward
 class PreviousSelection extends TextObject
   @extend()
   select: ->
-    {properties, @submode} = globalState.previousSelection
+    {properties, @submode} = @globalState.get('previousSelection')
     if properties? and @submode?
       selection = @editor.getLastSelection()
       swrap(selection).selectByProperties(properties)

@@ -1,4 +1,3 @@
-globalState = require './global-state'
 settings = require './settings'
 
 REGISTERS = /// (
@@ -20,8 +19,8 @@ REGISTERS = /// (
 
 class RegisterManager
   constructor: (@vimState) ->
-    {@editor, @editorElement} = @vimState
-    @data = globalState.register
+    {@editor, @editorElement, @globalState} = @vimState
+    @data = @globalState.get('register')
     @subscriptionBySelection = new Map
     @clipboardBySelection = new Map
 

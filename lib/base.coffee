@@ -45,7 +45,7 @@ class Base
   @delegatesMethods(vimStateMethods..., toProperty: 'vimState')
 
   constructor: (@vimState, properties) ->
-    {@editor, @editorElement} = @vimState
+    {@editor, @editorElement, @globalState} = @vimState
     _.extend(this, properties)
     if settings.get('showHoverOnOperate')
       hover = @hover?[settings.get('showHoverOnOperateIcon')]
