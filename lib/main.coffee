@@ -17,7 +17,6 @@ module.exports =
     @statusBarManager = new StatusBarManager
     @vimStatesByEditor = new Map
     @emitter = new Emitter
-    @highlightSearchPattern = null
 
     service = @provideVimModePlus()
     @subscribe(Base.init(service))
@@ -45,15 +44,15 @@ module.exports =
 
       @emitter.emit('did-add-vim-state', vimState)
 
+    workspaceClassList = atom.views.getView(atom.workspace).classList
+    @subscribe atom.workspace.onDidChangeActivePane ->
+      workspaceClassList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
+
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
       if atom.workspace.isTextEditor(item)
         # Still there is possibility editor is destroyed and don't have corresponding
         # vimState #196.
         @getEditorState(item)?.highlightSearch.refresh()
-
-    workspaceClassList = atom.views.getView(atom.workspace).classList
-    @subscribe atom.workspace.onDidChangeActivePane ->
-      workspaceClassList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
 
     @subscribe settings.observe 'highlightSearch', (newValue) ->
       if newValue
