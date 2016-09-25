@@ -55,11 +55,13 @@ module.exports =
     @subscribe atom.workspace.onDidChangeActivePane ->
       workspaceClassList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
 
-    @subscribe settings.observe 'highlightSearch', (newValue) =>
+    @subscribe settings.observe 'highlightSearch', (newValue) ->
       if newValue
-        @refreshHighlightSearchForVisibleEditors()
+        # Re-setting value trigger highlightSearch refresh
+        value = globalState.get('highlightSearchPattern')
+        globalState.set('highlightSearchPattern', value)
       else
-        @clearHighlightSearchForEditors()
+        globalState.set('highlightSearchPattern', null)
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
@@ -80,15 +82,6 @@ module.exports =
     @vimStatesByEditor.forEach(fn)
     @onDidAddVimState(fn)
 
-  refreshHighlightSearchForVisibleEditors: ->
-    for editor in getVisibleEditors()
-      @getEditorState(editor).highlightSearch.refresh()
-
-  clearHighlightSearchForEditors: ->
-    for editor in atom.workspace.getTextEditors()
-      @getEditorState(editor).highlightSearch.clearMarkers()
-    globalState.set('highlightSearchPattern', null)
-
   clearRangeMarkerForEditors: ->
     for editor in atom.workspace.getTextEditors()
       @getEditorState(editor).clearRangeMarkers()
@@ -108,7 +101,7 @@ module.exports =
     @subscribe atom.commands.add 'atom-text-editor:not([mini])',
       # One time clearing highlightSearch. equivalent to `nohlsearch` in pure Vim.
       # Clear all editor's highlight so that we won't see remaining highlight on tab changed.
-      'vim-mode-plus:clear-highlight-search': => @clearHighlightSearchForEditors()
+      'vim-mode-plus:clear-highlight-search': -> globalState.set('highlightSearchPattern', null)
       'vim-mode-plus:toggle-highlight-search': -> settings.toggle('highlightSearch')
       'vim-mode-plus:clear-range-marker': => @clearRangeMarkerForEditors()
 
