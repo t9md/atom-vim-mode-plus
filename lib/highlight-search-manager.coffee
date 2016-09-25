@@ -22,7 +22,10 @@ class HighlightSearchManager
     # -------------------------
     @disposables = @globalState.onDidChange ({name, newValue}) =>
       if name is 'highlightSearchPattern'
-        @refresh()
+        if newValue
+          @refresh()
+        else
+          @clearMarkers()
 
   destroy: ->
     @decorationLayer.destroy()

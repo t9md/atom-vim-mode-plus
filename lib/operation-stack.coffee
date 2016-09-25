@@ -22,14 +22,16 @@ swrap = require './selection-wrapper'
 class OperationStack
   constructor: (@vimState) ->
     {@editor, @editorElement, @occurrence} = @vimState
+
     CurrentSelection ?= Base.getClass('CurrentSelection')
     Select ?= Base.getClass('Select')
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
+
     @reset()
 
   # Return handler
   subscribe: (handler) ->
-    @subscriptions.add(handler)
+    @operationSubscriptions.add(handler)
     handler # DONT REMOVE
 
   composeOperation: (operation) ->
@@ -45,9 +47,6 @@ class OperationStack
         if (mode is 'visual')
           operation = new Select(@vimState).setTarget(operation)
     operation
-
-  hasSelectionProperty: ->
-    swrap(@editor.getLastSelection()).hasProperties()
 
   run: (klass, properties={}) ->
     try
@@ -101,7 +100,6 @@ class OperationStack
     try
       @reduce()
       top = @peekTop()
-
       if top.isComplete()
         @execute(@stack.pop())
       else
@@ -186,12 +184,12 @@ class OperationStack
     @resetCount()
     @stack = []
     @processing = false
-    @subscriptions?.dispose()
-    @subscriptions = new CompositeDisposable
+    @operationSubscriptions?.dispose()
+    @operationSubscriptions = new CompositeDisposable
 
   destroy: ->
-    @subscriptions?.dispose()
-    {@stack, @subscriptions} = {}
+    @operationSubscriptions?.dispose()
+    {@stack, @operationSubscriptions} = {}
 
   isEmpty: ->
     @stack.length is 0
