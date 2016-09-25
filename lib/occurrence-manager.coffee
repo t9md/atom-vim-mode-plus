@@ -17,6 +17,7 @@ class OccurrenceManager
     options = {type: 'highlight', class: 'vim-mode-plus-occurrence-match'}
     @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, options)
 
+    # @patterns is single source of truth (SSOT)
     # All maker create/destroy/css-update is done by reacting @patters's change.
     # -------------------------
     @onDidChangePatterns ({newPattern}) =>

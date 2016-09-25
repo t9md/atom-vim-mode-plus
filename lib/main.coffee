@@ -24,7 +24,6 @@ module.exports =
     @registerCommands()
     @registerVimStateCommands()
 
-
     if atom.inDevMode()
       developer = (new (require './developer'))
       @subscribe(developer.init(service))
@@ -49,7 +48,7 @@ module.exports =
         @vimStatesByEditor.delete(editor)
 
       editorSubscriptions.add editor.onDidStopChanging ->
-        vimState.refreshHighlightSearch()
+        vimState.highlightSearch.refresh()
       @subscribe(editorSubscriptions)
       @emitter.emit('did-add-vim-state', vimState)
 
@@ -57,7 +56,7 @@ module.exports =
       if atom.workspace.isTextEditor(item)
         # Still there is possibility editor is destroyed and don't have corresponding
         # vimState #196.
-        @getEditorState(item)?.refreshHighlightSearch()
+        @getEditorState(item)?.highlightSearch.refresh()
 
     workspaceClassList = atom.views.getView(atom.workspace).classList
     @subscribe atom.workspace.onDidChangeActivePane ->
@@ -97,11 +96,11 @@ module.exports =
 
   refreshHighlightSearchForVisibleEditors: ->
     for editor in getVisibleEditors()
-      @getEditorState(editor).refreshHighlightSearch()
+      @getEditorState(editor).highlightSearch.refresh()
 
   clearHighlightSearchForEditors: ->
     for editor in atom.workspace.getTextEditors()
-      @getEditorState(editor).clearHighlightSearch()
+      @getEditorState(editor).highlightSearch.clearMarkers()
     @highlightSearchPattern = null
 
   clearRangeMarkerForEditors: ->

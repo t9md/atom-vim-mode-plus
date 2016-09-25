@@ -25,6 +25,7 @@ SearchHistoryManager = require './search-history-manager'
 CursorStyleManager = require './cursor-style-manager'
 BlockwiseSelection = require './blockwise-selection'
 OccurrenceManager = require './occurrence-manager'
+HighlightSearchManager = require './highlight-search-manager'
 
 packageScope = 'vim-mode-plus'
 
@@ -49,6 +50,7 @@ class VimState
     @hover = new HoverElement().initialize(this)
     @hoverSearchCounter = new HoverElement().initialize(this)
     @searchHistory = new SearchHistoryManager(this)
+    @highlightSearch = new HighlightSearchManager(this)
     @occurrence = new OccurrenceManager(this)
 
     @input = new InputElement().initialize(this)
@@ -58,9 +60,6 @@ class VimState
     @cursorStyleManager = new CursorStyleManager(this)
     @blockwiseSelections = []
     @observeSelection()
-
-    @highlightSearchSubscription = @editorElement.onDidChangeScrollTop =>
-      @refreshHighlightSearch()
 
     @editorElement.classList.add(packageScope)
     if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
@@ -188,9 +187,7 @@ class VimState
     @modeManager?.destroy?()
     @operationRecords?.destroy?()
     @register?.destroy?
-    @clearHighlightSearch()
     @clearRangeMarkers()
-    @highlightSearchSubscription?.dispose()
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
@@ -198,7 +195,6 @@ class VimState
       @count, @rangeMarkers
       @editor, @editorElement, @subscriptions,
       @inputCharSubscriptions
-      @highlightSearchSubscription
       @occurrence
     } = {}
     @emitter.emit 'did-destroy'
@@ -254,7 +250,8 @@ class VimState
       else if @occurrence.hasPatterns()
         @occurrence.resetPatterns()
 
-      @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
+      if settings.get('clearHighlightSearchOnResetNormalMode')
+        @main.clearHighlightSearchForEditors()
     else
       @editor.clearSelections()
     @activate('normal')
@@ -282,37 +279,6 @@ class VimState
 
     for selection in selections
       swrap(selection).preserveCharacterwise()
-
-  # highlightSearch
-  # -------------------------
-  clearHighlightSearch: ->
-    for marker in @highlightSearchMarkers ? []
-      marker.destroy()
-    @highlightSearchMarkers = null
-
-  hasHighlightSearch: ->
-    @highlightSearchMarkers?
-
-  getHighlightSearch: ->
-    @highlightSearchMarkers
-
-  highlightSearch: (pattern, scanRange) ->
-    ranges = []
-    @editor.scanInBufferRange pattern, scanRange, ({range}) ->
-      ranges.push(range)
-    markers = highlightRanges @editor, ranges,
-      invalidate: 'inside'
-      class: 'vim-mode-plus-highlight-search'
-    markers
-
-  refreshHighlightSearch: ->
-    [startRow, endRow] = @editorElement.getVisibleRowRange()
-    return unless scanRange = getVisibleBufferRange(@editor)
-    @clearHighlightSearch()
-    return if matchScopes(@editorElement, settings.get('highlightSearchExcludeScopes'))
-
-    if settings.get('highlightSearch') and @main.highlightSearchPattern?
-      @highlightSearchMarkers = @highlightSearch(@main.highlightSearchPattern, scanRange)
 
   # Repeat
   # -------------------------

@@ -234,7 +234,7 @@ describe "Motion Search", ->
         editor.getTextInBufferRange(marker.getBufferRange())
 
       ensureHightlightSearch = (options) ->
-        markers = vimState.getHighlightSearch()
+        markers = vimState.highlightSearch.getMarkers()
         if options.length?
           expect(markers).toHaveLength(options.length)
 
@@ -248,14 +248,14 @@ describe "Motion Search", ->
       beforeEach ->
         jasmine.attachToDOM(getView(atom.workspace))
         settings.set('highlightSearch', true)
-        expect(vimState.hasHighlightSearch()).toBe(false)
+        expect(vimState.highlightSearch.hasMarkers()).toBe(false)
         ensure ['/', search: 'def'], cursor: [1, 0]
 
       describe "clearHighlightSearch command", ->
         it "clear highlightSearch marker", ->
           ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
           dispatch(editorElement, 'vim-mode-plus:clear-highlight-search')
-          expect(vimState.hasHighlightSearch()).toBe(false)
+          expect(vimState.highlightSearch.hasMarkers()).toBe(false)
 
       describe "clearHighlightSearchOnResetNormalMode", ->
         describe "default setting", ->
@@ -269,7 +269,7 @@ describe "Motion Search", ->
             settings.set('clearHighlightSearchOnResetNormalMode', true)
             ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
             dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
-            expect(vimState.hasHighlightSearch()).toBe(false)
+            expect(vimState.highlightSearch.hasMarkers()).toBe(false)
             ensure mode: 'normal'
 
   describe "the * keybinding", ->
