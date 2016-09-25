@@ -24,7 +24,6 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
 CursorPositionManager = require './cursor-position-manager'
-MutationTracker = require './mutation-tracker'
 {OperatorError} = require './errors'
 
 class Operator extends Base
@@ -36,8 +35,6 @@ class Operator extends Base
   occurrence: false
 
   patternForOccurence: null
-  mtrack: null
-
   stayOnLinewise: false
   stayAtSamePosition: null
   clipToMutationEndOnStay: true
@@ -104,6 +101,7 @@ class Operator extends Base
 
   constructor: ->
     super
+    @mtrack = @vimState.mutationTracker
     @initialize()
     @setTarget(@new(@target)) if _.isString(@target)
 
@@ -150,9 +148,6 @@ class Operator extends Base
         for selection in @editor.getSelections() when canMutate
           @mutateSelection(selection, stopMutation)
       @restoreCursorPositionsIfNecessary()
-      @onDidFinishOperation =>
-        @mtrack.destroy()
-        @mtrack = null
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
@@ -195,10 +190,11 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    @mtrack = new MutationTracker @vimState,
+    @mtrack.start(
       stay: @needStay()
       isSelect: @instanceof('Select')
       useMarker: @useMarkerForStay
+    )
     @mtrack.setCheckPoint('will-select')
 
     @emitWillSelectTarget()
@@ -288,9 +284,6 @@ class SelectOccurrence extends Operator
     if @selectTarget()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
-      @onDidFinishOperation =>
-        @mtrack.destroy()
-        @mtrack = null
 
 class SelectOccurrenceInARangeMarker extends SelectOccurrence
   @extend()

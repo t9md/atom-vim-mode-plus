@@ -1,4 +1,4 @@
-{Point} = require 'atom'
+{Point, Emitter, CompositeDisposable} = require 'atom'
 swrap = require './selection-wrapper'
 
 # keep mutation snapshot necessary for Operator processing.
@@ -15,18 +15,30 @@ swrap = require './selection-wrapper'
 #    Selection beeing tracked
 module.exports =
 class MutationTracker
-  editor: null
-  mutationsBySelection: null
-  pointsBySelection: null
+  constructor: (@vimState) ->
+    {@editor} = @vimState
 
-  constructor: (@vimState, options={}) ->
-    {@editor, @markerLayer} = @vimState
-    {@stay} = options
+    @disposables = new CompositeDisposable
+    @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
+    @emitter = new Emitter
+
+    @markerLayer = @editor.addMarkerLayer()
     @mutationsBySelection = new Map
     @pointsBySelection = new Map
 
+  start: (@options) ->
     for selection in @editor.getSelections()
-      @saveInitialPointForSelection(selection, options)
+      @saveInitialPointForSelection(selection, @options)
+
+  destroy: ->
+    @reset()
+    {@mutationsBySelection, @pointsBySelection, @editor} = {}
+
+  reset: ->
+    marker.destroy() for marker in @markerLayer.getMarkers()
+    @options = null
+    @mutationsBySelection.clear()
+    @pointsBySelection.clear()
 
   saveInitialPointForSelection: (selection, {useMarker, isSelect}) ->
     if @vimState.isMode('visual')
@@ -79,17 +91,8 @@ class MutationTracker
     else
       range.end.translate([0, -1])
 
-  destroy: ->
-    return if @destroyed
-    @mutationsBySelection.forEach (mutation) -> mutation.marker?.destroy()
-    @mutationsBySelection.clear()
-    @pointsBySelection.clear()
-
-    {@mutationsBySelection, @pointsBySelection, @editor} = {}
-    @destroyed = true
-
   getRestorePointForMutation: (mutation, {clipToMutationEnd, mutationEnd}={}) ->
-    if @stay
+    if @options.stay
       if point = @pointsBySelection.get(mutation.selection)
         unless point instanceof Point
           point = point.getHeadBufferPosition()

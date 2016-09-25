@@ -9,6 +9,7 @@ settings = require './settings'
   haveSomeSelection
   highlightRanges
   getVisibleBufferRange
+  getVisibleEditors
   matchScopes
   isRangeContainsSomePoint
 
@@ -25,6 +26,7 @@ CursorStyleManager = require './cursor-style-manager'
 BlockwiseSelection = require './blockwise-selection'
 OccurrenceManager = require './occurrence-manager'
 HighlightSearchManager = require './highlight-search-manager'
+MutationTracker = require './mutation-tracker'
 
 packageScope = 'vim-mode-plus'
 
@@ -45,12 +47,12 @@ class VimState
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
     @rangeMarkers = []
-    @markerLayer = @editor.addMarkerLayer()
     @hover = new HoverElement().initialize(this)
     @hoverSearchCounter = new HoverElement().initialize(this)
     @searchHistory = new SearchHistoryManager(this)
     @highlightSearch = new HighlightSearchManager(this)
     @occurrence = new OccurrenceManager(this)
+    @mutationTracker = new MutationTracker(this)
 
     @input = new InputElement().initialize(this)
     @searchInput = new SearchInputElement().initialize(this)
@@ -261,15 +263,14 @@ class VimState
 
   reset: ->
     @resetCharInput()
-    for marker in @markerLayer.getMarkers()
-      marker.destroy()
-
-    debug('marker length', @markerLayer.getMarkers().length)
-
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
     @operationStack.reset()
+    @mutationTracker.reset()
+
+  isVisible: ->
+    @editor in getVisibleEditors()
 
   updateCursorsVisibility: ->
     @cursorStyleManager.refresh()
