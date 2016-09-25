@@ -24,7 +24,6 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
 CursorPositionManager = require './cursor-position-manager'
-{OperatorError} = require './errors'
 
 class Operator extends Base
   @extend(false)
@@ -110,11 +109,7 @@ class Operator extends Base
       @setTarget(@new(@target))
 
   # target is TextObject or Motion to operate on.
-  setTarget: (target) ->
-    unless _.isFunction(target.select)
-      @emitDidFailToSetTarget()
-      throw new OperatorError("#{@getName()} cannot set #{target?.getName?()} as target")
-    @target = target
+  setTarget: (@target) ->
     @target.setOperator(this)
     @modifyTargetWiseIfNecessary()
     @emitDidSetTarget(this)

@@ -159,6 +159,8 @@ class VimState
   # Events
   # -------------------------
   onDidFailToSetTarget: (fn) -> @emitter.on('did-fail-to-set-target', fn)
+  emitDidFailToSetTarget: -> @emitter.emit('did-fail-to-set-target')
+
   onDidDestroy: (fn) -> @emitter.on('did-destroy', fn)
 
   # * `fn` {Function} to be called when mark was set.

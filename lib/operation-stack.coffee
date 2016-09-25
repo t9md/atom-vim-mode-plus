@@ -5,7 +5,7 @@ Base = require './base'
 {moveCursorLeft, getVisibleBufferRange} = require './utils'
 settings = require './settings'
 {CurrentSelection, Select, MoveToRelativeLine} = {}
-{OperationStackError, OperatorError, OperationAbortedError} = require './errors'
+{OperationAbortedError} = require './errors'
 swrap = require './selection-wrapper'
 
 # opration life in operationStack
@@ -34,6 +34,31 @@ class OperationStack
     @operationSubscriptions.add(handler)
     handler # DONT REMOVE
 
+  # Stack manipulation
+  # -------------------------
+  push: (operation) ->
+    @stack.push(operation)
+
+  pop: ->
+    @stack.pop()
+
+  peekTop: ->
+    _.last(@stack)
+
+  peekBottom: ->
+    @stack[0]
+
+  isEmpty: ->
+    @stack.length is 0
+
+  isFull: ->
+    @stack.length is 2
+
+  hasPending: ->
+    @stack.length is 1
+
+  # Compliment implicit operator or target(motion or text-object)
+  # -------------------------
   composeOperation: (operation) ->
     {mode} = @vimState
     switch
@@ -41,13 +66,15 @@ class OperationStack
         if (mode is 'visual') and not operation.hasTarget() # don't want to override target
           operation = operation.setTarget(new CurrentSelection(@vimState))
       when operation.isTextObject()
-        unless mode is 'operator-pending'
+        if mode isnt 'operator-pending'
           operation = new Select(@vimState).setTarget(operation)
       when operation.isMotion()
         if (mode is 'visual')
           operation = new Select(@vimState).setTarget(operation)
     operation
 
+  # Main
+  # -------------------------
   run: (klass, properties={}) ->
     try
       switch type = typeof(klass)
@@ -62,8 +89,12 @@ class OperationStack
         else
           throw new Error('Unsupported type of operation')
 
-      @stack.push(operation)
-      @process()
+      if @isEmpty() or (@peekTop().isOperator() and operation.isTarget())
+        @push(operation)
+        @process()
+      else
+        @vimState.emitDidFailToSetTarget() if @peekTop().isOperator()
+        @vimState.resetNormalMode()
     catch error
       @handleError(error)
 
@@ -89,41 +120,24 @@ class OperationStack
 
   process: ->
     @processing = true
-    if @stack.length > 2
-      throw new Error('Operation stack must not exceeds 2 length')
+    if @isFull()
+      operation = @pop()
+      @peekTop().setTarget(operation)
 
-    try
-      top = @peekTop()
+    top = @peekTop()
+    if top.isComplete()
+      @execute(@pop())
+    else
+      if @vimState.isMode('normal') and top.isOperator()
+        @vimState.activate('operator-pending')
+        if top.isOccurrence()
+          @addToClassList('with-occurrence')
+          unless @occurrenceManager.hasMarkers()
+            @occurrenceManager.addPattern(top.patternForOccurence)
 
-      if @stack.length is 2
-        operation = @stack.pop()
-        top = @peekTop()
-        unless top.setTarget?
-          throw new OperationStackError("The top operation in operation stack is not operator!")
-        top.setTarget(operation)
-
-      if top.isComplete()
-        @execute(@stack.pop())
-
-      else
-        if @vimState.isMode('normal') and top.isOperator()
-          @vimState.activate('operator-pending')
-          if top.isOccurrence()
-            @addToClassList('with-occurrence')
-            unless @occurrenceManager.hasMarkers()
-              @occurrenceManager.addPattern(top.patternForOccurence)
-
-        # Temporary set while command is running
-        if commandName = top.constructor.getCommandNameWithoutPrefix?()
-          @addToClassList(commandName + "-pending")
-    catch error
-      switch
-        when error instanceof OperatorError
-          @vimState.resetNormalMode()
-        when error instanceof OperationStackError
-          @vimState.resetNormalMode()
-        else
-          throw error
+      # Temporary set while command is running
+      if commandName = top.constructor.getCommandNameWithoutPrefix?()
+        @addToClassList(commandName + "-pending")
 
   addToClassList: (className) ->
     @editorElement.classList.add(className)
@@ -168,12 +182,6 @@ class OperationStack
     @vimState.updateCursorsVisibility()
     @vimState.reset()
 
-  peekTop: ->
-    _.last(@stack)
-
-  peekBottom: ->
-    @stack[0]
-
   reset: ->
     @resetCount()
     @stack = []
@@ -184,9 +192,6 @@ class OperationStack
   destroy: ->
     @operationSubscriptions?.dispose()
     {@stack, @operationSubscriptions} = {}
-
-  isEmpty: ->
-    @stack.length is 0
 
   record: (@recorded) ->
 
