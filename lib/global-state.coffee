@@ -23,9 +23,6 @@ class GlobalState
   emitDidChange: (event) ->
     @emitter.emit('did-change', event)
 
-  emitDidChange: (event) ->
-    @emitter.emit('did-change', event)
-
 module.exports = new GlobalState
   searchHistory: []
   currentSearch: null
