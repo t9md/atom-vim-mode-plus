@@ -695,6 +695,12 @@ scanInRanges = (editor, pattern, scanRanges, {includeIntersects, exclusiveInters
         ranges.push(range)
   ranges
 
+scanEditor = (editor, pattern) ->
+  ranges = []
+  editor.scan pattern, ({range}) ->
+    ranges.push(range)
+  ranges
+
 isRangeContainsSomePoint = (range, points, {exclusive}={}) ->
   exclusive ?= false
   points.some (point) ->
@@ -859,6 +865,7 @@ module.exports = {
   adjustRangeToRowRange
   shrinkRangeEndToBeforeNewLine
   scanInRanges
+  scanEditor
   isRangeContainsSomePoint
 
   # Debugging

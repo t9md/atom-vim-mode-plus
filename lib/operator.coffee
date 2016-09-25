@@ -174,7 +174,7 @@ class Operator extends Base
 
     cursorPositionManager.save('head')
     unless occurrence.hasMarkers()
-      occurrence.addMarker(@patternForOccurence)
+      occurrence.addPattern(@patternForOccurence)
     @patternForOccurence ?= occurrence.buildPattern() # save for repeat.
 
     fn()
@@ -185,7 +185,7 @@ class Operator extends Base
       markers = occurrence.getMarkersIntersectsWithRanges(scanRanges, wasVisual)
       ranges = markers.map (marker) -> marker.getBufferRange()
       # We got ranges to select, so good-by occurrence by reset()
-      occurrence.reset()
+      occurrence.resetPatterns()
 
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
@@ -351,7 +351,7 @@ class PresetOccurrence extends Operator
         pattern = new RegExp(_.escapeRegExp(text), 'g')
       pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
 
-      @vimState.occurrence.addMarker(pattern)
+      @vimState.occurrence.addPattern(pattern)
       @activateMode('normal')
 
 # Delete

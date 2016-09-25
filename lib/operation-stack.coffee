@@ -117,7 +117,7 @@ class OperationStack
           if top.isOccurrence()
             @addToClassList('with-occurrence')
             unless @occurrence.hasMarkers()
-              @occurrence.addMarker(top.patternForOccurence)
+              @occurrence.addPattern(top.patternForOccurence)
 
         # Temporary set while command is running
         if commandName = top.constructor.getCommandNameWithoutPrefix?()
@@ -223,7 +223,7 @@ class OperationStack
       if name is "occurrence" and value
         @addToClassList('with-occurrence')
         @occurrence.resetPatterns()
-        @occurrence.addMarker()
+        @occurrence.addPattern()
 
   # Count
   # -------------------------

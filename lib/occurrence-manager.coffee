@@ -1,6 +1,6 @@
 {Emitter, CompositeDisposable} = require 'atom'
 
-{getWordPatternAtCursor} = require './utils'
+{getWordPatternAtCursor, scanEditor} = require './utils'
 
 module.exports =
 class OccurrenceManager
@@ -17,18 +17,23 @@ class OccurrenceManager
     options = {type: 'highlight', class: 'vim-mode-plus-occurrence-match'}
     @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, options)
 
-    @onDidResetPatterns(@clearMarkers.bind(this))
-    @markerLayer.onDidUpdate(@updateView.bind(this))
+    # All maker create/destroy/css-update is done by reacting @patters's change.
+    # -------------------------
+    @onDidChangePatterns ({newPattern}) =>
+      if newPattern
+        @markerLayer.markBufferRange(range) for range in scanEditor(@editor, newPattern)
+      else
+        # When patterns were cleared, destroy all marker.
+        marker.destroy() for marker in @markerLayer.getMarkers()
 
-  onDidResetPatterns: (fn) ->
-    @emitter.on('did-reset-patterns', fn)
+    # Update css on every marker update.
+    @markerLayer.onDidUpdate =>
+      @editorElement.classList.toggle("occurrence-preset", @hasMarkers())
 
-  # Main
-  reset: ->
-    @resetPatterns()
-
-  updateView: ->
-    @editorElement.classList.toggle("occurrence-preset", @hasMarkers())
+  # Callback get passed following object
+  # - newPattern: can be undefined on reset event
+  onDidChangePatterns: (fn) ->
+    @emitter.on('did-change-patterns', fn)
 
   destroy: ->
     @decorationLayer.destroy()
@@ -41,22 +46,20 @@ class OccurrenceManager
 
   resetPatterns: ->
     @patterns = []
-    @emitter.emit('did-reset-patterns')
+    @emitter.emit('did-change-patterns', {})
 
+  addPattern: (pattern=null) ->
+    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
+    @patterns.push(pattern)
+    @emitter.emit('did-change-patterns', {newPattern: pattern})
+
+  # Return regex representing final pattern.
+  # Used to cache final pattern to each instance of operator so that we can
+  # repeat recorded operation by `.`.
+  # Pattern can be added interactively one by one, but we save it as union pattern.
   buildPattern: ->
     source = @patterns.map((pattern) -> pattern.source).join('|')
     new RegExp(source, 'g')
-
-  addMarker: (pattern=null) ->
-    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
-    @patterns.push(pattern)
-    @addMarkersForPattern(pattern)
-
-  addMarkersForPattern: (pattern) ->
-    ranges = []
-    @editor.scan pattern, ({range}) -> ranges.push(range)
-    for range in ranges
-      @markerLayer.markBufferRange(range, invalidate: 'never')
 
   # Markers
   # -------------------------
@@ -78,7 +81,3 @@ class OccurrenceManager
 
   getMarkerAtPoint: (point) ->
     @markerLayer.findMarkers(containsBufferPosition: point)[0]
-
-  clearMarkers: ->
-    for marker in @markerLayer.getMarkers()
-      marker.destroy()

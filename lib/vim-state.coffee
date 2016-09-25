@@ -252,7 +252,7 @@ class VimState
       else if @hasRangeMarkers() and settings.get('clearRangeMarkerOnResetNormalMode')
         @clearRangeMarkers()
       else if @occurrence.hasPatterns()
-        @occurrence.reset()
+        @occurrence.resetPatterns()
 
       @main.clearHighlightSearchForEditors() if settings.get('clearHighlightSearchOnResetNormalMode')
     else
