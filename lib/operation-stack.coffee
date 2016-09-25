@@ -8,9 +8,6 @@ settings = require './settings'
 {OperationStackError, OperatorError, OperationAbortedError} = require './errors'
 swrap = require './selection-wrapper'
 
-{debug} = require './utils'
-
-
 # opration life in operationStack
 # 1. run
 #    instantiated by new
@@ -53,9 +50,6 @@ class OperationStack
     swrap(@editor.getLastSelection()).hasProperties()
 
   run: (klass, properties={}) ->
-    # @reportAliveMakerLength('run')
-    if settings.get('debug')
-      debug 'run-start:', @hasSelectionProperty()
     try
       switch type = typeof(klass)
         when 'string', 'function'
@@ -109,7 +103,6 @@ class OperationStack
       top = @peekTop()
 
       if top.isComplete()
-        debug "will-execute:", top.toString()
         @execute(@stack.pop())
       else
         if @vimState.isMode('normal') and top.isOperator()
@@ -164,10 +157,6 @@ class OperationStack
       # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
       moveCursorLeft(cursor, {preserveGoalColumn: true})
 
-  reportAliveMakerLength: (subject) ->
-    length = @vimState.markerLayer.getMarkers().length
-    console.log "#{subject}:", length
-
   finish: (operation=null) ->
     @record(operation) if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
@@ -179,7 +168,6 @@ class OperationStack
       @vimState.modeManager.updateNarrowedState()
     @vimState.updateCursorsVisibility()
     @vimState.reset()
-    # @reportAliveMakerLength('fin')
 
   peekTop: ->
     _.last(@stack)
