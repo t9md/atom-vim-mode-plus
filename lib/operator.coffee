@@ -334,14 +334,15 @@ class PresetOccurrence extends Operator
   acceptPresetOccurrence: false
 
   execute: ->
-    if marker = @vimState.occurrence.getMarkerAtPoint(@editor.getCursorBufferPosition())
+    {@occurrenceManager} = @vimState
+    if marker = @occurrenceManager.getMarkerAtPoint(@editor.getCursorBufferPosition())
       marker.destroy()
     else
       if @isMode('visual') and text = @editor.getSelectedText()
         pattern = new RegExp(_.escapeRegExp(text), 'g')
       pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
 
-      @vimState.occurrence.addPattern(pattern)
+      @occurrenceManager.addPattern(pattern)
       @activateMode('normal')
 
 # Delete
