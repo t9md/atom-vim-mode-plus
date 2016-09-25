@@ -915,7 +915,6 @@ class SearchBase extends Motion
 
     unless @isQuiet()
       @globalState.set('lastSearchPattern', @getPattern(input))
-      @vimState.main.emitDidSetLastSearchPattern()
     @finish()
 
   getFromPoint: (cursor) ->

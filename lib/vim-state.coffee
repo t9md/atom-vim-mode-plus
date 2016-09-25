@@ -37,7 +37,7 @@ class VimState
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
   @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', toProperty: 'operationStack')
 
-  constructor: (@main, @editor, @statusBarManager, @globalState) ->
+  constructor: (@editor, @statusBarManager, @globalState) ->
     @editorElement = @editor.element
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
@@ -59,6 +59,10 @@ class VimState
     @cursorStyleManager = new CursorStyleManager(this)
     @blockwiseSelections = []
     @observeSelection()
+
+    refreshHighlightSearch = =>
+      @highlightSearch.refresh()
+    @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
 
     @editorElement.classList.add(packageScope)
     if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
@@ -250,7 +254,7 @@ class VimState
         @occurrence.resetPatterns()
 
       if settings.get('clearHighlightSearchOnResetNormalMode')
-        @main.clearHighlightSearchForEditors()
+        @globalState.set('highlightSearchPattern', null)
     else
       @editor.clearSelections()
     @activate('normal')

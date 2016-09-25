@@ -37,19 +37,12 @@ module.exports =
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini()
-      vimState = new VimState(this, editor, @statusBarManager, globalState)
+      vimState = new VimState(editor, @statusBarManager, globalState)
       @vimStatesByEditor.set(editor, vimState)
-
-      editorSubscriptions = new CompositeDisposable
-      editorSubscriptions.add editor.onDidDestroy =>
-        editorSubscriptions.dispose()
-        @unsubscribe(editorSubscriptions)
+      @subscribe editor.onDidDestroy =>
         vimState.destroy()
         @vimStatesByEditor.delete(editor)
 
-      editorSubscriptions.add editor.onDidStopChanging ->
-        vimState.highlightSearch.refresh()
-      @subscribe(editorSubscriptions)
       @emitter.emit('did-add-vim-state', vimState)
 
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
@@ -62,10 +55,6 @@ module.exports =
     @subscribe atom.workspace.onDidChangeActivePane ->
       workspaceClassList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
 
-    @onDidSetLastSearchPattern =>
-      @highlightSearchPattern = globalState.get('lastSearchPattern')
-      @refreshHighlightSearchForVisibleEditors()
-
     @subscribe settings.observe 'highlightSearch', (newValue) =>
       if newValue
         @refreshHighlightSearchForVisibleEditors()
@@ -76,9 +65,6 @@ module.exports =
     fn() if atom.packages.isPackageActive('vim-mode')
     atom.packages.onDidActivatePackage (pack) ->
       fn() if pack.name is 'vim-mode'
-
-  onDidSetLastSearchPattern: (fn) -> @emitter.on('did-set-last-search-pattern', fn)
-  emitDidSetLastSearchPattern: (fn) -> @emitter.emit('did-set-last-search-pattern')
 
   # * `fn` {Function} to be called when vimState instance was created.
   #  Usage:
@@ -101,7 +87,7 @@ module.exports =
   clearHighlightSearchForEditors: ->
     for editor in atom.workspace.getTextEditors()
       @getEditorState(editor).highlightSearch.clearMarkers()
-    @highlightSearchPattern = null
+    globalState.set('highlightSearchPattern', null)
 
   clearRangeMarkerForEditors: ->
     for editor in atom.workspace.getTextEditors()
