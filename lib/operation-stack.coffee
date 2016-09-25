@@ -34,6 +34,17 @@ class OperationStack
     @operationSubscriptions.add(handler)
     handler # DONT REMOVE
 
+  reset: ->
+    @resetCount()
+    @stack = []
+    @processing = false
+    @operationSubscriptions?.dispose()
+    @operationSubscriptions = new CompositeDisposable
+
+  destroy: ->
+    @operationSubscriptions?.dispose()
+    {@stack, @operationSubscriptions} = {}
+
   # Stack manipulation
   # -------------------------
   push: (operation) ->
@@ -99,7 +110,7 @@ class OperationStack
       @handleError(error)
 
   runRecorded: ->
-    if operation = @getRecorded()
+    if operation = @recordedOperation
       operation.setRepeated()
       if @hasCount()
         count = @getCount()
@@ -139,11 +150,6 @@ class OperationStack
       if commandName = top.constructor.getCommandNameWithoutPrefix?()
         @addToClassList(commandName + "-pending")
 
-  addToClassList: (className) ->
-    @editorElement.classList.add(className)
-    @subscribe new Disposable =>
-      @editorElement.classList.remove(className)
-
   execute: (operation) ->
     execution = operation.execute()
     if execution instanceof Promise
@@ -158,6 +164,18 @@ class OperationStack
       @vimState.resetNormalMode()
     @finish()
 
+  finish: (operation=null) ->
+    @recordedOperation = operation if operation?.isRecordable()
+    @vimState.emitter.emit('did-finish-operation')
+
+    if @vimState.isMode('normal')
+      @ensureAllSelectionsAreEmpty(operation)
+      @ensureAllCursorsAreNotAtEndOfLine()
+    if @vimState.isMode('visual')
+      @vimState.modeManager.updateNarrowedState()
+    @vimState.updateCursorsVisibility()
+    @vimState.reset()
+
   ensureAllSelectionsAreEmpty: (operation) ->
     unless @editor.getLastSelection().isEmpty()
       if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
@@ -170,33 +188,10 @@ class OperationStack
       # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
       moveCursorLeft(cursor, {preserveGoalColumn: true})
 
-  finish: (operation=null) ->
-    @record(operation) if operation?.isRecordable()
-    @vimState.emitter.emit('did-finish-operation')
-
-    if @vimState.isMode('normal')
-      @ensureAllSelectionsAreEmpty(operation)
-      @ensureAllCursorsAreNotAtEndOfLine()
-    if @vimState.isMode('visual')
-      @vimState.modeManager.updateNarrowedState()
-    @vimState.updateCursorsVisibility()
-    @vimState.reset()
-
-  reset: ->
-    @resetCount()
-    @stack = []
-    @processing = false
-    @operationSubscriptions?.dispose()
-    @operationSubscriptions = new CompositeDisposable
-
-  destroy: ->
-    @operationSubscriptions?.dispose()
-    {@stack, @operationSubscriptions} = {}
-
-  record: (@recorded) ->
-
-  getRecorded: ->
-    @recorded
+  addToClassList: (className) ->
+    @editorElement.classList.add(className)
+    @subscribe new Disposable =>
+      @editorElement.classList.remove(className)
 
   # This is method is called only by user explicitly by `o` e.g. `c o i p`, `d v j`.
   setOperatorModifier: (modifiers) ->
