@@ -105,6 +105,8 @@ class Operator extends Base
     if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
       @occurrence = true
 
+    # In visual-mode and target was pre-set, operate on selected area.
+    @target ?= "CurrentSelection" if @isMode('visual')
     if _.isString(@target)
       @setTarget(@new(@target))
 

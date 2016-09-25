@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 Base = require './base'
 {moveCursorLeft, getVisibleBufferRange} = require './utils'
 settings = require './settings'
-{CurrentSelection, Select, MoveToRelativeLine} = {}
+{Select, MoveToRelativeLine} = {}
 {OperationAbortedError} = require './errors'
 swrap = require './selection-wrapper'
 
@@ -23,7 +23,6 @@ class OperationStack
   constructor: (@vimState) ->
     {@editor, @editorElement, @occurrenceManager} = @vimState
 
-    CurrentSelection ?= Base.getClass('CurrentSelection')
     Select ?= Base.getClass('Select')
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
 
@@ -68,22 +67,6 @@ class OperationStack
   hasPending: ->
     @stack.length is 1
 
-  # Compliment implicit operator or target(motion or text-object)
-  # -------------------------
-  composeOperation: (operation) ->
-    {mode} = @vimState
-    switch
-      when operation.isOperator()
-        if (mode is 'visual') and not operation.hasTarget() # don't want to override target
-          operation = operation.setTarget(new CurrentSelection(@vimState))
-      when operation.isTextObject()
-        if mode isnt 'operator-pending'
-          operation = new Select(@vimState).setTarget(operation)
-      when operation.isMotion()
-        if (mode is 'visual')
-          operation = new Select(@vimState).setTarget(operation)
-    operation
-
   # Main
   # -------------------------
   run: (klass, properties={}) ->
@@ -94,7 +77,13 @@ class OperationStack
           # When identical operator repeated, it set target to MoveToRelativeLine.
           #  e.g. `dd`, `cc`, `gUgU`
           klass = MoveToRelativeLine if (@peekTop()?.constructor is klass)
-          operation = @composeOperation(new klass(@vimState, properties))
+
+          operation = new klass(@vimState, properties)
+
+          # Compliment implicit Select operator
+          {mode} = @vimState
+          if operation.isTextObject() and mode isnt 'operator-pending' or operation.isMotion() and mode is 'visual'
+            operation = new Select(@vimState).setTarget(operation)
         when 'object' # . repeat case
           operation = klass
         else
