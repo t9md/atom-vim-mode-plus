@@ -54,6 +54,10 @@ class OccurrenceManager
     @patterns.push(pattern)
     @emitter.emit('did-change-patterns', {newPattern: pattern})
 
+  replacePattern: (pattern=null) ->
+    @resetPatterns() # clear existing marker
+    @addPattern(pattern)
+
   # Return regex representing final pattern.
   # Used to cache final pattern to each instance of operator so that we can
   # repeat recorded operation by `.`.

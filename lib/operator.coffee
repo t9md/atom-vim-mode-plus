@@ -67,9 +67,6 @@ class Operator extends Base
   isOccurrence: ->
     @occurrence
 
-  canAcceptPresetOccurrence: ->
-    @acceptPresetOccurrence
-
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
 
@@ -88,7 +85,7 @@ class Operator extends Base
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      ranges = @mtrack.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
+      ranges = @mutationTracker.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
       if ranges.length
         @flashIfNecessary(ranges)
 
@@ -96,14 +93,21 @@ class Operator extends Base
     return unless @trackChange
 
     @onDidFinishOperation =>
-      if marker = @mtrack.getMutationForSelection(@editor.getLastSelection()).marker
+      if marker = @mutationTracker.getMutationForSelection(@editor.getLastSelection()).marker
         @setMarkForChange(marker.getBufferRange())
 
   constructor: ->
     super
-    @mtrack = @vimState.mutationTracker
+    {@mutationTracker, @occurrenceManager} = @vimState
+
     @initialize()
-    @setTarget(@new(@target)) if _.isString(@target)
+
+    # When preset-occurrence was exists, auto enable occurrence-wise
+    if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
+      @occurrence = true
+
+    if _.isString(@target)
+      @setTarget(@new(@target))
 
   # target is TextObject or Motion to operate on.
   setTarget: (target) ->
@@ -156,7 +160,6 @@ class Operator extends Base
   reselectOccurrence: (fn) ->
     scanRanges = null
     cursorPositionManager = new CursorPositionManager(@editor)
-    {occurrence} = @vimState
 
     wasVisual = @isMode('visual')
     if wasVisual
@@ -167,19 +170,19 @@ class Operator extends Base
       @vimState.modeManager.deactivate()
 
     cursorPositionManager.save('head')
-    unless occurrence.hasMarkers()
-      occurrence.addPattern(@patternForOccurence)
-    @patternForOccurence ?= occurrence.buildPattern() # save for repeat.
+    unless @occurrenceManager.hasMarkers()
+      @occurrenceManager.addPattern(@patternForOccurence)
+    @patternForOccurence ?= @occurrenceManager.buildPattern() # save for repeat.
 
     fn()
 
-    if occurrence.hasMarkers()
+    if @occurrenceManager.hasMarkers()
       scanRanges ?= @editor.getSelectedBufferRanges()
       scanRanges = scanRanges.map (range) -> shrinkRangeEndToBeforeNewLine(range)
-      markers = occurrence.getMarkersIntersectsWithRanges(scanRanges, wasVisual)
+      markers = @occurrenceManager.getMarkersIntersectsWithRanges(scanRanges, wasVisual)
       ranges = markers.map (marker) -> marker.getBufferRange()
-      # We got ranges to select, so good-by occurrence by reset()
-      occurrence.resetPatterns()
+      # We got ranges to select, so good-by @occurrenceManager by reset()
+      @occurrenceManager.resetPatterns()
 
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
@@ -190,12 +193,12 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    @mtrack.start(
+    @mutationTracker.start(
       stay: @needStay()
       isSelect: @instanceof('Select')
       useMarker: @useMarkerForStay
     )
-    @mtrack.setCheckPoint('will-select')
+    @mutationTracker.setCheckPoint('will-select')
 
     @emitWillSelectTarget()
 
@@ -206,7 +209,7 @@ class Operator extends Base
       @target.select()
 
     if haveSomeSelection(@editor)
-      @mtrack.setCheckPoint('did-select')
+      @mutationTracker.setCheckPoint('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
@@ -223,7 +226,7 @@ class Operator extends Base
       clipToMutationEnd: @clipToMutationEndOnStay
       isBlockwise: @target?.isBlockwise?()
       mutationEnd: @restorePositionsToMutationEnd
-    @mtrack.restoreCursorPositions(options)
+    @mutationTracker.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
 
 # Select
@@ -371,7 +374,7 @@ class Delete extends Operator
   adjustCursor: (cursor) ->
     row = getValidVimBufferRow(@editor, cursor.getBufferRow())
     if @needStay()
-      point = @mtrack.getInitialPointForSelection(cursor.selection)
+      point = @mutationTracker.getInitialPointForSelection(cursor.selection)
       cursor.setBufferPosition([row, point.column])
     else
       cursor.setBufferPosition([row, 0])

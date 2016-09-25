@@ -51,7 +51,7 @@ class VimState
     @hoverSearchCounter = new HoverElement().initialize(this)
     @searchHistory = new SearchHistoryManager(this)
     @highlightSearch = new HighlightSearchManager(this)
-    @occurrence = new OccurrenceManager(this)
+    @occurrenceManager = new OccurrenceManager(this)
     @mutationTracker = new MutationTracker(this)
 
     @input = new InputElement().initialize(this)
@@ -200,7 +200,7 @@ class VimState
       @count, @rangeMarkers
       @editor, @editorElement, @subscriptions,
       @inputCharSubscriptions
-      @occurrence
+      @occurrenceManager
     } = {}
     @emitter.emit 'did-destroy'
 
@@ -252,8 +252,8 @@ class VimState
         @editor.clearSelections()
       else if @hasRangeMarkers() and settings.get('clearRangeMarkerOnResetNormalMode')
         @clearRangeMarkers()
-      else if @occurrence.hasPatterns()
-        @occurrence.resetPatterns()
+      else if @occurrenceManager.hasPatterns()
+        @occurrenceManager.resetPatterns()
 
       if settings.get('clearHighlightSearchOnResetNormalMode')
         @globalState.set('highlightSearchPattern', null)

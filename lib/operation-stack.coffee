@@ -21,7 +21,7 @@ swrap = require './selection-wrapper'
 #    if not executable, enter "operator-pending-mode"
 class OperationStack
   constructor: (@vimState) ->
-    {@editor, @editorElement, @occurrence} = @vimState
+    {@editor, @editorElement, @occurrenceManager} = @vimState
 
     CurrentSelection ?= Base.getClass('CurrentSelection')
     Select ?= Base.getClass('Select')
@@ -63,11 +63,6 @@ class OperationStack
           throw new Error('Unsupported type of operation')
 
       @stack.push(operation)
-
-      if operation.isOperator() and operation.canAcceptPresetOccurrence()
-        if @occurrence.hasPatterns()
-          operation.occurrence = true
-
       @process()
     catch error
       @handleError(error)
@@ -98,17 +93,25 @@ class OperationStack
       throw new Error('Operation stack must not exceeds 2 length')
 
     try
-      @reduce()
       top = @peekTop()
+
+      if @stack.length is 2
+        operation = @stack.pop()
+        top = @peekTop()
+        unless top.setTarget?
+          throw new OperationStackError("The top operation in operation stack is not operator!")
+        top.setTarget(operation)
+
       if top.isComplete()
         @execute(@stack.pop())
+
       else
         if @vimState.isMode('normal') and top.isOperator()
           @vimState.activate('operator-pending')
           if top.isOccurrence()
             @addToClassList('with-occurrence')
-            unless @occurrence.hasMarkers()
-              @occurrence.addPattern(top.patternForOccurence)
+            unless @occurrenceManager.hasMarkers()
+              @occurrenceManager.addPattern(top.patternForOccurence)
 
         # Temporary set while command is running
         if commandName = top.constructor.getCommandNameWithoutPrefix?()
@@ -130,11 +133,9 @@ class OperationStack
   execute: (operation) ->
     execution = operation.execute()
     if execution instanceof Promise
-      finish = => @finish(operation)
-      handleError = => @handleError()
       execution
-        .then(finish)
-        .catch(handleError)
+        .then => @finish(operation)
+        .catch => @handleError()
     else
       @finish(operation)
 
@@ -173,13 +174,6 @@ class OperationStack
   peekBottom: ->
     @stack[0]
 
-  reduce: ->
-    until @stack.length < 2
-      operation = @stack.pop()
-      unless @peekTop().setTarget?
-        throw new OperationStackError("The top operation in operation stack is not operator!")
-      @peekTop().setTarget(operation)
-
   reset: ->
     @resetCount()
     @stack = []
@@ -208,8 +202,7 @@ class OperationStack
       operator[name] = value
       if name is "occurrence" and value
         @addToClassList('with-occurrence')
-        @occurrence.resetPatterns()
-        @occurrence.addPattern()
+        @occurrenceManager.replacePattern()
 
   # Count
   # -------------------------
