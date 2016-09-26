@@ -668,39 +668,36 @@ getCurrentWordBufferRangeAndKind = (cursor, options={}) ->
   options = _.extend(options, newOptions) # Complement
   getWordBufferRangeAndKindAtBufferPosition(cursor.editor, cursor.getBufferPosition(), options)
 
-getBeginningOfWordBufferPosition = (editor, position, {wordRegex}={}) ->
-  previousNonBlankRow = editor.buffer.previousNonBlankRow(position.row) ? 0
-  scanRange = [[previousNonBlankRow, 0], position]
+getBeginningOfWordBufferPosition = (editor, point, {wordRegex}={}) ->
+  scanRange = [[point.row, 0], point]
 
   found = null
   editor.backwardsScanInBufferRange wordRegex, scanRange, ({range, matchText, stop}) ->
-    # Ignore 'empty line' matches between '\r' and '\n'
     return if matchText is '' and range.start.column isnt 0
 
-    if range.start.isLessThan(position)
-      if range.end.isGreaterThanOrEqual(position)
+    if range.start.isLessThan(point)
+      if range.end.isGreaterThanOrEqual(point)
         found = range.start
       stop()
 
-  found ? position
+  found ? point
 
-getEndOfWordBufferPosition = (editor, position, {wordRegex}={}) ->
-  scanRange = [position, editor.getEofBufferPosition()]
+getEndOfWordBufferPosition = (editor, point, {wordRegex}={}) ->
+  scanRange = [point, [point.row, Infinity]]
+
   found = null
   editor.scanInBufferRange wordRegex, scanRange, ({range, matchText, stop}) ->
-    # Ignore 'empty line' matches between '\r' and '\n'
     return if matchText is '' and range.start.column isnt 0
-
-    if range.end.isGreaterThan(position)
-      if range.start.isLessThanOrEqual(position)
+    if range.end.isGreaterThan(point)
+      if range.start.isLessThanOrEqual(point)
         found = range.end
       stop()
 
-  found ? position
+  found ? point
 
 getWordBufferRangeAtBufferPosition = (editor, position, options={}) ->
   startPosition = getBeginningOfWordBufferPosition(editor, position, options)
-  endPosition = getEndOfWordBufferPosition(editor, position, options)
+  endPosition = getEndOfWordBufferPosition(editor, startPosition, options)
   new Range(startPosition, endPosition)
 
 getWordPatternAtCursor = (cursor, options={}) ->
