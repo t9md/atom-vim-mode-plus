@@ -1,3 +1,4 @@
+Delegato = require 'delegato'
 _ = require 'underscore-plus'
 
 {Disposable, CompositeDisposable} = require 'atom'
@@ -19,8 +20,10 @@ swrap = require './selection-wrapper'
 #    if executable, then pop stack then execute(poppedOperation)
 #    if not executable, enter "operator-pending-mode"
 class OperationStack
+  Delegato.includeInto(this)
+  @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
   constructor: (@vimState) ->
-    {@editor, @editorElement} = @vimState
+    {@editor, @editorElement, @modeManager} = @vimState
 
     Select ?= Base.getClass('Select')
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
@@ -70,23 +73,22 @@ class OperationStack
   # -------------------------
   run: (klass, properties={}) ->
     try
-      switch type = typeof(klass)
-        when 'string', 'function'
-          klass = Base.getClass(klass) if type is 'string'
-          # When identical operator repeated, it set target to MoveToRelativeLine.
-          #  e.g. `dd`, `cc`, `gUgU`
-          klass = MoveToRelativeLine if (@peekTop()?.constructor is klass)
+      type = typeof(klass)
+      unless type in ['string', 'function', 'object']
+        throw new Error('Unsupported type of operation')
 
-          operation = new klass(@vimState, properties)
+      if type is 'object' # . repeat case we can execute as-it-is.
+        operation = klass
+      else
+        klass = Base.getClass(klass) if type is 'string'
+        # Replace operator when identical one repeated, e.g. `dd`, `cc`, `gUgU`
+        klass = MoveToRelativeLine if (@peekTop()?.constructor is klass)
 
-          # Compliment implicit Select operator
-          {mode} = @vimState
-          if operation.isTextObject() and mode isnt 'operator-pending' or operation.isMotion() and mode is 'visual'
-            operation = new Select(@vimState).setTarget(operation)
-        when 'object' # . repeat case
-          operation = klass
-        else
-          throw new Error('Unsupported type of operation')
+        operation = new klass(@vimState, properties)
+
+        # Compliment implicit Select operator
+        if operation.isTextObject() and @mode isnt 'operator-pending' or operation.isMotion() and @mode is 'visual'
+          operation = new Select(@vimState).setTarget(operation)
 
       if @isEmpty() or (@peekTop().isOperator() and operation.isTarget())
         @push(operation)
@@ -127,7 +129,7 @@ class OperationStack
     if top.isComplete()
       @execute(@pop())
     else
-      if @vimState.isMode('normal') and top.isOperator()
+      if @mode is 'normal' and top.isOperator()
         @vimState.activate('operator-pending')
 
       # Temporary set while command is running
@@ -152,10 +154,10 @@ class OperationStack
     @recordedOperation = operation if operation?.isRecordable()
     @vimState.emitter.emit('did-finish-operation')
 
-    if @vimState.isMode('normal')
+    if @mode is 'normal'
       @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()
-    if @vimState.isMode('visual')
+    if @mode is 'visual'
       @vimState.modeManager.updateNarrowedState()
     @vimState.updateCursorsVisibility()
     @vimState.reset()
