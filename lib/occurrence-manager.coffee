@@ -1,6 +1,7 @@
+_ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
 
-{scanEditor, getWordPatternAtBufferPosition} = require './utils'
+{scanEditor, getWordBufferRangeAndKindAtBufferPosition} = require './utils'
 
 module.exports =
 class OccurrenceManager
@@ -49,15 +50,17 @@ class OccurrenceManager
     @patterns = []
     @emitter.emit('did-change-patterns', {})
 
+  addPatternForWordAtPoint: (point) ->
+    pattern = @getWordPatternAtBufferPosition(point, singleNonWordChar: true)
+    @addPattern(pattern)
+
   addPattern: (pattern=null) ->
-    point = @editor.getCursorBufferPosition()
-    pattern ?= getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
+    unless pattern
+      point = @editor.getCursorBufferPosition()
+      pattern = @getWordPatternAtBufferPosition(point)
+    console.log 'add', pattern
     @patterns.push(pattern)
     @emitter.emit('did-change-patterns', {newPattern: pattern})
-
-  replacePattern: (pattern=null) ->
-    @resetPatterns() # clear existing marker
-    @addPattern(pattern)
 
   # Return regex representing final pattern.
   # Used to cache final pattern to each instance of operator so that we can
@@ -66,6 +69,13 @@ class OccurrenceManager
   buildPattern: ->
     source = @patterns.map((pattern) -> pattern.source).join('|')
     new RegExp(source, 'g')
+
+  getWordPatternAtBufferPosition: (point, options={}) ->
+    {range, kind} = getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
+    pattern = _.escapeRegExp(@editor.getTextInBufferRange(range))
+    if kind is 'word'
+      pattern = "\\b" + pattern + "\\b"
+    new RegExp(pattern, 'g')
 
   # Markers
   # -------------------------

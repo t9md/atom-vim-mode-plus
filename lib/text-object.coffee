@@ -20,7 +20,6 @@ swrap = require './selection-wrapper'
   getStartPositionForPattern
   getEndPositionForPattern
   getVisibleBufferRange
-  buildWordPatternByCursor
 
   getBufferRangeWithExcludeSurroundingWhiteSpaces
 } = require './utils'

@@ -705,14 +705,6 @@ getWordBufferRangeAtBufferPosition = (editor, position, options={}) ->
 getWordPatternAtCursor = (cursor, options={}) ->
   getWordPatternAtCursor(cursor.editor, cursor.getBufferPosition(), options)
 
-getWordPatternAtBufferPosition = (editor, point, options={}) ->
-  {range, kind} = getWordBufferRangeAndKindAtBufferPosition(editor, point, options)
-  cursorWord = editor.getTextInBufferRange(range)
-  pattern = _.escapeRegExp(cursorWord)
-  if kind is 'word'
-    pattern = "\\b" + pattern + "\\b"
-  new RegExp(pattern, 'g')
-
 adjustRangeToRowRange = ({start, end}, options={}) ->
   # when linewise, end row is at column 0 of NEXT line
   # So need adjust to actually selected row in same way as Seleciton::getBufferRowRange()
@@ -925,7 +917,6 @@ module.exports = {
   getWordBufferRangeAndKindAtBufferPosition
   getNonWordCharactersForCursor
   getWordPatternAtCursor
-  getWordPatternAtBufferPosition
   adjustRangeToRowRange
   shrinkRangeEndToBeforeNewLine
   scanInRanges

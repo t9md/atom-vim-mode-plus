@@ -6,7 +6,6 @@ Delegato = require 'delegato'
   getVimLastBufferRow
   getVimLastScreenRow
   getWordBufferRangeAndKindAtBufferPosition
-  getWordPatternAtBufferPosition
 } = require './utils'
 
 settings = require './settings'
@@ -204,11 +203,8 @@ class Base
   getVimLastScreenRow: ->
     getVimLastScreenRow(@editor)
 
-  getWordBufferRangeAndKindAtBufferPosition: (point, options={}) ->
+  getWordBufferRangeAndKindAtBufferPosition: (point, options) ->
     getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
-
-  getWordPatternAtBufferPosition: (point, options={}) ->
-    getWordPatternAtBufferPosition(@editor, point, options)
 
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)

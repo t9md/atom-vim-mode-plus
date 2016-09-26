@@ -68,8 +68,11 @@ class ModeManager
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
 
+    @updateNarrowedState() if @mode is 'visual'
+
     @vimState.statusBarManager.update(@mode, @submode)
     @vimState.updateCursorsVisibility()
+
     @emitter.emit('did-activate-mode', {@mode, @submode})
 
   deactivate: ->
@@ -144,8 +147,6 @@ class ModeManager
         @vimState.selectLinewise()
       when 'blockwise'
         @vimState.selectBlockwise() unless swrap(@editor.getLastSelection()).isLinewise()
-
-    @updateNarrowedState()
 
     new Disposable =>
       @normalizeSelections(preservePreviousSelection: true)

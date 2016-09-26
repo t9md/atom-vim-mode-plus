@@ -106,7 +106,8 @@ class Operator extends Base
       if occurrence?
         if @occurrence = occurrence
           @addToClassList('with-occurrence')
-          @occurrenceManager.replacePattern()
+          @occurrenceManager.resetPatterns() # clear existing marker
+          @occurrenceManager.addPattern()
 
     # When preset-occurrence was exists, auto enable occurrence-wise
     if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
@@ -125,6 +126,7 @@ class Operator extends Base
       @addToClassList('with-occurrence')
       unless @occurrenceManager.hasMarkers()
         @occurrenceManager.addPattern(@patternForOccurence)
+
 
   # target is TextObject or Motion to operate on.
   setTarget: (@target) ->
@@ -356,11 +358,9 @@ class PresetOccurrence extends Operator
     if marker = @occurrenceManager.getMarkerAtPoint(@editor.getCursorBufferPosition())
       marker.destroy()
     else
+      pattern = null
       if @isMode('visual') and text = @editor.getSelectedText()
         pattern = new RegExp(_.escapeRegExp(text), 'g')
-      point = @editor.getCursorBufferPosition()
-      pattern ?= @getWordPatternAtBufferPosition(point, singleNonWordChar: true)
-
       @occurrenceManager.addPattern(pattern)
       @activateMode('normal')
 
