@@ -408,7 +408,7 @@ class MapSurround extends Surround
   @extend()
   @description: "Surround each word(`/\w+/`) within target"
   occurrence: true
-  patternForOccurence: /\w+/g
+  patternForOccurrence: /\w+/g
 
 class DeleteSurround extends Surround
   @extend()

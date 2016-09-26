@@ -11,7 +11,6 @@ _ = require 'underscore-plus'
   cursorIsAtEmptyRow
   scanInRanges
   getVisibleBufferRange
-  shrinkRangeEndToBeforeNewLine
 
   selectedRange
   selectedText
@@ -31,7 +30,7 @@ class Operator extends Base
   wise: null
   occurrence: false
 
-  patternForOccurence: null
+  patternForOccurrence: null
   stayOnLinewise: false
   stayAtSamePosition: null
   clipToMutationEndOnStay: true
@@ -100,18 +99,8 @@ class Operator extends Base
     @initialize()
 
     @onDidSetOperatorModifier ({occurrence, wise}) =>
-      if wise?
-        @wise = wise
-
-      if occurrence?
-        if @occurrence = occurrence
-          @addToClassList('with-occurrence')
-          @occurrenceManager.resetPatterns() # clear existing marker
-          @occurrenceManager.addPattern()
-
-    # When preset-occurrence was exists, auto enable occurrence-wise
-    if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
-      @occurrence = true
+      @wise = wise if wise?
+      @setOccurrence('modifier') if occurrence?
 
     # In visual-mode and target was not pre-set, operate on selected area.
     @target ?= "CurrentSelection" if @isMode('visual')
@@ -119,14 +108,30 @@ class Operator extends Base
     if _.isString(@target)
       @setTarget(@new(@target))
 
-    if @isOccurrence() and not @isComplete()
-      # [FIXME]
-      # Why we have to check @isComplete() is because we shoulld not render
-      # marker here in visual-mode, since cursor position is not normalized yet
-      @addToClassList('with-occurrence')
-      unless @occurrenceManager.hasMarkers()
-        @occurrenceManager.addPattern(@patternForOccurence)
+    # When preset-occurrence was exists, auto enable occurrence-wise
+    if @occurrence
+      @setOccurrence('static')
+    else if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
+      @setOccurrence('preset')
 
+  # type is one of ['preset', 'modifier']
+  setOccurrence: (type) ->
+    @addToClassList('with-occurrence')
+    @occurrence = true
+    switch type
+      when 'static'
+        unless @isComplete() # we enter operator-pending
+          debug 'static: mark as we enter operator-pending'
+          @addToClassList('with-occurrence')
+          unless @occurrenceManager.hasMarkers()
+            @occurrenceManager.addPattern(@patternForOccurrence)
+      when 'preset'
+        debug 'preset: nothing to do since we have markers already'
+        @addToClassList('with-occurrence')
+      when 'modifier'
+        debug 'modifier: overwrite existing marker when manually typed `o`'
+        @occurrenceManager.resetPatterns() # clear existing marker
+        @occurrenceManager.addPattern() # mark cursor word.
 
   # target is TextObject or Motion to operate on.
   setTarget: (@target) ->
@@ -178,24 +183,26 @@ class Operator extends Base
 
     wasVisual = @isMode('visual')
     if wasVisual
-      scanRanges = @editor.getSelectedBufferRanges()
-      # FIXME should not clear selection, clearing here means, when target is CurrentSelection,
-      # To say simply clearing here breaks `.` repeat capability.
-      # its get emptySelection that result in `.` repeat works on empty seleccion.
+      scanRanges = @editor.getSelectedBufferRanges() # save before clear selection.
+      # [FIXME] Deactivating to normalize cursor position to capture cursor word,
+      # but we also breaks `.` repeatability.
       @vimState.modeManager.deactivate()
 
     cursorPositionManager.save('head')
     unless @occurrenceManager.hasMarkers()
-      @occurrenceManager.addPattern(@patternForOccurence)
-    @patternForOccurence ?= @occurrenceManager.buildPattern() # save for repeat.
+      @occurrenceManager.addPattern(@patternForOccurrence)
 
     fn()
 
     if @occurrenceManager.hasMarkers()
       scanRanges ?= @editor.getSelectedBufferRanges()
-      scanRanges = scanRanges.map (range) -> shrinkRangeEndToBeforeNewLine(range)
       markers = @occurrenceManager.getMarkersIntersectsWithRanges(scanRanges, wasVisual)
       ranges = markers.map (marker) -> marker.getBufferRange()
+
+      # There is possibility that multiple markers are pre-setted manually.
+      # To repeat this multi pre-set occurrences by `.`, we consult manager to cache
+      # bundled(unioned) regex pattern to @patternForOccurrence.
+      @patternForOccurrence ?= @occurrenceManager.buildPattern()
       # We got ranges to select, so good-by @occurrenceManager by reset()
       @occurrenceManager.resetPatterns()
 

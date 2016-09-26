@@ -10,18 +10,17 @@ swrap = require './selection-wrapper'
 
 # opration life in operationStack
 # 1. run
-#    instantiated by new
-#    composed with implicit Operator.Select or Motion.CurrentSelection if necessary
-#    push composed opration to stack
+#    instantiated by new.
+#    compliment implicit Operator.Select operator if necessary.
+#    push operation to stack.
 # 2. process
-#    reduce stack by
-#     pop operation and set it as target of new stack top(which should be operator).
+#    reduce stack by, popping top of stack then set it as target of new top.
 #    check if remaining top of stack is executable by calling isComplete()
 #    if executable, then pop stack then execute(poppedOperation)
 #    if not executable, enter "operator-pending-mode"
 class OperationStack
   constructor: (@vimState) ->
-    {@editor, @editorElement, @occurrenceManager} = @vimState
+    {@editor, @editorElement} = @vimState
 
     Select ?= Base.getClass('Select')
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
