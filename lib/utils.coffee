@@ -657,14 +657,16 @@ getWordBufferRangeAndKindAtBufferPosition = (editor, point, options) ->
   range = getWordBufferRangeAtBufferPosition(editor, point, {wordRegex})
   {kind, range}
 
-getCurrentWordBufferRangeAndKind = (cursor, options={}) ->
+# Return options used for getWordBufferRangeAtBufferPosition
+buildWordPatternByCursor = (cursor, {wordRegex}) ->
   nonWordCharacters = getNonWordCharactersForCursor(cursor)
-  options.nonWordCharacters = nonWordCharacters
-  unless options.wordRegex
-    source = "^[\t ]*$|[^\\s#{_.escapeRegExp(nonWordCharacters)}]+"
-    options.wordRegex = new RegExp(source)
+  wordRegex ?= new RegExp("^[\t ]*$|[^\\s#{_.escapeRegExp(nonWordCharacters)}]+")
+  {wordRegex, nonWordCharacters}
 
-  getWordBufferRangeAndKind(cursor.editor, cursor.getBufferPosition(), options)
+getCurrentWordBufferRangeAndKind = (cursor, options={}) ->
+  newOptions = buildWordPatternByCursor(cursor, options)
+  options = _.extend(options, newOptions) # Complement
+  getWordBufferRangeAndKindAtBufferPosition(cursor.editor, cursor.getBufferPosition(), options)
 
 getBeginningOfWordBufferPosition = (editor, position, {wordRegex}={}) ->
   previousNonBlankRow = editor.buffer.previousNonBlankRow(position.row) ? 0
@@ -703,7 +705,8 @@ getWordBufferRangeAtBufferPosition = (editor, position, options={}) ->
 
 getWordPatternAtCursor = (cursor, options={}) ->
   editor = cursor.editor
-  {range, kind} = getCurrentWordBufferRangeAndKind(cursor, options)
+  options = _.extend(options, buildWordPatternByCursor(cursor, options)) # Complement
+  {range, kind} = getWordBufferRangeAndKindAtBufferPosition(editor, cursor.getBufferPosition(), options)
   cursorWord = editor.getTextInBufferRange(range)
   pattern = _.escapeRegExp(cursorWord)
   if kind is 'word'
@@ -917,6 +920,10 @@ module.exports = {
   isSurroundedBySpace
   isSingleLine
   getCurrentWordBufferRangeAndKind
+  buildWordPatternByCursor
+  getWordBufferRangeAtBufferPosition
+  getWordBufferRangeAndKindAtBufferPosition
+  getNonWordCharactersForCursor
   getWordPatternAtCursor
   adjustRangeToRowRange
   shrinkRangeEndToBeforeNewLine

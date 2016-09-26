@@ -7,7 +7,6 @@ _ = require 'underscore-plus'
   haveSomeSelection
   highlightRanges
   isEndsWithNewLineForBufferRow
-  getCurrentWordBufferRangeAndKind
   getWordPatternAtCursor
   getValidVimBufferRow
   cursorIsAtEmptyRow
