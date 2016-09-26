@@ -629,11 +629,14 @@ isSingleLine = (text) ->
 # The modification is tailord like this
 #   - ON white-space: Includs only white-spaces.
 #   - ON non-word: Includs only non word char(=excludes normal word char).
-# Following parameters is mandatory
+#
+# Valid options
 #  - wordRegex: instance of RegExp
 #  - nonWordCharacters: string
 getWordBufferRangeAndKindAtBufferPosition = (editor, point, options) ->
-  {singleNonWordChar, wordRegex, nonWordCharacters} = options
+  {singleNonWordChar, wordRegex, nonWordCharacters, cursor} = options
+  if cursor? and not wordRegex? and not nonWordCharacters? # Complement from cursor
+    {wordRegex, nonWordCharacters} = _.extend(options, buildWordPatternByCursor(cursor, options))
   singleNonWordChar ?= false
 
   characterAtPoint = getCharacterAtBufferPosition(editor, point)
@@ -664,8 +667,6 @@ buildWordPatternByCursor = (cursor, {wordRegex}) ->
   {wordRegex, nonWordCharacters}
 
 getCurrentWordBufferRangeAndKind = (cursor, options={}) ->
-  newOptions = buildWordPatternByCursor(cursor, options)
-  options = _.extend(options, newOptions) # Complement
   getWordBufferRangeAndKindAtBufferPosition(cursor.editor, cursor.getBufferPosition(), options)
 
 getBeginningOfWordBufferPosition = (editor, point, {wordRegex}={}) ->
@@ -702,7 +703,7 @@ getWordBufferRangeAtBufferPosition = (editor, position, options={}) ->
 
 getWordPatternAtCursor = (cursor, options={}) ->
   editor = cursor.editor
-  options = _.extend(options, buildWordPatternByCursor(cursor, options)) # Complement
+  options.cursor = cursor
   {range, kind} = getWordBufferRangeAndKindAtBufferPosition(editor, cursor.getBufferPosition(), options)
   cursorWord = editor.getTextInBufferRange(range)
   pattern = _.escapeRegExp(cursorWord)

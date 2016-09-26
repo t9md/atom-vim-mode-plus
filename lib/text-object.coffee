@@ -80,8 +80,7 @@ class Word extends TextObject
   getRange: (selection) ->
     cursor = selection.cursor
     point = cursor.getBufferPosition()
-    options = buildWordPatternByCursor(cursor, {@wordRegex})
-    {range, kind} = getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
+    {range, kind} = getWordBufferRangeAndKindAtBufferPosition(@editor, point, {@wordRegex, cursor})
     if @isA() and kind is 'word'
       range = @expandRangeToWhiteSpaces(range)
     range
