@@ -20,7 +20,8 @@ swrap = require './selection-wrapper'
   getStartPositionForPattern
   getEndPositionForPattern
   getVisibleBufferRange
-  getCurrentWordBufferRangeAndKind
+  buildWordPatternByCursor
+
   getBufferRangeWithExcludeSurroundingWhiteSpaces
 } = require './utils'
 
@@ -76,7 +77,7 @@ class Word extends TextObject
     super
 
   getRange: (selection) ->
-    {range, kind} = getCurrentWordBufferRangeAndKind(selection.cursor, {@wordRegex})
+    {range, kind} = @getWordBufferRangeAndKindAtBufferPosition(selection.cursor.getBufferPosition(), {@wordRegex})
     if @isA() and kind is 'word'
       range = @expandRangeToWhiteSpaces(range)
     range

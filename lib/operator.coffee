@@ -7,8 +7,6 @@ _ = require 'underscore-plus'
   haveSomeSelection
   highlightRanges
   isEndsWithNewLineForBufferRow
-  getCurrentWordBufferRangeAndKind
-  getWordPatternAtCursor
   getValidVimBufferRow
   cursorIsAtEmptyRow
   scanInRanges
@@ -360,7 +358,8 @@ class PresetOccurrence extends Operator
     else
       if @isMode('visual') and text = @editor.getSelectedText()
         pattern = new RegExp(_.escapeRegExp(text), 'g')
-      pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
+      point = @editor.getCursorBufferPosition()
+      pattern ?= @getWordPatternAtBufferPosition(point, singleNonWordChar: true)
 
       @occurrenceManager.addPattern(pattern)
       @activateMode('normal')

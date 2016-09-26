@@ -183,12 +183,19 @@ pointIsAtEndOfLine = (editor, point) ->
 getCharacterAtCursor = (cursor) ->
   getTextInScreenRange(cursor.editor, cursor.getScreenRange())
 
+getCharacterAtBufferPosition = (editor, startPosition) ->
+  endPosition = startPosition.translate([0, 1])
+  editor.getTextInBufferRange([startPosition, endPosition])
+
 getTextInScreenRange = (editor, screenRange) ->
   bufferRange = editor.bufferRangeForScreenRange(screenRange)
   editor.getTextInBufferRange(bufferRange)
 
 cursorIsOnWhiteSpace = (cursor) ->
   isAllWhiteSpace(getCharacterAtCursor(cursor))
+
+pointIsOnWhiteSpace = (editor, point) ->
+  isAllWhiteSpace(getCharacterAtBufferPosition(editor, point))
 
 getNonWordCharactersForCursor = (cursor) ->
   # Atom 1.11.0-beta5 have this experimental method.
@@ -200,6 +207,9 @@ getNonWordCharactersForCursor = (cursor) ->
 
 cursorIsOnNonWordCharacter = (cursor) ->
   getCharacterAtCursor(cursor) in getNonWordCharactersForCursor(cursor)
+
+pointIsOnNonWordCharacter = (editor, point, {nonWordCharacters}) ->
+  getCharacterAtBufferPosition(editor, point) in nonWordCharacters
 
 getWordRegExpForPointWithCursor = (cursor, point) ->
   options = {}
@@ -619,35 +629,84 @@ isSingleLine = (text) ->
 # The modification is tailord like this
 #   - ON white-space: Includs only white-spaces.
 #   - ON non-word: Includs only non word char(=excludes normal word char).
-getCurrentWordBufferRangeAndKind = (cursor, {singleNonWordChar, wordRegex}={}) ->
+#
+# Valid options
+#  - wordRegex: instance of RegExp
+#  - nonWordCharacters: string
+getWordBufferRangeAndKindAtBufferPosition = (editor, point, options) ->
+  {singleNonWordChar, wordRegex, nonWordCharacters, cursor} = options
+  if not wordRegex? and not nonWordCharacters? # Complement from cursor
+    cursor ?= editor.getLastCursor()
+    {wordRegex, nonWordCharacters} = _.extend(options, buildWordPatternByCursor(cursor, options))
   singleNonWordChar ?= false
 
-  if cursorIsOnWhiteSpace(cursor)
+  characterAtPoint = getCharacterAtBufferPosition(editor, point)
+  nonWordRegex = new RegExp("[#{_.escapeRegExp(nonWordCharacters)}]+")
+
+  if /\s/.test(characterAtPoint)
     source = "[\t ]+"
     kind = 'white-space'
     wordRegex = new RegExp(source)
-  else if cursorIsOnNonWordCharacter(cursor) and not wordRegex?.test(getCharacterAtCursor(cursor))
-    if singleNonWordChar
-      source = _.escapeRegExp(getCharacterAtCursor(cursor))
-    else
-      nonWordCharacters = _.escapeRegExp(getNonWordCharactersForCursor(cursor))
-      source = "[#{nonWordCharacters}]+"
-
+  else if nonWordRegex.test(characterAtPoint) and not wordRegex.test(characterAtPoint)
     kind = 'non-word'
-    wordRegex = new RegExp(source)
+    if singleNonWordChar
+      source = _.escapeRegExp(characterAtPoint)
+      wordRegex = new RegExp(source)
+    else
+      wordRegex = nonWordRegex
   else
     kind = 'word'
-    wordRegex ?= do ->
-      nonWordCharacters = _.escapeRegExp(getNonWordCharactersForCursor(cursor))
-      source = "^[\t ]*$|[^\\s#{nonWordCharacters}]+"
-      new RegExp(source)
 
-  range = cursor.getCurrentWordBufferRange({wordRegex})
+  # range = cursor.getCurrentWordBufferRange({wordRegex})
+  range = getWordBufferRangeAtBufferPosition(editor, point, {wordRegex})
   {kind, range}
 
+# Return options used for getWordBufferRangeAtBufferPosition
+buildWordPatternByCursor = (cursor, {wordRegex}) ->
+  nonWordCharacters = getNonWordCharactersForCursor(cursor)
+  wordRegex ?= new RegExp("^[\t ]*$|[^\\s#{_.escapeRegExp(nonWordCharacters)}]+")
+  {wordRegex, nonWordCharacters}
+
+getCurrentWordBufferRangeAndKind = (cursor, options={}) ->
+  getWordBufferRangeAndKindAtBufferPosition(cursor.editor, cursor.getBufferPosition(), options)
+
+getBeginningOfWordBufferPosition = (editor, point, {wordRegex}={}) ->
+  scanRange = [[point.row, 0], point]
+
+  found = null
+  editor.backwardsScanInBufferRange wordRegex, scanRange, ({range, matchText, stop}) ->
+    return if matchText is '' and range.start.column isnt 0
+
+    if range.start.isLessThan(point)
+      if range.end.isGreaterThanOrEqual(point)
+        found = range.start
+      stop()
+
+  found ? point
+
+getEndOfWordBufferPosition = (editor, point, {wordRegex}={}) ->
+  scanRange = [point, [point.row, Infinity]]
+
+  found = null
+  editor.scanInBufferRange wordRegex, scanRange, ({range, matchText, stop}) ->
+    return if matchText is '' and range.start.column isnt 0
+    if range.end.isGreaterThan(point)
+      if range.start.isLessThanOrEqual(point)
+        found = range.end
+      stop()
+
+  found ? point
+
+getWordBufferRangeAtBufferPosition = (editor, position, options={}) ->
+  startPosition = getBeginningOfWordBufferPosition(editor, position, options)
+  endPosition = getEndOfWordBufferPosition(editor, startPosition, options)
+  new Range(startPosition, endPosition)
+
 getWordPatternAtCursor = (cursor, options={}) ->
-  editor = cursor.editor
-  {range, kind} = getCurrentWordBufferRangeAndKind(cursor, options)
+  getWordPatternAtCursor(cursor.editor, cursor.getBufferPosition(), options)
+
+getWordPatternAtBufferPosition = (editor, point, options={}) ->
+  {range, kind} = getWordBufferRangeAndKindAtBufferPosition(editor, point, options)
   cursorWord = editor.getTextInBufferRange(range)
   pattern = _.escapeRegExp(cursorWord)
   if kind is 'word'
@@ -861,7 +920,12 @@ module.exports = {
   isSurroundedBySpace
   isSingleLine
   getCurrentWordBufferRangeAndKind
+  buildWordPatternByCursor
+  getWordBufferRangeAtBufferPosition
+  getWordBufferRangeAndKindAtBufferPosition
+  getNonWordCharactersForCursor
   getWordPatternAtCursor
+  getWordPatternAtBufferPosition
   adjustRangeToRowRange
   shrinkRangeEndToBeforeNewLine
   scanInRanges
