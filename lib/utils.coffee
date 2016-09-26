@@ -635,7 +635,8 @@ isSingleLine = (text) ->
 #  - nonWordCharacters: string
 getWordBufferRangeAndKindAtBufferPosition = (editor, point, options) ->
   {singleNonWordChar, wordRegex, nonWordCharacters, cursor} = options
-  if cursor? and not wordRegex? and not nonWordCharacters? # Complement from cursor
+  if not wordRegex? and not nonWordCharacters? # Complement from cursor
+    cursor ?= editor.getLastCursor()
     {wordRegex, nonWordCharacters} = _.extend(options, buildWordPatternByCursor(cursor, options))
   singleNonWordChar ?= false
 
@@ -702,9 +703,10 @@ getWordBufferRangeAtBufferPosition = (editor, position, options={}) ->
   new Range(startPosition, endPosition)
 
 getWordPatternAtCursor = (cursor, options={}) ->
-  editor = cursor.editor
-  options.cursor = cursor
-  {range, kind} = getWordBufferRangeAndKindAtBufferPosition(editor, cursor.getBufferPosition(), options)
+  getWordPatternAtCursor(cursor.editor, cursor.getBufferPosition(), options)
+
+getWordPatternAtBufferPosition = (editor, point, options={}) ->
+  {range, kind} = getWordBufferRangeAndKindAtBufferPosition(editor, point, options)
   cursorWord = editor.getTextInBufferRange(range)
   pattern = _.escapeRegExp(cursorWord)
   if kind is 'word'
@@ -923,6 +925,7 @@ module.exports = {
   getWordBufferRangeAndKindAtBufferPosition
   getNonWordCharactersForCursor
   getWordPatternAtCursor
+  getWordPatternAtBufferPosition
   adjustRangeToRowRange
   shrinkRangeEndToBeforeNewLine
   scanInRanges

@@ -1,6 +1,6 @@
 {Emitter, CompositeDisposable} = require 'atom'
 
-{getWordPatternAtCursor, scanEditor} = require './utils'
+{scanEditor, getWordPatternAtBufferPosition} = require './utils'
 
 module.exports =
 class OccurrenceManager
@@ -50,7 +50,8 @@ class OccurrenceManager
     @emitter.emit('did-change-patterns', {})
 
   addPattern: (pattern=null) ->
-    pattern ?= getWordPatternAtCursor(@editor.getLastCursor(), singleNonWordChar: true)
+    point = @editor.getCursorBufferPosition()
+    pattern ?= getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
     @patterns.push(pattern)
     @emitter.emit('did-change-patterns', {newPattern: pattern})
 
