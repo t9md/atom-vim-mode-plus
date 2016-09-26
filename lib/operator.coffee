@@ -101,12 +101,29 @@ class Operator extends Base
 
     @initialize()
 
+    @onDidSetOperatorModifier ({occurrence, wise}) =>
+      if wise?
+        @wise = wise
+
+      if occurrence?
+        if @occurrence = occurrence
+          @addToClassList('with-occurrence')
+          @occurrenceManager.replacePattern()
+
+    @onDidActivateMode ({mode, submode}) =>
+      if mode is 'operator-pending'
+        if @isOccurrence()
+          @addToClassList('with-occurrence')
+          unless @occurrenceManager.hasMarkers()
+            @occurrenceManager.addPattern(@patternForOccurence)
+
     # When preset-occurrence was exists, auto enable occurrence-wise
     if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
       @occurrence = true
 
-    # In visual-mode and target was pre-set, operate on selected area.
+    # In visual-mode and target was not pre-set, operate on selected area.
     @target ?= "CurrentSelection" if @isMode('visual')
+
     if _.isString(@target)
       @setTarget(@new(@target))
 

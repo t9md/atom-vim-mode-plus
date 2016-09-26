@@ -37,7 +37,7 @@ class VimState
 
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
-  @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', toProperty: 'operationStack')
+  @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', 'addToClassList', toProperty: 'operationStack')
 
   constructor: (@editor, @statusBarManager, @globalState) ->
     @editorElement = @editor.element
@@ -150,11 +150,21 @@ class VimState
   preemptDidSelectTarget: (fn) -> @subscribe @emitter.preempt('did-select-target', fn)
   onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
 
+  onDidSetOperatorModifier: (fn) -> @subscribe @emitter.on('did-set-operator-modifier', fn)
+  emitDidSetOperatorModifier: (options) -> @emitter.emit('did-set-operator-modifier', options)
+
   onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
 
   # Select list view
-  onDidConfirmSelectList: (fn, subscribe) -> @subscribe(@emitter.on('did-confirm-select-list', fn), subscribe)
-  onDidCancelSelectList: (fn, subscribe) -> @subscribe(@emitter.on('did-cancel-select-list', fn), subscribe)
+  onDidConfirmSelectList: (fn) -> @subscribe @emitter.on('did-confirm-select-list', fn)
+  onDidCancelSelectList: (fn) -> @subscribe @emitter.on('did-cancel-select-list', fn)
+
+  # Proxying modeManger's event hook with short-life subscription.
+  onWillActivateMode: (fn) -> @subscribe @modeManager.onWillActivateMode(fn)
+  onDidActivateMode: (fn) -> @subscribe @modeManager.onDidActivateMode(fn)
+  onWillDeactivateMode: (fn) -> @subscribe @modeManager.onWillDeactivateMode(fn)
+  preemptWillDeactivateMode: (fn) -> @subscribe @modeManager.preemptWillDeactivateMode(fn)
+  onDidDeactivateMode: (fn) -> @subscribe @modeManager.onDidDeactivateMode(fn)
 
   # Events
   # -------------------------

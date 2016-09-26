@@ -30,6 +30,13 @@ vimStateMethods = [
   "preemptWillSelectTarget"
   "preemptDidSelectTarget"
   "onDidRestoreCursorPositions"
+  "onDidSetOperatorModifier"
+
+  "onWillActivateMode"
+  "onDidActivateMode"
+  "onWillDeactivateMode"
+  "preemptWillDeactivateMode"
+  "onDidDeactivateMode"
 
   "onDidFinishOperation"
 
@@ -38,6 +45,7 @@ vimStateMethods = [
   "isMode"
   "getBlockwiseSelections"
   "updateSelectionProperties"
+  "addToClassList"
 ]
 
 class Base

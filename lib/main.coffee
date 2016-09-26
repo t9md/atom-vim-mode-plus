@@ -125,9 +125,9 @@ module.exports =
       'activate-blockwise-visual-mode': -> @activate('visual', 'blockwise')
       'reset-normal-mode': -> @resetNormalMode(userInvocation: true)
       'set-register-name': -> @register.setName() # "
-      'operator-modifier-characterwise': -> @operationStack.setOperatorModifier(wise: 'characterwise')
-      'operator-modifier-linewise': -> @operationStack.setOperatorModifier(wise: 'linewise')
-      'operator-modifier-occurrence': -> @operationStack.setOperatorModifier(occurrence: true)
+      'operator-modifier-characterwise': -> @emitDidSetOperatorModifier(wise: 'characterwise')
+      'operator-modifier-linewise': -> @emitDidSetOperatorModifier(wise: 'linewise')
+      'operator-modifier-occurrence': -> @emitDidSetOperatorModifier(occurrence: true)
       'repeat': -> @reapatRecordedOperation()
       'set-count-0': -> @setCount(0)
       'set-count-1': -> @setCount(1)

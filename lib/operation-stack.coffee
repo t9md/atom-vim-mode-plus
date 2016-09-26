@@ -130,10 +130,6 @@ class OperationStack
     else
       if @vimState.isMode('normal') and top.isOperator()
         @vimState.activate('operator-pending')
-        if top.isOccurrence()
-          @addToClassList('with-occurrence')
-          unless @occurrenceManager.hasMarkers()
-            @occurrenceManager.addPattern(top.patternForOccurence)
 
       # Temporary set while command is running
       if commandName = top.constructor.getCommandNameWithoutPrefix?()
@@ -181,17 +177,6 @@ class OperationStack
     @editorElement.classList.add(className)
     @subscribe new Disposable =>
       @editorElement.classList.remove(className)
-
-  # This is method is called only by user explicitly by `o` e.g. `c o i p`, `d v j`.
-  setOperatorModifier: (modifiers) ->
-    # In operator-pending-mode, stack length is always 1 and its' operator.
-    # So either of @peekTop() or @peekBottom() is OK
-    operator = @peekBottom()
-    for name, value of modifiers when name in ['occurrence', 'wise']
-      operator[name] = value
-      if name is "occurrence" and value
-        @addToClassList('with-occurrence')
-        @occurrenceManager.replacePattern()
 
   # Count
   # -------------------------
