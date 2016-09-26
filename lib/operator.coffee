@@ -110,13 +110,6 @@ class Operator extends Base
           @addToClassList('with-occurrence')
           @occurrenceManager.replacePattern()
 
-    @onDidActivateMode ({mode, submode}) =>
-      if mode is 'operator-pending'
-        if @isOccurrence()
-          @addToClassList('with-occurrence')
-          unless @occurrenceManager.hasMarkers()
-            @occurrenceManager.addPattern(@patternForOccurence)
-
     # When preset-occurrence was exists, auto enable occurrence-wise
     if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
       @occurrence = true
@@ -126,6 +119,14 @@ class Operator extends Base
 
     if _.isString(@target)
       @setTarget(@new(@target))
+
+    if @isOccurrence() and not @isComplete()
+      # [FIXME]
+      # Why we have to check @isComplete() is because we shoulld not render
+      # marker here in visual-mode, since cursor position is not normalized yet
+      @addToClassList('with-occurrence')
+      unless @occurrenceManager.hasMarkers()
+        @occurrenceManager.addPattern(@patternForOccurence)
 
   # target is TextObject or Motion to operate on.
   setTarget: (@target) ->
