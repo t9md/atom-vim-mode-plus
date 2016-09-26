@@ -58,7 +58,6 @@ class OccurrenceManager
     unless pattern
       point = @editor.getCursorBufferPosition()
       pattern = @getWordPatternAtBufferPosition(point)
-    console.log 'add', pattern
     @patterns.push(pattern)
     @emitter.emit('did-change-patterns', {newPattern: pattern})
 
