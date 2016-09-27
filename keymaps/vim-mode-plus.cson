@@ -131,7 +131,7 @@
   # 'g r':   'vim-mode-plus:reverse'
   # 'g s':   'vim-mode-plus:sort'
   # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
-  # 'g m': 'vim-mode-plus:toggle-range-marker'
+  # 'g m': 'vim-mode-plus:toggle-persistent-selection'
 
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
@@ -279,9 +279,9 @@
   '0': 'vim-mode-plus:set-count-0'
   '%': 'vim-mode-plus:move-to-line-by-percent'
 
-'atom-text-editor.vim-mode-plus.with-range-marker:not(.insert-mode)':
-  'cmd-d': 'vim-mode-plus:select-occurrence-in-a-range-marker'
-  'ctrl-cmd-g': 'vim-mode-plus:select-range-marker'
+'atom-text-editor.vim-mode-plus.with-persistent-selection:not(.insert-mode)':
+  'cmd-d': 'vim-mode-plus:select-occurrence-in-a-persistent-selection'
+  'ctrl-cmd-g': 'vim-mode-plus:select-persistent-selection'
 
 'atom-text-editor.vim-mode-plus.visual-mode.is-narrowed':
   'ctrl-cmd-c': 'vim-mode-plus:change-occurrence'
@@ -349,7 +349,7 @@
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode.with-occurrence':
   'p': 'vim-mode-plus:inner-paragraph'
-  'r': 'vim-mode-plus:a-range-marker'
+  'r': 'vim-mode-plus:a-persistent-selection'
   'f': 'vim-mode-plus:a-function'
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
@@ -458,8 +458,8 @@
   'a c': 'vim-mode-plus:a-latest-change'
   'g v': 'vim-mode-plus:previous-selection'
 
-  'i r': 'vim-mode-plus:inner-range-marker'
-  'a r': 'vim-mode-plus:a-range-marker'
+  'i r': 'vim-mode-plus:inner-persistent-selection'
+  'a r': 'vim-mode-plus:a-persistent-selection'
 
   'i v': 'vim-mode-plus:inner-visible-area'
   'a v': 'vim-mode-plus:a-visible-area'

@@ -340,12 +340,12 @@ describe "Occurrence", ->
               444: |||: ooo: ooo:
               """
 
-    describe "range-marker is exists", ->
-      rangeMarkerBufferRange = null
+    describe "persistent-selection is exists", ->
+      persistentSelectionBufferRange = null
       beforeEach ->
-        atom.keymaps.add "create-range-marker",
+        atom.keymaps.add "create-persistent-selection",
           'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            'm': 'vim-mode-plus:create-range-marker'
+            'm': 'vim-mode-plus:create-persistent-selection'
 
         set
           text: """
@@ -356,15 +356,15 @@ describe "Occurrence", ->
           """
           cursor: [0, 0]
 
-        rangeMarkerBufferRange = [
+        persistentSelectionBufferRange = [
           [[0, 0], [2, 0]]
           [[3, 0], [4, 0]]
         ]
         ensure 'V j m G m m',
-          rangeMarkerBufferRange: rangeMarkerBufferRange
+          persistentSelectionBufferRange: persistentSelectionBufferRange
 
       describe "when no selection is exists", ->
-        it "select occurrence in all range-marker", ->
+        it "select occurrence in all persistent-selection", ->
           set cursor: [0, 0]
           keystroke '/'
           searchEditor.insertText('xxx')
@@ -377,9 +377,9 @@ describe "Occurrence", ->
               ooo: xxx: |||: xxx: ooo:
               XXX: |||: ooo: ooo:\n
               """
-              rangeMarkerBufferRange: rangeMarkerBufferRange
+              persistentSelectionBufferRange: persistentSelectionBufferRange
 
-      describe "selection is prioritized over range-marker", ->
+      describe "selection is prioritized over persistent-selection", ->
         it "select all occurrence in selection", ->
           set cursor: [0, 0]
           keystroke 'V 2 j /'
@@ -393,17 +393,17 @@ describe "Occurrence", ->
               ooo: XXX: |||: XXX: ooo:
               xxx: |||: ooo: ooo:\n
               """
-              rangeMarkerBufferRange: rangeMarkerBufferRange
+              persistentSelectionBufferRange: persistentSelectionBufferRange
 
-    describe "demonstrate range-marker's practical scenario", ->
+    describe "demonstrate persistent-selection's practical scenario", ->
       [oldGrammar] = []
       afterEach ->
         editor.setGrammar(oldGrammar)
 
       beforeEach ->
-        atom.keymaps.add "create-range-marker",
+        atom.keymaps.add "create-persistent-selection",
           'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            'm': 'vim-mode-plus:toggle-range-marker'
+            'm': 'vim-mode-plus:toggle-persistent-selection'
 
         waitsForPromise ->
           atom.packages.activatePackage('language-coffee-script')
@@ -420,7 +420,7 @@ describe "Occurrence", ->
               @modeManager = new ModeManager(this)
               @mark = new MarkManager(this)
               @register = new RegisterManager(this)
-              @rangeMarkers = []
+              @persistentSelections = []
 
               @highlightSearchSubscription = @editorElement.onDidChangeScrollTop =>
                 @refreshHighlightSearch()
@@ -441,27 +441,27 @@ describe "Occurrence", ->
             keystroke [
               'g cmd-d' # select-occurrence
               'i f'     # inner-function-text-object
-              'm'       # toggle-range-marker
+              'm'       # toggle-persistent-selection
             ].join(" ")
 
-            textsInBufferRange = vimState.rangeMarker.getMarkerBufferRanges().map (range) ->
+            textsInBufferRange = vimState.persistentSelection.getMarkerBufferRanges().map (range) ->
               editor.getTextInBufferRange(range)
             textsInBufferRangeIsAllEqualChar = textsInBufferRange.every((text) -> text is '=')
             expect(textsInBufferRangeIsAllEqualChar).toBe(true)
-            expect(vimState.rangeMarker.getMarkers()).toHaveLength(11)
+            expect(vimState.persistentSelection.getMarkers()).toHaveLength(11)
 
             keystroke '2 l' # to move to out-side of range-mrker
             ensure ['/', search: '=>'], cursor: [9, 69]
-            keystroke "m" # clear rangeMarker at cursor which is = sign part of fat arrow.
-            expect(vimState.rangeMarker.getMarkers()).toHaveLength(10)
+            keystroke "m" # clear persistentSelection at cursor which is = sign part of fat arrow.
+            expect(vimState.persistentSelection.getMarkers()).toHaveLength(10)
 
         waitsFor ->
-          editorElement.classList.contains('with-range-marker')
+          editorElement.classList.contains('with-persistent-selection')
 
         runs ->
           withMockPlatform searchEditorElement, 'platform-darwin' , ->
             keystroke [
-              'ctrl-cmd-g' # select-range-marker
+              'ctrl-cmd-g' # select-persistent-selection
               'I'          # Insert at start of selection
             ]
             editor.insertText('?')
@@ -474,7 +474,7 @@ describe "Occurrence", ->
                 @modeManager ?= new ModeManager(this)
                 @mark ?= new MarkManager(this)
                 @register ?= new RegisterManager(this)
-                @rangeMarkers ?= []
+                @persistentSelections ?= []
 
                 @highlightSearchSubscription ?= @editorElement.onDidChangeScrollTop =>
                   @refreshHighlightSearch()
@@ -544,12 +544,13 @@ describe "Occurrence", ->
           beforeEach ->
             textOriginal = """
               This text have 3 instance of 'text' in the whole text
-              This text have 3 instance of 'text' in the whole text
+              This text have 3 instance of 'text' in the whole text\n
               """
             set
               cursor: [0, 0]
               text: textOriginal
           it "pick ocurrence-word from cursor position and continue visual-mode", ->
+            # swrap(editor.getLastSelection()).clearProperties()
             ensure 'w V j', mode: ['visual', 'linewise'], selectedText: textOriginal
             ensure 'g o',
               mode: ['visual', 'linewise']
@@ -559,7 +560,7 @@ describe "Occurrence", ->
               mode: 'normal'
               text: """
               This !!!! have 3 instance of '!!!!' in the whole !!!!
-              This !!!! have 3 instance of '!!!!' in the whole !!!!
+              This !!!! have 3 instance of '!!!!' in the whole !!!!\n
               """
 
       describe "in incremental-search", ->

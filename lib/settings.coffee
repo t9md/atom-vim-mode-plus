@@ -51,10 +51,10 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'boolean'
     default: false
     description: 'Clear highlightSearch on `escape` in normal-mode'
-  clearRangeMarkerOnResetNormalMode:
+  clearPersistentSelectionOnResetNormalMode:
     type: 'boolean'
     default: false
-    description: 'Clear rangeMarker on `escape` in normal-mode'
+    description: 'Clear persistentSelection on `escape` in normal-mode'
   charactersToAddSpaceOnSurround:
     type: 'array'
     items: type: 'string'

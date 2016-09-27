@@ -121,7 +121,7 @@ class Developer
     ".linewise": 'L'
     ".operator-pending-mode": 'o'
     ".with-count": '#'
-    ".with-range-marker": '%'
+    ".with-persistent-selection": '%'
 
   getCommandSpecs: ->
     compactSelector = (selector) ->
@@ -188,19 +188,19 @@ class Developer
 
     In this document, following abbreviations are used for shortness.
 
-    | Abbrev | Selector                     | Description                 |
-    |:-------|:-----------------------------|:----------------------------|
-    | `!i`   | `:not(.insert-mode)`         | except insert-mode          |
-    | `i`    | `.insert-mode`               |                             |
-    | `o`    | `.operator-pending-mode`     |                             |
-    | `n`    | `.normal-mode`               |                             |
-    | `v`    | `.visual-mode`               |                             |
-    | `vB`   | `.visual-mode.blockwise`     |                             |
-    | `vL`   | `.visual-mode.linewise`      |                             |
-    | `vC`   | `.visual-mode.characterwise` |                             |
-    | `iR`   | `.insert-mode.replace`       |                             |
-    | `#`    | `.with-count`                | when count is specified     |
-    | `%`    | `.with-range-marker`         | when range-marker is exists |
+    | Abbrev | Selector                     | Description                         |
+    |:-------|:-----------------------------|:------------------------------------|
+    | `!i`   | `:not(.insert-mode)`         | except insert-mode                  |
+    | `i`    | `.insert-mode`               |                                     |
+    | `o`    | `.operator-pending-mode`     |                                     |
+    | `n`    | `.normal-mode`               |                                     |
+    | `v`    | `.visual-mode`               |                                     |
+    | `vB`   | `.visual-mode.blockwise`     |                                     |
+    | `vL`   | `.visual-mode.linewise`      |                                     |
+    | `vC`   | `.visual-mode.characterwise` |                                     |
+    | `iR`   | `.insert-mode.replace`       |                                     |
+    | `#`    | `.with-count`                | when count is specified             |
+    | `%`    | `.with-persistent-selection` | when persistent-selection is exists |
 
     """
     @generateSummaryTableForCommandSpecs(@getCommandSpecs(), {header})

@@ -12,12 +12,12 @@ class RangeMakerManager
     @emitter = new Emitter
 
     @markerLayer = @editor.addMarkerLayer()
-    options = {type: 'highlight', class: 'vim-mode-plus-range-marker'}
+    options = {type: 'highlight', class: 'vim-mode-plus-persistent-selection'}
     @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, options)
 
     # Update css on every marker update.
     @markerLayer.onDidUpdate =>
-      @editorElement.classList.toggle("with-range-marker", @hasMarkers())
+      @editorElement.classList.toggle("with-persistent-selection", @hasMarkers())
 
   destroy: ->
     @decorationLayer.destroy()

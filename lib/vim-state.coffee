@@ -27,7 +27,7 @@ BlockwiseSelection = require './blockwise-selection'
 OccurrenceManager = require './occurrence-manager'
 HighlightSearchManager = require './highlight-search-manager'
 MutationTracker = require './mutation-tracker'
-RangeMarkerManager = require './range-marker-manager'
+PersistentSelectionManager = require './persistent-selection-manager'
 
 packageScope = 'vim-mode-plus'
 
@@ -51,7 +51,7 @@ class VimState
     @hoverSearchCounter = new HoverElement().initialize(this)
     @searchHistory = new SearchHistoryManager(this)
     @highlightSearch = new HighlightSearchManager(this)
-    @rangeMarker = new RangeMarkerManager(this)
+    @persistentSelection = new PersistentSelectionManager(this)
     @occurrenceManager = new OccurrenceManager(this)
     @mutationTracker = new MutationTracker(this)
 
@@ -214,7 +214,7 @@ class VimState
       @inputCharSubscriptions
       @occurrenceManager
       @previousSelection
-      @rangeMarker
+      @persistentSelection
     } = {}
     @emitter.emit 'did-destroy'
 
@@ -264,8 +264,8 @@ class VimState
     if userInvocation ? false
       if @editor.hasMultipleCursors()
         @editor.clearSelections()
-      else if @rangeMarker.hasMarkers() and settings.get('clearRangeMarkerOnResetNormalMode')
-        @rangeMarker.clearMarkers()
+      else if @persistentSelection.hasMarkers() and settings.get('clearPersistentSelectionOnResetNormalMode')
+        @persistentSelection.clearMarkers()
       else if @occurrenceManager.hasPatterns()
         @occurrenceManager.resetPatterns()
 

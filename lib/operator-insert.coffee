@@ -262,9 +262,9 @@ class ChangeOccurrenceInAFunctionOrInnerParagraph extends ChangeOccurrence
   @extend()
   target: 'AFunctionOrInnerParagraph'
 
-class ChangeOccurrenceInARangeMarker extends ChangeOccurrence
+class ChangeOccurrenceInAPersistentSelection extends ChangeOccurrence
   @extend()
-  target: "ARangeMarker"
+  target: "APersistentSelection"
 
 class Substitute extends Change
   @extend()

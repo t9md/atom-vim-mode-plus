@@ -221,7 +221,7 @@ class VimEditor
     'selectedScreenRange', 'selectedScreenRangeOrdered'
     'selectedBufferRange', 'selectedBufferRangeOrdered'
     'selectionIsReversed',
-    'rangeMarkerBufferRange'
+    'persistentSelectionBufferRange'
     'occurrenceCount', 'occurrenceText'
     'characterwiseHead'
     'scrollTop',
@@ -305,8 +305,8 @@ class VimEditor
       actual = selection.isReversed()
       expect(actual).toBe(reversed)
 
-  ensureRangeMarkerBufferRange: (range) ->
-    actual = @vimState.rangeMarker.getMarkerBufferRanges()
+  ensurePersistentSelectionBufferRange: (range) ->
+    actual = @vimState.persistentSelection.getMarkerBufferRanges()
     expect(actual).toEqual(toArrayOfRange(range))
 
   ensureOccurrenceCount: (number) ->

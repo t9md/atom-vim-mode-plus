@@ -290,13 +290,13 @@ class SelectPreviousSelection extends Select
     if @target.submode?
       @activateModeIfNecessary('visual', @target.submode)
 
-class SelectRangeMarker extends Select
+class SelectPersistentSelection extends Select
   @extend()
-  @description: "Select range-marker and clear all range-marker. It's like convert each range-marker to selection"
-  target: "ARangeMarker"
+  @description: "Select persistent-selection and clear all persistent-selection, it's like convert to real-selection"
+  target: "APersistentSelection"
   execute: ->
     super
-    @vimState.rangeMarker.clearMarkers()
+    @vimState.persistentSelection.clearMarkers()
 
 class SelectOccurrence extends Operator
   @extend()
@@ -312,9 +312,9 @@ class SelectOccurrence extends Operator
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
 
-class SelectOccurrenceInARangeMarker extends SelectOccurrence
+class SelectOccurrenceInAPersistentSelection extends SelectOccurrence
   @extend()
-  target: "ARangeMarker"
+  target: "APersistentSelection"
 
 class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
   @extend()
@@ -322,20 +322,20 @@ class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
 
 # Range Marker
 # =========================
-class CreateRangeMarker extends Operator
+class CreatePersistentSelection extends Operator
   @extend()
   flashTarget: false
   stayAtSamePosition: true
   acceptPresetOccurrence: false
 
   mutateSelection: (selection) ->
-    @vimState.rangeMarker.markBufferRange(selection.getBufferRange())
+    @vimState.persistentSelection.markBufferRange(selection.getBufferRange())
 
-class ToggleRangeMarker extends CreateRangeMarker
+class TogglePersistentSelection extends CreatePersistentSelection
   @extend()
   isComplete: ->
     point = @editor.getCursorBufferPosition()
-    if @markerToRemove = @vimState.rangeMarker.getMarkerAtPoint(point)
+    if @markerToRemove = @vimState.persistentSelection.getMarkerAtPoint(point)
       true
     else
       super
@@ -346,7 +346,7 @@ class ToggleRangeMarker extends CreateRangeMarker
     else
       super
 
-class ToggleRangeMarkerOnInnerWord extends ToggleRangeMarker
+class TogglePersistentSelectionOnInnerWord extends TogglePersistentSelection
   @extend()
   target: 'InnerWord'
 

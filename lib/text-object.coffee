@@ -804,18 +804,18 @@ class PreviousSelection extends TextObject
       selection = @editor.getLastSelection()
       swrap(selection).selectByProperties(properties)
 
-class RangeMarker extends TextObject
+class PersistentSelection extends TextObject
   @extend(false)
 
   select: ->
-    ranges = @vimState.rangeMarker.getMarkerBufferRanges()
+    ranges = @vimState.persistentSelection.getMarkerBufferRanges()
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
 
-class ARangeMarker extends RangeMarker
+class APersistentSelection extends PersistentSelection
   @extend()
 
-class InnerRangeMarker extends RangeMarker
+class InnerPersistentSelection extends PersistentSelection
   @extend()
 
 # -------------------------

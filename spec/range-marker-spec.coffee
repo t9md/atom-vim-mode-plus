@@ -15,12 +15,12 @@ describe "Range Marker", ->
   afterEach ->
     vimState.resetNormalMode()
 
-  describe "CreateRangeMarker operator", ->
+  describe "CreatePersistentSelection operator", ->
     textForMarker = (marker) ->
       editor.getTextInBufferRange(marker.getBufferRange())
 
-    ensureRangeMarker = (options) ->
-      markers = vimState.rangeMarker.getMarkers()
+    ensurePersistentSelection = (options) ->
+      markers = vimState.persistentSelection.getMarkers()
       if options.length?
         expect(markers).toHaveLength(options.length)
 
@@ -34,7 +34,7 @@ describe "Range Marker", ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g m': 'vim-mode-plus:create-range-marker'
+          'g m': 'vim-mode-plus:create-persistent-selection'
       set
         text: """
         ooo xxx ooo
@@ -47,19 +47,19 @@ describe "Range Marker", ->
         xxx ooo xxx\n
         """
         cursor: [0, 0]
-      expect(vimState.rangeMarker.hasMarkers()).toBe(false)
+      expect(vimState.persistentSelection.hasMarkers()).toBe(false)
 
     describe "basic behavior", ->
-      describe "create-range-marker", ->
-        it "create-range-marker create range marker", ->
+      describe "create-persistent-selection", ->
+        it "create-persistent-selection create range marker", ->
           keystroke('g m i w')
-          ensureRangeMarker length: 1, text: ['ooo']
+          ensurePersistentSelection length: 1, text: ['ooo']
           keystroke('j .')
-          ensureRangeMarker length: 2, text: ['ooo', 'xxx']
-      describe "[No behavior diff currently] inner-range-marker and a-range-marker", ->
-        it "apply operator to across all range-markers", ->
+          ensurePersistentSelection length: 2, text: ['ooo', 'xxx']
+      describe "[No behavior diff currently] inner-persistent-selection and a-persistent-selection", ->
+        it "apply operator to across all persistent-selections", ->
           keystroke('g m i w j . 2 j g m i p') # Mark 2 inner-word and 1 inner-paragraph
-          ensureRangeMarker length: 3, text: ['ooo', 'xxx', "ooo xxx ooo\nxxx ooo xxx\n"]
+          ensurePersistentSelection length: 3, text: ['ooo', 'xxx', "ooo xxx ooo\nxxx ooo xxx\n"]
           ensure 'g U a r',
             text: """
             OOO xxx ooo
@@ -72,12 +72,12 @@ describe "Range Marker", ->
             xxx ooo xxx\n
             """
 
-    describe "select-occurrence-in-a-range-marker", ->
+    describe "select-occurrence-in-a-persistent-selection", ->
       it "select all instance of cursor word only within marked range", ->
         keystroke('g m i p } } j .') # Mark 2 inner-word and 1 inner-paragraph
         paragraphText = "ooo xxx ooo\nxxx ooo xxx\n"
-        ensureRangeMarker length: 2, text: [paragraphText, paragraphText]
-        dispatch(editorElement, 'vim-mode-plus:select-occurrence-in-a-range-marker')
+        ensurePersistentSelection length: 2, text: [paragraphText, paragraphText]
+        dispatch(editorElement, 'vim-mode-plus:select-occurrence-in-a-persistent-selection')
         expect(editor.getSelections()).toHaveLength(6)
         keystroke 'c'
         editor.insertText '!!!'
@@ -93,25 +93,25 @@ describe "Range Marker", ->
           xxx !!! xxx\n
           """
 
-    describe "clearRangeMarkers command", ->
-      it "clear rangeMarkers", ->
+    describe "clearPersistentSelections command", ->
+      it "clear persistentSelections", ->
         keystroke('g m i w')
-        ensureRangeMarker length: 1, text: ['ooo']
-        dispatch(editorElement, 'vim-mode-plus:clear-range-marker')
-        expect(vimState.rangeMarker.hasMarkers()).toBe(false)
+        ensurePersistentSelection length: 1, text: ['ooo']
+        dispatch(editorElement, 'vim-mode-plus:clear-persistent-selection')
+        expect(vimState.persistentSelection.hasMarkers()).toBe(false)
 
-    describe "clearRangeMarkerOnResetNormalMode", ->
+    describe "clearPersistentSelectionOnResetNormalMode", ->
       describe "default setting", ->
-        it "it won't clear rangeMarker", ->
+        it "it won't clear persistentSelection", ->
           keystroke('g m i w')
-          ensureRangeMarker length: 1, text: ['ooo']
+          ensurePersistentSelection length: 1, text: ['ooo']
           dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
-          ensureRangeMarker length: 1, text: ['ooo']
+          ensurePersistentSelection length: 1, text: ['ooo']
 
       describe "when enabled", ->
-        it "it clear rangeMarker on reset-normal-mode", ->
-          settings.set('clearRangeMarkerOnResetNormalMode', true)
+        it "it clear persistentSelection on reset-normal-mode", ->
+          settings.set('clearPersistentSelectionOnResetNormalMode', true)
           keystroke('g m i w')
-          ensureRangeMarker length: 1, text: ['ooo']
+          ensurePersistentSelection length: 1, text: ['ooo']
           dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
-          expect(vimState.rangeMarker.hasMarkers()).toBe(false)
+          expect(vimState.persistentSelection.hasMarkers()).toBe(false)

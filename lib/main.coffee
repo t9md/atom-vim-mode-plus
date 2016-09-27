@@ -80,9 +80,9 @@ module.exports =
     @vimStatesByEditor.forEach(fn)
     @onDidAddVimState(fn)
 
-  clearRangeMarkerForEditors: ->
+  clearPersistentSelectionForEditors: ->
     for editor in atom.workspace.getTextEditors()
-      @getEditorState(editor).rangeMarker.clearMarkers()
+      @getEditorState(editor).persistentSelection.clearMarkers()
 
   deactivate: ->
     @subscriptions.dispose()
@@ -101,7 +101,7 @@ module.exports =
       # Clear all editor's highlight so that we won't see remaining highlight on tab changed.
       'vim-mode-plus:clear-highlight-search': -> globalState.set('highlightSearchPattern', null)
       'vim-mode-plus:toggle-highlight-search': -> settings.toggle('highlightSearch')
-      'vim-mode-plus:clear-range-marker': => @clearRangeMarkerForEditors()
+      'vim-mode-plus:clear-persistent-selection': => @clearPersistentSelectionForEditors()
 
     @subscribe atom.commands.add 'atom-workspace',
       'vim-mode-plus:maximize-pane': => @maximizePane()
