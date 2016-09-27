@@ -137,6 +137,7 @@ class OperationStack
         @addToClassList(commandName + "-pending")
 
   execute: (operation) ->
+    @vimState.updatePreviousSelection() if @mode is 'visual'
     execution = operation.execute()
     if execution instanceof Promise
       execution
@@ -146,7 +147,7 @@ class OperationStack
       @finish(operation)
 
   cancel: ->
-    if @vimState.mode not in ['visual', 'insert']
+    if @mode not in ['visual', 'insert']
       @vimState.resetNormalMode()
     @finish()
 
@@ -159,6 +160,7 @@ class OperationStack
       @ensureAllCursorsAreNotAtEndOfLine()
     if @mode is 'visual'
       @vimState.modeManager.updateNarrowedState()
+      @vimState.updatePreviousSelection()
     @vimState.updateCursorsVisibility()
     @vimState.reset()
 
@@ -194,8 +196,8 @@ class OperationStack
       null
 
   setCount: (number) ->
-    if @vimState.mode is 'operator-pending'
-      mode = @vimState.mode
+    if @mode is 'operator-pending'
+      mode = @mode
     else
       mode = 'normal'
     @count[mode] ?= 0

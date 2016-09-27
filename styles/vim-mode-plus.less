@@ -248,10 +248,11 @@ atom-text-editor, atom-text-editor::shadow {
   .vim-mode-plus-occurrence-match .region {
     .vim-mode-plus.solid-box;
     z-index: 1;
-    // border: 1.5px none @syntax-result-marker-color-selected;
-    // background-color: lighten(@syntax-selection-color, 5%);
-    border: 1.5px none @syntax-color-modified;
-    border-style: none none dotted none;
+    border: 2px none @syntax-color-modified;
+    border-top-style: none;
+    border-right-style: none;
+    border-bottom-style: dotted;
+    border-left-style: none;
   }
 }
 

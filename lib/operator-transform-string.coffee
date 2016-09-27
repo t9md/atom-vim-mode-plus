@@ -196,9 +196,6 @@ class TransformStringByExternalCommand extends TransformString
   stdoutBySelection: null
 
   execute: ->
-    # We need to preserve selection before selection is cleared as a result of mutation.
-    @updatePreviousSelectionIfVisualMode()
-    # Mutation phase
     if @selectTarget()
       new Promise (resolve) =>
         @collect(resolve)

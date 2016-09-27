@@ -799,7 +799,7 @@ class SearchMatchBackward extends SearchMatchForward
 class PreviousSelection extends TextObject
   @extend()
   select: ->
-    {properties, @submode} = @globalState.get('previousSelection')
+    {properties, @submode} = @vimState.previousSelection
     if properties? and @submode?
       selection = @editor.getLastSelection()
       swrap(selection).selectByProperties(properties)

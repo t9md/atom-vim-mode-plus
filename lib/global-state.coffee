@@ -29,7 +29,4 @@ module.exports = new GlobalState
   lastSearchPattern: null
   highlightSearchPattern: null
   currentFind: null
-  previousSelection:
-    properties: null
-    submode: null
   register: {}

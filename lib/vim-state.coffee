@@ -60,6 +60,7 @@ class VimState
     @operationStack = new OperationStack(this)
     @cursorStyleManager = new CursorStyleManager(this)
     @blockwiseSelections = []
+    @previousSelection = {}
     @observeSelection()
 
     refreshHighlightSearch = =>
@@ -204,6 +205,7 @@ class VimState
     @modeManager?.destroy?()
     @operationRecords?.destroy?()
     @register?.destroy?
+
     @clearRangeMarkers()
     {
       @hover, @hoverSearchCounter, @operationStack,
@@ -213,6 +215,7 @@ class VimState
       @editor, @editorElement, @subscriptions,
       @inputCharSubscriptions
       @occurrenceManager
+      @previousSelection
     } = {}
     @emitter.emit 'did-destroy'
 
@@ -346,8 +349,12 @@ class VimState
       properties = @getLastBlockwiseSelection().getCharacterwiseProperties()
     else
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
-
-    @globalState.set('previousSelection', {properties, @submode})
+    {head, tail} = properties
+    if head.isGreaterThan(tail)
+      @mark.setRange('<', '>', [tail, head])
+    else
+      @mark.setRange('<', '>', [head, tail])
+    @previousSelection = {properties, @submode}
 
   eachRangeMarkers: (fn) ->
     for rangeMarker in @getRangeMarkers()

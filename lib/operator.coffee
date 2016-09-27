@@ -47,19 +47,22 @@ class Operator extends Base
   # This mean return value may change depending on when you call.
   needStay: ->
     @stayAtSamePosition ?= do =>
-      if @instanceof('Increase')
-        param = 'stayOnIncrease'
-      else if @instanceof('TransformString')
-        param = 'stayOnTransformString'
-      else if @instanceof('Delete')
-        param = 'stayOnDelete'
-      else
-        param = "stayOn#{@getName()}"
-
+      param = @getStayParam()
       if @isMode('visual', 'linewise')
         settings.get(param)
       else
         settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
+
+  getStayParam: ->
+    switch
+      when @instanceof('Increase')
+        'stayOnIncrease'
+      when @instanceof('TransformString')
+        'stayOnTransformString'
+      when @instanceof('Delete')
+        'stayOnDelete'
+      else
+        "stayOn#{@getName()}"
 
   isOccurrence: ->
     @occurrence
@@ -148,13 +151,10 @@ class Operator extends Base
   # target is TextObject or Motion to operate on.
   setTarget: (@target) ->
     @target.setOperator(this)
-    @modifyTargetWiseIfNecessary()
     @emitDidSetTarget(this)
     this
 
-  modifyTargetWiseIfNecessary: ->
-    return unless @wise?
-
+  forceTargetWise: ->
     switch @wise
       when 'characterwise'
         if @target.linewise
@@ -174,9 +174,6 @@ class Operator extends Base
 
   # Main
   execute: ->
-    # We need to preserve selections before selection is cleared as a result of mutation.
-    @updatePreviousSelectionIfVisualMode()
-    # Mutation phase
     canMutate = true
     stopMutation = -> canMutate = false
     if @selectTarget()
@@ -229,6 +226,7 @@ class Operator extends Base
     )
     @mutationTracker.setCheckPoint('will-select')
 
+    @forceTargetWise() if @wise
     @emitWillSelectTarget()
 
     if @isOccurrence()
@@ -243,10 +241,6 @@ class Operator extends Base
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
     haveSomeSelection(@editor)
-
-  updatePreviousSelectionIfVisualMode: ->
-    return unless @isMode('visual')
-    @vimState.updatePreviousSelection()
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions

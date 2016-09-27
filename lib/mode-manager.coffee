@@ -68,7 +68,9 @@ class ModeManager
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
 
-    @updateNarrowedState() if @mode is 'visual'
+    if @mode is 'visual'
+      @updateNarrowedState()
+      @vimState.updatePreviousSelection()
 
     @vimState.statusBarManager.update(@mode, @submode)
     @vimState.updateCursorsVisibility()
@@ -149,7 +151,7 @@ class ModeManager
         @vimState.selectBlockwise() unless swrap(@editor.getLastSelection()).isLinewise()
 
     new Disposable =>
-      @normalizeSelections(preservePreviousSelection: true)
+      @normalizeSelections()
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
       @updateNarrowedState(false)
 
@@ -163,23 +165,9 @@ class ModeManager
           bs.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
 
-  normalizeSelections: ({preservePreviousSelection}={}) ->
-    preservePreviousSelection ?= false
-
-    if preservePreviousSelection
-      range = @editor.getLastSelection().getBufferRange()
-      @vimState.mark.setRange('<', '>', range)
+  normalizeSelections: ->
     @selectCharacterwise()
-
     swrap.clearProperties(@editor)
-
-    # Here we save previous selection range as characterwise range.
-    # even if original submode was blockwise. since we @selectCharacterwise() to
-    # restore characterwise range. above code.
-    if preservePreviousSelection and not @editor.getLastSelection().isEmpty()
-      lastSelection = @editor.getLastSelection()
-      properties = swrap(lastSelection).detectCharacterwiseProperties()
-      @vimState.globalState.set('previousSelection', {properties, @submode})
 
     # We selectRight()ed in visual-mode, so reset this effect here.
     # `vc`, `vs` make selection empty.
