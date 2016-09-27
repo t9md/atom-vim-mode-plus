@@ -811,6 +811,7 @@ class PersistentSelection extends TextObject
     ranges = @vimState.persistentSelection.getMarkerBufferRanges()
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
+    @vimState.clearPersistentSelections()
 
 class APersistentSelection extends PersistentSelection
   @extend()
@@ -852,6 +853,20 @@ class UnionTextObject extends TextObject
 class AFunctionOrInnerParagraph extends UnionTextObject
   @extend()
   member: ['AFunction', 'InnerParagraph']
+
+
+# FIXME: make Motion.CurrentSelection to TextObject then use concatTextObject
+class ACurrentSelectionAndAPersistentSelection extends TextObject
+  @extend()
+  select: ->
+    pesistentRanges = @vimState.getPersistentSelectionBuffferRanges()
+    selectedRanges = @editor.getSelectedBufferRanges()
+    ranges = pesistentRanges.concat(selectedRanges)
+
+    if ranges.length
+      @editor.setSelectedBufferRanges(ranges)
+    @vimState.clearPersistentSelections()
+    @editor.mergeIntersectingSelections()
 
 # -------------------------
 # Not used currently

@@ -41,6 +41,7 @@ class Operator extends Base
   flashTarget: true
   trackChange: false
   acceptPresetOccurrence: true
+  acceptPersistentSelection: true
 
   # [FIXME]
   # For TextObject, isLinewise result is changed before / after select.
@@ -106,8 +107,7 @@ class Operator extends Base
       @wise = wise if wise?
       @setOccurrence('modifier') if occurrence?
 
-    # In visual-mode and target was not pre-set, operate on selected area.
-    @target ?= "CurrentSelection" if @isMode('visual')
+    @target ?= implicitTarget if implicitTarget = @getImplicitTarget()
 
     if _.isString(@target)
       @setTarget(@new(@target))
@@ -117,6 +117,21 @@ class Operator extends Base
       @setOccurrence('static')
     else if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
       @setOccurrence('preset')
+
+  getImplicitTarget: ->
+    canSelectPersistentSelection =
+      @vimState.hasPersistentSelections() and
+        @acceptPersistentSelection and
+        settings.get('autoSetPersistentSelectionAsTarget')
+
+    # In visual-mode and target was not pre-set, operate on selected area.
+    if @isMode('visual')
+      if canSelectPersistentSelection
+        "ACurrentSelectionAndAPersistentSelection"
+      else
+        "CurrentSelection"
+    else
+      "APersistentSelection" if canSelectPersistentSelection
 
   # type is one of ['preset', 'modifier']
   setOccurrence: (type) ->
@@ -294,9 +309,6 @@ class SelectPersistentSelection extends Select
   @extend()
   @description: "Select persistent-selection and clear all persistent-selection, it's like convert to real-selection"
   target: "APersistentSelection"
-  execute: ->
-    super
-    @vimState.persistentSelection.clearMarkers()
 
 class SelectOccurrence extends Operator
   @extend()
@@ -327,6 +339,7 @@ class CreatePersistentSelection extends Operator
   flashTarget: false
   stayAtSamePosition: true
   acceptPresetOccurrence: false
+  acceptPersistentSelection: false
 
   mutateSelection: (selection) ->
     @vimState.persistentSelection.markBufferRange(selection.getBufferRange())

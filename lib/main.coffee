@@ -82,7 +82,7 @@ module.exports =
 
   clearPersistentSelectionForEditors: ->
     for editor in atom.workspace.getTextEditors()
-      @getEditorState(editor).persistentSelection.clearMarkers()
+      @getEditorState(editor).clearPersistentSelections()
 
   deactivate: ->
     @subscriptions.dispose()

@@ -264,8 +264,8 @@ class VimState
     if userInvocation ? false
       if @editor.hasMultipleCursors()
         @editor.clearSelections()
-      else if @persistentSelection.hasMarkers() and settings.get('clearPersistentSelectionOnResetNormalMode')
-        @persistentSelection.clearMarkers()
+      else if @hasPersistentSelections() and settings.get('clearPersistentSelectionOnResetNormalMode')
+        @clearPersistentSelections()
       else if @occurrenceManager.hasPatterns()
         @occurrenceManager.resetPatterns()
 
@@ -309,3 +309,12 @@ class VimState
     else
       @mark.setRange('<', '>', [head, tail])
     @previousSelection = {properties, @submode}
+
+  hasPersistentSelections: ->
+    @persistentSelection.hasMarkers()
+
+  getPersistentSelectionBuffferRanges: ->
+    @persistentSelection.getMarkerBufferRanges()
+
+  clearPersistentSelections: ->
+    @persistentSelection.clearMarkers()
