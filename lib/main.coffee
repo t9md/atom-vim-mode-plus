@@ -82,7 +82,7 @@ module.exports =
 
   clearRangeMarkerForEditors: ->
     for editor in atom.workspace.getTextEditors()
-      @getEditorState(editor).clearRangeMarkers()
+      @getEditorState(editor).rangeMarker.clearMarkers()
 
   deactivate: ->
     @subscriptions.dispose()
@@ -127,7 +127,7 @@ module.exports =
       'operator-modifier-characterwise': -> @emitDidSetOperatorModifier(wise: 'characterwise')
       'operator-modifier-linewise': -> @emitDidSetOperatorModifier(wise: 'linewise')
       'operator-modifier-occurrence': -> @emitDidSetOperatorModifier(occurrence: true)
-      'repeat': -> @reapatRecordedOperation()
+      'repeat': -> @operationStack.runRecorded()
       'set-count-0': -> @setCount(0)
       'set-count-1': -> @setCount(1)
       'set-count-2': -> @setCount(2)

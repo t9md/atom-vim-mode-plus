@@ -27,6 +27,7 @@ BlockwiseSelection = require './blockwise-selection'
 OccurrenceManager = require './occurrence-manager'
 HighlightSearchManager = require './highlight-search-manager'
 MutationTracker = require './mutation-tracker'
+RangeMarkerManager = require './range-marker-manager'
 
 packageScope = 'vim-mode-plus'
 
@@ -46,11 +47,11 @@ class VimState
     @modeManager = new ModeManager(this)
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
-    @rangeMarkers = []
     @hover = new HoverElement().initialize(this)
     @hoverSearchCounter = new HoverElement().initialize(this)
     @searchHistory = new SearchHistoryManager(this)
     @highlightSearch = new HighlightSearchManager(this)
+    @rangeMarker = new RangeMarkerManager(this)
     @occurrenceManager = new OccurrenceManager(this)
     @mutationTracker = new MutationTracker(this)
 
@@ -203,19 +204,17 @@ class VimState
     @input?.destroy?()
     @search?.destroy?()
     @modeManager?.destroy?()
-    @operationRecords?.destroy?()
     @register?.destroy?
-
-    @clearRangeMarkers()
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
-      @input, @search, @modeManager, @operationRecords, @register
-      @count, @rangeMarkers
+      @input, @search, @modeManager, @register
+      @count
       @editor, @editorElement, @subscriptions,
       @inputCharSubscriptions
       @occurrenceManager
       @previousSelection
+      @rangeMarker
     } = {}
     @emitter.emit 'did-destroy'
 
@@ -265,8 +264,8 @@ class VimState
     if userInvocation ? false
       if @editor.hasMultipleCursors()
         @editor.clearSelections()
-      else if @hasRangeMarkers() and settings.get('clearRangeMarkerOnResetNormalMode')
-        @clearRangeMarkers()
+      else if @rangeMarker.hasMarkers() and settings.get('clearRangeMarkerOnResetNormalMode')
+        @rangeMarker.clearMarkers()
       else if @occurrenceManager.hasPatterns()
         @occurrenceManager.resetPatterns()
 
@@ -299,51 +298,6 @@ class VimState
     for selection in selections
       swrap(selection).preserveCharacterwise()
 
-  # Repeat
-  # -------------------------
-  reapatRecordedOperation: ->
-    @operationStack.runRecorded()
-
-  # rangeMarkers for narrowRange
-  # -------------------------
-  addRangeMarkers: (markers) ->
-    @rangeMarkers.push(markers...)
-    @updateHasRangeMarkerState()
-
-  addRangeMarkersForRanges: (ranges) ->
-    markers = highlightRanges(@editor, ranges, class: 'vim-mode-plus-range-marker')
-    @addRangeMarkers(markers)
-
-  removeRangeMarker: (rangeMarker) ->
-    _.remove(@rangeMarkers, rangeMarker)
-    @updateHasRangeMarkerState()
-
-  getRangeMarkerAtBufferPosition: (point) ->
-    exclusive = false
-    for rangeMarker in @getRangeMarkers()
-      if rangeMarker.getBufferRange().containsPoint(point, exclusive)
-        return rangeMarker
-
-  updateHasRangeMarkerState: ->
-    @toggleClassList('with-range-marker', @hasRangeMarkers())
-
-  hasRangeMarkers: ->
-    @rangeMarkers.length > 0
-
-  getRangeMarkers: (markers) ->
-    @rangeMarkers
-
-  getRangeMarkerBufferRanges: ({cursorContainedOnly}={}) ->
-    ranges = @rangeMarkers.map (marker) ->
-      marker.getBufferRange()
-
-    unless (cursorContainedOnly ? false)
-      ranges
-    else
-      points = @editor.getCursorBufferPositions()
-      ranges.filter (range) ->
-        isRangeContainsSomePoint(range, points, exclusive: false)
-
   updatePreviousSelection: ->
     if @isMode('visual', 'blockwise')
       properties = @getLastBlockwiseSelection().getCharacterwiseProperties()
@@ -356,12 +310,13 @@ class VimState
       @mark.setRange('<', '>', [head, tail])
     @previousSelection = {properties, @submode}
 
-  eachRangeMarkers: (fn) ->
-    for rangeMarker in @getRangeMarkers()
-      fn(rangeMarker)
+  getRangeMarkerBufferRanges: ({cursorContainedOnly}={}) ->
+    ranges = @rangeMarker.getMarkers().map (marker) ->
+      marker.getBufferRange()
 
-  clearRangeMarkers: ->
-    @eachRangeMarkers (rangeMarker) ->
-      rangeMarker.destroy()
-    @rangeMarkers = []
-    @toggleClassList('with-range-marker', @hasRangeMarkers())
+    # unless (cursorContainedOnly ? false)
+    #   ranges
+    # else
+    #   points = @editor.getCursorBufferPositions()
+    #   ranges.filter (range) ->
+    #     isRangeContainsSomePoint(range, points, exclusive: false)

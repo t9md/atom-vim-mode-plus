@@ -20,7 +20,7 @@ describe "Range Marker", ->
       editor.getTextInBufferRange(marker.getBufferRange())
 
     ensureRangeMarker = (options) ->
-      markers = vimState.getRangeMarkers()
+      markers = vimState.rangeMarker.getMarkers()
       if options.length?
         expect(markers).toHaveLength(options.length)
 
@@ -47,7 +47,7 @@ describe "Range Marker", ->
         xxx ooo xxx\n
         """
         cursor: [0, 0]
-      expect(vimState.hasRangeMarkers()).toBe(false)
+      expect(vimState.rangeMarker.hasMarkers()).toBe(false)
 
     describe "basic behavior", ->
       describe "create-range-marker", ->
@@ -98,7 +98,7 @@ describe "Range Marker", ->
         keystroke('g m i w')
         ensureRangeMarker length: 1, text: ['ooo']
         dispatch(editorElement, 'vim-mode-plus:clear-range-marker')
-        expect(vimState.hasRangeMarkers()).toBe(false)
+        expect(vimState.rangeMarker.hasMarkers()).toBe(false)
 
     describe "clearRangeMarkerOnResetNormalMode", ->
       describe "default setting", ->
@@ -114,4 +114,4 @@ describe "Range Marker", ->
           keystroke('g m i w')
           ensureRangeMarker length: 1, text: ['ooo']
           dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
-          expect(vimState.hasRangeMarkers()).toBe(false)
+          expect(vimState.rangeMarker.hasMarkers()).toBe(false)

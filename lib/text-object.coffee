@@ -808,7 +808,7 @@ class RangeMarker extends TextObject
   @extend(false)
 
   select: ->
-    ranges = @vimState.getRangeMarkerBufferRanges()
+    ranges = @vimState.rangeMarker.getMarkerBufferRanges()
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
 

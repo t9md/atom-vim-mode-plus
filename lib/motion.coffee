@@ -1018,7 +1018,7 @@ class Search extends SearchBase
           @visitMatch(direction)
         when 'run'
           options = {patternForOccurrence: @matches.pattern} # preserve before cancel
-          options.target = 'ARangeMarker' if @vimState.hasRangeMarkers()
+          options.target = 'ARangeMarker' if @vimState.rangeMarker.hasMarkers()
           @vimState.searchHistory.save(@input)
           @vimState.searchInput.cancel()
           @vimState.operationStack.run(command.operation, options)
