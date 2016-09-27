@@ -305,7 +305,7 @@ class VimEditor
       expect(actual).toBe(reversed)
 
   ensureRangeMarkerBufferRange: (range) ->
-    actual = @vimState.getRangeMarkerBufferRanges()
+    actual = @vimState.rangeMarker.getMarkerBufferRanges()
     expect(actual).toEqual(toArrayOfRange(range))
 
   ensureCharacterwiseHead: (points) ->

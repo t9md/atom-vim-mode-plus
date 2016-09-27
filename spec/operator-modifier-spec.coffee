@@ -465,45 +465,52 @@ describe "Operator modifier", ->
         set cursor: [0, 0]
         ensure ['j f', input: '='], cursor: [1, 17]
 
-        withMockPlatform searchEditorElement, 'platform-darwin' , ->
-          keystroke [
-            'g cmd-d' # select-occurrence
-            'i f'     # inner-function-text-object
-            'm'       # toggle-range-marker
-          ].join(" ")
+        runs ->
+          withMockPlatform searchEditorElement, 'platform-darwin' , ->
+            keystroke [
+              'g cmd-d' # select-occurrence
+              'i f'     # inner-function-text-object
+              'm'       # toggle-range-marker
+            ].join(" ")
 
-          textsInBufferRange = vimState.getRangeMarkerBufferRanges().map (range) ->
-            editor.getTextInBufferRange(range)
-          textsInBufferRangeIsAllEqualChar = textsInBufferRange.every((text) -> text is '=')
-          expect(textsInBufferRangeIsAllEqualChar).toBe(true)
-          expect(vimState.getRangeMarkers()).toHaveLength(11)
+            textsInBufferRange = vimState.rangeMarker.getMarkerBufferRanges().map (range) ->
+              editor.getTextInBufferRange(range)
+            textsInBufferRangeIsAllEqualChar = textsInBufferRange.every((text) -> text is '=')
+            expect(textsInBufferRangeIsAllEqualChar).toBe(true)
+            expect(vimState.rangeMarker.getMarkers()).toHaveLength(11)
 
-          keystroke '2 l' # to move to out-side of range-mrker
-          ensure ['/', search: '=>'], cursor: [9, 69]
-          keystroke "m" # clear rangeMarker at cursor which is = sign part of fat arrow.
-          expect(vimState.getRangeMarkers()).toHaveLength(10)
-          keystroke [
-            'ctrl-cmd-g' # select-range-marker
-            'I'          # Insert at start of selection
-          ]
-          editor.insertText('?')
-          ensure 'escape',
-            text: """
-            constructor: (@main, @editor, @statusBarManager) ->
-              @editorElement ?= @editor.element
-              @emitter ?= new Emitter
-              @subscriptions ?= new CompositeDisposable
-              @modeManager ?= new ModeManager(this)
-              @mark ?= new MarkManager(this)
-              @register ?= new RegisterManager(this)
-              @rangeMarkers ?= []
+            keystroke '2 l' # to move to out-side of range-mrker
+            ensure ['/', search: '=>'], cursor: [9, 69]
+            keystroke "m" # clear rangeMarker at cursor which is = sign part of fat arrow.
+            expect(vimState.rangeMarker.getMarkers()).toHaveLength(10)
 
-              @highlightSearchSubscription ?= @editorElement.onDidChangeScrollTop =>
-                @refreshHighlightSearch()
+        waitsFor ->
+          editorElement.classList.contains('with-range-marker')
 
-              @operationStack ?= new OperationStack(this)
-              @cursorStyleManager ?= new CursorStyleManager(this)
+        runs ->
+          withMockPlatform searchEditorElement, 'platform-darwin' , ->
+            keystroke [
+              'ctrl-cmd-g' # select-range-marker
+              'I'          # Insert at start of selection
+            ]
+            editor.insertText('?')
+            ensure 'escape',
+              text: """
+              constructor: (@main, @editor, @statusBarManager) ->
+                @editorElement ?= @editor.element
+                @emitter ?= new Emitter
+                @subscriptions ?= new CompositeDisposable
+                @modeManager ?= new ModeManager(this)
+                @mark ?= new MarkManager(this)
+                @register ?= new RegisterManager(this)
+                @rangeMarkers ?= []
 
-            anotherFunc: ->
-              @hello = []
-            """
+                @highlightSearchSubscription ?= @editorElement.onDidChangeScrollTop =>
+                  @refreshHighlightSearch()
+
+                @operationStack ?= new OperationStack(this)
+                @cursorStyleManager ?= new CursorStyleManager(this)
+
+              anotherFunc: ->
+                @hello = []
+              """

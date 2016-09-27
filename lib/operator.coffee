@@ -295,7 +295,7 @@ class SelectRangeMarker extends Select
   target: "ARangeMarker"
   execute: ->
     super
-    @vimState.clearRangeMarkers()
+    @vimState.rangeMarker.clearMarkers()
 
 class SelectOccurrence extends Operator
   @extend()
@@ -328,23 +328,20 @@ class CreateRangeMarker extends Operator
   acceptPresetOccurrence: false
 
   mutateSelection: (selection) ->
-    @vimState.addRangeMarkersForRanges(selection.getBufferRange())
+    @vimState.rangeMarker.markBufferRange(selection.getBufferRange())
 
 class ToggleRangeMarker extends CreateRangeMarker
   @extend()
-  rangeMarkerToRemove: null
-
   isComplete: ->
     point = @editor.getCursorBufferPosition()
-    if @rangeMarkerToRemove = @vimState.getRangeMarkerAtBufferPosition(point)
+    if @markerToRemove = @vimState.rangeMarker.getMarkerAtPoint(point)
       true
     else
       super
 
   execute: ->
-    if @rangeMarkerToRemove
-      @rangeMarkerToRemove.destroy()
-      @vimState.removeRangeMarker(@rangeMarkerToRemove)
+    if @markerToRemove
+      @markerToRemove.destroy()
     else
       super
 
