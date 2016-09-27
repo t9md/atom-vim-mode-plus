@@ -205,24 +205,20 @@ class Operator extends Base
 
     fn()
 
-    if @occurrenceManager.hasMarkers()
-      scanRanges ?= @editor.getSelectedBufferRanges()
-      markers = @occurrenceManager.getMarkersIntersectsWithRanges(scanRanges, wasVisual)
-      ranges = markers.map (marker) -> marker.getBufferRange()
-
-      # There is possibility that multiple markers are pre-setted manually.
-      # To repeat this multi pre-set occurrences by `.`, we consult manager to cache
-      # bundled(unioned) regex pattern to @patternForOccurrence.
-      @patternForOccurrence ?= @occurrenceManager.buildPattern()
-      # We got ranges to select, so good-by @occurrenceManager by reset()
-      @occurrenceManager.resetPatterns()
-
-    if ranges.length
-      @editor.setSelectedBufferRanges(ranges)
+    scanRanges ?= @editor.getSelectedBufferRanges()
+    if @occurrenceManager.selectInRanges(scanRanges, wasVisual)
       cursorPositionManager.destroy()
     else
       # Restoring cursor position also clear selection. Require to avoid unwanted mutation.
       cursorPositionManager.restore()
+
+    # There is possibility that multiple markers are pre-setted manually.
+    # To repeat this multi pre-set occurrences by `.`, we consult manager to cache
+    # bundled(unioned) regex pattern to @patternForOccurrence.
+    @patternForOccurrence ?= @occurrenceManager.buildPattern()
+    # We got ranges to select, so good-by @occurrenceManager by reset()
+    @occurrenceManager.resetPatterns()
+
 
   # Return true unless all selection is empty.
   selectTarget: ->

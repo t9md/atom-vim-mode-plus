@@ -7,7 +7,6 @@ StatusBarManager = require './status-bar-manager'
 globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
-{getVisibleEditors} = require './utils'
 
 module.exports =
   config: settings.config

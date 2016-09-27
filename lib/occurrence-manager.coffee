@@ -45,6 +45,16 @@ class OccurrenceManager
     @disposables.dispose()
     @markerLayer.destroy()
 
+  # return true if success
+  selectInRanges: (ranges, exclusive=false) ->
+    markers = @getMarkersIntersectsWithRanges(ranges, exclusive)
+    if markers.length
+      ranges = markers.map (marker) -> marker.getBufferRange()
+      @editor.setSelectedBufferRanges(ranges)
+      true
+    else
+      false
+
   # Patterns
   hasPatterns: ->
     @patterns.length > 0
