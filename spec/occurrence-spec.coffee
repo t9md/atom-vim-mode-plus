@@ -539,6 +539,28 @@ describe "Occurrence", ->
           it 'set selected-text as preset occurrence marker and not move cursor', ->
             ensure 'w v l', mode: ['visual', 'characterwise'], selectedText: 'te'
             ensure 'g o', mode: 'normal', occurrenceText: ['te', 'te', 'te']
+        describe "is-narrowed selection", ->
+          [textOriginal] = []
+          beforeEach ->
+            textOriginal = """
+              This text have 3 instance of 'text' in the whole text
+              This text have 3 instance of 'text' in the whole text
+              """
+            set
+              cursor: [0, 0]
+              text: textOriginal
+          it "pick ocurrence-word from cursor position and continue visual-mode", ->
+            ensure 'w V j', mode: ['visual', 'linewise'], selectedText: textOriginal
+            ensure 'g o',
+              mode: ['visual', 'linewise']
+              selectedText: textOriginal
+              occurrenceText: ['text', 'text', 'text', 'text', 'text', 'text']
+            ensure ['r', input: '!'],
+              mode: 'normal'
+              text: """
+              This !!!! have 3 instance of '!!!!' in the whole !!!!
+              This !!!! have 3 instance of '!!!!' in the whole !!!!
+              """
 
       describe "in incremental-search", ->
         [searchEditor, searchEditorElement] = []

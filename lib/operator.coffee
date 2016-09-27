@@ -141,8 +141,9 @@ class Operator extends Base
 
   addOccurrencePattern: (pattern=null) ->
     pattern ?= @patternForOccurrence
-    point = @editor.getCursorBufferPosition()
-    pattern ?= getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
+    unless pattern?
+      point = @editor.getCursorBufferPosition()
+      pattern = getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
     @occurrenceManager.addPattern(pattern)
 
   resetOccurrencePatterns: ->
@@ -364,10 +365,17 @@ class PresetOccurrence extends Operator
       marker.destroy()
     else
       pattern = null
-      if @isMode('visual') and text = @editor.getSelectedText()
-        pattern = new RegExp(_.escapeRegExp(text), 'g')
+      if @isMode('visual')
+        if isNarrowed = @vimState.modeManager.isNarrowed()
+          options = {fromProperty: true, allowFallback: true}
+          point = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
+          pattern = getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
+        else
+          text = @editor.getSelectedText()
+          pattern = new RegExp(_.escapeRegExp(text), 'g')
+
       @addOccurrencePattern(pattern)
-      @activateMode('normal')
+      @activateMode('normal') unless isNarrowed
 
 # Delete
 # ================================
