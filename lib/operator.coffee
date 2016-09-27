@@ -11,6 +11,7 @@ _ = require 'underscore-plus'
   cursorIsAtEmptyRow
   scanInRanges
   getVisibleBufferRange
+  getWordPatternAtBufferPosition
 
   selectedRange
   selectedText
@@ -123,15 +124,26 @@ class Operator extends Base
         unless @isComplete() # we enter operator-pending
           debug 'static: mark as we enter operator-pending'
           @addToClassList('with-occurrence')
-          unless @occurrenceManager.hasMarkers()
-            @occurrenceManager.addPattern(@patternForOccurrence)
+          @addOccurrencePattern() unless @hasOccurrenceMarkers()
       when 'preset'
         debug 'preset: nothing to do since we have markers already'
         @addToClassList('with-occurrence')
       when 'modifier'
         debug 'modifier: overwrite existing marker when manually typed `o`'
-        @occurrenceManager.resetPatterns() # clear existing marker
-        @occurrenceManager.addPattern() # mark cursor word.
+        @resetOccurrencePatterns() # clear existing marker
+        @addOccurrencePattern() # mark cursor word.
+
+  hasOccurrenceMarkers: ->
+    @occurrenceManager.hasMarkers()
+
+  addOccurrencePattern: (pattern=null) ->
+    pattern ?= @patternForOccurrence
+    point = @editor.getCursorBufferPosition()
+    pattern ?= getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
+    @occurrenceManager.addPattern(pattern)
+
+  resetOccurrencePatterns: ->
+    @occurrenceManager.resetPatterns() # clear existing marker
 
   # target is TextObject or Motion to operate on.
   setTarget: (@target) ->
@@ -189,8 +201,7 @@ class Operator extends Base
       @vimState.modeManager.deactivate()
 
     cursorPositionManager.save('head')
-    unless @occurrenceManager.hasMarkers()
-      @occurrenceManager.addPattern(@patternForOccurrence)
+    @addOccurrencePattern() unless @hasOccurrenceMarkers()
 
     fn()
 
@@ -368,7 +379,7 @@ class PresetOccurrence extends Operator
       pattern = null
       if @isMode('visual') and text = @editor.getSelectedText()
         pattern = new RegExp(_.escapeRegExp(text), 'g')
-      @occurrenceManager.addPattern(pattern)
+      @addOccurrencePattern(pattern)
       @activateMode('normal')
 
 # Delete

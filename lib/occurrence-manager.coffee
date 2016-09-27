@@ -4,7 +4,6 @@ _ = require 'underscore-plus'
 {
   scanEditor
   shrinkRangeEndToBeforeNewLine
-  getWordBufferRangeAndKindAtBufferPosition
 } = require './utils'
 
 module.exports =
@@ -54,14 +53,7 @@ class OccurrenceManager
     @patterns = []
     @emitter.emit('did-change-patterns', {})
 
-  addPatternForWordAtPoint: (point) ->
-    pattern = @getWordPatternAtBufferPosition(point, singleNonWordChar: true)
-    @addPattern(pattern)
-
   addPattern: (pattern=null) ->
-    unless pattern
-      point = @editor.getCursorBufferPosition()
-      pattern = @getWordPatternAtBufferPosition(point)
     @patterns.push(pattern)
     @emitter.emit('did-change-patterns', {newPattern: pattern})
 
@@ -72,13 +64,6 @@ class OccurrenceManager
   buildPattern: ->
     source = @patterns.map((pattern) -> pattern.source).join('|')
     new RegExp(source, 'g')
-
-  getWordPatternAtBufferPosition: (point, options={}) ->
-    {range, kind} = getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
-    pattern = _.escapeRegExp(@editor.getTextInBufferRange(range))
-    if kind is 'word'
-      pattern = "\\b" + pattern + "\\b"
-    new RegExp(pattern, 'g')
 
   # Markers
   # -------------------------

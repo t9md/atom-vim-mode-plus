@@ -661,6 +661,13 @@ getWordBufferRangeAndKindAtBufferPosition = (editor, point, options) ->
   range = getWordBufferRangeAtBufferPosition(editor, point, {wordRegex})
   {kind, range}
 
+getWordPatternAtBufferPosition = (editor, point, options={}) ->
+  {range, kind} = getWordBufferRangeAndKindAtBufferPosition(editor, point, options)
+  pattern = _.escapeRegExp(editor.getTextInBufferRange(range))
+  if kind is 'word'
+    pattern = "\\b" + pattern + "\\b"
+  new RegExp(pattern, 'g')
+
 # Return options used for getWordBufferRangeAtBufferPosition
 buildWordPatternByCursor = (cursor, {wordRegex}) ->
   nonWordCharacters = getNonWordCharactersForCursor(cursor)
@@ -915,6 +922,7 @@ module.exports = {
   buildWordPatternByCursor
   getWordBufferRangeAtBufferPosition
   getWordBufferRangeAndKindAtBufferPosition
+  getWordPatternAtBufferPosition
   getNonWordCharactersForCursor
   getWordPatternAtCursor
   adjustRangeToRowRange
