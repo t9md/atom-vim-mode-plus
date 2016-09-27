@@ -309,14 +309,3 @@ class VimState
     else
       @mark.setRange('<', '>', [head, tail])
     @previousSelection = {properties, @submode}
-
-  getRangeMarkerBufferRanges: ({cursorContainedOnly}={}) ->
-    ranges = @rangeMarker.getMarkers().map (marker) ->
-      marker.getBufferRange()
-
-    # unless (cursorContainedOnly ? false)
-    #   ranges
-    # else
-    #   points = @editor.getCursorBufferPositions()
-    #   ranges.filter (range) ->
-    #     isRangeContainsSomePoint(range, points, exclusive: false)
