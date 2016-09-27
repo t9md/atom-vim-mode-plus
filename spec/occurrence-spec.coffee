@@ -611,6 +611,54 @@ describe "Occurrence", ->
             !!!: ooo: xxx: ooo xxx: ooo:
             """
             numCursors: 3
+        describe "predefined keymap on when occurrence-preset", ->
+          beforeEach ->
+            set
+              text: """
+              Vim is editor I used before
+              Vim is editor I used before
+              Vim is editor I used before
+              Vim is editor I used before
+              """
+
+          it '[insert-at-start] apply operation to preset-marker intersecting selected target', ->
+            set cursor: [1, 1]
+            runs ->
+              ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
+            waitsFor ->
+              editorElement.classList.contains('occurrence-preset')
+            runs ->
+              ensure 'i k',
+                mode: 'insert'
+                numCursors: 2
+              editor.insertText("pure-")
+              ensure 'escape',
+                mode: 'normal'
+                text: """
+                pure-Vim is editor I used before
+                pure-Vim is editor I used before
+                Vim is editor I used before
+                Vim is editor I used before
+                """
+          it '[insert-after-start] apply operation to preset-marker intersecting selected target', ->
+            set cursor: [1, 1]
+            runs ->
+              ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
+            waitsFor ->
+              editorElement.classList.contains('occurrence-preset')
+            runs ->
+              ensure 'a j',
+                mode: 'insert'
+                numCursors: 2
+              editor.insertText(" and Emacs")
+              ensure 'escape',
+                mode: 'normal'
+                text: """
+                Vim is editor I used before
+                Vim and Emacs is editor I used before
+                Vim and Emacs is editor I used before
+                Vim is editor I used before
+                """
 
       describe "visual-mode", ->
         it '[upcase] apply to preset-marker as long as it intersects selection', ->
@@ -680,11 +728,11 @@ describe "Occurrence", ->
             !!!: ooo: : ooo : ooo:
             """
             mode: 'normal'
+
       describe "occurrence bound operator don't overwite pre-existing preset marker", ->
         it "'o' always pick cursor-word and clear existing preset marker", ->
           ensure "g o",
             occurrenceText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
-
           ensure "2 w g cmd-d",
             occurrenceText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
             mode: 'operator-pending'
