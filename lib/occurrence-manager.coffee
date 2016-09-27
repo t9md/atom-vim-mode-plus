@@ -80,6 +80,12 @@ class OccurrenceManager
   hasMarkers: ->
     @markerLayer.getMarkerCount() > 0
 
+  getMarkers: ->
+    @markerLayer.getMarkers()
+
+  getMarkerCount: ->
+    @markerLayer.getMarkerCount()
+
   # Return occurrence markers intersecting given ranges
   getMarkersIntersectsWithRanges: (ranges, exclusive=false) ->
     # findmarkers()'s intersectsBufferRange param have no exclusive cotntroll

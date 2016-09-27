@@ -222,6 +222,7 @@ class VimEditor
     'selectedBufferRange', 'selectedBufferRangeOrdered'
     'selectionIsReversed',
     'rangeMarkerBufferRange'
+    'occurrenceCount', 'occurrenceText'
     'characterwiseHead'
     'scrollTop',
     'mode',
@@ -307,6 +308,16 @@ class VimEditor
   ensureRangeMarkerBufferRange: (range) ->
     actual = @vimState.rangeMarker.getMarkerBufferRanges()
     expect(actual).toEqual(toArrayOfRange(range))
+
+  ensureOccurrenceCount: (number) ->
+    actual = @vimState.occurrenceManager.getMarkerCount()
+    expect(actual).toBe number
+
+  ensureOccurrenceText: (text) ->
+    markers = @vimState.occurrenceManager.getMarkers()
+    ranges = (r.getBufferRange() for r in markers)
+    actual = (@editor.getTextInBufferRange(r) for r in ranges)
+    expect(actual).toEqual(toArray(text))
 
   ensureCharacterwiseHead: (points) ->
     actual = (swrap(s).getCharacterwiseHeadPosition() for s in @editor.getSelections())

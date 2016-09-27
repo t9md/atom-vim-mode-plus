@@ -32,6 +32,7 @@ describe "Occurrence", ->
         xxx: |||: ooo: ooo:
 
         """
+
     describe "operator-modifier-characterwise", ->
       it "change occurrence of cursor word in inner-paragraph", ->
         set cursor: [1, 0]
@@ -169,6 +170,7 @@ describe "Occurrence", ->
             ensureCursorWord([0, 3], selectedText: ['-', '-', '-', '-'])
             ensureCursorWord([0, 4], selectedText: ['mode', 'mode'])
             ensureCursorWord([0, 9], selectedText: ['plus', 'plus'])
+
         describe "cursor is at single white space [by delete]", ->
           it "pick single white space only", ->
             set
@@ -182,6 +184,7 @@ describe "Occurrence", ->
               ooooooooo
               ooooooooo
               """
+
         describe "cursor is at sequnce of space [by delete]", ->
           it "select sequnce of white spaces including partially mached one", ->
             set
@@ -207,8 +210,8 @@ describe "Occurrence", ->
         """
         cursor: [0, 0]
 
-    describe "[from visual.characterwise] select-occurrence then uppercase", ->
-      it "pick cursor-word from vC range and include word if start position of that word is in selecion", ->
+    describe "[vC] select-occurrence", ->
+      it "select cursor-word which intersecting selection then apply upper-case", ->
         ensure "v 2 j cmd-d U",
           text: """
           OOO: xxx: OOO:
@@ -217,8 +220,9 @@ describe "Occurrence", ->
           xxx: |||: ooo: ooo:
           """
           numCursors: 5
-    describe "[from visual.linewise] select-occurrence then uppercase", ->
-      it "pick cursor-word from vL range", ->
+
+    describe "[vL] select-occurrence", ->
+      it "select cursor-word which intersecting selection then apply upper-case", ->
         ensure "5 l V 2 j cmd-d U",
           text: """
           ooo: XXX: ooo:
@@ -227,8 +231,9 @@ describe "Occurrence", ->
           xxx: |||: ooo: ooo:
           """
           numCursors: 4
-    describe "[from visual.blockwise] select-occurrence then uppercase", ->
-      it "pick cursor-word from vB range", ->
+
+    describe "[vB] select-occurrence", ->
+      it "select cursor-word which intersecting selection then apply upper-case", ->
         ensure "W ctrl-v 2 j $ h cmd-d U",
           text: """
           ooo: xxx: OOO:
@@ -237,6 +242,7 @@ describe "Occurrence", ->
           xxx: |||: ooo: ooo:
           """
           numCursors: 4
+
       it "pick cursor-word from vB range", ->
         ensure "ctrl-v 7 l 2 j o cmd-d U",
           text: """
@@ -247,7 +253,7 @@ describe "Occurrence", ->
           """
           numCursors: 3
 
-  describe "from incremental search", ->
+  describe "incremental search integration: change-occurrence-from-search, select-occurrence-from-search", ->
     [searchEditor, searchEditorElement] = []
 
     beforeEach ->
@@ -265,7 +271,7 @@ describe "Occurrence", ->
         cursor: [0, 0]
 
     describe "from normal mode", ->
-      it "select occurrence by pattern in search-input", ->
+      it "select occurrence by pattern match", ->
         keystroke '/'
         searchEditor.insertText('\\d{3,4}')
         withMockPlatform searchEditorElement, 'platform-darwin' , ->
@@ -274,7 +280,7 @@ describe "Occurrence", ->
             selectedText: ['0000', '3333', '444']
             mode: ['visual', 'characterwise']
 
-      it "change occurrence by pattern in search-input", ->
+      it "change occurrence by pattern match", ->
         keystroke '/'
         searchEditor.insertText('^\\w+:')
         withMockPlatform searchEditorElement, 'platform-darwin' , ->
@@ -303,6 +309,7 @@ describe "Occurrence", ->
               ooo: xxx: |||: xxx: 3333:
               444: |||: ooo: ooo:
               """
+
       describe "visual linewise", ->
         it "change occurrence in narrowed selection", ->
           keystroke 'V j /'
@@ -316,6 +323,7 @@ describe "Occurrence", ->
               ooo: xxx: |||: xxx: 3333:
               444: |||: ooo: ooo:
               """
+
       describe "visual blockwise", ->
         it "change occurrence in narrowed selection", ->
           set cursor: [0, 5]
@@ -354,6 +362,7 @@ describe "Occurrence", ->
         ]
         ensure 'V j m G m m',
           rangeMarkerBufferRange: rangeMarkerBufferRange
+
       describe "when no selection is exists", ->
         it "select occurrence in all range-marker", ->
           set cursor: [0, 0]
@@ -369,6 +378,7 @@ describe "Occurrence", ->
               XXX: |||: ooo: ooo:\n
               """
               rangeMarkerBufferRange: rangeMarkerBufferRange
+
       describe "selection is prioritized over range-marker", ->
         it "select all occurrence in selection", ->
           set cursor: [0, 0]
@@ -475,3 +485,208 @@ describe "Occurrence", ->
               anotherFunc: ->
                 @hello = []
               """
+
+  describe "preset occurrence marker", ->
+    beforeEach ->
+      jasmine.attachToDOM(getView(atom.workspace))
+      set
+        text: """
+        This text have 3 instance of 'text' in the whole text
+        """
+        cursor: [0, 0]
+
+    describe "preset-occurrence commands", ->
+      describe "in normal-mode", ->
+        describe "add preset occurrence", ->
+          it 'set cursor-ward as preset occurrence marker and not move cursor', ->
+            ensure 'g o', occurrenceCount: 1, occurrenceText: 'This', cursor: [0, 0]
+            ensure 'w', cursor: [0, 5]
+            ensure 'g o', occurrenceCount: 4, occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
+
+        describe "remove preset occurrence", ->
+          it 'removes occurrence one by one separately', ->
+            ensure 'g o', occurrenceCount: 1, occurrenceText: 'This', cursor: [0, 0]
+            ensure 'w', cursor: [0, 5]
+            ensure 'g o', occurrenceCount: 4, occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
+            ensure 'g o', occurrenceCount: 3, occurrenceText: ['This', 'text', 'text'], cursor: [0, 5]
+            ensure 'b g o', occurrenceCount: 2, occurrenceText: ['text', 'text'], cursor: [0, 0]
+          it 'removes all occurrence in this editor by escape', ->
+            ensure 'g o', occurrenceCount: 1, occurrenceText: 'This', cursor: [0, 0]
+            ensure 'w', cursor: [0, 5]
+            ensure 'g o', occurrenceCount: 4, occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
+            ensure 'escape', occurrenceCount: 0
+
+        describe "css class preset-occurrence", ->
+          [classList, update] = []
+          beforeEach ->
+            vimState.occurrenceManager.markerLayer.onDidUpdate(update = jasmine.createSpy())
+          it 'is auto-set/unset wheter at least one preset-occurrence was exists or not', ->
+            runs ->
+              expect(editorElement.classList.contains('occurrence-preset')).toBe(false)
+              ensure 'g o', occurrenceCount: 1, occurrenceText: 'This', cursor: [0, 0]
+            waitsFor ->
+              update.callCount is 1
+            runs ->
+              expect(editorElement.classList.contains('occurrence-preset')).toBe(true)
+              ensure 'g o', occurrenceCount: 0, cursor: [0, 0]
+            waitsFor ->
+              update.callCount is 2
+            runs ->
+              expect(editorElement.classList.contains('occurrence-preset')).toBe(false)
+
+      describe "in visual-mode", ->
+        describe "add preset occurrence", ->
+          it 'set selected-text as preset occurrence marker and not move cursor', ->
+            ensure 'w v l', mode: ['visual', 'characterwise'], selectedText: 'te'
+            ensure 'g o', mode: 'normal', occurrenceText: ['te', 'te', 'te']
+
+      describe "in incremental-search", ->
+        [searchEditor, searchEditorElement] = []
+        beforeEach ->
+          searchEditor = vimState.searchInput.editor
+          searchEditorElement = searchEditor.element
+          jasmine.attachToDOM(getView(atom.workspace))
+          settings.set('incrementalSearch', true)
+
+        describe "add-occurrence-pattern-from-search", ->
+          it 'mark as occurrence which matches regex entered in search-ui', ->
+            keystroke '/'
+            searchEditor.insertText('\\bt\\w+')
+            withMockPlatform searchEditorElement, 'platform-darwin' , ->
+              rawKeystroke 'cmd-o', document.activeElement
+              ensure
+                occurrenceText: ['text', 'text', 'the', 'text']
+
+    describe "mutate preset occurence", ->
+      beforeEach ->
+        set text: """
+        ooo: xxx: ooo xxx: ooo:
+        !!!: ooo: xxx: ooo xxx: ooo:
+        """
+        cursor: [0, 0]
+        jasmine.attachToDOM(getView(atom.workspace))
+
+      describe "normal-mode", ->
+        it '[delete] apply operation to preset-marker intersecting selected target', ->
+          ensure 'l g o D',
+            text: """
+            : xxx:  xxx: :
+            !!!: ooo: xxx: ooo xxx: ooo:
+            """
+        it '[upcase] apply operation to preset-marker intersecting selected target', ->
+          set cursor: [0, 6]
+          ensure 'l g o g U j',
+            text: """
+            ooo: XXX: ooo XXX: ooo:
+            !!!: ooo: XXX: ooo XXX: ooo:
+            """
+        it '[upcase exclude] won\'t mutate removed marker', ->
+          set cursor: [0, 0]
+          ensure 'g o', occurrenceCount: 6
+          ensure 'g o', occurrenceCount: 5
+          ensure 'g U j',
+            text: """
+            ooo: xxx: OOO xxx: OOO:
+            !!!: OOO: xxx: OOO xxx: OOO:
+            """
+        it '[delete] apply operation to preset-marker intersecting selected target', ->
+          set cursor: [0, 10]
+          ensure 'g o g U $',
+            text: """
+            ooo: xxx: OOO xxx: OOO:
+            !!!: ooo: xxx: ooo xxx: ooo:
+            """
+        it '[change] apply operation to preset-marker intersecting selected target', ->
+          ensure 'l g o C',
+            mode: 'insert'
+            text: """
+            : xxx:  xxx: :
+            !!!: ooo: xxx: ooo xxx: ooo:
+            """
+          editor.insertText('YYY')
+          ensure 'l g o C',
+            mode: 'insert'
+            text: """
+            YYY: xxx: YYY xxx: YYY:
+            !!!: ooo: xxx: ooo xxx: ooo:
+            """
+            numCursors: 3
+
+      describe "visual-mode", ->
+        it '[upcase] apply to preset-marker as long as it intersects selection', ->
+          set
+            cursor: [0, 6]
+            text: """
+            ooo: xxx: ooo xxx: ooo:
+            xxx: ooo: xxx: ooo xxx: ooo:
+            """
+          ensure 'g o', occurrenceCount: 5
+          ensure 'v j U',
+            text: """
+            ooo: XXX: ooo XXX: ooo:
+            XXX: ooo: xxx: ooo xxx: ooo:
+            """
+
+      describe "visual-linewise-mode", ->
+        it '[upcase] apply to preset-marker as long as it intersects selection', ->
+          set
+            cursor: [0, 6]
+            text: """
+            ooo: xxx: ooo xxx: ooo:
+            xxx: ooo: xxx: ooo xxx: ooo:
+            """
+          ensure 'g o', occurrenceCount: 5
+          ensure 'V U',
+            text: """
+            ooo: XXX: ooo XXX: ooo:
+            xxx: ooo: xxx: ooo xxx: ooo:
+            """
+
+      describe "visual-blockwise-mode", ->
+        it '[upcase] apply to preset-marker as long as it intersects selection', ->
+          set
+            cursor: [0, 6]
+            text: """
+            ooo: xxx: ooo xxx: ooo:
+            xxx: ooo: xxx: ooo xxx: ooo:
+            """
+          ensure 'g o', occurrenceCount: 5
+          ensure 'ctrl-v j 2 w U',
+            text: """
+            ooo: XXX: ooo xxx: ooo:
+            xxx: ooo: XXX: ooo xxx: ooo:
+            """
+
+    describe "explict operator-modifier o and preset-marker", ->
+      beforeEach ->
+        set
+          text: """
+          ooo: xxx: ooo xxx: ooo:
+          !!!: ooo: xxx: ooo xxx: ooo:
+          """
+          cursor: [0, 0]
+          jasmine.attachToDOM(getView(atom.workspace))
+
+      describe "'o' modifier when preset occurrence already exists", ->
+        it "'o' always pick cursor-word and overwrite existing preset marker)", ->
+          ensure "g o",
+            occurrenceText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
+          ensure "2 w d o",
+            occurrenceText: ["xxx", "xxx", "xxx", "xxx"]
+            mode: 'operator-pending'
+          ensure "j",
+            text: """
+            ooo: : ooo : ooo:
+            !!!: ooo: : ooo : ooo:
+            """
+            mode: 'normal'
+      describe "occurrence bound operator don't overwite pre-existing preset marker", ->
+        it "'o' always pick cursor-word and clear existing preset marker", ->
+          ensure "g o",
+            occurrenceText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
+
+          ensure "2 w g cmd-d",
+            occurrenceText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
+            mode: 'operator-pending'
+          ensure "j",
+            selectedText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
