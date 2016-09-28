@@ -126,7 +126,7 @@ class Operator extends Base
     canSelectPersistentSelection =
       @vimState.hasPersistentSelections() and
         @acceptPersistentSelection and
-        settings.get('autoSetPersistentSelectionAsTarget')
+        settings.get('autoSelectPersistentSelectionOnOperate')
 
     # In visual-mode and target was not pre-set, operate on selected area.
     if @isMode('visual')

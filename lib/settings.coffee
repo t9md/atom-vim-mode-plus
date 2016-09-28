@@ -40,7 +40,7 @@ module.exports = new Settings 'vim-mode-plus',
   clearMultipleCursorsOnEscapeInsertMode:
     type: 'boolean'
     default: true
-  autoSetPersistentSelectionAsTarget:
+  autoSelectPersistentSelectionOnOperate:
     type: 'boolean'
     default: true
   wrapLeftRightMotion:
