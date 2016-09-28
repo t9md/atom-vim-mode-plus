@@ -651,7 +651,7 @@ describe "Occurrence", ->
             waitsFor ->
               editorElement.classList.contains('has-occurrence')
             runs ->
-              ensure 'i k',
+              ensure 'I k',
                 mode: 'insert'
                 numCursors: 2
               editor.insertText("pure-")
@@ -670,7 +670,7 @@ describe "Occurrence", ->
             waitsFor ->
               editorElement.classList.contains('has-occurrence')
             runs ->
-              ensure 'a j',
+              ensure 'A j',
                 mode: 'insert'
                 numCursors: 2
               editor.insertText(" and Emacs")

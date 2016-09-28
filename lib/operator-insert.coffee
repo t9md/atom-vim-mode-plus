@@ -160,35 +160,9 @@ class InsertAtStartOfTarget extends InsertByTarget
   @extend()
   which: 'start'
 
-# Alias for backward compatibility
-class InsertAtStartOfSelection extends InsertAtStartOfTarget
-  @extend()
-
 class InsertAtEndOfTarget extends InsertByTarget
   @extend()
   which: 'end'
-
-class InsertAtStartOfOccurrence extends InsertAtStartOfTarget
-  @extend()
-  occurrence: true
-
-class InsertAtEndOfOccurrence extends InsertAtEndOfTarget
-  @extend()
-  occurrence: true
-
-class InsertAtStartOfOccurrenceInAFunctionOrInnerParagraph extends InsertAtStartOfTarget
-  @extend()
-  target: "AFunctionOrInnerParagraph"
-  occurrence: true
-
-class InsertAtEndOfOccurrenceInAFunctionOrInnerParagraph extends InsertAtEndOfTarget
-  @extend()
-  target: "AFunctionOrInnerParagraph"
-  occurrence: true
-
-# Alias for backward compatibility
-class InsertAtEndOfSelection extends InsertAtEndOfTarget
-  @extend()
 
 class InsertAtHeadOfTarget extends InsertByTarget
   @extend()

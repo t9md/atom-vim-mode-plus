@@ -357,8 +357,8 @@
 # normal.occurrence-pending [Experimental] bulk-edit mode-like
 # -------------------------
 'atom-text-editor.vim-mode-plus.normal-mode.has-occurrence':
-  'i': 'vim-mode-plus:insert-at-start-of-occurrence'
-  'a': 'vim-mode-plus:insert-at-end-of-occurrence'
+  'I': 'vim-mode-plus:insert-at-start-of-target'
+  'A': 'vim-mode-plus:insert-at-end-of-target'
 
 # operator-pending, visual
 # -------------------------
@@ -477,8 +477,8 @@
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
 
-  'I': 'vim-mode-plus:insert-at-start-of-selection'
-  'A': 'vim-mode-plus:insert-at-end-of-selection'
+  'I': 'vim-mode-plus:insert-at-start-of-target'
+  'A': 'vim-mode-plus:insert-at-end-of-target'
 
   # 'p': 'vim-mode-plus:swap-with-register'
   # 'P': 'vim-mode-plus:swap-with-register'
