@@ -120,7 +120,7 @@ class MutationTracker
       points = points.filter (point) -> point?
       if @vimState.isMode('visual', 'blockwise')
         if point = points[0]
-          @vimState.getLastBlockwiseSelection().setHeadBufferPosition(point)
+          @vimState.getLastBlockwiseSelection()?.setHeadBufferPosition(point)
       else
         if point = points[0]
           @editor.setCursorBufferPosition(point)

@@ -280,7 +280,7 @@
   '%': 'vim-mode-plus:move-to-line-by-percent'
 
 'atom-text-editor.vim-mode-plus.with-persistent-selection:not(.insert-mode)':
-  'cmd-d': 'vim-mode-plus:select-occurrence-in-a-persistent-selection'
+  'cmd-d': 'vim-mode-plus:select-occurrence'
   'ctrl-cmd-g': 'vim-mode-plus:select-persistent-selection'
 
 'atom-text-editor.vim-mode-plus.visual-mode.is-narrowed':

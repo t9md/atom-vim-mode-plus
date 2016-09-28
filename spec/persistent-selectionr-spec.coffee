@@ -1,7 +1,7 @@
 {getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "Range Marker", ->
+describe "Persistent Selection", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
@@ -73,25 +73,33 @@ describe "Range Marker", ->
             """
 
     describe "select-occurrence-in-a-persistent-selection", ->
+      [update] = []
+      beforeEach ->
+        vimState.persistentSelection.markerLayer.onDidUpdate(update = jasmine.createSpy())
+
       it "select all instance of cursor word only within marked range", ->
-        keystroke('g m i p } } j .') # Mark 2 inner-word and 1 inner-paragraph
-        paragraphText = "ooo xxx ooo\nxxx ooo xxx\n"
-        ensurePersistentSelection length: 2, text: [paragraphText, paragraphText]
-        dispatch(editorElement, 'vim-mode-plus:select-occurrence-in-a-persistent-selection')
-        expect(editor.getSelections()).toHaveLength(6)
-        keystroke 'c'
-        editor.insertText '!!!'
-        ensure
-          text: """
-          !!! xxx !!!
-          xxx !!! xxx
+        runs ->
+          keystroke('g m i p } } j .') # Mark 2 inner-word and 1 inner-paragraph
+          paragraphText = "ooo xxx ooo\nxxx ooo xxx\n"
+          ensurePersistentSelection length: 2, text: [paragraphText, paragraphText]
+        waitsFor ->
+          update.callCount is 1
+        runs ->
+          ensure 'cmd-d',
+            selectedText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo', 'ooo' ]
+          keystroke 'c'
+          editor.insertText '!!!'
+          ensure
+            text: """
+            !!! xxx !!!
+            xxx !!! xxx
 
-          ooo xxx ooo
-          xxx ooo xxx
+            ooo xxx ooo
+            xxx ooo xxx
 
-          !!! xxx !!!
-          xxx !!! xxx\n
-          """
+            !!! xxx !!!
+            xxx !!! xxx\n
+            """
 
     describe "clearPersistentSelections command", ->
       it "clear persistentSelections", ->

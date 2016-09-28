@@ -300,9 +300,12 @@ class VimState
 
   updatePreviousSelection: ->
     if @isMode('visual', 'blockwise')
-      properties = @getLastBlockwiseSelection().getCharacterwiseProperties()
+      properties = @getLastBlockwiseSelection()?.getCharacterwiseProperties()
     else
       properties = swrap(@editor.getLastSelection()).detectCharacterwiseProperties()
+
+    return unless properties?
+
     {head, tail} = properties
     if head.isGreaterThan(tail)
       @mark.setRange('<', '>', [tail, head])

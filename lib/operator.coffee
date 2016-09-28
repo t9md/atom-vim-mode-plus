@@ -159,7 +159,6 @@ class Operator extends Base
     unless pattern?
       point = @getCursorBufferPosition()
       pattern = getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
-    console.log 'pattern', pattern
     @occurrenceManager.addPattern(pattern)
 
   resetOccurrencePatterns: ->
@@ -207,12 +206,17 @@ class Operator extends Base
     cursorPositionManager = new CursorPositionManager(@editor)
     cursorPositionManager.save('head', fromProperty: true, allowFallback: true)
 
+    # This has to be BEFORE @target.select, to use CURRENT cursor position.
+    # to find occurrence-word.
+    @addOccurrencePattern() unless @hasOccurrenceMarkers()
+
     fn()
 
     @addOccurrencePattern() unless @hasOccurrenceMarkers()
     scanRanges = @editor.getSelectedBufferRanges()
-    if isVisual = @isMode('visual')
-      @vimState.modeManager.deactivate()
+    isVisual = @isMode('visual')
+    @vimState.modeManager.deactivate() if isVisual
+    
     if @occurrenceManager.selectInRanges(scanRanges, isVisual)
       cursorPositionManager.destroy()
     else
@@ -316,10 +320,6 @@ class SelectOccurrence extends Operator
     if @selectTarget()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
-
-class SelectOccurrenceInAPersistentSelection extends SelectOccurrence
-  @extend()
-  target: "APersistentSelection"
 
 class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
   @extend()

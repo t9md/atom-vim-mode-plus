@@ -232,7 +232,6 @@ class Base
       @editor.getCursorBufferPosition()
 
   getCursorBufferPositions: ->
-    console.log "CALLED"
     if @isMode('visual')
       @editor.getSelections().map(@getCursorPositionForSelection.bind(this))
     else
