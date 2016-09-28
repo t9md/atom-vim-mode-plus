@@ -121,7 +121,7 @@ class Developer
     ".linewise": 'L'
     ".operator-pending-mode": 'o'
     ".with-count": '#'
-    ".with-persistent-selection": '%'
+    ".has-persistent-selection": '%'
 
   getCommandSpecs: ->
     compactSelector = (selector) ->
@@ -200,7 +200,7 @@ class Developer
     | `vC`   | `.visual-mode.characterwise` |                                     |
     | `iR`   | `.insert-mode.replace`       |                                     |
     | `#`    | `.with-count`                | when count is specified             |
-    | `%`    | `.with-persistent-selection` | when persistent-selection is exists |
+    | `%`    | `.has-persistent-selection` | when persistent-selection is exists |
 
     """
     @generateSummaryTableForCommandSpecs(@getCommandSpecs(), {header})

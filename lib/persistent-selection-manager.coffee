@@ -17,7 +17,7 @@ class PersistentSelectionManager
 
     # Update css on every marker update.
     @markerLayer.onDidUpdate =>
-      @editorElement.classList.toggle("with-persistent-selection", @hasMarkers())
+      @editorElement.classList.toggle("has-persistent-selection", @hasMarkers())
 
   destroy: ->
     @decorationLayer.destroy()

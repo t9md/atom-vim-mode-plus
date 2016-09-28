@@ -456,7 +456,7 @@ describe "Occurrence", ->
             expect(vimState.persistentSelection.getMarkers()).toHaveLength(10)
 
         waitsFor ->
-          editorElement.classList.contains('with-persistent-selection')
+          editorElement.classList.contains('has-persistent-selection')
 
         runs ->
           withMockPlatform searchEditorElement, 'platform-darwin' , ->
