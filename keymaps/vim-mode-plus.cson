@@ -131,7 +131,8 @@
   # 'g r':   'vim-mode-plus:reverse'
   # 'g s':   'vim-mode-plus:sort'
   # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
-  # 'g m': 'vim-mode-plus:toggle-persistent-selection'
+
+  # 'enter': 'vim-mode-plus:toggle-persistent-selection'
 
   'ctrl-a': 'vim-mode-plus:increase'
   'ctrl-x': 'vim-mode-plus:decrease'
@@ -479,6 +480,8 @@
 
   'I': 'vim-mode-plus:insert-at-start-of-target'
   'A': 'vim-mode-plus:insert-at-end-of-target'
+
+  'enter': 'vim-mode-plus:create-persistent-selection'
 
   # 'p': 'vim-mode-plus:swap-with-register'
   # 'P': 'vim-mode-plus:swap-with-register'
