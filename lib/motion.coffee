@@ -1016,15 +1016,16 @@ class Search extends SearchBase
               when 'next' then 'prev'
               when 'prev' then 'next'
           @visitMatch(direction)
-        when 'run'
-          options = {patternForOccurrence: @matches.pattern} # preserve before cancel
-          @vimState.searchHistory.save(@input)
-          @vimState.searchInput.cancel()
-          @vimState.operationStack.run(command.operation, options)
-        when 'add-occurrence-pattern'
+        when 'occurrence'
+          if command.operation?
+            @vimState.occurrenceManager.resetPatterns()
+
           @vimState.occurrenceManager.addPattern(@matches.pattern)
           @vimState.searchHistory.save(@input)
           @vimState.searchInput.cancel()
+
+          if command.operation?
+            @vimState.operationStack.run(command.operation)
 
   visitCursors: ->
     visitCursor = (cursor) =>

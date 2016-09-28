@@ -495,7 +495,7 @@ describe "Occurrence", ->
         """
         cursor: [0, 0]
 
-    describe "preset-occurrence commands", ->
+    describe "toggle-preset-occurrence commands", ->
       describe "in normal-mode", ->
         describe "add preset occurrence", ->
           it 'set cursor-ward as preset occurrence marker and not move cursor', ->
@@ -516,7 +516,7 @@ describe "Occurrence", ->
             ensure 'g o', occurrenceCount: 4, occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
             ensure 'escape', occurrenceCount: 0
 
-        describe "css class preset-occurrence", ->
+        describe "css class has-occurrence", ->
           [classList, update] = []
           beforeEach ->
             vimState.occurrenceManager.markerLayer.onDidUpdate(update = jasmine.createSpy())

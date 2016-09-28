@@ -347,13 +347,9 @@ class TogglePersistentSelection extends CreatePersistentSelection
     else
       super
 
-class TogglePersistentSelectionOnInnerWord extends TogglePersistentSelection
-  @extend()
-  target: 'InnerWord'
-
 # Preset Occurrence
 # =========================
-class PresetOccurrence extends Operator
+class TogglePresetOccurrence extends Operator
   @extend()
   flashTarget: false
   requireTarget: false

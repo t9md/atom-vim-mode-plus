@@ -98,7 +98,7 @@
   'C': 'vim-mode-plus:change-to-last-character-of-line'
   'S': 'vim-mode-plus:substitute-line'
   'r': 'vim-mode-plus:replace'
-  'g o': 'vim-mode-plus:preset-occurrence'
+  'g o': 'vim-mode-plus:toggle-preset-occurrence'
 
   # '_': 'vim-mode-plus:replace-with-register'
   'I': 'vim-mode-plus:insert-at-beginning-of-line'
