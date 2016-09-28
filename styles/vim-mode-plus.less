@@ -225,7 +225,8 @@ atom-text-editor, atom-text-editor::shadow {
   .vim-mode-plus-search-match .region {
     .vim-mode-plus.round-box;
     background-color: transparent;
-    border: 1px solid @syntax-result-marker-color;
+    border: 1px solid @syntax-text-color;
+    // border: 1px solid @syntax-result-marker-color;
   }
   .vim-mode-plus-search-match.first .region {
     border: 1px solid @syntax-color-renamed;
@@ -239,7 +240,7 @@ atom-text-editor, atom-text-editor::shadow {
   }
   .vim-mode-plus-highlight-search .region {
     .vim-mode-plus.round-box;
-    border: 1px solid fadeout(@syntax-result-marker-color, 70%);
+    border: 1px solid fadeout(@syntax-text-color, 70%);
     background-color: @syntax-selection-color;
   }
   .vim-mode-plus-persistent-selection .region {
@@ -248,11 +249,9 @@ atom-text-editor, atom-text-editor::shadow {
   .vim-mode-plus-occurrence-match .region {
     .vim-mode-plus.solid-box;
     z-index: 1;
-    border: 2px none @syntax-color-modified;
-    border-top-style: none;
-    border-right-style: none;
+    border-bottom-width: 2px;
+    border-color: @syntax-color-modified;
     border-bottom-style: dotted;
-    border-left-style: none;
   }
 }
 
