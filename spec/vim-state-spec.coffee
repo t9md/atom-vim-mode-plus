@@ -214,6 +214,24 @@ describe "VimState", ->
       withMockPlatform editorElement, 'platform-darwin' , ->
         ensure 'ctrl-c', mode: 'normal'
 
+    describe "clearMultipleCursorsOnEscapeInsertMode setting", ->
+      beforeEach ->
+        set
+          text: 'abc'
+          cursor: [[0, 0], [0, 1]]
+
+      describe "when enabled", ->
+        beforeEach ->
+          settings.set('clearMultipleCursorsOnEscapeInsertMode', true)
+        it "clear multiple cursor on escape", ->
+          ensure 'escape', mode: 'normal', numCursors: 1
+
+      describe "when disabled", ->
+        beforeEach ->
+          settings.set('clearMultipleCursorsOnEscapeInsertMode', false)
+        it "clear multiple cursor on escape", ->
+          ensure 'escape', mode: 'normal', numCursors: 2
+
   describe "replace-mode", ->
     describe "with content", ->
       beforeEach -> set text: "012345\n\nabcdef"
