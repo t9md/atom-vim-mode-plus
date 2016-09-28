@@ -118,6 +118,10 @@ class Operator extends Base
     else if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
       @setOccurrence('preset')
 
+    if @acceptPersistentSelection
+      @subscribe @onDidDeactivateMode ({mode}) =>
+        @occurrenceManager.resetPatterns() if mode is 'operator-pending'
+
   getImplicitTarget: ->
     canSelectPersistentSelection =
       @vimState.hasPersistentSelections() and
@@ -148,7 +152,7 @@ class Operator extends Base
         @addToClassList('with-occurrence')
       when 'modifier'
         debug 'modifier: overwrite existing marker when manually typed `o`'
-        @resetOccurrencePatterns() # clear existing marker
+        @occurrenceManager.resetPatterns() # clear existing marker
         @addOccurrencePattern() # mark cursor word.
 
   hasOccurrenceMarkers: ->
@@ -160,9 +164,6 @@ class Operator extends Base
       point = @getCursorBufferPosition()
       pattern = getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
     @occurrenceManager.addPattern(pattern)
-
-  resetOccurrencePatterns: ->
-    @occurrenceManager.resetPatterns() # clear existing marker
 
   # target is TextObject or Motion to operate on.
   setTarget: (@target) ->
@@ -216,7 +217,7 @@ class Operator extends Base
     scanRanges = @editor.getSelectedBufferRanges()
     isVisual = @isMode('visual')
     @vimState.modeManager.deactivate() if isVisual
-    
+
     if @occurrenceManager.selectInRanges(scanRanges, isVisual)
       cursorPositionManager.destroy()
     else

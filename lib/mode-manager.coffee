@@ -21,10 +21,6 @@ class ModeManager
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
     @emitter = new Emitter
-    @onDidDeactivateMode ({mode, submode}) =>
-      # [FIXME] find better place, quick&dirty fix for remaining-markers
-      if mode is 'operator-pending'
-        @vimState.occurrenceManager.resetPatterns()
 
   isMode: (mode, submodes) ->
     if submodes?
