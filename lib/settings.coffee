@@ -39,7 +39,7 @@ module.exports = new Settings 'vim-mode-plus',
     description: 'Start in insert-mode whan editorElement matches scope'
   clearMultipleCursorsOnEscapeInsertMode:
     type: 'boolean'
-    default: true
+    default: false
   autoSelectPersistentSelectionOnOperate:
     type: 'boolean'
     default: true

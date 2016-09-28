@@ -55,7 +55,7 @@ describe "Occurrence", ->
         editor.insertText('!!!')
         ensure "escape",
           mode: 'normal'
-          numCursors: 1
+          numCursors: 8
           text: """
 
           !!!: xxx: !!!:
@@ -71,7 +71,7 @@ describe "Occurrence", ->
           """
         ensure "} j .",
           mode: 'normal'
-          numCursors: 1
+          numCursors: 8
           text: """
 
           !!!: xxx: !!!:

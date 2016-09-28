@@ -463,7 +463,6 @@ describe "Operator ActivateInsertMode family", ->
       ensure 'escape', text: "abc123\nabc4567"
 
       keystroke 'i'
-      editor.addSelectionBelow()
       editor.insertText "d"
       editor.insertText "e"
       editor.insertText "f"
@@ -477,9 +476,7 @@ describe "Operator ActivateInsertMode family", ->
       editor.backspace()
       editor.backspace()
       ensure 'escape', text: "abc123\nabc4567"
-      editor.addSelectionBelow()
       ensure '.',      text: "ababcc123\nababcc4567"
-      editor.addSelectionBelow()
       ensure '.',      text: "abababccc123\nabababccc4567"
 
     describe 'with nonlinear input', ->
