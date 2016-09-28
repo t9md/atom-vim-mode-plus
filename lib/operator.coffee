@@ -139,24 +139,18 @@ class Operator extends Base
 
   # type is one of ['preset', 'modifier']
   setOccurrence: (type) ->
-    @addToClassList('with-occurrence')
     @occurrence = true
     switch type
       when 'static'
         unless @isComplete() # we enter operator-pending
           debug 'static: mark as we enter operator-pending'
-          @addToClassList('with-occurrence')
-          @addOccurrencePattern() unless @hasOccurrenceMarkers()
+          @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
       when 'preset'
         debug 'preset: nothing to do since we have markers already'
-        @addToClassList('with-occurrence')
       when 'modifier'
         debug 'modifier: overwrite existing marker when manually typed `o`'
         @occurrenceManager.resetPatterns() # clear existing marker
         @addOccurrencePattern() # mark cursor word.
-
-  hasOccurrenceMarkers: ->
-    @occurrenceManager.hasMarkers()
 
   addOccurrencePattern: (pattern=null) ->
     pattern ?= @patternForOccurrence
@@ -209,11 +203,11 @@ class Operator extends Base
 
     # This has to be BEFORE @target.select, to use CURRENT cursor position.
     # to find occurrence-word.
-    @addOccurrencePattern() unless @hasOccurrenceMarkers()
+    @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
     fn()
 
-    @addOccurrencePattern() unless @hasOccurrenceMarkers()
+    @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
     scanRanges = @editor.getSelectedBufferRanges()
     isVisual = @isMode('visual')
     @vimState.modeManager.deactivate() if isVisual

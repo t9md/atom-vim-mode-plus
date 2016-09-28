@@ -313,6 +313,8 @@ class VimState
       @mark.setRange('<', '>', [head, tail])
     @previousSelection = {properties, @submode}
 
+  # Persistent selection
+  # -------------------------
   hasPersistentSelections: ->
     @persistentSelection.hasMarkers()
 

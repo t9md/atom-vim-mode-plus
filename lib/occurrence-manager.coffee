@@ -33,7 +33,7 @@ class OccurrenceManager
 
     # Update css on every marker update.
     @markerLayer.onDidUpdate =>
-      @editorElement.classList.toggle("occurrence-preset", @hasMarkers())
+      @editorElement.classList.toggle("has-occurrence", @hasMarkers())
 
   # Callback get passed following object
   # - newPattern: can be undefined on reset event

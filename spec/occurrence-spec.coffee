@@ -522,17 +522,17 @@ describe "Occurrence", ->
             vimState.occurrenceManager.markerLayer.onDidUpdate(update = jasmine.createSpy())
           it 'is auto-set/unset wheter at least one preset-occurrence was exists or not', ->
             runs ->
-              expect(editorElement.classList.contains('occurrence-preset')).toBe(false)
+              expect(editorElement.classList.contains('has-occurrence')).toBe(false)
               ensure 'g o', occurrenceCount: 1, occurrenceText: 'This', cursor: [0, 0]
             waitsFor ->
               update.callCount is 1
             runs ->
-              expect(editorElement.classList.contains('occurrence-preset')).toBe(true)
+              expect(editorElement.classList.contains('has-occurrence')).toBe(true)
               ensure 'g o', occurrenceCount: 0, cursor: [0, 0]
             waitsFor ->
               update.callCount is 2
             runs ->
-              expect(editorElement.classList.contains('occurrence-preset')).toBe(false)
+              expect(editorElement.classList.contains('has-occurrence')).toBe(false)
 
       describe "in visual-mode", ->
         describe "add preset occurrence", ->
@@ -634,7 +634,7 @@ describe "Occurrence", ->
             !!!: ooo: xxx: ooo xxx: ooo:
             """
             numCursors: 3
-        describe "predefined keymap on when occurrence-preset", ->
+        describe "predefined keymap on when has-occurrence", ->
           beforeEach ->
             set
               text: """
@@ -649,7 +649,7 @@ describe "Occurrence", ->
             runs ->
               ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
             waitsFor ->
-              editorElement.classList.contains('occurrence-preset')
+              editorElement.classList.contains('has-occurrence')
             runs ->
               ensure 'i k',
                 mode: 'insert'
@@ -668,7 +668,7 @@ describe "Occurrence", ->
             runs ->
               ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
             waitsFor ->
-              editorElement.classList.contains('occurrence-preset')
+              editorElement.classList.contains('has-occurrence')
             runs ->
               ensure 'a j',
                 mode: 'insert'
