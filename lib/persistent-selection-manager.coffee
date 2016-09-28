@@ -2,7 +2,7 @@ _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
 
 module.exports =
-class RangeMakerManager
+class PersistentSelectionManager
   patterns: null
 
   constructor: (@vimState) ->
@@ -34,6 +34,9 @@ class RangeMakerManager
 
   getMarkers: ->
     @markerLayer.getMarkers()
+
+  getMarkerCount: ->
+    @markerLayer.getMarkerCount()
 
   clearMarkers: ->
     marker.destroy() for marker in @markerLayer.getMarkers()

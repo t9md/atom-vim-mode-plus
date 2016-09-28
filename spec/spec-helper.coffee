@@ -221,7 +221,7 @@ class VimEditor
     'selectedScreenRange', 'selectedScreenRangeOrdered'
     'selectedBufferRange', 'selectedBufferRangeOrdered'
     'selectionIsReversed',
-    'persistentSelectionBufferRange'
+    'persistentSelectionBufferRange', 'persistentSelectionCount'
     'occurrenceCount', 'occurrenceText'
     'characterwiseHead'
     'scrollTop',
@@ -308,6 +308,10 @@ class VimEditor
   ensurePersistentSelectionBufferRange: (range) ->
     actual = @vimState.persistentSelection.getMarkerBufferRanges()
     expect(actual).toEqual(toArrayOfRange(range))
+
+  ensurePersistentSelectionCount: (number) ->
+    actual = @vimState.persistentSelection.getMarkerCount()
+    expect(actual).toBe number
 
   ensureOccurrenceCount: (number) ->
     actual = @vimState.occurrenceManager.getMarkerCount()

@@ -157,8 +157,9 @@ class Operator extends Base
   addOccurrencePattern: (pattern=null) ->
     pattern ?= @patternForOccurrence
     unless pattern?
-      point = @editor.getCursorBufferPosition()
+      point = @getCursorBufferPosition()
       pattern = getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
+    console.log 'pattern', pattern
     @occurrenceManager.addPattern(pattern)
 
   resetOccurrencePatterns: ->
@@ -203,23 +204,16 @@ class Operator extends Base
     @activateMode('normal')
 
   reselectOccurrence: (fn) ->
-    scanRanges = null
     cursorPositionManager = new CursorPositionManager(@editor)
-
-    wasVisual = @isMode('visual')
-    if wasVisual
-      scanRanges = @editor.getSelectedBufferRanges() # save before clear selection.
-      # [FIXME] Deactivating to normalize cursor position to capture cursor word,
-      # but we also breaks `.` repeatability.
-      @vimState.modeManager.deactivate()
-
-    cursorPositionManager.save('head')
-    @addOccurrencePattern() unless @hasOccurrenceMarkers()
+    cursorPositionManager.save('head', fromProperty: true, allowFallback: true)
 
     fn()
 
-    scanRanges ?= @editor.getSelectedBufferRanges()
-    if @occurrenceManager.selectInRanges(scanRanges, wasVisual)
+    @addOccurrencePattern() unless @hasOccurrenceMarkers()
+    scanRanges = @editor.getSelectedBufferRanges()
+    if isVisual = @isMode('visual')
+      @vimState.modeManager.deactivate()
+    if @occurrenceManager.selectInRanges(scanRanges, isVisual)
       cursorPositionManager.destroy()
     else
       # Restoring cursor position also clear selection. Require to avoid unwanted mutation.
@@ -231,7 +225,6 @@ class Operator extends Base
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
     # We got ranges to select, so good-by @occurrenceManager by reset()
     @occurrenceManager.resetPatterns()
-
 
   # Return true unless all selection is empty.
   selectTarget: ->
@@ -378,14 +371,10 @@ class PresetOccurrence extends Operator
       marker.destroy()
     else
       pattern = null
-      if @isMode('visual')
-        if isNarrowed = @vimState.modeManager.isNarrowed()
-          options = {fromProperty: true, allowFallback: true}
-          point = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
-          pattern = getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
-        else
-          text = @editor.getSelectedText()
-          pattern = new RegExp(_.escapeRegExp(text), 'g')
+      isNarrowed = @vimState.modeManager.isNarrowed()
+      if @isMode('visual') and not isNarrowed
+        text = @editor.getSelectedText()
+        pattern = new RegExp(_.escapeRegExp(text), 'g')
 
       @addOccurrencePattern(pattern)
       @activateMode('normal') unless isNarrowed

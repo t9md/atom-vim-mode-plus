@@ -7,6 +7,7 @@ Delegato = require 'delegato'
   getVimLastScreenRow
   getWordBufferRangeAndKindAtBufferPosition
 } = require './utils'
+swrap = require './selection-wrapper'
 
 settings = require './settings'
 selectList = null
@@ -223,6 +224,23 @@ class Base
 
   getName: ->
     @constructor.name
+
+  getCursorBufferPosition: ->
+    if @isMode('visual')
+      [@editor.getLastSelection()].map(@getCursorPositionForSelection.bind(this))[0]
+    else
+      @editor.getCursorBufferPosition()
+
+  getCursorBufferPositions: ->
+    console.log "CALLED"
+    if @isMode('visual')
+      @editor.getSelections().map(@getCursorPositionForSelection.bind(this))
+    else
+      @editor.getCursorBufferPositions()
+
+  getCursorPositionForSelection: (selection) ->
+    options = {fromProperty: true, allowFallback: true}
+    swrap(selection).getBufferPositionFor('head', options)
 
   toString: ->
     str = @getName()

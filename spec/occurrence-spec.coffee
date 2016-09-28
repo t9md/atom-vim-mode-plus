@@ -377,9 +377,9 @@ describe "Occurrence", ->
               ooo: xxx: |||: xxx: ooo:
               XXX: |||: ooo: ooo:\n
               """
-              persistentSelectionBufferRange: persistentSelectionBufferRange
+              persistentSelectionCount: 0
 
-      describe "selection is prioritized over persistent-selection", ->
+      describe "when both exits, operator applied to both", ->
         it "select all occurrence in selection", ->
           set cursor: [0, 0]
           keystroke 'V 2 j /'
@@ -391,9 +391,9 @@ describe "Occurrence", ->
               ooo: XXX: ooo:
               |||: ooo: XXX: ooo:
               ooo: XXX: |||: XXX: ooo:
-              xxx: |||: ooo: ooo:\n
+              XXX: |||: ooo: ooo:\n
               """
-              persistentSelectionBufferRange: persistentSelectionBufferRange
+              persistentSelectionCount: 0
 
     describe "demonstrate persistent-selection's practical scenario", ->
       [oldGrammar] = []
