@@ -285,8 +285,8 @@
   'ctrl-cmd-g': 'vim-mode-plus:select-persistent-selection'
 
 'atom-text-editor.vim-mode-plus.visual-mode.is-narrowed':
-  'ctrl-cmd-c': 'vim-mode-plus:change-occurrence'
   'cmd-d': 'vim-mode-plus:select-occurrence'
+  'ctrl-cmd-c': 'vim-mode-plus:change-occurrence'
 
 '.platform-darwin atom-text-editor.vim-mode-plus-search':
   'ctrl-cmd-c': 'vim-mode-plus:change-occurrence-from-search'
@@ -333,9 +333,9 @@
   # 'd s': 'vim-mode-plus:delete-surround-any-pair'
   # 'd s': 'vim-mode-plus:delete-surround-any-pair-allow-forwarding'
 
-  # 'c s': 'vim-mode-plus:change-surround'
-  # 'c s': 'vim-mode-plus:change-surround-any-pair'
-  # 'c s': 'vim-mode-plus:change-surround-any-pair-allow-forwarding'
+  # 'y s c': 'vim-mode-plus:change-surround'
+  # 'y s c': 'vim-mode-plus:change-surround-any-pair'
+  # 'y s c': 'vim-mode-plus:change-surround-any-pair-allow-forwarding'
 
   # 'y m s':  'vim-mode-plus:map-surround'
 
