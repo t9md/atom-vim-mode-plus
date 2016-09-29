@@ -1,4 +1,4 @@
-# 0.58.0: [WIP] Preparing
+# 0.58.0:
 - New: `preset-occurrence` #395, #396
   - Allow user to set occurrence BEFORE operator.
   - Keymap: In `normal`, `visual`, `g o` to `toggle-preset-occurrence`.
