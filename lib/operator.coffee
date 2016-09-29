@@ -123,19 +123,20 @@ class Operator extends Base
         @occurrenceManager.resetPatterns() if mode is 'operator-pending'
 
   getImplicitTarget: ->
-    canSelectPersistentSelection =
-      @vimState.hasPersistentSelections() and
-        @acceptPersistentSelection and
-        settings.get('autoSelectPersistentSelectionOnOperate')
-
     # In visual-mode and target was not pre-set, operate on selected area.
-    if @isMode('visual')
-      if canSelectPersistentSelection
+    if @canSelectPersistentSelection()
+      @destroyUnknownSelection = true
+      if @isMode('visual')
         "ACurrentSelectionAndAPersistentSelection"
       else
-        "CurrentSelection"
+        "APersistentSelection"
     else
-      "APersistentSelection" if canSelectPersistentSelection
+      "CurrentSelection" if @isMode('visual')
+
+  canSelectPersistentSelection: ->
+    @acceptPersistentSelection and
+    @vimState.hasPersistentSelections() and
+    settings.get('autoSelectPersistentSelectionOnOperate')
 
   # type is one of ['preset', 'modifier']
   setOccurrence: (type) ->
@@ -227,11 +228,8 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    @mutationTracker.start(
-      stay: @needStay()
-      isSelect: @instanceof('Select')
-      useMarker: @useMarkerForStay
-    )
+    options = {isSelect: @instanceof('Select'), useMarker: @useMarkerForStay}
+    @mutationTracker.init(options)
     @mutationTracker.setCheckPoint('will-select')
 
     @forceTargetWise() if @wise
@@ -251,9 +249,12 @@ class Operator extends Base
     haveSomeSelection(@editor)
 
   restoreCursorPositionsIfNecessary: ->
+    # console.log "RESTORING"
     return unless @restorePositions
+    # console.log "RESTORING really"
     options =
-      strict: @isOccurrence()
+      stay: @needStay()
+      strict: @isOccurrence() or @destroyUnknownSelection
       clipToMutationEnd: @clipToMutationEndOnStay
       isBlockwise: @target?.isBlockwise?()
       mutationEnd: @restorePositionsToMutationEnd
@@ -271,6 +272,7 @@ class Select extends Operator
   flashTarget: false
   recordable: false
   acceptPresetOccurrence: false
+  acceptPersistentSelection: false
 
   canChangeMode: ->
     if @isMode('visual')
@@ -438,6 +440,7 @@ class Yank extends Operator
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
   stayOnLinewise: true
+  clipToMutationEndOnStay: false
 
   mutateSelection: (selection) ->
     @setTextToRegisterForSelection(selection)
