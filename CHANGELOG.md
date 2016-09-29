@@ -1,3 +1,49 @@
+# 0.58.0: [WIP] Preparing
+- New: `preset-occurrence` #395, #396
+  - Allow user to set occurrence BEFORE operator.
+  - Keymap: In `normal`, `visual`, `g o` to `toggle-preset-occurrence`.
+    - It add/remove `preset-occurrence` at cursor position.
+    - When removing, it remove one by one, not all.
+  - Keymap: In incsearch input, `cmd-o` to `add-occurrence-pattern-from-search`
+    - It add `preset-occurrence` by search-pattern.
+  - Following two operation do the same thing, but former is `operator-modifier`, later is `preset-occurrence`(`g o`).
+    - `c o $`: change cursor-word till end-of-line.
+    - `g o c $`: change cursor-word till end-of-line.
+- New: PersistentSelection: (former RangeMarker)
+  - Allow user to set target BEFORE operator.
+  - Used as implicit target of operator. As like selection in `visual-mode` is used as implict target.
+  - Config: `autoSelectPersistentSelectionOnOperate`(default=true) controll to disable implicit targeting.
+  - Updated style to seem like selection.
+  - Keymap: In `visual`, `enter` to `create-persistent-selection`.
+  - If you map `c s` to `change-surround`, I recommend you to disable it including other keymap starting with `c`.
+  - Following two operation do the same thing, but former target is normal selection, later target is `persistent-selection`.
+    - `V j j c`: change two three line.
+    - `V j j enter c`: change three line.
+  - Common use case is
+    - Work on multiple target without using mouse: set multiple target by `persistent-selection` then mutate.
+    - Narrow target range to include particular set of `occurrence`.
+- New: Highlight occurrence when occurrence modifier(`o`) is typed. #377
+- API Breking, Improve: globalState is no longer simple object, use `get`, `set` method instead. Now observable it's change.
+- Breaking, Improve: When `H`, and `L` motion is used as target of operator, ignore scrolloff to mutate till visible-top or bottom row.
+- Breaking: `clearMultipleCursorsOnEscapeInsertMode` is now default `false`, this was changed in v0.57.0, but now reverted. #376
+- Fix: PreviousSelection(`g v`) was incorrectly shared across editor.
+- Fix: No longer use `@syntax-result-marker-color` instead use `@syntax-text-color`.
+- Improve: Gradual clearing different kind of marker(persistent-selection, occur, hlsearch).
+- Improve, Fix: `stayOnDelete` is now work properly on every situation.
+- Improve: Use marker to track original cursor position to stay. #380
+- Improve: When `stayOnOperate` family feature are enabled, adjust cursor position to not exceeds end of mutation #380
+- Improve: Creanup OperationStack. #400
+- Improve: Many TextObject now follow new convention(return range of text-object by `getRange()`).
+- Improve: `word` text-object faimily to select more vim-like range(don't select adjoining non-word-char like Atom's default `selection.selectWord()`).
+- Internal: Debug codes and cleanup
+- Internal: `OperationStack::subscribe` now return subscribed handler.
+- Internal: Split out highlightSearch concerning code as HighlightSearchManager class #398
+- Internal: Split out mutation concerning code in operator as MutationTracker class
+- Internal: Split out rangeMaker concerning code as PersistentSelectionManager class
+- New: VisibleArea text-object. keymap `i v`.
+- New: `UnionTextObject` and `AFunctionOrInnerPair`
+- Rename: Operator `replace` to `replace-and-move-right` and `replace` is general replace operator.
+
 # 0.57.0:
 - Fix: `a-word` and `a-whole-word` now select leading white-space when trailing space was not exist #355
 - Fix: Paste(`p`) non-linewise text to empty line now insert text to same line, not next-line like previous version. #359.
