@@ -4,7 +4,7 @@ vim-mode improved.
 
 <!-- TOC START min:1 max:3 link:true update:true -->
 - [vim-mode-plus](#vim-mode-plus)
-- [What's new in v0.55.0](#whats-new-in-v0550)
+- [What's new in v0.58.0](#whats-new-in-v0580)
 - [Important](#important)
 - [Thanks](#thanks)
 - [Issue report](#issue-report)
@@ -24,11 +24,16 @@ vim-mode improved.
 
 <!-- TOC END -->
 
-# What's new in v0.55.0
+# What's new in v0.58.0
 
-v0.55.0 is big release which introduce serveral new features.  
-- [WhatsNew v0.55.0](https://github.com/t9md/atom-vim-mode-plus/wiki/WhatsNew-v0.55.0)
-- [CHANGELOG.md](https://github.com/t9md/atom-vim-mode-plus/blob/master/CHANGELOG.md#0550)
+In v0.58.0, introduce `preset-occurrence` and `persistent-selection`.
+In v0.55.0, introduce `occurrence-modifier`
+
+These features are very powerfull especially for power user, read folloiwng document to learn how to use.  
+
+- [Advanced Topic Tutorial](https://github.com/t9md/atom-vim-mode-plus/wiki/AdvancedTopicTutorial)
+- [Occurre Modifier](https://github.com/t9md/atom-vim-mode-plus/wiki/OccurrenceModifier)
+- [CHANGELOG.md](https://github.com/t9md/atom-vim-mode-plus/blob/master/CHANGELOG.md)
 
 # Important
 
