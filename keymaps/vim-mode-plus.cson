@@ -351,6 +351,7 @@
 'atom-text-editor.vim-mode-plus.operator-pending-mode.has-occurrence':
   'p': 'vim-mode-plus:inner-paragraph'
   'r': 'vim-mode-plus:a-persistent-selection'
+  'v': 'vim-mode-plus:inner-visible-area'
   'f': 'vim-mode-plus:a-function'
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
