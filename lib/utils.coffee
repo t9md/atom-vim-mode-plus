@@ -253,8 +253,7 @@ cursorIsAtVimEndOfFile = (cursor) ->
   pointIsAtVimEndOfFile(cursor.editor, cursor.getBufferPosition())
 
 isEmptyRow = (editor, row) ->
-  {start, end} = editor.bufferRangeForBufferRow(row)
-  start.column is 0 and end.column is 0
+  editor.bufferRangeForBufferRow(row).isEmpty()
 
 cursorIsAtEmptyRow = (cursor) ->
   isEmptyRow(cursor.editor, cursor.getBufferRow())
