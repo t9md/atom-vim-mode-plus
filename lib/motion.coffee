@@ -739,8 +739,7 @@ class Find extends Motion
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
     @setBufferPositionSafely(cursor, point)
-    unless @isRepeated()
-      @globalState.set('currentFind', this)
+    @globalState.set('currentFind', this) unless @isRepeated()
 
 # keymap: F
 class FindBackwards extends Find
@@ -767,21 +766,6 @@ class TillBackwards extends Till
   @extend()
   inclusive: false
   backwards: true
-
-class RepeatFind extends Find
-  @extend()
-  repeated: true
-
-  initialize: ->
-    unless findObj = @globalState.get('currentFind')
-      @abort()
-    {@offset, @backwards, @input} = findObj
-    super
-
-class RepeatFindReverse extends RepeatFind
-  @extend()
-  isBackwards: ->
-    not @backwards
 
 # Mark
 # -------------------------

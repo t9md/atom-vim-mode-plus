@@ -116,6 +116,9 @@ class Base
   getCount: ->
     @count ?= @vimState.getCount() ? @getDefaultCount()
 
+  resetCount: ->
+    @count = null
+
   isDefaultCount: ->
     @count is @getDefaultCount()
 
@@ -161,6 +164,13 @@ class Base
   new: (name, properties={}) ->
     klass = Base.getClass(name)
     new klass(@vimState, properties)
+
+  clone: (vimState) ->
+    object = _.clone(this)
+    object.vimState = vimState
+    object.editor = vimState.editor
+    object.editorElement = vimState.editorElement
+    object
 
   cancelOperation: ->
     @vimState.operationStack.cancel()

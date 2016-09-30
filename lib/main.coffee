@@ -128,6 +128,8 @@ module.exports =
       'operator-modifier-linewise': -> @emitDidSetOperatorModifier(wise: 'linewise')
       'operator-modifier-occurrence': -> @emitDidSetOperatorModifier(occurrence: true)
       'repeat': -> @operationStack.runRecorded()
+      'repeat-find': -> @operationStack.runCurrentFind()
+      'repeat-find-reverse': -> @operationStack.runCurrentFind(reverse: true)
       'set-count-0': -> @setCount(0)
       'set-count-1': -> @setCount(1)
       'set-count-2': -> @setCount(2)

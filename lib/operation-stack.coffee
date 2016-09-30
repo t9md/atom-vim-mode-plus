@@ -116,6 +116,16 @@ class OperationStack
       @editor.transact =>
         @run(operation)
 
+  runCurrentFind: ({reverse}={}) ->
+    if operation = @vimState.globalState.get('currentFind')
+      operation = operation.clone(@vimState)
+      operation.setRepeated()
+      operation.resetCount()
+      if reverse
+        operation.isBackwards = ->
+          not operation.backwards
+      @run(operation)
+
   handleError: (error) ->
     @vimState.reset()
     unless error instanceof OperationAbortedError
