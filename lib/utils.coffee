@@ -211,30 +211,6 @@ cursorIsOnNonWordCharacter = (cursor) ->
 pointIsOnNonWordCharacter = (editor, point, {nonWordCharacters}) ->
   getCharacterAtBufferPosition(editor, point) in nonWordCharacters
 
-getWordRegExpForPointWithCursor = (cursor, point) ->
-  options = {}
-  if pointIsBetweenWordAndNonWord(cursor.editor, point, cursor.getScopeDescriptor())
-    options.includeNonWordCharacters = false
-  cursor.wordRegExp(options)
-
-# borrowed from Cursor::isBetweenWordAndNonWord
-pointIsBetweenWordAndNonWord = (editor, point, scope) ->
-  point = Point.fromObject(point)
-  {row, column} = point
-  return false if (column is 0) or (pointIsAtEndOfLine(editor, point))
-  range = [[row, column - 1], [row, column + 1]]
-  [before, after] = editor.getTextInBufferRange(range)
-  if /\s/.test(before) or /\s/.test(after)
-    false
-  else
-    nonWordCharacters = atom.config.get('editor.nonWordCharacters', {scope}).split('')
-    _.contains(nonWordCharacters, before) isnt _.contains(nonWordCharacters, after)
-
-pointIsSurroundedByWhitespace = (editor, point) ->
-  {row, column} = Point.fromObject(point)
-  range = [[row, column - 1], [row, column + 1]]
-  /^\s+$/.test editor.getTextInBufferRange(range)
-
 # return true if moved
 moveCursorToNextNonWhitespace = (cursor) ->
   originalPoint = cursor.getBufferPosition()
@@ -883,9 +859,6 @@ module.exports = {
   getCharacterAtCursor
   getTextInScreenRange
   cursorIsOnWhiteSpace
-  getWordRegExpForPointWithCursor
-  pointIsBetweenWordAndNonWord
-  pointIsSurroundedByWhitespace
   moveCursorToNextNonWhitespace
   isEmptyRow
   cursorIsAtEmptyRow

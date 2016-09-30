@@ -15,8 +15,6 @@ swrap = require './selection-wrapper'
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
   isIncludeFunctionScopeForRow
-  pointIsSurroundedByWhitespace
-  getWordRegExpForPointWithCursor
   getStartPositionForPattern
   getEndPositionForPattern
   getVisibleBufferRange
