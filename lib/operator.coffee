@@ -334,6 +334,14 @@ class CreatePersistentSelection extends Operator
   mutateSelection: (selection) ->
     @vimState.persistentSelection.markBufferRange(selection.getBufferRange())
 
+  execute: ->
+    @onDidFinishOperation =>
+      lastSelection = @editor.getLastSelection()
+      for selection in @editor.getSelections() when selection isnt lastSelection
+        selection.destroy()
+    super
+
+
 class TogglePersistentSelection extends CreatePersistentSelection
   @extend()
   isComplete: ->
