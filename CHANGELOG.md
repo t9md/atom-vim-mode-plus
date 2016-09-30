@@ -1,3 +1,6 @@
+# 0.58.1:
+- Keymap: `[`, `]` to `vim-mode-plus:move-up-to-edge`, `vim-mode-plus:move-down-to-edge`
+
 # 0.58.0:
 - New: `preset-occurrence` #395, #396
   - Allow user to set occurrence BEFORE operator.
