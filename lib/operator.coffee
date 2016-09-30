@@ -94,7 +94,7 @@ class Operator extends Base
     return unless @trackChange
 
     @onDidFinishOperation =>
-      if marker = @mutationTracker.getMutationForSelection(@editor.getLastSelection()).marker
+      if marker = @mutationTracker.getMutationForSelection(@editor.getLastSelection())?.marker
         @setMarkForChange(marker.getBufferRange())
 
   constructor: ->

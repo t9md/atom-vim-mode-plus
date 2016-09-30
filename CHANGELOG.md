@@ -1,3 +1,6 @@
+# 0.58.2:
+- Fix: Guard in case mutation information was unavailable when tracking changes.
+
 # 0.58.1:
 - Improve: Clear multiple-selection when `create-persistent-selection` #414
 - Keymap: Remove `cmd-d` in `has-persistent-selection` scope to work well with default `cmd-d` #413
