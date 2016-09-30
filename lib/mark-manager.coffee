@@ -1,4 +1,4 @@
-{Range} = require 'atom'
+{Range, CompositeDisposable} = require 'atom'
 
 MARKS = /// (
   ?: [a-z]
@@ -11,6 +11,12 @@ class MarkManager
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
     @marks = {}
+
+    @subscriptions = new CompositeDisposable
+    @subscriptions.add @vimState.onDidDestroy(@destroy.bind(this))
+
+  destroy: ->
+    @subscriptions.dispose()
 
   isValid: (name) ->
     MARKS.test(name)

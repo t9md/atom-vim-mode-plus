@@ -198,18 +198,15 @@ class VimState
 
     @hover?.destroy?()
     @hoverSearchCounter?.destroy?()
-    @operationStack?.destroy?()
     @searchHistory?.destroy?()
     @cursorStyleManager?.destroy?()
     @input?.destroy?()
     @search?.destroy?()
-    @modeManager?.destroy?()
     @register?.destroy?
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
       @input, @search, @modeManager, @register
-      @count
       @editor, @editorElement, @subscriptions,
       @inputCharSubscriptions
       @occurrenceManager

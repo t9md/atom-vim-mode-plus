@@ -8,19 +8,17 @@ settings = require './settings'
 class ModeManager
   mode: 'insert' # Native atom is not modal editor and its default is 'insert'
   submode: null
-
-  vimState: null
-  editor: null
-  editorElement: null
-
-  emitter: null
-  deactivator: null
-
   replacedCharsBySelection: null
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
+    @mode = 'insert'
     @emitter = new Emitter
+    @subscriptions = new CompositeDisposable
+    @subscriptions.add @vimState.onDidDestroy(@destroy.bind(this))
+
+  destroy: ->
+    @subscriptions.dispose()
 
   isMode: (mode, submodes) ->
     if submodes?

@@ -3,7 +3,7 @@ _ = require 'underscore-plus'
 
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
-{moveCursorLeft, getVisibleBufferRange} = require './utils'
+{moveCursorLeft} = require './utils'
 settings = require './settings'
 {Select, MoveToRelativeLine} = {}
 {OperationAbortedError} = require './errors'
@@ -22,8 +22,12 @@ swrap = require './selection-wrapper'
 class OperationStack
   Delegato.includeInto(this)
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
+
   constructor: (@vimState) ->
     {@editor, @editorElement, @modeManager} = @vimState
+
+    @subscriptions = new CompositeDisposable
+    @subscriptions.add @vimState.onDidDestroy(@destroy.bind(this))
 
     Select ?= Base.getClass('Select')
     MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
@@ -43,6 +47,7 @@ class OperationStack
     @operationSubscriptions = new CompositeDisposable
 
   destroy: ->
+    @subscriptions.dispose()
     @operationSubscriptions?.dispose()
     {@stack, @operationSubscriptions} = {}
 
