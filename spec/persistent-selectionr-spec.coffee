@@ -85,7 +85,7 @@ describe "Persistent Selection", ->
         waitsFor ->
           update.callCount is 1
         runs ->
-          ensure 'cmd-d',
+          ensure 'g cmd-d',
             selectedText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo', 'ooo' ]
           keystroke 'c'
           editor.insertText '!!!'
