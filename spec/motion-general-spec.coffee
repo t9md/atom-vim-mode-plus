@@ -203,8 +203,8 @@ describe "Motion general", ->
       beforeEach ->
         atom.keymaps.add "test",
           'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            'g k': 'vim-mode-plus:move-up-to-edge'
-            'g j': 'vim-mode-plus:move-down-to-edge'
+            '[': 'vim-mode-plus:move-up-to-edge'
+            ']': 'vim-mode-plus:move-down-to-edge'
 
         text = new TextData """
           0:  4 67  01234567890123456789
@@ -219,35 +219,35 @@ describe "Motion general", ->
         set text: text.getRaw(), cursor: [4, 3]
 
       it "move first-row or last-row even if it's blank char", ->
-        ensure 'g k', cursor: [0, 3]
-        ensure 'g j', cursor: [7, 3]
+        ensure '[', cursor: [0, 3]
+        ensure ']', cursor: [7, 3]
       it "move to non-blank-char on both first and last row", ->
         set cursor: [4, 4]
-        ensure 'g k', cursor: [0, 4]
-        ensure 'g j', cursor: [7, 4]
+        ensure '[', cursor: [0, 4]
+        ensure ']', cursor: [7, 4]
       it "move to white space char when both side column is non-blank char", ->
         set cursor: [4, 5]
-        ensure 'g k', cursor: [0, 5]
-        ensure 'g j', cursor: [4, 5]
-        ensure 'g j', cursor: [7, 5]
+        ensure '[', cursor: [0, 5]
+        ensure ']', cursor: [4, 5]
+        ensure ']', cursor: [7, 5]
       it "only stops on row one of [first row, last row, up-or-down-row is blank] case-1", ->
         set cursor: [4, 6]
-        ensure 'g k', cursor: [2, 6]
-        ensure 'g k', cursor: [0, 6]
-        ensure 'g j', cursor: [2, 6]
-        ensure 'g j', cursor: [4, 6]
-        ensure 'g j', cursor: [7, 6]
+        ensure '[', cursor: [2, 6]
+        ensure '[', cursor: [0, 6]
+        ensure ']', cursor: [2, 6]
+        ensure ']', cursor: [4, 6]
+        ensure ']', cursor: [7, 6]
       it "only stops on row one of [first row, last row, up-or-down-row is blank] case-2", ->
         set cursor: [4, 7]
-        ensure 'g k', cursor: [2, 7]
-        ensure 'g k', cursor: [0, 7]
-        ensure 'g j', cursor: [2, 7]
-        ensure 'g j', cursor: [4, 7]
-        ensure 'g j', cursor: [7, 7]
+        ensure '[', cursor: [2, 7]
+        ensure '[', cursor: [0, 7]
+        ensure ']', cursor: [2, 7]
+        ensure ']', cursor: [4, 7]
+        ensure ']', cursor: [7, 7]
       it "support count", ->
         set cursor: [4, 6]
-        ensure '2 g k', cursor: [0, 6]
-        ensure '3 g j', cursor: [7, 6]
+        ensure '2 [', cursor: [0, 6]
+        ensure '3 ]', cursor: [7, 6]
 
       describe 'editor for hardTab', ->
         pack = 'language-go'
@@ -268,26 +268,26 @@ describe "Motion general", ->
           atom.packages.deactivatePackage(pack)
 
         it "move up/down to next edge of same *screen* column", ->
-          ensure 'g k', cursor: [5, 2]
-          ensure 'g k', cursor: [3, 2]
-          ensure 'g k', cursor: [2, 2]
-          ensure 'g k', cursor: [0, 2]
+          ensure '[', cursor: [5, 2]
+          ensure '[', cursor: [3, 2]
+          ensure '[', cursor: [2, 2]
+          ensure '[', cursor: [0, 2]
 
-          ensure 'g j', cursor: [2, 2]
-          ensure 'g j', cursor: [3, 2]
-          ensure 'g j', cursor: [5, 2]
-          ensure 'g j', cursor: [9, 2]
-          ensure 'g j', cursor: [11, 2]
-          ensure 'g j', cursor: [14, 2]
-          ensure 'g j', cursor: [17, 2]
+          ensure ']', cursor: [2, 2]
+          ensure ']', cursor: [3, 2]
+          ensure ']', cursor: [5, 2]
+          ensure ']', cursor: [9, 2]
+          ensure ']', cursor: [11, 2]
+          ensure ']', cursor: [14, 2]
+          ensure ']', cursor: [17, 2]
 
-          ensure 'g k', cursor: [14, 2]
-          ensure 'g k', cursor: [11, 2]
-          ensure 'g k', cursor: [9, 2]
-          ensure 'g k', cursor: [5, 2]
-          ensure 'g k', cursor: [3, 2]
-          ensure 'g k', cursor: [2, 2]
-          ensure 'g k', cursor: [0, 2]
+          ensure '[', cursor: [14, 2]
+          ensure '[', cursor: [11, 2]
+          ensure '[', cursor: [9, 2]
+          ensure '[', cursor: [5, 2]
+          ensure '[', cursor: [3, 2]
+          ensure '[', cursor: [2, 2]
+          ensure '[', cursor: [0, 2]
 
   describe "the w keybinding", ->
     baseText = """
