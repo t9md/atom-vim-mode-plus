@@ -1,5 +1,7 @@
 # 0.58.1:
-- Keymap: `[`, `]` to `vim-mode-plus:move-up-to-edge`, `vim-mode-plus:move-down-to-edge`
+- Improve: Clear multiple-selection when `create-persistent-selection` #414
+- Keymap: Remove `cmd-d` in `has-persistent-selection` scope to work well with default `cmd-d` #413
+- Keymap: Add `[`, `]` to `vim-mode-plus:move-up-to-edge`, `vim-mode-plus:move-down-to-edge` #412
 
 # 0.58.0:
 - New: `preset-occurrence` #395, #396
