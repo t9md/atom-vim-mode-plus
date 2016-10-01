@@ -5,8 +5,7 @@ swrap = require './selection-wrapper'
 
 # mutation stored by each Selection have following field
 #  marker:
-#    marker to track mutation. marker is created when `setCheckPoint` and selection is NOT empty.
-#    In other words, this mutationTracker nothing to do for empty selection.
+#    marker to track mutation. marker is created when `setCheckPoint`
 #  createdAt:
 #    'string' representing when marker was created.
 #  checkPoint: {}
@@ -115,11 +114,15 @@ class Mutation
     @marker = null
 
   update: (checkPoint) ->
-    if not @marker? and @selection.isEmpty()
-      return
+    # If marker range was empty and we have non-empty seleciton, we re-track that selection
+    # by invalidating old marker.
+    if @marker?.getBufferRange().isEmpty() and not @selection.getBufferRange().isEmpty()
+      @marker.destroy()
+      @marker = null
 
     unless @marker?
       @marker = @markerLayer.markBufferRange(@selection.getBufferRange(), invalidate: 'never')
+
     @checkPoint[checkPoint] = @marker.getBufferRange()
 
   getMutationEnd: ->
