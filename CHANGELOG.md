@@ -1,3 +1,7 @@
+# 0.58.3:
+- Internal, Improve: `f`, `F`, `t`, `T` is no longer instance of operator to avoid complexity.
+- Fix: Throwing error in `V D` keystroke. #416, #417.
+
 # 0.58.2:
 - Fix: Guard in case mutation information was unavailable when tracking changes.
 
