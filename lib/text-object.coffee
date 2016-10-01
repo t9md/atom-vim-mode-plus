@@ -736,6 +736,10 @@ class All extends Entire
   @extend(false)
 
 # -------------------------
+class Empty extends TextObject
+  @extend(false)
+
+# -------------------------
 class LatestChange extends TextObject
   @extend(false)
   getRange: ->

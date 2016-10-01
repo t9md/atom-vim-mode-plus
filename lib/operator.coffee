@@ -12,6 +12,7 @@ _ = require 'underscore-plus'
   scanInRanges
   getVisibleBufferRange
   getWordPatternAtBufferPosition
+  destroyNonLastSelection
 
   selectedRange
   selectedText
@@ -94,12 +95,13 @@ class Operator extends Base
     return unless @trackChange
 
     @onDidFinishOperation =>
-      if marker = @mutationTracker.getMutationForSelection(@editor.getLastSelection())?.marker
-        @setMarkForChange(marker.getBufferRange())
+      mutation = @mutationTracker.getMutationForSelection(@editor.getLastSelection())
+      if mutation.marker?
+        @setMarkForChange(mutation.marker.getBufferRange())
 
   constructor: ->
     super
-    {@mutationTracker, @occurrenceManager} = @vimState
+    {@mutationTracker, @occurrenceManager, @persistentSelection} = @vimState
 
     @initialize()
 
@@ -241,17 +243,16 @@ class Operator extends Base
     else
       @target.select()
 
-    if haveSomeSelection(@editor)
+    isExplicitEmptyTarget = @target.getName() is "Empty"
+    if haveSomeSelection(@editor) or isExplicitEmptyTarget
       @mutationTracker.setCheckPoint('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
-    haveSomeSelection(@editor)
+    haveSomeSelection(@editor) or isExplicitEmptyTarget
 
   restoreCursorPositionsIfNecessary: ->
-    # console.log "RESTORING"
     return unless @restorePositions
-    # console.log "RESTORING really"
     options =
       stay: @needStay()
       strict: @isOccurrence() or @destroyUnknownSelection
@@ -332,21 +333,19 @@ class CreatePersistentSelection extends Operator
   acceptPersistentSelection: false
 
   mutateSelection: (selection) ->
-    @vimState.persistentSelection.markBufferRange(selection.getBufferRange())
+    @persistentSelection.markBufferRange(selection.getBufferRange())
 
   execute: ->
     @onDidFinishOperation =>
-      lastSelection = @editor.getLastSelection()
-      for selection in @editor.getSelections() when selection isnt lastSelection
-        selection.destroy()
+      destroyNonLastSelection(@editor)
     super
-
 
 class TogglePersistentSelection extends CreatePersistentSelection
   @extend()
+
   isComplete: ->
     point = @editor.getCursorBufferPosition()
-    if @markerToRemove = @vimState.persistentSelection.getMarkerAtPoint(point)
+    if @markerToRemove = @persistentSelection.getMarkerAtPoint(point)
       true
     else
       super
@@ -556,31 +555,22 @@ class DecrementNumber extends IncrementNumber
 # -------------------------
 class PutBefore extends Operator
   @extend()
-  requireTarget: false
+  restorePositions: false
   location: 'before'
 
-  execute: ->
-    @editor.transact =>
-      for selection in @editor.getSelections()
-        {cursor} = selection
-        {text, type} = @vimState.register.get(null, selection)
-        break unless text
-        text = _.multiplyString(text, @getCount())
-        newRange = @paste selection, text,
-          linewise: (type is 'linewise') or @isMode('visual', 'linewise')
-          select: @selectPastedText
-        @setMarkForChange(newRange)
-        @flashIfNecessary(newRange)
+  initialize: ->
+    @target = "Empty" if @isMode('normal')
 
-    if @selectPastedText
-      @activateModeIfNecessary('visual', swrap.detectVisualModeSubmode(@editor))
-    else
-      @activateMode('normal')
+  mutateSelection: (selection) ->
+    {text, type} = @vimState.register.get(null, selection)
+    return unless text
 
-  paste: (selection, text, {linewise, select}) ->
+    text = _.multiplyString(text, @getCount())
+    linewise = (type is 'linewise') or @isMode('visual', 'linewise')
+    @paste(selection, text, {linewise, @selectPastedText})
+
+  paste: (selection, text, {linewise, selectPastedText}) ->
     {cursor} = selection
-    select ?= false
-    linewise ?= false
     if linewise
       newRange = @pasteLinewise(selection, text)
       adjustCursor = (range) ->
@@ -591,11 +581,10 @@ class PutBefore extends Operator
       adjustCursor = (range) ->
         cursor.setBufferPosition(range.end.translate([0, -1]))
 
-    if select
+    if selectPastedText
       selection.setBufferRange(newRange)
     else
       adjustCursor(newRange)
-    newRange
 
   # Return newRange
   pasteLinewise: (selection, text) ->
@@ -616,6 +605,7 @@ class PutBefore extends Operator
     else
       if @isMode('visual', 'linewise')
         unless selection.getBufferRange().end.column is 0
+          # Possible in last buffer line not have ending newLine
           text = text.replace(LineEndingRegExp, '')
       else
         selection.insertText("\n")
@@ -635,7 +625,12 @@ class PutBeforeAndSelect extends PutBefore
   @description: "Paste before then select"
   selectPastedText: true
 
-class PutAfterAndSelect extends PutAfter
+  activateMode: ->
+    submode = swrap.detectVisualModeSubmode(@editor)
+    unless @vimState.isMode('visual', submode)
+      super('visual', submode)
+
+class PutAfterAndSelect extends PutBeforeAndSelect
   @extend()
   @description: "Paste after then select"
-  selectPastedText: true
+  location: 'after'

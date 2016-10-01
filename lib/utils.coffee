@@ -730,6 +730,10 @@ isRangeContainsSomePoint = (range, points, {exclusive}={}) ->
   points.some (point) ->
     range.containsPoint(point, exclusive)
 
+destroyNonLastSelection = (editor) ->
+  for selection in editor.getSelections() when not selection.isLastSelection()
+    selection.destroy()
+
 # Debugging purpose
 # -------------------------
 logGoalColumnForSelection = (subject, selection) ->
@@ -893,6 +897,7 @@ module.exports = {
   scanInRanges
   scanEditor
   isRangeContainsSomePoint
+  destroyNonLastSelection
 
   # Debugging
   reportSelection,
