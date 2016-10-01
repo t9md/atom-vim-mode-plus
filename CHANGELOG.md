@@ -1,5 +1,8 @@
+# 0.58.4:
+- Fix, Degradation: Again guard in case mutation information was unavailable when tracking changes.
+
 # 0.58.3:
-- Internal, Improve: `f`, `F`, `t`, `T` is no longer instance of operator to avoid complexity.
+- Internal, Improve: `,` and `;` is no longer instance of operator to avoid complexity.
 - Fix: Throwing error in `V D` keystroke. #416, #417.
 
 # 0.58.2:
