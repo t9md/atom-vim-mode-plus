@@ -432,7 +432,8 @@ class DeleteLine extends Delete
   @extend()
   @commandScope: 'atom-text-editor.vim-mode-plus.visual-mode'
   execute: ->
-    @vimState.activate('visual', 'linewise')
+    unless @vimState.isMode('visual', 'linewise')
+      @vimState.activate('visual', 'linewise')
     super
 
 class DeleteOccurrenceInAFunctionOrInnerParagraph extends Delete
