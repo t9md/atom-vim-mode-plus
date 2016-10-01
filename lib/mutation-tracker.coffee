@@ -120,8 +120,7 @@ class Mutation
       @marker.destroy()
       @marker = null
 
-    unless @marker?
-      @marker = @markerLayer.markBufferRange(@selection.getBufferRange(), invalidate: 'never')
+    @marker ?= @markerLayer.markBufferRange(@selection.getBufferRange(), invalidate: 'never')
 
     @checkPoint[checkPoint] = @marker.getBufferRange()
 
