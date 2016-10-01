@@ -8,10 +8,8 @@ settings = require './settings'
 {
   haveSomeSelection
   highlightRanges
-  getVisibleBufferRange
   getVisibleEditors
   matchScopes
-  isRangeContainsSomePoint
 
   debug
 } = require './utils'

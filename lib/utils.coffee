@@ -159,15 +159,15 @@ getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
 countChar = (string, char) ->
   string.split(char).length - 1
 
-findIndex = (list, fn) ->
-  for e, i in list when fn(e)
+findIndexBy = (list, fn) ->
+  for item, i in list when fn(item)
     return i
   null
 
 mergeIntersectingRanges = (ranges) ->
   result = []
   for range, i in ranges
-    if index = findIndex(result, (r) -> r.intersectsWith(range))
+    if index = findIndexBy(result, (r) -> r.intersectsWith(range))
       result[index] = result[index].union(range)
     else
       result.push(range)
@@ -204,12 +204,6 @@ getNonWordCharactersForCursor = (cursor) ->
   else
     scope = cursor.getScopeDescriptor().getScopesArray()
     atom.config.get('editor.nonWordCharacters', {scope})
-
-cursorIsOnNonWordCharacter = (cursor) ->
-  getCharacterAtCursor(cursor) in getNonWordCharactersForCursor(cursor)
-
-pointIsOnNonWordCharacter = (editor, point, {nonWordCharacters}) ->
-  getCharacterAtBufferPosition(editor, point) in nonWordCharacters
 
 # return true if moved
 moveCursorToNextNonWhitespace = (cursor) ->
@@ -277,8 +271,7 @@ getFirstCharacterColumForBufferRow = (editor, row) ->
   else
     0
 
-getBufferRangeWithExcludeSurroundingWhiteSpaces = (editor, row) ->
-  scanRange = editor.bufferRangeForBufferRow(row)
+trimRange = (editor, scanRange) ->
   pattern = /\S/
   [start, end] = []
   editor.scanInBufferRange pattern, scanRange, ({range}) -> start = range.start
@@ -830,7 +823,7 @@ module.exports = {
   withVisibleBufferRange
   getVisibleEditors
   getNewTextRangeFromCheckpoint
-  findIndex
+  findIndexBy
   mergeIntersectingRanges
   pointIsAtEndOfLine
   pointIsAtVimEndOfFile
@@ -865,7 +858,7 @@ module.exports = {
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
   getFirstCharacterColumForBufferRow
-  getBufferRangeWithExcludeSurroundingWhiteSpaces
+  trimRange
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   cursorIsAtFirstCharacter

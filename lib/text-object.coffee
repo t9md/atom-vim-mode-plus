@@ -19,7 +19,7 @@ swrap = require './selection-wrapper'
   getEndPositionForPattern
   getVisibleBufferRange
 
-  getBufferRangeWithExcludeSurroundingWhiteSpaces
+  trimRange
 } = require './utils'
 
 class TextObject extends Base
@@ -706,10 +706,11 @@ class CurrentLine extends TextObject
   @extend(false)
   getRange: (selection) ->
     {cursor} = selection
+    range = cursor.getCurrentLineBufferRange()
     if @isA()
-      cursor.getCurrentLineBufferRange()
+      range
     else
-      getBufferRangeWithExcludeSurroundingWhiteSpaces(@editor, cursor.getBufferRow())
+      trimRange(@editor, range)
 
 class ACurrentLine extends CurrentLine
   @extend()
