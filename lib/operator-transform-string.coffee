@@ -422,11 +422,11 @@ class DeleteSurround extends Surround
     @processOperation()
 
   getNewText: (text) ->
+    [openChar, closeChar] = [text[0], _.last(text)]
     text = text[1...-1]
     if isSingleLine(text)
-      text.trim()
-    else
-      text
+      text = text.trim() if openChar isnt closeChar
+    text
 
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()

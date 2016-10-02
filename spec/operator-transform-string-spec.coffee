@@ -534,7 +534,7 @@ describe "Operator TransformString", ->
         set cursor: [3, 1]
         ensure ['d s', input: '('],
           text: "apple\npairs: [brackets]\npairs: [brackets]\n multi\n  line "
-      it "delete surrounded chars and trim padding spaces", ->
+      it "delete surrounded chars and trim padding spaces for non-identical pair-char", ->
         set
           text: """
             ( apple )
@@ -543,6 +543,15 @@ describe "Operator TransformString", ->
           cursor: [0, 0]
         ensure ['d s', input: '('], text: "apple\n{  orange   }\n"
         ensure ['j d s', input: '{'], text: "apple\norange\n"
+      it "delete surrounded chars and NOT trim padding spaces for identical pair-char", ->
+        set
+          text: """
+            ` apple `
+            "  orange   "\n
+            """
+          cursor: [0, 0]
+        ensure ['d s', input: '`'], text_: '_apple_\n"__orange___"\n'
+        ensure ['j d s', input: '"'], text_: "_apple_\n__orange___\n"
       it "delete surrounded for multi-line but dont affect code layout", ->
         set
           cursor: [0, 34]
@@ -644,10 +653,14 @@ describe "Operator TransformString", ->
               ensureChangeSurround '({', initialText: "(\napple\n)", text: "{\napple\n}"
 
         describe 'when first input char is not in charactersToAddSpaceOnSurround', ->
-          it "remove surrounding space of inner text", ->
+          it "remove surrounding space of inner text for identical pair-char", ->
             ensureChangeSurround '(}', initialText: "(apple)", text: "{apple}"
             ensureChangeSurround '(}', initialText: "( apple )", text: "{apple}"
             ensureChangeSurround '(}', initialText: "(  apple  )", text: "{apple}"
+          it "doesn't remove surrounding space of inner text for non-identical pair-char", ->
+            ensureChangeSurround '"`', initialText: '"apple"', text: "`apple`"
+            ensureChangeSurround '"`', initialText: '"  apple  "', text: "`  apple  `"
+            ensureChangeSurround "\"'", initialText: '"  apple  "', text: "'  apple  '"
 
     describe 'surround-word', ->
       beforeEach ->
