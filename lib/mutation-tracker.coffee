@@ -2,7 +2,6 @@
 swrap = require './selection-wrapper'
 
 # keep mutation snapshot necessary for Operator processing.
-
 # mutation stored by each Selection have following field
 #  marker:
 #    marker to track mutation. marker is created when `setCheckPoint`
@@ -51,15 +50,10 @@ class MutationTracker
   setCheckPoint: (checkPoint) ->
     for selection in @editor.getSelections()
       unless @mutationsBySelection.has(selection)
-        initialPoint =
-        options = {
-          selection: selection,
-          initialPoint: @saveInitialPointForSelection(selection)
-          createdAt: checkPoint
-          markerLayer: @markerLayer
-        }
+        createdAt = checkPoint
+        initialPoint = @saveInitialPointForSelection(selection)
+        options = {selection, initialPoint, createdAt, @markerLayer}
         @mutationsBySelection.set(selection, new Mutation(options))
-
       mutation = @mutationsBySelection.get(selection)
       mutation.update(checkPoint)
 
@@ -114,14 +108,13 @@ class Mutation
     @marker = null
 
   update: (checkPoint) ->
-    # If marker range was empty and we have non-empty seleciton, we re-track that selection
-    # by invalidating old marker.
-    if @marker?.getBufferRange().isEmpty() and not @selection.getBufferRange().isEmpty()
-      @marker.destroy()
+    # Current non-empty selection is prioritized over marker's range.
+    # We ivalidate old marker to re-track from current selection.
+    unless @selection.getBufferRange().isEmpty()
+      @marker?.destroy()
       @marker = null
 
     @marker ?= @markerLayer.markBufferRange(@selection.getBufferRange(), invalidate: 'never')
-
     @checkPoint[checkPoint] = @marker.getBufferRange()
 
   getMutationEnd: ->
