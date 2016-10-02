@@ -86,9 +86,6 @@ class Motion extends Base
 
     # Update characterwise properties on each movement.
     if @isMode('visual')
-      Select ?= Base.getClass('Select')
-      unless @getOperator() instanceof Select
-        debug "= updating: #{@getOperator()?.toString()}"
       @updateSelectionProperties()
 
     switch

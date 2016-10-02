@@ -99,8 +99,7 @@ class SelectionWrapper
     @setBufferRange(range, preserveFolds: true)
 
   # Native selection.expandOverLine is not aware of actual rowRange of selection.
-  expandOverLine: (options={}) ->
-    {preserveGoalColumn} = options
+  expandOverLine: ({preserveGoalColumn}={}) ->
     if preserveGoalColumn
       {goalColumn} = @selection.cursor
 
@@ -162,14 +161,13 @@ class SelectionWrapper
     @setReversedState(head.isLessThan(tail))
 
   # Equivalent to
-  # "not (selection.isReversed() or selection.isEmpty())"
+  # "not selection.isReversed() and not selection.isEmpty()"
   isForwarding: ->
     head = @selection.getHeadBufferPosition()
     tail = @selection.getTailBufferPosition()
     head.isGreaterThan(tail)
 
-  restoreCharacterwise: (options={}) ->
-    {preserveGoalColumn} = options
+  restoreCharacterwise: ({preserveGoalColumn}={}) ->
     {goalColumn} = @selection.cursor if preserveGoalColumn
 
     {head, tail} = @getProperties()

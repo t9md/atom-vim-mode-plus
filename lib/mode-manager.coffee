@@ -169,7 +169,7 @@ class ModeManager
     for selection in selections when swrap(selection).isForwarding()
       selection.modifySelection ->
         # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
-        moveCursorLeft(selection.cursor, {allowWrap: true, preserveGoalColumn: true})
+        moveCursorLeft(selection.cursor, allowWrap: true, preserveGoalColumn: true)
 
   # Narrow to selection
   # -------------------------
