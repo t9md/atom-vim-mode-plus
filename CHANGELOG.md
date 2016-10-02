@@ -1,3 +1,6 @@
+# 0.58.5:
+- Improve: `delete-surround`, `change-surround` no longer trim spaces when open-pair-char and close-pair-char was same(e.g `'text'`, `"text"`).
+
 # 0.58.4:
 - Fix, Degradation: Again guard in case mutation information was unavailable when tracking changes.
 
