@@ -46,19 +46,19 @@ class Motion extends Base
     @initialize()
 
   isLinewise: ->
-    if @isMode('visual')
-      @isMode('visual', 'linewise')
+    if @isAsOperatorTarget()
+      @linewise or @isMode('visual', 'linewise')
     else
-      @linewise
+      @isMode('visual', 'linewise')
 
   isBlockwise: ->
     @isMode('visual', 'blockwise')
 
   isInclusive: ->
-    if @isMode('visual')
-      @isMode('visual', ['characterwise', 'blockwise'])
+    if @isAsOperatorTarget()
+      @inclusive or @isMode('visual', ['characterwise', 'blockwise'])
     else
-      @inclusive
+      @isMode('visual', ['characterwise', 'blockwise'])
 
   setBufferPositionSafely: (cursor, point) ->
     cursor.setBufferPosition(point) if point?

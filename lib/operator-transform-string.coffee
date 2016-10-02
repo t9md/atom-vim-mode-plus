@@ -573,8 +573,9 @@ class SplitString extends TransformString
 
 class ChangeOrder extends TransformString
   @extend(false)
+  wise: 'linewise'
+
   mutateSelection: (selection) ->
-    swrap(selection).expandOverLine()
     textForRows = swrap(selection).lineTextForBufferRows()
     rows = @getNewRows(textForRows)
     newText = rows.join("\n") + "\n"

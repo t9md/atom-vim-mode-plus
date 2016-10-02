@@ -252,12 +252,14 @@ class Operator extends Base
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
+
     options =
       stay: @needStay()
       strict: @isOccurrence() or @destroyUnknownSelection
       clipToMutationEnd: @clipToMutationEndOnStay
       isBlockwise: @target?.isBlockwise?()
       mutationEnd: @restorePositionsToMutationEnd
+
     @mutationTracker.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
 
@@ -430,10 +432,7 @@ class DeleteToLastCharacterOfLine extends Delete
 class DeleteLine extends Delete
   @extend()
   @commandScope: 'atom-text-editor.vim-mode-plus.visual-mode'
-  execute: ->
-    unless @vimState.isMode('visual', 'linewise')
-      @vimState.activate('visual', 'linewise')
-    super
+  wise: 'linewise'
 
 class DeleteOccurrenceInAFunctionOrInnerParagraph extends Delete
   @extend()
@@ -454,13 +453,12 @@ class Yank extends Operator
 
 class YankLine extends Yank
   @extend()
-  target: 'MoveToRelativeLine'
+  wise: 'linewise'
 
-  execute: ->
-    if @isMode('visual')
-      unless @isMode('visual', 'linewise')
-        @vimState.modeManager.activate('visual', 'linewise')
-    super
+  initialize: ->
+    @target = 'MoveToRelativeLine' if @isMode('normal')
+    if @isMode('visual', 'characterwise')
+      @stayOnLinewise = false
 
 class YankToLastCharacterOfLine extends Yank
   @extend()
