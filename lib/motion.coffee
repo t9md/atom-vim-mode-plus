@@ -5,7 +5,7 @@ Select = null
 {
   saveEditorState, getVisibleBufferRange
   moveCursorLeft, moveCursorRight
-  moveCursorUp, moveCursorDown
+  moveCursorUpScreen, moveCursorDownScreen
   moveCursorDownBuffer
   moveCursorUpBuffer
   cursorIsAtVimEndOfFile
@@ -19,6 +19,7 @@ Select = null
   moveCursorToNextNonWhitespace
   cursorIsAtEmptyRow
   getCodeFoldRowRanges
+  getLargestFoldRangeContainsBufferRow
   isIncludeFunctionScopeForRow
   detectScopeStartPositionForScope
   getBufferRows
@@ -30,6 +31,9 @@ Select = null
 
   debug
 } = require './utils'
+
+getLengthForRange = (range) ->
+  Range.fromObject(range).getExtent().toString()
 
 swrap = require './selection-wrapper'
 {MatchList} = require './match'
@@ -73,9 +77,11 @@ class Motion extends Base
   modifySelections: (fn) ->
     wasVisual = @isMode('visual')
     @vimState.modeManager.normalizeSelections() if wasVisual
+    # console.log 'before', @editor.getLastSelection().getText(), getLengthForRange(@editor.getSelectedBufferRange())
 
     fn()
 
+    # console.log 'after', @editor.getLastSelection().getText(), getLengthForRange(@editor.getSelectedBufferRange())
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
@@ -95,6 +101,9 @@ class Motion extends Base
         if @isInclusive() or @isLinewise()
           @selectInclusively(selection)
         else
+          # [Settled]
+          # in backward, not include tail char
+          # in forward not include cursor char
           selection.modifySelection =>
             @moveCursor(selection.cursor)
 
@@ -209,33 +218,50 @@ class MoveRight extends Motion
 class MoveUp extends Motion
   @extend()
   linewise: true
-  direction: 'up'
 
-  move: (cursor) ->
-    moveCursorUp(cursor)
+  getPoint: (cursor) ->
+    row = cursor.getBufferRow()
+    new Point(@getRow(cursor.getBufferRow(row)), cursor.goalColumn)
+
+  getRow: (row) ->
+    row = Math.max(row - 1, 0)
+    if @editor.isFoldedAtBufferRow(row)
+      row = getLargestFoldRangeContainsBufferRow(@editor, row).start.row
+    row
 
   moveCursor: (cursor) ->
-    isBufferRowWise = @editor.isSoftWrapped() and @isMode('visual', 'linewise')
-    vimLastBufferRow = null
     @countTimes =>
-      if isBufferRowWise
-        vimLastBufferRow ?= @getVimLastBufferRow()
-        amount = if @direction is 'up' then -1 else + 1
-        row = cursor.getBufferRow() + amount
-        if row <= vimLastBufferRow
-          column = cursor.goalColumn or cursor.getBufferColumn()
-          cursor.setBufferPosition([row, column])
-          cursor.goalColumn = column
-      else
-        @move(cursor)
+      cursor.goalColumn ?= cursor.getBufferColumn()
+      {goalColumn} = cursor
+      cursor.setBufferPosition(@getPoint(cursor))
+      cursor.goalColumn = goalColumn
 
 class MoveDown extends MoveUp
   @extend()
   linewise: true
+
+  getRow: (row) ->
+    if @editor.isFoldedAtBufferRow(row)
+      row = getLargestFoldRangeContainsBufferRow(@editor, row).end.row
+    Math.min(row + 1, @getVimLastBufferRow())
+
+class MoveScreenUp extends Motion
+  @extend()
+  linewise: true
+  direction: 'up'
+
+  moveCursor: (cursor) ->
+    @countTimes ->
+      moveCursorUpScreen(cursor)
+
+class MoveScreenDown extends MoveScreenUp
+  @extend()
+  linewise: true
   direction: 'down'
 
-  move: (cursor) ->
-    moveCursorDown(cursor)
+  moveCursor: (cursor) ->
+    @countTimes ->
+      moveCursorDownScreen(cursor)
 
 # Move down/up to Edge
 # -------------------------
@@ -1289,3 +1315,19 @@ class MoveToPair extends Motion
         enclosingRange.containsRange(range)
 
     forwardingRanges[0]?.end.translate([0, -1]) or enclosingRange?.start
+
+class MoveThreeColumnRight extends Motion
+  @extend()
+  inclusive: true
+  moveCursor: (cursor) ->
+    point = cursor.getBufferPosition()
+    newPoint = point.translate([0, 3])
+    cursor.setBufferPosition(newPoint)
+
+class MoveThreeColumnLeft extends Motion
+  @extend()
+  inclusive: true
+  moveCursor: (cursor) ->
+    point = cursor.getBufferPosition()
+    newPoint = point.translate([0, -3])
+    cursor.setBufferPosition(newPoint)

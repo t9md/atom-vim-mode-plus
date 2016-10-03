@@ -27,20 +27,6 @@ translatePointAndClip = (editor, point, direction) ->
 
   point
 
-translateBufferRangeEndToRightForSelection = (selection) ->
-  editor = selection.editor
-  {start, end} = selection.getBufferRange()
-  screenPoint = editor.screenPositionForBufferPosition(end).translate([0, +1])
-  end = editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'forward')
-  new Range(start, end)
-
-translateBufferRangeEndToLeftForSelection = (selection) ->
-  editor = selection.editor
-  {start, end} = selection.getBufferRange()
-  screenPoint = editor.screenPositionForBufferPosition(end).translate([0, +1])
-  end = editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'backward')
-  new Range(start, end)
-
 class SelectionWrapper
   constructor: (@selection) ->
 
@@ -162,18 +148,30 @@ class SelectionWrapper
   getStartRow: -> @getRowFor('start')
   getEndRow: -> @getRowFor('end')
 
-  getTailBufferRange: ->
-    if (@isSingleRow() and @isLinewise())
-      @selection.editor.bufferRangeForBufferRow(@getTailRow(), includeNewline: true)
-    else
-      {editor} = @selection
-      start = @selection.getTailScreenPosition()
-      end = if @selection.isReversed()
-        editor.clipScreenPosition(start.translate([0, -1]), clipDirection: 'backward')
-      else
-        editor.clipScreenPosition(start.translate([0, +1]), clipDirection: 'forward')
 
-      editor.bufferRangeForScreenRange([start, end])
+  getTailBufferRange: ->
+    {editor} = @selection
+    if (@isSingleRow() and @isLinewise())
+      console.log "singleRow"
+      editor.bufferRangeForBufferRow(@getTailRow(), includeNewline: true)
+    else
+      console.log "normal tail"
+      tailStart = @selection.getTailScreenPosition()
+      # tailStart = @selection.getTailBufferPosition()
+      if @selection.isReversed()
+        # tailEnd = translatePointAndClip(editor, tailStart, 'backward')
+        tailEnd = editor.clipScreenPosition(tailStart.translate([0, -1]), clipDirection: 'backward')
+      else
+        # tailEnd = translatePointAndClip(editor, tailStart, 'forward')
+        tailEnd = editor.clipScreenPosition(tailStart.translate([0, +1]), clipDirection: 'forward')
+
+      # tailStart = @selection.getTailScreenPosition()
+      # if @selection.isReversed()
+      #   tailEnd = translatePointAndClip(editor, tailStart, 'backward')
+      # else
+      #   tailEnd = translatePointAndClip(editor, tailStart, 'forward')
+
+      editor.bufferRangeForScreenRange([tailStart, tailEnd])
 
   preserveCharacterwise: ->
     properties = @detectCharacterwiseProperties()

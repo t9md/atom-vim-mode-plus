@@ -51,10 +51,14 @@
   'l': 'vim-mode-plus:move-right'
   'space': 'vim-mode-plus:move-right'
   'right': 'vim-mode-plus:move-right'
+
   'k': 'vim-mode-plus:move-up'
   'up': 'vim-mode-plus:move-up'
   'j': 'vim-mode-plus:move-down'
   'down': 'vim-mode-plus:move-down'
+
+  'g k': 'vim-mode-plus:move-screen-up'
+  'g j': 'vim-mode-plus:move-screen-down'
 
   'w': 'vim-mode-plus:move-to-next-word'
   # 'w':     'vim-mode-plus:move-to-next-alphanumeric-word'

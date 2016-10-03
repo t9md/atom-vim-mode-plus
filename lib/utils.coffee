@@ -344,12 +344,12 @@ moveCursorRight = (cursor, options={}) ->
     motion = (cursor) -> cursor.moveRight()
     moveCursor(cursor, options, motion)
 
-moveCursorUp = (cursor, options={}) ->
+moveCursorUpScreen = (cursor, options={}) ->
   unless cursor.getScreenRow() is 0
     motion = (cursor) -> cursor.moveUp()
     moveCursor(cursor, options, motion)
 
-moveCursorDown = (cursor, options={}) ->
+moveCursorDownScreen = (cursor, options={}) ->
   unless getVimLastScreenRow(cursor.editor) is cursor.getScreenRow()
     motion = (cursor) -> cursor.moveDown()
     moveCursor(cursor, options, motion)
@@ -734,6 +734,26 @@ destroyNonLastSelection = (editor) ->
   for selection in editor.getSelections() when not selection.isLastSelection()
     selection.destroy()
 
+getLargestFoldRangeContainsBufferRow = (editor, row) ->
+  markers = editor.displayLayer.findFoldMarkers(intersectsRow: row)
+
+  startPoint = null
+  endPoint = null
+
+  for marker in markers ? []
+    {start, end} = marker.getRange()
+    unless startPoint
+      startPoint = start
+      endPoint = end
+      continue
+
+    if start.isLessThan(startPoint)
+      startPoint = start
+      endPoint = end
+
+  if startPoint? and endPoint?
+    new Range(startPoint, endPoint)
+
 # Debugging purpose
 # -------------------------
 logGoalColumnForSelection = (subject, selection) ->
@@ -838,8 +858,8 @@ module.exports = {
   getVimLastScreenRow
   moveCursorLeft
   moveCursorRight
-  moveCursorUp
-  moveCursorDown
+  moveCursorUpScreen
+  moveCursorDownScreen
   getEolForBufferRow
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
@@ -898,6 +918,7 @@ module.exports = {
   scanEditor
   isRangeContainsSomePoint
   destroyNonLastSelection
+  getLargestFoldRangeContainsBufferRow
 
   # Debugging
   reportSelection,
