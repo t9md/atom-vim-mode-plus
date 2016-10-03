@@ -55,7 +55,7 @@ class TextObject extends Base
       for selection in @editor.getSelections() when canSelect
         @selectTextObject(selection, stopSelection)
     @editor.mergeIntersectingSelections()
-    @updateSelectionProperties() if @isMode('visual')
+    swrap.updateSelectionProperties(@editor) if @isMode('visual')
 
   selectTextObject: (selection, stopSelection) ->
     range = @getRange(selection, stopSelection)

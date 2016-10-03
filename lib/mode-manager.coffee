@@ -134,9 +134,10 @@ class ModeManager
     if @submode?
       @selectCharacterwise()
     else if @editor.getLastSelection().isEmpty()
-      @editor.selectRight()
+      for selection in @editor.getSelections()
+        swrap(selection).translateSelectionEndAndClip('forward')
 
-    @vimState.updateSelectionProperties(force: false)
+    swrap.updateSelectionProperties(@editor, unknownOnly: true)
 
     switch submode
       when 'linewise'
@@ -153,7 +154,8 @@ class ModeManager
     switch @submode
       when 'linewise'
         for selection in @editor.getSelections() when not selection.isEmpty()
-          swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
+          swrap(selection).normalize()
+          swrap(selection).translateSelectionEndAndClip('forward')
       when 'blockwise'
         for bs in @vimState.getBlockwiseSelections()
           bs.restoreCharacterwise()
@@ -164,12 +166,8 @@ class ModeManager
     swrap.clearProperties(@editor)
 
     # We selectRight()ed in visual-mode, so reset this effect here.
-    # `vc`, `vs` make selection empty.
-    selections = @editor.getSelections()
-    for selection in selections when swrap(selection).isForwarding()
-      selection.modifySelection ->
-        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
-        moveCursorLeft(selection.cursor, allowWrap: true, preserveGoalColumn: true)
+    for selection in @editor.getSelections() when swrap(selection).isForwarding()
+      swrap(selection).translateSelectionEndAndClip('backward')
 
   # Narrow to selection
   # -------------------------

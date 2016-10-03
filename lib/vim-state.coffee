@@ -90,7 +90,7 @@ class VimState
   selectBlockwise: ->
     for selection in @editor.getSelections()
       @blockwiseSelections.push(new BlockwiseSelection(selection))
-    @updateSelectionProperties()
+    swrap.updateSelectionProperties(@editor)
 
   # Other
   # -------------------------
@@ -284,14 +284,6 @@ class VimState
   updateCursorsVisibility: ->
     @cursorStyleManager.refresh()
 
-  updateSelectionProperties: ({force}={}) ->
-    selections = @editor.getSelections()
-    unless (force ? true)
-      selections = selections.filter (selection) ->
-        not swrap(selection).getCharacterwiseHeadPosition()?
-
-    for selection in selections
-      swrap(selection).preserveCharacterwise()
 
   updatePreviousSelection: ->
     if @isMode('visual', 'blockwise')

@@ -70,27 +70,33 @@ class Motion extends Base
     @editor.moveCursors (cursor) =>
       @moveCursor(cursor)
 
-  select: ->
-    if @isMode('visual')
-      @vimState.modeManager.normalizeSelections()
+  modifySelections: (fn) ->
+    wasVisual = @isMode('visual')
+    @vimState.modeManager.normalizeSelections() if wasVisual
 
-    for selection in @editor.getSelections()
-      if @isInclusive() or @isLinewise()
-        @selectInclusively(selection)
-      else
-        selection.modifySelection =>
-          @moveCursor(selection.cursor)
+    fn()
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
     # Update characterwise properties on each movement.
-    if @isMode('visual')
-      @updateSelectionProperties()
+    swrap.updateSelectionProperties(@editor) if wasVisual
 
     switch
       when @isLinewise() then @vimState.selectLinewise()
       when @isBlockwise() then @vimState.selectBlockwise()
+
+  select: ->
+    unless @isAsOperatorTarget() or @operator?.getName() is "Select"
+      console.log "Why by #{@operator?.toString()}"
+
+    @modifySelections =>
+      for selection in @editor.getSelections()
+        if @isInclusive() or @isLinewise()
+          @selectInclusively(selection)
+        else
+          selection.modifySelection =>
+            @moveCursor(selection.cursor)
 
   # Modify selection inclusively
   # -------------------------

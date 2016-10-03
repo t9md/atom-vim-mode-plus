@@ -1,7 +1,45 @@
 _ = require 'underscore-plus'
-{Range, Disposable} = require 'atom'
+{Range, Point, Disposable} = require 'atom'
 
 propertyStore = new Map
+
+translatePointAndClip = (editor, point, direction) ->
+  point = Point.fromObject(point)
+
+  switch direction
+    when 'forward'
+      point = point.translate([0, +1])
+      eol = editor.bufferRangeForBufferRow(point.row).end
+      if point.isGreaterThan(eol)
+        point = new Point(point.row + 1, 0)
+
+      point = Point.min(point, editor.getEofBufferPosition())
+
+    when 'backward'
+      point = point.translate([0, -1])
+
+      if point.column < 0
+        newRow = point.row - 1
+        eol = editor.bufferRangeForBufferRow(newRow).end
+        point = new Point(newRow, eol.column)
+
+      point = Point.max(point, Point.ZERO)
+
+  point
+
+translateBufferRangeEndToRightForSelection = (selection) ->
+  editor = selection.editor
+  {start, end} = selection.getBufferRange()
+  screenPoint = editor.screenPositionForBufferPosition(end).translate([0, +1])
+  end = editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'forward')
+  new Range(start, end)
+
+translateBufferRangeEndToLeftForSelection = (selection) ->
+  editor = selection.editor
+  {start, end} = selection.getBufferRange()
+  screenPoint = editor.screenPositionForBufferPosition(end).translate([0, +1])
+  end = editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'backward')
+  new Range(start, end)
 
 class SelectionWrapper
   constructor: (@selection) ->
@@ -138,14 +176,17 @@ class SelectionWrapper
       editor.bufferRangeForScreenRange([start, end])
 
   preserveCharacterwise: ->
-    basename = require('path').basename
     properties = @detectCharacterwiseProperties()
     unless @selection.isEmpty()
-      endPoint = if @selection.isReversed() then 'tail' else 'head'
-      # In case selection is empty, I don't want to translate end position
-      # [FIXME] Check if removing this translation logic can simplify code?
-      point = properties[endPoint].translate([0, -1])
-      properties[endPoint] = @selection.editor.clipBufferPosition(point)
+      # We select righted in visual-mode, this translation de-effect select-right-effect
+      # so that after restoring preserved poperty we can do activate-visual mode without
+      # special care
+      endPoint = @selection.getBufferRange().end.translate([0, -1])
+      endPoint = @selection.editor.clipBufferPosition(endPoint)
+      if @selection.isReversed()
+        properties.tail = endPoint
+      else
+        properties.head = endPoint
     @setProperties(properties)
 
   detectCharacterwiseProperties: ->
@@ -167,9 +208,7 @@ class SelectionWrapper
     tail = @selection.getTailBufferPosition()
     head.isGreaterThan(tail)
 
-  restoreCharacterwise: ({preserveGoalColumn}={}) ->
-    {goalColumn} = @selection.cursor if preserveGoalColumn
-
+  normalize: ->
     {head, tail} = @getProperties()
     return unless head? and tail?
 
@@ -179,13 +218,9 @@ class SelectionWrapper
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
 
-    editor = @selection.editor
-    screenPoint = editor.screenPositionForBufferPosition(end).translate([0, 1])
-    end = editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'forward')
-
+    {goalColumn} = @selection.cursor
     @setBufferRange([start, end], {preserveFolds: true})
-    @clearProperties()
-    @selection.cursor.goalColumn = goalColumn if goalColumn
+    @selection.cursor.goalColumn = goalColumn if goalColumn?
 
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->
@@ -223,6 +258,14 @@ class SelectionWrapper
     else
       'characterwise'
 
+  # direction must be one of ['forward', 'backward']
+  translateSelectionEndAndClip: (direction) ->
+    {goalColumn} = @selection.cursor
+    {start, end} = @getBufferRange()
+    newEnd = translatePointAndClip(@selection.editor, end, direction)
+    @setBufferRange([start, newEnd], {preserveFolds: true})
+    @selection.cursor.goalColumn = goalColumn if goalColumn
+
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
@@ -252,5 +295,10 @@ swrap.detectVisualModeSubmode = (editor) ->
     'characterwise'
   else
     null
+
+swrap.updateSelectionProperties = (editor, {unknownOnly}={}) ->
+  for selection in editor.getSelections()
+    continue if unknownOnly and swrap(selection).hasProperties()
+    swrap(selection).preserveCharacterwise()
 
 module.exports = swrap
