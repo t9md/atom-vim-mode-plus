@@ -122,20 +122,22 @@ class Motion extends Base
     originalPoint = cursor.getBufferPosition()
     # save tailRange(range under cursor) before we start to modify selection
     tailRange = swrap(selection).getTailBufferRange()
+
     selection.modifySelection =>
       @moveCursor(cursor)
-      cursorMoved = not cursor.getBufferPosition().isEqual(originalPoint)
 
-      if @isMode('visual') and cursorIsAtEndOfLineAtNonEmptyRow(cursor)
-        swrap(selection).translateSelectionEndAndClip('backward')
+    cursorMoved = not cursor.getBufferPosition().isEqual(originalPoint)
 
-      if @isMode('visual') or cursorMoved
-        unless selection.isReversed()
-          # When cursor is at empty row, we allow to wrap to next line
-          # since when we `v`, we have to select line.
-          swrap(selection).translateSelectionEndAndClip('forward', hello: 'in select inclusive')
+    if @isMode('visual') and cursorIsAtEndOfLineAtNonEmptyRow(cursor)
+      swrap(selection).translateSelectionEndAndClip('backward')
 
-        swrap(selection).mergeBufferRange(tailRange, {preserveFolds: true})
+    if @isMode('visual') or cursorMoved
+      unless selection.isReversed()
+        # When cursor is at empty row, we allow to wrap to next line
+        # since when we `v`, we have to select line.
+        swrap(selection).translateSelectionEndAndClip('forward', hello: 'in select inclusive')
+
+      swrap(selection).mergeBufferRange(tailRange, {preserveFolds: true})
 
 
 # Used as operator's target in visual-mode.
