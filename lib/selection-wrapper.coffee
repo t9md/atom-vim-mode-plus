@@ -10,11 +10,13 @@ translatePointAndClip = (editor, point, direction) ->
     when 'forward'
       point = point.translate([0, +1])
       eol = editor.bufferRangeForBufferRow(point.row).end
+      if point.isEqual(eol)
+        return point
+
       if point.isGreaterThan(eol)
-        point = new Point(point.row + 1, 0)
+        return new Point(point.row + 1, 0)
 
       point = Point.min(point, editor.getEofBufferPosition())
-
     when 'backward'
       point = point.translate([0, -1])
 
@@ -25,7 +27,8 @@ translatePointAndClip = (editor, point, direction) ->
 
       point = Point.max(point, Point.ZERO)
 
-  point
+  screenPoint = editor.screenPositionForBufferPosition(point, clipDirection: direction)
+  editor.bufferPositionForScreenPosition(screenPoint)
 
 class SelectionWrapper
   constructor: (@selection) ->
@@ -148,30 +151,15 @@ class SelectionWrapper
   getStartRow: -> @getRowFor('start')
   getEndRow: -> @getRowFor('end')
 
-
   getTailBufferRange: ->
     {editor} = @selection
-    if (@isSingleRow() and @isLinewise())
-      console.log "singleRow"
-      editor.bufferRangeForBufferRow(@getTailRow(), includeNewline: true)
+    tailPoint = @selection.getTailBufferPosition()
+    if @selection.isReversed()
+      point = translatePointAndClip(editor, tailPoint, 'backward')
+      new Range(point, tailPoint)
     else
-      console.log "normal tail"
-      tailStart = @selection.getTailScreenPosition()
-      # tailStart = @selection.getTailBufferPosition()
-      if @selection.isReversed()
-        # tailEnd = translatePointAndClip(editor, tailStart, 'backward')
-        tailEnd = editor.clipScreenPosition(tailStart.translate([0, -1]), clipDirection: 'backward')
-      else
-        # tailEnd = translatePointAndClip(editor, tailStart, 'forward')
-        tailEnd = editor.clipScreenPosition(tailStart.translate([0, +1]), clipDirection: 'forward')
-
-      # tailStart = @selection.getTailScreenPosition()
-      # if @selection.isReversed()
-      #   tailEnd = translatePointAndClip(editor, tailStart, 'backward')
-      # else
-      #   tailEnd = translatePointAndClip(editor, tailStart, 'forward')
-
-      editor.bufferRangeForScreenRange([tailStart, tailEnd])
+      point = translatePointAndClip(editor, tailPoint, 'forward')
+      new Range(tailPoint, point)
 
   preserveCharacterwise: ->
     properties = @detectCharacterwiseProperties()
@@ -260,7 +248,9 @@ class SelectionWrapper
   translateSelectionEndAndClip: (direction) ->
     {goalColumn} = @selection.cursor
     {start, end} = @getBufferRange()
+    # console.log 'bef', end.toString()
     newEnd = translatePointAndClip(@selection.editor, end, direction)
+    # console.log 'aft', newEnd.toString()
     @setBufferRange([start, newEnd], {preserveFolds: true})
     @selection.cursor.goalColumn = goalColumn if goalColumn
 
