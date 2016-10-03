@@ -28,6 +28,7 @@ Select = null
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   getTextInScreenRange
+  cursorIsAtEndOfLineAtNonEmptyRow
 
   debug
 } = require './utils'
@@ -76,8 +77,11 @@ class Motion extends Base
 
   modifySelections: (fn) ->
     wasVisual = @isMode('visual')
+    console.log 'b', @editor.getCursorBufferPosition()
     @vimState.modeManager.normalizeSelections() if wasVisual
+    console.log 'a', @editor.getCursorBufferPosition()
     # console.log 'before', @editor.getLastSelection().getText(), getLengthForRange(@editor.getSelectedBufferRange())
+    console.log @editor.getLastSelection().isEmpty()
 
     fn()
 
@@ -122,21 +126,19 @@ class Motion extends Base
       @moveCursor(cursor)
 
       if @isMode('visual')
-        if cursor.isAtEndOfLine()
-          # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
-          moveCursorLeft(cursor, {preserveGoalColumn: true})
+        if cursorIsAtEndOfLineAtNonEmptyRow(cursor)
+          swrap(selection).translateSelectionEndAndClip('backward')
       else
         # Return here because no movement was happend, nothing to do.
         return if cursor.getBufferPosition().isEqual(originalPoint)
 
       unless selection.isReversed()
         # When cursor is at empty row, we allow to wrap to next line
-        # since when we `v`, w have to select line.
-        allowWrap = cursorIsAtEmptyRow(cursor)
-        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT: -> NECESSARY
-        moveCursorRight(cursor, {allowWrap, preserveGoalColumn: true})
+        # since when we `v`, we have to select line.
+        swrap(selection).translateSelectionEndAndClip('forward', hello: 'in select inclusive')
 
       swrap(selection).mergeBufferRange(tailRange, {preserveFolds: true})
+
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion

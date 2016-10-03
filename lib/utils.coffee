@@ -252,6 +252,9 @@ isEmptyRow = (editor, row) ->
 cursorIsAtEmptyRow = (cursor) ->
   isEmptyRow(cursor.editor, cursor.getBufferRow())
 
+cursorIsAtEndOfLineAtNonEmptyRow = (cursor) ->
+  cursor.isAtEndOfLine() and not cursorIsAtEmptyRow(cursor)
+
 getVimLastBufferRow = (editor) ->
   getVimEofBufferPosition(editor).row
 
@@ -878,6 +881,7 @@ module.exports = {
   moveCursorToNextNonWhitespace
   isEmptyRow
   cursorIsAtEmptyRow
+  cursorIsAtEndOfLineAtNonEmptyRow
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange

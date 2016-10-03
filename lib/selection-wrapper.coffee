@@ -3,22 +3,26 @@ _ = require 'underscore-plus'
 
 propertyStore = new Map
 
-translatePointAndClip = (editor, point, direction) ->
+translatePointAndClip = (editor, point, direction, {translate, hello}={}) ->
+  translate ?= true
   point = Point.fromObject(point)
 
   switch direction
     when 'forward'
-      point = point.translate([0, +1])
+      point = point.translate([0, +1]) if translate
       eol = editor.bufferRangeForBufferRow(point.row).end
+      console.log 'point, eol, hello', [point.toString(), eol.toString(), hello]
+
       if point.isEqual(eol)
-        return point
+        return Point.min(point, editor.getEofBufferPosition())
 
       if point.isGreaterThan(eol)
-        return new Point(point.row + 1, 0)
+        return Point.min(Point(point.row + 1, 0), editor.getEofBufferPosition())
 
       point = Point.min(point, editor.getEofBufferPosition())
     when 'backward'
-      point = point.translate([0, -1])
+      point = point.translate([0, -1]) if translate
+      console.log 'point, hello', [point.toString(), hello]
 
       if point.column < 0
         newRow = point.row - 1
@@ -158,7 +162,7 @@ class SelectionWrapper
       point = translatePointAndClip(editor, tailPoint, 'backward')
       new Range(point, tailPoint)
     else
-      point = translatePointAndClip(editor, tailPoint, 'forward')
+      point = translatePointAndClip(editor, tailPoint, 'forward', hello: 'when getting tailRange')
       new Range(tailPoint, point)
 
   preserveCharacterwise: ->
@@ -197,6 +201,7 @@ class SelectionWrapper
   normalize: ->
     {head, tail} = @getProperties()
     return unless head? and tail?
+    return if @selection.isEmpty()
 
     if @selection.isReversed()
       [start, end] = [head, tail]
@@ -205,6 +210,7 @@ class SelectionWrapper
     [start.row, end.row] = @selection.getBufferRowRange()
 
     {goalColumn} = @selection.cursor
+    end = translatePointAndClip(@selection.editor, end, 'backward', translate: false)
     @setBufferRange([start, end], {preserveFolds: true})
     @selection.cursor.goalColumn = goalColumn if goalColumn?
 
@@ -245,11 +251,12 @@ class SelectionWrapper
       'characterwise'
 
   # direction must be one of ['forward', 'backward']
-  translateSelectionEndAndClip: (direction) ->
+  # options: {translate: true or false} default true
+  translateSelectionEndAndClip: (direction, options) ->
     {goalColumn} = @selection.cursor
     {start, end} = @getBufferRange()
     # console.log 'bef', end.toString()
-    newEnd = translatePointAndClip(@selection.editor, end, direction)
+    newEnd = translatePointAndClip(@selection.editor, end, direction, options)
     # console.log 'aft', newEnd.toString()
     @setBufferRange([start, newEnd], {preserveFolds: true})
     @selection.cursor.goalColumn = goalColumn if goalColumn

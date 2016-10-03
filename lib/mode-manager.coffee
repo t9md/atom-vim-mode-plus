@@ -133,9 +133,10 @@ class ModeManager
   activateVisualMode: (submode) ->
     if @submode?
       @selectCharacterwise()
-    else if @editor.getLastSelection().isEmpty()
-      for selection in @editor.getSelections()
-        swrap(selection).translateSelectionEndAndClip('forward')
+    else
+      if @editor.getLastSelection().isEmpty()
+        for selection in @editor.getSelections()
+          swrap(selection).translateSelectionEndAndClip('forward')
 
     swrap.updateSelectionProperties(@editor, unknownOnly: true)
 
@@ -164,10 +165,8 @@ class ModeManager
   normalizeSelections: ->
     @selectCharacterwise()
     swrap.clearProperties(@editor)
-
-    # We selectRight()ed in visual-mode, so reset this effect here.
     for selection in @editor.getSelections() when swrap(selection).isForwarding()
-      swrap(selection).translateSelectionEndAndClip('backward')
+      swrap(selection).translateSelectionEndAndClip('backward', hello: 'normalize!')
 
   # Narrow to selection
   # -------------------------
