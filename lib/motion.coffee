@@ -77,11 +77,10 @@ class Motion extends Base
 
   modifySelections: (fn) ->
     wasVisual = @isMode('visual')
-    console.log 'b', @editor.getCursorBufferPosition()
+    # console.log 'b', @editor.getCursorBufferPosition()
     @vimState.modeManager.normalizeSelections() if wasVisual
-    console.log 'a', @editor.getCursorBufferPosition()
-    # console.log 'before', @editor.getLastSelection().getText(), getLengthForRange(@editor.getSelectedBufferRange())
-    console.log @editor.getLastSelection().isEmpty()
+    # console.log 'a', @editor.getCursorBufferPosition()
+    # console.log @editor.getLastSelection().isEmpty()
 
     fn()
 
@@ -120,24 +119,23 @@ class Motion extends Base
   selectInclusively: (selection) ->
     {cursor} = selection
     originalPoint = cursor.getBufferPosition()
-    # save tailRange(range under cursor) before we start to modify selection
     tailRange = swrap(selection).getTailBufferRange()
 
     selection.modifySelection =>
       @moveCursor(cursor)
 
     cursorMoved = not cursor.getBufferPosition().isEqual(originalPoint)
+    return unless cursorMoved or @isMode('visual')
 
     if @isMode('visual') and cursorIsAtEndOfLineAtNonEmptyRow(cursor)
       swrap(selection).translateSelectionEndAndClip('backward')
 
-    if @isMode('visual') or cursorMoved
-      unless selection.isReversed()
-        # When cursor is at empty row, we allow to wrap to next line
-        # since when we `v`, we have to select line.
-        swrap(selection).translateSelectionEndAndClip('forward', hello: 'in select inclusive')
+    unless selection.isReversed()
+      # When cursor is at empty row, we allow to wrap to next line
+      # since when we `v`, we have to select line.
+      swrap(selection).translateSelectionEndAndClip('forward', hello: 'in select inclusive')
 
-      swrap(selection).mergeBufferRange(tailRange, {preserveFolds: true})
+    swrap(selection).mergeBufferRange(tailRange, {preserveFolds: true})
 
 
 # Used as operator's target in visual-mode.
