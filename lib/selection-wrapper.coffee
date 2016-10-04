@@ -159,10 +159,9 @@ class SelectionWrapper
   getStartRow: -> @getRowFor('start')
   getEndRow: -> @getRowFor('end')
 
-  saveProperties: ({normalized}={}) ->
-    normalized ?= false
+  saveProperties: ->
     properties = @captureProperties()
-    unless @selection.isEmpty() or normalized
+    unless @selection.isEmpty()
       # We select righted in visual-mode, this translation de-effect select-right-effect
       # so that after restoring preserved poperty we can do activate-visual mode without
       # special care
@@ -173,7 +172,6 @@ class SelectionWrapper
       else
         properties.head = endPoint
 
-    properties.normalized = normalized
     @setProperties(properties)
 
   captureProperties: ->
@@ -193,7 +191,7 @@ class SelectionWrapper
     head.isGreaterThan(tail)
 
   normalize: ->
-    {head, tail, normalized} = @getProperties()
+    {head, tail} = @getProperties()
     return unless head? and tail?
     return if @selection.isEmpty()
 
@@ -204,8 +202,7 @@ class SelectionWrapper
     [start.row, end.row] = @selection.getBufferRowRange()
 
     {goalColumn} = @selection.cursor
-    unless normalized
-      end = translatePointAndClip(@selection.editor, end, 'backward', translate: false)
+    end = translatePointAndClip(@selection.editor, end, 'backward', translate: false)
     @setBufferRange([start, end], {preserveFolds: true})
     @selection.cursor.goalColumn = goalColumn if goalColumn?
 
@@ -300,10 +297,9 @@ swrap.detectVisualModeSubmode = (editor) ->
   else
     null
 
-swrap.updateSelectionProperties = (editor, options={}) ->
-  {unknownOnly, normalized} = options
+swrap.updateSelectionProperties = (editor, {unknownOnly}={}) ->
   for selection in editor.getSelections()
     continue if unknownOnly and swrap(selection).hasProperties()
-    swrap(selection).saveProperties({normalized})
+    swrap(selection).saveProperties()
 
 module.exports = swrap
