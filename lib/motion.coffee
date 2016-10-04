@@ -33,10 +33,6 @@ Select = null
   debug
 } = require './utils'
 
-getLengthForRange = (range) ->
-  Range.fromObject(range).getExtent().toString()
-
-swrap = require './selection-wrapper'
 {MatchList} = require './match'
 settings = require './settings'
 Base = require './base'
