@@ -50,20 +50,14 @@ class Motion extends Base
     super
     @initialize()
 
-  isLinewise: ->
-    if @isAsOperatorTarget()
-      @linewise or @isMode('visual', 'linewise')
-    else
-      @isMode('visual', 'linewise')
-
   isBlockwise: ->
     @isMode('visual', 'blockwise')
 
   isInclusive: ->
-    if @isAsOperatorTarget()
-      @inclusive or @isMode('visual', ['characterwise', 'blockwise'])
-    else
-      @isMode('visual', ['characterwise', 'blockwise'])
+    @isMode('visual') or @isAsOperatorTarget() and @inclusive
+
+  isLinewise: ->
+    @isMode('visual', 'linewise') or @isAsOperatorTarget() and @linewise
 
   setBufferPositionSafely: (cursor, point) ->
     cursor.setBufferPosition(point) if point?
@@ -75,54 +69,31 @@ class Motion extends Base
     @editor.moveCursors (cursor) =>
       @moveCursor(cursor)
 
-  modifySelections: (fn) ->
+  select: ->
     wasVisual = @isMode('visual')
-    # console.log 'b', @editor.getCursorBufferPosition()
     @vimState.modeManager.normalizeSelections() if wasVisual
-    # console.log 'a', @editor.getCursorBufferPosition()
-    # console.log @editor.getLastSelection().isEmpty()
 
-    fn()
+    for selection in @editor.getSelections()
+      @selectByMotion(selection)
 
-    # console.log 'after', @editor.getLastSelection().getText(), getLengthForRange(@editor.getSelectedBufferRange())
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
-    # Update characterwise properties on each movement.
     swrap.updateSelectionProperties(@editor) if wasVisual
 
     switch
       when @isLinewise() then @vimState.selectLinewise()
       when @isBlockwise() then @vimState.selectBlockwise()
 
-  select: ->
-    unless @isAsOperatorTarget() or @operator?.getName() is "Select"
-      console.log "Why by #{@operator?.toString()}"
-
-    @modifySelections =>
-      for selection in @editor.getSelections()
-        if @isInclusive() or @isLinewise()
-          @selectInclusively(selection)
-        else
-          # [Settled]
-          # in backward, not include tail char
-          # in forward not include cursor char
-          selection.modifySelection =>
-            @moveCursor(selection.cursor)
-
-  # Modify selection inclusively
-  # -------------------------
-  # * Why we need to allowWrap when moveCursorLeft/Right?
-  #  When 'linewise' selection, cursor is at column '0' of NEXT line, so we need to moveLeft
-  #  by wrapping, to put cursor on row which actually be selected(from UX point of view).
-  #  This adjustment is important so that j, k works without special care in moveCursor.
-  selectInclusively: (selection) ->
+  selectByMotion: (selection) ->
     {cursor} = selection
     originalPoint = cursor.getBufferPosition()
     tailRange = swrap(selection).getTailBufferRange()
 
     selection.modifySelection =>
       @moveCursor(cursor)
+
+    return unless @isInclusive() or @isLinewise()
 
     cursorMoved = not cursor.getBufferPosition().isEqual(originalPoint)
     return unless cursorMoved or @isMode('visual')
@@ -785,7 +756,7 @@ class Till extends Find
   getPoint: ->
     @point = super
 
-  selectInclusively: (selection) ->
+  selectByMotion: (selection) ->
     super
     if selection.isEmpty() and (@point? and not @backwards)
       selection.selectRight()

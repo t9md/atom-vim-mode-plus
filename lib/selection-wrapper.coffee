@@ -11,7 +11,7 @@ translatePointAndClip = (editor, point, direction, {translate, hello}={}) ->
     when 'forward'
       point = point.translate([0, +1]) if translate
       eol = editor.bufferRangeForBufferRow(point.row).end
-      console.log 'point, eol, hello', [point.toString(), eol.toString(), hello]
+      # console.log 'point, eol, hello', [point.toString(), eol.toString(), hello]
 
       if point.isEqual(eol)
         return Point.min(point, editor.getEofBufferPosition())
@@ -22,7 +22,7 @@ translatePointAndClip = (editor, point, direction, {translate, hello}={}) ->
       point = Point.min(point, editor.getEofBufferPosition())
     when 'backward'
       point = point.translate([0, -1]) if translate
-      console.log 'point, hello', [point.toString(), hello]
+      # console.log 'point, hello', [point.toString(), hello]
 
       if point.column < 0
         newRow = point.row - 1
