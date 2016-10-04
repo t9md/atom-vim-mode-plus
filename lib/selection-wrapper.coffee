@@ -40,6 +40,8 @@ translatePointAndClip = (editor, point, direction, {translate}={}) ->
 
 class SelectionWrapper
   constructor: (@selection) ->
+    @selection.onDidDestroy =>
+      @clearProperties()
 
   hasProperties: -> propertyStore.has(@selection)
   getProperties: -> propertyStore.get(@selection) ? {}
