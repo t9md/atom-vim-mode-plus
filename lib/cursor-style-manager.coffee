@@ -19,8 +19,8 @@ getOffset = (submode, cursor, isSoftWrapped) ->
       if not selection.isReversed() and not cursor.isAtBeginningOfLine()
         traversal.column -= 1
     when 'linewise'
-      bufferPoint = swrap(selection).getCharacterwiseHeadPosition()
-      # FIXME need to update original getCharacterwiseHeadPosition?
+      bufferPoint = swrap(selection).getBufferPositionFor('head', fromProperty: true)
+      # FIXME need to update original selection property?
       # to reflect outer vmp command modify linewise selection?
       [startRow, endRow] = selection.getBufferRowRange()
       if selection.isReversed()

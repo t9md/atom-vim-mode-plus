@@ -7,18 +7,21 @@ translatePointAndClip = (editor, point, direction, {translate}={}) ->
   translate ?= true
   point = Point.fromObject(point)
 
+  dontClip = false
   switch direction
     when 'forward'
       point = point.translate([0, +1]) if translate
       eol = editor.bufferRangeForBufferRow(point.row).end
 
       if point.isEqual(eol)
-        return Point.min(point, editor.getEofBufferPosition())
+        dontClip = true
 
       if point.isGreaterThan(eol)
-        return Point.min(Point(point.row + 1, 0), editor.getEofBufferPosition())
+        point = new Point(point.row + 1, 0)
+        dontClip = true
 
       point = Point.min(point, editor.getEofBufferPosition())
+
     when 'backward'
       point = point.translate([0, -1]) if translate
 
@@ -29,8 +32,11 @@ translatePointAndClip = (editor, point, direction, {translate}={}) ->
 
       point = Point.max(point, Point.ZERO)
 
-  screenPoint = editor.screenPositionForBufferPosition(point, clipDirection: direction)
-  editor.bufferPositionForScreenPosition(screenPoint)
+  if dontClip
+    point
+  else
+    screenPoint = editor.screenPositionForBufferPosition(point, clipDirection: direction)
+    editor.bufferPositionForScreenPosition(screenPoint)
 
 class SelectionWrapper
   constructor: (@selection) ->
@@ -170,9 +176,6 @@ class SelectionWrapper
   detectCharacterwiseProperties: ->
     head: @selection.getHeadBufferPosition()
     tail: @selection.getTailBufferPosition()
-
-  getCharacterwiseHeadPosition: ->
-    @getProperties().head
 
   selectByProperties: ({head, tail}) ->
     # No problem if head is greater than tail, Range constructor swap start/end.

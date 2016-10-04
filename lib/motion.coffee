@@ -894,7 +894,7 @@ class SearchBase extends Motion
 
   getFromPoint: (cursor) ->
     if @isMode('visual', 'linewise') and @isIncrementalSearch?()
-      swrap(cursor.selection).getCharacterwiseHeadPosition()
+      swrap(cursor.selection).getBufferPositionFor('head', fromProperty: true)
     else
       cursor.getBufferPosition()
 
