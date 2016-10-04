@@ -90,13 +90,15 @@ class Motion extends Base
 
     selection.modifySelection =>
       @moveCursor(cursor)
-      
+
+    return if not @isMode('visual') and selection.isEmpty() # Failed to move.
     return unless @isInclusive() or @isLinewise()
-    return if not @isMode('visual') and selection.isEmpty()
 
     if @isMode('visual') and cursorIsAtEndOfLineAtNonEmptyRow(cursor)
+      # Avoid puting cursor on EOL in visual-mode as long as cursor's row was non-empty.
       swrap(selection).translateSelectionHeadAndClip('backward')
-    swrap(selection).translateSelectionEndAndClip('forward')
+
+    swrap(selection).translateSelectionEndAndClip('forward') # @inclusive effect
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
