@@ -203,7 +203,7 @@ class Operator extends Base
     @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
     # To repoeat(`.`) operation where multiple occurrence patterns was set.
-    # Here we save patterns which resresent UNIONED regex which @occurrenceManager knows.
+    # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
     selectedRanges = @editor.getSelectedBufferRanges()
@@ -211,7 +211,7 @@ class Operator extends Base
       @vimState.modeManager.deactivate() if @isMode('visual')
       @editor.setSelectedBufferRanges(ranges)
     else
-      @mutationTracker.estoreInitialPositions() # Restoreing position also clear selection.
+      @mutationTracker.restoreInitialPositions() # Restoreing position also clear selection.
     @occurrenceManager.resetPatterns()
 
   # Return true unless all selection is empty.
