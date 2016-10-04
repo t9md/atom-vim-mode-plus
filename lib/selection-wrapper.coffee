@@ -191,8 +191,8 @@ class SelectionWrapper
     @setBufferRange([tail, head])
     @setReversedState(head.isLessThan(tail))
 
-  # Equivalent to
-  # "not selection.isReversed() and not selection.isEmpty()"
+  # Return true if selection was non-empty and non-reversed selection.
+  # Equivalent to not selection.isEmpty() and not selection.isReversed()"
   isForwarding: ->
     head = @selection.getHeadBufferPosition()
     tail = @selection.getTailBufferPosition()

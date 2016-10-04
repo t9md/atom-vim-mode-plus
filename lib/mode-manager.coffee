@@ -132,7 +132,7 @@ class ModeManager
   # At this point @submode is not yet updated to final submode.
   activateVisualMode: (submode) ->
     if @submode?
-      @selectCharacterwise()
+      @normalizeSelections(normalizeEndPosition: false)
     else
       if @editor.getLastSelection().isEmpty()
         for selection in @editor.getSelections()
@@ -151,8 +151,10 @@ class ModeManager
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
       @updateNarrowedState(false)
 
-  selectCharacterwise: ->
+  normalizeSelections: ({normalizeEndPosition}={})->
     switch @submode
+      when 'characterwise'
+        null
       when 'linewise'
         for selection in @editor.getSelections() when not selection.isEmpty()
           swrap(selection).normalize()
@@ -162,11 +164,10 @@ class ModeManager
           bs.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
 
-  normalizeSelections: ->
-    @selectCharacterwise()
-    swrap.clearProperties(@editor)
-    for selection in @editor.getSelections() when swrap(selection).isForwarding()
-      swrap(selection).translateSelectionEndAndClip('backward', hello: 'normalize!')
+    if normalizeEndPosition ? true
+      swrap.clearProperties(@editor)
+      for selection in @editor.getSelections() when swrap(selection).isForwarding()
+        swrap(selection).translateSelectionEndAndClip('backward', hello: 'normalize!')
 
   # Narrow to selection
   # -------------------------
