@@ -40,8 +40,6 @@ translatePointAndClip = (editor, point, direction, {translate}={}) ->
 
 class SelectionWrapper
   constructor: (@selection) ->
-    @selection.onDidDestroy =>
-      @clearProperties()
 
   hasProperties: -> propertyStore.has(@selection)
   getProperties: -> propertyStore.get(@selection) ? {}
@@ -161,8 +159,8 @@ class SelectionWrapper
   getStartRow: -> @getRowFor('start')
   getEndRow: -> @getRowFor('end')
 
-  preserveCharacterwise: ->
-    properties = @detectCharacterwiseProperties()
+  saveProperties: ->
+    properties = @captureProperties()
     unless @selection.isEmpty()
       # We select righted in visual-mode, this translation de-effect select-right-effect
       # so that after restoring preserved poperty we can do activate-visual mode without
@@ -175,7 +173,7 @@ class SelectionWrapper
         properties.head = endPoint
     @setProperties(properties)
 
-  detectCharacterwiseProperties: ->
+  captureProperties: ->
     head: @selection.getHeadBufferPosition()
     tail: @selection.getTailBufferPosition()
 
@@ -243,32 +241,30 @@ class SelectionWrapper
     else
       'characterwise'
 
+  withKeepingGoalColumn: (fn) ->
+    {goalColumn} = @selection.cursor
+    {start, end} = @getBufferRange()
+    fn()
+    @selection.cursor.goalColumn = goalColumn if goalColumn
+
   # direction must be one of ['forward', 'backward']
   # options: {translate: true or false} default true
   translateSelectionEndAndClip: (direction, options) ->
-    {goalColumn} = @selection.cursor
     {start, end} = @getBufferRange()
-    newEnd = translatePointAndClip(@selection.editor, end, direction, options)
-    @setBufferRange([start, newEnd], {preserveFolds: true})
-    @selection.cursor.goalColumn = goalColumn if goalColumn
+    @withKeepingGoalColumn =>
+      end = translatePointAndClip(@selection.editor, end, direction, options)
+      @setBufferRange([start, end], {preserveFolds: true})
 
   translateSelectionHeadAndClip: (direction, options) ->
-    {goalColumn} = @selection.cursor
     {start, end} = @getBufferRange()
-    if @selection.isReversed()
-      head = start
-    else
-      head = end
+    @withKeepingGoalColumn =>
+      if @selection.isReversed()
+        [head, tail] = [start, end]
+      else
+        [tail, head] = [start, end]
 
-    newHead = translatePointAndClip(@selection.editor, head, direction, options)
-
-    if @selection.isReversed()
-      newRange = [newHead, end]
-    else
-      newRange = [start, newHead]
-
-    @setBufferRange(newRange, {preserveFolds: true})
-    @selection.cursor.goalColumn = goalColumn if goalColumn
+      head = translatePointAndClip(@selection.editor, head, direction, options)
+      @setBufferRange([head, tail], {preserveFolds: true})
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
@@ -303,6 +299,6 @@ swrap.detectVisualModeSubmode = (editor) ->
 swrap.updateSelectionProperties = (editor, {unknownOnly}={}) ->
   for selection in editor.getSelections()
     continue if unknownOnly and swrap(selection).hasProperties()
-    swrap(selection).preserveCharacterwise()
+    swrap(selection).saveProperties()
 
 module.exports = swrap

@@ -78,7 +78,7 @@ class Motion extends Base
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
-    swrap.updateSelectionProperties(@editor) if @isMode('visual')
+    @updateSelectionProperties() if @isMode('visual')
 
     # Modify selection to submode-wisely
     switch

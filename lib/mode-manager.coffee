@@ -131,14 +131,15 @@ class ModeManager
   # -------------------------
   # At this point @submode is not yet updated to final submode.
   activateVisualMode: (submode) ->
-    if @submode?
-      @normalizeSelections(normalizeEndPosition: false)
-    else
-      if @editor.getLastSelection().isEmpty()
-        for selection in @editor.getSelections()
-          swrap(selection).translateSelectionEndAndClip('forward')
+    @normalizeSelections() if @submode?
 
-    swrap.updateSelectionProperties(@editor, unknownOnly: true)
+    # We only select-forwad only when
+    #  -  submode shift(@submode? is true)
+    #  -  initial activation(@submode? is false) and selection was empty.
+    for selection in @editor.getSelections() when @submode? or selection.isEmpty()
+      swrap(selection).translateSelectionEndAndClip('forward')
+
+    @vimState.updateSelectionProperties()
 
     switch submode
       when 'linewise'
@@ -166,7 +167,6 @@ class ModeManager
 
     if normalizeEndPosition ? true
       swrap.clearProperties(@editor)
-      # for selection in @editor.getSelections() when swrap(selection).isForwarding()
       for selection in @editor.getSelections() when not selection.isEmpty()
         swrap(selection).translateSelectionEndAndClip('backward')
 
