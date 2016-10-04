@@ -253,7 +253,7 @@ cursorIsAtEmptyRow = (cursor) ->
   isEmptyRow(cursor.editor, cursor.getBufferRow())
 
 cursorIsAtEndOfLineAtNonEmptyRow = (cursor) ->
-  cursor.isAtEndOfLine() and not cursorIsAtEmptyRow(cursor)
+  cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
 
 getVimLastBufferRow = (editor) ->
   getVimEofBufferPosition(editor).row

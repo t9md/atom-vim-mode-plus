@@ -70,8 +70,7 @@ class Motion extends Base
       @moveCursor(cursor)
 
   select: ->
-    wasVisual = @isMode('visual')
-    @vimState.modeManager.normalizeSelections() if wasVisual
+    @vimState.modeManager.normalizeSelections() if @isMode('visual')
 
     for selection in @editor.getSelections()
       @selectByMotion(selection)
@@ -79,35 +78,25 @@ class Motion extends Base
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
-    swrap.updateSelectionProperties(@editor) if wasVisual
+    swrap.updateSelectionProperties(@editor) if @isMode('visual')
 
+    # Modify selection to submode-wisely
     switch
       when @isLinewise() then @vimState.selectLinewise()
       when @isBlockwise() then @vimState.selectBlockwise()
 
   selectByMotion: (selection) ->
     {cursor} = selection
-    originalPoint = cursor.getBufferPosition()
-    tailRange = swrap(selection).getTailBufferRange()
 
     selection.modifySelection =>
       @moveCursor(cursor)
-
+      
     return unless @isInclusive() or @isLinewise()
-
-    cursorMoved = not cursor.getBufferPosition().isEqual(originalPoint)
-    return unless cursorMoved or @isMode('visual')
+    return if not @isMode('visual') and selection.isEmpty()
 
     if @isMode('visual') and cursorIsAtEndOfLineAtNonEmptyRow(cursor)
-      swrap(selection).translateSelectionEndAndClip('backward')
-
-    unless selection.isReversed()
-      # When cursor is at empty row, we allow to wrap to next line
-      # since when we `v`, we have to select line.
-      swrap(selection).translateSelectionEndAndClip('forward', hello: 'in select inclusive')
-
-    swrap(selection).mergeBufferRange(tailRange, {preserveFolds: true})
-
+      swrap(selection).translateSelectionHeadAndClip('backward')
+    swrap(selection).translateSelectionEndAndClip('forward')
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
@@ -759,7 +748,7 @@ class Till extends Find
   selectByMotion: (selection) ->
     super
     if selection.isEmpty() and (@point? and not @backwards)
-      selection.selectRight()
+      swrap(selection).translateSelectionEndAndClip('forward')
 
 # keymap: T
 class TillBackwards extends Till

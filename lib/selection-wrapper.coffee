@@ -3,7 +3,7 @@ _ = require 'underscore-plus'
 
 propertyStore = new Map
 
-translatePointAndClip = (editor, point, direction, {translate, hello}={}) ->
+translatePointAndClip = (editor, point, direction, {translate}={}) ->
   translate ?= true
   point = Point.fromObject(point)
 
@@ -11,7 +11,6 @@ translatePointAndClip = (editor, point, direction, {translate, hello}={}) ->
     when 'forward'
       point = point.translate([0, +1]) if translate
       eol = editor.bufferRangeForBufferRow(point.row).end
-      # console.log 'point, eol, hello', [point.toString(), eol.toString(), hello]
 
       if point.isEqual(eol)
         return Point.min(point, editor.getEofBufferPosition())
@@ -22,7 +21,6 @@ translatePointAndClip = (editor, point, direction, {translate, hello}={}) ->
       point = Point.min(point, editor.getEofBufferPosition())
     when 'backward'
       point = point.translate([0, -1]) if translate
-      # console.log 'point, hello', [point.toString(), hello]
 
       if point.column < 0
         newRow = point.row - 1
@@ -155,16 +153,6 @@ class SelectionWrapper
   getStartRow: -> @getRowFor('start')
   getEndRow: -> @getRowFor('end')
 
-  getTailBufferRange: ->
-    {editor} = @selection
-    tailPoint = @selection.getTailBufferPosition()
-    if @selection.isReversed()
-      point = translatePointAndClip(editor, tailPoint, 'backward')
-      new Range(point, tailPoint)
-    else
-      point = translatePointAndClip(editor, tailPoint, 'forward', hello: 'when getting tailRange')
-      new Range(tailPoint, point)
-
   preserveCharacterwise: ->
     properties = @detectCharacterwiseProperties()
     unless @selection.isEmpty()
@@ -255,10 +243,26 @@ class SelectionWrapper
   translateSelectionEndAndClip: (direction, options) ->
     {goalColumn} = @selection.cursor
     {start, end} = @getBufferRange()
-    # console.log 'bef', end.toString()
     newEnd = translatePointAndClip(@selection.editor, end, direction, options)
-    # console.log 'aft', newEnd.toString()
     @setBufferRange([start, newEnd], {preserveFolds: true})
+    @selection.cursor.goalColumn = goalColumn if goalColumn
+
+  translateSelectionHeadAndClip: (direction, options) ->
+    {goalColumn} = @selection.cursor
+    {start, end} = @getBufferRange()
+    if @selection.isReversed()
+      head = start
+    else
+      head = end
+
+    newHead = translatePointAndClip(@selection.editor, head, direction, options)
+
+    if @selection.isReversed()
+      newRange = [newHead, end]
+    else
+      newRange = [start, newHead]
+
+    @setBufferRange(newRange, {preserveFolds: true})
     @selection.cursor.goalColumn = goalColumn if goalColumn
 
 swrap = (selection) ->

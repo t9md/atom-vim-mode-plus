@@ -151,7 +151,7 @@ class ModeManager
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
       @updateNarrowedState(false)
 
-  normalizeSelections: ({normalizeEndPosition}={})->
+  normalizeSelections: ({normalizeEndPosition}={}) ->
     switch @submode
       when 'characterwise'
         null
@@ -166,8 +166,9 @@ class ModeManager
 
     if normalizeEndPosition ? true
       swrap.clearProperties(@editor)
-      for selection in @editor.getSelections() when swrap(selection).isForwarding()
-        swrap(selection).translateSelectionEndAndClip('backward', hello: 'normalize!')
+      # for selection in @editor.getSelections() when swrap(selection).isForwarding()
+      for selection in @editor.getSelections() when not selection.isEmpty()
+        swrap(selection).translateSelectionEndAndClip('backward')
 
   # Narrow to selection
   # -------------------------
