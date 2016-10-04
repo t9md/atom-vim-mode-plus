@@ -190,7 +190,7 @@ class SelectionWrapper
     tail = @selection.getTailBufferPosition()
     head.isGreaterThan(tail)
 
-  normalize: ->
+  restoreColumnFromProperties: ->
     {head, tail} = @getProperties()
     return unless head? and tail?
     return if @selection.isEmpty()
@@ -199,12 +199,11 @@ class SelectionWrapper
       [start, end] = [head, tail]
     else
       [start, end] = [tail, head]
-    [start.row, end.row] = @selection.getBufferRowRange()
 
-    {goalColumn} = @selection.cursor
-    end = translatePointAndClip(@selection.editor, end, 'backward', translate: false)
-    @setBufferRange([start, end], {preserveFolds: true})
-    @selection.cursor.goalColumn = goalColumn if goalColumn?
+    [start.row, end.row] = @selection.getBufferRowRange()
+    @withKeepingGoalColumn =>
+      @setBufferRange([start, end], preserveFolds: true)
+      @translateSelectionEndAndClip('backward', translate: false)
 
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->
@@ -254,7 +253,7 @@ class SelectionWrapper
     {start, end} = @getBufferRange()
     @withKeepingGoalColumn =>
       end = translatePointAndClip(@selection.editor, end, direction, options)
-      @setBufferRange([start, end], {preserveFolds: true})
+      @setBufferRange([start, end], preserveFolds: true)
 
   translateSelectionHeadAndClip: (direction, options) ->
     {start, end} = @getBufferRange()
@@ -265,7 +264,7 @@ class SelectionWrapper
         [tail, head] = [start, end]
 
       head = translatePointAndClip(@selection.editor, head, direction, options)
-      @setBufferRange([head, tail], {preserveFolds: true})
+      @setBufferRange([head, tail], preserveFolds: true)
 
 swrap = (selection) ->
   new SelectionWrapper(selection)

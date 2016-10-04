@@ -158,7 +158,7 @@ class ModeManager
         null
       when 'linewise'
         for selection in @editor.getSelections() when not selection.isEmpty()
-          swrap(selection).normalize()
+          swrap(selection).restoreColumnFromProperties()
           swrap(selection).translateSelectionEndAndClip('forward')
       when 'blockwise'
         for bs in @vimState.getBlockwiseSelections()
