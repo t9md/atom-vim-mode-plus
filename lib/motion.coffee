@@ -1277,19 +1277,3 @@ class MoveToPair extends Motion
         enclosingRange.containsRange(range)
 
     forwardingRanges[0]?.end.translate([0, -1]) or enclosingRange?.start
-
-class MoveThreeColumnRight extends Motion
-  @extend()
-  inclusive: true
-  moveCursor: (cursor) ->
-    point = cursor.getBufferPosition()
-    newPoint = point.translate([0, 3])
-    cursor.setBufferPosition(newPoint)
-
-class MoveThreeColumnLeft extends Motion
-  @extend()
-  inclusive: true
-  moveCursor: (cursor) ->
-    point = cursor.getBufferPosition()
-    newPoint = point.translate([0, -3])
-    cursor.setBufferPosition(newPoint)
