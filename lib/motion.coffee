@@ -33,6 +33,7 @@ Select = null
   debug
 } = require './utils'
 
+swrap = require './selection-wrapper'
 {MatchList} = require './match'
 settings = require './settings'
 Base = require './base'

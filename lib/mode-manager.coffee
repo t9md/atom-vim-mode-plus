@@ -158,8 +158,11 @@ class ModeManager
         null
       when 'linewise'
         for selection in @editor.getSelections() when not selection.isEmpty()
+          # console.log 'before restore column', selection.getBufferRange().toString()
           swrap(selection).restoreColumnFromProperties()
+          # console.log 'restored column', selection.getBufferRange().toString()
           swrap(selection).translateSelectionEndAndClip('forward')
+          # console.log 'clip forwarded', selection.getBufferRange().toString()
       when 'blockwise'
         for bs in @vimState.getBlockwiseSelections()
           bs.restoreCharacterwise()
@@ -167,7 +170,9 @@ class ModeManager
 
     swrap.clearProperties(@editor)
     for selection in @editor.getSelections() when not selection.isEmpty()
+
       swrap(selection).translateSelectionEndAndClip('backward')
+      # console.log 'clip backwarded', selection.getBufferRange().toString()
 
   # Narrow to selection
   # -------------------------
