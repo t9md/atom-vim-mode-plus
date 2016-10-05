@@ -164,16 +164,6 @@ class InsertAtEndOfTarget extends InsertByTarget
   @extend()
   which: 'end'
 
-class InsertAtStartOfInnerCurrentLine extends InsertByTarget
-  @extend()
-  which: 'start'
-  target: "InnerCurrentLine"
-
-class InsertAtEndOfInnerCurrentLine extends InsertByTarget
-  @extend()
-  which: 'end'
-  target: "InnerCurrentLine"
-
 class InsertAtStartOfInnerSmartWord extends InsertByTarget
   @extend()
   which: 'start'
