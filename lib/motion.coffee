@@ -94,8 +94,8 @@ class Motion extends Base
     if @isMode('visual') and cursorIsAtEndOfLineAtNonEmptyRow(cursor)
       # Avoid puting cursor on EOL in visual-mode as long as cursor's row was non-empty.
       swrap(selection).translateSelectionHeadAndClip('backward')
-
-    swrap(selection).translateSelectionEndAndClip('forward') # @inclusive effect
+    # to select @inclusive-ly
+    swrap(selection).translateSelectionEndAndClip('forward')
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
