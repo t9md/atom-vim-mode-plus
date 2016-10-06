@@ -25,6 +25,7 @@ swrap = require './selection-wrapper'
 class TextObject extends Base
   @extend(false)
   allowSubmodeChange: true
+  normalize: false
 
   constructor: ->
     @constructor::inner = @getName().startsWith('Inner')
@@ -52,6 +53,9 @@ class TextObject extends Base
       canSelect = false
 
     @countTimes =>
+      if @normalize and @isMode('visual')
+        @vimState.modeManager.normalizeSelections()
+
       for selection in @editor.getSelections() when canSelect
         @selectTextObject(selection, stopSelection)
     @editor.mergeIntersectingSelections()
@@ -68,10 +72,7 @@ class TextObject extends Base
 # -------------------------
 class Word extends TextObject
   @extend(false)
-
-  select: ->
-    @vimState.modeManager.normalizeSelections()
-    super
+  normalize: true
 
   getRange: (selection) ->
     {range, kind} = @getWordBufferRangeAndKindAtBufferPosition(selection.cursor.getBufferPosition(), {@wordRegex})
@@ -127,6 +128,7 @@ class Pair extends TextObject
   allowSubmodeChange: false
   adjustInnerRange: true
   pair: null
+  
   getPattern: ->
     [open, close] = @pair
     if open is close
