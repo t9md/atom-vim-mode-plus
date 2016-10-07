@@ -51,12 +51,6 @@ class TextObject extends Base
   stopSelection: ->
     @canSelect = false
 
-  getUnionedRangeUnlessSelectionWasEmpty: (selection, range) ->
-    if selection.isEmpty()
-      range
-    else
-      selection.getBufferRange().union(range)
-
   getNormalizedHeadBufferPosition: (selection) ->
     head = selection.getHeadBufferPosition()
     if @isMode('visual') and not selection.isReversed()
@@ -264,7 +258,7 @@ class Pair extends TextObject
 
   getPointToSearchFrom: (selection, searchFrom) ->
     switch searchFrom
-      when 'head' then swrap(selection).getNormalizedBufferPosition()
+      when 'head' then @getNormalizedHeadBufferPosition(selection)
       when 'start' then swrap(selection).getBufferPositionFor('start')
 
   # Allow override @allowForwarding by 2nd argument.
@@ -781,8 +775,8 @@ class SearchMatchForward extends TextObject
     {range: found, whichIsHead: 'end'}
 
   getRange: (selection) ->
-    unless pattern = @globalState.get('lastSearchPattern')
-      return null
+    pattern = @globalState.get('lastSearchPattern')
+    return unless pattern?
 
     fromPoint = selection.getHeadBufferPosition()
     {range, whichIsHead} = @findMatch(fromPoint, pattern)
@@ -884,7 +878,6 @@ class UnionTextObject extends TextObject
 class AFunctionOrInnerParagraph extends UnionTextObject
   @extend()
   member: ['AFunction', 'InnerParagraph']
-
 
 # FIXME: make Motion.CurrentSelection to TextObject then use concatTextObject
 class ACurrentSelectionAndAPersistentSelection extends TextObject
