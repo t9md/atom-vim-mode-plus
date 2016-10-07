@@ -166,11 +166,12 @@ class Base
     new klass(@vimState, properties)
 
   clone: (vimState) ->
-    object = _.clone(this)
-    object.vimState = vimState
-    object.editor = vimState.editor
-    object.editorElement = vimState.editorElement
-    object
+    properties = {}
+    excludeProperties = ['editor', 'editorElement', 'globalState']
+    for own key, value of this when key not in excludeProperties
+      properties[key] = value
+    klass = this.constructor
+    new klass(vimState, properties)
 
   cancelOperation: ->
     @vimState.operationStack.cancel()

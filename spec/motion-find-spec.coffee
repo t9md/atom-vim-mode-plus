@@ -22,6 +22,12 @@ describe "Motion Find", ->
     it 'moves to the first specified character it finds', ->
       ensure ['f', input: 'c'], cursor: [0, 2]
 
+    it 'extends visual selection in visual-mode and repetable', ->
+      ensure 'v', mode: ['visual', 'characterwise']
+      ensure ['f', input: 'c'], selectedText: 'abc', cursor: [0, 3]
+      ensure ';', selectedText: 'abcabc', cursor: [0, 6]
+      ensure ',', selectedText: 'abc', cursor: [0, 3]
+
     it 'moves backwards to the first specified character it finds', ->
       set cursor: [0, 2]
       ensure ['F', input: 'a'], cursor: [0, 0]
