@@ -1,42 +1,11 @@
 _ = require 'underscore-plus'
 {Range, Point, Disposable} = require 'atom'
+{
+  translatePointAndClip
+  getRangeByTranslatePointAndClip
+} = require './utils'
 
 propertyStore = new Map
-
-translatePointAndClip = (editor, point, direction, {translate}={}) ->
-  translate ?= true
-  point = Point.fromObject(point)
-
-  dontClip = false
-  switch direction
-    when 'forward'
-      point = point.translate([0, +1]) if translate
-      eol = editor.bufferRangeForBufferRow(point.row).end
-
-      if point.isEqual(eol)
-        dontClip = true
-
-      if point.isGreaterThan(eol)
-        point = new Point(point.row + 1, 0)
-        dontClip = true
-
-      point = Point.min(point, editor.getEofBufferPosition())
-
-    when 'backward'
-      point = point.translate([0, -1]) if translate
-
-      if point.column < 0
-        newRow = point.row - 1
-        eol = editor.bufferRangeForBufferRow(newRow).end
-        point = new Point(newRow, eol.column)
-
-      point = Point.max(point, Point.ZERO)
-
-  if dontClip
-    point
-  else
-    screenPoint = editor.screenPositionForBufferPosition(point, clipDirection: direction)
-    editor.bufferPositionForScreenPosition(screenPoint)
 
 class SelectionWrapper
   constructor: (@selection) ->
@@ -159,6 +128,15 @@ class SelectionWrapper
   getStartRow: -> @getRowFor('start')
   getEndRow: -> @getRowFor('end')
 
+  getTailBufferRange: ->
+    {editor} = @selection
+    tailPoint = @selection.getTailBufferPosition()
+    if @selection.isReversed()
+      point = translatePointAndClip(editor, tailPoint, 'backward')
+      new Range(point, tailPoint)
+    else
+      point = translatePointAndClip(editor, tailPoint, 'forward', hello: 'when getting tailRange')
+      new Range(tailPoint, point)
 
   saveProperties: ->
     # {inspect} = require 'util'
@@ -255,21 +233,20 @@ class SelectionWrapper
   # direction must be one of ['forward', 'backward']
   # options: {translate: true or false} default true
   translateSelectionEndAndClip: (direction, options) ->
-    {start, end} = @getBufferRange()
+    editor = @selection.editor
+    range = @getBufferRange()
+    newRange = getRangeByTranslatePointAndClip(editor, range, "end", direction, options)
     @withKeepingGoalColumn =>
-      end = translatePointAndClip(@selection.editor, end, direction, options)
-      @setBufferRange([start, end], preserveFolds: true)
+      @setBufferRange(newRange, preserveFolds: true)
 
   translateSelectionHeadAndClip: (direction, options) ->
-    {start, end} = @getBufferRange()
-    @withKeepingGoalColumn =>
-      if @selection.isReversed()
-        [head, tail] = [start, end]
-      else
-        [tail, head] = [start, end]
+    editor = @selection.editor
+    which  = if @selection.isReversed() then 'start' else 'end'
 
-      head = translatePointAndClip(@selection.editor, head, direction, options)
-      @setBufferRange([head, tail], preserveFolds: true)
+    range = @getBufferRange()
+    newRange = getRangeByTranslatePointAndClip(editor, range, which, direction, options)
+    @withKeepingGoalColumn =>
+      @setBufferRange(newRange, preserveFolds: true)
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
