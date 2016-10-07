@@ -212,17 +212,19 @@ moveCursorToNextNonWhitespace = (cursor) ->
     cursor.moveRight()
   not originalPoint.isEqual(cursor.getBufferPosition())
 
-getBufferRows = (editor, {startRow, direction, includeStartRow}) ->
+getBufferRows = (editor, {startRow, direction}) ->
   switch direction
     when 'previous'
-      if not includeStartRow and startRow <= 0
-        return []
-      [(startRow - 1)..0]
+      if startRow <= 0
+        []
+      else
+        [(startRow - 1)..0]
     when 'next'
       vimLastBufferRow = getVimLastBufferRow(editor)
-      if not includeStartRow and startRow >= vimLastBufferRow
-        return []
-      [(startRow + 1)..vimLastBufferRow]
+      if startRow >= vimLastBufferRow
+        []
+      else
+        [(startRow + 1)..vimLastBufferRow]
 
 # Return Vim's EOF position rather than Atom's EOF position.
 # This function change meaning of EOF from native TextEditor::getEofBufferPosition()

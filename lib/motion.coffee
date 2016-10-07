@@ -433,8 +433,7 @@ class MoveToNextParagraph extends Motion
 
   getPoint: (fromPoint) ->
     wasAtNonBlankRow = not @editor.isBufferRowBlank(fromPoint.row)
-    options = {startRow: fromPoint.row, @direction, includeStartRow: false}
-    for row in getBufferRows(@editor, options)
+    for row in getBufferRows(@editor, {startRow: fromPoint.row, @direction})
       if @editor.isBufferRowBlank(row)
         return new Point(row, 0) if wasAtNonBlankRow
       else
