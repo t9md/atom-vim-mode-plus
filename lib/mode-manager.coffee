@@ -131,12 +131,15 @@ class ModeManager
   # -------------------------
   # At this point @submode is not yet updated to final submode.
   activateVisualMode: (submode) ->
-    if @submode?
-      @selectCharacterwise()
-    else if @editor.getLastSelection().isEmpty()
-      @editor.selectRight()
+    @normalizeSelections() if @submode?
 
-    @vimState.updateSelectionProperties(force: false)
+    # We only select-forwad only when
+    #  -  submode shift(@submode? is true)
+    #  -  initial activation(@submode? is false) and selection was empty.
+    for selection in @editor.getSelections() when @submode? or selection.isEmpty()
+      swrap(selection).translateSelectionEndAndClip('forward')
+
+    @vimState.updateSelectionProperties()
 
     switch submode
       when 'linewise'
@@ -149,27 +152,27 @@ class ModeManager
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
       @updateNarrowedState(false)
 
-  selectCharacterwise: ->
+  normalizeSelections: ->
     switch @submode
+      when 'characterwise'
+        null
       when 'linewise'
         for selection in @editor.getSelections() when not selection.isEmpty()
-          swrap(selection).restoreCharacterwise(preserveGoalColumn: true)
+          # console.log 'before restore column', selection.getBufferRange().toString()
+          swrap(selection).restoreColumnFromProperties()
+          # console.log 'restored column', selection.getBufferRange().toString()
+          swrap(selection).translateSelectionEndAndClip('forward')
+          # console.log 'clip forwarded', selection.getBufferRange().toString()
       when 'blockwise'
         for bs in @vimState.getBlockwiseSelections()
           bs.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
 
-  normalizeSelections: ->
-    @selectCharacterwise()
     swrap.clearProperties(@editor)
+    for selection in @editor.getSelections() when not selection.isEmpty()
 
-    # We selectRight()ed in visual-mode, so reset this effect here.
-    # `vc`, `vs` make selection empty.
-    selections = @editor.getSelections()
-    for selection in selections when swrap(selection).isForwarding()
-      selection.modifySelection ->
-        # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
-        moveCursorLeft(selection.cursor, allowWrap: true, preserveGoalColumn: true)
+      swrap(selection).translateSelectionEndAndClip('backward')
+      # console.log 'clip backwarded', selection.getBufferRange().toString()
 
   # Narrow to selection
   # -------------------------

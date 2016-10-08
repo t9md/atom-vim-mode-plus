@@ -199,32 +199,19 @@ class Operator extends Base
     # we have to return to normal-mode from operator-pending or visual
     @activateMode('normal')
 
-  reselectOccurrence: (fn) ->
-    cursorPositionManager = new CursorPositionManager(@editor)
-    cursorPositionManager.save('head', fromProperty: true, allowFallback: true)
-
-    # This has to be BEFORE @target.select, to use CURRENT cursor position.
-    # to find occurrence-word.
+  selectOccurrence: ->
     @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
-    fn()
-
-    @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
-    scanRanges = @editor.getSelectedBufferRanges()
-    isVisual = @isMode('visual')
-    @vimState.modeManager.deactivate() if isVisual
-
-    if @occurrenceManager.selectInRanges(scanRanges, isVisual)
-      cursorPositionManager.destroy()
-    else
-      # Restoring cursor position also clear selection. Require to avoid unwanted mutation.
-      cursorPositionManager.restore()
-
-    # There is possibility that multiple markers are pre-setted manually.
-    # To repeat this multi pre-set occurrences by `.`, we consult manager to cache
-    # bundled(unioned) regex pattern to @patternForOccurrence.
+    # To repoeat(`.`) operation where multiple occurrence patterns was set.
+    # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
-    # We got ranges to select, so good-by @occurrenceManager by reset()
+
+    selectedRanges = @editor.getSelectedBufferRanges()
+    if ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
+      @vimState.modeManager.deactivate() if @isMode('visual')
+      @editor.setSelectedBufferRanges(ranges)
+    else
+      @mutationTracker.restoreInitialPositions() # Restoreing position also clear selection.
     @occurrenceManager.resetPatterns()
 
   # Return true unless all selection is empty.
@@ -236,11 +223,13 @@ class Operator extends Base
     @forceTargetWise() if @wise
     @emitWillSelectTarget()
 
+    # To use CURRENT cursor position, this has to be BEFORE @target.select() which move cursors.
+    if @isOccurrence() and not @occurrenceManager.hasMarkers()
+      @addOccurrencePattern()
+
+    @target.select()
     if @isOccurrence()
-      @reselectOccurrence =>
-        @target.select()
-    else
-      @target.select()
+      @selectOccurrence()
 
     isExplicitEmptyTarget = @target.getName() is "Empty"
     if haveSomeSelection(@editor) or isExplicitEmptyTarget
@@ -579,6 +568,7 @@ class PutBefore extends Operator
       adjustCursor = (range) ->
         cursor.setBufferPosition(range.end.translate([0, -1]))
 
+    @setMarkForChange(newRange)
     if selectPastedText
       selection.setBufferRange(newRange)
     else

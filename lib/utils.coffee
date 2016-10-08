@@ -212,17 +212,19 @@ moveCursorToNextNonWhitespace = (cursor) ->
     cursor.moveRight()
   not originalPoint.isEqual(cursor.getBufferPosition())
 
-getBufferRows = (editor, {startRow, direction, includeStartRow}) ->
+getBufferRows = (editor, {startRow, direction}) ->
   switch direction
     when 'previous'
-      if not includeStartRow and startRow <= 0
-        return []
-      [(startRow - 1)..0]
+      if startRow <= 0
+        []
+      else
+        [(startRow - 1)..0]
     when 'next'
       vimLastBufferRow = getVimLastBufferRow(editor)
-      if not includeStartRow and startRow >= vimLastBufferRow
-        return []
-      [(startRow + 1)..vimLastBufferRow]
+      if startRow >= vimLastBufferRow
+        []
+      else
+        [(startRow + 1)..vimLastBufferRow]
 
 # Return Vim's EOF position rather than Atom's EOF position.
 # This function change meaning of EOF from native TextEditor::getEofBufferPosition()
@@ -251,6 +253,9 @@ isEmptyRow = (editor, row) ->
 
 cursorIsAtEmptyRow = (cursor) ->
   isEmptyRow(cursor.editor, cursor.getBufferRow())
+
+cursorIsAtEndOfLineAtNonEmptyRow = (cursor) ->
+  cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
 
 getVimLastBufferRow = (editor) ->
   getVimEofBufferPosition(editor).row
@@ -344,12 +349,12 @@ moveCursorRight = (cursor, options={}) ->
     motion = (cursor) -> cursor.moveRight()
     moveCursor(cursor, options, motion)
 
-moveCursorUp = (cursor, options={}) ->
+moveCursorUpScreen = (cursor, options={}) ->
   unless cursor.getScreenRow() is 0
     motion = (cursor) -> cursor.moveUp()
     moveCursor(cursor, options, motion)
 
-moveCursorDown = (cursor, options={}) ->
+moveCursorDownScreen = (cursor, options={}) ->
   unless getVimLastScreenRow(cursor.editor) is cursor.getScreenRow()
     motion = (cursor) -> cursor.moveDown()
     moveCursor(cursor, options, motion)
@@ -734,6 +739,69 @@ destroyNonLastSelection = (editor) ->
   for selection in editor.getSelections() when not selection.isLastSelection()
     selection.destroy()
 
+getLargestFoldRangeContainsBufferRow = (editor, row) ->
+  markers = editor.displayLayer.findFoldMarkers(intersectsRow: row)
+
+  startPoint = null
+  endPoint = null
+
+  for marker in markers ? []
+    {start, end} = marker.getRange()
+    unless startPoint
+      startPoint = start
+      endPoint = end
+      continue
+
+    if start.isLessThan(startPoint)
+      startPoint = start
+      endPoint = end
+
+  if startPoint? and endPoint?
+    new Range(startPoint, endPoint)
+
+translatePointAndClip = (editor, point, direction, {translate}={}) ->
+  translate ?= true
+  point = Point.fromObject(point)
+
+  dontClip = false
+  switch direction
+    when 'forward'
+      point = point.translate([0, +1]) if translate
+      eol = editor.bufferRangeForBufferRow(point.row).end
+
+      if point.isEqual(eol)
+        dontClip = true
+
+      if point.isGreaterThan(eol)
+        point = new Point(point.row + 1, 0)
+        dontClip = true
+
+      point = Point.min(point, editor.getEofBufferPosition())
+
+    when 'backward'
+      point = point.translate([0, -1]) if translate
+
+      if point.column < 0
+        newRow = point.row - 1
+        eol = editor.bufferRangeForBufferRow(newRow).end
+        point = new Point(newRow, eol.column)
+
+      point = Point.max(point, Point.ZERO)
+
+  if dontClip
+    point
+  else
+    screenPoint = editor.screenPositionForBufferPosition(point, clipDirection: direction)
+    editor.bufferPositionForScreenPosition(screenPoint)
+
+getRangeByTranslatePointAndClip = (editor, range, which, direction, options) ->
+  newPoint = translatePointAndClip(editor, range[which], direction, options)
+  switch which
+    when 'start'
+      new Range(newPoint, range.end)
+    when 'end'
+      new Range(range.start, newPoint)
+
 # Debugging purpose
 # -------------------------
 logGoalColumnForSelection = (subject, selection) ->
@@ -838,8 +906,8 @@ module.exports = {
   getVimLastScreenRow
   moveCursorLeft
   moveCursorRight
-  moveCursorUp
-  moveCursorDown
+  moveCursorUpScreen
+  moveCursorDownScreen
   getEolForBufferRow
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
@@ -858,6 +926,7 @@ module.exports = {
   moveCursorToNextNonWhitespace
   isEmptyRow
   cursorIsAtEmptyRow
+  cursorIsAtEndOfLineAtNonEmptyRow
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
@@ -898,6 +967,9 @@ module.exports = {
   scanEditor
   isRangeContainsSomePoint
   destroyNonLastSelection
+  getLargestFoldRangeContainsBufferRow
+  translatePointAndClip
+  getRangeByTranslatePointAndClip
 
   # Debugging
   reportSelection,
