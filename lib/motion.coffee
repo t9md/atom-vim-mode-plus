@@ -204,7 +204,7 @@ class MoveDown extends MoveUp
       row = getLargestFoldRangeContainsBufferRow(@editor, row).end.row
     Math.min(row + 1, @getVimLastBufferRow())
 
-class MoveScreenUp extends Motion
+class MoveUpScreen extends Motion
   @extend()
   linewise: true
   direction: 'up'
@@ -213,7 +213,7 @@ class MoveScreenUp extends Motion
     @countTimes ->
       moveCursorUpScreen(cursor)
 
-class MoveScreenDown extends MoveScreenUp
+class MoveDownScreen extends MoveUpScreen
   @extend()
   linewise: true
   direction: 'down'

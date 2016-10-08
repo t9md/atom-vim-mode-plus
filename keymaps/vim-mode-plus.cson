@@ -57,8 +57,8 @@
   'j': 'vim-mode-plus:move-down'
   'down': 'vim-mode-plus:move-down'
 
-  'g k': 'vim-mode-plus:move-screen-up'
-  'g j': 'vim-mode-plus:move-screen-down'
+  'g k': 'vim-mode-plus:move-up-screen'
+  'g j': 'vim-mode-plus:move-down-screen'
 
   'w': 'vim-mode-plus:move-to-next-word'
   # 'w':     'vim-mode-plus:move-to-next-alphanumeric-word'
