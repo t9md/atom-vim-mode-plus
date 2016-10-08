@@ -133,7 +133,7 @@ class ModeManager
   activateVisualMode: (submode) ->
     @normalizeSelections() if @submode?
 
-    # We only select-forwad only when
+    # We only select-forward only when
     #  -  submode shift(@submode? is true)
     #  -  initial activation(@submode? is false) and selection was empty.
     for selection in @editor.getSelections() when @submode? or selection.isEmpty()
@@ -158,11 +158,8 @@ class ModeManager
         null
       when 'linewise'
         for selection in @editor.getSelections() when not selection.isEmpty()
-          # console.log 'before restore column', selection.getBufferRange().toString()
           swrap(selection).restoreColumnFromProperties()
-          # console.log 'restored column', selection.getBufferRange().toString()
           swrap(selection).translateSelectionEndAndClip('forward')
-          # console.log 'clip forwarded', selection.getBufferRange().toString()
       when 'blockwise'
         for bs in @vimState.getBlockwiseSelections()
           bs.restoreCharacterwise()
@@ -172,7 +169,6 @@ class ModeManager
     for selection in @editor.getSelections() when not selection.isEmpty()
 
       swrap(selection).translateSelectionEndAndClip('backward')
-      # console.log 'clip backwarded', selection.getBufferRange().toString()
 
   # Narrow to selection
   # -------------------------
