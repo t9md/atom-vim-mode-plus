@@ -32,7 +32,7 @@ In v0.55.0, introduce `occurrence-modifier`
 These features are very powerfull especially for power user, read folloiwng document to learn how to use.  
 
 - [Advanced Topic Tutorial](https://github.com/t9md/atom-vim-mode-plus/wiki/AdvancedTopicTutorial)
-- [Occurre Modifier](https://github.com/t9md/atom-vim-mode-plus/wiki/OccurrenceModifier)
+- [Occurrence Modifier](https://github.com/t9md/atom-vim-mode-plus/wiki/OccurrenceModifier)
 - [CHANGELOG.md](https://github.com/t9md/atom-vim-mode-plus/blob/master/CHANGELOG.md)
 
 # Important
