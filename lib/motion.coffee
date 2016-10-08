@@ -179,8 +179,8 @@ class MoveUp extends Motion
   linewise: true
 
   getPoint: (cursor) ->
-    row = cursor.getBufferRow()
-    new Point(@getRow(cursor.getBufferRow(row)), cursor.goalColumn)
+    row = @getRow(cursor.getBufferRow())
+    new Point(row, cursor.goalColumn)
 
   getRow: (row) ->
     row = Math.max(row - 1, 0)
@@ -259,12 +259,15 @@ class MoveUpToEdge extends Motion
       if point.row in [0, @getVimLastScreenRow()]
         true
       else
-        # If one of above/below row is not stoppable, it's Edge!
-        above = point.translate([-1, 0])
-        below = point.translate([+1, 0])
-        (not @isStoppablePoint(above)) or (not @isStoppablePoint(below))
+        @isEdge(point)
     else
       false
+
+  isEdge: (point) ->
+    # If one of above/below row is not stoppable, it's Edge!
+    above = point.translate([-1, 0])
+    below = point.translate([+1, 0])
+    (not @isStoppablePoint(above)) or (not @isStoppablePoint(below))
 
   # Avoid stopping on leading and trailing whitespace,
   isValidStoppablePoint: ({row, column}) ->

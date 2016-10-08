@@ -19,6 +19,7 @@ swrap = require './selection-wrapper'
   getEndPositionForPattern
   getVisibleBufferRange
   translatePointAndClip
+  getRangeByTranslatePointAndClip
   getBufferRows
   getValidVimBufferRow
 
@@ -48,7 +49,7 @@ class TextObject extends Base
     if @isAllowSubmodeChange()
       swrap.detectVisualModeSubmode(@editor) is 'linewise'
     else
-      @vimState.submode is 'linewise'
+      @isMode('visual', 'linewise')
 
   stopSelection: ->
     @canSelect = false
@@ -58,6 +59,10 @@ class TextObject extends Base
     if @isMode('visual') and not selection.isReversed()
       head = translatePointAndClip(@editor, head, 'backward')
     head
+
+  getNormalizedHeadScreenPosition: (selection) ->
+    bufferPosition = @getNormalizedHeadBufferPosition(selection)
+    @editor.screenPositionForBufferPosition(bufferPosition)
 
   select: ->
     @canSelect = true
@@ -876,6 +881,45 @@ class AVisibleArea extends VisibleArea
   @extend()
 
 class InnerVisibleArea extends VisibleArea
+  @extend()
+
+# -------------------------
+class Edge extends TextObject
+  @extend(false)
+
+  select: ->
+    @success = null
+
+    super
+
+    @vimState.activate('visual', 'linewise') if @success
+
+  getRange: (selection) ->
+    fromPoint = @getNormalizedHeadScreenPosition(selection)
+
+    moveUpToEdge = @new('MoveUpToEdge')
+    moveDownToEdge = @new('MoveDownToEdge')
+    return unless moveUpToEdge.isStoppablePoint(fromPoint)
+
+    startScreenPoint = endScreenPoint = null
+    startScreenPoint = endScreenPoint = fromPoint if moveUpToEdge.isEdge(fromPoint)
+
+    if moveUpToEdge.isStoppablePoint(fromPoint.translate([-1, 0]))
+      startScreenPoint = moveUpToEdge.getPoint(fromPoint)
+
+    if moveDownToEdge.isStoppablePoint(fromPoint.translate([+1, 0]))
+      endScreenPoint = moveDownToEdge.getPoint(fromPoint)
+
+    if startScreenPoint? and endScreenPoint?
+      @success ?= true
+      screenRange = new Range(startScreenPoint, endScreenPoint)
+      range = @editor.bufferRangeForScreenRange(screenRange)
+      getRangeByTranslatePointAndClip(@editor, range, 'end', 'forward')
+
+class AEdge extends Edge
+  @extend()
+
+class InnerEdge extends Edge
   @extend()
 
 # Meta text object
