@@ -577,25 +577,29 @@ class Paragraph extends TextObject
 
   getPredictFunction: (fromRow, selection) ->
     fromRowResult = @editor.isBufferRowBlank(fromRow)
-    if @isA()
+
+    if @isInner()
+      predict = (row, direction) =>
+        @editor.isBufferRowBlank(row) is fromRowResult
+    else
       if selection.isReversed()
         directionToExtend = 'previous'
       else
         directionToExtend = 'next'
 
-    flip = false
-    predict = (row, direction) =>
-      success = @editor.isBufferRowBlank(row) is fromRowResult
-      if @isA()
-        if flip
-          success = not success
-        else if (not success) and (direction is directionToExtend)
-          flip = true
-          success = true
-      success
-
-    predict.reset = ->
       flip = false
+      predict = (row, direction) =>
+        result = @editor.isBufferRowBlank(row) is fromRowResult
+        if flip
+          not result
+        else
+          if (not result) and (direction is directionToExtend)
+            flip = true
+            return true
+          result
+
+      predict.reset = ->
+        flip = false
     predict
 
   getRange: (selection) ->
@@ -608,7 +612,6 @@ class Paragraph extends TextObject
         fromRow++
       fromRow = getValidVimBufferRow(@editor, fromRow)
 
-    fromRowResult = @editor.isBufferRowBlank(fromRow)
     rowRange = @findRowRangeBy(fromRow, @getPredictFunction(fromRow, selection))
     selection.getBufferRange().union(getBufferRangeForRowRange(@editor, rowRange))
 
@@ -672,7 +675,7 @@ class Fold extends TextObject
     [startRow, endRow]
 
   getFoldRowRangesContainsForRow: (row) ->
-    getCodeFoldRowRangesContainesForRow(@editor, row, true)?.reverse()
+    getCodeFoldRowRangesContainesForRow(@editor, row, includeStartRow: false)?.reverse()
 
   getRange: (selection) ->
     range = selection.getBufferRange()
@@ -726,8 +729,8 @@ class InnerFunction extends Function
 class CurrentLine extends TextObject
   @extend(false)
   getRange: (selection) ->
-    point = @getNormalizedHeadBufferPosition(selection)
-    range = @editor.bufferRangeForBufferRow(point.row)
+    row = @getNormalizedHeadBufferPosition(selection).row
+    range = @editor.bufferRangeForBufferRow(row)
     if @isA()
       range
     else
@@ -764,6 +767,7 @@ class Empty extends TextObject
 class LatestChange extends TextObject
   @extend(false)
   getRange: ->
+    @stopSelection()
     @vimState.mark.getRange('[', ']')
 
 class ALatestChange extends LatestChange
@@ -771,7 +775,7 @@ class ALatestChange extends LatestChange
 
 # No diff from ALatestChange
 class InnerLatestChange extends LatestChange
-  # @extend()
+  @extend()
 
 # -------------------------
 class SearchMatchForward extends TextObject
@@ -863,10 +867,10 @@ class VisibleArea extends TextObject # 822 to 863
   @extend(false)
 
   getRange: (selection) ->
-    range = getVisibleBufferRange(selection.editor)
+    @stopSelection()
     # [BUG?] Need translate to shilnk top and bottom to fit actual row.
     # The reason I need -2 at bottom is because of status bar?
-    range.translate([+1, 0], [-3, 0])
+    getVisibleBufferRange(@editor).translate([+1, 0], [-3, 0])
 
 class AVisibleArea extends VisibleArea
   @extend()

@@ -442,12 +442,13 @@ getCodeFoldRowRanges = (editor) ->
       rowRange? and rowRange[0]? and rowRange[1]?
 
 # * `exclusive` to exclude startRow to determine inclusion.
-getCodeFoldRowRangesContainesForRow = (editor, bufferRow, exclusive=false) ->
+getCodeFoldRowRangesContainesForRow = (editor, bufferRow, {includeStartRow}={}) ->
+  includeStartRow ?= true
   getCodeFoldRowRanges(editor).filter ([startRow, endRow]) ->
-    if exclusive
-      startRow < bufferRow <= endRow
-    else
+    if includeStartRow
       startRow <= bufferRow <= endRow
+    else
+      startRow < bufferRow <= endRow
 
 getBufferRangeForRowRange = (editor, rowRange) ->
   [startRange, endRange] = rowRange.map (row) ->
