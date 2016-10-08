@@ -19,6 +19,8 @@ swrap = require './selection-wrapper'
   getEndPositionForPattern
   getVisibleBufferRange
   translatePointAndClip
+  getBufferRows
+  getValidVimBufferRow
 
   getEndPositionForPattern
   getStartPositionForPattern
@@ -559,47 +561,56 @@ class InnerTag extends Tag
 class Paragraph extends TextObject
   @extend(false)
 
-  getStartRow: (startRow, fn) ->
-    startRow = Math.max(0, startRow)
-    for row in [startRow..0] when not fn(row)
-      return row + 1
-    0
+  findRow: (fromRow, direction, fn) ->
+    fn.reset?()
+    foundRow = fromRow
+    for row in getBufferRows(@editor, {startRow: fromRow, direction})
+      break unless fn(row, direction)
+      foundRow = row
 
-  getEndRow: (startRow, fn) ->
-    lastRow = @editor.getLastBufferRow()
-    startRow = Math.min(lastRow, startRow)
-    for row in [startRow..lastRow] when not fn(row)
-      return row - 1
-    lastRow
+    foundRow
+
+  findRowRangeBy: (fromRow, fn) ->
+    startRow = @findRow(fromRow, 'previous', fn)
+    endRow = @findRow(fromRow, 'next', fn)
+    [startRow, endRow]
+
+  getPredictFunction: (fromRow, selection) ->
+    fromRowResult = @editor.isBufferRowBlank(fromRow)
+    if @isA()
+      if selection.isReversed()
+        directionToExtend = 'previous'
+      else
+        directionToExtend = 'next'
+
+    flip = false
+    predict = (row, direction) =>
+      success = @editor.isBufferRowBlank(row) is fromRowResult
+      if @isA()
+        if flip
+          success = not success
+        else if (not success) and (direction is directionToExtend)
+          flip = true
+          success = true
+      success
+
+    predict.reset = ->
+      flip = false
+    predict
 
   getRange: (selection) ->
-    @getRangeFromRow(selection.getBufferRange().start.row)
+    fromRow = @getNormalizedHeadBufferPosition(selection).row
 
-  getRangeFromRow: (startRow) ->
-    isBlank = @editor.isBufferRowBlank.bind(@editor)
-    wasBlank = isBlank(startRow)
-    fn = (row) -> isBlank(row) is wasBlank
-    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
-
-  selectParagraph: (selection, {firstTime}) ->
-    [startRow, endRow] = selection.getBufferRowRange()
-
-    if firstTime and not @isMode('visual', 'linewise')
-      swrap(selection).setBufferRangeSafely @getRange(selection)
-    else if not @instanceof('Indentation')
-      point = if selection.isReversed()
-        @getRangeFromRow(startRow - 1)?.start
+    if @isMode('visual', 'linewise')
+      if selection.isReversed()
+        fromRow--
       else
-        @getRangeFromRow(endRow + 1)?.end
-      selection.selectToBufferPosition point if point?
+        fromRow++
+      fromRow = getValidVimBufferRow(@editor, fromRow)
 
-  selectTextObject: (selection) ->
-    # FIXME: don't manage count on each child
-    firstTime = true
-    _.times @getCount(), =>
-      @selectParagraph(selection, {firstTime})
-      firstTime = false
-      @selectParagraph(selection, {firstTime}) if @instanceof('AParagraph')
+    fromRowResult = @editor.isBufferRowBlank(fromRow)
+    rowRange = @findRowRangeBy(fromRow, @getPredictFunction(fromRow, selection))
+    selection.getBufferRange().union(getBufferRangeForRowRange(@editor, rowRange))
 
 class AParagraph extends Paragraph
   @extend()
@@ -612,14 +623,17 @@ class Indentation extends Paragraph
   @extend(false)
 
   getRange: (selection) ->
-    startRow = selection.getBufferRange().start.row
-    baseIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
-    fn = (row) =>
+    fromRow = @getNormalizedHeadBufferPosition(selection).row
+
+    baseIndentLevel = getIndentLevelForBufferRow(@editor, fromRow)
+    predict = (row) =>
       if @editor.isBufferRowBlank(row)
         @isA()
       else
         getIndentLevelForBufferRow(@editor, row) >= baseIndentLevel
-    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
+
+    rowRange = @findRowRangeBy(fromRow, predict)
+    getBufferRangeForRowRange(@editor, rowRange)
 
 class AIndentation extends Indentation
   @extend()
