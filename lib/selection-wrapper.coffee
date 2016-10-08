@@ -139,9 +139,7 @@ class SelectionWrapper
       new Range(tailPoint, point)
 
   saveProperties: ->
-    # {inspect} = require 'util'
     properties = @captureProperties()
-    # console.log 'saving properties original', inspect(properties)
     unless @selection.isEmpty()
       # We select righted in visual-mode, this translation de-effect select-right-effect
       # so that after restoring preserved poperty we can do activate-visual mode without
@@ -152,8 +150,6 @@ class SelectionWrapper
         properties.tail = endPoint
       else
         properties.head = endPoint
-
-    # console.log 'saving properties end translated -1 column', inspect(properties)
     @setProperties(properties)
 
   captureProperties: ->
@@ -174,7 +170,6 @@ class SelectionWrapper
 
   restoreColumnFromProperties: ->
     {head, tail} = @getProperties()
-    # console.log [tail?.toString(), head?.toString()]
     return unless head? and tail?
     return if @selection.isEmpty()
 
@@ -184,7 +179,6 @@ class SelectionWrapper
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
     @withKeepingGoalColumn =>
-      # console.log 'restoring in restoreColumnFromProperties', new Point(start, end).toString()
       @setBufferRange([start, end], preserveFolds: true)
       @translateSelectionEndAndClip('backward', translate: false)
 
