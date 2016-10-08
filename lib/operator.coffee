@@ -568,6 +568,7 @@ class PutBefore extends Operator
       adjustCursor = (range) ->
         cursor.setBufferPosition(range.end.translate([0, -1]))
 
+    @setMarkForChange(newRange)
     if selectPastedText
       selection.setBufferRange(newRange)
     else
