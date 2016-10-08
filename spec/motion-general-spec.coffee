@@ -126,7 +126,7 @@ describe "Motion general", ->
           ensure 'v', cursor: [2, 4], selectedText: 'd'
           ensure 'k k', cursor: [0, 3], selectedText: "defg\n\nabcd"
 
-    describe "jk in softwrap", ->
+    describe "gj gk in softwrap", ->
       [text] = []
 
       beforeEach ->
@@ -144,10 +144,10 @@ describe "Motion general", ->
 
       describe "selection is not reversed", ->
         it "screen position and buffer position is different", ->
-          ensure 'j', cursor: [1, 0], cursorBuffer: [0, 9]
-          ensure 'j', cursor: [2, 0], cursorBuffer: [1, 0]
-          ensure 'j', cursor: [3, 0], cursorBuffer: [1, 9]
-          ensure 'j', cursor: [4, 0], cursorBuffer: [1, 12]
+          ensure 'g j', cursor: [1, 0], cursorBuffer: [0, 9]
+          ensure 'g j', cursor: [2, 0], cursorBuffer: [1, 0]
+          ensure 'g j', cursor: [3, 0], cursorBuffer: [1, 9]
+          ensure 'g j', cursor: [4, 0], cursorBuffer: [1, 12]
 
         it "jk move selection buffer-line wise", ->
           ensure 'V', selectedText: text.getLines([0..0])
@@ -163,10 +163,10 @@ describe "Motion general", ->
 
       describe "selection is reversed", ->
         it "screen position and buffer position is different", ->
-          ensure 'j', cursor: [1, 0], cursorBuffer: [0, 9]
-          ensure 'j', cursor: [2, 0], cursorBuffer: [1, 0]
-          ensure 'j', cursor: [3, 0], cursorBuffer: [1, 9]
-          ensure 'j', cursor: [4, 0], cursorBuffer: [1, 12]
+          ensure 'g j', cursor: [1, 0], cursorBuffer: [0, 9]
+          ensure 'g j', cursor: [2, 0], cursorBuffer: [1, 0]
+          ensure 'g j', cursor: [3, 0], cursorBuffer: [1, 9]
+          ensure 'g j', cursor: [4, 0], cursorBuffer: [1, 12]
 
         it "jk move selection buffer-line wise", ->
           set cursorBuffer: [4, 0]

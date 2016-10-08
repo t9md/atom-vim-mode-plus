@@ -34,6 +34,9 @@ withMockPlatform = (target, platform, fn) ->
 buildKeydownEvent = (key, options) ->
   KeymapManager.buildKeydownEvent(key, options)
 
+headFromProperty = (selection) ->
+  swrap(selection).getBufferPositionFor('head', fromProperty: true)
+
 buildKeydownEventFromKeystroke = (keystroke, target) ->
   modifier = ['ctrl', 'alt', 'shift', 'cmd']
   parts = if keystroke is '-'
@@ -324,7 +327,7 @@ class VimEditor
     expect(actual).toEqual(toArray(text))
 
   ensureCharacterwiseHead: (points) ->
-    actual = (swrap(s).getCharacterwiseHeadPosition() for s in @editor.getSelections())
+    actual = (headFromProperty(s) for s in @editor.getSelections())
     expect(actual).toEqual(toArrayOfPoint(points))
 
   ensureScrollTop: (scrollTop) ->

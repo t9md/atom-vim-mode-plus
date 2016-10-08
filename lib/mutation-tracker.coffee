@@ -67,6 +67,10 @@ class MutationTracker
         ranges.push(range)
     ranges
 
+  restoreInitialPositions: ->
+    for selection in @editor.getSelections() when point = @getInitialPointForSelection(selection)
+      selection.setBufferPosition(point)
+
   restoreCursorPositions: (options) ->
     {stay, strict, clipToMutationEnd, isBlockwise, mutationEnd} = options
     if isBlockwise

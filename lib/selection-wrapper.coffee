@@ -1,5 +1,9 @@
 _ = require 'underscore-plus'
-{Range, Disposable} = require 'atom'
+{Range, Point, Disposable} = require 'atom'
+{
+  translatePointAndClip
+  getRangeByTranslatePointAndClip
+} = require './utils'
 
 propertyStore = new Map
 
@@ -125,67 +129,64 @@ class SelectionWrapper
   getEndRow: -> @getRowFor('end')
 
   getTailBufferRange: ->
-    if (@isSingleRow() and @isLinewise())
-      @selection.editor.bufferRangeForBufferRow(@getTailRow(), includeNewline: true)
+    {editor} = @selection
+    tailPoint = @selection.getTailBufferPosition()
+    if @selection.isReversed()
+      point = translatePointAndClip(editor, tailPoint, 'backward')
+      new Range(point, tailPoint)
     else
-      {editor} = @selection
-      start = @selection.getTailScreenPosition()
-      end = if @selection.isReversed()
-        editor.clipScreenPosition(start.translate([0, -1]), clipDirection: 'backward')
-      else
-        editor.clipScreenPosition(start.translate([0, +1]), clipDirection: 'forward')
+      point = translatePointAndClip(editor, tailPoint, 'forward', hello: 'when getting tailRange')
+      new Range(tailPoint, point)
 
-      editor.bufferRangeForScreenRange([start, end])
-
-  preserveCharacterwise: ->
-    basename = require('path').basename
-    properties = @detectCharacterwiseProperties()
+  saveProperties: ->
+    # {inspect} = require 'util'
+    properties = @captureProperties()
+    # console.log 'saving properties original', inspect(properties)
     unless @selection.isEmpty()
-      endPoint = if @selection.isReversed() then 'tail' else 'head'
-      # In case selection is empty, I don't want to translate end position
-      # [FIXME] Check if removing this translation logic can simplify code?
-      point = properties[endPoint].translate([0, -1])
-      properties[endPoint] = @selection.editor.clipBufferPosition(point)
+      # We select righted in visual-mode, this translation de-effect select-right-effect
+      # so that after restoring preserved poperty we can do activate-visual mode without
+      # special care
+      endPoint = @selection.getBufferRange().end.translate([0, -1])
+      endPoint = @selection.editor.clipBufferPosition(endPoint)
+      if @selection.isReversed()
+        properties.tail = endPoint
+      else
+        properties.head = endPoint
+
+    # console.log 'saving properties end translated -1 column', inspect(properties)
     @setProperties(properties)
 
-  detectCharacterwiseProperties: ->
+  captureProperties: ->
     head: @selection.getHeadBufferPosition()
     tail: @selection.getTailBufferPosition()
-
-  getCharacterwiseHeadPosition: ->
-    @getProperties().head
 
   selectByProperties: ({head, tail}) ->
     # No problem if head is greater than tail, Range constructor swap start/end.
     @setBufferRange([tail, head])
     @setReversedState(head.isLessThan(tail))
 
-  # Equivalent to
-  # "not selection.isReversed() and not selection.isEmpty()"
+  # Return true if selection was non-empty and non-reversed selection.
+  # Equivalent to not selection.isEmpty() and not selection.isReversed()"
   isForwarding: ->
     head = @selection.getHeadBufferPosition()
     tail = @selection.getTailBufferPosition()
     head.isGreaterThan(tail)
 
-  restoreCharacterwise: ({preserveGoalColumn}={}) ->
-    {goalColumn} = @selection.cursor if preserveGoalColumn
-
+  restoreColumnFromProperties: ->
     {head, tail} = @getProperties()
+    # console.log [tail?.toString(), head?.toString()]
     return unless head? and tail?
+    return if @selection.isEmpty()
 
     if @selection.isReversed()
       [start, end] = [head, tail]
     else
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
-
-    editor = @selection.editor
-    screenPoint = editor.screenPositionForBufferPosition(end).translate([0, 1])
-    end = editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'forward')
-
-    @setBufferRange([start, end], {preserveFolds: true})
-    @clearProperties()
-    @selection.cursor.goalColumn = goalColumn if goalColumn
+    @withKeepingGoalColumn =>
+      # console.log 'restoring in restoreColumnFromProperties', new Point(start, end).toString()
+      @setBufferRange([start, end], preserveFolds: true)
+      @translateSelectionEndAndClip('backward', translate: false)
 
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->
@@ -223,6 +224,30 @@ class SelectionWrapper
     else
       'characterwise'
 
+  withKeepingGoalColumn: (fn) ->
+    {goalColumn} = @selection.cursor
+    {start, end} = @getBufferRange()
+    fn()
+    @selection.cursor.goalColumn = goalColumn if goalColumn
+
+  # direction must be one of ['forward', 'backward']
+  # options: {translate: true or false} default true
+  translateSelectionEndAndClip: (direction, options) ->
+    editor = @selection.editor
+    range = @getBufferRange()
+    newRange = getRangeByTranslatePointAndClip(editor, range, "end", direction, options)
+    @withKeepingGoalColumn =>
+      @setBufferRange(newRange, preserveFolds: true)
+
+  translateSelectionHeadAndClip: (direction, options) ->
+    editor = @selection.editor
+    which  = if @selection.isReversed() then 'start' else 'end'
+
+    range = @getBufferRange()
+    newRange = getRangeByTranslatePointAndClip(editor, range, which, direction, options)
+    @withKeepingGoalColumn =>
+      @setBufferRange(newRange, preserveFolds: true)
+
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
@@ -252,5 +277,10 @@ swrap.detectVisualModeSubmode = (editor) ->
     'characterwise'
   else
     null
+
+swrap.updateSelectionProperties = (editor, {unknownOnly}={}) ->
+  for selection in editor.getSelections()
+    continue if unknownOnly and swrap(selection).hasProperties()
+    swrap(selection).saveProperties()
 
 module.exports = swrap

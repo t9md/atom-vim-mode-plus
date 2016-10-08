@@ -351,7 +351,7 @@ describe "Operator general", ->
           cursorBuffer: [[0, 1], [1, 2], [2, 3]]
 
         ensure 'd e',
-          text: "a\n12\nABC\n"
+          text: "a\n12\nABC"
           cursorBuffer: [[0, 0], [1, 1], [2, 2]]
 
       it "doesn't delete empty selections", ->

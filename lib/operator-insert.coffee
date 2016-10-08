@@ -164,6 +164,16 @@ class InsertAtEndOfTarget extends InsertByTarget
   @extend()
   which: 'end'
 
+class InsertAtStartOfInnerSmartWord extends InsertByTarget
+  @extend()
+  which: 'start'
+  target: "InnerSmartWord"
+
+class InsertAtEndOfInnerSmartWord extends InsertByTarget
+  @extend()
+  which: 'end'
+  target: "InnerSmartWord"
+
 class InsertAtHeadOfTarget extends InsertByTarget
   @extend()
   which: 'head'

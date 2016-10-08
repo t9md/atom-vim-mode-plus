@@ -18,14 +18,18 @@ swrap = require './selection-wrapper'
   getStartPositionForPattern
   getEndPositionForPattern
   getVisibleBufferRange
+  translatePointAndClip
+  getBufferRows
+  getValidVimBufferRow
 
+  getEndPositionForPattern
+  getStartPositionForPattern
   trimRange
 } = require './utils'
 
 class TextObject extends Base
   @extend(false)
   allowSubmodeChange: true
-
   constructor: ->
     @constructor::inner = @getName().startsWith('Inner')
     super
@@ -46,19 +50,26 @@ class TextObject extends Base
     else
       @vimState.submode is 'linewise'
 
+  stopSelection: ->
+    @canSelect = false
+
+  getNormalizedHeadBufferPosition: (selection) ->
+    head = selection.getHeadBufferPosition()
+    if @isMode('visual') and not selection.isReversed()
+      head = translatePointAndClip(@editor, head, 'backward')
+    head
+
   select: ->
-    canSelect = true
-    stopSelection = ->
-      canSelect = false
+    @canSelect = true
 
     @countTimes =>
-      for selection in @editor.getSelections() when canSelect
-        @selectTextObject(selection, stopSelection)
+      for selection in @editor.getSelections() when @canSelect
+        @selectTextObject(selection)
     @editor.mergeIntersectingSelections()
     @updateSelectionProperties() if @isMode('visual')
 
-  selectTextObject: (selection, stopSelection) ->
-    range = @getRange(selection, stopSelection)
+  selectTextObject: (selection) ->
+    range = @getRange(selection)
     swrap(selection).setBufferRangeSafely(range)
 
   getRange: ->
@@ -69,12 +80,9 @@ class TextObject extends Base
 class Word extends TextObject
   @extend(false)
 
-  select: ->
-    @vimState.modeManager.normalizeSelections()
-    super
-
   getRange: (selection) ->
-    {range, kind} = @getWordBufferRangeAndKindAtBufferPosition(selection.cursor.getBufferPosition(), {@wordRegex})
+    point = @getNormalizedHeadBufferPosition(selection)
+    {range, kind} = @getWordBufferRangeAndKindAtBufferPosition(point, {@wordRegex})
     if @isA() and kind is 'word'
       range = @expandRangeToWhiteSpaces(range)
     range
@@ -127,6 +135,7 @@ class Pair extends TextObject
   allowSubmodeChange: false
   adjustInnerRange: true
   pair: null
+
   getPattern: ->
     [open, close] = @pair
     if open is close
@@ -251,7 +260,7 @@ class Pair extends TextObject
 
   getPointToSearchFrom: (selection, searchFrom) ->
     switch searchFrom
-      when 'head' then swrap(selection).getNormalizedBufferPosition()
+      when 'head' then @getNormalizedHeadBufferPosition(selection)
       when 'start' then swrap(selection).getBufferPositionFor('start')
 
   # Allow override @allowForwarding by 2nd argument.
@@ -552,47 +561,56 @@ class InnerTag extends Tag
 class Paragraph extends TextObject
   @extend(false)
 
-  getStartRow: (startRow, fn) ->
-    startRow = Math.max(0, startRow)
-    for row in [startRow..0] when not fn(row)
-      return row + 1
-    0
+  findRow: (fromRow, direction, fn) ->
+    fn.reset?()
+    foundRow = fromRow
+    for row in getBufferRows(@editor, {startRow: fromRow, direction})
+      break unless fn(row, direction)
+      foundRow = row
 
-  getEndRow: (startRow, fn) ->
-    lastRow = @editor.getLastBufferRow()
-    startRow = Math.min(lastRow, startRow)
-    for row in [startRow..lastRow] when not fn(row)
-      return row - 1
-    lastRow
+    foundRow
+
+  findRowRangeBy: (fromRow, fn) ->
+    startRow = @findRow(fromRow, 'previous', fn)
+    endRow = @findRow(fromRow, 'next', fn)
+    [startRow, endRow]
+
+  getPredictFunction: (fromRow, selection) ->
+    fromRowResult = @editor.isBufferRowBlank(fromRow)
+    if @isA()
+      if selection.isReversed()
+        directionToExtend = 'previous'
+      else
+        directionToExtend = 'next'
+
+    flip = false
+    predict = (row, direction) =>
+      success = @editor.isBufferRowBlank(row) is fromRowResult
+      if @isA()
+        if flip
+          success = not success
+        else if (not success) and (direction is directionToExtend)
+          flip = true
+          success = true
+      success
+
+    predict.reset = ->
+      flip = false
+    predict
 
   getRange: (selection) ->
-    @getRangeFromRow(selection.getBufferRange().start.row)
+    fromRow = @getNormalizedHeadBufferPosition(selection).row
 
-  getRangeFromRow: (startRow) ->
-    isBlank = @editor.isBufferRowBlank.bind(@editor)
-    wasBlank = isBlank(startRow)
-    fn = (row) -> isBlank(row) is wasBlank
-    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
-
-  selectParagraph: (selection, {firstTime}) ->
-    [startRow, endRow] = selection.getBufferRowRange()
-
-    if firstTime and not @isMode('visual', 'linewise')
-      swrap(selection).setBufferRangeSafely @getRange(selection)
-    else if not @instanceof('Indentation')
-      point = if selection.isReversed()
-        @getRangeFromRow(startRow - 1)?.start
+    if @isMode('visual', 'linewise')
+      if selection.isReversed()
+        fromRow--
       else
-        @getRangeFromRow(endRow + 1)?.end
-      selection.selectToBufferPosition point if point?
+        fromRow++
+      fromRow = getValidVimBufferRow(@editor, fromRow)
 
-  selectTextObject: (selection) ->
-    # FIXME: don't manage count on each child
-    firstTime = true
-    _.times @getCount(), =>
-      @selectParagraph(selection, {firstTime})
-      firstTime = false
-      @selectParagraph(selection, {firstTime}) if @instanceof('AParagraph')
+    fromRowResult = @editor.isBufferRowBlank(fromRow)
+    rowRange = @findRowRangeBy(fromRow, @getPredictFunction(fromRow, selection))
+    selection.getBufferRange().union(getBufferRangeForRowRange(@editor, rowRange))
 
 class AParagraph extends Paragraph
   @extend()
@@ -605,14 +623,17 @@ class Indentation extends Paragraph
   @extend(false)
 
   getRange: (selection) ->
-    startRow = selection.getBufferRange().start.row
-    baseIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
-    fn = (row) =>
+    fromRow = @getNormalizedHeadBufferPosition(selection).row
+
+    baseIndentLevel = getIndentLevelForBufferRow(@editor, fromRow)
+    predict = (row) =>
       if @editor.isBufferRowBlank(row)
         @isA()
       else
         getIndentLevelForBufferRow(@editor, row) >= baseIndentLevel
-    new Range([@getStartRow(startRow, fn), 0], [@getEndRow(startRow, fn) + 1, 0])
+
+    rowRange = @findRowRangeBy(fromRow, predict)
+    getBufferRangeForRowRange(@editor, rowRange)
 
 class AIndentation extends Indentation
   @extend()
@@ -705,8 +726,8 @@ class InnerFunction extends Function
 class CurrentLine extends TextObject
   @extend(false)
   getRange: (selection) ->
-    {cursor} = selection
-    range = cursor.getCurrentLineBufferRange()
+    point = @getNormalizedHeadBufferPosition(selection)
+    range = @editor.bufferRangeForBufferRow(point.row)
     if @isA()
       range
     else
@@ -721,8 +742,8 @@ class InnerCurrentLine extends CurrentLine
 # -------------------------
 class Entire extends TextObject
   @extend(false)
-  getRange: (selection, stopSelection) ->
-    stopSelection()
+  getRange: (selection) ->
+    @stopSelection()
     @editor.buffer.getRange()
 
 class AEntire extends Entire
@@ -750,51 +771,66 @@ class ALatestChange extends LatestChange
 
 # No diff from ALatestChange
 class InnerLatestChange extends LatestChange
-  @extend()
+  # @extend()
 
 # -------------------------
 class SearchMatchForward extends TextObject
   @extend()
+  backward: false
 
-  getRange: (selection) ->
-    unless pattern = @globalState.get('lastSearchPattern')
-      return null
-
-    scanStart = selection.getBufferRange().end
-    scanRange = [[scanStart.row, 0], @getVimEofBufferPosition()]
+  findMatch: (fromPoint, pattern) ->
+    fromPoint = translatePointAndClip(@editor, fromPoint, "forward") if @isMode('visual')
+    scanRange = [[fromPoint.row, 0], @getVimEofBufferPosition()]
     found = null
     @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
-      if range.end.isGreaterThan(scanStart)
+      if range.end.isGreaterThan(fromPoint)
         found = range
         stop()
-    found
+    {range: found, whichIsHead: 'end'}
+
+  getRange: (selection) ->
+    pattern = @globalState.get('lastSearchPattern')
+    return unless pattern?
+
+    fromPoint = selection.getHeadBufferPosition()
+    {range, whichIsHead} = @findMatch(fromPoint, pattern)
+    if range?
+      @unionRangeAndDetermineReversedState(selection, range, whichIsHead)
+
+  unionRangeAndDetermineReversedState: (selection, found, whichIsHead) ->
+    if selection.isEmpty()
+      found
+    else
+      head = found[whichIsHead]
+      tail = selection.getTailBufferPosition()
+
+      if @backward
+        head = translatePointAndClip(@editor, head, 'forward') if tail.isLessThan(head)
+      else
+        head = translatePointAndClip(@editor, head, 'backward') if head.isLessThan(tail)
+
+      @reversed = head.isLessThan(tail)
+      new Range(tail, head).union(swrap(selection).getTailBufferRange())
 
   selectTextObject: (selection) ->
     return unless range = @getRange(selection)
-
-    if selection.isEmpty()
-      reversed = @backward
-      swrap(selection).setBufferRange(range, {reversed})
-      selection.cursor.autoscroll()
-    else
-      swrap(selection).mergeBufferRange(range)
+    reversed = @reversed ? @backward
+    swrap(selection).setBufferRange(range, {reversed})
+    selection.cursor.autoscroll()
 
 class SearchMatchBackward extends SearchMatchForward
   @extend()
   backward: true
 
-  getRange: (selection) ->
-    unless pattern = @globalState.get('lastSearchPattern')
-      return null
-
-    scanStart = selection.getBufferRange().start
-    scanRange = [[scanStart.row, Infinity], [0, 0]]
+  findMatch: (fromPoint, pattern) ->
+    fromPoint = translatePointAndClip(@editor, fromPoint, "backward") if @isMode('visual')
+    scanRange = [[fromPoint.row, Infinity], [0, 0]]
     found = null
     @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
-      if range.start.isLessThan(scanStart)
+      if range.start.isLessThan(fromPoint)
         found = range
         stop()
-    found
+    {range: found, whichIsHead: 'start'}
 
 # [Limitation: won't fix]: Selected range is not submode aware. always characterwise.
 # So even if original selection was vL or vB, selected range by this text-object
@@ -856,7 +892,6 @@ class UnionTextObject extends TextObject
 class AFunctionOrInnerParagraph extends UnionTextObject
   @extend()
   member: ['AFunction', 'InnerParagraph']
-
 
 # FIXME: make Motion.CurrentSelection to TextObject then use concatTextObject
 class ACurrentSelectionAndAPersistentSelection extends TextObject
