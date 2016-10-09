@@ -36,7 +36,7 @@ describe "Motion Scroll", ->
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-u',
-        selectedText: text.getLines([33..42])
+        selectedText: text.getLines([32..42])
 
   describe "the ctrl-b keybinding", ->
     it "moves screen up one page", ->
@@ -51,7 +51,7 @@ describe "Motion Scroll", ->
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-b',
-        selectedText: text.getLines([23..42])
+        selectedText: text.getLines([22..42])
 
   describe "the ctrl-d keybinding", ->
     it "moves the screen down by half screen size and keeps cursor onscreen", ->
@@ -66,7 +66,7 @@ describe "Motion Scroll", ->
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-d',
-        selectedText: text.getLines([42..53])
+        selectedText: text.getLines([42..52])
 
   describe "the ctrl-f keybinding", ->
     it "moves screen down one page", ->
@@ -81,4 +81,4 @@ describe "Motion Scroll", ->
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-f',
-        selectedText: text.getLines([42..63])
+        selectedText: text.getLines([42..62])
