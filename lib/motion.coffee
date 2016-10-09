@@ -669,7 +669,7 @@ class ScrollFullScreenDown extends Motion
     duration = settings.get('smoothScrollOnScrollMotionDuration')
     jQuery(topPixelFrom).animate(topPixelTo, {step, done, duration})
 
-  flashRow: (screenRow) ->
+  highlightScreenRow: (screenRow) ->
     screenRange = new Range([screenRow, 0], [screenRow, Infinity])
     marker = @editor.markScreenRange(screenRange)
     @editor.decorateMarker(marker, type: 'highlight', class: 'vim-mode-plus-flash')
@@ -690,7 +690,7 @@ class ScrollFullScreenDown extends Motion
       newTopRow = fromRow + @getAmountOfRows()
 
       if settings.get('smoothScrollOnScrollMotion')
-        marker = @flashRow(cursor.getScreenRow())
+        marker = @highlightScreenRow(cursor.getScreenRow())
         destroyMaker = -> marker.destroy()
         @withScroll fromRow, newTopRow, =>
           setTimeout(destroyMaker, 100)
