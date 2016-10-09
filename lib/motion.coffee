@@ -657,7 +657,7 @@ class ScrollFullScreenDown extends Motion
     point = new Point(row, 0)
     @editor.element.pixelRectForScreenRange(new Range(point, point)).top
 
-  smoothScroll: (fromRow, toRow, options)->
+  smoothScroll: (fromRow, toRow, options) ->
     topPixelFrom = {top: @getPixelRectTopForSceenRow(fromRow)}
     topPixelTo = {top: @getPixelRectTopForSceenRow(toRow)}
     options.step = (newTop) => @editor.element.setScrollTop(newTop)
