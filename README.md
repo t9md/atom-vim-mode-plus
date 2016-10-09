@@ -114,14 +114,7 @@ If you want to directly edit `config.cson`, here it is.
 
 # Wiki
 
-- [TIPS](https://github.com/t9md/atom-vim-mode-plus/wiki/TIPS)
-- [Commands](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands) summary of vmp's commands with keymap.
-- [Operations](https://github.com/t9md/atom-vim-mode-plus/wiki/Operations) includes most of commands with keymap information.
-- [GIFs](https://github.com/t9md/atom-vim-mode-plus/wiki/GIFs) demonstrates fancy features.
-- [Keymap example](https://github.com/t9md/atom-vim-mode-plus/wiki/Keymap-example).
-- [Extend vmp in init file](https://github.com/t9md/atom-vim-mode-plus/wiki/Extend-vmp-in-init-file)
-- [Create vmp plugin](https://github.com/t9md/atom-vim-mode-plus/wiki/Create-vmp-plugin)
-- [List of vmp plugins](https://github.com/t9md/atom-vim-mode-plus/wiki/List-of-vmp-plugins)
+- [Home](https://github.com/t9md/atom-vim-mode-plus/wiki/Home)
 
 # Keymap
 
@@ -130,12 +123,11 @@ If you want to use full power of vim-mode-plus, see and experiment each keymap, 
 
 - [Commands](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands) summary of vmp's commands with keymap.
 - [default keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson)
-- [Commands which have no default keymap](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands-which-have-no-default-keymap)
 - [my dotfiles](https://github.com/t9md/dotfiles)
 
 # Helper packages
 
-- [List of vmp plugins](https://github.com/t9md/atom-vim-mode-plus/wiki/List-of-vmp-plugins)
+- [ListOfVimModePlusPlugins](https://github.com/t9md/atom-vim-mode-plus/wiki/ListOfVimModePlusPlugins)
 
 Below is list of my packages which provide more vim-like experience.  
 Why I don't builtin these feature? Because it take more time and some feature is useful for non-vim user.
