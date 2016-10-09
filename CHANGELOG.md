@@ -1,5 +1,7 @@
 # 0.60.0:
+- Improve: Fix minor inconsistency for amount of rows to scroll between normal and visual for `ctrl-f, b, d, u`.
 - New: Smooth scroll for `ctrl-f, b, d, u`. Disabled by default. New config option to enable and tweak animation duration.
+- New, Experimental: TextObject `a-edge` and `inner-edge`(no diff for now), which select from up-edge to down-edge. No keymap by default.
 
 # 0.59.0:
 - Breaking: `j`, `k` now always works as bufferRow-wise(screenRow-wise in previous version).
