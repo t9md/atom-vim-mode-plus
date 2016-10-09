@@ -37,7 +37,6 @@ swrap = require './selection-wrapper'
 {MatchList} = require './match'
 settings = require './settings'
 Base = require './base'
-jQuery = null
 
 class Motion extends Base
   @extend(false)
@@ -658,16 +657,12 @@ class ScrollFullScreenDown extends Motion
     point = new Point(row, 0)
     @editor.pixelRectForScreenRange(new Range(point, point)).top
 
-  withScroll: (fromRow, toRow, done) ->
-    jQuery ?= require('atom-space-pen-views').jQuery
-
+  smoothScroll: (fromRow, toRow, options)->
     topPixelFrom = {top: @getPixelRectTopForSceenRow(fromRow)}
     topPixelTo = {top: @getPixelRectTopForSceenRow(toRow)}
-
-    step = (now) => @editor.setScrollTop(now)
-
-    duration = settings.get('smoothScrollOnScrollMotionDuration')
-    jQuery(topPixelFrom).animate(topPixelTo, {step, done, duration})
+    options.step = (newTop) => @editor.setScrollTop(newTop)
+    options.duration = settings.get('smoothScrollOnScrollMotionDuration')
+    @vimState.requestScrollAnimation(topPixelFrom, topPixelTo, options)
 
   highlightScreenRow: (screenRow) ->
     screenRange = new Range([screenRow, 0], [screenRow, Infinity])
@@ -686,16 +681,19 @@ class ScrollFullScreenDown extends Motion
     cursor.setScreenPosition(@getPoint(cursor), autoscroll: false)
 
     if cursor.isLastCursor()
-      fromRow = @editor.getFirstVisibleScreenRow()
-      newTopRow = fromRow + @getAmountOfRows()
+      if settings.get('smoothScrollOnScrollMotion')
+        @vimState.finishScrollAnimation()
+
+      currentTopRow = @editor.getFirstVisibleScreenRow()
+      finalTopRow = currentTopRow + @getAmountOfRows()
+      done = => @editor.setFirstVisibleScreenRow(finalTopRow)
 
       if settings.get('smoothScrollOnScrollMotion')
         marker = @highlightScreenRow(cursor.getScreenRow())
-        destroyMaker = -> marker.destroy()
-        @withScroll fromRow, newTopRow, =>
-          setTimeout(destroyMaker, 100)
+        complete = -> marker.destroy()
+        @smoothScroll(currentTopRow, finalTopRow, {done, complete})
       else
-        @editor.setFirstVisibleScreenRow(newTopRow)
+        done()
 
 # keymap: ctrl-b
 class ScrollFullScreenUp extends ScrollFullScreenDown

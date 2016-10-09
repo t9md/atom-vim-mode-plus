@@ -1,4 +1,6 @@
 Delegato = require 'delegato'
+{jQuery} = require 'atom-space-pen-views'
+
 _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
@@ -313,3 +315,13 @@ class VimState
 
   clearPersistentSelections: ->
     @persistentSelection.clearMarkers()
+
+  # Animation management
+  # -------------------------
+  scrollAnimationEffect: null
+  requestScrollAnimation: (from, to, options) ->
+    @scrollAnimationEffect = jQuery(from).animate(to, options)
+
+  finishScrollAnimation: ->
+    @scrollAnimationEffect?.finish()
+    @scrollAnimationEffect = null
