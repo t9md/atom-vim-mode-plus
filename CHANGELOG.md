@@ -1,3 +1,6 @@
+# 0.60.0:
+- New: Smooth scroll for `ctrl-f, b, d, u`. Disabled by default. New config option to enable and tweak animation duration.
+
 # 0.59.0:
 - Breaking: `j`, `k` now always works as bufferRow-wise(screenRow-wise in previous version).
   - Previous `j`, `k` behavior is available as `g k`, `g j` as like pure Vim.
