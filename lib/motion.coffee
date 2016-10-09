@@ -37,6 +37,7 @@ swrap = require './selection-wrapper'
 {MatchList} = require './match'
 settings = require './settings'
 Base = require './base'
+jQuery = null
 
 class Motion extends Base
   @extend(false)
@@ -653,6 +654,27 @@ class ScrollFullScreenDown extends Motion
   @extend()
   amountOfPage: +1
 
+  getPixelRectTopForSceenRow: (row) ->
+    point = new Point(row, 0)
+    @editor.pixelRectForScreenRange(new Range(point, point)).top
+
+  withScroll: (fromRow, toRow, done) ->
+    jQuery ?= require('atom-space-pen-views').jQuery
+
+    topPixelFrom = {top: @getPixelRectTopForSceenRow(fromRow)}
+    topPixelTo = {top: @getPixelRectTopForSceenRow(toRow)}
+
+    step = (now) => @editor.setScrollTop(now)
+
+    duration = settings.get('smoothScrollOnScrollMotionDuration')
+    jQuery(topPixelFrom).animate(topPixelTo, {step, done, duration})
+
+  flashRow: (screenRow) ->
+    screenRange = new Range([screenRow, 0], [screenRow, Infinity])
+    marker = @editor.markScreenRange(screenRange)
+    @editor.decorateMarker(marker, type: 'highlight', class: 'vim-mode-plus-flash')
+    marker
+
   getAmountOfRows: ->
     Math.ceil(@amountOfPage * @editor.getRowsPerPage() * @getCount())
 
@@ -662,10 +684,18 @@ class ScrollFullScreenDown extends Motion
 
   moveCursor: (cursor) ->
     cursor.setScreenPosition(@getPoint(cursor), autoscroll: false)
+
     if cursor.isLastCursor()
-      newTopRow = @editor.getFirstVisibleScreenRow() + @getAmountOfRows()
-      newTopRow = getValidVimScreenRow(@editor, newTopRow)
-      @editor.setFirstVisibleScreenRow(newTopRow)
+      fromRow = @editor.getFirstVisibleScreenRow()
+      newTopRow = fromRow + @getAmountOfRows()
+
+      if settings.get('smoothScrollOnScrollMotion')
+        marker = @flashRow(cursor.getScreenRow())
+        destroyMaker = -> marker.destroy()
+        @withScroll fromRow, newTopRow, =>
+          setTimeout(destroyMaker, 100)
+      else
+        @editor.setFirstVisibleScreenRow(newTopRow)
 
 # keymap: ctrl-b
 class ScrollFullScreenUp extends ScrollFullScreenDown

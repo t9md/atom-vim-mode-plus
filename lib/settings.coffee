@@ -161,6 +161,12 @@ module.exports = new Settings 'vim-mode-plus',
   hideTabBarOnMaximizePane:
     type: 'boolean'
     default: true
+  smoothScrollOnScrollMotion:
+    type: 'boolean'
+    default: false
+  smoothScrollOnScrollMotionDuration:
+    type: 'integer'
+    default: 500
   throwErrorOnNonEmptySelectionInNormalMode:
     type: 'boolean'
     default: false
