@@ -653,6 +653,18 @@ class ScrollFullScreenDown extends Motion
   @extend()
   amountOfPage: +1
 
+  isSmoothScrollEnabled: ->
+    if Math.abs(@amountOfPage) is 1
+      settings.get('smoothScrollOnFullScrollMotion')
+    else
+      settings.get('smoothScrollOnHalfScrollMotion')
+
+  getSmoothScrollDuation: ->
+    if Math.abs(@amountOfPage) is 1
+      settings.get('smoothScrollOnFullScrollMotionDuration')
+    else
+      settings.get('smoothScrollOnHalfScrollMotionDuration')
+
   getPixelRectTopForSceenRow: (row) ->
     point = new Point(row, 0)
     @editor.element.pixelRectForScreenRange(new Range(point, point)).top
@@ -661,7 +673,7 @@ class ScrollFullScreenDown extends Motion
     topPixelFrom = {top: @getPixelRectTopForSceenRow(fromRow)}
     topPixelTo = {top: @getPixelRectTopForSceenRow(toRow)}
     options.step = (newTop) => @editor.element.setScrollTop(newTop)
-    options.duration = settings.get('smoothScrollOnScrollMotionDuration')
+    options.duration = @getSmoothScrollDuation()
     @vimState.requestScrollAnimation(topPixelFrom, topPixelTo, options)
 
   highlightScreenRow: (screenRow) ->
@@ -681,14 +693,14 @@ class ScrollFullScreenDown extends Motion
     cursor.setScreenPosition(@getPoint(cursor), autoscroll: false)
 
     if cursor.isLastCursor()
-      if settings.get('smoothScrollOnScrollMotion')
+      if @isSmoothScrollEnabled()
         @vimState.finishScrollAnimation()
 
       currentTopRow = @editor.getFirstVisibleScreenRow()
       finalTopRow = currentTopRow + @getAmountOfRows()
       done = => @editor.setFirstVisibleScreenRow(finalTopRow)
 
-      if settings.get('smoothScrollOnScrollMotion')
+      if @isSmoothScrollEnabled()
         marker = @highlightScreenRow(cursor.getScreenRow())
         complete = -> marker.destroy()
         @smoothScroll(currentTopRow, finalTopRow, {done, complete})
