@@ -1,11 +1,10 @@
 {Emitter, Disposable, CompositeDisposable} = require 'atom'
-{registerElement, getCharacterForEvent, ElementBuilder} = require './utils'
+{registerElement, getCharacterForEvent} = require './utils'
 packageScope = 'vim-mode-plus'
 
 # InputBase, InputElementBase
 # -------------------------
 class Input extends HTMLElement
-  ElementBuilder.includeInto(this)
   klass: "vim-mode-plus-input"
 
   onDidChange: (fn) -> @emitter.on 'did-change', fn

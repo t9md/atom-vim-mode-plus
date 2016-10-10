@@ -1,31 +1,26 @@
-{ElementBuilder} = require './utils'
+_ = require 'underscore-plus'
 
-modeStringToContent =
-  "normal": "Normal"
-  'insert': "Insert"
-  'insert.replace': "Replace"
-  'visual': "Visual"
-  "visual.characterwise": "Visual Char"
-  "visual.linewise": "Visual Line"
-  "visual.blockwise": "Visual Block"
-  "operator-pending": "Operator Pending"
+createDiv = ({id, classList}) ->
+  div = document.createElement('div')
+  div.id = id if id?
+  div.classList.add(classList...) if classList?
+  div
 
 module.exports =
 class StatusBarManager
-  ElementBuilder.includeInto(this)
   prefix: 'status-bar-vim-mode-plus'
 
   constructor: ->
-    @container = @div(id: "#{@prefix}-container", classList: ['inline-block'])
-    @container.appendChild(@element = @div(id: @prefix))
+    @container = createDiv(id: "#{@prefix}-container", classList: ['inline-block'])
+    @container.appendChild(@element = createDiv(id: @prefix))
 
   initialize: (@statusBar) ->
 
   update: (mode, submode) ->
-    modeString = mode
-    modeString += "." + submode if submode?
+    modeString = _.humanizeEventName(mode)
+    modeString += " " + _.humanizeEventName(submode) if submode?
     @element.className = "#{@prefix}-#{mode}"
-    @element.textContent = modeStringToContent[modeString]
+    @element.textContent = modeString
 
   attach: ->
     @tile = @statusBar.addRightTile(item: @container, priority: 20)
