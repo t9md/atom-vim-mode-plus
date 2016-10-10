@@ -22,7 +22,6 @@ _ = require 'underscore-plus'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
-CursorPositionManager = require './cursor-position-manager'
 
 class Operator extends Base
   @extend(false)

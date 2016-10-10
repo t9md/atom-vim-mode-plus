@@ -7,7 +7,6 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
 Operator = Base.getClass('Operator')
-CursorPositionManager = require './cursor-position-manager'
 
 # TransformString
 # ================================
@@ -462,8 +461,7 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   initialize: ->
     @onDidSetTarget =>
-      @preSelectPositions = new CursorPositionManager(@editor)
-      @preSelectPositions.save('head')
+      @restoreCursorPositions = saveCursorPositions(@editor)
       hoverPosition = @editor.getCursorBufferPosition()
 
       @target.select()
@@ -475,8 +473,8 @@ class ChangeSurroundAnyPair extends ChangeSurround
 
   onConfirm: (@char) ->
     # Clear pre-selected selection to start mutation from non-selection.
-    @preSelectPositions.restore()
-    @preSelectPositions = null
+    @restoreCursorPositions()
+    @restoreCursorPositions = null
     @input = @char
     @processOperation()
 
