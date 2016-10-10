@@ -24,7 +24,6 @@ Select = null
   detectScopeStartPositionForScope
   getBufferRows
   getStartPositionForPattern
-  getEndPositionForPattern
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   getTextInScreenRange

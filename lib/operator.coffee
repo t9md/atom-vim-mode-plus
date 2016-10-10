@@ -9,7 +9,6 @@ _ = require 'underscore-plus'
   isEndsWithNewLineForBufferRow
   getValidVimBufferRow
   cursorIsAtEmptyRow
-  scanInRanges
   getVisibleBufferRange
   getWordPatternAtBufferPosition
   destroyNonLastSelection

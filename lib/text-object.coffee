@@ -23,7 +23,6 @@ swrap = require './selection-wrapper'
   getBufferRows
   getValidVimBufferRow
 
-  getEndPositionForPattern
   getStartPositionForPattern
   trimRange
 } = require './utils'

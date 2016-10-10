@@ -170,12 +170,12 @@ mergeIntersectingRanges = (ranges) ->
       result.push(range)
   result
 
-getEolForBufferRow = (editor, row) ->
+getEndOfLineForBufferRow = (editor, row) ->
   editor.bufferRangeForBufferRow(row).end
 
 pointIsAtEndOfLine = (editor, point) ->
   point = Point.fromObject(point)
-  getEolForBufferRow(editor, point.row).isEqual(point)
+  getEndOfLineForBufferRow(editor, point.row).isEqual(point)
 
 getCharacterAtCursor = (cursor) ->
   getTextInScreenRange(cursor.editor, cursor.getScreenRange())
@@ -234,7 +234,7 @@ getVimEofBufferPosition = (editor) ->
   if (eof.row is 0) or (eof.column > 0)
     eof
   else
-    getEolForBufferRow(editor, eof.row - 1)
+    getEndOfLineForBufferRow(editor, eof.row - 1)
 
 getVimEofScreenPosition = (editor) ->
   editor.screenPositionForBufferPosition(getVimEofBufferPosition(editor))
@@ -276,9 +276,11 @@ getFirstCharacterColumForBufferRow = (editor, row) ->
 trimRange = (editor, scanRange) ->
   pattern = /\S/
   [start, end] = []
-  editor.scanInBufferRange pattern, scanRange, ({range}) -> start = range.start
-  if start
-    editor.backwardsScanInBufferRange pattern, scanRange, ({range}) -> end = range.end
+  setStart = ({range}) -> {start} = range
+  editor.scanInBufferRange(pattern, scanRange, setStart)
+  if start?
+    setEnd = ({range}) -> {end} = range
+    editor.backwardsScanInBufferRange(pattern, scanRange, setEnd)
     new Range(start, end)
   else
     scanRange
@@ -404,16 +406,6 @@ getValidVimScreenRow = (editor, row) ->
     when (row < 0) then 0
     when (row > vimLastScreenRow) then vimLastScreenRow
     else row
-
-# special {translate} option is used to translate AFTER converting to
-# screenPosition
-# Since translate in bufferPosition is abondoned when converted to screenPosition.
-clipScreenPositionForBufferPosition = (editor, bufferPosition, options) ->
-  screenPosition = editor.screenPositionForBufferPosition(bufferPosition)
-  {translate} = options
-  delete options.translate
-  screenPosition = screenPosition.translate(translate) if translate
-  editor.clipScreenPosition(screenPosition, options)
 
 # By default not include column
 getTextToPoint = (editor, {row, column}, {exclusive}={}) ->
@@ -583,10 +575,6 @@ matchScopes = (editorElement, scopes) ->
     return true if containsCount is classNames.length
   false
 
-spaceSurroundedRegExp = /^\s+([\s|\S]+)\s+$/
-isSurroundedBySpace = (text) ->
-  spaceSurroundedRegExp.test(text)
-
 isSingleLine = (text) ->
   text.split(/\n|\r\n/).length is 1
 
@@ -626,7 +614,6 @@ getWordBufferRangeAndKindAtBufferPosition = (editor, point, options) ->
   else
     kind = 'word'
 
-  # range = cursor.getCurrentWordBufferRange({wordRegex})
   range = getWordBufferRangeAtBufferPosition(editor, point, {wordRegex})
   {kind, range}
 
@@ -666,6 +653,7 @@ getEndOfWordBufferPosition = (editor, point, {wordRegex}={}) ->
   found = null
   editor.scanInBufferRange wordRegex, scanRange, ({range, matchText, stop}) ->
     return if matchText is '' and range.start.column isnt 0
+
     if range.end.isGreaterThan(point)
       if range.start.isLessThanOrEqual(point)
         found = range.end
@@ -677,9 +665,6 @@ getWordBufferRangeAtBufferPosition = (editor, position, options={}) ->
   startPosition = getBeginningOfWordBufferPosition(editor, position, options)
   endPosition = getEndOfWordBufferPosition(editor, startPosition, options)
   new Range(startPosition, endPosition)
-
-getWordPatternAtCursor = (cursor, options={}) ->
-  getWordPatternAtCursor(cursor.editor, cursor.getBufferPosition(), options)
 
 adjustRangeToRowRange = ({start, end}, options={}) ->
   # when linewise, end row is at column 0 of NEXT line
@@ -800,43 +785,6 @@ getRangeByTranslatePointAndClip = (editor, range, which, direction, options) ->
     when 'end'
       new Range(range.start, newPoint)
 
-# Debugging purpose
-# -------------------------
-logGoalColumnForSelection = (subject, selection) ->
-  console.log "#{subject}: goalColumn = ", selection.cursor.goalColumn
-
-reportSelection = (subject, selection) ->
-  console.log subject, selection.getBufferRange().toString()
-
-reportCursor = (subject, cursor) ->
-  console.log subject, cursor.getBufferPosition().toString()
-
-withTrackingCursorPositionChange = (cursor, fn) ->
-  cursorBefore = cursor.getBufferPosition()
-  fn()
-  cursorAfter = cursor.getBufferPosition()
-  unless cursorBefore.isEqual(cursorAfter)
-    console.log "Changed: #{cursorBefore.toString()} -> #{cursorAfter.toString()}"
-
-selectedRanges = (editor) ->
-  editor.getSelectedBufferRanges().map(toString).join("\n")
-
-selectedRange = (editor) ->
-  editor.getSelectedBufferRange().toString()
-
-{inspect} = require 'util'
-
-selectedText = (editor) ->
-  editor.getSelectedBufferRanges()
-    .map (range) ->
-      editor.getTextInBufferRange(range)
-      # inspect(editor.getTextInBufferRange(range))
-    .join("\n")
-
-toString = (obj) ->
-  if _.isFunction(obj.toString)
-    obj.toString()
-
 # Reloadable registerElement
 registerElement = (name, options) ->
   element = document.createElement(name)
@@ -881,7 +829,7 @@ module.exports = {
   moveCursorRight
   moveCursorUpScreen
   moveCursorDownScreen
-  getEolForBufferRow
+  getEndOfLineForBufferRow
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
   highlightRanges
@@ -889,7 +837,6 @@ module.exports = {
   getValidVimScreenRow
   moveCursorToFirstCharacterAtRow
   countChar
-  clipScreenPositionForBufferPosition
   getTextToPoint
   getIndentLevelForBufferRow
   isAllWhiteSpace
@@ -924,7 +871,6 @@ module.exports = {
   matchScopes
   moveCursorDownBuffer
   moveCursorUpBuffer
-  isSurroundedBySpace
   isSingleLine
   getCurrentWordBufferRangeAndKind
   buildWordPatternByCursor
@@ -932,7 +878,6 @@ module.exports = {
   getWordBufferRangeAndKindAtBufferPosition
   getWordPatternAtBufferPosition
   getNonWordCharactersForCursor
-  getWordPatternAtCursor
   adjustRangeToRowRange
   shrinkRangeEndToBeforeNewLine
   scanInRanges
@@ -942,15 +887,4 @@ module.exports = {
   getLargestFoldRangeContainsBufferRow
   translatePointAndClip
   getRangeByTranslatePointAndClip
-
-  # Debugging
-  reportSelection,
-  reportCursor
-  withTrackingCursorPositionChange
-  logGoalColumnForSelection
-
-  selectedRanges
-  selectedRange
-  selectedText
-  toString
 }
