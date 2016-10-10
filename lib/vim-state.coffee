@@ -160,6 +160,9 @@ class VimState
 
   onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
 
+  onDidResetOperationStack: (fn) -> @subscribe @emitter.on('did-reset-operation-stack', fn)
+  emitDidResetOperationStack: -> @emitter.emit('did-reset-operation-stack')
+
   # Select list view
   onDidConfirmSelectList: (fn) -> @subscribe @emitter.on('did-confirm-select-list', fn)
   onDidCancelSelectList: (fn) -> @subscribe @emitter.on('did-cancel-select-list', fn)

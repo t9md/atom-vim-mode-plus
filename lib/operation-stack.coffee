@@ -43,6 +43,10 @@ class OperationStack
     @resetCount()
     @stack = []
     @processing = false
+
+    # this has to be BEFORE @operationSubscriptions.dispose()
+    @vimState.emitDidResetOperationStack()
+
     @operationSubscriptions?.dispose()
     @operationSubscriptions = new CompositeDisposable
 

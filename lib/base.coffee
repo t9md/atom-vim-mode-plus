@@ -33,6 +33,7 @@ vimStateMethods = [
   "preemptDidSelectTarget"
   "onDidRestoreCursorPositions"
   "onDidSetOperatorModifier"
+  "onDidResetOperationStack"
 
   "onWillActivateMode"
   "onDidActivateMode"

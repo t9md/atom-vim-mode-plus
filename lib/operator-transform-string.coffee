@@ -1,8 +1,8 @@
 LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
-{BufferedProcess} = require 'atom'
+{BufferedProcess, Range} = require 'atom'
 
-{haveSomeSelection, isSingleLine, saveCursorPositions} = require './utils'
+{haveSomeSelection, isSingleLine} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
@@ -459,22 +459,30 @@ class ChangeSurroundAnyPair extends ChangeSurround
   charsMax: 1
   target: "AAnyPair"
 
-  initialize: ->
-    @onDidSetTarget =>
-      @restoreCursorPositions = saveCursorPositions(@editor)
-      hoverPosition = @editor.getCursorBufferPosition()
+  highlightTargetRange: (selection) ->
+    if range = @target.getRange(selection)
+      marker = @editor.markBufferRange(range)
+      @editor.decorateMarker(marker, type: 'highlight', class: 'vim-mode-plus-target-range')
+      marker
+    else
+      null
 
-      @target.select()
-      unless haveSomeSelection(@editor)
+  initialize: ->
+    marker = null
+    @onDidSetTarget =>
+      if marker = @highlightTargetRange(@editor.getLastSelection())
+        textRange = Range.fromPointWithDelta(marker.getBufferRange().start, 0, 1)
+        char = @editor.getTextInBufferRange(textRange)
+        @addHover(char, {}, @editor.getCursorBufferPosition())
+      else
         @vimState.input.cancel()
         @abort()
-      @addHover(@editor.getSelectedText()[0], {}, hoverPosition)
+
+    @onDidResetOperationStack ->
+      marker?.destroy()
     super
 
   onConfirm: (@char) ->
-    # Clear pre-selected selection to start mutation from non-selection.
-    @restoreCursorPositions()
-    @restoreCursorPositions = null
     @input = @char
     @processOperation()
 
