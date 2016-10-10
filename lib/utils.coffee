@@ -44,9 +44,6 @@ debug = (messages...) ->
       if fs.existsSync(filePath)
         fs.appendFileSync filePath, messages + "\n"
 
-getView = (model) ->
-  atom.views.getView(model)
-
 # Return function to restore editor's scrollTop and fold state.
 saveEditorState = (editor) ->
   editorElement = editor.element
@@ -95,7 +92,7 @@ isEndsWithNewLineForBufferRow = (editor, row) ->
   {start, end} = editor.bufferRangeForBufferRow(row, includeNewline: true)
   (not start.isEqual(end)) and end.column is 0
 
-haveSomeSelection = (editor) ->
+haveSomeNonEmptySelection = (editor) ->
   editor.getSelections().some (selection) ->
     not selection.isEmpty()
 
@@ -567,7 +564,7 @@ sortComparable = (collection) ->
 # Scroll to bufferPosition with minimum amount to keep original visible area.
 # If target position won't fit within onePageUp or onePageDown, it center target point.
 smartScrollToBufferPosition = (editor, point) ->
-  editorElement = getView(editor)
+  editorElement = editor.element
   editorAreaHeight = editor.getLineHeightInPixels() * (editor.getRowsPerPage() - 1)
   onePageUp = editorElement.getScrollTop() - editorAreaHeight # No need to limit to min=0
   onePageDown = editorElement.getScrollBottom() + editorAreaHeight
@@ -857,14 +854,13 @@ module.exports = {
   getKeyBindingForCommand
   include
   debug
-  getView
   saveEditorState
   saveCursorPositions
   getKeystrokeForEvent
   getCharacterForEvent
   isLinewiseRange
   isEndsWithNewLineForBufferRow
-  haveSomeSelection
+  haveSomeNonEmptySelection
   sortRanges
   sortRangesByEndPosition
   getIndex

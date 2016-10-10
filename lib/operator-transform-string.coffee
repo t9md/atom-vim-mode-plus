@@ -2,7 +2,7 @@ LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {BufferedProcess, Range} = require 'atom'
 
-{haveSomeSelection, isSingleLine} = require './utils'
+{haveSomeNonEmptySelection, isSingleLine} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'

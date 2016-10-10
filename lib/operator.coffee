@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 
 {inspect} = require 'util'
 {
-  haveSomeSelection
+  haveSomeNonEmptySelection
   highlightRanges
   isEndsWithNewLineForBufferRow
   getValidVimBufferRow
@@ -231,12 +231,12 @@ class Operator extends Base
       @selectOccurrence()
 
     isExplicitEmptyTarget = @target.getName() is "Empty"
-    if haveSomeSelection(@editor) or isExplicitEmptyTarget
+    if haveSomeNonEmptySelection(@editor) or isExplicitEmptyTarget
       @mutationManager.setCheckPoint('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
-    haveSomeSelection(@editor) or isExplicitEmptyTarget
+    haveSomeNonEmptySelection(@editor) or isExplicitEmptyTarget
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions

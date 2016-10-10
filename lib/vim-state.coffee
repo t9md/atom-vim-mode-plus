@@ -8,7 +8,7 @@ settings = require './settings'
 {HoverElement} = require './hover'
 {InputElement, SearchInputElement} = require './input'
 {
-  haveSomeSelection
+  haveSomeNonEmptySelection
   highlightRanges
   getVisibleEditors
   matchScopes
@@ -236,7 +236,7 @@ class VimState
 
     _checkSelection = =>
       return if @operationStack.isProcessing()
-      if haveSomeSelection(@editor)
+      if haveSomeNonEmptySelection(@editor)
         submode = swrap.detectVisualModeSubmode(@editor)
         if @isMode('visual', submode)
           @updateCursorsVisibility()
