@@ -29,9 +29,9 @@ describe "vim-mode-plus", ->
         statusBarTile = workspaceElement.querySelector("#status-bar-vim-mode-plus")
 
       runs ->
-        expect(statusBarTile.textContent).toBe("Normal")
+        expect(statusBarTile.textContent).toBe("N")
         ensure 'i', mode: 'insert'
-        expect(statusBarTile.textContent).toBe("Insert")
+        expect(statusBarTile.textContent).toBe("I")
 
     it "doesn't register duplicate command listeners for editors", ->
       set
