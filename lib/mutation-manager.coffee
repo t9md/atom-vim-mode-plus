@@ -13,7 +13,7 @@ swrap = require './selection-wrapper'
 #  selection:
 #    Selection beeing tracked
 module.exports =
-class MutationTracker
+class MutationManager
   constructor: (@vimState) ->
     {@editor} = @vimState
 

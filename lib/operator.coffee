@@ -86,7 +86,7 @@ class Operator extends Base
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      ranges = @mutationTracker.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
+      ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
       if ranges.length
         @flashIfNecessary(ranges)
 
@@ -94,12 +94,12 @@ class Operator extends Base
     return unless @trackChange
 
     @onDidFinishOperation =>
-      if marker = @mutationTracker.getMutationForSelection(@editor.getLastSelection())?.marker
+      if marker = @mutationManager.getMutationForSelection(@editor.getLastSelection())?.marker
         @setMarkForChange(marker.getBufferRange())
 
   constructor: ->
     super
-    {@mutationTracker, @occurrenceManager, @persistentSelection} = @vimState
+    {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
 
     @initialize()
 
@@ -210,14 +210,14 @@ class Operator extends Base
       @vimState.modeManager.deactivate() if @isMode('visual')
       @editor.setSelectedBufferRanges(ranges)
     else
-      @mutationTracker.restoreInitialPositions() # Restoreing position also clear selection.
+      @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
     @occurrenceManager.resetPatterns()
 
   # Return true unless all selection is empty.
   selectTarget: ->
     options = {isSelect: @instanceof('Select'), useMarker: @useMarkerForStay}
-    @mutationTracker.init(options)
-    @mutationTracker.setCheckPoint('will-select')
+    @mutationManager.init(options)
+    @mutationManager.setCheckPoint('will-select')
 
     @forceTargetWise() if @wise
     @emitWillSelectTarget()
@@ -232,7 +232,7 @@ class Operator extends Base
 
     isExplicitEmptyTarget = @target.getName() is "Empty"
     if haveSomeSelection(@editor) or isExplicitEmptyTarget
-      @mutationTracker.setCheckPoint('did-select')
+      @mutationManager.setCheckPoint('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
@@ -248,7 +248,7 @@ class Operator extends Base
       isBlockwise: @target?.isBlockwise?()
       mutationEnd: @restorePositionsToMutationEnd
 
-    @mutationTracker.restoreCursorPositions(options)
+    @mutationManager.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
 
 # Select
@@ -393,7 +393,7 @@ class Delete extends Operator
   adjustCursor: (cursor) ->
     row = getValidVimBufferRow(@editor, cursor.getBufferRow())
     if @needStay()
-      point = @mutationTracker.getInitialPointForSelection(cursor.selection)
+      point = @mutationManager.getInitialPointForSelection(cursor.selection)
       cursor.setBufferPosition([row, point.column])
     else
       cursor.setBufferPosition([row, 0])

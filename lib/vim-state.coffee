@@ -26,7 +26,7 @@ CursorStyleManager = require './cursor-style-manager'
 BlockwiseSelection = require './blockwise-selection'
 OccurrenceManager = require './occurrence-manager'
 HighlightSearchManager = require './highlight-search-manager'
-MutationTracker = require './mutation-tracker'
+MutationManager = require './mutation-manager'
 PersistentSelectionManager = require './persistent-selection-manager'
 
 packageScope = 'vim-mode-plus'
@@ -53,7 +53,7 @@ class VimState
     @highlightSearch = new HighlightSearchManager(this)
     @persistentSelection = new PersistentSelectionManager(this)
     @occurrenceManager = new OccurrenceManager(this)
-    @mutationTracker = new MutationTracker(this)
+    @mutationManager = new MutationManager(this)
 
     @input = new InputElement().initialize(this)
     @searchInput = new SearchInputElement().initialize(this)
@@ -284,7 +284,7 @@ class VimState
     @searchHistory.reset()
     @hover.reset()
     @operationStack.reset()
-    @mutationTracker.reset()
+    @mutationManager.reset()
 
   isVisible: ->
     @editor in getVisibleEditors()
