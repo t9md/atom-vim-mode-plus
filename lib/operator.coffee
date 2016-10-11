@@ -229,13 +229,14 @@ class Operator extends Base
     if @isOccurrence()
       @selectOccurrence()
 
-    isExplicitEmptyTarget = @target.getName() is "Empty"
-    if haveSomeNonEmptySelection(@editor) or isExplicitEmptyTarget
+    if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
       @mutationManager.setCheckPoint('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
-    haveSomeNonEmptySelection(@editor) or isExplicitEmptyTarget
+      true
+    else
+      false
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
@@ -544,7 +545,7 @@ class PutBefore extends Operator
   location: 'before'
 
   initialize: ->
-    @target = "Empty" if @isMode('normal')
+    @target = 'Empty' if @isMode('normal')
 
   mutateSelection: (selection) ->
     {text, type} = @vimState.register.get(null, selection)
