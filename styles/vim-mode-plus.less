@@ -11,7 +11,6 @@
 
 .block-cursor(@visibility) {
   .cursor-base();
-  // border: 0;
   background-color: @syntax-cursor-color;
   visibility: @visibility;
 }
@@ -85,17 +84,6 @@ atom-text-editor, atom-text-editor::shadow {
   }
   .vim-mode-plus-flash.removed .region {
     background-color: fadeout(@syntax-color-removed, 50%);
-  }
-  .vim-mode-plus-cursor-normal .region {
-    // z-index: 2147483647;
-    background-color: @syntax-cursor-color;
-    // background-color: @background-color-success;
-    opacity: 0.5;
-  }
-  .vim-mode-plus-cursor-insert .region {
-    // [FIXME] I want i-bar style cursor for insert-mode.
-    background-color: @syntax-cursor-color;
-    opacity: 0.8;
   }
 }
 
@@ -183,7 +171,6 @@ atom-text-editor, atom-text-editor::shadow {
     .vim-mode-plus.round-box;
     background-color: transparent;
     border: 1px solid @syntax-text-color;
-    // border: 1px solid @syntax-result-marker-color;
   }
   .vim-mode-plus-search-match.first .region {
     border: 1px solid @syntax-color-renamed;
