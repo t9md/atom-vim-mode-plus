@@ -57,6 +57,7 @@ class Input extends HTMLElement
   focus: (@options={}) ->
     @finished = false
     @panel.show()
+    @vimState.addToClassList('hidden-input-focused') if @klass is 'vim-mode-plus-input'
     @editorElement.focus()
     @commandSubscriptions = @handleEvents()
 
