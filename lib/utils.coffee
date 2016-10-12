@@ -590,7 +590,7 @@ isSingleLine = (text) ->
 # Valid options
 #  - wordRegex: instance of RegExp
 #  - nonWordCharacters: string
-getWordBufferRangeAndKindAtBufferPosition = (editor, point, options) ->
+getWordBufferRangeAndKindAtBufferPosition = (editor, point, options={}) ->
   {singleNonWordChar, wordRegex, nonWordCharacters, cursor} = options
   if not wordRegex? and not nonWordCharacters? # Complement from cursor
     cursor ?= editor.getLastCursor()

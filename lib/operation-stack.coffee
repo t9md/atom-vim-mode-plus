@@ -121,14 +121,21 @@ class OperationStack
       @editor.transact =>
         @run(operation)
 
-  runCurrentFind: ({reverse}={}) ->
-    if operation = @vimState.globalState.get('currentFind')
-      operation = operation.clone(@vimState)
-      operation.setRepeated()
-      operation.resetCount()
-      if reverse
-        operation.backwards = not operation.backwards
-      @run(operation)
+  runRecordedMotion: (key, {reverse}={}) ->
+    return unless operation = @vimState.globalState.get(key)
+
+    operation = operation.clone(@vimState)
+    operation.setRepeated()
+    operation.resetCount()
+    if reverse
+      operation.backwards = not operation.backwards
+    @run(operation)
+
+  runCurrentFind: (options) ->
+    @runRecordedMotion('currentFind', options)
+
+  runCurrentSearch: (options) ->
+    @runRecordedMotion('currentSearch', options)
 
   handleError: (error) ->
     @vimState.reset()

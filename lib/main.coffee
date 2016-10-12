@@ -130,6 +130,8 @@ module.exports =
       'repeat': -> @operationStack.runRecorded()
       'repeat-find': -> @operationStack.runCurrentFind()
       'repeat-find-reverse': -> @operationStack.runCurrentFind(reverse: true)
+      'repeat-search': -> @operationStack.runCurrentSearch()
+      'repeat-search-reverse': -> @operationStack.runCurrentSearch(reverse: true)
       'set-count-0': -> @setCount(0)
       'set-count-1': -> @setCount(1)
       'set-count-2': -> @setCount(2)

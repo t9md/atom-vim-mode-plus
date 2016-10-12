@@ -542,7 +542,7 @@ class MoveToFirstLine extends Motion
 
   moveCursor: (cursor) ->
     cursor.setBufferPosition(@getPoint())
-    cursor.autoscroll({center: true})
+    cursor.autoscroll(center: true)
 
   getPoint: ->
     getFirstCharacterPositionForBufferRow(@editor, @getRow())
@@ -858,7 +858,7 @@ class SearchBase extends Motion
       settings.get(key)
 
   needToUpdateSearchHistory: ->
-    @updateSearchHistory
+    @updateSearchHistory and not @isRepeated()
 
   isCaseSensitive: (term) ->
     switch @getCaseSensitivity()
@@ -977,6 +977,9 @@ class Search extends SearchBase
 
   initialize: ->
     super
+    # When repeated, no need to get user input
+    return if @isComplete()
+
     @activateIncrementalSearch() if @isIncrementalSearch()
 
     @onDidConfirmSearch ({@input, @landingPoint}) =>
@@ -1108,8 +1111,8 @@ class SearchCurrentWord extends SearchBase
 
   getNextNonWhiteSpacePoint: (from) ->
     point = null
-    scanRange = [from, [from.row, Infinity]]
-    @editor.scanInBufferRange /\S/, scanRange, ({range, stop}) ->
+    scanRange = Range.fromPointWithDelta(from, 0, Infinity)
+    @editor.scanInBufferRange /\S/, scanRange, ({range}) ->
       point = range.start
     point
 
@@ -1128,20 +1131,6 @@ class SearchCurrentWord extends SearchBase
 class SearchCurrentWordBackwards extends SearchCurrentWord
   @extend()
   backwards: true
-
-class RepeatSearch extends SearchBase
-  @extend()
-
-  initialize: ->
-    super
-    unless search = @globalState.get('currentSearch')
-      @abort()
-    {@input, @backwards, @getPattern, @getCaseSensitivity, @configScope, @quiet} = search
-
-class RepeatSearchReverse extends RepeatSearch
-  @extend()
-  isBackwards: ->
-    not @backwards
 
 # Fold
 # -------------------------
