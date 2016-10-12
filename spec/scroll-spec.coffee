@@ -15,6 +15,9 @@ describe "Scrolling", ->
 
   describe "scrolling keybindings", ->
     beforeEach ->
+      editor.setLineHeightInPixels(10)
+      editorElement.setHeight(50)
+      atom.views.performDocumentPoll()
       set
         cursor: [1, 2]
         text: """
@@ -29,22 +32,21 @@ describe "Scrolling", ->
           900
           1000
         """
-      editorElement.setHeight(editorElement.getHeight() * 4 / 10)
-      expect(editor.getVisibleRowRange()).toEqual [0, 4]
+      expect(editorElement.getVisibleRowRange()).toEqual [0, 4]
 
     describe "the ctrl-e and ctrl-y keybindings", ->
       it "moves the screen up and down by one and keeps cursor onscreen", ->
         ensure 'ctrl-e', cursor: [2, 2]
         expect(editor.getFirstVisibleScreenRow()).toBe 1
-        expect(editor.getLastVisibleScreenRow()).toBe 5
+        expect(editor.getLastVisibleScreenRow()).toBe 6
 
         ensure '2 ctrl-e', cursor: [4, 2]
         expect(editor.getFirstVisibleScreenRow()).toBe 3
-        expect(editor.getLastVisibleScreenRow()).toBe 7
-
+        expect(editor.getLastVisibleScreenRow()).toBe 8
+        
         ensure '2 ctrl-y', cursor: [2, 2]
         expect(editor.getFirstVisibleScreenRow()).toBe 1
-        expect(editor.getLastVisibleScreenRow()).toBe 5
+        expect(editor.getLastVisibleScreenRow()).toBe 6
 
   describe "scroll cursor keybindings", ->
     beforeEach ->
