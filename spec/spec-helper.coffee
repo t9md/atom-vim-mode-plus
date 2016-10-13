@@ -1,4 +1,5 @@
 _ = require 'underscore-plus'
+semver = require 'semver'
 {Range, Point, Disposable} = require 'atom'
 {inspect} = require 'util'
 swrap = require '../lib/selection-wrapper'
@@ -51,7 +52,9 @@ buildKeydownEventFromKeystroke = (keystroke, target) ->
       options[part] = true
     else
       key = part
-  key = ' ' if key is 'space'
+
+  if semver.satisfies(atom.getVersion(), '< 1.12')
+    key = ' ' if key is 'space'
   buildKeydownEvent(key, options)
 
 buildTextInputEvent = (key) ->
@@ -64,17 +67,6 @@ buildTextInputEvent = (key) ->
   event = document.createEvent('TextEvent')
   event.initTextEvent("textInput", eventArgs...)
   event
-
-getHiddenInputElementForEditor = (editor) ->
-  editor.element.component.hiddenInputComponent.getDomNode()
-
-# FIX orignal characterForKeyboardEvent(it can't handle 'space')
-characterForKeyboardEvent = (event) ->
-  unless event.ctrlKey or event.altKey or event.metaKey
-    if key = atom.keymaps.keystrokeForKeyboardEvent(event)
-      key = ' ' if key is 'space'
-      key = key[key.length - 1] if key.startsWith('shift-')
-      key if key.length is 1
 
 keydown = (key, target) ->
   target ?= document.activeElement
