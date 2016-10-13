@@ -28,6 +28,8 @@ Select = null
   getFirstCharacterBufferPositionForScreenRow
   getTextInScreenRange
   cursorIsAtEndOfLineAtNonEmptyRow
+  buildWordPatternByCursor
+  getNonWordCharactersForCursor
 
   debug
 } = require './utils'
@@ -1090,7 +1092,6 @@ class SearchCurrentWord extends SearchBase
   @extend()
   configScope: "SearchCurrentWord"
 
-  # NOTE: have side-effect. moving cursor to start of current word.
   getInput: ->
     @input ?= (
       wordRange = @getCurrentWordBufferRange()
@@ -1109,24 +1110,20 @@ class SearchCurrentWord extends SearchBase
     else
       new RegExp("\\b#{pattern}\\b", modifiers)
 
-  getNextNonWhiteSpacePoint: (from) ->
-    point = null
-    scanRange = Range.fromPointWithDelta(from, 0, Infinity)
-    @editor.scanInBufferRange /\S/, scanRange, ({range}) ->
-      point = range.start
-    point
-
   getCurrentWordBufferRange: ->
     cursor = @editor.getLastCursor()
-    originalPoint = cursor.getBufferPosition()
-    fromPoint = @getNextNonWhiteSpacePoint(originalPoint)
-    return unless fromPoint
-    cursor.setBufferPosition(fromPoint)
-    options = {}
-    options.includeNonWordCharacters = false if cursor.isBetweenWordAndNonWord()
-    wordRange = cursor.getCurrentWordBufferRange(options)
-    cursor.setBufferPosition(originalPoint)
-    wordRange
+    point = cursor.getBufferPosition()
+
+    nonWordCharacters = getNonWordCharactersForCursor(cursor)
+    wordRegex = new RegExp("[^\\s#{_.escapeRegExp(nonWordCharacters)}]+", 'g')
+
+    found = null
+    scanRange = @editor.bufferRangeForBufferRow(point.row)
+    @editor.scanInBufferRange wordRegex, scanRange, ({range, stop}) ->
+      if range.end.isGreaterThan(point)
+        found = range
+        stop()
+    found
 
 class SearchCurrentWordBackwards extends SearchCurrentWord
   @extend()

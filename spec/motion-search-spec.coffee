@@ -292,7 +292,7 @@ describe "Motion Search", ->
         ensure '*', cursorBuffer: [0, 0]
 
       describe "with words that contain 'non-word' characters", ->
-        it "moves cursor to next occurrence of word under cursor", ->
+        it "skips non-word-char when picking cursor-word then place cursor to next occurrence of word", ->
           set
             text: """
             abc
@@ -301,7 +301,7 @@ describe "Motion Search", ->
             @def\n
             """
             cursorBuffer: [1, 0]
-          ensure '*', cursorBuffer: [3, 0]
+          ensure '*', cursorBuffer: [3, 1]
 
         it "doesn't move cursor unless next match has exact word ending", ->
           set
@@ -314,12 +314,6 @@ describe "Motion Search", ->
             cursorBuffer: [1, 1]
           ensure '*', cursorBuffer: [1, 1]
 
-        # FIXME: This behavior is different from the one found in
-        # vim. This is because the word boundary match in Javascript
-        # ignores starting 'non-word' characters.
-        # e.g.
-        # in Vim:        /\<def\>/.test("@def") => false
-        # in Javascript: /\bdef\b/.test("@def") => true
         it "moves cursor to the start of valid word char", ->
           set
             text: "abc\ndef\nabc\n@def\n"
@@ -331,14 +325,14 @@ describe "Motion Search", ->
           set
             text: "abc\n@def\nabc\n@def\n"
             cursorBuffer: [1, 0]
-          ensure '*', cursorBuffer: [3, 0]
+          ensure '*', cursorBuffer: [3, 1]
 
       describe "when cursor is not on a word", ->
         it "does a match with the next word", ->
           set
             text: "abc\na  @def\n abc\n @def"
             cursorBuffer: [1, 1]
-          ensure '*', cursorBuffer: [3, 1]
+          ensure '*', cursorBuffer: [3, 2]
 
       describe "when cursor is at EOF", ->
         it "doesn't try to do any match", ->
@@ -414,7 +408,7 @@ describe "Motion Search", ->
           set
             text: "abc\n@def\nabc\n@def\n"
             cursorBuffer: [3, 0]
-          ensure '#', cursorBuffer: [1, 0]
+          ensure '#', cursorBuffer: [1, 1]
 
         it "moves cursor to the start of valid word char", ->
           set
@@ -427,7 +421,7 @@ describe "Motion Search", ->
           set
             text: "abc\n@def\nabc\n@def\n"
             cursorBuffer: [1, 0]
-          ensure '*', cursorBuffer: [3, 0]
+          ensure '*', cursorBuffer: [3, 1]
 
     describe "caseSensitivity setting", ->
       beforeEach ->
