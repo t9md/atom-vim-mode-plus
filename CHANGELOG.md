@@ -6,7 +6,7 @@
 # 0.59.0:
 - Breaking: `j`, `k` now always works as bufferRow-wise(screenRow-wise in previous version).
   - Previous `j`, `k` behavior is available as `g k`, `g j` as like pure Vim.
-- New: Opeator `InsertAtStartOfInnerSmartWord`, `InsertAtEndOfInnerSmartWord` no keymap by default #424
+- New: Operator `InsertAtStartOfInnerSmartWord`, `InsertAtEndOfInnerSmartWord` no keymap by default #424
 - Fix: `p`, `P` mutation tracked again(was not tracked by degradation) to `select-latest-changes` #426
 - Fix: `f` repeat by `;`, `,` clear existing selection where it should extend selection #425
 - Improve: `g n` and `g N` works more pure-vim-like.
@@ -43,8 +43,8 @@
     - `g o c $`: change cursor-word till end-of-line.
 - New: PersistentSelection: (former RangeMarker)
   - Allow user to set target BEFORE operator.
-  - Used as implicit target of operator. As like selection in `visual-mode` is used as implict target.
-  - Config: `autoSelectPersistentSelectionOnOperate`(default=true) controll to disable implicit targeting.
+  - Used as implicit target of operator. As like selection in `visual-mode` is used as implicit target.
+  - Config: `autoSelectPersistentSelectionOnOperate`(default=true) control to disable implicit targeting.
   - Updated style to seem like selection.
   - Keymap: In `visual`, `enter` to `create-persistent-selection`.
   - If you map `c s` to `change-surround`, I recommend you to disable it including other keymap starting with `c`.
@@ -55,7 +55,7 @@
     - Work on multiple target without using mouse: set multiple target by `persistent-selection` then mutate.
     - Narrow target range to include particular set of `occurrence`.
 - New: Highlight occurrence when occurrence modifier(`o`) is typed. #377
-- API Breking, Improve: globalState is no longer simple object, use `get`, `set` method instead. Now observable it's change.
+- API Breaking, Improve: globalState is no longer simple object, use `get`, `set` method instead. Now observable it's change.
 - Breaking, Improve: When `H`, and `L` motion is used as target of operator, ignore scrolloff to mutate till visible-top or bottom row.
 - Breaking: `clearMultipleCursorsOnEscapeInsertMode` is now default `false`, this was changed in v0.57.0, but now reverted. #376
 - Fix: PreviousSelection(`g v`) was incorrectly shared across editor.
@@ -64,9 +64,9 @@
 - Improve, Fix: `stayOnDelete` is now work properly on every situation.
 - Improve: Use marker to track original cursor position to stay. #380
 - Improve: When `stayOnOperate` family feature are enabled, adjust cursor position to not exceeds end of mutation #380
-- Improve: Creanup OperationStack. #400
+- Improve: Crean up OperationStack. #400
 - Improve: Many TextObject now follow new convention(return range of text-object by `getRange()`).
-- Improve: `word` text-object faimily to select more vim-like range(don't select adjoining non-word-char like Atom's default `selection.selectWord()`).
+- Improve: `word` text-object family to select more vim-like range(don't select adjoining non-word-char like Atom's default `selection.selectWord()`).
 - Internal: Debug codes and cleanup
 - Internal: `OperationStack::subscribe` now return subscribed handler.
 - Internal: Split out highlightSearch concerning code as HighlightSearchManager class #398
@@ -103,8 +103,8 @@
 - Fix: `f`, `F`, `t`, `T` was broken, no longer focus input on repeat by `;` or `,` #367
 
 # 0.55.0:
-- Internal: Avoid curcular referencing for string transformers store.
-- Doc: Update docstring of many operator for better command report for vmp wiki.
+- Internal: Avoid circular referencing for string transformers store.
+- Doc: Update doc-string of many operator for better command report for vmp wiki.
 - Breaking, Improve: `AddSelection` no longer get word from visual-mode #351
 - New: `All` TextObject as alias of `Entire`. #352
 - Improve?, Breaking?: Change range-marker style as-if selection #357
@@ -132,15 +132,15 @@
   - Direct command from search-input mini editor.
     - `ctrl-cmd-c`: `change-occurrence-from-search` to change occurrence of search pattern matched.
     - `cmd-d`: `select-occurrence-from-search` to select occurrence of search pattern matched.
-    - When above command is applied operator target is autmatically set in following priority.
+    - When above command is applied operator target is automatically set in following priority.
       1. In `visual-mode` use current selection as target.
       2. If there is `range-marker` then use it as target.
-      3. None of above match, then enter operator-pending state to get taret from user.
+      3. None of above match, then enter operator-pending state to get target from user.
 - Rename: `add-selection` to `select-occurrence`
 - Improve: `reset-normal-mode` clear hlsearch and range-marker more thoughtfully. No longer clear in following situation.
   - Internal invocation of `vimState.resetNormalMode()`.
   - When having multiple cursor.
-- Internal: Define `Base::initialize` to be eliminate uncertainty of super calll in child class. #361
+- Internal: Define `Base::initialize` to be eliminate uncertainty of super call in child class. #361
 
 # 0.54.1:
 - Breaking: Revert change introduced in 0.54.0(Was not good). insert-mode escape return to normal-mode regardless os autocomplet popup #339.
