@@ -38,7 +38,6 @@ atom-text-editor.vim-mode-plus.visual-mode
 }
 
 atom-text-editor.vim-mode-plus.operator-pending-mode.is-focused,
-atom-text-editor.vim-mode-plus-input-char-waiting
 {
   &::shadow {
     .cursor {
@@ -50,9 +49,9 @@ atom-text-editor.vim-mode-plus-input-char-waiting
   }
 }
 
-atom-text-editor.vim-mode-plus.insert-mode.replace
+atom-text-editor.vim-mode-plus.insert-mode.replace.is-focused,
 {
-  &.is-focused::shadow {
+  &::shadow {
     .cursor {
       .underline-cursor(visible);
     }
@@ -62,7 +61,8 @@ atom-text-editor.vim-mode-plus.insert-mode.replace
   }
 }
 
-atom-text-editor.vim-mode-plus.hidden-input-focused
+atom-text-editor.vim-mode-plus.hidden-input-focused,
+atom-text-editor.vim-mode-plus-input-char-waiting
 {
   &::shadow {
     .cursor {
@@ -75,15 +75,17 @@ atom-text-editor.vim-mode-plus.hidden-input-focused
 // Flash ranges e.g. flashing yanked range.
 // =========================
 atom-text-editor, atom-text-editor::shadow {
-  .vim-mode-plus-flash .region {
+  .vim-mode-plus-flash {
     z-index: 1;
-    background-color: fadeout(@syntax-selection-flash-color, 50%);
-  }
-  .vim-mode-plus-flash.added .region {
-    background-color: fadeout(darken(@syntax-color-added, 10%), 50%);
-  }
-  .vim-mode-plus-flash.removed .region {
-    background-color: fadeout(@syntax-color-removed, 50%);
+    .region {
+      background-color: fadeout(@syntax-selection-flash-color, 50%);
+    }
+    &.added .region {
+      background-color: fadeout(darken(@syntax-color-added, 10%), 50%);
+    }
+    &.removed .region {
+      background-color: fadeout(@syntax-color-removed, 50%);
+    }
   }
 }
 
