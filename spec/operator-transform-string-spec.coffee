@@ -334,6 +334,36 @@ describe "Operator TransformString", ->
     it "repeating twice works on current-line and won't move cursor", ->
       ensure 'l g - g -', text: 'vim-mode\natom_text_editor\n', cursor: [0, 1]
 
+  describe 'ReplaceTabToSpace', ->
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g R': 'vim-mode-plus:replace-tab-to-space'
+
+    describe "basic behavior", ->
+      it "convert tabs to spaces", ->
+        spacesText = new Array(editor.getTabLength() + 1).join(' ')
+        set
+          text: '	var10 =	0;'
+          cursor: [0, 0]
+        ensure 'g R $',
+          text: "#{spacesText}var10 =#{spacesText}0;"
+
+  describe 'ReplaceSpaceToTab', ->
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g r': 'vim-mode-plus:replace-space-to-tab'
+
+    describe "basic behavior", ->
+      it "convert spaces to tabs", ->
+        spacesText = new Array(editor.getTabLength() + 1).join(' ')
+        set
+          text: "#{spacesText}var10 =#{spacesText}0;"
+          cursor: [0, 0]
+        ensure 'g r $',
+          text: '	var10 =	0;'
+
   describe 'CompactSpaces', ->
     beforeEach ->
       set
