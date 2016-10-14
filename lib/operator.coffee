@@ -207,7 +207,7 @@ class Operator extends Base
     @mutationManager.init(options)
     @mutationManager.setCheckPoint('will-select')
 
-    @taget.forceWise(@wise) if @wise and @target.isMotion()
+    @target.forceWise(@wise) if @wise and @target.isMotion()
     @emitWillSelectTarget()
 
     # To use CURRENT cursor position, this has to be BEFORE @target.select() which move cursors.
