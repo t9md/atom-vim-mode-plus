@@ -338,7 +338,7 @@ describe "Operator TransformString", ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g tab': 'vim-mode-plus:conver-to-soft-tab'
+          'g tab': 'vim-mode-plus:convert-to-soft-tab'
 
     describe "basic behavior", ->
       it "convert tabs to spaces", ->

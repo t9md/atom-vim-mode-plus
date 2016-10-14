@@ -186,7 +186,7 @@ class CompactSpaces extends TransformString
       text.replace /^(\s*)(.*?)(\s*)$/gm, (m, leading, middle, trailing) ->
         leading + middle.split(/[ \t]+/).join(' ') + trailing
 
-class ConverToSoftTab extends TransformString
+class ConvertToSoftTab extends TransformString
   @extend()
   @registerToSelectList()
   displayName: 'Soft Tab'
