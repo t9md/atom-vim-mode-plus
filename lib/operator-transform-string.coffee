@@ -186,6 +186,14 @@ class CompactSpaces extends TransformString
       text.replace /^(\s*)(.*?)(\s*)$/gm, (m, leading, middle, trailing) ->
         leading + middle.split(/[ \t]+/).join(' ') + trailing
 
+class ConverToSoftTab extends TransformString
+  @extend()
+  @registerToSelectList()
+  displayName: 'Soft Tab'
+  getNewText: (text) ->
+    spaces = ' '.repeat(@editor.getTabLength())
+    text.replace(/\t/g, spaces)
+
 class ConvertToHardTab extends TransformString
   @extend()
   @registerToSelectList()
@@ -194,14 +202,6 @@ class ConvertToHardTab extends TransformString
     tabLength = @editor.getTabLength()
     pattern = new RegExp(" {#{tabLength}}", 'g')
     text.replace(pattern, "\t").replace(/[ ]+\t/g, "\t")
-
-class ConverToSoftTab extends TransformString
-  @extend()
-  @registerToSelectList()
-  displayName: 'Soft Tab'
-  getNewText: (text) ->
-    spaces = ' '.repeat(@editor.getTabLength())
-    text.replace(/\t/g, spaces)
 
 # -------------------------
 class TransformStringByExternalCommand extends TransformString
