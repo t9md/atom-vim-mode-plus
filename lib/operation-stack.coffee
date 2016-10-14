@@ -199,7 +199,6 @@ class OperationStack
 
   ensureAllCursorsAreNotAtEndOfLine: ->
     for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
-      # [FIXME] SCATTERED_CURSOR_ADJUSTMENT
       moveCursorLeft(cursor, {preserveGoalColumn: true})
 
   addToClassList: (className) ->

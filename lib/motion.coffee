@@ -56,14 +56,6 @@ class Motion extends Base
   isInclusive: ->
     @inclusive
 
-  forceWise: (wise) ->
-    if wise is 'characterwise'
-      if @wise is 'linewise'
-        @inclusive = false
-      else
-        @inclusive = not @inclusive
-    @wise = wise
-
   isCharacterwise: ->
     @wise is 'characterwise'
 
@@ -72,6 +64,14 @@ class Motion extends Base
 
   isBlockwise: ->
     @wise is 'blockwise'
+
+  forceWise: (wise) ->
+    if wise is 'characterwise'
+      if @wise is 'linewise'
+        @inclusive = false
+      else
+        @inclusive = not @inclusive
+    @wise = wise
 
   setBufferPositionSafely: (cursor, point) ->
     cursor.setBufferPosition(point) if point?
