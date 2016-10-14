@@ -50,20 +50,28 @@ class Motion extends Base
     # visual mode can overwrite default wise and inclusiveness
     if @isMode('visual')
       @inclusive = true
-      if @isMode('visual', 'linewise')
-        @wise = 'linewise'
-      else
-        @wise = 'characterwise'
+      @wise = @vimState.submode # ['characterwise', 'linewise', 'blockwise']
     @initialize()
-
-  isBlockwise: ->
-    @isMode('visual', 'blockwise')
 
   isInclusive: ->
     @inclusive
 
+  forceWise: (wise) ->
+    if wise is 'characterwise'
+      if @wise is 'linewise'
+        @inclusive = false
+      else
+        @inclusive = not @inclusive
+    @wise = wise
+
+  isCharacterwise: ->
+    @wise is 'characterwise'
+
   isLinewise: ->
     @wise is 'linewise'
+
+  isBlockwise: ->
+    @wise is 'blockwise'
 
   setBufferPositionSafely: (cursor, point) ->
     cursor.setBufferPosition(point) if point?
@@ -87,9 +95,9 @@ class Motion extends Base
     @updateSelectionProperties() if @isMode('visual')
 
     # Modify selection to submode-wisely
-    switch
-      when @isLinewise() then @vimState.selectLinewise()
-      when @isBlockwise() then @vimState.selectBlockwise()
+    switch @wise
+      when 'linewise' then @vimState.selectLinewise()
+      when 'blockwise' then @vimState.selectBlockwise()
 
   selectByMotion: (selection) ->
     {cursor} = selection
@@ -122,15 +130,11 @@ class CurrentSelection extends Motion
   moveCursor: (cursor) ->
     if @isMode('visual')
       if @isBlockwise()
-        @isBlockwise = -> true
         {start, end} = cursor.selection.getBufferRange()
         [head, tail] = if cursor.selection.isReversed() then [start, end] else [end, start]
         @selectionExtent = new Point(head.row - tail.row, head.column - tail.column)
       else
         @selectionExtent = @editor.getSelectedBufferRange().getExtent()
-
-       # Cache it in case repeated.
-      @wise = if @isLinewise() then 'linewise' else 'characterwise'
     else
       point = cursor.getBufferPosition()
       if @isBlockwise()
@@ -823,7 +827,7 @@ class MoveToMark extends Motion
       point ?= [0, 0] # if mark was not set, go to the beginning of the file
       @vimState.mark.set('`', fromPoint)
 
-    if point? and @wise is 'linewise'
+    if point? and @isLinewise()
       point = getFirstCharacterPositionForBufferRow(@editor, point.row)
     point
 

@@ -165,17 +165,6 @@ class Operator extends Base
     @emitDidSetTarget(this)
     this
 
-  forceTargetWise: ->
-    switch @wise
-      when 'characterwise'
-        if @target.wise is 'linewise'
-          @target.wise = 'characterwise'
-          @target.inclusive = false
-        else
-          @target.inclusive = not @target.inclusive
-      when 'linewise'
-        @target.wise = 'linewise'
-
   setTextToRegisterForSelection: (selection) ->
     @setTextToRegister(selection.getText(), selection)
 
@@ -218,7 +207,7 @@ class Operator extends Base
     @mutationManager.init(options)
     @mutationManager.setCheckPoint('will-select')
 
-    @forceTargetWise() if @wise
+    @taget.forceWise(@wise) if @wise and @target.isMotion()
     @emitWillSelectTarget()
 
     # To use CURRENT cursor position, this has to be BEFORE @target.select() which move cursors.
