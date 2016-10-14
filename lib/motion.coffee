@@ -42,20 +42,28 @@ Base = require './base'
 class Motion extends Base
   @extend(false)
   inclusive: false
-  linewise: false
+  wise: 'characterwise'
 
   constructor: ->
     super
+
+    # visual mode can overwrite default wise and inclusiveness
+    if @isMode('visual')
+      @inclusive = true
+      if @isMode('visual', 'linewise')
+        @wise = 'linewise'
+      else
+        @wise = 'characterwise'
     @initialize()
 
   isBlockwise: ->
     @isMode('visual', 'blockwise')
 
   isInclusive: ->
-    @isMode('visual') or @isAsOperatorTarget() and @inclusive
+    @inclusive
 
   isLinewise: ->
-    @isMode('visual', 'linewise') or @isAsOperatorTarget() and @linewise
+    @wise is 'linewise'
 
   setBufferPositionSafely: (cursor, point) ->
     cursor.setBufferPosition(point) if point?
@@ -121,7 +129,8 @@ class CurrentSelection extends Motion
       else
         @selectionExtent = @editor.getSelectedBufferRange().getExtent()
 
-      @linewise = @isLinewise() # Cache it in case repeated.
+       # Cache it in case repeated.
+      @wise = if @isLinewise() then 'linewise' else 'characterwise'
     else
       point = cursor.getBufferPosition()
       if @isBlockwise()
@@ -177,7 +186,7 @@ class MoveRight extends Motion
 
 class MoveUp extends Motion
   @extend()
-  linewise: true
+  wise: 'linewise'
 
   getPoint: (cursor) ->
     row = @getRow(cursor.getBufferRow())
@@ -198,7 +207,7 @@ class MoveUp extends Motion
 
 class MoveDown extends MoveUp
   @extend()
-  linewise: true
+  wise: 'linewise'
 
   getRow: (row) ->
     if @editor.isFoldedAtBufferRow(row)
@@ -207,7 +216,7 @@ class MoveDown extends MoveUp
 
 class MoveUpScreen extends Motion
   @extend()
-  linewise: true
+  wise: 'linewise'
   direction: 'up'
 
   moveCursor: (cursor) ->
@@ -216,7 +225,7 @@ class MoveUpScreen extends Motion
 
 class MoveDownScreen extends MoveUpScreen
   @extend()
-  linewise: true
+  wise: 'linewise'
   direction: 'down'
 
   moveCursor: (cursor) ->
@@ -230,7 +239,7 @@ class MoveDownScreen extends MoveUpScreen
 # when row is folded.
 class MoveUpToEdge extends Motion
   @extend()
-  linewise: true
+  wise: 'linewise'
   direction: 'up'
   @description: "Move cursor up to **edge** char at same-column"
 
@@ -518,7 +527,7 @@ class MoveToFirstCharacterOfLine extends Motion
 
 class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
-  linewise: true
+  wise: 'linewise'
   moveCursor: (cursor) ->
     @countTimes ->
       moveCursorUpBuffer(cursor)
@@ -526,7 +535,7 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
 
 class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
-  linewise: true
+  wise: 'linewise'
   moveCursor: (cursor) ->
     @countTimes ->
       moveCursorDownBuffer(cursor)
@@ -539,7 +548,7 @@ class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
 
 class MoveToFirstLine extends Motion
   @extend()
-  linewise: true
+  wise: 'linewise'
   defaultCount: null
 
   moveCursor: (cursor) ->
@@ -570,7 +579,7 @@ class MoveToLineByPercent extends MoveToFirstLine
 
 class MoveToRelativeLine extends Motion
   @extend(false)
-  linewise: true
+  wise: 'linewise'
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
@@ -594,7 +603,7 @@ class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
 # keymap: H
 class MoveToTopOfScreen extends Motion
   @extend()
-  linewise: true
+  wise: 'linewise'
   scrolloff: 2
   defaultCount: 0
 
@@ -814,7 +823,7 @@ class MoveToMark extends Motion
       point ?= [0, 0] # if mark was not set, go to the beginning of the file
       @vimState.mark.set('`', fromPoint)
 
-    if point? and @linewise
+    if point? and @wise is 'linewise'
       point = getFirstCharacterPositionForBufferRow(@editor, point.row)
     point
 
@@ -826,7 +835,7 @@ class MoveToMark extends Motion
 class MoveToMarkLine extends MoveToMark
   @extend()
   hover: icon: ":move-to-mark:'", emoji: ":round_pushpin:'"
-  linewise: true
+  wise: 'linewise'
 
 # Search
 # -------------------------
@@ -1134,7 +1143,7 @@ class SearchCurrentWordBackwards extends SearchCurrentWord
 class MoveToPreviousFoldStart extends Motion
   @extend()
   @description: "Move to previous fold start"
-  linewise: false
+  wise: 'characterwise'
   which: 'start'
   direction: 'prev'
 

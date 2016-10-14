@@ -168,13 +168,13 @@ class Operator extends Base
   forceTargetWise: ->
     switch @wise
       when 'characterwise'
-        if @target.linewise
-          @target.linewise = false
+        if @target.wise is 'linewise'
+          @target.wise = 'characterwise'
           @target.inclusive = false
         else
           @target.inclusive = not @target.inclusive
       when 'linewise'
-        @target.linewise = true
+        @target.wise = 'linewise'
 
   setTextToRegisterForSelection: (selection) ->
     @setTextToRegister(selection.getText(), selection)
