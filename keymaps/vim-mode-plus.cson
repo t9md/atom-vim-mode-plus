@@ -135,6 +135,8 @@
   # 'g r':   'vim-mode-plus:reverse'
   # 'g s':   'vim-mode-plus:sort'
   # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
+  # 'g tab': 'vim-mode-plus:convert-to-soft-tab'
+  # 'g shift-tab': 'vim-mode-plus:convert-to-hard-tab'
 
   # 'enter': 'vim-mode-plus:toggle-persistent-selection'
 

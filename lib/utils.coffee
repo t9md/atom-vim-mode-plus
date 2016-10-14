@@ -785,11 +785,6 @@ getRangeByTranslatePointAndClip = (editor, range, which, direction, options) ->
     when 'end'
       new Range(range.start, newPoint)
 
-# Range must not be multiple-line
-getScreenLengthForTextInBufferRange = (editor, range) ->
-  screenRange = editor.screenRangeForBufferRange(range)
-  screenRange.getExtent().column
-
 # Reloadable registerElement
 registerElement = (name, options) ->
   element = document.createElement(name)
@@ -892,5 +887,4 @@ module.exports = {
   getLargestFoldRangeContainsBufferRow
   translatePointAndClip
   getRangeByTranslatePointAndClip
-  getScreenLengthForTextInBufferRange
 }

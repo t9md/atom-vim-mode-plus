@@ -5,7 +5,6 @@ _ = require 'underscore-plus'
 {
   haveSomeNonEmptySelection
   isSingleLine
-  getScreenLengthForTextInBufferRange
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -201,7 +200,7 @@ class ConvertToSoftTab extends TransformString
     @editor.scanInBufferRange /\t/g, scanRange, ({range, replace}) =>
       # Replace \t to spaces which length is vary depending on tabStop and tabLenght
       # So we directly consult it's screen representing length.
-      length = getScreenLengthForTextInBufferRange(@editor, range)
+      length = @editor.screenRangeForBufferRange(range).getExtent().column
       replace(" ".repeat(length))
 
 class ConvertToHardTab extends TransformString
