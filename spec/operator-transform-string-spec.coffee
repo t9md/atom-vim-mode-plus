@@ -362,7 +362,7 @@ describe "Operator TransformString", ->
           text: "  var10 =    0;"
           cursor: [0, 0]
         ensure 'g shift-tab $',
-          text: "\tvar10 =\t\t0;"
+          text: "\tvar10\t=\t\t 0;"
 
   describe 'CompactSpaces', ->
     beforeEach ->

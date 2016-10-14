@@ -195,28 +195,41 @@ class ConvertToSoftTab extends TransformString
   @registerToSelectList()
   displayName: 'Soft Tab'
   wise: 'linewise'
-  pattern: /\t/g
 
   mutateSelection: (selection) ->
     scanRange = selection.getBufferRange()
-    @editor.scanInBufferRange @pattern, scanRange, ({range, replace}) =>
+    @editor.scanInBufferRange /\t/g, scanRange, ({range, replace}) =>
+      # Replace \t to spaces which length is vary depending on tabStop and tabLenght
+      # So we directly consult it's screen representing length.
       length = getScreenLengthForTextInBufferRange(@editor, range)
-      replace(@getNewTextForScreenLength(length))
+      replace(" ".repeat(length))
 
-  getNewTextForScreenLength: (length) ->
-    " ".repeat(length)
-
-class ConvertToHardTab extends ConvertToSoftTab
+class ConvertToHardTab extends TransformString
   @extend()
   @registerToSelectList()
   displayName: 'Hard Tab'
-  pattern: /[ \t]+/g
 
-  getNewTextForScreenLength: (length) ->
+  mutateSelection: (selection) ->
     tabLength = @editor.getTabLength()
-    tabs = "\t".repeat(length // tabLength)
-    spaces = " ".repeat(length %% tabLength)
-    tabs + spaces
+    scanRange = selection.getBufferRange()
+    @editor.scanInBufferRange /[ \t]+/g, scanRange, ({range, replace}) =>
+      screenRange = @editor.screenRangeForBufferRange(range)
+      {start: {column: startColumn}, end: {column: endColumn}} = screenRange
+
+      # We can't naively replace spaces to tab, we have to consider valid tabStop column
+      # If nextTabStop column exceeds replacable range, we pad with spaces.
+      newText = ''
+      loop
+        remainder = startColumn %% tabLength
+        nextTabStop = startColumn + (if remainder is 0 then tabLength else remainder)
+        if nextTabStop > endColumn
+          newText += " ".repeat(endColumn - startColumn)
+        else
+          newText += "\t"
+        startColumn = nextTabStop
+        break if startColumn >= endColumn
+
+      replace(newText)
 
 # -------------------------
 class TransformStringByExternalCommand extends TransformString
