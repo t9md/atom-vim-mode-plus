@@ -2,7 +2,11 @@ LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {BufferedProcess, Range} = require 'atom'
 
-{haveSomeNonEmptySelection, isSingleLine} = require './utils'
+{
+  haveSomeNonEmptySelection
+  isSingleLine
+  getScreenLengthForTextInBufferRange
+} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
@@ -190,18 +194,29 @@ class ConvertToSoftTab extends TransformString
   @extend()
   @registerToSelectList()
   displayName: 'Soft Tab'
-  getNewText: (text) ->
-    spaces = ' '.repeat(@editor.getTabLength())
-    text.replace(/\t/g, spaces)
+  wise: 'linewise'
+  pattern: /\t/g
 
-class ConvertToHardTab extends TransformString
+  mutateSelection: (selection) ->
+    scanRange = selection.getBufferRange()
+    @editor.scanInBufferRange @pattern, scanRange, ({range, replace}) =>
+      length = getScreenLengthForTextInBufferRange(@editor, range)
+      replace(@getNewTextForScreenLength(length))
+
+  getNewTextForScreenLength: (length) ->
+    " ".repeat(length)
+
+class ConvertToHardTab extends ConvertToSoftTab
   @extend()
   @registerToSelectList()
   displayName: 'Hard Tab'
-  getNewText: (text) ->
+  pattern: /[ \t]+/g
+
+  getNewTextForScreenLength: (length) ->
     tabLength = @editor.getTabLength()
-    pattern = new RegExp(" {#{tabLength}}", 'g')
-    text.replace(pattern, "\t").replace(/[ ]+\t/g, "\t")
+    tabs = "\t".repeat(length // tabLength)
+    spaces = " ".repeat(length %% tabLength)
+    tabs + spaces
 
 # -------------------------
 class TransformStringByExternalCommand extends TransformString
