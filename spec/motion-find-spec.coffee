@@ -11,7 +11,8 @@ describe "Motion Find", ->
       {set, ensure, keystroke} = _vim
 
   afterEach ->
-    vimState.resetNormalMode()
+    unless vimState.destroyed
+      vimState.resetNormalMode()
 
   describe 'the f/F keybindings', ->
     beforeEach ->
@@ -184,12 +185,15 @@ describe "Motion Find", ->
       ensure ['f', input: 'c'], cursor: [0, 8]
       ensure '2 ,', cursor: [0, 2]
 
-    it "shares the most recent find/till command with other editors", ->
-      getVimState (otherVimState, other) ->
+  describe "last find/till is repeatable on other editor", ->
+    [other, otherEditor, pane] = []
+    beforeEach ->
+      getVimState (otherVimState, _other) ->
         set
           text: "a baz bar\n"
           cursor: [0, 0]
 
+        other = _other
         other.set
           text: "foo bar baz",
           cursor: [0, 0]
@@ -198,22 +202,33 @@ describe "Motion Find", ->
         pane = atom.workspace.getActivePane()
         pane.activateItem(editor)
 
-        # by default keyDown and such go in the usual editor
-        ensure ['f', input: 'b'], cursor: [0, 2]
-        other.ensure cursor: [0, 0]
+    it "shares the most recent find/till command with other editors", ->
+      ensure ['f', input: 'b'], cursor: [0, 2]
+      other.ensure cursor: [0, 0]
 
-        # replay same find in the other editor
-        pane.activateItem(otherEditor)
-        other.keystroke ';'
-        ensure cursor: [0, 2]
-        other.ensure cursor: [0, 4]
+      # replay same find in the other editor
+      pane.activateItem(otherEditor)
+      other.keystroke ';'
+      ensure cursor: [0, 2]
+      other.ensure cursor: [0, 4]
 
-        # do a till in the other editor
-        other.keystroke ['t', input: 'r']
-        ensure cursor: [0, 2]
-        other.ensure cursor: [0, 5]
+      # do a till in the other editor
+      other.keystroke ['t', input: 'r']
+      ensure cursor: [0, 2]
+      other.ensure cursor: [0, 5]
 
-        # and replay in the normal editor
-        pane.activateItem(editor)
-        ensure ';', cursor: [0, 7]
-        other.ensure cursor: [0, 5]
+      # and replay in the normal editor
+      pane.activateItem(editor)
+      ensure ';', cursor: [0, 7]
+      other.ensure cursor: [0, 5]
+
+    it "is still repeatable after original editor was destroyed", ->
+      ensure ['f', input: 'b'], cursor: [0, 2]
+      other.ensure cursor: [0, 0]
+
+      pane.activateItem(otherEditor)
+      editor.destroy()
+      expect(editor.isAlive()).toBe(false)
+      other.ensure ';', cursor: [0, 4]
+      other.ensure ';', cursor: [0, 8]
+      other.ensure ',', cursor: [0, 4]
