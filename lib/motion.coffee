@@ -449,13 +449,15 @@ class MoveToNextParagraph extends Motion
     cursor.setBufferPosition(point)
 
   getPoint: (fromPoint) ->
-    wasAtNonBlankRow = not @editor.isBufferRowBlank(fromPoint.row)
-    for row in getBufferRows(@editor, {startRow: fromPoint.row, @direction})
+    startRow = fromPoint.row
+    wasAtNonBlankRow = not @editor.isBufferRowBlank(startRow)
+    for row in getBufferRows(@editor, {startRow, @direction})
       if @editor.isBufferRowBlank(row)
         return new Point(row, 0) if wasAtNonBlankRow
       else
         wasAtNonBlankRow = true
 
+    # fallback
     switch @direction
       when 'previous' then new Point(0, 0)
       when 'next' then @getVimEofBufferPosition()
