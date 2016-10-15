@@ -167,7 +167,7 @@ class Base
 
   clone: (vimState) ->
     properties = {}
-    excludeProperties = ['editor', 'editorElement', 'globalState']
+    excludeProperties = ['editor', 'editorElement', 'globalState', 'vimState']
     for own key, value of this when key not in excludeProperties
       properties[key] = value
     klass = this.constructor
