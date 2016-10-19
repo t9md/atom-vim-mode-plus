@@ -433,6 +433,7 @@ class YankLine extends Yank
   wise: 'linewise'
 
   initialize: ->
+    super
     @target = 'MoveToRelativeLine' if @isMode('normal')
     if @isMode('visual', 'characterwise')
       @stayOnLinewise = false
