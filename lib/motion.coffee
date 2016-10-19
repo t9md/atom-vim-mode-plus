@@ -188,6 +188,12 @@ class MoveRight extends Motion
       if cursor.isAtEndOfLine() and allowWrap and not cursorIsAtVimEndOfFile(cursor)
         moveCursorRight(cursor, {allowWrap})
 
+class MoveRightBufferColumn extends Motion
+  @extend(true)
+  moveCursor: (cursor) ->
+    newPoint = cursor.getBufferPosition().translate([0, @getCount()])
+    cursor.setBufferPosition(newPoint)
+
 class MoveUp extends Motion
   @extend()
   wise: 'linewise'

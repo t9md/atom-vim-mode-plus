@@ -222,6 +222,9 @@ class Base
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)
 
+  is: (klassName) ->
+    this.constructor is Base.getClass(klassName)
+
   isOperator: ->
     @instanceof('Operator')
 

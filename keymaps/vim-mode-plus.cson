@@ -303,7 +303,6 @@
 'atom-text-editor.vim-mode-plus.normal-mode':
   'i': 'vim-mode-plus:activate-insert-mode'
   'g i': 'vim-mode-plus:insert-at-last-insert'
-  'r': 'vim-mode-plus:replace-and-move-right'
 
   # 'g I': 'vim-mode-plus:insert-at-start-of-target'
   # 'g A': 'vim-mode-plus:insert-at-end-of-target'

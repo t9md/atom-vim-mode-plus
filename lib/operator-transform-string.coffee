@@ -79,24 +79,21 @@ class Replace extends TransformString
 
   initialize: ->
     super
+    if @isMode('normal')
+      @target = 'MoveRightBufferColumn'
     @focusInput()
 
   getInput: ->
     super or "\n"
 
   mutateSelection: (selection) ->
+    if @target.is('MoveRightBufferColumn')
+      return unless selection.getText().length is @getCount()
+
     input = @getInput()
     @restorePositions = false if input is "\n"
     text = selection.getText().replace(/./g, input)
     selection.insertText(text, autoIndentNewline: true)
-
-class ReplaceAndMoveRight extends Replace
-  @extend()
-  target: "MoveRight"
-
-  mutateSelection: (selection) ->
-    if selection.getText().length is @getCount()
-      super
 
 # -------------------------
 # DUP meaning with SplitString need consolidate.
