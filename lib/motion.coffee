@@ -450,13 +450,6 @@ class MoveToNextSentence extends Motion
   # closing [)\]"'], followed by EOL or whitespace
   sentenceRegex: /([\.!?][\s\]\)'"]*\s)\S/
 
-  # [FIXME] unused
-  moveToEndOfString: (point, string) ->
-    lines = string.split('\n')
-    row = lines.length - 1
-    column = lines[row].length
-    point.traverse([row, column])
-
   moveCursor: (cursor) ->
     point = cursor.getBufferPosition()
     @countTimes =>
