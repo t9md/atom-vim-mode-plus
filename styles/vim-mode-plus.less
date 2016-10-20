@@ -76,14 +76,16 @@ atom-text-editor.vim-mode-plus-input-char-waiting
 // =========================
 atom-text-editor, atom-text-editor::shadow {
   .vim-mode-plus-flash {
-    z-index: 1;
     .region {
+      z-index: 1;
       background-color: fadeout(@syntax-selection-flash-color, 50%);
     }
     &.added .region {
+      z-index: 1;
       background-color: fadeout(darken(@syntax-color-added, 10%), 50%);
     }
     &.removed .region {
+      z-index: 1;
       background-color: fadeout(@syntax-color-removed, 50%);
     }
   }
