@@ -30,6 +30,7 @@ Select = null
   cursorIsAtEndOfLineAtNonEmptyRow
   buildWordPatternByCursor
   getNonWordCharactersForCursor
+  getFirstCharacterColumForBufferRow
 
   debug
 } = require './utils'
@@ -448,7 +449,7 @@ class MoveToNextSentence extends Motion
 
   # Vim docs say a sentence is [.!?], followed by any number of
   # closing [)\]"'], followed by EOL or whitespace
-  sentenceRegex: /([\.!?][\s\]\)'"]*\s)\S/
+  sentenceRegex: /([\.!?][\s\]\)'"]*\s)(?=\S)/
 
   moveCursor: (cursor) ->
     point = cursor.getBufferPosition()
@@ -456,27 +457,61 @@ class MoveToNextSentence extends Motion
       point = @getPoint(point)
     cursor.setBufferPosition(point)
 
+  findNonblankCharacter: (startRow, direction) ->
+    row = startRow  # in case getBufferRows returns []
+    for row in getBufferRows(@editor, {startRow, direction})
+      break unless @editor.isBufferRowBlank(row)
+    row
+
+  # restricts the search range to the paragraph just after the next blank line
+  findScanPoint: (fromPoint, direction) ->
+    row = fromPoint.row
+    for row in getBufferRows(@editor, {startRow: row, direction})
+      if @editor.isBufferRowBlank(row)
+        switch direction
+          when 'next' then row = @findNonblankCharacter(row, direction)
+          when 'previous' then row += 1
+        break
+    # allow cursor to move to EOF if we're on the last line
+    end = @getVimEofBufferPosition()
+    return end if row is end.row
+    new Point(row, getFirstCharacterColumForBufferRow(@editor, row))
+
   getPoint: (fromPoint) ->
-    scanRange = [fromPoint, @getVimEofBufferPosition()]
+    pt = @findScanPoint(fromPoint, 'next')
+    scanRange = new Range(fromPoint, pt)
     foundPoint = null
     @editor.scanInBufferRange @sentenceRegex, scanRange, ({range}) ->
-      foundPoint = range.end.translate([0, -1])
-    foundPoint or @getVimEofBufferPosition()
+      foundPoint = range.end
+    if fromPoint.isEqual(scanRange.end)
+      @getVimEofBufferPosition()
+    else
+      foundPoint or scanRange.end
 
 class MoveToPreviousSentence extends MoveToNextSentence
   @extend()
 
+  findReverseScanPoint: (fromPoint, direction) ->
+    row = fromPoint.row
+    if @editor.isBufferRowBlank(row - 1)
+      # cursor must be at the start of the sentence before leaving this row
+      column = getFirstCharacterColumForBufferRow(@editor, row)
+      if fromPoint.column is column or @editor.isBufferRowBlank(row)
+        row = @findNonblankCharacter(row - 1, direction)
+      else
+        return new Point(row, column)   # move to start of sentence
+    @findScanPoint(new Point(row, fromPoint.column), direction)
+
   getPoint: (fromPoint) ->
-    scanRange = [[0, 0], fromPoint]
+    pt = @findReverseScanPoint(fromPoint, 'previous')
+    scanRange = new Range(pt, fromPoint.translate([0, -1]))
     foundPoint = null
     @editor.backwardsScanInBufferRange @sentenceRegex, scanRange, ({range}) ->
-      foundPoint = range.end.translate([0, -1])
-
+      foundPoint = range.end
+    return foundPoint if foundPoint
     # if no sentence was found, move to first nonblank character in file
-    unless foundPoint
-      @editor.scanInBufferRange /\S/, scanRange, ({range}) ->
-        foundPoint = range.start
-    foundPoint or [0, 0]
+    row = scanRange.start.row
+    new Point(row, getFirstCharacterColumForBufferRow(@editor, row))
 
 # Paragraph
 # -------------------------
