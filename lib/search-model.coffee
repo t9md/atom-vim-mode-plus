@@ -1,6 +1,6 @@
 {Emitter, CompositeDisposable} = require 'atom'
 {
-  highlightRanges
+  highlightRange
   scanInRanges
   getVisibleBufferRange
   smartScrollToBufferPosition
@@ -30,6 +30,7 @@ class SearchModel
         return
 
       if settings.get('showHoverSearchCounter')
+        @vimState.hoverSearchCounter.reset()
         hoverOptions =
           text: "#{@currentMatchIndex + 1}/#{@matches.length}"
           classList: @classNamesForRange(@currentMatch)
@@ -39,17 +40,18 @@ class SearchModel
 
         @vimState.hoverSearchCounter.withTimeout(@currentMatch.start, hoverOptions)
 
-      if settings.get('flashOnSearch')
-        @flashRange(@currentMatch)
-
       @editor.unfoldBufferRow(@currentMatch.start.row)
       smartScrollToBufferPosition(@editor, @currentMatch.start)
 
-  flashMarkers = []
+      if settings.get('flashOnSearch')
+        @flashRange(@currentMatch)
+
+  flashMarkers = null
   flashRange: (range) ->
-    marker.destroy() for marker in flashMarkers
-    options = {class: 'vim-mode-plus-flash', timeout: settings.get('flashOnSearchDuration')}
-    flashMarkers = highlightRanges(@editor, range, options)
+    flashMarkers?.destroy()
+    flashMarker = highlightRange @editor, range,
+      class: 'vim-mode-plus-flash'
+      timeout: settings.get('flashOnSearchDuration')
 
   destroy: ->
     @markerLayer.destroy()
@@ -61,13 +63,8 @@ class SearchModel
 
   scan: (@pattern) ->
     @matches = []
-    {scanRanges} = @options
-    if scanRanges.length
-      for range in scanInRanges(@editor, @pattern, scanRanges)
-        @matches.push(range)
-    else
-      @editor.scan @pattern, ({range}) =>
-        @matches.push(range)
+    @editor.scan @pattern, ({range}) =>
+      @matches.push(range)
 
     # [NOTE] others is not used, but dont changge this to bare ...
     # It affect behavior when matched range was only one.

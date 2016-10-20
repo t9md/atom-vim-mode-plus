@@ -23,16 +23,14 @@ class SearchBase extends Motion
   backwards: false
   useRegexp: true
   configScope: null
-  updateSearchHistory: true
   landingPoint: null # ['start' or 'end']
   defaultLandingPoint: 'start' # ['start' or 'end']
-  quiet: false
-
-  isQuiet: ->
-    @quiet
 
   isBackwards: ->
     @backwards
+
+  isIncrementalSearch: ->
+    @instanceof('Search') and not @isRepeated() and settings.get('incrementalSearch')
 
   getCount: ->
     count = super
@@ -41,15 +39,6 @@ class SearchBase extends Motion
     else
       count
 
-  getVisualEffectFor: (key) ->
-    if @isQuiet()
-      false
-    else
-      settings.get(key)
-
-  needToUpdateSearchHistory: ->
-    @updateSearchHistory and not @isRepeated()
-
   isCaseSensitive: (term) ->
     switch getCaseSensitivity(@configScope)
       when 'smartcase' then term.search('[A-Z]') isnt -1
@@ -57,7 +46,7 @@ class SearchBase extends Motion
       when 'sensitive' then true
 
   finish: ->
-    if @isIncrementalSearch?() and @getVisualEffectFor('showHoverSearchCounter')
+    if @isIncrementalSearch() and settings.get('showHoverSearchCounter')
       @vimState.hoverSearchCounter.reset()
     @searchModel?.destroy()
     @searchModel = null
@@ -80,25 +69,20 @@ class SearchBase extends Motion
     if point = @getPoint(cursor)
       cursor.setBufferPosition(point, autoscroll: false)
 
-    if @needToUpdateSearchHistory()
+    unless @isRepeated()
       @globalState.set('currentSearch', this)
       @vimState.searchHistory.save(input)
 
-    unless @isQuiet()
-      @globalState.set('lastSearchPattern', @getPattern(input))
+    @globalState.set('lastSearchPattern', @getPattern(input))
 
     @finish()
-
-  getScanRanges: ->
-    []
 
   getSearchModel: ->
     if @searchModel?
       @searchModel
     else
       options = {
-        scanRanges: @getScanRanges()
-        incrementalSearch: @isIncrementalSearch?()
+        incrementalSearch: @isIncrementalSearch()
       }
       @searchModel = new SearchModel(@vimState, options)
 
@@ -115,9 +99,6 @@ class Search extends SearchBase
   configScope: "Search"
   requireInput: true
 
-  isIncrementalSearch: ->
-    settings.get('incrementalSearch') and not @isRepeated()
-
   initialize: ->
     super
     # When repeated, no need to get user input
@@ -126,23 +107,19 @@ class Search extends SearchBase
     restoreEditorState = null
     if @isIncrementalSearch()
       restoreEditorState = saveEditorState(@editor)
-
       @onDidCommandSearch (commandEvent) =>
         return unless @input
         switch commandEvent.name
           when 'visit' then @handleVisitCommand(commandEvent)
           when 'occurrence' then @handleOccurrenceCommand(commandEvent)
 
-      @onDidConfirmSearch (event) =>
-        {@input, @landingPoint} = event
-        @processOperation()
-    else
-      @onDidConfirmSearch ({@input, @landingPoint}) =>
+    @onDidConfirmSearch ({@input, @landingPoint}) =>
+      unless @isIncrementalSearch()
         searchChar = if @isBackwards() then '?' else '/'
         if @input in ['', searchChar]
           @input = @vimState.searchHistory.get('prev')
           atom.beep() unless @input
-        @processOperation()
+      @processOperation()
 
     @onDidCancelSearch =>
       unless @isMode('visual') or @isMode('insert')
@@ -154,7 +131,7 @@ class Search extends SearchBase
     # If input starts with space, remove first space and disable useRegexp.
     @onDidChangeSearch (@input) =>
       if @input.startsWith(' ')
-        @input = input.replace(/^ /, '')
+        @input = @input.replace(/^ /, '')
         @useRegexp = false
       @vimState.searchInput.updateOptionSettings({@useRegexp})
 
@@ -169,10 +146,11 @@ class Search extends SearchBase
         when 'next' then 'prev'
         when 'prev' then 'next'
 
-    relativeIndex = if direction is 'next' then +1 else -1
-    @getSearchModel().updateCurrentMatch(relativeIndex)
+    switch direction
+      when 'next' then @getSearchModel().updateCurrentMatch(+1)
+      when 'prev' then @getSearchModel().updateCurrentMatch(-1)
 
-  handleOccurrenceCommand: ({operation, pattern}) ->
+  handleOccurrenceCommand: ({operation}) ->
     @vimState.occurrenceManager.resetPatterns() if operation?
 
     @vimState.occurrenceManager.addPattern(@getPattern(@input))

@@ -391,6 +391,9 @@ highlightRanges = (editor, ranges, options) ->
     setTimeout(destroyMarkers, timeout)
   markers
 
+highlightRange = (editor, range, options) ->
+  highlightRanges(editor, [range], options)[0]
+
 # Return valid row from 0 to vimLastBufferRow
 getValidVimBufferRow = (editor, row) ->
   vimLastBufferRow = getVimLastBufferRow(editor)
@@ -833,6 +836,7 @@ module.exports = {
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
   highlightRanges
+  highlightRange
   getValidVimBufferRow
   getValidVimScreenRow
   moveCursorToFirstCharacterAtRow
