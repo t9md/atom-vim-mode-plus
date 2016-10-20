@@ -201,16 +201,6 @@ class SearchBackwards extends Search
   @extend()
   backwards: true
 
-class SearchCurrentLine extends Search
-  @extend()
-  quiet: true
-  getScanRanges: ->
-    [@editor.getLastCursor().getCurrentLineBufferRange()]
-
-class SearchCurrentLineBackwards extends SearchCurrentLine
-  @extend()
-  backwards: true
-
 # *, #
 # -------------------------
 class SearchCurrentWord extends SearchBase
