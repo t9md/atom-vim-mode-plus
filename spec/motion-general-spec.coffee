@@ -577,6 +577,59 @@ describe "Motion general", ->
           set cursor: [0, 0]
           ensure 'v E E y', register: '"': text: 'ab  cde1+-'
 
+  describe "the (,) sentence keybinding", ->
+    describe "as a motion", ->
+      beforeEach ->
+        set text: """
+          sentence one.])'"    sen.tence .two here.
+
+          sentence three.
+          """
+
+      it "moves the cursor to the end of the sentence", ->
+        set cursor: [0, 0]
+        ensure ')', cursor: [0, 21]
+        ensure ')', cursor: [2, 0]
+        ensure ')', cursor: [2, 14]
+        ensure ')', cursor: [2, 14]
+        ensure '(', cursor: [2, 0]
+        ensure '(', cursor: [0, 21]
+        ensure '(', cursor: [0, 0]
+        ensure '(', cursor: [0, 0]
+
+      it "supports a count", ->
+        set cursor: [0, 0]
+        ensure '2 )', cursor: [2, 0]
+        ensure '2 (', cursor: [0, 0]
+
+      it "can move start of buffer or end of buffer at maximum", ->
+        set cursor: [0, 0]
+        ensure '1 0 }', cursor: [2, 14]
+        ensure '1 0 {', cursor: [0, 0]
+
+    describe "moving inside a blank document", ->
+      beforeEach ->
+        set text: "     \n     "
+
+      it "moves without crashing", ->
+        set cursor: [0, 0]
+        ensure ')', cursor: [1, 4]
+        ensure ')', cursor: [1, 4]
+        ensure '(', cursor: [0, 0]
+        ensure '(', cursor: [0, 0]
+
+    describe "as a selection", ->
+      beforeEach ->
+        set text: "sentence one. sentence two.\n  sentence three."
+
+      it 'selects to the end of the current sentence', ->
+        set cursor: [0, 20]
+        ensure 'y )', register: '"': text: "ce two.\n  "
+
+      it 'selects to the beginning of the current sentence', ->
+        set cursor: [0, 20]
+        ensure 'y (', register: '"': text: "senten"
+
   describe "the {,} keybinding", ->
     beforeEach ->
       set
