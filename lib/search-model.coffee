@@ -24,13 +24,12 @@ class SearchModel
     @onDidChangeCurrentMatch =>
       @updateView() if @options.incrementalSearch
 
+      @vimState.hoverSearchCounter.reset()
       unless @currentMatch?
         @flashScreen() if settings.get('flashScreenOnSearchHasNoMatch')
-        @vimState.hoverSearchCounter.reset()
         return
 
       if settings.get('showHoverSearchCounter')
-        @vimState.hoverSearchCounter.reset()
         hoverOptions =
           text: "#{@currentMatchIndex + 1}/#{@matches.length}"
           classList: @classNamesForRange(@currentMatch)
@@ -61,15 +60,6 @@ class SearchModel
     for marker in @markerLayer.getMarkers()
       marker.destroy()
 
-  scan: (@pattern) ->
-    @matches = []
-    @editor.scan @pattern, ({range}) =>
-      @matches.push(range)
-
-    # [NOTE] others is not used, but dont changge this to bare ...
-    # It affect behavior when matched range was only one.
-    [@firstMatch, others..., @lastMatch] = @matches
-
   classNamesForRange: (range) ->
     classNames = []
     if range is @firstMatch
@@ -98,22 +88,25 @@ class SearchModel
       type: 'highlight'
       class: classNames.join(' ')
 
-  findMatch: (fromPoint, relativeIndex) ->
+  search: (fromPoint, @pattern, relativeIndex) ->
+    @matches = []
+    @editor.scan @pattern, ({range}) =>
+      @matches.push(range)
+
+    [@firstMatch, ..., @lastMatch] = @matches
+
     currentMatch = null
-
-    [firstMatch, ..., lastMatch] = @matches
-
     if relativeIndex >= 0
       for range in @matches when range.start.isGreaterThan(fromPoint)
         currentMatch = range
         break
-      currentMatch ?= firstMatch
+      currentMatch ?= @firstMatch
       relativeIndex--
     else
       for range in @matches by -1 when range.start.isLessThan(fromPoint)
         currentMatch = range
         break
-      currentMatch ?= lastMatch
+      currentMatch ?= @lastMatch
       relativeIndex++
 
     @currentMatchIndex = @matches.indexOf(currentMatch)
@@ -130,5 +123,5 @@ class SearchModel
 
   flashScreen: ->
     options = {class: 'vim-mode-plus-flash', timeout: 100}
-    highlightRanges(@editor, getVisibleBufferRange(@editor), options)
+    highlightRange(@editor, getVisibleBufferRange(@editor), options)
     atom.beep()

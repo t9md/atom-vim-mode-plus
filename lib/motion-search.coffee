@@ -1,11 +1,7 @@
 _ = require 'underscore-plus'
 
-{
-  saveEditorState
-  getNonWordCharactersForCursor
-} = require './utils'
+{saveEditorState, getNonWordCharactersForCursor} = require './utils'
 SearchModel = require './search-model'
-
 settings = require './settings'
 Motion = require('./base').getClass('Motion')
 
@@ -78,19 +74,16 @@ class SearchBase extends Motion
     @finish()
 
   getSearchModel: ->
-    if @searchModel?
-      @searchModel
-    else
-      options = {
-        incrementalSearch: @isIncrementalSearch()
-      }
-      @searchModel = new SearchModel(@vimState, options)
+    @searchModel ?= new SearchModel(@vimState, incrementalSearch: @isIncrementalSearch())
 
   search: (cursor, input, relativeIndex) ->
     searchModel = @getSearchModel()
-    searchModel.scan(@getPattern(input))
-    fromPoint = @getBufferPositionForCursor(cursor)
-    searchModel.findMatch(fromPoint, relativeIndex)
+    if input
+      fromPoint = @getBufferPositionForCursor(cursor)
+      searchModel.search(fromPoint, @getPattern(input), relativeIndex)
+    else
+      @vimState.hoverSearchCounter.reset()
+      searchModel.clearMarkers()
 
 # /, ?
 # -------------------------
