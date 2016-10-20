@@ -442,6 +442,55 @@ class MoveToEndOfSmartWord extends MoveToEndOfWord
   @description: "Move to end of smart word (`/[\w-]+/`) word"
   wordRegex: /[\w-]+/
 
+# Sentence
+# -------------------------
+class MoveToNextSentence extends Motion
+  @extend()
+
+  # Vim docs say a sentence is [.!?], followed by any number of
+  # closing [)\]"'], followed by EOL or whitespace
+  sentenceRegex: /([\.!?][\s\]\)'"]*\s)\S/
+
+  # TODO: hm, this function is the same as MoveToNextParagraph
+  moveCursor: (cursor) ->
+    point = cursor.getBufferPosition()
+    @countTimes =>
+      point = @getPoint(point)
+    cursor.setBufferPosition(point)
+
+  moveToEndOfString: (pt, string) ->
+    lines = string.split('\n')
+    rows = lines.length - 1
+    columns = lines[rows].length
+    if rows > 0
+       # go to 1st column if moving down a line
+      columns -= pt.column
+    pt.translate([rows, columns])
+
+  getPoint: (fromPoint) ->
+    scanRange = [fromPoint, @getVimEofBufferPosition()]
+    foundPoint = null
+    @editor.scanInBufferRange @sentenceRegex, scanRange, ({range, match, stop}) =>
+      foundPoint = @moveToEndOfString(range.start, match[1])
+      stop()
+    foundPoint or @getVimEofBufferPosition()
+
+class MoveToPreviousSentence extends MoveToNextSentence
+  @extend()
+
+  getPoint: (fromPoint) ->
+    scanRange = [[0, 0], fromPoint]
+    foundPoint = null
+    @editor.backwardsScanInBufferRange @sentenceRegex, scanRange, ({range, match, stop}) =>
+      foundPoint = @moveToEndOfString(range.start, match[1])
+      stop()
+    # if no sentence was found, move to first nonblank character in file
+    if not foundPoint
+      @editor.scanInBufferRange /\S/, scanRange, ({range, stop}) ->
+        foundPoint = range.start
+        stop()
+    foundPoint or [0, 0]
+
 # Paragraph
 # -------------------------
 class MoveToNextParagraph extends Motion

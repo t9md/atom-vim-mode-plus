@@ -69,6 +69,8 @@
   'b': 'vim-mode-plus:move-to-previous-word'
   # 'b':     'vim-mode-plus:move-to-previous-alphanumeric-word'
   'B': 'vim-mode-plus:move-to-previous-whole-word'
+  ')': 'vim-mode-plus:move-to-next-sentence'
+  '(': 'vim-mode-plus:move-to-previous-sentence'
   '}': 'vim-mode-plus:move-to-next-paragraph'
   '{': 'vim-mode-plus:move-to-previous-paragraph'
   '0': 'vim-mode-plus:move-to-beginning-of-line'
