@@ -6,7 +6,8 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 {HoverElement} = require './hover'
-{InputElement, SearchInputElement} = require './input'
+{InputElement} = require './input'
+{SearchInputElement} = require './search-input'
 {
   haveSomeNonEmptySelection
   highlightRanges
