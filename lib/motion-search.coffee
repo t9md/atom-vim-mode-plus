@@ -94,63 +94,65 @@ class Search extends SearchBase
 
   initialize: ->
     super
-    # When repeated, no need to get user input
-    return if @isComplete()
+    return if @isComplete() # When repeated, no need to get user input
 
-    restoreEditorState = null
     if @isIncrementalSearch()
-      restoreEditorState = saveEditorState(@editor)
-      @onDidCommandSearch (commandEvent) =>
-        return unless @input
-        switch commandEvent.name
-          when 'visit' then @handleVisitCommand(commandEvent)
-          when 'occurrence' then @handleOccurrenceCommand(commandEvent)
+      @restoreEditorState = saveEditorState(@editor)
+      @onDidCommandSearch(@handleCommandEvent.bind(this))
 
-    @onDidConfirmSearch ({@input, @landingPoint}) =>
-      unless @isIncrementalSearch()
-        searchChar = if @isBackwards() then '?' else '/'
-        if @input in ['', searchChar]
-          @input = @vimState.searchHistory.get('prev')
-          atom.beep() unless @input
-      @processOperation()
-
-    @onDidCancelSearch =>
-      unless @isMode('visual') or @isMode('insert')
-        @vimState.resetNormalMode()
-      restoreEditorState?()
-      @vimState.reset()
-      @finish()
-
-    # If input starts with space, remove first space and disable useRegexp.
-    @onDidChangeSearch (@input) =>
-      if @input.startsWith(' ')
-        @input = @input.replace(/^ /, '')
-        @useRegexp = false
-      @vimState.searchInput.updateOptionSettings({@useRegexp})
-
-      if @isIncrementalSearch()
-        @search(@editor.getLastCursor(), @input, @getCount())
+    @onDidConfirmSearch(@handleConfirmSearch.bind(this))
+    @onDidCancelSearch(@handleCancelSeach.bind(this))
+    @onDidChangeSearch(@handleChangeSearch.bind(this))
 
     @vimState.searchInput.focus({@backwards})
 
-  handleVisitCommand: ({direction}) ->
-    if @isBackwards() and settings.get('incrementalSearchVisitDirection') is 'relative'
-      direction = switch direction
-        when 'next' then 'prev'
-        when 'prev' then 'next'
+  handleCommandEvent: (commandEvent) ->
+    return unless @input
+    switch commandEvent.name
+      when 'visit'
+        {direction} = commandEvent
+        if @isBackwards() and settings.get('incrementalSearchVisitDirection') is 'relative'
+          direction = switch direction
+            when 'next' then 'prev'
+            when 'prev' then 'next'
 
-    switch direction
-      when 'next' then @getSearchModel().updateCurrentMatch(+1)
-      when 'prev' then @getSearchModel().updateCurrentMatch(-1)
+        switch direction
+          when 'next' then @getSearchModel().updateCurrentMatch(+1)
+          when 'prev' then @getSearchModel().updateCurrentMatch(-1)
 
-  handleOccurrenceCommand: ({operation}) ->
-    @vimState.occurrenceManager.resetPatterns() if operation?
+      when 'occurrence'
+        {operation} = commandEvent
+        @vimState.occurrenceManager.resetPatterns() if operation?
 
-    @vimState.occurrenceManager.addPattern(@getPattern(@input))
-    @vimState.searchHistory.save(@input)
-    @vimState.searchInput.cancel()
+        @vimState.occurrenceManager.addPattern(@getPattern(@input))
+        @vimState.searchHistory.save(@input)
+        @vimState.searchInput.cancel()
 
-    @vimState.operationStack.run(operation) if operation?
+        @vimState.operationStack.run(operation) if operation?
+
+  handleCancelSeach: ->
+    @vimState.resetNormalMode() unless @isMode('visual') or @isMode('insert')
+    @restoreEditorState?()
+    @vimState.reset()
+    @finish()
+
+  handleConfirmSearch: ({@input, @landingPoint}) =>
+    unless @isIncrementalSearch()
+      searchChar = if @isBackwards() then '?' else '/'
+      if @input in ['', searchChar]
+        @input = @vimState.searchHistory.get('prev')
+        atom.beep() unless @input
+    @processOperation()
+
+  handleChangeSearch: (@input) ->
+    # If input starts with space, remove first space and disable useRegexp.
+    if @input.startsWith(' ')
+      @input = @input.replace(/^ /, '')
+      @useRegexp = false
+    @vimState.searchInput.updateOptionSettings({@useRegexp})
+
+    if @isIncrementalSearch()
+      @search(@editor.getLastCursor(), @input, @getCount())
 
   getPattern: (term) ->
     modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
