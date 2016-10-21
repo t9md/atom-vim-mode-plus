@@ -457,29 +457,31 @@ class MoveToNextSentence extends Motion
       point = @getPoint(point)
     cursor.setBufferPosition(point)
 
-  findNonblankCharacter: (startRow, direction) ->
-    row = startRow  # in case getBufferRows returns []
-    for row in getBufferRows(@editor, {startRow, direction})
-      break unless @editor.isBufferRowBlank(row)
-    row
+  getNonBlankRow: (startRow, direction) ->
+    rows = getBufferRows(@editor, {startRow, direction})
+    for row in rows when not @editor.isBufferRowBlank(row)
+      return row
+    startRow
 
   # restricts the search range to the paragraph just after the next blank line
   findScanPoint: (fromPoint, direction) ->
     row = fromPoint.row
-    for row in getBufferRows(@editor, {startRow: row, direction})
-      if @editor.isBufferRowBlank(row)
-        switch direction
-          when 'next' then row = @findNonblankCharacter(row, direction)
-          when 'previous' then row += 1
-        break
-    # allow cursor to move to EOF if we're on the last line
-    end = @getVimEofBufferPosition()
-    return end if row is end.row
-    new Point(row, getFirstCharacterColumForBufferRow(@editor, row))
+    rows = getBufferRows(@editor, {startRow: row, direction})
+    for row in rows when @editor.isBufferRowBlank(row)
+      row = switch direction
+        when 'next' then @getNonBlankRow(row, 'next')
+        when 'previous' then row + 1
+      break
+
+    vimEof = @getVimEofBufferPosition()
+    if row is vimEof.row
+      vimEof
+    else
+      new Point(row, getFirstCharacterColumForBufferRow(@editor, row))
 
   getPoint: (fromPoint) ->
-    pt = @findScanPoint(fromPoint, 'next')
-    scanRange = new Range(fromPoint, pt)
+    point = @findScanPoint(fromPoint, 'next')
+    scanRange = new Range(fromPoint, point)
     foundPoint = null
     @editor.scanInBufferRange @sentenceRegex, scanRange, ({range}) ->
       foundPoint = range.end
@@ -497,14 +499,14 @@ class MoveToPreviousSentence extends MoveToNextSentence
       # cursor must be at the start of the sentence before leaving this row
       column = getFirstCharacterColumForBufferRow(@editor, row)
       if fromPoint.column is column or @editor.isBufferRowBlank(row)
-        row = @findNonblankCharacter(row - 1, direction)
+        row = @getNonBlankRow(row - 1, direction)
       else
         return new Point(row, column)   # move to start of sentence
     @findScanPoint(new Point(row, fromPoint.column), direction)
 
   getPoint: (fromPoint) ->
-    pt = @findReverseScanPoint(fromPoint, 'previous')
-    scanRange = new Range(pt, fromPoint.translate([0, -1]))
+    point = @findReverseScanPoint(fromPoint, 'previous')
+    scanRange = new Range(point, fromPoint.translate([0, -1]))
     foundPoint = null
     @editor.backwardsScanInBufferRange @sentenceRegex, scanRange, ({range}) ->
       foundPoint = range.end
