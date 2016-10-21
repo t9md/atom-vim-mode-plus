@@ -580,35 +580,50 @@ describe "Motion general", ->
   describe "the (,) sentence keybinding", ->
     describe "as a motion", ->
       beforeEach ->
-        set text: """
-          sentence one.])'"    sen.tence .two
+        set
+          cursor: [0, 0]
+          text: """
+          sentence one.])'"    sen.tence .two.
           here.  sentence three
           more three
 
              sentence four
 
 
-          sentence five
+          sentence five.
           more five
+          more six
 
            last sentence
-          all done six
+          all done seven
           """
 
       it "moves the cursor to the end of the sentence", ->
-        set cursor: [0, 0]
         ensure ')', cursor: [0, 21]
+        ensure ')', cursor: [1, 0]
         ensure ')', cursor: [1, 7]
+        ensure ')', cursor: [3, 0]
         ensure ')', cursor: [4, 3]
+        ensure ')', cursor: [5, 0] # boundary is different by direction
         ensure ')', cursor: [7, 0]
-        ensure ')', cursor: [10, 1]
-        ensure ')', cursor: [11, 11]
-        ensure ')', cursor: [11, 11]
-        ensure '(', cursor: [10, 1]
+        ensure ')', cursor: [8, 0]
+        ensure ')', cursor: [10, 0]
+        ensure ')', cursor: [11, 1]
+
+        ensure ')', cursor: [12, 13]
+        ensure ')', cursor: [12, 13]
+
+        ensure '(', cursor: [11, 1]
+        ensure '(', cursor: [10, 0]
+        ensure '(', cursor: [8, 0]
         ensure '(', cursor: [7, 0]
+        ensure '(', cursor: [6, 0] # boundary is different by direction
         ensure '(', cursor: [4, 3]
+        ensure '(', cursor: [3, 0]
         ensure '(', cursor: [1, 7]
+        ensure '(', cursor: [1, 0]
         ensure '(', cursor: [0, 21]
+
         ensure '(', cursor: [0, 0]
         ensure '(', cursor: [0, 0]
 
@@ -618,17 +633,21 @@ describe "Motion general", ->
 
       it "supports a count", ->
         set cursor: [0, 0]
-        ensure '3 )', cursor: [4, 3]
+        ensure '3 )', cursor: [1, 7]
         ensure '3 (', cursor: [0, 0]
 
       it "can move start of buffer or end of buffer at maximum", ->
         set cursor: [0, 0]
-        ensure '1 0 )', cursor: [11, 11]
-        ensure '1 0 (', cursor: [0, 0]
+        ensure '2 0 )', cursor: [12, 13]
+        ensure '2 0 (', cursor: [0, 0]
 
     describe "moving inside a blank document", ->
       beforeEach ->
-        set text: "     \n     "
+        set
+          text_: """
+          _____
+          _____
+          """
 
       it "moves without crashing", ->
         set cursor: [0, 0]
