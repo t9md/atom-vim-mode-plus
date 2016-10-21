@@ -581,31 +581,50 @@ describe "Motion general", ->
     describe "as a motion", ->
       beforeEach ->
         set text: """
-          sentence one.])'"    sen.tence .two here.
+          sentence one.])'"    sen.tence .two
+          here.  sentence three
+          more three
 
-          sentence three.
+             sentence four
+
+
+          sentence five
+          more five
+
+           last sentence
+          all done six
           """
 
       it "moves the cursor to the end of the sentence", ->
         set cursor: [0, 0]
         ensure ')', cursor: [0, 21]
-        ensure ')', cursor: [2, 0]
-        ensure ')', cursor: [2, 14]
-        ensure ')', cursor: [2, 14]
-        ensure '(', cursor: [2, 0]
+        ensure ')', cursor: [1, 7]
+        ensure ')', cursor: [4, 3]
+        ensure ')', cursor: [7, 0]
+        ensure ')', cursor: [10, 1]
+        ensure ')', cursor: [11, 11]
+        ensure ')', cursor: [11, 11]
+        ensure '(', cursor: [10, 1]
+        ensure '(', cursor: [7, 0]
+        ensure '(', cursor: [4, 3]
+        ensure '(', cursor: [1, 7]
         ensure '(', cursor: [0, 21]
         ensure '(', cursor: [0, 0]
         ensure '(', cursor: [0, 0]
 
+      it "skips to beginning of sentence", ->
+        set cursor: [4, 15]
+        ensure '(', cursor: [4, 3]
+
       it "supports a count", ->
         set cursor: [0, 0]
-        ensure '2 )', cursor: [2, 0]
-        ensure '2 (', cursor: [0, 0]
+        ensure '3 )', cursor: [4, 3]
+        ensure '3 (', cursor: [0, 0]
 
       it "can move start of buffer or end of buffer at maximum", ->
         set cursor: [0, 0]
-        ensure '1 0 }', cursor: [2, 14]
-        ensure '1 0 {', cursor: [0, 0]
+        ensure '1 0 )', cursor: [11, 11]
+        ensure '1 0 (', cursor: [0, 0]
 
     describe "moving inside a blank document", ->
       beforeEach ->
