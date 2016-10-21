@@ -223,6 +223,17 @@ getBufferRows = (editor, {startRow, direction}) ->
       else
         [(startRow + 1)..vimLastBufferRow]
 
+getParagraphBoundaryRow = (editor, startRow, direction, fn) ->
+  wasAtNonBlankRow = not editor.isBufferRowBlank(startRow)
+  for row in getBufferRows(editor, {startRow, direction})
+    isAtNonBlankRow = not editor.isBufferRowBlank(row)
+    if wasAtNonBlankRow isnt isAtNonBlankRow
+      if fn?
+        return row if fn?(isAtNonBlankRow)
+      else
+        return row
+    wasAtNonBlankRow = isAtNonBlankRow
+
 # Return Vim's EOF position rather than Atom's EOF position.
 # This function change meaning of EOF from native TextEditor::getEofBufferPosition()
 # Atom is special(strange) for cursor can past very last newline character.
@@ -868,6 +879,7 @@ module.exports = {
   scanForScopeStart
   detectScopeStartPositionForScope
   getBufferRows
+  getParagraphBoundaryRow
   registerElement
   getBufferRangeForPatternFromPoint
   sortComparable
