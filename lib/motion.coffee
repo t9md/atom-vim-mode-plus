@@ -469,6 +469,7 @@ class MoveToNextSentence extends Motion
     foundPoint = null
     @editor.scanInBufferRange @sentenceRegex, scanRange, ({range, matchText, match, stop}) =>
       if match[1]?
+        return if @skipBlankRow and @isBlankRow(range.end.row)
         if @isBlankRow(range.start.row) isnt @isBlankRow(range.end.row)
           foundPoint = @getFirstCharacterPositionForRow(range.end.row)
       else
@@ -493,6 +494,7 @@ class MoveToPreviousSentence extends MoveToNextSentence
           if point.isLessThan(fromPoint)
             foundPoint = point
           else
+            return if @skipBlankRow
             foundPoint = @getFirstCharacterPositionForRow(startRow)
       else
         if range.end.isLessThan(fromPoint)
@@ -502,6 +504,14 @@ class MoveToPreviousSentence extends MoveToNextSentence
 
   getPoint: (fromPoint) ->
     @getPreviousStartOfSentence(fromPoint)
+
+class MoveToNextSentenceSkipBlankRow extends MoveToNextSentence
+  @extend()
+  skipBlankRow: true
+
+class MoveToPreviousSentenceSkipBlankRow extends MoveToPreviousSentence
+  @extend()
+  skipBlankRow: true
 
 # Paragraph
 # -------------------------
