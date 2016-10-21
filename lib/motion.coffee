@@ -476,9 +476,10 @@ class MoveToNextSentence extends Motion
     foundPoint = null
     @editor.scanInBufferRange @sentenceRegex, scanRange, ({range, matchText, match, stop}) =>
       if match[1]?
-        return if @skipBlankRow and @isBlankRow(range.end.row)
-        if @isBlankRow(range.start.row) isnt @isBlankRow(range.end.row)
-          foundPoint = @getFirstCharacterPositionForRow(range.end.row)
+        {start: {row: startRow}, end: {row: endRow}} = range
+        return if @skipBlankRow and @isBlankRow(endRow)
+        if @isBlankRow(startRow) isnt @isBlankRow(endRow)
+          foundPoint = @getFirstCharacterPositionForRow(endRow)
       else
         foundPoint = range.end
       stop() if foundPoint?
