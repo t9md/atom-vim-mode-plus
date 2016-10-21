@@ -641,6 +641,36 @@ describe "Motion general", ->
         ensure '2 0 )', cursor: [12, 13]
         ensure '2 0 (', cursor: [0, 0]
 
+      describe "sentence motion with skip-blank-row", ->
+        beforeEach ->
+          atom.keymaps.add "test",
+            'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+              'g )': 'vim-mode-plus:move-to-next-sentence-skip-blank-row'
+              'g (': 'vim-mode-plus:move-to-previous-sentence-skip-blank-row'
+
+        it "moves the cursor to the end of the sentence", ->
+          ensure 'g )', cursor: [0, 21]
+          ensure 'g )', cursor: [1, 0]
+          ensure 'g )', cursor: [1, 7]
+          ensure 'g )', cursor: [4, 3]
+          ensure 'g )', cursor: [7, 0]
+          ensure 'g )', cursor: [8, 0]
+          ensure 'g )', cursor: [11, 1]
+
+          ensure 'g )', cursor: [12, 13]
+          ensure 'g )', cursor: [12, 13]
+
+          ensure 'g (', cursor: [11, 1]
+          ensure 'g (', cursor: [8, 0]
+          ensure 'g (', cursor: [7, 0]
+          ensure 'g (', cursor: [4, 3]
+          ensure 'g (', cursor: [1, 7]
+          ensure 'g (', cursor: [1, 0]
+          ensure 'g (', cursor: [0, 21]
+
+          ensure 'g (', cursor: [0, 0]
+          ensure 'g (', cursor: [0, 0]
+
     describe "moving inside a blank document", ->
       beforeEach ->
         set

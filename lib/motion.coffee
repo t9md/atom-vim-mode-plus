@@ -451,12 +451,19 @@ class MoveToEndOfSmartWord extends MoveToEndOfWord
 class MoveToNextSentence extends Motion
   @extend()
   sentenceRegex: ///(?:[\.!\?][\)\]"']*\s+)|(\n|\r\n)///g
+  direction: 'next'
 
   moveCursor: (cursor) ->
     point = cursor.getBufferPosition()
     @countTimes =>
       point = @getPoint(point)
     cursor.setBufferPosition(point)
+
+  getPoint: (fromPoint) ->
+    if @direction is 'next'
+      @getNextStartOfSentence(fromPoint)
+    else if @direction is 'previous'
+      @getPreviousStartOfSentence(fromPoint)
 
   getFirstCharacterPositionForRow: (row) ->
     new Point(row, getFirstCharacterColumForBufferRow(@editor, row))
@@ -477,14 +484,8 @@ class MoveToNextSentence extends Motion
       stop() if foundPoint?
     foundPoint ? scanRange.end
 
-  getPoint: (fromPoint) ->
-    @getNextStartOfSentence(fromPoint)
-
-class MoveToPreviousSentence extends MoveToNextSentence
-  @extend()
-
   getPreviousStartOfSentence: (fromPoint) ->
-    scanRange = [fromPoint, [0, 0]]
+    scanRange = new Range(fromPoint, [0, 0])
     foundPoint = null
     @editor.backwardsScanInBufferRange @sentenceRegex, scanRange, ({range, match, stop, matchText}) =>
       if match[1]?
@@ -500,10 +501,11 @@ class MoveToPreviousSentence extends MoveToNextSentence
         if range.end.isLessThan(fromPoint)
           foundPoint = range.end
       stop() if foundPoint?
-    foundPoint ? [0, 0]
+    foundPoint ? scanRange.start
 
-  getPoint: (fromPoint) ->
-    @getPreviousStartOfSentence(fromPoint)
+class MoveToPreviousSentence extends MoveToNextSentence
+  @extend()
+  direction: 'previous'
 
 class MoveToNextSentenceSkipBlankRow extends MoveToNextSentence
   @extend()
