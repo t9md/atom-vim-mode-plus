@@ -28,8 +28,6 @@ Select = null
   getFirstCharacterBufferPositionForScreenRow
   getTextInScreenRange
   cursorIsAtEndOfLineAtNonEmptyRow
-  buildWordPatternByCursor
-  getNonWordCharactersForCursor
   getFirstCharacterColumForBufferRow
 
   debug
@@ -452,7 +450,7 @@ class MoveToEndOfSmartWord extends MoveToEndOfWord
 #  - section boundary is also sentence boundary(ignore)
 class MoveToNextSentence extends Motion
   @extend()
-  sentenceRegex: ///[\.!\?][\)\]"']*\s+///g
+  sentenceRegex: ///(?:[\.!\?][\)\]"']*\s+)|(\n|\r\n)///g
 
   moveCursor: (cursor) ->
     point = cursor.getBufferPosition()
@@ -463,37 +461,23 @@ class MoveToNextSentence extends Motion
   getFirstCharacterPositionForRow: (row) ->
     new Point(row, getFirstCharacterColumForBufferRow(@editor, row))
 
-  getParagraphBoundaryRow: (startRow, direction, fn) ->
-    wasAtNonBlankRow = not @editor.isBufferRowBlank(startRow)
-    for row in getBufferRows(@editor, {startRow, direction})
-      isAtNonBlankRow = not @editor.isBufferRowBlank(row)
-      if wasAtNonBlankRow isnt isAtNonBlankRow
-        if fn?
-          return row if fn?(isAtNonBlankRow)
-        else
-          return row
-      wasAtNonBlankRow = isAtNonBlankRow
+  isBlankRow: (row) ->
+    @editor.isBufferRowBlank(row)
 
   getNextStartOfSentence: (fromPoint) ->
-    scanRange = [fromPoint, @getVimEofBufferPosition()]
+    scanRange = new Range(fromPoint, @getVimEofBufferPosition())
     foundPoint = null
-    @editor.scanInBufferRange @sentenceRegex, scanRange, ({range, stop}) ->
-      foundPoint = range.end
-      stop()
-    foundPoint
+    @editor.scanInBufferRange @sentenceRegex, scanRange, ({range, matchText, match, stop}) =>
+      if match[1]?
+        if @isBlankRow(range.start.row) isnt @isBlankRow(range.end.row)
+          foundPoint = @getFirstCharacterPositionForRow(range.end.row)
+      else
+        foundPoint = range.end
+      stop() if foundPoint?
+    foundPoint ? scanRange.end
 
   getPoint: (fromPoint) ->
-    vimEof = @getVimEofBufferPosition()
-    foundPoint = @getNextStartOfSentence(fromPoint)
-
-    if boundaryRow = @getParagraphBoundaryRow(fromPoint.row, 'next')
-      paragraphBoundaryPoint = @getFirstCharacterPositionForRow(boundaryRow)
-    paragraphBoundaryPoint ?= vimEof
-
-    if foundPoint?
-      Point.min(foundPoint, paragraphBoundaryPoint)
-    else
-      paragraphBoundaryPoint
+    @getNextStartOfSentence(fromPoint)
 
 class MoveToPreviousSentence extends MoveToNextSentence
   @extend()
@@ -501,28 +485,23 @@ class MoveToPreviousSentence extends MoveToNextSentence
   getPreviousStartOfSentence: (fromPoint) ->
     scanRange = [fromPoint, [0, 0]]
     foundPoint = null
-    @editor.backwardsScanInBufferRange @sentenceRegex, scanRange, ({range, match, stop, matchText}) ->
-      if range.end.isLessThan(fromPoint)
-        foundPoint = range.end
-        stop()
-    foundPoint
+    @editor.backwardsScanInBufferRange @sentenceRegex, scanRange, ({range, match, stop, matchText}) =>
+      if match[1]?
+        {start: {row: startRow}, end: {row: endRow}} = range
+        if not @isBlankRow(endRow) and @isBlankRow(startRow)
+          point = @getFirstCharacterPositionForRow(endRow)
+          if point.isLessThan(fromPoint)
+            foundPoint = point
+          else
+            foundPoint = @getFirstCharacterPositionForRow(startRow)
+      else
+        if range.end.isLessThan(fromPoint)
+          foundPoint = range.end
+      stop() if foundPoint?
+    foundPoint ? [0, 0]
 
   getPoint: (fromPoint) ->
-    foundPoint = @getPreviousStartOfSentence(fromPoint)
-
-    isBlank = (isAtNonBlankRow) -> not isAtNonBlankRow
-    if boundaryRow = @getParagraphBoundaryRow(fromPoint.row, 'previous', isBlank)
-      point = @getFirstCharacterPositionForRow(boundaryRow + 1)
-      if point.isLessThan(fromPoint)
-        paragraphBoundaryPoint = point
-      else
-        paragraphBoundaryPoint = @getFirstCharacterPositionForRow(boundaryRow)
-    paragraphBoundaryPoint ?= [0, 0]
-
-    if foundPoint?
-      Point.max(foundPoint, paragraphBoundaryPoint)
-    else
-      paragraphBoundaryPoint
+    @getPreviousStartOfSentence(fromPoint)
 
 # Paragraph
 # -------------------------
