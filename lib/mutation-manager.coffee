@@ -69,7 +69,7 @@ class MutationManager
 
   restoreInitialPositions: ->
     for selection in @editor.getSelections() when point = @getInitialPointForSelection(selection)
-      selection.setBufferPosition(point)
+      selection.cursor.setBufferPosition(point)
 
   restoreCursorPositions: (options) ->
     {stay, strict, clipToMutationEnd, isBlockwise, mutationEnd} = options

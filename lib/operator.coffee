@@ -194,7 +194,8 @@ class Operator extends Base
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
     selectedRanges = @editor.getSelectedBufferRanges()
-    if ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
+    ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
+    if ranges.length
       @vimState.modeManager.deactivate() if @isMode('visual')
       @editor.setSelectedBufferRanges(ranges)
     else
