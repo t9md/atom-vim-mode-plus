@@ -1,3 +1,24 @@
+# 0.61.0:
+- Doc: Simplify README.md
+- New: Sentence motion by @bronson
+  - `move-to-next-sentence`: default keymap `)`
+  - `move-to-previous-sentence`: default keymap `(`
+  - `move-to-next-sentence-skip-blank-row`: no default keymap
+  - `move-to-previous-sentence-skip-blank-row`: no default keymap
+- New: tab to space, space to tab conversion operator by @zhaocai #432, #433
+  - `convert-to-soft-tab`: no default keymap
+  - `convert-to-hard-tab`: no default keymap
+- Improve: No longer actually select to display target range for `change-surround-any-pair`, so cursor position is not changed when canceled.
+- Breaking, Improve: Use shorter, minimum length mode indcator string on status-bar #428.
+- Improve: More pure-vim-like behavior for `#` and `#`.
+- Improve: Cleanup search motion(`/`, `?`). #440.
+- Breaking: Remove experimental motion and operator which was intended to replacement of `f`, `F` but was not such useful.
+  - `SearchCurrentLine`
+  - `SearchCurrentLineBackwards`
+  - `InsertAtStartOfSearchCurrentLine`
+  - `InsertAtEndOfSearchCurrentLine`
+- Fix: Don't pass empty array to `editor.setSelectedBufferRanges`, and collectly restore cursor when occurrence opeation was failed on `.` repeat.
+
 # 0.60.1:
 - Fix: `;`, `,` throw error if orignal-find-command-executed-editor was destoyed. #434
 
