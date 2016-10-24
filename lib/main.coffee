@@ -146,6 +146,7 @@ module.exports =
       'start-save-mark': -> @startCharInput("save-mark")
       'start-move-to-mark': -> @startCharInput("move-to-mark")
       'start-move-to-mark-line': -> @startCharInput("move-to-mark-line")
+      'start-find': -> @startCharInput("find")
 
     chars = [33..126].map (code) -> String.fromCharCode(code)
     for char in chars

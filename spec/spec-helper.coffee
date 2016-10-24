@@ -68,14 +68,15 @@ buildTextInputEvent = (key) ->
   event.initTextEvent("textInput", eventArgs...)
   event
 
-keydown = (key, target) ->
-  target ?= document.activeElement
+# Directly dispatch keydown event to target elment
+keydownDirect = (key, target) ->
   event = buildKeydownEventFromKeystroke(key, target)
-  atom.keymaps.handleKeyboardEvent(event)
+  target.dispatchEvent(event)
 
 rawKeystroke = (keystrokes, target) ->
   for key in normalizeKeystrokes(keystrokes).split(/\s+/)
-    keydown(key, target)
+    event = buildKeydownEventFromKeystroke(key, target)
+    atom.keymaps.handleKeyboardEvent(event)
 
 isPoint = (obj) ->
   if obj instanceof Point
@@ -361,7 +362,10 @@ class VimEditor
       else
         switch
           when k.input?
-            @vimState.input.editor.insertText(k.input)
+            if @vimState.useNewImput
+              keydownDirect(_key, target) for _key in k.input.split()
+            else
+              @vimState.input.editor.insertText(k.input)
           when k.search?
             @vimState.searchInput.editor.insertText(k.search)
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')

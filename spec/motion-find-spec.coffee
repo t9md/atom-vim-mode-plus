@@ -14,6 +14,65 @@ describe "Motion Find", ->
     unless vimState.destroyed
       vimState.resetNormalMode()
 
+  describe 'the f performance', ->
+    timesToExecute = 500
+    beforeEach ->
+      baseText = "llllllllll"
+      set
+        text: baseText.repeat(timesToExecute)
+
+    describe 'the f read-char-via-keybinding performance', ->
+      measureWithTimeEnd = (fn) ->
+        console.time(fn.name)
+        fn()
+        console.log "[time-end]"
+        console.timeEnd(fn.name)
+
+      measureWithPerformanceNow = (fn) ->
+        t0 = performance.now()
+        fn()
+        t1 = performance.now()
+        console.log "[performance.now] took #{t1 - t0} msec"
+
+      testPerformanceOfKeybind = ->
+        keystroke "f l" for n in [1..timesToExecute]
+        ensure cursor: [0, timesToExecute]
+
+      testPerformanceOfHiddenInput = ->
+        keystroke ['f', input: 'l'] for n in [1..timesToExecute]
+        ensure cursor: [0, timesToExecute]
+
+      it '[with keybind] moves to l char', ->
+        baseText = "llllllllll"
+        set text: baseText.repeat(timesToExecute), cursor: [0, 0]
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'f': 'vim-mode-plus:start-find'
+
+        console.log "== keybind"
+        set cursor: [0, 0]
+        measureWithTimeEnd(testPerformanceOfKeybind)
+
+        set cursor: [0, 0]
+        measureWithPerformanceNow(testPerformanceOfKeybind)
+
+      it '[with hidden-input] moves to l char', ->
+        console.log "== hidden"
+        set cursor: [0, 0]
+        measureWithTimeEnd(testPerformanceOfHiddenInput)
+        set cursor: [0, 0]
+        measureWithPerformanceNow(testPerformanceOfHiddenInput)
+
+      it '[with hidden-input] moves to l char', ->
+        console.log "== hidden newInput"
+        vimState.useNewImput = true
+        vimState.input = new (require '../lib/input-faster')(vimState)
+
+        set cursor: [0, 0]
+        measureWithTimeEnd(testPerformanceOfHiddenInput)
+        set cursor: [0, 0]
+        measureWithPerformanceNow(testPerformanceOfHiddenInput)
+
   describe 'the f/F keybindings', ->
     beforeEach ->
       set

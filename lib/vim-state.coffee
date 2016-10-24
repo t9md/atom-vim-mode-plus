@@ -1,3 +1,4 @@
+semver = require 'semver'
 Delegato = require 'delegato'
 {jQuery} = require 'atom-space-pen-views'
 
@@ -7,6 +8,7 @@ _ = require 'underscore-plus'
 settings = require './settings'
 {HoverElement} = require './hover'
 {InputElement} = require './input'
+Input = require './input-faster'
 {SearchInputElement} = require './search-input'
 {
   haveSomeNonEmptySelection
@@ -56,7 +58,11 @@ class VimState
     @occurrenceManager = new OccurrenceManager(this)
     @mutationManager = new MutationManager(this)
 
-    @input = new InputElement().initialize(this)
+    @useNewImput = semver.satisfies(atom.getVersion(), '>=1.12.0-beta3') and settings.get('useExperimentalFasterInput')
+    if @useNewImput
+      @input = new Input(this)
+    else
+      @input = new InputElement().initialize(this)
     @searchInput = new SearchInputElement().initialize(this)
 
     @operationStack = new OperationStack(this)
@@ -119,6 +125,8 @@ class VimState
         @operationStack.run("MoveToMark", input: char)
       when 'move-to-mark-line'
         @operationStack.run("MoveToMarkLine", input: char)
+      when 'find'
+        @operationStack.run("Find", input: char)
     @resetCharInput()
 
   resetCharInput: ->
