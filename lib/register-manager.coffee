@@ -131,7 +131,7 @@ class RegisterManager
       @vimState.toggleClassList('with-register', @hasName())
       @vimState.hover.add(@name)
     @vimState.onDidCancelInput => @vimState.hover.reset()
-    @vimState.input.focus({charsMax: 1})
+    @vimState.input.focus()
 
   getCopyType: (text) ->
     if text.lastIndexOf("\n") is text.length - 1

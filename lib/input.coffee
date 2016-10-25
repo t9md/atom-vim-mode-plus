@@ -1,88 +1,53 @@
-{Emitter, Disposable} = require 'atom'
-{registerElement} = require './utils'
+{Emitter, CompositeDisposable} = require 'atom'
 
-class Input extends HTMLElement
+module.exports =
+class Input
   onDidChange: (fn) -> @emitter.on 'did-change', fn
   onDidConfirm: (fn) -> @emitter.on 'did-confirm', fn
   onDidCancel: (fn) -> @emitter.on 'did-cancel', fn
   onDidUnfocus: (fn) -> @emitter.on 'did-unfocus', fn
   onDidCommand: (fn) -> @emitter.on 'did-command', fn
 
-  createdCallback: ->
-    @className = "vim-mode-plus-input"
-    @buildElements()
-    @editor = @editorElement.getModel()
-    @editor.setMini(true)
-
-    @emitter = new Emitter
-
-    @editor.onDidChange =>
-      return if @finished
-      text = @editor.getText()
-      @emitter.emit 'did-change', text
-      if (charsMax = @options?.charsMax) and text.length >= @options.charsMax
-        @confirm()
-    @panel = atom.workspace.addBottomPanel(item: this, visible: false)
-    this
-
-  buildElements: ->
-    @innerHTML = """
-    <atom-text-editor mini class='editor vim-mode-plus-input'></atom-text-editor>
-    """
-    @editorElement = @firstElementChild
-
-  initialize: (@vimState) ->
+  constructor: (@vimState) ->
+    {@editorElement} = @vimState
     @vimState.onDidFailToSetTarget =>
       @cancel()
-    this
+    @emitter = new Emitter
 
   destroy: ->
-    @editor.destroy()
-    @panel?.destroy()
-    {@editor, @panel, @editorElement, @vimState} = {}
-    @remove()
+    {@vimState} = {}
 
-  handleEvents: ->
-    atom.commands.add @editorElement,
-      'core:confirm': => @confirm()
-      'core:cancel': => @cancel()
-      'blur': => @cancel() unless @finished
-      'vim-mode-plus:input-cancel': => @cancel()
+  focus: (charsMax=1) ->
+    chars = []
 
-  focus: (@options={}) ->
-    @finished = false
-    @panel.show()
-    @vimState.addToClassList('hidden-input-focused')
-    @editorElement.focus()
-    @commandSubscriptions = @handleEvents()
+    @disposables = new CompositeDisposable()
+    @disposables.add @vimState.swapClassName("vim-mode-plus-input-char-waiting is-focused")
+    @disposables.add @vimState.onDidSetInputChar (char) =>
+      if charsMax is 1
+        @confirm(char)
+      else
+        chars.push(char)
+        text = chars.join('')
+        @emitter.emit('did-change', text)
+        if chars.length >= charsMax
+          @confirm(text)
 
-    # Cancel on tab switch
-    disposable = atom.workspace.onDidChangeActivePaneItem =>
-      disposable.dispose()
-      @cancel() unless @finished
+    @disposables.add atom.commands.add @editorElement,
+      'core:cancel': (event) =>
+        event.stopImmediatePropagation()
+        @cancel()
+      'core:confirm': (event) =>
+        event.stopImmediatePropagation()
+        @confirm(chars.join(''))
+
+  confirm: (char) ->
+    @unfocus()
+    @emitter.emit('did-confirm', char)
 
   unfocus: ->
-    @commandSubscriptions?.dispose()
-    @finished = true
-    atom.workspace.getActivePane().activate()
-    @editor.setText ''
-    @panel?.hide()
+    @disposables?.dispose()
     @emitter.emit('did-unfocus')
-
-  isVisible: ->
-    @panel?.isVisible()
 
   cancel: ->
     @emitter.emit('did-cancel')
     @unfocus()
-
-  confirm: ->
-    @emitter.emit('did-confirm', @editor.getText())
-    @unfocus()
-
-InputElement = registerElement 'vim-mode-plus-input',
-  prototype: Input.prototype
-
-module.exports = {
-  InputElement
-}

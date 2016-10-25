@@ -28,11 +28,21 @@
 }
 
 atom-text-editor.vim-mode-plus.normal-mode,
-atom-text-editor.vim-mode-plus.visual-mode
+atom-text-editor.vim-mode-plus.visual-mode,
 {
   &.is-focused::shadow {
     .cursor {
       .block-cursor(visible);
+    }
+  }
+}
+
+atom-text-editor.vim-mode-plus-input-char-waiting,
+{
+  &.is-focused::shadow {
+    .cursor {
+      .underline-cursor(visible);
+      border-bottom-width: .2em;
     }
   }
 }
@@ -61,16 +71,6 @@ atom-text-editor.vim-mode-plus.insert-mode.replace.is-focused,
   }
 }
 
-atom-text-editor.vim-mode-plus.hidden-input-focused,
-atom-text-editor.vim-mode-plus-input-char-waiting
-{
-  &::shadow {
-    .cursor {
-      .underline-cursor(visible);
-      border-bottom-width: .2em;
-    }
-  }
-}
 
 // Flash ranges e.g. flashing yanked range.
 // =========================

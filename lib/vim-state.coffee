@@ -1,3 +1,4 @@
+semver = require 'semver'
 Delegato = require 'delegato'
 {jQuery} = require 'atom-space-pen-views'
 
@@ -6,8 +7,8 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 {HoverElement} = require './hover'
-{InputElement} = require './input'
-{SearchInputElement} = require './search-input'
+Input = require './input'
+SearchInputElement = require './search-input'
 {
   haveSomeNonEmptySelection
   highlightRanges
@@ -56,7 +57,7 @@ class VimState
     @occurrenceManager = new OccurrenceManager(this)
     @mutationManager = new MutationManager(this)
 
-    @input = new InputElement().initialize(this)
+    @input = new Input(this)
     @searchInput = new SearchInputElement().initialize(this)
 
     @operationStack = new OperationStack(this)
@@ -74,6 +75,9 @@ class VimState
       @activate('insert')
     else
       @activate('normal')
+
+  isNewInput: ->
+    @input instanceof Input
 
   # BlockwiseSelections
   # -------------------------
@@ -103,27 +107,6 @@ class VimState
   updateSelectionProperties: (options) ->
     swrap.updateSelectionProperties(@editor, options)
 
-  # Mark
-  # -------------------------
-  startCharInput: (@charInputAction) ->
-    @inputCharSubscriptions = new CompositeDisposable()
-    @inputCharSubscriptions.add @swapClassName('vim-mode-plus-input-char-waiting')
-    @inputCharSubscriptions.add atom.commands.add @editorElement,
-      'core:cancel': => @resetCharInput()
-
-  setInputChar: (char) ->
-    switch @charInputAction
-      when 'save-mark'
-        @mark.set(char, @editor.getCursorBufferPosition())
-      when 'move-to-mark'
-        @operationStack.run("MoveToMark", input: char)
-      when 'move-to-mark-line'
-        @operationStack.run("MoveToMarkLine", input: char)
-    @resetCharInput()
-
-  resetCharInput: ->
-    @inputCharSubscriptions?.dispose()
-
   # -------------------------
   toggleClassList: (className, bool=undefined) ->
     @editorElement.classList.toggle(className, bool)
@@ -133,6 +116,7 @@ class VimState
     @editorElement.className = className
     new Disposable =>
       @editorElement.className = oldClassName
+      @editorElement.classList.add('is-focused')
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
@@ -191,6 +175,9 @@ class VimState
   #  Usage:
   #   onDidSetMark ({name, bufferPosition}) -> do something..
   onDidSetMark: (fn) -> @emitter.on('did-set-mark', fn)
+
+  onDidSetInputChar: (fn) -> @emitter.on('did-set-input-char', fn)
+  emitDidSetInputChar: (char) -> @emitter.emit('did-set-input-char', char)
 
   destroy: ->
     return if @destroyed
@@ -280,7 +267,6 @@ class VimState
     @activate('normal')
 
   reset: ->
-    @resetCharInput()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()

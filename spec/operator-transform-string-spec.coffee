@@ -472,7 +472,6 @@ describe "Operator TransformString", ->
           , 100
 
       it "surround text object with ( and repeatable", ->
-        # [FIXME] OLD STYLE
         ensure ['y s i w', input: '('],
           text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
           cursor: [0, 0]

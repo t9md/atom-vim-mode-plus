@@ -190,8 +190,7 @@ class Base
   hasInput: -> @input?
   getInput: -> @input
 
-  focusInput: (options={}) ->
-    options.charsMax ?= 1
+  focusInput: (charsMax) ->
     @onDidConfirmInput (@input) =>
       @processOperation()
 
@@ -205,7 +204,7 @@ class Base
     @onDidCancelInput =>
       @cancelOperation()
 
-    @vimState.input.focus(options)
+    @vimState.input.focus(charsMax)
 
   getVimEofBufferPosition: ->
     getVimEofBufferPosition(@editor)

@@ -404,9 +404,9 @@ class Surround extends TransformString
     @onDidCancelInput => @cancelOperation()
     if @requireTarget
       @onDidSetTarget =>
-        @vimState.input.focus({@charsMax})
+        @vimState.input.focus(@charsMax)
     else
-      @vimState.input.focus({@charsMax})
+      @vimState.input.focus(@charsMax)
 
   onConfirm: (@input) ->
     @processOperation()
@@ -584,7 +584,8 @@ class JoinByInput extends JoinWithKeepingSpace
   trim: true
   initialize: ->
     super
-    @focusInput(charsMax: 10)
+    charsMax = 10
+    @focusInput(charsMax)
 
   join: (rows) ->
     rows.join(" #{@input} ")
@@ -611,7 +612,8 @@ class SplitString extends TransformString
     super
     unless @isMode('visual')
       @setTarget @new("MoveToRelativeLine", {min: 1})
-    @focusInput(charsMax: 10)
+    charsMax = 10
+    @focusInput(charsMax)
 
   getNewText: (text) ->
     @input = "\\n" if @input is ''

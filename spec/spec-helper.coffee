@@ -3,6 +3,7 @@ semver = require 'semver'
 {Range, Point, Disposable} = require 'atom'
 {inspect} = require 'util'
 swrap = require '../lib/selection-wrapper'
+settings = require '../lib/settings'
 
 KeymapManager = atom.keymaps.constructor
 {normalizeKeystrokes} = require(atom.config.resourcePath + "/node_modules/atom-keymap/lib/helpers")
@@ -68,14 +69,10 @@ buildTextInputEvent = (key) ->
   event.initTextEvent("textInput", eventArgs...)
   event
 
-keydown = (key, target) ->
-  target ?= document.activeElement
-  event = buildKeydownEventFromKeystroke(key, target)
-  atom.keymaps.handleKeyboardEvent(event)
-
 rawKeystroke = (keystrokes, target) ->
   for key in normalizeKeystrokes(keystrokes).split(/\s+/)
-    keydown(key, target)
+    event = buildKeydownEventFromKeystroke(key, target)
+    atom.keymaps.handleKeyboardEvent(event)
 
 isPoint = (obj) ->
   if obj instanceof Point
@@ -361,7 +358,9 @@ class VimEditor
       else
         switch
           when k.input?
-            @vimState.input.editor.insertText(k.input)
+            # TODO no longer need to use [input: 'char'] style.
+            # if settings.
+            rawKeystroke(_key, target) for _key in k.input.split('')
           when k.search?
             @vimState.searchInput.editor.insertText(k.search)
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')

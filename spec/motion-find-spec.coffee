@@ -5,6 +5,7 @@ describe "Motion Find", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
+    settings.set('useExperimentalFasterInput', true)
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
