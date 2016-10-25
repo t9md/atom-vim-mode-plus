@@ -29,11 +29,20 @@
 
 atom-text-editor.vim-mode-plus.normal-mode,
 atom-text-editor.vim-mode-plus.visual-mode,
-atom-text-editor.vim-mode-plus-input-char-waiting
 {
   &.is-focused::shadow {
     .cursor {
       .block-cursor(visible);
+    }
+  }
+}
+
+atom-text-editor.vim-mode-plus-input-char-waiting,
+{
+  &.is-focused::shadow {
+    .cursor {
+      .underline-cursor(visible);
+      border-bottom-width: .2em;
     }
   }
 }
