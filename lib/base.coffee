@@ -18,12 +18,10 @@ vimStateMethods = [
   "onDidChangeInput"
   "onDidConfirmInput"
   "onDidCancelInput"
-  "onDidUnfocusInput"
-  "onDidCommandInput"
+
   "onDidChangeSearch"
   "onDidConfirmSearch"
   "onDidCancelSearch"
-  "onDidUnfocusSearch"
   "onDidCommandSearch"
 
   "onDidSetTarget"
@@ -55,9 +53,9 @@ class Base
   Delegato.includeInto(this)
   @delegatesMethods(vimStateMethods..., toProperty: 'vimState')
 
-  constructor: (@vimState, properties) ->
+  constructor: (@vimState, properties=null) ->
     {@editor, @editorElement, @globalState} = @vimState
-    _.extend(this, properties)
+    _.extend(this, properties) if properties?
     if settings.get('showHoverOnOperate')
       hover = @hover?[settings.get('showHoverOnOperateIcon')]
       if hover? and not @isComplete()
@@ -196,10 +194,11 @@ class Base
 
     # From 2nd addHover, we replace last section of hover
     # to sync content with input mini editor.
-    replace = false
-    @onDidChangeInput (input) =>
-      @addHover(input, {replace})
-      replace = true
+    unless charsMax is 1
+      replace = false
+      @onDidChangeInput (input) =>
+        @addHover(input, {replace})
+        replace = true
 
     @onDidCancelInput =>
       @cancelOperation()

@@ -123,13 +123,10 @@ class VimState
   onDidChangeInput: (fn) -> @subscribe @input.onDidChange(fn)
   onDidConfirmInput: (fn) -> @subscribe @input.onDidConfirm(fn)
   onDidCancelInput: (fn) -> @subscribe @input.onDidCancel(fn)
-  onDidUnfocusInput: (fn) -> @subscribe @input.onDidUnfocus(fn)
-  onDidCommandInput: (fn) -> @subscribe @input.onDidCommand(fn)
 
   onDidChangeSearch: (fn) -> @subscribe @searchInput.onDidChange(fn)
   onDidConfirmSearch: (fn) -> @subscribe @searchInput.onDidConfirm(fn)
   onDidCancelSearch: (fn) -> @subscribe @searchInput.onDidCancel(fn)
-  onDidUnfocusSearch: (fn) -> @subscribe @searchInput.onDidUnfocus(fn)
   onDidCommandSearch: (fn) -> @subscribe @searchInput.onDidCommand(fn)
 
   # Select and text mutation(Change)

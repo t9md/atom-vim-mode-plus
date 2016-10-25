@@ -5,8 +5,6 @@ class Input
   onDidChange: (fn) -> @emitter.on 'did-change', fn
   onDidConfirm: (fn) -> @emitter.on 'did-confirm', fn
   onDidCancel: (fn) -> @emitter.on 'did-cancel', fn
-  onDidUnfocus: (fn) -> @emitter.on 'did-unfocus', fn
-  onDidCommand: (fn) -> @emitter.on 'did-command', fn
 
   constructor: (@vimState) ->
     {@editorElement} = @vimState
@@ -41,13 +39,9 @@ class Input
         @confirm(chars.join(''))
 
   confirm: (char) ->
-    @unfocus()
+    @disposables?.dispose()
     @emitter.emit('did-confirm', char)
 
-  unfocus: ->
-    @disposables?.dispose()
-    @emitter.emit('did-unfocus')
-
   cancel: ->
+    @disposables?.dispose()
     @emitter.emit('did-cancel')
-    @unfocus()

@@ -80,7 +80,7 @@ class OperationStack
 
   # Main
   # -------------------------
-  run: (klass, properties={}) ->
+  run: (klass, properties) ->
     try
       type = typeof(klass)
       unless type in ['string', 'function', 'object']
