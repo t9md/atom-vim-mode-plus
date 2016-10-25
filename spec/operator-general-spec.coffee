@@ -336,7 +336,7 @@ describe "Operator general", ->
           set text: "test (xyz)", cursor: [0, 6]
 
         it "deletes until the closing parenthesis", ->
-          ensure ['y y d t', input: ')'],
+          ensure ['d t', input: ')'],
             text: 'test ()'
             cursor: [0, 6]
 
@@ -924,8 +924,7 @@ describe "Operator general", ->
       ensure ['r', input: 'x'], text: 'x2\nx4\n\n'
 
     it "does nothing when cancelled", ->
-      ensure 'r',
-        mode: 'operator-pending'
+      keystroke 'r'
       vimState.input.cancel()
       ensure
         text: '12\n34\n\n'
@@ -939,10 +938,7 @@ describe "Operator general", ->
         mode: ['visual', 'characterwise']
 
     it "replaces a single character with a line break", ->
-      inputEditorElement = vimState.input.editorElement
-      keystroke 'r'
-      dispatch(inputEditorElement, 'core:confirm')
-      ensure
+      ensure 'r enter',
         text: '\n2\n\n4\n\n'
         cursorBuffer: [[1, 0], [3, 0]]
 

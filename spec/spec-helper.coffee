@@ -68,11 +68,6 @@ buildTextInputEvent = (key) ->
   event.initTextEvent("textInput", eventArgs...)
   event
 
-# Directly dispatch keydown event to target elment
-keydownDirect = (key, target) ->
-  event = buildKeydownEventFromKeystroke(key, target)
-  target.dispatchEvent(event)
-
 rawKeystroke = (keystrokes, target) ->
   for key in normalizeKeystrokes(keystrokes).split(/\s+/)
     event = buildKeydownEventFromKeystroke(key, target)
@@ -362,10 +357,9 @@ class VimEditor
       else
         switch
           when k.input?
-            if @vimState.useNewImput
-              keydownDirect(_key, target) for _key in k.input.split()
-            else
-              @vimState.input.editor.insertText(k.input)
+            # TODO no longer need to use [input: 'char'] style.
+            for _key in k.input.split('')
+              rawKeystroke(_key, target)
           when k.search?
             @vimState.searchInput.editor.insertText(k.search)
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')

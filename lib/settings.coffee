@@ -183,5 +183,5 @@ module.exports = new Settings 'vim-mode-plus',
     description: "[Dev use] Throw error when non-empty selection was remained in normal-mode at the timing of operation finished"
   useExperimentalFasterInput:
     type: 'boolean'
-    default: false
+    default: true
     description: "[Dev use] Throw error when non-empty selection was remained in normal-mode at the timing of operation finished"

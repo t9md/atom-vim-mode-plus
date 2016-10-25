@@ -612,3 +612,15 @@ class PutAfterAndSelect extends PutBeforeAndSelect
   @extend()
   @description: "Paste after then select"
   location: 'after'
+
+# [FIXME] this is not operator
+class Mark extends Operator
+  @extend()
+  # hover: icon: ':mark:', emoji: ':round_pushpin:'
+  requireInput: true
+  requireTarget: false
+  initialize: ->
+    @focusInput()
+
+  execute: ->
+    @vimState.mark.set(@input, @editor.getCursorBufferPosition())

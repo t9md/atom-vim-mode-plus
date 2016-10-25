@@ -1,4 +1,4 @@
-{Emitter, Disposable} = require 'atom'
+{Emitter, CompositeDisposable} = require 'atom'
 
 module.exports =
 class Input
@@ -17,34 +17,47 @@ class Input
   destroy: ->
     {@vimState} = {}
 
-  handleCapture: (event) =>
-    event.stopImmediatePropagation()
-    isCharacterKey = not (event.ctrlKey or event.metaKey)
-    if isCharacterKey
-      if event.key.length is 1
-        @confirm(event.key)
-    else
-      @cancel()
+  focus: ({charsMax}={}) ->
+    # console.log "OCUS!"
+    chars = []
+    charsMax ?= 1
 
-  focus: (@options={}) ->
-    # console.log "FOCUSED?"
     @finished = false
-    @vimState.addToClassList('hidden-input-focused')
-    @editorElement.addEventListener('keydown', @handleCapture, true)
-    disposable = atom.workspace.onDidChangeActivePaneItem =>
-      disposable.dispose()
-      @cancel() unless @finished
+    @disposables = new CompositeDisposable()
+    @disposables.add @vimState.swapClassName("vim-mode-plus-input-char-waiting")
+    @disposables.add @vimState.onDidSetInputChar (char) =>
+      if charsMax is 1
+        @confirm(char)
+      else
+        chars.push(char)
+        text = chars.join('')
+        @emitter.emit('did-change', text)
+        if chars.length >= charsMax
+          @confirm(text)
+
+    @disposables.add atom.commands.add @editorElement,
+      'core:cancel': (event) =>
+        event.stopImmediatePropagation()
+        @cancel()
+      'core:confirm': (event) =>
+        event.stopImmediatePropagation()
+        @confirm("\n")
+
+    # disposable = atom.workspace.onDidChangeActivePaneItem =>
+    #   disposable.dispose()
+    #   @cancel() unless @finished
 
   confirm: (char) ->
-    @emitter.emit('did-confirm', char)
     @unfocus()
+    @emitter.emit('did-confirm', char)
 
   unfocus: ->
     return if @finished
     @finished = true
-    @editorElement.removeEventListener('keydown', @handleCapture, true)
+    @disposables?.dispose()
     @emitter.emit('did-unfocus')
 
   cancel: ->
+    console.log "CANCEL!!"
     @emitter.emit('did-cancel')
     @unfocus()

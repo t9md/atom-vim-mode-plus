@@ -58,11 +58,9 @@ class VimState
     @occurrenceManager = new OccurrenceManager(this)
     @mutationManager = new MutationManager(this)
 
-    @useNewImput = semver.satisfies(atom.getVersion(), '>=1.12.0-beta3') and settings.get('useExperimentalFasterInput')
-    if @useNewImput
-      @input = new Input(this)
-    else
-      @input = new InputElement().initialize(this)
+    @newInput = new Input(this)
+    @oldInput = new InputElement().initialize(this)
+
     @searchInput = new SearchInputElement().initialize(this)
 
     @operationStack = new OperationStack(this)
@@ -75,11 +73,20 @@ class VimState
       @highlightSearch.refresh()
     @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
 
+    @subscriptions.add settings.observe 'useExperimentalFasterInput', (newValue) =>
+      if newValue
+        @input = @newInput
+      else
+        @input = @oldInput
+
     @editorElement.classList.add(packageScope)
     if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
       @activate('insert')
     else
       @activate('normal')
+
+  isNewInput: ->
+    @input instanceof Input
 
   # BlockwiseSelections
   # -------------------------
@@ -117,17 +124,24 @@ class VimState
     @inputCharSubscriptions.add atom.commands.add @editorElement,
       'core:cancel': => @resetCharInput()
 
+  onDidSetInputChar: (fn) -> @emitter.on('did-set-input-char', fn)
+
   setInputChar: (char) ->
-    switch @charInputAction
-      when 'save-mark'
-        @mark.set(char, @editor.getCursorBufferPosition())
-      when 'move-to-mark'
-        @operationStack.run("MoveToMark", input: char)
-      when 'move-to-mark-line'
-        @operationStack.run("MoveToMarkLine", input: char)
-      when 'find'
-        @operationStack.run("Find", input: char)
-    @resetCharInput()
+    @emitter.emit('did-set-input-char', char)
+
+    # onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
+    #
+    # @didS
+    # switch @charInputAction
+    #   when 'save-mark'
+    #     @mark.set(char, @editor.getCursorBufferPosition())
+    #   when 'move-to-mark'
+    #     @operationStack.run("MoveToMark", input: char)
+    #   when 'move-to-mark-line'
+    #     @operationStack.run("MoveToMarkLine", input: char)
+    #   when 'find'
+    #     @operationStack.run("Find", input: char)
+    # @resetCharInput()
 
   resetCharInput: ->
     @inputCharSubscriptions?.dispose()
@@ -138,6 +152,7 @@ class VimState
 
   swapClassName: (className) ->
     oldClassName = @editorElement.className
+    # console.log 'swapped', [oldClassName, className]
     @editorElement.className = className
     new Disposable =>
       @editorElement.className = oldClassName

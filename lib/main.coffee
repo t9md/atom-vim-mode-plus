@@ -143,15 +143,14 @@ module.exports =
       'set-count-8': -> @setCount(8)
       'set-count-9': -> @setCount(9)
 
-      'start-save-mark': -> @startCharInput("save-mark")
-      'start-move-to-mark': -> @startCharInput("move-to-mark")
-      'start-move-to-mark-line': -> @startCharInput("move-to-mark-line")
-      'start-find': -> @startCharInput("find")
-
-    chars = [33..126].map (code) -> String.fromCharCode(code)
+    chars = [32..126].map (code) -> String.fromCharCode(code)
     for char in chars
       do (char) ->
-        commands["set-input-char-#{char}"] = -> @setInputChar(char)
+        charForKeymap = char
+        charForKeymap = 'space' if char is ' '
+        commands["set-input-char-#{charForKeymap}"] = -> @setInputChar(char)
+
+    commands["set-input-char-enter"] = -> @setInputChar("\n")
 
     getEditorState = @getEditorState.bind(this)
 
