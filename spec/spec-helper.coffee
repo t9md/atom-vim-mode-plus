@@ -3,6 +3,7 @@ semver = require 'semver'
 {Range, Point, Disposable} = require 'atom'
 {inspect} = require 'util'
 swrap = require '../lib/selection-wrapper'
+settings = require '../lib/settings'
 
 KeymapManager = atom.keymaps.constructor
 {normalizeKeystrokes} = require(atom.config.resourcePath + "/node_modules/atom-keymap/lib/helpers")
@@ -358,8 +359,12 @@ class VimEditor
         switch
           when k.input?
             # TODO no longer need to use [input: 'char'] style.
-            for _key in k.input.split('')
-              rawKeystroke(_key, target)
+            # if settings.
+            if settings.get('useExperimentalFasterInput')
+              for _key in k.input.split('')
+                rawKeystroke(_key, target)
+            else
+              @vimState.input.editor.insertText(k.input)
           when k.search?
             @vimState.searchInput.editor.insertText(k.search)
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')

@@ -23,6 +23,7 @@ describe "Motion Find", ->
         text: baseText.repeat(timesToExecute)
 
     xdescribe 'the f read-char-via-keybinding performance', ->
+    # fffdescribe 'the f read-char-via-keybinding performance', ->
       measureWithTimeEnd = (fn) ->
         console.time(fn.name)
         fn()

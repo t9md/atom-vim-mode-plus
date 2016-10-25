@@ -20,7 +20,7 @@ class Input extends HTMLElement
       return if @finished
       text = @editor.getText()
       @emitter.emit 'did-change', text
-      if (charsMax = @options?.charsMax) and text.length >= @options.charsMax
+      if text.length >= @charsMax
         @confirm()
     @panel = atom.workspace.addBottomPanel(item: this, visible: false)
     this
@@ -49,7 +49,7 @@ class Input extends HTMLElement
       'blur': => @cancel() unless @finished
       'vim-mode-plus:input-cancel': => @cancel()
 
-  focus: (@options={}) ->
+  focus: (@charsMax=1) ->
     @finished = false
     @panel.show()
     @editorElement.focus()

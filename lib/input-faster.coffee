@@ -17,10 +17,9 @@ class Input
   destroy: ->
     {@vimState} = {}
 
-  focus: ({charsMax}={}) ->
+  focus: (charsMax=1) ->
     # console.log "OCUS!"
     chars = []
-    charsMax ?= 1
 
     @finished = false
     @disposables = new CompositeDisposable()
