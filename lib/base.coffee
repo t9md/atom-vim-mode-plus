@@ -109,17 +109,14 @@ class Base
   # -------------------------
   count: null
   defaultCount: 1
-  getDefaultCount: ->
-    @defaultCount
-
   getCount: ->
-    @count ?= @vimState.getCount() ? @getDefaultCount()
+    @count ?= @vimState.getCount() ? @defaultCount
 
   resetCount: ->
     @count = null
 
   isDefaultCount: ->
-    @count is @getDefaultCount()
+    @count is @defaultCount
 
   # Register
   # -------------------------
@@ -160,7 +157,7 @@ class Base
     else
       @vimState.hover.add(text, point)
 
-  new: (name, properties={}) ->
+  new: (name, properties) ->
     klass = Base.getClass(name)
     new klass(@vimState, properties)
 
@@ -341,7 +338,6 @@ class Base
     atom.commands.add @getCommandScope(), @getCommandName(), (event) ->
       vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
       if vimState?
-        vimState.domEvent = event
         # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
         vimState.operationStack.run(klass)
       event.stopPropagation()

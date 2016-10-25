@@ -1,6 +1,3 @@
-Delegato = require 'delegato'
-_ = require 'underscore-plus'
-
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
 {moveCursorLeft} = require './utils'
@@ -20,8 +17,8 @@ swrap = require './selection-wrapper'
 #    if executable, then pop stack then execute(poppedOperation)
 #    if not executable, enter "operator-pending-mode"
 class OperationStack
-  Delegato.includeInto(this)
-  @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
+  Object.defineProperty @prototype, 'mode', get: -> @modeManager.mode
+  Object.defineProperty @prototype, 'submode', get: -> @modeManager.submode
 
   constructor: (@vimState) ->
     {@editor, @editorElement, @modeManager} = @vimState
@@ -55,37 +52,17 @@ class OperationStack
     @operationSubscriptions?.dispose()
     {@stack, @operationSubscriptions} = {}
 
-  # Stack manipulation
-  # -------------------------
-  push: (operation) ->
-    @stack.push(operation)
-
-  pop: ->
-    @stack.pop()
-
   peekTop: ->
-    _.last(@stack)
-
-  peekBottom: ->
-    @stack[0]
+    @stack[@stack.length - 1]
 
   isEmpty: ->
     @stack.length is 0
-
-  isFull: ->
-    @stack.length is 2
-
-  hasPending: ->
-    @stack.length is 1
 
   # Main
   # -------------------------
   run: (klass, properties) ->
     try
       type = typeof(klass)
-      unless type in ['string', 'function', 'object']
-        throw new Error('Unsupported type of operation')
-
       if type is 'object' # . repeat case we can execute as-it-is.
         operation = klass
       else
@@ -101,7 +78,7 @@ class OperationStack
         operation = new Select(@vimState).setTarget(operation)
 
       if @isEmpty() or (@peekTop().isOperator() and operation.isTarget())
-        @push(operation)
+        @stack.push(operation)
         @process()
       else
         @vimState.emitDidFailToSetTarget() if @peekTop().isOperator()
@@ -147,16 +124,16 @@ class OperationStack
 
   process: ->
     @processing = true
-    if @isFull()
-      operation = @pop()
+    if @stack.length is 2
+      operation = @stack.pop()
       @peekTop().setTarget(operation)
 
     top = @peekTop()
     if top.isComplete()
-      @execute(@pop())
+      @execute(@stack.pop())
     else
       if @mode is 'normal' and top.isOperator()
-        @vimState.activate('operator-pending')
+        @modeManager.activate('operator-pending')
 
       # Temporary set while command is running
       if commandName = top.constructor.getCommandNameWithoutPrefix?()
@@ -184,8 +161,8 @@ class OperationStack
     if @mode is 'normal'
       @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()
-    if @mode is 'visual'
-      @vimState.modeManager.updateNarrowedState()
+    else if @mode is 'visual'
+      @modeManager.updateNarrowedState()
       @vimState.updatePreviousSelection()
     @vimState.updateCursorsVisibility()
     @vimState.reset()
