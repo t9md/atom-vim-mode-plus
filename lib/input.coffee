@@ -52,7 +52,6 @@ class Input extends HTMLElement
   focus: (@options={}) ->
     @finished = false
     @panel.show()
-    @vimState.addToClassList('hidden-input-focused')
     @editorElement.focus()
     @commandSubscriptions = @handleEvents()
 

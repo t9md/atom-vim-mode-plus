@@ -24,7 +24,7 @@ class Input
 
     @finished = false
     @disposables = new CompositeDisposable()
-    @disposables.add @vimState.swapClassName("vim-mode-plus-input-char-waiting")
+    @disposables.add @vimState.swapClassName("vim-mode-plus-input-char-waiting is-focused")
     @disposables.add @vimState.onDidSetInputChar (char) =>
       if charsMax is 1
         @confirm(char)
