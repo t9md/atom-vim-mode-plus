@@ -7,7 +7,7 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 {HoverElement} = require './hover'
-Input = require './input-faster'
+Input = require './input'
 SearchInputElement = require './search-input'
 {
   haveSomeNonEmptySelection
