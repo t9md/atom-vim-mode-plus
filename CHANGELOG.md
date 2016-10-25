@@ -1,3 +1,6 @@
+# 0.62.0:
+- Improve: Improve performance for `f`, `F`, `t`, `T`, Surround #448, #435.
+
 # 0.61.0:
 - Doc: Simplify README.md
 - New: Sentence motion by @bronson
