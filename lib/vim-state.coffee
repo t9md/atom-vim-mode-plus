@@ -7,9 +7,8 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 {HoverElement} = require './hover'
-{InputElement} = require './input'
 Input = require './input-faster'
-{SearchInputElement} = require './search-input'
+SearchInputElement = require './search-input'
 {
   haveSomeNonEmptySelection
   highlightRanges
@@ -58,9 +57,7 @@ class VimState
     @occurrenceManager = new OccurrenceManager(this)
     @mutationManager = new MutationManager(this)
 
-    @newInput = new Input(this)
-    @oldInput = new InputElement().initialize(this)
-
+    @input = new Input(this)
     @searchInput = new SearchInputElement().initialize(this)
 
     @operationStack = new OperationStack(this)
@@ -72,12 +69,6 @@ class VimState
     refreshHighlightSearch = =>
       @highlightSearch.refresh()
     @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
-
-    @subscriptions.add settings.observe 'useExperimentalFasterInput', (newValue) =>
-      if newValue
-        @input = @newInput
-      else
-        @input = @oldInput
 
     @editorElement.classList.add(packageScope)
     if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
@@ -116,46 +107,16 @@ class VimState
   updateSelectionProperties: (options) ->
     swrap.updateSelectionProperties(@editor, options)
 
-  # Mark
-  # -------------------------
-  startCharInput: (@charInputAction) ->
-    @inputCharSubscriptions = new CompositeDisposable()
-    @inputCharSubscriptions.add @swapClassName('vim-mode-plus-input-char-waiting')
-    @inputCharSubscriptions.add atom.commands.add @editorElement,
-      'core:cancel': => @resetCharInput()
-
-  onDidSetInputChar: (fn) -> @emitter.on('did-set-input-char', fn)
-
-  setInputChar: (char) ->
-    @emitter.emit('did-set-input-char', char)
-
-    # onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
-    #
-    # @didS
-    # switch @charInputAction
-    #   when 'save-mark'
-    #     @mark.set(char, @editor.getCursorBufferPosition())
-    #   when 'move-to-mark'
-    #     @operationStack.run("MoveToMark", input: char)
-    #   when 'move-to-mark-line'
-    #     @operationStack.run("MoveToMarkLine", input: char)
-    #   when 'find'
-    #     @operationStack.run("Find", input: char)
-    # @resetCharInput()
-
-  resetCharInput: ->
-    @inputCharSubscriptions?.dispose()
-
   # -------------------------
   toggleClassList: (className, bool=undefined) ->
     @editorElement.classList.toggle(className, bool)
 
   swapClassName: (className) ->
     oldClassName = @editorElement.className
-    # console.log 'swapped', [oldClassName, className]
     @editorElement.className = className
     new Disposable =>
       @editorElement.className = oldClassName
+      @editorElement.classList.add('is-focused')
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
@@ -214,6 +175,9 @@ class VimState
   #  Usage:
   #   onDidSetMark ({name, bufferPosition}) -> do something..
   onDidSetMark: (fn) -> @emitter.on('did-set-mark', fn)
+
+  onDidSetInputChar: (fn) -> @emitter.on('did-set-input-char', fn)
+  emitDidSetInputChar: (char) -> @emitter.emit('did-set-input-char', char)
 
   destroy: ->
     return if @destroyed
@@ -303,7 +267,6 @@ class VimState
     @activate('normal')
 
   reset: ->
-    @resetCharInput()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()

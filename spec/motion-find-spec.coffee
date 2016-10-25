@@ -23,7 +23,6 @@ describe "Motion Find", ->
         text: baseText.repeat(timesToExecute)
 
     xdescribe 'the f read-char-via-keybinding performance', ->
-    # fffdescribe 'the f read-char-via-keybinding performance', ->
       measureWithTimeEnd = (fn) ->
         console.time(fn.name)
         fn()
@@ -45,16 +44,16 @@ describe "Motion Find", ->
         console.log "== old"
         set cursor: [0, 0]
         measureWithTimeEnd(testInputPerformance)
-        # set cursor: [0, 0]
-        # measureWithPerformanceNow(testInputPerformance)
+        set cursor: [0, 0]
+        measureWithPerformanceNow(testInputPerformance)
 
       it '[with faster-input] moves to l char', ->
         settings.set('useExperimentalFasterInput', true)
         console.log "== new"
         set cursor: [0, 0]
         measureWithTimeEnd(testInputPerformance)
-        # set cursor: [0, 0]
-        # measureWithPerformanceNow(testInputPerformance)
+        set cursor: [0, 0]
+        measureWithPerformanceNow(testInputPerformance)
 
   describe 'the f/F keybindings', ->
     beforeEach ->

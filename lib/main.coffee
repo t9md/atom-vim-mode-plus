@@ -146,11 +146,9 @@ module.exports =
     chars = [32..126].map (code) -> String.fromCharCode(code)
     for char in chars
       do (char) ->
-        charForKeymap = char
-        charForKeymap = 'space' if char is ' '
-        commands["set-input-char-#{charForKeymap}"] = -> @setInputChar(char)
-
-    commands["set-input-char-enter"] = -> @setInputChar("\n")
+        charForKeymap = if char is ' ' then 'space' else char
+        commands["set-input-char-#{charForKeymap}"] = ->
+          @emitDidSetInputChar(char)
 
     getEditorState = @getEditorState.bind(this)
 

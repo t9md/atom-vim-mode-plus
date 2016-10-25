@@ -18,10 +18,8 @@ class Input
     {@vimState} = {}
 
   focus: (charsMax=1) ->
-    # console.log "OCUS!"
     chars = []
 
-    @finished = false
     @disposables = new CompositeDisposable()
     @disposables.add @vimState.swapClassName("vim-mode-plus-input-char-waiting is-focused")
     @disposables.add @vimState.onDidSetInputChar (char) =>
@@ -40,23 +38,16 @@ class Input
         @cancel()
       'core:confirm': (event) =>
         event.stopImmediatePropagation()
-        @confirm("\n")
-
-    # disposable = atom.workspace.onDidChangeActivePaneItem =>
-    #   disposable.dispose()
-    #   @cancel() unless @finished
+        @confirm(chars.join(''))
 
   confirm: (char) ->
     @unfocus()
     @emitter.emit('did-confirm', char)
 
   unfocus: ->
-    return if @finished
-    @finished = true
     @disposables?.dispose()
     @emitter.emit('did-unfocus')
 
   cancel: ->
-    console.log "CANCEL!!"
     @emitter.emit('did-cancel')
     @unfocus()

@@ -247,7 +247,7 @@
   'z a': 'vim-mode-plus:toggle-fold'
 
 'atom-text-editor.vim-mode-plus-input-char-waiting':
-  'enter': 'vim-mode-plus:set-input-char-enter'
+  'enter': 'core:confirm'
 
   'space': 'vim-mode-plus:set-input-char-space'
   '!': 'vim-mode-plus:set-input-char-!'

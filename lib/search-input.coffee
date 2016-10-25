@@ -146,9 +146,5 @@ class SearchInput extends HTMLElement
       'core:move-down': => @editor.setText @vimState.searchHistory.get('next')
     )
 
-SearchInputElement = registerElement 'vim-mode-plus-search-input',
+module.exports = registerElement 'vim-mode-plus-search-input',
   prototype: SearchInput.prototype
-
-module.exports = {
-  SearchInputElement
-}

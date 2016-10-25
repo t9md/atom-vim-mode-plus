@@ -360,11 +360,7 @@ class VimEditor
           when k.input?
             # TODO no longer need to use [input: 'char'] style.
             # if settings.
-            if settings.get('useExperimentalFasterInput')
-              for _key in k.input.split('')
-                rawKeystroke(_key, target)
-            else
-              @vimState.input.editor.insertText(k.input)
+            rawKeystroke(_key, target) for _key in k.input.split('')
           when k.search?
             @vimState.searchInput.editor.insertText(k.search)
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')
