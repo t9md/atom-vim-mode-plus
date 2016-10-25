@@ -15,46 +15,6 @@ describe "Motion Find", ->
     unless vimState.destroyed
       vimState.resetNormalMode()
 
-  describe 'the f performance', ->
-    timesToExecute = 500
-    beforeEach ->
-      baseText = "llllllllll"
-      set
-        text: baseText.repeat(timesToExecute)
-
-    xdescribe 'the f read-char-via-keybinding performance', ->
-      measureWithTimeEnd = (fn) ->
-        console.time(fn.name)
-        fn()
-        console.log "[time-end]"
-        console.timeEnd(fn.name)
-
-      measureWithPerformanceNow = (fn) ->
-        t0 = performance.now()
-        fn()
-        t1 = performance.now()
-        console.log "[performance.now] took #{t1 - t0} msec"
-
-      testInputPerformance = ->
-        keystroke ['f', input: 'l'] for n in [1..timesToExecute]
-        ensure cursor: [0, timesToExecute]
-
-      it '[with hidden-input] moves to l char', ->
-        settings.set('useExperimentalFasterInput', false)
-        console.log "== old"
-        set cursor: [0, 0]
-        measureWithTimeEnd(testInputPerformance)
-        set cursor: [0, 0]
-        measureWithPerformanceNow(testInputPerformance)
-
-      it '[with faster-input] moves to l char', ->
-        settings.set('useExperimentalFasterInput', true)
-        console.log "== new"
-        set cursor: [0, 0]
-        measureWithTimeEnd(testInputPerformance)
-        set cursor: [0, 0]
-        measureWithPerformanceNow(testInputPerformance)
-
   describe 'the f/F keybindings', ->
     beforeEach ->
       set
