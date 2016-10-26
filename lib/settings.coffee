@@ -177,6 +177,10 @@ module.exports = new Settings 'vim-mode-plus',
     type: 'integer'
     default: 500
     description: "For `ctrl-d` and `ctrl-u`"
+  statusBarModeStringStyle:
+    type: 'string'
+    default: 'short'
+    enum: ['short', 'long']
   throwErrorOnNonEmptySelectionInNormalMode:
     type: 'boolean'
     default: false
