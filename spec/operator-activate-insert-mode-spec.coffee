@@ -550,6 +550,101 @@ describe "Operator ActivateInsertMode family", ->
       it "[case-C]", -> ensureDotRegister 'C', text: 'abc'
       it "[case-s]", -> ensureDotRegister 's', text: 'abc'
 
+  describe "repeat backspace/delete happened in insert-mode", ->
+    describe "single cursor operation", ->
+      beforeEach ->
+        set
+          cursor: [0, 0]
+          text: """
+          123
+          123
+          """
+
+      it "can repeat backspace only mutation: case-i", ->
+        set cursor: [0, 1]
+        keystroke 'i'
+        editor.backspace()
+        ensure 'escape', text: "23\n123", cursor: [0, 0]
+        ensure 'j .', text: "23\n123" # nothing happen
+        ensure 'l .', text: "23\n23"
+
+      it "can repeat backspace only mutation: case-a", ->
+        keystroke 'a'
+        editor.backspace()
+        ensure 'escape', text: "23\n123", cursor: [0, 0]
+        ensure '.', text: "3\n123", cursor: [0, 0]
+        ensure 'j . .', text: "3\n3"
+
+      it "can repeat delete only mutation: case-i", ->
+        keystroke 'i'
+        editor.delete()
+        ensure 'escape', text: "23\n123"
+        ensure 'j .', text: "23\n23"
+
+      it "can repeat delete only mutation: case-a", ->
+        keystroke 'a'
+        editor.delete()
+        ensure 'escape', text: "13\n123"
+        ensure 'j .', text: "13\n13"
+
+      it "can repeat backspace and insert mutation: case-i", ->
+        set cursor: [0, 1]
+        keystroke 'i'
+        editor.backspace()
+        editor.insertText("!!!")
+        ensure 'escape', text: "!!!23\n123"
+        set cursor: [1, 1]
+        ensure '.', text: "!!!23\n!!!23"
+
+      it "can repeat backspace and insert mutation: case-a", ->
+        keystroke 'a'
+        editor.backspace()
+        editor.insertText("!!!")
+        ensure 'escape', text: "!!!23\n123"
+        ensure 'j 0 .', text: "!!!23\n!!!23"
+
+      it "can repeat delete and insert mutation: case-i", ->
+        keystroke 'i'
+        editor.delete()
+        editor.insertText("!!!")
+        ensure 'escape', text: "!!!23\n123"
+        ensure 'j 0 .', text: "!!!23\n!!!23"
+
+      it "can repeat delete and insert mutation: case-a", ->
+        keystroke 'a'
+        editor.delete()
+        editor.insertText("!!!")
+        ensure 'escape', text: "1!!!3\n123"
+        ensure 'j 0 .', text: "1!!!3\n1!!!3"
+
+    describe "multi-cursors operation", ->
+      beforeEach ->
+        set
+          text: """
+          123
+
+          1234
+
+          12345
+          """
+          cursor: [[0, 0], [2, 0], [4, 0]]
+
+      it "can repeat backspace only mutation: case-multi-cursors", ->
+        ensure 'A', cursor: [[0, 3], [2, 4], [4, 5]], mode: 'insert'
+        editor.backspace()
+        ensure 'escape', text: "12\n\n123\n\n1234", cursor: [[0, 1], [2, 2], [4, 3]]
+        ensure '.', text: "1\n\n12\n\n123", cursor: [[0, 0], [2, 1], [4, 2]]
+
+      it "can repeat delete only mutation: case-multi-cursors", ->
+        ensure 'I', mode: 'insert'
+        editor.delete()
+        cursors = [[0, 0], [2, 0], [4, 0]]
+        ensure 'escape', text: "23\n\n234\n\n2345", cursor: cursors
+        ensure '.', text: "3\n\n34\n\n345", cursor: cursors
+        ensure '.', text: "\n\n4\n\n45", cursor: cursors
+        ensure '.', text: "\n\n\n\n5", cursor: cursors
+        ensure '.', text: "\n\n\n\n", cursor: cursors
+
   describe 'specify insertion count', ->
     ensureInsertionCount = (key, {insert, text, cursor}) ->
       keystroke key

@@ -2,7 +2,6 @@ _ = require 'underscore-plus'
 
 {
   moveCursorLeft, moveCursorRight
-  getNewTextRangeFromCheckpoint
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -24,13 +23,13 @@ class ActivateInsertMode extends Operator
       disposable.dispose()
 
       @vimState.mark.set('^', @editor.getCursorBufferPosition())
-      if (range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint('insert')))?
-        @setMarkForChange(range) # Marker can track following extra insertion incase count specified
-        textByUserInput = @editor.getTextInBufferRange(range)
-      else
-        textByUserInput = ''
-      @saveInsertedText(textByUserInput)
-      @vimState.register.set('.', {text: textByUserInput})
+      textByUserInput = ''
+      if change = @getChangeSinceCheckpoint('insert')
+        @lastChange = change
+        @vimState.mark.set('[', change.start)
+        @vimState.mark.set(']', change.start.traverse(change.newExtent))
+        textByUserInput = change.newText
+      @vimState.register.set('.', text: textByUserInput)
 
       _.times @getInsertionCount(), =>
         text = @textByOperator + textByUserInput
@@ -56,14 +55,39 @@ class ActivateInsertMode extends Operator
   getCheckpoint: (purpose) ->
     @checkpoint[purpose]
 
-  saveInsertedText: (@insertedText) -> @insertedText
+  # When each mutaion's extent is not intersecting, muitiple changes are recorded
+  # e.g
+  #  - Multicursors edit
+  #  - Cursor moved in insert-mode(e.g ctrl-f, ctrl-b)
+  # But I don't care multiple changes just because I'm lazy(so not perfect implementation).
+  # I only take care of one change happened at earliest(topCursor's change) position.
+  # Thats' why I save topCursor's position to @topCursorPositionAtInsertionStart to compare traversal to deletionStart
+  # Why I use topCursor's change? Just because it's easy to use first change returned by getChangeSinceCheckpoint().
+  getChangeSinceCheckpoint: (purpose) ->
+    checkpoint = @getCheckpoint(purpose)
+    @editor.buffer.getChangesSinceCheckpoint(checkpoint)[0]
 
-  getInsertedText: ->
-    @insertedText ? ''
+  # [BUG] Replaying text-deletion-operation is not compatible to pure Vim.
+  # Pure Vim record all operation in insert-mode as keystroke level and can distinguish
+  # character deleted by `Delete` or by `ctrl-u`.
+  # But I can not and don't trying to minic this level of compatibility.
+  # So basically deletion-done-in-one is expected to work well.
+  replayLastChange: (selection) ->
+    if @lastChange?
+      {start, newExtent, oldExtent, newText} = @lastChange
+      unless oldExtent.isZero()
+        traversalToStartOfDelete = start.traversalFrom(@topCursorPositionAtInsertionStart)
+        deletionStart = selection.cursor.getBufferPosition().traverse(traversalToStartOfDelete)
+        deletionEnd = deletionStart.traverse(oldExtent)
+        selection.setBufferRange([deletionStart, deletionEnd])
+    else
+      newText = ''
+    selection.insertText(newText, autoIndent: true)
 
   # called when repeated
+  # [FIXME] to use replayLastChange in repeatInsert overriding subclasss.
   repeatInsert: (selection, text) ->
-    selection.insertText(text, autoIndent: true)
+    @replayLastChange(selection)
 
   getInsertionCount: ->
     @insertionCount ?= if @supportInsertionCount then (@getCount() - 1) else 0
@@ -71,13 +95,12 @@ class ActivateInsertMode extends Operator
 
   execute: ->
     if @isRepeated()
-      return unless text = @getInsertedText()
       unless @instanceof('Change')
         @flashTarget = @trackChange = true
         @emitDidSelectTarget()
       @editor.transact =>
         for selection in @editor.getSelections()
-          @repeatInsert(selection, text)
+          @repeatInsert(selection, @lastChange?.newText ? '')
           moveCursorLeft(selection.cursor)
 
       if settings.get('clearMultipleCursorsOnEscapeInsertMode')
@@ -85,9 +108,10 @@ class ActivateInsertMode extends Operator
 
     else
       if @getInsertionCount() > 0
-        range = getNewTextRangeFromCheckpoint(@editor, @getCheckpoint('undo'))
-        @textByOperator = if range? then @editor.getTextInBufferRange(range) else ''
+        @textByOperator = @getChangeSinceCheckpoint('undo')?.newText ? ''
       @setCheckpoint('insert')
+      topCursor = @editor.getCursorsOrderedByBufferPosition()[0]
+      @topCursorPositionAtInsertionStart = topCursor.getBufferPosition()
       @vimState.activate('insert', @finalSubmode)
 
 class ActivateReplaceMode extends ActivateInsertMode
