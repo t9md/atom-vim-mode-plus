@@ -137,21 +137,6 @@ getVisibleEditors = ->
   for pane in atom.workspace.getPanes() when editor = pane.getActiveEditor()
     editor
 
-normalizePatchChanges = (changes) ->
-  changes.map (change) ->
-    start: Point.fromObject(change.newStart)
-    oldExtent: Point.fromObject(change.oldExtent)
-    newExtent: Point.fromObject(change.newExtent)
-    newText: change.newText
-
-getNewTextRangeFromCheckpoint = (editor, checkpoint) ->
-  range = null
-  if patch = editor.getBuffer().history?.getChangesSinceCheckpoint(checkpoint)
-    # Take only first chage, ignore change by multi-cursor.
-    if change = normalizePatchChanges(patch.getChanges()).shift()
-      range = new Range(change.start, change.start.traverse(change.newExtent))
-  range
-
 # char can be regExp pattern
 countChar = (string, char) ->
   string.split(char).length - 1
@@ -829,7 +814,6 @@ module.exports = {
   getVisibleBufferRange
   withVisibleBufferRange
   getVisibleEditors
-  getNewTextRangeFromCheckpoint
   findIndexBy
   mergeIntersectingRanges
   pointIsAtEndOfLine
