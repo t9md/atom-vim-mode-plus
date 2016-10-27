@@ -1,3 +1,7 @@
+# 0.63.0:
+- New: Config option `statusBarModeStringStyle`(default `short`) #451
+- New, Improve: Repeate(`.`) command now can repeat `insert-mode`'s delete/backspace operation #322
+
 # 0.62.0:
 - Improve: Improve performance for `f`, `F`, `t`, `T`, Surround #448, #435.
 
