@@ -70,6 +70,13 @@ class VimState
       @highlightSearch.refresh()
     @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
 
+    @subscriptions.add @editor.observeSelections (selection) =>
+      return if @operationStack.isProcessing()
+      unless swrap(selection).hasProperties()
+        swrap(selection).saveProperties()
+        @updateCursorsVisibility()
+        @editorElement.component.updateSync()
+
     @editorElement.classList.add(packageScope)
     if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
       @activate('insert')
@@ -245,7 +252,6 @@ class VimState
     # Hover position get wired when focus-change between more than two pane.
     # commenting out is far better than introducing Buggy behavior.
     # @subscriptions.add atom.commands.onWillDispatch(saveProperties)
-
     @subscriptions.add atom.commands.onDidDispatch(checkSelection)
 
   resetNormalMode: ({userInvocation}={}) ->
@@ -275,7 +281,6 @@ class VimState
 
   updateCursorsVisibility: ->
     @cursorStyleManager.refresh()
-
 
   updatePreviousSelection: ->
     if @isMode('visual', 'blockwise')
