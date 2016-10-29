@@ -10,6 +10,7 @@ settings = require './settings'
 
 module.exports =
 class SearchModel
+  relativeIndex: 0
   onDidChangeCurrentMatch: (fn) -> @emitter.on 'did-change-current-match', fn
 
   constructor: (@vimState, @options) ->
@@ -111,6 +112,7 @@ class SearchModel
 
     @currentMatchIndex = @matches.indexOf(currentMatch)
     @updateCurrentMatch(relativeIndex)
+    @initialCurrentMatchIndex = @currentMatchIndex
     @currentMatch
 
   updateCurrentMatch: (relativeIndex) ->
@@ -118,8 +120,8 @@ class SearchModel
     @currentMatch = @matches[@currentMatchIndex]
     @emitter.emit('did-change-current-match')
 
-  getCurrentMatch: ->
-    @currentMatch
+  getRelativeIndex: ->
+    @currentMatchIndex - @initialCurrentMatchIndex
 
   flashScreen: ->
     options = {class: 'vim-mode-plus-flash', timeout: 100}

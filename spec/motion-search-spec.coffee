@@ -271,6 +271,33 @@ describe "Motion Search", ->
             expect(vimState.highlightSearch.hasMarkers()).toBe(false)
             ensure mode: 'normal'
 
+  describe "IncrementalSearch", ->
+    beforeEach ->
+      settings.set('incrementalSearch', true)
+      jasmine.attachToDOM(getView(atom.workspace))
+
+    describe "with multiple-cursors", ->
+      beforeEach ->
+        set
+          text: """
+          0:    abc
+          1:    abc
+          2:    abc
+          3:    abc
+          """
+          cursor: [[0, 0], [1, 0]]
+
+      it "[forward] move each cursor to match", ->
+        ensure ['/', search: 'abc'], cursor: [[0, 6], [1, 6]]
+      it "[forward: count specified], move each cursor to match", ->
+        ensure ['2 /', search: 'abc'], cursor: [[1, 6], [2, 6]]
+
+      it "[backward] move each cursor to match", ->
+        ensure ['?', search: 'abc'], cursor: [[3, 6], [0, 6]]
+      it "[backward: count specified] move each cursor to match", ->
+        ensure ['2 ?', search: 'abc'], cursor: [[2, 6], [3, 6]]
+
+
   describe "the * keybinding", ->
     beforeEach ->
       set

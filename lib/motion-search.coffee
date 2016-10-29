@@ -21,12 +21,18 @@ class SearchBase extends Motion
   configScope: null
   landingPoint: null # ['start' or 'end']
   defaultLandingPoint: 'start' # ['start' or 'end']
+  relativeIndex: null
 
   isBackwards: ->
     @backwards
 
   isIncrementalSearch: ->
     @instanceof('Search') and not @isRepeated() and settings.get('incrementalSearch')
+
+  initialize: ->
+    super
+    @onDidFinishOperation =>
+      @finish()
 
   getCount: ->
     count = super
@@ -44,6 +50,7 @@ class SearchBase extends Motion
   finish: ->
     if @isIncrementalSearch() and settings.get('showHoverSearchCounter')
       @vimState.hoverSearchCounter.reset()
+    @relativeIndex = null
     @searchModel?.destroy()
     @searchModel = null
 
@@ -51,16 +58,22 @@ class SearchBase extends Motion
     @landingPoint ?= @defaultLandingPoint
 
   getPoint: (cursor) ->
-    range = @getSearchModel().getCurrentMatch()
-    range ?= @search(cursor, @input, @getCount())
-    if range?
-      range[@getLandingPoint()]
+    if @searchModel?
+      @relativeIndex = @getCount() + @searchModel.getRelativeIndex()
+    else
+      @relativeIndex ?= @getCount()
+
+    if range = @search(cursor, @input, @relativeIndex)
+      point = range[@getLandingPoint()]
+
+    @searchModel.destroy()
+    @searchModel = null
+
+    point
 
   moveCursor: (cursor) ->
     input = @getInput()
-    if input is ''
-      @finish()
-      return
+    return unless input
 
     if point = @getPoint(cursor)
       cursor.setBufferPosition(point, autoscroll: false)
@@ -70,8 +83,6 @@ class SearchBase extends Motion
       @vimState.searchHistory.save(input)
 
     @globalState.set('lastSearchPattern', @getPattern(input))
-
-    @finish()
 
   getSearchModel: ->
     @searchModel ?= new SearchModel(@vimState, incrementalSearch: @isIncrementalSearch())
