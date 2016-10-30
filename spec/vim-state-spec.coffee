@@ -454,8 +454,13 @@ describe "VimState", ->
         ensure 'V j', mode: ['visual', 'linewise'], cursor: [2, 0], selectedText: "0: abc\n\n"
         ensure 'escape', mode: 'normal', cursor: [1, 0]
       it "ctrl-v", ->
-        ensure 'ctrl-v', mode: ['visual', 'blockwise'], cursor: [2, 0]
+        ensure 'ctrl-v', mode: ['visual', 'blockwise'], selectedBufferRange: [[1, 0], [1, 0]]
         ensure 'escape', mode: 'normal', cursor: [1, 0]
+      it "ctrl-v and move over empty line", ->
+        ensure 'ctrl-v', mode: ['visual', 'blockwise'], selectedBufferRangeOrdered: [[1, 0], [1, 0]]
+        ensure 'k', mode: ['visual', 'blockwise'], selectedBufferRangeOrdered: [[[0, 0], [0, 1]], [[1, 0], [1, 0]]]
+        ensure 'j', mode: ['visual', 'blockwise'], selectedBufferRangeOrdered: [[1, 0], [1, 0]]
+        ensure 'j', mode: ['visual', 'blockwise'], selectedBufferRangeOrdered: [[[1, 0], [1, 0]], [[2, 0], [2, 1]]]
 
   describe "marks", ->
     beforeEach -> set text: "text in line 1\ntext in line 2\ntext in line 3"

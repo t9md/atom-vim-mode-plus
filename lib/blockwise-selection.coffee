@@ -29,30 +29,27 @@ class BlockwiseSelection
     @selections = [selection]
     wasReversed = reversed = selection.isReversed()
 
-    # If selection is single line we don't need to add selection.
-    # This tweeking allow find-and-replace:select-next then ctrl-v, I(or A) flow work.
-    unless swrap(selection).isSingleRow()
-      range = selection.getBufferRange()
-      if range.end.column is 0
-        range.end.row = range.end.row - 1
+    range = selection.getBufferRange()
+    if range.end.column is 0
+      range.end.row = range.end.row - 1
 
-      if @goalColumn?
-        if wasReversed
-          range.start.column = @goalColumn
-        else
-          range.end.column = @goalColumn + 1
+    if @goalColumn?
+      if wasReversed
+        range.start.column = @goalColumn
+      else
+        range.end.column = @goalColumn + 1
 
-      if range.start.column >= range.end.column
-        reversed = not reversed
-        range = range.translate([0, 1], [0, -1])
+    if range.start.column >= range.end.column
+      reversed = not reversed
+      range = range.translate([0, 1], [0, -1])
 
-      {start, end} = range
-      ranges = [start.row..end.row].map (row) ->
-        [[row, start.column], [row, end.column]]
+    {start, end} = range
+    ranges = [start.row..end.row].map (row) ->
+      [[row, start.column], [row, end.column]]
 
-      selection.setBufferRange(ranges.shift(), {reversed})
-      for range in ranges
-        @selections.push(@editor.addSelectionForBufferRange(range, {reversed}))
+    selection.setBufferRange(ranges.shift(), {reversed})
+    for range in ranges
+      @selections.push(@editor.addSelectionForBufferRange(range, {reversed}))
     @reverse() if wasReversed
     @updateGoalColumn()
 
@@ -166,7 +163,6 @@ class BlockwiseSelection
       [start, end] = [head, tail]
     else
       [start, end] = [tail, head]
-    end.row += 1 if end.column is 0
 
     unless (@isSingleRow() or @headReversedStateIsInSync())
       start.column -= 1
@@ -193,6 +189,10 @@ class BlockwiseSelection
     @clearSelections(except: head)
     {goalColumn} = head.cursor
     swrap(head).selectByProperties(properties)
+
+    if head.getBufferRange().end.column is 0
+      swrap(head).translateSelectionEndAndClip('forward')
+
     head.cursor.goalColumn ?= goalColumn if goalColumn?
 
 module.exports = BlockwiseSelection

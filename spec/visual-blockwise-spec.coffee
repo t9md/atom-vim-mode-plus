@@ -397,6 +397,7 @@ describe "Visual Blockwise", ->
       it 'case-4', -> ensureCharacterwiseWasRestored('v 2 h 3 k')
       it 'case-5', -> ensureCharacterwiseWasRestored('v l 3 k')
       it 'case-6', -> ensureCharacterwiseWasRestored('v 2 l 3 k')
+      it 'case-7', -> set cursor: [5, 0]; ensureCharacterwiseWasRestored('v 5 l 3 k')
 
   # [FIXME] not appropriate put here, re-consider all spec file layout later.
   describe "gv feature", ->
