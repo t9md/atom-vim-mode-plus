@@ -149,12 +149,11 @@ class Search extends SearchBase
     @finish()
 
   handleConfirmSearch: ({@input, @landingPoint}) =>
-    searchChar = if @isBackwards() then '?' else '/'
-    if @input in ['', searchChar]
-      @input = @vimState.searchHistory.get('prev')
-      atom.beep() unless @input
-      if @isIncrementalSearch()
-        @incrementalSearch = false
+    unless @isIncrementalSearch()
+      searchChar = if @isBackwards() then '?' else '/'
+      if @input in ['', searchChar]
+        @input = @vimState.searchHistory.get('prev')
+        atom.beep() unless @input
     @processOperation()
 
   handleChangeSearch: (@input) ->
