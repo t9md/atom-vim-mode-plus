@@ -640,6 +640,7 @@ class MoveToFirstLine extends Motion
     super - 1
 
   moveCursor: (cursor) ->
+    @vimState.mark.set('`', cursor.getBufferPosition())
     cursor.setBufferPosition(@getPoint())
     cursor.autoscroll(center: true)
 
@@ -898,6 +899,8 @@ class MoveToMark extends Motion
 
   getPoint: (fromPoint) ->
     input = @getInput()
+    if input is "'"
+      input = '`' # use single-quote as alias for back-quote for simplicity
     point = null
 
     point = @vimState.mark.get(input)
@@ -912,6 +915,7 @@ class MoveToMark extends Motion
   moveCursor: (cursor) ->
     point = cursor.getBufferPosition()
     @setBufferPositionSafely(cursor, @getPoint(point))
+    @vimState.mark.set('`', point)
 
 # keymap: '
 class MoveToMarkLine extends MoveToMark

@@ -76,6 +76,7 @@ class SearchBase extends Motion
     return unless input
 
     if point = @getPoint(cursor)
+      @vimState.mark.set('`', cursor.getBufferPosition())
       cursor.setBufferPosition(point, autoscroll: false)
 
     unless @isRepeated()
