@@ -112,7 +112,7 @@ class Search extends SearchBase
       @onDidCommandSearch(@handleCommandEvent.bind(this))
 
     @onDidConfirmSearch(@handleConfirmSearch.bind(this))
-    @onDidCancelSearch(@handleCancelSeach.bind(this))
+    @onDidCancelSearch(@handleCancelSearch.bind(this))
     @onDidChangeSearch(@handleChangeSearch.bind(this))
 
     @vimState.searchInput.focus({@backwards})
@@ -141,7 +141,7 @@ class Search extends SearchBase
 
         @vimState.operationStack.run(operation) if operation?
 
-  handleCancelSeach: ->
+  handleCancelSearch: ->
     @vimState.resetNormalMode() unless @isMode('visual') or @isMode('insert')
     @restoreEditorState?()
     @vimState.reset()
