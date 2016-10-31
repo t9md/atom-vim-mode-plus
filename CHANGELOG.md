@@ -1,3 +1,9 @@
+# 0.64.0:
+- Fix: cursor-style-manager no longer throw error when executing `find-and-replace:select-next` in wholeline selection. #406
+- Fix: No longer destroy first cursor after incremental-search is executeded with multi-cursors #461
+- Fix: In visual-blockwise, unnecessary add selection in bottom direction when bottom selection start at column 0 #454
+- Fix: `e`(`move-to-end-of-word`) on blank row at the end of file freezes Atom #469
+
 # 0.63.0:
 - New: Config option `statusBarModeStringStyle`(default `short`) #451
 - New, Improve: Repeate(`.`) command now can repeat `insert-mode`'s delete/backspace operation #322
