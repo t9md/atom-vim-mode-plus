@@ -190,7 +190,8 @@ getNonWordCharactersForCursor = (cursor) ->
 # return true if moved
 moveCursorToNextNonWhitespace = (cursor) ->
   originalPoint = cursor.getBufferPosition()
-  while cursorIsOnWhiteSpace(cursor) and (not cursorIsAtVimEndOfFile(cursor))
+  vimEof = getVimEofBufferPosition(cursor.editor)
+  while cursorIsOnWhiteSpace(cursor) and not cursor.getBufferPosition().isGreaterThanOrEqual(vimEof)
     cursor.moveRight()
   not originalPoint.isEqual(cursor.getBufferPosition())
 
