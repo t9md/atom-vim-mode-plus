@@ -6,6 +6,9 @@
   # 'ctrl-w z': 'vim-mode-plus:maximize-pane'
   'cmd-enter': 'vim-mode-plus:maximize-pane'
 
+# pane
+# -------------------------
+'atom-pane':
   'ctrl-w ctrl-h': 'window:focus-pane-on-left'
   'ctrl-w h': 'window:focus-pane-on-left'
   'ctrl-w left': 'window:focus-pane-on-left'
