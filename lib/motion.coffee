@@ -392,6 +392,34 @@ class MoveToEndOfWord extends Motion
         cursor.moveRight()
         @moveToNextEndOfWord(cursor)
 
+class MoveToEndOfPreviousWord extends MoveToPreviousWord
+  @extend()
+  inclusive: true
+
+  moveCursor: (cursor) ->
+    times = @getCount()
+    wordRange = cursor.getCurrentWordBufferRange()
+    curPos = cursor.getBufferPosition()
+
+    # if we're in the middle of a word then we need to move to its start
+    if curPos.isGreaterThan(wordRange.start) and curPos.isLessThan(wordRange.end)
+      times += 1
+
+    for [1..times]
+      point = cursor.getBeginningOfCurrentWordBufferPosition({@wordRegex})
+      console.log("setting", point)
+      cursor.setBufferPosition(point)
+
+    @moveToNextEndOfWord(cursor)
+    if cursor.getBufferPosition().isGreaterThanOrEqual(curPos)
+      cursor.setBufferPosition([0, 0])
+
+  moveToNextEndOfWord: (cursor) ->
+    point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex}).translate([0, -1])
+    point = Point.min(point, @getVimEofBufferPosition())
+    console.log("jumping to end at", point)
+    cursor.setBufferPosition(point)
+
 # Whole word
 # -------------------------
 class MoveToNextWholeWord extends MoveToNextWord
@@ -403,6 +431,10 @@ class MoveToPreviousWholeWord extends MoveToPreviousWord
   wordRegex: /^\s*$|\S+/
 
 class MoveToEndOfWholeWord extends MoveToEndOfWord
+  @extend()
+  wordRegex: /\S+/
+
+class MoveToEndOfPreviousWholeWord extends MoveToEndOfPreviousWord
   @extend()
   wordRegex: /\S+/
 
