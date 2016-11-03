@@ -1,4 +1,5 @@
-{getVimState, dispatch, TextData} = require './spec-helper'
+{Point} = require 'atom'
+{getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "Motion general", ->
@@ -1300,7 +1301,11 @@ describe "Motion general", ->
   describe 'the mark keybindings', ->
     beforeEach ->
       set
-        text: '  12\n    34\n56\n'
+        text: """
+          12
+            34
+        56\n
+        """
         cursor: [0, 1]
 
     it 'moves to the beginning of the line of a mark', ->
@@ -1338,6 +1343,104 @@ describe "Motion general", ->
       keystroke '` `'
       set cursorBuffer: [2, 1]
       ensure '` `', cursorBuffer: [1, 5]
+
+  describe "jump command update ` and ' mark", ->
+    ensureMark = (_keystroke, option) ->
+      keystroke(_keystroke)
+      ensure cursor: option.cursor
+      ensure mark: "`": option.mark
+      ensure mark: "'": option.mark
+
+    ensureJumpAndBack = (keystroke, option) ->
+      initial = editor.getCursorBufferPosition()
+      ensureMark keystroke, cursor: option.cursor, mark: initial
+      afterMove = editor.getCursorBufferPosition()
+      expect(initial.isEqual(afterMove)).toBe(false)
+      ensureMark "` `", cursor: initial, mark: option.cursor
+
+    ensureJumpAndBackLinewise = (keystroke, option) ->
+      initial = editor.getCursorBufferPosition()
+      expect(initial.column).not.toBe(0)
+      ensureMark keystroke, cursor: option.cursor, mark: initial
+      afterMove = editor.getCursorBufferPosition()
+      expect(initial.isEqual(afterMove)).toBe(false)
+      ensureMark "' '", cursor: [initial.row, 0], mark: option.cursor
+
+    beforeEach ->
+      for mark in "`'"
+        vimState.mark.marks[mark]?.destroy()
+        vimState.mark.marks[mark] = null
+
+      set
+        text: """
+        0: oo 0
+        1: 1111
+        2: 2222
+        3: oo 3
+        4: 4444
+        5: oo 5
+        """
+        cursor: [1, 0]
+
+    describe "initial state", ->
+      it "return [0, 0]", ->
+        ensure mark: "'": [0, 0]
+        ensure mark: "`": [0, 0]
+
+    describe "jump motion in normal-mode", ->
+      initial = [3, 3]
+      beforeEach ->
+        jasmine.attachToDOM(getView(atom.workspace)) # for L, M, H
+        ensure mark: "'": [0, 0]
+        ensure mark: "`": [0, 0]
+        set cursor: initial
+
+      it "G jump&back", -> ensureJumpAndBack 'G', cursor: [5, 0]
+      it "g g jump&back", -> ensureJumpAndBack "g g", cursor: [0, 0]
+      it "100 % jump&back", -> ensureJumpAndBack "1 0 0 %", cursor: [5, 0]
+      it ") jump&back", -> ensureJumpAndBack ")", cursor: [5, 6]
+      it "( jump&back", -> ensureJumpAndBack "(", cursor: [0, 0]
+      it "] jump&back", -> ensureJumpAndBack "]", cursor: [5, 3]
+      it "[ jump&back", -> ensureJumpAndBack "[", cursor: [0, 3]
+      it "} jump&back", -> ensureJumpAndBack "}", cursor: [5, 6]
+      it "{ jump&back", -> ensureJumpAndBack "{", cursor: [0, 0]
+      it "L jump&back", -> ensureJumpAndBack "L", cursor: [5, 0]
+      it "H jump&back", -> ensureJumpAndBack "H", cursor: [0, 0]
+      it "M jump&back", -> ensureJumpAndBack "M", cursor: [2, 0]
+      it "* jump&back", -> ensureJumpAndBack "*", cursor: [5, 3]
+
+      # [BUG] Strange bug, Using subject "# jump & back" skips spec.
+      # coffeescript bug? Atom v1.11.2
+      it "Sharp(#) jump&back", -> ensureJumpAndBack('#', cursor: [0, 3])
+
+      it "/ jump&back", -> ensureJumpAndBack ["/", search: 'oo'], cursor: [5, 3]
+      it "? jump&back", -> ensureJumpAndBack ["?", search: 'oo'], cursor: [0, 3]
+
+      it "n jump&back", ->
+        set cursor: [0, 0]
+        ensure ['/', search: 'oo'], cursor: [0, 3]
+        ensureJumpAndBack "n", cursor: [3, 3]
+        ensureJumpAndBack "N", cursor: [5, 3]
+
+      it "N jump&back", ->
+        set cursor: [0, 0]
+        ensure ['?', search: 'oo'], cursor: [5, 3]
+        ensureJumpAndBack "n", cursor: [3, 3]
+        ensureJumpAndBack "N", cursor: [0, 3]
+
+      it "G jump&back linewise", -> ensureJumpAndBackLinewise 'G', cursor: [5, 0]
+      it "g g jump&back linewise", -> ensureJumpAndBackLinewise "g g", cursor: [0, 0]
+      it "100 % jump&back linewise", -> ensureJumpAndBackLinewise "1 0 0 %", cursor: [5, 0]
+      it ") jump&back linewise", -> ensureJumpAndBackLinewise ")", cursor: [5, 6]
+      it "( jump&back linewise", -> ensureJumpAndBackLinewise "(", cursor: [0, 0]
+      it "] jump&back linewise", -> ensureJumpAndBackLinewise "]", cursor: [5, 3]
+      it "[ jump&back linewise", -> ensureJumpAndBackLinewise "[", cursor: [0, 3]
+      it "} jump&back linewise", -> ensureJumpAndBackLinewise "}", cursor: [5, 6]
+      it "{ jump&back linewise", -> ensureJumpAndBackLinewise "{", cursor: [0, 0]
+      it "L jump&back linewise", -> ensureJumpAndBackLinewise "L", cursor: [5, 0]
+      it "H jump&back linewise", -> ensureJumpAndBackLinewise "H", cursor: [0, 0]
+      it "M jump&back linewise", -> ensureJumpAndBackLinewise "M", cursor: [2, 0]
+      it "* jump&back linewise", -> ensureJumpAndBackLinewise "*", cursor: [5, 3]
 
   describe 'the V keybinding', ->
     [text] = []

@@ -1,8 +1,8 @@
-{Range, CompositeDisposable} = require 'atom'
+{Range, Point, CompositeDisposable} = require 'atom'
 
 MARKS = /// (
   ?: [a-z]
-   | [\[\]`.^(){}<>]
+   | [\[\]`'.^(){}<>]
 ) ///
 
 class MarkManager
@@ -23,7 +23,11 @@ class MarkManager
 
   get: (name) ->
     return unless @isValid(name)
-    @marks[name]?.getStartBufferPosition()
+    point = @marks[name]?.getStartBufferPosition()
+    if name in "`'"
+      point ? Point.ZERO
+    else
+      point
 
   # Return range between marks
   getRange: (startMark, endMark) ->

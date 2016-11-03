@@ -41,6 +41,7 @@ class Motion extends Base
   @extend(false)
   inclusive: false
   wise: 'characterwise'
+  jump: false
 
   constructor: ->
     super
@@ -53,6 +54,9 @@ class Motion extends Base
 
   isInclusive: ->
     @inclusive
+
+  isJump: ->
+    @jump
 
   isCharacterwise: ->
     @wise is 'characterwise'
@@ -77,9 +81,19 @@ class Motion extends Base
   setScreenPositionSafely: (cursor, point) ->
     cursor.setScreenPosition(point) if point?
 
+  moveWithSaveJump: (cursor) ->
+    if cursor.isLastCursor() and @isJump()
+      cursorPosition = cursor.getBufferPosition()
+
+    @moveCursor(cursor)
+
+    if cursorPosition? and not cursorPosition.isEqual(cursor.getBufferPosition())
+      @vimState.mark.set('`', cursorPosition)
+      @vimState.mark.set("'", cursorPosition)
+
   execute: ->
     @editor.moveCursors (cursor) =>
-      @moveCursor(cursor)
+      @moveWithSaveJump(cursor)
 
   select: ->
     @vimState.modeManager.normalizeSelections() if @isMode('visual')
@@ -101,7 +115,7 @@ class Motion extends Base
     {cursor} = selection
 
     selection.modifySelection =>
-      @moveCursor(cursor)
+      @moveWithSaveJump(cursor)
 
     return if not @isMode('visual') and selection.isEmpty() # Failed to move.
     return unless @isInclusive() or @isLinewise()
@@ -248,6 +262,7 @@ class MoveDownScreen extends MoveUpScreen
 class MoveUpToEdge extends Motion
   @extend()
   wise: 'linewise'
+  jump: true
   direction: 'up'
   @description: "Move cursor up to **edge** char at same-column"
 
@@ -450,6 +465,7 @@ class MoveToEndOfSmartWord extends MoveToEndOfWord
 #  - section boundary is also sentence boundary(ignore)
 class MoveToNextSentence extends Motion
   @extend()
+  jump: true
   sentenceRegex: ///(?:[\.!\?][\)\]"']*\s+)|(\n|\r\n)///g
   direction: 'next'
 
@@ -520,6 +536,7 @@ class MoveToPreviousSentenceSkipBlankRow extends MoveToPreviousSentence
 # -------------------------
 class MoveToNextParagraph extends Motion
   @extend()
+  jump: true
   direction: 'next'
 
   moveCursor: (cursor) ->
@@ -635,6 +652,7 @@ class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
 class MoveToFirstLine extends Motion
   @extend()
   wise: 'linewise'
+  jump: true
 
   getCount: ->
     super - 1
@@ -686,6 +704,7 @@ class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
 class MoveToTopOfScreen extends Motion
   @extend()
   wise: 'linewise'
+  jump: true
   scrolloff: 2
   defaultCount: 0
 
@@ -888,6 +907,7 @@ class TillBackwards extends Till
 # keymap: `
 class MoveToMark extends Motion
   @extend()
+  jump: true
   requireInput: true
   hover: icon: ":move-to-mark:`", emoji: ":round_pushpin:`"
   input: null # set when instatntiated via vimState::moveToMark()
@@ -896,28 +916,23 @@ class MoveToMark extends Motion
     super
     @focusInput() unless @isComplete()
 
-  getPoint: (fromPoint) ->
-    input = @getInput()
-    point = null
-
-    point = @vimState.mark.get(input)
-    if input is '`' # double '`' pressed
-      point ?= [0, 0] # if mark was not set, go to the beginning of the file
-      @vimState.mark.set('`', fromPoint)
-
-    if point? and @isLinewise()
-      point = getFirstCharacterPositionForBufferRow(@editor, point.row)
-    point
+  getPoint: ->
+    @vimState.mark.get(@getInput())
 
   moveCursor: (cursor) ->
-    point = cursor.getBufferPosition()
-    @setBufferPositionSafely(cursor, @getPoint(point))
+    if point = @getPoint()
+      cursor.setBufferPosition(point)
+      cursor.autoscroll(center: true)
 
 # keymap: '
 class MoveToMarkLine extends MoveToMark
   @extend()
   hover: icon: ":move-to-mark:'", emoji: ":round_pushpin:'"
   wise: 'linewise'
+
+  getPoint: ->
+    if point = super
+      getFirstCharacterPositionForBufferRow(@editor, point.row)
 
 # Fold
 # -------------------------
@@ -1044,6 +1059,7 @@ class MoveToNextNumber extends MoveToPreviousNumber
 class MoveToPair extends Motion
   @extend()
   inclusive: true
+  jump: true
   member: ['Parenthesis', 'CurlyBracket', 'SquareBracket', 'AngleBracket']
 
   moveCursor: (cursor) ->

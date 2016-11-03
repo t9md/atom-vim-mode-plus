@@ -16,6 +16,7 @@ getCaseSensitivity = (searchName) ->
 
 class SearchBase extends Motion
   @extend(false)
+  jump: true
   backwards: false
   useRegexp: true
   configScope: null

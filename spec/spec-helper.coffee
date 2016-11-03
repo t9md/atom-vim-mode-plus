@@ -217,6 +217,7 @@ class VimEditor
     'occurrenceCount', 'occurrenceText'
     'characterwiseHead'
     'scrollTop',
+    'mark'
     'mode',
   ]
   # Public
@@ -322,6 +323,11 @@ class VimEditor
   ensureScrollTop: (scrollTop) ->
     actual = @editorElement.getScrollTop()
     expect(actual).toEqual scrollTop
+
+  ensureMark: (mark) ->
+    for name, point of mark
+      actual = @vimState.mark.get(name)
+      expect(actual).toEqual(point)
 
   ensureMode: (mode) ->
     mode = toArray(mode)
