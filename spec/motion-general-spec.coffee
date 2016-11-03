@@ -1358,6 +1358,14 @@ describe "Motion general", ->
       expect(initial.isEqual(afterMove)).toBe(false)
       ensureMark "` `", cursor: initial, mark: option.cursor
 
+    ensureJumpAndBackLinewise = (keystroke, option) ->
+      initial = editor.getCursorBufferPosition()
+      expect(initial.column).not.toBe(0)
+      ensureMark keystroke, cursor: option.cursor, mark: initial
+      afterMove = editor.getCursorBufferPosition()
+      expect(initial.isEqual(afterMove)).toBe(false)
+      ensureMark "' '", cursor: [initial.row, 0], mark: option.cursor
+
     beforeEach ->
       for mark in "`'"
         vimState.mark.marks[mark]?.destroy()
@@ -1419,6 +1427,20 @@ describe "Motion general", ->
         ensure ['?', search: 'oo'], cursor: [5, 3]
         ensureJumpAndBack "n", cursor: [3, 3]
         ensureJumpAndBack "N", cursor: [0, 3]
+
+      it "G jump&back linewise", -> ensureJumpAndBackLinewise 'G', cursor: [5, 0]
+      it "g g jump&back linewise", -> ensureJumpAndBackLinewise "g g", cursor: [0, 0]
+      it "100 % jump&back linewise", -> ensureJumpAndBackLinewise "1 0 0 %", cursor: [5, 0]
+      it ") jump&back linewise", -> ensureJumpAndBackLinewise ")", cursor: [5, 6]
+      it "( jump&back linewise", -> ensureJumpAndBackLinewise "(", cursor: [0, 0]
+      it "] jump&back linewise", -> ensureJumpAndBackLinewise "]", cursor: [5, 3]
+      it "[ jump&back linewise", -> ensureJumpAndBackLinewise "[", cursor: [0, 3]
+      it "} jump&back linewise", -> ensureJumpAndBackLinewise "}", cursor: [5, 6]
+      it "{ jump&back linewise", -> ensureJumpAndBackLinewise "{", cursor: [0, 0]
+      it "L jump&back linewise", -> ensureJumpAndBackLinewise "L", cursor: [5, 0]
+      it "H jump&back linewise", -> ensureJumpAndBackLinewise "H", cursor: [0, 0]
+      it "M jump&back linewise", -> ensureJumpAndBackLinewise "M", cursor: [2, 0]
+      it "* jump&back linewise", -> ensureJumpAndBackLinewise "*", cursor: [5, 3]
 
   describe 'the V keybinding', ->
     [text] = []
