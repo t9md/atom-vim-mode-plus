@@ -1,3 +1,10 @@
+# 0.65.0:
+- Improve: Incremental-search `/ enter` and `? enter`(confirm with blank imput) repeat last-search #474, #464
+- New: Update backtick(`` ` ``) and `'` mark on jump-motion #476, #384
+  - So keystroke `` ` ` `` and `' '` jump back to previous position.
+- New: Support `'` mark.
+- New: `set-register-name-to-blackhole` command(no default keymap) to make blackhole-register(`_`) easy-to-use #478, #473
+
 # 0.64.0:
 - Fix: cursor-style-manager no longer throw error when executing `find-and-replace:select-next` in wholeline selection. #406
 - Fix: No longer destroy first cursor after incremental-search is executeded with multi-cursors #461
