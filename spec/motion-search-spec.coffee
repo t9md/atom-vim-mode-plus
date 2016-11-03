@@ -297,6 +297,34 @@ describe "Motion Search", ->
       it "[backward: count specified] move each cursor to match", ->
         ensure ['2 ?', search: 'abc'], cursor: [[2, 6], [3, 6]]
 
+    describe "blank input repeat last search", ->
+      beforeEach ->
+        vimState.searchHistory.clear()
+        set
+          text: """
+          0:    abc
+          1:    abc
+          2:    abc
+          3:    abc
+          4:
+          """
+
+      it "Do nothing when search history is empty", ->
+        set cursor [2, 1]
+        ensure ['/', search: ''], cursor: [2, 1]
+        ensure ['?', search: ''], cursor: [2, 1]
+
+      it "Repeat forward direction", ->
+        set cursor: [0, 0]
+        ensure ['/', search: 'abc'], cursor: [0, 6]
+        ensure ['/', search: ''], cursor: [1, 6]
+        ensure ['2 /', search: ''], cursor: [3, 6]
+
+      it "Repeat backward direction", ->
+        set cursor: [4, 0]
+        ensure ['?', search: 'abc'], cursor: [3, 6]
+        ensure ['?', search: ''], cursor: [2, 6]
+        ensure ['2 ?', search: ''], cursor: [0, 6]
 
   describe "the * keybinding", ->
     beforeEach ->
