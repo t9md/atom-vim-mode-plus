@@ -362,7 +362,7 @@ class VimEditor
             # if settings.
             rawKeystroke(_key, target) for _key in k.input.split('')
           when k.search?
-            @vimState.searchInput.editor.insertText(k.search)
+            @vimState.searchInput.editor.insertText(k.search) if k.search
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')
           else
             rawKeystroke(k, target)
