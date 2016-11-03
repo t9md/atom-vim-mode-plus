@@ -24,7 +24,7 @@ class MarkManager
   get: (name) ->
     return unless @isValid(name)
     point = @marks[name]?.getStartBufferPosition()
-    if name in ["'", '`']
+    if name in "`'"
       point ? Point.ZERO
     else
       point
