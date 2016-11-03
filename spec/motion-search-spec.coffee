@@ -310,7 +310,7 @@ describe "Motion Search", ->
           """
 
       it "Do nothing when search history is empty", ->
-        set cursor [2, 1]
+        set cursor: [2, 1]
         ensure ['/', search: ''], cursor: [2, 1]
         ensure ['?', search: ''], cursor: [2, 1]
 
