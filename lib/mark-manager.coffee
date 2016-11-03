@@ -2,7 +2,7 @@
 
 MARKS = /// (
   ?: [a-z]
-   | [\[\]`.^(){}<>]
+   | [\[\]`'.^(){}<>]
 ) ///
 
 class MarkManager
@@ -23,6 +23,8 @@ class MarkManager
 
   get: (name) ->
     return unless @isValid(name)
+    if name is "'"
+      name = '`' # use single-quote as simple alias for back-quote for simplicity
     @marks[name]?.getStartBufferPosition()
 
   # Return range between marks
@@ -41,6 +43,8 @@ class MarkManager
   set: (name, point) ->
     return unless @isValid(name)
     bufferPosition = @editor.clipBufferPosition(point)
+    if name is "'"
+      name = '`' # use single-quote as simple alias for back-quote for simplicity
     @marks[name] = @editor.markBufferPosition(bufferPosition)
     event = {name, bufferPosition, @editor}
     @vimState.emitter.emit('did-set-mark', event)
