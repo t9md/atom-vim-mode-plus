@@ -407,17 +407,18 @@ class MoveToEndOfWord extends Motion
         cursor.moveRight()
         @moveToNextEndOfWord(cursor)
 
-class MoveToEndOfPreviousWord extends MoveToPreviousWord
+# [TODO: Improve, accuracy]
+class MoveToPreviousEndOfWord extends MoveToPreviousWord
   @extend()
   inclusive: true
 
   moveCursor: (cursor) ->
     times = @getCount()
     wordRange = cursor.getCurrentWordBufferRange()
-    curPos = cursor.getBufferPosition()
+    cursorPosition = cursor.getBufferPosition()
 
     # if we're in the middle of a word then we need to move to its start
-    if curPos.isGreaterThan(wordRange.start) and curPos.isLessThan(wordRange.end)
+    if cursorPosition.isGreaterThan(wordRange.start) and cursorPosition.isLessThan(wordRange.end)
       times += 1
 
     for [1..times]
@@ -426,7 +427,7 @@ class MoveToEndOfPreviousWord extends MoveToPreviousWord
       cursor.setBufferPosition(point)
 
     @moveToNextEndOfWord(cursor)
-    if cursor.getBufferPosition().isGreaterThanOrEqual(curPos)
+    if cursor.getBufferPosition().isGreaterThanOrEqual(cursorPosition)
       cursor.setBufferPosition([0, 0])
 
   moveToNextEndOfWord: (cursor) ->
@@ -449,7 +450,8 @@ class MoveToEndOfWholeWord extends MoveToEndOfWord
   @extend()
   wordRegex: /\S+/
 
-class MoveToEndOfPreviousWholeWord extends MoveToEndOfPreviousWord
+# [TODO: Improve, accuracy]
+class MoveToPreviousEndOfWholeWord extends MoveToPreviousEndOfWord
   @extend()
   wordRegex: /\S+/
 
