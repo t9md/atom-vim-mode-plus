@@ -124,7 +124,7 @@ module.exports =
       'activate-blockwise-visual-mode': -> @activate('visual', 'blockwise')
       'reset-normal-mode': -> @resetNormalMode(userInvocation: true)
       'set-register-name': -> @register.setName() # "
-      'set-register-name-to-blackhole': -> @register.setName('_')
+      'set-register-name-to-_': -> @register.setName('_')
       'set-register-name-to-*': -> @register.setName('*')
       'operator-modifier-characterwise': -> @emitDidSetOperatorModifier(wise: 'characterwise')
       'operator-modifier-linewise': -> @emitDidSetOperatorModifier(wise: 'linewise')
