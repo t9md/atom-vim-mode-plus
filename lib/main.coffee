@@ -125,6 +125,7 @@ module.exports =
       'reset-normal-mode': -> @resetNormalMode(userInvocation: true)
       'set-register-name': -> @register.setName() # "
       'set-register-name-to-blackhole': -> @register.setName('_')
+      'set-register-name-to-system-clipboard': -> @register.setName('*')
       'operator-modifier-characterwise': -> @emitDidSetOperatorModifier(wise: 'characterwise')
       'operator-modifier-linewise': -> @emitDidSetOperatorModifier(wise: 'linewise')
       'operator-modifier-occurrence': -> @emitDidSetOperatorModifier(occurrence: true)
