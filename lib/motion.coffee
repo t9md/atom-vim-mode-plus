@@ -276,9 +276,9 @@ class MoveUpToEdge extends Motion
     @setScreenPositionSafely(cursor, point)
 
   getPoint: (fromPoint) ->
-    for row in @getScanRows(fromPoint)
-      if @isMovablePoint(point = new Point(row, fromPoint.column))
-        return point
+    column = fromPoint.column
+    for row in @getScanRows(fromPoint) when @isMovablePoint(point = new Point(row, column))
+      return point
 
   getScanRows: ({row}) ->
     validRow = getValidVimScreenRow.bind(null, @editor)
@@ -287,14 +287,11 @@ class MoveUpToEdge extends Motion
       when 'down' then [validRow(row + 1)..@getVimLastScreenRow()]
 
   isMovablePoint: (point) ->
-    if @isStoppablePoint(point)
-      # first and last row is always edge.
-      if point.row in [0, @getVimLastScreenRow()]
-        true
-      else
-        @isEdge(point)
+    pointIsStoppable = @isStoppablePoint(point)
+    if point.row in [0, @getVimLastScreenRow()]
+      pointIsStoppable
     else
-      false
+      pointIsStoppable and @isEdge(point)
 
   isEdge: (point) ->
     # If one of above/below row is not stoppable, it's Edge!
@@ -307,15 +304,19 @@ class MoveUpToEdge extends Motion
     text = getTextInScreenRange(@editor, [[row, 0], [row, Infinity]])
     softTabText = _.multiplyString(' ', @editor.getTabLength())
     text = text.replace(/\t/g, softTabText)
+
     if (match = text.match(/\S/g))?
       [firstChar, ..., lastChar] = match
-      text.indexOf(firstChar) <= column <= text.lastIndexOf(lastChar)
+      if row in [0, @getVimLastScreenRow()]
+        0 <= column <= text.lastIndexOf(lastChar) # allow leading white-space.
+      else
+        text.indexOf(firstChar) <= column <= text.lastIndexOf(lastChar)
     else
       false
 
   isStoppablePoint: (point) ->
     if point.row in [0, @getVimLastScreenRow()]
-      true
+      @isValidStoppablePoint(point)
     else if @isNonBlankPoint(point)
       true
     else if @isValidStoppablePoint(point)
@@ -423,7 +424,6 @@ class MoveToPreviousEndOfWord extends MoveToPreviousWord
 
     for [1..times]
       point = cursor.getBeginningOfCurrentWordBufferPosition({@wordRegex})
-      console.log("setting", point)
       cursor.setBufferPosition(point)
 
     @moveToNextEndOfWord(cursor)
@@ -433,7 +433,6 @@ class MoveToPreviousEndOfWord extends MoveToPreviousWord
   moveToNextEndOfWord: (cursor) ->
     point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex}).translate([0, -1])
     point = Point.min(point, @getVimEofBufferPosition())
-    console.log("jumping to end at", point)
     cursor.setBufferPosition(point)
 
 # Whole word

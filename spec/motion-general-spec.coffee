@@ -202,11 +202,6 @@ describe "Motion general", ->
     describe "move-(up/down)-to-edge", ->
       text = null
       beforeEach ->
-        atom.keymaps.add "test",
-          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            '[': 'vim-mode-plus:move-up-to-edge'
-            ']': 'vim-mode-plus:move-down-to-edge'
-
         text = new TextData """
           0:  4 67  01234567890123456789
           1:         1234567890123456789
@@ -219,9 +214,32 @@ describe "Motion general", ->
           """
         set text: text.getRaw(), cursor: [4, 3]
 
-      it "move first-row or last-row even if it's blank char", ->
-        ensure '[', cursor: [0, 3]
-        ensure ']', cursor: [7, 3]
+      describe "edgeness of first-line and last-line", ->
+        beforeEach ->
+          set
+            text_: """
+            ____this is line 0
+            ____this is text of line 1
+            ____this is text of line 2
+            ______hello line 3
+            ______hello line 4
+            """
+            cursor: [2, 2]
+
+        describe "whesn column is at leading space", ->
+          it 'is edge if line was first line', ->
+            ensure '[', cursor: [0, 2]
+          it 'is edge if line was last line', ->
+            ensure ']', cursor: [4, 2]
+
+        describe "whesn column is trailing spaces", ->
+          it "doesn't move cursor since it is NOT edge as same as normal line", ->
+            set cursor: [1, 20]
+            ensure ']', cursor: [2, 20]
+            ensure ']', cursor: [2, 20]
+            ensure '[', cursor: [1, 20]
+            ensure '[', cursor: [1, 20]
+
       it "move to non-blank-char on both first and last row", ->
         set cursor: [4, 4]
         ensure '[', cursor: [0, 4]
