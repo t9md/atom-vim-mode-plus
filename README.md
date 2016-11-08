@@ -26,10 +26,10 @@ vim-mode improved.
 
 # What's new in v0.58.0
 
-In v0.58.0, introduce `preset-occurrence` and `persistent-selection`.
-In v0.55.0, introduce `occurrence-modifier`
+- In v0.58.0, introduce `preset-occurrence` and `persistent-selection`.
+- In v0.55.0, introduce `occurrence-modifier`
 
-These features are very powerfull especially for power user, read folloiwng document to learn how to use.  
+These features are very powerful, especially for the power user. Read the following documents to learn how to use them.  
 
 - [Advanced Topic Tutorial](https://github.com/t9md/atom-vim-mode-plus/wiki/AdvancedTopicTutorial)
 - [Occurrence Modifier](https://github.com/t9md/atom-vim-mode-plus/wiki/OccurrenceModifier)
@@ -37,20 +37,20 @@ These features are very powerfull especially for power user, read folloiwng docu
 
 # Important
 
-- **vim-mode-plus is replacement of vim-mode, you must disable vim-mode first to use vim-mode-plus**.
-- You don't need following packages since it's built-in to vim-mode-plus.
+- **vim-mode-plus is replacement for vim-mode, you must disable vim-mode first to use vim-mode-plus**.
+- You don't need the following packages since they're built-in to vim-mode-plus:
   - [vim-surround](https://atom.io/packages/vim-surround)
   - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block)
 - Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
-- Internal code base is very different. Thus, issue, PRs should be directly sent to vim-mode-plus. **DONT report vim-mode-plus's issue or PRs to official vim-mode.**
+- Internal code base is very different. Thus, issues and PRs should be directly sent to vim-mode-plus. **DON'T report vim-mode-plus's issues or PRs to the older official vim-mode.**
 
 # Thanks
 
-My work is greatly owing to former achievement done by original vim-mode developers and many of its contributors.  
-As you can see in commit history, this project is originally started by forking official [vim-mode](https://github.com/atom/vim-mode).  
-The great design to achieve Vim operation by composing operator with target(motion, text-object) on top of operationStack is still lives in vim-mode-plus now.  
+My work is greatly owing to former achievements of the original vim-mode developers and many of its contributors.  
+As you can see in the commit history, this project was originally started by forking official [vim-mode](https://github.com/atom/vim-mode).  
+The great design to achieve Vim operation by composing operator with target (motion, text-object) on top of operationStack still lives in vim-mode-plus now.  
 I don't think I can find this idea by myself from nothing.  
-Sincerely, I feel I couldn't do anything without original vim-mode.  
+Sincerely, I feel I couldn't do anything without the original vim-mode.  
 
 # Issue report
 
@@ -58,19 +58,19 @@ Sincerely, I feel I couldn't do anything without original vim-mode.
 
 # Whats this?
 
-Fork of [vim-mode](https://github.com/atom/vim-mode). Started at 2015.8.1.
+Fork of [vim-mode](https://github.com/atom/vim-mode). Started on 2015.8.1.
 
 - Many bug fixes.
-- Refactoring: Rewritten almost every lines of codes.
+- Refactoring: Rewritten almost every line of code.
 - Highlight search
 - visual-blockwise built-in
-- Incremental search by `incrementalSearch` setting(disabled by default).
-- Cursor visible in all visual-mode(characterwise, blockwise, linewise).
-- Stay same cursor position after operate(e.g `y`, `gU`) by `stayOnYank`, `stayOnOperate` setting.(disabled by default)
-- Lots of new motion like `move-up-to-edge`, `move-down-to-edge`.(No keymap by default)
-- Surround built-in. Powerful AnyPair family(`change-surround-any-pair` operator, `inner-any-pair` text-object) to detect pair automatically.
-- Set cursor position to start of change on undo or redo by enabling `setCursorToStartOfChangeOnUndoRedo`(enabled by default. Atom's default is end of change).
-- Allow super granular keymap only effective when specific operation is pending like `yank-pending`, `delete-pending`. [#215](https://github.com/t9md/atom-vim-mode-plus/issues/215)
+- Incremental search by `incrementalSearch` setting (disabled by default).
+- Cursor visible in all visual-mode (characterwise, blockwise, linewise).
+- Maintain the same cursor position after operations (e.g `y`, `gU`) by `stayOnYank`, `stayOnOperate` setting. (disabled by default)
+- Lots of new motions like `move-up-to-edge`, `move-down-to-edge`. (No keymap by default)
+- Surround built-in. Powerful AnyPair family (`change-surround-any-pair` operator, `inner-any-pair` text-object) to detect pair automatically.
+- Set cursor position to start of change on undo or redo by enabling `setCursorToStartOfChangeOnUndoRedo` (enabled by default. Atom's default is end of change).
+- Allow super granular keymap which is only effective when specific operation is pending like `yank-pending`, `delete-pending`. [#215](https://github.com/t9md/atom-vim-mode-plus/issues/215)
 - And more...
 
 # FAQ
@@ -80,16 +80,16 @@ Search [Q&A](https://github.com/t9md/atom-vim-mode-plus/issues?utf8=%E2%9C%93&q=
 ### Why fork? why not directly contribute to official vim-mode?
 
 - Changes are [too big](https://github.com/t9md/atom-vim-mode-plus/graphs/contributors).
-- I felt many features are too experimental to merge to official vim-mode.
+- I felt many features are too experimental to merge to the official vim-mode.
 
-### In visual-block mode, some motion make editor slow, freeze.
+### In visual-block mode, some motions make the editor slow, freeze.
 
-Not freezing, its just VERY slow.  
+Not freezing, it's just VERY slow.  
 You can workaround by disabling some keymap. See [#214](https://github.com/t9md/atom-vim-mode-plus/issues/214).
 
 ### ex-mode?
 
-- Very immature package [vim-mode-plus-ex-mode](https://atom.io/packages/vim-mode-plus-ex-mode) is exists.
+- Very immature package [vim-mode-plus-ex-mode](https://atom.io/packages/vim-mode-plus-ex-mode) exists.
 - My thought for ex-mode is [here #52](https://github.com/t9md/atom-vim-mode-plus/issues/52).
 
 ### Want to suppress autocomplete-plus's auto suggestion except insert-mode.
@@ -118,8 +118,8 @@ If you want to directly edit `config.cson`, here it is.
 
 # Keymap
 
-vim-mode-plus have many advanced, experimental feature but most of it have no default keymap.  
-If you want to use full power of vim-mode-plus, see and experiment each keymap, command in following links.  
+vim-mode-plus has many advanced, experimental features but most of them have no default keymap.  
+If you want to use the full power of vim-mode-plus, see and experiment with each keymap, command in following links.  
 
 - [Commands](https://github.com/t9md/atom-vim-mode-plus/wiki/Commands) summary of vmp's commands with keymap.
 - [default keymaps](https://github.com/t9md/atom-vim-mode-plus/blob/master/keymaps/vim-mode-plus.cson)
@@ -130,16 +130,16 @@ If you want to use full power of vim-mode-plus, see and experiment each keymap, 
 - [ListOfVimModePlusPlugins](https://github.com/t9md/atom-vim-mode-plus/wiki/ListOfVimModePlusPlugins)
 
 Below is list of my packages which provide more vim-like experience.  
-Why I don't builtin these feature? Because it take more time and some feature is useful for non-vim user.
+Why I don't build in these features? Because it takes more time and some features are useful for non-vim user.
 
 - [cursor-history](https://atom.io/packages/cursor-history)
-provides <kbd>c-i</kbd>, <kbd>c-o</kbd> to go/back cursor position history.
+provides <kbd>c-i</kbd>, <kbd>c-o</kbd> to go/back in the cursor position history.
 - [open-this](https://atom.io/packages/open-this)
 provides <kbd>gf</kbd> to open file under cursor.
 - [clip-history](https://atom.io/packages/clip-history)
-Not exist in pure Vim, provides clip-board history you can pop yanked text until you get result you want.
+Does not exist in pure Vim, provides clip-board history you can pop yanked text until you get result you want.
 - [choose-pane](https://atom.io/packages/choose-pane)
-Not exist in pure Vim, provide keyboard navigation of between panes/panels by choosing it by label.
+Does not exist in pure Vim, provides keyboard navigation between panes/panels by choosing it by label.
 - [paner](https://atom.io/packages/paner)
 provides <kbd>ctrl-w H, J, K, L, x</kbd> to move pane.
 
