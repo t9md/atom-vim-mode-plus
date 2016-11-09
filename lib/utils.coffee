@@ -179,6 +179,11 @@ cursorIsOnWhiteSpace = (cursor) ->
 pointIsOnWhiteSpace = (editor, point) ->
   isAllWhiteSpace(getCharacterAtBufferPosition(editor, point))
 
+screenPositionIsAtWhiteSpace = (editor, screenPosition) ->
+  screenRange = Range.fromPointWithDelta(screenPosition, 0, 1)
+  char = getTextInScreenRange(editor, screenRange)
+  char? and /\S/.test(char)
+
 getNonWordCharactersForCursor = (cursor) ->
   # Atom 1.11.0-beta5 have this experimental method.
   if cursor.getNonWordCharacters?
@@ -843,6 +848,7 @@ module.exports = {
   getCharacterAtCursor
   getTextInScreenRange
   cursorIsOnWhiteSpace
+  screenPositionIsAtWhiteSpace
   moveCursorToNextNonWhitespace
   isEmptyRow
   cursorIsAtEmptyRow

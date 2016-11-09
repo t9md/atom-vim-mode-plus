@@ -226,14 +226,13 @@ describe "Motion general", ->
             """
             cursor: [2, 2]
 
-        describe "whesn column is at leading space", ->
-          it 'is edge if line was first line', ->
-            ensure '[', cursor: [0, 2]
-          it 'is edge if line was last line', ->
-            ensure ']', cursor: [4, 2]
+        describe "when column is leading spaces", ->
+          it "doesn't move cursor", ->
+            ensure '[', cursor: [2, 2]
+            ensure ']', cursor: [2, 2]
 
-        describe "whesn column is trailing spaces", ->
-          it "doesn't move cursor since it is NOT edge as same as normal line", ->
+        describe "when column is trailing spaces", ->
+          it "doesn't move cursor", ->
             set cursor: [1, 20]
             ensure ']', cursor: [2, 20]
             ensure ']', cursor: [2, 20]

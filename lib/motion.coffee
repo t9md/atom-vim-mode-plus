@@ -26,7 +26,7 @@ Select = null
   getStartPositionForPattern
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
-  getTextInScreenRange
+  screenPositionIsAtWhiteSpace
   cursorIsAtEndOfLineAtNonEmptyRow
   getFirstCharacterColumForBufferRow
 
@@ -277,8 +277,8 @@ class MoveUpToEdge extends Motion
 
   getPoint: (fromPoint) ->
     column = fromPoint.column
-    for row in @getScanRows(fromPoint) when @isMovablePoint(point = new Point(row, column))
-      return point
+    for row in @getScanRows(fromPoint) when point = new Point(row, column)
+      return point if @isEdge(point)
 
   getScanRows: ({row}) ->
     validRow = getValidVimScreenRow.bind(null, @editor)
@@ -286,50 +286,25 @@ class MoveUpToEdge extends Motion
       when 'up' then [validRow(row - 1)..0]
       when 'down' then [validRow(row + 1)..@getVimLastScreenRow()]
 
-  isMovablePoint: (point) ->
-    pointIsStoppable = @isStoppablePoint(point)
-    if point.row in [0, @getVimLastScreenRow()]
-      pointIsStoppable
-    else
-      pointIsStoppable and @isEdge(point)
-
   isEdge: (point) ->
-    # If one of above/below row is not stoppable, it's Edge!
-    above = point.translate([-1, 0])
-    below = point.translate([+1, 0])
-    (not @isStoppablePoint(above)) or (not @isStoppablePoint(below))
-
-  # Avoid stopping on leading and trailing whitespace,
-  isValidStoppablePoint: ({row, column}) ->
-    text = getTextInScreenRange(@editor, [[row, 0], [row, Infinity]])
-    softTabText = _.multiplyString(' ', @editor.getTabLength())
-    text = text.replace(/\t/g, softTabText)
-
-    if (match = text.match(/\S/g))?
-      [firstChar, ..., lastChar] = match
-      if row in [0, @getVimLastScreenRow()]
-        0 <= column <= text.lastIndexOf(lastChar) # allow leading white-space.
-      else
-        text.indexOf(firstChar) <= column <= text.lastIndexOf(lastChar)
+    if @isStoppablePoint(point)
+      # If one of above/below point was not stoppable, it's Edge!
+      above = point.translate([-1, 0])
+      below = point.translate([+1, 0])
+      (not @isStoppablePoint(above)) or (not @isStoppablePoint(below))
     else
       false
 
   isStoppablePoint: (point) ->
-    if point.row in [0, @getVimLastScreenRow()]
-      @isValidStoppablePoint(point)
-    else if @isNonBlankPoint(point)
+    if @isNonWhiteSpacePoint(point)
       true
-    else if @isValidStoppablePoint(point)
-      left = point.translate([0, -1])
-      right = point.translate([0, +1])
-      @isNonBlankPoint(left) and @isNonBlankPoint(right)
     else
-      false
+      leftPoint = point.translate([0, -1])
+      rightPoint = point.translate([0, +1])
+      @isNonWhiteSpacePoint(leftPoint) and @isNonWhiteSpacePoint(rightPoint)
 
-  isNonBlankPoint: (point) ->
-    screenRange = Range.fromPointWithDelta(point, 0, 1)
-    char = getTextInScreenRange(@editor, screenRange)
-    char? and /\S/.test(char)
+  isNonWhiteSpacePoint: (point) ->
+    screenPositionIsAtWhiteSpace(@editor, point)
 
 class MoveDownToEdge extends MoveUpToEdge
   @extend()

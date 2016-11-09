@@ -883,6 +883,7 @@ class InnerVisibleArea extends VisibleArea
   @extend()
 
 # -------------------------
+# [FIXME] wise mismatch sceenPosition vs bufferPosition
 class Edge extends TextObject
   @extend(false)
 
