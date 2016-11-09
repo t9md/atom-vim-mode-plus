@@ -11,7 +11,7 @@ vim-mode improved.
 - [Whats this?](#whats-this)
 - [FAQ](#faq)
     - [Why fork? why not directly contribute to official vim-mode?](#why-fork-why-not-directly-contribute-to-official-vim-mode)
-    - [In visual-block mode, some motion make editor slow, freeze.](#in-visual-block-mode-some-motion-make-editor-slow-freeze)
+    - [In visual-block mode, some motions make the editor slow, freeze.](#in-visual-block-mode-some-motions-make-the-editor-slow-freeze)
     - [ex-mode?](#ex-mode)
     - [Want to suppress autocomplete-plus's auto suggestion except insert-mode.](#want-to-suppress-autocomplete-pluss-auto-suggestion-except-insert-mode)
 - [Wiki](#wiki)
@@ -42,7 +42,7 @@ These features are very powerful, especially for the power user. Read the follow
   - [vim-surround](https://atom.io/packages/vim-surround)
   - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block)
 - Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
-- Internal code base is very different. Thus, issues and PRs should be directly sent to vim-mode-plus. **DON'T report vim-mode-plus's issues or PRs to the older official vim-mode.**
+- Internal code base is very different. Thus, issues and PRs should be directly sent to vim-mode-plus. **DON'T report vim-mode-plus's issues or PRs to the official vim-mode.**
 
 # Thanks
 
