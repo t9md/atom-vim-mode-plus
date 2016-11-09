@@ -67,7 +67,7 @@ Fork of [vim-mode](https://github.com/atom/vim-mode). Started on 2015.8.1.
 - Incremental search by `incrementalSearch` setting (disabled by default).
 - Cursor visible in all visual-mode (characterwise, blockwise, linewise).
 - Maintain the same cursor position after operations (e.g `y`, `gU`) by `stayOnYank`, `stayOnOperate` setting. (disabled by default)
-- Lots of new motions like `move-up-to-edge`, `move-down-to-edge`. (No keymap by default)
+- Lots of new motions like `move-up-to-edge`, `move-down-to-edge`. (Mapped to `[` and `]`, Aggressive decision.)
 - Surround built-in. Powerful AnyPair family (`change-surround-any-pair` operator, `inner-any-pair` text-object) to detect pair automatically.
 - Set cursor position to start of change on undo or redo by enabling `setCursorToStartOfChangeOnUndoRedo` (enabled by default. Atom's default is end of change).
 - Allow super granular keymap which is only effective when specific operation is pending like `yank-pending`, `delete-pending`. [#215](https://github.com/t9md/atom-vim-mode-plus/issues/215)
