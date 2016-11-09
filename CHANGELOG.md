@@ -1,3 +1,13 @@
+# 0.66.0:
+- New: Following motion commands by @bronson.
+  - `move-to-previous-end-of-word`(`g e`)
+  - `move-to-previous-end-of-whole-word`(`g E`)
+- New: Sugar command `set-register-name-to-*` to use system-clipboard. #272
+- Breaking: Rename `set-register-name-to-blackhole` to `set-register-name-to-_` #478, #473, #482
+- Breaking: `move-up-to-edge` and `move-down-to-edge` no longer move to first-line and last-line if it's not stoppable.
+  - This means, eliminated special handling for first-line and last-line. Just behave same as other line. #481
+- Doc: Fix typo and grammar for README.md by @jimt #483.
+
 # 0.65.0:
 - Improve: Incremental-search `/ enter` and `? enter`(confirm with blank imput) repeat last-search #474, #464
 - New: Update backtick(`` ` ``) and `'` mark on jump-motion #476, #384
