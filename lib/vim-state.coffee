@@ -213,37 +213,35 @@ class VimState
     } = {}
     @emitter.emit 'did-destroy'
 
+  isInterestingEvent: ({target, type}) ->
+    if @mode is 'insert'
+      false
+    else
+      @editor? and
+        target?.closest?('atom-text-editor') is @editorElement and
+        not @isMode('visual', 'blockwise') and
+        not type.startsWith('vim-mode-plus:')
+
+  checkSelection: (event) ->
+    return if @operationStack.isProcessing()
+    return unless @isInterestingEvent(event)
+
+    if haveSomeNonEmptySelection(@editor)
+      submode = swrap.detectVisualModeSubmode(@editor)
+      if @isMode('visual', submode)
+        @updateCursorsVisibility()
+      else
+        @activate('visual', submode)
+    else
+      @activate('normal') if @isMode('visual')
+
+  saveProperties: (event) ->
+    return unless @isInterestingEvent(event)
+    for selection in @editor.getSelections()
+      swrap(selection).saveProperties()
+
   observeSelection: ->
-    isInterestingEvent = ({target, type}) =>
-      if @mode is 'insert'
-        false
-      else
-        @editor? and
-          target is @editorElement and
-          not @isMode('visual', 'blockwise') and
-          not type.startsWith('vim-mode-plus:')
-
-    onInterestingEvent = (fn) ->
-      (event) -> fn() if isInterestingEvent(event)
-
-    _checkSelection = =>
-      return if @operationStack.isProcessing()
-      if haveSomeNonEmptySelection(@editor)
-        submode = swrap.detectVisualModeSubmode(@editor)
-        if @isMode('visual', submode)
-          @updateCursorsVisibility()
-        else
-          @activate('visual', submode)
-      else
-        @activate('normal') if @isMode('visual')
-
-    _saveProperties = =>
-      for selection in @editor.getSelections()
-        swrap(selection).saveProperties()
-
-    checkSelection = onInterestingEvent(_checkSelection)
-    saveProperties = onInterestingEvent(_saveProperties)
-
+    checkSelection = @checkSelection.bind(this)
     @editorElement.addEventListener('mouseup', checkSelection)
     @subscriptions.add new Disposable =>
       @editorElement.removeEventListener('mouseup', checkSelection)
