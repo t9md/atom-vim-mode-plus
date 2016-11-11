@@ -30,7 +30,7 @@
 atom-text-editor.vim-mode-plus.normal-mode,
 atom-text-editor.vim-mode-plus.visual-mode,
 {
-  &.is-focused::shadow {
+  &.is-focused {
     .cursor {
       .block-cursor(visible);
     }
@@ -39,7 +39,7 @@ atom-text-editor.vim-mode-plus.visual-mode,
 
 atom-text-editor.vim-mode-plus-input-char-waiting,
 {
-  &.is-focused::shadow {
+  &.is-focused {
     .cursor {
       .underline-cursor(visible);
       border-bottom-width: .2em;
@@ -47,9 +47,9 @@ atom-text-editor.vim-mode-plus-input-char-waiting,
   }
 }
 
-atom-text-editor.vim-mode-plus.operator-pending-mode.is-focused,
+atom-text-editor.vim-mode-plus.operator-pending-mode,
 {
-  &::shadow {
+  &.is-focused {
     .cursor {
       .low-block-cursor(visible);
     }
@@ -59,9 +59,9 @@ atom-text-editor.vim-mode-plus.operator-pending-mode.is-focused,
   }
 }
 
-atom-text-editor.vim-mode-plus.insert-mode.replace.is-focused,
+atom-text-editor.vim-mode-plus.insert-mode.replace,
 {
-  &::shadow {
+  &.is-focused {
     .cursor {
       .underline-cursor(visible);
     }
@@ -74,7 +74,7 @@ atom-text-editor.vim-mode-plus.insert-mode.replace.is-focused,
 
 // Flash ranges e.g. flashing yanked range.
 // =========================
-atom-text-editor, atom-text-editor::shadow {
+atom-text-editor {
   .vim-mode-plus-flash {
     .region {
       z-index: 1;
@@ -170,7 +170,7 @@ atom-text-editor[mini].vim-mode-plus-search {
   }
 }
 
-atom-text-editor, atom-text-editor::shadow {
+atom-text-editor {
   .vim-mode-plus-search-match .region {
     .vim-mode-plus.round-box;
     background-color: transparent;
