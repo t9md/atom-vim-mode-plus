@@ -186,8 +186,13 @@ class Base
   getInput: -> @input
 
   focusInput: (charsMax) ->
-    @onDidConfirmInput (@input) =>
-      @processOperation()
+    @onDidConfirmInput (input) =>
+      # [FIXME REALLY] when both operator and motion take user-input,
+      # Currently input UI is unappropreately shared by operator and motion.
+      # So without this guard, @input is overwritten by later input.
+      unless @input?
+        @input = input
+        @processOperation()
 
     # From 2nd addHover, we replace last section of hover
     # to sync content with input mini editor.
