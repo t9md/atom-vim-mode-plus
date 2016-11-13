@@ -1323,14 +1323,14 @@ describe "Motion general", ->
   describe "the N% keybinding", ->
     beforeEach ->
       set
-        text: [0..99].join("\n")
+        text: [0..999].join("\n")
         cursor: [0, 0]
 
     describe "put cursor on line specified by percent", ->
-      it "50%", -> ensure '5 0 %', cursor: [49, 0]
-      it "30%", -> ensure '3 0 %', cursor: [29, 0]
-      it "100%", -> ensure '1 0 0 %', cursor: [99, 0]
-      it "120%", -> ensure '1 2 0 %', cursor: [99, 0]
+      it "50%", -> ensure '5 0 %', cursor: [499, 0]
+      it "30%", -> ensure '3 0 %', cursor: [299, 0]
+      it "100%", -> ensure '1 0 0 %', cursor: [999, 0]
+      it "120%", -> ensure '1 2 0 %', cursor: [999, 0]
 
   describe "the H, M, L keybinding", ->
     [eel] = []
