@@ -1,3 +1,8 @@
+# 0.66.1:
+- Fix: Flash only one instance at a given moment when search `/`, `?`, `#`, `?`. #494
+- Fix: % motion now work again #493 by @mattaschmann
+- Fix When both operation and target take user input, it didn't work correctly. #491
+
 # 0.66.0:
 - New: Following motion commands by @bronson.
   - `move-to-previous-end-of-word`(`g e`)
