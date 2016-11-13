@@ -681,8 +681,8 @@ class MoveToLastLine extends MoveToFirstLine
 # keymap: N% e.g. 10%
 class MoveToLineByPercent extends MoveToFirstLine
   @extend()
-  getRow: ->
-    percent = Math.min(100, @getCount())
+  getCount: ->
+    percent = Math.min(100, super + 1)
     Math.floor(@getVimLastScreenRow() * (percent / 100))
 
 class MoveToRelativeLine extends Motion
