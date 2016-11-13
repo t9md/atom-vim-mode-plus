@@ -46,9 +46,9 @@ class SearchModel
       if settings.get('flashOnSearch')
         @flashRange(@currentMatch)
 
-  flashMarkers = null
+  flashMarker = null
   flashRange: (range) ->
-    flashMarkers?.destroy()
+    flashMarker?.destroy()
     flashMarker = highlightRange @editor, range,
       class: 'vim-mode-plus-flash'
       timeout: settings.get('flashOnSearchDuration')
