@@ -489,6 +489,21 @@ describe "Operator TransformString", ->
           cursor: [0, 0]
         ensure '3 j .',
           text: "{\napple\n}\n{\npairs: [brackets]\n}\npairs: [brackets]\n( multi\n  line )"
+      describe 'with motion which aloso taking user-iinput', ->
+        beforeEach ->
+          set text: "s _____ e", cursor: [0, 0]
+        describe "with 'f' motion", ->
+          it "surround with 'f' motion", ->
+            ensure ['y s f', input: 'e('], text: "(s _____ e)", cursor: [0, 0]
+
+        describe "with '`' motion", ->
+          beforeEach ->
+            set cursor: [0, 8] # start at `e` char
+            ensure 'm a', mark: 'a': [0, 8]
+            set cursor: [0, 0]
+
+          it "surround with '`' motion", ->
+            ensure ['y s `', input: 'a('], text: "(s _____ )e", cursor: [0, 0]
 
       describe 'charactersToAddSpaceOnSurround setting', ->
         beforeEach ->

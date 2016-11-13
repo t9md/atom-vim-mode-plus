@@ -399,13 +399,16 @@ class Surround extends TransformString
     super
 
     return unless @requireInput
-    @onDidConfirmInput (input) => @onConfirm(input)
-    @onDidChangeInput (input) => @addHover(input)
-    @onDidCancelInput => @cancelOperation()
     if @requireTarget
       @onDidSetTarget =>
+        @onDidConfirmInput (input) => @onConfirm(input)
+        @onDidChangeInput (input) => @addHover(input)
+        @onDidCancelInput => @cancelOperation()
         @vimState.input.focus(@charsMax)
     else
+      @onDidConfirmInput (input) => @onConfirm(input)
+      @onDidChangeInput (input) => @addHover(input)
+      @onDidCancelInput => @cancelOperation()
       @vimState.input.focus(@charsMax)
 
   onConfirm: (@input) ->

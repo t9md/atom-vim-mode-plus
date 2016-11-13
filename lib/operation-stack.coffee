@@ -125,6 +125,10 @@ class OperationStack
   process: ->
     @processing = true
     if @stack.length is 2
+      # [FIXME ideally]
+      # If target is not complete, we postpone compsing target with operator to keep situation simple.
+      # We can assume, when target is set to operator it's complete.
+      return unless @peekTop().isComplete()
       operation = @stack.pop()
       @peekTop().setTarget(operation)
 
