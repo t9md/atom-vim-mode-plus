@@ -26,11 +26,11 @@ flashTypes =
     decorationOptions:
       type: 'highlight'
       class: 'vim-mode-plus-flash removed'
-  scroll:
+  'screen-line': # unused.
     allowMultiple: false
     decorationOptions:
       type: 'line'
-      class: 'vim-mode-plus-flash-scroll'
+      class: 'vim-mode-plus-flash-screen-line'
 
 module.exports =
 class FlashManager
