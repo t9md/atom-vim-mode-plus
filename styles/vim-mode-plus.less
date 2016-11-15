@@ -196,20 +196,25 @@ atom-text-editor[mini].vim-mode-plus-search {
 }
 
 atom-text-editor {
-  .vim-mode-plus-search-match .region {
-    .vim-mode-plus.round-box;
-    background-color: transparent;
-    border: 1px solid @syntax-text-color;
-  }
-  .vim-mode-plus-search-match.first .region {
-    border: 1px solid @syntax-color-renamed;
-  }
-  .vim-mode-plus-search-match.last .region {
-    border: 1px solid @syntax-color-removed;
-  }
-  .vim-mode-plus-search-match.current .region {
-    border-width: 2px;
-    background-color: @syntax-selection-color;
+  .vim-mode-plus-search-match {
+    .region {
+      .vim-mode-plus.round-box;
+      background-color: @syntax-result-marker-color;
+      border: 0px solid @syntax-result-marker-color-selected;
+      transition: border-color .4s;
+    }
+    &.first .region {
+      border: 1px solid @syntax-color-renamed;
+      transition-duration: .1s;
+    }
+    &.last .region {
+      border: 1px solid @syntax-color-removed;
+      transition-duration: .1s;
+    }
+    &.current .region {
+      border-width: 2px;
+      transition-duration: .1s;
+    }
   }
   .vim-mode-plus-highlight-search .region {
     .vim-mode-plus.round-box;
