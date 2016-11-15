@@ -129,8 +129,8 @@ class Search extends SearchBase
             when 'prev' then 'next'
 
         switch direction
-          when 'next' then @getSearchModel().updateCurrentMatch(+1)
-          when 'prev' then @getSearchModel().updateCurrentMatch(-1)
+          when 'next' then @getSearchModel().visit(+1)
+          when 'prev' then @getSearchModel().visit(-1)
 
       when 'occurrence'
         {operation} = commandEvent

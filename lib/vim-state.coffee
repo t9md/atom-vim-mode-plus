@@ -121,11 +121,26 @@ class VimState
   toggleClassList: (className, bool=undefined) ->
     @editorElement.classList.toggle(className, bool)
 
-  swapClassName: (className) ->
-    oldClassName = @editorElement.className
-    @editorElement.className = className
+  # FIXME: remove this dengerous approarch ASAP and revert to read-inpu-via-mini-editor
+  swapClassName: (classNames...) ->
+    removedMode = null
+    modes = ['normal-mode', 'insert-mode', 'visual-mode', 'operator-pending-mode']
+    for mode in modes when @editorElement.classList.contains(mode)
+      @editorElement.classList.remove(mode)
+      removedMode = mode
+      break
+    @editorElement.classList.remove('vim-mode-plus')
+    @editorElement.classList.add(classNames...)
+
     new Disposable =>
-      @editorElement.className = oldClassName
+      @editorElement.classList.remove(classNames...)
+
+      hasMode = false
+      for mode in modes when @editorElement.classList.contains(mode)
+        hasMode = true
+      unless hasMode
+        @editorElement.classList.add(removedMode)
+      @editorElement.classList.add('vim-mode-plus')
       @editorElement.classList.add('is-focused')
 
   # All subscriptions here is celared on each operation finished.
