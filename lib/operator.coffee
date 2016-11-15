@@ -621,3 +621,4 @@ class Mark extends Operator
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
+    @activateMode('normal')
