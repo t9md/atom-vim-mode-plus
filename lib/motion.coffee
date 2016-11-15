@@ -816,7 +816,6 @@ class ScrollFullScreenDown extends Motion
       done = => @editor.setFirstVisibleScreenRow(finalTopRow)
 
       if @isSmoothScrollEnabled()
-        @vimState.flashScreenRange(cursor.getScreenRange(), type: 'scroll')
         @smoothScroll(currentTopRow, finalTopRow, {done})
       else
         done()
