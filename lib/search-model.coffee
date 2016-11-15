@@ -27,8 +27,10 @@ class SearchModel
 
       @vimState.hoverSearchCounter.reset()
       unless @currentMatch?
-        @flashScreen() if settings.get('flashScreenOnSearchHasNoMatch')
-        return
+        if settings.get('flashScreenOnSearchHasNoMatch')
+          @vimState.flash(getVisibleBufferRange(@editor), type: 'screen')
+          atom.beep()
+          return
 
       if settings.get('showHoverSearchCounter')
         hoverOptions =
@@ -44,14 +46,7 @@ class SearchModel
       smartScrollToBufferPosition(@editor, @currentMatch.start)
 
       if settings.get('flashOnSearch')
-        @flashRange(@currentMatch)
-
-  flashMarker = null
-  flashRange: (range) ->
-    flashMarker?.destroy()
-    flashMarker = highlightRange @editor, range,
-      class: 'vim-mode-plus-flash'
-      timeout: settings.get('flashOnSearchDuration')
+        @vimState.flash(@currentMatch, type: 'search')
 
   destroy: ->
     @markerLayer.destroy()
@@ -122,8 +117,3 @@ class SearchModel
 
   getRelativeIndex: ->
     @currentMatchIndex - @initialCurrentMatchIndex
-
-  flashScreen: ->
-    options = {class: 'vim-mode-plus-flash', timeout: 100}
-    highlightRange(@editor, getVisibleBufferRange(@editor), options)
-    atom.beep()

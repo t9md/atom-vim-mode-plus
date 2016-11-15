@@ -30,6 +30,7 @@ OccurrenceManager = require './occurrence-manager'
 HighlightSearchManager = require './highlight-search-manager'
 MutationManager = require './mutation-manager'
 PersistentSelectionManager = require './persistent-selection-manager'
+FlashManager = require './flash-manager'
 
 packageScope = 'vim-mode-plus'
 
@@ -40,6 +41,7 @@ class VimState
 
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
+  @delegatesMethods('flash', 'flashScreenRange', toProperty: 'flashManager')
   @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', 'addToClassList', toProperty: 'operationStack')
 
   constructor: (@editor, @statusBarManager, @globalState) ->
@@ -56,6 +58,7 @@ class VimState
     @persistentSelection = new PersistentSelectionManager(this)
     @occurrenceManager = new OccurrenceManager(this)
     @mutationManager = new MutationManager(this)
+    @flashManager = new FlashManager(this)
 
     @input = new Input(this)
     @searchInput = new SearchInputElement().initialize(this)
