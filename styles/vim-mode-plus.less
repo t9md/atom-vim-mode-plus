@@ -71,42 +71,49 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
   }
 }
 
-@keyframes vim-mode-plus-flash {
-  from { background-color: fadeout(darken(@syntax-selection-flash-color, 10%), 20%); }
-  to { background-color: transparent; }
+// Flash ranges e.g. flashing yanked range.
+// =========================
+.flash-animation (@name, @color) {
+  @keyframes @name {
+    from { background-color: @color; }
+    to { background-color: transparent; }
+  }
 }
 
-@keyframes vim-mode-plus-flash-add {
-  from { background-color: fadeout(darken(@syntax-color-added, 10%), 50%); }
-  to { background-color: transparent; }
-}
+@flash-base-color: contrast(
+  @syntax-background-color,
+  darken(@syntax-selection-color, 3%),
+  lighten(@syntax-selection-color, 3%)
+);
 
-@keyframes vim-mode-plus-flash-remove {
-  from { background-color: fadeout(@syntax-color-removed, 50%);}
-  to { background-color: transparent; }
-}
+@flash-search-color: fadeout(darken(@syntax-selection-flash-color, 10%), 20%);
+@flash-added-color: fadeout(darken(@syntax-color-added, 10%), 50%);
+@flash-removed-color: fadeout(@syntax-color-removed, 50%);
 
-.flash (){
-  z-index: 1;
-  animation-name: vim-mode-plus-flash;
-  animation-duration: .3s;
+.flash-animation(vim-mode-plus-flash-operator, @flash-base-color);
+.flash-animation(vim-mode-plus-flash-search, @flash-search-color);
+.flash-animation(vim-mode-plus-flash-screen, @flash-base-color);
+.flash-animation(vim-mode-plus-flash-added, @flash-added-color);
+.flash-animation(vim-mode-plus-flash-removed, @flash-removed-color);
+.flash-animation(vim-mode-plus-flash-line, @flash-search-color);
+
+.flash (@name; @duration: .3s){
+  animation-name: @name;
+  animation-duration: @duration;
   animation-iteration-count: 1;
 }
 
-// Flash ranges e.g. flashing yanked range.
-// =========================
 atom-text-editor .vim-mode-plus-flash {
-  &          .region { .flash; }
-  &.operator .region {}
-  &.search   .region { animation-duration: .5s; }
-  &.screen   .region {}
-  &.added    .region { animation-name: vim-mode-plus-flash-add; }
-  &.removed  .region { animation-name: vim-mode-plus-flash-remove; }
+  &.operator .region { .flash(vim-mode-plus-flash-operator)}
+  &.search   .region { .flash(vim-mode-plus-flash-search, .5s); }
+  &.screen   .region { .flash(vim-mode-plus-flash-screen); }
+  &.added    .region { .flash(vim-mode-plus-flash-added); }
+  &.removed  .region { .flash(vim-mode-plus-flash-removed); }
 }
 
 // type=line decoration not allow space separated multiple classes. atom/atom#13218
 atom-text-editor.editor .line.vim-mode-plus-flash-screen-line {
-  .flash;
+  .flash(vim-mode-plus-flash-line, .5s);
 }
 
 // Hover Counter
