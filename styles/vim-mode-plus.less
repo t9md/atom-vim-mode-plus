@@ -71,24 +71,43 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
   }
 }
 
+@keyframes vim-mode-plus-flash {
+  from { background-color: fadeout(darken(@syntax-selection-flash-color, 10%), 20%); }
+  to { background-color: transparent; }
+}
+
+@keyframes vim-mode-plus-flash-add {
+  from { background-color: fadeout(darken(@syntax-color-added, 10%), 50%); }
+  to { background-color: transparent; }
+}
+
+@keyframes vim-mode-plus-flash-remove {
+  from { background-color: fadeout(@syntax-color-removed, 50%);}
+  to { background-color: transparent; }
+}
+
+.flash (){
+  z-index: 1;
+  animation-name: vim-mode-plus-flash;
+  animation-duration: .3s;
+  animation-iteration-count: 1;
+}
 
 // Flash ranges e.g. flashing yanked range.
 // =========================
-atom-text-editor {
-  .vim-mode-plus-flash {
-    .region {
-      z-index: 1;
-      background-color: fadeout(@syntax-selection-flash-color, 50%);
-    }
-    &.added .region {
-      z-index: 1;
-      background-color: fadeout(darken(@syntax-color-added, 10%), 50%);
-    }
-    &.removed .region {
-      z-index: 1;
-      background-color: fadeout(@syntax-color-removed, 50%);
-    }
-  }
+atom-text-editor .vim-mode-plus-flash {
+  &          .region { .flash; }
+  &.operator .region {}
+  &.search   .region { animation-duration: .5s; }
+  &.screen   .region {}
+  &.added    .region { animation-name: vim-mode-plus-flash-add; }
+  &.removed  .region { animation-name: vim-mode-plus-flash-remove; }
+}
+
+// type=line decoration not allow space separated multiple classes. atom/atom#13218
+atom-text-editor.editor .line.vim-mode-plus-flash-scroll {
+  .flash;
+  animation-duration: .5s;
 }
 
 // Hover Counter

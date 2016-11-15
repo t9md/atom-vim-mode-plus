@@ -96,23 +96,14 @@ module.exports = new Settings 'vim-mode-plus',
     description: "Don't move cursor after Delete"
   flashOnUndoRedo:
     default: true
-  flashOnUndoRedoDuration:
-    default: 100
-    description: "Duration(msec) for flash"
   flashOnOperate:
     default: true
-  flashOnOperateDuration:
-    default: 100
-    description: "Duration(msec) for flash"
   flashOnOperateBlacklist:
     default: []
     items: type: 'string'
     description: 'comma separated list of operator class name to disable flash e.g. "Yank, AutoIndent"'
   flashOnSearch:
     default: true
-  flashOnSearchDuration:
-    default: 300
-    description: "Duration(msec) for search flash"
   flashScreenOnSearchHasNoMatch:
     default: true
   showHoverOnOperate:

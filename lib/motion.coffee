@@ -29,6 +29,7 @@ Select = null
   screenPositionIsAtWhiteSpace
   cursorIsAtEndOfLineAtNonEmptyRow
   getFirstCharacterColumForBufferRow
+  getFirstCharacterScreenPositionForScreenRow
 
   debug
 } = require './utils'
@@ -789,25 +790,19 @@ class ScrollFullScreenDown extends Motion
     point = new Point(row, 0)
     @editor.element.pixelRectForScreenRange(new Range(point, point)).top
 
-  smoothScroll: (fromRow, toRow, options) ->
+  smoothScroll: (fromRow, toRow, options={}) ->
     topPixelFrom = {top: @getPixelRectTopForSceenRow(fromRow)}
     topPixelTo = {top: @getPixelRectTopForSceenRow(toRow)}
     options.step = (newTop) => @editor.element.setScrollTop(newTop)
     options.duration = @getSmoothScrollDuation()
     @vimState.requestScrollAnimation(topPixelFrom, topPixelTo, options)
 
-  highlightScreenRow: (screenRow) ->
-    screenRange = new Range([screenRow, 0], [screenRow, Infinity])
-    marker = @editor.markScreenRange(screenRange)
-    @editor.decorateMarker(marker, type: 'highlight', class: 'vim-mode-plus-flash')
-    marker
-
   getAmountOfRows: ->
     Math.ceil(@amountOfPage * @editor.getRowsPerPage() * @getCount())
 
   getPoint: (cursor) ->
     row = getValidVimScreenRow(@editor, cursor.getScreenRow() + @getAmountOfRows())
-    new Point(row, 0)
+    getFirstCharacterScreenPositionForScreenRow(@editor, row)
 
   moveCursor: (cursor) ->
     cursor.setScreenPosition(@getPoint(cursor), autoscroll: false)
@@ -821,9 +816,8 @@ class ScrollFullScreenDown extends Motion
       done = => @editor.setFirstVisibleScreenRow(finalTopRow)
 
       if @isSmoothScrollEnabled()
-        marker = @highlightScreenRow(cursor.getScreenRow())
-        complete = -> marker.destroy()
-        @smoothScroll(currentTopRow, finalTopRow, {done, complete})
+        @vimState.flashScreenRange(cursor.getScreenRange(), type: 'scroll')
+        @smoothScroll(currentTopRow, finalTopRow, {done})
       else
         done()
 
