@@ -200,20 +200,24 @@ atom-text-editor {
     .region {
       .vim-mode-plus.round-box;
       background-color: @syntax-result-marker-color;
-      border: 0px solid @syntax-result-marker-color-selected;
-      transition: border-color .4s;
-    }
-    &.first .region {
-      border: 1px solid @syntax-color-renamed;
-      transition-duration: .1s;
-    }
-    &.last .region {
-      border: 1px solid @syntax-color-removed;
-      transition-duration: .1s;
+      border: 2px solid transparent;
+      transition: border-color .2s;
     }
     &.current .region {
-      border-width: 2px;
+      border-color: @syntax-result-marker-color-selected;
       transition-duration: .1s;
+    }
+    &.first .region {
+      background-color: fadeout(@syntax-color-renamed, 60%);
+    }
+    &.first.current .region {
+      border-color: @syntax-color-renamed;
+    }
+    &.last .region {
+      background-color: fadeout(@syntax-color-removed, 60%);
+    }
+    &.last.current .region {
+      border-color: @syntax-color-removed;
     }
   }
   .vim-mode-plus-highlight-search .region {

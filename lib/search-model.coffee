@@ -18,13 +18,12 @@ class SearchModel
 
     {@editor, @editorElement} = @vimState
     @disposables = new CompositeDisposable
-    @disposables.add(@editorElement.onDidChangeScrollTop(@updateView.bind(this)))
-    @disposables.add(@editorElement.onDidChangeScrollLeft(@updateView.bind(this)))
+    @disposables.add(@editorElement.onDidChangeScrollTop(@refreshMarkers.bind(this)))
+    @disposables.add(@editorElement.onDidChangeScrollLeft(@refreshMarkers.bind(this)))
     @markerLayer = @editor.addMarkerLayer()
+    @decoationByRange = {}
 
     @onDidChangeCurrentMatch =>
-      @updateView() if @options.incrementalSearch
-
       @vimState.hoverSearchCounter.reset()
       unless @currentMatch?
         if settings.get('flashScreenOnSearchHasNoMatch')
@@ -51,10 +50,12 @@ class SearchModel
   destroy: ->
     @markerLayer.destroy()
     @disposables.dispose()
+    @decoationByRange = null
 
   clearMarkers: ->
     for marker in @markerLayer.getMarkers()
       marker.destroy()
+    @decoationByRange = {}
 
   classNamesForRange: (range) ->
     classNames = []
@@ -68,9 +69,10 @@ class SearchModel
 
     classNames
 
-  updateView: ->
+  refreshMarkers: ->
     @clearMarkers()
-    @decorateRange(range) for range in @getVisibleMatchRanges()
+    for range in @getVisibleMatchRanges()
+      @decoationByRange[range.toString()] = @decorateRange(range)
 
   getVisibleMatchRanges: ->
     visibleRange = getVisibleBufferRange(@editor)
@@ -107,6 +109,8 @@ class SearchModel
 
     @currentMatchIndex = @matches.indexOf(currentMatch)
     @updateCurrentMatch(relativeIndex)
+    if @options.incrementalSearch
+      @refreshMarkers()
     @initialCurrentMatchIndex = @currentMatchIndex
     @currentMatch
 
@@ -114,6 +118,23 @@ class SearchModel
     @currentMatchIndex = getIndex(@currentMatchIndex + relativeIndex, @matches)
     @currentMatch = @matches[@currentMatchIndex]
     @emitter.emit('did-change-current-match')
+
+  visit: (relativeIndex) ->
+    return unless @matches.length
+    oldDecoration = @decoationByRange[@currentMatch.toString()]
+    @updateCurrentMatch(relativeIndex)
+    newDecoration = @decoationByRange[@currentMatch.toString()]
+
+    if oldDecoration?
+      oldClass = oldDecoration.getProperties().class
+      oldClass = oldClass.replace(/\s+current(\s+)?$/, '$1')
+      oldDecoration.setProperties(type: 'highlight', class: oldClass)
+
+    if newDecoration?
+      newClass = newDecoration.getProperties().class
+      newClass = newClass.replace(/\s+current(\s+)?$/, '$1')
+      newClass += ' current'
+      newDecoration.setProperties(type: 'highlight', class: newClass)
 
   getRelativeIndex: ->
     @currentMatchIndex - @initialCurrentMatchIndex

@@ -87,13 +87,13 @@ module.exports = new Settings 'vim-mode-plus',
     description: "Whether 'visit-next'(tab) and 'visit-prev'(shift-tab) depends on search direction('/' or '?')"
   stayOnTransformString:
     default: false
-    description: "Don't move cursor after TransformString e.g Toggle, Surround"
+    description: "Don't move cursor after TransformString e.g upper-case, surround"
   stayOnYank:
     default: false
-    description: "Don't move cursor after Yank"
+    description: "Don't move cursor after yank"
   stayOnDelete:
     default: false
-    description: "Don't move cursor after Delete"
+    description: "Don't move cursor after yank"
   flashOnUndoRedo:
     default: true
   flashOnOperate:
@@ -101,14 +101,14 @@ module.exports = new Settings 'vim-mode-plus',
   flashOnOperateBlacklist:
     default: []
     items: type: 'string'
-    description: 'comma separated list of operator class name to disable flash e.g. "Yank, AutoIndent"'
+    description: 'comma separated list of operator class name to disable flash e.g. "yank, auto-indent"'
   flashOnSearch:
     default: true
   flashScreenOnSearchHasNoMatch:
     default: true
   showHoverOnOperate:
     default: false
-    description: "Show count, register and optional icon on hover overlay"
+    description: "Optional icon on hover overlay"
   showHoverOnOperateIcon:
     default: 'icon'
     enum: ['none', 'icon', 'emoji']
@@ -124,13 +124,13 @@ module.exports = new Settings 'vim-mode-plus',
     description: "For `ctrl-f` and `ctrl-b`"
   smoothScrollOnFullScrollMotionDuration:
     default: 500
-    description: "For `ctrl-f` and `ctrl-b`"
+    description: "Smooth scroll duration in milliseconds for `ctrl-f` and `ctrl-b`"
   smoothScrollOnHalfScrollMotion:
     default: false
     description: "For `ctrl-d` and `ctrl-u`"
   smoothScrollOnHalfScrollMotionDuration:
     default: 500
-    description: "For `ctrl-d` and `ctrl-u`"
+    description: "Smooth scroll duration in milliseconds for `ctrl-d` and `ctrl-u`"
   statusBarModeStringStyle:
     default: 'short'
     enum: ['short', 'long']
