@@ -1,7 +1,7 @@
 {
   "name": "vim-mode-plus",
   "main": "./lib/main",
-  "version": "0.66.1",
+  "version": "0.67.0",
   "description": "vim-mode improved",
   "license": "MIT",
   "private": true,
