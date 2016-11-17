@@ -1,3 +1,7 @@
+# 0.68.0: WIP
+- New: `project-find-from-search` command which have being provided as separate package #508.
+  - `cmd-enter` is default keymap for macOS user.
+
 # 0.67.0:
 - Support: set minimum engines to `^1.13.0-beta1`.
 - Fix: Remove use of `::shadow`. #485
