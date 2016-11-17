@@ -1,3 +1,10 @@
+inferType = (value) ->
+  switch
+    when Number.isInteger(value) then 'integer'
+    when typeof(value) is 'boolean' then 'boolean'
+    when typeof(value) is 'string' then 'string'
+    when Array.isArray(value) then 'array'
+
 class Settings
   constructor: (@scope, @config) ->
     # Inject order props to display orderd in setting-view
@@ -5,12 +12,13 @@ class Settings
       @config[name].order = i
 
     # Automatically infer and inject `type` of each config parameter.
-    for key, object of @config
-      object.type = switch
-        when Number.isInteger(object.default) then 'integer'
-        when typeof(object.default) is 'boolean' then 'boolean'
-        when typeof(object.default) is 'string' then 'string'
-        when Array.isArray(object.default) then 'array'
+    # skip if value which aleady have `type` field.
+    # Also translate bare `boolean` value to {default: `boolean`} object
+    for key in Object.keys(@config)
+      if typeof(@config[key]) is 'boolean'
+        @config[key] = {default: @config[key]}
+      unless (value = @config[key]).type?
+        value.type = inferType(value.default)
 
   get: (param) ->
     if param is 'defaultRegister'
@@ -28,24 +36,17 @@ class Settings
     atom.config.observe "#{@scope}.#{param}", fn
 
 module.exports = new Settings 'vim-mode-plus',
-  setCursorToStartOfChangeOnUndoRedo:
-    default: true
-  groupChangesWhenLeavingInsertMode:
-    default: true
-  useClipboardAsDefaultRegister:
-    default: false
-  startInInsertMode:
-    default: false
+  setCursorToStartOfChangeOnUndoRedo: true
+  groupChangesWhenLeavingInsertMode: true
+  useClipboardAsDefaultRegister: false
+  startInInsertMode: false
   startInInsertModeScopes:
     default: []
     items: type: 'string'
     description: 'Start in insert-mode whan editorElement matches scope'
-  clearMultipleCursorsOnEscapeInsertMode:
-    default: false
-  autoSelectPersistentSelectionOnOperate:
-    default: true
-  wrapLeftRightMotion:
-    default: false
+  clearMultipleCursorsOnEscapeInsertMode: false
+  autoSelectPersistentSelectionOnOperate: true
+  wrapLeftRightMotion: false
   numberRegex:
     default: '-?[0-9]+'
     description: 'Used to find number in ctrl-a/ctrl-x. To ignore "-"(minus) char in string like "identifier-1" use "(?:\\B-)?[0-9]+"'
@@ -59,8 +60,7 @@ module.exports = new Settings 'vim-mode-plus',
     default: []
     items: type: 'string'
     description: 'Comma separated list of character, which add additional space inside when surround.'
-  showCursorInVisualMode:
-    default: true
+  showCursorInVisualMode: true
   ignoreCaseForSearch:
     default: false
     description: 'For `/` and `?`'
@@ -73,14 +73,12 @@ module.exports = new Settings 'vim-mode-plus',
   useSmartcaseForSearchCurrentWord:
     default: false
     description: 'For `*` and `#`. Override `ignoreCaseForSearchCurrentWord`'
-  highlightSearch:
-    default: false
+  highlightSearch: false
   highlightSearchExcludeScopes:
     default: []
     items: type: 'string'
     description: 'Suppress highlightSearch when any of these classes are present in the editor'
-  incrementalSearch:
-    default: false
+  incrementalSearch: false
   incrementalSearchVisitDirection:
     default: 'absolute'
     enum: ['absolute', 'relative']
@@ -94,31 +92,23 @@ module.exports = new Settings 'vim-mode-plus',
   stayOnDelete:
     default: false
     description: "Don't move cursor after yank"
-  flashOnUndoRedo:
-    default: true
-  flashOnOperate:
-    default: true
+  flashOnUndoRedo: true
+  flashOnOperate: true
   flashOnOperateBlacklist:
     default: []
     items: type: 'string'
     description: 'comma separated list of operator class name to disable flash e.g. "yank, auto-indent"'
-  flashOnSearch:
-    default: true
-  flashScreenOnSearchHasNoMatch:
-    default: true
-  showHoverOnOperate:
-    default: false
-    description: "Optional icon on hover overlay"
+  flashOnSearch: true
+  flashScreenOnSearchHasNoMatch: true
+  showHoverOnOperate: false
   showHoverOnOperateIcon:
     default: 'icon'
     enum: ['none', 'icon', 'emoji']
-  showHoverSearchCounter:
-    default: false
+  showHoverSearchCounter: false
   showHoverSearchCounterDuration:
     default: 700
     description: "Duration(msec) for hover search counter"
-  hideTabBarOnMaximizePane:
-    default: true
+  hideTabBarOnMaximizePane: true
   smoothScrollOnFullScrollMotion:
     default: false
     description: "For `ctrl-f` and `ctrl-b`"
