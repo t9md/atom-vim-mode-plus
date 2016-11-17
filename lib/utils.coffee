@@ -816,6 +816,25 @@ registerElement = (name, options) ->
     Element.prototype = options.prototype if options.prototype?
   Element
 
+getPackage = (name, fn) ->
+  new Promise (resolve) ->
+    if atom.packages.isPackageActive(name)
+      pkg = atom.packages.getActivePackage(name)
+      resolve(pkg)
+    else
+      disposable = atom.packages.onDidActivatePackage (pkg) ->
+        if pkg.name is name
+          disposable.dispose()
+          resolve(pkg)
+
+searchByProjectFind = (editor, text) ->
+  atom.commands.dispatch(editor.element, 'project-find:show')
+  getPackage('find-and-replace').then (pkg) ->
+    {projectFindView} = pkg.mainModule
+    if projectFindView?
+      projectFindView.findEditor.setText(text)
+      projectFindView.confirm()
+
 module.exports = {
   getParent
   getAncestors
@@ -910,4 +929,6 @@ module.exports = {
   getLargestFoldRangeContainsBufferRow
   translatePointAndClip
   getRangeByTranslatePointAndClip
+  getPackage
+  searchByProjectFind
 }
