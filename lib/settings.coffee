@@ -16,8 +16,7 @@ class Settings
       unless (value = @config[key]).type?
         value.type = inferType(value.default)
 
-    # [CAUTION] incecting order must come last
-    # Inject order props to display orderd in setting-view
+    # [CAUTION] injecting order propety to set order shown at setting-view MUST-COME-LAST.
     for name, i in Object.keys(@config)
       @config[name].order = i
 
