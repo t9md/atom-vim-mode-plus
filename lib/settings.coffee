@@ -7,10 +7,6 @@ inferType = (value) ->
 
 class Settings
   constructor: (@scope, @config) ->
-    # Inject order props to display orderd in setting-view
-    for name, i in Object.keys(@config)
-      @config[name].order = i
-
     # Automatically infer and inject `type` of each config parameter.
     # skip if value which aleady have `type` field.
     # Also translate bare `boolean` value to {default: `boolean`} object
@@ -19,6 +15,11 @@ class Settings
         @config[key] = {default: @config[key]}
       unless (value = @config[key]).type?
         value.type = inferType(value.default)
+
+    # [CAUTION] incecting order must come last
+    # Inject order props to display orderd in setting-view
+    for name, i in Object.keys(@config)
+      @config[name].order = i
 
   get: (param) ->
     if param is 'defaultRegister'
