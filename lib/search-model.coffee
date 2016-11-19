@@ -29,7 +29,7 @@ class SearchModel
         if settings.get('flashScreenOnSearchHasNoMatch')
           @vimState.flash(getVisibleBufferRange(@editor), type: 'screen')
           atom.beep()
-          
+
         return
 
       if settings.get('showHoverSearchCounter')
