@@ -1,6 +1,7 @@
-# 0.68.0: WIP
+# 0.68.0:
 - New: `project-find-from-search` command which have being provided as separate package #508.
   - `cmd-enter` is default keymap for macOS user.
+- Fix: when `flashScreenOnSearchHasNoMatch` was `false`, throw error when search item was not found #510.
 
 # 0.67.0:
 - Support: set minimum engines to `^1.13.0-beta1`.
