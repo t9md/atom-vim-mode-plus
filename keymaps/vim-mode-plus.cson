@@ -111,7 +111,8 @@
   'g o': 'vim-mode-plus:toggle-preset-occurrence'
 
   # '_': 'vim-mode-plus:replace-with-register'
-  'I': 'vim-mode-plus:insert-at-beginning-of-line'
+  'I': 'vim-mode-plus:insert-at-first-character-of-line'
+  'g I': 'vim-mode-plus:insert-at-beginning-of-line'
   '>': 'vim-mode-plus:indent'
   '<': 'vim-mode-plus:outdent'
   '=': 'vim-mode-plus:auto-indent'

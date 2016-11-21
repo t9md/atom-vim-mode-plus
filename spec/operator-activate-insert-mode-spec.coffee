@@ -411,6 +411,26 @@ describe "Operator ActivateInsertMode family", ->
         it "insert at end of selection", ->
           ensure "A", cursor: [3, 0], mode: "insert"
 
+  describe "the gI keybinding", ->
+    beforeEach ->
+      set
+        text: """
+        __this is text
+        """
+
+    describe "in normal-mode.", ->
+      it "start at insert at column 0 regardless of current column", ->
+        set cursor: [0, 5]
+        ensure "g I", cursor: [0, 0], mode: 'insert'
+        ensure "escape", mode: 'normal'
+
+        set cursor: [0, 0]
+        ensure "g I", cursor: [0, 0], mode: 'insert'
+        ensure "escape", mode: 'normal'
+
+        set cursor: [0, 13]
+        ensure "g I", cursor: [0, 0], mode: 'insert'
+
   describe "InsertAtPreviousFoldStart and Next", ->
     beforeEach ->
       waitsForPromise ->
