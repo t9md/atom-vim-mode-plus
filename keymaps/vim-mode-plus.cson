@@ -178,6 +178,8 @@
   'ctrl-w z': 'vim-mode-plus:maximize-pane'
   'cmd-enter': 'vim-mode-plus:maximize-pane'
 
+  'ctrl-w =': 'vim-mode-plus:equalize-panes'
+
   'ctrl-w ctrl-c': 'pane:close'
   'ctrl-w c': 'pane:close'
   'ctrl-w ctrl-q': 'core:close'

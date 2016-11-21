@@ -105,6 +105,7 @@ module.exports =
 
     @subscribe atom.commands.add 'atom-workspace',
       'vim-mode-plus:maximize-pane': => @maximizePane()
+      'vim-mode-plus:equalize-panes': => @equalizePanes()
 
   maximizePane: ->
     selector = 'vim-mode-plus-pane-maximized'
@@ -114,6 +115,14 @@ module.exports =
       classList.add('hide-tab-bar') if settings.get('hideTabBarOnMaximizePane')
     else
       classList.remove('hide-tab-bar')
+
+  equalizePanes: ->
+    for pane in atom.workspace.getPanes()
+      pane.setFlexScale 1
+      # I couldn't figure out a way to get all the PaneAxis in the workspace, this might result in some
+      # redundant sets
+      pane.parent.setFlexScale 1
+
 
   registerVimStateCommands: ->
     # all commands here is executed with context where 'this' binded to 'vimState'
