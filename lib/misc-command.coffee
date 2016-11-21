@@ -83,14 +83,8 @@ class Undo extends MiscCommand
     fn(range) if range?
     if settings.get('flashOnUndoRedo')
       @onDidFinishOperation =>
-        timeout = settings.get('flashOnUndoRedoDuration')
-        highlightRanges @editor, rangesRemoved,
-          class: "vim-mode-plus-flash removed"
-          timeout: timeout
-
-        highlightRanges @editor, rangesAdded,
-          class: "vim-mode-plus-flash added"
-          timeout: timeout
+        @vimState.flash(rangesRemoved, type: 'removed')
+        @vimState.flash(rangesAdded, type: 'added')
 
   execute: ->
     @mutateWithTrackingChanges (range) =>

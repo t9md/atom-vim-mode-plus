@@ -136,6 +136,7 @@ class SearchInput extends HTMLElement
       "select-occurrence-from-search": => @emitter.emit('did-command', name: 'occurrence', operation: 'SelectOccurrence')
       "change-occurrence-from-search": => @emitter.emit('did-command', name: 'occurrence', operation: 'ChangeOccurrence')
       "add-occurrence-pattern-from-search": => @emitter.emit('did-command', name: 'occurrence')
+      "project-find-from-search": => @emitter.emit('did-command', name: 'project-find')
 
       "search-insert-wild-pattern": => @editor.insertText('.*?')
       "search-activate-literal-mode": => @activateLiteralMode()

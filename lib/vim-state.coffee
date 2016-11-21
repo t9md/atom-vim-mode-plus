@@ -30,6 +30,7 @@ OccurrenceManager = require './occurrence-manager'
 HighlightSearchManager = require './highlight-search-manager'
 MutationManager = require './mutation-manager'
 PersistentSelectionManager = require './persistent-selection-manager'
+FlashManager = require './flash-manager'
 
 packageScope = 'vim-mode-plus'
 
@@ -40,6 +41,7 @@ class VimState
 
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
+  @delegatesMethods('flash', 'flashScreenRange', toProperty: 'flashManager')
   @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', 'addToClassList', toProperty: 'operationStack')
 
   constructor: (@editor, @statusBarManager, @globalState) ->
@@ -56,6 +58,7 @@ class VimState
     @persistentSelection = new PersistentSelectionManager(this)
     @occurrenceManager = new OccurrenceManager(this)
     @mutationManager = new MutationManager(this)
+    @flashManager = new FlashManager(this)
 
     @input = new Input(this)
     @searchInput = new SearchInputElement().initialize(this)
@@ -118,11 +121,18 @@ class VimState
   toggleClassList: (className, bool=undefined) ->
     @editorElement.classList.toggle(className, bool)
 
-  swapClassName: (className) ->
-    oldClassName = @editorElement.className
-    @editorElement.className = className
+  # FIXME: remove this dengerous approarch ASAP and revert to read-inpu-via-mini-editor
+  swapClassName: (classNames...) ->
+    oldMode = @mode
+    @editorElement.classList.remove(oldMode + "-mode")
+    @editorElement.classList.remove('vim-mode-plus')
+    @editorElement.classList.add(classNames...)
+
     new Disposable =>
-      @editorElement.className = oldClassName
+      @editorElement.classList.remove(classNames...)
+      if @mode is oldMode
+        @editorElement.classList.add(oldMode + "-mode")
+      @editorElement.classList.add('vim-mode-plus')
       @editorElement.classList.add('is-focused')
 
   # All subscriptions here is celared on each operation finished.
@@ -213,37 +223,35 @@ class VimState
     } = {}
     @emitter.emit 'did-destroy'
 
+  isInterestingEvent: ({target, type}) ->
+    if @mode is 'insert'
+      false
+    else
+      @editor? and
+        target?.closest?('atom-text-editor') is @editorElement and
+        not @isMode('visual', 'blockwise') and
+        not type.startsWith('vim-mode-plus:')
+
+  checkSelection: (event) ->
+    return if @operationStack.isProcessing()
+    return unless @isInterestingEvent(event)
+
+    if haveSomeNonEmptySelection(@editor)
+      submode = swrap.detectVisualModeSubmode(@editor)
+      if @isMode('visual', submode)
+        @updateCursorsVisibility()
+      else
+        @activate('visual', submode)
+    else
+      @activate('normal') if @isMode('visual')
+
+  saveProperties: (event) ->
+    return unless @isInterestingEvent(event)
+    for selection in @editor.getSelections()
+      swrap(selection).saveProperties()
+
   observeSelection: ->
-    isInterestingEvent = ({target, type}) =>
-      if @mode is 'insert'
-        false
-      else
-        @editor? and
-          target is @editorElement and
-          not @isMode('visual', 'blockwise') and
-          not type.startsWith('vim-mode-plus:')
-
-    onInterestingEvent = (fn) ->
-      (event) -> fn() if isInterestingEvent(event)
-
-    _checkSelection = =>
-      return if @operationStack.isProcessing()
-      if haveSomeNonEmptySelection(@editor)
-        submode = swrap.detectVisualModeSubmode(@editor)
-        if @isMode('visual', submode)
-          @updateCursorsVisibility()
-        else
-          @activate('visual', submode)
-      else
-        @activate('normal') if @isMode('visual')
-
-    _saveProperties = =>
-      for selection in @editor.getSelections()
-        swrap(selection).saveProperties()
-
-    checkSelection = onInterestingEvent(_checkSelection)
-    saveProperties = onInterestingEvent(_saveProperties)
-
+    checkSelection = @checkSelection.bind(this)
     @editorElement.addEventListener('mouseup', checkSelection)
     @subscriptions.add new Disposable =>
       @editorElement.removeEventListener('mouseup', checkSelection)

@@ -140,6 +140,12 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
   @extend()
   execute: ->
     @editor.moveToBeginningOfLine()
+    super
+
+class InsertAtFirstCharacterOfLine extends ActivateInsertMode
+  @extend()
+  execute: ->
+    @editor.moveToBeginningOfLine()
     @editor.moveToFirstCharacterOfLine()
     super
 

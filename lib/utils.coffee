@@ -275,6 +275,21 @@ getFirstCharacterColumForBufferRow = (editor, row) ->
   else
     0
 
+getFirstCharacterScreenPositionForScreenRow = (editor, screenRow) ->
+  screenLineStart = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
+  screenLineEnd = [screenRow, Infinity]
+  screenLineBufferRange = editor.bufferRangeForScreenRange([screenLineStart, screenLineEnd])
+
+  firstCharacterBufferPosition = null
+  editor.scanInBufferRange /\S/, screenLineBufferRange, ({range, stop}) ->
+    firstCharacterBufferPosition = range.start
+    stop()
+
+  if firstCharacterBufferPosition?
+    editor.screenPositionForBufferPosition(firstCharacterBufferPosition)
+  else
+    screenLineStart
+
 trimRange = (editor, scanRange) ->
   pattern = /\S/
   [start, end] = []
@@ -801,6 +816,25 @@ registerElement = (name, options) ->
     Element.prototype = options.prototype if options.prototype?
   Element
 
+getPackage = (name, fn) ->
+  new Promise (resolve) ->
+    if atom.packages.isPackageActive(name)
+      pkg = atom.packages.getActivePackage(name)
+      resolve(pkg)
+    else
+      disposable = atom.packages.onDidActivatePackage (pkg) ->
+        if pkg.name is name
+          disposable.dispose()
+          resolve(pkg)
+
+searchByProjectFind = (editor, text) ->
+  atom.commands.dispatch(editor.element, 'project-find:show')
+  getPackage('find-and-replace').then (pkg) ->
+    {projectFindView} = pkg.mainModule
+    if projectFindView?
+      projectFindView.findEditor.setText(text)
+      projectFindView.confirm()
+
 module.exports = {
   getParent
   getAncestors
@@ -857,6 +891,7 @@ module.exports = {
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
   getFirstCharacterColumForBufferRow
+  getFirstCharacterScreenPositionForScreenRow
   trimRange
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
@@ -894,4 +929,6 @@ module.exports = {
   getLargestFoldRangeContainsBufferRow
   translatePointAndClip
   getRangeByTranslatePointAndClip
+  getPackage
+  searchByProjectFind
 }

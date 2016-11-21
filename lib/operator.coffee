@@ -76,10 +76,7 @@ class Operator extends Base
 
   flashIfNecessary: (ranges) ->
     return unless @needFlash()
-
-    highlightRanges @editor, ranges,
-      class: 'vim-mode-plus-flash'
-      timeout: settings.get('flashOnOperateDuration')
+    @vimState.flash(ranges, type: 'operator')
 
   flashChangeIfNecessary: ->
     return unless @needFlash()
@@ -624,3 +621,4 @@ class Mark extends Operator
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
+    @activateMode('normal')

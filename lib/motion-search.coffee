@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
 
-{saveEditorState, getNonWordCharactersForCursor} = require './utils'
+{saveEditorState, getNonWordCharactersForCursor, searchByProjectFind} = require './utils'
 SearchModel = require './search-model'
 settings = require './settings'
 Motion = require('./base').getClass('Motion')
@@ -129,8 +129,8 @@ class Search extends SearchBase
             when 'prev' then 'next'
 
         switch direction
-          when 'next' then @getSearchModel().updateCurrentMatch(+1)
-          when 'prev' then @getSearchModel().updateCurrentMatch(-1)
+          when 'next' then @getSearchModel().visit(+1)
+          when 'prev' then @getSearchModel().visit(-1)
 
       when 'occurrence'
         {operation} = commandEvent
@@ -141,6 +141,10 @@ class Search extends SearchBase
         @vimState.searchInput.cancel()
 
         @vimState.operationStack.run(operation) if operation?
+      when 'project-find'
+        @vimState.searchHistory.save(@input)
+        @vimState.searchInput.cancel()
+        searchByProjectFind(@editor, @input)
 
   handleCancelSearch: ->
     @vimState.resetNormalMode() unless @isMode('visual') or @isMode('insert')

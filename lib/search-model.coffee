@@ -18,16 +18,18 @@ class SearchModel
 
     {@editor, @editorElement} = @vimState
     @disposables = new CompositeDisposable
-    @disposables.add(@editorElement.onDidChangeScrollTop(@updateView.bind(this)))
-    @disposables.add(@editorElement.onDidChangeScrollLeft(@updateView.bind(this)))
+    @disposables.add(@editorElement.onDidChangeScrollTop(@refreshMarkers.bind(this)))
+    @disposables.add(@editorElement.onDidChangeScrollLeft(@refreshMarkers.bind(this)))
     @markerLayer = @editor.addMarkerLayer()
+    @decoationByRange = {}
 
     @onDidChangeCurrentMatch =>
-      @updateView() if @options.incrementalSearch
-
       @vimState.hoverSearchCounter.reset()
       unless @currentMatch?
-        @flashScreen() if settings.get('flashScreenOnSearchHasNoMatch')
+        if settings.get('flashScreenOnSearchHasNoMatch')
+          @vimState.flash(getVisibleBufferRange(@editor), type: 'screen')
+          atom.beep()
+
         return
 
       if settings.get('showHoverSearchCounter')
@@ -44,22 +46,17 @@ class SearchModel
       smartScrollToBufferPosition(@editor, @currentMatch.start)
 
       if settings.get('flashOnSearch')
-        @flashRange(@currentMatch)
-
-  flashMarker = null
-  flashRange: (range) ->
-    flashMarker?.destroy()
-    flashMarker = highlightRange @editor, range,
-      class: 'vim-mode-plus-flash'
-      timeout: settings.get('flashOnSearchDuration')
+        @vimState.flash(@currentMatch, type: 'search')
 
   destroy: ->
     @markerLayer.destroy()
     @disposables.dispose()
+    @decoationByRange = null
 
   clearMarkers: ->
     for marker in @markerLayer.getMarkers()
       marker.destroy()
+    @decoationByRange = {}
 
   classNamesForRange: (range) ->
     classNames = []
@@ -73,9 +70,10 @@ class SearchModel
 
     classNames
 
-  updateView: ->
+  refreshMarkers: ->
     @clearMarkers()
-    @decorateRange(range) for range in @getVisibleMatchRanges()
+    for range in @getVisibleMatchRanges()
+      @decoationByRange[range.toString()] = @decorateRange(range)
 
   getVisibleMatchRanges: ->
     visibleRange = getVisibleBufferRange(@editor)
@@ -112,6 +110,8 @@ class SearchModel
 
     @currentMatchIndex = @matches.indexOf(currentMatch)
     @updateCurrentMatch(relativeIndex)
+    if @options.incrementalSearch
+      @refreshMarkers()
     @initialCurrentMatchIndex = @currentMatchIndex
     @currentMatch
 
@@ -120,10 +120,22 @@ class SearchModel
     @currentMatch = @matches[@currentMatchIndex]
     @emitter.emit('did-change-current-match')
 
+  visit: (relativeIndex) ->
+    return unless @matches.length
+    oldDecoration = @decoationByRange[@currentMatch.toString()]
+    @updateCurrentMatch(relativeIndex)
+    newDecoration = @decoationByRange[@currentMatch.toString()]
+
+    if oldDecoration?
+      oldClass = oldDecoration.getProperties().class
+      oldClass = oldClass.replace(/\s+current(\s+)?$/, '$1')
+      oldDecoration.setProperties(type: 'highlight', class: oldClass)
+
+    if newDecoration?
+      newClass = newDecoration.getProperties().class
+      newClass = newClass.replace(/\s+current(\s+)?$/, '$1')
+      newClass += ' current'
+      newDecoration.setProperties(type: 'highlight', class: newClass)
+
   getRelativeIndex: ->
     @currentMatchIndex - @initialCurrentMatchIndex
-
-  flashScreen: ->
-    options = {class: 'vim-mode-plus-flash', timeout: 100}
-    highlightRange(@editor, getVisibleBufferRange(@editor), options)
-    atom.beep()

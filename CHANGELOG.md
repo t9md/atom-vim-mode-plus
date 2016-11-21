@@ -1,3 +1,21 @@
+# 0.68.0:
+- New: `project-find-from-search` command which have being provided as separate package #508.
+  - `cmd-enter` is default keymap for macOS user.
+- Fix: when `flashScreenOnSearchHasNoMatch` was `false`, throw error when search item was not found #510.
+
+# 0.67.0:
+- Support: set minimum engines to `^1.13.0-beta1`.
+- Fix: Remove use of `::shadow`. #485
+- Fix: `cmd-d` didn't start `visual-mode` suffered by the side-effect of shadowDOM removal #490
+- Experimental, Improve: Better flashing effect using keyframe CSS animation
+  - Breaking: Removed flashing duration config params.
+  - Now flashingDuration is fixed to 1 sec at maximum(duration until marker be destroyed)
+  - User can tweak by css within this duration. Refer `styles/vim-mode-plus.less` if you want.
+- Fix: Scroll motion failed to put cursor at firstChar of screen line when it’s wrapped.
+- Breaking: Remove cursor line flashing effect on smoothScrolling. #502
+- UI: Modify style of search match to modern(??) style.
+- Fix: No longer remove non-vmp-css-class from editorElement temporarily while waiting-user-input #497.
+
 # 0.66.1:
 - Fix: Flash only one instance at a given moment when search `/`, `?`, `#`, `?`. #494
 - Fix: % motion now work again #493 by @mattaschmann
