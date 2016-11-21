@@ -117,12 +117,13 @@ module.exports =
       classList.remove('hide-tab-bar')
 
   equalizePanes: ->
-    for pane in atom.workspace.getPanes()
-      pane.setFlexScale 1
-      # I couldn't figure out a way to get all the PaneAxis in the workspace, this might result in some
-      # redundant sets
-      pane.parent.setFlexScale 1
+    setFlexScale = (base, newFlexScale) ->
+      base.setFlexScale(newFlexScale)
+      for child in base.children ? []
+        setFlexScale(child, newFlexScale)
 
+    root = atom.workspace.getActivePane().getContainer().getRoot()
+    setFlexScale(root, 1)
 
   registerVimStateCommands: ->
     # all commands here is executed with context where 'this' binded to 'vimState'
