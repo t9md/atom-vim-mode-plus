@@ -158,6 +158,7 @@ class VimState
   emitDidSetOperatorModifier: (options) -> @emitter.emit('did-set-operator-modifier', options)
 
   onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
+  emitDidFinishOperation: -> @emitter.emit('did-finish-operation')
 
   onDidResetOperationStack: (fn) -> @subscribe @emitter.on('did-reset-operation-stack', fn)
   emitDidResetOperationStack: -> @emitter.emit('did-reset-operation-stack')

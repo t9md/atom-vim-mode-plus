@@ -160,7 +160,7 @@ class OperationStack
 
   finish: (operation=null) ->
     @recordedOperation = operation if operation?.isRecordable()
-    @vimState.emitter.emit('did-finish-operation')
+    @vimState.emitDidFinishOperation()
 
     if @mode is 'normal'
       @ensureAllSelectionsAreEmpty(operation)
