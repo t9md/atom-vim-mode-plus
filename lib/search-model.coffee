@@ -11,6 +11,7 @@ settings = require './settings'
 module.exports =
 class SearchModel
   relativeIndex: 0
+  lastRelativeIndex: null
   onDidChangeCurrentMatch: (fn) -> @emitter.on 'did-change-current-match', fn
 
   constructor: (@vimState, @options) ->
@@ -120,7 +121,12 @@ class SearchModel
     @currentMatch = @matches[@currentMatchIndex]
     @emitter.emit('did-change-current-match')
 
-  visit: (relativeIndex) ->
+  visit: (relativeIndex=null) ->
+    if relativeIndex?
+      @lastRelativeIndex = relativeIndex
+    else
+      relativeIndex = @lastRelativeIndex ? +1
+
     return unless @matches.length
     oldDecoration = @decoationByRange[@currentMatch.toString()]
     @updateCurrentMatch(relativeIndex)

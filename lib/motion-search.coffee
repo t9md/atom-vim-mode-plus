@@ -152,9 +152,11 @@ class Search extends SearchBase
         @vimState.operationStack.run(operation) if operation?
       when 'toggle-occurrence'
         if @vimState.occurrenceManager.hasMarkers()
-          point = @getSearchModel().currentMatch.start
+          searchModel = @getSearchModel()
+          point = searchModel.currentMatch.start
           if marker = @vimState.occurrenceManager.getMarkerAtPoint(point)
             marker.destroy()
+            searchModel.visit()
 
       when 'project-find'
         {input} = commandEvent
