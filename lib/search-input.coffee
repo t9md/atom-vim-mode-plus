@@ -123,7 +123,7 @@ class SearchInput extends HTMLElement
     @registerCommands()
     this
 
-  emitDidCommand: (name, options={})->
+  emitDidCommand: (name, options={}) ->
     options.name = name
     options.input = @editor.getText()
     @emitter.emit('did-command', options)
