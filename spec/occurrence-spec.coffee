@@ -258,7 +258,7 @@ describe "Occurrence", ->
 
     beforeEach ->
       searchEditor = vimState.searchInput.editor
-      searchEditorElement = searchEditor.element
+      searchEditorElement = vimState.searchInput.editorElement
       jasmine.attachToDOM(getView(atom.workspace))
       settings.set('incrementalSearch', true)
       set
@@ -726,6 +726,70 @@ describe "Occurrence", ->
             text: """
             ooo: XXX: ooo xxx: ooo:
             xxx: ooo: XXX: ooo xxx: ooo:
+            """
+
+    describe "search occurrence", ->
+      [searchEditor, searchEditorElement] = []
+      beforeEach ->
+        searchEditor = vimState.searchInput.editor
+        searchEditorElement = vimState.searchInput.editorElement
+        jasmine.attachToDOM(getView(atom.workspace))
+        settings.set('incrementalSearch', true)
+        set
+          text: """
+          ooo: xxx: ooo
+          !!!: ooo: xxx:
+          ooo: xxx: ooo:
+          """
+          cursor: [0, 0]
+
+        runs ->
+          ensure 'g o',
+            occurrenceText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo']
+        waitsFor ->
+          editorElement.classList.contains('has-occurrence')
+
+      describe "tab, shift-tab", ->
+        it "search next/previous occurrence marker", ->
+          keystroke 'tab'
+          rawKeystroke('tab enter', searchEditorElement)
+          ensure cursor: [1, 5]
+
+          keystroke 'tab'
+          rawKeystroke('tab enter', searchEditorElement)
+          ensure cursor: [2, 10]
+
+          keystroke 'shift-tab'
+          rawKeystroke('shift-tab enter', searchEditorElement)
+          ensure cursor: [1, 5]
+
+          keystroke 'shift-tab'
+          rawKeystroke('shift-tab enter', searchEditorElement)
+          ensure cursor: [0, 0]
+
+      describe "space can clear preset-marker", ->
+        it "clear preset-occurrence and move to next", ->
+          keystroke 'tab'
+          rawKeystroke('tab space tab enter', searchEditorElement)
+          ensure cursor: [2, 10], occurrenceCount: 4
+
+          ensure 'g U i p',
+            text: """
+            OOO: xxx: OOO
+            !!!: ooo: xxx:
+            OOO: xxx: OOO:
+            """
+
+        it "clear preset-occurrence and move to previous", ->
+          keystroke 'shift-tab'
+          rawKeystroke('shift-tab space shift-tab enter', searchEditorElement)
+          ensure cursor: [0, 10], occurrenceCount: 4
+
+          ensure 'g U i p',
+            text: """
+            OOO: xxx: OOO
+            !!!: OOO: xxx:
+            ooo: xxx: OOO:
             """
 
     describe "explict operator-modifier o and preset-marker", ->
