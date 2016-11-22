@@ -221,6 +221,7 @@ class SearchOccurrence extends Search
   initialize: ->
     super
     if @vimState.occurrenceManager.hasPatterns()
+      @vimState.addToClassList('silent')
       regexSource = @vimState.occurrenceManager.buildPattern().source
       @vimState.searchInput.editor.insertText(regexSource)
 
