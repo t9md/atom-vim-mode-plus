@@ -62,7 +62,7 @@ class SearchInput extends HTMLElement
       @cancel() unless @finished
 
   unfocus: ->
-    @editorElement.classList.remove(@options.classList...) if @options.classList?
+    @editorElement.classList.remove(@options.classList...) if @options?.classList?
     @regexSearchStatus.classList.add 'btn-primary'
     @literalModeDeactivator?.dispose()
 
