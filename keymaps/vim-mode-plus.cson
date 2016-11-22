@@ -112,6 +112,7 @@
 
   # '_': 'vim-mode-plus:replace-with-register'
   'I': 'vim-mode-plus:insert-at-first-character-of-line'
+  'A': 'vim-mode-plus:insert-after-end-of-line'
   'g I': 'vim-mode-plus:insert-at-beginning-of-line'
   '>': 'vim-mode-plus:indent'
   '<': 'vim-mode-plus:outdent'
@@ -390,7 +391,6 @@
   'O': 'vim-mode-plus:insert-above-with-newline'
   'o': 'vim-mode-plus:insert-below-with-newline'
   'a': 'vim-mode-plus:insert-after'
-  'A': 'vim-mode-plus:insert-after-end-of-line'
   'x': 'vim-mode-plus:delete-right'
   'X': 'vim-mode-plus:delete-left'
   's': 'vim-mode-plus:substitute'
@@ -552,13 +552,14 @@
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
 
-  'I': 'vim-mode-plus:insert-at-start-of-target'
-  'A': 'vim-mode-plus:insert-at-end-of-target'
-
   'enter': 'vim-mode-plus:create-persistent-selection'
 
   # 'p': 'vim-mode-plus:swap-with-register'
   # 'P': 'vim-mode-plus:swap-with-register'
+
+'atom-text-editor.vim-mode-plus.visual-mode:not(.linewise)':
+  'I': 'vim-mode-plus:insert-at-start-of-target'
+  'A': 'vim-mode-plus:insert-at-end-of-target'
 
 # visual-blockwise
 # -------------------------
