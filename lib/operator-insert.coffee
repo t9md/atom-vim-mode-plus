@@ -130,21 +130,30 @@ class InsertAfter extends ActivateInsertMode
     moveCursorRight(cursor) for cursor in @editor.getCursors()
     super
 
-class InsertAfterEndOfLine extends ActivateInsertMode
-  @extend()
-  execute: ->
-    @editor.moveToEndOfLine()
-    super
-
+# key: 'g I'
 class InsertAtBeginningOfLine extends ActivateInsertMode
   @extend()
   execute: ->
+    if @isMode('visual', ['characterwise', 'linewise'])
+      @editor.splitSelectionsIntoLines()
     @editor.moveToBeginningOfLine()
     super
 
+# key: 'A', Used in 'normal-mode', 'visual-mode.linewise'
+class InsertAfterEndOfLine extends ActivateInsertMode
+  @extend()
+  execute: ->
+    if @isMode('visual', 'linewise')
+      @editor.splitSelectionsIntoLines()
+    @editor.moveToEndOfLine()
+    super
+
+# key: 'I', Used in 'normal-mode', 'visual-mode.linewise'
 class InsertAtFirstCharacterOfLine extends ActivateInsertMode
   @extend()
   execute: ->
+    if @isMode('visual', 'linewise')
+      @editor.splitSelectionsIntoLines()
     @editor.moveToBeginningOfLine()
     @editor.moveToFirstCharacterOfLine()
     super
@@ -186,11 +195,18 @@ class InsertByTarget extends ActivateInsertMode
       swrap(selection).setBufferPositionTo(@which)
     super
 
+# key: 'I', Used in 'visual-mode.characterwise', visual-mode.blockwise
 class InsertAtStartOfTarget extends InsertByTarget
   @extend()
   which: 'start'
+  execute: ->
+    if @isMode('visual', 'characterwise')
+      # `I(or A)` is short-hand of `ctrl-v I(or A)`
+      @vimState.selectBlockwise()
+    super
 
-class InsertAtEndOfTarget extends InsertByTarget
+# key: 'A', Used in 'visual-mode.characterwise', 'visual-mode.blockwise'
+class InsertAtEndOfTarget extends InsertAtStartOfTarget
   @extend()
   which: 'end'
 
