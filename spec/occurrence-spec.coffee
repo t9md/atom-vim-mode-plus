@@ -258,7 +258,7 @@ describe "Occurrence", ->
 
     beforeEach ->
       searchEditor = vimState.searchInput.editor
-      searchEditorElement = vimState.searchInput.editorElement
+      searchEditorElement = searchEditor.element
       jasmine.attachToDOM(getView(atom.workspace))
       settings.set('incrementalSearch', true)
       set
