@@ -10,7 +10,6 @@ settings = require './settings'
 Input = require './input'
 SearchInputElement = require './search-input'
 {
-  haveSomeNonEmptySelection
   highlightRanges
   getVisibleEditors
   matchScopes
@@ -72,15 +71,6 @@ class VimState
     refreshHighlightSearch = =>
       @highlightSearch.refresh()
     @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
-
-    # [FIXME] #406 find better way to fix, this is very imperative, result of just worked through try&error.
-    @subscriptions.add @editor.observeSelections (selection) =>
-      return if selection.isEmpty()
-      return if @operationStack.isProcessing()
-      unless swrap(selection).hasProperties()
-        swrap(selection).saveProperties()
-        @updateCursorsVisibility()
-        @editorElement.component.updateSync()
 
     @editorElement.classList.add(packageScope)
     if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
@@ -236,9 +226,12 @@ class VimState
     return if @operationStack.isProcessing()
     return unless @isInterestingEvent(event)
 
-    if haveSomeNonEmptySelection(@editor)
+    nonEmptySelecitons = @editor.getSelections().filter (selection) -> not selection.isEmpty()
+    if nonEmptySelecitons.length
       submode = swrap.detectVisualModeSubmode(@editor)
       if @isMode('visual', submode)
+        for selection in nonEmptySelecitons when not swrap(selection).hasProperties()
+          swrap(selection).saveProperties()
         @updateCursorsVisibility()
       else
         @activate('visual', submode)
