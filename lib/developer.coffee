@@ -39,7 +39,7 @@ class Developer
       pack = atom.packages.getLoadedPackage(packName)
 
       if pack?
-        console.log "deactivating #{packName}"
+        console.log "- deactivating #{packName}"
         atom.packages.deactivatePackage(packName)
         atom.packages.unloadPackage(packName)
 
@@ -51,6 +51,7 @@ class Developer
             delete require.cache[p]
 
         atom.packages.loadPackage(packName)
+        console.log "+ activating #{packName}"
         atom.packages.activatePackage(packName)
 
   toggleReloadPackagesOnSave: ->
