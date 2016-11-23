@@ -1,4 +1,5 @@
 settings = require './settings'
+{CompositeDisposable} = require 'atom'
 
 REGISTERS = /// (
   ?: [a-zA-Z*+%_".]
@@ -130,12 +131,13 @@ class RegisterManager
       @name = name if @isValidName(name)
     else
       @vimState.hover.add '"'
-      disposable = @vimState.onDidConfirmInput (@name) =>
-        disposable.dispose()
+      inputSubscriptions = new CompositeDisposable()
+      inputSubscriptions.add @vimState.onDidConfirmInput (@name) =>
+        inputSubscriptions.dispose()
         @vimState.toggleClassList('with-register', @hasName())
         @vimState.hover.add(@name)
-      @vimState.onDidCancelInput =>
-        disposable.disposable()
+      inputSubscriptions.add @vimState.onDidCancelInput =>
+        inputSubscriptions.disposable()
         @vimState.hover.reset()
       @vimState.input.focus(1)
 
