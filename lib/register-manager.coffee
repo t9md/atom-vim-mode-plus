@@ -130,10 +130,13 @@ class RegisterManager
       @name = name if @isValidName(name)
     else
       @vimState.hover.add '"'
-      @vimState.onDidConfirmInput (@name) =>
+      disposable = @vimState.onDidConfirmInput (@name) =>
+        disposable.dispose()
         @vimState.toggleClassList('with-register', @hasName())
         @vimState.hover.add(@name)
-      @vimState.onDidCancelInput => @vimState.hover.reset()
+      @vimState.onDidCancelInput =>
+        disposable.disposable()
+        @vimState.hover.reset()
       @vimState.input.focus(1)
 
   getCopyType: (text) ->
