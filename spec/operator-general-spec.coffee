@@ -494,11 +494,20 @@ describe "Operator general", ->
         ensure 'y y',
           cursor: [0, 4]
           register: '"': text: "012 345\n", type: 'linewise'
+      it "[N y y] yank N line, starting from the current", ->
+        ensure 'y 2 y',
+          cursor: [0, 4]
+          register: '"': text: "012 345\nabc\n"
+      it "[y N y] yank N line, starting from the current", ->
+        ensure '2 y y',
+          cursor: [0, 4]
+          register: '"': text: "012 345\nabc\n"
 
     describe "when useClipboardAsDefaultRegister enabled", ->
       beforeEach ->
         settings.set('useClipboardAsDefaultRegister', true)
         atom.clipboard.write('___________')
+        ensure register: '"': text: '___________'
 
       describe "read/write to clipboard through register", ->
         it "writes to clipboard with default register", ->
@@ -506,80 +515,59 @@ describe "Operator general", ->
           ensure 'y y', register: '"': text: savedText
           expect(atom.clipboard.read()).toBe(savedText)
 
-    describe "when followed with a repeated y", ->
-      beforeEach ->
-        keystroke 'y 2 y'
-
-      it "copies n lines, starting from the current", ->
-        ensure register: '"': text: "012 345\nabc\n"
-
-      it "leaves the cursor at the starting position", ->
-        ensure cursor: [0, 4]
-
     describe "with a register", ->
-      beforeEach ->
-        keystroke ['"', input: 'a', 'y y']
-
       it "saves the line to the a register", ->
-        ensure register: a: text: "012 345\n"
+        ensure ['"', input: 'a', 'y y'],
+          register: a: text: "012 345\n"
 
-      it "appends the line to the A register", ->
-        ensure ['"', input: 'A', 'y y'],
-          register: a: text: "012 345\n012 345\n"
+    describe "with A register", ->
+      it "append to existing value of lowercase-named register", ->
+        ensure ['"', input: 'a', 'y y'], register: a: text: "012 345\n"
+        ensure ['"', input: 'A', 'y y'], register: a: text: "012 345\n012 345\n"
 
-    describe "with a forward motion", ->
-      beforeEach ->
-        keystroke 'y e'
+    describe "with a motion", ->
+      it "yank from here to destnation of motion", ->
+        ensure 'y e', cursor: [0, 4], register: {'"': text: '345'}
 
-      it "saves the selected text to the default register", ->
-        ensure register: '"': text: '345'
+      it "does not yank when motion failed", ->
+        ensure ['y t', input: 'x'], register: {'"': text: undefined}
 
-      it "leaves the cursor at the starting position", ->
-        ensure cursor: [0, 4]
+      it "yank text-object and move cursor to start of target", ->
+        set cursor: [0, 5]
+        ensure 'y i w',
+          register: '"': text: "345"
+          cursor: [0, 4]
 
-      it "does not yank when motion fails", ->
-        ensure ['y t', input: 'x'],
-          register: '"': text: '345'
+      it "yank and move cursor to start of target", ->
+        ensure 'y h',
+          cursor: [0, 3]
+          register: '"': text: ' '
 
-    describe "with a text object", ->
-      it "moves the cursor to the beginning of the text object", ->
-        set cursorBuffer: [0, 5]
-        ensure 'y i w', cursorBuffer: [0, 4]
-
-    describe "with a left motion", ->
-      beforeEach ->
-        keystroke 'y h'
-
-      it "saves the left letter to the default register", ->
-        ensure register: '"': text: ' '
-
-      it "moves the cursor position to the left", ->
-        ensure cursor: [0, 3]
-
-    describe "with a down motion", ->
-      beforeEach ->
-        keystroke 'y j'
-
-      it "saves both full lines to the default register", ->
-        ensure register: '"': text: "012 345\nabc\n"
-
-      it "leaves the cursor at the starting position", ->
-        ensure cursor: [0, 4]
+      it "[with linewise motion] yank and desn't move cursor", ->
+        ensure 'y j',
+          cursor: [0, 4]
+          register: {'"': text: "012 345\nabc\n", type: 'linewise'}
 
     describe "when followed by a G", ->
       beforeEach ->
-        originalText = "12345\nabcde\nABCDE"
+        originalText = """
+        12345
+        abcde
+        ABCDE\n
+        """
         set text: originalText
 
-      describe "on the beginning of the second line", ->
-        it "deletes the bottom two lines", ->
-          set cursor: [1, 0]
-          ensure 'y G P', text: '12345\nabcde\nABCDE\nabcde\nABCDE'
+      it "yank and doesn't move cursor", ->
+        set cursor: [1, 0]
+        ensure 'y G',
+          register: {'"': text: "abcde\nABCDE\n", type: 'linewise'}
+          cursor: [1, 0]
 
-      describe "on the middle of the second line", ->
-        it "deletes the bottom two lines", ->
-          set cursor: [1, 2]
-          ensure 'y G P', text: '12345\nabcde\nABCDE\nabcde\nABCDE'
+      it "yank and doesn't move cursor", ->
+        set cursor: [1, 2]
+        ensure 'y G',
+          register: {'"': text: "abcde\nABCDE\n", type: 'linewise'}
+          cursor: [1, 2]
 
     describe "when followed by a goto line G", ->
       beforeEach ->
