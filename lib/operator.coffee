@@ -49,9 +49,11 @@ class Operator extends Base
     @stayAtSamePosition ?= do =>
       param = @getStayParam()
       if @isMode('visual', 'linewise')
-        settings.get(param)
+        @editor.getLastSelection().isReversed() or settings.get(param)
       else
-        settings.get(param) or (@stayOnLinewiseMotion and @target.isMotion() and @target.isLinewise())
+        settings.get(param) or (
+          @stayOnLinewiseMotion and @target.isMotion() and @target.isLinewise()
+        )
 
   getStayParam: ->
     switch

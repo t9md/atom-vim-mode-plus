@@ -455,7 +455,6 @@ describe "Operator general", ->
             ensure '3 j .', cursor: [1, 0], text: textData.getLines([B1, B2, P3..., B3], chomp: true)
             ensure '3 j .', cursor: [1, 0], text: textData.getLines([B1, B2, B3], chomp: true)
 
-
   describe "the D keybinding", ->
     beforeEach ->
       set
@@ -483,11 +482,40 @@ describe "Operator general", ->
         abc\n
         """
 
+    describe "when useClipboardAsDefaultRegister enabled", ->
+      beforeEach ->
+        settings.set('useClipboardAsDefaultRegister', true)
+        atom.clipboard.write('___________')
+        ensure register: '"': text: '___________'
+
+      describe "read/write to clipboard through register", ->
+        it "writes to clipboard with default register", ->
+          savedText = '012 345\n'
+          ensure 'y y', register: '"': text: savedText
+          expect(atom.clipboard.read()).toBe(savedText)
+
     describe "visual-mode.linewise", ->
-      it "saves to register(type=linewise), cursor move to start of target", ->
-        ensure "V j y",
-          cursor: [0, 0]
-          register: '"': text: "012 345\nabc\n", type: 'linewise'
+      beforeEach ->
+        set
+          cursor: [0, 4]
+          text: """
+          0000
+          1111
+          2222\n
+          """
+
+      describe "selection not reversed", ->
+        it "saves to register(type=linewise), cursor move to start of target", ->
+          ensure "V j y",
+            cursor: [0, 0]
+            register: '"': text: "0000\n1111\n", type: 'linewise'
+
+      describe "selection is reversed", ->
+        it "saves to register(type=linewise), cursor doesn't move", ->
+          set cursor: [2, 2]
+          ensure "V k y",
+            cursor: [1, 2]
+            register: '"': text: "1111\n2222\n", type: 'linewise'
 
     describe "y y", ->
       it "saves to register(type=linewise), cursor stay at same position", ->
@@ -502,18 +530,6 @@ describe "Operator general", ->
         ensure '2 y y',
           cursor: [0, 4]
           register: '"': text: "012 345\nabc\n"
-
-    describe "when useClipboardAsDefaultRegister enabled", ->
-      beforeEach ->
-        settings.set('useClipboardAsDefaultRegister', true)
-        atom.clipboard.write('___________')
-        ensure register: '"': text: '___________'
-
-      describe "read/write to clipboard through register", ->
-        it "writes to clipboard with default register", ->
-          savedText = '012 345\n'
-          ensure 'y y', register: '"': text: savedText
-          expect(atom.clipboard.read()).toBe(savedText)
 
     describe "with a register", ->
       it "saves the line to the a register", ->
