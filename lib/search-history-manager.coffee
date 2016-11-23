@@ -17,24 +17,22 @@ class SearchHistoryManager
 
   save: (entry) ->
     return if _.isEmpty(entry)
-    @replaceEntries _.uniq([entry].concat @getEntries())
+    entries = _.uniq([entry].concat(@getEntries()))
     if @getSize() > settings.get('historySize')
-      @getEntries().splice settings.get('historySize')
+      entries.splice(settings.get('historySize'))
+    @globalState.set('searchHistory', entries)
 
   reset: ->
     @idx = -1
 
   clear: ->
-    @replaceEntries []
+    @globalState.reset('searchHistory')
 
   getSize: ->
     @getEntries().length
 
   getEntries: ->
     @globalState.get('searchHistory')
-
-  replaceEntries: (entries) ->
-    @globalState.set('searchHistory', entries)
 
   destroy: ->
     @idx = null

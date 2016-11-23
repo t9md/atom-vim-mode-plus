@@ -30,7 +30,7 @@ describe "Motion Search", ->
 
       # clear search history
       vimState.searchHistory.clear()
-      vimState.globalState.set('currentSearch', null)
+      vimState.globalState.reset('currentSearch')
 
     describe "as a motion", ->
       it "moves the cursor to the specified search pattern", ->
