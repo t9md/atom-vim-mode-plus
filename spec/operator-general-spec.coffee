@@ -532,6 +532,16 @@ describe "Operator general", ->
       it "does not yank when motion failed", ->
         ensure ['y t', input: 'x'], register: {'"': text: undefined}
 
+      it "yank and move cursor to start of target", ->
+        ensure 'y h',
+          cursor: [0, 3]
+          register: '"': text: ' '
+
+      it "[with linewise motion] yank and desn't move cursor", ->
+        ensure 'y j',
+          cursor: [0, 4]
+          register: {'"': text: "012 345\nabc\n", type: 'linewise'}
+
     describe "with a text-obj", ->
       beforeEach ->
         set
@@ -553,16 +563,6 @@ describe "Operator general", ->
         ensure 'y i p',
           cursor: [1, 0]
           register: '"': text: "1st paragraph\n1st paragraph\n"
-
-      it "yank and move cursor to start of target", ->
-        ensure 'y h',
-          cursor: [0, 3]
-          register: '"': text: ' '
-
-      it "[with linewise motion] yank and desn't move cursor", ->
-        ensure 'y j',
-          cursor: [0, 4]
-          register: {'"': text: "012 345\nabc\n", type: 'linewise'}
 
     describe "when followed by a G", ->
       beforeEach ->
