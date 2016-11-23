@@ -73,7 +73,9 @@ class VimState
       @highlightSearch.refresh()
     @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
 
+    # [FIXME] #406 find better way to fix, this is very imperative, result of just worked through try&error.
     @subscriptions.add @editor.observeSelections (selection) =>
+      return if selection.isEmpty()
       return if @operationStack.isProcessing()
       unless swrap(selection).hasProperties()
         swrap(selection).saveProperties()
