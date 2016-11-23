@@ -532,11 +532,27 @@ describe "Operator general", ->
       it "does not yank when motion failed", ->
         ensure ['y t', input: 'x'], register: {'"': text: undefined}
 
-      it "yank text-object and move cursor to start of target", ->
-        set cursor: [0, 5]
+    describe "with a text-obj", ->
+      beforeEach ->
+        set
+          cursor: [2, 8]
+          text: """
+
+          1st paragraph
+          1st paragraph
+
+          2n paragraph
+          2n paragraph\n
+          """
+      it "inner-word and move cursor to start of target", ->
         ensure 'y i w',
-          register: '"': text: "345"
-          cursor: [0, 4]
+          register: '"': text: "paragraph"
+          cursor: [2, 4]
+
+      it "yank text-object inner-paragraph and move cursor to start of target", ->
+        ensure 'y i p',
+          cursor: [1, 0]
+          register: '"': text: "1st paragraph\n1st paragraph\n"
 
       it "yank and move cursor to start of target", ->
         ensure 'y h',

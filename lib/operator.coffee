@@ -31,7 +31,7 @@ class Operator extends Base
   occurrence: false
 
   patternForOccurrence: null
-  stayOnLinewise: false
+  stayOnLinewiseMotion: false
   stayAtSamePosition: null
   clipToMutationEndOnStay: true
   useMarkerForStay: false
@@ -51,7 +51,7 @@ class Operator extends Base
       if @isMode('visual', 'linewise')
         settings.get(param)
       else
-        settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
+        settings.get(param) or (@stayOnLinewiseMotion and @target.isMotion() and @target.isLinewise())
 
   getStayParam: ->
     switch
@@ -420,7 +420,7 @@ class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
-  stayOnLinewise: true
+  stayOnLinewiseMotion: true
   clipToMutationEndOnStay: false
 
   mutateSelection: (selection) ->
@@ -434,7 +434,7 @@ class YankLine extends Yank
     super
     @target = 'MoveToRelativeLine' if @isMode('normal')
     if @isMode('visual', 'characterwise')
-      @stayOnLinewise = false
+      @stayOnLinewiseMotion = false
 
 class YankToLastCharacterOfLine extends Yank
   @extend()
