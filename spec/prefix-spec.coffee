@@ -39,6 +39,9 @@ describe "Prefixes", ->
         ensure 'v 2 w', cursor: [0, 9]
 
   describe "Register", ->
+    beforeEach ->
+      vimState.globalState.reset('register')
+
     describe "the a register", ->
       it "saves a value for future reading", ->
         set    register: a: text: 'new content'
@@ -51,9 +54,6 @@ describe "Prefixes", ->
 
     describe "with yank command", ->
       beforeEach ->
-        set register: a: text: ''
-        set register: b: text: ''
-        set register: b: text: ''
         set
           cursor: [0, 0]
           text: """
