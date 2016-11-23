@@ -86,9 +86,6 @@ class VimState
     else
       @activate('normal')
 
-  isNewInput: ->
-    @input instanceof Input
-
   # BlockwiseSelections
   # -------------------------
   getBlockwiseSelections: ->
