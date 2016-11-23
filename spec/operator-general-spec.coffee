@@ -475,7 +475,12 @@ describe "Operator general", ->
 
   describe "the y keybinding", ->
     beforeEach ->
-      set text: "012 345\nabc\n", cursor: [0, 4]
+      set
+        cursor: [0, 4]
+        text: """
+        012 345
+        abc\n
+        """
 
     describe "when selected lines in visual linewise mode", ->
       beforeEach ->
