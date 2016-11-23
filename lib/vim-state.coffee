@@ -67,7 +67,7 @@ class VimState
     @cursorStyleManager = new CursorStyleManager(this)
     @blockwiseSelections = []
     @previousSelection = {}
-    @observeMouse()
+    @observeSelections()
 
     refreshHighlightSearch = =>
       @highlightSearch.refresh()
@@ -250,7 +250,7 @@ class VimState
     for selection in @editor.getSelections()
       swrap(selection).saveProperties()
 
-  observeMouse: ->
+  observeSelections: ->
     checkSelection = @checkSelection.bind(this)
     @editorElement.addEventListener('mouseup', checkSelection)
     @subscriptions.add new Disposable =>
