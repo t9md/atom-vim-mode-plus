@@ -11,6 +11,7 @@ describe "Operator general", ->
       {set, ensure, keystroke} = vim
 
   afterEach ->
+    vimState.globalState.reset('register')
     vimState.resetNormalMode()
 
   describe "cancelling operations", ->
@@ -482,34 +483,28 @@ describe "Operator general", ->
         abc\n
         """
 
-    describe "when selected lines in visual linewise mode", ->
-      beforeEach ->
-        keystroke 'V j y'
+    describe "visual-mode.linewise", ->
+      it "saves to register(type=linewise), cursor move to start of target", ->
+        ensure "V j y",
+          cursor: [0, 0]
+          register: '"': text: "012 345\nabc\n", type: 'linewise'
 
-      it "is in linewise motion", ->
-        ensure register: '"': type: 'linewise'
-
-      it "saves the lines to the default register", ->
-        ensure register: '"': text: "012 345\nabc\n"
-
-      it "places the cursor at the beginning of the selection", ->
-        ensure cursorBuffer: [0, 0]
-
-    describe "when followed by a second y ", ->
-      beforeEach ->
-        keystroke 'y y'
-
-      it "saves the line to the default register", ->
-        ensure register: '"': text: "012 345\n"
-
-      it "leaves the cursor at the starting position", ->
-        ensure cursor: [0, 4]
+    describe "y y", ->
+      it "saves to register(type=linewise), cursor stay at same position", ->
+        ensure 'y y',
+          cursor: [0, 4]
+          register: '"': text: "012 345\n", type: 'linewise'
 
     describe "when useClipboardAsDefaultRegister enabled", ->
-      it "writes to clipboard", ->
-        settings.set 'useClipboardAsDefaultRegister', true
-        keystroke 'y y'
-        expect(atom.clipboard.read()).toBe '012 345\n'
+      beforeEach ->
+        settings.set('useClipboardAsDefaultRegister', true)
+        atom.clipboard.write('___________')
+
+      describe "read/write to clipboard through register", ->
+        it "writes to clipboard with default register", ->
+          savedText = '012 345\n'
+          ensure 'y y', register: '"': text: savedText
+          expect(atom.clipboard.read()).toBe(savedText)
 
     describe "when followed with a repeated y", ->
       beforeEach ->
