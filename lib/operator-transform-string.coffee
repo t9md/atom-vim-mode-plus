@@ -346,7 +346,7 @@ class Indent extends TransformString
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
   useMarkerForStay: true
-  clipToMutationEndOnStay: false
+  wise: 'linewise'
 
   execute: ->
     unless @needStay()

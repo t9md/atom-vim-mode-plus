@@ -32,7 +32,6 @@ class Operator extends Base
 
   patternForOccurrence: null
   stayOptionName: null
-  clipToMutationEndOnStay: true
   useMarkerForStay: false
   restorePositions: true
   flashTarget: true
@@ -212,7 +211,6 @@ class Operator extends Base
     options =
       stay: @needStay()
       strict: @isOccurrence() or @destroyUnknownSelection
-      clipToMutationEnd: @clipToMutationEndOnStay
       isBlockwise: @target?.isBlockwise?()
 
     @mutationManager.restoreCursorPositions(options)
@@ -400,7 +398,6 @@ class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
-  clipToMutationEndOnStay: true
   stayOptionName: 'stayOnYank'
 
   mutateSelection: (selection) ->
