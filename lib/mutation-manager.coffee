@@ -72,7 +72,7 @@ class MutationManager
       selection.cursor.setBufferPosition(point)
 
   restoreCursorPositions: (options) ->
-    {stay, strict, clipToMutationEnd, isBlockwise, mutationEnd} = options
+    {stay, strict, clipToMutationEnd, isBlockwise} = options
     if isBlockwise
       # [FIXME] why I need this direct manupilation?
       # Because there's bug that blockwise selecction is not addes to each
@@ -97,7 +97,7 @@ class MutationManager
           selection.destroy()
           continue
 
-        if point = mutation.getRestorePoint({stay, clipToMutationEnd, mutationEnd})
+        if point = mutation.getRestorePoint({stay, clipToMutationEnd})
           selection.cursor.setBufferPosition(point)
 
 # mutation information is created even if selection.isEmpty()
@@ -129,7 +129,7 @@ class Mutation
       range.end.translate([0, -1])
 
   getRestorePoint: (options={}) ->
-    {stay, clipToMutationEnd, mutationEnd} = options
+    {stay, clipToMutationEnd} = options
     if stay
       if @initialPoint instanceof Point
         point = @initialPoint
@@ -141,9 +141,4 @@ class Mutation
       else
         point
     else
-      if mutationEnd
-        @getMutationEnd()
-      else if @checkPoint['did-move']?
-        @checkPoint['did-move'].start
-      else
-        @checkPoint['did-select']?.start
+      @checkPoint['did-move']?.start ? @checkPoint['did-select']?.start

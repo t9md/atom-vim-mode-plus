@@ -31,22 +31,17 @@ class Operator extends Base
   occurrence: false
 
   patternForOccurrence: null
-  stayAtSamePosition: null
   stayOptionName: null
   clipToMutationEndOnStay: true
   useMarkerForStay: false
   restorePositions: true
-  restorePositionsToMutationEnd: false
   flashTarget: true
   trackChange: false
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
 
   needStay: ->
-    if @stayAtSamePosition?
-      @stayAtSamePosition
-    else
-      @stayOptionName? and settings.get(@stayOptionName)
+    @stayOptionName? and settings.get(@stayOptionName)
 
   isOccurrence: ->
     @occurrence
@@ -219,7 +214,6 @@ class Operator extends Base
       strict: @isOccurrence() or @destroyUnknownSelection
       clipToMutationEnd: @clipToMutationEndOnStay
       isBlockwise: @target?.isBlockwise?()
-      mutationEnd: @restorePositionsToMutationEnd
 
     @mutationManager.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
@@ -290,7 +284,7 @@ class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
 class CreatePersistentSelection extends Operator
   @extend()
   flashTarget: false
-  stayAtSamePosition: true
+  stayOptionName: 'stayOnCreatePersistentSelection'
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
 
@@ -324,7 +318,6 @@ class TogglePresetOccurrence extends Operator
   @extend()
   flashTarget: false
   requireTarget: false
-  stayAtSamePosition: true
   acceptPresetOccurrence: false
 
   execute: ->
@@ -407,7 +400,7 @@ class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
-  clipToMutationEndOnStay: false
+  clipToMutationEndOnStay: true
   stayOptionName: 'stayOnYank'
 
   mutateSelection: (selection) ->

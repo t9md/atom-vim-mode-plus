@@ -92,6 +92,9 @@ module.exports = new Settings 'vim-mode-plus',
   stayOnDelete:
     default: false
     description: "Don't move cursor after yank"
+  stayOnCreatePersistentSelection:
+    default: true
+    description: "Don't move cursor after create-persistent-selection"
   flashOnUndoRedo: true
   flashOnOperate: true
   flashOnOperateBlacklist:
