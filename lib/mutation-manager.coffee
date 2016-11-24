@@ -1,4 +1,4 @@
-{Point, Emitter, CompositeDisposable} = require 'atom'
+{Point, CompositeDisposable} = require 'atom'
 swrap = require './selection-wrapper'
 
 # keep mutation snapshot necessary for Operator processing.
@@ -19,7 +19,6 @@ class MutationManager
 
     @disposables = new CompositeDisposable
     @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
-    @emitter = new Emitter
 
     @markerLayer = @editor.addMarkerLayer()
     @mutationsBySelection = new Map
