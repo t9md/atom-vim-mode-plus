@@ -188,8 +188,9 @@ class Base
   focusInput: (charsMax) ->
     @onDidConfirmInput (input) =>
       # [FIXME REALLY] when both operator and motion take user-input,
-      # Currently input UI is unappropreately shared by operator and motion.
+      # Currently input UI is inappropreately shared by operator and motion.
       # So without this guard, @input is overwritten by later input.
+      # console.log "#{@getName()} got input", input
       unless @input?
         @input = input
         @processOperation()

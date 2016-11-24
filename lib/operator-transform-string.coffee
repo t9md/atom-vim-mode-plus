@@ -401,15 +401,15 @@ class Surround extends TransformString
     return unless @requireInput
     if @requireTarget
       @onDidSetTarget =>
-        @onDidConfirmInput (input) => @onConfirm(input)
-        @onDidChangeInput (input) => @addHover(input)
-        @onDidCancelInput => @cancelOperation()
-        @vimState.input.focus(@charsMax)
+        @focusInput(@charsMax)
     else
-      @onDidConfirmInput (input) => @onConfirm(input)
-      @onDidChangeInput (input) => @addHover(input)
-      @onDidCancelInput => @cancelOperation()
-      @vimState.input.focus(@charsMax)
+      @focusInput(@charsMax)
+
+  focusInput: (charsMax) ->
+    @onDidConfirmInput (input) => @onConfirm(input)
+    @onDidChangeInput (input) => @addHover(input)
+    @onDidCancelInput => @cancelOperation()
+    @vimState.input.focus(charsMax)
 
   onConfirm: (@input) ->
     @processOperation()
