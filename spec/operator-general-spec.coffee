@@ -499,23 +499,23 @@ describe "Operator general", ->
         set
           cursor: [0, 4]
           text: """
-          0000
-          1111
-          2222\n
-          """
+            000000
+            111111
+            222222\n
+            """
 
       describe "selection not reversed", ->
         it "saves to register(type=linewise), cursor move to start of target", ->
           ensure "V j y",
             cursor: [0, 0]
-            register: '"': text: "0000\n1111\n", type: 'linewise'
+            register: '"': text: "000000\n111111\n", type: 'linewise'
 
       describe "selection is reversed", ->
         it "saves to register(type=linewise), cursor doesn't move", ->
           set cursor: [2, 2]
           ensure "V k y",
             cursor: [1, 2]
-            register: '"': text: "1111\n2222\n", type: 'linewise'
+            register: '"': text: "111111\n222222\n", type: 'linewise'
 
     describe "y y", ->
       it "saves to register(type=linewise), cursor stay at same position", ->
@@ -679,14 +679,13 @@ describe "Operator general", ->
           text: "no newline!\nno newline!\nno newline!"
 
   describe "the Y keybinding", ->
-    text = """
-    012 345
-    abc\n
-    """
+    text = null
     beforeEach ->
-      set
-        text: text
-        cursor: [0, 4]
+      text = """
+      012 345
+      abc\n
+      """
+      set text: text, cursor: [0, 4]
 
     it "saves the line to the default register", ->
       ensure 'Y', cursor: [0, 4], register: '"': text: "012 345\n"

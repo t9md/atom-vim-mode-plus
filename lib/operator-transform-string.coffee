@@ -17,7 +17,7 @@ transformerRegistry = []
 class TransformString extends Operator
   @extend(false)
   trackChange: true
-  stayOnLinewiseMotion: true
+  stayOptionName: 'stayOnTransformString'
   autoIndent: false
 
   @registerToSelectList: ->
@@ -345,7 +345,6 @@ class SwapWithRegister extends TransformString
 class Indent extends TransformString
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
-  stayOnLinewiseMotion: false
   useMarkerForStay: true
   clipToMutationEndOnStay: false
 

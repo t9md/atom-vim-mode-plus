@@ -107,6 +107,13 @@ class Motion extends Base
 
     @updateSelectionProperties() if @isMode('visual')
 
+    if @hasOperator()
+      if @isMode('visual')
+        if @isMode('visual', 'linewise') and @editor.getLastSelection().isReversed()
+          @vimState.mutationManager.setCheckPoint('did-move')
+      else
+        @vimState.mutationManager.setCheckPoint('did-move')
+
     # Modify selection to submode-wisely
     switch @wise
       when 'linewise' then @vimState.selectLinewise()
@@ -698,8 +705,8 @@ class MoveToRelativeLine extends Motion
   getCount: ->
     super - 1
 
-  getPoint: ({row}) ->
-    [row + @getCount(), 0]
+  getPoint: ({row, column}) ->
+    [row + @getCount(), column]
 
 class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
   @extend(false)

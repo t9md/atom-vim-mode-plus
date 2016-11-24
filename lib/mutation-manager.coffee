@@ -143,5 +143,7 @@ class Mutation
     else
       if mutationEnd
         @getMutationEnd()
+      else if @checkPoint['did-move']?
+        @checkPoint['did-move'].start
       else
         @checkPoint['did-select']?.start

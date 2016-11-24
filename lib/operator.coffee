@@ -31,8 +31,8 @@ class Operator extends Base
   occurrence: false
 
   patternForOccurrence: null
-  stayOnLinewiseMotion: false
   stayAtSamePosition: null
+  stayOptionName: null
   clipToMutationEndOnStay: true
   useMarkerForStay: false
   restorePositions: true
@@ -42,29 +42,11 @@ class Operator extends Base
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
 
-  # [FIXME]
-  # For TextObject, isLinewise result is changed before / after select.
-  # This mean return value may change depending on when you call.
   needStay: ->
-    @stayAtSamePosition ?= do =>
-      param = @getStayParam()
-      if @isMode('visual', 'linewise')
-        @editor.getLastSelection().isReversed() or settings.get(param)
-      else
-        settings.get(param) or (
-          @stayOnLinewiseMotion and @target.isMotion() and @target.isLinewise()
-        )
-
-  getStayParam: ->
-    switch
-      when @instanceof('Increase')
-        'stayOnIncrease'
-      when @instanceof('TransformString')
-        'stayOnTransformString'
-      when @instanceof('Delete')
-        'stayOnDelete'
-      else
-        "stayOn#{@getName()}"
+    if @stayAtSamePosition?
+      @stayAtSamePosition
+    else
+      @stayOptionName? and settings.get(@stayOptionName)
 
   isOccurrence: ->
     @occurrence
@@ -364,6 +346,7 @@ class Delete extends Operator
   hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
   flashTarget: false
+  stayOptionName: 'stayOnDelete'
 
   execute: ->
     @onDidSelectTarget =>
@@ -422,8 +405,8 @@ class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
-  stayOnLinewiseMotion: true
   clipToMutationEndOnStay: false
+  stayOptionName: 'stayOnYank'
 
   mutateSelection: (selection) ->
     @setTextToRegisterForSelection(selection)
@@ -435,8 +418,6 @@ class YankLine extends Yank
   initialize: ->
     super
     @target = 'MoveToRelativeLine' if @isMode('normal')
-    if @isMode('visual', 'characterwise')
-      @stayOnLinewiseMotion = false
 
 class YankToLastCharacterOfLine extends Yank
   @extend()
@@ -449,6 +430,7 @@ class YankToLastCharacterOfLine extends Yank
 class Increase extends Operator
   @extend()
   requireTarget: false
+  stayOptionName: 'stayOnIncrease'
   step: 1
 
   execute: ->
