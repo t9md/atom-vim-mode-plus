@@ -160,9 +160,7 @@ describe "Prefixes", ->
         ensure ['ctrl-r', input: 'a'], text: '01abc2\n'
 
       it "is cancelled with the escape key", ->
-        keystroke 'ctrl-r'
-        atom.commands.dispatch(vimState.input.editorElement, 'core:cancel')
-        ensure
+        ensure 'ctrl-r escape',
           text: '012\n'
           mode: 'insert'
           cursor: [0, 2]

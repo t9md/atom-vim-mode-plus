@@ -254,6 +254,7 @@
 
 'atom-text-editor.vim-mode-plus-input-char-waiting':
   'enter': 'core:confirm'
+  'escape': 'core:cancel'
 
   'space': 'vim-mode-plus:set-input-char-space'
   '!': 'vim-mode-plus:set-input-char-!'

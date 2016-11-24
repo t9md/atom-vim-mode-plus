@@ -944,16 +944,12 @@ describe "Operator general", ->
       ensure ['r', input: 'x'], text: 'x2\nx4\n\n'
 
     it "does nothing when cancelled", ->
-      keystroke 'r'
-      vimState.input.cancel()
-      ensure
+      ensure 'r escape',
         text: '12\n34\n\n'
         mode: 'normal'
 
     it "remain visual-mode when cancelled", ->
-      keystroke 'v r'
-      vimState.input.cancel()
-      ensure
+      ensure 'v r escape',
         text: '12\n34\n\n'
         mode: ['visual', 'characterwise']
 

@@ -7,7 +7,6 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 {HoverElement} = require './hover'
-Input = require './input'
 SearchInputElement = require './search-input'
 {
   highlightRanges
@@ -59,7 +58,6 @@ class VimState
     @mutationManager = new MutationManager(this)
     @flashManager = new FlashManager(this)
 
-    @input = new Input(this)
     @searchInput = new SearchInputElement().initialize(this)
 
     @operationStack = new OperationStack(this)
@@ -126,10 +124,6 @@ class VimState
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
-  onDidChangeInput: (fn) -> @subscribe @input.onDidChange(fn)
-  onDidConfirmInput: (fn) -> @subscribe @input.onDidConfirm(fn)
-  onDidCancelInput: (fn) -> @subscribe @input.onDidCancel(fn)
-
   onDidChangeSearch: (fn) -> @subscribe @searchInput.onDidChange(fn)
   onDidConfirmSearch: (fn) -> @subscribe @searchInput.onDidConfirm(fn)
   onDidCancelSearch: (fn) -> @subscribe @searchInput.onDidCancel(fn)
@@ -198,15 +192,13 @@ class VimState
     @hoverSearchCounter?.destroy?()
     @searchHistory?.destroy?()
     @cursorStyleManager?.destroy?()
-    @input?.destroy?()
     @search?.destroy?()
     @register?.destroy?
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
-      @input, @search, @modeManager, @register
+      @search, @modeManager, @register
       @editor, @editorElement, @subscriptions,
-      @inputCharSubscriptions
       @occurrenceManager
       @previousSelection
       @persistentSelection

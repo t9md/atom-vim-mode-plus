@@ -162,13 +162,16 @@ describe "VimState", ->
         set text: '012345\nabcdef'
 
       it 'properly clears the operations', ->
-        ensure 'd r',
-          mode: 'normal'
+
+        ensure 'd', mode: 'operator-pending'
+        expect(vimState.operationStack.isEmpty()).toBe(false)
+        ensure 'r', mode: 'normal'
         expect(vimState.operationStack.isEmpty()).toBe(true)
-        target = vimState.input.editorElement
-        keystroke 'd'
-        atom.commands.dispatch(target, 'core:cancel')
-        ensure text: '012345\nabcdef'
+
+        ensure 'd', mode: 'operator-pending'
+        expect(vimState.operationStack.isEmpty()).toBe(false)
+        ensure 'escape', mode: 'normal', text: '012345\nabcdef'
+        expect(vimState.operationStack.isEmpty()).toBe(true)
 
   describe "activate-normal-mode-once command", ->
     beforeEach ->
