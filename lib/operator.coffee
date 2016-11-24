@@ -55,7 +55,9 @@ class Operator extends Base
     @vimState.mark.setRange('[', ']', range)
 
   needFlash: ->
-    if @flashTarget and not @isMode('visual')
+    return unless @flashTarget
+    {mode, submode} = @vimState
+    if mode isnt 'visual' or (@target.isMotion() and submode isnt @target.wise)
       settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
 
   flashIfNecessary: (ranges) ->
