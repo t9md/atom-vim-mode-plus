@@ -9,16 +9,14 @@ Delegato = require 'delegato'
 } = require './utils'
 swrap = require './selection-wrapper'
 
+Input = require './input'
+
 settings = require './settings'
 selectList = null
 getEditorState = null # set by Base.init()
 {OperationAbortedError} = require './errors'
 
 vimStateMethods = [
-  "onDidChangeInput"
-  "onDidConfirmInput"
-  "onDidCancelInput"
-
   "onDidChangeSearch"
   "onDidConfirmSearch"
   "onDidCancelSearch"
@@ -161,6 +159,9 @@ class Base
     klass = Base.getClass(name)
     new klass(@vimState, properties)
 
+  newInputUI: ->
+    new Input(@vimState)
+
   clone: (vimState) ->
     properties = {}
     excludeProperties = ['editor', 'editorElement', 'globalState', 'vimState']
@@ -186,10 +187,8 @@ class Base
   getInput: -> @input
 
   focusInput: (charsMax) ->
-    @onDidConfirmInput (input) =>
-      # [FIXME REALLY] when both operator and motion take user-input,
-      # Currently input UI is unappropreately shared by operator and motion.
-      # So without this guard, @input is overwritten by later input.
+    inputUI = @newInputUI()
+    inputUI.onDidConfirm (input) =>
       unless @input?
         @input = input
         @processOperation()
@@ -198,14 +197,14 @@ class Base
     # to sync content with input mini editor.
     unless charsMax is 1
       replace = false
-      @onDidChangeInput (input) =>
+      inputUI.onDidChange (input) =>
         @addHover(input, {replace})
         replace = true
 
-    @onDidCancelInput =>
+    inputUI.onDidCancel =>
       @cancelOperation()
 
-    @vimState.input.focus(charsMax)
+    inputUI.focus(charsMax)
 
   getVimEofBufferPosition: ->
     getVimEofBufferPosition(@editor)

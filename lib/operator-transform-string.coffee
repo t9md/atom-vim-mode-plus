@@ -401,15 +401,16 @@ class Surround extends TransformString
     return unless @requireInput
     if @requireTarget
       @onDidSetTarget =>
-        @onDidConfirmInput (input) => @onConfirm(input)
-        @onDidChangeInput (input) => @addHover(input)
-        @onDidCancelInput => @cancelOperation()
-        @vimState.input.focus(@charsMax)
+        @focusInput(@charsMax)
     else
-      @onDidConfirmInput (input) => @onConfirm(input)
-      @onDidChangeInput (input) => @addHover(input)
-      @onDidCancelInput => @cancelOperation()
-      @vimState.input.focus(@charsMax)
+      @focusInput(@charsMax)
+
+  focusInput: (charsMax) ->
+    @inputUI = @newInputUI()
+    @inputUI.onDidConfirm(@onConfirm.bind(this))
+    @inputUI.onDidChange(@addHover.bind(this))
+    @inputUI.onDidCancel(@cancelOperation.bind(this))
+    @inputUI.focus(charsMax)
 
   onConfirm: (@input) ->
     @processOperation()
@@ -503,23 +504,21 @@ class ChangeSurroundAnyPair extends ChangeSurround
   charsMax: 1
   target: "AAnyPair"
 
-  highlightTargetRange: (selection) ->
-    if range = @target.getRange(selection)
-      marker = @editor.markBufferRange(range)
-      @editor.decorateMarker(marker, type: 'highlight', class: 'vim-mode-plus-target-range')
-      marker
-    else
-      null
+  highlightRange: (range) ->
+    marker = @editor.markBufferRange(range)
+    @editor.decorateMarker(marker, type: 'highlight', class: 'vim-mode-plus-target-range')
+    marker
 
   initialize: ->
     marker = null
     @onDidSetTarget =>
-      if marker = @highlightTargetRange(@editor.getLastSelection())
+      if range = @target.getRange(@editor.getLastSelection())
+        marker = @highlightRange(range)
         textRange = Range.fromPointWithDelta(marker.getBufferRange().start, 0, 1)
         char = @editor.getTextInBufferRange(textRange)
         @addHover(char, {}, @editor.getCursorBufferPosition())
       else
-        @vimState.input.cancel()
+        @inputUI.cancel()
         @abort()
 
     @onDidResetOperationStack ->
