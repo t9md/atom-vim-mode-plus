@@ -1,3 +1,27 @@
+# 0.69.0:
+- New: Command `equalize-panes`(`ctrl-w =`) by @mattaschmann
+- New, Breaking: `g I` support, breaking because old `I` mapped command was renamed(harmless for most users).
+  - Renamed because of naming-bug.
+  - Renamed old `insert-at-beginning-of-line` to `insert-at-first-character-of-line`(mapped to `I`).
+  - Then now `insert-at-beginning-of-line` is mapped to `g I`.
+- New: vim-niceblock compatible behavior #488
+  - Now visual-mode's `I`, `A` works differently depending on `vC`, `vB`, `vL` modes.
+  - See `YouDontKnowVimModePlus` page on vmp's wiki for detail.
+- New: [experimental] `search-occurrence` motion. #519
+  - When you can see dotted-underlined-occurrence-marker, `tab`, `shift-tab` can be used as motion.
+  - You can use `space` to deselect occurrence-marker while moving next/prev of `occurrence-marker`.
+  - [keymap]
+    - `tab`: `vim-mode-plus:search-occurrence`
+    - `shift-tab`: `vim-mode-plus:search-occurrence-backwards`
+- Fix: When yank into named register for input-taking-motion(e.g `" a y f )`), it fail to save to register. #520
+- Improve: now `vimState.globalState` is resettable for all or specific field
+- Dev: `open-in-vim` now open buffer with at same cursor position.
+- Fix: Improve: `y i p` now move to start of paragraph after operator finished. #507
+- Fix: Improve: Further compatible resulting cursor position after operator finished. #529
+- Fix: Hover used to show count and register was not correctly positioned, really was bad degradation. #406
+- Improve: No longer share inputUI across operation, as a result `vimState.input` become unavailable. #525.
+- New: `C` in `vC` mode change whole-line #527
+
 # 0.68.0:
 - New: `project-find-from-search` command which have being provided as separate package #508.
   - `cmd-enter` is default keymap for macOS user.
