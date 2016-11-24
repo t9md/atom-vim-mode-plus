@@ -269,6 +269,10 @@ class Change extends ActivateInsertMode
     # That's why repeatRecorded() need transact.wrap
     super
 
+class ChangeLine extends Change
+  @extend()
+  wise: 'linewise'
+
 class ChangeOccurrence extends Change
   @extend()
   @description: "Change all matching word within target range"

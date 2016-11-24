@@ -566,6 +566,11 @@
   'I': 'vim-mode-plus:insert-at-start-of-target'
   'A': 'vim-mode-plus:insert-at-end-of-target'
 
+# visual-characterwise
+# -------------------------
+'atom-text-editor.vim-mode-plus.visual-mode.characterwise':
+  'C': 'vim-mode-plus:change-line'
+
 # visual-blockwise
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.blockwise':

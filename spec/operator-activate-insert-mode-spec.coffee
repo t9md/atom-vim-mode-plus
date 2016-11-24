@@ -214,14 +214,36 @@ describe "Operator ActivateInsertMode family", ->
 
   describe "the C keybinding", ->
     beforeEach ->
-      set text: "012\n", cursor: [0, 1]
-      keystroke 'C'
+      set
+        cursor: [1, 2]
+        text: """
+        0!!!!!!
+        1!!!!!!
+        2!!!!!!
+        3!!!!!!\n
+        """
+    describe "in normal-mode", ->
+      it "deletes till the EOL then enter insert-mode", ->
+        ensure 'C',
+          cursor: [1, 2]
+          mode: 'insert'
+          text: """
+            0!!!!!!
+            1!
+            2!!!!!!
+            3!!!!!!\n
+            """
 
-    it "deletes the contents until the end of the line and enters insert mode", ->
-      ensure
-        text: "0\n"
-        cursor: [0, 1]
-        mode: 'insert'
+    describe "in visual-mode.characterwise", ->
+      it "delete whole lines and enter insert-mode", ->
+        ensure 'v j C',
+          cursor: [1, 0]
+          mode: 'insert'
+          text: """
+            0!!!!!!
+
+            3!!!!!!\n
+            """
 
   describe "the O keybinding", ->
     beforeEach ->
