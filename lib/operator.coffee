@@ -32,7 +32,7 @@ class Operator extends Base
 
   patternForOccurrence: null
   stayOptionName: null
-  useMarkerForStay: false
+  stayByMarker: false
   restorePositions: true
   flashTarget: true
   trackChange: false
@@ -181,8 +181,9 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    options = {isSelect: @instanceof('Select'), useMarker: @useMarkerForStay}
-    @mutationManager.init(options)
+    isSelect = @instanceof('Select')
+    useMarker = @needStay() and @stayByMarker
+    @mutationManager.init({isSelect, useMarker})
     @mutationManager.setCheckPoint('will-select')
 
     @target.forceWise(@wise) if @wise and @target.isMotion()

@@ -345,7 +345,7 @@ class SwapWithRegister extends TransformString
 class Indent extends TransformString
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
-  useMarkerForStay: true
+  stayByMarker: true
   wise: 'linewise'
 
   execute: ->
@@ -372,7 +372,7 @@ class AutoIndent extends Indent
 class ToggleLineComments extends TransformString
   @extend()
   hover: icon: ':toggle-line-comments:', emoji: ':mute:'
-  useMarkerForStay: true
+  stayByMarker: true
   mutateSelection: (selection) ->
     selection.toggleLineComments()
 
