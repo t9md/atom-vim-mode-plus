@@ -373,8 +373,11 @@ class DeleteToLastCharacterOfLine extends Delete
 
 class DeleteLine extends Delete
   @extend()
-  @commandScope: 'atom-text-editor.vim-mode-plus.visual-mode'
   wise: 'linewise'
+
+  initialize: ->
+    super
+    @target = 'MoveToRelativeLine' if @isMode('normal')
 
 class DeleteOccurrenceInAFunctionOrInnerParagraph extends Delete
   @extend()
@@ -575,7 +578,6 @@ class PutAfterAndSelect extends PutBeforeAndSelect
   @description: "Paste after then select"
   location: 'after'
 
-# [FIXME] this is not operator
 class Mark extends Operator
   @extend()
   # hover: icon: ':mark:', emoji: ':round_pushpin:'

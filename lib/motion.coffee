@@ -48,9 +48,9 @@ class Motion extends Base
     super
 
     # visual mode can overwrite default wise and inclusiveness
-    if @isMode('visual')
+    if @vimState.mode is 'visual'
       @inclusive = true
-      @wise = @vimState.submode # ['characterwise', 'linewise', 'blockwise']
+      @wise = @vimState.submode
     @initialize()
 
   isInclusive: ->
