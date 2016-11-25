@@ -430,9 +430,9 @@
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
 
-# normal.occurrence-pending [Experimental] bulk-edit mode-like
+# has-occurrence (when occurrence-marker was exists)
 # -------------------------
-'atom-text-editor.vim-mode-plus.normal-mode.has-occurrence':
+'atom-text-editor.vim-mode-plus.has-occurrence':
   'I': 'vim-mode-plus:insert-at-start-of-target'
   'A': 'vim-mode-plus:insert-at-end-of-target'
 
