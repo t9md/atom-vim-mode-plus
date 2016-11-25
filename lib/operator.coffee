@@ -379,11 +379,6 @@ class DeleteLine extends Delete
     super
     @target = 'MoveToRelativeLine' if @isMode('normal')
 
-class DeleteOccurrenceInAFunctionOrInnerParagraph extends Delete
-  @extend()
-  occurrence: true
-  target: "AFunctionOrInnerParagraph"
-
 # Yank
 # =========================
 class Yank extends Operator
