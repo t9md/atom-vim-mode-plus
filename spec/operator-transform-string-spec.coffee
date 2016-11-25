@@ -166,7 +166,7 @@ describe "Operator TransformString", ->
       it "allows repeating the operation", ->
         ensure '.', text: "    12345\nabcde\nABCDE"
 
-    fdescribe "in visual mode and stayOnTransformString enabled", ->
+    describe "in visual mode and stayOnTransformString enabled", ->
       beforeEach ->
         settings.set('stayOnTransformString', true)
         set cursor: [0, 0]
