@@ -301,5 +301,6 @@ class ChangeToLastCharacterOfLine extends Change
   execute: ->
     # Ensure all selections to un-reversed
     if @isMode('visual', 'blockwise')
-      swrap.setReversedState(@editor, false)
+      for selection in @editor.getSelections()
+        swrap(selection).extendToEOL()
     super

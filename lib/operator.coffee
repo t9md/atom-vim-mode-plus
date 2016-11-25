@@ -86,7 +86,7 @@ class Operator extends Base
           @occurrenceManager.resetPatterns()
           @addOccurrencePattern()
 
-    @target ?= implicitTarget if implicitTarget = @getImplicitTarget()
+    @target = selectionTarget if selectionTarget = @getSelectionTarget()
 
     if _.isString(@target)
       @setTarget(@new(@target))
@@ -101,7 +101,7 @@ class Operator extends Base
       @subscribe @onDidDeactivateMode ({mode}) =>
         @occurrenceManager.resetPatterns() if mode is 'operator-pending'
 
-  getImplicitTarget: ->
+  getSelectionTarget: ->
     # In visual-mode and target was not pre-set, operate on selected area.
     if @canSelectPersistentSelection()
       @destroyUnknownSelection = true
@@ -366,7 +366,8 @@ class DeleteToLastCharacterOfLine extends Delete
   execute: ->
     # Ensure all selections to un-reversed
     if @isMode('visual', 'blockwise')
-      swrap.setReversedState(@editor, false)
+      for selection in @editor.getSelections()
+        swrap(selection).extendToEOL()
     super
 
 class DeleteLine extends Delete
