@@ -29,6 +29,7 @@ class Operator extends Base
   restorePositions: true
   flashTarget: true
   trackChange: false
+
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
 

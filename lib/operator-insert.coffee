@@ -269,22 +269,10 @@ class Change extends ActivateInsertMode
     # That's why repeatRecorded() need transact.wrap
     super
 
-class ChangeLine extends Change
-  @extend()
-  wise: 'linewise'
-
 class ChangeOccurrence extends Change
   @extend()
   @description: "Change all matching word within target range"
   occurrence: true
-
-class ChangeOccurrenceInAFunctionOrInnerParagraph extends ChangeOccurrence
-  @extend()
-  target: 'AFunctionOrInnerParagraph'
-
-class ChangeOccurrenceInAPersistentSelection extends ChangeOccurrence
-  @extend()
-  target: "APersistentSelection"
 
 class Substitute extends Change
   @extend()
@@ -292,6 +280,7 @@ class Substitute extends Change
 
 class SubstituteLine extends Change
   @extend()
+  wise: 'linewise' # [FIXME] to re-override target.wise in visual-mode
   target: 'MoveToRelativeLine'
 
 class ChangeToLastCharacterOfLine extends Change
