@@ -283,6 +283,10 @@ class SubstituteLine extends Change
   wise: 'linewise' # [FIXME] to re-override target.wise in visual-mode
   target: 'MoveToRelativeLine'
 
+# alias
+class ChangeLine extends SubstituteLine
+  @extend()
+
 class ChangeToLastCharacterOfLine extends Change
   @extend()
   target: 'MoveToLastCharacterOfLine'

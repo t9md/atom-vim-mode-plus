@@ -569,7 +569,7 @@
 # visual-characterwise
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.characterwise':
-  'C': 'vim-mode-plus:substitute-line'
+  'C': 'vim-mode-plus:change-line'
 
 # visual-blockwise
 # -------------------------
