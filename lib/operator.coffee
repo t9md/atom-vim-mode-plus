@@ -5,18 +5,11 @@ _ = require 'underscore-plus'
 {inspect} = require 'util'
 {
   haveSomeNonEmptySelection
-  highlightRanges
   isEndsWithNewLineForBufferRow
   getValidVimBufferRow
   cursorIsAtEmptyRow
-  getVisibleBufferRange
   getWordPatternAtBufferPosition
   destroyNonLastSelection
-
-  selectedRange
-  selectedText
-  toString
-  debug
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -43,6 +36,9 @@ class Operator extends Base
     @stayOptionName? and settings.get(@stayOptionName)
 
   isOccurrence: ->
+    @occurrence
+
+  setOccurrence: (@occurrence) ->
     @occurrence
 
   setMarkForChange: (range) ->
@@ -79,9 +75,16 @@ class Operator extends Base
 
     @initialize()
 
-    @onDidSetOperatorModifier ({occurrence, wise}) =>
-      @wise = wise if wise?
-      @setOccurrence('modifier') if occurrence?
+    @onDidSetOperatorModifier (options) =>
+      if options.wise?
+        @wise = options.wise
+
+      if options.occurrence?
+        @setOccurrence(options.occurrence)
+        if @isOccurrence()
+          # Reset existing preset-occurrence. e.g. `c o p`, `d o f`
+          @occurrenceManager.resetPatterns()
+          @addOccurrencePattern()
 
     @target ?= implicitTarget if implicitTarget = @getImplicitTarget()
 
@@ -89,10 +92,10 @@ class Operator extends Base
       @setTarget(@new(@target))
 
     # When preset-occurrence was exists, auto enable occurrence-wise
-    if @occurrence
-      @setOccurrence('static')
-    else if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
-      @setOccurrence('preset')
+    if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
+      @setOccurrence(true)
+    if @isOccurrence()
+      @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
     if @acceptPersistentSelection
       @subscribe @onDidDeactivateMode ({mode}) =>
@@ -113,21 +116,6 @@ class Operator extends Base
     @acceptPersistentSelection and
     @vimState.hasPersistentSelections() and
     settings.get('autoSelectPersistentSelectionOnOperate')
-
-  # type is one of ['preset', 'modifier']
-  setOccurrence: (type) ->
-    @occurrence = true
-    switch type
-      when 'static'
-        unless @isComplete() # we enter operator-pending
-          debug 'static: mark as we enter operator-pending'
-          @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
-      when 'preset'
-        debug 'preset: nothing to do since we have markers already'
-      when 'modifier'
-        debug 'modifier: overwrite existing marker when manually typed `o`'
-        @occurrenceManager.resetPatterns() # clear existing marker
-        @addOccurrencePattern() # mark cursor word.
 
   addOccurrencePattern: (pattern=null) ->
     pattern ?= @patternForOccurrence
@@ -164,7 +152,9 @@ class Operator extends Base
     @activateMode('normal')
 
   selectOccurrence: ->
-    @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
+    # In `.` repeated case, initailize() is never called so need to set here.
+    if @isRepeated() and not @occurrenceManager.hasMarkers()
+      @addOccurrencePattern()
 
     # To repoeat(`.`) operation where multiple occurrence patterns was set.
     # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
@@ -181,21 +171,17 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    isSelect = @instanceof('Select')
-    useMarker = @needStay() and @stayByMarker
-    @mutationManager.init({isSelect, useMarker})
+    @mutationManager.init
+      isSelect: @instanceof('Select')
+      useMarker: @needStay() and @stayByMarker
     @mutationManager.setCheckPoint('will-select')
 
-    @target.forceWise(@wise) if @wise and @target.isMotion()
+    # Currently only motion have forceWise methods
+    @target.forceWise?(@wise) if @wise?
     @emitWillSelectTarget()
 
-    # To use CURRENT cursor position, this has to be BEFORE @target.select() which move cursors.
-    if @isOccurrence() and not @occurrenceManager.hasMarkers()
-      @addOccurrencePattern()
-
     @target.select()
-    if @isOccurrence()
-      @selectOccurrence()
+    @selectOccurrence() if @isOccurrence()
 
     if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
       @mutationManager.setCheckPoint('did-select')
