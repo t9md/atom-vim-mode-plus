@@ -75,6 +75,7 @@ class Replace extends TransformString
   @extend()
   input: null
   hover: icon: ':replace:', emoji: ':tractor:'
+  flashTarget: false
   requireInput: true
 
   initialize: ->
@@ -83,15 +84,13 @@ class Replace extends TransformString
       @target = 'MoveRightBufferColumn'
     @focusInput()
 
-  getInput: ->
-    super or "\n"
-
   mutateSelection: (selection) ->
     if @target.is('MoveRightBufferColumn')
       return unless selection.getText().length is @getCount()
 
-    input = @getInput()
-    @restorePositions = false if input is "\n"
+    input = @getInput() or "\n"
+    if input is "\n"
+      @restorePositions = false
     text = selection.getText().replace(/./g, input)
     selection.insertText(text, autoIndentNewline: true)
 
@@ -209,8 +208,9 @@ class ConvertToHardTab extends TransformString
     tabLength = @editor.getTabLength()
     scanRange = selection.getBufferRange()
     @editor.scanInBufferRange /[ \t]+/g, scanRange, ({range, replace}) =>
-      screenRange = @editor.screenRangeForBufferRange(range)
-      {start: {column: startColumn}, end: {column: endColumn}} = screenRange
+      {start, end} = @editor.screenRangeForBufferRange(range)
+      startColumn = start.column
+      endColumn = end.column
 
       # We can't naively replace spaces to tab, we have to consider valid tabStop column
       # If nextTabStop column exceeds replacable range, we pad with spaces.

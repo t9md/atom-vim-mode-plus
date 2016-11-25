@@ -209,7 +209,7 @@ class MoveRight extends Motion
         moveCursorRight(cursor, {allowWrap})
 
 class MoveRightBufferColumn extends Motion
-  @extend(true)
+  @extend(false)
   moveCursor: (cursor) ->
     newPoint = cursor.getBufferPosition().translate([0, @getCount()])
     cursor.setBufferPosition(newPoint)
