@@ -249,7 +249,6 @@ describe "TextObject", ->
         ensure 'd a q', text: """-- `def`  'efg'--"""
         ensure '.'  , text: """--   'efg'--"""
         ensure '.'  , text: """--   --"""
-        ensure '.'
       it "can select next quote", ->
         keystroke 'v'
         ensure 'a q', selectedText: '"abc"'
