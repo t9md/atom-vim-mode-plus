@@ -120,8 +120,11 @@ describe "Operator TransformString", ->
       describe "when followed by a >", ->
         it "indents the current line", ->
           ensure '> >',
-            text: "12345\nabcde\n  ABCDE"
-            cursor: [2, 2]
+            textC_: """
+            12345
+            abcde
+            __|ABCDE
+            """
 
     describe "on the first line", ->
       beforeEach ->
@@ -130,8 +133,11 @@ describe "Operator TransformString", ->
       describe "when followed by a >", ->
         it "indents the current line", ->
           ensure '> >',
-            text: "  12345\nabcde\nABCDE"
-            cursor: [0, 2]
+            textC_: """
+            __|12345
+            abcde
+            ABCDE
+            """
 
       describe "when followed by a repeating >", ->
         beforeEach ->
@@ -160,7 +166,7 @@ describe "Operator TransformString", ->
       it "allows repeating the operation", ->
         ensure '.', text: "    12345\nabcde\nABCDE"
 
-    describe "in visual mode and stayOnTransformString enabled", ->
+    fdescribe "in visual mode and stayOnTransformString enabled", ->
       beforeEach ->
         settings.set('stayOnTransformString', true)
         set cursor: [0, 0]
@@ -168,44 +174,39 @@ describe "Operator TransformString", ->
       it "indents the currrent selection and exits visual mode", ->
         ensure 'v j >',
           mode: 'normal'
-          cursor: [1, 2]
-          text: """
+          textC: """
             12345
-            abcde
+            |abcde
           ABCDE
           """
       it "when repeated, operate on same range when cursor was not moved", ->
         ensure 'v j >',
           mode: 'normal'
-          cursor: [1, 2]
-          text: """
+          textC: """
             12345
-            abcde
+            |abcde
           ABCDE
           """
         ensure '.',
           mode: 'normal'
-          cursor: [1, 4]
-          text: """
+          textC: """
               12345
-              abcde
+              |abcde
           ABCDE
           """
       it "when repeated, operate on relative range from cursor position with same extent when cursor was moved", ->
         ensure 'v j >',
           mode: 'normal'
-          cursor: [1, 2]
-          text: """
+          textC: """
             12345
-            abcde
+            |abcde
           ABCDE
           """
         ensure 'l .',
           mode: 'normal'
-          cursor: [1, 5]
-          text_: """
+          textC_: """
           __12345
-          ____abcde
+          ____a|bcde
           __ABCDE
           """
 
