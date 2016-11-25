@@ -141,6 +141,21 @@ class TextData
   getRaw: ->
     @rawData
 
+collectIndexInText = (char, text) ->
+  indexes = []
+  fromIndex = 0
+  while (index = text.indexOf(char, fromIndex)) >= 0
+    fromIndex = index + 1
+    indexes.push(index)
+  indexes
+
+collectCharPositionsInText = (char, text) ->
+  positions = []
+  for lineText, rowNumber in text.split(/\n/)
+    for index, i in collectIndexInText(char, lineText)
+      positions.push([rowNumber, index - i])
+  positions
+
 class VimEditor
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -150,9 +165,17 @@ class VimEditor
     if invalidOptions.length
       throw new Error("#{message}: #{inspect(invalidOptions)}")
 
+  validateExclusiveOptions: (options, rules) ->
+    allOptions = Object.keys(options)
+    for option, exclusiveOptions of rules when option of options
+      violatingOptions = exclusiveOptions.filter (exclusiveOption) -> exclusiveOption in allOptions
+      if violatingOptions.length
+        throw new Error("#{option} is exclusive with [#{violatingOptions}]")
+
   setOptionsOrdered = [
     'text',
     'text_',
+    'textC',
     'grammar',
     'cursor', 'cursorBuffer',
     'addCursor', 'addCursorBuffer'
@@ -160,9 +183,14 @@ class VimEditor
     'selectedBufferRange'
   ]
 
+  setExclusiveRules =
+    textC: ['cursor', 'cursorBuffer']
+
   # Public
   set: (options) =>
     @validateOptions(options, setOptionsOrdered, 'Invalid set options')
+    @validateExclusiveOptions(options, setExclusiveRules)
+
     for name in setOptionsOrdered when options[name]?
       method = 'set' + _.capitalize(_.camelize(name))
       this[method](options[name])
@@ -172,6 +200,12 @@ class VimEditor
 
   setText_: (text) ->
     @setText(text.replace(/_/g, ' '))
+
+  setTextC: (text) ->
+    points = collectCharPositionsInText('|', text)
+    @setText(text.replace(/\|/g, ''))
+    if points.length
+      @setCursor(points)
 
   setGrammar: (scope) ->
     @editor.setGrammar(atom.grammars.grammarForScopeName(scope))
@@ -206,6 +240,7 @@ class VimEditor
   ensureOptionsOrdered = [
     'text',
     'text_',
+    'textC',
     'selectedText', 'selectedTextOrdered', "selectionIsNarrowed"
     'cursor', 'cursorBuffer',
     'numCursors'
@@ -220,12 +255,17 @@ class VimEditor
     'mark'
     'mode',
   ]
+  ensureExclusiveRules =
+    textC: ['cursor', 'cursorBuffer']
+
   # Public
   ensure: (args...) =>
     switch args.length
       when 1 then [options] = args
       when 2 then [keystroke, options] = args
     @validateOptions(options, ensureOptionsOrdered, 'Invalid ensure option')
+    @validateExclusiveOptions(options, ensureExclusiveRules)
+
     # Input
     unless _.isEmpty(keystroke)
       @keystroke(keystroke)
@@ -238,6 +278,13 @@ class VimEditor
 
   ensureText_: (text) ->
     @ensureText(text.replace(/_/g, ' '))
+
+  ensureTextC: (text) ->
+    points = collectCharPositionsInText('|', text)
+    @ensureText(text.replace(/\|/g, ''))
+    if points.length
+      console.log points
+      @ensureCursor(points)
 
   ensureSelectedText: (text, ordered=false) ->
     selections = if ordered
