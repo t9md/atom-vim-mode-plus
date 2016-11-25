@@ -173,9 +173,8 @@ class VimEditor
         throw new Error("#{option} is exclusive with [#{violatingOptions}]")
 
   setOptionsOrdered = [
-    'text',
-    'text_',
-    'textC',
+    'text', 'text_',
+    'textC', 'textC_',
     'grammar',
     'cursor', 'cursorBuffer',
     'addCursor', 'addCursorBuffer'
@@ -185,6 +184,7 @@ class VimEditor
 
   setExclusiveRules =
     textC: ['cursor', 'cursorBuffer']
+    textC_: ['cursor', 'cursorBuffer']
 
   # Public
   set: (options) =>
@@ -206,6 +206,9 @@ class VimEditor
     @setText(text.replace(/\|/g, ''))
     if points.length
       @setCursor(points)
+
+  setTextC_: (text) ->
+    @setTextC(text.replace(/_/g, ' '))
 
   setGrammar: (scope) ->
     @editor.setGrammar(atom.grammars.grammarForScopeName(scope))
@@ -238,9 +241,8 @@ class VimEditor
     @editor.setSelectedBufferRange(range)
 
   ensureOptionsOrdered = [
-    'text',
-    'text_',
-    'textC',
+    'text', 'text_',
+    'textC', 'textC_',
     'selectedText', 'selectedTextOrdered', "selectionIsNarrowed"
     'cursor', 'cursorBuffer',
     'numCursors'
@@ -257,6 +259,7 @@ class VimEditor
   ]
   ensureExclusiveRules =
     textC: ['cursor', 'cursorBuffer']
+    textC_: ['cursor', 'cursorBuffer']
 
   # Public
   ensure: (args...) =>
@@ -274,7 +277,8 @@ class VimEditor
       method = 'ensure' + _.capitalize(_.camelize(name))
       this[method](options[name])
 
-  ensureText: (text) -> expect(@editor.getText()).toEqual(text)
+  ensureText: (text) ->
+    expect(@editor.getText()).toEqual(text)
 
   ensureText_: (text) ->
     @ensureText(text.replace(/_/g, ' '))
@@ -283,8 +287,10 @@ class VimEditor
     points = collectCharPositionsInText('|', text)
     @ensureText(text.replace(/\|/g, ''))
     if points.length
-      console.log points
       @ensureCursor(points)
+
+  ensureTextC_: (text) ->
+    @ensureTextC(text.replace(/_/g, ' '))
 
   ensureSelectedText: (text, ordered=false) ->
     selections = if ordered

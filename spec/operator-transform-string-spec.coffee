@@ -16,26 +16,35 @@ describe "Operator TransformString", ->
   describe 'the ~ keybinding', ->
     beforeEach ->
       set
-        text: 'aBc\nXyZ'
-        cursorBuffer: [[0, 0], [1, 0]]
+        textC: """
+        |aBc
+        |XyZ
+        """
 
     it 'toggles the case and moves right', ->
       ensure '~',
-        text: 'ABc\nxyZ'
-        cursor: [[0, 1], [1, 1]]
-
+        textC: """
+        A|Bc
+        x|yZ
+        """
       ensure '~',
-        text: 'Abc\nxYZ'
-        cursor: [[0, 2], [1, 2]]
+        textC: """
+        Ab|c
+        xY|Z
+        """
 
       ensure  '~',
-        text: 'AbC\nxYz'
-        cursor: [[0, 2], [1, 2]]
+        textC: """
+        Ab|C
+        xY|z
+        """
 
     it 'takes a count', ->
       ensure '4 ~',
-        text: 'AbC\nxYz'
-        cursor: [[0, 2], [1, 2]]
+        textC: """
+        Ab|C
+        xY|z
+        """
 
     describe "in visual mode", ->
       it "toggles the case of the selected text", ->
@@ -44,16 +53,16 @@ describe "Operator TransformString", ->
 
     describe "with g and motion", ->
       it "toggles the case of text, won't move cursor", ->
-        set cursorBuffer: [0, 0]
-        ensure 'g ~ 2 l', text: 'Abc\nXyZ', cursor: [0, 0]
+        set textC: "|aBc\nXyZ"
+        ensure 'g ~ 2 l', textC: '|Abc\nXyZ'
 
       it "g~~ toggles the line of text, won't move cursor", ->
-        set cursorBuffer: [0, 1]
-        ensure 'g ~ ~', text: 'AbC\nXyZ', cursor: [0, 1]
+        set textC: "a|Bc\nXyZ"
+        ensure 'g ~ ~', textC: 'A|bC\nXyZ'
 
       it "g~g~ toggles the line of text, won't move cursor", ->
-        set cursorBuffer: [0, 1]
-        ensure 'g ~ g ~', text: 'AbC\nXyZ', cursor: [0, 1]
+        set textC: "a|Bc\nXyZ"
+        ensure 'g ~ g ~', textC: 'A|bC\nXyZ'
 
   describe 'the U keybinding', ->
     beforeEach ->
