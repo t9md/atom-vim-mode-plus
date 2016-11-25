@@ -75,32 +75,32 @@ class Operator extends Base
     {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
 
     @initialize()
-
-    @onDidSetOperatorModifier (options) =>
-      if options.wise?
-        @wise = options.wise
-
-      if options.occurrence?
-        @setOccurrence(options.occurrence)
-        if @isOccurrence()
-          # Reset existing preset-occurrence. e.g. `c o p`, `d o f`
-          @occurrenceManager.resetPatterns()
-          @addOccurrencePattern()
-
+    @onDidSetOperatorModifier(@setModifier.bind(this))
     @target = selectionTarget if selectionTarget = @getSelectionTarget()
 
-    if _.isString(@target)
-      @setTarget(@new(@target))
+    @setTarget(@new(@target)) if _.isString(@target)
 
-    # When preset-occurrence was exists, auto enable occurrence-wise
-    if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
+    # When preset-occurrence was exists, operate on occurrence-wise
+    if @acceptPresetOccurrence and @occurrenceManager.hasMarkers()
       @setOccurrence(true)
+
     if @isOccurrence()
       @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
     if @acceptPersistentSelection
       @subscribe @onDidDeactivateMode ({mode}) =>
         @occurrenceManager.resetPatterns() if mode is 'operator-pending'
+
+  setModifier: (options) ->
+    if options.wise?
+      @wise = options.wise
+
+    if options.occurrence?
+      @setOccurrence(options.occurrence)
+      if @isOccurrence()
+        # Reset existing preset-occurrence. e.g. `c o p`, `d o f`
+        @occurrenceManager.resetPatterns()
+        @addOccurrencePattern()
 
   getSelectionTarget: ->
     # In visual-mode and target was not pre-set, operate on selected area.
