@@ -945,7 +945,7 @@ class AFunctionOrInnerParagraph extends UnionTextObject
 class ACurrentSelectionAndAPersistentSelection extends TextObject
   @extend()
   select: ->
-    pesistentRanges = @vimState.getPersistentSelectionBuffferRanges()
+    pesistentRanges = @vimState.getPersistentSelectionBufferRanges()
     selectedRanges = @editor.getSelectedBufferRanges()
     ranges = pesistentRanges.concat(selectedRanges)
 

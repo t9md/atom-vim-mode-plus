@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{Emitter, CompositeDisposable} = require 'atom'
+{CompositeDisposable} = require 'atom'
 
 module.exports =
 class PersistentSelectionManager
@@ -9,7 +9,6 @@ class PersistentSelectionManager
     {@editor, @editorElement} = @vimState
     @disposables = new CompositeDisposable
     @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
-    @emitter = new Emitter
 
     @markerLayer = @editor.addMarkerLayer()
     options = {type: 'highlight', class: 'vim-mode-plus-persistent-selection'}

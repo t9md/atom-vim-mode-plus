@@ -5,18 +5,11 @@ _ = require 'underscore-plus'
 {inspect} = require 'util'
 {
   haveSomeNonEmptySelection
-  highlightRanges
   isEndsWithNewLineForBufferRow
   getValidVimBufferRow
   cursorIsAtEmptyRow
-  getVisibleBufferRange
   getWordPatternAtBufferPosition
   destroyNonLastSelection
-
-  selectedRange
-  selectedText
-  toString
-  debug
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -31,24 +24,21 @@ class Operator extends Base
   occurrence: false
 
   patternForOccurrence: null
-  stayAtSamePosition: null
   stayOptionName: null
-  clipToMutationEndOnStay: true
-  useMarkerForStay: false
+  stayByMarker: false
   restorePositions: true
-  restorePositionsToMutationEnd: false
   flashTarget: true
   trackChange: false
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
 
   needStay: ->
-    if @stayAtSamePosition?
-      @stayAtSamePosition
-    else
-      @stayOptionName? and settings.get(@stayOptionName)
+    @stayOptionName? and settings.get(@stayOptionName)
 
   isOccurrence: ->
+    @occurrence
+
+  setOccurrence: (@occurrence) ->
     @occurrence
 
   setMarkForChange: (range) ->
@@ -85,26 +75,33 @@ class Operator extends Base
 
     @initialize()
 
-    @onDidSetOperatorModifier ({occurrence, wise}) =>
-      @wise = wise if wise?
-      @setOccurrence('modifier') if occurrence?
+    @onDidSetOperatorModifier (options) =>
+      if options.wise?
+        @wise = options.wise
 
-    @target ?= implicitTarget if implicitTarget = @getImplicitTarget()
+      if options.occurrence?
+        @setOccurrence(options.occurrence)
+        if @isOccurrence()
+          # Reset existing preset-occurrence. e.g. `c o p`, `d o f`
+          @occurrenceManager.resetPatterns()
+          @addOccurrencePattern()
+
+    @target = selectionTarget if selectionTarget = @getSelectionTarget()
 
     if _.isString(@target)
       @setTarget(@new(@target))
 
     # When preset-occurrence was exists, auto enable occurrence-wise
-    if @occurrence
-      @setOccurrence('static')
-    else if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
-      @setOccurrence('preset')
+    if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
+      @setOccurrence(true)
+    if @isOccurrence()
+      @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
     if @acceptPersistentSelection
       @subscribe @onDidDeactivateMode ({mode}) =>
         @occurrenceManager.resetPatterns() if mode is 'operator-pending'
 
-  getImplicitTarget: ->
+  getSelectionTarget: ->
     # In visual-mode and target was not pre-set, operate on selected area.
     if @canSelectPersistentSelection()
       @destroyUnknownSelection = true
@@ -119,21 +116,6 @@ class Operator extends Base
     @acceptPersistentSelection and
     @vimState.hasPersistentSelections() and
     settings.get('autoSelectPersistentSelectionOnOperate')
-
-  # type is one of ['preset', 'modifier']
-  setOccurrence: (type) ->
-    @occurrence = true
-    switch type
-      when 'static'
-        unless @isComplete() # we enter operator-pending
-          debug 'static: mark as we enter operator-pending'
-          @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
-      when 'preset'
-        debug 'preset: nothing to do since we have markers already'
-      when 'modifier'
-        debug 'modifier: overwrite existing marker when manually typed `o`'
-        @occurrenceManager.resetPatterns() # clear existing marker
-        @addOccurrencePattern() # mark cursor word.
 
   addOccurrencePattern: (pattern=null) ->
     pattern ?= @patternForOccurrence
@@ -170,7 +152,9 @@ class Operator extends Base
     @activateMode('normal')
 
   selectOccurrence: ->
-    @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
+    # In `.` repeated case, initailize() is never called so need to set here.
+    if @isRepeated() and not @occurrenceManager.hasMarkers()
+      @addOccurrencePattern()
 
     # To repoeat(`.`) operation where multiple occurrence patterns was set.
     # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
@@ -187,20 +171,17 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    options = {isSelect: @instanceof('Select'), useMarker: @useMarkerForStay}
-    @mutationManager.init(options)
+    @mutationManager.init
+      isSelect: @instanceof('Select')
+      useMarker: @needStay() and @stayByMarker
     @mutationManager.setCheckPoint('will-select')
 
-    @target.forceWise(@wise) if @wise and @target.isMotion()
+    # Currently only motion have forceWise methods
+    @target.forceWise?(@wise) if @wise?
     @emitWillSelectTarget()
 
-    # To use CURRENT cursor position, this has to be BEFORE @target.select() which move cursors.
-    if @isOccurrence() and not @occurrenceManager.hasMarkers()
-      @addOccurrencePattern()
-
     @target.select()
-    if @isOccurrence()
-      @selectOccurrence()
+    @selectOccurrence() if @isOccurrence()
 
     if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
       @mutationManager.setCheckPoint('did-select')
@@ -217,9 +198,7 @@ class Operator extends Base
     options =
       stay: @needStay()
       strict: @isOccurrence() or @destroyUnknownSelection
-      clipToMutationEnd: @clipToMutationEndOnStay
       isBlockwise: @target?.isBlockwise?()
-      mutationEnd: @restorePositionsToMutationEnd
 
     @mutationManager.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
@@ -290,7 +269,7 @@ class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
 class CreatePersistentSelection extends Operator
   @extend()
   flashTarget: false
-  stayAtSamePosition: true
+  stayOptionName: 'stayOnCreatePersistentSelection'
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
 
@@ -324,7 +303,6 @@ class TogglePresetOccurrence extends Operator
   @extend()
   flashTarget: false
   requireTarget: false
-  stayAtSamePosition: true
   acceptPresetOccurrence: false
 
   execute: ->
@@ -388,7 +366,8 @@ class DeleteToLastCharacterOfLine extends Delete
   execute: ->
     # Ensure all selections to un-reversed
     if @isMode('visual', 'blockwise')
-      swrap.setReversedState(@editor, false)
+      for selection in @editor.getSelections()
+        swrap(selection).extendToEOL()
     super
 
 class DeleteLine extends Delete
@@ -407,7 +386,6 @@ class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
-  clipToMutationEndOnStay: false
   stayOptionName: 'stayOnYank'
 
   mutateSelection: (selection) ->

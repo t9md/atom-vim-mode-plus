@@ -580,7 +580,7 @@ describe "Occurrence", ->
               ensure
                 occurrenceText: ['text', 'text', 'the', 'text']
 
-    describe "mutate preset occurence", ->
+    describe "mutate preset occurrence", ->
       beforeEach ->
         set text: """
         ooo: xxx: ooo xxx: ooo:

@@ -77,6 +77,12 @@ class SelectionWrapper
   mergeBufferRange: (range, option) ->
     @setBufferRange(@getBufferRange().union(range), option)
 
+  extendToEOL: ->
+    [startRow, endRow] = @selection.getBufferRowRange()
+    endRowRange = @selection.editor.bufferRangeForBufferRow(endRow)
+    newRange = new Range(@getBufferRange().start, endRowRange.end)
+    @setBufferRange(newRange)
+
   reverse: ->
     @setReversedState(not @selection.isReversed())
 

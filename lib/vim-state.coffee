@@ -295,7 +295,7 @@ class VimState
   hasPersistentSelections: ->
     @persistentSelection.hasMarkers()
 
-  getPersistentSelectionBuffferRanges: ->
+  getPersistentSelectionBufferRanges: ->
     @persistentSelection.getMarkerBufferRanges()
 
   clearPersistentSelections: ->
