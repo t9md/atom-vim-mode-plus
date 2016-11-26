@@ -165,7 +165,10 @@ class Operator extends Base
     selectedRanges = @editor.getSelectedBufferRanges()
     ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
     if ranges.length
-      @vimState.modeManager.activate('normal') if @isMode('visual')
+      if @isMode('visual')
+        @vimState.modeManager.deactivate()
+        # To SelectOccurrence operator can acivivate visual-mode with correct range.
+        @vimState.submode = null
       @editor.setSelectedBufferRanges(ranges)
     else
       @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
