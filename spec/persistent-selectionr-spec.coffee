@@ -29,7 +29,7 @@ describe "Persistent Selection", ->
         expect(text).toEqual(options.text)
 
       if options.mode?
-        ensure {mode: options.mode}
+        ensure mode: options.mode
 
     beforeEach ->
       atom.keymaps.add "test",
