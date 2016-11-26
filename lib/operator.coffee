@@ -77,16 +77,24 @@ class Operator extends Base
 
     @initialize()
     @onDidSetOperatorModifier(@setModifier.bind(this))
-    @target = selectionTarget if selectionTarget = @getSelectionTarget()
-
-    @setTarget(@new(@target)) if _.isString(@target)
 
     # When preset-occurrence was exists, operate on occurrence-wise
     if @acceptPresetOccurrence and @occurrenceManager.hasMarkers()
       @setOccurrence(true)
 
+    # [FIXME] ORDER-MATTER
+    # addOccurrencePattern pick cursor-word to find occurrence base pattern.
+    # This has to be done BEFORE converting persistent-selection into real-selection.
+    # Since when persistent-selection is actuall selected, it change cursor position.
     if @isOccurrence()
       @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
+
+    if @canSelectPersistentSelection()
+      @selectPersistentSelection() # This change cursor position.
+      unless @isMode('visual')
+        @vimState.modeManager.activate('visual', swrap.detectVisualModeSubmode(@editor))
+    @target = 'CurrentSelection' if @isMode('visual')
+    @setTarget(@new(@target)) if _.isString(@target)
 
     if @acceptPersistentSelection # ??? shouldn't this @acceptPresetOccurrence ?
       @subscribe @onDidDeactivateMode ({mode}) =>
@@ -103,24 +111,25 @@ class Operator extends Base
         @occurrenceManager.resetPatterns()
         @addOccurrencePattern()
 
-  getSelectionTarget: ->
-    # In visual-mode and target was not pre-set, operate on selected area.
-    if @canSelectPersistentSelection()
-      @destroyUnknownSelection = true
-      if @isMode('visual')
-        "ACurrentSelectionAndAPersistentSelection"
-      else
-        "APersistentSelection"
-    else
-      "CurrentSelection" if @isMode('visual')
-
   canSelectPersistentSelection: ->
     @acceptPersistentSelection and
     @vimState.hasPersistentSelections() and
     settings.get('autoSelectPersistentSelectionOnOperate')
 
+  selectPersistentSelection: ->
+    pesistentRanges = @vimState.getPersistentSelectionBufferRanges()
+    selectedRanges = @editor.getSelectedBufferRanges().filter (range) -> not range.isEmpty()
+    ranges = pesistentRanges.concat(selectedRanges)
+
+    @editor.setSelectedBufferRanges(ranges)
+
+    @vimState.clearPersistentSelections()
+    @editor.mergeIntersectingSelections()
+    @vimState.updateSelectionProperties()
+
   addOccurrencePattern: (pattern=null) ->
     pattern ?= @patternForOccurrence
+    console.log 'P', pattern
     unless pattern?
       point = @getCursorBufferPosition()
       pattern = getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
@@ -167,7 +176,7 @@ class Operator extends Base
     if ranges.length
       if @isMode('visual')
         @vimState.modeManager.deactivate()
-        # To SelectOccurrence operator can acivivate visual-mode with correct range.
+        # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
         @vimState.submode = null
       @editor.setSelectedBufferRanges(ranges)
     else
@@ -202,7 +211,7 @@ class Operator extends Base
 
     options =
       stay: @needStay()
-      strict: @isOccurrence() or @destroyUnknownSelection
+      strict: @isOccurrence()
       isBlockwise: @target?.isBlockwise?()
 
     @mutationManager.restoreCursorPositions(options)

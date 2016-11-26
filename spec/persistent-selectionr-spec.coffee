@@ -84,6 +84,49 @@ describe "Persistent Selection", ->
             xxx ooo xxx\n
             """
 
+    describe "practical scenario", ->
+      describe "persistent-selection is treated in same way as real selection", ->
+        beforeEach ->
+          set
+            cursor: [0, 0]
+            text: """
+            0 ==========
+            1 ==========
+            2 ==========
+            3 ==========
+            4 ==========
+            5 ==========
+            """
+
+          ensurePersistentSelection 'V j enter',
+            text: ['0 ==========\n1 ==========\n']
+
+          ensure '2 j V j',
+            selectedText: ['3 ==========\n4 ==========\n']
+            mode: ['visual', 'linewise']
+
+        it "I in vL-mode with persistent-selection", ->
+          ensure 'I',
+            textC: """
+            |0 ==========
+            |1 ==========
+            2 ==========
+            |3 ==========
+            |4 ==========
+            5 ==========
+            """
+
+        it "A in vL-mode with persistent-selection", ->
+          ensure 'A',
+            textC: """
+            0 ==========|
+            1 ==========|
+            2 ==========
+            3 ==========|
+            4 ==========|
+            5 ==========
+            """
+
     describe "select-occurrence-in-a-persistent-selection", ->
       [update] = []
       beforeEach ->
