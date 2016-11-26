@@ -129,7 +129,6 @@ class Operator extends Base
 
   addOccurrencePattern: (pattern=null) ->
     pattern ?= @patternForOccurrence
-    console.log 'P', pattern
     unless pattern?
       point = @getCursorBufferPosition()
       pattern = getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
