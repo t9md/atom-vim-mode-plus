@@ -23,12 +23,13 @@ class Operator extends Base
   wise: null
   occurrence: false
 
+  flashTarget: true
+  trackChange: false
+
   patternForOccurrence: null
   stayOptionName: null
   stayByMarker: false
   restorePositions: true
-  flashTarget: true
-  trackChange: false
 
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
@@ -87,7 +88,7 @@ class Operator extends Base
     if @isOccurrence()
       @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
-    if @acceptPersistentSelection
+    if @acceptPersistentSelection # ??? shouldn't this @acceptPresetOccurrence ?
       @subscribe @onDidDeactivateMode ({mode}) =>
         @occurrenceManager.resetPatterns() if mode is 'operator-pending'
 
@@ -164,7 +165,7 @@ class Operator extends Base
     selectedRanges = @editor.getSelectedBufferRanges()
     ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
     if ranges.length
-      @vimState.modeManager.deactivate() if @isMode('visual')
+      @vimState.modeManager.activate('normal') if @isMode('visual')
       @editor.setSelectedBufferRanges(ranges)
     else
       @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
