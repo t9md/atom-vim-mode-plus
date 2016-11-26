@@ -19,7 +19,14 @@ describe "Persistent Selection", ->
     textForMarker = (marker) ->
       editor.getTextInBufferRange(marker.getBufferRange())
 
-    ensurePersistentSelection = (options) ->
+    ensurePersistentSelection = (args...) ->
+      switch args.length
+        when 1 then [options] = args
+        when 2 then [_keystroke, options] = args
+
+      if _keystroke?
+        keystroke(_keystroke)
+
       markers = vimState.persistentSelection.getMarkers()
       if options.length?
         expect(markers).toHaveLength(options.length)
@@ -52,14 +59,19 @@ describe "Persistent Selection", ->
     describe "basic behavior", ->
       describe "create-persistent-selection", ->
         it "create-persistent-selection create range marker", ->
-          keystroke('g m i w')
-          ensurePersistentSelection length: 1, text: ['ooo']
-          keystroke('j .')
-          ensurePersistentSelection length: 2, text: ['ooo', 'xxx']
+          ensurePersistentSelection 'g m i w',
+            length: 1
+            text: ['ooo']
+          ensurePersistentSelection 'j .',
+            length: 2
+            text: ['ooo', 'xxx']
+
       describe "[No behavior diff currently] inner-persistent-selection and a-persistent-selection", ->
         it "apply operator to across all persistent-selections", ->
-          keystroke('g m i w j . 2 j g m i p') # Mark 2 inner-word and 1 inner-paragraph
-          ensurePersistentSelection length: 3, text: ['ooo', 'xxx', "ooo xxx ooo\nxxx ooo xxx\n"]
+          ensurePersistentSelection 'g m i w j . 2 j g m i p',  # Mark 2 inner-word and 1 inner-paragraph
+            length: 3
+            text: ['ooo', 'xxx', "ooo xxx ooo\nxxx ooo xxx\n"]
+
           ensure 'g U a r',
             text: """
             OOO xxx ooo
@@ -79,9 +91,11 @@ describe "Persistent Selection", ->
 
       it "select all instance of cursor word only within marked range", ->
         runs ->
-          keystroke('g m i p } } j .') # Mark 2 inner-word and 1 inner-paragraph
           paragraphText = "ooo xxx ooo\nxxx ooo xxx\n"
-          ensurePersistentSelection length: 2, text: [paragraphText, paragraphText]
+          ensurePersistentSelection 'g m i p } } j .', # Mark 2 inner-word and 1 inner-paragraph
+            length: 2
+            text: [paragraphText, paragraphText]
+
         waitsFor ->
           update.callCount is 1
         runs ->
@@ -103,23 +117,28 @@ describe "Persistent Selection", ->
 
     describe "clearPersistentSelections command", ->
       it "clear persistentSelections", ->
-        keystroke('g m i w')
-        ensurePersistentSelection length: 1, text: ['ooo']
+        ensurePersistentSelection 'g m i w',
+          length: 1
+          text: ['ooo']
+
         dispatch(editorElement, 'vim-mode-plus:clear-persistent-selection')
         expect(vimState.persistentSelection.hasMarkers()).toBe(false)
 
     describe "clearPersistentSelectionOnResetNormalMode", ->
       describe "default setting", ->
         it "it won't clear persistentSelection", ->
-          keystroke('g m i w')
-          ensurePersistentSelection length: 1, text: ['ooo']
+          ensurePersistentSelection 'g m i w',
+            length: 1
+            text: ['ooo']
+
           dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
           ensurePersistentSelection length: 1, text: ['ooo']
 
       describe "when enabled", ->
         it "it clear persistentSelection on reset-normal-mode", ->
           settings.set('clearPersistentSelectionOnResetNormalMode', true)
-          keystroke('g m i w')
-          ensurePersistentSelection length: 1, text: ['ooo']
+          ensurePersistentSelection 'g m i w',
+            length: 1
+            text: ['ooo']
           dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
           expect(vimState.persistentSelection.hasMarkers()).toBe(false)
