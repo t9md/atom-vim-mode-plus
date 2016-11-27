@@ -48,7 +48,7 @@ module.exports = new Settings 'vim-mode-plus',
   autoSelectPersistentSelectionOnOperate: true
   automaticallyEscapeInesrtModeOnActivePaneItemChange:
     default: false
-    description: '[Experimental]'
+    description: 'Escape insert-mode on tab switch, pane switch'
   wrapLeftRightMotion: false
   numberRegex:
     default: '-?[0-9]+'
