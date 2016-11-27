@@ -235,7 +235,7 @@ describe "VimState", ->
         it "clear multiple cursor on escape", ->
           ensure 'escape', mode: 'normal', numCursors: 2
 
-    describe "automaticallyEscapeInesrtModeOnActivePaneItemChange setting", ->
+    describe "automaticallyEscapeInsertModeOnActivePaneItemChange setting", ->
       [otherVim, otherEditor, pane] = []
 
       beforeEach ->
@@ -263,9 +263,9 @@ describe "VimState", ->
           ensure mode: 'insert'
           otherVim.ensure mode: 'insert'
 
-      describe "automaticallyEscapeInesrtModeOnActivePaneItemChange = true", ->
+      describe "automaticallyEscapeInsertModeOnActivePaneItemChange = true", ->
         beforeEach ->
-          settings.set('automaticallyEscapeInesrtModeOnActivePaneItemChange', true)
+          settings.set('automaticallyEscapeInsertModeOnActivePaneItemChange', true)
 
         it "return to escape mode for all vimEditors", ->
           pane.activateItem(otherEditor)

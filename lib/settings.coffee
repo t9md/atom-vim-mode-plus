@@ -46,7 +46,7 @@ module.exports = new Settings 'vim-mode-plus',
     description: 'Start in insert-mode whan editorElement matches scope'
   clearMultipleCursorsOnEscapeInsertMode: false
   autoSelectPersistentSelectionOnOperate: true
-  automaticallyEscapeInesrtModeOnActivePaneItemChange:
+  automaticallyEscapeInsertModeOnActivePaneItemChange:
     default: false
     description: 'Escape insert-mode on tab switch, pane switch'
   wrapLeftRightMotion: false
