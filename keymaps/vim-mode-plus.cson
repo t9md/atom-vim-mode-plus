@@ -45,6 +45,8 @@
 # except insert
 # -------------------------
 'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+  # Motions
+  # -------------------------
   'h': 'vim-mode-plus:move-left'
   'left': 'vim-mode-plus:move-left'
   'backspace': 'core:move-left'
@@ -89,6 +91,7 @@
   '+': 'vim-mode-plus:move-to-first-character-of-line-down'
   'enter': 'vim-mode-plus:move-to-first-character-of-line-down'
 
+  # scroll
   'ctrl-u': 'vim-mode-plus:scroll-half-screen-up'
   'ctrl-b': 'vim-mode-plus:scroll-full-screen-up'
   'ctrl-d': 'vim-mode-plus:scroll-half-screen-down'
@@ -102,8 +105,9 @@
   'L': 'vim-mode-plus:move-to-bottom-of-screen'
   'M': 'vim-mode-plus:move-to-middle-of-screen'
 
+  # Operator
+  # -------------------------
   'd': 'vim-mode-plus:delete'
-  'D': 'vim-mode-plus:delete-to-last-character-of-line'
   'c': 'vim-mode-plus:change'
   'C': 'vim-mode-plus:change-to-last-character-of-line'
   'S': 'vim-mode-plus:substitute-line'
@@ -111,8 +115,6 @@
   'g o': 'vim-mode-plus:toggle-preset-occurrence'
 
   # '_': 'vim-mode-plus:replace-with-register'
-  'I': 'vim-mode-plus:insert-at-first-character-of-line'
-  'A': 'vim-mode-plus:insert-after-end-of-line'
   'g I': 'vim-mode-plus:insert-at-beginning-of-line'
   '>': 'vim-mode-plus:indent'
   '<': 'vim-mode-plus:outdent'
@@ -373,13 +375,11 @@
 # -------------------------
 'atom-text-editor.vim-mode-plus.normal-mode':
   'i': 'vim-mode-plus:activate-insert-mode'
+  'a': 'vim-mode-plus:insert-after'
+  'I': 'vim-mode-plus:insert-at-first-character-of-line'
+  'A': 'vim-mode-plus:insert-after-end-of-line'
   'g i': 'vim-mode-plus:insert-at-last-insert'
-
-  # 'g I': 'vim-mode-plus:insert-at-start-of-target'
-  # 'g A': 'vim-mode-plus:insert-at-end-of-target'
-
-  # 'g [':    'vim-mode-plus:insert-at-previous-fold-start'
-  # 'g ]':    'vim-mode-plus:insert-at-next-fold-start'
+  'D': 'vim-mode-plus:delete-to-last-character-of-line'
 
   'R': 'vim-mode-plus:activate-replace-mode'
   'v': 'vim-mode-plus:activate-characterwise-visual-mode'
@@ -391,7 +391,6 @@
   'ctrl-r': 'vim-mode-plus:redo'
   'O': 'vim-mode-plus:insert-above-with-newline'
   'o': 'vim-mode-plus:insert-below-with-newline'
-  'a': 'vim-mode-plus:insert-after'
   'x': 'vim-mode-plus:delete-right'
   'X': 'vim-mode-plus:delete-left'
   's': 'vim-mode-plus:substitute'
@@ -443,7 +442,6 @@
 # operator-pending, visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
-  'x': 'vim-mode-plus:reset-normal-mode'
   '~': 'vim-mode-plus:toggle-case'
   'U': 'vim-mode-plus:upper-case'
   'u': 'vim-mode-plus:lower-case'
@@ -547,24 +545,23 @@
 # visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode':
-  'x': 'vim-mode-plus:delete'
-  's': 'vim-mode-plus:change'
   'o': 'vim-mode-plus:reverse-selections'
   '"': 'vim-mode-plus:set-register-name'
-  'D': 'vim-mode-plus:delete-line'
-
   'v': 'vim-mode-plus:activate-characterwise-visual-mode'
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
-
   'enter': 'vim-mode-plus:create-persistent-selection'
 
-  # 'p': 'vim-mode-plus:swap-with-register'
-  # 'P': 'vim-mode-plus:swap-with-register'
+'atom-text-editor.vim-mode-plus.has-persistent-selection.normal-mode,
+atom-text-editor.vim-mode-plus.visual-mode':
+  'x': 'vim-mode-plus:delete'
+  's': 'vim-mode-plus:change'
+  'D': 'vim-mode-plus:delete-line'
 
-'atom-text-editor.vim-mode-plus.visual-mode:not(.linewise)':
   'I': 'vim-mode-plus:insert-at-start-of-target'
   'A': 'vim-mode-plus:insert-at-end-of-target'
+  # 'p': 'vim-mode-plus:swap-with-register'
+  # 'P': 'vim-mode-plus:swap-with-register'
 
 # visual-characterwise
 # -------------------------

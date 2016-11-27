@@ -130,7 +130,7 @@ class InsertAfter extends ActivateInsertMode
     moveCursorRight(cursor) for cursor in @editor.getCursors()
     super
 
-# key: 'g I'
+# key: 'g I' in all mode
 class InsertAtBeginningOfLine extends ActivateInsertMode
   @extend()
   execute: ->
@@ -139,21 +139,17 @@ class InsertAtBeginningOfLine extends ActivateInsertMode
     @editor.moveToBeginningOfLine()
     super
 
-# key: 'A', Used in 'normal-mode', 'visual-mode.linewise'
+# key: normal 'A'
 class InsertAfterEndOfLine extends ActivateInsertMode
   @extend()
   execute: ->
-    if @isMode('visual', 'linewise')
-      @editor.splitSelectionsIntoLines()
     @editor.moveToEndOfLine()
     super
 
-# key: 'I', Used in 'normal-mode', 'visual-mode.linewise'
+# key: normal 'I'
 class InsertAtFirstCharacterOfLine extends ActivateInsertMode
   @extend()
   execute: ->
-    if @isMode('visual', 'linewise')
-      @editor.splitSelectionsIntoLines()
     @editor.moveToBeginningOfLine()
     @editor.moveToFirstCharacterOfLine()
     super
@@ -189,21 +185,32 @@ class InsertByTarget extends ActivateInsertMode
   @extend(false)
   requireTarget: true
   which: null # one of ['start', 'end', 'head', 'tail']
+
   execute: ->
     @selectTarget()
+
+    if @isMode('visual')
+      submode = @vimState.submode
+      if submode is 'characterwise'
+        # `I(or A)` is short-hand of `ctrl-v I(or A)`
+        @vimState.selectBlockwise()
+
+      else if submode is 'linewise'
+        @editor.splitSelectionsIntoLines()
+        modifyRange = switch @which
+          when 'start' then  (selection) -> swrap(selection).setStartToFirstCharacterOfLine()
+          when 'end' then (selection) -> swrap(selection).shrinkEndToBeforeNewLine()
+
     for selection in @editor.getSelections()
+      modifyRange?(selection)
       swrap(selection).setBufferPositionTo(@which)
+
     super
 
 # key: 'I', Used in 'visual-mode.characterwise', visual-mode.blockwise
 class InsertAtStartOfTarget extends InsertByTarget
   @extend()
   which: 'start'
-  execute: ->
-    if @isMode('visual', 'characterwise')
-      # `I(or A)` is short-hand of `ctrl-v I(or A)`
-      @vimState.selectBlockwise()
-    super
 
 # key: 'A', Used in 'visual-mode.characterwise', 'visual-mode.blockwise'
 class InsertAtEndOfTarget extends InsertAtStartOfTarget

@@ -3,6 +3,8 @@ _ = require 'underscore-plus'
 {
   translatePointAndClip
   getRangeByTranslatePointAndClip
+  shrinkRangeEndToBeforeNewLine
+  getFirstCharacterPositionForBufferRow
 } = require './utils'
 
 propertyStore = new Map
@@ -247,6 +249,16 @@ class SelectionWrapper
     newRange = getRangeByTranslatePointAndClip(editor, range, which, direction, options)
     @withKeepingGoalColumn =>
       @setBufferRange(newRange, preserveFolds: true)
+
+  shrinkEndToBeforeNewLine: ->
+    newRange = shrinkRangeEndToBeforeNewLine(@getBufferRange())
+    @setBufferRange(newRange)
+
+  setStartToFirstCharacterOfLine: ->
+    {start, end} = @getBufferRange()
+    newStart = getFirstCharacterPositionForBufferRow(@selection.editor, start.row)
+    newRange = new Range(newStart, end)
+    @setBufferRange(newRange)
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
