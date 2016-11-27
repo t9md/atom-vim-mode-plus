@@ -235,7 +235,7 @@ describe "VimState", ->
         it "clear multiple cursor on escape", ->
           ensure 'escape', mode: 'normal', numCursors: 2
 
-    fdescribe "automaticallyEscapeInesrtModeOnActivePaneItemChange setting", ->
+    describe "automaticallyEscapeInesrtModeOnActivePaneItemChange setting", ->
       [otherVim, otherEditor, pane] = []
 
       beforeEach ->
