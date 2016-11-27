@@ -47,6 +47,11 @@ module.exports =
     @subscribe atom.workspace.onDidChangeActivePane ->
       workspaceClassList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
 
+    @subscribe atom.workspace.onDidChangeActivePaneItem =>
+      if settings.get('automaticallyEscapeInesrtModeOnActivePaneItemChange')
+        @vimStatesByEditor.forEach (vimState) ->
+          vimState.activate('normal') if vimState.mode is 'insert'
+
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
       if atom.workspace.isTextEditor(item)
         # Still there is possibility editor is destroyed and don't have corresponding

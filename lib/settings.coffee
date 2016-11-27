@@ -46,6 +46,9 @@ module.exports = new Settings 'vim-mode-plus',
     description: 'Start in insert-mode whan editorElement matches scope'
   clearMultipleCursorsOnEscapeInsertMode: false
   autoSelectPersistentSelectionOnOperate: true
+  automaticallyEscapeInesrtModeOnActivePaneItemChange:
+    default: false
+    description: '[Experimental]'
   wrapLeftRightMotion: false
   numberRegex:
     default: '-?[0-9]+'

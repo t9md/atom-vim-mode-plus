@@ -235,6 +235,44 @@ describe "VimState", ->
         it "clear multiple cursor on escape", ->
           ensure 'escape', mode: 'normal', numCursors: 2
 
+    fdescribe "automaticallyEscapeInesrtModeOnActivePaneItemChange setting", ->
+      [otherVim, otherEditor, pane] = []
+
+      beforeEach ->
+        getVimState (otherVimState, _other) ->
+          otherVim = _other
+          otherEditor = otherVimState.editor
+
+        runs ->
+          pane = atom.workspace.getActivePane()
+          pane.activateItem(editor)
+
+          set textC: "|editor-1"
+          otherVim.set textC: "|editor-2"
+
+          ensure 'i', mode: 'insert'
+          otherVim.ensure 'i', mode: 'insert'
+          expect(pane.getActiveItem()).toBe(editor)
+
+      describe "default behavior", ->
+        it "remain in insert-mode on paneItem change by default", ->
+
+          pane.activateItem(otherEditor)
+          expect(pane.getActiveItem()).toBe(otherEditor)
+          
+          ensure mode: 'insert'
+          otherVim.ensure mode: 'insert'
+
+      describe "automaticallyEscapeInesrtModeOnActivePaneItemChange = true", ->
+        beforeEach ->
+          settings.set('automaticallyEscapeInesrtModeOnActivePaneItemChange', true)
+
+        it "return to escape mode for all vimEditors", ->
+          pane.activateItem(otherEditor)
+          expect(pane.getActiveItem()).toBe(otherEditor)
+          ensure mode: 'normal'
+          otherVim.ensure mode: 'normal'
+
   describe "replace-mode", ->
     describe "with content", ->
       beforeEach -> set text: "012345\n\nabcdef"
