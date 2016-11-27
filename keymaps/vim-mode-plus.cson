@@ -109,6 +109,10 @@
   # -------------------------
   'd': 'vim-mode-plus:delete'
   'c': 'vim-mode-plus:change'
+  's': 'vim-mode-plus:substitute'
+  'x': 'vim-mode-plus:delete-right' # to avoid `d x` is treated as `d d`
+  'D': 'vim-mode-plus:delete-line'
+
   'C': 'vim-mode-plus:change-to-last-character-of-line'
   'S': 'vim-mode-plus:substitute-line'
   'r': 'vim-mode-plus:replace'
@@ -554,10 +558,6 @@
 
 'atom-text-editor.vim-mode-plus.has-persistent-selection.normal-mode,
 atom-text-editor.vim-mode-plus.visual-mode':
-  'x': 'vim-mode-plus:delete'
-  's': 'vim-mode-plus:change'
-  'D': 'vim-mode-plus:delete-line'
-
   'I': 'vim-mode-plus:insert-at-start-of-target'
   'A': 'vim-mode-plus:insert-at-end-of-target'
   # 'p': 'vim-mode-plus:swap-with-register'
