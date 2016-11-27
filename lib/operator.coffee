@@ -27,6 +27,7 @@ class Operator extends Base
   trackChange: false
 
   patternForOccurrence: null
+  stayAtSamePosition: null
   stayOptionName: null
   stayByMarker: false
   restorePositions: true
@@ -35,7 +36,7 @@ class Operator extends Base
   acceptPersistentSelection: true
 
   needStay: ->
-    @stayOptionName? and settings.get(@stayOptionName)
+    @stayAtSamePosition ?= (@stayOptionName? and settings.get(@stayOptionName))
 
   isOccurrence: ->
     @occurrence
@@ -282,17 +283,15 @@ class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
 class CreatePersistentSelection extends Operator
   @extend()
   flashTarget: false
-  stayOptionName: 'stayOnCreatePersistentSelection'
+  stayAtSamePosition: true
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
 
+  initialize: ->
+    @restorePositions = false if @isMode('visual', 'blockwise')
+
   mutateSelection: (selection) ->
     @persistentSelection.markBufferRange(selection.getBufferRange())
-
-  execute: ->
-    @onDidFinishOperation =>
-      destroyNonLastSelection(@editor)
-    super
 
 class TogglePersistentSelection extends CreatePersistentSelection
   @extend()
