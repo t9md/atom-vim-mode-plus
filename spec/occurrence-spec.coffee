@@ -203,63 +203,53 @@ describe "Occurrence", ->
     beforeEach ->
       set
         text: """
-        ooo: xxx: ooo
-        |||: ooo: xxx: ooo
-        ooo: xxx: |||: xxx: ooo
-        xxx: |||: ooo: ooo
+        ooo: xxx: ooo:
+        |||: ooo: xxx: ooo:
+        ooo: xxx: |||: xxx: ooo:
+        xxx: |||: ooo: ooo:
         """
         cursor: [0, 0]
 
     describe "[vC] select-occurrence", ->
       it "select cursor-word which intersecting selection then apply upper-case", ->
-        ensure "v 2 j cmd-d",
-          selectedText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo']
-          mode: ['visual', 'characterwise']
-
-        ensure "U",
+        ensure "v 2 j cmd-d U",
           text: """
-          OOO: xxx: OOO
-          |||: OOO: xxx: OOO
-          OOO: xxx: |||: xxx: ooo
-          xxx: |||: ooo: ooo
+          OOO: xxx: OOO:
+          |||: OOO: xxx: OOO:
+          OOO: xxx: |||: xxx: ooo:
+          xxx: |||: ooo: ooo:
           """
           numCursors: 5
-          mode: 'normal'
 
     describe "[vL] select-occurrence", ->
       it "select cursor-word which intersecting selection then apply upper-case", ->
-        ensure "5 l V 2 j cmd-d",
-          selectedText: ['xxx', 'xxx', 'xxx', 'xxx']
-          mode: ['visual', 'characterwise']
-
-        ensure "U",
+        ensure "5 l V 2 j cmd-d U",
           text: """
-          ooo: XXX: ooo
-          |||: ooo: XXX: ooo
-          ooo: XXX: |||: XXX: ooo
-          xxx: |||: ooo: ooo
+          ooo: XXX: ooo:
+          |||: ooo: XXX: ooo:
+          ooo: XXX: |||: XXX: ooo:
+          xxx: |||: ooo: ooo:
           """
           numCursors: 4
-          mode: 'normal'
 
     describe "[vB] select-occurrence", ->
       it "select cursor-word which intersecting selection then apply upper-case", ->
         ensure "W ctrl-v 2 j $ h cmd-d U",
           text: """
-          ooo: xxx: OOO
-          |||: OOO: xxx: OOO
-          ooo: xxx: |||: xxx: OOO
-          xxx: |||: ooo: ooo
+          ooo: xxx: OOO:
+          |||: OOO: xxx: OOO:
+          ooo: xxx: |||: xxx: OOO:
+          xxx: |||: ooo: ooo:
           """
           numCursors: 4
 
       it "pick cursor-word from vB range", ->
         ensure "ctrl-v 7 l 2 j o cmd-d U",
           text: """
-          OOO: xxx: ooo
-          |||: OOO: xxx: ooo
-          OOO: xxx: |||: xxx: ooo
-          xxx: |||: ooo: ooo
+          OOO: xxx: ooo:
+          |||: OOO: xxx: ooo:
+          OOO: xxx: |||: xxx: ooo:
+          xxx: |||: ooo: ooo:
           """
           numCursors: 3
 

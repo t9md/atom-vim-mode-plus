@@ -75,10 +75,6 @@ class ModeManager
     unless @deactivator?.disposed
       @emitter.emit('will-deactivate-mode', {@mode, @submode})
       @deactivator?.dispose()
-      # Remove css class here in-case @deactivate() called solely(occurrence in visual-mode)
-      @editorElement.classList.remove("#{@mode}-mode")
-      @editorElement.classList.remove(@submode)
-
       @emitter.emit('did-deactivate-mode', {@mode, @submode})
 
   # Normal
