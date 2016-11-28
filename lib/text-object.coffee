@@ -42,9 +42,6 @@ class TextObject extends Base
   isA: ->
     not @isInner()
 
-  isAllowSubmodeChange: ->
-    true
-
   isLinewise: ->
     swrap.detectVisualModeSubmode(@editor) is 'linewise'
 

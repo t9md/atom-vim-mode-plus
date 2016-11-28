@@ -230,15 +230,9 @@ class Select extends Operator
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
 
-  canChangeMode: ->
-    if @isMode('visual')
-      @isOccurrence() or @target.isAllowSubmodeChange?()
-    else
-      true
-
   execute: ->
     @selectTarget()
-    if @canChangeMode()
+    if @target.isTextObject()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
 
