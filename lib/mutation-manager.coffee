@@ -91,13 +91,17 @@ class MutationManager
           for selection in @editor.getSelections()
             selection.destroy() unless selection.isLastSelection()
     else
-      for selection, i in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
-        if strict and mutation.createdAt isnt 'will-select'
-          selection.destroy()
-          continue
+      for selection, i in @editor.getSelections()
+        if mutation = @mutationsBySelection.get(selection)
+          if strict and mutation.createdAt isnt 'will-select'
+            selection.destroy()
+            continue
 
-        if point = mutation.getRestorePoint({stay})
-          selection.cursor.setBufferPosition(point)
+          if point = mutation.getRestorePoint({stay})
+            selection.cursor.setBufferPosition(point)
+        else
+          if strict
+            selection.destroy()
 
 # mutation information is created even if selection.isEmpty()
 # So that we can filter selection by when it was created.
