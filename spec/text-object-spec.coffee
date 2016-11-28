@@ -504,6 +504,51 @@ describe "TextObject", ->
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
         it "case-3 visual", -> check open, 'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
+
+      describe "change mode to characterwise", ->
+        # FIXME last "\n" should not be selected
+        textSelected = """
+        __1,
+        __2,
+        __3\n
+        """.replace(/_/g, ' ')
+
+
+        beforeEach ->
+          set
+            textC: """
+            {
+              |1,
+              2,
+              3
+            }
+            """
+          ensure mode: 'normal'
+
+        it "from vC, final-mode is 'characterwise'", ->
+          ensure 'v',
+            selectedText: ['1']
+            mode: ['visual', 'characterwise']
+          ensure 'i B',
+            selectedText: textSelected
+            mode: ['visual', 'characterwise']
+
+        it "from vL, final-mode is 'characterwise'", ->
+          ensure 'V',
+            selectedText: ["  1,\n"]
+            mode: ['visual', 'linewise']
+          ensure 'i B',
+            selectedText: textSelected
+            mode: ['visual', 'linewise'] # FIXME to 'characterwise'
+
+        it "from vB, final-mode is 'characterwise'", ->
+          ensure 'ctrl-v',
+            selectedText: ["1"]
+            mode: ['visual', 'blockwise']
+          ensure 'i B',
+            selectedText: textSelected
+            mode: ['visual', 'blockwise'] # FIXME to 'characterwise'
+
     describe "a-curly-bracket", ->
       beforeEach ->
         set
@@ -535,6 +580,51 @@ describe "TextObject", ->
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
         it "case-3 visual", -> check open, 'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
+
+      describe "change mode to characterwise", ->
+        textSelected = """
+          {
+            1,
+            2,
+            3
+          }
+          """
+        beforeEach ->
+          set
+            textC: """
+            {
+              |1,
+              2,
+              3
+            }
+
+            hello
+            """
+          ensure mode: 'normal'
+
+        it "from vC, final-mode is 'characterwise'", ->
+          ensure 'v',
+            selectedText: ['1']
+            mode: ['visual', 'characterwise']
+          ensure 'a B',
+            selectedText: textSelected
+            mode: ['visual', 'characterwise']
+        it "from vL, final-mode is 'characterwise'", ->
+          ensure 'V',
+            selectedText: ["  1,\n"]
+            mode: ['visual', 'linewise']
+          ensure 'a B',
+            selectedText: textSelected
+            mode: ['visual', 'linewise'] # FIXME to 'characterwise'
+
+        it "from vB, final-mode is 'characterwise'", ->
+          ensure 'ctrl-v',
+            selectedText: ["1"]
+            mode: ['visual', 'blockwise']
+          ensure 'a B',
+            selectedText: textSelected
+            mode: ['visual', 'blockwise'] # FIXME to 'characterwise'
+
   describe "AngleBracket", ->
     describe "inner-angle-bracket", ->
       beforeEach ->
