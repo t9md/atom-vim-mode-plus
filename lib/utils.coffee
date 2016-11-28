@@ -530,12 +530,16 @@ isIncludeFunctionScopeForRow = (editor, row) ->
 
 # [FIXME] very rough state, need improvement.
 isFunctionScope = (editor, scope) ->
-  {scopeName} = editor.getGrammar()
-  switch scopeName
+  switch editor.getGrammar().scopeName
     when 'source.go'
-      /^entity\.name\.function/.test(scope)
+      scopes = ['entity.name.function']
+    when 'source.ruby'
+      scopes = ['meta.function.', 'meta.class.', 'meta.module.']
     else
-      /^meta\.function\./.test(scope)
+      scopes = ['meta.function.', 'meta.class.']
+  pattern = new RegExp('^' + scopes.map(_.escapeRegExp).join('|'))
+  pattern.test(scope)
+
 
 getStartPositionForPattern = (editor, from, pattern, options={}) ->
   from = Point.fromObject(from)
