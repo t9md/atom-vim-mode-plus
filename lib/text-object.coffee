@@ -1,5 +1,6 @@
 {Range, Point} = require 'atom'
 _ = require 'underscore-plus'
+settings = require './settings'
 
 # [TODO] Need overhaul
 #  - [ ] must have getRange(selection) ->
@@ -669,6 +670,7 @@ class InnerComment extends Comment
 # -------------------------
 class Fold extends TextObject
   @extend(false)
+  respectCursorPositionOptionName: "Fold"
 
   adjustRowRange: ([startRow, endRow]) ->
     return [startRow, endRow] unless @isInner()
@@ -681,18 +683,39 @@ class Fold extends TextObject
   getFoldRowRangesContainsForRow: (row) ->
     getCodeFoldRowRangesContainesForRow(@editor, row, includeStartRow: false)?.reverse()
 
+  getIndentLevelForCursor: (cursor) ->
+    cursorColumn = @getBufferPositionForCursor(cursor).column
+    if @editor.getSoftTabs()
+      cursorColumn / @editor.getTabLength()
+    else
+      cursorColumn
+
+  shouldRespectCursorPosition: ->
+    optionName = "respectCursorPositionForTextObject" + @respectCursorPositionOptionName
+    settings.get(optionName) ? false
+
+  isValidRowRange: (rowRange, selection) ->
+    if @shouldRespectCursorPosition()
+      indentLevelForCursor = @getIndentLevelForCursor(selection.cursor)
+      indentLevelForRow = getIndentLevelForBufferRow(@editor, rowRange[0])
+      indentLevelForCursor >= indentLevelForRow
+    else
+      true
+
   getRange: (selection) ->
     range = selection.getBufferRange()
     rowRanges = @getFoldRowRangesContainsForRow(range.start.row)
     return unless rowRanges.length
 
-    if (rowRange = rowRanges.shift())?
+    cursorIndentLevel = @getIndentLevelForCursor(selection.cursor)
+
+    for rowRange, i in rowRanges when @isValidRowRange(rowRange, selection)
       rowRange = @adjustRowRange(rowRange)
       targetRange = getBufferRangeForRowRange(@editor, rowRange)
-      if targetRange.isEqual(range) and rowRanges.length
-        rowRange = @adjustRowRange(rowRanges.shift())
+      if targetRange.isEqual(range) and outerRowRange = rowRanges[i+1]
+        rowRange = @adjustRowRange(outerRowRange)
 
-    getBufferRangeForRowRange(@editor, rowRange)
+      return getBufferRangeForRowRange(@editor, rowRange)
 
 class AFold extends Fold
   @extend()
@@ -704,6 +727,7 @@ class InnerFold extends Fold
 # NOTE: Function range determination is depending on fold.
 class Function extends Fold
   @extend(false)
+  respectCursorPositionOptionName: "Function"
 
   # Some language don't include closing `}` into fold.
   omittingClosingCharLanguages: ['go']

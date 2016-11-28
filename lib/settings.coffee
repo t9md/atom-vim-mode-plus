@@ -127,6 +127,8 @@ module.exports = new Settings 'vim-mode-plus',
   statusBarModeStringStyle:
     default: 'short'
     enum: ['short', 'long']
+  respectCursorPositionForTextObjectFold: false
+  respectCursorPositionForTextObjectFunction: false
   throwErrorOnNonEmptySelectionInNormalMode:
     default: false
     description: "[Dev use] Throw error when non-empty selection was remained in normal-mode at the timing of operation finished"
