@@ -549,6 +549,23 @@ describe "TextObject", ->
             selectedText: textSelected
             mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
 
+        describe "as operator target", ->
+          it "change inser-pair", ->
+            ensure "c i B",
+              textC: """
+              {
+              |
+              }
+              """
+              mode: 'insert'
+          it "delete inser-pair", ->
+            ensure "d i B",
+              textC: """
+              {
+              |}
+              """
+              mode: 'normal'
+
     describe "a-curly-bracket", ->
       beforeEach ->
         set
@@ -625,6 +642,25 @@ describe "TextObject", ->
           ensure 'a B',
             selectedText: textSelected
             mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
+
+        describe "as operator target", ->
+          it "change inser-pair", ->
+            ensure "c a B",
+              textC: """
+              |
+
+              hello
+              """
+              mode: 'insert'
+          it "delete inser-pair", ->
+            ensure "d a B",
+              textC: """
+              |
+
+              hello
+              """
+              mode: 'normal'
+
 
   describe "AngleBracket", ->
     describe "inner-angle-bracket", ->
