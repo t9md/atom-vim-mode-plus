@@ -550,7 +550,7 @@ describe "TextObject", ->
             mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
 
         describe "as operator target", ->
-          it "change inser-pair", ->
+          it "change inner-pair", ->
             ensure "c i B",
               textC: """
               {
@@ -558,7 +558,7 @@ describe "TextObject", ->
               }
               """
               mode: 'insert'
-          it "delete inser-pair", ->
+          it "delete inner-pair", ->
             ensure "d i B",
               textC: """
               {
@@ -644,7 +644,7 @@ describe "TextObject", ->
             mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
 
         describe "as operator target", ->
-          it "change inser-pair", ->
+          it "change inner-pair", ->
             ensure "c a B",
               textC: """
               |
@@ -652,7 +652,7 @@ describe "TextObject", ->
               hello
               """
               mode: 'insert'
-          it "delete inser-pair", ->
+          it "delete inner-pair", ->
             ensure "d a B",
               textC: """
               |
