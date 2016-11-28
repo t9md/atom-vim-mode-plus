@@ -29,7 +29,8 @@ swrap = require './selection-wrapper'
 
 class TextObject extends Base
   @extend(false)
-  allowSubmodeChange: true
+  wise: 'characterwise'
+
   constructor: ->
     @constructor::inner = @getName().startsWith('Inner')
     super
@@ -42,13 +43,10 @@ class TextObject extends Base
     not @isInner()
 
   isAllowSubmodeChange: ->
-    @allowSubmodeChange
+    true
 
   isLinewise: ->
-    if @isAllowSubmodeChange()
-      swrap.detectVisualModeSubmode(@editor) is 'linewise'
-    else
-      @isMode('visual', 'linewise')
+    swrap.detectVisualModeSubmode(@editor) is 'linewise'
 
   stopSelection: ->
     @canSelect = false
@@ -136,7 +134,6 @@ class InnerSmartWord extends SmartWord
 class Pair extends TextObject
   @extend(false)
   allowNextLine: false
-  allowSubmodeChange: false
   adjustInnerRange: true
   pair: null
 
@@ -250,10 +247,18 @@ class Pair extends TextObject
       #  {
       #    aaa
       #  }
-      innerStart = new Point(innerStart.row + 1, 0) if pointIsAtEndOfLine(@editor, innerStart)
-      innerEnd = new Point(innerEnd.row, 0) if getTextToPoint(@editor, innerEnd).match(/^\s*$/)
-      if (innerEnd.column is 0) and (innerStart.column isnt 0)
-        innerEnd = new Point(innerEnd.row - 1, Infinity)
+      if pointIsAtEndOfLine(@editor, innerStart)
+        innerStart = new Point(innerStart.row + 1, 0)
+
+      if getTextToPoint(@editor, innerEnd).match(/^\s*$/)
+        if @isMode('visual')
+          # This is slightly innconsistent with regular Vim
+          # - regular Vim: select new line after EOL
+          # - vim-mode-plus: select to EOL(before new line)
+          # This is intentional since to make submode `characterwise` when auto-detect submode
+          innerEnd = new Point(innerEnd.row - 1, Infinity)
+        else
+          innerEnd = new Point(innerEnd.row, 0)
 
     innerRange = new Range(innerStart, innerEnd)
     targetRange = if @isInner() then innerRange else aRange

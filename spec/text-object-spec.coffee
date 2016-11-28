@@ -510,7 +510,7 @@ describe "TextObject", ->
         textSelected = """
         __1,
         __2,
-        __3\n
+        __3
         """.replace(/_/g, ' ')
 
 
@@ -539,7 +539,7 @@ describe "TextObject", ->
             mode: ['visual', 'linewise']
           ensure 'i B',
             selectedText: textSelected
-            mode: ['visual', 'linewise'] # FIXME to 'characterwise'
+            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
 
         it "from vB, final-mode is 'characterwise'", ->
           ensure 'ctrl-v',
@@ -547,7 +547,7 @@ describe "TextObject", ->
             mode: ['visual', 'blockwise']
           ensure 'i B',
             selectedText: textSelected
-            mode: ['visual', 'blockwise'] # FIXME to 'characterwise'
+            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
 
     describe "a-curly-bracket", ->
       beforeEach ->
@@ -609,13 +609,14 @@ describe "TextObject", ->
           ensure 'a B',
             selectedText: textSelected
             mode: ['visual', 'characterwise']
+
         it "from vL, final-mode is 'characterwise'", ->
           ensure 'V',
             selectedText: ["  1,\n"]
             mode: ['visual', 'linewise']
           ensure 'a B',
             selectedText: textSelected
-            mode: ['visual', 'linewise'] # FIXME to 'characterwise'
+            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
 
         it "from vB, final-mode is 'characterwise'", ->
           ensure 'ctrl-v',
@@ -623,7 +624,7 @@ describe "TextObject", ->
             mode: ['visual', 'blockwise']
           ensure 'a B',
             selectedText: textSelected
-            mode: ['visual', 'blockwise'] # FIXME to 'characterwise'
+            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
 
   describe "AngleBracket", ->
     describe "inner-angle-bracket", ->
@@ -791,7 +792,7 @@ describe "TextObject", ->
         keystroke 'v'
         ensure ';', selectedText: "222"
         ensure ';', selectedText: "333"
-        ensure ';', selectedText: "444()444\n"
+        ensure ';', selectedText: "444()444"
         ensure ';', selectedText: "", selectedBufferRange: [[3, 4], [3, 4]]
     describe "a", ->
       it "select forwarding range within enclosed range(if exists)", ->
