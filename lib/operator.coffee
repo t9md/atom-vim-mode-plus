@@ -145,7 +145,7 @@ class Operator extends Base
     @setTextToRegister(selection.getText(), selection)
 
   setTextToRegister: (text, selection) ->
-    text += "\n" if (@target.isLinewise?() and (not text.endsWith('\n')))
+    text += "\n" if (@target.isLinewise() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
 
   # Main
