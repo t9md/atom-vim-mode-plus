@@ -261,11 +261,13 @@ class Change extends ActivateInsertMode
       @vimState.activate('normal')
       return
 
+    # Allways dynamically determine selection wise wthout consulting target.wise
+    # Reason: when `c i {`, wise is 'characterwise', but actually selected range is 'linewise'
+    #   {
+    #     a
+    #   }
     text = ''
-    if @target.isTextObject()
-      text = "\n" if @target.isLinewise()
-    else if @target.isMotion()
-      text = "\n" if (swrap.detectVisualModeSubmode(@editor) is 'linewise')
+    text = "\n" if swrap.detectVisualModeSubmode(@editor) is 'linewise'
 
     @editor.transact =>
       for selection in @editor.getSelections()

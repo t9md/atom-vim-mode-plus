@@ -232,9 +232,8 @@ class Select extends Operator
 
   execute: ->
     @selectTarget()
-    if @target.isTextObject()
-      submode = swrap.detectVisualModeSubmode(@editor)
-      @activateModeIfNecessary('visual', submode)
+    if @target.isTextObject() and wise = @target.getWise()
+      @activateModeIfNecessary('visual', wise)
 
 class SelectLatestChange extends Select
   @extend()

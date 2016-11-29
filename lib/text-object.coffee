@@ -1,5 +1,6 @@
 {Range, Point} = require 'atom'
 _ = require 'underscore-plus'
+settings = require './settings'
 
 # [TODO] Need overhaul
 #  - [ ] must have getRange(selection) ->
@@ -29,7 +30,7 @@ swrap = require './selection-wrapper'
 
 class TextObject extends Base
   @extend(false)
-  wise: 'characterwise'
+  wise: null
 
   constructor: ->
     @constructor::inner = @getName().startsWith('Inner')
@@ -42,8 +43,20 @@ class TextObject extends Base
   isA: ->
     not @isInner()
 
+  getWise: ->
+    if @wise? and @getOperator().isOccurrence()
+      'characterwise'
+    else
+      @wise
+
+  isCharacterwise: ->
+    @getWise() is 'characterwise'
+
   isLinewise: ->
-    swrap.detectVisualModeSubmode(@editor) is 'linewise'
+    @getWise() is 'linewise'
+
+  isBlockwise: ->
+    @getWise() is 'blockwise'
 
   stopSelection: ->
     @canSelect = false
@@ -60,16 +73,36 @@ class TextObject extends Base
 
   select: ->
     @canSelect = true
+    @activateVisualLinwiseMode = null
 
+    {mode, submode} = @vimState
+    if settings.get('keepColumOnSelectLinewiseTextObject')
+      if @getOperator().instanceof('Select') and @wise is 'linewise' and submode isnt 'linewise'
+        unless @instanceof('Edge')
+          @activateVisualLinwiseMode = -> @vimState.modeManager.activate('visual', 'linewise')
+
+    selectResults = []
     @countTimes =>
       for selection in @editor.getSelections() when @canSelect
-        @selectTextObject(selection)
+        selectResults.push(@selectTextObject(selection))
+
     @editor.mergeIntersectingSelections()
-    @updateSelectionProperties() if @isMode('visual')
+    if @isMode('visual') and @wise is 'characterwise'
+      @updateSelectionProperties()
+
+    if selectResults.some((value) -> value)
+      @wise ?= swrap.detectVisualModeSubmode(@editor)
+    else
+      @wise = null
 
   selectTextObject: (selection) ->
-    range = @getRange(selection)
-    swrap(selection).setBufferRangeSafely(range)
+    if range = @getRange(selection)
+      @activateVisualLinwiseMode?()
+      @activateVisualLinwiseMode = null
+      swrap(selection).setBufferRangeSafely(range)
+      true
+    else
+      false
 
   getRange: ->
     # I want to
@@ -133,6 +166,7 @@ class Pair extends TextObject
   allowNextLine: false
   adjustInnerRange: true
   pair: null
+  wise: 'characterwise'
 
   getPattern: ->
     [open, close] = @pair
@@ -566,6 +600,7 @@ class InnerTag extends Tag
 # Paragraph is defined as consecutive (non-)blank-line.
 class Paragraph extends TextObject
   @extend(false)
+  wise: 'linewise'
 
   findRow: (fromRow, direction, fn) ->
     fn.reset?()
@@ -653,6 +688,7 @@ class InnerIndentation extends Indentation
 # -------------------------
 class Comment extends TextObject
   @extend(false)
+  wise: 'linewise'
 
   getRange: (selection) ->
     row = selection.getBufferRange().start.row
@@ -671,6 +707,7 @@ class InnerComment extends Comment
 # -------------------------
 class Fold extends TextObject
   @extend(false)
+  wise: 'linewise'
 
   adjustRowRange: ([startRow, endRow]) ->
     return [startRow, endRow] unless @isInner()
@@ -751,6 +788,7 @@ class InnerCurrentLine extends CurrentLine
 # -------------------------
 class Entire extends TextObject
   @extend(false)
+
   getRange: (selection) ->
     @stopSelection()
     @editor.buffer.getRange()
@@ -827,6 +865,7 @@ class SearchMatchForward extends TextObject
     reversed = @reversed ? @backward
     swrap(selection).setBufferRange(range, {reversed})
     selection.cursor.autoscroll()
+    true
 
 class SearchMatchBackward extends SearchMatchForward
   @extend()
@@ -847,11 +886,13 @@ class SearchMatchBackward extends SearchMatchForward
 # is always vC range.
 class PreviousSelection extends TextObject
   @extend()
+
   select: ->
     {properties, @submode} = @vimState.previousSelection
     if properties? and @submode?
       selection = @editor.getLastSelection()
       swrap(selection).selectByProperties(properties)
+      @wise = swrap.detectVisualModeSubmode(@editor)
 
 class PersistentSelection extends TextObject
   @extend(false)
@@ -860,7 +901,8 @@ class PersistentSelection extends TextObject
     ranges = @vimState.persistentSelection.getMarkerBufferRanges()
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
-    @vimState.clearPersistentSelections()
+      @vimState.clearPersistentSelections()
+      @wise = swrap.detectVisualModeSubmode(@editor)
 
 class APersistentSelection extends PersistentSelection
   @extend()
@@ -888,13 +930,7 @@ class InnerVisibleArea extends VisibleArea
 # [FIXME] wise mismatch sceenPosition vs bufferPosition
 class Edge extends TextObject
   @extend(false)
-
-  select: ->
-    @success = null
-
-    super
-
-    @vimState.activate('visual', 'linewise') if @success
+  wise: 'linewise'
 
   getRange: (selection) ->
     fromPoint = @getNormalizedHeadScreenPosition(selection)
@@ -913,10 +949,11 @@ class Edge extends TextObject
       endScreenPoint = moveDownToEdge.getPoint(fromPoint)
 
     if startScreenPoint? and endScreenPoint?
-      @success ?= true
       screenRange = new Range(startScreenPoint, endScreenPoint)
       range = @editor.bufferRangeForScreenRange(screenRange)
       getRangeByTranslatePointAndClip(@editor, range, 'end', 'forward')
+    else
+      null
 
 class AEdge extends Edge
   @extend()
