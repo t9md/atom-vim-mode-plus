@@ -78,8 +78,7 @@ class TextObject extends Base
     {mode, submode} = @vimState
     if settings.get('keepColumOnSelectLinewiseTextObject')
       if @getOperator().instanceof('Select') and @wise is 'linewise' and submode isnt 'linewise'
-        unless @instanceof('Edge')
-          @activateVisualLinwiseMode = -> @vimState.modeManager.activate('visual', 'linewise')
+        @activateVisualLinwiseMode = -> @vimState.modeManager.activate('visual', 'linewise')
 
     selectResults = []
     @countTimes =>
@@ -951,9 +950,7 @@ class Edge extends TextObject
     if startScreenPoint? and endScreenPoint?
       screenRange = new Range(startScreenPoint, endScreenPoint)
       range = @editor.bufferRangeForScreenRange(screenRange)
-      getRangeByTranslatePointAndClip(@editor, range, 'end', 'forward')
-    else
-      null
+      getBufferRangeForRowRange(@editor, [range.start.row, range.end.row])
 
 class AEdge extends Edge
   @extend()
