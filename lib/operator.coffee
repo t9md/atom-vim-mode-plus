@@ -243,10 +243,6 @@ class SelectLatestChange extends Select
 class SelectPreviousSelection extends Select
   @extend()
   target: "PreviousSelection"
-  execute: ->
-    @selectTarget()
-    if @target.submode?
-      @activateModeIfNecessary('visual', @target.submode)
 
 class SelectPersistentSelection extends Select
   @extend()
