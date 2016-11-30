@@ -195,4 +195,12 @@ class BlockwiseSelection
 
     head.cursor.goalColumn ?= goalColumn if goalColumn?
 
+  autoscroll: (options) ->
+    @getHeadSelection().autoscroll(options)
+
+  autoscrollIfReversed: (options) ->
+    # See #546 cursor out-of-screen issue happens only in reversed.
+    # So skip here for performance(but don't know if it's worth)
+    @autoscroll(options) if @isReversed()
+
 module.exports = BlockwiseSelection

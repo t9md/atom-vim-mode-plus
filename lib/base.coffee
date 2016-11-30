@@ -43,6 +43,7 @@ vimStateMethods = [
   "subscribe"
   "isMode"
   "getBlockwiseSelections"
+  "getLastBlockwiseSelection"
   "updateSelectionProperties"
   "addToClassList"
 ]

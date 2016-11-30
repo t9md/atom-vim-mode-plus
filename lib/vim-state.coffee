@@ -95,6 +95,7 @@ class VimState
     for selection in @editor.getSelections()
       @blockwiseSelections.push(new BlockwiseSelection(selection))
     @updateSelectionProperties()
+    @getLastBlockwiseSelection().autoscrollIfReversed()
 
   # Other
   # -------------------------

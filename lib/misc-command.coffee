@@ -28,8 +28,10 @@ class ReverseSelections extends MiscCommand
 class BlockwiseOtherEnd extends ReverseSelections
   @extend()
   execute: ->
-    bs.reverse() for bs in @getBlockwiseSelections()
+    for blockwiseSelection in @getBlockwiseSelections()
+      blockwiseSelection.reverse()
     super
+    @getLastBlockwiseSelection().autoscrollIfReversed()
 
 class Undo extends MiscCommand
   @extend()
