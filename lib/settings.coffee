@@ -95,6 +95,9 @@ module.exports = new Settings 'vim-mode-plus',
   stayOnDelete:
     default: false
     description: "Don't move cursor after yank"
+  keepColumOnSelectTextObject:
+    default: false
+    description: "Keep column on select TextObject(Paragraph, Indentation, Fold, Function, Edge)"
   flashOnUndoRedo: true
   flashOnOperate: true
   flashOnOperateBlacklist:

@@ -147,6 +147,7 @@ class ModeManager
 
     switch submode
       when 'linewise'
+        swrap.complementGoalColumn(@editor)
         @vimState.selectLinewise()
       when 'blockwise'
         @vimState.selectBlockwise()

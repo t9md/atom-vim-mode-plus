@@ -294,10 +294,10 @@ trimRange = (editor, scanRange) ->
   pattern = /\S/
   [start, end] = []
   setStart = ({range}) -> {start} = range
+  setEnd = ({range}) -> {end} = range
   editor.scanInBufferRange(pattern, scanRange, setStart)
-  if start?
-    setEnd = ({range}) -> {end} = range
-    editor.backwardsScanInBufferRange(pattern, scanRange, setEnd)
+  editor.backwardsScanInBufferRange(pattern, scanRange, setEnd) if start?
+  if start? and end?
     new Range(start, end)
   else
     scanRange
@@ -450,7 +450,6 @@ getCodeFoldRowRanges = (editor) ->
     .filter (rowRange) ->
       rowRange? and rowRange[0]? and rowRange[1]?
 
-# * `exclusive` to exclude startRow to determine inclusion.
 getCodeFoldRowRangesContainesForRow = (editor, bufferRow, {includeStartRow}={}) ->
   includeStartRow ?= true
   getCodeFoldRowRanges(editor).filter ([startRow, endRow]) ->

@@ -145,7 +145,7 @@ class Operator extends Base
     @setTextToRegister(selection.getText(), selection)
 
   setTextToRegister: (text, selection) ->
-    text += "\n" if (@target.isLinewise?() and (not text.endsWith('\n')))
+    text += "\n" if (@target.isLinewise() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
 
   # Main
@@ -230,17 +230,10 @@ class Select extends Operator
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
 
-  canChangeMode: ->
-    if @isMode('visual')
-      @isOccurrence() or @target.isAllowSubmodeChange?()
-    else
-      true
-
   execute: ->
     @selectTarget()
-    if @canChangeMode()
-      submode = swrap.detectVisualModeSubmode(@editor)
-      @activateModeIfNecessary('visual', submode)
+    if @target.isTextObject() and wise = @target.getWise()
+      @activateModeIfNecessary('visual', wise)
 
 class SelectLatestChange extends Select
   @extend()
@@ -250,10 +243,6 @@ class SelectLatestChange extends Select
 class SelectPreviousSelection extends Select
   @extend()
   target: "PreviousSelection"
-  execute: ->
-    @selectTarget()
-    if @target.submode?
-      @activateModeIfNecessary('visual', @target.submode)
 
 class SelectPersistentSelection extends Select
   @extend()
@@ -273,10 +262,6 @@ class SelectOccurrence extends Operator
     if @selectTarget()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
-
-class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
-  @extend()
-  target: "AFunctionOrInnerParagraph"
 
 # Range Marker
 # =========================

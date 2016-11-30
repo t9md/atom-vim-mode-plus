@@ -1,5 +1,6 @@
 {Range, Point} = require 'atom'
 _ = require 'underscore-plus'
+settings = require './settings'
 
 # [TODO] Need overhaul
 #  - [ ] must have getRange(selection) ->
@@ -29,7 +30,8 @@ swrap = require './selection-wrapper'
 
 class TextObject extends Base
   @extend(false)
-  allowSubmodeChange: true
+  wise: null
+
   constructor: ->
     @constructor::inner = @getName().startsWith('Inner')
     super
@@ -41,14 +43,20 @@ class TextObject extends Base
   isA: ->
     not @isInner()
 
-  isAllowSubmodeChange: ->
-    @allowSubmodeChange
+  getWise: ->
+    if @wise? and @getOperator().isOccurrence()
+      'characterwise'
+    else
+      @wise
+
+  isCharacterwise: ->
+    @getWise() is 'characterwise'
 
   isLinewise: ->
-    if @isAllowSubmodeChange()
-      swrap.detectVisualModeSubmode(@editor) is 'linewise'
-    else
-      @isMode('visual', 'linewise')
+    @getWise() is 'linewise'
+
+  isBlockwise: ->
+    @getWise() is 'blockwise'
 
   stopSelection: ->
     @canSelect = false
@@ -63,18 +71,40 @@ class TextObject extends Base
     bufferPosition = @getNormalizedHeadBufferPosition(selection)
     @editor.screenPositionForBufferPosition(bufferPosition)
 
+  needToKeepColumn: ->
+    @wise is 'linewise' and
+      settings.get('keepColumOnSelectTextObject') and
+      @getOperator().instanceof('Select')
+
   select: ->
     @canSelect = true
-
+    selectResults = []
     @countTimes =>
       for selection in @editor.getSelections() when @canSelect
-        @selectTextObject(selection)
+        selectResults.push(@selectTextObject(selection))
+
+    if @needToKeepColumn()
+      for selection in @editor.getSelections()
+        swrap(selection).clipPropertiesTillEndOfLine()
+
     @editor.mergeIntersectingSelections()
-    @updateSelectionProperties() if @isMode('visual')
+    if @isMode('visual') and @wise is 'characterwise'
+      @updateSelectionProperties()
+
+    if selectResults.some((value) -> value)
+      @wise ?= swrap.detectVisualModeSubmode(@editor)
+    else
+      @wise = null
 
   selectTextObject: (selection) ->
-    range = @getRange(selection)
-    swrap(selection).setBufferRangeSafely(range)
+    if range = @getRange(selection)
+      needToKeepColumn = @needToKeepColumn()
+      if needToKeepColumn and not @isMode('visual', 'linewise')
+        @vimState.modeManager.activate('visual', 'linewise')
+      swrap(selection).setBufferRangeSafely(range, keepGoalColumn: needToKeepColumn)
+      true
+    else
+      false
 
   getRange: ->
     # I want to
@@ -136,9 +166,9 @@ class InnerSmartWord extends SmartWord
 class Pair extends TextObject
   @extend(false)
   allowNextLine: false
-  allowSubmodeChange: false
   adjustInnerRange: true
   pair: null
+  wise: 'characterwise'
 
   getPattern: ->
     [open, close] = @pair
@@ -250,10 +280,18 @@ class Pair extends TextObject
       #  {
       #    aaa
       #  }
-      innerStart = new Point(innerStart.row + 1, 0) if pointIsAtEndOfLine(@editor, innerStart)
-      innerEnd = new Point(innerEnd.row, 0) if getTextToPoint(@editor, innerEnd).match(/^\s*$/)
-      if (innerEnd.column is 0) and (innerStart.column isnt 0)
-        innerEnd = new Point(innerEnd.row - 1, Infinity)
+      if pointIsAtEndOfLine(@editor, innerStart)
+        innerStart = new Point(innerStart.row + 1, 0)
+
+      if getTextToPoint(@editor, innerEnd).match(/^\s*$/)
+        if @isMode('visual')
+          # This is slightly innconsistent with regular Vim
+          # - regular Vim: select new line after EOL
+          # - vim-mode-plus: select to EOL(before new line)
+          # This is intentional since to make submode `characterwise` when auto-detect submode
+          innerEnd = new Point(innerEnd.row - 1, Infinity)
+        else
+          innerEnd = new Point(innerEnd.row, 0)
 
     innerRange = new Range(innerStart, innerEnd)
     targetRange = if @isInner() then innerRange else aRange
@@ -564,6 +602,7 @@ class InnerTag extends Tag
 # Paragraph is defined as consecutive (non-)blank-line.
 class Paragraph extends TextObject
   @extend(false)
+  wise: 'linewise'
 
   findRow: (fromRow, direction, fn) ->
     fn.reset?()
@@ -651,12 +690,12 @@ class InnerIndentation extends Indentation
 # -------------------------
 class Comment extends TextObject
   @extend(false)
+  wise: 'linewise'
 
   getRange: (selection) ->
-    row = selection.getBufferRange().start.row
+    row = swrap(selection).getStartRow()
     rowRange = @editor.languageMode.rowRangeForCommentAtBufferRow(row)
     rowRange ?= [row, row] if @editor.isBufferRowCommented(row)
-
     if rowRange
       getBufferRangeForRowRange(selection.editor, rowRange)
 
@@ -669,9 +708,12 @@ class InnerComment extends Comment
 # -------------------------
 class Fold extends TextObject
   @extend(false)
+  wise: 'linewise'
 
-  adjustRowRange: ([startRow, endRow]) ->
-    return [startRow, endRow] unless @isInner()
+  adjustRowRange: (rowRange) ->
+    return rowRange unless @isInner()
+
+    [startRow, endRow] = rowRange
     startRowIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
     endRowIndentLevel = getIndentLevelForBufferRow(@editor, endRow)
     endRow -= 1 if (startRowIndentLevel is endRowIndentLevel)
@@ -679,20 +721,16 @@ class Fold extends TextObject
     [startRow, endRow]
 
   getFoldRowRangesContainsForRow: (row) ->
-    getCodeFoldRowRangesContainesForRow(@editor, row, includeStartRow: false)?.reverse()
+    getCodeFoldRowRangesContainesForRow(@editor, row, includeStartRow: false).reverse()
 
   getRange: (selection) ->
-    range = selection.getBufferRange()
-    rowRanges = @getFoldRowRangesContainsForRow(range.start.row)
+    rowRanges = @getFoldRowRangesContainsForRow(swrap(selection).getStartRow())
     return unless rowRanges.length
 
-    if (rowRange = rowRanges.shift())?
-      rowRange = @adjustRowRange(rowRange)
-      targetRange = getBufferRangeForRowRange(@editor, rowRange)
-      if targetRange.isEqual(range) and rowRanges.length
-        rowRange = @adjustRowRange(rowRanges.shift())
-
-    getBufferRangeForRowRange(@editor, rowRange)
+    range = getBufferRangeForRowRange(@editor, @adjustRowRange(rowRanges.shift()))
+    if rowRanges.length and range.isEqual(selection.getBufferRange())
+      range = getBufferRangeForRowRange(@editor, @adjustRowRange(rowRanges.shift()))
+    range
 
 class AFold extends Fold
   @extend()
@@ -706,11 +744,7 @@ class Function extends Fold
   @extend(false)
 
   # Some language don't include closing `}` into fold.
-  omittingClosingCharLanguages: ['go']
-
-  initialize: ->
-    super
-    @language = @editor.getGrammar().scopeName.replace(/^source\./, '')
+  scopeNamesOmittingEndRow: ['source.go']
 
   getFoldRowRangesContainsForRow: (row) ->
     rowRanges = getCodeFoldRowRangesContainesForRow(@editor, row)?.reverse()
@@ -719,7 +753,7 @@ class Function extends Fold
 
   adjustRowRange: (rowRange) ->
     [startRow, endRow] = super
-    if @isA() and (@language in @omittingClosingCharLanguages)
+    if @isA() and @editor.getGrammar().scopeName in @scopeNamesOmittingEndRow
       endRow += 1
     [startRow, endRow]
 
@@ -749,6 +783,7 @@ class InnerCurrentLine extends CurrentLine
 # -------------------------
 class Entire extends TextObject
   @extend(false)
+
   getRange: (selection) ->
     @stopSelection()
     @editor.buffer.getRange()
@@ -825,6 +860,7 @@ class SearchMatchForward extends TextObject
     reversed = @reversed ? @backward
     swrap(selection).setBufferRange(range, {reversed})
     selection.cursor.autoscroll()
+    true
 
 class SearchMatchBackward extends SearchMatchForward
   @extend()
@@ -845,11 +881,13 @@ class SearchMatchBackward extends SearchMatchForward
 # is always vC range.
 class PreviousSelection extends TextObject
   @extend()
+
   select: ->
-    {properties, @submode} = @vimState.previousSelection
-    if properties? and @submode?
+    {properties, submode} = @vimState.previousSelection
+    if properties? and submode?
       selection = @editor.getLastSelection()
       swrap(selection).selectByProperties(properties)
+      @wise = submode
 
 class PersistentSelection extends TextObject
   @extend(false)
@@ -858,7 +896,8 @@ class PersistentSelection extends TextObject
     ranges = @vimState.persistentSelection.getMarkerBufferRanges()
     if ranges.length
       @editor.setSelectedBufferRanges(ranges)
-    @vimState.clearPersistentSelections()
+      @vimState.clearPersistentSelections()
+      @wise = swrap.detectVisualModeSubmode(@editor)
 
 class APersistentSelection extends PersistentSelection
   @extend()
@@ -886,13 +925,7 @@ class InnerVisibleArea extends VisibleArea
 # [FIXME] wise mismatch sceenPosition vs bufferPosition
 class Edge extends TextObject
   @extend(false)
-
-  select: ->
-    @success = null
-
-    super
-
-    @vimState.activate('visual', 'linewise') if @success
+  wise: 'linewise'
 
   getRange: (selection) ->
     fromPoint = @getNormalizedHeadScreenPosition(selection)
@@ -911,62 +944,12 @@ class Edge extends TextObject
       endScreenPoint = moveDownToEdge.getPoint(fromPoint)
 
     if startScreenPoint? and endScreenPoint?
-      @success ?= true
       screenRange = new Range(startScreenPoint, endScreenPoint)
       range = @editor.bufferRangeForScreenRange(screenRange)
-      getRangeByTranslatePointAndClip(@editor, range, 'end', 'forward')
+      getBufferRangeForRowRange(@editor, [range.start.row, range.end.row])
 
 class AEdge extends Edge
   @extend()
 
 class InnerEdge extends Edge
   @extend()
-
-# Meta text object
-# -------------------------
-class UnionTextObject extends TextObject
-  @extend(false)
-  member: []
-
-  getRange: (selection) ->
-    unionRange = null
-    for member in @member when range = @new(member).getRange(selection)
-      if unionRange?
-        unionRange = unionRange.union(range)
-      else
-        unionRange = range
-    unionRange
-
-class AFunctionOrInnerParagraph extends UnionTextObject
-  @extend()
-  member: ['AFunction', 'InnerParagraph']
-
-# FIXME: make Motion.CurrentSelection to TextObject then use concatTextObject
-class ACurrentSelectionAndAPersistentSelection extends TextObject
-  @extend()
-  select: ->
-    pesistentRanges = @vimState.getPersistentSelectionBufferRanges()
-    selectedRanges = @editor.getSelectedBufferRanges()
-    ranges = pesistentRanges.concat(selectedRanges)
-
-    if ranges.length
-      @editor.setSelectedBufferRanges(ranges)
-    @vimState.clearPersistentSelections()
-    @editor.mergeIntersectingSelections()
-
-# -------------------------
-# Not used currently
-class TextObjectFirstFound extends TextObject
-  @extend(false)
-  member: []
-  memberOptoins: {allowNextLine: false}
-
-  getRangeBy: (klass, selection) ->
-    @new(klass, @memberOptoins).getRange(selection)
-
-  getRanges: (selection) ->
-    (range for klass in @member when (range = @getRangeBy(klass, selection)))
-
-  getRange: (selection) ->
-    for member in @member when range = @getRangeBy(member, selection)
-      return range
