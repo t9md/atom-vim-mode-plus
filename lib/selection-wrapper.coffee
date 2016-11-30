@@ -18,9 +18,9 @@ class SelectionWrapper
   setProperties: (prop) -> propertyStore.set(@selection, prop)
   clearProperties: -> propertyStore.delete(@selection)
 
-  setBufferRangeSafely: (range) ->
+  setBufferRangeSafely: (range, options) ->
     if range
-      @setBufferRange(range)
+      @setBufferRange(range, options)
       if @selection.isLastSelection()
         @selection.cursor.autoscroll()
 
@@ -161,8 +161,13 @@ class SelectionWrapper
         properties.head = endPoint
     @setProperties(properties)
 
+  complementGoalColumn: ->
+    unless @selection.cursor.goalColumn?
+      column = @getBufferPositionFor('head', fromProperty: true, allowFallback: true).column
+      @selection.cursor.goalColumn = column
+
   # [FIXME]
-  # When `keepColumOnSelectLinewiseTextObject` was true,
+  # When `keepColumOnSelectTextObject` was true,
   #  cursor marker in vL-mode exceed EOL if initial row is longer than endRow of
   #  selected text-object.
   # To avoid this wired cursor position representation, this fucntion clip
@@ -217,8 +222,15 @@ class SelectionWrapper
 
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->
+    {keepGoalColumn} = options
+    delete options.keepGoalColumn if keepGoalColumn?
+
     options.autoscroll ?= false
-    @selection.setBufferRange(range, options)
+    if keepGoalColumn
+      @withKeepingGoalColumn =>
+        @selection.setBufferRange(range, options)
+    else
+      @selection.setBufferRange(range, options)
 
   # Return original text
   replace: (text) ->
@@ -255,7 +267,7 @@ class SelectionWrapper
     {goalColumn} = @selection.cursor
     {start, end} = @getBufferRange()
     fn()
-    @selection.cursor.goalColumn = goalColumn if goalColumn
+    @selection.cursor.goalColumn = goalColumn if goalColumn?
 
   # direction must be one of ['forward', 'backward']
   # options: {translate: true or false} default true
@@ -319,5 +331,9 @@ swrap.updateSelectionProperties = (editor, {unknownOnly}={}) ->
   for selection in editor.getSelections()
     continue if unknownOnly and swrap(selection).hasProperties()
     swrap(selection).saveProperties()
+
+swrap.complementGoalColumn = (editor) ->
+  for selection in editor.getSelections()
+    swrap(selection).complementGoalColumn()
 
 module.exports = swrap

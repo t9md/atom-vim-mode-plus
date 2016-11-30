@@ -71,21 +71,19 @@ class TextObject extends Base
     bufferPosition = @getNormalizedHeadBufferPosition(selection)
     @editor.screenPositionForBufferPosition(bufferPosition)
 
+  needToKeepColumn: ->
+    @wise is 'linewise' and
+      settings.get('keepColumOnSelectTextObject') and
+      @getOperator().instanceof('Select')
+
   select: ->
     @canSelect = true
-    @needToKeepColumn = false
-
-    {mode, submode} = @vimState
-    if settings.get('keepColumOnSelectLinewiseTextObject')
-      if @getOperator().instanceof('Select') and @wise is 'linewise' isnt @vimState.submode
-        @needToKeepColumn = true
-
     selectResults = []
     @countTimes =>
       for selection in @editor.getSelections() when @canSelect
         selectResults.push(@selectTextObject(selection))
 
-    if @needToKeepColumn
+    if @needToKeepColumn()
       for selection in @editor.getSelections()
         swrap(selection).clipPropertiesTillEndOfLine()
 
@@ -100,9 +98,10 @@ class TextObject extends Base
 
   selectTextObject: (selection) ->
     if range = @getRange(selection)
-      if @needToKeepColumn and not @isMode('visual', 'linewise')
+      needToKeepColumn = @needToKeepColumn()
+      if needToKeepColumn and not @isMode('visual', 'linewise')
         @vimState.modeManager.activate('visual', 'linewise')
-      swrap(selection).setBufferRangeSafely(range)
+      swrap(selection).setBufferRangeSafely(range, keepGoalColumn: needToKeepColumn)
       true
     else
       false
