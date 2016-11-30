@@ -5,6 +5,7 @@ _ = require 'underscore-plus'
   getRangeByTranslatePointAndClip
   shrinkRangeEndToBeforeNewLine
   getFirstCharacterPositionForBufferRow
+  getEndOfLineForBufferRow
 } = require './utils'
 
 propertyStore = new Map
@@ -159,6 +160,30 @@ class SelectionWrapper
       else
         properties.head = endPoint
     @setProperties(properties)
+
+  # [FIXME]
+  # When `keepColumOnSelectLinewiseTextObject` was true,
+  #  cursor marker in vL-mode exceed EOL if initial row is longer than endRow of
+  #  selected text-object.
+  # To avoid this wired cursor position representation, this fucntion clip
+  #  selection properties not exceeds EOL.
+  # Bud this should be temporal workaround, dpending this kind of ad-hoc adjustment is
+  # basically bad in the long run.
+  clipPropertiesTillEndOfLine: ->
+    return unless @hasProperties()
+
+    editor = @selection.editor
+    headRowEOL = getEndOfLineForBufferRow(editor, @getHeadRow())
+    tailRowEOL = getEndOfLineForBufferRow(editor, @getTailRow())
+    headMaxColumn = Math.max(headRowEOL.column - 1, 0)
+    tailMaxColumn = Math.max(tailRowEOL.column - 1, 0)
+
+    properties = @getProperties()
+    if properties.head.column > headMaxColumn
+      properties.head.column = headMaxColumn
+
+    if properties.tail.column > tailMaxColumn
+      properties.tail.column = tailMaxColumn
 
   captureProperties: ->
     head: @selection.getHeadBufferPosition()

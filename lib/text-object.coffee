@@ -73,17 +73,21 @@ class TextObject extends Base
 
   select: ->
     @canSelect = true
-    @activateVisualLinwiseMode = null
+    @needToKeepColumn = false
 
     {mode, submode} = @vimState
     if settings.get('keepColumOnSelectLinewiseTextObject')
       if @getOperator().instanceof('Select') and @wise is 'linewise' isnt @vimState.submode
-        @activateVisualLinwiseMode = -> @vimState.modeManager.activate('visual', 'linewise')
+        @needToKeepColumn = true
 
     selectResults = []
     @countTimes =>
       for selection in @editor.getSelections() when @canSelect
         selectResults.push(@selectTextObject(selection))
+
+    if @needToKeepColumn
+      for selection in @editor.getSelections()
+        swrap(selection).clipPropertiesTillEndOfLine()
 
     @editor.mergeIntersectingSelections()
     if @isMode('visual') and @wise is 'characterwise'
@@ -96,8 +100,8 @@ class TextObject extends Base
 
   selectTextObject: (selection) ->
     if range = @getRange(selection)
-      @activateVisualLinwiseMode?()
-      @activateVisualLinwiseMode = null
+      if @needToKeepColumn and not @isMode('visual', 'linewise')
+        @vimState.modeManager.activate('visual', 'linewise')
       swrap(selection).setBufferRangeSafely(range)
       true
     else
