@@ -24,6 +24,8 @@ class ReverseSelections extends MiscCommand
     reversed = @editor.getLastSelection().isReversed()
     for selection in @editor.getSelections() when selection.isReversed() is reversed
       swrap(selection).reverse()
+    if @isMode('visual', 'blockwise')
+      @getLastBlockwiseSelection().autoscrollIfReversed()
 
 class BlockwiseOtherEnd extends ReverseSelections
   @extend()
@@ -31,7 +33,6 @@ class BlockwiseOtherEnd extends ReverseSelections
     for blockwiseSelection in @getBlockwiseSelections()
       blockwiseSelection.reverse()
     super
-    @getLastBlockwiseSelection().autoscrollIfReversed()
 
 class Undo extends MiscCommand
   @extend()
