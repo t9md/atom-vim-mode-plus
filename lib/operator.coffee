@@ -267,10 +267,6 @@ class SelectOccurrence extends Operator
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
 
-class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
-  @extend()
-  target: "AFunctionOrInnerParagraph"
-
 # Range Marker
 # =========================
 class CreatePersistentSelection extends Operator

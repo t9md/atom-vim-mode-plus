@@ -120,7 +120,7 @@ class SelectionWrapper
 
   getRowFor: (where) ->
     [startRow, endRow] = @selection.getBufferRowRange()
-    unless @selection.isReversed()
+    if @selection.isReversed()
       [headRow, tailRow] = [startRow, endRow]
     else
       [headRow, tailRow] = [endRow, startRow]
