@@ -73,7 +73,7 @@ class TextObject extends Base
 
   needToKeepColumn: ->
     @wise is 'linewise' and
-      settings.get('keepColumOnSelectTextObject') and
+      settings.get('keepColumnOnSelectTextObject') and
       @getOperator().instanceof('Select')
 
   select: ->

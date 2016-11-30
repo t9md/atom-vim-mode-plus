@@ -167,7 +167,7 @@ class SelectionWrapper
       @selection.cursor.goalColumn = column
 
   # [FIXME]
-  # When `keepColumOnSelectTextObject` was true,
+  # When `keepColumnOnSelectTextObject` was true,
   #  cursor marker in vL-mode exceed EOL if initial row is longer than endRow of
   #  selected text-object.
   # To avoid this wired cursor position representation, this fucntion clip

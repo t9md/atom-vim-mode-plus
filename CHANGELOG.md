@@ -1,6 +1,6 @@
 # 0.70.0:
 - New: Option `automaticallyEscapeInsertModeOnActivePaneItemChange`  #535
-- New: Option `keepColumOnSelectTextObject` to keep original column in `v i p` etc. #541, #543
+- New: Option `keepColumnOnSelectTextObject` to keep original column in `v i p` etc. #541, #543
 - Fix: Cursor no longer become out-of-screen when move upward in `vB` #546
 - Fix: `I` and `A` should work on occurrence when has-occurrence #488, #518
 - Fix: select-occurrence in `vL` does not correctly select occurrence(spec missed to catch) in previous release.
