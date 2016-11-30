@@ -1,3 +1,25 @@
+# 0.70.0:
+- New: Option `automaticallyEscapeInsertModeOnActivePaneItemChange`  #535
+- New: Option `keepColumOnSelectTextObject` to keep original column in `v i p` etc. #541, #543
+- Fix: Cursor no longer become out-of-screen when move upward in `vB` #546
+- Fix: `I` and `A` should work on occurrence when has-occurrence #488, #518
+- Fix: select-occurrence in `vL` does not correctly select occurrence(spec missed to catch) in previous release.
+- Improve: flash-UI feedback when `Y` in `vC` mode.
+- Improve: Cleanup and suppress flash for `r` command
+- Improve: As general rule selection target can override pre-composed target #531
+  - e.g `transform-smart-word-by-select-list` works on selection if selection was not empty.
+- Improve: Persistent-selection treated as-if real-selection further #532, #534
+- Improve: Tweak what syntax scope is treated as function for TextObject.Function
+- Improve: `delete-line` is now available in all mode(visual mode only for default keymap)
+- Improve: Now pair text-object change mode to `vC` regardless of current mode. #542
+  - Remove internally used `TextObject::allowSubmodeChange` property
+- Breaking: Remove experimental but un-used operators and text-objects.
+  - Operator `DeleteOccurrenceInAFunctionOrInnerParagraph`, `ChangeOccurrenceInAFunctionOrInnerParagraph`, `ChangeOccurrenceInAPersistentSelection`
+  - TextObject `UnionTextObject`, `AFunctionOrInnerParagraph`, `ACurrentSelectionAndAPersistentSelection`, `TextObjectFirstFound`
+- Internal: Rename useMakerForStay to stayByMarker and no longer track marker unless needStay()
+- Internal: Cleanup mutationManger #530
+- Internal, Spec: New `textC` set/ensure option, validate exclusive option. #528, #533
+
 # 0.69.0:
 - New: Command `equalize-panes`(`ctrl-w =`) by @mattaschmann
 - New, Breaking: `g I` support, breaking because old `I` mapped command was renamed(harmless for most users).
