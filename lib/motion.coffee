@@ -697,9 +697,6 @@ class MoveToTopOfScreen extends Motion
   scrolloff: 2
   defaultCount: 0
 
-  getCount: ->
-    super - 1
-
   moveCursor: (cursor) ->
     cursor.setBufferPosition(@getPoint())
 
@@ -716,7 +713,7 @@ class MoveToTopOfScreen extends Motion
     row = getFirstVisibleScreenRow(@editor)
     offset = @getScrolloff()
     offset = 0 if (row is 0)
-    offset = Math.max(@getCount(), offset)
+    offset = Math.max(@getCount(-1), offset)
     row + offset
 
 # keymap: M
@@ -741,7 +738,7 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
     row = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
     offset = @getScrolloff() + 1
     offset = 0 if row is vimLastScreenRow
-    offset = Math.max(@getCount(), offset)
+    offset = Math.max(@getCount(-1), offset)
     row - offset
 
 # Scrolling
