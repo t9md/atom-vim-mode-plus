@@ -59,7 +59,7 @@ class TextObject extends Base
     @getWise() is 'blockwise'
 
   stopSelection: ->
-    @canSelect = false
+    @selectionStopped = true
 
   getNormalizedHeadBufferPosition: (selection) ->
     head = selection.getHeadBufferPosition()
@@ -77,10 +77,10 @@ class TextObject extends Base
       @getOperator().instanceof('Select')
 
   select: ->
-    @canSelect = true
+    @selectionStopped = false
     selectResults = []
     @countTimes =>
-      for selection in @editor.getSelections() when @canSelect
+      for selection in @editor.getSelections() when not @selectionStopped
         selectResults.push(@selectTextObject(selection))
 
     if @needToKeepColumn()

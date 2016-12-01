@@ -90,7 +90,7 @@ class ActivateInsertMode extends Operator
     @replayLastChange(selection)
 
   getInsertionCount: ->
-    @insertionCount ?= if @supportInsertionCount then (@getCount() - 1) else 0
+    @insertionCount ?= if @supportInsertionCount then @getCount(-1) else 0
     @insertionCount
 
   execute: ->

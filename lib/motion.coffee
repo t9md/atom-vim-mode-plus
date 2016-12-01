@@ -3,7 +3,6 @@ _ = require 'underscore-plus'
 Select = null
 
 {
-  saveEditorState, getVisibleBufferRange
   moveCursorLeft, moveCursorRight
   moveCursorUpScreen, moveCursorDownScreen
   moveCursorDownBuffer
@@ -27,8 +26,8 @@ Select = null
   screenPositionIsAtWhiteSpace
   cursorIsAtEndOfLineAtNonEmptyRow
   getFirstCharacterScreenPositionForScreenRow
-
-  debug
+  setBufferRow
+  setBufferColumn
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -207,36 +206,30 @@ class MoveRight extends Motion
 
 class MoveRightBufferColumn extends Motion
   @extend(false)
+
   moveCursor: (cursor) ->
-    newPoint = cursor.getBufferPosition().translate([0, @getCount()])
-    cursor.setBufferPosition(newPoint)
+    setBufferColumn(cursor, cursor.getBufferColumn() + @getCount())
 
 class MoveUp extends Motion
   @extend()
   wise: 'linewise'
 
-  getPoint: (cursor) ->
-    row = @getRow(cursor.getBufferRow())
-    new Point(row, cursor.goalColumn)
-
-  getRow: (row) ->
+  getBufferRow: (row) ->
     row = Math.max(row - 1, 0)
     if @editor.isFoldedAtBufferRow(row)
-      row = getLargestFoldRangeContainsBufferRow(@editor, row).start.row
-    row
+      getLargestFoldRangeContainsBufferRow(@editor, row).start.row
+    else
+      row
 
   moveCursor: (cursor) ->
     @countTimes =>
-      cursor.goalColumn ?= cursor.getBufferColumn()
-      {goalColumn} = cursor
-      cursor.setBufferPosition(@getPoint(cursor))
-      cursor.goalColumn = goalColumn
+      setBufferRow(cursor, @getBufferRow(cursor.getBufferRow()))
 
 class MoveDown extends MoveUp
   @extend()
   wise: 'linewise'
 
-  getRow: (row) ->
+  getBufferRow: (row) ->
     if @editor.isFoldedAtBufferRow(row)
       row = getLargestFoldRangeContainsBufferRow(@editor, row).end.row
     Math.min(row + 1, @getVimLastBufferRow())
@@ -282,8 +275,8 @@ class MoveUpToEdge extends Motion
 
   getPoint: (fromPoint) ->
     column = fromPoint.column
-    for row in @getScanRows(fromPoint) when point = new Point(row, column)
-      return point if @isEdge(point)
+    for row in @getScanRows(fromPoint) when @isEdge(point = new Point(row, column))
+      return point
 
   getScanRows: ({row}) ->
     validRow = getValidVimScreenRow.bind(null, @editor)
@@ -359,7 +352,7 @@ class MoveToNextWord extends Motion
     @countTimes ({isFinal}) =>
       cursorRow = cursor.getBufferRow()
       if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
-        point = [cursorRow+1, 0]
+        point = [cursorRow + 1, 0]
       else
         point = @getPoint(cursor)
         if isFinal and @isAsOperatorTarget()
@@ -589,53 +582,33 @@ class MoveToPreviousParagraph extends MoveToNextParagraph
 class MoveToBeginningOfLine extends Motion
   @extend()
 
-  getPoint: ({row}) ->
-    new Point(row, 0)
-
   moveCursor: (cursor) ->
-    point = @getPoint(cursor.getBufferPosition())
-    cursor.setBufferPosition(point)
+    setBufferColumn(cursor, 0)
 
 class MoveToColumn extends Motion
   @extend()
-  getCount: ->
-    super - 1
-
-  getPoint: ({row}) ->
-    new Point(row, @getCount())
 
   moveCursor: (cursor) ->
-    point = @getPoint(cursor.getScreenPosition())
-    cursor.setScreenPosition(point)
+    setBufferColumn(cursor, @getCount(-1))
 
 class MoveToLastCharacterOfLine extends Motion
   @extend()
 
-  getCount: ->
-    super - 1
-
-  getPoint: ({row}) ->
-    row = getValidVimBufferRow(@editor, row + @getCount())
-    new Point(row, Infinity)
-
   moveCursor: (cursor) ->
-    point = @getPoint(cursor.getBufferPosition())
-    cursor.setBufferPosition(point)
+    row = getValidVimBufferRow(@editor, cursor.getBufferRow() + @getCount(-1))
+    cursor.setBufferPosition([row, Infinity])
     cursor.goalColumn = Infinity
 
 class MoveToLastNonblankCharacterOfLineAndDown extends Motion
   @extend()
   inclusive: true
 
-  getCount: ->
-    super - 1
-
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
     cursor.setBufferPosition(point)
 
   getPoint: ({row}) ->
-    row = Math.min(row + @getCount(), @getVimLastBufferRow())
+    row = Math.min(row + @getCount(-1), @getVimLastBufferRow())
     from = new Point(row, Infinity)
     point = getStartPositionForPattern(@editor, from, /\s*$/)
     (point ? from).translate([0, -1])
@@ -685,7 +658,7 @@ class MoveToFirstLine extends Motion
     @getFirstCharacterPositionForBufferRow(row)
 
   getRow: ->
-    @getCount() - 1
+    @getCount(-1)
 
 # keymap: G
 class MoveToLastLine extends MoveToFirstLine
@@ -705,14 +678,7 @@ class MoveToRelativeLine extends Motion
   wise: 'linewise'
 
   moveCursor: (cursor) ->
-    point = @getPoint(cursor.getBufferPosition())
-    cursor.setBufferPosition(point)
-
-  getCount: ->
-    super - 1
-
-  getPoint: ({row, column}) ->
-    [row + @getCount(), column]
+    setBufferRow(cursor, cursor.getBufferRow() + @getCount(-1))
 
 class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
   @extend(false)
@@ -881,10 +847,7 @@ class Find extends Motion
     points = []
     @editor[method] ///#{_.escapeRegExp(@input)}///g, scanRange, ({range}) ->
       points.push(range.start)
-    points[@getCount()]?.translate([0, offset])
-
-  getCount: ->
-    super - 1
+    points[@getCount(-1)]?.translate([0, offset])
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())

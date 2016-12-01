@@ -109,8 +109,9 @@ class Base
   # -------------------------
   count: null
   defaultCount: 1
-  getCount: ->
+  getCount: (offset=0) ->
     @count ?= @vimState.getCount() ? @defaultCount
+    @count + offset
 
   resetCount: ->
     @count = null

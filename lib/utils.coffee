@@ -292,6 +292,15 @@ trimRange = (editor, scanRange) ->
 
 # Cursor motion wrapper
 # -------------------------
+# Just update bufferRow with keeping column by respecting goalColumn
+setBufferRow = (cursor, row) ->
+  column = cursor.goalColumn ? cursor.getBufferColumn()
+  cursor.setBufferPosition([row, column])
+  cursor.goalColumn = column
+
+setBufferColumn = (cursor, column) ->
+  cursor.setBufferPosition([cursor.getBufferRow(), column])
+
 moveCursor = (cursor, {preserveGoalColumn}, fn) ->
   {goalColumn} = cursor
   fn(cursor)
@@ -485,7 +494,6 @@ isFunctionScope = (editor, scope) ->
       scopes = ['meta.function.', 'meta.class.']
   pattern = new RegExp('^' + scopes.map(_.escapeRegExp).join('|'))
   pattern.test(scope)
-
 
 getStartPositionForPattern = (editor, from, pattern, options={}) ->
   from = Point.fromObject(from)
@@ -809,6 +817,8 @@ module.exports = {
   getVimEofScreenPosition
   getVimLastBufferRow
   getVimLastScreenRow
+  setBufferRow
+  setBufferColumn
   moveCursorLeft
   moveCursorRight
   moveCursorUpScreen
