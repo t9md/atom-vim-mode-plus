@@ -507,7 +507,7 @@ class MoveToNextSentence extends Motion
     foundPoint = null
     @editor.scanInBufferRange @sentenceRegex, scanRange, ({range, matchText, match, stop}) =>
       if match[1]?
-        {start: {row: startRow}, end: {row: endRow}} = range
+        [startRow, endRow] = [range.start.row, range.end.row]
         return if @skipBlankRow and @isBlankRow(endRow)
         if @isBlankRow(startRow) isnt @isBlankRow(endRow)
           foundPoint = @getFirstCharacterPositionForRow(endRow)
@@ -521,7 +521,7 @@ class MoveToNextSentence extends Motion
     foundPoint = null
     @editor.backwardsScanInBufferRange @sentenceRegex, scanRange, ({range, match, stop, matchText}) =>
       if match[1]?
-        {start: {row: startRow}, end: {row: endRow}} = range
+        [startRow, endRow] = [range.start.row, range.end.row]
         if not @isBlankRow(endRow) and @isBlankRow(startRow)
           point = @getFirstCharacterPositionForRow(endRow)
           if point.isLessThan(fromPoint)
