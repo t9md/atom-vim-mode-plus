@@ -8,7 +8,6 @@ _ = require 'underscore-plus'
 {
   pointIsAtEndOfLine
   mergeIntersectingRanges
-  highlightRanges
 } = require './utils'
 
 class MiscCommand extends Base

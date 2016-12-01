@@ -9,7 +9,6 @@ settings = require './settings'
 {HoverElement} = require './hover'
 SearchInputElement = require './search-input'
 {
-  highlightRanges
   getVisibleEditors
   matchScopes
 

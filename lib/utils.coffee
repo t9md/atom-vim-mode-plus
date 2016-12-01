@@ -55,17 +55,6 @@ saveEditorState = (editor) ->
       editor.foldBufferRow(row)
     editorElement.setScrollTop(scrollTop)
 
-# Return function to restore cursor position
-# When restoring, removed cursors are ignored.
-saveCursorPositions = (editor) ->
-  points = new Map
-  for cursor in editor.getCursors()
-    points.set(cursor, cursor.getBufferPosition())
-  ->
-    for cursor in editor.getCursors() when points.has(cursor)
-      point = points.get(cursor)
-      cursor.setBufferPosition(point)
-
 getKeystrokeForEvent = (event) ->
   keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
   atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
@@ -90,14 +79,16 @@ isLinewiseRange = ({start, end}) ->
 
 isEndsWithNewLineForBufferRow = (editor, row) ->
   {start, end} = editor.bufferRangeForBufferRow(row, includeNewline: true)
-  (not start.isEqual(end)) and end.column is 0
+  start.row isnt end.row
 
 haveSomeNonEmptySelection = (editor) ->
   editor.getSelections().some (selection) ->
     not selection.isEmpty()
 
-sortRanges = (ranges) ->
-  ranges.sort((a, b) -> a.compare(b))
+sortComparable = (collection) ->
+  collection.sort (a, b) -> a.compare(b)
+
+sortRanges = sortComparable
 
 sortRangesByEndPosition = (ranges, fn) ->
   ranges.sort((a, b) -> a.end.compare(b.end))
@@ -290,21 +281,9 @@ getFirstCharacterScreenPositionForScreenRow = (editor, screenRow) ->
   else
     screenLineStart
 
-trimRange = (editor, scanRange) ->
-  pattern = /\S/
-  [start, end] = []
-  setStart = ({range}) -> {start} = range
-  setEnd = ({range}) -> {end} = range
-  editor.scanInBufferRange(pattern, scanRange, setStart)
-  editor.backwardsScanInBufferRange(pattern, scanRange, setEnd) if start?
-  if start? and end?
-    new Range(start, end)
-  else
-    scanRange
-
 getFirstCharacterPositionForBufferRow = (editor, row) ->
-  from = [row, 0]
-  getEndPositionForPattern(editor, from, /\s*/, containedOnly: true) or from
+  fromPoint = new Point(row, 0)
+  getEndPositionForPattern(editor, fromPoint, /\s*/, containedOnly: true) ? fromPoint
 
 getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
   start = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
@@ -318,10 +297,20 @@ getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
   point ? scanRange.start
 
 cursorIsAtFirstCharacter = (cursor) ->
-  {editor} = cursor
-  column = cursor.getBufferColumn()
-  firstCharColumn = getFirstCharacterColumForBufferRow(editor, cursor.getBufferRow())
-  column is firstCharColumn
+  {row, column} = cursor.getBufferPosition()
+  column is getFirstCharacterColumForBufferRow(cursor.editor, row)
+
+trimRange = (editor, scanRange) ->
+  pattern = /\S/
+  [start, end] = []
+  setStart = ({range}) -> {start} = range
+  setEnd = ({range}) -> {end} = range
+  editor.scanInBufferRange(pattern, scanRange, setStart)
+  editor.backwardsScanInBufferRange(pattern, scanRange, setEnd) if start?
+  if start? and end?
+    new Range(start, end)
+  else
+    scanRange
 
 # Cursor motion wrapper
 # -------------------------
@@ -390,26 +379,6 @@ moveCursorUpBuffer = (cursor) ->
 moveCursorToFirstCharacterAtRow = (cursor, row) ->
   cursor.setBufferPosition([row, 0])
   cursor.moveToFirstCharacterOfLine()
-
-# Return markers
-highlightRanges = (editor, ranges, options) ->
-  ranges = [ranges] unless _.isArray(ranges)
-  return null unless ranges.length
-
-  invalidate = options.invalidate ? 'never'
-  markers = (editor.markBufferRange(range, {invalidate}) for range in ranges)
-
-  decorateOptions = {type: 'highlight', class: options.class}
-  editor.decorateMarker(marker, decorateOptions) for marker in markers
-
-  {timeout} = options
-  if timeout?
-    destroyMarkers = -> _.invoke(markers, 'destroy')
-    setTimeout(destroyMarkers, timeout)
-  markers
-
-highlightRange = (editor, range, options) ->
-  highlightRanges(editor, [range], options)[0]
 
 # Return valid row from 0 to vimLastBufferRow
 getValidVimBufferRow = (editor, row) ->
@@ -572,9 +541,6 @@ getBufferRangeForPatternFromPoint = (editor, fromPoint, pattern) ->
   end = getEndPositionForPattern(editor, fromPoint, pattern, containedOnly: true)
   start = getStartPositionForPattern(editor, end, pattern, containedOnly: true) if end?
   new Range(start, end) if start?
-
-sortComparable = (collection) ->
-  collection.sort (a, b) -> a.compare(b)
 
 # Scroll to bufferPosition with minimum amount to keep original visible area.
 # If target position won't fit within onePageUp or onePageDown, it center target point.
@@ -845,7 +811,6 @@ module.exports = {
   include
   debug
   saveEditorState
-  saveCursorPositions
   getKeystrokeForEvent
   getCharacterForEvent
   isLinewiseRange
@@ -873,8 +838,6 @@ module.exports = {
   getEndOfLineForBufferRow
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
-  highlightRanges
-  highlightRange
   getValidVimBufferRow
   getValidVimScreenRow
   moveCursorToFirstCharacterAtRow

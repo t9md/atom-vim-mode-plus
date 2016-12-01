@@ -1,6 +1,5 @@
 {Emitter, CompositeDisposable} = require 'atom'
 {
-  highlightRange
   scanInRanges
   getVisibleBufferRange
   smartScrollToBufferPosition

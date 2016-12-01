@@ -11,7 +11,6 @@ Select = null
   cursorIsAtVimEndOfFile
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getValidVimScreenRow, getValidVimBufferRow
-  highlightRanges
   moveCursorToFirstCharacterAtRow
   sortRanges
   getIndentLevelForBufferRow
