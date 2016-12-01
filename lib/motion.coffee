@@ -618,10 +618,8 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
 class MoveToFirstCharacterOfLine extends Motion
   @extend()
   moveCursor: (cursor) ->
-    @setBufferPositionSafely(cursor, @getPoint(cursor))
-
-  getPoint: (cursor) ->
-    @getFirstCharacterPositionForBufferRow(cursor.getBufferRow())
+    point = @getFirstCharacterPositionForBufferRow(cursor.getBufferRow())
+    @setBufferPositionSafely(cursor, point)
 
 class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
@@ -650,12 +648,10 @@ class MoveToFirstLine extends Motion
   jump: true
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint())
-    cursor.autoscroll(center: true)
-
-  getPoint: ->
     row = getValidVimBufferRow(@editor, @getRow())
-    @getFirstCharacterPositionForBufferRow(row)
+    point = @getFirstCharacterPositionForBufferRow(row)
+    cursor.setBufferPosition(point)
+    cursor.autoscroll(center: true)
 
   getRow: ->
     @getCount(-1)
@@ -698,10 +694,8 @@ class MoveToTopOfScreen extends Motion
   defaultCount: 0
 
   moveCursor: (cursor) ->
-    cursor.setBufferPosition(@getPoint())
-
-  getPoint: ->
-    getFirstCharacterBufferPositionForScreenRow(@editor, @getRow())
+    point = getFirstCharacterBufferPositionForScreenRow(@editor, @getRow())
+    cursor.setBufferPosition(point)
 
   getScrolloff: ->
     if @isAsOperatorTarget()
