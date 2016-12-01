@@ -23,11 +23,9 @@ Select = null
   detectScopeStartPositionForScope
   getBufferRows
   getStartPositionForPattern
-  getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   screenPositionIsAtWhiteSpace
   cursorIsAtEndOfLineAtNonEmptyRow
-  getFirstCharacterColumForBufferRow
   getFirstCharacterScreenPositionForScreenRow
 
   debug
@@ -344,6 +342,17 @@ class MoveToNextWord extends Motion
     else
       wordRange?.end ? cursorPoint
 
+  # Special case: "cw" and "cW" are treated like "ce" and "cE" if the cursor is
+  # on a non-blank.  This is because "cw" is interpreted as change-word, and a
+  # word does not include the following white space.  {Vi: "cw" when on a blank
+  # followed by other blanks changes only the first blank; this is probably a
+  # bug, because "dw" deletes all the blanks}
+  #
+  # Another special case: When using the "w" motion in combination with an
+  # operator and the last word moved over is at the end of a line, the end of
+  # that word becomes the end of the operated text, not the first word in the
+  # next line.
+
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
@@ -354,10 +363,11 @@ class MoveToNextWord extends Motion
       else
         point = @getPoint(cursor)
         if isFinal and @isAsOperatorTarget()
-          if @getOperator().getName() is 'Change' and (not wasOnWhiteSpace)
+          if @getOperator().is('Change') and (not wasOnWhiteSpace)
             point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
           else if (point.row > cursorRow)
             point = [cursorRow, Infinity]
+        else
       cursor.setBufferPosition(point)
 
 # b
@@ -496,9 +506,6 @@ class MoveToNextSentence extends Motion
     else if @direction is 'previous'
       @getPreviousStartOfSentence(fromPoint)
 
-  getFirstCharacterPositionForRow: (row) ->
-    new Point(row, getFirstCharacterColumForBufferRow(@editor, row))
-
   isBlankRow: (row) ->
     @editor.isBufferRowBlank(row)
 
@@ -510,7 +517,7 @@ class MoveToNextSentence extends Motion
         [startRow, endRow] = [range.start.row, range.end.row]
         return if @skipBlankRow and @isBlankRow(endRow)
         if @isBlankRow(startRow) isnt @isBlankRow(endRow)
-          foundPoint = @getFirstCharacterPositionForRow(endRow)
+          foundPoint = @getFirstCharacterPositionForBufferRow(endRow)
       else
         foundPoint = range.end
       stop() if foundPoint?
@@ -523,12 +530,12 @@ class MoveToNextSentence extends Motion
       if match[1]?
         [startRow, endRow] = [range.start.row, range.end.row]
         if not @isBlankRow(endRow) and @isBlankRow(startRow)
-          point = @getFirstCharacterPositionForRow(endRow)
+          point = @getFirstCharacterPositionForBufferRow(endRow)
           if point.isLessThan(fromPoint)
             foundPoint = point
           else
             return if @skipBlankRow
-            foundPoint = @getFirstCharacterPositionForRow(startRow)
+            foundPoint = @getFirstCharacterPositionForBufferRow(startRow)
       else
         if range.end.isLessThan(fromPoint)
           foundPoint = range.end
@@ -641,7 +648,7 @@ class MoveToFirstCharacterOfLine extends Motion
     @setBufferPositionSafely(cursor, @getPoint(cursor))
 
   getPoint: (cursor) ->
-    getFirstCharacterPositionForBufferRow(@editor, cursor.getBufferRow())
+    @getFirstCharacterPositionForBufferRow(cursor.getBufferRow())
 
 class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
@@ -675,7 +682,7 @@ class MoveToFirstLine extends Motion
 
   getPoint: ->
     row = getValidVimBufferRow(@editor, @getRow())
-    getFirstCharacterPositionForBufferRow(@editor, row)
+    @getFirstCharacterPositionForBufferRow(row)
 
   getRow: ->
     @getCount() - 1
@@ -940,7 +947,7 @@ class MoveToMarkLine extends MoveToMark
 
   getPoint: ->
     if point = super
-      getFirstCharacterPositionForBufferRow(@editor, point.row)
+      @getFirstCharacterPositionForBufferRow(point.row)
 
 # Fold
 # -------------------------

@@ -335,18 +335,29 @@ describe "Motion general", ->
         set text: 'abc', cursor: [0, 0]
         ensure 'w', cursor: [0, 2]
 
-      it "moves the cursor to beginning of the next word of next line when all remaining text is white space.", ->
+      it "move to next word by skipping trailing white spaces", ->
         set
-          text_: """
-            012___
+          textC_: """
+            012|___
               234
             """
-          cursor: [0, 3]
-        ensure 'w', cursor: [1, 2]
+        ensure 'w',
+          textC_: """
+            012___
+              |234
+            """
 
-      it "moves the cursor to beginning of the next word of next line when cursor is at EOL.", ->
-        set text: "\n  234", cursor: [0, 0]
-        ensure 'w', cursor: [1, 2]
+      it "move to next word from EOL", ->
+        set
+          textC_: """
+            |
+            __234"
+            """
+        ensure 'w',
+          textC_: """
+
+            __|234"
+            """
 
       # [FIXME] improve spec to loop same section with different text
       describe "for CRLF buffer", ->
