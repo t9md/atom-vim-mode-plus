@@ -1,3 +1,15 @@
+# 0.71.0:
+- New: `moveToFirstCharacterOnVerticalMotion` options #550, #549
+  - Default: `true`, if you disable, column position is kept after these motion.
+  - Similar to `startofline` option in pure-Vim.
+  - Affects following motion(Unlike pure-Vim, `d`, `< <`, `> >` is not affected)
+    - `G`, `g g`, `H`, `M`, `L`, `ctrl-f`, `ctrl-b`, `ctrl-d`, `ctrl-u`
+  - For `d`, `< <`, `> >`, use `stayOnXXX` option if you want to keep column.
+- Improve: Don't close search mini-editor on `blur` event. (e.g. app-switch by cmd-tab) #539
+- Internal: `Base::getCount()` can take offset.
+- Internal Bug: Now properly detect duplicate class Name among operations.
+- Internal: Rename `Misc.Scroll` to `ScrollWithoutChangingCursorPosition` for explicitness.
+
 # 0.70.0:
 - New: Option `automaticallyEscapeInsertModeOnActivePaneItemChange`  #535
 - New: Option `keepColumnOnSelectTextObject` to keep original column in `v i p` etc. #541, #543
