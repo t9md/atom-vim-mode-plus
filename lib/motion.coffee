@@ -750,9 +750,9 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
 # Full: ctrl-f, ctrl-b
 # -------------------------
 # [FIXME] count behave differently from original Vim.
-class ScrollFullScreenDown extends Motion
-  @extend()
-  amountOfPage: +1
+class Scroll extends Motion
+  @extend(false)
+  verticalMotion: true
 
   isSmoothScrollEnabled: ->
     if Math.abs(@amountOfPage) is 1
@@ -800,18 +800,23 @@ class ScrollFullScreenDown extends Motion
       else
         done()
 
+# keymap: ctrl-f
+class ScrollFullScreenDown extends Scroll
+  @extend(true)
+  amountOfPage: +1
+
 # keymap: ctrl-b
-class ScrollFullScreenUp extends ScrollFullScreenDown
+class ScrollFullScreenUp extends Scroll
   @extend()
   amountOfPage: -1
 
 # keymap: ctrl-d
-class ScrollHalfScreenDown extends ScrollFullScreenDown
+class ScrollHalfScreenDown extends Scroll
   @extend()
   amountOfPage: +1 / 2
 
 # keymap: ctrl-u
-class ScrollHalfScreenUp extends ScrollHalfScreenDown
+class ScrollHalfScreenUp extends Scroll
   @extend()
   amountOfPage: -1 / 2
 
