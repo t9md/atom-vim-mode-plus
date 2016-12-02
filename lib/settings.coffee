@@ -103,7 +103,7 @@ module.exports = new Settings 'vim-mode-plus',
     description: """
     Almost equivalent to `startofline` pure-Vim option. When true, move cursor to first char.
     Affects to `ctrl-f, b, d, u`, `G`, `H`, `M`, `L`, `gg`
-    But unlike pure-Vim `d`, `<<`, `>>` is not affected by this option, use independent `stayOn` options.
+    Unlike pure-Vim, `d`, `<<`, `>>` are not affected by this option, use independent `stayOn` options.
     """
   flashOnUndoRedo: true
   flashOnOperate: true
