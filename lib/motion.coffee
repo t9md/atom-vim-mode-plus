@@ -653,6 +653,7 @@ class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
   defaultCount: 0
   getCount: -> super - 1
 
+# keymap: g g
 class MoveToFirstLine extends Motion
   @extend()
   wise: 'linewise'
