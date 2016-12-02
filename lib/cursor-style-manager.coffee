@@ -77,7 +77,10 @@ class CursorStyleManager
     # But corresponding cursorsComponent(HTML element) is added in sync.
     # So to modify style of cursorsComponent, we have to make sure corresponding cursorsComponent
     # is available by component in sync to model.
-    @editorElement.component.updateSync() if submode in ['characterwise', 'blockwise']
+    # [FIXME]
+    # When ctrl-f, b, d, u in vL mode, I had to call updateSync to show cursor correctly
+    # But it wasn't necessary before I iintroduce `moveToFirstCharacterOnVerticalMotion` for `ctrl-f`
+    @editorElement.component.updateSync()
 
     # [FIXME] In spec mode, we skip here since not all spec have dom attached.
     return if isSpecMode
