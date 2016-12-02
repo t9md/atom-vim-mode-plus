@@ -28,6 +28,7 @@ Select = null
   getFirstCharacterScreenPositionForScreenRow
   setBufferRow
   setBufferColumn
+  limitNumber
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -39,6 +40,7 @@ class Motion extends Base
   inclusive: false
   wise: 'characterwise'
   jump: false
+  verticalMotion: false
 
   constructor: ->
     super
@@ -54,6 +56,9 @@ class Motion extends Base
 
   isJump: ->
     @jump
+
+  isVerticalMotion: ->
+    @verticalMotion
 
   isCharacterwise: ->
     @wise is 'characterwise'
@@ -129,6 +134,12 @@ class Motion extends Base
       swrap(selection).translateSelectionHeadAndClip('backward')
     # to select @inclusive-ly
     swrap(selection).translateSelectionEndAndClip('forward')
+
+  setCursorBuffeRow: (cursor, row, options) ->
+    if @isVerticalMotion() and settings.get('moveToFirstCharacterOnVerticalMotion')
+      cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row), options)
+    else
+      setBufferRow(cursor, row, options)
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
@@ -215,7 +226,7 @@ class MoveUp extends Motion
   wise: 'linewise'
 
   getBufferRow: (row) ->
-    row = Math.max(row - 1, 0)
+    row = limitNumber(row - 1, min: 0)
     if @editor.isFoldedAtBufferRow(row)
       getLargestFoldRangeContainsBufferRow(@editor, row).start.row
     else
@@ -232,7 +243,7 @@ class MoveDown extends MoveUp
   getBufferRow: (row) ->
     if @editor.isFoldedAtBufferRow(row)
       row = getLargestFoldRangeContainsBufferRow(@editor, row).end.row
-    Math.min(row + 1, @getVimLastBufferRow())
+    limitNumber(row + 1, max: @getVimLastBufferRow())
 
 class MoveUpScreen extends Motion
   @extend()
@@ -608,7 +619,7 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
     cursor.setBufferPosition(point)
 
   getPoint: ({row}) ->
-    row = Math.min(row + @getCount(-1), @getVimLastBufferRow())
+    row = limitNumber(row + @getCount(-1), max: @getVimLastBufferRow())
     from = new Point(row, Infinity)
     point = getStartPositionForPattern(@editor, from, /\s*$/)
     (point ? from).translate([0, -1])
@@ -642,15 +653,15 @@ class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
   defaultCount: 0
   getCount: -> super - 1
 
+# keymap: g g
 class MoveToFirstLine extends Motion
   @extend()
   wise: 'linewise'
   jump: true
+  verticalMotion: true
 
   moveCursor: (cursor) ->
-    row = getValidVimBufferRow(@editor, @getRow())
-    point = @getFirstCharacterPositionForBufferRow(row)
-    cursor.setBufferPosition(point)
+    @setCursorBuffeRow(cursor, getValidVimBufferRow(@editor, @getRow()))
     cursor.autoscroll(center: true)
 
   getRow: ->
@@ -666,8 +677,8 @@ class MoveToLineByPercent extends MoveToFirstLine
   @extend()
 
   getRow: ->
-    percent = Math.min(100, @getCount())
-    Math.floor(@getVimLastScreenRow() * (percent / 100))
+    percent = limitNumber(@getCount(), max: 100)
+    Math.floor((@editor.getLineCount() - 1) * (percent / 100))
 
 class MoveToRelativeLine extends Motion
   @extend(false)
@@ -681,7 +692,7 @@ class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
   min: 0
 
   getCount: ->
-    Math.max(@min, super)
+    limitNumber(super, {@min})
 
 # Position cursor without scrolling., H, M, L
 # -------------------------
@@ -692,10 +703,11 @@ class MoveToTopOfScreen extends Motion
   jump: true
   scrolloff: 2
   defaultCount: 0
+  verticalMotion: true
 
   moveCursor: (cursor) ->
-    point = getFirstCharacterBufferPositionForScreenRow(@editor, @getRow())
-    cursor.setBufferPosition(point)
+    bufferRow = @editor.bufferRowForScreenRow(@getScreenRow())
+    @setCursorBuffeRow(cursor, bufferRow)
 
   getScrolloff: ->
     if @isAsOperatorTarget()
@@ -703,36 +715,35 @@ class MoveToTopOfScreen extends Motion
     else
       @scrolloff
 
-  getRow: ->
-    row = getFirstVisibleScreenRow(@editor)
+  getScreenRow: ->
+    firstRow = getFirstVisibleScreenRow(@editor)
     offset = @getScrolloff()
-    offset = 0 if (row is 0)
-    offset = Math.max(@getCount(-1), offset)
-    row + offset
+    offset = 0 if firstRow is 0
+    offset = limitNumber(@getCount(-1), min: offset)
+    firstRow + offset
 
 # keymap: M
 class MoveToMiddleOfScreen extends MoveToTopOfScreen
   @extend()
-  getRow: ->
+  getScreenRow: ->
     startRow = getFirstVisibleScreenRow(@editor)
-    vimLastScreenRow = @getVimLastScreenRow()
-    endRow = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
+    endRow = limitNumber(@editor.getLastVisibleScreenRow(), max: @getVimLastScreenRow())
     startRow + Math.floor((endRow - startRow) / 2)
 
 # keymap: L
 class MoveToBottomOfScreen extends MoveToTopOfScreen
   @extend()
-  getRow: ->
+  getScreenRow: ->
     # [FIXME]
     # At least Atom v1.6.0, there are two implementation of getLastVisibleScreenRow()
     # editor.getLastVisibleScreenRow() and editorElement.getLastVisibleScreenRow()
     # Those two methods return different value, editor's one is corrent.
     # So I intentionally use editor.getLastScreenRow here.
     vimLastScreenRow = @getVimLastScreenRow()
-    row = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
+    row = limitNumber(@editor.getLastVisibleScreenRow(), max: vimLastScreenRow)
     offset = @getScrolloff() + 1
     offset = 0 if row is vimLastScreenRow
-    offset = Math.max(@getCount(-1), offset)
+    offset = limitNumber(@getCount(-1), min: offset)
     row - offset
 
 # Scrolling
@@ -740,9 +751,9 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
 # Full: ctrl-f, ctrl-b
 # -------------------------
 # [FIXME] count behave differently from original Vim.
-class ScrollFullScreenDown extends Motion
-  @extend()
-  amountOfPage: +1
+class Scroll extends Motion
+  @extend(false)
+  verticalMotion: true
 
   isSmoothScrollEnabled: ->
     if Math.abs(@amountOfPage) is 1
@@ -770,38 +781,50 @@ class ScrollFullScreenDown extends Motion
   getAmountOfRows: ->
     Math.ceil(@amountOfPage * @editor.getRowsPerPage() * @getCount())
 
-  getPoint: (cursor) ->
-    row = getValidVimScreenRow(@editor, cursor.getScreenRow() + @getAmountOfRows())
-    getFirstCharacterScreenPositionForScreenRow(@editor, row)
+  getBufferRow: (cursor) ->
+    screenRow = getValidVimScreenRow(@editor, cursor.getScreenRow() + @getAmountOfRows())
+    @editor.bufferRowForScreenRow(screenRow)
 
   moveCursor: (cursor) ->
-    cursor.setScreenPosition(@getPoint(cursor), autoscroll: false)
+    bufferRow = @getBufferRow(cursor)
+    @setCursorBuffeRow(cursor, @getBufferRow(cursor), autoscroll: false)
 
     if cursor.isLastCursor()
       if @isSmoothScrollEnabled()
         @vimState.finishScrollAnimation()
 
-      currentTopRow = @editor.getFirstVisibleScreenRow()
-      finalTopRow = currentTopRow + @getAmountOfRows()
-      done = => @editor.setFirstVisibleScreenRow(finalTopRow)
+      firstVisibileScreenRow = @editor.getFirstVisibleScreenRow()
+      newFirstVisibileBufferRow = @editor.bufferRowForScreenRow(firstVisibileScreenRow + @getAmountOfRows())
+      newFirstVisibileScreenRow = @editor.screenRowForBufferRow(newFirstVisibileBufferRow)
+      done = =>
+        @editor.setFirstVisibleScreenRow(newFirstVisibileScreenRow)
+        # [FIXME] sometimes, scrollTop is not updated, calling this fix.
+        # Investigate and find better approach then remove this workaround.
+        @editor.element.component.updateSync()
 
       if @isSmoothScrollEnabled()
-        @smoothScroll(currentTopRow, finalTopRow, {done})
+        @smoothScroll(firstVisibileScreenRow, newFirstVisibileScreenRow, {done})
       else
         done()
 
+
+# keymap: ctrl-f
+class ScrollFullScreenDown extends Scroll
+  @extend(true)
+  amountOfPage: +1
+
 # keymap: ctrl-b
-class ScrollFullScreenUp extends ScrollFullScreenDown
+class ScrollFullScreenUp extends Scroll
   @extend()
   amountOfPage: -1
 
 # keymap: ctrl-d
-class ScrollHalfScreenDown extends ScrollFullScreenDown
+class ScrollHalfScreenDown extends Scroll
   @extend()
   amountOfPage: +1 / 2
 
 # keymap: ctrl-u
-class ScrollHalfScreenUp extends ScrollHalfScreenDown
+class ScrollHalfScreenUp extends Scroll
   @extend()
   amountOfPage: -1 / 2
 

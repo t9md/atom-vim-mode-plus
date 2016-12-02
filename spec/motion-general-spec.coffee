@@ -1396,6 +1396,45 @@ describe "Motion general", ->
       it "moves the cursor to the non-blank-char of middle of screen", ->
         ensure 'M', cursor: [4, 2]
 
+  describe "moveToFirstCharacterOnVerticalMotion setting", ->
+    beforeEach ->
+      settings.set('moveToFirstCharacterOnVerticalMotion', false)
+      set
+        text: """
+          0 000000000000
+          1 111111111111
+        2 222222222222\n
+        """
+        cursor: [2, 10]
+
+    describe "gg, G, N%", ->
+      it "go to row with keep column and respect cursor.goalColum", ->
+        ensure 'g g', cursor: [0, 10]
+        ensure '$', cursor: [0, 15]
+        ensure 'G', cursor: [2, 13]
+        expect(editor.getLastCursor().goalColumn).toBe(Infinity)
+        ensure '1 %', cursor: [0, 15]
+        expect(editor.getLastCursor().goalColumn).toBe(Infinity)
+        ensure '1 0 h', cursor: [0, 5]
+        ensure '5 0 %', cursor: [1, 5]
+        ensure '1 0 0 %', cursor: [2, 5]
+
+    describe "H, M, L", ->
+      beforeEach ->
+        spyOn(editorElement, 'getFirstVisibleScreenRow').andReturn(0)
+        spyOn(editor, 'getLastVisibleScreenRow').andReturn(3)
+
+      it "go to row with keep column and respect cursor.goalColum", ->
+        ensure 'H', cursor: [0, 10]
+        ensure 'M', cursor: [1, 10]
+        ensure 'L', cursor: [2, 10]
+        ensure '$', cursor: [2, 13]
+        expect(editor.getLastCursor().goalColumn).toBe(Infinity)
+        ensure 'H', cursor: [0, 15]
+        ensure 'M', cursor: [1, 15]
+        ensure 'L', cursor: [2, 13]
+        expect(editor.getLastCursor().goalColumn).toBe(Infinity)
+
   describe 'the mark keybindings', ->
     beforeEach ->
       set

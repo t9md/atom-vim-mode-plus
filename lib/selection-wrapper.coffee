@@ -6,6 +6,7 @@ _ = require 'underscore-plus'
   shrinkRangeEndToBeforeNewLine
   getFirstCharacterPositionForBufferRow
   getEndOfLineForBufferRow
+  limitNumber
 } = require './utils'
 
 propertyStore = new Map
@@ -180,8 +181,8 @@ class SelectionWrapper
     editor = @selection.editor
     headRowEOL = getEndOfLineForBufferRow(editor, @getHeadRow())
     tailRowEOL = getEndOfLineForBufferRow(editor, @getTailRow())
-    headMaxColumn = Math.max(headRowEOL.column - 1, 0)
-    tailMaxColumn = Math.max(tailRowEOL.column - 1, 0)
+    headMaxColumn = limitNumber(headRowEOL.column - 1, min: 0)
+    tailMaxColumn = limitNumber(tailRowEOL.column - 1, min: 0)
 
     properties = @getProperties()
     if properties.head.column > headMaxColumn

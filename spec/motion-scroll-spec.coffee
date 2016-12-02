@@ -3,7 +3,8 @@ settings = require '../lib/settings'
 
 describe "Motion Scroll", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
-  text = new TextData([0...100].join("\n"))
+  lines = (n + " " + 'X'.repeat(10) for n in [0...100]).join("\n")
+  text = new TextData(lines)
 
   beforeEach ->
     getVimState (state, _vim) ->
@@ -18,7 +19,7 @@ describe "Motion Scroll", ->
       editorElement.style.lineHeight = "10px"
       atom.views.performDocumentPoll()
       editorElement.setScrollTop(40 * 10)
-      editor.setCursorBufferPosition([42, 0])
+      set cursor: [42, 0]
 
   afterEach ->
     vimState.resetNormalMode()
@@ -32,7 +33,7 @@ describe "Motion Scroll", ->
     it "selects on visual mode", ->
       set cursor: [42, 1]
       ensure 'v ctrl-u',
-        selectedText: text.getLines([32..42], chomp: true)
+        selectedText: text.getLines([32..41]) + "42"
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-u',
@@ -47,7 +48,7 @@ describe "Motion Scroll", ->
     it "selects on visual mode", ->
       set cursor: [42, 1]
       ensure 'v ctrl-b',
-        selectedText: text.getLines([22..42], chomp: true)
+        selectedText: text.getLines([22..41]) + "42"
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-b',
@@ -62,7 +63,7 @@ describe "Motion Scroll", ->
     it "selects on visual mode", ->
       set cursor: [42, 1]
       ensure 'v ctrl-d',
-        selectedText: text.getLines([42..52], chomp: true).slice(1, -1)
+        selectedText: text.getLines([42..51]).slice(1) + "5"
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-d',
@@ -77,8 +78,29 @@ describe "Motion Scroll", ->
     it "selects on visual mode", ->
       set cursor: [42, 1]
       ensure 'v ctrl-f',
-        selectedText: text.getLines([42..62], chomp: true).slice(1, -1)
+        selectedText: text.getLines([42..61]).slice(1) + "6"
 
     it "selects on linewise mode", ->
       ensure 'V ctrl-f',
         selectedText: text.getLines([42..62])
+
+  describe "ctrl-f, ctrl-b, ctrl-d, ctrl-u", ->
+    beforeEach ->
+      settings.set('moveToFirstCharacterOnVerticalMotion', false)
+      set cursor: [42, 10]
+      ensure scrollTop: 400
+
+    it "go to row with keep column and respect cursor.goalColum", ->
+      ensure 'ctrl-b', scrollTop: 200, cursor: [22, 10]
+      ensure 'ctrl-f', scrollTop: 400, cursor: [42, 10]
+      ensure 'ctrl-u', scrollTop: 300, cursor: [32, 10]
+      ensure 'ctrl-d', scrollTop: 400, cursor: [42, 10]
+      ensure '$', cursor: [42, 12]
+      expect(editor.getLastCursor().goalColumn).toBe(Infinity)
+      ensure 'ctrl-b', scrollTop: 200, cursor: [22, 12]
+      ensure 'ctrl-b', scrollTop:   0, cursor: [ 2, 11]
+      ensure 'ctrl-f', scrollTop: 200, cursor: [22, 12]
+      ensure 'ctrl-f', scrollTop: 400, cursor: [42, 12]
+      ensure 'ctrl-u', scrollTop: 300, cursor: [32, 12]
+      ensure 'ctrl-d', scrollTop: 400, cursor: [42, 12]
+      expect(editor.getLastCursor().goalColumn).toBe(Infinity)

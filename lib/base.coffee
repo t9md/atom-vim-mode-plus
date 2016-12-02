@@ -310,7 +310,7 @@ class Base
 
   registries = {Base}
   @extend: (@command=true) ->
-    if (name of registries) and (not @suppressWarning)
+    if (@name of registries) and (not @suppressWarning)
       console.warn("Duplicate constructor #{@name}")
     registries[@name] = this
 

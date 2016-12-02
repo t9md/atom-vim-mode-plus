@@ -293,9 +293,9 @@ trimRange = (editor, scanRange) ->
 # Cursor motion wrapper
 # -------------------------
 # Just update bufferRow with keeping column by respecting goalColumn
-setBufferRow = (cursor, row) ->
+setBufferRow = (cursor, row, options) ->
   column = cursor.goalColumn ? cursor.getBufferColumn()
-  cursor.setBufferPosition([row, column])
+  cursor.setBufferPosition([row, column], options)
   cursor.goalColumn = column
 
 setBufferColumn = (cursor, column) ->
@@ -646,7 +646,7 @@ adjustRangeToRowRange = ({start, end}, options={}) ->
   # So need adjust to actually selected row in same way as Seleciton::getBufferRowRange()
   endRow = end.row
   if end.column is 0
-    endRow = Math.max(start.row, end.row - 1)
+    endRow = limitNumber(end.row - 1, min: start.row)
   if options.endOnly ? false
     new Range(start, [endRow, Infinity])
   else
@@ -657,7 +657,7 @@ adjustRangeToRowRange = ({start, end}, options={}) ->
 shrinkRangeEndToBeforeNewLine = (range) ->
   {start, end} = range
   if end.column is 0
-    endRow = Math.max(start.row, end.row - 1)
+    endRow = limitNumber(end.row - 1, min: start.row)
     new Range(start, [endRow, Infinity])
   else
     range
@@ -790,6 +790,11 @@ searchByProjectFind = (editor, text) ->
       projectFindView.findEditor.setText(text)
       projectFindView.confirm()
 
+limitNumber = (number, {max, min}={}) ->
+  number = Math.min(number, max) if max?
+  number = Math.max(number, min) if min?
+  number
+
 module.exports = {
   getParent
   getAncestors
@@ -882,4 +887,5 @@ module.exports = {
   getRangeByTranslatePointAndClip
   getPackage
   searchByProjectFind
+  limitNumber
 }
