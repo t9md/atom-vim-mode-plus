@@ -134,11 +134,11 @@ class Motion extends Base
     # to select @inclusive-ly
     swrap(selection).translateSelectionEndAndClip('forward')
 
-  setCursorBuffeRow: (cursor, row) ->
+  setCursorBuffeRow: (cursor, row, options) ->
     if @isVerticalMotion() and settings.get('moveToFirstCharacterOnVerticalMotion')
-      cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row))
+      cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row), options)
     else
-      setBufferRow(cursor, row)
+      setBufferRow(cursor, row, options)
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
@@ -780,25 +780,32 @@ class Scroll extends Motion
   getAmountOfRows: ->
     Math.ceil(@amountOfPage * @editor.getRowsPerPage() * @getCount())
 
-  getPoint: (cursor) ->
-    row = getValidVimScreenRow(@editor, cursor.getScreenRow() + @getAmountOfRows())
-    getFirstCharacterScreenPositionForScreenRow(@editor, row)
+  getBufferRow: (cursor) ->
+    screenRow = getValidVimScreenRow(@editor, cursor.getScreenRow() + @getAmountOfRows())
+    @editor.bufferRowForScreenRow(screenRow)
 
   moveCursor: (cursor) ->
-    cursor.setScreenPosition(@getPoint(cursor), autoscroll: false)
+    bufferRow = @getBufferRow(cursor)
+    @setCursorBuffeRow(cursor, @getBufferRow(cursor), autoscroll: false)
 
     if cursor.isLastCursor()
       if @isSmoothScrollEnabled()
         @vimState.finishScrollAnimation()
 
-      currentTopRow = @editor.getFirstVisibleScreenRow()
-      finalTopRow = currentTopRow + @getAmountOfRows()
-      done = => @editor.setFirstVisibleScreenRow(finalTopRow)
+      firstVisibileScreenRow = @editor.getFirstVisibleScreenRow()
+      newFirstVisibileBufferRow = @editor.bufferRowForScreenRow(firstVisibileScreenRow + @getAmountOfRows())
+      newFirstVisibileScreenRow = @editor.screenRowForBufferRow(newFirstVisibileBufferRow)
+      done = =>
+        @editor.setFirstVisibleScreenRow(newFirstVisibileScreenRow)
+        # [FIXME] sometimes, scrollTop is not updated, calling this fix.
+        # Investigate and find better approach then remove this workaround.
+        @editor.element.component.updateSync()
 
       if @isSmoothScrollEnabled()
-        @smoothScroll(currentTopRow, finalTopRow, {done})
+        @smoothScroll(firstVisibileScreenRow, newFirstVisibileScreenRow, {done})
       else
         done()
+
 
 # keymap: ctrl-f
 class ScrollFullScreenDown extends Scroll
