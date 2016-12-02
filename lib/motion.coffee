@@ -39,6 +39,7 @@ class Motion extends Base
   inclusive: false
   wise: 'characterwise'
   jump: false
+  verticalMotion: false
 
   constructor: ->
     super
@@ -54,6 +55,9 @@ class Motion extends Base
 
   isJump: ->
     @jump
+
+  isVerticalMotion: ->
+    @verticalMotion
 
   isCharacterwise: ->
     @wise is 'characterwise'
@@ -129,6 +133,12 @@ class Motion extends Base
       swrap(selection).translateSelectionHeadAndClip('backward')
     # to select @inclusive-ly
     swrap(selection).translateSelectionEndAndClip('forward')
+
+  setCursorBuffeRow: (cursor, row) ->
+    if @isVerticalMotion() and settings.get('moveToFirstCharacterOnVerticalMotion')
+      cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row))
+    else
+      setBufferRow(cursor, row)
 
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
@@ -646,11 +656,11 @@ class MoveToFirstLine extends Motion
   @extend()
   wise: 'linewise'
   jump: true
+  verticalMotion: true
 
   moveCursor: (cursor) ->
     row = getValidVimBufferRow(@editor, @getRow())
-    point = @getFirstCharacterPositionForBufferRow(row)
-    cursor.setBufferPosition(point)
+    @setCursorBuffeRow(cursor, row)
     cursor.autoscroll(center: true)
 
   getRow: ->
@@ -667,7 +677,7 @@ class MoveToLineByPercent extends MoveToFirstLine
 
   getRow: ->
     percent = Math.min(100, @getCount())
-    Math.floor(@getVimLastScreenRow() * (percent / 100))
+    Math.floor((@editor.getLineCount() - 1) * (percent / 100))
 
 class MoveToRelativeLine extends Motion
   @extend(false)
@@ -692,10 +702,11 @@ class MoveToTopOfScreen extends Motion
   jump: true
   scrolloff: 2
   defaultCount: 0
+  verticalMotion: true
 
   moveCursor: (cursor) ->
-    point = getFirstCharacterBufferPositionForScreenRow(@editor, @getRow())
-    cursor.setBufferPosition(point)
+    bufferRow = @editor.bufferRowForScreenRow(@getScreenRow())
+    @setCursorBuffeRow(cursor, bufferRow)
 
   getScrolloff: ->
     if @isAsOperatorTarget()
@@ -703,26 +714,25 @@ class MoveToTopOfScreen extends Motion
     else
       @scrolloff
 
-  getRow: ->
-    row = getFirstVisibleScreenRow(@editor)
+  getScreenRow: ->
+    firstRow = getFirstVisibleScreenRow(@editor)
     offset = @getScrolloff()
-    offset = 0 if (row is 0)
+    offset = 0 if firstRow is 0
     offset = Math.max(@getCount(-1), offset)
-    row + offset
+    firstRow + offset
 
 # keymap: M
 class MoveToMiddleOfScreen extends MoveToTopOfScreen
   @extend()
-  getRow: ->
+  getScreenRow: ->
     startRow = getFirstVisibleScreenRow(@editor)
-    vimLastScreenRow = @getVimLastScreenRow()
-    endRow = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
+    endRow = Math.min(@editor.getLastVisibleScreenRow(), @getVimLastScreenRow())
     startRow + Math.floor((endRow - startRow) / 2)
 
 # keymap: L
 class MoveToBottomOfScreen extends MoveToTopOfScreen
   @extend()
-  getRow: ->
+  getScreenRow: ->
     # [FIXME]
     # At least Atom v1.6.0, there are two implementation of getLastVisibleScreenRow()
     # editor.getLastVisibleScreenRow() and editorElement.getLastVisibleScreenRow()

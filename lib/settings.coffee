@@ -98,6 +98,13 @@ module.exports = new Settings 'vim-mode-plus',
   keepColumnOnSelectTextObject:
     default: false
     description: "Keep column on select TextObject(Paragraph, Indentation, Fold, Function, Edge)"
+  moveToFirstCharacterOnVerticalMotion:
+    default: true
+    description: """
+    Almost equivalent to `startofline` pure-Vim option. When true, move cursor to first char.
+    Affects to `ctrl-f, b, d, u`, `G`, `H`, `M`, `L`, `gg`
+    But unlike pure-Vim `d`, `<<`, `>>` is not affected by this option, use independent `stayOn` options.
+    """
   flashOnUndoRedo: true
   flashOnOperate: true
   flashOnOperateBlacklist:

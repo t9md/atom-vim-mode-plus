@@ -345,8 +345,7 @@ class Delete extends Operator
       point = @mutationManager.getInitialPointForSelection(cursor.selection)
       cursor.setBufferPosition([row, point.column])
     else
-      cursor.setBufferPosition([row, 0])
-      cursor.skipLeadingWhitespace()
+      cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row))
 
 class DeleteRight extends Delete
   @extend()

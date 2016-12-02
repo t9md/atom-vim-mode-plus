@@ -293,9 +293,9 @@ trimRange = (editor, scanRange) ->
 # Cursor motion wrapper
 # -------------------------
 # Just update bufferRow with keeping column by respecting goalColumn
-setBufferRow = (cursor, row) ->
+setBufferRow = (cursor, row, options) ->
   column = cursor.goalColumn ? cursor.getBufferColumn()
-  cursor.setBufferPosition([row, column])
+  cursor.setBufferPosition([row, column], options)
   cursor.goalColumn = column
 
 setBufferColumn = (cursor, column) ->
