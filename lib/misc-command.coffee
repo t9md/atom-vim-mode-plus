@@ -124,8 +124,7 @@ class ReplaceModeBackspace extends MiscCommand
         unless selection.insertText(char).isEmpty()
           selection.cursor.moveLeft()
 
-# [FIXME] Name Scroll is misleading, AdjustVisibleArea is more explicit.
-class Scroll extends MiscCommand
+class ScrollWithoutChangingCursorPosition extends MiscCommand
   @extend(false)
   scrolloff: 2 # atom default. Better to use editor.getVerticalScrollMargin()?
   cursorPixel: null
@@ -144,7 +143,7 @@ class Scroll extends MiscCommand
     @editorElement.pixelPositionForScreenPosition(point)
 
 # ctrl-e scroll lines downwards
-class ScrollDown extends Scroll
+class ScrollDown extends ScrollWithoutChangingCursorPosition
   @extend()
 
   execute: ->
@@ -160,7 +159,7 @@ class ScrollDown extends Scroll
       @editor.setCursorScreenPosition(newPoint, autoscroll: false)
 
 # ctrl-y scroll lines upwards
-class ScrollUp extends Scroll
+class ScrollUp extends ScrollWithoutChangingCursorPosition
   @extend()
 
   execute: ->
@@ -175,9 +174,9 @@ class ScrollUp extends Scroll
       newPoint = [row - count, column]
       @editor.setCursorScreenPosition(newPoint, autoscroll: false)
 
-# Scroll without Cursor Position change.
+# ScrollWithoutChangingCursorPosition without Cursor Position change.
 # -------------------------
-class ScrollCursor extends Scroll
+class ScrollCursor extends ScrollWithoutChangingCursorPosition
   @extend(false)
   execute: ->
     @moveToFirstCharacterOfLine?()
@@ -232,10 +231,10 @@ class ScrollCursorToMiddleLeave extends ScrollCursorToMiddle
   @extend()
   moveToFirstCharacterOfLine: null
 
-# Horizontal Scroll
+# Horizontal ScrollWithoutChangingCursorPosition
 # -------------------------
 # zs
-class ScrollCursorToLeft extends Scroll
+class ScrollCursorToLeft extends ScrollWithoutChangingCursorPosition
   @extend()
 
   execute: ->
