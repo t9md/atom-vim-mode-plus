@@ -45,7 +45,6 @@ class SearchInput extends HTMLElement
     atom.commands.add @editorElement,
       'core:confirm': => @confirm()
       'core:cancel': => @cancel()
-      'blur': => @cancel() unless @finished
       'vim-mode-plus:input-cancel': => @cancel()
 
   focus: (@options={}) ->
