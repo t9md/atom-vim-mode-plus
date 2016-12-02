@@ -28,6 +28,7 @@ Select = null
   getFirstCharacterScreenPositionForScreenRow
   setBufferRow
   setBufferColumn
+  limitNumber
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -225,7 +226,7 @@ class MoveUp extends Motion
   wise: 'linewise'
 
   getBufferRow: (row) ->
-    row = Math.max(row - 1, 0)
+    row = limitNumber(row - 1, min: 0)
     if @editor.isFoldedAtBufferRow(row)
       getLargestFoldRangeContainsBufferRow(@editor, row).start.row
     else
@@ -242,7 +243,7 @@ class MoveDown extends MoveUp
   getBufferRow: (row) ->
     if @editor.isFoldedAtBufferRow(row)
       row = getLargestFoldRangeContainsBufferRow(@editor, row).end.row
-    Math.min(row + 1, @getVimLastBufferRow())
+    limitNumber(row + 1, max: @getVimLastBufferRow())
 
 class MoveUpScreen extends Motion
   @extend()
@@ -618,7 +619,7 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
     cursor.setBufferPosition(point)
 
   getPoint: ({row}) ->
-    row = Math.min(row + @getCount(-1), @getVimLastBufferRow())
+    row = limitNumber(row + @getCount(-1), max: @getVimLastBufferRow())
     from = new Point(row, Infinity)
     point = getStartPositionForPattern(@editor, from, /\s*$/)
     (point ? from).translate([0, -1])
@@ -659,8 +660,7 @@ class MoveToFirstLine extends Motion
   verticalMotion: true
 
   moveCursor: (cursor) ->
-    row = getValidVimBufferRow(@editor, @getRow())
-    @setCursorBuffeRow(cursor, row)
+    @setCursorBuffeRow(cursor, getValidVimBufferRow(@editor, @getRow()))
     cursor.autoscroll(center: true)
 
   getRow: ->
@@ -676,7 +676,7 @@ class MoveToLineByPercent extends MoveToFirstLine
   @extend()
 
   getRow: ->
-    percent = Math.min(100, @getCount())
+    percent = limitNumber(@getCount(), max: 100)
     Math.floor((@editor.getLineCount() - 1) * (percent / 100))
 
 class MoveToRelativeLine extends Motion
@@ -691,7 +691,7 @@ class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
   min: 0
 
   getCount: ->
-    Math.max(@min, super)
+    limitNumber(super, {@min})
 
 # Position cursor without scrolling., H, M, L
 # -------------------------
@@ -718,7 +718,7 @@ class MoveToTopOfScreen extends Motion
     firstRow = getFirstVisibleScreenRow(@editor)
     offset = @getScrolloff()
     offset = 0 if firstRow is 0
-    offset = Math.max(@getCount(-1), offset)
+    offset = limitNumber(@getCount(-1), min: offset)
     firstRow + offset
 
 # keymap: M
@@ -726,7 +726,7 @@ class MoveToMiddleOfScreen extends MoveToTopOfScreen
   @extend()
   getScreenRow: ->
     startRow = getFirstVisibleScreenRow(@editor)
-    endRow = Math.min(@editor.getLastVisibleScreenRow(), @getVimLastScreenRow())
+    endRow = limitNumber(@editor.getLastVisibleScreenRow(), max: @getVimLastScreenRow())
     startRow + Math.floor((endRow - startRow) / 2)
 
 # keymap: L
@@ -739,10 +739,10 @@ class MoveToBottomOfScreen extends MoveToTopOfScreen
     # Those two methods return different value, editor's one is corrent.
     # So I intentionally use editor.getLastScreenRow here.
     vimLastScreenRow = @getVimLastScreenRow()
-    row = Math.min(@editor.getLastVisibleScreenRow(), vimLastScreenRow)
+    row = limitNumber(@editor.getLastVisibleScreenRow(), max: vimLastScreenRow)
     offset = @getScrolloff() + 1
     offset = 0 if row is vimLastScreenRow
-    offset = Math.max(@getCount(-1), offset)
+    offset = limitNumber(@getCount(-1), min: offset)
     row - offset
 
 # Scrolling
