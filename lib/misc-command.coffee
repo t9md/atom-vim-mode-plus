@@ -8,6 +8,7 @@ _ = require 'underscore-plus'
 {
   pointIsAtEndOfLine
   mergeIntersectingRanges
+  sortRanges
 } = require './utils'
 
 class MiscCommand extends Base
@@ -36,57 +37,28 @@ class BlockwiseOtherEnd extends ReverseSelections
 class Undo extends MiscCommand
   @extend()
 
-  saveRangeAsMarker: (markers, range) ->
-    if _.all(markers, (m) -> not m.getBufferRange().intersectsWith(range))
-      markers.push @editor.markBufferRange(range)
-
-  trimEndOfLineRange: (range) ->
-    {start} = range
-    if (start.column isnt 0) and pointIsAtEndOfLine(@editor, start)
-      range.traverse([+1, 0], [0, 0])
-    else
-      range
-
-  mapToChangedRanges: (list, fn) ->
-    ranges = list.map (e) -> fn(e)
-    mergeIntersectingRanges(ranges).map (r) =>
-      @trimEndOfLineRange(r)
-
   mutateWithTrackingChanges: (fn) ->
-    markersAdded = []
-    rangesRemoved = []
+    newRanges = []
+    oldRanges = []
 
-    disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) =>
-      # To highlight(decorate) removed range, I don't want marker's auto-tracking-range-change feature.
-      # So here I simply use range for removal
-      rangesRemoved.push(oldRange) unless oldRange.isEmpty()
-      # For added range I want marker's auto-tracking-range-change feature.
-      @saveRangeAsMarker(markersAdded, newRange) unless newRange.isEmpty()
+    disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) ->
+      oldRanges.push(oldRange) unless oldRange.isEmpty()
+      newRanges.push(newRange) unless newRange.isEmpty()
+
     @mutate()
+
     disposable.dispose()
 
-    # FIXME: this is still not completely accurate and heavy approach.
-    # To accurately track range updated, need to add/remove manually.
-    rangesAdded = @mapToChangedRanges markersAdded, (m) -> m.getBufferRange()
-    markersAdded.forEach (m) -> m.destroy()
-    rangesRemoved = @mapToChangedRanges rangesRemoved, (r) -> r
+    newRanges = mergeIntersectingRanges(newRanges)
+    oldRanges = mergeIntersectingRanges(oldRanges)
 
-    firstAdded = rangesAdded[0]
-    lastRemoved = _.last(rangesRemoved)
-    range =
-      if firstAdded? and lastRemoved?
-        if firstAdded.start.isLessThan(lastRemoved.start)
-          firstAdded
-        else
-          lastRemoved
-      else
-        firstAdded or lastRemoved
+    if range = sortRanges(_.compact([newRanges[0], _.last(oldRanges)]))[0]
+      fn(range)
 
-    fn(range) if range?
     if settings.get('flashOnUndoRedo')
       @onDidFinishOperation =>
-        @vimState.flash(rangesRemoved, type: 'removed', timeout: 500)
-        @vimState.flash(rangesAdded, type: 'added', timeout: 500)
+        @vimState.flash(oldRanges, type: 'removed', timeout: 500)
+        @vimState.flash(newRanges, type: 'added', timeout: 500)
 
   execute: ->
     @mutateWithTrackingChanges (range) =>

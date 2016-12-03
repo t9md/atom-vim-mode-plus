@@ -163,35 +163,75 @@ describe "Operator general", ->
           cursor: [0, 2]
 
     describe "undo behavior", ->
-      originalText = "12345\nabcde\nABCDE\nQWERT"
+      originalText = null
+
       beforeEach ->
-        set text: originalText, cursor: [1, 1]
+        set
+          textC: """
+          12345
+          a|bcde
+          ABCDE
+          QWERT
+          """
+
+        originalText = editor.getText()
 
       it "undoes both lines", ->
-        ensure 'd 2 d u', text: originalText, selectedText: ''
+        ensure 'd 2 d',
+          textC: """
+          12345
+          |QWERT
+          """
+        ensure 'u',
+          textC: """
+          12345
+          |abcde
+          ABCDE
+          QWERT
+          """
+          selectedText: ""
 
       describe "with multiple cursors", ->
         beforeEach ->
-          set cursor: [[1, 1], [0, 0]]
+          set
+            textC: """
+            |12345
+            a|bcde
+            ABCDE
+            QWERT
+            """
+          ensure 'd l',
+            textC: """
+            |2345
+            a|cde
+            ABCDE
+            QWERT
+            """
 
         describe "setCursorToStartOfChangeOnUndoRedo is true(default)", ->
-          # [FIXME] Should keep cursor?. so guranularity is not perfect in multi-cursors
-          # And ensure set position to start.
-          it "is undone as one operation and clear cursors", ->
-            ensure 'd l u',
-              text: originalText
-              selectedText: ['']
-              numCursors: 1
+          it "clear multiple cursors and set cursor to start of changes", ->
+            ensure 'u',
+              textC: """
+              |12345
+              abcde
+              ABCDE
+              QWERT
+              """
+              selectedText: ''
 
         describe "setCursorToStartOfChangeOnUndoRedo is false", ->
           beforeEach ->
             settings.set('setCursorToStartOfChangeOnUndoRedo', false)
 
-          it "is undone as one operation", ->
-            ensure 'd l u',
-              text: originalText
+          it "put cursor to end of change (works in same way of atom's core:undo)", ->
+            ensure 'u',
+              textC: """
+              1|2345
+              ab|cde
+              ABCDE
+              QWERT
+              """
               selectedText: ['', '']
-              numCursors: 2
 
     describe "when followed by a w", ->
       it "deletes the next word until the end of the line and exits operator-pending mode", ->

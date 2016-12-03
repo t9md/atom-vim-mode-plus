@@ -10,11 +10,10 @@ class HighlightSearchManager
     @disposables = new CompositeDisposable
     @markerLayer = @editor.addMarkerLayer()
 
-    options =
+    decorationOptions =
       type: 'highlight'
-      invalidate: 'inside'
       class: 'vim-mode-plus-highlight-search'
-    @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, options)
+    @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, decorationOptions)
 
     @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
 
@@ -52,4 +51,4 @@ class HighlightSearchManager
     return if matchScopes(@editorElement, settings.get('highlightSearchExcludeScopes'))
 
     for range in scanEditor(@editor, pattern)
-      @markerLayer.markBufferRange(range)
+      @markerLayer.markBufferRange(range, invalidate: 'inside')
