@@ -27,7 +27,8 @@ getOffset = (submode, cursor) ->
 
     when 'linewise'
       bufferPoint = swrap(selection).getBufferPositionFor('head', fromProperty: true)
-      if cursor.editor.isSoftWrapped()
+      editor = cursor.editor
+      if editor.isSoftWrapped()
         screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
         offset = screenPoint.traversalFrom(cursor.getScreenPosition())
       else
