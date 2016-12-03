@@ -325,7 +325,7 @@ class AnyPair extends Pair
   skipEmptyPair: false
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
-    'CurlyBracket', 'AngleBracket', 'Tag', 'SquareBracket', 'Parenthesis'
+    'CurlyBracket', 'AngleBracket', 'SquareBracket', 'Parenthesis'
   ]
 
   getRangeBy: (klass, selection) ->
@@ -495,6 +495,7 @@ class InnerParenthesisAllowForwarding extends Parenthesis
 class AngleBracket extends Pair
   @extend(false)
   pair: ['<', '>']
+  allowNextLine: true
 
 class AAngleBracket extends AngleBracket
   @extend()
