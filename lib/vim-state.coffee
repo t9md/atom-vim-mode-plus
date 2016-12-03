@@ -33,8 +33,18 @@ packageScope = 'vim-mode-plus'
 
 module.exports =
 class VimState
+  @vimStatesByEditor: new Map
+
+  @getByEditor: (editor) ->
+    @vimStatesByEditor.get(editor)
+
+  @forEach: (fn) ->
+    @vimStatesByEditor.forEach(fn)
+
+  @clear: ->
+    @vimStatesByEditor.clear()
+
   Delegato.includeInto(this)
-  destroyed: false
 
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
@@ -74,6 +84,9 @@ class VimState
       @activate('insert')
     else
       @activate('normal')
+
+    @subscriptions.add @editor.onDidDestroy(@destroy.bind(this))
+    @constructor.vimStatesByEditor.set(@editor, this)
 
   # BlockwiseSelections
   # -------------------------
@@ -177,9 +190,13 @@ class VimState
   onDidSetInputChar: (fn) -> @emitter.on('did-set-input-char', fn)
   emitDidSetInputChar: (char) -> @emitter.emit('did-set-input-char', char)
 
+  isAlive: ->
+    @constructor.vimStatesByEditor.has(@editor)
+
   destroy: ->
-    return if @destroyed
-    @destroyed = true
+    return unless @isAlive()
+    @constructor.vimStatesByEditor.delete(@editor)
+
     @subscriptions.dispose()
 
     if @editor.isAlive()

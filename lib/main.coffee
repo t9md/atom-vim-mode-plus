@@ -14,7 +14,6 @@ module.exports =
   activate: (state) ->
     @subscriptions = new CompositeDisposable
     @statusBarManager = new StatusBarManager
-    @vimStatesByEditor = new Map
     @emitter = new Emitter
 
     service = @provideVimModePlus()
@@ -36,11 +35,6 @@ module.exports =
     @subscribe atom.workspace.observeTextEditors (editor) =>
       return if editor.isMini()
       vimState = new VimState(editor, @statusBarManager, globalState)
-      @vimStatesByEditor.set(editor, vimState)
-      @subscribe editor.onDidDestroy =>
-        vimState.destroy()
-        @vimStatesByEditor.delete(editor)
-
       @emitter.emit('did-add-vim-state', vimState)
 
     workspaceClassList = atom.views.getView(atom.workspace).classList
@@ -49,7 +43,7 @@ module.exports =
 
     @subscribe atom.workspace.onDidChangeActivePaneItem =>
       if settings.get('automaticallyEscapeInsertModeOnActivePaneItemChange')
-        @vimStatesByEditor.forEach (vimState) ->
+        VimState.forEach (vimState) ->
           vimState.activate('normal') if vimState.mode is 'insert'
 
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
@@ -81,7 +75,7 @@ module.exports =
   #   observeVimStates (vimState) -> do something..
   # Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
   observeVimStates: (fn) ->
-    @vimStatesByEditor.forEach(fn)
+    VimState.forEach(fn)
     @onDidAddVimState(fn)
 
   clearPersistentSelectionForEditors: ->
@@ -90,8 +84,9 @@ module.exports =
 
   deactivate: ->
     @subscriptions.dispose()
-    @vimStatesByEditor.forEach (vimState) ->
+    VimState.forEach (vimState) ->
       vimState.destroy()
+    VimState.clear()
 
   subscribe: (arg) ->
     @subscriptions.add(arg)
@@ -191,7 +186,7 @@ module.exports =
     globalState
 
   getEditorState: (editor) ->
-    @vimStatesByEditor.get(editor)
+    VimState.getByEditor(editor)
 
   provideVimModePlus: ->
     Base: Base
