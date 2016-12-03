@@ -9,9 +9,7 @@ Delegato = require 'delegato'
   getFirstCharacterPositionForBufferRow
 } = require './utils'
 swrap = require './selection-wrapper'
-
 Input = require './input'
-
 settings = require './settings'
 selectList = null
 getEditorState = null # set by Base.init()
@@ -118,19 +116,6 @@ class Base
 
   isDefaultCount: ->
     @count is @defaultCount
-
-  # Register
-  # -------------------------
-  register: null
-  getRegisterName: ->
-    @vimState.register.getName()
-    text = @vimState.register.getText(@getInput(), selection)
-
-  getRegisterValueAsText: (name=null, selection) ->
-    @vimState.register.getText(name, selection)
-
-  isDefaultRegisterName: ->
-    @vimState.register.isDefaultName()
 
   # Misc
   # -------------------------

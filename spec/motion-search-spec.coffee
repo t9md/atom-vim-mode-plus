@@ -12,6 +12,7 @@ describe "Motion Search", ->
 
   afterEach ->
     vimState.resetNormalMode()
+    vimState.globalState.reset()
 
   describe "the / keybinding", ->
     pane = null
@@ -28,9 +29,6 @@ describe "Motion Search", ->
         cursor: [0, 0]
       spyOn(atom.workspace, 'getActivePane').andReturn(pane)
 
-      # clear search history
-      vimState.searchHistory.clear()
-      vimState.globalState.reset('currentSearch')
 
     describe "as a motion", ->
       it "moves the cursor to the specified search pattern", ->
@@ -299,7 +297,6 @@ describe "Motion Search", ->
 
     describe "blank input repeat last search", ->
       beforeEach ->
-        vimState.searchHistory.clear()
         set
           text: """
           0:    abc

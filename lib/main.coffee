@@ -23,14 +23,14 @@ module.exports =
     @registerVimStateCommands()
 
     if atom.inDevMode()
-      developer = (new (require './developer'))
+      developer = new (require './developer')
       @subscribe(developer.init(service))
 
     @subscribe @observeVimMode ->
       message = """
-      ## Message by vim-mode-plus: vim-mode detected!
-      To use vim-mode-plus, you must **disable vim-mode** manually.
-      """.replace(/_/g, ' ')
+        ## Message by vim-mode-plus: vim-mode detected!
+        To use vim-mode-plus, you must **disable vim-mode** manually.
+        """
       atom.notifications.addWarning(message, dismissable: true)
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
@@ -61,8 +61,7 @@ module.exports =
     @subscribe settings.observe 'highlightSearch', (newValue) ->
       if newValue
         # Re-setting value trigger highlightSearch refresh
-        value = globalState.get('highlightSearchPattern')
-        globalState.set('highlightSearchPattern', value)
+        globalState.set('highlightSearchPattern', globalState.get('lastSearchPattern'))
       else
         globalState.set('highlightSearchPattern', null)
 
@@ -113,13 +112,12 @@ module.exports =
       'vim-mode-plus:equalize-panes': => @equalizePanes()
 
   maximizePane: ->
-    selector = 'vim-mode-plus-pane-maximized'
     classList = atom.views.getView(atom.workspace).classList
-    classList.toggle(selector)
-    if classList.contains(selector)
-      classList.add('hide-tab-bar') if settings.get('hideTabBarOnMaximizePane')
+    if classList.contains('vim-mode-plus-pane-maximized')
+      classList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
     else
-      classList.remove('hide-tab-bar')
+      classList.add('vim-mode-plus-pane-maximized')
+      classList.add('hide-tab-bar') if settings.get('hideTabBarOnMaximizePane')
 
   equalizePanes: ->
     setFlexScale = (base, newFlexScale) ->
