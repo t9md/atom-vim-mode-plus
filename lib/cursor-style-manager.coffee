@@ -58,10 +58,10 @@ class CursorStyleManager
     {@styleDisporser, @lineHeightObserver} = {}
 
   refresh: ->
-    {submode} = @vimState
+    {mode, submode} = @vimState
     @styleDisporser?.dispose()
     @styleDisporser = new CompositeDisposable
-    return unless (@vimState.isMode('visual') and settings.get('showCursorInVisualMode'))
+    return unless mode is 'visual' and settings.get('showCursorInVisualMode')
 
     cursors = cursorsToShow = @editor.getCursors()
     if submode is 'blockwise'
