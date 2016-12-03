@@ -11,29 +11,30 @@ getCursorNode = (editorElement, cursor) ->
 
 # Return cursor style offset(top, left)
 # ---------------------------------------
-getOffset = (submode, cursor, isSoftWrapped) ->
-  {selection, editor} = cursor
-  traversal = new Point(0, 0)
+getOffset = (submode, cursor) ->
+  {selection} = cursor
   switch submode
-    when 'characterwise', 'blockwise'
-      if not selection.isReversed() and not cursor.isAtBeginningOfLine()
-        traversal.column -= 1
+    when 'characterwise'
+      return if selection.isReversed()
+      if cursor.isAtBeginningOfLine()
+        new Point(-1, 0)
+      else
+        new Point(0, -1)
+
+    when 'blockwise'
+      return if cursor.isAtBeginningOfLine() or selection.isReversed()
+      new Point(0, -1)
+
     when 'linewise'
       bufferPoint = swrap(selection).getBufferPositionFor('head', fromProperty: true)
-      # FIXME need to update original selection property?
-      # to reflect outer vmp command modify linewise selection?
-      [startRow, endRow] = selection.getBufferRowRange()
-      if selection.isReversed()
-        bufferPoint.row = startRow
-
-      traversal = if isSoftWrapped
+      if cursor.editor.isSoftWrapped()
         screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
-        screenPoint.traversalFrom(cursor.getScreenPosition())
+        offset = screenPoint.traversalFrom(cursor.getScreenPosition())
       else
-        bufferPoint.traversalFrom(cursor.getBufferPosition())
-  if not selection.isReversed() and cursor.isAtBeginningOfLine() and submode isnt 'blockwise'
-    traversal.row = -1
-  traversal
+        offset = bufferPoint.traversalFrom(cursor.getBufferPosition())
+      if not selection.isReversed() and cursor.isAtBeginningOfLine()
+        offset.row = -1
+      offset
 
 setStyle = (style, {row, column}) ->
   style.setProperty('top', "#{row * lineHeight}em") unless row is 0
@@ -52,14 +53,14 @@ class CursorStyleManager
       @refresh()
 
   destroy: ->
-    @subscriptions?.dispose()
+    @styleDisporser?.dispose()
     @lineHeightObserver.dispose()
-    {@subscriptions, @lineHeightObserver} = {}
+    {@styleDisporser, @lineHeightObserver} = {}
 
   refresh: ->
     {submode} = @vimState
-    @subscriptions?.dispose()
-    @subscriptions = new CompositeDisposable
+    @styleDisporser?.dispose()
+    @styleDisporser = new CompositeDisposable
     return unless (@vimState.isMode('visual') and settings.get('showCursorInVisualMode'))
 
     cursors = cursorsToShow = @editor.getCursors()
@@ -73,6 +74,9 @@ class CursorStyleManager
       else
         cursor.setVisible(false) if cursor.isVisible()
 
+    # [FIXME] In spec mode, we skip here since not all spec have dom attached.
+    return if isSpecMode
+
     # [NOTE] In BlockwiseSelect we add selections(and corresponding cursors) in bluk.
     # But corresponding cursorsComponent(HTML element) is added in sync.
     # So to modify style of cursorsComponent, we have to make sure corresponding cursorsComponent
@@ -82,10 +86,8 @@ class CursorStyleManager
     # But it wasn't necessary before I iintroduce `moveToFirstCharacterOnVerticalMotion` for `ctrl-f`
     @editorElement.component.updateSync()
 
-    # [FIXME] In spec mode, we skip here since not all spec have dom attached.
-    return if isSpecMode
-    isSoftWrapped = @editor.isSoftWrapped()
-    for cursor in cursorsToShow when cursorNode = getCursorNode(@editorElement, cursor)
-      @subscriptions.add setStyle(cursorNode.style, getOffset(submode, cursor, isSoftWrapped))
+    for cursor in cursorsToShow when offset = getOffset(submode, cursor)
+      if cursorNode = getCursorNode(@editorElement, cursor)
+        @styleDisporser.add setStyle(cursorNode.style, offset)
 
 module.exports = CursorStyleManager
