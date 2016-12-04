@@ -46,10 +46,6 @@ class OccurrenceManager
     @disposables.dispose()
     @markerLayer.destroy()
 
-  getMarkerRangesIntersectsWithRanges: (ranges, exclusive=false) ->
-    @getMarkersIntersectsWithRanges(ranges, exclusive).map (marker) ->
-      marker.getBufferRange()
-
   # Patterns
   hasPatterns: ->
     @patterns.length > 0
