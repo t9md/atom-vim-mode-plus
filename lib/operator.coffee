@@ -182,7 +182,7 @@ class Operator extends Base
         # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
         @vimState.submode = null
 
-      if rangeForLastSelection = _.detect(ranges, (range) -> range.containsPoint(@_originalCursorPosition))
+      if rangeForLastSelection = _.detect(ranges, (range) => range.containsPoint(@_originalCursorPosition))
         _.remove(ranges, rangeForLastSelection)
         ranges.push(rangeForLastSelection)
 
