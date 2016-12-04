@@ -172,7 +172,9 @@ class Operator extends Base
     # To repoeat(`.`) operation where multiple occurrence patterns was set.
     # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
-    unless @occurrenceManager.select(@_originalCursorPosition)
+
+    startInsertMode = @instanceof('ActivateInsertMode') and not @isRepeated()
+    unless @occurrenceManager.select(@_originalCursorPosition, {startInsertMode})
       @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
 
   # Return true unless all selection is empty.
