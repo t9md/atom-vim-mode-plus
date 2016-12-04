@@ -99,8 +99,11 @@ class OccurrenceManager
   getMarkerAtPoint: (point) ->
     @markerLayer.findMarkers(containsBufferPosition: point)[0]
 
-
-  # Return true/false to indicate success or fail
+  # Select occurrence marker bufferRange intersecting current selections.
+  # - Return: true/false to indicate success or fail
+  #
+  # When startInsertMode was true, do special handling for which occurrence range
+  #  become lastSelection so that autocomplete+popup shows at original cursor position.
   select: ({startInsertMode}={}) ->
     isVisualMode = @vimState.mode is 'visual'
     markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
@@ -114,11 +117,34 @@ class OccurrenceManager
         @vimState.submode = null
 
       if startInsertMode
-        if rangeForLastSelection = findRangeContainsPoint(ranges, @vimState.getOriginalCursorPosition())
-          _.remove(ranges, rangeForLastSelection)
-          ranges.push(rangeForLastSelection)
+        range = @getRangeForLastSelection(ranges)
+        _.remove(ranges, range)
+        ranges.push(range)
+
       @editor.setSelectedBufferRanges(ranges)
 
       true
     else
       false
+
+  # Which occurrence become lastSelection is determined in following order
+  #  1. Occurrence under original cursor position
+  #  2. forwarding in same row
+  #  3. first occurrence in same row
+  #  4. forwarding (wrap-end)
+  getRangeForLastSelection: (ranges) ->
+    point = @vimState.getOriginalCursorPosition()
+
+    rangesSameRow = ranges.filter (range) -> range.start.row is point.row
+    if rangesSameRow.length
+      for range in rangesSameRow
+        if point.isGreaterThanOrEqual(range.start) and point.isLessThanOrEqual(range.end)
+          return range # Contained
+
+        if range.start.isGreaterThan(point)
+          return range # Forwarding
+      return rangesSameRow[0]
+
+    for range in ranges when range.start.isGreaterThan(point)  # Forwarding
+      return range
+    ranges[0] # return first as fallback
