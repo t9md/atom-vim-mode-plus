@@ -171,17 +171,9 @@ class Operator extends Base
     # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
-    selectedRanges = @editor.getSelectedBufferRanges()
-    ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
-    if ranges.length
-      if @isMode('visual')
-        @vimState.modeManager.deactivate()
-        # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
-        @vimState.submode = null
-      @editor.setSelectedBufferRanges(ranges)
-    else
+    startInsertMode = @instanceof('ActivateInsertMode') and not @isRepeated()
+    unless @occurrenceManager.select({startInsertMode})
       @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
-    @occurrenceManager.resetPatterns()
 
   # Return true unless all selection is empty.
   selectTarget: ->
@@ -301,6 +293,7 @@ class TogglePresetOccurrence extends Operator
   flashTarget: false
   requireTarget: false
   acceptPresetOccurrence: false
+  acceptPersistentSelection: false
 
   execute: ->
     {@occurrenceManager} = @vimState

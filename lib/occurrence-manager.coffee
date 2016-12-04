@@ -4,6 +4,7 @@ _ = require 'underscore-plus'
 {
   scanEditor
   shrinkRangeEndToBeforeNewLine
+  findRangeContainsPoint
 } = require './utils'
 
 module.exports =
@@ -82,7 +83,7 @@ class OccurrenceManager
 
   # Return occurrence markers intersecting given ranges
   getMarkersIntersectsWithRanges: (ranges, exclusive=false) ->
-    # findmarkers()'s intersectsBufferRange param have no exclusive cotntroll
+    # findmarkers()'s intersectsBufferRange param have no exclusive control
     # So I need extra check to filter out unwanted marker.
     # But basically I should prefer findMarker since It's fast than iterating
     # whole markers manually.
@@ -97,3 +98,54 @@ class OccurrenceManager
 
   getMarkerAtPoint: (point) ->
     @markerLayer.findMarkers(containsBufferPosition: point)[0]
+
+  # Select occurrence marker bufferRange intersecting current selections.
+  # - Return: true/false to indicate success or fail
+  #
+  # When startInsertMode was true, do special handling for which occurrence range
+  #  become lastSelection so that autocomplete+popup shows at original cursor position or near.
+  select: ({startInsertMode}={}) ->
+    isVisualMode = @vimState.mode is 'visual'
+    markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
+    ranges = markers.map (marker) -> marker.getBufferRange()
+    @resetPatterns()
+
+    if ranges.length
+      if isVisualMode
+        @vimState.modeManager.deactivate()
+        # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
+        @vimState.submode = null
+
+      if startInsertMode
+        range = @getRangeForLastSelection(ranges)
+        _.remove(ranges, range)
+        ranges.push(range)
+
+      @editor.setSelectedBufferRanges(ranges)
+
+      true
+    else
+      false
+
+  # Which occurrence become lastSelection is determined by following order
+  #  1. Occurrence under original cursor position
+  #  2. forwarding in same row
+  #  3. first occurrence in same row
+  #  4. forwarding (wrap-end)
+  getRangeForLastSelection: (ranges) ->
+    point = @vimState.getOriginalCursorPosition()
+
+    for range in ranges when range.containsPoint(point)
+      return range
+
+    rangesStartFromSameRow = ranges.filter((range) -> range.start.row is point.row)
+
+    if rangesStartFromSameRow.length
+      for range in rangesStartFromSameRow when range.start.isGreaterThan(point)
+        return range # Forwarding
+      return rangesStartFromSameRow[0]
+
+    for range in ranges when range.start.isGreaterThan(point)  # Forwarding
+      return range
+
+    ranges[0] # return first as fallback

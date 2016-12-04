@@ -267,7 +267,15 @@ class VimState
   resetNormalMode: ({userInvocation}={}) ->
     if userInvocation ? false
       if @editor.hasMultipleCursors()
-        @editor.clearSelections()
+        # Don't @editor.clearSelections() doesn't respect lastCursor
+        # So here I destroy() except lastSelection
+        # Important when clearing multi-cursor after bulk-edit using occurrence
+        for selection in @editor.getSelections()
+          if selection.isLastSelection()
+            selection.clear()
+          else
+            selection.destroy()
+
       else if @hasPersistentSelections() and settings.get('clearPersistentSelectionOnResetNormalMode')
         @clearPersistentSelections()
       else if @occurrenceManager.hasPatterns()
@@ -279,7 +287,11 @@ class VimState
       @editor.clearSelections()
     @activate('normal')
 
+  init: ->
+    @saveOriginalCursorPosition()
+
   reset: ->
+    @resetOriginalCursorPosition()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
@@ -327,3 +339,18 @@ class VimState
   finishScrollAnimation: ->
     @scrollAnimationEffect?.finish()
     @scrollAnimationEffect = null
+
+  # Other
+  # -------------------------
+  saveOriginalCursorPosition: ->
+    if @mode is 'visual'
+      options = {fromProperty: true, allowFallback: true}
+      @originalCursorPosition = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
+    else
+      @originalCursorPosition = @editor.getCursorBufferPosition()
+
+  getOriginalCursorPosition: ->
+    @originalCursorPosition
+
+  resetOriginalCursorPosition: ->
+    @originalCursorPosition = null

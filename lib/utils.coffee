@@ -795,6 +795,10 @@ limitNumber = (number, {max, min}={}) ->
   number = Math.max(number, min) if min?
   number
 
+findRangeContainsPoint = (ranges, point) ->
+  for range in ranges when range.containsPoint(point)
+    return range
+
 module.exports = {
   getParent
   getAncestors
@@ -888,4 +892,5 @@ module.exports = {
   getPackage
   searchByProjectFind
   limitNumber
+  findRangeContainsPoint
 }
