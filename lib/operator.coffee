@@ -293,6 +293,7 @@ class TogglePresetOccurrence extends Operator
   flashTarget: false
   requireTarget: false
   acceptPresetOccurrence: false
+  acceptPersistentSelection: false
 
   execute: ->
     {@occurrenceManager} = @vimState
