@@ -101,21 +101,20 @@ class OccurrenceManager
 
 
   # Return true/false to indicate success or fail
-  select: (originalCursorPosition, {startInsertMode}={}) ->
+  select: ({startInsertMode}={}) ->
     isVisualMode = @vimState.mode is 'visual'
     markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
     ranges = markers.map (marker) -> marker.getBufferRange()
     @resetPatterns()
 
     if ranges.length
-      success = true
       if isVisualMode
         @vimState.modeManager.deactivate()
         # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
         @vimState.submode = null
 
       if startInsertMode
-        if rangeForLastSelection = findRangeContainsPoint(ranges, originalCursorPosition)
+        if rangeForLastSelection = findRangeContainsPoint(ranges, @vimState.getOriginalCursorPosition())
           _.remove(ranges, rangeForLastSelection)
           ranges.push(rangeForLastSelection)
       @editor.setSelectedBufferRanges(ranges)

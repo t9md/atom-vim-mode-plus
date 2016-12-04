@@ -87,8 +87,6 @@ class Operator extends Base
     # addOccurrencePattern pick cursor-word to find occurrence base pattern.
     # This has to be done BEFORE converting persistent-selection into real-selection.
     # Since when persistent-selection is actuall selected, it change cursor position.
-    @_originalCursorPosition = @getCursorBufferPosition()
-
     if @isOccurrence()
       @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
@@ -174,7 +172,7 @@ class Operator extends Base
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
     startInsertMode = @instanceof('ActivateInsertMode') and not @isRepeated()
-    unless @occurrenceManager.select(@_originalCursorPosition, {startInsertMode})
+    unless @occurrenceManager.select({startInsertMode})
       @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
 
   # Return true unless all selection is empty.

@@ -279,7 +279,11 @@ class VimState
       @editor.clearSelections()
     @activate('normal')
 
+  init: ->
+    @saveOriginalCursorPosition()
+
   reset: ->
+    @resetOriginalCursorPosition()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
@@ -327,3 +331,18 @@ class VimState
   finishScrollAnimation: ->
     @scrollAnimationEffect?.finish()
     @scrollAnimationEffect = null
+
+  # Other
+  # -------------------------
+  saveOriginalCursorPosition: ->
+    if @mode is 'visual'
+      options = {fromProperty: true, allowFallback: true}
+      @originalCursorPosition = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
+    else
+      @originalCursorPosition = @editor.getCursorBufferPosition()
+
+  getOriginalCursorPosition: ->
+    @originalCursorPosition
+
+  resetOriginalCursorPosition: ->
+    @originalCursorPosition = null

@@ -62,6 +62,7 @@ class OperationStack
   # -------------------------
   run: (klass, properties) ->
     try
+      @vimState.init() if @isEmpty()
       type = typeof(klass)
       if type is 'object' # . repeat case we can execute as-it-is.
         operation = klass
