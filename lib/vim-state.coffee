@@ -267,7 +267,15 @@ class VimState
   resetNormalMode: ({userInvocation}={}) ->
     if userInvocation ? false
       if @editor.hasMultipleCursors()
-        @editor.clearSelections()
+        # Don't @editor.clearSelections() doesn't respect lastCursor
+        # So here I destroy() except lastSelection
+        # Important when clearing multi-cursor after bulk-edit using occurrence
+        for selection in @editor.getSelections()
+          if selection.isLastSelection()
+            selection.clear()
+          else
+            selection.destroy()
+
       else if @hasPersistentSelections() and settings.get('clearPersistentSelectionOnResetNormalMode')
         @clearPersistentSelections()
       else if @occurrenceManager.hasPatterns()
