@@ -87,6 +87,8 @@ class Operator extends Base
     # addOccurrencePattern pick cursor-word to find occurrence base pattern.
     # This has to be done BEFORE converting persistent-selection into real-selection.
     # Since when persistent-selection is actuall selected, it change cursor position.
+    @_originalCursorPosition = @getCursorBufferPosition()
+
     if @isOccurrence()
       @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
@@ -173,12 +175,19 @@ class Operator extends Base
 
     selectedRanges = @editor.getSelectedBufferRanges()
     ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
+
     if ranges.length
       if @isMode('visual')
         @vimState.modeManager.deactivate()
         # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
         @vimState.submode = null
+
+      if rangeForLastSelection = _.detect ranges, (range) -> range.containsPoint(@_originalCursorPosition)
+        _.remove(ranges, rangeForLastSelection)
+        ranges.push(rangeForLastSelection)
+
       @editor.setSelectedBufferRanges(ranges)
+
     else
       @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
     @occurrenceManager.resetPatterns()
