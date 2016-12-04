@@ -172,25 +172,8 @@ class Operator extends Base
     # To repoeat(`.`) operation where multiple occurrence patterns was set.
     # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
-
-    selectedRanges = @editor.getSelectedBufferRanges()
-    ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
-
-    if ranges.length
-      if @isMode('visual')
-        @vimState.modeManager.deactivate()
-        # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
-        @vimState.submode = null
-
-      if rangeForLastSelection = _.detect(ranges, (range) => range.containsPoint(@_originalCursorPosition))
-        _.remove(ranges, rangeForLastSelection)
-        ranges.push(rangeForLastSelection)
-
-      @editor.setSelectedBufferRanges(ranges)
-
-    else
+    unless @occurrenceManager.select(@_originalCursorPosition)
       @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
-    @occurrenceManager.resetPatterns()
 
   # Return true unless all selection is empty.
   selectTarget: ->

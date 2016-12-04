@@ -4,6 +4,7 @@ _ = require 'underscore-plus'
 {
   scanEditor
   shrinkRangeEndToBeforeNewLine
+  findRangeContainsPoint
 } = require './utils'
 
 module.exports =
@@ -82,7 +83,7 @@ class OccurrenceManager
 
   # Return occurrence markers intersecting given ranges
   getMarkersIntersectsWithRanges: (ranges, exclusive=false) ->
-    # findmarkers()'s intersectsBufferRange param have no exclusive cotntroll
+    # findmarkers()'s intersectsBufferRange param have no exclusive control
     # So I need extra check to filter out unwanted marker.
     # But basically I should prefer findMarker since It's fast than iterating
     # whole markers manually.
@@ -97,3 +98,27 @@ class OccurrenceManager
 
   getMarkerAtPoint: (point) ->
     @markerLayer.findMarkers(containsBufferPosition: point)[0]
+
+
+  # Return true/false to indicate success or fail
+  select: (originalCursorPosition) ->
+    isVisualMode = @vimState.mode is 'visual'
+    markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
+    ranges = markers.map (marker) -> marker.getBufferRange()
+    @resetPatterns()
+
+    if ranges.length
+      success = true
+      if isVisualMode
+        @vimState.modeManager.deactivate()
+        # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
+        @vimState.submode = null
+
+      if rangeForLastSelection = findRangeContainsPoint(ranges, originalCursorPosition)
+        _.remove(ranges, rangeForLastSelection)
+        ranges.push(rangeForLastSelection)
+      @editor.setSelectedBufferRanges(ranges)
+
+      true
+    else
+      false
