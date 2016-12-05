@@ -7,7 +7,6 @@ _ = require 'underscore-plus'
 
 {
   pointIsAtEndOfLine
-  mergeIntersectingRanges
   sortRanges
 } = require './utils'
 
@@ -37,13 +36,20 @@ class BlockwiseOtherEnd extends ReverseSelections
 class Undo extends MiscCommand
   @extend()
 
+  # Trim starting new-line-corresponding range if it transformed range become linewise range.
+  # this is special accomodation for flashing intuitively for human when `y y p` then `undo`, `redo`
+  trimStartingNewLine: (range) ->
+    {start, end} = range
+    if (end.column is 0) and (start.row + 1 isnt end.row) and pointIsAtEndOfLine(@editor, start)
+      new Range([start.row + 1, 0], end)
+    else
+      range
+
   withTrackingChanges: (fn) ->
     newRanges = []
     oldRanges = []
 
-    disposable = @editor.getBuffer().onDidChange (event) ->
-      {oldRange, newRange, oldText, newText} = event
-
+    disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) ->
       if newRange.containsRange(oldRange)
         newRanges.push(newRange)
         return
@@ -59,18 +65,16 @@ class Undo extends MiscCommand
 
     disposable.dispose()
 
-    newRanges = mergeIntersectingRanges(newRanges)
-    oldRanges = mergeIntersectingRanges(oldRanges)
-
     if range = sortRanges(_.compact([newRanges[0], _.last(oldRanges)]))[0]
       @vimState.mark.setRange('[', ']', range)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
         @editor.setCursorBufferPosition(range.start)
 
     if settings.get('flashOnUndoRedo')
+      trimStartingNewLine = @trimStartingNewLine.bind(this)
       @onDidFinishOperation =>
-        @vimState.flash(oldRanges, type: 'removed')
-        @vimState.flash(newRanges, type: 'added')
+        @vimState.flash(newRanges.map(trimStartingNewLine), type: 'removed')
+        @vimState.flash(oldRanges.map(trimStartingNewLine), type: 'added')
 
   execute: ->
     @withTrackingChanges =>
