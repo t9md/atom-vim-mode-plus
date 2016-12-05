@@ -37,9 +37,8 @@ module.exports =
       vimState = new VimState(editor, @statusBarManager, globalState)
       @emitter.emit('did-add-vim-state', vimState)
 
-    workspaceClassList = atom.views.getView(atom.workspace).classList
     @subscribe atom.workspace.onDidChangeActivePane ->
-      workspaceClassList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
+      atom.views.getView(atom.workspace).classList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
 
     @subscribe atom.workspace.onDidChangeActivePaneItem ->
       if settings.get('automaticallyEscapeInsertModeOnActivePaneItemChange')
