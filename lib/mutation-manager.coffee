@@ -97,7 +97,7 @@ class MutationManager
             selection.destroy()
             continue
 
-          if isOccurrence
+          if isOccurrence and stay
             point = @vimState.getOriginalCursorPosition()
             selection.cursor.setBufferPosition(point)
           else if point = mutation.getRestorePoint({stay})
