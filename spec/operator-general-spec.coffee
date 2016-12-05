@@ -192,24 +192,52 @@ describe "Operator general", ->
           selectedText: ""
 
       describe "with multiple cursors", ->
-        beforeEach ->
-          set
-            textC: """
-            |12345
-            a|bcde
-            ABCDE
-            QWERT
-            """
-          ensure 'd l',
-            textC: """
-            |2345
-            a|cde
-            ABCDE
-            QWERT
-            """
-
         describe "setCursorToStartOfChangeOnUndoRedo is true(default)", ->
-          it "clear multiple cursors and set cursor to start of changes", ->
+          it "clear multiple cursors and set cursor to start of changes of last cursor", ->
+            set
+              text: originalText
+              cursor: [[0, 0], [1, 1]]
+
+            ensure 'd l',
+              textC: """
+              |2345
+              a|cde
+              ABCDE
+              QWERT
+              """
+
+            ensure 'u',
+              textC: """
+              12345
+              a|bcde
+              ABCDE
+              QWERT
+              """
+              selectedText: ''
+
+            ensure 'ctrl-r',
+              textC: """
+              2345
+              a|cde
+              ABCDE
+              QWERT
+              """
+              selectedText: ''
+
+          it "clear multiple cursors and set cursor to start of changes of last cursor", ->
+            set
+              text: originalText
+              cursor: [[1, 1], [0, 0]]
+
+            ensure 'd l',
+              text: """
+              2345
+              acde
+              ABCDE
+              QWERT
+              """
+              cursor: [[1, 1], [0, 0]]
+
             ensure 'u',
               textC: """
               |12345
@@ -219,9 +247,32 @@ describe "Operator general", ->
               """
               selectedText: ''
 
+            ensure 'ctrl-r',
+              textC: """
+              |2345
+              acde
+              ABCDE
+              QWERT
+              """
+              selectedText: ''
+
         describe "setCursorToStartOfChangeOnUndoRedo is false", ->
           beforeEach ->
             settings.set('setCursorToStartOfChangeOnUndoRedo', false)
+            set
+              textC: """
+              |12345
+              a|bcde
+              ABCDE
+              QWERT
+              """
+            ensure 'd l',
+              textC: """
+              |2345
+              a|cde
+              ABCDE
+              QWERT
+              """
 
           it "put cursor to end of change (works in same way of atom's core:undo)", ->
             ensure 'u',

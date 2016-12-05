@@ -287,7 +287,7 @@ describe "Occurrence", ->
         withMockPlatform searchEditorElement, 'platform-darwin' , ->
           rawKeystroke 'cmd-d', document.activeElement
           ensure 'i e',
-            selectedText: ['0000', '3333', '444']
+            selectedText: ['3333', '444', '0000'] # Why '0000' comes last is '0000' become last selection.
             mode: ['visual', 'characterwise']
 
       it "change occurrence by pattern match", ->

@@ -186,10 +186,10 @@ class Operator extends Base
     @emitWillSelectTarget()
 
     @target.select()
+    @mutationManager.setCheckPoint('did-select')
     @selectOccurrence() if @isOccurrence()
 
     if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
-      @mutationManager.setCheckPoint('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()

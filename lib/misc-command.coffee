@@ -64,24 +64,32 @@ class Undo extends MiscCommand
     fn()
 
     disposable.dispose()
+    selection.clear() for selection in @editor.getSelections()
 
-    if range = sortRanges(_.compact([newRanges[0], _.last(oldRanges)]))[0]
-      @vimState.mark.setRange('[', ']', range)
+    trimStartingNewLine = @trimStartingNewLine.bind(this)
+    newRanges = newRanges.map(trimStartingNewLine)
+    oldRanges = oldRanges.map(trimStartingNewLine)
+
+    allRanges = sortRanges(newRanges.concat(oldRanges))
+
+    if @editor.hasMultipleCursors()
+      point = @editor.getCursorBufferPosition()
+      allRanges = allRanges.filter (range) -> range.containsPoint(point)
+
+    if changedRange = allRanges[0]
+      @vimState.mark.setRange('[', ']', changedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
-        @editor.setCursorBufferPosition(range.start)
+        @editor.setCursorBufferPosition(changedRange.start)
 
     if settings.get('flashOnUndoRedo')
-      trimStartingNewLine = @trimStartingNewLine.bind(this)
       @onDidFinishOperation =>
-        @vimState.flash(newRanges.map(trimStartingNewLine), type: 'removed')
-        @vimState.flash(oldRanges.map(trimStartingNewLine), type: 'added')
+        @vimState.flash(newRanges, type: 'added')
+        @vimState.flash(oldRanges, type: 'removed')
 
   execute: ->
     @withTrackingChanges =>
       @mutate()
 
-    for selection in @editor.getSelections()
-      selection.clear()
     @activateMode('normal')
 
   mutate: ->
