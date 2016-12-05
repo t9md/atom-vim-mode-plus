@@ -96,6 +96,12 @@ class SearchInput extends HTMLElement
     @emitter.emit('did-cancel')
     @unfocus()
 
+  backspace: ->
+    if @editor.getText().length is 0
+      @cancel()
+    else
+      atom.commands.dispatch(@editorElement, 'core:backspace')
+
   confirm: (landingPoint=null) ->
     @emitter.emit('did-confirm', {input: @editor.getText(), landingPoint})
     @unfocus()
@@ -129,6 +135,7 @@ class SearchInput extends HTMLElement
       "search-land-to-start": => @confirm()
       "search-land-to-end": => @confirm('end')
       "search-cancel": => @cancel()
+      "search-backspace": => @backspace()
 
       "search-visit-next": => @emitter.emit('did-command', name: 'visit', direction: 'next')
       "search-visit-prev": => @emitter.emit('did-command', name: 'visit', direction: 'prev')
