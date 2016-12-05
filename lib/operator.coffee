@@ -171,8 +171,7 @@ class Operator extends Base
     # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
-    startInsertMode = @instanceof('ActivateInsertMode') and not @isRepeated()
-    unless @occurrenceManager.select({startInsertMode})
+    unless @occurrenceManager.select()
       @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
 
   # Return true unless all selection is empty.

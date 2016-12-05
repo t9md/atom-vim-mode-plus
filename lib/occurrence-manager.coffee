@@ -98,9 +98,11 @@ class OccurrenceManager
   # Select occurrence marker bufferRange intersecting current selections.
   # - Return: true/false to indicate success or fail
   #
-  # When startInsertMode was true, do special handling for which occurrence range
-  #  become lastSelection so that autocomplete+popup shows at original cursor position or near.
-  select: ({startInsertMode}={}) ->
+  # Do special handling for which occurrence range become lastSelection
+  # e.g.
+  #  - c(change): So that autocomplete+popup shows at original cursor position or near.
+  #  - g U(upper-case): So that undo/redo can respect last cursor position.
+  select: ->
     isVisualMode = @vimState.mode is 'visual'
     markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
     ranges = markers.map (marker) -> marker.getBufferRange()
@@ -112,10 +114,9 @@ class OccurrenceManager
         # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
         @vimState.submode = null
 
-      if startInsertMode
-        range = @getRangeForLastSelection(ranges)
-        _.remove(ranges, range)
-        ranges.push(range)
+      range = @getRangeForLastSelection(ranges)
+      _.remove(ranges, range)
+      ranges.push(range)
 
       @editor.setSelectedBufferRanges(ranges)
 
