@@ -71,7 +71,6 @@ class MutationManager
       selection.cursor.setBufferPosition(point)
 
   restoreCursorPositions: (options) ->
-    console.log options
     {stay, isOccurrence, isBlockwise} = options
     if isBlockwise
       # [FIXME] why I need this direct manupilation?
