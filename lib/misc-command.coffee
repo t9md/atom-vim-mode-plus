@@ -41,7 +41,17 @@ class Undo extends MiscCommand
     newRanges = []
     oldRanges = []
 
-    disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) ->
+    disposable = @editor.getBuffer().onDidChange (event) ->
+      {oldRange, newRange, oldText, newText} = event
+
+      if newRange.containsRange(oldRange)
+        newRanges.push(newRange)
+        return
+
+      if oldRange.containsRange(newRange)
+        oldRanges.push(oldRange)
+        return
+
       oldRanges.push(oldRange) unless oldRange.isEmpty()
       newRanges.push(newRange) unless newRange.isEmpty()
 
