@@ -71,7 +71,8 @@ class MutationManager
       selection.cursor.setBufferPosition(point)
 
   restoreCursorPositions: (options) ->
-    {stay, strict, isBlockwise} = options
+    console.log options
+    {stay, isOccurrence, isBlockwise} = options
     if isBlockwise
       # [FIXME] why I need this direct manupilation?
       # Because there's bug that blockwise selecction is not addes to each
@@ -93,14 +94,17 @@ class MutationManager
     else
       for selection, i in @editor.getSelections()
         if mutation = @mutationsBySelection.get(selection)
-          if strict and mutation.createdAt isnt 'will-select'
+          if isOccurrence and mutation.createdAt isnt 'will-select'
             selection.destroy()
             continue
 
-          if point = mutation.getRestorePoint({stay})
+          if isOccurrence
+            point = @vimState.getOriginalCursorPosition()
+            selection.cursor.setBufferPosition(point)
+          else if point = mutation.getRestorePoint({stay})
             selection.cursor.setBufferPosition(point)
         else
-          if strict
+          if isOccurrence
             selection.destroy()
 
 # mutation information is created even if selection.isEmpty()

@@ -203,7 +203,7 @@ class Operator extends Base
 
     options =
       stay: @needStay()
-      strict: @isOccurrence()
+      isOccurrence: @isOccurrence()
       isBlockwise: @target?.isBlockwise?()
 
     @mutationManager.restoreCursorPositions(options)
