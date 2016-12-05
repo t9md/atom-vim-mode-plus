@@ -37,7 +37,7 @@ class BlockwiseOtherEnd extends ReverseSelections
 class Undo extends MiscCommand
   @extend()
 
-  mutateWithTrackingChanges: (fn) ->
+  withTrackingChanges: (fn) ->
     newRanges = []
     oldRanges = []
 
@@ -45,7 +45,7 @@ class Undo extends MiscCommand
       oldRanges.push(oldRange) unless oldRange.isEmpty()
       newRanges.push(newRange) unless newRange.isEmpty()
 
-    @mutate()
+    fn()
 
     disposable.dispose()
 
@@ -53,18 +53,18 @@ class Undo extends MiscCommand
     oldRanges = mergeIntersectingRanges(oldRanges)
 
     if range = sortRanges(_.compact([newRanges[0], _.last(oldRanges)]))[0]
-      fn(range)
-
-    if settings.get('flashOnUndoRedo')
-      @onDidFinishOperation =>
-        @vimState.flash(oldRanges, type: 'removed', timeout: 500)
-        @vimState.flash(newRanges, type: 'added', timeout: 500)
-
-  execute: ->
-    @mutateWithTrackingChanges (range) =>
       @vimState.mark.setRange('[', ']', range)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
         @editor.setCursorBufferPosition(range.start)
+
+    if settings.get('flashOnUndoRedo')
+      @onDidFinishOperation =>
+        @vimState.flash(oldRanges, type: 'removed')
+        @vimState.flash(newRanges, type: 'added')
+
+  execute: ->
+    @withTrackingChanges =>
+      @mutate()
 
     for selection in @editor.getSelections()
       selection.clear()

@@ -52,12 +52,13 @@ class FlashManager
     timeout ?= 1000
 
     {allowMultiple, decorationOptions} = flashTypes[type]
+    markerOptions = {invalidate: 'touch'}
 
     switch rangeType
       when 'buffer'
-        markers = (@editor.markBufferRange(range) for range in ranges)
+        markers = (@editor.markBufferRange(range, markerOptions) for range in ranges)
       when 'screen'
-        markers = (@editor.markScreenRange(range) for range in ranges)
+        markers = (@editor.markScreenRange(range, markerOptions) for range in ranges)
 
     unless allowMultiple
       if @markersByType.has(type)
