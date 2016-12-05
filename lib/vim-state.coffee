@@ -264,17 +264,16 @@ class VimState
     # @subscriptions.add atom.commands.onWillDispatch(saveProperties)
     @subscriptions.add atom.commands.onDidDispatch(checkSelection)
 
+  # What's this?
+  # editor.clearSelections() doesn't respect lastCursor positoin.
+  # This method works in same way as editor.clearSelections() but respect last cursor position.
+  clearSelections: ->
+    @editor.setCursorBufferPosition(@editor.getCursorBufferPosition())
+
   resetNormalMode: ({userInvocation}={}) ->
     if userInvocation ? false
       if @editor.hasMultipleCursors()
-        # Don't @editor.clearSelections() doesn't respect lastCursor
-        # So here I destroy() except lastSelection
-        # Important when clearing multi-cursor after bulk-edit using occurrence
-        for selection in @editor.getSelections()
-          if selection.isLastSelection()
-            selection.clear()
-          else
-            selection.destroy()
+        @clearSelections()
 
       else if @hasPersistentSelections() and settings.get('clearPersistentSelectionOnResetNormalMode')
         @clearPersistentSelections()
@@ -284,7 +283,7 @@ class VimState
       if settings.get('clearHighlightSearchOnResetNormalMode')
         @globalState.set('highlightSearchPattern', null)
     else
-      @editor.clearSelections()
+      @clearSelections()
     @activate('normal')
 
   init: ->

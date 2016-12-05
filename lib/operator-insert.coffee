@@ -104,7 +104,7 @@ class ActivateInsertMode extends Operator
           moveCursorLeft(selection.cursor)
 
       if settings.get('clearMultipleCursorsOnEscapeInsertMode')
-        @editor.clearSelections()
+        @vimState.clearSelections()
 
     else
       if @getInsertionCount() > 0

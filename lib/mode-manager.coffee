@@ -105,7 +105,7 @@ class ModeManager
       replaceModeDeactivator = null
 
       if settings.get('clearMultipleCursorsOnEscapeInsertMode')
-        @editor.clearSelections()
+        @vimState.clearSelections()
 
       # When escape from insert-mode, cursor move Left.
       needSpecialCareToPreventWrapLine = atom.config.get('editor.atomicSoftTabs') ? true

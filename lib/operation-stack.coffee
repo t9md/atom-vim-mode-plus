@@ -177,7 +177,7 @@ class OperationStack
       if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
         throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
       else
-        @editor.clearSelections()
+        @vimState.clearSelections()
 
   ensureAllCursorsAreNotAtEndOfLine: ->
     for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
