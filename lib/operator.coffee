@@ -24,7 +24,6 @@ class Operator extends Base
   occurrence: false
 
   flashTarget: true
-  flashType: 'operator-add'
   flashCheckpoint: 'did-finish'
   trackChange: false
 
@@ -67,9 +66,9 @@ class Operator extends Base
 
   getFlashType: ->
     if @isOccurrence()
-      @flashType + '-long'
+      'operator-occurrence'
     else
-      @flashType
+      'operator'
 
   trackChangeIfNecessary: ->
     return unless @trackChange
@@ -323,7 +322,6 @@ class Delete extends Operator
   @extend()
   hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
-  flashType: 'operator-remove'
   flashCheckpoint: 'did-select-occurrence'
   stayOptionName: 'stayOnDelete'
 
@@ -383,7 +381,6 @@ class Yank extends Operator
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
   stayOptionName: 'stayOnYank'
-  flashType: 'operator-nomutate'
 
   mutateSelection: (selection) ->
     @setTextToRegisterForSelection(selection)
@@ -426,7 +423,7 @@ class Increase extends Operator
         newRanges.push ranges
 
     if (newRanges = _.flatten(newRanges)).length
-      @vimState.flash(newRanges, type: @flashType)
+      @vimState.flash(newRanges, type: @getFlashType())
     else
       atom.beep()
 
@@ -461,7 +458,7 @@ class IncrementNumber extends Operator
       newRanges = for selection in @editor.getSelectionsOrderedByBufferPosition()
         @replaceNumber(selection.getBufferRange(), pattern)
     if (newRanges = _.flatten(newRanges)).length
-      @vimState.flash(newRanges, type: @flashType)
+      @vimState.flash(newRanges, type: @getFlashType())
     else
       atom.beep()
     for selection in @editor.getSelections()

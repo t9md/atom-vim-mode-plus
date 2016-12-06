@@ -47,6 +47,7 @@ class ToggleCase extends TransformString
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
   hover: null
+  flashTarget: false
   restorePositions: false
   target: 'MoveRight'
 
@@ -346,7 +347,6 @@ class Indent extends TransformString
   hover: icon: ':indent:', emoji: ':point_right:'
   stayByMarker: true
   wise: 'linewise'
-  flashType: 'operator-nomutate'
 
   execute: ->
     unless @needStay()
