@@ -140,7 +140,7 @@ class Mutation
     point = Point.max(start, end.translate([0, -1]))
     @selection.editor.clipBufferPosition(point)
 
-  getInitialPoint: ({clip}={})->
+  getInitialPoint: ({clip}={}) ->
     point = @initialPointMarker?.getHeadBufferPosition() ? @initialPoint
     if clip
       Point.min(@getEndBufferPosition(), point)
