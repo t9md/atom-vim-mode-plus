@@ -95,9 +95,7 @@ class OperationStack
         operation.count = count
         operation.target?.count = count # Some opeartor have no target like ctrl-a(increase).
 
-      # [FIXME] Degradation, this `transact` should not be necessary
-      @editor.transact =>
-        @run(operation)
+      @run(operation)
 
   runRecordedMotion: (key, {reverse}={}) ->
     return unless operation = @vimState.globalState.get(key)

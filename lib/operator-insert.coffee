@@ -42,7 +42,7 @@ class ActivateInsertMode extends Operator # FIXME
       if settings.get('groupChangesWhenLeavingInsertMode')
         @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
 
-  canContinue: (targetSelected) ->
+  canContinueOnEmptySelection: ->
     true
 
   # we have to manage two separate checkpoint for different purpose(timing is different)
@@ -95,7 +95,7 @@ class ActivateInsertMode extends Operator # FIXME
   execute: ->
     if @isRequireTarget()
       targetSelected = @selectTarget()
-      unless @canContinue(targetSelected)
+      if not targetSelected and not @canContinueOnEmptySelection()
         @vimState.activate('normal')
         return
 
@@ -209,13 +209,14 @@ class InsertByTarget extends ActivateInsertMode
 
       when 'linewise'
         @editor.splitSelectionsIntoLines()
-        switch @which
-          when 'start'
-            for selection in @editor.getSelections()
-              swrap(selection).setStartToFirstCharacterOfLine()
-          when 'end'
-            for selection in @editor.getSelections()
-              swrap(selection).shrinkEndToBeforeNewLine()
+        methodName =
+          if @which is 'start'
+            'setStartToFirstCharacterOfLine'
+          else if @which is 'end'
+            'shrinkEndToBeforeNewLine'
+
+        for selection in @editor.getSelections()
+          swrap(selection)[methodName]()
 
 # key: 'I', Used in 'visual-mode.characterwise', visual-mode.blockwise
 class InsertAtStartOfTarget extends InsertByTarget
@@ -262,8 +263,8 @@ class Change extends ActivateInsertMode # FIXME
   trackChange: true
   supportInsertionCount: false
 
-  canContinue: (targetSelected) ->
-    targetSelected or not @isOccurrence()
+  canContinueOnEmptySelection: ->
+    not @isOccurrence()
 
   mutateText: ->
     # Allways dynamically determine selection wise wthout consulting target.wise
@@ -279,8 +280,6 @@ class Change extends ActivateInsertMode # FIXME
         @setTextToRegisterForSelection(selection)
         range = selection.insertText(text, autoIndent: true)
         selection.cursor.moveLeft() unless range.isEmpty()
-    # FIXME calling super on OUTSIDE of editor.transact.
-    # That's why repeatRecorded() need transact.wrap
 
 class ChangeOccurrence extends Change
   @extend()
