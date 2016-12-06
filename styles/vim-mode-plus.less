@@ -90,7 +90,10 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
 @flash-added-color: fadeout(darken(@syntax-color-added, 10%), 50%);
 @flash-removed-color: fadeout(@syntax-color-removed, 50%);
 
-.flash-animation(vim-mode-plus-flash-operator, @flash-base-color);
+.flash-animation(vim-mode-plus-flash-operator-add, @flash-added-color);
+.flash-animation(vim-mode-plus-flash-operator-remove, @flash-removed-color);
+.flash-animation(vim-mode-plus-flash-operator-nomutate, @flash-base-color);
+
 .flash-animation(vim-mode-plus-flash-search, @flash-search-color);
 .flash-animation(vim-mode-plus-flash-screen, @flash-base-color);
 .flash-animation(vim-mode-plus-flash-added, @flash-added-color);
@@ -104,7 +107,14 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
 }
 
 atom-text-editor .vim-mode-plus-flash {
-  &.operator .region { .flash(vim-mode-plus-flash-operator)}
+  &.operator-add .region { .flash(vim-mode-plus-flash-operator-add)}
+  &.operator-remove .region {.flash(vim-mode-plus-flash-operator-remove)}
+  &.operator-nomutate .region { .flash(vim-mode-plus-flash-operator-nomutate)}
+
+  &.operator-add-long .region { .flash(vim-mode-plus-flash-operator-add, .6s)}
+  &.operator-remove-long .region {.flash(vim-mode-plus-flash-operator-remove, .6s)}
+  &.operator-nomutate-long .region { .flash(vim-mode-plus-flash-operator-nomutate, .6s)}
+
   &.search   .region { .flash(vim-mode-plus-flash-search, .5s); }
   &.screen   .region { .flash(vim-mode-plus-flash-screen); }
   &.added    .region { .flash(vim-mode-plus-flash-added); }

@@ -24,6 +24,8 @@ class Operator extends Base
   occurrence: false
 
   flashTarget: true
+  flashType: 'operator-add'
+  flashCheckpoint: 'did-finish'
   trackChange: false
 
   patternForOccurrence: null
@@ -57,8 +59,12 @@ class Operator extends Base
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      ranges = @mutationManager.getMarkerBufferRanges()
-      @vimState.flash(ranges, type: 'operator')
+      if @flashCheckpoint is 'did-finish'
+        ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
+      else
+        ranges = @mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint)
+      @flashType += '-long' if @isOccurrence()
+      @vimState.flash(ranges, type: @flashType)
 
   trackChangeIfNecessary: ->
     return unless @trackChange
@@ -183,8 +189,9 @@ class Operator extends Base
 
     @target.select()
     @mutationManager.setCheckpoint('did-select')
-    @selectOccurrence() if @isOccurrence()
-    @mutationManager.setCheckpoint('did-select-occurrence')
+    if @isOccurrence()
+      @selectOccurrence()
+      @mutationManager.setCheckpoint('did-select-occurrence')
 
     if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
       @emitDidSelectTarget()
@@ -309,10 +316,11 @@ class TogglePresetOccurrence extends Operator
 # ================================
 class Delete extends Operator
   @extend()
-  hover: icon: ':delete:', emoji: ':scissors:'
+  hover: con: ':delete:', emoj: ':scssors:'
   trackChange: true
-  flashTarget: false
-  stayOptionName: 'stayOnDelete'
+  flashType: 'operator-remove'
+  flashCheckpoint: 'did-select-occurrence'
+  stayOptonName: 'stayOnDelete'
 
   execute: ->
     @onDidSelectTarget =>
@@ -370,6 +378,7 @@ class Yank extends Operator
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
   stayOptionName: 'stayOnYank'
+  flashType: 'operator-nomutate'
 
   mutateSelection: (selection) ->
     @setTextToRegisterForSelection(selection)
@@ -412,7 +421,7 @@ class Increase extends Operator
         newRanges.push ranges
 
     if (newRanges = _.flatten(newRanges)).length
-      @vimState.flash(newRanges, type: 'operator')
+      @vimState.flash(newRanges, type: @flashType)
     else
       atom.beep()
 
@@ -447,7 +456,7 @@ class IncrementNumber extends Operator
       newRanges = for selection in @editor.getSelectionsOrderedByBufferPosition()
         @replaceNumber(selection.getBufferRange(), pattern)
     if (newRanges = _.flatten(newRanges)).length
-      @vimState.flash(newRanges, type: 'operator')
+      @vimState.flash(newRanges, type: @flashType)
     else
       atom.beep()
     for selection in @editor.getSelections()

@@ -68,6 +68,13 @@ class MutationManager
         ranges.push(range)
     ranges
 
+  getBufferRangesForCheckpoint: (checkpoint) ->
+    ranges = []
+    @mutationsBySelection.forEach (mutation) ->
+      if range = mutation.getBufferRangeForCheckpoint(checkpoint)
+        ranges.push(range)
+    ranges
+
   restoreInitialPositions: ->
     for selection in @editor.getSelections() when point = @getInitialPointForSelection(selection)
       selection.cursor.setBufferPosition(point)
@@ -146,6 +153,9 @@ class Mutation
       Point.min(@getEndBufferPosition(), point)
     else
       point
+
+  getBufferRangeForCheckpoint: (checkpoint) ->
+    @bufferRangeByCheckpoint[checkpoint]
 
   getRestorePoint: ({stay}={}) ->
     if stay

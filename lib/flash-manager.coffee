@@ -2,11 +2,36 @@ _ = require 'underscore-plus'
 {isNotEmpty} = require './utils'
 
 flashTypes =
-  operator:
+  "operator-add":
     allowMultiple: true
     decorationOptions:
       type: 'highlight'
-      class: 'vim-mode-plus-flash operator'
+      class: 'vim-mode-plus-flash operator-add'
+  "operator-remove":
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash operator-remove'
+  "operator-nomutate":
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash operator-nomutate'
+  'operator-add-long':
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash operator-add-long'
+  'operator-remove-long':
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash operator-remove-long'
+  'operator-nomutate-long':
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash operator-nomutate-long'
   search:
     allowMultiple: false
     decorationOptions:
