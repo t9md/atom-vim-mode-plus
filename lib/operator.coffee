@@ -53,17 +53,13 @@ class Operator extends Base
     if mode isnt 'visual' or (@target.isMotion() and submode isnt @target.wise)
       settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
 
-  flashIfNecessary: (ranges) ->
-    return unless @needFlash()
-    @vimState.flash(ranges, type: 'operator')
-
   flashChangeIfNecessary: ->
     return unless @needFlash()
 
     @onDidFinishOperation =>
       ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
       if ranges.length
-        @flashIfNecessary(ranges)
+        @vimState.flash(ranges, type: 'operator')
 
   trackChangeIfNecessary: ->
     return unless @trackChange
@@ -417,7 +413,7 @@ class Increase extends Operator
         newRanges.push ranges
 
     if (newRanges = _.flatten(newRanges)).length
-      @flashIfNecessary(newRanges)
+      @vimState.flash(newRanges, type: 'operator')
     else
       atom.beep()
 
@@ -452,7 +448,7 @@ class IncrementNumber extends Operator
       newRanges = for selection in @editor.getSelectionsOrderedByBufferPosition()
         @replaceNumber(selection.getBufferRange(), pattern)
     if (newRanges = _.flatten(newRanges)).length
-      @flashIfNecessary(newRanges)
+      @vimState.flash(newRanges, type: 'operator')
     else
       atom.beep()
     for selection in @editor.getSelections()
