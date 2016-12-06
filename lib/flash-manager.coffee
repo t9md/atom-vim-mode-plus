@@ -1,4 +1,5 @@
 _ = require 'underscore-plus'
+{isNotEmpty} = require './utils'
 
 flashTypes =
   operator:
@@ -6,6 +7,11 @@ flashTypes =
     decorationOptions:
       type: 'highlight'
       class: 'vim-mode-plus-flash operator'
+  'operator-occurrence':
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash operator-occurrence'
   search:
     allowMultiple: false
     decorationOptions:
@@ -44,8 +50,10 @@ class FlashManager
       marker.destroy() for marker in markers
     @markersByType.clear()
 
+
   flash: (ranges, options, rangeType='buffer') ->
     ranges = [ranges] unless _.isArray(ranges)
+    ranges = ranges.filter(isNotEmpty)
     return null unless ranges.length
 
     {type, timeout} = options

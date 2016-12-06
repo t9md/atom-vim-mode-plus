@@ -75,7 +75,7 @@ class Replace extends TransformString
   @extend()
   input: null
   hover: icon: ':replace:', emoji: ':tractor:'
-  flashTarget: false
+  flashCheckpoint: 'did-select-occurrence'
   requireInput: true
 
   initialize: ->

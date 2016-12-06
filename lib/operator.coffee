@@ -24,6 +24,7 @@ class Operator extends Base
   occurrence: false
 
   flashTarget: true
+  flashCheckpoint: 'did-finish'
   trackChange: false
 
   patternForOccurrence: null
@@ -55,15 +56,23 @@ class Operator extends Base
 
   flashIfNecessary: (ranges) ->
     return unless @needFlash()
-    @vimState.flash(ranges, type: 'operator')
+    @vimState.flash(ranges, type: @getFlashType())
 
   flashChangeIfNecessary: ->
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
-      if ranges.length
-        @flashIfNecessary(ranges)
+      if @flashCheckpoint is 'did-finish'
+        ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
+      else
+        ranges = @mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint)
+      @vimState.flash(ranges, type: @getFlashType())
+
+  getFlashType: ->
+    if @isOccurrence()
+      'operator-occurrence'
+    else
+      'operator'
 
   trackChangeIfNecessary: ->
     return unless @trackChange
@@ -188,8 +197,9 @@ class Operator extends Base
 
     @target.select()
     @mutationManager.setCheckpoint('did-select')
-    @selectOccurrence() if @isOccurrence()
-    @mutationManager.setCheckpoint('did-select-occurrence')
+    if @isOccurrence()
+      @selectOccurrence()
+      @mutationManager.setCheckpoint('did-select-occurrence')
 
     if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
       @emitDidSelectTarget()
@@ -316,7 +326,7 @@ class Delete extends Operator
   @extend()
   hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
-  flashTarget: false
+  flashCheckpoint: 'did-select-occurrence'
   stayOptionName: 'stayOnDelete'
 
   execute: ->
