@@ -251,31 +251,73 @@ describe "Operator ActivateInsertMode family", ->
       spyOn(editor, 'autoIndentBufferRow').andCallFake (line) ->
         editor.indent()
 
-      set text: "  abc\n  012\n", cursor: [1, 1]
+      set
+        textC_: """
+        __abc
+        _|_012\n
+        """
 
     it "switches to insert and adds a newline above the current one", ->
       keystroke 'O'
       ensure
-        text: "  abc\n  \n  012\n"
-        cursor: [1, 2]
+        textC_: """
+        __abc
+        __|
+        __012\n
+        """
         mode: 'insert'
 
     it "is repeatable", ->
       set
-        text: "  abc\n  012\n    4spaces\n", cursor: [1, 1]
+        textC_: """
+          __abc
+          __|012
+          ____4spaces\n
+          """
+      # set
+      #   text: "  abc\n  012\n    4spaces\n", cursor: [1, 1]
       keystroke 'O'
       editor.insertText "def"
-      ensure 'escape', text: "  abc\n  def\n  012\n    4spaces\n"
-      set cursor: [1, 1]
-      ensure '.', text: "  abc\n  def\n  def\n  012\n    4spaces\n"
-      set cursor: [4, 1]
-      ensure '.', text: "  abc\n  def\n  def\n  012\n    def\n    4spaces\n"
+      ensure 'escape',
+        textC_: """
+          __abc
+          __de|f
+          __012
+          ____4spaces\n
+          """
+      ensure '.',
+        textC_: """
+        __abc
+        __de|f
+        __def
+        __012
+        ____4spaces\n
+        """
+      set cursor: [4, 0]
+      ensure '.',
+        textC_: """
+        __abc
+        __def
+        __def
+        __012
+        ____de|f
+        ____4spaces\n
+        """
 
     it "is undoable", ->
       keystroke 'O'
       editor.insertText "def"
-      ensure 'escape', text: "  abc\n  def\n  012\n"
-      ensure 'u', text: "  abc\n  012\n"
+      ensure 'escape',
+        textC_: """
+        __abc
+        __def
+        __012\n
+        """
+      ensure 'u',
+        textC_: """
+        __abc
+        __012\n
+        """
 
   describe "the o keybinding", ->
     beforeEach ->
