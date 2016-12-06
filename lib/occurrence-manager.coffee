@@ -10,6 +10,8 @@ _ = require 'underscore-plus'
 module.exports =
 class OccurrenceManager
   patterns: null
+  markerOptions: {invalidate: 'inside'}
+  decorationOptions: {type: 'highlight', class: 'vim-mode-plus-occurrence-match'}
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
@@ -19,22 +21,24 @@ class OccurrenceManager
     @patterns = []
 
     @markerLayer = @editor.addMarkerLayer()
-    options = {type: 'highlight', class: 'vim-mode-plus-occurrence-match'}
-    @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, options)
+    @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, @decorationOptions)
 
     # @patterns is single source of truth (SSOT)
     # All maker create/destroy/css-update is done by reacting @patters's change.
     # -------------------------
     @onDidChangePatterns ({newPattern}) =>
       if newPattern
-        @markerLayer.markBufferRange(range) for range in scanEditor(@editor, newPattern)
+        @markBufferRangeByPattern(newPattern)
       else
-        # When patterns were cleared, destroy all marker.
-        marker.destroy() for marker in @markerLayer.getMarkers()
+        @clearMarkers()
 
     # Update css on every marker update.
     @markerLayer.onDidUpdate =>
       @editorElement.classList.toggle("has-occurrence", @hasMarkers())
+
+  markBufferRangeByPattern: (pattern) ->
+    for range in scanEditor(@editor, pattern)
+      @markerLayer.markBufferRange(range, @markerOptions)
 
   # Callback get passed following object
   # - newPattern: can be undefined on reset event
@@ -68,6 +72,10 @@ class OccurrenceManager
 
   # Markers
   # -------------------------
+  clearMarkers: (pattern) ->
+    for marker in @markerLayer.getMarkers()
+      marker.destroy()
+
   hasMarkers: ->
     @markerLayer.getMarkerCount() > 0
 
