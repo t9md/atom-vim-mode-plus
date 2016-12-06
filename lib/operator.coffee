@@ -176,19 +176,20 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    @mutationManager.init
+    @mutationManager.init(
       isSelect: @instanceof('Select')
       useMarker: @needStay() and @stayByMarker
-    @mutationManager.setCheckPoint('will-select')
+    )
+    @mutationManager.setCheckpoint('will-select')
 
     # Currently only motion have forceWise methods
     @target.forceWise?(@wise) if @wise?
     @emitWillSelectTarget()
 
     @target.select()
-    @mutationManager.setCheckPoint('did-select')
+    @mutationManager.setCheckpoint('did-select')
     @selectOccurrence() if @isOccurrence()
-    @mutationManager.setCheckPoint('did-select-occurrence')
+    @mutationManager.setCheckpoint('did-select-occurrence')
 
     if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
       @emitDidSelectTarget()

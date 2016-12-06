@@ -111,9 +111,9 @@ class Motion extends Base
     if @hasOperator()
       if @isMode('visual')
         if @isMode('visual', 'linewise') and @editor.getLastSelection().isReversed()
-          @vimState.mutationManager.setCheckPoint('did-move')
+          @vimState.mutationManager.setCheckpoint('did-move')
       else
-        @vimState.mutationManager.setCheckPoint('did-move')
+        @vimState.mutationManager.setCheckpoint('did-move')
 
     # Modify selection to submode-wisely
     switch @wise
