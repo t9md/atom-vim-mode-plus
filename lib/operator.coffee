@@ -63,8 +63,13 @@ class Operator extends Base
         ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
       else
         ranges = @mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint)
-      @flashType += '-long' if @isOccurrence()
-      @vimState.flash(ranges, type: @flashType)
+      @vimState.flash(ranges, type: @getFlashType())
+
+  getFlashType: ->
+    if @isOccurrence()
+      @flashType + '-long'
+    else
+      @flashType
 
   trackChangeIfNecessary: ->
     return unless @trackChange
@@ -316,11 +321,11 @@ class TogglePresetOccurrence extends Operator
 # ================================
 class Delete extends Operator
   @extend()
-  hover: con: ':delete:', emoj: ':scssors:'
+  hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
   flashType: 'operator-remove'
   flashCheckpoint: 'did-select-occurrence'
-  stayOptonName: 'stayOnDelete'
+  stayOptionName: 'stayOnDelete'
 
   execute: ->
     @onDidSelectTarget =>
