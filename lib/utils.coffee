@@ -799,6 +799,9 @@ findRangeContainsPoint = (ranges, point) ->
   for range in ranges when range.containsPoint(point)
     return range
 
+isNotEmpty = (target) ->
+  not target.isEmpty()
+
 module.exports = {
   getParent
   getAncestors
@@ -893,4 +896,5 @@ module.exports = {
   searchByProjectFind
   limitNumber
   findRangeContainsPoint
+  isNotEmpty
 }

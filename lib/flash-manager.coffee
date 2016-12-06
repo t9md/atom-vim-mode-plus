@@ -1,4 +1,5 @@
 _ = require 'underscore-plus'
+{isNotEmpty} = require './utils'
 
 flashTypes =
   operator:
@@ -44,8 +45,10 @@ class FlashManager
       marker.destroy() for marker in markers
     @markersByType.clear()
 
+
   flash: (ranges, options, rangeType='buffer') ->
     ranges = [ranges] unless _.isArray(ranges)
+    ranges = ranges.filter(isNotEmpty)
     return null unless ranges.length
 
     {type, timeout} = options

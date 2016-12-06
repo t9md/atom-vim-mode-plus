@@ -57,9 +57,8 @@ class Operator extends Base
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
-      if ranges.length
-        @vimState.flash(ranges, type: 'operator')
+      ranges = @mutationManager.getMarkerBufferRanges()
+      @vimState.flash(ranges, type: 'operator')
 
   trackChangeIfNecessary: ->
     return unless @trackChange
