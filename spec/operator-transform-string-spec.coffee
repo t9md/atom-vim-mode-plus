@@ -566,11 +566,11 @@ describe "Operator TransformString", ->
         set cursor: [2, 1]
         ensure ['m s i l', input: '<'],
           text: '\napple\n<pairs> <tomato>\norange\nmilk\n'
-          cursor: [2, 0]
+          cursor: [2, 1]
       it "surround text for each word in visual selection", ->
         ensure ['v i p m s', input: '"'],
           text: '\n"apple"\n"pairs" "tomato"\n"orange"\n"milk"\n'
-          cursor: [1, 0]
+          cursor: [4, 0]
 
     describe 'delete surround', ->
       beforeEach ->

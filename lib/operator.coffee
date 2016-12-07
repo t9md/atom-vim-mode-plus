@@ -37,7 +37,8 @@ class Operator extends Base
   acceptPersistentSelection: true
 
   needStay: ->
-    @stayAtSamePosition ?= (@stayOptionName? and settings.get(@stayOptionName))
+    @stayAtSamePosition ?=
+      (@isOccurrence() and settings.get('stayOnOccurrence')) or settings.get(@stayOptionName)
 
   isOccurrence: ->
     @occurrence

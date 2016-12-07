@@ -199,6 +199,40 @@ describe "Occurrence", ->
                ooo ooo ooo  ooo
               """
 
+  describe "stayOnOccurrence settings", ->
+    beforeEach ->
+      set
+        textC: """
+
+        aaa, bbb, ccc
+        bbb, a|aa, aaa
+
+        """
+
+    describe "when true (= default)", ->
+      it "keep cursor position after operation finished", ->
+        ensure 'g U o p', ->
+          textC: """
+
+          AAA, bbb, ccc
+          bbb, A|AA, AAA
+
+          """
+
+    describe "when false", ->
+      beforeEach ->
+        settings.set('stayOnOccurrence', false)
+
+      it "move cursor to start of target as like non-ocurrence operator", ->
+        ensure 'g U o p', ->
+          textC: """
+
+          |AAA, bbb, ccc
+          bbb, AAA, AAA
+
+          """
+
+
   describe "from visual-mode.is-narrowed", ->
     beforeEach ->
       set
