@@ -146,6 +146,8 @@ class Search extends SearchBase
         @vimState.occurrenceManager.resetPatterns() if operation?
 
         @vimState.occurrenceManager.addPattern(@getPattern(input))
+        @vimState.occurrenceManager.saveLastOccurrencePattern()
+
         @vimState.searchHistory.save(input)
         @vimState.searchInput.cancel()
 

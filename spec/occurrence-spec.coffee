@@ -543,22 +543,34 @@ describe "Occurrence", ->
       describe "in normal-mode", ->
         describe "add preset occurrence", ->
           it 'set cursor-ward as preset occurrence marker and not move cursor', ->
-            ensure 'g o', occurrenceCount: 1, occurrenceText: 'This', cursor: [0, 0]
+            ensure 'g o', occurrenceText: 'This', cursor: [0, 0]
             ensure 'w', cursor: [0, 5]
-            ensure 'g o', occurrenceCount: 4, occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
+            ensure 'g o', occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
 
         describe "remove preset occurrence", ->
           it 'removes occurrence one by one separately', ->
-            ensure 'g o', occurrenceCount: 1, occurrenceText: 'This', cursor: [0, 0]
+            ensure 'g o', occurrenceText: 'This', cursor: [0, 0]
             ensure 'w', cursor: [0, 5]
-            ensure 'g o', occurrenceCount: 4, occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
-            ensure 'g o', occurrenceCount: 3, occurrenceText: ['This', 'text', 'text'], cursor: [0, 5]
-            ensure 'b g o', occurrenceCount: 2, occurrenceText: ['text', 'text'], cursor: [0, 0]
+            ensure 'g o', occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
+            ensure 'g o', occurrenceText: ['This', 'text', 'text'], cursor: [0, 5]
+            ensure 'b g o', occurrenceText: ['text', 'text'], cursor: [0, 0]
           it 'removes all occurrence in this editor by escape', ->
-            ensure 'g o', occurrenceCount: 1, occurrenceText: 'This', cursor: [0, 0]
+            ensure 'g o', occurrenceText: 'This', cursor: [0, 0]
             ensure 'w', cursor: [0, 5]
-            ensure 'g o', occurrenceCount: 4, occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
+            ensure 'g o', occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
             ensure 'escape', occurrenceCount: 0
+
+          ffit 'can recall previously set occurence pattern by `g .`', ->
+            ensure 'w v l g o', occurrenceText: ['te', 'te', 'te'], cursor: [0, 6]
+            ensure 'escape', occurrenceCount: 0
+            expect(vimState.globalState.get('lastOccurrencePattern')).toEqual(/te/g)
+
+            ensure 'w', cursor: [0, 10] # to move cursor to text `have`
+            ensure 'g .', occurrenceText: ['te', 'te', 'te'], cursor: [0, 10]
+
+            # But operator modifier not update lastOccurrencePattern
+            ensure 'g U o $', textC: "This text |HAVE 3 instance of 'text' in the whole text"
+            expect(vimState.globalState.get('lastOccurrencePattern')).toEqual(/te/g)
 
         describe "css class has-occurrence", ->
           [classList, update] = []
@@ -567,7 +579,7 @@ describe "Occurrence", ->
           it 'is auto-set/unset wheter at least one preset-occurrence was exists or not', ->
             runs ->
               expect(editorElement.classList.contains('has-occurrence')).toBe(false)
-              ensure 'g o', occurrenceCount: 1, occurrenceText: 'This', cursor: [0, 0]
+              ensure 'g o', occurrenceText: 'This', cursor: [0, 0]
             waitsFor ->
               update.callCount is 1
             runs ->

@@ -117,6 +117,7 @@
   'S': 'vim-mode-plus:substitute-line'
   'r': 'vim-mode-plus:replace'
   'g o': 'vim-mode-plus:toggle-preset-occurrence'
+  'g .': 'vim-mode-plus:add-preset-occurrence-from-last-occurrence-pattern'
 
   # '_': 'vim-mode-plus:replace-with-register'
   'g I': 'vim-mode-plus:insert-at-beginning-of-line'

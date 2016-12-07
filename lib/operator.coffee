@@ -319,7 +319,15 @@ class TogglePresetOccurrence extends Operator
         pattern = new RegExp(_.escapeRegExp(text), 'g')
 
       @addOccurrencePattern(pattern)
+      @occurrenceManager.saveLastOccurrencePattern()
       @activateMode('normal') unless isNarrowed
+
+class AddPresetOccurrenceFromLastOccurrencePattern extends TogglePresetOccurrence
+  @extend()
+  execute: ->
+    if pattern = @vimState.globalState.get('lastOccurrencePattern')
+      @addOccurrencePattern(pattern)
+      @activateMode('normal')
 
 # Delete
 # ================================
