@@ -224,9 +224,19 @@ class InsertAtStartOfTarget extends InsertByTarget
   which: 'start'
 
 # key: 'A', Used in 'visual-mode.characterwise', 'visual-mode.blockwise'
-class InsertAtEndOfTarget extends InsertAtStartOfTarget
+class InsertAtEndOfTarget extends InsertByTarget
   @extend()
   which: 'end'
+
+class InsertAtStartOfOccurrence extends InsertByTarget
+  @extend()
+  which: 'start'
+  occurrence: true
+
+class InsertAtEndOfOccurrence extends InsertByTarget
+  @extend()
+  which: 'end'
+  occurrence: true
 
 class InsertAtStartOfInnerSmartWord extends InsertByTarget
   @extend()
