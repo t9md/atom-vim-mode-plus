@@ -248,22 +248,16 @@ class InsertAtEndOfInnerSmartWord extends InsertByTarget
   which: 'end'
   target: "InnerSmartWord"
 
-class InsertAtHeadOfTarget extends InsertByTarget
-  @extend()
-  which: 'head'
-
-class InsertAtTailOfTarget extends InsertByTarget
-  @extend()
-  which: 'tail'
-
-class InsertAtPreviousFoldStart extends InsertAtHeadOfTarget
+class InsertAtPreviousFoldStart extends InsertByTarget
   @extend()
   @description: "Move to previous fold start then enter insert-mode"
+  which: 'start'
   target: 'MoveToPreviousFoldStart'
 
-class InsertAtNextFoldStart extends InsertAtHeadOfTarget
+class InsertAtNextFoldStart extends InsertByTarget
   @extend()
   @description: "Move to next fold start then enter insert-mode"
+  which: 'end'
   target: 'MoveToNextFoldStart'
 
 # -------------------------
