@@ -1,3 +1,23 @@
+# 0.72.0:
+- New: Command `add-preset-occurrence-from-last-occurrence-pattern` default `g .` keymap.
+- New: Command `insert-at-start-of-occurrence`, `insert-at-end-of-occurrence`
+- New: Config parameter `stayOnOccurrence` to specify stayOn behavior on occurrence-operation. #569.
+- New: unused and unnecessary indirection
+- Improve: Efficiency improved for cursorStyleManager. Skip cursor style modification if it can,
+- Improve, Breaking: `AngleBracket` now can work with multi-line #552
+  - TextObject `Tag` is no longer member of `AnyPair`. Since its conflict with `AngleBracket`
+- Improve, Fix: No longer unwanted remaining flash by `flashOnOperate` since now it's invalidate when touched.
+- Improve: Flash color is more stand-out when occurrence-operation #566
+- Improve: For flashing undo/redo, no longer red/green color blended when whichever is contained other #562
+- Improve: Place cursor more accurately for undo/redo when occurrence is involved.
+- Improve: Respect last cursor position when multiple cursor is cleared by `escape` in `normal-mode`. #557, #562
+- Improve: When occurrence is involved in operation, respect original cursor position after operation finished. #557
+- Improve: highlight when highlightSearch changed like on, off, on  
+- Fix: `toggle-preset-occurrence` should not accept persistentSelection but it was in previous release.
+- Fix: highlightSearch no longer extend highlight marker on appending text on tail #555
+- Internal: All vimState instances are managed by VimState class itself.
+- Internal: New convention. Ensure `ActivateInsertMode` and it's child call `@selectTarget()` before starting any mutation.
+
 # 0.71.0:
 - New: `moveToFirstCharacterOnVerticalMotion` options #550, #549
   - Default: `true`, if you disable, column position is kept after these motion.
