@@ -560,7 +560,7 @@ describe "Occurrence", ->
             ensure 'g o', occurrenceText: ['This', 'text', 'text', 'text'], cursor: [0, 5]
             ensure 'escape', occurrenceCount: 0
 
-          ffit 'can recall previously set occurence pattern by `g .`', ->
+          it 'can recall previously set occurence pattern by `g .`', ->
             ensure 'w v l g o', occurrenceText: ['te', 'te', 'te'], cursor: [0, 6]
             ensure 'escape', occurrenceCount: 0
             expect(vimState.globalState.get('lastOccurrencePattern')).toEqual(/te/g)
