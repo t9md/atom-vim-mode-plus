@@ -436,11 +436,9 @@
 
 # has-occurrence (when occurrence-marker was exists)
 # -------------------------
-'atom-text-editor.vim-mode-plus.has-occurrence':
+'atom-text-editor.vim-mode-plus.has-occurrence:not(.insert-mode)':
   'I': 'vim-mode-plus:insert-at-start-of-target'
   'A': 'vim-mode-plus:insert-at-end-of-target'
-
-'atom-text-editor.vim-mode-plus.has-occurrence:not(.insert-mode)':
   'tab': 'vim-mode-plus:search-occurrence'
   'shift-tab': 'vim-mode-plus:search-occurrence-backwards'
 
