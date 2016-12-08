@@ -34,6 +34,9 @@ class OccurrenceManager
 
     # Update css on every marker update.
     @markerLayer.onDidUpdate =>
+      # FIXME: I have to manually destroy invalid marker.
+      # I'm coding based my assumption all markers exists is VALID.
+      @destroyInvalidMarkers()
       @editorElement.classList.toggle("has-occurrence", @hasMarkers())
 
   markBufferRangeByPattern: (pattern) ->
@@ -87,6 +90,10 @@ class OccurrenceManager
 
   getMarkerCount: ->
     @markerLayer.getMarkerCount()
+
+  destroyInvalidMarkers: ->
+    for marker in @markerLayer.getMarkers() when not marker.isValid()
+      marker.destroy()
 
   # Return occurrence markers intersecting given ranges
   getMarkersIntersectsWithRanges: (ranges, exclusive=false) ->
