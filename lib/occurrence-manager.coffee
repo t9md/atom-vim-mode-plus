@@ -117,7 +117,6 @@ class OccurrenceManager
     isVisualMode = @vimState.mode is 'visual'
     markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
     ranges = markers.map (marker) -> marker.getBufferRange()
-    @resetPatterns()
 
     if ranges.length
       if isVisualMode

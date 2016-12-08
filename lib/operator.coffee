@@ -86,6 +86,12 @@ class Operator extends Base
     super
     {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
 
+    # If occurrence property is set at prototype(@::) level.
+    # Treat `occurrence` is BOUNDED to operator itself so cleanup on each finish.
+    if @::occurrence
+      @onDidResetOperationStack =>
+        @occurrenceManager.resetPatterns()
+
     @initialize()
     @onDidSetOperatorModifier(@setModifier.bind(this))
 
@@ -107,10 +113,6 @@ class Operator extends Base
     @target = 'CurrentSelection' if @isMode('visual')
     @setTarget(@new(@target)) if _.isString(@target)
 
-    if @acceptPersistentSelection # ??? shouldn't this @acceptPresetOccurrence ?
-      @subscribe @onDidDeactivateMode ({mode}) =>
-        @occurrenceManager.resetPatterns() if mode is 'operator-pending'
-
   setModifier: (options) ->
     if options.wise?
       @wise = options.wise
@@ -121,6 +123,8 @@ class Operator extends Base
         # Reset existing preset-occurrence. e.g. `c o p`, `d o f`
         @occurrenceManager.resetPatterns()
         @addOccurrencePattern()
+        @subscribe @onDidDeactivateMode ({mode}) =>
+          @occurrenceManager.resetPatterns() if mode is 'operator-pending'
 
   canSelectPersistentSelection: ->
     @acceptPersistentSelection and
@@ -257,13 +261,10 @@ class SelectOccurrence extends Operator
   @extend()
   @description: "Add selection onto each matching word within target range"
   occurrence: true
-  initialize: ->
-    super
-    @onDidSelectTarget =>
-      swrap.clearProperties(@editor)
 
   execute: ->
     if @selectTarget()
+      @occurrenceManager.resetPatterns()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
 
@@ -326,6 +327,7 @@ class AddPresetOccurrenceFromLastOccurrencePattern extends TogglePresetOccurrenc
   @extend()
   execute: ->
     if pattern = @vimState.globalState.get('lastOccurrencePattern')
+      @occurrenceManager.resetPatterns()
       @addOccurrencePattern(pattern)
       @activateMode('normal')
 
