@@ -12,6 +12,11 @@ flashTypes =
     decorationOptions:
       type: 'highlight'
       class: 'vim-mode-plus-flash operator-occurrence'
+  'operator-remove-occurrence':
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash operator-remove-occurrence'
   search:
     allowMultiple: false
     decorationOptions:
