@@ -589,8 +589,6 @@ atom-text-editor.vim-mode-plus.visual-mode':
   'ctrl-v': 'vim-mode-plus:search-activate-literal-mode'
   'ctrl-c': 'vim-mode-plus:search-cancel'
   'ctrl-[': 'vim-mode-plus:search-cancel'
-  'ctrl-h': 'vim-mode-plus:search-backspace'
-  'backspace': 'vim-mode-plus:search-backspace'
   'shift-tab': 'vim-mode-plus:search-visit-prev'
   'tab': 'vim-mode-plus:search-visit-next'
 
