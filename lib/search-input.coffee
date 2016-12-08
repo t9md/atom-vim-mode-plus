@@ -45,6 +45,7 @@ class SearchInput extends HTMLElement
     atom.commands.add @editorElement,
       'core:confirm': => @confirm()
       'core:cancel': => @cancel()
+      'core:backspace': => @backspace()
       'vim-mode-plus:input-cancel': => @cancel()
 
   focus: (@options={}) ->
@@ -96,10 +97,7 @@ class SearchInput extends HTMLElement
     @unfocus()
 
   backspace: ->
-    if @editor.getText().length is 0
-      @cancel()
-    else
-      atom.commands.dispatch(@editorElement, 'core:backspace')
+    @cancel() if @editor.getText().length is 0
 
   confirm: (landingPoint=null) ->
     @emitter.emit('did-confirm', {input: @editor.getText(), landingPoint})
@@ -139,7 +137,6 @@ class SearchInput extends HTMLElement
       "search-land-to-start": => @confirm()
       "search-land-to-end": => @confirm('end')
       "search-cancel": => @cancel()
-      "search-backspace": => @backspace()
 
       "search-visit-next": => @emitDidCommand('visit', direction: 'next')
       "search-visit-prev": => @emitDidCommand('visit', direction: 'prev')
@@ -148,7 +145,6 @@ class SearchInput extends HTMLElement
       "change-occurrence-from-search": => @emitDidCommand('occurrence', operation: 'ChangeOccurrence')
       "add-occurrence-pattern-from-search": => @emitDidCommand('occurrence')
       "project-find-from-search": => @emitDidCommand('project-find')
-      "toggle-occurrence-from-search": => @emitDidCommand('toggle-occurrence')
 
       "search-insert-wild-pattern": => @editor.insertText('.*?')
       "search-activate-literal-mode": => @activateLiteralMode()

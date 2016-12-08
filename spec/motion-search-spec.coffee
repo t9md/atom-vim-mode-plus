@@ -29,7 +29,6 @@ describe "Motion Search", ->
         cursor: [0, 0]
       spyOn(atom.workspace, 'getActivePane').andReturn(pane)
 
-
     describe "as a motion", ->
       it "moves the cursor to the specified search pattern", ->
         ensure ['/', search: 'def'],

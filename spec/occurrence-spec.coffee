@@ -807,45 +807,26 @@ describe "Occurrence", ->
 
       describe "tab, shift-tab", ->
         it "search next/previous occurrence marker", ->
-          keystroke 'tab'
-          rawKeystroke('tab enter', searchEditorElement)
-          ensure cursor: [1, 5]
+          ensure 'tab tab', cursor: [1, 5]
+          ensure '2 tab', cursor: [2, 10]
+          ensure '2 shift-tab', cursor: [1, 5]
+          ensure '2 shift-tab', cursor: [0, 0]
 
-          keystroke 'tab'
-          rawKeystroke('tab enter', searchEditorElement)
-          ensure cursor: [2, 10]
-
-          keystroke 'shift-tab'
-          rawKeystroke('shift-tab enter', searchEditorElement)
-          ensure cursor: [1, 5]
-
-          keystroke 'shift-tab'
-          rawKeystroke('shift-tab enter', searchEditorElement)
-          ensure cursor: [0, 0]
-
-      describe "space can clear preset-marker", ->
+      describe "excude particular occurence by `.` repeat", ->
         it "clear preset-occurrence and move to next", ->
-          keystroke 'tab'
-          rawKeystroke('tab space tab enter', searchEditorElement)
-          ensure cursor: [2, 10], occurrenceCount: 4
-
-          ensure 'g U i p',
-            text: """
+          ensure '2 tab . g U i p',
+            textC: """
             OOO: xxx: OOO
-            !!!: ooo: xxx:
+            !!!: |ooo: xxx:
             OOO: xxx: OOO:
             """
 
         it "clear preset-occurrence and move to previous", ->
-          keystroke 'shift-tab'
-          rawKeystroke('shift-tab space shift-tab enter', searchEditorElement)
-          ensure cursor: [0, 10], occurrenceCount: 4
-
-          ensure 'g U i p',
-            text: """
+          ensure '2 shift-tab . g U i p',
+            textC: """
             OOO: xxx: OOO
             !!!: OOO: xxx:
-            ooo: xxx: OOO:
+            |ooo: xxx: OOO:
             """
 
     describe "explict operator-modifier o and preset-marker", ->
