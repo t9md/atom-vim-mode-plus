@@ -105,7 +105,6 @@ class Search extends SearchBase
   @extend()
   configScope: "Search"
   requireInput: true
-  classListForSearchEditor: []
 
   initialize: ->
     super
@@ -124,7 +123,6 @@ class Search extends SearchBase
   focusSearchInputEditor: ->
     classList = []
     classList.push('backwards') if @backwards
-    classList.push(@classListForSearchEditor...)
     @vimState.searchInput.focus({classList})
 
   handleCommandEvent: (commandEvent) ->
@@ -152,13 +150,6 @@ class Search extends SearchBase
         @vimState.searchInput.cancel()
 
         @vimState.operationStack.run(operation) if operation?
-      when 'toggle-occurrence'
-        if @vimState.occurrenceManager.hasMarkers()
-          searchModel = @getSearchModel()
-          point = searchModel.currentMatch.start
-          if marker = @vimState.occurrenceManager.getMarkerAtPoint(point)
-            marker.destroy()
-            searchModel.visit()
 
       when 'project-find'
         {input} = commandEvent
@@ -218,14 +209,11 @@ class SearchBackwards extends Search
 class SearchOccurrence extends Search
   @extend()
   updatelastSearchPattern: false
-  classListForSearchEditor: ['search-occurrence']
 
   initialize: ->
-    super
     if @vimState.occurrenceManager.hasPatterns()
-      @vimState.addToClassList('silent')
-      regexSource = @vimState.occurrenceManager.buildPattern().source
-      @vimState.searchInput.editor.insertText(regexSource)
+      @input = @vimState.occurrenceManager.buildPattern().source
+      super
 
 class SearchOccurrenceBackwards extends SearchOccurrence
   @extend()

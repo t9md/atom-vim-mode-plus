@@ -86,9 +86,9 @@ class Operator extends Base
     super
     {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
 
-    # If occurrence property is set at prototype(@::) level.
-    # Treat `occurrence` is BOUNDED to operator itself so cleanup on each finish.
-    if @::occurrence
+    # If occurrence property is set at this timing and there is no preset-occurrence marker.
+    # treat `occurrence` is BOUNDED to operator itself so cleanup on each finish.
+    if @occurrence and not @occurrenceManager.hasMarkers()
       @onDidResetOperationStack =>
         @occurrenceManager.resetPatterns()
 
@@ -264,7 +264,6 @@ class SelectOccurrence extends Operator
 
   execute: ->
     if @selectTarget()
-      @occurrenceManager.resetPatterns()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
 

@@ -592,9 +592,6 @@ atom-text-editor.vim-mode-plus.visual-mode':
   'shift-tab': 'vim-mode-plus:search-visit-prev'
   'tab': 'vim-mode-plus:search-visit-next'
 
-'atom-text-editor.vim-mode-plus-search.search-occurrence':
-  'space': 'vim-mode-plus:toggle-occurrence-from-search'
-
 # If you want to map normal char to special operation.
 # Use `not(.literal-mode)` selector like below.
 # When you hit `ctrl-v`, it activate literal-mode.
