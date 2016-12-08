@@ -107,8 +107,7 @@ class ActivateInsertMode extends Operator # FIXME
           @repeatInsert(selection, @lastChange?.newText ? '')
           moveCursorLeft(selection.cursor)
 
-      if settings.get('clearMultipleCursorsOnEscapeInsertMode')
-        @vimState.clearSelections()
+      @vimState.clearSelections()
 
     else
       @checkpoint = {}
