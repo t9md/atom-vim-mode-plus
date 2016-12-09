@@ -95,7 +95,11 @@ class ActivateInsertMode extends Operator # FIXME
 
   execute: ->
     if @isRequireTarget()
+      # FIXME when blockwise selection then change was repeated, cursor is added
+      # on ewach repeat.
+      console.log 'before', @editor.getSelections().length
       targetSelected = @selectTarget()
+      console.log 'after', @editor.getSelections().length
       if not targetSelected and not @canContinueOnEmptySelection()
         @vimState.activate('normal')
         return

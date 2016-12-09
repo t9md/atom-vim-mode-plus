@@ -461,6 +461,52 @@ describe "Operator ActivateInsertMode family", ->
       describe "I", ->
         it "insert at colum of start of selection for *each selection*", ->
           ensure "I", cursor: [[1, 4], [2, 4], [3, 4]], mode: "insert"
+
+        xit "can repeat after insert", ->
+          ensure "escape", mode: 'normal'
+          set
+            textC: """
+            |line0
+            line1
+            line2
+            """
+
+          ensure "ctrl-v j I",
+            textC: """
+            |line0
+            |line1
+            line2
+            """
+            mode: 'insert'
+
+          editor.insertText("ABC")
+
+          ensure "escape",
+            textC: """
+            AB|Cline0
+            AB!Cline1
+            line2
+            """
+            mode: 'normal'
+
+          # This should success
+          ensure "l .",
+            textC: """
+            ABCABC|line0
+            ABCABC|line1
+            line2
+            """
+            mode: 'normal'
+
+          # [BUG] But this pass in current implementation
+          # ensure "l .",
+          #   textC: """
+          #   ABCAB|Cline0
+          #   ABCAB|Cline1
+          #   linAB!Ce2
+          #   """
+          #   mode: 'normal'
+
       describe "A", ->
         it "insert at column of end of selection for *each selection*", ->
           ensure "A", cursor: [[1, 5], [2, 5], [3, 5]], mode: "insert"
