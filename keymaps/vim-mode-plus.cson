@@ -230,6 +230,8 @@
   '[': 'vim-mode-plus:move-up-to-edge'
   ']': 'vim-mode-plus:move-down-to-edge'
 
+  'tab': 'vim-mode-plus:search-occurrence'
+  'shift-tab': 'vim-mode-plus:search-occurrence-backwards'
   # '[ [': 'vim-mode-plus:move-to-previous-fold-start'
   # '] [': 'vim-mode-plus:move-to-next-fold-start'
   # '[ ]': 'vim-mode-plus:move-to-previous-fold-end'
@@ -439,8 +441,6 @@
 'atom-text-editor.vim-mode-plus.has-occurrence:not(.insert-mode)':
   'I': 'vim-mode-plus:insert-at-start-of-target'
   'A': 'vim-mode-plus:insert-at-end-of-target'
-  'tab': 'vim-mode-plus:search-occurrence'
-  'shift-tab': 'vim-mode-plus:search-occurrence-backwards'
 
 # operator-pending, visual
 # -------------------------
