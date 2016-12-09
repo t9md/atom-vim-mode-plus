@@ -64,23 +64,21 @@ describe "min DSL used in vim-mode-plus's spec", ->
 
     describe "with ! cursor", ->
       it "last cursor become ! one", ->
-        set
-          textC: """
-          |0: line0
-          !1: line1
-          """
-        ensure
-          cursor: [[0, 0], [1, 0]]
-        expect(editor.getLastCursor().getBufferPosition()).toEqual([1, 0])
+        set textC: "|012|345|678"
+        ensure cursor: [[0, 0], [0, 3], [0, 6]]
+        expect(editor.getLastCursor().getBufferPosition()).toEqual([0, 6])
 
-        set
-          textC: """
-          !0: line0
-          |1: line1
-          """
-        ensure
-          cursor: [[1, 0], [0, 0]]
+        set textC: "!012|345|678"
+        ensure cursor: [[0, 3], [0, 6], [0, 0]]
         expect(editor.getLastCursor().getBufferPosition()).toEqual([0, 0])
+
+        set textC: "|012!345|678"
+        ensure cursor: [[0, 0], [0, 6], [0, 3]]
+        expect(editor.getLastCursor().getBufferPosition()).toEqual([0, 3])
+
+        set textC: "|012|345!678"
+        ensure cursor: [[0, 0], [0, 3], [0, 6]]
+        expect(editor.getLastCursor().getBufferPosition()).toEqual([0, 6])
 
     describe "without ! cursor", ->
       beforeEach ->

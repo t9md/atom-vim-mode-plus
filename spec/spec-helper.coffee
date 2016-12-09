@@ -202,9 +202,8 @@ class VimEditor
     @setText(text.replace(/_/g, ' '))
 
   setTextC: (text) ->
-    cursors = collectCharPositionsInText('|', text)
-    lastCursor = collectCharPositionsInText('!', text)
-
+    cursors = collectCharPositionsInText('|', text.replace(/!/g, ''))
+    lastCursor = collectCharPositionsInText('!', text.replace(/\|/g, ''))
     @setText(text.replace(/[\|!]/g, ''))
     cursors = cursors.concat(lastCursor)
     if cursors.length
@@ -287,11 +286,10 @@ class VimEditor
     @ensureText(text.replace(/_/g, ' '))
 
   ensureTextC: (text) ->
-    cursors = collectCharPositionsInText('|', text)
-    lastCursor = collectCharPositionsInText('!', text)
-    @ensureText(text.replace(/[\|!]/g, ''))
-
+    cursors = collectCharPositionsInText('|', text.replace(/!/g, ''))
+    lastCursor = collectCharPositionsInText('!', text.replace(/\|/g, ''))
     cursors = cursors.concat(lastCursor)
+    @ensureText(text.replace(/[\|!]/g, ''))
     if cursors.length
       @ensureCursor(cursors)
 
