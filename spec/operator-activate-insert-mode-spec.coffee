@@ -583,11 +583,10 @@ describe "Operator ActivateInsertMode family", ->
   describe "the i keybinding", ->
     beforeEach ->
       set
-        text: """
-          123
-          4567
+        textC: """
+          |123
+          |4567
           """
-        cursorBuffer: [[0, 0], [1, 0]]
 
     it "allows undoing an entire batch of typing", ->
       keystroke 'i'
@@ -754,14 +753,13 @@ describe "Operator ActivateInsertMode family", ->
     describe "multi-cursors operation", ->
       beforeEach ->
         set
-          text: """
-          123
+          textC: """
+          |123
 
-          1234
+          |1234
 
-          12345
+          |12345
           """
-          cursor: [[0, 0], [2, 0], [4, 0]]
 
       it "can repeat backspace only mutation: case-multi-cursors", ->
         ensure 'A', cursor: [[0, 3], [2, 4], [4, 5]], mode: 'insert'
