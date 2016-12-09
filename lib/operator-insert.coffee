@@ -1,4 +1,5 @@
 _ = require 'underscore-plus'
+{Range} = require 'atom'
 
 {
   moveCursorLeft, moveCursorRight
@@ -28,8 +29,8 @@ class ActivateInsertMode extends Operator # FIXME
       textByUserInput = ''
       if change = @getChangeSinceCheckpoint('insert')
         @lastChange = change
-        @vimState.mark.set('[', change.start)
-        @vimState.mark.set(']', change.start.traverse(change.newExtent))
+        changedRange = new Range(change.start, change.start.traverse(change.newExtent))
+        @vimState.mark.setRange('[', ']', changedRange)
         textByUserInput = change.newText
       @vimState.register.set('.', text: textByUserInput) # Last inserted text
 
@@ -45,7 +46,7 @@ class ActivateInsertMode extends Operator # FIXME
   canContinueOnEmptySelection: ->
     true
 
-  # we have to manage two separate checkpoint for different purpose(timing is different)
+  # Two checkpoint for different purpose
   # - one for undo(handled by modeManager)
   # - one for preserve last inserted text
   setCheckpoint: (purpose) ->
@@ -66,7 +67,7 @@ class ActivateInsertMode extends Operator # FIXME
     checkpoint = @getCheckpoint(purpose)
     @editor.buffer.getChangesSinceCheckpoint(checkpoint)[0]
 
-  # [BUG] Replaying text-deletion-operation is not compatible to pure Vim.
+  # [BUG-BUT-OK] Replaying text-deletion-operation is not compatible to pure Vim.
   # Pure Vim record all operation in insert-mode as keystroke level and can distinguish
   # character deleted by `Delete` or by `ctrl-u`.
   # But I can not and don't trying to minic this level of compatibility.
