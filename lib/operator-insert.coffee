@@ -102,9 +102,9 @@ class ActivateInsertMode extends Operator # FIXME
 
     if @isRepeated()
       @flashTarget = @trackChange = true
-      @mutateText?()
       @editor.transact =>
-        for selection in @editor.getSelections()
+        @mutateText?()
+        for selection, i in @editor.getSelections()
           @repeatInsert(selection, @lastChange?.newText ? '')
           moveCursorLeft(selection.cursor)
 
