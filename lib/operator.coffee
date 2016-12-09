@@ -25,6 +25,8 @@ class Operator extends Base
 
   flashTarget: true
   flashCheckpoint: 'did-finish'
+  flashType: 'operator'
+  flashTypeForOccurrence: 'operator-occurrence'
   trackChange: false
 
   patternForOccurrence: null
@@ -71,9 +73,9 @@ class Operator extends Base
 
   getFlashType: ->
     if @isOccurrence()
-      'operator-occurrence'
+      @flashTypeForOccurrence
     else
-      'operator'
+      @flashType
 
   trackChangeIfNecessary: ->
     return unless @trackChange
@@ -337,6 +339,7 @@ class Delete extends Operator
   hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
   flashCheckpoint: 'did-select-occurrence'
+  flashTypeForOccurrence: 'operator-remove-occurrence'
   stayOptionName: 'stayOnDelete'
 
   execute: ->

@@ -92,6 +92,7 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
 
 .flash-animation(vim-mode-plus-flash-operator, @flash-base-color);
 .flash-animation(vim-mode-plus-flash-operator-occurrence, @flash-added-color);
+.flash-animation(vim-mode-plus-flash-operator-remove-occurrence, @flash-removed-color);
 .flash-animation(vim-mode-plus-flash-search, @flash-search-color);
 .flash-animation(vim-mode-plus-flash-screen, @flash-base-color);
 .flash-animation(vim-mode-plus-flash-added, @flash-added-color);
@@ -107,6 +108,7 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
 atom-text-editor .vim-mode-plus-flash {
   &.operator .region { .flash(vim-mode-plus-flash-operator)}
   &.operator-occurrence .region { .flash(vim-mode-plus-flash-operator-occurrence, .8s)}
+  &.operator-remove-occurrence .region { .flash(vim-mode-plus-flash-operator-remove-occurrence, .8s)}
   &.search .region { .flash(vim-mode-plus-flash-search, .5s); }
   &.screen .region { .flash(vim-mode-plus-flash-screen); }
   &.added .region { .flash(vim-mode-plus-flash-added); }
