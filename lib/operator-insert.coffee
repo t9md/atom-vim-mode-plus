@@ -95,11 +95,7 @@ class ActivateInsertMode extends Operator # FIXME
 
   execute: ->
     if @isRequireTarget()
-      # FIXME when blockwise selection then change was repeated, cursor is added
-      # on ewach repeat.
-      console.log 'before', @editor.getSelections().length
       targetSelected = @selectTarget()
-      console.log 'after', @editor.getSelections().length
       if not targetSelected and not @canContinueOnEmptySelection()
         @vimState.activate('normal')
         return
@@ -284,11 +280,10 @@ class Change extends ActivateInsertMode # FIXME
     text = ''
     text = "\n" if swrap.detectVisualModeSubmode(@editor) is 'linewise'
 
-    @editor.transact =>
-      for selection in @editor.getSelections()
-        @setTextToRegisterForSelection(selection)
-        range = selection.insertText(text, autoIndent: true)
-        selection.cursor.moveLeft() unless range.isEmpty()
+    for selection in @editor.getSelections()
+      @setTextToRegisterForSelection(selection)
+      range = selection.insertText(text, autoIndent: true)
+      selection.cursor.moveLeft() unless range.isEmpty()
 
 class ChangeOccurrence extends Change
   @extend()
