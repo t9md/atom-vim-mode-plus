@@ -83,8 +83,8 @@ class Undo extends MiscCommand
 
     if settings.get('flashOnUndoRedo')
       @onDidFinishOperation =>
-        @vimState.flash(newRanges, type: 'added')
-        @vimState.flash(oldRanges, type: 'removed')
+        @vimState.flash(newRanges, type: 'added', timeout: 400)
+        @vimState.flash(oldRanges, type: 'removed', timeout: 400)
 
   execute: ->
     @withTrackingChanges =>
