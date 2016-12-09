@@ -187,8 +187,7 @@ class Operator extends Base
     # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
-    unless @occurrenceManager.select()
-      @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
+    @occurrenceManager.select()
 
   # Return true unless all selection is empty.
   selectTarget: ->
