@@ -22,14 +22,14 @@ describe "Occurrence", ->
         text: """
 
         ooo: xxx: ooo:
-        |||: ooo: xxx: ooo:
-        ooo: xxx: |||: xxx: ooo:
-        xxx: |||: ooo: ooo:
+        ---: ooo: xxx: ooo:
+        ooo: xxx: ---: xxx: ooo:
+        xxx: ---: ooo: ooo:
 
         ooo: xxx: ooo:
-        |||: ooo: xxx: ooo:
-        ooo: xxx: |||: xxx: ooo:
-        xxx: |||: ooo: ooo:
+        ---: ooo: xxx: ooo:
+        ooo: xxx: ---: xxx: ooo:
+        xxx: ---: ooo: ooo:
 
         """
 
@@ -38,51 +38,49 @@ describe "Occurrence", ->
         set cursor: [1, 0]
         ensure "c o i p",
           mode: 'insert'
-          numCursors: 8
-          text: """
+          textC: """
 
-          : xxx: :
-          |||: : xxx: :
-          : xxx: |||: xxx: :
-          xxx: |||: : :
+          !: xxx: |:
+          ---: |: xxx: |:
+          |: xxx: ---: xxx: |:
+          xxx: ---: |: |:
 
           ooo: xxx: ooo:
-          |||: ooo: xxx: ooo:
-          ooo: xxx: |||: xxx: ooo:
-          xxx: |||: ooo: ooo:
+          ---: ooo: xxx: ooo:
+          ooo: xxx: ---: xxx: ooo:
+          xxx: ---: ooo: ooo:
 
           """
-        editor.insertText('!!!')
+        editor.insertText('===')
         ensure "escape",
           mode: 'normal'
-          numCursors: 8
-          text: """
+          textC: """
 
-          !!!: xxx: !!!:
-          |||: !!!: xxx: !!!:
-          !!!: xxx: |||: xxx: !!!:
-          xxx: |||: !!!: !!!:
+          ==!=: xxx: ==|=:
+          ---: ==|=: xxx: ==|=:
+          ==|=: xxx: ---: xxx: ==|=:
+          xxx: ---: ==|=: ==|=:
 
           ooo: xxx: ooo:
-          |||: ooo: xxx: ooo:
-          ooo: xxx: |||: xxx: ooo:
-          xxx: |||: ooo: ooo:
+          ---: ooo: xxx: ooo:
+          ooo: xxx: ---: xxx: ooo:
+          xxx: ---: ooo: ooo:
 
           """
+
         ensure "} j .",
           mode: 'normal'
-          numCursors: 8
-          text: """
+          textC: """
 
-          !!!: xxx: !!!:
-          |||: !!!: xxx: !!!:
-          !!!: xxx: |||: xxx: !!!:
-          xxx: |||: !!!: !!!:
+          ===: xxx: ===:
+          ---: ===: xxx: ===:
+          ===: xxx: ---: xxx: ===:
+          xxx: ---: ===: ===:
 
-          !!!: xxx: !!!:
-          |||: !!!: xxx: !!!:
-          !!!: xxx: |||: xxx: !!!:
-          xxx: |||: !!!: !!!:
+          ==!=: xxx: ==|=:
+          ---: ==|=: xxx: ==|=:
+          ==|=: xxx: ---: xxx: ==|=:
+          xxx: ---: ==|=: ==|=:
 
           """
 
@@ -792,12 +790,11 @@ describe "Occurrence", ->
         jasmine.attachToDOM(getView(atom.workspace))
         settings.set('incrementalSearch', true)
         set
-          text: """
-          ooo: xxx: ooo
-          !!!: ooo: xxx:
+          textC: """
+          |ooo: xxx: ooo
+          ___: ooo: xxx:
           ooo: xxx: ooo:
           """
-          cursor: [0, 0]
 
         runs ->
           ensure 'g o',
@@ -817,7 +814,7 @@ describe "Occurrence", ->
           ensure '2 tab . g U i p',
             textC: """
             OOO: xxx: OOO
-            !!!: |ooo: xxx:
+            ___: |ooo: xxx:
             OOO: xxx: OOO:
             """
 
@@ -825,18 +822,17 @@ describe "Occurrence", ->
           ensure '2 shift-tab . g U i p',
             textC: """
             OOO: xxx: OOO
-            !!!: OOO: xxx:
+            ___: OOO: xxx:
             |ooo: xxx: OOO:
             """
 
     describe "explict operator-modifier o and preset-marker", ->
       beforeEach ->
         set
-          text: """
-          ooo: xxx: ooo xxx: ooo:
-          !!!: ooo: xxx: ooo xxx: ooo:
+          textC: """
+          |ooo: xxx: ooo xxx: ooo:
+          ___: ooo: xxx: ooo xxx: ooo:
           """
-          cursor: [0, 0]
           jasmine.attachToDOM(getView(atom.workspace))
 
       describe "'o' modifier when preset occurrence already exists", ->
@@ -849,7 +845,7 @@ describe "Occurrence", ->
           ensure "j",
             text: """
             ooo: : ooo : ooo:
-            !!!: ooo: : ooo : ooo:
+            ___: ooo: : ooo : ooo:
             """
             mode: 'normal'
 
