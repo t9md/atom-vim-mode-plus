@@ -1074,7 +1074,8 @@ class MoveToNextOccurrence extends Motion
       if cursor.isLastCursor()
         @editor.unfoldBufferRow(range.start.row)
         cursor.autoscroll(center: true)
-      @vimState.flash(range, type: 'search')
+      if settings.get('flashOnMoveToOccurrence')
+        @vimState.flash(range, type: 'search')
 
   getIndex: (fromPoint) ->
     for range, i in @ranges when range.start.isGreaterThan(fromPoint)
