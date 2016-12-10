@@ -30,7 +30,6 @@ Select = null
   setBufferColumn
   limitNumber
   getIndex
-  smartScrollToBufferPosition
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -1070,10 +1069,11 @@ class MoveToNextOccurrence extends Motion
         when 'next' then @getCount(-1)
         when 'previous' then -@getCount(-1)
       range = @ranges[getIndex(index + offset, @ranges)]
-      point = range.start
-      @editor.unfoldBufferRow(point.row) if cursor.isLastCursor()
-      smartScrollToBufferPosition(@editor, point)
-      cursor.setBufferPosition(point, autoscroll: false)
+
+      cursor.setBufferPosition(range.start, autoscroll: false)
+      if cursor.isLastCursor()
+        @editor.unfoldBufferRow(range.start.row)
+        cursor.autoscroll(center: true)
       @vimState.flash(range, type: 'search')
 
   getIndex: (fromPoint) ->
