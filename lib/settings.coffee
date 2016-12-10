@@ -109,7 +109,7 @@ module.exports = new Settings 'vim-mode-plus',
     Unlike pure-Vim, `d`, `<<`, `>>` are not affected by this option, use independent `stayOn` options.
     """
   flashOnUndoRedo: true
-  flashOnMoveToOccurrence: true
+  flashOnMoveToOccurrence: false
   flashOnOperate: true
   flashOnOperateBlacklist:
     default: []
