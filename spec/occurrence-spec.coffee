@@ -782,13 +782,9 @@ describe "Occurrence", ->
             xxx: ooo: XXX: ooo xxx: ooo:
             """
 
-    describe "search occurrence", ->
-      [searchEditor, searchEditorElement] = []
+    describe "MoveToNextOccurrence, MoveToPreviousOccurrence", ->
       beforeEach ->
-        searchEditor = vimState.searchInput.editor
-        searchEditorElement = vimState.searchInput.editorElement
         jasmine.attachToDOM(getView(atom.workspace))
-        settings.set('incrementalSearch', true)
         set
           textC: """
           |ooo: xxx: ooo

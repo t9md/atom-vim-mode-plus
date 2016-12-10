@@ -206,19 +206,6 @@ class SearchBackwards extends Search
   @extend()
   backwards: true
 
-class SearchOccurrence extends Search
-  @extend()
-  updatelastSearchPattern: false
-
-  initialize: ->
-    if @vimState.occurrenceManager.hasPatterns()
-      @input = @vimState.occurrenceManager.buildPattern().source
-      super
-
-class SearchOccurrenceBackwards extends SearchOccurrence
-  @extend()
-  backwards: true
-
 # *, #
 # -------------------------
 class SearchCurrentWord extends SearchBase
