@@ -230,8 +230,8 @@
   '[': 'vim-mode-plus:move-up-to-edge'
   ']': 'vim-mode-plus:move-down-to-edge'
 
-  'tab': 'vim-mode-plus:search-occurrence'
-  'shift-tab': 'vim-mode-plus:search-occurrence-backwards'
+  'tab': 'vim-mode-plus:move-to-next-occurrence'
+  'shift-tab': 'vim-mode-plus:move-to-previous-occurrence'
   # '[ [': 'vim-mode-plus:move-to-previous-fold-start'
   # '] [': 'vim-mode-plus:move-to-next-fold-start'
   # '[ ]': 'vim-mode-plus:move-to-previous-fold-end'

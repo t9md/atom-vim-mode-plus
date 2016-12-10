@@ -29,6 +29,8 @@ Select = null
   setBufferRow
   setBufferColumn
   limitNumber
+  getIndex
+  smartScrollToBufferPosition
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -1045,6 +1047,48 @@ class MoveToNextNumber extends MoveToPreviousNumber
   @extend()
   @description: "Move to next number(searched by `constant.numeric` scope)"
   direction: 'forward'
+
+class MoveToNextOccurrence extends Motion
+  @extend()
+  jump: true
+  direction: 'next'
+
+  initialize: ->
+    super
+    # point
+    {@occurrenceManager} = @vimState
+    if @occurrenceManager.hasMarkers()
+      @ranges = @occurrenceManager.getMarkers().map (marker) -> marker.getBufferRange()
+    else
+      # point
+      @abort()
+
+  moveCursor: (cursor) ->
+    index = @getIndex(cursor.getBufferPosition())
+    if index?
+      offset = switch @direction
+        when 'next' then @getCount(-1)
+        when 'previous' then -@getCount(-1)
+      range = @ranges[getIndex(index + offset, @ranges)]
+      point = range.start
+      @editor.unfoldBufferRow(point.row) if cursor.isLastCursor()
+      smartScrollToBufferPosition(@editor, point)
+      cursor.setBufferPosition(point, autoscroll: false)
+      @vimState.flash(range, type: 'search')
+
+  getIndex: (fromPoint) ->
+    for range, i in @ranges when range.start.isGreaterThan(fromPoint)
+      return i
+    0
+
+class MoveToPreviousOccurrence extends MoveToNextOccurrence
+  @extend()
+  direction: 'previous'
+
+  getIndex: (fromPoint) ->
+    for range, i in @ranges by -1 when range.start.isLessThan(fromPoint)
+      return i
+    @ranges.length - 1
 
 # -------------------------
 # keymap: %
