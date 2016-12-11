@@ -52,7 +52,7 @@ module.exports = new Settings 'vim-mode-plus',
   wrapLeftRightMotion: false
   numberRegex:
     default: '-?[0-9]+'
-    description: 'Used to find number in ctrl-a/ctrl-x. To ignore "-"(minus) char in string like "identifier-1" use "(?:\\B-)?[0-9]+"'
+    description: 'Used to find number in ctrl-a/ctrl-x.<br>To ignore "-"(minus) char in string like "identifier-1" use "(?:\\B-)?[0-9]+"'
   clearHighlightSearchOnResetNormalMode:
     default: false
     description: 'Clear highlightSearch on `escape` in normal-mode'
@@ -62,7 +62,7 @@ module.exports = new Settings 'vim-mode-plus',
   charactersToAddSpaceOnSurround:
     default: []
     items: type: 'string'
-    description: 'Comma separated list of character, which add additional space inside when surround.'
+    description: 'Comma separated list of character, which add space around surrounded text.<br>For vim-surround compatible behavior, set `(, {, [, <`.'
   showCursorInVisualMode: true
   ignoreCaseForSearch:
     default: false
