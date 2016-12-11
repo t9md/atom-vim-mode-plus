@@ -406,18 +406,6 @@
   'ctrl-t': 'symbols-view:return-from-declaration'
   '"': 'vim-mode-plus:set-register-name'
 
-  # 'y s': 'vim-mode-plus:surround'
-  # 'y s w': 'vim-mode-plus:surround-word'
-
-  # 'd s': 'vim-mode-plus:delete-surround'
-  # 'd s': 'vim-mode-plus:delete-surround-any-pair'
-  # 'd s': 'vim-mode-plus:delete-surround-any-pair-allow-forwarding'
-
-  # 'y s c': 'vim-mode-plus:change-surround'
-  # 'y s c': 'vim-mode-plus:change-surround-any-pair'
-  # 'y s c': 'vim-mode-plus:change-surround-any-pair-allow-forwarding'
-
-  # 'y m s':  'vim-mode-plus:map-surround'
   # 'enter': 'vim-mode-plus:add-blank-line-below'
   # 'shift-enter': 'vim-mode-plus:add-blank-line-above'
 
