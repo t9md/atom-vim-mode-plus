@@ -595,3 +595,21 @@ class Mark extends Operator
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
     @activateMode('normal')
+
+class AddBlankLineBelow extends Operator
+  @extend()
+  flashTarget: false
+  target: "Empty"
+  stayAtSamePosition: true
+  stayByMarker: true
+  where: 'below'
+
+  mutateSelection: (selection, stopMutation) ->
+    row = selection.getHeadBufferPosition().row
+    row += 1 if @where is 'below'
+    point = [row, 0]
+    @editor.setTextInBufferRange([point, point], "\n".repeat(@getCount()))
+
+class AddBlankLineAbove extends AddBlankLineBelow
+  @extend()
+  where: 'above'

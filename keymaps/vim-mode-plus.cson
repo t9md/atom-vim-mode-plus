@@ -418,6 +418,8 @@
   # 'y s c': 'vim-mode-plus:change-surround-any-pair-allow-forwarding'
 
   # 'y m s':  'vim-mode-plus:map-surround'
+  # 'enter': 'vim-mode-plus:add-blank-line-below'
+  # 'shift-enter': 'vim-mode-plus:add-blank-line-above'
 
 # operator-pending
 # -------------------------

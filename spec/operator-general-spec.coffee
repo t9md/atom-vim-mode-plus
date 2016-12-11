@@ -1313,3 +1313,59 @@ describe "Operator general", ->
           """
           cursor: [3, 0]
           mode: 'normal'
+
+  describe 'AddBlankLineBelow, AddBlankLineAbove', ->
+    beforeEach ->
+      set
+        textC: """
+        line0
+        li|ne1
+        line2
+        line3
+        """
+
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus.normal-mode':
+          'enter': 'vim-mode-plus:add-blank-line-below'
+          'shift-enter': 'vim-mode-plus:add-blank-line-above'
+
+    it "insert blank line below/above", ->
+      ensure "enter",
+        textC: """
+        line0
+        li|ne1
+
+        line2
+        line3
+        """
+      ensure "shift-enter",
+        textC: """
+        line0
+
+        li|ne1
+
+        line2
+        line3
+        """
+
+    it "[with-count] insert blank line below/above", ->
+      ensure "2 enter",
+        textC: """
+        line0
+        li|ne1
+
+
+        line2
+        line3
+        """
+      ensure "2 shift-enter",
+        textC: """
+        line0
+
+
+        li|ne1
+
+
+        line2
+        line3
+        """
