@@ -409,8 +409,11 @@
   'y s': 'vim-mode-plus:surround'
   'd s': 'vim-mode-plus:delete-surround'
   'd s s': 'vim-mode-plus:delete-surround-any-pair'
+  'd s S': 'vim-mode-plus:delete-surround-any-pair-allow-forwarding'
   'c s': 'vim-mode-plus:change-surround'
   'c s s': 'vim-mode-plus:change-surround-any-pair'
+  'c s S': 'vim-mode-plus:change-surround-any-pair-allow-forwarding'
+
   # 'enter': 'vim-mode-plus:add-blank-line-below'
   # 'shift-enter': 'vim-mode-plus:add-blank-line-above'
 
