@@ -406,6 +406,11 @@
   'ctrl-t': 'symbols-view:return-from-declaration'
   '"': 'vim-mode-plus:set-register-name'
 
+  'y s': 'vim-mode-plus:surround'
+  'd s': 'vim-mode-plus:delete-surround'
+  'd s s': 'vim-mode-plus:delete-surround-any-pair'
+  'c s': 'vim-mode-plus:change-surround'
+  'c s s': 'vim-mode-plus:change-surround-any-pair'
   # 'enter': 'vim-mode-plus:add-blank-line-below'
   # 'shift-enter': 'vim-mode-plus:add-blank-line-above'
 
@@ -535,6 +540,11 @@
   'i v': 'vim-mode-plus:inner-visible-area'
   'a v': 'vim-mode-plus:a-visible-area'
 
+# operator-pending operator-specific
+# -------------------------
+'atom-text-editor.vim-mode-plus.operator-pending-mode.surround-pending':
+  's': 'vim-mode-plus:inner-current-line'
+
 # visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode':
@@ -543,6 +553,7 @@
   'v': 'vim-mode-plus:activate-characterwise-visual-mode'
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
+  'S': 'vim-mode-plus:surround'
   'enter': 'vim-mode-plus:create-persistent-selection'
 
 'atom-text-editor.vim-mode-plus.has-persistent-selection.normal-mode,
