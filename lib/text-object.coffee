@@ -706,7 +706,7 @@ class Function extends Fold
   @extend(false)
 
   # Some language don't include closing `}` into fold.
-  omittingClosingCharLanguages: ['go']
+  omittingClosingCharLanguages: ['go', 'elixir']
 
   initialize: ->
     super

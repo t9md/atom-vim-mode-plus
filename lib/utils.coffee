@@ -517,7 +517,7 @@ isIncludeFunctionScopeForRow = (editor, row) ->
 isFunctionScope = (editor, scope) ->
   {scopeName} = editor.getGrammar()
   switch scopeName
-    when 'source.go'
+    when 'source.go', 'source.elixir'
       /^entity\.name\.function/.test(scope)
     else
       /^meta\.function\./.test(scope)
