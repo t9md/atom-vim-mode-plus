@@ -43,7 +43,7 @@ module.exports = new Settings 'vim-mode-plus',
   startInInsertModeScopes:
     default: []
     items: type: 'string'
-    description: 'Start in insert-mode whan editorElement matches scope'
+    description: 'Start in insert-mode when editorElement matches scope'
   clearMultipleCursorsOnEscapeInsertMode: false
   autoSelectPersistentSelectionOnOperate: true
   automaticallyEscapeInsertModeOnActivePaneItemChange:
@@ -52,7 +52,10 @@ module.exports = new Settings 'vim-mode-plus',
   wrapLeftRightMotion: false
   numberRegex:
     default: '-?[0-9]+'
-    description: 'Used to find number in ctrl-a/ctrl-x.<br>To ignore "-"(minus) char in string like "identifier-1" use "(?:\\B-)?[0-9]+"'
+    description: """
+      Used to find number in ctrl-a/ctrl-x.<br>
+      To ignore "-"(minus) char in string like "identifier-1" use `(?:\\B-)?[0-9]+`
+      """
   clearHighlightSearchOnResetNormalMode:
     default: false
     description: 'Clear highlightSearch on `escape` in normal-mode'
@@ -62,7 +65,10 @@ module.exports = new Settings 'vim-mode-plus',
   charactersToAddSpaceOnSurround:
     default: []
     items: type: 'string'
-    description: 'Comma separated list of character, which add space around surrounded text.<br>For vim-surround compatible behavior, set `(, {, [, <`.'
+    description: """
+      Comma separated list of character, which add space around surrounded text.<br>
+      For vim-surround compatible behavior, set `(, {, [, <`.
+      """
   showCursorInVisualMode: true
   ignoreCaseForSearch:
     default: false
@@ -85,7 +91,7 @@ module.exports = new Settings 'vim-mode-plus',
   incrementalSearchVisitDirection:
     default: 'absolute'
     enum: ['absolute', 'relative']
-    description: "Whether 'visit-next'(tab) and 'visit-prev'(shift-tab) depends on search direction('/' or '?')"
+    description: "When `relative`, `tab`, and `shift-tab` respect search direction('/' or '?')"
   stayOnTransformString:
     default: false
     description: "Don't move cursor after TransformString e.g upper-case, surround"
@@ -104,17 +110,19 @@ module.exports = new Settings 'vim-mode-plus',
   moveToFirstCharacterOnVerticalMotion:
     default: true
     description: """
-    Almost equivalent to `startofline` pure-Vim option. When true, move cursor to first char.
-    Affects to `ctrl-f, b, d, u`, `G`, `H`, `M`, `L`, `gg`
-    Unlike pure-Vim, `d`, `<<`, `>>` are not affected by this option, use independent `stayOn` options.
-    """
+      Almost equivalent to `startofline` pure-Vim option. When true, move cursor to first char.<br>
+      Affects to `ctrl-f, b, d, u`, `G`, `H`, `M`, `L`, `gg`<br>
+      Unlike pure-Vim, `d`, `<<`, `>>` are not affected by this option, use independent `stayOn` options.
+      """
   flashOnUndoRedo: true
-  flashOnMoveToOccurrence: false
+  flashOnMoveToOccurrence:
+    default: false
+    description: "Affects normal-mode's `tab`, `shift-tab`."
   flashOnOperate: true
   flashOnOperateBlacklist:
     default: []
     items: type: 'string'
-    description: 'comma separated list of operator class name to disable flash e.g. "yank, auto-indent"'
+    description: 'Comma separated list of operator class name to disable flash e.g. "yank, auto-indent"'
   flashOnSearch: true
   flashScreenOnSearchHasNoMatch: true
   showHoverOnOperate: false
