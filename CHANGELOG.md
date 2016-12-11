@@ -1,3 +1,99 @@
+# 0.72.0:
+- New: Command `add-preset-occurrence-from-last-occurrence-pattern` default `g .` keymap.
+- New: Command `insert-at-start-of-occurrence`, `insert-at-end-of-occurrence`
+- New: Config parameter `stayOnOccurrence` to specify stayOn behavior on occurrence-operation. #569.
+- New: unused and unnecessary indirection
+- Improve: Efficiency improved for cursorStyleManager. Skip cursor style modification if it can,
+- Improve, Breaking: `AngleBracket` now can work with multi-line #552
+  - TextObject `Tag` is no longer member of `AnyPair`. Since its conflict with `AngleBracket`
+- Improve, Fix: No longer unwanted remaining flash by `flashOnOperate` since now it's invalidate when touched.
+- Improve: Flash color is more stand-out when occurrence-operation #566
+- Improve: For flashing undo/redo, no longer red/green color blended when whichever is contained other #562
+- Improve: Place cursor more accurately for undo/redo when occurrence is involved.
+- Improve: Respect last cursor position when multiple cursor is cleared by `escape` in `normal-mode`. #557, #562
+- Improve: When occurrence is involved in operation, respect original cursor position after operation finished. #557
+- Improve: highlight when highlightSearch changed like on, off, on  
+- Fix: `toggle-preset-occurrence` should not accept persistentSelection but it was in previous release.
+- Fix: highlightSearch no longer extend highlight marker on appending text on tail #555
+- Internal: All vimState instances are managed by VimState class itself.
+- Internal: New convention. Ensure `ActivateInsertMode` and it's child call `@selectTarget()` before starting any mutation.
+
+# 0.71.0:
+- New: `moveToFirstCharacterOnVerticalMotion` options #550, #549
+  - Default: `true`, if you disable, column position is kept after these motion.
+  - Similar to `startofline` option in pure-Vim.
+  - Affects following motion(Unlike pure-Vim, `d`, `< <`, `> >` is not affected)
+    - `G`, `g g`, `H`, `M`, `L`, `ctrl-f`, `ctrl-b`, `ctrl-d`, `ctrl-u`
+  - For `d`, `< <`, `> >`, use `stayOnXXX` option if you want to keep column.
+- Improve: Don't close search mini-editor on `blur` event. (e.g. app-switch by cmd-tab) #539
+- Internal: `Base::getCount()` can take offset.
+- Internal Bug: Now properly detect duplicate class Name among operations.
+- Internal: Rename `Misc.Scroll` to `ScrollWithoutChangingCursorPosition` for explicitness.
+
+# 0.70.0:
+- New: Option `automaticallyEscapeInsertModeOnActivePaneItemChange`  #535
+- New: Option `keepColumnOnSelectTextObject` to keep original column in `v i p` etc. #541, #543
+- Fix: Cursor no longer become out-of-screen when move upward in `vB` #546
+- Fix: `I` and `A` should work on occurrence when has-occurrence #488, #518
+- Fix: select-occurrence in `vL` does not correctly select occurrence(spec missed to catch) in previous release.
+- Improve: flash-UI feedback when `Y` in `vC` mode.
+- Improve: Cleanup and suppress flash for `r` command
+- Improve: As general rule selection target can override pre-composed target #531
+  - e.g `transform-smart-word-by-select-list` works on selection if selection was not empty.
+- Improve: Persistent-selection treated as-if real-selection further #532, #534
+- Improve: Tweak what syntax scope is treated as function for TextObject.Function
+- Improve: `delete-line` is now available in all mode(visual mode only for default keymap)
+- Improve: Now pair text-object change mode to `vC` regardless of current mode. #542
+  - Remove internally used `TextObject::allowSubmodeChange` property
+- Breaking: Remove experimental but un-used operators and text-objects.
+  - Operator `DeleteOccurrenceInAFunctionOrInnerParagraph`, `ChangeOccurrenceInAFunctionOrInnerParagraph`, `ChangeOccurrenceInAPersistentSelection`
+  - TextObject `UnionTextObject`, `AFunctionOrInnerParagraph`, `ACurrentSelectionAndAPersistentSelection`, `TextObjectFirstFound`
+- Internal: Rename useMakerForStay to stayByMarker and no longer track marker unless needStay()
+- Internal: Cleanup mutationManger #530
+- Internal, Spec: New `textC` set/ensure option, validate exclusive option. #528, #533
+
+# 0.69.0:
+- New: Command `equalize-panes`(`ctrl-w =`) by @mattaschmann
+- New, Breaking: `g I` support, breaking because old `I` mapped command was renamed(harmless for most users).
+  - Renamed because of naming-bug.
+  - Renamed old `insert-at-beginning-of-line` to `insert-at-first-character-of-line`(mapped to `I`).
+  - Then now `insert-at-beginning-of-line` is mapped to `g I`.
+- New: vim-niceblock compatible behavior #488
+  - Now visual-mode's `I`, `A` works differently depending on `vC`, `vB`, `vL` modes.
+  - See `YouDontKnowVimModePlus` page on vmp's wiki for detail.
+- New: [experimental] `search-occurrence` motion. #519
+  - When you can see dotted-underlined-occurrence-marker, `tab`, `shift-tab` can be used as motion.
+  - You can use `space` to deselect occurrence-marker while moving next/prev of `occurrence-marker`.
+  - [keymap]
+    - `tab`: `vim-mode-plus:search-occurrence`
+    - `shift-tab`: `vim-mode-plus:search-occurrence-backwards`
+- Fix: When yank into named register for input-taking-motion(e.g `" a y f )`), it fail to save to register. #520
+- Improve: now `vimState.globalState` is resettable for all or specific field
+- Dev: `open-in-vim` now open buffer with at same cursor position.
+- Fix: Improve: `y i p` now move to start of paragraph after operator finished. #507
+- Fix: Improve: Further compatible resulting cursor position after operator finished. #529
+- Fix: Hover used to show count and register was not correctly positioned, really was bad degradation. #406
+- Improve: No longer share inputUI across operation, as a result `vimState.input` become unavailable. #525.
+- New: `C` in `vC` mode change whole-line #527
+
+# 0.68.0:
+- New: `project-find-from-search` command which have being provided as separate package #508.
+  - `cmd-enter` is default keymap for macOS user.
+- Fix: when `flashScreenOnSearchHasNoMatch` was `false`, throw error when search item was not found #510.
+
+# 0.67.0:
+- Support: set minimum engines to `^1.13.0-beta1`.
+- Fix: Remove use of `::shadow`. #485
+- Fix: `cmd-d` didn't start `visual-mode` suffered by the side-effect of shadowDOM removal #490
+- Experimental, Improve: Better flashing effect using keyframe CSS animation
+  - Breaking: Removed flashing duration config params.
+  - Now flashingDuration is fixed to 1 sec at maximum(duration until marker be destroyed)
+  - User can tweak by css within this duration. Refer `styles/vim-mode-plus.less` if you want.
+- Fix: Scroll motion failed to put cursor at firstChar of screen line when it’s wrapped.
+- Breaking: Remove cursor line flashing effect on smoothScrolling. #502
+- UI: Modify style of search match to modern(??) style.
+- Fix: No longer remove non-vmp-css-class from editorElement temporarily while waiting-user-input #497.
+
 # 0.66.1:
 - Fix: Flash only one instance at a given moment when search `/`, `?`, `#`, `?`. #494
 - Fix: % motion now work again #493 by @mattaschmann

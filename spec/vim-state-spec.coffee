@@ -162,13 +162,16 @@ describe "VimState", ->
         set text: '012345\nabcdef'
 
       it 'properly clears the operations', ->
-        ensure 'd r',
-          mode: 'normal'
+
+        ensure 'd', mode: 'operator-pending'
+        expect(vimState.operationStack.isEmpty()).toBe(false)
+        ensure 'r', mode: 'normal'
         expect(vimState.operationStack.isEmpty()).toBe(true)
-        target = vimState.input.editorElement
-        keystroke 'd'
-        atom.commands.dispatch(target, 'core:cancel')
-        ensure text: '012345\nabcdef'
+
+        ensure 'd', mode: 'operator-pending'
+        expect(vimState.operationStack.isEmpty()).toBe(false)
+        ensure 'escape', mode: 'normal', text: '012345\nabcdef'
+        expect(vimState.operationStack.isEmpty()).toBe(true)
 
   describe "activate-normal-mode-once command", ->
     beforeEach ->
@@ -218,19 +221,61 @@ describe "VimState", ->
       beforeEach ->
         set
           text: 'abc'
-          cursor: [[0, 0], [0, 1]]
+          cursor: [[0, 1], [0, 2]]
 
-      describe "when enabled", ->
+      describe "when enabled, clear multiple cursors on escaping insert-mode", ->
         beforeEach ->
           settings.set('clearMultipleCursorsOnEscapeInsertMode', true)
-        it "clear multiple cursor on escape", ->
-          ensure 'escape', mode: 'normal', numCursors: 1
+        it "clear multiple cursors by respecting last cursor's position", ->
+          ensure 'escape', mode: 'normal', numCursors: 1, cursor: [0, 1]
+
+        it "clear multiple cursors by respecting last cursor's position", ->
+          set cursor: [[0, 2], [0, 1]]
+          ensure 'escape', mode: 'normal', numCursors: 1, cursor: [0, 0]
 
       describe "when disabled", ->
         beforeEach ->
           settings.set('clearMultipleCursorsOnEscapeInsertMode', false)
-        it "clear multiple cursor on escape", ->
-          ensure 'escape', mode: 'normal', numCursors: 2
+        it "keep multiple cursors", ->
+          ensure 'escape', mode: 'normal', numCursors: 2, cursor: [[0, 0], [0, 1]]
+
+    describe "automaticallyEscapeInsertModeOnActivePaneItemChange setting", ->
+      [otherVim, otherEditor, pane] = []
+
+      beforeEach ->
+        getVimState (otherVimState, _other) ->
+          otherVim = _other
+          otherEditor = otherVimState.editor
+
+        runs ->
+          pane = atom.workspace.getActivePane()
+          pane.activateItem(editor)
+
+          set textC: "|editor-1"
+          otherVim.set textC: "|editor-2"
+
+          ensure 'i', mode: 'insert'
+          otherVim.ensure 'i', mode: 'insert'
+          expect(pane.getActiveItem()).toBe(editor)
+
+      describe "default behavior", ->
+        it "remain in insert-mode on paneItem change by default", ->
+
+          pane.activateItem(otherEditor)
+          expect(pane.getActiveItem()).toBe(otherEditor)
+
+          ensure mode: 'insert'
+          otherVim.ensure mode: 'insert'
+
+      describe "automaticallyEscapeInsertModeOnActivePaneItemChange = true", ->
+        beforeEach ->
+          settings.set('automaticallyEscapeInsertModeOnActivePaneItemChange', true)
+
+        it "return to escape mode for all vimEditors", ->
+          pane.activateItem(otherEditor)
+          expect(pane.getActiveItem()).toBe(otherEditor)
+          ensure mode: 'normal'
+          otherVim.ensure mode: 'normal'
 
   describe "replace-mode", ->
     describe "with content", ->

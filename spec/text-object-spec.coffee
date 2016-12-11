@@ -249,7 +249,6 @@ describe "TextObject", ->
         ensure 'd a q', text: """-- `def`  'efg'--"""
         ensure '.'  , text: """--   'efg'--"""
         ensure '.'  , text: """--   --"""
-        ensure '.'
       it "can select next quote", ->
         keystroke 'v'
         ensure 'a q', selectedText: '"abc"'
@@ -505,6 +504,68 @@ describe "TextObject", ->
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
         it "case-3 visual", -> check open, 'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
+
+      describe "change mode to characterwise", ->
+        # FIXME last "\n" should not be selected
+        textSelected = """
+        __1,
+        __2,
+        __3
+        """.replace(/_/g, ' ')
+
+
+        beforeEach ->
+          set
+            textC: """
+            {
+              |1,
+              2,
+              3
+            }
+            """
+          ensure mode: 'normal'
+
+        it "from vC, final-mode is 'characterwise'", ->
+          ensure 'v',
+            selectedText: ['1']
+            mode: ['visual', 'characterwise']
+          ensure 'i B',
+            selectedText: textSelected
+            mode: ['visual', 'characterwise']
+
+        it "from vL, final-mode is 'characterwise'", ->
+          ensure 'V',
+            selectedText: ["  1,\n"]
+            mode: ['visual', 'linewise']
+          ensure 'i B',
+            selectedText: textSelected
+            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
+
+        it "from vB, final-mode is 'characterwise'", ->
+          ensure 'ctrl-v',
+            selectedText: ["1"]
+            mode: ['visual', 'blockwise']
+          ensure 'i B',
+            selectedText: textSelected
+            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
+
+        describe "as operator target", ->
+          it "change inner-pair", ->
+            ensure "c i B",
+              textC: """
+              {
+              |
+              }
+              """
+              mode: 'insert'
+          it "delete inner-pair", ->
+            ensure "d i B",
+              textC: """
+              {
+              |}
+              """
+              mode: 'normal'
+
     describe "a-curly-bracket", ->
       beforeEach ->
         set
@@ -536,6 +597,71 @@ describe "TextObject", ->
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
         it "case-3 visual", -> check open, 'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
+
+      describe "change mode to characterwise", ->
+        textSelected = """
+          {
+            1,
+            2,
+            3
+          }
+          """
+        beforeEach ->
+          set
+            textC: """
+            {
+              |1,
+              2,
+              3
+            }
+
+            hello
+            """
+          ensure mode: 'normal'
+
+        it "from vC, final-mode is 'characterwise'", ->
+          ensure 'v',
+            selectedText: ['1']
+            mode: ['visual', 'characterwise']
+          ensure 'a B',
+            selectedText: textSelected
+            mode: ['visual', 'characterwise']
+
+        it "from vL, final-mode is 'characterwise'", ->
+          ensure 'V',
+            selectedText: ["  1,\n"]
+            mode: ['visual', 'linewise']
+          ensure 'a B',
+            selectedText: textSelected
+            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
+
+        it "from vB, final-mode is 'characterwise'", ->
+          ensure 'ctrl-v',
+            selectedText: ["1"]
+            mode: ['visual', 'blockwise']
+          ensure 'a B',
+            selectedText: textSelected
+            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
+
+        describe "as operator target", ->
+          it "change inner-pair", ->
+            ensure "c a B",
+              textC: """
+              |
+
+              hello
+              """
+              mode: 'insert'
+          it "delete inner-pair", ->
+            ensure "d a B",
+              textC: """
+              |
+
+              hello
+              """
+              mode: 'normal'
+
+
   describe "AngleBracket", ->
     describe "inner-angle-bracket", ->
       beforeEach ->
@@ -702,7 +828,7 @@ describe "TextObject", ->
         keystroke 'v'
         ensure ';', selectedText: "222"
         ensure ';', selectedText: "333"
-        ensure ';', selectedText: "444()444\n"
+        ensure ';', selectedText: "444()444"
         ensure ';', selectedText: "", selectedBufferRange: [[3, 4], [3, 4]]
     describe "a", ->
       it "select forwarding range within enclosed range(if exists)", ->

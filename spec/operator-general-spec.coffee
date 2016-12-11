@@ -11,6 +11,7 @@ describe "Operator general", ->
       {set, ensure, keystroke} = vim
 
   afterEach ->
+    vimState.globalState.reset('register')
     vimState.resetNormalMode()
 
   describe "cancelling operations", ->
@@ -162,35 +163,126 @@ describe "Operator general", ->
           cursor: [0, 2]
 
     describe "undo behavior", ->
-      originalText = "12345\nabcde\nABCDE\nQWERT"
+      originalText = null
+
       beforeEach ->
-        set text: originalText, cursor: [1, 1]
+        set
+          textC: """
+          12345
+          a|bcde
+          ABCDE
+          QWERT
+          """
+
+        originalText = editor.getText()
 
       it "undoes both lines", ->
-        ensure 'd 2 d u', text: originalText, selectedText: ''
+        ensure 'd 2 d',
+          textC: """
+          12345
+          |QWERT
+          """
+        ensure 'u',
+          textC: """
+          12345
+          |abcde
+          ABCDE
+          QWERT
+          """
+          selectedText: ""
 
       describe "with multiple cursors", ->
-        beforeEach ->
-          set cursor: [[1, 1], [0, 0]]
-
         describe "setCursorToStartOfChangeOnUndoRedo is true(default)", ->
-          # [FIXME] Should keep cursor?. so guranularity is not perfect in multi-cursors
-          # And ensure set position to start.
-          it "is undone as one operation and clear cursors", ->
-            ensure 'd l u',
+          it "clear multiple cursors and set cursor to start of changes of last cursor", ->
+            set
               text: originalText
-              selectedText: ['']
-              numCursors: 1
+              cursor: [[0, 0], [1, 1]]
+
+            ensure 'd l',
+              textC: """
+              |2345
+              a|cde
+              ABCDE
+              QWERT
+              """
+
+            ensure 'u',
+              textC: """
+              12345
+              a|bcde
+              ABCDE
+              QWERT
+              """
+              selectedText: ''
+
+            ensure 'ctrl-r',
+              textC: """
+              2345
+              a|cde
+              ABCDE
+              QWERT
+              """
+              selectedText: ''
+
+          it "clear multiple cursors and set cursor to start of changes of last cursor", ->
+            set
+              text: originalText
+              cursor: [[1, 1], [0, 0]]
+
+            ensure 'd l',
+              text: """
+              2345
+              acde
+              ABCDE
+              QWERT
+              """
+              cursor: [[1, 1], [0, 0]]
+
+            ensure 'u',
+              textC: """
+              |12345
+              abcde
+              ABCDE
+              QWERT
+              """
+              selectedText: ''
+
+            ensure 'ctrl-r',
+              textC: """
+              |2345
+              acde
+              ABCDE
+              QWERT
+              """
+              selectedText: ''
 
         describe "setCursorToStartOfChangeOnUndoRedo is false", ->
           beforeEach ->
             settings.set('setCursorToStartOfChangeOnUndoRedo', false)
+            set
+              textC: """
+              |12345
+              a|bcde
+              ABCDE
+              QWERT
+              """
+            ensure 'd l',
+              textC: """
+              |2345
+              a|cde
+              ABCDE
+              QWERT
+              """
 
-          it "is undone as one operation", ->
-            ensure 'd l u',
-              text: originalText
+          it "put cursor to end of change (works in same way of atom's core:undo)", ->
+            ensure 'u',
+              textC: """
+              1|2345
+              ab|cde
+              ABCDE
+              QWERT
+              """
               selectedText: ['', '']
-              numCursors: 2
 
     describe "when followed by a w", ->
       it "deletes the next word until the end of the line and exits operator-pending mode", ->
@@ -454,7 +546,6 @@ describe "Operator general", ->
             ensure '3 j .', cursor: [1, 0], text: textData.getLines([B1, B2, P3..., B3], chomp: true)
             ensure '3 j .', cursor: [1, 0], text: textData.getLines([B1, B2, B3], chomp: true)
 
-
   describe "the D keybinding", ->
     beforeEach ->
       set
@@ -475,111 +566,131 @@ describe "Operator general", ->
 
   describe "the y keybinding", ->
     beforeEach ->
-      set text: "012 345\nabc\n", cursor: [0, 4]
-
-    describe "when selected lines in visual linewise mode", ->
-      beforeEach ->
-        keystroke 'V j y'
-
-      it "is in linewise motion", ->
-        ensure register: '"': type: 'linewise'
-
-      it "saves the lines to the default register", ->
-        ensure register: '"': text: "012 345\nabc\n"
-
-      it "places the cursor at the beginning of the selection", ->
-        ensure cursorBuffer: [0, 0]
-
-    describe "when followed by a second y ", ->
-      beforeEach ->
-        keystroke 'y y'
-
-      it "saves the line to the default register", ->
-        ensure register: '"': text: "012 345\n"
-
-      it "leaves the cursor at the starting position", ->
-        ensure cursor: [0, 4]
+      set
+        cursor: [0, 4]
+        text: """
+        012 345
+        abc\n
+        """
 
     describe "when useClipboardAsDefaultRegister enabled", ->
-      it "writes to clipboard", ->
-        settings.set 'useClipboardAsDefaultRegister', true
-        keystroke 'y y'
-        expect(atom.clipboard.read()).toBe '012 345\n'
-
-    describe "when followed with a repeated y", ->
       beforeEach ->
-        keystroke 'y 2 y'
+        settings.set('useClipboardAsDefaultRegister', true)
+        atom.clipboard.write('___________')
+        ensure register: '"': text: '___________'
 
-      it "copies n lines, starting from the current", ->
-        ensure register: '"': text: "012 345\nabc\n"
+      describe "read/write to clipboard through register", ->
+        it "writes to clipboard with default register", ->
+          savedText = '012 345\n'
+          ensure 'y y', register: '"': text: savedText
+          expect(atom.clipboard.read()).toBe(savedText)
 
-      it "leaves the cursor at the starting position", ->
-        ensure cursor: [0, 4]
+    describe "visual-mode.linewise", ->
+      beforeEach ->
+        set
+          cursor: [0, 4]
+          text: """
+            000000
+            111111
+            222222\n
+            """
+
+      describe "selection not reversed", ->
+        it "saves to register(type=linewise), cursor move to start of target", ->
+          ensure "V j y",
+            cursor: [0, 0]
+            register: '"': text: "000000\n111111\n", type: 'linewise'
+
+      describe "selection is reversed", ->
+        it "saves to register(type=linewise), cursor doesn't move", ->
+          set cursor: [2, 2]
+          ensure "V k y",
+            cursor: [1, 2]
+            register: '"': text: "111111\n222222\n", type: 'linewise'
+
+    describe "y y", ->
+      it "saves to register(type=linewise), cursor stay at same position", ->
+        ensure 'y y',
+          cursor: [0, 4]
+          register: '"': text: "012 345\n", type: 'linewise'
+      it "[N y y] yank N line, starting from the current", ->
+        ensure 'y 2 y',
+          cursor: [0, 4]
+          register: '"': text: "012 345\nabc\n"
+      it "[y N y] yank N line, starting from the current", ->
+        ensure '2 y y',
+          cursor: [0, 4]
+          register: '"': text: "012 345\nabc\n"
 
     describe "with a register", ->
-      beforeEach ->
-        keystroke ['"', input: 'a', 'y y']
-
       it "saves the line to the a register", ->
-        ensure register: a: text: "012 345\n"
+        ensure ['"', input: 'a', 'y y'],
+          register: a: text: "012 345\n"
 
-      it "appends the line to the A register", ->
-        ensure ['"', input: 'A', 'y y'],
-          register: a: text: "012 345\n012 345\n"
+    describe "with A register", ->
+      it "append to existing value of lowercase-named register", ->
+        ensure ['"', input: 'a', 'y y'], register: a: text: "012 345\n"
+        ensure ['"', input: 'A', 'y y'], register: a: text: "012 345\n012 345\n"
 
-    describe "with a forward motion", ->
+    describe "with a motion", ->
+      it "yank from here to destnation of motion", ->
+        ensure 'y e', cursor: [0, 4], register: {'"': text: '345'}
+
+      it "does not yank when motion failed", ->
+        ensure ['y t', input: 'x'], register: {'"': text: undefined}
+
+      it "yank and move cursor to start of target", ->
+        ensure 'y h',
+          cursor: [0, 3]
+          register: '"': text: ' '
+
+      it "[with linewise motion] yank and desn't move cursor", ->
+        ensure 'y j',
+          cursor: [0, 4]
+          register: {'"': text: "012 345\nabc\n", type: 'linewise'}
+
+    describe "with a text-obj", ->
       beforeEach ->
-        keystroke 'y e'
+        set
+          cursor: [2, 8]
+          text: """
 
-      it "saves the selected text to the default register", ->
-        ensure register: '"': text: '345'
+          1st paragraph
+          1st paragraph
 
-      it "leaves the cursor at the starting position", ->
-        ensure cursor: [0, 4]
+          2n paragraph
+          2n paragraph\n
+          """
+      it "inner-word and move cursor to start of target", ->
+        ensure 'y i w',
+          register: '"': text: "paragraph"
+          cursor: [2, 4]
 
-      it "does not yank when motion fails", ->
-        ensure ['y t', input: 'x'],
-          register: '"': text: '345'
-
-    describe "with a text object", ->
-      it "moves the cursor to the beginning of the text object", ->
-        set cursorBuffer: [0, 5]
-        ensure 'y i w', cursorBuffer: [0, 4]
-
-    describe "with a left motion", ->
-      beforeEach ->
-        keystroke 'y h'
-
-      it "saves the left letter to the default register", ->
-        ensure register: '"': text: ' '
-
-      it "moves the cursor position to the left", ->
-        ensure cursor: [0, 3]
-
-    describe "with a down motion", ->
-      beforeEach ->
-        keystroke 'y j'
-
-      it "saves both full lines to the default register", ->
-        ensure register: '"': text: "012 345\nabc\n"
-
-      it "leaves the cursor at the starting position", ->
-        ensure cursor: [0, 4]
+      it "yank text-object inner-paragraph and move cursor to start of target", ->
+        ensure 'y i p',
+          cursor: [1, 0]
+          register: '"': text: "1st paragraph\n1st paragraph\n"
 
     describe "when followed by a G", ->
       beforeEach ->
-        originalText = "12345\nabcde\nABCDE"
+        originalText = """
+        12345
+        abcde
+        ABCDE\n
+        """
         set text: originalText
 
-      describe "on the beginning of the second line", ->
-        it "deletes the bottom two lines", ->
-          set cursor: [1, 0]
-          ensure 'y G P', text: '12345\nabcde\nABCDE\nabcde\nABCDE'
+      it "yank and doesn't move cursor", ->
+        set cursor: [1, 0]
+        ensure 'y G',
+          register: {'"': text: "abcde\nABCDE\n", type: 'linewise'}
+          cursor: [1, 0]
 
-      describe "on the middle of the second line", ->
-        it "deletes the bottom two lines", ->
-          set cursor: [1, 2]
-          ensure 'y G P', text: '12345\nabcde\nABCDE\nabcde\nABCDE'
+      it "yank and doesn't move cursor", ->
+        set cursor: [1, 2]
+        ensure 'y G',
+          register: {'"': text: "abcde\nABCDE\n", type: 'linewise'}
+          cursor: [1, 2]
 
     describe "when followed by a goto line G", ->
       beforeEach ->
@@ -659,14 +770,13 @@ describe "Operator general", ->
           text: "no newline!\nno newline!\nno newline!"
 
   describe "the Y keybinding", ->
-    text = """
-    012 345
-    abc\n
-    """
+    text = null
     beforeEach ->
-      set
-        text: text
-        cursor: [0, 4]
+      text = """
+      012 345
+      abc\n
+      """
+      set text: text, cursor: [0, 4]
 
     it "saves the line to the default register", ->
       ensure 'Y', cursor: [0, 4], register: '"': text: "012 345\n"
@@ -924,16 +1034,12 @@ describe "Operator general", ->
       ensure ['r', input: 'x'], text: 'x2\nx4\n\n'
 
     it "does nothing when cancelled", ->
-      keystroke 'r'
-      vimState.input.cancel()
-      ensure
+      ensure 'r escape',
         text: '12\n34\n\n'
         mode: 'normal'
 
     it "remain visual-mode when cancelled", ->
-      keystroke 'v r'
-      vimState.input.cancel()
-      ensure
+      ensure 'v r escape',
         text: '12\n34\n\n'
         mode: ['visual', 'characterwise']
 
@@ -1207,3 +1313,59 @@ describe "Operator general", ->
           """
           cursor: [3, 0]
           mode: 'normal'
+
+  describe 'AddBlankLineBelow, AddBlankLineAbove', ->
+    beforeEach ->
+      set
+        textC: """
+        line0
+        li|ne1
+        line2
+        line3
+        """
+
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus.normal-mode':
+          'enter': 'vim-mode-plus:add-blank-line-below'
+          'shift-enter': 'vim-mode-plus:add-blank-line-above'
+
+    it "insert blank line below/above", ->
+      ensure "enter",
+        textC: """
+        line0
+        li|ne1
+
+        line2
+        line3
+        """
+      ensure "shift-enter",
+        textC: """
+        line0
+
+        li|ne1
+
+        line2
+        line3
+        """
+
+    it "[with-count] insert blank line below/above", ->
+      ensure "2 enter",
+        textC: """
+        line0
+        li|ne1
+
+
+        line2
+        line3
+        """
+      ensure "2 shift-enter",
+        textC: """
+        line0
+
+
+        li|ne1
+
+
+        line2
+        line3
+        """

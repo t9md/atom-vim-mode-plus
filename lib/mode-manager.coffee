@@ -75,6 +75,10 @@ class ModeManager
     unless @deactivator?.disposed
       @emitter.emit('will-deactivate-mode', {@mode, @submode})
       @deactivator?.dispose()
+      # Remove css class here in-case @deactivate() called solely(occurrence in visual-mode)
+      @editorElement.classList.remove("#{@mode}-mode")
+      @editorElement.classList.remove(@submode)
+
       @emitter.emit('did-deactivate-mode', {@mode, @submode})
 
   # Normal
@@ -101,7 +105,7 @@ class ModeManager
       replaceModeDeactivator = null
 
       if settings.get('clearMultipleCursorsOnEscapeInsertMode')
-        @editor.clearSelections()
+        @vimState.clearSelections()
 
       # When escape from insert-mode, cursor move Left.
       needSpecialCareToPreventWrapLine = atom.config.get('editor.atomicSoftTabs') ? true
@@ -143,6 +147,7 @@ class ModeManager
 
     switch submode
       when 'linewise'
+        swrap.complementGoalColumn(@editor)
         @vimState.selectLinewise()
       when 'blockwise'
         @vimState.selectBlockwise()

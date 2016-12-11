@@ -45,13 +45,13 @@ class SearchInput extends HTMLElement
     atom.commands.add @editorElement,
       'core:confirm': => @confirm()
       'core:cancel': => @cancel()
-      'blur': => @cancel() unless @finished
+      'core:backspace': => @backspace()
       'vim-mode-plus:input-cancel': => @cancel()
 
   focus: (@options={}) ->
     @finished = false
 
-    @editorElement.classList.add('backwards') if @options.backwards
+    @editorElement.classList.add(@options.classList...) if @options.classList?
     @panel.show()
     @editorElement.focus()
     @commandSubscriptions = @handleEvents()
@@ -62,7 +62,7 @@ class SearchInput extends HTMLElement
       @cancel() unless @finished
 
   unfocus: ->
-    @editorElement.classList.remove('backwards')
+    @editorElement.classList.remove(@options.classList...) if @options?.classList?
     @regexSearchStatus.classList.add 'btn-primary'
     @literalModeDeactivator?.dispose()
 
@@ -96,6 +96,9 @@ class SearchInput extends HTMLElement
     @emitter.emit('did-cancel')
     @unfocus()
 
+  backspace: ->
+    @cancel() if @editor.getText().length is 0
+
   confirm: (landingPoint=null) ->
     @emitter.emit('did-confirm', {input: @editor.getText(), landingPoint})
     @unfocus()
@@ -123,6 +126,11 @@ class SearchInput extends HTMLElement
     @registerCommands()
     this
 
+  emitDidCommand: (name, options={}) ->
+    options.name = name
+    options.input = @editor.getText()
+    @emitter.emit('did-command', options)
+
   registerCommands: ->
     atom.commands.add @editorElement, @stopPropagation(
       "search-confirm": => @confirm()
@@ -130,12 +138,13 @@ class SearchInput extends HTMLElement
       "search-land-to-end": => @confirm('end')
       "search-cancel": => @cancel()
 
-      "search-visit-next": => @emitter.emit('did-command', name: 'visit', direction: 'next')
-      "search-visit-prev": => @emitter.emit('did-command', name: 'visit', direction: 'prev')
+      "search-visit-next": => @emitDidCommand('visit', direction: 'next')
+      "search-visit-prev": => @emitDidCommand('visit', direction: 'prev')
 
-      "select-occurrence-from-search": => @emitter.emit('did-command', name: 'occurrence', operation: 'SelectOccurrence')
-      "change-occurrence-from-search": => @emitter.emit('did-command', name: 'occurrence', operation: 'ChangeOccurrence')
-      "add-occurrence-pattern-from-search": => @emitter.emit('did-command', name: 'occurrence')
+      "select-occurrence-from-search": => @emitDidCommand('occurrence', operation: 'SelectOccurrence')
+      "change-occurrence-from-search": => @emitDidCommand('occurrence', operation: 'ChangeOccurrence')
+      "add-occurrence-pattern-from-search": => @emitDidCommand('occurrence')
+      "project-find-from-search": => @emitDidCommand('project-find')
 
       "search-insert-wild-pattern": => @editor.insertText('.*?')
       "search-activate-literal-mode": => @activateLiteralMode()

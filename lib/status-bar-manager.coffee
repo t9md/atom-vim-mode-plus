@@ -19,10 +19,12 @@ class StatusBarManager
 
   update: (mode, submode) ->
     @element.className = "#{@prefix}-#{mode}"
-    modeString = switch settings.get('statusBarModeStringStyle')
-      when 'short' then @getShortModeString(mode, submode)
-      when 'long' then @getLongModeString(mode, submode)
-    @element.textContent = modeString
+    @element.textContent =
+      switch settings.get('statusBarModeStringStyle')
+        when 'short'
+          @getShortModeString(mode, submode)
+        when 'long'
+          @getLongModeString(mode, submode)
 
   getShortModeString: (mode, submode) ->
     (mode[0] + (if submode? then submode[0] else '')).toUpperCase()

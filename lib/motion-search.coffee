@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
 
-{saveEditorState, getNonWordCharactersForCursor} = require './utils'
+{saveEditorState, getNonWordCharactersForCursor, searchByProjectFind} = require './utils'
 SearchModel = require './search-model'
 settings = require './settings'
 Motion = require('./base').getClass('Motion')
@@ -23,6 +23,7 @@ class SearchBase extends Motion
   landingPoint: null # ['start' or 'end']
   defaultLandingPoint: 'start' # ['start' or 'end']
   relativeIndex: null
+  updatelastSearchPattern: true
 
   isBackwards: ->
     @backwards
@@ -83,7 +84,8 @@ class SearchBase extends Motion
       @globalState.set('currentSearch', this)
       @vimState.searchHistory.save(input)
 
-    @globalState.set('lastSearchPattern', @getPattern(input))
+    if @updatelastSearchPattern
+      @globalState.set('lastSearchPattern', @getPattern(input))
 
   getSearchModel: ->
     @searchModel ?= new SearchModel(@vimState, incrementalSearch: @isIncrementalSearch())
@@ -116,10 +118,15 @@ class Search extends SearchBase
     @onDidCancelSearch(@handleCancelSearch.bind(this))
     @onDidChangeSearch(@handleChangeSearch.bind(this))
 
-    @vimState.searchInput.focus({@backwards})
+    @focusSearchInputEditor()
+
+  focusSearchInputEditor: ->
+    classList = []
+    classList.push('backwards') if @backwards
+    @vimState.searchInput.focus({classList})
 
   handleCommandEvent: (commandEvent) ->
-    return unless @input
+    return unless commandEvent.input
     switch commandEvent.name
       when 'visit'
         {direction} = commandEvent
@@ -129,18 +136,26 @@ class Search extends SearchBase
             when 'prev' then 'next'
 
         switch direction
-          when 'next' then @getSearchModel().updateCurrentMatch(+1)
-          when 'prev' then @getSearchModel().updateCurrentMatch(-1)
+          when 'next' then @getSearchModel().visit(+1)
+          when 'prev' then @getSearchModel().visit(-1)
 
       when 'occurrence'
-        {operation} = commandEvent
+        {operation, input} = commandEvent
         @vimState.occurrenceManager.resetPatterns() if operation?
 
-        @vimState.occurrenceManager.addPattern(@getPattern(@input))
-        @vimState.searchHistory.save(@input)
+        @vimState.occurrenceManager.addPattern(@getPattern(input))
+        @vimState.occurrenceManager.saveLastOccurrencePattern()
+
+        @vimState.searchHistory.save(input)
         @vimState.searchInput.cancel()
 
         @vimState.operationStack.run(operation) if operation?
+
+      when 'project-find'
+        {input} = commandEvent
+        @vimState.searchHistory.save(input)
+        @vimState.searchInput.cancel()
+        searchByProjectFind(@editor, input)
 
   handleCancelSearch: ->
     @vimState.resetNormalMode() unless @isMode('visual') or @isMode('insert')
@@ -161,15 +176,15 @@ class Search extends SearchBase
       atom.beep() unless @input
     @processOperation()
 
-  handleChangeSearch: (@input) ->
+  handleChangeSearch: (input) ->
     # If input starts with space, remove first space and disable useRegexp.
-    if @input.startsWith(' ')
-      @input = @input.replace(/^ /, '')
+    if input.startsWith(' ')
+      input = input.replace(/^ /, '')
       @useRegexp = false
     @vimState.searchInput.updateOptionSettings({@useRegexp})
 
     if @isIncrementalSearch()
-      @search(@editor.getLastCursor(), @input, @getCount())
+      @search(@editor.getLastCursor(), input, @getCount())
 
   getPattern: (term) ->
     modifiers = if @isCaseSensitive(term) then 'g' else 'gi'

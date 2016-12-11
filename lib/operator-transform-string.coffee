@@ -17,7 +17,7 @@ transformerRegistry = []
 class TransformString extends Operator
   @extend(false)
   trackChange: true
-  stayOnLinewise: true
+  stayOptionName: 'stayOnTransformString'
   autoIndent: false
 
   @registerToSelectList: ->
@@ -75,6 +75,7 @@ class Replace extends TransformString
   @extend()
   input: null
   hover: icon: ':replace:', emoji: ':tractor:'
+  flashCheckpoint: 'did-select-occurrence'
   requireInput: true
 
   initialize: ->
@@ -83,15 +84,13 @@ class Replace extends TransformString
       @target = 'MoveRightBufferColumn'
     @focusInput()
 
-  getInput: ->
-    super or "\n"
-
   mutateSelection: (selection) ->
     if @target.is('MoveRightBufferColumn')
       return unless selection.getText().length is @getCount()
 
-    input = @getInput()
-    @restorePositions = false if input is "\n"
+    input = @getInput() or "\n"
+    if input is "\n"
+      @restorePositions = false
     text = selection.getText().replace(/./g, input)
     selection.insertText(text, autoIndentNewline: true)
 
@@ -209,8 +208,9 @@ class ConvertToHardTab extends TransformString
     tabLength = @editor.getTabLength()
     scanRange = selection.getBufferRange()
     @editor.scanInBufferRange /[ \t]+/g, scanRange, ({range, replace}) =>
-      screenRange = @editor.screenRangeForBufferRange(range)
-      {start: {column: startColumn}, end: {column: endColumn}} = screenRange
+      {start, end} = @editor.screenRangeForBufferRange(range)
+      startColumn = start.column
+      endColumn = end.column
 
       # We can't naively replace spaces to tab, we have to consider valid tabStop column
       # If nextTabStop column exceeds replacable range, we pad with spaces.
@@ -345,9 +345,8 @@ class SwapWithRegister extends TransformString
 class Indent extends TransformString
   @extend()
   hover: icon: ':indent:', emoji: ':point_right:'
-  stayOnLinewise: false
-  useMarkerForStay: true
-  clipToMutationEndOnStay: false
+  stayByMarker: true
+  wise: 'linewise'
 
   execute: ->
     unless @needStay()
@@ -373,7 +372,7 @@ class AutoIndent extends Indent
 class ToggleLineComments extends TransformString
   @extend()
   hover: icon: ':toggle-line-comments:', emoji: ':mute:'
-  useMarkerForStay: true
+  stayByMarker: true
   mutateSelection: (selection) ->
     selection.toggleLineComments()
 
@@ -401,15 +400,16 @@ class Surround extends TransformString
     return unless @requireInput
     if @requireTarget
       @onDidSetTarget =>
-        @onDidConfirmInput (input) => @onConfirm(input)
-        @onDidChangeInput (input) => @addHover(input)
-        @onDidCancelInput => @cancelOperation()
-        @vimState.input.focus(@charsMax)
+        @focusInput(@charsMax)
     else
-      @onDidConfirmInput (input) => @onConfirm(input)
-      @onDidChangeInput (input) => @addHover(input)
-      @onDidCancelInput => @cancelOperation()
-      @vimState.input.focus(@charsMax)
+      @focusInput(@charsMax)
+
+  focusInput: (charsMax) ->
+    @inputUI = @newInputUI()
+    @inputUI.onDidConfirm(@onConfirm.bind(this))
+    @inputUI.onDidChange(@addHover.bind(this))
+    @inputUI.onDidCancel(@cancelOperation.bind(this))
+    @inputUI.focus(charsMax)
 
   onConfirm: (@input) ->
     @processOperation()
@@ -503,23 +503,21 @@ class ChangeSurroundAnyPair extends ChangeSurround
   charsMax: 1
   target: "AAnyPair"
 
-  highlightTargetRange: (selection) ->
-    if range = @target.getRange(selection)
-      marker = @editor.markBufferRange(range)
-      @editor.decorateMarker(marker, type: 'highlight', class: 'vim-mode-plus-target-range')
-      marker
-    else
-      null
+  highlightRange: (range) ->
+    marker = @editor.markBufferRange(range)
+    @editor.decorateMarker(marker, type: 'highlight', class: 'vim-mode-plus-target-range')
+    marker
 
   initialize: ->
     marker = null
     @onDidSetTarget =>
-      if marker = @highlightTargetRange(@editor.getLastSelection())
+      if range = @target.getRange(@editor.getLastSelection())
+        marker = @highlightRange(range)
         textRange = Range.fromPointWithDelta(marker.getBufferRange().start, 0, 1)
         char = @editor.getTextInBufferRange(textRange)
         @addHover(char, {}, @editor.getCursorBufferPosition())
       else
-        @vimState.input.cancel()
+        @inputUI.cancel()
         @abort()
 
     @onDidResetOperationStack ->

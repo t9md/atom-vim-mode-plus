@@ -62,6 +62,7 @@ class OperationStack
   # -------------------------
   run: (klass, properties) ->
     try
+      @vimState.init() if @isEmpty()
       type = typeof(klass)
       if type is 'object' # . repeat case we can execute as-it-is.
         operation = klass
@@ -94,9 +95,7 @@ class OperationStack
         operation.count = count
         operation.target?.count = count # Some opeartor have no target like ctrl-a(increase).
 
-      # [FIXME] Degradation, this `transact` should not be necessary
-      @editor.transact =>
-        @run(operation)
+      @run(operation)
 
   runRecordedMotion: (key, {reverse}={}) ->
     return unless operation = @vimState.globalState.get(key)
@@ -160,7 +159,7 @@ class OperationStack
 
   finish: (operation=null) ->
     @recordedOperation = operation if operation?.isRecordable()
-    @vimState.emitter.emit('did-finish-operation')
+    @vimState.emitDidFinishOperation()
 
     if @mode is 'normal'
       @ensureAllSelectionsAreEmpty(operation)
@@ -176,7 +175,7 @@ class OperationStack
       if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
         throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
       else
-        @editor.clearSelections()
+        @vimState.clearSelections()
 
   ensureAllCursorsAreNotAtEndOfLine: ->
     for cursor in @editor.getCursors() when cursor.isAtEndOfLine()

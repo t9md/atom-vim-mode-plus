@@ -3,6 +3,10 @@ _ = require 'underscore-plus'
 {
   translatePointAndClip
   getRangeByTranslatePointAndClip
+  shrinkRangeEndToBeforeNewLine
+  getFirstCharacterPositionForBufferRow
+  getEndOfLineForBufferRow
+  limitNumber
 } = require './utils'
 
 propertyStore = new Map
@@ -15,9 +19,9 @@ class SelectionWrapper
   setProperties: (prop) -> propertyStore.set(@selection, prop)
   clearProperties: -> propertyStore.delete(@selection)
 
-  setBufferRangeSafely: (range) ->
+  setBufferRangeSafely: (range, options) ->
     if range
-      @setBufferRange(range)
+      @setBufferRange(range, options)
       if @selection.isLastSelection()
         @selection.cursor.autoscroll()
 
@@ -77,6 +81,12 @@ class SelectionWrapper
   mergeBufferRange: (range, option) ->
     @setBufferRange(@getBufferRange().union(range), option)
 
+  extendToEOL: ->
+    [startRow, endRow] = @selection.getBufferRowRange()
+    endRowRange = @selection.editor.bufferRangeForBufferRow(endRow)
+    newRange = new Range(@getBufferRange().start, endRowRange.end)
+    @setBufferRange(newRange)
+
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
@@ -112,7 +122,7 @@ class SelectionWrapper
 
   getRowFor: (where) ->
     [startRow, endRow] = @selection.getBufferRowRange()
-    unless @selection.isReversed()
+    if @selection.isReversed()
       [headRow, tailRow] = [startRow, endRow]
     else
       [headRow, tailRow] = [endRow, startRow]
@@ -152,6 +162,35 @@ class SelectionWrapper
         properties.head = endPoint
     @setProperties(properties)
 
+  complementGoalColumn: ->
+    unless @selection.cursor.goalColumn?
+      column = @getBufferPositionFor('head', fromProperty: true, allowFallback: true).column
+      @selection.cursor.goalColumn = column
+
+  # [FIXME]
+  # When `keepColumnOnSelectTextObject` was true,
+  #  cursor marker in vL-mode exceed EOL if initial row is longer than endRow of
+  #  selected text-object.
+  # To avoid this wired cursor position representation, this fucntion clip
+  #  selection properties not exceeds EOL.
+  # Bud this should be temporal workaround, dpending this kind of ad-hoc adjustment is
+  # basically bad in the long run.
+  clipPropertiesTillEndOfLine: ->
+    return unless @hasProperties()
+
+    editor = @selection.editor
+    headRowEOL = getEndOfLineForBufferRow(editor, @getHeadRow())
+    tailRowEOL = getEndOfLineForBufferRow(editor, @getTailRow())
+    headMaxColumn = limitNumber(headRowEOL.column - 1, min: 0)
+    tailMaxColumn = limitNumber(tailRowEOL.column - 1, min: 0)
+
+    properties = @getProperties()
+    if properties.head.column > headMaxColumn
+      properties.head.column = headMaxColumn
+
+    if properties.tail.column > tailMaxColumn
+      properties.tail.column = tailMaxColumn
+
   captureProperties: ->
     head: @selection.getHeadBufferPosition()
     tail: @selection.getTailBufferPosition()
@@ -184,8 +223,15 @@ class SelectionWrapper
 
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->
+    {keepGoalColumn} = options
+    delete options.keepGoalColumn if keepGoalColumn?
+
     options.autoscroll ?= false
-    @selection.setBufferRange(range, options)
+    if keepGoalColumn
+      @withKeepingGoalColumn =>
+        @selection.setBufferRange(range, options)
+    else
+      @selection.setBufferRange(range, options)
 
   # Return original text
   replace: (text) ->
@@ -222,7 +268,7 @@ class SelectionWrapper
     {goalColumn} = @selection.cursor
     {start, end} = @getBufferRange()
     fn()
-    @selection.cursor.goalColumn = goalColumn if goalColumn
+    @selection.cursor.goalColumn = goalColumn if goalColumn?
 
   # direction must be one of ['forward', 'backward']
   # options: {translate: true or false} default true
@@ -241,6 +287,16 @@ class SelectionWrapper
     newRange = getRangeByTranslatePointAndClip(editor, range, which, direction, options)
     @withKeepingGoalColumn =>
       @setBufferRange(newRange, preserveFolds: true)
+
+  shrinkEndToBeforeNewLine: ->
+    newRange = shrinkRangeEndToBeforeNewLine(@getBufferRange())
+    @setBufferRange(newRange)
+
+  setStartToFirstCharacterOfLine: ->
+    {start, end} = @getBufferRange()
+    newStart = getFirstCharacterPositionForBufferRow(@selection.editor, start.row)
+    newRange = new Range(newStart, end)
+    @setBufferRange(newRange)
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
@@ -276,5 +332,9 @@ swrap.updateSelectionProperties = (editor, {unknownOnly}={}) ->
   for selection in editor.getSelections()
     continue if unknownOnly and swrap(selection).hasProperties()
     swrap(selection).saveProperties()
+
+swrap.complementGoalColumn = (editor) ->
+  for selection in editor.getSelections()
+    swrap(selection).complementGoalColumn()
 
 module.exports = swrap

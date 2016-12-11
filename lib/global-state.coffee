@@ -1,7 +1,8 @@
 {Emitter} = require 'atom'
 
 class GlobalState
-  constructor: (@state) ->
+  constructor: ->
+    @reset()
     @emitter = new Emitter
 
     @onDidChange ({name, newValue}) =>
@@ -23,10 +24,20 @@ class GlobalState
   emitDidChange: (event) ->
     @emitter.emit('did-change', event)
 
-module.exports = new GlobalState
+  reset: (name) ->
+    initialState = getInitialState()
+    if name?
+      @set(name, initialState[name])
+    else
+      @state = initialState
+
+getInitialState = ->
   searchHistory: []
   currentSearch: null
   lastSearchPattern: null
+  lastOccurrencePattern: null
   highlightSearchPattern: null
   currentFind: null
   register: {}
+
+module.exports = new GlobalState()

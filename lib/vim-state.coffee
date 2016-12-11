@@ -7,11 +7,8 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 {HoverElement} = require './hover'
-Input = require './input'
 SearchInputElement = require './search-input'
 {
-  haveSomeNonEmptySelection
-  highlightRanges
   getVisibleEditors
   matchScopes
 
@@ -30,16 +27,28 @@ OccurrenceManager = require './occurrence-manager'
 HighlightSearchManager = require './highlight-search-manager'
 MutationManager = require './mutation-manager'
 PersistentSelectionManager = require './persistent-selection-manager'
+FlashManager = require './flash-manager'
 
 packageScope = 'vim-mode-plus'
 
 module.exports =
 class VimState
+  @vimStatesByEditor: new Map
+
+  @getByEditor: (editor) ->
+    @vimStatesByEditor.get(editor)
+
+  @forEach: (fn) ->
+    @vimStatesByEditor.forEach(fn)
+
+  @clear: ->
+    @vimStatesByEditor.clear()
+
   Delegato.includeInto(this)
-  destroyed: false
 
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
+  @delegatesMethods('flash', 'flashScreenRange', toProperty: 'flashManager')
   @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', 'addToClassList', toProperty: 'operationStack')
 
   constructor: (@editor, @statusBarManager, @globalState) ->
@@ -56,26 +65,19 @@ class VimState
     @persistentSelection = new PersistentSelectionManager(this)
     @occurrenceManager = new OccurrenceManager(this)
     @mutationManager = new MutationManager(this)
+    @flashManager = new FlashManager(this)
 
-    @input = new Input(this)
     @searchInput = new SearchInputElement().initialize(this)
 
     @operationStack = new OperationStack(this)
     @cursorStyleManager = new CursorStyleManager(this)
     @blockwiseSelections = []
     @previousSelection = {}
-    @observeSelection()
+    @observeSelections()
 
     refreshHighlightSearch = =>
       @highlightSearch.refresh()
     @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
-
-    @subscriptions.add @editor.observeSelections (selection) =>
-      return if @operationStack.isProcessing()
-      unless swrap(selection).hasProperties()
-        swrap(selection).saveProperties()
-        @updateCursorsVisibility()
-        @editorElement.component.updateSync()
 
     @editorElement.classList.add(packageScope)
     if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
@@ -83,8 +85,8 @@ class VimState
     else
       @activate('normal')
 
-  isNewInput: ->
-    @input instanceof Input
+    @subscriptions.add @editor.onDidDestroy(@destroy.bind(this))
+    @constructor.vimStatesByEditor.set(@editor, this)
 
   # BlockwiseSelections
   # -------------------------
@@ -105,6 +107,7 @@ class VimState
     for selection in @editor.getSelections()
       @blockwiseSelections.push(new BlockwiseSelection(selection))
     @updateSelectionProperties()
+    @getLastBlockwiseSelection().autoscrollIfReversed()
 
   # Other
   # -------------------------
@@ -118,19 +121,22 @@ class VimState
   toggleClassList: (className, bool=undefined) ->
     @editorElement.classList.toggle(className, bool)
 
-  swapClassName: (className) ->
-    oldClassName = @editorElement.className
-    @editorElement.className = className
+  # FIXME: remove this dengerous approarch ASAP and revert to read-inpu-via-mini-editor
+  swapClassName: (classNames...) ->
+    oldMode = @mode
+    @editorElement.classList.remove(oldMode + "-mode")
+    @editorElement.classList.remove('vim-mode-plus')
+    @editorElement.classList.add(classNames...)
+
     new Disposable =>
-      @editorElement.className = oldClassName
+      @editorElement.classList.remove(classNames...)
+      if @mode is oldMode
+        @editorElement.classList.add(oldMode + "-mode")
+      @editorElement.classList.add('vim-mode-plus')
       @editorElement.classList.add('is-focused')
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
-  onDidChangeInput: (fn) -> @subscribe @input.onDidChange(fn)
-  onDidConfirmInput: (fn) -> @subscribe @input.onDidConfirm(fn)
-  onDidCancelInput: (fn) -> @subscribe @input.onDidCancel(fn)
-
   onDidChangeSearch: (fn) -> @subscribe @searchInput.onDidChange(fn)
   onDidConfirmSearch: (fn) -> @subscribe @searchInput.onDidConfirm(fn)
   onDidCancelSearch: (fn) -> @subscribe @searchInput.onDidCancel(fn)
@@ -148,6 +154,7 @@ class VimState
   emitDidSetOperatorModifier: (options) -> @emitter.emit('did-set-operator-modifier', options)
 
   onDidFinishOperation: (fn) -> @subscribe @emitter.on('did-finish-operation', fn)
+  emitDidFinishOperation: -> @emitter.emit('did-finish-operation')
 
   onDidResetOperationStack: (fn) -> @subscribe @emitter.on('did-reset-operation-stack', fn)
   emitDidResetOperationStack: -> @emitter.emit('did-reset-operation-stack')
@@ -183,9 +190,13 @@ class VimState
   onDidSetInputChar: (fn) -> @emitter.on('did-set-input-char', fn)
   emitDidSetInputChar: (char) -> @emitter.emit('did-set-input-char', char)
 
+  isAlive: ->
+    @constructor.vimStatesByEditor.has(@editor)
+
   destroy: ->
-    return if @destroyed
-    @destroyed = true
+    return unless @isAlive()
+    @constructor.vimStatesByEditor.delete(@editor)
+
     @subscriptions.dispose()
 
     if @editor.isAlive()
@@ -198,52 +209,51 @@ class VimState
     @hoverSearchCounter?.destroy?()
     @searchHistory?.destroy?()
     @cursorStyleManager?.destroy?()
-    @input?.destroy?()
     @search?.destroy?()
     @register?.destroy?
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
-      @input, @search, @modeManager, @register
+      @search, @modeManager, @register
       @editor, @editorElement, @subscriptions,
-      @inputCharSubscriptions
       @occurrenceManager
       @previousSelection
       @persistentSelection
     } = {}
     @emitter.emit 'did-destroy'
 
-  observeSelection: ->
-    isInterestingEvent = ({target, type}) =>
-      if @mode is 'insert'
-        false
+  isInterestingEvent: ({target, type}) ->
+    if @mode is 'insert'
+      false
+    else
+      @editor? and
+        target?.closest?('atom-text-editor') is @editorElement and
+        not @isMode('visual', 'blockwise') and
+        not type.startsWith('vim-mode-plus:')
+
+  checkSelection: (event) ->
+    return if @operationStack.isProcessing()
+    return unless @isInterestingEvent(event)
+
+    nonEmptySelecitons = @editor.getSelections().filter (selection) -> not selection.isEmpty()
+    if nonEmptySelecitons.length
+      submode = swrap.detectVisualModeSubmode(@editor)
+      if @isMode('visual', submode)
+        for selection in nonEmptySelecitons when not swrap(selection).hasProperties()
+          swrap(selection).saveProperties()
+        @updateCursorsVisibility()
       else
-        @editor? and
-          target is @editorElement and
-          not @isMode('visual', 'blockwise') and
-          not type.startsWith('vim-mode-plus:')
+        @activate('visual', submode)
+    else
+      @activate('normal') if @isMode('visual')
 
-    onInterestingEvent = (fn) ->
-      (event) -> fn() if isInterestingEvent(event)
+  saveProperties: (event) ->
+    return unless @isInterestingEvent(event)
+    for selection in @editor.getSelections()
+      swrap(selection).saveProperties()
 
-    _checkSelection = =>
-      return if @operationStack.isProcessing()
-      if haveSomeNonEmptySelection(@editor)
-        submode = swrap.detectVisualModeSubmode(@editor)
-        if @isMode('visual', submode)
-          @updateCursorsVisibility()
-        else
-          @activate('visual', submode)
-      else
-        @activate('normal') if @isMode('visual')
-
-    _saveProperties = =>
-      for selection in @editor.getSelections()
-        swrap(selection).saveProperties()
-
-    checkSelection = onInterestingEvent(_checkSelection)
-    saveProperties = onInterestingEvent(_saveProperties)
-
+  observeSelections: ->
+    checkSelection = @checkSelection.bind(this)
     @editorElement.addEventListener('mouseup', checkSelection)
     @subscriptions.add new Disposable =>
       @editorElement.removeEventListener('mouseup', checkSelection)
@@ -254,10 +264,17 @@ class VimState
     # @subscriptions.add atom.commands.onWillDispatch(saveProperties)
     @subscriptions.add atom.commands.onDidDispatch(checkSelection)
 
+  # What's this?
+  # editor.clearSelections() doesn't respect lastCursor positoin.
+  # This method works in same way as editor.clearSelections() but respect last cursor position.
+  clearSelections: ->
+    @editor.setCursorBufferPosition(@editor.getCursorBufferPosition())
+
   resetNormalMode: ({userInvocation}={}) ->
     if userInvocation ? false
       if @editor.hasMultipleCursors()
-        @editor.clearSelections()
+        @clearSelections()
+
       else if @hasPersistentSelections() and settings.get('clearPersistentSelectionOnResetNormalMode')
         @clearPersistentSelections()
       else if @occurrenceManager.hasPatterns()
@@ -266,10 +283,14 @@ class VimState
       if settings.get('clearHighlightSearchOnResetNormalMode')
         @globalState.set('highlightSearchPattern', null)
     else
-      @editor.clearSelections()
+      @clearSelections()
     @activate('normal')
 
+  init: ->
+    @saveOriginalCursorPosition()
+
   reset: ->
+    @resetOriginalCursorPosition()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
@@ -282,7 +303,7 @@ class VimState
   updateCursorsVisibility: ->
     @cursorStyleManager.refresh()
 
-  updatePreviousSelection: ->
+  updatePreviousSelection: -> # FIXME: naming, updateLastSelectedInfo ?
     if @isMode('visual', 'blockwise')
       properties = @getLastBlockwiseSelection()?.getCharacterwiseProperties()
     else
@@ -302,7 +323,7 @@ class VimState
   hasPersistentSelections: ->
     @persistentSelection.hasMarkers()
 
-  getPersistentSelectionBuffferRanges: ->
+  getPersistentSelectionBufferRanges: ->
     @persistentSelection.getMarkerBufferRanges()
 
   clearPersistentSelections: ->
@@ -317,3 +338,18 @@ class VimState
   finishScrollAnimation: ->
     @scrollAnimationEffect?.finish()
     @scrollAnimationEffect = null
+
+  # Other
+  # -------------------------
+  saveOriginalCursorPosition: ->
+    if @mode is 'visual'
+      options = {fromProperty: true, allowFallback: true}
+      @originalCursorPosition = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
+    else
+      @originalCursorPosition = @editor.getCursorBufferPosition()
+
+  getOriginalCursorPosition: ->
+    @originalCursorPosition
+
+  resetOriginalCursorPosition: ->
+    @originalCursorPosition = null

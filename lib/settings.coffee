@@ -1,16 +1,24 @@
+inferType = (value) ->
+  switch
+    when Number.isInteger(value) then 'integer'
+    when typeof(value) is 'boolean' then 'boolean'
+    when typeof(value) is 'string' then 'string'
+    when Array.isArray(value) then 'array'
+
 class Settings
   constructor: (@scope, @config) ->
-    # Inject order props to display orderd in setting-view
+    # Automatically infer and inject `type` of each config parameter.
+    # skip if value which aleady have `type` field.
+    # Also translate bare `boolean` value to {default: `boolean`} object
+    for key in Object.keys(@config)
+      if typeof(@config[key]) is 'boolean'
+        @config[key] = {default: @config[key]}
+      unless (value = @config[key]).type?
+        value.type = inferType(value.default)
+
+    # [CAUTION] injecting order propety to set order shown at setting-view MUST-COME-LAST.
     for name, i in Object.keys(@config)
       @config[name].order = i
-
-    # Automatically infer and inject `type` of each config parameter.
-    for key, object of @config
-      object.type = switch
-        when Number.isInteger(object.default) then 'integer'
-        when typeof(object.default) is 'boolean' then 'boolean'
-        when typeof(object.default) is 'string' then 'string'
-        when Array.isArray(object.default) then 'array'
 
   get: (param) ->
     if param is 'defaultRegister'
@@ -28,24 +36,20 @@ class Settings
     atom.config.observe "#{@scope}.#{param}", fn
 
 module.exports = new Settings 'vim-mode-plus',
-  setCursorToStartOfChangeOnUndoRedo:
-    default: true
-  groupChangesWhenLeavingInsertMode:
-    default: true
-  useClipboardAsDefaultRegister:
-    default: false
-  startInInsertMode:
-    default: false
+  setCursorToStartOfChangeOnUndoRedo: true
+  groupChangesWhenLeavingInsertMode: true
+  useClipboardAsDefaultRegister: false
+  startInInsertMode: false
   startInInsertModeScopes:
     default: []
     items: type: 'string'
     description: 'Start in insert-mode whan editorElement matches scope'
-  clearMultipleCursorsOnEscapeInsertMode:
+  clearMultipleCursorsOnEscapeInsertMode: false
+  autoSelectPersistentSelectionOnOperate: true
+  automaticallyEscapeInsertModeOnActivePaneItemChange:
     default: false
-  autoSelectPersistentSelectionOnOperate:
-    default: true
-  wrapLeftRightMotion:
-    default: false
+    description: 'Escape insert-mode on tab switch, pane switch'
+  wrapLeftRightMotion: false
   numberRegex:
     default: '-?[0-9]+'
     description: 'Used to find number in ctrl-a/ctrl-x. To ignore "-"(minus) char in string like "identifier-1" use "(?:\\B-)?[0-9]+"'
@@ -59,8 +63,7 @@ module.exports = new Settings 'vim-mode-plus',
     default: []
     items: type: 'string'
     description: 'Comma separated list of character, which add additional space inside when surround.'
-  showCursorInVisualMode:
-    default: true
+  showCursorInVisualMode: true
   ignoreCaseForSearch:
     default: false
     description: 'For `/` and `?`'
@@ -73,73 +76,68 @@ module.exports = new Settings 'vim-mode-plus',
   useSmartcaseForSearchCurrentWord:
     default: false
     description: 'For `*` and `#`. Override `ignoreCaseForSearchCurrentWord`'
-  highlightSearch:
-    default: false
+  highlightSearch: false
   highlightSearchExcludeScopes:
     default: []
     items: type: 'string'
     description: 'Suppress highlightSearch when any of these classes are present in the editor'
-  incrementalSearch:
-    default: false
+  incrementalSearch: false
   incrementalSearchVisitDirection:
     default: 'absolute'
     enum: ['absolute', 'relative']
     description: "Whether 'visit-next'(tab) and 'visit-prev'(shift-tab) depends on search direction('/' or '?')"
   stayOnTransformString:
     default: false
-    description: "Don't move cursor after TransformString e.g Toggle, Surround"
+    description: "Don't move cursor after TransformString e.g upper-case, surround"
   stayOnYank:
     default: false
-    description: "Don't move cursor after Yank"
+    description: "Don't move cursor after yank"
   stayOnDelete:
     default: false
-    description: "Don't move cursor after Delete"
-  flashOnUndoRedo:
+    description: "Don't move cursor after yank"
+  stayOnOccurrence:
     default: true
-  flashOnUndoRedoDuration:
-    default: 100
-    description: "Duration(msec) for flash"
-  flashOnOperate:
+    description: "Don't move cursor when operator works on occurrences( when `true`, override operator specific `stayOn` options )"
+  keepColumnOnSelectTextObject:
+    default: false
+    description: "Keep column on select TextObject(Paragraph, Indentation, Fold, Function, Edge)"
+  moveToFirstCharacterOnVerticalMotion:
     default: true
-  flashOnOperateDuration:
-    default: 100
-    description: "Duration(msec) for flash"
+    description: """
+    Almost equivalent to `startofline` pure-Vim option. When true, move cursor to first char.
+    Affects to `ctrl-f, b, d, u`, `G`, `H`, `M`, `L`, `gg`
+    Unlike pure-Vim, `d`, `<<`, `>>` are not affected by this option, use independent `stayOn` options.
+    """
+  flashOnUndoRedo: true
+  flashOnMoveToOccurrence: false
+  flashOnOperate: true
   flashOnOperateBlacklist:
     default: []
     items: type: 'string'
-    description: 'comma separated list of operator class name to disable flash e.g. "Yank, AutoIndent"'
-  flashOnSearch:
-    default: true
-  flashOnSearchDuration:
-    default: 300
-    description: "Duration(msec) for search flash"
-  flashScreenOnSearchHasNoMatch:
-    default: true
-  showHoverOnOperate:
-    default: false
-    description: "Show count, register and optional icon on hover overlay"
+    description: 'comma separated list of operator class name to disable flash e.g. "yank, auto-indent"'
+  flashOnSearch: true
+  flashScreenOnSearchHasNoMatch: true
+  showHoverOnOperate: false
   showHoverOnOperateIcon:
     default: 'icon'
     enum: ['none', 'icon', 'emoji']
-  showHoverSearchCounter:
-    default: false
+  showHoverSearchCounter: false
   showHoverSearchCounterDuration:
     default: 700
     description: "Duration(msec) for hover search counter"
-  hideTabBarOnMaximizePane:
-    default: true
+  hideTabBarOnMaximizePane: true
   smoothScrollOnFullScrollMotion:
     default: false
     description: "For `ctrl-f` and `ctrl-b`"
   smoothScrollOnFullScrollMotionDuration:
     default: 500
-    description: "For `ctrl-f` and `ctrl-b`"
+    description: "Smooth scroll duration in milliseconds for `ctrl-f` and `ctrl-b`"
   smoothScrollOnHalfScrollMotion:
     default: false
     description: "For `ctrl-d` and `ctrl-u`"
   smoothScrollOnHalfScrollMotionDuration:
     default: 500
-    description: "For `ctrl-d` and `ctrl-u`"
+    description: "Smooth scroll duration in milliseconds for `ctrl-d` and `ctrl-u`"
   statusBarModeStringStyle:
     default: 'short'
     enum: ['short', 'long']

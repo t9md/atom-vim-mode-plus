@@ -55,17 +55,6 @@ saveEditorState = (editor) ->
       editor.foldBufferRow(row)
     editorElement.setScrollTop(scrollTop)
 
-# Return function to restore cursor position
-# When restoring, removed cursors are ignored.
-saveCursorPositions = (editor) ->
-  points = new Map
-  for cursor in editor.getCursors()
-    points.set(cursor, cursor.getBufferPosition())
-  ->
-    for cursor in editor.getCursors() when points.has(cursor)
-      point = points.get(cursor)
-      cursor.setBufferPosition(point)
-
 getKeystrokeForEvent = (event) ->
   keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
   atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
@@ -90,14 +79,16 @@ isLinewiseRange = ({start, end}) ->
 
 isEndsWithNewLineForBufferRow = (editor, row) ->
   {start, end} = editor.bufferRangeForBufferRow(row, includeNewline: true)
-  (not start.isEqual(end)) and end.column is 0
+  start.row isnt end.row
 
 haveSomeNonEmptySelection = (editor) ->
   editor.getSelections().some (selection) ->
     not selection.isEmpty()
 
-sortRanges = (ranges) ->
-  ranges.sort((a, b) -> a.compare(b))
+sortComparable = (collection) ->
+  collection.sort (a, b) -> a.compare(b)
+
+sortRanges = sortComparable
 
 sortRangesByEndPosition = (ranges, fn) ->
   ranges.sort((a, b) -> a.end.compare(b.end))
@@ -214,17 +205,6 @@ getBufferRows = (editor, {startRow, direction}) ->
       else
         [(startRow + 1)..vimLastBufferRow]
 
-getParagraphBoundaryRow = (editor, startRow, direction, fn) ->
-  wasAtNonBlankRow = not editor.isBufferRowBlank(startRow)
-  for row in getBufferRows(editor, {startRow, direction})
-    isAtNonBlankRow = not editor.isBufferRowBlank(row)
-    if wasAtNonBlankRow isnt isAtNonBlankRow
-      if fn?
-        return row if fn?(isAtNonBlankRow)
-      else
-        return row
-    wasAtNonBlankRow = isAtNonBlankRow
-
 # Return Vim's EOF position rather than Atom's EOF position.
 # This function change meaning of EOF from native TextEditor::getEofBufferPosition()
 # Atom is special(strange) for cursor can past very last newline character.
@@ -268,28 +248,24 @@ getFirstVisibleScreenRow = (editor) ->
 getLastVisibleScreenRow = (editor) ->
   editor.element.getLastVisibleScreenRow()
 
-getFirstCharacterColumForBufferRow = (editor, row) ->
-  text = editor.lineTextForBufferRow(row)
-  if (column = text.search(/\S/)) >= 0
-    column
-  else
-    0
+getFirstCharacterScreenPositionForScreenRow = (editor, screenRow) ->
+  screenLineStart = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
+  screenLineEnd = [screenRow, Infinity]
+  screenLineBufferRange = editor.bufferRangeForScreenRange([screenLineStart, screenLineEnd])
 
-trimRange = (editor, scanRange) ->
-  pattern = /\S/
-  [start, end] = []
-  setStart = ({range}) -> {start} = range
-  editor.scanInBufferRange(pattern, scanRange, setStart)
-  if start?
-    setEnd = ({range}) -> {end} = range
-    editor.backwardsScanInBufferRange(pattern, scanRange, setEnd)
-    new Range(start, end)
+  firstCharacterBufferPosition = null
+  editor.scanInBufferRange /\S/, screenLineBufferRange, ({range, stop}) ->
+    firstCharacterBufferPosition = range.start
+    stop()
+
+  if firstCharacterBufferPosition?
+    editor.screenPositionForBufferPosition(firstCharacterBufferPosition)
   else
-    scanRange
+    screenLineStart
 
 getFirstCharacterPositionForBufferRow = (editor, row) ->
-  from = [row, 0]
-  getEndPositionForPattern(editor, from, /\s*/, containedOnly: true) or from
+  fromPoint = new Point(row, 0)
+  getEndPositionForPattern(editor, fromPoint, /\s*/, containedOnly: true) ? fromPoint
 
 getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
   start = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
@@ -302,14 +278,29 @@ getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
     stop()
   point ? scanRange.start
 
-cursorIsAtFirstCharacter = (cursor) ->
-  {editor} = cursor
-  column = cursor.getBufferColumn()
-  firstCharColumn = getFirstCharacterColumForBufferRow(editor, cursor.getBufferRow())
-  column is firstCharColumn
+trimRange = (editor, scanRange) ->
+  pattern = /\S/
+  [start, end] = []
+  setStart = ({range}) -> {start} = range
+  setEnd = ({range}) -> {end} = range
+  editor.scanInBufferRange(pattern, scanRange, setStart)
+  editor.backwardsScanInBufferRange(pattern, scanRange, setEnd) if start?
+  if start? and end?
+    new Range(start, end)
+  else
+    scanRange
 
 # Cursor motion wrapper
 # -------------------------
+# Just update bufferRow with keeping column by respecting goalColumn
+setBufferRow = (cursor, row, options) ->
+  column = cursor.goalColumn ? cursor.getBufferColumn()
+  cursor.setBufferPosition([row, column], options)
+  cursor.goalColumn = column
+
+setBufferColumn = (cursor, column) ->
+  cursor.setBufferPosition([cursor.getBufferRow(), column])
+
 moveCursor = (cursor, {preserveGoalColumn}, fn) ->
   {goalColumn} = cursor
   fn(cursor)
@@ -376,26 +367,6 @@ moveCursorToFirstCharacterAtRow = (cursor, row) ->
   cursor.setBufferPosition([row, 0])
   cursor.moveToFirstCharacterOfLine()
 
-# Return markers
-highlightRanges = (editor, ranges, options) ->
-  ranges = [ranges] unless _.isArray(ranges)
-  return null unless ranges.length
-
-  invalidate = options.invalidate ? 'never'
-  markers = (editor.markBufferRange(range, {invalidate}) for range in ranges)
-
-  decorateOptions = {type: 'highlight', class: options.class}
-  editor.decorateMarker(marker, decorateOptions) for marker in markers
-
-  {timeout} = options
-  if timeout?
-    destroyMarkers = -> _.invoke(markers, 'destroy')
-    setTimeout(destroyMarkers, timeout)
-  markers
-
-highlightRange = (editor, range, options) ->
-  highlightRanges(editor, [range], options)[0]
-
 # Return valid row from 0 to vimLastBufferRow
 getValidVimBufferRow = (editor, row) ->
   vimLastBufferRow = getVimLastBufferRow(editor)
@@ -435,7 +406,6 @@ getCodeFoldRowRanges = (editor) ->
     .filter (rowRange) ->
       rowRange? and rowRange[0]? and rowRange[1]?
 
-# * `exclusive` to exclude startRow to determine inclusion.
 getCodeFoldRowRangesContainesForRow = (editor, bufferRow, {includeStartRow}={}) ->
   includeStartRow ?= true
   getCodeFoldRowRanges(editor).filter ([startRow, endRow]) ->
@@ -515,12 +485,15 @@ isIncludeFunctionScopeForRow = (editor, row) ->
 
 # [FIXME] very rough state, need improvement.
 isFunctionScope = (editor, scope) ->
-  {scopeName} = editor.getGrammar()
-  switch scopeName
+  switch editor.getGrammar().scopeName
     when 'source.go', 'source.elixir'
-      /^entity\.name\.function/.test(scope)
+      scopes = ['entity.name.function']
+    when 'source.ruby'
+      scopes = ['meta.function.', 'meta.class.', 'meta.module.']
     else
-      /^meta\.function\./.test(scope)
+      scopes = ['meta.function.', 'meta.class.']
+  pattern = new RegExp('^' + scopes.map(_.escapeRegExp).join('|'))
+  pattern.test(scope)
 
 getStartPositionForPattern = (editor, from, pattern, options={}) ->
   from = Point.fromObject(from)
@@ -554,9 +527,6 @@ getBufferRangeForPatternFromPoint = (editor, fromPoint, pattern) ->
   end = getEndPositionForPattern(editor, fromPoint, pattern, containedOnly: true)
   start = getStartPositionForPattern(editor, end, pattern, containedOnly: true) if end?
   new Range(start, end) if start?
-
-sortComparable = (collection) ->
-  collection.sort (a, b) -> a.compare(b)
 
 # Scroll to bufferPosition with minimum amount to keep original visible area.
 # If target position won't fit within onePageUp or onePageDown, it center target point.
@@ -676,7 +646,7 @@ adjustRangeToRowRange = ({start, end}, options={}) ->
   # So need adjust to actually selected row in same way as Seleciton::getBufferRowRange()
   endRow = end.row
   if end.column is 0
-    endRow = Math.max(start.row, end.row - 1)
+    endRow = limitNumber(end.row - 1, min: start.row)
   if options.endOnly ? false
     new Range(start, [endRow, Infinity])
   else
@@ -687,7 +657,7 @@ adjustRangeToRowRange = ({start, end}, options={}) ->
 shrinkRangeEndToBeforeNewLine = (range) ->
   {start, end} = range
   if end.column is 0
-    endRow = Math.max(start.row, end.row - 1)
+    endRow = limitNumber(end.row - 1, min: start.row)
     new Range(start, [endRow, Infinity])
   else
     range
@@ -801,6 +771,37 @@ registerElement = (name, options) ->
     Element.prototype = options.prototype if options.prototype?
   Element
 
+getPackage = (name, fn) ->
+  new Promise (resolve) ->
+    if atom.packages.isPackageActive(name)
+      pkg = atom.packages.getActivePackage(name)
+      resolve(pkg)
+    else
+      disposable = atom.packages.onDidActivatePackage (pkg) ->
+        if pkg.name is name
+          disposable.dispose()
+          resolve(pkg)
+
+searchByProjectFind = (editor, text) ->
+  atom.commands.dispatch(editor.element, 'project-find:show')
+  getPackage('find-and-replace').then (pkg) ->
+    {projectFindView} = pkg.mainModule
+    if projectFindView?
+      projectFindView.findEditor.setText(text)
+      projectFindView.confirm()
+
+limitNumber = (number, {max, min}={}) ->
+  number = Math.min(number, max) if max?
+  number = Math.max(number, min) if min?
+  number
+
+findRangeContainsPoint = (ranges, point) ->
+  for range in ranges when range.containsPoint(point)
+    return range
+
+isNotEmpty = (target) ->
+  not target.isEmpty()
+
 module.exports = {
   getParent
   getAncestors
@@ -808,7 +809,6 @@ module.exports = {
   include
   debug
   saveEditorState
-  saveCursorPositions
   getKeystrokeForEvent
   getCharacterForEvent
   isLinewiseRange
@@ -829,6 +829,8 @@ module.exports = {
   getVimEofScreenPosition
   getVimLastBufferRow
   getVimLastScreenRow
+  setBufferRow
+  setBufferColumn
   moveCursorLeft
   moveCursorRight
   moveCursorUpScreen
@@ -836,8 +838,6 @@ module.exports = {
   getEndOfLineForBufferRow
   getFirstVisibleScreenRow
   getLastVisibleScreenRow
-  highlightRanges
-  highlightRange
   getValidVimBufferRow
   getValidVimScreenRow
   moveCursorToFirstCharacterAtRow
@@ -856,11 +856,10 @@ module.exports = {
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
-  getFirstCharacterColumForBufferRow
+  getFirstCharacterScreenPositionForScreenRow
   trimRange
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
-  cursorIsAtFirstCharacter
   isFunctionScope
   getStartPositionForPattern
   getEndPositionForPattern
@@ -870,7 +869,6 @@ module.exports = {
   scanForScopeStart
   detectScopeStartPositionForScope
   getBufferRows
-  getParagraphBoundaryRow
   registerElement
   getBufferRangeForPatternFromPoint
   sortComparable
@@ -894,4 +892,9 @@ module.exports = {
   getLargestFoldRangeContainsBufferRow
   translatePointAndClip
   getRangeByTranslatePointAndClip
+  getPackage
+  searchByProjectFind
+  limitNumber
+  findRangeContainsPoint
+  isNotEmpty
 }

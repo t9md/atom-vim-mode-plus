@@ -214,14 +214,36 @@ describe "Operator ActivateInsertMode family", ->
 
   describe "the C keybinding", ->
     beforeEach ->
-      set text: "012\n", cursor: [0, 1]
-      keystroke 'C'
+      set
+        cursor: [1, 2]
+        text: """
+        0!!!!!!
+        1!!!!!!
+        2!!!!!!
+        3!!!!!!\n
+        """
+    describe "in normal-mode", ->
+      it "deletes till the EOL then enter insert-mode", ->
+        ensure 'C',
+          cursor: [1, 2]
+          mode: 'insert'
+          text: """
+            0!!!!!!
+            1!
+            2!!!!!!
+            3!!!!!!\n
+            """
 
-    it "deletes the contents until the end of the line and enters insert mode", ->
-      ensure
-        text: "0\n"
-        cursor: [0, 1]
-        mode: 'insert'
+    describe "in visual-mode.characterwise", ->
+      it "delete whole lines and enter insert-mode", ->
+        ensure 'v j C',
+          cursor: [1, 0]
+          mode: 'insert'
+          text: """
+            0!!!!!!
+
+            3!!!!!!\n
+            """
 
   describe "the O keybinding", ->
     beforeEach ->
@@ -229,31 +251,73 @@ describe "Operator ActivateInsertMode family", ->
       spyOn(editor, 'autoIndentBufferRow').andCallFake (line) ->
         editor.indent()
 
-      set text: "  abc\n  012\n", cursor: [1, 1]
+      set
+        textC_: """
+        __abc
+        _|_012\n
+        """
 
     it "switches to insert and adds a newline above the current one", ->
       keystroke 'O'
       ensure
-        text: "  abc\n  \n  012\n"
-        cursor: [1, 2]
+        textC_: """
+        __abc
+        __|
+        __012\n
+        """
         mode: 'insert'
 
     it "is repeatable", ->
       set
-        text: "  abc\n  012\n    4spaces\n", cursor: [1, 1]
+        textC_: """
+          __abc
+          __|012
+          ____4spaces\n
+          """
+      # set
+      #   text: "  abc\n  012\n    4spaces\n", cursor: [1, 1]
       keystroke 'O'
       editor.insertText "def"
-      ensure 'escape', text: "  abc\n  def\n  012\n    4spaces\n"
-      set cursor: [1, 1]
-      ensure '.', text: "  abc\n  def\n  def\n  012\n    4spaces\n"
-      set cursor: [4, 1]
-      ensure '.', text: "  abc\n  def\n  def\n  012\n    def\n    4spaces\n"
+      ensure 'escape',
+        textC_: """
+          __abc
+          __de|f
+          __012
+          ____4spaces\n
+          """
+      ensure '.',
+        textC_: """
+        __abc
+        __de|f
+        __def
+        __012
+        ____4spaces\n
+        """
+      set cursor: [4, 0]
+      ensure '.',
+        textC_: """
+        __abc
+        __def
+        __def
+        __012
+        ____de|f
+        ____4spaces\n
+        """
 
     it "is undoable", ->
       keystroke 'O'
       editor.insertText "def"
-      ensure 'escape', text: "  abc\n  def\n  012\n"
-      ensure 'u', text: "  abc\n  012\n"
+      ensure 'escape',
+        textC_: """
+        __abc
+        __def
+        __012\n
+        """
+      ensure 'u',
+        textC_: """
+        __abc
+        __012\n
+        """
 
   describe "the o keybinding", ->
     beforeEach ->
@@ -332,84 +396,200 @@ describe "Operator ActivateInsertMode family", ->
 
   describe "the I keybinding", ->
     beforeEach ->
-      set text: "11\n  22\n"
+      set
+        text_: """
+        __0: 3456 890
+        1: 3456 890
+        __2: 3456 890
+        ____3: 3456 890
+        """
 
-    describe "at the end of a line", ->
-      it "switches to insert mode at the beginning of the line", ->
-        set cursor: [0, 2]
-        ensure 'I',
-          cursor: [0, 0]
-          mode: 'insert'
+    describe "in normal-mode", ->
+      describe "I", ->
+        it "insert at first char of line", ->
+          set cursor: [0, 5]
+          ensure 'I', cursor: [0, 2], mode: 'insert'
+          ensure "escape", mode: 'normal'
 
-      it "switches to insert mode after leading whitespace", ->
-        set cursor: [1, 4]
-        ensure 'I',
-          cursor: [1, 2]
-          mode: 'insert'
+          set cursor: [1, 5]
+          ensure 'I', cursor: [1, 0], mode: 'insert'
+          ensure "escape", mode: 'normal'
 
-      it "repeats always as insert at the first character of the line", ->
-        set cursor: [0, 2]
-        keystroke 'I'
-        editor.insertText("abc")
-        ensure 'escape', cursor: [0, 2]
-        set cursor: [1, 4]
-        ensure '.',
-          text: "abc11\n  abc22\n"
-          cursor: [1, 4]
-          mode: 'normal'
+          set cursor: [1, 0]
+          ensure 'I', cursor: [1, 0], mode: 'insert'
+          ensure "escape", mode: 'normal'
 
-    describe "in visual-characterwise mode", ->
+      describe "A", ->
+        it "insert at end of line", ->
+          set cursor: [0, 5]
+          ensure 'A', cursor: [0, 13], mode: 'insert'
+          ensure "escape", mode: 'normal'
+
+          set cursor: [1, 5]
+          ensure 'A', cursor: [1, 11], mode: 'insert'
+          ensure "escape", mode: 'normal'
+
+          set cursor: [1, 11]
+          ensure 'A', cursor: [1, 11], mode: 'insert'
+          ensure "escape", mode: 'normal'
+
+    describe "visual-mode.linewise", ->
       beforeEach ->
-        set text: "012 456 890"
+        set cursor: [1, 3]
+        ensure "V 2 j",
+          selectedText: """
+          1: 3456 890
+            2: 3456 890
+              3: 3456 890
+          """
+          mode: ['visual', 'linewise']
 
-      describe "selection is not reversed", ->
-        beforeEach ->
-          set cursor: [0, 4]
-          ensure "v l l", selectedText: "456", selectionIsReversed: false
+      describe "I", ->
+        it "insert at first char of line *of each selected line*", ->
+          ensure "I", cursor: [[1, 0], [2, 2], [3, 4]], mode: "insert"
+      describe "A", ->
+        it "insert at end of line *of each selected line*", ->
+          ensure "A", cursor: [[1, 11], [2, 13], [3, 15]], mode: "insert"
 
-        it "insert at start of selection", ->
-          ensure "I", cursor: [0, 4], mode: "insert"
-        it "insert at end of selection", ->
-          ensure "A", cursor: [0, 7], mode: "insert"
+    describe "visual-mode.blockwise", ->
+      beforeEach ->
+        set cursor: [1, 4]
+        ensure "ctrl-v 2 j",
+          selectedText: ["4", " ", "3"]
+          mode: ['visual', 'blockwise']
 
-      describe "selection is reversed", ->
-        beforeEach ->
-          set cursor: [0, 6]
-          ensure "v h h", selectedText: "456", selectionIsReversed: true
+      describe "I", ->
+        it "insert at colum of start of selection for *each selection*", ->
+          ensure "I", cursor: [[1, 4], [2, 4], [3, 4]], mode: "insert"
 
-        it "insert at start of selection", ->
-          ensure "I", cursor: [0, 4], mode: "insert"
-        it "insert at end of selection", ->
-          ensure "A", cursor: [0, 7], mode: "insert"
+        xit "can repeat after insert", ->
+          ensure "escape", mode: 'normal'
+          set
+            textC: """
+            |line0
+            line1
+            line2
+            """
 
-    describe "in visual-linewise mode", ->
+          ensure "ctrl-v j I",
+            textC: """
+            |line0
+            |line1
+            line2
+            """
+            mode: 'insert'
+
+          editor.insertText("ABC")
+
+          ensure "escape",
+            textC: """
+            AB|Cline0
+            AB!Cline1
+            line2
+            """
+            mode: 'normal'
+
+          # This should success
+          ensure "l .",
+            textC: """
+            ABCABC|line0
+            ABCABC|line1
+            line2
+            """
+            mode: 'normal'
+
+          # [BUG] But this pass in current implementation
+          # ensure "l .",
+          #   textC: """
+          #   ABCAB|Cline0
+          #   ABCAB|Cline1
+          #   linAB!Ce2
+          #   """
+          #   mode: 'normal'
+
+      describe "A", ->
+        it "insert at column of end of selection for *each selection*", ->
+          ensure "A", cursor: [[1, 5], [2, 5], [3, 5]], mode: "insert"
+
+    describe "visual-mode.characterwise", ->
+      beforeEach ->
+        set cursor: [1, 4]
+        ensure "v 2 j",
+          selectedText: """
+          456 890
+            2: 3456 890
+              3
+          """
+          mode: ['visual', 'characterwise']
+
+      describe "I is short hand of `ctrl-v I`", ->
+        it "insert at colum of start of selection for *each selected lines*", ->
+          ensure "I", cursor: [[1, 4], [2, 4], [3, 4]], mode: "insert"
+      describe "A is short hand of `ctrl-v A`", ->
+        it "insert at column of end of selection for *each selected lines*", ->
+          ensure "A", cursor: [[1, 5], [2, 5], [3, 5]], mode: "insert"
+
+  describe "the gI keybinding", ->
+    beforeEach ->
+      set
+        text: """
+        __this is text
+        """
+
+    describe "in normal-mode.", ->
+      it "start at insert at column 0 regardless of current column", ->
+        set cursor: [0, 5]
+        ensure "g I", cursor: [0, 0], mode: 'insert'
+        ensure "escape", mode: 'normal'
+
+        set cursor: [0, 0]
+        ensure "g I", cursor: [0, 0], mode: 'insert'
+        ensure "escape", mode: 'normal'
+
+        set cursor: [0, 13]
+        ensure "g I", cursor: [0, 0], mode: 'insert'
+
+    describe "in visual-mode", ->
       beforeEach ->
         set
-          text: """
-          0: 3456 890
+          text_: """
+          __0: 3456 890
           1: 3456 890
-          2: 3456 890
-          3: 3456 890
+          __2: 3456 890
+          ____3: 3456 890
           """
-      describe "selection is not reversed", ->
-        beforeEach ->
-          set cursor: [1, 3]
-          ensure "V j", selectedText: "1: 3456 890\n2: 3456 890\n", selectionIsReversed: false
 
-        it "insert at start of selection", ->
-          ensure "I", cursor: [1, 0], mode: "insert"
-        it "insert at end of selection", ->
-          ensure "A", cursor: [3, 0], mode: "insert"
+      it "[characterwise]", ->
+        set cursor: [1, 4]
+        ensure "v 2 j",
+          selectedText: """
+          456 890
+            2: 3456 890
+              3
+          """
+          mode: ['visual', 'characterwise']
+        ensure "g I",
+          cursor: [[1, 0], [2, 0], [3, 0]], mode: "insert"
 
-      describe "selection is reversed", ->
-        beforeEach ->
-          set cursor: [2, 3]
-          ensure "V k", selectedText: "1: 3456 890\n2: 3456 890\n", selectionIsReversed: true
+      it "[linewise]", ->
+        set cursor: [1, 3]
+        ensure "V 2 j",
+          selectedText: """
+          1: 3456 890
+            2: 3456 890
+              3: 3456 890
+          """
+          mode: ['visual', 'linewise']
+        ensure "g I",
+          cursor: [[1, 0], [2, 0], [3, 0]], mode: "insert"
 
-        it "insert at start of selection", ->
-          ensure "I", cursor: [1, 0], mode: "insert"
-        it "insert at end of selection", ->
-          ensure "A", cursor: [3, 0], mode: "insert"
+      it "[blockwise]", ->
+        set cursor: [1, 4]
+        ensure "ctrl-v 2 j",
+          selectedText: ["4", " ", "3"]
+          mode: ['visual', 'blockwise']
+        ensure "g I",
+          cursor: [[1, 0], [2, 0], [3, 0]], mode: "insert"
 
   describe "InsertAtPreviousFoldStart and Next", ->
     beforeEach ->
@@ -449,11 +629,10 @@ describe "Operator ActivateInsertMode family", ->
   describe "the i keybinding", ->
     beforeEach ->
       set
-        text: """
-          123
-          4567
+        textC: """
+          |123
+          |4567
           """
-        cursorBuffer: [[0, 0], [1, 0]]
 
     it "allows undoing an entire batch of typing", ->
       keystroke 'i'
@@ -620,14 +799,13 @@ describe "Operator ActivateInsertMode family", ->
     describe "multi-cursors operation", ->
       beforeEach ->
         set
-          text: """
-          123
+          textC: """
+          |123
 
-          1234
+          |1234
 
-          12345
+          |12345
           """
-          cursor: [[0, 0], [2, 0], [4, 0]]
 
       it "can repeat backspace only mutation: case-multi-cursors", ->
         ensure 'A', cursor: [[0, 3], [2, 4], [4, 5]], mode: 'insert'

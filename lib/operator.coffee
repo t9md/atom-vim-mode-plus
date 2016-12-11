@@ -5,18 +5,11 @@ _ = require 'underscore-plus'
 {inspect} = require 'util'
 {
   haveSomeNonEmptySelection
-  highlightRanges
   isEndsWithNewLineForBufferRow
   getValidVimBufferRow
   cursorIsAtEmptyRow
-  getVisibleBufferRange
   getWordPatternAtBufferPosition
   destroyNonLastSelection
-
-  selectedRange
-  selectedText
-  toString
-  debug
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -30,64 +23,59 @@ class Operator extends Base
   wise: null
   occurrence: false
 
-  patternForOccurrence: null
-  stayOnLinewise: false
-  stayAtSamePosition: null
-  clipToMutationEndOnStay: true
-  useMarkerForStay: false
-  restorePositions: true
-  restorePositionsToMutationEnd: false
   flashTarget: true
+  flashCheckpoint: 'did-finish'
+  flashType: 'operator'
+  flashTypeForOccurrence: 'operator-occurrence'
   trackChange: false
+
+  patternForOccurrence: null
+  stayAtSamePosition: null
+  stayOptionName: null
+  stayByMarker: false
+  restorePositions: true
+
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
 
-  # [FIXME]
-  # For TextObject, isLinewise result is changed before / after select.
-  # This mean return value may change depending on when you call.
   needStay: ->
-    @stayAtSamePosition ?= do =>
-      param = @getStayParam()
-      if @isMode('visual', 'linewise')
-        settings.get(param)
-      else
-        settings.get(param) or (@stayOnLinewise and @target.isLinewise?())
-
-  getStayParam: ->
-    switch
-      when @instanceof('Increase')
-        'stayOnIncrease'
-      when @instanceof('TransformString')
-        'stayOnTransformString'
-      when @instanceof('Delete')
-        'stayOnDelete'
-      else
-        "stayOn#{@getName()}"
+    @stayAtSamePosition ?=
+      (@isOccurrence() and settings.get('stayOnOccurrence')) or settings.get(@stayOptionName)
 
   isOccurrence: ->
+    @occurrence
+
+  setOccurrence: (@occurrence) ->
     @occurrence
 
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
 
   needFlash: ->
-    if @flashTarget and not @isMode('visual')
+    return unless @flashTarget
+    {mode, submode} = @vimState
+    if mode isnt 'visual' or (@target.isMotion() and submode isnt @target.wise)
       settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
 
   flashIfNecessary: (ranges) ->
     return unless @needFlash()
-
-    highlightRanges @editor, ranges,
-      class: 'vim-mode-plus-flash'
-      timeout: settings.get('flashOnOperateDuration')
+    @vimState.flash(ranges, type: @getFlashType())
 
   flashChangeIfNecessary: ->
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
-      if ranges.length
-        @flashIfNecessary(ranges)
+      if @flashCheckpoint is 'did-finish'
+        ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
+      else
+        ranges = @mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint)
+      @vimState.flash(ranges, type: @getFlashType())
+
+  getFlashType: ->
+    if @isOccurrence()
+      @flashTypeForOccurrence
+    else
+      @flashType
 
   trackChangeIfNecessary: ->
     return unless @trackChange
@@ -100,57 +88,61 @@ class Operator extends Base
     super
     {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
 
+    # If occurrence property is set at this timing and there is no preset-occurrence marker.
+    # treat `occurrence` is BOUNDED to operator itself so cleanup on each finish.
+    if @occurrence and not @occurrenceManager.hasMarkers()
+      @onDidResetOperationStack =>
+        @occurrenceManager.resetPatterns()
+
     @initialize()
+    @onDidSetOperatorModifier(@setModifier.bind(this))
 
-    @onDidSetOperatorModifier ({occurrence, wise}) =>
-      @wise = wise if wise?
-      @setOccurrence('modifier') if occurrence?
+    # When preset-occurrence was exists, operate on occurrence-wise
+    if @acceptPresetOccurrence and @occurrenceManager.hasMarkers()
+      @setOccurrence(true)
 
-    @target ?= implicitTarget if implicitTarget = @getImplicitTarget()
+    # [FIXME] ORDER-MATTER
+    # addOccurrencePattern pick cursor-word to find occurrence base pattern.
+    # This has to be done BEFORE converting persistent-selection into real-selection.
+    # Since when persistent-selection is actuall selected, it change cursor position.
+    if @isOccurrence()
+      @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
 
-    if _.isString(@target)
-      @setTarget(@new(@target))
-
-    # When preset-occurrence was exists, auto enable occurrence-wise
-    if @occurrence
-      @setOccurrence('static')
-    else if @acceptPresetOccurrence and @occurrenceManager.hasPatterns()
-      @setOccurrence('preset')
-
-    if @acceptPersistentSelection
-      @subscribe @onDidDeactivateMode ({mode}) =>
-        @occurrenceManager.resetPatterns() if mode is 'operator-pending'
-
-  getImplicitTarget: ->
-    # In visual-mode and target was not pre-set, operate on selected area.
     if @canSelectPersistentSelection()
-      @destroyUnknownSelection = true
-      if @isMode('visual')
-        "ACurrentSelectionAndAPersistentSelection"
-      else
-        "APersistentSelection"
-    else
-      "CurrentSelection" if @isMode('visual')
+      @selectPersistentSelection() # This change cursor position.
+      unless @isMode('visual')
+        @vimState.modeManager.activate('visual', swrap.detectVisualModeSubmode(@editor))
+    @target = 'CurrentSelection' if @isMode('visual')
+    @setTarget(@new(@target)) if _.isString(@target)
+
+  setModifier: (options) ->
+    if options.wise?
+      @wise = options.wise
+
+    if options.occurrence?
+      @setOccurrence(options.occurrence)
+      if @isOccurrence()
+        # Reset existing preset-occurrence. e.g. `c o p`, `d o f`
+        @occurrenceManager.resetPatterns()
+        @addOccurrencePattern()
+        @subscribe @onDidDeactivateMode ({mode}) =>
+          @occurrenceManager.resetPatterns() if mode is 'operator-pending'
 
   canSelectPersistentSelection: ->
     @acceptPersistentSelection and
     @vimState.hasPersistentSelections() and
     settings.get('autoSelectPersistentSelectionOnOperate')
 
-  # type is one of ['preset', 'modifier']
-  setOccurrence: (type) ->
-    @occurrence = true
-    switch type
-      when 'static'
-        unless @isComplete() # we enter operator-pending
-          debug 'static: mark as we enter operator-pending'
-          @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
-      when 'preset'
-        debug 'preset: nothing to do since we have markers already'
-      when 'modifier'
-        debug 'modifier: overwrite existing marker when manually typed `o`'
-        @occurrenceManager.resetPatterns() # clear existing marker
-        @addOccurrencePattern() # mark cursor word.
+  selectPersistentSelection: ->
+    pesistentRanges = @vimState.getPersistentSelectionBufferRanges()
+    selectedRanges = @editor.getSelectedBufferRanges().filter (range) -> not range.isEmpty()
+    ranges = pesistentRanges.concat(selectedRanges)
+
+    @editor.setSelectedBufferRanges(ranges)
+
+    @vimState.clearPersistentSelections()
+    @editor.mergeIntersectingSelections()
+    @vimState.updateSelectionProperties()
 
   addOccurrencePattern: (pattern=null) ->
     pattern ?= @patternForOccurrence
@@ -169,7 +161,7 @@ class Operator extends Base
     @setTextToRegister(selection.getText(), selection)
 
   setTextToRegister: (text, selection) ->
-    text += "\n" if (@target.isLinewise?() and (not text.endsWith('\n')))
+    text += "\n" if (@target.isLinewise() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
 
   # Main
@@ -187,40 +179,35 @@ class Operator extends Base
     @activateMode('normal')
 
   selectOccurrence: ->
-    @addOccurrencePattern() unless @occurrenceManager.hasMarkers()
+    # In `.` repeated case, initailize() is never called so need to set here.
+    if @isRepeated() and not @occurrenceManager.hasMarkers()
+      @addOccurrencePattern()
 
     # To repoeat(`.`) operation where multiple occurrence patterns was set.
     # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
-    selectedRanges = @editor.getSelectedBufferRanges()
-    ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
-    if ranges.length
-      @vimState.modeManager.deactivate() if @isMode('visual')
-      @editor.setSelectedBufferRanges(ranges)
-    else
-      @mutationManager.restoreInitialPositions() # Restoreing position also clear selection.
-    @occurrenceManager.resetPatterns()
+    @occurrenceManager.select()
 
   # Return true unless all selection is empty.
   selectTarget: ->
-    options = {isSelect: @instanceof('Select'), useMarker: @useMarkerForStay}
-    @mutationManager.init(options)
-    @mutationManager.setCheckPoint('will-select')
+    @mutationManager.init(
+      isSelect: @instanceof('Select')
+      useMarker: @needStay() and @stayByMarker
+    )
+    @mutationManager.setCheckpoint('will-select')
 
-    @target.forceWise(@wise) if @wise and @target.isMotion()
+    # Currently only motion have forceWise methods
+    @target.forceWise?(@wise) if @wise?
     @emitWillSelectTarget()
 
-    # To use CURRENT cursor position, this has to be BEFORE @target.select() which move cursors.
-    if @isOccurrence() and not @occurrenceManager.hasMarkers()
-      @addOccurrencePattern()
-
     @target.select()
+    @mutationManager.setCheckpoint('did-select')
     if @isOccurrence()
       @selectOccurrence()
+      @mutationManager.setCheckpoint('did-select-occurrence')
 
     if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
-      @mutationManager.setCheckPoint('did-select')
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
@@ -233,10 +220,8 @@ class Operator extends Base
 
     options =
       stay: @needStay()
-      strict: @isOccurrence() or @destroyUnknownSelection
-      clipToMutationEnd: @clipToMutationEndOnStay
+      isOccurrence: @isOccurrence()
       isBlockwise: @target?.isBlockwise?()
-      mutationEnd: @restorePositionsToMutationEnd
 
     @mutationManager.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
@@ -254,17 +239,10 @@ class Select extends Operator
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
 
-  canChangeMode: ->
-    if @isMode('visual')
-      @isOccurrence() or @target.isAllowSubmodeChange?()
-    else
-      true
-
   execute: ->
     @selectTarget()
-    if @canChangeMode()
-      submode = swrap.detectVisualModeSubmode(@editor)
-      @activateModeIfNecessary('visual', submode)
+    if @target.isTextObject() and wise = @target.getWise()
+      @activateModeIfNecessary('visual', wise)
 
 class SelectLatestChange extends Select
   @extend()
@@ -274,10 +252,6 @@ class SelectLatestChange extends Select
 class SelectPreviousSelection extends Select
   @extend()
   target: "PreviousSelection"
-  execute: ->
-    @selectTarget()
-    if @target.submode?
-      @activateModeIfNecessary('visual', @target.submode)
 
 class SelectPersistentSelection extends Select
   @extend()
@@ -288,19 +262,11 @@ class SelectOccurrence extends Operator
   @extend()
   @description: "Add selection onto each matching word within target range"
   occurrence: true
-  initialize: ->
-    super
-    @onDidSelectTarget =>
-      swrap.clearProperties(@editor)
 
   execute: ->
     if @selectTarget()
       submode = swrap.detectVisualModeSubmode(@editor)
       @activateModeIfNecessary('visual', submode)
-
-class SelectOccurrenceInAFunctionOrInnerParagraph extends SelectOccurrence
-  @extend()
-  target: "AFunctionOrInnerParagraph"
 
 # Range Marker
 # =========================
@@ -311,13 +277,11 @@ class CreatePersistentSelection extends Operator
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
 
+  initialize: ->
+    @restorePositions = false if @isMode('visual', 'blockwise')
+
   mutateSelection: (selection) ->
     @persistentSelection.markBufferRange(selection.getBufferRange())
-
-  execute: ->
-    @onDidFinishOperation =>
-      destroyNonLastSelection(@editor)
-    super
 
 class TogglePersistentSelection extends CreatePersistentSelection
   @extend()
@@ -341,8 +305,8 @@ class TogglePresetOccurrence extends Operator
   @extend()
   flashTarget: false
   requireTarget: false
-  stayAtSamePosition: true
   acceptPresetOccurrence: false
+  acceptPersistentSelection: false
 
   execute: ->
     {@occurrenceManager} = @vimState
@@ -356,7 +320,16 @@ class TogglePresetOccurrence extends Operator
         pattern = new RegExp(_.escapeRegExp(text), 'g')
 
       @addOccurrencePattern(pattern)
+      @occurrenceManager.saveLastOccurrencePattern()
       @activateMode('normal') unless isNarrowed
+
+class AddPresetOccurrenceFromLastOccurrencePattern extends TogglePresetOccurrence
+  @extend()
+  execute: ->
+    if pattern = @vimState.globalState.get('lastOccurrencePattern')
+      @occurrenceManager.resetPatterns()
+      @addOccurrencePattern(pattern)
+      @activateMode('normal')
 
 # Delete
 # ================================
@@ -364,7 +337,9 @@ class Delete extends Operator
   @extend()
   hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
-  flashTarget: false
+  flashCheckpoint: 'did-select-occurrence'
+  flashTypeForOccurrence: 'operator-remove-occurrence'
+  stayOptionName: 'stayOnDelete'
 
   execute: ->
     @onDidSelectTarget =>
@@ -386,8 +361,7 @@ class Delete extends Operator
       point = @mutationManager.getInitialPointForSelection(cursor.selection)
       cursor.setBufferPosition([row, point.column])
     else
-      cursor.setBufferPosition([row, 0])
-      cursor.skipLeadingWhitespace()
+      cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row))
 
 class DeleteRight extends Delete
   @extend()
@@ -404,18 +378,17 @@ class DeleteToLastCharacterOfLine extends Delete
   execute: ->
     # Ensure all selections to un-reversed
     if @isMode('visual', 'blockwise')
-      swrap.setReversedState(@editor, false)
+      for selection in @editor.getSelections()
+        swrap(selection).extendToEOL()
     super
 
 class DeleteLine extends Delete
   @extend()
-  @commandScope: 'atom-text-editor.vim-mode-plus.visual-mode'
   wise: 'linewise'
 
-class DeleteOccurrenceInAFunctionOrInnerParagraph extends Delete
-  @extend()
-  occurrence: true
-  target: "AFunctionOrInnerParagraph"
+  initialize: ->
+    super
+    @target = 'MoveToRelativeLine' if @isMode('normal')
 
 # Yank
 # =========================
@@ -423,8 +396,7 @@ class Yank extends Operator
   @extend()
   hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
-  stayOnLinewise: true
-  clipToMutationEndOnStay: false
+  stayOptionName: 'stayOnYank'
 
   mutateSelection: (selection) ->
     @setTextToRegisterForSelection(selection)
@@ -436,8 +408,6 @@ class YankLine extends Yank
   initialize: ->
     super
     @target = 'MoveToRelativeLine' if @isMode('normal')
-    if @isMode('visual', 'characterwise')
-      @stayOnLinewise = false
 
 class YankToLastCharacterOfLine extends Yank
   @extend()
@@ -450,6 +420,7 @@ class YankToLastCharacterOfLine extends Yank
 class Increase extends Operator
   @extend()
   requireTarget: false
+  stayOptionName: 'stayOnIncrease'
   step: 1
 
   execute: ->
@@ -613,7 +584,6 @@ class PutAfterAndSelect extends PutBeforeAndSelect
   @description: "Paste after then select"
   location: 'after'
 
-# [FIXME] this is not operator
 class Mark extends Operator
   @extend()
   # hover: icon: ':mark:', emoji: ':round_pushpin:'
@@ -624,3 +594,22 @@ class Mark extends Operator
 
   execute: ->
     @vimState.mark.set(@input, @editor.getCursorBufferPosition())
+    @activateMode('normal')
+
+class AddBlankLineBelow extends Operator
+  @extend()
+  flashTarget: false
+  target: "Empty"
+  stayAtSamePosition: true
+  stayByMarker: true
+  where: 'below'
+
+  mutateSelection: (selection, stopMutation) ->
+    row = selection.getHeadBufferPosition().row
+    row += 1 if @where is 'below'
+    point = [row, 0]
+    @editor.setTextInBufferRange([point, point], "\n".repeat(@getCount()))
+
+class AddBlankLineAbove extends AddBlankLineBelow
+  @extend()
+  where: 'above'

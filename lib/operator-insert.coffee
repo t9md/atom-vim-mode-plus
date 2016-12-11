@@ -1,4 +1,5 @@
 _ = require 'underscore-plus'
+{Range} = require 'atom'
 
 {
   moveCursorLeft, moveCursorRight
@@ -9,7 +10,9 @@ Operator = require('./base').getClass('Operator')
 
 # Insert entering operation
 # -------------------------
-class ActivateInsertMode extends Operator
+# [NOTE]
+# Rule: Don't make any text mutation before calling `@selectTarget()`.
+class ActivateInsertMode extends Operator # FIXME
   @extend()
   requireTarget: false
   flashTarget: false
@@ -22,14 +25,14 @@ class ActivateInsertMode extends Operator
       return unless mode is 'insert'
       disposable.dispose()
 
-      @vimState.mark.set('^', @editor.getCursorBufferPosition())
+      @vimState.mark.set('^', @editor.getCursorBufferPosition()) # Last insert-mode position
       textByUserInput = ''
       if change = @getChangeSinceCheckpoint('insert')
         @lastChange = change
-        @vimState.mark.set('[', change.start)
-        @vimState.mark.set(']', change.start.traverse(change.newExtent))
+        changedRange = new Range(change.start, change.start.traverse(change.newExtent))
+        @vimState.mark.setRange('[', ']', changedRange)
         textByUserInput = change.newText
-      @vimState.register.set('.', text: textByUserInput)
+      @vimState.register.set('.', text: textByUserInput) # Last inserted text
 
       _.times @getInsertionCount(), =>
         text = @textByOperator + textByUserInput
@@ -40,13 +43,10 @@ class ActivateInsertMode extends Operator
       if settings.get('groupChangesWhenLeavingInsertMode')
         @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
 
-  initialize: ->
-    super
-    @checkpoint = {}
-    @setCheckpoint('undo') unless @isRepeated()
-    @observeWillDeactivateMode()
+  canContinueOnEmptySelection: ->
+    true
 
-  # we have to manage two separate checkpoint for different purpose(timing is different)
+  # Two checkpoint for different purpose
   # - one for undo(handled by modeManager)
   # - one for preserve last inserted text
   setCheckpoint: (purpose) ->
@@ -67,7 +67,7 @@ class ActivateInsertMode extends Operator
     checkpoint = @getCheckpoint(purpose)
     @editor.buffer.getChangesSinceCheckpoint(checkpoint)[0]
 
-  # [BUG] Replaying text-deletion-operation is not compatible to pure Vim.
+  # [BUG-BUT-OK] Replaying text-deletion-operation is not compatible to pure Vim.
   # Pure Vim record all operation in insert-mode as keystroke level and can distinguish
   # character deleted by `Delete` or by `ctrl-u`.
   # But I can not and don't trying to minic this level of compatibility.
@@ -90,25 +90,37 @@ class ActivateInsertMode extends Operator
     @replayLastChange(selection)
 
   getInsertionCount: ->
-    @insertionCount ?= if @supportInsertionCount then (@getCount() - 1) else 0
+    @insertionCount ?= if @supportInsertionCount then @getCount(-1) else 0
     @insertionCount
 
   execute: ->
+    if @isRequireTarget()
+      targetSelected = @selectTarget()
+      if not targetSelected and not @canContinueOnEmptySelection()
+        @vimState.activate('normal')
+        return
+
     if @isRepeated()
-      unless @instanceof('Change')
-        @flashTarget = @trackChange = true
-        @emitDidSelectTarget()
+      @flashTarget = @trackChange = true
       @editor.transact =>
-        for selection in @editor.getSelections()
+        @mutateText?()
+        for selection, i in @editor.getSelections()
           @repeatInsert(selection, @lastChange?.newText ? '')
           moveCursorLeft(selection.cursor)
 
       if settings.get('clearMultipleCursorsOnEscapeInsertMode')
-        @editor.clearSelections()
+        @vimState.clearSelections()
 
     else
+      @checkpoint = {}
+      @setCheckpoint('undo')
+      @observeWillDeactivateMode()
+
+      @mutateText?()
+
       if @getInsertionCount() > 0
         @textByOperator = @getChangeSinceCheckpoint('undo')?.newText ? ''
+
       @setCheckpoint('insert')
       topCursor = @editor.getCursorsOrderedByBufferPosition()[0]
       @topCursorPositionAtInsertionStart = topCursor.getBufferPosition()
@@ -130,13 +142,24 @@ class InsertAfter extends ActivateInsertMode
     moveCursorRight(cursor) for cursor in @editor.getCursors()
     super
 
+# key: 'g I' in all mode
+class InsertAtBeginningOfLine extends ActivateInsertMode
+  @extend()
+  execute: ->
+    if @isMode('visual', ['characterwise', 'linewise'])
+      @editor.splitSelectionsIntoLines()
+    @editor.moveToBeginningOfLine()
+    super
+
+# key: normal 'A'
 class InsertAfterEndOfLine extends ActivateInsertMode
   @extend()
   execute: ->
     @editor.moveToEndOfLine()
     super
 
-class InsertAtBeginningOfLine extends ActivateInsertMode
+# key: normal 'I'
+class InsertAtFirstCharacterOfLine extends ActivateInsertMode
   @extend()
   execute: ->
     @editor.moveToBeginningOfLine()
@@ -153,11 +176,7 @@ class InsertAtLastInsert extends ActivateInsertMode
 
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
-  execute: ->
-    @insertNewline()
-    super
-
-  insertNewline: ->
+  mutateText: ->
     @editor.insertNewlineAbove()
 
   repeatInsert: (selection, text) ->
@@ -165,7 +184,7 @@ class InsertAboveWithNewline extends ActivateInsertMode
 
 class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
-  insertNewline: ->
+  mutateText: ->
     @editor.insertNewlineBelow()
 
 # Advanced Insertion
@@ -174,19 +193,51 @@ class InsertByTarget extends ActivateInsertMode
   @extend(false)
   requireTarget: true
   which: null # one of ['start', 'end', 'head', 'tail']
+
   execute: ->
-    @selectTarget()
-    for selection in @editor.getSelections()
-      swrap(selection).setBufferPositionTo(@which)
+    @onDidSelectTarget =>
+      @modifySelection() if @vimState.isMode('visual')
+      for selection in @editor.getSelections()
+        swrap(selection).setBufferPositionTo(@which)
     super
 
+  modifySelection: ->
+
+    switch @vimState.submode
+      when 'characterwise'
+        # `I(or A)` is short-hand of `ctrl-v I(or A)`
+        @vimState.selectBlockwise()
+
+      when 'linewise'
+        @editor.splitSelectionsIntoLines()
+        methodName =
+          if @which is 'start'
+            'setStartToFirstCharacterOfLine'
+          else if @which is 'end'
+            'shrinkEndToBeforeNewLine'
+
+        for selection in @editor.getSelections()
+          swrap(selection)[methodName]()
+
+# key: 'I', Used in 'visual-mode.characterwise', visual-mode.blockwise
 class InsertAtStartOfTarget extends InsertByTarget
   @extend()
   which: 'start'
 
+# key: 'A', Used in 'visual-mode.characterwise', 'visual-mode.blockwise'
 class InsertAtEndOfTarget extends InsertByTarget
   @extend()
   which: 'end'
+
+class InsertAtStartOfOccurrence extends InsertByTarget
+  @extend()
+  which: 'start'
+  occurrence: true
+
+class InsertAtEndOfOccurrence extends InsertByTarget
+  @extend()
+  which: 'end'
+  occurrence: true
 
 class InsertAtStartOfInnerSmartWord extends InsertByTarget
   @extend()
@@ -198,67 +249,46 @@ class InsertAtEndOfInnerSmartWord extends InsertByTarget
   which: 'end'
   target: "InnerSmartWord"
 
-class InsertAtHeadOfTarget extends InsertByTarget
-  @extend()
-  which: 'head'
-
-class InsertAtTailOfTarget extends InsertByTarget
-  @extend()
-  which: 'tail'
-
-class InsertAtPreviousFoldStart extends InsertAtHeadOfTarget
+class InsertAtPreviousFoldStart extends InsertByTarget
   @extend()
   @description: "Move to previous fold start then enter insert-mode"
+  which: 'start'
   target: 'MoveToPreviousFoldStart'
 
-class InsertAtNextFoldStart extends InsertAtHeadOfTarget
+class InsertAtNextFoldStart extends InsertByTarget
   @extend()
   @description: "Move to next fold start then enter insert-mode"
+  which: 'end'
   target: 'MoveToNextFoldStart'
 
 # -------------------------
-class Change extends ActivateInsertMode
+class Change extends ActivateInsertMode # FIXME
   @extend()
   requireTarget: true
   trackChange: true
   supportInsertionCount: false
 
-  execute: ->
-    if @isRepeated()
-      @flashTarget = true
+  canContinueOnEmptySelection: ->
+    not @isOccurrence()
 
-    selected = @selectTarget()
-    if @isOccurrence() and not selected
-      @vimState.activate('normal')
-      return
-
+  mutateText: ->
+    # Allways dynamically determine selection wise wthout consulting target.wise
+    # Reason: when `c i {`, wise is 'characterwise', but actually selected range is 'linewise'
+    #   {
+    #     a
+    #   }
     text = ''
-    if @target.isTextObject() or @target.isMotion()
-      text = "\n" if (swrap.detectVisualModeSubmode(@editor) is 'linewise')
-    else
-      text = "\n" if @target.isLinewise?()
+    text = "\n" if swrap.detectVisualModeSubmode(@editor) is 'linewise'
 
-    @editor.transact =>
-      for selection in @editor.getSelections()
-        @setTextToRegisterForSelection(selection)
-        range = selection.insertText(text, autoIndent: true)
-        selection.cursor.moveLeft() unless range.isEmpty()
-    # FIXME calling super on OUTSIDE of editor.transact.
-    # That's why repeatRecorded() need transact.wrap
-    super
+    for selection in @editor.getSelections()
+      @setTextToRegisterForSelection(selection)
+      range = selection.insertText(text, autoIndent: true)
+      selection.cursor.moveLeft() unless range.isEmpty()
 
 class ChangeOccurrence extends Change
   @extend()
   @description: "Change all matching word within target range"
   occurrence: true
-
-class ChangeOccurrenceInAFunctionOrInnerParagraph extends ChangeOccurrence
-  @extend()
-  target: 'AFunctionOrInnerParagraph'
-
-class ChangeOccurrenceInAPersistentSelection extends ChangeOccurrence
-  @extend()
-  target: "APersistentSelection"
 
 class Substitute extends Change
   @extend()
@@ -266,7 +296,12 @@ class Substitute extends Change
 
 class SubstituteLine extends Change
   @extend()
+  wise: 'linewise' # [FIXME] to re-override target.wise in visual-mode
   target: 'MoveToRelativeLine'
+
+# alias
+class ChangeLine extends SubstituteLine
+  @extend()
 
 class ChangeToLastCharacterOfLine extends Change
   @extend()
@@ -275,5 +310,6 @@ class ChangeToLastCharacterOfLine extends Change
   execute: ->
     # Ensure all selections to un-reversed
     if @isMode('visual', 'blockwise')
-      swrap.setReversedState(@editor, false)
+      for selection in @editor.getSelections()
+        swrap(selection).extendToEOL()
     super

@@ -16,26 +16,35 @@ describe "Operator TransformString", ->
   describe 'the ~ keybinding', ->
     beforeEach ->
       set
-        text: 'aBc\nXyZ'
-        cursorBuffer: [[0, 0], [1, 0]]
+        textC: """
+        |aBc
+        |XyZ
+        """
 
     it 'toggles the case and moves right', ->
       ensure '~',
-        text: 'ABc\nxyZ'
-        cursor: [[0, 1], [1, 1]]
-
+        textC: """
+        A|Bc
+        x|yZ
+        """
       ensure '~',
-        text: 'Abc\nxYZ'
-        cursor: [[0, 2], [1, 2]]
+        textC: """
+        Ab|c
+        xY|Z
+        """
 
       ensure  '~',
-        text: 'AbC\nxYz'
-        cursor: [[0, 2], [1, 2]]
+        textC: """
+        Ab|C
+        xY|z
+        """
 
     it 'takes a count', ->
       ensure '4 ~',
-        text: 'AbC\nxYz'
-        cursor: [[0, 2], [1, 2]]
+        textC: """
+        Ab|C
+        xY|z
+        """
 
     describe "in visual mode", ->
       it "toggles the case of the selected text", ->
@@ -44,16 +53,16 @@ describe "Operator TransformString", ->
 
     describe "with g and motion", ->
       it "toggles the case of text, won't move cursor", ->
-        set cursorBuffer: [0, 0]
-        ensure 'g ~ 2 l', text: 'Abc\nXyZ', cursor: [0, 0]
+        set textC: "|aBc\nXyZ"
+        ensure 'g ~ 2 l', textC: '|Abc\nXyZ'
 
       it "g~~ toggles the line of text, won't move cursor", ->
-        set cursorBuffer: [0, 1]
-        ensure 'g ~ ~', text: 'AbC\nXyZ', cursor: [0, 1]
+        set textC: "a|Bc\nXyZ"
+        ensure 'g ~ ~', textC: 'A|bC\nXyZ'
 
       it "g~g~ toggles the line of text, won't move cursor", ->
-        set cursorBuffer: [0, 1]
-        ensure 'g ~ g ~', text: 'AbC\nXyZ', cursor: [0, 1]
+        set textC: "a|Bc\nXyZ"
+        ensure 'g ~ g ~', textC: 'A|bC\nXyZ'
 
   describe 'the U keybinding', ->
     beforeEach ->
@@ -111,8 +120,11 @@ describe "Operator TransformString", ->
       describe "when followed by a >", ->
         it "indents the current line", ->
           ensure '> >',
-            text: "12345\nabcde\n  ABCDE"
-            cursor: [2, 2]
+            textC_: """
+            12345
+            abcde
+            __|ABCDE
+            """
 
     describe "on the first line", ->
       beforeEach ->
@@ -121,8 +133,11 @@ describe "Operator TransformString", ->
       describe "when followed by a >", ->
         it "indents the current line", ->
           ensure '> >',
-            text: "  12345\nabcde\nABCDE"
-            cursor: [0, 2]
+            textC_: """
+            __|12345
+            abcde
+            ABCDE
+            """
 
       describe "when followed by a repeating >", ->
         beforeEach ->
@@ -159,44 +174,39 @@ describe "Operator TransformString", ->
       it "indents the currrent selection and exits visual mode", ->
         ensure 'v j >',
           mode: 'normal'
-          cursor: [1, 2]
-          text: """
+          textC: """
             12345
-            abcde
+            |abcde
           ABCDE
           """
       it "when repeated, operate on same range when cursor was not moved", ->
         ensure 'v j >',
           mode: 'normal'
-          cursor: [1, 2]
-          text: """
+          textC: """
             12345
-            abcde
+            |abcde
           ABCDE
           """
         ensure '.',
           mode: 'normal'
-          cursor: [1, 4]
-          text: """
+          textC: """
               12345
-              abcde
+              |abcde
           ABCDE
           """
       it "when repeated, operate on relative range from cursor position with same extent when cursor was moved", ->
         ensure 'v j >',
           mode: 'normal'
-          cursor: [1, 2]
-          text: """
+          textC: """
             12345
-            abcde
+            |abcde
           ABCDE
           """
         ensure 'l .',
           mode: 'normal'
-          cursor: [1, 5]
-          text_: """
+          textC_: """
           __12345
-          ____abcde
+          ____a|bcde
           __ABCDE
           """
 
@@ -556,11 +566,11 @@ describe "Operator TransformString", ->
         set cursor: [2, 1]
         ensure ['m s i l', input: '<'],
           text: '\napple\n<pairs> <tomato>\norange\nmilk\n'
-          cursor: [2, 0]
+          cursor: [2, 1]
       it "surround text for each word in visual selection", ->
         ensure ['v i p m s', input: '"'],
           text: '\n"apple"\n"pairs" "tomato"\n"orange"\n"milk"\n'
-          cursor: [1, 0]
+          cursor: [4, 0]
 
     describe 'delete surround', ->
       beforeEach ->
