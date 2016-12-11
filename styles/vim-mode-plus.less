@@ -99,20 +99,20 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
 .flash-animation(vim-mode-plus-flash-removed, @flash-removed-color);
 .flash-animation(vim-mode-plus-flash-line, @flash-search-color);
 
-.flash (@name; @duration: .3s){
+.flash (@name; @duration) {
   animation-name: @name;
   animation-duration: @duration;
   animation-iteration-count: 1;
 }
 
 atom-text-editor .vim-mode-plus-flash {
-  &.operator .region { .flash(vim-mode-plus-flash-operator)}
+  &.operator .region { .flash(vim-mode-plus-flash-operator, .3s)}
   &.operator-occurrence .region { .flash(vim-mode-plus-flash-operator-occurrence, .8s)}
   &.operator-remove-occurrence .region { .flash(vim-mode-plus-flash-operator-remove-occurrence, .8s)}
   &.search .region { .flash(vim-mode-plus-flash-search, .5s); }
-  &.screen .region { .flash(vim-mode-plus-flash-screen); }
-  &.added .region { .flash(vim-mode-plus-flash-added); }
-  &.removed .region { .flash(vim-mode-plus-flash-removed); }
+  &.screen .region { .flash(vim-mode-plus-flash-screen, .3s); }
+  &.added .region { .flash(vim-mode-plus-flash-added, .3s); }
+  &.removed .region { .flash(vim-mode-plus-flash-removed, .3s); }
 }
 
 // type=line decoration not allow space separated multiple classes. atom/atom#13218
