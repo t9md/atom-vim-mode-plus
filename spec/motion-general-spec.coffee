@@ -914,19 +914,19 @@ describe "Motion general", ->
 
   describe "the ^ keybinding", ->
     beforeEach ->
-      set text: "  abcde"
+      set textC: "|  abcde"
 
     describe "from the beginning of the line", ->
-      beforeEach ->
-        set cursor: [0, 0]
-
       describe "as a motion", ->
         it "moves the cursor to the first character of the line", ->
           ensure '^', cursor: [0, 2]
 
       describe "as a selection", ->
         it 'selects to the first character of the line', ->
-          ensure 'd ^', text: 'abcde', cursor: [0, 0]
+          ensure 'd ^',
+            partialMatchTimeout: true # FIXME!!! remove after atom/atom-keymap#195
+            text: 'abcde'
+            cursor: [0, 0]
 
     describe "from the first character of the line", ->
       beforeEach ->
@@ -938,7 +938,10 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it "does nothing", ->
-          ensure 'd ^', text: '  abcde', cursor: [0, 2]
+          ensure 'd ^',
+            partialMatchTimeout: true # FIXME!!! remove after atom/atom-keymap#195
+            text: '  abcde'
+            cursor: [0, 2]
 
     describe "from the middle of a word", ->
       beforeEach ->
@@ -950,7 +953,10 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it 'selects to the first character of the line', ->
-          ensure 'd ^', text: '  cde', cursor: [0, 2],
+          ensure 'd ^',
+            partialMatchTimeout: true # FIXME!!! remove after atom/atom-keymap#195
+            text: '  cde'
+            cursor: [0, 2]
 
   describe "the 0 keybinding", ->
     beforeEach ->

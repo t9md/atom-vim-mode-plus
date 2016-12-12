@@ -163,12 +163,16 @@ describe "VimState", ->
 
       it 'properly clears the operations', ->
 
-        ensure 'd', mode: 'operator-pending'
+        ensure 'd',
+          partialMatchTimeout: true
+          mode: 'operator-pending'
         expect(vimState.operationStack.isEmpty()).toBe(false)
         ensure 'r', mode: 'normal'
         expect(vimState.operationStack.isEmpty()).toBe(true)
 
-        ensure 'd', mode: 'operator-pending'
+        ensure 'd',
+          partialMatchTimeout: true
+          mode: 'operator-pending'
         expect(vimState.operationStack.isEmpty()).toBe(false)
         ensure 'escape', mode: 'normal', text: '012345\nabcdef'
         expect(vimState.operationStack.isEmpty()).toBe(true)
