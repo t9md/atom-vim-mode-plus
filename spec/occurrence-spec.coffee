@@ -2,13 +2,14 @@
 settings = require '../lib/settings'
 
 describe "Occurrence", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, keystroke, editor, editorElement, vimState, classList] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = vim
+      classList = editorElement.classList
 
     runs ->
       jasmine.attachToDOM(editorElement)
@@ -498,7 +499,7 @@ describe "Occurrence", ->
             expect(vimState.persistentSelection.getMarkers()).toHaveLength(10)
 
         waitsFor ->
-          editorElement.classList.contains('has-persistent-selection')
+          classList.contains('has-persistent-selection')
 
         runs ->
           withMockPlatform searchEditorElement, 'platform-darwin' , ->
@@ -571,10 +572,6 @@ describe "Occurrence", ->
             expect(vimState.globalState.get('lastOccurrencePattern')).toEqual(/te/g)
 
         describe "css class has-occurrence", ->
-          classList = null
-          beforeEach ->
-            classList = editorElement.classList
-
           describe "manually toggle by toggle-preset-occurrence command", ->
             it 'is auto-set/unset wheter at least one preset-occurrence was exists or not', ->
               expect(classList.contains('has-occurrence')).toBe(false)
@@ -722,7 +719,7 @@ describe "Occurrence", ->
 
           it '[insert-at-start] apply operation to preset-marker intersecting selected target', ->
             ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
-            editorElement.classList.contains('has-occurrence')
+            classList.contains('has-occurrence')
             ensure 'I k', mode: 'insert', numCursors: 2
             editor.insertText("pure-")
             ensure 'escape',
@@ -737,7 +734,7 @@ describe "Occurrence", ->
           it '[insert-after-start] apply operation to preset-marker intersecting selected target', ->
             set cursor: [1, 1]
             ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
-            editorElement.classList.contains('has-occurrence')
+            classList.contains('has-occurrence')
             ensure 'A j', mode: 'insert', numCursors: 2
             editor.insertText(" and Emacs")
             ensure 'escape',
@@ -806,12 +803,80 @@ describe "Occurrence", ->
         ensure 'g o',
           occurrenceText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo']
 
+
       describe "tab, shift-tab", ->
-        it "search next/previous occurrence marker", ->
-          ensure 'tab tab', cursor: [1, 5]
-          ensure '2 tab', cursor: [2, 10]
-          ensure '2 shift-tab', cursor: [1, 5]
-          ensure '2 shift-tab', cursor: [0, 0]
+        describe "cursor is at start of occurrence", ->
+          it "search next/previous occurrence marker", ->
+            ensure 'tab tab', cursor: [1, 5]
+            ensure '2 tab', cursor: [2, 10]
+            ensure '2 shift-tab', cursor: [1, 5]
+            ensure '2 shift-tab', cursor: [0, 0]
+
+        describe "when cursor is inside of occurrence", ->
+          beforeEach ->
+            ensure "escape", occurrenceCount: 0
+            set textC: "oooo oo|oo oooo"
+            ensure 'g o', occurrenceCount: 3
+
+          describe "tab", ->
+            it "move to next occurrence", ->
+              ensure 'tab', textC: 'oooo oooo |oooo'
+
+          describe "shift-tab", ->
+            it "move to previous occurrence", ->
+              ensure 'shift-tab', textC: '|oooo oooo oooo'
+
+      describe "as operator's target", ->
+        describe "tab", ->
+          it "operate on next occurrence and repeatable", ->
+            ensure "g U tab",
+              text: """
+              OOO: xxx: OOO
+              ___: ooo: xxx:
+              ooo: xxx: ooo:
+              """
+              occurrenceCount: 3
+            ensure ".",
+              text: """
+              OOO: xxx: OOO
+              ___: OOO: xxx:
+              ooo: xxx: ooo:
+              """
+              occurrenceCount: 2
+            ensure "2 .",
+              text: """
+              OOO: xxx: OOO
+              ___: OOO: xxx:
+              OOO: xxx: OOO:
+              """
+              occurrenceCount: 0
+            expect(classList.contains('has-occurrence')).toBe(false)
+
+        describe "shift-tab", ->
+          it "operate on next previous and repeatable", ->
+            set cursor: [2, 10]
+            ensure "g U shift-tab",
+              text: """
+              ooo: xxx: ooo
+              ___: ooo: xxx:
+              OOO: xxx: OOO:
+              """
+              occurrenceCount: 3
+            ensure ".",
+              text: """
+              ooo: xxx: ooo
+              ___: OOO: xxx:
+              OOO: xxx: OOO:
+              """
+              occurrenceCount: 2
+            ensure "2 .",
+              text: """
+              OOO: xxx: OOO
+              ___: OOO: xxx:
+              OOO: xxx: OOO:
+              """
+              occurrenceCount: 0
+            expect(classList.contains('has-occurrence')).toBe(false)
 
       describe "excude particular occurence by `.` repeat", ->
         it "clear preset-occurrence and move to next", ->

@@ -1097,7 +1097,7 @@ class MoveToPreviousOccurrence extends MoveToNextOccurrence
   direction: 'previous'
 
   getIndex: (fromPoint) ->
-    for range, i in @ranges by -1 when range.start.isLessThan(fromPoint)
+    for range, i in @ranges by -1 when range.end.isLessThan(fromPoint)
       return i
     @ranges.length - 1
 
