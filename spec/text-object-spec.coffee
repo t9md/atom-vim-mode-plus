@@ -1423,6 +1423,54 @@ describe "TextObject", ->
         it 'select function', ->
           ensure 'v a f', selectedBufferRange: [[2, 0], [7, 0]]
 
+    describe 'elixir', ->
+      pack = 'language-elixir'
+      scope = 'source.elixir'
+      beforeEach ->
+        console.log "ELIXIR"
+        waitsForPromise ->
+          atom.packages.activatePackage(pack)
+        set
+          text: """
+            # Commment
+
+            def hello do
+              a = 1
+              b = 2
+              c = 3
+            end
+
+            def one_liner, do: "return value"
+
+            # Commment
+            """
+          cursor: [3, 0]
+        runs ->
+          grammar = atom.grammars.grammarForScopeName(scope)
+          editor.setGrammar(grammar)
+      afterEach ->
+        atom.packages.deactivatePackage(pack)
+
+      describe 'inner-function for elixir', ->
+        it 'select except start row', ->
+          ensure 'v i f', selectedBufferRange: [[3, 0], [6, 0]]
+      describe 'a-function for elixir', ->
+        it 'select function', ->
+          ensure 'v a f', selectedBufferRange: [[2, 0], [7, 0]]
+      describe 'one-liner for elixir', ->
+        beforeEach ->
+          set
+            text: """
+              # Commment
+
+              def one_liner, do: "return value"
+
+              # Commment
+              """
+            cursor: [3, 0]
+        it 'select function', ->
+          ensure 'v a f', selectedBufferRange: [[3, 0], [4, 0]]
+
     describe 'go', ->
       pack = 'language-go'
       scope = 'source.go'

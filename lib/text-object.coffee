@@ -745,7 +745,7 @@ class Function extends Fold
   @extend(false)
 
   # Some language don't include closing `}` into fold.
-  scopeNamesOmittingEndRow: ['source.go']
+  scopeNamesOmittingEndRow: ['source.go', 'source.elixir']
 
   getFoldRowRangesContainsForRow: (row) ->
     rowRanges = getCodeFoldRowRangesContainesForRow(@editor, row)?.reverse()
