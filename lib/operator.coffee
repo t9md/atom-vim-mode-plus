@@ -311,7 +311,7 @@ class TogglePresetOccurrence extends Operator
   execute: ->
     {@occurrenceManager} = @vimState
     if marker = @occurrenceManager.getMarkerAtPoint(@editor.getCursorBufferPosition())
-      marker.destroy()
+      @occurrenceManager.destroyMarkers([marker])
     else
       pattern = null
       isNarrowed = @vimState.modeManager.isNarrowed()

@@ -7,6 +7,8 @@ _ = require 'underscore-plus'
   findRangeContainsPoint
 } = require './utils'
 
+isInvalidMarker = (marker) -> not marker.isValid()
+
 module.exports =
 class OccurrenceManager
   patterns: null
@@ -29,19 +31,18 @@ class OccurrenceManager
     @onDidChangePatterns ({newPattern}) =>
       if newPattern
         @markBufferRangeByPattern(newPattern)
+        @updateEditorElement()
       else
         @clearMarkers()
 
-    # Update css on every marker update.
-    @markerLayer.onDidUpdate =>
-      # FIXME: I have to manually destroy invalid marker.
-      # I'm coding based my assumption all markers exists is VALID.
-      @destroyInvalidMarkers()
-      @editorElement.classList.toggle("has-occurrence", @hasMarkers())
+    @markerLayer.onDidUpdate(@destroyInvalidMarkers.bind(this))
 
   markBufferRangeByPattern: (pattern) ->
     for range in scanEditor(@editor, pattern)
       @markerLayer.markBufferRange(range, @markerOptions)
+
+  updateEditorElement: ->
+    @editorElement.classList.toggle("has-occurrence", @hasMarkers())
 
   # Callback get passed following object
   # - newPattern: can be undefined on reset event
@@ -78,9 +79,16 @@ class OccurrenceManager
 
   # Markers
   # -------------------------
-  clearMarkers: (pattern) ->
-    for marker in @markerLayer.getMarkers()
-      marker.destroy()
+  clearMarkers: ->
+    @destroyMarkers(@getMarkers())
+
+  destroyMarkers: (markers) ->
+    marker.destroy() for marker in markers
+    # whenerver we destroy marker, we should sync `has-occurrence` scope in marker state..
+    @updateEditorElement()
+
+  destroyInvalidMarkers: ->
+    @destroyMarkers(@getMarkers().filter(isInvalidMarker))
 
   hasMarkers: ->
     @markerLayer.getMarkerCount() > 0
@@ -90,10 +98,6 @@ class OccurrenceManager
 
   getMarkerCount: ->
     @markerLayer.getMarkerCount()
-
-  destroyInvalidMarkers: ->
-    for marker in @markerLayer.getMarkers() when not marker.isValid()
-      marker.destroy()
 
   # Return occurrence markers intersecting given ranges
   getMarkersIntersectsWithRanges: (ranges, exclusive=false) ->
@@ -123,14 +127,22 @@ class OccurrenceManager
   select: ->
     isVisualMode = @vimState.mode is 'visual'
     markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
-    ranges = markers.map (marker) -> marker.getBufferRange()
 
-    if ranges.length
+    if markers.length
+      # NOTE: immediately destroy occurrence-marker which we are operates on from now.
+      # Markers are not beeing immediately destroyed unless explictly destroy.
+      # Manually destroying markers here gives us several benefits like bellow.
+      #  - Easy to write spec since markers are destroyed in-sync.
+      #  - SelectOccurrence operation not invalidate marker but destroyed once selected.
+      ranges = markers.map (marker) -> marker.getBufferRange()
+      @destroyMarkers(markers)
+
       if isVisualMode
         @vimState.modeManager.deactivate()
         # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
         @vimState.submode = null
 
+      # Important: To make last-cursor become original cursor position.
       range = @getRangeForLastSelection(ranges)
       _.remove(ranges, range)
       ranges.push(range)

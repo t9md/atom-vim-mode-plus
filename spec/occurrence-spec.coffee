@@ -571,22 +571,44 @@ describe "Occurrence", ->
             expect(vimState.globalState.get('lastOccurrencePattern')).toEqual(/te/g)
 
         describe "css class has-occurrence", ->
-          [classList, update] = []
+          classList = null
           beforeEach ->
-            vimState.occurrenceManager.markerLayer.onDidUpdate(update = jasmine.createSpy())
-          it 'is auto-set/unset wheter at least one preset-occurrence was exists or not', ->
-            runs ->
-              expect(editorElement.classList.contains('has-occurrence')).toBe(false)
+            classList = editorElement.classList
+
+          describe "manually toggle by toggle-preset-occurrence command", ->
+            it 'is auto-set/unset wheter at least one preset-occurrence was exists or not', ->
+              expect(classList.contains('has-occurrence')).toBe(false)
               ensure 'g o', occurrenceText: 'This', cursor: [0, 0]
-            waitsFor ->
-              update.callCount is 1
-            runs ->
-              expect(editorElement.classList.contains('has-occurrence')).toBe(true)
+              expect(classList.contains('has-occurrence')).toBe(true)
               ensure 'g o', occurrenceCount: 0, cursor: [0, 0]
-            waitsFor ->
-              update.callCount is 2
-            runs ->
-              expect(editorElement.classList.contains('has-occurrence')).toBe(false)
+              expect(classList.contains('has-occurrence')).toBe(false)
+
+          describe "change 'INSIDE' of marker", ->
+            markerLayerUpdated = null
+            beforeEach ->
+              markerLayerUpdated = false
+
+            it 'destroy marker and reflect to "has-occurrence" CSS', ->
+              runs ->
+                expect(classList.contains('has-occurrence')).toBe(false)
+                ensure 'g o', occurrenceText: 'This', cursor: [0, 0]
+                expect(classList.contains('has-occurrence')).toBe(true)
+
+                ensure 'l i', mode: 'insert'
+                vimState.occurrenceManager.markerLayer.onDidUpdate ->
+                  markerLayerUpdated = true
+
+                editor.insertText('--')
+                ensure "escape",
+                  textC: "T-|-his text have 3 instance of 'text' in the whole text"
+                  mode: 'normal'
+
+              waitsFor ->
+                markerLayerUpdated
+
+              runs ->
+                ensure occurrenceCount: 0
+                expect(classList.contains('has-occurrence')).toBe(false)
 
       describe "in visual-mode", ->
         describe "add preset occurrence", ->
@@ -691,58 +713,47 @@ describe "Occurrence", ->
         describe "predefined keymap on when has-occurrence", ->
           beforeEach ->
             set
-              text: """
+              textC: """
               Vim is editor I used before
-              Vim is editor I used before
+              V|im is editor I used before
               Vim is editor I used before
               Vim is editor I used before
               """
 
           it '[insert-at-start] apply operation to preset-marker intersecting selected target', ->
-            set cursor: [1, 1]
-            runs ->
-              ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
-            waitsFor ->
-              editorElement.classList.contains('has-occurrence')
-            runs ->
-              ensure 'I k',
-                mode: 'insert'
-                numCursors: 2
-              editor.insertText("pure-")
-              ensure 'escape',
-                mode: 'normal'
-                text: """
-                pure-Vim is editor I used before
-                pure-Vim is editor I used before
-                Vim is editor I used before
-                Vim is editor I used before
-                """
+            ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
+            editorElement.classList.contains('has-occurrence')
+            ensure 'I k', mode: 'insert', numCursors: 2
+            editor.insertText("pure-")
+            ensure 'escape',
+              mode: 'normal'
+              textC: """
+              pure|-Vim is editor I used before
+              pure!-Vim is editor I used before
+              Vim is editor I used before
+              Vim is editor I used before
+              """
+
           it '[insert-after-start] apply operation to preset-marker intersecting selected target', ->
             set cursor: [1, 1]
-            runs ->
-              ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
-            waitsFor ->
-              editorElement.classList.contains('has-occurrence')
-            runs ->
-              ensure 'A j',
-                mode: 'insert'
-                numCursors: 2
-              editor.insertText(" and Emacs")
-              ensure 'escape',
-                mode: 'normal'
-                text: """
-                Vim is editor I used before
-                Vim and Emacs is editor I used before
-                Vim and Emacs is editor I used before
-                Vim is editor I used before
-                """
+            ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
+            editorElement.classList.contains('has-occurrence')
+            ensure 'A j', mode: 'insert', numCursors: 2
+            editor.insertText(" and Emacs")
+            ensure 'escape',
+              mode: 'normal'
+              textC: """
+              Vim is editor I used before
+              Vim and Emac!s is editor I used before
+              Vim and Emac|s is editor I used before
+              Vim is editor I used before
+              """
 
       describe "visual-mode", ->
         it '[upcase] apply to preset-marker as long as it intersects selection', ->
           set
-            cursor: [0, 6]
-            text: """
-            ooo: xxx: ooo xxx: ooo:
+            textC: """
+            ooo: x|xx: ooo xxx: ooo:
             xxx: ooo: xxx: ooo xxx: ooo:
             """
           ensure 'g o', occurrenceCount: 5
@@ -792,11 +803,8 @@ describe "Occurrence", ->
           ooo: xxx: ooo:
           """
 
-        runs ->
-          ensure 'g o',
-            occurrenceText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo']
-        waitsFor ->
-          editorElement.classList.contains('has-occurrence')
+        ensure 'g o',
+          occurrenceText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo']
 
       describe "tab, shift-tab", ->
         it "search next/previous occurrence marker", ->
