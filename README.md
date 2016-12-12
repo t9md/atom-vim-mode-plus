@@ -40,7 +40,7 @@ These features are very powerful, especially for the power user. Read the follow
 
 - **vim-mode-plus is replacement for vim-mode, you must disable vim-mode first to use vim-mode-plus**.
 - You don't need the following packages since they're built-in to vim-mode-plus:
-  - [vim-surround](https://atom.io/packages/vim-surround)
+  - [vim-surround](https://atom.io/packages/vim-surround): No default keymap. See FAQ section in this doc.
   - [vim-mode-visual-block](https://atom.io/packages/vim-mode-visual-block)
 - Scope for CSS selector and keymap is different from vim-mode, **not compatible**.
 - Internal code base is very different. Thus, issues and PRs should be directly sent to vim-mode-plus. **DON'T report vim-mode-plus's issues or PRs to the official vim-mode.**
@@ -112,6 +112,11 @@ If you want to directly edit `config.cson`, here it is.
     "vim-mode-plus.insert-mode.replace"
   ]
 ```
+
+### Surround not work
+
+No default keymaps are provided.
+If you want, install [vim-mode-plus-keymaps-for-surround](https://github.com/t9md/atom-vim-mode-plus-keymaps-for-surround)
 
 ### How can I insert single white space when surround?
 
