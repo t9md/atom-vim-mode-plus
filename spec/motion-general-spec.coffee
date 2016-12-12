@@ -927,6 +927,8 @@ describe "Motion general", ->
             partialMatchTimeout: true # FIXME!!! remove after atom/atom-keymap#195
             text: 'abcde'
             cursor: [0, 0]
+        it 'selects to the first character of the line', ->
+          ensure 'd I', text: 'abcde', cursor: [0, 0]
 
     describe "from the first character of the line", ->
       beforeEach ->
@@ -957,6 +959,8 @@ describe "Motion general", ->
             partialMatchTimeout: true # FIXME!!! remove after atom/atom-keymap#195
             text: '  cde'
             cursor: [0, 2]
+        it 'selects to the first character of the line', ->
+          ensure 'd I', text: '  cde', cursor: [0, 2],
 
   describe "the 0 keybinding", ->
     beforeEach ->

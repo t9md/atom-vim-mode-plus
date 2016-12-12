@@ -423,6 +423,8 @@
   'v': 'vim-mode-plus:operator-modifier-characterwise'
   'V': 'vim-mode-plus:operator-modifier-linewise'
   'o': 'vim-mode-plus:operator-modifier-occurrence'
+  'I': 'vim-mode-plus:move-to-first-character-of-line'
+  'A': 'vim-mode-plus:move-to-last-character-of-line'
 
 # operator-pending.has-occurrence [Experimental]
 # -------------------------
