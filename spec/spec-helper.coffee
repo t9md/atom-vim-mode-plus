@@ -263,17 +263,25 @@ class VimEditor
     textC: ['cursor', 'cursorBuffer']
     textC_: ['cursor', 'cursorBuffer']
 
+  getAndDeleteKeystrokeOptions: (options) ->
+    {partialMatchTimeout} = options
+    delete options.partialMatchTimeout
+    {partialMatchTimeout}
+
   # Public
   ensure: (args...) =>
     switch args.length
       when 1 then [options] = args
       when 2 then [keystroke, options] = args
+
+    keystrokeOptions = @getAndDeleteKeystrokeOptions(options)
+
     @validateOptions(options, ensureOptionsOrdered, 'Invalid ensure option')
     @validateExclusiveOptions(options, ensureExclusiveRules)
 
     # Input
     unless _.isEmpty(keystroke)
-      @keystroke(keystroke)
+      @keystroke(keystroke, keystrokeOptions)
 
     for name in ensureOptionsOrdered when options[name]?
       method = 'ensure' + _.capitalize(_.camelize(name))
@@ -429,5 +437,8 @@ class VimEditor
             atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')
           else
             rawKeystroke(k, target)
+
+    if options.partialMatchTimeout
+      advanceClock(atom.keymaps.getPartialMatchTimeout())
 
 module.exports = {getVimState, getView, dispatch, TextData, withMockPlatform, rawKeystroke}
