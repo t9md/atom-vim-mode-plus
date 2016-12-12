@@ -1054,14 +1054,20 @@ class MoveToNextOccurrence extends Motion
   direction: 'next'
 
   initialize: ->
+    @abort() unless @vimState.occurrenceManager.hasMarkers()
     super
-    # point
-    {@occurrenceManager} = @vimState
-    if @occurrenceManager.hasMarkers()
-      @ranges = @occurrenceManager.getMarkers().map (marker) -> marker.getBufferRange()
-    else
-      # point
-      @abort()
+
+  getRanges: ->
+    @vimState.occurrenceManager.getMarkers().map (marker) ->
+      marker.getBufferRange()
+
+  select: ->
+    @ranges = @getRanges()
+    super
+
+  execute: ->
+    @ranges = @getRanges()
+    super
 
   moveCursor: (cursor) ->
     index = @getIndex(cursor.getBufferPosition())
