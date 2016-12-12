@@ -465,41 +465,32 @@ describe "Operator TransformString", ->
   describe 'surround', ->
     beforeEach ->
       set
-        text: """
-          apple
+        textC: """
+          |apple
           pairs: [brackets]
           pairs: [brackets]
           ( multi
             line )
           """
-        cursorBuffer: [0, 0]
 
     describe 'surround', ->
-      beforeEach ->
-        atom.keymaps.add "surround-test",
-          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            'y s': 'vim-mode-plus:surround'
-          , 100
-
       it "surround text object with ( and repeatable", ->
         ensure ['y s i w', input: '('],
-          text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
-          cursor: [0, 0]
+          textC: "|(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
         ensure 'j .',
           text: "(apple)\n(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
       it "surround text object with { and repeatable", ->
         ensure ['y s i w', input: '{'],
-          text: "{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
-          cursor: [0, 0]
+          textC: "|{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
         ensure 'j .',
-          text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
-      it "surround linewise", ->
-        ensure ['y s y s', input: '{'],
-          text: "{\napple\n}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
-          cursor: [0, 0]
-        ensure '3 j .',
-          text: "{\napple\n}\n{\npairs: [brackets]\n}\npairs: [brackets]\n( multi\n  line )"
-      describe 'with motion which aloso taking user-iinput', ->
+          textC: "{apple}\n|{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
+      it "surround current-line", ->
+        ensure ['y s s', input: '{'],
+          textC: "|{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
+        ensure 'j .',
+          textC: "{apple}\n|{pairs: [brackets]}\npairs: [brackets]\n( multi\n  line )"
+
+      describe 'with motion which takes user-input', ->
         beforeEach ->
           set text: "s _____ e", cursor: [0, 0]
         describe "with 'f' motion", ->
@@ -519,8 +510,7 @@ describe "Operator TransformString", ->
         beforeEach ->
           settings.set('charactersToAddSpaceOnSurround', ['(', '{', '['])
           set
-            text: "apple\norange\nlemmon"
-            cursorBuffer: [0, 0]
+            textC: "|apple\norange\nlemmon"
 
         describe "char is in charactersToAddSpaceOnSurround", ->
           it "add additional space inside pair char when surround", ->
@@ -724,42 +714,35 @@ describe "Operator TransformString", ->
 
       it "surround a word with ( and repeatable", ->
         ensure ['y s w', input: '('],
-          text: "(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
-          cursor: [0, 0]
+          textC: "|(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
         ensure 'j .',
-          text: "(apple)\n(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
+          textC: "(apple)\n|(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
       it "surround a word with { and repeatable", ->
         ensure ['y s w', input: '{'],
-          text: "{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
-          cursor: [0, 0]
+          textC: "|{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
         ensure 'j .',
-          text: "{apple}\n{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
+          textC: "{apple}\n|{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
 
     describe 'delete-surround-any-pair', ->
       beforeEach ->
         set
-          text: """
+          textC: """
             apple
-            (pairs: [brackets])
+            (pairs: [|brackets])
             {pairs "s" [brackets]}
             ( multi
               line )
             """
-          cursor: [1, 9]
-
-        atom.keymaps.add "test",
-          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            'd s': 'vim-mode-plus:delete-surround-any-pair'
 
       it "delete surrounded any pair found and repeatable", ->
-        ensure 'd s',
+        ensure 'd s s',
           text: 'apple\n(pairs: brackets)\n{pairs "s" [brackets]}\n( multi\n  line )'
         ensure '.',
           text: 'apple\npairs: brackets\n{pairs "s" [brackets]}\n( multi\n  line )'
 
       it "delete surrounded any pair found with skip pair out of cursor and repeatable", ->
         set cursor: [2, 14]
-        ensure 'd s',
+        ensure 'd s s',
           text: 'apple\n(pairs: [brackets])\n{pairs "s" brackets}\n( multi\n  line )'
         ensure '.',
           text: 'apple\n(pairs: [brackets])\npairs "s" brackets\n( multi\n  line )'
@@ -768,80 +751,64 @@ describe "Operator TransformString", ->
 
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
-        ensure 'd s',
+        ensure 'd s s',
           text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\n multi\n  line '
 
     describe 'delete-surround-any-pair-allow-forwarding', ->
       beforeEach ->
         settings.set('stayOnTransformString', true)
-        atom.keymaps.add "test",
-          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            'd s': 'vim-mode-plus:delete-surround-any-pair-allow-forwarding'
+
       it "[1] single line", ->
         set
-          cursor: [0, 0]
-          text: """
-          ___(inner)
-          ___(inner)
-          """
-        ensure 'd s',
-          text: """
-          ___inner
+          textC: """
+          |___(inner)
           ___(inner)
           """
-          cursor: [0, 0]
+        ensure 'd s S',
+          textC: """
+          |___inner
+          ___(inner)
+          """
         ensure 'j .',
-          text: """
+          textC: """
           ___inner
-          ___inner
+          |___inner
           """
-          cursor: [1, 0]
 
     describe 'change-surround-any-pair', ->
       beforeEach ->
         set
-          text: """
-            (apple)
+          textC: """
+            (|apple)
             (grape)
             <lemmon>
             {orange}
             """
-          cursor: [0, 1]
-
-        atom.keymaps.add "test",
-          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            'c s': 'vim-mode-plus:change-surround-any-pair'
 
       it "change any surrounded pair found and repeatable", ->
-        ensure ['c s', input: '<'], text: "<apple>\n(grape)\n<lemmon>\n{orange}"
-        ensure 'j .', text: "<apple>\n<grape>\n<lemmon>\n{orange}"
-        ensure 'j j .', text: "<apple>\n<grape>\n<lemmon>\n<orange>"
+        ensure ['c s s', input: '<'], textC: "|<apple>\n(grape)\n<lemmon>\n{orange}"
+        ensure 'j .', textC: "<apple>\n|<grape>\n<lemmon>\n{orange}"
+        ensure 'j j .', textC: "<apple>\n<grape>\n<lemmon>\n|<orange>"
 
     describe 'change-surround-any-pair-allow-forwarding', ->
       beforeEach ->
         settings.set('stayOnTransformString', true)
-        atom.keymaps.add "test",
-          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-            'c s': 'vim-mode-plus:change-surround-any-pair-allow-forwarding'
       it "[1] single line", ->
         set
-          cursor: [0, 0]
-          text: """
-          ___(inner)
-          ___(inner)
-          """
-        ensure ['c s', input: '<'],
-          text: """
-          ___<inner>
+          textC: """
+          |___(inner)
           ___(inner)
           """
-          cursor: [0, 0]
+        ensure ['c s S', input: '<'],
+          textC: """
+          |___<inner>
+          ___(inner)
+          """
         ensure 'j .',
-          text: """
+          textC: """
           ___<inner>
-          ___<inner>
+          |___<inner>
           """
-          cursor: [1, 0]
 
   describe 'ReplaceWithRegister', ->
     originalText = null

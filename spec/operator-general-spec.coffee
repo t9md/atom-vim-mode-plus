@@ -127,7 +127,9 @@ describe "Operator general", ->
         cursor: [1, 1]
 
     it "enters operator-pending mode", ->
-      ensure 'd', mode: 'operator-pending'
+      ensure 'd',
+        partialMatchTimeout: true
+        mode: 'operator-pending'
 
     describe "when followed by a d", ->
       it "deletes the current line and exits operator-pending mode", ->
@@ -303,6 +305,7 @@ describe "Operator general", ->
         set text: "12345 abcde ABCDE", cursor: [0, 9]
 
         ensure 'd',
+          partialMatchTimeout: true
           mode: 'operator-pending'
 
         ensure 'i w',
@@ -713,6 +716,7 @@ describe "Operator general", ->
           text: "  abcd\n  1234"
           cursorBuffer: [[0, 0], [1, 5]]
         ensure 'y ^',
+          partialMatchTimeout: true # FIXME!!! remove after atom/atom-keymap#195
           register: '"': text: '123'
           cursorBuffer: [[0, 0], [1, 2]]
 

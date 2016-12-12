@@ -14,6 +14,7 @@ vim-mode improved.
     - [In visual-block mode, some motions make the editor slow, freeze.](#in-visual-block-mode-some-motions-make-the-editor-slow-freeze)
     - [ex-mode?](#ex-mode)
     - [Want to suppress autocomplete-plus's auto suggestion except insert-mode.](#want-to-suppress-autocomplete-pluss-auto-suggestion-except-insert-mode)
+    - [How can I insert single white space when surround?](#how-can-i-insert-single-white-space-when-surround)
 - [Wiki](#wiki)
 - [Keymap](#keymap)
 - [Helper packages](#helper-packages)
@@ -111,6 +112,10 @@ If you want to directly edit `config.cson`, here it is.
     "vim-mode-plus.insert-mode.replace"
   ]
 ```
+
+### How can I insert single white space when surround?
+
+Set `Characters To Add Space On Surround`. from vim-mode-plus's setting.
 
 # Wiki
 
