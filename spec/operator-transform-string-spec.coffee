@@ -464,6 +464,23 @@ describe "Operator TransformString", ->
 
   describe 'surround', ->
     beforeEach ->
+      keymapsForSurround = {
+        'atom-text-editor.vim-mode-plus.normal-mode':
+          'y s': 'vim-mode-plus:surround'
+          'd s': 'vim-mode-plus:delete-surround-any-pair'
+          'd S': 'vim-mode-plus:delete-surround'
+          'c s': 'vim-mode-plus:change-surround-any-pair'
+          'c S': 'vim-mode-plus:change-surround'
+
+        'atom-text-editor.vim-mode-plus.operator-pending-mode.surround-pending':
+          's': 'vim-mode-plus:inner-current-line'
+
+        'atom-text-editor.vim-mode-plus.visual-mode':
+          'S': 'vim-mode-plus:surround'
+      }
+
+      atom.keymaps.add("keymaps-for-surround", keymapsForSurround)
+
       set
         textC: """
           |apple
@@ -564,19 +581,16 @@ describe "Operator TransformString", ->
 
     describe 'delete surround', ->
       beforeEach ->
-        atom.keymaps.add "surround-test",
-          'atom-text-editor.vim-mode-plus.normal-mode':
-            'd s': 'vim-mode-plus:delete-surround'
         set cursor: [1, 8]
 
       it "delete surrounded chars and repeatable", ->
-        ensure ['d s', input: '['],
+        ensure ['d S', input: '['],
           text: "apple\npairs: brackets\npairs: [brackets]\n( multi\n  line )"
         ensure 'j l .',
           text: "apple\npairs: brackets\npairs: brackets\n( multi\n  line )"
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
-        ensure ['d s', input: '('],
+        ensure ['d S', input: '('],
           text: "apple\npairs: [brackets]\npairs: [brackets]\n multi\n  line "
       it "delete surrounded chars and trim padding spaces for non-identical pair-char", ->
         set
@@ -585,8 +599,8 @@ describe "Operator TransformString", ->
             {  orange   }\n
             """
           cursor: [0, 0]
-        ensure ['d s', input: '('], text: "apple\n{  orange   }\n"
-        ensure ['j d s', input: '{'], text: "apple\norange\n"
+        ensure ['d S', input: '('], text: "apple\n{  orange   }\n"
+        ensure ['j d S', input: '{'], text: "apple\norange\n"
       it "delete surrounded chars and NOT trim padding spaces for identical pair-char", ->
         set
           text: """
@@ -594,8 +608,8 @@ describe "Operator TransformString", ->
             "  orange   "\n
             """
           cursor: [0, 0]
-        ensure ['d s', input: '`'], text_: '_apple_\n"__orange___"\n'
-        ensure ['j d s', input: '"'], text_: "_apple_\n__orange___\n"
+        ensure ['d S', input: '`'], text_: '_apple_\n"__orange___"\n'
+        ensure ['j d S', input: '"'], text_: "_apple_\n__orange___\n"
       it "delete surrounded for multi-line but dont affect code layout", ->
         set
           cursor: [0, 34]
@@ -605,7 +619,7 @@ describe "Operator TransformString", ->
               hello: world
             }
             """
-        ensure ['d s', input: '{'],
+        ensure ['d S', input: '{'],
           text: [
               "highlightRanges @editor, range, "
               "  timeout: timeout"
@@ -615,10 +629,6 @@ describe "Operator TransformString", ->
 
     describe 'change surround', ->
       beforeEach ->
-        atom.keymaps.add "surround-test",
-          'atom-text-editor.vim-mode-plus.normal-mode':
-            'c s': 'vim-mode-plus:change-surround'
-
         set
           text: """
             (apple)
@@ -628,7 +638,7 @@ describe "Operator TransformString", ->
             """
           cursorBuffer: [0, 1]
       it "change surrounded chars and repeatable", ->
-        ensure ['c s', input: '(['],
+        ensure ['c S', input: '(['],
           text: """
             [apple]
             (grape)
@@ -643,14 +653,14 @@ describe "Operator TransformString", ->
             {orange}
             """
       it "change surrounded chars", ->
-        ensure ['j j c s', input: '<"'],
+        ensure ['j j c S', input: '<"'],
           text: """
             (apple)
             (grape)
             "lemmon"
             {orange}
             """
-        ensure ['j l c s', input: '{!'],
+        ensure ['j l c S', input: '{!'],
           text: """
             (apple)
             (grape)
@@ -667,7 +677,7 @@ describe "Operator TransformString", ->
               hello: world
             }
             """
-        ensure ['c s', input: '{('],
+        ensure ['c S', input: '{('],
           text: """
             highlightRanges @editor, range, (
               timeout: timeout
@@ -679,7 +689,7 @@ describe "Operator TransformString", ->
         ensureChangeSurround = (inputKeystrokes, options) ->
           set(text: options.initialText, cursorBuffer: [0, 0])
           delete options.initialText
-          keystrokes = ['c s'].concat({input: inputKeystrokes})
+          keystrokes = ['c S'].concat({input: inputKeystrokes})
           ensure(keystrokes, options)
 
         beforeEach ->
@@ -735,14 +745,14 @@ describe "Operator TransformString", ->
             """
 
       it "delete surrounded any pair found and repeatable", ->
-        ensure 'd s s',
+        ensure 'd s',
           text: 'apple\n(pairs: brackets)\n{pairs "s" [brackets]}\n( multi\n  line )'
         ensure '.',
           text: 'apple\npairs: brackets\n{pairs "s" [brackets]}\n( multi\n  line )'
 
       it "delete surrounded any pair found with skip pair out of cursor and repeatable", ->
         set cursor: [2, 14]
-        ensure 'd s s',
+        ensure 'd s',
           text: 'apple\n(pairs: [brackets])\n{pairs "s" brackets}\n( multi\n  line )'
         ensure '.',
           text: 'apple\n(pairs: [brackets])\npairs "s" brackets\n( multi\n  line )'
@@ -751,11 +761,15 @@ describe "Operator TransformString", ->
 
       it "delete surrounded chars expanded to multi-line", ->
         set cursor: [3, 1]
-        ensure 'd s s',
+        ensure 'd s',
           text: 'apple\n(pairs: [brackets])\n{pairs "s" [brackets]}\n multi\n  line '
 
     describe 'delete-surround-any-pair-allow-forwarding', ->
       beforeEach ->
+        atom.keymaps.add "keymaps-for-surround",
+          'atom-text-editor.vim-mode-plus.normal-mode':
+            'd s': 'vim-mode-plus:delete-surround-any-pair-allow-forwarding'
+
         settings.set('stayOnTransformString', true)
 
       it "[1] single line", ->
@@ -764,7 +778,7 @@ describe "Operator TransformString", ->
           |___(inner)
           ___(inner)
           """
-        ensure 'd s S',
+        ensure 'd s',
           textC: """
           |___inner
           ___(inner)
@@ -786,12 +800,15 @@ describe "Operator TransformString", ->
             """
 
       it "change any surrounded pair found and repeatable", ->
-        ensure ['c s s', input: '<'], textC: "|<apple>\n(grape)\n<lemmon>\n{orange}"
+        ensure ['c s', input: '<'], textC: "|<apple>\n(grape)\n<lemmon>\n{orange}"
         ensure 'j .', textC: "<apple>\n|<grape>\n<lemmon>\n{orange}"
         ensure 'j j .', textC: "<apple>\n<grape>\n<lemmon>\n|<orange>"
 
     describe 'change-surround-any-pair-allow-forwarding', ->
       beforeEach ->
+        atom.keymaps.add "keymaps-for-surround",
+          'atom-text-editor.vim-mode-plus.normal-mode':
+            'c s': 'vim-mode-plus:change-surround-any-pair-allow-forwarding'
         settings.set('stayOnTransformString', true)
       it "[1] single line", ->
         set
@@ -799,7 +816,7 @@ describe "Operator TransformString", ->
           |___(inner)
           ___(inner)
           """
-        ensure ['c s S', input: '<'],
+        ensure ['c s', input: '<'],
           textC: """
           |___<inner>
           ___(inner)
