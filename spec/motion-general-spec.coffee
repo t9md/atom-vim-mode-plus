@@ -100,26 +100,54 @@ describe "Motion general", ->
           ensure 'j', selectedText: text.getLines([1])
           ensure 'j', selectedText: text.getLines([1, 2])
 
-    describe "with big count was given", ->
-      BIG_NUMBER = null
-      ensureBigCountMotion = (number, keystroke, options) ->
-        count = String(number).split('').join(' ')
-        ensure("#{count} #{keystroke}", options)
+    # [NOTE] See #560
+    # This spec is intended to be used in local test, not at CI service.
+    # Safe to execute if it passes, but freeze editor when it fail.
+    # So explicitly disabled because I don't want be banned by CI service.
+    # Enable this on demmand when freezing happens again!
+    xdescribe "with big count was given", ->
+      BIG_NUMBER = Number.MAX_SAFE_INTEGER
+      ensureBigCountMotion = (keystrokes, options) ->
+        count = String(BIG_NUMBER).split('').join(' ')
+        keystrokes = keystrokes.split('').join(' ')
+        ensure("#{count} #{keystrokes}", options)
 
       beforeEach ->
-        BIG_NUMBER = Number.MAX_SAFE_INTEGER
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'g {': 'vim-mode-plus:move-to-previous-fold-start'
+            'g }': 'vim-mode-plus:move-to-next-fold-start'
+            ', N': 'vim-mode-plus:move-to-previous-number'
+            ', n': 'vim-mode-plus:move-to-next-number'
         set
           text: """
           0000
           1111
-          2222
+          2222\n
           """
           cursor: [1, 2]
 
-      it "by `j`", -> ensureBigCountMotion BIG_NUMBER, 'j', cursor: [2, 2]
-      it "by `k`", -> ensureBigCountMotion BIG_NUMBER, 'k', cursor: [0, 2]
-      it "by `h`", -> ensureBigCountMotion BIG_NUMBER, 'h', cursor: [1, 0]
-      it "by `l`", -> ensureBigCountMotion BIG_NUMBER, 'l', cursor: [1, 3]
+      it "by `j`", -> ensureBigCountMotion 'j', cursor: [2, 2]
+      it "by `k`", -> ensureBigCountMotion 'k', cursor: [0, 2]
+      it "by `h`", -> ensureBigCountMotion 'h', cursor: [1, 0]
+      it "by `l`", -> ensureBigCountMotion 'l', cursor: [1, 3]
+      it "by `[`", -> ensureBigCountMotion '[', cursor: [0, 2]
+      it "by `]`", -> ensureBigCountMotion ']', cursor: [2, 2]
+      it "by `w`", -> ensureBigCountMotion 'w', cursor: [2, 3]
+      it "by `W`", -> ensureBigCountMotion 'W', cursor: [2, 3]
+      it "by `b`", -> ensureBigCountMotion 'b', cursor: [0, 0]
+      it "by `B`", -> ensureBigCountMotion 'B', cursor: [0, 0]
+      it "by `e`", -> ensureBigCountMotion 'e', cursor: [2, 3]
+      it "by `(`", -> ensureBigCountMotion '(', cursor: [0, 0]
+      it "by `)`", -> ensureBigCountMotion ')', cursor: [2, 3]
+      it "by `{`", -> ensureBigCountMotion '{', cursor: [0, 0]
+      it "by `}`", -> ensureBigCountMotion '}', cursor: [2, 3]
+      it "by `-`", -> ensureBigCountMotion '-', cursor: [0, 0]
+      it "by `_`", -> ensureBigCountMotion '_', cursor: [2, 0]
+      it "by `g {`", -> ensureBigCountMotion 'g {', cursor: [1, 2] # No fold no move but won't freeze.
+      it "by `g }`", -> ensureBigCountMotion 'g }', cursor: [1, 2] # No fold no move but won't freeze.
+      it "by `, N`", -> ensureBigCountMotion ', N', cursor: [1, 2] # No grammar, no move but won't freeze.
+      it "by `, n`", -> ensureBigCountMotion ', n', cursor: [1, 2] # No grammar, no move but won't freeze.
 
     describe "the k keybinding", ->
       beforeEach ->

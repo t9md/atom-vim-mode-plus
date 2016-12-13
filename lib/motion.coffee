@@ -148,10 +148,10 @@ class Motion extends Base
 
   moveCursorCountTimes: (cursor, fn) ->
     oldPosition = cursor.getBufferPosition()
-    @countTimes ({stop}) ->
-      fn()
+    @countTimes (state) =>
+      fn(state)
       if (newPosition = cursor.getBufferPosition()).isEqual(oldPosition)
-        stop()
+        state.stop()
       oldPosition = newPosition
 
 # Used as operator's target in visual-mode.
@@ -286,13 +286,8 @@ class MoveUpToEdge extends Motion
   @description: "Move cursor up to **edge** char at same-column"
 
   moveCursor: (cursor) ->
-    point = cursor.getScreenPosition()
-    @countTimes ({stop}) =>
-      if (newPoint = @getPoint(point))
-        point = newPoint
-      else
-        stop()
-    @setScreenPositionSafely(cursor, point)
+    @moveCursorCountTimes cursor, =>
+      @setScreenPositionSafely(cursor, @getPoint(cursor.getScreenPosition()))
 
   getPoint: (fromPoint) ->
     column = fromPoint.column
@@ -370,7 +365,7 @@ class MoveToNextWord extends Motion
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
-    @countTimes ({isFinal}) =>
+    @moveCursorCountTimes cursor, ({isFinal}) =>
       cursorRow = cursor.getBufferRow()
       if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
         point = [cursorRow + 1, 0]
@@ -390,7 +385,7 @@ class MoveToPreviousWord extends Motion
   wordRegex: null
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       point = cursor.getBeginningOfCurrentWordBufferPosition({@wordRegex})
       cursor.setBufferPosition(point)
 
@@ -406,7 +401,7 @@ class MoveToEndOfWord extends Motion
     cursor.setBufferPosition(point)
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       originalPoint = cursor.getBufferPosition()
       @moveToNextEndOfWord(cursor)
       if originalPoint.isEqual(cursor.getBufferPosition())
@@ -509,10 +504,8 @@ class MoveToNextSentence extends Motion
   direction: 'next'
 
   moveCursor: (cursor) ->
-    point = cursor.getBufferPosition()
-    @countTimes =>
-      point = @getPoint(point)
-    cursor.setBufferPosition(point)
+    @moveCursorCountTimes cursor, =>
+      @setBufferPositionSafely(cursor, @getPoint(cursor.getBufferPosition()))
 
   getPoint: (fromPoint) ->
     if @direction is 'next'
@@ -576,10 +569,8 @@ class MoveToNextParagraph extends Motion
   direction: 'next'
 
   moveCursor: (cursor) ->
-    point = cursor.getBufferPosition()
-    @countTimes =>
-      point = @getPoint(point)
-    cursor.setBufferPosition(point)
+    @moveCursorCountTimes cursor, =>
+      @setBufferPositionSafely(cursor, @getPoint(cursor.getBufferPosition()))
 
   getPoint: (fromPoint) ->
     startRow = fromPoint.row
@@ -646,7 +637,7 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
   wise: 'linewise'
   moveCursor: (cursor) ->
-    @countTimes ->
+    @moveCursorCountTimes cursor, =>
       moveCursorUpBuffer(cursor)
     super
 
@@ -654,7 +645,7 @@ class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
   wise: 'linewise'
   moveCursor: (cursor) ->
-    @countTimes ->
+    @moveCursorCountTimes cursor, =>
       moveCursorDownBuffer(cursor)
     super
 
@@ -967,7 +958,7 @@ class MoveToPreviousFoldStart extends Motion
     @getScanRows(cursor)[0]
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       if (row = @detectRow(cursor))?
         moveCursorToFirstCharacterAtRow(cursor, row)
 
@@ -1026,13 +1017,8 @@ class MoveToPositionByScope extends Motion
     detectScopeStartPositionForScope(@editor, fromPoint, @direction, @scope)
 
   moveCursor: (cursor) ->
-    point = cursor.getBufferPosition()
-    @countTimes ({stop}) =>
-      if (newPoint = @getPoint(point))
-        point = newPoint
-      else
-        stop()
-    @setBufferPositionSafely(cursor, point)
+    @moveCursorCountTimes cursor, =>
+      @setBufferPositionSafely(cursor, @getPoint(cursor.getBufferPosition()))
 
 class MoveToPreviousString extends MoveToPositionByScope
   @extend()
