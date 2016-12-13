@@ -31,6 +31,7 @@ swrap = require './selection-wrapper'
 class TextObject extends Base
   @extend(false)
   wise: null
+  supportCount: false # FIXME #472, #66
 
   constructor: ->
     @constructor::inner = @getName().startsWith('Inner')
@@ -42,6 +43,9 @@ class TextObject extends Base
 
   isA: ->
     not @isInner()
+
+  isSuportCount: ->
+    @supportCount
 
   getWise: ->
     if @wise? and @getOperator().isOccurrence()
@@ -57,9 +61,6 @@ class TextObject extends Base
 
   isBlockwise: ->
     @getWise() is 'blockwise'
-
-  stopSelection: ->
-    @selectionStopped = true
 
   getNormalizedHeadBufferPosition: (selection) ->
     head = selection.getHeadBufferPosition()
@@ -87,11 +88,15 @@ class TextObject extends Base
       throw new Error('in TextObject: Must not happen')
 
   select: ->
-    @selectionStopped = false
     selectResults = []
-    @countTimes =>
-      for selection in @editor.getSelections() when not @selectionStopped
+    @countTimes ({stop}) =>
+      @stopSelection = stop
+
+      for selection in @editor.getSelections()
         selectResults.push(@selectTextObject(selection))
+        unless @isSuportCount()
+          @stopSelection() # FIXME: quick-fix for #560
+
 
     if @needToKeepColumn()
       for selection in @editor.getSelections()
@@ -108,12 +113,20 @@ class TextObject extends Base
 
   selectTextObject: (selection) ->
     if range = @getRange(selection)
+      oldRange = selection.getBufferRange()
+
       needToKeepColumn = @needToKeepColumn()
       if needToKeepColumn and not @isMode('visual', 'linewise')
         @vimState.modeManager.activate('visual', 'linewise')
       swrap(selection).setBufferRangeSafely(range, keepGoalColumn: needToKeepColumn)
+
+      newRange = selection.getBufferRange()
+      if newRange.isEqual(oldRange)
+        @stopSelection() # FIXME: quick-fix for #560
+
       true
     else
+      @stopSelection() # FIXME: quick-fix for #560
       false
 
   getRange: ->
@@ -179,6 +192,7 @@ class Pair extends TextObject
   adjustInnerRange: true
   pair: null
   wise: 'characterwise'
+  supportCount: true
 
   getPattern: ->
     [open, close] = @pair
@@ -614,6 +628,7 @@ class InnerTag extends Tag
 class Paragraph extends TextObject
   @extend(false)
   wise: 'linewise'
+  supportCount: true
 
   findRow: (fromRow, direction, fn) ->
     fn.reset?()
@@ -657,6 +672,7 @@ class Paragraph extends TextObject
     predict
 
   getRange: (selection) ->
+    originalRange = selection.getBufferRange()
     fromRow = @getNormalizedHeadBufferPosition(selection).row
 
     if @isMode('visual', 'linewise')
