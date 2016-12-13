@@ -1,3 +1,38 @@
+# 0.73.0:
+- New: Close empty search-mini-editor by `backspace` from @gittyupagain. #567
+- New, Breaking: Keep `occurrence-marker` after operation. #572
+  - Improve: Destroy `occurrence-marker` remains after invalidated.
+  - Breaking: Operate on normal-target when fail to select `occurrence-marker`. #578, #579
+  - Improve: Destroy `occurrence-marker` in-sync if possible #592
+- New: [experimental] Operator `add-blank-line-below`, `add-blank-line-above`, No defaut keymap. #574
+- New, Breaking: `I`, `A` keymap in operator-pending(`d I` for `d ^`, `d A` for `d $`).
+- New: Simplify `tab`, `shift-tab`, #581, #594
+  - Keymap, Breaking: Mapped in all mode except `insert-mode`, opinionated decision.
+    - `tab`: `move-to-next-occurrence`
+    - `shift-tab`: `move-to-previous-occurrence`
+  - New: Setting `flashOnMoveToOccurrence`, default `false`.
+  - Improve: Now correctly skips cleared or invalidated(=invisible) `occurrence-marker`. #594
+  - Improve: `.` repeat support for `move-to-occurrence` targeted operation #591
+  - Improve: Spec coverage.
+- Fix: text-objects function new work properly in language-elixir syntax by @dillonkearns. #585
+- Fix: To undo repeat-of-change need `u` twice in v0.72.0.
+- Fix: When `has-occurrence`, `I`, `A` was incorrectly keymapped in `insert-mode`.
+- Fix: Prevent Atom editor freezes by passing BIG count. #560, #596
+  - For Motion(`9999999j`), TextObject: `v9999999ip` and Insert: `9999999i`
+- Improve: Flashing
+  - Use red flash color for delete operation #573
+  - Longer flash for undo/redo(by keyframe tweaking).
+  - Improve: Reduce chance to re-flash immediately split after undo by reducing duration(1sec to 500ms).
+- Improve: Documentation, description
+  - Improve config description
+  - Add FAQ for `charactersToAddSpaceOnSurround`
+  - Mention `vim-mode-plus-keymaps-for-surround` keymap only package in README.md.
+- Internal, Breaking: [experimental] No longer directly call `Motion::select()` from operator #595
+- Internal: Spec improved
+  - `textC` spec DSL which declare cursor position by `|` and `!`(last-cursor)
+  - Rewrite several specs by improving granularity by checking cursor position(was not checked before)
+  - Allow `partialMatchTimeout` options for ensure and keystroke spec helper
+
 # 0.72.0:
 - New: Command `add-preset-occurrence-from-last-occurrence-pattern` default `g .` keymap.
 - New: Command `insert-at-start-of-occurrence`, `insert-at-end-of-occurrence`
