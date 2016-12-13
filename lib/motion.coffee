@@ -146,6 +146,19 @@ class Motion extends Base
     else
       setBufferRow(cursor, row, options)
 
+  # [NOTE]
+  # Since this function checks cursor position change, a cursor position MUST be
+  # updated IN callback(=fn)
+  # Updating point only in callback is wrong-use of this funciton,
+  # since it stops immediately because of not cursor position change.
+  moveCursorCountTimes: (cursor, fn) ->
+    oldPosition = cursor.getBufferPosition()
+    @countTimes (state) =>
+      fn(state)
+      if (newPosition = cursor.getBufferPosition()).isEqual(oldPosition)
+        state.stop()
+      oldPosition = newPosition
+
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
   @extend(false)
@@ -198,7 +211,7 @@ class MoveLeft extends Motion
   @extend()
   moveCursor: (cursor) ->
     allowWrap = settings.get('wrapLeftRightMotion')
-    @countTimes ->
+    @moveCursorCountTimes cursor, ->
       moveCursorLeft(cursor, {allowWrap})
 
 class MoveRight extends Motion
@@ -210,7 +223,7 @@ class MoveRight extends Motion
       settings.get('wrapLeftRightMotion')
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       @editor.unfoldBufferRow(cursor.getBufferRow())
       allowWrap = @canWrapToNextLine(cursor)
       moveCursorRight(cursor)
@@ -235,7 +248,7 @@ class MoveUp extends Motion
       row
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       setBufferRow(cursor, @getBufferRow(cursor.getBufferRow()))
 
 class MoveDown extends MoveUp
@@ -253,7 +266,7 @@ class MoveUpScreen extends Motion
   direction: 'up'
 
   moveCursor: (cursor) ->
-    @countTimes ->
+    @moveCursorCountTimes cursor, =>
       moveCursorUpScreen(cursor)
 
 class MoveDownScreen extends MoveUpScreen
@@ -262,7 +275,7 @@ class MoveDownScreen extends MoveUpScreen
   direction: 'down'
 
   moveCursor: (cursor) ->
-    @countTimes ->
+    @moveCursorCountTimes cursor, =>
       moveCursorDownScreen(cursor)
 
 # Move down/up to Edge
@@ -278,13 +291,8 @@ class MoveUpToEdge extends Motion
   @description: "Move cursor up to **edge** char at same-column"
 
   moveCursor: (cursor) ->
-    point = cursor.getScreenPosition()
-    @countTimes ({stop}) =>
-      if (newPoint = @getPoint(point))
-        point = newPoint
-      else
-        stop()
-    @setScreenPositionSafely(cursor, point)
+    @moveCursorCountTimes cursor, =>
+      @setScreenPositionSafely(cursor, @getPoint(cursor.getScreenPosition()))
 
   getPoint: (fromPoint) ->
     column = fromPoint.column
@@ -362,7 +370,7 @@ class MoveToNextWord extends Motion
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
-    @countTimes ({isFinal}) =>
+    @moveCursorCountTimes cursor, ({isFinal}) =>
       cursorRow = cursor.getBufferRow()
       if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
         point = [cursorRow + 1, 0]
@@ -382,7 +390,7 @@ class MoveToPreviousWord extends Motion
   wordRegex: null
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       point = cursor.getBeginningOfCurrentWordBufferPosition({@wordRegex})
       cursor.setBufferPosition(point)
 
@@ -398,7 +406,7 @@ class MoveToEndOfWord extends Motion
     cursor.setBufferPosition(point)
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       originalPoint = cursor.getBufferPosition()
       @moveToNextEndOfWord(cursor)
       if originalPoint.isEqual(cursor.getBufferPosition())
@@ -501,10 +509,8 @@ class MoveToNextSentence extends Motion
   direction: 'next'
 
   moveCursor: (cursor) ->
-    point = cursor.getBufferPosition()
-    @countTimes =>
-      point = @getPoint(point)
-    cursor.setBufferPosition(point)
+    @moveCursorCountTimes cursor, =>
+      @setBufferPositionSafely(cursor, @getPoint(cursor.getBufferPosition()))
 
   getPoint: (fromPoint) ->
     if @direction is 'next'
@@ -568,10 +574,8 @@ class MoveToNextParagraph extends Motion
   direction: 'next'
 
   moveCursor: (cursor) ->
-    point = cursor.getBufferPosition()
-    @countTimes =>
-      point = @getPoint(point)
-    cursor.setBufferPosition(point)
+    @moveCursorCountTimes cursor, =>
+      @setBufferPositionSafely(cursor, @getPoint(cursor.getBufferPosition()))
 
   getPoint: (fromPoint) ->
     startRow = fromPoint.row
@@ -638,7 +642,7 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
   wise: 'linewise'
   moveCursor: (cursor) ->
-    @countTimes ->
+    @moveCursorCountTimes cursor, =>
       moveCursorUpBuffer(cursor)
     super
 
@@ -646,7 +650,7 @@ class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
   wise: 'linewise'
   moveCursor: (cursor) ->
-    @countTimes ->
+    @moveCursorCountTimes cursor, =>
       moveCursorDownBuffer(cursor)
     super
 
@@ -959,7 +963,7 @@ class MoveToPreviousFoldStart extends Motion
     @getScanRows(cursor)[0]
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       if (row = @detectRow(cursor))?
         moveCursorToFirstCharacterAtRow(cursor, row)
 
@@ -1018,13 +1022,8 @@ class MoveToPositionByScope extends Motion
     detectScopeStartPositionForScope(@editor, fromPoint, @direction, @scope)
 
   moveCursor: (cursor) ->
-    point = cursor.getBufferPosition()
-    @countTimes ({stop}) =>
-      if (newPoint = @getPoint(point))
-        point = newPoint
-      else
-        stop()
-    @setBufferPositionSafely(cursor, point)
+    @moveCursorCountTimes cursor, =>
+      @setBufferPositionSafely(cursor, @getPoint(cursor.getBufferPosition()))
 
 class MoveToPreviousString extends MoveToPositionByScope
   @extend()

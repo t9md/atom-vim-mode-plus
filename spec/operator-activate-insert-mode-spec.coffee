@@ -852,3 +852,12 @@ describe "Operator ActivateInsertMode family", ->
         it "[case-C]", -> ensureInsertionCount '3 C', insert: '=', text: "=", cursor: [0, 0]
         it "[case-s]", -> ensureInsertionCount '3 s', insert: '=', text: "=", cursor: [0, 0]
         it "[case-S]", -> ensureInsertionCount '3 S', insert: '=', text: "=", cursor: [0, 0]
+
+    describe "throttoling intertion count to 100 at maximum", ->
+      it "insert 100 times at maximum even if big count was given", ->
+        set text: ''
+        expect(editor.getLastBufferRow()).toBe(0)
+        ensure '5 5 5 5 5 5 5 i', mode: 'insert'
+        editor.insertText("a\n")
+        ensure 'escape', mode: 'normal'
+        expect(editor.getLastBufferRow()).toBe(101)

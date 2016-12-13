@@ -2,7 +2,7 @@ _ = require 'underscore-plus'
 {Range} = require 'atom'
 
 {
-  moveCursorLeft, moveCursorRight
+  moveCursorLeft, moveCursorRight, limitNumber
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -91,7 +91,8 @@ class ActivateInsertMode extends Operator # FIXME
 
   getInsertionCount: ->
     @insertionCount ?= if @supportInsertionCount then @getCount(-1) else 0
-    @insertionCount
+    # Avoid freezing by acccidental big count(e.g. `5555555555555i`), See #560, #596
+    limitNumber(@insertionCount, max: 100)
 
   execute: ->
     if @isRequireTarget()
