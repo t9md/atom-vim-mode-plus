@@ -108,7 +108,6 @@ describe "Motion general", ->
 
       beforeEach ->
         BIG_NUMBER = Number.MAX_SAFE_INTEGER
-        # BIG_NUMBER = 10
         set
           text: """
           0000
@@ -117,10 +116,10 @@ describe "Motion general", ->
           """
           cursor: [1, 2]
 
-      # it "by `j`", -> ensureBigCountMotion BIG_NUMBER, 'j', cursor: [2, 2]
-      # it "by `k`", -> ensureBigCountMotion BIG_NUMBER, 'k', cursor: [0, 2]
+      it "by `j`", -> ensureBigCountMotion BIG_NUMBER, 'j', cursor: [2, 2]
+      it "by `k`", -> ensureBigCountMotion BIG_NUMBER, 'k', cursor: [0, 2]
       it "by `h`", -> ensureBigCountMotion BIG_NUMBER, 'h', cursor: [1, 0]
-      # it "by `l`", -> ensureBigCountMotion BIG_NUMBER, 'l', cursor: [1, 3]
+      it "by `l`", -> ensureBigCountMotion BIG_NUMBER, 'l', cursor: [1, 3]
 
     describe "the k keybinding", ->
       beforeEach ->

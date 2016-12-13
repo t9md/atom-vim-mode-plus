@@ -146,6 +146,14 @@ class Motion extends Base
     else
       setBufferRow(cursor, row, options)
 
+  moveCursorCountTimes: (cursor, fn) ->
+    oldPosition = cursor.getBufferPosition()
+    @countTimes ({stop}) ->
+      fn()
+      if (newPosition = cursor.getBufferPosition()).isEqual(oldPosition)
+        stop()
+      oldPosition = newPosition
+
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
   @extend(false)
@@ -198,11 +206,8 @@ class MoveLeft extends Motion
   @extend()
   moveCursor: (cursor) ->
     allowWrap = settings.get('wrapLeftRightMotion')
-    point = cursor.getBufferPosition()
-    @countTimes ({stop})->
+    @moveCursorCountTimes cursor, ->
       moveCursorLeft(cursor, {allowWrap})
-      stop() if point.isEqual(cursor.getBufferPosition())
-      point = cursor.getBufferPosition()
 
 class MoveRight extends Motion
   @extend()
@@ -213,7 +218,7 @@ class MoveRight extends Motion
       settings.get('wrapLeftRightMotion')
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       @editor.unfoldBufferRow(cursor.getBufferRow())
       allowWrap = @canWrapToNextLine(cursor)
       moveCursorRight(cursor)
@@ -238,7 +243,7 @@ class MoveUp extends Motion
       row
 
   moveCursor: (cursor) ->
-    @countTimes =>
+    @moveCursorCountTimes cursor, =>
       setBufferRow(cursor, @getBufferRow(cursor.getBufferRow()))
 
 class MoveDown extends MoveUp
@@ -256,7 +261,7 @@ class MoveUpScreen extends Motion
   direction: 'up'
 
   moveCursor: (cursor) ->
-    @countTimes ->
+    @moveCursorCountTimes cursor, =>
       moveCursorUpScreen(cursor)
 
 class MoveDownScreen extends MoveUpScreen
@@ -265,7 +270,7 @@ class MoveDownScreen extends MoveUpScreen
   direction: 'down'
 
   moveCursor: (cursor) ->
-    @countTimes ->
+    @moveCursorCountTimes cursor, =>
       moveCursorDownScreen(cursor)
 
 # Move down/up to Edge
