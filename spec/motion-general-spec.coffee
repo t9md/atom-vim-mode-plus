@@ -100,6 +100,28 @@ describe "Motion general", ->
           ensure 'j', selectedText: text.getLines([1])
           ensure 'j', selectedText: text.getLines([1, 2])
 
+    describe "with big count was given", ->
+      BIG_NUMBER = null
+      ensureBigCountMotion = (number, keystroke, options) ->
+        count = String(number).split('').join(' ')
+        ensure("#{count} #{keystroke}", options)
+
+      beforeEach ->
+        BIG_NUMBER = Number.MAX_SAFE_INTEGER
+        BIG_NUMBER = 10
+        set
+          text: """
+          0000
+          1111
+          2222
+          """
+          cursor: [1, 2]
+
+      it "by `j`", -> ensureBigCountMotion BIG_NUMBER, 'j', cursor: [2, 2]
+      it "by `k`", -> ensureBigCountMotion BIG_NUMBER, 'k', cursor: [0, 2]
+      it "by `h`", -> ensureBigCountMotion BIG_NUMBER, 'h', cursor: [1, 0]
+      it "by `l`", -> ensureBigCountMotion BIG_NUMBER, 'l', cursor: [1, 3]
+
     describe "the k keybinding", ->
       beforeEach ->
         set cursor: [2, 1]
