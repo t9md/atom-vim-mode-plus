@@ -198,8 +198,11 @@ class MoveLeft extends Motion
   @extend()
   moveCursor: (cursor) ->
     allowWrap = settings.get('wrapLeftRightMotion')
-    @countTimes ->
+    point = cursor.getBufferPosition()
+    @countTimes ({stop})->
       moveCursorLeft(cursor, {allowWrap})
+      stop() if point.isEqual(cursor.getBufferPosition())
+      point = cursor.getBufferPosition()
 
 class MoveRight extends Motion
   @extend()
