@@ -89,10 +89,9 @@ class Operator extends Base
     {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
 
     # If occurrence property is set at this timing and there is no preset-occurrence marker.
-    # treat `occurrence` is BOUNDED to operator itself so cleanup on each finish.
+    # treat `occurrence` is BOUND to operator itself so cleanup on each finish.
     if @occurrence and not @occurrenceManager.hasMarkers()
-      @onDidResetOperationStack =>
-        @occurrenceManager.resetPatterns()
+      @onDidResetOperationStack(@resetOccurrencePattern.bind(this))
 
     @initialize()
     @onDidSetOperatorModifier(@setModifier.bind(this))
@@ -125,8 +124,7 @@ class Operator extends Base
         # Reset existing preset-occurrence. e.g. `c o p`, `d o f`
         @occurrenceManager.resetPatterns()
         @addOccurrencePattern()
-        @subscribe @onDidDeactivateMode ({mode}) =>
-          @occurrenceManager.resetPatterns() if mode is 'operator-pending'
+        @onDidResetOperationStack(@resetOccurrencePattern.bind(this))
 
   canSelectPersistentSelection: ->
     @acceptPersistentSelection and
@@ -150,6 +148,9 @@ class Operator extends Base
       point = @getCursorBufferPosition()
       pattern = getWordPatternAtBufferPosition(@editor, point, singleNonWordChar: true)
     @occurrenceManager.addPattern(pattern)
+
+  resetOccurrencePattern: ->
+    @occurrenceManager.resetPatterns()
 
   # target is TextObject or Motion to operate on.
   setTarget: (@target) ->
@@ -184,7 +185,7 @@ class Operator extends Base
       @addOccurrencePattern()
 
     # To repoeat(`.`) operation where multiple occurrence patterns was set.
-    # Here we save patterns which resresent unioned regex which @occurrenceManager knows.
+    # Here we save patterns which represent unioned regex which @occurrenceManager knows.
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
     @occurrenceManager.select()
