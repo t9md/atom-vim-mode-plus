@@ -852,6 +852,35 @@ describe "Occurrence", ->
               occurrenceCount: 0
             expect(classList.contains('has-occurrence')).toBe(false)
 
+          it "[o-modifier] operate on next occurrence and repeatable", ->
+            ensure "escape",
+              mode: 'normal'
+              occurrenceCount: 0
+
+            ensure "g U o tab",
+              text: """
+              OOO: xxx: OOO
+              ___: ooo: xxx:
+              ooo: xxx: ooo:
+              """
+              occurrenceCount: 0
+
+            ensure ".",
+              text: """
+              OOO: xxx: OOO
+              ___: OOO: xxx:
+              ooo: xxx: ooo:
+              """
+              occurrenceCount: 0
+
+            ensure "2 .",
+              text: """
+              OOO: xxx: OOO
+              ___: OOO: xxx:
+              OOO: xxx: OOO:
+              """
+              occurrenceCount: 0
+
         describe "shift-tab", ->
           it "operate on next previous and repeatable", ->
             set cursor: [2, 10]

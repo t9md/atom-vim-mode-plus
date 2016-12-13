@@ -87,11 +87,7 @@ class Operator extends Base
   constructor: ->
     super
     {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
-
-    # If occurrence property is set at this timing and there is no preset-occurrence marker.
-    # treat `occurrence` is BOUND to operator itself so cleanup on each finish.
-    if @occurrence and not @occurrenceManager.hasMarkers()
-      @onDidResetOperationStack(@resetOccurrencePattern.bind(this))
+    @subscribeResetOccurrencePatternIfNeeded()
 
     @initialize()
     @onDidSetOperatorModifier(@setModifier.bind(this))
@@ -113,6 +109,14 @@ class Operator extends Base
         @vimState.modeManager.activate('visual', swrap.detectVisualModeSubmode(@editor))
     @target = 'CurrentSelection' if @isMode('visual')
     @setTarget(@new(@target)) if _.isString(@target)
+
+  subscribeResetOccurrencePatternIfNeeded: ->
+    # [CAUTION]
+    # This method has to be called in PROPER timing.
+    # If occurrence is true but no preset-occurrence
+    # Treat that `occurrence` is BOUNDED to operator itself, so cleanp at finished.
+    if @occurrence and not @occurrenceManager.hasMarkers()
+      @onDidResetOperationStack(@resetOccurrencePattern.bind(this))
 
   setModifier: (options) ->
     if options.wise?
@@ -179,17 +183,6 @@ class Operator extends Base
     # we have to return to normal-mode from operator-pending or visual
     @activateMode('normal')
 
-  selectOccurrence: ->
-    # In `.` repeated case, initailize() is never called so need to set here.
-    if @isRepeated() and not @occurrenceManager.hasMarkers()
-      @addOccurrencePattern()
-
-    # To repoeat(`.`) operation where multiple occurrence patterns was set.
-    # Here we save patterns which represent unioned regex which @occurrenceManager knows.
-    @patternForOccurrence ?= @occurrenceManager.buildPattern()
-
-    @occurrenceManager.select()
-
   # Return true unless all selection is empty.
   selectTarget: ->
     @mutationManager.init(
@@ -202,11 +195,20 @@ class Operator extends Base
     @target.forceWise?(@wise) if @wise?
     @emitWillSelectTarget()
 
+    # NOTE
+    # Since MoveToNextOccurrence, MoveToPreviousOccurrence motion move by
+    #  occurrence-marker, occurrence-marker has to be created BEFORE `@target.execute()`
+    if @isRepeated() and @isOccurrence() and not @occurrenceManager.hasMarkers()
+      @addOccurrencePattern()
+
     @target.execute()
 
     @mutationManager.setCheckpoint('did-select')
     if @isOccurrence()
-      @selectOccurrence()
+      # To repoeat(`.`) operation where multiple occurrence patterns was set.
+      # Here we save patterns which represent unioned regex which @occurrenceManager knows.
+      @patternForOccurrence ?= @occurrenceManager.buildPattern()
+      @occurrenceManager.select()
       @mutationManager.setCheckpoint('did-select-occurrence')
 
     if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
