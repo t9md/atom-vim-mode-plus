@@ -201,7 +201,8 @@ class Operator extends Base
     @target.forceWise?(@wise) if @wise?
     @emitWillSelectTarget()
 
-    @target.select()
+    @target.execute()
+
     @mutationManager.setCheckpoint('did-select')
     if @isOccurrence()
       @selectOccurrence()

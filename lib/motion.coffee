@@ -96,8 +96,11 @@ class Motion extends Base
       @vimState.mark.set("'", cursorPosition)
 
   execute: ->
-    @editor.moveCursors (cursor) =>
-      @moveWithSaveJump(cursor)
+    if @hasOperator()
+      @select()
+    else
+      @editor.moveCursors (cursor) =>
+        @moveWithSaveJump(cursor)
 
   select: ->
     @vimState.modeManager.normalizeSelections() if @isMode('visual')
@@ -152,9 +155,6 @@ class CurrentSelection extends Motion
   initialize: ->
     super
     @pointInfoByCursor = new Map
-
-  execute: ->
-    throw new Error("#{@getName()} should not be executed")
 
   moveCursor: (cursor) ->
     if @isMode('visual')
@@ -1060,10 +1060,6 @@ class MoveToNextOccurrence extends Motion
   getRanges: ->
     @vimState.occurrenceManager.getMarkers().map (marker) ->
       marker.getBufferRange()
-
-  select: ->
-    @ranges = @getRanges()
-    super
 
   execute: ->
     @ranges = @getRanges()

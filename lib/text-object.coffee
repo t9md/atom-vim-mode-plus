@@ -76,6 +76,16 @@ class TextObject extends Base
       settings.get('keepColumnOnSelectTextObject') and
       @getOperator().instanceof('Select')
 
+  execute: ->
+    # Whennever TextObject is executed, it has @operator
+    # Called from Operator::selectTarget()
+    #  - `v i p`, is `Select` operator with @target = `InnerParagraph`.
+    #  - `d i p`, is `Delete` operator with @target = `InnerParagraph`.
+    if @hasOperator()
+      @select()
+    else
+      throw new Error('in TextObject: Must not happen')
+
   select: ->
     @selectionStopped = false
     selectResults = []
