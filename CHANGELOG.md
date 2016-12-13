@@ -14,7 +14,7 @@
   - Improve: Now correctly skips cleared or invalidated(=invisible) `occurrence-marker`. #594
   - Improve: `.` repeat support for `move-to-occurrence` targeted operation #591
   - Improve: Spec coverage.
-- Fix: text-objects function new work properly in language-elixir syntax by @dillonkearns. #585
+- Fix: text-objects function now work properly in language-elixir syntax by @dillonkearns. #585
 - Fix: To undo repeat-of-change need `u` twice in v0.72.0.
 - Fix: When `has-occurrence`, `I`, `A` was incorrectly keymapped in `insert-mode`.
 - Fix: Prevent Atom editor freezes by passing BIG count. #560, #596
