@@ -31,6 +31,7 @@ Select = null
   limitNumber
   getIndex
   smartScrollToBufferPosition
+  getKeystrokeForEvent
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -1052,17 +1053,23 @@ class MoveToNextOccurrence extends Motion
   jump: true
   direction: 'next'
 
-  initialize: ->
-    @abort() unless @vimState.occurrenceManager.hasMarkers()
-    super
-
   getRanges: ->
     @vimState.occurrenceManager.getMarkers().map (marker) ->
       marker.getBufferRange()
 
   execute: ->
     @ranges = @getRanges()
-    super
+    if @ranges.length
+      super
+    else
+      # If command is invoked via `tab` or `shift-tab`,
+      #  then dispatch Atom's original command as fallback.
+      if settings.get('fallbackTabAndShiftTabInNormalMode')
+        switch getKeystrokeForEvent(@vimState._event)
+          when 'tab'
+            atom.commands.dispatch(@editorElement, 'editor:indent')
+          when 'shift-tab'
+            atom.commands.dispatch(@editorElement, 'editor:outdent-selected-rows')
 
   moveCursor: (cursor) ->
     index = @getIndex(cursor.getBufferPosition())

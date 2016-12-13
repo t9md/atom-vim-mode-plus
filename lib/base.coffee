@@ -332,8 +332,8 @@ class Base
     klass = this
     atom.commands.add @getCommandScope(), @getCommandName(), (event) ->
       vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
-      if vimState?
-        # Reason: https://github.com/t9md/atom-vim-mode-plus/issues/85
+      if vimState? # Possibly undefined See #85
+        vimState._event = event
         vimState.operationStack.run(klass)
       event.stopPropagation()
 

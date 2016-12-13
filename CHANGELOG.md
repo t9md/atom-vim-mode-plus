@@ -1,3 +1,9 @@
+# 0.73.1:
+- Improve, New: fallback for `tab`, `shift-tab` in `normal-mode`.
+  - By default in `normal-mode`, `tab` and `shift-tab` is mapped to `move-to-occurrence` and `move-to-previous-occurrence`
+  - When no occurrence-marker was exists on editor, it fallbacks to Atom's default `editor:indent`, `editor:outdent-selected-rows`.
+  - For user don't want this fallback, set `fallbackTabAndShiftTabInNormalMode` to `false`(default `true`).
+  
 # 0.73.0:
 - New: Close empty search-mini-editor by `backspace` from @gittyupagain. #567
 - New, Breaking: Keep `occurrence-marker` after operation. #572
