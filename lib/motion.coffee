@@ -146,6 +146,11 @@ class Motion extends Base
     else
       setBufferRow(cursor, row, options)
 
+  # [NOTE]
+  # Since this function checks cursor position change, a cursor position MUST be
+  # updated IN callback(=fn)
+  # Updating point only in callback is wrong-use of this funciton,
+  # since it stops immediately because of not cursor position change.
   moveCursorCountTimes: (cursor, fn) ->
     oldPosition = cursor.getBufferPosition()
     @countTimes (state) =>
