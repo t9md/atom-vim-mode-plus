@@ -257,15 +257,16 @@ describe "Operator general", ->
               selectedText: ''
 
         describe "setCursorToStartOfChangeOnUndoRedo is false", ->
+          initialTextC = """
+            |12345
+            a|bcde
+            ABCDE
+            QWERT
+            """
+
           beforeEach ->
             settings.set('setCursorToStartOfChangeOnUndoRedo', false)
-            set
-              textC: """
-              |12345
-              a|bcde
-              ABCDE
-              QWERT
-              """
+            set textC: initialTextC
             ensure 'd l',
               textC: """
               |2345
@@ -276,12 +277,7 @@ describe "Operator general", ->
 
           it "put cursor to end of change (works in same way of atom's core:undo)", ->
             ensure 'u',
-              textC: """
-              1|2345
-              ab|cde
-              ABCDE
-              QWERT
-              """
+              textC: initialTextC
               selectedText: ['', '']
 
     describe "when followed by a w", ->
