@@ -175,14 +175,18 @@ class Operator extends Base
     canMutate = true
     stopMutation = -> canMutate = false
 
-    @checkpoint = @editor.createCheckpoint()
+    checkpoint = @editor.createCheckpoint()
 
     if @selectTarget()
       for selection in @editor.getSelections() when canMutate
         @mutateSelection(selection, stopMutation)
       @restoreCursorPositionsIfNecessary()
 
-    @editor.groupChangesSinceCheckpoint(@checkpoint)
+    @onDidNormalizeSelection =>
+      # override checkpoint since I want cursor state at this timing.
+      checkpoint = @editor.createCheckpoint()
+
+    @editor.groupChangesSinceCheckpoint(checkpoint)
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
@@ -208,8 +212,7 @@ class Operator extends Base
 
     if @target.isMotion() and @isMode('visual')
       @vimState.modeManager.normalizeSelections()
-      # override checkpoint since I want this cursor state
-      @checkpoint = @editor.createCheckpoint()
+      @emitDidNormalizeSelections()
 
     @target.execute()
 
