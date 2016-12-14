@@ -308,9 +308,10 @@ class ChangeToLastCharacterOfLine extends Change
   @extend()
   target: 'MoveToLastCharacterOfLine'
 
-  execute: ->
-    # Ensure all selections to un-reversed
+  initialize: ->
     if @isMode('visual', 'blockwise')
-      for selection in @editor.getSelections()
-        swrap(selection).extendToEOL()
+      # FIXME Maybe because of bug of CurrentSelection,
+      # we use MoveToLastCharacterOfLine as target
+      @acceptCurrentSelection = false
+      swrap.setReversedState(@editor, false) # Ensure all selections to un-reversed
     super

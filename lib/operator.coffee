@@ -37,6 +37,7 @@ class Operator extends Base
 
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
+  acceptCurrentSelection: true
 
   needStay: ->
     @stayAtSamePosition ?=
@@ -107,7 +108,7 @@ class Operator extends Base
       @selectPersistentSelection() # This change cursor position.
       unless @isMode('visual')
         @vimState.modeManager.activate('visual', swrap.detectVisualModeSubmode(@editor))
-    @target = 'CurrentSelection' if @isMode('visual')
+    @target = 'CurrentSelection' if @isMode('visual') and @acceptCurrentSelection
     @setTarget(@new(@target)) if _.isString(@target)
 
   subscribeResetOccurrencePatternIfNeeded: ->
@@ -379,11 +380,12 @@ class DeleteLeft extends Delete
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
   target: 'MoveToLastCharacterOfLine'
-  execute: ->
-    # Ensure all selections to un-reversed
+  initialize: ->
     if @isMode('visual', 'blockwise')
-      for selection in @editor.getSelections()
-        swrap(selection).extendToEOL()
+      # FIXME Maybe because of bug of CurrentSelection,
+      # we use MoveToLastCharacterOfLine as target
+      @acceptCurrentSelection = false
+      swrap.setReversedState(@editor, false) # Ensure all selections to un-reversed
     super
 
 class DeleteLine extends Delete
