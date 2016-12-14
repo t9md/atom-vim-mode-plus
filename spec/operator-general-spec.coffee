@@ -163,17 +163,15 @@ describe "Operator general", ->
           cursor: [0, 2]
 
     describe "undo behavior", ->
-      originalText = null
-
+      [originalText, initialTextC] = []
       beforeEach ->
-        set
-          textC: """
+        initialTextC = """
           12345
           a|bcde
           ABCDE
           QWERT
           """
-
+        set textC: initialTextC
         originalText = editor.getText()
 
       it "undoes both lines", ->
@@ -183,12 +181,7 @@ describe "Operator general", ->
           |QWERT
           """
         ensure 'u',
-          textC: """
-          12345
-          |abcde
-          ABCDE
-          QWERT
-          """
+          textC: initialTextC
           selectedText: ""
 
       describe "with multiple cursors", ->
@@ -257,14 +250,16 @@ describe "Operator general", ->
               selectedText: ''
 
         describe "setCursorToStartOfChangeOnUndoRedo is false", ->
-          initialTextC = """
-            |12345
-            a|bcde
-            ABCDE
-            QWERT
-            """
+          initialTextC = null
 
           beforeEach ->
+            initialTextC = """
+              |12345
+              a|bcde
+              ABCDE
+              QWERT
+              """
+
             settings.set('setCursorToStartOfChangeOnUndoRedo', false)
             set textC: initialTextC
             ensure 'd l',
