@@ -67,11 +67,11 @@ class Undo extends MiscCommand
 
     allRanges = sortRanges(newRanges.concat(oldRanges))
 
-    if @editor.hasMultipleCursors()
+    if allRanges.length > 0
       point = @editor.getCursorBufferPosition()
-      allRanges = allRanges.filter (range) -> range.containsPoint(point)
+      cursorContainedRanges = allRanges.filter (range) -> range.containsPoint(point)
 
-    if changedRange = allRanges[0]
+    if changedRange = cursorContainedRanges[0] ? allRanges[0]
       @vimState.mark.setRange('[', ']', changedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
         if isLinewiseRange(changedRange)
