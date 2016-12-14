@@ -3,7 +3,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 settings = require './settings'
 _ = require 'underscore-plus'
-{moveCursorRight} = require './utils'
+{moveCursorRight, isLinewiseRange, setBufferRow} = require './utils'
 
 {
   pointIsAtEndOfLine
@@ -74,7 +74,10 @@ class Undo extends MiscCommand
     if changedRange = allRanges[0]
       @vimState.mark.setRange('[', ']', changedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
-        @editor.setCursorBufferPosition(changedRange.start)
+        if isLinewiseRange(changedRange)
+          setBufferRow(@editor.getLastCursor(), changedRange.start.row)
+        else
+          @editor.setCursorBufferPosition(changedRange.start)
 
     if settings.get('flashOnUndoRedo')
       @onDidFinishOperation =>
