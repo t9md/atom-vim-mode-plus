@@ -175,11 +175,14 @@ class Operator extends Base
     canMutate = true
     stopMutation = -> canMutate = false
 
-    @editor.transact =>
-      if @selectTarget()
-        for selection in @editor.getSelections() when canMutate
-          @mutateSelection(selection, stopMutation)
-        @restoreCursorPositionsIfNecessary()
+    @checkpoint = @editor.createCheckpoint()
+
+    if @selectTarget()
+      for selection in @editor.getSelections() when canMutate
+        @mutateSelection(selection, stopMutation)
+      @restoreCursorPositionsIfNecessary()
+
+    @editor.groupChangesSinceCheckpoint(@checkpoint)
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
@@ -202,6 +205,11 @@ class Operator extends Base
     #  occurrence-marker, occurrence-marker has to be created BEFORE `@target.execute()`
     if @isRepeated() and @isOccurrence() and not @occurrenceManager.hasMarkers()
       @addOccurrencePattern()
+
+    if @target.isMotion() and @isMode('visual')
+      @vimState.modeManager.normalizeSelections()
+      # override checkpoint since I want this cursor state
+      @checkpoint = @editor.createCheckpoint()
 
     @target.execute()
 
