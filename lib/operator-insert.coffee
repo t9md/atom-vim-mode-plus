@@ -39,6 +39,11 @@ class ActivateInsertMode extends Operator # FIXME
         for selection in @editor.getSelections()
           selection.insertText(text, autoIndent: true)
 
+      # This cursor state is restored on undo.
+      # So cursor state has to be updated before next groupChangesSinceCheckpoint()
+      if settings.get('clearMultipleCursorsOnEscapeInsertMode')
+        @vimState.clearSelections()
+
       # grouping changes for undo checkpoint need to come last
       if settings.get('groupChangesWhenLeavingInsertMode')
         @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
