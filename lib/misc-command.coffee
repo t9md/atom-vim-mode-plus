@@ -50,23 +50,20 @@ class Undo extends MiscCommand
     oldRanges = []
 
     disposable = @editor.getBuffer().onDidChange ({oldRange, newRange, oldText, newText}) ->
-      switch
-        when not newRange.isEmpty() and oldRange.isEmpty()
-          console.log "Add only"
-          newRanges.push(newRange)
-        when newRange.isEmpty() and not oldRange.isEmpty()
-          console.log "Delete only"
-          oldRanges.push(oldRange)
-        when not newRange.isEmpty() and not oldRange.isEmpty()
-          if newRange.containsRange(oldRange)
-            console.log "replace longer area"
-            newRanges.push(newRange)
-          else
-            console.log 'replace shorter area'
-            newRanges.push(newRange)
-            oldRanges.push(new Range(newRange.end, oldRange.end))
-        when newRange.isEmpty() and oldRange.isEmpty()
-          console.log 'never happens'
+      if newRange.isEmpty() # Remove only
+        return oldRanges.push(oldRange)
+
+      if oldRange.isEmpty() # Add only
+        return newRanges.push(newRange)
+
+      # Both newRange and oldRange are NOT empty, this mean replace.
+      if newRange.containsRange(oldRange)
+        # newRange is longer than oldRange
+        newRanges.push(newRange)
+      else
+        # newRange is shorter than oldRange
+        newRanges.push(newRange)
+        oldRanges.push(new Range(newRange.end, oldRange.end))
 
     fn()
 
