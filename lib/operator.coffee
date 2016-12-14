@@ -174,11 +174,12 @@ class Operator extends Base
   execute: ->
     canMutate = true
     stopMutation = -> canMutate = false
-    if @selectTarget()
-      @editor.transact =>
+
+    @editor.transact =>
+      if @selectTarget()
         for selection in @editor.getSelections() when canMutate
           @mutateSelection(selection, stopMutation)
-      @restoreCursorPositionsIfNecessary()
+        @restoreCursorPositionsIfNecessary()
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
