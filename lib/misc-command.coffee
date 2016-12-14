@@ -49,6 +49,7 @@ class Undo extends MiscCommand
     newRanges = []
     oldRanges = []
 
+    # Collect changed range while mutating text-state by fn callback.
     disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) ->
       if newRange.isEmpty() # Remove only
         oldRanges.push(oldRange)
