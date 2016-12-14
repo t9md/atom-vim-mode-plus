@@ -50,10 +50,11 @@ class ActivateInsertMode extends Operator # FIXME
   # - one for undo(handled by modeManager)
   # - one for preserve last inserted text
   setCheckpoint: (purpose) ->
+    @checkpoint ?= {}
     @checkpoint[purpose] = @editor.createCheckpoint()
 
   getCheckpoint: (purpose) ->
-    @checkpoint[purpose]
+    @checkpoint?[purpose]
 
   # When each mutaion's extent is not intersecting, muitiple changes are recorded
   # e.g
@@ -95,14 +96,14 @@ class ActivateInsertMode extends Operator # FIXME
     limitNumber(@insertionCount, max: 100)
 
   execute: ->
-    if @isRequireTarget()
-      targetSelected = @selectTarget()
-      if not targetSelected and not @canContinueOnEmptySelection()
-        @vimState.activate('normal')
-        return
-
     if @isRepeated()
       @flashTarget = @trackChange = true
+
+      if @isRequireTarget()
+        targetSelected = @selectTarget()
+        if not targetSelected and not @canContinueOnEmptySelection()
+          return
+
       @editor.transact =>
         @mutateText?()
         for selection, i in @editor.getSelections()
@@ -113,8 +114,13 @@ class ActivateInsertMode extends Operator # FIXME
         @vimState.clearSelections()
 
     else
-      @checkpoint = {}
       @setCheckpoint('undo')
+      if @isRequireTarget()
+        targetSelected = @selectTarget()
+        if not targetSelected and not @canContinueOnEmptySelection()
+          @vimState.activate('normal')
+          return
+
       @observeWillDeactivateMode()
 
       @mutateText?()
@@ -263,11 +269,13 @@ class InsertAtNextFoldStart extends InsertByTarget
   target: 'MoveToNextFoldStart'
 
 # -------------------------
-class Change extends ActivateInsertMode # FIXME
+class Change extends ActivateInsertMode
   @extend()
   requireTarget: true
   trackChange: true
   supportInsertionCount: false
+
+
 
   canContinueOnEmptySelection: ->
     not @isOccurrence()
