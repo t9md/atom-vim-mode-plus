@@ -849,28 +849,47 @@ describe "Operator general", ->
       describe "on multiple lines", ->
         beforeEach ->
           set
-            text: "012\n 345"
+            text: """
+            012
+             345
+            """
             register: '"': text: " 456\n", type: 'linewise'
 
         it "inserts the contents of the default register at middle line", ->
           set cursor: [0, 1]
-          keystroke 'p'
-          ensure text: "012\n 456\n 345", cursor: [1, 1]
+          ensure "p",
+            textC: """
+            012
+             |456
+             345
+            """
 
         it "inserts the contents of the default register at end of line", ->
           set cursor: [1, 1]
-          ensure 'p', text: "012\n 345\n 456", cursor: [2, 1]
+          ensure 'p',
+            textC: """
+            012
+             345
+             |456
+            """
 
     describe "with multiple linewise contents", ->
       beforeEach ->
         set
-          text: "012\nabc",
-          cursor: [1, 0]
+          textC: """
+          012
+          |abc
+          """
           register: '"': text: " 345\n 678\n", type: 'linewise'
-        keystroke 'p'
 
       it "inserts the contents of the default register", ->
-        ensure text: "012\nabc\n 345\n 678", cursor: [2, 1]
+        ensure 'p',
+          textC: """
+          012
+          abc
+           |345
+           678
+          """
 
     describe "pasting twice", ->
       beforeEach ->

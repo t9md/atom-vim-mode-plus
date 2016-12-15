@@ -10,6 +10,8 @@ _ = require 'underscore-plus'
   cursorIsAtEmptyRow
   getWordPatternAtBufferPosition
   destroyNonLastSelection
+  getEndOfLineForBufferRow
+  setTextAtBufferPosition
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -569,14 +571,14 @@ class PutBefore extends Operator
       row = cursor.getBufferRow()
       switch @location
         when 'before'
-          range = [[row, 0], [row, 0]]
+          setTextAtBufferPosition(@editor, [row, 0], text)
         when 'after'
           unless isEndsWithNewLineForBufferRow(@editor, row)
-            text = text.replace(LineEndingRegExp, '')
-          cursor.moveToEndOfLine()
-          {end} = selection.insertText("\n")
-          range = @editor.bufferRangeForBufferRow(end.row, {includeNewline: true})
-      @editor.setTextInBufferRange(range, text)
+            eol = getEndOfLineForBufferRow(@editor, row)
+            range = setTextAtBufferPosition(@editor, eol, "\n" + text.trimRight())
+            range.traverse([1, 0], [0, 0])
+          else
+            setTextAtBufferPosition(@editor, [row + 1, 0], text)
     else
       if @isMode('visual', 'linewise')
         unless selection.getBufferRange().end.column is 0
