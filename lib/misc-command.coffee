@@ -4,6 +4,7 @@ swrap = require './selection-wrapper'
 settings = require './settings'
 _ = require 'underscore-plus'
 {moveCursorRight, isLinewiseRange, setBufferRow} = require './utils'
+{inspect} = require 'util'
 
 {
   pointIsAtEndOfLine
@@ -41,42 +42,57 @@ class Undo extends MiscCommand
   trimStartingNewLine: (range) ->
     {start, end} = range
     if (end.column is 0) and (start.row + 1 isnt end.row) and pointIsAtEndOfLine(@editor, start)
+    # if (end.column is 0) and pointIsAtEndOfLine(@editor, start)
+      console.log "TRIM"
       new Range([start.row + 1, 0], end)
     else
+      console.log "NONTRIME"
       range
+
+  isSingleNewLine: ({start, end}) ->
+    (end.column is 0) and (start.row + 1 is end.row)
 
   withTrackingChanges: (fn) ->
     newRanges = []
     oldRanges = []
+    changes = []
 
     # Collect changed range while mutating text-state by fn callback.
-    disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) ->
-      if newRange.isEmpty() # Remove only
-        oldRanges.push(oldRange)
-      else
-        newRanges.push(newRange)
+    disposable = @editor.getBuffer().onDidChange (change) ->
+      changes.push(change)
 
     fn()
 
     disposable.dispose()
     selection.clear() for selection in @editor.getSelections()
 
-    trimStartingNewLine = @trimStartingNewLine.bind(this)
-    newRanges = newRanges.map(trimStartingNewLine)
-    oldRanges = oldRanges.map(trimStartingNewLine)
+    for change in changes
+      {oldRange, oldText, newRange, newText} = change
+      console.log 'newText', inspect(newText)
+      console.log 'oldText', inspect(oldText)
+      console.log '------'
+      if newRange.isEmpty() or (@isSingleNewLine(newRange) and not oldRange.isEmpty()) # FIXME
+        oldRanges.push(oldRange) # Remove only
+      else
+        newRanges.push(newRange)
 
     allRanges = sortRanges(newRanges.concat(oldRanges))
 
     cursorPosition = @editor.getCursorBufferPosition()
     cursorContainedRanges = allRanges.filter (range) -> range.containsPoint(cursorPosition)
 
+    trimStartingNewLine = @trimStartingNewLine.bind(this)
     if changedRange = cursorContainedRanges[0] ? allRanges[0]
       @vimState.mark.setRange('[', ']', changedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
-        if isLinewiseRange(changedRange)
+        if isLinewiseRange(trimStartingNewLine(changedRange))
+          console.log 'linewise'
           setBufferRow(@editor.getLastCursor(), changedRange.start.row)
         else
           @editor.setCursorBufferPosition(changedRange.start)
+
+    oldRanges = oldRanges.map(trimStartingNewLine)
+    newRanges = newRanges.map(trimStartingNewLine)
 
     if settings.get('flashOnUndoRedo')
       @onDidFinishOperation =>
