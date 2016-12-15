@@ -189,12 +189,9 @@ class Operator extends Base
       delete @bufferCheckpointByPurpose[purpose]
 
   groupChangesSinceBufferCheckpoint: (purpose) ->
-    console.log "called groupChangesSinceCheckpoint #{purpose}"
     if checkpoint = @getBufferCheckpoint(purpose)
-      console.log "checkpoint found: #{purpose}"
       @editor.groupChangesSinceCheckpoint(checkpoint)
     else
-      console.log "checkpoint NOT found: #{purpose}"
     @deleteBufferCheckpoint(purpose)
 
   # Main
