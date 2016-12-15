@@ -90,13 +90,19 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
 @flash-added-color: fadeout(darken(@syntax-color-added, 10%), 50%);
 @flash-removed-color: fadeout(@syntax-color-removed, 50%);
 
+  // flashOnOperate
 .flash-animation(vim-mode-plus-flash-operator, @flash-base-color);
 .flash-animation(vim-mode-plus-flash-operator-occurrence, @flash-added-color);
 .flash-animation(vim-mode-plus-flash-operator-remove-occurrence, @flash-removed-color);
+
+  // flashOnUndoRedo
+.flash-animation(vim-mode-plus-flash-undo-redo, @flash-base-color);
+.flash-animation(vim-mode-plus-flash-undo-redo-multiple-changes, @flash-added-color);
+.flash-animation(vim-mode-plus-flash-undo-redo-multiple-delete, @flash-removed-color);
+
 .flash-animation(vim-mode-plus-flash-search, @flash-search-color);
 .flash-animation(vim-mode-plus-flash-screen, @flash-base-color);
-.flash-animation(vim-mode-plus-flash-added, @flash-added-color);
-.flash-animation(vim-mode-plus-flash-removed, @flash-removed-color);
+
 .flash-animation(vim-mode-plus-flash-line, @flash-search-color);
 
 .flash (@name; @duration) {
@@ -106,15 +112,18 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
 }
 
 atom-text-editor .vim-mode-plus-flash {
+  // flashOnOperate
   &.operator .region { .flash(vim-mode-plus-flash-operator, .3s)}
   &.operator-occurrence .region { .flash(vim-mode-plus-flash-operator-occurrence, .8s)}
   &.operator-remove-occurrence .region { .flash(vim-mode-plus-flash-operator-remove-occurrence, .8s)}
 
+  // flashOnUndoRedo
+  &.undo-redo .region { .flash(vim-mode-plus-flash-undo-redo, .5s)}
+  &.undo-redo-multiple-changes .region { .flash(vim-mode-plus-flash-undo-redo-multiple-changes, .5s)}
+  &.undo-redo-multiple-delete .region { .flash(vim-mode-plus-flash-undo-redo-multiple-delete, .5s)}
+
   &.search .region { .flash(vim-mode-plus-flash-search, .5s); }
   &.screen .region { .flash(vim-mode-plus-flash-screen, .3s); }
-
-  &.added .region { .flash(vim-mode-plus-flash-added, .5s); }
-  &.removed .region { .flash(vim-mode-plus-flash-removed, .5s); }
 }
 
 // type=line decoration not allow space separated multiple classes. atom/atom#13218
