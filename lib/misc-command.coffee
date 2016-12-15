@@ -66,12 +66,20 @@ class Undo extends MiscCommand
         else
           @editor.setCursorBufferPosition(changedRange.start)
 
-    oldRanges = [] if oldRanges.length is 1
-
     if settings.get('flashOnUndoRedo')
-      @onDidFinishOperation =>
-        @vimState.flash(newRanges, type: 'added', timeout: 500)
-        @vimState.flash(oldRanges, type: 'removed', timeout: 500)
+      if newRanges.length > 0
+        if newRanges.length is 1
+          @flash(newRanges, type: 'undo-redo')
+        else
+          @flash(newRanges, type: 'undo-redo-multiple-changes')
+      else
+        if oldRanges.length > 1
+          @flash(oldRanges, type: 'undo-redo-multiple-delete')
+
+  flash: (flashRanges, options) ->
+    options.timeout ?= 500
+    @onDidFinishOperation =>
+      @vimState.flash(flashRanges, options)
 
   execute: ->
     @withTrackingChanges =>

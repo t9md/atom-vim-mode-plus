@@ -27,16 +27,21 @@ flashTypes =
     decorationOptions:
       type: 'highlight'
       class: 'vim-mode-plus-flash screen'
-  added:
+  'undo-redo':
     allowMultiple: true
     decorationOptions:
       type: 'highlight'
-      class: 'vim-mode-plus-flash added'
-  removed:
+      class: 'vim-mode-plus-flash undo-redo'
+  'undo-redo-multiple-changes':
     allowMultiple: true
     decorationOptions:
       type: 'highlight'
-      class: 'vim-mode-plus-flash removed'
+      class: 'vim-mode-plus-flash undo-redo-multiple-changes'
+  'undo-redo-multiple-delete':
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash undo-redo-multiple-delete'
   'screen-line': # unused.
     allowMultiple: false
     decorationOptions:
