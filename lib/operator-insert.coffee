@@ -16,7 +16,6 @@ class ActivateInsertMode extends Operator # FIXME
   @extend()
   requireTarget: false
   flashTarget: false
-  checkpoint: null
   finalSubmode: null
   supportInsertionCount: true
 
@@ -39,21 +38,17 @@ class ActivateInsertMode extends Operator # FIXME
         for selection in @editor.getSelections()
           selection.insertText(text, autoIndent: true)
 
+      # This cursor state is restored on undo.
+      # So cursor state has to be updated before next groupChangesSinceCheckpoint()
+      if settings.get('clearMultipleCursorsOnEscapeInsertMode')
+        @vimState.clearSelections()
+
       # grouping changes for undo checkpoint need to come last
       if settings.get('groupChangesWhenLeavingInsertMode')
-        @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
+        @editor.groupChangesSinceCheckpoint(@getBufferCheckpoint('undo'))
 
   canContinueOnEmptySelection: ->
     true
-
-  # Two checkpoint for different purpose
-  # - one for undo(handled by modeManager)
-  # - one for preserve last inserted text
-  setCheckpoint: (purpose) ->
-    @checkpoint[purpose] = @editor.createCheckpoint()
-
-  getCheckpoint: (purpose) ->
-    @checkpoint[purpose]
 
   # When each mutaion's extent is not intersecting, muitiple changes are recorded
   # e.g
@@ -64,7 +59,7 @@ class ActivateInsertMode extends Operator # FIXME
   # Thats' why I save topCursor's position to @topCursorPositionAtInsertionStart to compare traversal to deletionStart
   # Why I use topCursor's change? Just because it's easy to use first change returned by getChangeSinceCheckpoint().
   getChangeSinceCheckpoint: (purpose) ->
-    checkpoint = @getCheckpoint(purpose)
+    checkpoint = @getBufferCheckpoint(purpose)
     @editor.buffer.getChangesSinceCheckpoint(checkpoint)[0]
 
   # [BUG-BUT-OK] Replaying text-deletion-operation is not compatible to pure Vim.
@@ -95,14 +90,14 @@ class ActivateInsertMode extends Operator # FIXME
     limitNumber(@insertionCount, max: 100)
 
   execute: ->
-    if @isRequireTarget()
-      targetSelected = @selectTarget()
-      if not targetSelected and not @canContinueOnEmptySelection()
-        @vimState.activate('normal')
-        return
-
     if @isRepeated()
       @flashTarget = @trackChange = true
+
+      if @isRequireTarget()
+        targetSelected = @selectTarget()
+        if not targetSelected and not @canContinueOnEmptySelection()
+          return
+
       @editor.transact =>
         @mutateText?()
         for selection, i in @editor.getSelections()
@@ -113,8 +108,13 @@ class ActivateInsertMode extends Operator # FIXME
         @vimState.clearSelections()
 
     else
-      @checkpoint = {}
-      @setCheckpoint('undo')
+      @createBufferCheckpoint('undo')
+      if @isRequireTarget()
+        targetSelected = @selectTarget()
+        if not targetSelected and not @canContinueOnEmptySelection()
+          @vimState.activate('normal')
+          return
+
       @observeWillDeactivateMode()
 
       @mutateText?()
@@ -122,7 +122,7 @@ class ActivateInsertMode extends Operator # FIXME
       if @getInsertionCount() > 0
         @textByOperator = @getChangeSinceCheckpoint('undo')?.newText ? ''
 
-      @setCheckpoint('insert')
+      @createBufferCheckpoint('insert')
       topCursor = @editor.getCursorsOrderedByBufferPosition()[0]
       @topCursorPositionAtInsertionStart = topCursor.getBufferPosition()
       @vimState.activate('insert', @finalSubmode)
@@ -263,7 +263,7 @@ class InsertAtNextFoldStart extends InsertByTarget
   target: 'MoveToNextFoldStart'
 
 # -------------------------
-class Change extends ActivateInsertMode # FIXME
+class Change extends ActivateInsertMode
   @extend()
   requireTarget: true
   trackChange: true

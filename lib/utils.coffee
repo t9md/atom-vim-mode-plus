@@ -802,6 +802,9 @@ findRangeContainsPoint = (ranges, point) ->
 isNotEmpty = (target) ->
   not target.isEmpty()
 
+setTextAtBufferPosition = (editor, point, text) ->
+  editor.setTextInBufferRange([point, point], text)
+
 module.exports = {
   getParent
   getAncestors
@@ -897,4 +900,5 @@ module.exports = {
   limitNumber
   findRangeContainsPoint
   isNotEmpty
+  setTextAtBufferPosition
 }

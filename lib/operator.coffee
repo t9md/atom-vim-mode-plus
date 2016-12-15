@@ -10,6 +10,9 @@ _ = require 'underscore-plus'
   cursorIsAtEmptyRow
   getWordPatternAtBufferPosition
   destroyNonLastSelection
+  getEndOfLineForBufferRow
+  setTextAtBufferPosition
+  setBufferRow
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -19,6 +22,7 @@ class Operator extends Base
   @extend(false)
   requireTarget: true
   recordable: true
+  bufferCheckpointByPurpose: null
 
   wise: null
   occurrence: false
@@ -170,15 +174,42 @@ class Operator extends Base
     text += "\n" if (@target.isLinewise() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
 
+  # Two checkpoint for different purpose
+  # - one for undo(handled by modeManager)
+  # - one for preserve last inserted text
+  createBufferCheckpoint: (purpose) ->
+    @bufferCheckpointByPurpose ?= {}
+    @bufferCheckpointByPurpose[purpose] = @editor.createCheckpoint()
+
+  getBufferCheckpoint: (purpose) ->
+    @bufferCheckpointByPurpose?[purpose]
+
+  deleteBufferCheckpoint: (purpose) ->
+    if @bufferCheckpointByPurpose?
+      delete @bufferCheckpointByPurpose[purpose]
+
+  groupChangesSinceBufferCheckpoint: (purpose) ->
+    console.log "called groupChangesSinceCheckpoint #{purpose}"
+    if checkpoint = @getBufferCheckpoint(purpose)
+      console.log "checkpoint found: #{purpose}"
+      @editor.groupChangesSinceCheckpoint(checkpoint)
+    else
+      console.log "checkpoint NOT found: #{purpose}"
+    @deleteBufferCheckpoint(purpose)
+
   # Main
   execute: ->
     canMutate = true
     stopMutation = -> canMutate = false
+
+    @createBufferCheckpoint('undo')
+
     if @selectTarget()
-      @editor.transact =>
-        for selection in @editor.getSelections() when canMutate
-          @mutateSelection(selection, stopMutation)
+      for selection in @editor.getSelections() when canMutate
+        @mutateSelection(selection, stopMutation)
       @restoreCursorPositionsIfNecessary()
+
+    @groupChangesSinceBufferCheckpoint('undo')
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
@@ -201,6 +232,11 @@ class Operator extends Base
     #  occurrence-marker, occurrence-marker has to be created BEFORE `@target.execute()`
     if @isRepeated() and @isOccurrence() and not @occurrenceManager.hasMarkers()
       @addOccurrencePattern()
+
+    if @target.isMotion() and @isMode('visual')
+      @vimState.modeManager.normalizeSelections()
+      # Overwrite checkpoint since I want restore cursor position at undo/redo.
+      @createBufferCheckpoint('undo')
 
     @target.execute()
 
@@ -549,14 +585,20 @@ class PutBefore extends Operator
       row = cursor.getBufferRow()
       switch @location
         when 'before'
-          range = [[row, 0], [row, 0]]
+          range = setTextAtBufferPosition(@editor, [row, 0], text)
+          setBufferRow(selection.cursor, range.start.row)
+          @groupChangesSinceBufferCheckpoint('undo')
+          range
         when 'after'
           unless isEndsWithNewLineForBufferRow(@editor, row)
-            text = text.replace(LineEndingRegExp, '')
-          cursor.moveToEndOfLine()
-          {end} = selection.insertText("\n")
-          range = @editor.bufferRangeForBufferRow(end.row, {includeNewline: true})
-      @editor.setTextInBufferRange(range, text)
+            eol = getEndOfLineForBufferRow(@editor, row)
+            range = setTextAtBufferPosition(@editor, eol, "\n" + text.trimRight())
+            @groupChangesSinceBufferCheckpoint('undo')
+            range.traverse([1, 0], [0, 0])
+          else
+            range = setTextAtBufferPosition(@editor, [row + 1, 0], text)
+            @groupChangesSinceBufferCheckpoint('undo')
+            range
     else
       if @isMode('visual', 'linewise')
         unless selection.getBufferRange().end.column is 0

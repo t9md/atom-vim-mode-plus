@@ -3,7 +3,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 settings = require './settings'
 _ = require 'underscore-plus'
-{moveCursorRight} = require './utils'
+{moveCursorRight, isLinewiseRange, setBufferRow} = require './utils'
 
 {
   pointIsAtEndOfLine
@@ -36,22 +36,14 @@ class BlockwiseOtherEnd extends ReverseSelections
 class Undo extends MiscCommand
   @extend()
 
-  # Trim starting new-line-corresponding range if it transformed range become linewise range.
-  # this is special accomodation for flashing intuitively for human when `y y p` then `undo`, `redo`
-  trimStartingNewLine: (range) ->
-    {start, end} = range
-    if (end.column is 0) and (start.row + 1 isnt end.row) and pointIsAtEndOfLine(@editor, start)
-      new Range([start.row + 1, 0], end)
-    else
-      range
-
   withTrackingChanges: (fn) ->
     newRanges = []
     oldRanges = []
 
-    disposable = @editor.getBuffer().onDidChange ({oldRange, newRange}) ->
-      if newRange.isEmpty() # Remove only
-        oldRanges.push(oldRange)
+    # Collect changed range while mutating text-state by fn callback.
+    disposable = @editor.getBuffer().onDidChange ({newRange, oldRange}) ->
+      if newRange.isEmpty()
+        oldRanges.push(oldRange) # Remove only
       else
         newRanges.push(newRange)
 
@@ -60,20 +52,21 @@ class Undo extends MiscCommand
     disposable.dispose()
     selection.clear() for selection in @editor.getSelections()
 
-    trimStartingNewLine = @trimStartingNewLine.bind(this)
-    newRanges = newRanges.map(trimStartingNewLine)
-    oldRanges = oldRanges.map(trimStartingNewLine)
-
     allRanges = sortRanges(newRanges.concat(oldRanges))
+    cursorPositionAfterMutate = @editor.getCursorBufferPosition()
+    cursorContainedRanges = allRanges.filter (range) ->
+      range.containsPoint(cursorPositionAfterMutate)
 
-    if @editor.hasMultipleCursors()
-      point = @editor.getCursorBufferPosition()
-      allRanges = allRanges.filter (range) -> range.containsPoint(point)
-
-    if changedRange = allRanges[0]
+    if changedRange = cursorContainedRanges[0] ? allRanges[0]
       @vimState.mark.setRange('[', ']', changedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
-        @editor.setCursorBufferPosition(changedRange.start)
+        if isLinewiseRange(changedRange)
+          if changedRange.containsPoint(cursorPositionAfterMutate)
+            setBufferRow(@editor.getLastCursor(), changedRange.start.row)
+        else
+          @editor.setCursorBufferPosition(changedRange.start)
+
+    oldRanges = [] if oldRanges.length is 1
 
     if settings.get('flashOnUndoRedo')
       @onDidFinishOperation =>
@@ -83,7 +76,6 @@ class Undo extends MiscCommand
   execute: ->
     @withTrackingChanges =>
       @mutate()
-
     @activateMode('normal')
 
   mutate: ->

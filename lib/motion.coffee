@@ -104,8 +104,6 @@ class Motion extends Base
         @moveWithSaveJump(cursor)
 
   select: ->
-    @vimState.modeManager.normalizeSelections() if @isMode('visual')
-
     for selection in @editor.getSelections()
       @selectByMotion(selection)
 
