@@ -183,6 +183,19 @@ class Operator extends Base
   getBufferCheckpoint: (purpose) ->
     @bufferCheckpointByPurpose?[purpose]
 
+  deleteBufferCheckpoint: (purpose) ->
+    if @bufferCheckpointByPurpose?
+      delete @bufferCheckpointByPurpose[purpose]
+
+  groupChangesSinceBufferCheckpoint: (purpose) ->
+    console.log "called groupChangesSinceCheckpoint #{purpose}"
+    if checkpoint = @getBufferCheckpoint(purpose)
+      console.log "checkpoint found: #{purpose}"
+      @editor.groupChangesSinceCheckpoint(checkpoint)
+    else
+      console.log "checkpoint NOT found: #{purpose}"
+    @deleteBufferCheckpoint(purpose)
+
   # Main
   execute: ->
     canMutate = true
@@ -195,7 +208,7 @@ class Operator extends Base
         @mutateSelection(selection, stopMutation)
       @restoreCursorPositionsIfNecessary()
 
-    @editor.groupChangesSinceCheckpoint(@getBufferCheckpoint('undo'))
+    @groupChangesSinceBufferCheckpoint('undo')
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
@@ -571,14 +584,19 @@ class PutBefore extends Operator
       row = cursor.getBufferRow()
       switch @location
         when 'before'
-          setTextAtBufferPosition(@editor, [row, 0], text)
+          range = setTextAtBufferPosition(@editor, [row, 0], text)
+          @groupChangesSinceBufferCheckpoint('undo')
+          range
         when 'after'
           unless isEndsWithNewLineForBufferRow(@editor, row)
             eol = getEndOfLineForBufferRow(@editor, row)
             range = setTextAtBufferPosition(@editor, eol, "\n" + text.trimRight())
+            @groupChangesSinceBufferCheckpoint('undo')
             range.traverse([1, 0], [0, 0])
           else
-            setTextAtBufferPosition(@editor, [row + 1, 0], text)
+            range = setTextAtBufferPosition(@editor, [row + 1, 0], text)
+            @groupChangesSinceBufferCheckpoint('undo')
+            range
     else
       if @isMode('visual', 'linewise')
         unless selection.getBufferRange().end.column is 0
