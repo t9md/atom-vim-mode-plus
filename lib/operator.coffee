@@ -12,6 +12,7 @@ _ = require 'underscore-plus'
   destroyNonLastSelection
   getEndOfLineForBufferRow
   setTextAtBufferPosition
+  setBufferRow
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -585,6 +586,7 @@ class PutBefore extends Operator
       switch @location
         when 'before'
           range = setTextAtBufferPosition(@editor, [row, 0], text)
+          setBufferRow(selection.cursor, range.start.row)
           @groupChangesSinceBufferCheckpoint('undo')
           range
         when 'after'
