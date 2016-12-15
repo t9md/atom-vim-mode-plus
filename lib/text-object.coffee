@@ -940,7 +940,11 @@ class VisibleArea extends TextObject # 822 to 863
     @stopSelection()
     # [BUG?] Need translate to shilnk top and bottom to fit actual row.
     # The reason I need -2 at bottom is because of status bar?
-    getVisibleBufferRange(@editor).translate([+1, 0], [-3, 0])
+    bufferRange = getVisibleBufferRange(@editor)
+    if bufferRange.getRows() > @editor.getRowsPerPage()
+      bufferRange.translate([+1, 0], [-3, 0])
+    else
+      bufferRange
 
 class AVisibleArea extends VisibleArea
   @extend()
