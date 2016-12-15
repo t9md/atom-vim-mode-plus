@@ -269,8 +269,6 @@ class Change extends ActivateInsertMode
   trackChange: true
   supportInsertionCount: false
 
-
-
   canContinueOnEmptySelection: ->
     not @isOccurrence()
 
