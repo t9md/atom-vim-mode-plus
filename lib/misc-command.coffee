@@ -48,8 +48,6 @@ class Undo extends MiscCommand
       else
         newRanges.push(newRange)
 
-    # cursorPositionBeforeMutate = @editor.getCursorBufferPosition()
-
     fn()
 
     disposable.dispose()
@@ -64,7 +62,8 @@ class Undo extends MiscCommand
       @vimState.mark.setRange('[', ']', changedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
         if isLinewiseRange(changedRange)
-          setBufferRow(@editor.getLastCursor(), changedRange.start.row)
+          if changedRange.containsPoint(cursorPositionAfterMutate)
+            setBufferRow(@editor.getLastCursor(), changedRange.start.row)
         else
           @editor.setCursorBufferPosition(changedRange.start)
 
