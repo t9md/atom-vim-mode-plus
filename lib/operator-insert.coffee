@@ -45,7 +45,7 @@ class ActivateInsertMode extends Operator # FIXME
 
       # grouping changes for undo checkpoint need to come last
       if settings.get('groupChangesWhenLeavingInsertMode')
-        @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
+        @editor.groupChangesSinceCheckpoint(@getBufferCheckpoint('undo'))
 
   canContinueOnEmptySelection: ->
     true
@@ -59,7 +59,7 @@ class ActivateInsertMode extends Operator # FIXME
   # Thats' why I save topCursor's position to @topCursorPositionAtInsertionStart to compare traversal to deletionStart
   # Why I use topCursor's change? Just because it's easy to use first change returned by getChangeSinceCheckpoint().
   getChangeSinceCheckpoint: (purpose) ->
-    checkpoint = @getCheckpoint(purpose)
+    checkpoint = @getBufferCheckpoint(purpose)
     @editor.buffer.getChangesSinceCheckpoint(checkpoint)[0]
 
   # [BUG-BUT-OK] Replaying text-deletion-operation is not compatible to pure Vim.
@@ -108,7 +108,7 @@ class ActivateInsertMode extends Operator # FIXME
         @vimState.clearSelections()
 
     else
-      @createCheckpoint('undo')
+      @createBufferCheckpoint('undo')
       if @isRequireTarget()
         targetSelected = @selectTarget()
         if not targetSelected and not @canContinueOnEmptySelection()
@@ -122,7 +122,7 @@ class ActivateInsertMode extends Operator # FIXME
       if @getInsertionCount() > 0
         @textByOperator = @getChangeSinceCheckpoint('undo')?.newText ? ''
 
-      @createCheckpoint('insert')
+      @createBufferCheckpoint('insert')
       topCursor = @editor.getCursorsOrderedByBufferPosition()[0]
       @topCursorPositionAtInsertionStart = topCursor.getBufferPosition()
       @vimState.activate('insert', @finalSubmode)
