@@ -39,7 +39,6 @@ class Undo extends MiscCommand
   withTrackingChanges: (fn) ->
     newRanges = []
     oldRanges = []
-    changes = []
 
     # Collect changed range while mutating text-state by fn callback.
     disposable = @editor.getBuffer().onDidChange ({newRange, oldRange}) ->
