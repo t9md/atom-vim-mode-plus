@@ -67,7 +67,6 @@ class Undo extends MiscCommand
         else
           @editor.setCursorBufferPosition(changedRange.start)
 
-    newRanges = [] if newRanges.length is 1
     oldRanges = [] if oldRanges.length is 1
 
     if settings.get('flashOnUndoRedo')
