@@ -19,6 +19,7 @@ class Operator extends Base
   @extend(false)
   requireTarget: true
   recordable: true
+  checkpointByPurpose: null
 
   wise: null
   occurrence: false
@@ -170,23 +171,29 @@ class Operator extends Base
     text += "\n" if (@target.isLinewise() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
 
+  # Two checkpoint for different purpose
+  # - one for undo(handled by modeManager)
+  # - one for preserve last inserted text
+  createCheckpoint: (purpose) ->
+    @checkpointByPurpose ?= {}
+    @checkpointByPurpose[purpose] = @editor.createCheckpoint()
+
+  getCheckpoint: (purpose) ->
+    @checkpointByPurpose?[purpose]
+
   # Main
   execute: ->
     canMutate = true
     stopMutation = -> canMutate = false
 
-    checkpoint = @editor.createCheckpoint()
+    @createCheckpoint('undo')
 
     if @selectTarget()
       for selection in @editor.getSelections() when canMutate
         @mutateSelection(selection, stopMutation)
       @restoreCursorPositionsIfNecessary()
 
-    @onDidNormalizeSelection =>
-      # override checkpoint since I want cursor state at this timing.
-      checkpoint = @editor.createCheckpoint()
-
-    @editor.groupChangesSinceCheckpoint(checkpoint)
+    @editor.groupChangesSinceCheckpoint(@getCheckpoint('undo'))
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
@@ -212,7 +219,8 @@ class Operator extends Base
 
     if @target.isMotion() and @isMode('visual')
       @vimState.modeManager.normalizeSelections()
-      @emitDidNormalizeSelections()
+      # Overwrite checkpoint since I want restore cursor position at undo/redo.
+      @createCheckpoint('undo')
 
     @target.execute()
 

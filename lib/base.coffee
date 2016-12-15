@@ -23,7 +23,6 @@ vimStateMethods = [
 
   "onDidSetTarget"
   "onWillSelectTarget"
-  "onDidNormalizeSelection"
   "onDidSelectTarget"
   "preemptWillSelectTarget"
   "preemptDidSelectTarget"
@@ -260,9 +259,6 @@ class Base
 
   emitWillSelectTarget: ->
     @vimState.emitter.emit('will-select-target')
-
-  emitDidNormalizeSelections: ->
-    @vimState.emitter.emit('did-normalize-selection')
 
   emitDidSelectTarget: ->
     @vimState.emitter.emit('did-select-target')

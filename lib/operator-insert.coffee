@@ -16,7 +16,6 @@ class ActivateInsertMode extends Operator # FIXME
   @extend()
   requireTarget: false
   flashTarget: false
-  checkpoint: null
   finalSubmode: null
   supportInsertionCount: true
 
@@ -50,16 +49,6 @@ class ActivateInsertMode extends Operator # FIXME
 
   canContinueOnEmptySelection: ->
     true
-
-  # Two checkpoint for different purpose
-  # - one for undo(handled by modeManager)
-  # - one for preserve last inserted text
-  setCheckpoint: (purpose) ->
-    @checkpoint ?= {}
-    @checkpoint[purpose] = @editor.createCheckpoint()
-
-  getCheckpoint: (purpose) ->
-    @checkpoint?[purpose]
 
   # When each mutaion's extent is not intersecting, muitiple changes are recorded
   # e.g
@@ -119,7 +108,7 @@ class ActivateInsertMode extends Operator # FIXME
         @vimState.clearSelections()
 
     else
-      @setCheckpoint('undo')
+      @createCheckpoint('undo')
       if @isRequireTarget()
         targetSelected = @selectTarget()
         if not targetSelected and not @canContinueOnEmptySelection()
@@ -133,7 +122,7 @@ class ActivateInsertMode extends Operator # FIXME
       if @getInsertionCount() > 0
         @textByOperator = @getChangeSinceCheckpoint('undo')?.newText ? ''
 
-      @setCheckpoint('insert')
+      @createCheckpoint('insert')
       topCursor = @editor.getCursorsOrderedByBufferPosition()[0]
       @topCursorPositionAtInsertionStart = topCursor.getBufferPosition()
       @vimState.activate('insert', @finalSubmode)
