@@ -6,7 +6,7 @@
     - Checkpoint mechanism was being used for long time for `i`, `a`, `c`, from this release used operator globally.
     - This shift is not completed, will continue gradual improvement.
 - Improve: Use different color on `flashOnUndoRedo` #610
-  - Single change: subtle color flash with duration `0.3s`
+  - Single change: subtle color flash with duration `0.3s`(singe delete-only change is no longer flashed).
   - Multi change add: green flash with duration `0.8s`
   - Multi change delete: red flash with duration `0.8s`
 - Improve: `p`, `P` #615
