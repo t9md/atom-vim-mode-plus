@@ -89,7 +89,7 @@ class TextObject extends Base
 
   select: ->
     selectResults = []
-    @countTimes ({stop}) =>
+    @countTimes @getCount(), ({stop}) =>
       @stopSelection = stop
 
       for selection in @editor.getSelections()

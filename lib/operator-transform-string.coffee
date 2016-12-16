@@ -5,6 +5,7 @@ _ = require 'underscore-plus'
 {
   haveSomeNonEmptySelection
   isSingleLine
+  limitNumber
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -355,18 +356,32 @@ class Indent extends TransformString
     super
 
   mutateSelection: (selection) ->
+    # Need count times indentation in visual-mode and its repeat(`.`).
+    if @target.is('CurrentSelection')
+      oldText = null
+       # limit to 100 to avoid freezing by accidental big number.
+      count = limitNumber(@getCount(), max: 100)
+      @countTimes count, ({stop}) =>
+        oldText = selection.getText()
+        @indent(selection)
+        newText = selection.getText()
+        stop() if oldText is newText
+    else
+      @indent(selection)
+
+  indent: (selection) ->
     selection.indentSelectedRows()
 
 class Outdent extends Indent
   @extend()
   hover: icon: ':outdent:', emoji: ':point_left:'
-  mutateSelection: (selection) ->
+  indent: (selection) ->
     selection.outdentSelectedRows()
 
 class AutoIndent extends Indent
   @extend()
   hover: icon: ':auto-indent:', emoji: ':open_hands:'
-  mutateSelection: (selection) ->
+  indent: (selection) ->
     selection.autoIndentSelectedRows()
 
 class ToggleLineComments extends TransformString

@@ -119,8 +119,8 @@ class Base
 
   # Misc
   # -------------------------
-  countTimes: (fn) ->
-    return if (last = @getCount()) < 1
+  countTimes: (last, fn) ->
+    return if last < 1
 
     stopped = false
     stop = -> stopped = true
