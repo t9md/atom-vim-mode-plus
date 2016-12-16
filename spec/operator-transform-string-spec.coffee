@@ -843,8 +843,8 @@ describe "Operator TransformString", ->
         text: originalText
         cursor: [0, 9]
 
-      set register: '"': text: 'default register', type: 'character'
-      set register: 'a': text: 'A register', type: 'character'
+      set register: '"': text: 'default register', type: 'characterwise'
+      set register: 'a': text: 'A register', type: 'characterwise'
 
     it "replace selection with regisgter's content", ->
       ensure 'v i w',
@@ -887,8 +887,8 @@ describe "Operator TransformString", ->
         text: originalText
         cursor: [0, 9]
 
-      set register: '"': text: 'default register', type: 'character'
-      set register: 'a': text: 'A register', type: 'character'
+      set register: '"': text: 'default register', type: 'characterwise'
+      set register: 'a': text: 'A register', type: 'characterwise'
 
     it "swap selection with regisgter's content", ->
       ensure 'v i w', selectedText: 'aaa'
