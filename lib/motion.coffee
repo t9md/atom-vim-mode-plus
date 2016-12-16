@@ -152,7 +152,7 @@ class Motion extends Base
   # since it stops immediately because of not cursor position change.
   moveCursorCountTimes: (cursor, fn) ->
     oldPosition = cursor.getBufferPosition()
-    @countTimes @getCount(), (state) =>
+    @countTimes @getCount(), (state) ->
       fn(state)
       if (newPosition = cursor.getBufferPosition()).isEqual(oldPosition)
         state.stop()
@@ -265,7 +265,7 @@ class MoveUpScreen extends Motion
   direction: 'up'
 
   moveCursor: (cursor) ->
-    @moveCursorCountTimes cursor, =>
+    @moveCursorCountTimes cursor, ->
       moveCursorUpScreen(cursor)
 
 class MoveDownScreen extends MoveUpScreen
@@ -274,7 +274,7 @@ class MoveDownScreen extends MoveUpScreen
   direction: 'down'
 
   moveCursor: (cursor) ->
-    @moveCursorCountTimes cursor, =>
+    @moveCursorCountTimes cursor, ->
       moveCursorDownScreen(cursor)
 
 # Move down/up to Edge
@@ -649,7 +649,7 @@ class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
   wise: 'linewise'
   moveCursor: (cursor) ->
-    @moveCursorCountTimes cursor, =>
+    @moveCursorCountTimes cursor, ->
       moveCursorDownBuffer(cursor)
     super
 
