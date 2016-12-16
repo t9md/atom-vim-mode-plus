@@ -641,7 +641,7 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   @extend()
   wise: 'linewise'
   moveCursor: (cursor) ->
-    @moveCursorCountTimes cursor, =>
+    @moveCursorCountTimes cursor, ->
       moveCursorUpBuffer(cursor)
     super
 
