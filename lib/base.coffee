@@ -27,6 +27,7 @@ vimStateMethods = [
   "preemptWillSelectTarget"
   "preemptDidSelectTarget"
   "onDidRestoreCursorPositions"
+  "onDidGroupChangesSinceBufferCheckpoint"
   "onDidSetOperatorModifier"
   "onDidResetOperationStack"
 
@@ -268,6 +269,9 @@ class Base
 
   emitDidRestoreCursorPositions: ->
     @vimState.emitter.emit('did-restore-cursor-positions')
+
+  emitDidGroupChangesSinceBufferCheckpoint: (purpose) ->
+    @vimState.emitter.emit('did-group-changes-since-buffer-checkpoint', {purpose})
 
   # Class methods
   # -------------------------

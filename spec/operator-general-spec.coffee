@@ -752,12 +752,12 @@ describe "Operator general", ->
       it "copies the entire line and pastes it correctly", ->
         ensure 'y y p',
           register: '"': text: "no newline!\n"
-          text: "no newline!\nno newline!"
+          text: "no newline!\nno newline!\n"
 
       it "copies the entire line and pastes it respecting count and new lines", ->
         ensure 'y y 2 p',
           register: '"': text: "no newline!\n"
-          text: "no newline!\nno newline!\nno newline!"
+          text: "no newline!\nno newline!\nno newline!\n"
 
   describe "the Y keybinding", ->
     text = null
@@ -775,76 +775,91 @@ describe "Operator general", ->
       ensure 'v j Y', cursor: [0, 0], register: '"': text: text
 
   describe "the p keybinding", ->
-    describe "with character contents", ->
+    describe "with single line character contents", ->
       beforeEach ->
-        set text: "012\n", cursor: [0, 0]
+        set textC: "|012\n"
         set register: '"': text: '345'
         set register: 'a': text: 'a'
-        atom.clipboard.write "clip"
+        atom.clipboard.write("clip")
 
       describe "from the default register", ->
-        beforeEach -> keystroke 'p'
-
         it "inserts the contents", ->
-          ensure text: "034512\n", cursor: [0, 3]
+          ensure "p", textC: "034|512\n"
 
       describe "at the end of a line", ->
         beforeEach ->
-          set cursor: [0, 2]
-          keystroke 'p'
-
+          set textC: "01|2\n"
         it "positions cursor correctly", ->
-          ensure text: "012345\n", cursor: [0, 5]
+          ensure "p", textC: "01234|5\n"
 
       describe "paste to empty line", ->
         it "paste content to that empty line", ->
           set
-            text: """
+            textC: """
             1st
-
+            |
             3rd
             """
-            cursor: [1, 0]
             register: '"': text: '2nd'
+
           ensure 'p',
-            text: """
+            textC: """
             1st
-            2nd
+            2n|d
             3rd
             """
 
       describe "when useClipboardAsDefaultRegister enabled", ->
         it "inserts contents from clipboard", ->
-          settings.set 'useClipboardAsDefaultRegister', true
-          ensure 'p', text: "0clip12\n"
+          settings.set('useClipboardAsDefaultRegister', true)
+          ensure 'p', textC: "0cli|p12\n"
 
       describe "from a specified register", ->
-        beforeEach ->
-          keystroke ['"', input: 'a', 'p']
-
         it "inserts the contents of the 'a' register", ->
-          ensure text: "0a12\n", cursor: [0, 1]
+          ensure '" a p', textC: "0|a12\n",
 
       describe "at the end of a line", ->
         it "inserts before the current line's newline", ->
-          set text: "abcde\none two three", cursor: [1, 4]
-          ensure 'd $ k $ p', text: "abcdetwo three\none "
+          set
+            textC: """
+            abcde
+            one |two three
+            """
+          ensure 'd $ k $ p',
+            textC_: """
+            abcdetwo thre|e
+            one_
+            """
+
+    describe "with multiline character contents", ->
+      beforeEach ->
+        set textC: "|012\n"
+        set register: '"': text: '345\n678'
+
+      it "p place cursor at start of mutation", -> ensure "p", textC: "0|345\n67812\n"
+      it "P place cursor at start of mutation", -> ensure "P", textC: "|345\n678012\n"
 
     describe "with linewise contents", ->
       describe "on a single line", ->
         beforeEach ->
           set
-            text: '012'
-            cursor: [0, 1]
-            register: '"': text: " 345\n", type: 'linewise'
+            textC: '0|12'
+            register: '"': {text: " 345\n", type: 'linewise'}
 
         it "inserts the contents of the default register", ->
-          ensure 'p', text: "012\n 345", cursor: [1, 1]
+          ensure 'p',
+            textC_: """
+            012
+            _|345\n
+            """
 
         it "replaces the current selection and put cursor to the first char of line", ->
-          ensure 'v p',
-            text: "0\n 345\n2"
-            cursor: [1, 1]
+          ensure 'v p', # '1' was replaced
+            textC_: """
+            0
+            _|345
+            2
+            """
 
       describe "on multiple lines", ->
         beforeEach ->
@@ -853,7 +868,7 @@ describe "Operator general", ->
             012
              345
             """
-            register: '"': text: " 456\n", type: 'linewise'
+            register: '"': {text: " 456\n", type: 'linewise'}
 
         it "inserts the contents of the default register at middle line", ->
           set cursor: [0, 1]
@@ -870,7 +885,7 @@ describe "Operator general", ->
             textC: """
             012
              345
-             |456
+             |456\n
             """
 
     describe "with multiple linewise contents", ->
@@ -880,7 +895,7 @@ describe "Operator general", ->
           012
           |abc
           """
-          register: '"': text: " 345\n 678\n", type: 'linewise'
+          register: '"': {text: " 345\n 678\n", type: 'linewise'}
 
       it "inserts the contents of the default register", ->
         ensure 'p',
@@ -888,7 +903,7 @@ describe "Operator general", ->
           012
           abc
            |345
-           678
+           678\n
           """
 
     describe "pasting twice", ->

@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
 
 {
   haveSomeNonEmptySelection
-  isSingleLine
+  isSingleLineText
   limitNumber
 } = require './utils'
 swrap = require './selection-wrapper'
@@ -441,7 +441,7 @@ class Surround extends TransformString
       open += "\n"
       close += "\n"
 
-    if char in settings.get('charactersToAddSpaceOnSurround') and isSingleLine(text)
+    if char in settings.get('charactersToAddSpaceOnSurround') and isSingleLineText(text)
       open + ' ' + text + ' ' + close
     else
       open + text + close
@@ -482,7 +482,7 @@ class DeleteSurround extends Surround
   getNewText: (text) ->
     [openChar, closeChar] = [text[0], _.last(text)]
     text = text[1...-1]
-    if isSingleLine(text)
+    if isSingleLineText(text)
       text = text.trim() if openChar isnt closeChar
     text
 

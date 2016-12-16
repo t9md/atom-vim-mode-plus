@@ -45,7 +45,7 @@ class ActivateInsertMode extends Operator # FIXME
 
       # grouping changes for undo checkpoint need to come last
       if settings.get('groupChangesWhenLeavingInsertMode')
-        @editor.groupChangesSinceCheckpoint(@getBufferCheckpoint('undo'))
+        @groupChangesSinceBufferCheckpoint('undo')
 
   canContinueOnEmptySelection: ->
     true
