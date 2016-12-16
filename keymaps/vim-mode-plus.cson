@@ -131,9 +131,6 @@
   'P': 'vim-mode-plus:put-before'
   'p': 'vim-mode-plus:put-after'
 
-  # 'g P': 'vim-mode-plus:put-before-and-select'
-  # 'g p': 'vim-mode-plus:put-after-and-select'
-
   # String transformation
   '~': 'vim-mode-plus:toggle-case-and-move-right'
   'g ~': 'vim-mode-plus:toggle-case'

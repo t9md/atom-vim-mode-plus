@@ -554,9 +554,9 @@ class PutBefore extends Operator
 
     text = _.multiplyString(text, @getCount())
     linewise = (type is 'linewise') or @isMode('visual', 'linewise')
-    @paste(selection, text, {linewise, @selectPastedText})
+    @paste(selection, text, {linewise})
 
-  paste: (selection, text, {linewise, selectPastedText}) ->
+  paste: (selection, text, {linewise}) ->
     {cursor} = selection
     if linewise
       newRange = @pasteLinewise(selection, text)
@@ -569,10 +569,7 @@ class PutBefore extends Operator
         cursor.setBufferPosition(range.end.translate([0, -1]))
 
     @setMarkForChange(newRange)
-    if selectPastedText
-      selection.setBufferRange(newRange)
-    else
-      adjustCursor(newRange)
+    adjustCursor(newRange)
 
   # Return newRange
   pasteLinewise: (selection, text) ->
@@ -612,21 +609,6 @@ class PutBefore extends Operator
 
 class PutAfter extends PutBefore
   @extend()
-  location: 'after'
-
-class PutBeforeAndSelect extends PutBefore
-  @extend()
-  @description: "Paste before then select"
-  selectPastedText: true
-
-  activateMode: ->
-    submode = swrap.detectVisualModeSubmode(@editor)
-    unless @vimState.isMode('visual', submode)
-      super('visual', submode)
-
-class PutAfterAndSelect extends PutBeforeAndSelect
-  @extend()
-  @description: "Paste after then select"
   location: 'after'
 
 class Mark extends Operator
