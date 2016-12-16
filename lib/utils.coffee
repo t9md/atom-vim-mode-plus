@@ -550,7 +550,7 @@ matchScopes = (editorElement, scopes) ->
     return true if containsCount is classNames.length
   false
 
-isSingleLine = (text) ->
+isSingleLineText = (text) ->
   text.split(/\n|\r\n/).length is 1
 
 # Return bufferRange and kind ['white-space', 'non-word', 'word']
@@ -805,6 +805,11 @@ isNotEmpty = (target) ->
 setTextAtBufferPosition = (editor, point, text) ->
   editor.setTextInBufferRange([point, point], text)
 
+ensureEndsWithNewLineForBufferRow = (editor, row) ->
+  unless isEndsWithNewLineForBufferRow(editor, row)
+    eol = getEndOfLineForBufferRow(editor, row)
+    setTextAtBufferPosition(editor, eol, "\n")
+
 module.exports = {
   getParent
   getAncestors
@@ -879,7 +884,7 @@ module.exports = {
   matchScopes
   moveCursorDownBuffer
   moveCursorUpBuffer
-  isSingleLine
+  isSingleLineText
   getCurrentWordBufferRangeAndKind
   buildWordPatternByCursor
   getWordBufferRangeAtBufferPosition
@@ -901,4 +906,5 @@ module.exports = {
   findRangeContainsPoint
   isNotEmpty
   setTextAtBufferPosition
+  ensureEndsWithNewLineForBufferRow
 }

@@ -7,6 +7,11 @@ flashTypes =
     decorationOptions:
       type: 'highlight'
       class: 'vim-mode-plus-flash operator'
+  'operator-long':
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash operator-long'
   'operator-occurrence':
     allowMultiple: true
     decorationOptions:

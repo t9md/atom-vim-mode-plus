@@ -149,6 +149,7 @@ class VimState
   preemptWillSelectTarget: (fn) -> @subscribe @emitter.preempt('will-select-target', fn)
   preemptDidSelectTarget: (fn) -> @subscribe @emitter.preempt('did-select-target', fn)
   onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
+  onDidGroupChangesSinceBufferCheckpoint: (fn) -> @subscribe @emitter.on('did-group-changes-since-buffer-checkpoint', fn)
 
   onDidSetOperatorModifier: (fn) -> @subscribe @emitter.on('did-set-operator-modifier', fn)
   emitDidSetOperatorModifier: (options) -> @emitter.emit('did-set-operator-modifier', options)

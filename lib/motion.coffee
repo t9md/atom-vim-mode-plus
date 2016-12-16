@@ -152,7 +152,7 @@ class Motion extends Base
   # since it stops immediately because of not cursor position change.
   moveCursorCountTimes: (cursor, fn) ->
     oldPosition = cursor.getBufferPosition()
-    @countTimes (state) =>
+    @countTimes @getCount(), (state) =>
       fn(state)
       if (newPosition = cursor.getBufferPosition()).isEqual(oldPosition)
         state.stop()

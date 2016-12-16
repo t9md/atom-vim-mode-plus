@@ -13,6 +13,8 @@ _ = require 'underscore-plus'
   getEndOfLineForBufferRow
   setTextAtBufferPosition
   setBufferRow
+  moveCursorToFirstCharacterAtRow
+  ensureEndsWithNewLineForBufferRow
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -77,7 +79,7 @@ class Operator extends Base
       @vimState.flash(ranges, type: @getFlashType())
 
   getFlashType: ->
-    if @isOccurrence()
+    if @occurrenceSelected
       @flashTypeForOccurrence
     else
       @flashType
@@ -191,8 +193,8 @@ class Operator extends Base
   groupChangesSinceBufferCheckpoint: (purpose) ->
     if checkpoint = @getBufferCheckpoint(purpose)
       @editor.groupChangesSinceCheckpoint(checkpoint)
-    else
-    @deleteBufferCheckpoint(purpose)
+      @deleteBufferCheckpoint(purpose)
+      @emitDidGroupChangesSinceBufferCheckpoint(purpose)
 
   # Main
   execute: ->
@@ -200,13 +202,11 @@ class Operator extends Base
     stopMutation = -> canMutate = false
 
     @createBufferCheckpoint('undo')
-
     if @selectTarget()
       for selection in @editor.getSelections() when canMutate
         @mutateSelection(selection, stopMutation)
       @restoreCursorPositionsIfNecessary()
-
-    @groupChangesSinceBufferCheckpoint('undo')
+      @groupChangesSinceBufferCheckpoint('undo')
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
@@ -214,15 +214,19 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
+    @occurrenceSelected = false
     @mutationManager.init(
       isSelect: @instanceof('Select')
       useMarker: @needStay() and @stayByMarker
     )
-    @mutationManager.setCheckpoint('will-select')
 
     # Currently only motion have forceWise methods
     @target.forceWise?(@wise) if @wise?
     @emitWillSelectTarget()
+
+    # Allow cursor position adjustment 'on-will-select-target' hook.
+    # so checkpoint comes AFTER @emitWillSelectTarget()
+    @mutationManager.setCheckpoint('will-select')
 
     # NOTE
     # Since MoveToNextOccurrence, MoveToPreviousOccurrence motion move by
@@ -242,8 +246,9 @@ class Operator extends Base
       # To repoeat(`.`) operation where multiple occurrence patterns was set.
       # Here we save patterns which represent unioned regex which @occurrenceManager knows.
       @patternForOccurrence ?= @occurrenceManager.buildPattern()
-      @occurrenceManager.select()
-      @mutationManager.setCheckpoint('did-select-occurrence')
+      if @occurrenceManager.select()
+        @occurrenceSelected = true
+        @mutationManager.setCheckpoint('did-select-occurrence')
 
     if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
       @emitDidSelectTarget()
@@ -540,72 +545,84 @@ class DecrementNumber extends IncrementNumber
 
 # Put
 # -------------------------
+# Cursor placement:
+# - place at end of mutation: paste non-multiline characterwise text
+# - place at start of mutation: non-multiline characterwise text(characterwise, linewise)
 class PutBefore extends Operator
   @extend()
-  restorePositions: false
   location: 'before'
+  target: 'Empty'
+  flashType: 'operator-long'
+  restorePositions: false # manage manually
+  flashTarget: true # manage manually
+  trackChange: false # manage manually
 
-  initialize: ->
-    @target = 'Empty' if @isMode('normal')
+  execute: ->
+    @mutationsBySelection = new Map()
+    @onDidGroupChangesSinceBufferCheckpoint(@adjustCursorPosition.bind(this))
+
+    @onDidFinishOperation =>
+      # TrackChange
+      if newRange = @mutationsBySelection.get(@editor.getLastSelection())
+        @setMarkForChange(newRange)
+
+      # Flash
+      if settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
+        toRange = (selection) => @mutationsBySelection.get(selection)
+        @vimState.flash(@editor.getSelections().map(toRange), type: @getFlashType())
+    super
+
+  adjustCursorPosition: ->
+    for selection in @editor.getSelections()
+      {cursor} = selection
+      {start, end} = newRange = @mutationsBySelection.get(selection)
+      @setMarkForChange(newRange) if selection.isLastSelection()
+      if @linewisePaste
+        moveCursorToFirstCharacterAtRow(cursor, start.row)
+      else
+        if newRange.isSingleLine()
+          cursor.setBufferPosition(end.translate([0, -1]))
+        else
+          cursor.setBufferPosition(start)
 
   mutateSelection: (selection) ->
     {text, type} = @vimState.register.get(null, selection)
     return unless text
-
     text = _.multiplyString(text, @getCount())
-    linewise = (type is 'linewise') or @isMode('visual', 'linewise')
-    @paste(selection, text, {linewise})
+    @linewisePaste = type is 'linewise' or @isMode('visual', 'linewise')
+    newRange = @paste(selection, text, {linewise: @linewisePaste})
+    @mutationsBySelection.set(selection, newRange)
 
   paste: (selection, text, {linewise}) ->
-    {cursor} = selection
     if linewise
-      newRange = @pasteLinewise(selection, text)
-      adjustCursor = (range) ->
-        cursor.setBufferPosition(range.start)
-        cursor.moveToFirstCharacterOfLine()
+      @pasteLinewise(selection, text)
     else
-      newRange = @pasteCharacterwise(selection, text)
-      adjustCursor = (range) ->
-        cursor.setBufferPosition(range.end.translate([0, -1]))
+      @pasteCharacterwise(selection, text)
 
-    @setMarkForChange(newRange)
-    adjustCursor(newRange)
+  pasteCharacterwise: (selection, text)->
+    {cursor} = selection
+    if selection.isEmpty() and @location is 'after' and not cursorIsAtEmptyRow(cursor)
+      cursor.moveRight()
+    return selection.insertText(text)
 
   # Return newRange
   pasteLinewise: (selection, text) ->
     {cursor} = selection
+    cursorRow = cursor.getBufferRow()
     text += "\n" unless text.endsWith("\n")
+    newRange = null
     if selection.isEmpty()
-      row = cursor.getBufferRow()
-      switch @location
-        when 'before'
-          range = setTextAtBufferPosition(@editor, [row, 0], text)
-          setBufferRow(selection.cursor, range.start.row)
-          @groupChangesSinceBufferCheckpoint('undo')
-          range
-        when 'after'
-          unless isEndsWithNewLineForBufferRow(@editor, row)
-            eol = getEndOfLineForBufferRow(@editor, row)
-            range = setTextAtBufferPosition(@editor, eol, "\n" + text.trimRight())
-            @groupChangesSinceBufferCheckpoint('undo')
-            range.traverse([1, 0], [0, 0])
-          else
-            range = setTextAtBufferPosition(@editor, [row + 1, 0], text)
-            @groupChangesSinceBufferCheckpoint('undo')
-            range
+      if @location is 'before'
+        newRange = setTextAtBufferPosition(@editor, [cursorRow, 0], text)
+        setBufferRow(cursor, newRange.start.row)
+      else if @location is 'after'
+        ensureEndsWithNewLineForBufferRow(@editor, cursorRow)
+        newRange = setTextAtBufferPosition(@editor, [cursorRow + 1, 0], text)
     else
-      if @isMode('visual', 'linewise')
-        unless selection.getBufferRange().end.column is 0
-          # Possible in last buffer line not have ending newLine
-          text = text.replace(LineEndingRegExp, '')
-      else
-        selection.insertText("\n")
-      selection.insertText(text)
+      selection.insertText("\n") unless @isMode('visual', 'linewise')
+      newRange = selection.insertText(text)
 
-  pasteCharacterwise: (selection, text) ->
-    if @location is 'after' and selection.isEmpty() and not cursorIsAtEmptyRow(selection.cursor)
-      selection.cursor.moveRight()
-    selection.insertText(text)
+    return newRange
 
 class PutAfter extends PutBefore
   @extend()

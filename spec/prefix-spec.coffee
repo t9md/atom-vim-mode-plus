@@ -91,7 +91,7 @@ describe "Prefixes", ->
     describe "the * register", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
-          ensure register: '*': text: 'initial clipboard content', type: 'character'
+          ensure register: '*': text: 'initial clipboard content', type: 'characterwise'
 
       describe "writing", ->
         beforeEach ->
@@ -108,7 +108,7 @@ describe "Prefixes", ->
       describe "reading", ->
         it "is the same the system clipboard", ->
           ensure register:
-            '*': text: 'initial clipboard content', type: 'character'
+            '*': text: 'initial clipboard content', type: 'characterwise'
 
       describe "writing", ->
         beforeEach ->
