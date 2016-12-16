@@ -1,3 +1,28 @@
+# 0.74.0
+- Improve: More accurate cursor placement after undo/redo. #603
+  - IMPORTANT, new approach to restore cursor position after undo/redo.
+    - Previous release: Did manual-cursor-position-adjustment after undo/redo
+    - From this release: Create text-buffer's checkpoint at correct timing then restore on undo/redo.
+    - Checkpoint mechanism was being used for long time for `i`, `a`, `c`, from this release used operator globally.
+    - This shift is not completed, will continue gradual improvement.
+- Improve: Use different color on `flashOnUndoRedo` #610
+  - Single change: subtle color flash with duration `0.3s`
+  - Multi change add: green flash with duration `0.8s`
+  - Multi change delete: red flash with duration `0.8s`
+- Improve: `p`, `P` #615
+  - Improve: Flash color differentiation on `p`, `P`(use longer flash to make it obvious mutation boundary).
+  - Breaking: Simplified linewise paste, when line have no ending newline, it add newline automatically
+  - Improve: Pasting characterwise register now place cursor at start of pasted text if text was not single-line-text.
+- Improve: Now Indent(`>`), Outdent(`<`) indent/outdent count times in `visual-mode` #614
+- Improve, Breaking: Improve `insert-at-start/end-of-smart-word`, now no longer stop at whitespace boundary. #613
+  - Breaking: Renamed command name(as same as previous release, no default-keymap)
+    - `insert-at-start-of-inner-smart-word` -> `insert-at-start-of-smart-word`
+    - `insert-at-end-of-inner-smart-word` -> `insert-at-end-of-smart-word`
+- FIX: Incorrectly used `occurrence-flash` if `occurrence-marker` exists but not selected by operation.
+- Breaking: Remove experimental `put-after-and-select`, `put-before-and-select` command #612
+- Internal: When fail to select occurrence `did-select-occurrence` event no longer fired(was fired in previous release).
+- Internal: Rename register type name from `character` to `characterwise` for consistency.
+
 # 0.73.2:
 - Fix: `C` and `D` in `vB`(visual-block) mode was broken from v0.70.0. #602.
 - Fix: `d o tab` then `.` repeat no longer fail #598
