@@ -113,58 +113,89 @@ describe "Operator TransformString", ->
         ABCDE
         """
 
-    describe "on the last line", ->
-      beforeEach ->
-        set cursor: [2, 0]
-
-      describe "when followed by a >", ->
+    describe "> >", ->
+      describe "from first line", ->
         it "indents the current line", ->
+          set cursor: [0, 0]
           ensure '> >',
-            textC_: """
-            12345
+            textC: """
+              |12345
             abcde
-            __|ABCDE
+            ABCDE
             """
-
-    describe "on the first line", ->
-      beforeEach ->
-        set cursor: [0, 0]
-
-      describe "when followed by a >", ->
-        it "indents the current line", ->
-          ensure '> >',
+        it "count means N line indents and undoable, repeatable", ->
+          set cursor: [0, 0]
+          ensure '3 > >',
             textC_: """
             __|12345
+            __abcde
+            __ABCDE
+            """
+
+          ensure 'u',
+            textC: """
+            |12345
             abcde
             ABCDE
             """
 
-      describe "when followed by a repeating >", ->
-        beforeEach ->
-          keystroke '3 > >'
+          ensure '. .',
+            textC_: """
+            ____|12345
+            ____abcde
+            ____ABCDE
+            """
 
-        it "indents multiple lines at once", ->
-          ensure
-            text: "  12345\n  abcde\n  ABCDE"
-            cursor: [0, 2]
-
-        describe "undo behavior", ->
-          it "outdents all three lines", ->
-            ensure 'u', text: "12345\nabcde\nABCDE"
+      describe "from last line", ->
+        it "indents the current line", ->
+          set cursor: [2, 0]
+          ensure '> >',
+            textC: """
+            12345
+            abcde
+              |ABCDE
+            """
 
     describe "in visual mode", ->
       beforeEach ->
         set cursor: [0, 0]
-        keystroke 'V >'
 
-      it "indents the current line and exits visual mode", ->
-        ensure
+      it "[vC] indent selected lines", ->
+        ensure "v j >",
           mode: 'normal'
-          text: "  12345\nabcde\nABCDE"
-          selectedBufferRange: [[0, 2], [0, 2]]
-
-      it "allows repeating the operation", ->
-        ensure '.', text: "    12345\nabcde\nABCDE"
+          textC_: """
+          __|12345
+          __abcde
+          ABCDE
+          """
+      it "[vL] indent selected lines", ->
+        ensure "V >",
+          mode: 'normal'
+          textC_: """
+          __|12345
+          abcde
+          ABCDE
+          """
+        ensure '.',
+          textC_: """
+          ____|12345
+          abcde
+          ABCDE
+          """
+      it "[vL] count means N times indent", ->
+        ensure "V 3 >",
+          mode: 'normal'
+          textC_: """
+          ______|12345
+          abcde
+          ABCDE
+          """
+        ensure '.',
+          textC_: """
+          ____________|12345
+          abcde
+          ABCDE
+          """
 
     describe "in visual mode and stayOnTransformString enabled", ->
       beforeEach ->
@@ -212,33 +243,62 @@ describe "Operator TransformString", ->
 
   describe "the < keybinding", ->
     beforeEach ->
-      set text: "  12345\n  abcde\nABCDE", cursor: [0, 0]
+      set
+        textC_: """
+        |__12345
+        __abcde
+        ABCDE
+        """
 
     describe "when followed by a <", ->
       it "indents the current line", ->
         ensure '< <',
-          text: "12345\n  abcde\nABCDE"
-          cursor: [0, 0]
+          textC_: """
+          |12345
+          __abcde
+          ABCDE
+          """
 
     describe "when followed by a repeating <", ->
-      beforeEach ->
-        keystroke '2 < <'
-
-      it "indents multiple lines at once", ->
-        ensure
-          text: "12345\nabcde\nABCDE"
-          cursor: [0, 0]
-
-      describe "undo behavior", ->
-        it "indents both lines", ->
-          ensure 'u', text: "  12345\n  abcde\nABCDE"
+      it "indents multiple lines at once and undoable", ->
+        ensure '2 < <',
+          textC_: """
+          |12345
+          abcde
+          ABCDE
+          """
+        ensure 'u',
+          textC_: """
+          |__12345
+          __abcde
+          ABCDE
+          """
 
     describe "in visual mode", ->
-      it "indents the current line and exits visual mode", ->
-        ensure 'V <',
-          mode: 'normal'
-          text: "12345\n  abcde\nABCDE"
-          selectedBufferRange: [[0, 0], [0, 0]]
+      beforeEach ->
+        set
+          textC_: """
+          |______12345
+          ______abcde
+          ABCDE
+          """
+
+      it "count means N times outdent", ->
+        ensure 'V j 2 <',
+          textC_: """
+          __|12345
+          __abcde
+          ABCDE
+          """
+        # This is not ideal cursor position, but current limitation.
+        # Since indent depending on Atom's selection.indentSelectedRows()
+        # Implementing it vmp independently solve issue, but I have another idea and want to use Atom's one now.
+        ensure 'u',
+          textC_: """
+          ______12345
+          |______abcde
+          ABCDE
+          """
 
   describe "the = keybinding", ->
     oldGrammar = []
