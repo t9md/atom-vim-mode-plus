@@ -240,15 +240,15 @@ class InsertAtEndOfOccurrence extends InsertByTarget
   which: 'end'
   occurrence: true
 
-class InsertAtStartOfInnerSmartWord extends InsertByTarget
+class InsertAtStartOfSmartWord extends InsertByTarget
   @extend()
   which: 'start'
-  target: "InnerSmartWord"
+  target: "MoveToPreviousSmartWord"
 
-class InsertAtEndOfInnerSmartWord extends InsertByTarget
+class InsertAtEndOfSmartWord extends InsertByTarget
   @extend()
   which: 'end'
-  target: "InnerSmartWord"
+  target: "MoveToEndOfSmartWord"
 
 class InsertAtPreviousFoldStart extends InsertByTarget
   @extend()
