@@ -599,7 +599,7 @@ class PutBefore extends Operator
     else
       @pasteCharacterwise(selection, text)
 
-  pasteCharacterwise: (selection, text)->
+  pasteCharacterwise: (selection, text) ->
     {cursor} = selection
     if selection.isEmpty() and @location is 'after' and not cursorIsAtEmptyRow(cursor)
       cursor.moveRight()
