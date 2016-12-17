@@ -18,6 +18,26 @@ class ActivateInsertMode extends Operator # FIXME
   flashTarget: false
   finalSubmode: null
   supportInsertionCount: true
+  bufferCheckpointByPurpose: null
+
+  # Two checkpoint for different purpose
+  # - one for undo(handled by modeManager)
+  # - one for preserve last inserted text
+  createBufferCheckpoint: (purpose) ->
+    @bufferCheckpointByPurpose ?= {}
+    @bufferCheckpointByPurpose[purpose] = @editor.createCheckpoint()
+
+  getBufferCheckpoint: (purpose) ->
+    @bufferCheckpointByPurpose?[purpose]
+
+  deleteBufferCheckpoint: (purpose) ->
+    if @bufferCheckpointByPurpose?
+      delete @bufferCheckpointByPurpose[purpose]
+
+  groupChangesSinceBufferCheckpoint: (purpose) ->
+    if checkpoint = @getBufferCheckpoint(purpose)
+      @editor.groupChangesSinceCheckpoint(checkpoint)
+      @deleteBufferCheckpoint(purpose)
 
   observeWillDeactivateMode: ->
     disposable = @vimState.modeManager.preemptWillDeactivateMode ({mode}) =>
@@ -89,9 +109,9 @@ class ActivateInsertMode extends Operator # FIXME
   execute: ->
     if @isRepeated()
       @flashTarget = @trackChange = true
-      @selectTarget() if @isRequireTarget()
 
-      @editor.transact =>
+      @startMutation =>
+        @selectTarget() if @isRequireTarget()
         @mutateText?()
         for selection in @editor.getSelections()
           @repeatInsert(selection, @lastChange?.newText ? '')
@@ -101,6 +121,7 @@ class ActivateInsertMode extends Operator # FIXME
         @vimState.clearSelections()
 
     else
+      @normalizeSelectionsIfNecessary() if @isRequireTarget()
       @createBufferCheckpoint('undo')
       @selectTarget() if @isRequireTarget()
       @observeWillDeactivateMode()

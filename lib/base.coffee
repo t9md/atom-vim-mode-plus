@@ -21,13 +21,14 @@ vimStateMethods = [
   "onDidCancelSearch"
   "onDidCommandSearch"
 
+  "onWillMutateTarget"
+  "onDidMutateTarget"
   "onDidSetTarget"
   "onWillSelectTarget"
   "onDidSelectTarget"
   "preemptWillSelectTarget"
   "preemptDidSelectTarget"
   "onDidRestoreCursorPositions"
-  "onDidGroupChangesSinceBufferCheckpoint"
   "onDidSetOperatorModifier"
   "onDidResetOperationStack"
 
@@ -270,8 +271,11 @@ class Base
   emitDidRestoreCursorPositions: ->
     @vimState.emitter.emit('did-restore-cursor-positions')
 
-  emitDidGroupChangesSinceBufferCheckpoint: (purpose) ->
-    @vimState.emitter.emit('did-group-changes-since-buffer-checkpoint', {purpose})
+  emitWillMutateTarget: ->
+    @vimState.emitter.emit('on-will-mutate-target')
+
+  emitDidMutateTarget: ->
+    @vimState.emitter.emit('on-did-mutate-target')
 
   # Class methods
   # -------------------------

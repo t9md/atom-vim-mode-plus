@@ -237,6 +237,7 @@ class TransformStringByExternalCommand extends TransformString
   stdoutBySelection: null
 
   execute: ->
+    @normalizeSelectionsIfNecessary()
     if @selectTarget()
       new Promise (resolve) =>
         @collect(resolve)
