@@ -46,8 +46,12 @@ class Operator extends Base
   acceptCurrentSelection: true
 
   needStay: ->
-    @stayAtSamePosition ?=
-      (@isOccurrence() and settings.get('stayOnOccurrence')) or settings.get(@stayOptionName)
+    @stayAtSamePosition ?
+      (@isOccurrence() and settings.get('stayOnOccurrence') and @occurrenceSelected) or settings.get(@stayOptionName)
+
+  needStayOnRestore: ->
+    @stayAtSamePosition ?
+      (@isOccurrence() and settings.get('stayOnOccurrence') and @occurrenceSelected) or settings.get(@stayOptionName)
 
   isOccurrence: ->
     @occurrence
@@ -262,9 +266,10 @@ class Operator extends Base
     return unless @restorePositions
 
     options =
-      stay: @needStay()
-      isOccurrence: @isOccurrence()
+      stay: @needStayOnRestore()
+      occurrenceSelected: @occurrenceSelected
       isBlockwise: @target?.isBlockwise?()
+    console.log options
 
     @mutationManager.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
@@ -400,7 +405,7 @@ class Delete extends Operator
 
   adjustCursor: (cursor) ->
     row = getValidVimBufferRow(@editor, cursor.getBufferRow())
-    if @needStay()
+    if @needStayOnRestore()
       point = @mutationManager.getInitialPointForSelection(cursor.selection)
       cursor.setBufferPosition([row, point.column])
     else
