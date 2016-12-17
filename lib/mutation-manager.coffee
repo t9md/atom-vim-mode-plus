@@ -100,20 +100,30 @@ class MutationManager
           for selection in @editor.getSelections()
             selection.destroy() unless selection.isLastSelection()
     else
-      for selection, i in @editor.getSelections()
-        if mutation = @mutationsBySelection.get(selection)
-          if occurrenceSelected and mutation.createdAt isnt 'will-select'
-            selection.destroy()
-            continue
+      for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
+        if occurrenceSelected and not mutation.isCreatedAt('will-select')
+          selection.destroy()
 
-          if occurrenceSelected and stay
-            point = @vimState.getOriginalCursorPosition()
-            selection.cursor.setBufferPosition(point)
-          else if point = mutation.getRestorePoint({stay})
-            selection.cursor.setBufferPosition(point)
-        else
-          if occurrenceSelected
-            selection.destroy()
+        if occurrenceSelected and stay
+          # This is essencially to clipToMutationEnd when `d o f`, `d o p` case.
+          point = @clipToMutationEndIfSomeMutationContainsPoint(@vimState.getOriginalCursorPosition())
+          selection.cursor.setBufferPosition(point)
+        else if point = mutation.getRestorePoint({stay})
+          selection.cursor.setBufferPosition(point)
+
+  clipToMutationEndIfSomeMutationContainsPoint: (point) ->
+    if mutation = @findMutationContainsPointAtCheckpoint(point, 'did-select-occurrence')
+      Point.min(mutation.getEndBufferPosition(), point)
+    else
+      point
+
+  findMutationContainsPointAtCheckpoint: (point, checkpoint) ->
+    # Coffeescript cannot iterate over iterator by JavaScript's 'of' because of syntax conflicts.
+    iterator = @mutationsBySelection.values()
+    while (entry = iterator.next()) and not entry.done
+      mutation = entry.value
+      if mutation.getBufferRangeForCheckpoint(checkpoint).containsPoint(point)
+        return mutation
 
 # Mutation information is created even if selection.isEmpty()
 # So that we can filter selection by when it was created.
@@ -128,6 +138,9 @@ class Mutation
     @bufferRangeByCheckpoint = {}
     @marker = null
     @update(checkpoint)
+
+  isCreatedAt: (timing) ->
+    @createdAt is timing
 
   update: (checkpoint) ->
     # Current non-empty selection is prioritized over existing marker's range.
