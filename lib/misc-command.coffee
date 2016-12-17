@@ -36,6 +36,11 @@ class BlockwiseOtherEnd extends ReverseSelections
 class Undo extends MiscCommand
   @extend()
 
+  findRangeContainsPoint: (ranges, point) ->
+    for range in ranges when range.containsPoint(point)
+      return range
+    null
+
   withTrackingChanges: (fn) ->
     newRanges = []
     oldRanges = []
@@ -53,18 +58,14 @@ class Undo extends MiscCommand
     selection.clear() for selection in @editor.getSelections()
 
     allRanges = sortRanges(newRanges.concat(oldRanges))
-    cursorPositionAfterMutate = @editor.getCursorBufferPosition()
-    cursorContainedRanges = allRanges.filter (range) ->
-      range.containsPoint(cursorPositionAfterMutate)
-
-    if changedRange = cursorContainedRanges[0] ? allRanges[0]
-      @vimState.mark.setRange('[', ']', changedRange)
+    restoredCursorPosition = @editor.getCursorBufferPosition()
+    if cursorContainedRange = @findRangeContainsPoint(allRanges, restoredCursorPosition)
+      @vimState.mark.setRange('[', ']', cursorContainedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
-        if isLinewiseRange(changedRange)
-          if changedRange.containsPoint(cursorPositionAfterMutate)
-            setBufferRow(@editor.getLastCursor(), changedRange.start.row)
+        if isLinewiseRange(cursorContainedRange)
+          setBufferRow(@editor.getLastCursor(), cursorContainedRange.start.row)
         else
-          @editor.setCursorBufferPosition(changedRange.start)
+          @editor.setCursorBufferPosition(cursorContainedRange.start)
 
     if settings.get('flashOnUndoRedo')
       if newRanges.length > 0
