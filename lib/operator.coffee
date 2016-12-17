@@ -390,7 +390,7 @@ class Delete extends Operator
 
   execute: ->
     @onDidSelectTarget =>
-      @requestAdjustCursorPositions() if @target.isLinewise()
+      @requestAdjustCursorPositions() if @target.isLinewise() and not @occurrenceSelected
     super
 
   mutateSelection: (selection) =>

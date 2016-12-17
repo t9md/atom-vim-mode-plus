@@ -146,8 +146,16 @@ describe "Occurrence", ->
             xxx:ooo:xxx
             \n
             """
-        it "delete occurrence and cursor is at mutation end", ->
+        it "[d o p] delete occurrence and cursor is at mutation end", ->
           ensure "d o p",
+            textC: """
+
+            |:xxx::
+            xxx::xxx
+            \n
+            """
+        it "[d o j] delete occurrence and cursor is at mutation end", ->
+          ensure "d o j",
             textC: """
 
             |:xxx::
