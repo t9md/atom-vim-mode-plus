@@ -269,7 +269,6 @@ class Operator extends Base
       stay: @needStayOnRestore()
       occurrenceSelected: @occurrenceSelected
       isBlockwise: @target?.isBlockwise?()
-    console.log options
 
     @mutationManager.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()

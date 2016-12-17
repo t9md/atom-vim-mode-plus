@@ -47,9 +47,6 @@ class ActivateInsertMode extends Operator # FIXME
       if settings.get('groupChangesWhenLeavingInsertMode')
         @groupChangesSinceBufferCheckpoint('undo')
 
-  canContinueOnEmptySelection: ->
-    true
-
   # When each mutaion's extent is not intersecting, muitiple changes are recorded
   # e.g
   #  - Multicursors edit
@@ -92,15 +89,11 @@ class ActivateInsertMode extends Operator # FIXME
   execute: ->
     if @isRepeated()
       @flashTarget = @trackChange = true
-
-      if @isRequireTarget()
-        targetSelected = @selectTarget()
-        if not targetSelected and not @canContinueOnEmptySelection()
-          return
+      @selectTarget() if @isRequireTarget()
 
       @editor.transact =>
         @mutateText?()
-        for selection, i in @editor.getSelections()
+        for selection in @editor.getSelections()
           @repeatInsert(selection, @lastChange?.newText ? '')
           moveCursorLeft(selection.cursor)
 
@@ -109,12 +102,7 @@ class ActivateInsertMode extends Operator # FIXME
 
     else
       @createBufferCheckpoint('undo')
-      if @isRequireTarget()
-        targetSelected = @selectTarget()
-        if not targetSelected and not @canContinueOnEmptySelection()
-          @vimState.activate('normal')
-          return
-
+      @selectTarget() if @isRequireTarget()
       @observeWillDeactivateMode()
 
       @mutateText?()
@@ -268,9 +256,6 @@ class Change extends ActivateInsertMode
   requireTarget: true
   trackChange: true
   supportInsertionCount: false
-
-  canContinueOnEmptySelection: ->
-    not @isOccurrence()
 
   mutateText: ->
     # Allways dynamically determine selection wise wthout consulting target.wise
