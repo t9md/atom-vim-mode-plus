@@ -218,6 +218,10 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
+    if @target.isMotion() and @isMode('visual')
+      @vimState.modeManager.normalizeSelections()
+      @createBufferCheckpoint('undo')
+
     @occurrenceSelected = false
     @mutationManager.init(
       isSelect: @instanceof('Select')
@@ -237,11 +241,6 @@ class Operator extends Base
     #  occurrence-marker, occurrence-marker has to be created BEFORE `@target.execute()`
     if @isRepeated() and @isOccurrence() and not @occurrenceManager.hasMarkers()
       @addOccurrencePattern()
-
-    if @target.isMotion() and @isMode('visual')
-      @vimState.modeManager.normalizeSelections()
-      # Overwrite checkpoint since I want restore cursor position at undo/redo.
-      @createBufferCheckpoint('undo')
 
     @target.execute()
 
