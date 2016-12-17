@@ -191,7 +191,6 @@ class InsertByTarget extends ActivateInsertMode
     super
 
   modifySelection: ->
-
     switch @vimState.submode
       when 'characterwise'
         # `I(or A)` is short-hand of `ctrl-v I(or A)`
@@ -263,13 +262,15 @@ class Change extends ActivateInsertMode
     #   {
     #     a
     #   }
-    text = ''
-    text = "\n" if swrap.detectVisualModeSubmode(@editor) is 'linewise'
-
+    isLinewiseTarget = swrap.detectVisualModeSubmode(@editor) is 'linewise'
     for selection in @editor.getSelections()
       @setTextToRegisterForSelection(selection)
-      range = selection.insertText(text, autoIndent: true)
-      selection.cursor.moveLeft() unless range.isEmpty()
+      if isLinewiseTarget
+        selection.insertText("\n", autoIndent: true)
+        selection.cursor.moveLeft()
+      else
+        selection.insertText('', autoIndent: true)
+
 
 class ChangeOccurrence extends Change
   @extend()
