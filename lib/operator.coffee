@@ -375,17 +375,15 @@ class Delete extends Operator
 
   execute: ->
     @onDidSelectTarget =>
-      @requestAdjustCursorPositions() if @target.isLinewise() and not @occurrenceSelected
+      return if @occurrenceSelected
+      if @target.isLinewise()
+        @onDidRestoreCursorPositions =>
+          @adjustCursor(cursor) for cursor in @editor.getCursors()
     super
 
   mutateSelection: (selection) =>
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
-
-  requestAdjustCursorPositions: ->
-    @onDidRestoreCursorPositions =>
-      for cursor in @editor.getCursors()
-        @adjustCursor(cursor)
 
   adjustCursor: (cursor) ->
     row = getValidVimBufferRow(@editor, cursor.getBufferRow())
