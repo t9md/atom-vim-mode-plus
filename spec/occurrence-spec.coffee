@@ -137,6 +137,34 @@ describe "Occurrence", ->
           XXX: |||: OOO: OOO:
           """
 
+      describe "clip to mutation end behavior", ->
+        beforeEach ->
+          set
+            textC: """
+
+            oo|o:xxx:ooo:
+            xxx:ooo:xxx
+            \n
+            """
+        it "delete occurrence and cursor is at mutation end", ->
+          ensure "d o p",
+            textC: """
+
+            |:xxx::
+            xxx::xxx
+            \n
+            """
+        it "not clip if original cursor not intersects any occurence-marker", ->
+          ensure 'g o', occurrenceText: ['ooo', 'ooo', 'ooo'], cursor: [1, 2]
+          keystroke 'j', cursor: [2, 2]
+          ensure "d p",
+            textC: """
+
+            :xxx::
+            xx|x::xxx
+            \n
+            """
+
     describe "auto extend target range to include occurrence", ->
       textOriginal = "This text have 3 instance of 'text' in the whole text.\n"
       textFinal = textOriginal.replace(/text/g, '')
