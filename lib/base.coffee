@@ -21,23 +21,30 @@ vimStateMethods = [
   "onDidCancelSearch"
   "onDidCommandSearch"
 
+  # Life cycle
   "onDidSetTarget"
-  "onWillSelectTarget"
-  "onDidSelectTarget"
-  "preemptWillSelectTarget"
-  "preemptDidSelectTarget"
-  "onDidRestoreCursorPositions"
-  "onDidGroupChangesSinceBufferCheckpoint"
-  "onDidSetOperatorModifier"
+  "emitDidSetTarget"
+    "onWillMutateTarget"
+    "emitWillMutateTarget"
+      "onWillSelectTarget"
+      "emitWillSelectTarget"
+      "onDidSelectTarget"
+      "emitDidSelectTarget"
+
+      "onDidRestoreCursorPositions"
+      "emitDidRestoreCursorPositions"
+    "onDidMutateTarget"
+    "emitDidMutateTarget"
+  "onDidFinishOperation"
   "onDidResetOperationStack"
+
+  "onDidSetOperatorModifier"
 
   "onWillActivateMode"
   "onDidActivateMode"
-  "onWillDeactivateMode"
   "preemptWillDeactivateMode"
+  "onWillDeactivateMode"
   "onDidDeactivateMode"
-
-  "onDidFinishOperation"
 
   "onDidCancelSelectList"
   "subscribe"
@@ -257,21 +264,6 @@ class Base
     str = @getName()
     str += ", target=#{@getTarget().toString()}" if @hasTarget()
     str
-
-  emitWillSelectTarget: ->
-    @vimState.emitter.emit('will-select-target')
-
-  emitDidSelectTarget: ->
-    @vimState.emitter.emit('did-select-target')
-
-  emitDidSetTarget: (operator) ->
-    @vimState.emitter.emit('did-set-target', operator)
-
-  emitDidRestoreCursorPositions: ->
-    @vimState.emitter.emit('did-restore-cursor-positions')
-
-  emitDidGroupChangesSinceBufferCheckpoint: (purpose) ->
-    @vimState.emitter.emit('did-group-changes-since-buffer-checkpoint', {purpose})
 
   # Class methods
   # -------------------------

@@ -58,7 +58,7 @@ describe "Persistent Selection", ->
 
     describe "basic behavior", ->
       describe "create-persistent-selection", ->
-        it "create-persistent-selection create range marker", ->
+        it "create-persistent-selection", ->
           ensurePersistentSelection 'g m i w',
             length: 1
             text: ['ooo']

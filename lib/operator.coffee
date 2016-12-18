@@ -24,7 +24,6 @@ class Operator extends Base
   @extend(false)
   requireTarget: true
   recordable: true
-  bufferCheckpointByPurpose: null
 
   wise: null
   occurrence: false
@@ -180,37 +179,26 @@ class Operator extends Base
     text += "\n" if (@target.isLinewise() and (not text.endsWith('\n')))
     @vimState.register.set({text, selection}) if text
 
-  # Two checkpoint for different purpose
-  # - one for undo(handled by modeManager)
-  # - one for preserve last inserted text
-  createBufferCheckpoint: (purpose) ->
-    @bufferCheckpointByPurpose ?= {}
-    @bufferCheckpointByPurpose[purpose] = @editor.createCheckpoint()
+  normalizeSelectionsIfNecessary: ->
+    if @target?.isMotion() and @isMode('visual')
+      @vimState.modeManager.normalizeSelections()
 
-  getBufferCheckpoint: (purpose) ->
-    @bufferCheckpointByPurpose?[purpose]
-
-  deleteBufferCheckpoint: (purpose) ->
-    if @bufferCheckpointByPurpose?
-      delete @bufferCheckpointByPurpose[purpose]
-
-  groupChangesSinceBufferCheckpoint: (purpose) ->
-    if checkpoint = @getBufferCheckpoint(purpose)
-      @editor.groupChangesSinceCheckpoint(checkpoint)
-      @deleteBufferCheckpoint(purpose)
-      @emitDidGroupChangesSinceBufferCheckpoint(purpose)
+  startMutation: (fn) ->
+    @emitWillMutateTarget()
+    @normalizeSelectionsIfNecessary()
+    @editor.transact(fn)
+    @emitDidMutateTarget()
 
   # Main
   execute: ->
     canMutate = true
     stopMutation = -> canMutate = false
 
-    @createBufferCheckpoint('undo')
-    if @selectTarget()
-      for selection in @editor.getSelections() when canMutate
-        @mutateSelection(selection, stopMutation)
-      @restoreCursorPositionsIfNecessary()
-      @groupChangesSinceBufferCheckpoint('undo')
+    @startMutation =>
+      if @selectTarget()
+        for selection in @editor.getSelections() when canMutate
+          @mutateSelection(selection, stopMutation)
+        @restoreCursorPositionsIfNecessary()
 
     # Even though we fail to select target and fail to mutate,
     # we have to return to normal-mode from operator-pending or visual
@@ -237,11 +225,6 @@ class Operator extends Base
     #  occurrence-marker, occurrence-marker has to be created BEFORE `@target.execute()`
     if @isRepeated() and @isOccurrence() and not @occurrenceManager.hasMarkers()
       @addOccurrencePattern()
-
-    if @target.isMotion() and @isMode('visual')
-      @vimState.modeManager.normalizeSelections()
-      # Overwrite checkpoint since I want restore cursor position at undo/redo.
-      @createBufferCheckpoint('undo')
 
     @target.execute()
 
@@ -287,7 +270,8 @@ class Select extends Operator
   acceptPersistentSelection: false
 
   execute: ->
-    @selectTarget()
+    @startMutation =>
+      @selectTarget()
     if @target.isTextObject() and wise = @target.getWise()
       @activateModeIfNecessary('visual', wise)
 
@@ -311,11 +295,12 @@ class SelectOccurrence extends Operator
   occurrence: true
 
   execute: ->
-    if @selectTarget()
-      submode = swrap.detectVisualModeSubmode(@editor)
-      @activateModeIfNecessary('visual', submode)
+    @startMutation =>
+      if @selectTarget()
+        submode = swrap.detectVisualModeSubmode(@editor)
+        @activateModeIfNecessary('visual', submode)
 
-# Range Marker
+# Persistent Selection
 # =========================
 class CreatePersistentSelection extends Operator
   @extend()
@@ -390,17 +375,15 @@ class Delete extends Operator
 
   execute: ->
     @onDidSelectTarget =>
-      @requestAdjustCursorPositions() if @target.isLinewise() and not @occurrenceSelected
+      return if @occurrenceSelected
+      if @target.isLinewise()
+        @onDidRestoreCursorPositions =>
+          @adjustCursor(cursor) for cursor in @editor.getCursors()
     super
 
   mutateSelection: (selection) =>
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
-
-  requestAdjustCursorPositions: ->
-    @onDidRestoreCursorPositions =>
-      for cursor in @editor.getCursors()
-        @adjustCursor(cursor)
 
   adjustCursor: (cursor) ->
     row = getValidVimBufferRow(@editor, cursor.getBufferRow())
@@ -517,10 +500,12 @@ class IncrementNumber extends Operator
   execute: ->
     pattern = ///#{settings.get('numberRegex')}///g
     newRanges = null
-    @selectTarget()
-    @editor.transact =>
+
+    @startMutation =>
+      @selectTarget()
       newRanges = for selection in @editor.getSelectionsOrderedByBufferPosition()
         @replaceNumber(selection.getBufferRange(), pattern)
+
     if (newRanges = _.flatten(newRanges)).length
       @flashIfNecessary(newRanges)
     else
@@ -563,7 +548,7 @@ class PutBefore extends Operator
 
   execute: ->
     @mutationsBySelection = new Map()
-    @onDidGroupChangesSinceBufferCheckpoint(@adjustCursorPosition.bind(this))
+    @onDidMutateTarget(@adjustCursorPosition.bind(this))
 
     @onDidFinishOperation =>
       # TrackChange

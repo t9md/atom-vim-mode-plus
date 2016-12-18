@@ -610,34 +610,52 @@ describe "Operator TransformString", ->
         jasmine.attachToDOM(editorElement)
 
         set
-          text: """
+          textC: """
 
-            apple
+            |apple
             pairs tomato
             orange
             milk
 
             """
-          cursorBuffer: [1, 0]
 
         atom.keymaps.add "ms",
           'atom-text-editor.vim-mode-plus:not(.insert-mode)':
             'm s': 'vim-mode-plus:map-surround'
           'atom-text-editor.vim-mode-plus.visual-mode':
             'm s':  'vim-mode-plus:map-surround'
+
       it "surround text for each word in target case-1", ->
-        ensure ['m s i p', input: '('],
-          text: "\n(apple)\n(pairs) (tomato)\n(orange)\n(milk)\n"
-          cursor: [1, 0]
+        ensure 'm s i p (',
+          textC: """
+
+          |(apple)
+          (pairs) (tomato)
+          (orange)
+          (milk)
+
+          """
       it "surround text for each word in target case-2", ->
         set cursor: [2, 1]
-        ensure ['m s i l', input: '<'],
-          text: '\napple\n<pairs> <tomato>\norange\nmilk\n'
-          cursor: [2, 1]
+        ensure 'm s i l <',
+          textC: """
+
+          apple
+          <|pairs> <tomato>
+          orange
+          milk
+
+          """
       it "surround text for each word in visual selection", ->
-        ensure ['v i p m s', input: '"'],
-          text: '\n"apple"\n"pairs" "tomato"\n"orange"\n"milk"\n'
-          cursor: [4, 0]
+        ensure 'v i p m s "',
+          textC: """
+
+          "apple"
+          "pairs" "tomato"
+          "orange"
+          |"milk"
+
+          """
 
     describe 'delete surround', ->
       beforeEach ->

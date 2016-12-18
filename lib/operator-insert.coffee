@@ -2,7 +2,9 @@ _ = require 'underscore-plus'
 {Range} = require 'atom'
 
 {
-  moveCursorLeft, moveCursorRight, limitNumber
+  moveCursorLeft
+  moveCursorRight
+  limitNumber
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -18,6 +20,26 @@ class ActivateInsertMode extends Operator # FIXME
   flashTarget: false
   finalSubmode: null
   supportInsertionCount: true
+  bufferCheckpointByPurpose: null
+
+  # Two checkpoint for different purpose
+  # - one for undo(handled by modeManager)
+  # - one for preserve last inserted text
+  createBufferCheckpoint: (purpose) ->
+    @bufferCheckpointByPurpose ?= {}
+    @bufferCheckpointByPurpose[purpose] = @editor.createCheckpoint()
+
+  getBufferCheckpoint: (purpose) ->
+    @bufferCheckpointByPurpose?[purpose]
+
+  deleteBufferCheckpoint: (purpose) ->
+    if @bufferCheckpointByPurpose?
+      delete @bufferCheckpointByPurpose[purpose]
+
+  groupChangesSinceBufferCheckpoint: (purpose) ->
+    if checkpoint = @getBufferCheckpoint(purpose)
+      @editor.groupChangesSinceCheckpoint(checkpoint)
+      @deleteBufferCheckpoint(purpose)
 
   observeWillDeactivateMode: ->
     disposable = @vimState.modeManager.preemptWillDeactivateMode ({mode}) =>
@@ -89,9 +111,9 @@ class ActivateInsertMode extends Operator # FIXME
   execute: ->
     if @isRepeated()
       @flashTarget = @trackChange = true
-      @selectTarget() if @isRequireTarget()
 
-      @editor.transact =>
+      @startMutation =>
+        @selectTarget() if @isRequireTarget()
         @mutateText?()
         for selection in @editor.getSelections()
           @repeatInsert(selection, @lastChange?.newText ? '')
@@ -101,6 +123,7 @@ class ActivateInsertMode extends Operator # FIXME
         @vimState.clearSelections()
 
     else
+      @normalizeSelectionsIfNecessary() if @isRequireTarget()
       @createBufferCheckpoint('undo')
       @selectTarget() if @isRequireTarget()
       @observeWillDeactivateMode()
@@ -165,6 +188,18 @@ class InsertAtLastInsert extends ActivateInsertMode
 
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
+
+  # This is for `o` and `O` operator.
+  # On undo/redo put cursor at original point where user type `o` or `O`.
+  groupChangesSinceBufferCheckpoint: ->
+    lastCursor = @editor.getLastCursor()
+    cursorPosition = lastCursor.getBufferPosition()
+    lastCursor.setBufferPosition(@vimState.getOriginalCursorPositionByMarker())
+
+    super
+
+    lastCursor.setBufferPosition(cursorPosition)
+
   mutateText: ->
     @editor.insertNewlineAbove()
 
@@ -270,7 +305,6 @@ class Change extends ActivateInsertMode
         selection.cursor.moveLeft()
       else
         selection.insertText('', autoIndent: true)
-
 
 class ChangeOccurrence extends Change
   @extend()

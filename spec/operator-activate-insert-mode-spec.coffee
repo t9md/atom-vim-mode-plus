@@ -351,6 +351,22 @@ describe "Operator ActivateInsertMode family", ->
       ensure 'escape', text: "abc\n  012\n  def\n"
       ensure 'u', text: "abc\n  012\n"
 
+  describe "undo/redo for `o` and `O`", ->
+    beforeEach ->
+      set textC: "----|=="
+    it "undo and redo by keeping cursor at o started position", ->
+      ensure 'o', mode: 'insert'
+      editor.insertText('@@')
+      ensure "escape", textC: "----==\n@|@"
+      ensure "u", textC: "----|=="
+      ensure "ctrl-r", textC: "----|==\n@@"
+    it "undo and redo by keeping cursor at O started position", ->
+      ensure 'O', mode: 'insert'
+      editor.insertText('@@')
+      ensure "escape", textC: "@|@\n----=="
+      ensure "u", textC: "----|=="
+      ensure "ctrl-r", textC: "@@\n----|=="
+
   describe "the a keybinding", ->
     beforeEach ->
       set text: "012\n"

@@ -144,12 +144,22 @@ class VimState
 
   # Select and text mutation(Change)
   onDidSetTarget: (fn) -> @subscribe @emitter.on('did-set-target', fn)
+  emitDidSetTarget: (operator) -> @emitter.emit('did-set-target', operator)
+
   onWillSelectTarget: (fn) -> @subscribe @emitter.on('will-select-target', fn)
+  emitWillSelectTarget: -> @emitter.emit('will-select-target')
+
   onDidSelectTarget: (fn) -> @subscribe @emitter.on('did-select-target', fn)
-  preemptWillSelectTarget: (fn) -> @subscribe @emitter.preempt('will-select-target', fn)
-  preemptDidSelectTarget: (fn) -> @subscribe @emitter.preempt('did-select-target', fn)
+  emitDidSelectTarget: -> @emitter.emit('did-select-target')
+
+  onWillMutateTarget: (fn) -> @subscribe @emitter.on('on-will-mutate-target', fn)
+  emitWillMutateTarget: -> @emitter.emit('on-will-mutate-target')
+
+  onDidMutateTarget: (fn) -> @subscribe @emitter.on('on-did-mutate-target', fn)
+  emitDidMutateTarget: -> @emitter.emit('on-did-mutate-target')
+
   onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
-  onDidGroupChangesSinceBufferCheckpoint: (fn) -> @subscribe @emitter.on('did-group-changes-since-buffer-checkpoint', fn)
+  emitDidRestoreCursorPositions: -> @emitter.emit('did-restore-cursor-positions')
 
   onDidSetOperatorModifier: (fn) -> @subscribe @emitter.on('did-set-operator-modifier', fn)
   emitDidSetOperatorModifier: (options) -> @emitter.emit('did-set-operator-modifier', options)
@@ -291,7 +301,6 @@ class VimState
     @saveOriginalCursorPosition()
 
   reset: ->
-    @resetOriginalCursorPosition()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
@@ -343,14 +352,19 @@ class VimState
   # Other
   # -------------------------
   saveOriginalCursorPosition: ->
+    @originalCursorPosition = null
+    @originalCursorPositionByMarker?.destroy()
+
     if @mode is 'visual'
       options = {fromProperty: true, allowFallback: true}
-      @originalCursorPosition = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
+      point = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
     else
-      @originalCursorPosition = @editor.getCursorBufferPosition()
+      point = @editor.getCursorBufferPosition()
+    @originalCursorPosition = point
+    @originalCursorPositionByMarker = @editor.markBufferPosition(point, invalidate: 'never')
 
   getOriginalCursorPosition: ->
     @originalCursorPosition
 
-  resetOriginalCursorPosition: ->
-    @originalCursorPosition = null
+  getOriginalCursorPositionByMarker: ->
+    @originalCursorPositionByMarker.getStartBufferPosition()
