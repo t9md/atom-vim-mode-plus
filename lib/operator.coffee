@@ -621,8 +621,10 @@ class PutAfter extends PutBefore
 class Mark extends Operator
   @extend()
   # hover: icon: ':mark:', emoji: ':round_pushpin:'
+  recordable: false
   requireInput: true
   requireTarget: false
+  acceptPersistentSelection: false
   initialize: ->
     @focusInput()
 
