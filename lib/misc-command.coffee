@@ -8,6 +8,7 @@ _ = require 'underscore-plus'
 {
   pointIsAtEndOfLine
   sortRanges
+  findRangeContainsPoint
 } = require './utils'
 
 class MiscCommand extends Base
@@ -36,11 +37,6 @@ class BlockwiseOtherEnd extends ReverseSelections
 class Undo extends MiscCommand
   @extend()
 
-  findRangeContainsPoint: (ranges, point) ->
-    for range in ranges when range.containsPoint(point)
-      return range
-    null
-
   withTrackingChanges: (fn) ->
     newRanges = []
     oldRanges = []
@@ -59,7 +55,7 @@ class Undo extends MiscCommand
 
     allRanges = sortRanges(newRanges.concat(oldRanges))
     restoredCursorPosition = @editor.getCursorBufferPosition()
-    if cursorContainedRange = @findRangeContainsPoint(allRanges, restoredCursorPosition)
+    if cursorContainedRange = findRangeContainsPoint(allRanges, restoredCursorPosition)
       @vimState.mark.setRange('[', ']', cursorContainedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
         if isLinewiseRange(cursorContainedRange)

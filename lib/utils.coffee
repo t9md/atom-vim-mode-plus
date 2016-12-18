@@ -798,6 +798,7 @@ limitNumber = (number, {max, min}={}) ->
 findRangeContainsPoint = (ranges, point) ->
   for range in ranges when range.containsPoint(point)
     return range
+  null
 
 isNotEmpty = (target) ->
   not target.isEmpty()
