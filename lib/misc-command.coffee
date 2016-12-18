@@ -41,8 +41,14 @@ class Undo extends MiscCommand
     newRanges = []
     oldRanges = []
 
+    # {inspect} = require 'util'
+    # p = (args...) -> console.log inspect(args...)
+
     # Collect changed range while mutating text-state by fn callback.
-    disposable = @editor.getBuffer().onDidChange ({newRange, oldRange}) ->
+    disposable = @editor.getBuffer().onDidChange (event) ->
+      {newRange, newText, oldRange, oldText} = event
+      # p {newRange, newText, oldRange, oldText}
+
       if newRange.isEmpty()
         oldRanges.push(oldRange) # Remove only
       else
@@ -55,6 +61,7 @@ class Undo extends MiscCommand
 
     allRanges = sortRanges(newRanges.concat(oldRanges))
     restoredCursorPosition = @editor.getCursorBufferPosition()
+    # if cursorContainedRange = findRangeContainsPoint(newRanges, restoredCursorPosition)
     if cursorContainedRange = findRangeContainsPoint(allRanges, restoredCursorPosition)
       @vimState.mark.setRange('[', ']', cursorContainedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')

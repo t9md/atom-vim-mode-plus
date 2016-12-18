@@ -2,7 +2,9 @@ _ = require 'underscore-plus'
 {Range} = require 'atom'
 
 {
-  moveCursorLeft, moveCursorRight, limitNumber
+  moveCursorLeft
+  moveCursorRight
+  limitNumber
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -65,7 +67,11 @@ class ActivateInsertMode extends Operator # FIXME
 
       # grouping changes for undo checkpoint need to come last
       if settings.get('groupChangesWhenLeavingInsertMode')
+        lastCursor = @editor.getLastCursor()
+        currentCursorPosition = lastCursor.getBufferPosition()
+        lastCursor.setBufferPosition(@vimState.getOriginalCursorPositionByMarker())
         @groupChangesSinceBufferCheckpoint('undo')
+        lastCursor.setBufferPosition(currentCursorPosition)
 
   # When each mutaion's extent is not intersecting, muitiple changes are recorded
   # e.g
@@ -291,7 +297,6 @@ class Change extends ActivateInsertMode
         selection.cursor.moveLeft()
       else
         selection.insertText('', autoIndent: true)
-
 
 class ChangeOccurrence extends Change
   @extend()

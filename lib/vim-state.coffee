@@ -301,7 +301,6 @@ class VimState
     @saveOriginalCursorPosition()
 
   reset: ->
-    @resetOriginalCursorPosition()
     @register.reset()
     @searchHistory.reset()
     @hover.reset()
@@ -353,14 +352,19 @@ class VimState
   # Other
   # -------------------------
   saveOriginalCursorPosition: ->
+    @originalCursorPosition = null
+    @originalCursorPositionByMarker?.destroy()
+
     if @mode is 'visual'
       options = {fromProperty: true, allowFallback: true}
-      @originalCursorPosition = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
+      point = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
     else
-      @originalCursorPosition = @editor.getCursorBufferPosition()
+      point = @editor.getCursorBufferPosition()
+    @originalCursorPosition = point
+    @originalCursorPositionByMarker = @editor.markBufferPosition(point, invalidate: 'never')
 
   getOriginalCursorPosition: ->
     @originalCursorPosition
 
-  resetOriginalCursorPosition: ->
-    @originalCursorPosition = null
+  getOriginalCursorPositionByMarker: ->
+    @originalCursorPositionByMarker.getStartBufferPosition()
