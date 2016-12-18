@@ -59,16 +59,17 @@ class Undo extends MiscCommand
     disposable.dispose()
     selection.clear() for selection in @editor.getSelections()
 
-    allRanges = sortRanges(newRanges.concat(oldRanges))
     restoredCursorPosition = @editor.getCursorBufferPosition()
-    # if cursorContainedRange = findRangeContainsPoint(newRanges, restoredCursorPosition)
-    if cursorContainedRange = findRangeContainsPoint(allRanges, restoredCursorPosition)
+    if cursorContainedRange = findRangeContainsPoint(newRanges, restoredCursorPosition)
       @vimState.mark.setRange('[', ']', cursorContainedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
         if isLinewiseRange(cursorContainedRange)
           setBufferRow(@editor.getLastCursor(), cursorContainedRange.start.row)
         else
-          @editor.setCursorBufferPosition(cursorContainedRange.start)
+          @editor.getLastCursor().setBufferPosition(cursorContainedRange.start)
+
+    if settings.get('setCursorToStartOfChangeOnUndoRedo')
+      @vimState.clearSelections()
 
     if settings.get('flashOnUndoRedo')
       if newRanges.length > 0
