@@ -15,6 +15,7 @@ _ = require 'underscore-plus'
   setBufferRow
   moveCursorToFirstCharacterAtRow
   ensureEndsWithNewLineForBufferRow
+  isNotEmpty
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -46,7 +47,7 @@ class Operator extends Base
 
   needStay: ->
     @stayAtSamePosition ?
-      (@isOccurrence() and settings.get('stayOnOccurrence') and @occurrenceSelected) or settings.get(@stayOptionName)
+      (@isOccurrence() and settings.get('stayOnOccurrence')) or settings.get(@stayOptionName)
 
   needStayOnRestore: ->
     @stayAtSamePosition ?
@@ -147,7 +148,7 @@ class Operator extends Base
 
   selectPersistentSelection: ->
     pesistentRanges = @vimState.getPersistentSelectionBufferRanges()
-    selectedRanges = @editor.getSelectedBufferRanges().filter (range) -> not range.isEmpty()
+    selectedRanges = @editor.getSelectedBufferRanges().filter(isNotEmpty)
     ranges = pesistentRanges.concat(selectedRanges)
 
     @editor.setSelectedBufferRanges(ranges)
