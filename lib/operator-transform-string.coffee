@@ -80,20 +80,24 @@ class Replace extends TransformString
   requireInput: true
 
   initialize: ->
+    @onDidSetTarget =>
+      @focusInput()
     super
-    if @isMode('normal')
-      @target = 'MoveRightBufferColumn'
-    @focusInput()
 
   mutateSelection: (selection) ->
     if @target.is('MoveRightBufferColumn')
-      return unless selection.getText().length is @getCount()
+      return selection.getText().length isnt @getCount()
 
-    input = @getInput() or "\n"
-    if input is "\n"
+    input = @getInput()
+    if input is ''
+      input = "\n"
       @restorePositions = false
     text = selection.getText().replace(/./g, input)
     selection.insertText(text, autoIndentNewline: true)
+
+class ReplaceCharacter extends Replace
+  @extend()
+  target: "MoveRightBufferColumn"
 
 # -------------------------
 # DUP meaning with SplitString need consolidate.
