@@ -1,4 +1,4 @@
-{Range} = require 'atom'
+{Range, Point} = require 'atom'
 Base = require './base'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -9,6 +9,7 @@ _ = require 'underscore-plus'
   pointIsAtEndOfLine
   sortRanges
   findRangeContainsPoint
+  mergeIntersectingRanges
 } = require './utils'
 
 class MiscCommand extends Base
@@ -41,14 +42,8 @@ class Undo extends MiscCommand
     newRanges = []
     oldRanges = []
 
-    # {inspect} = require 'util'
-    # p = (args...) -> console.log inspect(args...)
-
     # Collect changed range while mutating text-state by fn callback.
-    disposable = @editor.getBuffer().onDidChange (event) ->
-      {newRange, newText, oldRange, oldText} = event
-      # p {newRange, newText, oldRange, oldText}
-
+    disposable = @editor.getBuffer().onDidChange ({newRange, oldRange}) ->
       if newRange.isEmpty()
         oldRanges.push(oldRange) # Remove only
       else
@@ -59,27 +54,50 @@ class Undo extends MiscCommand
     disposable.dispose()
     selection.clear() for selection in @editor.getSelections()
 
-    restoredCursorPosition = @editor.getCursorBufferPosition()
-    if cursorContainedRange = findRangeContainsPoint(newRanges, restoredCursorPosition)
+    lastCursor = @editor.getLastCursor() # This is restored cursor
+    if cursorContainedRange = findRangeContainsPoint(newRanges, lastCursor.getBufferPosition())
       @vimState.mark.setRange('[', ']', cursorContainedRange)
       if settings.get('setCursorToStartOfChangeOnUndoRedo')
         if isLinewiseRange(cursorContainedRange)
-          setBufferRow(@editor.getLastCursor(), cursorContainedRange.start.row)
+          setBufferRow(lastCursor, cursorContainedRange.start.row)
         else
-          @editor.getLastCursor().setBufferPosition(cursorContainedRange.start)
+          lastCursor.setBufferPosition(cursorContainedRange.start)
 
     if settings.get('setCursorToStartOfChangeOnUndoRedo')
       @vimState.clearSelections()
 
+    multipleSingleLineRanges = (ranges) ->
+      ranges.length > 1 and ranges.every((range) -> range.isSingleLine())
+
     if settings.get('flashOnUndoRedo')
       if newRanges.length > 0
-        if newRanges.length is 1
-          @flash(newRanges, type: 'undo-redo')
-        else
+        newRanges = newRanges.map(@humanizeNewLineForRange.bind(this))
+        if multipleSingleLineRanges(newRanges)
           @flash(newRanges, type: 'undo-redo-multiple-changes')
+        else
+          @flash(newRanges, type: 'undo-redo')
       else
-        if oldRanges.length > 1
+        if multipleSingleLineRanges(oldRanges)
           @flash(oldRanges, type: 'undo-redo-multiple-delete')
+
+  # Modify range used for fash highlight to make it feel naturally for human.
+  # - When user inserted '\n abc' from **EOL**.
+  #  then modify corresponding range to ' abc\n'.
+  # - When user inserted '\n abc' from middle of line text.
+  #  then modify corresponding range to ' abc'.
+  #
+  # So always trim initial "\n" part range because flashing trailing line is counterintuitive.
+  humanizeNewLineForRange: (range) ->
+    {start, end} = range
+    if pointIsAtEndOfLine(@editor, start)
+      newStart = new Point(start.row + 1, 0)
+    if pointIsAtEndOfLine(@editor, end)
+      newEnd = new Point(end.row + 1, 0)
+
+    if newStart? or newEnd?
+      new Range(newStart ? start, newEnd ? end)
+    else
+      range
 
   flash: (flashRanges, options) ->
     options.timeout ?= 500

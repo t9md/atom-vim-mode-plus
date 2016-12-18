@@ -67,11 +67,7 @@ class ActivateInsertMode extends Operator # FIXME
 
       # grouping changes for undo checkpoint need to come last
       if settings.get('groupChangesWhenLeavingInsertMode')
-        lastCursor = @editor.getLastCursor()
-        currentCursorPosition = lastCursor.getBufferPosition()
-        lastCursor.setBufferPosition(@vimState.getOriginalCursorPositionByMarker())
         @groupChangesSinceBufferCheckpoint('undo')
-        lastCursor.setBufferPosition(currentCursorPosition)
 
   # When each mutaion's extent is not intersecting, muitiple changes are recorded
   # e.g
@@ -192,6 +188,18 @@ class InsertAtLastInsert extends ActivateInsertMode
 
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
+
+  # This is for `o` and `O` operator.
+  # On undo/redo put cursor at original point where user type `o` or `O`.
+  groupChangesSinceBufferCheckpoint: ->
+    lastCursor = @editor.getLastCursor()
+    cursorPosition = lastCursor.getBufferPosition()
+    lastCursor.setBufferPosition(@vimState.getOriginalCursorPositionByMarker())
+
+    super
+
+    lastCursor.setBufferPosition(cursorPosition)
+
   mutateText: ->
     @editor.insertNewlineAbove()
 
