@@ -402,6 +402,7 @@
   'ctrl-]': 'symbols-view:go-to-declaration'
   'ctrl-t': 'symbols-view:return-from-declaration'
   '"': 'vim-mode-plus:set-register-name'
+  'r': 'vim-mode-plus:replace-character'
 
   # 'enter': 'vim-mode-plus:add-blank-line-below'
   # 'shift-enter': 'vim-mode-plus:add-blank-line-above'

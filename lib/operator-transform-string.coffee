@@ -20,6 +20,7 @@ class TransformString extends Operator
   trackChange: true
   stayOptionName: 'stayOnTransformString'
   autoIndent: false
+  autoIndentNewline: false
 
   @registerToSelectList: ->
     transformerRegistry.push(this)
@@ -78,22 +79,21 @@ class Replace extends TransformString
   hover: icon: ':replace:', emoji: ':tractor:'
   flashCheckpoint: 'did-select-occurrence'
   requireInput: true
+  autoIndentNewline: true
 
   initialize: ->
     @onDidSetTarget =>
       @focusInput()
     super
 
-  mutateSelection: (selection) ->
-    if @target.is('MoveRightBufferColumn')
-      return selection.getText().length isnt @getCount()
+  getNewText: (text) ->
+    if @target.is('MoveRightBufferColumn') and text.length isnt @getCount()
+      return
 
-    input = @getInput()
-    if input is ''
-      input = "\n"
+    input = @getInput() or "\n"
+    if input is "\n"
       @restorePositions = false
-    text = selection.getText().replace(/./g, input)
-    selection.insertText(text, autoIndentNewline: true)
+    text.replace(/./g, input)
 
 class ReplaceCharacter extends Replace
   @extend()
