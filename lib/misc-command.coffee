@@ -42,10 +42,10 @@ class BlockwiseOtherEnd extends ReverseSelections
 class Undo extends MiscCommand
   @extend()
 
-  setCursorPosition: ({newRanges, oldRanges, cursorContainedNewRangeOnly}) ->
+  setCursorPosition: ({newRanges, oldRanges, strategy}) ->
     lastCursor = @editor.getLastCursor() # This is restored cursor
 
-    if cursorContainedNewRangeOnly
+    if strategy is 'smart'
       changedRange = findRangeContainsPoint(newRanges, lastCursor.getBufferPosition())
     else
       changedRange = sortRanges(newRanges.concat(oldRanges))[0]
@@ -128,8 +128,8 @@ class Undo extends MiscCommand
       selection.clear()
 
     if settings.get('setCursorToStartOfChangeOnUndoRedo')
-      cursorContainedNewRangeOnly = true
-      @setCursorPosition({newRanges, oldRanges, cursorContainedNewRangeOnly})
+      strategy = settings.get('setCursorToStartOfChangeOnUndoRedoStrategy')
+      @setCursorPosition({newRanges, oldRanges, strategy})
       @vimState.clearSelections()
 
     if settings.get('flashOnUndoRedo')

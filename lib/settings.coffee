@@ -37,6 +37,16 @@ class Settings
 
 module.exports = new Settings 'vim-mode-plus',
   setCursorToStartOfChangeOnUndoRedo: true
+  setCursorToStartOfChangeOnUndoRedoStrategy:
+    default: 'smart'
+    enum: ['smart', 'simple']
+    description: """
+    When you think undo/redo cursor position has BUG, set this to `simple`.<br>
+    <br>
+    `smart`: Good accuracy but have cusor-not-updated-on-different-editor limitation<br>
+    `simple`: Always work, but accuracy is not as good as `smart`.<br>
+    <br>
+    """
   groupChangesWhenLeavingInsertMode: true
   useClipboardAsDefaultRegister: false
   startInInsertMode: false
