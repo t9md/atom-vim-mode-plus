@@ -77,13 +77,18 @@ class Undo extends MiscCommand
       ranges.length > 1 and ranges.every(isSingleLineRange)
 
     if newRanges.length > 0
+      return if @isMultipleAndAllRangeHaveSameColumnRanges(newRanges)
+
       newRanges = newRanges.map(@humanizeNewLineForRange.bind(this))
       newRanges = @filterNonLeadingWhiteSpaceRange(newRanges)
+
       if isMultipleSingleLineRanges(newRanges)
         @flash(newRanges, type: 'undo-redo-multiple-changes')
       else
         @flash(newRanges, type: 'undo-redo')
     else
+      return if @isMultipleAndAllRangeHaveSameColumnRanges(oldRanges)
+
       if isMultipleSingleLineRanges(oldRanges)
         oldRanges = @filterNonLeadingWhiteSpaceRange(oldRanges)
         @flash(oldRanges, type: 'undo-redo-multiple-delete')
@@ -91,6 +96,16 @@ class Undo extends MiscCommand
   filterNonLeadingWhiteSpaceRange: (ranges) ->
     ranges.filter (range) =>
       not isLeadingWhiteSpaceRange(@editor, range)
+
+  isMultipleAndAllRangeHaveSameColumnRanges: (ranges) ->
+    return false if ranges.length <= 1
+
+    {start, end} = ranges[0]
+    startColumn = start.column
+    endColumn = end.column
+
+    ranges.every ({start, end}) ->
+      (start.column is startColumn) and (end.column is endColumn)
 
   # Modify range used for fash highlight to make it feel naturally for human.
   # - When user inserted '\n abc' from **EOL**.
