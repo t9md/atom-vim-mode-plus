@@ -185,10 +185,12 @@ class Operator extends Base
       @vimState.modeManager.normalizeSelections()
 
   startMutation: (fn) ->
-    @emitWillMutateTarget()
     @normalizeSelectionsIfNecessary()
-    @editor.transact(fn)
-    @emitDidMutateTarget()
+    @editor.transact =>
+      fn()
+      @emitWillFinishMutation()
+      
+    @emitDidFinishMutation()
 
   # Main
   execute: ->
@@ -549,7 +551,7 @@ class PutBefore extends Operator
 
   execute: ->
     @mutationsBySelection = new Map()
-    @onDidMutateTarget(@adjustCursorPosition.bind(this))
+    @onDidFinishMutation(@adjustCursorPosition.bind(this))
 
     @onDidFinishOperation =>
       # TrackChange

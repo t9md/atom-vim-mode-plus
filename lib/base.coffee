@@ -24,8 +24,6 @@ vimStateMethods = [
   # Life cycle
   "onDidSetTarget"
   "emitDidSetTarget"
-    "onWillMutateTarget"
-    "emitWillMutateTarget"
       "onWillSelectTarget"
       "emitWillSelectTarget"
       "onDidSelectTarget"
@@ -33,8 +31,10 @@ vimStateMethods = [
 
       "onDidRestoreCursorPositions"
       "emitDidRestoreCursorPositions"
-    "onDidMutateTarget"
-    "emitDidMutateTarget"
+    "onWillFinishMutation"
+    "emitWillFinishMutation"
+    "onDidFinishMutation"
+    "emitDidFinishMutation"
   "onDidFinishOperation"
   "onDidResetOperationStack"
 

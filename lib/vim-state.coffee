@@ -152,11 +152,11 @@ class VimState
   onDidSelectTarget: (fn) -> @subscribe @emitter.on('did-select-target', fn)
   emitDidSelectTarget: -> @emitter.emit('did-select-target')
 
-  onWillMutateTarget: (fn) -> @subscribe @emitter.on('on-will-mutate-target', fn)
-  emitWillMutateTarget: -> @emitter.emit('on-will-mutate-target')
+  onWillFinishMutation: (fn) -> @subscribe @emitter.on('on-will-finish-mutation', fn)
+  emitWillFinishMutation: -> @emitter.emit('on-will-finish-mutation')
 
-  onDidMutateTarget: (fn) -> @subscribe @emitter.on('on-did-mutate-target', fn)
-  emitDidMutateTarget: -> @emitter.emit('on-did-mutate-target')
+  onDidFinishMutation: (fn) -> @subscribe @emitter.on('on-did-finish-mutation', fn)
+  emitDidFinishMutation: -> @emitter.emit('on-did-finish-mutation')
 
   onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
   emitDidRestoreCursorPositions: -> @emitter.emit('did-restore-cursor-positions')
