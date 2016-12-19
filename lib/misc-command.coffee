@@ -14,6 +14,7 @@ _ = require 'underscore-plus'
   findRangeContainsPoint
   mergeIntersectingRanges
   isSingleLineRange
+  isLeadingWhiteSpaceRange
 } = require './utils'
 
 class MiscCommand extends Base
@@ -76,13 +77,19 @@ class Undo extends MiscCommand
     if settings.get('flashOnUndoRedo')
       if newRanges.length > 0
         newRanges = newRanges.map(@humanizeNewLineForRange.bind(this))
+        newRanges = @filterNonLeadingWhiteSpaceRange(newRanges)
         if multipleSingleLineRanges(newRanges)
           @flash(newRanges, type: 'undo-redo-multiple-changes')
         else
           @flash(newRanges, type: 'undo-redo')
       else
         if multipleSingleLineRanges(oldRanges)
+          oldRanges = @filterNonLeadingWhiteSpaceRange(oldRanges)
           @flash(oldRanges, type: 'undo-redo-multiple-delete')
+
+  filterNonLeadingWhiteSpaceRange: (ranges) ->
+    ranges.filter (range) =>
+      not isLeadingWhiteSpaceRange(@editor, range)
 
   # Modify range used for fash highlight to make it feel naturally for human.
   # - When user inserted '\n abc' from **EOL**.

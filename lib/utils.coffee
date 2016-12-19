@@ -813,6 +813,9 @@ isNotEmpty = negateFunction(isEmpty)
 isSingleLineRange = (range) -> range.isSingleLine()
 isNotSingleLineRange = negateFunction(isSingleLineRange)
 
+isLeadingWhiteSpaceRange = (editor, range) -> /^[\t ]*$/.test(editor.getTextInBufferRange(range))
+isNotLeadingWhiteSpaceRange = negateFunction(isLeadingWhiteSpaceRange)
+
 setTextAtBufferPosition = (editor, point, text) ->
   editor.setTextInBufferRange([point, point], text)
 
@@ -922,4 +925,6 @@ module.exports = {
 
   setTextAtBufferPosition
   ensureEndsWithNewLineForBufferRow
+  isLeadingWhiteSpaceRange
+  isNotLeadingWhiteSpaceRange
 }
