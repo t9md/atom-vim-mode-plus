@@ -14,16 +14,16 @@ Operator = Base.getClass('Operator')
 
 # TransformString
 # ================================
-transformerRegistry = []
 class TransformString extends Operator
   @extend(false)
   trackChange: true
   stayOptionName: 'stayOnTransformString'
   autoIndent: false
   autoIndentNewline: false
+  @stringTransformers: []
 
   @registerToSelectList: ->
-    transformerRegistry.push(this)
+    @stringTransformers.push(this)
 
   mutateSelection: (selection, stopMutation) ->
     if text = @getNewText(selection.getText(), selection, stopMutation)
@@ -305,14 +305,14 @@ class TransformStringByExternalCommand extends TransformString
   getStdout: (selection) -> @stdoutBySelection.get(selection)
 
 # -------------------------
-selectListItems = null
 class TransformStringBySelectList extends TransformString
   @extend()
   @description: "Interactively choose string transformation operator from select-list"
+  @selectListItems: null
   requireInput: true
 
   getItems: ->
-    selectListItems ?= transformerRegistry.map (klass) ->
+    @constructor.selectListItems ?= @constructor.stringTransformers.map (klass) ->
       if klass::hasOwnProperty('displayName')
         displayName = klass::displayName
       else
@@ -322,11 +322,16 @@ class TransformStringBySelectList extends TransformString
   initialize: ->
     super
 
-    @vimState.onDidConfirmSelectList (transformer) =>
+    @vimState.onDidConfirmSelectList (item) =>
+      transformer = item.name
+      @target = transformer::target if transformer::target?
       @vimState.reset()
-      target = @target?.constructor.name
-      @vimState.operationStack.run(transformer.name, {target})
-    @focusSelectList({items: @getItems()})
+      if @target?
+        @vimState.operationStack.run(transformer, {@target})
+      else
+        @vimState.operationStack.run(transformer)
+
+    @focusSelectList(items: @getItems())
 
   execute: ->
     # NEVER be executed since operationStack is replaced with selected transformer
@@ -565,8 +570,6 @@ class ChangeSurroundAnyPairAllowForwarding extends ChangeSurroundAnyPair
   @description: "Change surround character, from char is auto-detected from enclosed and forwarding area"
   target: "AAnyPairAllowForwarding"
 
-# Join < TransformString
-# -------------------------
 # FIXME
 # Currently native editor.joinLines() is better for cursor position setting
 # So I use native methods for a meanwhile.
@@ -640,13 +643,12 @@ class SplitString extends TransformString
   hover: icon: ':split-string:', emoji: ':hocho:'
   requireInput: true
   input: null
+  target: "MoveToRelativeLine"
 
   initialize: ->
+    @onDidSetTarget =>
+      @focusInput(charsMax = 10)
     super
-    unless @isMode('visual')
-      @setTarget @new("MoveToRelativeLine", {min: 1})
-    charsMax = 10
-    @focusInput(charsMax)
 
   getNewText: (text) ->
     @input = "\\n" if @input is ''
