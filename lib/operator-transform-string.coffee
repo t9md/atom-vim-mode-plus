@@ -190,6 +190,18 @@ class CompactSpaces extends TransformString
       text.replace /^(\s*)(.*?)(\s*)$/gm, (m, leading, middle, trailing) ->
         leading + middle.split(/[ \t]+/).join(' ') + trailing
 
+class RemoveLeadingWhiteSpaces extends TransformString
+  @extend()
+  @registerToSelectList()
+  wise: 'linewise'
+  @description: "`  a b c` -> `a b c`"
+  getNewText: (text, selection) ->
+    trimLeft = (text) -> text.trimLeft()
+
+    swrap(selection)
+      .mapToLineText(trimLeft, includeNewline: true)
+      .join("")
+
 class ConvertToSoftTab extends TransformString
   @extend()
   @registerToSelectList()

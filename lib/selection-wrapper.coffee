@@ -244,6 +244,14 @@ class SelectionWrapper
     @getRows().map (row) ->
       editor.lineTextForBufferRow(row)
 
+  mapToLineText: (fn, {includeNewline}) ->
+    {editor} = @selection
+    textForRow = (row) ->
+      range = editor.bufferRangeForBufferRow(row, {includeNewline})
+      editor.getTextInBufferRange(range)
+
+    @getRows().map(textForRow).map(fn)
+
   translate: (startDelta, endDelta=startDelta, options) ->
     newRange = @getBufferRange().translate(startDelta, endDelta)
     @setBufferRange(newRange, options)
