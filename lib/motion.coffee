@@ -1051,23 +1051,25 @@ class MoveToNextOccurrence extends Motion
   jump: true
   direction: 'next'
 
-  getRanges: ->
-    @vimState.occurrenceManager.getMarkers().map (marker) ->
-      marker.getBufferRange()
-
-  execute: ->
-    @ranges = @getRanges()
-    if @ranges.length
+  initialize: ->
+    if @vimState.occurrenceManager.hasMarkers()
       super
     else
-      # If command is invoked via `tab` or `shift-tab`,
-      #  then dispatch Atom's original command as fallback.
       if settings.get('fallbackTabAndShiftTabInNormalMode')
         switch getKeystrokeForEvent(@vimState._event)
           when 'tab'
             atom.commands.dispatch(@editorElement, 'editor:indent')
           when 'shift-tab'
             atom.commands.dispatch(@editorElement, 'editor:outdent-selected-rows')
+      @abort()
+
+  getRanges: ->
+    @vimState.occurrenceManager.getMarkers().map (marker) ->
+      marker.getBufferRange()
+
+  execute: ->
+    @ranges = @getRanges()
+    super
 
   moveCursor: (cursor) ->
     index = @getIndex(cursor.getBufferPosition())
