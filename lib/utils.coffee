@@ -82,8 +82,7 @@ isEndsWithNewLineForBufferRow = (editor, row) ->
   start.row isnt end.row
 
 haveSomeNonEmptySelection = (editor) ->
-  editor.getSelections().some (selection) ->
-    not selection.isEmpty()
+  editor.getSelections().some(isNotEmpty)
 
 sortComparable = (collection) ->
   collection.sort (a, b) -> a.compare(b)
@@ -152,6 +151,10 @@ getEndOfLineForBufferRow = (editor, row) ->
 pointIsAtEndOfLine = (editor, point) ->
   point = Point.fromObject(point)
   getEndOfLineForBufferRow(editor, point.row).isEqual(point)
+
+pointIsAtEndOfLineAtNonEmptyRow = (editor, point) ->
+  point = Point.fromObject(point)
+  point.column isnt 0 and pointIsAtEndOfLine(editor, point)
 
 getCharacterAtCursor = (cursor) ->
   getTextInScreenRange(cursor.editor, cursor.getScreenRange())
@@ -800,8 +803,15 @@ findRangeContainsPoint = (ranges, point) ->
     return range
   null
 
-isNotEmpty = (target) ->
-  not target.isEmpty()
+negateFunction = (fn) ->
+  (args...) ->
+    not fn(args...)
+
+isEmpty = (target) -> target.isEmpty()
+isNotEmpty = negateFunction(isEmpty)
+
+isSingleLineRange = (range) -> range.isSingleLine()
+isNotSingleLineRange = negateFunction(isSingleLineRange)
 
 setTextAtBufferPosition = (editor, point, text) ->
   editor.setTextInBufferRange([point, point], text)
@@ -832,6 +842,7 @@ module.exports = {
   findIndexBy
   mergeIntersectingRanges
   pointIsAtEndOfLine
+  pointIsAtEndOfLineAtNonEmptyRow
   pointIsAtVimEndOfFile
   cursorIsAtVimEndOfFile
   getVimEofBufferPosition
@@ -905,7 +916,10 @@ module.exports = {
   searchByProjectFind
   limitNumber
   findRangeContainsPoint
-  isNotEmpty
+
+  isEmpty, isNotEmpty
+  isSingleLineRange, isNotSingleLineRange
+
   setTextAtBufferPosition
   ensureEndsWithNewLineForBufferRow
 }

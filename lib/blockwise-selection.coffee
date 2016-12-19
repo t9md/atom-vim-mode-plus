@@ -1,7 +1,7 @@
 {Range} = require 'atom'
 _ = require 'underscore-plus'
 
-{sortRanges, getBufferRows} = require './utils'
+{sortRanges, getBufferRows, isEmpty} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
@@ -21,8 +21,7 @@ class BlockwiseSelection
     true
 
   isEmpty: ->
-    @getSelections().every (selection) ->
-      selection.isEmpty()
+    @getSelections().every(isEmpty)
 
   initialize: (selection) ->
     {@goalColumn} = selection.cursor

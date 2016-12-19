@@ -3,13 +3,17 @@ Base = require './base'
 swrap = require './selection-wrapper'
 settings = require './settings'
 _ = require 'underscore-plus'
-{moveCursorRight, isLinewiseRange, setBufferRow} = require './utils'
 
 {
+  moveCursorRight
+  isLinewiseRange
+  setBufferRow
   pointIsAtEndOfLine
+  pointIsAtEndOfLineAtNonEmptyRow
   sortRanges
   findRangeContainsPoint
   mergeIntersectingRanges
+  isSingleLineRange
 } = require './utils'
 
 class MiscCommand extends Base
@@ -67,7 +71,7 @@ class Undo extends MiscCommand
       @vimState.clearSelections()
 
     multipleSingleLineRanges = (ranges) ->
-      ranges.length > 1 and ranges.every((range) -> range.isSingleLine())
+      ranges.length > 1 and ranges.every(isSingleLineRange)
 
     if settings.get('flashOnUndoRedo')
       if newRanges.length > 0
@@ -91,7 +95,7 @@ class Undo extends MiscCommand
     {start, end} = range
     if pointIsAtEndOfLine(@editor, start)
       newStart = new Point(start.row + 1, 0)
-    if pointIsAtEndOfLine(@editor, end)
+    if pointIsAtEndOfLineAtNonEmptyRow(@editor, end)
       newEnd = new Point(end.row + 1, 0)
 
     if newStart? or newEnd?
