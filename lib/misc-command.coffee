@@ -42,7 +42,21 @@ class BlockwiseOtherEnd extends ReverseSelections
 class Undo extends MiscCommand
   @extend()
 
-  withTrackingChanges: (fn) ->
+  setCursorPosition: ({newRanges, oldRanges, cursorContainedNewRangeOnly}) ->
+    lastCursor = @editor.getLastCursor() # This is restored cursor
+
+    if cursorContainedNewRangeOnly
+      changedRange = findRangeContainsPoint(newRanges, lastCursor.getBufferPosition())
+    else
+      changedRange = sortRanges(newRanges.concat(oldRanges))[0]
+
+    if changedRange?
+      if isLinewiseRange(changedRange)
+        setBufferRow(lastCursor, changedRange.start.row)
+      else
+        lastCursor.setBufferPosition(changedRange.start)
+
+  mutateWithTrackChanges: ->
     newRanges = []
     oldRanges = []
 
@@ -53,38 +67,26 @@ class Undo extends MiscCommand
       else
         newRanges.push(newRange)
 
-    fn()
+    @mutate()
 
     disposable.dispose()
-    selection.clear() for selection in @editor.getSelections()
+    {newRanges, oldRanges}
 
-    lastCursor = @editor.getLastCursor() # This is restored cursor
-    if cursorContainedRange = findRangeContainsPoint(newRanges, lastCursor.getBufferPosition())
-      @vimState.mark.setRange('[', ']', cursorContainedRange)
-      if settings.get('setCursorToStartOfChangeOnUndoRedo')
-        if isLinewiseRange(cursorContainedRange)
-          setBufferRow(lastCursor, cursorContainedRange.start.row)
-        else
-          lastCursor.setBufferPosition(cursorContainedRange.start)
-
-    if settings.get('setCursorToStartOfChangeOnUndoRedo')
-      @vimState.clearSelections()
-
-    multipleSingleLineRanges = (ranges) ->
+  flashChanges: ({newRanges, oldRanges}) ->
+    isMultipleSingleLineRanges = (ranges) ->
       ranges.length > 1 and ranges.every(isSingleLineRange)
 
-    if settings.get('flashOnUndoRedo')
-      if newRanges.length > 0
-        newRanges = newRanges.map(@humanizeNewLineForRange.bind(this))
-        newRanges = @filterNonLeadingWhiteSpaceRange(newRanges)
-        if multipleSingleLineRanges(newRanges)
-          @flash(newRanges, type: 'undo-redo-multiple-changes')
-        else
-          @flash(newRanges, type: 'undo-redo')
+    if newRanges.length > 0
+      newRanges = newRanges.map(@humanizeNewLineForRange.bind(this))
+      newRanges = @filterNonLeadingWhiteSpaceRange(newRanges)
+      if isMultipleSingleLineRanges(newRanges)
+        @flash(newRanges, type: 'undo-redo-multiple-changes')
       else
-        if multipleSingleLineRanges(oldRanges)
-          oldRanges = @filterNonLeadingWhiteSpaceRange(oldRanges)
-          @flash(oldRanges, type: 'undo-redo-multiple-delete')
+        @flash(newRanges, type: 'undo-redo')
+    else
+      if isMultipleSingleLineRanges(oldRanges)
+        oldRanges = @filterNonLeadingWhiteSpaceRange(oldRanges)
+        @flash(oldRanges, type: 'undo-redo-multiple-delete')
 
   filterNonLeadingWhiteSpaceRange: (ranges) ->
     ranges.filter (range) =>
@@ -120,8 +122,19 @@ class Undo extends MiscCommand
       @vimState.flash(flashRanges, options)
 
   execute: ->
-    @withTrackingChanges =>
-      @mutate()
+    {newRanges, oldRanges} = @mutateWithTrackChanges()
+
+    for selection in @editor.getSelections()
+      selection.clear()
+
+    if settings.get('setCursorToStartOfChangeOnUndoRedo')
+      cursorContainedNewRangeOnly = true
+      @setCursorPosition({newRanges, oldRanges, cursorContainedNewRangeOnly})
+      @vimState.clearSelections()
+
+    if settings.get('flashOnUndoRedo')
+      @flashChanges({newRanges, oldRanges})
+
     @activateMode('normal')
 
   mutate: ->
