@@ -561,13 +561,13 @@ class PutBefore extends Operator
       if settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
         toRange = (selection) => @mutationsBySelection.get(selection)
         @vimState.flash(@editor.getSelections().map(toRange), type: @getFlashType())
+
     super
 
   adjustCursorPosition: ->
     for selection in @editor.getSelections()
       {cursor} = selection
       {start, end} = newRange = @mutationsBySelection.get(selection)
-      @setMarkForChange(newRange) if selection.isLastSelection()
       if @linewisePaste
         moveCursorToFirstCharacterAtRow(cursor, start.row)
       else
@@ -581,11 +581,11 @@ class PutBefore extends Operator
     return unless text
     text = _.multiplyString(text, @getCount())
     @linewisePaste = type is 'linewise' or @isMode('visual', 'linewise')
-    newRange = @paste(selection, text, {linewise: @linewisePaste})
+    newRange = @paste(selection, text, {@linewisePaste})
     @mutationsBySelection.set(selection, newRange)
 
-  paste: (selection, text, {linewise}) ->
-    if linewise
+  paste: (selection, text, {linewisePaste}) ->
+    if linewisePaste
       @pasteLinewise(selection, text)
     else
       @pasteCharacterwise(selection, text)

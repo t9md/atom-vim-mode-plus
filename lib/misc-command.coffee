@@ -9,7 +9,6 @@ _ = require 'underscore-plus'
   isLinewiseRange
   setBufferRow
   pointIsAtEndOfLine
-  pointIsAtEndOfLineAtNonEmptyRow
   sortRanges
   findRangeContainsPoint
   mergeIntersectingRanges
@@ -107,7 +106,7 @@ class Undo extends MiscCommand
     if pointIsAtEndOfLine(@editor, start)
       newStart = new Point(start.row + 1, 0)
 
-    if pointIsAtEndOfLineAtNonEmptyRow(@editor, end)
+    if pointIsAtEndOfLine(@editor, end)
       newEnd = new Point(end.row + 1, 0)
 
     if newStart? or newEnd?
