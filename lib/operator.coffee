@@ -189,7 +189,6 @@ class Operator extends Base
     @editor.transact =>
       fn()
       @emitWillFinishMutation()
-      
     @emitDidFinishMutation()
 
   # Main

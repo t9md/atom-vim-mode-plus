@@ -100,8 +100,13 @@ class Undo extends MiscCommand
   # So always trim initial "\n" part range because flashing trailing line is counterintuitive.
   humanizeNewLineForRange: (range) ->
     {start, end} = range
+
+    if isSingleLineRange(range)
+      return range
+
     if pointIsAtEndOfLine(@editor, start)
       newStart = new Point(start.row + 1, 0)
+
     if pointIsAtEndOfLineAtNonEmptyRow(@editor, end)
       newEnd = new Point(end.row + 1, 0)
 
