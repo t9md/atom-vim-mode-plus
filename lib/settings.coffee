@@ -42,10 +42,8 @@ module.exports = new Settings 'vim-mode-plus',
     enum: ['smart', 'simple']
     description: """
     When you think undo/redo cursor position has BUG, set this to `simple`.<br>
-    <br>
-    `smart`: Good accuracy but have cusor-not-updated-on-different-editor limitation<br>
+    `smart`: Good accuracy but have cursor-not-updated-on-different-editor limitation<br>
     `simple`: Always work, but accuracy is not as good as `smart`.<br>
-    <br>
     """
   groupChangesWhenLeavingInsertMode: true
   useClipboardAsDefaultRegister: false
