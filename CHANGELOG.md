@@ -1,3 +1,23 @@
+# 0.75.0
+- New: `setCursorToStartOfChangeOnUndoRedoStrategy`(default `smart`) #620, #621
+- New: `remove-leading-white-spaces`( no defautl keymap ): work always `linewise`.
+- New, Breaking: `replace` is now normal operator which enter `operator-pending-mode`, old `replace` command was renamed.
+  - OldName: `vim-mode-plus:replace`( mapped from `r` )
+  - NewName: `vim-mode-plus:replace-character`( mapped from `r` )
+- Fix: `m` command was inappropriately repeatable by `.`
+- Fix: No longer throw exception for `V tab` or `V shift-tab` #619
+- Improve: Respect operator specific `stayOn` option when `stayOnOccurrence` was `true` and fail to select `occurrence-marker`.
+- Improve: `d o p` moves cursor to end of mutation as normal `d` #611
+- Improve: `undo/redo`
+  - Cursor placement on `undo`/`redo` further.
+    - `o` and `O` undo/redo is now behave same as pure-Vim.
+  - Flashing is further suppressed to be un-noisy. Also humanize new line(`\n`) change flash to feel naturally.
+    - Skip flash for leading white spaces change
+    - Skip flash when multiple range start and end with exactly same column(e.g. `toggle-line-comments`).
+- Improve: `transform-smart-word-by-select-list` now respect precomposed target of each string transformer.
+  - E.g. `SplitString` have precomposed target( = `MoveToRelativeLine` ), respect it over `smart-word` target.
+- Internal: Remove manual checkpoint and change grouping management from normal operator as like before(was not necessary).
+
 # 0.74.0
 - Improve: More accurate cursor placement after undo/redo. #603
   - IMPORTANT, new approach to restore cursor position after undo/redo.
