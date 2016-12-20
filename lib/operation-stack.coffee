@@ -134,8 +134,6 @@ class OperationStack
       @peekTop().setTarget(operation)
 
     top = @peekTop()
-    console.log "in process() complete? ", top.isComplete()
-    console.log "in process() toString() ", top.toString()
 
     if top.isComplete()
       @execute(@stack.pop())
@@ -165,6 +163,8 @@ class OperationStack
   finish: (operation=null) ->
     @recordedOperation = operation if operation?.isRecordable()
     @vimState.emitDidFinishOperation()
+    if operation?.isOperator()
+      operation.resetState()
 
     if @mode is 'normal'
       @ensureAllSelectionsAreEmpty(operation)

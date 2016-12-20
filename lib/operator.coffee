@@ -45,14 +45,37 @@ class Operator extends Base
   acceptPersistentSelection: true
   acceptCurrentSelection: true
 
+  bufferCheckpointByPurpose: null
+
   # Experimentaly allow selectTarget before input Complete
   # -------------------------
   supportEarlySelect: false
-  isSelectable: ->
-    @supportEarlySelect and @hasTarget()
-
   targetSelected: null
   # -------------------------
+
+  # Called when operation finished
+  # This is essentially to reset state for `.` repeat.
+  resetState: ->
+    @targetSelected = null
+
+  # Two checkpoint for different purpose
+  # - one for undo(handled by modeManager)
+  # - one for preserve last inserted text
+  createBufferCheckpoint: (purpose) ->
+    @bufferCheckpointByPurpose ?= {}
+    @bufferCheckpointByPurpose[purpose] = @editor.createCheckpoint()
+
+  getBufferCheckpoint: (purpose) ->
+    @bufferCheckpointByPurpose?[purpose]
+
+  deleteBufferCheckpoint: (purpose) ->
+    if @bufferCheckpointByPurpose?
+      delete @bufferCheckpointByPurpose[purpose]
+
+  groupChangesSinceBufferCheckpoint: (purpose) ->
+    if checkpoint = @getBufferCheckpoint(purpose)
+      @editor.groupChangesSinceCheckpoint(checkpoint)
+      @deleteBufferCheckpoint(purpose)
 
   needStay: ->
     @stayAtSamePosition ?
@@ -108,11 +131,6 @@ class Operator extends Base
     super
     {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
     @subscribeResetOccurrencePatternIfNeeded()
-    if @supportEarlySelect
-      @onDidSetTarget =>
-        console.log "EARLY SELECT"
-        @selectTarget()
-
     @initialize()
     @onDidSetOperatorModifier(@setModifier.bind(this))
 
@@ -184,6 +202,11 @@ class Operator extends Base
   setTarget: (@target) ->
     @target.setOperator(this)
     @emitDidSetTarget(this)
+
+    if @supportEarlySelect
+      @normalizeSelectionsIfNecessary()
+      @createBufferCheckpoint('undo')
+      @selectTarget()
     this
 
   setTextToRegisterForSelection: (selection) ->
@@ -198,16 +221,23 @@ class Operator extends Base
       @vimState.modeManager.normalizeSelections()
 
   startMutation: (fn) ->
-    @normalizeSelectionsIfNecessary()
-    @editor.transact =>
+    if @supportEarlySelect
+      # - Skip selection normalization: already normalized before @selectTarget()
+      # - Manual checkpoint grouping: to create checkpoint before @selectTarget()
       fn()
       @emitWillFinishMutation()
+      @groupChangesSinceBufferCheckpoint('undo')
+
+    else
+      @normalizeSelectionsIfNecessary()
+      @editor.transact =>
+        fn()
+        @emitWillFinishMutation()
+
     @emitDidFinishMutation()
 
   # Main
   execute: ->
-    @onDidFinishOperation => @targetSelected = null
-
     @startMutation =>
       if @selectTarget()
         for selection in @editor.getSelections()
@@ -260,6 +290,7 @@ class Operator extends Base
       @targetSelected = true
       true
     else
+      @emitDidFailSelectTarget()
       @targetSelected = false
       false
 

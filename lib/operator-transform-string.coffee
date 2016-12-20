@@ -438,9 +438,7 @@ class Surround extends TransformString
 
     return unless @requireInput
     if @requireTarget
-      # @onDidSetTarget =>
       @onDidSelectTarget =>
-        console.log "SLECTED! now focusing input"
         @focusInput(@charsMax)
     else
       @focusInput(@charsMax)
@@ -453,7 +451,6 @@ class Surround extends TransformString
     @inputUI.focus(charsMax)
 
   onConfirm: (@input) ->
-    console.log 'confirmed input = ', @input
     @processOperation()
 
   getPair: (char) ->
@@ -545,25 +542,16 @@ class ChangeSurroundAnyPair extends ChangeSurround
   charsMax: 1
   target: "AAnyPair"
 
-  highlightRange: (range) ->
-    marker = @editor.markBufferRange(range)
-    @editor.decorateMarker(marker, type: 'highlight', class: 'vim-mode-plus-target-range')
-    marker
-
   initialize: ->
-    marker = null
-    @onDidSetTarget =>
-      if range = @target.getRange(@editor.getLastSelection())
-        marker = @highlightRange(range)
-        textRange = Range.fromPointWithDelta(marker.getBufferRange().start, 0, 1)
-        char = @editor.getTextInBufferRange(textRange)
-        @addHover(char, {}, @editor.getCursorBufferPosition())
-      else
-        @inputUI.cancel()
-        @abort()
+    @onDidSelectTarget =>
+      char = @editor.getSelectedText()[0]
+      point = @vimState.getOriginalCursorPosition()
+      @addHover(char, {}, point)
 
-    @onDidResetOperationStack ->
-      marker?.destroy()
+    @onDidFailSelectTarget =>
+      @inputUI.cancel()
+      @abort()
+
     super
 
   onConfirm: (@char) ->

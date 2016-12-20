@@ -152,6 +152,9 @@ class VimState
   onDidSelectTarget: (fn) -> @subscribe @emitter.on('did-select-target', fn)
   emitDidSelectTarget: -> @emitter.emit('did-select-target')
 
+  onDidFailSelectTarget: (fn) -> @subscribe @emitter.on('did-fail-select-target', fn)
+  emitDidFailSelectTarget: -> @emitter.emit('did-fail-select-target')
+
   onWillFinishMutation: (fn) -> @subscribe @emitter.on('on-will-finish-mutation', fn)
   emitWillFinishMutation: -> @emitter.emit('on-will-finish-mutation')
 
