@@ -824,6 +824,21 @@ ensureEndsWithNewLineForBufferRow = (editor, row) ->
     eol = getEndOfLineForBufferRow(editor, row)
     setTextAtBufferPosition(editor, eol, "\n")
 
+forEachPaneAxis = (fn, base) ->
+  base ?= atom.workspace.getActivePane().getContainer().getRoot()
+  if base.children?
+    fn(base)
+
+    for child in base.children
+      forEachPaneAxis(fn, child)
+
+modifyClassList = (action, element, classNames...) ->
+  element.classList[action](classNames...)
+
+addClassList = modifyClassList.bind(null, 'add')
+removeClassList = modifyClassList.bind(null, 'remove')
+toggleClassList = modifyClassList.bind(null, 'toggle')
+
 module.exports = {
   getParent
   getAncestors
@@ -927,4 +942,9 @@ module.exports = {
   ensureEndsWithNewLineForBufferRow
   isLeadingWhiteSpaceRange
   isNotLeadingWhiteSpaceRange
+
+  forEachPaneAxis
+  addClassList
+  removeClassList
+  toggleClassList
 }

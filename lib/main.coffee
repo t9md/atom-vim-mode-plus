@@ -7,6 +7,7 @@ StatusBarManager = require './status-bar-manager'
 globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
+{forEachPaneAxis, addClassList, removeClassList} = require './utils'
 
 module.exports =
   config: settings.config
@@ -37,9 +38,7 @@ module.exports =
       vimState = new VimState(editor, @statusBarManager, globalState)
       @emitter.emit('did-add-vim-state', vimState)
 
-    workspaceClassList = atom.views.getView(atom.workspace).classList
-    @subscribe atom.workspace.onDidChangeActivePane ->
-      workspaceClassList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
+    @subscribe atom.workspace.onDidChangeActivePane(@demaximizePane.bind(this))
 
     @subscribe atom.workspace.onDidChangeActivePaneItem ->
       if settings.get('automaticallyEscapeInsertModeOnActivePaneItemChange')
@@ -106,22 +105,51 @@ module.exports =
       'vim-mode-plus:maximize-pane': => @maximizePane()
       'vim-mode-plus:equalize-panes': => @equalizePanes()
 
+  demaximizePane: ->
+    if @maximizePaneDisposable?
+      @maximizePaneDisposable.dispose()
+      @unsubscribe(@maximizePaneDisposable)
+      @maximizePaneDisposable = null
+
   maximizePane: ->
-    classList = atom.views.getView(atom.workspace).classList
-    if classList.contains('vim-mode-plus-pane-maximized')
-      classList.remove('vim-mode-plus-pane-maximized', 'hide-tab-bar')
-    else
-      classList.add('vim-mode-plus-pane-maximized')
-      classList.add('hide-tab-bar') if settings.get('hideTabBarOnMaximizePane')
+    if @maximizePaneDisposable?
+      @demaximizePane()
+      return
+
+    getView = (model) -> atom.views.getView(model)
+    classPaneMaximized = 'vim-mode-plus--pane-maximized'
+    classHideTabBar = 'vim-mode-plus--hide-tab-bar'
+    classActivePaneAxis = 'vim-mode-plus--active-pane-axis'
+
+    workspaceElement = getView(atom.workspace)
+    paneElement = getView(atom.workspace.getActivePane())
+
+    workspaceClassNames = [classPaneMaximized]
+    if settings.get('hideTabBarOnMaximizePane')
+      workspaceClassNames.push(classHideTabBar)
+
+    addClassList(workspaceElement, workspaceClassNames...)
+
+    forEachPaneAxis (axis) ->
+      paneAxisElement = getView(axis)
+      if paneAxisElement.contains(paneElement)
+        addClassList(paneAxisElement, classActivePaneAxis)
+
+    @maximizePaneDisposable = new Disposable ->
+      forEachPaneAxis (axis) ->
+        removeClassList(getView(axis), classActivePaneAxis)
+      removeClassList(workspaceElement, workspaceClassNames...)
+
+    @subscribe(@maximizePaneDisposable)
 
   equalizePanes: ->
-    setFlexScale = (base, newFlexScale) ->
-      base.setFlexScale(newFlexScale)
+    setFlexScale = (newValue, base) ->
+      base ?= atom.workspace.getActivePane().getContainer().getRoot()
+      base.setFlexScale(newValue)
       for child in base.children ? []
-        setFlexScale(child, newFlexScale)
+        setFlexScale(newValue, child)
 
-    root = atom.workspace.getActivePane().getContainer().getRoot()
-    setFlexScale(root, 1)
+    setFlexScale(1)
 
   registerVimStateCommands: ->
     # all commands here is executed with context where 'this' binded to 'vimState'
