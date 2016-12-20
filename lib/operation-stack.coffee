@@ -134,6 +134,9 @@ class OperationStack
       @peekTop().setTarget(operation)
 
     top = @peekTop()
+    console.log "in process() complete? ", top.isComplete()
+    console.log "in process() toString() ", top.toString()
+
     if top.isComplete()
       @execute(@stack.pop())
     else

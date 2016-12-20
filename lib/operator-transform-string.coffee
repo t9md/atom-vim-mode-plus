@@ -431,12 +431,16 @@ class Surround extends TransformString
   requireInput: true
   autoIndent: false
 
+  supportEarlySelect: true # Experimental
+
   initialize: ->
     super
 
     return unless @requireInput
     if @requireTarget
-      @onDidSetTarget =>
+      # @onDidSetTarget =>
+      @onDidSelectTarget =>
+        console.log "SLECTED! now focusing input"
         @focusInput(@charsMax)
     else
       @focusInput(@charsMax)
@@ -449,6 +453,7 @@ class Surround extends TransformString
     @inputUI.focus(charsMax)
 
   onConfirm: (@input) ->
+    console.log 'confirmed input = ', @input
     @processOperation()
 
   getPair: (char) ->

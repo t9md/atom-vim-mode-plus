@@ -45,6 +45,15 @@ class Operator extends Base
   acceptPersistentSelection: true
   acceptCurrentSelection: true
 
+  # Experimentaly allow selectTarget before input Complete
+  # -------------------------
+  supportEarlySelect: false
+  isSelectable: ->
+    @supportEarlySelect and @hasTarget()
+
+  targetSelected: null
+  # -------------------------
+
   needStay: ->
     @stayAtSamePosition ?
       (@isOccurrence() and settings.get('stayOnOccurrence')) or settings.get(@stayOptionName)
@@ -99,6 +108,10 @@ class Operator extends Base
     super
     {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
     @subscribeResetOccurrencePatternIfNeeded()
+    if @supportEarlySelect
+      @onDidSetTarget =>
+        console.log "EARLY SELECT"
+        @selectTarget()
 
     @initialize()
     @onDidSetOperatorModifier(@setModifier.bind(this))
@@ -193,6 +206,8 @@ class Operator extends Base
 
   # Main
   execute: ->
+    @onDidFinishOperation => @targetSelected = null
+
     @startMutation =>
       if @selectTarget()
         for selection in @editor.getSelections()
@@ -205,6 +220,8 @@ class Operator extends Base
 
   # Return true unless all selection is empty.
   selectTarget: ->
+    return @targetSelected if @targetSelected?
+
     @occurrenceSelected = false
     @mutationManager.init(
       isSelect: @instanceof('Select')
@@ -240,8 +257,10 @@ class Operator extends Base
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
+      @targetSelected = true
       true
     else
+      @targetSelected = false
       false
 
   restoreCursorPositionsIfNecessary: ->
