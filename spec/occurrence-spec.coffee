@@ -1,8 +1,13 @@
-{getVimState, dispatch, TextData, getView, withMockPlatform, rawKeystroke} = require './spec-helper'
+{getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "Occurrence", ->
   [set, ensure, keystroke, editor, editorElement, vimState, classList] = []
+  [searchEditor, searchEditorElement] = []
+  inputSearchText = (text) ->
+    searchEditor.insertText(text)
+  dispatchSearchCommand = (name) ->
+    dispatch(searchEditorElement, name)
 
   beforeEach ->
     getVimState (state, vim) ->
@@ -10,6 +15,8 @@ describe "Occurrence", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = vim
       classList = editorElement.classList
+      searchEditor = vimState.searchInput.editor
+      searchEditorElement = vimState.searchInput.editorElement
 
     runs ->
       jasmine.attachToDOM(editorElement)
@@ -333,12 +340,7 @@ describe "Occurrence", ->
           numCursors: 3
 
   describe "incremental search integration: change-occurrence-from-search, select-occurrence-from-search", ->
-    [searchEditor, searchEditorElement] = []
-
     beforeEach ->
-      searchEditor = vimState.searchInput.editor
-      searchEditorElement = searchEditor.element
-      jasmine.attachToDOM(getView(atom.workspace))
       settings.set('incrementalSearch', true)
       set
         text: """
@@ -352,72 +354,66 @@ describe "Occurrence", ->
     describe "from normal mode", ->
       it "select occurrence by pattern match", ->
         keystroke '/'
-        searchEditor.insertText('\\d{3,4}')
-        withMockPlatform searchEditorElement, 'platform-darwin' , ->
-          rawKeystroke 'cmd-d', document.activeElement
-          ensure 'i e',
-            selectedText: ['3333', '444', '0000'] # Why '0000' comes last is '0000' become last selection.
-            mode: ['visual', 'characterwise']
+        inputSearchText('\\d{3,4}')
+        dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
+        ensure 'i e',
+          selectedText: ['3333', '444', '0000'] # Why '0000' comes last is '0000' become last selection.
+          mode: ['visual', 'characterwise']
 
       it "change occurrence by pattern match", ->
         keystroke '/'
-        searchEditor.insertText('^\\w+:')
-        withMockPlatform searchEditorElement, 'platform-darwin' , ->
-          rawKeystroke 'ctrl-cmd-c', document.activeElement
-          ensure 'i e', mode: 'insert'
-          editor.insertText('hello')
-          ensure
-            text: """
-            hello xxx: ooo: 0000
-            hello ooo: 22: ooo:
-            hello xxx: |||: xxx: 3333:
-            hello |||: ooo: ooo:
-            """
+        inputSearchText('^\\w+:')
+        dispatchSearchCommand('vim-mode-plus:change-occurrence-from-search')
+        ensure 'i e', mode: 'insert'
+        editor.insertText('hello')
+        ensure
+          text: """
+          hello xxx: ooo: 0000
+          hello ooo: 22: ooo:
+          hello xxx: |||: xxx: 3333:
+          hello |||: ooo: ooo:
+          """
 
     describe "from visual mode", ->
       describe "visual characterwise", ->
         it "change occurrence in narrowed selection", ->
           keystroke 'v j /'
-          searchEditor.insertText('o+')
-          withMockPlatform searchEditorElement, 'platform-darwin' , ->
-            rawKeystroke 'cmd-d', document.activeElement
-            ensure 'U',
-              text: """
-              OOO: xxx: OOO: 0000
-              1: ooo: 22: ooo:
-              ooo: xxx: |||: xxx: 3333:
-              444: |||: ooo: ooo:
-              """
+          inputSearchText('o+')
+          dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
+          ensure 'U',
+            text: """
+            OOO: xxx: OOO: 0000
+            1: ooo: 22: ooo:
+            ooo: xxx: |||: xxx: 3333:
+            444: |||: ooo: ooo:
+            """
 
       describe "visual linewise", ->
         it "change occurrence in narrowed selection", ->
           keystroke 'V j /'
-          searchEditor.insertText('o+')
-          withMockPlatform searchEditorElement, 'platform-darwin' , ->
-            rawKeystroke 'cmd-d', document.activeElement
-            ensure 'U',
-              text: """
-              OOO: xxx: OOO: 0000
-              1: OOO: 22: OOO:
-              ooo: xxx: |||: xxx: 3333:
-              444: |||: ooo: ooo:
-              """
+          inputSearchText('o+')
+          dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
+          ensure 'U',
+            text: """
+            OOO: xxx: OOO: 0000
+            1: OOO: 22: OOO:
+            ooo: xxx: |||: xxx: 3333:
+            444: |||: ooo: ooo:
+            """
 
       describe "visual blockwise", ->
         it "change occurrence in narrowed selection", ->
           set cursor: [0, 5]
           keystroke 'ctrl-v 2 j 1 0 l /'
-          searchEditor.insertText('o+')
-
-          withMockPlatform searchEditorElement, 'platform-darwin' , ->
-            rawKeystroke 'cmd-d', document.activeElement
-            ensure 'U',
-              text: """
-              ooo: xxx: OOO: 0000
-              1: OOO: 22: OOO:
-              ooo: xxx: |||: xxx: 3333:
-              444: |||: ooo: ooo:
-              """
+          inputSearchText('o+')
+          dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
+          ensure 'U',
+            text: """
+            ooo: xxx: OOO: 0000
+            1: OOO: 22: OOO:
+            ooo: xxx: |||: xxx: 3333:
+            444: |||: ooo: ooo:
+            """
 
     describe "persistent-selection is exists", ->
       persistentSelectionBufferRange = null
@@ -446,33 +442,31 @@ describe "Occurrence", ->
         it "select occurrence in all persistent-selection", ->
           set cursor: [0, 0]
           keystroke '/'
-          searchEditor.insertText('xxx')
-          withMockPlatform searchEditorElement, 'platform-darwin' , ->
-            rawKeystroke 'cmd-d', document.activeElement
-            ensure 'U',
-              text: """
-              ooo: XXX: ooo:
-              |||: ooo: XXX: ooo:
-              ooo: xxx: |||: xxx: ooo:
-              XXX: |||: ooo: ooo:\n
-              """
-              persistentSelectionCount: 0
+          inputSearchText('xxx')
+          dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
+          ensure 'U',
+            text: """
+            ooo: XXX: ooo:
+            |||: ooo: XXX: ooo:
+            ooo: xxx: |||: xxx: ooo:
+            XXX: |||: ooo: ooo:\n
+            """
+            persistentSelectionCount: 0
 
       describe "when both exits, operator applied to both", ->
         it "select all occurrence in selection", ->
           set cursor: [0, 0]
           keystroke 'V 2 j /'
-          searchEditor.insertText('xxx')
-          withMockPlatform searchEditorElement, 'platform-darwin' , ->
-            rawKeystroke 'cmd-d', document.activeElement
-            ensure 'U',
-              text: """
-              ooo: XXX: ooo:
-              |||: ooo: XXX: ooo:
-              ooo: XXX: |||: XXX: ooo:
-              XXX: |||: ooo: ooo:\n
-              """
-              persistentSelectionCount: 0
+          inputSearchText('xxx')
+          dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
+          ensure 'U',
+            text: """
+            ooo: XXX: ooo:
+            |||: ooo: XXX: ooo:
+            ooo: XXX: |||: XXX: ooo:
+            XXX: |||: ooo: ooo:\n
+            """
+            persistentSelectionCount: 0
 
     describe "demonstrate persistent-selection's practical scenario", ->
       [oldGrammar] = []
@@ -516,58 +510,55 @@ describe "Occurrence", ->
         ensure ['j f', input: '='], cursor: [1, 17]
 
         runs ->
-          withMockPlatform searchEditorElement, 'platform-darwin' , ->
-            keystroke [
-              'g cmd-d' # select-occurrence
-              'i f'     # inner-function-text-object
-              'm'       # toggle-persistent-selection
-            ].join(" ")
+          keystroke [
+            'g cmd-d' # select-occurrence
+            'i f'     # inner-function-text-object
+            'm'       # toggle-persistent-selection
+          ].join(" ")
 
-            textsInBufferRange = vimState.persistentSelection.getMarkerBufferRanges().map (range) ->
-              editor.getTextInBufferRange(range)
-            textsInBufferRangeIsAllEqualChar = textsInBufferRange.every((text) -> text is '=')
-            expect(textsInBufferRangeIsAllEqualChar).toBe(true)
-            expect(vimState.persistentSelection.getMarkers()).toHaveLength(11)
+          textsInBufferRange = vimState.persistentSelection.getMarkerBufferRanges().map (range) ->
+            editor.getTextInBufferRange(range)
+          textsInBufferRangeIsAllEqualChar = textsInBufferRange.every((text) -> text is '=')
+          expect(textsInBufferRangeIsAllEqualChar).toBe(true)
+          expect(vimState.persistentSelection.getMarkers()).toHaveLength(11)
 
-            keystroke '2 l' # to move to out-side of range-mrker
-            ensure ['/', search: '=>'], cursor: [9, 69]
-            keystroke "m" # clear persistentSelection at cursor which is = sign part of fat arrow.
-            expect(vimState.persistentSelection.getMarkers()).toHaveLength(10)
+          keystroke '2 l' # to move to out-side of range-mrker
+          ensure ['/', search: '=>'], cursor: [9, 69]
+          keystroke "m" # clear persistentSelection at cursor which is = sign part of fat arrow.
+          expect(vimState.persistentSelection.getMarkers()).toHaveLength(10)
 
         waitsFor ->
           classList.contains('has-persistent-selection')
 
         runs ->
-          withMockPlatform searchEditorElement, 'platform-darwin' , ->
-            keystroke [
-              'ctrl-cmd-g' # select-persistent-selection
-              'I'          # Insert at start of selection
-            ]
-            editor.insertText('?')
-            ensure 'escape',
-              text: """
-              constructor: (@main, @editor, @statusBarManager) ->
-                @editorElement ?= @editor.element
-                @emitter ?= new Emitter
-                @subscriptions ?= new CompositeDisposable
-                @modeManager ?= new ModeManager(this)
-                @mark ?= new MarkManager(this)
-                @register ?= new RegisterManager(this)
-                @persistentSelections ?= []
+          keystroke [
+            'ctrl-cmd-g' # select-persistent-selection
+            'I'          # Insert at start of selection
+          ]
+          editor.insertText('?')
+          ensure 'escape',
+            text: """
+            constructor: (@main, @editor, @statusBarManager) ->
+              @editorElement ?= @editor.element
+              @emitter ?= new Emitter
+              @subscriptions ?= new CompositeDisposable
+              @modeManager ?= new ModeManager(this)
+              @mark ?= new MarkManager(this)
+              @register ?= new RegisterManager(this)
+              @persistentSelections ?= []
 
-                @highlightSearchSubscription ?= @editorElement.onDidChangeScrollTop =>
-                  @refreshHighlightSearch()
+              @highlightSearchSubscription ?= @editorElement.onDidChangeScrollTop =>
+                @refreshHighlightSearch()
 
-                @operationStack ?= new OperationStack(this)
-                @cursorStyleManager ?= new CursorStyleManager(this)
+              @operationStack ?= new OperationStack(this)
+              @cursorStyleManager ?= new CursorStyleManager(this)
 
-              anotherFunc: ->
-                @hello = []
-              """
+            anotherFunc: ->
+              @hello = []
+            """
 
   describe "preset occurrence marker", ->
     beforeEach ->
-      jasmine.attachToDOM(getView(atom.workspace))
       set
         text: """
         This text have 3 instance of 'text' in the whole text
@@ -673,21 +664,16 @@ describe "Occurrence", ->
               """
 
       describe "in incremental-search", ->
-        [searchEditor, searchEditorElement] = []
         beforeEach ->
-          searchEditor = vimState.searchInput.editor
-          searchEditorElement = searchEditor.element
-          jasmine.attachToDOM(getView(atom.workspace))
           settings.set('incrementalSearch', true)
 
         describe "add-occurrence-pattern-from-search", ->
           it 'mark as occurrence which matches regex entered in search-ui', ->
             keystroke '/'
-            searchEditor.insertText('\\bt\\w+')
-            withMockPlatform searchEditorElement, 'platform-darwin' , ->
-              rawKeystroke 'cmd-o', document.activeElement
-              ensure
-                occurrenceText: ['text', 'text', 'the', 'text']
+            inputSearchText('\\bt\\w+')
+            dispatchSearchCommand('vim-mode-plus:add-occurrence-pattern-from-search')
+            ensure
+              occurrenceText: ['text', 'text', 'the', 'text']
 
     describe "mutate preset occurrence", ->
       beforeEach ->
@@ -696,7 +682,6 @@ describe "Occurrence", ->
         !!!: ooo: xxx: ooo xxx: ooo:
         """
         cursor: [0, 0]
-        jasmine.attachToDOM(getView(atom.workspace))
 
       describe "normal-mode", ->
         it '[delete] apply operation to preset-marker intersecting selected target', ->
@@ -828,7 +813,6 @@ describe "Occurrence", ->
 
     describe "MoveToNextOccurrence, MoveToPreviousOccurrence", ->
       beforeEach ->
-        jasmine.attachToDOM(getView(atom.workspace))
         set
           textC: """
           |ooo: xxx: ooo
@@ -967,7 +951,6 @@ describe "Occurrence", ->
           |ooo: xxx: ooo xxx: ooo:
           ___: ooo: xxx: ooo xxx: ooo:
           """
-          jasmine.attachToDOM(getView(atom.workspace))
 
       describe "'o' modifier when preset occurrence already exists", ->
         it "'o' always pick cursor-word and overwrite existing preset marker)", ->
@@ -991,4 +974,4 @@ describe "Occurrence", ->
             occurrenceText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
             mode: 'operator-pending'
           ensure "j",
-            selectedText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
+           selectedText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
