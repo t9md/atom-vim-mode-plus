@@ -25,8 +25,8 @@ class TransformString extends Operator
   @registerToSelectList: ->
     @stringTransformers.push(this)
 
-  mutateSelection: (selection, stopMutation) ->
-    if text = @getNewText(selection.getText(), selection, stopMutation)
+  mutateSelection: (selection) ->
+    if text = @getNewText(selection.getText(), selection)
       selection.insertText(text, {@autoIndent})
 
 class ToggleCase extends TransformString

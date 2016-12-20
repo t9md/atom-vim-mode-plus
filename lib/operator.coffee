@@ -193,13 +193,10 @@ class Operator extends Base
 
   # Main
   execute: ->
-    canMutate = true
-    stopMutation = -> canMutate = false
-
     @startMutation =>
       if @selectTarget()
-        for selection in @editor.getSelections() when canMutate
-          @mutateSelection(selection, stopMutation)
+        for selection in @editor.getSelections()
+          @mutateSelection(selection)
         @restoreCursorPositionsIfNecessary()
 
     # Even though we fail to select target and fail to mutate,
@@ -641,7 +638,7 @@ class AddBlankLineBelow extends Operator
   stayByMarker: true
   where: 'below'
 
-  mutateSelection: (selection, stopMutation) ->
+  mutateSelection: (selection) ->
     row = selection.getHeadBufferPosition().row
     row += 1 if @where is 'below'
     point = [row, 0]
