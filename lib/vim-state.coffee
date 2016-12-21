@@ -366,6 +366,9 @@ class VimState
     @originalCursorPosition = point
     @originalCursorPositionByMarker = @editor.markBufferPosition(point, invalidate: 'never')
 
+  restoreOriginalCursorPosition: ->
+    @editor.setCursorBufferPosition(@getOriginalCursorPosition())
+
   getOriginalCursorPosition: ->
     @originalCursorPosition
 

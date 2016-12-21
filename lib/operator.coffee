@@ -51,6 +51,8 @@ class Operator extends Base
   # -------------------------
   supportEarlySelect: false
   targetSelected: null
+  canEarlySelect: ->
+    @supportEarlySelect and not @isRepeated()
   # -------------------------
 
   # Called when operation finished
@@ -203,7 +205,7 @@ class Operator extends Base
     @target.setOperator(this)
     @emitDidSetTarget(this)
 
-    if @supportEarlySelect
+    if @canEarlySelect()
       @normalizeSelectionsIfNecessary()
       @createBufferCheckpoint('undo')
       @selectTarget()
@@ -221,7 +223,7 @@ class Operator extends Base
       @vimState.modeManager.normalizeSelections()
 
   startMutation: (fn) ->
-    if @supportEarlySelect
+    if @canEarlySelect()
       # - Skip selection normalization: already normalized before @selectTarget()
       # - Manual checkpoint grouping: to create checkpoint before @selectTarget()
       fn()

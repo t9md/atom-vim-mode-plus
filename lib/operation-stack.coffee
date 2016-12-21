@@ -158,6 +158,7 @@ class OperationStack
   cancel: ->
     if @mode not in ['visual', 'insert']
       @vimState.resetNormalMode()
+      @vimState.restoreOriginalCursorPosition()
     @finish()
 
   finish: (operation=null) ->

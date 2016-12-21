@@ -415,33 +415,26 @@ class ToggleLineComments extends TransformString
 
 # Surround < TransformString
 # -------------------------
-class Surround extends TransformString
-  @extend()
-  @description: "Surround target by specified character like `(`, `[`, `\"`"
-  displayName: "Surround ()"
-  hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
+class SurroundBase extends TransformString
+  @extend(false)
   pairs: [
     ['[', ']']
     ['(', ')']
     ['{', '}']
     ['<', '>']
   ]
+  pairCharsAllowForwarding: '[](){}'
   input: null
-  charsMax: 1
-  requireInput: true
   autoIndent: false
+
+  requireInput: true
+  requireTarget: true
 
   supportEarlySelect: true # Experimental
 
   initialize: ->
+    @subscribeForInput()
     super
-
-    return unless @requireInput
-    if @requireTarget
-      @onDidSelectTarget =>
-        @focusInput(@charsMax)
-    else
-      @focusInput(@charsMax)
 
   focusInput: (charsMax) ->
     @inputUI = @newInputUI()
@@ -449,9 +442,6 @@ class Surround extends TransformString
     @inputUI.onDidChange(@addHover.bind(this))
     @inputUI.onDidCancel(@cancelOperation.bind(this))
     @inputUI.focus(charsMax)
-
-  onConfirm: (@input) ->
-    @processOperation()
 
   getPair: (char) ->
     pair = _.detect(@pairs, (pair) -> char in pair)
@@ -469,6 +459,37 @@ class Surround extends TransformString
       open + ' ' + text + ' ' + close
     else
       open + text + close
+
+  deleteSurround: (text) ->
+    [open, innerText..., close] = text
+    innerText = innerText.join('')
+    if isSingleLineText(text) and (open isnt close)
+      innerText.trim()
+    else
+      innerText
+
+  setTargetFromPairChar: (char) ->
+    @setTarget @new 'Pair',
+      pair: @getPair(char)
+      inner: false
+      allowNextLine: char in @pairCharsAllowForwarding
+
+  showOldCharOnHover: ->
+    char = @editor.getSelectedText()[0]
+    point = @vimState.getOriginalCursorPosition()
+    @addHover(char, {}, point)
+
+class Surround extends SurroundBase
+  @extend()
+  @description: "Surround target by specified character like `(`, `[`, `\"`"
+  displayName: "Surround ()"
+  hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
+
+  subscribeForInput: ->
+    @onDidSelectTarget(@focusInput.bind(this))
+
+  onConfirm: (@input) ->
+    @processOperation()
 
   getNewText: (text) ->
     @surround(text, @input)
@@ -489,74 +510,67 @@ class MapSurround extends Surround
   occurrence: true
   patternForOccurrence: /\w+/g
 
-class DeleteSurround extends Surround
+# Delete Surround
+# -------------------------
+class DeleteSurround extends SurroundBase
   @extend()
   @description: "Delete specified surround character like `(`, `[`, `\"`"
-  pairChars: ['[]', '()', '{}'].join('')
   requireTarget: false
 
+  subscribeForInput: ->
+    if @isRequireInput()
+      @focusInput()
+
   onConfirm: (@input) ->
-    # FIXME: dont manage allowNextLine independently. Each Pair text-object can handle by themselvs.
-    @setTarget @new 'Pair',
-      pair: @getPair(@input)
-      inner: false
-      allowNextLine: (@input in @pairChars)
+    @setTargetFromPairChar(@input)
     @processOperation()
 
   getNewText: (text) ->
-    [openChar, closeChar] = [text[0], _.last(text)]
-    text = text[1...-1]
-    if isSingleLineText(text)
-      text = text.trim() if openChar isnt closeChar
-    text
+    @deleteSurround(text)
 
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
   @description: "Delete surround character by auto-detect paired char from cursor enclosed pair"
-  requireInput: false
   target: 'AAnyPair'
+  requireInput: false
 
 class DeleteSurroundAnyPairAllowForwarding extends DeleteSurroundAnyPair
   @extend()
   @description: "Delete surround character by auto-detect paired char from cursor enclosed pair and forwarding pair within same line"
   target: 'AAnyPairAllowForwarding'
 
-class ChangeSurround extends DeleteSurround
+# Change Surround
+# -------------------------
+class ChangeSurround extends SurroundBase
   @extend()
   @description: "Change surround character, specify both from and to pair char"
-  charsMax: 2
-  char: null
+
+  subscribeForInput: ->
+    if @hasTarget()
+      @onDidFailSelectTarget(@abort.bind(this))
+    else
+      @onDidFailSelectTarget(@cancelOperation.bind(this))
+      @focusInput()
+
+    @onDidSelectTarget =>
+      @showOldCharOnHover()
+      @focusInput()
 
   onConfirm: (input) ->
-    return unless input
-    [from, @char] = input.split('')
-    super(from)
+    if not @targetSelected
+      @setTargetFromPairChar(input)
+    else
+      @input = input
+      @processOperation()
 
   getNewText: (text) ->
-    innerText = super # Delete surround
-    @surround(innerText, @char, keepLayout: true)
+    innerText = @deleteSurround(text)
+    @surround(innerText, @input, keepLayout: true)
 
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
   @description: "Change surround character, from char is auto-detected"
-  charsMax: 1
   target: "AAnyPair"
-
-  initialize: ->
-    @onDidSelectTarget =>
-      char = @editor.getSelectedText()[0]
-      point = @vimState.getOriginalCursorPosition()
-      @addHover(char, {}, point)
-
-    @onDidFailSelectTarget =>
-      @inputUI.cancel()
-      @abort()
-
-    super
-
-  onConfirm: (@char) ->
-    @input = @char
-    @processOperation()
 
 class ChangeSurroundAnyPairAllowForwarding extends ChangeSurroundAnyPair
   @extend()
