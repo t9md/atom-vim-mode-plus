@@ -429,19 +429,17 @@ class SurroundBase extends TransformString
 
   requireInput: true
   requireTarget: true
-
   supportEarlySelect: true # Experimental
 
   initialize: ->
     @subscribeForInput()
     super
 
-  focusInput: (charsMax) ->
+  focusInput: ->
     @inputUI = @newInputUI()
     @inputUI.onDidConfirm(@onConfirm.bind(this))
-    @inputUI.onDidChange(@addHover.bind(this))
     @inputUI.onDidCancel(@cancelOperation.bind(this))
-    @inputUI.focus(charsMax)
+    @inputUI.focus()
 
   getPair: (char) ->
     pair = _.detect(@pairs, (pair) -> char in pair)
@@ -468,7 +466,7 @@ class SurroundBase extends TransformString
     else
       innerText
 
-  setTargetFromPairChar: (char) ->
+  setTargetForPairChar: (char) ->
     @setTarget @new 'Pair',
       pair: @getPair(char)
       inner: false
@@ -482,7 +480,6 @@ class SurroundBase extends TransformString
 class Surround extends SurroundBase
   @extend()
   @description: "Surround target by specified character like `(`, `[`, `\"`"
-  displayName: "Surround ()"
   hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
 
   subscribeForInput: ->
@@ -522,7 +519,7 @@ class DeleteSurround extends SurroundBase
       @focusInput()
 
   onConfirm: (@input) ->
-    @setTargetFromPairChar(@input)
+    @setTargetForPairChar(@input)
     @processOperation()
 
   getNewText: (text) ->
@@ -550,15 +547,15 @@ class ChangeSurround extends SurroundBase
       @onDidFailSelectTarget(@abort.bind(this))
     else
       @onDidFailSelectTarget(@cancelOperation.bind(this))
-      @focusInput()
+      @focusInput() # Read pair-char to determine target pair range.
 
     @onDidSelectTarget =>
       @showOldCharOnHover()
-      @focusInput()
+      @focusInput() # Read new pair-char.
 
   onConfirm: (input) ->
     if not @targetSelected
-      @setTargetFromPairChar(input)
+      @setTargetForPairChar(input)
     else
       @input = input
       @processOperation()
