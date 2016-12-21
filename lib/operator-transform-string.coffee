@@ -436,10 +436,10 @@ class SurroundBase extends TransformString
     super
 
   focusInput: ->
-    @inputUI = @newInputUI()
-    @inputUI.onDidConfirm(@onConfirm.bind(this))
-    @inputUI.onDidCancel(@cancelOperation.bind(this))
-    @inputUI.focus()
+    inputUI = @newInputUI()
+    inputUI.onDidConfirm(@onConfirm.bind(this))
+    inputUI.onDidCancel(@cancelOperation.bind(this))
+    inputUI.focus()
 
   getPair: (char) ->
     pair = _.detect(@pairs, (pair) -> char in pair)
@@ -454,9 +454,9 @@ class SurroundBase extends TransformString
       close += "\n"
 
     if char in settings.get('charactersToAddSpaceOnSurround') and isSingleLineText(text)
-      open + ' ' + text + ' ' + close
-    else
-      open + text + close
+      text = ' ' + text + ' '
+
+    open + text + close
 
   deleteSurround: (text) ->
     [open, innerText..., close] = text
@@ -574,6 +574,7 @@ class ChangeSurroundAnyPairAllowForwarding extends ChangeSurroundAnyPair
   @description: "Change surround character, from char is auto-detected from enclosed and forwarding area"
   target: "AAnyPairAllowForwarding"
 
+# -------------------------
 # FIXME
 # Currently native editor.joinLines() is better for cursor position setting
 # So I use native methods for a meanwhile.
