@@ -13,6 +13,7 @@ _ = require 'underscore-plus'
   findRangeContainsPoint
   mergeIntersectingRanges
   isSingleLineRange
+  isLinewiseRange
   isLeadingWhiteSpaceRange
 } = require './utils'
 
@@ -117,7 +118,7 @@ class Undo extends MiscCommand
   humanizeNewLineForRange: (range) ->
     {start, end} = range
 
-    if isSingleLineRange(range)
+    if isSingleLineRange(range) or isLinewiseRange(range)
       return range
 
     if pointIsAtEndOfLine(@editor, start)
