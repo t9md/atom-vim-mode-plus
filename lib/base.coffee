@@ -65,10 +65,6 @@ class Base
   constructor: (@vimState, properties=null) ->
     {@editor, @editorElement, @globalState} = @vimState
     _.extend(this, properties) if properties?
-    if settings.get('showHoverOnOperate')
-      hover = @hover?[settings.get('showHoverOnOperateIcon')]
-      if hover? and not @isComplete()
-        @addHover(hover)
 
   # Template
   initialize: ->
@@ -148,12 +144,6 @@ class Base
     unless @vimState.isMode(mode, submode)
       @activateMode(mode, submode)
 
-  addHover: (text, {replace}={}, point=null) ->
-    if replace ? false
-      @vimState.hover.replaceLastSection(text, point)
-    else
-      @vimState.hover.add(text, point)
-
   new: (name, properties) ->
     klass = Base.getClass(name)
     new klass(@vimState, properties)
@@ -191,15 +181,6 @@ class Base
       unless @input?  # [FIXME] I think I can delete this guard.
         @input = input
         @processOperation()
-
-    # From 2nd addHover, we replace last section of hover
-    # to sync content with input mini editor.
-    unless charsMax is 1
-      replace = false
-      inputUI.onDidChange (input) =>
-        @addHover(input, {replace})
-        replace = true
-
     inputUI.onDidCancel(@cancelOperation.bind(this))
     inputUI.focus(charsMax)
 

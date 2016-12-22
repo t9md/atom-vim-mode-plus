@@ -654,6 +654,7 @@ class SplitString extends TransformString
   input: null
   target: "MoveToRelativeLine"
 
+  # FIXME
   initialize: ->
     @onDidSetTarget =>
       @focusInput(charsMax = 10)

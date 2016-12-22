@@ -1,6 +1,3 @@
-emoji = require 'emoji-images'
-
-emojiFolder = 'atom://vim-mode-plus/node_modules/emoji-images/pngs'
 {registerElement} = require './utils'
 settings = require './settings'
 swrap = require './selection-wrapper'
@@ -30,14 +27,6 @@ class Hover extends HTMLElement
     @text.pop()
     @add(text)
 
-  convertText: (text, lineHeight) ->
-    text = String(text)
-    if settings.get('showHoverOnOperateIcon') is 'emoji'
-      emoji(text, emojiFolder, lineHeight)
-    else
-      text.replace /:(.*?):/g, (s, m) ->
-        "<span class='icon icon-#{m}'></span>"
-
   showLight: (char, point=@getPoint()) ->
     unless @lightHover?
       @lightHover = document.createElement('div')
@@ -45,7 +34,7 @@ class Hover extends HTMLElement
 
     @lightHoverMarker?.destroy()
     @lightHoverMarker = @editor.markBufferPosition(point)
-    @lightHover.innerHTML = char
+    @lightHover.textContent = char
     @editor.decorateMarker(@lightHoverMarker, type: 'overlay', item: @lightHover)
 
   resetLight: ->
@@ -54,14 +43,9 @@ class Hover extends HTMLElement
   show: (point) ->
     unless @marker?
       @marker = @createOverlay(point)
-      @lineHeight = @editor.getLineHeightInPixels()
-      @setIconSize(@lineHeight)
-      @style.marginTop = (@lineHeight * -2.2) + 'px'
 
     if @text.length
-      @innerHTML = @text.map (text) =>
-        @convertText(text, @lineHeight)
-      .join('')
+      @innerHTML = @text.map((text) -> String(text)).join('')
 
   withTimeout: (point, options) ->
     @reset()
@@ -80,15 +64,6 @@ class Hover extends HTMLElement
       item: this
     marker
 
-  setIconSize: (size) ->
-    @styleElement?.remove()
-    @styleElement = document.createElement 'style'
-    document.head.appendChild(@styleElement)
-    selector = '.vim-mode-plus-hover .icon::before'
-    size = "#{size*0.8}px"
-    style = "font-size: #{size}; width: #{size}; hegith: #{size};"
-    @styleElement.sheet.addRule(selector, style)
-
   isVisible: ->
     @marker?
 
@@ -99,15 +74,11 @@ class Hover extends HTMLElement
     @className = 'vim-mode-plus-hover'
     @textContent = ''
     @marker?.destroy()
-    @styleElement?.remove()
-    {
-      @marker, @lineHeight
-      @timeoutID, @styleElement
-    } = {}
+    {@marker, @timeoutID} = {}
 
   destroy: ->
     @reset()
-    {@vimState, @lineHeight} = {}
+    {@vimState} = {}
     @remove()
 
 HoverElement = registerElement "vim-mode-plus-hover",

@@ -133,10 +133,6 @@ module.exports = new Settings 'vim-mode-plus',
     description: 'Comma separated list of operator class name to disable flash e.g. "yank, auto-indent"'
   flashOnSearch: true
   flashScreenOnSearchHasNoMatch: true
-  showHoverOnOperate: false
-  showHoverOnOperateIcon:
-    default: 'icon'
-    enum: ['none', 'icon', 'emoji']
   showHoverSearchCounter: false
   showHoverSearchCounterDuration:
     default: 700

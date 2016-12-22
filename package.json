@@ -12,7 +12,6 @@
   "dependencies": {
     "atom-space-pen-views": "^2.1.1",
     "delegato": "^1.0.0",
-    "emoji-images": "^0.1.1",
     "fs-plus": "^2.8.1",
     "fuzzaldrin": "^2.1.0",
     "semver": "^5.1.0",
