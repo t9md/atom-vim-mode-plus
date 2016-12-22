@@ -124,7 +124,10 @@ atom-text-editor .vim-mode-plus-flash {
   &.undo-redo-multiple-changes .region { .flash(vim-mode-plus-flash-undo-redo-multiple-changes, .5s)}
   &.undo-redo-multiple-delete .region { .flash(vim-mode-plus-flash-undo-redo-multiple-delete, .5s)}
 
-  &.search .region { .flash(vim-mode-plus-flash-search, .5s); }
+  &.search .region {
+    .flash(vim-mode-plus-flash-search, .5s);
+    z-index: 1;
+  }
   &.screen .region { .flash(vim-mode-plus-flash-screen, .3s); }
 }
 
