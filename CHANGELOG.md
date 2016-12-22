@@ -1,3 +1,22 @@
+# 0.76.0
+- Breaking, Cosmetic: Remove `showHoverOnOperate` feature #626
+  - Reason:
+    - This is fancy feature added at very early phase of vim-mode-plus as experiment.
+    - But this feature getting in a way to improve, cleanup vim-mode-plus.
+  - Removed Configuration: Following parameters are removed, remove it manually from `config.cson` if necessary.
+    - `showHoverOnOperate`
+    - `showHoverOnOperateIcon`
+- New: [Experimental] `surround` now **select** target immediately then get user input.
+  - Better UI feedback, to reduce `what-I-have-to-do-next`, `where-am-I` situation in complex keystroke operation.
+  - When `change-surround` fail at first character, it immediately stop execution( No need to input useless next char ).
+- Fix: `maximize-pane` now work for many many split pane #623.
+- Improve: Hover performance is greatly improved #625
+  - Hover shown in `1 0 j`, `" a y y`, `change-surround` is now responsive than before.
+  - HoverElement is renamed to HoverManager(no longer HTMLELement).
+- Improve: `undo`/`redo` flashing humanization further.
+- Improve: Tweak search flashing to win over existing `highlight-search`.
+- Internal: Cleanup occurrence-spec, avoid using `editor.element` for mini-editor.
+
 # 0.75.0
 - New: `setCursorToStartOfChangeOnUndoRedoStrategy`(default `smart`) #620, #621
 - New: `remove-leading-white-spaces`( no defautl keymap ): work always `linewise`.
