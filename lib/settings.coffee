@@ -137,7 +137,9 @@ module.exports = new Settings 'vim-mode-plus',
   showHoverSearchCounterDuration:
     default: 700
     description: "Duration(msec) for hover search counter"
-  hideTabBarOnMaximizePane: true
+  hideTabBarOnMaximizePane:
+    default: true
+    description: "If set to `false`, tab still visible after maximize-pane( `cmd-enter` )"
   smoothScrollOnFullScrollMotion:
     default: false
     description: "For `ctrl-f` and `ctrl-b`"
