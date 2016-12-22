@@ -118,7 +118,13 @@ class TextObject extends Base
       needToKeepColumn = @needToKeepColumn()
       if needToKeepColumn and not @isMode('visual', 'linewise')
         @vimState.modeManager.activate('visual', 'linewise')
-      swrap(selection).setBufferRangeSafely(range, keepGoalColumn: needToKeepColumn)
+
+      # Prevent autoscroll to closing char on `change-surround-any-pair`.
+      options = {
+        preventAutoScrollToLastCursor: @getOperator()?.supportEarlySelect
+        keepGoalColumn: needToKeepColumn
+      }
+      swrap(selection).setBufferRangeSafely(range, options)
 
       newRange = selection.getBufferRange()
       if newRange.isEqual(oldRange)

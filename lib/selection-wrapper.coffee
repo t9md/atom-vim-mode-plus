@@ -21,8 +21,12 @@ class SelectionWrapper
 
   setBufferRangeSafely: (range, options) ->
     if range
+      # FIXME REMOVE IT after investigation.
+      {preventAutoScrollToLastCursor} = options
+      delete options.preventAutoScrollToLastCursor
+
       @setBufferRange(range, options)
-      if @selection.isLastSelection()
+      if @selection.isLastSelection() and not preventAutoScrollToLastCursor
         @selection.cursor.autoscroll()
 
   getBufferRange: ->
