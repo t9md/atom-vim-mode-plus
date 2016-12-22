@@ -38,6 +38,19 @@ class Hover extends HTMLElement
       text.replace /:(.*?):/g, (s, m) ->
         "<span class='icon icon-#{m}'></span>"
 
+  showLight: (char, point) ->
+    unless @lightHover?
+      @lightHover = document.createElement('div')
+      @lightHover.className = 'vim-mode-plus-hover-light'
+
+    @lightHoverMarker?.destroy()
+    @lightHoverMarker = @editor.markBufferPosition(point)
+    @lightHover.innerHTML = char
+    @editor.decorateMarker(@lightHoverMarker, type: 'overlay', item: @lightHover)
+
+  resetLight: ->
+    @lightHoverMarker?.destroy()
+
   show: (point) ->
     unless @marker?
       @marker = @createOverlay(point)

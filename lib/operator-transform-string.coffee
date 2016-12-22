@@ -448,8 +448,10 @@ class SurroundBase extends TransformString
     inputUI.focus()
 
   getPair: (char) ->
-    pair = _.detect(@pairs, (pair) -> char in pair)
-    pair ?= [char, char]
+    if pair = _.detect(@pairs, (pair) -> char in pair)
+      pair
+    else
+      [char, char]
 
   surround: (text, char, options={}) ->
     keepLayout = options.keepLayout ? false
@@ -545,9 +547,10 @@ class ChangeSurround extends SurroundBase
   @description: "Change surround character, specify both from and to pair char"
 
   showDeleteCharOnHover: ->
+    @onDidResetOperationStack =>
+      @vimState.hover.resetLight()
     char = @editor.getSelectedText()[0]
-    point = @vimState.getOriginalCursorPosition()
-    @addHover(char, {}, point)
+    @vimState.hover.showLight(char, @vimState.getOriginalCursorPosition())
 
   subscribeForInput: ->
     if @hasTarget()
