@@ -213,7 +213,7 @@ class OperationStack
     mode = @mode if @mode is 'operator-pending'
     @count[mode] ?= 0
     @count[mode] = (@count[mode] * 10) + number
-    @vimState.hover.showLight(@buildCountString())
+    @vimState.hover.set(@buildCountString())
     @vimState.toggleClassList('with-count', true)
 
   buildCountString: ->

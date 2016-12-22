@@ -6,7 +6,7 @@ _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
 settings = require './settings'
-{HoverElement} = require './hover'
+HoverManager = require './hover-manager'
 SearchInputElement = require './search-input'
 {
   getVisibleEditors
@@ -58,8 +58,8 @@ class VimState
     @modeManager = new ModeManager(this)
     @mark = new MarkManager(this)
     @register = new RegisterManager(this)
-    @hover = new HoverElement().initialize(this)
-    @hoverSearchCounter = new HoverElement().initialize(this)
+    @hover = new HoverManager(this)
+    @hoverSearchCounter = new HoverManager(this)
     @searchHistory = new SearchHistoryManager(this)
     @highlightSearch = new HighlightSearchManager(this)
     @persistentSelection = new PersistentSelectionManager(this)

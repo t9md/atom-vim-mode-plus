@@ -548,7 +548,7 @@ class ChangeSurround extends SurroundBase
 
   showDeleteCharOnHover: ->
     char = @editor.getSelectedText()[0]
-    @vimState.hover.showLight(char, @vimState.getOriginalCursorPosition())
+    @vimState.hover.set(char, @vimState.getOriginalCursorPosition())
 
   subscribeForInput: ->
     if @hasTarget()
