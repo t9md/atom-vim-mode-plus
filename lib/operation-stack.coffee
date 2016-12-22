@@ -217,11 +217,10 @@ class OperationStack
     @vimState.toggleClassList('with-count', true)
 
   buildCountString: ->
-    normalCount = String(@count['normal'])
-    if @count['operator-pending']?
-      normalCount + ' * ' + String(@count['operator-pending'])
-    else
-      normalCount
+    [@count['normal'], @count['operator-pending']]
+      .filter (count) -> count?
+      .map (count) -> String(count)
+      .join(' x ')
 
   resetCount: ->
     @count = {}
