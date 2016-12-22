@@ -121,7 +121,7 @@ class TextObject extends Base
 
       # Prevent autoscroll to closing char on `change-surround-any-pair`.
       options = {
-        preventAutoScrollToLastCursor: @getOperator()?.supportEarlySelect
+        autoscroll: selection.isLastSelection() and not @getOperator().supportEarlySelect
         keepGoalColumn: needToKeepColumn
       }
       swrap(selection).setBufferRangeSafely(range, options)

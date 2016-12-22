@@ -21,13 +21,7 @@ class SelectionWrapper
 
   setBufferRangeSafely: (range, options) ->
     if range
-      # FIXME REMOVE IT after investigation.
-      {preventAutoScrollToLastCursor} = options
-      delete options.preventAutoScrollToLastCursor
-
       @setBufferRange(range, options)
-      if @selection.isLastSelection() and not preventAutoScrollToLastCursor
-        @selection.cursor.autoscroll()
 
   getBufferRange: ->
     @selection.getBufferRange()
@@ -228,14 +222,15 @@ class SelectionWrapper
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->
     {keepGoalColumn} = options
-    delete options.keepGoalColumn if keepGoalColumn?
-
+    delete options.keepGoalColumn
     options.autoscroll ?= false
-    if keepGoalColumn
-      @withKeepingGoalColumn =>
-        @selection.setBufferRange(range, options)
-    else
+    setBufferRange = =>
       @selection.setBufferRange(range, options)
+
+    if keepGoalColumn
+      @withKeepingGoalColumn(setBufferRange)
+    else
+      setBufferRange()
 
   # Return original text
   replace: (text) ->
