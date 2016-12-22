@@ -435,9 +435,15 @@ class SurroundBase extends TransformString
     @subscribeForInput()
     super
 
-  focusInput: ->
+  focusInputForSurround: ->
     inputUI = @newInputUI()
-    inputUI.onDidConfirm(@onConfirm.bind(this))
+    inputUI.onDidConfirm(@onConfirmSurround.bind(this))
+    inputUI.onDidCancel(@cancelOperation.bind(this))
+    inputUI.focus()
+
+  focusInputForDeleteSurround: ->
+    inputUI = @newInputUI()
+    inputUI.onDidConfirm(@onConfirmDeleteSurround.bind(this))
     inputUI.onDidCancel(@cancelOperation.bind(this))
     inputUI.focus()
 
@@ -467,15 +473,16 @@ class SurroundBase extends TransformString
       innerText
 
   setTargetForPairChar: (char) ->
+
+  onConfirmSurround: (@input) ->
+    @processOperation()
+
+  onConfirmDeleteSurround: (char) ->
     @setTarget @new 'Pair',
       pair: @getPair(char)
       inner: false
       allowNextLine: char in @pairCharsAllowForwarding
-
-  showOldCharOnHover: ->
-    char = @editor.getSelectedText()[0]
-    point = @vimState.getOriginalCursorPosition()
-    @addHover(char, {}, point)
+    @setTargetForPairChar(char)
 
 class Surround extends SurroundBase
   @extend()
@@ -483,10 +490,7 @@ class Surround extends SurroundBase
   hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
 
   subscribeForInput: ->
-    @onDidSelectTarget(@focusInput.bind(this))
-
-  onConfirm: (@input) ->
-    @processOperation()
+    @onDidSelectTarget(@focusInputForSurround.bind(this))
 
   getNewText: (text) ->
     @surround(text, @input)
@@ -515,11 +519,12 @@ class DeleteSurround extends SurroundBase
   requireTarget: false
 
   subscribeForInput: ->
-    if @isRequireInput()
-      @focusInput()
+    unless @hasTarget()
+      @focusInputForDeleteSurround()
 
-  onConfirm: (@input) ->
-    @setTargetForPairChar(@input)
+  onConfirmDeleteSurround: (input) ->
+    @input = input
+    super
     @processOperation()
 
   getNewText: (text) ->
@@ -542,23 +547,24 @@ class ChangeSurround extends SurroundBase
   @extend()
   @description: "Change surround character, specify both from and to pair char"
 
+  showDeleteCharOnHover: ->
+    char = @editor.getSelectedText()[0]
+    point = @vimState.getOriginalCursorPosition()
+    @addHover(char, {}, point)
+
   subscribeForInput: ->
     if @hasTarget()
       @onDidFailSelectTarget(@abort.bind(this))
     else
       @onDidFailSelectTarget(@cancelOperation.bind(this))
-      @focusInput() # Read pair-char to determine target pair range.
+      @focusInputForDeleteSurround()
 
     @onDidSelectTarget =>
-      @showOldCharOnHover()
-      @focusInput() # Read new pair-char.
+      @showDeleteCharOnHover()
+      @focusInputForSurround()
 
-  onConfirm: (input) ->
-    if not @targetSelected
-      @setTargetForPairChar(input)
-    else
-      @input = input
-      @processOperation()
+  onConfirmSurround: (@input) ->
+    @processOperation()
 
   getNewText: (text) ->
     innerText = @deleteSurround(text)

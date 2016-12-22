@@ -121,9 +121,10 @@ class VimState
   toggleClassList: (className, bool=undefined) ->
     @editorElement.classList.toggle(className, bool)
 
-  # FIXME: remove this dengerous approarch ASAP and revert to read-inpu-via-mini-editor
+  # FIXME: I want to remove this dengerious approach, but I couldn't find the better way.
   swapClassName: (classNames...) ->
     oldMode = @mode
+
     @editorElement.classList.remove(oldMode + "-mode")
     @editorElement.classList.remove('vim-mode-plus')
     @editorElement.classList.add(classNames...)

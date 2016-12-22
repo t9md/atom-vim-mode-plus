@@ -188,7 +188,7 @@ class Base
   focusInput: (charsMax) ->
     inputUI = @newInputUI()
     inputUI.onDidConfirm (input) =>
-      unless @input?
+      unless @input?  # [FIXME] I think I can delete this guard.
         @input = input
         @processOperation()
 
@@ -200,9 +200,7 @@ class Base
         @addHover(input, {replace})
         replace = true
 
-    inputUI.onDidCancel =>
-      @cancelOperation()
-
+    inputUI.onDidCancel(@cancelOperation.bind(this))
     inputUI.focus(charsMax)
 
   getVimEofBufferPosition: ->
