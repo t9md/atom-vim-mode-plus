@@ -76,7 +76,7 @@ class Base
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
-    if (@isRequireInput() and not @hasInput())
+    if @isRequireInput() and not @hasInput()
       false
     else if @isRequireTarget()
       # When this function is called in Base::constructor

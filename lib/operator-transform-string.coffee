@@ -472,8 +472,6 @@ class SurroundBase extends TransformString
     else
       innerText
 
-  setTargetForPairChar: (char) ->
-
   onConfirmSurround: (@input) ->
     @processOperation()
 
@@ -482,7 +480,6 @@ class SurroundBase extends TransformString
       pair: @getPair(char)
       inner: false
       allowNextLine: char in @pairCharsAllowForwarding
-    @setTargetForPairChar(char)
 
 class Surround extends SurroundBase
   @extend()
@@ -523,8 +520,8 @@ class DeleteSurround extends SurroundBase
       @focusInputForDeleteSurround()
 
   onConfirmDeleteSurround: (input) ->
-    @input = input
     super
+    @input = input
     @processOperation()
 
   getNewText: (text) ->

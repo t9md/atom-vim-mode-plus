@@ -128,8 +128,10 @@ class OperationStack
     if @stack.length is 2
       # [FIXME ideally]
       # If target is not complete, we postpone compsing target with operator to keep situation simple.
-      # We can assume, when target is set to operator it's complete.
+      # So that we can assume when target is set to operator it's complete.
+      # e.g. `y s t a'(surround for range from here to till a)
       return unless @peekTop().isComplete()
+
       operation = @stack.pop()
       @peekTop().setTarget(operation)
 
