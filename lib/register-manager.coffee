@@ -131,12 +131,12 @@ class RegisterManager
     if name?
       @name = name if @isValidName(name)
     else
-      @vimState.hover.add '"'
+      @vimState.hover.set('"')
 
       inputUI = new Input(@vimState)
       inputUI.onDidConfirm (@name) =>
         @vimState.toggleClassList('with-register', true)
-        @vimState.hover.add(@name)
+        @vimState.hover.set('"' + @name)
       inputUI.onDidCancel =>
         @vimState.hover.reset()
       inputUI.focus(1)

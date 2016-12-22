@@ -124,7 +124,10 @@ atom-text-editor .vim-mode-plus-flash {
   &.undo-redo-multiple-changes .region { .flash(vim-mode-plus-flash-undo-redo-multiple-changes, .5s)}
   &.undo-redo-multiple-delete .region { .flash(vim-mode-plus-flash-undo-redo-multiple-delete, .5s)}
 
-  &.search .region { .flash(vim-mode-plus-flash-search, .5s); }
+  &.search .region {
+    .flash(vim-mode-plus-flash-search, .5s);
+    z-index: 1;
+  }
   &.screen .region { .flash(vim-mode-plus-flash-screen, .3s); }
 }
 
@@ -140,17 +143,30 @@ atom-text-editor.editor .line.vim-mode-plus-flash-screen-line {
   color: @text-color-highlight;
   background-color: @base-background-color;
   border-radius: @component-border-radius;
-  box-shadow: 0 0 10px @syntax-text-color;
+  box-shadow: 0 0 1px @syntax-text-color;
+
+  margin-top: -2.8em;
+  margin-left: -0.3em;
   padding-left: 0.2em;
   padding-right: 0.2em;
-  margin-left: -0.1em;
   text-align: center;
-  &.first {
-    background-color: @background-color-info;
-  }
-  &.last {
-    background-color: @background-color-error;
-  }
+
+  &.first { background-color: @background-color-info; }
+  &.last { background-color: @background-color-error; }
+}
+
+.vim-mode-plus-hover-light {
+  display: block;
+  color: @text-color-highlight;
+  background-color: @base-background-color;
+  border-radius: @component-border-radius;
+  box-shadow: 0 0 1px @syntax-text-color;
+
+  margin-top: -2.8em;
+  margin-left: -0.3em;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
+  text-align: center;
 }
 
 // Input mini editor, e.g surround char.

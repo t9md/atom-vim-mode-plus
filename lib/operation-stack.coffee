@@ -209,14 +209,18 @@ class OperationStack
       null
 
   setCount: (number) ->
-    if @mode is 'operator-pending'
-      mode = @mode
-    else
-      mode = 'normal'
+    mode = 'normal'
+    mode = @mode if @mode is 'operator-pending'
     @count[mode] ?= 0
     @count[mode] = (@count[mode] * 10) + number
-    @vimState.hover.add(number)
+    @vimState.hover.set(@buildCountString())
     @vimState.toggleClassList('with-count', true)
+
+  buildCountString: ->
+    [@count['normal'], @count['operator-pending']]
+      .filter (count) -> count?
+      .map (count) -> String(count)
+      .join('x')
 
   resetCount: ->
     @count = {}

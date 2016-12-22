@@ -133,15 +133,13 @@ module.exports = new Settings 'vim-mode-plus',
     description: 'Comma separated list of operator class name to disable flash e.g. "yank, auto-indent"'
   flashOnSearch: true
   flashScreenOnSearchHasNoMatch: true
-  showHoverOnOperate: false
-  showHoverOnOperateIcon:
-    default: 'icon'
-    enum: ['none', 'icon', 'emoji']
   showHoverSearchCounter: false
   showHoverSearchCounterDuration:
     default: 700
     description: "Duration(msec) for hover search counter"
-  hideTabBarOnMaximizePane: true
+  hideTabBarOnMaximizePane:
+    default: true
+    description: "If set to `false`, tab still visible after maximize-pane( `cmd-enter` )"
   smoothScrollOnFullScrollMotion:
     default: false
     description: "For `ctrl-f` and `ctrl-b`"

@@ -418,7 +418,6 @@ class AddPresetOccurrenceFromLastOccurrencePattern extends TogglePresetOccurrenc
 # ================================
 class Delete extends Operator
   @extend()
-  hover: icon: ':delete:', emoji: ':scissors:'
   trackChange: true
   flashCheckpoint: 'did-select-occurrence'
   flashTypeForOccurrence: 'operator-remove-occurrence'
@@ -447,7 +446,6 @@ class Delete extends Operator
 class DeleteRight extends Delete
   @extend()
   target: 'MoveRight'
-  hover: null
 
 class DeleteLeft extends Delete
   @extend()
@@ -476,7 +474,6 @@ class DeleteLine extends Delete
 # =========================
 class Yank extends Operator
   @extend()
-  hover: icon: ':yank:', emoji: ':clipboard:'
   trackChange: true
   stayOptionName: 'stayOnYank'
 
@@ -670,7 +667,6 @@ class PutAfter extends PutBefore
 
 class Mark extends Operator
   @extend()
-  # hover: icon: ':mark:', emoji: ':round_pushpin:'
   recordable: false
   requireInput: true
   requireTarget: false

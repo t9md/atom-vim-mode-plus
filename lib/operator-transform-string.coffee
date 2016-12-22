@@ -34,7 +34,6 @@ class ToggleCase extends TransformString
   @registerToSelectList()
   @description: "`Hello World` -> `hELLO wORLD`"
   displayName: 'Toggle ~'
-  hover: icon: ':toggle-case:', emoji: ':clap:'
 
   toggleCase: (char) ->
     charLower = char.toLowerCase()
@@ -48,7 +47,6 @@ class ToggleCase extends TransformString
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
-  hover: null
   flashTarget: false
   restorePositions: false
   target: 'MoveRight'
@@ -57,7 +55,6 @@ class UpperCase extends TransformString
   @extend()
   @registerToSelectList()
   @description: "`Hello World` -> `HELLO WORLD`"
-  hover: icon: ':upper-case:', emoji: ':point_up:'
   displayName: 'Upper'
   getNewText: (text) ->
     text.toUpperCase()
@@ -66,7 +63,6 @@ class LowerCase extends TransformString
   @extend()
   @registerToSelectList()
   @description: "`Hello World` -> `hello world`"
-  hover: icon: ':lower-case:', emoji: ':point_down:'
   displayName: 'Lower'
   getNewText: (text) ->
     text.toLowerCase()
@@ -76,7 +72,6 @@ class LowerCase extends TransformString
 class Replace extends TransformString
   @extend()
   input: null
-  hover: icon: ':replace:', emoji: ':tractor:'
   flashCheckpoint: 'did-select-occurrence'
   requireInput: true
   autoIndentNewline: true
@@ -112,7 +107,6 @@ class CamelCase extends TransformString
   @registerToSelectList()
   displayName: 'Camelize'
   @description: "`hello-world` -> `helloWorld`"
-  hover: icon: ':camel-case:', emoji: ':camel:'
   getNewText: (text) ->
     _.camelize(text)
 
@@ -121,7 +115,6 @@ class SnakeCase extends TransformString
   @registerToSelectList()
   @description: "`HelloWorld` -> `hello_world`"
   displayName: 'Underscore _'
-  hover: icon: ':snake-case:', emoji: ':snake:'
   getNewText: (text) ->
     _.underscore(text)
 
@@ -130,7 +123,6 @@ class PascalCase extends TransformString
   @registerToSelectList()
   @description: "`hello_world` -> `HelloWorld`"
   displayName: 'Pascalize'
-  hover: icon: ':pascal-case:', emoji: ':triangular_ruler:'
   getNewText: (text) ->
     _.capitalize(_.camelize(text))
 
@@ -139,7 +131,6 @@ class DashCase extends TransformString
   @registerToSelectList()
   displayName: 'Dasherize -'
   @description: "HelloWorld -> hello-world"
-  hover: icon: ':dash-case:', emoji: ':dash:'
   getNewText: (text) ->
     _.dasherize(text)
 
@@ -156,7 +147,6 @@ class EncodeUriComponent extends TransformString
   @registerToSelectList()
   @description: "`Hello World` -> `Hello%20World`"
   displayName: 'Encode URI Component %'
-  hover: icon: 'encodeURI', emoji: 'encodeURI'
   getNewText: (text) ->
     encodeURIComponent(text)
 
@@ -165,7 +155,6 @@ class DecodeUriComponent extends TransformString
   @registerToSelectList()
   @description: "`Hello%20World` -> `Hello World`"
   displayName: 'Decode URI Component %%'
-  hover: icon: 'decodeURI', emoji: 'decodeURI'
   getNewText: (text) ->
     decodeURIComponent(text)
 
@@ -350,7 +339,6 @@ class TransformSmartWordBySelectList extends TransformStringBySelectList
 class ReplaceWithRegister extends TransformString
   @extend()
   @description: "Replace target with specified register value"
-  hover: icon: ':replace-with-register:', emoji: ':pencil:'
   getNewText: (text) ->
     @vimState.register.getText()
 
@@ -367,7 +355,6 @@ class SwapWithRegister extends TransformString
 # -------------------------
 class Indent extends TransformString
   @extend()
-  hover: icon: ':indent:', emoji: ':point_right:'
   stayByMarker: true
   wise: 'linewise'
 
@@ -396,19 +383,16 @@ class Indent extends TransformString
 
 class Outdent extends Indent
   @extend()
-  hover: icon: ':outdent:', emoji: ':point_left:'
   indent: (selection) ->
     selection.outdentSelectedRows()
 
 class AutoIndent extends Indent
   @extend()
-  hover: icon: ':auto-indent:', emoji: ':open_hands:'
   indent: (selection) ->
     selection.autoIndentSelectedRows()
 
 class ToggleLineComments extends TransformString
   @extend()
-  hover: icon: ':toggle-line-comments:', emoji: ':mute:'
   stayByMarker: true
   mutateSelection: (selection) ->
     selection.toggleLineComments()
@@ -448,8 +432,10 @@ class SurroundBase extends TransformString
     inputUI.focus()
 
   getPair: (char) ->
-    pair = _.detect(@pairs, (pair) -> char in pair)
-    pair ?= [char, char]
+    if pair = _.detect(@pairs, (pair) -> char in pair)
+      pair
+    else
+      [char, char]
 
   surround: (text, char, options={}) ->
     keepLayout = options.keepLayout ? false
@@ -484,7 +470,6 @@ class SurroundBase extends TransformString
 class Surround extends SurroundBase
   @extend()
   @description: "Surround target by specified character like `(`, `[`, `\"`"
-  hover: icon: ':surround:', emoji: ':two_women_holding_hands:'
 
   subscribeForInput: ->
     @onDidSelectTarget(@focusInputForSurround.bind(this))
@@ -546,8 +531,7 @@ class ChangeSurround extends SurroundBase
 
   showDeleteCharOnHover: ->
     char = @editor.getSelectedText()[0]
-    point = @vimState.getOriginalCursorPosition()
-    @addHover(char, {}, point)
+    @vimState.hover.set(char, @vimState.getOriginalCursorPosition())
 
   subscribeForInput: ->
     if @hasTarget()
@@ -622,14 +606,12 @@ class JoinByInput extends JoinWithKeepingSpace
   @extend()
   @registerToSelectList()
   @description: "Transform multi-line to single-line by with specified separator character"
-  hover: icon: ':join:', emoji: ':couple:'
   requireInput: true
   input: null
   trim: true
   initialize: ->
     super
-    charsMax = 10
-    @focusInput(charsMax)
+    @focusInput(charsMax = 10)
 
   join: (rows) ->
     rows.join(" #{@input} ")
@@ -648,7 +630,6 @@ class SplitString extends TransformString
   @extend()
   @registerToSelectList()
   @description: "Split single-line into multi-line by splitting specified separator chars"
-  hover: icon: ':split-string:', emoji: ':hocho:'
   requireInput: true
   input: null
   target: "MoveToRelativeLine"
