@@ -7,6 +7,8 @@
 } = require './utils'
 settings = require './settings'
 
+hoverCounterTimeoutID = null
+
 module.exports =
 class SearchModel
   relativeIndex: 0
@@ -29,24 +31,31 @@ class SearchModel
         if settings.get('flashScreenOnSearchHasNoMatch')
           @vimState.flash(getVisibleBufferRange(@editor), type: 'screen')
           atom.beep()
-
         return
 
       if settings.get('showHoverSearchCounter')
-        hoverOptions =
-          text: "#{@currentMatchIndex + 1}/#{@matches.length}"
-          classList: @classNamesForRange(@currentMatch)
+        text = String(@currentMatchIndex + 1) + '/' + @matches.length
+        point = @currentMatch.start
+        classList = @classNamesForRange(@currentMatch)
+
+        @resetHover()
+        @vimState.hoverSearchCounter.set(text, point, {classList})
 
         unless @options.incrementalSearch
-          hoverOptions.timeout = settings.get('showHoverSearchCounterDuration')
-
-        @vimState.hoverSearchCounter.withTimeout(@currentMatch.start, hoverOptions)
+          timeout = settings.get('showHoverSearchCounterDuration')
+          hoverCounterTimeoutID = setTimeout(@resetHover.bind(this), timeout)
 
       @editor.unfoldBufferRow(@currentMatch.start.row)
       smartScrollToBufferPosition(@editor, @currentMatch.start)
 
       if settings.get('flashOnSearch')
         @vimState.flash(@currentMatch, type: 'search')
+
+  resetHover: ->
+    if hoverCounterTimeoutID?
+      clearTimeout(hoverCounterTimeoutID)
+      hoverCounterTimeoutID = null
+    @vimState.hoverSearchCounter.reset()
 
   destroy: ->
     @markerLayer.destroy()

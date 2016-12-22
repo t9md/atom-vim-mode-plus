@@ -15,29 +15,20 @@ class HoverManager
       swrapOptions = {fromProperty: true, allowFallback: true}
       swrap(@editor.getLastSelection()).getBufferPositionFor('head', swrapOptions)
 
-  set: (text, point=@getPoint()) ->
+  set: (text, point=@getPoint(), options={}) ->
     unless @marker?
       @marker = @editor.markBufferPosition(point)
       decorationOptions = {type: 'overlay', item: @container}
       decoration = @editor.decorateMarker(@marker, decorationOptions)
-    @container.textContent = text
 
-  withTimeout: (point, options) ->
-    @reset()
-    if options.classList.length
+    if options.classList?.length
       @container.classList.add(options.classList...)
-
-    @add(options.text, point)
-    if options.timeout?
-      @timeoutID = setTimeout  =>
-        @reset()
-      , options.timeout
+    @container.textContent = text
 
   reset: ->
     @container.className = 'vim-mode-plus-hover'
-    clearTimeout(@timeoutID)
     @marker?.destroy()
-    {@marker, @timeoutID} = {}
+    @marker = null
 
   destroy: ->
     {@vimState} = {}
