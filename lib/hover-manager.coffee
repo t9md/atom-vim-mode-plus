@@ -5,7 +5,8 @@ class HoverManager
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
     @container = document.createElement('div')
-    @container.className = 'vim-mode-plus-hover'
+    @decorationOptions = {type: 'overlay', item: @container}
+    @reset()
 
   getPoint: ->
     if @vimState.isMode('visual', 'blockwise')
@@ -18,8 +19,7 @@ class HoverManager
   set: (text, point=@getPoint(), options={}) ->
     unless @marker?
       @marker = @editor.markBufferPosition(point)
-      decorationOptions = {type: 'overlay', item: @container}
-      decoration = @editor.decorateMarker(@marker, decorationOptions)
+      @editor.decorateMarker(@marker, @decorationOptions)
 
     if options.classList?.length
       @container.classList.add(options.classList...)
