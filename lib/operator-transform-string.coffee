@@ -75,10 +75,10 @@ class Replace extends TransformString
   flashCheckpoint: 'did-select-occurrence'
   requireInput: true
   autoIndentNewline: true
+  supportEarlySelect: true
 
   initialize: ->
-    @onDidSetTarget =>
-      @focusInput()
+    @onDidSelectTarget(@focusInput.bind(this))
     super
 
   getNewText: (text) ->
