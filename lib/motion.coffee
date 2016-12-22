@@ -840,7 +840,6 @@ class Find extends Motion
   @extend()
   backwards: false
   inclusive: true
-  hover: icon: ':find:', emoji: ':mag_right:'
   offset: 0
   requireInput: true
 
@@ -878,7 +877,6 @@ class FindBackwards extends Find
   @extend()
   inclusive: false
   backwards: true
-  hover: icon: ':find:', emoji: ':mag:'
 
 # keymap: t
 class Till extends Find
@@ -906,7 +904,6 @@ class MoveToMark extends Motion
   @extend()
   jump: true
   requireInput: true
-  hover: icon: ":move-to-mark:`", emoji: ":round_pushpin:`"
   input: null # set when instatntiated via vimState::moveToMark()
 
   initialize: ->
@@ -924,7 +921,6 @@ class MoveToMark extends Motion
 # keymap: '
 class MoveToMarkLine extends MoveToMark
   @extend()
-  hover: icon: ":move-to-mark:'", emoji: ":round_pushpin:'"
   wise: 'linewise'
 
   getPoint: ->

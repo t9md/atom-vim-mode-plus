@@ -177,10 +177,13 @@ class Base
 
   focusInput: (charsMax) ->
     inputUI = @newInputUI()
-    inputUI.onDidConfirm (input) =>
-      unless @input?  # [FIXME] I think I can delete this guard.
-        @input = input
-        @processOperation()
+    inputUI.onDidConfirm (@input) =>
+      @processOperation()
+
+    if charsMax > 1
+      inputUI.onDidChange (input) =>
+        @vimState.hover.set(input)
+
     inputUI.onDidCancel(@cancelOperation.bind(this))
     inputUI.focus(charsMax)
 

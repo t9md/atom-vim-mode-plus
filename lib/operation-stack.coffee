@@ -220,7 +220,7 @@ class OperationStack
     [@count['normal'], @count['operator-pending']]
       .filter (count) -> count?
       .map (count) -> String(count)
-      .join(' x ')
+      .join('x')
 
   resetCount: ->
     @count = {}
