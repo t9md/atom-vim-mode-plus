@@ -547,8 +547,6 @@ class ChangeSurround extends SurroundBase
   @description: "Change surround character, specify both from and to pair char"
 
   showDeleteCharOnHover: ->
-    @onDidResetOperationStack =>
-      @vimState.hover.resetLight()
     char = @editor.getSelectedText()[0]
     @vimState.hover.showLight(char, @vimState.getOriginalCursorPosition())
 

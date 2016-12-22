@@ -38,7 +38,7 @@ class Hover extends HTMLElement
       text.replace /:(.*?):/g, (s, m) ->
         "<span class='icon icon-#{m}'></span>"
 
-  showLight: (char, point) ->
+  showLight: (char, point=@getPoint()) ->
     unless @lightHover?
       @lightHover = document.createElement('div')
       @lightHover.className = 'vim-mode-plus-hover-light'
@@ -94,6 +94,7 @@ class Hover extends HTMLElement
 
   reset: ->
     @text = []
+    @resetLight()
     clearTimeout @timeoutID
     @className = 'vim-mode-plus-hover'
     @textContent = ''
