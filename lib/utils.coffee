@@ -846,6 +846,12 @@ toggleCaseForCharacter = (char) ->
   else
     charLower
 
+splitTextByNewLine = (text) ->
+  if text.endsWith("\n")
+    text.trimRight().split(/\r?\n/g)
+  else
+    text.split(/\r?\n/g)
+
 module.exports = {
   getParent
   getAncestors
@@ -955,4 +961,5 @@ module.exports = {
   removeClassList
   toggleClassList
   toggleCaseForCharacter
+  splitTextByNewLine
 }

@@ -6,6 +6,7 @@ _ = require 'underscore-plus'
   isSingleLineText
   limitNumber
   toggleCaseForCharacter
+  splitTextByNewLine
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -179,10 +180,7 @@ class RemoveLeadingWhiteSpaces extends TransformString
   @description: "`  a b c` -> `a b c`"
   getNewText: (text, selection) ->
     trimLeft = (text) -> text.trimLeft()
-
-    swrap(selection)
-      .mapToLineText(trimLeft, includeNewline: true)
-      .join("")
+    splitTextByNewLine(text).map(trimLeft).join("\n") + "\n"
 
 class ConvertToSoftTab extends TransformString
   @extend()
@@ -587,9 +585,7 @@ class JoinBase extends TransformString
     super
 
   getNewText: (text) ->
-    text
-      .replace(/\r?\n$/, '')
-      .replace(@getPattern(@trim), @input) + "\n"
+    text.trimRight().replace(@getPattern(@trim), @input) + "\n"
 
 class JoinWithKeepingSpace extends JoinBase
   @extend()
@@ -628,8 +624,10 @@ class SplitString extends TransformString
   getNewText: (text) ->
     input = @input or "\\n"
     regex = ///#{_.escapeRegExp(input)}///g
-    lineSeparator = "\n"
-    lineSeparator += @input
+    if @keepSplitter
+      lineSeparator = @input + "\n"
+    else
+      lineSeparator = "\n"
     text.replace(regex, lineSeparator)
 
 class SplitStringWithKeepingSplitter extends SplitString
@@ -642,8 +640,7 @@ class ChangeOrder extends TransformString
   wise: 'linewise'
 
   getNewText: (text) ->
-    rows = text.trimRight().split(/\r?\n/g)
-    @getNewRows(rows).join("\n") + "\n"
+    @getNewRows(splitTextByNewLine(text)).join("\n") + "\n"
 
 class Reverse extends ChangeOrder
   @extend()
@@ -665,4 +662,4 @@ class SortByNumber extends ChangeOrder
   @description: "Sort lines numerically"
   getNewRows: (rows) ->
     _.sortBy rows, (row) ->
-      Number.parseInt(row) or 0
+      Number.parseInt(row) or Infinity

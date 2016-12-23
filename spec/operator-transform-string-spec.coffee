@@ -1230,3 +1230,109 @@ describe "Operator TransformString", ->
         """
 
       ensure '.', text: originalText
+
+  describe "SplitString, SplitStringWithKeepingSplitter", ->
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g /': 'vim-mode-plus:split-string'
+          'g ?': 'vim-mode-plus:split-string-with-keeping-splitter'
+      set
+        textC: """
+        |a:b:c
+        d:e:f\n
+        """
+    describe "SplitString", ->
+      it "split string into lines", ->
+        ensure "g / : enter",
+          textC: """
+          |a
+          b
+          c
+          d:e:f\n
+          """
+        ensure "G .",
+          textC: """
+          a
+          b
+          c
+          |d
+          e
+          f\n
+          """
+    describe "SplitStringWithKeepingSplitter", ->
+      it "split string into lines without removing spliter char", ->
+        ensure "g ? : enter",
+          textC: """
+          |a:
+          b:
+          c
+          d:e:f\n
+          """
+        ensure "G .",
+          textC: """
+          a:
+          b:
+          c
+          |d:
+          e:
+          f\n
+          """
+
+  describe "Reverse, Sort, SortByNumber", ->
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g r': 'vim-mode-plus:reverse'
+          'g s': 'vim-mode-plus:sort'
+          'g S': 'vim-mode-plus:sort-by-number'
+      set
+        textC: """
+        |z
+
+        10a
+        b
+        a
+
+        5
+        1\n
+        """
+    describe "Reverse", ->
+      it "reverse rows", ->
+        ensure 'g r G',
+          textC: """
+          |1
+          5
+
+          a
+          b
+          10a
+
+          z\n
+          """
+    describe "Sort", ->
+      it "sort rows", ->
+        ensure 'g s G',
+          textC: """
+          |
+
+          1
+          10a
+          5
+          a
+          b
+          z\n
+          """
+    describe "SortByNumber", ->
+      it "sort rows numerically", ->
+        ensure "g S G",
+          textC: """
+          |1
+          5
+          10a
+          z
+
+          b
+          a
+          \n
+          """
