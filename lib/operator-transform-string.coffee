@@ -387,6 +387,11 @@ class ToggleLineComments extends TransformString
   mutateSelection: (selection) ->
     selection.toggleLineComments()
 
+class AutoFlow extends TransformString
+  @extend()
+  mutateSelection: (selection) ->
+    atom.commands.dispatch(@editorElement, 'autoflow:reflow-selection')
+
 # Surround < TransformString
 # -------------------------
 class SurroundBase extends TransformString

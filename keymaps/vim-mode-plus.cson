@@ -141,6 +141,7 @@
   'g /': 'vim-mode-plus:toggle-line-comments'
   'g -': 'vim-mode-plus:dash-case'
   'g space': 'vim-mode-plus:compact-spaces'
+  'g q': 'vim-mode-plus:auto-flow'
   'g |': 'vim-mode-plus:trim-string'
   'g cmd-d': 'vim-mode-plus:select-occurrence'
   # 'g _': 'vim-mode-plus:snake-case'
@@ -415,6 +416,7 @@
   'o': 'vim-mode-plus:operator-modifier-occurrence'
   'I': 'vim-mode-plus:move-to-first-character-of-line'
   'A': 'vim-mode-plus:move-to-last-character-of-line'
+  'q': 'vim-mode-plus:auto-flow'
 
 # operator-pending.has-occurrence [Experimental]
 # -------------------------
