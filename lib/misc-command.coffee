@@ -15,6 +15,7 @@ _ = require 'underscore-plus'
   isSingleLineRange
   isLinewiseRange
   isLeadingWhiteSpaceRange
+  humanizeBufferRange
 } = require './utils'
 
 class MiscCommand extends Base
@@ -79,8 +80,7 @@ class Undo extends MiscCommand
 
     if newRanges.length > 0
       return if @isMultipleAndAllRangeHaveSameColumnRanges(newRanges)
-
-      newRanges = newRanges.map(@humanizeNewLineForRange.bind(this))
+      newRanges = newRanges.map (range) => humanizeBufferRange(@editor, range)
       newRanges = @filterNonLeadingWhiteSpaceRange(newRanges)
 
       if isMultipleSingleLineRanges(newRanges)
@@ -107,30 +107,6 @@ class Undo extends MiscCommand
 
     ranges.every ({start, end}) ->
       (start.column is startColumn) and (end.column is endColumn)
-
-  # Modify range used for fash highlight to make it feel naturally for human.
-  # - When user inserted '\n abc' from **EOL**.
-  #  then modify corresponding range to ' abc\n'.
-  # - When user inserted '\n abc' from middle of line text.
-  #  then modify corresponding range to ' abc'.
-  #
-  # So always trim initial "\n" part range because flashing trailing line is counterintuitive.
-  humanizeNewLineForRange: (range) ->
-    if isSingleLineRange(range) or isLinewiseRange(range)
-      return range
-
-    {start, end} = range
-
-    if pointIsAtEndOfLine(@editor, start)
-      newStart = new Point(start.row + 1, 0)
-
-    if pointIsAtEndOfLine(@editor, end)
-      newEnd = new Point(end.row + 1, 0)
-
-    if newStart? or newEnd?
-      new Range(newStart ? start, newEnd ? end)
-    else
-      range
 
   flash: (flashRanges, options) ->
     options.timeout ?= 500

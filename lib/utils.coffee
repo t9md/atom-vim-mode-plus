@@ -852,6 +852,32 @@ splitTextByNewLine = (text) ->
   else
     text.split(/\r?\n/g)
 
+# Modify range used for undo/redo flash highlight to make it feel naturally for human.
+#  - Trim starting new line("\n")
+#     "\nabc" -> "abc"
+#  - If range.end is EOL extend range to first column of next line.
+#     "abc" -> "abc\n"
+# e.g.
+# - when 'c' is atEOL: "\nabc" -> "abc\n"
+# - when 'c' is NOT atEOL: "\nabc" -> "abc"
+#
+# So always trim initial "\n" part range because flashing trailing line is counterintuitive.
+humanizeBufferRange = (editor, range) ->
+  if isSingleLineRange(range) or isLinewiseRange(range)
+    return range
+
+  {start, end} = range
+  if pointIsAtEndOfLine(editor, start)
+    newStart = start.traverse([1, 0])
+
+  if pointIsAtEndOfLine(editor, end)
+    newEnd = end.traverse([1, 0])
+
+  if newStart? or newEnd?
+    new Range(newStart ? start, newEnd ? end)
+  else
+    range
+
 module.exports = {
   getParent
   getAncestors
@@ -962,4 +988,5 @@ module.exports = {
   toggleClassList
   toggleCaseForCharacter
   splitTextByNewLine
+  humanizeBufferRange
 }
