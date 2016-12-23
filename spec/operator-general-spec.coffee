@@ -964,29 +964,6 @@ describe "Operator general", ->
       it "inserts the contents of the default register above", ->
         ensure text: "345012\n", cursor: [0, 2]
 
-  describe "the J keybinding", ->
-    beforeEach ->
-      set text: "012\n    456\n", cursor: [0, 1]
-
-    describe "without repeating", ->
-      beforeEach -> keystroke 'J'
-
-      it "joins the contents of the current line with the one below it", ->
-        ensure text: "012 456\n"
-
-    describe "with repeating", ->
-      beforeEach ->
-        set
-          text: "12345\nabcde\nABCDE\nQWERT"
-          cursor: [1, 1]
-        keystroke '2 J'
-
-      describe "undo behavior", ->
-        beforeEach -> keystroke 'u'
-
-        it "handles repeats", ->
-          ensure text: "12345\nabcde\nABCDE\nQWERT"
-
   describe "the . keybinding", ->
     beforeEach ->
       set text: "12\n34\n56\n78", cursor: [0, 0]

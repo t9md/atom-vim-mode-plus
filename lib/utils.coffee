@@ -839,6 +839,13 @@ addClassList = modifyClassList.bind(null, 'add')
 removeClassList = modifyClassList.bind(null, 'remove')
 toggleClassList = modifyClassList.bind(null, 'toggle')
 
+toggleCaseForCharacter = (char) ->
+  charLower = char.toLowerCase()
+  if charLower is char
+    char.toUpperCase()
+  else
+    charLower
+
 module.exports = {
   getParent
   getAncestors
@@ -947,4 +954,5 @@ module.exports = {
   addClassList
   removeClassList
   toggleClassList
+  toggleCaseForCharacter
 }

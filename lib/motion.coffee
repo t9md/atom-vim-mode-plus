@@ -692,12 +692,11 @@ class MoveToRelativeLine extends Motion
   moveCursor: (cursor) ->
     setBufferRow(cursor, cursor.getBufferRow() + @getCount(-1))
 
-class MoveToRelativeLineWithMinimum extends MoveToRelativeLine
+class MoveToRelativeLineMinimumOne extends MoveToRelativeLine
   @extend(false)
-  min: 0
 
   getCount: ->
-    limitNumber(super, {@min})
+    limitNumber(super, min: 1)
 
 # Position cursor without scrolling., H, M, L
 # -------------------------

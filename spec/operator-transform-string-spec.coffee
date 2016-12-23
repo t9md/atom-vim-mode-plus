@@ -1041,6 +1041,143 @@ describe "Operator TransformString", ->
 
         """
 
+  describe "Join and it's family", ->
+    beforeEach ->
+      set
+        textC_: """
+        __0|12
+        __345
+        __678
+        __9ab\n
+        """
+
+    describe "Join", ->
+      it "joins lines with triming leading whitespace", ->
+        ensure 'J',
+          textC_: """
+          __012| 345
+          __678
+          __9ab\n
+          """
+        ensure '.',
+          textC_: """
+          __012 345| 678
+          __9ab\n
+          """
+        ensure '.',
+          textC_: """
+          __012 345 678| 9ab\n
+          """
+
+        ensure 'u',
+          textC_: """
+          __012 345| 678
+          __9ab\n
+          """
+        ensure 'u',
+          textC_: """
+          __012| 345
+          __678
+          __9ab\n
+          """
+        ensure 'u',
+          textC_: """
+          __0|12
+          __345
+          __678
+          __9ab\n
+          """
+
+    describe "JoinWithKeepingSpace", ->
+      beforeEach ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'g J': 'vim-mode-plus:join-with-keeping-space'
+
+      it "joins lines without triming leading whitespace", ->
+        ensure 'g J',
+          textC_: """
+          __0|12__345
+          __678
+          __9ab\n
+          """
+        ensure '.',
+          textC_: """
+          __0|12__345__678
+          __9ab\n
+          """
+        ensure 'u u',
+          textC_: """
+          __0|12
+          __345
+          __678
+          __9ab\n
+          """
+        ensure '4 g J',
+          textC_: """
+          __0|12__345__678__9ab\n
+          """
+
+    describe "JoinByInput", ->
+      beforeEach ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'g J': 'vim-mode-plus:join-by-input'
+
+      it "joins lines by char from user with triming leading whitespace", ->
+        ensure 'g J : : enter',
+          textC_: """
+          __0|12::345
+          __678
+          __9ab\n
+          """
+        ensure '.',
+          textC_: """
+          __0|12::345::678
+          __9ab\n
+          """
+        ensure 'u u',
+          textC_: """
+          __0|12
+          __345
+          __678
+          __9ab\n
+          """
+        ensure '4 g J : : enter',
+          textC_: """
+          __0|12::345::678::9ab\n
+          """
+
+    describe "JoinByInputWithKeepingSpace", ->
+      beforeEach ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'g J': 'vim-mode-plus:join-by-input-with-keeping-space'
+
+      it "joins lines by char from user without triming leading whitespace", ->
+        ensure 'g J : : enter',
+          textC_: """
+          __0|12::__345
+          __678
+          __9ab\n
+          """
+        ensure '.',
+          textC_: """
+          __0|12::__345::__678
+          __9ab\n
+          """
+        ensure 'u u',
+          textC_: """
+          __0|12
+          __345
+          __678
+          __9ab\n
+          """
+        ensure '4 g J : : enter',
+          textC_: """
+          __0|12::__345::__678::__9ab\n
+          """
+
   describe 'ToggleLineComments', ->
     [oldGrammar, originalText] = []
     beforeEach ->

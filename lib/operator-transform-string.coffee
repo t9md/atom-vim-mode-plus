@@ -3,9 +3,9 @@ _ = require 'underscore-plus'
 {BufferedProcess, Range} = require 'atom'
 
 {
-  haveSomeNonEmptySelection
   isSingleLineText
   limitNumber
+  toggleCaseForCharacter
 } = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
@@ -35,15 +35,8 @@ class ToggleCase extends TransformString
   @description: "`Hello World` -> `hELLO wORLD`"
   displayName: 'Toggle ~'
 
-  toggleCase: (char) ->
-    charLower = char.toLowerCase()
-    if charLower is char
-      char.toUpperCase()
-    else
-      charLower
-
   getNewText: (text) ->
-    text.replace(/./g, @toggleCase.bind(this))
+    text.replace(/./g, toggleCaseForCharacter)
 
 class ToggleCaseAndMoveRight extends ToggleCase
   @extend()
@@ -373,8 +366,7 @@ class Indent extends TransformString
       @countTimes count, ({stop}) =>
         oldText = selection.getText()
         @indent(selection)
-        newText = selection.getText()
-        stop() if oldText is newText
+        stop() if selection.getText() is oldText
     else
       @indent(selection)
 
@@ -577,50 +569,45 @@ class Join extends TransformString
     end = selection.getBufferRange().end
     selection.cursor.setBufferPosition(end.translate([0, -1]))
 
-class JoinWithKeepingSpace extends TransformString
+class JoinBase extends TransformString
+  @extend(false)
+  wise: 'linewise'
+  trim: false
+  input: null
+  target: "MoveToRelativeLineMinimumOne"
+
+  getPattern: (trim=false) ->
+    if trim
+      /\r?\n[ \t]*/g
+    else
+      /\r?\n/g
+
+  initialize: ->
+    @focusInput(10) if @isRequireInput()
+    super
+
+  getNewText: (text) ->
+    text
+      .replace(/\r?\n$/, '')
+      .replace(@getPattern(@trim), @input) + "\n"
+
+class JoinWithKeepingSpace extends JoinBase
   @extend()
   @registerToSelectList()
   input: ''
-  requireTarget: false
-  trim: false
-  initialize: ->
-    @setTarget @new("MoveToRelativeLineWithMinimum", {min: 1})
 
-  mutateSelection: (selection) ->
-    [startRow, endRow] = selection.getBufferRowRange()
-    swrap(selection).expandOverLine()
-    rows = for row in [startRow..endRow]
-      text = @editor.lineTextForBufferRow(row)
-      if @trim and row isnt startRow
-        text.trimLeft()
-      else
-        text
-    selection.insertText @join(rows) + "\n"
-
-  join: (rows) ->
-    rows.join(@input)
-
-class JoinByInput extends JoinWithKeepingSpace
+class JoinByInput extends JoinBase
   @extend()
   @registerToSelectList()
   @description: "Transform multi-line to single-line by with specified separator character"
   requireInput: true
-  input: null
   trim: true
-  initialize: ->
-    super
-    @focusInput(charsMax = 10)
 
-  join: (rows) ->
-    rows.join(" #{@input} ")
-
-class JoinByInputWithKeepingSpace extends JoinByInput
-  @description: "Join lines without padding space between each line"
+class JoinByInputWithKeepingSpace extends JoinBase
   @extend()
   @registerToSelectList()
-  trim: false
-  join: (rows) ->
-    rows.join(@input)
+  @description: "Join lines without padding space between each line"
+  requireInput: true
 
 # -------------------------
 # String suffix in name is to avoid confusion with 'split' window.
@@ -634,7 +621,7 @@ class SplitString extends TransformString
 
   initialize: ->
     @onDidSetTarget =>
-      @focusInput(charsMax = 10)
+      @focusInput(10)
     super
 
   getNewText: (text) ->

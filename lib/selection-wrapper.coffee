@@ -243,7 +243,7 @@ class SelectionWrapper
     @getRows().map (row) ->
       editor.lineTextForBufferRow(row)
 
-  mapToLineText: (fn, {includeNewline}) ->
+  mapToLineText: (fn, {includeNewline}={}) ->
     {editor} = @selection
     textForRow = (row) ->
       range = editor.bufferRangeForBufferRow(row, {includeNewline})
