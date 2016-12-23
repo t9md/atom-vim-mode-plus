@@ -664,7 +664,5 @@ class SortByNumber extends ChangeOrder
   @registerToSelectList()
   @description: "Sort lines numerically"
   getNewRows: (rows) ->
-    parseInt = (row) ->
+    _.sortBy rows, (row) ->
       Number.parseInt(row) or 0
-
-    _.sortBy(rows, parseInt)
