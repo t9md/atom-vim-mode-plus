@@ -415,10 +415,6 @@ class SurroundBase extends TransformString
   requireTarget: true
   supportEarlySelect: true # Experimental
 
-  initialize: ->
-    @subscribeForInput()
-    super
-
   focusInputForSurround: ->
     inputUI = @newInputUI()
     inputUI.onDidConfirm(@onConfirmSurround.bind(this))
@@ -471,8 +467,9 @@ class Surround extends SurroundBase
   @extend()
   @description: "Surround target by specified character like `(`, `[`, `\"`"
 
-  subscribeForInput: ->
+  initialize: ->
     @onDidSelectTarget(@focusInputForSurround.bind(this))
+    super
 
   getNewText: (text) ->
     @surround(text, @input)
@@ -500,9 +497,9 @@ class DeleteSurround extends SurroundBase
   @description: "Delete specified surround character like `(`, `[`, `\"`"
   requireTarget: false
 
-  subscribeForInput: ->
-    unless @hasTarget()
-      @focusInputForDeleteSurround()
+  initialize: ->
+    @focusInputForDeleteSurround() unless @hasTarget()
+    super
 
   onConfirmDeleteSurround: (input) ->
     super
@@ -533,12 +530,13 @@ class ChangeSurround extends SurroundBase
     char = @editor.getSelectedText()[0]
     @vimState.hover.set(char, @vimState.getOriginalCursorPosition())
 
-  subscribeForInput: ->
+  initialize: ->
     if @hasTarget()
       @onDidFailSelectTarget(@abort.bind(this))
     else
       @onDidFailSelectTarget(@cancelOperation.bind(this))
       @focusInputForDeleteSurround()
+    super
 
     @onDidSelectTarget =>
       @showDeleteCharOnHover()
