@@ -618,6 +618,7 @@ class SplitString extends TransformString
   requireInput: true
   input: null
   target: "MoveToRelativeLine"
+  keepSplitter: false
 
   initialize: ->
     @onDidSetTarget =>
@@ -625,19 +626,24 @@ class SplitString extends TransformString
     super
 
   getNewText: (text) ->
-    @input = "\\n" if @input is ''
-    regex = ///#{_.escapeRegExp(@input)}///g
-    text.split(regex).join("\n")
+    input = @input or "\\n"
+    regex = ///#{_.escapeRegExp(input)}///g
+    lineSeparator = "\n"
+    lineSeparator += @input
+    text.replace(regex, lineSeparator)
+
+class SplitStringWithKeepingSplitter extends SplitString
+  @extend()
+  @registerToSelectList()
+  keepSplitter: true
 
 class ChangeOrder extends TransformString
   @extend(false)
   wise: 'linewise'
 
-  mutateSelection: (selection) ->
-    textForRows = swrap(selection).lineTextForBufferRows()
-    rows = @getNewRows(textForRows)
-    newText = rows.join("\n") + "\n"
-    selection.insertText(newText)
+  getNewText: (text) ->
+    rows = text.trimRight().split(/\r?\n/g)
+    @getNewRows(rows).join("\n") + "\n"
 
 class Reverse extends ChangeOrder
   @extend()
@@ -652,3 +658,13 @@ class Sort extends ChangeOrder
   @description: "Sort lines alphabetically"
   getNewRows: (rows) ->
     rows.sort()
+
+class SortByNumber extends ChangeOrder
+  @extend()
+  @registerToSelectList()
+  @description: "Sort lines numerically"
+  getNewRows: (rows) ->
+    parseInt = (row) ->
+      Number.parseInt(row) or 0
+
+    _.sortBy(rows, parseInt)
