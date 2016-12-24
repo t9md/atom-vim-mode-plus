@@ -198,6 +198,15 @@ class InsertByTarget extends ActivateInsertMode
   requireTarget: true
   which: null # one of ['start', 'end', 'head', 'tail']
 
+  initialize: ->
+    # HACK
+    # When g i is mapped to `insert-at-start-of-target`.
+    # `g i 3 l` start insert at 3 column right position.
+    # In this case, we don't want repeat insertion 3 times.
+    # This @getCount() call cache number at the timing BEFORE '3' is specified.
+    @getCount()
+    super
+
   execute: ->
     @onDidSelectTarget =>
       @modifySelection() if @vimState.isMode('visual')
