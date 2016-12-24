@@ -367,7 +367,8 @@ class TogglePersistentSelection extends CreatePersistentSelection
 
   isComplete: ->
     point = @editor.getCursorBufferPosition()
-    if @markerToRemove = @persistentSelection.getMarkerAtPoint(point)
+    @markerToRemove = @persistentSelection.getMarkerAtPoint(point)
+    if @markerToRemove
       true
     else
       super
