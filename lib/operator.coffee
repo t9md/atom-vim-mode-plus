@@ -495,39 +495,31 @@ class Increase extends Operator
     @pattern ?= ///#{settings.get('numberRegex')}///g
 
   mutateSelection: (selection) ->
-    pattern = ///#{settings.get('numberRegex')}///g
-    {cursor} = selection
+    initialPoint = @mutationManager.getInitialPointForSelection(selection)
+    pattern = @getPattern()
+    scanRange = selection.getBufferRange()
 
-    bufferRange = selection.getBufferRange()
+    newRange = null
+    @editor.scanInBufferRange pattern, scanRange, ({matchText, range, stop, replace}) =>
+      if @target.is('CurrentSelection')
+        replace(@getNextNumber(matchText))
+      else
+        return unless range.end.isGreaterThan(initialPoint)
+        newRange = replace(@getNextNumber(matchText))
+        stop()
 
-    ranges = []
-    @eachNumberInSelection selection, (matchText, replace) =>
-      newText = @getNextNumber(matchText)
-      ranges.push(replace(newText))
-
-    if @isMode('visual')
-      point = bufferRange.start
+    if @target.is('CurrentSelection')
+      point = scanRange.start
     else
-      if ranges.length
-        point = ranges[0].end.translate([0, -1])
+      if newRange?
+        point = newRange.end.translate([0, -1])
       else
         point = @mutationManager.getInitialPointForSelection(selection)
-    cursor.setBufferPosition(point)
+    selection.cursor.setBufferPosition(point)
 
   getNextNumber: (numberString) ->
     number = parseInt(numberString, 10) + @step * @getCount()
     String(number)
-
-  eachNumberInSelection: (selection, fn) ->
-    scanRange = selection.getBufferRange()
-    initialPoint = @mutationManager.getInitialPointForSelection(selection)
-    @editor.scanInBufferRange @getPattern(), scanRange, ({matchText, range, stop, replace}) =>
-      if @target.is('CurrentSelection')
-        fn(matchText, replace)
-      else
-        return unless range.end.isGreaterThan(initialPoint)
-        fn(matchText, replace)
-        stop()
 
 class Decrease extends Increase
   @extend()
