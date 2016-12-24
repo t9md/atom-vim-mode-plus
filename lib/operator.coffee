@@ -5,12 +5,9 @@ _ = require 'underscore-plus'
 {inspect} = require 'util'
 {
   haveSomeNonEmptySelection
-  isEndsWithNewLineForBufferRow
   getValidVimBufferRow
   cursorIsAtEmptyRow
   getWordPatternAtBufferPosition
-  destroyNonLastSelection
-  getEndOfLineForBufferRow
   setTextAtBufferPosition
   setBufferRow
   moveCursorToFirstCharacterAtRow
@@ -59,6 +56,7 @@ class Operator extends Base
   # This is essentially to reset state for `.` repeat.
   resetState: ->
     @targetSelected = null
+    @occurrenceSelected = false
 
   # Two checkpoint for different purpose
   # - one for undo(handled by modeManager)
@@ -253,8 +251,6 @@ class Operator extends Base
   # Return true unless all selection is empty.
   selectTarget: ->
     return @targetSelected if @targetSelected?
-
-    @occurrenceSelected = false
     @mutationManager.init(
       isSelect: @instanceof('Select')
       useMarker: @needStay() and @stayByMarker
@@ -321,8 +317,7 @@ class Select extends Operator
   acceptPersistentSelection: false
 
   execute: ->
-    @startMutation =>
-      @selectTarget()
+    @startMutation(@selectTarget.bind(this))
     if @target.isTextObject() and wise = @target.getWise()
       @activateModeIfNecessary('visual', wise)
 
@@ -465,10 +460,7 @@ class DeleteToLastCharacterOfLine extends Delete
 class DeleteLine extends Delete
   @extend()
   wise: 'linewise'
-
-  initialize: ->
-    super
-    @target = 'MoveToRelativeLine' if @isMode('normal')
+  target: "MoveToRelativeLine"
 
 # Yank
 # =========================
@@ -483,10 +475,7 @@ class Yank extends Operator
 class YankLine extends Yank
   @extend()
   wise: 'linewise'
-
-  initialize: ->
-    super
-    @target = 'MoveToRelativeLine' if @isMode('normal')
+  target: "MoveToRelativeLine"
 
 class YankToLastCharacterOfLine extends Yank
   @extend()
