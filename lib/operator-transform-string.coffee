@@ -576,21 +576,18 @@ class JoinBase extends TransformString
   @extend(false)
   wise: 'linewise'
   trim: false
-  input: null
   target: "MoveToRelativeLineMinimumOne"
-
-  getPattern: (trim=false) ->
-    if trim
-      /\r?\n[ \t]*/g
-    else
-      /\r?\n/g
 
   initialize: ->
     @focusInput(10) if @isRequireInput()
     super
 
   getNewText: (text) ->
-    text.trimRight().replace(@getPattern(@trim), @input) + "\n"
+    if @trim
+      pattern = /\r?\n[ \t]*/g
+    else
+      pattern = /\r?\n/g
+    text.trimRight().replace(pattern, @input) + "\n"
 
 class JoinWithKeepingSpace extends JoinBase
   @extend()
@@ -604,11 +601,11 @@ class JoinByInput extends JoinBase
   requireInput: true
   trim: true
 
-class JoinByInputWithKeepingSpace extends JoinBase
+class JoinByInputWithKeepingSpace extends JoinByInput
   @extend()
   @registerToSelectList()
   @description: "Join lines without padding space between each line"
-  requireInput: true
+  trim: false
 
 # -------------------------
 # String suffix in name is to avoid confusion with 'split' window.
