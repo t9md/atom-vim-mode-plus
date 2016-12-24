@@ -484,46 +484,56 @@ class YankToLastCharacterOfLine extends Yank
   target: 'MoveToLastCharacterOfLine'
 
 # -------------------------
-# [FIXME?]: inconsistent behavior from normal operator
-# Since its support visual-mode but not use setTarget() convension.
-# Maybe separating complete/in-complete version like IncreaseNow and Increase?
 class Increase extends Operator
   @extend()
-  requireTarget: false
-  stayOptionName: 'stayOnIncrease'
+  target: "ACurrentLine"
+  flashTarget: false
+  restorePositions: false
   step: 1
 
-  execute: ->
+  getPattern: ->
+    @pattern ?= ///#{settings.get('numberRegex')}///g
+
+  mutateSelection: (selection) ->
     pattern = ///#{settings.get('numberRegex')}///g
+    {cursor} = selection
 
-    newRanges = []
-    @editor.transact =>
-      for cursor in @editor.getCursors()
-        scanRange = if @isMode('visual')
-          cursor.selection.getBufferRange()
-        else
-          cursor.getCurrentLineBufferRange()
-        ranges = @increaseNumber(cursor, scanRange, pattern)
-        if not @isMode('visual') and ranges.length
-          cursor.setBufferPosition ranges[0].end.translate([0, -1])
-        newRanges.push ranges
+    bufferRange = selection.getBufferRange()
 
-    if (newRanges = _.flatten(newRanges)).length
-      @flashIfNecessary(newRanges)
+    ranges = []
+    @eachNumberInSelection selection, (matchText, replace) =>
+      newText = @getNextNumber(matchText)
+      ranges.push(replace(newText))
+
+    if @isMode('visual')
+      point = bufferRange.start
     else
-      atom.beep()
-
-  increaseNumber: (cursor, scanRange, pattern) ->
-    newRanges = []
-    @editor.scanInBufferRange pattern, scanRange, ({matchText, range, stop, replace}) =>
-      newText = String(parseInt(matchText, 10) + @step * @getCount())
-      if @isMode('visual')
-        newRanges.push replace(newText)
+      if ranges.length
+        point = ranges[0].end.translate([0, -1])
       else
-        return unless range.end.isGreaterThan cursor.getBufferPosition()
-        newRanges.push replace(newText)
+        point = @mutationManager.getInitialPointForSelection(selection)
+    cursor.setBufferPosition(point)
+    @newRanges.push(ranges)
+
+  getNextNumber: (numberString) ->
+    number = parseInt(numberString, 10) + @step * @getCount()
+    String(number)
+
+  eachNumberInSelection: (selection, fn) ->
+    scanRange = selection.getBufferRange()
+    initialPoint = @mutationManager.getInitialPointForSelection(selection)
+    @editor.scanInBufferRange @getPattern(), scanRange, ({matchText, range, stop, replace}) =>
+      if @target.is('CurrentSelection')
+        fn(matchText, replace)
+      else
+        return unless range.end.isGreaterThan(initialPoint)
+        fn(matchText, replace)
         stop()
-    newRanges
+
+  execute: ->
+    @newRanges = []
+    super
+    atom.beep() unless @newRanges.length
 
 class Decrease extends Increase
   @extend()

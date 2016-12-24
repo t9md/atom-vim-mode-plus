@@ -16,59 +16,102 @@ describe "Operator Increase", ->
   describe "the ctrl-a/ctrl-x keybindings", ->
     beforeEach ->
       set
-        text: """
-        123
-        ab45
-        cd-67ef
-        ab-5
-        a-bcdef
+        textC: """
+        |123
+        |ab45
+        |cd-67ef
+        ab-|5
+        !a-bcdef
         """
-        cursorBuffer: [[0, 0], [1, 0], [2, 0], [3, 3], [4, 0]]
 
     describe "increasing numbers", ->
       describe "normal-mode", ->
         it "increases the next number", ->
+          set textC: "|     1 abc"
+          ensure 'ctrl-a', textC: '     |2 abc'
+
+        it "increases the next number and repeatable", ->
           ensure 'ctrl-a',
-            text: '124\nab46\ncd-66ef\nab-4\na-bcdef'
-            cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 3], [4, 0]]
+            textC: """
+            12|4
+            ab4|6
+            cd-6|6ef
+            ab-|4
+            !a-bcdef
+            """
 
-        it "repeats with .", ->
-          ensure 'ctrl-a .',
-            text: '125\nab47\ncd-65ef\nab-3\na-bcdef'
-            cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 3], [4, 0]]
+          ensure '.',
+            textC: """
+            12|5
+            ab4|7
+            cd-6|5ef
+            ab-|3
+            !a-bcdef
+            """
 
-        it "can have a count", ->
+        it "support count", ->
           ensure '5 ctrl-a',
-            cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 2], [4, 0]]
-            text: '128\nab50\ncd-62ef\nab0\na-bcdef'
+            textC: """
+            12|8
+            ab5|0
+            cd-6|2ef
+            ab|0
+            !a-bcdef
+            """
 
         it "can make a negative number positive, change number of digits", ->
           ensure '9 9 ctrl-a',
-            text: '222\nab144\ncd32ef\nab94\na-bcdef'
-            cursorBuffer: [[0, 2], [1, 4], [2, 3], [3, 3], [4, 0]]
+            textC: """
+            22|2
+            ab14|4
+            cd3|2ef
+            ab9|4
+            |a-bcdef
+            """
 
         it "does nothing when cursor is after the number", ->
-          set cursorBuffer: [2, 5]
+          set cursor: [2, 5]
           ensure 'ctrl-a',
-            text: '123\nab45\ncd-67ef\nab-5\na-bcdef'
-            cursorBuffer: [[2, 5]]
+            textC: """
+            123
+            ab45
+            cd-67|ef
+            ab-5
+            a-bcdef
+            """
 
         it "does nothing on an empty line", ->
           set
-            text: '\n'
-            cursorBuffer: [[0, 0], [1, 0]]
+            textC: """
+            |
+            !
+            """
           ensure 'ctrl-a',
-            text: '\n'
-            cursorBuffer: [[0, 0], [1, 0]]
+            textC: """
+            |
+            !
+            """
 
         it "honours the vim-mode-plus.numberRegex setting", ->
-          set
-            text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
-            cursorBuffer: [[0, 0], [1, 0], [2, 0], [3, 3], [4, 0]]
           settings.set('numberRegex', '(?:\\B-)?[0-9]+')
+          set
+            textC:
+              """
+              |123
+              |ab45
+              |cd -67ef
+              ab-|5
+              !a-bcdef
+              """
           ensure 'ctrl-a',
-            cursorBuffer: [[0, 2], [1, 3], [2, 5], [3, 3], [4, 0]]
-            text: '124\nab46\ncd -66ef\nab-6\na-bcdef'
+            textC:
+              """
+              12|4
+              ab4|6
+              cd -6|6ef
+              ab-|6
+              !a-bcdef
+              """
       describe "visual-mode", ->
         beforeEach ->
           set
@@ -81,98 +124,137 @@ describe "Operator Increase", ->
         it "increase number in characterwise selected range", ->
           set cursor: [0, 2]
           ensure 'v 2 j ctrl-a',
-            text: """
-              1 3 4
+            textC: """
+              1 |3 4
               2 3 4
               2 3 3
               1 2 3
               """
-            selectedText: "3 4\n2 3 4\n2 3"
-            cursor: [2, 3]
         it "increase number in characterwise selected range when multiple cursors", ->
-          set cursor: [0, 2], addCursor: [2, 2]
-          ensure 'v 1 0 ctrl-a',
-            text: """
-              1 12 3
+          set
+            textC: """
+              1 |2 3
               1 2 3
-              1 12 3
+              1 !2 3
               1 2 3
               """
-            selectedTextOrdered: ["12", "12"]
-            selectedBufferRangeOrdered: [
-                [[0, 2], [0, 4]]
-                [[2, 2], [2, 4]]
-              ]
+          ensure 'v 1 0 ctrl-a',
+            textC: """
+              1 |12 3
+              1 2 3
+              1 !12 3
+              1 2 3
+              """
         it "increase number in linewise selected range", ->
           set cursor: [0, 0]
           ensure 'V 2 j ctrl-a',
-            text: """
-              2 3 4
+            textC: """
+              |2 3 4
               2 3 4
               2 3 4
               1 2 3
               """
-            selectedText: "2 3 4\n2 3 4\n2 3 4\n"
-            cursor: [3, 0]
         it "increase number in blockwise selected range", ->
           set cursor: [1, 2]
-          ensure 'ctrl-v 2 l 2 j ctrl-a',
-            text: """
+          set
+            textC: """
               1 2 3
-              1 3 4
-              1 3 4
-              1 3 4
+              1 |2 3
+              1 2 3
+              1 2 3
               """
-            selectedTextOrdered: ["3 4", "3 4", "3 4"]
-            selectedBufferRangeOrdered: [
-                [[1, 2], [1, 5]],
-                [[2, 2], [2, 5]],
-                [[3, 2], [3, 5]],
-              ]
+
+          # [FIXME] should clear multiple-cursor
+          ensure 'ctrl-v 2 l 2 j ctrl-a',
+            textC: """
+              1 2 3
+              1 |3 4
+              1 |3 4
+              1 !3 4
+              """
+
     describe "decreasing numbers", ->
       describe "normal-mode", ->
-        it "decreases the next number", ->
+        it "decreases the next number and repeatable", ->
           ensure 'ctrl-x',
-            text: '122\nab44\ncd-68ef\nab-6\na-bcdef'
-            cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 3], [4, 0]]
+            textC: """
+            12|2
+            ab4|4
+            cd-6|8ef
+            ab-|6
+            !a-bcdef
+            """
 
-        it "repeats with .", ->
-          ensure 'ctrl-x .',
-            text: '121\nab43\ncd-69ef\nab-7\na-bcdef'
-            cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 3], [4, 0]]
+          ensure '.',
+            textC: """
+            12|1
+            ab4|3
+            cd-6|9ef
+            ab-|7
+            !a-bcdef
+            """
 
-        it "can have a count", ->
+        it "support count", ->
           ensure '5 ctrl-x',
-            text: '118\nab40\ncd-72ef\nab-10\na-bcdef'
-            cursorBuffer: [[0, 2], [1, 3], [2, 4], [3, 4], [4, 0]]
+            textC: """
+            11|8
+            ab4|0
+            cd-7|2ef
+            ab-1|0
+            !a-bcdef
+            """
 
         it "can make a positive number negative, change number of digits", ->
           ensure '9 9 ctrl-x',
-            text: '24\nab-54\ncd-166ef\nab-104\na-bcdef'
-            cursorBuffer: [[0, 1], [1, 4], [2, 5], [3, 5], [4, 0]]
+            textC: """
+            2|4
+            ab-5|4
+            cd-16|6ef
+            ab-10|4
+            !a-bcdef
+            """
 
         it "does nothing when cursor is after the number", ->
-          set cursorBuffer: [2, 5]
+          set cursor: [2, 5]
           ensure 'ctrl-x',
-            text: '123\nab45\ncd-67ef\nab-5\na-bcdef'
-            cursorBuffer: [[2, 5]]
+            textC: """
+            123
+            ab45
+            cd-67|ef
+            ab-5
+            a-bcdef
+            """
 
         it "does nothing on an empty line", ->
           set
-            text: '\n'
-            cursorBuffer: [[0, 0], [1, 0]]
+            textC: """
+            |
+            !
+            """
           ensure 'ctrl-x',
-            text: '\n'
-            cursorBuffer: [[0, 0], [1, 0]],
+            textC: """
+            |
+            !
+            """
 
         it "honours the vim-mode-plus.numberRegex setting", ->
-          set
-            text: '123\nab45\ncd -67ef\nab-5\na-bcdef'
-            cursorBuffer: [[0, 0], [1, 0], [2, 0], [3, 3], [4, 0]]
           settings.set('numberRegex', '(?:\\B-)?[0-9]+')
+          set
+            textC: """
+            |123
+            |ab45
+            |cd -67ef
+            ab-|5
+            !a-bcdef
+            """
           ensure 'ctrl-x',
-            text: '122\nab44\ncd -68ef\nab-4\na-bcdef'
-            cursorBuffer: [[0, 2], [1, 3], [2, 5], [3, 3], [4, 0]]
+            textC: """
+            12|2
+            ab4|4
+            cd -6|8ef
+            ab-|4
+            !a-bcdef
+            """
       describe "visual-mode", ->
         beforeEach ->
           set
@@ -185,54 +267,48 @@ describe "Operator Increase", ->
         it "decrease number in characterwise selected range", ->
           set cursor: [0, 2]
           ensure 'v 2 j ctrl-x',
-            text: """
-              1 1 2
+            textC: """
+              1 |1 2
               0 1 2
               0 1 3
               1 2 3
               """
-            selectedText: "1 2\n0 1 2\n0 1"
-            cursor: [2, 3]
         it "decrease number in characterwise selected range when multiple cursors", ->
-          set cursor: [0, 2], addCursor: [2, 2]
-          ensure 'v 5 ctrl-x',
-            text: """
-              1 -3 3
+          set
+            textC: """
+              1 |2 3
               1 2 3
-              1 -3 3
+              1 !2 3
               1 2 3
               """
-            selectedTextOrdered: ["-3", "-3"]
-            selectedBufferRangeOrdered: [
-                [[0, 2], [0, 4]]
-                [[2, 2], [2, 4]]
-              ]
+          ensure 'v 5 ctrl-x',
+            textC: """
+              1 |-3 3
+              1 2 3
+              1 !-3 3
+              1 2 3
+              """
+
         it "decrease number in linewise selected range", ->
           set cursor: [0, 0]
           ensure 'V 2 j ctrl-x',
-            text: """
-              0 1 2
+            textC: """
+              |0 1 2
               0 1 2
               0 1 2
               1 2 3
               """
-            selectedText: "0 1 2\n0 1 2\n0 1 2\n"
-            cursor: [3, 0]
         it "decrease number in blockwise selected rage", ->
           set cursor: [1, 2]
+
+          # [FIXME] should clear multiple-cursor
           ensure 'ctrl-v 2 l 2 j ctrl-x',
-            text: """
+            textC: """
               1 2 3
-              1 1 2
-              1 1 2
-              1 1 2
+              1 |1 2
+              1 |1 2
+              1 !1 2
               """
-            selectedTextOrdered: ["1 2", "1 2", "1 2"]
-            selectedBufferRangeOrdered: [
-                [[1, 2], [1, 5]],
-                [[2, 2], [2, 5]],
-                [[3, 2], [3, 5]],
-              ]
 
   describe "the 'g ctrl-a', 'g ctrl-x' increment-number, decrement-number", ->
     describe "increment", ->
