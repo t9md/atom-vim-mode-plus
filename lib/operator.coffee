@@ -513,7 +513,6 @@ class Increase extends Operator
       else
         point = @mutationManager.getInitialPointForSelection(selection)
     cursor.setBufferPosition(point)
-    @newRanges.push(ranges)
 
   getNextNumber: (numberString) ->
     number = parseInt(numberString, 10) + @step * @getCount()
@@ -529,11 +528,6 @@ class Increase extends Operator
         return unless range.end.isGreaterThan(initialPoint)
         fn(matchText, replace)
         stop()
-
-  execute: ->
-    @newRanges = []
-    super
-    atom.beep() unless @newRanges.length
 
 class Decrease extends Increase
   @extend()
