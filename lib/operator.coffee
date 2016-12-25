@@ -491,30 +491,23 @@ class Increase extends Operator
   restorePositions: false
   step: 1
 
-  getPattern: ->
-    @pattern ?= ///#{settings.get('numberRegex')}///g
-
   mutateSelection: (selection) ->
     initialPoint = @mutationManager.getInitialPointForSelection(selection)
-    pattern = @getPattern()
+    @pattern ?= ///#{settings.get('numberRegex')}///g
     scanRange = selection.getBufferRange()
 
     newRange = null
-    @editor.scanInBufferRange pattern, scanRange, ({matchText, range, stop, replace}) =>
+    @editor.scanInBufferRange @pattern, scanRange, ({matchText, range, stop, replace}) =>
       if @target.is('CurrentSelection')
         replace(@getNextNumber(matchText))
-      else
-        return unless range.end.isGreaterThan(initialPoint)
+      else if range.end.isGreaterThan(initialPoint)
         newRange = replace(@getNextNumber(matchText))
         stop()
 
     if @target.is('CurrentSelection')
       point = scanRange.start
     else
-      if newRange?
-        point = newRange.end.translate([0, -1])
-      else
-        point = @mutationManager.getInitialPointForSelection(selection)
+      point = newRange?.end.translate([0, -1]) ? initialPoint
     selection.cursor.setBufferPosition(point)
 
   getNextNumber: (numberString) ->
