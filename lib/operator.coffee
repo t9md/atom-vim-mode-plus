@@ -499,7 +499,7 @@ class Increase extends Operator
     newRange = null
     @editor.scanInBufferRange @pattern, scanRange, ({matchText, range, stop, replace}) =>
       if @target.is('CurrentSelection')
-        replace(@getNextNumber(matchText))
+        @newRanges.push(replace(@getNextNumber(matchText)))
       else if range.end.isGreaterThan(initialPoint)
         newRange = replace(@getNextNumber(matchText))
         stop()
@@ -514,6 +514,13 @@ class Increase extends Operator
     number = parseInt(numberString, 10) + @step * @getCount()
     String(number)
 
+  execute: ->
+    @newRanges = []
+    super
+    if @newRanges.length
+      if settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
+        @vimState.flash(@newRanges, type: @flashTypeForOccurrence)
+
 class Decrease extends Increase
   @extend()
   step: -1
@@ -522,37 +529,38 @@ class Decrease extends Increase
 class IncrementNumber extends Operator
   @extend()
   displayName: 'Increment ++'
-  step: 1
   baseNumber: null
+  step: 1
 
   execute: ->
-    pattern = ///#{settings.get('numberRegex')}///g
     newRanges = null
+    @pattern ?= ///#{settings.get('numberRegex')}///g
 
     @startMutation =>
-      @selectTarget()
-      newRanges = for selection in @editor.getSelectionsOrderedByBufferPosition()
-        @replaceNumber(selection.getBufferRange(), pattern)
+      if @selectTarget()
+        selections = @editor.getSelectionsOrderedByBufferPosition()
+        newRanges = (@replaceNumber(selection) for selection in selections)
 
-    if (newRanges = _.flatten(newRanges)).length
-      @flashIfNecessary(newRanges)
-    else
-      atom.beep()
+    if (@newRanges = _.flatten(newRanges)).length
+      if settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
+        @vimState.flash(@newRanges, type: @flashTypeForOccurrence)
+
     for selection in @editor.getSelections()
       selection.cursor.setBufferPosition(selection.getBufferRange().start)
     @activateModeIfNecessary('normal')
 
-  replaceNumber: (scanRange, pattern) ->
+  replaceNumber: (selection) ->
+    scanRange = selection.getBufferRange()
     newRanges = []
-    @editor.scanInBufferRange pattern, scanRange, ({matchText, replace}) =>
-      newRanges.push replace(@getNewText(matchText))
+    @editor.scanInBufferRange @pattern, scanRange, ({matchText, replace}) =>
+      newRanges.push(replace(@getNextNumber(matchText)))
     newRanges
 
-  getNewText: (text) ->
-    @baseNumber = if @baseNumber?
-      @baseNumber + @step * @getCount()
+  getNextNumber: (text) ->
+    if @baseNumber?
+      @baseNumber += @step * @getCount()
     else
-      parseInt(text, 10)
+      @baseNumber = parseInt(text, 10)
     String(@baseNumber)
 
 class DecrementNumber extends IncrementNumber
