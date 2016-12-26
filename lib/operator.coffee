@@ -489,11 +489,12 @@ class YankToLastCharacterOfLine extends Yank
   target: 'MoveToLastCharacterOfLine'
 
 # -------------------------
+# [ctrl-a]
 class Increase extends Operator
   @extend()
-  target: "ACurrentLine"
-  flashTarget: false
-  restorePositions: false
+  target: "InnerCurrentLine" # ctrl-a in normal-mode find target number in CurrentLine
+  flashTarget: false # do manually
+  restorePositions: false # do manually
   step: 1
 
   execute: ->
@@ -519,6 +520,7 @@ class Increase extends Operator
       @newRanges.push(@replaceNumberInBufferRange(scanRange)...)
       selection.cursor.setBufferPosition(scanRange.start)
     else
+      # ctrl-a, ctrl-x in `normal-mode`
       initialPoint = @mutationManager.getInitialPointForSelection(selection)
       newRanges = @replaceNumberInBufferRange scanRange, ({range, stop}) ->
         if range.end.isGreaterThan(initialPoint)
@@ -531,13 +533,15 @@ class Increase extends Operator
       selection.cursor.setBufferPosition(point)
 
   getNextNumber: (numberString) ->
-    parseInt(numberString, 10) + @step * @getCount()
+    Number.parseInt(numberString, 10) + @step * @getCount()
 
+# [ctrl-x]
 class Decrease extends Increase
   @extend()
   step: -1
 
 # -------------------------
+# [g ctrl-a]
 class IncrementNumber extends Increase
   @extend()
   baseNumber: null
@@ -548,12 +552,12 @@ class IncrementNumber extends Increase
     if @baseNumber?
       @baseNumber += @step * @getCount()
     else
-      @baseNumber = parseInt(numberString, 10)
+      @baseNumber = Number.parseInt(numberString, 10)
     @baseNumber
 
+# [g ctrl-x]
 class DecrementNumber extends IncrementNumber
   @extend()
-  displayName: 'Decrement --'
   step: -1
 
 # Put
