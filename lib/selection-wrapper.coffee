@@ -88,11 +88,12 @@ class SelectionWrapper
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
+  setReversedState: (reversed) ->
+    return if @selection.isReversed() is reversed
     {head, tail} = @getProperties()
     if head? and tail?
       @setProperties(head: tail, tail: head)
 
-  setReversedState: (reversed) ->
     options = {autoscroll: true, reversed, preserveFolds: true}
     @setBufferRange(@getBufferRange(), options)
 
@@ -171,7 +172,7 @@ class SelectionWrapper
   #  selected text-object.
   # To avoid this wired cursor position representation, this fucntion clip
   #  selection properties not exceeds EOL.
-  # Bud this should be temporal workaround, dpending this kind of ad-hoc adjustment is
+  # But this should be temporal workaround, depending this kind of ad-hoc adjustment is
   # basically bad in the long run.
   clipPropertiesTillEndOfLine: ->
     return unless @hasProperties()

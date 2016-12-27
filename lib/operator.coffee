@@ -645,19 +645,6 @@ class PutAfter extends PutBefore
   @extend()
   location: 'after'
 
-class Mark extends Operator
-  @extend()
-  recordable: false
-  requireInput: true
-  requireTarget: false
-  acceptPersistentSelection: false
-  initialize: ->
-    @focusInput()
-
-  execute: ->
-    @vimState.mark.set(@input, @editor.getCursorBufferPosition())
-    @activateMode('normal')
-
 class AddBlankLineBelow extends Operator
   @extend()
   flashTarget: false

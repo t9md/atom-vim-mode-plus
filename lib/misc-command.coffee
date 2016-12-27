@@ -24,13 +24,21 @@ class MiscCommand extends Base
     super
     @initialize()
 
+class Mark extends MiscCommand
+  @extend()
+  requireInput: true
+  initialize: ->
+    @focusInput()
+    super
+
+  execute: ->
+    @vimState.mark.set(@input, @editor.getCursorBufferPosition())
+    @activateMode('normal')
+
 class ReverseSelections extends MiscCommand
   @extend()
   execute: ->
-    # Reverse only selection which reversed state is in-sync to last selection.
-    reversed = @editor.getLastSelection().isReversed()
-    for selection in @editor.getSelections() when selection.isReversed() is reversed
-      swrap(selection).reverse()
+    swrap.setReversedState(@editor, not @editor.getLastSelection().isReversed())
     if @isMode('visual', 'blockwise')
       @getLastBlockwiseSelection().autoscrollIfReversed()
 
