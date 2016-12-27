@@ -119,14 +119,15 @@ module.exports =
     getView = (model) -> atom.views.getView(model)
     classPaneMaximized = 'vim-mode-plus--pane-maximized'
     classHideTabBar = 'vim-mode-plus--hide-tab-bar'
+    classHideStatusBar = 'vim-mode-plus--hide-status-bar'
     classActivePaneAxis = 'vim-mode-plus--active-pane-axis'
 
     workspaceElement = getView(atom.workspace)
     paneElement = getView(atom.workspace.getActivePane())
 
     workspaceClassNames = [classPaneMaximized]
-    if settings.get('hideTabBarOnMaximizePane')
-      workspaceClassNames.push(classHideTabBar)
+    workspaceClassNames.push(classHideTabBar) if settings.get('hideTabBarOnMaximizePane')
+    workspaceClassNames.push(classHideStatusBar) if settings.get('hideStatusBarOnMaximizePane')
 
     addClassList(workspaceElement, workspaceClassNames...)
 

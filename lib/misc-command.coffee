@@ -155,7 +155,7 @@ class ReplaceModeBackspace extends MiscCommand
   @commandScope: 'atom-text-editor.vim-mode-plus.insert-mode.replace'
   @extend()
   execute: ->
-    @editor.getSelections().forEach (selection) =>
+    for selection in @editor.getSelections()
       # char might be empty.
       char = @vimState.modeManager.getReplacedCharForSelection(selection)
       if char?

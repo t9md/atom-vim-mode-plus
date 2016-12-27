@@ -282,13 +282,16 @@ atom-text-editor {
 
 // Maximize Pane
 // =========================
-.vim-mode-plus-maximize-pane() {
+atom-workspace.vim-mode-plus--pane-maximized {
   atom-pane-container {
     position: relative;
     atom-pane-axis:not(.vim-mode-plus--active-pane-axis) {
       display: none;
     }
     atom-pane {
+      .item-views {
+        background: @syntax-background-color !important;
+      }
       display: none;
       &.active {
         display: flex;
@@ -301,18 +304,18 @@ atom-text-editor {
       }
     }
   }
-}
-
-.hide-tab-bar() {
-  .tab-bar {
-    display: none;
+  atom-text-editor:not(.mini) {
+    margin-left: 25%;
   }
-}
-
-atom-workspace.vim-mode-plus--pane-maximized {
-  .vim-mode-plus-maximize-pane();
   &.vim-mode-plus--hide-tab-bar {
-    .hide-tab-bar()
+    .tab-bar {
+      display: none;
+    }
+  }
+  &.vim-mode-plus--hide-status-bar {
+    .status-bar {
+      display: none;
+    }
   }
 }
 
