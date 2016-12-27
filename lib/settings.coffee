@@ -140,6 +140,8 @@ module.exports = new Settings 'vim-mode-plus',
   hideTabBarOnMaximizePane:
     default: true
     description: "If set to `false`, tab still visible after maximize-pane( `cmd-enter` )"
+  hideStatusBarOnMaximizePane:
+    default: true
   smoothScrollOnFullScrollMotion:
     default: false
     description: "For `ctrl-f` and `ctrl-b`"
