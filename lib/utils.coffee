@@ -573,7 +573,7 @@ getWordBufferRangeAndKindAtBufferPosition = (editor, point, options={}) ->
   if not wordRegex? and not nonWordCharacters? # Complement from cursor
     cursor ?= editor.getLastCursor()
     {wordRegex, nonWordCharacters} = _.extend(options, buildWordPatternByCursor(cursor, options))
-  singleNonWordChar ?= false
+  singleNonWordChar ?= true
 
   characterAtPoint = getCharacterAtBufferPosition(editor, point)
   nonWordRegex = new RegExp("[#{_.escapeRegExp(nonWordCharacters)}]+")
