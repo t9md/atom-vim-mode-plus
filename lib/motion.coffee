@@ -494,6 +494,26 @@ class MoveToEndOfSmartWord extends MoveToEndOfWord
   @description: "Move to end of smart word (`/[\w-]+/`) word"
   wordRegex: /[\w-]+/
 
+# Subword
+# -------------------------
+class MoveToNextSubword extends MoveToNextWord
+  @extend()
+  moveCursor: (cursor) ->
+    @wordRegex = cursor.subwordRegExp()
+    super
+
+class MoveToPreviousSubword extends MoveToPreviousWord
+  @extend()
+  moveCursor: (cursor) ->
+    @wordRegex = cursor.subwordRegExp()
+    super
+
+class MoveToEndOfSubword extends MoveToEndOfWord
+  @extend()
+  moveCursor: (cursor) ->
+    @wordRegex = cursor.subwordRegExp()
+    super
+
 # Sentence
 # -------------------------
 # Sentence is defined as below

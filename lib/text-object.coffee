@@ -192,6 +192,20 @@ class InnerSmartWord extends SmartWord
   @extend()
 
 # -------------------------
+# Just include _, -
+class Subword extends Word
+  @extend(false)
+  getRange: (selection) ->
+    @wordRegex = selection.cursor.subwordRegExp()
+    super
+
+class ASubword extends Subword
+  @extend()
+
+class InnerSubword extends Subword
+  @extend()
+
+# -------------------------
 class Pair extends TextObject
   @extend(false)
   allowNextLine: false
