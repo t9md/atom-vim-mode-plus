@@ -570,7 +570,7 @@ isSingleLineText = (text) ->
 #  - nonWordCharacters: string
 getWordBufferRangeAndKindAtBufferPosition = (editor, point, options={}) ->
   {singleNonWordChar, wordRegex, nonWordCharacters, cursor} = options
-  if not wordRegex? and not nonWordCharacters? # Complement from cursor
+  if not wordRegex? or not nonWordCharacters? # Complement from cursor
     cursor ?= editor.getLastCursor()
     {wordRegex, nonWordCharacters} = _.extend(options, buildWordPatternByCursor(cursor, options))
   singleNonWordChar ?= true
@@ -596,11 +596,17 @@ getWordBufferRangeAndKindAtBufferPosition = (editor, point, options={}) ->
   {kind, range}
 
 getWordPatternAtBufferPosition = (editor, point, options={}) ->
+  boundarizeForWord = options.boundarizeForWord ? true
+  delete options.boundarizeForWord
   {range, kind} = getWordBufferRangeAndKindAtBufferPosition(editor, point, options)
   pattern = _.escapeRegExp(editor.getTextInBufferRange(range))
-  if kind is 'word'
+  if kind is 'word' and boundarizeForWord
     pattern = "\\b" + pattern + "\\b"
   new RegExp(pattern, 'g')
+
+getSubwordPatternAtBufferPosition = (editor, point, options={}) ->
+  options = {wordRegex: editor.getLastCursor().subwordRegExp(), boundarizeForWord: false}
+  getWordPatternAtBufferPosition(editor, point, options)
 
 # Return options used for getWordBufferRangeAtBufferPosition
 buildWordPatternByCursor = (cursor, {wordRegex}) ->
@@ -640,8 +646,8 @@ getEndOfWordBufferPosition = (editor, point, {wordRegex}={}) ->
   found ? point
 
 getWordBufferRangeAtBufferPosition = (editor, position, options={}) ->
-  startPosition = getBeginningOfWordBufferPosition(editor, position, options)
-  endPosition = getEndOfWordBufferPosition(editor, startPosition, options)
+  endPosition = getEndOfWordBufferPosition(editor, position, options)
+  startPosition = getBeginningOfWordBufferPosition(editor, endPosition, options)
   new Range(startPosition, endPosition)
 
 adjustRangeToRowRange = ({start, end}, options={}) ->
@@ -959,6 +965,7 @@ module.exports = {
   getWordBufferRangeAtBufferPosition
   getWordBufferRangeAndKindAtBufferPosition
   getWordPatternAtBufferPosition
+  getSubwordPatternAtBufferPosition
   getNonWordCharactersForCursor
   adjustRangeToRowRange
   shrinkRangeEndToBeforeNewLine

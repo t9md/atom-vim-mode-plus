@@ -8,6 +8,7 @@ _ = require 'underscore-plus'
   getValidVimBufferRow
   cursorIsAtEmptyRow
   getWordPatternAtBufferPosition
+  getSubwordPatternAtBufferPosition
   setTextAtBufferPosition
   setBufferRow
   moveCursorToFirstCharacterAtRow
@@ -195,9 +196,7 @@ class Operator extends Base
       when 'word'
         getWordPatternAtBufferPosition(@editor, @getCursorBufferPosition())
       when 'subword'
-        range = @new("InnerSubword").getRange(@editor.getLastSelection())
-        text = @editor.getTextInBufferRange(range)
-        new RegExp(_.escapeRegExp(text), 'g')
+        getSubwordPatternAtBufferPosition(@editor, @getCursorBufferPosition())
 
   addOccurrencePattern: (pattern) ->
     @occurrenceManager.addPattern(pattern)
