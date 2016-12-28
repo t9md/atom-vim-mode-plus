@@ -117,6 +117,7 @@
   'S': 'vim-mode-plus:substitute-line'
   'r': 'vim-mode-plus:replace'
   'g o': 'vim-mode-plus:toggle-preset-occurrence'
+  'g O': 'vim-mode-plus:toggle-preset-occurrence-for-subword'
   'g .': 'vim-mode-plus:add-preset-occurrence-from-last-occurrence-pattern'
 
   # '_': 'vim-mode-plus:replace-with-register'
@@ -414,6 +415,7 @@
   'v': 'vim-mode-plus:operator-modifier-characterwise'
   'V': 'vim-mode-plus:operator-modifier-linewise'
   'o': 'vim-mode-plus:operator-modifier-occurrence'
+  'O': 'vim-mode-plus:operator-modifier-occurrence-for-subword'
   'I': 'vim-mode-plus:move-to-first-character-of-line'
   'A': 'vim-mode-plus:move-to-last-character-of-line'
   'q': 'vim-mode-plus:auto-flow'
@@ -547,8 +549,7 @@
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
   'enter': 'vim-mode-plus:create-persistent-selection'
 
-'atom-text-editor.vim-mode-plus.has-persistent-selection.normal-mode,
-atom-text-editor.vim-mode-plus.visual-mode':
+'atom-text-editor.vim-mode-plus.has-persistent-selection.normal-mode, atom-text-editor.vim-mode-plus.visual-mode':
   'I': 'vim-mode-plus:insert-at-start-of-target'
   'A': 'vim-mode-plus:insert-at-end-of-target'
   # 'p': 'vim-mode-plus:swap-with-register'
@@ -562,8 +563,8 @@ atom-text-editor.vim-mode-plus.visual-mode':
 # visual-blockwise
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.blockwise':
-  'o': 'vim-mode-plus:blockwise-other-end',
-  'O': 'vim-mode-plus:reverse-selections',
+  'o': 'vim-mode-plus:blockwise-other-end'
+  'O': 'vim-mode-plus:reverse-selections'
   'D': 'vim-mode-plus:delete-to-last-character-of-line' # To avoid overridden by delete-line in visual-mode
 
 # Input mini editor e.g. mark, surround.
