@@ -27,7 +27,6 @@ class Operator extends Base
   wise: null
   occurrence: false
   occurrenceType: 'base'
-  occurrenceBounded: false
 
   flashTarget: true
   flashCheckpoint: 'did-finish'
@@ -61,8 +60,6 @@ class Operator extends Base
   resetState: ->
     @targetSelected = null
     @occurrenceSelected = false
-    if @occurrenceBounded and not @vimState.hasOcurrenceInitially
-      @occurrenceManager.resetPatterns()
 
   # Two checkpoint for different purpose
   # - one for undo(handled by modeManager)
@@ -136,7 +133,7 @@ class Operator extends Base
   constructor: ->
     super
     {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
-    @occurrenceBounded = @isOccurrence()
+    @subscribeResetOccurrencePatternIfNeeded()
     @initialize()
     @onDidSetOperatorModifier(@setModifier.bind(this))
 
@@ -158,6 +155,14 @@ class Operator extends Base
     @target = 'CurrentSelection' if @isMode('visual') and @acceptCurrentSelection
     @setTarget(@new(@target)) if _.isString(@target)
 
+  subscribeResetOccurrencePatternIfNeeded: ->
+    # [CAUTION]
+    # This method has to be called in PROPER timing.
+    # If occurrence is true but no preset-occurrence
+    # Treat that `occurrence` is BOUNDED to operator itself, so cleanp at finished.
+    if @occurrence and not @occurrenceManager.hasMarkers()
+      @onDidResetOperationStack(=> @occurrenceManager.resetPatterns())
+
   setModifier: (options) ->
     if options.wise?
       @wise = options.wise
@@ -166,7 +171,6 @@ class Operator extends Base
     if options.occurrence?
       @setOccurrence(options.occurrence)
       if @isOccurrence()
-        @occurrenceBounded = true
         @occurrenceType = options.occurrenceType
         # This is o modifier case(e.g. `c o p`, `d O f`)
         # We RESET existing occurence-marker when `o` or `O` modifier is typed by user.

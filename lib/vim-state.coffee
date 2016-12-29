@@ -303,7 +303,6 @@ class VimState
 
   init: ->
     @saveOriginalCursorPosition()
-    @hasOcurrenceInitially = @occurrenceManager.hasMarkers()
 
   reset: ->
     @register.reset()

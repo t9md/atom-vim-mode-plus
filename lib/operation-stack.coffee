@@ -94,7 +94,8 @@ class OperationStack
         count = @getCount()
         operation.count = count
         operation.target?.count = count # Some opeartor have no target like ctrl-a(increase).
-        
+
+      operation.subscribeResetOccurrencePatternIfNeeded()
       @run(operation)
 
   runRecordedMotion: (key, {reverse}={}) ->
