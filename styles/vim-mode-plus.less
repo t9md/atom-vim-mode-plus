@@ -226,6 +226,16 @@ atom-text-editor[mini].vim-mode-plus-search {
   &.solid-box {
     box-sizing: border-box;
   }
+  &.underline-dotted {
+    .vim-mode-plus.solid-box;
+    border-bottom-width: 2px;
+    border-bottom-style: dotted;
+  }
+  &.underline-solid {
+    .vim-mode-plus.solid-box;
+    border-bottom-width: 3px;
+    border-bottom-style: solid;
+  }
 }
 
 atom-text-editor:not(.silent) {
@@ -271,12 +281,15 @@ atom-text-editor {
   .vim-mode-plus-target-range .region {
     background-color: @syntax-selection-color;
   }
-  .vim-mode-plus-occurrence-match .region {
-    .vim-mode-plus.solid-box;
+  .vim-mode-plus-occurrence-base .region {
+    .vim-mode-plus.underline-dotted;
     z-index: 1;
-    border-bottom-width: 2px;
     border-color: @syntax-color-modified;
-    border-bottom-style: dotted;
+  }
+  .vim-mode-plus-occurrence-subword .region {
+    .vim-mode-plus.underline-solid;
+    z-index: 2;
+    border-color: @syntax-color-modified;
   }
 }
 
@@ -305,7 +318,7 @@ atom-workspace.vim-mode-plus--pane-maximized {
     }
   }
   atom-text-editor:not(.mini) {
-    margin-left: 25%;
+    margin-left: 20%;
   }
   &.vim-mode-plus--hide-tab-bar {
     .tab-bar {

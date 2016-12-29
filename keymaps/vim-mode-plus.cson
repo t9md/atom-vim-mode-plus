@@ -117,7 +117,7 @@
   'S': 'vim-mode-plus:substitute-line'
   'r': 'vim-mode-plus:replace'
   'g o': 'vim-mode-plus:toggle-preset-occurrence'
-  'g O': 'vim-mode-plus:toggle-preset-occurrence-for-subword'
+  'g O': 'vim-mode-plus:toggle-preset-subword-occurrence'
   'g .': 'vim-mode-plus:add-preset-occurrence-from-last-occurrence-pattern'
 
   # '_': 'vim-mode-plus:replace-with-register'
@@ -415,7 +415,7 @@
   'v': 'vim-mode-plus:operator-modifier-characterwise'
   'V': 'vim-mode-plus:operator-modifier-linewise'
   'o': 'vim-mode-plus:operator-modifier-occurrence'
-  'O': 'vim-mode-plus:operator-modifier-occurrence-for-subword'
+  'O': 'vim-mode-plus:operator-modifier-subword-occurrence'
   'I': 'vim-mode-plus:move-to-first-character-of-line'
   'A': 'vim-mode-plus:move-to-last-character-of-line'
   'q': 'vim-mode-plus:auto-flow'

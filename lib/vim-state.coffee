@@ -63,7 +63,8 @@ class VimState
     @searchHistory = new SearchHistoryManager(this)
     @highlightSearch = new HighlightSearchManager(this)
     @persistentSelection = new PersistentSelectionManager(this)
-    @occurrenceManager = new OccurrenceManager(this)
+    @occurrenceManager = new OccurrenceManager(this, occurrenceType: 'base')
+    @subwordOccurrenceManager = new OccurrenceManager(this, occurrenceType: 'subword', baseManager: @occurrenceManager)
     @mutationManager = new MutationManager(this)
     @flashManager = new FlashManager(this)
 
@@ -292,6 +293,8 @@ class VimState
 
       else if @hasPersistentSelections() and settings.get('clearPersistentSelectionOnResetNormalMode')
         @clearPersistentSelections()
+      else if @subwordOccurrenceManager.hasPatterns()
+        @subwordOccurrenceManager.resetPatterns()
       else if @occurrenceManager.hasPatterns()
         @occurrenceManager.resetPatterns()
 
@@ -342,6 +345,13 @@ class VimState
 
   clearPersistentSelections: ->
     @persistentSelection.clearMarkers()
+
+  # Occurrence manager
+  # -------------------------
+  getOccurrenceManager: (occurrenceType) ->
+    switch occurrenceType
+      when 'base' then @occurrenceManager
+      when 'subword' then @subwordOccurrenceManager
 
   # Animation management
   # -------------------------

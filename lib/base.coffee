@@ -56,6 +56,8 @@ vimStateMethods = [
   "getLastBlockwiseSelection"
   "updateSelectionProperties"
   "addToClassList"
+  
+  "getOccurrenceManager"
 ]
 
 class Base

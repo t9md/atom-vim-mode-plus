@@ -13,9 +13,15 @@ module.exports =
 class OccurrenceManager
   patterns: null
   markerOptions: {invalidate: 'inside'}
-  decorationOptions: {type: 'highlight', class: 'vim-mode-plus-occurrence-match'}
 
-  constructor: (@vimState) ->
+  constructor: (@vimState, options) ->
+    {occurrenceType, @baseManager} = options
+    switch occurrenceType
+      when 'base'
+        @globalStateParam = "lastOccurrencePattern"
+      when 'subword'
+        @globalStateParam = "lastSubwordOccurrencePattern"
+
     {@editor, @editorElement} = @vimState
     @disposables = new CompositeDisposable
     @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
@@ -23,7 +29,8 @@ class OccurrenceManager
     @patterns = []
 
     @markerLayer = @editor.addMarkerLayer()
-    @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, @decorationOptions)
+    decorationOptions = {type: 'highlight', class: "vim-mode-plus-occurrence-#{occurrenceType}"}
+    @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, decorationOptions)
 
     # @patterns is single source of truth (SSOT)
     # All maker create/destroy/css-update is done by reacting @patters's change.
@@ -31,11 +38,30 @@ class OccurrenceManager
     @onDidChangePatterns ({newPattern}) =>
       if newPattern
         @markBufferRangeByPattern(newPattern)
+        @filterByManager(@baseManager) if @baseManager?
         @updateEditorElement()
       else
         @clearMarkers()
 
+    if @baseManager?
+      @disposables.add(@observeBaseManager())
+
     @markerLayer.onDidUpdate(@destroyInvalidMarkers.bind(this))
+
+  filterByManager: (otherManager) ->
+    unless otherManager.hasMarkers() and @hasMarkers()
+      return
+    baseRanges = otherManager.getMarkerBufferRanges()
+    notContainedByBaseRanges = (marker) ->
+      not baseRanges.some (baseRange) -> baseRange.containsRange(marker.getBufferRange())
+
+    markers = @getMarkers().filter(notContainedByBaseRanges)
+    @destroyMarkers(markers)
+
+  observeBaseManager: ->
+    @baseManager.onDidChangePatterns ({newPattern}) =>
+      if newPattern
+        @filterByManager(@baseManager)
 
   markBufferRangeByPattern: (pattern) ->
     for range in scanEditor(@editor, pattern)
@@ -62,12 +88,16 @@ class OccurrenceManager
     @patterns = []
     @emitter.emit('did-change-patterns', {})
 
-  addPattern: (pattern=null) ->
+  addPattern: (pattern=null, {reset}={}) ->
+    @clearMarkers() if reset
     @patterns.push(pattern)
     @emitter.emit('did-change-patterns', {newPattern: pattern})
 
-  saveLastOccurrencePattern: ->
-    @vimState.globalState.set('lastOccurrencePattern', @buildPattern())
+  saveLastPattern: ->
+    @vimState.globalState.set(@globalStateParam, @buildPattern())
+
+  resetLastPattern: ->
+    @vimState.globalState.reset(@globalStateParam)
 
   # Return regex representing final pattern.
   # Used to cache final pattern to each instance of operator so that we can
@@ -95,6 +125,9 @@ class OccurrenceManager
 
   getMarkers: ->
     @markerLayer.getMarkers()
+
+  getMarkerBufferRanges: ->
+    @markerLayer.getMarkers().map (marker) -> marker.getBufferRange()
 
   getMarkerCount: ->
     @markerLayer.getMarkerCount()
@@ -127,6 +160,8 @@ class OccurrenceManager
   select: ->
     isVisualMode = @vimState.mode is 'visual'
     markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
+    if @baseManager? and @baseManager.hasMarkers()
+      markers = @getMarkersIntersectsWithRanges(@baseManager.getMarkerBufferRanges())
 
     if markers.length
       # NOTE: immediately destroy occurrence-marker which we are operates on from now.
