@@ -63,7 +63,7 @@ class VimState
     @searchHistory = new SearchHistoryManager(this)
     @highlightSearch = new HighlightSearchManager(this)
     @persistentSelection = new PersistentSelectionManager(this)
-    @occurrenceManager = new OccurrenceManager(this, occurrenceType: 'base')
+    @occurrenceManager = new OccurrenceManager(this)
     @mutationManager = new MutationManager(this)
     @flashManager = new FlashManager(this)
 

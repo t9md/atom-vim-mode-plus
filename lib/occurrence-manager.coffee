@@ -13,7 +13,7 @@ class OccurrenceManager
   patterns: null
   markerOptions: {invalidate: 'inside'}
 
-  constructor: (@vimState, options) ->
+  constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
     @disposables = new CompositeDisposable
     @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
