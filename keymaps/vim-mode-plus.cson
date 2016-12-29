@@ -424,9 +424,11 @@
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode.has-occurrence':
   'p': 'vim-mode-plus:inner-paragraph'
+  'P': 'vim-mode-plus:inner-paragraph' # in-case SHIFT is not keyuped. when O modifier
   'r': 'vim-mode-plus:a-persistent-selection'
   'v': 'vim-mode-plus:inner-visible-area'
   'f': 'vim-mode-plus:a-function'
+  'F': 'vim-mode-plus:a-function' # in-case SHIFT is not keyuped. when O modifier
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
 
