@@ -26,6 +26,8 @@ class Operator extends Base
 
   wise: null
   occurrence: false
+  occurrenceType: 'base'
+  occurrenceBounded: false
 
   flashTarget: true
   flashCheckpoint: 'did-finish'
@@ -59,6 +61,8 @@ class Operator extends Base
   resetState: ->
     @targetSelected = null
     @occurrenceSelected = false
+    if @occurrenceBounded and not @vimState.hasOcurrenceInitially
+      @occurrenceManager.resetPatterns()
 
   # Two checkpoint for different purpose
   # - one for undo(handled by modeManager)
@@ -131,21 +135,21 @@ class Operator extends Base
 
   constructor: ->
     super
-    {@mutationManager, @occurrenceManager, @subwordOccurrenceManager, @persistentSelection} = @vimState
-    @subscribeResetOccurrencePatternIfNeeded()
+    {@mutationManager, @occurrenceManager, @persistentSelection} = @vimState
+    @occurrenceBounded = @isOccurrence()
     @initialize()
     @onDidSetOperatorModifier(@setModifier.bind(this))
 
     # When preset-occurrence was exists, operate on occurrence-wise
-    if @acceptPresetOccurrence and @someOccurrenceManagerHasMarkers()
+    if @acceptPresetOccurrence and @occurrenceManager.hasMarkers()
       @setOccurrence(true)
 
     # [FIXME] ORDER-MATTER
     # To pick cursor-word to find occurrence base pattern.
     # This has to be done BEFORE converting persistent-selection into real-selection.
     # Since when persistent-selection is actuall selected, it change cursor position.
-    if @isOccurrence() and not @someOccurrenceManagerHasMarkers()
-      @occurrenceManager.addPattern(@patternForOccurrence ? @getPatternForOccurrenceType('base'))
+    if @isOccurrence() and not @occurrenceManager.hasMarkers()
+      @occurrenceManager.addPattern(@patternForOccurrence ? @getPatternForOccurrenceType(@occurrenceType))
 
     if @canSelectPersistentSelection()
       @selectPersistentSelection() # This change cursor position.
@@ -153,14 +157,6 @@ class Operator extends Base
         @vimState.modeManager.activate('visual', swrap.detectVisualModeSubmode(@editor))
     @target = 'CurrentSelection' if @isMode('visual') and @acceptCurrentSelection
     @setTarget(@new(@target)) if _.isString(@target)
-
-  subscribeResetOccurrencePatternIfNeeded: ->
-    # [CAUTION]
-    # This method has to be called in PROPER timing.
-    # If occurrence is true but no preset-occurrence
-    # Treat that `occurrence` is BOUNDED to operator itself, so cleanp at finished.
-    if @occurrence and not @occurrenceManager.hasMarkers()
-      @onDidResetOperationStack(@resetOccurrencePattern.bind(this))
 
   setModifier: (options) ->
     if options.wise?
@@ -170,12 +166,13 @@ class Operator extends Base
     if options.occurrence?
       @setOccurrence(options.occurrence)
       if @isOccurrence()
+        @occurrenceBounded = true
+        @occurrenceType = options.occurrenceType
         # This is o modifier case(e.g. `c o p`, `d O f`)
         # We RESET existing occurence-marker when `o` or `O` modifier is typed by user.
-        occurrenceManager = @getOccurrenceManager(options.occurrenceType)
-        pattern = @getPatternForOccurrenceType(options.occurrenceType)
-        occurrenceManager.addPattern(pattern, reset: true)
-        @onDidResetOperationStack(-> occurrenceManager.resetPatterns())
+        pattern = @getPatternForOccurrenceType(@occurrenceType)
+        @occurrenceManager.addPattern(pattern, {reset: true, @occurrenceType})
+        @onDidResetOperationStack(=> @occurrenceManager.resetPatterns())
 
   canSelectPersistentSelection: ->
     @acceptPersistentSelection and
@@ -199,10 +196,6 @@ class Operator extends Base
         getWordPatternAtBufferPosition(@editor, @getCursorBufferPosition())
       when 'subword'
         getSubwordPatternAtBufferPosition(@editor, @getCursorBufferPosition())
-
-  resetOccurrencePattern: ->
-    @occurrenceManager.resetPatterns()
-    @subwordOccurrenceManager.resetPatterns()
 
   # target is TextObject or Motion to operate on.
   setTarget: (@target) ->
@@ -279,7 +272,7 @@ class Operator extends Base
     #  occurrence-marker, occurrence-marker has to be created BEFORE `@target.execute()`
     # And when repeated, occurrence pattern is already cached at @patternForOccurrence
     if @isRepeated() and @isOccurrence() and not @occurrenceManager.hasMarkers()
-      @occurrenceManager.addPattern(@patternForOccurrence)
+      @occurrenceManager.addPattern(@patternForOccurrence, {@occurrenceType})
 
     @target.execute()
 
@@ -289,12 +282,7 @@ class Operator extends Base
       # Here we save patterns which represent unioned regex which @occurrenceManager knows.
       @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
-      if @subwordOccurrenceManager.hasMarkers()
-        occurrenceManager = @subwordOccurrenceManager
-      else
-        occurrenceManager = @occurrenceManager
-
-      if occurrenceManager.select()
+      if @occurrenceManager.select()
         @occurrenceSelected = true
         @mutationManager.setCheckpoint('did-select-occurrence')
 
@@ -407,31 +395,22 @@ class TogglePresetOccurrence extends Operator
   occurrenceType: 'base'
 
   execute: ->
-    occurrenceManager = @getOccurrenceManager(@occurrenceType)
-    if marker = occurrenceManager.getMarkerAtPoint(@editor.getCursorBufferPosition())
-      occurrenceManager.destroyMarkers([marker])
+    if marker = @occurrenceManager.getMarkerAtPoint(@editor.getCursorBufferPosition())
+      @occurrenceManager.destroyMarkers([marker])
     else
       pattern = null
       isNarrowed = @vimState.modeManager.isNarrowed()
+
       if @isMode('visual') and not isNarrowed
         @occurrenceType = 'base'
         pattern = new RegExp(_.escapeRegExp(@editor.getSelectedText()), 'g')
+      else
+        pattern = @getPatternForOccurrenceType(@occurrenceType)
 
-      pattern ?= @getPatternForOccurrenceType(@occurrenceType)
-      occurrenceManager.addPattern(pattern)
-      @saveLastPattern()
-      occurrenceManager.saveLastPattern()
+      @occurrenceManager.addPattern(pattern, {@occurrenceType})
+      @occurrenceManager.saveLastPattern()
 
       @activateMode('normal') unless isNarrowed
-
-  saveLastPattern: ->
-    manager = @getOccurrenceManager(@occurrenceType)
-    otherManager = @getOccurrenceManager(if @occurrenceType is 'base' then 'subword' else 'base')
-    if otherManager.hasMarkers()
-      manager.saveLastPattern()
-    else
-      otherManager.resetLastPattern()
-      manager.saveLastPattern()
 
 class TogglePresetSubwordOccurrence extends TogglePresetOccurrence
   @extend()
@@ -442,15 +421,9 @@ class AddPresetOccurrenceFromLastOccurrencePattern extends TogglePresetOccurrenc
   @extend()
   execute: ->
     @occurrenceManager.resetPatterns()
-    @subwordOccurrenceManager.resetPatterns()
-
-    if basePattern = @vimState.globalState.get('lastOccurrencePattern')
-      @occurrenceManager.addPattern(basePattern)
-
-    if subwordPattern = @vimState.globalState.get('lastSubwordOccurrencePattern')
-      @subwordOccurrenceManager.addPattern(subwordPattern)
-
-    if basePattern? or subwordPattern?
+    if pattern = @vimState.globalState.get('lastOccurrencePattern')
+      # BUG: NOT correctly restored for subword marker
+      @occurrenceManager.addPattern(pattern)
       @activateMode('normal')
 
 # Delete

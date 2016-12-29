@@ -36,7 +36,6 @@ getInitialState = ->
   currentSearch: null
   lastSearchPattern: null
   lastOccurrencePattern: null
-  lastSubwordOccurrencePattern: null
   highlightSearchPattern: null
   currentFind: null
   register: {}

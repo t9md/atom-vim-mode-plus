@@ -14,13 +14,6 @@ class OccurrenceManager
   markerOptions: {invalidate: 'inside'}
 
   constructor: (@vimState, options) ->
-    {@occurrenceType, @baseManager} = options
-    switch @occurrenceType
-      when 'base'
-        @globalStateParam = "lastOccurrencePattern"
-      when 'subword'
-        @globalStateParam = "lastSubwordOccurrencePattern"
-
     {@editor, @editorElement} = @vimState
     @disposables = new CompositeDisposable
     @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
@@ -28,42 +21,23 @@ class OccurrenceManager
     @patterns = []
 
     @markerLayer = @editor.addMarkerLayer()
-    decorationOptions = {type: 'highlight', class: "vim-mode-plus-occurrence-#{@occurrenceType}"}
+    decorationOptions = {type: 'highlight', class: "vim-mode-plus-occurrence-base"}
     @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, decorationOptions)
 
     # @patterns is single source of truth (SSOT)
     # All maker create/destroy/css-update is done by reacting @patters's change.
     # -------------------------
-    @onDidChangePatterns ({newPattern}) =>
-      if newPattern
-        @markBufferRangeByPattern(newPattern)
-        @filterByManager(@baseManager) if @baseManager?
+    @onDidChangePatterns ({pattern, occurrenceType}) =>
+      if pattern
+        @markBufferRangeByPattern(pattern, occurrenceType)
         @updateEditorElement()
       else
         @clearMarkers()
 
-    if @baseManager?
-      @disposables.add(@observeBaseManager())
-
     @markerLayer.onDidUpdate(@destroyInvalidMarkers.bind(this))
 
-  filterByManager: (otherManager) ->
-    unless otherManager.hasMarkers() and @hasMarkers()
-      return
-    baseRanges = otherManager.getMarkerBufferRanges()
-    notContainedByBaseRanges = (marker) ->
-      not baseRanges.some (baseRange) -> baseRange.containsRange(marker.getBufferRange())
-
-    markers = @getMarkers().filter(notContainedByBaseRanges)
-    @destroyMarkers(markers)
-
-  observeBaseManager: ->
-    @baseManager.onDidChangePatterns ({newPattern}) =>
-      if newPattern
-        @filterByManager(@baseManager)
-
-  markBufferRangeByPattern: (pattern) ->
-    if @occurrenceType is 'subword'
+  markBufferRangeByPattern: (pattern, occurrenceType) ->
+    if occurrenceType is 'subword'
       subwordRangesByRow = {} # cache
       subwordPattern = @editor.getLastCursor().subwordRegExp()
       isSubwordRange = (range) =>
@@ -72,7 +46,7 @@ class OccurrenceManager
         subwordRanges.some (subwordRange) -> subwordRange.isEqual(range)
 
     @editor.scan pattern, ({range, matchText}) =>
-      if @occurrenceType is 'subword'
+      if occurrenceType is 'subword'
         return unless isSubwordRange(range)
       @markerLayer.markBufferRange(range, @markerOptions)
 
@@ -80,7 +54,7 @@ class OccurrenceManager
     @editorElement.classList.toggle("has-occurrence", @hasMarkers())
 
   # Callback get passed following object
-  # - newPattern: can be undefined on reset event
+  # - pattern: can be undefined on reset event
   onDidChangePatterns: (fn) ->
     @emitter.on('did-change-patterns', fn)
 
@@ -97,16 +71,14 @@ class OccurrenceManager
     @patterns = []
     @emitter.emit('did-change-patterns', {})
 
-  addPattern: (pattern=null, {reset}={}) ->
+  addPattern: (pattern=null, {reset, occurrenceType}={}) ->
     @clearMarkers() if reset
     @patterns.push(pattern)
-    @emitter.emit('did-change-patterns', {newPattern: pattern})
+    occurrenceType ?= 'base'
+    @emitter.emit('did-change-patterns', {pattern, occurrenceType})
 
   saveLastPattern: ->
-    @vimState.globalState.set(@globalStateParam, @buildPattern())
-
-  resetLastPattern: ->
-    @vimState.globalState.reset(@globalStateParam)
+    @vimState.globalState.set("lastOccurrencePattern", @buildPattern())
 
   # Return regex representing final pattern.
   # Used to cache final pattern to each instance of operator so that we can
@@ -169,8 +141,6 @@ class OccurrenceManager
   select: ->
     isVisualMode = @vimState.mode is 'visual'
     markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
-    if @baseManager? and @baseManager.hasMarkers()
-      markers = @getMarkersIntersectsWithRanges(@baseManager.getMarkerBufferRanges())
 
     if markers.length
       # NOTE: immediately destroy occurrence-marker which we are operates on from now.

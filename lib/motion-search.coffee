@@ -141,8 +141,8 @@ class Search extends SearchBase
 
       when 'occurrence'
         {operation, input} = commandEvent
-        @getOccurrenceManager('base').addPattern(@getPattern(input), reset: operation?)
-        @getOccurrenceManager('base').saveLastPattern()
+        @vimState.occurrenceManager.addPattern(@getPattern(input), reset: operation?)
+        @vimState.occurrenceManager.saveLastPattern()
 
         @vimState.searchHistory.save(input)
         @vimState.searchInput.cancel()
