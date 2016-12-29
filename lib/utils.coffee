@@ -697,6 +697,13 @@ scanEditor = (editor, pattern) ->
     ranges.push(range)
   ranges
 
+scanBufferRow = (editor, pattern, row) ->
+  ranges = []
+  scanRange = editor.bufferRangeForBufferRow(row)
+  editor.scanInBufferRange pattern, scanRange, ({range}) ->
+    ranges.push(range)
+  ranges
+
 isRangeContainsSomePoint = (range, points, {exclusive}={}) ->
   exclusive ?= false
   points.some (point) ->
@@ -971,6 +978,7 @@ module.exports = {
   shrinkRangeEndToBeforeNewLine
   scanInRanges
   scanEditor
+  scanBufferRow
   isRangeContainsSomePoint
   destroyNonLastSelection
   getLargestFoldRangeContainsBufferRow

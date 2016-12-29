@@ -353,6 +353,9 @@ class VimState
       when 'base' then @occurrenceManager
       when 'subword' then @subwordOccurrenceManager
 
+  someOccurrenceManagerHasMarkers: ->
+    @occurrenceManager.hasMarkers() or @subwordOccurrenceManager.hasMarkers()
+
   # Animation management
   # -------------------------
   scrollAnimationEffect: null

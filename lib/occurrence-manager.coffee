@@ -2,9 +2,8 @@ _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
 
 {
-  scanEditor
   shrinkRangeEndToBeforeNewLine
-  findRangeContainsPoint
+  scanBufferRow
 } = require './utils'
 
 isInvalidMarker = (marker) -> not marker.isValid()
@@ -15,8 +14,8 @@ class OccurrenceManager
   markerOptions: {invalidate: 'inside'}
 
   constructor: (@vimState, options) ->
-    {occurrenceType, @baseManager} = options
-    switch occurrenceType
+    {@occurrenceType, @baseManager} = options
+    switch @occurrenceType
       when 'base'
         @globalStateParam = "lastOccurrencePattern"
       when 'subword'
@@ -29,7 +28,7 @@ class OccurrenceManager
     @patterns = []
 
     @markerLayer = @editor.addMarkerLayer()
-    decorationOptions = {type: 'highlight', class: "vim-mode-plus-occurrence-#{occurrenceType}"}
+    decorationOptions = {type: 'highlight', class: "vim-mode-plus-occurrence-#{@occurrenceType}"}
     @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, decorationOptions)
 
     # @patterns is single source of truth (SSOT)
@@ -64,7 +63,17 @@ class OccurrenceManager
         @filterByManager(@baseManager)
 
   markBufferRangeByPattern: (pattern) ->
-    for range in scanEditor(@editor, pattern)
+    if @occurrenceType is 'subword'
+      subwordRangesByRow = {} # cache
+      subwordPattern = @editor.getLastCursor().subwordRegExp()
+      isSubwordRange = (range) =>
+        row = range.start.row
+        subwordRanges = subwordRangesByRow[row] ?= scanBufferRow(@editor, subwordPattern, row)
+        subwordRanges.some (subwordRange) -> subwordRange.isEqual(range)
+
+    @editor.scan pattern, ({range, matchText}) =>
+      if @occurrenceType is 'subword'
+        return unless isSubwordRange(range)
       @markerLayer.markBufferRange(range, @markerOptions)
 
   updateEditorElement: ->

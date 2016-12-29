@@ -137,14 +137,14 @@ class Operator extends Base
     @onDidSetOperatorModifier(@setModifier.bind(this))
 
     # When preset-occurrence was exists, operate on occurrence-wise
-    if @acceptPresetOccurrence and @occurrenceManager.hasMarkers()
+    if @acceptPresetOccurrence and @someOccurrenceManagerHasMarkers()
       @setOccurrence(true)
 
     # [FIXME] ORDER-MATTER
     # To pick cursor-word to find occurrence base pattern.
     # This has to be done BEFORE converting persistent-selection into real-selection.
     # Since when persistent-selection is actuall selected, it change cursor position.
-    if @isOccurrence() and not @occurrenceManager.hasMarkers()
+    if @isOccurrence() and not @someOccurrenceManagerHasMarkers()
       @occurrenceManager.addPattern(@patternForOccurrence ? @getPatternForOccurrenceType('base'))
 
     if @canSelectPersistentSelection()
@@ -437,6 +437,7 @@ class TogglePresetSubwordOccurrence extends TogglePresetOccurrence
   @extend()
   occurrenceType: 'subword'
 
+# Want to rename RestoreOccurrenceMarker
 class AddPresetOccurrenceFromLastOccurrencePattern extends TogglePresetOccurrence
   @extend()
   execute: ->
