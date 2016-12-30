@@ -238,11 +238,8 @@ getFirstVisibleScreenRow = (editor) -> editor.element.getFirstVisibleScreenRow()
 getLastVisibleScreenRow = (editor) -> editor.element.getLastVisibleScreenRow()
 
 getFirstCharacterPositionForBufferRow = (editor, row) ->
-  point = null
-  scanRange = editor.bufferRangeForBufferRow(row)
-  editor.scanInBufferRange /\S/, scanRange, ({range}) ->
-    point = range.start
-  point ? scanRange.start
+  range = findRangeInBufferRow(editor, /\S/, row)
+  range?.start ? new Point(row, 0)
 
 getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
   start = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
@@ -629,6 +626,17 @@ scanBufferRow = (editor, pattern, row) ->
     ranges.push(range)
   ranges
 
+findRangeInBufferRow = (editor, pattern, row, {direction}={}) ->
+  if direction is 'backward'
+    scanFunctionName = 'backwardsScanInBufferRange'
+  else
+    scanFunctionName = 'scanInBufferRange'
+
+  range = null
+  scanRange = editor.bufferRangeForBufferRow(row)
+  editor[scanFunctionName] pattern, scanRange, (event) -> range = event.range
+  range
+
 isRangeContainsSomePoint = (range, points, {exclusive}={}) ->
   exclusive ?= false
   points.some (point) ->
@@ -919,6 +927,7 @@ module.exports = {
   scanInRanges
   scanEditor
   scanBufferRow
+  findRangeInBufferRow
   isRangeContainsSomePoint
   destroyNonLastSelection
   getLargestFoldRangeContainsBufferRow

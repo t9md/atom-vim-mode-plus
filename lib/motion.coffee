@@ -31,6 +31,7 @@ Select = null
   getKeystrokeForEvent
   pointIsAtEndOfLineAtNonEmptyRow
   getEndOfLineForBufferRow
+  findRangeInBufferRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -647,10 +648,8 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
 
   getPoint: ({row}) ->
     row = limitNumber(row + @getCount(-1), max: @getVimLastBufferRow())
-    point = null
-    scanRange = @editor.bufferRangeForBufferRow(row)
-    @editor.backwardsScanInBufferRange /\S|^/, scanRange, ({range}) -> point = range.start
-    point
+    range = findRangeInBufferRow(@editor, /\S|^/, row, direction: 'backward')
+    range?.start ? new Point(row, 0)
 
 # MoveToFirstCharacterOfLine faimily
 # ------------------------------------
