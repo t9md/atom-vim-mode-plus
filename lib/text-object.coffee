@@ -253,39 +253,44 @@ class Pair extends TextObject
       return if @isEscapedCharAtPoint(range.start)
       fn(event)
 
-  findOpen: (from,  pattern) ->
-    scanFunc = 'backwardsScanInBufferRange'
-    scanRange = new Range([0, 0], from)
+  findOpen: (from, pattern) ->
+    options =
+      scanFunc: 'backwardsScanInBufferRange'
+      scanRange: new Range([0, 0], from)
+      from: from
+      pattern: pattern
+
     stack = []
     found = null
-    @findPair 'open', {from, pattern, scanFunc, scanRange}, (event) =>
-      {matchText, range, stop} = event
-      pairState = @getPairState(event)
-      if pairState is 'close'
-        stack.push({pairState, matchText, range})
+    @findPair 'open', options, (event) =>
+      {range, stop} = event
+      if @getPairState(event) is 'close'
+        stack.push({range})
       else
         stack.pop()
-        if stack.length is 0
-          found = range
+        found = range if stack.length is 0
       stop() if found?
     found
 
   findClose: (from,  pattern) ->
-    scanFunc = 'scanInBufferRange'
-    scanRange = new Range(from, @editor.buffer.getEndPosition())
+    options =
+      scanFunc: 'scanInBufferRange'
+      scanRange: new Range(from, @editor.buffer.getEndPosition())
+      from: from
+      pattern: pattern
+
     stack = []
     found = null
-    @findPair 'close', {from, pattern, scanFunc, scanRange}, (event) =>
+    @findPair 'close', options, (event) =>
       {range, stop} = event
-      pairState = @getPairState(event)
-      if pairState is 'open'
-        stack.push({pairState, range})
+      if @getPairState(event) is 'open'
+        stack.push({range})
       else
         entry = stack.pop()
         if stack.length is 0
           if (openStart = entry?.range.start)
             if @allowForwarding
-              return if openStart.row > from.row
+              return if openStart.row isnt from.row
             else
               return if openStart.isGreaterThan(from)
           found = range
@@ -295,8 +300,8 @@ class Pair extends TextObject
   getPairInfo: (from) ->
     pairInfo = null
     pattern = @getPattern()
-    closeRange = @findClose from, pattern
-    openRange = @findOpen closeRange.end, pattern if closeRange?
+    closeRange = @findClose(from, pattern)
+    openRange = @findOpen(closeRange.end, pattern) if closeRange?
 
     unless (openRange? and closeRange?)
       return null
@@ -327,10 +332,7 @@ class Pair extends TextObject
 
     innerRange = new Range(innerStart, innerEnd)
     targetRange = if @isInner() then innerRange else aRange
-    if @skipEmptyPair and innerRange.isEmpty()
-      @getPairInfo(aRange.end)
-    else
-      {openRange, closeRange, aRange, innerRange, targetRange}
+    {openRange, closeRange, aRange, innerRange, targetRange}
 
   getPointToSearchFrom: (selection, searchFrom) ->
     switch searchFrom
@@ -354,14 +356,13 @@ class AnyPair extends Pair
   @extend(false)
   allowForwarding: false
   allowNextLine: null
-  skipEmptyPair: false
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
     'CurlyBracket', 'AngleBracket', 'SquareBracket', 'Parenthesis'
   ]
 
   getRangeBy: (klass, selection) ->
-    options = {@inner, @skipEmptyPair}
+    options = {@inner}
     options.allowNextLine = @allowNextLine if @allowNextLine?
     @new(klass, options).getRange(selection, {@allowForwarding, @searchFrom})
 
@@ -383,7 +384,6 @@ class AnyPairAllowForwarding extends AnyPair
   @extend(false)
   @description: "Range surrounded by auto-detected paired chars from enclosed and forwarding area"
   allowForwarding: true
-  skipEmptyPair: false
   searchFrom: 'start'
   getRange: (selection) ->
     ranges = @getRanges(selection)
