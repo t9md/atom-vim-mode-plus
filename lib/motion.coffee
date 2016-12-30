@@ -32,6 +32,9 @@ Select = null
   getIndex
   smartScrollToBufferPosition
   getKeystrokeForEvent
+  pointIsAtEndOfLineAtNonEmptyRow
+  pointIsAtVimEndOfFile
+  getEndOfLineForBufferRow
 } = require './utils'
 
 swrap = require './selection-wrapper'
@@ -336,25 +339,26 @@ class MoveToNextWord extends Motion
   @extend()
   wordRegex: null
 
-  getPoint: (cursor) ->
-    cursorPoint = cursor.getBufferPosition()
-    pattern = @wordRegex ? cursor.wordRegExp()
-    scanRange = [cursorPoint, @getVimEofBufferPosition()]
-
+  getPoint: (pattern, fromPoint) ->
+    scanRange = new Range(fromPoint, @getVimEofBufferPosition())
     wordRange = null
     found = false
     @editor.scanInBufferRange pattern, scanRange, ({range, matchText, stop}) ->
       wordRange = range
       # Ignore 'empty line' matches between '\r' and '\n'
       return if matchText is '' and range.start.column isnt 0
-      if range.start.isGreaterThan(cursorPoint)
+      if range.start.isGreaterThan(fromPoint)
         found = true
         stop()
 
     if found
-      wordRange.start
+      point = wordRange.start
+      if pointIsAtEndOfLineAtNonEmptyRow(@editor, point) and not point.isEqual(scanRange.end)
+        point.traverse([1, 0])
+      else
+        point
     else
-      wordRange?.end ? cursorPoint
+      wordRange?.end ? fromPoint
 
   # Special case: "cw" and "cW" are treated like "ce" and "cE" if the cursor is
   # on a non-blank.  This is because "cw" is interpreted as change-word, and a
@@ -366,22 +370,22 @@ class MoveToNextWord extends Motion
   # operator and the last word moved over is at the end of a line, the end of
   # that word becomes the end of the operated text, not the first word in the
   # next line.
-
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
     wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
+    isAsOperatorTarget = @isAsOperatorTarget()
     @moveCursorCountTimes cursor, ({isFinal}) =>
-      cursorRow = cursor.getBufferRow()
-      if cursorIsAtEmptyRow(cursor) and @isAsOperatorTarget()
-        point = [cursorRow + 1, 0]
+      cursorPosition = cursor.getBufferPosition()
+      if cursorIsAtEmptyRow(cursor) and isAsOperatorTarget
+        point = cursorPosition.traverse([1, 0])
       else
-        point = @getPoint(cursor)
-        if isFinal and @isAsOperatorTarget()
+        pattern = @wordRegex ? cursor.wordRegExp()
+        point = @getPoint(pattern, cursorPosition)
+        if isFinal and isAsOperatorTarget
           if @getOperator().is('Change') and (not wasOnWhiteSpace)
             point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
-          else if (point.row > cursorRow)
-            point = [cursorRow, Infinity]
-        else
+          else
+            point = Point.min(point, getEndOfLineForBufferRow(@editor, cursorPosition.row))
       cursor.setBufferPosition(point)
 
 # b
@@ -445,7 +449,7 @@ class MoveToPreviousEndOfWord extends MoveToPreviousWord
 # -------------------------
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
-  wordRegex: /^\s*$|\S+/g
+  wordRegex: /^\s*?$|\S+/g
 
 class MoveToPreviousWholeWord extends MoveToPreviousWord
   @extend()
