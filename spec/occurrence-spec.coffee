@@ -41,7 +41,7 @@ describe "Occurrence", ->
 
         """
 
-    describe "operator-modifier-characterwise", ->
+    describe "o modifier", ->
       it "change occurrence of cursor word in inner-paragraph", ->
         set cursor: [1, 0]
         ensure "c o i p",
@@ -90,6 +90,37 @@ describe "Occurrence", ->
           ==|=: xxx: ---: xxx: ==|=:
           xxx: ---: ==|=: ==|=:
 
+          """
+
+    describe "O modifier", ->
+      beforeEach ->
+        set
+          textC: """
+
+          camelCa|se Cases
+          "CaseStudy" SnakeCase
+          UP_CASE
+
+          other ParagraphCase
+          """
+      it "delete subword-occurrence in paragraph and repeatable", ->
+        ensure "d O p",
+          textC: """
+
+          camel| Cases
+          "Study" Snake
+          UP_CASE
+
+          other ParagraphCase
+          """
+        ensure "G .",
+          textC: """
+
+          camel Cases
+          "Study" Snake
+          UP_CASE
+
+          |other Paragraph
           """
 
     describe "apply various operator to occurrence in various target", ->
@@ -975,3 +1006,19 @@ describe "Occurrence", ->
             mode: 'operator-pending'
           ensure "j",
            selectedText: ["ooo", "ooo", "ooo", "ooo", "ooo", "ooo"]
+
+    describe "toggle-preset-subword-occurrence commands", ->
+      beforeEach ->
+        set
+          textC: """
+
+          camelCa|se Cases
+          "CaseStudy" SnakeCase
+          UP_CASE
+
+          other ParagraphCase
+          """
+
+      describe "add preset subword-occurrence", ->
+        it "mark subword under cursor", ->
+          ensure 'g O', occurrenceText: ['Case', 'Case', 'Case', 'Case']
