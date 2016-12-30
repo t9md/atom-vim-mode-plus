@@ -1,3 +1,24 @@
+# 0.77.0
+- New: Subword support #634
+  - Motion: `move-to-next-subword`, `move-to-previous-subword`, `move-to-end-of-subword`'
+  - TextObject: `a-subword`, `inner-subword`(no keymaps by default)
+  - OperatorModifier: `O` works as like `o`, except `O` works for subword.(e.g. `c O p`)
+  - `g O`(`toggle-preset-subword-occurrence`) mark subword, subword-version of `g o`.
+- New: TransformString family operator `split-string-with-keeping-splitter`, `sort-by-number`( no keymap )
+- New `g q`(`auto-flow`) operator, `g q q` or `g q g q` works for current line #187
+  - Implementation-wise, it just dispatch to core autoflow package. So might not be compatible with pure-Vim.
+- Improve: `maximize-pane` #633
+  - Tweak: Now set `left-margin`(`20%`) when maximized, so that code comes front of your eye.
+  - Now hide statusbar.
+  - New: option `hideStatusBarOnMaximizePane`(default `true`).
+- Tweak: Support #627 earlySelect for operator `replace`
+- Improve: Early settle insertion count for insertion operator(`i` `a`) to avoid taking count for motion.
+- Fix: Now `v enter` then `.` repeated correctly create 1 column persistent #630
+- Fix: `ctrl-v enter .` no longer throw error #630
+- Spec: Improve coverage for `TransformString` children(`join` etc..)
+- Internal: Rewrite `ctrl-a`, `ctrl-x`,  `g ctrl-a`, `g ctrl-x`
+  - Breaking: No longer beep when failed.
+
 # 0.76.0
 - Breaking, Cosmetic: Remove `showHoverOnOperate` feature #626
   - Reason:
