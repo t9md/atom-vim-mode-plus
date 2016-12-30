@@ -1331,15 +1331,15 @@ describe "TextObject", ->
         ensure 'i z', selectedBufferRange: rangeForRows(9, 28)
 
       describe "when startRow of selection is on fold startRow", ->
-        it 'select outer fold(skip)', ->
+        it 'select inner fold', ->
           set cursor: [20, 7]
-          ensure 'v i z', selectedBufferRange: rangeForRows(19, 23)
+          ensure 'v i z', selectedBufferRange: rangeForRows(21, 21)
 
       describe "when endRow of selection exceeds fold endRow", ->
         it "doesn't matter, select fold based on startRow of selection", ->
           set cursor: [20, 0]
           ensure 'V G', selectedBufferRange: rangeForRows(20, 30)
-          ensure 'i z', selectedBufferRange: rangeForRows(19, 23)
+          ensure 'i z', selectedBufferRange: rangeForRows(21, 21)
 
       describe "when indent level of fold startRow and endRow is same", ->
         beforeEach ->
