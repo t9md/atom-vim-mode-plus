@@ -73,6 +73,11 @@
   'b': 'vim-mode-plus:move-to-previous-word'
   # 'b':     'vim-mode-plus:move-to-previous-alphanumeric-word'
   'B': 'vim-mode-plus:move-to-previous-whole-word'
+
+  # 'q': 'vim-mode-plus:move-to-next-subword'
+  # 'Q': 'vim-mode-plus:move-to-previous-subword'
+  # 'ctrl-e': 'vim-mode-plus:move-to-end-of-subword'
+
   ')': 'vim-mode-plus:move-to-next-sentence'
   '(': 'vim-mode-plus:move-to-previous-sentence'
   # ')': 'vim-mode-plus:move-to-next-sentence-skip-blank-row'
@@ -543,7 +548,7 @@
 
   # 'a q': 'vim-mode-plus:a-subword'
   # 'i q': 'vim-mode-plus:inner-subword'
-  
+
 # visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode':
