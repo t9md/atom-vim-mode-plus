@@ -1,6 +1,5 @@
 _ = require 'underscore-plus'
 {Point, Range} = require 'atom'
-Select = null
 
 {
   moveCursorLeft, moveCursorRight
