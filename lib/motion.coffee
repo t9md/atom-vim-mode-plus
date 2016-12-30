@@ -13,19 +13,17 @@ Select = null
   moveCursorToFirstCharacterAtRow
   sortRanges
   getIndentLevelForBufferRow
-  cursorIsOnWhiteSpace
+  pointIsOnWhiteSpace
   moveCursorToNextNonWhitespace
-  cursorIsAtEmptyRow
+  isEmptyRow
   getCodeFoldRowRanges
   getLargestFoldRangeContainsBufferRow
   isIncludeFunctionScopeForRow
   detectScopeStartPositionForScope
   getBufferRows
   getStartPositionForPattern
-  getFirstCharacterBufferPositionForScreenRow
-  screenPositionIsAtWhiteSpace
+  getTextInScreenRange
   cursorIsAtEndOfLineAtNonEmptyRow
-  getFirstCharacterScreenPositionForScreenRow
   setBufferRow
   setBufferColumn
   limitNumber
@@ -33,7 +31,6 @@ Select = null
   smartScrollToBufferPosition
   getKeystrokeForEvent
   pointIsAtEndOfLineAtNonEmptyRow
-  pointIsAtVimEndOfFile
   getEndOfLineForBufferRow
 } = require './utils'
 
@@ -326,7 +323,8 @@ class MoveUpToEdge extends Motion
       @isNonWhiteSpacePoint(leftPoint) and @isNonWhiteSpacePoint(rightPoint)
 
   isNonWhiteSpacePoint: (point) ->
-    screenPositionIsAtWhiteSpace(@editor, point)
+    char = getTextInScreenRange(@editor, Range.fromPointWithDelta(point, 0, 1))
+    char? and /\S/.test(char)
 
 class MoveDownToEdge extends MoveUpToEdge
   @extend()
@@ -372,11 +370,11 @@ class MoveToNextWord extends Motion
   # next line.
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
-    wasOnWhiteSpace = cursorIsOnWhiteSpace(cursor)
+    wasOnWhiteSpace = pointIsOnWhiteSpace(@editor, cursor.getBufferPosition())
     isAsOperatorTarget = @isAsOperatorTarget()
     @moveCursorCountTimes cursor, ({isFinal}) =>
       cursorPosition = cursor.getBufferPosition()
-      if cursorIsAtEmptyRow(cursor) and isAsOperatorTarget
+      if isEmptyRow(@editor, cursorPosition.row) and isAsOperatorTarget
         point = cursorPosition.traverse([1, 0])
       else
         pattern = @wordRegex ? cursor.wordRegExp()

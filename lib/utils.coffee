@@ -148,35 +148,41 @@ mergeIntersectingRanges = (ranges) ->
 getEndOfLineForBufferRow = (editor, row) ->
   editor.bufferRangeForBufferRow(row).end
 
+
+# Point util
+# -------------------------
 pointIsAtEndOfLine = (editor, point) ->
   point = Point.fromObject(point)
   getEndOfLineForBufferRow(editor, point.row).isEqual(point)
+
+pointIsOnWhiteSpace = (editor, point) ->
+  isAllWhiteSpace(getRightCharacterForBufferPosition(editor, point))
 
 pointIsAtEndOfLineAtNonEmptyRow = (editor, point) ->
   point = Point.fromObject(point)
   point.column isnt 0 and pointIsAtEndOfLine(editor, point)
 
-getCharacterAtCursor = (cursor) ->
-  getTextInScreenRange(cursor.editor, cursor.getScreenRange())
+pointIsAtVimEndOfFile = (editor, point) ->
+  getVimEofBufferPosition(editor).isEqual(point)
 
-getCharacterAtBufferPosition = (editor, startPosition) ->
-  endPosition = startPosition.translate([0, 1])
-  editor.getTextInBufferRange([startPosition, endPosition])
+isEmptyRow = (editor, row) ->
+  editor.bufferRangeForBufferRow(row).isEmpty()
+
+# Cursor state validateion
+# -------------------------
+cursorIsAtEndOfLineAtNonEmptyRow = (cursor) ->
+  pointIsAtEndOfLineAtNonEmptyRow(cursor.editor, cursor.getBufferPosition())
+
+cursorIsAtVimEndOfFile = (cursor) ->
+  pointIsAtVimEndOfFile(cursor.editor, cursor.getBufferPosition())
+
+# -------------------------
+getRightCharacterForBufferPosition = (editor, startPosition) ->
+  editor.getTextInBufferRange(Range.fromPointWithDelta(startPosition, 0, 1))
 
 getTextInScreenRange = (editor, screenRange) ->
   bufferRange = editor.bufferRangeForScreenRange(screenRange)
   editor.getTextInBufferRange(bufferRange)
-
-cursorIsOnWhiteSpace = (cursor) ->
-  isAllWhiteSpace(getCharacterAtCursor(cursor))
-
-pointIsOnWhiteSpace = (editor, point) ->
-  isAllWhiteSpace(getCharacterAtBufferPosition(editor, point))
-
-screenPositionIsAtWhiteSpace = (editor, screenPosition) ->
-  screenRange = Range.fromPointWithDelta(screenPosition, 0, 1)
-  char = getTextInScreenRange(editor, screenRange)
-  char? and /\S/.test(char)
 
 getNonWordCharactersForCursor = (cursor) ->
   # Atom 1.11.0-beta5 have this experimental method.
@@ -186,11 +192,14 @@ getNonWordCharactersForCursor = (cursor) ->
     scope = cursor.getScopeDescriptor().getScopesArray()
     atom.config.get('editor.nonWordCharacters', {scope})
 
+# FIXME: remove this
 # return true if moved
 moveCursorToNextNonWhitespace = (cursor) ->
   originalPoint = cursor.getBufferPosition()
-  vimEof = getVimEofBufferPosition(cursor.editor)
-  while cursorIsOnWhiteSpace(cursor) and not cursor.getBufferPosition().isGreaterThanOrEqual(vimEof)
+  editor = cursor.editor
+  vimEof = getVimEofBufferPosition(editor)
+
+  while pointIsOnWhiteSpace(editor, point = cursor.getBufferPosition()) and not point.isGreaterThanOrEqual(vimEof)
     cursor.moveRight()
   not originalPoint.isEqual(cursor.getBufferPosition())
 
@@ -202,11 +211,11 @@ getBufferRows = (editor, {startRow, direction}) ->
       else
         [(startRow - 1)..0]
     when 'next'
-      vimLastBufferRow = getVimLastBufferRow(editor)
-      if startRow >= vimLastBufferRow
+      endRow = getVimLastBufferRow(editor)
+      if startRow >= endRow
         []
       else
-        [(startRow + 1)..vimLastBufferRow]
+        [(startRow + 1)..endRow]
 
 # Return Vim's EOF position rather than Atom's EOF position.
 # This function change meaning of EOF from native TextEditor::getEofBufferPosition()
@@ -223,21 +232,6 @@ getVimEofBufferPosition = (editor) ->
 
 getVimEofScreenPosition = (editor) ->
   editor.screenPositionForBufferPosition(getVimEofBufferPosition(editor))
-
-pointIsAtVimEndOfFile = (editor, point) ->
-  getVimEofBufferPosition(editor).isEqual(point)
-
-cursorIsAtVimEndOfFile = (cursor) ->
-  pointIsAtVimEndOfFile(cursor.editor, cursor.getBufferPosition())
-
-isEmptyRow = (editor, row) ->
-  editor.bufferRangeForBufferRow(row).isEmpty()
-
-cursorIsAtEmptyRow = (cursor) ->
-  isEmptyRow(cursor.editor, cursor.getBufferRow())
-
-cursorIsAtEndOfLineAtNonEmptyRow = (cursor) ->
-  cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
 
 getVimLastBufferRow = (editor) ->
   getVimEofBufferPosition(editor).row
@@ -370,37 +364,22 @@ moveCursorToFirstCharacterAtRow = (cursor, row) ->
   cursor.setBufferPosition([row, 0])
   cursor.moveToFirstCharacterOfLine()
 
-# Return valid row from 0 to vimLastBufferRow
-getValidVimBufferRow = (editor, row) ->
-  vimLastBufferRow = getVimLastBufferRow(editor)
-  switch
-    when (row < 0) then 0
-    when (row > vimLastBufferRow) then vimLastBufferRow
-    else row
+getValidVimBufferRow = (editor, row) -> limitNumber(row, min: 0, max: getVimLastBufferRow(editor))
 
-# Return valid row from 0 to vimLastScreenRow
-getValidVimScreenRow = (editor, row) ->
-  vimLastScreenRow = getVimLastScreenRow(editor)
-  switch
-    when (row < 0) then 0
-    when (row > vimLastScreenRow) then vimLastScreenRow
-    else row
+getValidVimScreenRow = (editor, row) -> limitNumber(row, min: 0, max: getVimLastScreenRow(editor))
 
 # By default not include column
-getTextToPoint = (editor, {row, column}, {exclusive}={}) ->
-  exclusive ?= true
-  if exclusive
+getLineTextToBufferPosition = (editor, {row, column}, {exclusive}={}) ->
+  if exclusive ? true
     editor.lineTextForBufferRow(row)[0...column]
   else
     editor.lineTextForBufferRow(row)[0..column]
 
 getIndentLevelForBufferRow = (editor, row) ->
-  text = editor.lineTextForBufferRow(row)
-  editor.indentLevelForLine(text)
+  editor.indentLevelForLine(editor.lineTextForBufferRow(row))
 
-WhiteSpaceRegExp = /^\s*$/
 isAllWhiteSpace = (text) ->
-  WhiteSpaceRegExp.test(text)
+  not /\S/.test(text)
 
 getCodeFoldRowRanges = (editor) ->
   [0..editor.getLastBufferRow()]
@@ -575,7 +554,7 @@ getWordBufferRangeAndKindAtBufferPosition = (editor, point, options={}) ->
     {wordRegex, nonWordCharacters} = _.extend(options, buildWordPatternByCursor(cursor, options))
   singleNonWordChar ?= true
 
-  characterAtPoint = getCharacterAtBufferPosition(editor, point)
+  characterAtPoint = getRightCharacterForBufferPosition(editor, point)
   nonWordRegex = new RegExp("[#{_.escapeRegExp(nonWordCharacters)}]+")
 
   if /\s/.test(characterAtPoint)
@@ -912,6 +891,7 @@ module.exports = {
   findIndexBy
   mergeIntersectingRanges
   pointIsAtEndOfLine
+  pointIsOnWhiteSpace
   pointIsAtEndOfLineAtNonEmptyRow
   pointIsAtVimEndOfFile
   cursorIsAtVimEndOfFile
@@ -932,16 +912,12 @@ module.exports = {
   getValidVimScreenRow
   moveCursorToFirstCharacterAtRow
   countChar
-  getTextToPoint
+  getLineTextToBufferPosition
   getIndentLevelForBufferRow
   isAllWhiteSpace
-  getCharacterAtCursor
   getTextInScreenRange
-  cursorIsOnWhiteSpace
-  screenPositionIsAtWhiteSpace
   moveCursorToNextNonWhitespace
   isEmptyRow
-  cursorIsAtEmptyRow
   cursorIsAtEndOfLineAtNonEmptyRow
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow

@@ -6,7 +6,7 @@ _ = require 'underscore-plus'
 {
   haveSomeNonEmptySelection
   getValidVimBufferRow
-  cursorIsAtEmptyRow
+  isEmptyRow
   getWordPatternAtBufferPosition
   getSubwordPatternAtBufferPosition
   setTextAtBufferPosition
@@ -632,7 +632,7 @@ class PutBefore extends Operator
 
   pasteCharacterwise: (selection, text) ->
     {cursor} = selection
-    if selection.isEmpty() and @location is 'after' and not cursorIsAtEmptyRow(cursor)
+    if selection.isEmpty() and @location is 'after' and not isEmptyRow(@editor, cursor.getBufferRow())
       cursor.moveRight()
     return selection.insertText(text)
 

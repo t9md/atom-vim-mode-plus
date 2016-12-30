@@ -11,7 +11,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 {
   sortRanges, sortRangesByEndPosition, countChar, pointIsAtEndOfLine,
-  getTextToPoint
+  getLineTextToBufferPosition
   getIndentLevelForBufferRow
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
@@ -233,7 +233,7 @@ class Pair extends TextObject
 
   backSlashPattern = _.escapeRegExp('\\')
   pairStateInBufferRange: (range, char) ->
-    text = getTextToPoint(@editor, range.end)
+    text = getLineTextToBufferPosition(@editor, range.end)
     escapedChar = _.escapeRegExp(char)
     bs = backSlashPattern
     patterns = [
@@ -327,7 +327,7 @@ class Pair extends TextObject
       if pointIsAtEndOfLine(@editor, innerStart)
         innerStart = new Point(innerStart.row + 1, 0)
 
-      if getTextToPoint(@editor, innerEnd).match(/^\s*$/)
+      if getLineTextToBufferPosition(@editor, innerEnd).match(/^\s*$/)
         if @isMode('visual')
           # This is slightly innconsistent with regular Vim
           # - regular Vim: select new line after EOL
