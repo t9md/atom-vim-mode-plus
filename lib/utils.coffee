@@ -148,7 +148,6 @@ mergeIntersectingRanges = (ranges) ->
 getEndOfLineForBufferRow = (editor, row) ->
   editor.bufferRangeForBufferRow(row).end
 
-
 # Point util
 # -------------------------
 pointIsAtEndOfLine = (editor, point) ->
@@ -156,7 +155,7 @@ pointIsAtEndOfLine = (editor, point) ->
   getEndOfLineForBufferRow(editor, point.row).isEqual(point)
 
 pointIsOnWhiteSpace = (editor, point) ->
-  isAllWhiteSpace(getRightCharacterForBufferPosition(editor, point))
+  isAllWhiteSpaceText(getRightCharacterForBufferPosition(editor, point))
 
 pointIsAtEndOfLineAtNonEmptyRow = (editor, point) ->
   point = Point.fromObject(point)
@@ -233,46 +232,26 @@ getVimEofBufferPosition = (editor) ->
 getVimEofScreenPosition = (editor) ->
   editor.screenPositionForBufferPosition(getVimEofBufferPosition(editor))
 
-getVimLastBufferRow = (editor) ->
-  getVimEofBufferPosition(editor).row
-
-getVimLastScreenRow = (editor) ->
-  getVimEofScreenPosition(editor).row
-
-getFirstVisibleScreenRow = (editor) ->
-  editor.element.getFirstVisibleScreenRow()
-
-getLastVisibleScreenRow = (editor) ->
-  editor.element.getLastVisibleScreenRow()
-
-getFirstCharacterScreenPositionForScreenRow = (editor, screenRow) ->
-  screenLineStart = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
-  screenLineEnd = [screenRow, Infinity]
-  screenLineBufferRange = editor.bufferRangeForScreenRange([screenLineStart, screenLineEnd])
-
-  firstCharacterBufferPosition = null
-  editor.scanInBufferRange /\S/, screenLineBufferRange, ({range, stop}) ->
-    firstCharacterBufferPosition = range.start
-    stop()
-
-  if firstCharacterBufferPosition?
-    editor.screenPositionForBufferPosition(firstCharacterBufferPosition)
-  else
-    screenLineStart
+getVimLastBufferRow = (editor) -> getVimEofBufferPosition(editor).row
+getVimLastScreenRow = (editor) -> getVimEofScreenPosition(editor).row
+getFirstVisibleScreenRow = (editor) -> editor.element.getFirstVisibleScreenRow()
+getLastVisibleScreenRow = (editor) -> editor.element.getLastVisibleScreenRow()
 
 getFirstCharacterPositionForBufferRow = (editor, row) ->
-  fromPoint = new Point(row, 0)
-  getEndPositionForPattern(editor, fromPoint, /\s*/, containedOnly: true) ? fromPoint
+  point = null
+  scanRange = editor.bufferRangeForBufferRow(row)
+  editor.scanInBufferRange /\S/, scanRange, ({range}) ->
+    point = range.start
+  point ? scanRange.start
 
 getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
   start = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
   end = [screenRow, Infinity]
-  scanRange = editor.bufferRangeForScreenRange([start, end])
 
   point = null
-  editor.scanInBufferRange /\S/, scanRange, ({range, stop}) ->
+  scanRange = editor.bufferRangeForScreenRange([start, end])
+  editor.scanInBufferRange /\S/, scanRange, ({range}) ->
     point = range.start
-    stop()
   point ? scanRange.start
 
 trimRange = (editor, scanRange) ->
@@ -378,7 +357,7 @@ getLineTextToBufferPosition = (editor, {row, column}, {exclusive}={}) ->
 getIndentLevelForBufferRow = (editor, row) ->
   editor.indentLevelForLine(editor.lineTextForBufferRow(row))
 
-isAllWhiteSpace = (text) ->
+isAllWhiteSpaceText = (text) ->
   not /\S/.test(text)
 
 getCodeFoldRowRanges = (editor) ->
@@ -476,39 +455,6 @@ isFunctionScope = (editor, scope) ->
       scopes = ['meta.function.', 'meta.class.']
   pattern = new RegExp('^' + scopes.map(_.escapeRegExp).join('|'))
   pattern.test(scope)
-
-getStartPositionForPattern = (editor, from, pattern, options={}) ->
-  from = Point.fromObject(from)
-  containedOnly = options.containedOnly ? false
-  scanRange = [[from.row, 0], from]
-  point = null
-  editor.backwardsScanInBufferRange pattern, scanRange, ({range, matchText, stop}) ->
-    # Ignore 'empty line' matches between '\r' and '\n'
-    return if matchText is '' and range.start.column isnt 0
-
-    if (not containedOnly) or range.end.isGreaterThanOrEqual(from)
-      point = range.start
-      stop()
-  point
-
-getEndPositionForPattern = (editor, from, pattern, options={}) ->
-  from = Point.fromObject(from)
-  containedOnly = options.containedOnly ? false
-  scanRange = [from, [from.row, Infinity]]
-  point = null
-  editor.scanInBufferRange pattern, scanRange, ({range, matchText, stop}) ->
-    # Ignore 'empty line' matches between '\r' and '\n'
-    return if matchText is '' and range.start.column isnt 0
-
-    if (not containedOnly) or range.start.isLessThanOrEqual(from)
-      point = range.end
-      stop()
-  point
-
-getBufferRangeForPatternFromPoint = (editor, fromPoint, pattern) ->
-  end = getEndPositionForPattern(editor, fromPoint, pattern, containedOnly: true)
-  start = getStartPositionForPattern(editor, end, pattern, containedOnly: true) if end?
-  new Range(start, end) if start?
 
 # Scroll to bufferPosition with minimum amount to keep original visible area.
 # If target position won't fit within onePageUp or onePageDown, it center target point.
@@ -870,6 +816,28 @@ humanizeBufferRange = (editor, range) ->
   else
     range
 
+
+expandRangeToWhiteSpaces = (editor, range, directions=[]) ->
+  {start, end} = range
+
+  for direction in directions
+    switch direction
+      when 'forward'
+        newEnd = null
+        scanRange = [end, getEndOfLineForBufferRow(editor, end.row)]
+        editor.scanInBufferRange /\S/, scanRange, ({range}) -> newEnd = range.start
+        if newEnd? and not newEnd.isEqual(end)
+          return new Range(start, newEnd)
+
+      when 'backward'
+        newStart = null
+        scanRange = [[start.row, 0], range.start]
+        editor.backwardsScanInBufferRange /\S/, scanRange, ({range}) -> newStart = range.end
+        if newStart? and not newStart.isEqual(start)
+          return new Range(newStart, end)
+
+  return range # fallback
+
 module.exports = {
   getParent
   getAncestors
@@ -914,7 +882,7 @@ module.exports = {
   countChar
   getLineTextToBufferPosition
   getIndentLevelForBufferRow
-  isAllWhiteSpace
+  isAllWhiteSpaceText
   getTextInScreenRange
   moveCursorToNextNonWhitespace
   isEmptyRow
@@ -922,13 +890,10 @@ module.exports = {
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
-  getFirstCharacterScreenPositionForScreenRow
   trimRange
   getFirstCharacterPositionForBufferRow
   getFirstCharacterBufferPositionForScreenRow
   isFunctionScope
-  getStartPositionForPattern
-  getEndPositionForPattern
   isIncludeFunctionScopeForRow
   getTokenizedLineForRow
   getScopesForTokenizedLine
@@ -936,7 +901,6 @@ module.exports = {
   detectScopeStartPositionForScope
   getBufferRows
   registerElement
-  getBufferRangeForPatternFromPoint
   sortComparable
   smartScrollToBufferPosition
   matchScopes
@@ -980,4 +944,5 @@ module.exports = {
   toggleCaseForCharacter
   splitTextByNewLine
   humanizeBufferRange
+  expandRangeToWhiteSpaces
 }

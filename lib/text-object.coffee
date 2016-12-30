@@ -16,15 +16,12 @@ swrap = require './selection-wrapper'
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
   isIncludeFunctionScopeForRow
-  getStartPositionForPattern
-  getEndPositionForPattern
+  expandRangeToWhiteSpaces
   getVisibleBufferRange
   translatePointAndClip
   getRangeByTranslatePointAndClip
   getBufferRows
   getValidVimBufferRow
-
-  getStartPositionForPattern
   trimRange
 } = require './utils'
 
@@ -145,20 +142,11 @@ class Word extends TextObject
 
   getRange: (selection) ->
     point = @getNormalizedHeadBufferPosition(selection)
-    {range, kind} = @getWordBufferRangeAndKindAtBufferPosition(point, {@wordRegex})
-    if @isA() and kind is 'word'
-      range = @expandRangeToWhiteSpaces(range)
-    range
-
-  expandRangeToWhiteSpaces: (range) ->
-    if newEnd = getEndPositionForPattern(@editor, range.end, /\s+/, containedOnly: true)
-      return new Range(range.start, newEnd)
-
-    if newStart = getStartPositionForPattern(@editor, range.start, /\s+/, containedOnly: true)
-      # To comform with pure vim, expand as long as it's not indent(white spaces starting with column 0).
-      return new Range(newStart, range.end) unless newStart.column is 0
-
-    range # return original range as fallback
+    {range} = @getWordBufferRangeAndKindAtBufferPosition(point, {@wordRegex})
+    if @isA()
+      expandRangeToWhiteSpaces(@editor, range, ['forward', 'backward'])
+    else
+      range
 
 class AWord extends Word
   @extend()

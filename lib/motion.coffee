@@ -21,7 +21,6 @@ Select = null
   isIncludeFunctionScopeForRow
   detectScopeStartPositionForScope
   getBufferRows
-  getStartPositionForPattern
   getTextInScreenRange
   cursorIsAtEndOfLineAtNonEmptyRow
   setBufferRow
@@ -648,9 +647,10 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
 
   getPoint: ({row}) ->
     row = limitNumber(row + @getCount(-1), max: @getVimLastBufferRow())
-    from = new Point(row, Infinity)
-    point = getStartPositionForPattern(@editor, from, /\s*$/)
-    (point ? from).translate([0, -1])
+    point = null
+    scanRange = @editor.bufferRangeForBufferRow(row)
+    @editor.backwardsScanInBufferRange /\S|^/, scanRange, ({range}) -> point = range.start
+    point
 
 # MoveToFirstCharacterOfLine faimily
 # ------------------------------------
