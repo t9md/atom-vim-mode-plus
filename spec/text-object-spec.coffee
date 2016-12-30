@@ -146,6 +146,35 @@ describe "TextObject", ->
         set text: "12(45\nab'de ABCDE", cursor: [0, 4]
         ensure 'v a W', selectedBufferRange: [[0, 0], [0, 5]]
 
+  describe "Subword", ->
+    escape = -> keystroke('escape')
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
+          'a q': 'vim-mode-plus:a-subword'
+          'i q': 'vim-mode-plus:inner-subword'
+
+    describe "inner-subword", ->
+      it "select subword", ->
+        set textC: "cam|elCase"; ensure "v i q", selectedText: "camel"; escape()
+        set textC: "came|lCase"; ensure "v i q", selectedText: "camel"; escape()
+        set textC: "camel|Case"; ensure "v i q", selectedText: "Case"; escape()
+        set textC: "camelCas|e"; ensure "v i q", selectedText: "Case"; escape()
+
+        set textC: "|_snake__case_"; ensure "v i q", selectedText: "_snake"; escape()
+        set textC: "_snak|e__case_"; ensure "v i q", selectedText: "_snake"; escape()
+        set textC: "_snake|__case_"; ensure "v i q", selectedText: "__case"; escape()
+        set textC: "_snake_|_case_"; ensure "v i q", selectedText: "__case"; escape()
+        set textC: "_snake__cas|e_"; ensure "v i q", selectedText: "__case"; escape()
+        set textC: "_snake__case|_"; ensure "v i q", selectedText: "_"; escape()
+
+    describe "a-subword", ->
+      it "select subword and spaces", ->
+        set textC: "camelCa|se  NextCamel"; ensure "v a q", selectedText: "Case  "; escape()
+        set textC: "camelCase  Ne|xtCamel"; ensure "v a q", selectedText: "  Next"; escape()
+        set textC: "snake_c|ase  next_snake"; ensure "v a q", selectedText: "_case  "; escape()
+        set textC: "snake_case  ne|xt_snake"; ensure "v a q", selectedText: "  next"; escape()
+
   describe "AnyPair", ->
     {simpleText, complexText} = {}
     beforeEach ->

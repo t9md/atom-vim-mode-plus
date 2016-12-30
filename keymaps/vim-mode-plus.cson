@@ -541,6 +541,9 @@
   'i v': 'vim-mode-plus:inner-visible-area'
   'a v': 'vim-mode-plus:a-visible-area'
 
+  # 'a q': 'vim-mode-plus:a-subword'
+  # 'i q': 'vim-mode-plus:inner-subword'
+  
 # visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode':
