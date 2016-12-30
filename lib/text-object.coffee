@@ -756,7 +756,7 @@ class Fold extends TextObject
     [startRow, endRow]
 
   getFoldRowRangesContainsForRow: (row) ->
-    getCodeFoldRowRangesContainesForRow(@editor, row, includeStartRow: false).reverse()
+    getCodeFoldRowRangesContainesForRow(@editor, row, includeStartRow: @isA()).reverse()
 
   getRange: (selection) ->
     rowRanges = @getFoldRowRangesContainsForRow(swrap(selection).getStartRow())

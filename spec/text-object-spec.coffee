@@ -1374,15 +1374,16 @@ describe "TextObject", ->
         ensure 'a z', selectedBufferRange: rangeForRows(8, 28)
 
       describe "when startRow of selection is on fold startRow", ->
-        it 'select outer fold(skip)', ->
+        it 'select fold starting from current row', ->
           set cursor: [20, 7]
-          ensure 'v a z', selectedBufferRange: rangeForRows(18, 23)
+          ensure 'v a z', selectedBufferRange: rangeForRows(20, 21)
 
       describe "when endRow of selection exceeds fold endRow", ->
         it "doesn't matter, select fold based on startRow of selection", ->
           set cursor: [20, 0]
+          cursor = editor.getLastCursor()
           ensure 'V G', selectedBufferRange: rangeForRows(20, 30)
-          ensure 'a z', selectedBufferRange: rangeForRows(18, 23)
+          ensure 'a z', selectedBufferRange: rangeForRows(20, 21)
 
   # Although following test picks specific language, other langauages are alsoe supported.
   describe 'Function', ->
