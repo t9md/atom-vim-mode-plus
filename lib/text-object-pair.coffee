@@ -10,21 +10,52 @@ TextObject = require('./base').getClass('TextObject')
   getLineTextToBufferPosition
 } = require './utils'
 
+getPatternForPair = (pair) ->
+  [open, close] = pair
+  if open is close
+    new RegExp("(#{_.escapeRegExp(open)})", 'g')
+  else
+    new RegExp("(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})", 'g')
+
+findPair = (editor, from, pair, direction, fn) ->
+  pattern = getPatternForPair(pair)
+  switch direction
+    when 'forward'
+      findPairForward(editor, from, pattern, fn)
+    when 'backward'
+      findPairBackward(editor, from, pattern, fn)
+
+findPairForward = (editor, from, pattern, fn) ->
+  scanRange = new Range(from, editor.buffer.getEndPosition())
+  editor.scanInBufferRange(pattern, scanRange, fn)
+
+findPairBackward = (editor, from, pattern, fn) ->
+  scanRange = new Range([0, 0], from)
+  editor.backwardsScanInBufferRange(pattern, scanRange, fn)
+
+# Take start point of matched range.
+backSlashPattern = _.escapeRegExp('\\')
+isEscapedCharAtPoint = (editor, point) ->
+  escaped = false
+  pattern = new RegExp("[^#{backSlashPattern}]#{backSlashPattern}")
+  scanRange = [[point.row, 0], point]
+  editor.backwardsScanInBufferRange pattern, scanRange, ({matchText, range, stop}) ->
+    if range.end.isEqual(point)
+      stop()
+      escaped = true
+  escaped
+
 # -------------------------
 class Pair extends TextObject
   @extend(false)
+
+  _newStyle: true # REMOVE after rewrite DONE
+
   allowNextLine: false
   adjustInnerRange: true
   pair: null
   wise: 'characterwise'
   supportCount: true
-
-  getPattern: ->
-    [open, close] = @pair
-    if open is close
-      new RegExp("(#{_.escapeRegExp(open)})", 'g')
-    else
-      new RegExp("(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})", 'g')
 
   # Return 'open' or 'close'
   getPairState: ({matchText, range, match}) ->
@@ -36,7 +67,6 @@ class Pair extends TextObject
           when match[1] then 'open'
           when match[2] then 'close'
 
-  backSlashPattern = _.escapeRegExp('\\')
   pairStateInBufferRange: (range, char) ->
     text = getLineTextToBufferPosition(@editor, range.end)
     escapedChar = _.escapeRegExp(char)
@@ -48,39 +78,34 @@ class Pair extends TextObject
     pattern = new RegExp(patterns.join('|'))
     ['close', 'open'][(countChar(text, pattern) % 2)]
 
-  # Take start point of matched range.
-  isEscapedCharAtPoint: (point) ->
-    found = false
+  getFilters: (from) ->
+    filters = []
+    if not @allowNextLine
+      isNotSameLine = ({range, stop}) ->
+        if from.row isnt range.start.row
+          stop()
+          true
+        else
+          false
 
-    bs = backSlashPattern
-    pattern = new RegExp("[^#{bs}]#{bs}")
-    scanRange = [[point.row, 0], point]
-    @editor.backwardsScanInBufferRange pattern, scanRange, ({matchText, range, stop}) ->
-      if range.end.isEqual(point)
-        stop()
-        found = true
-    found
+      filters.push(isNotSameLine)
 
-  findPair: (which, options, fn) ->
-    {from, pattern, scanFunc, scanRange} = options
-    @editor[scanFunc] pattern, scanRange, (event) =>
-      {matchText, range, stop} = event
-      unless @allowNextLine or (from.row is range.start.row)
-        return stop()
-      return if @isEscapedCharAtPoint(range.start)
-      fn(event)
+    isEscaped = ({range}) => isEscapedCharAtPoint(@editor, range.start)
 
-  findOpen: (from, pattern) ->
-    options =
-      scanFunc: 'backwardsScanInBufferRange'
-      scanRange: new Range([0, 0], from)
-      from: from
-      pattern: pattern
+    filters.push(isEscaped)
 
+    filters
+
+  findOpen: (from) ->
     stack = []
     found = null
-    @findPair 'open', options, (event) =>
+
+    filters = @getFilters(from)
+
+    findPair @editor, from, @pair, 'backward', (event) =>
       {range, stop} = event
+      return if filters.some((filter) -> filter(event))
+
       if @getPairState(event) is 'close'
         stack.push({range})
       else
@@ -89,17 +114,16 @@ class Pair extends TextObject
       stop() if found?
     found
 
-  findClose: (from,  pattern) ->
-    options =
-      scanFunc: 'scanInBufferRange'
-      scanRange: new Range(from, @editor.buffer.getEndPosition())
-      from: from
-      pattern: pattern
-
+  findClose: (from) ->
     stack = []
     found = null
-    @findPair 'close', options, (event) =>
+
+    filters = @getFilters(from)
+
+    findPair @editor, from, @pair, 'forward', (event) =>
       {range, stop} = event
+      return if filters.some((filter) -> filter(event))
+
       if @getPairState(event) is 'open'
         stack.push({range})
       else
@@ -116,9 +140,13 @@ class Pair extends TextObject
 
   getPairInfo: (from) ->
     pairInfo = null
-    pattern = @getPattern()
-    closeRange = @findClose(from, pattern)
-    openRange = @findOpen(closeRange.end, pattern) if closeRange?
+    if @_newStyle
+      closeRange = @findClose(from)
+      openRange = @findOpen(closeRange.end) if closeRange?
+    else
+      pattern = @getPattern()
+      closeRange = @findClose(from, pattern)
+      openRange = @findOpen(closeRange.end, pattern) if closeRange?
 
     unless (openRange? and closeRange?)
       return null
@@ -364,6 +392,9 @@ class InnerAngleBracketAllowForwarding extends AngleBracket
 tagPattern = /(<(\/?))([^\s>]+)[^>]*>/g
 class Tag extends Pair
   @extend(false)
+
+  _newStyle: false # REMOVE after rewrite DONE
+
   allowNextLine: true
   allowForwarding: true
   adjustInnerRange: false
@@ -393,6 +424,28 @@ class Tag extends Pair
       if entry.tagState is tagState
         return entry
     null
+
+  # Take start point of matched range.
+  isEscapedCharAtPoint: (point) ->
+    found = false
+
+    bs = backSlashPattern
+    pattern = new RegExp("[^#{bs}]#{bs}")
+    scanRange = [[point.row, 0], point]
+    @editor.backwardsScanInBufferRange pattern, scanRange, ({matchText, range, stop}) ->
+      if range.end.isEqual(point)
+        stop()
+        found = true
+    found
+
+  findPair: (which, options, fn) ->
+    {from, pattern, scanFunc, scanRange} = options
+    @editor[scanFunc] pattern, scanRange, (event) =>
+      {matchText, range, stop} = event
+      unless @allowNextLine or (from.row is range.start.row)
+        return stop()
+      return if @isEscapedCharAtPoint(range.start)
+      fn(event)
 
   findOpen: (from,  pattern) ->
     scanFunc = 'backwardsScanInBufferRange'
