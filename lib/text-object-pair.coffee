@@ -21,17 +21,11 @@ findPair = (editor, from, pair, direction, fn) ->
   pattern = getPatternForPair(pair)
   switch direction
     when 'forward'
-      findPairForward(editor, from, pattern, fn)
+      scanRange = new Range(from, editor.buffer.getEndPosition())
+      editor.scanInBufferRange(pattern, scanRange, fn)
     when 'backward'
-      findPairBackward(editor, from, pattern, fn)
-
-findPairForward = (editor, from, pattern, fn) ->
-  scanRange = new Range(from, editor.buffer.getEndPosition())
-  editor.scanInBufferRange(pattern, scanRange, fn)
-
-findPairBackward = (editor, from, pattern, fn) ->
-  scanRange = new Range([0, 0], from)
-  editor.backwardsScanInBufferRange(pattern, scanRange, fn)
+      scanRange = new Range([0, 0], from)
+      editor.backwardsScanInBufferRange(pattern, scanRange, fn)
 
 # Take start point of matched range.
 backSlashPattern = _.escapeRegExp('\\')
@@ -58,25 +52,10 @@ class Pair extends TextObject
   supportCount: true
 
   # Return 'open' or 'close'
-  getPairState: ({matchText, range, match}) ->
-    switch match.length
-      when 2
-        @pairStateInBufferRange(range, matchText)
-      when 3
-        switch
-          when match[1] then 'open'
-          when match[2] then 'close'
-
-  pairStateInBufferRange: (range, char) ->
-    text = getLineTextToBufferPosition(@editor, range.end)
-    escapedChar = _.escapeRegExp(char)
-    bs = backSlashPattern
-    patterns = [
-      "#{bs}#{bs}#{escapedChar}"
-      "[^#{bs}]?#{escapedChar}"
-    ]
-    pattern = new RegExp(patterns.join('|'))
-    ['close', 'open'][(countChar(text, pattern) % 2)]
+  getPairState: ({match}) ->
+    switch
+      when match[1] then 'open'
+      when match[2] then 'close'
 
   getFilters: (from) ->
     filters = []
@@ -98,45 +77,45 @@ class Pair extends TextObject
 
   findOpen: (from) ->
     stack = []
-    found = null
-
+    openRange = null
     filters = @getFilters(from)
 
     findPair @editor, from, @pair, 'backward', (event) =>
-      {range, stop} = event
       return if filters.some((filter) -> filter(event))
 
+      {range, stop} = event
       if @getPairState(event) is 'close'
-        stack.push({range})
+        stack.push(event)
       else
         stack.pop()
-        found = range if stack.length is 0
-      stop() if found?
-    found
+        openRange = range if stack.length is 0
+      stop() if openRange?
+    openRange
 
   findClose: (from) ->
     stack = []
-    found = null
-
+    closeRange = null
     filters = @getFilters(from)
 
+    isValidOpen = ({range}) =>
+      openStart = range.start
+      if @allowForwarding
+        openStart.row is from.row
+      else
+        openStart.isEqual(from)
+
     findPair @editor, from, @pair, 'forward', (event) =>
-      {range, stop} = event
       return if filters.some((filter) -> filter(event))
 
+      {range, stop} = event
       if @getPairState(event) is 'open'
-        stack.push({range})
+        stack.push(event)
       else
-        entry = stack.pop()
-        if stack.length is 0
-          if (openStart = entry?.range.start)
-            if @allowForwarding
-              return if openStart.row isnt from.row
-            else
-              return if openStart.isGreaterThan(from)
-          found = range
-      stop() if found?
-    found
+        openEvent = stack.pop()
+        if stack.length is 0 and ((not openEvent?) or isValidOpen(openEvent))
+          closeRange = range
+          stop()
+    closeRange
 
   getPairInfo: (from) ->
     pairInfo = null
@@ -274,6 +253,20 @@ class Quote extends Pair
   @extend(false)
   allowForwarding: true
   allowNextLine: false
+
+  getPairState: ({matchText, range, match}) ->
+    @pairStateInBufferRange(range, matchText)
+
+  pairStateInBufferRange: (range, char) ->
+    text = getLineTextToBufferPosition(@editor, range.end)
+    escapedChar = _.escapeRegExp(char)
+    bs = backSlashPattern
+    patterns = [
+      "#{bs}#{bs}#{escapedChar}"
+      "[^#{bs}]?#{escapedChar}"
+    ]
+    pattern = new RegExp(patterns.join('|'))
+    ['close', 'open'][(countChar(text, pattern) % 2)]
 
 class DoubleQuote extends Quote
   @extend(false)
