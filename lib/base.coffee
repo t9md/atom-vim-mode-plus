@@ -259,7 +259,7 @@ class Base
     [
       './operator', './operator-insert', './operator-transform-string',
       './motion', './motion-search',
-      './text-object',
+      './text-object', './text-object-pair',
       './insert-mode', './misc-command'
     ].forEach(require)
 
