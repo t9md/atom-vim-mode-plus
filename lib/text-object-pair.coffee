@@ -17,7 +17,7 @@ getPatternForPair = (pair) ->
   else
     new RegExp("(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})", 'g')
 
-findPair = (editor, from, pair, direction, fn) ->
+scanPair = (editor, from, pair, direction, fn) ->
   pattern = getPatternForPair(pair)
   switch direction
     when 'forward'
@@ -26,6 +26,23 @@ findPair = (editor, from, pair, direction, fn) ->
     when 'backward'
       scanRange = new Range([0, 0], from)
       editor.backwardsScanInBufferRange(pattern, scanRange, fn)
+
+findPairRange = ({editor, from, pair, which, direction, filters}, fn) ->
+  stack = []
+  range = null
+
+  scanPair editor, from, pair, direction, (event) ->
+    if filters? and filters.some((filter) -> filter(event))
+      return
+
+    if getPairState(editor, event) isnt which
+      stack.push(event)
+    else
+      topEvent = stack.pop()
+      if fn(stack, topEvent)
+        range = event.range
+        event.stop()
+  range
 
 # Take start point of matched range.
 backSlashPattern = _.escapeRegExp('\\')
@@ -39,6 +56,28 @@ isEscapedCharAtPoint = (editor, point) ->
       escaped = true
   escaped
 
+# Return 'open' or 'close'
+getPairState = (editor, event) ->
+  {matchText, range, match} = event
+  switch match.length
+    when 2
+      pairStateInBufferRange(editor, event)
+    when 3
+      switch
+        when match[1] then 'open'
+        when match[2] then 'close'
+
+pairStateInBufferRange = (editor, {matchText, range}) ->
+  text = getLineTextToBufferPosition(editor, range.end)
+  escapedChar = _.escapeRegExp(matchText)
+  bs = backSlashPattern
+  patterns = [
+    "#{bs}#{bs}#{escapedChar}"
+    "[^#{bs}]?#{escapedChar}"
+  ]
+  pattern = new RegExp(patterns.join('|'))
+  ['close', 'open'][(countChar(text, pattern) % 2)]
+
 # -------------------------
 class Pair extends TextObject
   @extend(false)
@@ -50,27 +89,6 @@ class Pair extends TextObject
   pair: null
   wise: 'characterwise'
   supportCount: true
-
-  # Return 'open' or 'close'
-  getPairState: ({matchText, range, match}) ->
-    switch match.length
-      when 2
-        @pairStateInBufferRange(range, matchText)
-      when 3
-        switch
-          when match[1] then 'open'
-          when match[2] then 'close'
-
-  pairStateInBufferRange: (range, char) ->
-    text = getLineTextToBufferPosition(@editor, range.end)
-    escapedChar = _.escapeRegExp(char)
-    bs = backSlashPattern
-    patterns = [
-      "#{bs}#{bs}#{escapedChar}"
-      "[^#{bs}]?#{escapedChar}"
-    ]
-    pattern = new RegExp(patterns.join('|'))
-    ['close', 'open'][(countChar(text, pattern) % 2)]
 
   getFilters: (from) ->
     filters = []
@@ -91,46 +109,18 @@ class Pair extends TextObject
     filters
 
   findOpen: (from) ->
-    stack = []
-    openRange = null
-    filters = @getFilters(from)
-
-    findPair @editor, from, @pair, 'backward', (event) =>
-      return if filters.some((filter) -> filter(event))
-
-      {range, stop} = event
-      if @getPairState(event) is 'close'
-        stack.push(event)
-      else
-        stack.pop()
-        openRange = range if stack.length is 0
-      stop() if openRange?
-    openRange
+    options = {@editor, from, @pair, which: 'open', direction: 'backward', filters: @getFilters(from)}
+    findPairRange options, (stack, openEvent) ->
+      stack.length is 0
 
   findClose: (from) ->
-    stack = []
-    closeRange = null
-    filters = @getFilters(from)
-
     isValidOpen = ({range}) =>
-      openStart = range.start
-      if @allowForwarding
-        openStart.row is from.row
-      else
-        openStart.isEqual(from)
+      {start} = range
+      start.isEqual(from) or (@allowForwarding and start.row is from.row)
 
-    findPair @editor, from, @pair, 'forward', (event) =>
-      return if filters.some((filter) -> filter(event))
-
-      {range, stop} = event
-      if @getPairState(event) is 'open'
-        stack.push(event)
-      else
-        openEvent = stack.pop()
-        if stack.length is 0 and ((not openEvent?) or isValidOpen(openEvent))
-          closeRange = range
-          stop()
-    closeRange
+    options = {@editor, from, @pair, which: 'close', direction: 'forward', filters: @getFilters(from)}
+    findPairRange options, (stack, openEvent) ->
+      stack.length is 0 and ((not openEvent?) or isValidOpen(openEvent))
 
   getPairInfo: (from) ->
     pairInfo = null
