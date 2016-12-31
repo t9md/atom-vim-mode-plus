@@ -52,10 +52,25 @@ class Pair extends TextObject
   supportCount: true
 
   # Return 'open' or 'close'
-  getPairState: ({match}) ->
-    switch
-      when match[1] then 'open'
-      when match[2] then 'close'
+  getPairState: ({matchText, range, match}) ->
+    switch match.length
+      when 2
+        @pairStateInBufferRange(range, matchText)
+      when 3
+        switch
+          when match[1] then 'open'
+          when match[2] then 'close'
+
+  pairStateInBufferRange: (range, char) ->
+    text = getLineTextToBufferPosition(@editor, range.end)
+    escapedChar = _.escapeRegExp(char)
+    bs = backSlashPattern
+    patterns = [
+      "#{bs}#{bs}#{escapedChar}"
+      "[^#{bs}]?#{escapedChar}"
+    ]
+    pattern = new RegExp(patterns.join('|'))
+    ['close', 'open'][(countChar(text, pattern) % 2)]
 
   getFilters: (from) ->
     filters = []
@@ -253,20 +268,6 @@ class Quote extends Pair
   @extend(false)
   allowForwarding: true
   allowNextLine: false
-
-  getPairState: ({matchText, range, match}) ->
-    @pairStateInBufferRange(range, matchText)
-
-  pairStateInBufferRange: (range, char) ->
-    text = getLineTextToBufferPosition(@editor, range.end)
-    escapedChar = _.escapeRegExp(char)
-    bs = backSlashPattern
-    patterns = [
-      "#{bs}#{bs}#{escapedChar}"
-      "[^#{bs}]?#{escapedChar}"
-    ]
-    pattern = new RegExp(patterns.join('|'))
-    ['close', 'open'][(countChar(text, pattern) % 2)]
 
 class DoubleQuote extends Quote
   @extend(false)
