@@ -27,11 +27,16 @@ scanPair = (editor, from, pair, direction, fn) ->
       scanRange = new Range([0, 0], from)
       editor.backwardsScanInBufferRange(pattern, scanRange, fn)
 
-findPairRange = ({editor, from, pair, which, direction, filters}, fn) ->
+findPairRange = (options, fn) ->
+  {editor, from, pair, which, direction, filters, allowNextLine} = options
   stack = []
   range = null
 
   scanPair editor, from, pair, direction, (event) ->
+    if not allowNextLine and (from.row isnt event.range.start.row)
+      event.stop()
+      return
+
     if filters? and filters.some((filter) -> filter(event))
       return
 
@@ -92,24 +97,13 @@ class Pair extends TextObject
 
   getFilters: (from) ->
     filters = []
-    if not @allowNextLine
-      isNotSameLine = ({range, stop}) ->
-        if from.row isnt range.start.row
-          stop()
-          true
-        else
-          false
-
-      filters.push(isNotSameLine)
-
     isEscaped = ({range}) => isEscapedCharAtPoint(@editor, range.start)
-
     filters.push(isEscaped)
-
     filters
 
   findOpen: (from) ->
     options = {@editor, from, @pair, which: 'open', direction: 'backward', filters: @getFilters(from)}
+    options.allowNextLine = @allowNextLine
     findPairRange options, (stack, openEvent) ->
       stack.length is 0
 
@@ -119,8 +113,9 @@ class Pair extends TextObject
       start.isEqual(from) or (@allowForwarding and start.row is from.row)
 
     options = {@editor, from, @pair, which: 'close', direction: 'forward', filters: @getFilters(from)}
+    options.allowNextLine = @allowNextLine
     findPairRange options, (stack, openEvent) ->
-      stack.length is 0 and ((not openEvent?) or isValidOpen(openEvent))
+      stack.length is 0 and (not openEvent? or isValidOpen(openEvent))
 
   getPairInfo: (from) ->
     pairInfo = null
