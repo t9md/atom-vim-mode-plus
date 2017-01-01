@@ -74,11 +74,11 @@ findPairRange = (which, direction, options, fn) ->
 
   return range
 
-findClosePairRangeForward = (options, fn) ->
+findClosePairRangeForward = (finder, options) ->
   {allowForwarding, from} = options
   delete options.allowForwarding
 
-  findPairRange 'close', 'forward', options, (stack, openEvent) ->
+  finder 'close', 'forward', options, (stack, openEvent) ->
     unless openEvent?
       return true
 
@@ -86,14 +86,14 @@ findClosePairRangeForward = (options, fn) ->
       {start} = openEvent.range
       start.isEqual(from) or (allowForwarding and start.row is from.row)
 
-findOpenPairRangeBackward = (options, fn) ->
-  findPairRange 'open', 'backward', options, (stack, openEvent) ->
+findOpenPairRangeBackward = (finder, options) ->
+  finder 'open', 'backward', options, (stack, openEvent) ->
     stack.length is 0
 
 getPairRangeInformation = (options) ->
-  if closeRange = findClosePairRangeForward(options)
+  if closeRange = findClosePairRangeForward(findPairRange, options)
     options.from = closeRange.end
-    openRange = findOpenPairRangeBackward(options)
+    openRange = findOpenPairRangeBackward(findPairRange, options)
 
   if openRange?
     {
@@ -411,29 +411,12 @@ getTagState = (event) ->
   {
     state: if (backslash is '') then 'open' else 'close'
     name: event.match[2]
-    event: event
+    range: event.range
   }
 
 findTagState = (stack, state, name) ->
   for tagState in stack by -1 when (tagState.state is state) and (tagState.name is name)
     return tagState
-
-findCloseTagRangeForward = (options) ->
-  {from, allowForwarding} = options
-  delete options.allowForwarding
-
-  findTagRange 'close', 'forward', options, (stack, openTagState) ->
-    unless openTagState?
-      # I'm very torelant for orphan tag like 'br', 'hr', or unclosed tag.
-      return true
-
-    if stack.length is 0
-      {start} = openTagState.event.range
-      start.isEqual(from) or (allowForwarding and start.row is from.row)
-
-findOpenTagRangeBackward = (options) ->
-  findTagRange 'open', 'backward', options, (stack, closeTagState) ->
-    stack.length is 0
 
 class Tag extends Pair
   @extend(false)
@@ -455,10 +438,10 @@ class Tag extends Pair
     filters = @getFilters()
     options = {@editor, from, filters, @allowNextLine, @allowForwarding}
 
-    return unless closeRange = findCloseTagRangeForward(options)
+    return unless closeRange = findClosePairRangeForward(findTagRange, options)
 
     options.from = closeRange.end
-    return unless openRange = findOpenTagRangeBackward(options)
+    return unless openRange = findOpenPairRangeBackward(findTagRange, options)
 
     aRange = new Range(openRange.start, closeRange.end)
     innerRange = new Range(openRange.end, closeRange.start)
