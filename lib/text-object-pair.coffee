@@ -10,29 +10,37 @@ TextObject = require('./base').getClass('TextObject')
   getLineTextToBufferPosition
 } = require './utils'
 
-getPatternForPair = (pair) ->
+getRuleForPair = (editor, pair) ->
   [open, close] = pair
-  if open is close
-    new RegExp("(#{_.escapeRegExp(open)})", 'g')
-  else
-    new RegExp("(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})", 'g')
 
-scanPair = (editor, from, pair, direction, fn) ->
-  pattern = getPatternForPair(pair)
-  switch direction
-    when 'forward'
-      scanRange = new Range(from, editor.buffer.getEndPosition())
-      editor.scanInBufferRange(pattern, scanRange, fn)
-    when 'backward'
-      scanRange = new Range([0, 0], from)
-      editor.backwardsScanInBufferRange(pattern, scanRange, fn)
+  if open is close
+    pattern = ///(#{_.escapeRegExp(open)})///g
+    getPairState = (event) ->
+      pairStateInBufferRange(editor, event)
+
+  else
+    pattern = ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
+    getPairState = ({match}) ->
+      switch
+        when match[1] then 'open'
+        when match[2] then 'close'
+
+  {pattern, getPairState}
 
 findPairRange = (options, fn) ->
   {editor, from, pair, which, direction, filters, allowNextLine} = options
+  switch direction
+    when 'forward'
+      scanRange = new Range(from, editor.buffer.getEndPosition())
+      scanFunctionName = 'scanInBufferRange'
+    when 'backward'
+      scanRange = new Range([0, 0], from)
+      scanFunctionName = 'backwardsScanInBufferRange'
+
   stack = []
   range = null
-
-  scanPair editor, from, pair, direction, (event) ->
+  {pattern, getPairState} = getRuleForPair(editor, pair)
+  editor[scanFunctionName] pattern, scanRange, (event) ->
     if not allowNextLine and (from.row isnt event.range.start.row)
       event.stop()
       return
@@ -40,14 +48,15 @@ findPairRange = (options, fn) ->
     if filters? and filters.some((filter) -> filter(event))
       return
 
-    if getPairState(editor, event) isnt which
+    if getPairState(event) isnt which
       stack.push(event)
     else
       topEvent = stack.pop()
       if fn(stack, topEvent)
         range = event.range
         event.stop()
-  range
+
+  return range
 
 # Take start point of matched range.
 backSlashPattern = _.escapeRegExp('\\')
@@ -60,17 +69,6 @@ isEscapedCharAtPoint = (editor, point) ->
       stop()
       escaped = true
   escaped
-
-# Return 'open' or 'close'
-getPairState = (editor, event) ->
-  {matchText, range, match} = event
-  switch match.length
-    when 2
-      pairStateInBufferRange(editor, event)
-    when 3
-      switch
-        when match[1] then 'open'
-        when match[2] then 'close'
 
 pairStateInBufferRange = (editor, {matchText, range}) ->
   text = getLineTextToBufferPosition(editor, range.end)
@@ -86,9 +84,6 @@ pairStateInBufferRange = (editor, {matchText, range}) ->
 # -------------------------
 class Pair extends TextObject
   @extend(false)
-
-  _newStyle: true # REMOVE after rewrite DONE
-
   allowNextLine: false
   adjustInnerRange: true
   pair: null
@@ -119,13 +114,14 @@ class Pair extends TextObject
 
   getPairInfo: (from) ->
     pairInfo = null
-    if @_newStyle
-      closeRange = @findClose(from)
-      openRange = @findOpen(closeRange.end) if closeRange?
-    else
+    if @instanceof('Tag')
+      # Old Style
       pattern = @getPattern()
       closeRange = @findClose(from, pattern)
       openRange = @findOpen(closeRange.end, pattern) if closeRange?
+    else
+      closeRange = @findClose(from)
+      openRange = @findOpen(closeRange.end) if closeRange?
 
     unless (openRange? and closeRange?)
       return null
@@ -371,9 +367,6 @@ class InnerAngleBracketAllowForwarding extends AngleBracket
 tagPattern = /(<(\/?))([^\s>]+)[^>]*>/g
 class Tag extends Pair
   @extend(false)
-
-  _newStyle: false # REMOVE after rewrite DONE
-
   allowNextLine: true
   allowForwarding: true
   adjustInnerRange: false
