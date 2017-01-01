@@ -110,11 +110,19 @@ isEscapedCharAtPoint = (editor, point) ->
 # -------------------------
 class Pair extends TextObject
   @extend(false)
-  allowNextLine: false
+  allowNextLine: null
   adjustInnerRange: true
   pair: null
   wise: 'characterwise'
   supportCount: true
+
+  isAllowNextLine: ->
+    @allowNextLine ? (@pair? and @pair[0] isnt @pair[1])
+
+  constructor: ->
+    # auto-set property from class name.
+    @allowForwarding ?= @getName().endsWith('AllowForwarding')
+    super
 
   getFilters: (from) ->
     filters = []
@@ -163,7 +171,8 @@ class Pair extends TextObject
       {openRange, closeRange, aRange, innerRange, targetRange}
     else
       filters = @getFilters(from)
-      pairInfo = getPairRangeInformation({@editor, from, @pair, filters, @allowNextLine, @allowForwarding})
+      allowNextLine = @isAllowNextLine()
+      pairInfo = getPairRangeInformation({@editor, from, @pair, filters, allowNextLine, @allowForwarding})
       unless pairInfo?
         return null
       pairInfo.innerRange = @adjustRange(pairInfo.innerRange) if @adjustInnerRange
@@ -186,6 +195,10 @@ class Pair extends TextObject
     if pairInfo?.targetRange.isEqual(originalRange)
       pairInfo = @getPairInfo(pairInfo.aRange.end)
     pairInfo?.targetRange
+
+# Used by DeleteSurround
+class APair extends Pair
+  @extend(false)
 
 # -------------------------
 class AnyPair extends Pair
@@ -262,7 +275,6 @@ class InnerAnyQuote extends AnyQuote
 class Quote extends Pair
   @extend(false)
   allowForwarding: true
-  allowNextLine: false
 
 class DoubleQuote extends Quote
   @extend(false)
@@ -301,7 +313,6 @@ class InnerBackTick extends BackTick
 class CurlyBracket extends Pair
   @extend(false)
   pair: ['{', '}']
-  allowNextLine: true
 
 class ACurlyBracket extends CurlyBracket
   @extend()
@@ -311,17 +322,14 @@ class InnerCurlyBracket extends CurlyBracket
 
 class ACurlyBracketAllowForwarding extends CurlyBracket
   @extend()
-  allowForwarding: true
 
 class InnerCurlyBracketAllowForwarding extends CurlyBracket
   @extend()
-  allowForwarding: true
 
 # -------------------------
 class SquareBracket extends Pair
   @extend(false)
   pair: ['[', ']']
-  allowNextLine: true
 
 class ASquareBracket extends SquareBracket
   @extend()
@@ -331,17 +339,14 @@ class InnerSquareBracket extends SquareBracket
 
 class ASquareBracketAllowForwarding extends SquareBracket
   @extend()
-  allowForwarding: true
 
 class InnerSquareBracketAllowForwarding extends SquareBracket
   @extend()
-  allowForwarding: true
 
 # -------------------------
 class Parenthesis extends Pair
   @extend(false)
   pair: ['(', ')']
-  allowNextLine: true
 
 class AParenthesis extends Parenthesis
   @extend()
@@ -351,17 +356,14 @@ class InnerParenthesis extends Parenthesis
 
 class AParenthesisAllowForwarding extends Parenthesis
   @extend()
-  allowForwarding: true
 
 class InnerParenthesisAllowForwarding extends Parenthesis
   @extend()
-  allowForwarding: true
 
 # -------------------------
 class AngleBracket extends Pair
   @extend(false)
   pair: ['<', '>']
-  allowNextLine: true
 
 class AAngleBracket extends AngleBracket
   @extend()
@@ -371,11 +373,9 @@ class InnerAngleBracket extends AngleBracket
 
 class AAngleBracketAllowForwarding extends AngleBracket
   @extend()
-  allowForwarding: true
 
 class InnerAngleBracketAllowForwarding extends AngleBracket
   @extend()
-  allowForwarding: true
 
 # -------------------------
 tagPattern = /(<(\/?))([^\s>]+)[^>]*>/g

@@ -453,10 +453,7 @@ class SurroundBase extends TransformString
     @processOperation()
 
   onConfirmDeleteSurround: (char) ->
-    @setTarget @new 'Pair',
-      pair: @getPair(char)
-      inner: false
-      allowNextLine: char in @pairCharsAllowForwarding
+    @setTarget @new('APair', pair: @getPair(char))
 
 class Surround extends SurroundBase
   @extend()
