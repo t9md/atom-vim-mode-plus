@@ -408,10 +408,9 @@ findTagRange = (which, direction, options, fn) ->
 
 getTagState = (event) ->
   backslash = event.match[1]
-  tagName = event.match[2]
   {
     state: if (backslash is '') then 'open' else 'close'
-    name: tagName
+    name: event.match[2]
     event: event
   }
 
@@ -456,13 +455,10 @@ class Tag extends Pair
     filters = @getFilters()
     options = {@editor, from, filters, @allowNextLine, @allowForwarding}
 
-    closeRange = findCloseTagRangeForward(options)
-    if closeRange?
-      options.from = closeRange.end
-      openRange = findOpenTagRangeBackward(options)
+    return unless closeRange = findCloseTagRangeForward(options)
 
-    unless (openRange? and closeRange?)
-      return null
+    options.from = closeRange.end
+    return unless openRange = findOpenTagRangeBackward(options)
 
     aRange = new Range(openRange.start, closeRange.end)
     innerRange = new Range(openRange.end, closeRange.start)
