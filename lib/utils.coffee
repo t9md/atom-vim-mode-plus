@@ -824,7 +824,6 @@ humanizeBufferRange = (editor, range) ->
   else
     range
 
-
 expandRangeToWhiteSpaces = (editor, range, directions=[]) ->
   {start, end} = range
 

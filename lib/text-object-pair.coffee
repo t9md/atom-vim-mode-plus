@@ -10,25 +10,41 @@ TextObject = require('./base').getClass('TextObject')
   getLineTextToBufferPosition
 } = require './utils'
 
+pairStateInBufferRange = (editor, {matchText, range}) ->
+  matchText = _.escapeRegExp(matchText)
+  backslash = _.escapeRegExp('\\')
+  patterns = [
+    "#{backslash}#{backslash}#{matchText}"
+    "[^#{backslash}]?#{matchText}"
+  ]
+  pattern = new RegExp(patterns.join('|'))
+  lineText = getLineTextToBufferPosition(editor, range.end)
+  charCount = countChar(lineText, pattern)
+  if charCount % 2 is 0
+    'close'
+  else
+    'open'
+
+getQuotePairRule = (char) ->
+  pattern: ///(#{_.escapeRegExp(char)})///g
+  getPairState: pairStateInBufferRange
+
+getBracketPairRule = (open, close) ->
+  pattern: ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
+  getPairState: (editor, {match}) ->
+    switch
+      when match[1] then 'open'
+      when match[2] then 'close'
+
 getRuleForPair = (editor, pair) ->
   [open, close] = pair
-
   if open is close
-    pattern = ///(#{_.escapeRegExp(open)})///g
-    getPairState = (event) ->
-      pairStateInBufferRange(editor, event)
-
+    getQuotePairRule(open)
   else
-    pattern = ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
-    getPairState = ({match}) ->
-      switch
-        when match[1] then 'open'
-        when match[2] then 'close'
+    getBracketPairRule(open, close)
 
-  {pattern, getPairState}
-
-findPairRange = (options, fn) ->
-  {editor, from, pair, which, direction, filters, allowNextLine} = options
+findPairRange = (which, direction, options, fn) ->
+  {editor, from, pair, filters, allowNextLine} = options
   switch direction
     when 'forward'
       scanRange = new Range(from, editor.buffer.getEndPosition())
@@ -48,7 +64,7 @@ findPairRange = (options, fn) ->
     if filters? and filters.some((filter) -> filter(event))
       return
 
-    if getPairState(event) isnt which
+    if getPairState(editor, event) isnt which
       stack.push(event)
     else
       topEvent = stack.pop()
@@ -58,28 +74,38 @@ findPairRange = (options, fn) ->
 
   return range
 
-# Take start point of matched range.
-backSlashPattern = _.escapeRegExp('\\')
-isEscapedCharAtPoint = (editor, point) ->
-  escaped = false
-  pattern = new RegExp("[^#{backSlashPattern}]#{backSlashPattern}")
-  scanRange = [[point.row, 0], point]
-  editor.backwardsScanInBufferRange pattern, scanRange, ({matchText, range, stop}) ->
-    if range.end.isEqual(point)
-      stop()
-      escaped = true
-  escaped
+findClosePairRangeForward = (options, fn) ->
+  {allowForwarding, from} = options
+  delete options.allowForwarding
 
-pairStateInBufferRange = (editor, {matchText, range}) ->
-  text = getLineTextToBufferPosition(editor, range.end)
-  escapedChar = _.escapeRegExp(matchText)
-  bs = backSlashPattern
-  patterns = [
-    "#{bs}#{bs}#{escapedChar}"
-    "[^#{bs}]?#{escapedChar}"
-  ]
-  pattern = new RegExp(patterns.join('|'))
-  ['close', 'open'][(countChar(text, pattern) % 2)]
+  findPairRange 'close', 'forward', options, (stack, openEvent) ->
+    if stack.length is 0
+      if not openEvent?
+        true
+      else
+        {start} = openEvent.range
+        start.isEqual(from) or (allowForwarding and start.row is from.row)
+
+findOpenPairRangeBackward = (options, fn) ->
+  findPairRange 'open', 'backward', options, (stack, openEvent) ->
+    stack.length is 0
+
+getPairRangeInformation = (options) ->
+  if closeRange = findClosePairRangeForward(options)
+    options.from = closeRange.end
+    openRange = findOpenPairRangeBackward(options)
+
+  if openRange?
+    {
+      aRange: new Range(openRange.start, closeRange.end)
+      innerRange: new Range(openRange.end, closeRange.start)
+      openRange: openRange
+      closeRange: closeRange
+    }
+
+isEscapedCharAtPoint = (editor, point) ->
+  text = getLineTextToBufferPosition(editor, point)
+  text.endsWith('\\') and not text.endsWith('\\\\')
 
 # -------------------------
 class Pair extends TextObject
@@ -96,63 +122,53 @@ class Pair extends TextObject
     filters.push(isEscaped)
     filters
 
-  findOpen: (from) ->
-    options = {@editor, from, @pair, which: 'open', direction: 'backward', filters: @getFilters(from)}
-    options.allowNextLine = @allowNextLine
-    findPairRange options, (stack, openEvent) ->
-      stack.length is 0
+  adjustRange: ({start, end}) ->
+    # Dirty work to feel natural for human, to behave compatible with pure Vim.
+    # Where this adjustment appear is in following situation.
+    # op-1: `ci{` replace only 2nd line
+    # op-2: `di{` delete only 2nd line.
+    # text:
+    #  {
+    #    aaa
+    #  }
+    if pointIsAtEndOfLine(@editor, start)
+      start = start.traverse([1, 0])
 
-  findClose: (from) ->
-    isValidOpen = ({range}) =>
-      {start} = range
-      start.isEqual(from) or (@allowForwarding and start.row is from.row)
+    if getLineTextToBufferPosition(@editor, end).match(/^\s*$/)
+      if @isMode('visual')
+        # This is slightly innconsistent with regular Vim
+        # - regular Vim: select new line after EOL
+        # - vim-mode-plus: select to EOL(before new line)
+        # This is intentional since to make submode `characterwise` when auto-detect submode
+        # innerEnd = new Point(innerEnd.row - 1, Infinity)
+        end = new Point(end.row - 1, Infinity)
+      else
+        end = new Point(end.row, 0)
 
-    options = {@editor, from, @pair, which: 'close', direction: 'forward', filters: @getFilters(from)}
-    options.allowNextLine = @allowNextLine
-    findPairRange options, (stack, openEvent) ->
-      stack.length is 0 and (not openEvent? or isValidOpen(openEvent))
+    new Range(start, end)
 
   getPairInfo: (from) ->
-    pairInfo = null
     if @instanceof('Tag')
       # Old Style
       pattern = @getPattern()
       closeRange = @findClose(from, pattern)
       openRange = @findOpen(closeRange.end, pattern) if closeRange?
+      unless (openRange? and closeRange?)
+        return null
+
+      aRange = new Range(openRange.start, closeRange.end)
+      innerRange = new Range(openRange.end, closeRange.start)
+      innerRange = @adjustRange(innerRange) if @adjustInnerRange
+      targetRange = if @isInner() then innerRange else aRange
+      {openRange, closeRange, aRange, innerRange, targetRange}
     else
-      closeRange = @findClose(from)
-      openRange = @findOpen(closeRange.end) if closeRange?
-
-    unless (openRange? and closeRange?)
-      return null
-
-    aRange = new Range(openRange.start, closeRange.end)
-    [innerStart, innerEnd] = [openRange.end, closeRange.start]
-    if @adjustInnerRange
-      # Dirty work to feel natural for human, to behave compatible with pure Vim.
-      # Where this adjustment appear is in following situation.
-      # op-1: `ci{` replace only 2nd line
-      # op-2: `di{` delete only 2nd line.
-      # text:
-      #  {
-      #    aaa
-      #  }
-      if pointIsAtEndOfLine(@editor, innerStart)
-        innerStart = new Point(innerStart.row + 1, 0)
-
-      if getLineTextToBufferPosition(@editor, innerEnd).match(/^\s*$/)
-        if @isMode('visual')
-          # This is slightly innconsistent with regular Vim
-          # - regular Vim: select new line after EOL
-          # - vim-mode-plus: select to EOL(before new line)
-          # This is intentional since to make submode `characterwise` when auto-detect submode
-          innerEnd = new Point(innerEnd.row - 1, Infinity)
-        else
-          innerEnd = new Point(innerEnd.row, 0)
-
-    innerRange = new Range(innerStart, innerEnd)
-    targetRange = if @isInner() then innerRange else aRange
-    {openRange, closeRange, aRange, innerRange, targetRange}
+      filters = @getFilters(from)
+      pairInfo = getPairRangeInformation({@editor, from, @pair, filters, @allowNextLine, @allowForwarding})
+      unless pairInfo?
+        return null
+      pairInfo.innerRange = @adjustRange(pairInfo.innerRange) if @adjustInnerRange
+      pairInfo.targetRange = if @isInner() then pairInfo.innerRange else pairInfo.aRange
+      pairInfo
 
   getPointToSearchFrom: (selection, searchFrom) ->
     switch searchFrom
@@ -175,19 +191,17 @@ class Pair extends TextObject
 class AnyPair extends Pair
   @extend(false)
   allowForwarding: false
-  allowNextLine: null
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
     'CurlyBracket', 'AngleBracket', 'SquareBracket', 'Parenthesis'
   ]
 
   getRangeBy: (klass, selection) ->
-    options = {@inner}
-    options.allowNextLine = @allowNextLine if @allowNextLine?
-    @new(klass, options).getRange(selection, {@allowForwarding, @searchFrom})
+    @new(klass).getRange(selection, {@allowForwarding, @searchFrom})
 
   getRanges: (selection) ->
-    (range for klass in @member when (range = @getRangeBy(klass, selection)))
+    prefix = if @isInner() then 'Inner' else 'A'
+    (range for klass in @member when (range = @getRangeBy(prefix + klass, selection)))
 
   getRange: (selection) ->
     ranges = @getRanges(selection)
@@ -397,26 +411,13 @@ class Tag extends Pair
         return entry
     null
 
-  # Take start point of matched range.
-  isEscapedCharAtPoint: (point) ->
-    found = false
-
-    bs = backSlashPattern
-    pattern = new RegExp("[^#{bs}]#{bs}")
-    scanRange = [[point.row, 0], point]
-    @editor.backwardsScanInBufferRange pattern, scanRange, ({matchText, range, stop}) ->
-      if range.end.isEqual(point)
-        stop()
-        found = true
-    found
-
   findPair: (which, options, fn) ->
     {from, pattern, scanFunc, scanRange} = options
     @editor[scanFunc] pattern, scanRange, (event) =>
       {matchText, range, stop} = event
       unless @allowNextLine or (from.row is range.start.row)
         return stop()
-      return if @isEscapedCharAtPoint(range.start)
+      return if isEscapedCharAtPoint(@editor, range.start)
       fn(event)
 
   findOpen: (from,  pattern) ->
