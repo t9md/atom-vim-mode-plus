@@ -20,7 +20,7 @@ class PairFinder
   getPattern: ->
     @pattern
 
-  findPairRange: (which, direction, from, fn) ->
+  scanPairRange: (which, direction, from, fn) ->
     switch direction
       when 'forward'
         scanRange = new Range(from, @editor.buffer.getEndPosition())
@@ -29,17 +29,20 @@ class PairFinder
         scanRange = new Range([0, 0], from)
         scanFunctionName = 'backwardsScanInBufferRange'
 
-    stack = []
-    range = null
-    @editor[scanFunctionName] @pattern, scanRange, (event) =>
+    @editor[scanFunctionName] @getPattern(), scanRange, (event) =>
       if not @allowNextLine and (from.row isnt event.range.start.row)
         event.stop()
         return
 
-      if @filters.some((filter) -> filter(event))
-        return
+      return if @filters.some((filter) -> filter(event))
 
-      if @getPairState(@editor, event) isnt which
+      fn(event)
+
+  findPairRange: (which, direction, from, fn) ->
+    stack = []
+    range = null
+    @scanPairRange which, direction, from, (event) =>
+      if @getPairState(event) isnt which
         stack.push(event)
       else
         topEvent = stack.pop()
@@ -79,7 +82,7 @@ class BracketFinder extends PairFinder
     [open, close] = pair
     @pattern = ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
 
-  getPairState: (editor, {match}) ->
+  getPairState: ({match}) ->
     switch
       when match[1] then 'open'
       when match[2] then 'close'
@@ -88,7 +91,7 @@ class QuoteFinder extends PairFinder
   setPatternForPair: (pair) ->
     @pattern = ///(#{_.escapeRegExp(pair[0])})///g
 
-  getPairState: (editor, {matchText, range}) ->
+  getPairState: ({matchText, range}) ->
     matchText = _.escapeRegExp(matchText)
     backslash = _.escapeRegExp('\\')
     patterns = [
@@ -96,7 +99,7 @@ class QuoteFinder extends PairFinder
       "[^#{backslash}]?#{matchText}"
     ]
     pattern = new RegExp(patterns.join('|'))
-    lineText = getLineTextToBufferPosition(editor, range.end)
+    lineText = getLineTextToBufferPosition(@editor, range.end)
     charCount = countChar(lineText, pattern)
     if charCount % 2 is 0
       'close'
@@ -114,36 +117,24 @@ class TagFinder extends PairFinder
       range: event.range
     }
 
-  findPairRange: (which, direction, from, fn) ->
-    switch direction
-      when 'forward'
-        scanRange = new Range(from, @editor.buffer.getEndPosition())
-        scanFunctionName = 'scanInBufferRange'
-      when 'backward'
-        scanRange = new Range([0, 0], from)
-        scanFunctionName = 'backwardsScanInBufferRange'
+  findTagState: (stack, state, name) ->
+    for tagState in stack by -1 when (tagState.state is state) and (tagState.name is name)
+      return tagState
 
+  findPairRange: (which, direction, from, fn) ->
     stack = []
     range = null
-
     findingState = which
     oppositeState = switch findingState
       when 'open' then 'close'
       when 'close' then 'open'
 
-    @editor[scanFunctionName] @getPattern(), scanRange, (event) =>
-      if not @allowNextLine and (from.row isnt event.range.start.row)
-        event.stop()
-        return
-
-      if @filters.some((filter) -> filter(event))
-        return
-
+    @scanPairRange which, direction, from, (event) =>
       tagState = @getPairState(event)
-      if tagState.state is oppositeState
+      if tagState.state isnt which
         stack.push(tagState)
       else
-        if oppositeTagState = findTagState(stack, oppositeState, tagState.name)
+        if oppositeTagState = @findTagState(stack, oppositeState, tagState.name)
           stack = stack[0...stack.indexOf(oppositeTagState)]
 
         if fn(stack, oppositeTagState)
@@ -423,18 +414,6 @@ class InnerAngleBracketAllowForwarding extends AngleBracket
 # Tag
 # -------------------------
 tagPattern = /<(\/?)([^\s>]+)[^>]*>/g
-
-getTagState = (event) ->
-  backslash = event.match[1]
-  {
-    state: if (backslash is '') then 'open' else 'close'
-    name: event.match[2]
-    range: event.range
-  }
-
-findTagState = (stack, state, name) ->
-  for tagState in stack by -1 when (tagState.state is state) and (tagState.name is name)
-    return tagState
 
 class Tag extends Pair
   @extend(false)
