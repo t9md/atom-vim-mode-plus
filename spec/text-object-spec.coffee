@@ -1,4 +1,5 @@
 {getVimState, dispatch, TextData} = require './spec-helper'
+settings = require '../lib/settings'
 
 describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -285,6 +286,55 @@ describe "TextObject", ->
         ensure 'a q', selectedText: "'efg'"
 
   describe "DoubleQuote", ->
+    describe "issue-635 new behavior of inner-double-quote", ->
+      beforeEach ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'g r': 'vim-mode-plus:replace'
+
+      describe "quote is un-balanced", ->
+        it "case1", ->
+          set                 textC_: '_|_"____"____"'
+          ensure 'g r i " +', textC_: '__"|++++"____"'
+        it "case2", ->
+          set                 textC_: '__"__|__"____"'
+          ensure 'g r i " +', textC_: '__"|++++"____"'
+        it "case3", ->
+          set                 textC_: '__"____"__|__"'
+          ensure 'g r i " +', textC_: '__"____"|++++"'
+        it "case4", ->
+          set                 textC_: '__|"____"____"'
+          ensure 'g r i " +', textC_: '__"|++++"____"'
+        it "case5", ->
+          set                 textC_: '__"____|"____"'
+          ensure 'g r i " +', textC_: '__"|++++"____"'
+        # xit "case6", -> # FIXME
+        #   set                 textC_: '__"____"____|"'
+        #   ensure 'g r i " +', textC_: '__"____"|++++"'
+
+      describe "quote is balanced", ->
+        it "case1", ->
+          set                 textC_: '_|_"===="____"==="'
+          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+        it "case2", ->
+          set                 textC_: '__"==|=="____"==="'
+          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+        it "case3", ->
+          set                 textC_: '__"===="__|__"==="'
+          ensure 'g r i " +', textC_: '__"===="|++++"==="'
+        it "case4", ->
+          set                 textC_: '__"===="____"=|=="'
+          ensure 'g r i " +', textC_: '__"===="____"|+++"'
+        it "case5", ->
+          set                 textC_: '__|"===="____"==="'
+          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+        it "case6", ->
+          set                 textC_: '__"====|"____"==="'
+          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+        it "case7", ->
+          set                 textC_: '__"===="____|"==="'
+          ensure 'g r i " +', textC_: '__"===="____"|+++"'
+
     describe "inner-double-quote", ->
       beforeEach ->
         set
@@ -296,17 +346,18 @@ describe "TextObject", ->
           text: '""here" " and over here'
           cursor: [0, 1]
 
-      it "skip non-string area and operate forwarding string whithin line", ->
+      it "applies operators inside the current string in operator-pending mode", ->
         set cursor: [0, 29]
         ensure 'd i "',
-          text: '" something in here and in "here"" and over here'
-          cursor: [0, 33]
+          text: '" something in here and in "" " and over here'
+          cursor: [0, 28]
 
       it "makes no change if past the last string on a line", ->
         set cursor: [0, 39]
         ensure 'd i "',
           text: '" something in here and in "here" " and over here'
           cursor: [0, 39]
+
       describe "cursor is on the pair char", ->
         check = getCheckFunctionFor('i "')
         text = '-"+"-'
@@ -331,12 +382,11 @@ describe "TextObject", ->
           cursor: [0, 0]
           mode: 'normal'
 
-      # it "[Changed Behavior] wont applies if its not within string", ->
-      it "skip non-string area and operate forwarding string whithin line", ->
+      it "delete a-double-quote", ->
         set cursor: [0, 29]
         ensure 'd a "',
-          text: '" something in here and in "here'
-          cursor: [0, 31]
+          text: '" something in here and in  "'
+          cursor: [0, 27]
           mode: 'normal'
       describe "cursor is on the pair char", ->
         check = getCheckFunctionFor('a "')
@@ -387,8 +437,8 @@ describe "TextObject", ->
         it "case-2", ->
           set cursor: [0, 17]
           ensure "d i '",
-            text: "'some-key-here\\'': ''"
-            cursor: [0, 20]
+            text: "'some-key-here\\'''here-is-the-val'"
+            cursor: [0, 17]
 
       it "applies operators inside the current string in operator-pending mode", ->
         ensure "d i '",
@@ -440,8 +490,8 @@ describe "TextObject", ->
       it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
         set cursor: [0, 29]
         ensure "d a '",
-          text: "' something in here and in 'here"
-          cursor: [0, 31]
+          text: "' something in here and in  '"
+          cursor: [0, 27]
           mode: 'normal'
       describe "cursor is on the pair char", ->
         check = getCheckFunctionFor("a '")
