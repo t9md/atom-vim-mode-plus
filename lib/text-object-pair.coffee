@@ -11,46 +11,14 @@ TextObject = require('./base').getClass('TextObject')
   isEscapedCharAtPoint
 } = require './utils'
 
-pairStateInBufferRange = (editor, {matchText, range}) ->
-  matchText = _.escapeRegExp(matchText)
-  backslash = _.escapeRegExp('\\')
-  patterns = [
-    "#{backslash}#{backslash}#{matchText}"
-    "[^#{backslash}]?#{matchText}"
-  ]
-  pattern = new RegExp(patterns.join('|'))
-  lineText = getLineTextToBufferPosition(editor, range.end)
-  charCount = countChar(lineText, pattern)
-  if charCount % 2 is 0
-    'close'
-  else
-    'open'
-
-getQuotePairRule = (char) ->
-  pattern: ///(#{_.escapeRegExp(char)})///g
-  getPairState: pairStateInBufferRange
-
-getBracketPairRule = (open, close) ->
-  pattern: ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
-  getPairState: (editor, {match}) ->
-    switch
-      when match[1] then 'open'
-      when match[2] then 'close'
-
-getRuleForPair = (editor, pair) ->
-  [open, close] = pair
-  if open is close
-    getQuotePairRule(open)
-  else
-    getBracketPairRule(open, close)
-
 class PairFinder
   filters: []
 
-  constructor: (@options) ->
-    {@editor, @pair, @filters, @allowNextLine} = @options
-    if @constructor.name isnt 'TagFinder'
-      {@pattern, @getPairState} = getRuleForPair(@editor, @pair)
+  constructor: (options) ->
+    {@editor, @pair, @filters, @allowNextLine} = options
+
+  getPattern: ->
+    @pattern
 
   findPairRange: (which, direction, from, fn) ->
     switch direction
@@ -106,8 +74,45 @@ class PairFinder
         closeRange: closeRange
       }
 
+class BracketFinder extends PairFinder
+  setPatternForPair: (pair) ->
+    [open, close] = pair
+    @pattern = ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
+
+  getPairState: (editor, {match}) ->
+    switch
+      when match[1] then 'open'
+      when match[2] then 'close'
+
+class QuoteFinder extends PairFinder
+  setPatternForPair: (pair) ->
+    @pattern = ///(#{_.escapeRegExp(pair[0])})///g
+
+  getPairState: (editor, {matchText, range}) ->
+    matchText = _.escapeRegExp(matchText)
+    backslash = _.escapeRegExp('\\')
+    patterns = [
+      "#{backslash}#{backslash}#{matchText}"
+      "[^#{backslash}]?#{matchText}"
+    ]
+    pattern = new RegExp(patterns.join('|'))
+    lineText = getLineTextToBufferPosition(editor, range.end)
+    charCount = countChar(lineText, pattern)
+    if charCount % 2 is 0
+      'close'
+    else
+      'open'
+
 class TagFinder extends PairFinder
   pattern: /<(\/?)([^\s>]+)[^>]*>/g
+
+  getPairState: (event) ->
+    backslash = event.match[1]
+    {
+      state: if (backslash is '') then 'open' else 'close'
+      name: event.match[2]
+      range: event.range
+    }
 
   findPairRange: (which, direction, from, fn) ->
     switch direction
@@ -126,7 +131,7 @@ class TagFinder extends PairFinder
       when 'open' then 'close'
       when 'close' then 'open'
 
-    @editor[scanFunctionName] @pattern, scanRange, (event) =>
+    @editor[scanFunctionName] @getPattern(), scanRange, (event) =>
       if not @allowNextLine and (from.row isnt event.range.start.row)
         event.stop()
         return
@@ -134,7 +139,7 @@ class TagFinder extends PairFinder
       if @filters.some((filter) -> filter(event))
         return
 
-      tagState = getTagState(event)
+      tagState = @getPairState(event)
       if tagState.state is oppositeState
         stack.push(tagState)
       else
@@ -198,7 +203,15 @@ class Pair extends TextObject
   getFinder: (from) ->
     filters = @getFilters()
     allowNextLine = @isAllowNextLine()
-    new PairFinder({@editor, from, @pair, filters, allowNextLine})
+    options = {@editor, from, filters, allowNextLine}
+
+    if @pair[0] is @pair[1]
+      finder = new QuoteFinder(options)
+    else
+      finder = new BracketFinder(options)
+
+    finder.setPatternForPair(@pair)
+    finder
 
   getPairInfo: (from) ->
     finder = @getFinder(from)
