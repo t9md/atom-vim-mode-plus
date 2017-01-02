@@ -152,7 +152,6 @@ class Word extends TextObject
 
 class AWord extends Word
   @extend()
-
 class InnerWord extends Word
   @extend()
 
@@ -163,7 +162,6 @@ class WholeWord extends Word
 
 class AWholeWord extends WholeWord
   @extend()
-
 class InnerWholeWord extends WholeWord
   @extend()
 
@@ -176,7 +174,6 @@ class SmartWord extends Word
 class ASmartWord extends SmartWord
   @description: "A word that consists of alphanumeric chars(`/[A-Za-z0-9_]/`) and hyphen `-`"
   @extend()
-
 class InnerSmartWord extends SmartWord
   @description: "Currently No diff from `a-smart-word`"
   @extend()
@@ -191,7 +188,6 @@ class Subword extends Word
 
 class ASubword extends Subword
   @extend()
-
 class InnerSubword extends Subword
   @extend()
 
@@ -298,7 +294,6 @@ class AnyPair extends Pair
 
 class AAnyPair extends AnyPair
   @extend()
-
 class InnerAnyPair extends AnyPair
   @extend()
 
@@ -327,7 +322,6 @@ class AnyPairAllowForwarding extends AnyPair
 
 class AAnyPairAllowForwarding extends AnyPairAllowForwarding
   @extend()
-
 class InnerAnyPairAllowForwarding extends AnyPairAllowForwarding
   @extend()
 
@@ -343,7 +337,6 @@ class AnyQuote extends AnyPair
 
 class AAnyQuote extends AnyQuote
   @extend()
-
 class InnerAnyQuote extends AnyQuote
   @extend()
 
@@ -352,13 +345,13 @@ class Quote extends Pair
   @extend(false)
   allowForwarding: true
 
+# -------------------------
 class DoubleQuote extends Quote
   @extend(false)
   pair: ['"', '"']
 
 class ADoubleQuote extends DoubleQuote
   @extend()
-
 class InnerDoubleQuote extends DoubleQuote
   @extend()
 
@@ -369,7 +362,6 @@ class SingleQuote extends Quote
 
 class ASingleQuote extends SingleQuote
   @extend()
-
 class InnerSingleQuote extends SingleQuote
   @extend()
 
@@ -380,7 +372,6 @@ class BackTick extends Quote
 
 class ABackTick extends BackTick
   @extend()
-
 class InnerBackTick extends BackTick
   @extend()
 
@@ -392,13 +383,10 @@ class CurlyBracket extends Pair
 
 class ACurlyBracket extends CurlyBracket
   @extend()
-
 class InnerCurlyBracket extends CurlyBracket
   @extend()
-
 class ACurlyBracketAllowForwarding extends CurlyBracket
   @extend()
-
 class InnerCurlyBracketAllowForwarding extends CurlyBracket
   @extend()
 
@@ -409,13 +397,10 @@ class SquareBracket extends Pair
 
 class ASquareBracket extends SquareBracket
   @extend()
-
 class InnerSquareBracket extends SquareBracket
   @extend()
-
 class ASquareBracketAllowForwarding extends SquareBracket
   @extend()
-
 class InnerSquareBracketAllowForwarding extends SquareBracket
   @extend()
 
@@ -426,13 +411,10 @@ class Parenthesis extends Pair
 
 class AParenthesis extends Parenthesis
   @extend()
-
 class InnerParenthesis extends Parenthesis
   @extend()
-
 class AParenthesisAllowForwarding extends Parenthesis
   @extend()
-
 class InnerParenthesisAllowForwarding extends Parenthesis
   @extend()
 
@@ -443,13 +425,10 @@ class AngleBracket extends Pair
 
 class AAngleBracket extends AngleBracket
   @extend()
-
 class InnerAngleBracket extends AngleBracket
   @extend()
-
 class AAngleBracketAllowForwarding extends AngleBracket
   @extend()
-
 class InnerAngleBracketAllowForwarding extends AngleBracket
   @extend()
 
@@ -479,7 +458,6 @@ class Tag extends Pair
 
 class ATag extends Tag
   @extend()
-
 class InnerTag extends Tag
   @extend()
 
@@ -548,7 +526,6 @@ class Paragraph extends TextObject
 
 class AParagraph extends Paragraph
   @extend()
-
 class InnerParagraph extends Paragraph
   @extend()
 
@@ -571,7 +548,6 @@ class Indentation extends Paragraph
 
 class AIndentation extends Indentation
   @extend()
-
 class InnerIndentation extends Indentation
   @extend()
 
@@ -589,7 +565,6 @@ class Comment extends TextObject
 
 class AComment extends Comment
   @extend()
-
 class InnerComment extends Comment
   @extend()
 
@@ -622,7 +597,6 @@ class Fold extends TextObject
 
 class AFold extends Fold
   @extend()
-
 class InnerFold extends Fold
   @extend()
 
@@ -647,7 +621,6 @@ class Function extends Fold
 
 class AFunction extends Function
   @extend()
-
 class InnerFunction extends Function
   @extend()
 
@@ -664,7 +637,6 @@ class CurrentLine extends TextObject
 
 class ACurrentLine extends CurrentLine
   @extend()
-
 class InnerCurrentLine extends CurrentLine
   @extend()
 
@@ -678,12 +650,9 @@ class Entire extends TextObject
 
 class AEntire extends Entire
   @extend()
-
 class InnerEntire extends Entire
   @extend()
-
-# Alias as accessible name
-class All extends Entire
+class All extends Entire # Alias as accessible name
   @extend(false)
 
 # -------------------------
@@ -699,9 +668,7 @@ class LatestChange extends TextObject
 
 class ALatestChange extends LatestChange
   @extend()
-
-# No diff from ALatestChange
-class InnerLatestChange extends LatestChange
+class InnerLatestChange extends LatestChange # No diff from ALatestChange
   @extend()
 
 # -------------------------
@@ -789,7 +756,6 @@ class PersistentSelection extends TextObject
 
 class APersistentSelection extends PersistentSelection
   @extend()
-
 class InnerPersistentSelection extends PersistentSelection
   @extend()
 
@@ -809,7 +775,6 @@ class VisibleArea extends TextObject # 822 to 863
 
 class AVisibleArea extends VisibleArea
   @extend()
-
 class InnerVisibleArea extends VisibleArea
   @extend()
 
@@ -842,6 +807,5 @@ class Edge extends TextObject
 
 class AEdge extends Edge
   @extend()
-
 class InnerEdge extends Edge
   @extend()
