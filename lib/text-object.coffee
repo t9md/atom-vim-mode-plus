@@ -10,7 +10,6 @@ settings = require './settings'
 Base = require './base'
 swrap = require './selection-wrapper'
 {
-  sortRanges, sortRangesByEndPosition, countChar, pointIsAtEndOfLine,
   getLineTextToBufferPosition
   getIndentLevelForBufferRow
   getCodeFoldRowRangesContainesForRow
@@ -19,11 +18,14 @@ swrap = require './selection-wrapper'
   expandRangeToWhiteSpaces
   getVisibleBufferRange
   translatePointAndClip
-  getRangeByTranslatePointAndClip
   getBufferRows
   getValidVimBufferRow
   trimRange
+
+  sortRanges
+  pointIsAtEndOfLine
 } = require './utils'
+{BracketFinder, QuoteFinder, TagFinder} = require './pair-finder.coffee'
 
 class TextObject extends Base
   @extend(false)
@@ -196,141 +198,62 @@ class InnerSubword extends Subword
 # -------------------------
 class Pair extends TextObject
   @extend(false)
-  allowNextLine: false
+  allowNextLine: null
   adjustInnerRange: true
   pair: null
   wise: 'characterwise'
   supportCount: true
 
-  getPattern: ->
-    [open, close] = @pair
-    if open is close
-      new RegExp("(#{_.escapeRegExp(open)})", 'g')
+  isAllowNextLine: ->
+    @allowNextLine ? (@pair? and @pair[0] isnt @pair[1])
+
+  constructor: ->
+    # auto-set property from class name.
+    @allowForwarding ?= @getName().endsWith('AllowForwarding')
+    super
+
+  adjustRange: ({start, end}) ->
+    # Dirty work to feel natural for human, to behave compatible with pure Vim.
+    # Where this adjustment appear is in following situation.
+    # op-1: `ci{` replace only 2nd line
+    # op-2: `di{` delete only 2nd line.
+    # text:
+    #  {
+    #    aaa
+    #  }
+    if pointIsAtEndOfLine(@editor, start)
+      start = start.traverse([1, 0])
+
+    if getLineTextToBufferPosition(@editor, end).match(/^\s*$/)
+      if @isMode('visual')
+        # This is slightly innconsistent with regular Vim
+        # - regular Vim: select new line after EOL
+        # - vim-mode-plus: select to EOL(before new line)
+        # This is intentional since to make submode `characterwise` when auto-detect submode
+        # innerEnd = new Point(innerEnd.row - 1, Infinity)
+        end = new Point(end.row - 1, Infinity)
+      else
+        end = new Point(end.row, 0)
+
+    new Range(start, end)
+
+  getFinder: ->
+    if @pair[0] is @pair[1]
+      finder = new QuoteFinder(@editor, allowNextLine: @isAllowNextLine())
     else
-      new RegExp("(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})", 'g')
+      finder = new BracketFinder(@editor, allowNextLine: @isAllowNextLine())
 
-  # Return 'open' or 'close'
-  getPairState: ({matchText, range, match}) ->
-    switch match.length
-      when 2
-        @pairStateInBufferRange(range, matchText)
-      when 3
-        switch
-          when match[1] then 'open'
-          when match[2] then 'close'
-
-  backSlashPattern = _.escapeRegExp('\\')
-  pairStateInBufferRange: (range, char) ->
-    text = getLineTextToBufferPosition(@editor, range.end)
-    escapedChar = _.escapeRegExp(char)
-    bs = backSlashPattern
-    patterns = [
-      "#{bs}#{bs}#{escapedChar}"
-      "[^#{bs}]?#{escapedChar}"
-    ]
-    pattern = new RegExp(patterns.join('|'))
-    ['close', 'open'][(countChar(text, pattern) % 2)]
-
-  # Take start point of matched range.
-  isEscapedCharAtPoint: (point) ->
-    found = false
-
-    bs = backSlashPattern
-    pattern = new RegExp("[^#{bs}]#{bs}")
-    scanRange = [[point.row, 0], point]
-    @editor.backwardsScanInBufferRange pattern, scanRange, ({matchText, range, stop}) ->
-      if range.end.isEqual(point)
-        stop()
-        found = true
-    found
-
-  findPair: (which, options, fn) ->
-    {from, pattern, scanFunc, scanRange} = options
-    @editor[scanFunc] pattern, scanRange, (event) =>
-      {matchText, range, stop} = event
-      unless @allowNextLine or (from.row is range.start.row)
-        return stop()
-      return if @isEscapedCharAtPoint(range.start)
-      fn(event)
-
-  findOpen: (from,  pattern) ->
-    scanFunc = 'backwardsScanInBufferRange'
-    scanRange = new Range([0, 0], from)
-    stack = []
-    found = null
-    @findPair 'open', {from, pattern, scanFunc, scanRange}, (event) =>
-      {matchText, range, stop} = event
-      pairState = @getPairState(event)
-      if pairState is 'close'
-        stack.push({pairState, matchText, range})
-      else
-        stack.pop()
-        if stack.length is 0
-          found = range
-      stop() if found?
-    found
-
-  findClose: (from,  pattern) ->
-    scanFunc = 'scanInBufferRange'
-    scanRange = new Range(from, @editor.buffer.getEndPosition())
-    stack = []
-    found = null
-    @findPair 'close', {from, pattern, scanFunc, scanRange}, (event) =>
-      {range, stop} = event
-      pairState = @getPairState(event)
-      if pairState is 'open'
-        stack.push({pairState, range})
-      else
-        entry = stack.pop()
-        if stack.length is 0
-          if (openStart = entry?.range.start)
-            if @allowForwarding
-              return if openStart.row > from.row
-            else
-              return if openStart.isGreaterThan(from)
-          found = range
-      stop() if found?
-    found
+    finder.setPatternForPair(@pair)
+    finder
 
   getPairInfo: (from) ->
-    pairInfo = null
-    pattern = @getPattern()
-    closeRange = @findClose from, pattern
-    openRange = @findOpen closeRange.end, pattern if closeRange?
-
-    unless (openRange? and closeRange?)
+    finder = @getFinder(from)
+    pairInfo = finder.find(from, {@allowForwarding})
+    unless pairInfo?
       return null
-
-    aRange = new Range(openRange.start, closeRange.end)
-    [innerStart, innerEnd] = [openRange.end, closeRange.start]
-    if @adjustInnerRange
-      # Dirty work to feel natural for human, to behave compatible with pure Vim.
-      # Where this adjustment appear is in following situation.
-      # op-1: `ci{` replace only 2nd line
-      # op-2: `di{` delete only 2nd line.
-      # text:
-      #  {
-      #    aaa
-      #  }
-      if pointIsAtEndOfLine(@editor, innerStart)
-        innerStart = new Point(innerStart.row + 1, 0)
-
-      if getLineTextToBufferPosition(@editor, innerEnd).match(/^\s*$/)
-        if @isMode('visual')
-          # This is slightly innconsistent with regular Vim
-          # - regular Vim: select new line after EOL
-          # - vim-mode-plus: select to EOL(before new line)
-          # This is intentional since to make submode `characterwise` when auto-detect submode
-          innerEnd = new Point(innerEnd.row - 1, Infinity)
-        else
-          innerEnd = new Point(innerEnd.row, 0)
-
-    innerRange = new Range(innerStart, innerEnd)
-    targetRange = if @isInner() then innerRange else aRange
-    if @skipEmptyPair and innerRange.isEmpty()
-      @getPairInfo(aRange.end)
-    else
-      {openRange, closeRange, aRange, innerRange, targetRange}
+    pairInfo.innerRange = @adjustRange(pairInfo.innerRange) if @adjustInnerRange
+    pairInfo.targetRange = if @isInner() then pairInfo.innerRange else pairInfo.aRange
+    pairInfo
 
   getPointToSearchFrom: (selection, searchFrom) ->
     switch searchFrom
@@ -349,24 +272,25 @@ class Pair extends TextObject
       pairInfo = @getPairInfo(pairInfo.aRange.end)
     pairInfo?.targetRange
 
+# Used by DeleteSurround
+class APair extends Pair
+  @extend(false)
+
 # -------------------------
 class AnyPair extends Pair
   @extend(false)
   allowForwarding: false
-  allowNextLine: null
-  skipEmptyPair: false
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
     'CurlyBracket', 'AngleBracket', 'SquareBracket', 'Parenthesis'
   ]
 
   getRangeBy: (klass, selection) ->
-    options = {@inner, @skipEmptyPair}
-    options.allowNextLine = @allowNextLine if @allowNextLine?
-    @new(klass, options).getRange(selection, {@allowForwarding, @searchFrom})
+    @new(klass).getRange(selection, {@allowForwarding, @searchFrom})
 
   getRanges: (selection) ->
-    (range for klass in @member when (range = @getRangeBy(klass, selection)))
+    prefix = if @isInner() then 'Inner' else 'A'
+    (range for klass in @member when (range = @getRangeBy(prefix + klass, selection)))
 
   getRange: (selection) ->
     ranges = @getRanges(selection)
@@ -383,7 +307,6 @@ class AnyPairAllowForwarding extends AnyPair
   @extend(false)
   @description: "Range surrounded by auto-detected paired chars from enclosed and forwarding area"
   allowForwarding: true
-  skipEmptyPair: false
   searchFrom: 'start'
   getRange: (selection) ->
     ranges = @getRanges(selection)
@@ -428,7 +351,6 @@ class InnerAnyQuote extends AnyQuote
 class Quote extends Pair
   @extend(false)
   allowForwarding: true
-  allowNextLine: false
 
 class DoubleQuote extends Quote
   @extend(false)
@@ -467,7 +389,6 @@ class InnerBackTick extends BackTick
 class CurlyBracket extends Pair
   @extend(false)
   pair: ['{', '}']
-  allowNextLine: true
 
 class ACurlyBracket extends CurlyBracket
   @extend()
@@ -477,17 +398,14 @@ class InnerCurlyBracket extends CurlyBracket
 
 class ACurlyBracketAllowForwarding extends CurlyBracket
   @extend()
-  allowForwarding: true
 
 class InnerCurlyBracketAllowForwarding extends CurlyBracket
   @extend()
-  allowForwarding: true
 
 # -------------------------
 class SquareBracket extends Pair
   @extend(false)
   pair: ['[', ']']
-  allowNextLine: true
 
 class ASquareBracket extends SquareBracket
   @extend()
@@ -497,17 +415,14 @@ class InnerSquareBracket extends SquareBracket
 
 class ASquareBracketAllowForwarding extends SquareBracket
   @extend()
-  allowForwarding: true
 
 class InnerSquareBracketAllowForwarding extends SquareBracket
   @extend()
-  allowForwarding: true
 
 # -------------------------
 class Parenthesis extends Pair
   @extend(false)
   pair: ['(', ')']
-  allowNextLine: true
 
 class AParenthesis extends Parenthesis
   @extend()
@@ -517,17 +432,14 @@ class InnerParenthesis extends Parenthesis
 
 class AParenthesisAllowForwarding extends Parenthesis
   @extend()
-  allowForwarding: true
 
 class InnerParenthesisAllowForwarding extends Parenthesis
   @extend()
-  allowForwarding: true
 
 # -------------------------
 class AngleBracket extends Pair
   @extend(false)
   pair: ['<', '>']
-  allowNextLine: true
 
 class AAngleBracket extends AngleBracket
   @extend()
@@ -537,92 +449,33 @@ class InnerAngleBracket extends AngleBracket
 
 class AAngleBracketAllowForwarding extends AngleBracket
   @extend()
-  allowForwarding: true
 
 class InnerAngleBracketAllowForwarding extends AngleBracket
   @extend()
-  allowForwarding: true
 
+# Tag
 # -------------------------
-tagPattern = /(<(\/?))([^\s>]+)[^>]*>/g
 class Tag extends Pair
   @extend(false)
   allowNextLine: true
   allowForwarding: true
   adjustInnerRange: false
-  getPattern: ->
-    tagPattern
-
-  getPairState: ({match, matchText}) ->
-    [__, __, slash, tagName] = match
-    if slash is ''
-      ['open', tagName]
-    else
-      ['close', tagName]
 
   getTagStartPoint: (from) ->
     tagRange = null
     scanRange = @editor.bufferRangeForBufferRow(from.row)
-    @editor.scanInBufferRange tagPattern, scanRange, ({range, stop}) ->
+    pattern = TagFinder::pattern
+    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
       if range.containsPoint(from, true)
         tagRange = range
         stop()
     tagRange?.start ? from
 
-  findTagState: (stack, tagState) ->
-    return null if stack.length is 0
-    for i in [(stack.length - 1)..0]
-      entry = stack[i]
-      if entry.tagState is tagState
-        return entry
-    null
+  getFinder: ->
+    new TagFinder(@editor, allowNextLine: @isAllowNextLine())
 
-  findOpen: (from,  pattern) ->
-    scanFunc = 'backwardsScanInBufferRange'
-    scanRange = new Range([0, 0], from)
-    stack = []
-    found = null
-    @findPair 'open', {from, pattern, scanFunc, scanRange}, (event) =>
-      {range, stop} = event
-      [pairState, tagName] = @getPairState(event)
-      if pairState is 'close'
-        tagState = pairState + tagName
-        stack.push({tagState, range})
-      else
-        if entry = @findTagState(stack, "close#{tagName}")
-          stack = stack[0...stack.indexOf(entry)]
-        if stack.length is 0
-          found = range
-      stop() if found?
-    found
-
-  findClose: (from,  pattern) ->
-    scanFunc = 'scanInBufferRange'
-    from = @getTagStartPoint(from)
-    scanRange = new Range(from, @editor.buffer.getEndPosition())
-    stack = []
-    found = null
-    @findPair 'close', {from, pattern, scanFunc, scanRange}, (event) =>
-      {range, stop} = event
-      [pairState, tagName] = @getPairState(event)
-      if pairState is 'open'
-        tagState = pairState + tagName
-        stack.push({tagState, range})
-      else
-        if entry = @findTagState(stack, "open#{tagName}")
-          stack = stack[0...stack.indexOf(entry)]
-        else
-          # I'm very torelant for orphan tag like 'br', 'hr', or unclosed tag.
-          stack = []
-        if stack.length is 0
-          if (openStart = entry?.range.start)
-            if @allowForwarding
-              return if openStart.row > from.row
-            else
-              return if openStart.isGreaterThan(from)
-          found = range
-      stop() if found?
-    found
+  getPairInfo: (from) ->
+    super(@getTagStartPoint(from))
 
 class ATag extends Tag
   @extend()

@@ -824,7 +824,6 @@ humanizeBufferRange = (editor, range) ->
   else
     range
 
-
 expandRangeToWhiteSpaces = (editor, range, directions=[]) ->
   {start, end} = range
 
@@ -845,6 +844,10 @@ expandRangeToWhiteSpaces = (editor, range, directions=[]) ->
           return new Range(newStart, end)
 
   return range # fallback
+
+isEscapedCharAtPoint = (editor, point) ->
+  text = getLineTextToBufferPosition(editor, point)
+  text.endsWith('\\') and not text.endsWith('\\\\')
 
 module.exports = {
   getParent
@@ -954,4 +957,5 @@ module.exports = {
   splitTextByNewLine
   humanizeBufferRange
   expandRangeToWhiteSpaces
+  isEscapedCharAtPoint
 }
