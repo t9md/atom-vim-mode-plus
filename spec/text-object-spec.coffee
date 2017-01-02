@@ -296,11 +296,11 @@ describe "TextObject", ->
           text: '""here" " and over here'
           cursor: [0, 1]
 
-      it "skip non-string area and operate forwarding string whithin line", ->
+      it "applies operators inside the current string in operator-pending mode", ->
         set cursor: [0, 29]
         ensure 'd i "',
-          text: '" something in here and in "here"" and over here'
-          cursor: [0, 33]
+          text: '" something in here and in "" " and over here'
+          cursor: [0, 28]
 
       it "makes no change if past the last string on a line", ->
         set cursor: [0, 39]
@@ -331,12 +331,11 @@ describe "TextObject", ->
           cursor: [0, 0]
           mode: 'normal'
 
-      # it "[Changed Behavior] wont applies if its not within string", ->
-      it "skip non-string area and operate forwarding string whithin line", ->
+      it "delete a-double-quote", ->
         set cursor: [0, 29]
         ensure 'd a "',
-          text: '" something in here and in "here'
-          cursor: [0, 31]
+          text: '" something in here and in  "'
+          cursor: [0, 27]
           mode: 'normal'
       describe "cursor is on the pair char", ->
         check = getCheckFunctionFor('a "')
@@ -387,8 +386,8 @@ describe "TextObject", ->
         it "case-2", ->
           set cursor: [0, 17]
           ensure "d i '",
-            text: "'some-key-here\\'': ''"
-            cursor: [0, 20]
+            text: "'some-key-here\\'''here-is-the-val'"
+            cursor: [0, 17]
 
       it "applies operators inside the current string in operator-pending mode", ->
         ensure "d i '",
@@ -440,8 +439,8 @@ describe "TextObject", ->
       it "applies operators inside the next string in operator-pending mode (if not in a string)", ->
         set cursor: [0, 29]
         ensure "d a '",
-          text: "' something in here and in 'here"
-          cursor: [0, 31]
+          text: "' something in here and in  '"
+          cursor: [0, 27]
           mode: 'normal'
       describe "cursor is on the pair char", ->
         check = getCheckFunctionFor("a '")

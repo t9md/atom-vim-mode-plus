@@ -958,4 +958,5 @@ module.exports = {
   humanizeBufferRange
   expandRangeToWhiteSpaces
   isEscapedCharAtPoint
+  getRightCharacterForBufferPosition
 }

@@ -4,6 +4,7 @@ _ = require 'underscore-plus'
   countChar
   getLineTextToBufferPosition
   isEscapedCharAtPoint
+  getRightCharacterForBufferPosition
 } = require './utils'
 
 class PairFinder
@@ -88,22 +89,47 @@ class BracketFinder extends PairFinder
 
 class QuoteFinder extends PairFinder
   setPatternForPair: (pair) ->
+    @quoteChar = pair[0]
     @pattern = ///(#{_.escapeRegExp(pair[0])})///g
 
-  getPairState: ({matchText, range}) ->
-    matchText = _.escapeRegExp(matchText)
-    backslash = _.escapeRegExp('\\')
-    patterns = [
-      "#{backslash}#{backslash}#{matchText}"
-      "[^#{backslash}]?#{matchText}"
-    ]
-    pattern = new RegExp(patterns.join('|'))
-    lineText = getLineTextToBufferPosition(@editor, range.end)
-    charCount = countChar(lineText, pattern)
+  detectStateAtPoint: (char, point) ->
+    charCount = @countCharTillPoint(char, point)
     if charCount % 2 is 0
       'close'
     else
       'open'
+
+  countCharTillPoint: (char, point) ->
+    char = _.escapeRegExp(char)
+    backslash = _.escapeRegExp('\\')
+    patterns = [
+      "(?:#{backslash}#{backslash}#{char})"
+      "(?:[^#{backslash}]?#{char})"
+    ]
+    pattern = new RegExp(patterns.join('|'))
+    lineText = getLineTextToBufferPosition(@editor, point)
+    countChar(lineText, pattern)
+
+  find: (from, options) ->
+    cursorChar = getRightCharacterForBufferPosition(@editor, from)
+    # blockCursor is ON char, sor diff in start and end column is 1
+    cursorEndPosition = from.translate([0, 1])
+    if (cursorChar is @quoteChar) and not isEscapedCharAtPoint(@editor, from)
+      state = @detectStateAtPoint(@quoteChar, cursorEndPosition)
+      if state is 'close'
+        @states = ['close', 'close', 'open']
+      else
+        @states = ['open', 'close', 'close', 'open']
+    else
+      if options.allowForwarding and @countCharTillPoint(@quoteChar, cursorEndPosition) is 0
+        @states = ['open', 'close', 'close', 'open']
+      else
+        @states = ['close', 'close', 'open']
+
+    super
+
+  getPairState: ->
+    @states.shift()
 
 class TagFinder extends PairFinder
   pattern: /<(\/?)([^\s>]+)[^>]*>/g
