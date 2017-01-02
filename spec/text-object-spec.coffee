@@ -286,10 +286,8 @@ describe "TextObject", ->
         ensure 'a q', selectedText: "'efg'"
 
   describe "DoubleQuote", ->
-    describe "#635 new behavior of inner-double-quote", ->
+    describe "issue-635 new behavior of inner-double-quote", ->
       beforeEach ->
-        # Just for spec easy to read/write, cursor position is not so important
-        # settings.set('stayOnTransformString', true)
         atom.keymaps.add "test",
           'atom-text-editor.vim-mode-plus:not(.insert-mode)':
             'g r': 'vim-mode-plus:replace'
@@ -310,9 +308,10 @@ describe "TextObject", ->
         it "case5", ->
           set                 textC_: '__"____|"____"'
           ensure 'g r i " +', textC_: '__"|++++"____"'
-        xit "case6", -> # FIXME
-          set                 textC_: '__"____"____|"'
-          ensure 'g r i " +', textC_: '__"____"|++++"'
+        # xit "case6", -> # FIXME
+        #   set                 textC_: '__"____"____|"'
+        #   ensure 'g r i " +', textC_: '__"____"|++++"'
+
       describe "quote is balanced", ->
         it "case1", ->
           set                 textC_: '_|_"===="____"==="'
@@ -324,12 +323,15 @@ describe "TextObject", ->
           set                 textC_: '__"===="__|__"==="'
           ensure 'g r i " +', textC_: '__"===="|++++"==="'
         it "case4", ->
+          set                 textC_: '__"===="____"=|=="'
+          ensure 'g r i " +', textC_: '__"===="____"|+++"'
+        it "case5", ->
           set                 textC_: '__|"===="____"==="'
           ensure 'g r i " +', textC_: '__"|++++"____"==="'
-        it "case5", ->
+        it "case6", ->
           set                 textC_: '__"====|"____"==="'
           ensure 'g r i " +', textC_: '__"|++++"____"==="'
-        it "case6", ->
+        it "case7", ->
           set                 textC_: '__"===="____|"==="'
           ensure 'g r i " +', textC_: '__"===="____"|+++"'
 

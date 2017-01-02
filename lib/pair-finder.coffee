@@ -114,6 +114,9 @@ class QuoteFinder extends PairFinder
     cursorChar = getRightCharacterForBufferPosition(@editor, from)
     # blockCursor is ON char, sor diff in start and end column is 1
     cursorEndPosition = from.translate([0, 1])
+    # HACK: Cant determine open/close from quote char itself
+    # So preset open/close state to get desiable result.
+    # Ideally this should be fixed more straightforward logic.
     if (cursorChar is @quoteChar) and not isEscapedCharAtPoint(@editor, from)
       state = @detectStateAtPoint(@quoteChar, cursorEndPosition)
       if state is 'close'
