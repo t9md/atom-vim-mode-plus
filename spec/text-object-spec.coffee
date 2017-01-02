@@ -1,4 +1,5 @@
 {getVimState, dispatch, TextData} = require './spec-helper'
+settings = require '../lib/settings'
 
 describe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -285,6 +286,53 @@ describe "TextObject", ->
         ensure 'a q', selectedText: "'efg'"
 
   describe "DoubleQuote", ->
+    describe "#635 new behavior of inner-double-quote", ->
+      beforeEach ->
+        # Just for spec easy to read/write, cursor position is not so important
+        # settings.set('stayOnTransformString', true)
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'g r': 'vim-mode-plus:replace'
+
+      describe "quote is un-balanced", ->
+        it "case1", ->
+          set                 textC_: '_|_"____"____"'
+          ensure 'g r i " +', textC_: '__"|++++"____"'
+        it "case2", ->
+          set                 textC_: '__"__|__"____"'
+          ensure 'g r i " +', textC_: '__"|++++"____"'
+        it "case3", ->
+          set                 textC_: '__"____"__|__"'
+          ensure 'g r i " +', textC_: '__"____"|++++"'
+        it "case4", ->
+          set                 textC_: '__|"____"____"'
+          ensure 'g r i " +', textC_: '__"|++++"____"'
+        it "case5", ->
+          set                 textC_: '__"____|"____"'
+          ensure 'g r i " +', textC_: '__"|++++"____"'
+        xit "case6", -> # FIXME
+          set                 textC_: '__"____"____|"'
+          ensure 'g r i " +', textC_: '__"____"|++++"'
+      describe "quote is balanced", ->
+        it "case1", ->
+          set                 textC_: '_|_"===="____"==="'
+          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+        it "case2", ->
+          set                 textC_: '__"==|=="____"==="'
+          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+        it "case3", ->
+          set                 textC_: '__"===="__|__"==="'
+          ensure 'g r i " +', textC_: '__"===="|++++"==="'
+        it "case4", ->
+          set                 textC_: '__|"===="____"==="'
+          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+        it "case5", ->
+          set                 textC_: '__"====|"____"==="'
+          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+        it "case6", ->
+          set                 textC_: '__"===="____|"==="'
+          ensure 'g r i " +', textC_: '__"===="____"|+++"'
+
     describe "inner-double-quote", ->
       beforeEach ->
         set
@@ -307,6 +355,7 @@ describe "TextObject", ->
         ensure 'd i "',
           text: '" something in here and in "here" " and over here'
           cursor: [0, 39]
+
       describe "cursor is on the pair char", ->
         check = getCheckFunctionFor('i "')
         text = '-"+"-'
