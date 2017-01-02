@@ -18,7 +18,7 @@ class PairFinder
     filters.push(isEscaped)
     filters
 
-  scanPairRange: (which, direction, from, fn) ->
+  scanPair: (which, direction, from, fn) ->
     switch direction
       when 'forward'
         scanRange = new Range(from, @editor.buffer.getEndPosition())
@@ -37,10 +37,10 @@ class PairFinder
 
       fn(event)
 
-  findPairRange: (which, direction, from, fn) ->
+  findPair: (which, direction, from, fn) ->
     stack = []
     range = null
-    @scanPairRange which, direction, from, (event) =>
+    @scanPair which, direction, from, (event) =>
       if @getPairState(event) isnt which
         stack.push(event)
       else
@@ -51,8 +51,8 @@ class PairFinder
 
     return range
 
-  findClosePairRangeForward: (from, {allowForwarding}={}) ->
-    @findPairRange 'close', 'forward', from, (stack, openEvent) ->
+  findCloseForward: (from, {allowForwarding}={}) ->
+    @findPair 'close', 'forward', from, (stack, openEvent) ->
       unless openEvent?
         return true
 
@@ -60,15 +60,15 @@ class PairFinder
         {start} = openEvent.range
         start.isEqual(from) or (allowForwarding and start.row is from.row)
 
-  findOpenPairRangeBackward: (from) ->
-    @findPairRange 'open', 'backward', from, (stack, openEvent) ->
+  findOpenBackward: (from) ->
+    @findPair 'open', 'backward', from, (stack, openEvent) ->
       stack.length is 0
 
-  getPairRangeInformation: (from, options) ->
-    if closeRange = @findClosePairRangeForward(from, options)
-      openRange = @findOpenPairRangeBackward(closeRange.end, options)
+  find: (from, options) ->
+    closeRange = @findCloseForward(from, options)
+    openRange = @findOpenBackward(closeRange.end, options) if closeRange?
 
-    if openRange?
+    if closeRange? and openRange?
       {
         aRange: new Range(openRange.start, closeRange.end)
         innerRange: new Range(openRange.end, closeRange.start)
@@ -120,7 +120,7 @@ class TagFinder extends PairFinder
     for tagState in stack by -1 when (tagState.state is state) and (tagState.name is name)
       return tagState
 
-  findPairRange: (which, direction, from, fn) ->
+  findPair: (which, direction, from, fn) ->
     stack = []
     range = null
     findingState = which
@@ -128,7 +128,7 @@ class TagFinder extends PairFinder
       when 'open' then 'close'
       when 'close' then 'open'
 
-    @scanPairRange which, direction, from, (event) =>
+    @scanPair which, direction, from, (event) =>
       tagState = @getPairState(event)
       if tagState.state isnt which
         stack.push(tagState)

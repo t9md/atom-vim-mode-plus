@@ -248,7 +248,7 @@ class Pair extends TextObject
 
   getPairInfo: (from) ->
     finder = @getFinder(from)
-    pairInfo = finder.getPairRangeInformation(from, {@allowForwarding})
+    pairInfo = finder.find(from, {@allowForwarding})
     unless pairInfo?
       return null
     pairInfo.innerRange = @adjustRange(pairInfo.innerRange) if @adjustInnerRange
