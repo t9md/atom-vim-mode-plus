@@ -8,6 +8,7 @@ TextObject = require('./base').getClass('TextObject')
   countChar
   pointIsAtEndOfLine
   getLineTextToBufferPosition
+  isEscapedCharAtPoint
 } = require './utils'
 
 pairStateInBufferRange = (editor, {matchText, range}) ->
@@ -43,69 +44,108 @@ getRuleForPair = (editor, pair) ->
   else
     getBracketPairRule(open, close)
 
-findPairRange = (which, direction, options, fn) ->
-  {editor, from, pair, filters, allowNextLine} = options
-  switch direction
-    when 'forward'
-      scanRange = new Range(from, editor.buffer.getEndPosition())
-      scanFunctionName = 'scanInBufferRange'
-    when 'backward'
-      scanRange = new Range([0, 0], from)
-      scanFunctionName = 'backwardsScanInBufferRange'
+class PairFinder
+  filters: []
 
-  stack = []
-  range = null
-  {pattern, getPairState} = getRuleForPair(editor, pair)
-  editor[scanFunctionName] pattern, scanRange, (event) ->
-    if not allowNextLine and (from.row isnt event.range.start.row)
-      event.stop()
-      return
+  constructor: (@options) ->
+    {@editor, @pair, @filters, @allowNextLine} = @options
+    if @constructor.name isnt 'TagFinder'
+      {@pattern, @getPairState} = getRuleForPair(@editor, @pair)
 
-    if filters? and filters.some((filter) -> filter(event))
-      return
+  findPairRange: (which, direction, from, fn) ->
+    switch direction
+      when 'forward'
+        scanRange = new Range(from, @editor.buffer.getEndPosition())
+        scanFunctionName = 'scanInBufferRange'
+      when 'backward'
+        scanRange = new Range([0, 0], from)
+        scanFunctionName = 'backwardsScanInBufferRange'
 
-    if getPairState(editor, event) isnt which
-      stack.push(event)
-    else
-      topEvent = stack.pop()
-      if fn(stack, topEvent)
-        range = event.range
+    stack = []
+    range = null
+    @editor[scanFunctionName] @pattern, scanRange, (event) =>
+      if not @allowNextLine and (from.row isnt event.range.start.row)
         event.stop()
+        return
 
-  return range
+      if @filters.some((filter) -> filter(event))
+        return
 
-findClosePairRangeForward = (finder, options) ->
-  {allowForwarding, from} = options
-  delete options.allowForwarding
+      if @getPairState(@editor, event) isnt which
+        stack.push(event)
+      else
+        topEvent = stack.pop()
+        if fn(stack, topEvent)
+          range = event.range
+          event.stop()
 
-  finder 'close', 'forward', options, (stack, openEvent) ->
-    unless openEvent?
-      return true
+    return range
 
-    if stack.length is 0
-      {start} = openEvent.range
-      start.isEqual(from) or (allowForwarding and start.row is from.row)
+  findClosePairRangeForward: (from, {allowForwarding}={}) ->
+    @findPairRange 'close', 'forward', from, (stack, openEvent) ->
+      unless openEvent?
+        return true
 
-findOpenPairRangeBackward = (finder, options) ->
-  finder 'open', 'backward', options, (stack, openEvent) ->
-    stack.length is 0
+      if stack.length is 0
+        {start} = openEvent.range
+        start.isEqual(from) or (allowForwarding and start.row is from.row)
 
-getPairRangeInformation = (options) ->
-  if closeRange = findClosePairRangeForward(findPairRange, options)
-    options.from = closeRange.end
-    openRange = findOpenPairRangeBackward(findPairRange, options)
+  findOpenPairRangeBackward: (from) ->
+    @findPairRange 'open', 'backward', from, (stack, openEvent) ->
+      stack.length is 0
 
-  if openRange?
-    {
-      aRange: new Range(openRange.start, closeRange.end)
-      innerRange: new Range(openRange.end, closeRange.start)
-      openRange: openRange
-      closeRange: closeRange
-    }
+  getPairRangeInformation: (from, options) ->
+    if closeRange = @findClosePairRangeForward(from, options)
+      openRange = @findOpenPairRangeBackward(closeRange.end, options)
 
-isEscapedCharAtPoint = (editor, point) ->
-  text = getLineTextToBufferPosition(editor, point)
-  text.endsWith('\\') and not text.endsWith('\\\\')
+    if openRange?
+      {
+        aRange: new Range(openRange.start, closeRange.end)
+        innerRange: new Range(openRange.end, closeRange.start)
+        openRange: openRange
+        closeRange: closeRange
+      }
+
+class TagFinder extends PairFinder
+  pattern: /<(\/?)([^\s>]+)[^>]*>/g
+
+  findPairRange: (which, direction, from, fn) ->
+    switch direction
+      when 'forward'
+        scanRange = new Range(from, @editor.buffer.getEndPosition())
+        scanFunctionName = 'scanInBufferRange'
+      when 'backward'
+        scanRange = new Range([0, 0], from)
+        scanFunctionName = 'backwardsScanInBufferRange'
+
+    stack = []
+    range = null
+
+    findingState = which
+    oppositeState = switch findingState
+      when 'open' then 'close'
+      when 'close' then 'open'
+
+    @editor[scanFunctionName] @pattern, scanRange, (event) =>
+      if not @allowNextLine and (from.row isnt event.range.start.row)
+        event.stop()
+        return
+
+      if @filters.some((filter) -> filter(event))
+        return
+
+      tagState = getTagState(event)
+      if tagState.state is oppositeState
+        stack.push(tagState)
+      else
+        if oppositeTagState = findTagState(stack, oppositeState, tagState.name)
+          stack = stack[0...stack.indexOf(oppositeTagState)]
+
+        if fn(stack, oppositeTagState)
+          range = event.range
+          event.stop()
+
+    return range
 
 # -------------------------
 class Pair extends TextObject
@@ -155,10 +195,14 @@ class Pair extends TextObject
 
     new Range(start, end)
 
-  getPairInfo: (from) ->
+  getFinder: (from) ->
     filters = @getFilters()
     allowNextLine = @isAllowNextLine()
-    pairInfo = getPairRangeInformation({@editor, from, @pair, filters, allowNextLine, @allowForwarding})
+    new PairFinder({@editor, from, @pair, filters, allowNextLine})
+
+  getPairInfo: (from) ->
+    finder = @getFinder(from)
+    pairInfo = finder.getPairRangeInformation(from, {@allowForwarding})
     unless pairInfo?
       return null
     pairInfo.innerRange = @adjustRange(pairInfo.innerRange) if @adjustInnerRange
@@ -367,45 +411,6 @@ class InnerAngleBracketAllowForwarding extends AngleBracket
 # -------------------------
 tagPattern = /<(\/?)([^\s>]+)[^>]*>/g
 
-findTagRange = (which, direction, options, fn) ->
-  {editor, from, filters, allowNextLine} = options
-  switch direction
-    when 'forward'
-      scanRange = new Range(from, editor.buffer.getEndPosition())
-      scanFunctionName = 'scanInBufferRange'
-    when 'backward'
-      scanRange = new Range([0, 0], from)
-      scanFunctionName = 'backwardsScanInBufferRange'
-
-  stack = []
-  range = null
-
-  findingState = which
-  oppositeState = switch findingState
-    when 'open' then 'close'
-    when 'close' then 'open'
-
-  editor[scanFunctionName] tagPattern, scanRange, (event) ->
-    if not allowNextLine and (from.row isnt event.range.start.row)
-      event.stop()
-      return
-
-    if filters? and filters.some((filter) -> filter(event))
-      return
-
-    tagState = getTagState(event)
-    if tagState.state is oppositeState
-      stack.push(tagState)
-    else
-      if oppositeTagState = findTagState(stack, oppositeState, tagState.name)
-        stack = stack[0...stack.indexOf(oppositeTagState)]
-
-      if fn(stack, oppositeTagState)
-        range = event.range
-        event.stop()
-
-  return range
-
 getTagState = (event) ->
   backslash = event.match[1]
   {
@@ -433,20 +438,13 @@ class Tag extends Pair
         stop()
     tagRange?.start ? from
 
-  getPairInfo: (from) ->
-    from = @getTagStartPoint(from)
+  getFinder: (from) ->
     filters = @getFilters()
-    options = {@editor, from, filters, @allowNextLine, @allowForwarding}
+    allowNextLine = @isAllowNextLine()
+    new TagFinder({@editor, from, filters, allowNextLine})
 
-    return unless closeRange = findClosePairRangeForward(findTagRange, options)
-
-    options.from = closeRange.end
-    return unless openRange = findOpenPairRangeBackward(findTagRange, options)
-
-    aRange = new Range(openRange.start, closeRange.end)
-    innerRange = new Range(openRange.end, closeRange.start)
-    targetRange = if @isInner() then innerRange else aRange
-    {openRange, closeRange, aRange, innerRange, targetRange}
+  getPairInfo: (from) ->
+    super(@getTagStartPoint(from))
 
 class ATag extends Tag
   @extend()
