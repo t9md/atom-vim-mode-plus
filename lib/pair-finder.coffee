@@ -100,13 +100,13 @@ class QuoteFinder extends PairFinder
   find: (from, options) ->
     # HACK: Cant determine open/close from quote char itself
     # So preset open/close state to get desiable result.
-    quoteInfo = @getCharacterRangeInformation(@quoteChar, from)
-    quoteIsBalanced = (quoteInfo.total.length % 2) is 0
-    onQuoteChar = quoteInfo.right[0]?.start.isEqual(from) # from point is on quote char
+    {total, left, right} = @getCharacterRangeInformation(@quoteChar, from)
+    quoteIsBalanced = (total.length % 2) is 0
+    onQuoteChar = right[0]?.start.isEqual(from) # from point is on quote char
     if quoteIsBalanced and onQuoteChar
-      nextQuoteIsOpen = quoteInfo.left.length % 2 is 0
+      nextQuoteIsOpen = left.length % 2 is 0
     else
-      nextQuoteIsOpen = quoteInfo.left.length is 0
+      nextQuoteIsOpen = left.length is 0
 
     if nextQuoteIsOpen
       @pairStates = ['open', 'close', 'close', 'open']
