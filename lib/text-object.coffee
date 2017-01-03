@@ -243,7 +243,7 @@ class Pair extends TextObject
     finder
 
   getPairInfo: (from) ->
-    finder = @getFinder(from)
+    finder = @getFinder()
     pairInfo = finder.find(from, {@allowForwarding})
     unless pairInfo?
       return null
