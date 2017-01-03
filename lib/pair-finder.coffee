@@ -1,10 +1,8 @@
 {Range} = require 'atom'
 _ = require 'underscore-plus'
 {
-  countChar
-  getLineTextToBufferPosition
-  isEscapedCharAtPoint
-  getRightCharacterForBufferPosition
+  isEscapedCharRange
+  scanBufferRow
 } = require './utils'
 
 class PairFinder
@@ -15,7 +13,7 @@ class PairFinder
 
   getFilters: ->
     filters = []
-    isEscaped = ({range}) => isEscapedCharAtPoint(@editor, range.start)
+    isEscaped = ({range}) => isEscapedCharRange(@editor, range)
     filters.push(isEscaped)
     filters
 
@@ -92,47 +90,33 @@ class QuoteFinder extends PairFinder
     @quoteChar = pair[0]
     @pattern = ///(#{_.escapeRegExp(pair[0])})///g
 
-  detectStateAtPoint: (char, point) ->
-    charCount = @countCharTillPoint(char, point)
-    if charCount % 2 is 0
-      'close'
-    else
-      'open'
-
-  countCharTillPoint: (char, point) ->
-    char = _.escapeRegExp(char)
-    backslash = _.escapeRegExp('\\')
-    patterns = [
-      "(?:#{backslash}#{backslash}#{char})"
-      "(?:[^#{backslash}]?#{char})"
-    ]
-    pattern = new RegExp(patterns.join('|'))
-    lineText = getLineTextToBufferPosition(@editor, point)
-    countChar(lineText, pattern)
+  getCharacterRangeInformation: (char, point) ->
+    pattern = ///#{_.escapeRegExp(char)}///g
+    total = scanBufferRow(@editor, point.row, pattern).filter (range) =>
+      not isEscapedCharRange(@editor, range)
+    [left, right] = _.partition(total, ({start}) -> start.isLessThan(point))
+    {total, left, right}
 
   find: (from, options) ->
-    cursorChar = getRightCharacterForBufferPosition(@editor, from)
-    # blockCursor is ON char, sor diff in start and end column is 1
-    cursorEndPosition = from.translate([0, 1])
     # HACK: Cant determine open/close from quote char itself
     # So preset open/close state to get desiable result.
-    # Ideally this should be fixed more straightforward logic.
-    if (cursorChar is @quoteChar) and not isEscapedCharAtPoint(@editor, from)
-      state = @detectStateAtPoint(@quoteChar, cursorEndPosition)
-      if state is 'close'
-        @states = ['close', 'close', 'open']
-      else
-        @states = ['open', 'close', 'close', 'open']
+    quoteInfo = @getCharacterRangeInformation(@quoteChar, from)
+    quoteIsBalanced = (quoteInfo.total.length % 2) is 0
+    onQuoteChar = quoteInfo.right[0]?.start.isEqual(from) # from point is on quote char
+    if quoteIsBalanced and onQuoteChar
+      nextQuoteIsOpen = quoteInfo.left.length % 2 is 0
     else
-      if options.allowForwarding and @countCharTillPoint(@quoteChar, cursorEndPosition) is 0
-        @states = ['open', 'close', 'close', 'open']
-      else
-        @states = ['close', 'close', 'open']
+      nextQuoteIsOpen = quoteInfo.left.length is 0
+
+    if nextQuoteIsOpen
+      @pairStates = ['open', 'close', 'close', 'open']
+    else
+      @pairStates = ['close', 'close', 'open']
 
     super
 
   getPairState: ->
-    @states.shift()
+    @pairStates.shift()
 
 class TagFinder extends PairFinder
   pattern: /<(\/?)([^\s>]+)[^>]*>/g

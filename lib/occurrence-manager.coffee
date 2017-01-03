@@ -42,7 +42,7 @@ class OccurrenceManager
       subwordPattern = @editor.getLastCursor().subwordRegExp()
       isSubwordRange = (range) =>
         row = range.start.row
-        subwordRanges = subwordRangesByRow[row] ?= scanBufferRow(@editor, subwordPattern, row)
+        subwordRanges = subwordRangesByRow[row] ?= scanBufferRow(@editor, row, subwordPattern)
         subwordRanges.some (subwordRange) -> subwordRange.isEqual(range)
 
     @editor.scan pattern, ({range, matchText}) =>

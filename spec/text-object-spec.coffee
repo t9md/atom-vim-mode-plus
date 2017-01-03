@@ -308,9 +308,9 @@ describe "TextObject", ->
         it "case5", ->
           set                 textC_: '__"____|"____"'
           ensure 'g r i " +', textC_: '__"|++++"____"'
-        # xit "case6", -> # FIXME
-        #   set                 textC_: '__"____"____|"'
-        #   ensure 'g r i " +', textC_: '__"____"|++++"'
+        it "case6", ->
+          set                 textC_: '__"____"____|"'
+          ensure 'g r i " +', textC_: '__"____"|++++"'
 
       describe "quote is balanced", ->
         it "case1", ->

@@ -127,10 +127,6 @@ getVisibleEditors = ->
   for pane in atom.workspace.getPanes() when editor = pane.getActiveEditor()
     editor
 
-# char can be regExp pattern
-countChar = (string, char) ->
-  string.split(char).length - 1
-
 findIndexBy = (list, fn) ->
   for item, i in list when fn(item)
     return i
@@ -176,8 +172,11 @@ cursorIsAtVimEndOfFile = (cursor) ->
   pointIsAtVimEndOfFile(cursor.editor, cursor.getBufferPosition())
 
 # -------------------------
-getRightCharacterForBufferPosition = (editor, startPosition) ->
-  editor.getTextInBufferRange(Range.fromPointWithDelta(startPosition, 0, 1))
+getRightCharacterForBufferPosition = (editor, point, amount=1) ->
+  editor.getTextInBufferRange(Range.fromPointWithDelta(point, 0, amount))
+
+getLeftCharacterForBufferPosition = (editor, point, amount=1) ->
+  editor.getTextInBufferRange(Range.fromPointWithDelta(point, 0, -amount))
 
 getTextInScreenRange = (editor, screenRange) ->
   bufferRange = editor.bufferRangeForScreenRange(screenRange)
@@ -619,7 +618,7 @@ scanEditor = (editor, pattern) ->
     ranges.push(range)
   ranges
 
-scanBufferRow = (editor, pattern, row) ->
+scanBufferRow = (editor, row, pattern) ->
   ranges = []
   scanRange = editor.bufferRangeForBufferRow(row)
   editor.scanInBufferRange pattern, scanRange, ({range}) ->
@@ -762,6 +761,11 @@ isNotSingleLineRange = negateFunction(isSingleLineRange)
 isLeadingWhiteSpaceRange = (editor, range) -> /^[\t ]*$/.test(editor.getTextInBufferRange(range))
 isNotLeadingWhiteSpaceRange = negateFunction(isLeadingWhiteSpaceRange)
 
+isEscapedCharRange = (editor, range) ->
+  range = Range.fromObject(range)
+  chars = getLeftCharacterForBufferPosition(editor, range.start, 2)
+  chars.endsWith('\\') and not chars.endsWith('\\\\')
+
 setTextAtBufferPosition = (editor, point, text) ->
   editor.setTextInBufferRange([point, point], text)
 
@@ -845,10 +849,6 @@ expandRangeToWhiteSpaces = (editor, range, directions=[]) ->
 
   return range # fallback
 
-isEscapedCharAtPoint = (editor, point) ->
-  text = getLineTextToBufferPosition(editor, point)
-  text.endsWith('\\') and not text.endsWith('\\\\')
-
 module.exports = {
   getParent
   getAncestors
@@ -890,7 +890,6 @@ module.exports = {
   getValidVimBufferRow
   getValidVimScreenRow
   moveCursorToFirstCharacterAtRow
-  countChar
   getLineTextToBufferPosition
   getIndentLevelForBufferRow
   isAllWhiteSpaceText
@@ -948,6 +947,7 @@ module.exports = {
   ensureEndsWithNewLineForBufferRow
   isLeadingWhiteSpaceRange
   isNotLeadingWhiteSpaceRange
+  isEscapedCharRange
 
   forEachPaneAxis
   addClassList
@@ -957,6 +957,6 @@ module.exports = {
   splitTextByNewLine
   humanizeBufferRange
   expandRangeToWhiteSpaces
-  isEscapedCharAtPoint
   getRightCharacterForBufferPosition
+  getLeftCharacterForBufferPosition
 }
