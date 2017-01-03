@@ -11,6 +11,17 @@ class PairFinder
   getPattern: ->
     @pattern
 
+  getCharacterRangeInformation: (char, point) ->
+    pattern = ///#{_.escapeRegExp(char)}///g
+    total = scanBufferRow(@editor, point.row, pattern).filter (range) =>
+      not isEscapedCharRange(@editor, range)
+    [left, right] = _.partition(total, ({start}) -> start.isLessThan(point))
+    balanced = (total.length % 2) is 0
+    {total, left, right, balanced}
+
+  filterEvent: ->
+    true
+
   scanPair: (which, direction, from, fn) ->
     switch direction
       when 'forward'
@@ -25,10 +36,9 @@ class PairFinder
         event.stop()
         return
 
-      if isEscapedCharRange(@editor, event.range)
-        return
-
-      fn(event)
+      return if isEscapedCharRange(@editor, event.range)
+      if @filterEvent(event)
+        fn(event)
 
   findPair: (which, direction, from, fn) ->
     stack = []
@@ -79,6 +89,25 @@ class BracketFinder extends PairFinder
     [open, close] = pair
     @pattern = ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
 
+  isInDoubleQuotes: (point) ->
+    {total, left, balanced} = @getCharacterRangeInformation('"', point)
+    if total.length is 0
+      false
+    else
+      balanced and left.length % 2 is 1
+
+  find: (from, options) ->
+    @fromInDoubleQuotes = @isInDoubleQuotes(from)
+    super
+
+  filterEvent: ({range}) ->
+    if @fromInDoubleQuotes
+      true
+    else
+      # HACK: If search start is NOT in double quotes,
+      # Only pick char which is NOT in double-quotes.
+      not @isInDoubleQuotes(range.start)
+
   getEventState: ({match, range}) ->
     state = switch
       when match[1] then 'open'
@@ -90,20 +119,12 @@ class QuoteFinder extends PairFinder
     @quoteChar = pair[0]
     @pattern = ///(#{_.escapeRegExp(pair[0])})///g
 
-  getCharacterRangeInformation: (char, point) ->
-    pattern = ///#{_.escapeRegExp(char)}///g
-    total = scanBufferRow(@editor, point.row, pattern).filter (range) =>
-      not isEscapedCharRange(@editor, range)
-    [left, right] = _.partition(total, ({start}) -> start.isLessThan(point))
-    {total, left, right}
-
   find: (from, options) ->
     # HACK: Cant determine open/close from quote char itself
     # So preset open/close state to get desiable result.
-    {total, left, right} = @getCharacterRangeInformation(@quoteChar, from)
-    quoteIsBalanced = (total.length % 2) is 0
+    {total, left, right, balanced} = @getCharacterRangeInformation(@quoteChar, from)
     onQuoteChar = right[0]?.start.isEqual(from) # from point is on quote char
-    if quoteIsBalanced and onQuoteChar
+    if balanced and onQuoteChar
       nextQuoteIsOpen = left.length % 2 is 0
     else
       nextQuoteIsOpen = left.length is 0
