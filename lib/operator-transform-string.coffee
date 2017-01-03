@@ -655,7 +655,7 @@ class Sort extends ChangeOrder
   getNewRows: (rows) ->
     rows.sort()
 
-class CaseInsensitiveSort extends ChangeOrder
+class SortCaseInsensitively extends ChangeOrder
   @extend()
   @registerToSelectList()
   @description: "Sort lines alphabetically (case insensitive)"
