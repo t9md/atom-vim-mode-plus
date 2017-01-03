@@ -91,10 +91,10 @@ class BracketFinder extends PairFinder
 
   isInDoubleQuotes: (point) ->
     {total, left, balanced} = @getCharacterRangeInformation('"', point)
-    if total.length is 0
+    if total.length is 0 or not balanced
       false
     else
-      balanced and left.length % 2 is 1
+      left.length % 2 is 1
 
   find: (from, options) ->
     @fromInDoubleQuotes = @isInDoubleQuotes(from)
