@@ -660,12 +660,11 @@ class CaseInsensitiveSort extends ChangeOrder
   @registerToSelectList()
   @description: "Sort lines alphabetically (case insensitive)"
   getNewRows: (rows) ->
-    mapped = rows.map (el, i) ->
-      {index: i, value: el.toLowerCase()}
-    mapped.sort (a, b) ->
-      +(a.value > b.value) or +(a.value is b.value) - 1
-    mapped.map (el) ->
-      rows[el.index]
+    rows.sort (a, b) ->
+      r = a.toLowerCase().localeCompare(b.toLowerCase())
+      if r is 0
+        r = a.localeCompare(b)
+      r
 
 class SortByNumber extends ChangeOrder
   @extend()
