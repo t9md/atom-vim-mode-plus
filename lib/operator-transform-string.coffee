@@ -655,6 +655,18 @@ class Sort extends ChangeOrder
   getNewRows: (rows) ->
     rows.sort()
 
+class CaseInsensitiveSort extends ChangeOrder
+  @extend()
+  @registerToSelectList()
+  @description: "Sort lines alphabetically (case insensitive)"
+  getNewRows: (rows) ->
+    mapped = rows.map (el, i) ->
+      {index: i, value: el.toLowerCase()}
+    mapped.sort (a, b) ->
+      +(a.value > b.value) or +(a.value is b.value) - 1
+    mapped.map (el) ->
+      rows[el.index]
+
 class SortByNumber extends ChangeOrder
   @extend()
   @registerToSelectList()
