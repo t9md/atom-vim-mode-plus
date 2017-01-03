@@ -102,10 +102,10 @@ class BracketFinder extends PairFinder
 
   filterEvent: ({range}) ->
     if @fromInDoubleQuotes
+      # Search from inside of double-quotes: Don't care char is in double-quotes.
       true
     else
-      # HACK: If search start is NOT in double quotes,
-      # Only pick char which is NOT in double-quotes.
+      # Search from outside of double-quotes: Ignore char inside of double-quotes.
       not @isInDoubleQuotes(range.start)
 
   getEventState: ({match, range}) ->
