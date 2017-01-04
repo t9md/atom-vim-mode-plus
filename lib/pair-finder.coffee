@@ -4,7 +4,7 @@ _ = require 'underscore-plus'
   isEscapedCharRange
   getEndOfLineForBufferRow
   scanBufferRow
-  getScanRange
+  scanEditorInDirection
 } = require './utils'
 
 isMatchScope = (pattern, scopes) ->
@@ -53,19 +53,13 @@ class PairFinder
     true
 
   findPair: (which, direction, from) ->
-    scanRange = getScanRange(@editor, direction, from, {@allowNextLine})
-    editorScanner = switch direction
-      when 'forward' then @editor.scanInBufferRange.bind(@editor)
-      when 'backward' then @editor.backwardsScanInBufferRange.bind(@editor)
-
     stack = []
     found = null
 
     # Quote is not nestable. So when we encounter 'open' while finding 'close',
     # it is forwarding pair, so stoppable is not @allowForwarding
     findingNonForwardingClosingQuote = (this instanceof QuoteFinder) and which is 'close' and not @allowForwarding
-
-    editorScanner @getPattern(), scanRange, (event) =>
+    scanEditorInDirection @editor, direction, @getPattern(), from, {@allowNextLine}, (event) =>
       {range, stop} = event
 
       return if isEscapedCharRange(@editor, range)

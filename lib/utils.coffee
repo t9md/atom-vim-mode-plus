@@ -863,6 +863,18 @@ getScanRange = (editor, direction, from, {allowNextLine}={}) ->
       else
         new Range([from.row, 0], from)
 
+getEditorScanner = (editor, direction) ->
+  switch direction
+    when 'forward'
+      editor.scanInBufferRange.bind(editor)
+    when 'backward'
+      editor.backwardsScanInBufferRange.bind(editor)
+
+scanEditorInDirection = (editor, direction, pattern, from, options, fn) ->
+  scanRange = getScanRange(editor, direction, from, options)
+  scanner = getEditorScanner(editor, direction)
+  scanner(pattern, scanRange, fn)
+
 module.exports = {
   getParent
   getAncestors
@@ -974,4 +986,6 @@ module.exports = {
   getRightCharacterForBufferPosition
   getLeftCharacterForBufferPosition
   getScanRange
+  getEditorScanner
+  scanEditorInDirection
 }
