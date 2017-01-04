@@ -4,6 +4,7 @@ _ = require 'underscore-plus'
   isEscapedCharRange
   getEndOfLineForBufferRow
   scanBufferRow
+  getScanRange
 } = require './utils'
 
 isMatchScope = (pattern, scopes) ->
@@ -51,71 +52,56 @@ class PairFinder
   filterEvent: ->
     true
 
-  getScanSpecFor: (direction, from) ->
-    switch direction
-      when 'forward'
-        if @allowNextLine
-          scanRange = new Range(from, @editor.buffer.getEndPosition())
-        else
-          scanRange = new Range(from, getEndOfLineForBufferRow(@editor, from.row))
-        functionName = 'scanInBufferRange'
-      when 'backward'
-        if @allowNextLine
-          scanRange = new Range([0, 0], from)
-        else
-          scanRange = new Range([from.row, 0], from)
-        functionName = 'backwardsScanInBufferRange'
-    {scanRange, functionName, pattern: @getPattern()}
-
   findPair: (which, direction, from) ->
-    {scanRange, functionName, pattern} = @getScanSpecFor(direction, from)
+    scanRange = getScanRange(@editor, direction, from, {@allowNextLine})
+    editorScanner = switch direction
+      when 'forward' then @editor.scanInBufferRange.bind(@editor)
+      when 'backward' then @editor.backwardsScanInBufferRange.bind(@editor)
 
     stack = []
-    range = null
+    found = null
 
     # Quote is not nestable. So when we encounter 'open' while finding 'close',
     # it is forwarding pair, so stoppable is not @allowForwarding
     findingNonForwardingClosingQuote = (this instanceof QuoteFinder) and which is 'close' and not @allowForwarding
 
-    @editor[functionName] pattern, scanRange, (event) =>
-      return if isEscapedCharRange(@editor, event.range)
+    editorScanner @getPattern(), scanRange, (event) =>
+      {range, stop} = event
+
+      return if isEscapedCharRange(@editor, range)
       return unless @filterEvent(event)
 
       eventState = @getEventState(event)
 
+      if findingNonForwardingClosingQuote and eventState.state is 'open' and range.start.isGreaterThan(from)
+        stop()
+        return
+
       if eventState.state isnt which
-        if findingNonForwardingClosingQuote and event.range.start.isGreaterThan(from)
-          event.stop()
-          return
         stack.push(eventState)
       else
-        foundEvent = {eventState, from}
-        isValid =
-          switch eventState.state
-            when 'open' then @onOpenFound(stack, foundEvent)
-            when 'close' then @onCloseFound(stack, foundEvent)
+        if @onFound(stack, {eventState, from})
+          found = range
+          stop()
 
-        if isValid
-          range = event.range
-          event.stop()
-
-    return range
+    return found
 
   spliceStack: (stack, eventState) ->
     stack.pop()
 
-  onCloseFound: (stack, {eventState, from}) ->
-    openState = @spliceStack(stack, eventState)
-    unless openState?
-      return true
+  onFound: (stack, {eventState, from}) ->
+    switch eventState.state
+      when 'open'
+        @spliceStack(stack, eventState)
+        stack.length is 0
+      when 'close'
+        openState = @spliceStack(stack, eventState)
+        unless openState?
+          return true
 
-    if stack.length is 0
-      {start} = openState.range
-      start.isEqual(from) or (@allowForwarding and start.row is from.row)
-
-  onOpenFound: (stack, {eventState, from}) ->
-    @spliceStack(stack, eventState)
-    stack.length is 0
+        if stack.length is 0
+          {start} = openState.range
+          start.isEqual(from) or (@allowForwarding and start.row is from.row)
 
   findCloseForward: (from) ->
     @findPair('close', 'forward', from)

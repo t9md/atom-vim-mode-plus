@@ -849,6 +849,20 @@ expandRangeToWhiteSpaces = (editor, range, directions=[]) ->
 
   return range # fallback
 
+getScanRange = (editor, direction, from, {allowNextLine}={}) ->
+  allowNextLine ?= true
+  switch direction
+    when 'forward'
+      if allowNextLine
+        new Range(from, editor.buffer.getEndPosition())
+      else
+        new Range(from, getEndOfLineForBufferRow(editor, from.row))
+    when 'backward'
+      if allowNextLine
+        new Range([0, 0], from)
+      else
+        new Range([from.row, 0], from)
+
 module.exports = {
   getParent
   getAncestors
@@ -959,4 +973,5 @@ module.exports = {
   expandRangeToWhiteSpaces
   getRightCharacterForBufferPosition
   getLeftCharacterForBufferPosition
+  getScanRange
 }
