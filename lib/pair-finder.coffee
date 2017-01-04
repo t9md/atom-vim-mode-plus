@@ -124,20 +124,21 @@ class PairFinder
       }
 
 class BracketFinder extends PairFinder
+  retry: false
+
   setPatternForPair: (pair) ->
     [open, close] = pair
     @pattern = ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
 
+  # This method can be called recursively
   find: (from, options) ->
-    @retry ?= false
-    @initialScopeState = new ScopeState(@editor, from)
+    @initialScopeState ?= new ScopeState(@editor, from)
 
     return found if found = super
 
-    unless @retry
+    if not @retry
       @retry = true
-      @closeRange = null
-      @closeScopeState = null
+      [@closeRange, @closeScopeState] = []
       @find(from, options)
 
   filterEvent: ({range}) ->
@@ -146,10 +147,10 @@ class BracketFinder extends PairFinder
       @closeScopeState ?= new ScopeState(@editor, @closeRange.start)
       @closeScopeState.isEqual(scopeState)
     else
-      if @retry
-        not @initialScopeState.isEqual(scopeState)
-      else
+      if not @retry
         @initialScopeState.isEqual(scopeState)
+      else
+        not @initialScopeState.isEqual(scopeState)
 
   getEventState: ({match, range}) ->
     state = switch
