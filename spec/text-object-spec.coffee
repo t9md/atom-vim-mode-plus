@@ -552,6 +552,42 @@ describe "TextObject", ->
         it "case-3 visual", -> check open, 'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
   describe "CurlyBracket", ->
+    describe "scope awareness of bracket", ->
+      it "[search from outside of double-quote] skips bracket in within-line-balanced-double-quotes", ->
+        set
+          textC: """
+          { | "hello {" }
+          """
+        ensure "v a {",
+          selectedText: """
+          {  "hello {" }
+          """
+
+      it "Not ignore bracket in within-line-not-balanced-double-quotes", ->
+        set
+          textC: """
+          {  "hello {" | '"' }
+          """
+        ensure "v a {",
+          selectedText: """
+          {"  '"' }
+          """
+      xit "[search from outside of double-quote] skips bracket in within-line-balanced-double-quotes", ->
+        # FIXME to success this spec
+        set
+          textC: """
+          {  "h|ello {" }
+          """
+        ensure "v a {",
+          selectedText: """
+          {  "hello {" }
+          """
+
+      beforeEach ->
+        set
+          textC_: """
+
+          """
     describe "inner-curly-bracket", ->
       beforeEach ->
         set
