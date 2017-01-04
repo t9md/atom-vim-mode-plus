@@ -2,6 +2,7 @@
 _ = require 'underscore-plus'
 {
   isEscapedCharRange
+  getEndOfLineForBufferRow
   scanBufferRow
 } = require './utils'
 
@@ -50,25 +51,25 @@ class PairFinder
   filterEvent: ->
     true
 
-  scanPair: (which, direction, from, fn) ->
+  getScanSpecFor: (direction, from) ->
     switch direction
       when 'forward'
-        scanRange = new Range(from, @editor.buffer.getEndPosition())
-        scanFunctionName = 'scanInBufferRange'
+        if @allowNextLine
+          scanRange = new Range(from, @editor.buffer.getEndPosition())
+        else
+          scanRange = new Range(from, getEndOfLineForBufferRow(@editor, from.row))
+        functionName = 'scanInBufferRange'
       when 'backward'
-        scanRange = new Range([0, 0], from)
-        scanFunctionName = 'backwardsScanInBufferRange'
+        if @allowNextLine
+          scanRange = new Range([0, 0], from)
+        else
+          scanRange = new Range([from.row, 0], from)
+        functionName = 'backwardsScanInBufferRange'
+    {scanRange, functionName, pattern: @getPattern()}
 
-    @editor[scanFunctionName] @getPattern(), scanRange, (event) =>
-      if not @allowNextLine and (from.row isnt event.range.start.row)
-        event.stop()
-        return
+  findPair: (which, direction, from) ->
+    {scanRange, functionName, pattern} = @getScanSpecFor(direction, from)
 
-      return if isEscapedCharRange(@editor, event.range)
-      if @filterEvent(event)
-        fn(event)
-
-  findPair: (which, direction, from, fn) ->
     stack = []
     range = null
 
@@ -76,7 +77,10 @@ class PairFinder
     # it is forwarding pair, so stoppable is not @allowForwarding
     findingNonForwardingClosingQuote = (this instanceof QuoteFinder) and which is 'close' and not @allowForwarding
 
-    @scanPair which, direction, from, (event) =>
+    @editor[functionName] pattern, scanRange, (event) =>
+      return if isEscapedCharRange(@editor, event.range)
+      return unless @filterEvent(event)
+
       eventState = @getEventState(event)
 
       if eventState.state isnt which
@@ -85,7 +89,13 @@ class PairFinder
           return
         stack.push(eventState)
       else
-        if fn(stack, eventState)
+        foundEvent = {eventState, from}
+        isValid =
+          switch eventState.state
+            when 'open' then @onOpenFound(stack, foundEvent)
+            when 'close' then @onCloseFound(stack, foundEvent)
+
+        if isValid
           range = event.range
           event.stop()
 
@@ -94,26 +104,28 @@ class PairFinder
   spliceStack: (stack, eventState) ->
     stack.pop()
 
-  findCloseForward: (from) ->
-    @findPair 'close', 'forward', from, (stack, closeState) =>
-      openState = @spliceStack(stack, closeState)
-      unless openState?
-        return true
+  onCloseFound: (stack, {eventState, from}) ->
+    openState = @spliceStack(stack, eventState)
+    unless openState?
+      return true
 
-      if stack.length is 0
-        {start} = openState.range
-        start.isEqual(from) or (@allowForwarding and start.row is from.row)
+    if stack.length is 0
+      {start} = openState.range
+      start.isEqual(from) or (@allowForwarding and start.row is from.row)
+
+  onOpenFound: (stack, {eventState, from}) ->
+    @spliceStack(stack, eventState)
+    stack.length is 0
+
+  findCloseForward: (from) ->
+    @findPair('close', 'forward', from)
 
   findOpenBackward: (from) ->
-    @findPair 'open', 'backward', from, (stack, openState) =>
-      @spliceStack(stack, openState)
-      stack.length is 0
+    @findPair('open', 'backward', from)
 
   find: (from) ->
-    closeRange = @findCloseForward(from)
-    if closeRange?
-      @closeRange = closeRange
-      openRange = @findOpenBackward(closeRange.end)
+    closeRange = @closeRange = @findCloseForward(from)
+    openRange = @findOpenBackward(closeRange.end) if closeRange?
 
     if closeRange? and openRange?
       {
