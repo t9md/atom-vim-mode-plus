@@ -1296,3 +1296,35 @@ describe "Operator TransformString", ->
           a
           \n
           """
+
+  describe "SortCaseInsensitively", ->
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g s': 'vim-mode-plus:sort-case-insensitively'
+    it "Sort rows case-insensitively", ->
+      set
+        textC: """
+        |apple
+        Beef
+        APPLE
+        DOG
+        beef
+        Apple
+        BEEF
+        Dog
+        dog
+        """
+
+      ensure "g s G", ->
+        text: """
+        apple
+        Apple
+        APPLE
+        beef
+        Beef
+        BEEF
+        dog
+        Dog
+        DOG
+        """
