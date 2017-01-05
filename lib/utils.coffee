@@ -849,31 +849,29 @@ expandRangeToWhiteSpaces = (editor, range, directions=[]) ->
 
   return range # fallback
 
-getScanRange = (editor, direction, from, {allowNextLine}={}) ->
-  allowNextLine ?= true
+scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
+  {allowNextLine, from, scanRange} = options
+  if not from? and not scanRange?
+    throw new Error("You must either of 'from' or 'scanRange' options")
+
+  if scanRange
+    allowNextLine = true
+  else
+    allowNextLine ?= true
+  from = Point.fromObject(from) if from?
   switch direction
     when 'forward'
-      if allowNextLine
-        new Range(from, editor.buffer.getEndPosition())
-      else
-        new Range(from, getEndOfLineForBufferRow(editor, from.row))
+      scanRange ?= new Range(from, getVimEofBufferPosition(editor))
+      scanFunction = 'scanInBufferRange'
     when 'backward'
-      if allowNextLine
-        new Range([0, 0], from)
-      else
-        new Range([from.row, 0], from)
+      scanRange ?= new Range([0, 0], from)
+      scanFunction = 'backwardsScanInBufferRange'
 
-getEditorScanner = (editor, direction) ->
-  switch direction
-    when 'forward'
-      editor.scanInBufferRange.bind(editor)
-    when 'backward'
-      editor.backwardsScanInBufferRange.bind(editor)
-
-scanEditorInDirection = (editor, direction, pattern, from, options, fn) ->
-  scanRange = getScanRange(editor, direction, from, options)
-  scanner = getEditorScanner(editor, direction)
-  scanner(pattern, scanRange, fn)
+  editor[scanFunction] pattern, scanRange, (event) ->
+    if not allowNextLine and event.range.start.row isnt from.row
+      event.stop()
+      return
+    fn(event)
 
 module.exports = {
   getParent
@@ -985,7 +983,5 @@ module.exports = {
   expandRangeToWhiteSpaces
   getRightCharacterForBufferPosition
   getLeftCharacterForBufferPosition
-  getScanRange
-  getEditorScanner
   scanEditorInDirection
 }

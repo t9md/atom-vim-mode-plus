@@ -336,15 +336,15 @@ class MoveToNextWord extends Motion
   @extend()
   wordRegex: null
 
-  getPoint: (pattern, fromPoint) ->
-    scanRange = new Range(fromPoint, @getVimEofBufferPosition())
+  getPoint: (pattern, from) ->
     wordRange = null
     found = false
-    @editor.scanInBufferRange pattern, scanRange, ({range, matchText, stop}) ->
+
+    @scanForward pattern, {from}, ({range, matchText, stop}) ->
       wordRange = range
       # Ignore 'empty line' matches between '\r' and '\n'
       return if matchText is '' and range.start.column isnt 0
-      if range.start.isGreaterThan(fromPoint)
+      if range.start.isGreaterThan(from)
         found = true
         stop()
 
@@ -355,7 +355,7 @@ class MoveToNextWord extends Motion
       else
         point
     else
-      wordRange?.end ? fromPoint
+      wordRange?.end ? from
 
   # Special case: "cw" and "cW" are treated like "ce" and "cE" if the cursor is
   # on a non-blank.  This is because "cw" is interpreted as change-word, and a
@@ -542,10 +542,9 @@ class MoveToNextSentence extends Motion
   isBlankRow: (row) ->
     @editor.isBufferRowBlank(row)
 
-  getNextStartOfSentence: (fromPoint) ->
-    scanRange = new Range(fromPoint, @getVimEofBufferPosition())
+  getNextStartOfSentence: (from) ->
     foundPoint = null
-    @editor.scanInBufferRange @sentenceRegex, scanRange, ({range, matchText, match, stop}) =>
+    @scanForward @sentenceRegex, {from}, ({range, matchText, match, stop}) =>
       if match[1]?
         [startRow, endRow] = [range.start.row, range.end.row]
         return if @skipBlankRow and @isBlankRow(endRow)
@@ -554,26 +553,25 @@ class MoveToNextSentence extends Motion
       else
         foundPoint = range.end
       stop() if foundPoint?
-    foundPoint ? scanRange.end
+    foundPoint ? @getVimEofBufferPosition()
 
-  getPreviousStartOfSentence: (fromPoint) ->
-    scanRange = new Range(fromPoint, [0, 0])
+  getPreviousStartOfSentence: (from) ->
     foundPoint = null
-    @editor.backwardsScanInBufferRange @sentenceRegex, scanRange, ({range, match, stop, matchText}) =>
+    @scanBackward @sentenceRegex, {from}, ({range, match, stop, matchText}) =>
       if match[1]?
         [startRow, endRow] = [range.start.row, range.end.row]
         if not @isBlankRow(endRow) and @isBlankRow(startRow)
           point = @getFirstCharacterPositionForBufferRow(endRow)
-          if point.isLessThan(fromPoint)
+          if point.isLessThan(from)
             foundPoint = point
           else
             return if @skipBlankRow
             foundPoint = @getFirstCharacterPositionForBufferRow(startRow)
       else
-        if range.end.isLessThan(fromPoint)
+        if range.end.isLessThan(from)
           foundPoint = range.end
       stop() if foundPoint?
-    foundPoint ? scanRange.start
+    foundPoint ? [0, 0]
 
 class MoveToPreviousSentence extends MoveToNextSentence
   @extend()

@@ -236,8 +236,7 @@ class SearchCurrentWord extends SearchBase
     wordRegex = new RegExp("[^\\s#{_.escapeRegExp(nonWordCharacters)}]+", 'g')
 
     found = null
-    scanRange = @editor.bufferRangeForBufferRow(point.row)
-    @editor.scanInBufferRange wordRegex, scanRange, ({range, stop}) ->
+    @scanForward wordRegex, {from: [point.row, 0], allowNextLine: false}, ({range, stop}) ->
       if range.end.isGreaterThan(point)
         found = range
         stop()

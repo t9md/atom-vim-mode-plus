@@ -446,9 +446,8 @@ class Tag extends Pair
 
   getTagStartPoint: (from) ->
     tagRange = null
-    scanRange = @editor.bufferRangeForBufferRow(from.row)
     pattern = TagFinder::pattern
-    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
+    @scanForward pattern, {from: [from.row, 0]}, ({range, stop}) ->
       if range.containsPoint(from, true)
         tagRange = range
         stop()
@@ -682,9 +681,8 @@ class SearchMatchForward extends TextObject
 
   findMatch: (fromPoint, pattern) ->
     fromPoint = translatePointAndClip(@editor, fromPoint, "forward") if @isMode('visual')
-    scanRange = [[fromPoint.row, 0], @getVimEofBufferPosition()]
     found = null
-    @editor.scanInBufferRange pattern, scanRange, ({range, stop}) ->
+    @scanForward pattern, {from: [fromPoint.row, 0]}, ({range, stop}) ->
       if range.end.isGreaterThan(fromPoint)
         found = range
         stop()
@@ -727,9 +725,8 @@ class SearchMatchBackward extends SearchMatchForward
 
   findMatch: (fromPoint, pattern) ->
     fromPoint = translatePointAndClip(@editor, fromPoint, "backward") if @isMode('visual')
-    scanRange = [[fromPoint.row, Infinity], [0, 0]]
     found = null
-    @editor.backwardsScanInBufferRange pattern, scanRange, ({range, stop}) ->
+    @scanBackward pattern, {from: [fromPoint.row, Infinity]}, ({range, stop}) ->
       if range.start.isLessThan(fromPoint)
         found = range
         stop()

@@ -57,7 +57,8 @@ class PairFinder
     # Quote is not nestable. So when we encounter 'open' while finding 'close',
     # it is forwarding pair, so stoppable is not @allowForwarding
     findingNonForwardingClosingQuote = (this instanceof QuoteFinder) and which is 'close' and not @allowForwarding
-    scanEditorInDirection @editor, direction, @getPattern(), from, {@allowNextLine}, (event) =>
+    scanner = scanEditorInDirection.bind(null, @editor, direction, @getPattern(), {from, @allowNextLine})
+    scanner (event) =>
       {range, stop} = event
 
       return if isEscapedCharRange(@editor, range)

@@ -189,8 +189,7 @@ class ConvertToSoftTab extends TransformString
   wise: 'linewise'
 
   mutateSelection: (selection) ->
-    scanRange = selection.getBufferRange()
-    @editor.scanInBufferRange /\t/g, scanRange, ({range, replace}) =>
+    @scanForward /\t/g, {scanRange: selection.getBufferRange()}, ({range, replace}) =>
       # Replace \t to spaces which length is vary depending on tabStop and tabLenght
       # So we directly consult it's screen representing length.
       length = @editor.screenRangeForBufferRange(range).getExtent().column
@@ -203,8 +202,7 @@ class ConvertToHardTab extends TransformString
 
   mutateSelection: (selection) ->
     tabLength = @editor.getTabLength()
-    scanRange = selection.getBufferRange()
-    @editor.scanInBufferRange /[ \t]+/g, scanRange, ({range, replace}) =>
+    @scanForward /[ \t]+/g, {scanRange: selection.getBufferRange()}, ({range, replace}) =>
       {start, end} = @editor.screenRangeForBufferRange(range)
       startColumn = start.column
       endColumn = end.column

@@ -521,7 +521,7 @@ class Increase extends Operator
   replaceNumberInBufferRange: (scanRange, fn=null) ->
     newRanges = []
     @pattern ?= ///#{settings.get('numberRegex')}///g
-    @editor.scanInBufferRange @pattern, scanRange, (event) =>
+    @scanForward @pattern, {scanRange}, (event) =>
       return if fn? and not fn(event)
       {matchText, replace} = event
       nextNumber = @getNextNumber(matchText)
