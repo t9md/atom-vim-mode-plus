@@ -1,10 +1,11 @@
-# 0.78.0: WIP: Happy New Year 2017!
+# 0.78.0: Happy New Year 2017!
 - New: TransformString Operator `sort-case-insensitively` by @thancock20 #640
+- Fix: `v *` then `n` or `N` in different editor no longer throw error #641.
 - Improve: Pair text-object
-  - Use new `PairFinder` class to find pair range(extracted from `text-object.coffee`).
-  - Bracket TextObject: `(, )`, `{, }`, `[, ]`, `<, >`
+  - Internal: Use new `PairFinder` class to find pair range(extracted from `text-object.coffee`).
+  - Improve: Bracket TextObject: `(, )`, `{, }`, `[, ]`, `<, >`
     - Find range by considering syntax-scope. #644.
-  - Quote TextObject: `'`, `"` etc..
+  - Improve: Quote TextObject: `'`, `"` etc..
     - Simply find quote if cursor is NOT in quote char #173, #638
     - If cursor is ON quote char consider inside/outside of double-quote #556, #642
 - Improve: Fold text-object(`i z`, `a z`) no longer ignore fold on cursor's row. #636
