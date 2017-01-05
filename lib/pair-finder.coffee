@@ -3,18 +3,13 @@ _ = require 'underscore-plus'
 {
   isEscapedCharRange
   getEndOfLineForBufferRow
-  scanBufferRow
+  collectRangeInBufferRow
   scanEditorInDirection
 } = require './utils'
 
-isMatchScope = (pattern, scopes) ->
-  for scope in scopes when pattern.test(scope)
-    return true
-  false
-
 getCharacterRangeInformation = (editor, point, char) ->
   pattern = ///#{_.escapeRegExp(char)}///g
-  total = scanBufferRow(editor, point.row, pattern).filter (range) ->
+  total = collectRangeInBufferRow(editor, point.row, pattern).filter (range) ->
     not isEscapedCharRange(editor, range)
   [left, right] = _.partition(total, ({start}) -> start.isLessThan(point))
   balanced = (total.length % 2) is 0
@@ -27,8 +22,8 @@ class ScopeState
   getScopeStateForBufferPosition: (point) ->
     scopes = @editor.scopeDescriptorForBufferPosition(point).getScopesArray()
     {
-      inString: isMatchScope(/^string\.*/, scopes)
-      inComment: isMatchScope(/^comment\.*/, scopes)
+      inString: scopes.some (scope) -> scope.startsWith('string.')
+      inComment: scopes.some (scope) -> scope.startsWith('comment.')
       inDoubleQuotes: @isInDoubleQuotes(point)
     }
 
@@ -41,6 +36,9 @@ class ScopeState
 
   isEqual: (other) ->
     _.isEqual(@state, other.state)
+
+  isInNormalCodeArea: ->
+    not (@state.inString or @state.inComment or @state.inDoubleQuotes)
 
 class PairFinder
   constructor: (@editor, options={}) ->
@@ -124,25 +122,30 @@ class BracketFinder extends PairFinder
 
   # This method can be called recursively
   find: (from, options) ->
-    @initialScopeState ?= new ScopeState(@editor, from)
+    @initialScope ?= new ScopeState(@editor, from)
 
     return found if found = super
 
     if not @retry
       @retry = true
-      [@closeRange, @closeScopeState] = []
+      [@closeRange, @closeRangeScope] = []
       @find(from, options)
 
   filterEvent: ({range}) ->
-    scopeState = new ScopeState(@editor, range.start)
-    if @closeRange?
-      @closeScopeState ?= new ScopeState(@editor, @closeRange.start)
-      @closeScopeState.isEqual(scopeState)
-    else
+    scope = new ScopeState(@editor, range.start)
+    if not @closeRange
+      # Now finding closeRange
       if not @retry
-        @initialScopeState.isEqual(scopeState)
+        @initialScope.isEqual(scope)
       else
-        not @initialScopeState.isEqual(scopeState)
+        if @initialScope.isInNormalCodeArea()
+          not scope.isInNormalCodeArea()
+        else
+          scope.isInNormalCodeArea()
+    else
+      # Now finding openRange: search from same scope
+      @closeRangeScope ?= new ScopeState(@editor, @closeRange.start)
+      @closeRangeScope.isEqual(scope)
 
   getEventState: ({match, range}) ->
     state = switch

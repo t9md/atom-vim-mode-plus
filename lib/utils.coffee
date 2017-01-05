@@ -618,7 +618,7 @@ scanEditor = (editor, pattern) ->
     ranges.push(range)
   ranges
 
-scanBufferRow = (editor, row, pattern) ->
+collectRangeInBufferRow = (editor, row, pattern) ->
   ranges = []
   scanRange = editor.bufferRangeForBufferRow(row)
   editor.scanInBufferRange pattern, scanRange, ({range}) ->
@@ -954,7 +954,7 @@ module.exports = {
   shrinkRangeEndToBeforeNewLine
   scanInRanges
   scanEditor
-  scanBufferRow
+  collectRangeInBufferRow
   findRangeInBufferRow
   isRangeContainsSomePoint
   destroyNonLastSelection
