@@ -572,8 +572,7 @@ describe "TextObject", ->
           selectedText: """
           {"  '"' }
           """
-      xit "[search from outside of double-quote] skips bracket in within-line-balanced-double-quotes", ->
-        # FIXME to success this spec
+      it "[search from inside of double-quote] skips bracket in within-line-balanced-double-quotes", ->
         set
           textC: """
           {  "h|ello {" }

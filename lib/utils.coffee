@@ -618,7 +618,7 @@ scanEditor = (editor, pattern) ->
     ranges.push(range)
   ranges
 
-scanBufferRow = (editor, row, pattern) ->
+collectRangeInBufferRow = (editor, row, pattern) ->
   ranges = []
   scanRange = editor.bufferRangeForBufferRow(row)
   editor.scanInBufferRange pattern, scanRange, ({range}) ->
@@ -849,6 +849,32 @@ expandRangeToWhiteSpaces = (editor, range, directions=[]) ->
 
   return range # fallback
 
+getScanRange = (editor, direction, from, {allowNextLine}={}) ->
+  allowNextLine ?= true
+  switch direction
+    when 'forward'
+      if allowNextLine
+        new Range(from, editor.buffer.getEndPosition())
+      else
+        new Range(from, getEndOfLineForBufferRow(editor, from.row))
+    when 'backward'
+      if allowNextLine
+        new Range([0, 0], from)
+      else
+        new Range([from.row, 0], from)
+
+getEditorScanner = (editor, direction) ->
+  switch direction
+    when 'forward'
+      editor.scanInBufferRange.bind(editor)
+    when 'backward'
+      editor.backwardsScanInBufferRange.bind(editor)
+
+scanEditorInDirection = (editor, direction, pattern, from, options, fn) ->
+  scanRange = getScanRange(editor, direction, from, options)
+  scanner = getEditorScanner(editor, direction)
+  scanner(pattern, scanRange, fn)
+
 module.exports = {
   getParent
   getAncestors
@@ -928,7 +954,7 @@ module.exports = {
   shrinkRangeEndToBeforeNewLine
   scanInRanges
   scanEditor
-  scanBufferRow
+  collectRangeInBufferRow
   findRangeInBufferRow
   isRangeContainsSomePoint
   destroyNonLastSelection
@@ -959,4 +985,7 @@ module.exports = {
   expandRangeToWhiteSpaces
   getRightCharacterForBufferPosition
   getLeftCharacterForBufferPosition
+  getScanRange
+  getEditorScanner
+  scanEditorInDirection
 }

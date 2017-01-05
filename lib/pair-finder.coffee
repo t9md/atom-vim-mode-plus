@@ -2,79 +2,108 @@
 _ = require 'underscore-plus'
 {
   isEscapedCharRange
-  scanBufferRow
+  getEndOfLineForBufferRow
+  collectRangeInBufferRow
+  scanEditorInDirection
 } = require './utils'
 
+getCharacterRangeInformation = (editor, point, char) ->
+  pattern = ///#{_.escapeRegExp(char)}///g
+  total = collectRangeInBufferRow(editor, point.row, pattern).filter (range) ->
+    not isEscapedCharRange(editor, range)
+  [left, right] = _.partition(total, ({start}) -> start.isLessThan(point))
+  balanced = (total.length % 2) is 0
+  {total, left, right, balanced}
+
+class ScopeState
+  constructor: (@editor, point) ->
+    @state = @getScopeStateForBufferPosition(point)
+
+  getScopeStateForBufferPosition: (point) ->
+    scopes = @editor.scopeDescriptorForBufferPosition(point).getScopesArray()
+    {
+      inString: scopes.some (scope) -> scope.startsWith('string.')
+      inComment: scopes.some (scope) -> scope.startsWith('comment.')
+      inDoubleQuotes: @isInDoubleQuotes(point)
+    }
+
+  isInDoubleQuotes: (point) ->
+    {total, left, balanced} = getCharacterRangeInformation(@editor, point, '"')
+    if total.length is 0 or not balanced
+      false
+    else
+      left.length % 2 is 1
+
+  isEqual: (other) ->
+    _.isEqual(@state, other.state)
+
+  isInNormalCodeArea: ->
+    not (@state.inString or @state.inComment or @state.inDoubleQuotes)
+
 class PairFinder
-  constructor: (@editor, {@allowNextLine}={}) ->
+  constructor: (@editor, options={}) ->
+    {@allowNextLine, @allowForwarding} = options
 
   getPattern: ->
     @pattern
 
-  getCharacterRangeInformation: (char, point) ->
-    pattern = ///#{_.escapeRegExp(char)}///g
-    total = scanBufferRow(@editor, point.row, pattern).filter (range) =>
-      not isEscapedCharRange(@editor, range)
-    [left, right] = _.partition(total, ({start}) -> start.isLessThan(point))
-    balanced = (total.length % 2) is 0
-    {total, left, right, balanced}
-
   filterEvent: ->
     true
 
-  scanPair: (which, direction, from, fn) ->
-    switch direction
-      when 'forward'
-        scanRange = new Range(from, @editor.buffer.getEndPosition())
-        scanFunctionName = 'scanInBufferRange'
-      when 'backward'
-        scanRange = new Range([0, 0], from)
-        scanFunctionName = 'backwardsScanInBufferRange'
+  findPair: (which, direction, from) ->
+    stack = []
+    found = null
 
-    @editor[scanFunctionName] @getPattern(), scanRange, (event) =>
-      if not @allowNextLine and (from.row isnt event.range.start.row)
-        event.stop()
+    # Quote is not nestable. So when we encounter 'open' while finding 'close',
+    # it is forwarding pair, so stoppable is not @allowForwarding
+    findingNonForwardingClosingQuote = (this instanceof QuoteFinder) and which is 'close' and not @allowForwarding
+    scanEditorInDirection @editor, direction, @getPattern(), from, {@allowNextLine}, (event) =>
+      {range, stop} = event
+
+      return if isEscapedCharRange(@editor, range)
+      return unless @filterEvent(event)
+
+      eventState = @getEventState(event)
+
+      if findingNonForwardingClosingQuote and eventState.state is 'open' and range.start.isGreaterThan(from)
+        stop()
         return
 
-      return if isEscapedCharRange(@editor, event.range)
-      if @filterEvent(event)
-        fn(event)
-
-  findPair: (which, direction, from, fn) ->
-    stack = []
-    range = null
-    @scanPair which, direction, from, (event) =>
-      eventState = @getEventState(event)
       if eventState.state isnt which
         stack.push(eventState)
       else
-        if fn(stack, eventState)
-          range = event.range
-          event.stop()
+        if @onFound(stack, {eventState, from})
+          found = range
+          stop()
 
-    return range
+    return found
 
   spliceStack: (stack, eventState) ->
     stack.pop()
 
-  findCloseForward: (from, {allowForwarding}={}) ->
-    @findPair 'close', 'forward', from, (stack, closeState) =>
-      openState = @spliceStack(stack, closeState)
-      unless openState?
-        return true
+  onFound: (stack, {eventState, from}) ->
+    switch eventState.state
+      when 'open'
+        @spliceStack(stack, eventState)
+        stack.length is 0
+      when 'close'
+        openState = @spliceStack(stack, eventState)
+        unless openState?
+          return true
 
-      if stack.length is 0
-        {start} = openState.range
-        start.isEqual(from) or (allowForwarding and start.row is from.row)
+        if stack.length is 0
+          {start} = openState.range
+          start.isEqual(from) or (@allowForwarding and start.row is from.row)
+
+  findCloseForward: (from) ->
+    @findPair('close', 'forward', from)
 
   findOpenBackward: (from) ->
-    @findPair 'open', 'backward', from, (stack, openState) =>
-      @spliceStack(stack, openState)
-      stack.length is 0
+    @findPair('open', 'backward', from)
 
-  find: (from, options) ->
-    closeRange = @findCloseForward(from, options)
-    openRange = @findOpenBackward(closeRange.end, options) if closeRange?
+  find: (from) ->
+    closeRange = @closeRange = @findCloseForward(from)
+    openRange = @findOpenBackward(closeRange.end) if closeRange?
 
     if closeRange? and openRange?
       {
@@ -85,28 +114,38 @@ class PairFinder
       }
 
 class BracketFinder extends PairFinder
+  retry: false
+
   setPatternForPair: (pair) ->
     [open, close] = pair
     @pattern = ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
 
-  isInDoubleQuotes: (point) ->
-    {total, left, balanced} = @getCharacterRangeInformation('"', point)
-    if total.length is 0 or not balanced
-      false
-    else
-      left.length % 2 is 1
-
+  # This method can be called recursively
   find: (from, options) ->
-    @fromInDoubleQuotes = @isInDoubleQuotes(from)
-    super
+    @initialScope ?= new ScopeState(@editor, from)
+
+    return found if found = super
+
+    if not @retry
+      @retry = true
+      [@closeRange, @closeRangeScope] = []
+      @find(from, options)
 
   filterEvent: ({range}) ->
-    if @fromInDoubleQuotes
-      # Search from inside of double-quotes: Don't care char is in double-quotes.
-      true
+    scope = new ScopeState(@editor, range.start)
+    if not @closeRange
+      # Now finding closeRange
+      if not @retry
+        @initialScope.isEqual(scope)
+      else
+        if @initialScope.isInNormalCodeArea()
+          not scope.isInNormalCodeArea()
+        else
+          scope.isInNormalCodeArea()
     else
-      # Search from outside of double-quotes: Ignore char inside of double-quotes.
-      not @isInDoubleQuotes(range.start)
+      # Now finding openRange: search from same scope
+      @closeRangeScope ?= new ScopeState(@editor, @closeRange.start)
+      @closeRangeScope.isEqual(scope)
 
   getEventState: ({match, range}) ->
     state = switch
@@ -122,7 +161,7 @@ class QuoteFinder extends PairFinder
   find: (from, options) ->
     # HACK: Cant determine open/close from quote char itself
     # So preset open/close state to get desiable result.
-    {total, left, right, balanced} = @getCharacterRangeInformation(@quoteChar, from)
+    {total, left, right, balanced} = getCharacterRangeInformation(@editor, from, @quoteChar)
     onQuoteChar = right[0]?.start.isEqual(from) # from point is on quote char
     if balanced and onQuoteChar
       nextQuoteIsOpen = left.length % 2 is 0

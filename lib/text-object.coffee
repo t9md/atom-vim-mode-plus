@@ -234,17 +234,18 @@ class Pair extends TextObject
     new Range(start, end)
 
   getFinder: ->
+    options = {allowNextLine: @isAllowNextLine(), @allowForwarding}
     if @pair[0] is @pair[1]
-      finder = new QuoteFinder(@editor, allowNextLine: @isAllowNextLine())
+      finder = new QuoteFinder(@editor, options)
     else
-      finder = new BracketFinder(@editor, allowNextLine: @isAllowNextLine())
+      finder = new BracketFinder(@editor, options)
 
     finder.setPatternForPair(@pair)
     finder
 
   getPairInfo: (from) ->
     finder = @getFinder()
-    pairInfo = finder.find(from, {@allowForwarding})
+    pairInfo = finder.find(from)
     unless pairInfo?
       return null
     pairInfo.innerRange = @adjustRange(pairInfo.innerRange) if @adjustInnerRange
@@ -286,7 +287,10 @@ class AnyPair extends Pair
 
   getRanges: (selection) ->
     prefix = if @isInner() then 'Inner' else 'A'
-    (range for klass in @member when (range = @getRangeBy(prefix + klass, selection)))
+    ranges = []
+    for klass in @member when range = @getRangeBy(prefix + klass, selection)
+      ranges.push(range)
+    ranges
 
   getRange: (selection) ->
     ranges = @getRanges(selection)
@@ -451,7 +455,7 @@ class Tag extends Pair
     tagRange?.start ? from
 
   getFinder: ->
-    new TagFinder(@editor, allowNextLine: @isAllowNextLine())
+    new TagFinder(@editor, {allowNextLine: @isAllowNextLine(), @allowForwarding})
 
   getPairInfo: (from) ->
     super(@getTagStartPoint(from))
