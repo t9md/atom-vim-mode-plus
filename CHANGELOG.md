@@ -1,3 +1,16 @@
+# 0.78.0: WIP: Happy New Year 2017!
+- New: TransformString Operator `sort-case-insensitively` by @thancock20 #640
+- Improve: Pair text-object
+  - Use new `PairFinder` class to find pair range(extracted from `text-object.coffee`).
+  - Bracket TextObject: `(, )`, `{, }`, `[, ]`, `<, >`
+    - Find range by considering syntax-scope. #644.
+  - Quote TextObject: `'`, `"` etc..
+    - Simply find quote if cursor is NOT in quote char #173, #638
+    - If cursor is ON quote char consider inside/outside of double-quote #556, #642
+- Improve: Fold text-object(`i z`, `a z`) no longer ignore fold on cursor's row. #636
+- Internal: New `Base::scanForward`, `Base::scanBackward` and use it
+- Internal: Lots of internal code cleanup(`utils.coffee`, `text-object.coffee` etc.)
+
 # 0.77.0
 - New: Subword support #634
   - Motion: `move-to-next-subword`, `move-to-previous-subword`, `move-to-end-of-subword`'
