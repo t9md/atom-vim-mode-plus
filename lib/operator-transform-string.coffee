@@ -658,11 +658,8 @@ class SortCaseInsensitively extends ChangeOrder
   @registerToSelectList()
   @description: "Sort lines alphabetically (case insensitive)"
   getNewRows: (rows) ->
-    rows.sort (a, b) ->
-      r = a.toLowerCase().localeCompare(b.toLowerCase())
-      if r is 0
-        r = a.localeCompare(b)
-      r
+    rows.sort (rowA, rowB) ->
+      rowA.localeCompare(rowB, sensitivity: 'base')
 
 class SortByNumber extends ChangeOrder
   @extend()
