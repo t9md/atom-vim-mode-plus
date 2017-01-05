@@ -42,7 +42,9 @@ class ScopeState
 
 class PairFinder
   constructor: (@editor, options={}) ->
-    {@allowNextLine, @allowForwarding} = options
+    {@allowNextLine, @allowForwarding, @pair} = options
+    if @pair?
+      @setPatternForPair(@pair)
 
   getPattern: ->
     @pattern
@@ -93,8 +95,8 @@ class PairFinder
           return true
 
         if stack.length is 0
-          {start} = openState.range
-          start.isEqual(from) or (@allowForwarding and start.row is from.row)
+          openRange = openState.range
+          openRange.start.isEqual(from) or (@allowForwarding and openRange.start.row is from.row)
 
   findCloseForward: (from) ->
     @findPair('close', 'forward', from)

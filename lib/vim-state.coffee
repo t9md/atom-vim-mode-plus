@@ -11,8 +11,6 @@ SearchInputElement = require './search-input'
 {
   getVisibleEditors
   matchScopes
-
-  debug
 } = require './utils'
 swrap = require './selection-wrapper'
 

@@ -146,7 +146,7 @@ class Word extends TextObject
     point = @getNormalizedHeadBufferPosition(selection)
     {range} = @getWordBufferRangeAndKindAtBufferPosition(point, {@wordRegex})
     if @isA()
-      expandRangeToWhiteSpaces(@editor, range, ['forward', 'backward'])
+      expandRangeToWhiteSpaces(@editor, range)
     else
       range
 
@@ -234,18 +234,14 @@ class Pair extends TextObject
     new Range(start, end)
 
   getFinder: ->
-    options = {allowNextLine: @isAllowNextLine(), @allowForwarding}
+    options = {allowNextLine: @isAllowNextLine(), @allowForwarding, @pair}
     if @pair[0] is @pair[1]
-      finder = new QuoteFinder(@editor, options)
+      new QuoteFinder(@editor, options)
     else
-      finder = new BracketFinder(@editor, options)
-
-    finder.setPatternForPair(@pair)
-    finder
+      new BracketFinder(@editor, options)
 
   getPairInfo: (from) ->
-    finder = @getFinder()
-    pairInfo = finder.find(from)
+    pairInfo = @getFinder().find(from)
     unless pairInfo?
       return null
     pairInfo.innerRange = @adjustRange(pairInfo.innerRange) if @adjustInnerRange

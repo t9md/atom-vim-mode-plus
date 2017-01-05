@@ -828,24 +828,26 @@ humanizeBufferRange = (editor, range) ->
   else
     range
 
-expandRangeToWhiteSpaces = (editor, range, directions=[]) ->
+# Expand range to white space
+#  1. Expand to forward direction, if suceed return new range.
+#  2. Expand to backward direction, if succeed return new range.
+#  3. When faild to expand either direction, return original range.
+expandRangeToWhiteSpaces = (editor, range) ->
   {start, end} = range
 
-  for direction in directions
-    switch direction
-      when 'forward'
-        newEnd = null
-        scanRange = [end, getEndOfLineForBufferRow(editor, end.row)]
-        editor.scanInBufferRange /\S/, scanRange, ({range}) -> newEnd = range.start
-        if newEnd? and not newEnd.isEqual(end)
-          return new Range(start, newEnd)
+  newEnd = null
+  scanRange = [end, getEndOfLineForBufferRow(editor, end.row)]
+  editor.scanInBufferRange /\S/, scanRange, ({range}) -> newEnd = range.start
 
-      when 'backward'
-        newStart = null
-        scanRange = [[start.row, 0], range.start]
-        editor.backwardsScanInBufferRange /\S/, scanRange, ({range}) -> newStart = range.end
-        if newStart? and not newStart.isEqual(start)
-          return new Range(newStart, end)
+  if newEnd?.isGreaterThan(end)
+    return new Range(start, newEnd)
+
+  newStart = null
+  scanRange = [[start.row, 0], range.start]
+  editor.backwardsScanInBufferRange /\S/, scanRange, ({range}) -> newStart = range.end
+
+  if newStart?.isLessThan(start)
+    return new Range(newStart, end)
 
   return range # fallback
 
