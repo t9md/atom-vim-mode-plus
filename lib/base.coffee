@@ -152,9 +152,13 @@ class Base
   newInputUI: ->
     new Input(@vimState)
 
+  # FIXME: This is used to clone Motion::Search to support `n` and `N`
+  # But manual reseting and overriding property is bug prone.
+  # Should extract as search spec object and use it by
+  # creating clean instance of Search.
   clone: (vimState) ->
     properties = {}
-    excludeProperties = ['editor', 'editorElement', 'globalState', 'vimState']
+    excludeProperties = ['editor', 'editorElement', 'globalState', 'vimState', 'operator']
     for own key, value of this when key not in excludeProperties
       properties[key] = value
     klass = this.constructor
