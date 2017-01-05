@@ -1001,46 +1001,6 @@ describe "Operator TransformString", ->
         text: originalText.replace('111', 'A register')
         register: 'a': text: '111'
 
-  describe 'Reverse and Sort', ->
-    beforeEach ->
-      atom.keymaps.add "test",
-        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g r':   'vim-mode-plus:reverse'
-          'g s':   'vim-mode-plus:sort'
-      set
-        text: """
-        a
-        2
-        c
-        3
-        1
-        b
-
-        """
-        cursor: [2, 0]
-
-    it 'sort rows, reverse rows', ->
-      ensure "g s i p", ->
-        text: """
-        1
-        2
-        3
-        a
-        b
-        c
-
-        """
-      ensure "g r i p", ->
-        text: """
-        c
-        b
-        a
-        3
-        2
-        1
-
-        """
-
   describe "Join and it's family", ->
     beforeEach ->
       set
