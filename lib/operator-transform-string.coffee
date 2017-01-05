@@ -655,6 +655,17 @@ class Sort extends ChangeOrder
   getNewRows: (rows) ->
     rows.sort()
 
+class SortCaseInsensitively extends ChangeOrder
+  @extend()
+  @registerToSelectList()
+  @description: "Sort lines alphabetically (case insensitive)"
+  getNewRows: (rows) ->
+    rows.sort (a, b) ->
+      r = a.toLowerCase().localeCompare(b.toLowerCase())
+      if r is 0
+        r = a.localeCompare(b)
+      r
+
 class SortByNumber extends ChangeOrder
   @extend()
   @registerToSelectList()
