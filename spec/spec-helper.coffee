@@ -245,7 +245,7 @@ class VimEditor
   ensureOptionsOrdered = [
     'text', 'text_',
     'textC', 'textC_',
-    'selectedText', 'selectedTextOrdered', "selectionIsNarrowed"
+    'selectedText', 'selectedText_', 'selectedTextOrdered', "selectionIsNarrowed"
     'cursor', 'cursorBuffer',
     'numCursors'
     'register',
@@ -311,6 +311,9 @@ class VimEditor
       @editor.getSelections()
     actual = (s.getText() for s in selections)
     expect(actual).toEqual(toArray(text))
+
+  ensureSelectedText_: (text, ordered) ->
+    @ensureSelectedText(text.replace(/_/g, ' '), ordered)
 
   ensureSelectionIsNarrowed: (isNarrowed) ->
     actual = @vimState.modeManager.isNarrowed()

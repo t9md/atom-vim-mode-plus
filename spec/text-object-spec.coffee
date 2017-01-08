@@ -966,31 +966,41 @@ describe "TextObject", ->
       ensure keystroke, {selectedText}
 
     describe "inner-tag", ->
-      describe "pricisely select inner", ->
+      describe "precisely select inner", ->
         check = getCheckFunctionFor('i t')
-        text = "<abc>  <title>TITLE</title> </abc>"
-        deletedText = "<abc>  <title></title> </abc>"
+        text = """
+          <abc>
+            <title>TITLE</title>
+          </abc>
+          """
         selectedText = "TITLE"
-        innerABC = "  <title>TITLE</title> "
+        innerABC = "\n  <title>TITLE</title>\n"
+        textAfterDeleted = """
+          <abc>
+            <title></title>
+          </abc>
+          """
+
         beforeEach ->
           set {text}
+
         # Select
-        it "[1] forwarding", -> check [0, 5], 'v', {selectedText}
-        it "[2] openTag leftmost", -> check [0, 7], 'v', {selectedText}
-        it "[3] openTag rightmost", -> check [0, 13], 'v', {selectedText}
-        it "[4] Inner text", -> check [0, 16], 'v', {selectedText}
-        it "[5] closeTag leftmost", -> check [0, 19], 'v', {selectedText}
-        it "[6] closeTag rightmost", -> check [0, 26], 'v', {selectedText}
-        it "[7] right of closeTag", -> check [0, 27], 'v', {selectedText: innerABC}
+        it "[1] forwarding", -> check [1, 0], 'v', {selectedText}
+        it "[2] openTag leftmost", -> check [1, 2], 'v', {selectedText}
+        it "[3] openTag rightmost", -> check [1, 8], 'v', {selectedText}
+        it "[4] Inner text", -> check [1, 10], 'v', {selectedText}
+        it "[5] closeTag leftmost", -> check [1, 14], 'v', {selectedText}
+        it "[6] closeTag rightmost", -> check [1, 21], 'v', {selectedText}
+        it "[7] right of closeTag", -> check [2, 0], 'v', {selectedText: innerABC}
 
         # Delete
-        it "[8] forwarding", -> check [0, 5], 'd', {text: deletedText}
-        it "[9] openTag leftmost", -> check [0, 7], 'd', {text: deletedText}
-        it "[10] openTag rightmost", -> check [0, 13], 'd', {text: deletedText}
-        it "[11] Inner text", -> check [0, 16], 'd', {text: deletedText}
-        it "[12] closeTag leftmost", -> check [0, 19], 'd', {text: deletedText}
-        it "[13] closeTag rightmost", -> check [0, 26], 'd', {text: deletedText}
-        it "[14] right of closeTag", -> check [0, 27], 'd', {text: "<abc></abc>"}
+        it "[8] forwarding", -> check [1, 0], 'd', {text: textAfterDeleted}
+        it "[9] openTag leftmost", -> check [1, 2], 'd', {text: textAfterDeleted}
+        it "[10] openTag rightmost", -> check [1, 8], 'd', {text: textAfterDeleted}
+        it "[11] Inner text", -> check [1, 10], 'd', {text: textAfterDeleted}
+        it "[12] closeTag leftmost", -> check [1, 14], 'd', {text: textAfterDeleted}
+        it "[13] closeTag rightmost", -> check [1, 21], 'd', {text: textAfterDeleted}
+        it "[14] right of closeTag", -> check [2, 0], 'd', {text: "<abc></abc>"}
 
       describe "expansion and deletion", ->
         beforeEach ->
@@ -1012,20 +1022,21 @@ describe "TextObject", ->
           </body>
           </html>\n
           """
-          set text: htmlLikeText
+          set text_: htmlLikeText
+
         it "can expand selection when repeated", ->
           set cursor: [9, 0]
-          ensure 'v i t', selectedText: """
+          ensure 'v i t', selectedText_: """
             \n________<p><a>
             ______
             """
-          ensure 'i t', selectedText: """
+          ensure 'i t', selectedText_: """
             \n______<div>
             ________<p><a>
             ______</div>
             ____
             """
-          ensure 'i t', selectedText: """
+          ensure 'i t', selectedText_: """
             \n____<div>
             ______<div>
             ________<p><a>
@@ -1033,7 +1044,7 @@ describe "TextObject", ->
             ____</div>
             __
             """
-          ensure 'i t', selectedText: """
+          ensure 'i t', selectedText_: """
             \n__<div>
             ____<div>
             ______<div>
@@ -1042,7 +1053,7 @@ describe "TextObject", ->
             ____</div>
             __</div>\n
             """
-          ensure 'i t', selectedText: """
+          ensure 'i t', selectedText_: """
             \n<head>
             __<meta charset="UTF-8" />
             __<title>Document</title>
@@ -1059,7 +1070,7 @@ describe "TextObject", ->
             """
         it 'delete inner-tag and repatable', ->
           set cursor: [9, 0]
-          ensure "d i t", text: """
+          ensure "d i t", text_: """
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -1075,7 +1086,7 @@ describe "TextObject", ->
             </body>
             </html>\n
             """
-          ensure "3 .", text: """
+          ensure "3 .", text_: """
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -1085,37 +1096,84 @@ describe "TextObject", ->
             <body></body>
             </html>\n
             """
-          ensure ".", text: """
+          ensure ".", text_: """
             <!DOCTYPE html>
             <html lang="en"></html>\n
             """
 
+      describe "tag's IN-tag/Off-tag recognition", ->
+        describe "When tagStart's row contains NO NON-whitespaece till tagStart", ->
+          it "[multi-line] select forwarding tag", ->
+            set textC: """
+              <span>
+                |  <span>inner</span>
+              </span>
+              """
+            ensure "d i t", text: """
+              <span>
+                  <span></span>
+              </span>
+              """
+
+        describe "When tagStart's row contains SOME NON-whitespaece till tagStart", ->
+          it "[multi-line] select enclosing tag", ->
+            set textC: """
+            <span>
+            hello | <span>inner</span>
+            </span>
+            """
+            ensure "d i t", text: "<span></span>"
+
+          it "[one-line-1] select enclosing tag", ->
+            set textC: """
+              <span> | <span>inner</span></span>
+              """
+
+            ensure "d i t", text: "<span></span>"
+
+          it "[one-line-2] select enclosing tag", ->
+            set textC: """
+              <span>h|ello<span>inner</span></span>
+              """
+
+            ensure "d i t", text: "<span></span>"
+
     describe "a-tag", ->
-      describe "pricisely select a", ->
+      describe "precisely select a", ->
         check = getCheckFunctionFor('a t')
-        text = "<abc>  <title>TITLE</title> </abc>"
-        deletedText = "<abc>   </abc>"
+        text = """
+          <abc>
+            <title>TITLE</title>
+          </abc>
+          """
         selectedText = "<title>TITLE</title>"
-        aABC = "<abc>  <title>TITLE</title> </abc>"
+        aABC = text
+        textAfterDeleted = """
+          <abc>
+          __
+          </abc>
+          """.replace(/_/g, '')
+
         beforeEach ->
           set {text}
+
         # Select
-        it "[1] forwarding", -> check [0, 5], 'v', {selectedText}
-        it "[2] openTag leftmost", -> check [0, 7], 'v', {selectedText}
-        it "[3] openTag rightmost", -> check [0, 13], 'v', {selectedText}
-        it "[4] Inner text", -> check [0, 16], 'v', {selectedText}
-        it "[5] closeTag leftmost", -> check [0, 19], 'v', {selectedText}
-        it "[6] closeTag rightmost", -> check [0, 26], 'v', {selectedText}
-        it "[7] right of closeTag", -> check [0, 27], 'v', {selectedText: aABC}
+        it "[1] forwarding", -> check [1, 0], 'v', {selectedText}
+        it "[2] openTag leftmost", -> check [1, 2], 'v', {selectedText}
+        it "[3] openTag rightmost", -> check [1, 8], 'v', {selectedText}
+        it "[4] Inner text", -> check [1, 10], 'v', {selectedText}
+        it "[5] closeTag leftmost", -> check [1, 14], 'v', {selectedText}
+        it "[6] closeTag rightmost", -> check [1, 21], 'v', {selectedText}
+        it "[7] right of closeTag", -> check [2, 0], 'v', {selectedText: aABC}
 
         # Delete
-        it "[8] forwarding", -> check [0, 5], 'd', {text: deletedText}
-        it "[9] openTag leftmost", -> check [0, 7], 'd', {text: deletedText}
-        it "[10] openTag rightmost", -> check [0, 13], 'd', {text: deletedText}
-        it "[11] Inner text", -> check [0, 16], 'd', {text: deletedText}
-        it "[12] closeTag leftmost", -> check [0, 19], 'd', {text: deletedText}
-        it "[13] closeTag rightmost", -> check [0, 26], 'd', {text: deletedText}
-        it "[14] right of closeTag", -> check [0, 27], 'd', {text: ""}
+        it "[8] forwarding", -> check [1, 0], 'd', {text: textAfterDeleted}
+        it "[9] openTag leftmost", -> check [1, 2], 'd', {text: textAfterDeleted}
+        it "[10] openTag rightmost", -> check [1, 8], 'd', {text: textAfterDeleted}
+        it "[11] Inner text", -> check [1, 10], 'd', {text: textAfterDeleted}
+        it "[12] closeTag leftmost", -> check [1, 14], 'd', {text: textAfterDeleted}
+        it "[13] closeTag rightmost", -> check [1, 21], 'd', {text: textAfterDeleted}
+        it "[14] right of closeTag", -> check [2, 0], 'd', {text: ""}
 
   describe "SquareBracket", ->
     describe "inner-square-bracket", ->
