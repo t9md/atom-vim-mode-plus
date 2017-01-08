@@ -22,10 +22,12 @@ class MutationManager
 
     @markerLayer = @editor.addMarkerLayer()
     @mutationsBySelection = new Map
+    @bufferRangesForCustomCheckpoint = []
 
   destroy: ->
     @reset()
     {@mutationsBySelection, @editor, @vimState} = {}
+    {@bufferRangesForCustomCheckpoint} = {}
 
   init: (@options) ->
     @reset()
@@ -33,6 +35,7 @@ class MutationManager
   reset: ->
     @clearMarkers()
     @mutationsBySelection.clear()
+    @bufferRangesForCustomCheckpoint = []
 
   clearMarkers: (pattern) ->
     for marker in @markerLayer.getMarkers()
@@ -69,11 +72,19 @@ class MutationManager
     ranges
 
   getBufferRangesForCheckpoint: (checkpoint) ->
+    # [FIXME] dirty workaround just using mutationManager as merely state registry
+    if checkpoint is 'custom'
+      return @bufferRangesForCustomCheckpoint
+
     ranges = []
     @mutationsBySelection.forEach (mutation) ->
       if range = mutation.getBufferRangeForCheckpoint(checkpoint)
         ranges.push(range)
     ranges
+
+  # [FIXME] dirty workaround just using mutationmanager for state registry
+  setBufferRangesForCustomCheckpoint: (ranges) ->
+    @bufferRangesForCustomCheckpoint = ranges
 
   restoreInitialPositions: ->
     for selection in @editor.getSelections() when point = @getInitialPointForSelection(selection)

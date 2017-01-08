@@ -14,12 +14,13 @@ Operator = require('./base').getClass('Operator')
 # -------------------------
 # [NOTE]
 # Rule: Don't make any text mutation before calling `@selectTarget()`.
-class ActivateInsertMode extends Operator # FIXME
+class ActivateInsertMode extends Operator
   @extend()
   requireTarget: false
   flashTarget: false
   finalSubmode: null
   supportInsertionCount: true
+  flashCheckpoint: 'custom'
 
   observeWillDeactivateMode: ->
     disposable = @vimState.modeManager.preemptWillDeactivateMode ({mode}) =>
@@ -95,9 +96,11 @@ class ActivateInsertMode extends Operator # FIXME
       @startMutation =>
         @selectTarget() if @isRequireTarget()
         @mutateText?()
+        mutatedRanges = []
         for selection in @editor.getSelections()
-          @repeatInsert(selection, @lastChange?.newText ? '')
+          mutatedRanges.push(@repeatInsert(selection, @lastChange?.newText ? ''))
           moveCursorLeft(selection.cursor)
+        @mutationManager.setBufferRangesForCustomCheckpoint(mutatedRanges)
 
       if settings.get('clearMultipleCursorsOnEscapeInsertMode')
         @vimState.clearSelections()
