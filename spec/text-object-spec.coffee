@@ -1152,7 +1152,7 @@ describe "TextObject", ->
           <abc>
           __
           </abc>
-          """.replace(/_/g, '')
+          """.replace(/_/g, ' ')
 
         beforeEach ->
           set {text}
