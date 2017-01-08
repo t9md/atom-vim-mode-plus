@@ -194,7 +194,7 @@ class TagFinder extends PairFinder
     if found? and @allowForwarding
       tagStart = found.aRange.start
       if tagStart.isGreaterThan(from) and @lineTextToPointContainsNonWhiteSpace(tagStart)
-        # We found range but aloso found that we are IN another tag,
+        # We found range but also found that we are IN another tag,
         # so will retry by excluding forwarding range.
         @allowForwarding = false
         return @find(from) # retry
