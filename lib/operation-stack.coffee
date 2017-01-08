@@ -178,6 +178,12 @@ class OperationStack
     @vimState.reset()
 
   ensureAllSelectionsAreEmpty: (operation) ->
+    # When @vimState.selectBlockwise() is called in non-visual-mode.
+    # e.g. `.` repeat of operation targeted blockwise `CurrentSelection`.
+    # We need to manually clear blockwiseSelection.
+    # See #647
+    @vimState.clearBlockwiseSelections()
+
     unless @editor.getLastSelection().isEmpty()
       if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
         throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
