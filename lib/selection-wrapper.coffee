@@ -306,6 +306,12 @@ class SelectionWrapper
     newRange = new Range(newStart, end)
     @setBufferRange(newRange)
 
+  # Return selection extent to replay blockwise selection on `.` repeating.
+  getBlockwiseSelectionExtent: ->
+    head = @selection.getHeadBufferPosition()
+    tail = @selection.getTailBufferPosition()
+    new Point(head.row - tail.row, head.column - tail.column)
+
 swrap = (selection) ->
   new SelectionWrapper(selection)
 

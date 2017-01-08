@@ -120,8 +120,10 @@ class Motion extends Base
 
     # Modify selection to submode-wisely
     switch @wise
-      when 'linewise' then @vimState.selectLinewise()
-      when 'blockwise' then @vimState.selectBlockwise()
+      when 'linewise'
+        @vimState.selectLinewise()
+      when 'blockwise'
+        @vimState.selectBlockwise()
 
   selectByMotion: (selection) ->
     {cursor} = selection
@@ -162,6 +164,7 @@ class Motion extends Base
 class CurrentSelection extends Motion
   @extend(false)
   selectionExtent: null
+  blockwiseSelectionExtent: null
   inclusive: true
 
   initialize: ->
@@ -171,15 +174,15 @@ class CurrentSelection extends Motion
   moveCursor: (cursor) ->
     if @isMode('visual')
       if @isBlockwise()
-        {start, end} = cursor.selection.getBufferRange()
-        [head, tail] = if cursor.selection.isReversed() then [start, end] else [end, start]
-        @selectionExtent = new Point(head.row - tail.row, head.column - tail.column)
+        @blockwiseSelectionExtent = swrap(cursor.selection).getBlockwiseSelectionExtent()
       else
         @selectionExtent = @editor.getSelectedBufferRange().getExtent()
     else
+      # `.` repeat case
       point = cursor.getBufferPosition()
-      if @isBlockwise()
-        cursor.setBufferPosition(point.translate(@selectionExtent))
+
+      if @blockwiseSelectionExtent?
+        cursor.setBufferPosition(point.translate(@blockwiseSelectionExtent))
       else
         cursor.setBufferPosition(point.traverse(@selectionExtent))
 
