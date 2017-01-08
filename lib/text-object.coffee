@@ -447,13 +447,13 @@ class Tag extends Pair
       if range.containsPoint(from, true)
         tagRange = range
         stop()
-    tagRange?.start ? from
+    tagRange?.start
 
   getFinder: ->
     new TagFinder(@editor, {allowNextLine: @isAllowNextLine(), @allowForwarding})
 
   getPairInfo: (from) ->
-    super(@getTagStartPoint(from))
+    super(@getTagStartPoint(from) ? from)
 
 class ATag extends Tag
   @extend()

@@ -5,6 +5,7 @@ _ = require 'underscore-plus'
   getEndOfLineForBufferRow
   collectRangeInBufferRow
   scanEditorInDirection
+  getLineTextToBufferPosition
 } = require './utils'
 
 getCharacterRangeInformation = (editor, point, char) ->
@@ -124,7 +125,7 @@ class BracketFinder extends PairFinder
     @pattern = ///(#{_.escapeRegExp(open)})|(#{_.escapeRegExp(close)})///g
 
   # This method can be called recursively
-  find: (from, options) ->
+  find: (from) ->
     @initialScope ?= new ScopeState(@editor, from)
 
     return found if found = super
@@ -132,7 +133,7 @@ class BracketFinder extends PairFinder
     if not @retry
       @retry = true
       [@closeRange, @closeRangeScope] = []
-      @find(from, options)
+      @find(from)
 
   filterEvent: ({range}) ->
     scope = new ScopeState(@editor, range.start)
@@ -161,7 +162,7 @@ class QuoteFinder extends PairFinder
     @quoteChar = pair[0]
     @pattern = ///(#{_.escapeRegExp(pair[0])})///g
 
-  find: (from, options) ->
+  find: (from) ->
     # HACK: Cant determine open/close from quote char itself
     # So preset open/close state to get desiable result.
     {total, left, right, balanced} = getCharacterRangeInformation(@editor, from, @quoteChar)
@@ -184,6 +185,20 @@ class QuoteFinder extends PairFinder
 
 class TagFinder extends PairFinder
   pattern: /<(\/?)([^\s>]+)[^>]*>/g
+
+  lineTextToPointContainsNonWhiteSpace: (point) ->
+    /\S/.test(getLineTextToBufferPosition(@editor, point))
+
+  find: (from) ->
+    found = super
+    if found? and @allowForwarding
+      tagStart = found.aRange.start
+      if tagStart.isGreaterThan(from) and @lineTextToPointContainsNonWhiteSpace(tagStart)
+        # We found range but aloso found that we are IN another tag,
+        # so will retry by excluding forwarding range.
+        @allowForwarding = false
+        return @find(from) # retry
+    found
 
   getEventState: (event) ->
     backslash = event.match[1]
