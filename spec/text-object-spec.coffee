@@ -653,7 +653,7 @@ describe "TextObject", ->
             mode: ['visual', 'linewise']
           ensure 'i B',
             selectedText: textSelected
-            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
+            mode: ['visual', 'characterwise']
 
         it "from vB, final-mode is 'characterwise'", ->
           ensure 'ctrl-v',
@@ -661,7 +661,7 @@ describe "TextObject", ->
             mode: ['visual', 'blockwise']
           ensure 'i B',
             selectedText: textSelected
-            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
+            mode: ['visual', 'characterwise']
 
         describe "as operator target", ->
           it "change inner-pair", ->
@@ -747,7 +747,7 @@ describe "TextObject", ->
             mode: ['visual', 'linewise']
           ensure 'a B',
             selectedText: textSelected
-            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
+            mode: ['visual', 'characterwise']
 
         it "from vB, final-mode is 'characterwise'", ->
           ensure 'ctrl-v',
@@ -755,7 +755,7 @@ describe "TextObject", ->
             mode: ['visual', 'blockwise']
           ensure 'a B',
             selectedText: textSelected
-            mode: ['visual', 'characterwise'] # FIXME to 'characterwise'
+            mode: ['visual', 'characterwise']
 
         describe "as operator target", ->
           it "change inner-pair", ->
