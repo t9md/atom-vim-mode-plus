@@ -23,6 +23,21 @@ class PersistentSelectionManager
     @disposables.dispose()
     @markerLayer.destroy()
 
+  select: ->
+    for range in @getMarkerBufferRanges()
+      @editor.addSelectionForBufferRange(range)
+    @clear()
+
+  setSelectedBufferRanges: ->
+    @editor.setSelectedBufferRanges(@getMarkerBufferRanges())
+    @clear()
+
+  clear: ->
+    @clearMarkers()
+
+  isEmpty: ->
+    @markerLayer.getMarkerCount() is 0
+
   # Markers
   # -------------------------
   markBufferRange: (range) ->

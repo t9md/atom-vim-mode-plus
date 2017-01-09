@@ -745,10 +745,9 @@ class PersistentSelection extends TextObject
   @extend(false)
 
   select: ->
-    ranges = @vimState.persistentSelection.getMarkerBufferRanges()
-    if ranges.length
-      @editor.setSelectedBufferRanges(ranges)
-      @vimState.clearPersistentSelections()
+    {persistentSelection} = @vimState
+    unless persistentSelection.isEmpty()
+      persistentSelection.replaceSelectedBufferRanges()
       @wise = swrap.detectVisualModeSubmode(@editor)
 
 class APersistentSelection extends PersistentSelection

@@ -148,8 +148,8 @@ class Operator extends Base
     if @isOccurrence() and not @occurrenceManager.hasMarkers()
       @occurrenceManager.addPattern(@patternForOccurrence ? @getPatternForOccurrenceType(@occurrenceType))
 
-    if @canSelectPersistentSelection()
-      @selectPersistentSelection() # This change cursor position.
+    # This change cursor position.
+    if @selectPersistentSelectionIfNecessary()
       if @isMode('visual')
         # [FIXME] Sync selection-wise this phase?
         # e.g. selected persisted selection convert to vB sel in vB-mode?
@@ -183,17 +183,19 @@ class Operator extends Base
         @occurrenceManager.addPattern(pattern, {reset: true, @occurrenceType})
         @onDidResetOperationStack(=> @occurrenceManager.resetPatterns())
 
-  canSelectPersistentSelection: ->
-    @acceptPersistentSelection and
-    @vimState.hasPersistentSelections() and
-    settings.get('autoSelectPersistentSelectionOnOperate')
+  # return true/false to indicate success
+  selectPersistentSelectionIfNecessary: ->
+    if @acceptPersistentSelection and
+        settings.get('autoSelectPersistentSelectionOnOperate') and
+        not @persistentSelection.isEmpty()
 
-  selectPersistentSelection: ->
-    for range in @vimState.getPersistentSelectionBufferRanges()
-      @editor.addSelectionForBufferRange(range)
-    @vimState.clearPersistentSelections()
-    @editor.mergeIntersectingSelections()
-    swrap.saveProperties(@editor)
+      @persistentSelection.select()
+      @editor.mergeIntersectingSelections()
+      swrap.saveProperties(@editor)
+
+      true
+    else
+      false
 
   getPatternForOccurrenceType: (occurrenceType) ->
     switch occurrenceType

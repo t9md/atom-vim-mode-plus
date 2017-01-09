@@ -145,7 +145,7 @@ describe "Persistent Selection", ->
             xxx !!! xxx\n
             """
 
-    describe "clearPersistentSelections command", ->
+    describe "clear-persistent-selections command", ->
       it "clear persistentSelections", ->
         ensurePersistentSelection 'g m i w',
           length: 1
