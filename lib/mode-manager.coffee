@@ -37,27 +37,27 @@ class ModeManager
   # activate: Public
   #  Use this method to change mode, DONT use other direct method.
   # -------------------------
-  activate: (mode, submode=null) ->
+  activate: (newMode, newSubmode=null) ->
     # Avoid odd state(=visual-mode but selection is empty)
-    return if (mode is 'visual') and @editor.isEmpty()
+    return if (newMode is 'visual') and @editor.isEmpty()
 
-    @emitter.emit('will-activate-mode', {mode, submode})
+    @emitter.emit('will-activate-mode', mode: newMode, submode: newSubmode)
 
-    if (mode is 'visual') and (submode is @submode)
-      [mode, submode] = ['normal', null]
+    if (newMode is 'visual') and (newSubmode is @submode)
+      [newMode, newSubmode] = ['normal', null]
 
-    @deactivate() if (mode isnt @mode)
+    @deactivate() if (newMode isnt @mode)
 
-    @deactivator = switch mode
+    @deactivator = switch newMode
       when 'normal' then @activateNormalMode()
       when 'operator-pending' then @activateOperatorPendingMode()
-      when 'insert' then @activateInsertMode(submode)
-      when 'visual' then @activateVisualMode(submode)
+      when 'insert' then @activateInsertMode(newSubmode)
+      when 'visual' then @activateVisualMode(newSubmode)
 
     @editorElement.classList.remove("#{@mode}-mode")
     @editorElement.classList.remove(@submode)
 
-    [@mode, @submode] = [mode, submode]
+    [@mode, @submode] = [newMode, newSubmode]
 
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
@@ -140,7 +140,7 @@ class ModeManager
     for selection in @editor.getSelections() when @submode? or selection.isEmpty()
       swrap(selection).translateSelectionEndAndClip('forward')
 
-    @vimState.updateSelectionProperties()
+    swrap.saveProperties(@editor)
 
     switch submode
       when 'linewise'

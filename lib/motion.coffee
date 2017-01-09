@@ -109,7 +109,7 @@ class Motion extends Base
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
-    @updateSelectionProperties() if @isMode('visual')
+    swrap.saveProperties(@editor) if @isMode('visual')
 
     if @hasOperator()
       if @isMode('visual')

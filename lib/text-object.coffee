@@ -103,7 +103,7 @@ class TextObject extends Base
 
     @editor.mergeIntersectingSelections()
     if @isMode('visual') and @wise is 'characterwise'
-      @updateSelectionProperties()
+      swrap.saveProperties(@editor)
 
     if selectResults.some((value) -> value)
       @wise ?= swrap.detectVisualModeSubmode(@editor)

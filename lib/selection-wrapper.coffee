@@ -186,9 +186,10 @@ class SelectionWrapper
     head.isGreaterThan(tail)
 
   restoreColumnFromProperties: ->
-    {head, tail} = @getProperties()
-    return unless head? and tail?
     return if @selection.isEmpty()
+    selectionProperties = @getProperties()
+    return unless selectionProperties?
+    {head, tail} = selectionProperties
 
     if @selection.isReversed()
       [start, end] = [head, tail]
@@ -321,9 +322,8 @@ swrap.detectVisualModeSubmode = (editor) ->
   else
     null
 
-swrap.updateSelectionProperties = (editor, {unknownOnly}={}) ->
+swrap.saveProperties = (editor) ->
   for selection in editor.getSelections()
-    continue if unknownOnly and swrap(selection).hasProperties()
     swrap(selection).saveProperties()
 
 swrap.complementGoalColumn = (editor) ->

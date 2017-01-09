@@ -104,16 +104,13 @@ class VimState
   selectBlockwise: ->
     for selection in @editor.getSelections()
       @blockwiseSelections.push(new BlockwiseSelection(selection))
-    @updateSelectionProperties()
+    swrap.saveProperties(@editor)
     @getLastBlockwiseSelection().autoscrollIfReversed()
 
   # Other
   # -------------------------
   selectLinewise: ->
     swrap.expandOverLine(@editor, preserveGoalColumn: true)
-
-  updateSelectionProperties: (options) ->
-    swrap.updateSelectionProperties(@editor, options)
 
   # -------------------------
   toggleClassList: (className, bool=undefined) ->

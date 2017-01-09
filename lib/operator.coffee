@@ -192,7 +192,7 @@ class Operator extends Base
 
     @vimState.clearPersistentSelections()
     @editor.mergeIntersectingSelections()
-    @vimState.updateSelectionProperties()
+    swrap.saveProperties(@editor)
 
   getPatternForOccurrenceType: (occurrenceType) ->
     switch occurrenceType
