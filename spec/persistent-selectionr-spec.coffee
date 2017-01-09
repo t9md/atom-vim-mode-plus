@@ -88,9 +88,8 @@ describe "Persistent Selection", ->
       describe "persistent-selection is treated in same way as real selection", ->
         beforeEach ->
           set
-            cursor: [0, 0]
-            text: """
-            0 ==========
+            textC: """
+            |0 ==========
             1 ==========
             2 ==========
             3 ==========
@@ -107,25 +106,13 @@ describe "Persistent Selection", ->
 
         it "I in vL-mode with persistent-selection", ->
           ensure 'I',
-            textC: """
-            |0 ==========
-            |1 ==========
-            2 ==========
-            |3 ==========
-            |4 ==========
-            5 ==========
-            """
+            mode: 'insert'
+            cursor: [[3, 0], [4, 0], [0, 0], [1, 0]]
 
         it "A in vL-mode with persistent-selection", ->
           ensure 'A',
-            textC: """
-            0 ==========|
-            1 ==========|
-            2 ==========
-            3 ==========|
-            4 ==========|
-            5 ==========
-            """
+            mode: 'insert'
+            cursor: [[3, 12], [4, 12], [0, 12], [1, 12]]
 
     describe "select-occurrence-in-a-persistent-selection", ->
       [update] = []

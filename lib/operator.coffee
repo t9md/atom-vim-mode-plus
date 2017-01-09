@@ -150,8 +150,13 @@ class Operator extends Base
 
     if @canSelectPersistentSelection()
       @selectPersistentSelection() # This change cursor position.
-      unless @isMode('visual')
+      if @isMode('visual')
+        # [FIXME] Sync selection-wise this phase?
+        # e.g. selected persisted selection convert to vB sel in vB-mode?
+        null
+      else
         @vimState.modeManager.activate('visual', swrap.detectVisualModeSubmode(@editor))
+
     @target = 'CurrentSelection' if @isMode('visual') and @acceptCurrentSelection
     @setTarget(@new(@target)) if _.isString(@target)
 
@@ -184,12 +189,8 @@ class Operator extends Base
     settings.get('autoSelectPersistentSelectionOnOperate')
 
   selectPersistentSelection: ->
-    pesistentRanges = @vimState.getPersistentSelectionBufferRanges()
-    selectedRanges = @editor.getSelectedBufferRanges().filter(isNotEmpty)
-    ranges = pesistentRanges.concat(selectedRanges)
-
-    @editor.setSelectedBufferRanges(ranges)
-
+    for range in @vimState.getPersistentSelectionBufferRanges()
+      @editor.addSelectionForBufferRange(range)
     @vimState.clearPersistentSelections()
     @editor.mergeIntersectingSelections()
     swrap.saveProperties(@editor)
