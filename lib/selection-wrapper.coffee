@@ -321,6 +321,8 @@ class SelectionWrapper
           @translateSelectionEndAndClip('backward')
         when 'linewise'
           @applyColumnFromProperties()
+        when 'blockwise'
+          @translateSelectionEndAndClip('backward')
     @clearProperties()
 
 swrap = (selection) ->

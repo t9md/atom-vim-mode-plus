@@ -153,27 +153,20 @@ class ModeManager
         swrap.applyWise(@editor, 'linewise')
       when 'blockwise'
         @vimState.selectBlockwise()
+        swrap.setWise(@editor, 'blockwise')
 
     new Disposable =>
       @normalizeSelections()
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
       @updateNarrowedState(false)
 
-  eachNonEmptySelection: (fn) ->
-    for selection in @editor.getSelections() when not selection.isEmpty()
-      fn(selection)
-
   normalizeSelections: ->
-    switch @submode
-      when 'blockwise'
-        for bs in @vimState.getBlockwiseSelections()
-          bs.restoreCharacterwise()
-        @vimState.clearBlockwiseSelections()
-        @eachNonEmptySelection (selection) ->
-          swrap(selection).translateSelectionEndAndClip('backward')
-        swrap.clearProperties(@editor)
-      else
-        swrap.normalize(@editor)
+    if @submode is 'blockwise'
+      for bs in @vimState.getBlockwiseSelections()
+        bs.restoreCharacterwise()
+      @vimState.clearBlockwiseSelections()
+
+    swrap.normalize(@editor)
 
   # Narrow to selection
   # -------------------------
