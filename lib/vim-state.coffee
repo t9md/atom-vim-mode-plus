@@ -110,7 +110,7 @@ class VimState
   # Other
   # -------------------------
   selectLinewise: ->
-    swrap.expandOverLine(@editor, preserveGoalColumn: true)
+    swrap.applyWise(@editor, 'linewise')
 
   # -------------------------
   toggleClassList: (className, bool=undefined) ->

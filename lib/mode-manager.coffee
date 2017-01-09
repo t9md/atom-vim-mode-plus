@@ -130,22 +130,27 @@ class ModeManager
 
   # Visual
   # -------------------------
-  # At this point @submode is not yet updated to final submode.
-  activateVisualMode: (submode) ->
-    @normalizeSelections() if @submode?
+  # We treat all selection is initially NOT normalized
+  #
+  # 1. First we normalize selection
+  # 2. Then update selection orientation(=wise).
+  #
+  # Regardless of selection is modified by vmp-command or outer-vmp-command like `cmd-l`.
+  # When normalize, we move cursor to left(selectLeft equivalent).
+  # Since Vim's visual-mode is always selectRighted.
+  #
+  # - un-normalized selection: This is the range we see in visual-mode.( So normal visual-mode range in user perspective ).
+  # - normalized selection: One column left selcted at selection end position
+  # - When selectRight at end position of normalized-selection, it become un-normalized selection
+  #   which is the range in visual-mode.
+  #
+  activateVisualMode: (newSubmode) ->
+    @normalizeSelections()
+    swrap.applyWise(@editor, 'characterwise')
 
-    # We only select-forward only when
-    #  -  submode shift(@submode? is true)
-    #  -  initial activation(@submode? is false) and selection was empty.
-    for selection in @editor.getSelections() when @submode? or selection.isEmpty()
-      swrap(selection).translateSelectionEndAndClip('forward')
-
-    swrap.saveProperties(@editor)
-
-    switch submode
+    switch newSubmode
       when 'linewise'
-        swrap.complementGoalColumn(@editor)
-        @vimState.selectLinewise()
+        swrap.applyWise(@editor, 'linewise')
       when 'blockwise'
         @vimState.selectBlockwise()
 
@@ -160,20 +165,15 @@ class ModeManager
 
   normalizeSelections: ->
     switch @submode
-      when 'characterwise'
-        @eachNonEmptySelection (selection) ->
-          swrap(selection).translateSelectionEndAndClip('backward')
-      when 'linewise'
-        @eachNonEmptySelection (selection) ->
-          swrap(selection).restoreColumnFromProperties()
       when 'blockwise'
         for bs in @vimState.getBlockwiseSelections()
           bs.restoreCharacterwise()
         @vimState.clearBlockwiseSelections()
         @eachNonEmptySelection (selection) ->
           swrap(selection).translateSelectionEndAndClip('backward')
-
-    swrap.clearProperties(@editor)
+        swrap.clearProperties(@editor)
+      else
+        swrap.normalize(@editor)
 
   # Narrow to selection
   # -------------------------

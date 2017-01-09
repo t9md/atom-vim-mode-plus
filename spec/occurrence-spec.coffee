@@ -681,7 +681,6 @@ describe "Occurrence", ->
               cursor: [0, 0]
               text: textOriginal
           it "pick ocurrence-word from cursor position and continue visual-mode", ->
-            # swrap(editor.getLastSelection()).clearProperties()
             ensure 'w V j', mode: ['visual', 'linewise'], selectedText: textOriginal
             ensure 'g o',
               mode: ['visual', 'linewise']

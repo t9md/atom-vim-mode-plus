@@ -140,6 +140,29 @@ class SelectionWrapper
         properties.head = endPoint
     @setProperties(properties)
 
+  setWise: (value) ->
+    @saveProperties() unless @hasProperties()
+    properties = @getProperties()
+    properties.wise = value
+
+  getWise: ->
+    @getProperties()?.wise ? 'characterwise'
+
+  applyWise: (newWise) ->
+    # NOTE:
+    # Must call against normalized selection
+    # Don't call non-normalized selection
+
+    switch newWise
+      when 'characterwise'
+        @translateSelectionEndAndClip('forward')
+        @saveProperties()
+        @setWise('characterwise')
+      when 'linewise'
+        @complementGoalColumn()
+        @expandOverLine(preserveGoalColumn: true)
+        @setWise('linewise')
+
   complementGoalColumn: ->
     unless @selection.cursor.goalColumn?
       column = @getBufferPositionFor('head', fromProperty: true, allowFallback: true).column
@@ -185,8 +208,7 @@ class SelectionWrapper
     tail = @selection.getTailBufferPosition()
     head.isGreaterThan(tail)
 
-  restoreColumnFromProperties: ->
-    return if @selection.isEmpty()
+  applyColumnFromProperties: ->
     selectionProperties = @getProperties()
     return unless selectionProperties?
     {head, tail} = selectionProperties
@@ -292,6 +314,15 @@ class SelectionWrapper
     tail = @selection.getTailBufferPosition()
     new Point(head.row - tail.row, head.column - tail.column)
 
+  normalize: ->
+    unless @selection.isEmpty()
+      switch @getWise()
+        when 'characterwise'
+          @translateSelectionEndAndClip('backward')
+        when 'linewise'
+          @applyColumnFromProperties()
+    @clearProperties()
+
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
@@ -329,5 +360,17 @@ swrap.saveProperties = (editor) ->
 swrap.complementGoalColumn = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).complementGoalColumn()
+
+swrap.normalize = (editor) ->
+  for selection in editor.getSelections()
+    swrap(selection).normalize()
+
+swrap.setWise = (editor, value) ->
+  for selection in editor.getSelections()
+    swrap(selection).setWise(value)
+
+swrap.applyWise = (editor, value) ->
+  for selection in editor.getSelections()
+    swrap(selection).applyWise(value)
 
 module.exports = swrap

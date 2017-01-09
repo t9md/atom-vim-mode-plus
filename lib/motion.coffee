@@ -109,7 +109,10 @@ class Motion extends Base
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
-    swrap.saveProperties(@editor) if @isMode('visual')
+    if @isMode('visual')
+      # We have to update selection prop
+      # AFTER cursor move and BEFORE return to submode-wise state
+      swrap.saveProperties(@editor)
 
     if @hasOperator()
       if @isMode('visual')
