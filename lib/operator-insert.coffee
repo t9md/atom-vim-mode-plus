@@ -222,6 +222,7 @@ class InsertByTarget extends ActivateInsertMode
       when 'characterwise'
         # `I(or A)` is short-hand of `ctrl-v I(or A)`
         @vimState.selectBlockwise()
+        @vimState.clearBlockwiseSelections() # just reset vimState's storage.
 
       when 'linewise'
         @editor.splitSelectionsIntoLines()
