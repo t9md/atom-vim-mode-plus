@@ -153,7 +153,6 @@ class ModeManager
         swrap.applyWise(@editor, 'linewise')
       when 'blockwise'
         @vimState.selectBlockwise()
-        swrap.setWise(@editor, 'blockwise')
 
     new Disposable =>
       @normalizeSelections()
