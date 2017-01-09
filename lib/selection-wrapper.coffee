@@ -26,27 +26,6 @@ class SelectionWrapper
   getBufferRange: ->
     @selection.getBufferRange()
 
-  getNormalizedBufferPosition: ->
-    point = @selection.getHeadBufferPosition()
-    if @isForwarding()
-      {editor} = @selection
-      screenPoint = editor.screenPositionForBufferPosition(point).translate([0, -1])
-      editor.bufferPositionForScreenPosition(screenPoint, clipDirection: 'backward')
-    else
-      point
-
-  # Return function to dispose(=revert) normalization.
-  normalizeBufferPosition: ->
-    head = @selection.getHeadBufferPosition()
-    point = @getNormalizedBufferPosition()
-    @selection.modifySelection =>
-      @selection.cursor.setBufferPosition(point)
-
-    new Disposable =>
-      unless head.isEqual(point)
-        @selection.modifySelection =>
-          @selection.cursor.setBufferPosition(head)
-
   getBufferPositionFor: (which, {fromProperty, allowFallback}={}) ->
     fromProperty ?= false
     allowFallback ?= false
