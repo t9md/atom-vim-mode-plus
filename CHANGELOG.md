@@ -1,3 +1,13 @@
+# 0.79.0:
+- Fix: #647 ensure clearing blockwiseSelection
+- Fix: #537 When `persistent-selection` is exists, `I` in `visual-blockwise`, make selected range get wired.
+- Fix: In atom 1.14-beta, when `IncrementalSearch` was enabled, `/` throw exception #652
+- Improve: #646 Improve `TagFinder` to find enclosed range first
+- Internal: Spec helper Improve
+  - Introduce cursorScreen for spec-helper for explicitness
+  - Now `cursor:` is bufferPosition-wise
+  - #650 `textC` no longer ensure order of cursors appear
+
 # 0.78.0: Happy New Year 2017!
 - New: TransformString Operator `sort-case-insensitively` by @thancock20 #640
 - Fix: `v *` then `n` or `N` in different editor no longer throw error #641.
