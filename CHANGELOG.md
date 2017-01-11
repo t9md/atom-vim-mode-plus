@@ -1,9 +1,10 @@
 # 0.79.0:
-- Fix: #647 ensure clearing blockwiseSelection
+- Fix: #647 Ensure clearing blockwise selection after `.` repeating blockwise operation.
 - Fix: #537 When `persistent-selection` is exists, `I` in `visual-blockwise`, make selected range get wired.
 - Fix: In atom 1.14-beta, when `IncrementalSearch` was enabled, `/` throw exception #652
 - Improve: #646 Improve `TagFinder` to find enclosed range first
-- Internal: Spec helper Improve
+- Internal: Extract normalization/denormalization of `linewise`, `characterwise` selection to selection-wrapper
+- Internal: Improve spec helper
   - Introduce cursorScreen for spec-helper for explicitness
   - Now `cursor:` is bufferPosition-wise
   - #650 `textC` no longer ensure order of cursors appear
