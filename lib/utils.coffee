@@ -49,7 +49,7 @@ saveEditorState = (editor) ->
   editorElement = editor.element
   scrollTop = editorElement.getScrollTop()
 
-  foldStartRows = editor.displayLayer.findFoldMarkers({}).map (m) -> m.getStartPosition().row
+  foldStartRows = editor.displayLayer.foldsMarkerLayer.findMarkers({}).map (m) -> m.getStartPosition().row
   ->
     for row in foldStartRows.reverse() when not editor.isFoldedAtBufferRow(row)
       editor.foldBufferRow(row)
@@ -646,7 +646,7 @@ destroyNonLastSelection = (editor) ->
     selection.destroy()
 
 getLargestFoldRangeContainsBufferRow = (editor, row) ->
-  markers = editor.displayLayer.findFoldMarkers(intersectsRow: row)
+  markers = editor.displayLayer.foldsMarkerLayer.findMarkers(intersectsRow: row)
 
   startPoint = null
   endPoint = null
