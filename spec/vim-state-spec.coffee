@@ -313,7 +313,7 @@ describe "VimState", ->
         text: """
         one two three
         """
-        cursorBuffer: [0, 4]
+        cursor: [0, 4]
       keystroke 'v'
 
     it "selects the character under the cursor", ->
@@ -323,7 +323,7 @@ describe "VimState", ->
 
     it "puts the editor into normal mode when <escape> is pressed", ->
       ensure 'escape',
-        cursorBuffer: [0, 4]
+        cursor: [0, 4]
         mode: 'normal'
 
     it "puts the editor into normal mode when <escape> is pressed on selection is reversed", ->
@@ -333,7 +333,7 @@ describe "VimState", ->
         selectionIsReversed: true
       ensure 'escape',
         mode: 'normal'
-        cursorBuffer: [0, 2]
+        cursor: [0, 2]
 
     describe "motions", ->
       it "transforms the selection", ->
@@ -366,7 +366,7 @@ describe "VimState", ->
           selectionIsReversed: true
 
       xit "harmonizes selection directions", ->
-        set cursorBuffer: [0, 0]
+        set cursor: [0, 0]
         keystroke 'e e'
         set addCursor: [0, Infinity]
         ensure 'h h',
@@ -374,7 +374,7 @@ describe "VimState", ->
             [[0, 0], [0, 5]],
             [[0, 11], [0, 13]]
           ]
-          cursorBuffer: [
+          cursor: [
             [0, 5]
             [0, 11]
           ]
@@ -384,7 +384,7 @@ describe "VimState", ->
             [[0, 0], [0, 5]],
             [[0, 11], [0, 13]]
           ]
-          cursorBuffer: [
+          cursor: [
             [0, 5]
             [0, 13]
           ]
@@ -419,7 +419,7 @@ describe "VimState", ->
         beforeEach ->
           set
             text: "line one\nline two\nline three\n"
-            cursorBuffer: [[0, 5], [2, 5]]
+            cursor: [[0, 5], [2, 5]]
 
         it "can change submode within visual mode", ->
           ensure 'v'        , mode: ['visual', 'characterwise']

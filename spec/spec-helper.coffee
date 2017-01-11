@@ -176,15 +176,15 @@ class VimEditor
     'text', 'text_',
     'textC', 'textC_',
     'grammar',
-    'cursor', 'cursorBuffer', 'cursorScreen'
-    'addCursor', 'addCursorBuffer', 'cursorScreen'
+    'cursor', 'cursorScreen'
+    'addCursor', 'cursorScreen'
     'register',
     'selectedBufferRange'
   ]
 
   setExclusiveRules =
-    textC: ['cursor', 'cursorBuffer', 'cursorScreen']
-    textC_: ['cursor', 'cursorBuffer', 'cursorScreen']
+    textC: ['cursor', 'cursorScreen']
+    textC_: ['cursor', 'cursorScreen']
 
   # Public
   set: (options) =>
@@ -217,12 +217,6 @@ class VimEditor
 
   setCursor: (points) ->
     points = toArrayOfPoint(points)
-    @editor.setCursorScreenPosition(points.shift())
-    for point in points
-      @editor.addCursorAtScreenPosition(point)
-
-  setCursorBuffer: (points) ->
-    points = toArrayOfPoint(points)
     @editor.setCursorBufferPosition(points.shift())
     for point in points
       @editor.addCursorAtBufferPosition(point)
@@ -234,10 +228,6 @@ class VimEditor
       @editor.addCursorAtScreenPosition(point)
 
   setAddCursor: (points) ->
-    for point in toArrayOfPoint(points)
-      @editor.addCursorAtScreenPosition(point)
-
-  setAddCursorBuffer: (points) ->
     for point in toArrayOfPoint(points)
       @editor.addCursorAtBufferPosition(point)
 
@@ -252,7 +242,7 @@ class VimEditor
     'text', 'text_',
     'textC', 'textC_',
     'selectedText', 'selectedText_', 'selectedTextOrdered', "selectionIsNarrowed"
-    'cursor', 'cursorBuffer', 'cursorScreen'
+    'cursor', 'cursorScreen'
     'numCursors'
     'register',
     'selectedScreenRange', 'selectedScreenRangeOrdered'
@@ -266,8 +256,8 @@ class VimEditor
     'mode',
   ]
   ensureExclusiveRules =
-    textC: ['cursor', 'cursorBuffer', 'cursorScreen']
-    textC_: ['cursor', 'cursorBuffer', 'cursorScreen']
+    textC: ['cursor', 'cursorScreen']
+    textC_: ['cursor', 'cursorScreen']
 
   getAndDeleteKeystrokeOptions: (options) ->
     {partialMatchTimeout} = options
@@ -329,15 +319,11 @@ class VimEditor
     @ensureSelectedText(text, true)
 
   ensureCursor: (points) ->
-    actual = @editor.getCursorScreenPositions()
+    actual = @editor.getCursorBufferPositions()
     expect(actual).toEqual(toArrayOfPoint(points))
 
   ensureCursorScreen: (points) ->
     actual = @editor.getCursorScreenPositions()
-    expect(actual).toEqual(toArrayOfPoint(points))
-
-  ensureCursorBuffer: (points) ->
-    actual = @editor.getCursorBufferPositions()
     expect(actual).toEqual(toArrayOfPoint(points))
 
   ensureRegister: (register) ->

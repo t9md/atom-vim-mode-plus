@@ -194,10 +194,10 @@ describe "Motion general", ->
 
       describe "selection is not reversed", ->
         it "screen position and buffer position is different", ->
-          ensure 'g j', cursorScreen: [1, 0], cursorBuffer: [0, 9]
-          ensure 'g j', cursorScreen: [2, 0], cursorBuffer: [1, 0]
-          ensure 'g j', cursorScreen: [3, 0], cursorBuffer: [1, 9]
-          ensure 'g j', cursorScreen: [4, 0], cursorBuffer: [1, 12]
+          ensure 'g j', cursorScreen: [1, 0], cursor: [0, 9]
+          ensure 'g j', cursorScreen: [2, 0], cursor: [1, 0]
+          ensure 'g j', cursorScreen: [3, 0], cursor: [1, 9]
+          ensure 'g j', cursorScreen: [4, 0], cursor: [1, 12]
 
         it "jk move selection buffer-line wise", ->
           ensure 'V', selectedText: text.getLines([0..0])
@@ -213,13 +213,13 @@ describe "Motion general", ->
 
       describe "selection is reversed", ->
         it "screen position and buffer position is different", ->
-          ensure 'g j', cursorScreen: [1, 0], cursorBuffer: [0, 9]
-          ensure 'g j', cursorScreen: [2, 0], cursorBuffer: [1, 0]
-          ensure 'g j', cursorScreen: [3, 0], cursorBuffer: [1, 9]
-          ensure 'g j', cursorScreen: [4, 0], cursorBuffer: [1, 12]
+          ensure 'g j', cursorScreen: [1, 0], cursor: [0, 9]
+          ensure 'g j', cursorScreen: [2, 0], cursor: [1, 0]
+          ensure 'g j', cursorScreen: [3, 0], cursor: [1, 9]
+          ensure 'g j', cursorScreen: [4, 0], cursor: [1, 12]
 
         it "jk move selection buffer-line wise", ->
-          set cursorBuffer: [4, 0]
+          set cursor: [4, 0]
           ensure 'V', selectedText: text.getLines([4..4])
           ensure 'k', selectedText: text.getLines([3..4])
           ensure 'k', selectedText: text.getLines([2..4])
@@ -329,32 +329,32 @@ describe "Motion general", ->
           runs ->
             set cursorScreen: [8, 2]
             # In hardTab indent bufferPosition is not same as screenPosition
-            ensure cursorBuffer: [8, 1]
+            ensure cursor: [8, 1]
 
         afterEach ->
           atom.packages.deactivatePackage(pack)
 
         it "move up/down to next edge of same *screen* column", ->
-          ensure '[', cursor: [5, 2]
-          ensure '[', cursor: [3, 2]
-          ensure '[', cursor: [2, 2]
-          ensure '[', cursor: [0, 2]
+          ensure '[', cursorScreen: [5, 2]
+          ensure '[', cursorScreen: [3, 2]
+          ensure '[', cursorScreen: [2, 2]
+          ensure '[', cursorScreen: [0, 2]
 
-          ensure ']', cursor: [2, 2]
-          ensure ']', cursor: [3, 2]
-          ensure ']', cursor: [5, 2]
-          ensure ']', cursor: [9, 2]
-          ensure ']', cursor: [11, 2]
-          ensure ']', cursor: [14, 2]
-          ensure ']', cursor: [17, 2]
+          ensure ']', cursorScreen: [2, 2]
+          ensure ']', cursorScreen: [3, 2]
+          ensure ']', cursorScreen: [5, 2]
+          ensure ']', cursorScreen: [9, 2]
+          ensure ']', cursorScreen: [11, 2]
+          ensure ']', cursorScreen: [14, 2]
+          ensure ']', cursorScreen: [17, 2]
 
-          ensure '[', cursor: [14, 2]
-          ensure '[', cursor: [11, 2]
-          ensure '[', cursor: [9, 2]
-          ensure '[', cursor: [5, 2]
-          ensure '[', cursor: [3, 2]
-          ensure '[', cursor: [2, 2]
-          ensure '[', cursor: [0, 2]
+          ensure '[', cursorScreen: [14, 2]
+          ensure '[', cursorScreen: [11, 2]
+          ensure '[', cursorScreen: [9, 2]
+          ensure '[', cursorScreen: [5, 2]
+          ensure '[', cursorScreen: [3, 2]
+          ensure '[', cursorScreen: [2, 2]
+          ensure '[', cursorScreen: [0, 2]
 
   describe "the w keybinding", ->
     baseText = """
@@ -948,13 +948,13 @@ describe "Motion general", ->
       it "moves the cursor to the beginning of the previous word", ->
         ensure 'B', cursor: [3, 1]
         ensure 'B', cursor: [2, 0]
-        ensure 'B', cursor: [1, 3]
+        ensure 'B', cursor: [1, 2]
         ensure 'B', cursor: [0, 7]
         ensure 'B', cursor: [0, 0]
 
     describe "as a selection", ->
       it "selects to the beginning of the whole word", ->
-        set cursor: [1, 9]
+        set cursor: [1, 8]
         ensure 'y B', register: '"': text: 'xyz-12' # because cursor is on the `3`
 
       it "doesn't go past the beginning of the file", ->
@@ -1772,27 +1772,27 @@ describe "Motion general", ->
         atom.packages.deactivatePackage(pack)
 
       it "move to next string", ->
-        set cursor: [0, 0]
-        ensure 'g s', cursor: [2, 7]
-        ensure 'g s', cursor: [3, 7]
-        ensure 'g s', cursor: [8, 8]
-        ensure 'g s', cursor: [9, 8]
-        ensure 'g s', cursor: [11, 20]
-        ensure 'g s', cursor: [12, 15]
-        ensure 'g s', cursor: [13, 15]
-        ensure 'g s', cursor: [15, 15]
-        ensure 'g s', cursor: [16, 15]
+        set cursorScreen: [0, 0]
+        ensure 'g s', cursorScreen: [2, 7]
+        ensure 'g s', cursorScreen: [3, 7]
+        ensure 'g s', cursorScreen: [8, 8]
+        ensure 'g s', cursorScreen: [9, 8]
+        ensure 'g s', cursorScreen: [11, 20]
+        ensure 'g s', cursorScreen: [12, 15]
+        ensure 'g s', cursorScreen: [13, 15]
+        ensure 'g s', cursorScreen: [15, 15]
+        ensure 'g s', cursorScreen: [16, 15]
       it "move to previous string", ->
-        set cursor: [18, 0]
-        ensure 'g S', cursor: [16, 15]
-        ensure 'g S', cursor: [15, 15]
-        ensure 'g S', cursor: [13, 15]
-        ensure 'g S', cursor: [12, 15]
-        ensure 'g S', cursor: [11, 20]
-        ensure 'g S', cursor: [9, 8]
-        ensure 'g S', cursor: [8, 8]
-        ensure 'g S', cursor: [3, 7]
-        ensure 'g S', cursor: [2, 7]
+        set cursorScreen: [18, 0]
+        ensure 'g S', cursorScreen: [16, 15]
+        ensure 'g S', cursorScreen: [15, 15]
+        ensure 'g S', cursorScreen: [13, 15]
+        ensure 'g S', cursorScreen: [12, 15]
+        ensure 'g S', cursorScreen: [11, 20]
+        ensure 'g S', cursorScreen: [9, 8]
+        ensure 'g S', cursorScreen: [8, 8]
+        ensure 'g S', cursorScreen: [3, 7]
+        ensure 'g S', cursorScreen: [2, 7]
 
   describe 'MoveTo(Previous|Next)Number', ->
     pack = 'language-coffee-script'
