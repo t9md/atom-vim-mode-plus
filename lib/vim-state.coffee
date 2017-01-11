@@ -103,9 +103,6 @@ class VimState
 
   selectBlockwiseForSelection: (selection) ->
     @blockwiseSelections.push(new BlockwiseSelection(selection))
-    swrap(selection).saveProperties()
-    # FIXME: blockwise prop shuld be applied to ALLL MEMBER SELECTION in vB seleciton
-    swrap(selection).setWise('blockwise')
 
   selectBlockwise: ->
     for selection in @editor.getSelections()

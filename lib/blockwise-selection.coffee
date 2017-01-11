@@ -14,6 +14,10 @@ class BlockwiseSelection
     {@editor} = selection
     @initialize(selection)
 
+    for memberSelection in @getSelections()
+      swrap(memberSelection).saveProperties()
+      swrap(memberSelection).setWise('blockwise')
+
   getSelections: ->
     @selections
 
@@ -30,7 +34,7 @@ class BlockwiseSelection
 
     range = selection.getBufferRange()
     if range.end.column is 0
-      range.end.row = range.end.row - 1
+      range.end.row -= 1
 
     if @goalColumn?
       if wasReversed
@@ -98,7 +102,7 @@ class BlockwiseSelection
     @getStartSelection().getBufferRange().start
 
   getEndBufferPosition: ->
-    @getStartSelection().getBufferRange().end
+    @getEndSelection().getBufferRange().end
 
   getBufferRowRange: ->
     startRow = @getStartSelection().getBufferRowRange()[0]
@@ -116,9 +120,6 @@ class BlockwiseSelection
     for range in ranges
       @selections.push @editor.addSelectionForBufferRange(range, {reversed})
     @updateGoalColumn()
-
-  sortSelections: ->
-    @selections?.sort (a, b) -> a.compare(b)
 
   # which must one of ['start', 'end', 'head', 'tail']
   setPositionForSelections: (which) ->
