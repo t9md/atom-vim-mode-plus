@@ -82,7 +82,7 @@ class OperationStack
         @stack.push(operation)
         @process()
       else
-        @vimState.emitDidFailToSetTarget() if @peekTop().isOperator()
+        @vimState.emitDidFailToPushToOperationStack()
         @vimState.resetNormalMode()
     catch error
       @handleError(error)

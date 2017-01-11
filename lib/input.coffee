@@ -8,7 +8,7 @@ class Input
 
   constructor: (@vimState) ->
     {@editorElement} = @vimState
-    @vimState.onDidFailToSetTarget =>
+    @vimState.onDidFailToPushToOperationStack =>
       @cancel()
     @emitter = new Emitter
 

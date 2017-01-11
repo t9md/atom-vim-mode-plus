@@ -184,8 +184,8 @@ class VimState
 
   # Events
   # -------------------------
-  onDidFailToSetTarget: (fn) -> @emitter.on('did-fail-to-set-target', fn)
-  emitDidFailToSetTarget: -> @emitter.emit('did-fail-to-set-target')
+  onDidFailToPushToOperationStack: (fn) -> @emitter.on('did-fail-to-push-to-operation-stack', fn)
+  emitDidFailToPushToOperationStack: -> @emitter.emit('did-fail-to-push-to-operation-stack')
 
   onDidDestroy: (fn) -> @emitter.on('did-destroy', fn)
 

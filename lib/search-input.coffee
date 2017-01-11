@@ -54,20 +54,25 @@ class SearchInput extends HTMLElement
     @editorElement.classList.add(@options.classList...) if @options.classList?
     @panel.show()
     @editorElement.focus()
-    @commandSubscriptions = @handleEvents()
+
+    @focusSubscriptions = new CompositeDisposable
+    @focusSubscriptions.add @handleEvents()
+    cancel = @cancel.bind(this)
+    @vimState.editorElement.addEventListener('click', cancel)
+    # Cancel on mouse click
+    @focusSubscriptions.add new Disposable =>
+      @vimState.editorElement.removeEventListener('click', cancel)
 
     # Cancel on tab switch
-    disposable = atom.workspace.onDidChangeActivePaneItem =>
-      disposable.dispose()
-      @cancel() unless @finished
+    @focusSubscriptions.add(atom.workspace.onDidChangeActivePaneItem(cancel))
 
   unfocus: ->
+    @finished = true
     @editorElement.classList.remove(@options.classList...) if @options?.classList?
     @regexSearchStatus.classList.add 'btn-primary'
     @literalModeDeactivator?.dispose()
 
-    @commandSubscriptions?.dispose()
-    @finished = true
+    @focusSubscriptions?.dispose()
     atom.workspace.getActivePane().activate()
     @editor.setText ''
     @panel?.hide()
@@ -93,6 +98,7 @@ class SearchInput extends HTMLElement
     @panel?.isVisible()
 
   cancel: ->
+    return if @finished
     @emitter.emit('did-cancel')
     @unfocus()
 
@@ -117,7 +123,7 @@ class SearchInput extends HTMLElement
     newCommands
 
   initialize: (@vimState) ->
-    @vimState.onDidFailToSetTarget =>
+    @vimState.onDidFailToPushToOperationStack =>
       @cancel()
 
     @disposables = new CompositeDisposable
