@@ -293,9 +293,15 @@ class VimEditor
     cursors = collectCharPositionsInText('|', text.replace(/!/g, ''))
     lastCursor = collectCharPositionsInText('!', text.replace(/\|/g, ''))
     cursors = cursors.concat(lastCursor)
+    cursors = cursors
+      .map (point) -> Point.fromObject(point)
+      .sort (a, b) -> a.compare(b)
     @ensureText(text.replace(/[\|!]/g, ''))
     if cursors.length
-      @ensureCursor(cursors)
+      @ensureCursor(cursors, true)
+
+    if lastCursor.length
+      expect(@editor.getCursorBufferPosition()).toEqual(lastCursor[0])
 
   ensureTextC_: (text) ->
     @ensureTextC(text.replace(/_/g, ' '))
@@ -318,8 +324,9 @@ class VimEditor
   ensureSelectedTextOrdered: (text) ->
     @ensureSelectedText(text, true)
 
-  ensureCursor: (points) ->
+  ensureCursor: (points, ordered=false) ->
     actual = @editor.getCursorBufferPositions()
+    actual = actual.sort (a, b) -> a.compare(b) if ordered
     expect(actual).toEqual(toArrayOfPoint(points))
 
   ensureCursorScreen: (points) ->

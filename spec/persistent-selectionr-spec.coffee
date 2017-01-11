@@ -107,12 +107,28 @@ describe "Persistent Selection", ->
         it "I in vL-mode with persistent-selection", ->
           ensure 'I',
             mode: 'insert'
-            cursor: [[3, 0], [4, 0], [0, 0], [1, 0]]
+            textC: """
+            |0 ==========
+            |1 ==========
+            2 ==========
+            |3 ==========
+            |4 ==========
+            5 ==========
+            """
+            # cursor: [[3, 0], [4, 0], [0, 0], [1, 0]]
 
         it "A in vL-mode with persistent-selection", ->
           ensure 'A',
             mode: 'insert'
-            cursor: [[3, 12], [4, 12], [0, 12], [1, 12]]
+            textC: """
+            0 ==========|
+            1 ==========|
+            2 ==========
+            3 ==========|
+            4 ==========|
+            5 ==========
+            """
+            # cursor: [[3, 12], [4, 12], [0, 12], [1, 12]]
 
     describe "select-occurrence-in-a-persistent-selection", ->
       [update] = []
