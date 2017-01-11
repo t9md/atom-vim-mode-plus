@@ -194,10 +194,10 @@ describe "Motion general", ->
 
       describe "selection is not reversed", ->
         it "screen position and buffer position is different", ->
-          ensure 'g j', cursor: [1, 0], cursorBuffer: [0, 9]
-          ensure 'g j', cursor: [2, 0], cursorBuffer: [1, 0]
-          ensure 'g j', cursor: [3, 0], cursorBuffer: [1, 9]
-          ensure 'g j', cursor: [4, 0], cursorBuffer: [1, 12]
+          ensure 'g j', cursorScreen: [1, 0], cursorBuffer: [0, 9]
+          ensure 'g j', cursorScreen: [2, 0], cursorBuffer: [1, 0]
+          ensure 'g j', cursorScreen: [3, 0], cursorBuffer: [1, 9]
+          ensure 'g j', cursorScreen: [4, 0], cursorBuffer: [1, 12]
 
         it "jk move selection buffer-line wise", ->
           ensure 'V', selectedText: text.getLines([0..0])
@@ -213,10 +213,10 @@ describe "Motion general", ->
 
       describe "selection is reversed", ->
         it "screen position and buffer position is different", ->
-          ensure 'g j', cursor: [1, 0], cursorBuffer: [0, 9]
-          ensure 'g j', cursor: [2, 0], cursorBuffer: [1, 0]
-          ensure 'g j', cursor: [3, 0], cursorBuffer: [1, 9]
-          ensure 'g j', cursor: [4, 0], cursorBuffer: [1, 12]
+          ensure 'g j', cursorScreen: [1, 0], cursorBuffer: [0, 9]
+          ensure 'g j', cursorScreen: [2, 0], cursorBuffer: [1, 0]
+          ensure 'g j', cursorScreen: [3, 0], cursorBuffer: [1, 9]
+          ensure 'g j', cursorScreen: [4, 0], cursorBuffer: [1, 12]
 
         it "jk move selection buffer-line wise", ->
           set cursorBuffer: [4, 0]
@@ -327,7 +327,7 @@ describe "Motion general", ->
             {set, ensure, keystroke} = vimEditor
 
           runs ->
-            set cursor: [8, 2]
+            set cursorScreen: [8, 2]
             # In hardTab indent bufferPosition is not same as screenPosition
             ensure cursorBuffer: [8, 1]
 
@@ -1508,34 +1508,34 @@ describe "Motion general", ->
       ensure "' a", cursor: [1, 4]
 
     it 'moves literally to a mark', ->
-      set cursorBuffer: [1, 1]
+      set cursor: [1, 2]
       keystroke 'm a'
-      set cursorBuffer: [0, 0]
-      ensure '` a', cursorBuffer: [1, 1]
+      set cursor: [0, 0]
+      ensure '` a', cursor: [1, 2]
 
     it 'deletes to a mark by line', ->
-      set cursorBuffer: [1, 5]
+      set cursor: [1, 5]
       keystroke 'm a'
-      set cursorBuffer: [0, 0]
+      set cursor: [0, 0]
       ensure "d ' a", text: '56\n'
 
     it 'deletes before to a mark literally', ->
-      set cursorBuffer: [1, 5]
+      set cursor: [1, 5]
       keystroke 'm a'
-      set cursorBuffer: [0, 1]
-      ensure 'd ` a', text: ' 4\n56\n'
+      set cursor: [0, 2]
+      ensure 'd ` a', text: '  4\n56\n'
 
     it 'deletes after to a mark literally', ->
-      set cursorBuffer: [1, 5]
+      set cursor: [1, 5]
       keystroke 'm a'
-      set cursorBuffer: [2, 1]
+      set cursor: [2, 1]
       ensure 'd ` a', text: '  12\n    36\n'
 
     it 'moves back to previous', ->
-      set cursorBuffer: [1, 5]
+      set cursor: [1, 5]
       keystroke '` `'
-      set cursorBuffer: [2, 1]
-      ensure '` `', cursorBuffer: [1, 5]
+      set cursor: [2, 1]
+      ensure '` `', cursor: [1, 5]
 
   describe "jump command update ` and ' mark", ->
     ensureMark = (_keystroke, option) ->

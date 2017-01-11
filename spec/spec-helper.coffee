@@ -176,15 +176,15 @@ class VimEditor
     'text', 'text_',
     'textC', 'textC_',
     'grammar',
-    'cursor', 'cursorBuffer',
-    'addCursor', 'addCursorBuffer'
+    'cursor', 'cursorBuffer', 'cursorScreen'
+    'addCursor', 'addCursorBuffer', 'cursorScreen'
     'register',
     'selectedBufferRange'
   ]
 
   setExclusiveRules =
-    textC: ['cursor', 'cursorBuffer']
-    textC_: ['cursor', 'cursorBuffer']
+    textC: ['cursor', 'cursorBuffer', 'cursorScreen']
+    textC_: ['cursor', 'cursorBuffer', 'cursorScreen']
 
   # Public
   set: (options) =>
@@ -227,6 +227,12 @@ class VimEditor
     for point in points
       @editor.addCursorAtBufferPosition(point)
 
+  setCursorScreen: (points) ->
+    points = toArrayOfPoint(points)
+    @editor.setCursorScreenPosition(points.shift())
+    for point in points
+      @editor.addCursorAtScreenPosition(point)
+
   setAddCursor: (points) ->
     for point in toArrayOfPoint(points)
       @editor.addCursorAtScreenPosition(point)
@@ -246,7 +252,7 @@ class VimEditor
     'text', 'text_',
     'textC', 'textC_',
     'selectedText', 'selectedText_', 'selectedTextOrdered', "selectionIsNarrowed"
-    'cursor', 'cursorBuffer',
+    'cursor', 'cursorBuffer', 'cursorScreen'
     'numCursors'
     'register',
     'selectedScreenRange', 'selectedScreenRangeOrdered'
@@ -260,8 +266,8 @@ class VimEditor
     'mode',
   ]
   ensureExclusiveRules =
-    textC: ['cursor', 'cursorBuffer']
-    textC_: ['cursor', 'cursorBuffer']
+    textC: ['cursor', 'cursorBuffer', 'cursorScreen']
+    textC_: ['cursor', 'cursorBuffer', 'cursorScreen']
 
   getAndDeleteKeystrokeOptions: (options) ->
     {partialMatchTimeout} = options
@@ -323,6 +329,10 @@ class VimEditor
     @ensureSelectedText(text, true)
 
   ensureCursor: (points) ->
+    actual = @editor.getCursorScreenPositions()
+    expect(actual).toEqual(toArrayOfPoint(points))
+
+  ensureCursorScreen: (points) ->
     actual = @editor.getCursorScreenPositions()
     expect(actual).toEqual(toArrayOfPoint(points))
 

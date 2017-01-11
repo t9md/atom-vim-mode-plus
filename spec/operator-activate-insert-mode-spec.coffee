@@ -180,7 +180,7 @@ describe "Operator ActivateInsertMode family", ->
 
     describe "when followed by a w", ->
       it "changes the word", ->
-        set text: "word1 word2 word3", cursorBuffer: [0, 7]
+        set text: "word1 word2 word3", cursor: [0, 7]
         ensure 'c w escape', text: "word1 w word3"
 
     describe "when followed by a G", ->
@@ -677,7 +677,7 @@ describe "Operator ActivateInsertMode family", ->
 
     describe 'with nonlinear input', ->
       beforeEach ->
-        set text: '', cursorBuffer: [0, 0]
+        set text: '', cursor: [0, 0]
 
       it 'deals with auto-matched brackets', ->
         keystroke 'i'
@@ -711,7 +711,7 @@ describe "Operator ActivateInsertMode family", ->
     beforeEach ->
       set
         text: ''
-        cursorBuffer: [0, 0]
+        cursor: [0, 0]
 
     it "can be undone in one go", ->
       keystroke 'a'
@@ -733,7 +733,7 @@ describe "Operator ActivateInsertMode family", ->
     beforeEach ->
       set
         text: "\n\n"
-        cursorBuffer: [0, 0]
+        cursor: [0, 0]
 
     describe "save inserted text to '.' register", ->
       ensureDotRegister = (key, {text}) ->

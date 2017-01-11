@@ -326,21 +326,21 @@ describe "Motion Search", ->
     beforeEach ->
       set
         text: "abd\n@def\nabd\ndef\n"
-        cursorBuffer: [0, 0]
+        cursor: [0, 0]
 
     describe "as a motion", ->
       it "moves cursor to next occurrence of word under cursor", ->
-        ensure '*', cursorBuffer: [2, 0]
+        ensure '*', cursor: [2, 0]
 
       it "repeats with the n key", ->
-        ensure '*', cursorBuffer: [2, 0]
-        ensure 'n', cursorBuffer: [0, 0]
+        ensure '*', cursor: [2, 0]
+        ensure 'n', cursor: [0, 0]
 
       it "doesn't move cursor unless next occurrence is the exact word (no partial matches)", ->
         set
           text: "abc\ndef\nghiabc\njkl\nabcdef"
-          cursorBuffer: [0, 0]
-        ensure '*', cursorBuffer: [0, 0]
+          cursor: [0, 0]
+        ensure '*', cursor: [0, 0]
 
       describe "with words that contain 'non-word' characters", ->
         it "skips non-word-char when picking cursor-word then place cursor to next occurrence of word", ->
@@ -351,8 +351,8 @@ describe "Motion Search", ->
             abc
             @def\n
             """
-            cursorBuffer: [1, 0]
-          ensure '*', cursorBuffer: [3, 1]
+            cursor: [1, 0]
+          ensure '*', cursor: [3, 1]
 
         it "doesn't move cursor unless next match has exact word ending", ->
           set
@@ -362,35 +362,35 @@ describe "Motion Search", ->
             abc
             @def1\n
             """
-            cursorBuffer: [1, 1]
-          ensure '*', cursorBuffer: [1, 1]
+            cursor: [1, 1]
+          ensure '*', cursor: [1, 1]
 
         it "moves cursor to the start of valid word char", ->
           set
             text: "abc\ndef\nabc\n@def\n"
-            cursorBuffer: [1, 0]
-          ensure '*', cursorBuffer: [3, 1]
+            cursor: [1, 0]
+          ensure '*', cursor: [3, 1]
 
       describe "when cursor is on non-word char column", ->
         it "matches only the non-word char", ->
           set
             text: "abc\n@def\nabc\n@def\n"
-            cursorBuffer: [1, 0]
-          ensure '*', cursorBuffer: [3, 1]
+            cursor: [1, 0]
+          ensure '*', cursor: [3, 1]
 
       describe "when cursor is not on a word", ->
         it "does a match with the next word", ->
           set
             text: "abc\na  @def\n abc\n @def"
-            cursorBuffer: [1, 1]
-          ensure '*', cursorBuffer: [3, 2]
+            cursor: [1, 1]
+          ensure '*', cursor: [3, 2]
 
       describe "when cursor is at EOF", ->
         it "doesn't try to do any match", ->
           set
             text: "abc\n@def\nabc\n "
-            cursorBuffer: [3, 0]
-          ensure '*', cursorBuffer: [3, 0]
+            cursor: [3, 0]
+          ensure '*', cursor: [3, 0]
 
     describe "caseSensitivity setting", ->
       beforeEach ->
@@ -406,15 +406,15 @@ describe "Motion Search", ->
 
       it "search case sensitively when `ignoreCaseForSearchCurrentWord` is false(=default)", ->
         expect(settings.get('ignoreCaseForSearchCurrentWord')).toBe(false)
-        ensure '*', cursorBuffer: [3, 0]
-        ensure 'n', cursorBuffer: [0, 0]
+        ensure '*', cursor: [3, 0]
+        ensure 'n', cursor: [0, 0]
 
       it "search case insensitively when `ignoreCaseForSearchCurrentWord` true", ->
         settings.set 'ignoreCaseForSearchCurrentWord', true
-        ensure '*', cursorBuffer: [1, 0]
-        ensure 'n', cursorBuffer: [2, 0]
-        ensure 'n', cursorBuffer: [3, 0]
-        ensure 'n', cursorBuffer: [4, 0]
+        ensure '*', cursor: [1, 0]
+        ensure 'n', cursor: [2, 0]
+        ensure 'n', cursor: [3, 0]
+        ensure 'n', cursor: [4, 0]
 
       describe "useSmartcaseForSearchCurrentWord is enabled", ->
         beforeEach ->
@@ -422,57 +422,57 @@ describe "Motion Search", ->
 
         it "search case sensitively when enable and search term includes uppercase", ->
           set cursor: [1, 0]
-          ensure '*', cursorBuffer: [4, 0]
-          ensure 'n', cursorBuffer: [1, 0]
+          ensure '*', cursor: [4, 0]
+          ensure 'n', cursor: [1, 0]
 
         it "search case insensitively when enable and search term NOT includes uppercase", ->
           set cursor: [0, 0]
-          ensure '*', cursorBuffer: [1, 0]
-          ensure 'n', cursorBuffer: [2, 0]
-          ensure 'n', cursorBuffer: [3, 0]
-          ensure 'n', cursorBuffer: [4, 0]
+          ensure '*', cursor: [1, 0]
+          ensure 'n', cursor: [2, 0]
+          ensure 'n', cursor: [3, 0]
+          ensure 'n', cursor: [4, 0]
 
   describe "the hash keybinding", ->
     describe "as a motion", ->
       it "moves cursor to previous occurrence of word under cursor", ->
         set
           text: "abc\n@def\nabc\ndef\n"
-          cursorBuffer: [2, 1]
-        ensure '#', cursorBuffer: [0, 0]
+          cursor: [2, 1]
+        ensure '#', cursor: [0, 0]
 
       it "repeats with n", ->
         set
           text: "abc\n@def\nabc\ndef\nabc\n"
-          cursorBuffer: [2, 1]
-        ensure '#', cursorBuffer: [0, 0]
-        ensure 'n', cursorBuffer: [4, 0]
-        ensure 'n', cursorBuffer: [2, 0]
+          cursor: [2, 1]
+        ensure '#', cursor: [0, 0]
+        ensure 'n', cursor: [4, 0]
+        ensure 'n', cursor: [2, 0]
 
       it "doesn't move cursor unless next occurrence is the exact word (no partial matches)", ->
         set
           text: "abc\ndef\nghiabc\njkl\nabcdef"
-          cursorBuffer: [0, 0]
-        ensure '#', cursorBuffer: [0, 0]
+          cursor: [0, 0]
+        ensure '#', cursor: [0, 0]
 
       describe "with words that containt 'non-word' characters", ->
         it "moves cursor to next occurrence of word under cursor", ->
           set
             text: "abc\n@def\nabc\n@def\n"
-            cursorBuffer: [3, 0]
-          ensure '#', cursorBuffer: [1, 1]
+            cursor: [3, 0]
+          ensure '#', cursor: [1, 1]
 
         it "moves cursor to the start of valid word char", ->
           set
             text: "abc\n@def\nabc\ndef\n"
-            cursorBuffer: [3, 0]
-          ensure '#', cursorBuffer: [1, 1]
+            cursor: [3, 0]
+          ensure '#', cursor: [1, 1]
 
       describe "when cursor is on non-word char column", ->
         it "matches only the non-word char", ->
           set
             text: "abc\n@def\nabc\n@def\n"
-            cursorBuffer: [1, 0]
-          ensure '*', cursorBuffer: [3, 1]
+            cursor: [1, 0]
+          ensure '*', cursor: [3, 1]
 
     describe "caseSensitivity setting", ->
       beforeEach ->
@@ -488,15 +488,15 @@ describe "Motion Search", ->
 
       it "search case sensitively when `ignoreCaseForSearchCurrentWord` is false(=default)", ->
         expect(settings.get('ignoreCaseForSearchCurrentWord')).toBe(false)
-        ensure '#', cursorBuffer: [1, 0]
-        ensure 'n', cursorBuffer: [4, 0]
+        ensure '#', cursor: [1, 0]
+        ensure 'n', cursor: [4, 0]
 
       it "search case insensitively when `ignoreCaseForSearchCurrentWord` true", ->
         settings.set 'ignoreCaseForSearchCurrentWord', true
-        ensure '#', cursorBuffer: [3, 0]
-        ensure 'n', cursorBuffer: [2, 0]
-        ensure 'n', cursorBuffer: [1, 0]
-        ensure 'n', cursorBuffer: [0, 0]
+        ensure '#', cursor: [3, 0]
+        ensure 'n', cursor: [2, 0]
+        ensure 'n', cursor: [1, 0]
+        ensure 'n', cursor: [0, 0]
 
       describe "useSmartcaseForSearchCurrentWord is enabled", ->
         beforeEach ->
@@ -504,16 +504,16 @@ describe "Motion Search", ->
 
         it "search case sensitively when enable and search term includes uppercase", ->
           set cursor: [4, 0]
-          ensure '#', cursorBuffer: [1, 0]
-          ensure 'n', cursorBuffer: [4, 0]
+          ensure '#', cursor: [1, 0]
+          ensure 'n', cursor: [4, 0]
 
         it "search case insensitively when enable and search term NOT includes uppercase", ->
           set cursor: [0, 0]
-          ensure '#', cursorBuffer: [4, 0]
-          ensure 'n', cursorBuffer: [3, 0]
-          ensure 'n', cursorBuffer: [2, 0]
-          ensure 'n', cursorBuffer: [1, 0]
-          ensure 'n', cursorBuffer: [0, 0]
+          ensure '#', cursor: [4, 0]
+          ensure 'n', cursor: [3, 0]
+          ensure 'n', cursor: [2, 0]
+          ensure 'n', cursor: [1, 0]
+          ensure 'n', cursor: [0, 0]
 
   # FIXME: No longer child of search so move to motion-general-spec.coffe?
   describe 'the % motion', ->

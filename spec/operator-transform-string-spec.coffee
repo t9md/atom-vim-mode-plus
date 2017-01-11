@@ -48,7 +48,7 @@ describe "Operator TransformString", ->
 
     describe "in visual mode", ->
       it "toggles the case of the selected text", ->
-        set cursorBuffer: [0, 0]
+        set cursor: [0, 0]
         ensure 'V ~', text: 'AbC\nXyZ'
 
     describe "with g and motion", ->
@@ -68,28 +68,28 @@ describe "Operator TransformString", ->
     beforeEach ->
       set
         text: 'aBc\nXyZ'
-        cursorBuffer: [0, 0]
+        cursor: [0, 0]
 
     it "makes text uppercase with g and motion, and won't move cursor", ->
       ensure 'g U l', text: 'ABc\nXyZ', cursor: [0, 0]
       ensure 'g U e', text: 'ABC\nXyZ', cursor: [0, 0]
-      set cursorBuffer: [1, 0]
+      set cursor: [1, 0]
       ensure 'g U $', text: 'ABC\nXYZ', cursor: [1, 0]
 
     it "makes the selected text uppercase in visual mode", ->
       ensure 'V U', text: 'ABC\nXyZ'
 
     it "gUU upcase the line of text, won't move cursor", ->
-      set cursorBuffer: [0, 1]
+      set cursor: [0, 1]
       ensure 'g U U', text: 'ABC\nXyZ', cursor: [0, 1]
 
     it "gUgU upcase the line of text, won't move cursor", ->
-      set cursorBuffer: [0, 1]
+      set cursor: [0, 1]
       ensure 'g U g U', text: 'ABC\nXyZ', cursor: [0, 1]
 
   describe 'the u keybinding', ->
     beforeEach ->
-      set text: 'aBc\nXyZ', cursorBuffer: [0, 0]
+      set text: 'aBc\nXyZ', cursor: [0, 0]
 
     it "makes text lowercase with g and motion, and won't move cursor", ->
       ensure 'g u $', text: 'abc\nXyZ', cursor: [0, 0]
@@ -98,11 +98,11 @@ describe "Operator TransformString", ->
       ensure 'V u', text: 'abc\nXyZ'
 
     it "guu downcase the line of text, won't move cursor", ->
-      set cursorBuffer: [0, 1]
+      set cursor: [0, 1]
       ensure 'g u u', text: 'abc\nXyZ', cursor: [0, 1]
 
     it "gugu downcase the line of text, won't move cursor", ->
-      set cursorBuffer: [0, 1]
+      set cursor: [0, 1]
       ensure 'g u g u', text: 'abc\nXyZ', cursor: [0, 1]
 
   describe "the > keybinding", ->
@@ -341,7 +341,7 @@ describe "Operator TransformString", ->
     beforeEach ->
       set
         text: 'vim-mode\natom-text-editor\n'
-        cursorBuffer: [0, 0]
+        cursor: [0, 0]
 
     it "transform text by motion and repeatable", ->
       ensure 'g c $', text: 'vimMode\natom-text-editor\n', cursor: [0, 0]
@@ -357,7 +357,7 @@ describe "Operator TransformString", ->
     beforeEach ->
       set
         text: 'vim-mode\natom-text-editor\n'
-        cursorBuffer: [0, 0]
+        cursor: [0, 0]
 
     it "transform text by motion and repeatable", ->
       ensure 'g C $', text: 'VimMode\natom-text-editor\n', cursor: [0, 0]
@@ -373,7 +373,7 @@ describe "Operator TransformString", ->
     beforeEach ->
       set
         text: 'vim-mode\natom-text-editor\n'
-        cursorBuffer: [0, 0]
+        cursor: [0, 0]
       atom.keymaps.add "g_",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
           'g _': 'vim-mode-plus:snake-case'
@@ -392,7 +392,7 @@ describe "Operator TransformString", ->
     beforeEach ->
       set
         text: 'vimMode\natom_text_editor\n'
-        cursorBuffer: [0, 0]
+        cursor: [0, 0]
 
     it "transform text by motion and repeatable", ->
       ensure 'g - $', text: 'vim-mode\natom_text_editor\n', cursor: [0, 0]
@@ -437,7 +437,7 @@ describe "Operator TransformString", ->
   describe 'CompactSpaces', ->
     beforeEach ->
       set
-        cursorBuffer: [0, 0]
+        cursor: [0, 0]
 
     describe "basic behavior", ->
       it "compats multiple space into one", ->
@@ -714,7 +714,7 @@ describe "Operator TransformString", ->
             <lemmon>
             {orange}
             """
-          cursorBuffer: [0, 1]
+          cursor: [0, 1]
       it "change surrounded chars and repeatable", ->
         ensure ['c S', input: '(['],
           text: """
@@ -765,7 +765,7 @@ describe "Operator TransformString", ->
 
       describe 'charactersToAddSpaceOnSurround setting', ->
         ensureChangeSurround = (inputKeystrokes, options) ->
-          set(text: options.initialText, cursorBuffer: [0, 0])
+          set(text: options.initialText, cursor: [0, 0])
           delete options.initialText
           keystrokes = ['c S'].concat({input: inputKeystrokes})
           ensure(keystrokes, options)

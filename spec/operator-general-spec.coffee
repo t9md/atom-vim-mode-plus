@@ -430,20 +430,20 @@ describe "Operator general", ->
             1234
             ABCD\n
             """
-          cursorBuffer: [[0, 1], [1, 2], [2, 3]]
+          cursor: [[0, 1], [1, 2], [2, 3]]
 
         ensure 'd e',
           text: "a\n12\nABC"
-          cursorBuffer: [[0, 0], [1, 1], [2, 2]]
+          cursor: [[0, 0], [1, 1], [2, 2]]
 
       it "doesn't delete empty selections", ->
         set
           text: "abcd\nabc\nabd"
-          cursorBuffer: [[0, 0], [1, 0], [2, 0]]
+          cursor: [[0, 0], [1, 0], [2, 0]]
 
         ensure ['d t', input: 'd'],
           text: "d\nabc\nd"
-          cursorBuffer: [[0, 0], [1, 0], [2, 0]]
+          cursor: [[0, 0], [1, 0], [2, 0]]
 
     describe "stayOnDelete setting", ->
       beforeEach ->
@@ -457,7 +457,6 @@ describe "Operator general", ->
           ___3333\n
           """
           cursor: [0, 3]
-          # "___3333\n__2222\n1111\n__2222\n___3333"
 
       describe "target range is linewise range", ->
         it "keep original column after delete", ->
@@ -701,10 +700,10 @@ describe "Operator general", ->
       it "moves each cursor and copies the last selection's text", ->
         set
           text: "  abcd\n  1234"
-          cursorBuffer: [[0, 0], [1, 5]]
+          cursor: [[0, 0], [1, 5]]
         ensure 'y ^',
           register: '"': text: '123'
-          cursorBuffer: [[0, 0], [1, 2]]
+          cursor: [[0, 0], [1, 2]]
 
     describe "stayOnYank setting", ->
       text = null
@@ -721,19 +720,19 @@ describe "Operator general", ->
         set text: text.getRaw(), cursor: [1, 2]
 
       it "don't move cursor after yank from normal-mode", ->
-        ensure "y i p", cursorBuffer: [1, 2], register: '"': text: text.getLines([0..2])
-        ensure "j y y", cursorBuffer: [2, 2], register: '"': text: text.getLines([2])
-        ensure "k .", cursorBuffer: [1, 2], register: '"': text: text.getLines([1])
+        ensure "y i p", cursor: [1, 2], register: '"': text: text.getLines([0..2])
+        ensure "j y y", cursor: [2, 2], register: '"': text: text.getLines([2])
+        ensure "k .", cursor: [1, 2], register: '"': text: text.getLines([1])
 
       it "don't move cursor after yank from visual-linewise", ->
-        ensure "V y", cursorBuffer: [1, 2], register: '"': text: text.getLines([1])
-        ensure "V j y", cursorBuffer: [2, 2], register: '"': text: text.getLines([1..2])
+        ensure "V y", cursor: [1, 2], register: '"': text: text.getLines([1])
+        ensure "V j y", cursor: [2, 2], register: '"': text: text.getLines([1..2])
 
       it "don't move cursor after yank from visual-characterwise", ->
-        ensure "v l l y", cursorBuffer: [1, 4], register: '"': text: "234"
-        ensure "v h h y", cursorBuffer: [1, 2], register: '"': text: "234"
-        ensure "v j y", cursorBuffer: [2, 2], register: '"': text: "234567\n2_2"
-        ensure "v 2 k y", cursorBuffer: [0, 2], register: '"': text: "234567\n1_234567\n2_2"
+        ensure "v l l y", cursor: [1, 4], register: '"': text: "234"
+        ensure "v h h y", cursor: [1, 2], register: '"': text: "234"
+        ensure "v j y", cursor: [2, 2], register: '"': text: "234567\n2_2"
+        ensure "v 2 k y", cursor: [0, 2], register: '"': text: "234567\n1_234567\n2_2"
 
   describe "the yy keybinding", ->
     describe "on a single line file", ->
@@ -982,7 +981,7 @@ describe "Operator general", ->
         34
         \n
         """
-        cursorBuffer: [[0, 0], [1, 0]]
+        cursor: [[0, 0], [1, 0]]
 
     it "replaces a single character", ->
       ensure ['r', input: 'x'], text: 'x2\nx4\n\n'
@@ -1000,13 +999,13 @@ describe "Operator general", ->
     it "replaces a single character with a line break", ->
       ensure 'r enter',
         text: '\n2\n\n4\n\n'
-        cursorBuffer: [[1, 0], [3, 0]]
+        cursor: [[1, 0], [3, 0]]
 
     it "composes properly with motions", ->
       ensure ['2 r', input: 'x'], text: 'xx\nxx\n\n'
 
     it "does nothing on an empty line", ->
-      set cursorBuffer: [2, 0]
+      set cursor: [2, 0]
       ensure ['r', input: 'x'], text: '12\n34\n\n'
 
     it "does nothing if asked to replace more characters than there are on a line", ->
@@ -1020,7 +1019,7 @@ describe "Operator general", ->
         ensure ['r', input: 'x'], text: 'xx\nxx\n\n'
 
       it "leaves the cursor at the beginning of the selection", ->
-        ensure ['r', input: 'x' ], cursorBuffer: [[0, 0], [1, 0]]
+        ensure ['r', input: 'x' ], cursor: [[0, 0], [1, 0]]
 
     describe "when in visual-block mode", ->
       textOriginal = """
@@ -1065,7 +1064,7 @@ describe "Operator general", ->
 
   describe 'the m keybinding', ->
     beforeEach ->
-      set text: '12\n34\n56\n', cursorBuffer: [0, 1]
+      set text: '12\n34\n56\n', cursor: [0, 1]
 
     it 'marks a position', ->
       keystroke 'm a'
@@ -1078,7 +1077,7 @@ describe "Operator general", ->
           12345
           67890
           """
-        cursorBuffer: [0, 2]
+        cursor: [0, 2]
 
     it "enters replace mode and replaces characters", ->
       ensure 'R',
@@ -1117,9 +1116,9 @@ describe "Operator general", ->
       keystroke 'R'
       editor.insertText "ab"
       keystroke 'escape'
-      set cursorBuffer: [1, 2]
+      set cursor: [1, 2]
       ensure '.', text: "12ab5\n67ab0", cursor: [1, 3]
-      set cursorBuffer: [0, 4]
+      set cursor: [0, 4]
       ensure '.', text: "12abab\n67ab0", cursor: [0, 5]
 
     it "can be interrupted by arrow keys and behave as insert for repeat", ->
@@ -1131,9 +1130,9 @@ describe "Operator general", ->
       keystroke 'backspace'
       editor.insertText "b"
       keystroke 'escape'
-      set cursorBuffer: [1, 2]
+      set cursor: [1, 2]
       ensure '.', text: "12b45\n67b90", cursor: [1, 2]
-      set cursorBuffer: [0, 4]
+      set cursor: [0, 4]
       ensure '.', text: "12b4b\n67b90", cursor: [0, 4]
 
     it "doesn't replace a character if newline is entered", ->
