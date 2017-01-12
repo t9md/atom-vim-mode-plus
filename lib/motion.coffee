@@ -345,6 +345,7 @@ class MoveToNextWord extends Motion
   getPoint: (pattern, from) ->
     wordRange = null
     found = false
+    vimEOF = @getVimEofBufferPosition(@editor)
 
     @scanForward pattern, {from}, ({range, matchText, stop}) ->
       wordRange = range
@@ -356,7 +357,7 @@ class MoveToNextWord extends Motion
 
     if found
       point = wordRange.start
-      if pointIsAtEndOfLineAtNonEmptyRow(@editor, point) and not point.isEqual(scanRange.end)
+      if pointIsAtEndOfLineAtNonEmptyRow(@editor, point) and not point.isEqual(vimEOF)
         point.traverse([1, 0])
       else
         point
@@ -452,11 +453,11 @@ class MoveToPreviousEndOfWord extends MoveToPreviousWord
 # -------------------------
 class MoveToNextWholeWord extends MoveToNextWord
   @extend()
-  wordRegex: /^\s*?$|\S+/g
+  wordRegex: /^$|\S+/g
 
 class MoveToPreviousWholeWord extends MoveToPreviousWord
   @extend()
-  wordRegex: /^\s*$|\S+/
+  wordRegex: /^$|\S+/
 
 class MoveToEndOfWholeWord extends MoveToEndOfWord
   @extend()
