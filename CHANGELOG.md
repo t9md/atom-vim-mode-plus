@@ -1,5 +1,7 @@
 # 0.79.1:
 - Fix: #653 Immediately close search-mini-editor when main editorElement was clicked to avoid stale decorations remains on editor.
+- Fix: Move to next subword no longer throw error in some ending string pattern.
+- Improve: `move-to-next-word` and it's child motion now skip white-space only row(compatible with pure-Vim).
 
 # 0.79.0:
 - Fix: #647 Ensure clearing blockwise selection after `.` repeating blockwise operation.
