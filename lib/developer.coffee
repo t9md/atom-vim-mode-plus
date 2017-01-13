@@ -35,6 +35,8 @@ class Developer
   reloadPackages: ->
     packages = settings.get('devReloadPackages') ? []
     packages.push('vim-mode-plus')
+
+    # Deactivate
     for packName in packages
       pack = atom.packages.getLoadedPackage(packName)
 
@@ -50,9 +52,11 @@ class Developer
           .forEach (p) ->
             delete require.cache[p]
 
-        atom.packages.loadPackage(packName)
-        console.log "+ activating #{packName}"
-        atom.packages.activatePackage(packName)
+    # Activate
+    for packName in packages
+      atom.packages.loadPackage(packName)
+      console.log "+ activating #{packName}"
+      atom.packages.activatePackage(packName)
 
   toggleReloadPackagesOnSave: ->
     return unless editor = atom.workspace.getActiveTextEditor()
