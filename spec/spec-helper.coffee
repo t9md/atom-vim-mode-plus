@@ -401,7 +401,7 @@ class VimEditor
       expect(actual).toEqual(point)
 
   ensureMode: (mode) ->
-    mode = toArray(mode)
+    mode = toArray(mode).slice()
     expect(@vimState.isMode(mode...)).toBe(true)
 
     mode[0] = "#{mode[0]}-mode"
