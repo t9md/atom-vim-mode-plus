@@ -437,12 +437,6 @@
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
 
-# has-occurrence (when occurrence-marker was exists)
-# -------------------------
-'atom-text-editor.vim-mode-plus.has-occurrence:not(.insert-mode)':
-  'I': 'vim-mode-plus:insert-at-start-of-target'
-  'A': 'vim-mode-plus:insert-at-end-of-target'
-
 # operator-pending, visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
