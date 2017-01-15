@@ -1,3 +1,19 @@
+# 0.80.0:
+- Breaking: Disable `I`, `A` special keymap in `has-occurrence` scope.
+  - To avoid surprising user. Now behave as normal `I` amnd `A`.
+  - To insert start/end of each occurrences, use `visual-mode` select then `I` or `A`.
+  - Or set keymap in your `keymap.cson` to restore previous verison's keymap.
+    ```
+    'atom-text-editor.vim-mode-plus.has-occurrence:not(.insert-mode)':
+      'I': 'vim-mode-plus:insert-at-start-of-target'
+      'A': 'vim-mode-plus:insert-at-end-of-target'
+    ```
+
+- Fix: No longer throw exception when specified register has no value(=text) on `p`, `P` operation. #656.
+- Fix: Now selection peroperties cleared on each normal-mode operationFinsish to avoid hover counter is shown at incorrect position.
+- Developer: Spec helper `ensureMode` no longer mutate passed array itself. 
+- Developer: `reload-packages` command now reload depending packages in correct order.
+
 # 0.79.1:
 - Fix: #653 Immediately close search-mini-editor when main editorElement was clicked to avoid stale decorations remains on editor.
 - Fix: Move to next subword no longer throw error in some ending string pattern.
