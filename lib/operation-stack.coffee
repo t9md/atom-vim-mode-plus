@@ -169,6 +169,7 @@ class OperationStack
       operation.resetState()
 
     if @mode is 'normal'
+      swrap.clearProperties(@editor)
       @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()
     else if @mode is 'visual'

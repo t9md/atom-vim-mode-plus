@@ -375,4 +375,8 @@ swrap.applyWise = (editor, value) ->
   for selection in editor.getSelections()
     swrap(selection).applyWise(value)
 
+swrap.clearProperties = (editor) ->
+  for selection in editor.getSelections()
+    swrap(selection).clearProperties()
+
 module.exports = swrap
