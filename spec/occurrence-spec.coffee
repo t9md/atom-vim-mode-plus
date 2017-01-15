@@ -771,13 +771,13 @@ describe "Occurrence", ->
           it '[insert-at-start] apply operation to preset-marker intersecting selected target', ->
             ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
             classList.contains('has-occurrence')
-            ensure 'I k', mode: 'insert', numCursors: 2
+            ensure 'v k I', mode: 'insert', numCursors: 2
             editor.insertText("pure-")
             ensure 'escape',
               mode: 'normal'
               textC: """
-              pure|-Vim is editor I used before
               pure!-Vim is editor I used before
+              pure|-Vim is editor I used before
               Vim is editor I used before
               Vim is editor I used before
               """
@@ -786,14 +786,14 @@ describe "Occurrence", ->
             set cursor: [1, 1]
             ensure 'g o', occurrenceText: ['Vim', 'Vim', 'Vim', 'Vim']
             classList.contains('has-occurrence')
-            ensure 'A j', mode: 'insert', numCursors: 2
+            ensure 'v j A', mode: 'insert', numCursors: 2
             editor.insertText(" and Emacs")
             ensure 'escape',
               mode: 'normal'
               textC: """
               Vim is editor I used before
-              Vim and Emac!s is editor I used before
               Vim and Emac|s is editor I used before
+              Vim and Emac!s is editor I used before
               Vim is editor I used before
               """
 
