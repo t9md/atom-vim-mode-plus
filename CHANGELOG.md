@@ -1,3 +1,10 @@
+# 0.81.0: WIP
+- Improve, Breaking: Remove `fallbackTabAndShiftTabInNormalMode`
+  - This was necessary since `tab`, `shift-tab` was mapped to `move-to-next-occurrence` and `move-to-previous-occurrence`.
+  - When `true`, fallback `tab`, `shift-tab` to `editor:indent` or `editor:outdent-selected-rows` when no `occurrence-marker` exist.
+  - But now, these mapping is defined in `has-occurrence` scope, which means `occurrence-marker` exists on editor.
+  - So your `tab`, `shift-tab` is no longer conflict if no `occurrence-marker` exits.
+
 # 0.80.0:
 - Breaking: Disable `I`, `A` special keymap in `has-occurrence` scope.
   - To avoid surprising user. Now behave as normal `I` amnd `A`.
@@ -11,7 +18,7 @@
 
 - Fix: No longer throw exception when specified register has no value(=text) on `p`, `P` operation. #656.
 - Fix: Now selection peroperties cleared on each normal-mode operationFinsish to avoid hover counter is shown at incorrect position.
-- Developer: Spec helper `ensureMode` no longer mutate passed array itself. 
+- Developer: Spec helper `ensureMode` no longer mutate passed array itself.
 - Developer: `reload-packages` command now reload depending packages in correct order.
 
 # 0.79.1:

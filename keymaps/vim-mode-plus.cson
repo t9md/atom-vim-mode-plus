@@ -234,8 +234,6 @@
   '[': 'vim-mode-plus:move-up-to-edge'
   ']': 'vim-mode-plus:move-down-to-edge'
 
-  'tab': 'vim-mode-plus:move-to-next-occurrence'
-  'shift-tab': 'vim-mode-plus:move-to-previous-occurrence'
   # '[ [': 'vim-mode-plus:move-to-previous-fold-start'
   # '] [': 'vim-mode-plus:move-to-next-fold-start'
   # '[ ]': 'vim-mode-plus:move-to-previous-fold-end'
@@ -248,6 +246,10 @@
 
   # 'g n': 'vim-mode-plus:move-to-next-number'
   # 'g N': 'vim-mode-plus:move-to-previous-number'
+
+'atom-text-editor.vim-mode-plus.has-occurrence:not(.insert-mode)':
+  'tab': 'vim-mode-plus:move-to-next-occurrence'
+  'shift-tab': 'vim-mode-plus:move-to-previous-occurrence'
 
 'atom-text-editor.vim-mode-plus:not(.insert-mode):not(.operator-pending-mode)':
   'z enter': 'vim-mode-plus:scroll-cursor-to-top'

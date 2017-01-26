@@ -1069,20 +1069,10 @@ class MoveToNextNumber extends MoveToPreviousNumber
 
 class MoveToNextOccurrence extends Motion
   @extend()
+  # Ensure this command is available when has-occurrence
+  @commandScope: 'atom-text-editor.vim-mode-plus.has-occurrence'
   jump: true
   direction: 'next'
-
-  initialize: ->
-    if @vimState.occurrenceManager.hasMarkers()
-      super
-    else
-      if settings.get('fallbackTabAndShiftTabInNormalMode')
-        switch getKeystrokeForEvent(@vimState._event)
-          when 'tab'
-            atom.commands.dispatch(@editorElement, 'editor:indent')
-          when 'shift-tab'
-            atom.commands.dispatch(@editorElement, 'editor:outdent-selected-rows')
-      @abort()
 
   getRanges: ->
     @vimState.occurrenceManager.getMarkers().map (marker) ->

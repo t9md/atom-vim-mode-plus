@@ -157,13 +157,6 @@ module.exports = new Settings 'vim-mode-plus',
   statusBarModeStringStyle:
     default: 'short'
     enum: ['short', 'long']
-  fallbackTabAndShiftTabInNormalMode:
-    default: true
-    description: """
-    tab, shift-tab is mapped to move-to-next-occurrence, move-to-previous-occurrence in normal-mode.<br>
-    Setting true fallbacks to original behavior `editor:indent`, `editor:outdent-selected-rows`, if
-     no occurrence-marker was set on that editor.
-    """
   throwErrorOnNonEmptySelectionInNormalMode:
     default: false
     description: "[Dev use] Throw error when non-empty selection was remained in normal-mode at the timing of operation finished"
