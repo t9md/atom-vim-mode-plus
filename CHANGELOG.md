@@ -1,4 +1,4 @@
-# 0.81.0: WIP
+# 0.81.0:
 - Improve, Breaking: Remove `fallbackTabAndShiftTabInNormalMode`
   - This was necessary since `tab`, `shift-tab` was mapped to `move-to-next-occurrence` and `move-to-previous-occurrence`.
   - When `true`, fallback `tab`, `shift-tab` to `editor:indent` or `editor:outdent-selected-rows` when no `occurrence-marker` exist.
