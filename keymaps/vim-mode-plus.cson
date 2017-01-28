@@ -55,8 +55,12 @@
   'right': 'vim-mode-plus:move-right'
 
   'k': 'vim-mode-plus:move-up'
-  'up': 'vim-mode-plus:move-up'
   'j': 'vim-mode-plus:move-down'
+
+  # 'k': 'vim-mode-plus:move-up-wrap'
+  # 'j': 'vim-mode-plus:move-down-wrap'
+
+  'up': 'vim-mode-plus:move-up'
   'down': 'vim-mode-plus:move-down'
 
   'g k': 'vim-mode-plus:move-up-screen'

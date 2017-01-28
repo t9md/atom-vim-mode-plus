@@ -100,6 +100,36 @@ describe "Motion general", ->
           ensure 'j', selectedText: text.getLines([1])
           ensure 'j', selectedText: text.getLines([1, 2])
 
+    describe "move-down-wrap, move-up-wrap", ->
+      beforeEach ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            'k': 'vim-mode-plus:move-up-wrap'
+            'j': 'vim-mode-plus:move-down-wrap'
+
+        set
+          text: """
+          hello
+          hello
+          hello
+          hello\n
+          """
+      describe 'move-down-wrap', ->
+        beforeEach ->
+          set cursor: [3, 1]
+        it "move down with wrawp", -> ensure 'j', cursor: [0, 1]
+        it "move down with wrawp", -> ensure '2 j', cursor: [1, 1]
+        it "move down with wrawp", -> ensure '4 j', cursor: [3, 1]
+
+      describe 'move-up-wrap', ->
+        beforeEach ->
+          set cursor: [0, 1]
+
+        it "move down with wrawp", -> ensure 'k', cursor: [3, 1]
+        it "move down with wrawp", -> ensure '2 k', cursor: [2, 1]
+        it "move down with wrawp", -> ensure '4 k', cursor: [0, 1]
+
+
     # [NOTE] See #560
     # This spec is intended to be used in local test, not at CI service.
     # Safe to execute if it passes, but freeze editor when it fail.
