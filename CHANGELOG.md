@@ -1,3 +1,7 @@
+# 0.82.0:
+- New: command `move-up-wrap`, `move-down-wrap`, `j`, `k` with line wrap( top-to-bottom/bottom-to-top ).
+  - No keymap by default. intended to use from atom-narrow package(now I'm actively developping).
+
 # 0.81.0:
 - Improve, Breaking: Remove `fallbackTabAndShiftTabInNormalMode`
   - This was necessary since `tab`, `shift-tab` was mapped to `move-to-next-occurrence` and `move-to-previous-occurrence`.
