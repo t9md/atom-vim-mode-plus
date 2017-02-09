@@ -1911,12 +1911,15 @@ describe "Motion general", ->
       ensure 'Q', textC: "camelCase => (with special) ChaR|ActerRs\n\ndash-case\n\nsnake_case_word\n"
       ensure 'Q', textC: "camelCase => (with special) Cha|RActerRs\n\ndash-case\n\nsnake_case_word\n"
       ensure 'Q', textC: "camelCase => (with special) |ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
+      ensure 'Q', textC: "camelCase => (with special)| ChaRActerRs\n\ndash-case\n\nsnake_case_word\n" # FIXME
       ensure 'Q', textC: "camelCase => (with special|) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
       ensure 'Q', textC: "camelCase => (with |special) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
+      ensure 'Q', textC: "camelCase => (with| special) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n" # FIXME
       ensure 'Q', textC: "camelCase => (|with special) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
       ensure 'Q', textC: "camelCase =>| (with special) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
       ensure 'Q', textC: "camelCase| => (with special) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
       ensure 'Q', textC: "camel|Case => (with special) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
+      ensure 'Q', textC: "|camelCase => (with special) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
     it "move-to-end-of-subword", ->
       set textC: "|camelCase => (with special) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
       ensure 'ctrl-e', textC: "came|lCase => (with special) ChaRActerRs\n\ndash-case\n\nsnake_case_word\n"
