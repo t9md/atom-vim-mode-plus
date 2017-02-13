@@ -67,6 +67,44 @@ describe "Prefixes", ->
       it "work with motion which also require input such as 't'", ->
         ensure ['" a y t', {input: 'c'}], register: a: text: 'aaa bbb '
 
+    describe "With p command", ->
+      beforeEach ->
+        vimState.globalState.reset('register')
+        set register: a: text: 'new content'
+        set
+          text: """
+          abc
+          def
+          """
+          cursor: [0, 0]
+
+      describe "when specified register have no text", ->
+        it "can paste from a register", ->
+          ensure ['"', input: 'a', 'p'],
+            text: """
+            anew contentbc
+            def
+            """
+            cursor: [0, 11]
+
+        it "but do nothing for z register", ->
+          ensure ['"', input: 'z', 'p'],
+            text: """
+            abc
+            def
+            """
+            cursor: [0, 0]
+
+      # [FIXME] just assuring NO exception.
+      describe "blockwise-mode paste just use register have no text", ->
+        it "paste from a register to each selction", ->
+          ensure ['ctrl-v j "', input: 'a', 'p'],
+            text: """
+            new contentbc
+            new contentef
+            """
+            cursor: [[0, 10], [1, 10]]
+
     describe "the B register", ->
       it "saves a value for future reading", ->
         set    register: B: text: 'new content'

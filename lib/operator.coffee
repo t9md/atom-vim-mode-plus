@@ -596,14 +596,8 @@ class PutBefore extends Operator
 
   execute: ->
     @mutationsBySelection = new Map()
-    @registerBySelection = new Map()
-    for selection in @editor.getSelections()
-      register = @vimState.register.get(null, selection)
-      if register.text?
-        @registerBySelection.set(selection, register)
-
-    return unless @registerBySelection.size
-
+    {text, type} = @vimState.register.get(null, @editor.getLastSelection())
+    return unless text
     @onDidFinishMutation(@adjustCursorPosition.bind(this))
 
     @onDidFinishOperation =>
@@ -631,8 +625,7 @@ class PutBefore extends Operator
           cursor.setBufferPosition(start)
 
   mutateSelection: (selection) ->
-    {text, type} = @registerBySelection.get(selection)
-    return unless text
+    {text, type} = @vimState.register.get(null, selection)
     text = _.multiplyString(text, @getCount())
     @linewisePaste = type is 'linewise' or @isMode('visual', 'linewise')
     newRange = @paste(selection, text, {@linewisePaste})
