@@ -1,3 +1,6 @@
+# 0.82.2:
+- Fix: No longer throw exception when `showHoverSearchCounter` is enabled and editor was closed immediately after hover counter was shown.
+
 # 0.82.1:
 - Fix: `p`, `P` in vB-mode no longer throw exception #672
   - This bug was introduced in v0.80.0.

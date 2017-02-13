@@ -55,7 +55,10 @@ class SearchModel
     if hoverCounterTimeoutID?
       clearTimeout(hoverCounterTimeoutID)
       hoverCounterTimeoutID = null
-    @vimState.hoverSearchCounter.reset()
+    # See #674
+    # This method called with setTimeout
+    # hoverSearchCounter might not be available when editor destroyed.
+    @vimState.hoverSearchCounter?.reset()
 
   destroy: ->
     @markerLayer.destroy()
