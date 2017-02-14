@@ -108,7 +108,7 @@ module.exports = new Settings 'vim-mode-plus',
     description: "Don't move cursor after yank"
   stayOnDelete:
     default: false
-    description: "Don't move cursor after yank"
+    description: "Don't move cursor after delete"
   stayOnOccurrence:
     default: true
     description: "Don't move cursor when operator works on occurrences( when `true`, override operator specific `stayOn` options )"
