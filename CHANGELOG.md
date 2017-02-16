@@ -1,3 +1,9 @@
+# 0.82.3:
+- Fix: `move-to-previous-subword` stops boundary of white-space unnecessarily( upstream issue auto-fixed)
+  - Spec to accommodating wrong behavior removed.
+- Fix: `B` moves to beginning of file when invoked from begging of line.
+  - Introduced by upstream change in Atom v1.14.0( or v1.14.1?).
+
 # 0.82.2:
 - Fix: No longer throw exception when `showHoverSearchCounter` is enabled and editor was closed immediately after hover counter was shown.
 
@@ -28,7 +34,7 @@
     ```
 
 - Fix: No longer throw exception when specified register has no value(=text) on `p`, `P` operation. #656.
-- Fix: Now selection properties cleared on each normal-mode operation finish to avoid hover counter is shown at incorrect position.
+- Fix: Now `selection` properties cleared on each normal-mode operation finish to avoid hover counter is shown at incorrect position.
 - Developer: Spec helper `ensureMode` no longer mutate passed array itself.
 - Developer: `reload-packages` command now reload depending packages in correct order.
 
