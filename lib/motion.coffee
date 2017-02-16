@@ -481,7 +481,7 @@ class MoveToNextWholeWord extends MoveToNextWord
 
 class MoveToPreviousWholeWord extends MoveToPreviousWord
   @extend()
-  wordRegex: /^$|\S+/
+  wordRegex: /^$|\S+/g
 
 class MoveToEndOfWholeWord extends MoveToEndOfWord
   @extend()
