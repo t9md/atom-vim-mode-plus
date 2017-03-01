@@ -633,29 +633,29 @@ describe "Occurrence", ->
           beforeEach ->
             set
               textC: """
-              occurrence
-              occurrenceMarker
-              occurrences
-              occurrence
+              camel
+              camelCase
+              camels
+              camel
               """
           it "can restore occurrence-marker added by `g o` in normal-mode", ->
             set cursor: [0, 0]
-            ensure "g o", occurrenceText: ['occurrence', 'occurrence']
+            ensure "g o", occurrenceText: ['camel', 'camel']
             ensure 'escape', occurrenceCount: 0
-            ensure "g .", occurrenceText: ['occurrence', 'occurrence']
+            ensure "g .", occurrenceText: ['camel', 'camel']
 
           it "can restore occurrence-marker added by `g o` in visual-mode", ->
             set cursor: [0, 0]
-            ensure "v i w", selectedText: "occurrence"
-            ensure "g o", occurrenceText: ['occurrence', 'occurrence', 'occurrence', 'occurrence']
+            ensure "v i w", selectedText: "camel"
+            ensure "g o", occurrenceText: ['camel', 'camel', 'camel', 'camel']
             ensure 'escape', occurrenceCount: 0
-            ensure "g .", occurrenceText: ['occurrence', 'occurrence', 'occurrence', 'occurrence']
+            ensure "g .", occurrenceText: ['camel', 'camel', 'camel', 'camel']
 
           it "can restore occurrence-marker added by `g O` in normal-mode", ->
             set cursor: [0, 0]
-            ensure "g O", occurrenceText: ['occurrence', 'occurrence', 'occurrence']
+            ensure "g O", occurrenceText: ['camel', 'camel', 'camel']
             ensure 'escape', occurrenceCount: 0
-            ensure "g .", occurrenceText: ['occurrence', 'occurrence', 'occurrence']
+            ensure "g .", occurrenceText: ['camel', 'camel', 'camel']
 
         describe "css class has-occurrence", ->
           describe "manually toggle by toggle-preset-occurrence command", ->
