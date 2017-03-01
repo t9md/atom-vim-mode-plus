@@ -1,4 +1,3 @@
-LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {Point, Range, Disposable} = require 'atom'
 
