@@ -639,17 +639,17 @@ describe "Occurrence", ->
               occurrence
               """
           it "can restore occurrence-marker added by `g o` in normal-mode", ->
-           set cursor: [0, 0]
-           ensure "g o", occurrenceText: ['occurrence', 'occurrence']
-           ensure 'escape', occurrenceCount: 0
-           ensure "g .", occurrenceText: ['occurrence', 'occurrence']
+            set cursor: [0, 0]
+            ensure "g o", occurrenceText: ['occurrence', 'occurrence']
+            ensure 'escape', occurrenceCount: 0
+            ensure "g .", occurrenceText: ['occurrence', 'occurrence']
 
           it "can restore occurrence-marker added by `g o` in visual-mode", ->
-           set cursor: [0, 0]
-           ensure "v i w", selectedText: "occurrence"
-           ensure "g o", occurrenceText: ['occurrence', 'occurrence', 'occurrence', 'occurrence']
-           ensure 'escape', occurrenceCount: 0
-           ensure "g .", occurrenceText: ['occurrence', 'occurrence', 'occurrence', 'occurrence']
+            set cursor: [0, 0]
+            ensure "v i w", selectedText: "occurrence"
+            ensure "g o", occurrenceText: ['occurrence', 'occurrence', 'occurrence', 'occurrence']
+            ensure 'escape', occurrenceCount: 0
+            ensure "g .", occurrenceText: ['occurrence', 'occurrence', 'occurrence', 'occurrence']
 
           it "can restore occurrence-marker added by `g O` in normal-mode", ->
             set cursor: [0, 0]
