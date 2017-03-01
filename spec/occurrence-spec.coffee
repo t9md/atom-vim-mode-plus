@@ -655,9 +655,7 @@ describe "Occurrence", ->
             set cursor: [0, 0]
             ensure "g O", occurrenceText: ['occurrence', 'occurrence', 'occurrence']
             ensure 'escape', occurrenceCount: 0
-
-            # ensure "g .", occurrenceText: ['occurrence', 'occurrence', 'occurrence'] # expectation
-            ensure "g .", occurrenceText: ['occurrence', 'occurrence', 'occurrence', 'occurrence'] # actual
+            ensure "g .", occurrenceText: ['occurrence', 'occurrence', 'occurrence']
 
         describe "css class has-occurrence", ->
           describe "manually toggle by toggle-preset-occurrence command", ->
