@@ -135,10 +135,6 @@ class BlockwiseSelection
     @clearSelections(except: head)
     head.cursor.setBufferPosition(point)
 
-  removeEmptySelections: ->
-    for selection in @selections.slice() when selection.isEmpty()
-      @removeSelection(selection)
-
   removeSelection: (selection) ->
     _.remove(@selections, selection)
     selection.destroy()
