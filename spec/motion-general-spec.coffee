@@ -1632,8 +1632,9 @@ describe "Motion general", ->
       it "M jump&back", -> ensureJumpAndBack "M", cursor: [2, 0]
       it "* jump&back", -> ensureJumpAndBack "*", cursor: [5, 3]
 
-      # [BUG] Strange bug, Using subject "# jump & back" skips spec.
-      # coffeescript bug? Atom v1.11.2
+      # [BUG] Strange bug of jasmine or atom's jasmine enhancment?
+      # Using subject "# jump & back" skips spec.
+      # Note at Atom v1.11.2
       it "Sharp(#) jump&back", -> ensureJumpAndBack('#', cursor: [0, 3])
 
       it "/ jump&back", -> ensureJumpAndBack ["/", search: 'oo'], cursor: [5, 3]
