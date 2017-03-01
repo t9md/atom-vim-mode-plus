@@ -77,8 +77,9 @@ class OccurrenceManager
     occurrenceType ?= 'base'
     @emitter.emit('did-change-patterns', {pattern, occurrenceType})
 
-  saveLastPattern: ->
+  saveLastPattern: (occurrenceType=null) ->
     @vimState.globalState.set("lastOccurrencePattern", @buildPattern())
+    @vimState.globalState.set("lastOccurrenceType", occurrenceType)
 
   # Return regex representing final pattern.
   # Used to cache final pattern to each instance of operator so that we can

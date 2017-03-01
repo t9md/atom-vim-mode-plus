@@ -1,7 +1,6 @@
 _ = require 'underscore-plus'
 {Point, Range, Disposable} = require 'atom'
 
-{inspect} = require 'util'
 {
   haveSomeNonEmptySelection
   getValidVimBufferRow
@@ -417,7 +416,7 @@ class TogglePresetOccurrence extends Operator
         pattern = @getPatternForOccurrenceType(@occurrenceType)
 
       @occurrenceManager.addPattern(pattern, {@occurrenceType})
-      @occurrenceManager.saveLastPattern()
+      @occurrenceManager.saveLastPattern(@occurrenceType)
 
       @activateMode('normal') unless isNarrowed
 
@@ -431,8 +430,8 @@ class AddPresetOccurrenceFromLastOccurrencePattern extends TogglePresetOccurrenc
   execute: ->
     @occurrenceManager.resetPatterns()
     if pattern = @vimState.globalState.get('lastOccurrencePattern')
-      # BUG: NOT correctly restored for subword marker
-      @occurrenceManager.addPattern(pattern)
+      occurrenceType = @vimState.globalState.get("lastOccurrenceType")
+      @occurrenceManager.addPattern(pattern, {occurrenceType})
       @activateMode('normal')
 
 # Delete
