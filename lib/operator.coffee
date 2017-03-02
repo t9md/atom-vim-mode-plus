@@ -1,6 +1,4 @@
 _ = require 'underscore-plus'
-{Point, Range, Disposable} = require 'atom'
-
 {
   haveSomeNonEmptySelection
   getValidVimBufferRow
