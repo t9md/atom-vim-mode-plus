@@ -259,10 +259,7 @@ class Operator extends Base
   # Return true unless all selection is empty.
   selectTarget: ->
     return @targetSelected if @targetSelected?
-    @mutationManager.init(
-      isSelect: @instanceof('Select')
-      useMarker: @needStay() and @stayByMarker
-    )
+    @mutationManager.init(useMarker: @needStay() and @stayByMarker)
 
     # Currently only motion have forceWise methods
     @target.forceWise?(@wise) if @wise?
@@ -307,7 +304,6 @@ class Operator extends Base
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
-
     options =
       stay: @needStayOnRestore()
       occurrenceSelected: @occurrenceSelected
