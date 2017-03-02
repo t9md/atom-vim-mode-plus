@@ -21,9 +21,6 @@ class BlockwiseSelection
   getSelections: ->
     @selections
 
-  isBlockwise: ->
-    true
-
   isEmpty: ->
     @getSelections().every(isEmpty)
 
