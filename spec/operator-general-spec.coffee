@@ -1022,45 +1022,42 @@ describe "Operator general", ->
         ensure ['r', input: 'x' ], cursor: [[0, 0], [1, 0]]
 
     describe "when in visual-block mode", ->
-      textOriginal = """
-        0:2345
-        1: o11o
-        2: o22o
-        3: o33o
-        4: o44o\n
-        """
-      textReplaced = """
-        0:2345
-        1: oxxo
-        2: oxxo
-        3: oxxo
-        4: oxxo\n
-        """
-      textRepeated = """
-        0:2345
-        xx oxxo
-        xx oxxo
-        xx oxxo
-        xx oxxo\n
-        """
-
       beforeEach ->
-        set text: textOriginal, cursor: [1, 4]
+        set
+          cursor: [1, 4]
+          text: """
+            0:2345
+            1: o11o
+            2: o22o
+            3: o33o
+            4: o44o\n
+            """
         ensure 'ctrl-v l 3 j',
           mode: ['visual', 'blockwise']
           selectedTextOrdered: ['11', '22', '33', '44'],
 
-      # [FIXME]
-      xit "replaces each selection and put cursor on start of top selection", ->
+      it "replaces each selection and put cursor on start of top selection", ->
         ensure ['r', input: 'x'],
           mode: 'normal'
-          text: textReplaced
           cursor: [1, 4]
+          text: """
+            0:2345
+            1: oxxo
+            2: oxxo
+            3: oxxo
+            4: oxxo\n
+            """
         set cursor: [1, 0]
         ensure '.',
           mode: 'normal'
-          text: textRepeated
           cursor: [1, 0]
+          text: """
+            0:2345
+            xx oxxo
+            xx oxxo
+            xx oxxo
+            xx oxxo\n
+            """
 
   describe 'the m keybinding', ->
     beforeEach ->
