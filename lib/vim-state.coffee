@@ -78,13 +78,16 @@ class VimState
     @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
 
     @editorElement.classList.add(packageScope)
-    if settings.get('startInInsertMode') or matchScopes(@editorElement, settings.get('startInInsertModeScopes'))
+    if @getConfig('startInInsertMode') or matchScopes(@editorElement, @getConfig('startInInsertModeScopes'))
       @activate('insert')
     else
       @activate('normal')
 
     @subscriptions.add @editor.onDidDestroy(@destroy.bind(this))
     @constructor.vimStatesByEditor.set(@editor, this)
+
+  getConfig: (param) ->
+    settings.get(param)
 
   # BlockwiseSelections
   # -------------------------
@@ -287,12 +290,12 @@ class VimState
       if @editor.hasMultipleCursors()
         @clearSelections()
 
-      else if @hasPersistentSelections() and settings.get('clearPersistentSelectionOnResetNormalMode')
+      else if @hasPersistentSelections() and @getConfig('clearPersistentSelectionOnResetNormalMode')
         @clearPersistentSelections()
       else if @occurrenceManager.hasPatterns()
         @occurrenceManager.resetPatterns()
 
-      if settings.get('clearHighlightSearchOnResetNormalMode')
+      if @getConfig('clearHighlightSearchOnResetNormalMode')
         @globalState.set('highlightSearchPattern', null)
     else
       @clearSelections()

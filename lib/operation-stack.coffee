@@ -1,7 +1,6 @@
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
 {moveCursorLeft} = require './utils'
-settings = require './settings'
 {Select, MoveToRelativeLine} = {}
 {OperationAbortedError} = require './errors'
 swrap = require './selection-wrapper'
@@ -186,7 +185,7 @@ class OperationStack
     @vimState.clearBlockwiseSelections()
 
     unless @editor.getLastSelection().isEmpty()
-      if settings.get('devThrowErrorOnNonEmptySelectionInNormalMode')
+      if @vimState.getConfig('devThrowErrorOnNonEmptySelectionInNormalMode')
         throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
       else
         @vimState.clearSelections()

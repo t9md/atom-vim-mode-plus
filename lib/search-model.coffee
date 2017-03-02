@@ -5,7 +5,6 @@
   smartScrollToBufferPosition
   getIndex
 } = require './utils'
-settings = require './settings'
 
 hoverCounterTimeoutID = null
 
@@ -28,12 +27,12 @@ class SearchModel
     @onDidChangeCurrentMatch =>
       @vimState.hoverSearchCounter.reset()
       unless @currentMatch?
-        if settings.get('flashScreenOnSearchHasNoMatch')
+        if @vimState.getConfig('flashScreenOnSearchHasNoMatch')
           @vimState.flash(getVisibleBufferRange(@editor), type: 'screen')
           atom.beep()
         return
 
-      if settings.get('showHoverSearchCounter')
+      if @vimState.getConfig('showHoverSearchCounter')
         text = String(@currentMatchIndex + 1) + '/' + @matches.length
         point = @currentMatch.start
         classList = @classNamesForRange(@currentMatch)
@@ -42,13 +41,13 @@ class SearchModel
         @vimState.hoverSearchCounter.set(text, point, {classList})
 
         unless @options.incrementalSearch
-          timeout = settings.get('showHoverSearchCounterDuration')
+          timeout = @vimState.getConfig('showHoverSearchCounterDuration')
           hoverCounterTimeoutID = setTimeout(@resetHover.bind(this), timeout)
 
       @editor.unfoldBufferRow(@currentMatch.start.row)
       smartScrollToBufferPosition(@editor, @currentMatch.start)
 
-      if settings.get('flashOnSearch')
+      if @vimState.getConfig('flashOnSearch')
         @vimState.flash(@currentMatch, type: 'search')
 
   resetHover: ->

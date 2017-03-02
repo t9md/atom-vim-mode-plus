@@ -34,7 +34,6 @@ _ = require 'underscore-plus'
 } = require './utils'
 
 swrap = require './selection-wrapper'
-settings = require './settings'
 Base = require './base'
 
 class Motion extends Base
@@ -145,7 +144,7 @@ class Motion extends Base
     swrap(selection).translateSelectionEndAndClip('forward')
 
   setCursorBuffeRow: (cursor, row, options) ->
-    if @isVerticalMotion() and settings.get('moveToFirstCharacterOnVerticalMotion')
+    if @isVerticalMotion() and @getConfig('moveToFirstCharacterOnVerticalMotion')
       cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row), options)
     else
       setBufferRow(cursor, row, options)
@@ -215,7 +214,7 @@ class CurrentSelection extends Motion
 class MoveLeft extends Motion
   @extend()
   moveCursor: (cursor) ->
-    allowWrap = settings.get('wrapLeftRightMotion')
+    allowWrap = @getConfig('wrapLeftRightMotion')
     @moveCursorCountTimes cursor, ->
       moveCursorLeft(cursor, {allowWrap})
 
@@ -225,7 +224,7 @@ class MoveRight extends Motion
     if @isAsTargetExceptSelect() and not cursor.isAtEndOfLine()
       false
     else
-      settings.get('wrapLeftRightMotion')
+      @getConfig('wrapLeftRightMotion')
 
   moveCursor: (cursor) ->
     @moveCursorCountTimes cursor, =>
@@ -812,15 +811,15 @@ class Scroll extends Motion
 
   isSmoothScrollEnabled: ->
     if Math.abs(@amountOfPage) is 1
-      settings.get('smoothScrollOnFullScrollMotion')
+      @getConfig('smoothScrollOnFullScrollMotion')
     else
-      settings.get('smoothScrollOnHalfScrollMotion')
+      @getConfig('smoothScrollOnHalfScrollMotion')
 
   getSmoothScrollDuation: ->
     if Math.abs(@amountOfPage) is 1
-      settings.get('smoothScrollOnFullScrollMotionDuration')
+      @getConfig('smoothScrollOnFullScrollMotionDuration')
     else
-      settings.get('smoothScrollOnHalfScrollMotionDuration')
+      @getConfig('smoothScrollOnHalfScrollMotionDuration')
 
   getPixelRectTopForSceenRow: (row) ->
     point = new Point(row, 0)
@@ -1122,7 +1121,7 @@ class MoveToNextOccurrence extends Motion
         @editor.unfoldBufferRow(point.row)
         smartScrollToBufferPosition(@editor, point)
 
-      if settings.get('flashOnMoveToOccurrence')
+      if @getConfig('flashOnMoveToOccurrence')
         @vimState.flash(range, type: 'search')
 
   getIndex: (fromPoint) ->

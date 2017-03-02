@@ -1,6 +1,5 @@
 {Range, Point} = require 'atom'
 _ = require 'underscore-plus'
-settings = require './settings'
 
 # [TODO] Need overhaul
 #  - [ ] must have getRange(selection) ->
@@ -73,7 +72,7 @@ class TextObject extends Base
 
   needToKeepColumn: ->
     @wise is 'linewise' and
-      settings.get('keepColumnOnSelectTextObject') and
+      @getConfig('keepColumnOnSelectTextObject') and
       @getOperator().instanceof('Select')
 
   execute: ->

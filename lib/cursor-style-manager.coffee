@@ -1,6 +1,5 @@
 {Point, Disposable, CompositeDisposable} = require 'atom'
 
-settings = require './settings'
 swrap = require './selection-wrapper'
 isSpecMode = atom.inSpecMode()
 lineHeight = null
@@ -67,7 +66,7 @@ class CursorStyleManager
     {mode, submode} = @vimState
     @styleDisporser?.dispose()
     @styleDisporser = new CompositeDisposable
-    return unless mode is 'visual' and settings.get('showCursorInVisualMode')
+    return unless mode is 'visual' and @vimState.getConfig('showCursorInVisualMode')
 
     cursors = cursorsToShow = @editor.getCursors()
     if submode is 'blockwise'

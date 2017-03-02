@@ -9,7 +9,6 @@ _ = require 'underscore-plus'
   splitTextByNewLine
 } = require './utils'
 swrap = require './selection-wrapper'
-settings = require './settings'
 Base = require './base'
 Operator = Base.getClass('Operator')
 
@@ -434,7 +433,7 @@ class SurroundBase extends TransformString
       open += "\n"
       close += "\n"
 
-    if char in settings.get('charactersToAddSpaceOnSurround') and isSingleLineText(text)
+    if char in @getConfig('charactersToAddSpaceOnSurround') and isSingleLineText(text)
       text = ' ' + text + ' '
 
     open + text + close

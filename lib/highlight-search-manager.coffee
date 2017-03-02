@@ -1,6 +1,5 @@
 {CompositeDisposable} = require 'atom'
 {scanEditor, matchScopes} = require './utils'
-settings = require './settings'
 
 decorationOptions =
   type: 'highlight'
@@ -45,10 +44,10 @@ class HighlightSearchManager
   refresh: ->
     @clearMarkers()
 
-    return unless settings.get('highlightSearch')
+    return unless @vimState.getConfig('highlightSearch')
     return unless @vimState.isVisible()
     return unless pattern = @globalState.get('highlightSearchPattern')
-    return if matchScopes(@editorElement, settings.get('highlightSearchExcludeScopes'))
+    return if matchScopes(@editorElement, @vimState.getConfig('highlightSearchExcludeScopes'))
 
     for range in scanEditor(@editor, pattern)
       @markerLayer.markBufferRange(range, invalidate: 'inside')

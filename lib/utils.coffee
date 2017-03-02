@@ -766,13 +766,13 @@ isEscapedCharRange = (editor, range) ->
   chars = getLeftCharacterForBufferPosition(editor, range.start, 2)
   chars.endsWith('\\') and not chars.endsWith('\\\\')
 
-setTextAtBufferPosition = (editor, point, text) ->
+insertTextAtBufferPosition = (editor, point, text) ->
   editor.setTextInBufferRange([point, point], text)
 
 ensureEndsWithNewLineForBufferRow = (editor, row) ->
   unless isEndsWithNewLineForBufferRow(editor, row)
     eol = getEndOfLineForBufferRow(editor, row)
-    setTextAtBufferPosition(editor, eol, "\n")
+    insertTextAtBufferPosition(editor, eol, "\n")
 
 forEachPaneAxis = (fn, base) ->
   base ?= atom.workspace.getActivePane().getContainer().getRoot()
@@ -969,7 +969,7 @@ module.exports = {
   isEmpty, isNotEmpty
   isSingleLineRange, isNotSingleLineRange
 
-  setTextAtBufferPosition
+  insertTextAtBufferPosition
   ensureEndsWithNewLineForBufferRow
   isLeadingWhiteSpaceRange
   isNotLeadingWhiteSpaceRange
