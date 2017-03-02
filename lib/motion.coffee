@@ -96,7 +96,7 @@ class Motion extends Base
       @vimState.mark.set("'", cursorPosition)
 
   execute: ->
-    if @hasOperator()
+    if @operator?
       @select()
     else
       @editor.moveCursors (cursor) =>
@@ -114,7 +114,7 @@ class Motion extends Base
       # AFTER cursor move and BEFORE return to submode-wise state
       swrap.saveProperties(@editor)
 
-    if @hasOperator()
+    if @operator?
       if @isMode('visual')
         if @isMode('visual', 'linewise') and @editor.getLastSelection().isReversed()
           @vimState.mutationManager.setCheckpoint('did-move')
@@ -222,7 +222,7 @@ class MoveLeft extends Motion
 class MoveRight extends Motion
   @extend()
   canWrapToNextLine: (cursor) ->
-    if @isAsOperatorTarget() and not cursor.isAtEndOfLine()
+    if @isAsTargetExceptSelect() and not cursor.isAtEndOfLine()
       false
     else
       settings.get('wrapLeftRightMotion')
@@ -401,15 +401,16 @@ class MoveToNextWord extends Motion
   moveCursor: (cursor) ->
     return if cursorIsAtVimEndOfFile(cursor)
     wasOnWhiteSpace = pointIsOnWhiteSpace(@editor, cursor.getBufferPosition())
-    isAsOperatorTarget = @isAsOperatorTarget()
+
+    isAsTargetExceptSelect = @isAsTargetExceptSelect()
     @moveCursorCountTimes cursor, ({isFinal}) =>
       cursorPosition = cursor.getBufferPosition()
-      if isEmptyRow(@editor, cursorPosition.row) and isAsOperatorTarget
+      if isEmptyRow(@editor, cursorPosition.row) and isAsTargetExceptSelect
         point = cursorPosition.traverse([1, 0])
       else
         pattern = @wordRegex ? cursor.wordRegExp()
         point = @getPoint(pattern, cursorPosition)
-        if isFinal and isAsOperatorTarget
+        if isFinal and isAsTargetExceptSelect
           if @getOperator().is('Change') and (not wasOnWhiteSpace)
             point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
           else
@@ -764,7 +765,7 @@ class MoveToTopOfScreen extends Motion
     @setCursorBuffeRow(cursor, bufferRow)
 
   getScrolloff: ->
-    if @isAsOperatorTarget()
+    if @isAsTargetExceptSelect()
       0
     else
       @scrolloff

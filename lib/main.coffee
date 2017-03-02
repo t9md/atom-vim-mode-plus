@@ -95,8 +95,6 @@ module.exports =
 
   registerCommands: ->
     @subscribe atom.commands.add 'atom-text-editor:not([mini])',
-      # One time clearing highlightSearch. equivalent to `nohlsearch` in pure Vim.
-      # Clear all editor's highlight so that we won't see remaining highlight on tab changed.
       'vim-mode-plus:clear-highlight-search': -> globalState.set('highlightSearchPattern', null)
       'vim-mode-plus:toggle-highlight-search': -> settings.toggle('highlightSearch')
       'vim-mode-plus:clear-persistent-selection': => @clearPersistentSelectionForEditors()
@@ -153,7 +151,7 @@ module.exports =
     setFlexScale(1)
 
   registerVimStateCommands: ->
-    # all commands here is executed with context where 'this' binded to 'vimState'
+    # all commands here is executed with context where 'this' bound to 'vimState'
     commands =
       'activate-normal-mode': -> @activate('normal')
       'activate-linewise-visual-mode': -> @activate('visual', 'linewise')

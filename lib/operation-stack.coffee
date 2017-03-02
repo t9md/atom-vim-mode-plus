@@ -78,7 +78,7 @@ class OperationStack
       if operation.isTextObject() and @mode isnt 'operator-pending' or operation.isMotion() and @mode is 'visual'
         operation = new Select(@vimState).setTarget(operation)
 
-      if @isEmpty() or (@peekTop().isOperator() and operation.isTarget())
+      if @isEmpty() or (@peekTop().isOperator() and operation.canBecomeTarget())
         @stack.push(operation)
         @process()
       else

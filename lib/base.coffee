@@ -66,7 +66,7 @@ class Base
     {@editor, @editorElement, @globalState} = @vimState
     _.extend(this, properties) if properties?
 
-  # Template
+  # To override
   initialize: ->
 
   # Operation processor execute only when isComplete() return true.
@@ -101,11 +101,10 @@ class Base
 
   # Intended to be used by TextObject or Motion
   operator: null
-  hasOperator: -> @operator?
   getOperator: -> @operator
   setOperator: (@operator) -> @operator
-  isAsOperatorTarget: ->
-    @hasOperator() and not @getOperator().instanceof('Select')
+  isAsTargetExceptSelect: ->
+    @operator? and not @operator.instanceof('Select')
 
   abort: ->
     throw new OperationAbortedError('aborted')
@@ -227,7 +226,7 @@ class Base
   isTextObject: ->
     @instanceof('TextObject')
 
-  isTarget: ->
+  canBecomeTarget: ->
     @isMotion() or @isTextObject()
 
   getName: ->

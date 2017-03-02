@@ -81,7 +81,7 @@ class TextObject extends Base
     # Called from Operator::selectTarget()
     #  - `v i p`, is `Select` operator with @target = `InnerParagraph`.
     #  - `d i p`, is `Delete` operator with @target = `InnerParagraph`.
-    if @hasOperator()
+    if @operator?
       @select()
     else
       throw new Error('in TextObject: Must not happen')
