@@ -66,8 +66,7 @@ class SearchModel
     @decoationByRange = null
 
   clearMarkers: ->
-    for marker in @markerLayer.getMarkers()
-      marker.destroy()
+    @markerLayer.clear()
     @decoationByRange = {}
 
   classNamesForRange: (range) ->

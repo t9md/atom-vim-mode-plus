@@ -40,7 +40,7 @@ class HighlightSearchManager
     @markerLayer.getMarkers()
 
   clearMarkers: ->
-    marker.destroy() for marker in @markerLayer.getMarkers()
+    @markerLayer.clear()
 
   refresh: ->
     @clearMarkers()

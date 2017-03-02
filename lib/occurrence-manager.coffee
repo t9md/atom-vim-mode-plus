@@ -92,7 +92,8 @@ class OccurrenceManager
   # Markers
   # -------------------------
   clearMarkers: ->
-    @destroyMarkers(@getMarkers())
+    @markerLayer.clear()
+    @updateEditorElement()
 
   destroyMarkers: (markers) ->
     marker.destroy() for marker in markers

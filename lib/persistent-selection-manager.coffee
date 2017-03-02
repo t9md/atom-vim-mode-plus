@@ -53,7 +53,7 @@ class PersistentSelectionManager
     @markerLayer.getMarkerCount()
 
   clearMarkers: ->
-    marker.destroy() for marker in @markerLayer.getMarkers()
+    @markerLayer.clear()
 
   getMarkerBufferRanges: ->
     @markerLayer.getMarkers().map (marker) ->
