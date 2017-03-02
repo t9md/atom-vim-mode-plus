@@ -121,10 +121,8 @@ class OccurrenceManager
     # So I need extra check to filter out unwanted marker.
     # But basically I should prefer findMarker since It's fast than iterating
     # whole markers manually.
-    ranges = ranges.map (range) -> shrinkRangeEndToBeforeNewLine(range)
-
     results = []
-    for range in ranges
+    for range in ranges.map(shrinkRangeEndToBeforeNewLine)
       markers = @markerLayer.findMarkers(intersectsBufferRange: range).filter (marker) ->
         range.intersectsWith(marker.getBufferRange(), exclusive)
       results.push(markers...)

@@ -33,12 +33,9 @@ class MutationManager
     @reset()
 
   reset: ->
-    @clearMarkers()
+    @markerLayer.clear()
     @mutationsBySelection.clear()
     @bufferRangesForCustomCheckpoint = []
-
-  clearMarkers: ->
-    @markerLayer.clear()
 
   getInitialPointForSelection: (selection, options) ->
     @getMutationForSelection(selection)?.getInitialPoint(options)

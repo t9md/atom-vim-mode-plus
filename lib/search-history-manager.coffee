@@ -17,7 +17,10 @@ class SearchHistoryManager
 
   save: (entry) ->
     return if _.isEmpty(entry)
-    entries = _.uniq([entry].concat(@getEntries()))
+
+    entries = @globalState.get('searchHistory').slice()
+    entries.unshift(entry)
+    entries = _.uniq(entries)
     if @getSize() > settings.get('historySize')
       entries.splice(settings.get('historySize'))
     @globalState.set('searchHistory', entries)
@@ -29,10 +32,7 @@ class SearchHistoryManager
     @globalState.reset('searchHistory')
 
   getSize: ->
-    @getEntries().length
-
-  getEntries: ->
-    @globalState.get('searchHistory')
+    @globalState.get('searchHistory').length
 
   destroy: ->
     @idx = null
