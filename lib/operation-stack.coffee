@@ -126,7 +126,7 @@ class OperationStack
     @processing = true
     if @stack.length is 2
       # [FIXME ideally]
-      # If target is not complete, we postpone compsing target with operator to keep situation simple.
+      # If target is not complete, we postpone composing target with operator to keep situation simple.
       # So that we can assume when target is set to operator it's complete.
       # e.g. `y s t a'(surround for range from here to till a)
       return unless @peekTop().isComplete()
@@ -186,7 +186,7 @@ class OperationStack
     @vimState.clearBlockwiseSelections()
 
     unless @editor.getLastSelection().isEmpty()
-      if settings.get('throwErrorOnNonEmptySelectionInNormalMode')
+      if settings.get('devThrowErrorOnNonEmptySelectionInNormalMode')
         throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
       else
         @vimState.clearSelections()
