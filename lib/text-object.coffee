@@ -92,9 +92,9 @@ class TextObject extends Base
 
       for selection in @editor.getSelections()
         selectResults.push(@selectTextObject(selection))
-        unless @isSuportCount()
-          @stopSelection() # FIXME: quick-fix for #560
 
+      unless @isSuportCount()
+        stop() # FIXME: quick-fix for #560
 
     if @needToKeepColumn()
       for selection in @editor.getSelections()

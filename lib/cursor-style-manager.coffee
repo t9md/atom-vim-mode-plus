@@ -28,7 +28,7 @@ getOffset = (submode, cursor) ->
       bufferPoint = swrap(selection).getBufferPositionFor('head', fromProperty: true)
       editor = cursor.editor
 
-      # FIXME: This adjustment should not necessary if selection property is always believable.
+      # FIXME: This adjustment should not be necessary if selection property is always believable.
       if selection.isReversed()
         bufferPoint.row = selection.getBufferRange().start.row
 
