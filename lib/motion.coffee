@@ -27,7 +27,6 @@ _ = require 'underscore-plus'
   limitNumber
   getIndex
   smartScrollToBufferPosition
-  getKeystrokeForEvent
   pointIsAtEndOfLineAtNonEmptyRow
   getEndOfLineForBufferRow
   findRangeInBufferRow

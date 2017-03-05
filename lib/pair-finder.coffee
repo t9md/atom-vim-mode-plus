@@ -2,7 +2,6 @@
 _ = require 'underscore-plus'
 {
   isEscapedCharRange
-  getEndOfLineForBufferRow
   collectRangeInBufferRow
   scanEditorInDirection
   getLineTextToBufferPosition

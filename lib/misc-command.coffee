@@ -7,12 +7,9 @@ _ = require 'underscore-plus'
   moveCursorRight
   isLinewiseRange
   setBufferRow
-  pointIsAtEndOfLine
   sortRanges
   findRangeContainsPoint
-  mergeIntersectingRanges
   isSingleLineRange
-  isLinewiseRange
   isLeadingWhiteSpaceRange
   humanizeBufferRange
 } = require './utils'
