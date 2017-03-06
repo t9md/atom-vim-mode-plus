@@ -69,9 +69,9 @@ class SelectionWrapper
 
   setReversedState: (reversed) ->
     return if @selection.isReversed() is reversed
-    {head, tail} = @getProperties()
+    {head, tail, wise} = @getProperties()
     if head? and tail?
-      @setProperties(head: tail, tail: head)
+      @setProperties(head: tail, tail: head, wise: wise)
 
     options = {autoscroll: true, reversed, preserveFolds: true}
     @setBufferRange(@getBufferRange(), options)

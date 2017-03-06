@@ -11,7 +11,6 @@ Delegato = require 'delegato'
 } = require './utils'
 swrap = require './selection-wrapper'
 Input = require './input'
-settings = require './settings'
 selectList = null
 getEditorState = null # set by Base.init()
 {OperationAbortedError} = require './errors'
@@ -56,6 +55,7 @@ vimStateMethods = [
   "getBlockwiseSelections"
   "getLastBlockwiseSelection"
   "addToClassList"
+  "getConfig"
 ]
 
 class Base

@@ -1,4 +1,3 @@
-settings = require './settings'
 {CompositeDisposable} = require 'atom'
 Input = require './input'
 
@@ -62,7 +61,7 @@ class RegisterManager
 
   get: (name, selection) ->
     name ?= @getName()
-    name = settings.get('defaultRegister') if name is '"'
+    name = @vimState.getConfig('defaultRegister') if name is '"'
 
     switch name
       when '*', '+' then text = @readClipboard(selection)
@@ -89,7 +88,7 @@ class RegisterManager
 
     name ?= @getName()
     return unless @isValidName(name)
-    name = settings.get('defaultRegister') if name is '"'
+    name = @vimState.getConfig('defaultRegister') if name is '"'
     value.type ?= @getCopyType(value.text)
 
     selection = value.selection
@@ -119,10 +118,10 @@ class RegisterManager
     register.text += value.text
 
   getName: ->
-    @name ? settings.get('defaultRegister')
+    @name ? @vimState.getConfig('defaultRegister')
 
   isDefaultName: ->
-    @getName() is settings.get('defaultRegister')
+    @getName() is @vimState.getConfig('defaultRegister')
 
   hasName: ->
     @name?

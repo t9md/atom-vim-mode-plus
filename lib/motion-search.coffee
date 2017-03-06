@@ -2,17 +2,7 @@ _ = require 'underscore-plus'
 
 {saveEditorState, getNonWordCharactersForCursor, searchByProjectFind} = require './utils'
 SearchModel = require './search-model'
-settings = require './settings'
 Motion = require('./base').getClass('Motion')
-
-getCaseSensitivity = (searchName) ->
-  # [TODO] deprecate old setting and auto-migrate to caseSensitivityForXXX
-  if settings.get("useSmartcaseFor#{searchName}")
-    'smartcase'
-  else if settings.get("ignoreCaseFor#{searchName}")
-    'insensitive'
-  else
-    'sensitive'
 
 class SearchBase extends Motion
   @extend(false)
@@ -29,7 +19,7 @@ class SearchBase extends Motion
     @backwards
 
   isIncrementalSearch: ->
-    @instanceof('Search') and not @isRepeated() and settings.get('incrementalSearch')
+    @instanceof('Search') and not @isRepeated() and @getConfig('incrementalSearch')
 
   initialize: ->
     super
@@ -43,14 +33,22 @@ class SearchBase extends Motion
     else
       count
 
+  getCaseSensitivity: ->
+    if @getConfig("useSmartcaseFor#{@configScope}")
+      'smartcase'
+    else if @getConfig("ignoreCaseFor#{@configScope}")
+      'insensitive'
+    else
+      'sensitive'
+
   isCaseSensitive: (term) ->
-    switch getCaseSensitivity(@configScope)
+    switch @getCaseSensitivity()
       when 'smartcase' then term.search('[A-Z]') isnt -1
       when 'insensitive' then false
       when 'sensitive' then true
 
   finish: ->
-    if @isIncrementalSearch() and settings.get('showHoverSearchCounter')
+    if @isIncrementalSearch() and @getConfig('showHoverSearchCounter')
       @vimState.hoverSearchCounter.reset()
     @relativeIndex = null
     @searchModel?.destroy()
@@ -130,7 +128,7 @@ class Search extends SearchBase
     switch commandEvent.name
       when 'visit'
         {direction} = commandEvent
-        if @isBackwards() and settings.get('incrementalSearchVisitDirection') is 'relative'
+        if @isBackwards() and @getConfig('incrementalSearchVisitDirection') is 'relative'
           direction = switch direction
             when 'next' then 'prev'
             when 'prev' then 'next'

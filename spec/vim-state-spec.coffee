@@ -394,10 +394,44 @@ describe "VimState", ->
       beforeEach ->
         cursorPosition = [0, 4]
         set
-          text: "line one\nline two\nline three\n"
+          text: """
+            line one
+            line two
+            line three\n
+            """
           cursor: cursorPosition
 
         ensure 'escape', mode: 'normal'
+
+      describe "restore characterwise from linewise", ->
+        beforeEach ->
+          ensure 'v', mode: ['visual', 'characterwise']
+          ensure '2 j V',
+            selectedText: """
+              line one
+              line two
+              line three\n
+              """
+            mode: ['visual', 'linewise']
+            selectionIsReversed: false
+          ensure 'o',
+            selectedText: """
+              line one
+              line two
+              line three\n
+              """
+            mode: ['visual', 'linewise']
+            selectionIsReversed: true
+
+        it "v after o", ->
+          ensure 'v',
+            selectedText: " one\nline two\nline "
+            mode: ['visual', 'characterwise']
+            selectionIsReversed: true
+        it "escape after o", ->
+          ensure 'escape',
+            cursor: [0, 4]
+            mode: 'normal'
 
       describe "activateVisualMode with same type puts the editor into normal mode", ->
         describe "characterwise: vv", ->

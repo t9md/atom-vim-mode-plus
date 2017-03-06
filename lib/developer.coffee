@@ -6,7 +6,7 @@ fs = require 'fs-plus'
 Base = require './base'
 {generateIntrospectionReport} = require './introspection'
 settings = require './settings'
-{debug, getParent, getAncestors, getKeyBindingForCommand} = require './utils'
+{debug, getAncestors, getKeyBindingForCommand} = require './utils'
 
 packageScope = 'vim-mode-plus'
 getEditorState = null

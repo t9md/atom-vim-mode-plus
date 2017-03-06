@@ -1,6 +1,9 @@
 {CompositeDisposable} = require 'atom'
 {scanEditor, matchScopes} = require './utils'
-settings = require './settings'
+
+decorationOptions =
+  type: 'highlight'
+  class: 'vim-mode-plus-highlight-search'
 
 # General purpose utility class to make Atom's marker management easier.
 module.exports =
@@ -10,16 +13,12 @@ class HighlightSearchManager
     @disposables = new CompositeDisposable
     @markerLayer = @editor.addMarkerLayer()
 
-    decorationOptions =
-      type: 'highlight'
-      class: 'vim-mode-plus-highlight-search'
-    @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, decorationOptions)
-
     @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
+    @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, decorationOptions)
 
     # Refresh highlight based on globalState.highlightSearchPattern changes.
     # -------------------------
-    @disposables = @globalState.onDidChange ({name, newValue}) =>
+    @disposables.add @globalState.onDidChange ({name, newValue}) =>
       if name is 'highlightSearchPattern'
         if newValue
           @refresh()
@@ -40,15 +39,15 @@ class HighlightSearchManager
     @markerLayer.getMarkers()
 
   clearMarkers: ->
-    marker.destroy() for marker in @markerLayer.getMarkers()
+    @markerLayer.clear()
 
   refresh: ->
     @clearMarkers()
 
-    return unless settings.get('highlightSearch')
+    return unless @vimState.getConfig('highlightSearch')
     return unless @vimState.isVisible()
     return unless pattern = @globalState.get('highlightSearchPattern')
-    return if matchScopes(@editorElement, settings.get('highlightSearchExcludeScopes'))
+    return if matchScopes(@editorElement, @vimState.getConfig('highlightSearchExcludeScopes'))
 
     for range in scanEditor(@editor, pattern)
       @markerLayer.markBufferRange(range, invalidate: 'inside')

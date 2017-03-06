@@ -7,7 +7,6 @@ _ = require 'underscore-plus'
   limitNumber
 } = require './utils'
 swrap = require './selection-wrapper'
-settings = require './settings'
 Operator = require('./base').getClass('Operator')
 
 # Insert entering operation
@@ -43,11 +42,11 @@ class ActivateInsertMode extends Operator
 
       # This cursor state is restored on undo.
       # So cursor state has to be updated before next groupChangesSinceCheckpoint()
-      if settings.get('clearMultipleCursorsOnEscapeInsertMode')
+      if @getConfig('clearMultipleCursorsOnEscapeInsertMode')
         @vimState.clearSelections()
 
       # grouping changes for undo checkpoint need to come last
-      if settings.get('groupChangesWhenLeavingInsertMode')
+      if @getConfig('groupChangesWhenLeavingInsertMode')
         @groupChangesSinceBufferCheckpoint('undo')
 
   # When each mutaion's extent is not intersecting, muitiple changes are recorded
@@ -102,7 +101,7 @@ class ActivateInsertMode extends Operator
           moveCursorLeft(selection.cursor)
         @mutationManager.setBufferRangesForCustomCheckpoint(mutatedRanges)
 
-      if settings.get('clearMultipleCursorsOnEscapeInsertMode')
+      if @getConfig('clearMultipleCursorsOnEscapeInsertMode')
         @vimState.clearSelections()
 
     else

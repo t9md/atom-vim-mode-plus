@@ -1,19 +1,15 @@
 {Range, Point} = require 'atom'
 Base = require './base'
 swrap = require './selection-wrapper'
-settings = require './settings'
 _ = require 'underscore-plus'
 
 {
   moveCursorRight
   isLinewiseRange
   setBufferRow
-  pointIsAtEndOfLine
   sortRanges
   findRangeContainsPoint
-  mergeIntersectingRanges
   isSingleLineRange
-  isLinewiseRange
   isLeadingWhiteSpaceRange
   humanizeBufferRange
 } = require './utils'
@@ -127,12 +123,12 @@ class Undo extends MiscCommand
     for selection in @editor.getSelections()
       selection.clear()
 
-    if settings.get('setCursorToStartOfChangeOnUndoRedo')
-      strategy = settings.get('setCursorToStartOfChangeOnUndoRedoStrategy')
+    if @getConfig('setCursorToStartOfChangeOnUndoRedo')
+      strategy = @getConfig('setCursorToStartOfChangeOnUndoRedoStrategy')
       @setCursorPosition({newRanges, oldRanges, strategy})
       @vimState.clearSelections()
 
-    if settings.get('flashOnUndoRedo')
+    if @getConfig('flashOnUndoRedo')
       @flashChanges({newRanges, oldRanges})
 
     @activateMode('normal')

@@ -1,7 +1,7 @@
 util = require 'util'
 _ = require 'underscore-plus'
 Base = require './base'
-{getParent, getAncestors, getKeyBindingForCommand} = require './utils'
+{getAncestors, getKeyBindingForCommand} = require './utils'
 
 packageName = 'vim-mode-plus'
 

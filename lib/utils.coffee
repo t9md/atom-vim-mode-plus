@@ -4,15 +4,12 @@ settings = require './settings'
 {Disposable, Range, Point} = require 'atom'
 _ = require 'underscore-plus'
 
-getParent = (obj) ->
-  obj.__super__?.constructor
-
 getAncestors = (obj) ->
   ancestors = []
   current = obj
   loop
     ancestors.push(current)
-    current = getParent(current)
+    current = current.__super__?.constructor
     break unless current
   ancestors
 
@@ -55,25 +52,6 @@ saveEditorState = (editor) ->
       editor.foldBufferRow(row)
     editorElement.setScrollTop(scrollTop)
 
-getKeystrokeForEvent = (event) ->
-  keyboardEvent = event.originalEvent.originalEvent ? event.originalEvent
-  atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
-
-keystrokeToCharCode =
-  backspace: 8
-  tab: 9
-  enter: 13
-  escape: 27
-  space: 32
-  delete: 127
-
-getCharacterForEvent = (event) ->
-  keystroke = getKeystrokeForEvent(event)
-  if charCode = keystrokeToCharCode[keystroke]
-    String.fromCharCode(charCode)
-  else
-    keystroke
-
 isLinewiseRange = ({start, end}) ->
   (start.row isnt end.row) and (start.column is end.column is 0)
 
@@ -84,13 +62,8 @@ isEndsWithNewLineForBufferRow = (editor, row) ->
 haveSomeNonEmptySelection = (editor) ->
   editor.getSelections().some(isNotEmpty)
 
-sortComparable = (collection) ->
+sortRanges = (collection) ->
   collection.sort (a, b) -> a.compare(b)
-
-sortRanges = sortComparable
-
-sortRangesByEndPosition = (ranges, fn) ->
-  ranges.sort((a, b) -> a.end.compare(b.end))
 
 # Return adjusted index fit whitin given list's length
 # return -1 if list is empty.
@@ -105,15 +78,6 @@ getIndex = (index, list) ->
     else
       length + index
 
-withVisibleBufferRange = (editor, fn) ->
-  if range = getVisibleBufferRange(editor)
-    fn(range)
-  else
-    disposable = editor.element.onDidAttach ->
-      disposable.dispose()
-      range = getVisibleBufferRange(editor)
-      fn(range)
-
 # NOTE: endRow become undefined if @editorElement is not yet attached.
 # e.g. Beging called immediately after open file.
 getVisibleBufferRange = (editor) ->
@@ -124,22 +88,7 @@ getVisibleBufferRange = (editor) ->
   new Range([startRow, 0], [endRow, Infinity])
 
 getVisibleEditors = ->
-  for pane in atom.workspace.getPanes() when editor = pane.getActiveEditor()
-    editor
-
-findIndexBy = (list, fn) ->
-  for item, i in list when fn(item)
-    return i
-  null
-
-mergeIntersectingRanges = (ranges) ->
-  result = []
-  for range, i in ranges
-    if index = findIndexBy(result, (r) -> r.intersectsWith(range))
-      result[index] = result[index].union(range)
-    else
-      result.push(range)
-  result
+  (editor for pane in atom.workspace.getPanes() when editor = pane.getActiveEditor())
 
 getEndOfLineForBufferRow = (editor, row) ->
   editor.bufferRangeForBufferRow(row).end
@@ -151,7 +100,8 @@ pointIsAtEndOfLine = (editor, point) ->
   getEndOfLineForBufferRow(editor, point.row).isEqual(point)
 
 pointIsOnWhiteSpace = (editor, point) ->
-  isAllWhiteSpaceText(getRightCharacterForBufferPosition(editor, point))
+  char = getRightCharacterForBufferPosition(editor, point)
+  not /\S/.test(char)
 
 pointIsAtEndOfLineAtNonEmptyRow = (editor, point) ->
   point = Point.fromObject(point)
@@ -239,16 +189,6 @@ getLastVisibleScreenRow = (editor) -> editor.element.getLastVisibleScreenRow()
 getFirstCharacterPositionForBufferRow = (editor, row) ->
   range = findRangeInBufferRow(editor, /\S/, row)
   range?.start ? new Point(row, 0)
-
-getFirstCharacterBufferPositionForScreenRow = (editor, screenRow) ->
-  start = editor.clipScreenPosition([screenRow, 0], skipSoftWrapIndentation: true)
-  end = [screenRow, Infinity]
-
-  point = null
-  scanRange = editor.bufferRangeForScreenRange([start, end])
-  editor.scanInBufferRange /\S/, scanRange, ({range}) ->
-    point = range.start
-  point ? scanRange.start
 
 trimRange = (editor, scanRange) ->
   pattern = /\S/
@@ -352,9 +292,6 @@ getLineTextToBufferPosition = (editor, {row, column}, {exclusive}={}) ->
 
 getIndentLevelForBufferRow = (editor, row) ->
   editor.indentLevelForLine(editor.lineTextForBufferRow(row))
-
-isAllWhiteSpaceText = (text) ->
-  not /\S/.test(text)
 
 getCodeFoldRowRanges = (editor) ->
   [0..editor.getLastBufferRow()]
@@ -535,9 +472,6 @@ buildWordPatternByCursor = (cursor, {wordRegex}) ->
   wordRegex ?= new RegExp("^[\t ]*$|[^\\s#{_.escapeRegExp(nonWordCharacters)}]+")
   {wordRegex, nonWordCharacters}
 
-getCurrentWordBufferRangeAndKind = (cursor, options={}) ->
-  getWordBufferRangeAndKindAtBufferPosition(cursor.editor, cursor.getBufferPosition(), options)
-
 getBeginningOfWordBufferPosition = (editor, point, {wordRegex}={}) ->
   scanRange = [[point.row, 0], point]
 
@@ -592,26 +526,6 @@ shrinkRangeEndToBeforeNewLine = (range) ->
   else
     range
 
-scanInRanges = (editor, pattern, scanRanges, {includeIntersects, exclusiveIntersects}={}) ->
-  if includeIntersects
-    originalScanRanges = scanRanges.slice()
-
-    # We need to scan each whole row to find intersects.
-    scanRanges = scanRanges.map(adjustRangeToRowRange)
-    isIntersects = ({range, scanRange}) ->
-      # exclusiveIntersects set true in visual-mode
-      scanRange.intersectsWith(range, exclusiveIntersects)
-
-  ranges = []
-  for scanRange, i in scanRanges
-    editor.scanInBufferRange pattern, scanRange, ({range}) ->
-      if includeIntersects
-        if isIntersects({range, scanRange: originalScanRanges[i]})
-          ranges.push(range)
-      else
-        ranges.push(range)
-  ranges
-
 scanEditor = (editor, pattern) ->
   ranges = []
   editor.scan pattern, ({range}) ->
@@ -635,15 +549,6 @@ findRangeInBufferRow = (editor, pattern, row, {direction}={}) ->
   scanRange = editor.bufferRangeForBufferRow(row)
   editor[scanFunctionName] pattern, scanRange, (event) -> range = event.range
   range
-
-isRangeContainsSomePoint = (range, points, {exclusive}={}) ->
-  exclusive ?= false
-  points.some (point) ->
-    range.containsPoint(point, exclusive)
-
-destroyNonLastSelection = (editor) ->
-  for selection in editor.getSelections() when not selection.isLastSelection()
-    selection.destroy()
 
 getLargestFoldRangeContainsBufferRow = (editor, row) ->
   markers = editor.displayLayer.foldsMarkerLayer.findMarkers(intersectsRow: row)
@@ -766,13 +671,13 @@ isEscapedCharRange = (editor, range) ->
   chars = getLeftCharacterForBufferPosition(editor, range.start, 2)
   chars.endsWith('\\') and not chars.endsWith('\\\\')
 
-setTextAtBufferPosition = (editor, point, text) ->
+insertTextAtBufferPosition = (editor, point, text) ->
   editor.setTextInBufferRange([point, point], text)
 
 ensureEndsWithNewLineForBufferRow = (editor, row) ->
   unless isEndsWithNewLineForBufferRow(editor, row)
     eol = getEndOfLineForBufferRow(editor, row)
-    setTextAtBufferPosition(editor, eol, "\n")
+    insertTextAtBufferPosition(editor, eol, "\n")
 
 forEachPaneAxis = (fn, base) ->
   base ?= atom.workspace.getActivePane().getContainer().getRoot()
@@ -876,25 +781,17 @@ scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
     fn(event)
 
 module.exports = {
-  getParent
   getAncestors
   getKeyBindingForCommand
   include
   debug
   saveEditorState
-  getKeystrokeForEvent
-  getCharacterForEvent
   isLinewiseRange
-  isEndsWithNewLineForBufferRow
   haveSomeNonEmptySelection
   sortRanges
-  sortRangesByEndPosition
   getIndex
   getVisibleBufferRange
-  withVisibleBufferRange
   getVisibleEditors
-  findIndexBy
-  mergeIntersectingRanges
   pointIsAtEndOfLine
   pointIsOnWhiteSpace
   pointIsAtEndOfLineAtNonEmptyRow
@@ -918,7 +815,6 @@ module.exports = {
   moveCursorToFirstCharacterAtRow
   getLineTextToBufferPosition
   getIndentLevelForBufferRow
-  isAllWhiteSpaceText
   getTextInScreenRange
   moveCursorToNextNonWhitespace
   isEmptyRow
@@ -928,36 +824,24 @@ module.exports = {
   getBufferRangeForRowRange
   trimRange
   getFirstCharacterPositionForBufferRow
-  getFirstCharacterBufferPositionForScreenRow
-  isFunctionScope
   isIncludeFunctionScopeForRow
-  getTokenizedLineForRow
-  getScopesForTokenizedLine
-  scanForScopeStart
   detectScopeStartPositionForScope
   getBufferRows
   registerElement
-  sortComparable
   smartScrollToBufferPosition
   matchScopes
   moveCursorDownBuffer
   moveCursorUpBuffer
   isSingleLineText
-  getCurrentWordBufferRangeAndKind
-  buildWordPatternByCursor
   getWordBufferRangeAtBufferPosition
   getWordBufferRangeAndKindAtBufferPosition
   getWordPatternAtBufferPosition
   getSubwordPatternAtBufferPosition
   getNonWordCharactersForCursor
-  adjustRangeToRowRange
   shrinkRangeEndToBeforeNewLine
-  scanInRanges
   scanEditor
   collectRangeInBufferRow
   findRangeInBufferRow
-  isRangeContainsSomePoint
-  destroyNonLastSelection
   getLargestFoldRangeContainsBufferRow
   translatePointAndClip
   getRangeByTranslatePointAndClip
@@ -969,7 +853,7 @@ module.exports = {
   isEmpty, isNotEmpty
   isSingleLineRange, isNotSingleLineRange
 
-  setTextAtBufferPosition
+  insertTextAtBufferPosition
   ensureEndsWithNewLineForBufferRow
   isLeadingWhiteSpaceRange
   isNotLeadingWhiteSpaceRange
@@ -983,7 +867,5 @@ module.exports = {
   splitTextByNewLine
   humanizeBufferRange
   expandRangeToWhiteSpaces
-  getRightCharacterForBufferPosition
-  getLeftCharacterForBufferPosition
   scanEditorInDirection
 }

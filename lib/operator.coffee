@@ -1,20 +1,16 @@
 _ = require 'underscore-plus'
-{Point, Range, Disposable} = require 'atom'
-
 {
   haveSomeNonEmptySelection
   getValidVimBufferRow
   isEmptyRow
   getWordPatternAtBufferPosition
   getSubwordPatternAtBufferPosition
-  setTextAtBufferPosition
+  insertTextAtBufferPosition
   setBufferRow
   moveCursorToFirstCharacterAtRow
   ensureEndsWithNewLineForBufferRow
-  isNotEmpty
 } = require './utils'
 swrap = require './selection-wrapper'
-settings = require './settings'
 Base = require './base'
 
 class Operator extends Base
@@ -80,11 +76,11 @@ class Operator extends Base
 
   needStay: ->
     @stayAtSamePosition ?
-      (@isOccurrence() and settings.get('stayOnOccurrence')) or settings.get(@stayOptionName)
+      (@isOccurrence() and @getConfig('stayOnOccurrence')) or @getConfig(@stayOptionName)
 
   needStayOnRestore: ->
     @stayAtSamePosition ?
-      (@isOccurrence() and settings.get('stayOnOccurrence') and @occurrenceSelected) or settings.get(@stayOptionName)
+      (@isOccurrence() and @getConfig('stayOnOccurrence') and @occurrenceSelected) or @getConfig(@stayOptionName)
 
   isOccurrence: ->
     @occurrence
@@ -99,7 +95,7 @@ class Operator extends Base
     return unless @flashTarget
     {mode, submode} = @vimState
     if mode isnt 'visual' or (@target.isMotion() and submode isnt @target.wise)
-      settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
+      @getConfig('flashOnOperate') and (@getName() not in @getConfig('flashOnOperateBlacklist'))
 
   flashIfNecessary: (ranges) ->
     return unless @needFlash()
@@ -184,7 +180,7 @@ class Operator extends Base
   # return true/false to indicate success
   selectPersistentSelectionIfNecessary: ->
     if @acceptPersistentSelection and
-        settings.get('autoSelectPersistentSelectionOnOperate') and
+        @getConfig('autoSelectPersistentSelectionOnOperate') and
         not @persistentSelection.isEmpty()
 
       @persistentSelection.select()
@@ -259,10 +255,7 @@ class Operator extends Base
   # Return true unless all selection is empty.
   selectTarget: ->
     return @targetSelected if @targetSelected?
-    @mutationManager.init(
-      isSelect: @instanceof('Select')
-      useMarker: @needStay() and @stayByMarker
-    )
+    @mutationManager.init(useMarker: @needStay() and @stayByMarker)
 
     # Currently only motion have forceWise methods
     @target.forceWise?(@wise) if @wise?
@@ -307,7 +300,6 @@ class Operator extends Base
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
-
     options =
       stay: @needStayOnRestore()
       occurrenceSelected: @occurrenceSelected
@@ -519,12 +511,12 @@ class Increase extends Operator
     @newRanges = []
     super
     if @newRanges.length
-      if settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
+      if @getConfig('flashOnOperate') and (@getName() not in @getConfig('flashOnOperateBlacklist'))
         @vimState.flash(@newRanges, type: @flashTypeForOccurrence)
 
   replaceNumberInBufferRange: (scanRange, fn=null) ->
     newRanges = []
-    @pattern ?= ///#{settings.get('numberRegex')}///g
+    @pattern ?= ///#{@getConfig('numberRegex')}///g
     @scanForward @pattern, {scanRange}, (event) =>
       return if fn? and not fn(event)
       {matchText, replace} = event
@@ -604,7 +596,7 @@ class PutBefore extends Operator
         @setMarkForChange(newRange)
 
       # Flash
-      if settings.get('flashOnOperate') and (@getName() not in settings.get('flashOnOperateBlacklist'))
+      if @getConfig('flashOnOperate') and (@getName() not in @getConfig('flashOnOperateBlacklist'))
         toRange = (selection) => @mutationsBySelection.get(selection)
         @vimState.flash(@editor.getSelections().map(toRange), type: @getFlashType())
 
@@ -649,11 +641,11 @@ class PutBefore extends Operator
     newRange = null
     if selection.isEmpty()
       if @location is 'before'
-        newRange = setTextAtBufferPosition(@editor, [cursorRow, 0], text)
+        newRange = insertTextAtBufferPosition(@editor, [cursorRow, 0], text)
         setBufferRow(cursor, newRange.start.row)
       else if @location is 'after'
         ensureEndsWithNewLineForBufferRow(@editor, cursorRow)
-        newRange = setTextAtBufferPosition(@editor, [cursorRow + 1, 0], text)
+        newRange = insertTextAtBufferPosition(@editor, [cursorRow + 1, 0], text)
     else
       selection.insertText("\n") unless @isMode('visual', 'linewise')
       newRange = selection.insertText(text)

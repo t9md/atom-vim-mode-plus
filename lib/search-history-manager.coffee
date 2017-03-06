@@ -1,5 +1,4 @@
 _ = require 'underscore-plus'
-settings = require './settings'
 
 module.exports =
 class SearchHistoryManager
@@ -17,9 +16,12 @@ class SearchHistoryManager
 
   save: (entry) ->
     return if _.isEmpty(entry)
-    entries = _.uniq([entry].concat(@getEntries()))
-    if @getSize() > settings.get('historySize')
-      entries.splice(settings.get('historySize'))
+
+    entries = @globalState.get('searchHistory').slice()
+    entries.unshift(entry)
+    entries = _.uniq(entries)
+    if @getSize() > @vimState.getConfig('historySize')
+      entries.splice(@vimState.getConfig('historySize'))
     @globalState.set('searchHistory', entries)
 
   reset: ->
@@ -29,10 +31,7 @@ class SearchHistoryManager
     @globalState.reset('searchHistory')
 
   getSize: ->
-    @getEntries().length
-
-  getEntries: ->
-    @globalState.get('searchHistory')
+    @globalState.get('searchHistory').length
 
   destroy: ->
     @idx = null

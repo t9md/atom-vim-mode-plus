@@ -33,13 +33,9 @@ class MutationManager
     @reset()
 
   reset: ->
-    @clearMarkers()
+    @markerLayer.clear()
     @mutationsBySelection.clear()
     @bufferRangesForCustomCheckpoint = []
-
-  clearMarkers: (pattern) ->
-    for marker in @markerLayer.getMarkers()
-      marker.destroy()
 
   getInitialPointForSelection: (selection, options) ->
     @getMutationForSelection(selection)?.getInitialPoint(options)
@@ -48,17 +44,13 @@ class MutationManager
     for selection in @editor.getSelections()
       if @mutationsBySelection.has(selection)
         @mutationsBySelection.get(selection).update(checkpoint)
-
       else
-        initialPoint =
-          if @vimState.isMode('visual')
-            swrap(selection).getBufferPositionFor('head', fromProperty: true, allowFallback: true)
-          else
-            # [FIXME] investigate WHY I did: initialPoint can be null when isSelect was true
-            swrap(selection).getBufferPositionFor('head') unless @options.isSelect
+        if @vimState.isMode('visual')
+          initialPoint = swrap(selection).getBufferPositionFor('head', fromProperty: true, allowFallback: true)
+        else
+          initialPoint = swrap(selection).getBufferPositionFor('head')
 
-        {useMarker} = @options
-        options = {selection, initialPoint, checkpoint, @markerLayer, useMarker}
+        options = {selection, initialPoint, checkpoint, @markerLayer, useMarker: @options.useMarker}
         @mutationsBySelection.set(selection, new Mutation(options))
 
   getMutationForSelection: (selection) ->
