@@ -457,9 +457,14 @@ getWordPatternAtBufferPosition = (editor, point, options={}) ->
   boundarizeForWord = options.boundarizeForWord ? true
   delete options.boundarizeForWord
   {range, kind} = getWordBufferRangeAndKindAtBufferPosition(editor, point, options)
-  pattern = _.escapeRegExp(editor.getTextInBufferRange(range))
+  text = editor.getTextInBufferRange(range)
+  pattern = _.escapeRegExp(text)
+
   if kind is 'word' and boundarizeForWord
-    pattern = "\\b" + pattern + "\\b"
+    # Set word-boundary( \b ) anchor only when it's effective #689
+    startBoundary = if /^\w/.test(text) then "\\b" else ''
+    endBoundary = if /\w$/.test(text) then "\\b" else ''
+    pattern = startBoundary + pattern + endBoundary
   new RegExp(pattern, 'g')
 
 getSubwordPatternAtBufferPosition = (editor, point, options={}) ->
