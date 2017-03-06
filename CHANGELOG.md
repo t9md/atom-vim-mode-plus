@@ -1,7 +1,7 @@
 # 0.83.0:
 - Support: set minimum engines to `^1.14.0`
-- Fix: When `o` was executed in `vL` mode, didn't correctly restore column on shift to `vL` or `normal`.
-  - Now correctly restore characterwise column after `o` in `vL` mode.
+- Fix: When `o` was executed in `vL` mode, didn't correctly restore column on shift to `vC` or `normal`.
+  - Now correctly restore `characterwise` column after `o` in `linewise` mode.
 - Improve: `g .` correctly restore subword-occurrence-marker
   - `g .`( `vim-mode-plus:add-preset-occurrence-from-last-occurrence-pattern` ) is command to restore last cleared preset-occurrence.
   - It is useful when you mistakenly cleared it by `escape` and quickly recover last preset-occurrence marker.
