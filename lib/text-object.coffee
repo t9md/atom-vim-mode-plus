@@ -101,8 +101,12 @@ class TextObject extends Base
         swrap(selection).clipPropertiesTillEndOfLine()
 
     @editor.mergeIntersectingSelections()
-    if @isMode('visual') and @wise is 'characterwise'
-      swrap.saveProperties(@editor)
+    if @isMode('visual')
+      switch @wise
+        when 'characterwise'
+          swrap.saveProperties(@editor)
+        when 'linewise'
+          swrap.fixPropertiesForLinewise(@editor)
 
     if selectResults.some((value) -> value)
       @wise ?= swrap.detectVisualModeSubmode(@editor)

@@ -28,10 +28,6 @@ getOffset = (submode, cursor) ->
       bufferPoint = swrap(selection).getBufferPositionFor('head', fromProperty: true)
       editor = cursor.editor
 
-      # FIXME: This adjustment should not be necessary if selection property is always believable.
-      if selection.isReversed()
-        bufferPoint.row = selection.getBufferRange().start.row
-
       if editor.isSoftWrapped()
         screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
         offset = screenPoint.traversalFrom(cursor.getScreenPosition())

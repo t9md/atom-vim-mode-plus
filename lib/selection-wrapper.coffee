@@ -140,6 +140,20 @@ class SelectionWrapper
         properties.head = endPoint
     @setProperties(properties)
 
+  fixPropertiesForLinewise: ->
+    selectionProperties = @getProperties()
+    return unless selectionProperties
+    {head, tail, wise} = selectionProperties
+    if @selection.isReversed()
+      [start, end] = [head, tail]
+    else
+      [start, end] = [tail, head]
+    [startRow, endRow] = @selection.getBufferRowRange()
+
+    start.row = startRow unless startRow is start.row
+    end.row = endRow unless endRow is end.row
+
+
   setWise: (value) ->
     @saveProperties() unless @hasProperties()
     properties = @getProperties()
@@ -162,6 +176,7 @@ class SelectionWrapper
         @complementGoalColumn()
         @expandOverLine(preserveGoalColumn: true)
         @setWise('linewise')
+        @fixPropertiesForLinewise()
 
   complementGoalColumn: ->
     unless @selection.cursor.goalColumn?
@@ -208,19 +223,11 @@ class SelectionWrapper
     tail = @selection.getTailBufferPosition()
     head.isGreaterThan(tail)
 
-  applyColumnFromProperties: ->
-    selectionProperties = @getProperties()
-    return unless selectionProperties?
-    {head, tail} = selectionProperties
-
-    if @selection.isReversed()
-      [start, end] = [head, tail]
-    else
-      [start, end] = [tail, head]
-    [start.row, end.row] = @selection.getBufferRowRange()
+  restoreFromProperties: ->
+    return unless @hasProperties()
+    {head, tail} = @getProperties()
     @withKeepingGoalColumn =>
-      @setBufferRange([start, end], preserveFolds: true)
-      @translateSelectionEndAndClip('backward', translate: false)
+      @setBufferRange([tail, head], preserveFolds: true)
 
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->
@@ -316,13 +323,11 @@ class SelectionWrapper
 
   normalize: ->
     unless @selection.isEmpty()
-      switch @getWise()
-        when 'characterwise'
-          @translateSelectionEndAndClip('backward')
-        when 'linewise'
-          @applyColumnFromProperties()
-        when 'blockwise'
-          @translateSelectionEndAndClip('backward')
+      if @getWise() is 'linewise'
+        @restoreFromProperties()
+        @translateSelectionEndAndClip('backward', translate: false)
+      else
+        @translateSelectionEndAndClip('backward')
     @clearProperties()
 
 swrap = (selection) ->
@@ -378,5 +383,9 @@ swrap.applyWise = (editor, value) ->
 swrap.clearProperties = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).clearProperties()
+
+swrap.fixPropertiesForLinewise = (editor) ->
+  for selection in editor.getSelections()
+    swrap(selection).fixPropertiesForLinewise()
 
 module.exports = swrap
