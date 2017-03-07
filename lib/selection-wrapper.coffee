@@ -69,8 +69,9 @@ class SelectionWrapper
 
   setReversedState: (reversed) ->
     return if @selection.isReversed() is reversed
-    {head, tail, wise} = @getProperties()
-    if head? and tail?
+
+    if @hasProperties()
+      {head, tail, wise} = @getProperties()
       @setProperties(head: tail, tail: head, wise: wise)
 
     options = {autoscroll: true, reversed, preserveFolds: true}
@@ -141,23 +142,17 @@ class SelectionWrapper
     @setProperties(properties)
 
   fixPropertiesForLinewise: ->
-    selectionProperties = @getProperties()
-    return unless selectionProperties
-    {head, tail, wise} = selectionProperties
+    return unless @hasProperties()
+    {head, tail} = @getProperties()
     if @selection.isReversed()
       [start, end] = [head, tail]
     else
       [start, end] = [tail, head]
-    [startRow, endRow] = @selection.getBufferRowRange()
-
-    start.row = startRow unless startRow is start.row
-    end.row = endRow unless endRow is end.row
-
+    [start.row, end.row] = @selection.getBufferRowRange()
 
   setWise: (value) ->
     @saveProperties() unless @hasProperties()
-    properties = @getProperties()
-    properties.wise = value
+    @getProperties().wise = value
 
   getWise: ->
     @getProperties()?.wise ? 'characterwise'
@@ -208,12 +203,13 @@ class SelectionWrapper
       properties.tail.column = tailMaxColumn
 
   captureProperties: ->
-    head: @selection.getHeadBufferPosition()
-    tail: @selection.getTailBufferPosition()
+    head = @selection.getHeadBufferPosition()
+    tail = @selection.getTailBufferPosition()
+    {head, tail}
 
   selectByProperties: ({head, tail}) ->
     # No problem if head is greater than tail, Range constructor swap start/end.
-    @setBufferRange([tail, head])
+    @setBufferRange([tail, head], preserveFolds: true)
     @setReversedState(head.isLessThan(tail))
 
   # Return true if selection was non-empty and non-reversed selection.
@@ -225,9 +221,8 @@ class SelectionWrapper
 
   restoreFromProperties: ->
     return unless @hasProperties()
-    {head, tail} = @getProperties()
     @withKeepingGoalColumn =>
-      @setBufferRange([tail, head], preserveFolds: true)
+      @selectByProperties(@getProperties())
 
   # Only for setting autoscroll option to false by default
   setBufferRange: (range, options={}) ->
