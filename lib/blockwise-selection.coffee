@@ -180,13 +180,9 @@ class BlockwiseSelection
     properties = @getCharacterwiseProperties()
     head = @getHeadSelection()
     @clearSelections(except: head)
-    {goalColumn} = head.cursor
-    swrap(head).selectByProperties(properties)
-
+    swrap(head).selectByProperties(properties, keepGoalColumn: true)
     if head.getBufferRange().end.column is 0
       swrap(head).translateSelectionEndAndClip('forward')
-
-    head.cursor.goalColumn ?= goalColumn if goalColumn?
 
   autoscroll: (options) ->
     @getHeadSelection().autoscroll(options)
