@@ -144,6 +144,7 @@ class ModeManager
   #   which is the range in visual-mode.
   #
   activateVisualMode: (newSubmode) ->
+    atom.assert(newSubmode?, "activate visual-mode without submode")
     @normalizeSelections()
     swrap.applyWise(@editor, 'characterwise')
 
