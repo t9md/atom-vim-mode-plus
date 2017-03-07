@@ -289,7 +289,7 @@ class Change extends ActivateInsertMode
     #   {
     #     a
     #   }
-    isLinewiseTarget = swrap.detectVisualModeSubmode(@editor) is 'linewise'
+    isLinewiseTarget = swrap.detectWise(@editor) is 'linewise'
     for selection in @editor.getSelections()
       @setTextToRegisterForSelection(selection)
       if isLinewiseTarget

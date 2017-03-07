@@ -149,7 +149,7 @@ class Operator extends Base
         # e.g. selected persisted selection convert to vB sel in vB-mode?
         null
       else
-        @vimState.modeManager.activate('visual', swrap.detectVisualModeSubmode(@editor))
+        @vimState.modeManager.activate('visual', swrap.detectWise(@editor))
 
     @target = 'CurrentSelection' if @isMode('visual') and @acceptCurrentSelection
     @setTarget(@new(@target)) if _.isString(@target)
@@ -348,8 +348,7 @@ class SelectOccurrence extends Operator
   execute: ->
     @startMutation =>
       if @selectTarget()
-        submode = swrap.detectVisualModeSubmode(@editor)
-        @activateModeIfNecessary('visual', submode)
+        @activateModeIfNecessary('visual', swrap.detectWise(@editor))
 
 # Persistent Selection
 # =========================

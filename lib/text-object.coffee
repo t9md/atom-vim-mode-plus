@@ -109,7 +109,7 @@ class TextObject extends Base
           swrap.fixPropertiesForLinewise(@editor)
 
     if selectResults.some((value) -> value)
-      @wise ?= swrap.detectVisualModeSubmode(@editor)
+      @wise ?= swrap.detectWise(@editor)
     else
       @wise = null
 
@@ -751,7 +751,7 @@ class PersistentSelection extends TextObject
     {persistentSelection} = @vimState
     unless persistentSelection.isEmpty()
       persistentSelection.setSelectedBufferRanges()
-      @wise = swrap.detectVisualModeSubmode(@editor)
+      @wise = swrap.detectWise(@editor)
 
 class APersistentSelection extends PersistentSelection
   @extend()

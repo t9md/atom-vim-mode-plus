@@ -252,13 +252,13 @@ class VimState
 
     nonEmptySelecitons = @editor.getSelections().filter (selection) -> not selection.isEmpty()
     if nonEmptySelecitons.length
-      submode = swrap.detectVisualModeSubmode(@editor)
-      if @isMode('visual', submode)
+      wise = swrap.detectWise(@editor)
+      if @isMode('visual', wise)
         for selection in nonEmptySelecitons when not swrap(selection).hasProperties()
           swrap(selection).saveProperties()
         @updateCursorsVisibility()
       else
-        @activate('visual', submode)
+        @activate('visual', wise)
     else
       @activate('normal') if @isMode('visual')
 

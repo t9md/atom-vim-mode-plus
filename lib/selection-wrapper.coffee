@@ -273,17 +273,14 @@ class SelectionWrapper
     {start, end} = @getBufferRange()
     (start.row isnt end.row) and (start.column is end.column is 0)
 
-  detectVisualModeSubmode: ->
-    if @selection.isEmpty()
-      null
-    else if @isLinewise()
+  detectWise: ->
+    if @isLinewise()
       'linewise'
     else
       'characterwise'
 
   withKeepingGoalColumn: (fn) ->
-    {goalColumn} = @selection.cursor
-    {start, end} = @getBufferRange()
+    goalColumn = @selection.cursor.goalColumn
     fn()
     @selection.cursor.goalColumn = goalColumn if goalColumn?
 
@@ -349,16 +346,11 @@ swrap.clearProperties = (editor) ->
   editor.getSelections().forEach (selection) ->
     swrap(selection).clearProperties()
 
-swrap.detectVisualModeSubmode = (editor) ->
-  selections = editor.getSelections()
-  results = (swrap(selection).detectVisualModeSubmode() for selection in selections)
-
-  if results.every((r) -> r is 'linewise')
+swrap.detectWise = (editor) ->
+  if editor.getSelections().every((selection) -> swrap(selection).detectWise() is 'linewise')
     'linewise'
-  else if results.some((r) -> r is 'characterwise')
-    'characterwise'
   else
-    null
+    'characterwise'
 
 swrap.saveProperties = (editor) ->
   for selection in editor.getSelections()
