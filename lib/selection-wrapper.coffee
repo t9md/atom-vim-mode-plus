@@ -57,9 +57,6 @@ class SelectionWrapper
     point = @getBufferPositionFor(which, options)
     @selection.cursor.setBufferPosition(point)
 
-  reverse: ->
-    @setReversedState(not @selection.isReversed())
-
   setReversedState: (isReversed) ->
     return if @selection.isReversed() is isReversed
 
@@ -198,13 +195,6 @@ class SelectionWrapper
     @setBufferRange([tail, head], options)
     @setReversedState(head.isLessThan(tail))
 
-  # Return true if selection was non-empty and non-reversed selection.
-  # Equivalent to not selection.isEmpty() and not selection.isReversed()"
-  isForwarding: ->
-    head = @selection.getHeadBufferPosition()
-    tail = @selection.getTailBufferPosition()
-    head.isGreaterThan(tail)
-
   restoreFromProperties: ->
     @selectByProperties(@getProperties()) if @hasProperties()
 
@@ -242,16 +232,6 @@ class SelectionWrapper
 
     range = @getBufferRange()
     newRange = getRangeByTranslatePointAndClip(editor, range, which, direction, options)
-    @setBufferRange(newRange)
-
-  shrinkEndToBeforeNewLine: ->
-    newRange = shrinkRangeEndToBeforeNewLine(@getBufferRange())
-    @setBufferRange(newRange)
-
-  setStartToFirstCharacterOfLine: ->
-    {start, end} = @getBufferRange()
-    newStart = getFirstCharacterPositionForBufferRow(@selection.editor, start.row)
-    newRange = new Range(newStart, end)
     @setBufferRange(newRange)
 
   # Return selection extent to replay blockwise selection on `.` repeating.
