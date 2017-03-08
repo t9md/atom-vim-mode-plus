@@ -101,11 +101,8 @@ class TextObject extends Base
         swrap(selection).clipPropertiesTillEndOfLine()
 
     @editor.mergeIntersectingSelections()
-    if @isMode('visual') and @wise is 'characterwise'
-      swrap.saveProperties(@editor)
-
     if selectResults.some((value) -> value)
-      @wise ?= swrap.detectVisualModeSubmode(@editor)
+      @wise ?= swrap.detectWise(@editor)
     else
       @wise = null
 
@@ -709,8 +706,7 @@ class SearchMatchForward extends TextObject
 
   selectTextObject: (selection) ->
     return unless range = @getRange(selection)
-    reversed = @reversed ? @backward
-    swrap(selection).setBufferRange(range, {reversed})
+    swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
     selection.cursor.autoscroll()
     true
 
@@ -737,7 +733,7 @@ class PreviousSelection extends TextObject
     {properties, submode} = @vimState.previousSelection
     if properties? and submode?
       selection = @editor.getLastSelection()
-      swrap(selection).selectByProperties(properties)
+      swrap(selection).selectByProperties(properties, keepGoalColumn: false)
       @wise = submode
 
 class PersistentSelection extends TextObject
@@ -747,7 +743,7 @@ class PersistentSelection extends TextObject
     {persistentSelection} = @vimState
     unless persistentSelection.isEmpty()
       persistentSelection.setSelectedBufferRanges()
-      @wise = swrap.detectVisualModeSubmode(@editor)
+      @wise = swrap.detectWise(@editor)
 
 class APersistentSelection extends PersistentSelection
   @extend()

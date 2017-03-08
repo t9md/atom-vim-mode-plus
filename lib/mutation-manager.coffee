@@ -46,7 +46,7 @@ class MutationManager
         @mutationsBySelection.get(selection).update(checkpoint)
       else
         if @vimState.isMode('visual')
-          initialPoint = swrap(selection).getBufferPositionFor('head', fromProperty: true, allowFallback: true)
+          initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
         else
           initialPoint = swrap(selection).getBufferPositionFor('head')
 

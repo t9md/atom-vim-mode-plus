@@ -5,6 +5,7 @@ _ = require 'underscore-plus'
   moveCursorLeft
   moveCursorRight
   limitNumber
+  shrinkRangeEndToBeforeNewLine
 } = require './utils'
 swrap = require './selection-wrapper'
 Operator = require('./base').getClass('Operator')
@@ -225,14 +226,14 @@ class InsertByTarget extends ActivateInsertMode
 
       when 'linewise'
         @editor.splitSelectionsIntoLines()
-        methodName =
-          if @which is 'start'
-            'setStartToFirstCharacterOfLine'
-          else if @which is 'end'
-            'shrinkEndToBeforeNewLine'
-
         for selection in @editor.getSelections()
-          swrap(selection)[methodName]()
+          {start, end} = range = selection.getBufferRange()
+          if @which is 'start'
+            newRange = [@getFirstCharacterPositionForBufferRow(start.row), end]
+          else
+            newRange = shrinkRangeEndToBeforeNewLine(range)
+
+          selection.setBufferRange(newRange)
 
 # key: 'I', Used in 'visual-mode.characterwise', visual-mode.blockwise
 class InsertAtStartOfTarget extends InsertByTarget
@@ -289,7 +290,7 @@ class Change extends ActivateInsertMode
     #   {
     #     a
     #   }
-    isLinewiseTarget = swrap.detectVisualModeSubmode(@editor) is 'linewise'
+    isLinewiseTarget = swrap.detectWise(@editor) is 'linewise'
     for selection in @editor.getSelections()
       @setTextToRegisterForSelection(selection)
       if isLinewiseTarget

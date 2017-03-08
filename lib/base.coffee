@@ -16,6 +16,8 @@ getEditorState = null # set by Base.init()
 {OperationAbortedError} = require './errors'
 
 vimStateMethods = [
+  "assert"
+  "assertWithException"
   "onDidChangeSearch"
   "onDidConfirmSearch"
   "onDidCancelSearch"
@@ -226,9 +228,6 @@ class Base
   isTextObject: ->
     @instanceof('TextObject')
 
-  canBecomeTarget: ->
-    @isMotion() or @isTextObject()
-
   getName: ->
     @constructor.name
 
@@ -251,8 +250,7 @@ class Base
       cursor.getBufferPosition()
 
   getCursorPositionForSelection: (selection) ->
-    options = {fromProperty: true, allowFallback: true}
-    swrap(selection).getBufferPositionFor('head', options)
+    swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
 
   toString: ->
     str = @getName()

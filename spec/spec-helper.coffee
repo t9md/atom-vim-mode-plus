@@ -37,7 +37,7 @@ buildKeydownEvent = (key, options) ->
   KeymapManager.buildKeydownEvent(key, options)
 
 headFromProperty = (selection) ->
-  swrap(selection).getBufferPositionFor('head', fromProperty: true)
+  swrap(selection).getBufferPositionFor('head', from: ['property'])
 
 buildKeydownEventFromKeystroke = (keystroke, target) ->
   modifier = ['ctrl', 'alt', 'shift', 'cmd']

@@ -33,7 +33,7 @@ class OperationStack
   # Return handler
   subscribe: (handler) ->
     @operationSubscriptions.add(handler)
-    handler # DONT REMOVE
+    return handler # DONT REMOVE
 
   reset: ->
     @resetCount()
@@ -73,11 +73,14 @@ class OperationStack
         else
           operation = new klass(@vimState, properties)
 
-      # Compliment implicit Select operator
-      if operation.isTextObject() and @mode isnt 'operator-pending' or operation.isMotion() and @mode is 'visual'
-        operation = new Select(@vimState).setTarget(operation)
+      if @isEmpty()
+        isValidOperation = true
+        if (@mode is 'visual' and operation.isMotion()) or operation.isTextObject()
+          operation = new Select(@vimState).setTarget(operation)
+      else
+        isValidOperation = @peekTop().isOperator() and (operation.isMotion() or operation.isTextObject())
 
-      if @isEmpty() or (@peekTop().isOperator() and operation.canBecomeTarget())
+      if isValidOperation
         @stack.push(operation)
         @process()
       else

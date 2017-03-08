@@ -11,6 +11,8 @@ SearchInputElement = require './search-input'
 {
   getVisibleEditors
   matchScopes
+  assert
+  assertWithException
 } = require './utils'
 swrap = require './selection-wrapper'
 
@@ -85,6 +87,12 @@ class VimState
 
     @subscriptions.add @editor.onDidDestroy(@destroy.bind(this))
     @constructor.vimStatesByEditor.set(@editor, this)
+
+  assert: (args...) ->
+    assert(args...)
+
+  assertWithException: (args...) ->
+    assertWithException(args...)
 
   getConfig: (param) ->
     settings.get(param)
@@ -252,13 +260,13 @@ class VimState
 
     nonEmptySelecitons = @editor.getSelections().filter (selection) -> not selection.isEmpty()
     if nonEmptySelecitons.length
-      submode = swrap.detectVisualModeSubmode(@editor)
-      if @isMode('visual', submode)
+      wise = swrap.detectWise(@editor)
+      if @isMode('visual', wise)
         for selection in nonEmptySelecitons when not swrap(selection).hasProperties()
           swrap(selection).saveProperties()
         @updateCursorsVisibility()
       else
-        @activate('visual', submode)
+        @activate('visual', wise)
     else
       @activate('normal') if @isMode('visual')
 
@@ -360,8 +368,8 @@ class VimState
     @originalCursorPositionByMarker?.destroy()
 
     if @mode is 'visual'
-      options = {fromProperty: true, allowFallback: true}
-      point = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
+      selection = @editor.getLastSelection()
+      point = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
     else
       point = @editor.getCursorBufferPosition()
     @originalCursorPosition = point

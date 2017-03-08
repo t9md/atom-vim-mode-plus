@@ -4,6 +4,7 @@ _ = require 'underscore-plus'
 
 {
   isSingleLineText
+  isLinewiseRange
   limitNumber
   toggleCaseForCharacter
   splitTextByNewLine
@@ -559,8 +560,7 @@ class Join extends TransformString
   restorePositions: false
 
   mutateSelection: (selection) ->
-    if swrap(selection).isLinewise()
-      range = selection.getBufferRange()
+    if isLinewiseRange(range = selection.getBufferRange())
       selection.setBufferRange(range.translate([0, 0], [-1, Infinity]))
     selection.joinLines()
     end = selection.getBufferRange().end

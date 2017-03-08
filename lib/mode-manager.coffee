@@ -42,7 +42,7 @@ class ModeManager
 
     @emitter.emit('will-activate-mode', mode: newMode, submode: newSubmode)
 
-    if (newMode is 'visual') and (newSubmode is @submode)
+    if (newMode is 'visual') and @submode? and (newSubmode is @submode)
       [newMode, newSubmode] = ['normal', null]
 
     @deactivate() if (newMode isnt @mode)
@@ -109,7 +109,7 @@ class ModeManager
         moveCursorLeft(cursor, {needSpecialCareToPreventWrapLine})
 
   activateReplaceMode: ->
-    @replacedCharsBySelection = {}
+    @replacedCharsBySelection = new WeakMap
     subs = new CompositeDisposable
     subs.add @editor.onWillInsertText ({text, cancel}) =>
       cancel()
@@ -117,15 +117,19 @@ class ModeManager
         for char in text.split('') ? []
           if (char isnt "\n") and (not selection.cursor.isAtEndOfLine())
             selection.selectRight()
-          @replacedCharsBySelection[selection.id] ?= []
-          @replacedCharsBySelection[selection.id].push(swrap(selection).replace(char))
+          selectedText = selection.getText()
+          selection.insertText(char)
+
+          unless @replacedCharsBySelection.has(selection)
+            @replacedCharsBySelection.set(selection, [])
+          @replacedCharsBySelection.get(selection).push(selectedText)
 
     subs.add new Disposable =>
       @replacedCharsBySelection = null
     subs
 
   getReplacedCharForSelection: (selection) ->
-    @replacedCharsBySelection[selection.id]?.pop()
+    @replacedCharsBySelection.get(selection)?.pop()
 
   # Visual
   # -------------------------
@@ -144,6 +148,7 @@ class ModeManager
   #   which is the range in visual-mode.
   #
   activateVisualMode: (newSubmode) ->
+    @vimState.assertWithException(newSubmode?, "activate visual-mode without submode")
     @normalizeSelections()
     swrap.applyWise(@editor, 'characterwise')
 
