@@ -8,6 +8,7 @@ _ = require 'underscore-plus'
   getEndOfLineForBufferRow
   getBufferRangeForRowRange
   limitNumber
+  isLinewiseRange
 } = require './utils'
 
 propertyStore = new Map
@@ -217,22 +218,12 @@ class SelectionWrapper
     @selection.setBufferRange(range, options)
     @selection.cursor.goalColumn = goalColumn if goalColumn?
 
-  # Return original text
-  replace: (text) ->
-    originalText = @selection.getText()
-    @selection.insertText(text)
-    originalText
-
   isSingleRow: ->
     [startRow, endRow] = @selection.getBufferRowRange()
     startRow is endRow
 
-  isLinewise: ->
-    {start, end} = @getBufferRange()
-    (start.row isnt end.row) and (start.column is end.column is 0)
-
   detectWise: ->
-    if @isLinewise()
+    if isLinewiseRange(@getBufferRange())
       'linewise'
     else
       'characterwise'
