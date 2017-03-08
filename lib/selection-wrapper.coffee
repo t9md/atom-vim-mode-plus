@@ -123,7 +123,6 @@ class SelectionWrapper
     @setProperties(properties)
 
   fixPropertiesForLinewise: ->
-    return unless @hasProperties()
     {head, tail} = @getProperties()
     if @selection.isReversed()
       [start, end] = [head, tail]

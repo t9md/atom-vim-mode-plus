@@ -324,6 +324,14 @@ class Select extends Operator
   execute: ->
     @startMutation(@selectTarget.bind(this))
     if @target.isTextObject() and wise = @target.getWise()
+      if @isMode('visual')
+        switch wise
+          when 'characterwise'
+            swrap.saveProperties(@editor)
+          when 'linewise'
+            unless @editor.getSelections().every((selection) -> swrap(selection).hasProperties())
+              @assertWithException(false, "no selection property on Select operation")
+            swrap.fixPropertiesForLinewise(@editor)
       @activateModeIfNecessary('visual', wise)
 
 class SelectLatestChange extends Select
