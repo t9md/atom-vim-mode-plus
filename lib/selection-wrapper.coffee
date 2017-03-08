@@ -147,7 +147,6 @@ class SelectionWrapper
     # NOTE:
     # Must call against normalized selection
     # Don't call non-normalized selection
-
     switch newWise
       when 'characterwise'
         @translateSelectionEndAndClip('forward')
@@ -210,18 +209,13 @@ class SelectionWrapper
 
   # set selections bufferRange with default option {autoscroll: false, preserveFolds: true}
   setBufferRange: (range, options={}) ->
-    keepGoalColumn = options.keepGoalColumn ? true
+    if options.keepGoalColumn ? true
+      goalColumn = @selection.cursor.goalColumn
     delete options.keepGoalColumn
-
-    setBufferRange = =>
-      @selection.setBufferRange(range, options)
     options.autoscroll ?= false
     options.preserveFolds ?= true
-
-    if keepGoalColumn
-      @withKeepingGoalColumn(setBufferRange)
-    else
-      setBufferRange()
+    @selection.setBufferRange(range, options)
+    @selection.cursor.goalColumn = goalColumn if goalColumn?
 
   # Return original text
   replace: (text) ->
@@ -242,11 +236,6 @@ class SelectionWrapper
       'linewise'
     else
       'characterwise'
-
-  withKeepingGoalColumn: (fn) ->
-    goalColumn = @selection.cursor.goalColumn
-    fn()
-    @selection.cursor.goalColumn = goalColumn if goalColumn?
 
   # direction must be one of ['forward', 'backward']
   # options: {translate: true or false} default true
