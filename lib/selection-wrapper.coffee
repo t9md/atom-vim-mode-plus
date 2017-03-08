@@ -192,9 +192,6 @@ class SelectionWrapper
     @setBufferRange([tail, head], options)
     @setReversedState(head.isLessThan(tail))
 
-  restoreFromProperties: ->
-    @selectByProperties(@getProperties()) if @hasProperties()
-
   # set selections bufferRange with default option {autoscroll: false, preserveFolds: true}
   setBufferRange: (range, options={}) ->
     if options.keepGoalColumn ? true
@@ -240,7 +237,7 @@ class SelectionWrapper
   normalize: ->
     unless @selection.isEmpty()
       if @getWise() is 'linewise'
-        @restoreFromProperties()
+        @selectByProperties(@getProperties())
         @translateSelectionEndAndClip('backward', translate: false)
       else
         @translateSelectionEndAndClip('backward')

@@ -16,6 +16,8 @@ getEditorState = null # set by Base.init()
 {OperationAbortedError} = require './errors'
 
 vimStateMethods = [
+  "assert"
+  "assertWithException"
   "onDidChangeSearch"
   "onDidConfirmSearch"
   "onDidCancelSearch"
@@ -225,9 +227,6 @@ class Base
 
   isTextObject: ->
     @instanceof('TextObject')
-
-  canBecomeTarget: ->
-    @isMotion() or @isTextObject()
 
   getName: ->
     @constructor.name

@@ -86,6 +86,16 @@ class VimState
     @subscriptions.add @editor.onDidDestroy(@destroy.bind(this))
     @constructor.vimStatesByEditor.set(@editor, this)
 
+  assert: (condition, message, fn) ->
+    unless fn?
+      fn = (error) ->
+        console.error error.message
+    atom.assert(condition, message, fn)
+
+  assertWithException: (condition, message, fn) ->
+    atom.assert condition, message, (error) ->
+      throw new Error(error.message)
+
   getConfig: (param) ->
     settings.get(param)
 

@@ -42,7 +42,7 @@ class ModeManager
 
     @emitter.emit('will-activate-mode', mode: newMode, submode: newSubmode)
 
-    if (newMode is 'visual') and (newSubmode is @submode)
+    if (newMode is 'visual') and @submode? and (newSubmode is @submode)
       [newMode, newSubmode] = ['normal', null]
 
     @deactivate() if (newMode isnt @mode)
@@ -148,7 +148,7 @@ class ModeManager
   #   which is the range in visual-mode.
   #
   activateVisualMode: (newSubmode) ->
-    atom.assert(newSubmode?, "activate visual-mode without submode")
+    @vimState.assertWithException(newSubmode?, "activate visual-mode without submode")
     @normalizeSelections()
     swrap.applyWise(@editor, 'characterwise')
 

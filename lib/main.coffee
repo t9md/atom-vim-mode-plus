@@ -24,9 +24,6 @@ module.exports =
 
     if atom.inDevMode()
       developer = new (require './developer')
-      atom.onDidFailAssertion (error) ->
-        console.log error
-
       @subscribe(developer.init(service))
 
     @subscribe @observeVimMode ->
