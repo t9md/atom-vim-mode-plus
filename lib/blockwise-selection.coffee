@@ -1,7 +1,6 @@
-{Range} = require 'atom'
 _ = require 'underscore-plus'
 
-{sortRanges, getBufferRows, isEmpty} = require './utils'
+{sortRanges, isEmpty} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection

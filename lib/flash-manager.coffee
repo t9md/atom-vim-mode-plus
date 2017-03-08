@@ -47,11 +47,6 @@ flashTypes =
     decorationOptions:
       type: 'highlight'
       class: 'vim-mode-plus-flash undo-redo-multiple-delete'
-  'screen-line': # unused.
-    allowMultiple: false
-    decorationOptions:
-      type: 'line'
-      class: 'vim-mode-plus-flash-screen-line'
 
 module.exports =
 class FlashManager
@@ -64,7 +59,6 @@ class FlashManager
     @markersByType.forEach (markers) ->
       marker.destroy() for marker in markers
     @markersByType.clear()
-
 
   flash: (ranges, options, rangeType='buffer') ->
     ranges = [ranges] unless _.isArray(ranges)
