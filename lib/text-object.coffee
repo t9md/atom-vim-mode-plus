@@ -713,8 +713,7 @@ class SearchMatchForward extends TextObject
 
   selectTextObject: (selection) ->
     return unless range = @getRange(selection)
-    reversed = @reversed ? @backward
-    swrap(selection).setBufferRange(range, {reversed})
+    swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
     selection.cursor.autoscroll()
     true
 
@@ -741,7 +740,7 @@ class PreviousSelection extends TextObject
     {properties, submode} = @vimState.previousSelection
     if properties? and submode?
       selection = @editor.getLastSelection()
-      swrap(selection).selectByProperties(properties)
+      swrap(selection).selectByProperties(properties, keepGoalColumn: false)
       @wise = submode
 
 class PersistentSelection extends TextObject

@@ -180,7 +180,7 @@ class BlockwiseSelection
     properties = @getCharacterwiseProperties()
     head = @getHeadSelection()
     @clearSelections(except: head)
-    swrap(head).selectByProperties(properties, keepGoalColumn: true)
+    swrap(head).selectByProperties(properties)
     if head.getBufferRange().end.column is 0
       swrap(head).translateSelectionEndAndClip('forward')
 

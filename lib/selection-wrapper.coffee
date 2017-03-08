@@ -56,12 +56,6 @@ class SelectionWrapper
     point = @getBufferPositionFor(which, options)
     @selection.cursor.setBufferPosition(point)
 
-  extendToEOL: ->
-    [startRow, endRow] = @selection.getBufferRowRange()
-    endRowRange = @selection.editor.bufferRangeForBufferRow(endRow)
-    newRange = new Range(@getBufferRange().start, endRowRange.end)
-    @setBufferRange(newRange)
-
   reverse: ->
     @setReversedState(not @selection.isReversed())
 
@@ -72,7 +66,10 @@ class SelectionWrapper
       {head, tail, wise} = @getProperties()
       @setProperties(head: tail, tail: head, wise: wise)
 
-    @setBufferRange(@getBufferRange(), autoscroll: true, reversed: isReversed)
+    @setBufferRange @getBufferRange(),
+      autoscroll: true
+      reversed: isReversed
+      keepGoalColumn: false
 
   getRows: ->
     [startRow, endRow] = @selection.getBufferRowRange()
@@ -82,10 +79,11 @@ class SelectionWrapper
     @getRows().length
 
   # Native selection.expandOverLine is not aware of actual rowRange of selection.
+  # unused
   expandOverLine: ->
     rowRange = @selection.getBufferRowRange()
     range = getBufferRangeForRowRange(@selection.editor, rowRange)
-    @setBufferRange(range, keepGoalColumn: true)
+    @setBufferRange(range)
 
   getRowFor: (where) ->
     [startRow, endRow] = @selection.getBufferRowRange()
@@ -208,18 +206,17 @@ class SelectionWrapper
     head.isGreaterThan(tail)
 
   restoreFromProperties: ->
-    if @hasProperties()
-      @selectByProperties(@getProperties(), keepGoalColumn: true)
+    @selectByProperties(@getProperties()) if @hasProperties()
 
   # set selections bufferRange with default option {autoscroll: false, preserveFolds: true}
   setBufferRange: (range, options={}) ->
-    {keepGoalColumn} = options
+    keepGoalColumn = options.keepGoalColumn ? true
     delete options.keepGoalColumn
 
-    options.autoscroll ?= false
-    options.preserveFolds ?= true
     setBufferRange = =>
       @selection.setBufferRange(range, options)
+    options.autoscroll ?= false
+    options.preserveFolds ?= true
 
     if keepGoalColumn
       @withKeepingGoalColumn(setBufferRange)
@@ -231,23 +228,6 @@ class SelectionWrapper
     originalText = @selection.getText()
     @selection.insertText(text)
     originalText
-
-  lineTextForBufferRows: ->
-    {editor} = @selection
-    @getRows().map (row) ->
-      editor.lineTextForBufferRow(row)
-
-  mapToLineText: (fn, {includeNewline}={}) ->
-    {editor} = @selection
-    textForRow = (row) ->
-      range = editor.bufferRangeForBufferRow(row, {includeNewline})
-      editor.getTextInBufferRange(range)
-
-    @getRows().map(textForRow).map(fn)
-
-  translate: (startDelta, endDelta=startDelta, options) ->
-    newRange = @getBufferRange().translate(startDelta, endDelta)
-    @setBufferRange(newRange, options)
 
   isSingleRow: ->
     [startRow, endRow] = @selection.getBufferRowRange()
@@ -274,7 +254,7 @@ class SelectionWrapper
     editor = @selection.editor
     range = @getBufferRange()
     newRange = getRangeByTranslatePointAndClip(editor, range, "end", direction, options)
-    @setBufferRange(newRange, keepGoalColumn: true)
+    @setBufferRange(newRange)
 
   translateSelectionHeadAndClip: (direction, options) ->
     editor = @selection.editor
@@ -282,7 +262,7 @@ class SelectionWrapper
 
     range = @getBufferRange()
     newRange = getRangeByTranslatePointAndClip(editor, range, which, direction, options)
-    @setBufferRange(newRange, keepGoalColumn: true)
+    @setBufferRange(newRange)
 
   shrinkEndToBeforeNewLine: ->
     newRange = shrinkRangeEndToBeforeNewLine(@getBufferRange())
