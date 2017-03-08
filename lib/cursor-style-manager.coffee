@@ -25,7 +25,7 @@ getOffset = (submode, cursor) ->
       new Point(0, -1)
 
     when 'linewise'
-      bufferPoint = swrap(selection).getBufferPositionFor('head', fromProperty: true)
+      bufferPoint = swrap(selection).getBufferPositionFor('head', from: ['property'])
       editor = cursor.editor
 
       if editor.isSoftWrapped()

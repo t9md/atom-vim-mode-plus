@@ -250,8 +250,7 @@ class Base
       cursor.getBufferPosition()
 
   getCursorPositionForSelection: (selection) ->
-    options = {fromProperty: true, allowFallback: true}
-    swrap(selection).getBufferPositionFor('head', options)
+    swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
 
   toString: ->
     str = @getName()

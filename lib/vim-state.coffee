@@ -368,8 +368,8 @@ class VimState
     @originalCursorPositionByMarker?.destroy()
 
     if @mode is 'visual'
-      options = {fromProperty: true, allowFallback: true}
-      point = swrap(@editor.getLastSelection()).getBufferPositionFor('head', options)
+      selection = @editor.getLastSelection()
+      point = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
     else
       point = @editor.getCursorBufferPosition()
     @originalCursorPosition = point

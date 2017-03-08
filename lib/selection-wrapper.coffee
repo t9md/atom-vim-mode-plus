@@ -1,5 +1,4 @@
-_ = require 'underscore-plus'
-{Range, Point, Disposable} = require 'atom'
+{Range, Point} = require 'atom'
 {
   translatePointAndClip
   getRangeByTranslatePointAndClip
@@ -16,7 +15,7 @@ class SelectionWrapper
   constructor: (@selection) ->
 
   hasProperties: -> propertyStore.has(@selection)
-  getProperties: -> propertyStore.get(@selection) ? {}
+  getProperties: -> propertyStore.get(@selection)
   setProperties: (prop) -> propertyStore.set(@selection, prop)
   clearProperties: -> propertyStore.delete(@selection)
   setWiseProperty: (value) -> @getProperties().wise = value
@@ -28,29 +27,29 @@ class SelectionWrapper
   getBufferRange: ->
     @selection.getBufferRange()
 
-  getBufferPositionFor: (which, {fromProperty, allowFallback}={}) ->
-    fromProperty ?= false
-    allowFallback ?= false
+  getBufferPositionFor: (which, {from}={}) ->
+    from ?= ['selection']
 
-    if fromProperty and (not @hasProperties()) and allowFallback
-      fromProperty = false
+    getPosition = (which) ->
+      switch which
+        when 'start' then start
+        when 'end' then end
+        when 'head' then head
+        when 'tail' then tail
 
-    if fromProperty
+    if ('property' in from) and @hasProperties()
       {head, tail} = @getProperties()
       if head.isGreaterThanOrEqual(tail)
         [start, end] = [tail, head]
       else
         [start, end] = [head, tail]
-    else
+      return getPosition(which)
+
+    if 'selection' in from
       {start, end} = @selection.getBufferRange()
       head = @selection.getHeadBufferPosition()
       tail = @selection.getTailBufferPosition()
-
-    switch which
-      when 'start' then start
-      when 'end' then end
-      when 'head' then head
-      when 'tail' then tail
+      return getPosition(which)
 
   # options: {fromProperty}
   setBufferPositionTo: (which, options) ->
@@ -77,7 +76,6 @@ class SelectionWrapper
     @getRows().length
 
   # Native selection.expandOverLine is not aware of actual rowRange of selection.
-  # unused
   expandOverLine: ->
     rowRange = @selection.getBufferRowRange()
     range = getBufferRangeForRowRange(@selection.editor, rowRange)
@@ -152,7 +150,7 @@ class SelectionWrapper
 
   complementGoalColumn: ->
     unless @selection.cursor.goalColumn?
-      column = @getBufferPositionFor('head', fromProperty: true, allowFallback: true).column
+      column = @getBufferPositionFor('head', from: ['property', 'selection']).column
       @selection.cursor.goalColumn = column
 
   # [FIXME]
@@ -244,16 +242,8 @@ swrap = (selection) ->
   new SelectionWrapper(selection)
 
 swrap.setReversedState = (editor, reversed) ->
-  editor.getSelections().forEach (selection) ->
+  for selection in editor.getSelections()
     swrap(selection).setReversedState(reversed)
-
-swrap.expandOverLine = (editor, options) ->
-  editor.getSelections().forEach (selection) ->
-    swrap(selection).expandOverLine(options)
-
-swrap.clearProperties = (editor) ->
-  editor.getSelections().forEach (selection) ->
-    swrap(selection).clearProperties()
 
 swrap.detectWise = (editor) ->
   selectionWiseIsLinewise = (selection) -> swrap(selection).detectWise() is 'linewise'
@@ -269,10 +259,6 @@ swrap.saveProperties = (editor) ->
 swrap.clearProperties = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).clearProperties()
-
-swrap.complementGoalColumn = (editor) ->
-  for selection in editor.getSelections()
-    swrap(selection).complementGoalColumn()
 
 swrap.normalize = (editor) ->
   for selection in editor.getSelections()
