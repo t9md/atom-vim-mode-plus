@@ -11,6 +11,8 @@ SearchInputElement = require './search-input'
 {
   getVisibleEditors
   matchScopes
+  assert
+  assertWithException
 } = require './utils'
 swrap = require './selection-wrapper'
 
@@ -86,15 +88,11 @@ class VimState
     @subscriptions.add @editor.onDidDestroy(@destroy.bind(this))
     @constructor.vimStatesByEditor.set(@editor, this)
 
-  assert: (condition, message, fn) ->
-    unless fn?
-      fn = (error) ->
-        console.error error.message
-    atom.assert(condition, message, fn)
+  assert: (args...) ->
+    assert(args...)
 
-  assertWithException: (condition, message, fn) ->
-    atom.assert condition, message, (error) ->
-      throw new Error(error.message)
+  assertWithException: (args...) ->
+    assertWithException(args...)
 
   getConfig: (param) ->
     settings.get(param)

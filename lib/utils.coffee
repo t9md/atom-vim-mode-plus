@@ -4,6 +4,16 @@ settings = require './settings'
 {Disposable, Range, Point} = require 'atom'
 _ = require 'underscore-plus'
 
+assert = (condition, message, fn) ->
+  unless fn?
+    fn = (error) ->
+      console.error error.message
+  atom.assert(condition, message, fn)
+
+assertWithException = (condition, message, fn) ->
+  atom.assert condition, message, (error) ->
+    throw new Error(error.message)
+
 getAncestors = (obj) ->
   ancestors = []
   current = obj
@@ -786,6 +796,8 @@ scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
     fn(event)
 
 module.exports = {
+  assert
+  assertWithException
   getAncestors
   getKeyBindingForCommand
   include

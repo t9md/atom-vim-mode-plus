@@ -7,6 +7,7 @@ _ = require 'underscore-plus'
   getBufferRangeForRowRange
   limitNumber
   isLinewiseRange
+  assertWithException
 } = require './utils'
 
 propertyStore = new Map
@@ -123,6 +124,8 @@ class SelectionWrapper
     @setProperties(properties)
 
   fixPropertiesForLinewise: ->
+    assertWithException(@hasProperties(), "trying to fixPropertiesForLinewise on properties-less selection")
+    
     {head, tail} = @getProperties()
     if @selection.isReversed()
       [start, end] = [head, tail]

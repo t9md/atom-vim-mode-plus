@@ -329,8 +329,6 @@ class Select extends Operator
           when 'characterwise'
             swrap.saveProperties(@editor)
           when 'linewise'
-            unless @editor.getSelections().every((selection) -> swrap(selection).hasProperties())
-              @assertWithException(false, "no selection property on Select operation")
             swrap.fixPropertiesForLinewise(@editor)
       @activateModeIfNecessary('visual', wise)
 
