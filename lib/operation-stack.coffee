@@ -73,11 +73,9 @@ class OperationStack
         else
           operation = new klass(@vimState, properties)
 
-      isValidOperation = false
       if @isEmpty()
         isValidOperation = true
         if (@mode is 'visual' and operation.isMotion()) or operation.isTextObject()
-          # Compliment implicit Select operator
           operation = new Select(@vimState).setTarget(operation)
       else
         isValidOperation = @peekTop().isOperator() and (operation.isMotion() or operation.isTextObject())
