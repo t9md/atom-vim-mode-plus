@@ -3,8 +3,6 @@ _ = require 'underscore-plus'
 {
   translatePointAndClip
   getRangeByTranslatePointAndClip
-  shrinkRangeEndToBeforeNewLine
-  getFirstCharacterPositionForBufferRow
   getEndOfLineForBufferRow
   getBufferRangeForRowRange
   limitNumber
