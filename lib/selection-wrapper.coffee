@@ -114,10 +114,9 @@ class SelectionWrapper
   saveProperties: ->
     properties = @captureProperties()
     unless @selection.isEmpty()
-      # We select righted in visual-mode, this translation de-effect select-right-effect
-      # so that after restoring preserved poperty we can do activate-visual mode without
-      # special care
-      endPoint = @selection.getBufferRange().end.translate([0, -1])
+      # We selectRight-ed in visual-mode, this translation de-effect select-right-effect
+      # So that we can activate-visual-mode without special translation after restoreing properties.
+      endPoint = @getBufferRange().end.translate([0, -1])
       endPoint = @selection.editor.clipBufferPosition(endPoint)
       if @selection.isReversed()
         properties.tail = endPoint
@@ -260,16 +259,13 @@ swrap.expandOverLine = (editor, options) ->
   editor.getSelections().forEach (selection) ->
     swrap(selection).expandOverLine(options)
 
-swrap.reverse = (editor) ->
-  editor.getSelections().forEach (selection) ->
-    swrap(selection).reverse()
-
 swrap.clearProperties = (editor) ->
   editor.getSelections().forEach (selection) ->
     swrap(selection).clearProperties()
 
 swrap.detectWise = (editor) ->
-  if editor.getSelections().every((selection) -> swrap(selection).detectWise() is 'linewise')
+  selectionWiseIsLinewise = (selection) -> swrap(selection).detectWise() is 'linewise'
+  if editor.getSelections().every(selectionWiseIsLinewise)
     'linewise'
   else
     'characterwise'
@@ -277,6 +273,10 @@ swrap.detectWise = (editor) ->
 swrap.saveProperties = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).saveProperties()
+
+swrap.clearProperties = (editor) ->
+  for selection in editor.getSelections()
+    swrap(selection).clearProperties()
 
 swrap.complementGoalColumn = (editor) ->
   for selection in editor.getSelections()
@@ -293,10 +293,6 @@ swrap.setWise = (editor, value) ->
 swrap.applyWise = (editor, value) ->
   for selection in editor.getSelections()
     swrap(selection).applyWise(value)
-
-swrap.clearProperties = (editor) ->
-  for selection in editor.getSelections()
-    swrap(selection).clearProperties()
 
 swrap.fixPropertiesForLinewise = (editor) ->
   for selection in editor.getSelections()
