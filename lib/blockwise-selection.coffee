@@ -16,7 +16,7 @@ class BlockwiseSelection
 
     for memberSelection in @getSelections()
       swrap(memberSelection).saveProperties()
-      swrap(memberSelection).setWise('blockwise')
+      swrap(memberSelection).setWiseProperty('blockwise')
 
   getSelections: ->
     @selections

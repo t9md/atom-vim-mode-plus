@@ -19,6 +19,7 @@ class SelectionWrapper
   getProperties: -> propertyStore.get(@selection) ? {}
   setProperties: (prop) -> propertyStore.set(@selection, prop)
   clearProperties: -> propertyStore.delete(@selection)
+  setWiseProperty: (value) -> @getProperties().wise = value
 
   setBufferRangeSafely: (range, options) ->
     if range
@@ -125,20 +126,13 @@ class SelectionWrapper
 
   fixPropertiesForLinewise: ->
     assertWithException(@hasProperties(), "trying to fixPropertiesForLinewise on properties-less selection")
-    
+
     {head, tail} = @getProperties()
     if @selection.isReversed()
       [start, end] = [head, tail]
     else
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
-
-  setWise: (value) ->
-    @saveProperties() unless @hasProperties()
-    @getProperties().wise = value
-
-  getWise: ->
-    @getProperties()?.wise ? 'characterwise'
 
   applyWise: (newWise) ->
     # NOTE:
@@ -148,11 +142,12 @@ class SelectionWrapper
       when 'characterwise'
         @translateSelectionEndAndClip('forward')
         @saveProperties()
-        @setWise('characterwise')
+        @setWiseProperty(newWise)
       when 'linewise'
         @complementGoalColumn()
         @expandOverLine()
-        @setWise('linewise')
+        @saveProperties() unless @hasProperties()
+        @setWiseProperty(newWise)
         @fixPropertiesForLinewise()
 
   complementGoalColumn: ->
@@ -238,7 +233,7 @@ class SelectionWrapper
 
   normalize: ->
     unless @selection.isEmpty()
-      if @getWise() is 'linewise'
+      if @hasProperties() and @getProperties().wise is 'linewise'
         @selectByProperties(@getProperties())
         @translateSelectionEndAndClip('backward', translate: false)
       else
@@ -282,10 +277,6 @@ swrap.complementGoalColumn = (editor) ->
 swrap.normalize = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).normalize()
-
-swrap.setWise = (editor, value) ->
-  for selection in editor.getSelections()
-    swrap(selection).setWise(value)
 
 swrap.applyWise = (editor, value) ->
   for selection in editor.getSelections()
