@@ -33,7 +33,7 @@ class OperationStack
   # Return handler
   subscribe: (handler) ->
     @operationSubscriptions.add(handler)
-    handler # DONT REMOVE
+    return handler # DONT REMOVE
 
   reset: ->
     @resetCount()

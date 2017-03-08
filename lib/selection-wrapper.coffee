@@ -51,7 +51,6 @@ class SelectionWrapper
       tail = @selection.getTailBufferPosition()
       return getPosition(which)
 
-  # options: {fromProperty}
   setBufferPositionTo: (which, options) ->
     point = @getBufferPositionFor(which, options)
     @selection.cursor.setBufferPosition(point)
@@ -106,7 +105,7 @@ class SelectionWrapper
       point = translatePointAndClip(editor, tailPoint, 'backward')
       new Range(point, tailPoint)
     else
-      point = translatePointAndClip(editor, tailPoint, 'forward', hello: 'when getting tailRange')
+      point = translatePointAndClip(editor, tailPoint, 'forward')
       new Range(tailPoint, point)
 
   saveProperties: ->
