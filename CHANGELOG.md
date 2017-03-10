@@ -1,3 +1,13 @@
+# 0.84.0:
+- Fix, Improve: #689 Occurrence was not worked for the word which include non-word char such as `$` and `@`.
+  - E.g. `$var` in Perl, PHP.
+  - This was because when finding occurrences, it searched by `\bword\b` pattern.
+  - But `\b\$var\b` never match `$var`, in this case find by `\$var\b` pattern from this release( auto relax `\b` boundary ).
+- Improve: Preserve fold on `g v`
+- Internal:
+  - Cleanup selection-wrapper code.
+  - Remove unused functions from `utils.coffee`
+
 # 0.83.0:
 - Support: set minimum engines to `^1.14.0`
 - Fix: When `o` was executed in `vL` mode, didn't correctly restore column on shift to `vC` or `normal`.
