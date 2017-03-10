@@ -257,8 +257,7 @@ class Operator extends Base
     return @targetSelected if @targetSelected?
     @mutationManager.init(useMarker: @needStay() and @stayByMarker)
 
-    # Currently only motion have forceWise methods
-    @target.forceWise?(@wise) if @wise?
+    @target.forceWise(@wise) if @wise? and @target.isMotion()
     @emitWillSelectTarget()
 
     # Allow cursor position adjustment 'on-will-select-target' hook.
@@ -323,7 +322,8 @@ class Select extends Operator
 
   execute: ->
     @startMutation(@selectTarget.bind(this))
-    if @target.isTextObject() and wise = @target.getWise()
+    # [FIXME] Don't use wise as status
+    if @target.isTextObject() and wise = @target.wise
       if @isMode('visual')
         switch wise
           when 'characterwise'

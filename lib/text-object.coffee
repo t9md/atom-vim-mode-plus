@@ -18,7 +18,6 @@ swrap = require './selection-wrapper'
   getBufferRows
   getValidVimBufferRow
   trimRange
-
   sortRanges
   pointIsAtEndOfLine
 } = require './utils'
@@ -43,26 +42,18 @@ class TextObject extends Base
   isSuportCount: ->
     @supportCount
 
-  getWise: ->
-    if @wise? and @getOperator().isOccurrence()
-      'characterwise'
-    else
-      @wise
-
-  isCharacterwise: ->
-    @getWise() is 'characterwise'
-
   isLinewise: ->
-    @getWise() is 'linewise'
+    @wise is 'linewise'
 
   isBlockwise: ->
-    @getWise() is 'blockwise'
+    @wise is 'blockwise'
 
   getNormalizedHeadBufferPosition: (selection) ->
     head = selection.getHeadBufferPosition()
     if @isMode('visual') and not selection.isReversed()
-      head = translatePointAndClip(@editor, head, 'backward')
-    head
+      translatePointAndClip(@editor, head, 'backward')
+    else
+      head
 
   getNormalizedHeadScreenPosition: (selection) ->
     bufferPosition = @getNormalizedHeadBufferPosition(selection)
@@ -104,6 +95,7 @@ class TextObject extends Base
     else
       @wise = null
 
+  # Return true or false
   selectTextObject: (selection) ->
     if range = @getRange(selection)
       oldRange = selection.getBufferRange()

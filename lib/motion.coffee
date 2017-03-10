@@ -59,9 +59,6 @@ class Motion extends Base
   isVerticalMotion: ->
     @verticalMotion
 
-  isCharacterwise: ->
-    @wise is 'characterwise'
-
   isLinewise: ->
     @wise is 'linewise'
 
