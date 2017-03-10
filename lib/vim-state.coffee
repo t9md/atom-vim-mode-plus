@@ -329,7 +329,11 @@ class VimState
     if @isMode('visual', 'blockwise')
       properties = @getLastBlockwiseSelection()?.getCharacterwiseProperties()
     else
-      properties = swrap(@editor.getLastSelection()).captureProperties()
+      selection = @editor.getLastSelection()
+      if swrap(selection).hasProperties()
+        properties = swrap(selection).getProperties()
+      else
+        properties = swrap(@editor.getLastSelection()).captureProperties()
 
     return unless properties?
 
@@ -338,6 +342,7 @@ class VimState
       @mark.setRange('<', '>', [tail, head])
     else
       @mark.setRange('<', '>', [head, tail])
+
     @previousSelection = {properties, @submode}
 
   # Persistent selection
