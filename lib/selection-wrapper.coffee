@@ -1,4 +1,4 @@
-{Range, Point} = require 'atom'
+{Range, Point, Disposable} = require 'atom'
 {
   translatePointAndClip
   getRangeByTranslatePointAndClip
@@ -282,5 +282,14 @@ swrap.applyWise = (editor, value) ->
 swrap.fixPropertiesForLinewise = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).fixPropertiesForLinewise()
+
+# Return function to restore
+# Used in vmp-move-selected-text
+swrap.switchToLinewise = (editor) ->
+  swrap.saveProperties(editor)
+  swrap.applyWise(editor, 'linewise')
+  new Disposable ->
+    swrap.normalize(editor)
+    swrap.applyWise(editor, 'characterwise')
 
 module.exports = swrap
