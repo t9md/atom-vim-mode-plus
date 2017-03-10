@@ -329,12 +329,9 @@ class VimState
     if @isMode('visual', 'blockwise')
       properties = @getLastBlockwiseSelection()?.getCharacterwiseProperties()
     else
-      selection = @editor.getLastSelection()
-      if swrap(selection).hasProperties()
-        properties = swrap(selection).getProperties()
-      else
-        properties = swrap(@editor.getLastSelection()).captureProperties()
-
+      # FIXME: Want to do, but need more overhaul to get property-restored-end-position right.
+      # properties = swrap(@editor.getLastSelection()).getProperties()
+      properties = swrap(@editor.getLastSelection()).captureProperties()
     return unless properties?
 
     {head, tail} = properties
