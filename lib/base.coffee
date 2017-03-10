@@ -266,7 +266,7 @@ class Base
     if @hasTarget()
       str += ", target=#{@target.getName()}, target.wise=#{@target.wise} "
     else if @hasOperator()
-      str += "wise=#{@wise} , operator=#{@operator.getName()}"
+      str += ", wise=#{@wise} , operator=#{@operator.getName()}"
     else
       str
 

@@ -65,6 +65,7 @@ class TextObject extends Base
       @getOperator().instanceof('Select')
 
   execute: ->
+    @selectSucceeded = null
     # Whennever TextObject is executed, it has @operator
     # Called from Operator::selectTarget()
     #  - `v i p`, is `Select` operator with @target = `InnerParagraph`.
@@ -75,12 +76,12 @@ class TextObject extends Base
       throw new Error('in TextObject: Must not happen')
 
   select: ->
-    selectResults = []
     @countTimes @getCount(), ({stop}) =>
       @stopSelection = stop
 
       for selection in @editor.getSelections()
-        selectResults.push(@selectTextObject(selection))
+        result = @selectTextObject(selection)
+        @selectSucceeded = result if result
 
       unless @isSuportCount()
         stop() # FIXME: quick-fix for #560
@@ -90,10 +91,7 @@ class TextObject extends Base
         swrap(selection).clipPropertiesTillEndOfLine()
 
     @editor.mergeIntersectingSelections()
-    if selectResults.some((value) -> value)
-      @wise ?= swrap.detectWise(@editor)
-    else
-      @wise = null
+    @wise ?= swrap.detectWise(@editor)
 
   # Return true or false
   selectTextObject: (selection) ->
@@ -685,9 +683,10 @@ class PreviousSelection extends TextObject
   select: ->
     {properties, submode} = @vimState.previousSelection
     if properties? and submode?
+      @selectSucceeded = true
+      @wise = submode
       selection = @editor.getLastSelection()
       swrap(selection).selectByProperties(properties, keepGoalColumn: false)
-      @wise = submode
 
 class PersistentSelection extends TextObject
   @extend(false)
@@ -695,6 +694,7 @@ class PersistentSelection extends TextObject
   select: ->
     {persistentSelection} = @vimState
     unless persistentSelection.isEmpty()
+      @selectSucceeded = true
       persistentSelection.setSelectedBufferRanges()
       @wise = swrap.detectWise(@editor)
 class APersistentSelection extends PersistentSelection

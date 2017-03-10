@@ -323,7 +323,8 @@ class Select extends Operator
   execute: ->
     @startMutation(@selectTarget.bind(this))
     # [FIXME] Don't use wise as status
-    if @target.isTextObject() and wise = @target.wise
+    if @target.isTextObject() and @target.selectSucceeded
+      wise = @target.wise
       if @isMode('visual')
         switch wise
           when 'characterwise'
