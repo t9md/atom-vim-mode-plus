@@ -66,6 +66,7 @@ class TextObject extends Base
 
   execute: ->
     @selectSucceeded = null
+
     # Whennever TextObject is executed, it has @operator
     # Called from Operator::selectTarget()
     #  - `v i p`, is `Select` operator with @target = `InnerParagraph`.
@@ -80,8 +81,8 @@ class TextObject extends Base
       @stopSelection = stop
 
       for selection in @editor.getSelections()
-        result = @selectTextObject(selection)
-        @selectSucceeded = result if result
+        if @selectTextObject(selection)
+          @selectSucceeded = true
 
       unless @isSuportCount()
         stop() # FIXME: quick-fix for #560
@@ -113,10 +114,10 @@ class TextObject extends Base
       if newRange.isEqual(oldRange)
         @stopSelection() # FIXME: quick-fix for #560
 
-      true
+      return true
     else
       @stopSelection() # FIXME: quick-fix for #560
-      false
+      return false
 
   getRange: ->
     # I want to
