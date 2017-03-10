@@ -1,3 +1,6 @@
+# 0.84.1:
+- Fix: To fix vim-mode-plus-move-selected-text degradation.
+
 # 0.84.0:
 - Fix, Improve: #689 Occurrence was not worked for the word which include non-word char such as `$` and `@`.
   - E.g. `$var` in Perl, PHP.
