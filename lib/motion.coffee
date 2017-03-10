@@ -11,7 +11,6 @@ _ = require 'underscore-plus'
   getValidVimScreenRow, getValidVimBufferRow
   moveCursorToFirstCharacterAtRow
   sortRanges
-  getIndentLevelForBufferRow
   pointIsOnWhiteSpace
   moveCursorToNextNonWhitespace
   isEmptyRow
@@ -1019,9 +1018,9 @@ class MoveToPreviousFoldStartWithSameIndent extends MoveToPreviousFoldStart
   @extend()
   @description: "Move to previous same-indented fold start"
   detectRow: (cursor) ->
-    baseIndentLevel = getIndentLevelForBufferRow(@editor, cursor.getBufferRow())
+    baseIndentLevel = @getIndentLevelForBufferRow(cursor.getBufferRow())
     for row in @getScanRows(cursor)
-      if getIndentLevelForBufferRow(@editor, row) is baseIndentLevel
+      if @getIndentLevelForBufferRow(row) is baseIndentLevel
         return row
     null
 

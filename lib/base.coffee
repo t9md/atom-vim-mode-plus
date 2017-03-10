@@ -7,6 +7,8 @@ Delegato = require 'delegato'
   getVimLastScreenRow
   getWordBufferRangeAndKindAtBufferPosition
   getFirstCharacterPositionForBufferRow
+  getBufferRangeForRowRange
+  getIndentLevelForBufferRow
   scanEditorInDirection
 } = require './utils'
 swrap = require './selection-wrapper'
@@ -206,6 +208,12 @@ class Base
 
   getFirstCharacterPositionForBufferRow: (row) ->
     getFirstCharacterPositionForBufferRow(@editor, row)
+
+  getBufferRangeForRowRange: (rowRange) ->
+    getBufferRangeForRowRange(@editor, rowRange)
+
+  getIndentLevelForBufferRow: (row) ->
+    getIndentLevelForBufferRow(@editor, row)
 
   scanForward: (args...) ->
     scanEditorInDirection(@editor, 'forward', args...)
