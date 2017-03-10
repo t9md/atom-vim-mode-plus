@@ -302,7 +302,7 @@ class Operator extends Base
     options =
       stay: @needStayOnRestore()
       occurrenceSelected: @occurrenceSelected
-      isBlockwise: @target?.isBlockwise?()
+      isBlockwise: @target.isBlockwise()
 
     @mutationManager.restoreCursorPositions(options)
     @emitDidRestoreCursorPositions()
@@ -322,7 +322,7 @@ class Select extends Operator
 
   execute: ->
     @startMutation(@selectTarget.bind(this))
-    # [FIXME] Don't use wise as status
+
     if @target.isTextObject() and @target.selectSucceeded
       wise = @target.wise
       if @isMode('visual')
