@@ -1,4 +1,4 @@
-{Range, Point} = require 'atom'
+{Range, Point, Disposable} = require 'atom'
 {
   translatePointAndClip
   getRangeByTranslatePointAndClip
@@ -186,6 +186,19 @@ class SelectionWrapper
     @setBufferRange([tail, head], options)
     @setReversedState(head.isLessThan(tail))
 
+  applyColumnFromProperties: ->
+    selectionProperties = @getProperties()
+    return unless selectionProperties?
+    {head, tail} = selectionProperties
+
+    if @selection.isReversed()
+      [start, end] = [head, tail]
+    else
+      [start, end] = [tail, head]
+    [start.row, end.row] = @selection.getBufferRowRange()
+    @setBufferRange([start, end])
+    @translateSelectionEndAndClip('backward', translate: false)
+
   # set selections bufferRange with default option {autoscroll: false, preserveFolds: true}
   setBufferRange: (range, options={}) ->
     if options.keepGoalColumn ? true
@@ -231,8 +244,7 @@ class SelectionWrapper
   normalize: ->
     unless @selection.isEmpty()
       if @hasProperties() and @getProperties().wise is 'linewise'
-        @selectByProperties(@getProperties())
-        @translateSelectionEndAndClip('backward', translate: false)
+        @applyColumnFromProperties()
       else
         @translateSelectionEndAndClip('backward')
     @clearProperties()
@@ -270,5 +282,14 @@ swrap.applyWise = (editor, value) ->
 swrap.fixPropertiesForLinewise = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).fixPropertiesForLinewise()
+
+# Return function to restore
+# Used in vmp-move-selected-text
+swrap.switchToLinewise = (editor) ->
+  swrap.saveProperties(editor)
+  swrap.applyWise(editor, 'linewise')
+  new Disposable ->
+    swrap.normalize(editor)
+    swrap.applyWise(editor, 'characterwise')
 
 module.exports = swrap
