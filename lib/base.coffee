@@ -105,7 +105,6 @@ class Base
 
   # Intended to be used by TextObject or Motion
   operator: null
-  hasOperator: -> @operator?
   getOperator: -> @operator
   setOperator: (@operator) -> @operator
   isAsTargetExceptSelect: ->
@@ -265,7 +264,7 @@ class Base
     str = @getName()
     if @hasTarget()
       str += ", target=#{@target.getName()}, target.wise=#{@target.wise} "
-    else if @hasOperator()
+    else if @operator?
       str += ", wise=#{@wise} , operator=#{@operator.getName()}"
     else
       str

@@ -60,12 +60,16 @@ class TextObject extends Base
     @editor.screenPositionForBufferPosition(bufferPosition)
 
   needToKeepColumn: ->
-    @wise is 'linewise' and
+    @isLinewise() and
       @getConfig('keepColumnOnSelectTextObject') and
       @getOperator().instanceof('Select')
 
-  execute: ->
+  resetState: ->
     @selectSucceeded = null
+    @stopSelection = null
+
+  execute: ->
+    @resetState()
 
     # Whennever TextObject is executed, it has @operator
     # Called from Operator::selectTarget()
@@ -78,20 +82,15 @@ class TextObject extends Base
 
   select: ->
     @countTimes @getCount(), ({stop}) =>
-      @stopSelection = stop
+      @stopSelection ?= stop
+      @stopSelection() unless @isSuportCount() # quick-fix for #560
 
       for selection in @editor.getSelections()
         if @selectTextObject(selection)
           @selectSucceeded = true
 
-      unless @isSuportCount()
-        stop() # FIXME: quick-fix for #560
-
-    if @needToKeepColumn()
-      for selection in @editor.getSelections()
-        swrap(selection).clipPropertiesTillEndOfLine()
-
     @editor.mergeIntersectingSelections()
+    # Some TextObject's wise is NOT deterministic. It has to be detected from selected range.
     @wise ?= swrap.detectWise(@editor)
 
   # Return true or false
