@@ -188,8 +188,8 @@ class CurrentSelection extends Motion
       super
     else
       for cursor in @editor.getCursors() when pointInfo = @pointInfoByCursor.get(cursor)
-        {cursorPosition, startOfSelection, atEOL} = pointInfo
-        if atEOL or cursorPosition.isEqual(cursor.getBufferPosition())
+        {cursorPosition, startOfSelection} = pointInfo
+        if cursorPosition.isEqual(cursor.getBufferPosition())
           cursor.setBufferPosition(startOfSelection)
       super
 
@@ -203,8 +203,7 @@ class CurrentSelection extends Motion
       startOfSelection = cursor.selection.getBufferRange().start
       @onDidFinishOperation =>
         cursorPosition = cursor.getBufferPosition()
-        atEOL = cursor.isAtEndOfLine()
-        @pointInfoByCursor.set(cursor, {startOfSelection, cursorPosition, atEOL})
+        @pointInfoByCursor.set(cursor, {startOfSelection, cursorPosition})
 
 class MoveLeft extends Motion
   @extend()
