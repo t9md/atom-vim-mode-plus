@@ -27,6 +27,7 @@ class TextObject extends Base
   @extend(false)
   wise: 'characterwise'
   supportCount: false # FIXME #472, #66
+  selectOnce: false
 
   constructor: ->
     @constructor::inner = @getName().startsWith('Inner')
@@ -38,9 +39,6 @@ class TextObject extends Base
 
   isA: ->
     not @isInner()
-
-  isSuportCount: ->
-    @supportCount
 
   isLinewise: ->
     @wise is 'linewise'
@@ -64,7 +62,6 @@ class TextObject extends Base
 
   resetState: ->
     @selectSucceeded = null
-    @stopSelection = null
 
   execute: ->
     @resetState()
@@ -80,12 +77,14 @@ class TextObject extends Base
 
   select: ->
     @countTimes @getCount(), ({stop}) =>
-      @stopSelection ?= stop
-      @stopSelection() unless @isSuportCount() # quick-fix for #560
-
+      stop() unless @supportCount # quick-fix for #560
       for selection in @editor.getSelections()
+        oldRange = selection.getBufferRange()
         if @selectTextObject(selection)
           @selectSucceeded = true
+        if selection.getBufferRange().isEqual(oldRange)
+          stop()
+        break if @selectOnce
 
     @editor.mergeIntersectingSelections()
     # Some TextObject's wise is NOT deterministic. It has to be detected from selected range.
@@ -94,8 +93,6 @@ class TextObject extends Base
   # Return true or false
   selectTextObject: (selection) ->
     if range = @getRange(selection)
-      oldRange = selection.getBufferRange()
-
       needToKeepColumn = @needToKeepColumn()
       if needToKeepColumn and not @isMode('visual', 'linewise')
         @vimState.modeManager.activate('visual', 'linewise')
@@ -105,20 +102,15 @@ class TextObject extends Base
         autoscroll: selection.isLastSelection() and not @operator.supportEarlySelect
         keepGoalColumn: needToKeepColumn
       }
-      swrap(selection).setBufferRangeSafely(range, options)
-
-      newRange = selection.getBufferRange()
-      if newRange.isEqual(oldRange)
-        @stopSelection() # FIXME: quick-fix for #560
+      swrap(selection).setBufferRange(range, options)
 
       return true
     else
-      @stopSelection() # FIXME: quick-fix for #560
       return false
 
+  # to override
   getRange: ->
-    # I want to
-    # throw new Error('text-object must respond to range by getRange()!')
+    null
 
 # Section: Word
 # =========================
@@ -591,10 +583,10 @@ class InnerCurrentLine extends CurrentLine
 
 class Entire extends TextObject
   wise: 'linewise'
+  selectOnce: true
   @extend(false)
 
   getRange: (selection) ->
-    @stopSelection()
     @editor.buffer.getRange()
 class AEntire extends Entire
   @extend()
@@ -603,12 +595,13 @@ class InnerEntire extends Entire
 
 class Empty extends TextObject
   @extend(false)
+  selectOnce: true
 
 class LatestChange extends TextObject
-  wise: null
   @extend(false)
+  wise: null
+  selectOnce: true
   getRange: ->
-    @stopSelection()
     @vimState.mark.getRange('[', ']')
 class ALatestChange extends LatestChange
   @extend()
@@ -702,9 +695,9 @@ class InnerPersistentSelection extends PersistentSelection
 
 class VisibleArea extends TextObject
   @extend(false)
+  selectOnce: true
 
   getRange: (selection) ->
-    @stopSelection()
     # [BUG?] Need translate to shilnk top and bottom to fit actual row.
     # The reason I need -2 at bottom is because of status bar?
     bufferRange = getVisibleBufferRange(@editor)
