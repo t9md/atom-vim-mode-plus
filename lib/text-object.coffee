@@ -86,10 +86,7 @@ class TextObject extends Base
       # Prevent autoscroll to closing char on `change-surround-any-pair`.
       autoscroll = selection.isLastSelection() and not @operator.supportEarlySelect
       swrap(selection).setBufferRange(range, {autoscroll})
-
       return true
-    else
-      return false
 
   # to override
   getRange: ->
@@ -632,9 +629,7 @@ class SearchMatchForward extends TextObject
     if range = @getRange(selection)
       swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
       selection.cursor.autoscroll()
-      true
-    else
-      false
+      return true
 class SearchMatchBackward extends SearchMatchForward
   @extend()
   backward: true
@@ -654,25 +649,24 @@ class SearchMatchBackward extends SearchMatchForward
 class PreviousSelection extends TextObject
   @extend()
   wise: null
+  selectOnce: true
 
-  select: ->
+  selectTextObject: (selection) ->
     {properties, submode} = @vimState.previousSelection
     if properties? and submode?
-      @selectSucceeded = true
       @wise = submode
       selection = @editor.getLastSelection()
       swrap(selection).selectByProperties(properties, keepGoalColumn: false)
+      return true
 
 class PersistentSelection extends TextObject
   @extend(false)
   wise: null
 
-  select: ->
-    {persistentSelection} = @vimState
-    unless persistentSelection.isEmpty()
-      persistentSelection.setSelectedBufferRanges()
-      @selectSucceeded = true
-      @wise = swrap.detectWise(@editor)
+  selectTextObject: (selection) ->
+    if @vimState.hasPersistentSelections()
+      @vimState.persistentSelection.setSelectedBufferRanges()
+      return true
 class APersistentSelection extends PersistentSelection
   @extend()
 class InnerPersistentSelection extends PersistentSelection
