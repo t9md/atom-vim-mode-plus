@@ -329,8 +329,9 @@ class VimState
     if @isMode('visual', 'blockwise')
       properties = @getLastBlockwiseSelection()?.getCharacterwiseProperties()
     else
+      # FIXME: Want to do, but need more overhaul to get property-restored-end-position right.
+      # properties = swrap(@editor.getLastSelection()).getProperties()
       properties = swrap(@editor.getLastSelection()).captureProperties()
-
     return unless properties?
 
     {head, tail} = properties
@@ -338,6 +339,7 @@ class VimState
       @mark.setRange('<', '>', [tail, head])
     else
       @mark.setRange('<', '>', [head, tail])
+
     @previousSelection = {properties, @submode}
 
   # Persistent selection

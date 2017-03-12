@@ -131,50 +131,36 @@ class SelectionWrapper
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
 
-  applyWise: (newWise) ->
+    # Clipt property till one column left before EOL
+    # When `keepColumnOnSelectTextObject` was true,
+    #  cursor marker in vL-mode exceed EOL
+    # FIXME: respect goalcolumn
+    editor = @selection.editor
+    startEOL = getEndOfLineForBufferRow(editor, start.row)
+    endEOL = getEndOfLineForBufferRow(editor, end.row)
+    start.column = Math.min(start.column, limitNumber(startEOL.column - 1, min: 0))
+    end.column = Math.min(end.column, limitNumber(endEOL.column - 1, min: 0))
+
+  # wise must be 'characterwise' or 'linewise'
+  applyWise: (wise) ->
     # NOTE:
     # Must call against normalized selection
     # Don't call non-normalized selection
-    switch newWise
+    switch wise
       when 'characterwise'
         @translateSelectionEndAndClip('forward')
         @saveProperties()
-        @setWiseProperty(newWise)
       when 'linewise'
         @complementGoalColumn()
-        @expandOverLine()
         @saveProperties() unless @hasProperties()
-        @setWiseProperty(newWise)
-        @fixPropertiesForLinewise()
+        @expandOverLine()
+
+    @setWiseProperty(wise)
 
   complementGoalColumn: ->
     unless @selection.cursor.goalColumn?
       column = @getBufferPositionFor('head', from: ['property', 'selection']).column
       @selection.cursor.goalColumn = column
-
-  # [FIXME]
-  # When `keepColumnOnSelectTextObject` was true,
-  #  cursor marker in vL-mode exceed EOL if initial row is longer than endRow of
-  #  selected text-object.
-  # To avoid this wired cursor position representation, this fucntion clip
-  #  selection properties not exceeds EOL.
-  # But this should be temporal workaround, depending this kind of ad-hoc adjustment is
-  # basically bad in the long run.
-  clipPropertiesTillEndOfLine: ->
-    return unless @hasProperties()
-
-    editor = @selection.editor
-    headRowEOL = getEndOfLineForBufferRow(editor, @getHeadRow())
-    tailRowEOL = getEndOfLineForBufferRow(editor, @getTailRow())
-    headMaxColumn = limitNumber(headRowEOL.column - 1, min: 0)
-    tailMaxColumn = limitNumber(tailRowEOL.column - 1, min: 0)
-
-    properties = @getProperties()
-    if properties.head.column > headMaxColumn
-      properties.head.column = headMaxColumn
-
-    if properties.tail.column > tailMaxColumn
-      properties.tail.column = tailMaxColumn
 
   captureProperties: ->
     head = @selection.getHeadBufferPosition()
@@ -244,7 +230,9 @@ class SelectionWrapper
   normalize: ->
     unless @selection.isEmpty()
       if @hasProperties() and @getProperties().wise is 'linewise'
-        @applyColumnFromProperties()
+        @fixPropertiesForLinewise()
+        @selectByProperties(@getProperties())
+        @translateSelectionEndAndClip('backward', translate: false)
       else
         @translateSelectionEndAndClip('backward')
     @clearProperties()

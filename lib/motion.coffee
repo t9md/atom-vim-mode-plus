@@ -11,7 +11,6 @@ _ = require 'underscore-plus'
   getValidVimScreenRow, getValidVimBufferRow
   moveCursorToFirstCharacterAtRow
   sortRanges
-  getIndentLevelForBufferRow
   pointIsOnWhiteSpace
   moveCursorToNextNonWhitespace
   isEmptyRow
@@ -59,9 +58,6 @@ class Motion extends Base
 
   isVerticalMotion: ->
     @verticalMotion
-
-  isCharacterwise: ->
-    @wise is 'characterwise'
 
   isLinewise: ->
     @wise is 'linewise'
@@ -192,8 +188,8 @@ class CurrentSelection extends Motion
       super
     else
       for cursor in @editor.getCursors() when pointInfo = @pointInfoByCursor.get(cursor)
-        {cursorPosition, startOfSelection, atEOL} = pointInfo
-        if atEOL or cursorPosition.isEqual(cursor.getBufferPosition())
+        {cursorPosition, startOfSelection} = pointInfo
+        if cursorPosition.isEqual(cursor.getBufferPosition())
           cursor.setBufferPosition(startOfSelection)
       super
 
@@ -207,8 +203,7 @@ class CurrentSelection extends Motion
       startOfSelection = cursor.selection.getBufferRange().start
       @onDidFinishOperation =>
         cursorPosition = cursor.getBufferPosition()
-        atEOL = cursor.isAtEndOfLine()
-        @pointInfoByCursor.set(cursor, {startOfSelection, cursorPosition, atEOL})
+        @pointInfoByCursor.set(cursor, {startOfSelection, cursorPosition})
 
 class MoveLeft extends Motion
   @extend()
@@ -1019,9 +1014,9 @@ class MoveToPreviousFoldStartWithSameIndent extends MoveToPreviousFoldStart
   @extend()
   @description: "Move to previous same-indented fold start"
   detectRow: (cursor) ->
-    baseIndentLevel = getIndentLevelForBufferRow(@editor, cursor.getBufferRow())
+    baseIndentLevel = @getIndentLevelForBufferRow(cursor.getBufferRow())
     for row in @getScanRows(cursor)
-      if getIndentLevelForBufferRow(@editor, row) is baseIndentLevel
+      if @getIndentLevelForBufferRow(row) is baseIndentLevel
         return row
     null
 
