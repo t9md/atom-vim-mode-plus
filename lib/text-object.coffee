@@ -60,9 +60,7 @@ class TextObject extends Base
     @editor.screenPositionForBufferPosition(bufferPosition)
 
   needToKeepColumn: ->
-    @isLinewise() and
-      @getConfig('keepColumnOnSelectTextObject') and
-      @getOperator().instanceof('Select')
+    @isLinewise() and @getConfig('keepColumnOnSelectTextObject') and @operator.instanceof('Select')
 
   resetState: ->
     @selectSucceeded = null
@@ -104,7 +102,7 @@ class TextObject extends Base
 
       # Prevent autoscroll to closing char on `change-surround-any-pair`.
       options = {
-        autoscroll: selection.isLastSelection() and not @getOperator().supportEarlySelect
+        autoscroll: selection.isLastSelection() and not @operator.supportEarlySelect
         keepGoalColumn: needToKeepColumn
       }
       swrap(selection).setBufferRangeSafely(range, options)
@@ -126,6 +124,7 @@ class TextObject extends Base
 # =========================
 class Word extends TextObject
   @extend(false)
+  wise: 'characterwise'
 
   getRange: (selection) ->
     point = @getNormalizedHeadBufferPosition(selection)
@@ -173,11 +172,11 @@ class InnerSubword extends Subword
 # =========================
 class Pair extends TextObject
   @extend(false)
+  wise: 'characterwise'
+  supportCount: true
   allowNextLine: null
   adjustInnerRange: true
   pair: null
-  wise: 'characterwise'
-  supportCount: true
 
   isAllowNextLine: ->
     @allowNextLine ? (@pair? and @pair[0] isnt @pair[1])
@@ -579,6 +578,7 @@ class InnerFunction extends Function
 # Section: Other
 # =========================
 class CurrentLine extends TextObject
+  wise: 'characterwise'
   @extend(false)
   getRange: (selection) ->
     row = @getNormalizedHeadBufferPosition(selection).row
@@ -593,6 +593,7 @@ class InnerCurrentLine extends CurrentLine
   @extend()
 
 class Entire extends TextObject
+  wise: 'linewise'
   @extend(false)
 
   getRange: (selection) ->
@@ -620,6 +621,7 @@ class InnerLatestChange extends LatestChange # No diff from ALatestChange
 
 class SearchMatchForward extends TextObject
   @extend()
+  wise: 'characterwise'
   backward: false
 
   findMatch: (fromPoint, pattern) ->
@@ -703,6 +705,7 @@ class InnerPersistentSelection extends PersistentSelection
 
 class VisibleArea extends TextObject # 822 to 863
   @extend(false)
+  wise: 'characterwise'
 
   getRange: (selection) ->
     @stopSelection()
