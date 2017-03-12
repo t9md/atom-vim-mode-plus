@@ -10,7 +10,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 {
   getLineTextToBufferPosition
-  getCodeFoldRowRangesContainesForRow
+  getCodeFoldRowRanges
   isIncludeFunctionScopeForRow
   expandRangeToWhiteSpaces
   getVisibleBufferRange
@@ -523,7 +523,6 @@ class InnerComment extends Comment
 class Fold extends TextObject
   @extend(false)
   wise: 'linewise'
-  includeStartRow: true
 
   adjustRowRange: (rowRange) ->
     return rowRange if @isA()
@@ -535,7 +534,9 @@ class Fold extends TextObject
     [startRow, endRow]
 
   getFoldRowRangesContainsForRow: (row) ->
-    getCodeFoldRowRangesContainesForRow(@editor, row, {@includeStartRow}).reverse()
+    getCodeFoldRowRanges(@editor)
+      .filter ([startRow, endRow]) -> startRow <= row <= endRow
+      .reverse()
 
   getRange: (selection) ->
     rowRanges = @getFoldRowRangesContainsForRow(swrap(selection).getStartRow())
@@ -557,8 +558,6 @@ class InnerFold extends Fold
 # NOTE: Function range determination is depending on fold.
 class Function extends Fold
   @extend(false)
-  includeStartRow: false
-
   # Some language don't include closing `}` into fold.
   scopeNamesOmittingEndRow: ['source.go', 'source.elixir']
 
