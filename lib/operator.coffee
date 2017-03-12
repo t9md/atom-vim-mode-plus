@@ -144,11 +144,8 @@ class Operator extends Base
 
     # This change cursor position.
     if @selectPersistentSelectionIfNecessary()
-      if @isMode('visual')
-        # [FIXME] Sync selection-wise this phase?
-        # e.g. selected persisted selection convert to vB sel in vB-mode?
-        null
-      else
+      # [FIXME] selection-wise is not synched if it already visual-mode
+      unless @isMode('visual')
         @vimState.modeManager.activate('visual', swrap.detectWise(@editor))
 
     @target = 'CurrentSelection' if @isMode('visual') and @acceptCurrentSelection
@@ -355,7 +352,7 @@ class SelectOccurrence extends Operator
   execute: ->
     @startMutation =>
       if @selectTarget()
-        @activateModeIfNecessary('visual', swrap.detectWise(@editor))
+        @activateModeIfNecessary('visual', 'characterwise')
 
 # Persistent Selection
 # =========================
