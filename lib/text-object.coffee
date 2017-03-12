@@ -51,10 +51,6 @@ class TextObject extends Base
     else
       head
 
-  getNormalizedHeadScreenPosition: (selection) ->
-    bufferPosition = @getNormalizedHeadBufferPosition(selection)
-    @editor.screenPositionForBufferPosition(bufferPosition)
-
   resetState: ->
     @selectSucceeded = null
 
