@@ -25,7 +25,7 @@ swrap = require './selection-wrapper'
 
 class TextObject extends Base
   @extend(false)
-  wise: null
+  wise: 'characterwise'
   supportCount: false # FIXME #472, #66
 
   constructor: ->
@@ -124,7 +124,6 @@ class TextObject extends Base
 # =========================
 class Word extends TextObject
   @extend(false)
-  wise: 'characterwise'
 
   getRange: (selection) ->
     point = @getNormalizedHeadBufferPosition(selection)
@@ -172,7 +171,6 @@ class InnerSubword extends Subword
 # =========================
 class Pair extends TextObject
   @extend(false)
-  wise: 'characterwise'
   supportCount: true
   allowNextLine: null
   adjustInnerRange: true
@@ -578,7 +576,6 @@ class InnerFunction extends Function
 # Section: Other
 # =========================
 class CurrentLine extends TextObject
-  wise: 'characterwise'
   @extend(false)
   getRange: (selection) ->
     row = @getNormalizedHeadBufferPosition(selection).row
@@ -610,6 +607,7 @@ class Empty extends TextObject
   @extend(false)
 
 class LatestChange extends TextObject
+  wise: null
   @extend(false)
   getRange: ->
     @stopSelection()
@@ -621,7 +619,6 @@ class InnerLatestChange extends LatestChange # No diff from ALatestChange
 
 class SearchMatchForward extends TextObject
   @extend()
-  wise: 'characterwise'
   backward: false
 
   findMatch: (fromPoint, pattern) ->
@@ -680,6 +677,7 @@ class SearchMatchBackward extends SearchMatchForward
 # is always vC range.
 class PreviousSelection extends TextObject
   @extend()
+  wise: null
 
   select: ->
     {properties, submode} = @vimState.previousSelection
@@ -691,12 +689,13 @@ class PreviousSelection extends TextObject
 
 class PersistentSelection extends TextObject
   @extend(false)
+  wise: null
 
   select: ->
     {persistentSelection} = @vimState
     unless persistentSelection.isEmpty()
-      @selectSucceeded = true
       persistentSelection.setSelectedBufferRanges()
+      @selectSucceeded = true
       @wise = swrap.detectWise(@editor)
 class APersistentSelection extends PersistentSelection
   @extend()
@@ -705,7 +704,6 @@ class InnerPersistentSelection extends PersistentSelection
 
 class VisibleArea extends TextObject # 822 to 863
   @extend(false)
-  wise: 'characterwise'
 
   getRange: (selection) ->
     @stopSelection()
