@@ -141,20 +141,21 @@ class SelectionWrapper
     start.column = Math.min(start.column, limitNumber(startEOL.column - 1, min: 0))
     end.column = Math.min(end.column, limitNumber(endEOL.column - 1, min: 0))
 
-  applyWise: (newWise) ->
+  # wise must be 'characterwise' or 'linewise'
+  applyWise: (wise) ->
     # NOTE:
     # Must call against normalized selection
     # Don't call non-normalized selection
-    switch newWise
+    switch wise
       when 'characterwise'
         @translateSelectionEndAndClip('forward')
         @saveProperties()
-        @setWiseProperty(newWise)
       when 'linewise'
         @complementGoalColumn()
-        @expandOverLine()
         @saveProperties() unless @hasProperties()
-        @setWiseProperty(newWise)
+        @expandOverLine()
+
+    @setWiseProperty(wise)
 
   complementGoalColumn: ->
     unless @selection.cursor.goalColumn?
