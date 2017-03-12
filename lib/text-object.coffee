@@ -600,8 +600,6 @@ class AEntire extends Entire
   @extend()
 class InnerEntire extends Entire
   @extend()
-class All extends Entire # Alias as accessible name
-  @extend(false)
 
 class Empty extends TextObject
   @extend(false)
@@ -702,7 +700,7 @@ class APersistentSelection extends PersistentSelection
 class InnerPersistentSelection extends PersistentSelection
   @extend()
 
-class VisibleArea extends TextObject # 822 to 863
+class VisibleArea extends TextObject
   @extend(false)
 
   getRange: (selection) ->
@@ -717,34 +715,4 @@ class VisibleArea extends TextObject # 822 to 863
 class AVisibleArea extends VisibleArea
   @extend()
 class InnerVisibleArea extends VisibleArea
-  @extend()
-
-# [FIXME] wise mismatch sceenPosition vs bufferPosition
-class Edge extends TextObject
-  @extend(false)
-  wise: 'linewise'
-
-  getRange: (selection) ->
-    fromPoint = @getNormalizedHeadScreenPosition(selection)
-
-    moveUpToEdge = @new('MoveUpToEdge')
-    moveDownToEdge = @new('MoveDownToEdge')
-    return unless moveUpToEdge.isStoppablePoint(fromPoint)
-
-    startScreenPoint = endScreenPoint = null
-    startScreenPoint = endScreenPoint = fromPoint if moveUpToEdge.isEdge(fromPoint)
-
-    if moveUpToEdge.isStoppablePoint(fromPoint.translate([-1, 0]))
-      startScreenPoint = moveUpToEdge.getPoint(fromPoint)
-
-    if moveDownToEdge.isStoppablePoint(fromPoint.translate([+1, 0]))
-      endScreenPoint = moveDownToEdge.getPoint(fromPoint)
-
-    if startScreenPoint? and endScreenPoint?
-      screenRange = new Range(startScreenPoint, endScreenPoint)
-      range = @editor.bufferRangeForScreenRange(screenRange)
-      @getBufferRangeForRowRange([range.start.row, range.end.row])
-class AEdge extends Edge
-  @extend()
-class InnerEdge extends Edge
   @extend()
