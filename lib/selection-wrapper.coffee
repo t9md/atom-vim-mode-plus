@@ -149,7 +149,7 @@ class SelectionWrapper
     switch wise
       when 'characterwise'
         @translateSelectionEndAndClip('forward')
-        @saveProperties()
+        @saveProperties() unless @hasProperties()
       when 'linewise'
         @complementGoalColumn()
         @saveProperties() unless @hasProperties()
@@ -235,7 +235,6 @@ class SelectionWrapper
         @translateSelectionEndAndClip('backward', translate: false)
       else
         @translateSelectionEndAndClip('backward')
-    @clearProperties()
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
@@ -258,6 +257,15 @@ swrap.saveProperties = (editor) ->
 swrap.clearProperties = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).clearProperties()
+
+swrap.hasProperties = (editor) ->
+  editor.getSelections().every (selection) ->
+    swrap(selection).hasProperties()
+
+{inspect} = require 'util'
+swrap.dumpProperties = (editor) ->
+  for selection in editor.getSelections() when swrap(selection).hasProperties()
+    console.log inspect(swrap(selection).getProperties())
 
 swrap.normalize = (editor) ->
   for selection in editor.getSelections()

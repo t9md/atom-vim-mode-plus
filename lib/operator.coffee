@@ -327,7 +327,10 @@ class Select extends Operator
           when 'characterwise'
             swrap.saveProperties(@editor)
           when 'linewise'
+            unless @getConfig('keepColumnOnSelectTextObject')
+              swrap.saveProperties(@editor)
             swrap.fixPropertiesForLinewise(@editor)
+
       @activateModeIfNecessary('visual', wise)
 
 class SelectLatestChange extends Select

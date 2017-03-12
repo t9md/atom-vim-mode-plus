@@ -57,9 +57,6 @@ class TextObject extends Base
     bufferPosition = @getNormalizedHeadBufferPosition(selection)
     @editor.screenPositionForBufferPosition(bufferPosition)
 
-  needToKeepColumn: ->
-    @isLinewise() and @getConfig('keepColumnOnSelectTextObject') and @operator.instanceof('Select')
-
   resetState: ->
     @selectSucceeded = null
 
@@ -92,16 +89,9 @@ class TextObject extends Base
   # Return true or false
   selectTextObject: (selection) ->
     if range = @getRange(selection)
-      needToKeepColumn = @needToKeepColumn()
-      if needToKeepColumn and not @isMode('visual', 'linewise')
-        @vimState.modeManager.activate('visual', 'linewise')
-
       # Prevent autoscroll to closing char on `change-surround-any-pair`.
-      options = {
-        autoscroll: selection.isLastSelection() and not @operator.supportEarlySelect
-        keepGoalColumn: needToKeepColumn
-      }
-      swrap(selection).setBufferRange(range, options)
+      autoscroll = selection.isLastSelection() and not @operator.supportEarlySelect
+      swrap(selection).setBufferRange(range, {autoscroll})
 
       return true
     else
