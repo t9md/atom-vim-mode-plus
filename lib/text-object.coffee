@@ -45,11 +45,11 @@ class TextObject extends Base
     @wise is 'blockwise'
 
   getNormalizedHeadBufferPosition: (selection) ->
-    head = selection.getHeadBufferPosition()
+    point = selection.getHeadBufferPosition()
     if @isMode('visual') and not selection.isReversed()
-      translatePointAndClip(@editor, head, 'backward')
+      translatePointAndClip(@editor, point, 'backward')
     else
-      head
+      point
 
   resetState: ->
     @selectSucceeded = null
