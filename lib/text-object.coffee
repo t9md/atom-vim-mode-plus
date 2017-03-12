@@ -2,8 +2,6 @@
 _ = require 'underscore-plus'
 
 # [TODO] Need overhaul
-#  - [ ] must have getRange(selection) ->
-#  - [ ] Remove selectTextObject?
 #  - [ ] Make expandable by selection.getBufferRange().union(@getRange(selection))
 #  - [ ] Count support(priority low)?
 Base = require './base'
