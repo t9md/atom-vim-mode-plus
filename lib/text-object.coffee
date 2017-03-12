@@ -662,6 +662,7 @@ class PreviousSelection extends TextObject
 class PersistentSelection extends TextObject
   @extend(false)
   wise: null
+  selectOnce: true
 
   selectTextObject: (selection) ->
     if @vimState.hasPersistentSelections()
