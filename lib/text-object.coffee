@@ -82,8 +82,7 @@ class TextObject extends Base
         oldRange = selection.getBufferRange()
         if @selectTextObject(selection)
           @selectSucceeded = true
-        if selection.getBufferRange().isEqual(oldRange)
-          stop()
+        stop() if selection.getBufferRange().isEqual(oldRange)
         break if @selectOnce
 
     @editor.mergeIntersectingSelections()
@@ -646,10 +645,12 @@ class SearchMatchForward extends TextObject
       new Range(tail, head).union(swrap(selection).getTailBufferRange())
 
   selectTextObject: (selection) ->
-    return unless range = @getRange(selection)
-    swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
-    selection.cursor.autoscroll()
-    true
+    if range = @getRange(selection)
+      swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
+      selection.cursor.autoscroll()
+      true
+    else
+      false
 class SearchMatchBackward extends SearchMatchForward
   @extend()
   backward: true
