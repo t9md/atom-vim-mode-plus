@@ -123,7 +123,6 @@ class ASmartWord extends SmartWord
   @description: "A word that consists of alphanumeric chars(`/[A-Za-z0-9_]/`) and hyphen `-`"
   @extend()
 class InnerSmartWord extends SmartWord
-  @description: "Currently No diff from `a-smart-word`"
   @extend()
 
 # Just include _, -
