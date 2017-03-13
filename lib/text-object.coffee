@@ -27,11 +27,11 @@ class TextObject extends Base
   supportCount: false # FIXME #472, #66
   selectOnce: false
 
-  @derivesInnerAndA: ->
+  @deriveInnerAndA: ->
     @generateClass("A" + @name, false)
     @generateClass("Inner" + @name, true)
 
-  @derivesInnerAndAForAllowForwarding: ->
+  @deriveInnerAndAForAllowForwarding: ->
     @generateClass("A" + @name + "AllowForwarding", false, true)
     @generateClass("Inner" + @name + "AllowForwarding", true, true)
 
@@ -108,7 +108,7 @@ class TextObject extends Base
 # =========================
 class Word extends TextObject
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
 
   getRange: (selection) ->
     point = @getNormalizedHeadBufferPosition(selection)
@@ -120,20 +120,20 @@ class Word extends TextObject
 
 class WholeWord extends Word
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   wordRegex: /\S+/
 
 # Just include _, -
 class SmartWord extends Word
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   @description: "A word that consists of alphanumeric chars(`/[A-Za-z0-9_]/`) and hyphen `-`"
   wordRegex: /[\w-]+/
 
 # Just include _, -
 class Subword extends Word
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   getRange: (selection) ->
     @wordRegex = selection.cursor.subwordRegExp()
     super
@@ -213,7 +213,7 @@ class APair extends Pair
 
 class AnyPair extends Pair
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   allowForwarding: false
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
@@ -236,7 +236,7 @@ class AnyPair extends Pair
 
 class AnyPairAllowForwarding extends AnyPair
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   @description: "Range surrounded by auto-detected paired chars from enclosed and forwarding area"
   allowForwarding: true
   searchFrom: 'start'
@@ -259,7 +259,7 @@ class AnyPairAllowForwarding extends AnyPair
 
 class AnyQuote extends AnyPair
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   allowForwarding: true
   member: ['DoubleQuote', 'SingleQuote', 'BackTick']
   getRange: (selection) ->
@@ -273,46 +273,46 @@ class Quote extends Pair
 
 class DoubleQuote extends Quote
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   pair: ['"', '"']
 
 class SingleQuote extends Quote
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   pair: ["'", "'"]
 
 class BackTick extends Quote
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   pair: ['`', '`']
 
 class CurlyBracket extends Pair
   @extend(false)
-  @derivesInnerAndA()
-  @derivesInnerAndAForAllowForwarding()
+  @deriveInnerAndA()
+  @deriveInnerAndAForAllowForwarding()
   pair: ['{', '}']
 
 class SquareBracket extends Pair
   @extend(false)
-  @derivesInnerAndA()
-  @derivesInnerAndAForAllowForwarding()
+  @deriveInnerAndA()
+  @deriveInnerAndAForAllowForwarding()
   pair: ['[', ']']
 
 class Parenthesis extends Pair
   @extend(false)
-  @derivesInnerAndA()
-  @derivesInnerAndAForAllowForwarding()
+  @deriveInnerAndA()
+  @deriveInnerAndAForAllowForwarding()
   pair: ['(', ')']
 
 class AngleBracket extends Pair
   @extend(false)
-  @derivesInnerAndA()
-  @derivesInnerAndAForAllowForwarding()
+  @deriveInnerAndA()
+  @deriveInnerAndAForAllowForwarding()
   pair: ['<', '>']
 
 class Tag extends Pair
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   allowNextLine: true
   allowForwarding: true
   adjustInnerRange: false
@@ -337,7 +337,7 @@ class Tag extends Pair
 # Paragraph is defined as consecutive (non-)blank-line.
 class Paragraph extends TextObject
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   wise: 'linewise'
   supportCount: true
 
@@ -398,7 +398,7 @@ class Paragraph extends TextObject
 
 class Indentation extends Paragraph
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
 
   getRange: (selection) ->
     fromRow = @getNormalizedHeadBufferPosition(selection).row
@@ -417,7 +417,7 @@ class Indentation extends Paragraph
 # =========================
 class Comment extends TextObject
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   wise: 'linewise'
 
   getRange: (selection) ->
@@ -431,7 +431,7 @@ class Comment extends TextObject
 # =========================
 class Fold extends TextObject
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   wise: 'linewise'
 
   adjustRowRange: (rowRange) ->
@@ -464,7 +464,7 @@ class Fold extends TextObject
 # NOTE: Function range determination is depending on fold.
 class Function extends Fold
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   # Some language don't include closing `}` into fold.
   scopeNamesOmittingEndRow: ['source.go', 'source.elixir']
 
@@ -483,7 +483,7 @@ class Function extends Fold
 # =========================
 class CurrentLine extends TextObject
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
 
   getRange: (selection) ->
     row = @getNormalizedHeadBufferPosition(selection).row
@@ -495,7 +495,7 @@ class CurrentLine extends TextObject
 
 class Entire extends TextObject
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   wise: 'linewise'
   selectOnce: true
 
@@ -508,7 +508,7 @@ class Empty extends TextObject
 
 class LatestChange extends TextObject
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   wise: null
   selectOnce: true
   getRange: ->
@@ -587,7 +587,7 @@ class PreviousSelection extends TextObject
 
 class PersistentSelection extends TextObject
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   wise: null
   selectOnce: true
 
@@ -598,7 +598,7 @@ class PersistentSelection extends TextObject
 
 class VisibleArea extends TextObject
   @extend(false)
-  @derivesInnerAndA()
+  @deriveInnerAndA()
   selectOnce: true
 
   getRange: (selection) ->
