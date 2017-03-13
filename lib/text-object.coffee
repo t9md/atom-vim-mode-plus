@@ -27,8 +27,22 @@ class TextObject extends Base
   supportCount: false # FIXME #472, #66
   selectOnce: false
 
+  @deriveInnerAndA: ->
+    @generateClass("A" + @name, false)
+    @generateClass("Inner" + @name, true)
+
+  @deriveInnerAndAForAllowForwarding: ->
+    @generateClass("A" + @name + "AllowForwarding", false, true)
+    @generateClass("Inner" + @name + "AllowForwarding", true, true)
+
+  @generateClass: (klassName, inner, allowForwarding) ->
+    klass = class extends this
+    Object.defineProperty klass, 'name', get: -> klassName
+    klass::inner = inner
+    klass::allowForwarding = true if allowForwarding
+    klass.extend()
+
   constructor: ->
-    @constructor::inner = @getName().startsWith('Inner')
     super
     @initialize()
 
@@ -94,6 +108,7 @@ class TextObject extends Base
 # =========================
 class Word extends TextObject
   @extend(false)
+  @deriveInnerAndA()
 
   getRange: (selection) ->
     point = @getNormalizedHeadBufferPosition(selection)
@@ -102,39 +117,26 @@ class Word extends TextObject
       expandRangeToWhiteSpaces(@editor, range)
     else
       range
-class AWord extends Word
-  @extend()
-class InnerWord extends Word
-  @extend()
 
 class WholeWord extends Word
   @extend(false)
+  @deriveInnerAndA()
   wordRegex: /\S+/
-class AWholeWord extends WholeWord
-  @extend()
-class InnerWholeWord extends WholeWord
-  @extend()
 
 # Just include _, -
 class SmartWord extends Word
   @extend(false)
-  wordRegex: /[\w-]+/
-class ASmartWord extends SmartWord
+  @deriveInnerAndA()
   @description: "A word that consists of alphanumeric chars(`/[A-Za-z0-9_]/`) and hyphen `-`"
-  @extend()
-class InnerSmartWord extends SmartWord
-  @extend()
+  wordRegex: /[\w-]+/
 
 # Just include _, -
 class Subword extends Word
   @extend(false)
+  @deriveInnerAndA()
   getRange: (selection) ->
     @wordRegex = selection.cursor.subwordRegExp()
     super
-class ASubword extends Subword
-  @extend()
-class InnerSubword extends Subword
-  @extend()
 
 # Section: Pair
 # =========================
@@ -147,11 +149,6 @@ class Pair extends TextObject
 
   isAllowNextLine: ->
     @allowNextLine ? (@pair? and @pair[0] isnt @pair[1])
-
-  constructor: ->
-    # auto-set property from class name.
-    @allowForwarding ?= @getName().endsWith('AllowForwarding')
-    super
 
   adjustRange: ({start, end}) ->
     # Dirty work to feel natural for human, to behave compatible with pure Vim.
@@ -216,6 +213,7 @@ class APair extends Pair
 
 class AnyPair extends Pair
   @extend(false)
+  @deriveInnerAndA()
   allowForwarding: false
   member: [
     'DoubleQuote', 'SingleQuote', 'BackTick',
@@ -235,13 +233,10 @@ class AnyPair extends Pair
   getRange: (selection) ->
     ranges = @getRanges(selection)
     _.last(sortRanges(ranges)) if ranges.length
-class AAnyPair extends AnyPair
-  @extend()
-class InnerAnyPair extends AnyPair
-  @extend()
 
 class AnyPairAllowForwarding extends AnyPair
   @extend(false)
+  @deriveInnerAndA()
   @description: "Range surrounded by auto-detected paired chars from enclosed and forwarding area"
   allowForwarding: true
   searchFrom: 'start'
@@ -261,23 +256,16 @@ class AnyPairAllowForwarding extends AnyPair
         enclosingRange.containsRange(range)
 
     forwardingRanges[0] or enclosingRange
-class AAnyPairAllowForwarding extends AnyPairAllowForwarding
-  @extend()
-class InnerAnyPairAllowForwarding extends AnyPairAllowForwarding
-  @extend()
 
 class AnyQuote extends AnyPair
   @extend(false)
+  @deriveInnerAndA()
   allowForwarding: true
   member: ['DoubleQuote', 'SingleQuote', 'BackTick']
   getRange: (selection) ->
     ranges = @getRanges(selection)
     # Pick range which end.colum is leftmost(mean, closed first)
     _.first(_.sortBy(ranges, (r) -> r.end.column)) if ranges.length
-class AAnyQuote extends AnyQuote
-  @extend()
-class InnerAnyQuote extends AnyQuote
-  @extend()
 
 class Quote extends Pair
   @extend(false)
@@ -285,78 +273,46 @@ class Quote extends Pair
 
 class DoubleQuote extends Quote
   @extend(false)
+  @deriveInnerAndA()
   pair: ['"', '"']
-class ADoubleQuote extends DoubleQuote
-  @extend()
-class InnerDoubleQuote extends DoubleQuote
-  @extend()
 
 class SingleQuote extends Quote
   @extend(false)
+  @deriveInnerAndA()
   pair: ["'", "'"]
-class ASingleQuote extends SingleQuote
-  @extend()
-class InnerSingleQuote extends SingleQuote
-  @extend()
 
 class BackTick extends Quote
   @extend(false)
+  @deriveInnerAndA()
   pair: ['`', '`']
-class ABackTick extends BackTick
-  @extend()
-class InnerBackTick extends BackTick
-  @extend()
 
 class CurlyBracket extends Pair
   @extend(false)
+  @deriveInnerAndA()
+  @deriveInnerAndAForAllowForwarding()
   pair: ['{', '}']
-class ACurlyBracket extends CurlyBracket
-  @extend()
-class InnerCurlyBracket extends CurlyBracket
-  @extend()
-class ACurlyBracketAllowForwarding extends CurlyBracket
-  @extend()
-class InnerCurlyBracketAllowForwarding extends CurlyBracket
-  @extend()
 
 class SquareBracket extends Pair
   @extend(false)
+  @deriveInnerAndA()
+  @deriveInnerAndAForAllowForwarding()
   pair: ['[', ']']
-class ASquareBracket extends SquareBracket
-  @extend()
-class InnerSquareBracket extends SquareBracket
-  @extend()
-class ASquareBracketAllowForwarding extends SquareBracket
-  @extend()
-class InnerSquareBracketAllowForwarding extends SquareBracket
-  @extend()
 
 class Parenthesis extends Pair
   @extend(false)
+  @deriveInnerAndA()
+  @deriveInnerAndAForAllowForwarding()
   pair: ['(', ')']
-class AParenthesis extends Parenthesis
-  @extend()
-class InnerParenthesis extends Parenthesis
-  @extend()
-class AParenthesisAllowForwarding extends Parenthesis
-  @extend()
-class InnerParenthesisAllowForwarding extends Parenthesis
-  @extend()
 
 class AngleBracket extends Pair
   @extend(false)
+  @deriveInnerAndA()
+  @deriveInnerAndAForAllowForwarding()
   pair: ['<', '>']
-class AAngleBracket extends AngleBracket
-  @extend()
-class InnerAngleBracket extends AngleBracket
-  @extend()
-class AAngleBracketAllowForwarding extends AngleBracket
-  @extend()
-class InnerAngleBracketAllowForwarding extends AngleBracket
-  @extend()
 
 class Tag extends Pair
   @extend(false)
+  @deriveInnerAndA()
   allowNextLine: true
   allowForwarding: true
   adjustInnerRange: false
@@ -375,16 +331,13 @@ class Tag extends Pair
 
   getPairInfo: (from) ->
     super(@getTagStartPoint(from) ? from)
-class ATag extends Tag
-  @extend()
-class InnerTag extends Tag
-  @extend()
 
 # Section: Paragraph
 # =========================
 # Paragraph is defined as consecutive (non-)blank-line.
 class Paragraph extends TextObject
   @extend(false)
+  @deriveInnerAndA()
   wise: 'linewise'
   supportCount: true
 
@@ -442,13 +395,10 @@ class Paragraph extends TextObject
 
     rowRange = @findRowRangeBy(fromRow, @getPredictFunction(fromRow, selection))
     selection.getBufferRange().union(@getBufferRangeForRowRange(rowRange))
-class AParagraph extends Paragraph
-  @extend()
-class InnerParagraph extends Paragraph
-  @extend()
 
 class Indentation extends Paragraph
   @extend(false)
+  @deriveInnerAndA()
 
   getRange: (selection) ->
     fromRow = @getNormalizedHeadBufferPosition(selection).row
@@ -462,15 +412,12 @@ class Indentation extends Paragraph
 
     rowRange = @findRowRangeBy(fromRow, predict)
     @getBufferRangeForRowRange(rowRange)
-class AIndentation extends Indentation
-  @extend()
-class InnerIndentation extends Indentation
-  @extend()
 
 # Section: Comment
 # =========================
 class Comment extends TextObject
   @extend(false)
+  @deriveInnerAndA()
   wise: 'linewise'
 
   getRange: (selection) ->
@@ -479,15 +426,12 @@ class Comment extends TextObject
     rowRange ?= [row, row] if @editor.isBufferRowCommented(row)
     if rowRange?
       @getBufferRangeForRowRange(rowRange)
-class AComment extends Comment
-  @extend()
-class InnerComment extends Comment
-  @extend()
 
 # Section: Fold
 # =========================
 class Fold extends TextObject
   @extend(false)
+  @deriveInnerAndA()
   wise: 'linewise'
 
   adjustRowRange: (rowRange) ->
@@ -516,14 +460,11 @@ class Fold extends TextObject
       popNextBufferRange()
     else
       range
-class AFold extends Fold
-  @extend()
-class InnerFold extends Fold
-  @extend()
 
 # NOTE: Function range determination is depending on fold.
 class Function extends Fold
   @extend(false)
+  @deriveInnerAndA()
   # Some language don't include closing `}` into fold.
   scopeNamesOmittingEndRow: ['source.go', 'source.elixir']
 
@@ -537,15 +478,13 @@ class Function extends Fold
     if @isA() and @editor.getGrammar().scopeName in @scopeNamesOmittingEndRow
       endRow += 1
     [startRow, endRow]
-class AFunction extends Function
-  @extend()
-class InnerFunction extends Function
-  @extend()
 
 # Section: Other
 # =========================
 class CurrentLine extends TextObject
   @extend(false)
+  @deriveInnerAndA()
+
   getRange: (selection) ->
     row = @getNormalizedHeadBufferPosition(selection).row
     range = @editor.bufferRangeForBufferRow(row)
@@ -553,22 +492,15 @@ class CurrentLine extends TextObject
       range
     else
       trimRange(@editor, range)
-class ACurrentLine extends CurrentLine
-  @extend()
-class InnerCurrentLine extends CurrentLine
-  @extend()
 
 class Entire extends TextObject
+  @extend(false)
+  @deriveInnerAndA()
   wise: 'linewise'
   selectOnce: true
-  @extend(false)
 
   getRange: (selection) ->
     @editor.buffer.getRange()
-class AEntire extends Entire
-  @extend()
-class InnerEntire extends Entire
-  @extend()
 
 class Empty extends TextObject
   @extend(false)
@@ -576,14 +508,11 @@ class Empty extends TextObject
 
 class LatestChange extends TextObject
   @extend(false)
+  @deriveInnerAndA()
   wise: null
   selectOnce: true
   getRange: ->
     @vimState.mark.getRange('[', ']')
-class ALatestChange extends LatestChange
-  @extend()
-class InnerLatestChange extends LatestChange # No diff from ALatestChange
-  @extend()
 
 class SearchMatchForward extends TextObject
   @extend()
@@ -626,6 +555,7 @@ class SearchMatchForward extends TextObject
     if range = @getRange(selection)
       swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
       return true
+
 class SearchMatchBackward extends SearchMatchForward
   @extend()
   backward: true
@@ -657,6 +587,7 @@ class PreviousSelection extends TextObject
 
 class PersistentSelection extends TextObject
   @extend(false)
+  @deriveInnerAndA()
   wise: null
   selectOnce: true
 
@@ -664,13 +595,10 @@ class PersistentSelection extends TextObject
     if @vimState.hasPersistentSelections()
       @vimState.persistentSelection.setSelectedBufferRanges()
       return true
-class APersistentSelection extends PersistentSelection
-  @extend()
-class InnerPersistentSelection extends PersistentSelection
-  @extend()
 
 class VisibleArea extends TextObject
   @extend(false)
+  @deriveInnerAndA()
   selectOnce: true
 
   getRange: (selection) ->
@@ -681,7 +609,3 @@ class VisibleArea extends TextObject
       bufferRange.translate([+1, 0], [-3, 0])
     else
       bufferRange
-class AVisibleArea extends VisibleArea
-  @extend()
-class InnerVisibleArea extends VisibleArea
-  @extend()
