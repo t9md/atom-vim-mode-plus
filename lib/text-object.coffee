@@ -39,8 +39,7 @@ class TextObject extends Base
     klass = class extends this
     Object.defineProperty klass, 'name', get: -> klassName
     klass::inner = inner
-    if allowForwarding
-      klass::allowForwarding = true
+    klass::allowForwarding = true if allowForwarding
     klass.extend()
 
   constructor: ->
@@ -556,6 +555,7 @@ class SearchMatchForward extends TextObject
     if range = @getRange(selection)
       swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
       return true
+
 class SearchMatchBackward extends SearchMatchForward
   @extend()
   backward: true
