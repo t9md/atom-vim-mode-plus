@@ -83,9 +83,7 @@ class TextObject extends Base
   # Return true or false
   selectTextObject: (selection) ->
     if range = @getRange(selection)
-      # Prevent autoscroll to closing char on `change-surround-any-pair`.
-      autoscroll = selection.isLastSelection() and not @operator.supportEarlySelect
-      swrap(selection).setBufferRange(range, {autoscroll})
+      swrap(selection).setBufferRange(range)
       return true
 
   # to override
@@ -628,7 +626,6 @@ class SearchMatchForward extends TextObject
   selectTextObject: (selection) ->
     if range = @getRange(selection)
       swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
-      selection.cursor.autoscroll()
       return true
 class SearchMatchBackward extends SearchMatchForward
   @extend()

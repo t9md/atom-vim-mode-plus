@@ -331,6 +331,7 @@ class Select extends Operator
               swrap.saveProperties(@editor)
             swrap.fixPropertiesForLinewise(@editor)
 
+      @editor.scrollToCursorPosition()
       @activateModeIfNecessary('visual', wise)
 
 class SelectLatestChange extends Select
