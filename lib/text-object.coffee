@@ -27,6 +27,16 @@ class TextObject extends Base
   supportCount: false # FIXME #472, #66
   selectOnce: false
 
+  @derivesInnerAndA: ->
+    @generateClass("A" + @name, false).extend()
+    @generateClass("Inner" + @name, true).extend()
+
+  @generateClass: (klassName, isInner) ->
+    klass = class extends this
+    Object.defineProperty klass, 'name', get: -> klassName
+    klass::inner = isInner
+    klass
+
   constructor: ->
     @constructor::inner = @getName().startsWith('Inner')
     super
@@ -94,6 +104,7 @@ class TextObject extends Base
 # =========================
 class Word extends TextObject
   @extend(false)
+  @derivesInnerAndA()
 
   getRange: (selection) ->
     point = @getNormalizedHeadBufferPosition(selection)
@@ -102,10 +113,6 @@ class Word extends TextObject
       expandRangeToWhiteSpaces(@editor, range)
     else
       range
-class AWord extends Word
-  @extend()
-class InnerWord extends Word
-  @extend()
 
 class WholeWord extends Word
   @extend(false)
