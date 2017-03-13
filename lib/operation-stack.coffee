@@ -171,12 +171,12 @@ class OperationStack
       operation.resetState()
 
     if @mode is 'normal'
-      swrap.clearProperties(@editor)
       @ensureAllSelectionsAreEmpty(operation)
       @ensureAllCursorsAreNotAtEndOfLine()
     else if @mode is 'visual'
       @modeManager.updateNarrowedState()
       @vimState.updatePreviousSelection()
+
     @vimState.updateCursorsVisibility()
     @vimState.reset()
 
@@ -195,7 +195,7 @@ class OperationStack
 
   ensureAllCursorsAreNotAtEndOfLine: ->
     for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
-      moveCursorLeft(cursor, {preserveGoalColumn: true})
+      moveCursorLeft(cursor, preserveGoalColumn: true)
 
   addToClassList: (className) ->
     @editorElement.classList.add(className)

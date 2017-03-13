@@ -2,8 +2,6 @@
 _ = require 'underscore-plus'
 
 # [TODO] Need overhaul
-#  - [ ] must have getRange(selection) ->
-#  - [ ] Remove selectTextObject?
 #  - [ ] Make expandable by selection.getBufferRange().union(@getRange(selection))
 #  - [ ] Count support(priority low)?
 Base = require './base'
@@ -47,18 +45,11 @@ class TextObject extends Base
     @wise is 'blockwise'
 
   getNormalizedHeadBufferPosition: (selection) ->
-    head = selection.getHeadBufferPosition()
+    point = selection.getHeadBufferPosition()
     if @isMode('visual') and not selection.isReversed()
-      translatePointAndClip(@editor, head, 'backward')
+      translatePointAndClip(@editor, point, 'backward')
     else
-      head
-
-  getNormalizedHeadScreenPosition: (selection) ->
-    bufferPosition = @getNormalizedHeadBufferPosition(selection)
-    @editor.screenPositionForBufferPosition(bufferPosition)
-
-  needToKeepColumn: ->
-    @isLinewise() and @getConfig('keepColumnOnSelectTextObject') and @operator.instanceof('Select')
+      point
 
   resetState: ->
     @selectSucceeded = null
@@ -92,20 +83,8 @@ class TextObject extends Base
   # Return true or false
   selectTextObject: (selection) ->
     if range = @getRange(selection)
-      needToKeepColumn = @needToKeepColumn()
-      if needToKeepColumn and not @isMode('visual', 'linewise')
-        @vimState.modeManager.activate('visual', 'linewise')
-
-      # Prevent autoscroll to closing char on `change-surround-any-pair`.
-      options = {
-        autoscroll: selection.isLastSelection() and not @operator.supportEarlySelect
-        keepGoalColumn: needToKeepColumn
-      }
-      swrap(selection).setBufferRange(range, options)
-
+      swrap(selection).setBufferRange(range)
       return true
-    else
-      return false
 
   # to override
   getRange: ->
@@ -144,7 +123,6 @@ class ASmartWord extends SmartWord
   @description: "A word that consists of alphanumeric chars(`/[A-Za-z0-9_]/`) and hyphen `-`"
   @extend()
 class InnerSmartWord extends SmartWord
-  @description: "Currently No diff from `a-smart-word`"
   @extend()
 
 # Just include _, -
@@ -647,10 +625,7 @@ class SearchMatchForward extends TextObject
   selectTextObject: (selection) ->
     if range = @getRange(selection)
       swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
-      selection.cursor.autoscroll()
-      true
-    else
-      false
+      return true
 class SearchMatchBackward extends SearchMatchForward
   @extend()
   backward: true
@@ -670,25 +645,25 @@ class SearchMatchBackward extends SearchMatchForward
 class PreviousSelection extends TextObject
   @extend()
   wise: null
+  selectOnce: true
 
-  select: ->
+  selectTextObject: (selection) ->
     {properties, submode} = @vimState.previousSelection
     if properties? and submode?
-      @selectSucceeded = true
       @wise = submode
       selection = @editor.getLastSelection()
       swrap(selection).selectByProperties(properties, keepGoalColumn: false)
+      return true
 
 class PersistentSelection extends TextObject
   @extend(false)
   wise: null
+  selectOnce: true
 
-  select: ->
-    {persistentSelection} = @vimState
-    unless persistentSelection.isEmpty()
-      persistentSelection.setSelectedBufferRanges()
-      @selectSucceeded = true
-      @wise = swrap.detectWise(@editor)
+  selectTextObject: (selection) ->
+    if @vimState.hasPersistentSelections()
+      @vimState.persistentSelection.setSelectedBufferRanges()
+      return true
 class APersistentSelection extends PersistentSelection
   @extend()
 class InnerPersistentSelection extends PersistentSelection

@@ -53,6 +53,9 @@ class ModeManager
       when 'insert' then @activateInsertMode(newSubmode)
       when 'visual' then @activateVisualMode(newSubmode)
 
+    unless newMode is 'visual'
+      swrap.clearProperties(@editor)
+
     @editorElement.classList.remove("#{@mode}-mode")
     @editorElement.classList.remove(@submode)
 
