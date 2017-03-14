@@ -8,7 +8,7 @@ Base = require './base'
 swrap = require './selection-wrapper'
 {
   getLineTextToBufferPosition
-  getCodeFoldRowRanges
+  getCodeFoldRowRangesContainesForRow
   isIncludeFunctionScopeForRow
   expandRangeToWhiteSpaces
   getVisibleBufferRange
@@ -50,7 +50,7 @@ class TextObject extends Base
     @inner
 
   isA: ->
-    not @isInner()
+    not @inner
 
   isLinewise: ->
     @wise is 'linewise'
@@ -101,7 +101,7 @@ class TextObject extends Base
       return true
 
   # to override
-  getRange: ->
+  getRange: (selection) ->
     null
 
 # Section: Word
@@ -421,7 +421,7 @@ class Comment extends TextObject
   wise: 'linewise'
 
   getRange: (selection) ->
-    row = swrap(selection).getStartRow()
+    row = @getNormalizedHeadBufferPosition(selection).row
     rowRange = @editor.languageMode.rowRangeForCommentAtBufferRow(row)
     rowRange ?= [row, row] if @editor.isBufferRowCommented(row)
     if rowRange?
@@ -444,22 +444,18 @@ class Fold extends TextObject
     [startRow, endRow]
 
   getFoldRowRangesContainsForRow: (row) ->
-    getCodeFoldRowRanges(@editor)
-      .filter ([startRow, endRow]) -> startRow <= row <= endRow
-      .reverse()
+    getCodeFoldRowRangesContainesForRow(@editor, row).reverse()
 
   getRange: (selection) ->
-    rowRanges = @getFoldRowRangesContainsForRow(swrap(selection).getStartRow())
-    return unless rowRanges.length
+    row = swrap(selection).getHeadRow()
+    selectedRange = selection.getBufferRange()
+    for rowRange in @getFoldRowRangesContainsForRow(row)
+      range = @getBufferRangeForRowRange(@adjustRowRange(rowRange))
 
-    popNextBufferRange = =>
-      @getBufferRangeForRowRange(@adjustRowRange(rowRanges.shift()))
-
-    range = popNextBufferRange()
-    if rowRanges.length and range.isEqual(selection.getBufferRange())
-      popNextBufferRange()
-    else
-      range
+      # Don't change to `if range.containsRange(selectedRange, true)`
+      # There is behavior diff when cursor is at beginning of line( column 0 ).
+      unless selectedRange.containsRange(range)
+        return range
 
 # NOTE: Function range determination is depending on fold.
 class Function extends Fold
@@ -511,7 +507,7 @@ class LatestChange extends TextObject
   @deriveInnerAndA()
   wise: null
   selectOnce: true
-  getRange: ->
+  getRange: (selection) ->
     @vimState.mark.getRange('[', ']')
 
 class SearchMatchForward extends TextObject

@@ -310,6 +310,15 @@ getCodeFoldRowRanges = (editor) ->
     .filter (rowRange) ->
       rowRange? and rowRange[0]? and rowRange[1]?
 
+# Used in vmp-jasmine-increase-focus
+getCodeFoldRowRangesContainesForRow = (editor, bufferRow, {includeStartRow}={}) ->
+  includeStartRow ?= true
+  getCodeFoldRowRanges(editor).filter ([startRow, endRow]) ->
+    if includeStartRow
+      startRow <= bufferRow <= endRow
+    else
+      startRow < bufferRow <= endRow
+
 getBufferRangeForRowRange = (editor, rowRange) ->
   [startRange, endRange] = rowRange.map (row) ->
     editor.bufferRangeForBufferRow(row, includeNewline: true)
@@ -829,6 +838,7 @@ module.exports = {
   isEmptyRow
   cursorIsAtEndOfLineAtNonEmptyRow
   getCodeFoldRowRanges
+  getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange
   trimRange
   getFirstCharacterPositionForBufferRow

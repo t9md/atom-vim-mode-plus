@@ -199,8 +199,11 @@ class SelectionWrapper
     [startRow, endRow] = @selection.getBufferRowRange()
     startRow is endRow
 
+  isLinewiseRange: ->
+    isLinewiseRange(@getBufferRange())
+
   detectWise: ->
-    if isLinewiseRange(@getBufferRange())
+    if @isLinewiseRange()
       'linewise'
     else
       'characterwise'
@@ -244,8 +247,7 @@ swrap.setReversedState = (editor, reversed) ->
     swrap(selection).setReversedState(reversed)
 
 swrap.detectWise = (editor) ->
-  selectionWiseIsLinewise = (selection) -> swrap(selection).detectWise() is 'linewise'
-  if editor.getSelections().every(selectionWiseIsLinewise)
+  if editor.getSelections().every((selection) -> swrap(selection).isLinewiseRange())
     'linewise'
   else
     'characterwise'

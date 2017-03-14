@@ -1478,11 +1478,11 @@ describe "TextObject", ->
           set cursor: [20, 7]
           ensure 'v i z', selectedBufferRange: rangeForRows(21, 21)
 
-      describe "when endRow of selection exceeds fold endRow", ->
-        it "doesn't matter, select fold based on startRow of selection", ->
+      describe "when containing fold are not found", ->
+        it "do nothing", ->
           set cursor: [20, 0]
           ensure 'V G', selectedBufferRange: rangeForRows(20, 30)
-          ensure 'i z', selectedBufferRange: rangeForRows(21, 21)
+          ensure 'i z', selectedBufferRange: rangeForRows(20, 30)
 
       describe "when indent level of fold startRow and endRow is same", ->
         beforeEach ->
@@ -1521,12 +1521,11 @@ describe "TextObject", ->
           set cursor: [20, 7]
           ensure 'v a z', selectedBufferRange: rangeForRows(20, 21)
 
-      describe "when endRow of selection exceeds fold endRow", ->
-        it "doesn't matter, select fold based on startRow of selection", ->
+      describe "when containing fold are not found", ->
+        it "do nothing", ->
           set cursor: [20, 0]
-          cursor = editor.getLastCursor()
           ensure 'V G', selectedBufferRange: rangeForRows(20, 30)
-          ensure 'a z', selectedBufferRange: rangeForRows(20, 21)
+          ensure 'a z', selectedBufferRange: rangeForRows(20, 30)
 
   # Although following test picks specific language, other langauages are alsoe supported.
   describe 'Function', ->
