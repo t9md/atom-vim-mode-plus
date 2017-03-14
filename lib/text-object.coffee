@@ -211,19 +211,13 @@ class AnyPair extends Pair
     'CurlyBracket', 'AngleBracket', 'SquareBracket', 'Parenthesis'
   ]
 
-  getRangeBy: (klass, selection) ->
-    @new(klass, {@allowForwarding}).getRange(selection)
-
   getRanges: (selection) ->
-    prefix = if @isInner() then 'Inner' else 'A'
-    ranges = []
-    for klass in @member when range = @getRangeBy(prefix + klass, selection)
-      ranges.push(range)
-    ranges
+    @member
+      .map (klass) => @new(klass, {@inner, @allowForwarding}).getRange(selection)
+      .filter (range) -> range?
 
   getRange: (selection) ->
-    ranges = @getRanges(selection)
-    _.last(sortRanges(ranges)) if ranges.length
+    _.last(sortRanges(@getRanges(selection)))
 
 class AnyPairAllowForwarding extends AnyPair
   @extend(false)

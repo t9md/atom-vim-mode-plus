@@ -1143,39 +1143,28 @@ class MoveToPair extends Motion
   moveCursor: (cursor) ->
     @setBufferPositionSafely(cursor, @getPoint(cursor))
 
+  getPointForTag: (point) ->
+    pairInfo = @new("ATag").getPairInfo(point)
+    return null unless pairInfo?
+    {openRange, closeRange} = pairInfo
+    openRange = openRange.translate([0, +1], [0, -1])
+    closeRange = closeRange.translate([0, +1], [0, -1])
+    return closeRange.start if openRange.containsPoint(point) and (not point.isEqual(openRange.end))
+    return openRange.start if closeRange.containsPoint(point) and (not point.isEqual(closeRange.end))
+
   getPoint: (cursor) ->
     cursorPosition = cursor.getBufferPosition()
     cursorRow = cursorPosition.row
+    return point if point = @getPointForTag(cursorPosition)
 
-    getPointForTag = =>
-      p = cursorPosition
-      pairInfo = @new("ATag").getPairInfo(p)
-      return null unless pairInfo?
-      {openRange, closeRange} = pairInfo
-      openRange = openRange.translate([0, +1], [0, -1])
-      closeRange = closeRange.translate([0, +1], [0, -1])
-      return closeRange.start if openRange.containsPoint(p) and (not p.isEqual(openRange.end))
-      return openRange.start if closeRange.containsPoint(p) and (not p.isEqual(closeRange.end))
-
-    point = getPointForTag()
-    return point if point?
-
-    ranges = @new("AAnyPair", {allowForwarding: true, @member}).getRanges(cursor.selection)
-    ranges = ranges.filter ({start, end}) ->
-      p = cursorPosition
-      (p.row is start.row) and start.isGreaterThanOrEqual(p) or
-        (p.row is end.row) and end.isGreaterThanOrEqual(p)
-
-    return null unless ranges.length
-    # Calling containsPoint exclusive(pass true as 2nd arg) make opening pair under
-    # cursor is grouped to forwardingRanges
-    [enclosingRanges, forwardingRanges] = _.partition ranges, (range) ->
-      range.containsPoint(cursorPosition, true)
-    enclosingRange = _.last(sortRanges(enclosingRanges))
-    forwardingRanges = sortRanges(forwardingRanges)
-
-    if enclosingRange
-      forwardingRanges = forwardingRanges.filter (range) ->
-        enclosingRange.containsRange(range)
-
-    forwardingRanges[0]?.end.translate([0, -1]) or enclosingRange?.start
+    # AAnyPairAllowForwarding return forwarding range or enclosing range.
+    range = @new("AAnyPairAllowForwarding", {@member}).getRange(cursor.selection)
+    return null unless range?
+    {start, end} = range
+    if (start.row is cursorRow) and start.isGreaterThanOrEqual(cursorPosition)
+      # Forwarding range found
+      end.translate([0, -1])
+    else if end.row is cursorPosition.row
+      # Enclosing range was returned
+      # We move to start( open-pair ) only when close-pair was at same row as cursor-row.
+      start
