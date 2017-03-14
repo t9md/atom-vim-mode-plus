@@ -369,7 +369,6 @@ class Paragraph extends TextObject
   getRange: (selection) ->
     originalRange = selection.getBufferRange()
     fromRow = @getNormalizedHeadBufferPosition(selection).row
-    console.log fromRow
 
     if @isMode('visual', 'linewise')
       if selection.isReversed()

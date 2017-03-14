@@ -327,9 +327,15 @@ class Select extends Operator
           when 'characterwise'
             swrap.saveProperties(@editor)
           when 'linewise'
-            unless @getConfig('keepColumnOnSelectTextObject')
-              swrap.saveProperties(@editor)
-            swrap.fixPropertiesForLinewise(@editor)
+            # When target is persistent-selection, new selection is added after selectTextObject.
+            # So we have to assure all selection have selction property.
+            # Maybe this logic can be moved to operation stack.
+            for selection in @editor.getSelections() when wrapped = swrap(selection)
+              if @getConfig('keepColumnOnSelectTextObject')
+                wrapped.saveProperties() unless wrapped.hasProperties()
+              else
+                wrapped.saveProperties()
+              wrapped.fixPropertiesForLinewise()
 
       @editor.scrollToCursorPosition()
       @activateModeIfNecessary('visual', wise)
