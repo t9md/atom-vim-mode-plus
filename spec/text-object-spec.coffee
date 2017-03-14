@@ -943,7 +943,6 @@ describe "TextObject", ->
         ensure ';', selectedText: "222"
         ensure ';', selectedText: "333"
         ensure ';', selectedText: "444()444"
-        ensure ';', selectedText: "", selectedBufferRange: [[3, 4], [3, 4]]
     describe "a", ->
       it "select forwarding range within enclosed range(if exists)", ->
         set cursor: [2, 0]

@@ -131,7 +131,7 @@ class SelectionWrapper
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
 
-    # Clipt property till one column left before EOL
+    # Clip property till one column left before EOL
     # When `keepColumnOnSelectTextObject` was true,
     #  cursor marker in vL-mode exceed EOL
     # FIXME: respect goalcolumn

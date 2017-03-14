@@ -190,18 +190,9 @@ class Pair extends TextObject
     pairInfo.targetRange = if @isInner() then pairInfo.innerRange else pairInfo.aRange
     pairInfo
 
-  getPointToSearchFrom: (selection, searchFrom) ->
-    switch searchFrom
-      when 'head' then @getNormalizedHeadBufferPosition(selection)
-      when 'start' then swrap(selection).getBufferPositionFor('start')
-
-  # Allow override @allowForwarding by 2nd argument.
-  getRange: (selection, options={}) ->
-    {allowForwarding, searchFrom} = options
-    searchFrom ?= 'head'
-    @allowForwarding = allowForwarding if allowForwarding?
+  getRange: (selection) ->
     originalRange = selection.getBufferRange()
-    pairInfo = @getPairInfo(@getPointToSearchFrom(selection, searchFrom))
+    pairInfo = @getPairInfo(@getNormalizedHeadBufferPosition(selection))
     # When range was same, try to expand range
     if pairInfo?.targetRange.isEqual(originalRange)
       pairInfo = @getPairInfo(pairInfo.aRange.end)
@@ -221,7 +212,7 @@ class AnyPair extends Pair
   ]
 
   getRangeBy: (klass, selection) ->
-    @new(klass).getRange(selection, {@allowForwarding, @searchFrom})
+    @new(klass, {@allowForwarding}).getRange(selection)
 
   getRanges: (selection) ->
     prefix = if @isInner() then 'Inner' else 'A'
@@ -239,7 +230,6 @@ class AnyPairAllowForwarding extends AnyPair
   @deriveInnerAndA()
   @description: "Range surrounded by auto-detected paired chars from enclosed and forwarding area"
   allowForwarding: true
-  searchFrom: 'start'
   getRange: (selection) ->
     ranges = @getRanges(selection)
     from = selection.cursor.getBufferPosition()
@@ -385,6 +375,7 @@ class Paragraph extends TextObject
   getRange: (selection) ->
     originalRange = selection.getBufferRange()
     fromRow = @getNormalizedHeadBufferPosition(selection).row
+    console.log fromRow
 
     if @isMode('visual', 'linewise')
       if selection.isReversed()
@@ -447,7 +438,7 @@ class Fold extends TextObject
     getCodeFoldRowRangesContainesForRow(@editor, row).reverse()
 
   getRange: (selection) ->
-    row = swrap(selection).getHeadRow()
+    row = @getNormalizedHeadBufferPosition(selection).row
     selectedRange = selection.getBufferRange()
     for rowRange in @getFoldRowRangesContainsForRow(row)
       range = @getBufferRangeForRowRange(@adjustRowRange(rowRange))
