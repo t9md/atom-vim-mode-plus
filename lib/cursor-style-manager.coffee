@@ -1,6 +1,7 @@
 {Point, Disposable, CompositeDisposable} = require 'atom'
 
 swrap = require './selection-wrapper'
+{pointIsAtEndOfLineAtNonEmptyRow} = require './utils'
 isSpecMode = atom.inSpecMode()
 lineHeight = null
 
@@ -25,16 +26,18 @@ getOffset = (submode, cursor) ->
       new Point(0, -1)
 
     when 'linewise'
-      bufferPoint = swrap(selection).getBufferPositionFor('head', from: ['property'])
       editor = cursor.editor
+      column = swrap(selection).getBufferPositionFor('head', from: ['property']).column
+      row = swrap(selection).getRowFor('head')
+      bufferPoint = editor.clipBufferPosition([row, column])
+      if pointIsAtEndOfLineAtNonEmptyRow(editor, bufferPoint)
+        bufferPoint.column -= 1
 
       if editor.isSoftWrapped()
         screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
         offset = screenPoint.traversalFrom(cursor.getScreenPosition())
       else
         offset = bufferPoint.traversalFrom(cursor.getBufferPosition())
-      if not selection.isReversed() and cursor.isAtBeginningOfLine()
-        offset.row = -1
       offset
 
 setStyle = (style, {row, column}) ->

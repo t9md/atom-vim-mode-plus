@@ -119,6 +119,7 @@ class SelectionWrapper
         properties.tail = endPoint
       else
         properties.head = endPoint
+    # properties.head.column = @selection.cursor.goalColumn if @selection.cursor.goalColumn
     @setProperties(properties)
 
   fixPropertiesForLinewise: ->
@@ -130,16 +131,6 @@ class SelectionWrapper
     else
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
-
-    # Clip property till one column left before EOL
-    # When `keepColumnOnSelectTextObject` was true,
-    #  cursor marker in vL-mode exceed EOL
-    # FIXME: respect goalcolumn
-    editor = @selection.editor
-    startEOL = getEndOfLineForBufferRow(editor, start.row)
-    endEOL = getEndOfLineForBufferRow(editor, end.row)
-    start.column = Math.min(start.column, limitNumber(startEOL.column - 1, min: 0))
-    end.column = Math.min(end.column, limitNumber(endEOL.column - 1, min: 0))
 
   # wise must be 'characterwise' or 'linewise'
   applyWise: (wise) ->

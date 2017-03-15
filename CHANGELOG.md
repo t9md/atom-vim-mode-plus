@@ -1,3 +1,7 @@
+# 0.85.0: WIP
+- Improve: When `keepColumnOnSelectTextObject` is `true`, `v i p` respect `goalColumn` of cursor.
+  - This improve appears when you type `$ v i p`.
+
 # 0.84.1:
 - Fix: To fix vim-mode-plus-move-selected-text degradation.
 
