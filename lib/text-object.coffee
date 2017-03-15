@@ -58,13 +58,6 @@ class TextObject extends Base
   isBlockwise: ->
     @wise is 'blockwise'
 
-  getNormalizedHeadBufferPosition: (selection) ->
-    point = selection.getHeadBufferPosition()
-    if @isMode('visual') and not selection.isReversed()
-      translatePointAndClip(@editor, point, 'backward')
-    else
-      point
-
   resetState: ->
     @selectSucceeded = null
 
@@ -111,7 +104,7 @@ class Word extends TextObject
   @deriveInnerAndA()
 
   getRange: (selection) ->
-    point = @getNormalizedHeadBufferPosition(selection)
+    point = @getCursorPositionForSelection(selection)
     {range} = @getWordBufferRangeAndKindAtBufferPosition(point, {@wordRegex})
     if @isA()
       expandRangeToWhiteSpaces(@editor, range)
@@ -192,7 +185,7 @@ class Pair extends TextObject
 
   getRange: (selection) ->
     originalRange = selection.getBufferRange()
-    pairInfo = @getPairInfo(@getNormalizedHeadBufferPosition(selection))
+    pairInfo = @getPairInfo(@getCursorPositionForSelection(selection))
     # When range was same, try to expand range
     if pairInfo?.targetRange.isEqual(originalRange)
       pairInfo = @getPairInfo(pairInfo.aRange.end)
@@ -368,7 +361,8 @@ class Paragraph extends TextObject
 
   getRange: (selection) ->
     originalRange = selection.getBufferRange()
-    fromRow = @getNormalizedHeadBufferPosition(selection).row
+    fromRow = swrap(selection).getRowFor('head')
+    # fromRow = @getCursorPositionForSelection(selection).row
 
     if @isMode('visual', 'linewise')
       if selection.isReversed()
@@ -385,7 +379,8 @@ class Indentation extends Paragraph
   @deriveInnerAndA()
 
   getRange: (selection) ->
-    fromRow = @getNormalizedHeadBufferPosition(selection).row
+    fromRow = swrap(selection).getRowFor('head')
+    # fromRow = @getCursorPositionForSelection(selection).row
 
     baseIndentLevel = @getIndentLevelForBufferRow(fromRow)
     predict = (row) =>
@@ -405,7 +400,7 @@ class Comment extends TextObject
   wise: 'linewise'
 
   getRange: (selection) ->
-    row = @getNormalizedHeadBufferPosition(selection).row
+    row = @getCursorPositionForSelection(selection).row
     rowRange = @editor.languageMode.rowRangeForCommentAtBufferRow(row)
     rowRange ?= [row, row] if @editor.isBufferRowCommented(row)
     if rowRange?
@@ -431,7 +426,7 @@ class Fold extends TextObject
     getCodeFoldRowRangesContainesForRow(@editor, row).reverse()
 
   getRange: (selection) ->
-    row = @getNormalizedHeadBufferPosition(selection).row
+    row = @getCursorPositionForSelection(selection).row
     selectedRange = selection.getBufferRange()
     for rowRange in @getFoldRowRangesContainsForRow(row)
       range = @getBufferRangeForRowRange(@adjustRowRange(rowRange))
@@ -466,7 +461,7 @@ class CurrentLine extends TextObject
   @deriveInnerAndA()
 
   getRange: (selection) ->
-    row = @getNormalizedHeadBufferPosition(selection).row
+    row = @getCursorPositionForSelection(selection).row
     range = @editor.bufferRangeForBufferRow(row)
     if @isA()
       range
