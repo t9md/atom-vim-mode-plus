@@ -110,11 +110,27 @@ class SelectionWrapper
 
   saveProperties: ->
     properties = @captureProperties()
+
     unless @selection.isEmpty()
       # We selectRight-ed in visual-mode, this translation de-effect select-right-effect
       # So that we can activate-visual-mode without special translation after restoreing properties.
-      endPoint = @getBufferRange().end.translate([0, -1])
-      endPoint = @selection.editor.clipBufferPosition(endPoint)
+
+      {start, end} = @getBufferRange()
+
+      if end.column is 0
+        # console.log 'hey!'
+        endPoint = new Point(limitNumber(end.row - 1, min: start.row) , Infinity)
+        endPoint = @selection.editor.clipBufferPosition(endPoint)
+
+        # end.column)
+        # endPoint = new Range(start, [endRow, Infinity])
+      else
+        console.log "HEY!"
+        endPoint = end.translate([0, -1])
+        endPoint = @selection.editor.clipBufferPosition(endPoint)
+
+      # endPoint = @getBufferRange().end.translate([0, -1])
+      # endPoint = @selection.editor.clipBufferPosition(endPoint)
       if @selection.isReversed()
         properties.tail = endPoint
       else

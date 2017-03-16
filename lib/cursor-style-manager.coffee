@@ -16,10 +16,16 @@ getOffset = (submode, cursor) ->
   switch submode
     when 'characterwise'
       return if selection.isReversed()
-      if cursor.isAtBeginningOfLine()
-        new Point(-1, 0)
-      else
-        new Point(0, -1)
+      bufferPoint = swrap(selection).getBufferPositionFor('head', from: ['property'])
+      # console.log bufferPoint
+      offset = bufferPoint.traversalFrom(cursor.getBufferPosition())
+      # console.log 'ofst', offset.toString()
+      return offset
+
+      # if cursor.isAtBeginningOfLine()
+      #   new Point(-1, 0)
+      # else
+      #   new Point(0, -1)
 
     when 'blockwise'
       return if cursor.isAtBeginningOfLine() or selection.isReversed()

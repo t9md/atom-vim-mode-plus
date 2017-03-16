@@ -1003,8 +1003,9 @@ describe "TextObject", ->
 
       describe "expansion and deletion", ->
         beforeEach ->
+          # [NOTE] Intentionally omit `!` prefix of DOCTYPE since it represent last cursor in textC.
           htmlLikeText = """
-          <!DOCTYPE html>
+          <DOCTYPE html>
           <html lang="en">
           <head>
           __<meta charset="UTF-8" />
@@ -1013,7 +1014,7 @@ describe "TextObject", ->
           <body>
           __<div>
           ____<div>
-          ______<div>
+          |______<div>
           ________<p><a>
           ______</div>
           ____</div>
@@ -1021,10 +1022,9 @@ describe "TextObject", ->
           </body>
           </html>\n
           """
-          set text_: htmlLikeText
+          set textC_: htmlLikeText
 
         it "can expand selection when repeated", ->
-          set cursor: [9, 0]
           ensure 'v i t', selectedText_: """
             \n________<p><a>
             ______
@@ -1070,7 +1070,7 @@ describe "TextObject", ->
         it 'delete inner-tag and repatable', ->
           set cursor: [9, 0]
           ensure "d i t", text_: """
-            <!DOCTYPE html>
+            <DOCTYPE html>
             <html lang="en">
             <head>
             __<meta charset="UTF-8" />
@@ -1086,7 +1086,7 @@ describe "TextObject", ->
             </html>\n
             """
           ensure "3 .", text_: """
-            <!DOCTYPE html>
+            <DOCTYPE html>
             <html lang="en">
             <head>
             __<meta charset="UTF-8" />
@@ -1096,7 +1096,7 @@ describe "TextObject", ->
             </html>\n
             """
           ensure ".", text_: """
-            <!DOCTYPE html>
+            <DOCTYPE html>
             <html lang="en"></html>\n
             """
 
