@@ -155,11 +155,19 @@ class ModeManager
       swrapped.saveProperties() unless swrapped.hasProperties()
 
     @normalizeSelections()
+
     if newSubmode is 'blockwise'
       swrap.applyWise(@editor, 'characterwise')
       @vimState.selectBlockwise()
     else
       swrap.applyWise(@editor, newSubmode)
+
+    # OLD one
+    #   swrap.applyWise(@editor, 'characterwise')
+    #   if newSubmode is 'blockwise'
+    #     @vimState.selectBlockwise()
+    #   else if newSubmode is 'linewise'
+    #     swrap.applyWise(@editor, newSubmode)
 
     new Disposable =>
       @normalizeSelections()

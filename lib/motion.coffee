@@ -118,7 +118,13 @@ class Motion extends Base
     # Modify selection to submode-wisely
     switch @wise
       when 'linewise'
-        @vimState.selectLinewise()
+        for selection in @editor.getSelections()
+          wrapped = swrap(selection)
+          wrapped.complementGoalColumn()
+          unless wrapped.hasProperties()
+            wrapped.saveProperties()
+          wrapped.expandOverLine()
+          wrapped.setWiseProperty(@wise)
       when 'blockwise'
         @vimState.selectBlockwise()
 

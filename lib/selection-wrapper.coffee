@@ -150,7 +150,11 @@ class SelectionWrapper
         @complementGoalColumn()
         @saveProperties() unless @hasProperties()
         # throw new Errow("applyWise linewise without prop")
-        @expandOverLine()
+
+        # Even if end.column is 0, expand over that end.row( don't care selection.getRowRange() )
+        {start, end} = @getBufferRange()
+        range = getBufferRangeForRowRange(@selection.editor, [start.row, end.row])
+        @setBufferRange(range)
 
     @setWiseProperty(wise)
 
