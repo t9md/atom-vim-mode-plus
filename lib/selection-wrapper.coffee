@@ -140,6 +140,7 @@ class SelectionWrapper
 
   # wise must be 'characterwise' or 'linewise'
   applyWise: (wise) ->
+    assertWithException(@hasProperties(), "trying to applyWise on properties-less selection")
     # NOTE:
     # Must call against normalized selection
     # Don't call non-normalized selection
@@ -148,9 +149,6 @@ class SelectionWrapper
         @translateSelectionEndAndClip('forward') # equivalent to core selection.selectRight but keep goalColumn
       when 'linewise'
         @complementGoalColumn()
-        @saveProperties() unless @hasProperties()
-        # throw new Errow("applyWise linewise without prop")
-
         # Even if end.column is 0, expand over that end.row( don't care selection.getRowRange() )
         {start, end} = @getBufferRange()
         range = getBufferRangeForRowRange(@selection.editor, [start.row, end.row])

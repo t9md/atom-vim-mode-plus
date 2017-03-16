@@ -121,10 +121,7 @@ class Motion extends Base
         for selection in @editor.getSelections()
           wrapped = swrap(selection)
           wrapped.complementGoalColumn()
-          unless wrapped.hasProperties()
-            wrapped.saveProperties()
           wrapped.expandOverLine()
-          wrapped.setWiseProperty(@wise)
       when 'blockwise'
         @vimState.selectBlockwise()
 
