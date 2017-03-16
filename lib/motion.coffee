@@ -118,10 +118,7 @@ class Motion extends Base
     # Modify selection to submode-wisely
     switch @wise
       when 'linewise'
-        for selection in @editor.getSelections()
-          wrapped = swrap(selection)
-          wrapped.complementGoalColumn()
-          wrapped.expandOverLine()
+        @vimState.selectLinewiseOld()
       when 'blockwise'
         @vimState.selectBlockwise()
 
@@ -135,9 +132,6 @@ class Motion extends Base
       return
     return unless @isInclusive() or @isLinewise()
 
-    if @isMode('visual') and cursorIsAtEndOfLineAtNonEmptyRow(cursor)
-      # Avoid puting cursor on EOL in visual-mode as long as cursor's row was non-empty.
-      swrap(selection).translateSelectionHeadAndClip('backward')
     # to select @inclusive-ly
     swrap(selection).translateSelectionEndAndClip('forward')
 
