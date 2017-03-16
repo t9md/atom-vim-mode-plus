@@ -130,7 +130,7 @@ class Motion extends Base
 
     if not @isMode('visual') and not @is('CurrentSelection') and selection.isEmpty() # Failed to move.
       return
-    return unless @isInclusive() or @isLinewise()
+    return if not @isInclusive() and not @isLinewise()
 
     # to select @inclusive-ly
     swrap(selection).translateSelectionEndAndClip('forward')
