@@ -1,7 +1,6 @@
 {Point, Disposable, CompositeDisposable} = require 'atom'
 
 swrap = require './selection-wrapper'
-{pointIsAtEndOfLineAtNonEmptyRow} = require './utils'
 isSpecMode = atom.inSpecMode()
 lineHeight = null
 
@@ -15,10 +14,10 @@ getOffset = (submode, cursor) ->
   {selection} = cursor
   switch submode
     when 'characterwise'
-      return if selection.isReversed()
-      bufferPoint = swrap(selection).getBufferPositionFor('head', from: ['property'])
-      offset = bufferPoint.traversalFrom(cursor.getBufferPosition())
-      return offset
+      # TODO-#698 Enabled this again when performance is important.
+      # return if selection.isReversed()
+
+      swrap(selection).getCursorTraversalFromPropertyInBufferPosition()
 
       # TODO-#698 Enabled this again when performance is important.
       # if cursor.isAtBeginningOfLine()
@@ -26,25 +25,16 @@ getOffset = (submode, cursor) ->
       # else
       #   new Point(0, -1)
 
+    when 'linewise'
+      if selection.editor.isSoftWrapped()
+        swrap(selection).getCursorTraversalFromPropertyInScreenPosition(true)
+      else
+        swrap(selection).getCursorTraversalFromPropertyInBufferPosition(true)
 
     when 'blockwise'
       return if cursor.isAtBeginningOfLine() or selection.isReversed()
       new Point(0, -1)
 
-    when 'linewise'
-      editor = cursor.editor
-      column = swrap(selection).getBufferPositionFor('head', from: ['property']).column
-      row = swrap(selection).getRowFor('head')
-      bufferPoint = editor.clipBufferPosition([row, column])
-      if pointIsAtEndOfLineAtNonEmptyRow(editor, bufferPoint)
-        bufferPoint.column -= 1
-
-      if editor.isSoftWrapped()
-        screenPoint = editor.screenPositionForBufferPosition(bufferPoint)
-        offset = screenPoint.traversalFrom(cursor.getScreenPosition())
-      else
-        offset = bufferPoint.traversalFrom(cursor.getBufferPosition())
-      offset
 
 setStyle = (style, {row, column}) ->
   style.setProperty('top', "#{row * lineHeight}em") unless row is 0
