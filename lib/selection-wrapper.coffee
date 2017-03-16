@@ -229,10 +229,15 @@ class SelectionWrapper
     tail = @selection.getTailBufferPosition()
     new Point(head.row - tail.row, head.column - tail.column)
 
+  # What's the normalize?
+  # Normalization is restore selection range from property.
+  # As a result it range became range where end of selection moved to left.
+  # This end-move-to-left de-efect of end-mode-to-right effect( this is visual-mode orientation )
   normalize: ->
-    assertWithException(not @selection.isEmpty(), "attempted to normalize for empty selection")
-    assertWithException(@hasProperties(), "attempted to normalize for un-propertized selection")
+    # empty selection IS already 'normalized'
+    return if @selection.isEmpty()
 
+    assertWithException(@hasProperties(), "attempted to normalize but no properties to restore")
     if @getProperties().wise is 'linewise'
       @fixPropertyRowToRowRange()
     @selectByProperties(@getProperties())
