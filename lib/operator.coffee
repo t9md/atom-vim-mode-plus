@@ -335,7 +335,7 @@ class Select extends Operator
                 wrapped.saveProperties() unless wrapped.hasProperties()
               else
                 wrapped.saveProperties()
-              wrapped.fixPropertiesForLinewise()
+              wrapped.fixPropertyRowToRowRange()
 
       @editor.scrollToCursorPosition()
       @activateModeIfNecessary('visual', wise)

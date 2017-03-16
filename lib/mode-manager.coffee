@@ -149,17 +149,17 @@ class ModeManager
   # - normalized selection: One column left selcted at selection end position
   # - When selectRight at end position of normalized-selection, it become un-normalized selection
   #   which is the range in visual-mode.
-  #
   activateVisualMode: (newSubmode) ->
     @vimState.assertWithException(newSubmode?, "activate visual-mode without submode")
-    @normalizeSelections()
-    swrap.applyWise(@editor, 'characterwise')
+    for selection in @editor.getSelections() when swrapped = swrap(selection)
+      swrapped.saveProperties() unless swrapped.hasProperties()
 
-    switch newSubmode
-      when 'linewise'
-        swrap.applyWise(@editor, 'linewise')
-      when 'blockwise'
-        @vimState.selectBlockwise()
+    @normalizeSelections()
+    if newSubmode is 'blockwise'
+      swrap.applyWise(@editor, 'characterwise')
+      @vimState.selectBlockwise()
+    else
+      swrap.applyWise(@editor, newSubmode)
 
     new Disposable =>
       @normalizeSelections()
@@ -169,10 +169,13 @@ class ModeManager
   normalizeSelections: ->
     if @submode is 'blockwise'
       for bs in @vimState.getBlockwiseSelections()
-        bs.restoreCharacterwise()
+        bs.restoreCharacterwise() # TODO-#698 in this state, selection is multiple-selection in vC-wise
       @vimState.clearBlockwiseSelections()
+      for selection in @editor.getSelections()
+        swrap(selection).saveProperties()
 
-    swrap.normalize(@editor)
+    for selection in @editor.getSelections() when not selection.isEmpty()
+      swrap(selection).normalize()
 
   # Narrow to selection
   # -------------------------

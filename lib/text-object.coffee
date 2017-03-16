@@ -361,9 +361,7 @@ class Paragraph extends TextObject
 
   getRange: (selection) ->
     originalRange = selection.getBufferRange()
-    fromRow = swrap(selection).getRowFor('head')
-    # fromRow = @getCursorPositionForSelection(selection).row
-
+    fromRow = @getCursorPositionForSelection(selection).row
     if @isMode('visual', 'linewise')
       if selection.isReversed()
         fromRow--
@@ -379,8 +377,7 @@ class Indentation extends Paragraph
   @deriveInnerAndA()
 
   getRange: (selection) ->
-    fromRow = swrap(selection).getRowFor('head')
-    # fromRow = @getCursorPositionForSelection(selection).row
+    fromRow = @getCursorPositionForSelection(selection).row
 
     baseIndentLevel = @getIndentLevelForBufferRow(fromRow)
     predict = (row) =>

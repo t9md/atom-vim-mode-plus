@@ -1,3 +1,7 @@
+# TODO-#698 remove when finished
+{inspect} = require 'util'
+p = (args...) -> console.log inspect(args...)
+
 {Range, Point, Disposable} = require 'atom'
 {
   translatePointAndClip
@@ -109,37 +113,23 @@ class SelectionWrapper
       new Range(tailPoint, point)
 
   saveProperties: ->
-    properties = @captureProperties()
-
-    unless @selection.isEmpty()
+    head = @selection.getHeadBufferPosition()
+    tail = @selection.getTailBufferPosition()
+    if @selection.isEmpty()
+      properties = {head, tail}
+    else
       # We selectRight-ed in visual-mode, this translation de-effect select-right-effect
       # So that we can activate-visual-mode without special translation after restoreing properties.
-
-      {start, end} = @getBufferRange()
-
-      if end.column is 0
-        # console.log 'hey!'
-        endPoint = new Point(limitNumber(end.row - 1, min: start.row) , Infinity)
-        endPoint = @selection.editor.clipBufferPosition(endPoint)
-
-        # end.column)
-        # endPoint = new Range(start, [endRow, Infinity])
-      else
-        console.log "HEY!"
-        endPoint = end.translate([0, -1])
-        endPoint = @selection.editor.clipBufferPosition(endPoint)
-
-      # endPoint = @getBufferRange().end.translate([0, -1])
-      # endPoint = @selection.editor.clipBufferPosition(endPoint)
+      {end} = @getBufferRange()
+      end = translatePointAndClip(@selection.editor, end, 'backward')
       if @selection.isReversed()
-        properties.tail = endPoint
+        properties = {head: head, tail: end}
       else
-        properties.head = endPoint
-    # properties.head.column = @selection.cursor.goalColumn if @selection.cursor.goalColumn
+        properties = {head: end, tail: tail}
     @setProperties(properties)
 
-  fixPropertiesForLinewise: ->
-    assertWithException(@hasProperties(), "trying to fixPropertiesForLinewise on properties-less selection")
+  fixPropertyRowToRowRange: ->
+    assertWithException(@hasProperties(), "trying to fixPropertyRowToRowRange on properties-less selection")
 
     {head, tail} = @getProperties()
     if @selection.isReversed()
@@ -155,11 +145,11 @@ class SelectionWrapper
     # Don't call non-normalized selection
     switch wise
       when 'characterwise'
-        @translateSelectionEndAndClip('forward')
-        @saveProperties() unless @hasProperties()
+        @translateSelectionEndAndClip('forward') # equivalent to core selection.selectRight but keep goalColumn
       when 'linewise'
         @complementGoalColumn()
         @saveProperties() unless @hasProperties()
+        # throw new Errow("applyWise linewise without prop")
         @expandOverLine()
 
     @setWiseProperty(wise)
@@ -238,13 +228,11 @@ class SelectionWrapper
     new Point(head.row - tail.row, head.column - tail.column)
 
   normalize: ->
-    unless @selection.isEmpty()
-      if @hasProperties() and @getProperties().wise is 'linewise'
-        @fixPropertiesForLinewise()
-        @selectByProperties(@getProperties())
-        @translateSelectionEndAndClip('backward', translate: false)
-      else
-        @translateSelectionEndAndClip('backward')
+    assertWithException(not @selection.isEmpty(), "attempted to normalize for empty selection")
+    assertWithException(@hasProperties(), "attempted to normalize for un-propertized selection")
+    if @getProperties().wise is 'linewise'
+      @fixPropertyRowToRowRange()
+    @selectByProperties(@getProperties())
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
@@ -284,9 +272,9 @@ swrap.applyWise = (editor, value) ->
   for selection in editor.getSelections()
     swrap(selection).applyWise(value)
 
-swrap.fixPropertiesForLinewise = (editor) ->
+swrap.fixPropertyRowToRowRange = (editor) ->
   for selection in editor.getSelections()
-    swrap(selection).fixPropertiesForLinewise()
+    swrap(selection).fixPropertyRowToRowRange()
 
 # Return function to restore
 # Used in vmp-move-selected-text
