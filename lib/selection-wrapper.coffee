@@ -232,6 +232,7 @@ class SelectionWrapper
   normalize: ->
     assertWithException(not @selection.isEmpty(), "attempted to normalize for empty selection")
     assertWithException(@hasProperties(), "attempted to normalize for un-propertized selection")
+
     if @getProperties().wise is 'linewise'
       @fixPropertyRowToRowRange()
     @selectByProperties(@getProperties())
