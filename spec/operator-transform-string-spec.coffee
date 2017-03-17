@@ -646,7 +646,7 @@ describe "Operator TransformString", ->
           milk
 
           """
-      # TODO-#698 FIX when finished
+      # TODO#698 FIX when finished
       xit "surround text for each word in visual selection", ->
         ensure 'v i p m s "',
           textC: """

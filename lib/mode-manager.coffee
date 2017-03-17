@@ -163,7 +163,6 @@ class ModeManager
     @normalizeSelections()
 
     if newSubmode is 'blockwise'
-      swrap.applyWise(@editor, 'characterwise')
       @vimState.selectBlockwise()
     else
       swrap.applyWise(@editor, newSubmode)
@@ -176,7 +175,7 @@ class ModeManager
   normalizeSelections: ->
     if @submode is 'blockwise'
       for bs in @vimState.getBlockwiseSelections()
-        bs.restoreCharacterwise() # TODO-#698 in this state, selection is multiple-selection in vC-wise
+        bs.restoreCharacterwise() # NOTE#698 in this state, selection is multiple-selection in vC-wise
       @vimState.clearBlockwiseSelections()
       swrap.saveProperties(@editor)
 

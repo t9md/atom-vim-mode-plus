@@ -122,7 +122,7 @@ class VimState
 
   # Other
   # -------------------------
-  # TODO-#698 Remove when done
+  # TODO#698 Remove when done
   selectLinewiseOld: ->
     for selection in @editor.getSelections() when wrapped = swrap(selection)
       wrapped.complementGoalColumn()

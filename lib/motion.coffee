@@ -135,6 +135,8 @@ class Motion extends Base
       return
     return if not @isInclusive() and not @isLinewise()
 
+    return if @wise is 'blockwise' # Lift-off
+
     # to select @inclusive-ly
     swrap(selection).translateSelectionEndAndClip('forward')
 

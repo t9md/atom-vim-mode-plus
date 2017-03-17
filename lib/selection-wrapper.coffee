@@ -1,4 +1,4 @@
-# TODO-#698 remove when finished
+# TODO#698 remove when finished
 {inspect} = require 'util'
 p = (args...) -> console.log inspect(args...)
 
@@ -151,12 +151,11 @@ class SelectionWrapper
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
 
-  # wise must be 'characterwise' or 'linewise'
+  # NOTE:
+  # 'wise' must be 'characterwise' or 'linewise'
+  # Use this for normalized(non-select-right-ed) selection.
   applyWise: (wise) ->
-    assertWithException(@hasProperties(), "trying to applyWise on properties-less selection")
-    # NOTE:
-    # Must call against normalized selection
-    # Don't call non-normalized selection
+    assertWithException(@hasProperties(), "trying to applyWise #{wise} on properties-less selection")
     switch wise
       when 'characterwise'
         @translateSelectionEndAndClip('forward') # equivalent to core selection.selectRight but keep goalColumn
@@ -285,6 +284,9 @@ swrap.dumpProperties = (editor) ->
   for selection in editor.getSelections() when swrap(selection).hasProperties()
     console.log inspect(swrap(selection).getProperties())
 
+swrap.hasProperties = (editor) ->
+  editor.getSelections().every (selection) -> swrap(selection).hasProperties()
+
 swrap.normalize = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).normalize()
@@ -296,6 +298,10 @@ swrap.applyWise = (editor, value) ->
 swrap.fixPropertyRowToRowRange = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).fixPropertyRowToRowRange()
+
+swrap.setWiseProperty = (editor, wise) ->
+  for selection in editor.getSelections()
+    swrap(selection).setWiseProperty(wise)
 
 # Return function to restore
 # Used in vmp-move-selected-text

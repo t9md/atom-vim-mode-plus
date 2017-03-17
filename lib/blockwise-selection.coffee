@@ -11,10 +11,13 @@ class BlockwiseSelection
 
   constructor: (selection) ->
     {@editor} = selection
+    swrap(selection).saveProperties() # TODO#698  remove this?
+    swrap(selection).applyWise('characterwise') # NOTE#698 added this line
+    
     @initialize(selection)
 
     for memberSelection in @getSelections()
-      swrap(memberSelection).saveProperties()
+      swrap(memberSelection).saveProperties() # TODO#698  remove this?
       swrap(memberSelection).setWiseProperty('blockwise')
 
   getSelections: ->
