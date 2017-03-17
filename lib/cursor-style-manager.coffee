@@ -24,6 +24,7 @@ class CursorStyleManager
     # Intentionally skip in spec mode, since not all spec have DOM attached( and don't want to ).
     return if atom.inSpecMode()
 
+    # We must dispose previous style modification for non-visual-mode
     @styleDisposables?.dispose()
     return unless (@mode is 'visual' and @vimState.getConfig('showCursorInVisualMode'))
 
