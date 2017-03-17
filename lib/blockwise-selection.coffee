@@ -181,7 +181,7 @@ class BlockwiseSelection
     @clearSelections(except: head)
     {goalColumn} = head.cursor # FIXME this should not be necessary
     swrap(head).selectByProperties(properties)
-    if head.getBufferRange().end.column is 0
+    if head.getBufferRange().end.column is 0 # FIXME this should be done by restoring selection prop
       swrap(head).translateSelectionEndAndClip('forward')
     head.cursor.goalColumn ?= goalColumn if goalColumn # FIXME this should not be necessary
 
