@@ -47,42 +47,24 @@ class CursorStyleManager
     # But it wasn't necessary before I iintroduce `moveToFirstCharacterOnVerticalMotion` for `ctrl-f`
     @editorElement.component.updateSync()
 
-    for cursor in cursorsToShow when @needModifyStyle(cursor.selection) and domNode = @getCursorNode(cursor)
-      @styleDisposables.add(@modifyStyle(cursor, domNode))
-
-  needModifyStyle: (selection) ->
-    switch @submode
-      when 'characterwise'
-        not selection.isReversed()
-      when 'linewise'
-        true
-      when 'blockwise'
-        not (selection.isReversed() or selection.cursor.isAtBeginningOfLine())
-
-  getCursorNode: (cursor) ->
-    @editorElement.component.linesComponent.cursorsComponent.cursorNodesById[cursor.id]
+    # [NOTE] Using non-public API
+    cursorNodesById = @editorElement.component.linesComponent.cursorsComponent.cursorNodesById
+    for cursor in cursorsToShow when cursorNode = cursorNodesById[cursor.id]
+      @styleDisposables.add @modifyStyle(cursor, cursorNode)
 
   # Apply selection property's traversal from actual cursor to cursorNode's style
   modifyStyle: (cursor, domNode) ->
     selection = cursor.selection
     {row, column} = switch @submode
-      when 'characterwise'
-        swrap(selection).getCursorTraversalFromPropertyInBufferPosition()
-        # TODO-#698 Enabled this again when performance is important.
-        # if cursor.isAtBeginningOfLine()
-        #   new Point(-1, 0)
-        # else
-        #   new Point(0, -1)
       when 'linewise'
         if selection.editor.isSoftWrapped()
           swrap(selection).getCursorTraversalFromPropertyInScreenPosition(true)
         else
           swrap(selection).getCursorTraversalFromPropertyInBufferPosition(true)
-      when 'blockwise'
-        new Point(0, -1)
+      else
+        swrap(selection).getCursorTraversalFromPropertyInBufferPosition()
 
     style = domNode.style
-
     style.setProperty('top', "#{row * @lineHeight}em") if row
     style.setProperty('left', "#{column}ch") if column
     new Disposable ->
