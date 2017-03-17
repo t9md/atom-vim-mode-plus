@@ -28,15 +28,14 @@ class CursorStyleManager
     return unless (@mode is 'visual' and @vimState.getConfig('showCursorInVisualMode'))
 
     @styleDisposables = new CompositeDisposable
-    cursors = cursorsToShow = @editor.getCursors()
     if @submode is 'blockwise'
       cursorsToShow = @vimState.getBlockwiseSelections().map (bs) -> bs.getHeadSelection().cursor
+    else
+      cursorsToShow = @editor.getCursors()
 
-    for cursor in cursors
-      if cursor in cursorsToShow
-        cursor.setVisible(true) unless cursor.isVisible()
-      else
-        cursor.setVisible(false) if cursor.isVisible()
+    # In blockwise, show only blockwise-head cursor
+    for cursor in @editor.getCursors()
+      cursor.setVisible(cursor in cursorsToShow)
 
     # [NOTE] In BlockwiseSelect we add selections(and corresponding cursors) in bluk.
     # But corresponding cursorsComponent(HTML element) is added in sync.
