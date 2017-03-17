@@ -168,13 +168,6 @@ class ModeManager
     else
       swrap.applyWise(@editor, newSubmode)
 
-    # OLD one
-    #   swrap.applyWise(@editor, 'characterwise')
-    #   if newSubmode is 'blockwise'
-    #     @vimState.selectBlockwise()
-    #   else if newSubmode is 'linewise'
-    #     swrap.applyWise(@editor, newSubmode)
-
     new Disposable =>
       @normalizeSelections()
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
