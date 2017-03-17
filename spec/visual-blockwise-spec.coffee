@@ -1,7 +1,7 @@
 {getVimState, TextData} = require './spec-helper'
 swrap = require '../lib/selection-wrapper'
 
-fdescribe "Visual Blockwise", ->
+describe "Visual Blockwise", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
   textInitial = """
     01234567890123456789
@@ -80,6 +80,7 @@ fdescribe "Visual Blockwise", ->
       when 'top' then first
       when 'bottom' then last
     bs = vimState.getLastBlockwiseSelection()
+
     expect(bs.getHeadSelection()).toBe head
     tail = switch o.tail
       when 'top' then first
@@ -402,6 +403,36 @@ fdescribe "Visual Blockwise", ->
       it 'case-5', -> ensureCharacterwiseWasRestored('v l 3 k')
       it 'case-6', -> ensureCharacterwiseWasRestored('v 2 l 3 k')
       it 'case-7', -> set cursor: [5, 0]; ensureCharacterwiseWasRestored('v 5 l 3 k')
+
+  describe "keep goalColumn", ->
+    selectedBlockTexts = []
+    beforeEach ->
+      selectedBlockTexts = ["3456", "", "DEFG"]
+      set text: """
+        012345678
+
+        ABCDEFGHI\n
+        """
+      ensure "ctrl-v", mode: ['visual', 'blockwise']
+
+    it "when [reversed = false, headReversed = false]", ->
+      set cursor: [0, 3]
+      ensure "l l l j j", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
+      ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: false
+    it "when [reversed = true, headReversed = true]", ->
+      set cursor: [2, 6]
+      ensure "h h h k k", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
+      ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: true
+    it "when [reversed = false, headReversed = true]", ->
+      set cursor: [0, 6]
+      # FIXME: changing `2 j` to `j j` spec fail
+      ensure "h h h 2 j", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
+      ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: true
+    it "when [reversed = true, headReversed = false]", ->
+      set cursor: [2, 3]
+      # FIXME: changing `2 k` to `k k` spec fail
+      ensure "l l l 2 k", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
+      ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: false
 
   # [FIXME] not appropriate put here, re-consider all spec file layout later.
   describe "gv feature", ->
