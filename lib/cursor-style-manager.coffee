@@ -37,14 +37,11 @@ class CursorStyleManager
     for cursor in @editor.getCursors()
       cursor.setVisible(cursor in cursorsToShow)
 
-    # [NOTE] In BlockwiseSelect we add selections(and corresponding cursors) in bluk.
-    # But corresponding cursorsComponent(HTML element) is added in sync.
-    # So to modify style of cursorsComponent, we have to make sure corresponding cursorsComponent
-    # is available by component in sync to model.
-    # [FIXME]
-    # When ctrl-f, b, d, u in vL mode, I had to call updateSync to show cursor correctly
-    # But it wasn't necessary before I iintroduce `moveToFirstCharacterOnVerticalMotion` for `ctrl-f`
-    @editorElement.component.updateSync()
+    # [NOTE] When activating visual-blockwise-mode multiple slections are added in bulk.
+    # But corresponding cursorsComponent(HTML element) is added asynchronously.
+    # We need to make sure that corresponding cursor's domNode is available to modify it's style.
+    if @submode is 'blockwise'
+      @editorElement.component.updateSync()
 
     # [NOTE] Using non-public API
     cursorNodesById = @editorElement.component.linesComponent.cursorsComponent.cursorNodesById
