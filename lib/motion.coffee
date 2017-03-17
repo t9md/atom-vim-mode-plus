@@ -129,8 +129,9 @@ class Motion extends Base
     selection.modifySelection =>
       @moveWithSaveJump(cursor)
 
-    if not @isMode('visual') and not @is('CurrentSelection') and
-        (if @moveSucceeded? then not @moveSucceeded else selection.isEmpty())
+    moveSucceeded = @moveSucceeded ? not selection.isEmpty()
+
+    if not @isMode('visual') and not @is('CurrentSelection') and not moveSucceeded
       return
     return if not @isInclusive() and not @isLinewise()
 
