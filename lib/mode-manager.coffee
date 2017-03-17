@@ -89,6 +89,12 @@ class ModeManager
     @vimState.reset()
     # Component is not necessary avaiable see #98.
     @editorElement.component?.setInputEnabled(false)
+
+    # In visual-mode, cursor can place at EOL. move left if cursor is at EOL
+    # We should not do this in visual-mode deactivation phase.
+    # e.g. `A` directly shift from visua-mode to `insert-mode`, and cursor should remain at EOL.
+    for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
+      moveCursorLeft(cursor, preserveGoalColumn: true)
     new Disposable
 
   # Operator Pending
