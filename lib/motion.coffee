@@ -40,6 +40,7 @@ class Motion extends Base
   wise: 'characterwise'
   jump: false
   verticalMotion: false
+  moveSucceeded: null
 
   constructor: ->
     super
@@ -128,7 +129,8 @@ class Motion extends Base
     selection.modifySelection =>
       @moveWithSaveJump(cursor)
 
-    if not @isMode('visual') and not @is('CurrentSelection') and selection.isEmpty() # Failed to move.
+    if not @isMode('visual') and not @is('CurrentSelection') and
+        (if @moveSucceeded? then not @moveSucceeded else selection.isEmpty())
       return
     return if not @isInclusive() and not @isLinewise()
 
@@ -925,11 +927,8 @@ class Till extends Find
 
   getPoint: ->
     @point = super
-
-  selectByMotion: (selection) ->
-    super
-    if selection.isEmpty() and (@point? and not @backwards)
-      swrap(selection).translateSelectionEndAndClip('forward')
+    @moveSucceeded = @point?
+    return @point
 
 # keymap: T
 class TillBackwards extends Till

@@ -1,4 +1,8 @@
 # 0.85.0: WIP
+- Fix: Respect `v` operator-modifier for `t`( Till ) motion.
+  - e.g. In text "ab" whre cursor is at "a"
+    - Old: `d t b` delete "a"( Good ), `d v t b` delete "a"( Bad ).
+    - New: `d t b` delete "a"( Good ), `d v t b` don't delete "a"( Good ).
 - Improve: When `keepColumnOnSelectTextObject` is `true`, `v i p` respect `goalColumn` of cursor.
   - This improve appears when you type `$ v i p`.
 
