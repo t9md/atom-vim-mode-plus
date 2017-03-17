@@ -1,7 +1,7 @@
 {getVimState, TextData} = require './spec-helper'
 swrap = require '../lib/selection-wrapper'
 
-describe "Visual Blockwise", ->
+fdescribe "Visual Blockwise", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
   textInitial = """
     01234567890123456789
@@ -89,9 +89,13 @@ describe "Visual Blockwise", ->
     for s in others
       expect(bs.getHeadSelection()).not.toBe s
       expect(bs.getTailSelection()).not.toBe s
+
     if o.reversed?
+      expect(bs.isReversed()).toBe o.reversed
+
+    if o.headReversed?
       for s in selections
-        expect(s.isReversed()).toBe o.reversed
+        expect(s.isReversed()).toBe o.headReversed
 
   beforeEach ->
     getVimState (state, vimEditor) ->
@@ -230,16 +234,16 @@ describe "Visual Blockwise", ->
     describe 'o', ->
       it "change blockwiseHead to opposite side and reverse selection", ->
         keystroke 'o'
-        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: true
 
         keystroke 'o'
-        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
     describe 'capital O', ->
       it "reverse each selection", ->
         keystroke 'O'
-        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: true
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: true
         keystroke 'O'
-        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
 
   describe "shift from characterwise to blockwise", ->
     describe "when selection is not reversed", ->
@@ -258,7 +262,7 @@ describe "Visual Blockwise", ->
             '+'
             'C'
           ]
-        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
 
       it 'case-2', ->
         ensure 'h 3 j ctrl-v',
@@ -269,7 +273,7 @@ describe "Visual Blockwise", ->
             '-+'
             '-C'
           ]
-        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: true
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: true
 
       it 'case-3', ->
         ensure '2 h 3 j ctrl-v',
@@ -280,7 +284,7 @@ describe "Visual Blockwise", ->
             '--+'
             '--C'
           ]
-        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: true
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: true
 
       it 'case-4', ->
         ensure 'l 3 j ctrl-v',
@@ -291,7 +295,7 @@ describe "Visual Blockwise", ->
             '++'
             'C-'
           ]
-        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
       it 'case-5', ->
         ensure '2 l 3 j ctrl-v',
           mode: ['visual', 'blockwise']
@@ -301,7 +305,7 @@ describe "Visual Blockwise", ->
             '+++'
             'C--'
           ]
-        ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false
+        ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
 
     describe "when selection is reversed", ->
       beforeEach ->
@@ -319,7 +323,7 @@ describe "Visual Blockwise", ->
             '+'
             'C'
           ]
-        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: true
 
       it 'case-2', ->
         ensure 'h 3 k ctrl-v',
@@ -330,7 +334,7 @@ describe "Visual Blockwise", ->
             '-+'
             '-C'
           ]
-        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: true
 
       it 'case-3', ->
         ensure '2 h 3 k ctrl-v',
@@ -341,7 +345,7 @@ describe "Visual Blockwise", ->
             '--+'
             '--C'
           ]
-        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: true
 
       it 'case-4', ->
         ensure 'l 3 k ctrl-v',
@@ -352,7 +356,7 @@ describe "Visual Blockwise", ->
             '++'
             'C-'
           ]
-        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: false
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: false
 
       it 'case-5', ->
         ensure '2 l 3 k ctrl-v',
@@ -363,7 +367,7 @@ describe "Visual Blockwise", ->
             '+++'
             'C--'
           ]
-        ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: false
+        ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: false
 
   describe "shift from blockwise to characterwise", ->
     preserveSelection = ->
