@@ -99,7 +99,12 @@ class Motion extends Base
 
   select: ->
     for selection in @editor.getSelections()
-      @selectByMotion(selection)
+      succeeded = @selectByMotion(selection)
+      if (succeeded or @isMode('visual') or @is('CurrentSelection')) and
+          (@isInclusive() or @isLinewise()) and
+          @wise isnt 'blockwise'
+
+        swrap(selection).translateSelectionEndAndClip('forward')
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
@@ -124,21 +129,9 @@ class Motion extends Base
         @vimState.selectBlockwise()
 
   selectByMotion: (selection) ->
-    {cursor} = selection
-
     selection.modifySelection =>
-      @moveWithSaveJump(cursor)
-
-    moveSucceeded = @moveSucceeded ? not selection.isEmpty()
-
-    if not @isMode('visual') and not @is('CurrentSelection') and not moveSucceeded
-      return
-    return if not @isInclusive() and not @isLinewise()
-
-    return if @wise is 'blockwise' # Lift-off
-
-    # to select @inclusive-ly
-    swrap(selection).translateSelectionEndAndClip('forward')
+      @moveWithSaveJump(selection.cursor)
+    @moveSucceeded ? not selection.isEmpty()
 
   setCursorBuffeRow: (cursor, row, options) ->
     if @isVerticalMotion() and @getConfig('moveToFirstCharacterOnVerticalMotion')
