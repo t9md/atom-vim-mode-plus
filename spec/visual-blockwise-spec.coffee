@@ -1,5 +1,4 @@
 {getVimState, TextData} = require './spec-helper'
-swrap = require '../lib/selection-wrapper'
 
 describe "Visual Blockwise", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
@@ -425,13 +424,11 @@ describe "Visual Blockwise", ->
       ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: true
     it "when [reversed = false, headReversed = true]", ->
       set cursor: [0, 6]
-      # FIXME: changing `2 j` to `j j` spec fail
-      ensure "h h h 2 j", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
+      ensure "h h h j j", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
       ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: true
     it "when [reversed = true, headReversed = false]", ->
       set cursor: [2, 3]
-      # FIXME: changing `2 k` to `k k` spec fail
-      ensure "l l l 2 k", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
+      ensure "l l l k k", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
       ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: false
 
   # [FIXME] not appropriate put here, re-consider all spec file layout later.

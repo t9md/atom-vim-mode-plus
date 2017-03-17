@@ -179,9 +179,11 @@ class BlockwiseSelection
     properties = @getCharacterwiseProperties()
     head = @getHeadSelection()
     @clearSelections(except: head)
+    {goalColumn} = head.cursor # FIXME this should not be necessary
     swrap(head).selectByProperties(properties)
     if head.getBufferRange().end.column is 0
       swrap(head).translateSelectionEndAndClip('forward')
+    head.cursor.goalColumn ?= goalColumn if goalColumn # FIXME this should not be necessary
 
   autoscroll: (options) ->
     @getHeadSelection().autoscroll(options)
