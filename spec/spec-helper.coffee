@@ -36,8 +36,11 @@ withMockPlatform = (target, platform, fn) ->
 buildKeydownEvent = (key, options) ->
   KeymapManager.buildKeydownEvent(key, options)
 
-headFromProperty = (selection) ->
+getHeadProperty = (selection) ->
   swrap(selection).getBufferPositionFor('head', from: ['property'])
+
+getTailProperty = (selection) ->
+  swrap(selection).getBufferPositionFor('tail', from: ['property'])
 
 buildKeydownEventFromKeystroke = (keystroke, target) ->
   modifier = ['ctrl', 'alt', 'shift', 'cmd']
@@ -250,7 +253,8 @@ class VimEditor
     'selectionIsReversed',
     'persistentSelectionBufferRange', 'persistentSelectionCount'
     'occurrenceCount', 'occurrenceText'
-    'characterwiseHead'
+    'propertyHead'
+    'propertyTail'
     'scrollTop',
     'mark'
     'mode',
@@ -387,8 +391,12 @@ class VimEditor
     actual = (@editor.getTextInBufferRange(r) for r in ranges)
     expect(actual).toEqual(toArray(text))
 
-  ensureCharacterwiseHead: (points) ->
-    actual = (headFromProperty(s) for s in @editor.getSelections())
+  ensurePropertyHead: (points) ->
+    actual = (getHeadProperty(s) for s in @editor.getSelections())
+    expect(actual).toEqual(toArrayOfPoint(points))
+
+  ensurePropertyTail: (points) ->
+    actual = (getTailProperty(s) for s in @editor.getSelections())
     expect(actual).toEqual(toArrayOfPoint(points))
 
   ensureScrollTop: (scrollTop) ->
