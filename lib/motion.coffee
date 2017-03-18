@@ -49,20 +49,8 @@ class Motion extends Base
       @wise = @vimState.submode
     @initialize()
 
-  isInclusive: ->
-    @inclusive
-
-  isJump: ->
-    @jump
-
-  isVerticalMotion: ->
-    @verticalMotion
-
-  isLinewise: ->
-    @wise is 'linewise'
-
-  isBlockwise: ->
-    @wise is 'blockwise'
+  isLinewise: -> @wise is 'linewise'
+  isBlockwise: -> @wise is 'blockwise'
 
   forceWise: (wise) ->
     if wise is 'characterwise'
@@ -79,7 +67,7 @@ class Motion extends Base
     cursor.setScreenPosition(point) if point?
 
   moveWithSaveJump: (cursor) ->
-    if cursor.isLastCursor() and @isJump()
+    if cursor.isLastCursor() and @jump
       cursorPosition = cursor.getBufferPosition()
 
     @moveCursor(cursor)
@@ -111,7 +99,7 @@ class Motion extends Base
         swrap(selection).translateSelectionEndAndClip('forward')
         swrap(selection).saveProperties() if @isMode('visual')
 
-      else if succeeded and (@isInclusive() or @isLinewise())
+      else if succeeded and (@inclusive or @isLinewise())
         swrap(selection).translateSelectionEndAndClip('forward')
 
     @editor.mergeCursors()
@@ -132,7 +120,7 @@ class Motion extends Base
     return @moveSucceeded ? not selection.isEmpty()
 
   setCursorBuffeRow: (cursor, row, options) ->
-    if @isVerticalMotion() and @getConfig('moveToFirstCharacterOnVerticalMotion')
+    if @verticalMotion and @getConfig('moveToFirstCharacterOnVerticalMotion')
       cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row), options)
     else
       setBufferRow(cursor, row, options)
