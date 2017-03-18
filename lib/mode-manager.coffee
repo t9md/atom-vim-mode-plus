@@ -19,11 +19,8 @@ class ModeManager
   destroy: ->
     @subscriptions.dispose()
 
-  isMode: (mode, submodes) ->
-    if submodes?
-      (@mode is mode) and (@submode in [].concat(submodes))
-    else
-      @mode is mode
+  isMode: (mode, submode=null) ->
+    (mode is @mode) and (submode is @submode)
 
   # Event
   # -------------------------

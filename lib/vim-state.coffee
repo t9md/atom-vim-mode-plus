@@ -274,7 +274,7 @@ class VimState
       else
         @activate('visual', wise)
     else
-      @activate('normal') if @isMode('visual')
+      @activate('normal') if @mode is 'visual'
 
   saveProperties: (event) ->
     return unless @isInterestingEvent(event)

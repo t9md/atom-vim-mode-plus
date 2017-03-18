@@ -45,8 +45,8 @@ class Motion extends Base
   constructor: ->
     super
 
-    if @vimState.mode is 'visual'
-      @wise = @vimState.submode
+    if @mode is 'visual'
+      @wise = @submode
     @initialize()
 
   isLinewise: -> @wise is 'linewise'
@@ -84,8 +84,8 @@ class Motion extends Base
         @moveWithSaveJump(cursor)
 
   setMutationCheckPointCheckPointIfNecessary: ->
-    if @isMode('visual')
-      if @isMode('visual', 'linewise') and @editor.getLastSelection().isReversed()
+    if @mode is 'visual'
+      if @submode is 'linewise' and @editor.getLastSelection().isReversed()
         @vimState.mutationManager.setCheckpoint('did-move')
     else
       @vimState.mutationManager.setCheckpoint('did-move')
@@ -95,9 +95,9 @@ class Motion extends Base
       succeeded = @selectByMotion(selection)
       continue if @wise is 'blockwise'
 
-      if @isMode('visual') or @is('CurrentSelection') # guaranteed to be @inclusive = true
+      if @mode is 'visual' or @is('CurrentSelection') # guaranteed to be @inclusive = true
         swrap(selection).translateSelectionEndAndClip('forward')
-        swrap(selection).saveProperties() if @isMode('visual')
+        swrap(selection).saveProperties() if @mode is 'visual'
 
       else if succeeded and (@inclusive or @isLinewise())
         swrap(selection).translateSelectionEndAndClip('forward')
@@ -150,7 +150,7 @@ class CurrentSelection extends Motion
     @pointInfoByCursor = new Map
 
   moveCursor: (cursor) ->
-    if @isMode('visual')
+    if @mode is 'visual'
       if @isBlockwise()
         @blockwiseSelectionExtent = swrap(cursor.selection).getBlockwiseSelectionExtent()
       else
@@ -165,7 +165,7 @@ class CurrentSelection extends Motion
         cursor.setBufferPosition(point.traverse(@selectionExtent))
 
   select: ->
-    if @isMode('visual')
+    if @mode is 'visual'
       super
     else
       for cursor in @editor.getCursors() when pointInfo = @pointInfoByCursor.get(cursor)

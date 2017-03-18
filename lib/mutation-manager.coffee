@@ -45,7 +45,7 @@ class MutationManager
       if @mutationsBySelection.has(selection)
         @mutationsBySelection.get(selection).update(checkpoint)
       else
-        if @vimState.isMode('visual')
+        if @vimState.mode is 'visual'
           initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
         else
           initialPoint = swrap(selection).getBufferPositionFor('head')

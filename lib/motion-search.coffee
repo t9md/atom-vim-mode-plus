@@ -154,7 +154,7 @@ class Search extends SearchBase
         searchByProjectFind(@editor, input)
 
   handleCancelSearch: ->
-    @vimState.resetNormalMode() unless @isMode('visual') or @isMode('insert')
+    @vimState.resetNormalMode() unless @mode in ['visual', 'insert']
     @restoreEditorState?()
     @vimState.reset()
     @finish()

@@ -145,10 +145,10 @@ class Operator extends Base
     # This change cursor position.
     if @selectPersistentSelectionIfNecessary()
       # [FIXME] selection-wise is not synched if it already visual-mode
-      unless @isMode('visual')
+      unless @mode is 'visual'
         @vimState.modeManager.activate('visual', swrap.detectWise(@editor))
 
-    @target = 'CurrentSelection' if @isMode('visual') and @acceptCurrentSelection
+    @target = 'CurrentSelection' if (@mode is 'visual') and @acceptCurrentSelection
     @setTarget(@new(@target)) if _.isString(@target)
 
   subscribeResetOccurrencePatternIfNeeded: ->
@@ -214,7 +214,7 @@ class Operator extends Base
     @vimState.register.set({text, selection}) if text
 
   normalizeSelectionsIfNecessary: ->
-    if @target?.isMotion() and @isMode('visual')
+    if @target?.isMotion() and @mode is 'visual'
       @vimState.modeManager.normalizeSelections()
 
   startMutation: (fn) ->
@@ -322,7 +322,7 @@ class Select extends Operator
 
     if @target.isTextObject() and @target.selectSucceeded
       wise = @target.wise
-      if @isMode('visual')
+      if @mode is 'visual'
         switch wise
           when 'characterwise'
             swrap.saveProperties(@editor)
@@ -414,7 +414,7 @@ class TogglePresetOccurrence extends Operator
       pattern = null
       isNarrowed = @vimState.modeManager.isNarrowed()
 
-      if @isMode('visual') and not isNarrowed
+      if @mode is 'visual' and not isNarrowed
         @occurrenceType = 'base'
         pattern = new RegExp(_.escapeRegExp(@editor.getSelectedText()), 'g')
       else

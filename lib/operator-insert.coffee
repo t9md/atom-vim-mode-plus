@@ -141,7 +141,7 @@ class InsertAfter extends ActivateInsertMode
 class InsertAtBeginningOfLine extends ActivateInsertMode
   @extend()
   execute: ->
-    if @isMode('visual', ['characterwise', 'linewise'])
+    if @mode is 'visual' and @submode in ['characterwise', 'linewise']
       @editor.splitSelectionsIntoLines()
     @editor.moveToBeginningOfLine()
     super
@@ -212,7 +212,7 @@ class InsertByTarget extends ActivateInsertMode
 
   execute: ->
     @onDidSelectTarget =>
-      @modifySelection() if @vimState.isMode('visual')
+      @modifySelection() if @vimState.mode is 'visual'
       for selection in @editor.getSelections()
         swrap(selection).setBufferPositionTo(@which)
     super
