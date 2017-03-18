@@ -97,6 +97,13 @@ class Motion extends Base
       @editor.moveCursors (cursor) =>
         @moveWithSaveJump(cursor)
 
+  setMutationCheckPointCheckPointIfNecessary: ->
+    if @isMode('visual')
+      if @isMode('visual', 'linewise') and @editor.getLastSelection().isReversed()
+        @vimState.mutationManager.setCheckpoint('did-move')
+    else
+      @vimState.mutationManager.setCheckpoint('did-move')
+
   select: ->
     for selection in @editor.getSelections()
       succeeded = @selectByMotion(selection)
@@ -104,24 +111,14 @@ class Motion extends Base
 
       if @isMode('visual') or @is('CurrentSelection') # guaranteed to be @inclusive = true
         swrap(selection).translateSelectionEndAndClip('forward')
-        
+        swrap(selection).saveProperties() if @isMode('visual')
+
       else if succeeded and (@isInclusive() or @isLinewise())
         swrap(selection).translateSelectionEndAndClip('forward')
 
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
-
-    if @isMode('visual')
-      # We have to update selection prop
-      # AFTER cursor move and BEFORE return to submode-wise state
-      swrap.saveProperties(@editor)
-
-    if @operator?
-      if @isMode('visual')
-        if @isMode('visual', 'linewise') and @editor.getLastSelection().isReversed()
-          @vimState.mutationManager.setCheckpoint('did-move')
-      else
-        @vimState.mutationManager.setCheckpoint('did-move')
+    @setMutationCheckPointCheckPointIfNecessary() if @operator?
 
     # Modify selection to submode-wisely
     switch @wise

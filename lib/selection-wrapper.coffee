@@ -13,7 +13,7 @@ p = (args...) -> console.log inspect(args...)
   assertWithException
 } = require './utils'
 
-propertyStore = new Map
+propertyStore = new WeakMap
 
 class SelectionWrapper
   constructor: (@selection) ->
