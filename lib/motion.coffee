@@ -119,7 +119,7 @@ class Motion extends Base
       @moveWithSaveJump(selection.cursor)
     return @moveSucceeded ? not selection.isEmpty()
 
-  setCursorBuffeRow: (cursor, row, options) ->
+  setCursorBufferRow: (cursor, row, options) ->
     if @verticalMotion and @getConfig('moveToFirstCharacterOnVerticalMotion')
       cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row), options)
     else
@@ -691,7 +691,7 @@ class MoveToFirstLine extends Motion
   verticalMotion: true
 
   moveCursor: (cursor) ->
-    @setCursorBuffeRow(cursor, getValidVimBufferRow(@editor, @getRow()))
+    @setCursorBufferRow(cursor, getValidVimBufferRow(@editor, @getRow()))
     cursor.autoscroll(center: true)
 
   getRow: ->
@@ -736,7 +736,7 @@ class MoveToTopOfScreen extends Motion
 
   moveCursor: (cursor) ->
     bufferRow = @editor.bufferRowForScreenRow(@getScreenRow())
-    @setCursorBuffeRow(cursor, bufferRow)
+    @setCursorBufferRow(cursor, bufferRow)
 
   getScrolloff: ->
     if @isAsTargetExceptSelect()
@@ -816,7 +816,7 @@ class Scroll extends Motion
 
   moveCursor: (cursor) ->
     bufferRow = @getBufferRow(cursor)
-    @setCursorBuffeRow(cursor, @getBufferRow(cursor), autoscroll: false)
+    @setCursorBufferRow(cursor, @getBufferRow(cursor), autoscroll: false)
 
     if cursor.isLastCursor()
       if @isSmoothScrollEnabled()
