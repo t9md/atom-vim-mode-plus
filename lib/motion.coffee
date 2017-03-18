@@ -45,7 +45,7 @@ class Motion extends Base
   constructor: ->
     super
 
-    # visual mode can overwrite default wise and inclusiveness
+    # visual mode can overwrite default wise
     if @vimState.mode is 'visual'
       @inclusive = true
       @wise = @vimState.submode
@@ -100,10 +100,12 @@ class Motion extends Base
   select: ->
     for selection in @editor.getSelections()
       succeeded = @selectByMotion(selection)
-      if (succeeded or @isMode('visual') or @is('CurrentSelection')) and
-          (@isInclusive() or @isLinewise()) and
-          @wise isnt 'blockwise'
+      continue if @wise is 'blockwise'
 
+      if @isMode('visual') or @is('CurrentSelection') # guaranteed to be @inclusive = true
+        swrap(selection).translateSelectionEndAndClip('forward')
+        
+      else if succeeded and (@isInclusive() or @isLinewise())
         swrap(selection).translateSelectionEndAndClip('forward')
 
     @editor.mergeCursors()
@@ -128,10 +130,11 @@ class Motion extends Base
       when 'blockwise'
         @vimState.selectBlockwise()
 
+  # return status
   selectByMotion: (selection) ->
     selection.modifySelection =>
       @moveWithSaveJump(selection.cursor)
-    @moveSucceeded ? not selection.isEmpty()
+    return @moveSucceeded ? not selection.isEmpty()
 
   setCursorBuffeRow: (cursor, row, options) ->
     if @isVerticalMotion() and @getConfig('moveToFirstCharacterOnVerticalMotion')
