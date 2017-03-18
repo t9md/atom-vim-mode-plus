@@ -80,31 +80,16 @@ class Motion extends Base
     if @operator?
       @select()
     else
-      @editor.moveCursors (cursor) =>
-        @moveWithSaveJump(cursor)
-
-  setMutationCheckPointCheckPointIfNecessary: ->
-    if @mode is 'visual'
-      if @submode is 'linewise' and @editor.getLastSelection().isReversed()
-        @vimState.mutationManager.setCheckpoint('did-move')
-    else
-      @vimState.mutationManager.setCheckpoint('did-move')
+      @moveWithSaveJump(cursor) for cursor in @editor.getCursors()
+    @editor.mergeCursors()
+    @editor.mergeIntersectingSelections()
 
   select: ->
     for selection in @editor.getSelections()
-      succeeded = @selectByMotion(selection)
-      continue if @wise is 'blockwise'
+      @selectByMotion(selection)
 
-      if @mode is 'visual' or @is('CurrentSelection') # guaranteed to be @inclusive = true
-        swrap(selection).translateSelectionEndAndClip('forward')
-        swrap(selection).saveProperties() if @mode is 'visual'
-
-      else if succeeded and (@inclusive or @isLinewise())
-        swrap(selection).translateSelectionEndAndClip('forward')
-
-    @editor.mergeCursors()
-    @editor.mergeIntersectingSelections()
-    @setMutationCheckPointCheckPointIfNecessary() if @operator?
+    if (@mode isnt 'visual') or (@submode is 'linewise' and @editor.getLastSelection().isReversed())
+      @vimState.mutationManager.setCheckpoint('did-move')
 
     # Modify selection to submode-wisely
     switch @wise
@@ -117,7 +102,13 @@ class Motion extends Base
   selectByMotion: (selection) ->
     selection.modifySelection =>
       @moveWithSaveJump(selection.cursor)
-    return @moveSucceeded ? not selection.isEmpty()
+
+    return if @isBlockwise()
+    succeeded = @moveSucceeded ? not selection.isEmpty()
+
+    if (@mode is 'visual' or @is('CurrentSelection')) or (succeeded and (@inclusive or @isLinewise()))
+      swrap(selection).translateSelectionEndAndClip('forward')
+      swrap(selection).saveProperties() if @mode is 'visual'
 
   setCursorBufferRow: (cursor, row, options) ->
     if @verticalMotion and @getConfig('moveToFirstCharacterOnVerticalMotion')
