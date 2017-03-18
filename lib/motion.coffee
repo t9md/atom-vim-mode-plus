@@ -45,9 +45,7 @@ class Motion extends Base
   constructor: ->
     super
 
-    # visual mode can overwrite default wise
     if @vimState.mode is 'visual'
-      @inclusive = true
       @wise = @vimState.submode
     @initialize()
 
