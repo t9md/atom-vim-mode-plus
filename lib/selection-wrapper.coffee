@@ -1,7 +1,3 @@
-# TODO#698 remove when finished
-{inspect} = require 'util'
-p = (args...) -> console.log inspect(args...)
-
 {Range, Point, Disposable} = require 'atom'
 {
   translatePointAndClip
