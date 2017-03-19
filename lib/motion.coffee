@@ -90,22 +90,20 @@ class Motion extends Base
       selection.modifySelection =>
         @moveWithSaveJump(selection.cursor)
 
-      continue if @isBlockwise()
-      succeeded = @moveSucceeded ? not selection.isEmpty()
+      succeeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessIfLinewise and @isLinewise())
       if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
-        swrap(selection).translateSelectionEndAndClip('forward')
+        wrapped = swrap(selection)
+        wrapped.translateSelectionEndAndClip('forward')
+        wrapped.saveProperties()
+        @vimState.mutationManager.setCheckpointForSelection(selection, 'did-move')
+        wrapped.normalize()
+        if @wise is 'blockwise'
+          @vimState.selectBlockwiseForSelection(selection)
+        else
+          wrapped.applyWise(@wise)
 
-      swrap(selection).saveProperties()
-
-    @vimState.mutationManager.setCheckpoint('did-move')
-
-    # Modify selection to submode-wisely
-    switch @wise
-      when 'linewise'
-        @vimState.modeManager.normalizeSelections()
-        swrap.applyWise(@editor, @wise)
-      when 'blockwise'
-        @vimState.selectBlockwise()
+    if @wise is 'blockwise'
+      @vimState.getLastBlockwiseSelection().autoscrollIfReversed()
 
   setCursorBufferRow: (cursor, row, options) ->
     if @verticalMotion and @getConfig('moveToFirstCharacterOnVerticalMotion')
@@ -677,6 +675,7 @@ class MoveToFirstLine extends Motion
   wise: 'linewise'
   jump: true
   verticalMotion: true
+  moveSuccessIfLinewise: true
 
   moveCursor: (cursor) ->
     @setCursorBufferRow(cursor, getValidVimBufferRow(@editor, @getRow()))
@@ -701,6 +700,7 @@ class MoveToLineByPercent extends MoveToFirstLine
 class MoveToRelativeLine extends Motion
   @extend(false)
   wise: 'linewise'
+  moveSuccessIfLinewise: true
 
   moveCursor: (cursor) ->
     setBufferRow(cursor, cursor.getBufferRow() + @getCount(-1))

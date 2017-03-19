@@ -42,16 +42,19 @@ class MutationManager
 
   setCheckpoint: (checkpoint) ->
     for selection in @editor.getSelections()
-      if @mutationsBySelection.has(selection)
-        @mutationsBySelection.get(selection).update(checkpoint)
-      else
-        if @vimState.mode is 'visual'
-          initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
-        else
-          initialPoint = swrap(selection).getBufferPositionFor('head')
+      @setCheckpointForSelection(selection, checkpoint)
 
-        options = {selection, initialPoint, checkpoint, @markerLayer, useMarker: @options.useMarker, @vimState}
-        @mutationsBySelection.set(selection, new Mutation(options))
+  setCheckpointForSelection: (selection, checkpoint) ->
+    if @mutationsBySelection.has(selection)
+      @mutationsBySelection.get(selection).update(checkpoint)
+    else
+      if @vimState.mode is 'visual'
+        initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
+      else
+        initialPoint = swrap(selection).getBufferPositionFor('head')
+
+      options = {selection, initialPoint, checkpoint, @markerLayer, useMarker: @options.useMarker, @vimState}
+      @mutationsBySelection.set(selection, new Mutation(options))
 
   getMutationForSelection: (selection) ->
     @mutationsBySelection.get(selection)
