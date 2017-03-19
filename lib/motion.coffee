@@ -85,6 +85,7 @@ class Motion extends Base
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
+  # NOTE: Modify selection by modtion, selection is already "normalized" before this function is called.
   select: ->
     isOrWasVisual = @mode is 'visual' or @is('CurrentSelection') # need to care was visual for `.` repeated.
     for selection in @editor.getSelections()
@@ -94,8 +95,7 @@ class Motion extends Base
       succeeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessOnLinewise and @isLinewise())
       if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
         $selection = swrap(selection)
-        $selection.saveProperties(true) # save property by telling this selection is already normalized
-        @vimState.mutationManager.setCheckpointForSelection(selection, 'did-move')
+        $selection.saveProperties(true) # save property of "already-normalized-selection"
         if @wise is 'blockwise'
           @vimState.selectBlockwiseForSelection(selection)
         else

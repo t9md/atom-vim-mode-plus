@@ -180,7 +180,7 @@ class Mutation
     if stay
       @getInitialPoint(clip: true)
     else
-      {mode, submode, editor} = @vimState
-      if (mode isnt 'visual') or (submode is 'linewise' and editor.getLastSelection().isReversed())
-        point = @bufferRangeByCheckpoint['did-move']?.start
+      {mode, submode} = @vimState
+      if (mode isnt 'visual') or (submode is 'linewise' and @selection.isReversed())
+        point = swrap(@selection).getBufferPositionFor('start', from: ['property'])
       point ? @bufferRangeByCheckpoint['did-select']?.start
