@@ -372,16 +372,6 @@ describe "Operator general", ->
         it "deletes both lines", ->
           ensure 'd k', text: "a\nb\n", cursor: [1, 0]
 
-      # [TODO] write more generic operator test. #119
-      # This is general behavior of all operator.
-      # When it cant move, its target selection should be empty so nothing happen.
-      xdescribe "when it can't move", ->
-        textOriginal = "a\nb\n"
-        cursorOriginal = [0, 0]
-        it "deletes delete nothing", ->
-          set text: textOriginal, cursor: cursorOriginal
-          ensure 'd k', text: textOriginal, cursor: cursorOriginal
-
     describe "when followed by a G", ->
       beforeEach ->
         originalText = "12345\nabcde\nABCDE"

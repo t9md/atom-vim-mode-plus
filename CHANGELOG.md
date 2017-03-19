@@ -1,3 +1,21 @@
+# 0.85.0: WIP
+- Improve: In `visual` mode, can select new-line
+- Improve: Now can select line-ending new line char in `visual-mode`.
+  - E.g. Move right by `l` at end of line select new-line.
+- Fix: Respect `v` operator-modifier for `t`( Till ) motion.
+  - e.g. In text "ab" whre cursor is at "a"
+    - Old: `d t b` delete "a"( Good ), `d v t b` delete "a"( Bad ).
+    - New: `d t b` delete "a"( Good ), `d v t b` don't delete "a"( Good ).
+- Improve: When `keepColumnOnSelectTextObject` is `true`, `v i p` respect `goalColumn` of cursor.
+  - This improve appears when you type `$ v i p`.
+- Fix: #699 Lost goalColumn in `visual.blockwise` when move across blank-row.
+  - This is regression in v0.84.0.
+- Fix: #119 When `j`, `k` is used as operator's target, don't apply operation when failed to move.
+  - Now more compatible with pure Vim.
+  - Example:
+    - `d j` from last line do nothing. ( In previous version, delete last line ).
+    - `d k` from first line do nothing. ( In previous version, delete first line ).
+
 # 0.84.1:
 - Fix: To fix vim-mode-plus-move-selected-text degradation.
 

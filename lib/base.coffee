@@ -65,6 +65,7 @@ vimStateMethods = [
 class Base
   Delegato.includeInto(this)
   @delegatesMethods(vimStateMethods..., toProperty: 'vimState')
+  @delegatesProperty('mode', 'submode', toProperty: 'vimState')
 
   constructor: (@vimState, properties=null) ->
     {@editor, @editorElement, @globalState} = @vimState
@@ -240,19 +241,19 @@ class Base
     @constructor.name
 
   getCursorBufferPosition: ->
-    if @isMode('visual')
+    if @mode is 'visual'
       @getCursorPositionForSelection(@editor.getLastSelection())
     else
       @editor.getCursorBufferPosition()
 
   getCursorBufferPositions: ->
-    if @isMode('visual')
+    if @mode is 'visual'
       @editor.getSelections().map(@getCursorPositionForSelection.bind(this))
     else
       @editor.getCursorBufferPositions()
 
   getBufferPositionForCursor: (cursor) ->
-    if @isMode('visual')
+    if @mode is 'visual'
       @getCursorPositionForSelection(cursor.selection)
     else
       cursor.getBufferPosition()

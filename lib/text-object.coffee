@@ -156,7 +156,7 @@ class Pair extends TextObject
       start = start.traverse([1, 0])
 
     if getLineTextToBufferPosition(@editor, end).match(/^\s*$/)
-      if @isMode('visual')
+      if @mode is 'visual'
         # This is slightly innconsistent with regular Vim
         # - regular Vim: select new line after EOL
         # - vim-mode-plus: select to EOL(before new line)
@@ -361,9 +361,7 @@ class Paragraph extends TextObject
 
   getRange: (selection) ->
     originalRange = selection.getBufferRange()
-    fromRow = swrap(selection).getRowFor('head')
-    # fromRow = @getCursorPositionForSelection(selection).row
-
+    fromRow = @getCursorPositionForSelection(selection).row
     if @isMode('visual', 'linewise')
       if selection.isReversed()
         fromRow--
@@ -379,8 +377,7 @@ class Indentation extends Paragraph
   @deriveInnerAndA()
 
   getRange: (selection) ->
-    fromRow = swrap(selection).getRowFor('head')
-    # fromRow = @getCursorPositionForSelection(selection).row
+    fromRow = @getCursorPositionForSelection(selection).row
 
     baseIndentLevel = @getIndentLevelForBufferRow(fromRow)
     predict = (row) =>
@@ -494,7 +491,7 @@ class SearchMatchForward extends TextObject
   backward: false
 
   findMatch: (fromPoint, pattern) ->
-    fromPoint = translatePointAndClip(@editor, fromPoint, "forward") if @isMode('visual')
+    fromPoint = translatePointAndClip(@editor, fromPoint, "forward") if (@mode is 'visual')
     found = null
     @scanForward pattern, {from: [fromPoint.row, 0]}, ({range, stop}) ->
       if range.end.isGreaterThan(fromPoint)
@@ -536,7 +533,7 @@ class SearchMatchBackward extends SearchMatchForward
   backward: true
 
   findMatch: (fromPoint, pattern) ->
-    fromPoint = translatePointAndClip(@editor, fromPoint, "backward") if @isMode('visual')
+    fromPoint = translatePointAndClip(@editor, fromPoint, "backward") if (@mode is 'visual')
     found = null
     @scanBackward pattern, {from: [fromPoint.row, Infinity]}, ({range, stop}) ->
       if range.start.isLessThan(fromPoint)

@@ -586,6 +586,7 @@ getLargestFoldRangeContainsBufferRow = (editor, row) ->
   if startPoint? and endPoint?
     new Range(startPoint, endPoint)
 
+# take bufferPosition
 translatePointAndClip = (editor, point, direction, {translate}={}) ->
   translate ?= true
   point = Point.fromObject(point)
@@ -598,10 +599,9 @@ translatePointAndClip = (editor, point, direction, {translate}={}) ->
 
       if point.isEqual(eol)
         dontClip = true
-
-      if point.isGreaterThan(eol)
-        point = new Point(point.row + 1, 0)
+      else if point.isGreaterThan(eol)
         dontClip = true
+        point = new Point(point.row + 1, 0) # move point to new-line selected point
 
       point = Point.min(point, editor.getEofBufferPosition())
 
@@ -609,6 +609,7 @@ translatePointAndClip = (editor, point, direction, {translate}={}) ->
       point = point.translate([0, -1]) if translate
 
       if point.column < 0
+        dontClip = true
         newRow = point.row - 1
         eol = editor.bufferRangeForBufferRow(newRow).end
         point = new Point(newRow, eol.column)

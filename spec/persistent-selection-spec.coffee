@@ -65,6 +65,13 @@ describe "Persistent Selection", ->
           ensurePersistentSelection 'j .',
             length: 2
             text: ['ooo', 'xxx']
+        it "create-persistent-selection forr current selection and repeatable by .", ->
+          ensurePersistentSelection 'v enter',
+            length: 1
+            text: ['o']
+          ensurePersistentSelection 'j .',
+            length: 2
+            text: ['o', 'x']
 
       describe "[No behavior diff currently] inner-persistent-selection and a-persistent-selection", ->
         it "apply operator to across all persistent-selections", ->

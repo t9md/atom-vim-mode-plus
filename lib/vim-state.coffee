@@ -122,10 +122,6 @@ class VimState
 
   # Other
   # -------------------------
-  selectLinewise: ->
-    swrap.applyWise(@editor, 'linewise')
-
-  # -------------------------
   toggleClassList: (className, bool=undefined) ->
     @editorElement.classList.toggle(className, bool)
 
@@ -268,7 +264,7 @@ class VimState
       else
         @activate('visual', wise)
     else
-      @activate('normal') if @isMode('visual')
+      @activate('normal') if @mode is 'visual'
 
   saveProperties: (event) ->
     return unless @isInterestingEvent(event)

@@ -13,6 +13,7 @@ describe "Motion general", ->
 
   afterEach ->
     vimState.resetNormalMode()
+    vimState.globalState.reset()
 
   describe "simple motions", ->
     text = null
@@ -385,6 +386,63 @@ describe "Motion general", ->
           ensure '[', cursorScreen: [3, 2]
           ensure '[', cursorScreen: [2, 2]
           ensure '[', cursorScreen: [0, 2]
+
+  describe 'moveSuccessOnLinewise behaviral characteristic', ->
+    originalText = null
+    beforeEach ->
+      set
+        text: """
+          000
+          111
+          222\n
+          """
+      originalText = editor.getText()
+      ensure register: {'"': text: undefined}
+
+    describe "moveSuccessOnLinewise=false motion", ->
+      describe "when it can move", ->
+        beforeEach -> set cursor: [1, 0]
+        it "delete by j", -> ensure "d j", text: "000\n", mode: 'normal'
+        it "yank by j", -> ensure "y j", text: originalText, register: {'"': text: "111\n222\n"}, mode: 'normal'
+        it "change by j", -> ensure "c j", textC: "000\n|\n", register: {'"': text: "111\n222\n"}, mode: 'insert'
+
+        it "delete by k", -> ensure "d k", text: "222\n", mode: 'normal'
+        it "yank by k", -> ensure "y k", text: originalText, register: {'"': text: "000\n111\n"}, mode: 'normal'
+        it "change by k", -> ensure "c k", textC: "|\n222\n", register: {'"': text: "000\n111\n"}, mode: 'insert'
+
+      describe "when it can not move-up", ->
+        beforeEach -> set cursor: [0, 0]
+        it "delete by dk", -> ensure "d k", text: originalText, mode: 'normal'
+        it "yank by yk", -> ensure "y k", text: originalText, register: {'"': text: undefined}, mode: 'normal'
+        it "change by ck", -> ensure "c k", textC: "|000\n111\n222\n", register: {'"': text: "\n"}, mode: 'insert' # FIXME, incompatible: shoud remain in normal.
+
+      describe "when it can not move-down", ->
+        beforeEach -> set cursor: [2, 0]
+        it "delete by dj", -> ensure "d j", text: originalText, mode: 'normal'
+        it "yank by yj", -> ensure "y j", text: originalText, register: {'"': text: undefined}, mode: 'normal'
+        it "change by cj", -> ensure "c j", textC: "000\n111\n|222\n", register: {'"': text: "\n"}, mode: 'insert' # FIXME, incompatible: shoud remain in normal.
+
+    describe "moveSuccessOnLinewise=true motion", ->
+      describe "when it can move", ->
+        beforeEach -> set cursor: [1, 0]
+        it "delete by G", -> ensure "d G", text: "000\n", mode: 'normal'
+        it "yank by G", -> ensure "y G", text: originalText, register: {'"': text: "111\n222\n"}, mode: 'normal'
+        it "change by G", -> ensure "c G", textC: "000\n|\n", register: {'"': text: "111\n222\n"}, mode: 'insert'
+
+        it "delete by gg", -> ensure "d g g", text: "222\n", mode: 'normal'
+        it "yank by gg", -> ensure "y g g", text: originalText, register: {'"': text: "000\n111\n"}, mode: 'normal'
+        it "change by gg", -> ensure "c g g", textC: "|\n222\n", register: {'"': text: "000\n111\n"}, mode: 'insert'
+
+      describe "when it can not move-up", ->
+        beforeEach -> set cursor: [0, 0]
+        it "delete by gg", -> ensure "d g g", text: "111\n222\n", mode: 'normal'
+        it "yank by gg", -> ensure "y g g", text: originalText, register: {'"': text: "000\n"}, mode: 'normal'
+        it "change by gg", -> ensure "c g g", textC: "|\n111\n222\n", register: {'"': text: "000\n"}, mode: 'insert'
+      describe "when it can not move-down", ->
+        beforeEach -> set cursor: [2, 0]
+        it "delete by G", -> ensure "d G", text: "000\n111\n", mode: 'normal'
+        it "yank by G", -> ensure "y G", text: originalText, register: {'"': text: "222\n"}, mode: 'normal'
+        it "change by G", -> ensure "c G", textC: "000\n111\n|\n", register: {'"': text: "222\n"}, mode: 'insert'
 
   describe "the w keybinding", ->
     baseText = """

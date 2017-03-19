@@ -9,7 +9,7 @@
   assertWithException
 } = require './utils'
 
-propertyStore = new Map
+propertyStore = new WeakMap
 
 class SelectionWrapper
   constructor: (@selection) ->
@@ -74,12 +74,6 @@ class SelectionWrapper
   getRowCount: ->
     @getRows().length
 
-  # Native selection.expandOverLine is not aware of actual rowRange of selection.
-  expandOverLine: ->
-    rowRange = @selection.getBufferRowRange()
-    range = getBufferRangeForRowRange(@selection.editor, rowRange)
-    @setBufferRange(range)
-
   getRowFor: (where) ->
     [startRow, endRow] = @selection.getBufferRowRange()
     if @selection.isReversed()
@@ -108,21 +102,23 @@ class SelectionWrapper
       point = translatePointAndClip(editor, tailPoint, 'forward')
       new Range(tailPoint, point)
 
-  saveProperties: ->
-    properties = @captureProperties()
-    unless @selection.isEmpty()
+  saveProperties: (isNormalized) ->
+    head = @selection.getHeadBufferPosition()
+    tail = @selection.getTailBufferPosition()
+    if @selection.isEmpty() or isNormalized
+      properties = {head, tail}
+    else
       # We selectRight-ed in visual-mode, this translation de-effect select-right-effect
       # So that we can activate-visual-mode without special translation after restoreing properties.
-      endPoint = @getBufferRange().end.translate([0, -1])
-      endPoint = @selection.editor.clipBufferPosition(endPoint)
+      end = translatePointAndClip(@selection.editor, @getBufferRange().end, 'backward')
       if @selection.isReversed()
-        properties.tail = endPoint
+        properties = {head: head, tail: end}
       else
-        properties.head = endPoint
+        properties = {head: end, tail: tail}
     @setProperties(properties)
 
-  fixPropertiesForLinewise: ->
-    assertWithException(@hasProperties(), "trying to fixPropertiesForLinewise on properties-less selection")
+  fixPropertyRowToRowRange: ->
+    assertWithException(@hasProperties(), "trying to fixPropertyRowToRowRange on properties-less selection")
 
     {head, tail} = @getProperties()
     if @selection.isReversed()
@@ -131,29 +127,20 @@ class SelectionWrapper
       [start, end] = [tail, head]
     [start.row, end.row] = @selection.getBufferRowRange()
 
-    # Clip property till one column left before EOL
-    # When `keepColumnOnSelectTextObject` was true,
-    #  cursor marker in vL-mode exceed EOL
-    # FIXME: respect goalcolumn
-    editor = @selection.editor
-    startEOL = getEndOfLineForBufferRow(editor, start.row)
-    endEOL = getEndOfLineForBufferRow(editor, end.row)
-    start.column = Math.min(start.column, limitNumber(startEOL.column - 1, min: 0))
-    end.column = Math.min(end.column, limitNumber(endEOL.column - 1, min: 0))
-
-  # wise must be 'characterwise' or 'linewise'
+  # NOTE:
+  # 'wise' must be 'characterwise' or 'linewise'
+  # Use this for normalized(non-select-right-ed) selection.
   applyWise: (wise) ->
-    # NOTE:
-    # Must call against normalized selection
-    # Don't call non-normalized selection
+    assertWithException(@hasProperties(), "trying to applyWise #{wise} on properties-less selection")
     switch wise
       when 'characterwise'
-        @translateSelectionEndAndClip('forward')
-        @saveProperties() unless @hasProperties()
+        @translateSelectionEndAndClip('forward') # equivalent to core selection.selectRight but keep goalColumn
       when 'linewise'
         @complementGoalColumn()
-        @saveProperties() unless @hasProperties()
-        @expandOverLine()
+        # Even if end.column is 0, expand over that end.row( don't care selection.getRowRange() )
+        {start, end} = @getBufferRange()
+        range = getBufferRangeForRowRange(@selection.editor, [start.row, end.row])
+        @setBufferRange(range)
 
     @setWiseProperty(wise)
 
@@ -171,19 +158,6 @@ class SelectionWrapper
     # No problem if head is greater than tail, Range constructor swap start/end.
     @setBufferRange([tail, head], options)
     @setReversedState(head.isLessThan(tail))
-
-  applyColumnFromProperties: ->
-    selectionProperties = @getProperties()
-    return unless selectionProperties?
-    {head, tail} = selectionProperties
-
-    if @selection.isReversed()
-      [start, end] = [head, tail]
-    else
-      [start, end] = [tail, head]
-    [start.row, end.row] = @selection.getBufferRowRange()
-    @setBufferRange([start, end])
-    @translateSelectionEndAndClip('backward', translate: false)
 
   # set selections bufferRange with default option {autoscroll: false, preserveFolds: true}
   setBufferRange: (range, options={}) ->
@@ -230,14 +204,18 @@ class SelectionWrapper
     tail = @selection.getTailBufferPosition()
     new Point(head.row - tail.row, head.column - tail.column)
 
+  # What's the normalize?
+  # Normalization is restore selection range from property.
+  # As a result it range became range where end of selection moved to left.
+  # This end-move-to-left de-efect of end-mode-to-right effect( this is visual-mode orientation )
   normalize: ->
-    unless @selection.isEmpty()
-      if @hasProperties() and @getProperties().wise is 'linewise'
-        @fixPropertiesForLinewise()
-        @selectByProperties(@getProperties())
-        @translateSelectionEndAndClip('backward', translate: false)
-      else
-        @translateSelectionEndAndClip('backward')
+    # empty selection IS already 'normalized'
+    return if @selection.isEmpty()
+
+    assertWithException(@hasProperties(), "attempted to normalize but no properties to restore")
+    if @getProperties().wise is 'linewise'
+      @fixPropertyRowToRowRange()
+    @selectByProperties(@getProperties())
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
@@ -252,9 +230,9 @@ swrap.detectWise = (editor) ->
   else
     'characterwise'
 
-swrap.saveProperties = (editor) ->
+swrap.saveProperties = (editor, isNormalized) ->
   for selection in editor.getSelections()
-    swrap(selection).saveProperties()
+    swrap(selection).saveProperties(isNormalized)
 
 swrap.clearProperties = (editor) ->
   for selection in editor.getSelections()
@@ -269,6 +247,9 @@ swrap.dumpProperties = (editor) ->
   for selection in editor.getSelections() when swrap(selection).hasProperties()
     console.log inspect(swrap(selection).getProperties())
 
+swrap.hasProperties = (editor) ->
+  editor.getSelections().every (selection) -> swrap(selection).hasProperties()
+
 swrap.normalize = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).normalize()
@@ -277,9 +258,9 @@ swrap.applyWise = (editor, value) ->
   for selection in editor.getSelections()
     swrap(selection).applyWise(value)
 
-swrap.fixPropertiesForLinewise = (editor) ->
+swrap.fixPropertyRowToRowRange = (editor) ->
   for selection in editor.getSelections()
-    swrap(selection).fixPropertiesForLinewise()
+    swrap(selection).fixPropertyRowToRowRange()
 
 # Return function to restore
 # Used in vmp-move-selected-text

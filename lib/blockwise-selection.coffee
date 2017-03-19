@@ -11,10 +11,12 @@ class BlockwiseSelection
 
   constructor: (selection) ->
     {@editor} = selection
+    swrap(selection).applyWise('characterwise') # NOTE#698 added this line
+
     @initialize(selection)
 
     for memberSelection in @getSelections()
-      swrap(memberSelection).saveProperties()
+      swrap(memberSelection).saveProperties() # TODO#698  remove this?
       swrap(memberSelection).setWiseProperty('blockwise')
 
   getSelections: ->
@@ -179,9 +181,12 @@ class BlockwiseSelection
     properties = @getCharacterwiseProperties()
     head = @getHeadSelection()
     @clearSelections(except: head)
+    {goalColumn} = head.cursor # FIXME this should not be necessary
     swrap(head).selectByProperties(properties)
-    if head.getBufferRange().end.column is 0
+    if head.getBufferRange().end.column is 0 # FIXME this should be done by restoring selection prop
       swrap(head).translateSelectionEndAndClip('forward')
+    swrap(head).saveProperties()
+    head.cursor.goalColumn ?= goalColumn if goalColumn # FIXME this should not be necessary
 
   autoscroll: (options) ->
     @getHeadSelection().autoscroll(options)

@@ -19,11 +19,8 @@ class ModeManager
   destroy: ->
     @subscriptions.dispose()
 
-  isMode: (mode, submodes) ->
-    if submodes?
-      (@mode is mode) and (@submode in [].concat(submodes))
-    else
-      @mode is mode
+  isMode: (mode, submode=null) ->
+    (mode is @mode) and (submode is @submode)
 
   # Event
   # -------------------------
@@ -89,6 +86,12 @@ class ModeManager
     @vimState.reset()
     # Component is not necessary avaiable see #98.
     @editorElement.component?.setInputEnabled(false)
+
+    # In visual-mode, cursor can place at EOL. move left if cursor is at EOL
+    # We should not do this in visual-mode deactivation phase.
+    # e.g. `A` directly shift from visua-mode to `insert-mode`, and cursor should remain at EOL.
+    for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
+      moveCursorLeft(cursor, preserveGoalColumn: true)
     new Disposable
 
   # Operator Pending
@@ -149,17 +152,17 @@ class ModeManager
   # - normalized selection: One column left selcted at selection end position
   # - When selectRight at end position of normalized-selection, it become un-normalized selection
   #   which is the range in visual-mode.
-  #
   activateVisualMode: (newSubmode) ->
     @vimState.assertWithException(newSubmode?, "activate visual-mode without submode")
-    @normalizeSelections()
-    swrap.applyWise(@editor, 'characterwise')
+    for selection in @editor.getSelections() when $selection = swrap(selection)
+      $selection.saveProperties() unless $selection.hasProperties()
 
-    switch newSubmode
-      when 'linewise'
-        swrap.applyWise(@editor, 'linewise')
-      when 'blockwise'
-        @vimState.selectBlockwise()
+    @normalizeSelections()
+
+    if newSubmode is 'blockwise'
+      @vimState.selectBlockwise()
+    else
+      swrap.applyWise(@editor, newSubmode)
 
     new Disposable =>
       @normalizeSelections()
@@ -169,7 +172,7 @@ class ModeManager
   normalizeSelections: ->
     if @submode is 'blockwise'
       for bs in @vimState.getBlockwiseSelections()
-        bs.restoreCharacterwise()
+        bs.restoreCharacterwise() # NOTE#698 in this state, selection is multiple-selection in vC-wise
       @vimState.clearBlockwiseSelections()
 
     swrap.normalize(@editor)

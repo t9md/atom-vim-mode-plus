@@ -99,10 +99,15 @@ describe "Motion Find", ->
       ensure ['d 2 t', input: 'b'],
         text: 'abcbcabc\n'
 
-    it "selects character under cursor even when no movement happens", ->
+    it "delete char under cursor even when no movement happens since it's inclusive motion", ->
       set cursor: [0, 0]
       ensure ['d t', input: 'b'],
         text: 'bcabcabcabc\n'
+    it "do nothing when inclusiveness inverted by v operator-modifier", ->
+      text: "abcabcabcabc\n"
+      set cursor: [0, 0]
+      ensure ['d v t', input: 'b'],
+        text: 'abcabcabcabc\n'
 
     it "T behaves exclusively when composes with operator", ->
       set cursor: [0, 3]

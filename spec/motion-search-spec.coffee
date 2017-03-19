@@ -75,7 +75,7 @@ describe "Motion Search", ->
       it 'searches to the correct column in visual linewise mode', ->
         ensure ['V /', search: 'ef'],
           selectedText: "abc\ndef\n",
-          characterwiseHead: [1, 1]
+          propertyHead: [1, 1]
           cursor: [2, 0]
           mode: ['visual', 'linewise']
 

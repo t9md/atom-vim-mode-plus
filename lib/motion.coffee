@@ -40,30 +40,18 @@ class Motion extends Base
   wise: 'characterwise'
   jump: false
   verticalMotion: false
+  moveSucceeded: null
+  moveSuccessOnLinewise: false
 
   constructor: ->
     super
 
-    # visual mode can overwrite default wise and inclusiveness
-    if @vimState.mode is 'visual'
-      @inclusive = true
-      @wise = @vimState.submode
+    if @mode is 'visual'
+      @wise = @submode
     @initialize()
 
-  isInclusive: ->
-    @inclusive
-
-  isJump: ->
-    @jump
-
-  isVerticalMotion: ->
-    @verticalMotion
-
-  isLinewise: ->
-    @wise is 'linewise'
-
-  isBlockwise: ->
-    @wise is 'blockwise'
+  isLinewise: -> @wise is 'linewise'
+  isBlockwise: -> @wise is 'blockwise'
 
   forceWise: (wise) ->
     if wise is 'characterwise'
@@ -80,7 +68,7 @@ class Motion extends Base
     cursor.setScreenPosition(point) if point?
 
   moveWithSaveJump: (cursor) ->
-    if cursor.isLastCursor() and @isJump()
+    if cursor.isLastCursor() and @jump
       cursorPosition = cursor.getBufferPosition()
 
     @moveCursor(cursor)
@@ -93,53 +81,32 @@ class Motion extends Base
     if @operator?
       @select()
     else
-      @editor.moveCursors (cursor) =>
-        @moveWithSaveJump(cursor)
-
-  select: ->
-    for selection in @editor.getSelections()
-      @selectByMotion(selection)
-
+      @moveWithSaveJump(cursor) for cursor in @editor.getCursors()
     @editor.mergeCursors()
     @editor.mergeIntersectingSelections()
 
-    if @isMode('visual')
-      # We have to update selection prop
-      # AFTER cursor move and BEFORE return to submode-wise state
-      swrap.saveProperties(@editor)
+  # NOTE: Modify selection by modtion, selection is already "normalized" before this function is called.
+  select: ->
+    isOrWasVisual = @mode is 'visual' or @is('CurrentSelection') # need to care was visual for `.` repeated.
+    for selection in @editor.getSelections()
+      selection.modifySelection =>
+        @moveWithSaveJump(selection.cursor)
 
-    if @operator?
-      if @isMode('visual')
-        if @isMode('visual', 'linewise') and @editor.getLastSelection().isReversed()
-          @vimState.mutationManager.setCheckpoint('did-move')
-      else
-        @vimState.mutationManager.setCheckpoint('did-move')
+      succeeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessOnLinewise and @isLinewise())
+      if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
+        $selection = swrap(selection)
+        $selection.saveProperties(true) # save property of "already-normalized-selection"
 
-    # Modify selection to submode-wisely
-    switch @wise
-      when 'linewise'
-        @vimState.selectLinewise()
-      when 'blockwise'
-        @vimState.selectBlockwise()
+        if @wise is 'blockwise'
+          @vimState.selectBlockwiseForSelection(selection)
+        else
+          $selection.applyWise(@wise)
 
-  selectByMotion: (selection) ->
-    {cursor} = selection
+    if @wise is 'blockwise'
+      @vimState.getLastBlockwiseSelection().autoscrollIfReversed()
 
-    selection.modifySelection =>
-      @moveWithSaveJump(cursor)
-
-    if not @isMode('visual') and not @is('CurrentSelection') and selection.isEmpty() # Failed to move.
-      return
-    return unless @isInclusive() or @isLinewise()
-
-    if @isMode('visual') and cursorIsAtEndOfLineAtNonEmptyRow(cursor)
-      # Avoid puting cursor on EOL in visual-mode as long as cursor's row was non-empty.
-      swrap(selection).translateSelectionHeadAndClip('backward')
-    # to select @inclusive-ly
-    swrap(selection).translateSelectionEndAndClip('forward')
-
-  setCursorBuffeRow: (cursor, row, options) ->
-    if @isVerticalMotion() and @getConfig('moveToFirstCharacterOnVerticalMotion')
+  setCursorBufferRow: (cursor, row, options) ->
+    if @verticalMotion and @getConfig('moveToFirstCharacterOnVerticalMotion')
       cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row), options)
     else
       setBufferRow(cursor, row, options)
@@ -169,7 +136,7 @@ class CurrentSelection extends Motion
     @pointInfoByCursor = new Map
 
   moveCursor: (cursor) ->
-    if @isMode('visual')
+    if @mode is 'visual'
       if @isBlockwise()
         @blockwiseSelectionExtent = swrap(cursor.selection).getBlockwiseSelectionExtent()
       else
@@ -184,7 +151,7 @@ class CurrentSelection extends Motion
         cursor.setBufferPosition(point.traverse(@selectionExtent))
 
   select: ->
-    if @isMode('visual')
+    if @mode is 'visual'
       super
     else
       for cursor in @editor.getCursors() when pointInfo = @pointInfoByCursor.get(cursor)
@@ -708,9 +675,10 @@ class MoveToFirstLine extends Motion
   wise: 'linewise'
   jump: true
   verticalMotion: true
+  moveSuccessOnLinewise: true
 
   moveCursor: (cursor) ->
-    @setCursorBuffeRow(cursor, getValidVimBufferRow(@editor, @getRow()))
+    @setCursorBufferRow(cursor, getValidVimBufferRow(@editor, @getRow()))
     cursor.autoscroll(center: true)
 
   getRow: ->
@@ -732,6 +700,7 @@ class MoveToLineByPercent extends MoveToFirstLine
 class MoveToRelativeLine extends Motion
   @extend(false)
   wise: 'linewise'
+  moveSuccessOnLinewise: true
 
   moveCursor: (cursor) ->
     setBufferRow(cursor, cursor.getBufferRow() + @getCount(-1))
@@ -755,7 +724,7 @@ class MoveToTopOfScreen extends Motion
 
   moveCursor: (cursor) ->
     bufferRow = @editor.bufferRowForScreenRow(@getScreenRow())
-    @setCursorBuffeRow(cursor, bufferRow)
+    @setCursorBufferRow(cursor, bufferRow)
 
   getScrolloff: ->
     if @isAsTargetExceptSelect()
@@ -835,7 +804,7 @@ class Scroll extends Motion
 
   moveCursor: (cursor) ->
     bufferRow = @getBufferRow(cursor)
-    @setCursorBuffeRow(cursor, @getBufferRow(cursor), autoscroll: false)
+    @setCursorBufferRow(cursor, @getBufferRow(cursor), autoscroll: false)
 
     if cursor.isLastCursor()
       if @isSmoothScrollEnabled()
@@ -928,11 +897,8 @@ class Till extends Find
 
   getPoint: ->
     @point = super
-
-  selectByMotion: (selection) ->
-    super
-    if selection.isEmpty() and (@point? and not @backwards)
-      swrap(selection).translateSelectionEndAndClip('forward')
+    @moveSucceeded = @point?
+    return @point
 
 # keymap: T
 class TillBackwards extends Till
