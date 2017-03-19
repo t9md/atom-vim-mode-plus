@@ -115,10 +115,10 @@ class SelectionWrapper
       point = translatePointAndClip(editor, tailPoint, 'forward')
       new Range(tailPoint, point)
 
-  saveProperties: ->
+  saveProperties: (isNormalized) ->
     head = @selection.getHeadBufferPosition()
     tail = @selection.getTailBufferPosition()
-    if @selection.isEmpty()
+    if @selection.isEmpty() or isNormalized
       properties = {head, tail}
     else
       # We selectRight-ed in visual-mode, this translation de-effect select-right-effect
@@ -243,9 +243,9 @@ swrap.detectWise = (editor) ->
   else
     'characterwise'
 
-swrap.saveProperties = (editor) ->
+swrap.saveProperties = (editor, isNormalized) ->
   for selection in editor.getSelections()
-    swrap(selection).saveProperties()
+    swrap(selection).saveProperties(isNormalized)
 
 swrap.clearProperties = (editor) ->
   for selection in editor.getSelections()

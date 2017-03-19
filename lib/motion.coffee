@@ -94,10 +94,8 @@ class Motion extends Base
       succeeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessOnLinewise and @isLinewise())
       if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
         $selection = swrap(selection)
-        $selection.translateSelectionEndAndClip('forward')
-        $selection.saveProperties()
+        $selection.saveProperties(true) # save property by telling this selection is already normalized
         @vimState.mutationManager.setCheckpointForSelection(selection, 'did-move')
-        $selection.normalize()
         if @wise is 'blockwise'
           @vimState.selectBlockwiseForSelection(selection)
         else
