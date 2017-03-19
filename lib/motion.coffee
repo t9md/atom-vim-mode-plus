@@ -41,6 +41,7 @@ class Motion extends Base
   jump: false
   verticalMotion: false
   moveSucceeded: null
+  moveSuccessOnLinewise: false
 
   constructor: ->
     super
@@ -90,7 +91,7 @@ class Motion extends Base
       selection.modifySelection =>
         @moveWithSaveJump(selection.cursor)
 
-      succeeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessIfLinewise and @isLinewise())
+      succeeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessOnLinewise and @isLinewise())
       if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
         wrapped = swrap(selection)
         wrapped.translateSelectionEndAndClip('forward')
@@ -675,7 +676,7 @@ class MoveToFirstLine extends Motion
   wise: 'linewise'
   jump: true
   verticalMotion: true
-  moveSuccessIfLinewise: true
+  moveSuccessOnLinewise: true
 
   moveCursor: (cursor) ->
     @setCursorBufferRow(cursor, getValidVimBufferRow(@editor, @getRow()))
@@ -700,7 +701,7 @@ class MoveToLineByPercent extends MoveToFirstLine
 class MoveToRelativeLine extends Motion
   @extend(false)
   wise: 'linewise'
-  moveSuccessIfLinewise: true
+  moveSuccessOnLinewise: true
 
   moveCursor: (cursor) ->
     setBufferRow(cursor, cursor.getBufferRow() + @getCount(-1))
