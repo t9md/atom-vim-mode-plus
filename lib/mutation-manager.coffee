@@ -50,7 +50,7 @@ class MutationManager
         else
           initialPoint = swrap(selection).getBufferPositionFor('head')
 
-        options = {selection, initialPoint, checkpoint, @markerLayer, useMarker: @options.useMarker}
+        options = {selection, initialPoint, checkpoint, @markerLayer, useMarker: @options.useMarker, @vimState}
         @mutationsBySelection.set(selection, new Mutation(options))
 
   getMutationForSelection: (selection) ->
@@ -133,7 +133,7 @@ class MutationManager
 #  e.g. Some selection is created at 'will-select' checkpoint, others at 'did-select' or 'did-select-occurrence'
 class Mutation
   constructor: (options) ->
-    {@selection, @initialPoint, checkpoint, @markerLayer, @useMarker} = options
+    {@selection, @initialPoint, checkpoint, @markerLayer, @useMarker, @vimState} = options
 
     @createdAt = checkpoint
     if @useMarker
@@ -177,4 +177,7 @@ class Mutation
     if stay
       @getInitialPoint(clip: true)
     else
-      @bufferRangeByCheckpoint['did-move']?.start ? @bufferRangeByCheckpoint['did-select']?.start
+      {mode, submode, editor} = @vimState
+      if (mode isnt 'visual') or (submode is 'linewise' and editor.getLastSelection().isReversed())
+        point = @bufferRangeByCheckpoint['did-move']?.start
+      point ? @bufferRangeByCheckpoint['did-select']?.start

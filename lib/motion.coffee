@@ -88,8 +88,7 @@ class Motion extends Base
     for selection in @editor.getSelections()
       @selectByMotion(selection)
 
-    if (@mode isnt 'visual') or (@submode is 'linewise' and @editor.getLastSelection().isReversed())
-      @vimState.mutationManager.setCheckpoint('did-move')
+    @vimState.mutationManager.setCheckpoint('did-move')
 
     # Modify selection to submode-wisely
     switch @wise
@@ -108,7 +107,8 @@ class Motion extends Base
 
     if (@mode is 'visual' or @is('CurrentSelection')) or (succeeded and (@inclusive or @isLinewise()))
       swrap(selection).translateSelectionEndAndClip('forward')
-      swrap(selection).saveProperties() if @mode is 'visual'
+
+    swrap(selection).saveProperties() if @mode is 'visual'
 
   setCursorBufferRow: (cursor, row, options) ->
     if @verticalMotion and @getConfig('moveToFirstCharacterOnVerticalMotion')

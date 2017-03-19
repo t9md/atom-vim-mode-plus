@@ -129,8 +129,7 @@ class SelectionWrapper
     else
       # We selectRight-ed in visual-mode, this translation de-effect select-right-effect
       # So that we can activate-visual-mode without special translation after restoreing properties.
-      {end} = @getBufferRange()
-      end = translatePointAndClip(@selection.editor, end, 'backward')
+      end = translatePointAndClip(@selection.editor, @getBufferRange().end, 'backward')
       if @selection.isReversed()
         properties = {head: head, tail: end}
       else
@@ -157,6 +156,7 @@ class SelectionWrapper
         @translateSelectionEndAndClip('forward') # equivalent to core selection.selectRight but keep goalColumn
       when 'linewise'
         @complementGoalColumn()
+
         # Even if end.column is 0, expand over that end.row( don't care selection.getRowRange() )
         {start, end} = @getBufferRange()
         range = getBufferRangeForRowRange(@selection.editor, [start.row, end.row])
