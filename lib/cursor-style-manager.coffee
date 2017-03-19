@@ -49,17 +49,26 @@ class CursorStyleManager
     for cursor in cursorsToShow when cursorNode = cursorNodesById[cursor.id]
       @styleDisposables.add @modifyStyle(cursor, cursorNode)
 
+  getCursorBufferPositionToDisplay: (selection) ->
+    bufferPosition = swrap(selection).getBufferPositionFor('head', from: ['property'])
+    if @editor.hasAtomicSoftTabs() and not selection.isReversed()
+      screenPosition = @editor.screenPositionForBufferPosition(bufferPosition.translate([0, +1]), clipDirection: 'forward')
+      bufferPositionToDisplay = @editor.bufferPositionForScreenPosition(screenPosition).translate([0, -1])
+      if bufferPositionToDisplay.isGreaterThan(bufferPosition)
+        bufferPosition = bufferPositionToDisplay
+
+    @editor.clipBufferPosition(bufferPosition)
+
   # Apply selection property's traversal from actual cursor to cursorNode's style
   modifyStyle: (cursor, domNode) ->
     selection = cursor.selection
-    {row, column} = switch @submode
-      when 'linewise'
-        if selection.editor.isSoftWrapped()
-          swrap(selection).getCursorTraversalFromPropertyInScreenPosition(true)
-        else
-          swrap(selection).getCursorTraversalFromPropertyInBufferPosition(true)
-      else
-        swrap(selection).getCursorTraversalFromPropertyInBufferPosition()
+    bufferPosition = @getCursorBufferPositionToDisplay(selection)
+
+    if @submode is 'linewise' and @editor.isSoftWrapped()
+      screenPosition = @editor.screenPositionForBufferPosition(bufferPosition)
+      {row, column} = screenPosition.traversalFrom(cursor.getScreenPosition())
+    else
+      {row, column} = bufferPosition.traversalFrom(cursor.getBufferPosition())
 
     style = domNode.style
     style.setProperty('top', "#{row * @lineHeight}em") if row

@@ -27,19 +27,6 @@ class SelectionWrapper
   getBufferRange: ->
     @selection.getBufferRange()
 
-  getCursorTraversalFromPropertyInBufferPosition: (clip) ->
-    bufferPosition = @getBufferPositionFor('head', from: ['property'])
-    if clip
-      bufferPosition = @selection.editor.clipBufferPosition(bufferPosition)
-    bufferPosition.traversalFrom(@selection.cursor.getBufferPosition())
-
-  getCursorTraversalFromPropertyInScreenPosition: (clip) ->
-    bufferPosition = @getBufferPositionFor('head', from: ['property'])
-    if clip
-      bufferPosition = @selection.editor.clipBufferPosition(bufferPosition)
-    screenPosition = @selection.editor.screenPositionForBufferPosition(bufferPosition)
-    screenPosition.traversalFrom(@selection.cursor.getScreenPosition())
-
   getBufferPositionFor: (which, {from}={}) ->
     from ?= ['selection']
 

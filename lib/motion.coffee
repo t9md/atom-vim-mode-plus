@@ -96,6 +96,7 @@ class Motion extends Base
       if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
         $selection = swrap(selection)
         $selection.saveProperties(true) # save property of "already-normalized-selection"
+
         if @wise is 'blockwise'
           @vimState.selectBlockwiseForSelection(selection)
         else

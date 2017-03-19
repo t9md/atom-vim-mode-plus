@@ -174,7 +174,6 @@ class ModeManager
       for bs in @vimState.getBlockwiseSelections()
         bs.restoreCharacterwise() # NOTE#698 in this state, selection is multiple-selection in vC-wise
       @vimState.clearBlockwiseSelections()
-      swrap.saveProperties(@editor)
 
     swrap.normalize(@editor)
 

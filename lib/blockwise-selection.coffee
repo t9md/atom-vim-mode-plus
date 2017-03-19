@@ -185,6 +185,7 @@ class BlockwiseSelection
     swrap(head).selectByProperties(properties)
     if head.getBufferRange().end.column is 0 # FIXME this should be done by restoring selection prop
       swrap(head).translateSelectionEndAndClip('forward')
+    swrap(head).saveProperties()
     head.cursor.goalColumn ?= goalColumn if goalColumn # FIXME this should not be necessary
 
   autoscroll: (options) ->
