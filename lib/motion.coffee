@@ -85,30 +85,27 @@ class Motion extends Base
     @editor.mergeIntersectingSelections()
 
   select: ->
+    isOrWasVisual = @mode is 'visual' or @is('CurrentSelection') # need to care was visual for `.` repeated.
     for selection in @editor.getSelections()
-      @selectByMotion(selection)
+      selection.modifySelection =>
+        @moveWithSaveJump(selection.cursor)
+
+      continue if @isBlockwise()
+      succeeded = @moveSucceeded ? not selection.isEmpty()
+      if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
+        swrap(selection).translateSelectionEndAndClip('forward')
+
+      swrap(selection).saveProperties()
 
     @vimState.mutationManager.setCheckpoint('did-move')
 
     # Modify selection to submode-wisely
     switch @wise
       when 'linewise'
-        @vimState.selectLinewiseOld()
+        @vimState.modeManager.normalizeSelections()
+        swrap.applyWise(@editor, @wise)
       when 'blockwise'
         @vimState.selectBlockwise()
-
-  # return status
-  selectByMotion: (selection) ->
-    selection.modifySelection =>
-      @moveWithSaveJump(selection.cursor)
-
-    return if @isBlockwise()
-    succeeded = @moveSucceeded ? not selection.isEmpty()
-
-    if (@mode is 'visual' or @is('CurrentSelection')) or (succeeded and (@inclusive or @isLinewise()))
-      swrap(selection).translateSelectionEndAndClip('forward')
-
-    swrap(selection).saveProperties() if @mode is 'visual'
 
   setCursorBufferRow: (cursor, row, options) ->
     if @verticalMotion and @getConfig('moveToFirstCharacterOnVerticalMotion')

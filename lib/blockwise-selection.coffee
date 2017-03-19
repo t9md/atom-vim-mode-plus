@@ -13,7 +13,7 @@ class BlockwiseSelection
     {@editor} = selection
     swrap(selection).saveProperties() # TODO#698  remove this?
     swrap(selection).applyWise('characterwise') # NOTE#698 added this line
-    
+
     @initialize(selection)
 
     for memberSelection in @getSelections()

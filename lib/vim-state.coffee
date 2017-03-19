@@ -122,16 +122,6 @@ class VimState
 
   # Other
   # -------------------------
-  # TODO#698 Remove when done
-  selectLinewiseOld: ->
-    for selection in @editor.getSelections() when wrapped = swrap(selection)
-      wrapped.complementGoalColumn()
-      wrapped.expandOverLine()
-
-  selectLinewise: ->
-    swrap.applyWise(@editor, 'linewise')
-
-  # -------------------------
   toggleClassList: (className, bool=undefined) ->
     @editorElement.classList.toggle(className, bool)
 

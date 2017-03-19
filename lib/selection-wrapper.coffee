@@ -87,12 +87,6 @@ class SelectionWrapper
   getRowCount: ->
     @getRows().length
 
-  # Native selection.expandOverLine is not aware of actual rowRange of selection.
-  expandOverLine: ->
-    rowRange = @selection.getBufferRowRange()
-    range = getBufferRangeForRowRange(@selection.editor, rowRange)
-    @setBufferRange(range)
-
   getRowFor: (where) ->
     [startRow, endRow] = @selection.getBufferRowRange()
     if @selection.isReversed()
@@ -156,7 +150,6 @@ class SelectionWrapper
         @translateSelectionEndAndClip('forward') # equivalent to core selection.selectRight but keep goalColumn
       when 'linewise'
         @complementGoalColumn()
-
         # Even if end.column is 0, expand over that end.row( don't care selection.getRowRange() )
         {start, end} = @getBufferRange()
         range = getBufferRangeForRowRange(@selection.editor, [start.row, end.row])
@@ -178,19 +171,6 @@ class SelectionWrapper
     # No problem if head is greater than tail, Range constructor swap start/end.
     @setBufferRange([tail, head], options)
     @setReversedState(head.isLessThan(tail))
-
-  applyColumnFromProperties: ->
-    selectionProperties = @getProperties()
-    return unless selectionProperties?
-    {head, tail} = selectionProperties
-
-    if @selection.isReversed()
-      [start, end] = [head, tail]
-    else
-      [start, end] = [tail, head]
-    [start.row, end.row] = @selection.getBufferRowRange()
-    @setBufferRange([start, end])
-    @translateSelectionEndAndClip('backward', translate: false)
 
   # set selections bufferRange with default option {autoscroll: false, preserveFolds: true}
   setBufferRange: (range, options={}) ->
@@ -294,10 +274,6 @@ swrap.applyWise = (editor, value) ->
 swrap.fixPropertyRowToRowRange = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).fixPropertyRowToRowRange()
-
-swrap.setWiseProperty = (editor, wise) ->
-  for selection in editor.getSelections()
-    swrap(selection).setWiseProperty(wise)
 
 # Return function to restore
 # Used in vmp-move-selected-text
