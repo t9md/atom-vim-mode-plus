@@ -330,12 +330,12 @@ class Select extends Operator
             # When target is persistent-selection, new selection is added after selectTextObject.
             # So we have to assure all selection have selction property.
             # Maybe this logic can be moved to operation stack.
-            for selection in @editor.getSelections() when wrapped = swrap(selection)
+            for selection in @editor.getSelections() when $selection = swrap(selection)
               if @getConfig('keepColumnOnSelectTextObject')
-                wrapped.saveProperties() unless wrapped.hasProperties()
+                $selection.saveProperties() unless $selection.hasProperties()
               else
-                wrapped.saveProperties()
-              wrapped.fixPropertyRowToRowRange()
+                $selection.saveProperties()
+              $selection.fixPropertyRowToRowRange()
 
       @editor.scrollToCursorPosition()
       @activateModeIfNecessary('visual', wise)
