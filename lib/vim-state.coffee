@@ -100,25 +100,23 @@ class VimState
   # BlockwiseSelections
   # -------------------------
   getBlockwiseSelections: ->
-    @blockwiseSelections
+    BlockwiseSelection.getSelections()
 
   getLastBlockwiseSelection: ->
-    _.last(@blockwiseSelections)
+    BlockwiseSelection.getLastSelection()
 
   getBlockwiseSelectionsOrderedByBufferPosition: ->
-    @getBlockwiseSelections().sort (a, b) ->
-      a.getStartSelection().compare(b.getStartSelection())
+    BlockwiseSelection.getSelectionsOrderedByBufferPosition()
 
   clearBlockwiseSelections: ->
-    @blockwiseSelections = []
+    BlockwiseSelection.clearSelections()
 
   selectBlockwiseForSelection: (selection) ->
-    @blockwiseSelections.push(new BlockwiseSelection(selection))
+    new BlockwiseSelection(selection)
 
   selectBlockwise: ->
     for selection in @editor.getSelections()
       @selectBlockwiseForSelection(selection)
-    @getLastBlockwiseSelection().autoscrollIfReversed()
 
   # Other
   # -------------------------

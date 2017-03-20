@@ -161,6 +161,7 @@ class ModeManager
 
     if newSubmode is 'blockwise'
       @vimState.selectBlockwise()
+      @vimState.getLastBlockwiseSelection().autoscrollIfReversed()
     else
       swrap.applyWise(@editor, newSubmode)
 

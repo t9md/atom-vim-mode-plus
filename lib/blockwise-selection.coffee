@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
 
-{sortRanges, isEmpty} = require './utils'
+{sortRanges, isEmpty, cursorIsAtEndOfLineAtNonEmptyRow} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
@@ -9,8 +9,27 @@ class BlockwiseSelection
   goalColumn: null
   reversed: false
 
+  @blockwiseSelections = []
+  @clearSelections: ->
+    @blockwiseSelections = []
+
+  @getSelections: ->
+    @blockwiseSelections
+
+  getSelectionsOrderedByBufferPosition: ->
+    @blockwiseSelections.sort (a, b) ->
+      a.getStartSelection().compare(b.getStartSelection())
+
+  @getLastSelection: ->
+    _.last(@blockwiseSelections)
+
+  @saveSelection: (blockwiseSelection) ->
+    @blockwiseSelections.push(blockwiseSelection)
+
   constructor: (selection) ->
     {@editor} = selection
+    if cursorIsAtEndOfLineAtNonEmptyRow(selection.cursor)
+      swrap(selection).translateSelectionEndAndClip('backward')
     swrap(selection).applyWise('characterwise') # NOTE#698 added this line
 
     @initialize(selection)
@@ -18,6 +37,8 @@ class BlockwiseSelection
     for memberSelection in @getSelections()
       swrap(memberSelection).saveProperties() # TODO#698  remove this?
       swrap(memberSelection).setWiseProperty('blockwise')
+
+    @constructor.saveSelection(this)
 
   getSelections: ->
     @selections
