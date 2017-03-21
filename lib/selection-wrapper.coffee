@@ -8,12 +8,12 @@
   isLinewiseRange
   assertWithException
 } = require './utils'
+BlockwiseSelection = null
 
 propertyStore = new WeakMap
 
 class SelectionWrapper
   constructor: (@selection) ->
-
   hasProperties: -> propertyStore.has(@selection)
   getProperties: -> propertyStore.get(@selection)
   setProperties: (prop) -> propertyStore.set(@selection, prop)
@@ -141,6 +141,9 @@ class SelectionWrapper
         {start, end} = @getBufferRange()
         range = getBufferRangeForRowRange(@selection.editor, [start.row, end.row])
         @setBufferRange(range)
+      when 'blockwise'
+        BlockwiseSelection ?= require './blockwise-selection'
+        new BlockwiseSelection(@selection)
 
     @setWiseProperty(wise)
 

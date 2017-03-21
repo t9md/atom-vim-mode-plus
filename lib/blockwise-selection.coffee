@@ -30,7 +30,7 @@ class BlockwiseSelection
     {@editor} = selection
     if cursorIsAtEndOfLineAtNonEmptyRow(selection.cursor)
       swrap(selection).translateSelectionEndAndClip('backward')
-    swrap(selection).applyWise('characterwise') # NOTE#698 added this line
+    swrap(selection).translateSelectionEndAndClip('forward') # NOTE#698 added this line
 
     @initialize(selection)
 
@@ -209,12 +209,7 @@ class BlockwiseSelection
     swrap(head).saveProperties()
     head.cursor.goalColumn ?= goalColumn if goalColumn # FIXME this should not be necessary
 
-  autoscroll: (options) ->
-    @getHeadSelection().autoscroll(options)
-
-  autoscrollIfReversed: (options) ->
-    # See #546 cursor out-of-screen issue happens only in reversed.
-    # So skip here for performance(but don't know if it's worth)
-    @autoscroll(options) if @isReversed()
+  autoscroll: ->
+    @getHeadSelection().autoscroll()
 
 module.exports = BlockwiseSelection

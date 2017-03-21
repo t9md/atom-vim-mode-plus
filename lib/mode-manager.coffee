@@ -159,11 +159,8 @@ class ModeManager
 
     @normalizeSelections()
 
-    if newSubmode is 'blockwise'
-      @vimState.selectBlockwise()
-      @vimState.getLastBlockwiseSelection().autoscrollIfReversed()
-    else
-      swrap.applyWise(@editor, newSubmode)
+    swrap.applyWise(@editor, newSubmode)
+    @vimState.getLastBlockwiseSelection().autoscroll() if newSubmode is 'blockwise'
 
     new Disposable =>
       @normalizeSelections()

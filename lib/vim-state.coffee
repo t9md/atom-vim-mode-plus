@@ -111,13 +111,6 @@ class VimState
   clearBlockwiseSelections: ->
     BlockwiseSelection.clearSelections()
 
-  selectBlockwiseForSelection: (selection) ->
-    new BlockwiseSelection(selection)
-
-  selectBlockwise: ->
-    for selection in @editor.getSelections()
-      @selectBlockwiseForSelection(selection)
-
   # Other
   # -------------------------
   toggleClassList: (className, bool=undefined) ->

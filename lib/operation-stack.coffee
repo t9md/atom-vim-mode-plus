@@ -185,7 +185,7 @@ class OperationStack
     # e.g. `.` repeat of operation targeted blockwise `CurrentSelection`.
     # We need to manually clear blockwiseSelection.
     # See #647
-    @vimState.clearBlockwiseSelections()
+    @vimState.clearBlockwiseSelections() # FIXME, should be removed
 
     unless @editor.getLastSelection().isEmpty()
       if @vimState.getConfig('devThrowErrorOnNonEmptySelectionInNormalMode')
