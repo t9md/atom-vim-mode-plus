@@ -214,7 +214,7 @@ class Operator extends Base
     @vimState.register.set({text, selection}) if text
 
   normalizeSelectionsIfNecessary: ->
-    if @target?.isMotion() and @mode is 'visual'
+    if @target?.isMotion() and (@mode is 'visual') and not @skipNormalization
       @vimState.modeManager.normalizeSelections()
 
   startMutation: (fn) ->
@@ -326,6 +326,9 @@ class Select extends Operator
         switch wise
           when 'characterwise'
             swrap.saveProperties(@editor)
+
+            if @submode is 'blockwise' #TODO#704 FIXME
+              @vimState.getLastBlockwiseSelection().properties = swrap(@editor.getLastSelection()).getProperties()
           when 'linewise'
             # When target is persistent-selection, new selection is added after selectTextObject.
             # So we have to assure all selection have selction property.
@@ -481,10 +484,17 @@ class DeleteToLastCharacterOfLine extends Delete
   target: 'MoveToLastCharacterOfLine'
   initialize: ->
     if @isMode('visual', 'blockwise')
-      # FIXME Maybe because of bug of CurrentSelection,
-      # we use MoveToLastCharacterOfLine as target
       @acceptCurrentSelection = false
-      swrap.setReversedState(@editor, false) # Ensure all selections to un-reversed
+    super
+
+  execute: ->
+    if @isMode('visual', 'blockwise')
+      @skipNormalization = true
+      for blockwiseSelection in @getBlockwiseSelections()
+        blockwiseSelection.setPositionForSelections('start')
+      @onDidFinishOperation =>
+        for blockwiseSelection in @getBlockwiseSelections()
+          blockwiseSelection.clearSelections(except: blockwiseSelection.getStartSelection())
     super
 
 class DeleteLine extends Delete

@@ -1,6 +1,11 @@
 _ = require 'underscore-plus'
 
-{sortRanges, isEmpty, cursorIsAtEndOfLineAtNonEmptyRow} = require './utils'
+{
+  sortRanges
+  isEmpty
+  cursorIsAtEndOfLineAtNonEmptyRow
+  assertWithException
+} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
@@ -27,17 +32,23 @@ class BlockwiseSelection
     @blockwiseSelections.push(blockwiseSelection)
 
   constructor: (selection) ->
+    assertWithException(swrap.hasProperties(selection.editor), "trying to instantiate vB from properties-less selection")
+
     {@editor} = selection
+    $selection = swrap(selection)
+
     if cursorIsAtEndOfLineAtNonEmptyRow(selection.cursor)
-      swrap(selection).translateSelectionEndAndClip('backward')
-    swrap(selection).translateSelectionEndAndClip('forward') # NOTE#698 added this line
+      $selection.translateSelectionEndAndClip('backward')
+    $selection.translateSelectionEndAndClip('forward') # NOTE#698 added this line
 
     @initialize(selection)
 
-    for memberSelection in @getSelections()
-      swrap(memberSelection).saveProperties() # TODO#698  remove this?
-      swrap(memberSelection).setWiseProperty('blockwise')
+    for memberSelection in @getSelections() when $memberSelection = swrap(memberSelection)
+      $memberSelection.saveProperties() # TODO#698  remove this?
+      $memberSelection.setWiseProperty('blockwise')
 
+    @properties = {}
+    @saveProperties()
     @constructor.saveSelection(this)
 
   getSelections: ->
@@ -72,7 +83,7 @@ class BlockwiseSelection
     selection.setBufferRange(ranges.shift(), {reversed})
     for range in ranges
       @selections.push(@editor.addSelectionForBufferRange(range, {reversed}))
-    @reverse() if wasReversed
+    @reversed = wasReversed
     @updateGoalColumn()
 
   isReversed: ->
@@ -80,6 +91,11 @@ class BlockwiseSelection
 
   reverse: ->
     @reversed = not @reversed
+    @saveProperties()
+
+  saveProperties: ->
+    @properties.head = swrap(@getHeadSelection()).getProperties().head
+    @properties.tail = swrap(@getTailSelection()).getProperties().tail
 
   updateGoalColumn: ->
     if @goalColumn?
@@ -193,20 +209,15 @@ class BlockwiseSelection
       end = @getEndSelection.getBufferrange().start.translate([0, +1])
     {start, end}
 
-  # [FIXME] duplicate codes with setHeadBufferRange
-  restoreCharacterwise: ->
-    # When all selection is empty, we don't want to loose multi-cursor
-    # by restoreing characterwise range.
+  normalize: ->
     return if @isEmpty()
 
-    properties = @getCharacterwiseProperties()
     head = @getHeadSelection()
     @clearSelections(except: head)
     {goalColumn} = head.cursor # FIXME this should not be necessary
-    swrap(head).selectByProperties(properties)
-    if head.getBufferRange().end.column is 0 # FIXME this should be done by restoring selection prop
-      swrap(head).translateSelectionEndAndClip('forward')
-    swrap(head).saveProperties()
+    $selection = swrap(head)
+    $selection.selectByProperties(@properties)
+    $selection.saveProperties(true)
     head.cursor.goalColumn ?= goalColumn if goalColumn # FIXME this should not be necessary
 
   autoscroll: ->

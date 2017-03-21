@@ -170,10 +170,10 @@ class ModeManager
   normalizeSelections: ->
     if @submode is 'blockwise'
       for bs in @vimState.getBlockwiseSelections()
-        bs.restoreCharacterwise() # NOTE#698 in this state, selection is multiple-selection in vC-wise
+        bs.normalize()
       @vimState.clearBlockwiseSelections()
-
-    swrap.normalize(@editor)
+    else
+      swrap.normalize(@editor)
 
   # Narrow to selection
   # -------------------------

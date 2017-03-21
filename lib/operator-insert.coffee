@@ -324,8 +324,8 @@ class ChangeToLastCharacterOfLine extends Change
 
   initialize: ->
     if @isMode('visual', 'blockwise')
-      # FIXME Maybe because of bug of CurrentSelection,
-      # we use MoveToLastCharacterOfLine as target
       @acceptCurrentSelection = false
-      swrap.setReversedState(@editor, false) # Ensure all selections to un-reversed
+      # Make all blockwise-member-selection empty to skip normalization.
+      for blockwiseSelection in @getBlockwiseSelections()
+        blockwiseSelection.setPositionForSelections('start')
     super
