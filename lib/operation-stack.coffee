@@ -149,7 +149,9 @@ class OperationStack
         @addToClassList(commandName + "-pending")
 
   execute: (operation) ->
-    @vimState.updatePreviousSelection() if @mode is 'visual'
+    if @mode is 'visual'
+      @vimState.updatePreviousSelection()
+
     execution = operation.execute()
     if execution instanceof Promise
       execution

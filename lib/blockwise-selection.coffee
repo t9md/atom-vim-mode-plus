@@ -93,6 +93,9 @@ class BlockwiseSelection
     @reversed = not @reversed
     @saveProperties()
 
+  getProperties: ->
+    @properties
+
   saveProperties: ->
     @properties.head = swrap(@getHeadSelection()).getProperties().head
     @properties.tail = swrap(@getTailSelection()).getProperties().tail
@@ -144,9 +147,6 @@ class BlockwiseSelection
     endRow = @getEndSelection().getBufferRowRange()[0]
     [startRow, endRow]
 
-  headReversedStateIsInSync: ->
-    @isReversed() is @getHeadSelection().isReversed()
-
   # [NOTE] Used by plugin package vmp:move-selected-text
   setSelectedBufferRanges: (ranges, {reversed}) ->
     sortRanges(ranges)
@@ -185,29 +185,6 @@ class BlockwiseSelection
     # cursor in visual-block mode.
     head.setBufferRange(range, options)
     head.cursor.goalColumn ?= goalColumn if goalColumn?
-
-  getCharacterwiseProperties: ->
-    head = @getHeadBufferPosition()
-    tail = @getTailBufferPosition()
-
-    if @isReversed()
-      [start, end] = [head, tail]
-    else
-      [start, end] = [tail, head]
-
-    unless (@isSingleRow() or @headReversedStateIsInSync())
-      start.column -= 1
-      end.column += 1
-    {head, tail}
-
-  getBufferRange: ->
-    if @headReversedStateIsInSync()
-      start = @getStartSelection.getBufferrange().start
-      end = @getEndSelection.getBufferrange().end
-    else
-      start = @getStartSelection.getBufferrange().end.translate([0, -1])
-      end = @getEndSelection.getBufferrange().start.translate([0, +1])
-    {start, end}
 
   normalize: ->
     return if @isEmpty()
