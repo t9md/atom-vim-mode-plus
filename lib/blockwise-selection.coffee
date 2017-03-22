@@ -3,7 +3,7 @@ _ = require 'underscore-plus'
 {
   sortRanges
   isEmpty
-  cursorIsAtEndOfLineAtNonEmptyRow
+  pointIsAtEndOfLineAtNonEmptyRow
   assertWithException
 } = require './utils'
 swrap = require './selection-wrapper'
@@ -37,7 +37,7 @@ class BlockwiseSelection
     {@editor} = selection
     $selection = swrap(selection)
 
-    if cursorIsAtEndOfLineAtNonEmptyRow(selection.cursor)
+    if pointIsAtEndOfLineAtNonEmptyRow(@editor, selection.getBufferRange().end)
       $selection.translateSelectionEndAndClip('backward')
     $selection.translateSelectionEndAndClip('forward') # NOTE#698 added this line
 
