@@ -111,7 +111,6 @@ class TextObject extends Base
         swrap.applyWise(@editor, 'blockwise')
         @editorElement.component.updateSync()
 
-
   # Return true or false
   selectTextObject: (selection) ->
     if range = @getRange(selection)

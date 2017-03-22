@@ -321,10 +321,8 @@ class Select extends Operator
     @startMutation(@selectTarget.bind(this))
 
     if @target.isTextObject() and @target.selectSucceeded
-      wise = @target.wise
       @editor.scrollToCursorPosition()
-      # unless @submode is 'blockwise'
-      @activateModeIfNecessary('visual', wise)
+      @activateModeIfNecessary('visual', @target.wise)
 
 class SelectLatestChange extends Select
   @extend()

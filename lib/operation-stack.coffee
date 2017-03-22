@@ -60,6 +60,8 @@ class OperationStack
   # Main
   # -------------------------
   run: (klass, properties) ->
+    # console.log @vimState.getBlockwiseSelections().length
+    # console.log swrap.getPropertyStore().size
     try
       @vimState.init() if @isEmpty()
       type = typeof(klass)

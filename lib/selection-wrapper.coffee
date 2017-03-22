@@ -10,7 +10,8 @@
 } = require './utils'
 BlockwiseSelection = null
 
-propertyStore = new WeakMap
+# propertyStore = new WeakMap
+propertyStore = new Map
 
 class SelectionWrapper
   constructor: (@selection) ->
@@ -273,5 +274,8 @@ swrap.switchToLinewise = (editor) ->
   new Disposable ->
     swrap.normalize(editor)
     swrap.applyWise(editor, 'characterwise')
+
+swrap.getPropertyStore = ->
+  propertyStore
 
 module.exports = swrap

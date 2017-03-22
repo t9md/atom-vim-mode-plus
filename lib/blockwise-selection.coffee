@@ -171,6 +171,7 @@ class BlockwiseSelection
     head.cursor.setBufferPosition(point)
 
   removeSelection: (selection) ->
+    swrap(selection).clearProperties()
     _.remove(@selections, selection)
     selection.destroy()
 
