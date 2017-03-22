@@ -180,7 +180,7 @@ class BlockwiseSelection
     {goalColumn} = head.cursor
     # When reversed state of selection change, goalColumn is cleared.
     # But here for blockwise, I want to keep goalColumn unchanged.
-    # This behavior is not identical to pure Vim I know.
+    # This behavior is not compatible with pure-Vim I know.
     # But I believe this is more unnoisy and less confusion while moving
     # cursor in visual-block mode.
     head.setBufferRange(range, options)

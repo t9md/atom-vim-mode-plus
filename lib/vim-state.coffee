@@ -315,11 +315,12 @@ class VimState
 
   updatePreviousSelection: -> # FIXME: naming, updateLastSelectedInfo ?
     if @isMode('visual', 'blockwise')
-      properties = @getLastBlockwiseSelection().getProperties()
+      properties = @getLastBlockwiseSelection()?.getProperties()
     else
       properties = swrap(@editor.getLastSelection()).getProperties()
-      # TODO#704 when cursor is added in visual-mode, corresponding selection prop yet not exists.
-      return unless properties
+      
+    # TODO#704 when cursor is added in visual-mode, corresponding selection prop yet not exists.
+    return unless properties
 
     {head, tail} = properties
 

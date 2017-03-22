@@ -322,25 +322,8 @@ class Select extends Operator
 
     if @target.isTextObject() and @target.selectSucceeded
       wise = @target.wise
-      if @mode is 'visual'
-        switch wise
-          when 'characterwise'
-            swrap.saveProperties(@editor)
-
-            if @submode is 'blockwise' #TODO#704 FIXME
-              @vimState.getLastBlockwiseSelection().properties = swrap(@editor.getLastSelection()).getProperties()
-          when 'linewise'
-            # When target is persistent-selection, new selection is added after selectTextObject.
-            # So we have to assure all selection have selction property.
-            # Maybe this logic can be moved to operation stack.
-            for selection in @editor.getSelections() when $selection = swrap(selection)
-              if @getConfig('keepColumnOnSelectTextObject')
-                $selection.saveProperties() unless $selection.hasProperties()
-              else
-                $selection.saveProperties()
-              $selection.fixPropertyRowToRowRange()
-
       @editor.scrollToCursorPosition()
+      # unless @submode is 'blockwise'
       @activateModeIfNecessary('visual', wise)
 
 class SelectLatestChange extends Select
