@@ -74,6 +74,9 @@ class TextObject extends Base
       throw new Error('in TextObject: Must not happen')
 
   select: ->
+    if @isMode('visual', 'blockwise')
+      @vimState.modeManager.normalizeSelections()
+
     @countTimes @getCount(), ({stop}) =>
       stop() unless @supportCount # quick-fix for #560
       for selection in @editor.getSelections()
@@ -86,6 +89,27 @@ class TextObject extends Base
     @editor.mergeIntersectingSelections()
     # Some TextObject's wise is NOT deterministic. It has to be detected from selected range.
     @wise ?= swrap.detectWise(@editor)
+
+    if @mode is 'visual'
+      if @selectSucceeded
+        switch @wise
+          when 'characterwise'
+            swrap.saveProperties(@editor)
+          when 'linewise'
+            # When target is persistent-selection, new selection is added after selectTextObject.
+            # So we have to assure all selection have selction property.
+            # Maybe this logic can be moved to operation stack.
+            for selection in @editor.getSelections() when $selection = swrap(selection)
+              if @getConfig('keepColumnOnSelectTextObject')
+                $selection.saveProperties() unless $selection.hasProperties()
+              else
+                $selection.saveProperties()
+              $selection.fixPropertyRowToRowRange()
+
+      if @submode is 'blockwise'
+        swrap.normalize(@editor)
+        swrap.applyWise(@editor, 'blockwise')
+        @editorElement.component.updateSync()
 
   # Return true or false
   selectTextObject: (selection) ->

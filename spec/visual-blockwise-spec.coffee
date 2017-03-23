@@ -407,28 +407,28 @@ describe "Visual Blockwise", ->
     selectedBlockTexts = []
     beforeEach ->
       selectedBlockTexts = ["3456", "", "DEFG"]
-      set text: """
+      set
+        text: """
         012345678
 
         ABCDEFGHI\n
         """
-      ensure "ctrl-v", mode: ['visual', 'blockwise']
 
     it "when [reversed = false, headReversed = false]", ->
       set cursor: [0, 3]
-      ensure "l l l j j", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
+      ensure "ctrl-v l l l j j", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
       ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: false
     it "when [reversed = true, headReversed = true]", ->
       set cursor: [2, 6]
-      ensure "h h h k k", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
+      ensure "ctrl-v h h h k k", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
       ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: true
     it "when [reversed = false, headReversed = true]", ->
       set cursor: [0, 6]
-      ensure "h h h j j", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
+      ensure "ctrl-v h h h j j", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
       ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: true
     it "when [reversed = true, headReversed = false]", ->
       set cursor: [2, 3]
-      ensure "l l l k k", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
+      ensure "ctrl-v l l l k k", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
       ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: false
 
   # [FIXME] not appropriate put here, re-consider all spec file layout later.

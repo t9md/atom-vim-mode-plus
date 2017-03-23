@@ -159,23 +159,23 @@ class ModeManager
 
     @normalizeSelections()
 
-    if newSubmode is 'blockwise'
-      @vimState.selectBlockwise()
-    else
-      swrap.applyWise(@editor, newSubmode)
+    swrap.applyWise(@editor, newSubmode)
+    @vimState.getLastBlockwiseSelection().autoscroll() if newSubmode is 'blockwise'
 
     new Disposable =>
       @normalizeSelections()
+      if @submode is 'blockwise'
+        swrap.setReversedState(@editor, true)
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
       @updateNarrowedState(false)
 
   normalizeSelections: ->
     if @submode is 'blockwise'
       for bs in @vimState.getBlockwiseSelections()
-        bs.restoreCharacterwise() # NOTE#698 in this state, selection is multiple-selection in vC-wise
+        bs.normalize()
       @vimState.clearBlockwiseSelections()
-
-    swrap.normalize(@editor)
+    else
+      swrap.normalize(@editor)
 
   # Narrow to selection
   # -------------------------

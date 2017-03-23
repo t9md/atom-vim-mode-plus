@@ -36,7 +36,6 @@ class Operator extends Base
 
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
-  acceptCurrentSelection: true
 
   bufferCheckpointByPurpose: null
   mutateSelectionOrderd: false
@@ -148,7 +147,7 @@ class Operator extends Base
       unless @mode is 'visual'
         @vimState.modeManager.activate('visual', swrap.detectWise(@editor))
 
-    @target = 'CurrentSelection' if (@mode is 'visual') and @acceptCurrentSelection
+    @target = 'CurrentSelection' if @mode is 'visual'
     @setTarget(@new(@target)) if _.isString(@target)
 
   subscribeResetOccurrencePatternIfNeeded: ->
@@ -214,7 +213,7 @@ class Operator extends Base
     @vimState.register.set({text, selection}) if text
 
   normalizeSelectionsIfNecessary: ->
-    if @target?.isMotion() and @mode is 'visual'
+    if @target?.isMotion() and (@mode is 'visual')
       @vimState.modeManager.normalizeSelections()
 
   startMutation: (fn) ->
@@ -321,24 +320,8 @@ class Select extends Operator
     @startMutation(@selectTarget.bind(this))
 
     if @target.isTextObject() and @target.selectSucceeded
-      wise = @target.wise
-      if @mode is 'visual'
-        switch wise
-          when 'characterwise'
-            swrap.saveProperties(@editor)
-          when 'linewise'
-            # When target is persistent-selection, new selection is added after selectTextObject.
-            # So we have to assure all selection have selction property.
-            # Maybe this logic can be moved to operation stack.
-            for selection in @editor.getSelections() when $selection = swrap(selection)
-              if @getConfig('keepColumnOnSelectTextObject')
-                $selection.saveProperties() unless $selection.hasProperties()
-              else
-                $selection.saveProperties()
-              $selection.fixPropertyRowToRowRange()
-
       @editor.scrollToCursorPosition()
-      @activateModeIfNecessary('visual', wise)
+      @activateModeIfNecessary('visual', @target.wise)
 
 class SelectLatestChange extends Select
   @extend()
@@ -479,12 +462,13 @@ class DeleteLeft extends Delete
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
   target: 'MoveToLastCharacterOfLine'
-  initialize: ->
-    if @isMode('visual', 'blockwise')
-      # FIXME Maybe because of bug of CurrentSelection,
-      # we use MoveToLastCharacterOfLine as target
-      @acceptCurrentSelection = false
-      swrap.setReversedState(@editor, false) # Ensure all selections to un-reversed
+
+  execute: ->
+    if @target.wise is 'blockwise'
+      @onDidSelectTarget =>
+        for blockwiseSelection in @getBlockwiseSelections()
+          blockwiseSelection.extendMemberSelectionsToEndOfLine()
+
     super
 
 class DeleteLine extends Delete

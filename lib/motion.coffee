@@ -96,14 +96,9 @@ class Motion extends Base
       if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
         $selection = swrap(selection)
         $selection.saveProperties(true) # save property of "already-normalized-selection"
+        $selection.applyWise(@wise)
 
-        if @wise is 'blockwise'
-          @vimState.selectBlockwiseForSelection(selection)
-        else
-          $selection.applyWise(@wise)
-
-    if @wise is 'blockwise'
-      @vimState.getLastBlockwiseSelection().autoscrollIfReversed()
+    @vimState.getLastBlockwiseSelection().autoscroll() if @wise is 'blockwise'
 
   setCursorBufferRow: (cursor, row, options) ->
     if @verticalMotion and @getConfig('moveToFirstCharacterOnVerticalMotion')

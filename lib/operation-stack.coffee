@@ -60,6 +60,8 @@ class OperationStack
   # Main
   # -------------------------
   run: (klass, properties) ->
+    # console.log @vimState.getBlockwiseSelections().length
+    # console.log swrap.getPropertyStore().size
     try
       @vimState.init() if @isEmpty()
       type = typeof(klass)
@@ -149,7 +151,9 @@ class OperationStack
         @addToClassList(commandName + "-pending")
 
   execute: (operation) ->
-    @vimState.updatePreviousSelection() if @mode is 'visual'
+    if @mode is 'visual'
+      @vimState.updatePreviousSelection()
+
     execution = operation.execute()
     if execution instanceof Promise
       execution
@@ -185,7 +189,7 @@ class OperationStack
     # e.g. `.` repeat of operation targeted blockwise `CurrentSelection`.
     # We need to manually clear blockwiseSelection.
     # See #647
-    @vimState.clearBlockwiseSelections()
+    @vimState.clearBlockwiseSelections() # FIXME, should be removed
 
     unless @editor.getLastSelection().isEmpty()
       if @vimState.getConfig('devThrowErrorOnNonEmptySelectionInNormalMode')

@@ -80,6 +80,7 @@ describe "Prefixes", ->
 
       describe "when specified register have no text", ->
         it "can paste from a register", ->
+          ensure mode: "normal"
           ensure ['"', input: 'a', 'p'],
             text: """
             anew contentbc
@@ -95,15 +96,13 @@ describe "Prefixes", ->
             """
             cursor: [0, 0]
 
-      # [FIXME] just assuring NO exception.
       describe "blockwise-mode paste just use register have no text", ->
         it "paste from a register to each selction", ->
           ensure ['ctrl-v j "', input: 'a', 'p'],
-            text: """
-            new contentbc
+            textC: """
+            !new contentbc
             new contentef
             """
-            cursor: [[0, 10], [1, 10]]
 
     describe "the B register", ->
       it "saves a value for future reading", ->

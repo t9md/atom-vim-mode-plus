@@ -159,18 +159,17 @@ describe "Operator Increase", ->
           set
             textC: """
               1 2 3
-              1 |2 3
+              1 !2 3
               1 2 3
               1 2 3
               """
 
-          # [FIXME] should clear multiple-cursor
           ensure 'ctrl-v 2 l 2 j ctrl-a',
             textC: """
               1 2 3
-              1 |3 4
-              1 |3 4
               1 !3 4
+              1 3 4
+              1 3 4
               """
 
     describe "decreasing numbers", ->
@@ -300,14 +299,12 @@ describe "Operator Increase", ->
               """
         it "decrease number in blockwise selected rage", ->
           set cursor: [1, 2]
-
-          # [FIXME] should clear multiple-cursor
           ensure 'ctrl-v 2 l 2 j ctrl-x',
             textC: """
               1 2 3
-              1 |1 2
-              1 |1 2
               1 !1 2
+              1 1 2
+              1 1 2
               """
 
   describe "the 'g ctrl-a', 'g ctrl-x' increment-number, decrement-number", ->
@@ -350,8 +347,8 @@ describe "Operator Increase", ->
       it "works in blockwise visual-mode", ->
         set cursor: [0, 2]
         ensure 'ctrl-v 2 j $ g ctrl-a',
-          text: """
-            1 10 11
+          textC: """
+            1 !10 11
             0 12 13
             0 14 15
             """

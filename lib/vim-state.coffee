@@ -13,6 +13,7 @@ SearchInputElement = require './search-input'
   matchScopes
   assert
   assertWithException
+  translatePointAndClip
 } = require './utils'
 swrap = require './selection-wrapper'
 
@@ -100,25 +101,16 @@ class VimState
   # BlockwiseSelections
   # -------------------------
   getBlockwiseSelections: ->
-    @blockwiseSelections
+    BlockwiseSelection.getSelections()
 
   getLastBlockwiseSelection: ->
-    _.last(@blockwiseSelections)
+    BlockwiseSelection.getLastSelection()
 
   getBlockwiseSelectionsOrderedByBufferPosition: ->
-    @getBlockwiseSelections().sort (a, b) ->
-      a.getStartSelection().compare(b.getStartSelection())
+    BlockwiseSelection.getSelectionsOrderedByBufferPosition()
 
   clearBlockwiseSelections: ->
-    @blockwiseSelections = []
-
-  selectBlockwiseForSelection: (selection) ->
-    @blockwiseSelections.push(new BlockwiseSelection(selection))
-
-  selectBlockwise: ->
-    for selection in @editor.getSelections()
-      @selectBlockwiseForSelection(selection)
-    @getLastBlockwiseSelection().autoscrollIfReversed()
+    BlockwiseSelection.clearSelections()
 
   # Other
   # -------------------------
@@ -323,20 +315,24 @@ class VimState
 
   updatePreviousSelection: -> # FIXME: naming, updateLastSelectedInfo ?
     if @isMode('visual', 'blockwise')
-      properties = @getLastBlockwiseSelection()?.getCharacterwiseProperties()
+      properties = @getLastBlockwiseSelection()?.getProperties()
     else
-      # FIXME: Want to do, but need more overhaul to get property-restored-end-position right.
-      # properties = swrap(@editor.getLastSelection()).getProperties()
-      properties = swrap(@editor.getLastSelection()).captureProperties()
-    return unless properties?
+      properties = swrap(@editor.getLastSelection()).getProperties()
+
+    # TODO#704 when cursor is added in visual-mode, corresponding selection prop yet not exists.
+    return unless properties
 
     {head, tail} = properties
-    if head.isGreaterThan(tail)
-      @mark.setRange('<', '>', [tail, head])
-    else
-      @mark.setRange('<', '>', [head, tail])
 
-    @previousSelection = {properties, @submode}
+    if head.isGreaterThanOrEqual(tail)
+      [start, end] = [tail, head]
+      head = end = translatePointAndClip(@editor, end, 'forward')
+    else
+      [start, end] = [head, tail]
+      tail = end = translatePointAndClip(@editor, end, 'forward')
+
+    @mark.setRange('<', '>', [start, end])
+    @previousSelection = {properties: {head, tail}, @submode}
 
   # Persistent selection
   # -------------------------

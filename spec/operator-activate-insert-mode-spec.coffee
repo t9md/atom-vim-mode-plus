@@ -475,7 +475,7 @@ describe "Operator ActivateInsertMode family", ->
           mode: ['visual', 'blockwise']
 
       describe "I", ->
-        it "insert at colum of start of selection for *each selection*", ->
+        it "insert at column of start of selection for *each selection*", ->
           ensure "I", cursor: [[1, 4], [2, 4], [3, 4]], mode: "insert"
 
         it "can repeat after insert AFTER clearing multiple cursor", ->

@@ -8,12 +8,13 @@
   isLinewiseRange
   assertWithException
 } = require './utils'
+BlockwiseSelection = null
 
-propertyStore = new WeakMap
+# propertyStore = new WeakMap
+propertyStore = new Map
 
 class SelectionWrapper
   constructor: (@selection) ->
-
   hasProperties: -> propertyStore.has(@selection)
   getProperties: -> propertyStore.get(@selection)
   setProperties: (prop) -> propertyStore.set(@selection, prop)
@@ -30,29 +31,18 @@ class SelectionWrapper
   getBufferPositionFor: (which, {from}={}) ->
     from ?= ['selection']
 
-    getPosition = (which) ->
-      switch which
-        when 'start' then start
-        when 'end' then end
-        when 'head' then head
-        when 'tail' then tail
-
     if ('property' in from) and @hasProperties()
-      {head, tail} = @getProperties()
-      if head.isGreaterThanOrEqual(tail)
-        [start, end] = [tail, head]
-      else
-        [start, end] = [head, tail]
-      return getPosition(which)
+      return @getPropertiesWithStartAndEnd()[which]
 
     if 'selection' in from
       {start, end} = @selection.getBufferRange()
       head = @selection.getHeadBufferPosition()
       tail = @selection.getTailBufferPosition()
-      return getPosition(which)
+      {start, end, head, tail}[which]
 
   setBufferPositionTo: (which, options) ->
     point = @getBufferPositionFor(which, options)
+    # console.log point.toString()
     @selection.cursor.setBufferPosition(point)
 
   setReversedState: (isReversed) ->
@@ -117,14 +107,20 @@ class SelectionWrapper
         properties = {head: end, tail: tail}
     @setProperties(properties)
 
-  fixPropertyRowToRowRange: ->
-    assertWithException(@hasProperties(), "trying to fixPropertyRowToRowRange on properties-less selection")
-
-    {head, tail} = @getProperties()
+  getPropertiesWithStartAndEnd: ->
+    properties = @getProperties()
+    {head, tail} = properties
     if @selection.isReversed()
       [start, end] = [head, tail]
     else
       [start, end] = [tail, head]
+    properties.start = start
+    properties.end = end
+    properties
+
+  fixPropertyRowToRowRange: ->
+    assertWithException(@hasProperties(), "trying to fixPropertyRowToRowRange on properties-less selection")
+    {start, end} = @getPropertiesWithStartAndEnd()
     [start.row, end.row] = @selection.getBufferRowRange()
 
   # NOTE:
@@ -141,6 +137,9 @@ class SelectionWrapper
         {start, end} = @getBufferRange()
         range = getBufferRangeForRowRange(@selection.editor, [start.row, end.row])
         @setBufferRange(range)
+      when 'blockwise'
+        BlockwiseSelection ?= require './blockwise-selection'
+        new BlockwiseSelection(@selection)
 
     @setWiseProperty(wise)
 
@@ -270,5 +269,8 @@ swrap.switchToLinewise = (editor) ->
   new Disposable ->
     swrap.normalize(editor)
     swrap.applyWise(editor, 'characterwise')
+
+swrap.getPropertyStore = ->
+  propertyStore
 
 module.exports = swrap
