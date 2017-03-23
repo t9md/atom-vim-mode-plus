@@ -39,7 +39,8 @@ class BlockwiseSelection
     {start, end, head, tail} = $selection.getPropertiesWithStartAndEnd()
 
     # Respect goalColumn only when it's value is Infinity and selection's head-column is bigger than tail-column
-    if (@goalColumn is Infinity) and head.column >= tail.column
+    [headColumn, tailColumn] = [head.column, tail.column]
+    if (@goalColumn is Infinity) and headColumn >= tailColumn
       if selection.isReversed()
         start.column = @goalColumn
       else
@@ -64,6 +65,8 @@ class BlockwiseSelection
 
     for memberSelection in @getSelections() when $memberSelection = swrap(memberSelection)
       $memberSelection.saveProperties() # TODO#698  remove this?
+      $memberSelection.getProperties().head.column = headColumn
+      $memberSelection.getProperties().tail.column = tailColumn
       $memberSelection.setWiseProperty('blockwise')
 
     @saveProperties()
