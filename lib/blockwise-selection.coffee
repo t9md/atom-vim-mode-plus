@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
 
-{sortRanges, assertWithException} = require './utils'
+{sortRanges, assertWithException, trimRange} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
@@ -51,6 +51,12 @@ class BlockwiseSelection
       {start, end} = selection.getBufferRange()
       end.column = Infinity
       selection.setBufferRange([start, end])
+
+  expandMemberSelectionsOverLineWithTrimRange: ->
+    for selection in @getSelections()
+      start = selection.getBufferRange().start
+      range = trimRange(@editor, @editor.bufferRangeForBufferRow(start.row))
+      selection.setBufferRange(range)
 
   initialize: (selection) ->
     {@goalColumn} = selection.cursor

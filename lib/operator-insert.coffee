@@ -5,7 +5,6 @@ _ = require 'underscore-plus'
   moveCursorLeft
   moveCursorRight
   limitNumber
-  shrinkRangeEndToBeforeNewLine
 } = require './utils'
 swrap = require './selection-wrapper'
 Operator = require('./base').getClass('Operator')
@@ -216,30 +215,17 @@ class InsertByTarget extends ActivateInsertMode
     super
 
   execute: ->
+    if @mode is 'visual' and @submode in ['characterwise', 'linewise']
+      @wise = 'blockwise'
+
     @onDidSelectTarget =>
-      @modifySelection() if @vimState.mode is 'visual'
+      if @submode is 'linewise'
+        for blockwiseSelection in @getBlockwiseSelections()
+          blockwiseSelection.expandMemberSelectionsOverLineWithTrimRange()
+
       for selection in @editor.getSelections()
         swrap(selection).setBufferPositionTo(@which)
     super
-
-  modifySelection: ->
-    switch @vimState.submode
-      when 'characterwise'
-        # `I(or A)` is short-hand of `ctrl-v I(or A)`
-        for selection in @editor.getSelections()
-          swrap(selection).normalize()
-          swrap(selection).applyWise('blockwise')
-
-      when 'linewise'
-        @editor.splitSelectionsIntoLines()
-        for selection in @editor.getSelections()
-          {start, end} = range = selection.getBufferRange()
-          if @which is 'start'
-            newRange = [@getFirstCharacterPositionForBufferRow(start.row), end]
-          else
-            newRange = shrinkRangeEndToBeforeNewLine(range)
-
-          selection.setBufferRange(newRange)
 
 # key: 'I', Used in 'visual-mode.characterwise', visual-mode.blockwise
 class InsertAtStartOfTarget extends InsertByTarget
