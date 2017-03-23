@@ -318,7 +318,7 @@ class VimState
       properties = @getLastBlockwiseSelection()?.getProperties()
     else
       properties = swrap(@editor.getLastSelection()).getProperties()
-      
+
     # TODO#704 when cursor is added in visual-mode, corresponding selection prop yet not exists.
     return unless properties
 

@@ -119,7 +119,12 @@ class ActivateInsertMode extends Operator
       @createBufferCheckpoint('insert')
       topCursor = @editor.getCursorsOrderedByBufferPosition()[0]
       @topCursorPositionAtInsertionStart = topCursor.getBufferPosition()
-      @vimState.activate('insert', @finalSubmode)
+
+      # Skip normalization of blockwiseSelection.
+      # Since want to keep multi-cursor and it's position in when shift to insert-mode.
+      for blockwiseSelection in @getBlockwiseSelections()
+        blockwiseSelection.skipNormalization()
+      @activateMode('insert', @finalSubmode)
 
 class ActivateReplaceMode extends ActivateInsertMode
   @extend()
@@ -225,8 +230,6 @@ class InsertByTarget extends ActivateInsertMode
           swrap(selection).normalize()
           swrap(selection).applyWise('blockwise')
 
-        @vimState.clearBlockwiseSelections() # just reset vimState's storage.
-
       when 'linewise'
         @editor.splitSelectionsIntoLines()
         for selection in @editor.getSelections()
@@ -324,10 +327,9 @@ class ChangeToLastCharacterOfLine extends Change
   @extend()
   target: 'MoveToLastCharacterOfLine'
 
-  initialize: ->
-    if @isMode('visual', 'blockwise')
-      @acceptCurrentSelection = false
-      # Make all blockwise-member-selection empty to skip normalization.
-      for blockwiseSelection in @getBlockwiseSelections()
-        blockwiseSelection.setPositionForSelections('start')
+  execute: ->
+    if @target.wise is 'blockwise'
+      @onDidSelectTarget =>
+        for blockwiseSelection in @getBlockwiseSelections()
+          blockwiseSelection.extendMemberSelectionsToEndOfLine()
     super

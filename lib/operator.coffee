@@ -36,7 +36,6 @@ class Operator extends Base
 
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
-  acceptCurrentSelection: true
 
   bufferCheckpointByPurpose: null
   mutateSelectionOrderd: false
@@ -148,7 +147,7 @@ class Operator extends Base
       unless @mode is 'visual'
         @vimState.modeManager.activate('visual', swrap.detectWise(@editor))
 
-    @target = 'CurrentSelection' if (@mode is 'visual') and @acceptCurrentSelection
+    @target = 'CurrentSelection' if @mode is 'visual'
     @setTarget(@new(@target)) if _.isString(@target)
 
   subscribeResetOccurrencePatternIfNeeded: ->
@@ -214,7 +213,7 @@ class Operator extends Base
     @vimState.register.set({text, selection}) if text
 
   normalizeSelectionsIfNecessary: ->
-    if @target?.isMotion() and (@mode is 'visual') and not @skipNormalization
+    if @target?.isMotion() and (@mode is 'visual')
       @vimState.modeManager.normalizeSelections()
 
   startMutation: (fn) ->
@@ -463,19 +462,13 @@ class DeleteLeft extends Delete
 class DeleteToLastCharacterOfLine extends Delete
   @extend()
   target: 'MoveToLastCharacterOfLine'
-  initialize: ->
-    if @isMode('visual', 'blockwise')
-      @acceptCurrentSelection = false
-    super
 
   execute: ->
-    if @isMode('visual', 'blockwise')
-      @skipNormalization = true
-      for blockwiseSelection in @getBlockwiseSelections()
-        blockwiseSelection.setPositionForSelections('start')
-      @onDidFinishOperation =>
+    if @target.wise is 'blockwise'
+      @onDidSelectTarget =>
         for blockwiseSelection in @getBlockwiseSelections()
-          blockwiseSelection.clearSelections(except: blockwiseSelection.getStartSelection())
+          blockwiseSelection.extendMemberSelectionsToEndOfLine()
+
     super
 
 class DeleteLine extends Delete

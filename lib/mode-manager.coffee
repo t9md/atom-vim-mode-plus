@@ -164,6 +164,8 @@ class ModeManager
 
     new Disposable =>
       @normalizeSelections()
+      if @submode is 'blockwise'
+        swrap.setReversedState(@editor, true)
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
       @updateNarrowedState(false)
 

@@ -1,11 +1,6 @@
 _ = require 'underscore-plus'
 
-{
-  sortRanges
-  isEmpty
-  pointIsAtEndOfLineAtNonEmptyRow
-  assertWithException
-} = require './utils'
+{sortRanges, assertWithException} = require './utils'
 swrap = require './selection-wrapper'
 
 class BlockwiseSelection
@@ -32,14 +27,11 @@ class BlockwiseSelection
     @blockwiseSelections.push(blockwiseSelection)
 
   constructor: (selection) ->
-    assertWithException(swrap.hasProperties(selection.editor), "trying to instantiate vB from properties-less selection")
-
+    assertWithException(swrap.hasProperties(selection.editor), "Trying to instantiate vB from properties-less selection")
+    @needSkipNormalization = false
+    @properties = {}
     {@editor} = selection
     $selection = swrap(selection)
-
-    if pointIsAtEndOfLineAtNonEmptyRow(@editor, selection.getBufferRange().end)
-      $selection.translateSelectionEndAndClip('backward')
-    $selection.translateSelectionEndAndClip('forward') # NOTE#698 added this line
 
     @initialize(selection)
 
@@ -47,43 +39,46 @@ class BlockwiseSelection
       $memberSelection.saveProperties() # TODO#698  remove this?
       $memberSelection.setWiseProperty('blockwise')
 
-    @properties = {}
     @saveProperties()
     @constructor.saveSelection(this)
 
   getSelections: ->
     @selections
 
-  isEmpty: ->
-    @getSelections().every(isEmpty)
+  extendMemberSelectionsToEndOfLine: ->
+    swrap.setReversedState(@editor, false)
+    for selection in @getSelections()
+      {start, end} = selection.getBufferRange()
+      end.column = Infinity
+      selection.setBufferRange([start, end])
 
   initialize: (selection) ->
     {@goalColumn} = selection.cursor
+
     @selections = [selection]
-    wasReversed = reversed = selection.isReversed()
+    @reversed = memberReversed = selection.isReversed()
 
-    range = selection.getBufferRange()
-    if range.end.column is 0
-      range.end.row -= 1
-
+    {start, end} = swrap(selection).getPropertiesWithStartAndEnd()
     if @goalColumn?
-      if wasReversed
-        range.start.column = @goalColumn
+      if selection.isReversed() # head is start
+        start.column = @goalColumn
       else
-        range.end.column = @goalColumn + 1
+        end.column = @goalColumn
 
-    if range.start.column >= range.end.column
-      reversed = not reversed
-      range = range.translate([0, 1], [0, -1])
+    if start.column > end.column
+      memberReversed = not memberReversed
+      startColumn = end.column
+      endColumn = start.column + 1
+    else
+      startColumn = start.column
+      endColumn = end.column + 1
 
-    {start, end} = range
     ranges = [start.row..end.row].map (row) ->
-      [[row, start.column], [row, end.column]]
+      [[row, startColumn], [row, endColumn]]
 
-    selection.setBufferRange(ranges.shift(), {reversed})
+    selection.setBufferRange(ranges.shift(), reversed: memberReversed)
     for range in ranges
-      @selections.push(@editor.addSelectionForBufferRange(range, {reversed}))
-    @reversed = wasReversed
+      @selections.push(@editor.addSelectionForBufferRange(range, reversed: memberReversed))
     @updateGoalColumn()
 
   isReversed: ->
@@ -187,8 +182,11 @@ class BlockwiseSelection
     head.setBufferRange(range, options)
     head.cursor.goalColumn ?= goalColumn if goalColumn?
 
+  skipNormalization: ->
+    @needSkipNormalization = true
+
   normalize: ->
-    return if @isEmpty()
+    return if @needSkipNormalization
 
     head = @getHeadSelection()
     @clearSelections(except: head)
