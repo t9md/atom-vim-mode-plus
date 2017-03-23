@@ -33,40 +33,14 @@ class BlockwiseSelection
     {@editor} = selection
     $selection = swrap(selection)
 
-    @initialize(selection)
-
-    for memberSelection in @getSelections() when $memberSelection = swrap(memberSelection)
-      $memberSelection.saveProperties() # TODO#698  remove this?
-      $memberSelection.setWiseProperty('blockwise')
-
-    @saveProperties()
-    @constructor.saveSelection(this)
-
-  getSelections: ->
-    @selections
-
-  extendMemberSelectionsToEndOfLine: ->
-    swrap.setReversedState(@editor, false)
-    for selection in @getSelections()
-      {start, end} = selection.getBufferRange()
-      end.column = Infinity
-      selection.setBufferRange([start, end])
-
-  expandMemberSelectionsOverLineWithTrimRange: ->
-    for selection in @getSelections()
-      start = selection.getBufferRange().start
-      range = trimRange(@editor, @editor.bufferRangeForBufferRow(start.row))
-      selection.setBufferRange(range)
-
-  initialize: (selection) ->
-    {@goalColumn} = selection.cursor
-
-    @selections = [selection]
+    @goalColumn = selection.cursor.goalColumn
     @reversed = memberReversed = selection.isReversed()
 
-    {start, end} = swrap(selection).getPropertiesWithStartAndEnd()
-    if @goalColumn?
-      if selection.isReversed() # head is start
+    {start, end, head, tail} = $selection.getPropertiesWithStartAndEnd()
+
+    # Respect goalColumn only when it's value is Infinity and selection's head-column is bigger than tail-column
+    if (@goalColumn is Infinity) and head.column >= tail.column
+      if selection.isReversed()
         start.column = @goalColumn
       else
         end.column = @goalColumn
@@ -83,9 +57,32 @@ class BlockwiseSelection
       [[row, startColumn], [row, endColumn]]
 
     selection.setBufferRange(ranges.shift(), reversed: memberReversed)
+    @selections = [selection]
     for range in ranges
       @selections.push(@editor.addSelectionForBufferRange(range, reversed: memberReversed))
     @updateGoalColumn()
+
+    for memberSelection in @getSelections() when $memberSelection = swrap(memberSelection)
+      $memberSelection.saveProperties() # TODO#698  remove this?
+      $memberSelection.setWiseProperty('blockwise')
+
+    @saveProperties()
+    @constructor.saveSelection(this)
+
+  getSelections: ->
+    @selections
+
+  extendMemberSelectionsToEndOfLine: ->
+    for selection in @getSelections()
+      {start, end} = selection.getBufferRange()
+      end.column = Infinity
+      selection.setBufferRange([start, end])
+
+  expandMemberSelectionsOverLineWithTrimRange: ->
+    for selection in @getSelections()
+      start = selection.getBufferRange().start
+      range = trimRange(@editor, @editor.bufferRangeForBufferRow(start.row))
+      selection.setBufferRange(range)
 
   isReversed: ->
     @reversed

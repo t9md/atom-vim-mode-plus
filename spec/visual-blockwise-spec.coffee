@@ -86,7 +86,7 @@ describe "Visual Blockwise", ->
       when 'bottom' then last
     expect(bs.getTailSelection()).toBe tail
 
-    for s in others
+    for s in others ? []
       expect(bs.getHeadSelection()).not.toBe s
       expect(bs.getTailSelection()).not.toBe s
 
@@ -404,9 +404,7 @@ describe "Visual Blockwise", ->
       it 'case-7', -> set cursor: [5, 0]; ensureCharacterwiseWasRestored('v 5 l 3 k')
 
   describe "keep goalColumn", ->
-    selectedBlockTexts = []
     beforeEach ->
-      selectedBlockTexts = ["3456", "", "DEFG"]
       set
         text: """
         012345678
@@ -416,19 +414,46 @@ describe "Visual Blockwise", ->
 
     it "when [reversed = false, headReversed = false]", ->
       set cursor: [0, 3]
-      ensure "ctrl-v l l l j j", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
+      ensure "ctrl-v l l l", cursor: [[0, 7]], selectedTextOrdered: ["3456"]
       ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: false
+
+      ensure "j", cursor: [[0, 0], [1, 0]], selectedTextOrdered: ["0123", ""]
+      ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: true
+
+      ensure "j", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: ["3456", "", "DEFG"]
+      ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: false
+
     it "when [reversed = true, headReversed = true]", ->
       set cursor: [2, 6]
-      ensure "ctrl-v h h h k k", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
+      ensure "ctrl-v h h h", cursor: [[2, 3]], selectedTextOrdered: ["DEFG"]
       ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: true
+
+      ensure "k", cursor: [[1, 0], [2, 0]], selectedTextOrdered: ["", "ABCDEFG"]
+      ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: true
+
+      ensure "k", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: ["3456", "", "DEFG"]
+      ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: true
+
     it "when [reversed = false, headReversed = true]", ->
       set cursor: [0, 6]
-      ensure "ctrl-v h h h j j", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: selectedBlockTexts
+      ensure "ctrl-v h h h", cursor: [[0, 3]], selectedTextOrdered: ["3456"]
+      ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: true, headReversed: true
+
+      ensure "j", cursor: [[0, 0], [1, 0]], selectedTextOrdered: ["0123456", ""]
       ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: true
+
+      ensure "j", cursor: [[0, 3], [1, 0], [2, 3]], selectedTextOrdered: ["3456", "", "DEFG"]
+      ensureBlockwiseSelection head: 'bottom', tail: 'top', reversed: false, headReversed: true
+
     it "when [reversed = true, headReversed = false]", ->
       set cursor: [2, 3]
-      ensure "ctrl-v l l l k k", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered: selectedBlockTexts
+      ensure "ctrl-v l l l", cursor: [[2, 7]], selectedTextOrdered: ["DEFG"]
+      ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: false, headReversed: false
+
+      ensure "k", cursor: [[1, 0], [2, 0]], selectedTextOrdered: ["", "ABCD"]
+      ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: true
+
+      ensure "k", cursor: [[0, 7], [1, 0], [2, 7]], selectedTextOrdered:  ["3456", "", "DEFG"]
       ensureBlockwiseSelection head: 'top', tail: 'bottom', reversed: true, headReversed: false
 
   # [FIXME] not appropriate put here, re-consider all spec file layout later.
