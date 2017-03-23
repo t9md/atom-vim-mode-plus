@@ -132,7 +132,6 @@ class SelectionWrapper
       when 'characterwise'
         @translateSelectionEndAndClip('forward') # equivalent to core selection.selectRight but keep goalColumn
       when 'linewise'
-        @complementGoalColumn()
         # Even if end.column is 0, expand over that end.row( don't care selection.getRowRange() )
         {start, end} = @getBufferRange()
         range = getBufferRangeForRowRange(@selection.editor, [start.row, end.row])
@@ -142,16 +141,6 @@ class SelectionWrapper
         new BlockwiseSelection(@selection)
 
     @setWiseProperty(wise)
-
-  complementGoalColumn: ->
-    unless @selection.cursor.goalColumn?
-      column = @getBufferPositionFor('head', from: ['property', 'selection']).column
-      @selection.cursor.goalColumn = column
-
-  captureProperties: ->
-    head = @selection.getHeadBufferPosition()
-    tail = @selection.getTailBufferPosition()
-    {head, tail}
 
   selectByProperties: ({head, tail}, options) ->
     # No problem if head is greater than tail, Range constructor swap start/end.
