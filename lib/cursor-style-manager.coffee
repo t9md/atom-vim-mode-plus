@@ -12,17 +12,18 @@ class CursorStyleManager
 
   constructor: (@vimState) ->
     {@editorElement, @editor} = @vimState
-    @disposable = atom.config.observe 'editor.lineHeight', (newValue) =>
-      @lineHeight = newValue
-      @refresh()
+    @subscriptions = new CompositeDisposable
+    @subscriptions.add atom.config.observe('editor.lineHeight', @refresh)
+    @subscriptions.add atom.config.observe('editor.fontSize', @refresh)
 
   destroy: ->
     @styleDisposables?.dispose()
-    @disposable.dispose()
+    @subscriptions.dispose()
 
-  refresh: ->
+  refresh: =>
     # Intentionally skip in spec mode, since not all spec have DOM attached( and don't want to ).
     return if atom.inSpecMode()
+    @lineHeight = @editor.getLineHeightInPixels()
 
     # We must dispose previous style modification for non-visual-mode
     @styleDisposables?.dispose()
@@ -71,7 +72,7 @@ class CursorStyleManager
       {row, column} = bufferPosition.traversalFrom(cursor.getBufferPosition())
 
     style = domNode.style
-    style.setProperty('top', "#{row * @lineHeight}em") if row
+    style.setProperty('top', "#{@lineHeight * row}px") if row
     style.setProperty('left', "#{column}ch") if column
     new Disposable ->
       style.removeProperty('top')
