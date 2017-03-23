@@ -6,7 +6,7 @@ class InsertMode extends Base
   @extend(false)
   constructor: ->
     super
-    @initialize?()
+    @initialize()
 
 class InsertRegister extends InsertMode
   @extend()
