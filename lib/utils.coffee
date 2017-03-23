@@ -587,14 +587,13 @@ getLargestFoldRangeContainsBufferRow = (editor, row) ->
     new Range(startPoint, endPoint)
 
 # take bufferPosition
-translatePointAndClip = (editor, point, direction, {translate}={}) ->
-  translate ?= true
+translatePointAndClip = (editor, point, direction) ->
   point = Point.fromObject(point)
 
   dontClip = false
   switch direction
     when 'forward'
-      point = point.translate([0, +1]) if translate
+      point = point.translate([0, +1])
       eol = editor.bufferRangeForBufferRow(point.row).end
 
       if point.isEqual(eol)
@@ -606,7 +605,7 @@ translatePointAndClip = (editor, point, direction, {translate}={}) ->
       point = Point.min(point, editor.getEofBufferPosition())
 
     when 'backward'
-      point = point.translate([0, -1]) if translate
+      point = point.translate([0, -1])
 
       if point.column < 0
         dontClip = true
@@ -622,8 +621,8 @@ translatePointAndClip = (editor, point, direction, {translate}={}) ->
     screenPoint = editor.screenPositionForBufferPosition(point, clipDirection: direction)
     editor.bufferPositionForScreenPosition(screenPoint)
 
-getRangeByTranslatePointAndClip = (editor, range, which, direction, options) ->
-  newPoint = translatePointAndClip(editor, range[which], direction, options)
+getRangeByTranslatePointAndClip = (editor, range, which, direction) ->
+  newPoint = translatePointAndClip(editor, range[which], direction)
   switch which
     when 'start'
       new Range(newPoint, range.end)

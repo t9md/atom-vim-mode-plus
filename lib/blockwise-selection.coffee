@@ -162,23 +162,20 @@ class BlockwiseSelection
     for selection in @selections
       swrap(selection).setBufferPositionTo(which)
 
-  clearSelections: ({except}={}) ->
+  removeSelections: ({except}={}) ->
     for selection in @selections.slice() when (selection isnt except)
-      @removeSelection(selection)
+      swrap(selection).clearProperties()
+      _.remove(@selections, selection)
+      selection.destroy()
 
   setHeadBufferPosition: (point) ->
     head = @getHeadSelection()
-    @clearSelections(except: head)
+    @removeSelections(except: head)
     head.cursor.setBufferPosition(point)
-
-  removeSelection: (selection) ->
-    swrap(selection).clearProperties()
-    _.remove(@selections, selection)
-    selection.destroy()
 
   setHeadBufferRange: (range, options) ->
     head = @getHeadSelection()
-    @clearSelections(except: head)
+    @removeSelections(except: head)
     {goalColumn} = head.cursor
     # When reversed state of selection change, goalColumn is cleared.
     # But here for blockwise, I want to keep goalColumn unchanged.
@@ -195,7 +192,7 @@ class BlockwiseSelection
     return if @needSkipNormalization
 
     head = @getHeadSelection()
-    @clearSelections(except: head)
+    @removeSelections(except: head)
     {goalColumn} = head.cursor # FIXME this should not be necessary
     $selection = swrap(head)
     $selection.selectByProperties(@properties)

@@ -134,8 +134,7 @@ class SelectionWrapper
       when 'linewise'
         # Even if end.column is 0, expand over that end.row( don't care selection.getRowRange() )
         {start, end} = @getBufferRange()
-        range = getBufferRangeForRowRange(@selection.editor, [start.row, end.row])
-        @setBufferRange(range)
+        @setBufferRange(getBufferRangeForRowRange(@selection.editor, [start.row, end.row]))
       when 'blockwise'
         BlockwiseSelection ?= require './blockwise-selection'
         new BlockwiseSelection(@selection)
@@ -171,19 +170,8 @@ class SelectionWrapper
       'characterwise'
 
   # direction must be one of ['forward', 'backward']
-  # options: {translate: true or false} default true
-  translateSelectionEndAndClip: (direction, options) ->
-    editor = @selection.editor
-    range = @getBufferRange()
-    newRange = getRangeByTranslatePointAndClip(editor, range, "end", direction, options)
-    @setBufferRange(newRange)
-
-  translateSelectionHeadAndClip: (direction, options) ->
-    editor = @selection.editor
-    which = if @selection.isReversed() then 'start' else 'end'
-
-    range = @getBufferRange()
-    newRange = getRangeByTranslatePointAndClip(editor, range, which, direction, options)
+  translateSelectionEndAndClip: (direction) ->
+    newRange = getRangeByTranslatePointAndClip(@selection.editor, @getBufferRange(), "end", direction)
     @setBufferRange(newRange)
 
   # Return selection extent to replay blockwise selection on `.` repeating.
@@ -199,10 +187,7 @@ class SelectionWrapper
   normalize: ->
     # empty selection IS already 'normalized'
     return if @selection.isEmpty()
-
     assertWithException(@hasProperties(), "attempted to normalize but no properties to restore")
-    if @getProperties().wise is 'linewise'
-      @fixPropertyRowToRowRange()
     @selectByProperties(@getProperties())
 
 swrap = (selection) ->
@@ -226,10 +211,6 @@ swrap.clearProperties = (editor) ->
   for selection in editor.getSelections()
     swrap(selection).clearProperties()
 
-swrap.hasProperties = (editor) ->
-  editor.getSelections().every (selection) ->
-    swrap(selection).hasProperties()
-
 {inspect} = require 'util'
 swrap.dumpProperties = (editor) ->
   for selection in editor.getSelections() when swrap(selection).hasProperties()
@@ -245,10 +226,6 @@ swrap.normalize = (editor) ->
 swrap.applyWise = (editor, value) ->
   for selection in editor.getSelections()
     swrap(selection).applyWise(value)
-
-swrap.fixPropertyRowToRowRange = (editor) ->
-  for selection in editor.getSelections()
-    swrap(selection).fixPropertyRowToRowRange()
 
 # Return function to restore
 # Used in vmp-move-selected-text
