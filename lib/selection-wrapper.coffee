@@ -10,7 +10,6 @@
 } = require './utils'
 BlockwiseSelection = null
 
-# propertyStore = new WeakMap
 propertyStore = new Map
 
 class SelectionWrapper
@@ -29,21 +28,28 @@ class SelectionWrapper
     @selection.getBufferRange()
 
   getBufferPositionFor: (which, {from}={}) ->
-    from ?= ['selection']
+    for _from in from ? ['selection']
+      switch _from
+        when 'property'
+          continue unless @hasProperties()
 
-    if ('property' in from) and @hasProperties()
-      return @getPropertiesWithStartAndEnd()[which]
+          properties = @getProperties()
+          return switch which
+            when 'start' then (if @selection.isReversed() then properties.head else properties.tail)
+            when 'end' then (if @selection.isReversed() then properties.tail else properties.head)
+            when 'head' then properties.head
+            when 'tail' then properties.tail
 
-    if 'selection' in from
-      {start, end} = @selection.getBufferRange()
-      head = @selection.getHeadBufferPosition()
-      tail = @selection.getTailBufferPosition()
-      {start, end, head, tail}[which]
+        when 'selection'
+          return switch which
+            when 'start' then @selection.getBufferRange().start
+            when 'end' then @selection.getBufferRange().end
+            when 'head' then @selection.getHeadBufferPosition()
+            when 'tail' then @selection.getTailBufferPosition()
+    null
 
-  setBufferPositionTo: (which, options) ->
-    point = @getBufferPositionFor(which, options)
-    # console.log point.toString()
-    @selection.cursor.setBufferPosition(point)
+  setBufferPositionTo: (which) ->
+    @selection.cursor.setBufferPosition(@getBufferPositionFor(which))
 
   setReversedState: (isReversed) ->
     return if @selection.isReversed() is isReversed
@@ -77,11 +83,6 @@ class SelectionWrapper
       when 'head' then headRow
       when 'tail' then tailRow
 
-  getHeadRow: -> @getRowFor('head')
-  getTailRow: -> @getRowFor('tail')
-  getStartRow: -> @getRowFor('start')
-  getEndRow: -> @getRowFor('end')
-
   getTailBufferRange: ->
     {editor} = @selection
     tailPoint = @selection.getTailBufferPosition()
@@ -107,21 +108,13 @@ class SelectionWrapper
         properties = {head: end, tail: tail}
     @setProperties(properties)
 
-  getPropertiesWithStartAndEnd: ->
-    properties = @getProperties()
-    {head, tail} = properties
-    if @selection.isReversed()
-      [start, end] = [head, tail]
-    else
-      [start, end] = [tail, head]
-    properties.start = start
-    properties.end = end
-    properties
-
   fixPropertyRowToRowRange: ->
     assertWithException(@hasProperties(), "trying to fixPropertyRowToRowRange on properties-less selection")
-    {start, end} = @getPropertiesWithStartAndEnd()
-    [start.row, end.row] = @selection.getBufferRowRange()
+    {head, tail} = @getProperties()
+    if @selection.isReversed()
+      [head.row, tail.row] = @selection.getBufferRowRange()
+    else
+      [tail.row, head.row] = @selection.getBufferRowRange()
 
   # NOTE:
   # 'wise' must be 'characterwise' or 'linewise'

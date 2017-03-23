@@ -36,10 +36,11 @@ class BlockwiseSelection
     @goalColumn = selection.cursor.goalColumn
     @reversed = memberReversed = selection.isReversed()
 
-    {start, end, head, tail} = $selection.getPropertiesWithStartAndEnd()
+    {head: {column: headColumn}, tail: {column: tailColumn}} = $selection.getProperties()
+    start = $selection.getBufferPositionFor('start', from: ['property'])
+    end = $selection.getBufferPositionFor('end', from: ['property'])
 
     # Respect goalColumn only when it's value is Infinity and selection's head-column is bigger than tail-column
-    [headColumn, tailColumn] = [head.column, tail.column]
     if (@goalColumn is Infinity) and headColumn >= tailColumn
       if selection.isReversed()
         start.column = @goalColumn
@@ -131,18 +132,6 @@ class BlockwiseSelection
     else
       @getStartSelection()
 
-  getHeadBufferPosition: ->
-    @getHeadSelection().getHeadBufferPosition()
-
-  getTailBufferPosition: ->
-    @getTailSelection().getTailBufferPosition()
-
-  getStartBufferPosition: ->
-    @getStartSelection().getBufferRange().start
-
-  getEndBufferPosition: ->
-    @getEndSelection().getBufferRange().end
-
   getBufferRowRange: ->
     startRow = @getStartSelection().getBufferRowRange()[0]
     endRow = @getEndSelection().getBufferRowRange()[0]
@@ -152,15 +141,21 @@ class BlockwiseSelection
   setSelectedBufferRanges: (ranges, {reversed}) ->
     sortRanges(ranges)
     range = ranges.shift()
-    @setHeadBufferRange(range, {reversed})
+
+    head = @getHeadSelection()
+    @removeSelections(except: head)
+    {goalColumn} = head.cursor
+    # When reversed state of selection change, goalColumn is cleared.
+    # But here for blockwise, I want to keep goalColumn unchanged.
+    # This behavior is not compatible with pure-Vim I know.
+    # But I believe this is more unnoisy and less confusion while moving
+    # cursor in visual-block mode.
+    head.setBufferRange(range, {reversed})
+    head.cursor.goalColumn ?= goalColumn if goalColumn?
+
     for range in ranges
       @selections.push @editor.addSelectionForBufferRange(range, {reversed})
     @updateGoalColumn()
-
-  # which must one of ['start', 'end', 'head', 'tail']
-  setPositionForSelections: (which) ->
-    for selection in @selections
-      swrap(selection).setBufferPositionTo(which)
 
   removeSelections: ({except}={}) ->
     for selection in @selections.slice() when (selection isnt except)
@@ -172,18 +167,6 @@ class BlockwiseSelection
     head = @getHeadSelection()
     @removeSelections(except: head)
     head.cursor.setBufferPosition(point)
-
-  setHeadBufferRange: (range, options) ->
-    head = @getHeadSelection()
-    @removeSelections(except: head)
-    {goalColumn} = head.cursor
-    # When reversed state of selection change, goalColumn is cleared.
-    # But here for blockwise, I want to keep goalColumn unchanged.
-    # This behavior is not compatible with pure-Vim I know.
-    # But I believe this is more unnoisy and less confusion while moving
-    # cursor in visual-block mode.
-    head.setBufferRange(range, options)
-    head.cursor.goalColumn ?= goalColumn if goalColumn?
 
   skipNormalization: ->
     @needSkipNormalization = true
