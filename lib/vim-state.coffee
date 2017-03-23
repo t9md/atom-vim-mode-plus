@@ -283,13 +283,13 @@ class VimState
 
   resetNormalMode: ({userInvocation}={}) ->
     if userInvocation ? false
-      if @editor.hasMultipleCursors()
-        @clearSelections()
-
-      else if @hasPersistentSelections() and @getConfig('clearPersistentSelectionOnResetNormalMode')
-        @clearPersistentSelections()
-      else if @occurrenceManager.hasPatterns()
-        @occurrenceManager.resetPatterns()
+      switch
+        when @editor.hasMultipleCursors()
+          @clearSelections()
+        when @hasPersistentSelections() and @getConfig('clearPersistentSelectionOnResetNormalMode')
+          @clearPersistentSelections()
+        when @occurrenceManager.hasPatterns()
+          @occurrenceManager.resetPatterns()
 
       if @getConfig('clearHighlightSearchOnResetNormalMode')
         @globalState.set('highlightSearchPattern', null)
