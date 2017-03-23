@@ -27,10 +27,10 @@ class BlockwiseSelection
     @blockwiseSelections.push(blockwiseSelection)
 
   constructor: (selection) ->
-    assertWithException(swrap.hasProperties(selection.editor), "Trying to instantiate vB from properties-less selection")
+    assertWithException(swrap(selection).hasProperties(), "Trying to instantiate vB from properties-less selection")
     @needSkipNormalization = false
     @properties = {}
-    {@editor} = selection
+    @editor = selection.editor
     $selection = swrap(selection)
 
     @goalColumn = selection.cursor.goalColumn
