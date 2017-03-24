@@ -215,14 +215,15 @@ class InsertByTarget extends ActivateInsertMode
     super
 
   execute: ->
-    if @mode is 'visual' and @submode in ['characterwise', 'linewise']
+    # unless @isOccurrence()
+    if not @isOccurrence() and @mode is 'visual' and @submode in ['characterwise', 'linewise']
       @wise = 'blockwise'
+      @onDidSelectTarget =>
+        if @submode is 'linewise'
+          for blockwiseSelection in @getBlockwiseSelections()
+            blockwiseSelection.expandMemberSelectionsOverLineWithTrimRange()
 
     @onDidSelectTarget =>
-      if @submode is 'linewise'
-        for blockwiseSelection in @getBlockwiseSelections()
-          blockwiseSelection.expandMemberSelectionsOverLineWithTrimRange()
-
       for selection in @editor.getSelections()
         swrap(selection).setBufferPositionTo(@which)
     super
