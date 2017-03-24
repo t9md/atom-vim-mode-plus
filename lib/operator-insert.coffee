@@ -215,11 +215,10 @@ class InsertByTarget extends ActivateInsertMode
     super
 
   execute: ->
-    # unless @isOccurrence()
     if not @isOccurrence() and @mode is 'visual' and @submode in ['characterwise', 'linewise']
       @wise = 'blockwise'
-      @onDidSelectTarget =>
-        if @submode is 'linewise'
+      if @submode is 'linewise'
+        @onDidSelectTarget =>
           for blockwiseSelection in @getBlockwiseSelections()
             blockwiseSelection.expandMemberSelectionsOverLineWithTrimRange()
 
