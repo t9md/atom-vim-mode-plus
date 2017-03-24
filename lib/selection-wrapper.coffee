@@ -18,7 +18,6 @@ class SelectionWrapper
   getProperties: -> propertyStore.get(@selection)
   setProperties: (prop) -> propertyStore.set(@selection, prop)
   clearProperties: -> propertyStore.delete(@selection)
-  setWiseProperty: (value) -> @getProperties().wise = value
 
   setBufferRangeSafely: (range, options) ->
     if range
@@ -55,8 +54,8 @@ class SelectionWrapper
     return if @selection.isReversed() is isReversed
 
     if @hasProperties()
-      {head, tail, wise} = @getProperties()
-      @setProperties(head: tail, tail: head, wise: wise)
+      {head, tail} = @getProperties()
+      @setProperties(head: tail, tail: head)
 
     @setBufferRange @getBufferRange(),
       autoscroll: true
@@ -109,7 +108,6 @@ class SelectionWrapper
     @setProperties(properties)
 
   fixPropertyRowToRowRange: ->
-    assertWithException(@hasProperties(), "trying to fixPropertyRowToRowRange on properties-less selection")
     {head, tail} = @getProperties()
     if @selection.isReversed()
       [head.row, tail.row] = @selection.getBufferRowRange()
@@ -131,8 +129,6 @@ class SelectionWrapper
       when 'blockwise'
         BlockwiseSelection ?= require './blockwise-selection'
         new BlockwiseSelection(@selection)
-
-    @setWiseProperty(wise)
 
   selectByProperties: ({head, tail}, options) ->
     # No problem if head is greater than tail, Range constructor swap start/end.
@@ -194,7 +190,7 @@ swrap.setReversedState = (editor, reversed) ->
   $selection.setReversedState(reversed) for $selection in @getSelections(editor)
 
 swrap.detectWise = (editor) ->
-  if @getSelections(editor).every(($selection) -> $selection.isLinewiseRange())
+  if @getSelections(editor).every(($selection) -> $selection.detectWise() is 'linewise')
     'linewise'
   else
     'characterwise'
@@ -209,12 +205,6 @@ swrap.dumpProperties = (editor) ->
 
 swrap.hasProperties = (editor) ->
   @getSelections(editor).every ($selection) -> $selection.hasProperties()
-
-swrap.normalize = (editor) ->
-  $selection.normalize() for $selection in @getSelections(editor)
-
-swrap.applyWise = (editor, wise) ->
-  $selection.applyWise(wise) for $selection in @getSelections(editor)
 
 # Return function to restore
 # Used in vmp-move-selected-text

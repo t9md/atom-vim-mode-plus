@@ -160,7 +160,8 @@ class ModeManager
 
     @normalizeSelections()
 
-    swrap.applyWise(@editor, newSubmode)
+    $selection.applyWise(newSubmode) for $selection in swrap.getSelections(@editor)
+
     @vimState.getLastBlockwiseSelection().autoscroll() if newSubmode is 'blockwise'
 
     new Disposable =>
@@ -176,7 +177,7 @@ class ModeManager
         bs.normalize()
       @vimState.clearBlockwiseSelections()
     else
-      swrap.normalize(@editor)
+      $selection.normalize() for $selection in swrap.getSelections(@editor)
 
   # Narrow to selection
   # -------------------------

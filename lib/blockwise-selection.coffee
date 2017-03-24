@@ -68,7 +68,6 @@ class BlockwiseSelection
       $memberSelection.saveProperties() # TODO#698  remove this?
       $memberSelection.getProperties().head.column = headColumn
       $memberSelection.getProperties().tail.column = tailColumn
-      $memberSelection.setWiseProperty('blockwise')
 
     @saveProperties()
     @constructor.saveSelection(this)
