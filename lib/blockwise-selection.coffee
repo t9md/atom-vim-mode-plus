@@ -9,22 +9,26 @@ class BlockwiseSelection
   goalColumn: null
   reversed: false
 
-  @blockwiseSelections = []
-  @clearSelections: ->
-    @blockwiseSelections = []
+  @blockwiseSelectionsByEditor = new Map()
 
-  @getSelections: ->
-    @blockwiseSelections
+  @clearSelections: (editor) ->
+    @blockwiseSelectionsByEditor.delete(editor)
 
-  @getSelectionsOrderedByBufferPosition: ->
-    @blockwiseSelections.sort (a, b) ->
+  @getSelections: (editor) ->
+    @blockwiseSelectionsByEditor.get(editor) ? []
+
+  @getSelectionsOrderedByBufferPosition: (editor) ->
+    @blockwiseSelectionsByEditor(editor).sort (a, b) ->
       a.getStartSelection().compare(b.getStartSelection())
 
-  @getLastSelection: ->
-    _.last(@blockwiseSelections)
+  @getLastSelection: (editor) ->
+    _.last(@blockwiseSelectionsByEditor.get(editor))
 
   @saveSelection: (blockwiseSelection) ->
-    @blockwiseSelections.push(blockwiseSelection)
+    editor = blockwiseSelection.editor
+    unless @blockwiseSelectionsByEditor.has(editor)
+      @blockwiseSelectionsByEditor.set(editor, [])
+    @blockwiseSelectionsByEditor.get(editor).push(blockwiseSelection)
 
   constructor: (selection) ->
     assertWithException(swrap(selection).hasProperties(), "Trying to instantiate vB from properties-less selection")

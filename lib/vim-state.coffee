@@ -101,16 +101,16 @@ class VimState
   # BlockwiseSelections
   # -------------------------
   getBlockwiseSelections: ->
-    BlockwiseSelection.getSelections()
+    BlockwiseSelection.getSelections(@editor)
 
   getLastBlockwiseSelection: ->
-    BlockwiseSelection.getLastSelection()
+    BlockwiseSelection.getLastSelection(@editor)
 
   getBlockwiseSelectionsOrderedByBufferPosition: ->
-    BlockwiseSelection.getSelectionsOrderedByBufferPosition()
+    BlockwiseSelection.getSelectionsOrderedByBufferPosition(@editor)
 
   clearBlockwiseSelections: ->
-    BlockwiseSelection.clearSelections()
+    BlockwiseSelection.clearSelections(@editor)
 
   # Other
   # -------------------------
@@ -207,6 +207,7 @@ class VimState
   destroy: ->
     return unless @isAlive()
     @constructor.vimStatesByEditor.delete(@editor)
+    BlockwiseSelection.clearSelections(@editor)
 
     @subscriptions.dispose()
 
