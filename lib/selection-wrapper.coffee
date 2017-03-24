@@ -218,11 +218,12 @@ swrap.applyWise = (editor, wise) ->
 # Return function to restore
 # Used in vmp-move-selected-text
 swrap.switchToLinewise = (editor) ->
-  for $selection in @getSelections(editor)
+  for $selection in swrap.getSelections(editor)
     $selection.saveProperties()
     $selection.applyWise('linewise')
   new Disposable ->
-    for $selection in @getSelections(editor)
+    for $selection in swrap.getSelections(editor)
+      $selection.fixPropertyRowToRowRange()
       $selection.normalize()
       $selection.applyWise('characterwise')
 

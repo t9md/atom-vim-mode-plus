@@ -16,7 +16,7 @@ class BlockwiseSelection
   @getSelections: ->
     @blockwiseSelections
 
-  getSelectionsOrderedByBufferPosition: ->
+  @getSelectionsOrderedByBufferPosition: ->
     @blockwiseSelections.sort (a, b) ->
       a.getStartSelection().compare(b.getStartSelection())
 
