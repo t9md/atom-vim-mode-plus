@@ -158,26 +158,19 @@ class ModeManager
     for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
       $selection.saveProperties()
 
-    @normalizeSelections()
+    swrap.normalize(@editor)
 
     $selection.applyWise(newSubmode) for $selection in swrap.getSelections(@editor)
 
     @vimState.getLastBlockwiseSelection().autoscroll() if newSubmode is 'blockwise'
 
     new Disposable =>
-      @normalizeSelections()
+      swrap.normalize(@editor)
+
       if @submode is 'blockwise'
         swrap.setReversedState(@editor, true)
       selection.clear(autoscroll: false) for selection in @editor.getSelections()
       @updateNarrowedState(false)
-
-  normalizeSelections: ->
-    if @submode is 'blockwise'
-      for bs in @vimState.getBlockwiseSelections()
-        bs.normalize()
-      @vimState.clearBlockwiseSelections()
-    else
-      $selection.normalize() for $selection in swrap.getSelections(@editor)
 
   # Narrow to selection
   # -------------------------

@@ -14,6 +14,9 @@ class BlockwiseSelection
   @clearSelections: (editor) ->
     @blockwiseSelectionsByEditor.delete(editor)
 
+  @has: (editor) ->
+    @blockwiseSelectionsByEditor.has(editor)
+
   @getSelections: (editor) ->
     @blockwiseSelectionsByEditor.get(editor) ? []
 
@@ -26,8 +29,7 @@ class BlockwiseSelection
 
   @saveSelection: (blockwiseSelection) ->
     editor = blockwiseSelection.editor
-    unless @blockwiseSelectionsByEditor.has(editor)
-      @blockwiseSelectionsByEditor.set(editor, [])
+    @blockwiseSelectionsByEditor.set(editor, []) unless @has(editor)
     @blockwiseSelectionsByEditor.get(editor).push(blockwiseSelection)
 
   constructor: (selection) ->

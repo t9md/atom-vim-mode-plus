@@ -203,6 +203,16 @@ swrap.dumpProperties = (editor) ->
   for $selection in @getSelections(editor) when $selection.hasProperties()
     console.log inspect($selection.getProperties())
 
+swrap.normalize = (editor) ->
+  BlockwiseSelection ?= require './blockwise-selection'
+  if BlockwiseSelection.has(editor)#blockwiseSelections =
+    for blockwiseSelection in BlockwiseSelection.getSelections(editor)
+      blockwiseSelection.normalize()
+    BlockwiseSelection.clearSelections(editor)
+  else
+    for $selection in @getSelections(editor)
+      $selection.normalize()
+
 swrap.hasProperties = (editor) ->
   @getSelections(editor).every ($selection) -> $selection.hasProperties()
 

@@ -214,7 +214,7 @@ class Operator extends Base
 
   normalizeSelectionsIfNecessary: ->
     if @target?.isMotion() and (@mode is 'visual')
-      @vimState.modeManager.normalizeSelections()
+      swrap.normalize(@editor)
 
   startMutation: (fn) ->
     if @canEarlySelect()

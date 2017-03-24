@@ -283,6 +283,8 @@ class VimState
     @editor.setCursorBufferPosition(@editor.getCursorBufferPosition())
 
   resetNormalMode: ({userInvocation}={}) ->
+    BlockwiseSelection.clearSelections(@editor)
+
     if userInvocation ? false
       switch
         when @editor.hasMultipleCursors()

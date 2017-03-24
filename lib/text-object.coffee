@@ -75,7 +75,7 @@ class TextObject extends Base
 
   select: ->
     if @isMode('visual', 'blockwise')
-      @vimState.modeManager.normalizeSelections()
+      swrap.normalize(@editor)
 
     @countTimes @getCount(), ({stop}) =>
       stop() unless @supportCount # quick-fix for #560
