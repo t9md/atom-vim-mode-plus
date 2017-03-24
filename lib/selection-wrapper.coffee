@@ -181,6 +181,7 @@ class SelectionWrapper
     # empty selection IS already 'normalized'
     return if @selection.isEmpty()
     assertWithException(@hasProperties(), "attempted to normalize but no properties to restore")
+    @fixPropertyRowToRowRange()
     @selectByProperties(@getProperties())
 
 swrap = (selection) ->
@@ -223,7 +224,6 @@ swrap.switchToLinewise = (editor) ->
     $selection.applyWise('linewise')
   new Disposable ->
     for $selection in swrap.getSelections(editor)
-      $selection.fixPropertyRowToRowRange()
       $selection.normalize()
       $selection.applyWise('characterwise')
 

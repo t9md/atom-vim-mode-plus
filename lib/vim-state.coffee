@@ -249,8 +249,10 @@ class VimState
     nonEmptySelecitons = @editor.getSelections().filter (selection) -> not selection.isEmpty()
     if nonEmptySelecitons.length
       wise = swrap.detectWise(@editor)
-      if @isMode('visual', wise)
+      if @mode is 'visual'
         @editorElement.component.updateSync()
+
+      if @isMode('visual', wise)
         @updateCursorsVisibility()
       else
         @activate('visual', wise)
