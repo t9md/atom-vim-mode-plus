@@ -432,6 +432,9 @@ class Delete extends Operator
   stayOptionName: 'stayOnDelete'
 
   execute: ->
+    if @target.wise is 'blockwise'
+      @restorePositions = false
+
     @onDidSelectTarget =>
       return if @occurrenceSelected
       if @target.isLinewise()
@@ -468,7 +471,6 @@ class DeleteToLastCharacterOfLine extends Delete
       @onDidSelectTarget =>
         for blockwiseSelection in @getBlockwiseSelections()
           blockwiseSelection.extendMemberSelectionsToEndOfLine()
-
     super
 
 class DeleteLine extends Delete

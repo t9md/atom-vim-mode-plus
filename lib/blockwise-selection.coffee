@@ -69,7 +69,6 @@ class BlockwiseSelection
       $memberSelection.getProperties().head.column = headColumn
       $memberSelection.getProperties().tail.column = tailColumn
 
-    @saveProperties()
     @constructor.saveSelection(this)
 
   getSelections: ->
@@ -92,14 +91,12 @@ class BlockwiseSelection
 
   reverse: ->
     @reversed = not @reversed
-    @saveProperties()
 
   getProperties: ->
-    @properties
-
-  saveProperties: ->
-    @properties.head = swrap(@getHeadSelection()).getProperties().head
-    @properties.tail = swrap(@getTailSelection()).getProperties().tail
+    {
+      head: swrap(@getHeadSelection()).getProperties().head
+      tail: swrap(@getTailSelection()).getProperties().tail
+    }
 
   updateGoalColumn: ->
     if @goalColumn?
@@ -173,11 +170,14 @@ class BlockwiseSelection
   normalize: ->
     return if @needSkipNormalization
 
+    properties = @getProperties() # Save prop BEFORE removing member selections.
+
     head = @getHeadSelection()
     @removeSelections(except: head)
+
     {goalColumn} = head.cursor # FIXME this should not be necessary
     $selection = swrap(head)
-    $selection.selectByProperties(@properties)
+    $selection.selectByProperties(properties)
     $selection.saveProperties(true)
     head.cursor.goalColumn ?= goalColumn if goalColumn # FIXME this should not be necessary
 
