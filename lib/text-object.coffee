@@ -94,12 +94,12 @@ class TextObject extends Base
       if @selectSucceeded
         switch @wise
           when 'characterwise'
-            swrap.saveProperties(@editor)
+            $selection.saveProperties() for $selection in swrap.getSelections(@editor)
           when 'linewise'
             # When target is persistent-selection, new selection is added after selectTextObject.
             # So we have to assure all selection have selction property.
             # Maybe this logic can be moved to operation stack.
-            for selection in @editor.getSelections() when $selection = swrap(selection)
+            for $selection in swrap.getSelections(@editor)
               if @getConfig('keepColumnOnSelectTextObject')
                 $selection.saveProperties() unless $selection.hasProperties()
               else
@@ -107,8 +107,9 @@ class TextObject extends Base
               $selection.fixPropertyRowToRowRange()
 
       if @submode is 'blockwise'
-        swrap.normalize(@editor)
-        swrap.applyWise(@editor, 'blockwise')
+        for $selection in swrap.getSelections(@editor)
+          $selection.normalize()
+          $selection.applyWise('blockwise')
         @editorElement.component.updateSync()
 
   # Return true or false

@@ -181,8 +181,8 @@ class Operator extends Base
 
       @persistentSelection.select()
       @editor.mergeIntersectingSelections()
-      swrap.saveProperties(@editor)
-
+      for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
+        $selection.saveProperties()
       true
     else
       false

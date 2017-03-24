@@ -154,8 +154,9 @@ class ModeManager
   #   which is the range in visual-mode.
   activateVisualMode: (newSubmode) ->
     @vimState.assertWithException(newSubmode?, "activate visual-mode without submode")
-    for selection in @editor.getSelections() when $selection = swrap(selection)
-      $selection.saveProperties() unless $selection.hasProperties()
+
+    for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
+      $selection.saveProperties()
 
     @normalizeSelections()
 

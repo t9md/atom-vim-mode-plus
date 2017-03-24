@@ -186,48 +186,45 @@ class SelectionWrapper
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
+swrap.getSelections = (editor) ->
+  editor.getSelections(editor).map(swrap)
+
 swrap.setReversedState = (editor, reversed) ->
-  for selection in editor.getSelections()
-    swrap(selection).setReversedState(reversed)
+  $selection.setReversedState(reversed) for $selection in @getSelections(editor)
 
 swrap.detectWise = (editor) ->
-  if editor.getSelections().every((selection) -> swrap(selection).isLinewiseRange())
+  if @getSelections(editor).every(($selection) -> $selection.isLinewiseRange())
     'linewise'
   else
     'characterwise'
 
-swrap.saveProperties = (editor, isNormalized) ->
-  for selection in editor.getSelections()
-    swrap(selection).saveProperties(isNormalized)
-
 swrap.clearProperties = (editor) ->
-  for selection in editor.getSelections()
-    swrap(selection).clearProperties()
+  $selection.clearProperties() for $selection in @getSelections(editor)
 
-{inspect} = require 'util'
 swrap.dumpProperties = (editor) ->
-  for selection in editor.getSelections() when swrap(selection).hasProperties()
-    console.log inspect(swrap(selection).getProperties())
+  {inspect} = require 'util'
+  for $selection in @getSelections(editor) when $selection.hasProperties()
+    console.log inspect($selection.getProperties())
 
 swrap.hasProperties = (editor) ->
-  editor.getSelections().every (selection) -> swrap(selection).hasProperties()
+  @getSelections(editor).every ($selection) -> $selection.hasProperties()
 
 swrap.normalize = (editor) ->
-  for selection in editor.getSelections()
-    swrap(selection).normalize()
+  $selection.normalize() for $selection in @getSelections(editor)
 
-swrap.applyWise = (editor, value) ->
-  for selection in editor.getSelections()
-    swrap(selection).applyWise(value)
+swrap.applyWise = (editor, wise) ->
+  $selection.applyWise(wise) for $selection in @getSelections(editor)
 
 # Return function to restore
 # Used in vmp-move-selected-text
 swrap.switchToLinewise = (editor) ->
-  swrap.saveProperties(editor)
-  swrap.applyWise(editor, 'linewise')
+  for $selection in @getSelections(editor)
+    $selection.saveProperties()
+    $selection.applyWise('linewise')
   new Disposable ->
-    swrap.normalize(editor)
-    swrap.applyWise(editor, 'characterwise')
+    for $selection in @getSelections(editor)
+      $selection.normalize()
+      $selection.applyWise('characterwise')
 
 swrap.getPropertyStore = ->
   propertyStore
