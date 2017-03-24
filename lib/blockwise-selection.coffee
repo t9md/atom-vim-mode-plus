@@ -21,7 +21,7 @@ class BlockwiseSelection
     @blockwiseSelectionsByEditor.get(editor) ? []
 
   @getSelectionsOrderedByBufferPosition: (editor) ->
-    @blockwiseSelectionsByEditor(editor).sort (a, b) ->
+    @getSelections(editor).sort (a, b) ->
       a.getStartSelection().compare(b.getStartSelection())
 
   @getLastSelection: (editor) ->
