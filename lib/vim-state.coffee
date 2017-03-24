@@ -252,6 +252,11 @@ class VimState
       wise = swrap.detectWise(@editor)
       if @isMode('visual', wise)
         @editorElement.component.updateSync()
+        for $selection in swrap.getSelections(@editor)
+          if $selection.hasProperties()
+            $selection.fixPropertyRowToRowRange() if wise is 'linewise'
+          else
+            $selection.saveProperties()
         @updateCursorsVisibility()
       else
         @editorElement.component.updateSync()

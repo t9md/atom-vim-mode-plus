@@ -51,8 +51,6 @@ class CursorStyleManager
       @styleDisposables.add @modifyStyle(cursor, cursorNode)
 
   getCursorBufferPositionToDisplay: (selection) ->
-    $selection = swrap(selection)
-    $selection.saveProperties() unless $selection.hasProperties()
     bufferPosition = swrap(selection).getBufferPositionFor('head', from: ['property'])
     if @editor.hasAtomicSoftTabs() and not selection.isReversed()
       screenPosition = @editor.screenPositionForBufferPosition(bufferPosition.translate([0, +1]), clipDirection: 'forward')

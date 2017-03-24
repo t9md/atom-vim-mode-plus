@@ -69,19 +69,6 @@ class SelectionWrapper
   getRowCount: ->
     @getRows().length
 
-  getRowFor: (where) ->
-    [startRow, endRow] = @selection.getBufferRowRange()
-    if @selection.isReversed()
-      [headRow, tailRow] = [startRow, endRow]
-    else
-      [headRow, tailRow] = [endRow, startRow]
-
-    switch where
-      when 'start' then startRow
-      when 'end' then endRow
-      when 'head' then headRow
-      when 'tail' then tailRow
-
   getTailBufferRange: ->
     {editor} = @selection
     tailPoint = @selection.getTailBufferPosition()
