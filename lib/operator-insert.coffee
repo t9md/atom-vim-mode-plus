@@ -215,14 +215,20 @@ class InsertByTarget extends ActivateInsertMode
     super
 
   execute: ->
-    if not @isOccurrence() and @mode is 'visual' and @submode in ['characterwise', 'linewise']
-      @wise = 'blockwise'
-      if @submode is 'linewise'
-        @onDidSelectTarget =>
+    @onDidSelectTarget =>
+      # In vC/vL, when occurrence marker was NOT selected,
+      # it behave's very specially
+      # vC: `I` and `A` behaves as shoft hand of `ctrl-v I` and `ctrl-v A`.
+      # vL: `I` and `A` place cursors at each selected lines of start( or end ) of non-white-space char.
+      if not @occurrenceSelected and @mode is 'visual' and @submode in ['characterwise', 'linewise']
+        for $selection in swrap.getSelections(@editor)
+          $selection.normalize()
+          $selection.applyWise('blockwise')
+
+        if @submode is 'linewise'
           for blockwiseSelection in @getBlockwiseSelections()
             blockwiseSelection.expandMemberSelectionsOverLineWithTrimRange()
 
-    @onDidSelectTarget =>
       for selection in @editor.getSelections()
         swrap(selection).setBufferPositionTo(@which)
     super
