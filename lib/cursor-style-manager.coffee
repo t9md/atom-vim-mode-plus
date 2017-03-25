@@ -39,11 +39,9 @@ class CursorStyleManager
     for cursor in @editor.getCursors()
       cursor.setVisible(cursor in cursorsToShow)
 
-    # [NOTE] When activating visual-blockwise-mode multiple slections are added in bulk.
-    # But corresponding cursorsComponent(HTML element) is added asynchronously.
+    # FIXME: in occurrence, in vB, multi-selections are added during operation but selection is added asynchronously.
     # We need to make sure that corresponding cursor's domNode is available to modify it's style.
-    if @submode is 'blockwise'
-      @editorElement.component.updateSync()
+    @editorElement.component.updateSync()
 
     # [NOTE] Using non-public API
     cursorNodesById = @editorElement.component.linesComponent.cursorsComponent.cursorNodesById

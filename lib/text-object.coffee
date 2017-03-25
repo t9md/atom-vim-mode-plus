@@ -110,7 +110,6 @@ class TextObject extends Base
         for $selection in swrap.getSelections(@editor)
           $selection.normalize()
           $selection.applyWise('blockwise')
-        @editorElement.component.updateSync()
 
   # Return true or false
   selectTextObject: (selection) ->

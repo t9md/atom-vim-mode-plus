@@ -250,8 +250,8 @@ class VimState
     nonEmptySelecitons = @editor.getSelections().filter (selection) -> not selection.isEmpty()
     if nonEmptySelecitons.length
       wise = swrap.detectWise(@editor)
+      @editorElement.component.updateSync()
       if @isMode('visual', wise)
-        @editorElement.component.updateSync()
         for $selection in swrap.getSelections(@editor)
           if $selection.hasProperties()
             $selection.fixPropertyRowToRowRange() if wise is 'linewise'
@@ -259,7 +259,6 @@ class VimState
             $selection.saveProperties()
         @updateCursorsVisibility()
       else
-        @editorElement.component.updateSync()
         @activate('visual', wise)
     else
       @activate('normal') if @mode is 'visual'
