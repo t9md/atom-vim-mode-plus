@@ -1,11 +1,12 @@
 # 0.85.0: WIP
-- Improve: In `visual` mode, can select new-line
-- Improve: Now can select line-ending new line char in `visual-mode`.
-  - E.g. Move right by `l` at end of line select new-line.
+- Fix: [Cosmetic but important] Fix very small cursor position jump( cosmetic ) when activating vL ( because of gap between px and em? )
 - Fix: Respect `v` operator-modifier for `t`( Till ) motion.
   - e.g. In text "ab" whre cursor is at "a"
     - Old: `d t b` delete "a"( Good ), `d v t b` delete "a"( Bad ).
     - New: `d t b` delete "a"( Good ), `d v t b` don't delete "a"( Good ).
+- Improve: In `visual` mode, can select new-line
+- Improve: Now can select line-ending new line char in `visual-mode`.
+  - E.g. Move right by `l` at end of line select new-line.
 - Improve: When `keepColumnOnSelectTextObject` is `true`, `v i p` respect `goalColumn` of cursor.
   - This improve appears when you type `$ v i p`.
 - Fix: #699 Lost goalColumn in `visual.blockwise` when move across blank-row.
@@ -15,6 +16,29 @@
   - Example:
     - `d j` from last line do nothing. ( In previous version, delete last line ).
     - `d k` from first line do nothing. ( In previous version, delete first line ).
+- Improve: `g v` after `vL`( visual-linewise ) to restore characterwise `column`.
+- Fix: `v i p d` then `.` repeat from different cursor position now works correctly
+- Internal:
+  - Overhaul: `CursorStyleManager`, `SelectionWrapper`, `TextObject`, `BlockwiseSelection`
+  - Rename `characterwiseHead` to `propertyHead` in `spec-helper.coffee`
+  - Remove lots of unnecessary `null` guard.
+- Breaking: Remove `All` text-obect, it's alias of `Entire` but not used.
+- Breaking: Remove `Edge` text-object, it's experimentally added in the past, but not maintained and not as useful as I originally thought.
+- Improve: TextObject
+  - Improve: No longer iterate `selectTextObject` over each memberSelection of blockwise selection.
+  - Improve: `Fold` , `Function` text-object now always expand if it possible by checking containment against selected buffer range
+  - Improve: `Pair` text-object now always find from cursor position.
+  - Improve: Executing text-object from `vL` mode now works as expected in most of text-object.
+  - Internal: Set wise explicitly in most of text-obect rather than dynamically determine from selection range.
+  - Internal: Auto-generate `Inner`, or `A` prefixed classes and `AllowForwarding` suffixed classes.
+- Improve: visual-blockwise ( `vB`-mode )
+  - #699 Fix: Now respect goalColumn in `vB` when move across blank row by `j` or `k`.
+    - Regression introduced in v0.84.0, but now fixed.
+  - #704 Rewrite vB-mode related code.
+    - vB selection is normalized before selecting text-object.
+    - So no longer iterate `selectTextObject` over each memberSelection of blockwise selection.
+  - Improve: #438 when vB selection respect goalColumn
+    - Original goalColumn is respected as long as selection-head is right-most column.
 
 # 0.84.1:
 - Fix: To fix vim-mode-plus-move-selected-text degradation.
