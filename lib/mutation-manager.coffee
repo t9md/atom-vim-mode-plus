@@ -1,6 +1,7 @@
 {Point, CompositeDisposable} = require 'atom'
 swrap = require './selection-wrapper'
 
+
 # keep mutation snapshot necessary for Operator processing.
 # mutation stored by each Selection have following field
 #  marker:
