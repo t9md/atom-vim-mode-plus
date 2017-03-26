@@ -82,10 +82,6 @@ class MutationManager
   setBufferRangesForCustomCheckpoint: (ranges) ->
     @bufferRangesForCustomCheckpoint = ranges
 
-  restoreInitialPositions: ->
-    for selection in @editor.getSelections() when point = @getInitialPointForSelection(selection)
-      selection.cursor.setBufferPosition(point)
-
   restoreCursorPositions: (options) ->
     {stay, occurrenceSelected, isBlockwise} = options
     if isBlockwise
