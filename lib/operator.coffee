@@ -104,11 +104,7 @@ class Operator extends Base
     return unless @needFlash()
 
     @onDidFinishOperation =>
-      if @flashCheckpoint is 'did-finish'
-        ranges = @mutationManager.getMarkerBufferRanges().filter (range) -> not range.isEmpty()
-      else
-        ranges = @mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint)
-      @vimState.flash(ranges, type: @getFlashType())
+      @vimState.flash(@mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint), type: @getFlashType())
 
   getFlashType: ->
     if @occurrenceSelected

@@ -1,7 +1,6 @@
 {Point, CompositeDisposable} = require 'atom'
 swrap = require './selection-wrapper'
 
-
 # keep mutation snapshot necessary for Operator processing.
 # mutation stored by each Selection have following field
 #  marker:
@@ -30,7 +29,8 @@ class MutationManager
     {@mutationsBySelection, @editor, @vimState} = {}
     {@bufferRangesForCustomCheckpoint} = {}
 
-  init: (@options) ->
+  init: (options) ->
+    {@useMarker} = options
     @reset()
 
   reset: ->
@@ -49,12 +49,8 @@ class MutationManager
     if @mutationsBySelection.has(selection)
       @mutationsBySelection.get(selection).update(checkpoint)
     else
-      if @vimState.mode is 'visual'
-        initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
-      else
-        initialPoint = swrap(selection).getBufferPositionFor('head')
-
-      options = {selection, initialPoint, checkpoint, @markerLayer, useMarker: @options.useMarker, @vimState}
+      initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
+      options = {selection, initialPoint, checkpoint, @markerLayer, @useMarker, @vimState}
       @mutationsBySelection.set(selection, new Mutation(options))
 
   getMutationForSelection: (selection) ->
