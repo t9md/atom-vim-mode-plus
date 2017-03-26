@@ -1,6 +1,7 @@
 {Point, CompositeDisposable} = require 'atom'
 swrap = require './selection-wrapper'
 
+
 # keep mutation snapshot necessary for Operator processing.
 # mutation stored by each Selection have following field
 #  marker:
@@ -37,8 +38,8 @@ class MutationManager
     @mutationsBySelection.clear()
     @bufferRangesForCustomCheckpoint = []
 
-  getInitialPointForSelection: (selection, options) ->
-    @getMutationForSelection(selection)?.getInitialPoint(options)
+  getInitialPointForSelection: (selection) ->
+    @getMutationForSelection(selection)?.getInitialPoint()
 
   setCheckpoint: (checkpoint) ->
     for selection in @editor.getSelections()
@@ -81,30 +82,14 @@ class MutationManager
   setBufferRangesForCustomCheckpoint: (ranges) ->
     @bufferRangesForCustomCheckpoint = ranges
 
-  restoreInitialPositions: ->
-    for selection in @editor.getSelections() when point = @getInitialPointForSelection(selection)
-      selection.cursor.setBufferPosition(point)
-
   restoreCursorPositions: (options) ->
     {stay, occurrenceSelected, isBlockwise} = options
     if isBlockwise
-      # [FIXME] why I need this direct manupilation?
-      # Because there's bug that blockwise selecction is not addes to each
-      # bsInstance.selection. Need investigation.
-      points = []
-      @mutationsBySelection.forEach (mutation, selection) ->
-        points.push(mutation.bufferRangeByCheckpoint['will-select']?.start)
-      points = points.sort (a, b) -> a.compare(b)
-      points = points.filter (point) -> point?
-      if @vimState.isMode('visual', 'blockwise')
-        if point = points[0]
-          @vimState.getLastBlockwiseSelection()?.setHeadBufferPosition(point)
-      else
-        if point = points[0]
-          @editor.setCursorBufferPosition(point)
-        else
-          for selection in @editor.getSelections()
-            selection.destroy() unless selection.isLastSelection()
+      for blockwiseSelection in @vimState.getBlockwiseSelections()
+        {head, tail} = blockwiseSelection.getProperties()
+        point = if stay then head else Point.min(head, tail)
+        blockwiseSelection.setHeadBufferPosition(point)
+        blockwiseSelection.skipNormalization()
     else
       for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
         if occurrenceSelected and not mutation.isCreatedAt('will-select')
@@ -178,7 +163,8 @@ class Mutation
 
   getRestorePoint: ({stay}={}) ->
     if stay
-      @getInitialPoint(clip: true)
+      clip = not @getBufferRangeForCheckpoint('did-select')?.isEqual(@marker.getBufferRange())
+      @getInitialPoint({clip})
     else
       {mode, submode} = @vimState
       if (mode isnt 'visual') or (submode is 'linewise' and @selection.isReversed())
