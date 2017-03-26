@@ -356,10 +356,6 @@ class CreatePersistentSelection extends Operator
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
 
-  execute: ->
-    @restorePositions = not @isMode('visual', 'blockwise')
-    super
-
   mutateSelection: (selection) ->
     @persistentSelection.markBufferRange(selection.getBufferRange())
 

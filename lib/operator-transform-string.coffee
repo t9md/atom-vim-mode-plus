@@ -75,11 +75,6 @@ class Replace extends TransformString
     @onDidSelectTarget(@focusInput.bind(this))
     super
 
-  execute: ->
-    # FIXME mutation manager updated to vB aware
-    @restorePositions = not @isMode('visual', 'blockwise')
-    super
-
   getNewText: (text) ->
     if @target.is('MoveRightBufferColumn') and text.length isnt @getCount()
       return

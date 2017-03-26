@@ -587,6 +587,48 @@ describe "Operator general", ->
             cursor: [1, 2]
             register: '"': text: "111111\n222222\n", type: 'linewise'
 
+    describe "visual-mode.blockwise", ->
+      beforeEach ->
+        set
+          textC_: """
+          000000
+          1!11111
+          222222
+          333333
+          4|44444
+          555555\n
+          """
+        ensure "ctrl-v l l j",
+          selectedTextOrdered: ["111", "222", "444", "555"]
+          mode: ['visual', 'blockwise']
+
+      describe "when stayOnYank = false", ->
+        it "place cursor at start of block after yank", ->
+          ensure "y",
+            mode: 'normal'
+            textC_: """
+              000000
+              1!11111
+              222222
+              333333
+              4|44444
+              555555\n
+              """
+      describe "when stayOnYank = true", ->
+        beforeEach ->
+          settings.set('stayOnYank', true)
+        it "place cursor at head of block after yank", ->
+          ensure "y", ->
+            mode: 'normal'
+            textC_: """
+              000000
+              111111
+              222!222
+              333333
+              444444
+              555|555\n
+              """
+
     describe "y y", ->
       it "saves to register(type=linewise), cursor stay at same position", ->
         ensure 'y y',
