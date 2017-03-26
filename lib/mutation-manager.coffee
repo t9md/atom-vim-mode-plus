@@ -38,8 +38,8 @@ class MutationManager
     @mutationsBySelection.clear()
     @bufferRangesForCustomCheckpoint = []
 
-  getInitialPointForSelection: (selection, options) ->
-    @getMutationForSelection(selection)?.getInitialPoint(options)
+  getInitialPointForSelection: (selection) ->
+    @getMutationForSelection(selection)?.getInitialPoint()
 
   setCheckpoint: (checkpoint) ->
     for selection in @editor.getSelections()
@@ -167,7 +167,8 @@ class Mutation
 
   getRestorePoint: ({stay}={}) ->
     if stay
-      @getInitialPoint(clip: true)
+      clip = not @getBufferRangeForCheckpoint('did-select')?.isEqual(@marker.getBufferRange())
+      @getInitialPoint({clip})
     else
       {mode, submode} = @vimState
       if (mode isnt 'visual') or (submode is 'linewise' and @selection.isReversed())
