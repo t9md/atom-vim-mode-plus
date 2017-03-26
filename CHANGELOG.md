@@ -1,4 +1,5 @@
 # 0.85.0: WIP
+- Fix: When `stayOnYank` was enabled, `y 0`, `y h` no longer move cursor.
 - Fix: [Cosmetic but important] Fix very small cursor position jump( cosmetic ) when activating vL ( because of gap between px and em? )
 - Fix: Respect `v` operator-modifier for `t`( Till ) motion.
   - e.g. In text "ab" when cursor is at "a"
