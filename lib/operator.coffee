@@ -102,8 +102,8 @@ class Operator extends Base
     return unless @trackChange
 
     @onDidFinishOperation =>
-      if marker = @mutationManager.getMutationForSelection(@editor.getLastSelection())?.marker
-        @setMarkForChange(marker.getBufferRange())
+      if range = @mutationManager.getMutatedBufferRange(@editor.getLastSelection())
+        @setMarkForChange(range)
 
   constructor: ->
     super
@@ -464,7 +464,7 @@ class YankToLastCharacterOfLine extends Yank
 # [ctrl-a]
 class Increase extends Operator
   @extend()
-  target: "InnerCurrentLine" # ctrl-a in normal-mode find target number in CurrentLine
+  target: "Empty" # ctrl-a in normal-mode find target number in current line manually
   flashTarget: false # do manually
   restorePositions: false # do manually
   step: 1
@@ -487,22 +487,23 @@ class Increase extends Operator
     newRanges
 
   mutateSelection: (selection) ->
-    scanRange = selection.getBufferRange()
-    if @instanceof('IncrementNumber') or @target.is('CurrentSelection')
-      @newRanges.push(@replaceNumberInBufferRange(scanRange)...)
-      selection.cursor.setBufferPosition(scanRange.start)
-    else
-      # ctrl-a, ctrl-x in `normal-mode`
-      initialPoint = @mutationManager.getInitialPointForSelection(selection)
+    {cursor} = selection
+    if @is('Empty') # ctrl-a, ctrl-x in `normal-mode`
+      cursorPosition = cursor.getBufferPosition()
+      scanRange = @editor.bufferRangeForBufferRow(cursorPosition.row)
       newRanges = @replaceNumberInBufferRange scanRange, ({range, stop}) ->
-        if range.end.isGreaterThan(initialPoint)
+        if range.end.isGreaterThan(cursorPosition)
           stop()
           true
         else
           false
 
-      point = newRanges[0]?.end.translate([0, -1]) ? initialPoint
-      selection.cursor.setBufferPosition(point)
+      point = newRanges[0]?.end.translate([0, -1]) ? cursorPosition
+      cursor.setBufferPosition(point)
+    else
+      scanRange = selection.getBufferRange()
+      @newRanges.push(@replaceNumberInBufferRange(scanRange)...)
+      cursor.setBufferPosition(scanRange.start)
 
   getNextNumber: (numberString) ->
     Number.parseInt(numberString, 10) + @step * @getCount()

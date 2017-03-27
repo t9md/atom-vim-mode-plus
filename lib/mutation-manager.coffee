@@ -35,9 +35,6 @@ class MutationManager
     @markerLayer.clear()
     @mutationsBySelection.clear()
 
-  getInitialPointForSelection: (selection) ->
-    @getMutationForSelection(selection)?.getInitialPoint(clip: false)
-
   setCheckpoint: (checkpoint) ->
     for selection in @editor.getSelections()
       @setCheckpointForSelection(selection, checkpoint)
@@ -49,6 +46,10 @@ class MutationManager
       initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
       options = {selection, initialPoint, checkpoint, @markerLayer, @stayByMarker, @vimState}
       @mutationsBySelection.set(selection, new Mutation(options))
+
+  getMutatedBufferRange: (selection) ->
+    if marker = @getMutationForSelection(selection)?.marker
+      marker.getBufferRange()
 
   getMutationForSelection: (selection) ->
     @mutationsBySelection.get(selection)
