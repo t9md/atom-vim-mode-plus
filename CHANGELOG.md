@@ -1,3 +1,10 @@
+# 0.85.1:
+- Fix, SUPER Critical: #175 Moving cursor in `visual-mode` make Atom editor really slow.
+  - vmp's mark is stored as marker and was created limitlessly without destroying previous-marker.
+  - As number of marker increased, editor get really slow.
+  - This is old Bug from original vim-mode, but impact get really significant from v0.58.0.
+    - Since from v0.58.0, to track previousSelection(used for `g v`) `<` and `>` mark is updated on every `visual-mode` movement.
+
 # 0.85.0:
 - Fix: When `stayOnYank` was enabled, `y 0`, `y h` no longer move cursor.
 - Fix: [Cosmetic but important] Fix very small cursor position jump( cosmetic ) when activating vL ( because of gap between px and em? )
