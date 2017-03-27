@@ -73,12 +73,6 @@ class Operator extends Base
       @editor.groupChangesSinceCheckpoint(checkpoint)
       @deleteBufferCheckpoint(purpose)
 
-  isOccurrence: ->
-    @occurrence
-
-  setOccurrence: (@occurrence) ->
-    @occurrence
-
   setMarkForChange: (range) ->
     @vimState.mark.setRange('[', ']', range)
 
@@ -119,13 +113,13 @@ class Operator extends Base
 
     # When preset-occurrence was exists, operate on occurrence-wise
     if @acceptPresetOccurrence and @occurrenceManager.hasMarkers()
-      @setOccurrence(true)
+      @occurrence = true
 
     # [FIXME] ORDER-MATTER
     # To pick cursor-word to find occurrence base pattern.
     # This has to be done BEFORE converting persistent-selection into real-selection.
     # Since when persistent-selection is actuall selected, it change cursor position.
-    if @isOccurrence() and not @occurrenceManager.hasMarkers()
+    if @occurrence and not @occurrenceManager.hasMarkers()
       @occurrenceManager.addPattern(@patternForOccurrence ? @getPatternForOccurrenceType(@occurrenceType))
 
     # This change cursor position.
@@ -151,8 +145,8 @@ class Operator extends Base
       return
 
     if options.occurrence?
-      @setOccurrence(options.occurrence)
-      if @isOccurrence()
+      @occurrence = options.occurrence
+      if @occurrence
         @occurrenceType = options.occurrenceType
         # This is o modifier case(e.g. `c o p`, `d O f`)
         # We RESET existing occurence-marker when `o` or `O` modifier is typed by user.
@@ -252,13 +246,13 @@ class Operator extends Base
     # Since MoveToNextOccurrence, MoveToPreviousOccurrence motion move by
     #  occurrence-marker, occurrence-marker has to be created BEFORE `@target.execute()`
     # And when repeated, occurrence pattern is already cached at @patternForOccurrence
-    if @isRepeated() and @isOccurrence() and not @occurrenceManager.hasMarkers()
+    if @isRepeated() and @occurrence and not @occurrenceManager.hasMarkers()
       @occurrenceManager.addPattern(@patternForOccurrence, {@occurrenceType})
 
     @target.execute()
 
     @mutationManager.setCheckpoint('did-select')
-    if @isOccurrence()
+    if @occurrence
       # To repoeat(`.`) operation where multiple occurrence patterns was set.
       # Here we save patterns which represent unioned regex which @occurrenceManager knows.
       @patternForOccurrence ?= @occurrenceManager.buildPattern()
