@@ -488,7 +488,7 @@ class Increase extends Operator
 
   mutateSelection: (selection) ->
     {cursor} = selection
-    if @is('Empty') # ctrl-a, ctrl-x in `normal-mode`
+    if @target.is('Empty') # ctrl-a, ctrl-x in `normal-mode`
       cursorPosition = cursor.getBufferPosition()
       scanRange = @editor.bufferRangeForBufferRow(cursorPosition.row)
       newRanges = @replaceNumberInBufferRange scanRange, ({range, stop}) ->
