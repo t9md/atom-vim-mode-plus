@@ -102,7 +102,6 @@ class Operator extends Base
 
   flashChangeIfNecessary: ->
     return unless @needFlash()
-
     @onDidFinishOperation =>
       @vimState.flash(@mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint), type: @getFlashType())
 
@@ -238,6 +237,7 @@ class Operator extends Base
           selections = @editor.getSelections()
         for selection in selections
           @mutateSelection(selection)
+        @mutationManager.setCheckpoint('did-finish')
         @restoreCursorPositionsIfNecessary()
 
     # Even though we fail to select target and fail to mutate,

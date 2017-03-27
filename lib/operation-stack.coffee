@@ -167,8 +167,6 @@ class OperationStack
 
   finish: (operation=null) ->
     @recordedOperation = operation if operation?.isRecordable()
-    if operation?.isOperator()
-      @vimState.mutationManager.setCheckpoint('did-finish')
     @vimState.emitDidFinishOperation()
     if operation?.isOperator()
       operation.resetState()
