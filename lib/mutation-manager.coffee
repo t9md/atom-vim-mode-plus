@@ -1,4 +1,5 @@
 {Point, CompositeDisposable} = require 'atom'
+{getFirstCharacterPositionForBufferRow, getValidVimBufferRow} = require './utils'
 swrap = require './selection-wrapper'
 
 # keep mutation snapshot necessary for Operator processing.
@@ -35,7 +36,7 @@ class MutationManager
     @mutationsBySelection.clear()
 
   getInitialPointForSelection: (selection) ->
-    @getMutationForSelection(selection)?.getInitialPoint()
+    @getMutationForSelection(selection)?.getInitialPoint(clip: false)
 
   setCheckpoint: (checkpoint) ->
     for selection in @editor.getSelections()
@@ -60,8 +61,8 @@ class MutationManager
     ranges
 
   restoreCursorPositions: (options) ->
-    {stay, occurrenceSelected, isBlockwise} = options
-    if isBlockwise
+    {stay, wise, occurrenceSelected, setToFirstCharacterOnLinewise} = options
+    if wise is 'blockwise'
       for blockwiseSelection in @vimState.getBlockwiseSelections()
         {head, tail} = blockwiseSelection.getProperties()
         point = if stay then head else Point.min(head, tail)
@@ -76,7 +77,9 @@ class MutationManager
           # This is essencially to clipToMutationEnd when `d o f`, `d o p` case.
           point = @clipToMutationEndIfSomeMutationContainsPoint(@vimState.getOriginalCursorPosition())
           selection.cursor.setBufferPosition(point)
-        else if point = mutation.getRestorePoint({stay})
+        else if point = mutation.getRestorePoint({stay, wise})
+          if (not stay) and setToFirstCharacterOnLinewise and (wise is 'linewise')
+            point = getFirstCharacterPositionForBufferRow(@editor, point.row)
           selection.cursor.setBufferPosition(point)
 
   clipToMutationEndIfSomeMutationContainsPoint: (point) ->
@@ -128,22 +131,29 @@ class Mutation
     point = Point.max(start, end.translate([0, -1]))
     @selection.editor.clipBufferPosition(point)
 
-  getInitialPoint: ({clip}={}) ->
+  getInitialPoint: ({clip, wise}={}) ->
     point = @initialPointMarker?.getHeadBufferPosition() ? @initialPoint
+    clip ?= not @getBufferRangeForCheckpoint('did-select')?.isEqual(@marker.getBufferRange())
     if clip
-      Point.min(@getEndBufferPosition(), point)
+      if wise is 'linewise'
+        Point.min([@getEndBufferPosition().row, point.column], point)
+      else
+        Point.min(@getEndBufferPosition(), point)
     else
       point
 
   getBufferRangeForCheckpoint: (checkpoint) ->
     @bufferRangeByCheckpoint[checkpoint]
 
-  getRestorePoint: ({stay}={}) ->
+  getRestorePoint: ({stay, wise}={}) ->
     if stay
-      clip = not @getBufferRangeForCheckpoint('did-select')?.isEqual(@marker.getBufferRange())
-      @getInitialPoint({clip})
+      point = @getInitialPoint({wise})
     else
       {mode, submode} = @vimState
       if (mode isnt 'visual') or (submode is 'linewise' and @selection.isReversed())
         point = swrap(@selection).getBufferPositionFor('start', from: ['property'])
-      point ? @bufferRangeByCheckpoint['did-select']?.start
+      point = point ? @bufferRangeByCheckpoint['did-select']?.start
+
+    if point?
+      point.row = getValidVimBufferRow(@selection.editor, point.row)
+    point

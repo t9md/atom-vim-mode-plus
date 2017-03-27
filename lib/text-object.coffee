@@ -52,11 +52,11 @@ class TextObject extends Base
   isA: ->
     not @inner
 
-  isLinewise: ->
-    @wise is 'linewise'
+  isLinewise: -> @wise is 'linewise'
+  isBlockwise: -> @wise is 'blockwise'
 
-  isBlockwise: ->
-    @wise is 'blockwise'
+  forceWise: (wise) ->
+    @wise = wise # FIXME currently not well supported
 
   resetState: ->
     @selectSucceeded = null

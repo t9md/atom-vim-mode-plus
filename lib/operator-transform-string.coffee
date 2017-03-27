@@ -345,12 +345,8 @@ class SwapWithRegister extends TransformString
 class Indent extends TransformString
   @extend()
   stayByMarker: true
+  setToFirstCharacterOnLinewise: true
   wise: 'linewise'
-
-  execute: ->
-    @onDidRestoreCursorPositions ({stay}) =>
-      @editor.moveToFirstCharacterOfLine() unless stay
-    super
 
   mutateSelection: (selection) ->
     # Need count times indentation in visual-mode and its repeat(`.`).

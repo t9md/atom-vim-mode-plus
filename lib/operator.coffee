@@ -1,7 +1,6 @@
 _ = require 'underscore-plus'
 {
   haveSomeNonEmptySelection
-  getValidVimBufferRow
   isEmptyRow
   getWordPatternAtBufferPosition
   getSubwordPatternAtBufferPosition
@@ -9,6 +8,7 @@ _ = require 'underscore-plus'
   setBufferRow
   moveCursorToFirstCharacterAtRow
   ensureEndsWithNewLineForBufferRow
+  assertWithException
 } = require './utils'
 swrap = require './selection-wrapper'
 Base = require './base'
@@ -33,6 +33,7 @@ class Operator extends Base
   stayOptionName: null
   stayByMarker: false
   restorePositions: true
+  setToFirstCharacterOnLinewise: false
 
   acceptPresetOccurrence: true
   acceptPersistentSelection: true
@@ -235,7 +236,7 @@ class Operator extends Base
     return @targetSelected if @targetSelected?
     @mutationManager.init({@stayByMarker})
 
-    @target.forceWise(@wise) if @wise? and @target.isMotion()
+    @target.forceWise(@wise) if @wise?
     @emitWillSelectTarget()
 
     # Allow cursor position adjustment 'on-will-select-target' hook.
@@ -278,13 +279,8 @@ class Operator extends Base
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
     stay = @stayAtSamePosition ? @getConfig(@stayOptionName) or (@occurrenceSelected and @getConfig('stayOnOccurrence'))
-
-    options =
-      stay: stay
-      occurrenceSelected: @occurrenceSelected
-      isBlockwise: @target.isBlockwise()
-
-    @mutationManager.restoreCursorPositions(options)
+    wise = @target.wise
+    @mutationManager.restoreCursorPositions({stay, wise, @occurrenceSelected, @setToFirstCharacterOnLinewise})
     @emitDidRestoreCursorPositions({stay})
 
 # Select
@@ -410,29 +406,16 @@ class Delete extends Operator
   flashCheckpoint: 'did-select-occurrence'
   flashTypeForOccurrence: 'operator-remove-occurrence'
   stayOptionName: 'stayOnDelete'
+  setToFirstCharacterOnLinewise: true
 
   execute: ->
     if @target.wise is 'blockwise'
       @restorePositions = false
-
-    @onDidSelectTarget =>
-      return if @occurrenceSelected
-      if @target.isLinewise()
-        @onDidRestoreCursorPositions ({stay}) =>
-          @adjustCursor(cursor, stay) for cursor in @editor.getCursors()
     super
 
   mutateSelection: (selection) =>
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
-
-  adjustCursor: (cursor, stay) ->
-    row = getValidVimBufferRow(@editor, cursor.getBufferRow())
-    if stay
-      point = @mutationManager.getInitialPointForSelection(cursor.selection)
-      cursor.setBufferPosition([row, point.column])
-    else
-      cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row))
 
 class DeleteRight extends Delete
   @extend()
