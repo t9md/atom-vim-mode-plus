@@ -16,6 +16,7 @@ class MarkManager
     @subscriptions.add @vimState.onDidDestroy(@destroy.bind(this))
 
   destroy: ->
+    marker.destroy() for name, marker in @marks
     @subscriptions.dispose()
 
   isValid: (name) ->
@@ -44,6 +45,7 @@ class MarkManager
   # [FIXME] Need to support Global mark with capital name [A-Z]
   set: (name, point) ->
     return unless @isValid(name)
+    marker.destroy() if marker = @marks[name]
     bufferPosition = @editor.clipBufferPosition(point)
     @marks[name] = @editor.markBufferPosition(bufferPosition)
     event = {name, bufferPosition, @editor}

@@ -320,7 +320,8 @@ class VimState
   updateCursorsVisibility: ->
     @cursorStyleManager.refresh()
 
-  updatePreviousSelection: -> # FIXME: naming, updateLastSelectedInfo ?
+  # FIXME: naming, updateLastSelectedInfo ?
+  updatePreviousSelection: ->
     if @isMode('visual', 'blockwise')
       properties = @getLastBlockwiseSelection()?.getProperties()
     else
