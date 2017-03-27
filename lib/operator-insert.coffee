@@ -19,7 +19,6 @@ class ActivateInsertMode extends Operator
   flashTarget: false
   finalSubmode: null
   supportInsertionCount: true
-  flashCheckpoint: 'custom'
 
   observeWillDeactivateMode: ->
     disposable = @vimState.modeManager.preemptWillDeactivateMode ({mode}) =>
@@ -95,11 +94,10 @@ class ActivateInsertMode extends Operator
       @startMutation =>
         @selectTarget() if @isRequireTarget()
         @mutateText?()
-        mutatedRanges = []
         for selection in @editor.getSelections()
-          mutatedRanges.push(@repeatInsert(selection, @lastChange?.newText ? ''))
+          @repeatInsert(selection, @lastChange?.newText ? '')
           moveCursorLeft(selection.cursor)
-        @mutationManager.setBufferRangesForCustomCheckpoint(mutatedRanges)
+        @mutationManager.setCheckpoint('did-finish')
 
       if @getConfig('clearMultipleCursorsOnEscapeInsertMode')
         @vimState.clearSelections()

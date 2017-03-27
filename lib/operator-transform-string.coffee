@@ -348,9 +348,8 @@ class Indent extends TransformString
   wise: 'linewise'
 
   execute: ->
-    unless @needStay()
-      @onDidRestoreCursorPositions =>
-        @editor.moveToFirstCharacterOfLine()
+    @onDidRestoreCursorPositions ({stay}) =>
+      @editor.moveToFirstCharacterOfLine() unless stay
     super
 
   mutateSelection: (selection) ->

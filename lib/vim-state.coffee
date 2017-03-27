@@ -159,7 +159,7 @@ class VimState
   emitDidFinishMutation: -> @emitter.emit('on-did-finish-mutation')
 
   onDidRestoreCursorPositions: (fn) -> @subscribe @emitter.on('did-restore-cursor-positions', fn)
-  emitDidRestoreCursorPositions: -> @emitter.emit('did-restore-cursor-positions')
+  emitDidRestoreCursorPositions: (event) -> @emitter.emit('did-restore-cursor-positions', event)
 
   onDidSetOperatorModifier: (fn) -> @subscribe @emitter.on('did-set-operator-modifier', fn)
   emitDidSetOperatorModifier: (options) -> @emitter.emit('did-set-operator-modifier', options)

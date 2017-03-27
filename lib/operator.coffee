@@ -73,14 +73,6 @@ class Operator extends Base
       @editor.groupChangesSinceCheckpoint(checkpoint)
       @deleteBufferCheckpoint(purpose)
 
-  needStay: ->
-    @stayAtSamePosition ?
-      (@isOccurrence() and @getConfig('stayOnOccurrence')) or @getConfig(@stayOptionName)
-
-  needStayOnRestore: ->
-    @stayAtSamePosition ?
-      (@isOccurrence() and @getConfig('stayOnOccurrence') and @occurrenceSelected) or @getConfig(@stayOptionName)
-
   isOccurrence: ->
     @occurrence
 
@@ -92,18 +84,18 @@ class Operator extends Base
 
   needFlash: ->
     return unless @flashTarget
-    {mode, submode} = @vimState
-    if mode isnt 'visual' or (@target.isMotion() and submode isnt @target.wise)
-      @getConfig('flashOnOperate') and (@getName() not in @getConfig('flashOnOperateBlacklist'))
+    return unless @getConfig('flashOnOperate')
+    return if @getName() in @getConfig('flashOnOperateBlacklist')
+    (@mode isnt 'visual') or (@submode isnt @target.wise) # e.g. Y in vC
 
   flashIfNecessary: (ranges) ->
-    return unless @needFlash()
-    @vimState.flash(ranges, type: @getFlashType())
+    if @needFlash()
+      @vimState.flash(ranges, type: @getFlashType())
 
   flashChangeIfNecessary: ->
-    return unless @needFlash()
-    @onDidFinishOperation =>
-      @vimState.flash(@mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint), type: @getFlashType())
+    if @needFlash()
+      @onDidFinishOperation =>
+        @vimState.flash(@mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint), type: @getFlashType())
 
   getFlashType: ->
     if @occurrenceSelected
@@ -247,7 +239,7 @@ class Operator extends Base
   # Return true unless all selection is empty.
   selectTarget: ->
     return @targetSelected if @targetSelected?
-    @mutationManager.init(useMarker: @needStay() and @stayByMarker)
+    @mutationManager.init({@stayByMarker})
 
     @target.forceWise(@wise) if @wise? and @target.isMotion()
     @emitWillSelectTarget()
@@ -291,13 +283,15 @@ class Operator extends Base
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
+    stay = @stayAtSamePosition ? @getConfig(@stayOptionName) or (@occurrenceSelected and @getConfig('stayOnOccurrence'))
+
     options =
-      stay: @needStayOnRestore()
+      stay: stay
       occurrenceSelected: @occurrenceSelected
       isBlockwise: @target.isBlockwise()
 
     @mutationManager.restoreCursorPositions(options)
-    @emitDidRestoreCursorPositions()
+    @emitDidRestoreCursorPositions({stay})
 
 # Select
 # When text-object is invoked from normal or viusal-mode, operation would be
@@ -430,17 +424,17 @@ class Delete extends Operator
     @onDidSelectTarget =>
       return if @occurrenceSelected
       if @target.isLinewise()
-        @onDidRestoreCursorPositions =>
-          @adjustCursor(cursor) for cursor in @editor.getCursors()
+        @onDidRestoreCursorPositions ({stay}) =>
+          @adjustCursor(cursor, stay) for cursor in @editor.getCursors()
     super
 
   mutateSelection: (selection) =>
     @setTextToRegisterForSelection(selection)
     selection.deleteSelectedText()
 
-  adjustCursor: (cursor) ->
+  adjustCursor: (cursor, stay) ->
     row = getValidVimBufferRow(@editor, cursor.getBufferRow())
-    if @needStayOnRestore()
+    if stay
       point = @mutationManager.getInitialPointForSelection(cursor.selection)
       cursor.setBufferPosition([row, point.column])
     else

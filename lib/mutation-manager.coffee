@@ -22,21 +22,17 @@ class MutationManager
 
     @markerLayer = @editor.addMarkerLayer()
     @mutationsBySelection = new Map
-    @bufferRangesForCustomCheckpoint = []
 
   destroy: ->
     @reset()
     {@mutationsBySelection, @editor, @vimState} = {}
-    {@bufferRangesForCustomCheckpoint} = {}
 
-  init: (options) ->
-    {@useMarker} = options
+  init: ({@stayByMarker}) ->
     @reset()
 
   reset: ->
     @markerLayer.clear()
     @mutationsBySelection.clear()
-    @bufferRangesForCustomCheckpoint = []
 
   getInitialPointForSelection: (selection) ->
     @getMutationForSelection(selection)?.getInitialPoint()
@@ -50,33 +46,18 @@ class MutationManager
       @mutationsBySelection.get(selection).update(checkpoint)
     else
       initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
-      options = {selection, initialPoint, checkpoint, @markerLayer, @useMarker, @vimState}
+      options = {selection, initialPoint, checkpoint, @markerLayer, @stayByMarker, @vimState}
       @mutationsBySelection.set(selection, new Mutation(options))
 
   getMutationForSelection: (selection) ->
     @mutationsBySelection.get(selection)
 
-  getMarkerBufferRanges: ->
-    ranges = []
-    @mutationsBySelection.forEach (mutation, selection) ->
-      if range = mutation.marker?.getBufferRange()
-        ranges.push(range)
-    ranges
-
   getBufferRangesForCheckpoint: (checkpoint) ->
-    # [FIXME] dirty workaround just using mutationManager as merely state registry
-    if checkpoint is 'custom'
-      return @bufferRangesForCustomCheckpoint
-
     ranges = []
     @mutationsBySelection.forEach (mutation) ->
       if range = mutation.getBufferRangeForCheckpoint(checkpoint)
         ranges.push(range)
     ranges
-
-  # [FIXME] dirty workaround just using mutationmanager for state registry
-  setBufferRangesForCustomCheckpoint: (ranges) ->
-    @bufferRangesForCustomCheckpoint = ranges
 
   restoreCursorPositions: (options) ->
     {stay, occurrenceSelected, isBlockwise} = options
@@ -117,10 +98,10 @@ class MutationManager
 #  e.g. Some selection is created at 'will-select' checkpoint, others at 'did-select' or 'did-select-occurrence'
 class Mutation
   constructor: (options) ->
-    {@selection, @initialPoint, checkpoint, @markerLayer, @useMarker, @vimState} = options
+    {@selection, @initialPoint, checkpoint, @markerLayer, @stayByMarker, @vimState} = options
 
     @createdAt = checkpoint
-    if @useMarker
+    if @stayByMarker
       @initialPointMarker = @markerLayer.markBufferPosition(@initialPoint, invalidate: 'never')
     @bufferRangeByCheckpoint = {}
     @marker = null
