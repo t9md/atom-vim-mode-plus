@@ -36,8 +36,6 @@ vimStateMethods = [
       "onDidFailSelectTarget"
       "emitDidFailSelectTarget"
 
-      "onDidRestoreCursorPositions"
-      "emitDidRestoreCursorPositions"
     "onWillFinishMutation"
     "emitWillFinishMutation"
     "onDidFinishMutation"
