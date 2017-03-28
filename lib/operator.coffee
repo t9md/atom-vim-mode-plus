@@ -90,7 +90,8 @@ class Operator extends Base
   flashChangeIfNecessary: ->
     if @needFlash()
       @onDidFinishOperation =>
-        @vimState.flash(@mutationManager.getBufferRangesForCheckpoint(@flashCheckpoint), type: @getFlashType())
+        ranges = @mutationManager.getSelectedBufferRangesForCheckpoint(@flashCheckpoint)
+        @vimState.flash(ranges, type: @getFlashType())
 
   getFlashType: ->
     if @occurrenceSelected
@@ -102,7 +103,7 @@ class Operator extends Base
     return unless @trackChange
 
     @onDidFinishOperation =>
-      if range = @mutationManager.getMutatedBufferRange(@editor.getLastSelection())
+      if range = @mutationManager.getMutatedBufferRangeForSelection(@editor.getLastSelection())
         @setMarkForChange(range)
 
   constructor: ->

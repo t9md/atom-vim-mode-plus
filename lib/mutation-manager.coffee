@@ -40,21 +40,18 @@ class MutationManager
       @setCheckpointForSelection(selection, checkpoint)
 
   setCheckpointForSelection: (selection, checkpoint) ->
-    if @mutationsBySelection.has(selection)
-      @mutationsBySelection.get(selection).update(checkpoint)
-    else
+    unless @mutationsBySelection.has(selection)
       initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
       options = {selection, initialPoint, checkpoint, @markerLayer, @stayByMarker, @vimState}
       @mutationsBySelection.set(selection, new Mutation(options))
 
-  getMutatedBufferRange: (selection) ->
-    if marker = @getMutationForSelection(selection)?.marker
-      marker.getBufferRange()
+    @mutationsBySelection.get(selection).update(checkpoint)
 
-  getMutationForSelection: (selection) ->
-    @mutationsBySelection.get(selection)
+  getMutatedBufferRangeForSelection: (selection) ->
+    if @mutationsBySelection.has(selection)
+      @mutationsBySelection.get(selection).marker.getBufferRange()
 
-  getBufferRangesForCheckpoint: (checkpoint) ->
+  getSelectedBufferRangesForCheckpoint: (checkpoint) ->
     ranges = []
     @mutationsBySelection.forEach (mutation) ->
       if range = mutation.getBufferRangeForCheckpoint(checkpoint)
@@ -103,16 +100,15 @@ class MutationManager
 class Mutation
   constructor: (options) ->
     {@selection, @initialPoint, checkpoint, @markerLayer, @stayByMarker, @vimState} = options
-
     @createdAt = checkpoint
-    if @stayByMarker
-      @initialPointMarker = @markerLayer.markBufferPosition(@initialPoint, invalidate: 'never')
     @bufferRangeByCheckpoint = {}
     @marker = null
-    @update(checkpoint)
 
-  isCreatedAt: (timing) ->
-    @createdAt is timing
+    if @stayByMarker
+      @initialPointMarker = @markerLayer.markBufferPosition(@initialPoint, invalidate: 'never')
+
+  isCreatedAt: (checkpoint) ->
+    @createdAt is checkpoint
 
   update: (checkpoint) ->
     # Current non-empty selection is prioritized over existing marker's range.
@@ -124,16 +120,17 @@ class Mutation
     @marker ?= @markerLayer.markBufferRange(@selection.getBufferRange(), invalidate: 'never')
     @bufferRangeByCheckpoint[checkpoint] = @marker.getBufferRange()
 
-  getStartBufferPosition: ->
-    @marker.getBufferRange().start
-
   getEndBufferPosition: ->
     {start, end} = @marker.getBufferRange()
     point = Point.max(start, end.translate([0, -1]))
     @selection.editor.clipBufferPosition(point)
 
   getInitialPoint: ({clip, wise}={}) ->
-    point = @initialPointMarker?.getHeadBufferPosition() ? @initialPoint
+    if @stayByMarker
+      point = @initialPointMarker.getHeadBufferPosition()
+    else
+      point = @initialPoint
+
     clip ?= not @getBufferRangeForCheckpoint('did-select')?.isEqual(@marker.getBufferRange())
     if clip
       if wise is 'linewise'
