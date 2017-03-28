@@ -113,11 +113,12 @@ class Mutation
   update: (checkpoint) ->
     # Current non-empty selection is prioritized over existing marker's range.
     # We invalidate old marker to re-track from current selection.
-    unless @selection.getBufferRange().isEmpty()
+    range = @selection.getBufferRange()
+    unless range.isEmpty()
       @marker?.destroy()
       @marker = null
 
-    @marker ?= @markerLayer.markBufferRange(@selection.getBufferRange(), invalidate: 'never')
+    @marker ?= @markerLayer.markBufferRange(range, invalidate: 'never')
     @bufferRangeByCheckpoint[checkpoint] = @marker.getBufferRange()
 
   getEndBufferPosition: ->
