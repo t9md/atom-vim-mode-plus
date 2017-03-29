@@ -67,12 +67,13 @@ class MutationManager
         blockwiseSelection.setHeadBufferPosition(point)
         blockwiseSelection.skipNormalization()
     else
-      for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
-        # When occurrenceSelected, destroy selection which is NOT exists initially.
-        if occurrenceSelected and not mutation.isCreatedAt('will-select')
-          selection.destroy()
-          continue
+      if occurrenceSelected and not mutation.isCreatedAt('will-select')
+        for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
+          # When occurrenceSelected, destroy selection which is NOT exists initially.
+          unless mutation.isCreatedAt('will-select')
+            selection.destroy()
 
+      for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
         if occurrenceSelected and stay
           # This is essencially to clipToMutationEnd when `d o f`, `d o p` case.
           point = @clipToMutationEndIfSomeMutationContainsPoint(@vimState.getOriginalCursorPosition())
