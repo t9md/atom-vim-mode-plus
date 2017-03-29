@@ -274,9 +274,7 @@ class Base
 
     [
       './operator', './operator-insert', './operator-transform-string',
-      './motion', './motion-search',
-      './text-object',
-      './insert-mode', './misc-command'
+      './motion', './motion-search', './text-object', './misc-command'
     ].forEach(require)
 
     for __, klass of @getRegistries() when klass.isCommand()

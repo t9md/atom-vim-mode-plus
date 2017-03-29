@@ -282,9 +282,13 @@ class ScrollCursorToRight extends ScrollCursorToLeft
   execute: ->
     @editorElement.setScrollRight(@getCursorPixel().left)
 
-class ActivateNormalModeOnce extends MiscCommand
-  @extend()
+# insert-mode specific commands
+# -------------------------
+class InsertMode extends MiscCommand
   @commandScope: 'atom-text-editor.vim-mode-plus.insert-mode'
+
+class ActivateNormalModeOnce extends InsertMode
+  @extend()
   thisCommandName: @getCommandName()
 
   execute: ->
@@ -296,3 +300,52 @@ class ActivateNormalModeOnce extends MiscCommand
       disposable.dispose()
       disposable = null
       @vimState.activate('insert')
+
+class InsertRegister extends InsertMode
+  @extend()
+  requireInput: true
+
+  initialize: ->
+    super
+    @focusInput()
+
+  execute: ->
+    @editor.transact =>
+      for selection in @editor.getSelections()
+        text = @vimState.register.getText(@getInput(), selection)
+        selection.insertText(text)
+
+class InsertLastInserted extends InsertMode
+  @extend()
+  @description: """
+  Insert text inserted in latest insert-mode.
+  Equivalent to *i_CTRL-A* of pure Vim
+  """
+  execute: ->
+    text = @vimState.register.getText('.')
+    @editor.insertText(text)
+
+class CopyFromLineAbove extends InsertMode
+  @extend()
+  @description: """
+  Insert character of same-column of above line.
+  Equivalent to *i_CTRL-Y* of pure Vim
+  """
+  rowDelta: -1
+
+  execute: ->
+    translation = [@rowDelta, 0]
+    @editor.transact =>
+      for selection in @editor.getSelections()
+        point = selection.cursor.getBufferPosition().translate(translation)
+        range = Range.fromPointWithDelta(point, 0, 1)
+        if text = @editor.getTextInBufferRange(range)
+          selection.insertText(text)
+
+class CopyFromLineBelow extends CopyFromLineAbove
+  @extend()
+  @description: """
+  Insert character of same-column of above line.
+  Equivalent to *i_CTRL-E* of pure Vim
+  """
+  rowDelta: +1
