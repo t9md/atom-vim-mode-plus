@@ -72,7 +72,8 @@ class Replace extends TransformString
   supportEarlySelect: true
 
   initialize: ->
-    @onDidSelectTarget(@focusInput.bind(this))
+    @onDidSelectTarget =>
+      @focusInput(1, true)
     super
 
   getNewText: (text) ->
@@ -407,7 +408,7 @@ class SurroundBase extends TransformString
     inputUI = @newInputUI()
     inputUI.onDidConfirm(@onConfirmSurround.bind(this))
     inputUI.onDidCancel(@cancelOperation.bind(this))
-    inputUI.focus()
+    inputUI.focus(1, true)
 
   focusInputForDeleteSurround: ->
     inputUI = @newInputUI()

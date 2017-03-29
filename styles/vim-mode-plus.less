@@ -47,6 +47,15 @@ atom-text-editor.vim-mode-plus-input-char-waiting,
   }
 }
 
+atom-text-editor.vim-mode-plus-input-char-waiting.hide-cursor,
+{
+  &.is-focused {
+    .cursor {
+      .underline-cursor(hidden);
+    }
+  }
+}
+
 atom-text-editor.vim-mode-plus.operator-pending-mode,
 {
   &.is-focused {

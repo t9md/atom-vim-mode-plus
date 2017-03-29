@@ -182,7 +182,7 @@ class Base
   hasInput: -> @input?
   getInput: -> @input
 
-  focusInput: (charsMax) ->
+  focusInput: (charsMax, hideCursor) ->
     inputUI = @newInputUI()
     inputUI.onDidConfirm (@input) =>
       @processOperation()
@@ -192,7 +192,7 @@ class Base
         @vimState.hover.set(input)
 
     inputUI.onDidCancel(@cancelOperation.bind(this))
-    inputUI.focus(charsMax)
+    inputUI.focus(charsMax, hideCursor)
 
   getVimEofBufferPosition: ->
     getVimEofBufferPosition(@editor)
