@@ -47,6 +47,12 @@ class MutationManager
 
     @mutationsBySelection.get(selection).update(checkpoint)
 
+  migrateMutation: (oldSelection, newSelection) ->
+    mutation = @mutationsBySelection.get(oldSelection)
+    @mutationsBySelection.delete(oldSelection)
+    mutation.selection = newSelection
+    @mutationsBySelection.set(newSelection, mutation)
+
   getMutatedBufferRangeForSelection: (selection) ->
     if @mutationsBySelection.has(selection)
       @mutationsBySelection.get(selection).marker.getBufferRange()
@@ -67,35 +73,19 @@ class MutationManager
         blockwiseSelection.setHeadBufferPosition(point)
         blockwiseSelection.skipNormalization()
     else
-      if occurrenceSelected and not mutation.isCreatedAt('will-select')
+      if occurrenceSelected
+        # Make sure destroying all temporal selection BEFORE starting to set cursors to final position.
+        # This is important to avoid destroy-order dependent bugs.
         for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
-          # When occurrenceSelected, destroy selection which is NOT exists initially.
           unless mutation.isCreatedAt('will-select')
             selection.destroy()
 
       for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
-        if occurrenceSelected and stay
-          # This is essencially to clipToMutationEnd when `d o f`, `d o p` case.
-          point = @clipToMutationEndIfSomeMutationContainsPoint(@vimState.getOriginalCursorPosition())
-          selection.cursor.setBufferPosition(point)
-        else if point = mutation.getRestorePoint({stay, wise})
+        wise = 'characterwise' if occurrenceSelected
+        if point = mutation.getRestorePoint({stay, wise})
           if (not stay) and setToFirstCharacterOnLinewise and (wise is 'linewise')
             point = getFirstCharacterPositionForBufferRow(@editor, point.row)
           selection.cursor.setBufferPosition(point)
-
-  clipToMutationEndIfSomeMutationContainsPoint: (point) ->
-    if mutation = @findMutationContainsPointAtCheckpoint(point, 'did-select-occurrence')
-      Point.min(mutation.getEndBufferPosition(), point)
-    else
-      point
-
-  findMutationContainsPointAtCheckpoint: (point, checkpoint) ->
-    # Coffeescript cannot iterate over iterator by JavaScript's 'of' because of syntax conflicts.
-    iterator = @mutationsBySelection.values()
-    while (entry = iterator.next()) and not entry.done
-      mutation = entry.value
-      if mutation.getBufferRangeForCheckpoint(checkpoint).containsPoint(point)
-        return mutation
 
 # Mutation information is created even if selection.isEmpty()
 # So that we can filter selection by when it was created.

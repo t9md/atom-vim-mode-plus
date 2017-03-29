@@ -1,5 +1,6 @@
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
+swrap = require './selection-wrapper'
 
 {
   shrinkRangeEndToBeforeNewLine
@@ -116,17 +117,14 @@ class OccurrenceManager
     @markerLayer.getMarkerCount()
 
   # Return occurrence markers intersecting given ranges
-  getMarkersIntersectsWithRanges: (ranges, exclusive=false) ->
+  getMarkersIntersectsWithSelection: (selection, exclusive=false) ->
     # findmarkers()'s intersectsBufferRange param have no exclusive control
-    # So I need extra check to filter out unwanted marker.
+    # So need extra check to filter out unwanted marker.
     # But basically I should prefer findMarker since It's fast than iterating
     # whole markers manually.
-    results = []
-    for range in ranges.map(shrinkRangeEndToBeforeNewLine)
-      markers = @markerLayer.findMarkers(intersectsBufferRange: range).filter (marker) ->
-        range.intersectsWith(marker.getBufferRange(), exclusive)
-      results.push(markers...)
-    results
+    range = shrinkRangeEndToBeforeNewLine(selection.getBufferRange())
+    @markerLayer.findMarkers(intersectsBufferRange: range).filter (marker) ->
+      range.intersectsWith(marker.getBufferRange(), exclusive)
 
   getMarkerAtPoint: (point) ->
     @markerLayer.findMarkers(containsBufferPosition: point)[0]
@@ -140,29 +138,36 @@ class OccurrenceManager
   #  - g U(upper-case): So that undo/redo can respect last cursor position.
   select: ->
     isVisualMode = @vimState.mode is 'visual'
-    markers = @getMarkersIntersectsWithRanges(@editor.getSelectedBufferRanges(), isVisualMode)
+    indexByOldSelection = new Map
+    allRanges = []
+    markersSelected = []
 
-    if markers.length
-      # NOTE: immediately destroy occurrence-marker which we are operates on from now.
-      # Markers are not beeing immediately destroyed unless explictly destroy.
-      # Manually destroying markers here gives us several benefits like bellow.
-      #  - Easy to write spec since markers are destroyed in-sync.
-      #  - SelectOccurrence operation not invalidate marker but destroyed once selected.
+    for selection in @editor.getSelections() when (markers = @getMarkersIntersectsWithSelection(selection, isVisualMode)).length
       ranges = markers.map (marker) -> marker.getBufferRange()
-      @destroyMarkers(markers)
+      markersSelected.push(markers...)
+      # [HACK] Place closest range to last so that final last-selection become closest one.
+      # E.g.
+      # `c o f`(change occurrence in a-function) show autocomplete+ popup at closest occurrence.( popup shows at last-selection )
+      closestRange = @getClosestRangeForSelection(ranges, selection)
+      _.remove(ranges, closestRange)
+      ranges.push(closestRange)
+      allRanges.push(ranges...)
+      indexByOldSelection.set(selection, allRanges.indexOf(closestRange))
 
+    if allRanges.length
       if isVisualMode
+        # To avoid selected occurrence ruined by normalization when disposing current submode to shift to new submode.
         @vimState.modeManager.deactivate()
-        # So that SelectOccurrence can acivivate visual-mode with correct range, we have to unset submode here.
         @vimState.submode = null
 
-      # Important: To make last-cursor become original cursor position.
-      range = @getRangeForLastSelection(ranges)
-      _.remove(ranges, range)
-      ranges.push(range)
+      @editor.setSelectedBufferRanges(allRanges)
+      selections = @editor.getSelections()
+      indexByOldSelection.forEach (index, selection) =>
+        @vimState.mutationManager.migrateMutation(selection, selections[index])
 
-      @editor.setSelectedBufferRanges(ranges)
-
+      @destroyMarkers(markersSelected)
+      for $selection in swrap.getSelections(@editor)
+        $selection.saveProperties()
       true
     else
       false
@@ -172,8 +177,8 @@ class OccurrenceManager
   #  2. forwarding in same row
   #  3. first occurrence in same row
   #  4. forwarding (wrap-end)
-  getRangeForLastSelection: (ranges) ->
-    point = @vimState.getOriginalCursorPosition()
+  getClosestRangeForSelection: (ranges, selection) ->
+    point = @vimState.mutationManager.mutationsBySelection.get(selection).initialPoint
 
     for range in ranges when range.containsPoint(point)
       return range

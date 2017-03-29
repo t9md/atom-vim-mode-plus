@@ -259,9 +259,6 @@ class Operator extends Base
       @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
       if @occurrenceManager.select()
-        # To skip restoreing position from selection prop when shift visual-mode submode on SelectOccurrence
-        swrap.clearProperties(@editor)
-
         @occurrenceSelected = true
         @mutationManager.setCheckpoint('did-select-occurrence')
 
