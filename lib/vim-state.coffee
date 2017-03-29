@@ -7,7 +7,7 @@ _ = require 'underscore-plus'
 
 settings = require './settings'
 HoverManager = require './hover-manager'
-SearchInputElement = require './search-input'
+SearchInput = require './search-input'
 {
   getVisibleEditors
   matchScopes
@@ -67,9 +67,7 @@ class VimState
     @occurrenceManager = new OccurrenceManager(this)
     @mutationManager = new MutationManager(this)
     @flashManager = new FlashManager(this)
-
-    @searchInput = new SearchInputElement().initialize(this)
-
+    @searchInput = new SearchInput(this)
     @operationStack = new OperationStack(this)
     @cursorStyleManager = new CursorStyleManager(this)
     @blockwiseSelections = []

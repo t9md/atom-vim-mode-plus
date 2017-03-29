@@ -1,7 +1,7 @@
 {Emitter, Disposable, CompositeDisposable} = require 'atom'
-{registerElement} = require './utils'
 
-class SearchInput extends HTMLElement
+module.exports =
+class SearchInput
   literalModeDeactivator: null
 
   onDidChange: (fn) -> @emitter.on 'did-change', fn
@@ -9,37 +9,43 @@ class SearchInput extends HTMLElement
   onDidCancel: (fn) -> @emitter.on 'did-cancel', fn
   onDidCommand: (fn) -> @emitter.on 'did-command', fn
 
-  createdCallback: ->
-    @className = "vim-mode-plus-search-container"
+  constructor: (@vimState) ->
     @emitter = new Emitter
+    @disposables = new CompositeDisposable
+    @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
 
-    @innerHTML = """
-    <div class='options-container'>
-      <span class='inline-block-tight btn btn-primary'>.*</span>
-    </div>
-    <div class='editor-container'>
-      <atom-text-editor mini class='editor vim-mode-plus-search'></atom-text-editor>
-    </div>
-    """
-    [optionsContainer, editorContainer] = @getElementsByTagName('div')
+    @container = document.createElement('div')
+    @container.className = 'vim-mode-plus-search-container'
+    @container.innerHTML = """
+      <div class='options-container'>
+        <span class='inline-block-tight btn btn-primary'>.*</span>
+      </div>
+      <div class='editor-container'>
+      </div>
+      """
+
+    [optionsContainer, editorContainer] = @container.getElementsByTagName('div')
     @regexSearchStatus = optionsContainer.firstElementChild
-    @editorElement = editorContainer.firstElementChild
-    @editor = @editorElement.getModel()
-    @editor.setMini(true)
-
+    @editor = atom.workspace.buildTextEditor(mini: true)
+    @editorElement = @editor.element
+    @editorElement.classList.add('vim-mode-plus-search')
+    editorContainer.appendChild(@editorElement)
     @editor.onDidChange =>
       return if @finished
       @emitter.emit('did-change', @editor.getText())
 
-    @panel = atom.workspace.addBottomPanel(item: this, visible: false)
-    this
+    @panel = atom.workspace.addBottomPanel(item: @container, visible: false)
+
+    @vimState.onDidFailToPushToOperationStack =>
+      @cancel()
+
+    @registerCommands()
 
   destroy: ->
     @disposables.dispose()
     @editor.destroy()
     @panel?.destroy()
     {@editor, @panel, @editorElement, @vimState} = {}
-    @remove()
 
   handleEvents: ->
     atom.commands.add @editorElement,
@@ -122,15 +128,6 @@ class SearchInput extends HTMLElement
           fn(event)
     newCommands
 
-  initialize: (@vimState) ->
-    @vimState.onDidFailToPushToOperationStack =>
-      @cancel()
-
-    @disposables = new CompositeDisposable
-    @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
-
-    @registerCommands()
-    this
 
   emitDidCommand: (name, options={}) ->
     options.name = name
@@ -158,6 +155,3 @@ class SearchInput extends HTMLElement
       'core:move-up': => @editor.setText @vimState.searchHistory.get('prev')
       'core:move-down': => @editor.setText @vimState.searchHistory.get('next')
     )
-
-module.exports = registerElement 'vim-mode-plus-search-input',
-  prototype: SearchInput.prototype
