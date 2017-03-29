@@ -629,17 +629,6 @@ getRangeByTranslatePointAndClip = (editor, range, which, direction) ->
     when 'end'
       new Range(range.start, newPoint)
 
-# Reloadable registerElement
-registerElement = (name, options) ->
-  element = document.createElement(name)
-  # if constructor is HTMLElement, we haven't registerd yet
-  if element.constructor is HTMLElement
-    Element = document.registerElement(name, options)
-  else
-    Element = element.constructor
-    Element.prototype = options.prototype if options.prototype?
-  Element
-
 getPackage = (name, fn) ->
   new Promise (resolve) ->
     if atom.packages.isPackageActive(name)
@@ -845,7 +834,6 @@ module.exports = {
   isIncludeFunctionScopeForRow
   detectScopeStartPositionForScope
   getBufferRows
-  registerElement
   smartScrollToBufferPosition
   matchScopes
   moveCursorDownBuffer
