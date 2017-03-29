@@ -313,7 +313,7 @@ class TransformStringBySelectList extends TransformString
 
   execute: ->
     # NEVER be executed since operationStack is replaced with selected transformer
-    throw new Error("#{@getName()} should not be executed")
+    throw new Error("#{@name} should not be executed")
 
 class TransformWordBySelectList extends TransformStringBySelectList
   @extend()

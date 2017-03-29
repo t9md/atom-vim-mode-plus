@@ -67,6 +67,7 @@ class Base
 
   constructor: (@vimState, properties=null) ->
     {@editor, @editorElement, @globalState} = @vimState
+    @name = @constructor.name
     _.extend(this, properties) if properties?
 
   # To override
@@ -235,9 +236,6 @@ class Base
   isTextObject: ->
     @instanceof('TextObject')
 
-  getName: ->
-    @constructor.name
-
   getCursorBufferPosition: ->
     if @mode is 'visual'
       @getCursorPositionForSelection(@editor.getLastSelection())
@@ -260,11 +258,11 @@ class Base
     swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
 
   toString: ->
-    str = @getName()
+    str = @name
     if @hasTarget()
-      str += ", target=#{@target.getName()}, target.wise=#{@target.wise} "
+      str += ", target=#{@target.name}, target.wise=#{@target.wise} "
     else if @operator?
-      str += ", wise=#{@wise} , operator=#{@operator.getName()}"
+      str += ", wise=#{@wise} , operator=#{@operator.name}"
     else
       str
 

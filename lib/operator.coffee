@@ -78,10 +78,9 @@ class Operator extends Base
     @vimState.mark.setRange('[', ']', range)
 
   needFlash: ->
-    return unless @flashTarget
-    return unless @getConfig('flashOnOperate')
-    return if @getName() in @getConfig('flashOnOperateBlacklist')
-    (@mode isnt 'visual') or (@submode isnt @target.wise) # e.g. Y in vC
+    @flashTarget and @getConfig('flashOnOperate') and
+      (@name not in @getConfig('flashOnOperateBlacklist')) and
+      ((@mode isnt 'visual') or (@submode isnt @target.wise)) # e.g. Y in vC
 
   flashIfNecessary: (ranges) ->
     if @needFlash()
@@ -266,7 +265,7 @@ class Operator extends Base
         @occurrenceSelected = true
         @mutationManager.setCheckpoint('did-select-occurrence')
 
-    if haveSomeNonEmptySelection(@editor) or @target.getName() is "Empty"
+    if haveSomeNonEmptySelection(@editor) or @target.name is "Empty"
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
@@ -473,7 +472,7 @@ class Increase extends Operator
     @newRanges = []
     super
     if @newRanges.length
-      if @getConfig('flashOnOperate') and (@getName() not in @getConfig('flashOnOperateBlacklist'))
+      if @getConfig('flashOnOperate') and @name not in @getConfig('flashOnOperateBlacklist')
         @vimState.flash(@newRanges, type: @flashTypeForOccurrence)
 
   replaceNumberInBufferRange: (scanRange, fn=null) ->
@@ -559,7 +558,7 @@ class PutBefore extends Operator
         @setMarkForChange(newRange)
 
       # Flash
-      if @getConfig('flashOnOperate') and (@getName() not in @getConfig('flashOnOperateBlacklist'))
+      if @getConfig('flashOnOperate') and @name not in @getConfig('flashOnOperateBlacklist')
         toRange = (selection) => @mutationsBySelection.get(selection)
         @vimState.flash(@editor.getSelections().map(toRange), type: @getFlashType())
 
