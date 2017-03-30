@@ -263,16 +263,13 @@ class Operator extends Base
         @occurrenceSelected = true
         @mutationManager.setCheckpoint('did-select-occurrence')
 
-    if haveSomeNonEmptySelection(@editor) or @target.name is "Empty"
+    if @targetSelected = haveSomeNonEmptySelection(@editor) or @target.name is "Empty"
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()
-      @targetSelected = true
-      true
     else
       @emitDidFailSelectTarget()
-      @targetSelected = false
-      false
+    return @targetSelected
 
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
