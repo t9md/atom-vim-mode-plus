@@ -521,17 +521,6 @@ getWordBufferRangeAtBufferPosition = (editor, position, options={}) ->
   startPosition = getBeginningOfWordBufferPosition(editor, endPosition, options)
   new Range(startPosition, endPosition)
 
-adjustRangeToRowRange = ({start, end}, options={}) ->
-  # when linewise, end row is at column 0 of NEXT line
-  # So need adjust to actually selected row in same way as Seleciton::getBufferRowRange()
-  endRow = end.row
-  if end.column is 0
-    endRow = limitNumber(end.row - 1, min: start.row)
-  if options.endOnly ? false
-    new Range(start, [endRow, Infinity])
-  else
-    new Range([start.row, 0], [endRow, Infinity])
-
 # When range is linewise range, range end have column 0 of NEXT row.
 # Which is very unintuitive and unwanted result.
 shrinkRangeEndToBeforeNewLine = (range) ->
