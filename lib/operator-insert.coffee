@@ -92,7 +92,7 @@ class ActivateInsertMode extends Operator
       @flashTarget = @trackChange = true
 
       @startMutation =>
-        @selectTarget() if @requireTarget
+        @selectTarget() if @target?
         @mutateText?()
         for selection in @editor.getSelections()
           @repeatInsert(selection, @lastChange?.newText ? '')
@@ -103,9 +103,9 @@ class ActivateInsertMode extends Operator
         @vimState.clearSelections()
 
     else
-      @normalizeSelectionsIfNecessary() if @requireTarget
+      @normalizeSelectionsIfNecessary()
       @createBufferCheckpoint('undo')
-      @selectTarget() if @requireTarget
+      @selectTarget() if @target?
       @observeWillDeactivateMode()
 
       @mutateText?()

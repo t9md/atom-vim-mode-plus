@@ -130,7 +130,7 @@ class Operator extends Base
       unless @mode is 'visual'
         @vimState.modeManager.activate('visual', swrap.detectWise(@editor))
 
-    @target = 'CurrentSelection' if @mode is 'visual'
+    @target = 'CurrentSelection' if @mode is 'visual' and @requireTarget
     @setTarget(@new(@target)) if _.isString(@target)
 
   subscribeResetOccurrencePatternIfNeeded: ->
@@ -362,8 +362,8 @@ class TogglePersistentSelection extends CreatePersistentSelection
 # =========================
 class TogglePresetOccurrence extends Operator
   @extend()
+  target: "Empty"
   flashTarget: false
-  requireTarget: false
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
   occurrenceType: 'base'

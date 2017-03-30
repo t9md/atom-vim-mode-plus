@@ -401,18 +401,17 @@ class SurroundBase extends TransformString
   autoIndent: false
 
   requireInput: true
-  requireTarget: true
   supportEarlySelect: true # Experimental
 
-  focusInputForSurround: ->
+  focusInputForSurroundChar: ->
     inputUI = @newInputUI()
-    inputUI.onDidConfirm(@onConfirmSurround.bind(this))
+    inputUI.onDidConfirm(@onConfirmSurroundChar.bind(this))
     inputUI.onDidCancel(@cancelOperation.bind(this))
     inputUI.focus(1, true)
 
-  focusInputForDeleteSurround: ->
+  focusInputForTargetPairChar: ->
     inputUI = @newInputUI()
-    inputUI.onDidConfirm(@onConfirmDeleteSurround.bind(this))
+    inputUI.onDidConfirm(@onConfirmTargetPairChar.bind(this))
     inputUI.onDidCancel(@cancelOperation.bind(this))
     inputUI.focus()
 
@@ -443,10 +442,10 @@ class SurroundBase extends TransformString
     else
       innerText
 
-  onConfirmSurround: (@input) ->
+  onConfirmSurroundChar: (@input) ->
     @processOperation()
 
-  onConfirmDeleteSurround: (char) ->
+  onConfirmTargetPairChar: (char) ->
     @setTarget @new('APair', pair: @getPair(char))
 
 class Surround extends SurroundBase
@@ -454,7 +453,7 @@ class Surround extends SurroundBase
   @description: "Surround target by specified character like `(`, `[`, `\"`"
 
   initialize: ->
-    @onDidSelectTarget(@focusInputForSurround.bind(this))
+    @onDidSelectTarget(@focusInputForSurroundChar.bind(this))
     super
 
   getNewText: (text) ->
@@ -481,13 +480,12 @@ class MapSurround extends Surround
 class DeleteSurround extends SurroundBase
   @extend()
   @description: "Delete specified surround character like `(`, `[`, `\"`"
-  requireTarget: false
 
   initialize: ->
-    @focusInputForDeleteSurround() unless @target?
+    @focusInputForTargetPairChar() unless @target?
     super
 
-  onConfirmDeleteSurround: (input) ->
+  onConfirmTargetPairChar: (input) ->
     super
     @input = input
     @processOperation()
@@ -521,15 +519,12 @@ class ChangeSurround extends SurroundBase
       @onDidFailSelectTarget(@abort.bind(this))
     else
       @onDidFailSelectTarget(@cancelOperation.bind(this))
-      @focusInputForDeleteSurround()
+      @focusInputForTargetPairChar()
     super
 
     @onDidSelectTarget =>
       @showDeleteCharOnHover()
-      @focusInputForSurround()
-
-  onConfirmSurround: (@input) ->
-    @processOperation()
+      @focusInputForSurroundChar()
 
   getNewText: (text) ->
     innerText = @deleteSurround(text)
