@@ -29,8 +29,7 @@ class ActivateInsertMode extends Operator
       textByUserInput = ''
       if change = @getChangeSinceCheckpoint('insert')
         @lastChange = change
-        changedRange = new Range(change.start, change.start.traverse(change.newExtent))
-        @vimState.mark.setRange('[', ']', changedRange)
+        @setMarkForChange(new Range(change.start, change.start.traverse(change.newExtent)))
         textByUserInput = change.newText
       @vimState.register.set('.', text: textByUserInput) # Last inserted text
 

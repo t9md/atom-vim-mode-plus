@@ -1,4 +1,4 @@
-{Range, Point, CompositeDisposable} = require 'atom'
+{Point, CompositeDisposable} = require 'atom'
 
 MARKS = /// (
   ?: [a-z]
@@ -10,14 +10,16 @@ class MarkManager
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
-    @marks = {}
+    @disposables = new CompositeDisposable
+    @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
 
-    @subscriptions = new CompositeDisposable
-    @subscriptions.add @vimState.onDidDestroy(@destroy.bind(this))
+    @marks = {}
+    @markerLayer = @editor.addMarkerLayer()
 
   destroy: ->
-    marker.destroy() for name, marker in @marks
-    @subscriptions.dispose()
+    @disposables.dispose()
+    @markerLayer.destroy()
+    @marks = null
 
   isValid: (name) ->
     MARKS.test(name)
@@ -30,25 +32,13 @@ class MarkManager
     else
       point
 
-  # Return range between marks
-  getRange: (startMark, endMark) ->
-    start = @get(startMark)
-    end = @get(endMark)
-    if start? and end?
-      new Range(start, end)
-
-  setRange: (startMark, endMark, range) ->
-    {start, end} = Range.fromObject(range)
-    @set(startMark, start)
-    @set(endMark, end)
-
   # [FIXME] Need to support Global mark with capital name [A-Z]
   set: (name, point) ->
     return unless @isValid(name)
-    marker.destroy() if marker = @marks[name]
+    if marker = @marks[name]
+      marker.destroy()
     bufferPosition = @editor.clipBufferPosition(point)
-    @marks[name] = @editor.markBufferPosition(bufferPosition)
-    event = {name, bufferPosition, @editor}
-    @vimState.emitter.emit('did-set-mark', event)
+    @marks[name] = @markerLayer.markBufferPosition(bufferPosition, invalidate: 'never')
+    @vimState.emitter.emit('did-set-mark', {name, bufferPosition, @editor})
 
 module.exports = MarkManager

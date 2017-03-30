@@ -334,7 +334,8 @@ class VimState
       [start, end] = [head, tail]
       tail = end = translatePointAndClip(@editor, end, 'forward')
 
-    @mark.setRange('<', '>', [start, end])
+    @mark.set('<', start)
+    @mark.set('>', end)
     @previousSelection = {properties: {head, tail}, @submode}
 
   # Persistent selection

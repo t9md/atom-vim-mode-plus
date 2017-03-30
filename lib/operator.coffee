@@ -75,7 +75,8 @@ class Operator extends Base
       @deleteBufferCheckpoint(purpose)
 
   setMarkForChange: (range) ->
-    @vimState.mark.setRange('[', ']', range)
+    @vimState.mark.set('[', range.start)
+    @vimState.mark.set(']', range.end)
 
   needFlash: ->
     @flashTarget and @getConfig('flashOnOperate') and

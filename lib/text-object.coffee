@@ -508,7 +508,10 @@ class LatestChange extends TextObject
   wise: null
   selectOnce: true
   getRange: (selection) ->
-    @vimState.mark.getRange('[', ']')
+    start = @vimState.mark.get('[')
+    end = @vimState.mark.get(']')
+    if start? and end?
+      new Range(start, end)
 
 class SearchMatchForward extends TextObject
   @extend()
