@@ -70,7 +70,7 @@ class MutationManager
   getSelectedBufferRangesForCheckpoint: (checkpoint) ->
     ranges = []
     @mutationsBySelection.forEach (mutation) ->
-      if range = mutation.getBufferRangeForCheckpoint(checkpoint)
+      if range = mutation.bufferRangeByCheckpoint[checkpoint]
         ranges.push(range)
     ranges
 
@@ -87,7 +87,7 @@ class MutationManager
         # Make sure destroying all temporal selection BEFORE starting to set cursors to final position.
         # This is important to avoid destroy-order dependent bugs.
         for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
-          unless mutation.isCreatedAt('will-select')
+          if mutation.createdAt isnt 'will-select'
             selection.destroy()
 
       for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
@@ -107,9 +107,6 @@ class Mutation
     @bufferRangeByCheckpoint = {}
     @marker = null
 
-  isCreatedAt: (checkpoint) ->
-    @createdAt is checkpoint
-
   update: (checkpoint, marker) ->
     if marker?
       @marker?.destroy()
@@ -121,10 +118,9 @@ class Mutation
     point = Point.max(start, end.translate([0, -1]))
     @selection.editor.clipBufferPosition(point)
 
-  getInitialPoint: ({clip, wise}={}) ->
+  getInitialPoint: (wise) ->
     point = @initialPointMarker?.getHeadBufferPosition() ? @initialPoint
-    clip ?= not @getBufferRangeForCheckpoint('did-select')?.isEqual(@marker.getBufferRange())
-    if clip
+    if not @bufferRangeByCheckpoint['did-select']?.isEqual(@marker.getBufferRange())
       if wise is 'linewise'
         Point.min([@getEndBufferPosition().row, point.column], point)
       else
@@ -132,12 +128,9 @@ class Mutation
     else
       point
 
-  getBufferRangeForCheckpoint: (checkpoint) ->
-    @bufferRangeByCheckpoint[checkpoint]
-
   getRestorePoint: ({stay, wise}={}) ->
     if stay
-      point = @getInitialPoint({wise})
+      point = @getInitialPoint(wise)
     else
       {mode, submode} = @vimState
       if (mode isnt 'visual') or (submode is 'linewise' and @selection.isReversed())
