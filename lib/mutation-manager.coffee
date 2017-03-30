@@ -40,12 +40,22 @@ class MutationManager
       @setCheckpointForSelection(selection, checkpoint)
 
   setCheckpointForSelection: (selection, checkpoint) ->
-    unless @mutationsBySelection.has(selection)
+    if @mutationsBySelection.has(selection)
+      # Current non-empty selection is prioritized over existing marker's range.
+      # We invalidate old marker to re-track from current selection.
+      resetMarker = not selection.getBufferRange().isEmpty()
+    else
+      resetMarker = true
       initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
-      options = {selection, initialPoint, checkpoint, @markerLayer, @stayByMarker, @vimState}
+      if @stayByMarker
+        initialPointMarker = @markerLayer.markBufferPosition(initialPoint, invalidate: 'never')
+
+      options = {selection, initialPoint, initialPointMarker, checkpoint, @vimState}
       @mutationsBySelection.set(selection, new Mutation(options))
 
-    @mutationsBySelection.get(selection).update(checkpoint)
+    if resetMarker
+      marker = @markerLayer.markBufferRange(selection.getBufferRange(), invalidate: 'never')
+    @mutationsBySelection.get(selection).update(checkpoint, marker)
 
   migrateMutation: (oldSelection, newSelection) ->
     mutation = @mutationsBySelection.get(oldSelection)
@@ -92,26 +102,18 @@ class MutationManager
 #  e.g. Some selection is created at 'will-select' checkpoint, others at 'did-select' or 'did-select-occurrence'
 class Mutation
   constructor: (options) ->
-    {@selection, @initialPoint, checkpoint, @markerLayer, @stayByMarker, @vimState} = options
+    {@selection, @initialPoint, @initialPointMarker, checkpoint, @vimState} = options
     @createdAt = checkpoint
     @bufferRangeByCheckpoint = {}
     @marker = null
 
-    if @stayByMarker
-      @initialPointMarker = @markerLayer.markBufferPosition(@initialPoint, invalidate: 'never')
-
   isCreatedAt: (checkpoint) ->
     @createdAt is checkpoint
 
-  update: (checkpoint) ->
-    # Current non-empty selection is prioritized over existing marker's range.
-    # We invalidate old marker to re-track from current selection.
-    range = @selection.getBufferRange()
-    unless range.isEmpty()
+  update: (checkpoint, marker) ->
+    if marker?
       @marker?.destroy()
-      @marker = null
-
-    @marker ?= @markerLayer.markBufferRange(range, invalidate: 'never')
+      @marker = marker
     @bufferRangeByCheckpoint[checkpoint] = @marker.getBufferRange()
 
   getEndBufferPosition: ->
@@ -120,11 +122,7 @@ class Mutation
     @selection.editor.clipBufferPosition(point)
 
   getInitialPoint: ({clip, wise}={}) ->
-    if @stayByMarker
-      point = @initialPointMarker.getHeadBufferPosition()
-    else
-      point = @initialPoint
-
+    point = @initialPointMarker?.getHeadBufferPosition() ? @initialPoint
     clip ?= not @getBufferRangeForCheckpoint('did-select')?.isEqual(@marker.getBufferRange())
     if clip
       if wise is 'linewise'
