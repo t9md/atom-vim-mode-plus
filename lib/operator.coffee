@@ -123,6 +123,7 @@ class Operator extends Base
     if @occurrence and not @occurrenceManager.hasMarkers()
       @occurrenceManager.addPattern(@patternForOccurrence ? @getPatternForOccurrenceType(@occurrenceType))
 
+
     # This change cursor position.
     if @selectPersistentSelectionIfNecessary()
       # [FIXME] selection-wise is not synched if it already visual-mode
@@ -285,6 +286,11 @@ class Operator extends Base
 # When motion is invoked from visual-mode, operation would be
 #  => Select operator with target=motion)
 # ================================
+# Select is used in TWO situation.
+# - visual-mode operation
+#   - e.g: `v l`, `V j`, `v i p`...
+# - Directly invoke text-object from normal-mode
+#   - e.g: Invoke `Inner Paragraph` from command-palette.
 class Select extends Operator
   @extend(false)
   flashTarget: false

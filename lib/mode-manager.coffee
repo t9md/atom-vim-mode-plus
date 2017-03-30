@@ -61,10 +61,6 @@ class ModeManager
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
 
-    if @mode is 'visual'
-      @updateNarrowedState()
-      @vimState.updatePreviousSelection()
-
     @vimState.statusBarManager.update(@mode, @submode)
     @vimState.updateCursorsVisibility()
 
@@ -152,17 +148,19 @@ class ModeManager
   # - normalized selection: One column left selcted at selection end position
   # - When selectRight at end position of normalized-selection, it become un-normalized selection
   #   which is the range in visual-mode.
-  activateVisualMode: (newSubmode) ->
-    @vimState.assertWithException(newSubmode?, "activate visual-mode without submode")
+  activateVisualMode: (submode) ->
+    @vimState.assertWithException(submode?, "activate visual-mode without submode")
 
     for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
       $selection.saveProperties()
 
     swrap.normalize(@editor)
 
-    $selection.applyWise(newSubmode) for $selection in swrap.getSelections(@editor)
+    $selection.applyWise(submode) for $selection in swrap.getSelections(@editor)
 
-    @vimState.getLastBlockwiseSelection().autoscroll() if newSubmode is 'blockwise'
+    @vimState.getLastBlockwiseSelection().autoscroll() if submode is 'blockwise'
+    @updateNarrowedState()
+    @vimState.updatePreviousSelection()
 
     new Disposable =>
       swrap.normalize(@editor)
