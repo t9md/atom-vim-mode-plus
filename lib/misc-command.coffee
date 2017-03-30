@@ -312,7 +312,7 @@ class InsertRegister extends InsertMode
   execute: ->
     @editor.transact =>
       for selection in @editor.getSelections()
-        text = @vimState.register.getText(@getInput(), selection)
+        text = @vimState.register.getText(@input, selection)
         selection.insertText(text)
 
 class InsertLastInserted extends InsertMode

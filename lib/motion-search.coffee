@@ -19,7 +19,7 @@ class SearchBase extends Motion
     @backwards
 
   isIncrementalSearch: ->
-    @instanceof('Search') and not @isRepeated() and @getConfig('incrementalSearch')
+    @instanceof('Search') and not @repeated and @getConfig('incrementalSearch')
 
   initialize: ->
     super
@@ -72,13 +72,13 @@ class SearchBase extends Motion
     point
 
   moveCursor: (cursor) ->
-    input = @getInput()
+    input = @input
     return unless input
 
     if point = @getPoint(cursor)
       cursor.setBufferPosition(point, autoscroll: false)
 
-    unless @isRepeated()
+    unless @repeated
       @globalState.set('currentSearch', this)
       @vimState.searchHistory.save(input)
 
@@ -208,7 +208,7 @@ class SearchCurrentWord extends SearchBase
   @extend()
   configScope: "SearchCurrentWord"
 
-  getInput: ->
+  moveCursor: (cursor) ->
     @input ?= (
       wordRange = @getCurrentWordBufferRange()
       if wordRange?
@@ -217,6 +217,7 @@ class SearchCurrentWord extends SearchBase
       else
         ''
     )
+    super
 
   getPattern: (term) ->
     modifiers = if @isCaseSensitive(term) then 'g' else 'gi'

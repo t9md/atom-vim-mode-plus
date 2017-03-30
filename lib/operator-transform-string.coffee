@@ -80,7 +80,7 @@ class Replace extends TransformString
     if @target.is('MoveRightBufferColumn') and text.length isnt @getCount()
       return
 
-    input = @getInput() or "\n"
+    input = @input or "\n"
     if input is "\n"
       @restorePositions = false
     text.replace(/./g, input)
@@ -484,7 +484,7 @@ class DeleteSurround extends SurroundBase
   requireTarget: false
 
   initialize: ->
-    @focusInputForDeleteSurround() unless @hasTarget()
+    @focusInputForDeleteSurround() unless @target?
     super
 
   onConfirmDeleteSurround: (input) ->
@@ -517,7 +517,7 @@ class ChangeSurround extends SurroundBase
     @vimState.hover.set(char, @vimState.getOriginalCursorPosition())
 
   initialize: ->
-    if @hasTarget()
+    if @target?
       @onDidFailSelectTarget(@abort.bind(this))
     else
       @onDidFailSelectTarget(@cancelOperation.bind(this))
@@ -569,7 +569,7 @@ class JoinBase extends TransformString
   target: "MoveToRelativeLineMinimumOne"
 
   initialize: ->
-    @focusInput(10) if @isRequireInput()
+    @focusInput(10) if @requireInput
     super
 
   getNewText: (text) ->

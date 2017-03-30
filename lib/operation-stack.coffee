@@ -93,7 +93,7 @@ class OperationStack
 
   runRecorded: ->
     if operation = @recordedOperation
-      operation.setRepeated()
+      operation.repeated = true
       if @hasCount()
         count = @getCount()
         operation.count = count
@@ -106,7 +106,7 @@ class OperationStack
     return unless operation = @vimState.globalState.get(key)
 
     operation = operation.clone(@vimState)
-    operation.setRepeated()
+    operation.repeated = true
     operation.resetCount()
     if reverse
       operation.backwards = not operation.backwards
@@ -166,7 +166,7 @@ class OperationStack
     @finish()
 
   finish: (operation=null) ->
-    @recordedOperation = operation if operation?.isRecordable()
+    @recordedOperation = operation if operation?.recordable
     @vimState.emitDidFinishOperation()
     if operation?.isOperator()
       operation.resetState()

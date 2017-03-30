@@ -46,7 +46,7 @@ class Operator extends Base
   supportEarlySelect: false
   targetSelected: null
   canEarlySelect: ->
-    @supportEarlySelect and not @isRepeated()
+    @supportEarlySelect and not @repeated
   # -------------------------
 
   # Called when operation finished
@@ -179,7 +179,7 @@ class Operator extends Base
 
   # target is TextObject or Motion to operate on.
   setTarget: (@target) ->
-    @target.setOperator(this)
+    @target.operator = this
     @emitDidSetTarget(this)
 
     if @canEarlySelect()
@@ -248,7 +248,7 @@ class Operator extends Base
     # Since MoveToNextOccurrence, MoveToPreviousOccurrence motion move by
     #  occurrence-marker, occurrence-marker has to be created BEFORE `@target.execute()`
     # And when repeated, occurrence pattern is already cached at @patternForOccurrence
-    if @isRepeated() and @occurrence and not @occurrenceManager.hasMarkers()
+    if @repeated and @occurrence and not @occurrenceManager.hasMarkers()
       @occurrenceManager.addPattern(@patternForOccurrence, {@occurrenceType})
 
     @target.execute()

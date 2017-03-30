@@ -76,37 +76,22 @@ class Base
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
   isComplete: ->
-    if @isRequireInput() and not @hasInput()
+    if @requireInput and not @input?
       false
-    else if @isRequireTarget()
+    else if @requireTarget
       # When this function is called in Base::constructor
       # tagert is still string like `MoveToRight`, in this case isComplete
       # is not available.
-      @getTarget()?.isComplete?()
+      @target?.isComplete?()
     else
       true
 
-  target: null
-  hasTarget: -> @target?
-  getTarget: -> @target
-
   requireTarget: false
-  isRequireTarget: -> @requireTarget
-
   requireInput: false
-  isRequireInput: -> @requireInput
-
   recordable: false
-  isRecordable: -> @recordable
-
   repeated: false
-  isRepeated: -> @repeated
-  setRepeated: -> @repeated = true
-
-  # Intended to be used by TextObject or Motion
-  operator: null
-  getOperator: -> @operator
-  setOperator: (@operator) -> @operator
+  target: null # Set in Operator
+  operator: null # Set in operator's target( Motion or TextObject )
   isAsTargetExceptSelect: ->
     @operator? and not @operator.instanceof('Select')
 
@@ -179,12 +164,10 @@ class Base
     selectList.show(@vimState, options)
 
   input: null
-  hasInput: -> @input?
-  getInput: -> @input
-
   focusInput: (charsMax, hideCursor) ->
     inputUI = @newInputUI()
-    inputUI.onDidConfirm (@input) =>
+    inputUI.onDidConfirm (input) =>
+      @input = input
       @processOperation()
 
     if charsMax > 1
@@ -259,7 +242,7 @@ class Base
 
   toString: ->
     str = @name
-    if @hasTarget()
+    if @target?
       str += ", target=#{@target.name}, target.wise=#{@target.wise} "
     else if @operator?
       str += ", wise=#{@wise} , operator=#{@operator.name}"

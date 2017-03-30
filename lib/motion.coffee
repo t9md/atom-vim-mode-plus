@@ -366,7 +366,7 @@ class MoveToNextWord extends Motion
         pattern = @wordRegex ? cursor.wordRegExp()
         point = @getPoint(pattern, cursorPosition)
         if isFinal and isAsTargetExceptSelect
-          if @getOperator().is('Change') and (not wasOnWhiteSpace)
+          if @operator.is('Change') and (not wasOnWhiteSpace)
             point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
           else
             point = Point.min(point, getEndOfLineForBufferRow(@editor, cursorPosition.row))
@@ -861,7 +861,7 @@ class Find extends Motion
     {start, end} = @editor.bufferRangeForBufferRow(fromPoint.row)
 
     offset = if @isBackwards() then @offset else -@offset
-    unOffset = -offset * @isRepeated()
+    unOffset = -offset * @repeated
     if @isBackwards()
       scanRange = [start, fromPoint.translate([0, unOffset])]
       method = 'backwardsScanInBufferRange'
@@ -877,7 +877,7 @@ class Find extends Motion
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
     @setBufferPositionSafely(cursor, point)
-    @globalState.set('currentFind', this) unless @isRepeated()
+    @globalState.set('currentFind', this) unless @repeated
 
 # keymap: F
 class FindBackwards extends Find
@@ -915,7 +915,7 @@ class MoveToMark extends Motion
     @focusInput() unless @isComplete()
 
   getPoint: ->
-    @vimState.mark.get(@getInput())
+    @vimState.mark.get(@input)
 
   moveCursor: (cursor) ->
     if point = @getPoint()

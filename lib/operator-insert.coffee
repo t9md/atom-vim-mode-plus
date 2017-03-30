@@ -88,11 +88,11 @@ class ActivateInsertMode extends Operator
     limitNumber(@insertionCount, max: 100)
 
   execute: ->
-    if @isRepeated()
+    if @repeated
       @flashTarget = @trackChange = true
 
       @startMutation =>
-        @selectTarget() if @isRequireTarget()
+        @selectTarget() if @requireTarget
         @mutateText?()
         for selection in @editor.getSelections()
           @repeatInsert(selection, @lastChange?.newText ? '')
@@ -103,9 +103,9 @@ class ActivateInsertMode extends Operator
         @vimState.clearSelections()
 
     else
-      @normalizeSelectionsIfNecessary() if @isRequireTarget()
+      @normalizeSelectionsIfNecessary() if @requireTarget
       @createBufferCheckpoint('undo')
-      @selectTarget() if @isRequireTarget()
+      @selectTarget() if @requireTarget
       @observeWillDeactivateMode()
 
       @mutateText?()
