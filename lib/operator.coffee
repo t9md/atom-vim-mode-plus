@@ -275,8 +275,8 @@ class Operator extends Base
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
     stay = @stayAtSamePosition ? @getConfig(@stayOptionName) or (@occurrenceSelected and @getConfig('stayOnOccurrence'))
-    wise = @target.wise
-    @mutationManager.restoreCursorPositions({stay, wise, @occurrenceSelected, @setToFirstCharacterOnLinewise})
+    wise = if @occurrenceSelected then 'characterwise' else @target.wise
+    @mutationManager.restoreCursorPositions({stay, wise, @setToFirstCharacterOnLinewise})
 
 # Select
 # When text-object is invoked from normal or viusal-mode, operation would be

@@ -74,8 +74,7 @@ class MutationManager
         ranges.push(range)
     ranges
 
-  restoreCursorPositions: (options) ->
-    {stay, wise, occurrenceSelected, setToFirstCharacterOnLinewise} = options
+  restoreCursorPositions: ({stay, wise, setToFirstCharacterOnLinewise}) ->
     if wise is 'blockwise'
       for blockwiseSelection in @vimState.getBlockwiseSelections()
         {head, tail} = blockwiseSelection.getProperties()
@@ -83,19 +82,20 @@ class MutationManager
         blockwiseSelection.setHeadBufferPosition(point)
         blockwiseSelection.skipNormalization()
     else
-      if occurrenceSelected
-        # Make sure destroying all temporal selection BEFORE starting to set cursors to final position.
-        # This is important to avoid destroy-order dependent bugs.
-        for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
-          if mutation.createdAt isnt 'will-select'
-            selection.destroy()
+      # Make sure destroying all temporal selection BEFORE starting to set cursors to final position.
+      # This is important to avoid destroy order dependent bugs.
+      for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
+        if mutation.createdAt isnt 'will-select'
+          selection.destroy()
 
       for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
-        wise = 'characterwise' if occurrenceSelected
-        if point = mutation.getRestorePoint({stay, wise})
-          if (not stay) and setToFirstCharacterOnLinewise and (wise is 'linewise')
-            point = getFirstCharacterPositionForBufferRow(@editor, point.row)
-          selection.cursor.setBufferPosition(point)
+        point = mutation.getRestorePoint({stay, wise})
+        point = @editor.clipBufferPosition(point)
+        point.row = getValidVimBufferRow(@editor, point.row)
+
+        if (not stay) and setToFirstCharacterOnLinewise and (wise is 'linewise')
+          point = getFirstCharacterPositionForBufferRow(@editor, point.row)
+        selection.cursor.setBufferPosition(point)
 
 # Mutation information is created even if selection.isEmpty()
 # So that we can filter selection by when it was created.
@@ -113,30 +113,21 @@ class Mutation
       @marker = marker
     @bufferRangeByCheckpoint[checkpoint] = @marker.getBufferRange()
 
-  getEndBufferPosition: ->
-    {start, end} = @marker.getBufferRange()
-    point = Point.max(start, end.translate([0, -1]))
-    @selection.editor.clipBufferPosition(point)
-
-  getInitialPoint: (wise) ->
-    point = @initialPointMarker?.getHeadBufferPosition() ? @initialPoint
-    if not @bufferRangeByCheckpoint['did-select']?.isEqual(@marker.getBufferRange())
-      if wise is 'linewise'
-        Point.min([@getEndBufferPosition().row, point.column], point)
-      else
-        Point.min(@getEndBufferPosition(), point)
-    else
-      point
-
   getRestorePoint: ({stay, wise}={}) ->
     if stay
-      point = @getInitialPoint(wise)
+      point = @initialPointMarker?.getHeadBufferPosition() ? @initialPoint
+      mutated = not @bufferRangeByCheckpoint['did-select'].isEqual(@marker.getBufferRange())
+      unless mutated
+        point
+      else
+        {start, end} = @marker.getBufferRange()
+        mutationEnd = Point.max(start, end.translate([0, -1]))
+        if wise is 'linewise'
+          Point.min([mutationEnd.row, point.column], point)
+        else
+          Point.min(mutationEnd, point)
     else
       {mode, submode} = @vimState
       if (mode isnt 'visual') or (submode is 'linewise' and @selection.isReversed())
         point = swrap(@selection).getBufferPositionFor('start', from: ['property'])
-      point = point ? @bufferRangeByCheckpoint['did-select']?.start
-
-    if point?
-      point.row = getValidVimBufferRow(@selection.editor, point.row)
-    point
+      point ? @bufferRangeByCheckpoint['did-select'].start
