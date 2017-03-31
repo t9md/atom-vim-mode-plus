@@ -276,7 +276,7 @@ class Operator extends Base
     return unless @restorePositions
     stay = @stayAtSamePosition ? @getConfig(@stayOptionName) or (@occurrenceSelected and @getConfig('stayOnOccurrence'))
     wise = if @occurrenceSelected then 'characterwise' else @target.wise
-    @mutationManager.restoreCursorPositions({stay, wise, @setToFirstCharacterOnLinewise})
+    @mutationManager.restoreCursorPositions({stay, wise, @setToFirstCharacterOnLinewise, @occurrenceSelected})
 
 # Select
 # When text-object is invoked from normal or viusal-mode, operation would be
