@@ -378,6 +378,7 @@ class AutoIndent extends Indent
 class ToggleLineComments extends TransformString
   @extend()
   stayByMarker: true
+  wise: 'linewise'
   mutateSelection: (selection) ->
     selection.toggleLineComments()
 

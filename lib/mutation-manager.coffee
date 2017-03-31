@@ -1,5 +1,5 @@
 {Point, CompositeDisposable} = require 'atom'
-{getFirstCharacterPositionForBufferRow, getValidVimBufferRow} = require './utils'
+{getFirstCharacterPositionForBufferRow, getVimLastBufferRow} = require './utils'
 swrap = require './selection-wrapper'
 
 # keep mutation snapshot necessary for Operator processing.
@@ -91,15 +91,16 @@ class MutationManager
 
       for selection in @editor.getSelections() when mutation = @mutationsBySelection.get(selection)
         if stay
-          point = mutation.getStayPoint(wise)
+          point = @clipPoint(mutation.getStayPosition(wise))
         else
-          point = mutation.startPositionOnDidSelect
-        point = @editor.clipBufferPosition(point)
-        point.row = getValidVimBufferRow(@editor, point.row)
-
-        if (not stay) and setToFirstCharacterOnLinewise and (wise is 'linewise')
-          point = getFirstCharacterPositionForBufferRow(@editor, point.row)
+          point = @clipPoint(mutation.startPositionOnDidSelect)
+          if setToFirstCharacterOnLinewise and wise is 'linewise'
+            point = getFirstCharacterPositionForBufferRow(@editor, point.row)
         selection.cursor.setBufferPosition(point)
+
+  clipPoint: (point) ->
+    point.row = Math.min(getVimLastBufferRow(@editor), point.row)
+    @editor.clipBufferPosition(point)
 
 # Mutation information is created even if selection.isEmpty()
 # So that we can filter selection by when it was created.
@@ -124,15 +125,16 @@ class Mutation
         from = ['property', 'selection']
       @startPositionOnDidSelect = swrap(@selection).getBufferPositionFor('start', {from})
 
-  getStayPoint: (wise) ->
+  getStayPosition: (wise) ->
     point = @initialPointMarker?.getHeadBufferPosition() ? @initialPoint
-    mutated = not @bufferRangeByCheckpoint['did-select'].isEqual(@marker.getBufferRange())
-    unless mutated
+    selectedRange = @bufferRangeByCheckpoint['did-select-occurrence'] ? @bufferRangeByCheckpoint['did-select']
+    if selectedRange.isEqual(@marker.getBufferRange()) # Check if need Clip
       point
     else
-      {start, end} = @marker.getBufferRange()
+      {start, end} = range = @marker.getBufferRange()
       end = Point.max(start, end.translate([0, -1]))
       if wise is 'linewise'
-        Point.min([end.row, point.column], point)
+        point.row = Math.min(end.row, point.row)
+        point
       else
         Point.min(end, point)
