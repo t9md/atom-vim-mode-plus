@@ -250,6 +250,14 @@ class InsertAtEndOfOccurrence extends InsertByTarget
   which: 'end'
   occurrence: true
 
+class InsertAtStartOfSubwordOccurrence extends InsertAtStartOfOccurrence
+  @extend()
+  occurrenceType: 'subword'
+
+class InsertAtEndOfSubwordOccurrence extends InsertAtEndOfOccurrence
+  @extend()
+  occurrenceType: 'subword'
+
 class InsertAtStartOfSmartWord extends InsertByTarget
   @extend()
   which: 'start'
