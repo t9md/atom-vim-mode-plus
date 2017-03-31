@@ -118,6 +118,10 @@ class Mutation
       @marker?.destroy()
       @marker = marker
     @bufferRangeByCheckpoint[checkpoint] = @marker.getBufferRange()
+    # NOTE: stupidly respect pure-Vim's behavior which is inconsistent.
+    # Maybe I'll remove this blindly-following-to-pure-Vim code.
+    #  - `V k y`: don't move cursor
+    #  - `V j y`: move curor to start of selected line.(Inconsistent!)
     if checkpoint is 'did-select'
       if (mode is 'visual' and not @selection.isReversed())
         from = ['selection']
