@@ -618,7 +618,7 @@ describe "Operator general", ->
         beforeEach ->
           settings.set('stayOnYank', true)
         it "place cursor at head of block after yank", ->
-          ensure "y", ->
+          ensure "y",
             mode: 'normal'
             textC_: """
               000000
@@ -755,6 +755,8 @@ describe "Operator general", ->
         ensure "y i p", cursor: [1, 2], register: '"': text: text.getLines([0..2])
         ensure "j y y", cursor: [2, 2], register: '"': text: text.getLines([2])
         ensure "k .", cursor: [1, 2], register: '"': text: text.getLines([1])
+        ensure "y h", cursor: [1, 2], register: '"': text: "_"
+        ensure "y b", cursor: [1, 2], register: '"': text: "1_"
 
       it "don't move cursor after yank from visual-linewise", ->
         ensure "V y", cursor: [1, 2], register: '"': text: text.getLines([1])

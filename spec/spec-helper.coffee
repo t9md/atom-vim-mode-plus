@@ -274,6 +274,11 @@ class VimEditor
       when 1 then [options] = args
       when 2 then [keystroke, options] = args
 
+    unless typeof(options) is 'object'
+      throw new Error("Invalid options for 'ensure': must be 'object' but got '#{typeof(options)}'")
+    if keystroke? and not (typeof(keystroke) is 'string' or Array.isArray(keystroke))
+      throw new Error("Invalid keystroke for 'ensure': must be 'string' or 'array' but got '#{typeof(keystroke)}'")
+
     keystrokeOptions = @getAndDeleteKeystrokeOptions(options)
 
     @validateOptions(options, ensureOptionsOrdered, 'Invalid ensure option')

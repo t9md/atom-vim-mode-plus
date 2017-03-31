@@ -1314,10 +1314,10 @@ describe "Operator TransformString", ->
         Apple
         BEEF
         Dog
-        dog
+        dog\n
         """
 
-      ensure "g s G", ->
+      ensure "g s G",
         text: """
         apple
         Apple
@@ -1327,5 +1327,5 @@ describe "Operator TransformString", ->
         BEEF
         dog
         Dog
-        DOG
+        DOG\n
         """

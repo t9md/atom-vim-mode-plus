@@ -126,53 +126,33 @@ describe "Occurrence", ->
     describe "apply various operator to occurrence in various target", ->
       beforeEach ->
         set
-          text: """
-          ooo: xxx: ooo:
-          |||: ooo: xxx: ooo:
-          ooo: xxx: |||: xxx: ooo:
-          xxx: |||: ooo: ooo:
+          textC: """
+          ooo: xxx: o!oo:
+          ===: ooo: xxx: ooo:
+          ooo: xxx: ===: xxx: ooo:
+          xxx: ===: ooo: ooo:
           """
       it "upper case inner-word", ->
-        set cursor: [0, 11]
-        ensure "g U o i l", ->
-          text: """
-          OOO: xxx: OOO:
-          |||: ooo: xxx: ooo:
-          ooo: xxx: |||: xxx: ooo:
-          xxx: |||: ooo: ooo:
+        ensure "g U o i l",
+          textC: """
+          OOO: xxx: O!OO:
+          ===: ooo: xxx: ooo:
+          ooo: xxx: ===: xxx: ooo:
+          xxx: ===: ooo: ooo:
           """
-          cursor: [0, 0]
-        ensure "2 j .", ->
-          text: """
+        ensure "2 j .",
+          textC: """
           OOO: xxx: OOO:
-          |||: ooo: xxx: ooo:
-          OOO: xxx: |||: xxx: OOO:
-          xxx: |||: ooo: ooo:
+          ===: ooo: xxx: ooo:
+          OOO: xxx: =!==: xxx: OOO:
+          xxx: ===: ooo: ooo:
           """
-          cursor: [2, 0]
-        ensure "j .", ->
-          text: """
+        ensure "j .",
+          textC: """
           OOO: xxx: OOO:
-          |||: ooo: xxx: ooo:
-          OOO: xxx: |||: xxx: OOO:
-          xxx: |||: OOO: OOO:
-          """
-          cursor: [2, 0]
-      it "lower case with motion", ->
-        set
-          text: """
-          OOO: XXX: OOO:
-          |||: OOO: XXX: OOO:
-          OOO: XXX: |||: XXX: OOO:
-          XXX: |||: OOO: OOO:
-          """
-          cursor: [0, 6]
-        ensure "g u o 2 j", # lowercase xxx only
-          text: """
-          OOO: xxx: OOO:
-          |||: OOO: xxx: OOO:
-          OOO: xxx: |||: xxx: OOO:
-          XXX: |||: OOO: OOO:
+          ===: ooo: xxx: ooo:
+          OOO: xxx: ===: xxx: OOO:
+          xxx: ===: O!OO: OOO:
           """
 
       describe "clip to mutation end behavior", ->
@@ -284,7 +264,7 @@ describe "Occurrence", ->
 
     describe "when true (= default)", ->
       it "keep cursor position after operation finished", ->
-        ensure 'g U o p', ->
+        ensure 'g U o p',
           textC: """
 
           AAA, bbb, ccc
@@ -297,7 +277,7 @@ describe "Occurrence", ->
         settings.set('stayOnOccurrence', false)
 
       it "move cursor to start of target as like non-ocurrence operator", ->
-        ensure 'g U o p', ->
+        ensure 'g U o p',
           textC: """
 
           |AAA, bbb, ccc
