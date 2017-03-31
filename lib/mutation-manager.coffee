@@ -2,17 +2,6 @@
 {getFirstCharacterPositionForBufferRow, getVimLastBufferRow} = require './utils'
 swrap = require './selection-wrapper'
 
-# keep mutation snapshot necessary for Operator processing.
-# mutation stored by each Selection have following field
-#  marker:
-#    marker to track mutation. marker is created when `setCheckpoint`
-#  createdAt:
-#    'string' representing when marker was created.
-#  checkpoint: {}
-#    key is ['will-select', 'did-select', 'will-mutate', 'did-mutate']
-#    key is checkpoint, value is bufferRange for marker at that checkpoint
-#  selection:
-#    Selection beeing tracked
 module.exports =
 class MutationManager
   constructor: (@vimState) ->
@@ -75,7 +64,6 @@ class MutationManager
     ranges
 
   restoreCursorPositions: ({stay, wise, setToFirstCharacterOnLinewise}) ->
-    # stay = false
     if wise is 'blockwise'
       for blockwiseSelection in @vimState.getBlockwiseSelections()
         {head, tail} = blockwiseSelection.getProperties()
@@ -135,7 +123,7 @@ class Mutation
     if selectedRange.isEqual(@marker.getBufferRange()) # Check if need Clip
       point
     else
-      {start, end} = range = @marker.getBufferRange()
+      {start, end} = @marker.getBufferRange()
       end = Point.max(start, end.translate([0, -1]))
       if wise is 'linewise'
         point.row = Math.min(end.row, point.row)
