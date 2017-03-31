@@ -123,15 +123,6 @@ pointIsAtVimEndOfFile = (editor, point) ->
 isEmptyRow = (editor, row) ->
   editor.bufferRangeForBufferRow(row).isEmpty()
 
-# Cursor state validateion
-# -------------------------
-cursorIsAtEndOfLineAtNonEmptyRow = (cursor) ->
-  pointIsAtEndOfLineAtNonEmptyRow(cursor.editor, cursor.getBufferPosition())
-
-cursorIsAtVimEndOfFile = (cursor) ->
-  pointIsAtVimEndOfFile(cursor.editor, cursor.getBufferPosition())
-
-# -------------------------
 getRightCharacterForBufferPosition = (editor, point, amount=1) ->
   editor.getTextInBufferRange(Range.fromPointWithDelta(point, 0, amount))
 
@@ -792,7 +783,6 @@ module.exports = {
   pointIsOnWhiteSpace
   pointIsAtEndOfLineAtNonEmptyRow
   pointIsAtVimEndOfFile
-  cursorIsAtVimEndOfFile
   getVimEofBufferPosition
   getVimEofScreenPosition
   getVimLastBufferRow
@@ -814,7 +804,6 @@ module.exports = {
   getTextInScreenRange
   moveCursorToNextNonWhitespace
   isEmptyRow
-  cursorIsAtEndOfLineAtNonEmptyRow
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow
   getBufferRangeForRowRange

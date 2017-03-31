@@ -6,7 +6,7 @@ _ = require 'underscore-plus'
   moveCursorUpScreen, moveCursorDownScreen
   moveCursorDownBuffer
   moveCursorUpBuffer
-  cursorIsAtVimEndOfFile
+  pointIsAtVimEndOfFile
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getValidVimScreenRow, getValidVimBufferRow
   moveCursorToFirstCharacterAtRow
@@ -20,7 +20,6 @@ _ = require 'underscore-plus'
   detectScopeStartPositionForScope
   getBufferRows
   getTextInScreenRange
-  cursorIsAtEndOfLineAtNonEmptyRow
   setBufferRow
   setBufferColumn
   limitNumber
@@ -184,10 +183,11 @@ class MoveRight extends Motion
 
   moveCursor: (cursor) ->
     @moveCursorCountTimes cursor, =>
-      @editor.unfoldBufferRow(cursor.getBufferRow())
+      cursorPosition = cursor.getBufferPosition()
+      @editor.unfoldBufferRow(cursorPosition.row)
       allowWrap = @canWrapToNextLine(cursor)
       moveCursorRight(cursor)
-      if cursor.isAtEndOfLine() and allowWrap and not cursorIsAtVimEndOfFile(cursor)
+      if cursor.isAtEndOfLine() and allowWrap and not pointIsAtVimEndOfFile(@editor, cursorPosition)
         moveCursorRight(cursor, {allowWrap})
 
 class MoveRightBufferColumn extends Motion
@@ -354,8 +354,9 @@ class MoveToNextWord extends Motion
   # that word becomes the end of the operated text, not the first word in the
   # next line.
   moveCursor: (cursor) ->
-    return if cursorIsAtVimEndOfFile(cursor)
-    wasOnWhiteSpace = pointIsOnWhiteSpace(@editor, cursor.getBufferPosition())
+    cursorPosition = cursor.getBufferPosition()
+    return if pointIsAtVimEndOfFile(@editor, cursorPosition)
+    wasOnWhiteSpace = pointIsOnWhiteSpace(@editor, cursorPosition)
 
     isAsTargetExceptSelect = @isAsTargetExceptSelect()
     @moveCursorCountTimes cursor, ({isFinal}) =>
