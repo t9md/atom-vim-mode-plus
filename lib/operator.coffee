@@ -616,7 +616,7 @@ class PutBefore extends Operator
 
     if @editor.autoIndentOnPaste
       neededIndent = @editor.suggestedIndentForBufferRow(newRange.start.row)
-      actualIndent = getIndentLevelForBufferRow(@editor, newRange.start.row);
+      actualIndent = getIndentLevelForBufferRow(@editor, newRange.start.row)
       indentDelta = neededIndent - actualIndent
 
       if indentDelta > 0
