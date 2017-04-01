@@ -300,7 +300,7 @@ describe "Operator ActivateInsertMode family", ->
         __def
         __def
         __012
-        ____de|f
+        __de|f
         ____4spaces\n
         """
 
