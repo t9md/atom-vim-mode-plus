@@ -871,6 +871,9 @@ describe "Operator general", ->
       it "P place cursor at start of mutation", -> ensure "P", textC: "|345\n678012\n"
 
     describe "with linewise contents", ->
+      beforeEach ->
+        editor.autoIndentOnPaste = false
+
       describe "on a single line", ->
         beforeEach ->
           set
@@ -919,8 +922,36 @@ describe "Operator general", ->
              |456\n
             """
 
+    describe "with linewise contents and autoIndentOnPaste", ->
+      indentText = ''
+
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage('language-javascript')
+        runs ->
+          indentText = editor.buildIndentString(1)
+          editor.autoIndentOnPaste = true
+          set
+            grammar: 'source.js'
+
+      describe "on a single line", ->
+        beforeEach ->
+          set
+            textC: 'if| () {\n}'
+            register: '"': {text: " 345\n", type: 'linewise'}
+            grammar: 'source.js'
+
+        it "inserts the contents of the default register", ->
+          ensure 'p',
+            textC_: """
+            if () {
+            #{editor.buildIndentString(1)}|345
+            }
+            """
+
     describe "with multiple linewise contents", ->
       beforeEach ->
+        editor.autoIndentOnPaste = false
         set
           textC: """
           012
@@ -935,6 +966,39 @@ describe "Operator general", ->
           abc
            |345
            678\n
+          """
+
+    describe "with multiple linewise contents and autoIndentOnPaste", ->
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage('language-javascript')
+        runs ->
+          indentText = editor.buildIndentString(1)
+          editor.autoIndentOnPaste = true
+          set
+            grammar: 'source.js'
+            textC: """
+            if (1) {
+            #{editor.buildIndentString(1)}|if (2) {
+            #{editor.buildIndentString(1)}}
+            }
+            """
+            register: '"': {text: """
+            if(3) {
+            #{editor.buildIndentString(1)}if(4) {}
+            }
+            """, type: 'linewise'}
+
+      it "inserts the contents of the default register", ->
+        ensure 'p',
+          textC: """
+          if (1) {
+          #{editor.buildIndentString(1)}if (2) {
+          #{editor.buildIndentString(2)}|if(3) {
+          #{editor.buildIndentString(3)}if(4) {}
+          #{editor.buildIndentString(2)}}
+          #{editor.buildIndentString(1)}}
+          }
           """
 
     describe "pasting twice", ->
