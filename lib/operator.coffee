@@ -3,6 +3,7 @@ _ = require 'underscore-plus'
   haveSomeNonEmptySelection
   isEmptyRow
   getWordPatternAtBufferPosition
+  getIndentLevelForBufferRow
   getSubwordPatternAtBufferPosition
   insertTextAtBufferPosition
   setBufferRow
@@ -612,6 +613,20 @@ class PutBefore extends Operator
     else
       selection.insertText("\n") unless @isMode('visual', 'linewise')
       newRange = selection.insertText(text)
+
+    if @editor.autoIndentOnPaste
+      neededIndent = @editor.suggestedIndentForBufferRow(newRange.start.row)
+      actualIndent = getIndentLevelForBufferRow(@editor, newRange.start.row);
+      indentDelta = neededIndent - actualIndent
+
+      if indentDelta > 0
+        indentText = @editor.buildIndentString(indentDelta)
+        for bufferRow in [newRange.start.row..newRange.end.row - 1]
+          insertTextAtBufferPosition(@editor, [bufferRow, 0], indentText)
+      else if indentDelta < 0
+        charsToRemove = @editor.buildIndentString(Math.abs(indentDelta)).length
+        for bufferRow in [newRange.start.row..newRange.end.row - 1]
+          @editor.setTextInBufferRange([[bufferRow, 0], [bufferRow, charsToRemove]], '')
 
     return newRange
 
