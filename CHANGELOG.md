@@ -1,5 +1,5 @@
 # 0.86.0, 0.86.1(just changelog-typo-fix):
-- New: `insert-at-start-of-subword-occurrence` and `insert-at-start-of-subword-occurrence` command.
+- New: `insert-at-start-of-subword-occurrence` and `insert-at-end-of-subword-occurrence` command.
   - Start insert at start or end of `subword` occurrence.
   - E.g
     - When I map `{`, and `}` to these command in `normal-mode`.
