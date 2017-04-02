@@ -8,6 +8,7 @@
   isLinewiseRange
   assertWithException
 } = require './utils'
+settings = require './settings'
 BlockwiseSelection = null
 
 propertyStore = new Map
@@ -164,7 +165,10 @@ class SelectionWrapper
   normalize: ->
     # empty selection IS already 'normalized'
     return if @selection.isEmpty()
-    assertWithException(@hasProperties(), "attempted to normalize but no properties to restore")
+    if settings.get('strictAssertion')
+      assertWithException(@hasProperties(), "attempted to normalize but no properties to restore")
+
+    @saveProperties() unless @hasProperties()
     {head, tail} = @getProperties()
     @setBufferRange([tail, head])
 

@@ -60,8 +60,10 @@ class OperationStack
   # Main
   # -------------------------
   run: (klass, properties) ->
-    # console.log @vimState.getBlockwiseSelections().length
-    # console.log swrap.getPropertyStore().size
+    if @mode is 'visual'
+      for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
+        $selection.saveProperties()
+
     try
       @vimState.init() if @isEmpty()
       type = typeof(klass)
