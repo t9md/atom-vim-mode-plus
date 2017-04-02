@@ -1,6 +1,6 @@
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
-{moveCursorLeft} = require './utils'
+{moveCursorLeft, haveSomeNonEmptySelection, assertWithException} = require './utils'
 {Select, MoveToRelativeLine} = {}
 {OperationAbortedError} = require './errors'
 swrap = require './selection-wrapper'
@@ -187,12 +187,10 @@ class OperationStack
     # We need to manually clear blockwiseSelection.
     # See #647
     @vimState.clearBlockwiseSelections() # FIXME, should be removed
-
-    unless @editor.getLastSelection().isEmpty()
-      if @vimState.getConfig('devThrowErrorOnNonEmptySelectionInNormalMode')
-        throw new Error("Selection is not empty in normal-mode: #{operation.toString()}")
-      else
-        @vimState.clearSelections()
+    if haveSomeNonEmptySelection(@editor)
+      if @vimState.getConfig('strictAssertion')
+        assertWithException(false, "Have some non-empty selection in normal-mode: #{operation.toString()}")
+      @vimState.clearSelections()
 
   ensureAllCursorsAreNotAtEndOfLine: ->
     for cursor in @editor.getCursors() when cursor.isAtEndOfLine()

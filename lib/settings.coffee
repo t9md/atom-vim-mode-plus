@@ -157,8 +157,9 @@ module.exports = new Settings 'vim-mode-plus',
   statusBarModeStringStyle:
     default: 'short'
     enum: ['short', 'long']
-  devThrowErrorOnNonEmptySelectionInNormalMode:
-    default: false
-    description: "[Dev use] Throw error when non-empty selection was remained in normal-mode at the timing of operation finished"
   debug:
     default: false
+    description: "[Dev use]"
+  strictAssertion:
+    default: false
+    description: "[Dev use] to catche wired state in vmp-dev, enable this if you want help me"
