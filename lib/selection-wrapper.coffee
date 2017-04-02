@@ -52,6 +52,7 @@ class SelectionWrapper
 
   setReversedState: (isReversed) ->
     return if @selection.isReversed() is isReversed
+    assertWithException(@hasProperties(), "trying to reverse selection which is non-empty and property-lesss")
 
     if @hasProperties()
       {head, tail} = @getProperties()
@@ -117,10 +118,13 @@ class SelectionWrapper
         BlockwiseSelection ?= require './blockwise-selection'
         new BlockwiseSelection(@selection)
 
-  selectByProperties: ({head, tail}, options) ->
+  # [FIXME] Passed property is un-normalized this is breaking-consistency logic.
+  selectByProperties: ({head, tail}) ->
     # No problem if head is greater than tail, Range constructor swap start/end.
-    @setBufferRange([tail, head], options)
-    @setReversedState(head.isLessThan(tail))
+    @setBufferRange [tail, head],
+      autoscroll: true
+      reversed: head.isLessThan(tail)
+      keepGoalColumn: false
 
   # set selections bufferRange with default option {autoscroll: false, preserveFolds: true}
   setBufferRange: (range, options={}) ->
