@@ -37,11 +37,42 @@ class Settings
 
 module.exports = new Settings 'vim-mode-plus',
   keymapCCToChangeSmartWord:
-    title: "Keymap CC To Change Smart Word"
+    title: "Keymap cc To change inner-smart-word"
     default: false
     description: """
     Disable this to `c c` behave as normal Vim.<br>
-    Enable this to `c c` to `change inner-smart-word`.<br>
+    """
+  keymapUnderscoreToReplaceWithRegister:
+    title: "Keymap _ To replace-with-register"
+    default: false
+    description: """
+    Disable this to `_` behave like normal Vim.<br>
+    """
+  keymapSemicolonToInnerAnyPair:
+    title: "Keymap ; To inner-any-pair"
+    default: false
+    description: """
+    Disable this to `;` behave like normal Vim.<br>
+    """
+  keymapIToInsertStartOfTargetWhenCursorIsAtOccurrenceMarker:
+    title: "Keymap I To insert-at-start-of-target When Cursor Is At Occurrence Marker"
+    default: false
+    description: """
+    When cursor is at preset-occurrence-marker.
+    `I`: behave as `insert-at-start-of-target` operator<br>
+    e.g. place cursor on occurrence-marker then<br>
+    `I p` start insertion at start of every occurrence in paragraph<br>
+    `I f` start insertion at start of every occurrence in function<br>
+    """
+  keymapAToInsertStartOfTargetWhenCursorIsAtOccurrenceMarker:
+    title: "Keymap A To insert-at-end-of-target When Cursor Is At Occurrence Marker"
+    default: false
+    description: """
+    When cursor is at preset-occurrence-marker.
+    `A`: behave as `insert-at-end-of-target` operator<br>
+    e.g. place cursor on occurrence-marker then<br>
+    `A p` start insertion at end of every occurrence in paragraph<br>
+    `A f` start insertion at end of every occurrence in function<br>
     """
   setCursorToStartOfChangeOnUndoRedo: true
   setCursorToStartOfChangeOnUndoRedoStrategy:

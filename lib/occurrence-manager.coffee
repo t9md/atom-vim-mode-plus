@@ -143,7 +143,7 @@ class OccurrenceManager
     # We have to check all returned marker until found, since we do aditional marker validation.
     # e.g. For text `abc()`, mark for `abc` and `(`. cursor on `(` char return multiple marker
     # and we pick `(` by isGreaterThan check.
-    for marker in markers ? [] when marker.getBufferRange().end.isGreaterThan(point)
+    for marker in markers when marker.getBufferRange().end.isGreaterThan(point)
       return marker
 
   # Select occurrence marker bufferRange intersecting current selections.

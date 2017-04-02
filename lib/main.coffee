@@ -64,15 +64,34 @@ module.exports =
     @enableConditionalKeymap()
 
   enableConditionalKeymap: ->
-    # Bollowed&modified from `tabs` core package
-    keyBindSourceForCC = 'vim-mode-plus-conditional-keymap:cc'
-    settings.observe "keymapCCToChangeSmartWord", (newValue) ->
-      if newValue
-        atom.keymaps.add keyBindSourceForCC,
-          'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
-            'c': 'vim-mode-plus:inner-smart-word'
-      else
-        atom.keymaps.removeBindingsFromSource(keyBindSourceForCC)
+    setConditionalKeymap = (configParam, keymapSpec) ->
+      keymapSource = "vim-mode-plus-conditional-keymap:#{configParam}"
+      settings.observe configParam, (newValue) ->
+        # console.log configParam, newValue
+        if newValue
+          atom.keymaps.add(keymapSource, keymapSpec)
+        else
+          atom.keymaps.removeBindingsFromSource(keymapSource)
+
+    conditionalKeymaps =
+      keymapCCToChangeSmartWord:
+        'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
+          'c': 'vim-mode-plus:inner-smart-word'
+      keymapUnderscoreToReplaceWithRegister:
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          '_': 'vim-mode-plus:replace-with-register'
+      keymapSemicolonToInnerAnyPair:
+        'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
+          ';': 'vim-mode-plus:inner-any-pair'
+      keymapIToInsertStartOfTargetWhenCursorIsAtOccurrenceMarker:
+        'atom-text-editor.vim-mode-plus.at-occurrence:not(.insert-mode)':
+          'I': 'vim-mode-plus:insert-at-start-of-target'
+      keymapAToInsertStartOfTargetWhenCursorIsAtOccurrenceMarker:
+        'atom-text-editor.vim-mode-plus.at-occurrence:not(.insert-mode)':
+          'A': 'vim-mode-plus:insert-at-end-of-target'
+
+    for configParam, keymapSpec of conditionalKeymaps
+      @subscribe(setConditionalKeymap(configParam, keymapSpec))
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
