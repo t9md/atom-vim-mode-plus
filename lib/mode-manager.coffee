@@ -50,13 +50,16 @@ class ModeManager
       when 'insert' then @activateInsertMode(newSubmode)
       when 'visual' then @activateVisualMode(newSubmode)
 
-    unless newMode is 'visual'
-      swrap.clearProperties(@editor)
-
     @editorElement.classList.remove("#{@mode}-mode")
     @editorElement.classList.remove(@submode)
 
     [@mode, @submode] = [newMode, newSubmode]
+
+    if @mode is 'visual'
+      @updateNarrowedState()
+      @vimState.updatePreviousSelection()
+    else
+      swrap.clearProperties(@editor)
 
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
@@ -157,8 +160,6 @@ class ModeManager
     $selection.applyWise(submode) for $selection in swrap.getSelections(@editor)
 
     @vimState.getLastBlockwiseSelection().autoscroll() if submode is 'blockwise'
-    @updateNarrowedState()
-    @vimState.updatePreviousSelection()
 
     new Disposable =>
       swrap.normalize(@editor)

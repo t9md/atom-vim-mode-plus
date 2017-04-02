@@ -530,6 +530,11 @@ describe "Visual Blockwise", ->
     describe "linewise selection", ->
       beforeEach ->
         set cursor: [2, 0]
+      describe "immediately after V", ->
+        it 'restore previous selection', ->
+          ensureRestored 'V',
+            selectedText: textData.getLines([2])
+            mode: ['visual', 'linewise']
       describe "selection is not reversed", ->
         it 'restore previous selection', ->
           ensureRestored 'V j',
@@ -544,6 +549,11 @@ describe "Visual Blockwise", ->
     describe "characterwise selection", ->
       beforeEach ->
         set cursor: [2, 0]
+      describe "immediately after v", ->
+        it 'restore previous selection', ->
+          ensureRestored 'v',
+            selectedText: "2"
+            mode: ['visual', 'characterwise']
       describe "selection is not reversed", ->
         it 'restore previous selection', ->
           ensureRestored 'v j',
@@ -562,6 +572,13 @@ describe "Visual Blockwise", ->
             mode: ['visual', 'characterwise']
 
     describe "blockwise selection", ->
+      describe "immediately after ctrl-v", ->
+        beforeEach ->
+          set cursor: [2, 0]
+        it 'restore previous selection', ->
+          ensureRestored 'ctrl-v',
+            selectedText: "2"
+            mode: ['visual', 'blockwise']
       describe "selection is not reversed", ->
         it 'restore previous selection case-1', ->
           set cursor: [2, 5]
