@@ -54,9 +54,8 @@ class SelectionWrapper
     return if @selection.isReversed() is isReversed
     assertWithException(@hasProperties(), "trying to reverse selection which is non-empty and property-lesss")
 
-    if @hasProperties()
-      {head, tail} = @getProperties()
-      @setProperties(head: tail, tail: head)
+    {head, tail} = @getProperties()
+    @setProperties(head: tail, tail: head)
 
     @setBufferRange @getBufferRange(),
       autoscroll: true
@@ -106,12 +105,11 @@ class SelectionWrapper
   # 'wise' must be 'characterwise' or 'linewise'
   # Use this for normalized(non-select-right-ed) selection.
   applyWise: (wise) ->
-    assertWithException(@hasProperties(), "trying to applyWise #{wise} on properties-less selection")
     switch wise
       when 'characterwise'
         @translateSelectionEndAndClip('forward') # equivalent to core selection.selectRight but keep goalColumn
       when 'linewise'
-        # Even if end.column is 0, expand over that end.row( don't care selection.getRowRange() )
+        # Even if end.column is 0, expand over that end.row( don't use selection.getRowRange() )
         {start, end} = @getBufferRange()
         @setBufferRange(getBufferRangeForRowRange(@selection.editor, [start.row, end.row]))
       when 'blockwise'
