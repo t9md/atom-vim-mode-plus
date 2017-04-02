@@ -1,3 +1,8 @@
+# 0.86.2
+- Fix: #725 Now `v`( or `V` or `ctrl-v`) then `escape g v` correctly re-select previously selected range.
+- Improve: #726 Relax selection-property assertion.
+  - Fix: #716 No longer throw error when confirming color via color-picker then `escape`.
+
 # 0.86.0, 0.86.1(just changelog-typo-fix):
 - New: `insert-at-start-of-subword-occurrence` and `insert-at-end-of-subword-occurrence` command.
   - Start insert at start or end of `subword` occurrence.
