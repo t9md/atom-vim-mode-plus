@@ -77,19 +77,18 @@ class OperationStack
         else
           operation = new klass(@vimState, properties)
 
-      if @isEmpty()
-        isValidOperation = true
-        if (@mode is 'visual' and operation.isMotion()) or operation.isTextObject()
-          operation = new Select(@vimState).setTarget(operation)
-      else
-        isValidOperation = @peekTop().isOperator() and (operation.isMotion() or operation.isTextObject())
-
-      if isValidOperation
-        @stack.push(operation)
-        @process()
-      else
-        @vimState.emitDidFailToPushToOperationStack()
-        @vimState.resetNormalMode()
+      switch
+        when @isEmpty()
+          if (@mode is 'visual' and operation.isMotion()) or operation.isTextObject()
+            operation = new Select(@vimState).setTarget(operation)
+          @stack.push(operation)
+          @process()
+        when @peekTop().isOperator() and (operation.isMotion() or operation.isTextObject())
+          @stack.push(operation)
+          @process()
+        else
+          @vimState.emitDidFailToPushToOperationStack()
+          @vimState.resetNormalMode()
     catch error
       @handleError(error)
 
