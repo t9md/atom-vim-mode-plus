@@ -61,6 +61,19 @@ module.exports =
       else
         globalState.set('highlightSearchPattern', null)
 
+    @enableConditionalKeymap()
+
+  enableConditionalKeymap: ->
+    # Bollowed&modified from `tabs` core package
+    keyBindSourceForCC = 'vim-mode-plus-conditional-keymap:cc'
+    settings.observe "allowOverrideCCkeymap", (newValue) ->
+      if newValue
+        atom.keymaps.add keyBindSourceForCC,
+          'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
+            'c': 'vim-mode-plus:inner-smart-word'
+      else
+        atom.keymaps.removeBindingsFromSource(keyBindSourceForCC)
+
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
     atom.packages.onDidActivatePackage (pack) ->

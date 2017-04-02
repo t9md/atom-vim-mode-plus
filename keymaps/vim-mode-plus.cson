@@ -443,6 +443,20 @@
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
 
+# operator-pending for specific operator targeting.
+# -------------------------
+# comment-in by `g / /`
+'atom-text-editor.vim-mode-plus.toggle-line-comments-pending':
+  '/': 'vim-mode-plus:inner-comment'
+
+# `c d` to change subword, `y d` to yank subword without affecting `d d`
+'atom-text-editor.vim-mode-plus.operator-pending-mode:not(.delete-pending)':
+  'd': 'vim-mode-plus:inner-subword'
+
+# `d c` to delete current-smart-word, `y c` to change cursor-word.
+'atom-text-editor.vim-mode-plus.operator-pending-mode:not(.change-pending)':
+  'c': 'vim-mode-plus:inner-smart-word'
+
 # operator-pending, visual
 # -------------------------
 'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
