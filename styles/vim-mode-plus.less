@@ -242,10 +242,16 @@ atom-text-editor[mini].vim-mode-plus-search {
   }
 }
 
+@search-match-base: @syntax-result-marker-color;
+@search-match: hsla(hue(@search-match-base), saturation(@search-match-base), lightness(@search-match-base), 0.4);
+@search-match-border-current: hsla(hue(@search-match-base), saturation(@search-match-base), lightness(@search-match-base), 1.0);
+@search-match-border-first: syntax-color-renamed;
+@search-match-border-last: syntax-color-removed;
+
 atom-text-editor:not(.silent) {
   .vim-mode-plus-search-match {
     .region {
-      background-color: @syntax-result-marker-color;
+      background-color: @search-match;
     }
     &.first .region {
       background-color: fadeout(@syntax-color-renamed, 60%);
@@ -264,14 +270,14 @@ atom-text-editor {
       transition: border-color .2s;
     }
     &.current .region {
-      border-color: @syntax-result-marker-color-selected;
+      border-color: @search-match-border-current;
       transition-duration: .1s;
     }
     &.first.current .region {
-      border-color: @syntax-color-renamed;
+      border-color: search-match-border-first;
     }
     &.last.current .region {
-      border-color: @syntax-color-removed;
+      border-color: @search-match-border-last;
     }
   }
   .vim-mode-plus-highlight-search .region {
