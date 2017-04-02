@@ -118,7 +118,6 @@ class SelectionWrapper
         BlockwiseSelection ?= require './blockwise-selection'
         new BlockwiseSelection(@selection)
 
-  # [FIXME] Passed property is un-normalized this is breaking-consistency logic.
   selectByProperties: ({head, tail}) ->
     # No problem if head is greater than tail, Range constructor swap start/end.
     @setBufferRange [tail, head],
