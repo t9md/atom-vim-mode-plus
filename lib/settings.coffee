@@ -36,12 +36,12 @@ class Settings
     atom.config.observe "#{@scope}.#{param}", fn
 
 module.exports = new Settings 'vim-mode-plus',
-  allowOverrideCCkeymap:
-    title: "Allow Override CC Keymap"
-    default: true
+  keymapCCToChangeSmartWord:
+    title: "Keymap CC To Change Smart Word"
+    default: false
     description: """
     Disable this to `c c` behave as normal Vim.<br>
-    Enable this to `c c` to change-smart-word.<br>
+    Enable this to `c c` to `change inner-smart-word`.<br>
     """
   setCursorToStartOfChangeOnUndoRedo: true
   setCursorToStartOfChangeOnUndoRedoStrategy:

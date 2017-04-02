@@ -66,7 +66,7 @@ module.exports =
   enableConditionalKeymap: ->
     # Bollowed&modified from `tabs` core package
     keyBindSourceForCC = 'vim-mode-plus-conditional-keymap:cc'
-    settings.observe "allowOverrideCCkeymap", (newValue) ->
+    settings.observe "keymapCCToChangeSmartWord", (newValue) ->
       if newValue
         atom.keymaps.add keyBindSourceForCC,
           'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
