@@ -534,6 +534,7 @@
 
   'i e': 'vim-mode-plus:inner-entire'
   'a e': 'vim-mode-plus:a-entire'
+  'cmd-a': 'vim-mode-plus:inner-entire'
 
   # [NOTE] subject to change in future
   'i c': 'vim-mode-plus:inner-latest-change'
