@@ -164,8 +164,8 @@ class SelectionWrapper
     # empty selection IS already 'normalized'
     return if @selection.isEmpty()
     assertWithException(@hasProperties(), "attempted to normalize but no properties to restore")
-    @fixPropertyRowToRowRange()
-    @selectByProperties(@getProperties())
+    {head, tail} = @getProperties()
+    @setBufferRange([tail, head])
 
 swrap = (selection) ->
   new SelectionWrapper(selection)
