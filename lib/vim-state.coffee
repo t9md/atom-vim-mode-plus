@@ -8,13 +8,7 @@ _ = require 'underscore-plus'
 settings = require './settings'
 HoverManager = require './hover-manager'
 SearchInput = require './search-input'
-{
-  getVisibleEditors
-  matchScopes
-  assert
-  assertWithException
-  translatePointAndClip
-} = require './utils'
+{getVisibleEditors, matchScopes, translatePointAndClip} = require './utils'
 swrap = require './selection-wrapper'
 
 OperationStack = require './operation-stack'
@@ -86,12 +80,6 @@ class VimState
 
     @subscriptions.add @editor.onDidDestroy(@destroy.bind(this))
     @constructor.vimStatesByEditor.set(@editor, this)
-
-  assert: (args...) ->
-    assert(args...)
-
-  assertWithException: (args...) ->
-    assertWithException(args...)
 
   getConfig: (param) ->
     settings.get(param)

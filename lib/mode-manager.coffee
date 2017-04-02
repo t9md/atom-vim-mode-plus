@@ -149,8 +149,6 @@ class ModeManager
   # - When selectRight at end position of normalized-selection, it become un-normalized selection
   #   which is the range in visual-mode.
   activateVisualMode: (submode) ->
-    @vimState.assertWithException(submode?, "activate visual-mode without submode")
-
     for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
       $selection.saveProperties()
 

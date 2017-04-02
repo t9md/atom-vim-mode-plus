@@ -8,7 +8,6 @@ _ = require 'underscore-plus'
   setBufferRow
   moveCursorToFirstCharacterAtRow
   ensureEndsWithNewLineForBufferRow
-  assertWithException
 } = require './utils'
 swrap = require './selection-wrapper'
 Base = require './base'
