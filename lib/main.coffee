@@ -22,6 +22,9 @@ module.exports =
     @registerCommands()
     @registerVimStateCommands()
 
+    if atom.inSpecMode()
+      settings.set('strictAssertion', true)
+
     if atom.inDevMode()
       developer = new (require './developer')
       @subscribe(developer.init(service))

@@ -2,6 +2,7 @@ _ = require 'underscore-plus'
 
 {sortRanges, assertWithException, trimRange} = require './utils'
 swrap = require './selection-wrapper'
+settings = require './settings'
 
 class BlockwiseSelection
   editor: null
@@ -33,11 +34,14 @@ class BlockwiseSelection
     @blockwiseSelectionsByEditor.get(editor).push(blockwiseSelection)
 
   constructor: (selection) ->
-    assertWithException(swrap(selection).hasProperties(), "Trying to instantiate vB from properties-less selection")
     @needSkipNormalization = false
     @properties = {}
     @editor = selection.editor
     $selection = swrap(selection)
+    unless $selection.hasProperties()
+      if settings.get('strictAssertion')
+        assertWithException(false, "Trying to instantiate vB from properties-less selection")
+      $selection.saveProperties()
 
     @goalColumn = selection.cursor.goalColumn
     @reversed = memberReversed = selection.isReversed()

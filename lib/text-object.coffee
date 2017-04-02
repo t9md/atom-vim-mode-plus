@@ -580,8 +580,7 @@ class PreviousSelection extends TextObject
     {properties, submode} = @vimState.previousSelection
     if properties? and submode?
       @wise = submode
-      selection = @editor.getLastSelection()
-      swrap(selection).selectByProperties(properties, keepGoalColumn: false)
+      swrap(@editor.getLastSelection()).selectByProperties(properties)
       return true
 
 class PersistentSelection extends TextObject
