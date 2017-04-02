@@ -1,3 +1,23 @@
+# 0.86.0:
+- New: `inser-at-start-of-subword-occurrence` and `inser-at-end-of-subword-occurrence` command.
+  - Start insert at start or end of `subword` occurrence.
+  - E.g
+    - When I map `{`, and `}` to these command in `normal-mode`.
+      - `{ f`: start insert at each start of subword-occurrence within function.
+      - `} f`: start insert at each end of subword-occurrence within function.
+      - `{ p`: start insert at each start of subword-occurrence within paragraph.
+- Internal, Breaking: Remove `did-restore-cursor-positions` hook which was used in Operator code but no longer used.
+- Internal, Breaking: Remove many of simple accessor method like `getName`, `getOperator`, now just use `@name`, `@operator` to access these values.
+- Improve: Hide cursor on early select
+   - For `supportEarlySelect = true` operator( `surround`, `replace` ).
+   - These operator began to shows cursor on early-select from Atom v1.15, but now hide again for early-select timing.
+- Internal, Dev: #719 No longer use `HTMLElement` as search-input for speedy dev by hot-reload vmp.
+- Internal, Breaking: Move `InsertMode`(was in `insert-mode.coffee`) operations under `MiscCommands`( in `misc-commands.coffee`)
+- Improve: Keep original multi-cursor on occurrence operation by migrating mutation info.
+- Improve: Simplify mark manager and destroy all marker on `vimState.onDidDestroy`.
+- Improve: Clean up mutationManager.
+- Fix, Internal: Now do TYPE check for spec-helper's `ensure` function's argument, some test was silently skipped in previous release.
+
 # 0.85.1:
 - Fix, SUPER Critical: #175 Moving cursor in `visual-mode` make Atom editor really slow.
   - vmp's mark is stored as marker and was created limitlessly without destroying previous-marker.
