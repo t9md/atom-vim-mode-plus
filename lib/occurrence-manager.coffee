@@ -35,6 +35,10 @@ class OccurrenceManager
       else
         @clearMarkers()
 
+    @disposables.add @editor.onDidChangeCursorPosition ({cursor}) =>
+      if cursor.isLastCursor() and @hasMarkers()
+        @editorElement.classList.toggle("at-occurrence", @cursorIsAtOccurrenceMarker())
+
     @markerLayer.onDidUpdate(@destroyInvalidMarkers.bind(this))
 
   markBufferRangeByPattern: (pattern, occurrenceType) ->
@@ -52,7 +56,15 @@ class OccurrenceManager
       @markerLayer.markBufferRange(range, @markerOptions)
 
   updateEditorElement: ->
-    @editorElement.classList.toggle("has-occurrence", @hasMarkers())
+    hasMarkers = @hasMarkers()
+    @editorElement.classList.toggle("has-occurrence", hasMarkers)
+    if hasMarkers
+      @editorElement.classList.toggle("at-occurrence", @cursorIsAtOccurrenceMarker())
+    else
+      @editorElement.classList.remove("at-occurrence")
+
+  cursorIsAtOccurrenceMarker: ->
+    @getMarkerAtPoint(@editor.getCursorBufferPosition())?
 
   # Callback get passed following object
   # - pattern: can be undefined on reset event
@@ -127,7 +139,12 @@ class OccurrenceManager
       range.intersectsWith(marker.getBufferRange(), exclusive)
 
   getMarkerAtPoint: (point) ->
-    @markerLayer.findMarkers(containsBufferPosition: point)[0]
+    markers = @markerLayer.findMarkers(containsBufferPosition: point)
+    # We have to check all returned marker until found, since we do aditional marker validation.
+    # e.g. For text `abc()`, mark for `abc` and `(`. cursor on `(` char return multiple marker
+    # and we pick `(` by isGreaterThan check.
+    for marker in markers ? [] when marker.getBufferRange().end.isGreaterThan(point)
+      return marker
 
   # Select occurrence marker bufferRange intersecting current selections.
   # - Return: true/false to indicate success or fail
