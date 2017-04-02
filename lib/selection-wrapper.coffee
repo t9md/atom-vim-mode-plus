@@ -165,10 +165,10 @@ class SelectionWrapper
   normalize: ->
     # empty selection IS already 'normalized'
     return if @selection.isEmpty()
-    if settings.get('strictAssertion')
-      assertWithException(@hasProperties(), "attempted to normalize but no properties to restore")
-
-    @saveProperties() unless @hasProperties()
+    unless @hasProperties()
+      if settings.get('strictAssertion')
+        assertWithException(false, "attempted to normalize but no properties to restore")
+      @saveProperties()
     {head, tail} = @getProperties()
     @setBufferRange([tail, head])
 

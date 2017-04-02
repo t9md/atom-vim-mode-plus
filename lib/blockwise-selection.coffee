@@ -38,9 +38,9 @@ class BlockwiseSelection
     @properties = {}
     @editor = selection.editor
     $selection = swrap(selection)
-    if settings.get('strictAssertion')
-      assertWithException($selection.hasProperties(), "Trying to instantiate vB from properties-less selection")
-    else
+    unless $selection.hasProperties()
+      if settings.get('strictAssertion')
+        assertWithException(false, "Trying to instantiate vB from properties-less selection")
       $selection.saveProperties()
 
     @goalColumn = selection.cursor.goalColumn
