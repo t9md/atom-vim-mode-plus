@@ -1,3 +1,6 @@
+# 0.86.3
+- Improve: #727 Tweak incremental-search match highlight style to not hide covering text in some syntax-theme.
+
 # 0.86.2
 - Fix: #725 Now `v`( or `V` or `ctrl-v`) then `escape g v` correctly re-select previously selected range.
 - Improve: #726 Relax selection-property assertion.
