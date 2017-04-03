@@ -375,6 +375,7 @@ class VimState
 
   demoToggle: (options) ->
     Demo ?= require './demo'
+
     if @demo?
       @demo.destroy()
       @demo = null

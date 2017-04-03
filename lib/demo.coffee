@@ -21,6 +21,12 @@ class Demo
     @disposables.add atom.keymaps.onDidMatchBinding (event) =>
       return unless atom.workspace.getActiveTextEditor() is @editor
       @add(event.binding)
+
+    # @disposables.add @editor.onDidChangeCursorPosition =>
+    #   @marker?.destroy()
+    #   if container = @getContainer()
+    #     @render(container)
+
     @disposables.add @editorElement.onDidChangeScrollTop =>
       @marker?.destroy()
       if container = @getContainer()
@@ -62,6 +68,7 @@ class Demo
     @marker?.destroy()
     screenRow = @editorElement.getFirstVisibleScreenRow()
     point = @editor.bufferPositionForScreenPosition([screenRow, 0])
+    # point = @editor.getCursorScreenPosition()
     @marker = @editor.markBufferPosition(point, invalidate: 'never')
     @editor.decorateMarker(@marker, {type: 'overlay', item: item})
 
