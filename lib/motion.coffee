@@ -35,6 +35,7 @@ Base = require './base'
 
 class Motion extends Base
   @extend(false)
+  @operationKind: 'motion'
   inclusive: false
   wise: 'characterwise'
   jump: false

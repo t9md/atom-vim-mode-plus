@@ -23,6 +23,7 @@ HighlightSearchManager = require './highlight-search-manager'
 MutationManager = require './mutation-manager'
 PersistentSelectionManager = require './persistent-selection-manager'
 FlashManager = require './flash-manager'
+Demo = null
 
 packageScope = 'vim-mode-plus'
 
@@ -205,7 +206,8 @@ class VimState
     @searchHistory?.destroy?()
     @cursorStyleManager?.destroy?()
     @search?.destroy?()
-    @register?.destroy?
+    @register?.destroy()?
+    @demo?.destroy()
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
@@ -285,6 +287,7 @@ class VimState
         @globalState.set('highlightSearchPattern', null)
     else
       @clearSelections()
+
     @activate('normal')
 
   init: ->
@@ -369,3 +372,14 @@ class VimState
 
   getOriginalCursorPositionByMarker: ->
     @originalCursorPositionByMarker.getStartBufferPosition()
+
+
+  demoStart: ->
+    Demo ?= require './demo'
+    @demoStop()
+    @demo = new Demo(this)
+
+  demoStop: -> @demo?.destroy()
+  demoReset: -> @demo?.reset()
+  demoCancel: -> @demo?.cancelReset()
+  demoResetImmediate: -> @demo?.resetImmediate()
