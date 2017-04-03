@@ -331,3 +331,37 @@ atom-workspace.vim-mode-plus--pane-maximized {
     font-weight: bold;
   }
 }
+
+// Demo mode overlay
+// =========================
+.vim-mode-plus-demo {
+  display: block;
+  min-width: 25em;
+  color: @text-color-highlight;
+  background-color: @base-background-color;
+  border-radius: @component-border-radius;
+  box-shadow: 0 0 1px @syntax-text-color;
+
+  padding: 0.3em 1em;
+  font-size: 1.2em;
+
+  .binding {
+    span {
+      display: inline-block;;
+      padding-left: 0.2em;
+      padding-right: 0.2em;
+    }
+  }
+
+  .keystroke {
+    min-width: 3em;
+    font-weight: bold;
+    color: @text-color-warning;
+  }
+  .command {
+    // min-width: 25px;
+  }
+  .kind {
+    color: @text-color-selected;
+  }
+}

@@ -46,7 +46,7 @@ class Demo
       screenRow = @editorElement.getFirstVisibleScreenRow()
       point = @editor.bufferPositionForScreenPosition([screenRow, 0])
       @container = document.createElement('div')
-      @container.className = 'keystroke-hover'
+      @container.className = 'vim-mode-plus-demo'
       @marker = @editor.markBufferPosition(point, invalidate: 'never')
       @editor.decorateMarker(@marker, {type: 'overlay', item: @container})
 
