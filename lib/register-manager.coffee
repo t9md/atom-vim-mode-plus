@@ -61,7 +61,7 @@ class RegisterManager
 
   get: (name, selection) ->
     name ?= @getName()
-    name = @vimState.getConfig('defaultRegisterName') if name is '"'
+    name = @getNameForDefaultRegister() if name is '"'
 
     switch name
       when '*', '+' then text = @readClipboard(selection)
@@ -88,7 +88,7 @@ class RegisterManager
 
     name ?= @getName()
     return unless @isValidName(name)
-    name = @vimState.getConfig('defaultRegisterName') if name is '"'
+    name = @getNameForDefaultRegister() if name is '"'
     value.type ?= @getCopyType(value.text)
 
     selection = value.selection
@@ -118,10 +118,16 @@ class RegisterManager
     register.text += value.text
 
   getName: ->
-    @name ? @vimState.getConfig('defaultRegisterName')
+    @name ? @getNameForDefaultRegister()
+
+  getNameForDefaultRegister: ->
+    if @vimState.getConfig('useClipboardAsDefaultRegister')
+      '*'
+    else
+      '"'
 
   isDefaultName: ->
-    @getName() is @vimState.getConfig('defaultRegisterName')
+    @getName() is @getNameForDefaultRegister()
 
   hasName: ->
     @name?

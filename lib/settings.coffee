@@ -21,19 +21,16 @@ class Settings
       @config[name].order = i
 
   get: (param) ->
-    if param is 'defaultRegisterName'
-      if @get('useClipboardAsDefaultRegister') then '*' else '"'
-    else
-      atom.config.get "#{@scope}.#{param}"
+    atom.config.get("#{@scope}.#{param}")
 
   set: (param, value) ->
-    atom.config.set "#{@scope}.#{param}", value
+    atom.config.set("#{@scope}.#{param}", value)
 
   toggle: (param) ->
     @set(param, not @get(param))
 
   observe: (param, fn) ->
-    atom.config.observe "#{@scope}.#{param}", fn
+    atom.config.observe("#{@scope}.#{param}", fn)
 
 module.exports = new Settings 'vim-mode-plus',
   keymapCCToChangeSmartWord:
