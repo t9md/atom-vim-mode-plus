@@ -103,7 +103,7 @@ module.exports = new Settings 'vim-mode-plus',
     default: true
     description: 'Clear highlightSearch on `escape` in normal-mode'
   clearPersistentSelectionOnResetNormalMode:
-    default: false
+    default: true
     description: 'Clear persistentSelection on `escape` in normal-mode'
   charactersToAddSpaceOnSurround:
     default: []
