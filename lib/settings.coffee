@@ -125,7 +125,7 @@ module.exports = new Settings 'vim-mode-plus',
   useSmartcaseForSearchCurrentWord:
     default: false
     description: 'For `*` and `#`. Override `ignoreCaseForSearchCurrentWord`'
-  highlightSearch: false
+  highlightSearch: true
   highlightSearchExcludeScopes:
     default: []
     items: type: 'string'
