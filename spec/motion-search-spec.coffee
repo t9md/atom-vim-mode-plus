@@ -254,17 +254,18 @@ describe "Motion Search", ->
           expect(vimState.highlightSearch.hasMarkers()).toBe(false)
 
       describe "clearHighlightSearchOnResetNormalMode", ->
-        describe "default setting", ->
+        describe "when disabled", ->
           it "it won't clear highlightSearch", ->
+            settings.set('clearHighlightSearchOnResetNormalMode', false)
             ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
-            dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
+            ensure "escape", mode: 'normal'
             ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
 
         describe "when enabled", ->
           it "it clear highlightSearch on reset-normal-mode", ->
             settings.set('clearHighlightSearchOnResetNormalMode', true)
             ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
-            dispatch(editorElement, 'vim-mode-plus:reset-normal-mode')
+            ensure "escape", mode: 'normal'
             expect(vimState.highlightSearch.hasMarkers()).toBe(false)
             ensure mode: 'normal'
 

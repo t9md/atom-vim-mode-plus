@@ -100,7 +100,7 @@ module.exports = new Settings 'vim-mode-plus',
       To ignore "-"(minus) char in string like "identifier-1" use `(?:\\B-)?[0-9]+`
       """
   clearHighlightSearchOnResetNormalMode:
-    default: false
+    default: true
     description: 'Clear highlightSearch on `escape` in normal-mode'
   clearPersistentSelectionOnResetNormalMode:
     default: false
