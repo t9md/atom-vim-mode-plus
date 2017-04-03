@@ -654,6 +654,9 @@ describe "Operator general", ->
         ensure ['"', input: 'A', 'y y'], register: a: text: "012 345\n012 345\n"
 
     describe "with a motion", ->
+      beforeEach ->
+        settings.set('useClipboardAsDefaultRegister', false)
+
       it "yank from here to destnation of motion", ->
         ensure 'y e', cursor: [0, 4], register: {'"': text: '345'}
 
@@ -810,6 +813,8 @@ describe "Operator general", ->
   describe "the p keybinding", ->
     describe "with single line character contents", ->
       beforeEach ->
+        settings.set('useClipboardAsDefaultRegister', false)
+
         set textC: "|012\n"
         set register: '"': text: '345'
         set register: 'a': text: 'a'

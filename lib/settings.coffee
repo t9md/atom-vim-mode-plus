@@ -21,7 +21,7 @@ class Settings
       @config[name].order = i
 
   get: (param) ->
-    if param is 'defaultRegister'
+    if param is 'defaultRegisterName'
       if @get('useClipboardAsDefaultRegister') then '*' else '"'
     else
       atom.config.get "#{@scope}.#{param}"
@@ -84,7 +84,7 @@ module.exports = new Settings 'vim-mode-plus',
     `simple`: Always work, but accuracy is not as good as `smart`.<br>
     """
   groupChangesWhenLeavingInsertMode: true
-  useClipboardAsDefaultRegister: false
+  useClipboardAsDefaultRegister: true
   startInInsertMode: false
   startInInsertModeScopes:
     default: []

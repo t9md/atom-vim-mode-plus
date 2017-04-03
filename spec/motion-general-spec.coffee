@@ -390,6 +390,7 @@ describe "Motion general", ->
   describe 'moveSuccessOnLinewise behaviral characteristic', ->
     originalText = null
     beforeEach ->
+      settings.set('useClipboardAsDefaultRegister', false)
       set
         text: """
           000
