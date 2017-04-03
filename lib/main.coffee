@@ -185,7 +185,9 @@ module.exports =
       'set-count-9': -> @setCount(9)
 
       'demo-toggle': -> @demoToggle()
-      'demo-toggle-auto-hide': -> @demoToggle(autoHide: true)
+      'demo-toggle-with-auto-hide': -> @demoToggle(autoHide: true)
+      'demo-stop-or-start-auto-hide': -> @demoStopOrStartAutoHide()
+      'demo-clear': -> @demoClear()
 
     chars = [32..126].map (code) -> String.fromCharCode(code)
     for char in chars

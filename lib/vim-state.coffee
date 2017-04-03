@@ -380,3 +380,10 @@ class VimState
       @demo = null
     else
       @demo = new Demo(this, options)
+
+  demoStopOrStartAutoHide: ->
+    if @demo?
+      @demo.stopOrStartAutoHide()
+
+  demoClear: ->
+    @demo.clear() if @demo?

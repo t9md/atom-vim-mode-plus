@@ -2,6 +2,12 @@
 _ = require 'underscore-plus'
 Base = require './base'
 
+DemoCommands = [
+  'vim-mode-plus:demo-toggle'
+  'vim-mode-plus:demo-toggle-with-auto-hide'
+  'vim-mode-plus:demo-stop-or-start-auto-hide'
+  'vim-mode-plus:demo-clear'
+]
 MaxKeystrokeToShows = 5
 module.exports =
 class Demo
@@ -60,7 +66,7 @@ class Demo
     @editor.decorateMarker(@marker, {type: 'overlay', item: item})
 
   add: ({keystrokes, command}) ->
-    return if command in ['vim-mode-plus:demo-toggle', 'vim-mode-plus:demo-toggle-auto-hide']
+    return if command in DemoCommands
 
     if @autoHide
       @hideAfter(@vimState.getConfig('demoAutoHideTimeout'))
@@ -73,15 +79,31 @@ class Demo
       container.firstElementChild.remove()
     @render(container) unless @marker?
 
-   hideAfter: (timeout) ->
-     clearTimeout(@autoHideTimeoutID) if @autoHideTimeoutID?
-     hideCallback = =>
-       @autoHideTimeoutID = null
-       @container?.remove()
-       @marker?.destroy()
-       @marker = null
-       @container = null
-     @autoHideTimeoutID = setTimeout(hideCallback, timeout)
+  hideAfter: (timeout) ->
+    clearTimeout(@autoHideTimeoutID) if @autoHideTimeoutID?
+    hideCallback = =>
+      @autoHideTimeoutID = null
+      @container?.remove()
+      @marker?.destroy()
+      @marker = null
+      @container = null
+    @autoHideTimeoutID = setTimeout(hideCallback, timeout)
+
+  stopOrStartAutoHide: ->
+    if @autoHide
+      # Stop scheduled auto hide task to keep it display.
+      clearTimeout(@autoHideTimeoutID) if @autoHideTimeoutID?
+      @autoHide = false
+    else
+      @clear()
+      @autoHide = true
+
+  clear: ->
+    clearTimeout(@autoHideTimeoutID) if @autoHideTimeoutID?
+    @container?.remove()
+    @marker?.destroy()
+    @marker = null
+    @container = null
 
   destroy: ->
     @disposables.dispose()
