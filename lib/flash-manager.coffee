@@ -68,6 +68,10 @@ class FlashManager
     {type, timeout} = options
     timeout ?= 1000
 
+    # HACK: in demo mode, replace flash type for longer flash
+    if @vimState.demo? and type is 'operator'
+      type = 'operator-long'
+
     {allowMultiple, decorationOptions} = flashTypes[type]
     markerOptions = {invalidate: 'touch'}
 

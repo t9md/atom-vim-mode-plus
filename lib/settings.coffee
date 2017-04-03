@@ -163,3 +163,7 @@ module.exports = new Settings 'vim-mode-plus',
   strictAssertion:
     default: false
     description: "[Dev use] to catche wired state in vmp-dev, enable this if you want help me"
+  demoAutoHideTimeout:
+    default: 1000
+  demoMaxKeystrokeToShow:
+    default: 5

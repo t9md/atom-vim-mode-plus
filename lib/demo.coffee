@@ -3,10 +3,11 @@ _ = require 'underscore-plus'
 Base = require './base'
 
 MaxKeystrokeToShows = 5
-AutoHideTimeout = 2000
 module.exports =
 class Demo
-  constructor: (@vimState) ->
+  constructor: (@vimState, options={}) ->
+    {@autoHide} = options
+    @maxKeystrokes = @vimState.getConfig('demoMaxKeystrokeToShow')
     {@editor, @editorElement} = @vimState
     @showKeystrokeDisposable = null
     @disposables = new CompositeDisposable
@@ -14,6 +15,10 @@ class Demo
     @disposables.add atom.keymaps.onDidMatchBinding (event) =>
       return unless atom.workspace.getActiveTextEditor() is @editor
       @add(event.binding)
+    @disposables.add @editorElement.onDidChangeScrollTop =>
+      @marker?.destroy()
+      if container = @getContainer()
+        @render(container)
 
   elementForKeystroke: ({command, keystrokes, kind}) ->
     commandShort = command.replace(/^vim-mode-plus:/, '')
@@ -39,41 +44,46 @@ class Demo
     else
       'non-vmp'
 
-  add: ({keystrokes, command}) ->
-    return if command in ['vim-mode-plus:demo-start', 'vim-mode-plus:demo-reset']
-
-    unless @marker?
-      screenRow = @editorElement.getFirstVisibleScreenRow()
-      point = @editor.bufferPositionForScreenPosition([screenRow, 0])
+  getContainer: ->
+    if @container?
+      @container
+    else
       @container = document.createElement('div')
       @container.className = 'vim-mode-plus-demo'
-      @marker = @editor.markBufferPosition(point, invalidate: 'never')
-      @editor.decorateMarker(@marker, {type: 'overlay', item: @container})
+      @container
+
+  render: (item) ->
+    @marker?.destroy()
+    screenRow = @editorElement.getFirstVisibleScreenRow()
+    point = @editor.bufferPositionForScreenPosition([screenRow, 0])
+    @marker = @editor.markBufferPosition(point, invalidate: 'never')
+    @editor.decorateMarker(@marker, {type: 'overlay', item: item})
+
+  add: ({keystrokes, command}) ->
+    return if command in ['vim-mode-plus:demo-toggle', 'vim-mode-plus:demo-toggle-auto-hide']
+
+    if @autoHide
+      @hideAfter(@vimState.getConfig('demoAutoHideTimeout'))
 
     kind = @getKindForCommand(command)
+    container = @getContainer()
     element = @elementForKeystroke({keystrokes, command, kind})
-    if @container.childElementCount >= (MaxKeystrokeToShows - 1)
-      @container.firstElementChild.remove()
-    @container.appendChild(element)
+    container.appendChild(element)
+    if container.childElementCount > @maxKeystrokes
+      container.firstElementChild.remove()
+    @render(container) unless @marker?
 
-   reset: ->
-     @cancelReset()
-     resetCallback = =>
-       @resetTimeoutID = null
-       @resetImmediate()
-     @resetTimeoutID = setTimeout(resetCallback, AutoHideTimeout)
-
-  cancelReset: ->
-    clearTimeout(@resetTimeoutID) if @resetTimeoutID?
-
-  resetImmediate: ->
-    @cancelReset()
-    @container?.remove()
-    @marker?.destroy()
-    @marker = null
+   hideAfter: (timeout) ->
+     clearTimeout(@autoHideTimeoutID) if @autoHideTimeoutID?
+     hideCallback = =>
+       @autoHideTimeoutID = null
+       @container?.remove()
+       @marker?.destroy()
+       @marker = null
+       @container = null
+     @autoHideTimeoutID = setTimeout(hideCallback, timeout)
 
   destroy: ->
-    # console.log 'destroyed'
     @disposables.dispose()
     @marker?.destroy()
     @container?.remove()

@@ -373,13 +373,10 @@ class VimState
   getOriginalCursorPositionByMarker: ->
     @originalCursorPositionByMarker.getStartBufferPosition()
 
-
-  demoStart: ->
+  demoToggle: (options) ->
     Demo ?= require './demo'
-    @demoStop()
-    @demo = new Demo(this)
-
-  demoStop: -> @demo?.destroy()
-  demoReset: -> @demo?.reset()
-  demoCancel: -> @demo?.cancelReset()
-  demoResetImmediate: -> @demo?.resetImmediate()
+    if @demo?
+      @demo.destroy()
+      @demo = null
+    else
+      @demo = new Demo(this, options)
