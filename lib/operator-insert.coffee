@@ -187,7 +187,7 @@ class InsertAboveWithNewline extends ActivateInsertMode
 
   adjustIndent: ->
     currentRow = @editor.getCursorBufferPosition().row
-    if currentRow > 0 and @editor.lineTextForBufferRow(currentRow - 1) == ''
+    if currentRow > 0 and @editor.lineTextForBufferRow(currentRow - 1) is ''
       @editor.autoIndentBufferRow(currentRow)
 
   mutateText: ->
