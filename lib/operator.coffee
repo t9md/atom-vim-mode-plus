@@ -638,6 +638,9 @@ class PutBeforeWithAutoIndent extends PutBefore
       if @editor.lineTextForBufferRow(bufferRow) isnt ''
         actualIndent = Math.min(actualIndent, getIndentLevelForBufferRow(@editor, bufferRow))
 
+    # The user put blank lines only, prevent autoIndent
+    return newRange if actualIndent is Number.MAX_SAFE_INTEGER
+
     indentDelta = neededIndent - actualIndent
 
     if indentDelta > 0
