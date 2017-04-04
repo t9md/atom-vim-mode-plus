@@ -2,13 +2,13 @@
 settings = require '../lib/settings'
 
 describe "Operator general", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, ensureOperation, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure, ensureOperation, keystroke} = vim
 
   afterEach ->
     vimState.globalState.reset('register')
@@ -871,9 +871,6 @@ describe "Operator general", ->
       it "P place cursor at start of mutation", -> ensure "P", textC: "|345\n678012\n"
 
     describe "with linewise contents", ->
-      beforeEach ->
-        editor.autoIndentOnPaste = false
-
       describe "on a single line", ->
         beforeEach ->
           set
@@ -922,36 +919,8 @@ describe "Operator general", ->
              |456\n
             """
 
-    describe "with linewise contents and autoIndentOnPaste", ->
-      indentText = ''
-
-      beforeEach ->
-        waitsForPromise ->
-          atom.packages.activatePackage('language-javascript')
-        runs ->
-          indentText = editor.buildIndentString(1)
-          editor.autoIndentOnPaste = true
-          set
-            grammar: 'source.js'
-
-      describe "on a single line", ->
-        beforeEach ->
-          set
-            textC: 'if| () {\n}'
-            register: '"': {text: " 345\n", type: 'linewise'}
-            grammar: 'source.js'
-
-        it "inserts the contents of the default register", ->
-          ensure 'p',
-            textC_: """
-            if () {
-            #{editor.buildIndentString(1)}|345
-            }
-            """
-
     describe "with multiple linewise contents", ->
       beforeEach ->
-        editor.autoIndentOnPaste = false
         set
           textC: """
           012
@@ -968,13 +937,53 @@ describe "Operator general", ->
            678\n
           """
 
-    describe "with multiple linewise contents and autoIndentOnPaste", ->
+    describe "with linewise contents and putting with auto indent", ->
+      indentText = ''
+
       beforeEach ->
         waitsForPromise ->
           atom.packages.activatePackage('language-javascript')
         runs ->
           indentText = editor.buildIndentString(1)
-          editor.autoIndentOnPaste = true
+          set
+            grammar: 'source.js'
+
+      describe "on a single line with leading spaces", ->
+        beforeEach ->
+          set
+            textC: 'if| () {\n}'
+            register: '"': {text: " 345\n", type: 'linewise'}
+            grammar: 'source.js'
+
+        it "inserts the contents of the default register", ->
+          ensureOperation 'vim-mode-plus:put-after-with-auto-indent',
+            textC_: """
+            if () {
+            #{editor.buildIndentString(1)}|345
+            }
+            """
+
+      describe "on a single line without leading spaces", ->
+        beforeEach ->
+          set
+            textC: 'if| () {\n}'
+            register: '"': {text: "345\n", type: 'linewise'}
+            grammar: 'source.js'
+
+        it "inserts the contents of the default register", ->
+          ensureOperation 'vim-mode-plus:put-after-with-auto-indent',
+            textC_: """
+            if () {
+            #{editor.buildIndentString(1)}|345
+            }
+            """
+
+    describe "with multiple linewise contents and putting with auto indent", ->
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage('language-javascript')
+        runs ->
+          indentText = editor.buildIndentString(1)
           set
             grammar: 'source.js'
             textC: """
@@ -990,13 +999,43 @@ describe "Operator general", ->
             """, type: 'linewise'}
 
       it "inserts the contents of the default register", ->
-        ensure 'p',
+        ensureOperation 'vim-mode-plus:put-after-with-auto-indent',
           textC: """
           if (1) {
           #{editor.buildIndentString(1)}if (2) {
           #{editor.buildIndentString(2)}|if(3) {
           #{editor.buildIndentString(3)}if(4) {}
           #{editor.buildIndentString(2)}}
+          #{editor.buildIndentString(1)}}
+          }
+          """
+
+    describe "with multiple offset linewise contents and putting with auto indent", ->
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage('language-javascript')
+        runs ->
+          indentText = editor.buildIndentString(1)
+          set
+            grammar: 'source.js'
+            textC: """
+            if (1) {
+            #{editor.buildIndentString(1)}|if (2) {
+            #{editor.buildIndentString(1)}}
+            }
+            """
+            register: '"': {text: """
+               a: 123,
+            bbbb: 456,
+            """, type: 'linewise'}
+
+      it "inserts the contents of the default register", ->
+        ensureOperation 'vim-mode-plus:put-after-with-auto-indent',
+          textC: """
+          if (1) {
+          #{editor.buildIndentString(1)}if (2) {
+          #{editor.buildIndentString(2)}   |a: 123,
+          #{editor.buildIndentString(2)}bbbb: 456,
           #{editor.buildIndentString(1)}}
           }
           """
