@@ -1040,6 +1040,42 @@ describe "Operator general", ->
           }
           """
 
+    describe "with multiple linewise contents with blanks and putting with auto indent", ->
+      beforeEach ->
+        waitsForPromise ->
+          atom.packages.activatePackage('language-javascript')
+        runs ->
+          indentText = editor.buildIndentString(1)
+          set
+            grammar: 'source.js'
+            textC: """
+            if (1) {
+            #{editor.buildIndentString(1)}|if (2) {
+            #{editor.buildIndentString(1)}}
+            }
+            """
+            register: '"': {text: """
+            if(3) {
+            #{editor.buildIndentString(1)}abc
+            #{''}
+            #{editor.buildIndentString(1)}def
+            }
+            """, type: 'linewise'}
+
+      it "inserts the contents of the default register", ->
+        ensureOperation 'vim-mode-plus:put-after-with-auto-indent',
+          textC: """
+          if (1) {
+          #{editor.buildIndentString(1)}if (2) {
+          #{editor.buildIndentString(2)}|if(3) {
+          #{editor.buildIndentString(3)}abc
+          #{editor.buildIndentString(2)}
+          #{editor.buildIndentString(3)}def
+          #{editor.buildIndentString(2)}}
+          #{editor.buildIndentString(1)}}
+          }
+          """
+
     describe "pasting twice", ->
       beforeEach ->
         set

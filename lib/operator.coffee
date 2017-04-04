@@ -635,7 +635,8 @@ class PutBeforeWithAutoIndent extends PutBefore
     # varFortyTwo: value
     actualIndent = Number.MAX_SAFE_INTEGER
     for bufferRow in [newRange.start.row..newRange.end.row - 1]
-      actualIndent = Math.min(actualIndent, getIndentLevelForBufferRow(@editor, bufferRow))
+      if @editor.lineTextForBufferRow(bufferRow) isnt ''
+        actualIndent = Math.min(actualIndent, getIndentLevelForBufferRow(@editor, bufferRow))
 
     indentDelta = neededIndent - actualIndent
 
