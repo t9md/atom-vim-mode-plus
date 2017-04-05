@@ -624,34 +624,37 @@ class PutBeforeWithAutoIndent extends PutBefore
   @extend()
 
   pasteLinewise: (selection, text) ->
-    newRange = super(selection, text)
+    newRange = super
 
-    neededIndent = @editor.suggestedIndentForBufferRow(newRange.start.row)
+    [startRow, endRow] = [newRange.start.row, newRange.end.row]
+    suggestedIndentLevel = @editor.suggestedIndentForBufferRow(startRow)
 
     # We must calculate the min here to ensure we're not deleting non-space characters from the line.
     # This occurs if the register contents has greater indentation on the first line than the others,
     # such as:
     #      varOne: value
     # varFortyTwo: value
-    actualIndent = Number.MAX_SAFE_INTEGER
-    for bufferRow in [newRange.start.row..newRange.end.row - 1]
-      if @editor.lineTextForBufferRow(bufferRow) isnt ''
-        actualIndent = Math.min(actualIndent, getIndentLevelForBufferRow(@editor, bufferRow))
+    minIndentLevel = null
+    for row in [startRow...endRow] when not isEmptyRow(@editor, row)
+      indentLevel = getIndentLevelForBufferRow(@editor, row)
+      if minIndentLevel?
+        minIndentLevel = Math.min(minIndentLevel, indentLevel)
+      else
+        minIndentLevel = indentLevel
 
     # The user put blank lines only, prevent autoIndent
-    return newRange if actualIndent is Number.MAX_SAFE_INTEGER
+    return newRange unless minIndentLevel?
 
-    indentDelta = neededIndent - actualIndent
+    indentDelta = suggestedIndentLevel - minIndentLevel
 
     if indentDelta > 0
       indentText = @editor.buildIndentString(indentDelta)
-      for bufferRow in [newRange.start.row..newRange.end.row - 1]
-        insertTextAtBufferPosition(@editor, [bufferRow, 0], indentText)
+      for row in [startRow...endRow]
+        insertTextAtBufferPosition(@editor, [row, 0], indentText)
     else if indentDelta < 0
       charsToRemove = @editor.buildIndentString(Math.abs(indentDelta)).length
-      for bufferRow in [newRange.start.row..newRange.end.row - 1]
-        @editor.setTextInBufferRange([[bufferRow, 0], [bufferRow, charsToRemove]], '')
-
+      for row in [startRow...endRow]
+        @editor.setTextInBufferRange([[row, 0], [row, charsToRemove]], '')
     return newRange
 
 class PutAfterWithAutoIndent extends PutBeforeWithAutoIndent
