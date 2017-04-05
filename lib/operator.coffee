@@ -640,16 +640,16 @@ class PutBeforeWithAutoIndent extends PutBefore
     [startRow, endRow] = [newRange.start.row, newRange.end.row]
     suggestedLevel = @editor.suggestedIndentForBufferRow(startRow)
     minLevel = null
-    rowAndDetectedLevels = []
+    rowAndActualLevels = []
     for row in [startRow...endRow]
-      detectedLevel = getIndentLevelForBufferRow(@editor, row)
-      rowAndDetectedLevels.push([row, detectedLevel])
+      actualLevel = getIndentLevelForBufferRow(@editor, row)
+      rowAndActualLevels.push([row, actualLevel])
       unless isEmptyRow(@editor, row)
-        minLevel = Math.min(minLevel ? Infinity, detectedLevel)
+        minLevel = Math.min(minLevel ? Infinity, actualLevel)
 
-    if minLevel? and (levelDeltaToSuggestedLevel = suggestedLevel - minLevel)
-      for [row, detectedLevel] in rowAndDetectedLevels
-        newLevel = detectedLevel + levelDeltaToSuggestedLevel
+    if minLevel? and (deltaToSuggestedLevel = suggestedLevel - minLevel)
+      for [row, actualLevel] in rowAndActualLevels
+        newLevel = actualLevel + deltaToSuggestedLevel
         @editor.setIndentationForBufferRow(row, newLevel)
     return newRange
 
