@@ -625,36 +625,30 @@ class PutBeforeWithAutoIndent extends PutBefore
 
   pasteLinewise: (selection, text) ->
     newRange = super
-
+    # Adjust indentLevel with keeping original layout of pasting text.
+    # Suggested indent level of newRange.start.row is correct as long as newRange.start.row have minimum indent level.
+    # When we paste following already indented two-line text, we can't apply suggested level naively.
+    #
+    #        varOne: value
+    #   varFortyTwo: value
+    #
+    # So what we are doing here is apply suggestedIndentLevel with fixing issue above.
+    # 1. Determine minimum indent level among pasted range(= newRange ) excluding empty row
+    # 2. Then update indentLevel of each rows to final indentLevel of minimum-indented row have suggestedIndentLevel.
     [startRow, endRow] = [newRange.start.row, newRange.end.row]
-    suggestedIndentLevel = @editor.suggestedIndentForBufferRow(startRow)
+    suggestedLevel = @editor.suggestedIndentForBufferRow(startRow)
+    minLevel = null
+    rowAndDetectedLevels = []
+    for row in [startRow...endRow]
+      detectedLevel = getIndentLevelForBufferRow(@editor, row)
+      rowAndDetectedLevels.push([row, detectedLevel])
+      unless isEmptyRow(@editor, row)
+        minLevel = Math.min(minLevel ? Infinity, detectedLevel)
 
-    # We must calculate the min here to ensure we're not deleting non-space characters from the line.
-    # This occurs if the register contents has greater indentation on the first line than the others,
-    # such as:
-    #      varOne: value
-    # varFortyTwo: value
-    minIndentLevel = null
-    for row in [startRow...endRow] when not isEmptyRow(@editor, row)
-      indentLevel = getIndentLevelForBufferRow(@editor, row)
-      if minIndentLevel?
-        minIndentLevel = Math.min(minIndentLevel, indentLevel)
-      else
-        minIndentLevel = indentLevel
-
-    # The user put blank lines only, prevent autoIndent
-    return newRange unless minIndentLevel?
-
-    indentDelta = suggestedIndentLevel - minIndentLevel
-
-    if indentDelta > 0
-      indentText = @editor.buildIndentString(indentDelta)
-      for row in [startRow...endRow]
-        insertTextAtBufferPosition(@editor, [row, 0], indentText)
-    else if indentDelta < 0
-      charsToRemove = @editor.buildIndentString(Math.abs(indentDelta)).length
-      for row in [startRow...endRow]
-        @editor.setTextInBufferRange([[row, 0], [row, charsToRemove]], '')
+    if minLevel? and (levelDeltaToSuggestedLevel = suggestedLevel - minLevel)
+      for [row, detectedLevel] in rowAndDetectedLevels
+        newLevel = detectedLevel + levelDeltaToSuggestedLevel
+        @editor.setIndentationForBufferRow(row, newLevel)
     return newRange
 
 class PutAfterWithAutoIndent extends PutBeforeWithAutoIndent
