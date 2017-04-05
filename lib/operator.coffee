@@ -627,10 +627,12 @@ class PutBeforeWithAutoIndent extends PutBefore
     newRange = super
     # Adjust indentLevel with keeping original layout of pasting text.
     # Suggested indent level of newRange.start.row is correct as long as newRange.start.row have minimum indent level.
-    # When we paste following already indented two-line text, we can't apply suggested level naively.
+    # But when we paste following already indented three line text, we have to adjust indent level
+    #  so that `varFortyTwo` line have suggestedIndentLevel.
     #
-    #        varOne: value
-    #   varFortyTwo: value
+    #        varOne: value # suggestedIndentLevel is determined by this line
+    #   varFortyTwo: value # We need to make final indent level of this row to be suggestedIndentLevel.
+    #      varThree: value
     #
     # So what we are doing here is apply suggestedIndentLevel with fixing issue above.
     # 1. Determine minimum indent level among pasted range(= newRange ) excluding empty row
