@@ -14,6 +14,7 @@ Base = require './base'
 
 class Operator extends Base
   @extend(false)
+  @operationKind: 'operator'
   requireTarget: true
   recordable: true
 

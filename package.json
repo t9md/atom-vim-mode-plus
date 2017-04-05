@@ -22,6 +22,11 @@
       "versions": {
         "^1.0.0": "consumeStatusBar"
       }
+    },
+    "demo-mode": {
+      "versions": {
+        "^1.0.0": "consumeDemoMode"
+      }
     }
   },
   "providedServices": {

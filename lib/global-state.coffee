@@ -40,5 +40,6 @@ getInitialState = ->
   highlightSearchPattern: null
   currentFind: null
   register: {}
+  demoModeIsActive: false
 
 module.exports = new GlobalState()

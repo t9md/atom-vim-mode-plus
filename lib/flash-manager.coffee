@@ -12,6 +12,11 @@ flashTypes =
     decorationOptions:
       type: 'highlight'
       class: 'vim-mode-plus-flash operator-long'
+  'operator-demo':
+    allowMultiple: true
+    decorationOptions:
+      type: 'highlight'
+      class: 'vim-mode-plus-flash operator-demo'
   'operator-occurrence':
     allowMultiple: true
     decorationOptions:
@@ -67,6 +72,11 @@ class FlashManager
 
     {type, timeout} = options
     timeout ?= 1000
+
+    # HACK: in demo mode, replace flash type for longer flash
+    if @vimState.globalState.get('demoModeIsActive') and type in ['operator', 'operator-long']
+      type = 'operator-demo'
+      timeout = 1500
 
     {allowMultiple, decorationOptions} = flashTypes[type]
     markerOptions = {invalidate: 'touch'}

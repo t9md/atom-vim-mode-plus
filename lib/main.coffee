@@ -211,6 +211,33 @@ module.exports =
     @subscribe new Disposable =>
       @statusBarManager.detach()
 
+  consumeDemoMode: ({onWillAddItem, onDidStart, onDidStop}) ->
+    @subscribe(
+      onDidStart(-> globalState.set('demoModeIsActive', true))
+      onDidStop(-> globalState.set('demoModeIsActive', false))
+      onWillAddItem(({item, event}) =>
+        element = document.createElement('span')
+        element.classList.add('kind', 'pull-right')
+
+        if event.binding.command.startsWith('vim-mode-plus:')
+          commandElement = item.getElementsByClassName('command')[0]
+          commandElement.textContent = commandElement.textContent.replace(/^vim-mode-plus:/, '')
+
+        element.textContent = @getKindForCommand(event.binding.command)
+        item.appendChild(element)
+      )
+    )
+
+  getKindForCommand: (command) ->
+    if command.startsWith('vim-mode-plus')
+      command = command.replace(/^vim-mode-plus:/, '')
+      if command.startsWith('operator-modifier')
+        kind = 'op-modifier'
+      else
+        Base.getKindForCommandName(command) ? 'vmp-other'
+    else
+      'non-vmp'
+
   # Service API
   # -------------------------
   getGlobalState: ->

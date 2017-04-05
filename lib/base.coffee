@@ -313,4 +313,11 @@ class Base
         vimState.operationStack.run(klass)
       event.stopPropagation()
 
+  # For demo-mode pkg integration
+  @operationKind: null
+  @getKindForCommandName: (command) ->
+    name = _.capitalize(_.camelize(command))
+    if name of registries
+      registries[name].operationKind
+
 module.exports = Base
