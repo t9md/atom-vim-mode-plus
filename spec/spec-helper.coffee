@@ -292,9 +292,8 @@ class VimEditor
       method = 'ensure' + _.capitalize(_.camelize(name))
       this[method](options[name])
 
-  ensureOperation: (operation, options) =>
-    atom.commands.dispatch(atom.views.getView(@editor), operation)
-    
+  ensureByDispatch: (command, options) =>
+    dispatch(atom.views.getView(@editor), command)
     for name in ensureOptionsOrdered when options[name]?
       method = 'ensure' + _.capitalize(_.camelize(name))
       this[method](options[name])
