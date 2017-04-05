@@ -5,6 +5,7 @@ _ = require 'underscore-plus'
   moveCursorLeft
   moveCursorRight
   limitNumber
+  isEmptyRow
 } = require './utils'
 swrap = require './selection-wrapper'
 Operator = require('./base').getClass('Operator')
@@ -184,14 +185,14 @@ class InsertAboveWithNewline extends ActivateInsertMode
 
     lastCursor.setBufferPosition(cursorPosition)
 
-  adjustIndent: ->
-    currentRow = @editor.getCursorBufferPosition().row
-    if currentRow > 0 and @editor.lineTextForBufferRow(currentRow - 1) is ''
-      @editor.autoIndentBufferRow(currentRow)
+  autoIndentEmptyRows: ->
+    for cursor in @editor.getCursors()
+      row = cursor.getBufferRow()
+      @editor.autoIndentBufferRow(row) if isEmptyRow(@editor, row)
 
   mutateText: ->
     @editor.insertNewlineAbove()
-    @adjustIndent() if @editor.autoIndent
+    @autoIndentEmptyRows() if @editor.autoIndent
 
   repeatInsert: (selection, text) ->
     selection.insertText(text.trimLeft(), autoIndent: true)
@@ -200,7 +201,7 @@ class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
   mutateText: ->
     @editor.insertNewlineBelow()
-    @adjustIndent() if @editor.autoIndent
+    @autoIndentEmptyRows() if @editor.autoIndent
 
 # Advanced Insertion
 # -------------------------
