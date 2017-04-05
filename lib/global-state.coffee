@@ -42,5 +42,6 @@ getInitialState = ->
   register: {}
   demoMarginTopInEm: null
   demoMarginLeftInEm: null
+  demo: false
 
 module.exports = new GlobalState()

@@ -74,7 +74,7 @@ class FlashManager
     timeout ?= 1000
 
     # HACK: in demo mode, replace flash type for longer flash
-    if @vimState.demo? and type in ['operator', 'operator-long']
+    if @vimState.globalState.get('demo') and type in ['operator', 'operator-long']
       type = 'operator-demo'
       timeout = 1500
 

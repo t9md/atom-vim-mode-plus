@@ -167,3 +167,7 @@ module.exports = new Settings 'vim-mode-plus',
     default: 1000
   demoMaxKeystrokeToShow:
     default: 5
+  demoInitialMarginTopInEm:
+    default: 5
+  demoInitialMarginLeftInEm:
+    default: 2
