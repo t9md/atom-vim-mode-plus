@@ -637,11 +637,10 @@ class PutBeforeWithAutoIndent extends PutBefore
     # So what we are doing here is apply suggestedIndentLevel with fixing issue above.
     # 1. Determine minimum indent level among pasted range(= newRange ) excluding empty row
     # 2. Then update indentLevel of each rows to final indentLevel of minimum-indented row have suggestedIndentLevel.
-    [startRow, endRow] = [newRange.start.row, newRange.end.row]
-    suggestedLevel = @editor.suggestedIndentForBufferRow(startRow)
+    suggestedLevel = @editor.suggestedIndentForBufferRow(newRange.start.row)
     minLevel = null
     rowAndActualLevels = []
-    for row in [startRow...endRow]
+    for row in [newRange.start.row...newRange.end.row]
       actualLevel = getIndentLevelForBufferRow(@editor, row)
       rowAndActualLevels.push([row, actualLevel])
       unless isEmptyRow(@editor, row)
