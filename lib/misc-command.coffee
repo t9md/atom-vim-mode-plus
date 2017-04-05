@@ -15,6 +15,7 @@ _ = require 'underscore-plus'
 } = require './utils'
 
 class MiscCommand extends Base
+  @operationKind: 'misc-command'
   @extend(false)
   constructor: ->
     super

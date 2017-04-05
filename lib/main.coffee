@@ -8,6 +8,7 @@ globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
 {forEachPaneAxis, addClassList, removeClassList} = require './utils'
+Demo = null
 
 module.exports =
   config: settings.config
@@ -102,10 +103,38 @@ module.exports =
       'vim-mode-plus:toggle-highlight-search': -> settings.toggle('highlightSearch')
       'vim-mode-plus:clear-persistent-selection': => @clearPersistentSelectionForEditors()
 
+      'vim-mode-plus:demo-toggle': => @demoToggle()
+      'vim-mode-plus:demo-toggle-with-auto-hide': => @demoToggle(autoHide: true)
+      'vim-mode-plus:demo-stop-or-start-auto-hide': => @demoStopOrStartAutoHide()
+      'vim-mode-plus:demo-clear': => @demoClear()
+      'vim-mode-plus:demo-move-hover-up': => @demoMoveHover('up')
+      'vim-mode-plus:demo-move-hover-down': => @demoMoveHover('down')
+      'vim-mode-plus:demo-move-hover-left': => @demoMoveHover('left')
+      'vim-mode-plus:demo-move-hover-right': => @demoMoveHover('right')
+
     @subscribe atom.commands.add 'atom-workspace',
       'vim-mode-plus:maximize-pane': => @maximizePane()
       'vim-mode-plus:equalize-panes': => @equalizePanes()
 
+  # Demo-mode
+  # -------------------------
+  demoToggle: (options) ->
+    Demo ?= require './demo'
+
+    if @demo?
+      @demo.destroy()
+      @demo = null
+    else
+      @demo = new Demo(options)
+
+  demoStopOrStartAutoHide: ->
+    @demo?.stopOrStartAutoHide()
+
+  demoClear: ->
+    @demo?.clear()
+
+  demoMoveHover: (direction) ->
+    @demo?.moveHover(direction)
   demaximizePane: ->
     if @maximizePaneDisposable?
       @maximizePaneDisposable.dispose()

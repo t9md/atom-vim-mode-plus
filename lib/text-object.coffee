@@ -23,6 +23,7 @@ swrap = require './selection-wrapper'
 
 class TextObject extends Base
   @extend(false)
+  @operationKind: 'text-object'
   wise: 'characterwise'
   supportCount: false # FIXME #472, #66
   selectOnce: false

@@ -102,6 +102,7 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
   // flashOnOperate
 .flash-animation(vim-mode-plus-flash-operator, @flash-base-color);
 .flash-animation(vim-mode-plus-flash-operator-long, @flash-base-color);
+.flash-animation(vim-mode-plus-flash-operator-demo, @flash-base-color);
 .flash-animation(vim-mode-plus-flash-operator-occurrence, @flash-added-color);
 .flash-animation(vim-mode-plus-flash-operator-remove-occurrence, @flash-removed-color);
 
@@ -125,6 +126,7 @@ atom-text-editor .vim-mode-plus-flash {
   // flashOnOperate
   &.operator .region { .flash(vim-mode-plus-flash-operator, .3s)}
   &.operator-long .region { .flash(vim-mode-plus-flash-operator, .8s)}
+  &.operator-demo .region { .flash(vim-mode-plus-flash-operator, 1.5s)}
   &.operator-occurrence .region { .flash(vim-mode-plus-flash-operator-occurrence, .8s)}
   &.operator-remove-occurrence .region { .flash(vim-mode-plus-flash-operator-remove-occurrence, .8s)}
 
@@ -329,5 +331,47 @@ atom-workspace.vim-mode-plus--pane-maximized {
   .character-match {
     color: @text-color-highlight;
     font-weight: bold;
+  }
+}
+
+// Demo mode overlay
+// =========================
+.vim-mode-plus-demo {
+  // z-index: 
+  z-index: 2147483647;
+  position: absolute;
+  display: block;
+  min-width: 22em;
+  color: @text-color-highlight;
+  background-color: @base-background-color;
+  border-radius: @component-border-radius;
+  box-shadow: 0 0 1px @syntax-text-color;
+
+  padding: 0.3em 1em;
+  font-size: 1.2em;
+
+  // margin-top: -2.8em;
+  // margin-left: -0.3em;
+
+  .binding {
+    span {
+      display: inline-block;;
+      padding-left: 0.2em;
+      padding-right: 0.2em;
+    }
+  }
+
+  .keystroke {
+    min-width: 3em;
+    font-weight: bold;
+    color: @text-color-warning;
+  }
+  .command {
+    font-size: 1.0em;
+    // min-width: 25px;
+  }
+  .kind {
+    font-size: 0.8em;
+    color: @text-color-selected;
   }
 }

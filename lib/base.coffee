@@ -304,6 +304,11 @@ class Base
     else
       null
 
+  @getKindForCommandName: (command) ->
+    name = _.capitalize(_.camelize(command))
+    if name of registries
+      registries[name].operationKind
+
   @registerCommand: ->
     klass = this
     atom.commands.add @getCommandScope(), @getCommandName(), (event) ->
