@@ -373,6 +373,8 @@ class VimState
   getOriginalCursorPositionByMarker: ->
     @originalCursorPositionByMarker.getStartBufferPosition()
 
+  # Demo-mode
+  # -------------------------
   demoToggle: (options) ->
     Demo ?= require './demo'
 
@@ -383,8 +385,10 @@ class VimState
       @demo = new Demo(this, options)
 
   demoStopOrStartAutoHide: ->
-    if @demo?
-      @demo.stopOrStartAutoHide()
+    @demo?.stopOrStartAutoHide()
 
   demoClear: ->
-    @demo.clear() if @demo?
+    @demo?.clear()
+
+  demoMoveHover: (direction) ->
+    @demo?.moveHover(direction)

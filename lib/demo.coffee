@@ -1,4 +1,4 @@
-{CompositeDisposable} = require 'atom'
+{CompositeDisposable, Disposable} = require 'atom'
 _ = require 'underscore-plus'
 Base = require './base'
 
@@ -7,38 +7,54 @@ DemoCommands = [
   'vim-mode-plus:demo-toggle-with-auto-hide'
   'vim-mode-plus:demo-stop-or-start-auto-hide'
   'vim-mode-plus:demo-clear'
+  'vim-mode-plus:demo-move-hover-up'
+  'vim-mode-plus:demo-move-hover-down'
+  'vim-mode-plus:demo-move-hover-right'
+  'vim-mode-plus:demo-move-hover-left'
 ]
-MaxKeystrokeToShows = 5
 module.exports =
 class Demo
   constructor: (@vimState, options={}) ->
+    {@editor, @editorElement, @globalState} = @vimState
     {@autoHide} = options
-    @maxKeystrokes = @vimState.getConfig('demoMaxKeystrokeToShow')
-    {@editor, @editorElement} = @vimState
-    @showKeystrokeDisposable = null
+    @maxKeystrokesToShow = @vimState.getConfig('demoMaxKeystrokeToShow')
     @disposables = new CompositeDisposable
-    @point = @editor.getCursorBufferPosition()
+
+    @editorElement.classList.add('demo')
+    @disposables.add new Disposable => @editorElement.classList.remove('demo')
+
     @disposables.add atom.keymaps.onDidMatchBinding (event) =>
       return unless atom.workspace.getActiveTextEditor() is @editor
-      @add(event.binding)
-
-    # @disposables.add @editor.onDidChangeCursorPosition =>
-    #   @marker?.destroy()
-    #   if container = @getContainer()
-    #     @render(container)
+      return if event.binding.command in DemoCommands
+      @add(event)
 
     @disposables.add @editorElement.onDidChangeScrollTop =>
-      @marker?.destroy()
-      if container = @getContainer()
-        @render(container)
+      @refresh() if @container?
+    @updateStyle()
 
-  elementForKeystroke: ({command, keystrokes, kind}) ->
+    @disposables.add @globalState.onDidChange ({name, newValue}) =>
+      if name in ['demoMarginTopInEm', 'demoMarginLeftInEm']
+        @updateStyle()
+
+  updateStyle: ->
+    @styleElement?.remove()
+    @styleElement = document.createElement 'style'
+    document.head.appendChild(@styleElement)
+    top = @globalState.get('demoMarginTopInEm')
+    left = @globalState.get('demoMarginLeftInEm')
+
+    @styleElement.sheet.addRule '.vim-mode-plus-demo', """
+      margin-top: #{top}em;
+      margin-left: #{left}em;
+      """
+  elementForKeystroke: ({command, keystrokes}) ->
     commandShort = command.replace(/^vim-mode-plus:/, '')
     element = document.createElement('div')
     keystrokes = keystrokes.split(' ')
       .map (keystroke) -> keystroke.replace(/^shift-/, '')
       .join(' ')
     element.className = 'binding'
+    kind = @getKindForCommand(command)
     element.innerHTML = """
       <span class='keystroke'>#{keystrokes}</span>
       <span class='commmaand'>#{commandShort}</span>
@@ -64,27 +80,22 @@ class Demo
       @container.className = 'vim-mode-plus-demo'
       @container
 
-  render: (item) ->
+  refresh: ->
     @marker?.destroy()
     screenRow = @editorElement.getFirstVisibleScreenRow()
     point = @editor.bufferPositionForScreenPosition([screenRow, 0])
-    # point = @editor.getCursorScreenPosition()
     @marker = @editor.markBufferPosition(point, invalidate: 'never')
-    @editor.decorateMarker(@marker, {type: 'overlay', item: item})
+    @editor.decorateMarker(@marker, {type: 'overlay', item: @getContainer()})
 
-  add: ({keystrokes, command}) ->
-    return if command in DemoCommands
-
+  add: (event) ->
     if @autoHide
       @hideAfter(@vimState.getConfig('demoAutoHideTimeout'))
 
-    kind = @getKindForCommand(command)
     container = @getContainer()
-    element = @elementForKeystroke({keystrokes, command, kind})
-    container.appendChild(element)
-    if container.childElementCount > @maxKeystrokes
+    container.appendChild(@elementForKeystroke(event.binding))
+    if container.childElementCount > @maxKeystrokesToShow
       container.firstElementChild.remove()
-    @render(container) unless @marker?
+    @refresh() unless @marker?
 
   hideAfter: (timeout) ->
     clearTimeout(@autoHideTimeoutID) if @autoHideTimeoutID?
@@ -114,5 +125,18 @@ class Demo
 
   destroy: ->
     @disposables.dispose()
+    @styleElement?.remove()
     @marker?.destroy()
     @container?.remove()
+
+  moveHover: (direction) ->
+    return unless @container?
+
+    setValue = (param, delta) =>
+      @globalState.set(param, @globalState.get(param) + delta)
+
+    switch direction
+      when 'up' then setValue('demoMarginTopInEm', -1)
+      when 'down' then setValue('demoMarginTopInEm', +1)
+      when 'left' then setValue('demoMarginLeftInEm', -1)
+      when 'right' then setValue('demoMarginLeftInEm', +1)

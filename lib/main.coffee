@@ -188,6 +188,10 @@ module.exports =
       'demo-toggle-with-auto-hide': -> @demoToggle(autoHide: true)
       'demo-stop-or-start-auto-hide': -> @demoStopOrStartAutoHide()
       'demo-clear': -> @demoClear()
+      'demo-move-hover-up': -> @demoMoveHover('up')
+      'demo-move-hover-down': -> @demoMoveHover('down')
+      'demo-move-hover-left': -> @demoMoveHover('left')
+      'demo-move-hover-right': -> @demoMoveHover('right')
 
     chars = [32..126].map (code) -> String.fromCharCode(code)
     for char in chars

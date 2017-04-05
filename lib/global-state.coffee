@@ -40,5 +40,7 @@ getInitialState = ->
   highlightSearchPattern: null
   currentFind: null
   register: {}
+  demoMarginTopInEm: null
+  demoMarginLeftInEm: null
 
 module.exports = new GlobalState()
