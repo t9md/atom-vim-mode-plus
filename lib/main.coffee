@@ -216,13 +216,12 @@ module.exports =
       onDidStart(-> globalState.set('demoModeIsActive', true))
       onDidStop(-> globalState.set('demoModeIsActive', false))
       onWillAddItem(({item, event}) =>
-        element = document.createElement('span')
-        element.classList.add('kind', 'pull-right')
-
         if event.binding.command.startsWith('vim-mode-plus:')
           commandElement = item.getElementsByClassName('command')[0]
           commandElement.textContent = commandElement.textContent.replace(/^vim-mode-plus:/, '')
 
+        element = document.createElement('span')
+        element.classList.add('kind', 'pull-right')
         element.textContent = @getKindForCommand(event.binding.command)
         item.appendChild(element)
       )
