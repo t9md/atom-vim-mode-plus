@@ -1,3 +1,6 @@
+# 0.88.0: WIP
+- Improve: Better integration with `demo-mode` package
+  - Postpone destroying operator-flash while demo-mode's hover indicator is displayed.
 # 0.87.0:
 - New: #732 Add integration with `demo-mode` package.
   - `demo-mode` is new Atom package I've released recently, it was originally developed as part of vim-mode-plus.
