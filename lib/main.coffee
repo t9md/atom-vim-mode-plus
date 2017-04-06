@@ -90,8 +90,8 @@ module.exports =
       vimState.destroy()
     VimState.clear()
 
-  subscribe: (arg) ->
-    @subscriptions.add(arg)
+  subscribe: (args...) ->
+    @subscriptions.add(args...)
 
   unsubscribe: (arg) ->
     @subscriptions.remove(arg)
