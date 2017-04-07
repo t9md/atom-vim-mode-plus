@@ -3,9 +3,12 @@
   getVisibleBufferRange
   smartScrollToBufferPosition
   getIndex
+  replaceDecorationClassBy
 } = require './utils'
 
 hoverCounterTimeoutID = null
+removeCurrentClassForDecoration = null
+addCurrentClassForDecoration = null
 
 module.exports =
 class SearchModel
@@ -140,16 +143,17 @@ class SearchModel
     @updateCurrentMatch(relativeIndex)
     newDecoration = @decoationByRange[@currentMatch.toString()]
 
+    removeCurrentClassForDecoration ?= replaceDecorationClassBy.bind null , (text) ->
+      text.replace(/\s+current(\s+)?$/, '$1')
+
+    addCurrentClassForDecoration ?= replaceDecorationClassBy.bind null , (text) ->
+      text.replace(/\s+current(\s+)?$/, '$1') + ' current'
+
     if oldDecoration?
-      oldClass = oldDecoration.getProperties().class
-      oldClass = oldClass.replace(/\s+current(\s+)?$/, '$1')
-      oldDecoration.setProperties(type: 'highlight', class: oldClass)
+      removeCurrentClassForDecoration(oldDecoration)
 
     if newDecoration?
-      newClass = newDecoration.getProperties().class
-      newClass = newClass.replace(/\s+current(\s+)?$/, '$1')
-      newClass += ' current'
-      newDecoration.setProperties(type: 'highlight', class: newClass)
+      addCurrentClassForDecoration(newDecoration)
 
   getRelativeIndex: ->
     @currentMatchIndex - @initialCurrentMatchIndex
