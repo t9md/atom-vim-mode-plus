@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{isNotEmpty} = require './utils'
+{isNotEmpty, replaceDecorationClassBy} = require './utils'
 
 flashTypes =
   operator:
@@ -48,34 +48,26 @@ flashTypes =
       type: 'highlight'
       class: 'vim-mode-plus-flash undo-redo-multiple-delete'
 
+addDemoSuffix = replaceDecorationClassBy.bind(null, (text) -> text + '-demo')
+removeDemoSuffix = replaceDecorationClassBy.bind(null, (text) -> text.replace(/-demo$/, ''))
+
 module.exports =
 class FlashManager
   constructor: (@vimState) ->
     {@editor} = @vimState
     @markersByType = new Map
     @vimState.onDidDestroy(@destroy.bind(this))
-    @postponedDestroyMarkersTask = []
+    @postponedDestroyMarkersTasks = []
 
   destroy: ->
     @markersByType.forEach (markers) ->
       marker.destroy() for marker in markers
     @markersByType.clear()
 
-  postponeDestroyMarkers: (markers, decorationOptions, timeout) ->
-    demoDedecorationOptions = _.clone(decorationOptions) # NOTE: don't mutate object directly
-    demoDedecorationOptions.class += '-demo'
-    decorations = (@editor.decorateMarker(marker, demoDedecorationOptions) for marker in markers)
-    fn = =>
-      for decoration in decorations
-        props = decoration.getProperties()
-        decoration.setProperties(_.defaults({class: props.class.replace(/-demo$/, '')}, props))
-      @destroyMarkersAfter(markers, timeout)
-    @postponedDestroyMarkersTask.push(fn)
-
   destroyDemoModeMarkers: ->
-    for fn in @postponedDestroyMarkersTask
-      fn()
-    @postponedDestroyMarkersTask = []
+    for resolve in @postponedDestroyMarkersTasks
+      resolve()
+    @postponedDestroyMarkersTasks = []
 
   destroyMarkersAfter: (markers, timeout) ->
     setTimeout ->
@@ -105,10 +97,14 @@ class FlashManager
         marker.destroy() for marker in @markersByType.get(type)
       @markersByType.set(type, markers)
 
+    decorations = markers.map (marker) => @editor.decorateMarker(marker, decorationOptions)
+
     if @vimState.globalState.get('demoModeIsActive')
-      @postponeDestroyMarkers(markers, decorationOptions, timeout)
+      decorations.map(addDemoSuffix)
+      @postponedDestroyMarkersTasks.push =>
+        decorations.map(removeDemoSuffix)
+        @destroyMarkersAfter(markers, timeout)
     else
-      @editor.decorateMarker(marker, decorationOptions) for marker in markers
       @destroyMarkersAfter(markers, timeout)
 
   flashScreenRange: (args...) ->

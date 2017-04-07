@@ -686,6 +686,10 @@ splitTextByNewLine = (text) ->
   else
     text.split(/\r?\n/g)
 
+replaceDecorationClassBy = (fn, decoration) ->
+  props = decoration.getProperties()
+  decoration.setProperties(_.defaults({class: fn(props.class)}, props))
+
 # Modify range used for undo/redo flash highlight to make it feel naturally for human.
 #  - Trim starting new line("\n")
 #     "\nabc" -> "abc"
@@ -842,6 +846,7 @@ module.exports = {
   toggleClassList
   toggleCaseForCharacter
   splitTextByNewLine
+  replaceDecorationClassBy
   humanizeBufferRange
   expandRangeToWhiteSpaces
   scanEditorInDirection
