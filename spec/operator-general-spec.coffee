@@ -949,6 +949,7 @@ describe "Operator general", ->
     describe "put-after-with-auto-indent command", ->
       beforeEach ->
         waitsForPromise ->
+          settings.set('useClipboardAsDefaultRegister', false)
           atom.packages.activatePackage('language-javascript')
         runs ->
           set grammar: 'source.js'
