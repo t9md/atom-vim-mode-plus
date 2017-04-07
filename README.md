@@ -26,10 +26,11 @@ vim-mode improved.
 
 <!-- TOC END -->
 
-# What's new in v0.58.0
+# Installation
 
-- In v0.58.0, introduce `preset-occurrence` and `persistent-selection`.
-- In v0.55.0, introduce `occurrence-modifier`
+Install using [Atoms package installer](http://flight-manual.atom.io/using-atom/sections/atom-packages/)
+
+# Some Features
 
 These features are very powerful, especially for the power user. Read the following documents to learn how to use them.  
 
