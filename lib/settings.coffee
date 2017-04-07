@@ -51,26 +51,6 @@ module.exports = new Settings 'vim-mode-plus',
     description: """
     Disable this to `;` behave like normal Vim.<br>
     """
-  keymapIToInsertStartOfTargetWhenCursorIsAtOccurrenceMarker:
-    title: "Keymap I To insert-at-start-of-target When Cursor Is At Occurrence Marker"
-    default: false
-    description: """
-    When cursor is at preset-occurrence-marker.
-    `I`: behave as `insert-at-start-of-target` operator<br>
-    e.g. place cursor on occurrence-marker then<br>
-    `I p` start insertion at start of every occurrence in paragraph<br>
-    `I f` start insertion at start of every occurrence in function<br>
-    """
-  keymapAToInsertStartOfTargetWhenCursorIsAtOccurrenceMarker:
-    title: "Keymap A To insert-at-end-of-target When Cursor Is At Occurrence Marker"
-    default: false
-    description: """
-    When cursor is at preset-occurrence-marker.
-    `A`: behave as `insert-at-end-of-target` operator<br>
-    e.g. place cursor on occurrence-marker then<br>
-    `A p` start insertion at end of every occurrence in paragraph<br>
-    `A f` start insertion at end of every occurrence in function<br>
-    """
   setCursorToStartOfChangeOnUndoRedo: true
   setCursorToStartOfChangeOnUndoRedoStrategy:
     default: 'smart'

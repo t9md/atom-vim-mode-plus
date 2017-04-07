@@ -35,10 +35,6 @@ class OccurrenceManager
       else
         @clearMarkers()
 
-    @disposables.add @editor.onDidChangeCursorPosition ({cursor}) =>
-      if cursor.isLastCursor() and @hasMarkers()
-        @editorElement.classList.toggle("at-occurrence", @cursorIsAtOccurrenceMarker())
-
     @markerLayer.onDidUpdate(@destroyInvalidMarkers.bind(this))
 
   markBufferRangeByPattern: (pattern, occurrenceType) ->
@@ -56,15 +52,7 @@ class OccurrenceManager
       @markerLayer.markBufferRange(range, @markerOptions)
 
   updateEditorElement: ->
-    hasMarkers = @hasMarkers()
-    @editorElement.classList.toggle("has-occurrence", hasMarkers)
-    if hasMarkers
-      @editorElement.classList.toggle("at-occurrence", @cursorIsAtOccurrenceMarker())
-    else
-      @editorElement.classList.remove("at-occurrence")
-
-  cursorIsAtOccurrenceMarker: ->
-    @getMarkerAtPoint(@editor.getCursorBufferPosition())?
+    @editorElement.classList.toggle("has-occurrence", @hasMarkers())
 
   # Callback get passed following object
   # - pattern: can be undefined on reset event
