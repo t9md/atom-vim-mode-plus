@@ -102,7 +102,6 @@ atom-text-editor.vim-mode-plus.insert-mode.replace,
   // flashOnOperate
 .flash-animation(vim-mode-plus-flash-operator, @flash-base-color);
 .flash-animation(vim-mode-plus-flash-operator-long, @flash-base-color);
-.flash-animation(vim-mode-plus-flash-operator-demo, @flash-base-color);
 .flash-animation(vim-mode-plus-flash-operator-occurrence, @flash-added-color);
 .flash-animation(vim-mode-plus-flash-operator-remove-occurrence, @flash-removed-color);
 
@@ -126,7 +125,6 @@ atom-text-editor .vim-mode-plus-flash {
   // flashOnOperate
   &.operator .region { .flash(vim-mode-plus-flash-operator, .3s)}
   &.operator-long .region { .flash(vim-mode-plus-flash-operator, .8s)}
-  &.operator-demo .region { .flash(vim-mode-plus-flash-operator, 2.0s)}
   &.operator-occurrence .region { .flash(vim-mode-plus-flash-operator-occurrence, .8s)}
   &.operator-remove-occurrence .region { .flash(vim-mode-plus-flash-operator-remove-occurrence, .8s)}
 
@@ -134,6 +132,15 @@ atom-text-editor .vim-mode-plus-flash {
   &.undo-redo .region { .flash(vim-mode-plus-flash-undo-redo, .5s)}
   &.undo-redo-multiple-changes .region { .flash(vim-mode-plus-flash-undo-redo-multiple-changes, .5s)}
   &.undo-redo-multiple-delete .region { .flash(vim-mode-plus-flash-undo-redo-multiple-delete, .5s)}
+
+  // used for demo-mode integration to stop flash while demo-mode's hover is active
+  &.operator-demo .region { background: @flash-base-color }
+  &.operator-long-demo .region { background: @flash-base-color }
+  &.operator-occurrence-demo .region { background: @flash-added-color }
+  &.operator-remove-occurrence-demo .region { background: @flash-removed-color }
+  &.undo-redo-demo .region { background: @flash-base-color }
+  &.undo-redo-multiple-changes-demo .region { background: @flash-added-color }
+  &.undo-redo-multiple-delete-demo .region { background: @flash-removed-color }
 
   &.search .region {
     .flash(vim-mode-plus-flash-search, .5s);

@@ -1,3 +1,8 @@
+# 0.88.0: WIP
+- Improve: Better integration with `demo-mode` package
+  - Postpone destroying operator-flash while demo-mode's hover indicator is displayed.
+- Improve: When undo/redoing occurrence operation, flash was suppressed when all occurrence start and end with same column, but now flashed.
+
 # 0.87.0:
 - New: #732 Add integration with `demo-mode` package.
   - `demo-mode` is new Atom package I've released recently, it was originally developed as part of vim-mode-plus.

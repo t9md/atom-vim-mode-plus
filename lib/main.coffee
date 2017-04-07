@@ -90,8 +90,8 @@ module.exports =
       vimState.destroy()
     VimState.clear()
 
-  subscribe: (arg) ->
-    @subscriptions.add(arg)
+  subscribe: (args...) ->
+    @subscriptions.add(args...)
 
   unsubscribe: (arg) ->
     @subscriptions.remove(arg)
@@ -211,10 +211,11 @@ module.exports =
     @subscribe new Disposable =>
       @statusBarManager.detach()
 
-  consumeDemoMode: ({onWillAddItem, onDidStart, onDidStop}) ->
+  consumeDemoMode: ({onWillAddItem, onDidStart, onDidStop, onDidRemoveHover}) ->
     @subscribe(
       onDidStart(-> globalState.set('demoModeIsActive', true))
       onDidStop(-> globalState.set('demoModeIsActive', false))
+      onDidRemoveHover(@destroyAllDemoModeFlasheMarkers.bind(this))
       onWillAddItem(({item, event}) =>
         if event.binding.command.startsWith('vim-mode-plus:')
           commandElement = item.getElementsByClassName('command')[0]
@@ -226,6 +227,10 @@ module.exports =
         item.appendChild(element)
       )
     )
+
+  destroyAllDemoModeFlasheMarkers: ->
+    VimState.forEach (vimState) ->
+      vimState.flashManager.destroyDemoModeMarkers()
 
   getKindForCommand: (command) ->
     if command.startsWith('vim-mode-plus')
