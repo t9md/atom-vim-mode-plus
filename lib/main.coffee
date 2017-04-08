@@ -61,34 +61,8 @@ module.exports =
       else
         globalState.set('highlightSearchPattern', null)
 
-    @enableConditionalKeymap()
-
-  enableConditionalKeymap: ->
-    setConditionalKeymap = (configParam, keymapSpec) ->
-      keymapSource = "vim-mode-plus-conditional-keymap:#{configParam}"
-      settings.observe configParam, (newValue) ->
-        # console.log configParam, newValue
-        if newValue
-          atom.keymaps.add(keymapSource, keymapSpec)
-        else
-          atom.keymaps.removeBindingsFromSource(keymapSource)
-
-    conditionalKeymaps =
-      keymapCCToChangeSmartWord:
-        'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
-          'c': 'vim-mode-plus:inner-smart-word'
-      keymapUnderscoreToReplaceWithRegister:
-        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          '_': 'vim-mode-plus:replace-with-register'
-      keymapSemicolonToInnerAnyPairInOperatorPendingMode:
-        'atom-text-editor.vim-mode-plus.operator-pending-mode':
-          ';': 'vim-mode-plus:inner-any-pair'
-      keymapSemicolonToInnerAnyPairInVisualMode:
-        'atom-text-editor.vim-mode-plus.visual-mode':
-          ';': 'vim-mode-plus:inner-any-pair'
-
-    for configParam, keymapSpec of conditionalKeymaps
-      @subscribe(setConditionalKeymap(configParam, keymapSpec))
+    atom.keymaps.onDidLoadUserKeymap? =>
+      @subscribe(settings.observeConditionalKeymaps()...)
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')

@@ -1,3 +1,14 @@
+{Disposable} = require 'atom'
+
+userKeymapDefinedForKeymapSpec = (keymapSpec) ->
+  scope = Object.keys(keymapSpec)[0]
+  body = keymapSpec[scope]
+  keystrokes = Object.keys(body)[0]
+  command = body[keystrokes]
+  userKeymapPath = atom.keymaps.getUserKeymapPath()
+  atom.keymaps.findKeyBindings({command, keystrokes}).some (keyBinding) ->
+    keyBinding.source is userKeymapPath
+
 inferType = (value) ->
   switch
     when Number.isInteger(value) then 'integer'
@@ -31,6 +42,38 @@ class Settings
 
   observe: (param, fn) ->
     atom.config.observe("#{@scope}.#{param}", fn)
+
+  observeConditionalKeymaps: ->
+    conditionalKeymaps =
+      keymapCCToChangeSmartWord:
+        'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
+          'c': 'vim-mode-plus:inner-smart-word'
+      keymapUnderscoreToReplaceWithRegister:
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          '_': 'vim-mode-plus:replace-with-register'
+      keymapSemicolonToInnerAnyPairInOperatorPendingMode:
+        'atom-text-editor.vim-mode-plus.operator-pending-mode':
+          ';': 'vim-mode-plus:inner-any-pair'
+      keymapSemicolonToInnerAnyPairInVisualMode:
+        'atom-text-editor.vim-mode-plus.visual-mode':
+          ';': 'vim-mode-plus:inner-any-pair'
+
+    observeConditionalKeymap = (param) =>
+      keymapSource = "vim-mode-plus-conditional-keymap:#{param}"
+      disposable = @observe param, (newValue) ->
+        if newValue
+          keymapSpec = conditionalKeymaps[param]
+          unless userKeymapDefinedForKeymapSpec(keymapSpec)
+            atom.keymaps.add(keymapSource, keymapSpec)
+        else
+          atom.keymaps.removeBindingsFromSource(keymapSource)
+
+      new Disposable ->
+        disposable.dispose()
+        atom.keymaps.removeBindingsFromSource(keymapSource)
+
+    # Return disposalbes to dispose config observation and conditional keymap.
+    return Object.keys(conditionalKeymaps).map (param) -> observeConditionalKeymap(param)
 
 module.exports = new Settings 'vim-mode-plus',
   keymapUnderscoreToReplaceWithRegister:
