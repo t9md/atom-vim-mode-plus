@@ -428,6 +428,16 @@ class Comment extends TextObject
     if rowRange?
       @getBufferRangeForRowRange(rowRange)
 
+class CommentOrParagraph extends TextObject
+  @extend(false)
+  @deriveInnerAndA()
+  wise: 'linewise'
+
+  getRange: (selection) ->
+    for klass in ['Comment', 'Paragraph']
+      if range = @new(klass, {@inner}).getRange(selection)
+        return range
+
 # Section: Fold
 # =========================
 class Fold extends TextObject

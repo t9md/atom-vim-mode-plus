@@ -1,4 +1,3 @@
-
 # workspace
 # -------------------------
 # To maximize none-editor paneItem e.g. setting-view
@@ -448,7 +447,7 @@
 # -------------------------
 # comment-in by `g / /`
 'atom-text-editor.vim-mode-plus.toggle-line-comments-pending':
-  '/': 'vim-mode-plus:inner-comment'
+  '/': 'vim-mode-plus:inner-comment-or-paragraph'
 
 # `c d` to change subword, `y d` to yank subword without affecting `d d`
 'atom-text-editor.vim-mode-plus.operator-pending-mode:not(.delete-pending)':
