@@ -113,6 +113,12 @@ module.exports = new Settings 'vim-mode-plus',
     """
   groupChangesWhenLeavingInsertMode: true
   useClipboardAsDefaultRegister: true
+  updateRegisterOnChangeOrSubstitute:
+    default: true
+    description: """
+    When set to `false` any `change` or `substitute` operation no longer change register content<br>
+    Affects `c`, `C`, `s`, `S`.
+    """
   startInInsertMode: false
   startInInsertModeScopes:
     default: []

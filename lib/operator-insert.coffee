@@ -303,7 +303,7 @@ class Change extends ActivateInsertMode
     #   }
     isLinewiseTarget = swrap.detectWise(@editor) is 'linewise'
     for selection in @editor.getSelections()
-      @setTextToRegisterForSelection(selection)
+      @setTextToRegisterForSelection(selection) if @getConfig('updateRegisterOnChangeOrSubstitute')
       if isLinewiseTarget
         selection.insertText("\n", autoIndent: true)
         selection.cursor.moveLeft()

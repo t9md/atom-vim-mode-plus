@@ -292,6 +292,14 @@ class VimEditor
       method = 'ensure' + _.capitalize(_.camelize(name))
       this[method](options[name])
 
+  bindEnsureOption: (optionsBase) =>
+    (keystroke, options) =>
+      intersectingOptions = _.intersection(_.keys(options), _.keys(optionsBase))
+      if intersectingOptions.length
+        throw new Error("conflict with bound options #{inspect(intersectingOptions)}")
+
+      @ensure(keystroke, _.defaults(_.clone(options), optionsBase))
+
   ensureByDispatch: (command, options) =>
     dispatch(atom.views.getView(@editor), command)
     for name in ensureOptionsOrdered when options[name]?
