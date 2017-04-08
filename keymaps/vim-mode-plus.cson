@@ -429,10 +429,34 @@
   'O': 'vim-mode-plus:operator-modifier-subword-occurrence'
   'I': 'vim-mode-plus:move-to-first-character-of-line'
   'A': 'vim-mode-plus:move-to-last-character-of-line'
+
+  'c': 'vim-mode-plus:inner-smart-word' # `y c` to `yank inner-smart-word`.
+  'd': 'vim-mode-plus:inner-subword'    # `y d` to `yank inner-subword`.
+  'C': 'vim-mode-plus:inner-whole-word' # `y C` to `yank inner-whole-word`.
+  'p': 'vim-mode-plus:inner-paragraph'  # `y p` to `yank inner-paragraph`.
+
+  # In this scope, all operator keys are safely remappable.
+  # e.g. p, d, D, x, u, X, S, ., r
+
+# operator-pending with operator specified
+# -------------------------
+# `c c` to works as change current line.
+'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
+  'c': 'vim-mode-plus:change'
+
+# `d d` to works as delete current line
+'atom-text-editor.vim-mode-plus.operator-pending-mode.delete-pending':
+  'd': 'vim-mode-plus:delete'
+
+# for `g q q` to auto-flow current line
+'atom-text-editor.vim-mode-plus.operator-pending-mode.auto-flow-pending':
   'q': 'vim-mode-plus:auto-flow'
 
-# operator-pending.has-occurrence [Experimental]
-# -------------------------
+# `g / /` to comment-in commented region, `g / /` to comment-out paragraph.
+'atom-text-editor.vim-mode-plus.operator-pending.toggle-line-comments-pending':
+  '/': 'vim-mode-plus:inner-comment-or-paragraph'
+
+# operator-pending.has-occurrence
 'atom-text-editor.vim-mode-plus.operator-pending-mode.has-occurrence':
   'p': 'vim-mode-plus:inner-paragraph'
   'P': 'vim-mode-plus:inner-paragraph' # in-case SHIFT is not keyuped. when O modifier
@@ -442,20 +466,6 @@
   'F': 'vim-mode-plus:a-function' # in-case SHIFT is not keyuped. when O modifier
   'l': 'vim-mode-plus:inner-current-line'
   'z': 'vim-mode-plus:a-fold'
-
-# operator-pending for specific operator targeting.
-# -------------------------
-# comment-in by `g / /`
-'atom-text-editor.vim-mode-plus.toggle-line-comments-pending':
-  '/': 'vim-mode-plus:inner-comment-or-paragraph'
-
-# `c d` to change subword, `y d` to yank subword without affecting `d d`
-'atom-text-editor.vim-mode-plus.operator-pending-mode:not(.delete-pending)':
-  'd': 'vim-mode-plus:inner-subword'
-
-# `d c` to delete current-smart-word, `y c` to change cursor-word.
-'atom-text-editor.vim-mode-plus.operator-pending-mode:not(.change-pending)':
-  'c': 'vim-mode-plus:inner-smart-word'
 
 # operator-pending, visual
 # -------------------------
@@ -561,8 +571,8 @@
   'i v': 'vim-mode-plus:inner-visible-area'
   'a v': 'vim-mode-plus:a-visible-area'
 
-  # 'a q': 'vim-mode-plus:a-subword'
-  # 'i q': 'vim-mode-plus:inner-subword'
+  'a d': 'vim-mode-plus:a-subword'
+  'i d': 'vim-mode-plus:inner-subword'
 
 # visual
 # -------------------------
