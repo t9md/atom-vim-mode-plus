@@ -33,23 +33,31 @@ class Settings
     atom.config.observe("#{@scope}.#{param}", fn)
 
 module.exports = new Settings 'vim-mode-plus',
-  keymapCCToChangeSmartWord:
-    title: "Keymap cc To change inner-smart-word"
-    default: false
-    description: """
-    Disable this to `c c` behave as normal Vim.<br>
-    """
   keymapUnderscoreToReplaceWithRegister:
     title: "Keymap _ To replace-with-register"
     default: false
     description: """
-    Disable this to `_` behave like normal Vim.<br>
+    `_ i (` to replace inner-parenthesis with register's value<br>
+    Conflicts with original `_`( `move-to-first-character-of-line-and-down` ) motion.
     """
-  keymapSemicolonToInnerAnyPair:
-    title: "Keymap ; To inner-any-pair"
+  keymapCCToChangeSmartWord:
+    title: "Keymap cc To change inner-smart-word"
     default: false
     description: """
-    Disable this to `;` behave like normal Vim.<br>
+    `c c` to `change inner-smart-word`
+    Conflicts with original `c c` keystroke used for change-line(Equivalent to `S` or `c i l` etc.)
+    """
+  keymapSemicolonToInnerAnyPairInOperatorPendingMode:
+    title: "Keymap ; To inner-any-pair in operator-pending-mode"
+    default: false
+    description: """
+    `c ;` to `change inner-any-pair`, Conflicts with original `;`( `repeat-find` ) motion.
+    """
+  keymapSemicolonToInnerAnyPairInVisualMode:
+    title: "Keymap ; To inner-any-pair in visual-mode"
+    default: false
+    description: """
+    `v ;` to `select inner-any-pair`, Conflicts with original `;`( `repeat-find` ) motion.
     """
   setCursorToStartOfChangeOnUndoRedo: true
   setCursorToStartOfChangeOnUndoRedoStrategy:

@@ -80,8 +80,11 @@ module.exports =
       keymapUnderscoreToReplaceWithRegister:
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
           '_': 'vim-mode-plus:replace-with-register'
-      keymapSemicolonToInnerAnyPair:
-        'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
+      keymapSemicolonToInnerAnyPairInOperatorPendingMode:
+        'atom-text-editor.vim-mode-plus.operator-pending-mode':
+          ';': 'vim-mode-plus:inner-any-pair'
+      keymapSemicolonToInnerAnyPairInVisualMode:
+        'atom-text-editor.vim-mode-plus.visual-mode':
           ';': 'vim-mode-plus:inner-any-pair'
 
     for configParam, keymapSpec of conditionalKeymaps
