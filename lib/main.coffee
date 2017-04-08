@@ -83,12 +83,6 @@ module.exports =
       keymapSemicolonToInnerAnyPair:
         'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
           ';': 'vim-mode-plus:inner-any-pair'
-      keymapIToInsertStartOfTargetWhenCursorIsAtOccurrenceMarker:
-        'atom-text-editor.vim-mode-plus.at-occurrence:not(.insert-mode)':
-          'I': 'vim-mode-plus:insert-at-start-of-target'
-      keymapAToInsertStartOfTargetWhenCursorIsAtOccurrenceMarker:
-        'atom-text-editor.vim-mode-plus.at-occurrence:not(.insert-mode)':
-          'A': 'vim-mode-plus:insert-at-end-of-target'
 
     for configParam, keymapSpec of conditionalKeymaps
       @subscribe(setConditionalKeymap(configParam, keymapSpec))
