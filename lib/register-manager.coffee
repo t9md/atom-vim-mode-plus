@@ -18,6 +18,7 @@ REGISTERS = /// (
 #  [x] 9. The black hole register "_
 #  [ ] 10. Last search pattern register "/
 
+module.exports =
 class RegisterManager
   constructor: (@vimState) ->
     {@editor, @editorElement, @globalState} = @vimState
@@ -27,7 +28,7 @@ class RegisterManager
 
   reset: ->
     @name = null
-    @vimState.toggleClassList('with-register', @name?)
+    @editorElement.classList.toggle('with-register', false)
 
   destroy: ->
     @subscriptionBySelection.forEach (disposable) ->
@@ -128,7 +129,7 @@ class RegisterManager
 
   setName: (@name) ->
     if @name?
-      @vimState.toggleClassList('with-register', true)
+      @editorElement.classList.toggle('with-register', true)
       @vimState.hover.set('"' + @name)
     else
       @vimState.hover.set('"')
@@ -144,5 +145,3 @@ class RegisterManager
       'linewise'
     else
       'characterwise'
-
-module.exports = RegisterManager
