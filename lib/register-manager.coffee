@@ -81,12 +81,7 @@ class RegisterManager
   #  type: (optional) if ommited automatically set from text.
   #
   # Returns nothing.
-  set: (args...) ->
-    [name, value] = []
-    switch args.length
-      when 1 then [value] = args
-      when 2 then [name, value] = args
-
+  set: (name, value) ->
     name ?= @getName()
     return unless @isValidName(name)
     name = @getNameForDefaultRegister() if name is '"'

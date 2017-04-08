@@ -195,7 +195,7 @@ class Operator extends Base
 
   setTextToRegister: (text, selection) ->
     text += "\n" if (@target.isLinewise() and (not text.endsWith('\n')))
-    @vimState.register.set({text, selection}) if text
+    @vimState.register.set(null, {text, selection}) if text
 
   normalizeSelectionsIfNecessary: ->
     if @target?.isMotion() and (@mode is 'visual')
