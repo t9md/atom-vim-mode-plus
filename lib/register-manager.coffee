@@ -60,9 +60,19 @@ class RegisterManager
       atom.clipboard.write(text)
     @clipboardBySelection.set(selection, text) if selection?
 
+  getRegisterNameToUse: (name) ->
+    if name? and not @isValidName(name)
+      return null
+
+    name ?= @name ? '"'
+    if name is '"' and @vimState.getConfig('useClipboardAsDefaultRegister')
+      '*'
+    else
+      name
+
   get: (name, selection) ->
-    name ?= @getName()
-    name = @getNameForDefaultRegister() if name is '"'
+    name = @getRegisterNameToUse(name)
+    return unless name?
 
     switch name
       when '*', '+' then text = @readClipboard(selection)
@@ -82,61 +92,55 @@ class RegisterManager
   #
   # Returns nothing.
   set: (name, value) ->
-    name ?= @getName()
-    return unless @isValidName(name)
-    name = @getNameForDefaultRegister() if name is '"'
+    name = @getRegisterNameToUse(name)
+    return unless name?
+
     value.type ?= @getCopyType(value.text)
 
     selection = value.selection
     delete value.selection
+
     switch name
       when '*', '+' then @writeClipboard(selection, value.text)
       when '_', '%' then null
       else
         if /^[A-Z]$/.test(name)
-          @append(name.toLowerCase(), value)
+          name = name.toLowerCase()
+          if @data[name]?
+            @append(name, value)
+          else
+            @data[name] = value
         else
           @data[name] = value
 
-  # Private: append a value into a given register
-  # like setRegister, but appends the value
   append: (name, value) ->
-    unless register = @data[name]
-      @data[name] = value
-      return
-
+    register = @data[name]
     if 'linewise' in [register.type, value.type]
       if register.type isnt 'linewise'
-        register.text += '\n'
         register.type = 'linewise'
+        register.text += '\n'
       if value.type isnt 'linewise'
         value.text += '\n'
     register.text += value.text
 
-  getName: ->
-    @name ? @getNameForDefaultRegister()
-
-  getNameForDefaultRegister: ->
-    if @vimState.getConfig('useClipboardAsDefaultRegister')
-      '*'
-    else
-      '"'
-
-  setName: (@name) ->
-    if @name?
+  setName: (name) ->
+    if name?
+      @name = name
       @editorElement.classList.toggle('with-register', true)
       @vimState.hover.set('"' + @name)
     else
-      @vimState.hover.set('"')
       inputUI = new Input(@vimState)
-      inputUI.onDidConfirm (name) => @setName(name)
+      inputUI.onDidConfirm (name) =>
+        if @isValidName(name)
+          @setName(name)
+        else
+          @vimState.hover.reset()
       inputUI.onDidCancel => @vimState.hover.reset()
+      @vimState.hover.set('"')
       inputUI.focus(1)
 
   getCopyType: (text) ->
-    if text.lastIndexOf("\n") is text.length - 1
-      'linewise'
-    else if text.lastIndexOf("\r") is text.length - 1
+    if text.endsWith("\n") or text.endsWith("\r")
       'linewise'
     else
       'characterwise'

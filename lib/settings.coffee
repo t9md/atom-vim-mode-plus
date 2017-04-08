@@ -1,14 +1,5 @@
 {Disposable} = require 'atom'
 
-userKeymapDefinedForKeymapSpec = (keymapSpec) ->
-  scope = Object.keys(keymapSpec)[0]
-  body = keymapSpec[scope]
-  keystrokes = Object.keys(body)[0]
-  command = body[keystrokes]
-  userKeymapPath = atom.keymaps.getUserKeymapPath()
-  atom.keymaps.findKeyBindings({command, keystrokes}).some (keyBinding) ->
-    keyBinding.source is userKeymapPath
-
 inferType = (value) ->
   switch
     when Number.isInteger(value) then 'integer'
@@ -62,9 +53,7 @@ class Settings
       keymapSource = "vim-mode-plus-conditional-keymap:#{param}"
       disposable = @observe param, (newValue) ->
         if newValue
-          keymapSpec = conditionalKeymaps[param]
-          unless userKeymapDefinedForKeymapSpec(keymapSpec)
-            atom.keymaps.add(keymapSource, keymapSpec)
+          atom.keymaps.add(keymapSource, conditionalKeymaps[param])
         else
           atom.keymaps.removeBindingsFromSource(keymapSource)
 

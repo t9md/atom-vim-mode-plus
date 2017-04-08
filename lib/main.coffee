@@ -61,8 +61,7 @@ module.exports =
       else
         globalState.set('highlightSearchPattern', null)
 
-    atom.keymaps.onDidLoadUserKeymap? =>
-      @subscribe(settings.observeConditionalKeymaps()...)
+    @subscribe(settings.observeConditionalKeymaps()...)
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
