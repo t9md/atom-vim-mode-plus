@@ -27,7 +27,7 @@ class RegisterManager
 
   reset: ->
     @name = null
-    @vimState.toggleClassList('with-register', @hasName())
+    @vimState.toggleClassList('with-register', @name?)
 
   destroy: ->
     @subscriptionBySelection.forEach (disposable) ->
@@ -126,24 +126,15 @@ class RegisterManager
     else
       '"'
 
-  isDefaultName: ->
-    @getName() is @getNameForDefaultRegister()
-
-  hasName: ->
-    @name?
-
-  setName: (name=null) ->
-    if name?
-      @name = name if @isValidName(name)
+  setName: (@name) ->
+    if @name?
+      @vimState.toggleClassList('with-register', true)
+      @vimState.hover.set('"' + @name)
     else
       @vimState.hover.set('"')
-
       inputUI = new Input(@vimState)
-      inputUI.onDidConfirm (@name) =>
-        @vimState.toggleClassList('with-register', true)
-        @vimState.hover.set('"' + @name)
-      inputUI.onDidCancel =>
-        @vimState.hover.reset()
+      inputUI.onDidConfirm (name) => @setName(name)
+      inputUI.onDidCancel => @vimState.hover.reset()
       inputUI.focus(1)
 
   getCopyType: (text) ->
