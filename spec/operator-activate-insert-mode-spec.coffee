@@ -246,7 +246,7 @@ describe "Operator ActivateInsertMode family", ->
             3!!!!!!\n
             """
 
-  fdescribe "dontUpdateRegisterOnChangeOrSubstitute settings", ->
+  describe "dontUpdateRegisterOnChangeOrSubstitute settings", ->
     resultTextC = null
     beforeEach ->
       set
