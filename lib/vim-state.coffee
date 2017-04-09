@@ -217,18 +217,14 @@ class VimState
     } = {}
     @emitter.emit 'did-destroy'
 
-  isInterestingEvent: ({target, type}) ->
-    if @mode is 'insert'
-      false
-    else
-      @editor? and
-        target?.closest?('atom-text-editor') is @editorElement and
-        not @isMode('visual', 'blockwise') and
-        not type.startsWith('vim-mode-plus:')
-
   checkSelection: (event) ->
+    return unless atom.workspace.getActiveTextEditor() is @editor
     return if @operationStack.isProcessing()
-    return unless @isInterestingEvent(event)
+    return if @mode is 'insert'
+    # Intentionally using target.closest('atom-text-editor')
+    # Don't use target.getModel() which is work for CustomEvent but not work for mouse event.
+    return unless @editorElement is event.target?.closest?('atom-text-editor')
+    return if event.type.startsWith('vim-mode-plus:')
 
     if haveSomeNonEmptySelection(@editor)
       @editorElement.component.updateSync()
@@ -242,22 +238,17 @@ class VimState
     else
       @activate('normal') if @mode is 'visual'
 
-  saveProperties: (event) ->
-    return unless @isInterestingEvent(event)
-    for selection in @editor.getSelections()
-      swrap(selection).saveProperties()
-
   observeSelections: ->
     checkSelection = @checkSelection.bind(this)
     @editorElement.addEventListener('mouseup', checkSelection)
     @subscriptions.add new Disposable =>
       @editorElement.removeEventListener('mouseup', checkSelection)
 
-    # [FIXME]
-    # Hover position get wired when focus-change between more than two pane.
-    # commenting out is far better than introducing Buggy behavior.
-    # @subscriptions.add atom.commands.onWillDispatch(saveProperties)
     @subscriptions.add atom.commands.onDidDispatch(checkSelection)
+
+    @editorElement.addEventListener('focus', checkSelection)
+    @subscriptions.add new Disposable =>
+      @editorElement.removeEventListener('focus', checkSelection)
 
   # What's this?
   # editor.clearSelections() doesn't respect lastCursor positoin.
