@@ -224,7 +224,7 @@ class VimState
     # Intentionally using target.closest('atom-text-editor')
     # Don't use target.getModel() which is work for CustomEvent but not work for mouse event.
     return unless @editorElement is event.target?.closest?('atom-text-editor')
-    return if event.type.startsWith('vim-mode-plus:')
+    return if event.type.startsWith('vim-mode-plus') # to match vim-mode-plus: and vim-mode-plus-user:
 
     if haveSomeNonEmptySelection(@editor)
       @editorElement.component.updateSync()
