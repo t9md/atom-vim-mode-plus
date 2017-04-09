@@ -16,20 +16,25 @@
     - This mean, we can safely use operator command's keymap in `operator-pending-mode` as shorthand keymap of `text-object` or `motion`.
     - But using these keymap for `motion` is meaningless since motion is single-key, but text-object key is two keystroke(e.g. `i w`).
     - So I pre-defined short-hand keymap for text-object which was work for me.
-  - `c` as shorthand of `inner-smart-word`, but `c c` is not affected
-    - To make `c c` works for `change inner-smart-word`, set `Keymap cc To change inner-smart-word` to `true`( `false` by default )
+  - `c` as shorthand of `inner-smart-word`, but `c c` is not affected by this keymap( `smart-word` is similar to `word` but it's include `-` char ).
+    - You can `yank word` by `y c` instead of `y i w`. ( change by `c c` if you enabled it in setting )
+    - To make `c c` works for `change inner-smart-word`, set `keymapCCToChangeInnerSmartWord` to `true`( `false` by default )
   - `C` as shorthand of `inner-whole-word`
+    - You can `yank whole-word` by `y C` instead of `y i W`. ( change by `c C` )
   - `d` as shorthand of `inner-subword`, but `d d` is not affected by this keymap.
+    - You can `yank subword` by `y d` instead of `y i d`. ( change by `c d` )
   - `p` as shorthand of `inner-paragraph`
+    - You can `yank paragraph` by `y p` instead of `y i p`. ( change by `c p` )
 - Keymaps: Conditional keymap enabled by setting.
   - Prerequisite
     - Added several configuration option which is 1-to-1 mapped to keymap.
     - When set to `true`, corresponding keymap is defined.
     - This is just as helper to define complex keymap via checkbox.
-  - `keymapCCToChangeSmartWord`: default `false`
+  - `keymapCCToChangeInnerSmartWord`: default `false`
   - `keymapUnderscoreToReplaceWithRegister`: default `false`
   - `keymapSemicolonToInnerAnyPairInOperatorPendingMode`: default `false`
   - `keymapSemicolonToInnerAnyPairInVisualMode`: default `false`
+  - `keymapBackslashToInnerCommentOrParagraphWhenToggleLineCommentsIsPending`: default `false`
 - Improve: Improve containment check for `togggle-preset-occurrence`
   - When cursor is at right column of non-word char(e.g. closing parenthesis `)`), not longer misunderstand that cursor is on occurrence-marker.
 - Default Change:
