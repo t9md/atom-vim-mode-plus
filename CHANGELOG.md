@@ -1,4 +1,7 @@
 # 0.88.0:
+- Doc: New wiki page
+  - DifferencesFromPureVim
+  - VmpUniqueKeymaps
 - Keymaps: Normal keymap addition
   - New: Now `subword` text-object have default keymap, you can change subword by `c i d`.
     - `i d`: `inner-subword`
