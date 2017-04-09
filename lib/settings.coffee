@@ -49,7 +49,6 @@ class Settings
         'atom-text-editor.vim-mode-plus.visual-mode':
           ';': 'vim-mode-plus:inner-any-pair'
       keymapBackslashToInnerCommentOrParagraphWhenToggleLineCommentsIsPending:
-        # `g / /` to comment-in commented region, `g / /` to comment-out paragraph.
         'atom-text-editor.vim-mode-plus.operator-pending-mode.toggle-line-comments-pending':
           '/': 'vim-mode-plus:inner-comment-or-paragraph'
 

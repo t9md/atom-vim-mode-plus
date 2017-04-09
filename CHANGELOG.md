@@ -32,8 +32,8 @@
     - For me, I enabled all of these setting and I want strongly recommend you to evaluate these setting at least once.
     - These keymaps are picked from my local keymap which was realy work well for a log time.
   - Here is new setting, all `false` by default. Effect(good and bad) of these keymap is explained in vmp's setting-view.
-    - `keymapCCToChangeInnerSmartWord`
     - `keymapUnderscoreToReplaceWithRegister`
+    - `keymapCCToChangeInnerSmartWord`
     - `keymapSemicolonToInnerAnyPairInOperatorPendingMode`
     - `keymapSemicolonToInnerAnyPairInVisualMode`
     - `keymapBackslashToInnerCommentOrParagraphWhenToggleLineCommentsIsPending`
