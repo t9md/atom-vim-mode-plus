@@ -70,6 +70,7 @@ module.exports = new Settings 'vim-mode-plus',
     default: false
     description: """
     `_ i (` to replace inner-parenthesis with register's value<br>
+    `_ i ;` to replace inner-any-pair if you enabled `keymapSemicolonToInnerAnyPairInOperatorPendingMode`<br>
     Conflicts with original `_`( `move-to-first-character-of-line-and-down` ) motion.
     """
   keymapCCToChangeSmartWord:
@@ -77,19 +78,21 @@ module.exports = new Settings 'vim-mode-plus',
     default: false
     description: """
     `c c` to `change inner-smart-word`
-    Conflicts with original `c c` keystroke used for change-line(Equivalent to `S` or `c i l` etc.)
+    Conflicts: `c c`( change-current-line ) keystroke which is equivalent to `S` or `c i l` etc.
     """
   keymapSemicolonToInnerAnyPairInOperatorPendingMode:
     title: "Keymap ; To inner-any-pair in operator-pending-mode"
     default: false
     description: """
     `c ;` to `change inner-any-pair`, Conflicts with original `;`( `repeat-find` ) motion.
+    Conflicts: `;`( `repeat-find` ).
     """
   keymapSemicolonToInnerAnyPairInVisualMode:
     title: "Keymap ; To inner-any-pair in visual-mode"
     default: false
     description: """
     `v ;` to `select inner-any-pair`, Conflicts with original `;`( `repeat-find` ) motion.
+    Conflicts: `;`( `repeat-find` ).
     """
   setCursorToStartOfChangeOnUndoRedo: true
   setCursorToStartOfChangeOnUndoRedoStrategy:
