@@ -36,12 +36,12 @@ class Settings
 
   observeConditionalKeymaps: ->
     conditionalKeymaps =
-      keymapCCToChangeInnerSmartWord:
-        'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
-          'c': 'vim-mode-plus:inner-smart-word'
       keymapUnderscoreToReplaceWithRegister:
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
           '_': 'vim-mode-plus:replace-with-register'
+      keymapCCToChangeInnerSmartWord:
+        'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
+          'c': 'vim-mode-plus:inner-smart-word'
       keymapSemicolonToInnerAnyPairInOperatorPendingMode:
         'atom-text-editor.vim-mode-plus.operator-pending-mode':
           ';': 'vim-mode-plus:inner-any-pair'
