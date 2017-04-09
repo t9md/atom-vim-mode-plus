@@ -452,10 +452,6 @@
 'atom-text-editor.vim-mode-plus.operator-pending-mode.auto-flow-pending':
   'q': 'vim-mode-plus:auto-flow'
 
-# `g / /` to comment-in commented region, `g / /` to comment-out paragraph.
-'atom-text-editor.vim-mode-plus.operator-pending-mode.toggle-line-comments-pending':
-  '/': 'vim-mode-plus:inner-comment-or-paragraph'
-
 # operator-pending.has-occurrence
 'atom-text-editor.vim-mode-plus.operator-pending-mode.has-occurrence':
   'p': 'vim-mode-plus:inner-paragraph'

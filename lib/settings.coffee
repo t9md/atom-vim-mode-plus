@@ -48,6 +48,10 @@ class Settings
       keymapSemicolonToInnerAnyPairInVisualMode:
         'atom-text-editor.vim-mode-plus.visual-mode':
           ';': 'vim-mode-plus:inner-any-pair'
+      keymapBackslashToInnerCommentOrParagraphWhenToggleLineCommentsIsPending:
+        # `g / /` to comment-in commented region, `g / /` to comment-out paragraph.
+        'atom-text-editor.vim-mode-plus.operator-pending-mode.toggle-line-comments-pending':
+          '/': 'vim-mode-plus:inner-comment-or-paragraph'
 
     observeConditionalKeymap = (param) =>
       keymapSource = "vim-mode-plus-conditional-keymap:#{param}"
@@ -69,30 +73,37 @@ module.exports = new Settings 'vim-mode-plus',
     title: "Keymap _ To replace-with-register"
     default: false
     description: """
-    `_ i (` to replace inner-parenthesis with register's value<br>
-    `_ i ;` to replace inner-any-pair if you enabled `keymapSemicolonToInnerAnyPairInOperatorPendingMode`<br>
-    Conflicts with original `_`( `move-to-first-character-of-line-and-down` ) motion.
+    Can: `_ i (` to replace inner-parenthesis with register's value<br>
+    Can: `_ i ;` to replace inner-any-pair if you enabled `keymapSemicolonToInnerAnyPairInOperatorPendingMode`<br>
+    Conflicts: `_`( `move-to-first-character-of-line-and-down` ) motion. Who use this??
     """
   keymapCCToChangeSmartWord:
     title: "Keymap cc To change inner-smart-word"
     default: false
     description: """
-    `c c` to `change inner-smart-word`
+    Can: `c c` to `change inner-smart-word`<br>
     Conflicts: `c c`( change-current-line ) keystroke which is equivalent to `S` or `c i l` etc.
     """
   keymapSemicolonToInnerAnyPairInOperatorPendingMode:
     title: "Keymap ; To inner-any-pair in operator-pending-mode"
     default: false
     description: """
-    `c ;` to `change inner-any-pair`, Conflicts with original `;`( `repeat-find` ) motion.
+    Can: `c ;` to `change inner-any-pair`, Conflicts with original `;`( `repeat-find` ) motion.<br>
     Conflicts: `;`( `repeat-find` ).
     """
   keymapSemicolonToInnerAnyPairInVisualMode:
     title: "Keymap ; To inner-any-pair in visual-mode"
     default: false
     description: """
-    `v ;` to `select inner-any-pair`, Conflicts with original `;`( `repeat-find` ) motion.
+    Can: `v ;` to `select inner-any-pair`, Conflicts with original `;`( `repeat-find` ) motion.<br>L
     Conflicts: `;`( `repeat-find` ).
+    """
+  keymapBackslashToInnerCommentOrParagraphWhenToggleLineCommentsIsPending:
+    title: "Keymap / To inner-comment-or-paragraph when 'g /' is pending in operator-pending-mode"
+    default: false
+    description: """
+    Can: `g / /` to comment-in already commented region, `g / /` to comment-out paragraph.<br>
+    Conflicts: `/`( `search` ) motion only when `g /` is pending. you no longe can `g /` with search.
     """
   setCursorToStartOfChangeOnUndoRedo: true
   setCursorToStartOfChangeOnUndoRedoStrategy:
