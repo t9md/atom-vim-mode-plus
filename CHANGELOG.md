@@ -1,9 +1,6 @@
-# 0.88.0: WIP
-- Improve: Better integration with `demo-mode` package
-  - Postpone destroying operator-flash while demo-mode's hover indicator is displayed.
-- Improve: When undo/redoing occurrence operation, flash was suppressed when all occurrence start and end with same column, but now flashed.
-- Keymaps:
-  - Now subword text-object have default keymap, you can change subword by `c i d`.
+# 0.88.0:
+- Keymaps: Normal keymap addition
+  - New: Now `subword` text-object have default keymap, you can change subword by `c i d`.
     - `i d`: `inner-subword`
     - `a d`: `a-subword`
   - `cmd-a` is mapped to `inner-entire` in `operator-pending` and `visual-mode` for macOS user.
@@ -16,43 +13,51 @@
     - This mean, we can safely use operator command's keymap in `operator-pending-mode` as shorthand keymap of `text-object` or `motion`.
     - But using these keymap for `motion` is meaningless since motion is single-key, but text-object key is two keystroke(e.g. `i w`).
     - So I pre-defined short-hand keymap for text-object which was work for me.
-  - `c` as shorthand of `inner-smart-word`, but `c c` is not affected by this keymap( `smart-word` is similar to `word` but it's include `-` char ).
-    - You can `yank word` by `y c` instead of `y i w`. ( change by `c c` if you enabled it in setting )
-    - To make `c c` works for `change inner-smart-word`, set `keymapCCToChangeInnerSmartWord` to `true`( `false` by default )
-  - `C` as shorthand of `inner-whole-word`
-    - You can `yank whole-word` by `y C` instead of `y i W`. ( change by `c C` )
-  - `d` as shorthand of `inner-subword`, but `d d` is not affected by this keymap.
-    - You can `yank subword` by `y d` instead of `y i d`. ( change by `c d` )
-  - `p` as shorthand of `inner-paragraph`
-    - You can `yank paragraph` by `y p` instead of `y i p`. ( change by `c p` )
+  - What was defined?
+    - `c` as shorthand of `inner-smart-word`, but `c c` is not affected.
+      - You can `yank word` by `y c` instead of `y i w`. ( change by `c c` if you enabled it in setting )
+      - To make `c c` works for `change inner-smart-word`, set `keymapCCToChangeInnerSmartWord` to `true`( `false` by default )
+      - `smart-word` is similar to `word` but it's include `-` char.
+    - `C` as shorthand of `inner-whole-word`
+      - You can `yank whole-word` by `y C` instead of `y i W`. ( change by `c C` )
+    - `d` as shorthand of `inner-subword`, but `d d` is not affected.
+      - You can `yank subword` by `y d` instead of `y i d`. ( change by `c d` )
+    - `p` as shorthand of `inner-paragraph`
+      - You can `yank paragraph` by `y p` instead of `y i p`. ( change by `c p` )
 - Keymaps: Conditional keymap enabled by setting.
   - Prerequisite
     - Added several configuration option which is 1-to-1 mapped to keymap.
     - When set to `true`, corresponding keymap is defined.
     - This is just as helper to define complex keymap via checkbox.
-  - `keymapCCToChangeInnerSmartWord`: default `false`
-  - `keymapUnderscoreToReplaceWithRegister`: default `false`
-  - `keymapSemicolonToInnerAnyPairInOperatorPendingMode`: default `false`
-  - `keymapSemicolonToInnerAnyPairInVisualMode`: default `false`
-  - `keymapBackslashToInnerCommentOrParagraphWhenToggleLineCommentsIsPending`: default `false`
-- Improve: Improve containment check for `togggle-preset-occurrence`
-  - When cursor is at right column of non-word char(e.g. closing parenthesis `)`), not longer misunderstand that cursor is on occurrence-marker.
-- Default Change:
+    - For me, I enabled all of these setting and I want strongly recommend you to evaluate these setting at least once.
+    - These keymaps are picked from my local keymap which was realy work well for a log time.
+  - Here is new setting, all `false` by default. Effect(good and bad) of these keymap is explained in vmp's setting-view.
+    - `keymapCCToChangeInnerSmartWord`
+    - `keymapUnderscoreToReplaceWithRegister`
+    - `keymapSemicolonToInnerAnyPairInOperatorPendingMode`
+    - `keymapSemicolonToInnerAnyPairInVisualMode`
+    - `keymapBackslashToInnerCommentOrParagraphWhenToggleLineCommentsIsPending`
+- Breaking: Default setting change:
   - `clearPersistentSelectionOnResetNormalMode`: `true`( `false` in previous version )
   - `clearHighlightSearchOnResetNormalMode`: `true`( `false` in previous version )
   - `highlightSearch`: `true`( `false` in previous version )
   - `useClipboardAsDefaultRegister`: `true`( `false` in previous version )
-- New: TextObject `comment-or-paragraph` for use of easy comment-in/out when `g /` is pending.
-- Fix: For commands `set-register-name-to-*` or `set-register-name-to-_`, now show hover and correctly set `with-register` CSS scope on editorElement.
-- Internal: #742 Rewrite `RegisterManager`, reduced complex logic which make me really confuse.
 - New: #743, #739 New config option `dontUpdateRegisterOnChangeOrSubstitute`( default `false` ).
   - When set to `true`, all `c`, `s`, `C`, `S` operation no longer update register content.
   - If you want keep register content unchanged by `c i w`, set this to `false`.
-- Fix, Improve: #744 Update selection property when outer-vmp command update selection range to make vmp work well with other atom-pkg or atom's native feature.
-  - Update selection prop if on command dispatch of outer-vmp command
-    - Now correctly start update cursor visibility and start `visual-mode` after `cmd-e` then `cmd-g`.
+- New: TextObject `comment-or-paragraph` for use of easy comment-in/out when `g /` is pending.
+- Fix: For commands `set-register-name-to-*` or `set-register-name-to-_`, now show hover and correctly set `with-register` CSS scope on editorElement.
+- Fix, Improve: #744 Make vmp work well with other atom-pkg or atom's native feature.
+  - Update selection prop on command dispatch of outer-vmp command
+    - Now correctly update cursor visibility and start `visual-mode` after `cmd-e` then `cmd-g`.
   - Update selection prop if editor retake `focus`.
     - Now correctly start `visual-mode` after `cmd-f` result was confirmed by `enter`.
+- Improve: Better integration with `demo-mode` package
+  - Postpone destroying operator-flash while demo-mode's hover indicator is displayed.
+- Improve: When undo/redoing occurrence operation, flash was suppressed when all occurrence start and end with same column, but now flashed.
+- Improve: Improve containment check for `togggle-preset-occurrence`
+  - When cursor is at right column of non-word char(e.g. closing parenthesis `)`), not longer misunderstand that cursor is on occurrence-marker.
+- Internal: #742 Rewrite `RegisterManager`, reduced complex logic which make me really confuse.
 
 # 0.87.0:
 - New: #732 Add integration with `demo-mode` package.
