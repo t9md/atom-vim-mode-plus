@@ -246,7 +246,7 @@ describe "Operator ActivateInsertMode family", ->
             3!!!!!!\n
             """
 
-  describe "updateRegisterOnChangeOrSubstitute settings", ->
+  fdescribe "dontUpdateRegisterOnChangeOrSubstitute settings", ->
     resultTextC = null
     beforeEach ->
       set
@@ -277,20 +277,20 @@ describe "Operator ActivateInsertMode family", ->
           |
           2ghi\n
           """
-    describe "when updateRegisterOnChangeOrSubstitute=true", ->
+    describe "when dontUpdateRegisterOnChangeOrSubstitute=false", ->
       ensure_ = null
       beforeEach ->
         ensure_ = bindEnsureOption(mode: 'insert')
-        settings.set("updateRegisterOnChangeOrSubstitute", true)
+        settings.set("dontUpdateRegisterOnChangeOrSubstitute", false)
       it 'c mutate register', -> ensure_ 'c l', textC: resultTextC.cl, register: {'"': text: 'd'}
       it 'C mutate register', -> ensure_ 'C', textC: resultTextC.C, register: {'"': text: 'def'}
       it 's mutate register', -> ensure_ 's', textC: resultTextC.s, register: {'"': text: 'd'}
       it 'S mutate register', -> ensure_ 'S', textC: resultTextC.S, register: {'"': text: '1def\n'}
-    describe "when updateRegisterOnChangeOrSubstitute=false", ->
+    describe "when dontUpdateRegisterOnChangeOrSubstitute=true", ->
       ensure_ = null
       beforeEach ->
         ensure_ = bindEnsureOption(mode: 'insert', register: {'"': text: 'initial-value'})
-        settings.set("updateRegisterOnChangeOrSubstitute", false)
+        settings.set("dontUpdateRegisterOnChangeOrSubstitute", true)
       it 'c mutate register', -> ensure_ 'c l', textC: resultTextC.cl
       it 'C mutate register', -> ensure_ 'C', textC: resultTextC.C
       it 's mutate register', -> ensure_ 's', textC: resultTextC.s

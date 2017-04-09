@@ -36,12 +36,13 @@
   - `clearPersistentSelectionOnResetNormalMode`: `true`( `false` in previous version )
   - `clearHighlightSearchOnResetNormalMode`: `true`( `false` in previous version )
   - `highlightSearch`: `true`( `false` in previous version )
+  - `useClipboardAsDefaultRegister`: `true`( `false` in previous version )
 - New: TextObject `comment-or-paragraph` for use of easy comment-in/out when `g /` is pending.
 - Fix: For commands `set-register-name-to-*` or `set-register-name-to-_`, now show hover and correctly set `with-register` CSS scope on editorElement.
 - Internal: #742 Rewrite `RegisterManager`, reduced complex logic which make me really confuse.
-- New: #743 New config option `updateRegisterOnChangeOrSubstitute`( default `true` ).
-  - When set to `false`, all `c`, `s`, `C`, `S` operation no longer mutate register.
-  - If you want keep reigser content unchanged by `c i w`, set this to `false`.
+- New: #743, #739 New config option `dontUpdateRegisterOnChangeOrSubstitute`( default `false` ).
+  - When set to `true`, all `c`, `s`, `C`, `S` operation no longer update register content.
+  - If you want keep register content unchanged by `c i w`, set this to `false`.
 - Fix, Improve: #744 Update selection property when outer-vmp command update selection range to make vmp work well with other atom-pkg or atom's native feature.
   - Update selection prop if on command dispatch of outer-vmp command
     - Now correctly start update cursor visibility and start `visual-mode` after `cmd-e` then `cmd-g`.
