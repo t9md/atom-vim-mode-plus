@@ -8,7 +8,7 @@ _ = require 'underscore-plus'
 settings = require './settings'
 HoverManager = require './hover-manager'
 SearchInput = require './search-input'
-{getVisibleEditors, matchScopes, translatePointAndClip} = require './utils'
+{getVisibleEditors, matchScopes, translatePointAndClip, haveSomeNonEmptySelection} = require './utils'
 swrap = require './selection-wrapper'
 
 OperationStack = require './operation-stack'
@@ -230,16 +230,12 @@ class VimState
     return if @operationStack.isProcessing()
     return unless @isInterestingEvent(event)
 
-    nonEmptySelecitons = @editor.getSelections().filter (selection) -> not selection.isEmpty()
-    if nonEmptySelecitons.length
-      wise = swrap.detectWise(@editor)
+    if haveSomeNonEmptySelection(@editor)
       @editorElement.component.updateSync()
+      wise = swrap.detectWise(@editor)
       if @isMode('visual', wise)
         for $selection in swrap.getSelections(@editor)
-          if $selection.hasProperties()
-            $selection.fixPropertyRowToRowRange() if wise is 'linewise'
-          else
-            $selection.saveProperties()
+          $selection.saveProperties()
         @updateCursorsVisibility()
       else
         @activate('visual', wise)
