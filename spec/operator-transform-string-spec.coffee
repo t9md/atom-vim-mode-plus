@@ -1247,6 +1247,44 @@ describe "Operator TransformString", ->
           'g r': 'vim-mode-plus:reverse'
           'g s': 'vim-mode-plus:sort'
           'g S': 'vim-mode-plus:sort-by-number'
+    describe "characterwise target", ->
+      describe "Reverse", ->
+        it "[comma separated] reverse text", ->
+          set textC: "   ( dog, ca|t, fish, rabbit, duck, gopher, squid )"
+          ensure 'g r i (', textC_: "   (| squid, gopher, duck, rabbit, fish, cat, dog )"
+        it "[comma sparated] reverse text", ->
+          set textC: "   ( 'dog ca|t', 'fish rabbit', 'duck gopher squid' )"
+          ensure 'g r i (', textC_: "   (| 'duck gopher squid', 'fish rabbit', 'dog cat' )"
+        it "[space sparated] reverse text", ->
+          set textC: "   ( dog ca|t fish rabbit duck gopher squid )"
+          ensure 'g r i (', textC_: "   (| squid gopher duck rabbit fish cat dog )"
+        it "[comma sparated multi-line] reverse text", ->
+          set textC: """
+            {
+              |1, 2, 3, 4,
+              5, 6,
+              7,
+              8, 9
+            }
+            """
+          ensure 'g r i {',
+            textC: """
+            {
+              9, 8, 7, 6,
+              5, 4,
+              3,
+              2, 1
+            }
+            """
+      describe "Sort", ->
+        it "[comma separated] sort text", ->
+          set textC: "   ( dog, ca|t, fish, rabbit, duck, gopher, squid )"
+          ensure 'g s i (', textC: "   (| cat, dog, duck, fish, gopher, rabbit, squid )"
+      describe "SortByNumber", ->
+        it "[comma separated] sort by number", ->
+          set textC_: "___(9, 1, |10, 5)"
+          ensure 'g S i (', textC_: "___(|1, 5, 9, 10)"
+
     describe "linewise target", ->
       beforeEach ->
         set

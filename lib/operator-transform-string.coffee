@@ -8,6 +8,7 @@ _ = require 'underscore-plus'
   limitNumber
   toggleCaseForCharacter
   splitTextByNewLine
+  splitAndJoinBy
 } = require './utils'
 swrap = require './selection-wrapper'
 Base = require './base'
@@ -625,37 +626,40 @@ class SplitStringWithKeepingSplitter extends SplitString
 
 class ChangeOrder extends TransformString
   @extend(false)
-  wise: 'linewise'
-
   getNewText: (text) ->
-    @getNewRows(splitTextByNewLine(text)).join("\n") + "\n"
+    if @target.isLinewise()
+      @getNewList(splitTextByNewLine(text)).join("\n") + "\n"
+    else
+      if "," in text
+        pattern = /,\s+/
+      else
+        pattern = /\s+/
+      splitAndJoinBy text, pattern, (items) => @getNewList(items)
+
+  changeTextOrderWithKeepingSplitter: (text) ->
 
 class Reverse extends ChangeOrder
   @extend()
   @registerToSelectList()
-  @description: "Reverse lines(e.g reverse selected three line)"
-  getNewRows: (rows) ->
+  getNewList: (rows) ->
     rows.reverse()
 
 class Sort extends ChangeOrder
   @extend()
   @registerToSelectList()
-  @description: "Sort lines alphabetically"
-  getNewRows: (rows) ->
+  getNewList: (rows) ->
     rows.sort()
 
 class SortCaseInsensitively extends ChangeOrder
   @extend()
   @registerToSelectList()
-  @description: "Sort lines alphabetically (case insensitive)"
-  getNewRows: (rows) ->
+  getNewList: (rows) ->
     rows.sort (rowA, rowB) ->
       rowA.localeCompare(rowB, sensitivity: 'base')
 
 class SortByNumber extends ChangeOrder
   @extend()
   @registerToSelectList()
-  @description: "Sort lines numerically"
-  getNewRows: (rows) ->
+  getNewList: (rows) ->
     _.sortBy rows, (row) ->
       Number.parseInt(row) or Infinity

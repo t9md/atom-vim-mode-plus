@@ -739,6 +739,45 @@ expandRangeToWhiteSpaces = (editor, range) ->
 
   return range # fallback
 
+# Split and join after mutate item by callback with keep original separator unchanged.
+#
+# 1. Trim leading and trainling white spaces and remember
+# 1. Split text with given pattern and remember original separators.
+# 2. Change order by callback
+# 3. Join with original spearator and concat with remembered leading and trainling white spaces.
+#
+splitAndJoinBy = (text, pattern, fn) ->
+  leadingSpaces = trailingSpaces = ''
+  start = text.search(/\S/)
+  end = text.search(/\s*$/)
+  leadingSpaces = trailingSpaces = ''
+  leadingSpaces = text[0...start] if start isnt -1
+  trailingSpaces = text[end...] if end isnt -1
+  text = text[start...end]
+
+  flags = 'g'
+  flags += 'i' if pattern.ignoreCase
+  regexp = new RegExp("(#{pattern.source})", flags)
+  # e.g.
+  # When text = "a, b, c", pattern = /,?\s+/
+  #   items = ['a', 'b', 'c'], spearators = [', ', ', ']
+  # When text = "a b\n c", pattern = /,?\s+/
+  #   items = ['a', 'b', 'c'], spearators = [' ', '\n ']
+  items = []
+  separators = []
+  for segment, i in text.split(regexp)
+    if i % 2 is 0
+      items.push(segment)
+    else
+      separators.push(segment)
+  separators.push('')
+  items = fn(items)
+  result = ''
+  for [item, separator] in _.zip(items, separators)
+    result += item + separator
+  leadingSpaces + result + trailingSpaces
+
+
 scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
   {allowNextLine, from, scanRange} = options
   if not from? and not scanRange?
@@ -849,5 +888,6 @@ module.exports = {
   replaceDecorationClassBy
   humanizeBufferRange
   expandRangeToWhiteSpaces
+  splitAndJoinBy
   scanEditorInDirection
 }
