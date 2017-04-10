@@ -1240,92 +1240,93 @@ describe "Operator TransformString", ->
           f\n
           """
 
-  describe "Reverse, Sort, SortByNumber", ->
+  fdescribe "Change Order faimliy: Reverse, Sort, SortCaseInsensitively, SortByNumber", ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
           'g r': 'vim-mode-plus:reverse'
           'g s': 'vim-mode-plus:sort'
           'g S': 'vim-mode-plus:sort-by-number'
-      set
-        textC: """
-        |z
-
-        10a
-        b
-        a
-
-        5
-        1\n
-        """
-    describe "Reverse", ->
-      it "reverse rows", ->
-        ensure 'g r G',
+    describe "linewise target", ->
+      beforeEach ->
+        set
           textC: """
-          |1
-          5
+          |z
 
-          a
-          b
           10a
-
-          z\n
-          """
-    describe "Sort", ->
-      it "sort rows", ->
-        ensure 'g s G',
-          textC: """
-          |
-
-          1
-          10a
-          5
-          a
-          b
-          z\n
-          """
-    describe "SortByNumber", ->
-      it "sort rows numerically", ->
-        ensure "g S G",
-          textC: """
-          |1
-          5
-          10a
-          z
-
           b
           a
-          \n
+
+          5
+          1\n
           """
+      describe "Reverse", ->
+        it "reverse rows", ->
+          ensure 'g r G',
+            textC: """
+            |1
+            5
 
-  describe "SortCaseInsensitively", ->
-    beforeEach ->
-      atom.keymaps.add "test",
-        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g s': 'vim-mode-plus:sort-case-insensitively'
-    it "Sort rows case-insensitively", ->
-      set
-        textC: """
-        |apple
-        Beef
-        APPLE
-        DOG
-        beef
-        Apple
-        BEEF
-        Dog
-        dog\n
-        """
+            a
+            b
+            10a
 
-      ensure "g s G",
-        text: """
-        apple
-        Apple
-        APPLE
-        beef
-        Beef
-        BEEF
-        dog
-        Dog
-        DOG\n
-        """
+            z\n
+            """
+      describe "Sort", ->
+        it "sort rows", ->
+          ensure 'g s G',
+            textC: """
+            |
+
+            1
+            10a
+            5
+            a
+            b
+            z\n
+            """
+      describe "SortByNumber", ->
+        it "sort rows numerically", ->
+          ensure "g S G",
+            textC: """
+            |1
+            5
+            10a
+            z
+
+            b
+            a
+            \n
+            """
+      describe "SortCaseInsensitively", ->
+        beforeEach ->
+          atom.keymaps.add "test",
+            'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+              'g s': 'vim-mode-plus:sort-case-insensitively'
+        it "Sort rows case-insensitively", ->
+          set
+            textC: """
+            |apple
+            Beef
+            APPLE
+            DOG
+            beef
+            Apple
+            BEEF
+            Dog
+            dog\n
+            """
+
+          ensure "g s G",
+            text: """
+            apple
+            Apple
+            APPLE
+            beef
+            Beef
+            BEEF
+            dog
+            Dog
+            DOG\n
+            """
