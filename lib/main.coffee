@@ -22,6 +22,8 @@ module.exports =
     @registerCommands()
     @registerVimStateCommands()
 
+    settings.notifyDeprecatedParams()
+
     if atom.inSpecMode()
       settings.set('strictAssertion', true)
 

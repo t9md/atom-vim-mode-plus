@@ -27,7 +27,7 @@ class CursorStyleManager
 
     # We must dispose previous style modification for non-visual-mode
     @styleDisposables?.dispose()
-    return unless (@mode is 'visual' and @vimState.getConfig('showCursorInVisualMode'))
+    return unless @mode is 'visual'
 
     @styleDisposables = new CompositeDisposable
     if @submode is 'blockwise'

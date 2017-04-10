@@ -8,6 +8,31 @@ inferType = (value) ->
     when Array.isArray(value) then 'array'
 
 class Settings
+  deprecatedParams: [
+    'showCursorInVisualMode'
+    'showCursorInVisualMode2'
+  ]
+  notifyDeprecatedParams: ->
+    deprecatedParams = @deprecatedParams.filter((param) => @has(param))
+    return if deprecatedParams.length is 0
+
+    content = [
+      "#{@scope}: Config options deprecated.  ",
+      "Remove from your `connfig.cson` now?  "
+    ]
+    content.push "- `#{param}`" for param in deprecatedParams
+
+    notification = atom.notifications.addWarning content.join("\n"),
+      dismissable: true
+      buttons: [
+        {
+          text: 'Remove All'
+          onDidClick: =>
+            @delete(param) for param in deprecatedParams
+            notification.dismiss()
+        }
+      ]
+
   constructor: (@scope, @config) ->
     # Automatically infer and inject `type` of each config parameter.
     # skip if value which aleady have `type` field.
@@ -21,6 +46,12 @@ class Settings
     # [CAUTION] injecting order propety to set order shown at setting-view MUST-COME-LAST.
     for name, i in Object.keys(@config)
       @config[name].order = i
+
+  has: (param) ->
+    param of atom.config.get(@scope)
+
+  delete: (param) ->
+    @set(param, undefined)
 
   get: (param) ->
     atom.config.get("#{@scope}.#{param}")
@@ -158,7 +189,6 @@ module.exports = new Settings 'vim-mode-plus',
       Comma separated list of character, which add space around surrounded text.<br>
       For vim-surround compatible behavior, set `(, {, [, <`.
       """
-  showCursorInVisualMode: true
   ignoreCaseForSearch:
     default: false
     description: 'For `/` and `?`'
