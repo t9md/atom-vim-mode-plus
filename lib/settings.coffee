@@ -39,6 +39,10 @@ class Settings
       keymapUnderscoreToReplaceWithRegister:
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
           '_': 'vim-mode-plus:replace-with-register'
+      keymapPToPutWithAutoIndent:
+        'atom-text-editor.vim-mode-plus:not(.insert-mode):not(.operator-pending-mode)':
+          'P': 'vim-mode-plus:put-before-with-auto-indent'
+          'p': 'vim-mode-plus:put-after-with-auto-indent'
       keymapCCToChangeInnerSmartWord:
         'atom-text-editor.vim-mode-plus.operator-pending-mode.change-pending':
           'c': 'vim-mode-plus:inner-smart-word'
@@ -74,6 +78,14 @@ module.exports = new Settings 'vim-mode-plus',
     Can: `_ i (` to replace inner-parenthesis with register's value<br>
     Can: `_ i ;` to replace inner-any-pair if you enabled `keymapSemicolonToInnerAnyPairInOperatorPendingMode`<br>
     Conflicts: `_`( `move-to-first-character-of-line-and-down` ) motion. Who use this??
+    """
+  keymapPToPutWithAutoIndent:
+    default: false
+    description: """
+    Remap `p` and `P` to auto indent version.<br>
+    `p` remapped to `put-before-with-auto-indent` from original `put-before`<br>
+    `P` remapped to `put-after-with-auto-indent` from original `put-after`<br>
+    Conflicts: Original `put-after` and `put-before` become unavailable unless you set different keymap by yourself.
     """
   keymapCCToChangeInnerSmartWord:
     default: false
