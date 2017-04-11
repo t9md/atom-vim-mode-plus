@@ -8,7 +8,7 @@ _ = require 'underscore-plus'
   limitNumber
   toggleCaseForCharacter
   splitTextByNewLine
-  splitAndJoinBy
+  changeOrderOfArgumentInTextBy
 } = require './utils'
 swrap = require './selection-wrapper'
 Base = require './base'
@@ -630,11 +630,7 @@ class ChangeOrder extends TransformString
     if @target.isLinewise()
       @getNewList(splitTextByNewLine(text)).join("\n") + "\n"
     else
-      if "," in text
-        pattern = /,\s+/
-      else
-        pattern = /\s+/
-      splitAndJoinBy text, pattern, (items) => @getNewList(items)
+      changeOrderOfArgumentInTextBy(text, (args) => @getNewList(args))
 
   changeTextOrderWithKeepingSplitter: (text) ->
 

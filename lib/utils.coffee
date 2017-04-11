@@ -777,6 +777,88 @@ splitAndJoinBy = (text, pattern, fn) ->
     result += item + separator
   leadingSpaces + result + trailingSpaces
 
+changeOrderOfArgumentInTextBy = (text, fn) ->
+  leadingSpaces = trailingSpaces = ''
+  start = text.search(/\S/)
+  end = text.search(/\s*$/)
+  leadingSpaces = trailingSpaces = ''
+  leadingSpaces = text[0...start] if start isnt -1
+  trailingSpaces = text[end...] if end isnt -1
+  text = text[start...end]
+  {tokens, separators} = splitIntoTokensAndSeparators(text)
+  separators.push('')
+  items = fn(tokens)
+  result = ''
+  for [item, separator] in _.zip(items, separators)
+    result += item + separator
+  leadingSpaces + result + trailingSpaces
+
+splitIntoTokensAndSeparators = (text) ->
+  tokens = []
+  separators = []
+  stack = []
+  token = ''
+  separator = ''
+  separatorChars = "\t, \n"
+  quoteChars = "\"'"
+  openPairChars = "({<"
+  closePairChars = ")}>"
+
+  inQuote = false
+  isEscaped = false
+  # Parse text as list of tokens which is commma separated or white space separated.
+  # e.g. 'a, fun1(b, c), d' => ['a', 'fun1(b, c), 'd']
+  # Not perfect. but far better than simple string split by regex pattern.
+  for char in text
+    if (stack.length is 0) and (char in separatorChars)
+      if token
+        tokens.push(token)
+        token = ''
+      separator += char
+    else
+      if isEscaped
+        isEscaped = false
+      else if char is "\\"
+        isEscaped = true
+      else if char in openPairChars
+        stack.push(char) unless inQuote
+      else if char in closePairChars
+        stack.pop() unless inQuote
+      else if char in quoteChars
+        if inQuote
+          if _.last(stack) is char
+            stack.pop()
+            inQuote = false
+        else
+          inQuote = true
+          stack.push(char)
+
+      if separator
+        separators.push(separator)
+        separator = ''
+
+      token += char
+  if token
+    tokens.push(token)
+
+  if separators.some((separator) -> ',' in separator)
+    # When some separator contains `,` treat white-space separator is just part of token.
+    # So we move white-space only sparator into tokens by joining mis-separatoed tokens.
+    newTokens = []
+    newSeparators = []
+    while separators.length
+      separator = separators.shift()
+      token = tokens.shift()
+      if ',' in separator
+        newTokens.push(token)
+        newSeparators.push(separator)
+      else
+        tokens.unshift(token + separator + tokens.shift())
+    newTokens.push(tokens.shift())
+    tokens = newTokens
+    separators = newSeparators
+
+  {tokens, separators}
 
 scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
   {allowNextLine, from, scanRange} = options
@@ -889,5 +971,6 @@ module.exports = {
   humanizeBufferRange
   expandRangeToWhiteSpaces
   splitAndJoinBy
+  changeOrderOfArgumentInTextBy
   scanEditorInDirection
 }
