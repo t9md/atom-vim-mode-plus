@@ -786,11 +786,10 @@ changeOrderOfArgumentInTextBy = (text, fn) ->
   trailingSpaces = text[end...] if end isnt -1
   text = text[start...end]
   {tokens, separators} = splitIntoTokensAndSeparators(text)
-  separators.push('')
   items = fn(tokens)
   result = ''
   for [item, separator] in _.zip(items, separators)
-    result += item + separator
+    result += item + (separator ? '')
   leadingSpaces + result + trailingSpaces
 
 splitIntoTokensAndSeparators = (text) ->
@@ -838,15 +837,16 @@ splitIntoTokensAndSeparators = (text) ->
         separator = ''
 
       token += char
-  if token
-    tokens.push(token)
+
+  tokens.push(token) if token
+  separators.push(separator) if separator
 
   if separators.some((separator) -> ',' in separator)
     # When some separator contains `,` treat white-space separator is just part of token.
     # So we move white-space only sparator into tokens by joining mis-separatoed tokens.
     newTokens = []
     newSeparators = []
-    while separators.length
+    while (separators.length and tokens.length)
       separator = separators.shift()
       token = tokens.shift()
       if ',' in separator
@@ -854,7 +854,7 @@ splitIntoTokensAndSeparators = (text) ->
         newSeparators.push(separator)
       else
         tokens.unshift(token + separator + tokens.shift())
-    newTokens.push(tokens.shift())
+    newTokens.push(tokens.shift()) if tokens.length
     tokens = newTokens
     separators = newSeparators
 
