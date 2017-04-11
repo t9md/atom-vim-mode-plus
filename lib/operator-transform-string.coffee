@@ -640,6 +640,20 @@ class Reverse extends ChangeOrder
   getNewList: (rows) ->
     rows.reverse()
 
+class Rotate extends ChangeOrder
+  @extend()
+  @registerToSelectList()
+  getNewList: (rows) ->
+    rows.unshift(rows.pop())
+    rows
+
+class RotateBackwards extends ChangeOrder
+  @extend()
+  @registerToSelectList()
+  getNewList: (rows) ->
+    rows.push(rows.shift())
+    rows
+
 class Sort extends ChangeOrder
   @extend()
   @registerToSelectList()
