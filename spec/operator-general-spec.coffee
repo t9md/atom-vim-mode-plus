@@ -1143,6 +1143,17 @@ describe "Operator general", ->
         text: '\n2\n\n4\n\n'
         cursor: [[1, 0], [3, 0]]
 
+    it "auto indent when replaced with singe new line", ->
+      set
+        textC_: """
+        __a|bc
+        """
+      ensure 'r enter',
+        textC_: """
+        __a
+        __|c
+        """
+
     it "composes properly with motions", ->
       ensure ['2 r', input: 'x'], text: 'xx\nxx\n\n'
 

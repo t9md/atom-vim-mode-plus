@@ -3,12 +3,12 @@ _ = require 'underscore-plus'
   haveSomeNonEmptySelection
   isEmptyRow
   getWordPatternAtBufferPosition
-  getIndentLevelForBufferRow
   getSubwordPatternAtBufferPosition
   insertTextAtBufferPosition
   setBufferRow
   moveCursorToFirstCharacterAtRow
   ensureEndsWithNewLineForBufferRow
+  adjustIndentWithKeepingLayout
 } = require './utils'
 swrap = require './selection-wrapper'
 Base = require './base'
@@ -625,31 +625,7 @@ class PutBeforeWithAutoIndent extends PutBefore
 
   pasteLinewise: (selection, text) ->
     newRange = super
-    # Adjust indentLevel with keeping original layout of pasting text.
-    # Suggested indent level of newRange.start.row is correct as long as newRange.start.row have minimum indent level.
-    # But when we paste following already indented three line text, we have to adjust indent level
-    #  so that `varFortyTwo` line have suggestedIndentLevel.
-    #
-    #        varOne: value # suggestedIndentLevel is determined by this line
-    #   varFortyTwo: value # We need to make final indent level of this row to be suggestedIndentLevel.
-    #      varThree: value
-    #
-    # So what we are doing here is apply suggestedIndentLevel with fixing issue above.
-    # 1. Determine minimum indent level among pasted range(= newRange ) excluding empty row
-    # 2. Then update indentLevel of each rows to final indentLevel of minimum-indented row have suggestedIndentLevel.
-    suggestedLevel = @editor.suggestedIndentForBufferRow(newRange.start.row)
-    minLevel = null
-    rowAndActualLevels = []
-    for row in [newRange.start.row...newRange.end.row]
-      actualLevel = getIndentLevelForBufferRow(@editor, row)
-      rowAndActualLevels.push([row, actualLevel])
-      unless isEmptyRow(@editor, row)
-        minLevel = Math.min(minLevel ? Infinity, actualLevel)
-
-    if minLevel? and (deltaToSuggestedLevel = suggestedLevel - minLevel)
-      for [row, actualLevel] in rowAndActualLevels
-        newLevel = actualLevel + deltaToSuggestedLevel
-        @editor.setIndentationForBufferRow(row, newLevel)
+    adjustIndentWithKeepingLayout(@editor, newRange)
     return newRange
 
 class PutAfterWithAutoIndent extends PutBeforeWithAutoIndent

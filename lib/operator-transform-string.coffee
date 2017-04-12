@@ -1,4 +1,3 @@
-LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {BufferedProcess, Range} = require 'atom'
 
@@ -9,6 +8,9 @@ _ = require 'underscore-plus'
   toggleCaseForCharacter
   splitTextByNewLine
   sortArgumentsInTextBy
+  splitArgumentsInTextIntoLines
+  getIndentLevelForBufferRow
+  adjustIndentWithKeepingLayout
 } = require './utils'
 swrap = require './selection-wrapper'
 Base = require './base'
@@ -22,6 +24,7 @@ class TransformString extends Operator
   stayOptionName: 'stayOnTransformString'
   autoIndent: false
   autoIndentNewline: false
+  autoIndentAfterInsertText: false
   @stringTransformers: []
 
   @registerToSelectList: ->
@@ -29,7 +32,17 @@ class TransformString extends Operator
 
   mutateSelection: (selection) ->
     if text = @getNewText(selection.getText(), selection)
-      selection.insertText(text, {@autoIndent})
+      if @autoIndentAfterInsertText
+        startRow = selection.getBufferRange().start.row
+        startRowIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
+      range = selection.insertText(text, {@autoIndent, @autoIndentNewline})
+      if @autoIndentAfterInsertText
+        # Currently used by SplitByArguments and Surround( linewise target only )
+        range = range.translate([0, 0], [-1, 0]) if @target.isLinewise()
+        @editor.setIndentationForBufferRow(range.start.row, startRowIndentLevel)
+        @editor.setIndentationForBufferRow(range.end.row, startRowIndentLevel)
+        # Adjust inner range, end.row is already( if needed ) translated so no need to re-translate.
+        adjustIndentWithKeepingLayout(@editor, range.translate([1, 0], [0, 0]))
 
 class ToggleCase extends TransformString
   @extend()
@@ -66,8 +79,9 @@ class LowerCase extends TransformString
 # -------------------------
 class Replace extends TransformString
   @extend()
-  input: null
+  @registerToSelectList()
   flashCheckpoint: 'did-select-occurrence'
+  input: null
   requireInput: true
   autoIndentNewline: true
   supportEarlySelect: true
@@ -400,8 +414,6 @@ class SurroundBase extends TransformString
   ]
   pairCharsAllowForwarding: '[](){}'
   input: null
-  autoIndent: false
-
   requireInput: true
   supportEarlySelect: true # Experimental
 
@@ -426,8 +438,8 @@ class SurroundBase extends TransformString
   surround: (text, char, options={}) ->
     keepLayout = options.keepLayout ? false
     [open, close] = @getPair(char)
-    if (not keepLayout) and LineEndingRegExp.test(text)
-      @autoIndent = true # [FIXME]
+    if (not keepLayout) and text.endsWith("\n")
+      @autoIndentAfterInsertText = true
       open += "\n"
       close += "\n"
 
@@ -624,6 +636,20 @@ class SplitStringWithKeepingSplitter extends SplitString
   @registerToSelectList()
   keepSplitter: true
 
+class SplitByArguments extends TransformString
+  @extend()
+  @registerToSelectList()
+  keepSeparator: true
+  autoIndentAfterInsertText: true
+
+  getNewText: (text) ->
+    splitArgumentsInTextIntoLines(text, {@keepSeparator})
+
+class SplitByArgumentsWithRemoveSeparator extends SplitByArguments
+  @extend()
+  @registerToSelectList()
+  keepSeparator: false
+
 class ChangeOrder extends TransformString
   @extend(false)
   getNewText: (text) ->
@@ -631,8 +657,6 @@ class ChangeOrder extends TransformString
       @getNewList(splitTextByNewLine(text)).join("\n") + "\n"
     else
       sortArgumentsInTextBy(text, (args) => @getNewList(args))
-
-  changeTextOrderWithKeepingSplitter: (text) ->
 
 class Reverse extends ChangeOrder
   @extend()
@@ -657,12 +681,14 @@ class RotateBackwards extends ChangeOrder
 class Sort extends ChangeOrder
   @extend()
   @registerToSelectList()
+  @description: "Sort alphabetically"
   getNewList: (rows) ->
     rows.sort()
 
 class SortCaseInsensitively extends ChangeOrder
   @extend()
   @registerToSelectList()
+  @description: "Sort alphabetically with case insensitively"
   getNewList: (rows) ->
     rows.sort (rowA, rowB) ->
       rowA.localeCompare(rowB, sensitivity: 'base')
@@ -670,6 +696,7 @@ class SortCaseInsensitively extends ChangeOrder
 class SortByNumber extends ChangeOrder
   @extend()
   @registerToSelectList()
+  @description: "Sort numerically"
   getNewList: (rows) ->
     _.sortBy rows, (row) ->
       Number.parseInt(row) or Infinity

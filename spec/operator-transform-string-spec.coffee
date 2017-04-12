@@ -567,6 +567,33 @@ describe "Operator TransformString", ->
         ensure 'j .',
           textC: "{apple}\n|{pairs: [brackets]}\npairs: [brackets]\n( multi\n  line )"
 
+      describe 'adjustIndentation when surround linewise target', ->
+        beforeEach ->
+          waitsForPromise ->
+            atom.packages.activatePackage('language-javascript')
+          runs ->
+            set
+              textC: """
+                hello = () => {
+                  if true {
+                  |  console.log('hello');
+                  }
+                }
+                """
+              grammar: 'source.js'
+
+        it "adjustIndentation surrounded text ", ->
+          ensure ['y s i f', input: '{'],
+            textC: """
+              hello = () => {
+              |  {
+                  if true {
+                    console.log('hello');
+                  }
+                }
+              }
+              """
+
       describe 'with motion which takes user-input', ->
         beforeEach ->
           set text: "s _____ e", cursor: [0, 0]
@@ -1238,6 +1265,103 @@ describe "Operator TransformString", ->
           |d:
           e:
           f\n
+          """
+
+  describe "SplitByArguments, SplitByArgumentsWithRemoveSeparator", ->
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g ,': 'vim-mode-plus:split-by-arguments'
+          'g !': 'vim-mode-plus:split-by-arguments-with-remove-separator'
+
+      waitsForPromise ->
+        atom.packages.activatePackage('language-javascript')
+      runs ->
+        set
+          grammar: 'source.js'
+          text: """
+            hello = () => {
+              {f1, f2, f3} = require('hello')
+              f1(f2(1, "a, b, c"), 2, (arg) => console.log(arg))
+              s = `abc def hij`
+            }
+            """
+
+    describe "SplitByArguments", ->
+      it "split by commma with adjust indent", ->
+        set cursor: [1, 3]
+        ensure 'g , i {',
+          textC: """
+            hello = () => {
+              |{
+                f1,
+                f2,
+                f3
+              } = require('hello')
+              f1(f2(1, "a, b, c"), 2, (arg) => console.log(arg))
+              s = `abc def hij`
+            }
+            """
+      it "split by commma with adjust indent", ->
+        set cursor: [2, 5]
+        ensure 'g , i (',
+          textC: """
+            hello = () => {
+              {f1, f2, f3} = require('hello')
+              f1|(
+                f2(1, "a, b, c"),
+                2,
+                (arg) => console.log(arg)
+              )
+              s = `abc def hij`
+            }
+            """
+        keystroke 'j w'
+        ensure 'g , i (',
+          textC: """
+            hello = () => {
+              {f1, f2, f3} = require('hello')
+              f1(
+                f2|(
+                  1,
+                  "a, b, c"
+                ),
+                2,
+                (arg) => console.log(arg)
+              )
+              s = `abc def hij`
+            }
+            """
+      it "split by white-space with adjust indent", ->
+        set cursor: [3, 10]
+        ensure 'g , i `',
+          textC: """
+            hello = () => {
+              {f1, f2, f3} = require('hello')
+              f1(f2(1, "a, b, c"), 2, (arg) => console.log(arg))
+              s = |`
+              abc
+              def
+              hij
+              `
+            }
+            """
+
+    describe "SplitByArgumentsWithRemoveSeparator", ->
+      beforeEach ->
+      it "remove splitter when split", ->
+        set cursor: [1, 3]
+        ensure 'g ! i {',
+          textC: """
+          hello = () => {
+            |{
+              f1
+              f2
+              f3
+            } = require('hello')
+            f1(f2(1, "a, b, c"), 2, (arg) => console.log(arg))
+            s = `abc def hij`
+          }
           """
 
   describe "Change Order faimliy: Reverse, Sort, SortCaseInsensitively, SortByNumber", ->

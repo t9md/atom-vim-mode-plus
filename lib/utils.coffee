@@ -785,23 +785,31 @@ sortArgumentsInTextBy = (text, fn) ->
   leadingSpaces = text[0...start] if start isnt -1
   trailingSpaces = text[end...] if end isnt -1
   text = text[start...end]
-  {tokens, separators} = splitIntoTokensAndSeparators(text)
-  items = fn(tokens)
+  {tokens, separators} = splitByArguments(text)
+  tokens = fn(tokens)
   result = ''
-  for [item, separator] in _.zip(items, separators)
-    result += item + (separator ? '')
+  for [token, separator] in _.zip(tokens, separators)
+    result += token + (separator ? '')
   leadingSpaces + result + trailingSpaces
 
-splitIntoTokensAndSeparators = (text) ->
+splitArgumentsInTextIntoLines = (text, options={}) ->
+  {tokens, separators} = splitByArguments(text.trim())
+  newText = ''
+  for [token, separator] in _.zip(tokens, separators)
+    separator = if options.keepSeparator then separator ? '' else ''
+    newText += token + separator.trim() + "\n"
+  "\n" + newText
+
+splitByArguments = (text) ->
   tokens = []
   separators = []
   stack = []
   token = ''
   separator = ''
   separatorChars = "\t, \n"
-  quoteChars = "\"'"
-  openPairChars = "({<"
-  closePairChars = ")}>"
+  quoteChars = "\"'`"
+  openPairChars = "({[<"
+  closePairChars = ">]})"
 
   inQuote = false
   isEscaped = false
@@ -883,6 +891,33 @@ scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
       event.stop()
       return
     fn(event)
+
+adjustIndentWithKeepingLayout = (editor, range) ->
+  # Adjust indentLevel with keeping original layout of pasting text.
+  # Suggested indent level of range.start.row is correct as long as range.start.row have minimum indent level.
+  # But when we paste following already indented three line text, we have to adjust indent level
+  #  so that `varFortyTwo` line have suggestedIndentLevel.
+  #
+  #        varOne: value # suggestedIndentLevel is determined by this line
+  #   varFortyTwo: value # We need to make final indent level of this row to be suggestedIndentLevel.
+  #      varThree: value
+  #
+  # So what we are doing here is apply suggestedIndentLevel with fixing issue above.
+  # 1. Determine minimum indent level among pasted range(= range ) excluding empty row
+  # 2. Then update indentLevel of each rows to final indentLevel of minimum-indented row have suggestedIndentLevel.
+  suggestedLevel = editor.suggestedIndentForBufferRow(range.start.row)
+  minLevel = null
+  rowAndActualLevels = []
+  for row in [range.start.row...range.end.row]
+    actualLevel = getIndentLevelForBufferRow(editor, row)
+    rowAndActualLevels.push([row, actualLevel])
+    unless isEmptyRow(editor, row)
+      minLevel = Math.min(minLevel ? Infinity, actualLevel)
+
+  if minLevel? and (deltaToSuggestedLevel = suggestedLevel - minLevel)
+    for [row, actualLevel] in rowAndActualLevels
+      newLevel = actualLevel + deltaToSuggestedLevel
+      editor.setIndentationForBufferRow(row, newLevel)
 
 module.exports = {
   assertWithException
@@ -972,5 +1007,7 @@ module.exports = {
   expandRangeToWhiteSpaces
   splitAndJoinBy
   sortArgumentsInTextBy
+  splitArgumentsInTextIntoLines
   scanEditorInDirection
+  adjustIndentWithKeepingLayout
 }
