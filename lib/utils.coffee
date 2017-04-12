@@ -739,6 +739,135 @@ expandRangeToWhiteSpaces = (editor, range) ->
 
   return range # fallback
 
+# Split and join after mutate item by callback with keep original separator unchanged.
+#
+# 1. Trim leading and trainling white spaces and remember
+# 1. Split text with given pattern and remember original separators.
+# 2. Change order by callback
+# 3. Join with original spearator and concat with remembered leading and trainling white spaces.
+#
+splitAndJoinBy = (text, pattern, fn) ->
+  leadingSpaces = trailingSpaces = ''
+  start = text.search(/\S/)
+  end = text.search(/\s*$/)
+  leadingSpaces = trailingSpaces = ''
+  leadingSpaces = text[0...start] if start isnt -1
+  trailingSpaces = text[end...] if end isnt -1
+  text = text[start...end]
+
+  flags = 'g'
+  flags += 'i' if pattern.ignoreCase
+  regexp = new RegExp("(#{pattern.source})", flags)
+  # e.g.
+  # When text = "a, b, c", pattern = /,?\s+/
+  #   items = ['a', 'b', 'c'], spearators = [', ', ', ']
+  # When text = "a b\n c", pattern = /,?\s+/
+  #   items = ['a', 'b', 'c'], spearators = [' ', '\n ']
+  items = []
+  separators = []
+  for segment, i in text.split(regexp)
+    if i % 2 is 0
+      items.push(segment)
+    else
+      separators.push(segment)
+  separators.push('')
+  items = fn(items)
+  result = ''
+  for [item, separator] in _.zip(items, separators)
+    result += item + separator
+  leadingSpaces + result + trailingSpaces
+
+sortArgumentsInTextBy = (text, fn) ->
+  leadingSpaces = trailingSpaces = ''
+  start = text.search(/\S/)
+  end = text.search(/\s*$/)
+  leadingSpaces = trailingSpaces = ''
+  leadingSpaces = text[0...start] if start isnt -1
+  trailingSpaces = text[end...] if end isnt -1
+  text = text[start...end]
+  {tokens, separators} = splitByArguments(text)
+  tokens = fn(tokens)
+  result = ''
+  for [token, separator] in _.zip(tokens, separators)
+    result += token + (separator ? '')
+  leadingSpaces + result + trailingSpaces
+
+splitArgumentsInTextIntoLines = (text, options={}) ->
+  {tokens, separators} = splitByArguments(text.trim())
+  newText = ''
+  for [token, separator] in _.zip(tokens, separators)
+    separator = if options.keepSeparator then separator ? '' else ''
+    newText += token + separator.trim() + "\n"
+  "\n" + newText
+
+splitByArguments = (text) ->
+  tokens = []
+  separators = []
+  stack = []
+  token = ''
+  separator = ''
+  separatorChars = "\t, \n"
+  quoteChars = "\"'`"
+  openPairChars = "({[<"
+  closePairChars = ">]})"
+
+  inQuote = false
+  isEscaped = false
+  # Parse text as list of tokens which is commma separated or white space separated.
+  # e.g. 'a, fun1(b, c), d' => ['a', 'fun1(b, c), 'd']
+  # Not perfect. but far better than simple string split by regex pattern.
+  for char in text
+    if (stack.length is 0) and (char in separatorChars)
+      if token
+        tokens.push(token)
+        token = ''
+      separator += char
+    else
+      if isEscaped
+        isEscaped = false
+      else if char is "\\"
+        isEscaped = true
+      else if char in openPairChars
+        stack.push(char) unless inQuote
+      else if char in closePairChars
+        stack.pop() unless inQuote
+      else if char in quoteChars
+        if inQuote
+          if _.last(stack) is char
+            stack.pop()
+            inQuote = false
+        else
+          inQuote = true
+          stack.push(char)
+
+      if separator
+        separators.push(separator)
+        separator = ''
+
+      token += char
+
+  tokens.push(token) if token
+  separators.push(separator) if separator
+
+  if separators.some((separator) -> ',' in separator)
+    # When some separator contains `,` treat white-space separator is just part of token.
+    # So we move white-space only sparator into tokens by joining mis-separatoed tokens.
+    newTokens = []
+    newSeparators = []
+    while (separators.length and tokens.length)
+      separator = separators.shift()
+      token = tokens.shift()
+      if ',' in separator
+        newTokens.push(token)
+        newSeparators.push(separator)
+      else
+        tokens.unshift(token + separator + tokens.shift())
+    newTokens.push(tokens.shift()) if tokens.length
+    tokens = newTokens
+    separators = newSeparators
+
+  {tokens, separators}
+
 scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
   {allowNextLine, from, scanRange} = options
   if not from? and not scanRange?
@@ -762,6 +891,33 @@ scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
       event.stop()
       return
     fn(event)
+
+adjustIndentWithKeepingLayout = (editor, range) ->
+  # Adjust indentLevel with keeping original layout of pasting text.
+  # Suggested indent level of range.start.row is correct as long as range.start.row have minimum indent level.
+  # But when we paste following already indented three line text, we have to adjust indent level
+  #  so that `varFortyTwo` line have suggestedIndentLevel.
+  #
+  #        varOne: value # suggestedIndentLevel is determined by this line
+  #   varFortyTwo: value # We need to make final indent level of this row to be suggestedIndentLevel.
+  #      varThree: value
+  #
+  # So what we are doing here is apply suggestedIndentLevel with fixing issue above.
+  # 1. Determine minimum indent level among pasted range(= range ) excluding empty row
+  # 2. Then update indentLevel of each rows to final indentLevel of minimum-indented row have suggestedIndentLevel.
+  suggestedLevel = editor.suggestedIndentForBufferRow(range.start.row)
+  minLevel = null
+  rowAndActualLevels = []
+  for row in [range.start.row...range.end.row]
+    actualLevel = getIndentLevelForBufferRow(editor, row)
+    rowAndActualLevels.push([row, actualLevel])
+    unless isEmptyRow(editor, row)
+      minLevel = Math.min(minLevel ? Infinity, actualLevel)
+
+  if minLevel? and (deltaToSuggestedLevel = suggestedLevel - minLevel)
+    for [row, actualLevel] in rowAndActualLevels
+      newLevel = actualLevel + deltaToSuggestedLevel
+      editor.setIndentationForBufferRow(row, newLevel)
 
 module.exports = {
   assertWithException
@@ -849,5 +1005,9 @@ module.exports = {
   replaceDecorationClassBy
   humanizeBufferRange
   expandRangeToWhiteSpaces
+  splitAndJoinBy
+  sortArgumentsInTextBy
+  splitArgumentsInTextIntoLines
   scanEditorInDirection
+  adjustIndentWithKeepingLayout
 }
