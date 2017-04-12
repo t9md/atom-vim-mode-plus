@@ -650,6 +650,11 @@ class SplitByArgumentsWithRemoveSeparator extends SplitByArguments
   @registerToSelectList()
   keepSeparator: false
 
+class SplitByArgumentsOfInnerAnyPair extends SplitByArguments
+  @extend()
+  @registerToSelectList()
+  target: "InnerAnyPair"
+
 class ChangeOrder extends TransformString
   @extend(false)
   getNewText: (text) ->
@@ -663,6 +668,10 @@ class Reverse extends ChangeOrder
   @registerToSelectList()
   getNewList: (rows) ->
     rows.reverse()
+
+class ReverseInnerAnyPair extends Reverse
+  @extend()
+  target: "InnerAnyPair"
 
 class Rotate extends ChangeOrder
   @extend()
