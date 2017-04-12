@@ -1270,11 +1270,57 @@ describe "Operator TransformString", ->
           ensure 'g r i {',
             textC: """
             {
-              9, 8, 7, 6,
+            |  9, 8, 7, 6,
               5, 4,
               3,
               2, 1
             }
+            """
+        it "[comma sparated multi-line] keep comma followed to last entry", ->
+          set textC: """
+            [
+              |1, 2, 3, 4,
+              5, 6,
+            ]
+            """
+          ensure 'g r i [',
+            textC: """
+            [
+            |  6, 5, 4, 3,
+              2, 1,
+            ]
+            """
+        it "[comma sparated multi-line] aware of nexted pair and quotes and escaped quote", ->
+          set textC: """
+            (
+              |"(a, b, c)", "[( d e f", test(g, h, i),
+              "\\"j, k, l",
+              '\\'m, n', test(o, p),
+            )
+            """
+          ensure 'g r i (',
+            textC: """
+            (
+            |  test(o, p), '\\'m, n', "\\"j, k, l",
+              test(g, h, i),
+              "[( d e f", "(a, b, c)",
+            )
+            """
+        it "[space sparated multi-line] aware of nexted pair and quotes and escaped quote", ->
+          set textC_: """
+            (
+              |"(a, b, c)" "[( d e f"      test(g, h, i)
+              "\\"j, k, l"___
+              '\\'m, n'    test(o, p)
+            )
+            """
+          ensure 'g r i (',
+            textC_: """
+            (
+            |  test(o, p) '\\'m, n'      "\\"j, k, l"
+              test(g, h, i)___
+              "[( d e f"    "(a, b, c)"
+            )
             """
       describe "Sort", ->
         it "[comma separated] sort text", ->

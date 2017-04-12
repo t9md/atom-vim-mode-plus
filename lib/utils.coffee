@@ -777,7 +777,7 @@ splitAndJoinBy = (text, pattern, fn) ->
     result += item + separator
   leadingSpaces + result + trailingSpaces
 
-changeOrderOfArgumentInTextBy = (text, fn) ->
+sortArgumentsInTextBy = (text, fn) ->
   leadingSpaces = trailingSpaces = ''
   start = text.search(/\S/)
   end = text.search(/\s*$/)
@@ -971,6 +971,6 @@ module.exports = {
   humanizeBufferRange
   expandRangeToWhiteSpaces
   splitAndJoinBy
-  changeOrderOfArgumentInTextBy
+  sortArgumentsInTextBy
   scanEditorInDirection
 }
