@@ -642,12 +642,17 @@ class SplitByArguments extends TransformString
   autoIndentAfterInsertText: true
 
   getNewText: (text) ->
-    {args, separators} = splitArguments(text.trim())
+    allTokens = splitArguments(text.trim())
     newText = ''
-    for [arg, separator] in _.zip(args, separators)
-      separator = if @keepSeparator then separator ? '' else ''
-      newText += arg + separator.trim() + "\n"
-    "\n" + newText
+    while allTokens.length
+      {text, type} = allTokens.shift()
+      if type is 'separator'
+        if @keepSeparator
+          text = text.trim() + "\n"
+        else
+          text = "\n"
+      newText += text
+    "\n" + newText + "\n"
 
 class SplitByArgumentsWithRemoveSeparator extends SplitByArguments
   @extend()
@@ -675,12 +680,21 @@ class ChangeOrder extends TransformString
     leadingSpaces = text[0...start] if start isnt -1
     trailingSpaces = text[end...] if end isnt -1
     text = text[start...end]
-    {args, separators} = splitArguments(text)
-    args = fn(args)
-    result = ''
-    for [arg, separator] in _.zip(args, separators)
-      result += arg + (separator ? '')
-    leadingSpaces + result + trailingSpaces
+
+    allTokens = splitArguments(text)
+    args = allTokens
+      .filter (token) -> token.type is 'argument'
+      .map (token) -> token.text
+    newArgs = fn(args)
+
+    newText = ''
+    while allTokens.length
+      {text, type} = allTokens.shift()
+      newText += switch type
+        when 'separator' then text
+        when 'argument' then newArgs.shift()
+    leadingSpaces + newText + trailingSpaces
+
 
 class Reverse extends ChangeOrder
   @extend()

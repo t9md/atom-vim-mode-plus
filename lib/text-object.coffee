@@ -524,30 +524,39 @@ class Arguments extends TextObject
     range = trimRange(@editor, range)
 
     text = @editor.getTextInBufferRange(range)
-    {args, separators} = splitArguments(text, pairRangeFound)
+    allTokens = splitArguments(text, pairRangeFound)
 
     # {inspect} = require 'util'
     # p = (args...) -> console.log inspect(args...)
     # p {args, separators}
 
     argTokens = []
-    allTokens = _.zip(args, separators)
     argStart = range.start
-    while allTokens.length
-      [arg, separator] = allTokens.shift()
-      argToken = @newArgToken(argStart, arg, separator)
-      if (allTokens.length is 0) and (lastArgToken = _.last(argTokens))
-        argToken.aRange = argToken.argRange.union(lastArgToken.separatorRange)
 
-      argStart = argToken.aRange.end
-      argTokens.push(argToken)
+    # Skip starting separator
+    if allTokens.length and allTokens[0].type is 'separator'
+      token = allTokens.shift()
+      argStart = traverseTextFromPoint(argStart, token.text)
+
+    while allTokens.length
+      token = allTokens.shift()
+      if token.type is 'argument'
+        separator = allTokens.shift()?.text
+        argToken = @newArgToken(argStart, token.text, separator)
+
+        if (allTokens.length is 0) and (lastArgToken = _.last(argTokens))
+          argToken.aRange = argToken.argRange.union(lastArgToken.separatorRange)
+
+        argStart = argToken.aRange.end
+        argTokens.push(argToken)
+      else
+        throw new Error('must not happen')
 
     point = @getCursorPositionForSelection(selection)
     for {innerRange, aRange} in argTokens
       if innerRange.end.isGreaterThan(point)
         return if @isInner() then innerRange else aRange
     null
-
 
 class CurrentLine extends TextObject
   @extend(false)

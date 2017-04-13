@@ -829,9 +829,7 @@ splitArguments = (text, joinSpaceSeparatedToken) ->
       allTokens.push({text: token, type: 'argument'}) if token
       allTokens.push({text: separator, type: 'separator'}) if separator
 
-  # console.log allTokens
-  someSeparatorContainsComma = allTokens.some(({type, text}) -> (type is 'separator') and (',' in text))
-  if someSeparatorContainsComma and joinSpaceSeparatedToken
+  if joinSpaceSeparatedToken and allTokens.some(({type, text}) -> type is 'separator' and ',' in text)
     # When some separator contains `,` treat white-space separator is just part of token.
     # So we move white-space only sparator into tokens by joining mis-separatoed tokens.
     newAllTokens = []
@@ -849,12 +847,7 @@ splitArguments = (text, joinSpaceSeparatedToken) ->
             text = token.text + (allTokens.shift()?.text ? '') # concat with next-argument
             newAllTokens[newAllTokens.length - 1].text += text
     allTokens = newAllTokens
-
-  args = allTokens.filter ({type}) -> type is 'argument'
-  args = _.pluck(args, 'text')
-  separators = allTokens.filter ({type}) -> type is 'separator'
-  separators = _.pluck(separators, 'text')
-  {args, separators}
+  allTokens
 
 scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
   {allowNextLine, from, scanRange} = options
