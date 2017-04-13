@@ -7,8 +7,7 @@ _ = require 'underscore-plus'
   limitNumber
   toggleCaseForCharacter
   splitTextByNewLine
-  sortArgumentsInTextBy
-  splitArgumentsInTextIntoLines
+  splitArguments
   getIndentLevelForBufferRow
   adjustIndentWithKeepingLayout
 } = require './utils'
@@ -643,7 +642,12 @@ class SplitByArguments extends TransformString
   autoIndentAfterInsertText: true
 
   getNewText: (text) ->
-    splitArgumentsInTextIntoLines(text, {@keepSeparator})
+    {tokens, separators} = splitArguments(text.trim())
+    newText = ''
+    for [token, separator] in _.zip(tokens, separators)
+      separator = if @keepSeparator then separator ? '' else ''
+      newText += token + separator.trim() + "\n"
+    "\n" + newText
 
 class SplitByArgumentsWithRemoveSeparator extends SplitByArguments
   @extend()
@@ -661,7 +665,22 @@ class ChangeOrder extends TransformString
     if @target.isLinewise()
       @getNewList(splitTextByNewLine(text)).join("\n") + "\n"
     else
-      sortArgumentsInTextBy(text, (args) => @getNewList(args))
+      @sortArgumentsInTextBy(text, (args) => @getNewList(args))
+
+  sortArgumentsInTextBy: (text, fn) ->
+    leadingSpaces = trailingSpaces = ''
+    start = text.search(/\S/)
+    end = text.search(/\s*$/)
+    leadingSpaces = trailingSpaces = ''
+    leadingSpaces = text[0...start] if start isnt -1
+    trailingSpaces = text[end...] if end isnt -1
+    text = text[start...end]
+    {tokens, separators} = splitArguments(text)
+    tokens = fn(tokens)
+    result = ''
+    for [token, separator] in _.zip(tokens, separators)
+      result += token + (separator ? '')
+    leadingSpaces + result + trailingSpaces
 
 class Reverse extends ChangeOrder
   @extend()

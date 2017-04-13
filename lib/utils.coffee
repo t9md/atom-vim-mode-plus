@@ -777,30 +777,8 @@ splitAndJoinBy = (text, pattern, fn) ->
     result += item + separator
   leadingSpaces + result + trailingSpaces
 
-sortArgumentsInTextBy = (text, fn) ->
-  leadingSpaces = trailingSpaces = ''
-  start = text.search(/\S/)
-  end = text.search(/\s*$/)
-  leadingSpaces = trailingSpaces = ''
-  leadingSpaces = text[0...start] if start isnt -1
-  trailingSpaces = text[end...] if end isnt -1
-  text = text[start...end]
-  {tokens, separators} = splitByArguments(text)
-  tokens = fn(tokens)
-  result = ''
-  for [token, separator] in _.zip(tokens, separators)
-    result += token + (separator ? '')
-  leadingSpaces + result + trailingSpaces
-
-splitArgumentsInTextIntoLines = (text, options={}) ->
-  {tokens, separators} = splitByArguments(text.trim())
-  newText = ''
-  for [token, separator] in _.zip(tokens, separators)
-    separator = if options.keepSeparator then separator ? '' else ''
-    newText += token + separator.trim() + "\n"
-  "\n" + newText
-
-splitByArguments = (text) ->
+splitArguments = (text, joinSpaceSeparatedToken) ->
+  joinSpaceSeparatedToken ?= true
   tokens = []
   separators = []
   stack = []
@@ -850,7 +828,7 @@ splitByArguments = (text) ->
   tokens.push(token) if token
   separators.push(separator) if separator
 
-  if separators.some((separator) -> ',' in separator)
+  if separators.some((separator) -> ',' in separator) and joinSpaceSeparatedToken
     # When some separator contains `,` treat white-space separator is just part of token.
     # So we move white-space only sparator into tokens by joining mis-separatoed tokens.
     newTokens = []
@@ -924,6 +902,20 @@ adjustIndentWithKeepingLayout = (editor, range) ->
 rangeContainsPointWithEndExclusive = (range, point) ->
   range.start.isLessThanOrEqual(point) and
     range.end.isGreaterThan(point)
+
+traverseTextFromPoint = (point, text) ->
+  point.traverse(getTraversalForText(text))
+
+getTraversalForText = (text) ->
+  row = 0
+  column = 0
+  for char in text
+    if char is "\n"
+      row++
+      column = 0
+    else
+      column++
+  [row, column]
 
 module.exports = {
   assertWithException
@@ -1012,10 +1004,9 @@ module.exports = {
   humanizeBufferRange
   expandRangeToWhiteSpaces
   splitAndJoinBy
-  sortArgumentsInTextBy
-  splitArgumentsInTextIntoLines
-  splitByArguments
+  splitArguments
   scanEditorInDirection
   adjustIndentWithKeepingLayout
   rangeContainsPointWithEndExclusive
+  traverseTextFromPoint
 }
