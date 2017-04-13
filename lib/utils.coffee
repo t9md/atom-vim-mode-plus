@@ -920,6 +920,11 @@ adjustIndentWithKeepingLayout = (editor, range) ->
       newLevel = actualLevel + deltaToSuggestedLevel
       editor.setIndentationForBufferRow(row, newLevel)
 
+# Check point containment with end position exclusive
+rangeContainsPointWithEndExclusive = (range, point) ->
+  range.start.isLessThanOrEqual(point) and
+    range.end.isGreaterThan(point)
+
 module.exports = {
   assertWithException
   getAncestors
@@ -1009,6 +1014,8 @@ module.exports = {
   splitAndJoinBy
   sortArgumentsInTextBy
   splitArgumentsInTextIntoLines
+  splitByArguments
   scanEditorInDirection
   adjustIndentWithKeepingLayout
+  rangeContainsPointWithEndExclusive
 }
