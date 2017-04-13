@@ -42,7 +42,8 @@ class ScopeState
 
 class PairFinder
   constructor: (@editor, options={}) ->
-    {@allowNextLine, @allowForwarding, @pair} = options
+    {@allowNextLine, @allowForwarding, @pair, @inclusive} = options
+    @inclusive ?= true
     if @pair?
       @setPatternForPair(@pair)
 
@@ -57,7 +58,7 @@ class PairFinder
     found = null
 
     # Quote is not nestable. So when we encounter 'open' while finding 'close',
-    # it is forwarding pair, so stoppable is not @allowForwarding
+    # it is forwarding pair, so stoppable unless @allowForwarding
     findingNonForwardingClosingQuote = (this instanceof QuoteFinder) and which is 'close' and not @allowForwarding
     scanner = scanEditorInDirection.bind(null, @editor, direction, @getPattern(), {from, @allowNextLine})
     scanner (event) =>
@@ -92,11 +93,15 @@ class PairFinder
       when 'close'
         openState = @spliceStack(stack, eventState)
         unless openState?
-          return true
+          return @inclusive or eventState.range.start.isGreaterThan(from)
 
         if stack.length is 0
           openRange = openState.range
-          openRange.start.isEqual(from) or (@allowForwarding and openRange.start.row is from.row)
+          openStart = openRange.start
+          if @inclusive
+            openStart.isEqual(from) or (@allowForwarding and openStart.row is from.row)
+          else
+            openStart.isLessThan(from) or (@allowForwarding and openStart.isGreaterThan(from) and openStart.row is from.row)
 
   findCloseForward: (from) ->
     @findPair('close', 'forward', from)
