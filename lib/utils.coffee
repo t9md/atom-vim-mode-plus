@@ -804,13 +804,14 @@ splitByArguments = (text) ->
   tokens = []
   separators = []
   stack = []
-  token = ''
-  separator = ''
-  separatorChars = "\t, \n"
+  separatorChars = "\t, \r\n"
   quoteChars = "\"'`"
   openPairChars = "({[<"
   closePairChars = ">]})"
+  escapeChar = "\\"
 
+  token = ''
+  separator = ''
   inQuote = false
   isEscaped = false
   # Parse text as list of tokens which is commma separated or white space separated.
@@ -825,7 +826,7 @@ splitByArguments = (text) ->
     else
       if isEscaped
         isEscaped = false
-      else if char is "\\"
+      else if char is escapeChar
         isEscaped = true
       else if char in openPairChars
         stack.push(char) unless inQuote
