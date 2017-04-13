@@ -18,6 +18,8 @@ swrap = require './selection-wrapper'
   trimRange
   sortRanges
   pointIsAtEndOfLine
+  splitArguments
+  traverseTextFromPoint
 } = require './utils'
 {BracketFinder, QuoteFinder, TagFinder} = require './pair-finder.coffee'
 
@@ -164,6 +166,7 @@ class Pair extends TextObject
   allowNextLine: null
   adjustInnerRange: true
   pair: null
+  inclusive: true
 
   isAllowNextLine: ->
     @allowNextLine ? (@pair? and @pair[0] isnt @pair[1])
@@ -194,7 +197,7 @@ class Pair extends TextObject
     new Range(start, end)
 
   getFinder: ->
-    options = {allowNextLine: @isAllowNextLine(), @allowForwarding, @pair}
+    options = {allowNextLine: @isAllowNextLine(), @allowForwarding, @pair, @inclusive}
     if @pair[0] is @pair[1]
       new QuoteFinder(@editor, options)
     else
@@ -231,7 +234,7 @@ class AnyPair extends Pair
 
   getRanges: (selection) ->
     @member
-      .map (klass) => @new(klass, {@inner, @allowForwarding}).getRange(selection)
+      .map (klass) => @new(klass, {@inner, @allowForwarding, @inclusive}).getRange(selection)
       .filter (range) -> range?
 
   getRange: (selection) ->
@@ -329,7 +332,7 @@ class Tag extends Pair
     tagRange?.start
 
   getFinder: ->
-    new TagFinder(@editor, {allowNextLine: @isAllowNextLine(), @allowForwarding})
+    new TagFinder(@editor, {allowNextLine: @isAllowNextLine(), @allowForwarding, @inclusive})
 
   getPairInfo: (from) ->
     super(@getTagStartPoint(from) ? from)
@@ -488,6 +491,64 @@ class Function extends Fold
 
 # Section: Other
 # =========================
+class Arguments extends TextObject
+  @extend(false)
+  @deriveInnerAndA()
+
+  newArgToken: (argumentStart, argument, separator) ->
+    argumentEnd = traverseTextFromPoint(argumentStart, argument)
+    argumentRange = new Range(argumentStart, argumentEnd)
+
+    separatorEnd = traverseTextFromPoint(argumentEnd, separator ? '')
+    separatorRange = new Range(argumentEnd, separatorEnd)
+
+    innerRange = argumentRange
+    aRange = argumentRange.union(separatorRange)
+    {argumentRange, separatorRange, innerRange, aRange}
+
+  getArgumentsRangeForSelection: (selection) ->
+    member = [
+      'CurlyBracket'
+      'AngleBracket'
+      'SquareBracket'
+      'Parenthesis'
+    ]
+    @new("InnerAnyPair", {inclusive: false, member: member}).getRange(selection)
+
+  getRange: (selection) ->
+    range = @getArgumentsRangeForSelection(selection)
+    pairRangeFound = range?
+    range ?= @new("InnerCurrentLine").getRange(selection) # fallback
+    return unless range
+
+    range = trimRange(@editor, range)
+
+    text = @editor.getTextInBufferRange(range)
+    {tokens, separators} = splitArguments(text, pairRangeFound)
+
+    # {inspect} = require 'util'
+    # p = (args...) -> console.log inspect(args...)
+    # p {tokens, separators}
+
+    argTokens = []
+    allTokens = _.zip(tokens, separators)
+    argStart = range.start
+    while allTokens.length
+      [argument, separator] = allTokens.shift()
+      argToken = @newArgToken(argStart, argument, separator)
+      if (allTokens.length is 0) and (lastArgToken = _.last(argTokens))
+        argToken.aRange = argToken.argumentRange.union(lastArgToken.separatorRange)
+
+      argStart = argToken.aRange.end
+      argTokens.push(argToken)
+
+    point = @getCursorPositionForSelection(selection)
+    for {innerRange, aRange} in argTokens
+      if innerRange.end.isGreaterThan(point)
+        return if @isInner() then innerRange else aRange
+    null
+
+
 class CurrentLine extends TextObject
   @extend(false)
   @deriveInnerAndA()

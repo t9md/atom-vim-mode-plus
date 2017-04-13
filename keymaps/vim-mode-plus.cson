@@ -430,10 +430,12 @@
   'I': 'vim-mode-plus:move-to-first-character-of-line'
   'A': 'vim-mode-plus:move-to-last-character-of-line'
 
+  # Shorthand keymap for two-keystroke text-object
   'c': 'vim-mode-plus:inner-smart-word' # `y c` to `yank inner-smart-word`.
   'd': 'vim-mode-plus:inner-subword'    # `y d` to `yank inner-subword`.
   'C': 'vim-mode-plus:inner-whole-word' # `y C` to `yank inner-whole-word`.
   'p': 'vim-mode-plus:inner-paragraph'  # `y p` to `yank inner-paragraph`.
+  ',': 'vim-mode-plus:inner-arguments'
 
   # In this scope, all operator keys are safely remappable.
   # e.g. p, d, D, x, u, X, S, ., r
@@ -569,6 +571,9 @@
 
   'a d': 'vim-mode-plus:a-subword'
   'i d': 'vim-mode-plus:inner-subword'
+
+  'a ,': 'vim-mode-plus:a-arguments'
+  'i ,': 'vim-mode-plus:inner-arguments'
 
 # visual
 # -------------------------
