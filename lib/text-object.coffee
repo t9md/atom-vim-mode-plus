@@ -495,16 +495,16 @@ class Arguments extends TextObject
   @extend(false)
   @deriveInnerAndA()
 
-  newArgToken: (argumentStart, argument, separator) ->
-    argumentEnd = traverseTextFromPoint(argumentStart, argument)
-    argumentRange = new Range(argumentStart, argumentEnd)
+  newArgToken: (argStart, arg, separator) ->
+    argEnd = traverseTextFromPoint(argStart, arg)
+    argRange = new Range(argStart, argEnd)
 
-    separatorEnd = traverseTextFromPoint(argumentEnd, separator ? '')
-    separatorRange = new Range(argumentEnd, separatorEnd)
+    separatorEnd = traverseTextFromPoint(argEnd, separator ? '')
+    separatorRange = new Range(argEnd, separatorEnd)
 
-    innerRange = argumentRange
-    aRange = argumentRange.union(separatorRange)
-    {argumentRange, separatorRange, innerRange, aRange}
+    innerRange = argRange
+    aRange = argRange.union(separatorRange)
+    {argRange, separatorRange, innerRange, aRange}
 
   getArgumentsRangeForSelection: (selection) ->
     member = [
@@ -524,20 +524,20 @@ class Arguments extends TextObject
     range = trimRange(@editor, range)
 
     text = @editor.getTextInBufferRange(range)
-    {tokens, separators} = splitArguments(text, pairRangeFound)
+    {args, separators} = splitArguments(text, pairRangeFound)
 
     # {inspect} = require 'util'
     # p = (args...) -> console.log inspect(args...)
-    # p {tokens, separators}
+    # p {args, separators}
 
     argTokens = []
-    allTokens = _.zip(tokens, separators)
+    allTokens = _.zip(args, separators)
     argStart = range.start
     while allTokens.length
-      [argument, separator] = allTokens.shift()
-      argToken = @newArgToken(argStart, argument, separator)
+      [arg, separator] = allTokens.shift()
+      argToken = @newArgToken(argStart, arg, separator)
       if (allTokens.length is 0) and (lastArgToken = _.last(argTokens))
-        argToken.aRange = argToken.argumentRange.union(lastArgToken.separatorRange)
+        argToken.aRange = argToken.argRange.union(lastArgToken.separatorRange)
 
       argStart = argToken.aRange.end
       argTokens.push(argToken)

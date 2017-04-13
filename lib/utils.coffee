@@ -795,10 +795,11 @@ splitArguments = (text, joinSpaceSeparatedToken) ->
   # Parse text as list of tokens which is commma separated or white space separated.
   # e.g. 'a, fun1(b, c), d' => ['a', 'fun1(b, c), 'd']
   # Not perfect. but far better than simple string split by regex pattern.
-  for char in text
+  allTokens = []
+  for char, i in text
     if (stack.length is 0) and (char in separatorChars)
       if token
-        tokens.push(token)
+        allTokens.push({text: token, type: 'argument'})
         token = ''
       separator += char
     else
@@ -820,32 +821,40 @@ splitArguments = (text, joinSpaceSeparatedToken) ->
           stack.push(char)
 
       if separator
-        separators.push(separator)
+        allTokens.push({text: separator, type: 'separator'})
         separator = ''
-
       token += char
 
-  tokens.push(token) if token
-  separators.push(separator) if separator
+    if i is (text.length - 1)
+      allTokens.push({text: token, type: 'argument'}) if token
+      allTokens.push({text: separator, type: 'separator'}) if separator
 
-  if separators.some((separator) -> ',' in separator) and joinSpaceSeparatedToken
+  # console.log allTokens
+  someSeparatorContainsComma = allTokens.some(({type, text}) -> (type is 'separator') and (',' in text))
+  if someSeparatorContainsComma and joinSpaceSeparatedToken
     # When some separator contains `,` treat white-space separator is just part of token.
     # So we move white-space only sparator into tokens by joining mis-separatoed tokens.
-    newTokens = []
-    newSeparators = []
-    while (separators.length and tokens.length)
-      separator = separators.shift()
-      token = tokens.shift()
-      if ',' in separator
-        newTokens.push(token)
-        newSeparators.push(separator)
-      else
-        tokens.unshift(token + separator + tokens.shift())
-    newTokens.push(tokens.shift()) if tokens.length
-    tokens = newTokens
-    separators = newSeparators
+    newAllTokens = []
+    while allTokens.length
+      token = allTokens.shift()
+      switch token.type
+        when 'argument'
+          newAllTokens.push(token)
+        when 'separator'
+          if ',' in token.text
+            newAllTokens.push(token)
+          else
+            # 1. Concatthis white-space-separator and next-argument
+            # 2. Then join into latest argument
+            text = token.text + (allTokens.shift()?.text ? '') # concat with next-argument
+            newAllTokens[newAllTokens.length - 1].text += text
+    allTokens = newAllTokens
 
-  {tokens, separators}
+  args = allTokens.filter ({type}) -> type is 'argument'
+  args = _.pluck(args, 'text')
+  separators = allTokens.filter ({type}) -> type is 'separator'
+  separators = _.pluck(separators, 'text')
+  {args, separators}
 
 scanEditorInDirection = (editor, direction, pattern, options={}, fn) ->
   {allowNextLine, from, scanRange} = options
