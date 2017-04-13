@@ -777,57 +777,77 @@ splitAndJoinBy = (text, pattern, fn) ->
     result += item + separator
   leadingSpaces + result + trailingSpaces
 
+class ArgumentsSplitter
+  constructor: ->
+    @allTokens = []
+    @currentSection = null
+
+  settlePending: ->
+    if @pendingToken
+      @allTokens.push({text: @pendingToken, type: @currentSection})
+      @pendingToken = ''
+
+  changeSection: (newSection) ->
+    if @currentSection isnt newSection
+      @settlePending() if @currentSection
+      @currentSection = newSection
+
 splitArguments = (text, joinSpaceSeparatedToken) ->
   joinSpaceSeparatedToken ?= true
-  tokens = []
-  separators = []
-  stack = []
   separatorChars = "\t, \r\n"
   quoteChars = "\"'`"
-  openPairChars = "({[<"
-  closePairChars = ">]})"
+  closeCharToOpenChar = {
+    ")": "("
+    "}": "{"
+    "]": "["
+  }
+  closePairChars = _.keys(closeCharToOpenChar).join('')
+  openPairChars = _.values(closeCharToOpenChar).join('')
   escapeChar = "\\"
 
-  token = ''
-  separator = ''
+  pendingToken = ''
   inQuote = false
   isEscaped = false
   # Parse text as list of tokens which is commma separated or white space separated.
   # e.g. 'a, fun1(b, c), d' => ['a', 'fun1(b, c), 'd']
   # Not perfect. but far better than simple string split by regex pattern.
   allTokens = []
-  for char, i in text
-    if (stack.length is 0) and (char in separatorChars)
-      if token
-        allTokens.push({text: token, type: 'argument'})
-        token = ''
-      separator += char
+  currentSection = null
+
+  settlePending = ->
+    if pendingToken
+      allTokens.push({text: pendingToken, type: currentSection})
+      pendingToken = ''
+
+  changeSection = (newSection) ->
+    if currentSection isnt newSection
+      settlePending() if currentSection
+      currentSection = newSection
+
+  pairStack = []
+  for char in text
+    if (pairStack.length is 0) and (char in separatorChars)
+      changeSection('separator')
     else
+      changeSection('argument')
       if isEscaped
         isEscaped = false
       else if char is escapeChar
         isEscaped = true
-      else if char in openPairChars
-        stack.push(char) unless inQuote
-      else if char in closePairChars
-        stack.pop() unless inQuote
+      else if inQuote
+        if (char in quoteChars) and _.last(pairStack) is char
+          pairStack.pop()
+          inQuote = false
       else if char in quoteChars
-        if inQuote
-          if _.last(stack) is char
-            stack.pop()
-            inQuote = false
-        else
-          inQuote = true
-          stack.push(char)
+        inQuote = true
+        pairStack.push(char)
+      else if char in openPairChars
+        pairStack.push(char)
+      else if char in closePairChars
+        pairStack.pop() if _.last(pairStack) is closeCharToOpenChar[char]
 
-      if separator
-        allTokens.push({text: separator, type: 'separator'})
-        separator = ''
-      token += char
-
-    if i is (text.length - 1)
-      allTokens.push({text: token, type: 'argument'}) if token
-      allTokens.push({text: separator, type: 'separator'}) if separator
+    pendingToken += char
+  settlePending()
 
   if joinSpaceSeparatedToken and allTokens.some(({type, text}) -> type is 'separator' and ',' in text)
     # When some separator contains `,` treat white-space separator is just part of token.
@@ -842,10 +862,11 @@ splitArguments = (text, joinSpaceSeparatedToken) ->
           if ',' in token.text
             newAllTokens.push(token)
           else
-            # 1. Concatthis white-space-separator and next-argument
+            # 1. Concatnate white-space-separator and next-argument
             # 2. Then join into latest argument
-            text = token.text + (allTokens.shift()?.text ? '') # concat with next-argument
-            newAllTokens[newAllTokens.length - 1].text += text
+            lastArg = newAllTokens.pop() ? {text: '', 'argument'}
+            lastArg.text += token.text + (allTokens.shift()?.text ? '') # concat with next-argument
+            newAllTokens.push(lastArg)
     allTokens = newAllTokens
   allTokens
 

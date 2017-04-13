@@ -495,7 +495,7 @@ class Arguments extends TextObject
   @extend(false)
   @deriveInnerAndA()
 
-  newArgToken: (argStart, arg, separator) ->
+  newArgInfo: (argStart, arg, separator) ->
     argEnd = traverseTextFromPoint(argStart, arg)
     argRange = new Range(argStart, argEnd)
 
@@ -509,7 +509,6 @@ class Arguments extends TextObject
   getArgumentsRangeForSelection: (selection) ->
     member = [
       'CurlyBracket'
-      'AngleBracket'
       'SquareBracket'
       'Parenthesis'
     ]
@@ -526,11 +525,7 @@ class Arguments extends TextObject
     text = @editor.getTextInBufferRange(range)
     allTokens = splitArguments(text, pairRangeFound)
 
-    # {inspect} = require 'util'
-    # p = (args...) -> console.log inspect(args...)
-    # p {args, separators}
-
-    argTokens = []
+    argInfos = []
     argStart = range.start
 
     # Skip starting separator
@@ -542,18 +537,18 @@ class Arguments extends TextObject
       token = allTokens.shift()
       if token.type is 'argument'
         separator = allTokens.shift()?.text
-        argToken = @newArgToken(argStart, token.text, separator)
+        argInfo = @newArgInfo(argStart, token.text, separator)
 
-        if (allTokens.length is 0) and (lastArgToken = _.last(argTokens))
-          argToken.aRange = argToken.argRange.union(lastArgToken.separatorRange)
+        if (allTokens.length is 0) and (lastArgInfo = _.last(argInfos))
+          argInfo.aRange = argInfo.argRange.union(lastArgInfo.separatorRange)
 
-        argStart = argToken.aRange.end
-        argTokens.push(argToken)
+        argStart = argInfo.aRange.end
+        argInfos.push(argInfo)
       else
         throw new Error('must not happen')
 
     point = @getCursorPositionForSelection(selection)
-    for {innerRange, aRange} in argTokens
+    for {innerRange, aRange} in argInfos
       if innerRange.end.isGreaterThan(point)
         return if @isInner() then innerRange else aRange
     null
