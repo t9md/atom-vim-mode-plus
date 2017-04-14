@@ -26,11 +26,41 @@ class Developer
       'clear-debug-output': => @clearDebugOutput()
       'reload-packages': => @reloadPackages()
       'toggle-reload-packages-on-save': => @toggleReloadPackagesOnSave()
+      'report-total-marker-count': => @getAllMarkerCount()
+      'report-total-and-per-editor-marker-count': => @getAllMarkerCount(true)
 
     subscriptions = new CompositeDisposable
     for name, fn of commands
       subscriptions.add @addCommand(name, fn)
     subscriptions
+
+  getAllMarkerCount: (showEditorsReport=false) ->
+    {inspect} = require 'util'
+    basename = require('path').basename
+    total =
+      mark: 0
+      hlsearch: 0
+      mutation: 0
+      occurrence: 0
+      persistentSel: 0
+
+    for editor in atom.workspace.getTextEditors()
+      vimState = getEditorState(editor)
+      mark = vimState.mark.markerLayer.getMarkerCount()
+      hlsearch = vimState.highlightSearch.markerLayer.getMarkerCount()
+      mutation = vimState.mutationManager.markerLayer.getMarkerCount()
+      occurrence = vimState.occurrenceManager.markerLayer.getMarkerCount()
+      persistentSel = vimState.persistentSelection.markerLayer.getMarkerCount()
+      if showEditorsReport
+        console.log basename(editor.getPath()), inspect({mark, hlsearch, mutation, occurrence, persistentSel})
+
+      total.mark += mark
+      total.hlsearch += hlsearch
+      total.mutation += mutation
+      total.occurrence += occurrence
+      total.persistentSel += persistentSel
+
+    console.log 'total', inspect(total)
 
   reloadPackages: ->
     packages = settings.get('devReloadPackages') ? []
