@@ -549,7 +549,7 @@ class Arguments extends TextObject
 
     point = @getCursorPositionForSelection(selection)
     for {innerRange, aRange} in argInfos
-      if innerRange.end.isGreaterThan(point)
+      if innerRange.end.isGreaterThanOrEqual(point)
         return if @isInner() then innerRange else aRange
     null
 

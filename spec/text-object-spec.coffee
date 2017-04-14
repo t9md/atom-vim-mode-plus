@@ -1653,6 +1653,251 @@ describe "TextObject", ->
         set cursor: [1, 0]
         ensure 'v a l', selectedText: '  multi line'
 
+  describe 'Arguments', ->
+    describe 'auto-detect inner-pair target', ->
+      describe 'inner-pair is comma separated', ->
+        it "target inner-paren by auto-detect", ->
+          set textC: "(1|st, 2nd)"; ensure 'd i ,', textC: "(|, 2nd)"
+          set textC: "(1|st, 2nd)"; ensure 'd a ,', textC: "(|2nd)"
+          set textC: "(1st, 2|nd)"; ensure 'd i ,', textC: "(1st, |)"
+          set textC: "(1st, 2|nd)"; ensure 'd a ,', textC: "(1st|)"
+        it "target inner-curly-bracket by auto-detect", ->
+          set textC: "{1|st, 2nd}"; ensure 'd i ,', textC: "{|, 2nd}"
+          set textC: "{1|st, 2nd}"; ensure 'd a ,', textC: "{|2nd}"
+          set textC: "{1st, 2|nd}"; ensure 'd i ,', textC: "{1st, |}"
+          set textC: "{1st, 2|nd}"; ensure 'd a ,', textC: "{1st|}"
+        it "target inner-square-bracket by auto-detect", ->
+          set textC: "[1|st, 2nd]"; ensure 'd i ,', textC: "[|, 2nd]"
+          set textC: "[1|st, 2nd]"; ensure 'd a ,', textC: "[|2nd]"
+          set textC: "[1st, 2|nd]"; ensure 'd i ,', textC: "[1st, |]"
+          set textC: "[1st, 2|nd]"; ensure 'd a ,', textC: "[1st|]"
+      describe 'inner-pair is space separated', ->
+        it "target inner-paren by auto-detect", ->
+          set textC: "(1|st 2nd)"; ensure 'd i ,', textC: "(| 2nd)"
+          set textC: "(1|st 2nd)"; ensure 'd a ,', textC: "(|2nd)"
+          set textC: "(1st 2|nd)"; ensure 'd i ,', textC: "(1st |)"
+          set textC: "(1st 2|nd)"; ensure 'd a ,', textC: "(1st|)"
+        it "target inner-curly-bracket by auto-detect", ->
+          set textC: "{1|st 2nd}"; ensure 'd i ,', textC: "{| 2nd}"
+          set textC: "{1|st 2nd}"; ensure 'd a ,', textC: "{|2nd}"
+          set textC: "{1st 2|nd}"; ensure 'd i ,', textC: "{1st |}"
+          set textC: "{1st 2|nd}"; ensure 'd a ,', textC: "{1st|}"
+        it "target inner-square-bracket by auto-detect", ->
+          set textC: "[1|st 2nd]"; ensure 'd i ,', textC: "[| 2nd]"
+          set textC: "[1|st 2nd]"; ensure 'd a ,', textC: "[|2nd]"
+          set textC: "[1st 2|nd]"; ensure 'd i ,', textC: "[1st |]"
+          set textC: "[1st 2|nd]"; ensure 'd a ,', textC: "[1st|]"
+    describe "[fallback] when auto-detect failed, target current-line", ->
+      beforeEach ->
+        set
+          text: """
+          if hello(world) and good(bye) {
+            1st;
+            2nd;
+          }
+          """
+
+      it "delete 1st elem of inner-curly-bracket when auto-detect succeeded", ->
+        set cursor: [1, 3]
+        ensure 'd a ,',
+          textC: """
+          if hello(world) and good(bye) {
+            |2nd;
+          }
+          """
+      it "delete 2st elem of inner-curly-bracket when auto-detect succeeded", ->
+        set cursor: [2, 3]
+        ensure 'd a ,',
+          textC: """
+          if hello(world) and good(bye) {
+            1st|;
+          }
+          """
+      it "delete 1st elem of current-line when auto-detect failed", ->
+        set cursor: [0, 0]
+        ensure 'd a ,',
+          textC: """
+          |hello(world) and good(bye) {
+            1st;
+            2nd;
+          }
+          """
+      it "delete 2nd elem of current-line when auto-detect failed", ->
+        set cursor: [0, 3]
+        ensure 'd a ,',
+          textC: """
+          if |and good(bye) {
+            1st;
+            2nd;
+          }
+          """
+      it "delete 3rd elem of current-line when auto-detect failed", ->
+        set cursor: [0, 16]
+        ensure 'd a ,',
+          textC: """
+          if hello(world) |good(bye) {
+            1st;
+            2nd;
+          }
+          """
+      it "delete 4th elem of current-line when auto-detect failed", ->
+        set cursor: [0, 20]
+        ensure 'd a ,',
+          textC: """
+          if hello(world) and |{
+            1st;
+            2nd;
+          }
+          """
+
+    describe 'slingle line comma separated text', ->
+      describe "change 1st arg", ->
+        beforeEach ->               set textC: "var a = func(f|irst(1, 2, 3), second(), 3)"
+        it 'change', -> ensure 'c i ,', textC: "var a = func(|, second(), 3)"
+        it 'change', -> ensure 'c a ,', textC: "var a = func(|second(), 3)"
+
+      describe 'change 2nd arg', ->
+        beforeEach ->               set textC: "var a = func(first(1, 2, 3),| second(), 3)"
+        it 'change', -> ensure 'c i ,', textC: "var a = func(first(1, 2, 3), |, 3)"
+        it 'change', -> ensure 'c a ,', textC: "var a = func(first(1, 2, 3), |3)"
+
+      describe 'change 3rd arg', ->
+        beforeEach ->               set textC: "var a = func(first(1, 2, 3), second(),| 3)"
+        it 'change', -> ensure 'c i ,', textC: "var a = func(first(1, 2, 3), second(), |)"
+        it 'change', -> ensure 'c a ,', textC: "var a = func(first(1, 2, 3), second()|)"
+
+      describe 'when cursor is on-comma-separator, it affects preceeding arg', ->
+        beforeEach ->                   set textC: "var a = func(first(1, 2, 3)|, second(), 3)"
+        it 'change 1st', -> ensure 'c i ,', textC: "var a = func(|, second(), 3)"
+        it 'change 1st', -> ensure 'c a ,', textC: "var a = func(|second(), 3)"
+
+      describe 'cursor-is-on-white-space, it affects followed arg', ->
+        beforeEach ->                   set textC: "var a = func(first(1, 2, 3),| second(), 3)"
+        it 'change 2nd', -> ensure 'c i ,', textC: "var a = func(first(1, 2, 3), |, 3)"
+        it 'change 2nd', -> ensure 'c a ,', textC: "var a = func(first(1, 2, 3), |3)"
+
+      describe "cursor-is-on-parehthesis, it wont target inner-parent", ->
+        it 'change 1st of outer-paren', ->
+          set textC: "var a = func(first|(1, 2, 3), second(), 3)"
+          ensure 'c i ,', textC: "var a = func(|, second(), 3)"
+        it 'change 3rd of outer-paren', ->
+          set textC: "var a = func(first(1, 2, 3|), second(), 3)"
+          ensure 'c i ,', textC: "var a = func(|, second(), 3)"
+
+      describe "cursor-is-next-or-before parehthesis, it target inner-parent", ->
+        it 'change 1st of inner-paren', ->
+          set textC: "var a = func(first(|1, 2, 3), second(), 3)"
+          ensure 'c i ,', textC: "var a = func(first(|, 2, 3), second(), 3)"
+        it 'change 3rd of inner-paren', ->
+          set textC: "var a = func(first(1, 2, |3), second(), 3)"
+          ensure 'c i ,', textC: "var a = func(first(1, 2, |), second(), 3)"
+
+    describe 'slingle line space separated text', ->
+      describe "change 1st arg", ->
+        beforeEach ->               set textC: "%w(|1st 2nd 3rd)"
+        it 'change', -> ensure 'c i ,', textC: "%w(| 2nd 3rd)"
+        it 'change', -> ensure 'c a ,', textC: "%w(|2nd 3rd)"
+      describe "change 2nd arg", ->
+        beforeEach ->               set textC: "%w(1st |2nd 3rd)"
+        it 'change', -> ensure 'c i ,', textC: "%w(1st | 3rd)"
+        it 'change', -> ensure 'c a ,', textC: "%w(1st |3rd)"
+      describe "change 2nd arg", ->
+        beforeEach ->               set textC: "%w(1st 2nd |3rd)"
+        it 'change', -> ensure 'c i ,', textC: "%w(1st 2nd |)"
+        it 'change', -> ensure 'c a ,', textC: "%w(1st 2nd|)"
+
+    describe 'multi line comma separated text', ->
+      beforeEach ->
+        set
+          textC_: """
+          [
+            "1st elem is string",
+            () => hello('2nd elm is function'),
+            3rdElmHasTrailingComma,
+          ]
+          """
+      describe "change 1st arg", ->
+        it 'change 1st inner-arg', ->
+          set cursor: [1, 0]
+          ensure 'c i ,',
+            textC: """
+            [
+              |,
+              () => hello('2nd elm is function'),
+              3rdElmHasTrailingComma,
+            ]
+            """
+        it 'change 1st a-arg', ->
+          set cursor: [1, 0]
+          ensure 'c a ,',
+            textC: """
+            [
+              |() => hello('2nd elm is function'),
+              3rdElmHasTrailingComma,
+            ]
+            """
+        it 'change 2nd inner-arg', ->
+          set cursor: [2, 0]
+          ensure 'c i ,',
+            textC: """
+            [
+              "1st elem is string",
+              |,
+              3rdElmHasTrailingComma,
+            ]
+            """
+        it 'change 2nd a-arg', ->
+          set cursor: [2, 0]
+          ensure 'c a ,',
+            textC: """
+            [
+              "1st elem is string",
+              |3rdElmHasTrailingComma,
+            ]
+            """
+        it 'change 3rd inner-arg', ->
+          set cursor: [3, 0]
+          ensure 'c i ,',
+            textC: """
+            [
+              "1st elem is string",
+              () => hello('2nd elm is function'),
+              |,
+            ]
+            """
+        it 'change 3rd a-arg', ->
+          set cursor: [3, 0]
+          ensure 'c a ,',
+            textC: """
+            [
+              "1st elem is string",
+              () => hello('2nd elm is function')|,
+            ]
+            """
+
+    describe 'when it coudnt find inner-pair from cursor it target current-line', ->
+      beforeEach ->
+        set
+          textC_: """
+          if |isMorning(time, of, the, day) {
+            helllo("world");
+          }
+          """
+      it "change inner-arg", ->
+        ensure "c i ,",
+          textC_: """
+          if | {
+            helllo("world");
+          }
+          """
+      it "change a-arg", ->
+        ensure "c a ,",
+          textC_: """
+          if |{
+            helllo("world");
+          }
+          """
+
   describe 'Entire', ->
     text = """
       This is
