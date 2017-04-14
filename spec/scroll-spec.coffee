@@ -10,9 +10,6 @@ describe "Scrolling", ->
       {set, ensure, keystroke} = vim
       jasmine.attachToDOM(editorElement)
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "scrolling keybindings", ->
     beforeEach ->
       editor.setLineHeightInPixels(10)
@@ -43,7 +40,7 @@ describe "Scrolling", ->
         ensure '2 ctrl-e', cursor: [4, 2]
         expect(editor.getFirstVisibleScreenRow()).toBe 3
         expect(editor.getLastVisibleScreenRow()).toBe 8
-        
+
         ensure '2 ctrl-y', cursor: [2, 2]
         expect(editor.getFirstVisibleScreenRow()).toBe 1
         expect(editor.getLastVisibleScreenRow()).toBe 6

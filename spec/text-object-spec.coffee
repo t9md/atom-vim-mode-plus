@@ -15,9 +15,6 @@ describe "TextObject", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = vimEditor
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "TextObject", ->
     beforeEach ->
       waitsForPromise ->

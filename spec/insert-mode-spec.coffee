@@ -9,9 +9,6 @@ describe "Insert mode commands", ->
       {editor, editorElement} = _vimState
       {set, ensure, keystroke} = vim
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "Copy from line above/below", ->
     beforeEach ->
       set

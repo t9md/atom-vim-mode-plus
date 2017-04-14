@@ -10,10 +10,6 @@ describe "Operator general", ->
       {editor, editorElement} = vimState
       {set, ensure, ensureByDispatch, keystroke} = vim
 
-  afterEach ->
-    vimState.globalState.reset('register')
-    vimState.resetNormalMode()
-
   describe "cancelling operations", ->
     it "clear pending operation", ->
       keystroke '/'

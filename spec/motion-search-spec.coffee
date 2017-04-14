@@ -10,10 +10,6 @@ describe "Motion Search", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = _vim
 
-  afterEach ->
-    vimState.resetNormalMode()
-    vimState.globalState.reset()
-
   describe "the / keybinding", ->
     pane = null
 

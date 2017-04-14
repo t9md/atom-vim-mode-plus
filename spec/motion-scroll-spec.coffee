@@ -21,9 +21,6 @@ describe "Motion Scroll", ->
       editorElement.setScrollTop(40 * 10)
       set cursor: [42, 0]
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "the ctrl-u keybinding", ->
     it "moves the screen down by half screen size and keeps cursor onscreen", ->
       ensure 'ctrl-u',

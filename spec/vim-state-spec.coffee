@@ -11,9 +11,6 @@ describe "VimState", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = vim
 
-  beforeEach ->
-    vimState.resetNormalMode()
-
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->
       ensure mode: 'normal'

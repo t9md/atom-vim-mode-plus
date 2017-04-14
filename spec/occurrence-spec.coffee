@@ -21,9 +21,6 @@ describe "Occurrence", ->
     runs ->
       jasmine.attachToDOM(editorElement)
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "operator-modifier-occurrence", ->
     beforeEach ->
       set

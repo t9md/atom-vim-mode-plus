@@ -10,9 +10,6 @@ describe "Operator Increase", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = vim
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "the ctrl-a/ctrl-x keybindings", ->
     beforeEach ->
       set

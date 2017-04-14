@@ -15,9 +15,6 @@ describe "vim-mode-plus", ->
     waitsForPromise ->
       atom.packages.activatePackage('status-bar')
 
-  afterEach ->
-    vimState.resetNormalMode() if vimState.isAlive()
-
   describe ".activate", ->
     it "puts the editor in normal-mode initially by default", ->
       ensure mode: 'normal'

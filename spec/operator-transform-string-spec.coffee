@@ -10,9 +10,6 @@ describe "Operator TransformString", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = vim
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe 'the ~ keybinding', ->
     beforeEach ->
       set

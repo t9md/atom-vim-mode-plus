@@ -13,9 +13,6 @@ describe "min DSL used in vim-mode-plus's spec", ->
     runs ->
       jasmine.attachToDOM(editorElement)
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "old exisisting spec options", ->
     beforeEach ->
       set text: "abc", cursor: [0, 0]

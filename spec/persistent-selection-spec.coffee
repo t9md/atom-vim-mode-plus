@@ -12,9 +12,6 @@ describe "Persistent Selection", ->
     runs ->
       jasmine.attachToDOM(editorElement)
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "CreatePersistentSelection operator", ->
     textForMarker = (marker) ->
       editor.getTextInBufferRange(marker.getBufferRange())

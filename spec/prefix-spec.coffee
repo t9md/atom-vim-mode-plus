@@ -10,10 +10,6 @@ describe "Prefixes", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = vim
 
-  afterEach ->
-    vimState.resetNormalMode()
-    vimState.globalState.reset()
-
   describe "Repeat", ->
     describe "with operations", ->
       beforeEach ->

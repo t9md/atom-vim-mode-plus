@@ -4,6 +4,7 @@ semver = require 'semver'
 {inspect} = require 'util'
 swrap = require '../lib/selection-wrapper'
 settings = require '../lib/settings'
+globalState = require '../lib/global-state'
 
 KeymapManager = atom.keymaps.constructor
 {normalizeKeystrokes} = require(atom.config.resourcePath + "/node_modules/atom-keymap/lib/helpers")
@@ -17,6 +18,11 @@ supportedModeClass = [
   'blockwise'
   'characterwise'
 ]
+
+# Init spec state
+# -------------------------
+beforeEach ->
+  globalState.reset()
 
 # Utils
 # -------------------------

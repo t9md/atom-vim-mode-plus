@@ -11,10 +11,6 @@ describe "Operator ActivateInsertMode family", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke, bindEnsureOption} = vim
 
-  afterEach ->
-    vimState.resetNormalMode()
-    vimState.globalState.reset()
-
   describe "the s keybinding", ->
     beforeEach ->
       set text: '012345', cursor: [0, 1]

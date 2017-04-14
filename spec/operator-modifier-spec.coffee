@@ -13,9 +13,6 @@ describe "Operator modifier", ->
     runs ->
       jasmine.attachToDOM(editorElement)
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "operator-modifier to force wise", ->
     beforeEach ->
       set

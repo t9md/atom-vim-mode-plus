@@ -106,9 +106,6 @@ describe "Visual Blockwise", ->
     runs ->
       set text: textInitial
 
-  afterEach ->
-    vimState.resetNormalMode()
-
   describe "j", ->
     beforeEach ->
       set cursor: [3, 5]

@@ -11,10 +11,6 @@ describe "Motion general", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = _vim
 
-  afterEach ->
-    vimState.resetNormalMode()
-    vimState.globalState.reset()
-
   describe "simple motions", ->
     text = null
     beforeEach ->
