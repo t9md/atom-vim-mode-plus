@@ -1,3 +1,58 @@
+# 0.89.0:
+- New: Text-object for arguments
+  - Keymap:
+    - `i ,`: `inner-arguments`
+    - `a ,`: `a-arguments`
+    - `,`: `inner-arguments`( shorthand keymap available only in operator-pending-mode )
+  - Example:
+    - `c i ,`( you can do `c ,`)
+    - `d i ,`( you can do `d ,`)
+    - `d a ,`
+    - `v a ,`
+  - From where this text-object find arguments?
+    - Auto-detect inner range of `()`, `[]`, `{}` pairs and parse argument and select.
+    - When it failed to find inner-pair range, it fallbacks to current-line range.
+  - How to determine separator of arguments?
+    - Heuristically determine separator from comma `, ` or white-space.
+      - When some separator contains comma, it treat comma as separator.
+      - When no separator contains comma, it treat white-space as separator.
+- New, Setting: #747 Conditional keymap setting `keymapPToPutWithAutoIndent`.
+  - When enabled, `p`, and `P` paste with-auto-indent for linewise paste.
+  - Why I added this helper setting?
+    - You can set keymap by yourself in your `keymap.cson`
+      - But you need to be careful to not overwrite `p` in `operator-pending-mode`.
+    - In `normal-mode`, `p` is mapped to `put`.
+    - In `operator-pending-mode`, `p` is mapped to `inner-paragraph`, as shorthand of `i p`.
+    - When set `p` keymap in your `keymap.cson` without breaking predefined shorthand `p`.
+    - You need to exclude `operator-pending-mode` scope like this.
+      ```coffescript
+      'atom-text-editor.vim-mode-plus:not(.insert-mode):not(.operator-pending-mode)':
+        'p': 'vim-mode-plus:put-after-with-auto-indent'
+      ```
+    - But I don't think I can expect normal user to do so. So
+- New: `rotate`, `rotate-backwards` operator
+  - No keymap by default.
+  - ChangeOrder family operator, which rotate line in `linewise`, argument in `charactewise`.
+- New: #748 ChangeOrder family( child ) operator now work differently for charactewise-target.
+  - Affects: `reverse`, `rotate`, `rotate-backwards`, `sort`, `sort-case-insensitively`, `sort-by-number`
+  - [Same]: When `linewise` target, it change order of line.
+  - [New]: When `characterwise` target, it auto-detect arguments and change order of arguments within characterwise-range.
+- New: Operator `split-arguments` and `split-arguments-with-remove-separator`
+  - Commands:
+    - `split-arguments`: split arguments into multiple-lines within specified target without removing separator.
+    - `split-arguments-with-remove-separator`: behave same as `split-arguments` but it remove separator(sugh as `, `).
+  - Keymap `g ,` to `split-arguments` by default( aggressive decision ).
+    - Pure-Vim's `g , ` is "move to newer cursor position of change list", but vmp have no `changelist` anyway.
+- New: [Experimental] Added `inner-pair` pre-targeted version of `split-arguments` and `reverse` to evaluate it's usefulness.
+  - No keymap
+  - Commands:
+    - `split-arguments-of-inner-any-pair`
+    - `reverse-inner-any-pair`
+- Breaking: Remove `showCursorInVisualMode` setting
+  - Notify and ask confirmation for auto-remove from `config.cson` if it set to non-default value.
+- Improve: `r enter` to replace with new-line now correctly auto-indent inserted new-line.
+- Improve: When `surround` linewse-target, now auto-indent surrounded lines more accurately than previous release.
+
 # 0.88.0:
 - Doc: New wiki page
   - DifferencesFromPureVim
