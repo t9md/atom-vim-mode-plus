@@ -1267,12 +1267,12 @@ describe "Operator TransformString", ->
           f\n
           """
 
-  describe "SplitByArguments, SplitByArgumentsWithRemoveSeparator", ->
+  describe "SplitArguments, SplitArgumentsWithRemoveSeparator", ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g ,': 'vim-mode-plus:split-by-arguments'
-          'g !': 'vim-mode-plus:split-by-arguments-with-remove-separator'
+          'g ,': 'vim-mode-plus:split-arguments'
+          'g !': 'vim-mode-plus:split-arguments-with-remove-separator'
 
       waitsForPromise ->
         atom.packages.activatePackage('language-javascript')
@@ -1287,7 +1287,7 @@ describe "Operator TransformString", ->
             }
             """
 
-    describe "SplitByArguments", ->
+    describe "SplitArguments", ->
       it "split by commma with adjust indent", ->
         set cursor: [1, 3]
         ensure 'g , i {',

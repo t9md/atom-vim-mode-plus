@@ -36,7 +36,7 @@ class TransformString extends Operator
         startRowIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
       range = selection.insertText(text, {@autoIndent, @autoIndentNewline})
       if @autoIndentAfterInsertText
-        # Currently used by SplitByArguments and Surround( linewise target only )
+        # Currently used by SplitArguments and Surround( linewise target only )
         range = range.translate([0, 0], [-1, 0]) if @target.isLinewise()
         @editor.setIndentationForBufferRow(range.start.row, startRowIndentLevel)
         @editor.setIndentationForBufferRow(range.end.row, startRowIndentLevel)
@@ -635,7 +635,7 @@ class SplitStringWithKeepingSplitter extends SplitString
   @registerToSelectList()
   keepSplitter: true
 
-class SplitByArguments extends TransformString
+class SplitArguments extends TransformString
   @extend()
   @registerToSelectList()
   keepSeparator: true
@@ -654,12 +654,12 @@ class SplitByArguments extends TransformString
       newText += text
     "\n" + newText + "\n"
 
-class SplitByArgumentsWithRemoveSeparator extends SplitByArguments
+class SplitArgumentsWithRemoveSeparator extends SplitArguments
   @extend()
   @registerToSelectList()
   keepSeparator: false
 
-class SplitByArgumentsOfInnerAnyPair extends SplitByArguments
+class SplitArgumentsOfInnerAnyPair extends SplitArguments
   @extend()
   @registerToSelectList()
   target: "InnerAnyPair"
@@ -694,7 +694,6 @@ class ChangeOrder extends TransformString
         when 'separator' then text
         when 'argument' then newArgs.shift()
     leadingSpaces + newText + trailingSpaces
-
 
 class Reverse extends ChangeOrder
   @extend()
