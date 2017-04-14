@@ -344,17 +344,21 @@ describe "Operator TransformString", ->
         cursor: [0, 0]
 
     it "transform text by motion and repeatable", ->
-      ensure 'g c $', text: 'vimMode\natom-text-editor\n', cursor: [0, 0]
+      ensure 'g C $', text: 'vimMode\natom-text-editor\n', cursor: [0, 0]
       ensure 'j .', text: 'vimMode\natomTextEditor\n', cursor: [1, 0]
 
     it "transform selection", ->
-      ensure 'V j g c', text: 'vimMode\natomTextEditor\n', cursor: [0, 0]
+      ensure 'V j g C', text: 'vimMode\natomTextEditor\n', cursor: [0, 0]
 
     it "repeating twice works on current-line and won't move cursor", ->
-      ensure 'l g c g c', text: 'vimMode\natom-text-editor\n', cursor: [0, 1]
+      ensure 'l g C g C', text: 'vimMode\natom-text-editor\n', cursor: [0, 1]
 
   describe 'PascalCase', ->
     beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g C': 'vim-mode-plus:pascal-case'
+
       set
         text: 'vim-mode\natom-text-editor\n'
         cursor: [0, 0]
