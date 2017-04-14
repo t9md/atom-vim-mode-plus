@@ -146,8 +146,8 @@
   'g ~': 'vim-mode-plus:toggle-case'
   'g U': 'vim-mode-plus:upper-case'
   'g u': 'vim-mode-plus:lower-case'
-  'g c': 'vim-mode-plus:camel-case'
-  'g C': 'vim-mode-plus:pascal-case'
+  'g C': 'vim-mode-plus:camel-case'
+  # 'g C': 'vim-mode-plus:pascal-case'
   'g /': 'vim-mode-plus:toggle-line-comments'
   'g -': 'vim-mode-plus:dash-case'
   'g space': 'vim-mode-plus:compact-spaces'
@@ -156,9 +156,8 @@
   'g cmd-d': 'vim-mode-plus:select-occurrence'
   'g ,': 'vim-mode-plus:split-arguments'
   # 'g _': 'vim-mode-plus:snake-case'
-  # 'g r':   'vim-mode-plus:reverse'
-  # 'g s':   'vim-mode-plus:sort'
-  # 'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
+  'g r':   'vim-mode-plus:reverse' # incompatible-with-pure-vim
+  'g s':   'vim-mode-plus:sort' # incompatible-to-pure-vim
   # 'g tab': 'vim-mode-plus:convert-to-soft-tab'
   # 'g shift-tab': 'vim-mode-plus:convert-to-hard-tab'
 
@@ -248,7 +247,6 @@
 
   # 'g s': 'vim-mode-plus:move-to-next-string'
   # 'g S': 'vim-mode-plus:move-to-previous-string'
-
   # 'g n': 'vim-mode-plus:move-to-next-number'
   # 'g N': 'vim-mode-plus:move-to-previous-number'
 
@@ -403,8 +401,10 @@
   'v': 'vim-mode-plus:activate-characterwise-visual-mode'
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
+
   'g v': 'vim-mode-plus:select-previous-selection'
-  # 'g c':    'vim-mode-plus:select-latest-change'
+  'g c': 'vim-mode-plus:select-latest-change'
+
   'u': 'vim-mode-plus:undo'
   'ctrl-r': 'vim-mode-plus:redo'
   'O': 'vim-mode-plus:insert-above-with-newline'
@@ -420,6 +420,11 @@
 
   # 'enter': 'vim-mode-plus:add-blank-line-below'
   # 'shift-enter': 'vim-mode-plus:add-blank-line-above'
+
+# normal macOS only
+# -------------------------
+'.platform-darwin atom-text-editor.vim-mode-plus.normal-mode':
+  'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
 
 # operator-pending
 # -------------------------
