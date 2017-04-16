@@ -443,6 +443,7 @@
   'C': 'vim-mode-plus:inner-whole-word' # `y C` for `y i W`
   'p': 'vim-mode-plus:inner-paragraph'  # `y p` for `y i p`
   ',': 'vim-mode-plus:inner-arguments'  # `y ,` for `y i ,`
+  'z': 'vim-mode-plus:a-fold'           # `y z` for `y a z`
 
   # In this scope, all operator keys are safely remappable.
   # e.g. p, d, D, x, u, X, S, ., r
