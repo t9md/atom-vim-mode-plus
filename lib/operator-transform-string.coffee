@@ -411,8 +411,10 @@ class SurroundBase extends TransformString
     ['{', '}']
     ['<', '>']
   ]
-  pairCharAliases: {
-    b: ')', B: '}', r: ']'
+  pairsByAlias: {
+    b: ['(', ')']
+    B: ['{', '}']
+    r: ['[', ']']
   }
 
   pairCharsAllowForwarding: '[](){}'
@@ -433,12 +435,10 @@ class SurroundBase extends TransformString
     inputUI.focus()
 
   getPair: (char) ->
-    char = @pairCharAliases[char] if char of @pairCharAliases
-
-    if pair = _.detect(@pairs, (pair) -> char in pair)
-      pair
-    else
-      [char, char]
+    pair = @pairsByAlias[char]
+    pair ?= _.detect(@pairs, (pair) -> char in pair)
+    pair ?= [char, char]
+    pair
 
   surround: (text, char, options={}) ->
     keepLayout = options.keepLayout ? false

@@ -650,6 +650,28 @@ describe "Operator TransformString", ->
             keystroke 'j'
             ensure ['y s i w', input: ']'], text: "(apple)\n{orange}\n[lemmon]"
 
+        describe "it distinctively handle aliased keymap", ->
+          describe "normal pair-chars are set to add space", ->
+            beforeEach ->
+              settings.set('charactersToAddSpaceOnSurround', ['(', '{', '['])
+            it "distinctively handle", ->
+              set textC: "|abc"; ensure ['y s i w', input: '('], text: "( abc )"
+              set textC: "|abc"; ensure ['y s i w', input: 'b'], text: "(abc)"
+              set textC: "|abc"; ensure ['y s i w', input: '{'], text: "{ abc }"
+              set textC: "|abc"; ensure ['y s i w', input: 'B'], text: "{abc}"
+              set textC: "|abc"; ensure ['y s i w', input: '['], text: "[ abc ]"
+              set textC: "|abc"; ensure ['y s i w', input: 'r'], text: "[abc]"
+          describe "aliased pair-chars are set to add space", ->
+            beforeEach ->
+              settings.set('charactersToAddSpaceOnSurround', ['b', 'B', 'r'])
+            it "distinctively handle", ->
+              set textC: "|abc"; ensure ['y s i w', input: '('], text: "(abc)"
+              set textC: "|abc"; ensure ['y s i w', input: 'b'], text: "( abc )"
+              set textC: "|abc"; ensure ['y s i w', input: '{'], text: "{abc}"
+              set textC: "|abc"; ensure ['y s i w', input: 'B'], text: "{ abc }"
+              set textC: "|abc"; ensure ['y s i w', input: '['], text: "[abc]"
+              set textC: "|abc"; ensure ['y s i w', input: 'r'], text: "[ abc ]"
+
     describe 'map-surround', ->
       beforeEach ->
         jasmine.attachToDOM(editorElement)
