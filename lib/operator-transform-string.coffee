@@ -714,16 +714,26 @@ class ReverseInnerAnyPair extends Reverse
 class Rotate extends ChangeOrder
   @extend()
   @registerToSelectList()
+  backwards: false
   getNewList: (rows) ->
-    rows.unshift(rows.pop())
+    if @backwards
+      rows.push(rows.shift())
+    else
+      rows.unshift(rows.pop())
     rows
 
 class RotateBackwards extends ChangeOrder
   @extend()
   @registerToSelectList()
-  getNewList: (rows) ->
-    rows.push(rows.shift())
-    rows
+  backwards: true
+
+class RotateArgumentsOfInnerPair extends Rotate
+  @extend()
+  target: "InnerAnyPair"
+
+class RotateArgumentsBackwardsOfInnerPair extends RotateArgumentsOfInnerPair
+  @extend()
+  backwards: true
 
 class Sort extends ChangeOrder
   @extend()
