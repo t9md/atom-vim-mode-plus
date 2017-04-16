@@ -87,7 +87,7 @@ class Replace extends TransformString
 
   initialize: ->
     @onDidSelectTarget =>
-      @focusInput(1, true)
+      @focusInput(hideCursor: true)
     super
 
   getNewText: (text) ->
@@ -411,6 +411,10 @@ class SurroundBase extends TransformString
     ['{', '}']
     ['<', '>']
   ]
+  pairCharAliases: {
+    b: ')', B: '}', r: ']'
+  }
+
   pairCharsAllowForwarding: '[](){}'
   input: null
   requireInput: true
@@ -420,7 +424,7 @@ class SurroundBase extends TransformString
     inputUI = @newInputUI()
     inputUI.onDidConfirm(@onConfirmSurroundChar.bind(this))
     inputUI.onDidCancel(@cancelOperation.bind(this))
-    inputUI.focus(1, true)
+    inputUI.focus(hideCursor: true)
 
   focusInputForTargetPairChar: ->
     inputUI = @newInputUI()
@@ -429,6 +433,8 @@ class SurroundBase extends TransformString
     inputUI.focus()
 
   getPair: (char) ->
+    char = @pairCharAliases[char] if char of @pairCharAliases
+
     if pair = _.detect(@pairs, (pair) -> char in pair)
       pair
     else
@@ -577,7 +583,7 @@ class JoinBase extends TransformString
   target: "MoveToRelativeLineMinimumOne"
 
   initialize: ->
-    @focusInput(10) if @requireInput
+    @focusInput(charsMax: 10) if @requireInput
     super
 
   getNewText: (text) ->
@@ -618,7 +624,7 @@ class SplitString extends TransformString
 
   initialize: ->
     @onDidSetTarget =>
-      @focusInput(10)
+      @focusInput(charsMax: 10)
     super
 
   getNewText: (text) ->

@@ -551,6 +551,23 @@ describe "Operator TransformString", ->
             line )
           """
 
+    describe 'alias keymap for surround, change-surround, delete-surround', ->
+      it "surround by aliased char", ->
+        set textC: "|abc"; ensure ['y s i w', input: 'b'], text: "(abc)"
+        set textC: "|abc"; ensure ['y s i w', input: 'B'], text: "{abc}"
+        set textC: "|abc"; ensure ['y s i w', input: 'r'], text: "[abc]"
+      it "delete surround by aliased char", ->
+        set textC: "|(abc)"; ensure ['d S', input: 'b'], text: "abc"
+        set textC: "|{abc}"; ensure ['d S', input: 'B'], text: "abc"
+        set textC: "|[abc]"; ensure ['d S', input: 'r'], text: "abc"
+      it "change surround by aliased char", ->
+        set textC: "|(abc)"; ensure ['c S', input: 'bB'], text: "{abc}"
+        set textC: "|(abc)"; ensure ['c S', input: 'br'], text: "[abc]"
+        set textC: "|{abc}"; ensure ['c S', input: 'Bb'], text: "(abc)"
+        set textC: "|{abc}"; ensure ['c S', input: 'Br'], text: "[abc]"
+        set textC: "|[abc]"; ensure ['c S', input: 'rb'], text: "(abc)"
+        set textC: "|[abc]"; ensure ['c S', input: 'rB'], text: "{abc}"
+
     describe 'surround', ->
       it "surround text object with ( and repeatable", ->
         ensure ['y s i w', input: '('],
