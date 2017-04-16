@@ -11,6 +11,11 @@ settings = require './settings'
 packageScope = 'vim-mode-plus'
 getEditorState = null
 
+invalidateRequireCacheForPackage = (packPath) ->
+  Object.keys(require.cache)
+    .filter (p) -> p.startsWith(packPath + path.sep)
+    .forEach (p) -> delete require.cache[p]
+
 class Developer
   init: (service) ->
     {getEditorState} = service
@@ -22,10 +27,9 @@ class Developer
       'open-in-vim': => @openInVim()
       'generate-introspection-report': => @generateIntrospectionReport()
       'generate-command-summary-table': => @generateCommandSummaryTable()
-      'toggle-dev-environment': => @toggleDevEnvironment()
       'clear-debug-output': => @clearDebugOutput()
-      'reload-packages': => @reloadPackages()
-      'toggle-reload-packages-on-save': => @toggleReloadPackagesOnSave()
+      'reload': => @reload()
+      'reload-with-dependencies': => @reload(true)
       'report-total-marker-count': => @getAllMarkerCount()
       'report-total-and-per-editor-marker-count': => @getAllMarkerCount(true)
 
@@ -62,59 +66,29 @@ class Developer
 
     console.log 'total', inspect(total)
 
-  reloadPackages: ->
-    packages = settings.get('devReloadPackages') ? []
-    packages.push('vim-mode-plus')
+  reload: (reloadDependencies) ->
+    packages = ['vim-mode-plus']
+    if reloadDependencies
+      packages.push(settings.get('devReloadPackages')...)
 
-    # Deactivate
-    for packName in packages
-      pack = atom.packages.getLoadedPackage(packName)
+    deactivate = (packName) ->
+      console.log "- deactivating #{packName}"
+      packPath = atom.packages.getLoadedPackage(packName).path
+      atom.packages.deactivatePackage(packName)
+      atom.packages.unloadPackage(packName)
+      invalidateRequireCacheForPackage(packPath)
 
-      if pack?
-        console.log "- deactivating #{packName}"
-        atom.packages.deactivatePackage(packName)
-        atom.packages.unloadPackage(packName)
-
-        packPath = pack.path
-        Object.keys(require.cache)
-          .filter (p) ->
-            p.indexOf(packPath + path.sep) is 0
-          .forEach (p) ->
-            delete require.cache[p]
-
-    # Activate
-    for packName in packages
-      atom.packages.loadPackage(packName)
+    activate = (packName) ->
       console.log "+ activating #{packName}"
+      atom.packages.loadPackage(packName)
       atom.packages.activatePackage(packName)
 
-  toggleReloadPackagesOnSave: ->
-    return unless editor = atom.workspace.getActiveTextEditor()
-    buffer = editor.getBuffer()
-    fileName = path.basename(editor.getPath())
-
-    if subscription = @reloadSubscriptionByBuffer.get(buffer)
-      subscription.dispose()
-      @reloadSubscriptionByBuffer.delete(buffer)
-      console.log "disposed reloadPackagesOnSave for #{fileName}"
-    else
-      @reloadSubscriptionByBuffer.set buffer, buffer.onDidSave =>
-        console.clear()
-        @reloadPackages()
-      console.log "activated reloadPackagesOnSave for #{fileName}"
-
-  toggleDevEnvironment: ->
-    return unless editor = atom.workspace.getActiveTextEditor()
-    buffer = editor.getBuffer()
-    fileName = path.basename(editor.getPath())
-
-    if @devEnvironmentByBuffer.has(buffer)
-      @devEnvironmentByBuffer.get(buffer).dispose()
-      @devEnvironmentByBuffer.delete(buffer)
-      console.log "disposed dev env #{fileName}"
-    else
-      @devEnvironmentByBuffer.set(buffer, new DevEnvironment(editor))
-      console.log "activated dev env #{fileName}"
+    loadedPackages = packages.filter (packName) -> atom.packages.getLoadedPackages(packName)
+    console.log "reload", loadedPackages
+    loadedPackages.map(deactivate)
+    console.time('activate')
+    loadedPackages.map(activate)
+    console.timeEnd('activate')
 
   addCommand: (name, fn) ->
     atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
@@ -263,36 +237,5 @@ class Developer
         'delegatesMethod',
       ]
       recursiveInspect: Base
-
-class DevEnvironment
-  constructor: (@editor) ->
-    @editorElement = @editor.element
-    @emitter = new Emitter
-    fileName = path.basename(@editor.getPath())
-    @disposable = @editor.onDidSave =>
-      console.clear()
-      Base.suppressWarning = true
-      @reload()
-      Base.suppressWarning = false
-      Base.reset()
-      @emitter.emit 'did-reload'
-      console.log "reloaded #{fileName}"
-
-  dispose: ->
-    @disposable?.dispose()
-
-  onDidReload: (fn) -> @emitter.on('did-reload', fn)
-
-  reload: ->
-    packPath = atom.packages.resolvePackagePath('vim-mode-plus')
-    originalRequire = global.require
-    global.require = (libPath) ->
-      if libPath.startsWith './'
-        originalRequire "#{packPath}/lib/#{libPath}"
-      else
-        originalRequire libPath
-
-    atom.commands.dispatch(@editorElement, 'run-in-atom:run-in-atom')
-    global.require = originalRequire
 
 module.exports = Developer
