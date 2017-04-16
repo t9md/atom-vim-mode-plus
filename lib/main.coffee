@@ -43,22 +43,16 @@ module.exports =
         """
       atom.notifications.addWarning(message, dismissable: true)
 
-    # @subscribe atom.workspace.observeTextEditors (editor) =>
-    #   unless editor.isMini()
-    #     @createVimState(editor)
+    @subscribe atom.workspace.observeTextEditors (editor) =>
+      @createVimState(editor) unless editor.isMini()
 
     @subscribe atom.workspace.onDidChangeActivePaneItem (item) =>
-      if atom.workspace.isTextEditor(item) and not item.isMini()
-        @createVimStateIfNecessary(item)
       @demaximizePane()
 
     @subscribe atom.workspace.onDidChangeActivePaneItem ->
       if settings.get('automaticallyEscapeInsertModeOnActivePaneItemChange')
         VimState?.forEach (vimState) ->
           vimState.activate('normal') if vimState.mode is 'insert'
-
-    if editor = atom.workspace.getActiveTextEditor()
-      @createVimStateIfNecessary(editor)
 
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
       if atom.workspace.isTextEditor(item) and not item.isMini()
@@ -74,7 +68,6 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
-    # console.timeEnd('vmp-activate')
     console.log 'done', VimState.vimStatesByEditor.size
     console.timeEnd('vmp-activate')
 

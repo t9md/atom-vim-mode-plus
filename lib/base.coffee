@@ -324,6 +324,7 @@ class Base
       return klass
 
     if spec = @commandTable[name]
+      console.log "req #{spec.file} for #{name}"
       require(spec.file)
       klass = registries[name]
       return klass if klass?

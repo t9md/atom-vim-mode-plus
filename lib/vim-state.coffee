@@ -6,25 +6,25 @@ _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
 settings = require './settings'
-HoverManager = require './hover-manager'
-SearchInput = require './search-input'
+# HoverManager = require './hover-manager'
+# SearchInput = require './search-input'
 {getVisibleEditors, matchScopes, translatePointAndClip, haveSomeNonEmptySelection} = require './utils'
 swrap = require './selection-wrapper'
 
-OperationStack = require './operation-stack'
-MarkManager = require './mark-manager'
-ModeManager = require './mode-manager'
-RegisterManager = require './register-manager'
-SearchHistoryManager = require './search-history-manager'
-CursorStyleManager = require './cursor-style-manager'
-BlockwiseSelection = require './blockwise-selection'
-OccurrenceManager = require './occurrence-manager'
-HighlightSearchManager = require './highlight-search-manager'
-MutationManager = require './mutation-manager'
-PersistentSelectionManager = require './persistent-selection-manager'
-FlashManager = require './flash-manager'
+# OperationStack = require './operation-stack'
+LazyLoadedLibs = {}
 
-packageScope = 'vim-mode-plus'
+# MarkManager = require './mark-manager'
+# ModeManager = require './mode-manager'
+# RegisterManager = require './register-manager'
+# SearchHistoryManager = require './search-history-manager'
+# CursorStyleManager = require './cursor-style-manager'
+BlockwiseSelection = null
+# OccurrenceManager = require './occurrence-manager'
+# HighlightSearchManager = require './highlight-search-manager'
+# MutationManager = require './mutation-manager'
+# PersistentSelectionManager = require './persistent-selection-manager'
+# FlashManager = require './flash-manager'
 
 module.exports =
 class VimState
@@ -43,31 +43,58 @@ class VimState
     @vimStatesByEditor.clear()
 
   Delegato.includeInto(this)
-
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
   @delegatesMethods('isMode', 'activate', toProperty: 'modeManager')
   @delegatesMethods('flash', 'flashScreenRange', toProperty: 'flashManager')
   @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', 'addToClassList', toProperty: 'operationStack')
 
+  @defineLazyProperty: (name, fileToLoad) ->
+    Object.defineProperty @prototype, name,
+      get: ->
+        propName = "__" + name
+        this[propName] ?= do =>
+          klass = (LazyLoadedLibs[fileToLoad] ?= require(fileToLoad))
+          new klass(this)
+
+  @lazyProperties =
+    mark: './mark-manager'
+    register: './register-manager'
+    hover: './hover-manager'
+    hoverSearchCounter: './hover-manager'
+    searchHistory: './search-history-manager'
+    persistentSelection: './persistent-selection-manager'
+    occurrenceManager: './occurrence-manager'
+    mutationManager: './mutation-manager'
+    flashManager: './flash-manager'
+    searchInput: './search-input'
+    highlightSearch: './highlight-search-manager'
+    cursorStyleManager: './cursor-style-manager'
+    operationStack: './operation-stack'
+    modeManager: './mode-manager'
+
+  for propName, fileToLoad of @lazyLoadProperties
+    # console.log propName, fileToLoad
+    @defineLazyProperty(propName, fileToLoad)
+
   constructor: (@editor, @statusBarManager, @globalState) ->
     @editorElement = @editor.element
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
-    @modeManager = new ModeManager(this)
-    @mark = new MarkManager(this)
-    @register = new RegisterManager(this)
-    @hover = new HoverManager(this)
-    @hoverSearchCounter = new HoverManager(this)
-    @searchHistory = new SearchHistoryManager(this)
-    @highlightSearch = new HighlightSearchManager(this)
-    @persistentSelection = new PersistentSelectionManager(this)
-    @occurrenceManager = new OccurrenceManager(this)
-    @mutationManager = new MutationManager(this)
-    @flashManager = new FlashManager(this)
-    @searchInput = new SearchInput(this)
-    @operationStack = new OperationStack(this)
-    @cursorStyleManager = new CursorStyleManager(this)
-    @blockwiseSelections = []
+
+    # @modeManager = new ModeManager(this)
+    # @mark = new MarkManager(this)
+    # @register = new RegisterManager(this)
+    # @hover = new HoverManager(this)
+    # @hoverSearchCounter = new HoverManager(this)
+    # @searchHistory = new SearchHistoryManager(this)
+    # @highlightSearch = new HighlightSearchManager(this)
+    # @persistentSelection = new PersistentSelectionManager(this)
+    # @occurrenceManager = new OccurrenceManager(this)
+    # @mutationManager = new MutationManager(this)
+    # @flashManager = new FlashManager(this)
+    # @searchInput = new SearchInput(this)
+    # @operationStack = new OperationStack(this)
+    # @cursorStyleManager = new CursorStyleManager(this)
     @previousSelection = {}
     @observeSelections()
 
@@ -75,7 +102,7 @@ class VimState
       @highlightSearch.refresh()
     @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
 
-    @editorElement.classList.add(packageScope)
+    @editorElement.classList.add('vim-mode-plus')
     if @getConfig('startInInsertMode') or matchScopes(@editorElement, @getConfig('startInInsertModeScopes'))
       @activate('insert')
     else
@@ -90,15 +117,19 @@ class VimState
   # BlockwiseSelections
   # -------------------------
   getBlockwiseSelections: ->
+    BlockwiseSelection ?= require './blockwise-selection'
     BlockwiseSelection.getSelections(@editor)
 
   getLastBlockwiseSelection: ->
+    BlockwiseSelection ?= require './blockwise-selection'
     BlockwiseSelection.getLastSelection(@editor)
 
   getBlockwiseSelectionsOrderedByBufferPosition: ->
+    BlockwiseSelection ?= require './blockwise-selection'
     BlockwiseSelection.getSelectionsOrderedByBufferPosition(@editor)
 
   clearBlockwiseSelections: ->
+    BlockwiseSelection ?= require './blockwise-selection'
     BlockwiseSelection.clearSelections(@editor)
 
   # Other
@@ -193,6 +224,8 @@ class VimState
   destroy: ->
     return unless @isAlive()
     @constructor.vimStatesByEditor.delete(@editor)
+
+    BlockwiseSelection ?= require './blockwise-selection'
     BlockwiseSelection.clearSelections(@editor)
 
     @subscriptions.dispose()
@@ -201,7 +234,7 @@ class VimState
       @resetNormalMode()
       @reset()
       @editorElement.component?.setInputEnabled(true)
-      @editorElement.classList.remove(packageScope, 'normal-mode')
+      @editorElement.classList.remove('vim-mode-plus', 'normal-mode')
 
     @hover?.destroy?()
     @hoverSearchCounter?.destroy?()
@@ -260,6 +293,7 @@ class VimState
     @editor.setCursorBufferPosition(@editor.getCursorBufferPosition())
 
   resetNormalMode: ({userInvocation}={}) ->
+    BlockwiseSelection ?= require './blockwise-selection'
     BlockwiseSelection.clearSelections(@editor)
 
     if userInvocation ? false
