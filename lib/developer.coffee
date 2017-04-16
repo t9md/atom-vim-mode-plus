@@ -168,6 +168,10 @@ class Developer
     )
     commands
 
+  generateCommandTableForMotion: ->
+    require('./motion')
+
+
   kinds = ["Operator", "Motion", "TextObject", "InsertMode", "MiscCommand", "Scroll"]
   generateSummaryTableForCommandSpecs: (specs, {header}={}) ->
     grouped = _.groupBy(specs, 'kind')

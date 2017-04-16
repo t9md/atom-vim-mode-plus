@@ -1,6 +1,6 @@
 semver = require 'semver'
 Delegato = require 'delegato'
-{jQuery} = require 'atom-space-pen-views'
+jQuery = null
 
 _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
@@ -32,6 +32,9 @@ class VimState
 
   @getByEditor: (editor) ->
     @vimStatesByEditor.get(editor)
+
+  @has: (editor) ->
+    @vimStatesByEditor.has(editor)
 
   @forEach: (fn) ->
     @vimStatesByEditor.forEach(fn)
@@ -328,6 +331,7 @@ class VimState
   # -------------------------
   scrollAnimationEffect: null
   requestScrollAnimation: (from, to, options) ->
+    jQuery ?= require('atom-space-pen-views').jQuery
     @scrollAnimationEffect = jQuery(from).animate(to, options)
 
   finishScrollAnimation: ->

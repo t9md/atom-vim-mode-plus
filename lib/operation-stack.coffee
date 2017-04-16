@@ -25,9 +25,6 @@ class OperationStack
     @subscriptions = new CompositeDisposable
     @subscriptions.add @vimState.onDidDestroy(@destroy.bind(this))
 
-    Select ?= Base.getClass('Select')
-    MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
-
     @reset()
 
   # Return handler
@@ -57,6 +54,19 @@ class OperationStack
   isEmpty: ->
     @stack.length is 0
 
+  newMoveToRelativeLine: ->
+    MoveToRelativeLine ?= Base.getClass('MoveToRelativeLine')
+    new MoveToRelativeLine(@vimState)
+
+  newSelectWithTarget: (target) ->
+    Select ?= Base.getClass('Select')
+    new Select(@vimState).setTarget(target)
+
+
+  # new: (klass, properties) ->
+  #   klass = Base.getClass(klass)
+  #   new klass(@vimState, properties)
+
   # Main
   # -------------------------
   run: (klass, properties) ->
@@ -71,16 +81,17 @@ class OperationStack
         operation = klass
       else
         klass = Base.getClass(klass) if type is 'string'
+
         # Replace operator when identical one repeated, e.g. `dd`, `cc`, `gUgU`
         if @peekTop()?.constructor is klass
-          operation = new MoveToRelativeLine(@vimState)
+          operation = @newMoveToRelativeLine()
         else
           operation = new klass(@vimState, properties)
 
       switch
         when @isEmpty()
           if (@mode is 'visual' and operation.isMotion()) or operation.isTextObject()
-            operation = new Select(@vimState).setTarget(operation)
+            operation = @newSelectWithTarget(operation)
           @stack.push(operation)
           @process()
         when @peekTop().isOperator() and (operation.isMotion() or operation.isTextObject())

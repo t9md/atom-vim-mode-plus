@@ -12,9 +12,19 @@ Delegato = require 'delegato'
   scanEditorInDirection
 } = require './utils'
 swrap = require './selection-wrapper'
-Input = require './input'
+
+Input = null
 selectList = null
 getEditorState = null # set by Base.init()
+CSON = null
+
+serializeCommandTable = (specByKlass) ->
+  CSON ?= require 'season'
+  data = CSON.stringify(specByKlass)
+  CommandTablePath = require.resolve('./command-table.cson')
+  atom.workspace.open(CommandTablePath).then (editor) ->
+    editor.setText(data)
+
 {OperationAbortedError} = require './errors'
 
 vimStateMethods = [
@@ -135,6 +145,7 @@ class Base
     new klass(@vimState, properties)
 
   newInputUI: ->
+    Input ?= require './input'
     new Input(@vimState)
 
   # FIXME: This is used to clone Motion::Search to support `n` and `N`
@@ -249,25 +260,58 @@ class Base
 
   # Class methods
   # -------------------------
-  @init: (service) ->
+  @init: (service, commandTable) ->
     {getEditorState} = service
+
+    registerCommandFromSpec = (spec) ->
+      {name, commandScope, commandName} = spec
+      atom.commands.add commandScope, commandName, (event) ->
+        vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
+        if vimState? # Possibly undefined See #85
+          vimState.operationStack.run(name)
+        event.stopPropagation()
+
     @subscriptions = new CompositeDisposable()
 
-    [
-      './operator', './operator-insert', './operator-transform-string',
-      './motion', './motion-search', './text-object', './misc-command'
-    ].forEach(require)
+    @commandTable = require('./command-table')
+    # @commandTable = null
 
-    for __, klass of @getRegistries() when klass.isCommand()
-      @subscriptions.add(klass.registerCommand())
-    @subscriptions
+    if @commandTable?
+      console.log 'lazy strategy'
+      for name, spec of @commandTable when spec.isCommand
+        @subscriptions.add(registerCommandFromSpec(spec))
+      @subscriptions
+    else
+      console.log 'non lazy strategy'
+      files = [
+        './operator', './operator-insert', './operator-transform-string',
+        './motion', './motion-search', './text-object', './misc-command'
+      ]
+      @commandTable = {}
+      filenameByKlass = {}
+      for file in files
+        beforeRequire = _.keys(@getRegistries())
+        # console.time(file)
+        require(file)
+        # console.timeEnd(file)
+        afterRequire = _.keys(@getRegistries())
+        addedKlass = _.difference(afterRequire, beforeRequire)
+        for klass in addedKlass
+          filenameByKlass[klass] = file
 
-  # For development easiness without reloading vim-mode-plus
-  @reset: ->
-    @subscriptions.dispose()
-    @subscriptions = new CompositeDisposable()
-    for __, klass of @getRegistries() when klass.isCommand()
-      @subscriptions.add(klass.registerCommand())
+      for __, klass of @getRegistries()# when klass.isCommand()
+        @commandTable[klass.name] = spec = {
+          name: klass.name
+          file: filenameByKlass[klass.name]
+          commandName: klass.getCommandName()
+          isCommand: klass.isCommand()
+          commandScope: klass.getCommandScope()
+        }
+
+      # serializeCommandTable(@commandTable)
+      for name, spec of @commandTable when spec.isCommand
+        @subscriptions.add(registerCommandFromSpec(spec))
+      @subscriptions
 
   registries = {Base}
   @extend: (@command=true) ->
@@ -277,9 +321,14 @@ class Base
 
   @getClass: (name) ->
     if (klass = registries[name])?
-      klass
-    else
-      throw new Error("class '#{name}' not found")
+      return klass
+
+    if spec = @commandTable[name]
+      require(spec.file)
+      klass = registries[name]
+      return klass if klass?
+
+    throw new Error("class '#{name}' not found")
 
   @getRegistries: ->
     registries
@@ -309,7 +358,6 @@ class Base
     atom.commands.add @getCommandScope(), @getCommandName(), (event) ->
       vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
       if vimState? # Possibly undefined See #85
-        vimState._event = event
         vimState.operationStack.run(klass)
       event.stopPropagation()
 

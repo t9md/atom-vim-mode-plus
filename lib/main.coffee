@@ -3,7 +3,6 @@ _ = require 'underscore-plus'
 {Disposable, Emitter, CompositeDisposable} = require 'atom'
 
 Base = require './base'
-StatusBarManager = require './status-bar-manager'
 globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
@@ -12,13 +11,19 @@ VimState = require './vim-state'
 module.exports =
   config: settings.config
 
+  getStatusBarManager: ->
+    @statusBarManager ?= new (require './status-bar-manager')
+
   activate: (state) ->
+    console.time('vmp-activate')
+
     @subscriptions = new CompositeDisposable
-    @statusBarManager = new StatusBarManager
     @emitter = new Emitter
 
     service = @provideVimModePlus()
+    console.time('Base.init')
     @subscribe(Base.init(service))
+    console.timeEnd('Base.init')
     @registerCommands()
     @registerVimStateCommands()
 
@@ -38,20 +43,25 @@ module.exports =
         """
       atom.notifications.addWarning(message, dismissable: true)
 
-    @subscribe atom.workspace.observeTextEditors (editor) =>
-      return if editor.isMini()
-      vimState = new VimState(editor, @statusBarManager, globalState)
-      @emitter.emit('did-add-vim-state', vimState)
+    # @subscribe atom.workspace.observeTextEditors (editor) =>
+    #   unless editor.isMini()
+    #     @createVimState(editor)
 
-    @subscribe atom.workspace.onDidChangeActivePane(@demaximizePane.bind(this))
+    @subscribe atom.workspace.onDidChangeActivePaneItem (item) =>
+      if atom.workspace.isTextEditor(item) and not item.isMini()
+        @createVimStateIfNecessary(item)
+      @demaximizePane()
 
     @subscribe atom.workspace.onDidChangeActivePaneItem ->
       if settings.get('automaticallyEscapeInsertModeOnActivePaneItemChange')
-        VimState.forEach (vimState) ->
+        VimState?.forEach (vimState) ->
           vimState.activate('normal') if vimState.mode is 'insert'
 
+    if editor = atom.workspace.getActiveTextEditor()
+      @createVimStateIfNecessary(editor)
+
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
-      if atom.workspace.isTextEditor(item)
+      if atom.workspace.isTextEditor(item) and not item.isMini()
         # Still there is possibility editor is destroyed and don't have corresponding
         # vimState #196.
         @getEditorState(item)?.highlightSearch.refresh()
@@ -64,6 +74,9 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
+    # console.timeEnd('vmp-activate')
+    console.log 'done', VimState.vimStatesByEditor.size
+    console.timeEnd('vmp-activate')
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
@@ -81,7 +94,7 @@ module.exports =
   #   observeVimStates (vimState) -> do something..
   # Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
   observeVimStates: (fn) ->
-    VimState.forEach(fn)
+    VimState?.forEach(fn)
     @onDidAddVimState(fn)
 
   clearPersistentSelectionForEditors: ->
@@ -90,9 +103,9 @@ module.exports =
 
   deactivate: ->
     @subscriptions.dispose()
-    VimState.forEach (vimState) ->
+    VimState?.forEach (vimState) ->
       vimState.destroy()
-    VimState.clear()
+    VimState?.clear()
 
   subscribe: (args...) ->
     @subscriptions.add(args...)
@@ -210,10 +223,11 @@ module.exports =
     @subscribe atom.commands.add('atom-text-editor:not([mini])', bindToVimState(commands))
 
   consumeStatusBar: (statusBar) ->
-    @statusBarManager.initialize(statusBar)
-    @statusBarManager.attach()
-    @subscribe new Disposable =>
-      @statusBarManager.detach()
+    statusBarManager = @getStatusBarManager()
+    statusBarManager.initialize(statusBar)
+    statusBarManager.attach()
+    @subscribe new Disposable ->
+      statusBarManager.detach()
 
   consumeDemoMode: ({onWillAddItem, onDidStart, onDidStop, onDidRemoveHover}) ->
     @subscribe(
@@ -233,7 +247,7 @@ module.exports =
     )
 
   destroyAllDemoModeFlasheMarkers: ->
-    VimState.forEach (vimState) ->
+    VimState?.forEach (vimState) ->
       vimState.flashManager.destroyDemoModeMarkers()
 
   getKindForCommand: (command) ->
@@ -246,12 +260,23 @@ module.exports =
     else
       'non-vmp'
 
+  createVimState: (editor) ->
+    vimState = new VimState(editor, @getStatusBarManager(), globalState)
+    @emitter.emit('did-add-vim-state', vimState)
+
+  createVimStateIfNecessary: (editor) ->
+    return if VimState.has(editor)
+    # console.log "CREATED"
+    vimState = new VimState(editor, @getStatusBarManager(), globalState)
+    @emitter.emit('did-add-vim-state', vimState)
+
   # Service API
   # -------------------------
   getGlobalState: ->
     globalState
 
   getEditorState: (editor) ->
+    @createVimStateIfNecessary(editor)
     VimState.getByEditor(editor)
 
   provideVimModePlus: ->
