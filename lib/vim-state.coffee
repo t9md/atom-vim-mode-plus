@@ -72,7 +72,7 @@ class VimState
     operationStack: './operation-stack'
     modeManager: './mode-manager'
 
-  for propName, fileToLoad of @lazyLoadProperties
+  for propName, fileToLoad of @lazyProperties
     # console.log propName, fileToLoad
     @defineLazyProperty(propName, fileToLoad)
 
