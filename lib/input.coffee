@@ -15,7 +15,9 @@ class Input
   destroy: ->
     {@vimState} = {}
 
-  focus: (charsMax=1, hideCursor) ->
+  focus: (options={}) ->
+    {charsMax, hideCursor} = options
+    charsMax ?= 1
     chars = []
 
     @disposables = new CompositeDisposable()
