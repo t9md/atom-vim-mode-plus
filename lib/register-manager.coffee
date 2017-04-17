@@ -21,8 +21,8 @@ REGISTERS = /// (
 module.exports =
 class RegisterManager
   constructor: (@vimState) ->
-    {@editor, @editorElement, @globalState} = @vimState
-    @data = @globalState.get('register')
+    {@editor, @editorElement} = @vimState
+    @data = @vimState.globalState.get('register')
     @subscriptionBySelection = new Map
     @clipboardBySelection = new Map
 

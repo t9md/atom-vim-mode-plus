@@ -17,6 +17,7 @@ Input = null
 selectList = null
 getEditorState = null # set by Base.init()
 CSON = null
+LazyLoadedLibs = {}
 
 serializeCommandTable = (specByKlass) ->
   CSON ?= require 'season'
@@ -277,7 +278,7 @@ class Base
     # @commandTable = null
 
     if @commandTable?
-      console.log 'lazy strategy'
+      console.log 'lazy strategy' unless atom.inSpecMode()
       for name, spec of @commandTable when spec.isCommand
         @subscriptions.add(registerCommandFromSpec(spec))
       @subscriptions
@@ -324,8 +325,9 @@ class Base
       return klass
 
     if spec = @commandTable[name]
-      console.log "req #{spec.file} for #{name}"
-      require(spec.file)
+      unless atom.inSpecMode()
+        console.log "req #{spec.file} for #{name}"
+      LazyLoadedLibs[spec.file] ?= require(spec.file)
       klass = registries[name]
       return klass if klass?
 
@@ -360,6 +362,19 @@ class Base
       vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
       if vimState? # Possibly undefined See #85
         vimState.operationStack.run(klass)
+      event.stopPropagation()
+
+  @registerCommandFromSpec: (spec) ->
+    {name, commandScope, commandPrefix, getClass} = spec
+    commandScope ?= 'atom-text-editor'
+    commandName = (commandPrefix ? 'vim-mode-plus') + ':' + _.dasherize(name)
+    atom.commands.add commandScope, commandName, (event) ->
+      vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
+      if vimState? # Possibly undefined See #85
+        if getClass?
+          vimState.operationStack.run(getClass(name))
+        else
+          vimState.operationStack.run(name)
       event.stopPropagation()
 
   # For demo-mode pkg integration

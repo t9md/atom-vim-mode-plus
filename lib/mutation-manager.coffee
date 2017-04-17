@@ -15,6 +15,7 @@ class MutationManager
 
   destroy: ->
     @reset()
+    @disposables.dispose()
     {@mutationsBySelection, @editor, @vimState} = {}
 
   init: ({@stayByMarker}) ->

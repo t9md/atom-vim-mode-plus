@@ -1,9 +1,10 @@
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
 {moveCursorLeft, haveSomeNonEmptySelection, assertWithException} = require './utils'
-{Select, MoveToRelativeLine} = {}
 {OperationAbortedError} = require './errors'
 swrap = require './selection-wrapper'
+
+[Select, MoveToRelativeLine] = []
 
 # opration life in operationStack
 # 1. run
@@ -61,11 +62,6 @@ class OperationStack
   newSelectWithTarget: (target) ->
     Select ?= Base.getClass('Select')
     new Select(@vimState).setTarget(target)
-
-
-  # new: (klass, properties) ->
-  #   klass = Base.getClass(klass)
-  #   new klass(@vimState, properties)
 
   # Main
   # -------------------------
@@ -233,7 +229,7 @@ class OperationStack
     @count[mode] ?= 0
     @count[mode] = (@count[mode] * 10) + number
     @vimState.hover.set(@buildCountString())
-    @vimState.toggleClassList('with-count', true)
+    @editorElement.classList.toggle('with-count', true)
 
   buildCountString: ->
     [@count['normal'], @count['operator-pending']]
@@ -243,6 +239,6 @@ class OperationStack
 
   resetCount: ->
     @count = {}
-    @vimState.toggleClassList('with-count', false)
+    @editorElement.classList.remove('with-count')
 
 module.exports = OperationStack

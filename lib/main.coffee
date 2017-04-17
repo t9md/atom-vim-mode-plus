@@ -15,15 +15,15 @@ module.exports =
     @statusBarManager ?= new (require './status-bar-manager')
 
   activate: (state) ->
-    console.time('vmp-activate')
+    console.time('vmp-activate') unless atom.inSpecMode()
 
     @subscriptions = new CompositeDisposable
     @emitter = new Emitter
 
     service = @provideVimModePlus()
-    console.time('Base.init')
+    console.time('Base.init') unless atom.inSpecMode()
     @subscribe(Base.init(service))
-    console.timeEnd('Base.init')
+    console.timeEnd('Base.init') unless atom.inSpecMode()
     @registerCommands()
     @registerVimStateCommands()
 
@@ -43,10 +43,15 @@ module.exports =
         """
       atom.notifications.addWarning(message, dismissable: true)
 
+    # [REVERT-after-finish]
     @subscribe atom.workspace.observeTextEditors (editor) =>
       @createVimState(editor) unless editor.isMini()
 
-    @subscribe atom.workspace.onDidChangeActivePaneItem (item) =>
+    # if editor = atom.workspace.getActiveTextEditor()
+    #   @createVimState(editor)
+
+    @subscribe atom.workspace.onDidChangeActivePaneItem =>
+      # @createVimStateIfNecessary(editor) unless editor.isMini()
       @demaximizePane()
 
     @subscribe atom.workspace.onDidChangeActivePaneItem ->
@@ -68,8 +73,8 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
-    console.log 'done', VimState.vimStatesByEditor.size
-    console.timeEnd('vmp-activate')
+    console.log 'done', VimState.vimStatesByEditor.size unless atom.inSpecMode()
+    console.timeEnd('vmp-activate') unless atom.inSpecMode()
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
@@ -274,6 +279,7 @@ module.exports =
 
   provideVimModePlus: ->
     Base: Base
+    registerCommandFromSpec: Base.registerCommandFromSpec
     getGlobalState: @getGlobalState.bind(this)
     getEditorState: @getEditorState.bind(this)
     observeVimStates: @observeVimStates.bind(this)

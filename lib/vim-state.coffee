@@ -1,3 +1,5 @@
+{basename} = require 'path'
+
 semver = require 'semver'
 Delegato = require 'delegato'
 jQuery = null
@@ -53,7 +55,13 @@ class VimState
       get: ->
         propName = "__" + name
         this[propName] ?= do =>
-          klass = (LazyLoadedLibs[fileToLoad] ?= require(fileToLoad))
+          unless fileToLoad of LazyLoadedLibs
+            unless atom.inSpecMode()
+              console.log "# lazy-require: #{fileToLoad}, #{basename(@editor.getPath() ? '')}"
+              console.trace()
+              console.log '----------'
+            LazyLoadedLibs[fileToLoad] = require(fileToLoad)
+          klass = LazyLoadedLibs[fileToLoad]
           new klass(this)
 
   @lazyProperties =
@@ -134,9 +142,6 @@ class VimState
 
   # Other
   # -------------------------
-  toggleClassList: (className, bool=undefined) ->
-    @editorElement.classList.toggle(className, bool)
-
   # FIXME: I want to remove this dengerious approach, but I couldn't find the better way.
   swapClassName: (classNames...) ->
     oldMode = @mode
@@ -236,16 +241,16 @@ class VimState
       @editorElement.component?.setInputEnabled(true)
       @editorElement.classList.remove('vim-mode-plus', 'normal-mode')
 
-    @hover?.destroy?()
-    @hoverSearchCounter?.destroy?()
-    @searchHistory?.destroy?()
-    @cursorStyleManager?.destroy?()
-    @search?.destroy?()
-    @register?.destroy?
+    @hover?.destroy?() if @__hover?
+    @hoverSearchCounter?.destroy?() if @__hoverSearchCounter?
+    @searchHistory?.destroy?() if @__searchHistory?
+    @cursorStyleManager?.destroy?() if @__cursorStyleManager?
+    @register?.destroy? if @__register?
+
     {
       @hover, @hoverSearchCounter, @operationStack,
       @searchHistory, @cursorStyleManager
-      @search, @modeManager, @register
+      @modeManager, @register
       @editor, @editorElement, @subscriptions,
       @occurrenceManager
       @previousSelection
@@ -315,11 +320,17 @@ class VimState
     @saveOriginalCursorPosition()
 
   reset: ->
-    @register.reset()
-    @searchHistory.reset()
-    @hover.reset()
-    @operationStack.reset()
-    @mutationManager.reset()
+    @register.reset() if @__register?
+    @searchHistory.reset() if @__searchHistory?
+    @hover.reset() if @__hover?
+    @operationStack.reset() if @__operationStack?
+    @mutationManager.reset() if @__mutationManager?
+
+    # @register.reset()
+    # @searchHistory.reset()
+    # @hover.reset()
+    # @operationStack.reset()
+    # @mutationManager.reset()
 
   isVisible: ->
     @editor in getVisibleEditors()
