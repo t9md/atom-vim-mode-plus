@@ -8,25 +8,11 @@ _ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
 settings = require './settings'
-# HoverManager = require './hover-manager'
-# SearchInput = require './search-input'
 {getVisibleEditors, matchScopes, translatePointAndClip, haveSomeNonEmptySelection} = require './utils'
 swrap = require './selection-wrapper'
 
-# OperationStack = require './operation-stack'
 LazyLoadedLibs = {}
-
-# MarkManager = require './mark-manager'
-# ModeManager = require './mode-manager'
-# RegisterManager = require './register-manager'
-# SearchHistoryManager = require './search-history-manager'
-# CursorStyleManager = require './cursor-style-manager'
 BlockwiseSelection = null
-# OccurrenceManager = require './occurrence-manager'
-# HighlightSearchManager = require './highlight-search-manager'
-# MutationManager = require './mutation-manager'
-# PersistentSelectionManager = require './persistent-selection-manager'
-# FlashManager = require './flash-manager'
 
 module.exports =
 class VimState
@@ -50,10 +36,10 @@ class VimState
         propName = "__" + name
         this[propName] ?= do =>
           unless fileToLoad of LazyLoadedLibs
-            if atom.inDevMode()
-              console.log "# lazy-property: #{fileToLoad}, #{basename(@editor.getPath() ? '')}"
-              # console.trace()
-              # console.log '----------'
+            # if atom.inDevMode()
+            #   console.log "# lazy-property: #{fileToLoad}, #{basename(@editor.getPath() ? '')}"
+            #   # console.trace()
+            #   # console.log '----------'
             LazyLoadedLibs[fileToLoad] = require(fileToLoad)
           klass = LazyLoadedLibs[fileToLoad]
           new klass(this)

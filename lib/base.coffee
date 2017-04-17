@@ -13,6 +13,7 @@ Delegato = require 'delegato'
   scanEditorInDirection
 } = require './utils'
 swrap = require './selection-wrapper'
+settings = require './settings'
 
 [
   Input
@@ -282,6 +283,11 @@ class Base
 
   @init: (service) ->
     {getEditorState} = service
+    if settings.get('ignorePrePopulatedCommandTable')
+      console.log "ignore"
+      @commandTable = @generateCommandTableByEagerLoad()
+      return @registerCommandFromTable(@commandTable)
+
     if atom.inDevMode() and not fs.existsSync(@commandTablePath)
       @commandTable = @generateCommandTableByEagerLoad()
       loadableCSONText = @getLoadableTextForCommandTable(@commandTable)
@@ -293,6 +299,7 @@ class Base
           atom.notifications.addInfo("Updated commandTable", dismissable: true)
     else
       @commandTable = require(@commandTablePath)
+
     return @registerCommandFromTable(@commandTable)
 
   @getLoadableTextForCommandTable: (commandTable) ->
