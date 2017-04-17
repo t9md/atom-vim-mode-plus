@@ -32,20 +32,11 @@ module.exports =
 class VimState
   @vimStatesByEditor: new Map
 
-  @getByEditor: (editor) ->
-    @vimStatesByEditor.get(editor)
-
-  @has: (editor) ->
-    @vimStatesByEditor.has(editor)
-
-  @delete: (editor) ->
-    @vimStatesByEditor.delete(editor)
-
-  @forEach: (fn) ->
-    @vimStatesByEditor.forEach(fn)
-
-  @clear: ->
-    @vimStatesByEditor.clear()
+  @getByEditor: (editor) -> @vimStatesByEditor.get(editor)
+  @has: (editor) -> @vimStatesByEditor.has(editor)
+  @delete: (editor) -> @vimStatesByEditor.delete(editor)
+  @forEach: (fn) -> @vimStatesByEditor.forEach(fn)
+  @clear: -> @vimStatesByEditor.clear()
 
   Delegato.includeInto(this)
   @delegatesProperty('mode', 'submode', toProperty: 'modeManager')
@@ -68,20 +59,20 @@ class VimState
           new klass(this)
 
   @lazyProperties =
+    modeManager: './mode-manager'
     mark: './mark-manager'
     register: './register-manager'
     hover: './hover-manager'
     hoverSearchCounter: './hover-manager'
     searchHistory: './search-history-manager'
+    highlightSearch: './highlight-search-manager'
     persistentSelection: './persistent-selection-manager'
     occurrenceManager: './occurrence-manager'
     mutationManager: './mutation-manager'
     flashManager: './flash-manager'
     searchInput: './search-input'
-    highlightSearch: './highlight-search-manager'
-    cursorStyleManager: './cursor-style-manager'
     operationStack: './operation-stack'
-    modeManager: './mode-manager'
+    cursorStyleManager: './cursor-style-manager'
 
   for propName, fileToLoad of @lazyProperties
     # console.log propName, fileToLoad
