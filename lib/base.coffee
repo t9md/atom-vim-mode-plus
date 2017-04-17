@@ -25,16 +25,6 @@ commandTablePath = __dirname + "/command-table.coffee"
 
 {OperationAbortedError} = require './errors'
 
-serializeCommandTable = (commandTable) ->
-  csonString = (require 'season').stringify(commandTable)
-  textToWrite = "module.exports = \n" + csonString + "\n"
-  atom.workspace.open(commandTablePath, activateItem: false).then (editor) ->
-    if editor.getText() isnt textToWrite
-      editor.setText(textToWrite)
-      editor.save()
-      editor.destroy()
-      atom.notifications.addInfo("Updated commandTable", dismissable: true)
-
 vimStateMethods = [
   "onDidChangeSearch"
   "onDidConfirmSearch"
@@ -77,6 +67,8 @@ vimStateMethods = [
 ]
 
 class Base
+  @commandTablePath: commandTablePath
+
   Delegato.includeInto(this)
   @delegatesMethods(vimStateMethods..., toProperty: 'vimState')
   @delegatesProperty('mode', 'submode', toProperty: 'vimState')
@@ -271,7 +263,7 @@ class Base
   @registerCommandFromTable: (table) ->
     subscriptions = new CompositeDisposable()
     for name, spec of table when spec.commandName?
-      subscriptions.add(@registerCommandFromSpecNew(name, spec))
+      subscriptions.add(@registerCommandFromSpec(name, spec))
     subscriptions
 
   @generateCommandTableByEagerLoad: =>
@@ -284,18 +276,28 @@ class Base
       LOADING_FILE = null
 
     commandTable = {}
-    for name, klass of @getRegistries()
+    for name, klass of @getRegistries() when name isnt "Base"
       commandTable[name] = klass.getSpec()
     commandTable
 
-  @init: (service, commandTable) ->
+  @init: (service) ->
     {getEditorState} = service
-    if atom.inDevMode() and not fs.existsSync(commandTablePath)
+    if atom.inDevMode() and not fs.existsSync(@commandTablePath)
       @commandTable = @generateCommandTableByEagerLoad()
-      serializeCommandTable(@commandTable)
+      loadableCSONText = @getLoadableTextForCommandTable(@commandTable)
+      atom.workspace.open(@commandTablePath, activateItem: false).then (editor) ->
+        if editor.getText() isnt loadableCSONText
+          editor.setText(loadableCSONText)
+          editor.save()
+          editor.destroy()
+          atom.notifications.addInfo("Updated commandTable", dismissable: true)
     else
-      @commandTable = require(commandTablePath)
+      @commandTable = require(@commandTablePath)
     return @registerCommandFromTable(@commandTable)
+
+  @getLoadableTextForCommandTable: (commandTable) ->
+    csonString = (require 'season').stringify(commandTable)
+    "module.exports =\n" + csonString + "\n"
 
   registries = {Base}
   @extend: (@command=true) ->
@@ -356,16 +358,8 @@ class Base
         vimState.operationStack.run(klass)
       event.stopPropagation()
 
-  @registerCommandFromSpecNew: (name, spec) ->
-    {commandScope, commandPrefix, commandName} = spec
-    atom.commands.add commandScope, commandName, (event) ->
-      vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
-      if vimState? # Possibly undefined See #85
-        vimState.operationStack.run(name)
-      event.stopPropagation()
-
-  @registerCommandFromSpec: (spec) ->
-    {name, commandScope, commandPrefix, getClass} = spec
+  @registerCommandFromSpec: (name, spec) ->
+    {commandScope, commandPrefix, commandName, getClass} = spec
     commandScope ?= 'atom-text-editor'
     commandName = (commandPrefix ? 'vim-mode-plus') + ':' + _.dasherize(name)
     atom.commands.add commandScope, commandName, (event) ->

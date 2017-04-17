@@ -1,5 +1,4 @@
 module.exports =
-Base: {}
 Operator:
   file: "./operator"
 Select:
