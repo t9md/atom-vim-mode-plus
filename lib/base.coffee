@@ -317,8 +317,8 @@ class Base
       return klass
 
     if spec = @commandTable[name]
-      unless atom.inSpecMode()
-        console.log "req #{spec.file} for #{name}"
+      if atom.inDevMode()
+        console.log "lazy-require file: #{spec.file} for #{name}"
       LazyLoadedLibs[spec.file] ?= require(spec.file)
       klass = registries[name]
       return klass if klass?

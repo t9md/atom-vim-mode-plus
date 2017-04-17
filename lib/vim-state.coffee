@@ -50,8 +50,8 @@ class VimState
         propName = "__" + name
         this[propName] ?= do =>
           unless fileToLoad of LazyLoadedLibs
-            unless atom.inSpecMode()
-              console.log "# lazy-require: #{fileToLoad}, #{basename(@editor.getPath() ? '')}"
+            if atom.inDevMode()
+              console.log "# lazy-property: #{fileToLoad}, #{basename(@editor.getPath() ? '')}"
               # console.trace()
               # console.log '----------'
             LazyLoadedLibs[fileToLoad] = require(fileToLoad)
