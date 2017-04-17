@@ -7,6 +7,7 @@ class SearchHistoryManager
   constructor: (@vimState) ->
     {@globalState} = @vimState
     @idx = -1
+    @vimState.onDidDestroy(@destroy)
 
   get: (direction) ->
     switch direction
@@ -33,5 +34,5 @@ class SearchHistoryManager
   getSize: ->
     @globalState.get('searchHistory').length
 
-  destroy: ->
+  destroy: =>
     @idx = null

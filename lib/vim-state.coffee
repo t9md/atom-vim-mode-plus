@@ -38,6 +38,9 @@ class VimState
   @has: (editor) ->
     @vimStatesByEditor.has(editor)
 
+  @delete: (editor) ->
+    @vimStatesByEditor.delete(editor)
+
   @forEach: (fn) ->
     @vimStatesByEditor.forEach(fn)
 
@@ -145,17 +148,15 @@ class VimState
   # FIXME: I want to remove this dengerious approach, but I couldn't find the better way.
   swapClassName: (classNames...) ->
     oldMode = @mode
-
-    @editorElement.classList.remove(oldMode + "-mode")
-    @editorElement.classList.remove('vim-mode-plus')
+    @editorElement.classList.remove('vim-mode-plus', oldMode + "-mode")
     @editorElement.classList.add(classNames...)
 
     new Disposable =>
       @editorElement.classList.remove(classNames...)
+      classToAdd = ['vim-mode-plus', 'is-focused']
       if @mode is oldMode
-        @editorElement.classList.add(oldMode + "-mode")
-      @editorElement.classList.add('vim-mode-plus')
-      @editorElement.classList.add('is-focused')
+        classToAdd.push(oldMode - "-mode")
+      @editorElement.classList.add(classToAdd...)
 
   # All subscriptions here is celared on each operation finished.
   # -------------------------
@@ -224,11 +225,11 @@ class VimState
   emitDidSetInputChar: (char) -> @emitter.emit('did-set-input-char', char)
 
   isAlive: ->
-    @constructor.vimStatesByEditor.has(@editor)
+    @constructor.has(@editor)
 
   destroy: ->
     return unless @isAlive()
-    @constructor.vimStatesByEditor.delete(@editor)
+    @constructor.delete(@editor)
 
     BlockwiseSelection ?= require './blockwise-selection'
     BlockwiseSelection.clearSelections(@editor)
@@ -240,12 +241,6 @@ class VimState
       @reset()
       @editorElement.component?.setInputEnabled(true)
       @editorElement.classList.remove('vim-mode-plus', 'normal-mode')
-
-    @hover?.destroy?() if @__hover?
-    @hoverSearchCounter?.destroy?() if @__hoverSearchCounter?
-    @searchHistory?.destroy?() if @__searchHistory?
-    @cursorStyleManager?.destroy?() if @__cursorStyleManager?
-    @register?.destroy? if @__register?
 
     {
       @hover, @hoverSearchCounter, @operationStack,

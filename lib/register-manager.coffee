@@ -1,4 +1,3 @@
-{CompositeDisposable} = require 'atom'
 Input = require './input'
 
 REGISTERS = /// (
@@ -26,11 +25,13 @@ class RegisterManager
     @subscriptionBySelection = new Map
     @clipboardBySelection = new Map
 
+    @vimState.onDidDestroy(@destroy)
+
   reset: ->
     @name = null
     @editorElement.classList.toggle('with-register', false)
 
-  destroy: ->
+  destroy: =>
     @subscriptionBySelection.forEach (disposable) ->
       disposable.dispose()
     @subscriptionBySelection.clear()

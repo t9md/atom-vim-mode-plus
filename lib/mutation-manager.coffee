@@ -1,4 +1,4 @@
-{Point, CompositeDisposable} = require 'atom'
+{Point} = require 'atom'
 {getFirstCharacterPositionForBufferRow, getVimLastBufferRow} = require './utils'
 swrap = require './selection-wrapper'
 
@@ -7,16 +7,14 @@ class MutationManager
   constructor: (@vimState) ->
     {@editor} = @vimState
 
-    @disposables = new CompositeDisposable
-    @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
+    @vimState.onDidDestroy(@destroy)
 
     @markerLayer = @editor.addMarkerLayer()
     @mutationsBySelection = new Map
 
-  destroy: ->
-    @reset()
-    @disposables.dispose()
-    {@mutationsBySelection, @editor, @vimState} = {}
+  destroy: =>
+    @markerLayer.destroy()
+    @mutationsBySelection.clear()
 
   init: ({@stayByMarker}) ->
     @reset()
