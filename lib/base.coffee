@@ -284,7 +284,6 @@ class Base
   @init: (service) ->
     {getEditorState} = service
     if settings.get('ignorePrePopulatedCommandTable')
-      console.log "ignore"
       @commandTable = @generateCommandTableByEagerLoad()
       return @registerCommandFromTable(@commandTable)
 
@@ -326,8 +325,8 @@ class Base
       return klass
 
     if spec = @commandTable[name]
-      if atom.inDevMode()
-        console.log "lazy-require file: #{spec.file} for #{name}"
+      # if atom.inDevMode()
+      #   console.log "lazy-require file: #{spec.file} for #{name}"
       LazyLoadedLibs[spec.file] ?= require(spec.file)
       klass = registries[name]
       return klass if klass?

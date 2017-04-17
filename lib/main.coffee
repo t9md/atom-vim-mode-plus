@@ -15,16 +15,11 @@ module.exports =
     @statusBarManager ?= new (require './status-bar-manager')
 
   activate: (state) ->
-    isDevMode = atom.inDevMode()
-    console.time('vmp-activate') if isDevMode
-
     @subscriptions = new CompositeDisposable
     @emitter = new Emitter
 
     service = @provideVimModePlus()
-    console.time('Base.init') if isDevMode
     @subscribe(Base.init(service))
-    console.timeEnd('Base.init') if isDevMode
     @registerCommands()
     @registerVimStateCommands()
 
@@ -46,7 +41,6 @@ module.exports =
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
       @createVimState(editor) unless editor.isMini()
-
     @subscribe atom.workspace.onDidChangeActivePaneItem =>
       @demaximizePane()
 
@@ -69,8 +63,6 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
-    console.log 'vimState size:', VimState.vimStatesByEditor.size if isDevMode
-    console.timeEnd('vmp-activate') if isDevMode
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
