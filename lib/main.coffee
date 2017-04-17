@@ -276,5 +276,5 @@ module.exports =
     registerCommandFromSpec: Base.registerCommandFromSpec
     getGlobalState: @getGlobalState
     getEditorState: @getEditorState
-    observeVimStates: @observeVimStates
+    observeVimStates: @observeVimStates.bind(this)
     onDidAddVimState: @onDidAddVimState.bind(this)

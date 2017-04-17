@@ -274,40 +274,28 @@ class Base
       subscriptions.add(@registerCommandFromSpecNew(name, spec))
     subscriptions
 
+  @generateCommandTableByEagerLoad: =>
+    [
+      './operator', './operator-insert', './operator-transform-string',
+      './motion', './motion-search', './text-object', './misc-command'
+    ].forEach (file) ->
+      LOADING_FILE = file
+      require(file)
+      LOADING_FILE = null
+
+    commandTable = {}
+    for name, klass of @getRegistries()
+      commandTable[name] = klass.getSpec()
+    commandTable
+
   @init: (service, commandTable) ->
     {getEditorState} = service
-    isDevMode = atom.inDevMode()
-
-    readTableAndRegisterCommands = =>
-      console.time('lazy strategy') if isDevMode
-      @commandTable = require(commandTablePath)
-      subs = @registerCommandFromTable(@commandTable)
-      console.timeEnd('lazy strategy') if isDevMode
-      subs
-
-    registerAndGenerateCommandTable = =>
-      console.time('register and gen-cmd-table') if isDevMode
-      [
-        './operator', './operator-insert', './operator-transform-string',
-        './motion', './motion-search', './text-object', './misc-command'
-      ].forEach (file) ->
-        LOADING_FILE = file
-        require(file)
-        LOADING_FILE = null
-
-      @commandTable = {}
-      for name, klass of @getRegistries()
-        @commandTable[name] = klass.getSpec()
-
+    if atom.inDevMode() and not fs.existsSync(commandTablePath)
+      @commandTable = @generateCommandTableByEagerLoad()
       serializeCommandTable(@commandTable)
-      subs = @registerCommandFromTable(@commandTable)
-      console.timeEnd('register and gen-cmd-table') if isDevMode
-      subs
-
-    if fs.existsSync(commandTablePath)
-      return readTableAndRegisterCommands()
     else
-      return registerAndGenerateCommandTable()
+      @commandTable = require(commandTablePath)
+    return @registerCommandFromTable(@commandTable)
 
   registries = {Base}
   @extend: (@command=true) ->
