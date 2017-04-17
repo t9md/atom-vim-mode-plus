@@ -21,7 +21,7 @@ swrap = require './selection-wrapper'
   splitArguments
   traverseTextFromPoint
 } = require './utils'
-{BracketFinder, QuoteFinder, TagFinder} = require './pair-finder.coffee'
+PairFinder = null
 
 class TextObject extends Base
   @extend(false)
@@ -168,6 +168,11 @@ class Pair extends TextObject
   pair: null
   inclusive: true
 
+  initialize: ->
+    PairFinder ?= require './pair-finder.coffee'
+    super
+
+
   isAllowNextLine: ->
     @allowNextLine ? (@pair? and @pair[0] isnt @pair[1])
 
@@ -199,9 +204,9 @@ class Pair extends TextObject
   getFinder: ->
     options = {allowNextLine: @isAllowNextLine(), @allowForwarding, @pair, @inclusive}
     if @pair[0] is @pair[1]
-      new QuoteFinder(@editor, options)
+      new PairFinder.QuoteFinder(@editor, options)
     else
-      new BracketFinder(@editor, options)
+      new PairFinder.BracketFinder(@editor, options)
 
   getPairInfo: (from) ->
     pairInfo = @getFinder().find(from)
@@ -324,7 +329,7 @@ class Tag extends Pair
 
   getTagStartPoint: (from) ->
     tagRange = null
-    pattern = TagFinder::pattern
+    pattern = PairFinder.TagFinder::pattern
     @scanForward pattern, {from: [from.row, 0]}, ({range, stop}) ->
       if range.containsPoint(from, true)
         tagRange = range
@@ -332,7 +337,7 @@ class Tag extends Pair
     tagRange?.start
 
   getFinder: ->
-    new TagFinder(@editor, {allowNextLine: @isAllowNextLine(), @allowForwarding, @inclusive})
+    new PairFinder.TagFinder(@editor, {allowNextLine: @isAllowNextLine(), @allowForwarding, @inclusive})
 
   getPairInfo: (from) ->
     super(@getTagStartPoint(from) ? from)
