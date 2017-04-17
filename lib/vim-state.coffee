@@ -82,21 +82,6 @@ class VimState
     @editorElement = @editor.element
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
-
-    # @modeManager = new ModeManager(this)
-    # @mark = new MarkManager(this)
-    # @register = new RegisterManager(this)
-    # @hover = new HoverManager(this)
-    # @hoverSearchCounter = new HoverManager(this)
-    # @searchHistory = new SearchHistoryManager(this)
-    # @highlightSearch = new HighlightSearchManager(this)
-    # @persistentSelection = new PersistentSelectionManager(this)
-    # @occurrenceManager = new OccurrenceManager(this)
-    # @mutationManager = new MutationManager(this)
-    # @flashManager = new FlashManager(this)
-    # @searchInput = new SearchInput(this)
-    # @operationStack = new OperationStack(this)
-    # @cursorStyleManager = new CursorStyleManager(this)
     @previousSelection = {}
     @observeSelections()
 
@@ -110,7 +95,7 @@ class VimState
     else
       @activate('normal')
 
-    @subscriptions.add @editor.onDidDestroy(@destroy.bind(this))
+    @editor.onDidDestroy(@destroy)
     @constructor.vimStatesByEditor.set(@editor, this)
 
   getConfig: (param) ->
@@ -218,7 +203,7 @@ class VimState
   isAlive: ->
     @constructor.has(@editor)
 
-  destroy: ->
+  destroy: =>
     return unless @isAlive()
     @constructor.delete(@editor)
 
@@ -311,12 +296,6 @@ class VimState
     @hover.reset() if @__hover?
     @operationStack.reset() if @__operationStack?
     @mutationManager.reset() if @__mutationManager?
-
-    # @register.reset()
-    # @searchHistory.reset()
-    # @hover.reset()
-    # @operationStack.reset()
-    # @mutationManager.reset()
 
   isVisible: ->
     @editor in getVisibleEditors()
