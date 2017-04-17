@@ -300,7 +300,7 @@ class Base
         @commandTable[name] = klass.getSpec()
 
       serializeCommandTable(@commandTable)
-      subs = registerCommandFromTable(@commandTable)
+      subs = @registerCommandFromTable(@commandTable)
       console.timeEnd('register and gen-cmd-table') if isDevMode
       subs
 
