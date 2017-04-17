@@ -15,15 +15,16 @@ module.exports =
     @statusBarManager ?= new (require './status-bar-manager')
 
   activate: (state) ->
-    console.time('vmp-activate') unless atom.inSpecMode()
+    isDevMode = atom.inDevMode()
+    console.time('vmp-activate') if isDevMode
 
     @subscriptions = new CompositeDisposable
     @emitter = new Emitter
 
     service = @provideVimModePlus()
-    console.time('Base.init') unless atom.inSpecMode()
+    console.time('Base.init') if isDevMode
     @subscribe(Base.init(service))
-    console.timeEnd('Base.init') unless atom.inSpecMode()
+    console.timeEnd('Base.init') if isDevMode
     @registerCommands()
     @registerVimStateCommands()
 
@@ -73,8 +74,8 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
-    console.log 'done', VimState.vimStatesByEditor.size unless atom.inSpecMode()
-    console.timeEnd('vmp-activate') unless atom.inSpecMode()
+    console.log 'vimState size:', VimState.vimStatesByEditor.size if isDevMode
+    console.timeEnd('vmp-activate') if isDevMode
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
