@@ -1,3 +1,4 @@
+fs = require 'fs'
 _ = require 'underscore-plus'
 Delegato = require 'delegato'
 {CompositeDisposable} = require 'atom'
@@ -16,19 +17,23 @@ swrap = require './selection-wrapper'
 [
   Input
   selectList
-  getEditorState
-  CSON # set by Base.init()
+  getEditorState  # set by Base.init()
+  LOADING_FILE
 ] = []
 LazyLoadedLibs = {}
-
-serializeCommandTable = (commandTable) ->
-  CSON ?= require 'season'
-  data = CSON.stringify(commandTable)
-  CommandTablePath = require.resolve('./command-table.cson')
-  atom.workspace.open(CommandTablePath).then (editor) ->
-    editor.setText(data)
+commandTablePath = __dirname + "/command-table.coffee"
 
 {OperationAbortedError} = require './errors'
+
+serializeCommandTable = (commandTable) ->
+  csonString = (require 'season').stringify(commandTable)
+  textToWrite = "module.exports = \n" + csonString + "\n"
+  atom.workspace.open(commandTablePath, activateItem: false).then (editor) ->
+    if editor.getText() isnt textToWrite
+      editor.setText(textToWrite)
+      editor.save()
+      editor.destroy()
+      atom.notifications.addInfo("Updated commandTable", dismissable: true)
 
 vimStateMethods = [
   "onDidChangeSearch"
@@ -223,13 +228,13 @@ class Base
     this.constructor is Base.getClass(klassName)
 
   isOperator: ->
-    @instanceof('Operator')
+    @constructor.operationKind is 'operator'
 
   isMotion: ->
-    @instanceof('Motion')
+    @constructor.operationKind is 'motion'
 
   isTextObject: ->
-    @instanceof('TextObject')
+    @constructor.operationKind is 'text-object'
 
   getCursorBufferPosition: ->
     if @mode is 'visual'
@@ -263,73 +268,61 @@ class Base
 
   # Class methods
   # -------------------------
+  @registerCommandFromTable: (table) ->
+    subscriptions = new CompositeDisposable()
+    for name, spec of table when spec.commandName?
+      subscriptions.add(@registerCommandFromSpecNew(name, spec))
+    subscriptions
+
   @init: (service, commandTable) ->
     {getEditorState} = service
     isDevMode = atom.inDevMode()
-    registerCommandFromTable = (table) =>
-      @subscriptions = new CompositeDisposable()
-      for name, spec of table when spec.isCommand
-        @subscriptions.add(@registerCommandFromSpec(spec))
-      @subscriptions
 
     readTableAndRegisterCommands = =>
       console.time('lazy strategy') if isDevMode
-      @commandTable = require('./command-table')
-      subs = registerCommandFromTable(@commandTable)
+      @commandTable = require(commandTablePath)
+      subs = @registerCommandFromTable(@commandTable)
       console.timeEnd('lazy strategy') if isDevMode
       subs
 
-    registerCommandOldStyle = =>
-      console.time('old style') if isDevMode
+    registerAndGenerateCommandTable = =>
+      console.time('register and gen-cmd-table') if isDevMode
       [
         './operator', './operator-insert', './operator-transform-string',
         './motion', './motion-search', './text-object', './misc-command'
-      ].forEach(require)
-
-      @subscriptions = new CompositeDisposable()
-      for __, klass of @getRegistries() when klass.isCommand()
-        @subscriptions.add(klass.registerCommand())
-      console.timeEnd('old style') if isDevMode
-      @subscriptions
-
-    registerAndGenerateCommandTable = =>
-      console.time('register and gen-cmd-table') if isDevMode
-      files = [
-        './operator', './operator-insert', './operator-transform-string',
-        './motion', './motion-search', './text-object', './misc-command'
-      ]
-      @commandTable = {}
-      filenameByKlass = {}
-      for file in files
-        beforeRequire = _.keys(@getRegistries())
+      ].forEach (file) ->
+        LOADING_FILE = file
         require(file)
-        afterRequire = _.keys(@getRegistries())
-        for klass in _.difference(afterRequire, beforeRequire)
-          filenameByKlass[klass] = file
+        LOADING_FILE = null
 
-      for __, klass of @getRegistries()
-        @commandTable[klass.name] = spec = {
-          name: klass.name
-          file: filenameByKlass[klass.name]
-          commandName: klass.getCommandName()
-          isCommand: klass.isCommand()
-          commandScope: klass.getCommandScope()
-        }
+      @commandTable = {}
+      for name, klass of @getRegistries()
+        @commandTable[name] = klass.getSpec()
 
-      # serializeCommandTable(@commandTable)
+      serializeCommandTable(@commandTable)
       subs = registerCommandFromTable(@commandTable)
       console.timeEnd('register and gen-cmd-table') if isDevMode
       subs
 
-    return readTableAndRegisterCommands()
-    # return registerCommandOldStyle()
-    # return registerAndGenerateCommandTable()
+    if fs.existsSync(commandTablePath)
+      return readTableAndRegisterCommands()
+    else
+      return registerAndGenerateCommandTable()
 
   registries = {Base}
   @extend: (@command=true) ->
-    if (@name of registries) and (not @suppressWarning)
-      console.warn("Duplicate constructor #{@name}")
+    @__vmpFilename = LOADING_FILE
+    if @name of registries
+      throw new Error("Duplicate constructor #{@name}")
     registries[@name] = this
+
+  @getSpec: ->
+    if @isCommand()
+      file: @__vmpFilename
+      commandName: @getCommandName()
+      commandScope: @getCommandScope()
+    else
+      file: @__vmpFilename
 
   @getClass: (name) ->
     if (klass = registries[name])?
@@ -373,6 +366,14 @@ class Base
       vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
       if vimState? # Possibly undefined See #85
         vimState.operationStack.run(klass)
+      event.stopPropagation()
+
+  @registerCommandFromSpecNew: (name, spec) ->
+    {commandScope, commandPrefix, commandName} = spec
+    atom.commands.add commandScope, commandName, (event) ->
+      vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
+      if vimState? # Possibly undefined See #85
+        vimState.operationStack.run(name)
       event.stopPropagation()
 
   @registerCommandFromSpec: (spec) ->

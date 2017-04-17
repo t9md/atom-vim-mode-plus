@@ -44,15 +44,10 @@ module.exports =
         """
       atom.notifications.addWarning(message, dismissable: true)
 
-    # [REVERT-after-finish]
     @subscribe atom.workspace.observeTextEditors (editor) =>
       @createVimState(editor) unless editor.isMini()
 
-    # if editor = atom.workspace.getActiveTextEditor()
-    #   @createVimState(editor)
-
     @subscribe atom.workspace.onDidChangeActivePaneItem =>
-      # @createVimStateIfNecessary(editor) unless editor.isMini()
       @demaximizePane()
 
     @subscribe atom.workspace.onDidChangeActivePaneItem ->
@@ -265,7 +260,6 @@ module.exports =
 
   createVimStateIfNecessary: (editor) ->
     return if VimState.has(editor)
-    # console.log "CREATED"
     vimState = new VimState(editor, @getStatusBarManager(), globalState)
     @emitter.emit('did-add-vim-state', vimState)
 
@@ -275,13 +269,12 @@ module.exports =
     globalState
 
   getEditorState: (editor) ->
-    @createVimStateIfNecessary(editor)
     VimState.getByEditor(editor)
 
   provideVimModePlus: ->
     Base: Base
     registerCommandFromSpec: Base.registerCommandFromSpec
-    getGlobalState: @getGlobalState.bind(this)
-    getEditorState: @getEditorState.bind(this)
-    observeVimStates: @observeVimStates.bind(this)
+    getGlobalState: getGlobalState
+    getEditorState: getEditorState
+    observeVimStates: observeVimStates
     onDidAddVimState: @onDidAddVimState.bind(this)

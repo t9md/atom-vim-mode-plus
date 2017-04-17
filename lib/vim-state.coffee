@@ -52,8 +52,8 @@ class VimState
           unless fileToLoad of LazyLoadedLibs
             unless atom.inSpecMode()
               console.log "# lazy-require: #{fileToLoad}, #{basename(@editor.getPath() ? '')}"
-              console.trace()
-              console.log '----------'
+              # console.trace()
+              # console.log '----------'
             LazyLoadedLibs[fileToLoad] = require(fileToLoad)
           klass = LazyLoadedLibs[fileToLoad]
           new klass(this)
