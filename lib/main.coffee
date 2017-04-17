@@ -274,7 +274,7 @@ module.exports =
   provideVimModePlus: ->
     Base: Base
     registerCommandFromSpec: Base.registerCommandFromSpec
-    getGlobalState: getGlobalState
-    getEditorState: getEditorState
-    observeVimStates: observeVimStates
+    getGlobalState: @getGlobalState
+    getEditorState: @getEditorState
+    observeVimStates: @observeVimStates
     onDidAddVimState: @onDidAddVimState.bind(this)
