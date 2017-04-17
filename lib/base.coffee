@@ -13,15 +13,17 @@ Delegato = require 'delegato'
 } = require './utils'
 swrap = require './selection-wrapper'
 
-Input = null
-selectList = null
-getEditorState = null # set by Base.init()
-CSON = null
+[
+  Input
+  selectList
+  getEditorState
+  CSON # set by Base.init()
+] = []
 LazyLoadedLibs = {}
 
-serializeCommandTable = (specByKlass) ->
+serializeCommandTable = (commandTable) ->
   CSON ?= require 'season'
-  data = CSON.stringify(specByKlass)
+  data = CSON.stringify(commandTable)
   CommandTablePath = require.resolve('./command-table.cson')
   atom.workspace.open(CommandTablePath).then (editor) ->
     editor.setText(data)
@@ -263,27 +265,35 @@ class Base
   # -------------------------
   @init: (service, commandTable) ->
     {getEditorState} = service
-
-    registerCommandFromSpec = (spec) ->
-      {name, commandScope, commandName} = spec
-      atom.commands.add commandScope, commandName, (event) ->
-        vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
-        if vimState? # Possibly undefined See #85
-          vimState.operationStack.run(name)
-        event.stopPropagation()
-
-    @subscriptions = new CompositeDisposable()
-
-    @commandTable = require('./command-table')
-    # @commandTable = null
-
-    if @commandTable?
-      console.log 'lazy strategy' unless atom.inSpecMode()
-      for name, spec of @commandTable when spec.isCommand
-        @subscriptions.add(registerCommandFromSpec(spec))
+    isDevMode = atom.inDevMode()
+    registerCommandFromTable = (table) =>
+      @subscriptions = new CompositeDisposable()
+      for name, spec of table when spec.isCommand
+        @subscriptions.add(@registerCommandFromSpec(spec))
       @subscriptions
-    else
-      console.log 'non lazy strategy'
+
+    readTableAndRegisterCommands = =>
+      console.time('lazy strategy') if isDevMode
+      @commandTable = require('./command-table')
+      subs = registerCommandFromTable(@commandTable)
+      console.timeEnd('lazy strategy') if isDevMode
+      subs
+
+    registerCommandOldStyle = =>
+      console.time('old style') if isDevMode
+      [
+        './operator', './operator-insert', './operator-transform-string',
+        './motion', './motion-search', './text-object', './misc-command'
+      ].forEach(require)
+
+      @subscriptions = new CompositeDisposable()
+      for __, klass of @getRegistries() when klass.isCommand()
+        @subscriptions.add(klass.registerCommand())
+      console.timeEnd('old style') if isDevMode
+      @subscriptions
+
+    registerAndGenerateCommandTable = =>
+      console.time('register and gen-cmd-table') if isDevMode
       files = [
         './operator', './operator-insert', './operator-transform-string',
         './motion', './motion-search', './text-object', './misc-command'
@@ -292,15 +302,12 @@ class Base
       filenameByKlass = {}
       for file in files
         beforeRequire = _.keys(@getRegistries())
-        # console.time(file)
         require(file)
-        # console.timeEnd(file)
         afterRequire = _.keys(@getRegistries())
-        addedKlass = _.difference(afterRequire, beforeRequire)
-        for klass in addedKlass
+        for klass in _.difference(afterRequire, beforeRequire)
           filenameByKlass[klass] = file
 
-      for __, klass of @getRegistries()# when klass.isCommand()
+      for __, klass of @getRegistries()
         @commandTable[klass.name] = spec = {
           name: klass.name
           file: filenameByKlass[klass.name]
@@ -310,9 +317,13 @@ class Base
         }
 
       # serializeCommandTable(@commandTable)
-      for name, spec of @commandTable when spec.isCommand
-        @subscriptions.add(registerCommandFromSpec(spec))
-      @subscriptions
+      subs = registerCommandFromTable(@commandTable)
+      console.timeEnd('register and gen-cmd-table') if isDevMode
+      subs
+
+    return readTableAndRegisterCommands()
+    # return registerCommandOldStyle()
+    # return registerAndGenerateCommandTable()
 
   registries = {Base}
   @extend: (@command=true) ->
