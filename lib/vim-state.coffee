@@ -155,7 +155,7 @@ class VimState
       @editorElement.classList.remove(classNames...)
       classToAdd = ['vim-mode-plus', 'is-focused']
       if @mode is oldMode
-        classToAdd.push(oldMode - "-mode")
+        classToAdd.push(oldMode + "-mode")
       @editorElement.classList.add(classToAdd...)
 
   # All subscriptions here is celared on each operation finished.
