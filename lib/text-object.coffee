@@ -252,19 +252,15 @@ class AnyPairAllowForwarding extends AnyPair
   getRange: (selection) ->
     ranges = @getRanges(selection)
     from = selection.cursor.getBufferPosition()
-    [forwardingRanges, enclosingRanges] = _.partition ranges, (range) ->
-      range.start.isGreaterThanOrEqual(from)
-    enclosingRange = _.last(sortRanges(enclosingRanges))
-    forwardingRanges = sortRanges(forwardingRanges)
-
-    # When enclosingRange is exists,
-    # We don't go across enclosingRange.end.
-    # So choose from ranges contained in enclosingRange.
-    if enclosingRange
-      forwardingRanges = forwardingRanges.filter (range) ->
-        enclosingRange.containsRange(range)
-
-    forwardingRanges[0] or enclosingRange
+    for range in ranges when range.start.isGreaterThanOrEqual(from)
+      if !bestRange or bestRange.start.isGreaterThan(range.start)
+        bestRange = range
+    closest = if bestRange then bestRange.start else from
+    for range in ranges
+      if !bestRange or closest.isGreaterThanOrEqual(range.end)
+        bestRange = range
+        closest = bestRange.end
+    bestRange
 
 class AnyQuote extends AnyPair
   @extend(false)
