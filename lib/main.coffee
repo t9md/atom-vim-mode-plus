@@ -3,7 +3,6 @@ _ = require 'underscore-plus'
 {Disposable, Emitter, CompositeDisposable} = require 'atom'
 
 Base = require './base'
-StatusBarManager = require './status-bar-manager'
 globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
@@ -12,9 +11,11 @@ VimState = require './vim-state'
 module.exports =
   config: settings.config
 
+  getStatusBarManager: ->
+    @statusBarManager ?= new (require './status-bar-manager')
+
   activate: (state) ->
     @subscriptions = new CompositeDisposable
-    @statusBarManager = new StatusBarManager
     @emitter = new Emitter
 
     service = @provideVimModePlus()
@@ -39,19 +40,17 @@ module.exports =
       atom.notifications.addWarning(message, dismissable: true)
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
-      return if editor.isMini()
-      vimState = new VimState(editor, @statusBarManager, globalState)
-      @emitter.emit('did-add-vim-state', vimState)
-
-    @subscribe atom.workspace.onDidChangeActivePane(@demaximizePane.bind(this))
+      @createVimState(editor) unless editor.isMini()
+    @subscribe atom.workspace.onDidChangeActivePaneItem =>
+      @demaximizePane()
 
     @subscribe atom.workspace.onDidChangeActivePaneItem ->
       if settings.get('automaticallyEscapeInsertModeOnActivePaneItemChange')
-        VimState.forEach (vimState) ->
+        VimState?.forEach (vimState) ->
           vimState.activate('normal') if vimState.mode is 'insert'
 
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
-      if atom.workspace.isTextEditor(item)
+      if atom.workspace.isTextEditor(item) and not item.isMini()
         # Still there is possibility editor is destroyed and don't have corresponding
         # vimState #196.
         @getEditorState(item)?.highlightSearch.refresh()
@@ -81,7 +80,7 @@ module.exports =
   #   observeVimStates (vimState) -> do something..
   # Returns a {Disposable} on which `.dispose()` can be called to unsubscribe.
   observeVimStates: (fn) ->
-    VimState.forEach(fn)
+    VimState?.forEach(fn)
     @onDidAddVimState(fn)
 
   clearPersistentSelectionForEditors: ->
@@ -90,9 +89,9 @@ module.exports =
 
   deactivate: ->
     @subscriptions.dispose()
-    VimState.forEach (vimState) ->
+    VimState?.forEach (vimState) ->
       vimState.destroy()
-    VimState.clear()
+    VimState?.clear()
 
   subscribe: (args...) ->
     @subscriptions.add(args...)
@@ -210,10 +209,11 @@ module.exports =
     @subscribe atom.commands.add('atom-text-editor:not([mini])', bindToVimState(commands))
 
   consumeStatusBar: (statusBar) ->
-    @statusBarManager.initialize(statusBar)
-    @statusBarManager.attach()
-    @subscribe new Disposable =>
-      @statusBarManager.detach()
+    statusBarManager = @getStatusBarManager()
+    statusBarManager.initialize(statusBar)
+    statusBarManager.attach()
+    @subscribe new Disposable ->
+      statusBarManager.detach()
 
   consumeDemoMode: ({onWillAddItem, onDidStart, onDidStop, onDidRemoveHover}) ->
     @subscribe(
@@ -233,7 +233,7 @@ module.exports =
     )
 
   destroyAllDemoModeFlasheMarkers: ->
-    VimState.forEach (vimState) ->
+    VimState?.forEach (vimState) ->
       vimState.flashManager.destroyDemoModeMarkers()
 
   getKindForCommand: (command) ->
@@ -246,6 +246,15 @@ module.exports =
     else
       'non-vmp'
 
+  createVimState: (editor) ->
+    vimState = new VimState(editor, @getStatusBarManager(), globalState)
+    @emitter.emit('did-add-vim-state', vimState)
+
+  createVimStateIfNecessary: (editor) ->
+    return if VimState.has(editor)
+    vimState = new VimState(editor, @getStatusBarManager(), globalState)
+    @emitter.emit('did-add-vim-state', vimState)
+
   # Service API
   # -------------------------
   getGlobalState: ->
@@ -256,7 +265,8 @@ module.exports =
 
   provideVimModePlus: ->
     Base: Base
-    getGlobalState: @getGlobalState.bind(this)
-    getEditorState: @getEditorState.bind(this)
+    registerCommandFromSpec: Base.registerCommandFromSpec
+    getGlobalState: @getGlobalState
+    getEditorState: @getEditorState
     observeVimStates: @observeVimStates.bind(this)
     onDidAddVimState: @onDidAddVimState.bind(this)

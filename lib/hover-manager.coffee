@@ -6,6 +6,7 @@ class HoverManager
     {@editor, @editorElement} = @vimState
     @container = document.createElement('div')
     @decorationOptions = {type: 'overlay', item: @container}
+    @vimState.onDidDestroy(@destroy)
     @reset()
 
   getPoint: ->
@@ -29,6 +30,7 @@ class HoverManager
     @marker?.destroy()
     @marker = null
 
-  destroy: ->
-    {@vimState} = {}
-    @reset()
+  destroy: =>
+    @container.remove()
+    @marker?.destroy()
+    @marker = null

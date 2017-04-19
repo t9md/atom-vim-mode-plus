@@ -10,7 +10,7 @@ _ = require 'underscore-plus'
 swrap = require './selection-wrapper'
 Operator = require('./base').getClass('Operator')
 
-# Insert entering operation
+# Operator which start 'insert-mode'
 # -------------------------
 # [NOTE]
 # Rule: Don't make any text mutation before calling `@selectTarget()`.

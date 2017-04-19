@@ -13,7 +13,7 @@ class HighlightSearchManager
     @disposables = new CompositeDisposable
     @markerLayer = @editor.addMarkerLayer()
 
-    @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
+    @disposables.add @vimState.onDidDestroy(@destroy)
     @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, decorationOptions)
 
     # Refresh highlight based on globalState.highlightSearchPattern changes.
@@ -25,7 +25,7 @@ class HighlightSearchManager
         else
           @clearMarkers()
 
-  destroy: ->
+  destroy: =>
     @decorationLayer.destroy()
     @disposables.dispose()
     @markerLayer.destroy()

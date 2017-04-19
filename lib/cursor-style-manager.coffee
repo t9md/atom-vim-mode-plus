@@ -12,13 +12,14 @@ class CursorStyleManager
 
   constructor: (@vimState) ->
     {@editorElement, @editor} = @vimState
-    @subscriptions = new CompositeDisposable
-    @subscriptions.add atom.config.observe('editor.lineHeight', @refresh)
-    @subscriptions.add atom.config.observe('editor.fontSize', @refresh)
+    @disposables = new CompositeDisposable
+    @disposables.add atom.config.observe('editor.lineHeight', @refresh)
+    @disposables.add atom.config.observe('editor.fontSize', @refresh)
+    @vimState.onDidDestroy(@destroy)
 
-  destroy: ->
+  destroy: =>
     @styleDisposables?.dispose()
-    @subscriptions.dispose()
+    @disposables.dispose()
 
   refresh: =>
     # Intentionally skip in spec mode, since not all spec have DOM attached( and don't want to ).
