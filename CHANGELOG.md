@@ -1,3 +1,7 @@
+# 0.90.2:
+- Fix: For `search` on initial active-editor after startup, `highlightSearch` did not happened.
+  - This is regression introduced as part of lazy instantiation of `HighlightSearchManager`.
+
 # 0.90.1:
 - Fix: Sorry, removed leftover `console.log` in atom running in dev mode.
 
