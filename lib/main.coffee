@@ -46,7 +46,7 @@ module.exports =
 
     @subscribe atom.workspace.onDidChangeActivePaneItem ->
       if settings.get('automaticallyEscapeInsertModeOnActivePaneItemChange')
-        VimState?.forEach (vimState) ->
+        VimState.forEach (vimState) ->
           vimState.activate('normal') if vimState.mode is 'insert'
 
     @subscribe atom.workspace.onDidStopChangingActivePaneItem (item) =>
@@ -54,6 +54,20 @@ module.exports =
         # Still there is possibility editor is destroyed and don't have corresponding
         # vimState #196.
         @getEditorState(item)?.highlightSearch.refresh()
+
+    # @subscribe  globalState.get('highlightSearchPattern')
+    # Refresh highlight based on globalState.highlightSearchPattern changes.
+    # -------------------------
+    @subscribe globalState.onDidChange ({name, newValue}) ->
+      if name is 'highlightSearchPattern'
+        if newValue
+          VimState.forEach (vimState) ->
+            vimState.highlightSearch.refresh()
+        else
+          VimState.forEach (vimState) ->
+            # avoid populate prop unnecessarily on vimState.reset on startup
+            if vimState.__highlightSearch
+              vimState.highlightSearch.clearMarkers()
 
     @subscribe settings.observe 'highlightSearch', (newValue) ->
       if newValue

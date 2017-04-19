@@ -14,10 +14,12 @@ BlockwiseSelection = null
 
 lazyRequire = (file) ->
   unless file of LazyLoadedLibs
+
     # if atom.inDevMode()
     #   console.log "# lazy-require: #{file}"
     #   console.trace()
     #   console.log '----------'
+
     LazyLoadedLibs[file] = require(file)
   LazyLoadedLibs[file]
 

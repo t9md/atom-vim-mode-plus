@@ -16,15 +16,6 @@ class HighlightSearchManager
     @disposables.add @vimState.onDidDestroy(@destroy)
     @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, decorationOptions)
 
-    # Refresh highlight based on globalState.highlightSearchPattern changes.
-    # -------------------------
-    @disposables.add @globalState.onDidChange ({name, newValue}) =>
-      if name is 'highlightSearchPattern'
-        if newValue
-          @refresh()
-        else
-          @clearMarkers()
-
   destroy: =>
     @decorationLayer.destroy()
     @disposables.dispose()
