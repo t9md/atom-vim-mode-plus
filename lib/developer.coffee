@@ -27,7 +27,7 @@ class Developer
       'open-in-vim': => @openInVim()
       'generate-introspection-report': => @generateIntrospectionReport()
       'generate-command-summary-table': => @generateCommandSummaryTable()
-      'update-command-table': -> Base.writeCommandTableOnDisk()
+      'write-command-table-on-disk': -> Base.writeCommandTableOnDisk()
       'clear-debug-output': => @clearDebugOutput()
       'reload': => @reload()
       'reload-with-dependencies': => @reload(true)

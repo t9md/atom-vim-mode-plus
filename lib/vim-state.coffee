@@ -1,5 +1,3 @@
-{basename} = require 'path'
-
 semver = require 'semver'
 Delegato = require 'delegato'
 jQuery = null
@@ -13,6 +11,15 @@ swrap = require './selection-wrapper'
 
 LazyLoadedLibs = {}
 BlockwiseSelection = null
+
+lazyRequire = (file) ->
+  unless file of LazyLoadedLibs
+    # if atom.inDevMode()
+    #   console.log "# lazy-require: #{file}"
+    #   console.trace()
+    #   console.log '----------'
+    LazyLoadedLibs[file] = require(file)
+  LazyLoadedLibs[file]
 
 module.exports =
 class VimState
@@ -32,17 +39,7 @@ class VimState
 
   @defineLazyProperty: (name, fileToLoad) ->
     Object.defineProperty @prototype, name,
-      get: ->
-        propName = "__" + name
-        this[propName] ?= do =>
-          unless fileToLoad of LazyLoadedLibs
-            # if atom.inDevMode()
-            #   console.log "# lazy-property: #{fileToLoad}, #{basename(@editor.getPath() ? '')}"
-            #   # console.trace()
-            #   # console.log '----------'
-            LazyLoadedLibs[fileToLoad] = require(fileToLoad)
-          klass = LazyLoadedLibs[fileToLoad]
-          new klass(this)
+      get: -> this["__#{name}"] ?= new (lazyRequire(fileToLoad))(this)
 
   @lazyProperties =
     modeManager: './mode-manager'
@@ -61,7 +58,6 @@ class VimState
     cursorStyleManager: './cursor-style-manager'
 
   for propName, fileToLoad of @lazyProperties
-    # console.log propName, fileToLoad
     @defineLazyProperty(propName, fileToLoad)
 
   constructor: (@editor, @statusBarManager, @globalState) ->
@@ -217,7 +213,7 @@ class VimState
 
   checkSelection: (event) ->
     return unless atom.workspace.getActiveTextEditor() is @editor
-    return if @operationStack.isProcessing()
+    return if @__operationStack? and @operationStack.isProcessing() # Don't populate lazy-prop on startup
     return if @mode is 'insert'
     # Intentionally using target.closest('atom-text-editor')
     # Don't use target.getModel() which is work for CustomEvent but not work for mouse event.
@@ -277,6 +273,7 @@ class VimState
     @saveOriginalCursorPosition()
 
   reset: ->
+    # Don't populate lazy-prop on startup
     @register.reset() if @__register?
     @searchHistory.reset() if @__searchHistory?
     @hover.reset() if @__hover?
