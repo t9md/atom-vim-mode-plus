@@ -415,6 +415,7 @@ class SurroundBase extends TransformString
     b: ['(', ')']
     B: ['{', '}']
     r: ['[', ']']
+    a: ['<', '>']
   }
 
   pairCharsAllowForwarding: '[](){}'

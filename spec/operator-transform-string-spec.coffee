@@ -556,17 +556,28 @@ describe "Operator TransformString", ->
         set textC: "|abc"; ensure ['y s i w', input: 'b'], text: "(abc)"
         set textC: "|abc"; ensure ['y s i w', input: 'B'], text: "{abc}"
         set textC: "|abc"; ensure ['y s i w', input: 'r'], text: "[abc]"
+        set textC: "|abc"; ensure ['y s i w', input: 'a'], text: "<abc>"
       it "delete surround by aliased char", ->
         set textC: "|(abc)"; ensure ['d S', input: 'b'], text: "abc"
         set textC: "|{abc}"; ensure ['d S', input: 'B'], text: "abc"
         set textC: "|[abc]"; ensure ['d S', input: 'r'], text: "abc"
+        set textC: "|<abc>"; ensure ['d S', input: 'a'], text: "abc"
       it "change surround by aliased char", ->
         set textC: "|(abc)"; ensure ['c S', input: 'bB'], text: "{abc}"
         set textC: "|(abc)"; ensure ['c S', input: 'br'], text: "[abc]"
+        set textC: "|(abc)"; ensure ['c S', input: 'ba'], text: "<abc>"
+
         set textC: "|{abc}"; ensure ['c S', input: 'Bb'], text: "(abc)"
         set textC: "|{abc}"; ensure ['c S', input: 'Br'], text: "[abc]"
+        set textC: "|{abc}"; ensure ['c S', input: 'Ba'], text: "<abc>"
+
         set textC: "|[abc]"; ensure ['c S', input: 'rb'], text: "(abc)"
         set textC: "|[abc]"; ensure ['c S', input: 'rB'], text: "{abc}"
+        set textC: "|[abc]"; ensure ['c S', input: 'ra'], text: "<abc>"
+
+        set textC: "|<abc>"; ensure ['c S', input: 'ab'], text: "(abc)"
+        set textC: "|<abc>"; ensure ['c S', input: 'aB'], text: "{abc}"
+        set textC: "|<abc>"; ensure ['c S', input: 'ar'], text: "[abc]"
 
     describe 'surround', ->
       it "surround text object with ( and repeatable", ->
@@ -653,7 +664,7 @@ describe "Operator TransformString", ->
         describe "it distinctively handle aliased keymap", ->
           describe "normal pair-chars are set to add space", ->
             beforeEach ->
-              settings.set('charactersToAddSpaceOnSurround', ['(', '{', '['])
+              settings.set('charactersToAddSpaceOnSurround', ['(', '{', '[', '<'])
             it "distinctively handle", ->
               set textC: "|abc"; ensure ['y s i w', input: '('], text: "( abc )"
               set textC: "|abc"; ensure ['y s i w', input: 'b'], text: "(abc)"
@@ -661,9 +672,11 @@ describe "Operator TransformString", ->
               set textC: "|abc"; ensure ['y s i w', input: 'B'], text: "{abc}"
               set textC: "|abc"; ensure ['y s i w', input: '['], text: "[ abc ]"
               set textC: "|abc"; ensure ['y s i w', input: 'r'], text: "[abc]"
+              set textC: "|abc"; ensure ['y s i w', input: '<'], text: "< abc >"
+              set textC: "|abc"; ensure ['y s i w', input: 'a'], text: "<abc>"
           describe "aliased pair-chars are set to add space", ->
             beforeEach ->
-              settings.set('charactersToAddSpaceOnSurround', ['b', 'B', 'r'])
+              settings.set('charactersToAddSpaceOnSurround', ['b', 'B', 'r', 'a'])
             it "distinctively handle", ->
               set textC: "|abc"; ensure ['y s i w', input: '('], text: "(abc)"
               set textC: "|abc"; ensure ['y s i w', input: 'b'], text: "( abc )"
@@ -671,6 +684,8 @@ describe "Operator TransformString", ->
               set textC: "|abc"; ensure ['y s i w', input: 'B'], text: "{ abc }"
               set textC: "|abc"; ensure ['y s i w', input: '['], text: "[abc]"
               set textC: "|abc"; ensure ['y s i w', input: 'r'], text: "[ abc ]"
+              set textC: "|abc"; ensure ['y s i w', input: '<'], text: "<abc>"
+              set textC: "|abc"; ensure ['y s i w', input: 'a'], text: "< abc >"
 
     describe 'map-surround', ->
       beforeEach ->
