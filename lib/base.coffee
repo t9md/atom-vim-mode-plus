@@ -325,8 +325,8 @@ class Base
 
     fileToLoad = @commandTable[name].file
     if fileToLoad not in VMP_LOADED_FILES
-      if atom.inDevMode()
-        console.log "lazy-require: #{fileToLoad} for #{name}"
+      # if atom.inDevMode()
+      #   console.log "lazy-require: #{fileToLoad} for #{name}"
       loadVmpOperationFile(fileToLoad)
       return klass if (klass = classRegistry[name])
 
