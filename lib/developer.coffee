@@ -154,7 +154,7 @@ class Developer
         .replace(/\s+/, '')
 
     commands = (
-      for name, klass of Base.getRegistries() when klass.isCommand()
+      for name, klass of Base.getClassRegistry() when klass.isCommand()
         kind = getAncestors(klass).map((k) -> k.name)[-2..-2][0]
         commandName = klass.getCommandName()
         description = klass.getDesctiption()?.replace(/\n/g, '<br/>')
@@ -228,12 +228,12 @@ class Developer
       args: ['-g', editor.getPath(), "+call cursor(#{row+1}, #{column+1})"]
 
   generateIntrospectionReport: ->
-    generateIntrospectionReport _.values(Base.getRegistries()),
+    generateIntrospectionReport _.values(Base.getClassRegistry()),
       excludeProperties: [
         'run'
         'getCommandNameWithoutPrefix'
         'getClass', 'extend', 'getParent', 'getAncestors', 'isCommand'
-        'getRegistries', 'command', 'reset'
+        'getClassRegistry', 'command', 'reset'
         'getDesctiption', 'description'
         'init', 'getCommandName', 'getCommandScope', 'registerCommand',
         'delegatesProperties', 'subscriptions', 'commandPrefix', 'commandScope'

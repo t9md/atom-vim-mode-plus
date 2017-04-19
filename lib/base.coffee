@@ -1,7 +1,8 @@
-fs = require 'fs'
 _ = require 'underscore-plus'
 Delegato = require 'delegato'
 CSON = null
+path = null
+
 {CompositeDisposable} = require 'atom'
 {
   getVimEofBufferPosition
@@ -20,17 +21,17 @@ settings = require './settings'
   Input
   selectList
   getEditorState  # set by Base.init()
-  LOADING_FILE
 ] = []
-LazyLoadedLibs = {}
-commandTablePath = __dirname + "/command-table.coffee"
 
-requireFile = (filename) ->
-  LOADING_FILE = filename
-  console.log 'loading', LOADING_FILE
-  required = require(filename)
-  LOADING_FILE = null
-  required
+VMP_LOADING_FILE = null
+VMP_LOADED_FILES = []
+
+loadVmpOperationFile = (filename) ->
+  VMP_LOADING_FILE = filename
+  loaded = require(filename)
+  VMP_LOADING_FILE = null
+  VMP_LOADED_FILES.push(filename)
+  loaded
 
 {OperationAbortedError} = require './errors'
 
@@ -69,8 +70,6 @@ vimStateMethods = [
 ]
 
 class Base
-  @commandTablePath: commandTablePath
-
   Delegato.includeInto(this)
   @delegatesMethods(vimStateMethods..., toProperty: 'vimState')
   @delegatesProperty('mode', 'submode', toProperty: 'vimState')
@@ -262,12 +261,6 @@ class Base
 
   # Class methods
   # -------------------------
-  @registerCommandFromTable: (table) ->
-    subscriptions = new CompositeDisposable()
-    for name, spec of table when spec.commandName?
-      subscriptions.add(@registerCommandFromSpec(name, spec))
-    subscriptions
-
   @writeCommandTableOnDisk: ->
     commandTable = @generateCommandTableByEagerLoad()
     if _.isEqual(@commandTable, commandTable)
@@ -275,9 +268,10 @@ class Base
       return
 
     CSON ?= require 'season'
+    path ?= require('path')
+
     loadableCSONText = "module.exports =\n" + CSON.stringify(commandTable) + "\n"
-    commandTablePath = @commandTablePath
-    # commandTablePath = "/tmp/command-table.coffee"
+    commandTablePath = path.join(__dirname, "command-table.coffee")
     atom.workspace.open(commandTablePath, activateItem: false).then (editor) ->
       editor.setText(loadableCSONText)
       editor.save()
@@ -290,9 +284,10 @@ class Base
       './operator', './operator-insert', './operator-transform-string',
       './motion', './motion-search', './text-object', './misc-command'
     ]
-    filesToLoad.forEach(requireFile)
-    klasses = _.values(@getRegistries())
-    klassesGroupedByFile = _.groupBy(klasses, (klass) -> klass.__vmpFilename)
+    filesToLoad.forEach(loadVmpOperationFile)
+
+    klasses = _.values(@getClassRegistry())
+    klassesGroupedByFile = _.groupBy(klasses, (klass) -> klass.VMP_LOADING_FILE)
 
     commandTable = {}
     for file in filesToLoad
@@ -303,39 +298,42 @@ class Base
   @commandTable: null
   @init: (service) ->
     {getEditorState} = service
-    @commandTable = require(@commandTablePath)
-    return @registerCommandFromTable(@commandTable)
+    subscriptions = new CompositeDisposable()
 
-  registries = {Base}
+    @commandTable = require('./command-table')
+    for name, spec of @commandTable when spec.commandName?
+      subscriptions.add(@registerCommandFromSpec(name, spec))
+    return subscriptions
+
+  classRegistry = {Base}
   @extend: (@command=true) ->
-    @__vmpFilename = LOADING_FILE
-    if @name of registries
+    @VMP_LOADING_FILE = VMP_LOADING_FILE
+    if @name of classRegistry
       throw new Error("Duplicate constructor #{@name}")
-    registries[@name] = this
+    classRegistry[@name] = this
 
   @getSpec: ->
     if @isCommand()
-      file: @__vmpFilename
+      file: @VMP_LOADING_FILE
       commandName: @getCommandName()
       commandScope: @getCommandScope()
     else
-      file: @__vmpFilename
+      file: @VMP_LOADING_FILE
 
   @getClass: (name) ->
-    if (klass = registries[name])?
-      return klass
+    return klass if (klass = classRegistry[name])
 
-    if spec = @commandTable[name]
+    fileToLoad = @commandTable[name].file
+    if fileToLoad not in VMP_LOADED_FILES
       if atom.inDevMode()
-        console.log "lazy-require file: #{spec.file} for #{name}"
-      LazyLoadedLibs[spec.file] ?= requireFile(spec.file)
-      klass = registries[name]
-      return klass if klass?
+        console.log "lazy-require file: #{fileToLoad} for #{name}"
+      loadVmpOperationFile(fileToLoad)
+      return klass if (klass = classRegistry[name])
 
     throw new Error("class '#{name}' not found")
 
-  @getRegistries: ->
-    registries
+  @getClassRegistry: ->
+    classRegistry
 
   @isCommand: ->
     @command
@@ -382,7 +380,7 @@ class Base
   @operationKind: null
   @getKindForCommandName: (command) ->
     name = _.capitalize(_.camelize(command))
-    if name of registries
-      registries[name].operationKind
+    if name of classRegistry
+      classRegistry[name].operationKind
 
 module.exports = Base
