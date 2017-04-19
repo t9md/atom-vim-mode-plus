@@ -251,6 +251,11 @@
   # 'g n': 'vim-mode-plus:move-to-next-number'
   # 'g N': 'vim-mode-plus:move-to-previous-number'
 
+
+# macOS only
+'.platform-darwin atom-text-editor.vim-mode-plus:not(.insert-mode)':
+  'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
+
 'atom-text-editor.vim-mode-plus.has-occurrence:not(.insert-mode)':
   'tab': 'vim-mode-plus:move-to-next-occurrence'
   'shift-tab': 'vim-mode-plus:move-to-previous-occurrence'
@@ -421,11 +426,6 @@
 
   # 'enter': 'vim-mode-plus:add-blank-line-below'
   # 'shift-enter': 'vim-mode-plus:add-blank-line-above'
-
-# normal macOS only
-# -------------------------
-'.platform-darwin atom-text-editor.vim-mode-plus.normal-mode':
-  'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
 
 # operator-pending
 # -------------------------
