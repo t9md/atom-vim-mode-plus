@@ -1,3 +1,6 @@
+# 0.90.1:
+- Fix: Sorry, removed leftover `console.log` in atom running in dev mode.
+
 # 0.90.0:
 - Improve: Reduce activation time of vim-mode-plus to reduce your frustration on Atom startup. #758
   - About 2x faster activation time( Full detail is on #758 ).
