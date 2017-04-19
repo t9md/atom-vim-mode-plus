@@ -1,6 +1,7 @@
 fs = require 'fs'
 _ = require 'underscore-plus'
 Delegato = require 'delegato'
+CSON = null
 {CompositeDisposable} = require 'atom'
 {
   getVimEofBufferPosition
@@ -24,6 +25,13 @@ settings = require './settings'
 LazyLoadedLibs = {}
 commandTablePath = __dirname + "/command-table.coffee"
 
+requireFile = (filename) ->
+  LOADING_FILE = filename
+  console.log 'loading', LOADING_FILE
+  required = require(filename)
+  LOADING_FILE = null
+  required
+
 {OperationAbortedError} = require './errors'
 
 vimStateMethods = [
@@ -32,21 +40,14 @@ vimStateMethods = [
   "onDidCancelSearch"
   "onDidCommandSearch"
 
-  # Life cycle
-  "onDidSetTarget"
-  "emitDidSetTarget"
-      "onWillSelectTarget"
-      "emitWillSelectTarget"
-      "onDidSelectTarget"
-      "emitDidSelectTarget"
+  # Life cycle of operationStack
+  "onDidSetTarget", "emitDidSetTarget"
+    "onWillSelectTarget", "emitWillSelectTarget"
+    "onDidSelectTarget", "emitDidSelectTarget"
+    "onDidFailSelectTarget", "emitDidFailSelectTarget"
 
-      "onDidFailSelectTarget"
-      "emitDidFailSelectTarget"
-
-    "onWillFinishMutation"
-    "emitWillFinishMutation"
-    "onDidFinishMutation"
-    "emitDidFinishMutation"
+    "onWillFinishMutation", "emitWillFinishMutation"
+    "onDidFinishMutation", "emitDidFinishMutation"
   "onDidFinishOperation"
   "onDidResetOperationStack"
 
@@ -267,43 +268,43 @@ class Base
       subscriptions.add(@registerCommandFromSpec(name, spec))
     subscriptions
 
-  @generateCommandTableByEagerLoad: =>
-    [
+  @writeCommandTableOnDisk: ->
+    commandTable = @generateCommandTableByEagerLoad()
+    if _.isEqual(@commandTable, commandTable)
+      atom.notifications.addInfo("No change commandTable", dismissable: true)
+      return
+
+    CSON ?= require 'season'
+    loadableCSONText = "module.exports =\n" + CSON.stringify(commandTable) + "\n"
+    commandTablePath = @commandTablePath
+    # commandTablePath = "/tmp/command-table.coffee"
+    atom.workspace.open(commandTablePath, activateItem: false).then (editor) ->
+      editor.setText(loadableCSONText)
+      editor.save()
+      editor.destroy()
+      atom.notifications.addInfo("Updated commandTable", dismissable: true)
+
+  @generateCommandTableByEagerLoad: ->
+    # NOTE: changing order affects output of lib/command-table.coffee
+    filesToLoad = [
       './operator', './operator-insert', './operator-transform-string',
       './motion', './motion-search', './text-object', './misc-command'
-    ].forEach (file) ->
-      LOADING_FILE = file
-      require(file)
-      LOADING_FILE = null
+    ]
+    filesToLoad.forEach(requireFile)
+    klasses = _.values(@getRegistries())
+    klassesGroupedByFile = _.groupBy(klasses, (klass) -> klass.__vmpFilename)
 
     commandTable = {}
-    for name, klass of @getRegistries() when name isnt "Base"
-      commandTable[name] = klass.getSpec()
+    for file in filesToLoad
+      for klass in klassesGroupedByFile[file]
+        commandTable[klass.name] = klass.getSpec()
     commandTable
 
+  @commandTable: null
   @init: (service) ->
     {getEditorState} = service
-    if settings.get('ignorePrePopulatedCommandTable')
-      @commandTable = @generateCommandTableByEagerLoad()
-      return @registerCommandFromTable(@commandTable)
-
-    if atom.inDevMode() and not fs.existsSync(@commandTablePath)
-      @commandTable = @generateCommandTableByEagerLoad()
-      loadableCSONText = @getLoadableTextForCommandTable(@commandTable)
-      atom.workspace.open(@commandTablePath, activateItem: false).then (editor) ->
-        if editor.getText() isnt loadableCSONText
-          editor.setText(loadableCSONText)
-          editor.save()
-          editor.destroy()
-          atom.notifications.addInfo("Updated commandTable", dismissable: true)
-    else
-      @commandTable = require(@commandTablePath)
-
+    @commandTable = require(@commandTablePath)
     return @registerCommandFromTable(@commandTable)
-
-  @getLoadableTextForCommandTable: (commandTable) ->
-    csonString = (require 'season').stringify(commandTable)
-    "module.exports =\n" + csonString + "\n"
 
   registries = {Base}
   @extend: (@command=true) ->
@@ -325,9 +326,9 @@ class Base
       return klass
 
     if spec = @commandTable[name]
-      # if atom.inDevMode()
-      #   console.log "lazy-require file: #{spec.file} for #{name}"
-      LazyLoadedLibs[spec.file] ?= require(spec.file)
+      if atom.inDevMode()
+        console.log "lazy-require file: #{spec.file} for #{name}"
+      LazyLoadedLibs[spec.file] ?= requireFile(spec.file)
       klass = registries[name]
       return klass if klass?
 

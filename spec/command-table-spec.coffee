@@ -28,13 +28,8 @@ describe "command-table", ->
       newRegistriesLength = Object.keys(newRegistries).length
 
       expect(newRegistriesLength).toBeGreaterThan(oldRegistriesLength)
-      expect(oldCommandTable).not.toBe(newCommandTable)
-      expect(oldCommandTable).toEqual(newCommandTable)
-
-      loadableCSONText = Base.getLoadableTextForCommandTable(newCommandTable)
-      fileContent = fs.readFileSync(Base.commandTablePath, 'utf-8')
-      expect(loadableCSONText).toEqual(fileContent)
 
       loadedCommandTable = require(Base.commandTablePath)
+      expect(oldCommandTable).not.toBe(newCommandTable)
       expect(loadedCommandTable).toEqual(oldCommandTable)
       expect(loadedCommandTable).toEqual(newCommandTable)

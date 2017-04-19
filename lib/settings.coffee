@@ -274,6 +274,3 @@ module.exports = new Settings 'vim-mode-plus',
   strictAssertion:
     default: false
     description: "[Dev use] to catche wired state in vmp-dev, enable this if you want help me"
-  ignorePrePopulatedCommandTable:
-    default: false
-    description: "[Dev/debug] when true, ignore loading lib/command-table.coffee from disk"
