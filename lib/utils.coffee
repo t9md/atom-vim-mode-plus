@@ -1,4 +1,4 @@
-fs = require 'fs-plus'
+fs = null
 settings = require './settings'
 
 {Disposable, Range, Point} = require 'atom'
@@ -41,6 +41,7 @@ debug = (messages...) ->
     when 'console'
       console.log messages...
     when 'file'
+      fs ?= require 'fs-plus'
       filePath = fs.normalize settings.get('debugOutputFilePath')
       if fs.existsSync(filePath)
         fs.appendFileSync filePath, messages + "\n"

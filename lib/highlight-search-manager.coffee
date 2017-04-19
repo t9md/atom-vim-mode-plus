@@ -1,19 +1,18 @@
 {CompositeDisposable} = require 'atom'
 {scanEditor, matchScopes} = require './utils'
 
-decorationOptions =
-  type: 'highlight'
-  class: 'vim-mode-plus-highlight-search'
-
 # General purpose utility class to make Atom's marker management easier.
 module.exports =
 class HighlightSearchManager
   constructor: (@vimState) ->
     {@editor, @editorElement, @globalState} = @vimState
     @disposables = new CompositeDisposable
-    @markerLayer = @editor.addMarkerLayer()
 
     @disposables.add @vimState.onDidDestroy(@destroy)
+    @disposables.add @editor.onDidStopChanging => @refresh()
+
+    @markerLayer = @editor.addMarkerLayer()
+    decorationOptions = {type: 'highlight', class: 'vim-mode-plus-highlight-search'}
     @decorationLayer = @editor.decorateMarkerLayer(@markerLayer, decorationOptions)
 
   destroy: =>

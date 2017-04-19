@@ -6,7 +6,7 @@ Base = require './base'
 globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
-{forEachPaneAxis, addClassList, removeClassList} = require './utils'
+{forEachPaneAxis} = require './utils'
 
 module.exports =
   config: settings.config
@@ -18,8 +18,8 @@ module.exports =
     @subscriptions = new CompositeDisposable
     @emitter = new Emitter
 
-    service = @provideVimModePlus()
-    @subscribe(Base.init(service))
+    getEditorState = @getEditorState.bind(this)
+    @subscribe(Base.init(getEditorState)...)
     @registerCommands()
     @registerVimStateCommands()
 
@@ -30,7 +30,7 @@ module.exports =
 
     if atom.inDevMode()
       developer = new (require './developer')
-      @subscribe(developer.init(service))
+      @subscribe(developer.init(getEditorState))
 
     @subscribe @observeVimMode ->
       message = """
@@ -147,17 +147,17 @@ module.exports =
     workspaceClassNames.push(classHideTabBar) if settings.get('hideTabBarOnMaximizePane')
     workspaceClassNames.push(classHideStatusBar) if settings.get('hideStatusBarOnMaximizePane')
 
-    addClassList(workspaceElement, workspaceClassNames...)
+    workspaceElement.classList.add(workspaceClassNames...)
 
     forEachPaneAxis (axis) ->
       paneAxisElement = getView(axis)
       if paneAxisElement.contains(paneElement)
-        addClassList(paneAxisElement, classActivePaneAxis)
+        paneAxisElement.classList.add(classActivePaneAxis)
 
     @maximizePaneDisposable = new Disposable ->
       forEachPaneAxis (axis) ->
-        removeClassList(getView(axis), classActivePaneAxis)
-      removeClassList(workspaceElement, workspaceClassNames...)
+        getView(axis).classList.remove(classActivePaneAxis)
+      workspaceElement.classList.remove(workspaceClassNames...)
 
     @subscribe(@maximizePaneDisposable)
 

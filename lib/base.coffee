@@ -3,7 +3,6 @@ Delegato = require 'delegato'
 CSON = null
 path = null
 
-{CompositeDisposable} = require 'atom'
 {
   getVimEofBufferPosition
   getVimLastBufferRow
@@ -296,13 +295,12 @@ class Base
     commandTable
 
   @commandTable: null
-  @init: (service) ->
-    {getEditorState} = service
-    subscriptions = new CompositeDisposable()
-
+  @init: (_getEditorState) ->
+    getEditorState = _getEditorState
     @commandTable = require('./command-table')
+    subscriptions = []
     for name, spec of @commandTable when spec.commandName?
-      subscriptions.add(@registerCommandFromSpec(name, spec))
+      subscriptions.push(@registerCommandFromSpec(name, spec))
     return subscriptions
 
   classRegistry = {Base}
@@ -325,8 +323,8 @@ class Base
 
     fileToLoad = @commandTable[name].file
     if fileToLoad not in VMP_LOADED_FILES
-      # if atom.inDevMode()
-      #   console.log "lazy-require: #{fileToLoad} for #{name}"
+      if atom.inDevMode() and settings.get('debug')
+        console.log "lazy-require: #{fileToLoad} for #{name}"
       loadVmpOperationFile(fileToLoad)
       return klass if (klass = classRegistry[name])
 

@@ -1,4 +1,3 @@
-semver = require 'semver'
 Delegato = require 'delegato'
 jQuery = null
 
@@ -15,11 +14,9 @@ BlockwiseSelection = null
 lazyRequire = (file) ->
   unless file of LazyLoadedLibs
 
-    # if atom.inDevMode()
-    #   console.log "# lazy-require: #{file}"
-    #   console.trace()
-    #   console.log '----------'
-
+    if atom.inDevMode() and settings.get('debug')
+      console.log "# lazy-require: #{file}"
+      # console.trace()
     LazyLoadedLibs[file] = require(file)
   LazyLoadedLibs[file]
 
@@ -68,10 +65,6 @@ class VimState
     @subscriptions = new CompositeDisposable
     @previousSelection = {}
     @observeSelections()
-
-    refreshHighlightSearch = =>
-      @highlightSearch.refresh()
-    @subscriptions.add @editor.onDidStopChanging(refreshHighlightSearch)
 
     @editorElement.classList.add('vim-mode-plus')
     if @getConfig('startInInsertMode') or matchScopes(@editorElement, @getConfig('startInInsertModeScopes'))
