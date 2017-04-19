@@ -1,3 +1,50 @@
+# 0.90.0:
+- Improve: Reduce activation time of vim-mode-plus to reduce your frustration on Atom startup. #758
+  - About 2x faster activation time( Full detail is on #758 ).
+  - With Two technique
+    - Define all vmp-command from pre-populated command-table and lazy-require necessary command file on execution.
+    - Defer instantiation of xxxManager referred by `vimState`.
+      - E.g. `vimState.highlightSearch` is instance of `HighlightSearchManager` and it's now set on-demand.
+  - [For vmp developer only] If command signature was changed, need update command-table.
+    - Command signature it's name and scope(e.g. `vim-mode-plus:move-down` and `atom-text-editor` )
+    - [Caution] `write-command-table-on-disk` command is available only when atom running in dev-mode.
+    - [Caution] Directly update `lib/command-table.coffee` if populated-table was changed from loaded one.
+- New, Breaking: Default keymap update #753
+  - macOS user only
+    - `ctrl-s` mapped to `transform-string-by-select-list` in `normal-mode` and `visual-mode`
+  - All user
+    - `z` in `operator-pending` is short hand of `a z`(`a-fold`).
+      - You can do `y z` instead of `y a z`. E.g. When you yank foldable whole `if` block.
+      - You can do `c z` instead of `c a z`. E.g. When you change foldable whole `if` block.
+    - `g r` mapped to `reverse`
+    - `g s` mapped to `sort`
+    - `g c` mapped to `select-latest-change` which correspond to `g v` ( `select-previous-selection` )
+    - `g C` mapped to `camel-case`
+  - What was broken?
+    Before: `g c` was for `camel-case`, `g C` was for `pascal-case`.
+    Now: `g c` is for `select-latest-change`, `g C` is for `camel-case`. No default `pascal-case`.
+- New: Target alias for surround #751, #755
+  - Now `b`, `B`, `r`, `a` char is aliased to corresponding target.
+    - `b` is alias for `(` or `)`
+    - `B` is alias for `{` or `}`
+    - `r` is alias for `[` or `]`
+    - `a` is alias for `<` or `>`( I don't like this, just followed how `surround.vim` is doing ).
+  - These alias can be used in `surround`, `delete-surround`, `change-surround`.
+    - When have these keymap: `surround`( `y s` ), `delete-surround`( `d s` ), `change-surround`(`c s`)
+      - `y s i w b` is equals to `y s i w (`.
+      - `y s i w B` is equals to `y s i w {`
+      - `y s i w r` is equals to `y s i w [`
+      - `y s i w a` is equals to `y s i w <`
+- New: InnerPair pre-targeted `rotate` command
+  - Commands:
+    - `rotate-arguments-of-inner-pair`
+    - `rotate-arguments-backwards-of-inner-pair`
+  - No keymap by default.
+  - E.g.
+    - When you map `g >` to `rotate-arguments-of-inner-pair` and `g <` to `backwards`
+    - You can rotate arg of parenthesis by `g >` and `.` if necessary, `g <` for backwards.
+- Internal: Cleanup `developer.coffee` and remove unused dev commands.
+
 # 0.89.0:
 - New: Text-object for arguments
   - Keymap:
