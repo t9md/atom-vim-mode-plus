@@ -7,7 +7,6 @@ _ = require 'underscore-plus'
   limitNumber
   isEmptyRow
 } = require './utils'
-swrap = require './selection-wrapper'
 Operator = require('./base').getClass('Operator')
 
 # Operator which start 'insert-mode'
@@ -226,7 +225,7 @@ class InsertByTarget extends ActivateInsertMode
       # vC: `I` and `A` behaves as shoft hand of `ctrl-v I` and `ctrl-v A`.
       # vL: `I` and `A` place cursors at each selected lines of start( or end ) of non-white-space char.
       if not @occurrenceSelected and @mode is 'visual' and @submode in ['characterwise', 'linewise']
-        for $selection in swrap.getSelections(@editor)
+        for $selection in @swrap.getSelections(@editor)
           $selection.normalize()
           $selection.applyWise('blockwise')
 
@@ -234,8 +233,8 @@ class InsertByTarget extends ActivateInsertMode
           for blockwiseSelection in @getBlockwiseSelections()
             blockwiseSelection.expandMemberSelectionsOverLineWithTrimRange()
 
-      for selection in @editor.getSelections()
-        swrap(selection).setBufferPositionTo(@which)
+      for $selection in @swrap.getSelections(@editor)
+        $selection.setBufferPositionTo(@which)
     super
 
 # key: 'I', Used in 'visual-mode.characterwise', visual-mode.blockwise
@@ -301,7 +300,7 @@ class Change extends ActivateInsertMode
     #   {
     #     a
     #   }
-    isLinewiseTarget = swrap.detectWise(@editor) is 'linewise'
+    isLinewiseTarget = @swrap.detectWise(@editor) is 'linewise'
     for selection in @editor.getSelections()
       @setTextToRegisterForSelection(selection) unless @getConfig('dontUpdateRegisterOnChangeOrSubstitute')
       if isLinewiseTarget

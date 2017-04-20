@@ -4,8 +4,6 @@ _ = require 'underscore-plus'
 {
   moveCursorLeft, moveCursorRight
   moveCursorUpScreen, moveCursorDownScreen
-  moveCursorDownBuffer
-  moveCursorUpBuffer
   pointIsAtVimEndOfFile
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getValidVimScreenRow, getValidVimBufferRow
@@ -30,7 +28,6 @@ _ = require 'underscore-plus'
   findRangeInBufferRow
 } = require './utils'
 
-swrap = require './selection-wrapper'
 Base = require './base'
 
 class Motion extends Base
@@ -94,7 +91,7 @@ class Motion extends Base
 
       succeeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessOnLinewise and @isLinewise())
       if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
-        $selection = swrap(selection)
+        $selection = @swrap(selection)
         $selection.saveProperties(true) # save property of "already-normalized-selection"
         $selection.applyWise(@wise)
 
@@ -133,7 +130,7 @@ class CurrentSelection extends Motion
   moveCursor: (cursor) ->
     if @mode is 'visual'
       if @isBlockwise()
-        @blockwiseSelectionExtent = swrap(cursor.selection).getBlockwiseSelectionExtent()
+        @blockwiseSelectionExtent = @swrap(cursor.selection).getBlockwiseSelectionExtent()
       else
         @selectionExtent = @editor.getSelectedBufferRange().getExtent()
     else
@@ -650,15 +647,19 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   wise: 'linewise'
   moveCursor: (cursor) ->
     @moveCursorCountTimes cursor, ->
-      moveCursorUpBuffer(cursor)
+      point = cursor.getBufferPosition()
+      unless point.row is 0
+        cursor.setBufferPosition(point.translate([-1, 0]))
     super
 
 class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
   wise: 'linewise'
   moveCursor: (cursor) ->
-    @moveCursorCountTimes cursor, ->
-      moveCursorDownBuffer(cursor)
+    @moveCursorCountTimes cursor, =>
+      point = cursor.getBufferPosition()
+      unless @getVimLastBufferRow() is point.row
+        cursor.setBufferPosition(point.translate([+1, 0]))
     super
 
 class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown

@@ -1,26 +1,14 @@
 _ = require 'underscore-plus'
 Delegato = require 'delegato'
-CSON = null
-path = null
-
-{
-  getVimEofBufferPosition
-  getVimLastBufferRow
-  getVimLastScreenRow
-  getWordBufferRangeAndKindAtBufferPosition
-  getFirstCharacterPositionForBufferRow
-  getBufferRangeForRowRange
-  getIndentLevelForBufferRow
-  scanEditorInDirection
-} = require './utils'
-swrap = require './selection-wrapper'
 settings = require './settings'
 
 [
+  CSON
+  path
   Input
   selectList
   getEditorState  # set by Base.init()
-] = []
+] = [] # set null
 
 VMP_LOADING_FILE = null
 VMP_LOADED_FILES = []
@@ -71,10 +59,10 @@ vimStateMethods = [
 class Base
   Delegato.includeInto(this)
   @delegatesMethods(vimStateMethods..., toProperty: 'vimState')
-  @delegatesProperty('mode', 'submode', toProperty: 'vimState')
+  @delegatesProperty('mode', 'submode', 'swrap', 'utils', toProperty: 'vimState')
 
   constructor: (@vimState, properties=null) ->
-    {@editor, @editorElement, @globalState} = @vimState
+    {@editor, @editorElement, @globalState, @swrap} = @vimState
     @name = @constructor.name
     _.extend(this, properties) if properties?
 
@@ -187,31 +175,31 @@ class Base
     inputUI.focus(options)
 
   getVimEofBufferPosition: ->
-    getVimEofBufferPosition(@editor)
+    @utils.getVimEofBufferPosition(@editor)
 
   getVimLastBufferRow: ->
-    getVimLastBufferRow(@editor)
+    @utils.getVimLastBufferRow(@editor)
 
   getVimLastScreenRow: ->
-    getVimLastScreenRow(@editor)
+    @utils.getVimLastScreenRow(@editor)
 
   getWordBufferRangeAndKindAtBufferPosition: (point, options) ->
-    getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
+    @utils.getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
 
   getFirstCharacterPositionForBufferRow: (row) ->
-    getFirstCharacterPositionForBufferRow(@editor, row)
+    @utils.getFirstCharacterPositionForBufferRow(@editor, row)
 
   getBufferRangeForRowRange: (rowRange) ->
-    getBufferRangeForRowRange(@editor, rowRange)
+    @utils.getBufferRangeForRowRange(@editor, rowRange)
 
   getIndentLevelForBufferRow: (row) ->
-    getIndentLevelForBufferRow(@editor, row)
+    @utils.getIndentLevelForBufferRow(@editor, row)
 
   scanForward: (args...) ->
-    scanEditorInDirection(@editor, 'forward', args...)
+    @utils.scanEditorInDirection(@editor, 'forward', args...)
 
   scanBackward: (args...) ->
-    scanEditorInDirection(@editor, 'backward', args...)
+    @utils.scanEditorInDirection(@editor, 'backward', args...)
 
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)
@@ -247,7 +235,7 @@ class Base
       cursor.getBufferPosition()
 
   getCursorPositionForSelection: (selection) ->
-    swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
+    @swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
 
   toString: ->
     str = @name
@@ -364,7 +352,7 @@ class Base
   @registerCommandFromSpec: (name, spec) ->
     {commandScope, commandPrefix, commandName, getClass} = spec
     commandScope ?= 'atom-text-editor'
-    commandName = (commandPrefix ? 'vim-mode-plus') + ':' + _.dasherize(name)
+    commandName ?= (commandPrefix ? 'vim-mode-plus') + ':' + _.dasherize(name)
     atom.commands.add commandScope, commandName, (event) ->
       vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
       if vimState? # Possibly undefined See #85

@@ -1,8 +1,6 @@
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
-Base = require './base'
-swrap = require './selection-wrapper'
-{moveCursorLeft} = require './utils'
+moveCursorLeft = null
 
 class ModeManager
   mode: 'insert' # Native atom is not modal editor and its default is 'insert'
@@ -11,13 +9,11 @@ class ModeManager
 
   constructor: (@vimState) ->
     {@editor, @editorElement} = @vimState
-    @mode = 'insert'
+
     @emitter = new Emitter
-    @subscriptions = new CompositeDisposable
-    @subscriptions.add @vimState.onDidDestroy(@destroy.bind(this))
+    @vimState.onDidDestroy(@destroy.bind(this))
 
   destroy: ->
-    @subscriptions.dispose()
 
   isMode: (mode, submode=null) ->
     (mode is @mode) and (submode is @submode)
@@ -59,13 +55,17 @@ class ModeManager
       @updateNarrowedState()
       @vimState.updatePreviousSelection()
     else
-      swrap.clearProperties(@editor)
+      # Prevent swrap from loaded on initial mode-setup on startup.
+      @vimState.getProp('swrap')?.clearProperties(@editor)
 
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
 
     @vimState.statusBarManager.update(@mode, @submode)
-    @vimState.updateCursorsVisibility()
+    if @mode is 'visual'
+      @vimState.cursorStyleManager.refresh()
+    else
+      @vimState.getProp('cursorStyleManager')?.refresh()
 
     @emitter.emit('did-activate-mode', {@mode, @submode})
 
@@ -89,8 +89,11 @@ class ModeManager
     # In visual-mode, cursor can place at EOL. move left if cursor is at EOL
     # We should not do this in visual-mode deactivation phase.
     # e.g. `A` directly shift from visua-mode to `insert-mode`, and cursor should remain at EOL.
-    for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
-      moveCursorLeft(cursor, preserveGoalColumn: true)
+    for cursor in @editor.getCursors() when cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
+      # Don't use utils moveCursorLeft to skip require('./utils') for faster startup.
+      {goalColumn} = cursor
+      cursor.moveLeft()
+      cursor.goalColumn = goalColumn if goalColumn?
     new Disposable
 
   # Operator Pending
@@ -105,6 +108,8 @@ class ModeManager
     replaceModeDeactivator = @activateReplaceMode() if submode is 'replace'
 
     new Disposable =>
+      moveCursorLeft ?= require('./utils').moveCursorLeft
+
       replaceModeDeactivator?.dispose()
       replaceModeDeactivator = null
 
@@ -152,6 +157,7 @@ class ModeManager
   # - When selectRight at end position of normalized-selection, it become un-normalized selection
   #   which is the range in visual-mode.
   activateVisualMode: (submode) ->
+    swrap = @vimState.swrap
     for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
       $selection.saveProperties()
 
@@ -176,7 +182,7 @@ class ModeManager
       # [FIXME] why I need null guard here
       not @vimState.getLastBlockwiseSelection()?.isSingleRow()
     else
-      not swrap(@editor.getLastSelection()).isSingleRow()
+      not @vimState.swrap(@editor.getLastSelection()).isSingleRow()
 
   updateNarrowedState: (value=null) ->
     @editorElement.classList.toggle('is-narrowed', value ? @hasMultiLineSelection())

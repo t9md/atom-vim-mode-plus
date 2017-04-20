@@ -1,9 +1,6 @@
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
-{moveCursorLeft, haveSomeNonEmptySelection, assertWithException} = require './utils'
 {OperationAbortedError} = require './errors'
-swrap = require './selection-wrapper'
-
 [Select, MoveToRelativeLine] = []
 
 # opration life in operationStack
@@ -21,7 +18,7 @@ class OperationStack
   Object.defineProperty @prototype, 'submode', get: -> @modeManager.submode
 
   constructor: (@vimState) ->
-    {@editor, @editorElement, @modeManager} = @vimState
+    {@editor, @editorElement, @modeManager, @swrap} = @vimState
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add @vimState.onDidDestroy(@destroy.bind(this))
@@ -67,7 +64,7 @@ class OperationStack
   # -------------------------
   run: (klass, properties) ->
     if @mode is 'visual'
-      for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
+      for $selection in @swrap.getSelections(@editor) when not $selection.hasProperties()
         $selection.saveProperties()
 
     try
@@ -186,7 +183,7 @@ class OperationStack
       @modeManager.updateNarrowedState()
       @vimState.updatePreviousSelection()
 
-    @vimState.updateCursorsVisibility()
+    @vimState.cursorStyleManager.refresh()
     @vimState.reset()
 
   ensureAllSelectionsAreEmpty: (operation) ->
@@ -195,14 +192,14 @@ class OperationStack
     # We need to manually clear blockwiseSelection.
     # See #647
     @vimState.clearBlockwiseSelections() # FIXME, should be removed
-    if haveSomeNonEmptySelection(@editor)
+    if @vimState.haveSomeNonEmptySelection()
       if @vimState.getConfig('strictAssertion')
-        assertWithException(false, "Have some non-empty selection in normal-mode: #{operation.toString()}")
+        @vimState.utils.assertWithException(false, "Have some non-empty selection in normal-mode: #{operation.toString()}")
       @vimState.clearSelections()
 
   ensureAllCursorsAreNotAtEndOfLine: ->
     for cursor in @editor.getCursors() when cursor.isAtEndOfLine()
-      moveCursorLeft(cursor, preserveGoalColumn: true)
+      @vimState.utils.moveCursorLeft(cursor, preserveGoalColumn: true)
 
   addToClassList: (className) ->
     @editorElement.classList.add(className)

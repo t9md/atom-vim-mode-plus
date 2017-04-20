@@ -1,12 +1,9 @@
 {Point} = require 'atom'
-{getFirstCharacterPositionForBufferRow, getVimLastBufferRow} = require './utils'
-swrap = require './selection-wrapper'
 
 module.exports =
 class MutationManager
   constructor: (@vimState) ->
-    {@editor} = @vimState
-
+    {@editor, @swrap} = @vimState
     @vimState.onDidDestroy(@destroy)
 
     @markerLayer = @editor.addMarkerLayer()
@@ -34,11 +31,11 @@ class MutationManager
       resetMarker = not selection.getBufferRange().isEmpty()
     else
       resetMarker = true
-      initialPoint = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
+      initialPoint = @swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
       if @stayByMarker
         initialPointMarker = @markerLayer.markBufferPosition(initialPoint, invalidate: 'never')
 
-      options = {selection, initialPoint, initialPointMarker, checkpoint}
+      options = {selection, initialPoint, initialPointMarker, checkpoint, @swrap}
       @mutationsBySelection.set(selection, new Mutation(options))
 
     if resetMarker
@@ -82,11 +79,11 @@ class MutationManager
         else
           point = @clipPoint(mutation.startPositionOnDidSelect)
           if setToFirstCharacterOnLinewise and wise is 'linewise'
-            point = getFirstCharacterPositionForBufferRow(@editor, point.row)
+            point = @vimState.utils.getFirstCharacterPositionForBufferRow(@editor, point.row)
         selection.cursor.setBufferPosition(point)
 
   clipPoint: (point) ->
-    point.row = Math.min(getVimLastBufferRow(@editor), point.row)
+    point.row = Math.min(@vimState.utils.getVimLastBufferRow(@editor), point.row)
     @editor.clipBufferPosition(point)
 
 # Mutation information is created even if selection.isEmpty()
@@ -94,7 +91,7 @@ class MutationManager
 #  e.g. Some selection is created at 'will-select' checkpoint, others at 'did-select' or 'did-select-occurrence'
 class Mutation
   constructor: (options) ->
-    {@selection, @initialPoint, @initialPointMarker, checkpoint} = options
+    {@selection, @initialPoint, @initialPointMarker, checkpoint, @swrap} = options
     @createdAt = checkpoint
     @bufferRangeByCheckpoint = {}
     @marker = null
@@ -114,7 +111,7 @@ class Mutation
         from = ['selection']
       else
         from = ['property', 'selection']
-      @startPositionOnDidSelect = swrap(@selection).getBufferPositionFor('start', {from})
+      @startPositionOnDidSelect = @swrap(@selection).getBufferPositionFor('start', {from})
 
   getStayPosition: (wise) ->
     point = @initialPointMarker?.getHeadBufferPosition() ? @initialPoint

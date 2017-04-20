@@ -1,8 +1,12 @@
 _ = require 'underscore-plus'
 
 {sortRanges, assertWithException, trimRange} = require './utils'
-swrap = require './selection-wrapper'
 settings = require './settings'
+
+__swrap = null
+swrap = (args...) ->
+  __swrap ?= require './selection-wrapper'
+  __swrap(args...)
 
 class BlockwiseSelection
   editor: null

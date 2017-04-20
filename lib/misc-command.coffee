@@ -1,6 +1,5 @@
 {Range, Point} = require 'atom'
 Base = require './base'
-swrap = require './selection-wrapper'
 _ = require 'underscore-plus'
 
 {
@@ -35,7 +34,7 @@ class Mark extends MiscCommand
 class ReverseSelections extends MiscCommand
   @extend()
   execute: ->
-    swrap.setReversedState(@editor, not @editor.getLastSelection().isReversed())
+    @swrap.setReversedState(@editor, not @editor.getLastSelection().isReversed())
     if @isMode('visual', 'blockwise')
       @getLastBlockwiseSelection().autoscroll()
 

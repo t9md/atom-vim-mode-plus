@@ -64,9 +64,6 @@ isEndsWithNewLineForBufferRow = (editor, row) ->
   {start, end} = editor.bufferRangeForBufferRow(row, includeNewline: true)
   start.row isnt end.row
 
-haveSomeNonEmptySelection = (editor) ->
-  editor.getSelections().some(isNotEmpty)
-
 sortRanges = (collection) ->
   collection.sort (a, b) -> a.compare(b)
 
@@ -258,18 +255,6 @@ moveCursorDownScreen = (cursor, options={}) ->
   unless getVimLastScreenRow(cursor.editor) is cursor.getScreenRow()
     motion = (cursor) -> cursor.moveDown()
     moveCursor(cursor, options, motion)
-
-# FIXME
-moveCursorDownBuffer = (cursor) ->
-  point = cursor.getBufferPosition()
-  unless getVimLastBufferRow(cursor.editor) is point.row
-    cursor.setBufferPosition(point.translate([+1, 0]))
-
-# FIXME
-moveCursorUpBuffer = (cursor) ->
-  point = cursor.getBufferPosition()
-  unless point.row is 0
-    cursor.setBufferPosition(point.translate([-1, 0]))
 
 moveCursorToFirstCharacterAtRow = (cursor, row) ->
   cursor.setBufferPosition([row, 0])
@@ -949,7 +934,6 @@ module.exports = {
   debug
   saveEditorState
   isLinewiseRange
-  haveSomeNonEmptySelection
   sortRanges
   getIndex
   getVisibleBufferRange
@@ -989,8 +973,6 @@ module.exports = {
   getBufferRows
   smartScrollToBufferPosition
   matchScopes
-  moveCursorDownBuffer
-  moveCursorUpBuffer
   isSingleLineText
   getWordBufferRangeAtBufferPosition
   getWordBufferRangeAndKindAtBufferPosition
@@ -1034,3 +1016,4 @@ module.exports = {
   rangeContainsPointWithEndExclusive
   traverseTextFromPoint
 }
+console.log "loaded", __filename

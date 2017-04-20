@@ -4,11 +4,8 @@ fs = require 'fs-plus'
 {Emitter, Disposable, BufferedProcess, CompositeDisposable} = require 'atom'
 
 Base = require './base'
-{generateIntrospectionReport} = require './introspection'
+generateIntrospectionReport = null
 settings = require './settings'
-{debug, getAncestors, getKeyBindingForCommand} = require './utils'
-
-packageScope = 'vim-mode-plus'
 getEditorState = null
 
 invalidateRequireCacheForPackage = (packPath) ->
@@ -33,11 +30,28 @@ class Developer
       'reload-with-dependencies': => @reload(true)
       'report-total-marker-count': => @getAllMarkerCount()
       'report-total-and-per-editor-marker-count': => @getAllMarkerCount(true)
+      'report-require-cache': => @reportRequireCache(excludeNodModules: true)
+      'report-require-cache-all': => @reportRequireCache(excludeNodModules: false)
 
     subscriptions = new CompositeDisposable
     for name, fn of commands
       subscriptions.add @addCommand(name, fn)
     subscriptions
+
+  reportRequireCache: ({focus, excludeNodModules}) ->
+    {inspect} = require 'util'
+    path = require 'path'
+    packPath = atom.packages.getLoadedPackage("vim-mode-plus").path
+    cachedPaths = Object.keys(require.cache)
+      .filter (p) -> p.startsWith(packPath + path.sep)
+      .map (p) -> p.replace(packPath, '')
+
+    for cachedPath in cachedPaths
+      if excludeNodModules and cachedPath.search(/node_modules/) >= 0
+        continue
+      if focus and cachedPath.search(///#{focus}///) >= 0
+        cachedPath = '*' + cachedPath
+      console.log cachedPath
 
   getAllMarkerCount: (showEditorsReport=false) ->
     {inspect} = require 'util'
@@ -92,7 +106,7 @@ class Developer
     console.timeEnd('activate')
 
   addCommand: (name, fn) ->
-    atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
+    atom.commands.add('atom-text-editor', "vim-mode-plus:#{name}", fn)
 
   clearDebugOutput: (name, fn) ->
     filePath = fs.normalize(settings.get('debugOutputFilePath'))
@@ -153,6 +167,7 @@ class Developer
         .replace(/\|/g, '&#124;')
         .replace(/\s+/, '')
 
+    {getKeyBindingForCommand, getAncestors} = @vimstate.utils
     commands = (
       for name, klass of Base.getClassRegistry() when klass.isCommand()
         kind = getAncestors(klass).map((k) -> k.name)[-2..-2][0]
@@ -228,6 +243,7 @@ class Developer
       args: ['-g', editor.getPath(), "+call cursor(#{row+1}, #{column+1})"]
 
   generateIntrospectionReport: ->
+    generateIntrospectionReport ?= require './introspection'
     generateIntrospectionReport _.values(Base.getClassRegistry()),
       excludeProperties: [
         'run'

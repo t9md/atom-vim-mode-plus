@@ -6,7 +6,7 @@ Base = require './base'
 globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
-{forEachPaneAxis} = require './utils'
+forEachPaneAxis = null
 
 module.exports =
   config: settings.config
@@ -41,6 +41,7 @@ module.exports =
 
     @subscribe atom.workspace.observeTextEditors (editor) =>
       @createVimState(editor) unless editor.isMini()
+
     @subscribe atom.workspace.onDidChangeActivePaneItem =>
       @demaximizePane()
 
@@ -77,6 +78,23 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
+    # @reportRequireCache(excludeNodModules: true)
+
+  reportRequireCache: ({focus, excludeNodModules}) ->
+    {inspect} = require 'util'
+    path = require 'path'
+    packPath = atom.packages.getLoadedPackage("vim-mode-plus").path
+    cachedPaths = Object.keys(require.cache)
+      .filter (p) -> p.startsWith(packPath + path.sep)
+      .map (p) -> p.replace(packPath, '')
+
+    for cachedPath in cachedPaths
+      if excludeNodModules and cachedPath.search(/node_modules/) >= 0
+        continue
+      if focus and cachedPath.search(///#{focus}///) >= 0
+        cachedPath = '*' + cachedPath
+
+      console.log cachedPath
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
@@ -149,6 +167,7 @@ module.exports =
 
     workspaceElement.classList.add(workspaceClassNames...)
 
+    forEachPaneAxis ?= require('./utils').forEachPaneAxis
     forEachPaneAxis (axis) ->
       paneAxisElement = getView(axis)
       if paneAxisElement.contains(paneElement)

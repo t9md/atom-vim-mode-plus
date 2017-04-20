@@ -1,5 +1,3 @@
-swrap = require './selection-wrapper'
-
 module.exports =
 class HoverManager
   constructor: (@vimState) ->
@@ -14,7 +12,7 @@ class HoverManager
       @vimState.getLastBlockwiseSelection().getHeadSelection().getHeadBufferPosition()
     else
       selection = @editor.getLastSelection()
-      swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
+      @vimState.swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
 
   set: (text, point=@getPoint(), options={}) ->
     unless @marker?
