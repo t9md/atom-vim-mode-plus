@@ -7,7 +7,6 @@ settings = require './settings'
 ModeManager = require './mode-manager'
 
 LazyLoadedLibs = {}
-BlockwiseSelection = null
 
 lazyRequire = (file) ->
   unless file of LazyLoadedLibs
@@ -207,10 +206,6 @@ class VimState
   destroy: =>
     return unless @isAlive()
     @constructor.delete(@editor)
-
-    BlockwiseSelection ?= require './blockwise-selection'
-    BlockwiseSelection.clearSelections(@editor)
-
     @subscriptions.dispose()
 
     if @editor.isAlive()
@@ -273,8 +268,7 @@ class VimState
     @editor.setCursorBufferPosition(@editor.getCursorBufferPosition())
 
   resetNormalMode: ({userInvocation}={}) ->
-    BlockwiseSelection ?= require './blockwise-selection'
-    BlockwiseSelection.clearSelections(@editor)
+    @getProp('swrap')?.clearBlockwiseSelections()
 
     if userInvocation ? false
       switch

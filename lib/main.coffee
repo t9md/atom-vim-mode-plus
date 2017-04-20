@@ -76,8 +76,9 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
-    # developer?.reportRequireCache(excludeNodModules: true)
-    developer?.reportRequireCache(excludeNodModules: false)
+    
+    if settings.get('debug')
+      developer?.reportRequireCache(excludeNodModules: false)
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')
