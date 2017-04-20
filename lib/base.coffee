@@ -13,7 +13,8 @@ path = null
   getIndentLevelForBufferRow
   scanEditorInDirection
 } = require './utils'
-swrap = require './selection-wrapper'
+swrap = null
+
 settings = require './settings'
 
 [
@@ -247,6 +248,7 @@ class Base
       cursor.getBufferPosition()
 
   getCursorPositionForSelection: (selection) ->
+    swrap ?= require './selection-wrapper'
     swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
 
   toString: ->
@@ -364,7 +366,7 @@ class Base
   @registerCommandFromSpec: (name, spec) ->
     {commandScope, commandPrefix, commandName, getClass} = spec
     commandScope ?= 'atom-text-editor'
-    commandName = (commandPrefix ? 'vim-mode-plus') + ':' + _.dasherize(name)
+    commandName ?= (commandPrefix ? 'vim-mode-plus') + ':' + _.dasherize(name)
     atom.commands.add commandScope, commandName, (event) ->
       vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
       if vimState? # Possibly undefined See #85
