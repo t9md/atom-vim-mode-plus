@@ -78,9 +78,7 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
-
-    # console.log 'main---'
-    @reportRequireCache(focus: 'selection-wrapper', excludeNodModules: true)
+    # @reportRequireCache(excludeNodModules: true)
 
   reportRequireCache: ({focus, excludeNodModules}) ->
     {inspect} = require 'util'

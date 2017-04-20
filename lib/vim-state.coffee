@@ -108,20 +108,16 @@ class VimState
   # BlockwiseSelections
   # -------------------------
   getBlockwiseSelections: ->
-    BlockwiseSelection ?= require './blockwise-selection'
-    BlockwiseSelection.getSelections(@editor)
+    @swrap.getBlockwiseSelections(@editor)
 
   getLastBlockwiseSelection: ->
-    BlockwiseSelection ?= require './blockwise-selection'
-    BlockwiseSelection.getLastSelection(@editor)
+    @swrap.getLastBlockwiseSelections(@editor)
 
   getBlockwiseSelectionsOrderedByBufferPosition: ->
-    BlockwiseSelection ?= require './blockwise-selection'
-    BlockwiseSelection.getSelectionsOrderedByBufferPosition(@editor)
+    @swrap.getBlockwiseSelectionsOrderedByBufferPosition(@editor)
 
   clearBlockwiseSelections: ->
-    BlockwiseSelection ?= require './blockwise-selection'
-    BlockwiseSelection.clearSelections(@editor)
+    @swrap.clearBlockwiseSelections(@editor)
 
   # Other
   # -------------------------

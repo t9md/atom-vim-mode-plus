@@ -9,7 +9,7 @@
   assertWithException
 } = require './utils'
 settings = require './settings'
-BlockwiseSelection = null
+BlockwiseSelection = require './blockwise-selection'
 
 propertyStore = new Map
 
@@ -114,7 +114,6 @@ class SelectionWrapper
         {start, end} = @getBufferRange()
         @setBufferRange(getBufferRangeForRowRange(@selection.editor, [start.row, end.row]))
       when 'blockwise'
-        BlockwiseSelection ?= require './blockwise-selection'
         new BlockwiseSelection(@selection)
 
   selectByProperties: ({head, tail}) ->
@@ -175,6 +174,19 @@ class SelectionWrapper
 swrap = (selection) ->
   new SelectionWrapper(selection)
 
+# BlockwiseSelection proxy
+swrap.getBlockwiseSelections = (editor) ->
+  BlockwiseSelection.getSelections(editor)
+
+swrap.getLastBlockwiseSelections = (editor) ->
+  BlockwiseSelection.getLastSelection(editor)
+
+swrap.getBlockwiseSelectionsOrderedByBufferPosition = (editor) ->
+  BlockwiseSelection.getSelectionsOrderedByBufferPosition(editor)
+
+swrap.clearBlockwiseSelections = (editor) ->
+  BlockwiseSelection.clearSelections(editor)
+
 swrap.getSelections = (editor) ->
   editor.getSelections(editor).map(swrap)
 
@@ -196,8 +208,7 @@ swrap.dumpProperties = (editor) ->
     console.log inspect($selection.getProperties())
 
 swrap.normalize = (editor) ->
-  BlockwiseSelection ?= require './blockwise-selection'
-  if BlockwiseSelection.has(editor)#blockwiseSelections =
+  if BlockwiseSelection.has(editor)
     for blockwiseSelection in BlockwiseSelection.getSelections(editor)
       blockwiseSelection.normalize()
     BlockwiseSelection.clearSelections(editor)
