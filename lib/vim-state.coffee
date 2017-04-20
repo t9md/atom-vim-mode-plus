@@ -35,18 +35,19 @@ class VimState
   @delegatesMethods('flash', 'flashScreenRange', toProperty: 'flashManager')
   @delegatesMethods('subscribe', 'getCount', 'setCount', 'hasCount', 'addToClassList', toProperty: 'operationStack')
 
-  @defineLazyProperty: (name, fileToLoad) ->
+  @defineLazyProperty: (name, fileToLoad, instantiate=true) ->
     Object.defineProperty @prototype, name,
-      get: -> this["__#{name}"] ?= new (lazyRequire(fileToLoad))(this)
-
-  Object.defineProperty @prototype, 'swrap',
-    get: -> this.__swrap ?= lazyRequire('./selection-wrapper')
-
-  Object.defineProperty @prototype, 'utils',
-    get: -> this.__utils ?= lazyRequire('./utils')
+      get: -> this["__#{name}"] ?= do =>
+        if instantiate
+          new (lazyRequire(fileToLoad))(this)
+        else
+          lazyRequire(fileToLoad)
 
   getProp: (name) ->
     this[name] if this["__#{name}"]?
+
+  @defineLazyProperty('swrap', './selection-wrapper', false)
+  @defineLazyProperty('utils', './utils', false)
 
   @lazyProperties =
     mark: './mark-manager'
