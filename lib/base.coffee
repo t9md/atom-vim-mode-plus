@@ -1,4 +1,8 @@
-_ = require 'underscore-plus'
+# To avoid loading underscore-plus and depending underscore on startup
+__plus = null
+_plus = ->
+  __plus ?= require 'underscore-plus'
+
 Delegato = require 'delegato'
 settings = require './settings'
 
@@ -20,7 +24,7 @@ loadVmpOperationFile = (filename) ->
   VMP_LOADED_FILES.push(filename)
   loaded
 
-{OperationAbortedError} = require './errors'
+OperationAbortedError = null
 
 vimStateMethods = [
   "onDidChangeSearch"
@@ -64,7 +68,7 @@ class Base
   constructor: (@vimState, properties=null) ->
     {@editor, @editorElement, @globalState, @swrap} = @vimState
     @name = @constructor.name
-    _.extend(this, properties) if properties?
+    Object.assign(this, properties) if properties?
 
   # To override
   initialize: ->
@@ -92,6 +96,7 @@ class Base
     @operator? and not @operator.instanceof('Select')
 
   abort: ->
+    OperationAbortedError ?= require './errors'
     throw new OperationAbortedError('aborted')
 
   # Count
@@ -250,6 +255,7 @@ class Base
   # -------------------------
   @writeCommandTableOnDisk: ->
     commandTable = @generateCommandTableByEagerLoad()
+    _ = _plus()
     if _.isEqual(@commandTable, commandTable)
       atom.notifications.addInfo("No change commandTable", dismissable: true)
       return
@@ -272,7 +278,7 @@ class Base
       './motion', './motion-search', './text-object', './misc-command'
     ]
     filesToLoad.forEach(loadVmpOperationFile)
-
+    _ = _plus()
     klasses = _.values(@getClassRegistry())
     klassesGroupedByFile = _.groupBy(klasses, (klass) -> klass.VMP_LOADING_FILE)
 
@@ -326,10 +332,10 @@ class Base
 
   @commandPrefix: 'vim-mode-plus'
   @getCommandName: ->
-    @commandPrefix + ':' + _.dasherize(@name)
+    @commandPrefix + ':' + _plus().dasherize(@name)
 
   @getCommandNameWithoutPrefix: ->
-    _.dasherize(@name)
+    _plus().dasherize(@name)
 
   @commandScope: 'atom-text-editor'
   @getCommandScope: ->
@@ -352,7 +358,7 @@ class Base
   @registerCommandFromSpec: (name, spec) ->
     {commandScope, commandPrefix, commandName, getClass} = spec
     commandScope ?= 'atom-text-editor'
-    commandName ?= (commandPrefix ? 'vim-mode-plus') + ':' + _.dasherize(name)
+    commandName ?= (commandPrefix ? 'vim-mode-plus') + ':' + _plus().dasherize(name)
     atom.commands.add commandScope, commandName, (event) ->
       vimState = getEditorState(@getModel()) ? getEditorState(atom.workspace.getActiveTextEditor())
       if vimState? # Possibly undefined See #85
@@ -365,6 +371,7 @@ class Base
   # For demo-mode pkg integration
   @operationKind: null
   @getKindForCommandName: (command) ->
+    _ = _plus()
     name = _.capitalize(_.camelize(command))
     if name of classRegistry
       classRegistry[name].operationKind

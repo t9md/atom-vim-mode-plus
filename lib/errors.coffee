@@ -1,9 +1,4 @@
-class VimModePlusError extends Error
+module.exports =
+class OperationAbortedError extends Error
   constructor: ({@message}) ->
     @name = @constructor.name
-
-class OperationAbortedError extends VimModePlusError
-
-module.exports = {
-  OperationAbortedError
-}

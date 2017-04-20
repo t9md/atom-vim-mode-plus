@@ -1016,4 +1016,3 @@ module.exports = {
   rangeContainsPointWithEndExclusive
   traverseTextFromPoint
 }
-console.log "loaded", __filename

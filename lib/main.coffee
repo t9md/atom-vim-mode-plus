@@ -1,5 +1,3 @@
-_ = require 'underscore-plus'
-
 {Disposable, Emitter, CompositeDisposable} = require 'atom'
 
 Base = require './base'
@@ -78,23 +76,8 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
-    # @reportRequireCache(excludeNodModules: true)
-
-  reportRequireCache: ({focus, excludeNodModules}) ->
-    {inspect} = require 'util'
-    path = require 'path'
-    packPath = atom.packages.getLoadedPackage("vim-mode-plus").path
-    cachedPaths = Object.keys(require.cache)
-      .filter (p) -> p.startsWith(packPath + path.sep)
-      .map (p) -> p.replace(packPath, '')
-
-    for cachedPath in cachedPaths
-      if excludeNodModules and cachedPath.search(/node_modules/) >= 0
-        continue
-      if focus and cachedPath.search(///#{focus}///) >= 0
-        cachedPath = '*' + cachedPath
-
-      console.log cachedPath
+    # developer?.reportRequireCache(excludeNodModules: true)
+    developer?.reportRequireCache(excludeNodModules: false)
 
   observeVimMode: (fn) ->
     fn() if atom.packages.isPackageActive('vim-mode')

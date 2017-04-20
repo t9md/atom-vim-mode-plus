@@ -1,7 +1,7 @@
 {Disposable, CompositeDisposable} = require 'atom'
 Base = require './base'
-{OperationAbortedError} = require './errors'
-[Select, MoveToRelativeLine] = []
+
+[OperationAbortedError, Select, MoveToRelativeLine] = []
 
 # opration life in operationStack
 # 1. run
@@ -125,6 +125,7 @@ class OperationStack
 
   handleError: (error) ->
     @vimState.reset()
+    OperationAbortedError ?= require './errors'
     unless error instanceof OperationAbortedError
       throw error
 

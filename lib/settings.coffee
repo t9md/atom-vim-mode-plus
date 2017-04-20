@@ -10,7 +10,6 @@ inferType = (value) ->
 class Settings
   deprecatedParams: [
     'showCursorInVisualMode'
-    'showCursorInVisualMode2'
   ]
   notifyDeprecatedParams: ->
     deprecatedParams = @deprecatedParams.filter((param) => @has(param))

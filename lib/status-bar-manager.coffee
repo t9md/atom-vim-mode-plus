@@ -1,4 +1,3 @@
-_ = require 'underscore-plus'
 settings = require './settings'
 
 createDiv = ({id, classList}) ->
@@ -6,6 +5,15 @@ createDiv = ({id, classList}) ->
   div.id = id if id?
   div.classList.add(classList...) if classList?
   div
+
+LongModeStringTable =
+  'normal': "Normal"
+  'operator-pending': "Operator Pending"
+  'visual.characterwise': "Visual Characterwise"
+  'visual.blockwise': "Visual Blockwise"
+  'visual.linewise': "Visual Linewise"
+  'insert': "Insert"
+  'insert.replace': "Insert Replace"
 
 module.exports =
 class StatusBarManager
@@ -22,17 +30,9 @@ class StatusBarManager
     @element.textContent =
       switch settings.get('statusBarModeStringStyle')
         when 'short'
-          @getShortModeString(mode, submode)
+          (mode[0] + (if submode? then submode[0] else '')).toUpperCase()
         when 'long'
-          @getLongModeString(mode, submode)
-
-  getShortModeString: (mode, submode) ->
-    (mode[0] + (if submode? then submode[0] else '')).toUpperCase()
-
-  getLongModeString: (mode, submode) ->
-    modeString = _.humanizeEventName(mode)
-    modeString += " " + _.humanizeEventName(submode) if submode?
-    modeString
+          LongModeStringTable[mode + (if submode? then '.' + submode else '')]
 
   attach: ->
     @tile = @statusBar.addRightTile(item: @container, priority: 20)

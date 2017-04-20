@@ -1,4 +1,3 @@
-_ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 moveCursorLeft = null
 
