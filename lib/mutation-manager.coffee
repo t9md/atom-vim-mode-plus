@@ -1,5 +1,4 @@
 {Point} = require 'atom'
-{getFirstCharacterPositionForBufferRow, getVimLastBufferRow} = require './utils'
 
 module.exports =
 class MutationManager
@@ -80,11 +79,11 @@ class MutationManager
         else
           point = @clipPoint(mutation.startPositionOnDidSelect)
           if setToFirstCharacterOnLinewise and wise is 'linewise'
-            point = getFirstCharacterPositionForBufferRow(@editor, point.row)
+            point = @vimState.utils.getFirstCharacterPositionForBufferRow(@editor, point.row)
         selection.cursor.setBufferPosition(point)
 
   clipPoint: (point) ->
-    point.row = Math.min(getVimLastBufferRow(@editor), point.row)
+    point.row = Math.min(@vimState.utils.getVimLastBufferRow(@editor), point.row)
     @editor.clipBufferPosition(point)
 
 # Mutation information is created even if selection.isEmpty()

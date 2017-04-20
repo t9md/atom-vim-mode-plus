@@ -64,9 +64,6 @@ isEndsWithNewLineForBufferRow = (editor, row) ->
   {start, end} = editor.bufferRangeForBufferRow(row, includeNewline: true)
   start.row isnt end.row
 
-haveSomeNonEmptySelection = (editor) ->
-  editor.getSelections().some(isNotEmpty)
-
 sortRanges = (collection) ->
   collection.sort (a, b) -> a.compare(b)
 
@@ -937,7 +934,6 @@ module.exports = {
   debug
   saveEditorState
   isLinewiseRange
-  haveSomeNonEmptySelection
   sortRanges
   getIndex
   getVisibleBufferRange

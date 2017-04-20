@@ -1,6 +1,5 @@
 _ = require 'underscore-plus'
 {
-  haveSomeNonEmptySelection
   isEmptyRow
   getWordPatternAtBufferPosition
   getSubwordPatternAtBufferPosition
@@ -264,7 +263,7 @@ class Operator extends Base
         @occurrenceSelected = true
         @mutationManager.setCheckpoint('did-select-occurrence')
 
-    if @targetSelected = haveSomeNonEmptySelection(@editor) or @target.name is "Empty"
+    if @targetSelected = @vimState.haveSomeNonEmptySelection() or @target.name is "Empty"
       @emitDidSelectTarget()
       @flashChangeIfNecessary()
       @trackChangeIfNecessary()

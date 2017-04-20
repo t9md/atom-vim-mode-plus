@@ -6,11 +6,6 @@ fs = require 'fs-plus'
 Base = require './base'
 generateIntrospectionReport = null
 settings = require './settings'
-__$u = null
-$u = ->
-  __$u ?= require('./utils')
-
-packageScope = 'vim-mode-plus'
 getEditorState = null
 
 invalidateRequireCacheForPackage = (packPath) ->
@@ -111,7 +106,7 @@ class Developer
     console.timeEnd('activate')
 
   addCommand: (name, fn) ->
-    atom.commands.add('atom-text-editor', "#{packageScope}:#{name}", fn)
+    atom.commands.add('atom-text-editor', "vim-mode-plus:#{name}", fn)
 
   clearDebugOutput: (name, fn) ->
     filePath = fs.normalize(settings.get('debugOutputFilePath'))
@@ -172,14 +167,15 @@ class Developer
         .replace(/\|/g, '&#124;')
         .replace(/\s+/, '')
 
+    {getKeyBindingForCommand, getAncestors} = @vimstate.utils
     commands = (
       for name, klass of Base.getClassRegistry() when klass.isCommand()
-        kind = $u().getAncestors(klass).map((k) -> k.name)[-2..-2][0]
+        kind = getAncestors(klass).map((k) -> k.name)[-2..-2][0]
         commandName = klass.getCommandName()
         description = klass.getDesctiption()?.replace(/\n/g, '<br/>')
 
         keymap = null
-        if keymaps = $u().getKeyBindingForCommand(commandName, packageName: "vim-mode-plus")
+        if keymaps = getKeyBindingForCommand(commandName, packageName: "vim-mode-plus")
           keymap = keymaps.map ({keystrokes, selector}) ->
             "`#{compactSelector(selector)}` <code>#{compactKeystrokes(keystrokes)}</code>"
           .join("<br/>")

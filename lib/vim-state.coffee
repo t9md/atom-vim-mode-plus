@@ -4,16 +4,6 @@ jQuery = null
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
 settings = require './settings'
-
-__$u = null
-$u = ->
-  unless __$u?
-    console.log 'lazy-U'
-    console.trace()
-    __$u = require('./utils')
-  __$u
-
-# {getVisibleEditors, matchScopes, translatePointAndClip, haveSomeNonEmptySelection} = require './utils'
 ModeManager = require './mode-manager'
 
 LazyLoadedLibs = {}
@@ -24,7 +14,7 @@ lazyRequire = (file) ->
 
     if atom.inDevMode() and settings.get('debug')
       console.log "# lazy-require: #{file}"
-      console.trace()
+      # console.trace()
 
     LazyLoadedLibs[file] = require(file)
   LazyLoadedLibs[file]
@@ -51,6 +41,9 @@ class VimState
 
   Object.defineProperty @prototype, 'swrap',
     get: -> this.__swrap ?= lazyRequire('./selection-wrapper')
+
+  Object.defineProperty @prototype, 'utils',
+    get: -> this.__utils ?= lazyRequire('./utils')
 
   getProp: (name) ->
     this[name] if this["__#{name}"]?
@@ -101,7 +94,7 @@ class VimState
     @editorElement.classList.add('vim-mode-plus')
     startInsertScopes = @getConfig('startInInsertModeScopes')
 
-    if @getConfig('startInInsertMode') or startInsertScopes.length and $u().matchScopes(@editorElement, startInsertScopes)
+    if @getConfig('startInInsertMode') or startInsertScopes.length and @utils.matchScopes(@editorElement, startInsertScopes)
       @activate('insert')
     else
       @activate('normal')
@@ -240,6 +233,9 @@ class VimState
     } = {}
     @emitter.emit 'did-destroy'
 
+  haveSomeNonEmptySelection: ->
+    @editor.getSelections().some((selection) -> not selection.isEmpty())
+
   checkSelection: (event) ->
     return unless atom.workspace.getActiveTextEditor() is @editor
     return if @getProp('operationStack')?.isProcessing() # Don't populate lazy-prop on startup
@@ -249,7 +245,7 @@ class VimState
     return unless @editorElement is event.target?.closest?('atom-text-editor')
     return if event.type.startsWith('vim-mode-plus') # to match vim-mode-plus: and vim-mode-plus-user:
 
-    if @editor.getSelections().some((selection) -> not selection.isEmpty())
+    if @haveSomeNonEmptySelection()
       @editorElement.component.updateSync()
       wise = @swrap.detectWise(@editor)
       if @isMode('visual', wise)
@@ -310,7 +306,7 @@ class VimState
     @getProp('mutationManager')?.reset()
 
   isVisible: ->
-    @editor in $u().getVisibleEditors()
+    @editor in @utils.getVisibleEditors()
 
   # FIXME: naming, updateLastSelectedInfo ?
   updatePreviousSelection: ->
@@ -326,10 +322,10 @@ class VimState
 
     if head.isGreaterThanOrEqual(tail)
       [start, end] = [tail, head]
-      head = end = $u().translatePointAndClip(@editor, end, 'forward')
+      head = end = @utils.translatePointAndClip(@editor, end, 'forward')
     else
       [start, end] = [head, tail]
-      tail = end = $u().translatePointAndClip(@editor, end, 'forward')
+      tail = end = @utils.translatePointAndClip(@editor, end, 'forward')
 
     @mark.set('<', start)
     @mark.set('>', end)

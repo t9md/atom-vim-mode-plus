@@ -55,6 +55,7 @@ class ModeManager
       @updateNarrowedState()
       @vimState.updatePreviousSelection()
     else
+      # Prevent swrap from loaded on initial mode-setup on startup.
       @vimState.getProp('swrap')?.clearProperties(@editor)
 
     @editorElement.classList.add("#{@mode}-mode")

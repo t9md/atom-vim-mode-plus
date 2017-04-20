@@ -1,30 +1,14 @@
 _ = require 'underscore-plus'
 Delegato = require 'delegato'
-CSON = null
-path = null
-
-# {
-#   getVimEofBufferPosition
-#   getVimLastBufferRow
-#   getVimLastScreenRow
-#   getWordBufferRangeAndKindAtBufferPosition
-#   getFirstCharacterPositionForBufferRow
-#   getBufferRangeForRowRange
-#   getIndentLevelForBufferRow
-#   scanEditorInDirection
-# } = require './utils'
-
-__$u = null
-$u = ->
-  __$u ?= require('./utils')
-
 settings = require './settings'
 
 [
+  CSON
+  path
   Input
   selectList
   getEditorState  # set by Base.init()
-] = []
+] = [] # set null
 
 VMP_LOADING_FILE = null
 VMP_LOADED_FILES = []
@@ -75,7 +59,7 @@ vimStateMethods = [
 class Base
   Delegato.includeInto(this)
   @delegatesMethods(vimStateMethods..., toProperty: 'vimState')
-  @delegatesProperty('mode', 'submode', 'swrap', toProperty: 'vimState')
+  @delegatesProperty('mode', 'submode', 'swrap', 'utils', toProperty: 'vimState')
 
   constructor: (@vimState, properties=null) ->
     {@editor, @editorElement, @globalState, @swrap} = @vimState
@@ -191,31 +175,31 @@ class Base
     inputUI.focus(options)
 
   getVimEofBufferPosition: ->
-    $u().getVimEofBufferPosition(@editor)
+    @utils.getVimEofBufferPosition(@editor)
 
   getVimLastBufferRow: ->
-    $u().getVimLastBufferRow(@editor)
+    @utils.getVimLastBufferRow(@editor)
 
   getVimLastScreenRow: ->
-    $u().getVimLastScreenRow(@editor)
+    @utils.getVimLastScreenRow(@editor)
 
   getWordBufferRangeAndKindAtBufferPosition: (point, options) ->
-    $u().getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
+    @utils.getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
 
   getFirstCharacterPositionForBufferRow: (row) ->
-    $u().getFirstCharacterPositionForBufferRow(@editor, row)
+    @utils.getFirstCharacterPositionForBufferRow(@editor, row)
 
   getBufferRangeForRowRange: (rowRange) ->
-    $u().getBufferRangeForRowRange(@editor, rowRange)
+    @utils.getBufferRangeForRowRange(@editor, rowRange)
 
   getIndentLevelForBufferRow: (row) ->
-    $u().getIndentLevelForBufferRow(@editor, row)
+    @utils.getIndentLevelForBufferRow(@editor, row)
 
   scanForward: (args...) ->
-    $u().scanEditorInDirection(@editor, 'forward', args...)
+    @utils.scanEditorInDirection(@editor, 'forward', args...)
 
   scanBackward: (args...) ->
-    $u().scanEditorInDirection(@editor, 'backward', args...)
+    @utils.scanEditorInDirection(@editor, 'backward', args...)
 
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)

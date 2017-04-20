@@ -1,5 +1,4 @@
 {CompositeDisposable} = require 'atom'
-{scanEditor, matchScopes} = require './utils'
 
 # General purpose utility class to make Atom's marker management easier.
 module.exports =
@@ -37,7 +36,7 @@ class HighlightSearchManager
     return unless @vimState.getConfig('highlightSearch')
     return unless @vimState.isVisible()
     return unless pattern = @globalState.get('highlightSearchPattern')
-    return if matchScopes(@editorElement, @vimState.getConfig('highlightSearchExcludeScopes'))
+    return if @vimState.utils.matchScopes(@editorElement, @vimState.getConfig('highlightSearchExcludeScopes'))
 
-    for range in scanEditor(@editor, pattern)
+    for range in @vimState.utils.scanEditor(@editor, pattern)
       @markerLayer.markBufferRange(range, invalidate: 'inside')
