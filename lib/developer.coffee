@@ -1,21 +1,12 @@
-_ = require 'underscore-plus'
-path = require 'path'
-fs = require 'fs-plus'
 {Emitter, Disposable, BufferedProcess, CompositeDisposable} = require 'atom'
 
 Base = require './base'
-generateIntrospectionReport = null
 settings = require './settings'
 getEditorState = null
 
-invalidateRequireCacheForPackage = (packPath) ->
-  Object.keys(require.cache)
-    .filter (p) -> p.startsWith(packPath + path.sep)
-    .forEach (p) -> delete require.cache[p]
-
 class Developer
-  init: (service) ->
-    {getEditorState} = service
+  init: (_getEditorState) ->
+    getEditorState = _getEditorState
     @devEnvironmentByBuffer = new Map
     @reloadSubscriptionByBuffer = new Map
 
@@ -39,11 +30,10 @@ class Developer
     subscriptions
 
   reportRequireCache: ({focus, excludeNodModules}) ->
-    {inspect} = require 'util'
-    path = require 'path'
+    pathSeparator = require('path').sep
     packPath = atom.packages.getLoadedPackage("vim-mode-plus").path
     cachedPaths = Object.keys(require.cache)
-      .filter (p) -> p.startsWith(packPath + path.sep)
+      .filter (p) -> p.startsWith(packPath + pathSeparator)
       .map (p) -> p.replace(packPath, '')
 
     for cachedPath in cachedPaths
@@ -82,9 +72,16 @@ class Developer
     console.log 'total', inspect(total)
 
   reload: (reloadDependencies) ->
+    pathSeparator = require('path').sep
+
     packages = ['vim-mode-plus']
     if reloadDependencies
       packages.push(settings.get('devReloadPackages')...)
+
+    invalidateRequireCacheForPackage = (packPath) ->
+      Object.keys(require.cache)
+        .filter (p) -> p.startsWith(packPath + pathSeparator)
+        .forEach (p) -> delete require.cache[p]
 
     deactivate = (packName) ->
       console.log "- deactivating #{packName}"
@@ -109,7 +106,8 @@ class Developer
     atom.commands.add('atom-text-editor', "vim-mode-plus:#{name}", fn)
 
   clearDebugOutput: (name, fn) ->
-    filePath = fs.normalize(settings.get('debugOutputFilePath'))
+    {normalize} = require('fs-plus')
+    filePath = normalize(settings.get('debugOutputFilePath'))
     options = {searchAllPanes: true, activatePane: false}
     atom.workspace.open(filePath, options).then (editor) ->
       editor.setText('')
@@ -148,6 +146,8 @@ class Developer
     ".has-persistent-selection": '%'
 
   getCommandSpecs: ->
+    _ = require 'underscore-plus'
+
     compactSelector = (selector) ->
       pattern = ///(#{_.keys(selectorMap).map(_.escapeRegExp).join('|')})///g
       selector.split(/,\s*/g).map (scope) ->
@@ -190,6 +190,8 @@ class Developer
 
   kinds = ["Operator", "Motion", "TextObject", "InsertMode", "MiscCommand", "Scroll"]
   generateSummaryTableForCommandSpecs: (specs, {header}={}) ->
+    _ = require 'underscore-plus'
+
     grouped = _.groupBy(specs, 'kind')
     str = ""
     for kind in kinds when specs = grouped[kind]
@@ -243,7 +245,9 @@ class Developer
       args: ['-g', editor.getPath(), "+call cursor(#{row+1}, #{column+1})"]
 
   generateIntrospectionReport: ->
-    generateIntrospectionReport ?= require './introspection'
+    _ = require 'underscore-plus'
+    generateIntrospectionReport = require './introspection'
+
     generateIntrospectionReport _.values(Base.getClassRegistry()),
       excludeProperties: [
         'run'
