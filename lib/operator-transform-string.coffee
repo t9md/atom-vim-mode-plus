@@ -11,7 +11,6 @@ _ = require 'underscore-plus'
   getIndentLevelForBufferRow
   adjustIndentWithKeepingLayout
 } = require './utils'
-swrap = require './selection-wrapper'
 Base = require './base'
 Operator = Base.getClass('Operator')
 

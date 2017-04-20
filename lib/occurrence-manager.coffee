@@ -1,7 +1,5 @@
 _ = require 'underscore-plus'
 {Emitter, CompositeDisposable} = require 'atom'
-swrap = require './selection-wrapper'
-
 {
   shrinkRangeEndToBeforeNewLine
   collectRangeInBufferRow
@@ -15,7 +13,7 @@ class OccurrenceManager
   markerOptions: {invalidate: 'inside'}
 
   constructor: (@vimState) ->
-    {@editor, @editorElement} = @vimState
+    {@editor, @editorElement, @swrap} = @vimState
     @disposables = new CompositeDisposable
     @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
     @emitter = new Emitter
@@ -171,7 +169,7 @@ class OccurrenceManager
         @vimState.mutationManager.migrateMutation(selection, selections[index])
 
       @destroyMarkers(markersSelected)
-      for $selection in swrap.getSelections(@editor)
+      for $selection in @swrap.getSelections(@editor)
         $selection.saveProperties()
       true
     else

@@ -2,8 +2,6 @@
 Base = require './base'
 {moveCursorLeft, haveSomeNonEmptySelection, assertWithException} = require './utils'
 {OperationAbortedError} = require './errors'
-swrap = require './selection-wrapper'
-
 [Select, MoveToRelativeLine] = []
 
 # opration life in operationStack
@@ -21,7 +19,7 @@ class OperationStack
   Object.defineProperty @prototype, 'submode', get: -> @modeManager.submode
 
   constructor: (@vimState) ->
-    {@editor, @editorElement, @modeManager} = @vimState
+    {@editor, @editorElement, @modeManager, @swrap} = @vimState
 
     @subscriptions = new CompositeDisposable
     @subscriptions.add @vimState.onDidDestroy(@destroy.bind(this))
@@ -67,7 +65,7 @@ class OperationStack
   # -------------------------
   run: (klass, properties) ->
     if @mode is 'visual'
-      for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
+      for $selection in @swrap.getSelections(@editor) when not $selection.hasProperties()
         $selection.saveProperties()
 
     try

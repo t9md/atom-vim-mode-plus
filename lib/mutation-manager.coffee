@@ -1,6 +1,5 @@
 {Point} = require 'atom'
 {getFirstCharacterPositionForBufferRow, getVimLastBufferRow} = require './utils'
-# swrap = require './selection-wrapper'
 
 module.exports =
 class MutationManager

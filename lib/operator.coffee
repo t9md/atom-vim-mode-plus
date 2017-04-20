@@ -10,7 +10,6 @@ _ = require 'underscore-plus'
   ensureEndsWithNewLineForBufferRow
   adjustIndentWithKeepingLayout
 } = require './utils'
-swrap = require './selection-wrapper'
 Base = require './base'
 
 class Operator extends Base
@@ -130,7 +129,7 @@ class Operator extends Base
     if @selectPersistentSelectionIfNecessary()
       # [FIXME] selection-wise is not synched if it already visual-mode
       unless @mode is 'visual'
-        @vimState.modeManager.activate('visual', swrap.detectWise(@editor))
+        @vimState.modeManager.activate('visual', @swrap.detectWise(@editor))
 
     @target = 'CurrentSelection' if @mode is 'visual' and @requireTarget
     @setTarget(@new(@target)) if _.isString(@target)
@@ -166,7 +165,7 @@ class Operator extends Base
 
       @persistentSelection.select()
       @editor.mergeIntersectingSelections()
-      for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
+      for $selection in @swrap.getSelections(@editor) when not $selection.hasProperties()
         $selection.saveProperties()
       true
     else
@@ -199,7 +198,7 @@ class Operator extends Base
 
   normalizeSelectionsIfNecessary: ->
     if @target?.isMotion() and (@mode is 'visual')
-      swrap.normalize(@editor)
+      @swrap.normalize(@editor)
 
   startMutation: (fn) ->
     if @canEarlySelect()

@@ -1,7 +1,6 @@
 _ = require 'underscore-plus'
 
 {getVimState} = require './spec-helper'
-swrap = require '../lib/selection-wrapper'
 
 xdescribe "visual-mode performance", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []

@@ -30,7 +30,6 @@ _ = require 'underscore-plus'
   findRangeInBufferRow
 } = require './utils'
 
-swrap = require './selection-wrapper'
 Base = require './base'
 
 class Motion extends Base
@@ -94,7 +93,7 @@ class Motion extends Base
 
       succeeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessOnLinewise and @isLinewise())
       if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
-        $selection = swrap(selection)
+        $selection = @swrap(selection)
         $selection.saveProperties(true) # save property of "already-normalized-selection"
         $selection.applyWise(@wise)
 
@@ -133,7 +132,7 @@ class CurrentSelection extends Motion
   moveCursor: (cursor) ->
     if @mode is 'visual'
       if @isBlockwise()
-        @blockwiseSelectionExtent = swrap(cursor.selection).getBlockwiseSelectionExtent()
+        @blockwiseSelectionExtent = @swrap(cursor.selection).getBlockwiseSelectionExtent()
       else
         @selectionExtent = @editor.getSelectedBufferRange().getExtent()
     else

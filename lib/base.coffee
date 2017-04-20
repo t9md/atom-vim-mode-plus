@@ -73,7 +73,7 @@ class Base
   @delegatesProperty('mode', 'submode', 'swrap', toProperty: 'vimState')
 
   constructor: (@vimState, properties=null) ->
-    {@editor, @editorElement, @globalState} = @vimState
+    {@editor, @editorElement, @globalState, @swrap} = @vimState
     @name = @constructor.name
     _.extend(this, properties) if properties?
 

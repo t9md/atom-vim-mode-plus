@@ -5,7 +5,6 @@ _ = require 'underscore-plus'
 #  - [ ] Make expandable by selection.getBufferRange().union(@getRange(selection))
 #  - [ ] Count support(priority low)?
 Base = require './base'
-swrap = require './selection-wrapper'
 {
   getLineTextToBufferPosition
   getCodeFoldRowRangesContainesForRow
@@ -78,7 +77,7 @@ class TextObject extends Base
 
   select: ->
     if @isMode('visual', 'blockwise')
-      swrap.normalize(@editor)
+      @swrap.normalize(@editor)
 
     @countTimes @getCount(), ({stop}) =>
       stop() unless @supportCount # quick-fix for #560
@@ -91,18 +90,18 @@ class TextObject extends Base
 
     @editor.mergeIntersectingSelections()
     # Some TextObject's wise is NOT deterministic. It has to be detected from selected range.
-    @wise ?= swrap.detectWise(@editor)
+    @wise ?= @swrap.detectWise(@editor)
 
     if @mode is 'visual'
       if @selectSucceeded
         switch @wise
           when 'characterwise'
-            $selection.saveProperties() for $selection in swrap.getSelections(@editor)
+            $selection.saveProperties() for $selection in @swrap.getSelections(@editor)
           when 'linewise'
             # When target is persistent-selection, new selection is added after selectTextObject.
             # So we have to assure all selection have selction property.
             # Maybe this logic can be moved to operation stack.
-            for $selection in swrap.getSelections(@editor)
+            for $selection in @swrap.getSelections(@editor)
               if @getConfig('keepColumnOnSelectTextObject')
                 $selection.saveProperties() unless $selection.hasProperties()
               else
@@ -110,14 +109,14 @@ class TextObject extends Base
               $selection.fixPropertyRowToRowRange()
 
       if @submode is 'blockwise'
-        for $selection in swrap.getSelections(@editor)
+        for $selection in @swrap.getSelections(@editor)
           $selection.normalize()
           $selection.applyWise('blockwise')
 
   # Return true or false
   selectTextObject: (selection) ->
     if range = @getRange(selection)
-      swrap(selection).setBufferRange(range)
+      @swrap(selection).setBufferRange(range)
       return true
 
   # to override
@@ -629,11 +628,11 @@ class SearchMatchForward extends TextObject
         head = translatePointAndClip(@editor, head, 'backward') if head.isLessThan(tail)
 
       @reversed = head.isLessThan(tail)
-      new Range(tail, head).union(swrap(selection).getTailBufferRange())
+      new Range(tail, head).union(@swrap(selection).getTailBufferRange())
 
   selectTextObject: (selection) ->
     if range = @getRange(selection)
-      swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
+      @swrap(selection).setBufferRange(range, {reversed: @reversed ? @backward})
       return true
 
 class SearchMatchBackward extends SearchMatchForward
@@ -661,7 +660,7 @@ class PreviousSelection extends TextObject
     {properties, submode} = @vimState.previousSelection
     if properties? and submode?
       @wise = submode
-      swrap(@editor.getLastSelection()).selectByProperties(properties)
+      @swrap(@editor.getLastSelection()).selectByProperties(properties)
       return true
 
 class PersistentSelection extends TextObject
