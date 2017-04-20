@@ -192,7 +192,4 @@ inspectInstance = (obj, options={}) ->
 getCommandFromClass = (klass) ->
   if klass.isCommand() then klass.getCommandName() else null
 
-module.exports = {
-  generateIntrospectionReport
-  inspectInstance
-}
+module.exports = generateIntrospectionReport

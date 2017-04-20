@@ -4,7 +4,7 @@ fs = require 'fs-plus'
 {Emitter, Disposable, BufferedProcess, CompositeDisposable} = require 'atom'
 
 Base = require './base'
-{generateIntrospectionReport} = require './introspection'
+generateIntrospectionReport = null
 settings = require './settings'
 {debug, getAncestors, getKeyBindingForCommand} = require './utils'
 
@@ -228,6 +228,7 @@ class Developer
       args: ['-g', editor.getPath(), "+call cursor(#{row+1}, #{column+1})"]
 
   generateIntrospectionReport: ->
+    generateIntrospectionReport ?= require './introspection'
     generateIntrospectionReport _.values(Base.getClassRegistry()),
       excludeProperties: [
         'run'
