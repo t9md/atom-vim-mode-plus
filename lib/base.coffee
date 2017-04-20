@@ -3,16 +3,21 @@ Delegato = require 'delegato'
 CSON = null
 path = null
 
-{
-  getVimEofBufferPosition
-  getVimLastBufferRow
-  getVimLastScreenRow
-  getWordBufferRangeAndKindAtBufferPosition
-  getFirstCharacterPositionForBufferRow
-  getBufferRangeForRowRange
-  getIndentLevelForBufferRow
-  scanEditorInDirection
-} = require './utils'
+# {
+#   getVimEofBufferPosition
+#   getVimLastBufferRow
+#   getVimLastScreenRow
+#   getWordBufferRangeAndKindAtBufferPosition
+#   getFirstCharacterPositionForBufferRow
+#   getBufferRangeForRowRange
+#   getIndentLevelForBufferRow
+#   scanEditorInDirection
+# } = require './utils'
+
+__$u = null
+$u = ->
+  __$u ?= require('./utils')
+
 settings = require './settings'
 
 [
@@ -186,31 +191,31 @@ class Base
     inputUI.focus(options)
 
   getVimEofBufferPosition: ->
-    getVimEofBufferPosition(@editor)
+    $u().getVimEofBufferPosition(@editor)
 
   getVimLastBufferRow: ->
-    getVimLastBufferRow(@editor)
+    $u().getVimLastBufferRow(@editor)
 
   getVimLastScreenRow: ->
-    getVimLastScreenRow(@editor)
+    $u().getVimLastScreenRow(@editor)
 
   getWordBufferRangeAndKindAtBufferPosition: (point, options) ->
-    getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
+    $u().getWordBufferRangeAndKindAtBufferPosition(@editor, point, options)
 
   getFirstCharacterPositionForBufferRow: (row) ->
-    getFirstCharacterPositionForBufferRow(@editor, row)
+    $u().getFirstCharacterPositionForBufferRow(@editor, row)
 
   getBufferRangeForRowRange: (rowRange) ->
-    getBufferRangeForRowRange(@editor, rowRange)
+    $u().getBufferRangeForRowRange(@editor, rowRange)
 
   getIndentLevelForBufferRow: (row) ->
-    getIndentLevelForBufferRow(@editor, row)
+    $u().getIndentLevelForBufferRow(@editor, row)
 
   scanForward: (args...) ->
-    scanEditorInDirection(@editor, 'forward', args...)
+    $u().scanEditorInDirection(@editor, 'forward', args...)
 
   scanBackward: (args...) ->
-    scanEditorInDirection(@editor, 'backward', args...)
+    $u().scanEditorInDirection(@editor, 'backward', args...)
 
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)

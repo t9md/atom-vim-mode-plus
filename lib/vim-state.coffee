@@ -4,7 +4,17 @@ jQuery = null
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
 settings = require './settings'
-{getVisibleEditors, matchScopes, translatePointAndClip, haveSomeNonEmptySelection} = require './utils'
+
+__$u = null
+$u = ->
+  unless __$u?
+    console.log 'lazy-U'
+    console.trace()
+    __$u = require('./utils')
+  __$u
+
+# {getVisibleEditors, matchScopes, translatePointAndClip, haveSomeNonEmptySelection} = require './utils'
+ModeManager = require './mode-manager'
 
 LazyLoadedLibs = {}
 BlockwiseSelection = null
@@ -14,7 +24,8 @@ lazyRequire = (file) ->
 
     if atom.inDevMode() and settings.get('debug')
       console.log "# lazy-require: #{file}"
-      # console.trace()
+      console.trace()
+
     LazyLoadedLibs[file] = require(file)
   LazyLoadedLibs[file]
 
@@ -45,7 +56,6 @@ class VimState
     this[name] if this["__#{name}"]?
 
   @lazyProperties =
-    modeManager: './mode-manager'
     mark: './mark-manager'
     register: './register-manager'
     hover: './hover-manager'
@@ -63,15 +73,35 @@ class VimState
   for propName, fileToLoad of @lazyProperties
     @defineLazyProperty(propName, fileToLoad)
 
+  reportRequireCache: ({focus, excludeNodModules}) ->
+    {inspect} = require 'util'
+    path = require 'path'
+    packPath = atom.packages.getLoadedPackage("vim-mode-plus").path
+    cachedPaths = Object.keys(require.cache)
+      .filter (p) -> p.startsWith(packPath + path.sep)
+      .map (p) -> p.replace(packPath, '')
+
+    for cachedPath in cachedPaths
+      if excludeNodModules and cachedPath.search(/node_modules/) >= 0
+        continue
+      if focus and cachedPath.search(///#{focus}///) >= 0
+        cachedPath = '*' + cachedPath
+
+      console.log cachedPath
+
+
   constructor: (@editor, @statusBarManager, @globalState) ->
     @editorElement = @editor.element
     @emitter = new Emitter
     @subscriptions = new CompositeDisposable
+    @modeManager = new ModeManager(this)
     @previousSelection = {}
     @observeSelections()
 
     @editorElement.classList.add('vim-mode-plus')
-    if @getConfig('startInInsertMode') or matchScopes(@editorElement, @getConfig('startInInsertModeScopes'))
+    startInsertScopes = @getConfig('startInInsertModeScopes')
+
+    if @getConfig('startInInsertMode') or startInsertScopes.length and $u().matchScopes(@editorElement, startInsertScopes)
       @activate('insert')
     else
       @activate('normal')
@@ -219,13 +249,13 @@ class VimState
     return unless @editorElement is event.target?.closest?('atom-text-editor')
     return if event.type.startsWith('vim-mode-plus') # to match vim-mode-plus: and vim-mode-plus-user:
 
-    if haveSomeNonEmptySelection(@editor)
+    if @editor.getSelections().some((selection) -> not selection.isEmpty())
       @editorElement.component.updateSync()
       wise = @swrap.detectWise(@editor)
       if @isMode('visual', wise)
         for $selection in @swrap.getSelections(@editor)
           $selection.saveProperties()
-        @updateCursorsVisibility()
+        @cursorStyleManager.refresh()
       else
         @activate('visual', wise)
     else
@@ -259,7 +289,7 @@ class VimState
           @clearSelections()
         when @hasPersistentSelections() and @getConfig('clearPersistentSelectionOnResetNormalMode')
           @clearPersistentSelections()
-        when @occurrenceManager.hasPatterns()
+        when @getProp('occurrenceManager')?.hasPatterns()
           @occurrenceManager.resetPatterns()
 
       if @getConfig('clearHighlightSearchOnResetNormalMode')
@@ -280,10 +310,7 @@ class VimState
     @getProp('mutationManager')?.reset()
 
   isVisible: ->
-    @editor in getVisibleEditors()
-
-  updateCursorsVisibility: ->
-    @cursorStyleManager.refresh()
+    @editor in $u().getVisibleEditors()
 
   # FIXME: naming, updateLastSelectedInfo ?
   updatePreviousSelection: ->
@@ -299,10 +326,10 @@ class VimState
 
     if head.isGreaterThanOrEqual(tail)
       [start, end] = [tail, head]
-      head = end = translatePointAndClip(@editor, end, 'forward')
+      head = end = $u().translatePointAndClip(@editor, end, 'forward')
     else
       [start, end] = [head, tail]
-      tail = end = translatePointAndClip(@editor, end, 'forward')
+      tail = end = $u().translatePointAndClip(@editor, end, 'forward')
 
     @mark.set('<', start)
     @mark.set('>', end)
@@ -311,13 +338,13 @@ class VimState
   # Persistent selection
   # -------------------------
   hasPersistentSelections: ->
-    @persistentSelection.hasMarkers()
+    @getProp('persistentSelection')?.hasMarkers()
 
   getPersistentSelectionBufferRanges: ->
-    @persistentSelection.getMarkerBufferRanges()
+    @getProp('persistentSelection')?.getMarkerBufferRanges() ? []
 
   clearPersistentSelections: ->
-    @persistentSelection.clearMarkers()
+    @getProp('persistentSelection')?.clearMarkers()
 
   # Animation management
   # -------------------------

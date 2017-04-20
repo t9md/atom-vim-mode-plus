@@ -6,7 +6,9 @@ fs = require 'fs-plus'
 Base = require './base'
 generateIntrospectionReport = null
 settings = require './settings'
-{debug, getAncestors, getKeyBindingForCommand} = require './utils'
+__$u = null
+$u = ->
+  __$u ?= require('./utils')
 
 packageScope = 'vim-mode-plus'
 getEditorState = null
@@ -33,11 +35,28 @@ class Developer
       'reload-with-dependencies': => @reload(true)
       'report-total-marker-count': => @getAllMarkerCount()
       'report-total-and-per-editor-marker-count': => @getAllMarkerCount(true)
+      'report-require-cache': => @reportRequireCache(excludeNodModules: true)
+      'report-require-cache-all': => @reportRequireCache(excludeNodModules: false)
 
     subscriptions = new CompositeDisposable
     for name, fn of commands
       subscriptions.add @addCommand(name, fn)
     subscriptions
+
+  reportRequireCache: ({focus, excludeNodModules}) ->
+    {inspect} = require 'util'
+    path = require 'path'
+    packPath = atom.packages.getLoadedPackage("vim-mode-plus").path
+    cachedPaths = Object.keys(require.cache)
+      .filter (p) -> p.startsWith(packPath + path.sep)
+      .map (p) -> p.replace(packPath, '')
+
+    for cachedPath in cachedPaths
+      if excludeNodModules and cachedPath.search(/node_modules/) >= 0
+        continue
+      if focus and cachedPath.search(///#{focus}///) >= 0
+        cachedPath = '*' + cachedPath
+      console.log cachedPath
 
   getAllMarkerCount: (showEditorsReport=false) ->
     {inspect} = require 'util'
@@ -155,12 +174,12 @@ class Developer
 
     commands = (
       for name, klass of Base.getClassRegistry() when klass.isCommand()
-        kind = getAncestors(klass).map((k) -> k.name)[-2..-2][0]
+        kind = $u().getAncestors(klass).map((k) -> k.name)[-2..-2][0]
         commandName = klass.getCommandName()
         description = klass.getDesctiption()?.replace(/\n/g, '<br/>')
 
         keymap = null
-        if keymaps = getKeyBindingForCommand(commandName, packageName: "vim-mode-plus")
+        if keymaps = $u().getKeyBindingForCommand(commandName, packageName: "vim-mode-plus")
           keymap = keymaps.map ({keystrokes, selector}) ->
             "`#{compactSelector(selector)}` <code>#{compactKeystrokes(keystrokes)}</code>"
           .join("<br/>")

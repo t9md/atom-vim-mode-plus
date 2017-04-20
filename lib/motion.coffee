@@ -4,8 +4,6 @@ _ = require 'underscore-plus'
 {
   moveCursorLeft, moveCursorRight
   moveCursorUpScreen, moveCursorDownScreen
-  moveCursorDownBuffer
-  moveCursorUpBuffer
   pointIsAtVimEndOfFile
   getFirstVisibleScreenRow, getLastVisibleScreenRow
   getValidVimScreenRow, getValidVimBufferRow
@@ -649,15 +647,19 @@ class MoveToFirstCharacterOfLineUp extends MoveToFirstCharacterOfLine
   wise: 'linewise'
   moveCursor: (cursor) ->
     @moveCursorCountTimes cursor, ->
-      moveCursorUpBuffer(cursor)
+      point = cursor.getBufferPosition()
+      unless point.row is 0
+        cursor.setBufferPosition(point.translate([-1, 0]))
     super
 
 class MoveToFirstCharacterOfLineDown extends MoveToFirstCharacterOfLine
   @extend()
   wise: 'linewise'
   moveCursor: (cursor) ->
-    @moveCursorCountTimes cursor, ->
-      moveCursorDownBuffer(cursor)
+    @moveCursorCountTimes cursor, =>
+      point = cursor.getBufferPosition()
+      unless @getVimLastBufferRow() is point.row
+        cursor.setBufferPosition(point.translate([+1, 0]))
     super
 
 class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown

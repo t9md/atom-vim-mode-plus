@@ -259,18 +259,6 @@ moveCursorDownScreen = (cursor, options={}) ->
     motion = (cursor) -> cursor.moveDown()
     moveCursor(cursor, options, motion)
 
-# FIXME
-moveCursorDownBuffer = (cursor) ->
-  point = cursor.getBufferPosition()
-  unless getVimLastBufferRow(cursor.editor) is point.row
-    cursor.setBufferPosition(point.translate([+1, 0]))
-
-# FIXME
-moveCursorUpBuffer = (cursor) ->
-  point = cursor.getBufferPosition()
-  unless point.row is 0
-    cursor.setBufferPosition(point.translate([-1, 0]))
-
 moveCursorToFirstCharacterAtRow = (cursor, row) ->
   cursor.setBufferPosition([row, 0])
   cursor.moveToFirstCharacterOfLine()
@@ -989,8 +977,6 @@ module.exports = {
   getBufferRows
   smartScrollToBufferPosition
   matchScopes
-  moveCursorDownBuffer
-  moveCursorUpBuffer
   isSingleLineText
   getWordBufferRangeAtBufferPosition
   getWordBufferRangeAndKindAtBufferPosition
@@ -1034,3 +1020,4 @@ module.exports = {
   rangeContainsPointWithEndExclusive
   traverseTextFromPoint
 }
+console.log "loaded", __filename

@@ -184,7 +184,7 @@ class OperationStack
       @modeManager.updateNarrowedState()
       @vimState.updatePreviousSelection()
 
-    @vimState.updateCursorsVisibility()
+    @vimState.cursorStyleManager.refresh()
     @vimState.reset()
 
   ensureAllSelectionsAreEmpty: (operation) ->
