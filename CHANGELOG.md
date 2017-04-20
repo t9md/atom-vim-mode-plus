@@ -1,11 +1,11 @@
 # 0.91.0:
-- Developer: When `debug` setting was set to `true`, log lazy-require info when atom `inDevMode`.
-- Performance: Reduce number of file to read on startup further. #760
-  - Avoid require on initial package activation. Especially following widely-used libs.
+- Improve, Performance: Reduce amount of IO( number of files to read ) on startup further. #760
+  - Avoid require on initial package activation. Especially following widely-used libs is not longer `require`d on startup.
     - `lib/selection-wrapper.coffee`
     - `lib/utils.coffee`
     - `underscore-plus`
   - Now `swrap` and `utils` are accessible via lazy-prop( `vimState.utils` and `vimState.swrap` ).
+- Developer: When `debug` setting was set to `true`, log lazy-require info when atom `inDevMode`.
 
 # 0.90.2:
 - Fix: For `search` on initial active-editor after startup, `highlightSearch` did not happened.
