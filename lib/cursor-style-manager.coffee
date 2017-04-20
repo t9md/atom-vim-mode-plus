@@ -1,6 +1,5 @@
 {Point, Disposable, CompositeDisposable} = require 'atom'
 Delegato = require 'delegato'
-swrap = require './selection-wrapper'
 
 # Display cursor in visual-mode
 # ----------------------------------
@@ -50,7 +49,7 @@ class CursorStyleManager
       @styleDisposables.add @modifyStyle(cursor, cursorNode)
 
   getCursorBufferPositionToDisplay: (selection) ->
-    bufferPosition = swrap(selection).getBufferPositionFor('head', from: ['property'])
+    bufferPosition = @vimState.swrap(selection).getBufferPositionFor('head', from: ['property'])
     if @editor.hasAtomicSoftTabs() and not selection.isReversed()
       screenPosition = @editor.screenPositionForBufferPosition(bufferPosition.translate([0, +1]), clipDirection: 'forward')
       bufferPositionToDisplay = @editor.bufferPositionForScreenPosition(screenPosition).translate([0, -1])

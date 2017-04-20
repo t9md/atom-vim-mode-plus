@@ -1,7 +1,6 @@
 _ = require 'underscore-plus'
 {Emitter, Range, CompositeDisposable, Disposable} = require 'atom'
 Base = require './base'
-swrap = require './selection-wrapper'
 {moveCursorLeft} = require './utils'
 
 class ModeManager
@@ -59,7 +58,7 @@ class ModeManager
       @updateNarrowedState()
       @vimState.updatePreviousSelection()
     else
-      swrap.clearProperties(@editor)
+      @vimState.getProp('swrap')?.clearProperties(@editor)
 
     @editorElement.classList.add("#{@mode}-mode")
     @editorElement.classList.add(@submode) if @submode?
@@ -152,6 +151,7 @@ class ModeManager
   # - When selectRight at end position of normalized-selection, it become un-normalized selection
   #   which is the range in visual-mode.
   activateVisualMode: (submode) ->
+    swrap = @vimState.swrap
     for $selection in swrap.getSelections(@editor) when not $selection.hasProperties()
       $selection.saveProperties()
 
@@ -176,7 +176,7 @@ class ModeManager
       # [FIXME] why I need null guard here
       not @vimState.getLastBlockwiseSelection()?.isSingleRow()
     else
-      not swrap(@editor.getLastSelection()).isSingleRow()
+      not @vimState.swrap(@editor.getLastSelection()).isSingleRow()
 
   updateNarrowedState: (value=null) ->
     @editorElement.classList.toggle('is-narrowed', value ? @hasMultiLineSelection())

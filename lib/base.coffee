@@ -13,8 +13,6 @@ path = null
   getIndentLevelForBufferRow
   scanEditorInDirection
 } = require './utils'
-swrap = null
-
 settings = require './settings'
 
 [
@@ -72,7 +70,7 @@ vimStateMethods = [
 class Base
   Delegato.includeInto(this)
   @delegatesMethods(vimStateMethods..., toProperty: 'vimState')
-  @delegatesProperty('mode', 'submode', toProperty: 'vimState')
+  @delegatesProperty('mode', 'submode', 'swrap', toProperty: 'vimState')
 
   constructor: (@vimState, properties=null) ->
     {@editor, @editorElement, @globalState} = @vimState
@@ -248,8 +246,7 @@ class Base
       cursor.getBufferPosition()
 
   getCursorPositionForSelection: (selection) ->
-    swrap ?= require './selection-wrapper'
-    swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
+    @swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
 
   toString: ->
     str = @name

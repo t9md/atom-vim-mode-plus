@@ -1,12 +1,10 @@
 Delegato = require 'delegato'
 jQuery = null
 
-_ = require 'underscore-plus'
 {Emitter, Disposable, CompositeDisposable, Range} = require 'atom'
 
 settings = require './settings'
 {getVisibleEditors, matchScopes, translatePointAndClip, haveSomeNonEmptySelection} = require './utils'
-swrap = require './selection-wrapper'
 
 LazyLoadedLibs = {}
 BlockwiseSelection = null
@@ -39,6 +37,12 @@ class VimState
   @defineLazyProperty: (name, fileToLoad) ->
     Object.defineProperty @prototype, name,
       get: -> this["__#{name}"] ?= new (lazyRequire(fileToLoad))(this)
+
+  Object.defineProperty @prototype, 'swrap',
+    get: -> this.__swrap ?= lazyRequire('./selection-wrapper')
+
+  getProp: (name) ->
+    this[name] if this["__#{name}"]?
 
   @lazyProperties =
     modeManager: './mode-manager'
@@ -208,7 +212,7 @@ class VimState
 
   checkSelection: (event) ->
     return unless atom.workspace.getActiveTextEditor() is @editor
-    return if @__operationStack? and @operationStack.isProcessing() # Don't populate lazy-prop on startup
+    return if @getProp('operationStack')?.isProcessing() # Don't populate lazy-prop on startup
     return if @mode is 'insert'
     # Intentionally using target.closest('atom-text-editor')
     # Don't use target.getModel() which is work for CustomEvent but not work for mouse event.
@@ -217,9 +221,9 @@ class VimState
 
     if haveSomeNonEmptySelection(@editor)
       @editorElement.component.updateSync()
-      wise = swrap.detectWise(@editor)
+      wise = @swrap.detectWise(@editor)
       if @isMode('visual', wise)
-        for $selection in swrap.getSelections(@editor)
+        for $selection in @swrap.getSelections(@editor)
           $selection.saveProperties()
         @updateCursorsVisibility()
       else
@@ -269,11 +273,11 @@ class VimState
 
   reset: ->
     # Don't populate lazy-prop on startup
-    @register.reset() if @__register?
-    @searchHistory.reset() if @__searchHistory?
-    @hover.reset() if @__hover?
-    @operationStack.reset() if @__operationStack?
-    @mutationManager.reset() if @__mutationManager?
+    @getProp('register')?.reset()
+    @getProp('searchHistory')?.reset()
+    @getProp('hover')?.reset()
+    @getProp('operationStack')?.reset()
+    @getProp('mutationManager')?.reset()
 
   isVisible: ->
     @editor in getVisibleEditors()
@@ -286,7 +290,7 @@ class VimState
     if @isMode('visual', 'blockwise')
       properties = @getLastBlockwiseSelection()?.getProperties()
     else
-      properties = swrap(@editor.getLastSelection()).getProperties()
+      properties = @swrap(@editor.getLastSelection()).getProperties()
 
     # TODO#704 when cursor is added in visual-mode, corresponding selection prop yet not exists.
     return unless properties
@@ -334,7 +338,7 @@ class VimState
 
     if @mode is 'visual'
       selection = @editor.getLastSelection()
-      point = swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
+      point = @swrap(selection).getBufferPositionFor('head', from: ['property', 'selection'])
     else
       point = @editor.getCursorBufferPosition()
     @originalCursorPosition = point
