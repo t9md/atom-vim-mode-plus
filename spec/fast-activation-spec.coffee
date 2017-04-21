@@ -29,14 +29,18 @@ describe "dirty work for fast package activation", ->
 
       withCleanActivation = (fn) ->
         savedCache = {}
+        pack = null
         runs ->
           getRequiredLibOrNodeModulePaths().forEach (p) ->
             savedCache[p] = require.cache[p]
             delete require.cache[p]
 
         waitsForPromise ->
-          atom.packages.activatePackage('vim-mode-plus').then (pack) ->
-            return Promise.resolve(fn(pack))
+          atom.packages.activatePackage('vim-mode-plus').then (_pack) ->
+            pack = _pack
+
+        runs ->
+          fn(pack)
 
         runs ->
           oldPaths = Object.keys(savedCache)
@@ -73,14 +77,17 @@ describe "dirty work for fast package activation", ->
 
     it "[one editor opened] require minimum set of files", ->
       withCleanActivation ->
-        atom.workspace.open().then ->
+        waitsForPromise -> atom.workspace.open()
+        runs ->
           files = shouldRequireFilesInOrdered.concat('lib/status-bar-manager.coffee')
           ensureRequiredFiles(files)
 
     it "[after motion executed] require minimum set of files", ->
       withCleanActivation ->
-        atom.workspace.open().then (e) ->
-          atom.commands.dispatch(e.element, 'vim-mode-plus:move-right')
+        waitsForPromise ->
+          atom.workspace.open().then (e) ->
+            atom.commands.dispatch(e.element, 'vim-mode-plus:move-right')
+        runs ->
           extraShouldRequireFilesInOrdered = [
             "lib/status-bar-manager.coffee"
             "lib/operation-stack.coffee"
