@@ -36,7 +36,7 @@ describe "dirty work for fast package activation", ->
 
         waitsForPromise ->
           atom.packages.activatePackage('vim-mode-plus').then (pack) ->
-            return fn(pack)
+            return Promise.resolve(fn(pack))
 
         runs ->
           oldPaths = Object.keys(savedCache)
