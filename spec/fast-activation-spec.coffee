@@ -71,7 +71,7 @@ describe "dirty work for fast package activation", ->
       shouldRequireFilesInOrdered.push('lib/developer.coffee')
 
     # * To reduce IO and compile-evaluation of js file on startup
-    it "require minimum set of files", ->
+    xit "require minimum set of files", ->
       withCleanActivation ->
         ensureRequiredFiles(shouldRequireFilesInOrdered)
 
