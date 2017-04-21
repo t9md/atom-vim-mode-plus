@@ -2,7 +2,6 @@ _ = require 'underscore-plus'
 semver = require 'semver'
 {Range, Point, Disposable} = require 'atom'
 {inspect} = require 'util'
-settings = require '../lib/settings'
 globalState = require '../lib/global-state'
 
 KeymapManager = atom.keymaps.constructor
@@ -466,7 +465,6 @@ class VimEditor
         switch
           when k.input?
             # TODO no longer need to use [input: 'char'] style.
-            # if settings.
             rawKeystroke(_key, target) for _key in k.input.split('')
           when k.search?
             @vimState.searchInput.editor.insertText(k.search) if k.search
