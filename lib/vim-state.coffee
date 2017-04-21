@@ -117,7 +117,7 @@ class VimState
     @swrap.getBlockwiseSelectionsOrderedByBufferPosition(@editor)
 
   clearBlockwiseSelections: ->
-    @swrap.clearBlockwiseSelections(@editor)
+    @getProp('swrap')?.clearBlockwiseSelections(@editor)
 
   # Other
   # -------------------------
@@ -268,7 +268,7 @@ class VimState
     @editor.setCursorBufferPosition(@editor.getCursorBufferPosition())
 
   resetNormalMode: ({userInvocation}={}) ->
-    @getProp('swrap')?.clearBlockwiseSelections()
+    @clearBlockwiseSelections()
 
     if userInvocation ? false
       switch
