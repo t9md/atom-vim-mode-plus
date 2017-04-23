@@ -76,7 +76,7 @@ describe "dirty work for fast package activation", ->
     if atom.inDevMode()
       shouldRequireFilesInOrdered.push('lib/developer.coffee')
 
-    it "THIS IS WORKAROUND FOR Travis-CI's" ->
+    it "THIS IS WORKAROUND FOR Travis-CI's", ->
       # HACK:
       # After very first call of atom.packages.activatePackage('vim-mode-plus')
       # require.cache is NOT populated yet on Travis-CI.
