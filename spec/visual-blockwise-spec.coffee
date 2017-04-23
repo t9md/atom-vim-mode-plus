@@ -1,6 +1,6 @@
 {getVimState, TextData} = require './spec-helper'
 
-describe "Visual Blockwise", ->
+xdescribe "Visual Blockwise", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
   textInitial = """
     01234567890123456789

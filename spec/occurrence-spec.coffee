@@ -1,7 +1,7 @@
 {getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "Occurrence", ->
+xdescribe "Occurrence", ->
   [set, ensure, keystroke, editor, editorElement, vimState, classList] = []
   [searchEditor, searchEditorElement] = []
   inputSearchText = (text) ->

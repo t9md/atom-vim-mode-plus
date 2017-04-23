@@ -1,7 +1,7 @@
 {getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "Motion Search", ->
+xdescribe "Motion Search", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->

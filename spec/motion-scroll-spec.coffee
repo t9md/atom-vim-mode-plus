@@ -1,7 +1,7 @@
 {getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "Motion Scroll", ->
+xdescribe "Motion Scroll", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
   lines = (n + " " + 'X'.repeat(10) for n in [0...100]).join("\n")
   text = new TextData(lines)

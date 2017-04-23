@@ -1,7 +1,7 @@
 {getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "Operator general", ->
+xdescribe "Operator general", ->
   [set, ensure, ensureByDispatch, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->

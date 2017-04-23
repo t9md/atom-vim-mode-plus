@@ -1,7 +1,7 @@
 {getVimState, dispatch, TextData, getView, withMockPlatform, rawKeystroke} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "min DSL used in vim-mode-plus's spec", ->
+xdescribe "min DSL used in vim-mode-plus's spec", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->

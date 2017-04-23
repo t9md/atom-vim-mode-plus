@@ -1,7 +1,7 @@
 {getVimState} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "Prefixes", ->
+xdescribe "Prefixes", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->

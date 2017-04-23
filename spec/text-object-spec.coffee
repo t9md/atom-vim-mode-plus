@@ -1,7 +1,7 @@
 {getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "TextObject", ->
+xdescribe "TextObject", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   getCheckFunctionFor = (textObject) ->
