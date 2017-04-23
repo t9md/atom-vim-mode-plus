@@ -67,7 +67,10 @@ class CursorStyleManager
       screenPosition = @editor.screenPositionForBufferPosition(bufferPosition)
       {row, column} = screenPosition.traversalFrom(cursor.getScreenPosition())
     else
-      {row, column} = bufferPosition.traversalFrom(cursor.getBufferPosition())
+      if cursor.isAtBeginningOfLine()
+        {row, column} = new Point(-1, 0)
+      else
+        {row, column} = new Point(0, -1)
 
     style = domNode.style
     style.setProperty('top', "#{@lineHeight * row}px") if row
