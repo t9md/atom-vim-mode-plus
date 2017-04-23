@@ -23,6 +23,7 @@ describe "dirty work for fast package activation", ->
   beforeEach ->
     runs ->
       packPath = atom.packages.loadPackage('vim-mode-plus').path
+
       getRequiredLibOrNodeModulePaths = ->
         Object.keys(require.cache).filter (p) ->
           p.startsWith(packPath + 'lib') or p.startsWith(packPath + 'node_modules')
@@ -30,8 +31,10 @@ describe "dirty work for fast package activation", ->
       withCleanActivation = (fn) ->
         savedCache = {}
         pack = null
+        oldPaths = null
         runs ->
-          getRequiredLibOrNodeModulePaths().forEach (p) ->
+          oldPaths = getRequiredLibOrNodeModulePaths()
+          oldPaths.forEach (p) ->
             savedCache[p] = require.cache[p]
             delete require.cache[p]
 
@@ -43,13 +46,17 @@ describe "dirty work for fast package activation", ->
           fn(pack)
 
         runs ->
-          oldPaths = Object.keys(savedCache)
-          newPaths = getRequiredLibOrNodeModulePaths()
-          newPaths.forEach (p) ->
-            if p in oldPaths
-              require.cache[p] = savedCache[p]
-            else
+          oldPaths.forEach (p) ->
+            require.cache[p] = savedCache[p]
+          getRequiredLibOrNodeModulePaths().forEach (p) ->
+            if p not in oldPaths
               delete require.cache[p]
+          # after = getRequiredLibOrNodeModulePaths()
+          # console.log 'before', inspect(oldPaths)
+          # console.log 'after', inspect(after)
+          # _ = require 'underscore-plus'
+          # console.log _.isEqual(oldPaths.slice().sort(), after.slice().sort())
+
 
       ensureRequiredFiles = (files) ->
         should = files.map((file) -> packPath + file)
@@ -71,7 +78,7 @@ describe "dirty work for fast package activation", ->
       shouldRequireFilesInOrdered.push('lib/developer.coffee')
 
     # * To reduce IO and compile-evaluation of js file on startup
-    xit "require minimum set of files", ->
+    it "require minimum set of files", ->
       withCleanActivation ->
         ensureRequiredFiles(shouldRequireFilesInOrdered)
 
