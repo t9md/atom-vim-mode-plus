@@ -52,7 +52,12 @@ module.exports =
       if atom.workspace.isTextEditor(item) and not item.isMini()
         # Still there is possibility editor is destroyed and don't have corresponding
         # vimState #196.
-        @getEditorState(item)?.highlightSearch.refresh()
+        vimState = @getEditorState(item)
+        return unless vimState?
+        if globalState.get('highlightSearchPattern')
+          vimState.highlightSearch.refresh()
+        else
+          vimState.getProp('highlightSearch')?.refresh()
 
     # @subscribe  globalState.get('highlightSearchPattern')
     # Refresh highlight based on globalState.highlightSearchPattern changes.
