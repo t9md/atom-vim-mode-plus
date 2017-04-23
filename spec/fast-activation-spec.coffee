@@ -22,7 +22,9 @@ describe "dirty work for fast package activation", ->
 
   beforeEach ->
     runs ->
+      console.log "before load"
       packPath = atom.packages.loadPackage('vim-mode-plus').path
+      console.log "after load"
 
       getRequiredLibOrNodeModulePaths = ->
         Object.keys(require.cache).filter (p) ->
@@ -39,11 +41,10 @@ describe "dirty work for fast package activation", ->
             delete require.cache[p]
 
         waitsForPromise ->
+          console.log "before activate"
           atom.packages.activatePackage('vim-mode-plus').then (_pack) ->
             pack = _pack
-            # {inspect} = require 'util'
-            # paths = getRequiredLibOrNodeModulePaths()
-            # console.log inspect(paths.map (p) -> p.replace(packPath, ''))
+            console.log "after activate"
 
         runs ->
           fn(pack)
@@ -54,20 +55,12 @@ describe "dirty work for fast package activation", ->
           getRequiredLibOrNodeModulePaths().forEach (p) ->
             if p not in oldPaths
               delete require.cache[p]
-          # after = getRequiredLibOrNodeModulePaths()
-          # console.log 'before', inspect(oldPaths)
-          # console.log 'after', inspect(after)
-          # _ = require 'underscore-plus'
-          # console.log _.isEqual(oldPaths.slice().sort(), after.slice().sort())
 
       ensureRequiredFiles = (files) ->
         should = files.map((file) -> packPath + file)
-        paths = getRequiredLibOrNodeModulePaths()
-        {inspect} = require 'util'
-        # p = (args...) -> console.log inspect(args...)
-        # console.log inspect(paths.map (p) -> p.replace(packPath, ''))
-        expect(paths).toEqual(should)
+        expect(getRequiredLibOrNodeModulePaths()).toEqual(should)
 
+  # * To reduce IO and compile-evaluation of js file on startup
   describe "requrie as minimum num of file as possible on startup", ->
     shouldRequireFilesInOrdered = [
       "lib/main.coffee"
@@ -83,11 +76,15 @@ describe "dirty work for fast package activation", ->
     if atom.inDevMode()
       shouldRequireFilesInOrdered.push('lib/developer.coffee')
 
-    # * To reduce IO and compile-evaluation of js file on startup
-    it "just null require minimum set of files", ->
+    it "THIS IS WORKAROUND FOR Travis-CI's" ->
+      # HACK:
+      # After very first call of atom.packages.activatePackage('vim-mode-plus')
+      # require.cache is NOT populated yet on Travis-CI.
+      # It doesn't include lib/main.coffee( this is odd state! ).
+      # This only happens in very first activation.
+      # So puting here useless test just activate package can be workaround.
       withCleanActivation ->
         null
-        # ensureRequiredFiles(shouldRequireFilesInOrdered)
 
     it "require minimum set of files", ->
       withCleanActivation ->

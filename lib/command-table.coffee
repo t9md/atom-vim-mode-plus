@@ -1,3 +1,4 @@
+console.log __filename
 module.exports =
 Operator:
   file: "./operator"
