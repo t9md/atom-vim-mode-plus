@@ -22,39 +22,35 @@ describe "dirty work for fast package activation", ->
 
   beforeEach ->
     runs ->
-      console.log "before load"
       packPath = atom.packages.loadPackage('vim-mode-plus').path
-      console.log "after load"
 
       getRequiredLibOrNodeModulePaths = ->
         Object.keys(require.cache).filter (p) ->
           p.startsWith(packPath + 'lib') or p.startsWith(packPath + 'node_modules')
 
-      withCleanActivation = (fn) ->
+      # Return function to restore original require.cache of interest
+      cleanRequireCache = ->
         savedCache = {}
-        pack = null
-        oldPaths = null
-        runs ->
-          oldPaths = getRequiredLibOrNodeModulePaths()
-          oldPaths.forEach (p) ->
-            savedCache[p] = require.cache[p]
-            delete require.cache[p]
+        oldPaths = getRequiredLibOrNodeModulePaths()
+        oldPaths.forEach (p) ->
+          savedCache[p] = require.cache[p]
+          delete require.cache[p]
 
-        waitsForPromise ->
-          console.log "before activate"
-          atom.packages.activatePackage('vim-mode-plus').then (_pack) ->
-            pack = _pack
-            console.log "after activate"
-
-        runs ->
-          fn(pack)
-
-        runs ->
+        return ->
           oldPaths.forEach (p) ->
             require.cache[p] = savedCache[p]
           getRequiredLibOrNodeModulePaths().forEach (p) ->
             if p not in oldPaths
               delete require.cache[p]
+
+      withCleanActivation = (fn) ->
+        restoreRequireCache = null
+        runs ->
+          restoreRequireCache = cleanRequireCache()
+        waitsForPromise ->
+          atom.packages.activatePackage('vim-mode-plus').then(fn)
+        runs ->
+          restoreRequireCache()
 
       ensureRequiredFiles = (files) ->
         should = files.map((file) -> packPath + file)
@@ -92,7 +88,8 @@ describe "dirty work for fast package activation", ->
 
     it "[one editor opened] require minimum set of files", ->
       withCleanActivation ->
-        waitsForPromise -> atom.workspace.open()
+        waitsForPromise ->
+          atom.workspace.open()
         runs ->
           files = shouldRequireFilesInOrdered.concat('lib/status-bar-manager.coffee')
           ensureRequiredFiles(files)
