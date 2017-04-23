@@ -76,7 +76,7 @@ module.exports =
         globalState.set('highlightSearchPattern', null)
 
     @subscribe(settings.observeConditionalKeymaps()...)
-    
+
     if settings.get('debug')
       developer?.reportRequireCache(excludeNodModules: false)
 
