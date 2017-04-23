@@ -57,10 +57,13 @@ describe "dirty work for fast package activation", ->
           # _ = require 'underscore-plus'
           # console.log _.isEqual(oldPaths.slice().sort(), after.slice().sort())
 
-
       ensureRequiredFiles = (files) ->
         should = files.map((file) -> packPath + file)
-        expect(getRequiredLibOrNodeModulePaths()).toEqual(should)
+        paths = getRequiredLibOrNodeModulePaths()
+        {inspect} = require 'util'
+        p = (args...) -> console.log inspect(args...)
+        console.log inspect(paths.map (p) -> p.replace(packPath, ''))
+        expect(paths).toEqual(should)
 
   describe "requrie as minimum num of file as possible on startup", ->
     shouldRequireFilesInOrdered = [
