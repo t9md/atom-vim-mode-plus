@@ -1,7 +1,7 @@
 {getVimState, dispatch, TextData, getView, withMockPlatform, rawKeystroke} = require './spec-helper'
 settings = require '../lib/settings'
 
-xdescribe "Operator modifier", ->
+describe "Operator modifier", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->

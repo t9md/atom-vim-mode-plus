@@ -2,7 +2,7 @@ _ = require 'underscore-plus'
 {getVimState, TextData, withMockPlatform} = require './spec-helper'
 settings = require '../lib/settings'
 
-xdescribe "VimState", ->
+describe "VimState", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->

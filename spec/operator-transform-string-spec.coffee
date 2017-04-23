@@ -1,7 +1,7 @@
 {getVimState, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
 
-xdescribe "Operator TransformString", ->
+describe "Operator TransformString", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->

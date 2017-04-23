@@ -1,6 +1,6 @@
 {getVimState} = require './spec-helper'
 
-xdescribe "Scrolling", ->
+describe "Scrolling", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->

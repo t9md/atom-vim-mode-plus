@@ -1,7 +1,7 @@
 {getVimState, getView} = require './spec-helper'
 
 packageName = 'vim-mode-plus'
-xdescribe "vim-mode-plus", ->
+describe "vim-mode-plus", ->
   [set, ensure, keystroke, editor, editorElement, vimState, workspaceElement] = []
 
   beforeEach ->

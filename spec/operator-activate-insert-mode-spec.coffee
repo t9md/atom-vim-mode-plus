@@ -2,7 +2,7 @@
 settings = require '../lib/settings'
 {inspect} = require 'util'
 
-xdescribe "Operator ActivateInsertMode family", ->
+describe "Operator ActivateInsertMode family", ->
   [set, ensure, bindEnsureOption, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
