@@ -37,6 +37,7 @@ describe "dirty work for fast package activation", ->
           oldPaths.forEach (p) ->
             savedCache[p] = require.cache[p]
             delete require.cache[p]
+          console.log getRequiredLibOrNodeModulePaths()
 
         waitsForPromise ->
           atom.packages.activatePackage('vim-mode-plus').then (_pack) ->
@@ -141,7 +142,7 @@ describe "dirty work for fast package activation", ->
           newRegistriesLength = Object.keys(Base.getClassRegistry()).length
           expect(newRegistriesLength).toBeGreaterThan(oldRegistriesLength)
 
-    describe "make sure cmd-table is NOT out-of-date", ->
+    xdescribe "make sure cmd-table is NOT out-of-date", ->
       it "generateCommandTableByEagerLoad return table which is equals to initially loaded command table", ->
         withCleanActivation (pack) ->
           Base = pack.mainModule.provideVimModePlus().Base
