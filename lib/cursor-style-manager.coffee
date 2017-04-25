@@ -1,5 +1,6 @@
 {Point, Disposable, CompositeDisposable} = require 'atom'
 Delegato = require 'delegato'
+SupportCursorSetVisible = null
 
 # Display cursor in visual-mode
 # ----------------------------------
@@ -35,18 +36,45 @@ class CursorStyleManager
     else
       cursorsToShow = @editor.getCursors()
 
-    # In blockwise, show only blockwise-head cursor
+    SupportCursorSetVisible ?= @editor.getLastCursor().setVisible?
+
+    if SupportCursorSetVisible
+      # FIXME: In visual-mode or in occurrence operation, cursor are added during operation but selection is added asynchronously.
+      # We have to make sure that corresponding cursor's domNode is available at this point to directly modify it's style.
+      @editorElement.component.updateSync()
+
     for cursor in @editor.getCursors()
-      cursor.setVisible(cursor in cursorsToShow)
+      # In blockwise, show only blockwise-head cursor
+      cursorIsVisible = cursor in cursorsToShow
+      if SupportCursorSetVisible
+        cursor.setVisible(cursor, cursorIsVisible)
+      else
+        visibility = if cursorIsVisible then 'visible' else 'hidden'
+        @editor.decorateMarker(cursor.getMarker(), type: 'cursor', style: {visibility})
+      continue unless cursorIsVisible
 
-    # FIXME: in occurrence, in vB, multi-selections are added during operation but selection is added asynchronously.
-    # We need to make sure that corresponding cursor's domNode is available to modify it's style.
-    @editorElement.component.updateSync()
+      traversal = @getCursorTraversal(cursor)
+      cursorStyle = {
+        top: @lineHeight * traversal.row + 'px'
+        left: traversal.column + 'ch'
+      }
 
-    # [NOTE] Using non-public API
-    cursorNodesById = @editorElement.component.linesComponent.cursorsComponent.cursorNodesById
-    for cursor in cursorsToShow when cursorNode = cursorNodesById[cursor.id]
-      @styleDisposables.add @modifyStyle(cursor, cursorNode)
+      if SupportCursorSetVisible
+        # [NOTE] Using non-public API
+        cursorNode = @editorElement.component.linesComponent.cursorsComponent.cursorNodesById[cursor.id]
+        cursorNode.style.setProperty('top', cursorStyle.top)
+        cursorNode.style.setProperty('left', cursorStyle.left)
+        @styleDisposables.add new Disposable ->
+          cursorNode.style.removeProperty('top')
+          cursorNode.style.removeProperty('left')
+      else
+        # @editorElement.component.getNextUpdatePromise().then =>
+        #   for cursorNode in @editorElement.querySelectorAll('.cursor')
+        #     console.log [cursorNode.style.top, cursorNode.style.left]
+        cursorMarker = cursor.getMarker()
+        @editor.decorateMarker(cursorMarker, type: 'cursor', style: cursorStyle)
+        @styleDisposables.add new Disposable =>
+          @editor.decorateMarker(cursorMarker, type: 'cursor', style: {top: '0px', left: '0ch'})
 
   getCursorBufferPositionToDisplay: (selection) ->
     bufferPosition = @vimState.swrap(selection).getBufferPositionFor('head', from: ['property'])
@@ -58,22 +86,14 @@ class CursorStyleManager
 
     @editor.clipBufferPosition(bufferPosition)
 
-  # Apply selection property's traversal from actual cursor to cursorNode's style
-  modifyStyle: (cursor, domNode) ->
+  getCursorTraversal: (cursor) ->
     selection = cursor.selection
     bufferPosition = @getCursorBufferPositionToDisplay(selection)
 
     if @submode is 'linewise' and @editor.isSoftWrapped()
       screenPosition = @editor.screenPositionForBufferPosition(bufferPosition)
-      {row, column} = screenPosition.traversalFrom(cursor.getScreenPosition())
+      screenPosition.traversalFrom(cursor.getScreenPosition())
     else
-      {row, column} = bufferPosition.traversalFrom(cursor.getBufferPosition())
-
-    style = domNode.style
-    style.setProperty('top', "#{@lineHeight * row}px") if row
-    style.setProperty('left', "#{column}ch") if column
-    new Disposable ->
-      style.removeProperty('top')
-      style.removeProperty('left')
+      bufferPosition.traversalFrom(cursor.getBufferPosition())
 
 module.exports = CursorStyleManager
