@@ -4,6 +4,7 @@ SupportCursorSetVisible = null
 
 # Display cursor in visual-mode
 # ----------------------------------
+module.exports =
 class CursorStyleManager
   lineHeight: null
 
@@ -110,5 +111,3 @@ class CursorStyleManager
       }
     else
       return {visibility: 'hidden'}
-
-module.exports = CursorStyleManager
