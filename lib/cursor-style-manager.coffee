@@ -12,6 +12,7 @@ class CursorStyleManager
 
   constructor: (@vimState) ->
     {@editorElement, @editor} = @vimState
+    SupportCursorSetVisible ?= @editor.getLastCursor().setVisible?
     @disposables = new CompositeDisposable
     @disposables.add atom.config.observe('editor.lineHeight', @refresh)
     @disposables.add atom.config.observe('editor.fontSize', @refresh)
@@ -35,8 +36,6 @@ class CursorStyleManager
       cursorsToShow = @vimState.getBlockwiseSelections().map (bs) -> bs.getHeadSelection().cursor
     else
       cursorsToShow = @editor.getCursors()
-
-    SupportCursorSetVisible ?= @editor.getLastCursor().setVisible?
 
     if SupportCursorSetVisible
       # FIXME: In visual-mode or in occurrence operation, cursor are added during operation but selection is added asynchronously.
