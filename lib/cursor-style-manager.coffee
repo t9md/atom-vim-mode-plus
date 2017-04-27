@@ -47,11 +47,14 @@ class CursorStyleManager
     cursorStyle = @getCursorStyle(cursor, true)
     # [NOTE] Using non-public API
     cursorNode = @editorElement.component.linesComponent.cursorsComponent.cursorNodesById[cursor.id]
-    cursorNode.style.setProperty('top', cursorStyle.top)
-    cursorNode.style.setProperty('left', cursorStyle.left)
-    new Disposable ->
-      cursorNode.style.removeProperty('top')
-      cursorNode.style.removeProperty('left')
+    if cursorNode
+      cursorNode.style.setProperty('top', cursorStyle.top)
+      cursorNode.style.setProperty('left', cursorStyle.left)
+      new Disposable ->
+        cursorNode.style?.removeProperty('top')
+        cursorNode.style?.removeProperty('left')
+    else
+      new Disposable
 
   updateCursorStyleNew: ->
     # We must dispose previous style modification for non-visual-mode
