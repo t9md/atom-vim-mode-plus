@@ -1,9 +1,5 @@
 {CompositeDisposable} = require 'atom'
 
-# see `foldnestmax` in VIM help manual
-# TODO: Settings with this param
-FOLD_NEST_MAX = 20
-
 # A manager for memorizing fold level.
 module.exports =
 class FoldManager
@@ -14,25 +10,28 @@ class FoldManager
     @disposables = new CompositeDisposable
     @disposables.add @vimState.onDidDestroy(@destroy.bind(this))
 
-    @foldLevel = FOLD_NEST_MAX
+    @foldLevel = @getFoldNestMax()
 
   destroy: ->
     @disposables.dispose()
 
+  getFoldNestMax: ->
+    @vimState.getConfig('maximumNestingOfFolds')
+
   unfoldAll: ->
     @editor.displayLayer.destroyAllFolds()
-    @foldLevel = FOLD_NEST_MAX
+    @foldLevel = @getFoldNestMax()
 
   foldAll: ->
-    if FOLD_NEST_MAX > 0
+    if @getFoldNestMax() > 0
       @editor.foldAll()
     @foldLevel = 0
 
   # Internal use
   foldAllAtIndentLevel: (indentLevel) ->
     @editor.unfoldAll()
-    if indentLevel >= FOLD_NEST_MAX
-      @foldLevel = FOLD_NEST_MAX
+    if indentLevel >= @getFoldNestMax()
+      @foldLevel = @getFoldNestMax()
       return
 
     foldedRowRanges = {}
@@ -60,7 +59,7 @@ class FoldManager
     if not folded
       @foldLevel = maxBufferIndentLevel
       # automatically fold one level if not folded
-      if indentLevel is FOLD_NEST_MAX - 1
+      if indentLevel is @getFoldNestMax() - 1
         @foldAllAtIndentLevel(Math.max(@foldLevel - 1, 0))
 
   unfoldAllByOneIndentLevel: ->
