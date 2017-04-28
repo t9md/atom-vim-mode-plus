@@ -160,6 +160,26 @@ class ToggleFold extends MiscCommand
     point = @editor.getCursorBufferPosition()
     @editor.toggleFoldAtBufferRow(point.row)
 
+class UnfoldAll extends MiscCommand
+  @extend()
+  execute: ->
+    @vimState.foldManager.unfoldAll()
+
+class FoldAll extends MiscCommand
+  @extend()
+  execute: ->
+    @vimState.foldManager.foldAll()
+
+class UnfoldAllByOneIndentLevel extends MiscCommand
+  @extend()
+  execute: ->
+    @vimState.foldManager.unfoldAllByOneIndentLevel()
+
+class FoldAllByOneIndentLevel extends MiscCommand
+  @extend()
+  execute: ->
+    @vimState.foldManager.foldAllByOneIndentLevel()
+
 class ReplaceModeBackspace extends MiscCommand
   @commandScope: 'atom-text-editor.vim-mode-plus.insert-mode.replace'
   @extend()
