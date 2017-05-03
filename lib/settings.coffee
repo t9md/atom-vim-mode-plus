@@ -243,6 +243,9 @@ module.exports = new Settings 'vim-mode-plus',
     description: 'Comma separated list of operator class name to disable flash e.g. "yank, auto-indent"'
   flashOnSearch: true
   flashScreenOnSearchHasNoMatch: true
+  maximumNestingOfFolds:
+    default: 20
+    description: 'Sets the maximum nesting of folds to avoid creating too many folds.'
   showHoverSearchCounter: false
   showHoverSearchCounterDuration:
     default: 700

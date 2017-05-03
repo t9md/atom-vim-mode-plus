@@ -270,11 +270,13 @@
   'z s': 'vim-mode-plus:scroll-cursor-to-left'
   'z e': 'vim-mode-plus:scroll-cursor-to-right'
 
-  'z M': 'editor:fold-all'
-  'z R': 'editor:unfold-all'
   'z c': 'editor:fold-current-row'
   'z o': 'editor:unfold-current-row'
   'z a': 'vim-mode-plus:toggle-fold'
+  'z M': 'vim-mode-plus:fold-all'
+  'z R': 'vim-mode-plus:unfold-all'
+  'z m': 'vim-mode-plus:fold-all-by-one-indent-level'
+  'z r': 'vim-mode-plus:unfold-all-by-one-indent-level'
 
 'atom-text-editor.vim-mode-plus-input-char-waiting':
   'enter': 'core:confirm'

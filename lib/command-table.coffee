@@ -1121,6 +1121,22 @@ ToggleFold:
   file: "./misc-command"
   commandName: "vim-mode-plus:toggle-fold"
   commandScope: "atom-text-editor"
+UnfoldAll:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:unfold-all"
+  commandScope: "atom-text-editor"
+FoldAll:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:fold-all"
+  commandScope: "atom-text-editor"
+UnfoldAllByOneIndentLevel:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:unfold-all-by-one-indent-level"
+  commandScope: "atom-text-editor"
+FoldAllByOneIndentLevel:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:fold-all-by-one-indent-level"
+  commandScope: "atom-text-editor"
 ReplaceModeBackspace:
   file: "./misc-command"
   commandName: "vim-mode-plus:replace-mode-backspace"
