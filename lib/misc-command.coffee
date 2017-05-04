@@ -156,17 +156,20 @@ class Redo extends Undo
   mutate: ->
     @editor.redo()
 
+# za
 class ToggleFold extends MiscCommand
   @extend()
   execute: ->
     point = @editor.getCursorBufferPosition()
     @editor.toggleFoldAtBufferRow(point.row)
 
+# zR
 class UnfoldAll extends MiscCommand
   @extend()
   execute: ->
     @editor.unfoldAll()
 
+# zM
 class FoldAll extends MiscCommand
   @extend()
   execute: ->
@@ -177,6 +180,7 @@ class FoldAll extends MiscCommand
         if indent <= @getConfig('maxFoldableIndentLevel')
           @editor.foldBufferRowRange(startRow, endRow)
 
+# zr
 class UnfoldNextIndentLevel extends MiscCommand
   @extend()
   execute: ->
@@ -189,6 +193,7 @@ class UnfoldNextIndentLevel extends MiscCommand
         if indent in targetIndents
           @editor.unfoldBufferRow(startRow)
 
+# zm
 class FoldNextIndentLevel extends MiscCommand
   @extend()
   execute: ->

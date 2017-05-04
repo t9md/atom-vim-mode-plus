@@ -4,7 +4,8 @@ vim-mode improved.
 
 <!-- TOC START min:1 max:3 link:true update:true -->
 - [vim-mode-plus](#vim-mode-plus)
-- [What's new in v0.58.0](#whats-new-in-v0580)
+- [Installation](#installation)
+- [Some Features](#some-features)
 - [Important](#important)
 - [Thanks](#thanks)
 - [Issue report](#issue-report)
