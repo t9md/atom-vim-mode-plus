@@ -275,8 +275,8 @@
   'z a': 'vim-mode-plus:toggle-fold'
   'z M': 'vim-mode-plus:fold-all'
   'z R': 'vim-mode-plus:unfold-all'
-  'z m': 'vim-mode-plus:fold-all-by-one-indent-level'
-  'z r': 'vim-mode-plus:unfold-all-by-one-indent-level'
+  'z m': 'vim-mode-plus:fold-next-indent-level'
+  'z r': 'vim-mode-plus:unfold-next-indent-level'
 
 'atom-text-editor.vim-mode-plus-input-char-waiting':
   'enter': 'core:confirm'

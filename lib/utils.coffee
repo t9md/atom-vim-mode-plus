@@ -290,6 +290,44 @@ getCodeFoldRowRangesContainesForRow = (editor, bufferRow, {includeStartRow}={}) 
     else
       startRow < bufferRow <= endRow
 
+getFoldRowRanges = (editor) ->
+  seen = {}
+  [0..editor.getLastBufferRow()]
+    .map (row) ->
+      editor.languageMode.rowRangeForCodeFoldAtBufferRow(row)
+    .filter (rowRange) ->
+      rowRange? and rowRange[0]? and rowRange[1]?
+    .filter (rowRange) ->
+      if seen[rowRange]
+        false
+      else
+        seen[rowRange] = true
+
+getFoldRangesWithIndent = (editor) ->
+  getFoldRowRanges(editor)
+    .map ([startRow, endRow]) ->
+      indent = editor.indentationForBufferRow(startRow)
+      {startRow, endRow, indent}
+
+getFoldInfoByKind = (editor) ->
+  foldInfoByKind = {}
+
+  updateFoldInfo = (kind, rowRangeWithIndent) ->
+    foldInfo = (foldInfoByKind[kind] ?= {})
+    foldInfo.rowRangesWithIndent ?= []
+    foldInfo.rowRangesWithIndent.push(rowRangeWithIndent)
+    indent = rowRangeWithIndent.indent
+    foldInfo.minIndent = Math.min(foldInfo.minIndent ? indent, indent)
+    foldInfo.maxIndent = Math.max(foldInfo.maxIndent ? indent, indent)
+
+  for rowRangeWithIndent in getFoldRangesWithIndent(editor)
+    updateFoldInfo('allFold', rowRangeWithIndent)
+    if editor.isFoldedAtBufferRow(rowRangeWithIndent.startRow)
+      updateFoldInfo('folded', rowRangeWithIndent)
+    else
+      updateFoldInfo('unfolded', rowRangeWithIndent)
+  foldInfoByKind
+
 getBufferRangeForRowRange = (editor, rowRange) ->
   [startRange, endRange] = rowRange.map (row) ->
     editor.bufferRangeForBufferRow(row, includeNewline: true)
@@ -965,6 +1003,9 @@ module.exports = {
   isEmptyRow
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow
+  getFoldRowRanges
+  getFoldRangesWithIndent
+  getFoldInfoByKind
   getBufferRangeForRowRange
   trimRange
   getFirstCharacterPositionForBufferRow

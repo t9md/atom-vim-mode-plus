@@ -11,6 +11,8 @@ _ = require 'underscore-plus'
   isSingleLineRange
   isLeadingWhiteSpaceRange
   humanizeBufferRange
+  getFoldInfoByKind
+  limitNumber
 } = require './utils'
 
 class MiscCommand extends Base
@@ -163,22 +165,51 @@ class ToggleFold extends MiscCommand
 class UnfoldAll extends MiscCommand
   @extend()
   execute: ->
-    @vimState.foldManager.unfoldAll()
+    @editor.unfoldAll()
 
 class FoldAll extends MiscCommand
   @extend()
   execute: ->
-    @vimState.foldManager.foldAll()
+    {allFold} = getFoldInfoByKind(@editor)
+    if allFold?
+      @editor.unfoldAll()
+      for {indent, startRow, endRow} in allFold.rowRangesWithIndent
+        if indent <= @getConfig('maxFoldableIndentLevel')
+          @editor.foldBufferRowRange(startRow, endRow)
 
-class UnfoldAllByOneIndentLevel extends MiscCommand
+class UnfoldNextIndentLevel extends MiscCommand
   @extend()
   execute: ->
-    @vimState.foldManager.unfoldAllByOneIndentLevel()
+    {folded} = getFoldInfoByKind(@editor)
+    if folded?
+      {minIndent, rowRangesWithIndent} = folded
+      count = limitNumber(@getCount() - 1, min: 0)
+      targetIndents = [minIndent..(minIndent + count)]
+      for {indent, startRow} in rowRangesWithIndent
+        if indent in targetIndents
+          @editor.unfoldBufferRow(startRow)
 
-class FoldAllByOneIndentLevel extends MiscCommand
+class FoldNextIndentLevel extends MiscCommand
   @extend()
   execute: ->
-    @vimState.foldManager.foldAllByOneIndentLevel()
+    {unfolded, allFold} = getFoldInfoByKind(@editor)
+    if unfolded?
+      # FIXME: Why I need unfoldAll()? Why can't I just fold non-folded-fold only?
+      # Unless unfoldAll() here, @editor.unfoldAll() delete foldMarker but fail
+      # to render unfolded rows correctly.
+      # I believe this is bug of text-buffer's markerLayer which assume folds are
+      # created **in-order** from top-row to bottom-row.
+      @editor.unfoldAll()
+
+      maxFoldable = @getConfig('maxFoldableIndentLevel')
+      fromLevel = Math.min(unfolded.maxIndent, maxFoldable)
+      count = limitNumber(@getCount() - 1, min: 0)
+      fromLevel = limitNumber(fromLevel - count, min: 0)
+      targetIndents = [fromLevel..maxFoldable]
+
+      for {indent, startRow, endRow} in allFold.rowRangesWithIndent
+        if indent in targetIndents
+          @editor.foldBufferRowRange(startRow, endRow)
 
 class ReplaceModeBackspace extends MiscCommand
   @commandScope: 'atom-text-editor.vim-mode-plus.insert-mode.replace'

@@ -62,7 +62,6 @@ class VimState
     searchInput: './search-input'
     operationStack: './operation-stack'
     cursorStyleManager: './cursor-style-manager'
-    foldManager: './fold-manager'
 
   for propName, fileToLoad of @lazyProperties
     @defineLazyProperty(propName, fileToLoad)
