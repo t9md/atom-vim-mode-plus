@@ -1,3 +1,4 @@
+# 0.92.0:
 - Fix: blockwise-selection was not cleared correctly in some situation(but I noticed via code review)
 - Fix: #780 No longer throw exception when close editor in the middle of smooth scrolling.
 - New: #770, #774 Add fold manipulation commands based on PR by @weihanglo.
