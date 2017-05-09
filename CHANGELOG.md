@@ -1,3 +1,36 @@
+- Fix: blockwise-selection was not cleared correctly in some situation(but I noticed via code review)
+- Fix: #780 No longer throw exception when close editor in the middle of smooth scrolling.
+- New: #770, #774 Add fold manipulation commands based on PR by @weihanglo.
+  - Commands: Put non-NEW commands here for thoroughness.
+    - `z a`: `toggle-fold`, toggle( fold or unfold ) cursor's fold.( NEW )
+    - `z r`: `unfold-next-indent-level`, unfold deepest folded fold. support count.( NEW )
+    - `z m`: `fold-next-indent-level`, fold deepest unfolded fold. support count.( NEW )
+    - `z M`: `fold-all`, unfold all fold.( not NEW )
+    - `z R`: `unfold-all`, fold all fold.( not NEW )
+  - Setting: `maxFoldableIndentLevel`( default `20` )
+    - Folds which startRow exceeds this level are not folded on `zm` and `zM`
+    - e.g.
+      - If you have 3 folds in editor, each fold starts following indentLevel.
+        - `fold-a: 0`
+        - `fold-b: 1`
+        - `fold-c: 2`
+      - `maxFoldableIndentLevel = 20`:
+        - `z M` fold all
+        - `z m` fold `fold-c`, `fold-b`, `fold-a` on each time.
+      - `maxFoldableIndentLevel = 1`:
+        - `z M` fold `fold-a`
+        - `z m` fold `fold-b`, `fold-a` on each time.
+      - `maxFoldableIndentLevel = 0`:
+        - `z M` fold `fold-a` only.
+        - `z m` fold `fold-a`.
+  - Implementation is NOT exactly same as pure-Vim.
+    - Pure-vim: explicitly manage `foldlevel` value and `zm`, `zr` is done based on `foldlevel` kept.
+    - vmp: Does not manage `foldlevel` explicitly, instead it detect fold state from editor.
+      - This approach gives better compatibility for Atom's native fold commands like `cmd-k cmd-1`
+- Improve: Don't auto-load `vimState.highlightSearch` when nothing to highlight.
+- Internal: #768 Support upcoming new decoration `type: 'cursor'` for cursor visibility in visual-mode.
+- Internal: #763 add spec for ensure minimum required file on vmp startup.
+
 # 0.91.0:
 - Improve, Performance: Reduce amount of IO( number of files to read ) on startup further. #760
   - Avoid require on initial package activation. Especially following widely-used libs is not longer `require`d on startup.
