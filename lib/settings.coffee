@@ -106,7 +106,7 @@ module.exports = new Settings 'vim-mode-plus',
     default: false
     description: """
     Can: `_ i (` to replace inner-parenthesis with register's value<br>
-    Can: `_ i ;` to replace inner-any-pair if you enabled `keymapSemicolonToInnerAnyPairInOperatorPendingMode`<br>
+    Can: `_ ;` to replace inner-any-pair if you enabled `keymapSemicolonToInnerAnyPairInOperatorPendingMode`<br>
     Conflicts: `_`( `move-to-first-character-of-line-and-down` ) motion. Who use this??
     """
   keymapPToPutWithAutoIndent:
