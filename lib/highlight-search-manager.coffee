@@ -38,5 +38,5 @@ class HighlightSearchManager
     return unless pattern = @globalState.get('highlightSearchPattern')
     return if @vimState.utils.matchScopes(@editorElement, @vimState.getConfig('highlightSearchExcludeScopes'))
 
-    for range in @vimState.utils.scanEditor(@editor, pattern)
+    for range in @vimState.utils.scanEditor(@editor, pattern) when not range.isEmpty()
       @markerLayer.markBufferRange(range, invalidate: 'inside')

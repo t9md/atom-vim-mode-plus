@@ -84,7 +84,7 @@ class SearchModel
 
   refreshMarkers: ->
     @clearMarkers()
-    for range in @getVisibleMatchRanges()
+    for range in @getVisibleMatchRanges() when not range.isEmpty()
       @decoationByRange[range.toString()] = @decorateRange(range)
 
   getVisibleMatchRanges: ->
