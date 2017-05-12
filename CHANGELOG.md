@@ -1,3 +1,10 @@
+# 0.92.1:
+- Improve: #782 Skip creating marker/decoration for empty range in hlsearch and incsearch.
+  - E.g.
+    - When user searched `()` literally, it matches empty-range between each char.
+    - In previous release, invisible hlsearch/incsearch marker/decoration was created.
+    - By skipping this empty range highlight, improve responsiveness when user repeat `n` or `N` for that search.
+
 # 0.92.0:
 - Fix: blockwise-selection was not cleared correctly in some situation(but I noticed via code review)
 - Fix: #780 No longer throw exception when close editor in the middle of smooth scrolling.
