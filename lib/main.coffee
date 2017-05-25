@@ -146,9 +146,11 @@ module.exports =
     classHideTabBar = 'vim-mode-plus--hide-tab-bar'
     classHideStatusBar = 'vim-mode-plus--hide-status-bar'
     classActivePaneAxis = 'vim-mode-plus--active-pane-axis'
+    classActivePane = 'vim-mode-plus--active-pane'
 
     workspaceElement = getView(atom.workspace)
     paneElement = getView(atom.workspace.getActivePane())
+    paneElement.classList.add(classActivePane)
 
     workspaceClassNames = [classPaneMaximized]
     workspaceClassNames.push(classHideTabBar) if settings.get('hideTabBarOnMaximizePane')
@@ -166,6 +168,7 @@ module.exports =
       forEachPaneAxis (axis) ->
         getView(axis).classList.remove(classActivePaneAxis)
       workspaceElement.classList.remove(workspaceClassNames...)
+      paneElement.classList.remove(classActivePane)
 
     @subscribe(@maximizePaneDisposable)
 
