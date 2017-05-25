@@ -1,8 +1,8 @@
 # 0.92.2:
-- Doc: mention ex-mode link on README.md since it's now support vim-mode-plus.
 - Fix: #766 executing `maximize-pane` on single-pane workspace make screen blank.
   - This was happening only when pane have not yet split once after atom launch.
 - Fix: #777 `J` at last buffer row no longer clear text.
+- Doc: mention ex-mode link on README.md since it's now support vim-mode-plus.
 
 # 0.92.1:
 - Improve: #782 Skip creating marker/decoration for empty range in hlsearch and incsearch.
