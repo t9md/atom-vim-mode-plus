@@ -418,3 +418,20 @@ class CopyFromLineBelow extends CopyFromLineAbove
   Equivalent to *i_CTRL-E* of pure Vim
   """
   rowDelta: +1
+
+class NextTab extends MiscCommand
+  @extend()
+  defaultCount: 0
+  execute: ->
+    count = @getCount()
+    pane = atom.workspace.paneForItem(@editor)
+    if count
+      pane.activateItemAtIndex(count - 1)
+    else
+      pane.activateNextItem()
+
+class PreviousTab extends MiscCommand
+  @extend()
+  execute: ->
+    pane = atom.workspace.paneForItem(@editor)
+    pane.activatePreviousItem()

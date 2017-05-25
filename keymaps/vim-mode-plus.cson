@@ -200,8 +200,8 @@
   'ctrl-w c': 'pane:close'
   'ctrl-w ctrl-q': 'core:close'
   'ctrl-w q': 'core:close'
-  'g t': 'pane:show-next-item'
-  'g T': 'pane:show-previous-item'
+  'g t': 'vim-mode-plus:next-tab'
+  'g T': 'vim-mode-plus:previous-tab'
 
   'f': 'vim-mode-plus:find'
   'F': 'vim-mode-plus:find-backwards'
