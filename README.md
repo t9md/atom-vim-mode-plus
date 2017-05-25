@@ -93,6 +93,7 @@ You can workaround by disabling some keymap. See [#214](https://github.com/t9md/
 
 ### ex-mode?
 
+- The [ex-mode](https://atom.io/packages/ex-mode) package has the most complete ex-mode support.
 - Very immature package [vim-mode-plus-ex-mode](https://atom.io/packages/vim-mode-plus-ex-mode) exists.
 - My thought for ex-mode is [here #52](https://github.com/t9md/atom-vim-mode-plus/issues/52).
 
