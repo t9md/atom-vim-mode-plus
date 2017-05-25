@@ -141,45 +141,40 @@ module.exports =
       @demaximizePane()
       return
 
-    getView = (model) -> atom.views.getView(model)
-    classPaneMaximized = 'vim-mode-plus--pane-maximized'
-    classHideTabBar = 'vim-mode-plus--hide-tab-bar'
-    classHideStatusBar = 'vim-mode-plus--hide-status-bar'
-    classActivePaneAxis = 'vim-mode-plus--active-pane-axis'
-    classActivePane = 'vim-mode-plus--active-pane'
+    @maximizePaneDisposable = new CompositeDisposable
 
-    workspaceElement = getView(atom.workspace)
-    paneElement = getView(atom.workspace.getActivePane())
-    paneElement.classList.add(classActivePane)
+    addClassList = (element, classList) =>
+      classList = classList.map (className) ->
+        "vim-mode-plus--#{className}"
+      element.classList.add(classList...)
+      @maximizePaneDisposable.add new Disposable ->
+        element.classList.remove(classList...)
 
-    workspaceClassNames = [classPaneMaximized]
-    workspaceClassNames.push(classHideTabBar) if settings.get('hideTabBarOnMaximizePane')
-    workspaceClassNames.push(classHideStatusBar) if settings.get('hideStatusBarOnMaximizePane')
+    workspaceClassList = ['pane-maximized']
+    workspaceClassList.push('hide-tab-bar') if settings.get('hideTabBarOnMaximizePane')
+    workspaceClassList.push('hide-status-bar') if settings.get('hideStatusBarOnMaximizePane')
+    addClassList(atom.views.getView(atom.workspace), workspaceClassList)
 
-    workspaceElement.classList.add(workspaceClassNames...)
+    activePane = atom.workspace.getActivePane()
+    activePaneElement = atom.views.getView(activePane)
+    addClassList(activePaneElement, ['active-pane'])
 
     forEachPaneAxis ?= require('./utils').forEachPaneAxis
-    forEachPaneAxis (axis) ->
-      paneAxisElement = getView(axis)
-      if paneAxisElement.contains(paneElement)
-        paneAxisElement.classList.add(classActivePaneAxis)
-
-    @maximizePaneDisposable = new Disposable ->
-      forEachPaneAxis (axis) ->
-        getView(axis).classList.remove(classActivePaneAxis)
-      workspaceElement.classList.remove(workspaceClassNames...)
-      paneElement.classList.remove(classActivePane)
+    root = activePane.getContainer().getRoot()
+    forEachPaneAxis root, (axis) ->
+      paneAxisElement = atom.views.getView(axis)
+      if paneAxisElement.contains(activePaneElement)
+        addClassList(paneAxisElement, ['active-pane-axis'])
 
     @subscribe(@maximizePaneDisposable)
 
   equalizePanes: ->
-    setFlexScale = (newValue, base) ->
-      base ?= atom.workspace.getActivePane().getContainer().getRoot()
-      base.setFlexScale(newValue)
-      for child in base.children ? []
-        setFlexScale(newValue, child)
+    setFlexScale = (root, newValue) ->
+      root.setFlexScale(newValue)
+      for child in root.children ? []
+        setFlexScale(child, newValue)
 
-    setFlexScale(1)
+    setFlexScale(atom.workspace.getActivePane().getContainer().getRoot(), 1)
 
   registerVimStateCommands: ->
     # all commands here is executed with context where 'this' bound to 'vimState'
