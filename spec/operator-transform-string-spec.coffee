@@ -1131,6 +1131,15 @@ describe "Operator TransformString", ->
           __9ab\n
           """
 
+      it "joins do nothing when it cannot join any more", ->
+        # FIXME: "\n" remain it's inconsistent with multi-time J
+        ensure '1 0 0 J', textC_: "  012 345 678 9a|b\n"
+
+      it "joins do nothing when it cannot join any more", ->
+        ensure 'J J J', textC_: "  012 345 678| 9ab\n"
+        ensure 'J', textC_: "  012 345 678 9a|b"
+        ensure 'J', textC_: "  012 345 678 9a|b"
+
     describe "JoinWithKeepingSpace", ->
       beforeEach ->
         atom.keymaps.add "test",

@@ -570,9 +570,15 @@ class Join extends TransformString
   restorePositions: false
 
   mutateSelection: (selection) ->
-    if isLinewiseRange(range = selection.getBufferRange())
-      selection.setBufferRange(range.translate([0, 0], [-1, Infinity]))
-    selection.joinLines()
+    range = selection.getBufferRange()
+
+    # When cursor is at last BUFFER row, it select last-buffer-row, then
+    # joinning result in "clear last-buffer-row text".
+    # I believe this is BUG of upstream atom-core. guard this situation here
+    unless (range.isSingleLine() and range.end.row is @editor.getLastBufferRow())
+      if isLinewiseRange(range)
+        selection.setBufferRange(range.translate([0, 0], [-1, Infinity]))
+      selection.joinLines()
     end = selection.getBufferRange().end
     selection.cursor.setBufferPosition(end.translate([0, -1]))
 
