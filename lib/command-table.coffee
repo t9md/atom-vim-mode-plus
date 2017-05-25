@@ -1205,3 +1205,11 @@ CopyFromLineBelow:
   file: "./misc-command"
   commandName: "vim-mode-plus:copy-from-line-below"
   commandScope: "atom-text-editor.vim-mode-plus.insert-mode"
+NextTab:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:next-tab"
+  commandScope: "atom-text-editor"
+PreviousTab:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:previous-tab"
+  commandScope: "atom-text-editor"
