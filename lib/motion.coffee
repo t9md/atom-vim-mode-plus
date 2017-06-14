@@ -1109,7 +1109,7 @@ class MoveToPair extends Motion
   @extend()
   inclusive: true
   jump: true
-  member: ['Parenthesis', 'CurlyBracket', 'SquareBracket', 'AngleBracket']
+  member: ['Parenthesis', 'CurlyBracket', 'SquareBracket']
 
   moveCursor: (cursor) ->
     @setBufferPositionSafely(cursor, @getPoint(cursor))
