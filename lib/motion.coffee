@@ -792,7 +792,11 @@ class Scroll extends Motion
     # [NOTE]
     # intentionally use `element.component.setScrollTop` instead of `element.setScrollTop`.
     # SInce element.setScrollTop will throw exception when element.component no longer exists.
-    step = (newTop) => @editor.element.component?.setScrollTop(newTop)
+    step = (newTop) =>
+      if @editor.element.component?
+        @editor.element.component.setScrollTop(newTop)
+        @editor.element.component.updateSync()
+
     duration = @getSmoothScrollDuation()
     @vimState.requestScrollAnimation(topPixelFrom, topPixelTo, {duration, step, done})
 
