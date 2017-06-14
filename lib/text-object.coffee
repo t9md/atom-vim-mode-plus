@@ -253,11 +253,11 @@ class AnyPairAllowForwarding extends AnyPair
     ranges = @getRanges(selection)
     from = selection.cursor.getBufferPosition()
     for range in ranges when range.start.isGreaterThanOrEqual(from)
-      if !bestRange or bestRange.start.isGreaterThan(range.start)
+      if not bestRange or bestRange.start.isGreaterThan(range.start)
         bestRange = range
     closest = if bestRange then bestRange.start else from
     for range in ranges
-      if !bestRange or closest.isGreaterThanOrEqual(range.end)
+      if not bestRange or closest.isGreaterThanOrEqual(range.end)
         bestRange = range
         closest = bestRange.end
     bestRange
