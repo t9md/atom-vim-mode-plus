@@ -156,12 +156,42 @@ class Redo extends Undo
   mutate: ->
     @editor.redo()
 
+# zc
+class FoldCurrentRow extends MiscCommand
+  @extend()
+  execute: ->
+    null
+
+# zC
+class FoldCurrentRowRecursively extends MiscCommand
+  @extend()
+  execute: ->
+    null
+
+# zo
+class UnfoldCurrentRow extends MiscCommand
+  @extend()
+  execute: ->
+    null
+
+# zO
+class UnfoldCurrentRowRecursively extends MiscCommand
+  @extend()
+  execute: ->
+    null
+
 # za
 class ToggleFold extends MiscCommand
   @extend()
   execute: ->
     point = @editor.getCursorBufferPosition()
     @editor.toggleFoldAtBufferRow(point.row)
+
+# zA
+class ToggleFoldRecursively extends MiscCommand
+  @extend()
+  execute: ->
+    null
 
 # zR
 class UnfoldAll extends MiscCommand
