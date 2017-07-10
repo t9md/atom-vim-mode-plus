@@ -88,7 +88,7 @@
   # '(': 'vim-mode-plus:move-to-previous-sentence-skip-blank-row'
   '}': 'vim-mode-plus:move-to-next-paragraph'
   '{': 'vim-mode-plus:move-to-previous-paragraph'
-  
+
   '0': 'vim-mode-plus:move-to-beginning-of-line'
   'numpad0': 'vim-mode-plus:move-to-beginning-of-line'
 
@@ -234,7 +234,6 @@
   '8': 'vim-mode-plus:set-count-8'
   '9': 'vim-mode-plus:set-count-9'
 
-  'numpad0': 'vim-mode-plus:set-count-0'
   'numpad1': 'vim-mode-plus:set-count-1'
   'numpad2': 'vim-mode-plus:set-count-2'
   'numpad3': 'vim-mode-plus:set-count-3'
