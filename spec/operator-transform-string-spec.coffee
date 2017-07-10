@@ -199,7 +199,7 @@ describe "Operator TransformString", ->
         settings.set('stayOnTransformString', true)
         set cursor: [0, 0]
 
-      it "indents the currrent selection and exits visual mode", ->
+      it "indents the current selection and exits visual mode", ->
         ensure 'v j >',
           mode: 'normal'
           textC: """
