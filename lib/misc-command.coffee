@@ -472,6 +472,7 @@ class CopyFromLineAbove extends InsertMode
     @editor.transact =>
       for selection in @editor.getSelections()
         point = selection.cursor.getBufferPosition().translate(translation)
+        continue if point.row < 0
         range = Range.fromPointWithDelta(point, 0, 1)
         if text = @editor.getTextInBufferRange(range)
           selection.insertText(text)

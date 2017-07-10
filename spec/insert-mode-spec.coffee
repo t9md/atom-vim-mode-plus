@@ -58,21 +58,27 @@ describe "Insert mode commands", ->
 
       it "does nothing on the first line", ->
         set
-          cursor: [[0, 2], [3, 2]]
+          textC: """
+          12|345
+
+          abcd
+          ef!ghi
+          """
+
         editor.insertText 'a'
         ensure
-          text: """
-            12a345
+          textC: """
+            12a|345
 
             abcd
-            efaghi
+            efa!ghi
             """
         ensure 'ctrl-y',
-          text: """
-            12a345
+          textC: """
+            12a|345
 
             abcd
-            efadghi
+            efad!ghi
             """
 
     describe "the ctrl-e command", ->
