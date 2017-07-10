@@ -565,7 +565,7 @@ class PutBefore extends Operator
     super
 
   adjustCursorPosition: ->
-    for selection in @editor.getSelections()
+    for selection in @editor.getSelections() when @mutationsBySelection.has(selection)
       {cursor} = selection
       {start, end} = newRange = @mutationsBySelection.get(selection)
       if @linewisePaste
