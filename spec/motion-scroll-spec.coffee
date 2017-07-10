@@ -15,9 +15,17 @@ describe "Motion Scroll", ->
     runs ->
       jasmine.attachToDOM(editorElement)
       set text: text.getRaw()
+
       editorElement.setHeight(20 * 10)
       editorElement.style.lineHeight = "10px"
-      atom.views.performDocumentPoll()
+
+      if editorElement.measureDimensions?
+        # For Atom-v1.19
+        editorElement.measureDimensions()
+      else # For Atom-v1.18
+        # [TODO] Remove when v.1.19 become stable
+        atom.views.performDocumentPoll()
+
       editorElement.setScrollTop(40 * 10)
       set cursor: [42, 0]
 
