@@ -283,9 +283,9 @@
   'z s': 'vim-mode-plus:scroll-cursor-to-left'
   'z e': 'vim-mode-plus:scroll-cursor-to-right'
 
-  'z c': 'editor:fold-current-row'
+  'z c': 'vim-mode-plus:fold-current-row'
   'z C': 'vim-mode-plus:fold-current-row-recursively'
-  'z o': 'editor:unfold-current-row'
+  'z o': 'vim-mode-plus:unfold-current-row'
   'z O': 'vim-mode-plus:unfold-current-row-recursively'
   'z a': 'vim-mode-plus:toggle-fold'
   'z A': 'vim-mode-plus:toggle-fold-recursively'

@@ -160,7 +160,9 @@ class Redo extends Undo
 class FoldCurrentRow extends MiscCommand
   @extend()
   execute: ->
-    null
+    for selection in @editor.getSelections()
+      {row} = @getCursorPositionForSelection(selection)
+      @editor.foldBufferRow(row)
 
 # zC
 class FoldCurrentRowRecursively extends MiscCommand
@@ -172,7 +174,9 @@ class FoldCurrentRowRecursively extends MiscCommand
 class UnfoldCurrentRow extends MiscCommand
   @extend()
   execute: ->
-    null
+    for selection in @editor.getSelections()
+      {row} = @getCursorPositionForSelection(selection)
+      @editor.unfoldBufferRow(row)
 
 # zO
 class UnfoldCurrentRowRecursively extends MiscCommand
