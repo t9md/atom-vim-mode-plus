@@ -13,6 +13,7 @@ _ = require 'underscore-plus'
   humanizeBufferRange
   getFoldInfoByKind
   limitNumber
+  getFoldRowRangesContainedByFoldStartsAtRow
 } = require './utils'
 
 class MiscCommand extends Base
@@ -164,12 +165,6 @@ class FoldCurrentRow extends MiscCommand
       {row} = @getCursorPositionForSelection(selection)
       @editor.foldBufferRow(row)
 
-# zC
-class FoldCurrentRowRecursively extends MiscCommand
-  @extend()
-  execute: ->
-    null
-
 # zo
 class UnfoldCurrentRow extends MiscCommand
   @extend()
@@ -178,12 +173,6 @@ class UnfoldCurrentRow extends MiscCommand
       {row} = @getCursorPositionForSelection(selection)
       @editor.unfoldBufferRow(row)
 
-# zO
-class UnfoldCurrentRowRecursively extends MiscCommand
-  @extend()
-  execute: ->
-    null
-
 # za
 class ToggleFold extends MiscCommand
   @extend()
@@ -191,11 +180,53 @@ class ToggleFold extends MiscCommand
     point = @editor.getCursorBufferPosition()
     @editor.toggleFoldAtBufferRow(point.row)
 
-# zA
-class ToggleFoldRecursively extends MiscCommand
+# Base of zC, zO, zA
+class FoldCurrentRowRecursivelyBase extends MiscCommand
+  @extend(false)
+
+  foldRecursively: (row) ->
+    rowRanges = getFoldRowRangesContainedByFoldStartsAtRow(@editor, row)
+    if rowRanges?
+      startRows = rowRanges.map (rowRange) -> rowRange[0]
+      for row in startRows.reverse() when not @editor.isFoldedAtBufferRow(row)
+        @editor.foldBufferRow(row)
+
+  unfoldRecursively: (row) ->
+    rowRanges = getFoldRowRangesContainedByFoldStartsAtRow(@editor, row)
+    if rowRanges?
+      startRows = rowRanges.map (rowRange) -> rowRange[0]
+      for row in startRows when @editor.isFoldedAtBufferRow(row)
+        @editor.unfoldBufferRow(row)
+
+  foldRecursivelyForAllSelections: ->
+    for selection in @editor.getSelectionsOrderedByBufferPosition().reverse()
+      @foldRecursively(@getCursorPositionForSelection(selection).row)
+
+  unfoldRecursivelyForAllSelections: ->
+    for selection in @editor.getSelectionsOrderedByBufferPosition()
+      @unfoldRecursively(@getCursorPositionForSelection(selection).row)
+
+# zC
+class FoldCurrentRowRecursively extends FoldCurrentRowRecursivelyBase
   @extend()
   execute: ->
-    null
+    @foldRecursivelyForAllSelections()
+
+# zO
+class UnfoldCurrentRowRecursively extends FoldCurrentRowRecursivelyBase
+  @extend()
+  execute: ->
+    @unfoldRecursivelyForAllSelections()
+
+# zA
+class ToggleFoldRecursively extends FoldCurrentRowRecursivelyBase
+  @extend()
+  execute: ->
+    row = @getCursorPositionForSelection(@editor.getLastSelection()).row
+    if @editor.isFoldedAtBufferRow(row)
+      @unfoldRecursivelyForAllSelections()
+    else
+      @foldRecursivelyForAllSelections()
 
 # zR
 class UnfoldAll extends MiscCommand

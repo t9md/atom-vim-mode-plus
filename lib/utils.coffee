@@ -290,6 +290,20 @@ getCodeFoldRowRangesContainesForRow = (editor, bufferRow, {includeStartRow}={}) 
     else
       startRow < bufferRow <= endRow
 
+getFoldRowRangesContainedByFoldStartsAtRow = (editor, row) ->
+  return null unless editor.isFoldableAtBufferRow(row)
+
+  [startRow, endRow] = editor.languageMode.rowRangeForFoldAtBufferRow(row)
+
+  seen = {}
+  [startRow..endRow]
+    .map (row) ->
+      editor.languageMode.rowRangeForFoldAtBufferRow(row)
+    .filter (rowRange) ->
+      rowRange? and rowRange[0]? and rowRange[1]?
+    .filter (rowRange) ->
+      if seen[rowRange] then false else seen[rowRange] = true
+
 getFoldRowRanges = (editor) ->
   seen = {}
   [0..editor.getLastBufferRow()]
@@ -298,10 +312,7 @@ getFoldRowRanges = (editor) ->
     .filter (rowRange) ->
       rowRange? and rowRange[0]? and rowRange[1]?
     .filter (rowRange) ->
-      if seen[rowRange]
-        false
-      else
-        seen[rowRange] = true
+      if seen[rowRange] then false else seen[rowRange] = true
 
 getFoldRangesWithIndent = (editor) ->
   getFoldRowRanges(editor)
@@ -1002,6 +1013,7 @@ module.exports = {
   isEmptyRow
   getCodeFoldRowRanges
   getCodeFoldRowRangesContainesForRow
+  getFoldRowRangesContainedByFoldStartsAtRow
   getFoldRowRanges
   getFoldRangesWithIndent
   getFoldInfoByKind

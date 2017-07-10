@@ -1123,21 +1123,23 @@ FoldCurrentRow:
   file: "./misc-command"
   commandName: "vim-mode-plus:fold-current-row"
   commandScope: "atom-text-editor"
-FoldCurrentRowRecursively:
-  file: "./misc-command"
-  commandName: "vim-mode-plus:fold-current-row-recursively"
-  commandScope: "atom-text-editor"
 UnfoldCurrentRow:
   file: "./misc-command"
   commandName: "vim-mode-plus:unfold-current-row"
   commandScope: "atom-text-editor"
-UnfoldCurrentRowRecursively:
-  file: "./misc-command"
-  commandName: "vim-mode-plus:unfold-current-row-recursively"
-  commandScope: "atom-text-editor"
 ToggleFold:
   file: "./misc-command"
   commandName: "vim-mode-plus:toggle-fold"
+  commandScope: "atom-text-editor"
+FoldCurrentRowRecursivelyBase:
+  file: "./misc-command"
+FoldCurrentRowRecursively:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:fold-current-row-recursively"
+  commandScope: "atom-text-editor"
+UnfoldCurrentRowRecursively:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:unfold-current-row-recursively"
   commandScope: "atom-text-editor"
 ToggleFoldRecursively:
   file: "./misc-command"
