@@ -1,9 +1,37 @@
-# 0.94.0: WIP
-- Breaking: In search mini-editor, remove default `ctrl-v` keymap to avoid conflicts.
-  - In scope `atom-text-editor.vim-mode-plus-search`
-  - `ctrl-v` was mapped to `vim-mode-plus:search-activate-literal-mode` in previous release.
-  - But removed to avoid default `ctrl-v` keymap on Windows platform.
-
+# 0.94.0:
+- Improve: Improve Fold handling in several operations. #809.
+  - `y y`, `d d` now yank/delete whole fold.
+  - `o` now start insertion from *next* line of end-of-fold(OLD-ver was next line of start-of-fold).
+  - `V` on folded row select whole fold, so `V d` delete multiple lines which was folded.
+    - No longer show cursor at incorrect row when `V` on folded row(long lived cosmetic issue now FIXED).
+  - `p` on folded row paste *next* line of end-of-fold(OLD-ver was next line of start-of-fold).
+- New: Add several Fold manipulation commands. #807
+  - Commands:
+    - `z c`: `fold-current-row`
+    - `z C`: `fold-current-row-recursively`
+    - `z o`: `unfold-current-row`
+    - `z O`: `unfold-current-row-recursively`
+    - `z a`: `toggle-fold`
+    - `z A`: `toggle-fold-recursively`
+  - Previously `z c`, `z o` was mapped to following Atom's native fold commands. But now replaced with `vmp`'s one.
+  - Why? for consistency, and vmp's one is multi-cursor aware, linewise selection aware(not manipulate next line of selected row).
+    - `z c`: `editor:fold-current-row`
+    - `z o`: `editor:unfold-current-row`
+- Improve, Experimental: Hide, left/right dock when `maximized-pane`.
+- Improve: Disable `maximized-pane` keymap(`cmd-enter`) in `tree-view` scope.
+- Keymap, Breaking: Remove default `ctrl-v` keymap in search-mini-editor to avoid conflicts. #791
+  - Previous version have following keymap(was experimental, you can recover this by set manually).
+    - scope: `atom-text-editor.vim-mode-plus-search`
+    - keystroke: `ctrl-v` to `vim-mode-plus:search-activate-literal-mode`
+- Fix: Protect from `p` throw exception in some uncertain situation `p` #802.
+- Fix: [Atom-v1.19-beta] Smooth scroll now work again.
+  - This issue is introduced by the big change in editor-rendering rewrite in v1.19.
+- Fix: [Atom-v1.19-beta], `ctrl-y` on first line of editor incorrectly mutate that row(do nothing is correct behavior) #808
+- Fix: [Atom-v1.19-beta] `ctrl-y`, `ctrl-e` now correctly use 2 lines offset.
+- Keymap: Make numpad0-9 behave same way as normal 0-9 key #806
+- Improve?, Breaking: Remove angle-bracket(<,>) matching for `%` motion. refs #700
+  - Still work in progress to improve behavior.
+- Spec: Fix spec failure in v1.19.0-beta.
 
 # 0.93.0:
 - New: `count` support for `g t` to activate Nth pane item(= tab).
