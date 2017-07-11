@@ -974,6 +974,14 @@ getTraversalForText = (text) ->
       column++
   [row, column]
 
+
+# Return endRow of fold if row was folded or just return passed row.
+getFoldEndRowForRow = (editor, row) ->
+  if editor.isFoldedAtBufferRow(row)
+    getLargestFoldRangeContainsBufferRow(editor, row).end.row
+  else
+    row
+
 module.exports = {
   assertWithException
   getAncestors
@@ -1067,4 +1075,5 @@ module.exports = {
   adjustIndentWithKeepingLayout
   rangeContainsPointWithEndExclusive
   traverseTextFromPoint
+  getFoldEndRowForRow
 }

@@ -6,6 +6,9 @@
   # 'ctrl-w z': 'vim-mode-plus:maximize-pane'
   'cmd-enter': 'vim-mode-plus:maximize-pane'
 
+'atom-workspace .tree-view':
+  'cmd-enter': 'abort!'
+
 # all
 # -------------------------
 'atom-text-editor.vim-mode-plus':

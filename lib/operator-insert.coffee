@@ -6,6 +6,7 @@ _ = require 'underscore-plus'
   moveCursorRight
   limitNumber
   isEmptyRow
+  setBufferRow
 } = require './utils'
 Operator = require('./base').getClass('Operator')
 
@@ -199,6 +200,9 @@ class InsertAboveWithNewline extends ActivateInsertMode
 class InsertBelowWithNewline extends InsertAboveWithNewline
   @extend()
   mutateText: ->
+    for cursor in @editor.getCursors() when cursorRow = cursor.getBufferRow()
+      setBufferRow(cursor, @getFoldEndRowForRow(cursorRow))
+
     @editor.insertNewlineBelow()
     @autoIndentEmptyRows() if @editor.autoIndent
 

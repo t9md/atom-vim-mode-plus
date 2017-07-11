@@ -7,6 +7,7 @@
   limitNumber
   isLinewiseRange
   assertWithException
+  getFoldEndRowForRow
 } = require './utils'
 settings = require './settings'
 BlockwiseSelection = require './blockwise-selection'
@@ -112,7 +113,8 @@ class SelectionWrapper
       when 'linewise'
         # Even if end.column is 0, expand over that end.row( don't use selection.getRowRange() )
         {start, end} = @getBufferRange()
-        @setBufferRange(getBufferRangeForRowRange(@selection.editor, [start.row, end.row]))
+        endRow = getFoldEndRowForRow(@selection.editor, end.row) # cover folded rowRange
+        @setBufferRange(getBufferRangeForRowRange(@selection.editor, [start.row, endRow]))
       when 'blockwise'
         new BlockwiseSelection(@selection)
 

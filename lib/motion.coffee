@@ -701,7 +701,14 @@ class MoveToRelativeLine extends Motion
   moveSuccessOnLinewise: true
 
   moveCursor: (cursor) ->
-    setBufferRow(cursor, cursor.getBufferRow() + @getCount(-1))
+    row = @getFoldEndRowForRow(cursor.getBufferRow())
+
+    count = @getCount(-1)
+    while (count > 0)
+      row = @getFoldEndRowForRow(row + 1)
+      count--
+
+    setBufferRow(cursor, row)
 
 class MoveToRelativeLineMinimumOne extends MoveToRelativeLine
   @extend(false)
