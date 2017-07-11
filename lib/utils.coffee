@@ -978,8 +978,7 @@ getTraversalForText = (text) ->
 # Return endRow of fold if row was folded or just return passed row.
 getFoldEndRowForRow = (editor, row) ->
   if editor.isFoldedAtBufferRow(row)
-    screenRow = editor.screenRowForBufferRow(row)
-    editor.bufferRowForScreenRow(screenRow + 1) - 1
+    getLargestFoldRangeContainsBufferRow(editor, row).end.row
   else
     row
 
