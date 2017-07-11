@@ -103,7 +103,7 @@ class CursorStyleManager
   getCursorStyle: (cursor, visible) ->
     if visible
       bufferPosition = @getCursorBufferPositionToDisplay(cursor.selection)
-      if @submode is 'linewise' and @editor.isSoftWrapped()
+      if @submode is 'linewise' and (@editor.isSoftWrapped() or @editor.isFoldedAtBufferRow(bufferPosition.row))
         screenPosition = @editor.screenPositionForBufferPosition(bufferPosition)
         {row, column} = screenPosition.traversalFrom(cursor.getScreenPosition())
       else
