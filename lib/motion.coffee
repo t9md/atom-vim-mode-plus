@@ -700,8 +700,21 @@ class MoveToRelativeLine extends Motion
   wise: 'linewise'
   moveSuccessOnLinewise: true
 
+  getRow: (row) ->
+    if @editor.isFoldedAtBufferRow(row)
+      getLargestFoldRangeContainsBufferRow(@editor, row).end.row
+    else
+      row
+
   moveCursor: (cursor) ->
-    setBufferRow(cursor, cursor.getBufferRow() + @getCount(-1))
+    row = @getRow(cursor.getBufferRow())
+
+    count = @getCount(-1)
+    while (count > 0)
+      row = @getRow(row + 1)
+      count--
+
+    setBufferRow(cursor, row)
 
 class MoveToRelativeLineMinimumOne extends MoveToRelativeLine
   @extend(false)
