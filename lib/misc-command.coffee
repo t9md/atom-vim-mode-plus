@@ -321,9 +321,9 @@ class ScrollDown extends ScrollWithoutChangingCursorPosition
     @editor.setFirstVisibleScreenRow(oldFirstRow + count)
     newFirstRow = @editor.getFirstVisibleScreenRow()
 
-    margin = @editor.getVerticalScrollMargin()
+    offset = 2
     {row, column} = @editor.getCursorScreenPosition()
-    if row < (newFirstRow + margin)
+    if row < (newFirstRow + offset)
       newPoint = [row + count, column]
       @editor.setCursorScreenPosition(newPoint, autoscroll: false)
 
@@ -337,9 +337,9 @@ class ScrollUp extends ScrollWithoutChangingCursorPosition
     @editor.setFirstVisibleScreenRow(oldFirstRow - count)
     newLastRow = @editor.getLastVisibleScreenRow()
 
-    margin = @editor.getVerticalScrollMargin()
+    offset = 2
     {row, column} = @editor.getCursorScreenPosition()
-    if row >= (newLastRow - margin)
+    if row >= (newLastRow - offset)
       newPoint = [row - count, column]
       @editor.setCursorScreenPosition(newPoint, autoscroll: false)
 
