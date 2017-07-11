@@ -170,7 +170,7 @@ provides <kbd>ctrl-w H, J, K, L, x</kbd> to move pane.
 
 ## Other
 - [operator, the true power of Vim](http://whileimautomaton.net/2008/11/vimm3/operator) by kana.  
-  True power of Vim is Operator and TextOjbect.
+  True power of Vim is Operator and TextObject.
 
 - [List of text-object as vim plugin](https://github.com/kana/vim-textobj-user/wiki)  
   vim-mode-plus builtin textobj for function, fold, entire, comment, indent, line, and any-pair(super set of many pair text-obj)
