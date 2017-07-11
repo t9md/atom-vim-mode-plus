@@ -649,7 +649,7 @@
 # -------------------------
 'atom-text-editor.vim-mode-plus-search':
   'ctrl-r ctrl-w': 'vim-mode-plus:search-set-cursor-word'
-  'ctrl-v': 'vim-mode-plus:search-activate-literal-mode'
+  # 'ctrl-v': 'vim-mode-plus:search-activate-literal-mode'
   'ctrl-c': 'vim-mode-plus:search-cancel'
   'ctrl-[': 'vim-mode-plus:search-cancel'
   'shift-tab': 'vim-mode-plus:search-visit-prev'

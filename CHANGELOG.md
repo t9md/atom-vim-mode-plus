@@ -1,3 +1,10 @@
+# 0.94.0: WIP
+- Breaking: In search mini-editor, remove default `ctrl-v` keymap to avoid conflicts.
+  - In scope `atom-text-editor.vim-mode-plus-search`
+  - `ctrl-v` was mapped to `vim-mode-plus:search-activate-literal-mode` in previous release.
+  - But removed to avoid default `ctrl-v` keymap on Windows platform.
+
+
 # 0.93.0:
 - New: `count` support for `g t` to activate Nth pane item(= tab).
   - `3 g t` activate 3rd pane item.
