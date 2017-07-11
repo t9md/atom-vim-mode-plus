@@ -12,9 +12,20 @@ describe "Scrolling", ->
 
   describe "scrolling keybindings", ->
     beforeEach ->
-      editor.setLineHeightInPixels(10)
-      editorElement.setHeight(50)
-      atom.views.performDocumentPoll()
+      if editorElement.measureDimensions?
+        # For Atom-v1.19
+        {component} = editor
+        component.element.style.height = component.getLineHeight() * 5 + 'px'
+        editorElement.measureDimensions()
+        initialRowRange = [0, 5]
+
+      else # For Atom-v1.18
+        # [TODO] Remove when v.1.19 become stable
+        editor.setLineHeightInPixels(10)
+        editorElement.setHeight(10 * 5)
+        atom.views.performDocumentPoll()
+        initialRowRange = [0, 4]
+
       set
         cursor: [1, 2]
         text: """
@@ -29,7 +40,7 @@ describe "Scrolling", ->
           900
           1000
         """
-      expect(editorElement.getVisibleRowRange()).toEqual [0, 4]
+      expect(editorElement.getVisibleRowRange()).toEqual(initialRowRange)
 
     describe "the ctrl-e and ctrl-y keybindings", ->
       it "moves the screen up and down by one and keeps cursor onscreen", ->
@@ -49,8 +60,16 @@ describe "Scrolling", ->
     beforeEach ->
       editor.setText [1..200].join("\n")
       editorElement.style.lineHeight = "20px"
-      editorElement.component.sampleFontStyling()
+
       editorElement.setHeight(20 * 10)
+
+      if editorElement.measureDimensions?
+        # For Atom-v1.19
+        editorElement.measureDimensions()
+      else # For Atom-v1.18
+        # [TODO] Remove when v.1.19 become stable
+        editorElement.component.sampleFontStyling()
+
       spyOn(editor, 'moveToFirstCharacterOfLine')
       spyOn(editorElement, 'setScrollTop')
       spyOn(editorElement, 'getFirstVisibleScreenRow').andReturn(90)
@@ -99,7 +118,14 @@ describe "Scrolling", ->
       editorElement.setHeight(600)
       editorElement.style.lineHeight = "10px"
       editorElement.style.font = "16px monospace"
-      atom.views.performDocumentPoll()
+
+      if editorElement.measureDimensions?
+        # For Atom-v1.19
+        editorElement.measureDimensions()
+      else # For Atom-v1.18
+        # [TODO] Remove when v.1.19 become stable
+        atom.views.performDocumentPoll()
+
       text = ""
       for i in [100..199]
         text += "#{i} "

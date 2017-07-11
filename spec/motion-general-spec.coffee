@@ -1669,6 +1669,13 @@ describe "Motion general", ->
       initial = [3, 3]
       beforeEach ->
         jasmine.attachToDOM(getView(atom.workspace)) # for L, M, H
+
+        # TODO: remove when 1.19 become stable
+        if editorElement.measureDimensions?
+          {component} = editor
+          component.element.style.height = component.getLineHeight() * editor.getLineCount() + 'px'
+          editorElement.measureDimensions()
+
         ensure mark: "'": [0, 0]
         ensure mark: "`": [0, 0]
         set cursor: initial

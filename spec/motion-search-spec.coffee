@@ -5,6 +5,7 @@ describe "Motion Search", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
+    jasmine.attachToDOM(getView(atom.workspace))
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
