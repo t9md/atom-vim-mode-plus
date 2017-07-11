@@ -206,6 +206,9 @@ class Base
   scanBackward: (args...) ->
     @utils.scanEditorInDirection(@editor, 'backward', args...)
 
+  getFoldEndRowForRow: (args...) ->
+    @utils.getFoldEndRowForRow(@editor, args...)
+
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)
 
@@ -255,6 +258,7 @@ class Base
   # -------------------------
   @writeCommandTableOnDisk: ->
     commandTable = @generateCommandTableByEagerLoad()
+    console.log commandTable # investigate why sometime this get empty?
     _ = _plus()
     if _.isEqual(@commandTable, commandTable)
       atom.notifications.addInfo("No change commandTable", dismissable: true)

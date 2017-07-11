@@ -606,8 +606,9 @@ class PutBefore extends Operator
         newRange = insertTextAtBufferPosition(@editor, [cursorRow, 0], text)
         setBufferRow(cursor, newRange.start.row)
       else if @location is 'after'
-        ensureEndsWithNewLineForBufferRow(@editor, cursorRow)
-        newRange = insertTextAtBufferPosition(@editor, [cursorRow + 1, 0], text)
+        targetRow = @getFoldEndRowForRow(cursorRow)
+        ensureEndsWithNewLineForBufferRow(@editor, targetRow)
+        newRange = insertTextAtBufferPosition(@editor, [targetRow + 1, 0], text)
     else
       selection.insertText("\n") unless @isMode('visual', 'linewise')
       newRange = selection.insertText(text)
