@@ -258,7 +258,7 @@ class Base
   # -------------------------
   @writeCommandTableOnDisk: ->
     commandTable = @generateCommandTableByEagerLoad()
-    console.log commandTable # investigate why sometime this get empty?
+    console.warn commandTable # investigate why sometime this get empty?
     _ = _plus()
     if _.isEqual(@commandTable, commandTable)
       atom.notifications.addInfo("No change commandTable", dismissable: true)
