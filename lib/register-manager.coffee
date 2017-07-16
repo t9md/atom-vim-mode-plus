@@ -42,7 +42,7 @@ class RegisterManager
     REGISTERS.test(name)
 
   getText: (name, selection) ->
-    @get(name, selection).text ? ''
+    @get(name, selection)?.text ? ''
 
   readClipboard: (selection=null) ->
     if selection?.editor.hasMultipleCursors() and @clipboardBySelection.has(selection)
