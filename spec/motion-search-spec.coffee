@@ -626,6 +626,36 @@ describe "Motion Search", ->
         set cursor: [0, 2]
         ensure '%', cursor: [0, 0]
 
+    describe "mixed brackets", ->
+      beforeEach ->
+        set
+          text: """
+          if (a < b) {
+            a->foo(b);
+          }
+          """
+      it 'move to matching parenthesis', ->
+        set cursor: [0, 7]
+        ensure '%', cursor: [0, 3]
+        ensure '%', cursor: [0, 9]
+        set cursor: [1, 5]
+        ensure '%', cursor: [1, 10]
+        ensure '%', cursor: [1, 8]
+      it 'move to matching angle brackets', ->
+        set cursor: [0, 4]
+        ensure '%', cursor: [1, 4]
+        ensure '%', cursor: [0, 6]
+        set cursor: [0, 6]
+        ensure '%', cursor: [1, 4]
+        ensure '%', cursor: [0, 6]
+        set cursor: [1, 0]
+        ensure '%', cursor: [0, 6]
+        ensure '%', cursor: [1, 4]
+      it 'move to matching curly brackets', ->
+        set cursor: [0, 10]
+        ensure '%', cursor: [2, 0]
+        ensure '%', cursor: [0, 11]
+
     describe "complex situation with html tag", ->
       beforeEach ->
         set
