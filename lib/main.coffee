@@ -5,6 +5,7 @@ globalState = require './global-state'
 settings = require './settings'
 VimState = require './vim-state'
 forEachPaneAxis = null
+paneUtils = null
 
 module.exports =
   config: settings.config
@@ -129,6 +130,11 @@ module.exports =
     @subscribe atom.commands.add 'atom-workspace',
       'vim-mode-plus:maximize-pane': => @maximizePane()
       'vim-mode-plus:equalize-panes': => @equalizePanes()
+      'vim-mode-plus:exchange-pane': => @exchangePane()
+
+  exchangePane: ->
+    paneUtils ?= require("./pane-utils")
+    paneUtils.exchangePane()
 
   demaximizePane: ->
     if @maximizePaneDisposable?

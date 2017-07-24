@@ -191,6 +191,9 @@
   'ctrl-w ctrl-p': 'window:focus-previous-pane'
   'ctrl-w p': 'window:focus-previous-pane'
 
+  'ctrl-w ctrl-x': 'vim-mode-plus:exchange-pane'
+  'ctrl-w x': 'vim-mode-plus:exchange-pane'
+
   # From v1.6.0
   'ctrl-w ctrl-v': 'pane:split-right-and-copy-active-item'
   'ctrl-w v': 'pane:split-right-and-copy-active-item'
