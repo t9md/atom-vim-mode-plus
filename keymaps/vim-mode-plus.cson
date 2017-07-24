@@ -191,6 +191,14 @@
   'ctrl-w ctrl-p': 'window:focus-previous-pane'
   'ctrl-w p': 'window:focus-previous-pane'
 
+  'ctrl-w ctrl-x': 'vim-mode-plus:exchange-pane'
+  'ctrl-w x': 'vim-mode-plus:exchange-pane'
+
+  'ctrl-w K': 'vim-mode-plus:move-pane-to-very-top'
+  'ctrl-w J': 'vim-mode-plus:move-pane-to-very-bottom'
+  'ctrl-w H': 'vim-mode-plus:move-pane-to-very-left'
+  'ctrl-w L': 'vim-mode-plus:move-pane-to-very-right'
+
   # From v1.6.0
   'ctrl-w ctrl-v': 'pane:split-right-and-copy-active-item'
   'ctrl-w v': 'pane:split-right-and-copy-active-item'
