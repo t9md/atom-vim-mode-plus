@@ -175,12 +175,8 @@ module.exports =
     @subscribe(@maximizePaneDisposable)
 
   equalizePanes: ->
-    setFlexScale = (root, newValue) ->
-      root.setFlexScale(newValue)
-      for child in root.children ? []
-        setFlexScale(child, newValue)
-
-    setFlexScale(atom.workspace.getActivePane().getContainer().getRoot(), 1)
+    paneUtils ?= require("./pane-utils")
+    paneUtils.equalizePanes()
 
   registerVimStateCommands: ->
     # all commands here is executed with context where 'this' bound to 'vimState'
