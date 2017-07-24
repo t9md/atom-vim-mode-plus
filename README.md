@@ -154,8 +154,6 @@ provides <kbd>gf</kbd> to open file under cursor.
 Does not exist in pure Vim, provides clip-board history you can pop yanked text until you get result you want.
 - [choose-pane](https://atom.io/packages/choose-pane)
 Does not exist in pure Vim, provides keyboard navigation between panes/panels by choosing it by label.
-- [paner](https://atom.io/packages/paner)
-provides <kbd>ctrl-w H, J, K, L, x</kbd> to move pane.
 
 # References
 
