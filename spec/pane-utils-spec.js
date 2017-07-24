@@ -33,7 +33,7 @@ function paneLayoutFor(root) {
   return layout
 }
 
-fdescribe("pane manipulation commands", () => {
+describe("pane manipulation commands", () => {
   beforeEach(() => {
     // `destroyEmptyPanes` is default true, but atom's spec-helper reset to `false`
     // So set it to `true` again here to test with default value.
