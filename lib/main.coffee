@@ -133,6 +133,10 @@ module.exports =
       'vim-mode-plus:maximize-pane': => @maximizePane()
       'vim-mode-plus:equalize-panes': => @equalizePanes()
       'vim-mode-plus:exchange-pane': => @exchangePane()
+      "vim-mode-plus:move-pane-to-very-top": => @movePaneToVery("top")
+      "vim-mode-plus:move-pane-to-very-bottom": => @movePaneToVery("bottom")
+      "vim-mode-plus:move-pane-to-very-left": => @movePaneToVery("left")
+      "vim-mode-plus:move-pane-to-very-right": => @movePaneToVery("right")
 
   exchangePane: ->
     paneUtils ?= require("./pane-utils")
@@ -154,6 +158,10 @@ module.exports =
   equalizePanes: ->
     paneUtils ?= require("./pane-utils")
     paneUtils.equalizePanes()
+
+  movePaneToVery: (direction) ->
+    paneUtils ?= require("./pane-utils")
+    paneUtils.movePaneToVery(direction)
 
   registerVimStateCommands: ->
     # all commands here is executed with context where 'this' bound to 'vimState'
