@@ -25,9 +25,9 @@ function paneLayoutFor(root) {
   layout[root.getOrientation()] = root.getChildren().map(child => {
     switch (child.constructor.name) {
       case "Pane":
-      return child.getItems()
+        return child.getItems()
       case "PaneAxis":
-      return paneLayoutFor(child)
+        return paneLayoutFor(child)
     }
   })
   return layout
@@ -40,7 +40,7 @@ describe("pane manipulation commands", () => {
     atom.config.set("core.destroyEmptyPanes", true)
     jasmine.attachToDOM(atom.workspace.getElement())
 
-    return atom.packages.activatePackage('vim-mode-plus')
+    return atom.packages.activatePackage("vim-mode-plus")
   })
 
   describe("moveToVery direction", () => {

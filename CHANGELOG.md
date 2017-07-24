@@ -1,3 +1,15 @@
+# 0.95.0:
+- New: Pane manipulation commands `ctrl-w H`, `ctrl-w J`, `ctrl-w K`, `ctrl-w L`.
+  - These feature are merged from my `paner` package.
+  - Following keymaps are provided in `atom-workspace` scope.
+    - `ctrl-w ctrl-x` or `ctrl-w x`: `vim-mode-plus:exchange-pane`
+    - `ctrl-w K`: `vim-mode-plus:move-pane-to-very-top`
+    - `ctrl-w J`: `vim-mode-plus:move-pane-to-very-bottom`
+    - `ctrl-w H`: `vim-mode-plus:move-pane-to-very-left`
+    - `ctrl-w L`: `vim-mode-plus:move-pane-to-very-right`
+- Fix: No longer throw exception when accessing unsupported register via `insert-mode`'s `ctrl-r`(`insert-mode`) #812.
+- Support: set minimum engines to `1.18.0`.
+
 # 0.94.0:
 - Improve: Improve Fold handling in several operations. #809.
   - `y y`, `d d` now yank/delete whole fold.
