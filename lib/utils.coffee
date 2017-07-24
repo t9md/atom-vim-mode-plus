@@ -693,13 +693,6 @@ ensureEndsWithNewLineForBufferRow = (editor, row) ->
     eol = getEndOfLineForBufferRow(editor, row)
     insertTextAtBufferPosition(editor, eol, "\n")
 
-forEachPaneAxis = (base, fn) ->
-  if base.children?
-    fn(base)
-
-    for child in base.children
-      forEachPaneAxis(child, fn)
-
 modifyClassList = (action, element, classNames...) ->
   element.classList[action](classNames...)
 
@@ -1060,7 +1053,6 @@ module.exports = {
   isNotLeadingWhiteSpaceRange
   isEscapedCharRange
 
-  forEachPaneAxis
   addClassList
   removeClassList
   toggleClassList

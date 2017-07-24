@@ -110,6 +110,8 @@ module.exports =
       @getEditorState(editor).clearPersistentSelections()
 
   deactivate: ->
+    @demaximizePane()
+
     @subscriptions.dispose()
     VimState?.forEach (vimState) ->
       vimState.destroy()
@@ -139,7 +141,6 @@ module.exports =
   demaximizePane: ->
     if @maximizePaneDisposable?
       @maximizePaneDisposable.dispose()
-      @unsubscribe(@maximizePaneDisposable)
       @maximizePaneDisposable = null
 
   maximizePane: ->
@@ -147,32 +148,8 @@ module.exports =
       @demaximizePane()
       return
 
-    @maximizePaneDisposable = new CompositeDisposable
-
-    addClassList = (element, classList) =>
-      classList = classList.map (className) ->
-        "vim-mode-plus--#{className}"
-      element.classList.add(classList...)
-      @maximizePaneDisposable.add new Disposable ->
-        element.classList.remove(classList...)
-
-    workspaceClassList = ['pane-maximized']
-    workspaceClassList.push('hide-tab-bar') if settings.get('hideTabBarOnMaximizePane')
-    workspaceClassList.push('hide-status-bar') if settings.get('hideStatusBarOnMaximizePane')
-    addClassList(atom.views.getView(atom.workspace), workspaceClassList)
-
-    activePane = atom.workspace.getActivePane()
-    activePaneElement = atom.views.getView(activePane)
-    addClassList(activePaneElement, ['active-pane'])
-
-    forEachPaneAxis ?= require('./utils').forEachPaneAxis
-    root = activePane.getContainer().getRoot()
-    forEachPaneAxis root, (axis) ->
-      paneAxisElement = atom.views.getView(axis)
-      if paneAxisElement.contains(activePaneElement)
-        addClassList(paneAxisElement, ['active-pane-axis'])
-
-    @subscribe(@maximizePaneDisposable)
+    paneUtils ?= require("./pane-utils")
+    @maximizePaneDisposable = paneUtils.maximizePane()
 
   equalizePanes: ->
     paneUtils ?= require("./pane-utils")
