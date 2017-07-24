@@ -130,9 +130,9 @@ module.exports =
       'vim-mode-plus:clear-persistent-selection': => @clearPersistentSelectionForEditors()
 
     @subscribe atom.commands.add 'atom-workspace',
-      'vim-mode-plus:maximize-pane': => @maximizePane()
-      'vim-mode-plus:equalize-panes': => @equalizePanes()
-      'vim-mode-plus:exchange-pane': => @exchangePane()
+      "vim-mode-plus:maximize-pane": => @maximizePane()
+      "vim-mode-plus:equalize-panes": => @equalizePanes()
+      "vim-mode-plus:exchange-pane": => @exchangePane()
       "vim-mode-plus:move-pane-to-very-top": => @movePaneToVery("top")
       "vim-mode-plus:move-pane-to-very-bottom": => @movePaneToVery("bottom")
       "vim-mode-plus:move-pane-to-very-left": => @movePaneToVery("left")
