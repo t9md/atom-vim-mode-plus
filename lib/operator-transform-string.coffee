@@ -395,10 +395,14 @@ class ToggleLineComments extends TransformString
   mutateSelection: (selection) ->
     selection.toggleLineComments()
 
-class AutoFlow extends TransformString
+class Reflow extends TransformString
   @extend()
   mutateSelection: (selection) ->
     atom.commands.dispatch(@editorElement, 'autoflow:reflow-selection')
+
+class ReflowWithStay extends Reflow
+  @extend()
+  stayAtSamePosition: true
 
 # Surround < TransformString
 # -------------------------

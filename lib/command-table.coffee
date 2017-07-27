@@ -331,9 +331,13 @@ ToggleLineComments:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:toggle-line-comments"
   commandScope: "atom-text-editor"
-AutoFlow:
+Reflow:
   file: "./operator-transform-string"
-  commandName: "vim-mode-plus:auto-flow"
+  commandName: "vim-mode-plus:reflow"
+  commandScope: "atom-text-editor"
+ReflowWithStay:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:reflow-with-stay"
   commandScope: "atom-text-editor"
 SurroundBase:
   file: "./operator-transform-string"
