@@ -483,13 +483,13 @@ class Function extends Fold
   scopeNamesOmittingEndRow: ['source.go', 'source.elixir']
 
   isGrammarNotFoldEndRow: ->
-    {scopeName, path} = @editor.getGrammar()
+    {scopeName, packageName} = @editor.getGrammar()
     if scopeName in @scopeNamesOmittingEndRow
       true
     else
       # HACK: Rust have two package `language-rust` and `atom-language-rust`
       # language-rust don't fold ending `}`, but atom-language-rust does.
-      scopeName is 'source.rust' and path.includes("/language-rust")
+      scopeName is 'source.rust' and packageName is "language-rust"
 
   getFoldRowRangesContainsForRow: (row) ->
     (super).filter (rowRange) =>
