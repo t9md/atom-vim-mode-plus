@@ -482,6 +482,15 @@ class Function extends Fold
   # Some language don't include closing `}` into fold.
   scopeNamesOmittingEndRow: ['source.go', 'source.elixir']
 
+  isGrammarNotFoldEndRow: ->
+    {scopeName, path} = @editor.getGrammar()
+    if scopeName in @scopeNamesOmittingEndRow
+      true
+    else
+      # HACK: Rust have two package `language-rust` and `atom-language-rust`
+      # language-rust don't fold ending `}`, but atom-language-rust does.
+      scopeName is 'source.rust' and path.includes("/language-rust")
+
   getFoldRowRangesContainsForRow: (row) ->
     (super).filter (rowRange) =>
       isIncludeFunctionScopeForRow(@editor, rowRange[0])
@@ -489,7 +498,7 @@ class Function extends Fold
   adjustRowRange: (rowRange) ->
     [startRow, endRow] = super
     # NOTE: This adjustment shoud not be necessary if language-syntax is properly defined.
-    if @isA() and @editor.getGrammar().scopeName in @scopeNamesOmittingEndRow
+    if @isA() and @isGrammarNotFoldEndRow()
       endRow += 1
     [startRow, endRow]
 

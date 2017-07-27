@@ -411,7 +411,7 @@ isIncludeFunctionScopeForRow = (editor, row) ->
 # [FIXME] very rough state, need improvement.
 isFunctionScope = (editor, scope) ->
   switch editor.getGrammar().scopeName
-    when 'source.go', 'source.elixir'
+    when 'source.go', 'source.elixir', 'source.rust'
       scopes = ['entity.name.function']
     when 'source.ruby'
       scopes = ['meta.function.', 'meta.class.', 'meta.module.']
