@@ -258,7 +258,6 @@ class Base
   # -------------------------
   @writeCommandTableOnDisk: ->
     commandTable = @generateCommandTableByEagerLoad()
-    console.warn commandTable # investigate why sometime this get empty?
     _ = _plus()
     if _.isEqual(@commandTable, commandTable)
       atom.notifications.addInfo("No change commandTable", dismissable: true)
@@ -274,10 +273,9 @@ class Base
       #{CSON.stringify(commandTable)}\n
       """
     commandTablePath = path.join(__dirname, "command-table.coffee")
-    atom.workspace.open(commandTablePath, activateItem: false).then (editor) ->
+    atom.workspace.open(commandTablePath).then (editor) ->
       editor.setText(loadableCSONText)
       editor.save()
-      editor.destroy()
       atom.notifications.addInfo("Updated commandTable", dismissable: true)
 
   @generateCommandTableByEagerLoad: ->
