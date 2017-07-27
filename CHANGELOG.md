@@ -1,3 +1,7 @@
+# 0.96.2:
+- Improve: #819 TextObject function for `language-rust` now alsow works on Windows platform.
+
+- Fix: `g q q` now work again. `g w w` also work now.
 # 0.96.1:
 - Fix: `g q q` now work again. `g w w` also work now.
 
