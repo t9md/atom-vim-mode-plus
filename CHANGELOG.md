@@ -1,3 +1,6 @@
+# 0.96.1:
+- Fix: `g q q` now work again. `g w w` also work now.
+
 # 0.96.0:
 - New, Breaking: Operator `reflow-with-stay`. #818
   - `reflow-with-stay` is `g q` equivalent feature. but unlike `g q`, `g w` keep cursor at same position.

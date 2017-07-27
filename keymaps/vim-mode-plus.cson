@@ -498,9 +498,13 @@
 'atom-text-editor.vim-mode-plus.operator-pending-mode.delete-pending':
   'd': 'vim-mode-plus:delete'
 
-# for `g q q` to auto-flow current line
-'atom-text-editor.vim-mode-plus.operator-pending-mode.auto-flow-pending':
-  'q': 'vim-mode-plus:auto-flow'
+# for `g q q`
+'atom-text-editor.vim-mode-plus.operator-pending-mode.reflow-pending':
+  'q': 'vim-mode-plus:reflow'
+
+# for `g w w`
+'atom-text-editor.vim-mode-plus.operator-pending-mode.reflow-with-stay-pending':
+  'w': 'vim-mode-plus:reflow-with-stay'
 
 # operator-pending.has-occurrence
 'atom-text-editor.vim-mode-plus.operator-pending-mode.has-occurrence':
