@@ -1,9 +1,10 @@
-# 0.96.0: WIP
-- New, Breaking: Operator `reflow-with-stay`.
+# 0.96.0:
+- New, Breaking: Operator `reflow-with-stay`. #818
   - `reflow-with-stay` is `g q` equivalent feature. but unlike `g q`, `g w` keep cursor at same position.
   - It auto-format each lines to fit with `editor.preferredLineLength`.
   - Breaking: Existing command for `g q` was `auto-flow`, but renamed to `reflow` at this timing.
   - If you enabled, `stayOnTransformString` config, `g q` and `g w` behave exactly same way.
+- Improve: #819 TextObject function now work for both `language-rust` and `atom-language-rust`.
 
 # 0.95.0:
 - New: Pane manipulation commands `ctrl-w H`, `ctrl-w J`, `ctrl-w K`, `ctrl-w L`.
