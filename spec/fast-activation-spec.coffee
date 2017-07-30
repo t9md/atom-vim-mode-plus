@@ -107,9 +107,9 @@ describe "dirty work for fast package activation", ->
             "lib/utils.coffee"
             "node_modules/underscore-plus/lib/underscore-plus.js"
             "node_modules/underscore/underscore.js"
-            "lib/blockwise-selection.coffee"
+            "lib/blockwise-selection.js"
             "lib/motion.coffee"
-            "lib/cursor-style-manager.coffee"
+            "lib/cursor-style-manager.js"
           ]
           files = shouldRequireFilesInOrdered.concat(extraShouldRequireFilesInOrdered)
           ensureRequiredFiles(files)
