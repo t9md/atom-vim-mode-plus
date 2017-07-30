@@ -92,9 +92,8 @@ class VimState
     @observeSelections()
 
     @editorElement.classList.add('vim-mode-plus')
-    startInsertScopes = @getConfig('startInInsertModeScopes')
 
-    if @getConfig('startInInsertMode') or startInsertScopes.length and @utils.matchScopes(@editorElement, startInsertScopes)
+    if @getConfig('startInInsertMode') or @matchScopes(@getConfig('startInInsertModeScopes'))
       @activate('insert')
     else
       @activate('normal')
@@ -104,6 +103,10 @@ class VimState
 
   getConfig: (param) ->
     settings.get(param)
+
+  matchScopes: (scopes = []) ->
+    if scopes.length
+      @utils.matchScopes(@editorElement, scopes)
 
   # BlockwiseSelections
   # -------------------------

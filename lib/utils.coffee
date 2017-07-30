@@ -551,12 +551,6 @@ shrinkRangeEndToBeforeNewLine = (range) ->
   else
     range
 
-scanEditor = (editor, pattern) ->
-  ranges = []
-  editor.scan pattern, ({range}) ->
-    ranges.push(range)
-  ranges
-
 collectRangeInBufferRow = (editor, row, pattern) ->
   ranges = []
   scanRange = editor.bufferRangeForBufferRow(row)
@@ -1033,7 +1027,6 @@ module.exports = {
   getSubwordPatternAtBufferPosition
   getNonWordCharactersForCursor
   shrinkRangeEndToBeforeNewLine
-  scanEditor
   collectRangeInBufferRow
   findRangeInBufferRow
   getLargestFoldRangeContainsBufferRow

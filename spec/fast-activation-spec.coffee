@@ -64,7 +64,7 @@ describe "dirty work for fast package activation", ->
       "node_modules/delegato/lib/delegator.js"
       "node_modules/mixto/lib/mixin.js"
       "lib/settings.coffee"
-      "lib/global-state.coffee"
+      "lib/global-state.js"
       "lib/vim-state.coffee"
       "lib/mode-manager.coffee"
       "lib/command-table.coffee"
@@ -91,7 +91,7 @@ describe "dirty work for fast package activation", ->
         waitsForPromise ->
           atom.workspace.open()
         runs ->
-          files = shouldRequireFilesInOrdered.concat('lib/status-bar-manager.coffee')
+          files = shouldRequireFilesInOrdered.concat('lib/status-bar-manager.js')
           ensureRequiredFiles(files)
 
     it "[after motion executed] require minimum set of files", ->
@@ -101,7 +101,7 @@ describe "dirty work for fast package activation", ->
             atom.commands.dispatch(e.element, 'vim-mode-plus:move-right')
         runs ->
           extraShouldRequireFilesInOrdered = [
-            "lib/status-bar-manager.coffee"
+            "lib/status-bar-manager.js"
             "lib/operation-stack.coffee"
             "lib/selection-wrapper.coffee"
             "lib/utils.coffee"
