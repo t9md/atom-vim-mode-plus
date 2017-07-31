@@ -59,7 +59,7 @@ describe "dirty work for fast package activation", ->
   # * To reduce IO and compile-evaluation of js file on startup
   describe "requrie as minimum num of file as possible on startup", ->
     shouldRequireFilesInOrdered = [
-      "lib/main.coffee"
+      "lib/main.js"
       "lib/base.coffee"
       "node_modules/delegato/lib/delegator.js"
       "node_modules/mixto/lib/mixin.js"
