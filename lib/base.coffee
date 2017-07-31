@@ -162,7 +162,7 @@ class Base
   focusSelectList: (options={}) ->
     @onDidCancelSelectList =>
       @cancelOperation()
-    selectList ?= require './select-list'
+    selectList ?= new (require './select-list')
     selectList.show(@vimState, options)
 
   input: null
