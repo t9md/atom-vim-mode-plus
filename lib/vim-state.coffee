@@ -45,6 +45,9 @@ class VimState
   getProp: (name) ->
     this[name] if this["__#{name}"]?
 
+  hasProp: (name) ->
+    "__#{name}" of this
+
   @defineLazyProperty('swrap', './selection-wrapper', false)
   @defineLazyProperty('utils', './utils', false)
 
