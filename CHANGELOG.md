@@ -5,10 +5,10 @@
     - 2. Manual cleanup.
   - Sorry If I create some regression.
 - Improve: Hide mode-string in status-bar while non-editor-item become active item(e.g. settings-view).
-- Breaking: Change behavior of `vim-mode-plus:clear-persistent-selection`
+- Breaking: Rename and change behavior of `vim-mode-plus:clear-persistent-selection` to `vim-mode-plus:clear-persistent-selections`.
   - How?
-    - Old: clear `persistent-selection` for all editors in workspace.
-    - New: clear `persistent-selection` for current active editor.
+    - Old: clear persistent selections for all editors in workspace.
+    - New: clear persistent selections for current active editor.
   - Why I changed
     - Previous behavior is inconsistent with other similar command.
     - I couldn't imagine practical scenario where previous behavior shines.

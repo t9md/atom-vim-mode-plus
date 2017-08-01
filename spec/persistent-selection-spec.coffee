@@ -168,7 +168,7 @@ describe "Persistent Selection", ->
           length: 1
           text: ['ooo']
 
-        dispatch(editorElement, 'vim-mode-plus:clear-persistent-selection')
+        dispatch(editorElement, 'vim-mode-plus:clear-persistent-selections')
         expect(vimState.persistentSelection.hasMarkers()).toBe(false)
 
     describe "clearPersistentSelectionOnResetNormalMode", ->
