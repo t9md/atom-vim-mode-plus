@@ -63,7 +63,7 @@ describe "dirty work for fast package activation", ->
       "lib/base.coffee"
       "node_modules/delegato/lib/delegator.js"
       "node_modules/mixto/lib/mixin.js"
-      "lib/settings.coffee"
+      "lib/settings.js"
       "lib/global-state.js"
       "lib/vim-state.coffee"
       "lib/mode-manager.coffee"
