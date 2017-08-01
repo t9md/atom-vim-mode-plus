@@ -352,6 +352,9 @@ class VimState
 
   # Other
   # -------------------------
+  updateStatusBar: ->
+    @statusBarManager.update(@mode, @submode)
+
   saveOriginalCursorPosition: ->
     @originalCursorPosition = null
     @originalCursorPositionByMarker?.destroy()
