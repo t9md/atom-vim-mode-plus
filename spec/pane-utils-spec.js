@@ -1,15 +1,7 @@
 "use babel"
 
 const {Range} = require("atom")
-const {
-  it,
-  fit,
-  ffit,
-  fffit,
-  emitterEventPromise,
-  beforeEach,
-  afterEach,
-} = require("./async-spec-helpers")
+const {it, fit, ffit, fffit, emitterEventPromise, beforeEach, afterEach} = require("./async-spec-helpers")
 
 function dispatchCommand(commandName) {
   atom.commands.dispatch(atom.workspace.getElement(), commandName)
