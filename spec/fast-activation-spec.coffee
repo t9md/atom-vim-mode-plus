@@ -104,7 +104,7 @@ describe "dirty work for fast package activation", ->
             "lib/status-bar-manager.js"
             "lib/operation-stack.coffee"
             "lib/selection-wrapper.coffee"
-            "lib/utils.coffee"
+            "lib/utils.js"
             "node_modules/underscore-plus/lib/underscore-plus.js"
             "node_modules/underscore/underscore.js"
             "lib/blockwise-selection.js"
