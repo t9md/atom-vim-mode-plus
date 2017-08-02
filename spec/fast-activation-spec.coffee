@@ -66,7 +66,7 @@ describe "dirty work for fast package activation", ->
       "lib/settings.js"
       "lib/global-state.js"
       "lib/vim-state.coffee"
-      "lib/mode-manager.coffee"
+      "lib/mode-manager.js"
       "lib/command-table.coffee"
     ]
     if atom.inDevMode()
@@ -102,7 +102,7 @@ describe "dirty work for fast package activation", ->
         runs ->
           extraShouldRequireFilesInOrdered = [
             "lib/status-bar-manager.js"
-            "lib/operation-stack.coffee"
+            "lib/operation-stack.js"
             "lib/selection-wrapper.coffee"
             "lib/utils.js"
             "node_modules/underscore-plus/lib/underscore-plus.js"
