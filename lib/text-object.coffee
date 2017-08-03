@@ -168,7 +168,7 @@ class Pair extends TextObject
   inclusive: true
 
   initialize: ->
-    PairFinder ?= require './pair-finder.coffee'
+    PairFinder ?= require './pair-finder'
     super
 
 
@@ -328,7 +328,7 @@ class Tag extends Pair
 
   getTagStartPoint: (from) ->
     tagRange = null
-    pattern = PairFinder.TagFinder::pattern
+    pattern = PairFinder.TagFinder.pattern
     @scanForward pattern, {from: [from.row, 0]}, ({range, stop}) ->
       if range.containsPoint(from, true)
         tagRange = range
