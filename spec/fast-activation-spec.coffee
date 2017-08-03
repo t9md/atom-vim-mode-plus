@@ -54,6 +54,8 @@ describe "dirty work for fast package activation", ->
 
       ensureRequiredFiles = (files) ->
         should = files.map((file) -> packPath + file)
+        # console.log "# should", should.join("\n")
+        # console.log "# actual", getRequiredLibOrNodeModulePaths().join("\n")
         expect(getRequiredLibOrNodeModulePaths()).toEqual(should)
 
   # * To reduce IO and compile-evaluation of js file on startup
@@ -65,7 +67,7 @@ describe "dirty work for fast package activation", ->
       "node_modules/mixto/lib/mixin.js"
       "lib/settings.js"
       "lib/global-state.js"
-      "lib/vim-state.coffee"
+      "lib/vim-state.js"
       "lib/mode-manager.js"
       "lib/command-table.coffee"
     ]
