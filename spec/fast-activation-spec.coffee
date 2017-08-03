@@ -103,7 +103,7 @@ describe "dirty work for fast package activation", ->
           extraShouldRequireFilesInOrdered = [
             "lib/status-bar-manager.js"
             "lib/operation-stack.js"
-            "lib/selection-wrapper.coffee"
+            "lib/selection-wrapper.js"
             "lib/utils.js"
             "node_modules/underscore-plus/lib/underscore-plus.js"
             "node_modules/underscore/underscore.js"
