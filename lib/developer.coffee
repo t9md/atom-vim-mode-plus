@@ -147,12 +147,14 @@ class Developer
 
   getCommandSpecs: ->
     _ = require 'underscore-plus'
+    {getKeyBindingForCommand, getAncestors} = require "./utils"
+
 
     compactSelector = (selector) ->
       pattern = ///(#{_.keys(selectorMap).map(_.escapeRegExp).join('|')})///g
       selector.split(/,\s*/g).map (scope) ->
         scope
-          .replace(/:not\((.*)\)/, '!$1')
+          .replace(/:not\((.*?)\)/g, '!$1')
           .replace(pattern, (s) -> selectorMap[s])
       .join(",")
 
@@ -167,7 +169,6 @@ class Developer
         .replace(/\|/g, '&#124;')
         .replace(/\s+/, '')
 
-    {getKeyBindingForCommand, getAncestors} = @vimstate.utils
     commands = (
       for name, klass of Base.getClassRegistry() when klass.isCommand()
         kind = getAncestors(klass).map((k) -> k.name)[-2..-2][0]
