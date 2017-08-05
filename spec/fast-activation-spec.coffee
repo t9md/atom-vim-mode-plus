@@ -72,7 +72,7 @@ describe "dirty work for fast package activation", ->
       "lib/command-table.coffee"
     ]
     if atom.inDevMode()
-      shouldRequireFilesInOrdered.push('lib/developer.coffee')
+      shouldRequireFilesInOrdered.push('lib/developer.js')
 
     it "THIS IS WORKAROUND FOR Travis-CI's", ->
       # HACK:

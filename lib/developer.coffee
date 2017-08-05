@@ -3,17 +3,42 @@
 Base = require './base'
 settings = require './settings'
 getEditorState = null
+kinds = ["Operator", "Motion", "TextObject", "InsertMode", "MiscCommand", "Scroll"]
+
+# Borrowed from underscore-plus
+modifierKeyMap =
+  "ctrl-cmd-": '\u2303\u2318'
+  "cmd-": '\u2318'
+  "ctrl-": '\u2303'
+  alt: '\u2325'
+  option: '\u2325'
+  enter: '\u23ce'
+  left: '\u2190'
+  right: '\u2192'
+  up: '\u2191'
+  down: '\u2193'
+  backspace: 'BS'
+  space: 'SPC'
+
+selectorMap =
+  "atom-text-editor.vim-mode-plus": ''
+  ".normal-mode": 'n'
+  ".insert-mode": 'i'
+  ".replace": 'R'
+  ".visual-mode": 'v'
+  ".characterwise": 'C'
+  ".blockwise": 'B'
+  ".linewise": 'L'
+  ".operator-pending-mode": 'o'
+  ".with-count": '#'
+  ".has-persistent-selection": '%'
 
 class Developer
   init: (_getEditorState) ->
     getEditorState = _getEditorState
-    @devEnvironmentByBuffer = new Map
-    @reloadSubscriptionByBuffer = new Map
-
     commands =
       'toggle-debug': => @toggleDebug()
       'open-in-vim': => @openInVim()
-      'generate-introspection-report': => @generateIntrospectionReport()
       'generate-command-summary-table': => @generateCommandSummaryTable()
       'write-command-table-on-disk': -> Base.writeCommandTableOnDisk()
       'clear-debug-output': => @clearDebugOutput()
@@ -42,6 +67,7 @@ class Developer
       if focus and cachedPath.search(///#{focus}///) >= 0
         cachedPath = '*' + cachedPath
       console.log cachedPath
+    return
 
   getAllMarkerCount: (showEditorsReport=false) ->
     {inspect} = require 'util'
@@ -112,43 +138,15 @@ class Developer
     atom.workspace.open(filePath, options).then (editor) ->
       editor.setText('')
       editor.save()
+    return
 
   toggleDebug: ->
     settings.set('debug', not settings.get('debug'))
     console.log "#{settings.scope} debug:", settings.get('debug')
 
-  # Borrowed from underscore-plus
-  modifierKeyMap =
-    "ctrl-cmd-": '\u2303\u2318'
-    "cmd-": '\u2318'
-    "ctrl-": '\u2303'
-    alt: '\u2325'
-    option: '\u2325'
-    enter: '\u23ce'
-    left: '\u2190'
-    right: '\u2192'
-    up: '\u2191'
-    down: '\u2193'
-    backspace: 'BS'
-    space: 'SPC'
-
-  selectorMap =
-    "atom-text-editor.vim-mode-plus": ''
-    ".normal-mode": 'n'
-    ".insert-mode": 'i'
-    ".replace": 'R'
-    ".visual-mode": 'v'
-    ".characterwise": 'C'
-    ".blockwise": 'B'
-    ".linewise": 'L'
-    ".operator-pending-mode": 'o'
-    ".with-count": '#'
-    ".has-persistent-selection": '%'
-
   getCommandSpecs: ->
     _ = require 'underscore-plus'
     {getKeyBindingForCommand, getAncestors} = require "./utils"
-
 
     compactSelector = (selector) ->
       pattern = ///(#{_.keys(selectorMap).map(_.escapeRegExp).join('|')})///g
@@ -185,11 +183,6 @@ class Developer
     )
     commands
 
-  generateCommandTableForMotion: ->
-    require('./motion')
-
-
-  kinds = ["Operator", "Motion", "TextObject", "InsertMode", "MiscCommand", "Scroll"]
   generateSummaryTableForCommandSpecs: (specs, {header}={}) ->
     _ = require 'underscore-plus'
 
@@ -244,24 +237,5 @@ class Developer
     new BufferedProcess
       command: "/Applications/MacVim.app/Contents/MacOS/Vim"
       args: ['-g', editor.getPath(), "+call cursor(#{row+1}, #{column+1})"]
-
-  generateIntrospectionReport: ->
-    _ = require 'underscore-plus'
-    generateIntrospectionReport = require './introspection'
-
-    generateIntrospectionReport _.values(Base.getClassRegistry()),
-      excludeProperties: [
-        'run'
-        'getCommandNameWithoutPrefix'
-        'getClass', 'extend', 'getParent', 'getAncestors', 'isCommand'
-        'getClassRegistry', 'command', 'reset'
-        'getDesctiption', 'description'
-        'init', 'getCommandName', 'getCommandScope', 'registerCommand',
-        'delegatesProperties', 'subscriptions', 'commandPrefix', 'commandScope'
-        'delegatesMethods',
-        'delegatesProperty',
-        'delegatesMethod',
-      ]
-      recursiveInspect: Base
 
 module.exports = Developer
