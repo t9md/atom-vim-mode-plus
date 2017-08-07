@@ -383,6 +383,7 @@ class Base
   # For demo-mode pkg integration
   @operationKind: null
   @getKindForCommandName: (command) ->
+    command = command.replace(/^vim-mode-plus:/, "")
     _ = _plus()
     name = _.capitalize(_.camelize(command))
     if name of classRegistry
