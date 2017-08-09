@@ -54,23 +54,25 @@ describe "dirty work for fast package activation", ->
 
       ensureRequiredFiles = (files) ->
         should = files.map((file) -> packPath + file)
+        # console.log "# should", should.join("\n")
+        # console.log "# actual", getRequiredLibOrNodeModulePaths().join("\n")
         expect(getRequiredLibOrNodeModulePaths()).toEqual(should)
 
   # * To reduce IO and compile-evaluation of js file on startup
   describe "requrie as minimum num of file as possible on startup", ->
     shouldRequireFilesInOrdered = [
-      "lib/main.coffee"
+      "lib/main.js"
       "lib/base.coffee"
       "node_modules/delegato/lib/delegator.js"
       "node_modules/mixto/lib/mixin.js"
-      "lib/settings.coffee"
-      "lib/global-state.coffee"
-      "lib/vim-state.coffee"
-      "lib/mode-manager.coffee"
+      "lib/settings.js"
+      "lib/global-state.js"
+      "lib/vim-state.js"
+      "lib/mode-manager.js"
       "lib/command-table.coffee"
     ]
     if atom.inDevMode()
-      shouldRequireFilesInOrdered.push('lib/developer.coffee')
+      shouldRequireFilesInOrdered.push('lib/developer.js')
 
     it "THIS IS WORKAROUND FOR Travis-CI's", ->
       # HACK:
@@ -91,7 +93,7 @@ describe "dirty work for fast package activation", ->
         waitsForPromise ->
           atom.workspace.open()
         runs ->
-          files = shouldRequireFilesInOrdered.concat('lib/status-bar-manager.coffee')
+          files = shouldRequireFilesInOrdered.concat('lib/status-bar-manager.js')
           ensureRequiredFiles(files)
 
     it "[after motion executed] require minimum set of files", ->
@@ -101,15 +103,15 @@ describe "dirty work for fast package activation", ->
             atom.commands.dispatch(e.element, 'vim-mode-plus:move-right')
         runs ->
           extraShouldRequireFilesInOrdered = [
-            "lib/status-bar-manager.coffee"
-            "lib/operation-stack.coffee"
-            "lib/selection-wrapper.coffee"
-            "lib/utils.coffee"
+            "lib/status-bar-manager.js"
+            "lib/operation-stack.js"
+            "lib/selection-wrapper.js"
+            "lib/utils.js"
             "node_modules/underscore-plus/lib/underscore-plus.js"
             "node_modules/underscore/underscore.js"
-            "lib/blockwise-selection.coffee"
+            "lib/blockwise-selection.js"
             "lib/motion.coffee"
-            "lib/cursor-style-manager.coffee"
+            "lib/cursor-style-manager.js"
           ]
           files = shouldRequireFilesInOrdered.concat(extraShouldRequireFilesInOrdered)
           ensureRequiredFiles(files)

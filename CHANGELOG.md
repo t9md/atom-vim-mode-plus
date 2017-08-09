@@ -1,3 +1,18 @@
+# 0.97.0: WIP
+- Maintenance: Rewrite big amount of part from CoffeScript to JavaScript.
+  - Rewritten by
+    - 1. Translate by decaffeinate command provided by decaffeinate project
+    - 2. Manual cleanup.
+  - Sorry If I create some regression.
+- Improve: Hide mode-string in status-bar while non-editor-item become active item(e.g. settings-view).
+- Breaking: Rename and change behavior of `vim-mode-plus:clear-persistent-selection` to `vim-mode-plus:clear-persistent-selections`.
+  - How?
+    - Old: clear persistent selections for all editors in workspace.
+    - New: clear persistent selections for current active editor.
+  - Why I changed
+    - Previous behavior is inconsistent with other similar command.
+    - I couldn't imagine practical scenario where previous behavior shines.
+
 # 0.96.2:
 - Improve: #819 TextObject function for `language-rust` now alsow works on Windows platform.
 

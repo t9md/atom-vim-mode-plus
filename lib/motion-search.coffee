@@ -92,7 +92,7 @@ class SearchBase extends Motion
     searchModel = @getSearchModel()
     if input
       fromPoint = @getBufferPositionForCursor(cursor)
-      searchModel.search(fromPoint, @getPattern(input), relativeIndex)
+      return searchModel.search(fromPoint, @getPattern(input), relativeIndex)
     else
       @vimState.hoverSearchCounter.reset()
       searchModel.clearMarkers()

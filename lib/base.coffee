@@ -18,11 +18,16 @@ VMP_LOADING_FILE = null
 VMP_LOADED_FILES = []
 
 loadVmpOperationFile = (filename) ->
+  # Call to loadVmpOperationFile can be nested.
+  # 1. require("./operator-transform-string")
+  # 2. in operator-transform-string.coffee call Base.getClass("Operator") cause operator.coffee required.
+  # So we have to save original VMP_LOADING_FILE and restore it after require finished.
+  vmpLoadingFileOriginal = VMP_LOADING_FILE
   VMP_LOADING_FILE = filename
-  loaded = require(filename)
-  VMP_LOADING_FILE = null
+  require(filename)
+  VMP_LOADING_FILE = vmpLoadingFileOriginal
+
   VMP_LOADED_FILES.push(filename)
-  loaded
 
 OperationAbortedError = null
 
@@ -162,7 +167,7 @@ class Base
   focusSelectList: (options={}) ->
     @onDidCancelSelectList =>
       @cancelOperation()
-    selectList ?= require './select-list'
+    selectList ?= new (require './select-list')
     selectList.show(@vimState, options)
 
   input: null
@@ -378,6 +383,7 @@ class Base
   # For demo-mode pkg integration
   @operationKind: null
   @getKindForCommandName: (command) ->
+    command = command.replace(/^vim-mode-plus:/, "")
     _ = _plus()
     name = _.capitalize(_.camelize(command))
     if name of classRegistry

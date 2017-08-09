@@ -18,10 +18,10 @@ describe "Motion Search", ->
       pane = {activate: jasmine.createSpy("activate")}
       set
         text: """
-            abc
-            def
-            abc
-            def\n
+          abc
+          def
+          abc
+          def\n
           """
         cursor: [0, 0]
       spyOn(atom.workspace, 'getActivePane').andReturn(pane)

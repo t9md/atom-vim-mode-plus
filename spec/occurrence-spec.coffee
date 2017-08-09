@@ -424,7 +424,6 @@ describe "Occurrence", ->
             """
 
     describe "persistent-selection is exists", ->
-      persistentSelectionBufferRange = null
       beforeEach ->
         atom.keymaps.add "create-persistent-selection",
           'atom-text-editor.vim-mode-plus:not(.insert-mode)':
@@ -439,12 +438,11 @@ describe "Occurrence", ->
           """
           cursor: [0, 0]
 
-        persistentSelectionBufferRange = [
-          [[0, 0], [2, 0]]
-          [[3, 0], [4, 0]]
-        ]
         ensure 'V j m G m m',
-          persistentSelectionBufferRange: persistentSelectionBufferRange
+          persistentSelectionBufferRange: [
+            [[0, 0], [2, 0]]
+            [[3, 0], [4, 0]]
+          ]
 
       describe "when no selection is exists", ->
         it "select occurrence in all persistent-selection", ->

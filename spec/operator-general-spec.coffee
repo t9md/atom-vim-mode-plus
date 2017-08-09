@@ -940,8 +940,6 @@ describe "Operator general", ->
            678\n
           """
 
-    # HERE
-    # -------------------------
     describe "put-after-with-auto-indent command", ->
       beforeEach ->
         waitsForPromise ->
@@ -1033,7 +1031,7 @@ describe "Operator general", ->
               if (2) {
                 |if(3) {
                   abc
-            ____
+
                   def
                 }
               }
