@@ -12,6 +12,8 @@
   - Why I changed
     - Previous behavior is inconsistent with other similar command.
     - I couldn't imagine practical scenario where previous behavior shines.
+- Improve: `maximize-pane`
+  - New: option `centerPaneOnMaximizePane` (default `true`).
 
 # 0.96.2:
 - Improve: #819 TextObject function for `language-rust` now alsow works on Windows platform.
