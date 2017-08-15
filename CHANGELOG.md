@@ -1,5 +1,5 @@
 # 0.97.1:
-- Fix: When `startInInsertMode` was `true` clicking editor in `insert-mode` throw exception.
+- Fix: When `startInInsertMode` was `true` clicking editor in `insert-mode` throw exception but no longer. #830.
 
 # 0.97.0:
 - Maintenance: Rewrite big amount of part from CoffeScript to JavaScript.
