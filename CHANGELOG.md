@@ -1,3 +1,8 @@
+# 0.97.2:
+- Fix: Clicking find-and-replace's project-find result view throw exception when `projectSearchResultsPaneSplitDirection` set to `none`(default).
+  - Because, it opens matched entry on **same pane** and fire `mouseup` only(without preceeding `mousedown` event) on newly opened editor.
+  - Now vmp guard wired mouse-event by explicitly manage next expecting mouse-event.
+
 # 0.97.1:
 - Fix: When `startInInsertMode` was `true` clicking editor in `insert-mode` throw exception but no longer. #830.
 
