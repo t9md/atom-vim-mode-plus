@@ -14,11 +14,12 @@
     - I couldn't imagine practical scenario where previous behavior shines.
 - Improve: `maximize-pane` #828, #829
   - New: config option `centerPaneOnMaximizePane` (default `true`).
-  - New command: `vim-mode-plus:maximize-pane-without-center`.
-  - If you never need centering effect, set `centerPaneOnMaximizePane` to `false` and use `vim-mode-plus:maximize-pane` command.
-  - If you sometime want to centering, but sometime don't want centering
-    - leave `centerPaneOnMaximizePane` to `true`
-    - use `vim-mode-plus:maximize-pane`(`cmd-enter` or `ctrl-w z`) and `vim-mode-plus:maximize-pane-without-center`(`ctrl-w Z`) command respectively."
+  - New command: `vim-mode-plus:maximize-pane-without-center`(default keymap: `ctrl-w Z`).
+  - Confusing?
+    - If you never need centering effect, set `centerPaneOnMaximizePane` to `false` and use `vim-mode-plus:maximize-pane` command.
+    - If you sometime want to centering, but sometime don't want centering
+      - leave `centerPaneOnMaximizePane` to `true`
+      - use `maximize-pane`(`cmd-enter` or `ctrl-w z`) and `maximize-pane-without-center`(`ctrl-w Z`) command respectively."
 
 # 0.96.2:
 - Improve: #819 TextObject function for `language-rust` now alsow works on Windows platform.
