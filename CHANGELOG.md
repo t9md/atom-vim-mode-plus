@@ -1,7 +1,9 @@
-# 0.97.0: WIP
+# 0.97.0:
 - Maintenance: Rewrite big amount of part from CoffeScript to JavaScript.
-  - Rewritten by
-    - 1. Translate by decaffeinate command provided by decaffeinate project
+  - Spec files are not re-written yet(and no plan at this point).
+  - Now files under lib/ directory are 29(JavaScript) vs 9(CoffeScript).
+  - Rewritten is done in following processare
+    - 1. Translate by decaffeinate command provided by decaffeinate project(thanks!).
     - 2. Manual cleanup.
   - Sorry If I create some regression.
 - Improve: Hide mode-string in status-bar while non-editor-item become active item(e.g. settings-view).
@@ -10,19 +12,32 @@
     - Old: clear persistent selections for all editors in workspace.
     - New: clear persistent selections for current active editor.
   - Why I changed
-    - Previous behavior is inconsistent with other similar command.
-    - I couldn't imagine practical scenario where previous behavior shines.
+    - Old behavior is inconsistent with other similar command.
+    - I couldn't imagine practical scenario where old behavior shines.
 - Improve: `maximize-pane` #828, #829
-  - New: config option `centerPaneOnMaximizePane` (default `true`).
-  - New command: `vim-mode-plus:maximize-pane-without-center`(default keymap: `ctrl-w Z`).
+  - New: Config option `centerPaneOnMaximizePane` ( default `true` ).
+    - Old behavior: Text in editor is always centered.
+    - New behavior: Text in editor is centered if `centerPaneOnMaximizePane` is `true`.
+  - New: Command `vim-mode-plus:maximize-pane-without-center`(default keymap: `ctrl-w Z`).
   - Confusing?
     - If you never need centering effect, set `centerPaneOnMaximizePane` to `false` and use `vim-mode-plus:maximize-pane` command.
     - If you sometime want to centering, but sometime don't want centering
-      - leave `centerPaneOnMaximizePane` to `true`
-      - use `maximize-pane`(`cmd-enter` or `ctrl-w z`) and `maximize-pane-without-center`(`ctrl-w Z`) command respectively."
+      - Leave `centerPaneOnMaximizePane` to `true`( default )
+      - Use `maximize-pane`(`cmd-enter` or `ctrl-w z`) and `maximize-pane-without-center`(`ctrl-w Z`) command respectively."
+- Internal, Dev, Breaking: Remove introspection report generating command, which was important in early phase of vmp, but no longer.
+- Dev: `write-command-table` no longer throw exception on first use after restart.
+- Tweak: Change normal operator flash duration from 0.3s to 0.5s.
+- Improve: Mouse #826
+  - Fix: click in `visual.blockwise` mode no longer move cursor to first line of editor.
+  - Now mouse action appropriately modify selection and enter `visual-mode` if necessary.
+    - `shift-click`
+    - `click`(mousedown -> mouseup)
+    - `drag`(mousedown -> mousemove -> mouseup).
+    - double click: Atom select clicked word, vmp update visual-mode.
+    - triple click: Atom select clicked row, vmp update visual-mode.
 
 # 0.96.2:
-- Improve: #819 TextObject function for `language-rust` now alsow works on Windows platform.
+- Improve: #819 TextObject function for `language-rust` now also works on Windows platform.
 
 - Fix: `g q q` now work again. `g w w` also work now.
 # 0.96.1:
