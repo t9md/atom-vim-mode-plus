@@ -15,7 +15,7 @@
     - Old behavior is inconsistent with other similar command.
     - I couldn't imagine practical scenario where old behavior shines.
 - Improve: `maximize-pane` #828, #829
-  - New: Config option `centerPaneOnMaximizePane` ( default `true` ).
+  - New: Config option `centerPaneOnMaximizePane` ( default `true` ). by @dcalhoun
     - Old behavior: Text in editor is always centered.
     - New behavior: Text in editor is centered if `centerPaneOnMaximizePane` is `true`.
   - New: Command `vim-mode-plus:maximize-pane-without-center`(default keymap: `ctrl-w Z`).
