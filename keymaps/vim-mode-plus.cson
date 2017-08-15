@@ -207,7 +207,9 @@
   'ctrl-w s': 'pane:split-down-and-copy-active-item'
 
   'ctrl-w z': 'vim-mode-plus:maximize-pane'
+  'ctrl-w Z': 'vim-mode-plus:maximize-pane-without-center'
   'cmd-enter': 'vim-mode-plus:maximize-pane'
+  # 'cmd-shift-enter': 'vim-mode-plus:maximize-pane-without-center'
 
   'ctrl-w =': 'vim-mode-plus:equalize-panes'
 
