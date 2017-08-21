@@ -404,7 +404,7 @@ describe "Operator general", ->
           set text: "test (xyz)", cursor: [0, 6]
 
         it "deletes until the closing parenthesis", ->
-          ensure ['d t', input: ')'],
+          ensure 'd t )',
             text: 'test ()'
             cursor: [0, 6]
 
@@ -427,7 +427,7 @@ describe "Operator general", ->
           text: "abcd\nabc\nabd"
           cursor: [[0, 0], [1, 0], [2, 0]]
 
-        ensure ['d t', input: 'd'],
+        ensure 'd t d',
           text: "d\nabc\nd"
           cursor: [[0, 0], [1, 0], [2, 0]]
 
@@ -641,13 +641,13 @@ describe "Operator general", ->
 
     describe "with a register", ->
       it "saves the line to the a register", ->
-        ensure ['"', input: 'a', 'y y'],
+        ensure '" a y y',
           register: a: text: "012 345\n"
 
     describe "with A register", ->
       it "append to existing value of lowercase-named register", ->
-        ensure ['"', input: 'a', 'y y'], register: a: text: "012 345\n"
-        ensure ['"', input: 'A', 'y y'], register: a: text: "012 345\n012 345\n"
+        ensure '" a y y', register: a: text: "012 345\n"
+        ensure '" A y y', register: a: text: "012 345\n012 345\n"
 
     describe "with a motion", ->
       beforeEach ->
@@ -657,7 +657,7 @@ describe "Operator general", ->
         ensure 'y e', cursor: [0, 4], register: {'"': text: '345'}
 
       it "does not yank when motion failed", ->
-        ensure ['y t', input: 'x'], register: {'"': text: undefined}
+        ensure 'y t x', register: {'"': text: undefined}
 
       it "yank and move cursor to start of target", ->
         ensure 'y h',
@@ -1120,7 +1120,7 @@ describe "Operator general", ->
         cursor: [[0, 0], [1, 0]]
 
     it "replaces a single character", ->
-      ensure ['r', input: 'x'], text: 'x2\nx4\n\n'
+      ensure 'r x', text: 'x2\nx4\n\n'
 
     it "does nothing when cancelled", ->
       ensure 'r escape',
@@ -1149,24 +1149,24 @@ describe "Operator general", ->
         """
 
     it "composes properly with motions", ->
-      ensure ['2 r', input: 'x'], text: 'xx\nxx\n\n'
+      ensure '2 r x', text: 'xx\nxx\n\n'
 
     it "does nothing on an empty line", ->
       set cursor: [2, 0]
-      ensure ['r', input: 'x'], text: '12\n34\n\n'
+      ensure 'r x', text: '12\n34\n\n'
 
     it "does nothing if asked to replace more characters than there are on a line", ->
-      ensure ['3 r', input: 'x'], text: '12\n34\n\n'
+      ensure '3 r x', text: '12\n34\n\n'
 
     describe "when in visual mode", ->
       beforeEach ->
         keystroke 'v e'
 
       it "replaces the entire selection with the given character", ->
-        ensure ['r', input: 'x'], text: 'xx\nxx\n\n'
+        ensure 'r x', text: 'xx\nxx\n\n'
 
       it "leaves the cursor at the beginning of the selection", ->
-        ensure ['r', input: 'x' ], cursor: [[0, 0], [1, 0]]
+        ensure 'r x', cursor: [[0, 0], [1, 0]]
 
     describe "when in visual-block mode", ->
       beforeEach ->
@@ -1184,7 +1184,7 @@ describe "Operator general", ->
           selectedTextOrdered: ['11', '22', '33', '44'],
 
       it "replaces each selection and put cursor on start of top selection", ->
-        ensure ['r', input: 'x'],
+        ensure 'r x',
           mode: 'normal'
           cursor: [1, 4]
           text: """

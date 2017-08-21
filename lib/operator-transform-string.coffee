@@ -427,16 +427,15 @@ class SurroundBase extends TransformString
   supportEarlySelect: true # Experimental
 
   focusInputForSurroundChar: ->
-    inputUI = @newInputUI()
-    inputUI.onDidConfirm(@onConfirmSurroundChar.bind(this))
-    inputUI.onDidCancel(@cancelOperation.bind(this))
-    inputUI.focus(hideCursor: true)
+    @vimState.focusInput
+      hideCursor: true
+      onConfirm: (@input) => @processOperation()
+      onCancel: => @cancelOperation()
 
   focusInputForTargetPairChar: ->
-    inputUI = @newInputUI()
-    inputUI.onDidConfirm(@onConfirmTargetPairChar.bind(this))
-    inputUI.onDidCancel(@cancelOperation.bind(this))
-    inputUI.focus()
+    @vimState.focusInput
+      onConfirm: (char) => @onConfirmTargetPairChar(char)
+      onCancel: => @cancelOperation()
 
   getPair: (char) ->
     pair = @pairsByAlias[char]
@@ -464,9 +463,6 @@ class SurroundBase extends TransformString
       innerText.trim()
     else
       innerText
-
-  onConfirmSurroundChar: (@input) ->
-    @processOperation()
 
   onConfirmTargetPairChar: (char) ->
     @setTarget @new('APair', pair: @getPair(char))
@@ -508,9 +504,9 @@ class DeleteSurround extends SurroundBase
     @focusInputForTargetPairChar() unless @target?
     super
 
-  onConfirmTargetPairChar: (input) ->
+  onConfirmTargetPairChar: (char) ->
     super
-    @input = input
+    @input = char
     @processOperation()
 
   getNewText: (text) ->

@@ -1699,18 +1699,18 @@ describe "Motion general", ->
       # Note at Atom v1.11.2
       it "Sharp(#) jump&back", -> ensureJumpAndBack('#', cursor: [0, 3])
 
-      it "/ jump&back", -> ensureJumpAndBack ["/", search: 'oo'], cursor: [5, 3]
-      it "? jump&back", -> ensureJumpAndBack ["?", search: 'oo'], cursor: [0, 3]
+      it "/ jump&back", -> ensureJumpAndBack '/ oo enter', cursor: [5, 3]
+      it "? jump&back", -> ensureJumpAndBack '? oo enter', cursor: [0, 3]
 
       it "n jump&back", ->
         set cursor: [0, 0]
-        ensure ['/', search: 'oo'], cursor: [0, 3]
+        ensure '/ oo enter', cursor: [0, 3]
         ensureJumpAndBack "n", cursor: [3, 3]
         ensureJumpAndBack "N", cursor: [5, 3]
 
       it "N jump&back", ->
         set cursor: [0, 0]
-        ensure ['?', search: 'oo'], cursor: [5, 3]
+        ensure '? oo enter', cursor: [5, 3]
         ensureJumpAndBack "n", cursor: [3, 3]
         ensureJumpAndBack "N", cursor: [0, 3]
 

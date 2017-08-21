@@ -1,4 +1,4 @@
-{getVimState, dispatch, TextData, getView, withMockPlatform, rawKeystroke} = require './spec-helper'
+{getVimState, dispatch, TextData, getView, withMockPlatform} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "Operator modifier", ->
@@ -48,6 +48,6 @@ describe "Operator modifier", ->
     describe "operator-modifier-linewise", ->
       it "operate linewisely for characterwise target", ->
         set cursor: [0, 1]
-        ensure ['d V /', search: 'DEF'],
+        ensure 'd V / DEF enter',
           cursor: [0, 0]
           text: ""

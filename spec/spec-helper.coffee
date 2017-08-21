@@ -70,11 +70,6 @@ buildTextInputEvent = (key) ->
   event.initTextEvent("textInput", eventArgs...)
   event
 
-rawKeystroke = (keystrokes, target) ->
-  for key in normalizeKeystrokes(keystrokes).split(/\s+/)
-    event = buildKeydownEventFromKeystroke(key, target)
-    atom.keymaps.handleKeyboardEvent(event)
-
 isPoint = (obj) ->
   if obj instanceof Point
     true
@@ -454,25 +449,29 @@ class VimEditor
       waitsFor -> finished
       return
 
-    # keys must be String or Array
-    # Not support Object for keys to avoid ambiguity.
     target = @editorElement
 
-    for k in toArray(keys)
-      if _.isString(k)
-        rawKeystroke(k, target)
+    for key in keys.split(/\s+/)
+      # [FIXME] Why can't I let atom.keymaps handle enter/escape by buildEvent and handleKeyboardEvent
+      if @vimState.__searchInput?.hasFocus() # to avoid auto populate
+        target = @vimState.searchInput.editorElement
+        switch key
+          when "enter" then atom.commands.dispatch(target, 'core:confirm')
+          when "escape" then atom.commands.dispatch(target, 'core:cancel')
+          else @vimState.searchInput.editor.insertText(key)
+
+      else if @vimState.inputEditor?
+        target = @vimState.inputEditor.element
+        switch key
+          when "enter" then atom.commands.dispatch(target, 'core:confirm')
+          when "escape" then atom.commands.dispatch(target, 'core:cancel')
+          else @vimState.inputEditor.insertText(key)
+
       else
-        switch
-          when k.input?
-            # TODO no longer need to use [input: 'char'] style.
-            rawKeystroke(_key, target) for _key in k.input.split('')
-          when k.search?
-            @vimState.searchInput.editor.insertText(k.search) if k.search
-            atom.commands.dispatch(@vimState.searchInput.editorElement, 'core:confirm')
-          else
-            rawKeystroke(k, target)
+        event = buildKeydownEventFromKeystroke(normalizeKeystrokes(key), target)
+        atom.keymaps.handleKeyboardEvent(event)
 
     if options.partialMatchTimeout
       advanceClock(atom.keymaps.getPartialMatchTimeout())
 
-module.exports = {getVimState, getView, dispatch, TextData, withMockPlatform, rawKeystroke}
+module.exports = {getVimState, getView, dispatch, TextData, withMockPlatform}

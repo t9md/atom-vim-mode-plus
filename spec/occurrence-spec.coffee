@@ -513,7 +513,7 @@ describe "Occurrence", ->
 
       it 'change all assignment("=") of current-function to "?="', ->
         set cursor: [0, 0]
-        ensure ['j f', input: '='], cursor: [1, 17]
+        ensure 'j f =', cursor: [1, 17]
 
         runs ->
           keystroke [
@@ -529,7 +529,7 @@ describe "Occurrence", ->
           expect(vimState.persistentSelection.getMarkers()).toHaveLength(11)
 
           keystroke '2 l' # to move to out-side of range-mrker
-          ensure ['/', search: '=>'], cursor: [9, 69]
+          ensure '/ => enter', cursor: [9, 69]
           keystroke "m" # clear persistentSelection at cursor which is = sign part of fat arrow.
           expect(vimState.persistentSelection.getMarkers()).toHaveLength(10)
 
@@ -537,10 +537,8 @@ describe "Occurrence", ->
           classList.contains('has-persistent-selection')
 
         runs ->
-          keystroke [
-            'ctrl-cmd-g' # select-persistent-selection
-            'I'          # Insert at start of selection
-          ]
+          keystroke "ctrl-cmd-g I" # "select-persistent-selection" then "Insert at start of selection"
+          
           editor.insertText('?')
           ensure 'escape',
             text: """
@@ -689,7 +687,7 @@ describe "Occurrence", ->
               mode: ['visual', 'linewise']
               selectedText: textOriginal
               occurrenceText: ['text', 'text', 'text', 'text', 'text', 'text']
-            ensure ['r', input: '!'],
+            ensure 'r !',
               mode: 'normal'
               text: """
               This !!!! have 3 instance of '!!!!' in the whole !!!!

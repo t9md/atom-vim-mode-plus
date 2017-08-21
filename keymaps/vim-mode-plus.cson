@@ -660,8 +660,8 @@
 # Input mini editor e.g. mark, surround.
 # -------------------------
 'atom-text-editor.vim-mode-plus-input':
-  'ctrl-c': 'vim-mode-plus:input-cancel'
-  'ctrl-[': 'vim-mode-plus:input-cancel'
+  'ctrl-c': 'core:cancel'
+  'ctrl-[': 'core:cancel'
 
 # Search mini editor
 # -------------------------

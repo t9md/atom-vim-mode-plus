@@ -27,7 +27,7 @@ class Mark extends MiscCommand
   @extend()
   requireInput: true
   initialize: ->
-    @focusInput()
+    @readChar()
     super
 
   execute: ->
@@ -441,7 +441,7 @@ class InsertRegister extends InsertMode
 
   initialize: ->
     super
-    @focusInput()
+    @readChar()
 
   execute: ->
     @editor.transact =>

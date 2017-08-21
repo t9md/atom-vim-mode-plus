@@ -35,6 +35,18 @@ atom-text-editor.vim-mode-plus.visual-mode,
       .block-cursor(visible);
     }
   }
+  &.vim-mode-plus-input-focused {
+    .cursor {
+      .underline-cursor(visible);
+      border-bottom-width: .2em;
+    }
+  }
+  &.vim-mode-plus-input-focused.hide-cursor {
+    .cursor {
+      .underline-cursor(hidden);
+      border-bottom-width: 0em;
+    }
+  }
 }
 
 atom-text-editor.vim-mode-plus-input-char-waiting,
@@ -168,22 +180,23 @@ atom-text-editor .vim-mode-plus-flash {
   &.last { background-color: @background-color-error; }
 }
 
-// Input mini editor, e.g surround char.
-// =========================
-.vim-mode-plus-input atom-text-editor[mini] {
+atom-text-editor[mini].vim-mode-plus-input  {
   background-color: inherit;
-  border: none;
-  width: 100%;
-  height: 0px;
   font-weight: normal;
   color: @text-color;
   line-height: 1.28;
   cursor: default;
   white-space: nowrap;
   padding-left: 10px;
-  &.is-focused {
-    box-shadow: none;
-  }
+  height: 0px !important;
+  width: 0px !important;
+  overflow: hidden !important;
+  border: none !important;
+  padding: 0 !important;
+  display: block !important;
+  position: fixed !important;
+  top: -10px !important;
+  left: -10px !important;
 }
 
 // Search
