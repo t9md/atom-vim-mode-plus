@@ -171,18 +171,18 @@ class Base
     selectList.show(@vimState, options)
 
   input: null
-  focusInput: (options) ->
-    inputUI = @newInputUI()
-    inputUI.onDidConfirm (input) =>
-      @input = input
-      @processOperation()
+  focusInput: ({charsMax, hideCursor} = {}) ->
+    @newInputUI().focus
+      charsMax: charsMax
+      hideCursor: hideCursor
+      onConfirm: (@input) => @processOperation()
+      onCancel: => @cancelOperation()
+      onChange: (input) => @vimState.hover.set(input)
 
-    if options?.charsMax > 1
-      inputUI.onDidChange (input) =>
-        @vimState.hover.set(input)
-
-    inputUI.onDidCancel(@cancelOperation.bind(this))
-    inputUI.focus(options)
+  readChar: ->
+    @vimState.readChar
+      onConfirm: (@input) => @processOperation()
+      onCancel: => @cancelOperation()
 
   getVimEofBufferPosition: ->
     @utils.getVimEofBufferPosition(@editor)

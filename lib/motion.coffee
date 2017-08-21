@@ -929,7 +929,7 @@ class MoveToMark extends Motion
 
   initialize: ->
     super
-    @focusInput() unless @isComplete()
+    @readChar() unless @isComplete()
 
   getPoint: ->
     @vimState.mark.get(@input)

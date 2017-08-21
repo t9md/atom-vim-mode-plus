@@ -1,4 +1,4 @@
-{getVimState, dispatch, TextData, getView, withMockPlatform, rawKeystroke} = require './spec-helper'
+{getVimState, dispatch, TextData, getView, withMockPlatform} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "min DSL used in vim-mode-plus's spec", ->

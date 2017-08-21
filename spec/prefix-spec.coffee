@@ -62,7 +62,7 @@ describe "Prefixes", ->
         ensure 'w " c y i w', register: c: text: 'ccc'
 
       it "work with motion which also require input such as 't'", ->
-        ensure ['" a y t', {input: 'c'}], register: a: text: 'aaa bbb '
+        ensure '" a y t c', register: a: text: 'aaa bbb '
 
     describe "With p command", ->
       beforeEach ->
@@ -78,26 +78,24 @@ describe "Prefixes", ->
       describe "when specified register have no text", ->
         it "can paste from a register", ->
           ensure mode: "normal"
-          ensure ['"', input: 'a', 'p'],
-            text: """
-            anew contentbc
+          ensure '" a p',
+            textC: """
+            anew conten|tbc
             def
             """
-            cursor: [0, 11]
 
         it "but do nothing for z register", ->
-          ensure ['"', input: 'z', 'p'],
-            text: """
-            abc
+          ensure '" z p',
+            textC: """
+            |abc
             def
             """
-            cursor: [0, 0]
 
       describe "blockwise-mode paste just use register have no text", ->
         it "paste from a register to each selction", ->
-          ensure ['ctrl-v j "', input: 'a', 'p'],
+          ensure 'ctrl-v j " a p',
             textC: """
-            !new contentbc
+            |new contentbc
             new contentef
             """
 
@@ -190,7 +188,7 @@ describe "Prefixes", ->
           atom.clipboard.write "clip"
 
         it "inserts contents from clipboard with \"", ->
-          ensure ['ctrl-r', input: '"'], text: '01clip2\n'
+          ensure 'ctrl-r "', text: '01clip2\n'
 
       describe "useClipboardAsDefaultRegister = false", ->
         beforeEach ->
@@ -199,10 +197,10 @@ describe "Prefixes", ->
           atom.clipboard.write "clip"
 
         it "inserts contents from \" with \"", ->
-          ensure ['ctrl-r', input: '"'], text: '013452\n'
+          ensure 'ctrl-r "', text: '013452\n'
 
       it "inserts contents of the 'a' register", ->
-        ensure ['ctrl-r', input: 'a'], text: '01abc2\n'
+        ensure 'ctrl-r a', text: '01abc2\n'
 
       it "is cancelled with the escape key", ->
         ensure 'ctrl-r escape',
@@ -278,7 +276,7 @@ describe "Prefixes", ->
         it "insert from per selection registe", ->
           ensure "d i w", text: ":\n:\n:\n"
           ensure 'a', mode: 'insert'
-          ensure ['ctrl-r', input: '"'],
+          ensure 'ctrl-r "',
             text: """
               :012
               :abc
