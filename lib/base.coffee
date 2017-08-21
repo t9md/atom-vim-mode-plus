@@ -9,7 +9,6 @@ settings = require './settings'
 [
   CSON
   path
-  Input
   selectList
   getEditorState  # set by Base.init()
 ] = [] # set null
@@ -142,10 +141,6 @@ class Base
     klass = Base.getClass(name)
     new klass(@vimState, properties)
 
-  newInputUI: ->
-    Input ?= require './input'
-    new Input(@vimState)
-
   # FIXME: This is used to clone Motion::Search to support `n` and `N`
   # But manual reseting and overriding property is bug prone.
   # Should extract as search spec object and use it by
@@ -172,7 +167,7 @@ class Base
 
   input: null
   focusInput: ({charsMax, hideCursor} = {}) ->
-    @newInputUI().focus
+    @vimState.focusInput
       charsMax: charsMax
       hideCursor: hideCursor
       onConfirm: (@input) => @processOperation()

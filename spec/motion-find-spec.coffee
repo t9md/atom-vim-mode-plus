@@ -13,7 +13,7 @@ describe "Motion Find", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = _vim
 
-  xdescribe 'the f performance', ->
+  describe 'the f performance', ->
     timesToExecute = 500
     # timesToExecute = 1
     measureWithTimeEnd = (fn) ->
@@ -49,10 +49,7 @@ describe "Motion Find", ->
         # set cursor: [0, 0]
         # measureWithPerformanceNow(testPerformanceOfKeybind)
 
-    xdescribe '[with hidden-input] moves to l char', ->
-      beforeEach ->
-        vimState.useMiniEditor = true
-
+    describe '[with hidden-input] moves to l char', ->
       it '[with hidden-input] moves to l char', ->
         testPerformanceOfHiddenInput = ->
           keystroke 'f l' for n in [1..timesToExecute]

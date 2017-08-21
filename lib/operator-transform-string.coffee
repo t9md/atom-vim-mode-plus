@@ -427,13 +427,13 @@ class SurroundBase extends TransformString
   supportEarlySelect: true # Experimental
 
   focusInputForSurroundChar: ->
-    @newInputUI().focus
+    @vimState.focusInput
       hideCursor: true
       onConfirm: (@input) => @processOperation()
       onCancel: => @cancelOperation()
 
   focusInputForTargetPairChar: ->
-    @newInputUI().focus
+    @vimState.focusInput
       onConfirm: (char) => @onConfirmTargetPairChar(char)
       onCancel: => @cancelOperation()
 
