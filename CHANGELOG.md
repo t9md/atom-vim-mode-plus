@@ -1,3 +1,15 @@
+# 0.98.0:
+- Improve: Now `r`, `f`, `F`, `t`, `T` and `surround` use mini-editor to read user-input. #838
+  - Benefit?
+    - Old: User cannot input non ascii char. It used keybinding to read user-input.
+    - New: User can input non ascii char and also can paste from clipboard( `cmd-v` ).
+  - Limitation
+    - When user set keymap like `f a`, original `f` command no longer work properly( You cannot use `f b`, `f c`, etc... ).
+    - This is Atom's keymap system's limitation which cannot follow activeElement change when replaying keystroke on partial-match.
+  -  Still `m`, ``` ` ```, `'` read char through keybinding intentionally.
+    - These command use ascii char only.
+    - To allow user to set `m` prefix keymap like `m X` without breaking whole `m` feature.
+
 # 0.97.2:
 - Fix: Clicking find-and-replace's project-find result view throw exception when `projectSearchResultsPaneSplitDirection` set to `none`(default). #830.
   - Because, it opens matched entry on **same pane** and fire `mouseup` only(without preceeding `mousedown` event) on newly opened editor.
