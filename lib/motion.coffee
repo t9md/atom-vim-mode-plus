@@ -601,6 +601,7 @@ class MoveToPreviousParagraph extends MoveToNextParagraph
   direction: 'previous'
 
 # -------------------------
+# keymap: 0
 class MoveToBeginningOfLine extends Motion
   @extend()
 
@@ -636,6 +637,7 @@ class MoveToLastNonblankCharacterOfLineAndDown extends Motion
 
 # MoveToFirstCharacterOfLine faimily
 # ------------------------------------
+# ^
 class MoveToFirstCharacterOfLine extends Motion
   @extend()
   moveCursor: (cursor) ->
@@ -681,6 +683,36 @@ class MoveToFirstLine extends Motion
 
   getRow: ->
     @getCount(-1)
+
+# keymap: g 0
+class MoveToBeginningOfScreenLine extends Motion
+  @extend()
+  moveCursor: (cursor) ->
+    row = cursor.getScreenRow()
+    column = @editor.getFirstVisibleScreenColumn()
+    cursor.setScreenPosition([row, column])
+
+# g ^: `move-to-first-character-of-screen-line`
+class MoveToFirstCharacterOfScreenLine extends Motion
+  @extend()
+  moveCursor: (cursor) ->
+    row = cursor.getScreenRow()
+    startColumn = @editor.getFirstVisibleScreenColumn()
+    scanRange = @editor.bufferRangeForScreenRange([[row, startColumn], [row, Infinity]])
+
+    firstCharacterPosition = null
+    @editor.scanInBufferRange /\S/, scanRange, ({range}) =>
+      firstCharacterPosition = range.start
+    if firstCharacterPosition
+      cursor.setBufferPosition(firstCharacterPosition)
+
+# keymap: g $
+class MoveToLastCharacterOfScreenLine extends Motion
+  @extend()
+  moveCursor: (cursor) ->
+    row = cursor.getScreenRow()
+    column = @editor.getFirstVisibleScreenColumn() + @editor.getEditorWidthInChars()
+    cursor.setScreenPosition([row, column])
 
 # keymap: G
 class MoveToLastLine extends MoveToFirstLine

@@ -105,6 +105,10 @@
   '-': 'vim-mode-plus:move-to-first-character-of-line-up'
   '+': 'vim-mode-plus:move-to-first-character-of-line-down'
   'enter': 'vim-mode-plus:move-to-first-character-of-line-down'
+  
+  'g 0': 'vim-mode-plus:move-to-beginning-of-screen-line'
+  'g ^': 'vim-mode-plus:move-to-first-character-of-screen-line'
+  'g $': 'vim-mode-plus:move-to-last-character-of-screen-line'
 
   # scroll
   'ctrl-u': 'vim-mode-plus:scroll-half-screen-up'

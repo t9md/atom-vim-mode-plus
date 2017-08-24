@@ -607,6 +607,18 @@ MoveToLastCharacterOfLine:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-last-character-of-line"
   commandScope: "atom-text-editor"
+MoveToBeginningOfScreenLine:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-beginning-of-screen-line"
+  commandScope: "atom-text-editor"
+MoveToFirstCharacterOfScreenLine:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-first-character-of-screen-line"
+  commandScope: "atom-text-editor"
+MoveToLastCharacterOfScreenLine:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-last-character-of-screen-line"
+  commandScope: "atom-text-editor"
 MoveToLastNonblankCharacterOfLineAndDown:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-last-nonblank-character-of-line-and-down"
