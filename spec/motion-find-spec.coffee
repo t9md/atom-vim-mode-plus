@@ -13,7 +13,7 @@ describe "Motion Find", ->
       {editor, editorElement} = vimState
       {set, ensure, keystroke} = _vim
 
-  describe 'the f performance', ->
+  xdescribe 'the f performance', ->
     timesToExecute = 500
     # timesToExecute = 1
     measureWithTimeEnd = (fn) ->

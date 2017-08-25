@@ -684,35 +684,27 @@ class MoveToFirstLine extends Motion
   getRow: ->
     @getCount(-1)
 
-# keymap: g 0
-class MoveToBeginningOfScreenLine extends Motion
-  @extend()
+class MoveToScreenColumn extends Motion
+  @extend(false)
   moveCursor: (cursor) ->
-    row = cursor.getScreenRow()
-    column = @editor.getFirstVisibleScreenColumn()
-    cursor.setScreenPosition([row, column])
+    allowOffScreenPosition = @getConfig("allowMoveToOffScreenColumnOnScreenLineMotion")
+    point = @vimState.utils.getScreenPositionForScreenRow(@editor, cursor.getScreenRow(), @which, {allowOffScreenPosition})
+    @setScreenPositionSafely(cursor, point)
+
+# keymap: g 0
+class MoveToBeginningOfScreenLine extends MoveToScreenColumn
+  @extend()
+  which: "beginning"
 
 # g ^: `move-to-first-character-of-screen-line`
-class MoveToFirstCharacterOfScreenLine extends Motion
+class MoveToFirstCharacterOfScreenLine extends MoveToScreenColumn
   @extend()
-  moveCursor: (cursor) ->
-    row = cursor.getScreenRow()
-    startColumn = @editor.getFirstVisibleScreenColumn()
-    scanRange = @editor.bufferRangeForScreenRange([[row, startColumn], [row, Infinity]])
-
-    firstCharacterPosition = null
-    @editor.scanInBufferRange /\S/, scanRange, ({range}) =>
-      firstCharacterPosition = range.start
-    if firstCharacterPosition
-      cursor.setBufferPosition(firstCharacterPosition)
+  which: "first-character"
 
 # keymap: g $
-class MoveToLastCharacterOfScreenLine extends Motion
+class MoveToLastCharacterOfScreenLine extends MoveToScreenColumn
   @extend()
-  moveCursor: (cursor) ->
-    row = cursor.getScreenRow()
-    column = @editor.getFirstVisibleScreenColumn() + @editor.getEditorWidthInChars()
-    cursor.setScreenPosition([row, column])
+  which: "last-character"
 
 # keymap: G
 class MoveToLastLine extends MoveToFirstLine

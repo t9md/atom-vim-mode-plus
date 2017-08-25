@@ -1,3 +1,27 @@
+# 0.99.0:
+- New: Screen line based column motion commands `g 0`, `g ^` and `g $`.
+  Commands:
+    - `move-to-beginning-of-screen-line`( keymap `g 0` )
+    - `move-to-first-character-of-screen-line`( keymap `g ^` )
+    - `move-to-last-character-of-screen-line`( keymap `g $` )
+  Config: `allowMoveToOffScreenColumnOnScreenLineMotion`( vim-mode-plus original ).
+    - Affects how `g 0`, `g ^` and `g $` find destination position.
+    - When a line is wider than the screen width(no-wrapped line a)
+      - `true`(default): move to off-screen column.
+      - `false`: move to on-screen(visible) column( = Vim default ).
+    - Behavioral difference appears only when
+      - Line is not wrapped.
+      - Destination column is off-screen(invisible because of the line is wider than screen width).
+        - for `g 0`: column-0 is off-screen
+          - `true`: move to column-0.
+          - `false`: move to first-visible-column.
+        - for `g ^`: first-char-column is off-screen
+          - `true`: move to first-char-column.
+          - `false`: move to first-visible-char-column.
+        - for `g $`: last-char-column is off-screen
+          - `true`: move to last-char-column.
+          - `false`: move to last-visible-char-column.
+
 # 0.98.0:
 - Improve: Now `r`, `f`, `F`, `t`, `T` and `surround` use mini-editor to read user-input. #838
   - Benefit?
