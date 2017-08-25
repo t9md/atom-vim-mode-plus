@@ -1095,7 +1095,7 @@ describe "Motion general", ->
 
   describe "the 0 keybinding", ->
     beforeEach ->
-      set text: "  abcde", cursor: [0, 4]
+      set textC: "  ab|cde"
 
     describe "as a motion", ->
       it "moves the cursor to the first column", ->
@@ -1154,14 +1154,6 @@ describe "Motion general", ->
         ensure 'd $',
           text: "  ab\n\n1234567890"
           cursor: [0, 3]
-
-  describe "the 0 keybinding", ->
-    beforeEach ->
-      set text: "  a\n", cursor: [0, 2],
-
-    describe "as a motion", ->
-      it "moves the cursor to the beginning of the line", ->
-        ensure '0', cursor: [0, 0]
 
   describe "the - keybinding", ->
     beforeEach ->
