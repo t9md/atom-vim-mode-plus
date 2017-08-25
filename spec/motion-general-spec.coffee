@@ -2,6 +2,12 @@
 {getVimState, dispatch, TextData, getView} = require './spec-helper'
 settings = require '../lib/settings'
 
+setEditorWidthInCharacters = (editor, widthInCharacters) ->
+  component = editor.component
+  component.element.style.width =
+    component.getGutterContainerWidth() + widthInCharacters * component.measurements.baseCharacterWidth + "px"
+  return component.getNextUpdatePromise()
+
 describe "Motion general", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
@@ -1104,6 +1110,126 @@ describe "Motion general", ->
     describe "as a selection", ->
       it 'selects to the first column of the line', ->
         ensure 'd 0', text: 'cde', cursor: [0, 0]
+
+  describe "g 0, g ^ and g $", ->
+    enableSoftWrapAndEnsure = ->
+      editor.setSoftWrapped(true)
+      expect(editor.lineTextForScreenRow(0)).toBe(" 123456789")
+      expect(editor.lineTextForScreenRow(1)).toBe(" B12345678") # first space is softwrap indentation
+      expect(editor.lineTextForScreenRow(2)).toBe(" 9C1234567") # first space is softwrap indentation
+      expect(editor.lineTextForScreenRow(3)).toBe(" 89") # first space is softwrap indentation
+
+    beforeEach ->
+      set text_: """
+      _123456789B123456789C123456789
+      """
+      jasmine.attachToDOM(getView(atom.workspace))
+      waitsForPromise -> setEditorWidthInCharacters(editor, 10)
+
+    describe "the g 0 keybinding", ->
+      describe "allowMoveToOffScreenColumnOnScreenLineMotion = true(default)", ->
+        beforeEach -> settings.set('allowMoveToOffScreenColumnOnScreenLineMotion', true)
+
+        describe "softwrap = false, firstColumnIsVisible = true", ->
+          beforeEach -> set cursor: [0, 3];
+          it "move to column 0 of screen line", -> ensure "g 0", cursor: [0, 0]
+
+        describe "softwrap = false, firstColumnIsVisible = false", ->
+          beforeEach -> set cursor: [0, 15]; editor.setFirstVisibleScreenColumn(10)
+          it "move to column 0 of screen line", -> ensure "g 0", cursor: [0, 0]
+
+        describe "softwrap = true", ->
+          beforeEach -> enableSoftWrapAndEnsure()
+          it "move to column 0 of screen line", ->
+            set cursorScreen: [0, 3]; ensure "g 0", cursorScreen: [0, 0]
+            set cursorScreen: [1, 3]; ensure "g 0", cursorScreen: [1, 1] # skip softwrap indentation.
+
+      describe "allowMoveToOffScreenColumnOnScreenLineMotion = false", ->
+        beforeEach -> settings.set('allowMoveToOffScreenColumnOnScreenLineMotion', false)
+
+        describe "softwrap = false, firstColumnIsVisible = true", ->
+          beforeEach -> set cursor: [0, 3]
+          it "move to column 0 of screen line", -> ensure "g 0", cursor: [0, 0]
+
+        describe "softwrap = false, firstColumnIsVisible = false", ->
+          beforeEach -> set cursor: [0, 15]; editor.setFirstVisibleScreenColumn(10)
+          it "move to first visible colum of screen line", -> ensure "g 0", cursor: [0, 10]
+
+        describe "softwrap = true", ->
+          beforeEach -> enableSoftWrapAndEnsure()
+          it "move to column 0 of screen line", ->
+            set cursorScreen: [0, 3]; ensure "g 0", cursorScreen: [0, 0]
+            set cursorScreen: [1, 3]; ensure "g 0", cursorScreen: [1, 1] # skip softwrap indentation.
+
+    describe "the g ^ keybinding", ->
+      describe "allowMoveToOffScreenColumnOnScreenLineMotion = true(default)", ->
+        beforeEach -> settings.set('allowMoveToOffScreenColumnOnScreenLineMotion', true)
+
+        describe "softwrap = false, firstColumnIsVisible = true", ->
+          beforeEach -> set cursor: [0, 3]
+          it "move to first-char of screen line", -> ensure "g ^", cursor: [0, 1]
+
+        describe "softwrap = false, firstColumnIsVisible = false", ->
+          beforeEach -> set cursor: [0, 15]; editor.setFirstVisibleScreenColumn(10)
+          it "move to first-char of screen line", -> ensure "g ^", cursor: [0, 1]
+
+        describe "softwrap = true", ->
+          beforeEach -> enableSoftWrapAndEnsure()
+          it "move to first-char of screen line", ->
+            set cursorScreen: [0, 3]; ensure "g ^", cursorScreen: [0, 1]
+            set cursorScreen: [1, 3]; ensure "g ^", cursorScreen: [1, 1] # skip softwrap indentation.
+
+      describe "allowMoveToOffScreenColumnOnScreenLineMotion = false", ->
+        beforeEach -> settings.set('allowMoveToOffScreenColumnOnScreenLineMotion', false)
+
+        describe "softwrap = false, firstColumnIsVisible = true", ->
+          beforeEach -> set cursor: [0, 3]
+          it "move to first-char of screen line", -> ensure "g ^", cursor: [0, 1]
+
+        describe "softwrap = false, firstColumnIsVisible = false", ->
+          beforeEach -> set cursor: [0, 15]; editor.setFirstVisibleScreenColumn(10)
+          it "move to first-char of screen line", -> ensure "g ^", cursor: [0, 10]
+
+        describe "softwrap = true", ->
+          beforeEach -> enableSoftWrapAndEnsure()
+          it "move to first-char of screen line", ->
+            set cursorScreen: [0, 3]; ensure "g ^", cursorScreen: [0, 1]
+            set cursorScreen: [1, 3]; ensure "g ^", cursorScreen: [1, 1] # skip softwrap indentation.
+
+    describe "the g $ keybinding", ->
+      describe "allowMoveToOffScreenColumnOnScreenLineMotion = true(default)", ->
+        beforeEach -> settings.set('allowMoveToOffScreenColumnOnScreenLineMotion', true)
+
+        describe "softwrap = false, lastColumnIsVisible = true", ->
+          beforeEach -> set cursor: [0, 27]
+          it "move to last-char of screen line", -> ensure "g $", cursor: [0, 29]
+
+        describe "softwrap = false, lastColumnIsVisible = false", ->
+          beforeEach -> set cursor: [0, 15]; editor.setFirstVisibleScreenColumn(10)
+          it "move to last-char of screen line", -> ensure "g $", cursor: [0, 29]
+
+        describe "softwrap = true", ->
+          beforeEach -> enableSoftWrapAndEnsure()
+          it "move to last-char of screen line", ->
+            set cursorScreen: [0, 3]; ensure "g $", cursorScreen: [0, 9]
+            set cursorScreen: [1, 3]; ensure "g $", cursorScreen: [1, 9]
+
+      describe "allowMoveToOffScreenColumnOnScreenLineMotion = false", ->
+        beforeEach -> settings.set('allowMoveToOffScreenColumnOnScreenLineMotion', false)
+
+        describe "softwrap = false, lastColumnIsVisible = true", ->
+          beforeEach -> set cursor: [0, 27]
+          it "move to last-char of screen line", -> ensure "g $", cursor: [0, 29]
+
+        describe "softwrap = false, lastColumnIsVisible = false", ->
+          beforeEach -> set cursor: [0, 15]; editor.setFirstVisibleScreenColumn(10)
+          it "move to last-char in visible screen line", -> ensure "g $", cursor: [0, 20]
+
+        describe "softwrap = true", ->
+          beforeEach -> enableSoftWrapAndEnsure()
+          it "move to last-char of screen line", ->
+            set cursorScreen: [0, 3]; ensure "g $", cursorScreen: [0, 9]
+            set cursorScreen: [1, 3]; ensure "g $", cursorScreen: [1, 9]
 
   describe "the | keybinding", ->
     beforeEach ->
