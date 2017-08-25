@@ -1,10 +1,11 @@
 # 0.99.0:
+- Fix: Incorrect mouse selection when editor was soft-wrapped.
 - New: Screen line based column motion commands `g 0`, `g ^` and `g $`.
   Commands:
     - `move-to-beginning-of-screen-line`( keymap `g 0` )
     - `move-to-first-character-of-screen-line`( keymap `g ^` )
     - `move-to-last-character-of-screen-line`( keymap `g $` )
-  Config: `allowMoveToOffScreenColumnOnScreenLineMotion`( vim-mode-plus original ).
+  Config: `allowMoveToOffScreenColumnOnScreenLineMotion`( vim-mode-plus original, intentionally differentiate from pure-Vim ).
     - Affects how `g 0`, `g ^` and `g $` find destination position.
     - When a line is wider than the screen width(no-wrapped line a)
       - `true`(default): move to off-screen column.
