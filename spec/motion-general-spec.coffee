@@ -1115,16 +1115,24 @@ describe "Motion general", ->
   describe "g 0, g ^ and g $", ->
     enableSoftWrapAndEnsure = ->
       editor.setSoftWrapped(true)
-      expect(editor.lineTextForScreenRow(0)).toBe(" 123456789")
-      expect(editor.lineTextForScreenRow(1)).toBe(" B12345678") # first space is softwrap indentation
-      expect(editor.lineTextForScreenRow(2)).toBe(" 9C1234567") # first space is softwrap indentation
-      expect(editor.lineTextForScreenRow(3)).toBe(" 89") # first space is softwrap indentation
+      expect(editor.lineTextForScreenRow(0)).toBe(" 1234567")
+      expect(editor.lineTextForScreenRow(1)).toBe(" 89B1234") # first space is softwrap indentation
+      expect(editor.lineTextForScreenRow(2)).toBe(" 56789C1") # first space is softwrap indentation
+      expect(editor.lineTextForScreenRow(3)).toBe(" 2345678") # first space is softwrap indentation
+      expect(editor.lineTextForScreenRow(4)).toBe(" 9") # first space is softwrap indentation
 
     beforeEach ->
+      # Force scrollbars to be visible regardless of local system configuration
+      scrollbarStyle = document.createElement('style')
+      scrollbarStyle.textContent = '::-webkit-scrollbar { -webkit-appearance: none }'
+      jasmine.attachToDOM(scrollbarStyle)
+
+
       set text_: """
       _123456789B123456789C123456789
       """
       jasmine.attachToDOM(getView(atom.workspace))
+      # jasmine.attachToDOM(edit)
       waitsForPromise ->
         setEditorWidthInCharacters(editor, 10)
 
@@ -1213,8 +1221,8 @@ describe "Motion general", ->
         describe "softwrap = true", ->
           beforeEach -> enableSoftWrapAndEnsure()
           it "move to last-char of screen line", ->
-            set cursorScreen: [0, 3]; ensure "g $", cursorScreen: [0, 9]
-            set cursorScreen: [1, 3]; ensure "g $", cursorScreen: [1, 9]
+            set cursorScreen: [0, 3]; ensure "g $", cursorScreen: [0, 7]
+            set cursorScreen: [1, 3]; ensure "g $", cursorScreen: [1, 7]
 
       describe "allowMoveToOffScreenColumnOnScreenLineMotion = false", ->
         beforeEach -> settings.set('allowMoveToOffScreenColumnOnScreenLineMotion', false)
@@ -1225,13 +1233,13 @@ describe "Motion general", ->
 
         describe "softwrap = false, lastColumnIsVisible = false", ->
           beforeEach -> set cursor: [0, 15]; editor.setFirstVisibleScreenColumn(10)
-          it "move to last-char in visible screen line", -> ensure "g $", cursor: [0, 20]
+          it "move to last-char in visible screen line", -> ensure "g $", cursor: [0, 18]
 
         describe "softwrap = true", ->
           beforeEach -> enableSoftWrapAndEnsure()
           it "move to last-char of screen line", ->
-            set cursorScreen: [0, 3]; ensure "g $", cursorScreen: [0, 9]
-            set cursorScreen: [1, 3]; ensure "g $", cursorScreen: [1, 9]
+            set cursorScreen: [0, 3]; ensure "g $", cursorScreen: [0, 7]
+            set cursorScreen: [1, 3]; ensure "g $", cursorScreen: [1, 7]
 
   describe "the | keybinding", ->
     beforeEach ->
