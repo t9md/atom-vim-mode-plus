@@ -3,6 +3,7 @@
 settings = require '../lib/settings'
 
 setEditorWidthInCharacters = (editor, widthInCharacters) ->
+  editor.setDefaultCharWidth(1)
   component = editor.component
   component.element.style.width =
     component.getGutterContainerWidth() + widthInCharacters * component.measurements.baseCharacterWidth + "px"
@@ -1124,7 +1125,8 @@ describe "Motion general", ->
       _123456789B123456789C123456789
       """
       jasmine.attachToDOM(getView(atom.workspace))
-      waitsForPromise -> setEditorWidthInCharacters(editor, 10)
+      waitsForPromise ->
+        setEditorWidthInCharacters(editor, 10)
 
     describe "the g 0 keybinding", ->
       describe "allowMoveToOffScreenColumnOnScreenLineMotion = true(default)", ->
