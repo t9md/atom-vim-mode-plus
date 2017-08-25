@@ -1131,7 +1131,7 @@ describe "Motion general", ->
         beforeEach -> settings.set('allowMoveToOffScreenColumnOnScreenLineMotion', true)
 
         describe "softwrap = false, firstColumnIsVisible = true", ->
-          beforeEach -> set cursor: [0, 3];
+          beforeEach -> set cursor: [0, 3]
           it "move to column 0 of screen line", -> ensure "g 0", cursor: [0, 0]
 
         describe "softwrap = false, firstColumnIsVisible = false", ->
@@ -1195,7 +1195,6 @@ describe "Motion general", ->
           it "move to first-char of screen line", ->
             set cursorScreen: [0, 3]; ensure "g ^", cursorScreen: [0, 1]
             set cursorScreen: [1, 3]; ensure "g ^", cursorScreen: [1, 1] # skip softwrap indentation.
-
     describe "the g $ keybinding", ->
       describe "allowMoveToOffScreenColumnOnScreenLineMotion = true(default)", ->
         beforeEach -> settings.set('allowMoveToOffScreenColumnOnScreenLineMotion', true)
