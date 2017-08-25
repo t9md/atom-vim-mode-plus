@@ -5,7 +5,7 @@
     - `move-to-beginning-of-screen-line`( keymap `g 0` )
     - `move-to-first-character-of-screen-line`( keymap `g ^` )
     - `move-to-last-character-of-screen-line`( keymap `g $` )
-  Config: `allowMoveToOffScreenColumnOnScreenLineMotion`( vim-mode-plus original, intentionally differentiate from pure-Vim ).
+  Config: `allowMoveToOffScreenColumnOnScreenLineMotion`( vim-mode-plus original, intentionally differentiate default behavior from pure-Vim ).
     - Affects how `g 0`, `g ^` and `g $` find destination position.
     - When a line is wider than the screen width(no-wrapped line a)
       - `true`(default): move to off-screen column.
