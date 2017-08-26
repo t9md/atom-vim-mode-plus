@@ -1,5 +1,5 @@
 # 0.99.0:
-- New: Conditional keymap config `keymapYToYankToLastCharacterOfLine`.
+- New: Conditional keymap config `keymapYToYankToLastCharacterOfLine`(default `false`).
   - By default `Y` behaves as `y y`.
   - This is not consistent with `C` and `D` which behaves `c $` and `d $`.
   - By enabling this `Y` behaves as `y $`.
