@@ -1,3 +1,12 @@
+# 0.99.1:
+- Fix: Attempt to user non-yet-supported register( such as `" 0 y` ) no longer throw exception.
+  - This is regression introduced in v0.98.0. #844.
+- Fix: Quickly switching active tab and back no longer re-start remaining flash animation #846.
+  - In previous version of vmp, You can see remaining flash re-triggered by(just an example)
+    1. `y i p` see yanked paragraph is flashed.
+    2. `cmd-shfit-]`( `pane:show-next-item` ), `cmd-shfit-]`( `pane:show-previous-item` ) quickly.
+    3. When you come back to original editor, once fadeout-ed flash is re-started. But no longer from this version.
+
 # 0.99.0:
 - Fix: Incorrect mouse selection when editor was soft-wrapped.
 - Improve: Make conditional keymaps config's title and description more user friendly.
