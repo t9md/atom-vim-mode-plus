@@ -1,9 +1,10 @@
 # 0.99.0:
+- Fix: Incorrect mouse selection when editor was soft-wrapped.
+- Improve: Make conditional keymaps config's title and description more user friendly.
 - New: Conditional keymap config `keymapYToYankToLastCharacterOfLine`(default `false`).
   - By default `Y` behaves as `y y`.
   - This is not consistent with `C` and `D` which behaves `c $` and `d $`.
   - By enabling this `Y` behaves as `y $`.
-- Fix: Incorrect mouse selection when editor was soft-wrapped.
 - New: Screen line based column motion commands `g 0`, `g ^` and `g $`.
   Commands:
     - `move-to-beginning-of-screen-line`( keymap `g 0` )
