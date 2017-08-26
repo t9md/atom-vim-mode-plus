@@ -1132,7 +1132,6 @@ describe "Motion general", ->
       _123456789B123456789C123456789
       """
       jasmine.attachToDOM(getView(atom.workspace))
-      # jasmine.attachToDOM(edit)
       waitsForPromise ->
         setEditorWidthInCharacters(editor, 10)
 
