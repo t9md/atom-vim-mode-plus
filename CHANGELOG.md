@@ -1,3 +1,12 @@
+# 1.0.0: [WIP]
+- Breaking: Default behavior change. You can change by config param.
+  - `keepColumnOnSelectTextObject`: when `true`, keep original cursor column when selecting text object(e.g. `v i p`).
+    - old default: `false`
+    - new default: `true`
+  - `incrementalSearch`: when `true`, visit matched position as you type search term.
+    - old default: `false`
+    - new default: `true`
+
 # 0.99.1:
 - Fix: Attempt to user non-yet-supported register( such as `" 0 y` ) no longer throw exception.
   - This is regression introduced in v0.98.0. #844.
