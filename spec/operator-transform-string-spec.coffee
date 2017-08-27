@@ -736,7 +736,7 @@ describe "Operator TransformString", ->
           "apple"
           "pairs" "tomato"
           "orange"
-          "mil|k"
+          |"milk"
 
           """
 
