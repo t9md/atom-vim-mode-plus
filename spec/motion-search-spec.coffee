@@ -144,8 +144,12 @@ describe "Motion Search", ->
         it "repeats previous search with /<enter>", ->
           ensure '/  enter', cursor: [3, 0]
 
-        it "repeats previous search with //", ->
-          ensure '/ / enter', cursor: [3, 0]
+        describe "non-incrementalSearch only feature", ->
+          beforeEach ->
+            settings.set("incrementalSearch", false)
+
+          it "repeats previous search with //", ->
+            ensure '/ / enter', cursor: [3, 0]
 
         describe "the n keybinding", ->
           it "repeats the last search", ->
@@ -183,8 +187,12 @@ describe "Motion Search", ->
         it "repeats previous search as reversed with ?<enter>", ->
           ensure "? enter", cursor: [1, 0]
 
-        it "repeats previous search as reversed with ??", ->
-          ensure '? ? enter', cursor: [1, 0]
+        describe "non-incrementalSearch only feature", ->
+          beforeEach ->
+            settings.set("incrementalSearch", false)
+
+          it "repeats previous search as reversed with ??", ->
+            ensure '? ? enter', cursor: [1, 0]
 
         describe 'the n keybinding', ->
           it "repeats the last search backwards", ->
@@ -266,7 +274,6 @@ describe "Motion Search", ->
 
   describe "IncrementalSearch", ->
     beforeEach ->
-      settings.set('incrementalSearch', true)
       jasmine.attachToDOM(getView(atom.workspace))
 
     describe "with multiple-cursors", ->
