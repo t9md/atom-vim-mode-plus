@@ -117,7 +117,7 @@ describe "Occurrence", ->
           "Study" Snake
           UP_CASE
 
-          |other Paragraph
+          other| Paragraph
           """
 
     describe "apply various operator to occurrence in various target", ->
@@ -538,7 +538,7 @@ describe "Occurrence", ->
 
         runs ->
           keystroke "ctrl-cmd-g I" # "select-persistent-selection" then "Insert at start of selection"
-          
+
           editor.insertText('?')
           ensure 'escape',
             text: """
