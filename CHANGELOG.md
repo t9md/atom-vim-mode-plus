@@ -1,11 +1,27 @@
 # 1.0.0: [WIP]
-- Breaking: Default behavior change. You can change by config param.
-  - `keepColumnOnSelectTextObject`: when `true`, keep original cursor column when selecting text object(e.g. `v i p`).
-    - old default: `false`
-    - new default: `true`
-  - `incrementalSearch`: when `true`, visit matched position as you type search term.
-    - old default: `false`
-    - new default: `true`
+- Breaking: Renamed config parameter name, changed default value.
+  - Automatically migrate existing config on activation of vmp.
+  - By renaming, we have member of `stayOn` prefixed config which shares same purpose.
+    - Purpose of renaming is to have `stayOn` shared prefix since it's purpose is same.
+      - Respect original cursor position as much as possible after operation( select, move, operate ).
+      - It keep both cursor's row and column or column only( if vertical move was necessary ).
+  - Config params renamed and changed default value
+    - Param: `keepColumnOnSelectTextObject`
+      - Renamed to `stayOnSelectTextObject`
+      - New default `true`
+        - `true`: keep original cursor column when selecting text object(e.g. `v i p`).
+        - `false`: cursor moved to end of selection.
+    - Param: `incrementalSearch`
+      - New default: `true`
+        - `true`, visit matched position as you type search term.
+        - `false`, move to matched position after you confirmed by `enter`.
+    - Param: `moveToFirstCharacterOnVerticalMotion`
+      - Renamed to `stayOnVerticalMotion` with meaning **inverted**
+      - New default: `true`
+        - `true`, keep cursor column on vertical motion(e.g. `ctrl-f, b, d, u`, `G`, `g g` etc.)
+        - `false`, Move to first non-blank char after vertical move.
+      - What's "meaning **inverted**"?
+        - `(stayOnVerticalMotion = true) === (moveToFirstCharacterOnVerticalMotion = false)`
 
 # 0.99.1:
 - Fix: Attempt to user non-yet-supported register( such as `" 0 y` ) no longer throw exception.
