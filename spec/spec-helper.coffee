@@ -3,6 +3,7 @@ semver = require 'semver'
 {Range, Point, Disposable} = require 'atom'
 {inspect} = require 'util'
 globalState = require '../lib/global-state'
+settings = require '../lib/settings'
 
 KeymapManager = atom.keymaps.constructor
 {normalizeKeystrokes} = require(atom.config.resourcePath + "/node_modules/atom-keymap/lib/helpers")
@@ -21,6 +22,9 @@ supportedModeClass = [
 # -------------------------
 beforeEach ->
   globalState.reset()
+  settings.set("stayOnTransformString", false)
+  settings.set("stayOnYank", false)
+  settings.set("stayOnDelete", false)
 
 # Utils
 # -------------------------

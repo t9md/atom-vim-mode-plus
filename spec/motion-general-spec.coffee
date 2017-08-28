@@ -992,36 +992,38 @@ describe "Motion general", ->
 
   describe "the b keybinding", ->
     beforeEach ->
-      set text: " ab cde1+- \n xyz\n\nzip }\n last"
+      set
+        textC_: """
+        _ab cde1+-_
+        _xyz
+
+        zip }
+        _|last
+        """
 
     describe "as a motion", ->
-      beforeEach ->
-        set cursor: [4, 1]
-
       it "moves the cursor to the beginning of the previous word", ->
-        ensure 'b', cursor: [3, 4]
-        ensure 'b', cursor: [3, 0]
-        ensure 'b', cursor: [2, 0]
-        ensure 'b', cursor: [1, 1]
-        ensure 'b', cursor: [0, 8]
-        ensure 'b', cursor: [0, 4]
-        ensure 'b', cursor: [0, 1]
+        ensure 'b', textC: " ab cde1+- \n xyz\n\nzip |}\n last"
+        ensure 'b', textC: " ab cde1+- \n xyz\n\n|zip }\n last"
+        ensure 'b', textC: " ab cde1+- \n xyz\n|\nzip }\n last"
+        ensure 'b', textC: " ab cde1+- \n |xyz\n\nzip }\n last"
+        ensure 'b', textC: " ab cde1|+- \n xyz\n\nzip }\n last"
+        ensure 'b', textC: " ab |cde1+- \n xyz\n\nzip }\n last"
+        ensure 'b', textC: " |ab cde1+- \n xyz\n\nzip }\n last"
 
         # Go to start of the file, after moving past the first word
-        ensure 'b', cursor: [0, 0]
-        # Stay at the start of the file
-        ensure 'b', cursor: [0, 0]
+        ensure 'b', textC: "| ab cde1+- \n xyz\n\nzip }\n last"
+        # Do nothing
+        ensure 'b', textC: "| ab cde1+- \n xyz\n\nzip }\n last"
 
     describe "as a selection", ->
       describe "within a word", ->
         it "selects to the beginning of the current word", ->
-          set cursor: [0, 2]
-          ensure 'y b', cursor: [0, 1], register: '"': text: 'a'
+          set textC: " a|b cd"; ensure 'y b', textC: " |ab cd", register: '"': text: 'a'
 
       describe "between words", ->
         it "selects to the beginning of the last word", ->
-          set cursor: [0, 4]
-          ensure 'y b', cursor: [0, 1], register: '"': text: 'ab '
+          set textC: " ab |cd"; ensure 'y b', textC: " |ab cd", register: '"': text: 'ab '
 
   describe "the B keybinding", ->
     beforeEach ->
@@ -1301,7 +1303,6 @@ describe "Motion general", ->
     describe "from the middle of a line", ->
       beforeEach ->
         set cursor: [1, 3]
-
       describe "as a motion", ->
         it "moves the cursor to the last character of the previous line", ->
           ensure '-', cursor: [0, 0]
@@ -1321,8 +1322,8 @@ describe "Motion general", ->
       describe "as a selection", ->
         it "selects to the first character of the previous line (directly above)", ->
           ensure 'd -', text: "abcdefg\n"
-          # commented out because the column is wrong due to a bug in `k`; re-enable when `k` is fixed
-          #expect(editor.getCursorScreenPosition()).toEqual [0, 2]
+          # FIXME commented out because the column is wrong due to a bug in `k`; re-enable when `k` is fixed
+          # ensure cursor: [0, 2]
 
     describe "from the beginning of a line preceded by an indented line", ->
       beforeEach ->
