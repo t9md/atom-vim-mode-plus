@@ -1,10 +1,11 @@
-# 1.0.0: [WIP] Big change on default config value.
-- Breaking: Renamed config parameter name, changed default value.
+# 1.0.0: New default `stayOn` all `true`.
+- Breaking: Default config change/Renamed config name.
   - Summary:
+    - Now all `stayOn` prefixed configuration have new default `true`.
+    - New default behavior is NOT compatible with pure-Vim.
+      - Set all `stayOn` prefixed configuration to `false` to revert to previous behavior.
     - Some configuration parameter name is renamed to have `stayOn` prefix.
       - Automatically migrate existing config on activation of vmp.
-    - Now all `stayOn` prefixed configuration have new default value `true`( was `false` ).
-      - If you don't like new default behavior, set `false` for all `stayOn` prefixed configuration.
     - What is `stayOnXXX` configuration?
       - Respect original cursor position as much as possible after operation( select, move, operate ).
       - It keep both cursor's row and column or column only( if vertical move was necessary ).
@@ -15,7 +16,7 @@
     - New default: `stayOnDelete` = `true`
     - Renamed/New default: `keepColumnOnSelectTextObject` > `stayOnSelectTextObject` = `true`
     - Renamed/New default: `moveToFirstCharacterOnVerticalMotion` !> `stayOnVerticalMotion` = `true`
-      - Renamed with meaning inverted: `(stayOnVerticalMotion = true) === (moveToFirstCharacterOnVerticalMotion = false)`
+      - Renamed with meaning inverted: `!moveToFirstCharacterOnVerticalMotion === stayOnVerticalMotion`
 
 # 0.99.1:
 - Fix: Attempt to user non-yet-supported register( such as `" 0 y` ) no longer throw exception.
