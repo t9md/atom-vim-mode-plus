@@ -149,14 +149,12 @@ describe "Operator general", ->
 
       it "leaves the cursor on the first nonblank character", ->
         set
-          text: """
-          12345
+          textC: """
+          1234|5
             abcde\n
           """
-          cursor: [0, 4]
         ensure 'd d',
-          text: "  abcde\n"
-          cursor: [0, 2]
+          textC: "  |abcde\n"
 
     describe "undo behavior", ->
       [originalText, initialTextC] = []
@@ -542,9 +540,8 @@ describe "Operator general", ->
   describe "the y keybinding", ->
     beforeEach ->
       set
-        cursor: [0, 4]
-        text: """
-        012 345
+        textC: """
+        012 |345
         abc\n
         """
 
@@ -563,9 +560,8 @@ describe "Operator general", ->
     describe "visual-mode.linewise", ->
       beforeEach ->
         set
-          cursor: [0, 4]
-          text: """
-            000000
+          textC: """
+            0000|00
             111111
             222222\n
             """
