@@ -1,4 +1,8 @@
-# vim-mode-plus [![Build Status](https://travis-ci.org/t9md/atom-vim-mode-plus.svg)](https://travis-ci.org/t9md/atom-vim-mode-plus)
+
+# vim-mode-plus
+
+[![Build Status](https://travis-ci.org/t12md/atom-vim-mode-plus.svg)](https://travis-ci.org/t9md/atom-vim-mode-plus)
+ [![BountySource](https://api.bountysource.com/badge/team?team_id=116280&style=raised)](https://www.bountysource.com/teams/atom-vim-mode-plus)
 
 vim-mode improved.
 

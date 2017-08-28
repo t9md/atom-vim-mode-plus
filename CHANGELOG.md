@@ -4,6 +4,7 @@
     - Some configuration parameter name is renamed to have `stayOn` prefix.
       - Automatically migrate existing config on activation of vmp.
     - Now all `stayOn` prefixed configuration have new default value `true`( was `false` ).
+      - If you don't like new default behavior, set `false` for all `stayOn` prefixed configuration.
     - What is `stayOnXXX` configuration?
       - Respect original cursor position as much as possible after operation( select, move, operate ).
       - It keep both cursor's row and column or column only( if vertical move was necessary ).
