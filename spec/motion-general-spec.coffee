@@ -1491,8 +1491,9 @@ describe "Motion general", ->
             text: referenceText
             cursor: referenceCursorPosition
 
-  describe "the gg keybinding", ->
+  describe "the gg keybinding with stayOnVerticalMotion = false", ->
     beforeEach ->
+      settings.set('stayOnVerticalMotion', false)
       set
         text: """
            1abc
@@ -1573,8 +1574,9 @@ describe "Motion general", ->
         ensure 'v 2 g _',
           selectedText: "  2  \n 3abc"
 
-  describe "the G keybinding", ->
+  describe "the G keybinding (stayOnVerticalMotion = false)", ->
     beforeEach ->
+      settings.set('stayOnVerticalMotion', false)
       set
         text_: """
         1
@@ -1611,9 +1613,11 @@ describe "Motion general", ->
       it "100%", -> ensure '1 0 0 %', cursor: [999, 0]
       it "120%", -> ensure '1 2 0 %', cursor: [999, 0]
 
-  describe "the H, M, L keybinding", ->
+  describe "the H, M, L keybinding( stayOnVerticalMotio = false )", ->
     [eel] = []
     beforeEach ->
+      settings.set('stayOnVerticalMotion', false)
+
       eel = editorElement
       set
         text: """
@@ -1750,26 +1754,35 @@ describe "Motion general", ->
       ensure '` `', cursor: [1, 5]
 
   describe "jump command update ` and ' mark", ->
-    ensureMark = (_keystroke, option) ->
-      keystroke(_keystroke)
-      ensure cursor: option.cursor
-      ensure mark: "`": option.mark
-      ensure mark: "'": option.mark
+    ensureJumpMark = (value) ->
+      ensure mark: "`": value
+      ensure mark: "'": value
 
     ensureJumpAndBack = (keystroke, option) ->
-      initial = editor.getCursorBufferPosition()
-      ensureMark keystroke, cursor: option.cursor, mark: initial
-      afterMove = editor.getCursorBufferPosition()
-      expect(initial.isEqual(afterMove)).toBe(false)
-      ensureMark "` `", cursor: initial, mark: option.cursor
+      afterMove = option.cursor
+      beforeMove = editor.getCursorBufferPosition()
+
+      ensure keystroke, cursor: afterMove
+      ensureJumpMark(beforeMove)
+
+      expect(beforeMove.isEqual(afterMove)).toBe(false)
+
+      ensure "` `", cursor: beforeMove
+      ensureJumpMark(afterMove)
 
     ensureJumpAndBackLinewise = (keystroke, option) ->
-      initial = editor.getCursorBufferPosition()
-      expect(initial.column).not.toBe(0)
-      ensureMark keystroke, cursor: option.cursor, mark: initial
-      afterMove = editor.getCursorBufferPosition()
-      expect(initial.isEqual(afterMove)).toBe(false)
-      ensureMark "' '", cursor: [initial.row, 0], mark: option.cursor
+      afterMove = option.cursor
+      beforeMove = editor.getCursorBufferPosition()
+
+      expect(beforeMove.column).not.toBe(0)
+
+      ensure keystroke, cursor: afterMove
+      ensureJumpMark(beforeMove)
+
+      expect(beforeMove.isEqual(afterMove)).toBe(false)
+
+      ensure "' '", cursor: [beforeMove.row, 0]
+      ensureJumpMark(afterMove)
 
     beforeEach ->
       for mark in "`'"
