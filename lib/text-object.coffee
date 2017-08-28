@@ -102,7 +102,7 @@ class TextObject extends Base
             # So we have to assure all selection have selction property.
             # Maybe this logic can be moved to operation stack.
             for $selection in @swrap.getSelections(@editor)
-              if @getConfig('keepColumnOnSelectTextObject')
+              if @getConfig('stayOnSelectTextObject')
                 $selection.saveProperties() unless $selection.hasProperties()
               else
                 $selection.saveProperties()
