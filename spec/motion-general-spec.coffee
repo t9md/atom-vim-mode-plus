@@ -1664,9 +1664,9 @@ describe "Motion general", ->
       it "moves the cursor to the non-blank-char of middle of screen", ->
         ensure 'M', cursor: [4, 2]
 
-  describe "moveToFirstCharacterOnVerticalMotion setting", ->
+  describe "stayOnVerticalMotion setting", ->
     beforeEach ->
-      settings.set('moveToFirstCharacterOnVerticalMotion', false)
+      settings.set('stayOnVerticalMotion', true)
       set
         text: """
           0 000000000000

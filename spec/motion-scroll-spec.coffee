@@ -91,7 +91,7 @@ describe "Motion Scroll", ->
 
   describe "ctrl-f, ctrl-b, ctrl-d, ctrl-u", ->
     beforeEach ->
-      settings.set('moveToFirstCharacterOnVerticalMotion', false)
+      settings.set('stayOnVerticalMotion', true)
       set cursor: [42, 10]
       ensure scrollTop: 400
 
