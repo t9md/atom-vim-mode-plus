@@ -1,4 +1,5 @@
 # 1.0.0: New default `stayOn` all `true`.
+- Version: Decided to bump major version.
 - Breaking: Default config change/Renamed config name.
   - Summary:
     - Now all `stayOn` prefixed configuration have new default `true`.

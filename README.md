@@ -12,6 +12,7 @@ vim-mode improved.
 - [Whats this?](#whats-this)
 - [FAQ](#faq)
     - [Why fork? why not directly contribute to official vim-mode?](#why-fork-why-not-directly-contribute-to-official-vim-mode)
+    - [Behavior different from pure Vim?](#behavior-different-from-pure-vim)
     - [In visual-block mode, some motions make the editor slow, freeze.](#in-visual-block-mode-some-motions-make-the-editor-slow-freeze)
     - [ex-mode?](#ex-mode)
     - [Want to suppress autocomplete-plus's auto suggestion except insert-mode.](#want-to-suppress-autocomplete-pluss-auto-suggestion-except-insert-mode)
@@ -85,6 +86,11 @@ Search [Q&A](https://github.com/t9md/atom-vim-mode-plus/issues?utf8=%E2%9C%93&q=
 
 - Changes are [too big](https://github.com/t9md/atom-vim-mode-plus/graphs/contributors).
 - I felt many features are too experimental to merge to the official vim-mode.
+
+### Behavior different from pure Vim?
+
+Some behaviors are intentionally have different default behaviors.
+See [DifferencesFromPureVim](https://github.com/t9md/atom-vim-mode-plus/wiki/DifferencesFromPureVim) for details.
 
 ### In visual-block mode, some motions make the editor slow, freeze.
 
