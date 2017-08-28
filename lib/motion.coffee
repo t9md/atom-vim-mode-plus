@@ -98,7 +98,7 @@ class Motion extends Base
     @vimState.getLastBlockwiseSelection().autoscroll() if @wise is 'blockwise'
 
   setCursorBufferRow: (cursor, row, options) ->
-    if @verticalMotion and @getConfig('moveToFirstCharacterOnVerticalMotion')
+    if @verticalMotion and not @getConfig('stayOnVerticalMotion')
       cursor.setBufferPosition(@getFirstCharacterPositionForBufferRow(row), options)
     else
       setBufferRow(cursor, row, options)

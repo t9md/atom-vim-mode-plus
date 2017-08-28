@@ -134,6 +134,9 @@ class TextData
     else
       text + "\n"
 
+  getLine: (line, options) ->
+    @getLines([line], options)
+
   getRaw: ->
     @rawData
 

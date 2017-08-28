@@ -1491,8 +1491,9 @@ describe "Motion general", ->
             text: referenceText
             cursor: referenceCursorPosition
 
-  describe "the gg keybinding", ->
+  describe "the gg keybinding with stayOnVerticalMotion = false", ->
     beforeEach ->
+      settings.set('stayOnVerticalMotion', false)
       set
         text: """
            1abc
@@ -1573,8 +1574,9 @@ describe "Motion general", ->
         ensure 'v 2 g _',
           selectedText: "  2  \n 3abc"
 
-  describe "the G keybinding", ->
+  describe "the G keybinding (stayOnVerticalMotion = false)", ->
     beforeEach ->
+      settings.set('stayOnVerticalMotion', false)
       set
         text_: """
         1
@@ -1611,9 +1613,11 @@ describe "Motion general", ->
       it "100%", -> ensure '1 0 0 %', cursor: [999, 0]
       it "120%", -> ensure '1 2 0 %', cursor: [999, 0]
 
-  describe "the H, M, L keybinding", ->
+  describe "the H, M, L keybinding( stayOnVerticalMotio = false )", ->
     [eel] = []
     beforeEach ->
+      settings.set('stayOnVerticalMotion', false)
+
       eel = editorElement
       set
         text: """
@@ -1664,9 +1668,9 @@ describe "Motion general", ->
       it "moves the cursor to the non-blank-char of middle of screen", ->
         ensure 'M', cursor: [4, 2]
 
-  describe "moveToFirstCharacterOnVerticalMotion setting", ->
+  describe "stayOnVerticalMotion setting", ->
     beforeEach ->
-      settings.set('moveToFirstCharacterOnVerticalMotion', false)
+      settings.set('stayOnVerticalMotion', true)
       set
         text: """
           0 000000000000
@@ -1750,26 +1754,35 @@ describe "Motion general", ->
       ensure '` `', cursor: [1, 5]
 
   describe "jump command update ` and ' mark", ->
-    ensureMark = (_keystroke, option) ->
-      keystroke(_keystroke)
-      ensure cursor: option.cursor
-      ensure mark: "`": option.mark
-      ensure mark: "'": option.mark
+    ensureJumpMark = (value) ->
+      ensure mark: "`": value
+      ensure mark: "'": value
 
     ensureJumpAndBack = (keystroke, option) ->
-      initial = editor.getCursorBufferPosition()
-      ensureMark keystroke, cursor: option.cursor, mark: initial
-      afterMove = editor.getCursorBufferPosition()
-      expect(initial.isEqual(afterMove)).toBe(false)
-      ensureMark "` `", cursor: initial, mark: option.cursor
+      afterMove = option.cursor
+      beforeMove = editor.getCursorBufferPosition()
+
+      ensure keystroke, cursor: afterMove
+      ensureJumpMark(beforeMove)
+
+      expect(beforeMove.isEqual(afterMove)).toBe(false)
+
+      ensure "` `", cursor: beforeMove
+      ensureJumpMark(afterMove)
 
     ensureJumpAndBackLinewise = (keystroke, option) ->
-      initial = editor.getCursorBufferPosition()
-      expect(initial.column).not.toBe(0)
-      ensureMark keystroke, cursor: option.cursor, mark: initial
-      afterMove = editor.getCursorBufferPosition()
-      expect(initial.isEqual(afterMove)).toBe(false)
-      ensureMark "' '", cursor: [initial.row, 0], mark: option.cursor
+      afterMove = option.cursor
+      beforeMove = editor.getCursorBufferPosition()
+
+      expect(beforeMove.column).not.toBe(0)
+
+      ensure keystroke, cursor: afterMove
+      ensureJumpMark(beforeMove)
+
+      expect(beforeMove.isEqual(afterMove)).toBe(false)
+
+      ensure "' '", cursor: [beforeMove.row, 0]
+      ensureJumpMark(afterMove)
 
     beforeEach ->
       for mark in "`'"
@@ -1807,18 +1820,18 @@ describe "Motion general", ->
         ensure mark: "`": [0, 0]
         set cursor: initial
 
-      it "G jump&back", -> ensureJumpAndBack 'G', cursor: [5, 0]
-      it "g g jump&back", -> ensureJumpAndBack "g g", cursor: [0, 0]
-      it "100 % jump&back", -> ensureJumpAndBack "1 0 0 %", cursor: [5, 0]
+      it "G jump&back", -> ensureJumpAndBack 'G', cursor: [5, 3]
+      it "g g jump&back", -> ensureJumpAndBack "g g", cursor: [0, 3]
+      it "100 % jump&back", -> ensureJumpAndBack "1 0 0 %", cursor: [5, 3]
       it ") jump&back", -> ensureJumpAndBack ")", cursor: [5, 6]
       it "( jump&back", -> ensureJumpAndBack "(", cursor: [0, 0]
       it "] jump&back", -> ensureJumpAndBack "]", cursor: [5, 3]
       it "[ jump&back", -> ensureJumpAndBack "[", cursor: [0, 3]
       it "} jump&back", -> ensureJumpAndBack "}", cursor: [5, 6]
       it "{ jump&back", -> ensureJumpAndBack "{", cursor: [0, 0]
-      it "L jump&back", -> ensureJumpAndBack "L", cursor: [5, 0]
-      it "H jump&back", -> ensureJumpAndBack "H", cursor: [0, 0]
-      it "M jump&back", -> ensureJumpAndBack "M", cursor: [2, 0]
+      it "L jump&back", -> ensureJumpAndBack "L", cursor: [5, 3]
+      it "H jump&back", -> ensureJumpAndBack "H", cursor: [0, 3]
+      it "M jump&back", -> ensureJumpAndBack "M", cursor: [2, 3]
       it "* jump&back", -> ensureJumpAndBack "*", cursor: [5, 3]
 
       # [BUG] Strange bug of jasmine or atom's jasmine enhancment?
@@ -1841,18 +1854,18 @@ describe "Motion general", ->
         ensureJumpAndBack "n", cursor: [3, 3]
         ensureJumpAndBack "N", cursor: [0, 3]
 
-      it "G jump&back linewise", -> ensureJumpAndBackLinewise 'G', cursor: [5, 0]
-      it "g g jump&back linewise", -> ensureJumpAndBackLinewise "g g", cursor: [0, 0]
-      it "100 % jump&back linewise", -> ensureJumpAndBackLinewise "1 0 0 %", cursor: [5, 0]
+      it "G jump&back linewise", -> ensureJumpAndBackLinewise 'G', cursor: [5, 3]
+      it "g g jump&back linewise", -> ensureJumpAndBackLinewise "g g", cursor: [0, 3]
+      it "100 % jump&back linewise", -> ensureJumpAndBackLinewise "1 0 0 %", cursor: [5, 3]
       it ") jump&back linewise", -> ensureJumpAndBackLinewise ")", cursor: [5, 6]
       it "( jump&back linewise", -> ensureJumpAndBackLinewise "(", cursor: [0, 0]
       it "] jump&back linewise", -> ensureJumpAndBackLinewise "]", cursor: [5, 3]
       it "[ jump&back linewise", -> ensureJumpAndBackLinewise "[", cursor: [0, 3]
       it "} jump&back linewise", -> ensureJumpAndBackLinewise "}", cursor: [5, 6]
       it "{ jump&back linewise", -> ensureJumpAndBackLinewise "{", cursor: [0, 0]
-      it "L jump&back linewise", -> ensureJumpAndBackLinewise "L", cursor: [5, 0]
-      it "H jump&back linewise", -> ensureJumpAndBackLinewise "H", cursor: [0, 0]
-      it "M jump&back linewise", -> ensureJumpAndBackLinewise "M", cursor: [2, 0]
+      it "L jump&back linewise", -> ensureJumpAndBackLinewise "L", cursor: [5, 3]
+      it "H jump&back linewise", -> ensureJumpAndBackLinewise "H", cursor: [0, 3]
+      it "M jump&back linewise", -> ensureJumpAndBackLinewise "M", cursor: [2, 3]
       it "* jump&back linewise", -> ensureJumpAndBackLinewise "*", cursor: [5, 3]
 
   describe 'the V keybinding', ->
