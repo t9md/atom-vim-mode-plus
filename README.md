@@ -1,4 +1,4 @@
-# vim-mode-plus [![Build Status](https://travis-ci.org/t12md/atom-vim-mode-plus.svg)](https://travis-ci.org/t9md/atom-vim-mode-plus) [![BountySource](https://api.bountysource.com/badge/team?team_id=116280&style=raised)](https://www.bountysource.com/teams/atom-vim-mode-plus)
+# vim-mode-plus [![Build Status](https://travis-ci.org/t9md/atom-vim-mode-plus.svg)](https://travis-ci.org/t9md/atom-vim-mode-plus) [![BountySource](https://api.bountysource.com/badge/team?team_id=116280&style=raised)](https://www.bountysource.com/teams/atom-vim-mode-plus)
 
 vim-mode improved.
 
@@ -160,6 +160,8 @@ provides <kbd>gf</kbd> to open file under cursor.
 Does not exist in pure Vim, provides clip-board history you can pop yanked text until you get result you want.
 - [choose-pane](https://atom.io/packages/choose-pane)
 Does not exist in pure Vim, provides keyboard navigation between panes/panels by choosing it by label.
+- [keystroke](https://atom.io/packages/keystroke)
+Keystrokes to keystroke keyamp in you `keymap.cson`.
 
 # References
 
