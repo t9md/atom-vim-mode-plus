@@ -911,8 +911,14 @@ class Find extends Motion
       method = 'scanInBufferRange'
 
     points = []
+    rangesToHighlight = []
     @editor[method] ///#{_.escapeRegExp(@input)}///g, scanRange, ({range}) ->
+      rangesToHighlight.push(range)
       points.push(range.start)
+
+    if @getConfig('highlightFind') and not @vimState.highlightFind.hasMarkers()
+      @vimState.highlightFind.highlightRanges(rangesToHighlight)
+
     points[@getCount(-1)]?.translate([0, offset])
 
   moveCursor: (cursor) ->
