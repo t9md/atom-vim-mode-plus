@@ -914,7 +914,7 @@ class Find extends Motion
           @cancelOperation()
 
     options ?= {}
-    options.classList = ["find"]
+    options.purpose = "find"
 
     @focusInput(options)
 
