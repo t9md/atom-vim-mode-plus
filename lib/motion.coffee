@@ -929,7 +929,6 @@ class Find extends Motion
 
   execute: ->
     super
-
     @highlightTextCursorRows(@input, true)
 
   getPoint: (fromPoint) ->
