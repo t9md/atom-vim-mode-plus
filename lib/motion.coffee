@@ -908,7 +908,7 @@ class Find extends Motion
       options =
         charsMax: 2
         autoConfirmTimeout: @getConfig("findByTwoCharsAutoConfirmTimeout")
-        onChange: (char) => @highlightTextInRow(char, @editor.getCursorBufferPosition().row)
+        onChange: (char) => @highlightTextCursorRows(char)
         onCancel: =>
           @vimState.highlightFind.clearMarkers()
           @cancelOperation()
@@ -927,6 +927,11 @@ class Find extends Motion
   isBackwards: ->
     @backwards
 
+  execute: ->
+    super
+
+    @highlightTextCursorRows(@input, true)
+
   getPoint: (fromPoint) ->
     {start, end} = @editor.bufferRangeForBufferRow(fromPoint.row)
 
@@ -940,17 +945,16 @@ class Find extends Motion
       method = 'scanInBufferRange'
 
     points = []
-    @editor[method] @getRegex(@input), scanRange, ({range}) ->
-      points.push(range.start)
+    @editor[method] @getRegex(@input), scanRange, ({range}) -> points.push(range.start)
 
-    @highlightTextInRow(@input, fromPoint.row, true)
     points[@getCount(-1)]?.translate([0, offset])
 
-  highlightTextInRow: (text, row, confirmed) ->
+  highlightTextCursorRows: (text, confirmed) ->
     return unless @getConfig("highlightFindChar")
-    scanRange = @editor.bufferRangeForBufferRow(row)
     ranges = []
-    @editor.scanInBufferRange(@getRegex(text), scanRange, ({range}) -> ranges.push(range))
+    for cursor in @editor.getCursors()
+      scanRange = cursor.getCurrentLineBufferRange()
+      @editor.scanInBufferRange(@getRegex(text), scanRange, ({range}) -> ranges.push(range))
     @vimState.highlightFind.highlightRanges(ranges, confirmed)
 
   moveCursor: (cursor) ->
