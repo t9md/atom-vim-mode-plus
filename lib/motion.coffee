@@ -909,6 +909,10 @@ class Find extends Motion
         charsMax: 2
         autoConfirmTimeout: @getConfig("findByTwoCharsAutoConfirmTimeout")
         onChange: (char) => @highlightTextInRow(char, @editor.getCursorBufferPosition().row)
+        onCancel: =>
+          @vimState.highlightFind.clearMarkers()
+          @cancelOperation()
+
     options ?= {}
     options.classList = ["find"]
 
