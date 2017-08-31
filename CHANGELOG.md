@@ -2,10 +2,11 @@
 
 - New: Now `f` is **tunable** to make it better, more efficient. #852.
   - Inspired pure-vim's plugins: `clever-f`, `vim-seek`, `vim-sneak`.
-  - Highlighting find-char find-char help pre-determine consequence of repeat.
+  - Highlighting find-char help you to pre-determine consequence of repeat by `;`, `,` and `.`.
   - Aiming to get both benefit of two-char find(`vim-seek`, `vim-sneak`) and one-char-find( vim's default ).
-  - Reuse `f`, `F` to repeat find like `clever-f`.
-- Config: Following configuration option is available to **tune** `f` motion.
+    - When two-char input was enabled, you still can auto-confirm single-char input by specified timeout.
+  - Can reuse `f`, `F` to repeat find like `clever-f`.
+- Config: Following configuration option is available to **tune** `f`.
   - `keymapSemicolonToConfirmFind`: default `false`.
     - See explanation for `findByTwoChars`.
   - `ignoreCaseForFind`: default `false`
