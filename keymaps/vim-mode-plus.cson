@@ -660,7 +660,7 @@
   'O': 'vim-mode-plus:reverse-selections'
   'D': 'vim-mode-plus:delete-to-last-character-of-line' # To avoid overridden by delete-line in visual-mode
 
-# Input mini editor e.g. mark, surround.
+# Input mini editor e.g. mark, surround, find, till.
 # -------------------------
 'atom-text-editor.vim-mode-plus-input':
   'ctrl-c': 'core:cancel'

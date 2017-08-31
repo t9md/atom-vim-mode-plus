@@ -270,6 +270,11 @@ atom-text-editor:not(.silent) {
   }
 }
 
+@keyframes vim-mode-plus-flash-find-char {
+  from { border-color: @syntax-color-function; }
+  to { border-color: transparent; }
+}
+
 atom-text-editor {
   .vim-mode-plus-search-match {
     .region {
@@ -305,12 +310,29 @@ atom-text-editor {
     border-color: @syntax-color-modified;
   }
 
-  .vim-mode-plus-find-char .region {
-    border-color: @syntax-color-function;
-    box-sizing: border-box;
-    border-width: 0px;
-    border-bottom-width: 2px;
-    border-style: solid;
+  .vim-mode-plus-find-char {
+    .region {
+      border-color: @syntax-color-function;
+      box-sizing: border-box;
+      border-width: 0px;
+      border-bottom-width: 2px;
+      border-style: solid;
+    }
+    &.confirmed .region {
+      .flash(vim-mode-plus-flash-find-char, 2.0s);
+    }
+  }
+}
+
+atom-text-editor {
+  &.find-pending,
+  &.find-backwards-pending,
+  &.till-pending,
+  &.till-backwards-pending,
+  {
+    .vim-mode-plus-find-char .region {
+      border-color: @syntax-color-constant;
+    }
   }
 }
 

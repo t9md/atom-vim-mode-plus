@@ -891,9 +891,27 @@ class Find extends Motion
   offset: 0
   requireInput: true
 
+  repeatIfNecessary: ->
+    if @getConfig("reuseFindForRepeatFind")
+      if @vimState.operationStack.getLastCommandName() in ["Find", "FindBackwards", "Till", "TillBackwards"]
+        @input = @vimState.globalState.get("currentFind").input
+        @repeated = true
+
   initialize: ->
     super
-    @focusInput() unless @isComplete()
+
+    @repeatIfNecessary()
+    return if @isComplete()
+
+    if @getConfig("findByTwoChars")
+      options =
+        charsMax: 2
+        autoConfirmTimeout: @getConfig("findByTwoCharsAutoConfirmTimeout")
+        onChange: (char) => @highlightTextInRow(char, @editor.getCursorBufferPosition().row)
+    options ?= {}
+    options.classList = ["find"]
+
+    @focusInput(options)
 
   isBackwards: ->
     @backwards
@@ -914,13 +932,16 @@ class Find extends Motion
     @editor[method] ///#{_.escapeRegExp(@input)}///g, scanRange, ({range}) ->
       points.push(range.start)
 
-    rangesToHighlight = []
-    rangeForCurrentRow = @editor.bufferRangeForBufferRow(fromPoint.row)
-    @editor[method] ///#{_.escapeRegExp(@input)}///g, rangeForCurrentRow, ({range}) ->
-      rangesToHighlight.push(range)
-    @vimState.highlightFind.highlightRanges(rangesToHighlight)
-
+    @highlightTextInRow(@input, fromPoint.row, true)
     points[@getCount(-1)]?.translate([0, offset])
+
+  highlightTextInRow: (text, row, confirmed) ->
+    return unless @getConfig("highlightFindChar")
+    scanRange = @editor.bufferRangeForBufferRow(row)
+    regex = ///#{_.escapeRegExp(text)}///g
+    ranges = []
+    @editor.scanInBufferRange(regex, scanRange, ({range}) -> ranges.push(range))
+    @vimState.highlightFind.highlightRanges(ranges, confirmed)
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
