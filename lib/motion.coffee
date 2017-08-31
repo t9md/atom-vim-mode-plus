@@ -116,6 +116,12 @@ class Motion extends Base
         state.stop()
       oldPosition = newPosition
 
+  isCaseSensitive: (term) ->
+    if @getConfig("useSmartcaseFor#{@caseSensitivityKind}")
+      term.search(/[A-Z]/) isnt -1
+    else
+      not @getConfig("ignoreCaseFor#{@caseSensitivityKind}")
+
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
   @extend(false)
@@ -890,30 +896,7 @@ class Find extends Motion
   inclusive: true
   offset: 0
   requireInput: true
-
-  getCaseSensitivity: ->
-    if @getConfig("useSmartcaseForFind")
-      'smartcase'
-    else if @getConfig("ignoreCaseForFind")
-      'insensitive'
-    else
-      'sensitive'
-
-  isCaseSensitive: (term) ->
-    switch @getCaseSensitivity()
-      when 'smartcase' then term.search('[A-Z]') isnt -1
-      when 'insensitive' then false
-      when 'sensitive' then true
-
-  getRegex: (term) ->
-    modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
-    new RegExp(term, modifiers)
-
-  repeatIfNecessary: ->
-    if @getConfig("reuseFindForRepeatFind")
-      if @vimState.operationStack.getLastCommandName() in ["Find", "FindBackwards", "Till", "TillBackwards"]
-        @input = @vimState.globalState.get("currentFind").input
-        @repeated = true
+  caseSensitivityKind: "Find"
 
   initialize: ->
     super
@@ -930,6 +913,12 @@ class Find extends Motion
     options.classList = ["find"]
 
     @focusInput(options)
+
+  repeatIfNecessary: ->
+    if @getConfig("reuseFindForRepeatFind")
+      if @vimState.operationStack.getLastCommandName() in ["Find", "FindBackwards", "Till", "TillBackwards"]
+        @input = @vimState.globalState.get("currentFind").input
+        @repeated = true
 
   isBackwards: ->
     @backwards
@@ -964,6 +953,10 @@ class Find extends Motion
     point = @getPoint(cursor.getBufferPosition())
     @setBufferPositionSafely(cursor, point)
     @globalState.set('currentFind', this) unless @repeated
+
+  getRegex: (term) ->
+    modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
+    new RegExp(_.escapeRegExp(term), modifiers)
 
 # keymap: F
 class FindBackwards extends Find
