@@ -1,3 +1,40 @@
+# 1.1.0: [WIP] Tryout to make `f` better.
+
+- New: Now `f` is **tunable** to make it better, more efficient. #852.
+  - Inspired pure-vim's plugins: `clever-f`, `vim-seek`, `vim-sneak`.
+  - Highlighting find-char find-char help pre-determine consequence of repeat.
+  - Aiming to get both benefit of two-char find(`vim-seek`, `vim-sneak`) and one-char-find( vim's default ).
+  - Reuse `f`, `F` to repeat find like `clever-f`.
+- Config: Following configuration option is available to **tune** `f` motion.
+  - `keymapSemicolonToConfirmFind`: default `false`.
+    - See explanation for `findByTwoChars`.
+  - `ignoreCaseForFind`: default `false`
+  - `useSmartcaseForFind`: default `false`
+  - `highlightFindChar`: default `true`
+    - Highlight find char, fadeout automatically( this auto-disappearing behavior is not configurable ).
+  - `findByTwoChars`: default `false`
+    - When enabled, `f` accept TWO chars.
+      - Pros. Greatly reduces matches, less chance of retry by `;` or `,`.
+      - Cons. You need to **confirm** for single char-input. You might mitigate frustration by.
+        - Confirm by `;`( easier to type and well blend to forwarding repeat-find( `;` ))
+          - Enable "keymap `;` to confirm `find` motion"( `keymapSemicolonToConfirmFind` ) configuration.
+          - e.g. `f a ;` to move to `a`( better than `f a enter`?). `f a ; ;` to move to 2nd `a`(well blended to default repeat-find(`;`)).
+        - Enable auto confirm by timeout( See. `findByTwoCharsAutoConfirmTimeout` )
+  - `findByTwoCharsAutoConfirmTimeout`: default `0`.
+    - "When `findByTwoChars` was enabled, automatically confirm single-char input on timeout( msec ).
+    - `0` means no timeout.
+  - `reuseFindForRepeatFind`: default `false`
+    - When `true` you can repeat last-find by `f` and `F`(also `t` and `T`).
+    - You still can use `,` and `;`.
+    - e.g. `f a f` move cursor to 2nd `a`.
+  - My configuration( I'm still in-eval phase, don't take this as recommendation )
+    ```coffeescript
+    findByTwoChars: true
+    findByTwoCharsAutoConfirmTimeout: 200
+    reuseFindForRepeatFind: true
+    useSmartcaseForFind: true
+    ```
+
 # 1.0.0: New default `stayOn` all `true`.
 - Version: Decided to bump major version.
 - Breaking: Default config change/Renamed config name.
