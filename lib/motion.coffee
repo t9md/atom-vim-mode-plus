@@ -891,6 +891,24 @@ class Find extends Motion
   offset: 0
   requireInput: true
 
+  getCaseSensitivity: ->
+    if @getConfig("useSmartcaseForFind")
+      'smartcase'
+    else if @getConfig("ignoreCaseForFind")
+      'insensitive'
+    else
+      'sensitive'
+
+  isCaseSensitive: (term) ->
+    switch @getCaseSensitivity()
+      when 'smartcase' then term.search('[A-Z]') isnt -1
+      when 'insensitive' then false
+      when 'sensitive' then true
+
+  getRegex: (term) ->
+    modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
+    new RegExp(term, modifiers)
+
   repeatIfNecessary: ->
     if @getConfig("reuseFindForRepeatFind")
       if @vimState.operationStack.getLastCommandName() in ["Find", "FindBackwards", "Till", "TillBackwards"]
@@ -929,7 +947,7 @@ class Find extends Motion
       method = 'scanInBufferRange'
 
     points = []
-    @editor[method] ///#{_.escapeRegExp(@input)}///g, scanRange, ({range}) ->
+    @editor[method] @getRegex(@input), scanRange, ({range}) ->
       points.push(range.start)
 
     @highlightTextInRow(@input, fromPoint.row, true)
@@ -938,9 +956,8 @@ class Find extends Motion
   highlightTextInRow: (text, row, confirmed) ->
     return unless @getConfig("highlightFindChar")
     scanRange = @editor.bufferRangeForBufferRow(row)
-    regex = ///#{_.escapeRegExp(text)}///g
     ranges = []
-    @editor.scanInBufferRange(regex, scanRange, ({range}) -> ranges.push(range))
+    @editor.scanInBufferRange(@getRegex(text), scanRange, ({range}) -> ranges.push(range))
     @vimState.highlightFind.highlightRanges(ranges, confirmed)
 
   moveCursor: (cursor) ->
