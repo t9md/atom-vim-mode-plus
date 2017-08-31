@@ -282,12 +282,6 @@
   # 'g n': 'vim-mode-plus:move-to-next-number'
   # 'g N': 'vim-mode-plus:move-to-previous-number'
 
-'atom-text-editor.vim-mode-plus.has-highlight-find:not(.insert-mode)':
-  'f': 'vim-mode-plus:repeat-find'
-  'F': 'vim-mode-plus:repeat-find-reverse'
-  't': 'vim-mode-plus:repeat-find'
-  'T': 'vim-mode-plus:repeat-find-reverse'
-
 # macOS only
 '.platform-darwin atom-text-editor.vim-mode-plus:not(.insert-mode)':
   'ctrl-s': 'vim-mode-plus:transform-string-by-select-list'
