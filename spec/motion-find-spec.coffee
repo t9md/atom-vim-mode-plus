@@ -334,6 +334,22 @@ describe "Motion Find", ->
         ensure "T",   textC: "    A    ab    a|    Ab    a"
         ensure "T",   textC: "    A    a|b    a    Ab    a"
 
+    describe "findAcrossLines", ->
+      beforeEach ->
+        settings.set("findAcrossLines", true)
+
+      it "searches across multiple lines", ->
+        set           textC: "|0:    a    a\n1:    a    a\n2:    a    a\n"
+        ensure "f a", textC: "0:    |a    a\n1:    a    a\n2:    a    a\n"
+        ensure ";",   textC: "0:    a    |a\n1:    a    a\n2:    a    a\n"
+        ensure ";",   textC: "0:    a    a\n1:    |a    a\n2:    a    a\n"
+        ensure ";",   textC: "0:    a    a\n1:    a    |a\n2:    a    a\n"
+        ensure ";",   textC: "0:    a    a\n1:    a    a\n2:    |a    a\n"
+        ensure "F a", textC: "0:    a    a\n1:    a    |a\n2:    a    a\n"
+        ensure "t a", textC: "0:    a    a\n1:    a    a\n2:   | a    a\n"
+        ensure "T a", textC: "0:    a    a\n1:    a    |a\n2:    a    a\n"
+        ensure "T a", textC: "0:    a    a\n1:    a|    a\n2:    a    a\n"
+
     describe "findByTwoChars", ->
       beforeEach ->
         settings.set("findByTwoChars", true)

@@ -939,13 +939,11 @@ class Find extends Motion
     offset = if @isBackwards() then @offset else -@offset
     unOffset = -offset * @repeated
     if @isBackwards()
-      if @getConfig("findAcrossLines")
-        start = Point.ZERO
+      start = Point.ZERO if @getConfig("findAcrossLines")
       scanRange = [start, fromPoint.translate([0, unOffset])]
       method = 'backwardsScanInBufferRange'
     else
-      if @getConfig("findAcrossLines")
-        end = @editor.getEofBufferPosition()
+      end = @editor.getEofBufferPosition() if @getConfig("findAcrossLines")
       scanRange = [fromPoint.translate([0, 1 + unOffset]), end]
       method = 'scanInBufferRange'
 
