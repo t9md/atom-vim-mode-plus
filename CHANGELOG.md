@@ -29,10 +29,11 @@
     - When `true` you can repeat last-find by `f` and `F`(also `t` and `T`).
     - You still can use `,` and `;`.
     - e.g. `f a f` move cursor to 2nd `a`.
-  - My configuration( I'm still in-eval phase, don't take this as recommendation )
+  - My configuration( I'm still in-eval phase, don't take this as recommendation ).
     ```coffeescript
+    keymapSemicolonToConfirmFind: true
     findByTwoChars: true
-    findByTwoCharsAutoConfirmTimeout: 200
+    findByTwoCharsAutoConfirmTimeout: 500
     reuseFindForRepeatFind: true
     useSmartcaseForFind: true
     ```
@@ -41,7 +42,7 @@
 - Version: Decided to bump major version.
 - Breaking: Default config change/Renamed config name.
   - Summary:
-    - Now all `stayOn` prefixed configuration have new default `true`.
+    - Now all `stayOn` prefixed configuration have new default `false`.
     - New default behavior is NOT compatible with pure-Vim.
       - Set all `stayOn` prefixed configuration to `false` to revert to previous behavior.
     - Some configuration parameter name is renamed to have `stayOn` prefix.
