@@ -908,7 +908,7 @@ class Find extends Motion
       options =
         charsMax: 2
         autoConfirmTimeout: @getConfig("findByTwoCharsAutoConfirmTimeout")
-        onChange: (char) => @highlightTextCursorRows(char)
+        onChange: (char) => @highlightTextInCursorRows(char, "pre-confirm")
         onCancel: =>
           @vimState.highlightFind.clearMarkers()
           @cancelOperation()
@@ -929,7 +929,9 @@ class Find extends Motion
 
   execute: ->
     super
-    @highlightTextCursorRows(@input, true)
+    decorationType = "post-confirm"
+    decorationType += "-long" if @isAsTargetExceptSelect()
+    @highlightTextInCursorRows(@input, decorationType)
 
   getPoint: (fromPoint) ->
     {start, end} = @editor.bufferRangeForBufferRow(fromPoint.row)
@@ -948,13 +950,13 @@ class Find extends Motion
 
     points[@getCount(-1)]?.translate([0, offset])
 
-  highlightTextCursorRows: (text, confirmed) ->
+  highlightTextInCursorRows: (text, decorationType) ->
     return unless @getConfig("highlightFindChar")
     ranges = []
     for cursor in @editor.getCursors()
       scanRange = cursor.getCurrentLineBufferRange()
       @editor.scanInBufferRange(@getRegex(text), scanRange, ({range}) -> ranges.push(range))
-    @vimState.highlightFind.highlightRanges(ranges, confirmed)
+    @vimState.highlightFind.highlightRanges(ranges, decorationType)
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())

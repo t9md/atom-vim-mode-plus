@@ -312,14 +312,19 @@ atom-text-editor {
 
   .vim-mode-plus-find-char {
     .region {
-      border-color: @syntax-color-function;
       box-sizing: border-box;
       border-width: 0px;
       border-bottom-width: 2px;
       border-style: solid;
     }
-    &.confirmed .region {
+    &.pre-confirm .region {
+      border-color: @syntax-color-function;
+    }
+    &.post-confirm .region {
       .flash(vim-mode-plus-flash-find-char, 2.0s);
+    }
+    &.post-confirm-long .region {
+      .flash(vim-mode-plus-flash-find-char, 4.0s);
     }
   }
 }
