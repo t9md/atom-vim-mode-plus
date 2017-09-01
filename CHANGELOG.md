@@ -5,6 +5,8 @@
   - Aiming to get both benefit of two-char-find(`vim-seek`, `vim-sneak`) and one-char-find( vim's default ).
     - Even after two-char-find was enabled, you can auto-confirm one-char input by specified timeout.
   - Can reuse `f`, `F`, `t`, `T` as `repeat-find` like `clever-f`.
+  - Maybe reading test-spec for these feature is clearer than reading following explanation.
+    - https://github.com/t9md/atom-vim-mode-plus/blob/396514199f08e0901d2af918782c6d8a28efc9e7/spec/motion-find-spec.coffee#L291-L369
 - Config: [Detail] Following configuration option is available to **tune** `f`.
   - `keymapSemicolonToConfirmFind`: default `false`.
     - See explanation for `findByTwoChars`.
