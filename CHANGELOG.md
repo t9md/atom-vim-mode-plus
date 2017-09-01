@@ -1,4 +1,8 @@
-# 1.2.0: WIP
+# 1.2.0:
+- New, Experimental: `findAcrossLines`: default `false`
+  - When `true`, `f` searches over next lines. Affects `f`, `F`, `t`, `T`.
+  - [Collecting feedback] twitter: @t9md or https://github.com/t9md/atom-vim-mode-plus/issues/851
+    - Not sure if this is really necessary feature since `/` and `?` is available for multi-line search.
 - Breaking: New default: `flashOnMoveToOccurrence` = `true`
   - When preset-occurrence( `g o` ) is exist on editor, you can move between occurrences by `tab` and `shift-tab`
   - When set to `true`, flash occurrence under cursor after move
