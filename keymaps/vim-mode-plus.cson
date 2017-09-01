@@ -105,7 +105,7 @@
   '-': 'vim-mode-plus:move-to-first-character-of-line-up'
   '+': 'vim-mode-plus:move-to-first-character-of-line-down'
   'enter': 'vim-mode-plus:move-to-first-character-of-line-down'
-  
+
   'g 0': 'vim-mode-plus:move-to-beginning-of-screen-line'
   'g ^': 'vim-mode-plus:move-to-first-character-of-screen-line'
   'g $': 'vim-mode-plus:move-to-last-character-of-screen-line'
@@ -281,7 +281,6 @@
 
   # 'g n': 'vim-mode-plus:move-to-next-number'
   # 'g N': 'vim-mode-plus:move-to-previous-number'
-
 
 # macOS only
 '.platform-darwin atom-text-editor.vim-mode-plus:not(.insert-mode)':
@@ -661,7 +660,7 @@
   'O': 'vim-mode-plus:reverse-selections'
   'D': 'vim-mode-plus:delete-to-last-character-of-line' # To avoid overridden by delete-line in visual-mode
 
-# Input mini editor e.g. mark, surround.
+# Input mini editor e.g. mark, surround, find, till.
 # -------------------------
 'atom-text-editor.vim-mode-plus-input':
   'ctrl-c': 'core:cancel'

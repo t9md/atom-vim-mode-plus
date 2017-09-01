@@ -287,3 +287,83 @@ describe "Motion Find", ->
       other.ensure ';', cursor: [0, 4]
       other.ensure ';', cursor: [0, 8]
       other.ensure ',', cursor: [0, 4]
+
+  describe "vmp unique feature of `f` family", ->
+    describe "ignoreCaseForFind", ->
+      beforeEach ->
+        settings.set("ignoreCaseForFind", true)
+
+      it "ignore case to find", ->
+        set textC: "|    A    ab    a    Ab    a"
+        ensure "f a", textC: "    |A    ab    a    Ab    a"
+        ensure ";",   textC: "    A    |ab    a    Ab    a"
+        ensure ";",   textC: "    A    ab    |a    Ab    a"
+        ensure ";",   textC: "    A    ab    a    |Ab    a"
+
+    describe "useSmartcaseForFind", ->
+      beforeEach ->
+        settings.set("useSmartcaseForFind", true)
+
+      it "ignore case when input is lower char", ->
+        set textC: "|    A    ab    a    Ab    a"
+        ensure "f a", textC: "    |A    ab    a    Ab    a"
+        ensure ";",   textC: "    A    |ab    a    Ab    a"
+        ensure ";",   textC: "    A    ab    |a    Ab    a"
+        ensure ";",   textC: "    A    ab    a    |Ab    a"
+
+      it "find case-sensitively when input is lager char", ->
+        set textC: "|    A    ab    a    Ab    a"
+        ensure "f A", textC: "    |A    ab    a    Ab    a"
+        ensure "f A", textC: "    A    ab    a    |Ab    a"
+        ensure ",",   textC: "    |A    ab    a    Ab    a"
+        ensure ";",   textC: "    A    ab    a    |Ab    a"
+
+    describe "reuseFindForRepeatFind", ->
+      beforeEach ->
+        settings.set("reuseFindForRepeatFind", true)
+
+      it "can reuse f and t as ;, F and T as ',' respectively", ->
+        set textC: "|    A    ab    a    Ab    a"
+        ensure "f a", textC: "    A    |ab    a    Ab    a"
+        ensure "f",   textC: "    A    ab    |a    Ab    a"
+        ensure "f",   textC: "    A    ab    a    Ab    |a"
+        ensure "F",   textC: "    A    ab    |a    Ab    a"
+        ensure "F",   textC: "    A    |ab    a    Ab    a"
+        ensure "t",   textC: "    A    ab   | a    Ab    a"
+        ensure "t",   textC: "    A    ab    a    Ab   | a"
+        ensure "T",   textC: "    A    ab    a|    Ab    a"
+        ensure "T",   textC: "    A    a|b    a    Ab    a"
+
+    describe "findByTwoChars", ->
+      beforeEach ->
+        settings.set("findByTwoChars", true)
+
+      describe "can find one or two char", ->
+        it "can find by two char", ->
+          set             textC: "|    a    ab    a    cd    a"
+          ensure "f a b", textC: "    a    |ab    a    cd    a"
+          ensure "f c d", textC: "    a    ab    a    |cd    a"
+
+        it "can find by one-char by confirming explicitly", ->
+          set                 textC: "|    a    ab    a    cd    a"
+          ensure "f a enter", textC: "    |a    ab    a    cd    a"
+          ensure "f c enter", textC: "    a    ab    a    |cd    a"
+
+      describe "autoConfirmTimeout", ->
+        beforeEach -> settings.set("findByTwoCharsAutoConfirmTimeout", 500)
+        it "auto-confirm single-char input on timeout", ->
+          set             textC: "|    a    ab    a    cd    a"
+
+          ensure "f a",   textC: "|    a    ab    a    cd    a"
+          advanceClock(500)
+          ensure          textC: "    |a    ab    a    cd    a"
+
+          ensure "f c d", textC: "    a    ab    a    |cd    a"
+
+          ensure "f a",   textC: "    a    ab    a    |cd    a"
+          advanceClock(500)
+          ensure          textC: "    a    ab    a    cd    |a"
+
+          ensure "F b",   textC: "    a    ab    a    cd    |a"
+          advanceClock(500)
+          ensure          textC: "    a    a|b    a    cd    a"

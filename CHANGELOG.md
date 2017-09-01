@@ -1,8 +1,48 @@
+# 1.1.0: This release is all for better `f` by making it tunable
+- New: [Summary] Now `f` is **tunable**. #852.
+  - Inspired pure-vim's plugins: `clever-f`, `vim-seek`, `vim-sneak`.
+  - Highlighting find-char. It help you to pre-determine consequence of repeat by `;`, `,` and `.`.
+  - Aiming to get both benefit of two-char-find(`vim-seek`, `vim-sneak`) and one-char-find( vim's default ).
+    - Even after two-char-find was enabled, you can auto-confirm one-char input by specified timeout.
+  - Can reuse `f`, `F`, `t`, `T` as `repeat-find` like `clever-f`.
+- Config: [Detail] Following configuration option is available to **tune** `f`.
+  - `keymapSemicolonToConfirmFind`: default `false`.
+    - See explanation for `findByTwoChars`.
+  - `ignoreCaseForFind`: default `false`
+  - `useSmartcaseForFind`: default `false`
+  - `highlightFindChar`: default `true`
+    - Highlight find char, fadeout automatically( this auto-disappearing behavior/duration is not configurable ).
+      - Fadeout in 2 second when used as motion.
+      - Fadeout in 4 second when used as operator-target.
+  - `findByTwoChars`: default `false`
+    - When enabled, `f` accept TWO chars.
+      - Pros. Greatly reduces possible matches, avoid being stopped at earlier spot than where you aimed.
+      - Cons. Require explicit **confirmation** by `enter` for single char-input. You might mitigate frustration by.
+        - Confirm by `;`, easier to type and well blend to forwarding `repeat-find`( `;` ).
+          - Enable "keymap `;` to confirm `find` motion"( `keymapSemicolonToConfirmFind` ) configuration.
+          - e.g. `f a ;` to move to `a`( better than `f a enter`?). `f a ; ;` to move to 2nd `a`(well blended to default repeat-find(`;`)).
+        - Enable auto confirm by timeout( See. `findByTwoCharsAutoConfirmTimeout` )
+  - `findByTwoCharsAutoConfirmTimeout`: default `0`.
+    - "When `findByTwoChars` was enabled, automatically confirm single-char input on timeout( msec ).
+    - `0` means no timeout.
+  - `reuseFindForRepeatFind`: default `false`
+    - When `true` you can repeat last-find by `f` and `F`(also `t` and `T`).
+    - You still can use `,` and `;`.
+    - e.g. `f a f` move cursor to 2nd `a`.
+  - My configuration( I'm still in-eval phase, don't take this as recommendation ).
+    ```coffeescript
+    keymapSemicolonToConfirmFind: true
+    findByTwoChars: true
+    findByTwoCharsAutoConfirmTimeout: 500
+    reuseFindForRepeatFind: true
+    useSmartcaseForFind: true
+    ```
+
 # 1.0.0: New default `stayOn` all `true`.
 - Version: Decided to bump major version.
 - Breaking: Default config change/Renamed config name.
   - Summary:
-    - Now all `stayOn` prefixed configuration have new default `true`.
+    - Now all `stayOn` prefixed configuration have new default `false`.
     - New default behavior is NOT compatible with pure-Vim.
       - Set all `stayOn` prefixed configuration to `false` to revert to previous behavior.
     - Some configuration parameter name is renamed to have `stayOn` prefix.

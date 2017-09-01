@@ -166,13 +166,11 @@ class Base
     selectList.show(@vimState, options)
 
   input: null
-  focusInput: ({charsMax, hideCursor} = {}) ->
-    @vimState.focusInput
-      charsMax: charsMax
-      hideCursor: hideCursor
-      onConfirm: (@input) => @processOperation()
-      onCancel: => @cancelOperation()
-      onChange: (input) => @vimState.hover.set(input)
+  focusInput: (options = {}) ->
+    options.onConfirm ?= (@input) => @processOperation()
+    options.onCancel ?= => @cancelOperation()
+    options.onChange ?= (input) => @vimState.hover.set(input)
+    @vimState.focusInput(options)
 
   readChar: ->
     @vimState.readChar

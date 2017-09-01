@@ -270,6 +270,11 @@ atom-text-editor:not(.silent) {
   }
 }
 
+@keyframes vim-mode-plus-flash-find-char {
+  from { border-color: @syntax-color-function; }
+  to { border-color: transparent; }
+}
+
 atom-text-editor {
   .vim-mode-plus-search-match {
     .region {
@@ -303,6 +308,24 @@ atom-text-editor {
     .vim-mode-plus.underline-dotted;
     z-index: 1;
     border-color: @syntax-color-modified;
+  }
+
+  .vim-mode-plus-find-char {
+    .region {
+      box-sizing: border-box;
+      border-width: 0px;
+      border-bottom-width: 2px;
+      border-style: solid;
+    }
+    &.pre-confirm .region {
+      border-color: @syntax-color-constant;
+    }
+    &.post-confirm .region {
+      .flash(vim-mode-plus-flash-find-char, 2.0s);
+    }
+    &.post-confirm-long .region {
+      .flash(vim-mode-plus-flash-find-char, 4.0s);
+    }
   }
 }
 

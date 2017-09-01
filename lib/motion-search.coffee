@@ -9,7 +9,7 @@ class SearchBase extends Motion
   jump: true
   backwards: false
   useRegexp: true
-  configScope: null
+  caseSensitivityKind: null
   landingPoint: null # ['start' or 'end']
   defaultLandingPoint: 'start' # ['start' or 'end']
   relativeIndex: null
@@ -32,20 +32,6 @@ class SearchBase extends Motion
       -count
     else
       count
-
-  getCaseSensitivity: ->
-    if @getConfig("useSmartcaseFor#{@configScope}")
-      'smartcase'
-    else if @getConfig("ignoreCaseFor#{@configScope}")
-      'insensitive'
-    else
-      'sensitive'
-
-  isCaseSensitive: (term) ->
-    switch @getCaseSensitivity()
-      when 'smartcase' then term.search('[A-Z]') isnt -1
-      when 'insensitive' then false
-      when 'sensitive' then true
 
   finish: ->
     if @isIncrementalSearch() and @getConfig('showHoverSearchCounter')
@@ -101,7 +87,7 @@ class SearchBase extends Motion
 # -------------------------
 class Search extends SearchBase
   @extend()
-  configScope: "Search"
+  caseSensitivityKind: "Search"
   requireInput: true
 
   initialize: ->
@@ -206,7 +192,7 @@ class SearchBackwards extends Search
 # -------------------------
 class SearchCurrentWord extends SearchBase
   @extend()
-  configScope: "SearchCurrentWord"
+  caseSensitivityKind: "SearchCurrentWord"
 
   moveCursor: (cursor) ->
     @input ?= (

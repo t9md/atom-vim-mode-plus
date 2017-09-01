@@ -116,6 +116,12 @@ class Motion extends Base
         state.stop()
       oldPosition = newPosition
 
+  isCaseSensitive: (term) ->
+    if @getConfig("useSmartcaseFor#{@caseSensitivityKind}")
+      term.search(/[A-Z]/) isnt -1
+    else
+      not @getConfig("ignoreCaseFor#{@caseSensitivityKind}")
+
 # Used as operator's target in visual-mode.
 class CurrentSelection extends Motion
   @extend(false)
@@ -890,13 +896,42 @@ class Find extends Motion
   inclusive: true
   offset: 0
   requireInput: true
+  caseSensitivityKind: "Find"
 
   initialize: ->
     super
-    @focusInput() unless @isComplete()
+
+    @repeatIfNecessary()
+    return if @isComplete()
+
+    if @getConfig("findByTwoChars")
+      options =
+        charsMax: 2
+        autoConfirmTimeout: @getConfig("findByTwoCharsAutoConfirmTimeout")
+        onChange: (char) => @highlightTextInCursorRows(char, "pre-confirm")
+        onCancel: =>
+          @vimState.highlightFind.clearMarkers()
+          @cancelOperation()
+
+    options ?= {}
+    options.purpose = "find"
+
+    @focusInput(options)
+
+  repeatIfNecessary: ->
+    if @getConfig("reuseFindForRepeatFind")
+      if @vimState.operationStack.getLastCommandName() in ["Find", "FindBackwards", "Till", "TillBackwards"]
+        @input = @vimState.globalState.get("currentFind").input
+        @repeated = true
 
   isBackwards: ->
     @backwards
+
+  execute: ->
+    super
+    decorationType = "post-confirm"
+    decorationType += "-long" if @isAsTargetExceptSelect()
+    @highlightTextInCursorRows(@input, decorationType)
 
   getPoint: (fromPoint) ->
     {start, end} = @editor.bufferRangeForBufferRow(fromPoint.row)
@@ -911,14 +946,26 @@ class Find extends Motion
       method = 'scanInBufferRange'
 
     points = []
-    @editor[method] ///#{_.escapeRegExp(@input)}///g, scanRange, ({range}) ->
-      points.push(range.start)
+    @editor[method] @getRegex(@input), scanRange, ({range}) -> points.push(range.start)
+
     points[@getCount(-1)]?.translate([0, offset])
+
+  highlightTextInCursorRows: (text, decorationType) ->
+    return unless @getConfig("highlightFindChar")
+    ranges = []
+    for cursor in @editor.getCursors()
+      scanRange = cursor.getCurrentLineBufferRange()
+      @editor.scanInBufferRange(@getRegex(text), scanRange, ({range}) -> ranges.push(range))
+    @vimState.highlightFind.highlightRanges(ranges, decorationType)
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
     @setBufferPositionSafely(cursor, point)
     @globalState.set('currentFind', this) unless @repeated
+
+  getRegex: (term) ->
+    modifiers = if @isCaseSensitive(term) then 'g' else 'gi'
+    new RegExp(_.escapeRegExp(term), modifiers)
 
 # keymap: F
 class FindBackwards extends Find
