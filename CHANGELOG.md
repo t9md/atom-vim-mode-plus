@@ -1,23 +1,24 @@
-# 1.1.0: [WIP] Tryout to make `f` better.
-
-- New: Now `f` is **tunable** to make it better, more efficient. #852.
+# 1.1.0: This release is all for better `f` by making it tunable
+- New: [Summary] Now `f` is **tunable**. #852.
   - Inspired pure-vim's plugins: `clever-f`, `vim-seek`, `vim-sneak`.
-  - Highlighting find-char help you to pre-determine consequence of repeat by `;`, `,` and `.`.
-  - Aiming to get both benefit of two-char find(`vim-seek`, `vim-sneak`) and one-char-find( vim's default ).
-    - When two-char input was enabled, you still can auto-confirm single-char input by specified timeout.
-  - Can reuse `f`, `F` to repeat find like `clever-f`.
-- Config: Following configuration option is available to **tune** `f`.
+  - Highlighting find-char. It help you to pre-determine consequence of repeat by `;`, `,` and `.`.
+  - Aiming to get both benefit of two-char-find(`vim-seek`, `vim-sneak`) and one-char-find( vim's default ).
+    - Even after two-char-find was enabled, you can auto-confirm one-char input by specified timeout.
+  - Can reuse `f`, `F`, `t`, `T` as `repeat-find` like `clever-f`.
+- Config: [Detail] Following configuration option is available to **tune** `f`.
   - `keymapSemicolonToConfirmFind`: default `false`.
     - See explanation for `findByTwoChars`.
   - `ignoreCaseForFind`: default `false`
   - `useSmartcaseForFind`: default `false`
   - `highlightFindChar`: default `true`
-    - Highlight find char, fadeout automatically( this auto-disappearing behavior is not configurable ).
+    - Highlight find char, fadeout automatically( this auto-disappearing behavior/duration is not configurable ).
+      - Fadeout in 2 second when used as motion.
+      - Fadeout in 4 second when used as operator-target.
   - `findByTwoChars`: default `false`
     - When enabled, `f` accept TWO chars.
-      - Pros. Greatly reduces matches, less chance of retry by `;` or `,`.
-      - Cons. You need to **confirm** for single char-input. You might mitigate frustration by.
-        - Confirm by `;`( easier to type and well blend to forwarding repeat-find( `;` ))
+      - Pros. Greatly reduces possible matches, avoid being stopped at earlier spot than where you aimed.
+      - Cons. Require explicit **confirmation** by `enter` for single char-input. You might mitigate frustration by.
+        - Confirm by `;`, easier to type and well blend to forwarding `repeat-find`( `;` ).
           - Enable "keymap `;` to confirm `find` motion"( `keymapSemicolonToConfirmFind` ) configuration.
           - e.g. `f a ;` to move to `a`( better than `f a enter`?). `f a ; ;` to move to 2nd `a`(well blended to default repeat-find(`;`)).
         - Enable auto confirm by timeout( See. `findByTwoCharsAutoConfirmTimeout` )

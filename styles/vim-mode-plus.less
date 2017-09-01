@@ -318,25 +318,13 @@ atom-text-editor {
       border-style: solid;
     }
     &.pre-confirm .region {
-      border-color: @syntax-color-function;
+      border-color: @syntax-color-constant;
     }
     &.post-confirm .region {
       .flash(vim-mode-plus-flash-find-char, 2.0s);
     }
     &.post-confirm-long .region {
       .flash(vim-mode-plus-flash-find-char, 4.0s);
-    }
-  }
-}
-
-atom-text-editor {
-  &.find-pending,
-  &.find-backwards-pending,
-  &.till-pending,
-  &.till-backwards-pending,
-  {
-    .vim-mode-plus-find-char .region {
-      border-color: @syntax-color-constant;
     }
   }
 }
