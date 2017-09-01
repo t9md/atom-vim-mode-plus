@@ -948,12 +948,12 @@ class Find extends Motion
       method = 'scanInBufferRange'
 
     points = []
-    indexWantAcess = @getCount(-1)
+    indexWantAccess = @getCount(-1)
     @editor[method] @getRegex(@input), scanRange, ({range, stop}) ->
       points.push(range.start)
-      stop() if points.length > indexWantAcess
+      stop() if points.length > indexWantAccess
 
-    points[@getCount(-1)]?.translate([0, offset])
+    points[indexWantAccess]?.translate([0, offset])
 
   highlightTextInCursorRows: (text, decorationType) ->
     return unless @getConfig("highlightFindChar")
