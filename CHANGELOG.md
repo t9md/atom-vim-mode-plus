@@ -1,3 +1,6 @@
+# 1.1.1:
+- Fix: Fix confusing description in setting, no behavioral diff.
+
 # 1.1.0: This release is all for better `f` by making it tunable
 - New: [Summary] Now `f` is **tunable**. #852.
   - Inspired pure-vim's plugins: `clever-f`, `vim-seek`, `vim-sneak`.
