@@ -1,3 +1,9 @@
+# 1.2.0: WIP
+- Breaking: New default: `flashOnMoveToOccurrence` = `true`
+  - When preset-occurrence( `g o` ) is exist on editor, you can move between occurrences by `tab` and `shift-tab`
+  - When set to `true`, flash occurrence under cursor after move
+  - This feature is NOT new, Just "flashing by default" is new change in this release.
+
 # 1.1.1:
 - Fix: Fix confusing description in setting, no behavioral diff.
 
