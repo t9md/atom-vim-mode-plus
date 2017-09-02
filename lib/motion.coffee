@@ -959,10 +959,18 @@ class Find extends Motion
 
   highlightTextInCursorRows: (text, decorationType) ->
     return unless @getConfig("highlightFindChar")
+
+    if @getConfig("findAcrossLines")
+      point = @editor.getCursorsOrderedByBufferPosition()[0].getBufferPosition()
+      {start, end} = @vimState.utils.getVisibleBufferRange(@editor)
+      scanRanges = [if @isBackwards() then [start, point] else [point, end]]
+    else
+      scanRanges = @editor.getCursors().map((cursor) -> cursor.getCurrentLineBufferRange())
+
+    regex = @getRegex(text)
     ranges = []
-    for cursor in @editor.getCursors()
-      scanRange = cursor.getCurrentLineBufferRange()
-      @editor.scanInBufferRange(@getRegex(text), scanRange, ({range}) -> ranges.push(range))
+    for scanRange in scanRanges
+      @editor.scanInBufferRange(regex, scanRange, ({range}) -> ranges.push(range))
     @vimState.highlightFind.highlightRanges(ranges, decorationType)
 
   moveCursor: (cursor) ->
