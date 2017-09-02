@@ -1,3 +1,13 @@
+# 1.3.0:
+- Breaking, New: `findCharsMax` options to find arbitrary length of chars by `f`.
+  - Involves renaming, auto-value-conversion of existing configuration introduced in v1.1.0( yesterday ).
+  - New, Rename: `findCharsMax`: default `1`.
+    - If `find`'s input reaches this length, confirm without waiting explicit `enter`.
+    - So default `f a`(move to `a` char) is behavior when `findCharsMax` is `1`.
+    - By setting bigger number(such as `100`) and enabling `findConfirmByTimeout`, you can expect FIXED timing of confirmation agains your input.
+    - Old `findByTwoChars = true` is equals to `findCharsMax = 2`, and migrated on first time activation.
+  - Rename: `findByTwoCharsAutoConfirmTimeout` to `findConfirmByTimeout`( generalize naming )
+
 # 1.2.0:
 - New, Experimental: `findAcrossLines`: default `false`
   - When `true`, `f` searches over next lines. Affects `f`, `F`, `t`, `T`.
