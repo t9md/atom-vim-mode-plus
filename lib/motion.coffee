@@ -961,9 +961,13 @@ class Find extends Motion
     return unless @getConfig("highlightFindChar")
 
     if @getConfig("findAcrossLines")
-      point = @editor.getCursorsOrderedByBufferPosition()[0].getBufferPosition()
       {start, end} = @vimState.utils.getVisibleBufferRange(@editor)
-      scanRanges = [if @isBackwards() then [start, point] else [point, end]]
+      if @isBackwards()
+        bottomCursor = @editor.getCursorsOrderedByBufferPosition().pop()
+        scanRanges = [[start, bottomCursor.getBufferPosition()]]
+      else
+        topCursor = @editor.getCursorsOrderedByBufferPosition().shift()
+        scanRanges = [[topCursor.getBufferPosition(), end]]
     else
       scanRanges = @editor.getCursors().map((cursor) -> cursor.getCurrentLineBufferRange())
 
