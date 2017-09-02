@@ -1,3 +1,6 @@
+# 1.3.1:
+- Fix: Fix confusing description in setting, no behavioral diff.
+
 # 1.3.0:
 - Breaking, New: `findCharsMax` options to find arbitrary length of chars by `f`.
   - Involves renaming, auto-value-conversion of existing configuration introduced in v1.1.0( yesterday ).
