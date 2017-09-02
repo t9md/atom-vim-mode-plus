@@ -932,7 +932,7 @@ class Find extends Motion
   execute: ->
     super
     decorationType = "post-confirm"
-    decorationType += "-long" if @isAsTargetExceptSelect()
+    decorationType += " long" if @isAsTargetExceptSelect()
     @editor.component.getNextUpdatePromise().then =>
       @highlightTextInCursorRows(@input, decorationType)
 
@@ -978,6 +978,9 @@ class Find extends Motion
     ranges = []
     for scanRange in scanRanges
       @editor.scanInBufferRange(regex, scanRange, ({range}) -> ranges.push(range))
+    if (decorationType is "pre-confirm") and (ranges.length is 1)
+      decorationType += " single-match"
+      console.log decorationType
     @vimState.highlightFind.highlightRanges(ranges, decorationType)
 
   moveCursor: (cursor) ->

@@ -1,3 +1,7 @@
+# 1.3.3:
+- Improve: highlight-find-char now highlight differently( with thicker border ) if there is single match in VISIBLE screen range,
+  - If you see this thick border while typing, it means you don't need extra typing to move that target.
+
 # 1.3.2:
 - Improve: highlight-find-char now highlight all chars in next lines when `findAcrossLines` was set.
   - This gives important feedback for your keystroke when your eye is needling destination keyword while typing.

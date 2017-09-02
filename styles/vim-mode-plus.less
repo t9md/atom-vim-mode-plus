@@ -318,13 +318,12 @@ atom-text-editor {
       border-style: solid;
     }
     &.pre-confirm .region {
-      border-color: @syntax-color-constant;
+      border-color: @syntax-color-modified;
+      &.single-match { border-bottom-width: 5px; }
     }
     &.post-confirm .region {
       .flash(vim-mode-plus-flash-find-char, 2.0s);
-    }
-    &.post-confirm-long .region {
-      .flash(vim-mode-plus-flash-find-char, 4.0s);
+      &.long { animation-duration: 4.0s; }
     }
   }
 }
