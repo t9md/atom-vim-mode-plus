@@ -350,23 +350,40 @@ describe "Motion Find", ->
         ensure "T a", textC: "0:    a    a\n1:    a    |a\n2:    a    a\n"
         ensure "T a", textC: "0:    a    a\n1:    a|    a\n2:    a    a\n"
 
-    describe "findByTwoChars", ->
-      beforeEach ->
-        settings.set("findByTwoChars", true)
+    describe "findCharsMax", ->
 
-      describe "can find one or two char", ->
-        it "can find by two char", ->
-          set             textC: "|    a    ab    a    cd    a"
-          ensure "f a b", textC: "    a    |ab    a    cd    a"
-          ensure "f c d", textC: "    a    ab    a    |cd    a"
+      describe "with 2 length", ->
+        beforeEach ->
+          settings.set("findCharsMax", 2)
 
-        it "can find by one-char by confirming explicitly", ->
-          set                 textC: "|    a    ab    a    cd    a"
-          ensure "f a enter", textC: "    |a    ab    a    cd    a"
-          ensure "f c enter", textC: "    a    ab    a    |cd    a"
+        describe "can find one or two char", ->
+          it "can find by two char", ->
+            set             textC: "|    a    ab    a    cd    a"
+            ensure "f a b", textC: "    a    |ab    a    cd    a"
+            ensure "f c d", textC: "    a    ab    a    |cd    a"
+
+          it "can find by one-char by confirming explicitly", ->
+            set                 textC: "|    a    ab    a    cd    a"
+            ensure "f a enter", textC: "    |a    ab    a    cd    a"
+            ensure "f c enter", textC: "    a    ab    a    |cd    a"
+
+      describe "with 3 length", ->
+        beforeEach ->
+          settings.set("findCharsMax", 3)
+
+        describe "can find 3 at maximum", ->
+          it "can find by one or two or three char", ->
+            set                   textC: "|    a    ab    a    cd    efg"
+            ensure "f a b enter", textC: "    a    |ab    a    cd    efg"
+            ensure "f a enter",   textC: "    a    ab    |a    cd    efg"
+            ensure "f c d enter", textC: "    a    ab    a    |cd    efg"
+            ensure "f e f g",     textC: "    a    ab    a    cd    |efg"
 
       describe "autoConfirmTimeout", ->
-        beforeEach -> settings.set("findByTwoCharsAutoConfirmTimeout", 500)
+        beforeEach ->
+          settings.set("findCharsMax", 2)
+          settings.set("findConfirmByTimeout", 500)
+
         it "auto-confirm single-char input on timeout", ->
           set             textC: "|    a    ab    a    cd    a"
 

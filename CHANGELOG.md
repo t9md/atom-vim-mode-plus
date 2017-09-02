@@ -1,3 +1,14 @@
+# 1.3.0:
+- Breaking, New: `findCharsMax` options to find arbitrary length of chars by `f`.
+  - Involves renaming, auto-value-conversion of existing configuration introduced in v1.1.0( yesterday ).
+  - New, Rename: `findCharsMax`: default `1`.
+    - If `find`'s input reaches this length, confirm without waiting explicit `enter`.
+    - So default `f a`(move to `a` char) is behavior when `findCharsMax` is `1`.
+    - By setting bigger number(such as `100`) with also enabling `findConfirmByTimeout`, you can expect FIXED timing of confirmation against your input.
+      - FIXED-timing-gap for "f > chars-input > wait > land(always by timeout)" flow.
+    - Old `findByTwoChars = true` is equals to `findCharsMax = 2`, and migrated on first time activation.
+  - Rename: `findByTwoCharsAutoConfirmTimeout` to `findConfirmByTimeout`( generalize naming )
+
 # 1.2.0:
 - New, Experimental: `findAcrossLines`: default `false`
   - When `true`, `f` searches over next lines. Affects `f`, `F`, `t`, `T`.
@@ -12,6 +23,16 @@
 - Fix: Fix confusing description in setting, no behavioral diff.
 
 # 1.1.0: This release is all for better `f` by making it tunable
+
+- [CAUTION: added at release of v1.3.0]: Config option name changed.
+  - I basically don't want update old CHANGELOG, but this is for reducing confusion.
+  - Because of short release timing gap with braking config params change.
+    - v1.1.0: 2017.9.1
+    - v1.3.0: 2017.9.2
+  - When you read this below, keep in mind, change in available config params.
+    - Parameterized: `findByTwoChars = true` to `findCharsMax = 2`
+    - Renamed: `findByTwoCharsAutoConfirmTimeout` to `findConfirmByTimeout`
+
 - New: [Summary] Now `f` is **tunable**. #852.
   - Inspired pure-vim's plugins: `clever-f`, `vim-seek`, `vim-sneak`.
   - Highlighting find-char. It help you to pre-determine consequence of repeat by `;`, `,` and `.`.
@@ -47,8 +68,8 @@
   - My configuration( I'm still in-eval phase, don't take this as recommendation ).
     ```coffeescript
     keymapSemicolonToConfirmFind: true
-    findByTwoChars: true
-    findByTwoCharsAutoConfirmTimeout: 500
+    findByTwoChars: true # [converted] to `findCharsMax = 2`
+    findByTwoCharsAutoConfirmTimeout: 500 # [converted] to `findConfirmByTimeout = 500`
     reuseFindForRepeatFind: true
     useSmartcaseForFind: true
     ```
