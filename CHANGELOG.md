@@ -1,6 +1,6 @@
 # 1.3.2:
 - Improve: highlight-find-char now highlight all chars in next lines when `findAcrossLines` was set.
-  - This gives important feedback for your keystroke when your eye is needling destination word while typing.
+  - This gives important feedback for your keystroke when your eye is needling destination keyword while typing.
 
 # 1.3.1:
 - Fix: Fix confusing description in setting, no behavioral diff.
