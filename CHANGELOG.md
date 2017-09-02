@@ -4,7 +4,8 @@
   - New, Rename: `findCharsMax`: default `1`.
     - If `find`'s input reaches this length, confirm without waiting explicit `enter`.
     - So default `f a`(move to `a` char) is behavior when `findCharsMax` is `1`.
-    - By setting bigger number(such as `100`) and enabling `findConfirmByTimeout`, you can expect FIXED timing of confirmation agains your input.
+    - By setting bigger number(such as `100`) with also enabling `findConfirmByTimeout`, you can expect FIXED timing of confirmation against your input.
+      - FIXED-timing-gap for "f > chars-input > wait > land(always by timeout)" flow.
     - Old `findByTwoChars = true` is equals to `findCharsMax = 2`, and migrated on first time activation.
   - Rename: `findByTwoCharsAutoConfirmTimeout` to `findConfirmByTimeout`( generalize naming )
 
@@ -67,8 +68,8 @@
   - My configuration( I'm still in-eval phase, don't take this as recommendation ).
     ```coffeescript
     keymapSemicolonToConfirmFind: true
-    findByTwoChars: true
-    findByTwoCharsAutoConfirmTimeout: 500
+    findByTwoChars: true # [converted] to `findCharsMax = 2`
+    findByTwoCharsAutoConfirmTimeout: 500 # [converted] to `findConfirmByTimeout = 500`
     reuseFindForRepeatFind: true
     useSmartcaseForFind: true
     ```
