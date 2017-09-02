@@ -904,10 +904,11 @@ class Find extends Motion
     @repeatIfNecessary()
     return if @isComplete()
 
-    if @getConfig("findByTwoChars")
+    charsMax = @getConfig("findCharsMax")
+
+    if (charsMax > 1)
       options =
-        charsMax: 2
-        autoConfirmTimeout: @getConfig("findByTwoCharsAutoConfirmTimeout")
+        autoConfirmTimeout: @getConfig("findConfirmByTimeout")
         onChange: (char) => @highlightTextInCursorRows(char, "pre-confirm")
         onCancel: =>
           @vimState.highlightFind.clearMarkers()
@@ -915,6 +916,7 @@ class Find extends Motion
 
     options ?= {}
     options.purpose = "find"
+    options.charsMax = charsMax
 
     @focusInput(options)
 
