@@ -933,7 +933,10 @@ class Find extends Motion
     super
     decorationType = "post-confirm"
     decorationType += "-long" if @isAsTargetExceptSelect()
-    @highlightTextInCursorRows(@input, decorationType)
+    @editor.component.getNextUpdatePromise().then =>
+      @highlightTextInCursorRows(@input, decorationType)
+
+    return # Don't return Promise here. OperationStack treat Promise differently.
 
   getPoint: (fromPoint) ->
     {start, end} = @editor.bufferRangeForBufferRow(fromPoint.row)
@@ -963,11 +966,11 @@ class Find extends Motion
     if @getConfig("findAcrossLines")
       {start, end} = @vimState.utils.getVisibleBufferRange(@editor)
       if @isBackwards()
-        bottomCursor = @editor.getCursorsOrderedByBufferPosition().pop()
-        scanRanges = [[start, bottomCursor.getBufferPosition()]]
+        row = @editor.getCursorsOrderedByBufferPosition().pop().getBufferRow()
+        scanRanges = [[start, [row, Infinity]]]
       else
-        topCursor = @editor.getCursorsOrderedByBufferPosition().shift()
-        scanRanges = [[topCursor.getBufferPosition(), end]]
+        row = @editor.getCursorsOrderedByBufferPosition().shift().getBufferRow()
+        scanRanges = [[[row, 0], end]]
     else
       scanRanges = @editor.getCursors().map((cursor) -> cursor.getCurrentLineBufferRange())
 
