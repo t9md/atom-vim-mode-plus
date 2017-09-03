@@ -965,42 +965,7 @@ class Find extends Motion
 
   highlightTextInCursorRows: (text, decorationType) ->
     return unless @getConfig("highlightFindChar")
-    @vimState.highlightFind.clearMarkers()
-
-    visibleRange = @vimState.utils.getVisibleBufferRange(@editor)
-    cursors = @editor.getCursors().filter (cursor) ->
-      visibleRange.containsPoint(cursor.getBufferPosition())
-    cursors = @vimState.utils.sortCursors(cursors ? [])
-    return unless cursors.length
-
-    if @getConfig("findAcrossLines")
-      if @isBackwards()
-        scanRanges = [[visibleRange.start, cursors.pop().getBufferPosition()]]
-      else
-        scanRanges = [[cursors.shift().getBufferPosition(), visibleRange.end]]
-    else
-      if @isBackwards()
-        scanRanges = cursors.map (cursor) ->
-          [cursor.getCurrentLineBufferRange().start, cursor.getBufferPosition()]
-      else
-        scanRanges = cursors.map (cursor) ->
-          [cursor.getBufferPosition(), cursor.getCurrentLineBufferRange().end]
-
-    regex = @getRegex(text)
-    ranges = []
-    for scanRange in scanRanges
-      @editor.scanInBufferRange(regex, scanRange, ({range}) -> ranges.push(range))
-
-    return unless ranges.length
-
-    if (decorationType is "pre-confirm")
-      cursorPosition = @editor.getCursorBufferPosition()
-      if @isBackwards()
-        candidates = ranges.reverse().filter (range) -> range.start.isLessThan(cursorPosition)
-      else
-        candidates = ranges.filter (range) -> range.start.isGreaterThan(cursorPosition)
-      currentRange = candidates[@getCount(-1)]
-    @vimState.highlightFind.highlightRanges(ranges, decorationType, currentRange)
+    @vimState.highlightFind.highlightCursorRows(@getRegex(text), decorationType, @isBackwards(), @getCount(-1))
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
