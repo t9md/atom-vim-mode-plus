@@ -938,7 +938,7 @@ class Find extends Motion
 
     return # Don't return Promise here. OperationStack treat Promise differently.
 
-  getPoint: (fromPoint) ->
+  getScanInfo: (fromPoint) ->
     {start, end} = @editor.bufferRangeForBufferRow(fromPoint.row)
 
     offset = if @isBackwards() then @offset else -@offset
@@ -951,7 +951,10 @@ class Find extends Motion
       end = @editor.getEofBufferPosition() if @getConfig("findAcrossLines")
       scanRange = [fromPoint.translate([0, 1 + unOffset]), end]
       method = 'scanInBufferRange'
+    {scanRange, method, offset}
 
+  getPoint: (fromPoint) ->
+    {scanRange, method, offset} = @getScanInfo(fromPoint)
     points = []
     indexWantAccess = @getCount(-1)
     @editor[method] @getRegex(@input), scanRange, ({range, stop}) ->
@@ -962,26 +965,7 @@ class Find extends Motion
 
   highlightTextInCursorRows: (text, decorationType) ->
     return unless @getConfig("highlightFindChar")
-
-    if @getConfig("findAcrossLines")
-      {start, end} = @vimState.utils.getVisibleBufferRange(@editor)
-      if @isBackwards()
-        row = @editor.getCursorsOrderedByBufferPosition().pop().getBufferRow()
-        scanRanges = [[start, [row, Infinity]]]
-      else
-        row = @editor.getCursorsOrderedByBufferPosition().shift().getBufferRow()
-        scanRanges = [[[row, 0], end]]
-    else
-      scanRanges = @editor.getCursors().map((cursor) -> cursor.getCurrentLineBufferRange())
-
-    regex = @getRegex(text)
-    ranges = []
-    for scanRange in scanRanges
-      @editor.scanInBufferRange(regex, scanRange, ({range}) -> ranges.push(range))
-    if (decorationType is "pre-confirm") and (ranges.length is 1)
-      decorationType += " single-match"
-      console.log decorationType
-    @vimState.highlightFind.highlightRanges(ranges, decorationType)
+    @vimState.highlightFind.highlightCursorRows(@getRegex(text), decorationType, @isBackwards(), @getCount(-1))
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())

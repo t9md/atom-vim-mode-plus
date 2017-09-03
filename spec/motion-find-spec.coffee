@@ -351,6 +351,9 @@ describe "Motion Find", ->
         ensure "T a", textC: "0:    a    a\n1:    a|    a\n2:    a    a\n"
 
     describe "findCharsMax", ->
+      beforeEach ->
+        # To pass hlFind logic it require "visible" screen range.
+        jasmine.attachToDOM(atom.workspace.getElement())
 
       describe "with 2 length", ->
         beforeEach ->
