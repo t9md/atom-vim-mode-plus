@@ -1,3 +1,23 @@
+# 1.4.0: WIP
+- Maintenance: Remove `[EXPERIMENTAL]` tag from description of `findAcrossLines` settings, since we found it useful.
+- Fix: Incorrect cursor rendering when `automaticallyEscapeInsertModeOnActivePaneItemChange` is enabled. #855
+  - When `automaticallyEscapeInsertModeOnActivePaneItemChange` is set and active-tab change and back.
+  - Cursor rendered odd way.
+  - This is started from Atom v1.19.0 with new editor-rendering change.
+  - To workaround issue, now use more appropriate `onDidStopChangingActivePaneItem` hook.
+- New, Experimental: Conditional keymap config `keymapIAndAToInsertAtTargetWhenHasOccurrence`(default `false`). #862
+  - This is revival of old default keymap which is removed because it was too aggressive, confusing as default-keymap.
+  - When enabled and edigtor has `preset-occurrence` marker, `I` and `A` behave as operator which take `target`.
+  - e.g. `I p`, `A p` to insert at start or end of `preset-occurrence` in paragraph(`p`).
+- Improve: Now `maximize-pane` no longer automatically `de-maximized` on active pane item change(tab-change). #866
+  - So user can switch active tab with keep maximized.
+  - This was original behavioral design I intended. Noticed it's broken(not sure when, or initially broken), so fixed.
+- Improve: `move-to-next-occurrence`, `move-to-previous-occurrence` now visit in ordered by buffer position. #864
+  - Following behavioral change is noticeable only when user create multiple `preset-occurrence` for different word.
+    - old: `tab`, `shift-tab` visit `preset-occurrence` in created order.
+    - new: `tab`, `shift-tab` visit `preset-occurrence` in ordered by buffer position.
+- Style: Tweak boldness from 5px to 4px for pre-confirmed-current-match of highlight-find-char.
+
 # 1.3.3:
 - Improve: highlight-find-char now highlight unconfirmed-current-match differently( with thicker border ).
   - You now visually notified "no extra keytype is required to land this position" while typing.
