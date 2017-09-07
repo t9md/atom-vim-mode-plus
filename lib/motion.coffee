@@ -1155,7 +1155,7 @@ class MoveToNextOccurrence extends Motion
       marker.getBufferRange()
 
   execute: ->
-    @ranges = @getRanges()
+    @ranges = @vimState.utils.sortRanges(@getRanges())
     super
 
   moveCursor: (cursor) ->
