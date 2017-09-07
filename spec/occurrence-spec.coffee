@@ -854,7 +854,6 @@ describe "Occurrence", ->
         ensure 'g o',
           occurrenceText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo']
 
-
       describe "tab, shift-tab", ->
         describe "cursor is at start of occurrence", ->
           it "search next/previous occurrence marker", ->
@@ -974,6 +973,26 @@ describe "Occurrence", ->
             ___: OOO: xxx:
             |ooo: xxx: OOO:
             """
+
+      describe "when multiple preset-occurrence created at different timing", ->
+        beforeEach ->
+          set
+            cursor: [0, 5]
+          ensure 'g o',
+            occurrenceText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo', 'xxx', 'xxx', 'xxx']
+
+        it "visit occurrences ordered by buffer position", ->
+          ensure "tab",       textC: "ooo: xxx: |ooo\n___: ooo: xxx:\nooo: xxx: ooo:"
+          ensure "tab",       textC: "ooo: xxx: ooo\n___: |ooo: xxx:\nooo: xxx: ooo:"
+          ensure "tab",       textC: "ooo: xxx: ooo\n___: ooo: |xxx:\nooo: xxx: ooo:"
+          ensure "tab",       textC: "ooo: xxx: ooo\n___: ooo: xxx:\n|ooo: xxx: ooo:"
+          ensure "tab",       textC: "ooo: xxx: ooo\n___: ooo: xxx:\nooo: |xxx: ooo:"
+          ensure "tab",       textC: "ooo: xxx: ooo\n___: ooo: xxx:\nooo: xxx: |ooo:"
+          ensure "shift-tab", textC: "ooo: xxx: ooo\n___: ooo: xxx:\nooo: |xxx: ooo:"
+          ensure "shift-tab", textC: "ooo: xxx: ooo\n___: ooo: xxx:\n|ooo: xxx: ooo:"
+          ensure "shift-tab", textC: "ooo: xxx: ooo\n___: ooo: |xxx:\nooo: xxx: ooo:"
+          ensure "shift-tab", textC: "ooo: xxx: ooo\n___: |ooo: xxx:\nooo: xxx: ooo:"
+          ensure "shift-tab", textC: "ooo: xxx: |ooo\n___: ooo: xxx:\nooo: xxx: ooo:"
 
     describe "explict operator-modifier o and preset-marker", ->
       beforeEach ->

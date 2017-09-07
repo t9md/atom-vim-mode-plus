@@ -1155,40 +1155,38 @@ class MoveToNextOccurrence extends Motion
       marker.getBufferRange()
 
   execute: ->
-    @ranges = @getRanges()
+    @ranges = @vimState.utils.sortRanges(@getRanges())
     super
 
   moveCursor: (cursor) ->
-    index = @getIndex(cursor.getBufferPosition())
-    if index?
-      offset = switch @direction
-        when 'next' then @getCount(-1)
-        when 'previous' then -@getCount(-1)
-      range = @ranges[getIndex(index + offset, @ranges)]
-      point = range.start
+    range = @ranges[getIndex(@getIndex(cursor.getBufferPosition()), @ranges)]
+    point = range.start
+    cursor.setBufferPosition(point, autoscroll: false)
 
-      cursor.setBufferPosition(point, autoscroll: false)
+    if cursor.isLastCursor()
+      @editor.unfoldBufferRow(point.row)
+      smartScrollToBufferPosition(@editor, point)
 
-      if cursor.isLastCursor()
-        @editor.unfoldBufferRow(point.row)
-        smartScrollToBufferPosition(@editor, point)
-
-      if @getConfig('flashOnMoveToOccurrence')
-        @vimState.flash(range, type: 'search')
+    if @getConfig('flashOnMoveToOccurrence')
+      @vimState.flash(range, type: 'search')
 
   getIndex: (fromPoint) ->
+    index = null
     for range, i in @ranges when range.start.isGreaterThan(fromPoint)
-      return i
-    0
+      index = i
+      break
+    (index ? 0) + @getCount(-1)
 
 class MoveToPreviousOccurrence extends MoveToNextOccurrence
   @extend()
   direction: 'previous'
 
   getIndex: (fromPoint) ->
+    index = null
     for range, i in @ranges by -1 when range.end.isLessThan(fromPoint)
-      return i
-    @ranges.length - 1
+      index = i
+      break
+    (index ? @ranges.length - 1) - @getCount(-1)
 
 # -------------------------
 # keymap: %
