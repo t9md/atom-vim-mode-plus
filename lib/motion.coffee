@@ -909,21 +909,24 @@ class Find extends Motion
     if (charsMax > 1)
       options =
         autoConfirmTimeout: @getConfig("findConfirmByTimeout")
-        onChange: (@chars) => @highlightTextInCursorRows(@chars, "pre-confirm")
+        onChange: (@preConfirmedChars) => @highlightTextInCursorRows(@preConfirmedChars, "pre-confirm")
         onCancel: =>
           @vimState.highlightFind.clearMarkers()
           @cancelOperation()
         commands:
-          "vim-mode-plus:find-next": =>
-            if @chars
-              @count += 1
-              @highlightTextInCursorRows(@chars, "pre-confirm")
+          "vim-mode-plus:find-next-pre-confirmed": => @findPreConfirmed(+1)
+          "vim-mode-plus:find-previous-pre-confirmed": =>  @findPreConfirmed(-1)
 
     options ?= {}
     options.purpose = "find"
     options.charsMax = charsMax
 
     @focusInput(options)
+
+  findPreConfirmed: (delta) ->
+    if @preConfirmedChars
+      @count += delta
+      @highlightTextInCursorRows(@preConfirmedChars, "pre-confirm")
 
   repeatIfNecessary: ->
     if @getConfig("reuseFindForRepeatFind")
