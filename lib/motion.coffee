@@ -901,7 +901,7 @@ class Find extends Motion
   initialize: ->
     super
 
-    @repeatIfNecessary()
+    @repeatIfNecessary() if @getConfig("reuseFindForRepeatFind")
     return if @isComplete()
 
     charsMax = @getConfig("findCharsMax")
@@ -930,10 +930,9 @@ class Find extends Motion
       @count = index + 1
 
   repeatIfNecessary: ->
-    if @getConfig("reuseFindForRepeatFind")
-      if @vimState.operationStack.getLastCommandName() in ["Find", "FindBackwards", "Till", "TillBackwards"]
-        @input = @vimState.globalState.get("currentFind").input
-        @repeated = true
+    if @vimState.operationStack.getLastCommandName() in ["Find", "FindBackwards", "Till", "TillBackwards"]
+      @input = @vimState.globalState.get("currentFind").input
+      @repeated = true
 
   isBackwards: ->
     @backwards
@@ -973,7 +972,7 @@ class Find extends Motion
 
   highlightTextInCursorRows: (text, decorationType, index = @getCount(-1), adjustIndex = false) ->
     return unless @getConfig("highlightFindChar")
-    @vimState.highlightFind.highlightCursorRows(@getRegex(text), decorationType, @isBackwards(), index, adjustIndex)
+    @vimState.highlightFind.highlightCursorRows(@getRegex(text), decorationType, @isBackwards(), @offset, index, adjustIndex)
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
