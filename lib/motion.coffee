@@ -906,7 +906,6 @@ class Find extends Motion
 
     charsMax = @getConfig("findCharsMax")
 
-    inputEditor = null
     if (charsMax > 1)
       options =
         autoConfirmTimeout: @getConfig("findConfirmByTimeout")
@@ -914,30 +913,15 @@ class Find extends Motion
         onCancel: =>
           @vimState.highlightFind.clearMarkers()
           @cancelOperation()
-        onWillInsertText: (event) =>
-          return unless @preConfirmedChars
-          switch event.text
-            when ";" then event.cancel(); @findPreConfirmed(+1)
-            when "," then event.cancel(); @findPreConfirmed(-1)
         commands:
           "vim-mode-plus:find-next-pre-confirmed": => @findPreConfirmed(+1)
           "vim-mode-plus:find-previous-pre-confirmed": =>  @findPreConfirmed(-1)
-          "vim-mode-plus:insert-semicolon-or-find-next-pre-confirmed": =>
-            if @preConfirmedChars
-              @findPreConfirmed(+1)
-            else
-              inputEditor.insertText(";")
-          "vim-mode-plus:insert-comma-or-find-previous-pre-confirmed": =>
-            if @preConfirmedChars
-              @findPreConfirmed(-1)
-            else
-              inputEditor.insertText(":")
 
     options ?= {}
     options.purpose = "find"
     options.charsMax = charsMax
 
-    inputEditor = @focusInput(options)
+    @focusInput(options)
 
   findPreConfirmed: (delta) ->
     if @preConfirmedChars and @getConfig("highlightFindChar")
