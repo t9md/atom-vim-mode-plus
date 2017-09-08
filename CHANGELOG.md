@@ -16,7 +16,6 @@
   - Following behavioral change is noticeable only when user create multiple `preset-occurrence` for different word.
     - old: `tab`, `shift-tab` visit `preset-occurrence` in created order.
     - new: `tab`, `shift-tab` visit `preset-occurrence` in ordered by buffer position.
-- Style: Tweak boldness from 5px to 4px for pre-confirmed-current-match of highlight-find-char.
 
 # 1.3.3:
 - Improve: highlight-find-char now highlight unconfirmed-current-match differently( with thicker border ).
