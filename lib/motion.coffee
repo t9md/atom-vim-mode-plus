@@ -906,6 +906,7 @@ class Find extends Motion
 
     charsMax = @getConfig("findCharsMax")
 
+    inputEditor = null
     if (charsMax > 1)
       options =
         autoConfirmTimeout: @getConfig("findConfirmByTimeout")
@@ -913,20 +914,35 @@ class Find extends Motion
         onCancel: =>
           @vimState.highlightFind.clearMarkers()
           @cancelOperation()
+        onWillInsertText: (event) =>
+          return unless @preConfirmedChars
+          switch event.text
+            when ";" then event.cancel(); @findPreConfirmed(+1)
+            when "," then event.cancel(); @findPreConfirmed(-1)
         commands:
           "vim-mode-plus:find-next-pre-confirmed": => @findPreConfirmed(+1)
           "vim-mode-plus:find-previous-pre-confirmed": =>  @findPreConfirmed(-1)
+          "vim-mode-plus:insert-semicolon-or-find-next-pre-confirmed": =>
+            if @preConfirmedChars
+              @findPreConfirmed(+1)
+            else
+              inputEditor.insertText(";")
+          "vim-mode-plus:insert-comma-or-find-previous-pre-confirmed": =>
+            if @preConfirmedChars
+              @findPreConfirmed(-1)
+            else
+              inputEditor.insertText(":")
 
     options ?= {}
     options.purpose = "find"
     options.charsMax = charsMax
 
-    @focusInput(options)
+    inputEditor = @focusInput(options)
 
   findPreConfirmed: (delta) ->
-    if @preConfirmedChars
-      @count += delta
-      @highlightTextInCursorRows(@preConfirmedChars, "pre-confirm")
+    if @preConfirmedChars and @getConfig("highlightFindChar")
+      index = @highlightTextInCursorRows(@preConfirmedChars, "pre-confirm", @getCount(-1) + delta, true)
+      @count = index + 1
 
   repeatIfNecessary: ->
     if @getConfig("reuseFindForRepeatFind")
@@ -971,9 +987,9 @@ class Find extends Motion
 
     points[indexWantAccess]?.translate([0, offset])
 
-  highlightTextInCursorRows: (text, decorationType) ->
+  highlightTextInCursorRows: (text, decorationType, index = @getCount(-1), adjustIndex = false) ->
     return unless @getConfig("highlightFindChar")
-    @vimState.highlightFind.highlightCursorRows(@getRegex(text), decorationType, @isBackwards(), @getCount(-1))
+    @vimState.highlightFind.highlightCursorRows(@getRegex(text), decorationType, @isBackwards(), index, adjustIndex)
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
