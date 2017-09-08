@@ -947,29 +947,28 @@ class Find extends Motion
 
     return # Don't return Promise here. OperationStack treat Promise differently.
 
-  getScanInfo: (fromPoint) ->
-    {start, end} = @editor.bufferRangeForBufferRow(fromPoint.row)
+  getPoint: (fromPoint) ->
+    scanRange = @editor.bufferRangeForBufferRow(fromPoint.row)
+    points = []
+    regex = @getRegex(@input)
+    indexWantAccess = @getCount(-1)
+
+    if @isBackwards()
+      scanRange.start = Point.ZERO if @getConfig("findAcrossLines")
+      fromPoint = fromPoint.translate([0, -1]) if @repeated and @offset
+      @editor.backwardsScanInBufferRange regex, scanRange, ({range, stop}) ->
+        if range.start.isLessThan(fromPoint)
+          points.push(range.start)
+          stop() if points.length > indexWantAccess
+    else
+      scanRange.end = @editor.getEofBufferPosition() if @getConfig("findAcrossLines")
+      fromPoint = fromPoint.translate([0, 1]) if @repeated and @offset
+      @editor.scanInBufferRange regex, scanRange, ({range, stop}) ->
+        if range.start.isGreaterThan(fromPoint)
+          points.push(range.start)
+          stop() if points.length > indexWantAccess
 
     offset = if @isBackwards() then @offset else -@offset
-    unOffset = -offset * @repeated
-    if @isBackwards()
-      start = Point.ZERO if @getConfig("findAcrossLines")
-      scanRange = [start, fromPoint.translate([0, unOffset])]
-      method = 'backwardsScanInBufferRange'
-    else
-      end = @editor.getEofBufferPosition() if @getConfig("findAcrossLines")
-      scanRange = [fromPoint.translate([0, 1 + unOffset]), end]
-      method = 'scanInBufferRange'
-    {scanRange, method, offset}
-
-  getPoint: (fromPoint) ->
-    {scanRange, method, offset} = @getScanInfo(fromPoint)
-    points = []
-    indexWantAccess = @getCount(-1)
-    @editor[method] @getRegex(@input), scanRange, ({range, stop}) ->
-      points.push(range.start)
-      stop() if points.length > indexWantAccess
-
     points[indexWantAccess]?.translate([0, offset])
 
   highlightTextInCursorRows: (text, decorationType, index = @getCount(-1), adjustIndex = false) ->
