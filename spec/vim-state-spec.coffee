@@ -267,12 +267,22 @@ describe "VimState", ->
       describe "automaticallyEscapeInsertModeOnActivePaneItemChange = true", ->
         beforeEach ->
           settings.set('automaticallyEscapeInsertModeOnActivePaneItemChange', true)
+          jasmine.useRealClock()
 
-        it "return to escape mode for all vimEditors", ->
-          pane.activateItem(otherEditor)
-          expect(pane.getActiveItem()).toBe(otherEditor)
-          ensure mode: 'normal'
-          otherVim.ensure mode: 'normal'
+        it "automatically shift to normal mode except new active editor", ->
+          called = false
+
+          runs ->
+            atom.workspace.onDidStopChangingActivePaneItem -> called = true
+            pane.activateItem(otherEditor)
+
+          waitsFor ->
+            called
+
+          runs ->
+            expect(pane.getActiveItem()).toBe(otherEditor)
+            ensure mode: 'normal'
+            otherVim.ensure mode: 'insert'
 
   describe "replace-mode", ->
     describe "with content", ->
