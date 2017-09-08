@@ -909,6 +909,7 @@ class Find extends Motion
     if (charsMax > 1)
       options =
         autoConfirmTimeout: @getConfig("findConfirmByTimeout")
+        onConfirm: (@input) => if @input then @processOperation() else @cancelOperation()
         onChange: (@preConfirmedChars) => @highlightTextInCursorRows(@preConfirmedChars, "pre-confirm")
         onCancel: =>
           @vimState.highlightFind.clearMarkers()
