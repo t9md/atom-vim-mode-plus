@@ -1,11 +1,26 @@
 # 1.4.0: WIP
-- Maintenance: Remove `[EXPERIMENTAL]` tag from description of `findAcrossLines` settings, since we found it useful.
+- Improve: `f` family related
+  - Improve: Restore original scrollTop when `findAcrossLines` enabled and cancelled after scroll.
+  - Rename config: `keymapSemicolonToConfirmFind` to `keymapSemicolonToConfirmOnFindInput`(auto-migrate)
+  - Improve: Empty confirm no longer move cursor when `findCharsMax` > 1.
+  - New: Commands `find-next-pre-confirmed` and `find-previous-pre-confirmed`.
+    - Scope: Available when `f` family waiting for input(`atom-text-editor.vim-mode-plus-input.find`).
+    - Keymap: `tab`, and `shift-tab` is mapped by default.
+    - Why?
+      - Allow you to adjust landing target BEFORE confirm to skip un-aimed stop interactively.
+      - In most case, using `;` or `,` after `f` finished is OK.
+      - But when `f` is used with operator, such as `c t f "` and `"` matched earlier spot than you aimed.
+      - This situation is not recoverable/retry-able by `.` repeat, but manually avoid-able by new commands.
+  - New, Experimental: Conditional keymap `keymapSemicolonAndCommaToFindPreConfirmedOnFindInput`(default `false`).
+    - When enabled, `;` and `,` is mapped to new `find-next-pre-confirmed` and `find-previous-pre-confirmed`.
+  - Maintenance: Remove `[EXPERIMENTAL]` tag from description of `findAcrossLines` settings, since we found it useful.
+  - Improve: Fix several highlight inconsistencies.
 - Fix: Incorrect cursor rendering when `automaticallyEscapeInsertModeOnActivePaneItemChange` is enabled. #855
   - When `automaticallyEscapeInsertModeOnActivePaneItemChange` is set and active-tab change and back.
   - Cursor rendered odd way.
   - This is started from Atom v1.19.0 with new editor-rendering change.
   - To workaround issue, now use more appropriate `onDidStopChangingActivePaneItem` hook.
-- New, Experimental: Conditional keymap config `keymapIAndAToInsertAtTargetWhenHasOccurrence`(default `false`). #862
+- New, Experimental: Conditional keymap `keymapIAndAToInsertAtTargetWhenHasOccurrence`(default `false`). #862
   - This is revival of old default keymap which is removed because it was too aggressive, confusing as default-keymap.
   - When enabled and edigtor has `preset-occurrence` marker, `I` and `A` behave as operator which take `target`.
   - e.g. `I p`, `A p` to insert at start or end of `preset-occurrence` in paragraph(`p`).
