@@ -26,6 +26,7 @@ _ = require 'underscore-plus'
   pointIsAtEndOfLineAtNonEmptyRow
   getEndOfLineForBufferRow
   findRangeInBufferRow
+  saveEditorState
 } = require './utils'
 
 Base = require './base'
@@ -898,6 +899,14 @@ class Find extends Motion
   requireInput: true
   caseSensitivityKind: "Find"
 
+  restoreEditorState: ->
+    @_restoreEditorState?()
+    @_restoreEditorState = null
+
+  cancelOperation: ->
+    @restoreEditorState()
+    super
+
   initialize: ->
     super
 
@@ -907,6 +916,8 @@ class Find extends Motion
     charsMax = @getConfig("findCharsMax")
 
     if (charsMax > 1)
+      @_restoreEditorState = saveEditorState(@editor)
+
       options =
         autoConfirmTimeout: @getConfig("findConfirmByTimeout")
         onConfirm: (@input) => if @input then @processOperation() else @cancelOperation()
@@ -952,23 +963,23 @@ class Find extends Motion
     regex = @getRegex(@input)
     indexWantAccess = @getCount(-1)
 
+    translation = new Point(0, if @isBackwards() then @offset else -@offset)
+    fromPoint = fromPoint.translate(translation.negate()) if @repeated
+
     if @isBackwards()
       scanRange.start = Point.ZERO if @getConfig("findAcrossLines")
-      fromPoint = fromPoint.translate([0, -1]) if @repeated and @offset
       @editor.backwardsScanInBufferRange regex, scanRange, ({range, stop}) ->
         if range.start.isLessThan(fromPoint)
           points.push(range.start)
           stop() if points.length > indexWantAccess
     else
       scanRange.end = @editor.getEofBufferPosition() if @getConfig("findAcrossLines")
-      fromPoint = fromPoint.translate([0, 1]) if @repeated and @offset
       @editor.scanInBufferRange regex, scanRange, ({range, stop}) ->
         if range.start.isGreaterThan(fromPoint)
           points.push(range.start)
           stop() if points.length > indexWantAccess
 
-    offset = if @isBackwards() then @offset else -@offset
-    points[indexWantAccess]?.translate([0, offset])
+    points[indexWantAccess]?.translate(translation)
 
   highlightTextInCursorRows: (text, decorationType, index = @getCount(-1), adjustIndex = false) ->
     return unless @getConfig("highlightFindChar")
@@ -976,7 +987,11 @@ class Find extends Motion
 
   moveCursor: (cursor) ->
     point = @getPoint(cursor.getBufferPosition())
-    @setBufferPositionSafely(cursor, point)
+    if point?
+      cursor.setBufferPosition(point)
+    else
+      @restoreEditorState()
+
     @globalState.set('currentFind', this) unless @repeated
 
   getRegex: (term) ->

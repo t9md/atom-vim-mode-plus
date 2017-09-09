@@ -350,6 +350,39 @@ describe "Motion Find", ->
         ensure "T a", textC: "0:    a    a\n1:    a    |a\n2:    a    a\n"
         ensure "T a", textC: "0:    a    a\n1:    a|    a\n2:    a    a\n"
 
+    describe "find-next/previous-pre-confirmed", ->
+      beforeEach ->
+        settings.set("findCharsMax", 10)
+        # To pass hlFind logic it require "visible" screen range.
+        jasmine.attachToDOM(atom.workspace.getElement())
+
+      describe "can find one or two char", ->
+        it "adjust to next-pre-confirmed", ->
+          set                 textC: "|    a    ab    a    cd    a"
+          keystroke "f a "
+          element = vimState.inputEditor.element
+          dispatch(element, "vim-mode-plus:find-next-pre-confirmed")
+          dispatch(element, "vim-mode-plus:find-next-pre-confirmed")
+          ensure "enter",     textC: "    a    ab    |a    cd    a"
+
+        it "adjust to previous-pre-confirmed", ->
+          set                   textC: "|    a    ab    a    cd    a"
+          ensure "3 f a enter", textC: "    a    ab    |a    cd    a"
+          set                   textC: "|    a    ab    a    cd    a"
+          keystroke "3 f a"
+          element = vimState.inputEditor.element
+          dispatch(element, "vim-mode-plus:find-previous-pre-confirmed")
+          dispatch(element, "vim-mode-plus:find-previous-pre-confirmed")
+          ensure "enter",     textC: "    |a    ab    a    cd    a"
+
+        it "is useful to skip earlier spot interactivelly", ->
+          set  textC: 'text = "this is |\"example\" of use case"'
+          keystroke 'c t "'
+          element = vimState.inputEditor.element
+          dispatch(element, "vim-mode-plus:find-next-pre-confirmed") # tab
+          dispatch(element, "vim-mode-plus:find-next-pre-confirmed") # tab
+          ensure "enter", textC: 'text = "this is |"', mode: "insert"
+
     describe "findCharsMax", ->
       beforeEach ->
         # To pass hlFind logic it require "visible" screen range.
