@@ -546,6 +546,15 @@ class PutBefore extends Operator
   flashTarget: true # manage manually
   trackChange: false # manage manually
 
+  initialize: ->
+    if @getConfig("pasteFromHistoryOnSequentialPut")
+      sequentialExecution = @vimState.operationStack.getLastCommandName() is @name
+      @pasteFromHistory = @vimState.flashManager.hasMarkers() and sequentialExecution
+      if @pasteFromHistory
+        @target = "LastPastedRange"
+      else
+        @vimState.register.resetHistoryIndex()
+
   execute: ->
     @mutationsBySelection = new Map()
     {text, type} = @vimState.register.get(null, @editor.getLastSelection())
@@ -562,6 +571,8 @@ class PutBefore extends Operator
         toRange = (selection) => @mutationsBySelection.get(selection)
         @vimState.flash(@editor.getSelections().map(toRange), type: @getFlashType())
 
+      @vimState.setLastPastedRangesBySelection(@mutationsBySelection)
+
     super
 
   adjustCursorPosition: ->
@@ -577,14 +588,18 @@ class PutBefore extends Operator
           cursor.setBufferPosition(start)
 
   mutateSelection: (selection) ->
-    {text, type} = @vimState.register.get(null, selection)
+    if @pasteFromHistory
+      {text, type} = @vimState.register.getHistory()
+    else
+      {text, type} = @vimState.register.get(null, selection)
+
     text = _.multiplyString(text, @getCount())
     @linewisePaste = type is 'linewise' or @isMode('visual', 'linewise')
     newRange = @paste(selection, text, {@linewisePaste})
     @mutationsBySelection.set(selection, newRange)
 
   paste: (selection, text, {linewisePaste}) ->
-    if linewisePaste
+    if not @pasteFromHistory and linewisePaste
       @pasteLinewise(selection, text)
     else
       @pasteCharacterwise(selection, text)

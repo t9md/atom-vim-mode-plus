@@ -683,6 +683,19 @@ class PersistentSelection extends TextObject
       @vimState.persistentSelection.setSelectedBufferRanges()
       return true
 
+class LastPastedRange extends TextObject
+  @extend(false)
+  wise: null
+  selectOnce: true
+
+  selectTextObject: (selection) ->
+    pastedRangesBySelection = @vimState.getLastPastedRangesBySelection()
+    for selection in @editor.getSelections()
+      range = pastedRangesBySelection.get(selection)
+      selection.setBufferRange(range)
+
+    return true
+
 class VisibleArea extends TextObject
   @extend(false)
   @deriveInnerAndA()

@@ -1105,6 +1105,8 @@ InnerPersistentSelection:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-persistent-selection"
   commandScope: "atom-text-editor"
+LastPastedRange:
+  file: "./text-object"
 VisibleArea:
   file: "./text-object"
 AVisibleArea:
