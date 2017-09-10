@@ -552,8 +552,6 @@ class PutBefore extends Operator
       @pasteFromHistory = @vimState.flashManager.hasMarkers() and sequentialExecution
       if @pasteFromHistory
         @target = "LastPastedRange"
-      else
-        @vimState.register.resetHistoryIndex()
 
   execute: ->
     @mutationsBySelection = new Map()
@@ -591,6 +589,7 @@ class PutBefore extends Operator
     if @pasteFromHistory
       {text, type} = @vimState.register.getHistory()
     else
+      @vimState.register.getHistory() # Just for rotate
       {text, type} = @vimState.register.get(null, selection)
 
     text = _.multiplyString(text, @getCount())
