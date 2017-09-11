@@ -8,6 +8,7 @@ _ = require 'underscore-plus'
   moveCursorToFirstCharacterAtRow
   ensureEndsWithNewLineForBufferRow
   adjustIndentWithKeepingLayout
+  normalizeIndent
 } = require './utils'
 Base = require './base'
 
@@ -543,7 +544,7 @@ class PutBefore extends Operator
   target: 'Empty'
   flashType: 'operator-long'
   restorePositions: false # manage manually
-  flashTarget: true # manage manually
+  flashTarget: false # manage manually
   trackChange: false # manage manually
 
   initialize: ->
@@ -557,6 +558,10 @@ class PutBefore extends Operator
     @mutationsBySelection = new Map()
     {text, type} = @vimState.register.get(null, @editor.getLastSelection())
     return unless text
+
+    unless @pasteFromHistory
+      pasteCheckpoint = @editor.createCheckpoint()
+
     @onDidFinishMutation(@adjustCursorPosition.bind(this))
 
     @onDidFinishOperation =>
@@ -570,6 +575,11 @@ class PutBefore extends Operator
         @vimState.flash(@editor.getSelections().map(toRange), type: @getFlashType())
 
       @vimState.setLastPastedRangesBySelection(@mutationsBySelection)
+
+      if @pasteFromHistory
+        @editor.groupChangesSinceCheckpoint(@vimState.getPasteCheckpoint())
+      else
+        @vimState.setPasteCheckpoint(pasteCheckpoint)
 
     super
 
@@ -588,6 +598,7 @@ class PutBefore extends Operator
   mutateSelection: (selection) ->
     if @pasteFromHistory
       {text, type} = @vimState.register.getHistory()
+      text = normalizeIndent(text, @editor, @vimState.getLastPastedRangeForSelection(selection))
     else
       @vimState.register.getHistory() # Just for rotate
       {text, type} = @vimState.register.get(null, selection)
