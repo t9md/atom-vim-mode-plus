@@ -589,7 +589,11 @@ class PutBefore extends Operator
           cursor.setBufferPosition(start)
 
   mutateSelection: (selection) ->
-    {text, type} = @vimState.sequentialPasteManager.getRegister(@pasteFromHistory, selection)
+    if @pasteFromHistory
+      {text, type} = @vimState.sequentialPasteManager.getRegister(selection)
+    else
+      @vimState.register.getHistory() # Just for rotate
+      {text, type} = @vimState.register.get(null, selection)
 
     text = _.multiplyString(text, @getCount())
     @linewisePaste = type is 'linewise' or @isMode('visual', 'linewise')

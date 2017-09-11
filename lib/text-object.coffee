@@ -683,6 +683,7 @@ class PersistentSelection extends TextObject
       @vimState.persistentSelection.setSelectedBufferRanges()
       return true
 
+# Used only by ReplaceWithRegister and PutBefore and its' children.
 class LastPastedRange extends TextObject
   @extend(false)
   wise: null

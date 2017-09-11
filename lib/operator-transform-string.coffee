@@ -358,7 +358,12 @@ class ReplaceWithRegister extends TransformString
     super
 
   getNewText: (text, selection) ->
-    @vimState.sequentialPasteManager.getRegister(@pasteFromHistory, selection)?.text ? ""
+    if @pasteFromHistory
+      value = @vimState.sequentialPasteManager.getRegister(selection)
+    else
+      @vimState.register.getHistory() # Just for rotate
+      value = @vimState.register.get(null, selection)
+    value?.text ? ""
 
 # Save text to register before replace
 class SwapWithRegister extends TransformString
