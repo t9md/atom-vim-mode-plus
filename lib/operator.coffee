@@ -595,7 +595,7 @@ class PutBefore extends Operator
     @linewisePaste = type is 'linewise' or @isMode('visual', 'linewise')
     newRange = @paste(selection, text, {@linewisePaste})
     @mutationsBySelection.set(selection, newRange)
-    @vimState.sequentialPasteManager.setPastedRangeForSelection(selection, range)
+    @vimState.sequentialPasteManager.savePastedRangeForSelection(selection, range)
 
 
   paste: (selection, text, {linewisePaste}) ->

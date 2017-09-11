@@ -36,7 +36,7 @@ class TransformString extends Operator
       range = selection.insertText(text, {@autoIndent, @autoIndentNewline})
 
       if @name is "ReplaceWithRegister"
-        @vimState.sequentialPasteManager.setPastedRangeForSelection(selection, range)
+        @vimState.sequentialPasteManager.savePastedRangeForSelection(selection, range)
 
       if @autoIndentAfterInsertText
         # Currently used by SplitArguments and Surround( linewise target only )
