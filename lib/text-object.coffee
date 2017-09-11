@@ -689,9 +689,8 @@ class LastPastedRange extends TextObject
   selectOnce: true
 
   selectTextObject: (selection) ->
-    pastedRangesBySelection = @vimState.getLastPastedRangesBySelection()
     for selection in @editor.getSelections()
-      range = pastedRangesBySelection.get(selection)
+      range = @vimState.sequentialPasteManager.getPastedRangeForSelection(selection)
       selection.setBufferRange(range)
 
     return true

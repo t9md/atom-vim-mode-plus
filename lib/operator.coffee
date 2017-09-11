@@ -8,7 +8,6 @@ _ = require 'underscore-plus'
   moveCursorToFirstCharacterAtRow
   ensureEndsWithNewLineForBufferRow
   adjustIndentWithKeepingLayout
-  normalizeIndent
 } = require './utils'
 Base = require './base'
 
@@ -548,19 +547,16 @@ class PutBefore extends Operator
   trackChange: false # manage manually
 
   initialize: ->
-    if @getConfig("pasteFromHistoryOnSequentialPut")
-      sequentialExecution = @vimState.operationStack.getLastCommandName() is @name
-      @pasteFromHistory = @vimState.flashManager.hasMarkers() and sequentialExecution
-      if @pasteFromHistory
-        @target = "LastPastedRange"
+    @pasteFromHistory = @vimState.sequentialPasteManager.isSequentialPaste(this)
+    if @pasteFromHistory
+      @target = "LastPastedRange"
 
   execute: ->
     @mutationsBySelection = new Map()
     {text, type} = @vimState.register.get(null, @editor.getLastSelection())
     return unless text
 
-    unless @pasteFromHistory
-      pasteCheckpoint = @editor.createCheckpoint()
+    @vimState.sequentialPasteManager.start(@pasteFromHistory)
 
     @onDidFinishMutation(@adjustCursorPosition.bind(this))
 
@@ -574,12 +570,9 @@ class PutBefore extends Operator
         toRange = (selection) => @mutationsBySelection.get(selection)
         @vimState.flash(@editor.getSelections().map(toRange), type: @getFlashType())
 
-      @vimState.setLastPastedRangesBySelection(@mutationsBySelection)
-
-      if @pasteFromHistory
-        @editor.groupChangesSinceCheckpoint(@vimState.getPasteCheckpoint())
-      else
-        @vimState.setPasteCheckpoint(pasteCheckpoint)
+      # @vimState.setLastPastedRangesBySelection(@mutationsBySelection)
+      @mutationsBySelection.forEach (range, selection) =>
+        @vimState.sequentialPasteManager.setPastedRangeForSelection(selection, range)
 
     super
 
@@ -596,12 +589,7 @@ class PutBefore extends Operator
           cursor.setBufferPosition(start)
 
   mutateSelection: (selection) ->
-    if @pasteFromHistory
-      {text, type} = @vimState.register.getHistory()
-      text = normalizeIndent(text, @editor, @vimState.getLastPastedRangeForSelection(selection))
-    else
-      @vimState.register.getHistory() # Just for rotate
-      {text, type} = @vimState.register.get(null, selection)
+    {text, type} = @vimState.sequentialPasteManager.getRegister(@pasteFromHistory, selection)
 
     text = _.multiplyString(text, @getCount())
     @linewisePaste = type is 'linewise' or @isMode('visual', 'linewise')
@@ -609,7 +597,9 @@ class PutBefore extends Operator
     @mutationsBySelection.set(selection, newRange)
 
   paste: (selection, text, {linewisePaste}) ->
-    if not @pasteFromHistory and linewisePaste
+    if @pasteFromHistory
+      @pasteCharacterwise(selection, text)
+    else if linewisePaste
       @pasteLinewise(selection, text)
     else
       @pasteCharacterwise(selection, text)
@@ -625,20 +615,16 @@ class PutBefore extends Operator
     {cursor} = selection
     cursorRow = cursor.getBufferRow()
     text += "\n" unless text.endsWith("\n")
-    newRange = null
     if selection.isEmpty()
       if @location is 'before'
-        newRange = insertTextAtBufferPosition(@editor, [cursorRow, 0], text)
-        setBufferRow(cursor, newRange.start.row)
+        insertTextAtBufferPosition(@editor, [cursorRow, 0], text)
       else if @location is 'after'
         targetRow = @getFoldEndRowForRow(cursorRow)
         ensureEndsWithNewLineForBufferRow(@editor, targetRow)
-        newRange = insertTextAtBufferPosition(@editor, [targetRow + 1, 0], text)
+        insertTextAtBufferPosition(@editor, [targetRow + 1, 0], text)
     else
       selection.insertText("\n") unless @isMode('visual', 'linewise')
-      newRange = selection.insertText(text)
-
-    return newRange
+      selection.insertText(text)
 
 class PutAfter extends PutBefore
   @extend()
