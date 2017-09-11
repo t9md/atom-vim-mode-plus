@@ -553,12 +553,13 @@ class PutBefore extends Operator
 
   execute: ->
     @mutationsBySelection = new Map()
-    {text, type} = @vimState.register.get(null, @editor.getLastSelection())
-    return unless text
-
     @vimState.sequentialPasteManager.start(@pasteFromHistory)
+    @onDidFinishMutation =>
+      @adjustCursorPosition() unless @cancelled
 
-    @onDidFinishMutation(@adjustCursorPosition.bind(this))
+    super
+
+    return if @cancelled
 
     @onDidFinishOperation =>
       # TrackChange
@@ -569,8 +570,6 @@ class PutBefore extends Operator
       if @getConfig('flashOnOperate') and @name not in @getConfig('flashOnOperateBlacklist')
         toRange = (selection) => @mutationsBySelection.get(selection)
         @vimState.flash(@editor.getSelections().map(toRange), type: @getFlashType())
-
-    super
 
   adjustCursorPosition: ->
     for selection in @editor.getSelections() when @mutationsBySelection.has(selection)
@@ -585,18 +584,16 @@ class PutBefore extends Operator
           cursor.setBufferPosition(start)
 
   mutateSelection: (selection) ->
-    if @pasteFromHistory
-      {text, type} = @vimState.sequentialPasteManager.getRegister(selection)
-    else
-      @vimState.register.getHistory() # Just for rotate
-      {text, type} = @vimState.register.get(null, selection)
+    {text, type} = @vimState.register.get(null, selection, @pasteFromHistory)
+    unless text
+      @cancelled = true
+      return
 
     text = _.multiplyString(text, @getCount())
     @linewisePaste = type is 'linewise' or @isMode('visual', 'linewise')
     newRange = @paste(selection, text, {@linewisePaste})
     @mutationsBySelection.set(selection, newRange)
     @vimState.sequentialPasteManager.savePastedRangeForSelection(selection, newRange)
-
 
   paste: (selection, text, {linewisePaste}) ->
     if @pasteFromHistory
