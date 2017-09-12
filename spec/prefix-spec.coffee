@@ -172,6 +172,149 @@ describe "Prefixes", ->
           set    register: '%': text: 'new content'
           ensure register: '%': text: '/Users/atom/known_value.txt'
 
+    describe "the numbered 0-9 register", ->
+      describe "0", ->
+        it "keep most recent yank-ed text", ->
+          ensure register: '"': {text: 'initial clipboard content'}, '0': {text: undefined}
+          set textC: "|000"
+          ensure "y w", register: '"': {text: "000"}, '0': {text: "000"}
+          ensure "y l", register: '"': {text: "0"}, '0': {text: "0"}
+
+      describe "1-9 and small-delete(-) register", ->
+        beforeEach ->
+          set textC: "|0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"
+
+        it "keep deleted text", ->
+          ensure "d d",
+            textC:  "|1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"
+            register:
+              '"': {text: '0\n'},     '-': {text: undefined},
+              '1': {text: '0\n'},     '2': {text: undefined}, '3': {text: undefined},
+              '4': {text: undefined}, '5': {text: undefined}, '6': {text: undefined},
+              '7': {text: undefined}, '8': {text: undefined}, '9': {text: undefined},
+          ensure ".",
+            textC:  "|2\n3\n4\n5\n6\n7\n8\n9\n10\n"
+            register:
+              '"': {text: '1\n'},     '-': {text: undefined},
+              '1': {text: '1\n'},     '2': {text: '0\n'}, '3': {text: undefined},
+              '4': {text: undefined}, '5': {text: undefined}, '6': {text: undefined},
+              '7': {text: undefined}, '8': {text: undefined}, '9': {text: undefined},
+          ensure ".",
+            textC:  "|3\n4\n5\n6\n7\n8\n9\n10\n"
+            register:
+              '"': {text: '2\n'}, '-': {text: undefined},
+              '1': {text: '2\n'}, '2': {text: '1\n'}, '3': {text: '0\n'},
+              '4': {text: undefined}, '5': {text: undefined}, '6': {text: undefined},
+              '7': {text: undefined}, '8': {text: undefined}, '9': {text: undefined},
+          ensure ".",
+            textC:  "|4\n5\n6\n7\n8\n9\n10\n"
+            register:
+              '"': {text: '3\n'}, '-': {text: undefined},
+              '1': {text: '3\n'}, '2': {text: '2\n'}, '3': {text: '1\n'},
+              '4': {text: '0\n'}, '5': {text: undefined}, '6': {text: undefined},
+              '7': {text: undefined}, '8': {text: undefined}, '9': {text: undefined},
+          ensure ".",
+            textC:  "|5\n6\n7\n8\n9\n10\n"
+            register:
+              '"': {text: '4\n'}, '-': {text: undefined},
+              '1': {text: '4\n'},     '2': {text: '3\n'},     '3': {text: '2\n'},
+              '4': {text: '1\n'},     '5': {text: '0\n'},     '6': {text: undefined},
+              '7': {text: undefined}, '8': {text: undefined}, '9': {text: undefined},
+          ensure ".",
+            textC:  "|6\n7\n8\n9\n10\n"
+            register:
+              '"': {text: '5\n'}, '-': {text: undefined},
+              '1': {text: '5\n'},     '2': {text: '4\n'},     '3': {text: '3\n'},
+              '4': {text: '2\n'},     '5': {text: '1\n'},     '6': {text: '0\n'},
+              '7': {text: undefined}, '8': {text: undefined}, '9': {text: undefined},
+          ensure ".",
+            textC:  "|7\n8\n9\n10\n"
+            register:
+              '"': {text: '6\n'}, '-': {text: undefined},
+              '1': {text: '6\n'}, '2': {text: '5\n'},     '3': {text: '4\n'},
+              '4': {text: '3\n'}, '5': {text: '2\n'},     '6': {text: '1\n'},
+              '7': {text: '0\n'}, '8': {text: undefined}, '9': {text: undefined},
+          ensure ".",
+            textC:  "|8\n9\n10\n"
+            register:
+              '"': {text: '7\n'}, '-': {text: undefined},
+              '1': {text: '7\n'}, '2': {text: '6\n'}, '3': {text: '5\n'},
+              '4': {text: '4\n'}, '5': {text: '3\n'}, '6': {text: '2\n'},
+              '7': {text: '1\n'}, '8': {text: '0\n'}, '9': {text: undefined},
+          ensure ".",
+            textC:  "|9\n10\n"
+            register:
+              '"': {text: '8\n'}, '-': {text: undefined},
+              '1': {text: '8\n'}, '2': {text: '7\n'}, '3': {text: '6\n'},
+              '4': {text: '5\n'}, '5': {text: '4\n'}, '6': {text: '3\n'},
+              '7': {text: '2\n'}, '8': {text: '1\n'}, '9': {text: '0\n'},
+          ensure ".",
+            textC:  "|10\n"
+            register:
+              '"': {text: '9\n'}, '-': {text: undefined},
+              '1': {text: '9\n'}, '2': {text: '8\n'}, '3': {text: '7\n'},
+              '4': {text: '6\n'}, '5': {text: '5\n'}, '6': {text: '4\n'},
+              '7': {text: '3\n'}, '8': {text: '2\n'}, '9': {text: '1\n'}
+        it "also keeps changed text", ->
+          ensure "c j",
+            textC:  "|\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"
+            register:
+              '"': {text: '0\n1\n'}, '-': {text: undefined},
+              '1': {text: '0\n1\n'}, '2': {text: undefined}, '3': {text: undefined},
+              '4': {text: undefined}, '5': {text: undefined}, '6': {text: undefined},
+              '7': {text: undefined}, '8': {text: undefined}, '9': {text: undefined},
+
+        describe "which goes to numbered and which goes to small-delete register", ->
+          beforeEach ->
+            set textC: "|{abc}\n"
+
+          it "small-change goes to - register", ->
+            ensure "c $",
+              textC: "|\n"
+              register:
+                '"': {text: '{abc}'}, '-': {text: '{abc}'},
+                '1': {text: undefined}, '2': {text: undefined}, '3': {text: undefined},
+                '4': {text: undefined}, '5': {text: undefined}, '6': {text: undefined},
+                '7': {text: undefined}, '8': {text: undefined}, '9': {text: undefined},
+          it "small-delete goes to - register", ->
+            ensure "d $",
+              textC: "|\n"
+              register:
+                '"': {text: '{abc}'}, '-': {text: '{abc}'},
+                '1': {text: undefined}, '2': {text: undefined}, '3': {text: undefined},
+                '4': {text: undefined}, '5': {text: undefined}, '6': {text: undefined},
+                '7': {text: undefined}, '8': {text: undefined}, '9': {text: undefined},
+          it "[exception] % motion always save to numbered", ->
+            set textC: "|{abc}\n"
+            ensure "d %", textC: "|\n", register: {'"': {text: '{abc}'}, '-': {text: undefined}, '1': {text: '{abc}'}, '2': {text: undefined}}
+          it "[exception] / motion always save to numbered", ->
+            jasmine.attachToDOM(atom.workspace.getElement())
+            set textC: "|{abc}\n"
+            ensure "d / } enter",
+              textC: "|}\n",
+              register: {'"': {text: '{abc'}, '-': {text: undefined}, '1': {text: '{abc'}, '2': {text: undefined}}
+
+          it "/, n motion always save to numbered", ->
+            jasmine.attachToDOM(atom.workspace.getElement())
+            set textC: "|abc axx abc\n"
+            ensure "d / a enter",
+              textC: "|axx abc\n",
+              register: {'"': {text: 'abc '}, '-': {text: undefined}, '1': {text: 'abc '}, '2': {text: undefined}}
+            ensure "d n",
+              textC: "|abc\n",
+              register: {'"': {text: 'axx '}, '-': {text: undefined}, '1': {text: 'axx '}, '2': {text: 'abc '}}
+          it "?, N motion always save to numbered", ->
+            jasmine.attachToDOM(atom.workspace.getElement())
+            set textC: "abc axx |abc\n"
+            ensure "d ? a enter",
+              textC: "abc |abc\n",
+              register: {'"': {text: 'axx '}, '-': {text: undefined}, '1': {text: 'axx '}, '2': {text: undefined}}
+            ensure "0",
+              textC: "|abc abc\n",
+            ensure "c N",
+              textC: "|abc\n",
+              register: {'"': {text: 'abc '}, '-': {text: undefined}, '1': {text: 'abc '}, '2': {text: "axx "}}
+
     describe "the ctrl-r command in insert mode", ->
       beforeEach ->
         set register: '"': text: '345'
