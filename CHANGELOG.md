@@ -1,18 +1,16 @@
-# 1.4.0: WIP
+# 1.4.0:
 - New: Numbered register(`0-9`) and small delete register(`-`). #871
   - When are they updated?
     - `0` is for yank, `1-9` is for `change` and `delete`.
     - `-` is for small `change` and `delete`, what `small` means is "content is less-than-one-line".
   - Currently no command to display register's content
     - Package author can access register by `vimState.register.get(REGISTER_NAME)`.
-- Fix: `f`, `r` doesn't work correctly when user modified `.plain.text` grammar. #869
-  - This issue only happen when user set `.plain.text` grammar to have `softWrap = true` and `softWrapHangingIndent > 1`.
-- Internal: Cleanup RegisterManager code to reduce my confusion.
-- New: SequentialPaste for `p`, `P` and `replace-with-register`.
+- Fix: `f`, `r` did not work correctly when user modified `.plain.text` grammar. #869
+  - This issue only happens when user set `.plain.text` grammar to have `softWrap` to `true` and `softWrapHangingIndent` to non-zero value.
+- New, Experimental: SequentialPaste for `p`, `P` and `replace-with-register`.
   - Unnamed register(`"`) maintain history at maximum `sequentialPasteMaxHistory`.
   - When user execute `p` sequentially, it pop content from older history.
   - Intended to be used as lazy quick escape hatch from very recent unwanted register mutation.
-    - Not intended to enhance into pick from select-list. Use `clipboard-plus` in that case.
   - New configuration to control this new feature.
     - Config: `sequentialPaste`(default `false`) when enabled, pop history on sequential paste by `p`, `P`, and `replace-with-register`.
     - Config: `sequentialPasteMaxHistory`(default `3`). maintain history specified this value.
@@ -48,6 +46,7 @@
   - Following behavioral change is noticeable only when user create multiple `preset-occurrence` for different word.
     - old: `tab`, `shift-tab` visit `preset-occurrence` in created order.
     - new: `tab`, `shift-tab` visit `preset-occurrence` in ordered by buffer position.
+- Internal: Cleanup RegisterManager code to reduce my confusion.
 
 # 1.3.3:
 - Improve: highlight-find-char now highlight unconfirmed-current-match differently( with thicker border ).
