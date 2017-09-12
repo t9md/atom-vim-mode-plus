@@ -346,14 +346,10 @@ class ReplaceWithRegister extends TransformString
   flashType: 'operator-long'
 
   initialize: ->
-    @sequentialPaste = @vimState.sequentialPasteManager.isSequentialPaste(this)
-    if @sequentialPaste
-      @target = "LastPastedRange"
+    @vimState.sequentialPasteManager.onInitialize(this)
 
   execute: ->
-    if @repeated
-      @sequentialPaste = @vimState.sequentialPasteManager.isSequentialPaste(this)
-    @vimState.sequentialPasteManager.start(this, @sequentialPaste)
+    @sequentialPaste = @vimState.sequentialPasteManager.onExecute(this)
 
     super
 

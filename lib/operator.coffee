@@ -547,15 +547,11 @@ class PutBefore extends Operator
   trackChange: false # manage manually
 
   initialize: ->
-    @sequentialPaste = @vimState.sequentialPasteManager.isSequentialPaste(this)
-    if @sequentialPaste
-      @target = "LastPastedRange"
+    @vimState.sequentialPasteManager.onInitialize(this)
 
   execute: ->
     @mutationsBySelection = new Map()
-    if @repeated
-      @sequentialPaste = @vimState.sequentialPasteManager.isSequentialPaste(this)
-    @vimState.sequentialPasteManager.start(this)
+    @sequentialPaste = @vimState.sequentialPasteManager.onExecute(this)
 
     @onDidFinishMutation =>
       @adjustCursorPosition() unless @cancelled
