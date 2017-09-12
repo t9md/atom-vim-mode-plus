@@ -349,16 +349,19 @@ class ReplaceWithRegister extends TransformString
   flashType: 'operator-long'
 
   initialize: ->
-    @pasteFromHistory = @vimState.sequentialPasteManager.isSequentialPaste(this)
-    if @pasteFromHistory
+    @sequentialPaste = @vimState.sequentialPasteManager.isSequentialPaste(this)
+    if @sequentialPaste
       @target = "LastPastedRange"
 
   execute: ->
-    @vimState.sequentialPasteManager.start(@pasteFromHistory)
+    if @repeated
+      @sequentialPaste = @vimState.sequentialPasteManager.isSequentialPaste(this)
+    @vimState.sequentialPasteManager.start(this, @sequentialPaste)
+
     super
 
   getNewText: (text, selection) ->
-    @vimState.register.get(null, selection, @pasteFromHistory)?.text ? ""
+    @vimState.register.get(null, selection, @sequentialPaste)?.text ? ""
 
 # Save text to register before replace
 class SwapWithRegister extends TransformString

@@ -547,13 +547,16 @@ class PutBefore extends Operator
   trackChange: false # manage manually
 
   initialize: ->
-    @pasteFromHistory = @vimState.sequentialPasteManager.isSequentialPaste(this)
-    if @pasteFromHistory
+    @sequentialPaste = @vimState.sequentialPasteManager.isSequentialPaste(this)
+    if @sequentialPaste
       @target = "LastPastedRange"
 
   execute: ->
     @mutationsBySelection = new Map()
-    @vimState.sequentialPasteManager.start(@pasteFromHistory)
+    if @repeated
+      @sequentialPaste = @vimState.sequentialPasteManager.isSequentialPaste(this)
+    @vimState.sequentialPasteManager.start(this)
+
     @onDidFinishMutation =>
       @adjustCursorPosition() unless @cancelled
 
@@ -584,7 +587,7 @@ class PutBefore extends Operator
           cursor.setBufferPosition(start)
 
   mutateSelection: (selection) ->
-    {text, type} = @vimState.register.get(null, selection, @pasteFromHistory)
+    {text, type} = @vimState.register.get(null, selection, @sequentialPaste)
     unless text
       @cancelled = true
       return
@@ -596,7 +599,7 @@ class PutBefore extends Operator
     @vimState.sequentialPasteManager.savePastedRangeForSelection(selection, newRange)
 
   paste: (selection, text, {linewisePaste}) ->
-    if @pasteFromHistory
+    if @sequentialPaste
       @pasteCharacterwise(selection, text)
     else if linewisePaste
       @pasteLinewise(selection, text)
