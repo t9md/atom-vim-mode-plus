@@ -35,9 +35,6 @@ class TransformString extends Operator
         startRowIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
       range = selection.insertText(text, {@autoIndent, @autoIndentNewline})
 
-      if @name is "ReplaceWithRegister"
-        @vimState.sequentialPasteManager.savePastedRangeForSelection(selection, range)
-
       if @autoIndentAfterInsertText
         # Currently used by SplitArguments and Surround( linewise target only )
         range = range.translate([0, 0], [-1, 0]) if @target.isLinewise()
@@ -359,6 +356,10 @@ class ReplaceWithRegister extends TransformString
     @vimState.sequentialPasteManager.start(this, @sequentialPaste)
 
     super
+
+    for selection in @editor.getSelections()
+      range = @mutationManager.getMutatedBufferRangeForSelection(selection)
+      @vimState.sequentialPasteManager.savePastedRangeForSelection(selection, range)
 
   getNewText: (text, selection) ->
     @vimState.register.get(null, selection, @sequentialPaste)?.text ? ""
