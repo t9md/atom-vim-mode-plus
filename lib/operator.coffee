@@ -448,7 +448,13 @@ class Yank extends Operator
   stayOptionName: 'stayOnYank'
 
   mutateSelection: (selection) ->
-    @setTextToRegisterForSelection(selection)
+    @setTextToRegister(selection.getText(), selection)
+
+  setTextToRegister: (text, selection) ->
+    text += "\n" if (@target.isLinewise() and (not text.endsWith('\n')))
+    if text
+      @vimState.register.set(null, {text, selection})
+      @vimState.register.set('0', {text, selection}) if @vimState.register.isUnnamed()
 
 class YankLine extends Yank
   @extend()
