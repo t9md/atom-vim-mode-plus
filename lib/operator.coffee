@@ -198,16 +198,16 @@ class Operator extends Base
       @vimState.register.set(null, {text, selection})
 
       if @vimState.register.isUnnamed()
-        if @instanceOf("Delete") or @instanceOf("Change")
-          if not @shouldSaveToNumberedRegister(@target) and isSingleLineText(text) # small-change
+        if @instanceof("Delete") or @instanceof("Change")
+          if not @needSaveToNumberedRegister(@target) and isSingleLineText(text) # small-change
             @vimState.register.set('-', {text, selection})
           else
             @vimState.register.set('1', {text, selection})
 
-        else if @instanceOf("Yank")
+        else if @instanceof("Yank")
           @vimState.register.set('0', {text, selection})
 
-  targetShouldSaveToNumberedRegister: (target) ->
+  needSaveToNumberedRegister: (target) ->
     # Used to determine what register to use on change and delete operation.
     # Following motion should save to 1-9 register regerdless of content is small or big.
     goesToNumberedRegisterMotionNames = [
