@@ -34,6 +34,7 @@ class TransformString extends Operator
         startRow = selection.getBufferRange().start.row
         startRowIndentLevel = getIndentLevelForBufferRow(@editor, startRow)
       range = selection.insertText(text, {@autoIndent, @autoIndentNewline})
+
       if @autoIndentAfterInsertText
         # Currently used by SplitArguments and Surround( linewise target only )
         range = range.translate([0, 0], [-1, 0]) if @target.isLinewise()
@@ -342,8 +343,22 @@ class TransformSmartWordBySelectList extends TransformStringBySelectList
 class ReplaceWithRegister extends TransformString
   @extend()
   @description: "Replace target with specified register value"
-  getNewText: (text) ->
-    @vimState.register.getText()
+  flashType: 'operator-long'
+
+  initialize: ->
+    @vimState.sequentialPasteManager.onInitialize(this)
+
+  execute: ->
+    @sequentialPaste = @vimState.sequentialPasteManager.onExecute(this)
+
+    super
+
+    for selection in @editor.getSelections()
+      range = @mutationManager.getMutatedBufferRangeForSelection(selection)
+      @vimState.sequentialPasteManager.savePastedRangeForSelection(selection, range)
+
+  getNewText: (text, selection) ->
+    @vimState.register.get(null, selection, @sequentialPaste)?.text ? ""
 
 # Save text to register before replace
 class SwapWithRegister extends TransformString

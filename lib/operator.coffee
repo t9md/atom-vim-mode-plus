@@ -543,14 +543,22 @@ class PutBefore extends Operator
   target: 'Empty'
   flashType: 'operator-long'
   restorePositions: false # manage manually
-  flashTarget: true # manage manually
+  flashTarget: false # manage manually
   trackChange: false # manage manually
+
+  initialize: ->
+    @vimState.sequentialPasteManager.onInitialize(this)
 
   execute: ->
     @mutationsBySelection = new Map()
-    {text, type} = @vimState.register.get(null, @editor.getLastSelection())
-    return unless text
-    @onDidFinishMutation(@adjustCursorPosition.bind(this))
+    @sequentialPaste = @vimState.sequentialPasteManager.onExecute(this)
+
+    @onDidFinishMutation =>
+      @adjustCursorPosition() unless @cancelled
+
+    super
+
+    return if @cancelled
 
     @onDidFinishOperation =>
       # TrackChange
@@ -561,8 +569,6 @@ class PutBefore extends Operator
       if @getConfig('flashOnOperate') and @name not in @getConfig('flashOnOperateBlacklist')
         toRange = (selection) => @mutationsBySelection.get(selection)
         @vimState.flash(@editor.getSelections().map(toRange), type: @getFlashType())
-
-    super
 
   adjustCursorPosition: ->
     for selection in @editor.getSelections() when @mutationsBySelection.has(selection)
@@ -577,14 +583,21 @@ class PutBefore extends Operator
           cursor.setBufferPosition(start)
 
   mutateSelection: (selection) ->
-    {text, type} = @vimState.register.get(null, selection)
+    {text, type} = @vimState.register.get(null, selection, @sequentialPaste)
+    unless text
+      @cancelled = true
+      return
+
     text = _.multiplyString(text, @getCount())
     @linewisePaste = type is 'linewise' or @isMode('visual', 'linewise')
     newRange = @paste(selection, text, {@linewisePaste})
     @mutationsBySelection.set(selection, newRange)
+    @vimState.sequentialPasteManager.savePastedRangeForSelection(selection, newRange)
 
   paste: (selection, text, {linewisePaste}) ->
-    if linewisePaste
+    if @sequentialPaste
+      @pasteCharacterwise(selection, text)
+    else if linewisePaste
       @pasteLinewise(selection, text)
     else
       @pasteCharacterwise(selection, text)
@@ -600,20 +613,16 @@ class PutBefore extends Operator
     {cursor} = selection
     cursorRow = cursor.getBufferRow()
     text += "\n" unless text.endsWith("\n")
-    newRange = null
     if selection.isEmpty()
       if @location is 'before'
-        newRange = insertTextAtBufferPosition(@editor, [cursorRow, 0], text)
-        setBufferRow(cursor, newRange.start.row)
+        insertTextAtBufferPosition(@editor, [cursorRow, 0], text)
       else if @location is 'after'
         targetRow = @getFoldEndRowForRow(cursorRow)
         ensureEndsWithNewLineForBufferRow(@editor, targetRow)
-        newRange = insertTextAtBufferPosition(@editor, [targetRow + 1, 0], text)
+        insertTextAtBufferPosition(@editor, [targetRow + 1, 0], text)
     else
       selection.insertText("\n") unless @isMode('visual', 'linewise')
-      newRange = selection.insertText(text)
-
-    return newRange
+      selection.insertText(text)
 
 class PutAfter extends PutBefore
   @extend()
