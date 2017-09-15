@@ -1,3 +1,17 @@
+# 1.5.0:
+- Improve, Fix: Reconcile visual-mode with outer-vmp command in better way(my hope!) #878
+  - Fix #874: `cmd-d`(`find-and-replace:select-next`) in normal mode respect `SelectNext#wordSelected` state for `find-and-replace`.
+    - Behavior diff with text = `atom atomic atom`
+      - Old: `cmd-d cmd-d` select 1st and 2nd `atom`. Here, `atom` of `atomic` is selected, bad!.
+      - New: `cmd-d cmd-d` select 1st and 3rd `atom`.
+  - Fix: #873 Now whenever outer-vmp command modify selection, vmp starts `visual-mode` accordingly.
+    - How vmp handle temporal selection modification done in single-command?
+    - When outer-vmp command select some range(1) and clear(2) within single-command.
+    - Vmp start `visual-mode` at (1), then reset to `normal-mode` at (2).
+    - This is NOT elegant solution, but there is no other better way.
+    - We cannot determine selection is eventually cleared or not within `editor.onDidChangeSelectionRange` event.
+    - Delaying, debouncing to minimize useless mode-shift is bad for UX, user see slight delay for cursor updated.
+
 # 1.4.0:
 - New: Numbered register(`0-9`) and small delete register(`-`). #871
   - When are they updated?
