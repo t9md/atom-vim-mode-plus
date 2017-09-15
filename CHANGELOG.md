@@ -1,9 +1,15 @@
 # 1.5.0:
 - Improve, Fix: Reconcile visual-mode with outer-vmp command in better way(my hope!) #878
-  - Fix #874: `cmd-d`(`find-and-replace:select-next`) in normal mode respect `SelectNext#wordSelected` state for `find-and-replace`.
+  - This is ambitious and dangerous change.
+    - If success, lots of potential issue are fixed.
+    - But dangerous since it use more frequently called/used hook(`editor.onDidChangeSelectionRange`).
+      - I'm not 100% sure how this time change works well for ALL commands(by atom-core and by package).
+  - Fix: #874 `cmd-d`(`find-and-replace:select-next`) in normal mode respect `SelectNext#wordSelected` state for `find-and-replace`.
     - Behavior diff with text = `atom atomic atom`
       - Old: `cmd-d cmd-d` select 1st and 2nd `atom`. Here, `atom` of `atomic` is selected, bad!.
       - New: `cmd-d cmd-d` select 1st and 3rd `atom`.
+  - Fix: #872 `cmd-f`(`find-and-replace:show`), search word, confirm then `escape` to clear selection no longer reset cursor position to where `cmd-f` was started.
+    - This happens when `cmd-f` started with non-empty selection.
   - Fix: #873 Now whenever outer-vmp command modify selection, vmp starts `visual-mode` accordingly.
     - How vmp handle temporal selection modification done in single-command?
     - When outer-vmp command select some range(1) and clear(2) within single-command.
