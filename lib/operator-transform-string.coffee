@@ -405,8 +405,10 @@ class AutoIndent extends Indent
 
 class ToggleLineComments extends TransformString
   @extend()
+  flashTarget: false
   stayByMarker: true
   wise: 'linewise'
+
   mutateSelection: (selection) ->
     selection.toggleLineComments()
 

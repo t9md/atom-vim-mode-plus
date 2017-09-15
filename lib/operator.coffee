@@ -260,7 +260,8 @@ class Operator extends Base
     return @targetSelected if @targetSelected?
     @mutationManager.init({@stayByMarker})
 
-    @target.forceWise(@wise) if @wise?
+    boundWise = @wise
+    @target.forceWise(boundWise) if boundWise?
     @emitWillSelectTarget()
 
     # Allow cursor position adjustment 'on-will-select-target' hook.
@@ -282,8 +283,9 @@ class Operator extends Base
       # Here we save patterns which represent unioned regex which @occurrenceManager knows.
       @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
-      if @occurrenceManager.select()
+      if @occurrenceManager.select(boundWise)
         @occurrenceSelected = true
+        @occurrenceWise = boundWise ? "characterwise"
         @mutationManager.setCheckpoint('did-select-occurrence')
 
     if @targetSelected = @vimState.haveSomeNonEmptySelection() or @target.name is "Empty"
@@ -297,7 +299,7 @@ class Operator extends Base
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
     stay = @stayAtSamePosition ? @getConfig(@stayOptionName) or (@occurrenceSelected and @getConfig('stayOnOccurrence'))
-    wise = if @occurrenceSelected then 'characterwise' else @target.wise
+    wise = if @occurrenceSelected then @occurrenceWise else @target.wise
     @mutationManager.restoreCursorPositions({stay, wise, @setToFirstCharacterOnLinewise})
 
 # Select
@@ -462,6 +464,7 @@ class DeleteLine extends Delete
   @extend()
   wise: 'linewise'
   target: "MoveToRelativeLine"
+  flashTarget: false
 
 # Yank
 # =========================
