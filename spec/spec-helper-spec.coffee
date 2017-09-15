@@ -1,7 +1,7 @@
 {getVimState, dispatch, TextData, getView, withMockPlatform} = require './spec-helper'
 settings = require '../lib/settings'
 
-describe "min DSL used in vim-mode-plus's spec", ->
+describe "mini DSL used in vim-mode-plus's spec", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
@@ -49,7 +49,7 @@ describe "min DSL used in vim-mode-plus's spec", ->
 
   describe "multi-low, multi-cursor case", ->
     describe "without ! cursor", ->
-      it "last cursor become last one", ->
+      it "last | become last cursor", ->
         set
           textC: """
           |0: line0
@@ -60,7 +60,7 @@ describe "min DSL used in vim-mode-plus's spec", ->
         expect(editor.getLastCursor().getBufferPosition()).toEqual([1, 0])
 
     describe "with ! cursor", ->
-      it "last cursor become ! one", ->
+      it "! become last cursor", ->
         set textC: "|012|345|678"
         ensure textC: "|012|345|678"
         ensure cursor: [[0, 0], [0, 3], [0, 6]]

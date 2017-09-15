@@ -112,14 +112,13 @@ describe "Operator Increase", ->
       describe "visual-mode", ->
         beforeEach ->
           set
-            text: """
-              1 2 3
+            textC: """
+              1 |2 3
               1 2 3
               1 2 3
               1 2 3
               """
         it "increase number in characterwise selected range", ->
-          set cursor: [0, 2]
           ensure 'v 2 j ctrl-a',
             textC: """
               1 |3 4
