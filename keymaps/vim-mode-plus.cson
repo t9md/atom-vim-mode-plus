@@ -648,13 +648,15 @@
   # 'p': 'vim-mode-plus:swap-with-register'
   # 'P': 'vim-mode-plus:swap-with-register'
 
-# visual-blockwise
+# visual-characterwise
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.characterwise':
   'D': 'vim-mode-plus:delete-line'
   'C': 'vim-mode-plus:change-line'
   'Y': 'vim-mode-plus:yank-line'
 
+# visual-blockwise
+# -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.blockwise':
   'o': 'vim-mode-plus:blockwise-other-end'
   'O': 'vim-mode-plus:reverse-selections'
