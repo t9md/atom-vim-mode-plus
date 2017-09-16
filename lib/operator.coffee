@@ -260,8 +260,7 @@ class Operator extends Base
     return @targetSelected if @targetSelected?
     @mutationManager.init({@stayByMarker})
 
-    boundWise = @wise
-    @target.forceWise(boundWise) if boundWise?
+    @target.forceWise(@wise) if @wise?
     @emitWillSelectTarget()
 
     # Allow cursor position adjustment 'on-will-select-target' hook.
@@ -283,9 +282,9 @@ class Operator extends Base
       # Here we save patterns which represent unioned regex which @occurrenceManager knows.
       @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
-      if @occurrenceManager.select(boundWise)
+      @occurrenceWise = @wise ? "characterwise"
+      if @occurrenceManager.select(@occurrenceWise)
         @occurrenceSelected = true
-        @occurrenceWise = boundWise ? "characterwise"
         @mutationManager.setCheckpoint('did-select-occurrence')
 
     if @targetSelected = @vimState.haveSomeNonEmptySelection() or @target.name is "Empty"
