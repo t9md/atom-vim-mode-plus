@@ -641,6 +641,9 @@
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
   'enter': 'vim-mode-plus:create-persistent-selection'
+  'D': 'vim-mode-plus:delete-line'
+  'C': 'vim-mode-plus:change-line'
+  'Y': 'vim-mode-plus:yank-line'
 
 'atom-text-editor.vim-mode-plus.has-persistent-selection.normal-mode, atom-text-editor.vim-mode-plus.visual-mode':
   'I': 'vim-mode-plus:insert-at-start-of-target'
@@ -648,18 +651,13 @@
   # 'p': 'vim-mode-plus:swap-with-register'
   # 'P': 'vim-mode-plus:swap-with-register'
 
-# visual-characterwise
-# -------------------------
-'atom-text-editor.vim-mode-plus.visual-mode.characterwise':
-  'D': 'vim-mode-plus:delete-line'
-  'C': 'vim-mode-plus:change-line'
-  'Y': 'vim-mode-plus:yank-line'
-
 # visual-blockwise
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.blockwise':
   'o': 'vim-mode-plus:blockwise-other-end'
   'O': 'vim-mode-plus:reverse-selections'
+  'D': 'vim-mode-plus:delete-to-last-character-of-line'
+  'C': 'vim-mode-plus:change-to-last-character-of-line'
 
 # Input mini editor e.g. mark, surround, find, till.
 # -------------------------
