@@ -1,4 +1,4 @@
-# 1.6.0: Occurrence respects operator-bound-wise.
+# 1.6.0: Occurrence respects operator-bound-wise. [WIP]
 - Improve: `Linewise-bound-operator` now works `linewise` in `occurrence-operation`(formerly works as `characterwise`).
   - What's `occurrence-operation`?
     - Operation with `o` modifier(e.g. `c o f`) or operation with preset-occurrence(e.g. `g o c f`).
