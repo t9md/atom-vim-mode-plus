@@ -251,6 +251,10 @@ class InsertAtEndOfTarget extends InsertByTarget
   @extend()
   which: 'end'
 
+class InsertAtHeadOfTarget extends InsertByTarget
+  @extend()
+  which: 'head'
+
 class InsertAtStartOfOccurrence extends InsertByTarget
   @extend()
   which: 'start'

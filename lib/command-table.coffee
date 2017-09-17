@@ -159,6 +159,10 @@ InsertAtEndOfTarget:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-target"
   commandScope: "atom-text-editor"
+InsertAtHeadOfTarget:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-head-of-target"
+  commandScope: "atom-text-editor"
 InsertAtStartOfOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-occurrence"
