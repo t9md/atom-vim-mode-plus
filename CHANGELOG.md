@@ -1,4 +1,4 @@
-# 1.6.0: Occurrence respects operator-bound-wise.
+# 1.6.0: Occurrence respects operator-bound-wise. #879
 - Improve: `occurrence-operation` now aware of `operator-bound-wise`.
   - What's new in behavior
     - Old: `occurrence-operation` always works in `characterwise`.
@@ -6,7 +6,7 @@
   - What's `occurrence-operation` and `operator-bound-wise` ?
     - `occurrence-operation`: Operation with `o` modifier(e.g. `c o f`) or operation with preset-occurrence(e.g. `g o c f`).
     - `operator-bound-wise`: `D`, `C`, `Y` in `visual-mode` and `V` forced operation like `d V p`.
-  - Example
+  - Example(See also animation GIF in PR #879)
     - Assume non consecutive `console.log` lines scattered in function and you want to bulk appply operation **linewise-ly**.
     - First place cursor at `console` of `console.log`. Then you can do variety of operation linewise-ly.
     - `g o v i p D`: Mark occurrence(`g o`), select-paragraph(`v i p`), then `delete-line`(`D`).
