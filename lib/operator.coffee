@@ -432,8 +432,10 @@ class Delete extends Operator
   setToFirstCharacterOnLinewise: true
 
   execute: ->
-    if @target.wise is 'blockwise'
-      @restorePositions = false
+    @onDidSelectTarget =>
+      @flashTarget = false if (@occurrenceSelected and @occurrenceWise is "linewise")
+
+    @restorePositions = false  if @target.wise is 'blockwise'
     super
 
   mutateSelection: (selection) ->
