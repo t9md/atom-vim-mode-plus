@@ -1041,3 +1041,104 @@ describe "Occurrence", ->
       describe "add preset subword-occurrence", ->
         it "mark subword under cursor", ->
           ensure 'g O', occurrenceText: ['Case', 'Case', 'Case', 'Case']
+
+  describe "linewise-bound-operation in occurrence operation", ->
+    beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage("language-javascript")
+
+      runs ->
+        set
+          grammar: 'source.js'
+          textC: """
+          function hello(name) {
+            console.log("debug-1")
+            |console.log("debug-2")
+
+            const greeting = "hello"
+            console.log("debug-3")
+
+            console.log("debug-4, includ `console` word")
+            returrn name + " " + greeting
+          }
+          """
+
+    describe "with preset-occurrence", ->
+      it "works characterwise for `delete` operator", ->
+        ensure "g o v i f", mode: ['visual', 'linewise']
+        ensure "d",
+          textC: """
+          function hello(name) {
+            |.log("debug-1")
+            .log("debug-2")
+
+            const greeting = "hello"
+            .log("debug-3")
+
+            .log("debug-4, includ `` word")
+            returrn name + " " + greeting
+          }
+          """
+      it "works linewise for `delete-line` operator", ->
+        ensure "g o v i f D",
+          textC: """
+          function hello(name) {
+          |
+            const greeting = "hello"
+
+            returrn name + " " + greeting
+          }
+          """
+    describe "when specified both o and V operator-modifier", ->
+      it "delete `console` including line by `V` modifier", ->
+        ensure "d o V f",
+          textC: """
+          function hello(name) {
+          |
+            const greeting = "hello"
+
+            returrn name + " " + greeting
+          }
+          """
+      it "upper-case `console` including line by `V` modifier", ->
+        ensure "g U o V f",
+          textC: """
+          function hello(name) {
+            CONSOLE.LOG("DEBUG-1")
+            |CONSOLE.LOG("DEBUG-2")
+
+            const greeting = "hello"
+            CONSOLE.LOG("DEBUG-3")
+
+            CONSOLE.LOG("DEBUG-4, INCLUD `CONSOLE` WORD")
+            returrn name + " " + greeting
+          }
+          """
+    describe "with o operator-modifier", ->
+      it "toggle-line-comments of `occurrence` inclding **lines**", ->
+        ensure "g / o f",
+          textC: """
+          function hello(name) {
+            // console.log("debug-1")
+            // |console.log("debug-2")
+
+            const greeting = "hello"
+            // console.log("debug-3")
+
+            // console.log("debug-4, includ `console` word")
+            returrn name + " " + greeting
+          }
+          """
+        ensure '.',
+          textC: """
+          function hello(name) {
+            console.log("debug-1")
+            |console.log("debug-2")
+
+            const greeting = "hello"
+            console.log("debug-3")
+
+            console.log("debug-4, includ `console` word")
+            returrn name + " " + greeting
+          }
+          """

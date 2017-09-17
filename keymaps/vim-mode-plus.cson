@@ -130,10 +130,12 @@
   'c': 'vim-mode-plus:change'
   's': 'vim-mode-plus:substitute'
   'x': 'vim-mode-plus:delete-right' # to avoid `d x` is treated as `d d`
-  'D': 'vim-mode-plus:delete-line'
 
+  'D': 'vim-mode-plus:delete-to-last-character-of-line'
   'C': 'vim-mode-plus:change-to-last-character-of-line'
   'S': 'vim-mode-plus:substitute-line'
+  'Y': 'vim-mode-plus:yank-line'
+
   'r': 'vim-mode-plus:replace'
   'g o': 'vim-mode-plus:toggle-preset-occurrence'
   'g O': 'vim-mode-plus:toggle-preset-subword-occurrence'
@@ -147,7 +149,6 @@
   'J': 'vim-mode-plus:join'
   'g J': 'vim-mode-plus:join-with-keeping-space'
   'y': 'vim-mode-plus:yank'
-  'Y': 'vim-mode-plus:yank-line'
   'P': 'vim-mode-plus:put-before'
   'p': 'vim-mode-plus:put-after'
 
@@ -446,7 +447,6 @@
   'I': 'vim-mode-plus:insert-at-first-character-of-line'
   'A': 'vim-mode-plus:insert-after-end-of-line'
   'g i': 'vim-mode-plus:insert-at-last-insert'
-  'D': 'vim-mode-plus:delete-to-last-character-of-line'
 
   'R': 'vim-mode-plus:activate-replace-mode'
   'v': 'vim-mode-plus:activate-characterwise-visual-mode'
@@ -641,6 +641,9 @@
   'V': 'vim-mode-plus:activate-linewise-visual-mode'
   'ctrl-v': 'vim-mode-plus:activate-blockwise-visual-mode'
   'enter': 'vim-mode-plus:create-persistent-selection'
+  'D': 'vim-mode-plus:delete-line'
+  'C': 'vim-mode-plus:change-line'
+  'Y': 'vim-mode-plus:yank-line'
 
 'atom-text-editor.vim-mode-plus.has-persistent-selection.normal-mode, atom-text-editor.vim-mode-plus.visual-mode':
   'I': 'vim-mode-plus:insert-at-start-of-target'
@@ -648,17 +651,13 @@
   # 'p': 'vim-mode-plus:swap-with-register'
   # 'P': 'vim-mode-plus:swap-with-register'
 
-# visual-characterwise
-# -------------------------
-'atom-text-editor.vim-mode-plus.visual-mode.characterwise':
-  'C': 'vim-mode-plus:change-line'
-
 # visual-blockwise
 # -------------------------
 'atom-text-editor.vim-mode-plus.visual-mode.blockwise':
   'o': 'vim-mode-plus:blockwise-other-end'
   'O': 'vim-mode-plus:reverse-selections'
-  'D': 'vim-mode-plus:delete-to-last-character-of-line' # To avoid overridden by delete-line in visual-mode
+  'D': 'vim-mode-plus:delete-to-last-character-of-line'
+  'C': 'vim-mode-plus:change-to-last-character-of-line'
 
 # Input mini editor e.g. mark, surround, find, till.
 # -------------------------

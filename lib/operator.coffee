@@ -282,7 +282,8 @@ class Operator extends Base
       # Here we save patterns which represent unioned regex which @occurrenceManager knows.
       @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
-      if @occurrenceManager.select()
+      @occurrenceWise = @wise ? "characterwise"
+      if @occurrenceManager.select(@occurrenceWise)
         @occurrenceSelected = true
         @mutationManager.setCheckpoint('did-select-occurrence')
 
@@ -297,7 +298,7 @@ class Operator extends Base
   restoreCursorPositionsIfNecessary: ->
     return unless @restorePositions
     stay = @stayAtSamePosition ? @getConfig(@stayOptionName) or (@occurrenceSelected and @getConfig('stayOnOccurrence'))
-    wise = if @occurrenceSelected then 'characterwise' else @target.wise
+    wise = if @occurrenceSelected then @occurrenceWise else @target.wise
     @mutationManager.restoreCursorPositions({stay, wise, @setToFirstCharacterOnLinewise})
 
 # Select
@@ -431,8 +432,10 @@ class Delete extends Operator
   setToFirstCharacterOnLinewise: true
 
   execute: ->
-    if @target.wise is 'blockwise'
-      @restorePositions = false
+    @onDidSelectTarget =>
+      @flashTarget = false if (@occurrenceSelected and @occurrenceWise is "linewise")
+
+    @restorePositions = false  if @target.wise is 'blockwise'
     super
 
   mutateSelection: (selection) ->
@@ -462,6 +465,7 @@ class DeleteLine extends Delete
   @extend()
   wise: 'linewise'
   target: "MoveToRelativeLine"
+  flashTarget: false
 
 # Yank
 # =========================
