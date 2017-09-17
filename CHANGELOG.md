@@ -1,3 +1,44 @@
+# 1.6.0: Occurrence respects operator-bound-wise.
+- Improve: `Linewise-bound-operator` now works `linewise` in `occurrence-operation`(formerly works as `characterwise`).
+  - What's `occurrence-operation`?
+    - Operation with `o` modifier(e.g. `c o f`) or operation with preset-occurrence(e.g. `g o c f`).
+  - What's `linewise-bound-operator`?
+    - In `visual-mode`, `D`, `C`, `Y` works as linewise regardless of`visual-mode`'s wise.
+  - Example
+    - Delete `console` word including **lines**
+      1. Place cursor at `console`.
+      2. `g o v i p D`
+        - `g o`: mark `console` as preset-occurrence by
+        - `v i p`: start `visual-mode` then select paragraph by `i p`.
+        - `D`: `delete-line` delete all `console` word including lines(you can still use `d` if you want to delete occurrence only.)
+    - Toggle-line-comment for `console` word including **lines**
+      1. Place cursor at `console`.
+      2. `g / o p`
+        - `g /`: start `vim-mode-plus:toggle-line-comments` operator.
+        - `o`: set `o`(occurrence) modifier.
+        - `p`: specify `inner-paragraph`(here `p` is short hand of `i p`). Now all `console` including lines are commented out.
+    - Upper case for `console` including **lines**.
+      1. Place cursor at `console`.
+      2. `g U o V p` or `g U V o p`
+        - `g U`: start `vim-mode-plus:upper-case` operator.
+        - `o`: set `o`(occurrence) modifier.
+        - `V`: set `V` modifier, which force wise to `linewise`.
+        - `p`: specify `inner-paragraph`. Now all `console` including **lines** are upper-cased.
+  - Theoretical background:
+    - Most operator have no wise in operator, in this case operation's wise is determined by target(motion or text-object).
+    - Some exceptional operator have wise in operator level, in this case, operation's wise is forced to this pre-bound wise.
+    - `linewise-bound-operator` is operator which wise is bound to `linewise`.
+    - When `V` operator-modifier is used in operation, it's one-time linewise-bound-operation which forces operation's wise to `linewise`.
+  - Behavioral diff
+    - Old: all `occurrence-operation` works as `characterwise`.
+    - New: `linewise-bound-operator` works `linewise`.
+  - Takeout
+    - Some operators(e.g. `C`, `Y`, `D`, `g /`, `>`, `<` etc) have pre-bound to `linewise`.
+    - `linewise-pre-bound-operator` works for lines(= `linewise`) in `occurrence-operation`.
+    - You can force wise to `linewise` by `V` operator-modifier in `occurrence-operation`, for normal operator.
+    - Also remember you can distinguish [`c` and `C`], [`y` and `Y`], [`d` and `D`] in `visual-linewise` mode.
+      - Use capital letter version(`C`, `Y`, `D`) if you want `linewise` behavior.
+
 # 1.5.0: Reconcile visual-mode with outer-vmp command in better way. #878
 - Summary: This is ambitious and dangerous change.
   - If success, lots of potential issue would be fixed.
