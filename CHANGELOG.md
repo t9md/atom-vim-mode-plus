@@ -1,43 +1,31 @@
-# 1.6.0: Occurrence respects operator-bound-wise. [WIP]
-- Improve: `Linewise-bound-operator` now works `linewise` in `occurrence-operation`(formerly works as `characterwise`).
-  - What's `occurrence-operation`?
-    - Operation with `o` modifier(e.g. `c o f`) or operation with preset-occurrence(e.g. `g o c f`).
-  - What's `linewise-bound-operator`?
-    - In `visual-mode`, `D`, `C`, `Y` works as linewise regardless of`visual-mode`'s wise.
+# 1.6.0: Occurrence respects operator-bound-wise.
+- Improve: `occurrence-operation` now aware of `operator-bound-wise`.
+  - What's new in behavior
+    - Old: `occurrence-operation` always works in `characterwise`.
+    - New: If wise is forced by `V` modifier or operator is pre-bound to `linewise`, it works in `linewise`.
+  - What's `occurrence-operation` and `operator-bound-wise` ?
+    - `occurrence-operation`: Operation with `o` modifier(e.g. `c o f`) or operation with preset-occurrence(e.g. `g o c f`).
+    - `operator-bound-wise`: `D`, `C`, `Y` in `visual-mode` and `V` forced operation like `d V p`.
   - Example
-    - Delete `console` word including **lines**
-      1. Place cursor at `console`.
-      2. `g o v i p D`
-        - `g o`: mark `console` as preset-occurrence by
-        - `v i p`: start `visual-mode` then select paragraph by `i p`.
-        - `D`: `delete-line` delete all `console` word including lines(you can still use `d` if you want to delete occurrence only.)
-    - Toggle-line-comment for `console` word including **lines**
-      1. Place cursor at `console`.
-      2. `g / o p`
-        - `g /`: start `vim-mode-plus:toggle-line-comments` operator.
-        - `o`: set `o`(occurrence) modifier.
-        - `p`: specify `inner-paragraph`(here `p` is short hand of `i p`). Now all `console` including lines are commented out.
-    - Upper case for `console` including **lines**.
-      1. Place cursor at `console`.
-      2. `g U o V p` or `g U V o p`
-        - `g U`: start `vim-mode-plus:upper-case` operator.
-        - `o`: set `o`(occurrence) modifier.
-        - `V`: set `V` modifier, which force wise to `linewise`.
-        - `p`: specify `inner-paragraph`. Now all `console` including **lines** are upper-cased.
-  - Theoretical background:
-    - Most operator have no wise in operator, in this case operation's wise is determined by target(motion or text-object).
-    - Some exceptional operator have wise in operator level, in this case, operation's wise is forced to this pre-bound wise.
-    - `linewise-bound-operator` is operator which wise is bound to `linewise`.
-    - When `V` operator-modifier is used in operation, it's one-time linewise-bound-operation which forces operation's wise to `linewise`.
-  - Behavioral diff
-    - Old: all `occurrence-operation` works as `characterwise`.
-    - New: `linewise-bound-operator` works `linewise`.
+    - Assume non consecutive `console.log` lines scattered in function and you want to bulk appply operation **linewise-ly**.
+    - First place cursor at `console` of `console.log`. Then you can do variety of operation linewise-ly.
+    - `g o v i p D`: Mark occurrence(`g o`), select-paragraph(`v i p`), then `delete-line`(`D`).
+    - `g / o p`: `toggle-line-comments`(`g /`) for `occurrence`(`o`) in paragraph(`p`).
+    - `g U o V p` or `g U V o p`: `upper-case`(`g U`) for `occurrence`(`o`) with force linewise(`V`) in paragraph(`p`).
+  - How this works?
+    - Most operator doesn't have wise in operator-level, in this case operation's wise is determined by target(motion or text-object).
+    - When `V` operator-modifier or `wise-bound-operator` is used, operation's wise is forced to this bound wise.
+    - When `occurrence-operation` is forced `linewise`, it total steps is here.
+      1. Select target(1)
+      2. select occurrences contains in (1)
+      3. range > select linwisely and merge selections with immediately adjacent row.
   - Takeout
     - Some operators(e.g. `C`, `Y`, `D`, `g /`, `>`, `<` etc) have pre-bound to `linewise`.
-    - `linewise-pre-bound-operator` works for lines(= `linewise`) in `occurrence-operation`.
-    - You can force wise to `linewise` by `V` operator-modifier in `occurrence-operation`, for normal operator.
+      - When you use these operation with `o` or `g o`, it works as `linewise`.
+    - You can force wise to `linewise` by `V` operator-modifier, in this case occurrence-operation also works `linewise`.
     - Also remember you can distinguish [`c` and `C`], [`y` and `Y`], [`d` and `D`] in `visual-linewise` mode.
-      - Use capital letter version(`C`, `Y`, `D`) if you want `linewise` behavior.
+      - Use lower letter(`c`, `y`, `d`) if you want `characterwise` behavior.
+      - Use capital letter(`c`, `y`, `d`) if you want `linewise` behavior.
 
 # 1.5.0: Reconcile visual-mode with outer-vmp command in better way. #878
 - Summary: This is ambitious and dangerous change.
