@@ -1,9 +1,11 @@
 # 1.6.0: Occurrence respects operator-bound-wise. #879
 - Improve: `occurrence-operation` now aware of `operator-bound-wise`.
-  - What's new in behavior
-    - Old: `occurrence-operation` always works in `characterwise`.
-    - New: If wise is forced by `V` modifier or operator is pre-bound to `linewise`, it works in `linewise`.
-  - What's `occurrence-operation` and `operator-bound-wise` ?
+  - Behavior diff: Diff appears in `occurrence-operation`.
+    - Old: Always worked as `characterwise`.
+    - New: Works as `linewise` when
+      - `V` operator-modifier is used.
+      - `linewise-bound-operator`(e.g. `g /`, `>` in `normal-mode`, `D`, `Y` in `visual-mode` etc) is used.
+  - What is `occurrence-operation` and `operator-bound-wise` ?
     - `occurrence-operation`: Operation with `o` modifier(e.g. `c o f`) or operation with preset-occurrence(e.g. `g o c f`).
     - `operator-bound-wise`: `D`, `C`, `Y` in `visual-mode` and `V` forced operation like `d V p`.
   - Example(See also animation GIF in PR #879)
