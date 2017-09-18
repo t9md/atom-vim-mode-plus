@@ -1,3 +1,6 @@
+# 1.x.x: WIP
+- Fix: `f escape f` no longer throw exception when `reuseFindForRepeatFind` was enabled #883
+
 # 1.6.0: Occurrence respects operator-bound-wise. #879
 - Improve: `occurrence-operation` now aware of `operator-bound-wise`.
   - Behavior diff: Diff appears in `occurrence-operation`.
