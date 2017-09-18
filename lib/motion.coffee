@@ -941,8 +941,10 @@ class Find extends Motion
       @count = index + 1
 
   repeatIfNecessary: ->
-    if @vimState.operationStack.getLastCommandName() in ["Find", "FindBackwards", "Till", "TillBackwards"]
-      @input = @vimState.globalState.get("currentFind").input
+    currentFind = @vimState.globalState.get("currentFind")
+    isSequentialExecution = @vimState.operationStack.getLastCommandName() in ["Find", "FindBackwards", "Till", "TillBackwards"]
+    if currentFind? and isSequentialExecution
+      @input = currentFind.input
       @repeated = true
 
   isBackwards: ->

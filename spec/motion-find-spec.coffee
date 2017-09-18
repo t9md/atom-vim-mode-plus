@@ -334,6 +334,13 @@ describe "Motion Find", ->
         ensure "T",   textC: "    A    ab    a|    Ab    a"
         ensure "T",   textC: "    A    a|b    a    Ab    a"
 
+      it "behave as normal f if no successful previous find was exists", ->
+        set                textC: "  |  A    ab    a    Ab    a"
+        ensure "f escape", textC: "  |  A    ab    a    Ab    a"
+        expect(vimState.globalState.get("currentFind")).toBeNull()
+        ensure "f a",      textC: "    A    |ab    a    Ab    a"
+        expect(vimState.globalState.get("currentFind")).toBeTruthy()
+
     describe "findAcrossLines", ->
       beforeEach ->
         settings.set("findAcrossLines", true)
