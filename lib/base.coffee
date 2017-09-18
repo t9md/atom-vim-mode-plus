@@ -154,7 +154,7 @@ class Base
     new klass(vimState, properties)
 
   cancelOperation: ->
-    @vimState.operationStack.cancel()
+    @vimState.operationStack.cancel(this)
 
   processOperation: ->
     @vimState.operationStack.process()
