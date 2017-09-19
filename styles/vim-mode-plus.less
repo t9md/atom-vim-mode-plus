@@ -9,82 +9,62 @@
   opacity: 0.5;
 }
 
-.block-cursor(@visibility) {
+.block-cursor() {
   .cursor-base();
   background-color: @syntax-cursor-color;
-  visibility: @visibility;
+  visibility: visible;
 }
 
-.underline-cursor(@visibility) {
+.underline-cursor(@bottom-width: 0.2em) {
   .cursor-base();
-  border-bottom: 0.3em solid @syntax-cursor-color;
-  visibility: @visibility;
-}
-
-.low-block-cursor(@visibility) {
-  .cursor-base();
-  border-bottom: 0.6em solid @syntax-cursor-color;
-  visibility: @visibility;
+  border-bottom-width: @bottom-width;
+  border-bottom-style: solid;
+  border-bottom-color: @syntax-cursor-color;
+  visibility: visible;
 }
 
 atom-text-editor.vim-mode-plus.normal-mode,
 atom-text-editor.vim-mode-plus.visual-mode {
-  &.is-focused {
-    .cursor {
-      .block-cursor(visible);
-    }
-  }
-  &.vim-mode-plus-input-focused {
-    .cursor {
-      .underline-cursor(visible);
-      border-bottom-width: 0.2em;
-    }
-  }
-  &.vim-mode-plus-input-focused.hide-cursor {
-    .cursor {
-      .underline-cursor(hidden);
-      border-bottom-width: 0em;
-    }
-  }
-}
-
-atom-text-editor.vim-mode-plus-input-char-waiting {
-  &.is-focused {
-    .cursor {
-      .underline-cursor(visible);
-      border-bottom-width: 0.2em;
-    }
-  }
-}
-
-atom-text-editor.vim-mode-plus-input-char-waiting.hide-cursor {
-  &.is-focused {
-    .cursor {
-      .underline-cursor(hidden);
-    }
+  &.is-focused,
+  &.vim-mode-plus-search-input-focused {
+    .cursor { .block-cursor(); }
   }
 }
 
 atom-text-editor.vim-mode-plus.operator-pending-mode {
-  &.is-focused {
-    .cursor {
-      .low-block-cursor(visible);
-    }
-    .cursors.blink-off .cursor {
-      .low-block-cursor(hidden);
-    }
+  &.is-focused,
+  &.vim-mode-plus-search-input-focused {
+    .cursor { .underline-cursor(0.6em); }
+    .cursors.blink-off .cursor { visibility: hidden; }
   }
 }
 
 atom-text-editor.vim-mode-plus.insert-mode.replace {
   &.is-focused {
-    .cursor {
-      .underline-cursor(visible);
-    }
-    .cursors.blink-off .cursor {
-      .underline-cursor(hidden);
+    .cursor { .underline-cursor(); }
+    .cursors.blink-off .cursor { visibility: hidden; }
+  }
+}
+
+// vim-mode-plus-input-focused for surround, f, F, t, T, r etc.
+atom-text-editor.vim-mode-plus.normal-mode,
+atom-text-editor.vim-mode-plus.visual-mode,
+atom-text-editor.vim-mode-plus.operator-pending-mode, {
+  &.vim-mode-plus-input-focused {
+    .cursor { .underline-cursor(); }
+    .cursors.blink-off .cursor { visibility: visible; }
+
+    &.hide-cursor {
+      .cursor { visibility: hidden; }
+      .cursors.blink-off .cursor { visibility: hidden; }
     }
   }
+}
+
+
+atom-text-editor.vim-mode-plus-input-char-waiting {
+  &.is-focused { .cursor { .underline-cursor(); } }
+  &.hide-cursor.is-focused { .cursor { visibility: hidden; } }
 }
 
 // Flash ranges e.g. flashing yanked range.
@@ -252,7 +232,7 @@ atom-text-editor:not(.silent) {
 atom-text-editor {
   .vim-mode-plus-search-match {
     .region {
-      .round-box;
+      .round-box();
       border: 2px solid transparent;
       transition: border-color 0.2s;
     }
@@ -268,7 +248,7 @@ atom-text-editor {
     }
   }
   .vim-mode-plus-highlight-search .region {
-    .round-box;
+    .round-box();
     border: 1px solid fadeout(@syntax-text-color, 70%);
     background-color: @syntax-selection-color;
   }
