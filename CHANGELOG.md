@@ -1,5 +1,13 @@
 # 1.x.x: WIP
 - Fix: `f escape f` no longer throw exception when `reuseFindForRepeatFind` was enabled #883
+- Improve: Cancelling in the middle of operation no longer clear reset multiple-cursors #882, #885
+  - Motion: Find family `f`, `F`, `t`, `T`
+  - Operator: Replace `r`
+  - Operator `surround` family
+  - Operator: `split-string` family
+  - Operator: `join-by-input` family
+- Doc: Wrote wiki and update README to for `cursor-line` modifying syntax-theme issue #887.
+  - See FAQ section of README: "Flash effect not appear on cursor-line..."
 
 # 1.6.0: Occurrence respects operator-bound-wise. #879
 - Improve: `occurrence-operation` now aware of `operator-bound-wise`.
