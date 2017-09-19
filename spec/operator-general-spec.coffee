@@ -1118,11 +1118,6 @@ describe "Operator general", ->
     it "replaces a single character", ->
       ensure 'r x', text: 'x2\nx4\n\n'
 
-    it "does nothing when cancelled", ->
-      ensure 'r escape',
-        text: '12\n34\n\n'
-        mode: 'normal'
-
     it "remain visual-mode when cancelled", ->
       ensure 'v r escape',
         text: '12\n34\n\n'
@@ -1153,6 +1148,19 @@ describe "Operator general", ->
 
     it "does nothing if asked to replace more characters than there are on a line", ->
       ensure '3 r x', text: '12\n34\n\n'
+
+    describe "cancellation", ->
+      it "does nothing when cancelled", ->
+        ensure 'r escape', text: '12\n34\n\n', mode: 'normal'
+
+      it "keep multi-cursor on cancelled", ->
+        set                textC: "|    a\n!    a\n|    a\n"
+        ensure "r escape", textC: "|    a\n!    a\n|    a\n", mode: "normal"
+
+      it "keep multi-cursor on cancelled", ->
+        set                textC: "|**a\n!**a\n|**a\n"
+        ensure "v l",      textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
+        ensure "r escape", textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
 
     describe "when in visual mode", ->
       beforeEach ->

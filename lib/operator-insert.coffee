@@ -174,12 +174,17 @@ class InsertAtLastInsert extends ActivateInsertMode
 class InsertAboveWithNewline extends ActivateInsertMode
   @extend()
 
+  initialize: ->
+    if @getConfig('groupChangesWhenLeavingInsertMode')
+      @originalCursorPositionMarker = @editor.markBufferPosition(@editor.getCursorBufferPosition())
+
   # This is for `o` and `O` operator.
   # On undo/redo put cursor at original point where user type `o` or `O`.
   groupChangesSinceBufferCheckpoint: ->
     lastCursor = @editor.getLastCursor()
     cursorPosition = lastCursor.getBufferPosition()
-    lastCursor.setBufferPosition(@vimState.getOriginalCursorPositionByMarker())
+    lastCursor.setBufferPosition(@originalCursorPositionMarker.getHeadBufferPosition())
+    @originalCursorPositionMarker.destroy()
 
     super
 
