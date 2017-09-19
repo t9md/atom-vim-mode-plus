@@ -551,6 +551,90 @@ describe "Operator TransformString", ->
             line )
           """
 
+    describe 'cancellation', ->
+      beforeEach ->
+        set
+          textC: """
+          (a|bc) def
+          (g!hi) jkl
+          (m|no) pqr\n
+          """
+
+      describe 'surround cancellation', ->
+        it "[normal] keep multpcursor on surround cancel", ->
+          ensure "y s escape",
+            textC: """
+            (a|bc) def
+            (g!hi) jkl
+            (m|no) pqr\n
+            """
+            mode: "normal"
+
+        it "[visual] keep multpcursor on surround cancel", ->
+          ensure "v",
+            mode: ["visual", "characterwise"]
+            textC: """
+            (ab|c) def
+            (gh!i) jkl
+            (mn|o) pqr\n
+            """
+            selectedTextOrdered: ["b", "h", "n"]
+          ensure "S escape",
+            mode: ["visual", "characterwise"]
+            textC: """
+            (ab|c) def
+            (gh!i) jkl
+            (mn|o) pqr\n
+            """
+            selectedTextOrdered: ["b", "h", "n"]
+
+      describe 'delete-surround cancellation', ->
+        it "[from normal] keep multpcursor on cancel", ->
+          ensure "d S escape",
+            mode: "normal"
+            textC: """
+            (a|bc) def
+            (g!hi) jkl
+            (m|no) pqr\n
+            """
+
+      describe 'change-surround cancellation', ->
+        it "[from normal] keep multpcursor on cancel of 1st input", ->
+          ensure "c S escape", # On choosing deleting pair-char
+            mode: "normal"
+            textC: """
+            (a|bc) def
+            (g!hi) jkl
+            (m|no) pqr\n
+            """
+        it "[from normal] keep multpcursor on cancel of 2nd input", ->
+          ensure "c S (",
+            selectedTextOrdered: ["(abc)", "(ghi)", "(mno)"] # early select(for better UX) effect.
+
+          ensure "escape", # On choosing deleting pair-char
+            mode: "normal"
+            textC: """
+            (a|bc) def
+            (g!hi) jkl
+            (m|no) pqr\n
+            """
+
+      describe 'surround-word cancellation', ->
+        beforeEach ->
+          atom.keymaps.add "surround-test",
+            'atom-text-editor.vim-mode-plus.normal-mode':
+              'y s w': 'vim-mode-plus:surround-word'
+
+        it "[from normal] keep multpcursor on cancel", ->
+          ensure "y s w", selectedTextOrdered: ["abc", "ghi", "mno"] # early select(for better UX) effect.
+          ensure "escape",
+            mode: "normal"
+            textC: """
+            (a|bc) def
+            (g!hi) jkl
+            (m|no) pqr\n
+            """
+
     describe 'alias keymap for surround, change-surround, delete-surround', ->
       it "surround by aliased char", ->
         set textC: "|abc"; ensure 'y s i w b', text: "(abc)"
@@ -1194,6 +1278,10 @@ describe "Operator TransformString", ->
           __0|12::345::678::9ab\n
           """
 
+      it "keep multi-cursors on cancel", ->
+        set                    textC: "  0|12\n  345\n  6!78\n  9ab\n  c|de\n  fgh\n"
+        ensure "g J : escape", textC: "  0|12\n  345\n  6!78\n  9ab\n  c|de\n  fgh\n"
+
     describe "JoinByInputWithKeepingSpace", ->
       beforeEach ->
         atom.keymaps.add "test",
@@ -1306,6 +1394,14 @@ describe "Operator TransformString", ->
           e
           f\n
           """
+      it "[from normal] keep multi-cursors on cancel", ->
+        set textC_: "  0|12  345  6!78  9ab  c|de  fgh"
+        ensure "g / : escape", textC_: "  0|12  345  6!78  9ab  c|de  fgh"
+      it "[from visual] keep multi-cursors on cancel", ->
+        set                  textC: "  0|12  345  6!78  9ab  c|de  fgh"
+        ensure "v",          textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
+        ensure "g / escape", textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
+
     describe "SplitStringWithKeepingSplitter", ->
       it "split string into lines without removing spliter char", ->
         ensure "g ? : enter",
@@ -1324,6 +1420,13 @@ describe "Operator TransformString", ->
           e:
           f\n
           """
+      it "keep multi-cursors on cancel", ->
+        set textC_: "  0|12  345  6!78  9ab  c|de  fgh"
+        ensure "g ? : escape", textC_: "  0|12  345  6!78  9ab  c|de  fgh"
+      it "[from visual] keep multi-cursors on cancel", ->
+        set                  textC: "  0|12  345  6!78  9ab  c|de  fgh"
+        ensure "v",          textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
+        ensure "g ? escape", textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
 
   describe "SplitArguments, SplitArgumentsWithRemoveSeparator", ->
     beforeEach ->
