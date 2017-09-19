@@ -16,6 +16,7 @@ vim-mode improved.
     - [In visual-block mode, some motions make the editor slow, freeze.](#in-visual-block-mode-some-motions-make-the-editor-slow-freeze)
     - [ex-mode?](#ex-mode)
     - [Want to suppress autocomplete-plus's auto suggestion except insert-mode.](#want-to-suppress-autocomplete-pluss-auto-suggestion-except-insert-mode)
+    - [Flash effect not appear on cursor-line, occurrence-marker is not displayed on cursor-line too.](#flash-effect-not-appear-on-cursor-line-occurrence-marker-is-not-displayed-on-cursor-line-too)
     - [Surround not work](#surround-not-work)
     - [How can I insert single white space when surround?](#how-can-i-insert-single-white-space-when-surround)
 - [Wiki](#wiki)
@@ -122,6 +123,11 @@ If you want to directly edit `config.cson`, here it is.
     "vim-mode-plus.insert-mode.replace"
   ]
 ```
+
+### Flash effect not appear on cursor-line, occurrence-marker is not displayed on cursor-line too.
+
+This is because of syntax-theme you are using.
+See [this tips on Wiki](https://github.com/t9md/atom-vim-mode-plus/wiki/TIPS#flash-effect-not-appear-on-cursor-line-occurrence-marker-is-not-displayed-on-cursor-line-too).
 
 ### Surround not work
 
