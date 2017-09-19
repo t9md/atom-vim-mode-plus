@@ -25,7 +25,25 @@
 
 atom-text-editor.vim-mode-plus.normal-mode,
 atom-text-editor.vim-mode-plus.visual-mode {
-  &.is-focused { .cursor { .block-cursor(); } }
+  &.is-focused,
+  &.vim-mode-plus-search-input-focused {
+    .cursor { .block-cursor(); }
+  }
+}
+
+atom-text-editor.vim-mode-plus.operator-pending-mode {
+  &.is-focused,
+  &.vim-mode-plus-search-input-focused {
+    .cursor { .underline-cursor(0.6em); }
+    .cursors.blink-off .cursor { visibility: hidden; }
+  }
+}
+
+atom-text-editor.vim-mode-plus.insert-mode.replace {
+  &.is-focused {
+    .cursor { .underline-cursor(); }
+    .cursors.blink-off .cursor { visibility: hidden; }
+  }
 }
 
 // vim-mode-plus-input-focused for surround, f, F, t, T, r etc.
@@ -43,39 +61,10 @@ atom-text-editor.vim-mode-plus.operator-pending-mode, {
   }
 }
 
-// vim-mode-plus-search-input-focused for /, ?
-atom-text-editor.vim-mode-plus.normal-mode,
-atom-text-editor.vim-mode-plus.operator-pending-mode, {
-  &.vim-mode-plus-search-input-focused {
-    .cursor { .underline-cursor(); }
-    .cursors.blink-off .cursor { visibility: visible; }
-  }
-}
-// in visual-mode want to show normal block-cursor
-atom-text-editor.vim-mode-plus.visual-mode {
-  &.vim-mode-plus-search-input-focused {
-    .cursor { .block-cursor(); }
-    .cursors.blink-off .cursor { visibility: visible; }
-  }
-}
 
 atom-text-editor.vim-mode-plus-input-char-waiting {
   &.is-focused { .cursor { .underline-cursor(); } }
   &.hide-cursor.is-focused { .cursor { visibility: hidden; } }
-}
-
-atom-text-editor.vim-mode-plus.operator-pending-mode {
-  &.is-focused {
-    .cursor { .underline-cursor(0.6em); }
-    .cursors.blink-off .cursor { visibility: hidden; }
-  }
-}
-
-atom-text-editor.vim-mode-plus.insert-mode.replace {
-  &.is-focused {
-    .cursor { .underline-cursor(); }
-    .cursors.blink-off .cursor { visibility: hidden; }
-  }
 }
 
 // Flash ranges e.g. flashing yanked range.
