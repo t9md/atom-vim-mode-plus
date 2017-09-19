@@ -109,6 +109,11 @@ describe "Motion Find", ->
       set cursor: [0, 3]
       ensure 'd F a', text: 'abcabcabc\n'
 
+  describe "cancellation", ->
+    it "keeps multiple-cursors when cancelled", ->
+      set                 textC: "|   a\n!   a\n|   a\n"
+      ensure "f escape",  textC: "|   a\n!   a\n|   a\n"
+
   describe 'the t/T keybindings', ->
     beforeEach ->
       set
