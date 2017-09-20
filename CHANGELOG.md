@@ -1,10 +1,12 @@
 # 1.8.0: WIP
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.7.0...v1.8.0)
 - Improve: make `[` and `]` stop at first row and last row(again).
   - `[`(`move-up-to-edge`) and `]`(`move-down-to-edge`) now stop at first and last row as target column is stoppable.
   - This behavior is added at #314(v0.49.0) but removed at #481(v0.66.0).
   - Now re-introduced this feature with avoiding edge case reported in #481.
 
 # 1.7.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.6.0...v1.7.0)
 - Fix: `f escape f` no longer throw exception when `reuseFindForRepeatFind` was enabled #883
 - New: `insert-at-head-of-target` operator, in the past I removed this operator, but I need this now #881.
 - Improve: Cancelling in the middle of operation no longer clear reset multiple-cursors #882, #885
@@ -20,6 +22,7 @@
 - Internal: Add debug code to investigate known issue #875(for cursor jumped unexpectedly).
 
 # 1.6.0: Occurrence respects operator-bound-wise. #879
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.5.0...v1.6.0)
 - Improve: `occurrence-operation` now aware of `operator-bound-wise`.
   - Behavior diff: Diff appears in `occurrence-operation`.
     - Old: Always worked as `characterwise`.
@@ -51,6 +54,7 @@
       - Use capital letter(`c`, `y`, `d`) if you want `linewise` behavior.
 
 # 1.5.0: Reconcile visual-mode with outer-vmp command in better way. #878
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.4.0...v1.5.0)
 - Summary: This is ambitious and dangerous change.
   - If success, lots of potential issue would be fixed.
   - But dangerous since it use more frequently fired hook(`editor.onDidChangeSelectionRange`).
@@ -73,6 +77,7 @@
   - Delaying, debouncing to minimize useless mode-shift is bad for UX, user see slight delay for cursor updated.
 
 # 1.4.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.3.3...v1.4.0)
 - New: Numbered register(`0-9`) and small delete register(`-`). #871
   - When are they updated?
     - `0` is for yank, `1-9` is for `change` and `delete`.
@@ -123,17 +128,21 @@
 - Internal: Cleanup RegisterManager code to reduce my confusion.
 
 # 1.3.3:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.3.2...v1.3.3)
 - Improve: highlight-find-char now highlight unconfirmed-current-match differently( with thicker border ).
   - You now visually notified "no extra keytype is required to land this position" while typing.
 
 # 1.3.2:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.3.1...v1.3.2)
 - Improve: highlight-find-char now highlight all chars in next lines when `findAcrossLines` was set.
   - This gives important feedback for your keystroke when your eye is needling destination keyword while typing.
 
 # 1.3.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.3.0...v1.3.1)
 - Fix: Fix confusing description in setting, no behavioral diff.
 
 # 1.3.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.2.0...v1.3.0)
 - Breaking, New: `findCharsMax` options to find arbitrary length of chars by `f`.
   - Involves renaming, auto-value-conversion of existing configuration introduced in v1.1.0( yesterday ).
   - New, Rename: `findCharsMax`: default `1`.
@@ -145,6 +154,7 @@
   - Rename: `findByTwoCharsAutoConfirmTimeout` to `findConfirmByTimeout`( generalize naming )
 
 # 1.2.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.1.1...v1.2.0)
 - New, Experimental: `findAcrossLines`: default `false`
   - When `true`, `f` searches over next lines. Affects `f`, `F`, `t`, `T`.
   - [Collecting feedback] twitter: @t9md or https://github.com/t9md/atom-vim-mode-plus/issues/851
@@ -155,10 +165,11 @@
   - This feature is NOT new, Just "flashing by default" is new change in this release.
 
 # 1.1.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.1.0...v1.1.1)
 - Fix: Fix confusing description in setting, no behavioral diff.
 
 # 1.1.0: This release is all for better `f` by making it tunable
-
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.0.0...v1.1.0)
 - [CAUTION: added at release of v1.3.0]: Config option name changed.
   - I basically don't want update old CHANGELOG, but this is for reducing confusion.
   - Because of short release timing gap with braking config params change.
@@ -167,7 +178,6 @@
   - When you read this below, keep in mind, change in available config params.
     - Parameterized: `findByTwoChars = true` to `findCharsMax = 2`
     - Renamed: `findByTwoCharsAutoConfirmTimeout` to `findConfirmByTimeout`
-
 - New: [Summary] Now `f` is **tunable**. #852.
   - Inspired pure-vim's plugins: `clever-f`, `vim-seek`, `vim-sneak`.
   - Highlighting find-char. It help you to pre-determine consequence of repeat by `;`, `,` and `.`.
@@ -210,6 +220,7 @@
     ```
 
 # 1.0.0: New default `stayOn` all `true`.
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v0.99.1...v1.0.0)
 - Version: Decided to bump major version.
 - Breaking: Default config change/Renamed config name.
   - Summary:
