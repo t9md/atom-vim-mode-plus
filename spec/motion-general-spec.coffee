@@ -310,7 +310,21 @@ describe "Motion general", ->
             cursor: [2, 2]
 
         describe "when column is leading spaces", ->
-          it "doesn't move cursor", ->
+          it "move cursor if it's stoppable", ->
+            ensure '[', cursor: [0, 2]
+            ensure ']', cursor: [4, 2]
+
+          it "doesn't move cursor if it's NOT stoppable", ->
+            set
+              text_: """
+              __
+              ____this is text of line 1
+              ____this is text of line 2
+              ______hello line 3
+              ______hello line 4
+              __
+              """
+              cursor: [2, 2]
             ensure '[', cursor: [2, 2]
             ensure ']', cursor: [2, 2]
 

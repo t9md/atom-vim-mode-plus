@@ -1,3 +1,7 @@
+# 1.8.0: WIP
+- Improve: make `[` and `]` stop at first row and last row(again).
+  - `[`(`move-up-to-edge`) and `]`(`move-down-to-edge`) now stop at first and last row as target column is stoppable.
+
 # 1.7.0:
 - Fix: `f escape f` no longer throw exception when `reuseFindForRepeatFind` was enabled #883
 - New: `insert-at-head-of-target` operator, in the past I removed this operator, but I need this now #881.
