@@ -1,13 +1,17 @@
-# 1.x.x: WIP
+# 1.7.0:
 - Fix: `f escape f` no longer throw exception when `reuseFindForRepeatFind` was enabled #883
+- New: `insert-at-head-of-target` operator, in the past I removed this operator, but I need this now #881.
 - Improve: Cancelling in the middle of operation no longer clear reset multiple-cursors #882, #885
   - Motion: Find family `f`, `F`, `t`, `T`
-  - Operator: Replace `r`
-  - Operator `surround` family
-  - Operator: `split-string` family
-  - Operator: `join-by-input` family
+  - Operator: Replace `r` `surround` family, `split-string` family, `join-by-input` family
+- Improve: No longer hide cursor when focus is at mini-editor.
+  - `/`, `?`: was hidden in all mode in older version.
+  - `f`, `t`: was hidden in `operator-pending-mode` in older version.
+- Improve: cleanup CSS in `vim-mode-plus.less`.
+- Improve: Respect original selection's reversed state on occurrence-operation operation.
 - Doc: Wrote wiki and update README to for `cursor-line` modifying syntax-theme issue #887.
   - See FAQ section of README: "Flash effect not appear on cursor-line..."
+- Internal: Add debug code to investigate known issue #875(for cursor jumped unexpectedly).
 
 # 1.6.0: Occurrence respects operator-bound-wise. #879
 - Improve: `occurrence-operation` now aware of `operator-bound-wise`.
