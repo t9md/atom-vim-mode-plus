@@ -1,3 +1,9 @@
+# 1.8.0: WIP
+- Improve: make `[` and `]` stop at first row and last row(again).
+  - `[`(`move-up-to-edge`) and `]`(`move-down-to-edge`) now stop at first and last row as target column is stoppable.
+  - This behavior is added at #314(v0.49.0) but removed at #481(v0.66.0).
+  - Now re-introduced this feature with avoiding edge case reported in #481.
+
 # 1.7.0:
 - Fix: `f escape f` no longer throw exception when `reuseFindForRepeatFind` was enabled #883
 - New: `insert-at-head-of-target` operator, in the past I removed this operator, but I need this now #881.

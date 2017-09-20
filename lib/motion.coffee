@@ -304,7 +304,7 @@ class MoveUpToEdge extends Motion
       false
 
   isStoppablePoint: (point) ->
-    if @isNonWhiteSpacePoint(point)
+    if @isNonWhiteSpacePoint(point) or @isFirstRowOrLastRowAndStoppable(point)
       true
     else
       leftPoint = point.translate([0, -1])
@@ -314,6 +314,15 @@ class MoveUpToEdge extends Motion
   isNonWhiteSpacePoint: (point) ->
     char = getTextInScreenRange(@editor, Range.fromPointWithDelta(point, 0, 1))
     char? and /\S/.test(char)
+
+  isFirstRowOrLastRowAndStoppable: (point) ->
+    # In normal-mode we adjust cursor by moving-left if cursor at EOL of non-blank row.
+    # So explicitly guard to not answer it stoppable.
+    if @isMode('normal') and pointIsAtEndOfLineAtNonEmptyRow(@editor, point)
+      false
+    else
+      point.isEqual(@editor.clipScreenPosition(point)) and
+        ((point.row is 0) or (point.row is @getVimLastBufferRow()))
 
 class MoveDownToEdge extends MoveUpToEdge
   @extend()
