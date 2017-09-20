@@ -87,6 +87,19 @@ class ActivateInsertMode extends Operator
     # Avoid freezing by acccidental big count(e.g. `5555555555555i`), See #560, #596
     limitNumber(@insertionCount, max: 100)
 
+  investigateCursorPosition: ->
+    [c1, c2, c3] = []
+    c1 = @editor.getCursorBufferPosition()
+
+    @onWillActivateMode ({mode, submode}) =>
+      c2 = @editor.getCursorBufferPosition()
+      console.info 'diff c1, c2', c1.toString(), c2.toString() unless c1.isEqual(c2)
+
+    @onDidActivateMode ({mode, submode}) =>
+      c3 = @editor.getCursorBufferPosition()
+      if c2.row isnt c3.row
+        console.warn 'dff c2, c3', c2.toString(), c3.toString()
+
   execute: ->
     if @repeated
       @flashTarget = @trackChange = true
@@ -103,6 +116,8 @@ class ActivateInsertMode extends Operator
         @vimState.clearSelections()
 
     else
+      @investigateCursorPosition() if @getConfig("debug")
+      
       @normalizeSelectionsIfNecessary()
       @createBufferCheckpoint('undo')
       @selectTarget() if @target?
