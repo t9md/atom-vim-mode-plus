@@ -313,18 +313,20 @@ class Operator extends Base
 # - Directly invoke text-object from normal-mode
 #   - e.g: Invoke `Inner Paragraph` from command-palette.
 class Select extends Operator
-  @extend(false)
+  @extend()
   flashTarget: false
   recordable: false
   acceptPresetOccurrence: false
   acceptPersistentSelection: false
 
   execute: ->
-    @startMutation(@selectTarget.bind(this))
+    @startMutation =>
+      if @selectTarget()
+        if (@target.isTextObject() and @target.selectSucceeded) or @target.isMotion()
+          @editor.scrollToCursorPosition() if @target.isTextObject()
 
-    if @target.isTextObject() and @target.selectSucceeded
-      @editor.scrollToCursorPosition()
-      @activateModeIfNecessary('visual', @target.wise)
+          wise = if @occurrenceSelected then @occurrenceWise else @target.wise
+          @activateModeIfNecessary('visual', wise)
 
 class SelectLatestChange extends Select
   @extend()
@@ -340,15 +342,11 @@ class SelectPersistentSelection extends Select
   @description: "Select persistent-selection and clear all persistent-selection, it's like convert to real-selection"
   target: "APersistentSelection"
 
-class SelectOccurrence extends Operator
+class SelectOccurrence extends Select
   @extend()
   @description: "Add selection onto each matching word within target range"
   occurrence: true
-
-  execute: ->
-    @startMutation =>
-      if @selectTarget()
-        @activateModeIfNecessary('visual', 'characterwise')
+  acceptPersistentSelection: true
 
 # Persistent Selection
 # =========================

@@ -5,6 +5,8 @@ Operator:
   file: "./operator"
 Select:
   file: "./operator"
+  commandName: "vim-mode-plus:select"
+  commandScope: "atom-text-editor"
 SelectLatestChange:
   file: "./operator"
   commandName: "vim-mode-plus:select-latest-change"
