@@ -97,7 +97,7 @@ class Base
   target: null # Set in Operator
   operator: null # Set in operator's target( Motion or TextObject )
   isAsTargetExceptSelect: ->
-    @operator? and not @operator.instanceof('Select')
+    @operator? and not @operator.instanceof('SelectInVisualMode')
 
   abort: ->
     OperationAbortedError ?= require './errors'

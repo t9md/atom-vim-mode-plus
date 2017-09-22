@@ -301,23 +301,10 @@ class Operator extends Base
     wise = if @occurrenceSelected then @occurrenceWise else @target.wise
     @mutationManager.restoreCursorPositions({stay, wise, @setToFirstCharacterOnLinewise})
 
-# Select
-# When text-object is invoked from normal or viusal-mode, operation would be
-#  => Select operator with target=text-object
-# When motion is invoked from visual-mode, operation would be
-#  => Select operator with target=motion)
-# ================================
-# Select is used in TWO situation.
-# - visual-mode operation
-#   - e.g: `v l`, `V j`, `v i p`...
-# - Directly invoke text-object from normal-mode
-#   - e.g: Invoke `Inner Paragraph` from command-palette.
 class Select extends Operator
   @extend()
   flashTarget: false
   recordable: false
-  acceptPresetOccurrence: false
-  acceptPersistentSelection: false
 
   execute: ->
     @startMutation =>
@@ -346,7 +333,22 @@ class SelectOccurrence extends Select
   @extend()
   @description: "Add selection onto each matching word within target range"
   occurrence: true
-  acceptPersistentSelection: true
+
+# SelectInVisualMode: used in visual-mode
+# When text-object is invoked from normal or viusal-mode, operation would be
+#  => SelectInVisualMode operator with target=text-object
+# When motion is invoked from visual-mode, operation would be
+#  => SelectInVisualMode operator with target=motion)
+# ================================
+# SelectInVisualMode is used in TWO situation.
+# - visual-mode operation
+#   - e.g: `v l`, `V j`, `v i p`...
+# - Directly invoke text-object from normal-mode
+#   - e.g: Invoke `Inner Paragraph` from command-palette.
+class SelectInVisualMode extends Select
+  @extend(false)
+  acceptPresetOccurrence: false
+  acceptPersistentSelection: false
 
 # Persistent Selection
 # =========================
