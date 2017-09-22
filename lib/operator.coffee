@@ -328,6 +328,7 @@ class SelectPersistentSelection extends Select
   @extend()
   @description: "Select persistent-selection and clear all persistent-selection, it's like convert to real-selection"
   target: "APersistentSelection"
+  acceptPersistentSelection: false
 
 class SelectOccurrence extends Select
   @extend()
