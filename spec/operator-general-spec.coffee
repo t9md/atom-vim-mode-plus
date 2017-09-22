@@ -1470,3 +1470,92 @@ describe "Operator general", ->
         line2
         line3
         """
+
+  describe 'Select as operator', ->
+    beforeEach ->
+      settings.set('keymapSToSelect', true)
+      jasmine.attachToDOM(editorElement)
+
+    describe "select by target", ->
+      beforeEach ->
+        set
+          textC: """
+          0 |ooo xxx ***
+          1 xxx *** ooo
+
+          3 ooo xxx ***
+          4 xxx *** ooo\n
+          """
+
+      it "select text-object", ->
+        ensure "s p", # p is `i p` shorthand.
+          mode: ["visual", "linewise"]
+          selectedText: """
+          0 ooo xxx ***
+          1 xxx *** ooo\n
+          """
+
+      it "select occurrence in text-object with occurrence-modifier", ->
+        ensure "s o p", # p is `i p` shorthand.
+          mode: ["visual", "characterwise"]
+          selectedText: ["ooo", "ooo"]
+          selectedBufferRangeOrdered: [
+            [[0, 2], [0, 5]]
+            [[1, 10], [1, 13]]
+          ]
+
+      it "select occurrence in text-object with preset-occurrence", ->
+        ensure "g o s p", # p is `i p` shorthand.
+          mode: ["visual", "characterwise"]
+          selectedText: ["ooo", "ooo"]
+          selectedBufferRangeOrdered: [
+            [[0, 2], [0, 5]]
+            [[1, 10], [1, 13]]
+          ]
+
+      it "convert presistent-selection into normal selection", ->
+        ensure "v j enter",
+          mode: "normal"
+          persistentSelectionCount: 1
+          persistentSelectionBufferRange: [
+            [[0, 2], [1, 3]]
+          ]
+
+        ensure "j j v j",
+          persistentSelectionCount: 1
+          persistentSelectionBufferRange: [
+            [[0, 2], [1, 3]]
+          ]
+          mode: ["visual", "characterwise"]
+          selectedText: "ooo xxx ***\n4 x"
+
+        # Now it's show time, to convert persistent selection into normal selection
+        # by only `s`.
+        ensure "s",
+          mode: ["visual", "characterwise"]
+          persistentSelectionCount: 0
+          selectedTextOrdered: ["ooo xxx ***\n1 x", "ooo xxx ***\n4 x"]
+
+      it "select preset-occurrence in presistent-selection and normal selection", ->
+        ensure "g o",
+          occurrenceText: ['ooo', 'ooo', 'ooo', 'ooo']
+
+        ensure "V j enter G V",
+          persistentSelectionCount: 1
+          mode: ["visual", "linewise"]
+          selectedText: "4 xxx *** ooo\n"
+
+        ensure "s", # Notice `ooo` in row 3 is EXCLUDED.
+          persistentSelectionCount: 0
+          mode: ["visual", "characterwise"]
+          selectedText: ["ooo", "ooo", "ooo"]
+          selectedBufferRangeOrdered: [
+            [[0, 2], [0, 5]]
+            [[1, 10], [1, 13]]
+            [[4, 10], [4, 13]]
+          ]
+
+      it "select by motion", ->
+        ensure "s $", # p is `i p` shorthand.
+          mode: ["visual", "characterwise"]
+          selectedText: "ooo xxx ***"
