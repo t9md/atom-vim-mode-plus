@@ -10,6 +10,8 @@
   - Windows and Linux user can `ctrl-a` as shorthand of `i e`(`inner-entire`).
     - Usage example: `y ctrl-a` to yank all text in buffer.
   - For macOS user `cmd-a` is provided as shorthand of `i e` from older version(v0.88.0).
+- New: Operator command `insert-at-head-of-occurrence`, `insert-at-head-of-subword-occurrence`.
+  - Previously only `start` and `end` version of this commands are provided.
 
 # 1.7.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.6.0...v1.7.0)
