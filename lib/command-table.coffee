@@ -175,6 +175,10 @@ InsertAtEndOfOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-occurrence"
   commandScope: "atom-text-editor"
+InsertAtHeadOfOccurrence:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-head-of-occurrence"
+  commandScope: "atom-text-editor"
 InsertAtStartOfSubwordOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-subword-occurrence"
@@ -182,6 +186,10 @@ InsertAtStartOfSubwordOccurrence:
 InsertAtEndOfSubwordOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-subword-occurrence"
+  commandScope: "atom-text-editor"
+InsertAtHeadOfSubwordOccurrence:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-head-of-subword-occurrence"
   commandScope: "atom-text-editor"
 InsertAtStartOfSmartWord:
   file: "./operator-insert"
