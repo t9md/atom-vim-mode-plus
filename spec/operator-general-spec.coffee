@@ -1555,10 +1555,39 @@ describe "Operator general", ->
             [[4, 10], [4, 13]]
           ]
 
-      it "select by motion", ->
-        ensure "s $", # p is `i p` shorthand.
+      it "select by motion $", ->
+        ensure "s $",
           mode: ["visual", "characterwise"]
           selectedText: "ooo xxx ***"
+
+      it "select by motion j", ->
+        ensure "s j",
+          mode: ["visual", "linewise"]
+          selectedText: "0 ooo xxx ***\n1 xxx *** ooo\n"
+
+      it "select by motion j v-modifier", ->
+        ensure "s v j",
+          mode: ["visual", "characterwise"]
+          selectedText: "ooo xxx ***\n1 "
+
+      it "select occurrence by motion G", ->
+        ensure "s o G",
+          mode: ["visual", "characterwise"]
+          selectedText: ["ooo", "ooo", "ooo", "ooo"]
+          selectedBufferRangeOrdered: [
+            [[0, 2], [0, 5]]
+            [[1, 10], [1, 13]]
+            [[3, 2], [3, 5]]
+            [[4, 10], [4, 13]]
+          ]
+
+      it "select occurrence by motion G with explicit V-modifier", ->
+        ensure "s o V G",
+          mode: ["visual", "linewise"]
+          selectedTextOrdered: [
+            "0 ooo xxx ***\n1 xxx *** ooo\n"
+            "3 ooo xxx ***\n4 xxx *** ooo\n"
+          ]
 
       it "return to normal-mode when fail to select", ->
         # attempt to select inner-function but there is no function.
