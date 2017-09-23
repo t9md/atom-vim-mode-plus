@@ -1604,3 +1604,32 @@ describe "Operator general", ->
         ensure "s f z",
           mode: "normal"
           cursor: [0, 2]
+
+      describe "complex scenario", ->
+        beforeEach ->
+          waitsForPromise ->
+            atom.packages.activatePackage('language-javascript')
+
+          runs ->
+            set
+              grammar: 'source.js'
+              textC: """
+              const result = []
+              for (const !member of members) {
+                let member2 = member + member
+                let member3 = member + member + member
+                result.push(member2, member3)
+              }\n
+              """
+
+        it "select occurrence in a-fold ,reverse(o) then escape to normal-mode", ->
+          ensure "s o z o escape",
+            mode: "normal"
+            textC: """
+            const result = []
+            for (const |member of members) {
+              let member2 = |member + |member
+              let member3 = |member + |member + |member
+              result.push(member2, member3)
+            }\n
+            """
