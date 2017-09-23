@@ -307,6 +307,7 @@ class Select extends Operator
   recordable: false
 
   execute: ->
+    succeeded = false
     @startMutation =>
       if @selectTarget()
         if (@target.isTextObject() and @target.selectSucceeded) or @target.isMotion()
@@ -314,6 +315,9 @@ class Select extends Operator
 
           wise = if @occurrenceSelected then @occurrenceWise else @target.wise
           @activateModeIfNecessary('visual', wise)
+          succeeded = true
+
+    @cancelOperation() unless succeeded
 
 class SelectLatestChange extends Select
   @extend()
@@ -369,13 +373,10 @@ class TogglePersistentSelection extends CreatePersistentSelection
   isComplete: ->
     point = @editor.getCursorBufferPosition()
     @markerToRemove = @persistentSelection.getMarkerAtPoint(point)
-    if @markerToRemove
-      true
-    else
-      super
+    @markerToRemove? or super
 
   execute: ->
-    if @markerToRemove
+    if @markerToRemove?
       @markerToRemove.destroy()
     else
       super

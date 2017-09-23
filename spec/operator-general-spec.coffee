@@ -1559,3 +1559,14 @@ describe "Operator general", ->
         ensure "s $", # p is `i p` shorthand.
           mode: ["visual", "characterwise"]
           selectedText: "ooo xxx ***"
+
+      it "return to normal-mode when fail to select", ->
+        # attempt to select inner-function but there is no function.
+        ensure "s i f",
+          mode: "normal"
+          cursor: [0, 2]
+
+        # attempt to find 'z' but no "z".
+        ensure "s f z",
+          mode: "normal"
+          cursor: [0, 2]
