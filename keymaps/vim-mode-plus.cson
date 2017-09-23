@@ -493,6 +493,12 @@
   # In this scope, all operator keys are safely remappable.
   # e.g. p, d, D, x, u, X, S, ., r
 
+'.platform-win32, atom-text-editor.vim-mode-plus.operator-pending-mode':
+  'ctrl-a': 'vim-mode-plus:inner-entire'
+
+'.platform-linux, atom-text-editor.vim-mode-plus.operator-pending-mode':
+  'ctrl-a': 'vim-mode-plus:inner-entire'
+
 # operator-pending with operator specified
 # -------------------------
 # `c c` to works as change current line.
