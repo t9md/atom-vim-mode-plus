@@ -814,6 +814,7 @@ describe "Operator TransformString", ->
           """
       # TODO#698 FIX when finished
       it "surround text for each word in visual selection", ->
+        settings.set("stayOnSelectTextObject", true)
         ensure 'v i p m s "',
           textC: """
 
