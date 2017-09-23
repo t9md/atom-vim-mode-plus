@@ -1490,10 +1490,15 @@ describe "Operator general", ->
       it "select text-object", ->
         ensure "s p", # p is `i p` shorthand.
           mode: ["visual", "linewise"]
-          selectedText: """
-          0 ooo xxx ***
-          1 xxx *** ooo\n
-          """
+          selectedText: "0 ooo xxx ***\n1 xxx *** ooo\n"
+          propertyHead: [1, 13]
+
+      it "select by motion j with stayOnSelectTextObject", ->
+        settings.set("stayOnSelectTextObject", true)
+        ensure "s i p",
+          mode: ["visual", "linewise"]
+          selectedText: "0 ooo xxx ***\n1 xxx *** ooo\n"
+          propertyHead: [1, 2]
 
       it "select occurrence in text-object with occurrence-modifier", ->
         ensure "s o p", # p is `i p` shorthand.
