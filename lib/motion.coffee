@@ -181,7 +181,7 @@ class MoveLeft extends Motion
 class MoveRight extends Motion
   @extend()
   canWrapToNextLine: (cursor) ->
-    if @isAsTargetExceptSelect() and not cursor.isAtEndOfLine()
+    if @isAsTargetExceptSelectInVisualMode() and not cursor.isAtEndOfLine()
       false
     else
       @getConfig('wrapLeftRightMotion')
@@ -372,15 +372,15 @@ class MoveToNextWord extends Motion
     return if pointIsAtVimEndOfFile(@editor, cursorPosition)
     wasOnWhiteSpace = pointIsOnWhiteSpace(@editor, cursorPosition)
 
-    isAsTargetExceptSelect = @isAsTargetExceptSelect()
+    isAsTargetExceptSelectInVisualMode = @isAsTargetExceptSelectInVisualMode()
     @moveCursorCountTimes cursor, ({isFinal}) =>
       cursorPosition = cursor.getBufferPosition()
-      if isEmptyRow(@editor, cursorPosition.row) and isAsTargetExceptSelect
+      if isEmptyRow(@editor, cursorPosition.row) and isAsTargetExceptSelectInVisualMode
         point = cursorPosition.traverse([1, 0])
       else
         pattern = @wordRegex ? cursor.wordRegExp()
         point = @getPoint(pattern, cursorPosition)
-        if isFinal and isAsTargetExceptSelect
+        if isFinal and isAsTargetExceptSelectInVisualMode
           if @operator.is('Change') and (not wasOnWhiteSpace)
             point = cursor.getEndOfCurrentWordBufferPosition({@wordRegex})
           else
@@ -772,7 +772,7 @@ class MoveToTopOfScreen extends Motion
     @setCursorBufferRow(cursor, bufferRow)
 
   getScrolloff: ->
-    if @isAsTargetExceptSelect()
+    if @isAsTargetExceptSelectInVisualMode()
       0
     else
       @scrolloff
@@ -962,7 +962,7 @@ class Find extends Motion
   execute: ->
     super
     decorationType = "post-confirm"
-    decorationType += " long" if @isAsTargetExceptSelect()
+    decorationType += " long" if (@operator? and not @operator?.instanceof("Select"))
     @editor.component.getNextUpdatePromise().then =>
       @highlightTextInCursorRows(@input, decorationType)
 
