@@ -92,7 +92,7 @@ class TextObject extends Base
     # Some TextObject's wise is NOT deterministic. It has to be detected from selected range.
     @wise ?= @swrap.detectWise(@editor)
 
-    if @mode is 'visual'
+    if @operator.instanceof("Select")
       if @selectSucceeded
         switch @wise
           when 'characterwise'

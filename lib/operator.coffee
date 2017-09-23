@@ -305,39 +305,45 @@ class Select extends Operator
   @extend()
   flashTarget: false
   recordable: false
+  updateSelectionProperties: true
 
   execute: ->
-    succeeded = false
-    @startMutation =>
-      if @selectTarget()
-        if (@target.isTextObject() and @target.selectSucceeded) or @target.isMotion()
-          @editor.scrollToCursorPosition() if @target.isTextObject()
+    if @updateSelectionProperties
+      for $selection in @swrap.getSelections(@editor) when not $selection.hasProperties()
+        $selection.saveProperties()
 
-          wise = if @occurrenceSelected then @occurrenceWise else @target.wise
-          @activateModeIfNecessary('visual', wise)
-          succeeded = true
+    @startMutation => @selectTarget()
 
-    @cancelOperation() unless succeeded
+    if (@target.selectSucceeded)
+      @editor.scrollToCursorPosition() if @target.isTextObject()
+      wise = if @occurrenceSelected then @occurrenceWise else @target.wise
+      @activateModeIfNecessary('visual', wise)
+    else
+      @cancelOperation()
 
 class SelectLatestChange extends Select
   @extend()
   @description: "Select latest yanked or changed range"
   target: 'ALatestChange'
+  updateSelectionProperties: false
 
 class SelectPreviousSelection extends Select
   @extend()
   target: "PreviousSelection"
+  updateSelectionProperties: false
 
 class SelectPersistentSelection extends Select
   @extend()
   @description: "Select persistent-selection and clear all persistent-selection, it's like convert to real-selection"
   target: "APersistentSelection"
   acceptPersistentSelection: false
+  updateSelectionProperties: false
 
 class SelectOccurrence extends Select
   @extend()
   @description: "Add selection onto each matching word within target range"
   occurrence: true
+  updateSelectionProperties: false
 
 # SelectInVisualMode: used in visual-mode
 # When text-object is invoked from normal or viusal-mode, operation would be

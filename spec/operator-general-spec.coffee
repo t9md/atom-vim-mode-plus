@@ -1558,7 +1558,7 @@ describe "Operator general", ->
       it "select by motion $", ->
         ensure "s $",
           mode: ["visual", "characterwise"]
-          selectedText: "ooo xxx ***"
+          selectedText: "ooo xxx ***\n"
 
       it "select by motion j", ->
         ensure "s j",
@@ -1568,7 +1568,7 @@ describe "Operator general", ->
       it "select by motion j v-modifier", ->
         ensure "s v j",
           mode: ["visual", "characterwise"]
-          selectedText: "ooo xxx ***\n1 "
+          selectedText: "ooo xxx ***\n1 x"
 
       it "select occurrence by motion G", ->
         ensure "s o G",

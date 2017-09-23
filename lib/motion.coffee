@@ -85,13 +85,16 @@ class Motion extends Base
 
   # NOTE: Modify selection by modtion, selection is already "normalized" before this function is called.
   select: ->
-    isOrWasVisual = @mode is 'visual' or @is('CurrentSelection') # need to care was visual for `.` repeated.
+    @selectSucceeded = false
+
+    isOrWasVisual = @operator?.instanceof('Select') or @is('CurrentSelection') # need to care was visual for `.` repeated.
     for selection in @editor.getSelections()
       selection.modifySelection =>
         @moveWithSaveJump(selection.cursor)
 
-      succeeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessOnLinewise and @isLinewise())
-      if isOrWasVisual or (succeeded and (@inclusive or @isLinewise()))
+      @selectSucceeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessOnLinewise and @isLinewise())
+
+      if isOrWasVisual or (@selectSucceeded and (@inclusive or @isLinewise()))
         $selection = @swrap(selection)
         $selection.saveProperties(true) # save property of "already-normalized-selection"
         $selection.applyWise(@wise)
