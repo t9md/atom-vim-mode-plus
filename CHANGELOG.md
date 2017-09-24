@@ -19,6 +19,8 @@
   - Now stoppable as long as target column is exist at first row or last row.
   - This behavior is added at #314(v0.49.0) but removed at #481(v0.66.0).
   - Now re-introduced this feature with avoiding edge case reported in #481.
+- Improve: Confirm on occurrence operation #888
+  - TODO
 - Keymap: Shorthand keymap for `inner-entire` in `operator-pending-mode` for Linux and Windows.
   - Windows and Linux user can `ctrl-a` as shorthand of `i e`(`inner-entire`).
     - Usage example: `y ctrl-a` to yank all text in buffer.
