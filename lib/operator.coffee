@@ -301,17 +301,12 @@ class Operator extends Base
     wise = if @occurrenceSelected then @occurrenceWise else @target.wise
     @mutationManager.restoreCursorPositions({stay, wise, @setToFirstCharacterOnLinewise})
 
-class Select extends Operator
-  @extend()
+class SelectBase extends Operator
+  @extend(false)
   flashTarget: false
   recordable: false
-  updateSelectionProperties: true
 
   execute: ->
-    if @updateSelectionProperties
-      for $selection in @swrap.getSelections(@editor) when not $selection.hasProperties()
-        $selection.saveProperties()
-
     @startMutation => @selectTarget()
 
     if (@target.selectSucceeded)
@@ -321,29 +316,32 @@ class Select extends Operator
     else
       @cancelOperation()
 
-class SelectLatestChange extends Select
+class Select extends SelectBase
+  @extend()
+  execute: ->
+    for $selection in @swrap.getSelections(@editor) when not $selection.hasProperties()
+      $selection.saveProperties()
+    super
+
+class SelectLatestChange extends SelectBase
   @extend()
   @description: "Select latest yanked or changed range"
   target: 'ALatestChange'
-  updateSelectionProperties: false
 
-class SelectPreviousSelection extends Select
+class SelectPreviousSelection extends SelectBase
   @extend()
   target: "PreviousSelection"
-  updateSelectionProperties: false
 
-class SelectPersistentSelection extends Select
+class SelectPersistentSelection extends SelectBase
   @extend()
   @description: "Select persistent-selection and clear all persistent-selection, it's like convert to real-selection"
   target: "APersistentSelection"
   acceptPersistentSelection: false
-  updateSelectionProperties: false
 
-class SelectOccurrence extends Select
+class SelectOccurrence extends SelectBase
   @extend()
   @description: "Add selection onto each matching word within target range"
   occurrence: true
-  updateSelectionProperties: false
 
 # SelectInVisualMode: used in visual-mode
 # When text-object is invoked from normal or viusal-mode, operation would be
@@ -356,7 +354,7 @@ class SelectOccurrence extends Select
 #   - e.g: `v l`, `V j`, `v i p`...
 # - Directly invoke text-object from normal-mode
 #   - e.g: Invoke `Inner Paragraph` from command-palette.
-class SelectInVisualMode extends Select
+class SelectInVisualMode extends SelectBase
   @extend(false)
   acceptPresetOccurrence: false
   acceptPersistentSelection: false

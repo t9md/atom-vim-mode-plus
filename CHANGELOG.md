@@ -2,11 +2,11 @@
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.7.0...v1.8.0)
 - New: `select` operator just for `select` target.
   - `select` is super essential operator which have been used in every motion in `visual-mode`.
-  - But this `select` operator was not available to user.
+  - But this `select` operator was not available as command.
   - Now vmp expose this as `select` operator with slight modification.
     - Original `Select` operator used in `visual-mode` was renamed to `SelectInVisualMode`.
     - The diff between `Select` and `SelectInVisualMode` is
-      - `Select`: Accept `preset-occurrence` and `persistent-selection` but `SelectInVisualMode` is not so that usr can modify  selection without being interfered by these.
+      - `Select` accept `preset-occurrence` and `persistent-selection` but `SelectInVisualMode` is not so that user can modify selection without being interfered by existing `preset-occurrence` and `persistent-selection`.
 - New Config: `keymapSToSelect` conditional keymap. When enabled, `s` behaves as `select` operator.
   - `s p`: select paragraph. Equivalent to `v i p`.
   - `s i i`: select `inner-indentation` Equivalent to `v i i`.
@@ -15,14 +15,14 @@
   - `s o p o escape`: Place cursors to each start position of `occurrence` in paragraph.
   - `s o p I`: insert at start position of `occurrence` in paragraph.
   - `s o p A`: insert at end position of `occurrence` in paragraph.
-- Improve: make `[` and `]` stop at first row and last row(again).
-  - `[`(`move-up-to-edge`) and `]`(`move-down-to-edge`) now stop at first and last row as target column is stoppable.
+- Improve: `[`(`move-up-to-edge`) and `]`(`move-down-to-edge`) now motion stops at first and last row again.
+  - Now stoppable as long as target column is exist at first row or last row.
   - This behavior is added at #314(v0.49.0) but removed at #481(v0.66.0).
   - Now re-introduced this feature with avoiding edge case reported in #481.
 - Keymap: Shorthand keymap for `inner-entire` in `operator-pending-mode` for Linux and Windows.
   - Windows and Linux user can `ctrl-a` as shorthand of `i e`(`inner-entire`).
     - Usage example: `y ctrl-a` to yank all text in buffer.
-  - For macOS user `cmd-a` is provided as shorthand of `i e` from older version(v0.88.0).
+  - For macOS user `cmd-a` is provided as shorthand of `i e` in older version(v0.88.0).
 - New: Operator command `insert-at-head-of-occurrence`, `insert-at-head-of-subword-occurrence`.
   - Previously only `start` and `end` version of this commands are provided.
 

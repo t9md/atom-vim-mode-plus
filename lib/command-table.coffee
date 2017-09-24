@@ -3,6 +3,8 @@
 module.exports =
 Operator:
   file: "./operator"
+SelectBase:
+  file: "./operator"
 Select:
   file: "./operator"
   commandName: "vim-mode-plus:select"
