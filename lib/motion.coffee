@@ -87,12 +87,12 @@ class Motion extends Base
   select: ->
     @selectSucceeded = false
 
-    isOrWasVisual = @operator?.instanceof('Select') or @is('CurrentSelection') # need to care was visual for `.` repeated.
+    isOrWasVisual = @operator?.instanceof('SelectBase') or @is('CurrentSelection') # need to care was visual for `.` repeated.
     for selection in @editor.getSelections()
       selection.modifySelection =>
         @moveWithSaveJump(selection.cursor)
 
-      @selectSucceeded = @moveSucceeded ? not selection.isEmpty() or (@moveSuccessOnLinewise and @isLinewise())
+      @selectSucceeded = @moveSucceeded ? not selection.isEmpty() or (@isLinewise() and @moveSuccessOnLinewise)
 
       if isOrWasVisual or (@selectSucceeded and (@inclusive or @isLinewise()))
         $selection = @swrap(selection)
@@ -965,7 +965,7 @@ class Find extends Motion
   execute: ->
     super
     decorationType = "post-confirm"
-    decorationType += " long" if (@operator? and not @operator?.instanceof("Select"))
+    decorationType += " long" if (@operator? and not @operator?.instanceof("SelectBase"))
     @editor.component.getNextUpdatePromise().then =>
       @highlightTextInCursorRows(@input, decorationType)
 
