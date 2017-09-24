@@ -76,6 +76,7 @@ class Base
 
   # To override
   initialize: ->
+  resetState: ->
 
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.

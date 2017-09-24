@@ -40,6 +40,7 @@ class Motion extends Base
   verticalMotion: false
   moveSucceeded: null
   moveSuccessOnLinewise: false
+  selectSucceeded: false
 
   constructor: ->
     super
@@ -58,6 +59,9 @@ class Motion extends Base
       else
         @inclusive = not @inclusive
     @wise = wise
+
+  resetState: ->
+    @selectSucceeded = false
 
   setBufferPositionSafely: (cursor, point) ->
     cursor.setBufferPosition(point) if point?
@@ -85,16 +89,15 @@ class Motion extends Base
 
   # NOTE: Modify selection by modtion, selection is already "normalized" before this function is called.
   select: ->
-    @selectSucceeded = false
-
     isOrWasVisual = @operator?.instanceof('SelectBase') or @is('CurrentSelection') # need to care was visual for `.` repeated.
     for selection in @editor.getSelections()
       selection.modifySelection =>
         @moveWithSaveJump(selection.cursor)
 
-      @selectSucceeded = @moveSucceeded ? not selection.isEmpty() or (@isLinewise() and @moveSuccessOnLinewise)
+      selectSucceeded = @moveSucceeded ? not selection.isEmpty() or (@isLinewise() and @moveSuccessOnLinewise)
+      @selectSucceeded or= selectSucceeded
 
-      if isOrWasVisual or (@selectSucceeded and (@inclusive or @isLinewise()))
+      if isOrWasVisual or (selectSucceeded and (@inclusive or @isLinewise()))
         $selection = @swrap(selection)
         $selection.saveProperties(true) # save property of "already-normalized-selection"
         $selection.applyWise(@wise)

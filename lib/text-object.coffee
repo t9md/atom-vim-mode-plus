@@ -28,6 +28,7 @@ class TextObject extends Base
   wise: 'characterwise'
   supportCount: false # FIXME #472, #66
   selectOnce: false
+  selectSucceeded: false
 
   @deriveInnerAndA: ->
     @generateClass("A" + @name, false)
@@ -61,11 +62,9 @@ class TextObject extends Base
     @wise = wise # FIXME currently not well supported
 
   resetState: ->
-    @selectSucceeded = null
+    @selectSucceeded = false
 
   execute: ->
-    @resetState()
-
     # Whennever TextObject is executed, it has @operator
     # Called from Operator::selectTarget()
     #  - `v i p`, is `SelectInVisualMode` operator with @target = `InnerParagraph`.
