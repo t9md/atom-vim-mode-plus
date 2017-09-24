@@ -282,7 +282,6 @@ describe "Occurrence", ->
 
           """
 
-
   describe "from visual-mode.is-narrowed", ->
     beforeEach ->
       set
@@ -1142,3 +1141,46 @@ describe "Occurrence", ->
             returrn name + " " + greeting
           }
           """
+
+  describe "confirmThresholdOnOccurrenceOperation config", ->
+    beforeEach ->
+      set textC: "|oo oo oo oo oo\n"
+      spyOn(atom, 'confirm')
+
+    describe "when under threshold", ->
+      beforeEach ->
+        settings.set("confirmThresholdOnOccurrenceOperation", 100)
+
+      it "does not ask confirmation on o-modifier", ->
+        ensure "c o", mode: "operator-pending", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']
+        expect(atom.confirm).not.toHaveBeenCalled()
+
+      it "does not ask confirmation on `g o`", ->
+        ensure "g o", mode: "normal", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']
+        expect(atom.confirm).not.toHaveBeenCalled()
+
+    describe "when exceeding threshold", ->
+      beforeEach ->
+        settings.set("confirmThresholdOnOccurrenceOperation", 2)
+
+      it "ask confirmation on o-modifier", ->
+        ensure "c o", mode: "operator-pending", occurrenceText: []
+        expect(atom.confirm).toHaveBeenCalled()
+
+      it "can cancel and confirm on o-modifier", ->
+        atom.confirm.andCallFake ({buttons}) -> buttons.indexOf("Cancel")
+        ensure "c o", mode: "operator-pending", occurrenceText: []
+        ensure mode: "operator-pending", occurrenceText: []
+        atom.confirm.andCallFake ({buttons}) -> buttons.indexOf("Continue")
+        ensure "o", mode: "operator-pending", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']
+
+      it "ask confirmation on `g o`", ->
+        ensure "g o", mode: "normal", occurrenceText: []
+        expect(atom.confirm).toHaveBeenCalled()
+
+      it "can cancel and confirm on `g o`", ->
+        atom.confirm.andCallFake ({buttons}) -> buttons.indexOf("Cancel")
+        ensure "g o", mode: "normal", occurrenceText: []
+        ensure mode: "normal", occurrenceText: []
+        atom.confirm.andCallFake ({buttons}) -> buttons.indexOf("Continue")
+        ensure "g o", mode: "normal", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']

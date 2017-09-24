@@ -19,6 +19,11 @@
   - Now stoppable as long as target column is exist at first row or last row.
   - This behavior is added at #314(v0.49.0) but removed at #481(v0.66.0).
   - Now re-introduced this feature with avoiding edge case reported in #481.
+- Improve: Confirm on occurrence operation #888, #894
+  - Now ask confirmation before starting to create `occurrence-markers` in `g o`(`preset-occurrence`), or `c o`(using `o` modifier) operation.
+  - Allows cancellation to avoid editor become unresponsive while creating tons of markers.
+    - e.g. If you `g o` accidentally for single-space and editor have huge matches, no longer freeze editor if you cancel confirmation.
+  - New: config `confirmThresholdOnOccurrenceOperation`(default `2000`) control confirmation threshold.
 - Keymap: Shorthand keymap for `inner-entire` in `operator-pending-mode` for Linux and Windows.
   - Windows and Linux user can `ctrl-a` as shorthand of `i e`(`inner-entire`).
     - Usage example: `y ctrl-a` to yank all text in buffer.
