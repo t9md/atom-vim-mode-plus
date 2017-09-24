@@ -493,6 +493,12 @@
   # In this scope, all operator keys are safely remappable.
   # e.g. p, d, D, x, u, X, S, ., r
 
+'.platform-win32, atom-text-editor.vim-mode-plus.operator-pending-mode':
+  'ctrl-a': 'vim-mode-plus:inner-entire'
+
+'.platform-linux, atom-text-editor.vim-mode-plus.operator-pending-mode':
+  'ctrl-a': 'vim-mode-plus:inner-entire'
+
 # operator-pending with operator specified
 # -------------------------
 # `c c` to works as change current line.
@@ -516,7 +522,6 @@
   'p': 'vim-mode-plus:inner-paragraph'
   'P': 'vim-mode-plus:inner-paragraph' # in-case SHIFT is not keyuped. when O modifier
   'r': 'vim-mode-plus:a-persistent-selection'
-  'v': 'vim-mode-plus:inner-visible-area'
   'f': 'vim-mode-plus:a-function'
   'F': 'vim-mode-plus:a-function' # in-case SHIFT is not keyuped. when O modifier
   'l': 'vim-mode-plus:inner-current-line'

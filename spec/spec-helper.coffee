@@ -25,6 +25,8 @@ beforeEach ->
   settings.set("stayOnTransformString", false)
   settings.set("stayOnYank", false)
   settings.set("stayOnDelete", false)
+  settings.set("stayOnSelectTextObject", false)
+  settings.set("stayOnVerticalMotion", true)
 
 # Utils
 # -------------------------

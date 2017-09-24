@@ -117,7 +117,7 @@ class ActivateInsertMode extends Operator
 
     else
       @investigateCursorPosition() if @getConfig("debug")
-      
+
       @normalizeSelectionsIfNecessary()
       @createBufferCheckpoint('undo')
       @selectTarget() if @target?
@@ -275,14 +275,16 @@ class InsertAtHeadOfTarget extends InsertByTarget
   @extend()
   which: 'head'
 
-class InsertAtStartOfOccurrence extends InsertByTarget
+class InsertAtStartOfOccurrence extends InsertAtStartOfTarget
   @extend()
-  which: 'start'
   occurrence: true
 
-class InsertAtEndOfOccurrence extends InsertByTarget
+class InsertAtEndOfOccurrence extends InsertAtEndOfTarget
   @extend()
-  which: 'end'
+  occurrence: true
+
+class InsertAtHeadOfOccurrence extends InsertAtHeadOfTarget
+  @extend()
   occurrence: true
 
 class InsertAtStartOfSubwordOccurrence extends InsertAtStartOfOccurrence
@@ -290,6 +292,10 @@ class InsertAtStartOfSubwordOccurrence extends InsertAtStartOfOccurrence
   occurrenceType: 'subword'
 
 class InsertAtEndOfSubwordOccurrence extends InsertAtEndOfOccurrence
+  @extend()
+  occurrenceType: 'subword'
+
+class InsertAtHeadOfSubwordOccurrence extends InsertAtHeadOfOccurrence
   @extend()
   occurrenceType: 'subword'
 

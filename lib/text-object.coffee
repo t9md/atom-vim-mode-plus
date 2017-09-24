@@ -68,7 +68,7 @@ class TextObject extends Base
 
     # Whennever TextObject is executed, it has @operator
     # Called from Operator::selectTarget()
-    #  - `v i p`, is `Select` operator with @target = `InnerParagraph`.
+    #  - `v i p`, is `SelectInVisualMode` operator with @target = `InnerParagraph`.
     #  - `d i p`, is `Delete` operator with @target = `InnerParagraph`.
     if @operator?
       @select()
@@ -92,7 +92,7 @@ class TextObject extends Base
     # Some TextObject's wise is NOT deterministic. It has to be detected from selected range.
     @wise ?= @swrap.detectWise(@editor)
 
-    if @mode is 'visual'
+    if @operator.instanceof("Select")
       if @selectSucceeded
         switch @wise
           when 'characterwise'
