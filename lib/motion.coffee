@@ -328,7 +328,7 @@ class MoveUpToEdge extends Motion
       false
     else
       point.isEqual(@editor.clipScreenPosition(point)) and
-        ((point.row is 0) or (point.row is @getVimLastBufferRow()))
+        ((point.row is 0) or (point.row is @getVimLastScreenRow()))
 
 class MoveDownToEdge extends MoveUpToEdge
   @extend()
