@@ -8,7 +8,10 @@ function dispatchCommand(commandName) {
 }
 
 function ensurePaneLayout(layout) {
-  const root = atom.workspace.getActivePane().getContainer().getRoot()
+  const root = atom.workspace
+    .getActivePane()
+    .getContainer()
+    .getRoot()
   expect(paneLayoutFor(root)).toEqual(layout)
 }
 
