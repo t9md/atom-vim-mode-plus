@@ -477,7 +477,7 @@ class SurroundBase extends TransformString
       innerText
 
   onConfirmTargetPairChar: (char) ->
-    @setTarget @new('APair', pair: @getPair(char))
+    @setTarget @new('APair').assign(pair: @getPair(char))
 
 class Surround extends SurroundBase
   @extend()
