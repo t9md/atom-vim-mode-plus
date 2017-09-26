@@ -1253,7 +1253,7 @@ class MoveToPair extends Motion
     return point if point = @getPointForTag(cursorPosition)
 
     # AAnyPairAllowForwarding return forwarding range or enclosing range.
-    range = @new("AAnyPairAllowForwarding", {@member}).getRange(cursor.selection)
+    range = @new("AAnyPairAllowForwarding").assign({@member}).getRange(cursor.selection)
     return null unless range?
     {start, end} = range
     if (start.row is cursorRow) and start.isGreaterThanOrEqual(cursorPosition)

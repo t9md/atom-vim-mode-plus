@@ -72,11 +72,18 @@ class Base
   constructor: (@vimState, properties=null) ->
     {@editor, @editorElement, @globalState, @swrap} = @vimState
     @name = @constructor.name
-    Object.assign(this, properties) if properties?
+    if properties?
+      if @getConfig("debug")
+        console.warn(properties)
+        # throw new Error("don't pass 2nd args to Base constructor")
+      Object.assign(this, properties)
 
   # To override
   initialize: ->
   resetState: ->
+
+  assign: (object) ->
+    Object.assign(this, object)
 
   # Operation processor execute only when isComplete() return true.
   # If false, operation processor postpone its execution.
@@ -154,6 +161,7 @@ class Base
       properties[key] = value
     klass = this.constructor
     new klass(vimState, properties)
+    # new klass(vimState).assign(properties)
 
   cancelOperation: ->
     @vimState.operationStack.cancel(this)
