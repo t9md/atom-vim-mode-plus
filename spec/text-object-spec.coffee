@@ -1747,7 +1747,7 @@ describe "TextObject", ->
           }
           """
 
-    describe 'slingle line comma separated text', ->
+    describe 'single line comma separated text', ->
       describe "change 1st arg", ->
         beforeEach ->               set textC: "var a = func(f|irst(1, 2, 3), second(), 3)"
         it 'change', -> ensure 'c i ,', textC: "var a = func(|, second(), 3)"
