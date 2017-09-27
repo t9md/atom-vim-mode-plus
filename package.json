@@ -15,7 +15,6 @@
     "fs-plus": "^2.8.1",
     "fuzzaldrin": "^2.1.0",
     "season": "^6.0.0",
-    "semver": "^5.1.0",
     "underscore-plus": "1.x"
   },
   "consumedServices": {
