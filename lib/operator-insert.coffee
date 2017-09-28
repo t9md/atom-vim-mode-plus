@@ -366,8 +366,8 @@ class ChangeToLastCharacterOfLine extends Change
   target: 'MoveToLastCharacterOfLine'
 
   execute: ->
-    if @target.wise is 'blockwise'
-      @onDidSelectTarget =>
+    @onDidSelectTarget =>
+      if @target.wise is 'blockwise'
         for blockwiseSelection in @getBlockwiseSelections()
           blockwiseSelection.extendMemberSelectionsToEndOfLine()
     super
