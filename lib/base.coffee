@@ -80,6 +80,8 @@ class Base
 
   # To override
   initialize: ->
+
+  # Called both on cancel and success
   resetState: ->
 
   assign: (object) ->
@@ -150,18 +152,10 @@ class Base
     klass = Base.getClass(name)
     new klass(@vimState, properties)
 
-  # FIXME: This is used to clone Motion::Search to support `n` and `N`
-  # But manual reseting and overriding property is bug prone.
-  # Should extract as search spec object and use it by
-  # creating clean instance of Search.
-  clone: (vimState) ->
-    properties = {}
-    excludeProperties = ['editor', 'editorElement', 'globalState', 'vimState', 'operator']
-    for own key, value of this when key not in excludeProperties
-      properties[key] = value
-    klass = this.constructor
-    new klass(vimState, properties)
-    # new klass(vimState).assign(properties)
+  # Currently used in repeat-search and repeat-find("n", "N", ";", ",").
+  rebindVimState: (vimState) ->
+    if vimState isnt @vimState
+      {@editor, @editorElement} = @vimState = vimState
 
   cancelOperation: ->
     @vimState.operationStack.cancel(this)
