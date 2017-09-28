@@ -260,7 +260,9 @@ class Operator extends Base
     return @targetSelected if @targetSelected?
     @mutationManager.init({@stayByMarker})
 
+    @target.wise = @submode if (@target.isMotion() and @mode is "visual")
     @target.forceWise(@wise) if @wise?
+
     @emitWillSelectTarget()
 
     # Allow cursor position adjustment 'on-will-select-target' hook.
@@ -461,8 +463,8 @@ class DeleteToLastCharacterOfLine extends Delete
   target: 'MoveToLastCharacterOfLine'
 
   execute: ->
-    if @target.wise is 'blockwise'
-      @onDidSelectTarget =>
+    @onDidSelectTarget =>
+      if @target.wise is 'blockwise'
         for blockwiseSelection in @getBlockwiseSelections()
           blockwiseSelection.extendMemberSelectionsToEndOfLine()
     super
