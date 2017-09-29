@@ -327,7 +327,6 @@ class Select extends SelectBase
 
 class SelectLatestChange extends SelectBase
   @extend()
-  @description: "Select latest yanked or changed range"
   target: 'ALatestChange'
 
 class SelectPreviousSelection extends SelectBase
@@ -336,13 +335,11 @@ class SelectPreviousSelection extends SelectBase
 
 class SelectPersistentSelection extends SelectBase
   @extend()
-  @description: "Select persistent-selection and clear all persistent-selection, it's like convert to real-selection"
   target: "APersistentSelection"
   acceptPersistentSelection: false
 
 class SelectOccurrence extends SelectBase
   @extend()
-  @description: "Add selection onto each matching word within target range"
   occurrence: true
 
 # SelectInVisualMode: used in visual-mode

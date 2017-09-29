@@ -46,7 +46,6 @@ class TransformString extends Operator
 class ToggleCase extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "`Hello World` -> `hELLO wORLD`"
   displayName: 'Toggle ~'
 
   getNewText: (text) ->
@@ -61,7 +60,6 @@ class ToggleCaseAndMoveRight extends ToggleCase
 class UpperCase extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "`Hello World` -> `HELLO WORLD`"
   displayName: 'Upper'
   getNewText: (text) ->
     text.toUpperCase()
@@ -69,7 +67,6 @@ class UpperCase extends TransformString
 class LowerCase extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "`Hello World` -> `hello world`"
   displayName: 'Lower'
   getNewText: (text) ->
     text.toLowerCase()
@@ -115,14 +112,12 @@ class CamelCase extends TransformString
   @extend()
   @registerToSelectList()
   displayName: 'Camelize'
-  @description: "`hello-world` -> `helloWorld`"
   getNewText: (text) ->
     _.camelize(text)
 
 class SnakeCase extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "`HelloWorld` -> `hello_world`"
   displayName: 'Underscore _'
   getNewText: (text) ->
     _.underscore(text)
@@ -130,7 +125,6 @@ class SnakeCase extends TransformString
 class PascalCase extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "`hello_world` -> `HelloWorld`"
   displayName: 'Pascalize'
   getNewText: (text) ->
     _.capitalize(_.camelize(text))
@@ -139,14 +133,12 @@ class DashCase extends TransformString
   @extend()
   @registerToSelectList()
   displayName: 'Dasherize -'
-  @description: "HelloWorld -> hello-world"
   getNewText: (text) ->
     _.dasherize(text)
 
 class TitleCase extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "`HelloWorld` -> `Hello World`"
   displayName: 'Titlize'
   getNewText: (text) ->
     _.humanizeEventName(_.dasherize(text))
@@ -154,7 +146,6 @@ class TitleCase extends TransformString
 class EncodeUriComponent extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "`Hello World` -> `Hello%20World`"
   displayName: 'Encode URI Component %'
   getNewText: (text) ->
     encodeURIComponent(text)
@@ -162,7 +153,6 @@ class EncodeUriComponent extends TransformString
 class DecodeUriComponent extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "`Hello%20World` -> `Hello World`"
   displayName: 'Decode URI Component %%'
   getNewText: (text) ->
     decodeURIComponent(text)
@@ -170,7 +160,6 @@ class DecodeUriComponent extends TransformString
 class TrimString extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "` hello ` -> `hello`"
   displayName: 'Trim string'
   getNewText: (text) ->
     text.trim()
@@ -178,7 +167,6 @@ class TrimString extends TransformString
 class CompactSpaces extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "`  a    b    c` -> `a b c`"
   displayName: 'Compact space'
   getNewText: (text) ->
     if text.match(/^[ ]+$/)
@@ -192,7 +180,6 @@ class RemoveLeadingWhiteSpaces extends TransformString
   @extend()
   @registerToSelectList()
   wise: 'linewise'
-  @description: "`  a b c` -> `a b c`"
   getNewText: (text, selection) ->
     trimLeft = (text) -> text.trimLeft()
     splitTextByNewLine(text).map(trimLeft).join("\n") + "\n"
@@ -300,7 +287,6 @@ class TransformStringByExternalCommand extends TransformString
 # -------------------------
 class TransformStringBySelectList extends TransformString
   @extend()
-  @description: "Interactively choose string transformation operator from select-list"
   @selectListItems: null
   requireInput: true
 
@@ -336,13 +322,11 @@ class TransformWordBySelectList extends TransformStringBySelectList
 
 class TransformSmartWordBySelectList extends TransformStringBySelectList
   @extend()
-  @description: "Transform InnerSmartWord by `transform-string-by-select-list`"
   target: "InnerSmartWord"
 
 # -------------------------
 class ReplaceWithRegister extends TransformString
   @extend()
-  @description: "Replace target with specified register value"
   flashType: 'operator-long'
 
   initialize: ->
@@ -363,7 +347,6 @@ class ReplaceWithRegister extends TransformString
 # Save text to register before replace
 class SwapWithRegister extends TransformString
   @extend()
-  @description: "Swap register value with target"
   getNewText: (text, selection) ->
     newText = @vimState.register.getText()
     @setTextToRegister(text, selection)
@@ -481,7 +464,6 @@ class SurroundBase extends TransformString
 
 class Surround extends SurroundBase
   @extend()
-  @description: "Surround target by specified character like `(`, `[`, `\"`"
 
   initialize: ->
     @onDidSelectTarget(@focusInputForSurroundChar.bind(this))
@@ -492,17 +474,14 @@ class Surround extends SurroundBase
 
 class SurroundWord extends Surround
   @extend()
-  @description: "Surround **word**"
   target: 'InnerWord'
 
 class SurroundSmartWord extends Surround
   @extend()
-  @description: "Surround **smart-word**"
   target: 'InnerSmartWord'
 
 class MapSurround extends Surround
   @extend()
-  @description: "Surround each word(`/\w+/`) within target"
   occurrence: true
   patternForOccurrence: /\w+/g
 
@@ -510,7 +489,6 @@ class MapSurround extends Surround
 # -------------------------
 class DeleteSurround extends SurroundBase
   @extend()
-  @description: "Delete specified surround character like `(`, `[`, `\"`"
 
   initialize: ->
     @focusInputForTargetPairChar() unless @target?
@@ -526,20 +504,17 @@ class DeleteSurround extends SurroundBase
 
 class DeleteSurroundAnyPair extends DeleteSurround
   @extend()
-  @description: "Delete surround character by auto-detect paired char from cursor enclosed pair"
   target: 'AAnyPair'
   requireInput: false
 
 class DeleteSurroundAnyPairAllowForwarding extends DeleteSurroundAnyPair
   @extend()
-  @description: "Delete surround character by auto-detect paired char from cursor enclosed pair and forwarding pair within same line"
   target: 'AAnyPairAllowForwarding'
 
 # Change Surround
 # -------------------------
 class ChangeSurround extends SurroundBase
   @extend()
-  @description: "Change surround character, specify both from and to pair char"
 
   showDeleteCharOnHover: ->
     hoverPoint = @mutationManager.getInitialPointForSelection(@editor.getLastSelection())
@@ -564,12 +539,10 @@ class ChangeSurround extends SurroundBase
 
 class ChangeSurroundAnyPair extends ChangeSurround
   @extend()
-  @description: "Change surround character, from char is auto-detected"
   target: "AAnyPair"
 
 class ChangeSurroundAnyPairAllowForwarding extends ChangeSurroundAnyPair
   @extend()
-  @description: "Change surround character, from char is auto-detected from enclosed and forwarding area"
   target: "AAnyPairAllowForwarding"
 
 # -------------------------
@@ -620,14 +593,12 @@ class JoinWithKeepingSpace extends JoinBase
 class JoinByInput extends JoinBase
   @extend()
   @registerToSelectList()
-  @description: "Transform multi-line to single-line by with specified separator character"
   requireInput: true
   trim: true
 
 class JoinByInputWithKeepingSpace extends JoinByInput
   @extend()
   @registerToSelectList()
-  @description: "Join lines without padding space between each line"
   trim: false
 
 # -------------------------
@@ -635,7 +606,6 @@ class JoinByInputWithKeepingSpace extends JoinByInput
 class SplitString extends TransformString
   @extend()
   @registerToSelectList()
-  @description: "Split single-line into multi-line by splitting specified separator chars"
   requireInput: true
   input: null
   target: "MoveToRelativeLine"
@@ -757,14 +727,12 @@ class RotateArgumentsBackwardsOfInnerPair extends RotateArgumentsOfInnerPair
 class Sort extends ChangeOrder
   @extend()
   @registerToSelectList()
-  @description: "Sort alphabetically"
   getNewList: (rows) ->
     rows.sort()
 
 class SortCaseInsensitively extends ChangeOrder
   @extend()
   @registerToSelectList()
-  @description: "Sort alphabetically with case insensitively"
   getNewList: (rows) ->
     rows.sort (rowA, rowB) ->
       rowA.localeCompare(rowB, sensitivity: 'base')
@@ -772,7 +740,6 @@ class SortCaseInsensitively extends ChangeOrder
 class SortByNumber extends ChangeOrder
   @extend()
   @registerToSelectList()
-  @description: "Sort numerically"
   getNewList: (rows) ->
     _.sortBy rows, (row) ->
       Number.parseInt(row) or Infinity
