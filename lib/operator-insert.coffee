@@ -311,13 +311,11 @@ class InsertAtEndOfSmartWord extends InsertByTarget
 
 class InsertAtPreviousFoldStart extends InsertByTarget
   @extend()
-  @description: "Move to previous fold start then enter insert-mode"
   which: 'start'
   target: 'MoveToPreviousFoldStart'
 
 class InsertAtNextFoldStart extends InsertByTarget
   @extend()
-  @description: "Move to next fold start then enter insert-mode"
   which: 'end'
   target: 'MoveToNextFoldStart'
 
@@ -345,7 +343,6 @@ class Change extends ActivateInsertMode
 
 class ChangeOccurrence extends Change
   @extend()
-  @description: "Change all matching word within target range"
   occurrence: true
 
 class Substitute extends Change
