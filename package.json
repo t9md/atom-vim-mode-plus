@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "atom-space-pen-views": "^2.1.1",
-    "delegato": "^1.0.0",
     "fs-plus": "^2.8.1",
     "fuzzaldrin": "^2.1.0",
     "season": "^6.0.0",
@@ -39,7 +38,6 @@
   },
   "devDependencies": {
     "coffeelint": "^1.10.1",
-    "eslint": "^4.8.0",
     "prettier": "^1.7.0",
     "semver": "^5.3.0"
   },

@@ -306,7 +306,6 @@ class Base
       subscriptions.push(@registerCommandFromSpec(name, spec))
     return subscriptions
 
-  classRegistry = {Base}
   @extend: (@command=true) ->
     @VMP_LOADING_FILE = VMP_LOADING_FILE
     if @name of classRegistry
@@ -387,5 +386,7 @@ class Base
     name = _.capitalize(_.camelize(command))
     if name of classRegistry
       classRegistry[name].operationKind
+
+classRegistry = {Base}
 
 module.exports = Base
