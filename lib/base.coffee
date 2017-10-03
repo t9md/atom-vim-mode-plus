@@ -312,12 +312,7 @@ class Base
       console.warn("Duplicate constructor #{@name}")
     classRegistry[@name] = this
 
-<<<<<<< HEAD
   @initClass = @extend
-=======
-  @initClass: (args...) ->
-    @extend(args...)
->>>>>>> origin/convert-misc-to-js
 
   @getSpec: ->
     if @isCommand()
