@@ -1,3 +1,6 @@
+# 1.8.1:
+- Maintenance: Add `Base.initClass` as alias of `Base.extend` for upcoming vmp changes.
+
 # 1.8.0: Expose select operator as normal command
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.7.0...v1.8.0)
 - New: `select` operator just for `select` target.

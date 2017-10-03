@@ -311,6 +311,8 @@ class Base
       console.warn("Duplicate constructor #{@name}")
     classRegistry[@name] = this
 
+  @initClass = @extend
+
   @getSpec: ->
     if @isCommand()
       file: @VMP_LOADING_FILE
