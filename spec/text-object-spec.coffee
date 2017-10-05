@@ -1747,7 +1747,14 @@ describe "TextObject", ->
           }
           """
 
-    describe 'slingle line comma separated text', ->
+    describe 'without parentheses', ->
+      it "works with css selectors", ->
+        set textC: "atom-te|xt-editor, :host {\n}"; ensure 'd a ,', textC: ":host {\n}"
+        set textC: "atom-text-editor, :ho|st {\n}"; ensure 'd a ,', textC: "atom-text-editor {\n}"
+        set textC: "atom-te|xt-editor .gutter, :host .gutter {\n}"; ensure 'd a ,', textC: ":host .gutter {\n}"
+        set textC: "atom-text-editor .gutter, :ho|st .gutter {\n}"; ensure 'd a ,', textC: "atom-text-editor .gutter {\n}"
+
+    describe 'single line comma separated text', ->
       describe "change 1st arg", ->
         beforeEach ->               set textC: "var a = func(f|irst(1, 2, 3), second(), 3)"
         it 'change', -> ensure 'c i ,', textC: "var a = func(|, second(), 3)"
