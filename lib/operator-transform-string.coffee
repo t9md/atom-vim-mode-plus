@@ -255,7 +255,7 @@ class TransformStringByExternalCommand extends TransformString
           text = @getNewText(selection.getText(), selection)
           selection.insertText(text, {@autoIndent})
         @restoreCursorPositionsIfNecessary()
-        @activateMode(@finalMode, @finalSubmode)
+        @activateMode("normal")
 
   collect: (resolve) ->
     @stdoutBySelection = new Map

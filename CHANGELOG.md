@@ -1,3 +1,7 @@
+# 1.8.2:
+- Fix: `TransformStringByExternalCommand` operator now correctly shift to `normal-mode` after operation finished.
+  - This operator is specifically used by `vim-mode-plus-replace-with-execution` pkg(was broken, but recover now).
+
 # 1.8.1:
 - Maintenance: Add `Base.initClass` as alias of `Base.extend` for upcoming vmp changes.
 
