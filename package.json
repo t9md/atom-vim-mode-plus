@@ -39,7 +39,7 @@
   "devDependencies": {
     "coffeelint": "^1.10.1",
     "prettier": "^1.7.0",
-    "semver": "^5.3.0"
+    "semver": "^5.4.1"
   },
   "scripts": {
     "test": "apm test",
