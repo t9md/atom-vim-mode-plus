@@ -371,7 +371,7 @@ describe "Motion Find", ->
       describe "can find one or two char", ->
         it "adjust to next-pre-confirmed", ->
           set                 textC: "|    a    ab    a    cd    a"
-          keystroke "f a "
+          keystroke "f a"
           element = vimState.inputEditor.element
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed")
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed")

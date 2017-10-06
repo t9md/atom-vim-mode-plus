@@ -673,7 +673,7 @@ MoveToLineByPercent:
   commandScope: "atom-text-editor"
 MoveToRelativeLine:
   file: "./motion"
-MoveToRelativeLineMinimumOne:
+MoveToRelativeLineMinimumTwo:
   file: "./motion"
 MoveToTopOfScreen:
   file: "./motion"

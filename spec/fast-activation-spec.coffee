@@ -62,9 +62,7 @@ describe "dirty work for fast package activation", ->
   describe "requrie as minimum num of file as possible on startup", ->
     shouldRequireFilesInOrdered = [
       "lib/main.js"
-      "lib/base.coffee"
-      "node_modules/delegato/lib/delegator.js"
-      "node_modules/mixto/lib/mixin.js"
+      "lib/base.js"
       "lib/settings.js"
       "lib/global-state.js"
       "lib/vim-state.js"
@@ -110,7 +108,7 @@ describe "dirty work for fast package activation", ->
             "node_modules/underscore-plus/lib/underscore-plus.js"
             "node_modules/underscore/underscore.js"
             "lib/blockwise-selection.js"
-            "lib/motion.coffee"
+            "lib/motion.js"
             "lib/cursor-style-manager.js"
           ]
           files = shouldRequireFilesInOrdered.concat(extraShouldRequireFilesInOrdered)
