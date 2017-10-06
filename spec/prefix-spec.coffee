@@ -494,16 +494,16 @@ describe "Prefixes", ->
           ]
 
         it "default", -> ensure register: {'"': text: "initial clipboard content"}
-        it 'c NOT mutate register', -> ensure 'c l', register: {'"': text: "initial clipboard content" }
-        it 'C NOT mutate register', -> ensure 'C', register: {'"': text: "initial clipboard content" }
-        it 'x NOT mutate register', -> ensure 'x', register: {'"': text: "initial clipboard content" }
-        it 'X NOT mutate register', -> ensure 'X', register: {'"': text: "initial clipboard content" }
-        it 'y NOT mutate register', -> ensure 'y l', register: {'"': text: "initial clipboard content" }
-        it 'Y NOT mutate register', -> ensure 'Y', register: {'"': text: "initial clipboard content" }
-        it 's NOT mutate register', -> ensure 's', register: {'"': text: "initial clipboard content" }
-        it 'S NOT mutate register', -> ensure 'S', register: {'"': text: "initial clipboard content" }
-        it 'd NOT mutate register', -> ensure 'd l', register: {'"': text: "initial clipboard content" }
-        it 'D NOT mutate register', -> ensure 'D', register: {'"': text: "initial clipboard content" }
+        it 'c NOT mutate register', -> ensure 'c l', register: {'"': text: "initial clipboard content"}
+        it 'C NOT mutate register', -> ensure 'C', register: {'"': text: "initial clipboard content"}
+        it 'x NOT mutate register', -> ensure 'x', register: {'"': text: "initial clipboard content"}
+        it 'X NOT mutate register', -> ensure 'X', register: {'"': text: "initial clipboard content"}
+        it 'y NOT mutate register', -> ensure 'y l', register: {'"': text: "initial clipboard content"}
+        it 'Y NOT mutate register', -> ensure 'Y', register: {'"': text: "initial clipboard content"}
+        it 's NOT mutate register', -> ensure 's', register: {'"': text: "initial clipboard content"}
+        it 'S NOT mutate register', -> ensure 'S', register: {'"': text: "initial clipboard content"}
+        it 'd NOT mutate register', -> ensure 'd l', register: {'"': text: "initial clipboard content"}
+        it 'D NOT mutate register', -> ensure 'D', register: {'"': text: "initial clipboard content"}
 
       describe "blackhole selectively", ->
         beforeEach ->
