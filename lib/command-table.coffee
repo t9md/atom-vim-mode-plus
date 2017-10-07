@@ -299,6 +299,10 @@ CompactSpaces:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:compact-spaces"
   commandScope: "atom-text-editor"
+AlignOccurrence:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:align-occurrence"
+  commandScope: "atom-text-editor"
 AlignStartOfOccurrence:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:align-start-of-occurrence"
