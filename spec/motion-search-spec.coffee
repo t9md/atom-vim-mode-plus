@@ -573,33 +573,33 @@ describe "Motion Search", ->
             """
         describe "when open and close pair is not at cursor line", ->
           it "fail to move", ->
-            set cursor: [0, 0]
+            set         cursor: [0, 0]
             ensure '%', cursor: [0, 0]
           it "fail to move", ->
-            set cursor: [2, 0]
+            set         cursor: [2, 0]
             ensure '%', cursor: [2, 0]
         describe "when open pair is forwarding to cursor in same row", ->
           it "move to closing pair", ->
-            set cursor: [1, 0]
+            set         cursor: [1, 0]
             ensure '%', cursor: [3, 3]
         describe "when cursor position is greater than open pair", ->
           it "fail to move", ->
-            set cursor: [1, 4]
+            set         cursor: [1, 4]
             ensure '%', cursor: [1, 4]
         describe "when close pair is forwarding to cursor in same row", ->
           it "move to closing pair", ->
-            set cursor: [3, 0]
+            set         cursor: [3, 0]
             ensure '%', cursor: [1, 3]
 
     describe "CurlyBracket", ->
       beforeEach ->
         set text: "{___}"
       it "cursor is at open pair, it move to closing pair", ->
-        set cursor: [0, 0]
+        set         cursor: [0, 0]
         ensure '%', cursor: [0, 4]
         ensure '%', cursor: [0, 0]
       it "cursor is at close pair, it move to open pair", ->
-        set cursor: [0, 4]
+        set         cursor: [0, 4]
         ensure '%', cursor: [0, 0]
         ensure '%', cursor: [0, 4]
 
@@ -607,11 +607,11 @@ describe "Motion Search", ->
       beforeEach ->
         set text: "[___]"
       it "cursor is at open pair, it move to closing pair", ->
-        set cursor: [0, 0]
+        set         cursor: [0, 0]
         ensure '%', cursor: [0, 4]
         ensure '%', cursor: [0, 0]
       it "cursor is at close pair, it move to open pair", ->
-        set cursor: [0, 4]
+        set         cursor: [0, 4]
         ensure '%', cursor: [0, 0]
         ensure '%', cursor: [0, 4]
 
