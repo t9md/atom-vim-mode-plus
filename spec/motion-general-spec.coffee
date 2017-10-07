@@ -161,23 +161,23 @@ describe "Motion general", ->
           """
           cursor: [1, 2]
 
-      it "by `j`", -> ensureBigCountMotion 'j', cursor: [2, 2]
-      it "by `k`", -> ensureBigCountMotion 'k', cursor: [0, 2]
-      it "by `h`", -> ensureBigCountMotion 'h', cursor: [1, 0]
-      it "by `l`", -> ensureBigCountMotion 'l', cursor: [1, 3]
-      it "by `[`", -> ensureBigCountMotion '[', cursor: [0, 2]
-      it "by `]`", -> ensureBigCountMotion ']', cursor: [2, 2]
-      it "by `w`", -> ensureBigCountMotion 'w', cursor: [2, 3]
-      it "by `W`", -> ensureBigCountMotion 'W', cursor: [2, 3]
-      it "by `b`", -> ensureBigCountMotion 'b', cursor: [0, 0]
-      it "by `B`", -> ensureBigCountMotion 'B', cursor: [0, 0]
-      it "by `e`", -> ensureBigCountMotion 'e', cursor: [2, 3]
-      it "by `(`", -> ensureBigCountMotion '(', cursor: [0, 0]
-      it "by `)`", -> ensureBigCountMotion ')', cursor: [2, 3]
-      it "by `{`", -> ensureBigCountMotion '{', cursor: [0, 0]
-      it "by `}`", -> ensureBigCountMotion '}', cursor: [2, 3]
-      it "by `-`", -> ensureBigCountMotion '-', cursor: [0, 0]
-      it "by `_`", -> ensureBigCountMotion '_', cursor: [2, 0]
+      it "by `j`",   -> ensureBigCountMotion 'j',   cursor: [2, 2]
+      it "by `k`",   -> ensureBigCountMotion 'k',   cursor: [0, 2]
+      it "by `h`",   -> ensureBigCountMotion 'h',   cursor: [1, 0]
+      it "by `l`",   -> ensureBigCountMotion 'l',   cursor: [1, 3]
+      it "by `[`",   -> ensureBigCountMotion '[',   cursor: [0, 2]
+      it "by `]`",   -> ensureBigCountMotion ']',   cursor: [2, 2]
+      it "by `w`",   -> ensureBigCountMotion 'w',   cursor: [2, 3]
+      it "by `W`",   -> ensureBigCountMotion 'W',   cursor: [2, 3]
+      it "by `b`",   -> ensureBigCountMotion 'b',   cursor: [0, 0]
+      it "by `B`",   -> ensureBigCountMotion 'B',   cursor: [0, 0]
+      it "by `e`",   -> ensureBigCountMotion 'e',   cursor: [2, 3]
+      it "by `(`",   -> ensureBigCountMotion '(',   cursor: [0, 0]
+      it "by `)`",   -> ensureBigCountMotion ')',   cursor: [2, 3]
+      it "by `{`",   -> ensureBigCountMotion '{',   cursor: [0, 0]
+      it "by `}`",   -> ensureBigCountMotion '}',   cursor: [2, 3]
+      it "by `-`",   -> ensureBigCountMotion '-',   cursor: [0, 0]
+      it "by `_`",   -> ensureBigCountMotion '_',   cursor: [2, 0]
       it "by `g {`", -> ensureBigCountMotion 'g {', cursor: [1, 2] # No fold no move but won't freeze.
       it "by `g }`", -> ensureBigCountMotion 'g }', cursor: [1, 2] # No fold no move but won't freeze.
       it "by `, N`", -> ensureBigCountMotion ', N', cursor: [1, 2] # No grammar, no move but won't freeze.
@@ -421,46 +421,46 @@ describe "Motion general", ->
       describe "when it can move", ->
         beforeEach -> set cursor: [1, 0]
         it "delete by j", -> ensure "d j", text: "000\n", mode: 'normal'
-        it "yank by j", -> ensure "y j", text: originalText, register: {'"': text: "111\n222\n"}, mode: 'normal'
+        it "yank by j", ->   ensure "y j", text: originalText, register: {'"': text: "111\n222\n"}, mode: 'normal'
         it "change by j", -> ensure "c j", textC: "000\n|\n", register: {'"': text: "111\n222\n"}, mode: 'insert'
 
         it "delete by k", -> ensure "d k", text: "222\n", mode: 'normal'
-        it "yank by k", -> ensure "y k", text: originalText, register: {'"': text: "000\n111\n"}, mode: 'normal'
+        it "yank by k", ->   ensure "y k", text: originalText, register: {'"': text: "000\n111\n"}, mode: 'normal'
         it "change by k", -> ensure "c k", textC: "|\n222\n", register: {'"': text: "000\n111\n"}, mode: 'insert'
 
       describe "when it can not move-up", ->
         beforeEach -> set cursor: [0, 0]
         it "delete by dk", -> ensure "d k", text: originalText, mode: 'normal'
-        it "yank by yk", -> ensure "y k", text: originalText, register: {'"': text: undefined}, mode: 'normal'
+        it "yank by yk", ->   ensure "y k", text: originalText, register: {'"': text: undefined}, mode: 'normal'
         it "change by ck", -> ensure "c k", textC: "|000\n111\n222\n", register: {'"': text: "\n"}, mode: 'insert' # FIXME, incompatible: shoud remain in normal.
 
       describe "when it can not move-down", ->
         beforeEach -> set cursor: [2, 0]
         it "delete by dj", -> ensure "d j", text: originalText, mode: 'normal'
-        it "yank by yj", -> ensure "y j", text: originalText, register: {'"': text: undefined}, mode: 'normal'
+        it "yank by yj", ->   ensure "y j", text: originalText, register: {'"': text: undefined}, mode: 'normal'
         it "change by cj", -> ensure "c j", textC: "000\n111\n|222\n", register: {'"': text: "\n"}, mode: 'insert' # FIXME, incompatible: shoud remain in normal.
 
     describe "moveSuccessOnLinewise=true motion", ->
       describe "when it can move", ->
         beforeEach -> set cursor: [1, 0]
         it "delete by G", -> ensure "d G", text: "000\n", mode: 'normal'
-        it "yank by G", -> ensure "y G", text: originalText, register: {'"': text: "111\n222\n"}, mode: 'normal'
+        it "yank by G", ->   ensure "y G", text: originalText, register: {'"': text: "111\n222\n"}, mode: 'normal'
         it "change by G", -> ensure "c G", textC: "000\n|\n", register: {'"': text: "111\n222\n"}, mode: 'insert'
 
         it "delete by gg", -> ensure "d g g", text: "222\n", mode: 'normal'
-        it "yank by gg", -> ensure "y g g", text: originalText, register: {'"': text: "000\n111\n"}, mode: 'normal'
+        it "yank by gg", ->   ensure "y g g", text: originalText, register: {'"': text: "000\n111\n"}, mode: 'normal'
         it "change by gg", -> ensure "c g g", textC: "|\n222\n", register: {'"': text: "000\n111\n"}, mode: 'insert'
 
       describe "when it can not move-up", ->
         beforeEach -> set cursor: [0, 0]
         it "delete by gg", -> ensure "d g g", text: "111\n222\n", mode: 'normal'
-        it "yank by gg", -> ensure "y g g", text: originalText, register: {'"': text: "000\n"}, mode: 'normal'
+        it "yank by gg", ->   ensure "y g g", text: originalText, register: {'"': text: "000\n"}, mode: 'normal'
         it "change by gg", -> ensure "c g g", textC: "|\n111\n222\n", register: {'"': text: "000\n"}, mode: 'insert'
       describe "when it can not move-down", ->
         beforeEach -> set cursor: [2, 0]
-        it "delete by G", -> ensure "d G", text: "000\n111\n", mode: 'normal'
-        it "yank by G", -> ensure "y G", text: originalText, register: {'"': text: "222\n"}, mode: 'normal'
-        it "change by G", -> ensure "c G", textC: "000\n111\n|\n", register: {'"': text: "222\n"}, mode: 'insert'
+        it "delete by G", ->  ensure "d G", text: "000\n111\n", mode: 'normal'
+        it "yank by G", ->    ensure "y G", text: originalText, register: {'"': text: "222\n"}, mode: 'normal'
+        it "change by G", ->  ensure "c G", textC: "000\n111\n|\n", register: {'"': text: "222\n"}, mode: 'insert'
 
   describe "the w keybinding", ->
     baseText = """
@@ -728,35 +728,30 @@ describe "Motion general", ->
   describe "the ge keybinding", ->
     describe "as a motion", ->
       it "moves the cursor to the end of the previous word", ->
-        set text: "1234 5678 wordword"
-        set cursor: [0, 16]
+        set text: "1234 5678 wordword", cursor: [0, 16]
         ensure 'g e', cursor: [0, 8]
         ensure 'g e', cursor: [0, 3]
         ensure 'g e', cursor: [0, 0]
         ensure 'g e', cursor: [0, 0]
 
       it "moves corrently when starting between words", ->
-        set text: "1 leading     end"
-        set cursor: [0, 12]
+        set text: "1 leading     end", cursor: [0, 12]
         ensure 'g e', cursor: [0, 8]
 
       it "takes a count", ->
-        set text: "vim mode plus is getting there"
-        set cursor: [0, 28]
+        set text: "vim mode plus is getting there", cursor: [0, 28]
         ensure '5 g e', cursor: [0, 2]
 
       # test will fail until the code is fixed
       xit "handles non-words inside words like vim", ->
-        set text: "1234 5678 word-word"
-        set cursor: [0, 18]
+        set text: "1234 5678 word-word", cursor: [0, 18]
         ensure 'g e', cursor: [0, 14]
         ensure 'g e', cursor: [0, 13]
         ensure 'g e', cursor: [0, 8]
 
       # test will fail until the code is fixed
       xit "handles newlines like vim", ->
-        set text: "1234\n\n\n\n5678"
-        set cursor: [5, 2]
+        set text: "1234\n\n\n\n5678", cursor: [5, 2]
         # vim seems to think an end-of-word is at every blank line
         ensure 'g e', cursor: [4, 0]
         ensure 'g e', cursor: [3, 0]
@@ -768,21 +763,18 @@ describe "Motion general", ->
 
     describe "when used by Change operator", ->
       it "changes word fragments", ->
-        set text: "cet document"
-        set cursor: [0, 7]
+        set text: "cet document", cursor: [0, 7]
         ensure 'c g e', cursor: [0, 2], text: "cement", mode: 'insert'
         # TODO: I'm not sure how to check the register after checking the document
         # ensure register: '"', text: 't docu'
 
       it "changes whitespace properly", ->
-        set text: "ce    doc"
-        set cursor: [0, 4]
+        set text: "ce    doc", cursor: [0, 4]
         ensure 'c g e', cursor: [0, 1], text: "c doc", mode: 'insert'
 
     describe "in characterwise visual mode", ->
       it "selects word fragments", ->
-        set text: "cet document"
-        set cursor: [0, 7]
+        set text: "cet document", cursor: [0, 7]
         ensure 'v g e', cursor: [0, 2], selectedText: "t docu"
 
   describe "the E keybinding", ->
@@ -824,8 +816,7 @@ describe "Motion general", ->
   describe "the gE keybinding", ->
     describe "as a motion", ->
       it "moves the cursor to the end of the previous word", ->
-        set text: "12.4 5~7- word-word"
-        set cursor: [0, 16]
+        set text: "12.4 5~7- word-word", cursor: [0, 16]
         ensure 'g E', cursor: [0, 8]
         ensure 'g E', cursor: [0, 3]
         ensure 'g E', cursor: [0, 0]
@@ -882,16 +873,16 @@ describe "Motion general", ->
         ensure '(', cursor: [0, 0]
 
       it "skips to beginning of sentence", ->
-        set cursor: [4, 15]
+        set         cursor: [4, 15]
         ensure '(', cursor: [4, 3]
 
       it "supports a count", ->
-        set cursor: [0, 0]
+        set           cursor: [0, 0]
         ensure '3 )', cursor: [1, 7]
         ensure '3 (', cursor: [0, 0]
 
       it "can move start of buffer or end of buffer at maximum", ->
-        set cursor: [0, 0]
+        set             cursor: [0, 0]
         ensure '2 0 )', cursor: [12, 13]
         ensure '2 0 (', cursor: [0, 0]
 
@@ -934,7 +925,7 @@ describe "Motion general", ->
           """
 
       it "moves without crashing", ->
-        set cursor: [0, 0]
+        set         cursor: [0, 0]
         ensure ')', cursor: [1, 4]
         ensure ')', cursor: [1, 4]
         ensure '(', cursor: [0, 0]
@@ -978,7 +969,7 @@ describe "Motion general", ->
 
     describe "as a motion", ->
       it "moves the cursor to the end of the paragraph", ->
-        set cursor: [0, 0]
+        set         cursor: [0, 0]
         ensure '}', cursor: [5, 0]
         ensure '}', cursor: [9, 0]
         ensure '}', cursor: [14, 0]
@@ -987,12 +978,12 @@ describe "Motion general", ->
         ensure '{', cursor: [2, 0]
 
       it "support count", ->
-        set cursor: [0, 0]
+        set           cursor: [0, 0]
         ensure '3 }', cursor: [14, 0]
         ensure '3 {', cursor: [2, 0]
 
       it "can move start of buffer or end of buffer at maximum", ->
-        set cursor: [0, 0]
+        set             cursor: [0, 0]
         ensure '1 0 }', cursor: [16, 14]
         ensure '1 0 {', cursor: [0, 0]
 
@@ -1080,9 +1071,7 @@ describe "Motion general", ->
 
       describe "as a selection", ->
         it 'selects to the first character of the line', ->
-          ensure 'd ^',
-            text: 'abcde'
-            cursor: [0, 0]
+          ensure 'd ^', text: 'abcde', cursor: [0, 0]
         it 'selects to the first character of the line', ->
           ensure 'd I', text: 'abcde', cursor: [0, 0]
 
@@ -1262,7 +1251,7 @@ describe "Motion general", ->
 
     describe "as a motion", ->
       it "moves the cursor to the number column", ->
-        ensure '|', cursor: [0, 0]
+        ensure '|',   cursor: [0, 0]
         ensure '1 |', cursor: [0, 0]
         ensure '3 |', cursor: [0, 2]
         ensure '4 |', cursor: [0, 3]
@@ -1280,7 +1269,7 @@ describe "Motion general", ->
 
     describe "as a motion from empty line", ->
       it "moves the cursor to the end of the line", ->
-        set cursor: [1, 0]
+        set         cursor: [1, 0]
         ensure '$', cursor: [1, 0]
 
     describe "as a motion", ->
@@ -1295,7 +1284,7 @@ describe "Motion general", ->
 
       it "should remain in the last column when moving down", ->
         ensure '$ j', cursor: [1, 0]
-        ensure 'j', cursor: [2, 9]
+        ensure 'j',   cursor: [2, 9]
 
       it "support count", ->
         ensure '3 $', cursor: [2, 9]
@@ -1520,7 +1509,7 @@ describe "Motion general", ->
     describe "as a motion", ->
       describe "in normal mode", ->
         it "moves the cursor to the beginning of the first line", ->
-          set cursor: [2, 0]
+          set           cursor: [2, 0]
           ensure 'g g', cursor: [0, 1]
 
         it "move to same position if its on first line and first char", ->
@@ -1571,16 +1560,16 @@ describe "Motion general", ->
 
     describe "as a motion", ->
       it "moves the cursor to the last nonblank character", ->
-        set cursor: [1, 0]
+        set           cursor: [1, 0]
         ensure 'g _', cursor: [1, 4]
 
       it "will move the cursor to the beginning of the line if necessary", ->
-        set cursor: [0, 2]
+        set           cursor: [0, 2]
         ensure 'g _', cursor: [0, 0]
 
     describe "as a repeated motion", ->
       it "moves the cursor downward and outward", ->
-        set cursor: [0, 0]
+        set             cursor: [0, 0]
         ensure '2 g _', cursor: [1, 4]
 
     describe "as a selection", ->
@@ -1623,8 +1612,8 @@ describe "Motion general", ->
         cursor: [0, 0]
 
     describe "put cursor on line specified by percent", ->
-      it "50%", -> ensure '5 0 %', cursor: [499, 0]
-      it "30%", -> ensure '3 0 %', cursor: [299, 0]
+      it "50%", ->  ensure '5 0 %',   cursor: [499, 0]
+      it "30%", ->  ensure '3 0 %',   cursor: [299, 0]
       it "100%", -> ensure '1 0 0 %', cursor: [999, 0]
       it "120%", -> ensure '1 2 0 %', cursor: [999, 0]
 
@@ -1696,14 +1685,14 @@ describe "Motion general", ->
 
     describe "gg, G, N%", ->
       it "go to row with keep column and respect cursor.goalColum", ->
-        ensure 'g g', cursor: [0, 10]
-        ensure '$', cursor: [0, 15]
-        ensure 'G', cursor: [2, 13]
+        ensure 'g g',     cursor: [0, 10]
+        ensure '$',       cursor: [0, 15]
+        ensure 'G',       cursor: [2, 13]
         expect(editor.getLastCursor().goalColumn).toBe(Infinity)
-        ensure '1 %', cursor: [0, 15]
+        ensure '1 %',     cursor: [0, 15]
         expect(editor.getLastCursor().goalColumn).toBe(Infinity)
-        ensure '1 0 h', cursor: [0, 5]
-        ensure '5 0 %', cursor: [1, 5]
+        ensure '1 0 h',   cursor: [0, 5]
+        ensure '5 0 %',   cursor: [1, 5]
         ensure '1 0 0 %', cursor: [2, 5]
 
     describe "H, M, L", ->
