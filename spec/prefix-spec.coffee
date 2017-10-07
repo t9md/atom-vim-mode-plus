@@ -451,23 +451,24 @@ describe "Prefixes", ->
     it "repeat operator and motion respectively", ->
       ensure '3 d 2 w', text: "666 777 888 999"
 
-  fdescribe "blackholeRegisteredOperators settings", ->
+  describe "blackholeRegisteredOperators settings", ->
+    originalText = "initial clipboard content"
     beforeEach ->
       set
         textC: "a|bc"
 
     describe "when false(default)", ->
-      it "default", -> ensure register: {'"': text: "initial clipboard content"}
-      it 'c mutate register', -> ensure 'c l', register: {'"': text: 'b'}
-      it 'C mutate register', -> ensure 'C', register: {'"': text: 'bc'}
-      it 'x mutate register', -> ensure 'x', register: {'"': text: 'b'}
-      it 'X mutate register', -> ensure 'X', register: {'"': text: 'a'}
-      it 'y mutate register', -> ensure 'y l', register: {'"': text: 'b'}
-      it 'Y mutate register', -> ensure 'Y', register: {'"': text: "abc\n"}
-      it 's mutate register', -> ensure 's', register: {'"': text: 'b'}
-      it 'S mutate register', -> ensure 'S', register: {'"': text: 'abc\n'}
-      it 'd mutate register', -> ensure 'd l', register: {'"': text: 'b'}
-      it 'D mutate register', -> ensure 'D', register: {'"': text: 'bc'}
+      it "default", -> ensure register: {'"': text: originalText}
+      it 'c update', -> ensure 'c l', register: {'"': text: 'b'}
+      it 'C update', -> ensure 'C', register: {'"': text: 'bc'}
+      it 'x update', -> ensure 'x', register: {'"': text: 'b'}
+      it 'X update', -> ensure 'X', register: {'"': text: 'a'}
+      it 'y update', -> ensure 'y l', register: {'"': text: 'b'}
+      it 'Y update', -> ensure 'Y', register: {'"': text: "abc\n"}
+      it 's update', -> ensure 's', register: {'"': text: 'b'}
+      it 'S update', -> ensure 'S', register: {'"': text: 'abc\n'}
+      it 'd update', -> ensure 'd l', register: {'"': text: 'b'}
+      it 'D update', -> ensure 'D', register: {'"': text: 'bc'}
 
     describe "when true(default)", ->
       describe "blackhole all", ->
@@ -493,17 +494,17 @@ describe "Prefixes", ->
             # "substitute*"
           ]
 
-        it "default", -> ensure register: {'"': text: "initial clipboard content"}
-        it 'c NOT mutate register', -> ensure 'c l', register: {'"': text: "initial clipboard content"}
-        it 'C NOT mutate register', -> ensure 'C', register: {'"': text: "initial clipboard content"}
-        it 'x NOT mutate register', -> ensure 'x', register: {'"': text: "initial clipboard content"}
-        it 'X NOT mutate register', -> ensure 'X', register: {'"': text: "initial clipboard content"}
-        it 'y NOT mutate register', -> ensure 'y l', register: {'"': text: "initial clipboard content"}
-        it 'Y NOT mutate register', -> ensure 'Y', register: {'"': text: "initial clipboard content"}
-        it 's NOT mutate register', -> ensure 's', register: {'"': text: "initial clipboard content"}
-        it 'S NOT mutate register', -> ensure 'S', register: {'"': text: "initial clipboard content"}
-        it 'd NOT mutate register', -> ensure 'd l', register: {'"': text: "initial clipboard content"}
-        it 'D NOT mutate register', -> ensure 'D', register: {'"': text: "initial clipboard content"}
+        it "default",      -> ensure        register: {'"': text: originalText}
+        it 'c NOT update', -> ensure 'c l', register: {'"': text: originalText}
+        it 'C NOT update', -> ensure 'C',   register: {'"': text: originalText}
+        it 'x NOT update', -> ensure 'x',   register: {'"': text: originalText}
+        it 'X NOT update', -> ensure 'X',   register: {'"': text: originalText}
+        it 'y NOT update', -> ensure 'y l', register: {'"': text: originalText}
+        it 'Y NOT update', -> ensure 'Y',   register: {'"': text: originalText}
+        it 's NOT update', -> ensure 's',   register: {'"': text: originalText}
+        it 'S NOT update', -> ensure 'S',   register: {'"': text: originalText}
+        it 'd NOT update', -> ensure 'd l', register: {'"': text: originalText}
+        it 'D NOT update', -> ensure 'D',   register: {'"': text: originalText}
 
       describe "blackhole selectively", ->
         beforeEach ->
@@ -513,17 +514,17 @@ describe "Prefixes", ->
             "substitute" # s
           ]
 
-        it "default", -> ensure register: {'"': text: "initial clipboard content"}
-        it 'c mutate register', -> ensure 'c l', register: {'"': text: 'b'}
-        it 'C NOT mutate register', -> ensure 'C', register: {'"': text: "initial clipboard content"}
-        it 'x NOT mutate register', -> ensure 'x', register: {'"': text: "initial clipboard content"}
-        it 'X mutate register', -> ensure 'X', register: {'"': text: 'a'}
-        it 'y mutate register', -> ensure 'y l', register: {'"': text: 'b'}
-        it 'Y mutate register', -> ensure 'Y', register: {'"': text: "abc\n"}
-        it 's NOT mutate register', -> ensure 's', register: {'"': text: "initial clipboard content"}
-        it 'S mutate register', -> ensure 'S', register: {'"': text: 'abc\n'}
-        it 'd mutate register', -> ensure 'd l', register: {'"': text: 'b'}
-        it 'D mutate register', -> ensure 'D', register: {'"': text: 'bc'}
+        it "default",      -> ensure        register: {'"': text: originalText}
+        it 'c update',     -> ensure 'c l', register: {'"': text: 'b'}
+        it 'C NOT update', -> ensure 'C',   register: {'"': text: originalText}
+        it 'x NOT update', -> ensure 'x',   register: {'"': text: originalText}
+        it 'X update',     -> ensure 'X',   register: {'"': text: 'a'}
+        it 'y update',     -> ensure 'y l', register: {'"': text: 'b'}
+        it 'Y update',     -> ensure 'Y',   register: {'"': text: "abc\n"}
+        it 's NOT update', -> ensure 's',   register: {'"': text: originalText}
+        it 'S update',     -> ensure 'S',   register: {'"': text: 'abc\n'}
+        it 'd update',     -> ensure 'd l', register: {'"': text: 'b'}
+        it 'D update',     -> ensure 'D',   register: {'"': text: 'bc'}
 
       describe "blackhole by wildcard", ->
         beforeEach ->
@@ -534,16 +535,16 @@ describe "Prefixes", ->
             # "yank*"
           ]
 
-        it "default", -> ensure register: {'"': text: "initial clipboard content"}
-        it 'c NOT mutate register', -> ensure 'c l', register: {'"': text: "initial clipboard content"}
-        it 'c still CAN update register if specified explicitly', -> ensure '" a c l', register: {'a': text: "b"}
-        it 'c NOT mutate register', -> ensure 'c l', register: {'"': text: "initial clipboard content"}
-        it 'C NOT mutate register', -> ensure 'C', register: {'"': text: "initial clipboard content"}
-        it 'x NOT mutate register', -> ensure 'x', register: {'"': text: "initial clipboard content"}
-        it 'X NOT mutate register', -> ensure 'X', register: {'"': text: "initial clipboard content"}
-        it 'y mutate register', -> ensure 'y l', register: {'"': text: 'b'}
-        it 'Y mutate register', -> ensure 'Y', register: {'"': text: "abc\n"}
-        it 's mutate register', -> ensure 's', register: {'"': text: 'b'}
-        it 'S mutate register', -> ensure 'S', register: {'"': text: 'abc\n'}
-        it 'd NOT mutate register', -> ensure 'd l', register: {'"': text: "initial clipboard content"}
-        it 'D NOT mutate register', -> ensure 'D', register: {'"': text: "initial clipboard content"}
+        it "default",      -> ensure        register: {'"': text: originalText}
+        it 'c NOT update', -> ensure 'c l', register: {'"': text: originalText}
+        it 'c update if specified', -> ensure '" a c l', register: {'a': text: "b"}
+        it 'c NOT update', -> ensure 'c l', register: {'"': text: originalText}
+        it 'C NOT update', -> ensure 'C',   register: {'"': text: originalText}
+        it 'x NOT update', -> ensure 'x',   register: {'"': text: originalText}
+        it 'X NOT update', -> ensure 'X',   register: {'"': text: originalText}
+        it 'y update',     -> ensure 'y l', register: {'"': text: 'b'}
+        it 'Y update',     -> ensure 'Y',   register: {'"': text: "abc\n"}
+        it 's update',     -> ensure 's',   register: {'"': text: 'b'}
+        it 'S update',     -> ensure 'S',   register: {'"': text: 'abc\n'}
+        it 'd NOT update', -> ensure 'd l', register: {'"': text: originalText}
+        it 'D NOT update', -> ensure 'D',   register: {'"': text: originalText}
