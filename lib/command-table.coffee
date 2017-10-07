@@ -299,6 +299,18 @@ CompactSpaces:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:compact-spaces"
   commandScope: "atom-text-editor"
+AlignOccurrence:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:align-occurrence"
+  commandScope: "atom-text-editor"
+AlignStartOfOccurrence:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:align-start-of-occurrence"
+  commandScope: "atom-text-editor"
+AlignEndOfOccurrence:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:align-end-of-occurrence"
+  commandScope: "atom-text-editor"
 RemoveLeadingWhiteSpaces:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:remove-leading-white-spaces"
