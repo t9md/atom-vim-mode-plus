@@ -650,3 +650,15 @@ describe "Motion Search", ->
         set cursor: [4, 2]; ensure '%', cursor: [0, 1]
         set cursor: [4, 3]; ensure '%', cursor: [0, 1]
         set cursor: [4, 4]; ensure '%', cursor: [0, 1]
+
+  describe "[regression gurad] repeat(n or N) after used as operator target", ->
+    it "repeat after d /", ->
+      set                   textC: "a1    |a2    a3    a4"
+      ensure "d / a enter", textC: "a1    |a3    a4",      mode: "normal", selectedText: ""
+      ensure "n",           textC: "a1    a3    |a4",      mode: "normal", selectedText: ""
+      ensure "N",           textC: "a1    |a3    a4",      mode: "normal", selectedText: ""
+    it "repeat after d ?", ->
+      set                   textC: "a1    a2    |a3    a4"
+      ensure "d ? a enter", textC: "a1    |a3    a4", mode: "normal", selectedText: ""
+      ensure "n",           textC: "|a1    a3    a4", mode: "normal", selectedText: ""
+      ensure "N",           textC: "a1    |a3    a4", mode: "normal", selectedText: ""

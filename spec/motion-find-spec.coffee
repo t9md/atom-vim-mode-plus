@@ -109,6 +109,29 @@ describe "Motion Find", ->
       set cursor: [0, 3]
       ensure 'd F a', text: 'abcabcabc\n'
 
+  describe "[regression gurad] repeat(; or ,) after used as operator target", ->
+    it "repeat after d f", ->
+      set             textC: "a1    |a2    a3    a4"
+      ensure "d f a", textC: "a1    |3    a4", mode: "normal", selectedText: ""
+      ensure ";",     textC: "a1    3    |a4", mode: "normal", selectedText: ""
+      ensure ",",     textC: "|a1    3    a4", mode: "normal", selectedText: ""
+    it "repeat after d t", ->
+      set             textC: "|a1    a2    a3    a4"
+      ensure "d t a", textC: "|a2    a3    a4", mode: "normal", selectedText: ""
+      ensure ";",     textC: "a2   | a3    a4", mode: "normal", selectedText: ""
+      ensure ",",     textC: "a|2    a3    a4", mode: "normal", selectedText: ""
+    it "repeat after d F", ->
+      set             textC: "a1    a2    a3    |a4"
+      ensure "d F a", textC: "a1    a2    |a4", mode: "normal", selectedText: ""
+      ensure ";",     textC: "a1    |a2    a4", mode: "normal", selectedText: ""
+      ensure ",",     textC: "a1    a2    |a4", mode: "normal", selectedText: ""
+    it "repeat after d T", ->
+      set             textC: "a1    a2    a3    |a4"
+      set             textC: "a1    a2    a|a4"
+      ensure "d T a", textC: "a1    a2    a|a4", mode: "normal", selectedText: ""
+      ensure ";",     textC: "a1    a|2    aa4", mode: "normal", selectedText: ""
+      ensure ",",     textC: "a1    a2   | aa4", mode: "normal", selectedText: ""
+
   describe "cancellation", ->
     it "keeps multiple-cursors when cancelled", ->
       set                 textC: "|   a\n!   a\n|   a\n"
