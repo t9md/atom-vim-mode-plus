@@ -472,6 +472,81 @@ describe "Operator TransformString", ->
         ensure 'g space w',
           text: '01234 90'
 
+  describe 'AlignOccurrence family', ->
+    beforeEach ->
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+          'g |': 'vim-mode-plus:align-occurrence'
+
+    describe "AlignOccurrence", ->
+      it "[c1] align by =", ->
+        set
+          textC: """
+
+          a |= 100
+          bcd = 1
+          ijklm = 1000
+
+          """
+        ensure "g | p",
+          textC: """
+
+          a |    = 100
+          bcd   = 1
+          ijklm = 1000
+
+          """
+      it "[c1] align by comma", ->
+        set
+          textC: """
+
+          a|, 100, 30
+          b, 30000, 50
+          200000, 1
+
+          """
+        ensure "g | p",
+          textC: """
+
+          a|,      100,   30
+          b,      30000, 50
+          200000, 1
+
+          """
+
+      it "[c1] align by non-word-char-ending", ->
+        set
+          textC: """
+
+          abc|: 10
+          defgh: 20
+          ij: 30
+
+          """
+        ensure "g | p",
+          textC: """
+
+          abc|:   10
+          defgh: 20
+          ij:    30
+
+          """
+      it "[c1] align by normal word", ->
+        set
+          textC: """
+
+          xxx fir|stName: "Hello", lastName: "World"
+          yyyyyyyy firstName: "Good Bye", lastName: "World"
+
+          """
+        ensure "g | p",
+          textC: """
+
+          xxx    |  firstName: "Hello", lastName: "World"
+          yyyyyyyy firstName: "Good Bye", lastName: "World"
+
+          """
+
   describe 'TrimString', ->
     beforeEach ->
       set
