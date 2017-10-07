@@ -73,20 +73,20 @@ describe "Motion Find", ->
       ensure 'f c', cursor: [0, 2]
 
     it 'extends visual selection in visual-mode and repetable', ->
-      ensure 'v', mode: ['visual', 'characterwise']
-      ensure 'f c', selectedText: 'abc', cursor: [0, 3]
-      ensure ';', selectedText: 'abcabc', cursor: [0, 6]
-      ensure ',', selectedText: 'abc', cursor: [0, 3]
+      ensure 'v',   mode: ['visual', 'characterwise']
+      ensure 'f c', selectedText: 'abc',    cursor: [0, 3]
+      ensure ';',   selectedText: 'abcabc', cursor: [0, 6]
+      ensure ',',   selectedText: 'abc',    cursor: [0, 3]
 
     it 'moves backwards to the first specified character it finds', ->
-      set cursor: [0, 2]
+      set           cursor: [0, 2]
       ensure 'F a', cursor: [0, 0]
 
     it 'respects count forward', ->
       ensure '2 f a', cursor: [0, 6]
 
     it 'respects count backward', ->
-      cursor: [0, 6]
+      set             cursor: [0, 6]
       ensure '2 F a', cursor: [0, 0]
 
     it "doesn't move if the character specified isn't found", ->
@@ -97,7 +97,7 @@ describe "Motion Find", ->
       # a bug was making this behaviour depend on the count
       ensure '1 1 f a', cursor: [0, 0]
       # and backwards now
-      set cursor: [0, 6]
+      set               cursor: [0, 6]
       ensure '1 0 F a', cursor: [0, 6]
       ensure '1 1 F a', cursor: [0, 6]
 
@@ -204,66 +204,66 @@ describe "Motion Find", ->
 
     it "repeat f in same direction", ->
       ensure 'f c', cursor: [0, 2]
-      ensure ';', cursor: [0, 5]
-      ensure ';', cursor: [0, 8]
+      ensure ';',   cursor: [0, 5]
+      ensure ';',   cursor: [0, 8]
 
     it "repeat F in same direction", ->
-      set cursor: [0, 10]
+      set           cursor: [0, 10]
       ensure 'F c', cursor: [0, 8]
-      ensure ';', cursor: [0, 5]
-      ensure ';', cursor: [0, 2]
+      ensure ';',   cursor: [0, 5]
+      ensure ';',   cursor: [0, 2]
 
     it "repeat f in opposite direction", ->
-      set cursor: [0, 6]
+      set           cursor: [0, 6]
       ensure 'f c', cursor: [0, 8]
-      ensure ',', cursor: [0, 5]
-      ensure ',', cursor: [0, 2]
+      ensure ',',   cursor: [0, 5]
+      ensure ',',   cursor: [0, 2]
 
     it "repeat F in opposite direction", ->
-      set cursor: [0, 4]
+      set           cursor: [0, 4]
       ensure 'F c', cursor: [0, 2]
-      ensure ',', cursor: [0, 5]
-      ensure ',', cursor: [0, 8]
+      ensure ',',   cursor: [0, 5]
+      ensure ',',   cursor: [0, 8]
 
     it "alternate repeat f in same direction and reverse", ->
       ensure 'f c', cursor: [0, 2]
-      ensure ';', cursor: [0, 5]
-      ensure ',', cursor: [0, 2]
+      ensure ';',   cursor: [0, 5]
+      ensure ',',   cursor: [0, 2]
 
     it "alternate repeat F in same direction and reverse", ->
-      set cursor: [0, 10]
+      set           cursor: [0, 10]
       ensure 'F c', cursor: [0, 8]
-      ensure ';', cursor: [0, 5]
-      ensure ',', cursor: [0, 8]
+      ensure ';',   cursor: [0, 5]
+      ensure ',',   cursor: [0, 8]
 
     it "repeat t in same direction", ->
       ensure 't c', cursor: [0, 1]
-      ensure ';', cursor: [0, 4]
+      ensure ';',   cursor: [0, 4]
 
     it "repeat T in same direction", ->
-      set cursor: [0, 10]
+      set           cursor: [0, 10]
       ensure 'T c', cursor: [0, 9]
-      ensure ';', cursor: [0, 6]
+      ensure ';',   cursor: [0, 6]
 
     it "repeat t in opposite direction first, and then reverse", ->
-      set cursor: [0, 3]
+      set           cursor: [0, 3]
       ensure 't c', cursor: [0, 4]
-      ensure ',', cursor: [0, 3]
-      ensure ';', cursor: [0, 4]
+      ensure ',',   cursor: [0, 3]
+      ensure ';',   cursor: [0, 4]
 
     it "repeat T in opposite direction first, and then reverse", ->
-      set cursor: [0, 4]
+      set           cursor: [0, 4]
       ensure 'T c', cursor: [0, 3]
-      ensure ',', cursor: [0, 4]
-      ensure ';', cursor: [0, 3]
+      ensure ',',   cursor: [0, 4]
+      ensure ';',   cursor: [0, 3]
 
     it "repeat with count in same direction", ->
-      set cursor: [0, 0]
+      set           cursor: [0, 0]
       ensure 'f c', cursor: [0, 2]
       ensure '2 ;', cursor: [0, 8]
 
     it "repeat with count in reverse direction", ->
-      set cursor: [0, 6]
+      set           cursor: [0, 6]
       ensure 'f c', cursor: [0, 8]
       ensure '2 ,', cursor: [0, 2]
 
@@ -322,7 +322,7 @@ describe "Motion Find", ->
         settings.set("ignoreCaseForFind", true)
 
       it "ignore case to find", ->
-        set textC: "|    A    ab    a    Ab    a"
+        set           textC: "|    A    ab    a    Ab    a"
         ensure "f a", textC: "    |A    ab    a    Ab    a"
         ensure ";",   textC: "    A    |ab    a    Ab    a"
         ensure ";",   textC: "    A    ab    |a    Ab    a"
@@ -333,14 +333,14 @@ describe "Motion Find", ->
         settings.set("useSmartcaseForFind", true)
 
       it "ignore case when input is lower char", ->
-        set textC: "|    A    ab    a    Ab    a"
+        set           textC: "|    A    ab    a    Ab    a"
         ensure "f a", textC: "    |A    ab    a    Ab    a"
         ensure ";",   textC: "    A    |ab    a    Ab    a"
         ensure ";",   textC: "    A    ab    |a    Ab    a"
         ensure ";",   textC: "    A    ab    a    |Ab    a"
 
       it "find case-sensitively when input is lager char", ->
-        set textC: "|    A    ab    a    Ab    a"
+        set           textC: "|    A    ab    a    Ab    a"
         ensure "f A", textC: "    |A    ab    a    Ab    a"
         ensure "f A", textC: "    A    ab    a    |Ab    a"
         ensure ",",   textC: "    |A    ab    a    Ab    a"
@@ -353,14 +353,14 @@ describe "Motion Find", ->
       it "can reuse f and t as ;, F and T as ',' respectively", ->
         set textC: "|    A    ab    a    Ab    a"
         ensure "f a", textC: "    A    |ab    a    Ab    a"
-        ensure "f",   textC: "    A    ab    |a    Ab    a"
-        ensure "f",   textC: "    A    ab    a    Ab    |a"
-        ensure "F",   textC: "    A    ab    |a    Ab    a"
-        ensure "F",   textC: "    A    |ab    a    Ab    a"
-        ensure "t",   textC: "    A    ab   | a    Ab    a"
-        ensure "t",   textC: "    A    ab    a    Ab   | a"
-        ensure "T",   textC: "    A    ab    a|    Ab    a"
-        ensure "T",   textC: "    A    a|b    a    Ab    a"
+        ensure "f", textC: "    A    ab    |a    Ab    a"
+        ensure "f", textC: "    A    ab    a    Ab    |a"
+        ensure "F", textC: "    A    ab    |a    Ab    a"
+        ensure "F", textC: "    A    |ab    a    Ab    a"
+        ensure "t", textC: "    A    ab   | a    Ab    a"
+        ensure "t", textC: "    A    ab    a    Ab   | a"
+        ensure "T", textC: "    A    ab    a|    Ab    a"
+        ensure "T", textC: "    A    a|b    a    Ab    a"
 
       it "behave as normal f if no successful previous find was exists", ->
         set                textC: "  |  A    ab    a    Ab    a"
