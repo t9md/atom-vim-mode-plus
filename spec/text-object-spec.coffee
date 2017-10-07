@@ -364,9 +364,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 2]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-double-quote", ->
       originalText = '" something in here and in "here" "'
@@ -394,9 +394,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 1]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
   describe "SingleQuote", ->
     describe "inner-single-quote", ->
@@ -469,9 +469,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 2]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-single-quote", ->
       originalText = "' something in here and in 'here' '"
@@ -611,9 +611,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 2]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
 
       describe "change mode to characterwise", ->
@@ -704,9 +704,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 1]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
 
       describe "change mode to characterwise", ->
@@ -799,9 +799,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 2]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-angle-bracket", ->
       beforeEach ->
@@ -830,24 +830,24 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 1]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
 
   describe "AllowForwarding family", ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
-          'i }':  'vim-mode-plus:inner-curly-bracket-allow-forwarding'
-          'i >':  'vim-mode-plus:inner-angle-bracket-allow-forwarding'
-          'i ]':  'vim-mode-plus:inner-square-bracket-allow-forwarding'
-          'i )':  'vim-mode-plus:inner-parenthesis-allow-forwarding'
+          'i }': 'vim-mode-plus:inner-curly-bracket-allow-forwarding'
+          'i >': 'vim-mode-plus:inner-angle-bracket-allow-forwarding'
+          'i ]': 'vim-mode-plus:inner-square-bracket-allow-forwarding'
+          'i )': 'vim-mode-plus:inner-parenthesis-allow-forwarding'
 
-          'a }':  'vim-mode-plus:a-curly-bracket-allow-forwarding'
-          'a >':  'vim-mode-plus:a-angle-bracket-allow-forwarding'
-          'a ]':  'vim-mode-plus:a-square-bracket-allow-forwarding'
-          'a )':  'vim-mode-plus:a-parenthesis-allow-forwarding'
+          'a }': 'vim-mode-plus:a-curly-bracket-allow-forwarding'
+          'a >': 'vim-mode-plus:a-angle-bracket-allow-forwarding'
+          'a ]': 'vim-mode-plus:a-square-bracket-allow-forwarding'
+          'a )': 'vim-mode-plus:a-parenthesis-allow-forwarding'
 
       set
         text: """
@@ -892,31 +892,19 @@ describe "TextObject", ->
           111}
           """
       describe "forwarding inner", ->
-        it "select forwarding range", ->
-          set cursor: [1, 0]; ensure "v i }", selectedText: textOneInner
-        it "select forwarding range", ->
-          set cursor: [2, 0]; ensure "v i }", selectedText: "22"
-        it "[case-1] no forwarding open pair, fail to find", ->
-          set cursor: [0, 0]; ensure "v i }", selectedText: '0', cursor: [0, 1]
-        it "[case-2] no forwarding open pair, select enclosed", ->
-          set cursor: [1, 4]; ensure "v i }", selectedText: textOneInner
-        it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [3, 0]; ensure "v i }", selectedText: textOneInner
-        it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [4, 0]; ensure "v i }", selectedText: textOneInner
+        it "select forwarding range", ->           set cursor: [1, 0]; ensure "v i }", selectedText: textOneInner
+        it "select forwarding range", ->           set cursor: [2, 0]; ensure "v i }", selectedText: "22"
+        it "[c1] no fwd open, fail to find", ->    set cursor: [0, 0]; ensure "v i }", selectedText: '0', cursor: [0, 1]
+        it "[c2] no fwd open, select enclosed", -> set cursor: [1, 4]; ensure "v i }", selectedText: textOneInner
+        it "[c3] no fwd open, select enclosed", -> set cursor: [3, 0]; ensure "v i }", selectedText: textOneInner
+        it "[c3] no fwd open, select enclosed", -> set cursor: [4, 0]; ensure "v i }", selectedText: textOneInner
       describe "forwarding a", ->
-        it "select forwarding range", ->
-          set cursor: [1, 0]; ensure "v a }", selectedText: textOneA
-        it "select forwarding range", ->
-          set cursor: [2, 0]; ensure "v a }", selectedText: "{22}"
-        it "[case-1] no forwarding open pair, fail to find", ->
-          set cursor: [0, 0]; ensure "v a }", selectedText: '0', cursor: [0, 1]
-        it "[case-2] no forwarding open pair, select enclosed", ->
-          set cursor: [1, 4]; ensure "v a }", selectedText: textOneA
-        it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [3, 0]; ensure "v a }", selectedText: textOneA
-        it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [4, 0]; ensure "v a }", selectedText: textOneA
+        it "select forwarding range", ->           set cursor: [1, 0]; ensure "v a }", selectedText: textOneA
+        it "select forwarding range", ->           set cursor: [2, 0]; ensure "v a }", selectedText: "{22}"
+        it "[c1] no fwd open, fail to find", ->    set cursor: [0, 0]; ensure "v a }", selectedText: '0', cursor: [0, 1]
+        it "[c2] no fwd open, select enclosed", -> set cursor: [1, 4]; ensure "v a }", selectedText: textOneA
+        it "[c3] no fwd open, select enclosed", -> set cursor: [3, 0]; ensure "v a }", selectedText: textOneA
+        it "[c3] no fwd open, select enclosed", -> set cursor: [4, 0]; ensure "v a }", selectedText: textOneA
 
   describe "AnyPairAllowForwarding", ->
     beforeEach ->
@@ -981,22 +969,22 @@ describe "TextObject", ->
           set {text}
 
         # Select
-        it "[1] forwarding", -> check [1, 0], 'v', {selectedText}
-        it "[2] openTag leftmost", -> check [1, 2], 'v', {selectedText}
-        it "[3] openTag rightmost", -> check [1, 8], 'v', {selectedText}
-        it "[4] Inner text", -> check [1, 10], 'v', {selectedText}
-        it "[5] closeTag leftmost", -> check [1, 14], 'v', {selectedText}
-        it "[6] closeTag rightmost", -> check [1, 21], 'v', {selectedText}
-        it "[7] right of closeTag", -> check [2, 0], 'v', {selectedText: innerABC}
+        it "[1] forwarding",         -> check [1,  0],  'v', {selectedText}
+        it "[2] openTag leftmost",   -> check [1,  2],  'v', {selectedText}
+        it "[3] openTag rightmost",  -> check [1,  8],  'v', {selectedText}
+        it "[4] Inner text",         -> check [1,  10], 'v', {selectedText}
+        it "[5] closeTag leftmost",  -> check [1,  14], 'v', {selectedText}
+        it "[6] closeTag rightmost", -> check [1,  21], 'v', {selectedText}
+        it "[7] right of closeTag",  -> check [2,  0],  'v', {selectedText: innerABC}
 
         # Delete
-        it "[8] forwarding", -> check [1, 0], 'd', {text: textAfterDeleted}
-        it "[9] openTag leftmost", -> check [1, 2], 'd', {text: textAfterDeleted}
-        it "[10] openTag rightmost", -> check [1, 8], 'd', {text: textAfterDeleted}
-        it "[11] Inner text", -> check [1, 10], 'd', {text: textAfterDeleted}
-        it "[12] closeTag leftmost", -> check [1, 14], 'd', {text: textAfterDeleted}
+        it "[8] forwarding",          -> check [1, 0],  'd', {text: textAfterDeleted}
+        it "[9] openTag leftmost",    -> check [1, 2],  'd', {text: textAfterDeleted}
+        it "[10] openTag rightmost",  -> check [1, 8],  'd', {text: textAfterDeleted}
+        it "[11] Inner text",         -> check [1, 10], 'd', {text: textAfterDeleted}
+        it "[12] closeTag leftmost",  -> check [1, 14], 'd', {text: textAfterDeleted}
         it "[13] closeTag rightmost", -> check [1, 21], 'd', {text: textAfterDeleted}
-        it "[14] right of closeTag", -> check [2, 0], 'd', {text: "<abc></abc>"}
+        it "[14] right of closeTag",  -> check [2, 0],  'd', {text: "<abc></abc>"}
 
       describe "expansion and deletion", ->
         beforeEach ->
@@ -1154,22 +1142,22 @@ describe "TextObject", ->
           set {text}
 
         # Select
-        it "[1] forwarding", -> check [1, 0], 'v', {selectedText}
-        it "[2] openTag leftmost", -> check [1, 2], 'v', {selectedText}
-        it "[3] openTag rightmost", -> check [1, 8], 'v', {selectedText}
-        it "[4] Inner text", -> check [1, 10], 'v', {selectedText}
-        it "[5] closeTag leftmost", -> check [1, 14], 'v', {selectedText}
+        it "[1] forwarding",         -> check [1, 0],  'v', {selectedText}
+        it "[2] openTag leftmost",   -> check [1, 2],  'v', {selectedText}
+        it "[3] openTag rightmost",  -> check [1, 8],  'v', {selectedText}
+        it "[4] Inner text",         -> check [1, 10], 'v', {selectedText}
+        it "[5] closeTag leftmost",  -> check [1, 14], 'v', {selectedText}
         it "[6] closeTag rightmost", -> check [1, 21], 'v', {selectedText}
-        it "[7] right of closeTag", -> check [2, 0], 'v', {selectedText: aABC}
+        it "[7] right of closeTag",  -> check [2, 0],  'v', {selectedText: aABC}
 
         # Delete
-        it "[8] forwarding", -> check [1, 0], 'd', {text: textAfterDeleted}
-        it "[9] openTag leftmost", -> check [1, 2], 'd', {text: textAfterDeleted}
-        it "[10] openTag rightmost", -> check [1, 8], 'd', {text: textAfterDeleted}
-        it "[11] Inner text", -> check [1, 10], 'd', {text: textAfterDeleted}
-        it "[12] closeTag leftmost", -> check [1, 14], 'd', {text: textAfterDeleted}
+        it "[8] forwarding",          -> check [1, 0],  'd', {text: textAfterDeleted}
+        it "[9] openTag leftmost",    -> check [1, 2],  'd', {text: textAfterDeleted}
+        it "[10] openTag rightmost",  -> check [1, 8],  'd', {text: textAfterDeleted}
+        it "[11] Inner text",         -> check [1, 10], 'd', {text: textAfterDeleted}
+        it "[12] closeTag leftmost",  -> check [1, 14], 'd', {text: textAfterDeleted}
         it "[13] closeTag rightmost", -> check [1, 21], 'd', {text: textAfterDeleted}
-        it "[14] right of closeTag", -> check [2, 0], 'd', {text: ""}
+        it "[14] right of closeTag",  -> check [2, 0],  'd', {text: ""}
 
   describe "SquareBracket", ->
     describe "inner-square-bracket", ->
