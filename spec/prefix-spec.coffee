@@ -57,7 +57,7 @@ describe "Prefixes", ->
           aaa bbb ccc
           """
       it "save to pre specified register", ->
-        ensure '" a y i w', register: a: text: 'aaa'
+        ensure '" a y i w',   register: a: text: 'aaa'
         ensure 'w " b y i w', register: b: text: 'bbb'
         ensure 'w " c y i w', register: c: text: 'ccc'
 
@@ -458,17 +458,17 @@ describe "Prefixes", ->
         textC: "a|bc"
 
     describe "when false(default)", ->
-      it "default", -> ensure register: {'"': text: originalText}
+      it "default",  -> ensure        register: {'"': text: originalText}
       it 'c update', -> ensure 'c l', register: {'"': text: 'b'}
-      it 'C update', -> ensure 'C', register: {'"': text: 'bc'}
-      it 'x update', -> ensure 'x', register: {'"': text: 'b'}
-      it 'X update', -> ensure 'X', register: {'"': text: 'a'}
+      it 'C update', -> ensure 'C',   register: {'"': text: 'bc'}
+      it 'x update', -> ensure 'x',   register: {'"': text: 'b'}
+      it 'X update', -> ensure 'X',   register: {'"': text: 'a'}
       it 'y update', -> ensure 'y l', register: {'"': text: 'b'}
-      it 'Y update', -> ensure 'Y', register: {'"': text: "abc\n"}
-      it 's update', -> ensure 's', register: {'"': text: 'b'}
-      it 'S update', -> ensure 'S', register: {'"': text: 'abc\n'}
+      it 'Y update', -> ensure 'Y',   register: {'"': text: "abc\n"}
+      it 's update', -> ensure 's',   register: {'"': text: 'b'}
+      it 'S update', -> ensure 'S',   register: {'"': text: 'abc\n'}
       it 'd update', -> ensure 'd l', register: {'"': text: 'b'}
-      it 'D update', -> ensure 'D', register: {'"': text: 'bc'}
+      it 'D update', -> ensure 'D',   register: {'"': text: 'bc'}
 
     describe "when true(default)", ->
       describe "blackhole all", ->
@@ -535,16 +535,16 @@ describe "Prefixes", ->
             # "yank*"
           ]
 
-        it "default",      -> ensure        register: {'"': text: originalText}
-        it 'c NOT update', -> ensure 'c l', register: {'"': text: originalText}
+        it "default",               -> ensure            register: {'"': text: originalText}
+        it 'c NOT update',          -> ensure 'c l',     register: {'"': text: originalText}
         it 'c update if specified', -> ensure '" a c l', register: {'a': text: "b"}
-        it 'c NOT update', -> ensure 'c l', register: {'"': text: originalText}
-        it 'C NOT update', -> ensure 'C',   register: {'"': text: originalText}
-        it 'x NOT update', -> ensure 'x',   register: {'"': text: originalText}
-        it 'X NOT update', -> ensure 'X',   register: {'"': text: originalText}
-        it 'y update',     -> ensure 'y l', register: {'"': text: 'b'}
-        it 'Y update',     -> ensure 'Y',   register: {'"': text: "abc\n"}
-        it 's update',     -> ensure 's',   register: {'"': text: 'b'}
-        it 'S update',     -> ensure 'S',   register: {'"': text: 'abc\n'}
-        it 'd NOT update', -> ensure 'd l', register: {'"': text: originalText}
-        it 'D NOT update', -> ensure 'D',   register: {'"': text: originalText}
+        it 'c NOT update',          -> ensure 'c l',     register: {'"': text: originalText}
+        it 'C NOT update',          -> ensure 'C',       register: {'"': text: originalText}
+        it 'x NOT update',          -> ensure 'x',       register: {'"': text: originalText}
+        it 'X NOT update',          -> ensure 'X',       register: {'"': text: originalText}
+        it 'y update',              -> ensure 'y l',     register: {'"': text: 'b'}
+        it 'Y update',              -> ensure 'Y',       register: {'"': text: "abc\n"}
+        it 's update',              -> ensure 's',       register: {'"': text: 'b'}
+        it 'S update',              -> ensure 'S',       register: {'"': text: 'abc\n'}
+        it 'd NOT update',          -> ensure 'd l',     register: {'"': text: originalText}
+        it 'D NOT update',          -> ensure 'D',       register: {'"': text: originalText}
