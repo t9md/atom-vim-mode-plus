@@ -438,3 +438,113 @@ describe "Prefixes", ->
       ensure 'd 2 w', text: "222 333 444 555 666 777 888 999"
     it "repeat operator and motion respectively", ->
       ensure '3 d 2 w', text: "666 777 888 999"
+  describe "Count modifier", ->
+    beforeEach ->
+      set
+        text: "000 111 222 333 444 555 666 777 888 999"
+        cursor: [0, 0]
+
+    it "repeat operator", ->
+      ensure '3 d w', text: "333 444 555 666 777 888 999"
+    it "repeat motion", ->
+      ensure 'd 2 w', text: "222 333 444 555 666 777 888 999"
+    it "repeat operator and motion respectively", ->
+      ensure '3 d 2 w', text: "666 777 888 999"
+
+  describe "blackholeRegisteredOperators settings", ->
+    originalText = "initial clipboard content"
+    beforeEach ->
+      set
+        textC: "a|bc"
+
+    describe "when false(default)", ->
+      it "default", -> ensure register: {'"': text: originalText}
+      it 'c update', -> ensure 'c l', register: {'"': text: 'b'}
+      it 'C update', -> ensure 'C', register: {'"': text: 'bc'}
+      it 'x update', -> ensure 'x', register: {'"': text: 'b'}
+      it 'X update', -> ensure 'X', register: {'"': text: 'a'}
+      it 'y update', -> ensure 'y l', register: {'"': text: 'b'}
+      it 'Y update', -> ensure 'Y', register: {'"': text: "abc\n"}
+      it 's update', -> ensure 's', register: {'"': text: 'b'}
+      it 'S update', -> ensure 'S', register: {'"': text: 'abc\n'}
+      it 'd update', -> ensure 'd l', register: {'"': text: 'b'}
+      it 'D update', -> ensure 'D', register: {'"': text: 'bc'}
+
+    describe "when true(default)", ->
+      describe "blackhole all", ->
+        beforeEach ->
+          settings.set "blackholeRegisteredOperators", [
+            "change" # c
+            "change-to-last-character-of-line" # C
+            "change-line" # C in visual
+            "change-occurrence"
+            "change-occurrence-from-search"
+            "delete" # d
+            "delete-to-last-character-of-line" # D
+            "delete-line" # D in visual
+            "delete-right" # x
+            "delete-left" # X
+            "substitute" # s
+            "substitute-line" # S
+            "yank" # y
+            "yank-line" # Y
+            # "delete*"
+            # "change*"
+            # "yank*"
+            # "substitute*"
+          ]
+
+        it "default",      -> ensure        register: {'"': text: originalText}
+        it 'c NOT update', -> ensure 'c l', register: {'"': text: originalText}
+        it 'C NOT update', -> ensure 'C',   register: {'"': text: originalText}
+        it 'x NOT update', -> ensure 'x',   register: {'"': text: originalText}
+        it 'X NOT update', -> ensure 'X',   register: {'"': text: originalText}
+        it 'y NOT update', -> ensure 'y l', register: {'"': text: originalText}
+        it 'Y NOT update', -> ensure 'Y',   register: {'"': text: originalText}
+        it 's NOT update', -> ensure 's',   register: {'"': text: originalText}
+        it 'S NOT update', -> ensure 'S',   register: {'"': text: originalText}
+        it 'd NOT update', -> ensure 'd l', register: {'"': text: originalText}
+        it 'D NOT update', -> ensure 'D',   register: {'"': text: originalText}
+
+      describe "blackhole selectively", ->
+        beforeEach ->
+          settings.set "blackholeRegisteredOperators", [
+            "change-to-last-character-of-line" # C
+            "delete-right" # x
+            "substitute" # s
+          ]
+
+        it "default",      -> ensure        register: {'"': text: originalText}
+        it 'c update',     -> ensure 'c l', register: {'"': text: 'b'}
+        it 'C NOT update', -> ensure 'C',   register: {'"': text: originalText}
+        it 'x NOT update', -> ensure 'x',   register: {'"': text: originalText}
+        it 'X update',     -> ensure 'X',   register: {'"': text: 'a'}
+        it 'y update',     -> ensure 'y l', register: {'"': text: 'b'}
+        it 'Y update',     -> ensure 'Y',   register: {'"': text: "abc\n"}
+        it 's NOT update', -> ensure 's',   register: {'"': text: originalText}
+        it 'S update',     -> ensure 'S',   register: {'"': text: 'abc\n'}
+        it 'd update',     -> ensure 'd l', register: {'"': text: 'b'}
+        it 'D update',     -> ensure 'D',   register: {'"': text: 'bc'}
+
+      describe "blackhole by wildcard", ->
+        beforeEach ->
+          settings.set "blackholeRegisteredOperators", [
+            "change*" # C
+            "delete*" # x
+            # "substitute*" # s
+            # "yank*"
+          ]
+
+        it "default",      -> ensure        register: {'"': text: originalText}
+        it 'c NOT update', -> ensure 'c l', register: {'"': text: originalText}
+        it 'c update if specified', -> ensure '" a c l', register: {'a': text: "b"}
+        it 'c NOT update', -> ensure 'c l', register: {'"': text: originalText}
+        it 'C NOT update', -> ensure 'C',   register: {'"': text: originalText}
+        it 'x NOT update', -> ensure 'x',   register: {'"': text: originalText}
+        it 'X NOT update', -> ensure 'X',   register: {'"': text: originalText}
+        it 'y update',     -> ensure 'y l', register: {'"': text: 'b'}
+        it 'Y update',     -> ensure 'Y',   register: {'"': text: "abc\n"}
+        it 's update',     -> ensure 's',   register: {'"': text: 'b'}
+        it 'S update',     -> ensure 'S',   register: {'"': text: 'abc\n'}
+        it 'd NOT update', -> ensure 'd l', register: {'"': text: originalText}
+        it 'D NOT update', -> ensure 'D',   register: {'"': text: originalText}
