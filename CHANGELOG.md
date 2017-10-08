@@ -6,6 +6,7 @@
 - Breaking: CoffeeScript based custom-vmp-operation is no longer supported.
   - From this version, all operations are defined as ES6 class which is NOT extend-able by CoffeeScript.,
   - If you have custom-vmp-operation in your `init.coffee`, require rewrite to JS. See [Wiki](https://github.com/t9md/atom-vim-mode-plus/wiki/ExtendVimModePlusInInitFile).
+  - Also all vmp-plugin pkg I'm maintaining is rewritten this time, see [#895](https://github.com/t9md/atom-vim-mode-plus/pull/895) for detail.
 - Fix: Broken features broken from Atom-v1.22.0-beta0 now work again.
   - Fold related commands: `a-fold`, `inner-fold`, `move-to-next-fold-start` etc..
   - Comment text-object.
