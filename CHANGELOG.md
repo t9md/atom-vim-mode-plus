@@ -1,3 +1,29 @@
+# 1.9.0: Converted to JS, as a result, CoffeeScript based customization is no longer supported.
+- Maintenance: Convert from CoffeeScript to JavaScript for operator, motion, text-object codes.
+  - Now all running code is written in JavaScript.
+  - Still test-spec is written in CoffeScript.
+  - Through rewriting to JS, introduced lots of refactoring(architectural simplification, minor bug fixes).
+- Breaking: CoffeeScript based custom-vmp-operation is no longer supported.
+  - From this version, all operations are defined as ES6 class which is NOT extend-able by CoffeeScript.,
+  - If you have custom-vmp-operation in your `init.coffee`, require rewrite to JS. See [Wiki](https://github.com/t9md/atom-vim-mode-plus/wiki/ExtendVimModePlusInInitFile).
+- Fix: Broken features broken from Atom-v1.22.0-beta0 now work again.
+  - Fold related commands: `a-fold`, `inner-fold`, `move-to-next-fold-start` etc..
+  - Comment text-object.
+- New: Operator `AlignOccurrence`, `AlignStartOfOccurrence`, `AlignEndOfOccurrence`. #904 #906
+  - No default keymap(set it by yourself if necessary).
+  - Available from `transform-string-by-select-list`(`ctrl-s` for macOS user) commands.
+  - How align operator works.
+    - I introduce this operator with great simplicity by intention.
+    - It's always add space to start or end of occurrence to align occurrence.
+    - Add only, not trim existing spaces, if you want to remove consecutive spaces, use `compact-spaces` operator(`g space` for macOS).
+  - For general purpose aligning(such as align lines by `=` assignment), use pkg like [aligner](https://atom.io/packages/aligner).
+  - This operator's goodness is explicitness and manual control for pattern to use for align, which make it possible general purpose aligner tools is not good at.
+- New: `blackholeRegisteredOperators` to disable register update for selected operator commands. #901, #902
+  - Old `dontUpdateRegisterOnChangeOrSubstitute` are deprecated. it's setting is auto-migrated on first startup.
+  - Set list of operator commands to `blackholeRegisteredOperators`.
+    - E.g. `change, change-to-last-character-of-line, delete-right, delete-left`.
+  - `change*`, `substitute*`, `delete*` is special value available to specify ALL same family operators.
+
 # 1.8.2:
 - Fix: `TransformStringByExternalCommand` operator now correctly shift to `normal-mode` after operation finished.
   - This operator is specifically used by `vim-mode-plus-replace-with-execution` pkg(was broken, but recover now).
