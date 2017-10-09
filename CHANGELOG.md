@@ -1918,13 +1918,13 @@ When disabled, changes are not bundled and user can undo more granular level(sma
 - FIX: debug feature was broken
 - FIX:#4 select area when TextObject is executed via command-pallate(was throw err).
 
-# 0.1.1
+# 0.1.1 first public release of vim-mode-plus.
 - 1st public release
 
 # 0.1.0
 - 2015.9.21 rename vim-mode to vim-mode-plus
 
-# 0.0.0
+# 0.0.0 vim-mode-plus started as fork of vim-mode
 - 2015.8.1 forked from vim-mode.
 
 ---
