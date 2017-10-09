@@ -1,3 +1,6 @@
+# 1.9.1:
+- Fix: [CRITICAL] No longer throw exception by lack of `semver` dependency. Sorry!
+
 # 1.9.0: Converted to JS, as a result, CoffeeScript based customization is no longer supported.
 - Maintenance: Convert from CoffeeScript to JavaScript for operator, motion, text-object codes.
   - Now all running code is written in JavaScript.
