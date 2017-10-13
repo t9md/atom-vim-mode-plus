@@ -64,7 +64,6 @@ describe "dirty work for fast package activation", ->
       "lib/main.js"
       "lib/base.js"
       "lib/settings.js"
-      "lib/global-state.js"
       "lib/vim-state.js"
       "lib/mode-manager.js"
       "lib/command-table.coffee"
