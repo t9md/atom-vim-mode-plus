@@ -1618,11 +1618,9 @@ describe "Motion general", ->
       it "120%", -> ensure '1 2 0 %', cursor: [999, 0]
 
   describe "the H, M, L keybinding( stayOnVerticalMotio = false )", ->
-    [eel] = []
     beforeEach ->
       settings.set('stayOnVerticalMotion', false)
 
-      eel = editorElement
       set
         text: """
             1
@@ -1640,15 +1638,15 @@ describe "Motion general", ->
 
     describe "the H keybinding", ->
       it "moves the cursor to the non-blank-char on first row if visible", ->
-        spyOn(eel, 'getFirstVisibleScreenRow').andReturn(0)
+        spyOn(editor, 'getFirstVisibleScreenRow').andReturn(0)
         ensure 'H', cursor: [0, 2]
 
       it "moves the cursor to the non-blank-char on first visible row plus scroll offset", ->
-        spyOn(eel, 'getFirstVisibleScreenRow').andReturn(2)
+        spyOn(editor, 'getFirstVisibleScreenRow').andReturn(2)
         ensure 'H', cursor: [4, 2]
 
       it "respects counts", ->
-        spyOn(eel, 'getFirstVisibleScreenRow').andReturn(0)
+        spyOn(editor, 'getFirstVisibleScreenRow').andReturn(0)
         ensure '4 H', cursor: [3, 0]
 
     describe "the L keybinding", ->
@@ -1666,7 +1664,7 @@ describe "Motion general", ->
 
     describe "the M keybinding", ->
       beforeEach ->
-        spyOn(eel, 'getFirstVisibleScreenRow').andReturn(0)
+        spyOn(editor, 'getFirstVisibleScreenRow').andReturn(0)
         spyOn(editor, 'getLastVisibleScreenRow').andReturn(10)
 
       it "moves the cursor to the non-blank-char of middle of screen", ->
@@ -1697,7 +1695,7 @@ describe "Motion general", ->
 
     describe "H, M, L", ->
       beforeEach ->
-        spyOn(editorElement, 'getFirstVisibleScreenRow').andReturn(0)
+        spyOn(editor, 'getFirstVisibleScreenRow').andReturn(0)
         spyOn(editor, 'getLastVisibleScreenRow').andReturn(3)
 
       it "go to row with keep column and respect cursor.goalColum", ->

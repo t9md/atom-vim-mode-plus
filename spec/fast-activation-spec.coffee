@@ -54,8 +54,10 @@ describe "dirty work for fast package activation", ->
 
       ensureRequiredFiles = (files) ->
         should = files.map((file) -> packPath + file)
+
         # console.log "# should", should.join("\n")
         # console.log "# actual", getRequiredLibOrNodeModulePaths().join("\n")
+
         expect(getRequiredLibOrNodeModulePaths()).toEqual(should)
 
   # * To reduce IO and compile-evaluation of js file on startup
@@ -102,12 +104,10 @@ describe "dirty work for fast package activation", ->
           extraShouldRequireFilesInOrdered = [
             "lib/status-bar-manager.js"
             "lib/operation-stack.js"
-            "lib/selection-wrapper.js"
-            "lib/utils.js"
+            "lib/motion.js"
             "node_modules/underscore-plus/lib/underscore-plus.js"
             "node_modules/underscore/underscore.js"
-            "lib/blockwise-selection.js"
-            "lib/motion.js"
+            "lib/utils.js"
             "lib/cursor-style-manager.js"
           ]
           files = shouldRequireFilesInOrdered.concat(extraShouldRequireFilesInOrdered)

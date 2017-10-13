@@ -62,18 +62,12 @@ describe "Scrolling", ->
       editorElement.style.lineHeight = "20px"
 
       editorElement.setHeight(20 * 10)
-
-      if editorElement.measureDimensions?
-        # For Atom-v1.19
-        editorElement.measureDimensions()
-      else # For Atom-v1.18
-        # [TODO] Remove when v.1.19 become stable
-        editorElement.component.sampleFontStyling()
+      editorElement.measureDimensions()
 
       spyOn(editor, 'moveToFirstCharacterOfLine')
       spyOn(editorElement, 'setScrollTop')
-      spyOn(editorElement, 'getFirstVisibleScreenRow').andReturn(90)
-      spyOn(editorElement, 'getLastVisibleScreenRow').andReturn(110)
+      spyOn(editor, 'getFirstVisibleScreenRow').andReturn(90)
+      spyOn(editor, 'getLastVisibleScreenRow').andReturn(110)
       spyOn(editorElement, 'pixelPositionForScreenPosition').andReturn({top: 1000, left: 0})
 
     describe "the z<CR> keybinding", ->
