@@ -1775,3 +1775,12 @@ describe "Operator TransformString", ->
             Dog
             DOG\n
             """
+
+  describe "NumberingLines", ->
+    ensureNumbering = (args...) ->
+      dispatch(editor.element, 'vim-mode-plus:numbering-lines')
+      ensure args...
+
+    beforeEach -> set textC: "|a\nb\nc\n\n"
+    it "numbering by motion", ->     ensureNumbering "j", textC: "|1: a\n2: b\nc\n\n"
+    it "numbering by text-object", -> ensureNumbering "p", textC: "|1: a\n2: b\n3: c\n\n"
