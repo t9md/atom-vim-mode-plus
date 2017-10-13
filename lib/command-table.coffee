@@ -487,6 +487,10 @@ SortByNumber:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:sort-by-number"
   commandScope: "atom-text-editor"
+NumberingLines:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:numbering-lines"
+  commandScope: "atom-text-editor"
 Motion:
   file: "./motion"
 CurrentSelection:

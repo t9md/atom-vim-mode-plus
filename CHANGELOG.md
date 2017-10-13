@@ -1,3 +1,6 @@
+# 1.10.0: WIP
+- New: `numbering-lines` operator, which adds line number to each line. #915
+
 # 1.9.1:
 - Fix: [CRITICAL] No longer throw exception by lack of `semver` dependency. Sorry!
 
