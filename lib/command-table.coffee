@@ -303,13 +303,13 @@ AlignOccurrence:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:align-occurrence"
   commandScope: "atom-text-editor"
-AlignStartOfOccurrence:
+AlignOccurrenceByPadStart:
   file: "./operator-transform-string"
-  commandName: "vim-mode-plus:align-start-of-occurrence"
+  commandName: "vim-mode-plus:align-occurrence-by-pad-start"
   commandScope: "atom-text-editor"
-AlignEndOfOccurrence:
+AlignOccurrenceByPadEnd:
   file: "./operator-transform-string"
-  commandName: "vim-mode-plus:align-end-of-occurrence"
+  commandName: "vim-mode-plus:align-occurrence-by-pad-end"
   commandScope: "atom-text-editor"
 RemoveLeadingWhiteSpaces:
   file: "./operator-transform-string"
