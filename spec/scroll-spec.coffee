@@ -1,6 +1,6 @@
 {getVimState} = require './spec-helper'
 
-describe "Scrolling", ->
+fdescribe "Scrolling", ->
   [set, ensure, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
@@ -12,19 +12,10 @@ describe "Scrolling", ->
 
   describe "scrolling keybindings", ->
     beforeEach ->
-      if editorElement.measureDimensions?
-        # For Atom-v1.19
-        {component} = editor
-        component.element.style.height = component.getLineHeight() * 5 + 'px'
-        editorElement.measureDimensions()
-        initialRowRange = [0, 5]
-
-      else # For Atom-v1.18
-        # [TODO] Remove when v.1.19 become stable
-        editor.setLineHeightInPixels(10)
-        editorElement.setHeight(10 * 5)
-        atom.views.performDocumentPoll()
-        initialRowRange = [0, 4]
+      {component} = editor
+      component.element.style.height = component.getLineHeight() * 5 + 'px'
+      editorElement.measureDimensions()
+      initialRowRange = [0, 5]
 
       set
         cursor: [1, 2]
@@ -112,13 +103,7 @@ describe "Scrolling", ->
       editorElement.setHeight(600)
       editorElement.style.lineHeight = "10px"
       editorElement.style.font = "16px monospace"
-
-      if editorElement.measureDimensions?
-        # For Atom-v1.19
-        editorElement.measureDimensions()
-      else # For Atom-v1.18
-        # [TODO] Remove when v.1.19 become stable
-        atom.views.performDocumentPoll()
+      editorElement.measureDimensions()
 
       text = ""
       for i in [100..199]
@@ -127,12 +112,13 @@ describe "Scrolling", ->
       editor.setCursorBufferPosition([0, 0])
 
     describe "the zs keybinding", ->
+      startPosition = null
+
       zsPos = (pos) ->
         editor.setCursorBufferPosition([0, pos])
         keystroke 'z s'
         editorElement.getScrollLeft()
 
-      startPosition = NaN
       beforeEach ->
         startPosition = editorElement.getScrollLeft()
 

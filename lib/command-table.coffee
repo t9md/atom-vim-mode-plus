@@ -1255,6 +1255,8 @@ ScrollCursorToBottomLeave:
   commandScope: "atom-text-editor"
 ScrollCursorToLeft:
   file: "./misc-command"
+  commandName: "vim-mode-plus:scroll-cursor-to-left"
+  commandScope: "atom-text-editor"
 ScrollCursorToRight:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-right"
