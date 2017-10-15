@@ -762,7 +762,7 @@ describe "Operator TransformString", ->
           runs ->
             set
               textC: """
-                hello = () => {
+                function hello() {
                   if true {
                   |  console.log('hello');
                   }
@@ -773,7 +773,7 @@ describe "Operator TransformString", ->
         it "adjustIndentation surrounded text ", ->
           ensure 'y s i f {',
             textC: """
-              hello = () => {
+              function hello() {
               |  {
                   if true {
                     console.log('hello');
