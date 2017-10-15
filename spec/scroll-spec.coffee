@@ -192,7 +192,7 @@ describe "Scrolling", ->
         expect(pos110).toBeGreaterThan(startPosition)
 
         pos109 = zePos(109)
-        expect(pos110 - pos109).toEqual(9)
+        expect(pos110 - pos109).toEqual(10)
 
       # FIXME description is no longer appropriate
       it "does nothing when very near the end of the line", ->

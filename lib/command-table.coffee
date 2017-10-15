@@ -1219,8 +1219,6 @@ ReplaceModeBackspace:
   file: "./misc-command"
   commandName: "vim-mode-plus:replace-mode-backspace"
   commandScope: "atom-text-editor.vim-mode-plus.insert-mode.replace"
-ScrollWithoutChangingCursorPosition:
-  file: "./misc-command"
 ScrollDown:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-down"
@@ -1239,14 +1237,6 @@ ScrollCursorToTopLeave:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-top-leave"
   commandScope: "atom-text-editor"
-ScrollCursorToBottom:
-  file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-bottom"
-  commandScope: "atom-text-editor"
-ScrollCursorToBottomLeave:
-  file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-bottom-leave"
-  commandScope: "atom-text-editor"
 ScrollCursorToMiddle:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-middle"
@@ -1255,10 +1245,16 @@ ScrollCursorToMiddleLeave:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-middle-leave"
   commandScope: "atom-text-editor"
+ScrollCursorToBottom:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:scroll-cursor-to-bottom"
+  commandScope: "atom-text-editor"
+ScrollCursorToBottomLeave:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:scroll-cursor-to-bottom-leave"
+  commandScope: "atom-text-editor"
 ScrollCursorToLeft:
   file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-left"
-  commandScope: "atom-text-editor"
 ScrollCursorToRight:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-right"
