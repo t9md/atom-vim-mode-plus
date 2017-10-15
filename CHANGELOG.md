@@ -1,8 +1,11 @@
-# 1.10.0: WIP
+# 1.10.0:
 - New: `numbering-lines` operator, which adds line number to each line.
+  - No default keymap, accessible via `transform-string-by-select-list`(`ctrl-s` for macOS user) command.
 - Improve: `z t`, `z enter` works properly when last screen row was visible. @dcalhoun #915.
-  - `editor.scrollPastEnd` need to be `true` to work these command properly, so show notification if not.
+  - `editor.scrollPastEnd` need to be `true` to work these command properly, so show notification if not enabled.
 - Fix: `z e` did not scroll until next cursor move is happens, but now scroll immediately.
+- Improve, Performance: Lazy load further
+- Improve: Improve integration with demo-mode package by making hover and flash highlight fadeout more in-sync.
 - Internal: Remove intermediate class `ScrollWithoutChangingCursorPosition` used for misc-scroll commands.
 
 # 1.9.1:
