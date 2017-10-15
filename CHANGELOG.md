@@ -1,5 +1,9 @@
 # 1.10.0: WIP
 - New: `numbering-lines` operator, which adds line number to each line.
+- Improve: `z t`, `z enter` works properly when last screen row was visible. @dcalhoun #915.
+  - `editor.scrollPastEnd` need to be `true` to work these command properly, so show notification if not.
+- Fix: `z e` did not scroll until next cursor move is happens, but now scroll immediately.
+- Internal: Remove intermediate class `ScrollWithoutChangingCursorPosition` used for misc-scroll commands.
 
 # 1.9.1:
 - Fix: [CRITICAL] No longer throw exception by lack of `semver` dependency. Sorry!
