@@ -254,7 +254,7 @@ describe "Motion Search", ->
         it "clear highlightSearch marker", ->
           ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
           dispatch(editorElement, 'vim-mode-plus:clear-highlight-search')
-          expect(vimState.highlightSearch.hasMarkers()).toBe(false)
+          ensureHightlightSearch length: 0, mode: 'normal'
 
       describe "clearHighlightSearchOnResetNormalMode", ->
         describe "when disabled", ->
@@ -269,8 +269,18 @@ describe "Motion Search", ->
             settings.set('clearHighlightSearchOnResetNormalMode', true)
             ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
             ensure "escape", mode: 'normal'
-            expect(vimState.highlightSearch.hasMarkers()).toBe(false)
-            ensure mode: 'normal'
+            ensureHightlightSearch length: 0, mode: 'normal'
+
+      describe "toggle-highlight-search command", ->
+        it "toggle highlightSearch config and re-hihighlight on re-enabled", ->
+          runs ->
+            expect(settings.get("highlightSearch")).toBe(true)
+            ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
+            dispatch(editorElement, 'vim-mode-plus:toggle-highlight-search')
+            ensureHightlightSearch length: 0, mode: 'normal'
+            dispatch(editorElement, 'vim-mode-plus:toggle-highlight-search')
+            expect(settings.get("highlightSearch")).toBe(true)
+            ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
 
   describe "IncrementalSearch", ->
     beforeEach ->

@@ -1,4 +1,10 @@
+# 1.10.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.10.0...v1.10.1)
+- Fix: `toggle-highlight-search` command now correctly clear/re-highlight when value changed #918
+  - This is regression introduced in v1.10.0 sorry!
+
 # 1.10.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.9.1...v1.10.0)
 - New: `numbering-lines` operator, which adds line number to each line.
   - No default keymap, accessible via `transform-string-by-select-list`(`ctrl-s` for macOS user) command.
 - Improve: `z t`, `z enter` works properly when last screen row was visible. @dcalhoun #915.
@@ -9,9 +15,11 @@
 - Internal: Remove intermediate class `ScrollWithoutChangingCursorPosition` used for misc-scroll commands.
 
 # 1.9.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.9.0...v1.9.1)
 - Fix: [CRITICAL] No longer throw exception by lack of `semver` dependency. Sorry!
 
 # 1.9.0: Converted to JS, as a result, CoffeeScript based customization is no longer supported.
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.8.2...v1.9.0)
 - Maintenance: Convert from CoffeeScript to JavaScript for operator, motion, text-object codes.
   - Now all running code is written in JavaScript.
   - Still test-spec is written in CoffeScript.
@@ -39,10 +47,12 @@
   - `change*`, `substitute*`, `delete*` is special value available to specify ALL same family operators.
 
 # 1.8.2:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.8.1...v1.8.2)
 - Fix: `TransformStringByExternalCommand` operator now correctly shift to `normal-mode` after operation finished.
   - This operator is specifically used by `vim-mode-plus-replace-with-execution` pkg(was broken, but recover now).
 
 # 1.8.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.8.0...v1.8.1)
 - Maintenance: Add `Base.initClass` as alias of `Base.extend` for upcoming vmp changes.
 
 # 1.8.0: Expose select operator as normal command
