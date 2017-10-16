@@ -1,7 +1,17 @@
-# 1.10.1:
-- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.10.0...v1.10.1)
+# 1.11.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.10.0...v1.11.0)
 - Fix: `toggle-highlight-search` command now correctly clear/re-highlight when value changed #918
   - This is regression introduced in v1.10.0 sorry!
+- Improve: `toggle-fold` now work with multiple cursors.
+- Improve, Breaking: How text-object function detect function scopes
+  - Improve: function scope detection for `type-script`.
+  - Improve, Breaking: `source.js` and `source.jsx`.
+    - Ignore arrow function. Use `a-fold`(e.g. `y z`) for arrow-function.
+    - Now no longer detect instantiation (`new Class`) call as function text-object.
+- Breaking: Rename following align operator since it was confusing.
+  - Old: `align-start-of-occurrence`, New: `align-occurrence-by-pad-start`
+  - Old: `align-end-of-occurrence`, New: `align-occurrence-by-pad-end`
+- Internal: Convention change, return value of `Base.prototype.initialize()` is not used, so no need to return `this`.
 
 # 1.10.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.9.1...v1.10.0)
