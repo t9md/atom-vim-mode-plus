@@ -1,4 +1,13 @@
+# 1.11.2:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.1...v1.11.2)
+- Fix: No longer throw exception when `demo-mode` pkg was activated, regression from v1.11.0.
+- Fix `remove-leading-white-spaces` operator work properly again regression from v1.11.0.
+- Improve: #701, When `wrapLeftRightMotion` is enabled and `l` in `vC` now can select new-line(can stop at column 0 of next-line).
+- Internal: No longer expect `Operator.protoype.setTarget` return instance.
+  - This eliminate unessential contract between caller/callee.
+
 # 1.11.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.0...v1.11.1)
 - Fix: `z c` no longer throw exception, this is regression from v1.11.0.
 - Fix: `highlightSearch`, fix minor not-highlighted issue where it should be.
   - Fix: Highlight newly opened editor is not highlighted when `mainMoudle.globalState` was not populated.
