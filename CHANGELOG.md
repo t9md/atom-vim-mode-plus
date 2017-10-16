@@ -1,3 +1,10 @@
+# 1.11.1:
+- Fix: `z c` no longer throw exception, this is regression from v1.11.0.
+- Fix: `highlightSearch`, fix minor not-highlighted issue where it should be.
+  - Fix: Highlight newly opened editor is not highlighted when `mainMoudle.globalState` was not populated.
+    - E.g. `pane:split-right`, `pane:split-down` on fuzzy-finder's `select-list`
+  - Fix: Now highlight newly opened editor even when it's not initially **activated**.(e.g. open on next pane without activating it).
+
 # 1.11.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.10.0...v1.11.0)
 - Fix: `toggle-highlight-search` command now correctly clear/re-highlight when value changed #918
