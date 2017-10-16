@@ -267,20 +267,58 @@ describe "Motion general", ->
 
     describe "the l keybinding", ->
       beforeEach ->
+        set
+          textC: """
+          0: aaaa
+          1: bbbb
+          2: cccc
+
+          4:\n
+          """
         set cursor: [1, 2]
 
-      it "moves the cursor right, but not to the next line", ->
-        ensure 'l', cursor: [1, 3]
-        ensure 'l', cursor: [1, 3]
+      describe "when wrapLeftRightMotion = false(=default)", ->
+        it "[normal] move to right, count support, but not wrap to next-line", ->
+          set cursor: [0, 0]
+          ensure 'l', cursor: [0, 1]
+          ensure 'l', cursor: [0, 2]
+          ensure '2 l', cursor: [0, 4]
+          ensure '5 l', cursor: [0, 6]
+          ensure 'l', cursor: [0, 6] # no wrap
+        it "[normal: at-blank-row] not wrap to next line", ->
+          set cursor: [3, 0]
+          ensure 'l', cursor: [3, 0], mode: "normal"
+        it "[visual: at-last-char] can select newline but not wrap to next-line", ->
+          set cursor: [0, 6]
+          ensure "v", selectedText: "a", mode: ['visual', 'characterwise'], cursor: [0, 7]
+          expect(editor.getLastCursor().isAtEndOfLine()).toBe(true)
+          ensure "l", selectedText: "a\n", mode: ['visual', 'characterwise'], cursor: [1, 0]
+          ensure "l", selectedText: "a\n", mode: ['visual', 'characterwise'], cursor: [1, 0]
+        it "[visual: at-blank-row] can select newline but not wrap to next-line", ->
+          set cursor: [3, 0]
+          ensure "v", selectedText: "\n", mode: ['visual', 'characterwise'], cursor: [4, 0]
+          ensure "l", selectedText: "\n", mode: ['visual', 'characterwise'], cursor: [4, 0]
 
-      it "moves the cursor to the next line if wrapLeftRightMotion is true", ->
-        settings.set('wrapLeftRightMotion', true)
-        ensure 'l l', cursor: [2, 0]
+      describe "when wrapLeftRightMotion = true", ->
+        beforeEach ->
+          settings.set('wrapLeftRightMotion', true)
 
-      describe "on a blank line", ->
-        it "doesn't move the cursor", ->
-          set text: "\n\n\n", cursor: [1, 0]
-          ensure 'l', cursor: [1, 0]
+        it "[normal: at-last-char] moves the cursor to the next line", ->
+          set cursor: [0, 6]
+          ensure 'l', cursor: [1, 0], mode: "normal"
+        it "[normal: at-blank-row] wrap to next line", ->
+          set cursor: [3, 0]
+          ensure 'l', cursor: [4, 0], mode: "normal"
+        it "[visual: at-last-char] select newline then move to next-line", ->
+          set cursor: [0, 6]
+          ensure "v", selectedText: "a", mode: ['visual', 'characterwise'], cursor: [0, 7]
+          expect(editor.getLastCursor().isAtEndOfLine()).toBe(true)
+          ensure "l", selectedText: "a\n", mode: ['visual', 'characterwise'], cursor: [1, 0]
+          ensure "l", selectedText: "a\n1", mode: ['visual', 'characterwise'], cursor: [1, 1]
+        it "[visual: at-blank-row] move to next-line", ->
+          set cursor: [3, 0]
+          ensure "v", selectedText: "\n", mode: ['visual', 'characterwise'], cursor: [4, 0]
+          ensure "l", selectedText: "\n4", mode: ['visual', 'characterwise'], cursor: [4, 1]
 
     describe "move-(up/down)-to-edge", ->
       text = null
