@@ -161,46 +161,30 @@ describe "Scrolling", ->
         keystroke 'z e'
         editorElement.getScrollLeft()
 
-      startPosition = NaN
+      startPosition = null
 
       beforeEach ->
         startPosition = editorElement.getScrollLeft()
 
       it "does nothing near the start of the line", ->
-        pos1 = zePos(1)
-        expect(pos1).toEqual(startPosition)
-
-        pos40 = zePos(40)
-        expect(pos40).toEqual(startPosition)
+        expect(zePos(1)).toEqual(startPosition)
+        expect(zePos(40)).toEqual(startPosition)
 
       it "moves the cursor the nearest it can to the right edge of the editor", ->
         pos110 = zePos(110)
         expect(pos110).toBeGreaterThan(startPosition)
-
-        pos109 = zePos(109)
-        expect(pos110 - pos109).toEqual(10)
+        expect(pos110 - zePos(109)).toEqual(10)
 
       # FIXME description is no longer appropriate
       it "does nothing when very near the end of the line", ->
         posEnd = zePos(399)
-        expect(editor.getCursorBufferPosition()).toEqual [0, 399]
-
-        pos397 = zePos(397)
-        expect(pos397).toBeLessThan(posEnd)
-        expect(editor.getCursorBufferPosition()).toEqual [0, 397]
-
+        expect(zePos(397)).toBeLessThan(posEnd)
         pos380 = zePos(380)
         expect(pos380).toBeLessThan(posEnd)
-
-        pos382 = zePos(382)
-        expect(pos382 - pos380).toEqual(19)
+        expect(zePos(382) - pos380).toEqual(19)
 
       it "does nothing if all lines are short", ->
         editor.setText('short')
         startPosition = editorElement.getScrollLeft()
-        pos1 = zePos(1)
-        expect(pos1).toEqual(startPosition)
-        expect(editor.getCursorBufferPosition()).toEqual [0, 1]
-        pos10 = zePos(10)
-        expect(pos10).toEqual(startPosition)
-        expect(editor.getCursorBufferPosition()).toEqual [0, 4]
+        expect(zePos(1)).toEqual(startPosition)
+        expect(zePos(10)).toEqual(startPosition)
