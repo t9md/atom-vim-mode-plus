@@ -2,13 +2,13 @@
 settings = require '../lib/settings'
 
 describe "Operator general", ->
-  [set, ensure, ensureByDispatch, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, ensureByDispatch, bindEnsureOption, keystroke, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, ensureByDispatch, keystroke} = vim
+      {set, ensure, ensureByDispatch, bindEnsureOption, keystroke} = vim
 
   describe "cancelling operations", ->
     it "clear pending operation", ->
@@ -1211,12 +1211,30 @@ describe "Operator general", ->
             """
 
   describe 'the m keybinding', ->
-    beforeEach ->
-      set text: '12\n34\n56\n', cursor: [0, 1]
+    ensureMarkByMode = (mode) ->
+      _ensure = bindEnsureOption({mode})
+      _ensure "m a", mark: "a": [0, 2]
+      _ensure "l m a", mark: "a": [0, 3]
+      _ensure "j m a", mark: "a": [1, 3]
+      _ensure "j m b", mark: "a": [1, 3], "b": [2, 3]
+      _ensure "l m c", mark: "a": [1, 3], "b": [2, 3], "c": [2, 4]
 
-    it 'marks a position', ->
-      keystroke 'm a'
-      expect(vimState.mark.get('a')).toEqual [0, 1]
+    beforeEach ->
+      set
+        textC: """
+        0:| 12
+        1: 34
+        2: 56
+        """
+
+    it "[normal] can mark multiple positon", ->
+      ensureMarkByMode("normal")
+    it "[vC] can mark", ->
+      keystroke "v"
+      ensureMarkByMode(["visual", "characterwise"])
+    it "[vL] can mark", ->
+      keystroke "V"
+      ensureMarkByMode(["visual", "linewise"])
 
   describe 'the R keybinding', ->
     beforeEach ->
