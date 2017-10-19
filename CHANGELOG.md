@@ -1,3 +1,6 @@
+# 1.11.3:
+- No longer throw exception when `change-surround-any-pair` cannot find surround pair.
+
 # 1.11.2:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.1...v1.11.2)
 - Fix: No longer throw exception when `demo-mode` pkg was activated, regression from v1.11.0.
