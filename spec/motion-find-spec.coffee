@@ -33,7 +33,7 @@ describe "Motion Find", ->
         text: "  " + "l".repeat(timesToExecute)
         cursor: [0, 0]
 
-    xdescribe 'the f read-char-via-keybinding performance', ->
+    describe 'the f read-char-via-keybinding performance', ->
       beforeEach ->
         vimState.useMiniEditor = false
 
@@ -49,7 +49,7 @@ describe "Motion Find", ->
         # set cursor: [0, 0]
         # measureWithPerformanceNow(testPerformanceOfKeybind)
 
-    describe '[with hidden-input] moves to l char', ->
+    xdescribe '[with hidden-input] moves to l char', ->
       it '[with hidden-input] moves to l char', ->
         testPerformanceOfHiddenInput = ->
           keystroke 'f l' for n in [1..timesToExecute]
