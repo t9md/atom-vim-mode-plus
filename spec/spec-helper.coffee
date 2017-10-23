@@ -266,9 +266,10 @@ class VimEditor
     textC_: ['cursor', 'cursorScreen']
 
   getAndDeleteKeystrokeOptions: (options) ->
-    {partialMatchTimeout} = options
+    {partialMatchTimeout, waitsForFinish} = options
     delete options.partialMatchTimeout
-    {partialMatchTimeout}
+    delete options.waitsForFinish
+    {partialMatchTimeout, waitsForFinish}
 
   # Public
   ensure: (args...) =>
@@ -286,13 +287,15 @@ class VimEditor
     @validateOptions(options, ensureOptionsOrdered, 'Invalid ensure option')
     @validateExclusiveOptions(options, ensureExclusiveRules)
 
-    # Input
-    unless _.isEmpty(keystroke)
-      @keystroke(keystroke, keystrokeOptions)
+    runSmart = (fn) -> if keystrokeOptions.waitsForFinish then runs(fn) else fn()
 
-    for name in ensureOptionsOrdered when options[name]?
-      method = 'ensure' + _.capitalize(_.camelize(name))
-      this[method](options[name])
+    runSmart =>
+      @keystroke(keystroke, keystrokeOptions) unless _.isEmpty(keystroke)
+
+    runSmart =>
+      for name in ensureOptionsOrdered when options[name]?
+        method = 'ensure' + _.capitalize(_.camelize(name))
+        this[method](options[name])
 
   bindEnsureOption: (optionsBase) =>
     (keystroke, options) =>

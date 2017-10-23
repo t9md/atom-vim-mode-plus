@@ -1106,7 +1106,11 @@ describe "Operator general", ->
       ensure 'd d 2 .', text: "78"
 
   describe "the r keybinding", ->
+    _ensure = null
     beforeEach ->
+      # `r` is executed async since it `readInputAfterExecute`.
+      _ensure = bindEnsureOption(waitsForFinish: true)
+
       set
         text: """
         12
@@ -1116,15 +1120,15 @@ describe "Operator general", ->
         cursor: [[0, 0], [1, 0]]
 
     it "replaces a single character", ->
-      ensure 'r x', text: 'x2\nx4\n\n'
+      _ensure 'r x', text: 'x2\nx4\n\n'
 
     it "remain visual-mode when cancelled", ->
-      ensure 'v r escape',
+      _ensure 'v r escape',
         text: '12\n34\n\n'
         mode: ['visual', 'characterwise']
 
     it "replaces a single character with a line break", ->
-      ensure 'r enter',
+      _ensure 'r enter',
         text: '\n2\n\n4\n\n'
         cursor: [[1, 0], [3, 0]]
 
@@ -1133,44 +1137,44 @@ describe "Operator general", ->
         textC_: """
         __a|bc
         """
-      ensure 'r enter',
+      _ensure 'r enter',
         textC_: """
         __a
         __|c
         """
 
     it "composes properly with motions", ->
-      ensure '2 r x', text: 'xx\nxx\n\n'
+      _ensure '2 r x', text: 'xx\nxx\n\n'
 
     it "does nothing on an empty line", ->
       set cursor: [2, 0]
-      ensure 'r x', text: '12\n34\n\n'
+      _ensure 'r x', text: '12\n34\n\n'
 
     it "does nothing if asked to replace more characters than there are on a line", ->
-      ensure '3 r x', text: '12\n34\n\n'
+      _ensure '3 r x', text: '12\n34\n\n'
 
     describe "cancellation", ->
       it "does nothing when cancelled", ->
-        ensure 'r escape', text: '12\n34\n\n', mode: 'normal'
+        _ensure 'r escape', text: '12\n34\n\n', mode: 'normal'
 
       it "keep multi-cursor on cancelled", ->
         set                textC: "|    a\n!    a\n|    a\n"
-        ensure "r escape", textC: "|    a\n!    a\n|    a\n", mode: "normal"
+        _ensure "r escape", textC: "|    a\n!    a\n|    a\n", mode: "normal"
 
       it "keep multi-cursor on cancelled", ->
         set                textC: "|**a\n!**a\n|**a\n"
-        ensure "v l",      textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
-        ensure "r escape", textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
+        _ensure "v l",      textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
+        _ensure "r escape", textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
 
     describe "when in visual mode", ->
       beforeEach ->
         keystroke 'v e'
 
       it "replaces the entire selection with the given character", ->
-        ensure 'r x', text: 'xx\nxx\n\n'
+        _ensure 'r x', text: 'xx\nxx\n\n'
 
       it "leaves the cursor at the beginning of the selection", ->
-        ensure 'r x', cursor: [[0, 0], [1, 0]]
+        _ensure 'r x', cursor: [[0, 0], [1, 0]]
 
     describe "when in visual-block mode", ->
       beforeEach ->
@@ -1188,27 +1192,32 @@ describe "Operator general", ->
           selectedTextOrdered: ['11', '22', '33', '44'],
 
       it "replaces each selection and put cursor on start of top selection", ->
-        ensure 'r x',
-          mode: 'normal'
-          cursor: [1, 4]
-          text: """
-            0:2345
-            1: oxxo
-            2: oxxo
-            3: oxxo
-            4: oxxo\n
-            """
-        set cursor: [1, 0]
-        ensure '.',
-          mode: 'normal'
-          cursor: [1, 0]
-          text: """
-            0:2345
-            xx oxxo
-            xx oxxo
-            xx oxxo
-            xx oxxo\n
-            """
+        runs ->
+          _ensure 'r x',
+            mode: 'normal'
+            cursor: [1, 4]
+            text: """
+              0:2345
+              1: oxxo
+              2: oxxo
+              3: oxxo
+              4: oxxo\n
+              """
+
+        runs ->
+          set cursor: [1, 0]
+
+        runs ->
+          _ensure '.',
+            mode: 'normal'
+            cursor: [1, 0]
+            text: """
+              0:2345
+              xx oxxo
+              xx oxxo
+              xx oxxo
+              xx oxxo\n
+              """
 
   describe 'the m keybinding', ->
     ensureMarkByMode = (mode) ->
