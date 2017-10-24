@@ -274,8 +274,10 @@ class VimEditor
   # Public
   ensure: (args...) =>
     switch args.length
-      when 1 then [options] = args
-      when 2 then [keystroke, options] = args
+      when 1
+        [options] = args
+      when 2
+        [keystroke, options] = args
 
     unless typeof(options) is 'object'
       throw new Error("Invalid options for 'ensure': must be 'object' but got '#{typeof(options)}'")
@@ -290,7 +292,7 @@ class VimEditor
     runSmart = (fn) -> if keystrokeOptions.waitsForFinish then runs(fn) else fn()
 
     runSmart =>
-      @keystroke(keystroke, keystrokeOptions) unless _.isEmpty(keystroke)
+      @_keystroke(keystroke, keystrokeOptions) unless _.isEmpty(keystroke)
 
     runSmart =>
       for name in ensureOptionsOrdered when options[name]?
@@ -319,12 +321,12 @@ class VimEditor
   bindEnsureWaitOption: (optionsBase) =>
     @bindEnsureOption(optionsBase, true)
 
-  keystroke: (keys, options={}) =>
+  _keystroke: (keys, options={}) =>
     if options.waitsForFinish
       finished = false
       @vimState.onDidFinishOperation -> finished = true
       delete options.waitsForFinish
-      @keystroke(keys, options)
+      @_keystroke(keys, options)
       waitsFor -> finished
       return
 
@@ -353,8 +355,9 @@ class VimEditor
     if options.partialMatchTimeout
       advanceClock(atom.keymaps.getPartialMatchTimeout())
 
-  keystrokeWait: (keys, options={}) =>
-    @keystroke keys, Object.assign(waitsForFinish: true)
+  keystroke: ->
+    # DONT remove this method since field extraction is still used in vmp plugins
+    throw new Error('Dont use `keystroke("x y z")`, instead use `ensure("x y z", {})`')
 
   # Ensure each options from here
   # -----------------------------

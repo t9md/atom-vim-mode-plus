@@ -2,13 +2,13 @@
 
 packageName = 'vim-mode-plus'
 describe "vim-mode-plus", ->
-  [set, ensure, keystroke, editor, editorElement, vimState, workspaceElement] = []
+  [set, ensure, editor, editorElement, vimState, workspaceElement] = []
 
   beforeEach ->
     getVimState (_vimState, vim) ->
       vimState = _vimState
       {editor, editorElement} = _vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure} = vim
 
     workspaceElement = getView(atom.workspace)
 

@@ -2,13 +2,13 @@
 settings = require '../lib/settings'
 
 describe "mini DSL used in vim-mode-plus's spec", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure} = vim
 
     runs ->
       jasmine.attachToDOM(editorElement)

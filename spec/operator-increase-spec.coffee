@@ -2,13 +2,13 @@
 settings = require '../lib/settings'
 
 describe "Operator Increase", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure} = vim
 
   describe "the ctrl-a/ctrl-x keybindings", ->
     beforeEach ->

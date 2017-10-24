@@ -2,7 +2,7 @@
 settings = require '../lib/settings'
 
 describe "Motion Find", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     settings.set('useExperimentalFasterInput', true)
@@ -11,7 +11,7 @@ describe "Motion Find", ->
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = _vim
+      {set, ensure} = _vim
 
   xdescribe 'the f performance', ->
     timesToExecute = 500
@@ -39,7 +39,7 @@ describe "Motion Find", ->
 
       it '[with keybind] moves to l char', ->
         testPerformanceOfKeybind = ->
-          keystroke "f l" for n in [1..timesToExecute]
+          ensure("f l", {}) for n in [1..timesToExecute]
           ensure cursor: [0, timesToExecute + 1]
 
         console.log "== keybind"
@@ -52,7 +52,7 @@ describe "Motion Find", ->
     xdescribe '[with hidden-input] moves to l char', ->
       it '[with hidden-input] moves to l char', ->
         testPerformanceOfHiddenInput = ->
-          keystroke 'f l' for n in [1..timesToExecute]
+          ensure('f l', {}) for n in [1..timesToExecute]
           ensure cursor: [0, timesToExecute + 1]
 
         console.log "== hidden"
@@ -291,12 +291,12 @@ describe "Motion Find", ->
 
       # replay same find in the other editor
       pane.activateItem(otherEditor)
-      other.keystroke ';'
+      other.ensure ';', {}
       ensure cursor: [0, 2]
       other.ensure cursor: [0, 4]
 
       # do a till in the other editor
-      other.keystroke 't r'
+      other.ensure 't r', {}
       ensure cursor: [0, 2]
       other.ensure cursor: [0, 5]
 
@@ -394,7 +394,7 @@ describe "Motion Find", ->
       describe "can find one or two char", ->
         it "adjust to next-pre-confirmed", ->
           set                 textC: "|    a    ab    a    cd    a"
-          keystroke "f a"
+          ensure "f a", {}
           element = vimState.inputEditor.element
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed")
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed")
@@ -404,7 +404,7 @@ describe "Motion Find", ->
           set                   textC: "|    a    ab    a    cd    a"
           ensure "3 f a enter", textC: "    a    ab    |a    cd    a"
           set                   textC: "|    a    ab    a    cd    a"
-          keystroke "3 f a"
+          ensure "3 f a", {}
           element = vimState.inputEditor.element
           dispatch(element, "vim-mode-plus:find-previous-pre-confirmed")
           dispatch(element, "vim-mode-plus:find-previous-pre-confirmed")
@@ -412,7 +412,7 @@ describe "Motion Find", ->
 
         it "is useful to skip earlier spot interactivelly", ->
           set  textC: 'text = "this is |\"example\" of use case"'
-          keystroke 'c t "'
+          ensure 'c t "', {}
           element = vimState.inputEditor.element
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed") # tab
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed") # tab

@@ -2,7 +2,7 @@
 settings = require '../lib/settings'
 
 describe "Motion Scroll", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
   lines = (n + " " + 'X'.repeat(10) for n in [0...100]).join("\n")
   text = new TextData(lines)
 
@@ -10,7 +10,7 @@ describe "Motion Scroll", ->
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = _vim
+      {set, ensure} = _vim
 
     runs ->
       jasmine.attachToDOM(editorElement)

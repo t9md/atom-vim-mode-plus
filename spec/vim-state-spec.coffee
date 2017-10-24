@@ -3,13 +3,13 @@ _ = require 'underscore-plus'
 settings = require '../lib/settings'
 
 describe "VimState", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure} = vim
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->
@@ -38,32 +38,32 @@ describe "VimState", ->
   describe "normal-mode", ->
     describe "when entering an insertable character", ->
       beforeEach ->
-        keystroke '\\'
+        ensure '\\', {}
 
       it "stops propagation", ->
         ensure text: ''
 
     describe "when entering an operator", ->
       beforeEach ->
-        keystroke 'd'
+        ensure 'd', {}
 
       describe "with an operator that can't be composed", ->
         beforeEach ->
-          keystroke 'x'
+          ensure 'x', {}
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the escape keybinding", ->
         beforeEach ->
-          keystroke 'escape'
+          ensure 'escape', {}
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the ctrl-c keybinding", ->
         beforeEach ->
-          keystroke 'ctrl-c'
+          ensure 'ctrl-c', {}
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
@@ -83,7 +83,7 @@ describe "VimState", ->
             abc
             """
           cursor: [0, 0]
-        keystroke 'v'
+        ensure 'v', {}
 
       it "puts the editor into visual characterwise mode", ->
         ensure
@@ -185,7 +185,7 @@ describe "VimState", ->
       ensure 'l', cursor: [0, 3], mode: 'insert'
 
   describe "insert-mode", ->
-    beforeEach -> keystroke 'i'
+    beforeEach -> ensure 'i', {}
 
     describe "with content", ->
       beforeEach ->
@@ -302,7 +302,7 @@ describe "VimState", ->
 
       describe "on a line with content", ->
         it "allows the cursor to be placed on the \n character", ->
-          keystroke 'R'
+          ensure 'R', {}
           set cursor: [0, 6]
           ensure cursor: [0, 6]
 
@@ -321,7 +321,7 @@ describe "VimState", ->
         one two three
         """
         cursor: [0, 4]
-      keystroke 'v'
+      ensure 'v', {}
 
     it "selects the character under the cursor", ->
       ensure
@@ -374,7 +374,7 @@ describe "VimState", ->
 
       xit "harmonizes selection directions", ->
         set cursor: [0, 0]
-        keystroke 'e e'
+        ensure 'e e', {}
         set addCursor: [0, Infinity]
         ensure 'h h',
           selectedBufferRange: [
@@ -554,19 +554,19 @@ describe "VimState", ->
 
     it "basic marking functionality", ->
       set cursor: [1, 1]
-      keystroke 'm t'
+      ensure 'm t', {}
       set cursor: [2, 2]
       ensure '` t', cursor: [1, 1]
 
     it "real (tracking) marking functionality", ->
       set cursor: [2, 2]
-      keystroke 'm q'
+      ensure 'm q', {}
       set cursor: [1, 2]
       ensure 'o escape ` q', cursor: [3, 2]
 
     it "real (tracking) marking functionality", ->
       set cursor: [2, 2]
-      keystroke 'm q'
+      ensure 'm q', {}
       set cursor: [1, 2]
       ensure 'd d escape ` q', cursor: [1, 2]
 

@@ -2,18 +2,18 @@
 settings = require '../lib/settings'
 
 describe "Operator general", ->
-  [set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption, keystroke, keystrokeWait] = []
+  [set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption] = []
   [editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption, keystroke, keystrokeWait} = vim
+      {set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption} = vim
 
   describe "cancelling operations", ->
     it "clear pending operation", ->
-      keystroke '/'
+      ensure '/', {}
       expect(vimState.operationStack.isEmpty()).toBe false
       vimState.searchInput.cancel()
       expect(vimState.operationStack.isEmpty()).toBe true
@@ -1048,7 +1048,7 @@ describe "Operator general", ->
           text: "12345\nabcde\nABCDE\nQWERT"
           cursor: [1, 1]
           register: '"': text: '123'
-        keystroke '2 p'
+        ensure '2 p', {}
 
       it "inserts the same line twice", ->
         ensure text: "12345\nab123123cde\nABCDE\nQWERT"
@@ -1095,7 +1095,7 @@ describe "Operator general", ->
         set text: "012\n", cursor: [0, 0]
         set register: '"': text: '345'
         set register: a: text: 'a'
-        keystroke 'P'
+        ensure 'P', {}
 
       it "inserts the contents of the default register above", ->
         ensure text: "345012\n", cursor: [0, 2]
@@ -1169,7 +1169,7 @@ describe "Operator general", ->
 
     describe "when in visual mode", ->
       beforeEach ->
-        keystroke 'v e'
+        ensure 'v e', {}
 
       it "replaces the entire selection with the given character", ->
         ensureWait 'r x', text: 'xx\nxx\n\n'
@@ -1240,10 +1240,10 @@ describe "Operator general", ->
     it "[normal] can mark multiple positon", ->
       ensureMarkByMode("normal")
     it "[vC] can mark", ->
-      keystroke "v"
+      ensure "v", {}
       ensureMarkByMode(["visual", "characterwise"])
     it "[vL] can mark", ->
-      keystroke "V"
+      ensure "V", {}
       ensureMarkByMode(["visual", "linewise"])
 
   describe 'the R keybinding', ->
@@ -1272,7 +1272,7 @@ describe "Operator general", ->
 
     it 'treats backspace as undo', ->
       editor.insertText "foo"
-      keystroke 'R'
+      ensure 'R', {}
       editor.insertText "a"
       editor.insertText "b"
       ensure text: "12fooab5\n67890"
@@ -1289,9 +1289,9 @@ describe "Operator general", ->
         selectedText: ''
 
     it "can be repeated", ->
-      keystroke 'R'
+      ensure 'R', {}
       editor.insertText "ab"
-      keystroke 'escape'
+      ensure 'escape', {}
       set cursor: [1, 2]
       ensure '.', text: "12ab5\n67ab0", cursor: [1, 3]
       set cursor: [0, 4]
@@ -1301,11 +1301,11 @@ describe "Operator general", ->
       # FIXME don't know how to test this (also, depends on PR #568)
 
     it "repeats correctly when backspace was used in the text", ->
-      keystroke 'R'
+      ensure 'R', {}
       editor.insertText "a"
-      keystroke 'backspace'
+      ensure 'backspace', {}
       editor.insertText "b"
-      keystroke 'escape'
+      ensure 'escape', {}
       set cursor: [1, 2]
       ensure '.', text: "12b45\n67b90", cursor: [1, 2]
       set cursor: [0, 4]

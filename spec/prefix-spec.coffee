@@ -2,13 +2,13 @@
 settings = require '../lib/settings'
 
 describe "Prefixes", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure} = vim
 
   describe "Repeat", ->
     describe "with operations", ->
@@ -372,7 +372,7 @@ describe "Prefixes", ->
           expect(clipboardBySelection.size).toBe(0)
           expect(subscriptionBySelection.size).toBe(0)
 
-          keystroke "y i w"
+          ensure "y i w", {}
           ensurePerSelectionRegister('012', 'abc', 'def')
 
           expect(clipboardBySelection.size).toBe(3)
@@ -383,7 +383,7 @@ describe "Prefixes", ->
 
       describe "Yank", ->
         it "save text to per selection register", ->
-          keystroke "y i w"
+          ensure "y i w", {}
           ensurePerSelectionRegister('012', 'abc', 'def')
 
       describe "Delete family", ->

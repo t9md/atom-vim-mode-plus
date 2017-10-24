@@ -2,14 +2,14 @@
 settings = require '../lib/settings'
 
 describe "Operator TransformString", ->
-  [set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption, keystroke, keystrokeWait] = []
+  [set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption] = []
   [editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption, keystroke, keystrokeWait} = vim
+      {set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption} = vim
 
   describe 'the ~ keybinding', ->
     beforeEach ->
@@ -319,14 +319,14 @@ describe "Operator TransformString", ->
 
       describe "when followed by a =", ->
         beforeEach ->
-          keystroke '= ='
+          ensure '= =', {}
 
         it "indents the current line", ->
           expect(editor.indentationForBufferRow(1)).toBe 0
 
       describe "when followed by a repeating =", ->
         beforeEach ->
-          keystroke '2 = ='
+          ensure '2 = =', {}
 
         it "autoindents multiple lines at once", ->
           ensure text: "foo\nbar\nbaz", cursor: [1, 0]
@@ -908,7 +908,8 @@ describe "Operator TransformString", ->
           """
       it "surround text for each word in visual selection", ->
         settings.set("stayOnSelectTextObject", true)
-        ensureWait 'v i p m s "',
+        ensure 'v i p', {}
+        ensureWait 'm s "',
           textC: """
 
           "apple"
@@ -1564,7 +1565,7 @@ describe "Operator TransformString", ->
               s = `abc def hij`
             }
             """
-        keystroke 'j w'
+        ensure 'j w', {}
         ensure 'g , i (',
           textC: """
             hello = () => {
