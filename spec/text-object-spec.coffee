@@ -2,7 +2,7 @@
 settings = require '../lib/settings'
 
 describe "TextObject", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, ensureWait, keystroke, editor, editorElement, vimState] = []
 
   getCheckFunctionFor = (textObject) ->
     (initialPoint, keystroke, options) ->
@@ -13,7 +13,7 @@ describe "TextObject", ->
     getVimState (state, vimEditor) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vimEditor
+      {set, ensure, ensureWait, keystroke} = vimEditor
 
   describe "TextObject", ->
     beforeEach ->
@@ -291,46 +291,46 @@ describe "TextObject", ->
 
       describe "quote is un-balanced", ->
         it "case1", ->
-          set                 textC_: '_|_"____"____"'
-          ensure 'g r i " +', textC_: '__"|++++"____"'
+          set                     textC_: '_|_"____"____"'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"'
         it "case2", ->
-          set                 textC_: '__"__|__"____"'
-          ensure 'g r i " +', textC_: '__"|++++"____"'
+          set                     textC_: '__"__|__"____"'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"'
         it "case3", ->
-          set                 textC_: '__"____"__|__"'
-          ensure 'g r i " +', textC_: '__"____"|++++"'
+          set                     textC_: '__"____"__|__"'
+          ensureWait 'g r i " +', textC_: '__"____"|++++"'
         it "case4", ->
-          set                 textC_: '__|"____"____"'
-          ensure 'g r i " +', textC_: '__"|++++"____"'
+          set                     textC_: '__|"____"____"'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"'
         it "case5", ->
-          set                 textC_: '__"____|"____"'
-          ensure 'g r i " +', textC_: '__"|++++"____"'
+          set                     textC_: '__"____|"____"'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"'
         it "case6", ->
-          set                 textC_: '__"____"____|"'
-          ensure 'g r i " +', textC_: '__"____"|++++"'
+          set                     textC_: '__"____"____|"'
+          ensureWait 'g r i " +', textC_: '__"____"|++++"'
 
       describe "quote is balanced", ->
         it "case1", ->
-          set                 textC_: '_|_"===="____"==="'
-          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+          set                     textC_: '_|_"===="____"==="'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"==="'
         it "case2", ->
-          set                 textC_: '__"==|=="____"==="'
-          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+          set                     textC_: '__"==|=="____"==="'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"==="'
         it "case3", ->
-          set                 textC_: '__"===="__|__"==="'
-          ensure 'g r i " +', textC_: '__"===="|++++"==="'
+          set                     textC_: '__"===="__|__"==="'
+          ensureWait 'g r i " +', textC_: '__"===="|++++"==="'
         it "case4", ->
-          set                 textC_: '__"===="____"=|=="'
-          ensure 'g r i " +', textC_: '__"===="____"|+++"'
+          set                     textC_: '__"===="____"=|=="'
+          ensureWait 'g r i " +', textC_: '__"===="____"|+++"'
         it "case5", ->
-          set                 textC_: '__|"===="____"==="'
-          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+          set                     textC_: '__|"===="____"==="'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"==="'
         it "case6", ->
-          set                 textC_: '__"====|"____"==="'
-          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+          set                     textC_: '__"====|"____"==="'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"==="'
         it "case7", ->
-          set                 textC_: '__"===="____|"==="'
-          ensure 'g r i " +', textC_: '__"===="____"|+++"'
+          set                     textC_: '__"===="____|"==="'
+          ensureWait 'g r i " +', textC_: '__"===="____"|+++"'
 
     describe "inner-double-quote", ->
       beforeEach ->
