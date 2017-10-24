@@ -2,7 +2,7 @@
 settings = require '../lib/settings'
 
 describe "Occurrence", ->
-  [set, ensure, keystroke, editor, editorElement, vimState, classList] = []
+  [set, ensure, ensureWait, keystroke, editor, editorElement, vimState, classList] = []
   [searchEditor, searchEditorElement] = []
   inputSearchText = (text) ->
     searchEditor.insertText(text)
@@ -13,7 +13,7 @@ describe "Occurrence", ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure, ensureWait, keystroke} = vim
       classList = editorElement.classList
       searchEditor = vimState.searchInput.editor
       searchEditorElement = vimState.searchInput.editorElement
@@ -686,7 +686,7 @@ describe "Occurrence", ->
               mode: ['visual', 'linewise']
               selectedText: textOriginal
               occurrenceText: ['text', 'text', 'text', 'text', 'text', 'text']
-            ensure 'r !',
+            ensureWait 'r !',
               mode: 'normal'
               text: """
               This !!!! have 3 instance of '!!!!' in the whole !!!!
