@@ -303,10 +303,8 @@ class VimEditor
         throw new Error("conflict with bound options #{inspect(intersectingOptions)}")
 
       options = _.defaults(_.clone(options), optionsBase)
-      if wait
-        @ensureWait(keystroke, options)
-      else
-        @ensure(keystroke, options)
+      options.waitsForFinish = true if wait
+      @ensure(keystroke, options)
 
   bindEnsureWaitOption: (optionsBase) =>
     @bindEnsureOption(optionsBase, true)
