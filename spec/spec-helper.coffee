@@ -310,17 +310,16 @@ class VimEditor
     @bindEnsureOption(optionsBase, true)
 
   _keystroke: (keys, options={}) =>
-    if options.waitsForFinish
-      finished = false
-      @vimState.onDidFinishOperation -> finished = true
-      delete options.waitsForFinish
-      @_keystroke(keys, options)
-      waitsFor -> finished
-      return
-
     target = @editorElement
+    keystrokesToExecute = keys.split(/\s+/)
+    lastKeystrokeIndex = keystrokesToExecute.length - 2
 
-    for key in keys.split(/\s+/)
+    for key, i in keystrokesToExecute
+      waitsForFinish = (i is lastKeystrokeIndex) and options.waitsForFinish
+      if waitsForFinish
+        finished = false
+        @vimState.onDidFinishOperation -> finished = true
+
       # [FIXME] Why can't I let atom.keymaps handle enter/escape by buildEvent and handleKeyboardEvent
       if @vimState.__searchInput?.hasFocus() # to avoid auto populate
         target = @vimState.searchInput.editorElement
@@ -339,6 +338,9 @@ class VimEditor
       else
         event = buildKeydownEventFromKeystroke(normalizeKeystrokes(key), target)
         atom.keymaps.handleKeyboardEvent(event)
+
+      if waitsForFinish
+        waitsFor -> finished
 
     if options.partialMatchTimeout
       advanceClock(atom.keymaps.getPartialMatchTimeout())

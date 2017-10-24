@@ -681,7 +681,7 @@ describe "Operator TransformString", ->
             (mn|o) pqr\n
             """
             selectedTextOrdered: ["b", "h", "n"]
-          ensure "S escape",
+          ensureWait "S escape",
             mode: ["visual", "characterwise"]
             textC: """
             (ab|c) def
@@ -828,19 +828,15 @@ describe "Operator TransformString", ->
 
         describe "char is in charactersToAddSpaceOnSurround", ->
           it "add additional space inside pair char when surround", ->
-            ensureWait 'y s i w (', text: "( apple )\norange\nlemmon"
-            ensureWait "j"
-            ensureWait 'y s i w {', text: "( apple )\n{ orange }\nlemmon"
-            ensureWait "j"
-            ensureWait 'y s i w [', text: "( apple )\n{ orange }\n[ lemmon ]"
+            ensureWait 'y s i w (',   text: "( apple )\norange\nlemmon"
+            ensureWait 'j y s i w {', text: "( apple )\n{ orange }\nlemmon"
+            ensureWait 'j y s i w [', text: "( apple )\n{ orange }\n[ lemmon ]"
 
         describe "char is not in charactersToAddSpaceOnSurround", ->
           it "add additional space inside pair char when surround", ->
-            ensureWait 'y s i w )', text: "(apple)\norange\nlemmon"
-            ensureWait "j"
-            ensureWait 'y s i w }', text: "(apple)\n{orange}\nlemmon"
-            ensureWait "j"
-            ensureWait 'y s i w ]', text: "(apple)\n{orange}\n[lemmon]"
+            ensureWait 'y s i w )',   text: "(apple)\norange\nlemmon"
+            ensureWait 'j y s i w }', text: "(apple)\n{orange}\nlemmon"
+            ensureWait 'j y s i w ]', text: "(apple)\n{orange}\n[lemmon]"
 
         describe "it distinctively handle aliased keymap", ->
           beforeEach -> set textC: "|abc"
@@ -908,8 +904,7 @@ describe "Operator TransformString", ->
           """
       it "surround text for each word in visual selection", ->
         settings.set("stayOnSelectTextObject", true)
-        ensure 'v i p'
-        ensureWait 'm s "',
+        ensureWait 'v i p m s "',
           textC: """
 
           "apple"
@@ -993,17 +988,14 @@ describe "Operator TransformString", ->
             {orange}
             """
       it "change surrounded chars", ->
-        ensureWait "2 j"
-        ensureWait 'c S < "',
+        ensureWait 'j j c S < "',
           text: """
             (apple)
             (grape)
             "lemmon"
             {orange}
             """
-        ensureWait "j"
-        ensureWait "l"
-        ensureWait 'c S { !',
+        ensureWait 'j l c S { !',
           text: """
             (apple)
             (grape)
@@ -1059,11 +1051,11 @@ describe "Operator TransformString", ->
             'y s w': 'vim-mode-plus:surround-word'
 
       it "surround a word with ( and repeatable", ->
-        ensureWait 'y s w (',               textC: "|(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
-        ensureWait 'j'; ensureWait '.', textC: "(apple)\n|(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
+        ensureWait 'y s w (', textC: "|(apple)\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
+        ensureWait 'j .',     textC: "(apple)\n|(pairs): [brackets]\npairs: [brackets]\n( multi\n  line )"
       it "surround a word with { and repeatable", ->
-        ensureWait 'y s w {',               textC: "|{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
-        ensureWait 'j'; ensureWait '.', textC: "{apple}\n|{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
+        ensureWait 'y s w {', textC: "|{apple}\npairs: [brackets]\npairs: [brackets]\n( multi\n  line )"
+        ensureWait 'j .',     textC: "{apple}\n|{pairs}: [brackets]\npairs: [brackets]\n( multi\n  line )"
 
     describe 'delete-surround-any-pair', ->
       beforeEach ->
@@ -1126,9 +1118,9 @@ describe "Operator TransformString", ->
             """
 
       it "change any surrounded pair found and repeatable", ->
-        ensureWait 'c s <',                   textC: "|<apple>\n(grape)\n<lemmon>\n{orange}"
-        ensureWait 'j'; ensureWait '.',   textC: "<apple>\n|<grape>\n<lemmon>\n{orange}"
-        ensureWait '2 j'; ensureWait '.', textC: "<apple>\n<grape>\n<lemmon>\n|<orange>"
+        ensureWait 'c s <', textC: "|<apple>\n(grape)\n<lemmon>\n{orange}"
+        ensureWait 'j .',   textC: "<apple>\n|<grape>\n<lemmon>\n{orange}"
+        ensureWait '2 j .', textC: "<apple>\n<grape>\n<lemmon>\n|<orange>"
 
     describe 'change-surround-any-pair-allow-forwarding', ->
       beforeEach ->
@@ -1147,8 +1139,7 @@ describe "Operator TransformString", ->
           |___<inner>
           ___(inner)
           """
-        ensureWait 'j'
-        ensureWait '.',
+        ensureWait 'j .',
           textC: """
           ___<inner>
           |___<inner>
