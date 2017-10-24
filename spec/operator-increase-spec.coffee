@@ -354,7 +354,7 @@ describe "Operator Increase", ->
           set text: "1 0 0 0 0", cursor: [0, 0]
           ensure "v $", selectedText: '1 0 0 0 0'
         it "put cursor on start position when finished and repeatable (case: selection is not reversed)", ->
-          ensure selectionIsReversed: false
+          ensure null, selectionIsReversed: false
           ensure 'g ctrl-a', text: "1 2 3 4 5", cursor: [0, 0], mode: 'normal'
           ensure '.', text: "6 7 8 9 10" , cursor: [0, 0]
         it "put cursor on start position when finished and repeatable (case: selection is reversed)", ->

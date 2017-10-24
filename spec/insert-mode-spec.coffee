@@ -19,7 +19,7 @@ describe "Insert mode commands", ->
           efghi
           """
         cursor: [[1, 0], [3, 0]]
-      ensure 'i', {}
+      ensure 'i'
 
     describe "the ctrl-y command", ->
       it "copies from the line above", ->
@@ -66,7 +66,7 @@ describe "Insert mode commands", ->
           """
 
         editor.insertText 'a'
-        ensure
+        ensure null,
           textC: """
             12a|345
 
@@ -124,7 +124,7 @@ describe "Insert mode commands", ->
     describe "InsertLastInserted", ->
       ensureInsertLastInserted = (key, options) ->
         {insert, text, finalText} = options
-        ensure key, {}
+        ensure key
         editor.insertText(insert)
         ensure "escape", text: text
         ensure "G I ctrl-a", text: finalText
@@ -139,7 +139,7 @@ describe "Insert mode commands", ->
           def\n
           """
         set text: "", cursor: [0, 0]
-        ensure 'i', {}
+        ensure 'i'
         editor.insertText(initialText)
         ensure "escape g g",
           text: initialText

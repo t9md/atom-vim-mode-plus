@@ -150,7 +150,7 @@ describe "Visual Blockwise", ->
         cursor: [[2, 5], [3, 5], [4, 5], [5, 5] ]
         text: textAfterDeleted
       editor.insertText("!!!")
-      ensure
+      ensure null,
         mode: 'insert'
         cursor: [[2, 8], [3, 8], [4, 8], [5, 8]]
         text: textAfterInserted
@@ -181,9 +181,9 @@ describe "Visual Blockwise", ->
     beforeEach ->
       selectBlockwise()
     it "enter insert mode with each cursors position set to start of selection", ->
-      ensure 'I', {}
+      ensure 'I'
       editor.insertText "!!!"
-      ensure
+      ensure null,
         text: """
           01234567890123456789
           1-------------------
@@ -205,9 +205,9 @@ describe "Visual Blockwise", ->
     beforeEach ->
       selectBlockwise()
     it "enter insert mode with each cursors position set to end of selection", ->
-      ensure 'A', {}
+      ensure 'A'
       editor.insertText "!!!"
-      ensure
+      ensure null,
         text: """
           01234567890123456789
           1-------------------
@@ -230,16 +230,16 @@ describe "Visual Blockwise", ->
 
     describe 'o', ->
       it "change blockwiseHead to opposite side and reverse selection", ->
-        ensure 'o', {}
+        ensure 'o'
         ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: true
 
-        ensure 'o', {}
+        ensure 'o'
         ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
     describe 'capital O', ->
       it "reverse each selection", ->
-        ensure 'O', {}
+        ensure 'O'
         ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: true
-        ensure 'O', {}
+        ensure 'O'
         ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
 
   describe "shift from characterwise to blockwise", ->
@@ -579,26 +579,26 @@ describe "Visual Blockwise", ->
       describe "selection is not reversed", ->
         it 'restore previous selection case-1', ->
           set cursor: [2, 5]
-          ensure 'ctrl-v 1 0 l', {}
+          ensure 'ctrl-v 1 0 l'
           ensureRestored '3 j',
             selectedText: blockTexts[2..5]
             mode: ['visual', 'blockwise']
         it 'restore previous selection case-2', ->
           set cursor: [5, 5]
-          ensure 'ctrl-v 1 0 l', {}
+          ensure 'ctrl-v 1 0 l'
           ensureRestored '3 k',
             selectedTextOrdered: blockTexts[2..5]
             mode: ['visual', 'blockwise']
       describe "selection is reversed", ->
         it 'restore previous selection case-1', ->
           set cursor: [2, 15]
-          ensure 'ctrl-v 1 0 h', {}
+          ensure 'ctrl-v 1 0 h'
           ensureRestored '3 j',
             selectedText: blockTexts[2..5]
             mode: ['visual', 'blockwise']
         it 'restore previous selection case-2', ->
           set cursor: [5, 15]
-          ensure 'ctrl-v 1 0 h', {}
+          ensure 'ctrl-v 1 0 h'
           ensureRestored '3 k',
             selectedTextOrdered: blockTexts[2..5]
             mode: ['visual', 'blockwise']

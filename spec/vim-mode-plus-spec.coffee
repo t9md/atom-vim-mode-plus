@@ -17,7 +17,7 @@ describe "vim-mode-plus", ->
 
   describe ".activate", ->
     it "puts the editor in normal-mode initially by default", ->
-      ensure mode: 'normal'
+      ensure null, mode: 'normal'
 
     it "shows the current vim mode in the status bar", ->
       statusBarTile = null

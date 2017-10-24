@@ -13,7 +13,7 @@ describe "Operator general", ->
 
   describe "cancelling operations", ->
     it "clear pending operation", ->
-      ensure '/', {}
+      ensure '/'
       expect(vimState.operationStack.isEmpty()).toBe false
       vimState.searchInput.cancel()
       expect(vimState.operationStack.isEmpty()).toBe true
@@ -550,7 +550,7 @@ describe "Operator general", ->
       beforeEach ->
         settings.set('useClipboardAsDefaultRegister', true)
         atom.clipboard.write('___________')
-        ensure register: '"': text: '___________'
+        ensure null, register: '"': text: '___________'
 
       describe "read/write to clipboard through register", ->
         it "writes to clipboard with default register", ->
@@ -954,7 +954,7 @@ describe "Operator general", ->
             }
             """
           dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
-          ensure
+          ensure null,
             textC_: """
             if () {
               |345
@@ -976,7 +976,7 @@ describe "Operator general", ->
             }
             """
           dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
-          ensure
+          ensure null,
             textC: """
             if (1) {
               if (2) {
@@ -1005,7 +1005,7 @@ describe "Operator general", ->
 
           set register: '"': {text: registerContent, type: 'linewise'}
           dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
-          ensure
+          ensure null,
             textC: """
             if (1) {
               if (2) {
@@ -1026,7 +1026,7 @@ describe "Operator general", ->
 
           set register: '"': {text: registerContent, type: 'linewise'}
           dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
-          ensure
+          ensure null,
             textC_: """
             if (1) {
               if (2) {
@@ -1048,10 +1048,10 @@ describe "Operator general", ->
           text: "12345\nabcde\nABCDE\nQWERT"
           cursor: [1, 1]
           register: '"': text: '123'
-        ensure '2 p', {}
+        ensure '2 p'
 
       it "inserts the same line twice", ->
-        ensure text: "12345\nab123123cde\nABCDE\nQWERT"
+        ensure null, text: "12345\nab123123cde\nABCDE\nQWERT"
 
       describe "when undone", ->
         it "removes both lines", ->
@@ -1095,10 +1095,10 @@ describe "Operator general", ->
         set text: "012\n", cursor: [0, 0]
         set register: '"': text: '345'
         set register: a: text: 'a'
-        ensure 'P', {}
+        ensure 'P'
 
       it "inserts the contents of the default register above", ->
-        ensure text: "345012\n", cursor: [0, 2]
+        ensure null, text: "345012\n", cursor: [0, 2]
 
   describe "the . keybinding", ->
     beforeEach ->
@@ -1169,7 +1169,7 @@ describe "Operator general", ->
 
     describe "when in visual mode", ->
       beforeEach ->
-        ensure 'v e', {}
+        ensure 'v e'
 
       it "replaces the entire selection with the given character", ->
         ensureWait 'r x', text: 'xx\nxx\n\n'
@@ -1240,10 +1240,10 @@ describe "Operator general", ->
     it "[normal] can mark multiple positon", ->
       ensureMarkByMode("normal")
     it "[vC] can mark", ->
-      ensure "v", {}
+      ensure "v"
       ensureMarkByMode(["visual", "characterwise"])
     it "[vL] can mark", ->
-      ensure "V", {}
+      ensure "V"
       ensureMarkByMode(["visual", "linewise"])
 
   describe 'the R keybinding', ->
@@ -1272,14 +1272,14 @@ describe "Operator general", ->
 
     it 'treats backspace as undo', ->
       editor.insertText "foo"
-      ensure 'R', {}
+      ensure 'R'
       editor.insertText "a"
       editor.insertText "b"
-      ensure text: "12fooab5\n67890"
+      ensure null, text: "12fooab5\n67890"
 
       ensure 'backspace', text: "12fooa45\n67890"
       editor.insertText "c"
-      ensure text: "12fooac5\n67890"
+      ensure null, text: "12fooac5\n67890"
       ensure 'backspace backspace',
         text: "12foo345\n67890"
         selectedText: ''
@@ -1289,9 +1289,9 @@ describe "Operator general", ->
         selectedText: ''
 
     it "can be repeated", ->
-      ensure 'R', {}
+      ensure 'R'
       editor.insertText "ab"
-      ensure 'escape', {}
+      ensure 'escape'
       set cursor: [1, 2]
       ensure '.', text: "12ab5\n67ab0", cursor: [1, 3]
       set cursor: [0, 4]
@@ -1301,11 +1301,11 @@ describe "Operator general", ->
       # FIXME don't know how to test this (also, depends on PR #568)
 
     it "repeats correctly when backspace was used in the text", ->
-      ensure 'R', {}
+      ensure 'R'
       editor.insertText "a"
-      ensure 'backspace', {}
+      ensure 'backspace'
       editor.insertText "b"
-      ensure 'escape', {}
+      ensure 'escape'
       set cursor: [1, 2]
       ensure '.', text: "12b45\n67b90", cursor: [1, 2]
       set cursor: [0, 4]
@@ -1326,7 +1326,7 @@ describe "Operator general", ->
       it "replace character unless input isnt new line(\\n)", ->
         ensure 'R', mode: ['insert', 'replace']
         editor.insertText "a\nb\nc"
-        ensure
+        ensure null,
           text: """
             a
             b
@@ -1338,7 +1338,7 @@ describe "Operator general", ->
         ensure 'R', mode: ['insert', 'replace']
         set cursor: [0, 1]
         editor.insertText "a\nb\nc"
-        ensure
+        ensure null,
           text: """
             0a
             b
@@ -1396,7 +1396,7 @@ describe "Operator general", ->
       it "repeate multiline text case-1", ->
         ensure 'R', mode: ['insert', 'replace']
         editor.insertText "abc\ndef"
-        ensure
+        ensure null,
           text: """
             abc
             def
@@ -1425,7 +1425,7 @@ describe "Operator general", ->
       it "repeate multiline text case-2", ->
         ensure 'R', mode: ['insert', 'replace']
         editor.insertText "abc\nd"
-        ensure
+        ensure null,
           text: """
             abc
             d4

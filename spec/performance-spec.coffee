@@ -23,8 +23,8 @@ xdescribe "visual-mode performance", ->
       switch scenario
         when 'vmp'
           moveByVMP = ->
-            _.times moveCount, -> ensure 'l', {}
-            _.times moveCount, -> ensure 'h', {}
+            _.times moveCount, -> ensure 'l'
+            _.times moveCount, -> ensure 'h'
           _.times 10, -> measureWithTimeEnd(moveByVMP)
         when 'sel'
           moveBySelect = ->

@@ -139,7 +139,7 @@ describe "Motion Search", ->
 
       describe "repeating with search history", ->
         beforeEach ->
-          ensure '/ def enter', {}
+          ensure '/ def enter'
 
         it "repeats previous search with /<enter>", ->
           ensure '/  enter', cursor: [3, 0]
@@ -182,7 +182,7 @@ describe "Motion Search", ->
 
       describe "repeating", ->
         beforeEach ->
-          ensure '? def enter', {}
+          ensure '? def enter'
 
         it "repeats previous search as reversed with ?<enter>", ->
           ensure "? enter", cursor: [1, 0]
@@ -216,13 +216,13 @@ describe "Motion Search", ->
         inputEditor = vimState.searchInput.editorElement
 
       it "allows searching history in the search field", ->
-        ensure '/', {}
+        ensure '/'
         ensureInputEditor 'core:move-up', text: 'abc'
         ensureInputEditor 'core:move-up', text: 'def'
         ensureInputEditor 'core:move-up', text: 'def'
 
       it "resets the search field to empty when scrolling back", ->
-        ensure '/', {}
+        ensure '/'
         ensureInputEditor 'core:move-up', text: 'abc'
         ensureInputEditor 'core:move-up', text: 'def'
         ensureInputEditor 'core:move-down', text: 'abc'
@@ -242,7 +242,7 @@ describe "Motion Search", ->
           expect(text).toEqual(options.text)
 
         if options.mode?
-          ensure {mode: options.mode}
+          ensure null, {mode: options.mode}
 
       beforeEach ->
         jasmine.attachToDOM(getView(atom.workspace))

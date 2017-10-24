@@ -93,7 +93,7 @@ describe "Motion Scroll", ->
     beforeEach ->
       settings.set('stayOnVerticalMotion', true)
       set cursor: [42, 10]
-      ensure scrollTop: 400
+      ensure null, scrollTop: 400
 
     it "go to row with keep column and respect cursor.goalColum", ->
       ensure 'ctrl-b', scrollTop: 200, cursor: [22, 10]

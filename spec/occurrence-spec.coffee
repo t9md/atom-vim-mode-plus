@@ -360,7 +360,7 @@ describe "Occurrence", ->
 
     describe "from normal mode", ->
       it "select occurrence by pattern match", ->
-        ensure '/', {}
+        ensure '/'
         inputSearchText('\\d{3,4}')
         dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
         ensure 'i e',
@@ -368,12 +368,12 @@ describe "Occurrence", ->
           mode: ['visual', 'characterwise']
 
       it "change occurrence by pattern match", ->
-        ensure '/', {}
+        ensure '/'
         inputSearchText('^\\w+:')
         dispatchSearchCommand('vim-mode-plus:change-occurrence-from-search')
         ensure 'i e', mode: 'insert'
         editor.insertText('hello')
-        ensure
+        ensure null,
           text: """
           hello xxx: ooo: 0000
           hello ooo: 22: ooo:
@@ -384,7 +384,7 @@ describe "Occurrence", ->
     describe "from visual mode", ->
       describe "visual characterwise", ->
         it "change occurrence in narrowed selection", ->
-          ensure 'v j /', {}
+          ensure 'v j /'
           inputSearchText('o+')
           dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
           ensure 'U',
@@ -397,7 +397,7 @@ describe "Occurrence", ->
 
       describe "visual linewise", ->
         it "change occurrence in narrowed selection", ->
-          ensure 'V j /', {}
+          ensure 'V j /'
           inputSearchText('o+')
           dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
           ensure 'U',
@@ -411,7 +411,7 @@ describe "Occurrence", ->
       describe "visual blockwise", ->
         it "change occurrence in narrowed selection", ->
           set cursor: [0, 5]
-          ensure 'ctrl-v 2 j 1 0 l /', {}
+          ensure 'ctrl-v 2 j 1 0 l /'
           inputSearchText('o+')
           dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
           ensure 'U',
@@ -446,7 +446,7 @@ describe "Occurrence", ->
       describe "when no selection is exists", ->
         it "select occurrence in all persistent-selection", ->
           set cursor: [0, 0]
-          ensure '/', {}
+          ensure '/'
           inputSearchText('xxx')
           dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
           ensure 'U',
@@ -461,7 +461,7 @@ describe "Occurrence", ->
       describe "when both exits, operator applied to both", ->
         it "select all occurrence in selection", ->
           set cursor: [0, 0]
-          ensure 'V 2 j /', {}
+          ensure 'V 2 j /'
           inputSearchText('xxx')
           dispatchSearchCommand('vim-mode-plus:select-occurrence-from-search')
           ensure 'U',
@@ -520,7 +520,7 @@ describe "Occurrence", ->
             'i f'     # inner-function-text-object
             'm'       # toggle-persistent-selection
           ].join(" ")
-          ensure(_keystroke, {})
+          ensure(_keystroke)
 
           textsInBufferRange = vimState.persistentSelection.getMarkerBufferRanges().map (range) ->
             editor.getTextInBufferRange(range)
@@ -528,16 +528,16 @@ describe "Occurrence", ->
           expect(textsInBufferRangeIsAllEqualChar).toBe(true)
           expect(vimState.persistentSelection.getMarkers()).toHaveLength(11)
 
-          ensure '2 l', {} # to move to out-side of range-mrker
+          ensure '2 l' # to move to out-side of range-mrker
           ensure '/ => enter', cursor: [9, 69]
-          ensure "m", {} # clear persistentSelection at cursor which is = sign part of fat arrow.
+          ensure "m" # clear persistentSelection at cursor which is = sign part of fat arrow.
           expect(vimState.persistentSelection.getMarkers()).toHaveLength(10)
 
         waitsFor ->
           classList.contains('has-persistent-selection')
 
         runs ->
-          ensure "ctrl-cmd-g I", {} # "select-persistent-selection" then "Insert at start of selection"
+          ensure "ctrl-cmd-g I" # "select-persistent-selection" then "Insert at start of selection"
 
           editor.insertText('?')
           ensure 'escape',
@@ -663,7 +663,7 @@ describe "Occurrence", ->
                 markerLayerUpdated
 
               runs ->
-                ensure occurrenceCount: 0
+                ensure null, occurrenceCount: 0
                 expect(classList.contains('has-occurrence')).toBe(false)
 
       describe "in visual-mode", ->
@@ -700,10 +700,10 @@ describe "Occurrence", ->
 
         describe "add-occurrence-pattern-from-search", ->
           it 'mark as occurrence which matches regex entered in search-ui', ->
-            ensure '/', {}
+            ensure '/'
             inputSearchText('\\bt\\w+')
             dispatchSearchCommand('vim-mode-plus:add-occurrence-pattern-from-search')
-            ensure
+            ensure null,
               occurrenceText: ['text', 'text', 'the', 'text']
 
     describe "mutate preset occurrence", ->
@@ -1171,7 +1171,7 @@ describe "Occurrence", ->
       it "can cancel and confirm on o-modifier", ->
         atom.confirm.andCallFake ({buttons}) -> buttons.indexOf("Cancel")
         ensure "c o", mode: "operator-pending", occurrenceText: []
-        ensure mode: "operator-pending", occurrenceText: []
+        ensure null, mode: "operator-pending", occurrenceText: []
         atom.confirm.andCallFake ({buttons}) -> buttons.indexOf("Continue")
         ensure "o", mode: "operator-pending", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']
 
@@ -1182,6 +1182,6 @@ describe "Occurrence", ->
       it "can cancel and confirm on `g o`", ->
         atom.confirm.andCallFake ({buttons}) -> buttons.indexOf("Cancel")
         ensure "g o", mode: "normal", occurrenceText: []
-        ensure mode: "normal", occurrenceText: []
+        ensure null, mode: "normal", occurrenceText: []
         atom.confirm.andCallFake ({buttons}) -> buttons.indexOf("Continue")
         ensure "g o", mode: "normal", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']

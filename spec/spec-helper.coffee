@@ -272,13 +272,7 @@ class VimEditor
     {partialMatchTimeout, waitsForFinish}
 
   # Public
-  ensure: (args...) =>
-    switch args.length
-      when 1
-        [options] = args
-      when 2
-        [keystroke, options] = args
-
+  ensure: (keystroke, options={}) =>
     unless typeof(options) is 'object'
       throw new Error("Invalid options for 'ensure': must be 'object' but got '#{typeof(options)}'")
     if keystroke? and not (typeof(keystroke) is 'string' or Array.isArray(keystroke))
@@ -299,12 +293,8 @@ class VimEditor
         method = 'ensure' + _.capitalize(_.camelize(name))
         this[method](options[name])
 
-  ensureWait: (args...) =>
-    switch args.length
-      when 1 then [options] = args
-      when 2 then [keystroke, options] = args
-    options.waitsForFinish = true
-    @ensure(args...)
+  ensureWait: (keystroke, options={}) =>
+    @ensure(keystroke, Object.assign(options, waitsForFinish: true))
 
   bindEnsureOption: (optionsBase, wait=false) =>
     (keystroke, options) =>
@@ -357,7 +347,7 @@ class VimEditor
 
   keystroke: ->
     # DONT remove this method since field extraction is still used in vmp plugins
-    throw new Error('Dont use `keystroke("x y z")`, instead use `ensure("x y z", {})`')
+    throw new Error('Dont use `keystroke("x y z")`, instead use `ensure("x y z")`')
 
   # Ensure each options from here
   # -----------------------------

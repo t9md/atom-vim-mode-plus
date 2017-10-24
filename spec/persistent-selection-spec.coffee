@@ -22,7 +22,7 @@ describe "Persistent Selection", ->
         when 2 then [_keystroke, options] = args
 
       if _keystroke?
-        ensure(_keystroke, {})
+        ensure(_keystroke)
 
       markers = vimState.persistentSelection.getMarkers()
       if options.length?
@@ -33,7 +33,7 @@ describe "Persistent Selection", ->
         expect(text).toEqual(options.text)
 
       if options.mode?
-        ensure mode: options.mode
+        ensure null, mode: options.mode
 
     beforeEach ->
       atom.keymaps.add "test",
@@ -148,9 +148,9 @@ describe "Persistent Selection", ->
         runs ->
           ensure 'g cmd-d',
             selectedText: ['ooo', 'ooo', 'ooo', 'ooo', 'ooo', 'ooo' ]
-          ensure 'c', {}
+          ensure 'c'
           editor.insertText '!!!'
-          ensure
+          ensure null,
             text: """
             !!! xxx !!!
             xxx !!! xxx

@@ -29,7 +29,7 @@ describe "TextObject", ->
       it "select that TextObject", ->
         set cursor: [8, 7]
         dispatch(editorElement, 'vim-mode-plus:inner-word')
-        ensure selectedText: 'QuickSort'
+        ensure null, selectedText: 'QuickSort'
 
   describe "Word", ->
     describe "inner-word", ->
@@ -145,7 +145,7 @@ describe "TextObject", ->
         ensure 'v a W', selectedBufferRange: [[0, 0], [0, 5]]
 
   describe "Subword", ->
-    escape = -> ensure('escape', {})
+    escape = -> ensure('escape')
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
@@ -219,7 +219,7 @@ describe "TextObject", ->
             """
       it "can expand selection", ->
         set text: complexText, cursor: [2, 8]
-        ensure 'v', {}
+        ensure 'v'
         ensure 'i s', selectedText: """1s-1e"""
         ensure 'i s', selectedText: """2s(1s-1e)2e"""
         ensure 'i s', selectedText: """3s\n----"2s(1s-1e)2e"\n---3e"""
@@ -248,7 +248,7 @@ describe "TextObject", ->
             """
       it "can expand selection", ->
         set text: complexText, cursor: [2, 8]
-        ensure 'v', {}
+        ensure 'v'
         ensure 'a s', selectedText: """(1s-1e)"""
         ensure 'a s', selectedText: """\"2s(1s-1e)2e\""""
         ensure 'a s', selectedText: """{3s\n----"2s(1s-1e)2e"\n---3e}"""
@@ -267,7 +267,7 @@ describe "TextObject", ->
         ensure '.', text: """--"" ``  'efg'--"""
         ensure '.', text: """--"" ``  ''--"""
       it "can select next quote", ->
-        ensure 'v', {}
+        ensure 'v'
         ensure 'i q', selectedText: 'abc'
         ensure 'i q', selectedText: 'def'
         ensure 'i q', selectedText: 'efg'
@@ -277,7 +277,7 @@ describe "TextObject", ->
         ensure '.'  , text: """--   'efg'--"""
         ensure '.'  , text: """--   --"""
       it "can select next quote", ->
-        ensure 'v', {}
+        ensure 'v'
         ensure 'a q', selectedText: '"abc"'
         ensure 'a q', selectedText: '`def`'
         ensure 'a q', selectedText: "'efg'"
@@ -634,7 +634,7 @@ describe "TextObject", ->
               3
             }
             """
-          ensure mode: 'normal'
+          ensure null, mode: 'normal'
 
         it "from vC, final-mode is 'characterwise'", ->
           ensure 'v',
@@ -728,7 +728,7 @@ describe "TextObject", ->
 
             hello
             """
-          ensure mode: 'normal'
+          ensure null, mode: 'normal'
 
         it "from vC, final-mode is 'characterwise'", ->
           ensure 'v',
@@ -924,14 +924,14 @@ describe "TextObject", ->
     describe "inner", ->
       it "select forwarding range within enclosed range(if exists)", ->
         set cursor: [2, 0]
-        ensure 'v', {}
+        ensure 'v'
         ensure ';', selectedText: "222"
         ensure ';', selectedText: "333"
         ensure ';', selectedText: "444()444"
     describe "a", ->
       it "select forwarding range within enclosed range(if exists)", ->
         set cursor: [2, 0]
-        ensure 'v', {}
+        ensure 'v'
         ensure ':', selectedText: '"222"'
         ensure ':', selectedText: "{333}"
         ensure ':', selectedText: "(\n444()444\n)"
@@ -1453,7 +1453,7 @@ describe "TextObject", ->
 
       it "can expand selection", ->
         set cursor: [23, 0]
-        ensure 'v', {}
+        ensure 'v'
         ensure 'i z', selectedBufferRange: rangeForRows(23, 23)
         ensure 'i z', selectedBufferRange: rangeForRows(19, 23)
         ensure 'i z', selectedBufferRange: rangeForRows(10, 25)
@@ -1496,7 +1496,7 @@ describe "TextObject", ->
 
       it 'can expand selection', ->
         set cursor: [23, 0]
-        ensure 'v', {}
+        ensure 'v'
         ensure 'a z', selectedBufferRange: rangeForRows(22, 23)
         ensure 'a z', selectedBufferRange: rangeForRows(18, 23)
         ensure 'a z', selectedBufferRange: rangeForRows(9, 25)
@@ -2029,7 +2029,7 @@ describe "TextObject", ->
             3 xxx abc
             4 abc\n
             """
-        ensure 'escape', {}
+        ensure 'escape'
         set cursor: [4, 0]
         ensure 'c g N',
           cursor: [3, 6]

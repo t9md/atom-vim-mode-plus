@@ -63,37 +63,37 @@ describe "Scrolling", ->
 
     describe "the z<CR> keybinding", ->
       it "moves the screen to position cursor at the top of the window and moves cursor to first non-blank in the line", ->
-        ensure 'z enter', {}
+        ensure 'z enter'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(960)
         expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
 
     describe "the zt keybinding", ->
       it "moves the screen to position cursor at the top of the window and leave cursor in the same column", ->
-        ensure 'z t', {}
+        ensure 'z t'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(960)
         expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
 
     describe "the z. keybinding", ->
       it "moves the screen to position cursor at the center of the window and moves cursor to first non-blank in the line", ->
-        ensure 'z .', {}
+        ensure 'z .'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(900)
         expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
 
     describe "the zz keybinding", ->
       it "moves the screen to position cursor at the center of the window and leave cursor in the same column", ->
-        ensure 'z z', {}
+        ensure 'z z'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(900)
         expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
 
     describe "the z- keybinding", ->
       it "moves the screen to position cursor at the bottom of the window and moves cursor to first non-blank in the line", ->
-        ensure 'z -', {}
+        ensure 'z -'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(860)
         expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
 
     describe "the zb keybinding", ->
       it "moves the screen to position cursor at the bottom of the window and leave cursor in the same column", ->
-        ensure 'z b', {}
+        ensure 'z b'
         expect(editorElement.setScrollTop).toHaveBeenCalledWith(860)
         expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
 
@@ -116,7 +116,7 @@ describe "Scrolling", ->
 
       zsPos = (pos) ->
         editor.setCursorBufferPosition([0, pos])
-        ensure 'z s', {}
+        ensure 'z s'
         editorElement.getScrollLeft()
 
       beforeEach ->
@@ -158,7 +158,7 @@ describe "Scrolling", ->
     describe "the ze keybinding", ->
       zePos = (pos) ->
         editor.setCursorBufferPosition([0, pos])
-        ensure 'z e', {}
+        ensure 'z e'
         editorElement.getScrollLeft()
 
       startPosition = null
