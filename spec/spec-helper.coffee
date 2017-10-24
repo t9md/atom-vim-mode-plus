@@ -319,6 +319,43 @@ class VimEditor
   bindEnsureWaitOption: (optionsBase) =>
     @bindEnsureOption(optionsBase, true)
 
+  keystroke: (keys, options={}) =>
+    if options.waitsForFinish
+      finished = false
+      @vimState.onDidFinishOperation -> finished = true
+      delete options.waitsForFinish
+      @keystroke(keys, options)
+      waitsFor -> finished
+      return
+
+    target = @editorElement
+
+    for key in keys.split(/\s+/)
+      # [FIXME] Why can't I let atom.keymaps handle enter/escape by buildEvent and handleKeyboardEvent
+      if @vimState.__searchInput?.hasFocus() # to avoid auto populate
+        target = @vimState.searchInput.editorElement
+        switch key
+          when "enter" then atom.commands.dispatch(target, 'core:confirm')
+          when "escape" then atom.commands.dispatch(target, 'core:cancel')
+          else @vimState.searchInput.editor.insertText(key)
+
+      else if @vimState.inputEditor?
+        target = @vimState.inputEditor.element
+        switch key
+          when "enter" then atom.commands.dispatch(target, 'core:confirm')
+          when "escape" then atom.commands.dispatch(target, 'core:cancel')
+          else @vimState.inputEditor.insertText(key)
+
+      else
+        event = buildKeydownEventFromKeystroke(normalizeKeystrokes(key), target)
+        atom.keymaps.handleKeyboardEvent(event)
+
+    if options.partialMatchTimeout
+      advanceClock(atom.keymaps.getPartialMatchTimeout())
+
+  keystrokeWait: (keys, options={}) =>
+    @keystroke keys, Object.assign(waitsForFinish: true)
+
   # Ensure each options from here
   # -----------------------------
   ensureText: (text) ->
@@ -458,45 +495,5 @@ class VimEditor
     shouldNotContainClasses = _.difference(supportedModeClass, mode)
     for m in shouldNotContainClasses
       expect(@editorElement.classList.contains(m)).toBe(false)
-
-  # Public
-  # options
-  # - waitsForFinish
-  keystroke: (keys, options={}) =>
-    if options.waitsForFinish
-      finished = false
-      @vimState.onDidFinishOperation -> finished = true
-      delete options.waitsForFinish
-      @keystroke(keys, options)
-      waitsFor -> finished
-      return
-
-    target = @editorElement
-
-    for key in keys.split(/\s+/)
-      # [FIXME] Why can't I let atom.keymaps handle enter/escape by buildEvent and handleKeyboardEvent
-      if @vimState.__searchInput?.hasFocus() # to avoid auto populate
-        target = @vimState.searchInput.editorElement
-        switch key
-          when "enter" then atom.commands.dispatch(target, 'core:confirm')
-          when "escape" then atom.commands.dispatch(target, 'core:cancel')
-          else @vimState.searchInput.editor.insertText(key)
-
-      else if @vimState.inputEditor?
-        target = @vimState.inputEditor.element
-        switch key
-          when "enter" then atom.commands.dispatch(target, 'core:confirm')
-          when "escape" then atom.commands.dispatch(target, 'core:cancel')
-          else @vimState.inputEditor.insertText(key)
-
-      else
-        event = buildKeydownEventFromKeystroke(normalizeKeystrokes(key), target)
-        atom.keymaps.handleKeyboardEvent(event)
-
-    if options.partialMatchTimeout
-      advanceClock(atom.keymaps.getPartialMatchTimeout())
-
-  keystrokeWait: (keys, options={}) =>
-    @keystroke keys, Object.assign(waitsForFinish: true)
 
 module.exports = {getVimState, getView, dispatch, TextData, withMockPlatform}
