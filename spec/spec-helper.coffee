@@ -297,20 +297,30 @@ class VimEditor
         method = 'ensure' + _.capitalize(_.camelize(name))
         this[method](options[name])
 
-  bindEnsureOption: (optionsBase) =>
+  ensureWait: (args...) =>
+    switch args.length
+      when 1 then [options] = args
+      when 2 then [keystroke, options] = args
+    options.waitsForFinish = true
+    @ensure(args...)
+
+  bindEnsureOption: (optionsBase, wait=false) =>
     (keystroke, options) =>
       intersectingOptions = _.intersection(_.keys(options), _.keys(optionsBase))
       if intersectingOptions.length
         throw new Error("conflict with bound options #{inspect(intersectingOptions)}")
 
-      @ensure(keystroke, _.defaults(_.clone(options), optionsBase))
+      options = _.defaults(_.clone(options), optionsBase)
+      if wait
+        @ensureWait(keystroke, options)
+      else
+        @ensure(keystroke, options)
 
-  ensureByDispatch: (command, options) =>
-    dispatch(atom.views.getView(@editor), command)
-    for name in ensureOptionsOrdered when options[name]?
-      method = 'ensure' + _.capitalize(_.camelize(name))
-      this[method](options[name])
+  bindEnsureWaitOption: (optionsBase) =>
+    @bindEnsureOption(optionsBase, true)
 
+  # Ensure each options from here
+  # -----------------------------
   ensureText: (text) ->
     expect(@editor.getText()).toEqual(text)
 
@@ -485,5 +495,8 @@ class VimEditor
 
     if options.partialMatchTimeout
       advanceClock(atom.keymaps.getPartialMatchTimeout())
+
+  keystrokeWait: (keys, options={}) =>
+    @keystroke keys, Object.assign(waitsForFinish: true)
 
 module.exports = {getVimState, getView, dispatch, TextData, withMockPlatform}

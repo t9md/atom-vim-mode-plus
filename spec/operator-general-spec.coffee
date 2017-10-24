@@ -2,13 +2,14 @@
 settings = require '../lib/settings'
 
 describe "Operator general", ->
-  [set, ensure, ensureByDispatch, bindEnsureOption, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption, keystroke, keystrokeWait] = []
+  [editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, ensureByDispatch, bindEnsureOption, keystroke} = vim
+      {set, ensure, ensureWait, bindEnsureOption, bindEnsureWaitOption, keystroke, keystrokeWait} = vim
 
   describe "cancelling operations", ->
     it "clear pending operation", ->
@@ -952,7 +953,8 @@ describe "Operator general", ->
             if| () {
             }
             """
-          ensureByDispatch 'vim-mode-plus:put-after-with-auto-indent',
+          dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
+          ensure
             textC_: """
             if () {
               |345
@@ -973,7 +975,8 @@ describe "Operator general", ->
               }
             }
             """
-          ensureByDispatch 'vim-mode-plus:put-after-with-auto-indent',
+          dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
+          ensure
             textC: """
             if (1) {
               if (2) {
@@ -1001,7 +1004,8 @@ describe "Operator general", ->
             """
 
           set register: '"': {text: registerContent, type: 'linewise'}
-          ensureByDispatch 'vim-mode-plus:put-after-with-auto-indent',
+          dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
+          ensure
             textC: """
             if (1) {
               if (2) {
@@ -1021,7 +1025,8 @@ describe "Operator general", ->
             """.replace(/_/g, ' ')
 
           set register: '"': {text: registerContent, type: 'linewise'}
-          ensureByDispatch 'vim-mode-plus:put-after-with-auto-indent',
+          dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
+          ensure
             textC_: """
             if (1) {
               if (2) {
@@ -1106,11 +1111,7 @@ describe "Operator general", ->
       ensure 'd d 2 .', text: "78"
 
   describe "the r keybinding", ->
-    _ensure = null
     beforeEach ->
-      # `r` is executed async since it `readInputAfterExecute`.
-      _ensure = bindEnsureOption(waitsForFinish: true)
-
       set
         text: """
         12
@@ -1120,15 +1121,15 @@ describe "Operator general", ->
         cursor: [[0, 0], [1, 0]]
 
     it "replaces a single character", ->
-      _ensure 'r x', text: 'x2\nx4\n\n'
+      ensureWait 'r x', text: 'x2\nx4\n\n'
 
     it "remain visual-mode when cancelled", ->
-      _ensure 'v r escape',
+      ensureWait 'v r escape',
         text: '12\n34\n\n'
         mode: ['visual', 'characterwise']
 
     it "replaces a single character with a line break", ->
-      _ensure 'r enter',
+      ensureWait 'r enter',
         text: '\n2\n\n4\n\n'
         cursor: [[1, 0], [3, 0]]
 
@@ -1137,44 +1138,44 @@ describe "Operator general", ->
         textC_: """
         __a|bc
         """
-      _ensure 'r enter',
+      ensureWait 'r enter',
         textC_: """
         __a
         __|c
         """
 
     it "composes properly with motions", ->
-      _ensure '2 r x', text: 'xx\nxx\n\n'
+      ensureWait '2 r x', text: 'xx\nxx\n\n'
 
     it "does nothing on an empty line", ->
       set cursor: [2, 0]
-      _ensure 'r x', text: '12\n34\n\n'
+      ensureWait 'r x', text: '12\n34\n\n'
 
     it "does nothing if asked to replace more characters than there are on a line", ->
-      _ensure '3 r x', text: '12\n34\n\n'
+      ensureWait '3 r x', text: '12\n34\n\n'
 
     describe "cancellation", ->
       it "does nothing when cancelled", ->
-        _ensure 'r escape', text: '12\n34\n\n', mode: 'normal'
+        ensureWait 'r escape', text: '12\n34\n\n', mode: 'normal'
 
       it "keep multi-cursor on cancelled", ->
         set                textC: "|    a\n!    a\n|    a\n"
-        _ensure "r escape", textC: "|    a\n!    a\n|    a\n", mode: "normal"
+        ensureWait "r escape", textC: "|    a\n!    a\n|    a\n", mode: "normal"
 
       it "keep multi-cursor on cancelled", ->
         set                textC: "|**a\n!**a\n|**a\n"
-        _ensure "v l",      textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
-        _ensure "r escape", textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
+        ensureWait "v l",      textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
+        ensureWait "r escape", textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
 
     describe "when in visual mode", ->
       beforeEach ->
         keystroke 'v e'
 
       it "replaces the entire selection with the given character", ->
-        _ensure 'r x', text: 'xx\nxx\n\n'
+        ensureWait 'r x', text: 'xx\nxx\n\n'
 
       it "leaves the cursor at the beginning of the selection", ->
-        _ensure 'r x', cursor: [[0, 0], [1, 0]]
+        ensureWait 'r x', cursor: [[0, 0], [1, 0]]
 
     describe "when in visual-block mode", ->
       beforeEach ->
@@ -1193,7 +1194,7 @@ describe "Operator general", ->
 
       it "replaces each selection and put cursor on start of top selection", ->
         runs ->
-          _ensure 'r x',
+          ensureWait 'r x',
             mode: 'normal'
             cursor: [1, 4]
             text: """
@@ -1208,7 +1209,7 @@ describe "Operator general", ->
           set cursor: [1, 0]
 
         runs ->
-          _ensure '.',
+          ensureWait '.',
             mode: 'normal'
             cursor: [1, 0]
             text: """
