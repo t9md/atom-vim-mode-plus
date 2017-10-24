@@ -312,7 +312,7 @@ class VimEditor
   _keystroke: (keys, options={}) =>
     target = @editorElement
     keystrokesToExecute = keys.split(/\s+/)
-    lastKeystrokeIndex = keystrokesToExecute.length - 2
+    lastKeystrokeIndex = keystrokesToExecute.length - 1
 
     for key, i in keystrokesToExecute
       waitsForFinish = (i is lastKeystrokeIndex) and options.waitsForFinish
