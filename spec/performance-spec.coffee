@@ -3,13 +3,13 @@ _ = require 'underscore-plus'
 {getVimState} = require './spec-helper'
 
 xdescribe "visual-mode performance", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = _vim
+      {set, ensure} = _vim
 
   afterEach ->
     vimState.resetNormalMode()
@@ -23,8 +23,8 @@ xdescribe "visual-mode performance", ->
       switch scenario
         when 'vmp'
           moveByVMP = ->
-            _.times moveCount, -> keystroke 'l'
-            _.times moveCount, -> keystroke 'h'
+            _.times moveCount, -> ensure 'l'
+            _.times moveCount, -> ensure 'h'
           _.times 10, -> measureWithTimeEnd(moveByVMP)
         when 'sel'
           moveBySelect = ->

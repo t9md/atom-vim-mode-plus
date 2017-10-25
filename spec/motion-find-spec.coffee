@@ -2,7 +2,7 @@
 settings = require '../lib/settings'
 
 describe "Motion Find", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     settings.set('useExperimentalFasterInput', true)
@@ -11,7 +11,7 @@ describe "Motion Find", ->
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = _vim
+      {set, ensure} = _vim
 
   xdescribe 'the f performance', ->
     timesToExecute = 500
@@ -33,14 +33,14 @@ describe "Motion Find", ->
         text: "  " + "l".repeat(timesToExecute)
         cursor: [0, 0]
 
-    xdescribe 'the f read-char-via-keybinding performance', ->
+    describe 'the f read-char-via-keybinding performance', ->
       beforeEach ->
         vimState.useMiniEditor = false
 
       it '[with keybind] moves to l char', ->
         testPerformanceOfKeybind = ->
-          keystroke "f l" for n in [1..timesToExecute]
-          ensure cursor: [0, timesToExecute + 1]
+          ensure("f l") for n in [1..timesToExecute]
+          ensure null, cursor: [0, timesToExecute + 1]
 
         console.log "== keybind"
         ensure "f l", cursor: [0, 2]
@@ -49,11 +49,11 @@ describe "Motion Find", ->
         # set cursor: [0, 0]
         # measureWithPerformanceNow(testPerformanceOfKeybind)
 
-    describe '[with hidden-input] moves to l char', ->
+    xdescribe '[with hidden-input] moves to l char', ->
       it '[with hidden-input] moves to l char', ->
         testPerformanceOfHiddenInput = ->
-          keystroke 'f l' for n in [1..timesToExecute]
-          ensure cursor: [0, timesToExecute + 1]
+          ensure('f l') for n in [1..timesToExecute]
+          ensure null, cursor: [0, timesToExecute + 1]
 
         console.log "== hidden"
         ensure 'f l', cursor: [0, 2]
@@ -73,20 +73,20 @@ describe "Motion Find", ->
       ensure 'f c', cursor: [0, 2]
 
     it 'extends visual selection in visual-mode and repetable', ->
-      ensure 'v', mode: ['visual', 'characterwise']
-      ensure 'f c', selectedText: 'abc', cursor: [0, 3]
-      ensure ';', selectedText: 'abcabc', cursor: [0, 6]
-      ensure ',', selectedText: 'abc', cursor: [0, 3]
+      ensure 'v',   mode: ['visual', 'characterwise']
+      ensure 'f c', selectedText: 'abc',    cursor: [0, 3]
+      ensure ';',   selectedText: 'abcabc', cursor: [0, 6]
+      ensure ',',   selectedText: 'abc',    cursor: [0, 3]
 
     it 'moves backwards to the first specified character it finds', ->
-      set cursor: [0, 2]
+      set           cursor: [0, 2]
       ensure 'F a', cursor: [0, 0]
 
     it 'respects count forward', ->
       ensure '2 f a', cursor: [0, 6]
 
     it 'respects count backward', ->
-      cursor: [0, 6]
+      set             cursor: [0, 6]
       ensure '2 F a', cursor: [0, 0]
 
     it "doesn't move if the character specified isn't found", ->
@@ -97,7 +97,7 @@ describe "Motion Find", ->
       # a bug was making this behaviour depend on the count
       ensure '1 1 f a', cursor: [0, 0]
       # and backwards now
-      set cursor: [0, 6]
+      set               cursor: [0, 6]
       ensure '1 0 F a', cursor: [0, 6]
       ensure '1 1 F a', cursor: [0, 6]
 
@@ -108,6 +108,29 @@ describe "Motion Find", ->
     it "F behaves exclusively when composes with operator", ->
       set cursor: [0, 3]
       ensure 'd F a', text: 'abcabcabc\n'
+
+  describe "[regression gurad] repeat(; or ,) after used as operator target", ->
+    it "repeat after d f", ->
+      set             textC: "a1    |a2    a3    a4"
+      ensure "d f a", textC: "a1    |3    a4", mode: "normal", selectedText: ""
+      ensure ";",     textC: "a1    3    |a4", mode: "normal", selectedText: ""
+      ensure ",",     textC: "|a1    3    a4", mode: "normal", selectedText: ""
+    it "repeat after d t", ->
+      set             textC: "|a1    a2    a3    a4"
+      ensure "d t a", textC: "|a2    a3    a4", mode: "normal", selectedText: ""
+      ensure ";",     textC: "a2   | a3    a4", mode: "normal", selectedText: ""
+      ensure ",",     textC: "a|2    a3    a4", mode: "normal", selectedText: ""
+    it "repeat after d F", ->
+      set             textC: "a1    a2    a3    |a4"
+      ensure "d F a", textC: "a1    a2    |a4", mode: "normal", selectedText: ""
+      ensure ";",     textC: "a1    |a2    a4", mode: "normal", selectedText: ""
+      ensure ",",     textC: "a1    a2    |a4", mode: "normal", selectedText: ""
+    it "repeat after d T", ->
+      set             textC: "a1    a2    a3    |a4"
+      set             textC: "a1    a2    a|a4"
+      ensure "d T a", textC: "a1    a2    a|a4", mode: "normal", selectedText: ""
+      ensure ";",     textC: "a1    a|2    aa4", mode: "normal", selectedText: ""
+      ensure ",",     textC: "a1    a2   | aa4", mode: "normal", selectedText: ""
 
   describe "cancellation", ->
     it "keeps multiple-cursors when cancelled", ->
@@ -181,66 +204,66 @@ describe "Motion Find", ->
 
     it "repeat f in same direction", ->
       ensure 'f c', cursor: [0, 2]
-      ensure ';', cursor: [0, 5]
-      ensure ';', cursor: [0, 8]
+      ensure ';',   cursor: [0, 5]
+      ensure ';',   cursor: [0, 8]
 
     it "repeat F in same direction", ->
-      set cursor: [0, 10]
+      set           cursor: [0, 10]
       ensure 'F c', cursor: [0, 8]
-      ensure ';', cursor: [0, 5]
-      ensure ';', cursor: [0, 2]
+      ensure ';',   cursor: [0, 5]
+      ensure ';',   cursor: [0, 2]
 
     it "repeat f in opposite direction", ->
-      set cursor: [0, 6]
+      set           cursor: [0, 6]
       ensure 'f c', cursor: [0, 8]
-      ensure ',', cursor: [0, 5]
-      ensure ',', cursor: [0, 2]
+      ensure ',',   cursor: [0, 5]
+      ensure ',',   cursor: [0, 2]
 
     it "repeat F in opposite direction", ->
-      set cursor: [0, 4]
+      set           cursor: [0, 4]
       ensure 'F c', cursor: [0, 2]
-      ensure ',', cursor: [0, 5]
-      ensure ',', cursor: [0, 8]
+      ensure ',',   cursor: [0, 5]
+      ensure ',',   cursor: [0, 8]
 
     it "alternate repeat f in same direction and reverse", ->
       ensure 'f c', cursor: [0, 2]
-      ensure ';', cursor: [0, 5]
-      ensure ',', cursor: [0, 2]
+      ensure ';',   cursor: [0, 5]
+      ensure ',',   cursor: [0, 2]
 
     it "alternate repeat F in same direction and reverse", ->
-      set cursor: [0, 10]
+      set           cursor: [0, 10]
       ensure 'F c', cursor: [0, 8]
-      ensure ';', cursor: [0, 5]
-      ensure ',', cursor: [0, 8]
+      ensure ';',   cursor: [0, 5]
+      ensure ',',   cursor: [0, 8]
 
     it "repeat t in same direction", ->
       ensure 't c', cursor: [0, 1]
-      ensure ';', cursor: [0, 4]
+      ensure ';',   cursor: [0, 4]
 
     it "repeat T in same direction", ->
-      set cursor: [0, 10]
+      set           cursor: [0, 10]
       ensure 'T c', cursor: [0, 9]
-      ensure ';', cursor: [0, 6]
+      ensure ';',   cursor: [0, 6]
 
     it "repeat t in opposite direction first, and then reverse", ->
-      set cursor: [0, 3]
+      set           cursor: [0, 3]
       ensure 't c', cursor: [0, 4]
-      ensure ',', cursor: [0, 3]
-      ensure ';', cursor: [0, 4]
+      ensure ',',   cursor: [0, 3]
+      ensure ';',   cursor: [0, 4]
 
     it "repeat T in opposite direction first, and then reverse", ->
-      set cursor: [0, 4]
+      set           cursor: [0, 4]
       ensure 'T c', cursor: [0, 3]
-      ensure ',', cursor: [0, 4]
-      ensure ';', cursor: [0, 3]
+      ensure ',',   cursor: [0, 4]
+      ensure ';',   cursor: [0, 3]
 
     it "repeat with count in same direction", ->
-      set cursor: [0, 0]
+      set           cursor: [0, 0]
       ensure 'f c', cursor: [0, 2]
       ensure '2 ;', cursor: [0, 8]
 
     it "repeat with count in reverse direction", ->
-      set cursor: [0, 6]
+      set           cursor: [0, 6]
       ensure 'f c', cursor: [0, 8]
       ensure '2 ,', cursor: [0, 2]
 
@@ -264,27 +287,27 @@ describe "Motion Find", ->
 
     it "shares the most recent find/till command with other editors", ->
       ensure 'f b', cursor: [0, 2]
-      other.ensure cursor: [0, 0]
+      other.ensure null, cursor: [0, 0]
 
       # replay same find in the other editor
       pane.activateItem(otherEditor)
-      other.keystroke ';'
-      ensure cursor: [0, 2]
-      other.ensure cursor: [0, 4]
+      other.ensure ';'
+      ensure null, cursor: [0, 2]
+      other.ensure null, cursor: [0, 4]
 
       # do a till in the other editor
-      other.keystroke 't r'
-      ensure cursor: [0, 2]
-      other.ensure cursor: [0, 5]
+      other.ensure 't r'
+      ensure null, cursor: [0, 2]
+      other.ensure null, cursor: [0, 5]
 
       # and replay in the normal editor
       pane.activateItem(editor)
       ensure ';', cursor: [0, 7]
-      other.ensure cursor: [0, 5]
+      other.ensure null, cursor: [0, 5]
 
     it "is still repeatable after original editor was destroyed", ->
       ensure 'f b', cursor: [0, 2]
-      other.ensure cursor: [0, 0]
+      other.ensure null, cursor: [0, 0]
 
       pane.activateItem(otherEditor)
       editor.destroy()
@@ -299,7 +322,7 @@ describe "Motion Find", ->
         settings.set("ignoreCaseForFind", true)
 
       it "ignore case to find", ->
-        set textC: "|    A    ab    a    Ab    a"
+        set           textC: "|    A    ab    a    Ab    a"
         ensure "f a", textC: "    |A    ab    a    Ab    a"
         ensure ";",   textC: "    A    |ab    a    Ab    a"
         ensure ";",   textC: "    A    ab    |a    Ab    a"
@@ -310,14 +333,14 @@ describe "Motion Find", ->
         settings.set("useSmartcaseForFind", true)
 
       it "ignore case when input is lower char", ->
-        set textC: "|    A    ab    a    Ab    a"
+        set           textC: "|    A    ab    a    Ab    a"
         ensure "f a", textC: "    |A    ab    a    Ab    a"
         ensure ";",   textC: "    A    |ab    a    Ab    a"
         ensure ";",   textC: "    A    ab    |a    Ab    a"
         ensure ";",   textC: "    A    ab    a    |Ab    a"
 
       it "find case-sensitively when input is lager char", ->
-        set textC: "|    A    ab    a    Ab    a"
+        set           textC: "|    A    ab    a    Ab    a"
         ensure "f A", textC: "    |A    ab    a    Ab    a"
         ensure "f A", textC: "    A    ab    a    |Ab    a"
         ensure ",",   textC: "    |A    ab    a    Ab    a"
@@ -330,14 +353,14 @@ describe "Motion Find", ->
       it "can reuse f and t as ;, F and T as ',' respectively", ->
         set textC: "|    A    ab    a    Ab    a"
         ensure "f a", textC: "    A    |ab    a    Ab    a"
-        ensure "f",   textC: "    A    ab    |a    Ab    a"
-        ensure "f",   textC: "    A    ab    a    Ab    |a"
-        ensure "F",   textC: "    A    ab    |a    Ab    a"
-        ensure "F",   textC: "    A    |ab    a    Ab    a"
-        ensure "t",   textC: "    A    ab   | a    Ab    a"
-        ensure "t",   textC: "    A    ab    a    Ab   | a"
-        ensure "T",   textC: "    A    ab    a|    Ab    a"
-        ensure "T",   textC: "    A    a|b    a    Ab    a"
+        ensure "f", textC: "    A    ab    |a    Ab    a"
+        ensure "f", textC: "    A    ab    a    Ab    |a"
+        ensure "F", textC: "    A    ab    |a    Ab    a"
+        ensure "F", textC: "    A    |ab    a    Ab    a"
+        ensure "t", textC: "    A    ab   | a    Ab    a"
+        ensure "t", textC: "    A    ab    a    Ab   | a"
+        ensure "T", textC: "    A    ab    a|    Ab    a"
+        ensure "T", textC: "    A    a|b    a    Ab    a"
 
       it "behave as normal f if no successful previous find was exists", ->
         set                textC: "  |  A    ab    a    Ab    a"
@@ -371,7 +394,7 @@ describe "Motion Find", ->
       describe "can find one or two char", ->
         it "adjust to next-pre-confirmed", ->
           set                 textC: "|    a    ab    a    cd    a"
-          keystroke "f a "
+          ensure "f a"
           element = vimState.inputEditor.element
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed")
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed")
@@ -381,7 +404,7 @@ describe "Motion Find", ->
           set                   textC: "|    a    ab    a    cd    a"
           ensure "3 f a enter", textC: "    a    ab    |a    cd    a"
           set                   textC: "|    a    ab    a    cd    a"
-          keystroke "3 f a"
+          ensure "3 f a"
           element = vimState.inputEditor.element
           dispatch(element, "vim-mode-plus:find-previous-pre-confirmed")
           dispatch(element, "vim-mode-plus:find-previous-pre-confirmed")
@@ -389,7 +412,7 @@ describe "Motion Find", ->
 
         it "is useful to skip earlier spot interactivelly", ->
           set  textC: 'text = "this is |\"example\" of use case"'
-          keystroke 'c t "'
+          ensure 'c t "'
           element = vimState.inputEditor.element
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed") # tab
           dispatch(element, "vim-mode-plus:find-next-pre-confirmed") # tab
@@ -437,14 +460,14 @@ describe "Motion Find", ->
 
           ensure "f a",   textC: "|    a    ab    a    cd    a"
           advanceClock(500)
-          ensure          textC: "    |a    ab    a    cd    a"
+          ensure null,    textC: "    |a    ab    a    cd    a"
 
           ensure "f c d", textC: "    a    ab    a    |cd    a"
 
           ensure "f a",   textC: "    a    ab    a    |cd    a"
           advanceClock(500)
-          ensure          textC: "    a    ab    a    cd    |a"
+          ensure null,    textC: "    a    ab    a    cd    |a"
 
           ensure "F b",   textC: "    a    ab    a    cd    |a"
           advanceClock(500)
-          ensure          textC: "    a    a|b    a    cd    a"
+          ensure null,    textC: "    a    a|b    a    cd    a"

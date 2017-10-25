@@ -2,14 +2,14 @@
 settings = require '../lib/settings'
 
 describe "Motion Search", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     jasmine.attachToDOM(getView(atom.workspace))
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = _vim
+      {set, ensure} = _vim
 
   describe "the / keybinding", ->
     pane = null
@@ -139,7 +139,7 @@ describe "Motion Search", ->
 
       describe "repeating with search history", ->
         beforeEach ->
-          keystroke '/ def enter'
+          ensure '/ def enter'
 
         it "repeats previous search with /<enter>", ->
           ensure '/  enter', cursor: [3, 0]
@@ -182,7 +182,7 @@ describe "Motion Search", ->
 
       describe "repeating", ->
         beforeEach ->
-          keystroke '? def enter'
+          ensure '? def enter'
 
         it "repeats previous search as reversed with ?<enter>", ->
           ensure "? enter", cursor: [1, 0]
@@ -216,13 +216,13 @@ describe "Motion Search", ->
         inputEditor = vimState.searchInput.editorElement
 
       it "allows searching history in the search field", ->
-        keystroke '/'
+        ensure '/'
         ensureInputEditor 'core:move-up', text: 'abc'
         ensureInputEditor 'core:move-up', text: 'def'
         ensureInputEditor 'core:move-up', text: 'def'
 
       it "resets the search field to empty when scrolling back", ->
-        keystroke '/'
+        ensure '/'
         ensureInputEditor 'core:move-up', text: 'abc'
         ensureInputEditor 'core:move-up', text: 'def'
         ensureInputEditor 'core:move-down', text: 'abc'
@@ -242,7 +242,7 @@ describe "Motion Search", ->
           expect(text).toEqual(options.text)
 
         if options.mode?
-          ensure {mode: options.mode}
+          ensure null, {mode: options.mode}
 
       beforeEach ->
         jasmine.attachToDOM(getView(atom.workspace))
@@ -254,7 +254,7 @@ describe "Motion Search", ->
         it "clear highlightSearch marker", ->
           ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
           dispatch(editorElement, 'vim-mode-plus:clear-highlight-search')
-          expect(vimState.highlightSearch.hasMarkers()).toBe(false)
+          ensureHightlightSearch length: 0, mode: 'normal'
 
       describe "clearHighlightSearchOnResetNormalMode", ->
         describe "when disabled", ->
@@ -269,8 +269,18 @@ describe "Motion Search", ->
             settings.set('clearHighlightSearchOnResetNormalMode', true)
             ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
             ensure "escape", mode: 'normal'
-            expect(vimState.highlightSearch.hasMarkers()).toBe(false)
-            ensure mode: 'normal'
+            ensureHightlightSearch length: 0, mode: 'normal'
+
+      describe "toggle-highlight-search command", ->
+        it "toggle highlightSearch config and re-hihighlight on re-enabled", ->
+          runs ->
+            expect(settings.get("highlightSearch")).toBe(true)
+            ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
+            dispatch(editorElement, 'vim-mode-plus:toggle-highlight-search')
+            ensureHightlightSearch length: 0, mode: 'normal'
+            dispatch(editorElement, 'vim-mode-plus:toggle-highlight-search')
+            expect(settings.get("highlightSearch")).toBe(true)
+            ensureHightlightSearch length: 2, text: ["def", "def"], mode: 'normal'
 
   describe "IncrementalSearch", ->
     beforeEach ->
@@ -573,33 +583,33 @@ describe "Motion Search", ->
             """
         describe "when open and close pair is not at cursor line", ->
           it "fail to move", ->
-            set cursor: [0, 0]
+            set         cursor: [0, 0]
             ensure '%', cursor: [0, 0]
           it "fail to move", ->
-            set cursor: [2, 0]
+            set         cursor: [2, 0]
             ensure '%', cursor: [2, 0]
         describe "when open pair is forwarding to cursor in same row", ->
           it "move to closing pair", ->
-            set cursor: [1, 0]
+            set         cursor: [1, 0]
             ensure '%', cursor: [3, 3]
         describe "when cursor position is greater than open pair", ->
           it "fail to move", ->
-            set cursor: [1, 4]
+            set         cursor: [1, 4]
             ensure '%', cursor: [1, 4]
         describe "when close pair is forwarding to cursor in same row", ->
           it "move to closing pair", ->
-            set cursor: [3, 0]
+            set         cursor: [3, 0]
             ensure '%', cursor: [1, 3]
 
     describe "CurlyBracket", ->
       beforeEach ->
         set text: "{___}"
       it "cursor is at open pair, it move to closing pair", ->
-        set cursor: [0, 0]
+        set         cursor: [0, 0]
         ensure '%', cursor: [0, 4]
         ensure '%', cursor: [0, 0]
       it "cursor is at close pair, it move to open pair", ->
-        set cursor: [0, 4]
+        set         cursor: [0, 4]
         ensure '%', cursor: [0, 0]
         ensure '%', cursor: [0, 4]
 
@@ -607,11 +617,11 @@ describe "Motion Search", ->
       beforeEach ->
         set text: "[___]"
       it "cursor is at open pair, it move to closing pair", ->
-        set cursor: [0, 0]
+        set         cursor: [0, 0]
         ensure '%', cursor: [0, 4]
         ensure '%', cursor: [0, 0]
       it "cursor is at close pair, it move to open pair", ->
-        set cursor: [0, 4]
+        set         cursor: [0, 4]
         ensure '%', cursor: [0, 0]
         ensure '%', cursor: [0, 4]
 
@@ -650,3 +660,15 @@ describe "Motion Search", ->
         set cursor: [4, 2]; ensure '%', cursor: [0, 1]
         set cursor: [4, 3]; ensure '%', cursor: [0, 1]
         set cursor: [4, 4]; ensure '%', cursor: [0, 1]
+
+  describe "[regression gurad] repeat(n or N) after used as operator target", ->
+    it "repeat after d /", ->
+      set                   textC: "a1    |a2    a3    a4"
+      ensure "d / a enter", textC: "a1    |a3    a4",      mode: "normal", selectedText: ""
+      ensure "n",           textC: "a1    a3    |a4",      mode: "normal", selectedText: ""
+      ensure "N",           textC: "a1    |a3    a4",      mode: "normal", selectedText: ""
+    it "repeat after d ?", ->
+      set                   textC: "a1    a2    |a3    a4"
+      ensure "d ? a enter", textC: "a1    |a3    a4", mode: "normal", selectedText: ""
+      ensure "n",           textC: "|a1    a3    a4", mode: "normal", selectedText: ""
+      ensure "N",           textC: "a1    |a3    a4", mode: "normal", selectedText: ""

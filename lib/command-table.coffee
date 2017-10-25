@@ -299,6 +299,18 @@ CompactSpaces:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:compact-spaces"
   commandScope: "atom-text-editor"
+AlignOccurrence:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:align-occurrence"
+  commandScope: "atom-text-editor"
+AlignOccurrenceByPadLeft:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:align-occurrence-by-pad-left"
+  commandScope: "atom-text-editor"
+AlignOccurrenceByPadRight:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:align-occurrence-by-pad-right"
+  commandScope: "atom-text-editor"
 RemoveLeadingWhiteSpaces:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:remove-leading-white-spaces"
@@ -475,6 +487,14 @@ SortByNumber:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:sort-by-number"
   commandScope: "atom-text-editor"
+NumberingLines:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:numbering-lines"
+  commandScope: "atom-text-editor"
+DuplicateWithCommentOutOriginal:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:duplicate-with-comment-out-original"
+  commandScope: "atom-text-editor"
 Motion:
   file: "./motion"
 CurrentSelection:
@@ -645,10 +665,6 @@ MoveToFirstCharacterOfLineAndDown:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-first-character-of-line-and-down"
   commandScope: "atom-text-editor"
-MoveToFirstLine:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-first-line"
-  commandScope: "atom-text-editor"
 MoveToScreenColumn:
   file: "./motion"
 MoveToBeginningOfScreenLine:
@@ -663,6 +679,10 @@ MoveToLastCharacterOfScreenLine:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-last-character-of-screen-line"
   commandScope: "atom-text-editor"
+MoveToFirstLine:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-first-line"
+  commandScope: "atom-text-editor"
 MoveToLastLine:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-last-line"
@@ -673,7 +693,7 @@ MoveToLineByPercent:
   commandScope: "atom-text-editor"
 MoveToRelativeLine:
   file: "./motion"
-MoveToRelativeLineMinimumOne:
+MoveToRelativeLineMinimumTwo:
   file: "./motion"
 MoveToTopOfScreen:
   file: "./motion"
@@ -1203,8 +1223,6 @@ ReplaceModeBackspace:
   file: "./misc-command"
   commandName: "vim-mode-plus:replace-mode-backspace"
   commandScope: "atom-text-editor.vim-mode-plus.insert-mode.replace"
-ScrollWithoutChangingCursorPosition:
-  file: "./misc-command"
 ScrollDown:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-down"
@@ -1223,14 +1241,6 @@ ScrollCursorToTopLeave:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-top-leave"
   commandScope: "atom-text-editor"
-ScrollCursorToBottom:
-  file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-bottom"
-  commandScope: "atom-text-editor"
-ScrollCursorToBottomLeave:
-  file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-bottom-leave"
-  commandScope: "atom-text-editor"
 ScrollCursorToMiddle:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-middle"
@@ -1238,6 +1248,14 @@ ScrollCursorToMiddle:
 ScrollCursorToMiddleLeave:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-middle-leave"
+  commandScope: "atom-text-editor"
+ScrollCursorToBottom:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:scroll-cursor-to-bottom"
+  commandScope: "atom-text-editor"
+ScrollCursorToBottomLeave:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:scroll-cursor-to-bottom-leave"
   commandScope: "atom-text-editor"
 ScrollCursorToLeft:
   file: "./misc-command"

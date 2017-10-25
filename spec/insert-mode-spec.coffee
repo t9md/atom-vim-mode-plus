@@ -1,13 +1,13 @@
 {getVimState} = require './spec-helper'
 
 describe "Insert mode commands", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (_vimState, vim) ->
       vimState = _vimState
       {editor, editorElement} = _vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure} = vim
 
   describe "Copy from line above/below", ->
     beforeEach ->
@@ -19,7 +19,7 @@ describe "Insert mode commands", ->
           efghi
           """
         cursor: [[1, 0], [3, 0]]
-      keystroke 'i'
+      ensure 'i'
 
     describe "the ctrl-y command", ->
       it "copies from the line above", ->
@@ -66,7 +66,7 @@ describe "Insert mode commands", ->
           """
 
         editor.insertText 'a'
-        ensure
+        ensure null,
           textC: """
             12a|345
 
@@ -124,7 +124,7 @@ describe "Insert mode commands", ->
     describe "InsertLastInserted", ->
       ensureInsertLastInserted = (key, options) ->
         {insert, text, finalText} = options
-        keystroke key
+        ensure key
         editor.insertText(insert)
         ensure "escape", text: text
         ensure "G I ctrl-a", text: finalText
@@ -139,7 +139,7 @@ describe "Insert mode commands", ->
           def\n
           """
         set text: "", cursor: [0, 0]
-        keystroke 'i'
+        ensure 'i'
         editor.insertText(initialText)
         ensure "escape g g",
           text: initialText

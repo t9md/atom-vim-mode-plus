@@ -2,13 +2,13 @@
 settings = require '../lib/settings'
 
 describe "mini DSL used in vim-mode-plus's spec", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure} = vim
 
     runs ->
       jasmine.attachToDOM(editorElement)
@@ -24,20 +24,20 @@ describe "mini DSL used in vim-mode-plus's spec", ->
     describe "| represent cursor", ->
       beforeEach ->
         set textC: "|abc"
-        ensure text: "abc", cursor: [0, 0] # explanatory purpose
+        ensure null, text: "abc", cursor: [0, 0] # explanatory purpose
 
       it "toggle and move right", ->
         ensure "~", textC: "A|bc"
-        ensure text: "Abc", cursor: [0, 1] # explanatory purpose
+        ensure null, text: "Abc", cursor: [0, 1] # explanatory purpose
 
     describe "! represent cursor", ->
       beforeEach ->
         set textC: "!abc"
-        ensure text: "abc", cursor: [0, 0] # explanatory purpose
+        ensure null, text: "abc", cursor: [0, 0] # explanatory purpose
 
       it "toggle and move right", ->
         ensure "~", textC: "A!bc"
-        ensure text: "Abc", cursor: [0, 1] # explanatory purpose
+        ensure null, text: "Abc", cursor: [0, 1] # explanatory purpose
 
     describe "| and ! is exchangable", ->
       it "both are OK", ->
@@ -56,29 +56,29 @@ describe "mini DSL used in vim-mode-plus's spec", ->
           |1: line1
           """
 
-        ensure cursor: [[0, 0], [1, 0]]
+        ensure null, cursor: [[0, 0], [1, 0]]
         expect(editor.getLastCursor().getBufferPosition()).toEqual([1, 0])
 
     describe "with ! cursor", ->
       it "! become last cursor", ->
         set textC: "|012|345|678"
-        ensure textC: "|012|345|678"
-        ensure cursor: [[0, 0], [0, 3], [0, 6]]
+        ensure null, textC: "|012|345|678"
+        ensure null, cursor: [[0, 0], [0, 3], [0, 6]]
         expect(editor.getLastCursor().getBufferPosition()).toEqual([0, 6])
 
         set textC: "!012|345|678"
-        ensure textC: "!012|345|678"
-        ensure cursor: [[0, 3], [0, 6], [0, 0]]
+        ensure null, textC: "!012|345|678"
+        ensure null, cursor: [[0, 3], [0, 6], [0, 0]]
         expect(editor.getLastCursor().getBufferPosition()).toEqual([0, 0])
 
         set textC: "|012!345|678"
-        ensure textC: "|012!345|678"
-        ensure cursor: [[0, 0], [0, 6], [0, 3]]
+        ensure null, textC: "|012!345|678"
+        ensure null, cursor: [[0, 0], [0, 6], [0, 3]]
         expect(editor.getLastCursor().getBufferPosition()).toEqual([0, 3])
 
         set textC: "|012|345!678"
-        ensure textC: "|012|345!678"
-        ensure cursor: [[0, 0], [0, 3], [0, 6]]
+        ensure null, textC: "|012|345!678"
+        ensure null, cursor: [[0, 0], [0, 3], [0, 6]]
         expect(editor.getLastCursor().getBufferPosition()).toEqual([0, 6])
 
     describe "without ! cursor", ->
@@ -90,7 +90,7 @@ describe "mini DSL used in vim-mode-plus's spec", ->
           opqrstu\n
           """
 
-        ensure
+        ensure null,
           text: """
           abcdefg
           hijklmn
@@ -106,7 +106,7 @@ describe "mini DSL used in vim-mode-plus's spec", ->
           opqrstu\n
           """
 
-        ensure
+        ensure null,
           text: """
           AbCdeFg
           hiJklmn

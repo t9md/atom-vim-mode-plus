@@ -1,7 +1,7 @@
 {getVimState, TextData} = require './spec-helper'
 
 describe "Visual Blockwise", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
   textInitial = """
     01234567890123456789
     1-------------------
@@ -101,7 +101,7 @@ describe "Visual Blockwise", ->
     getVimState (state, vimEditor) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vimEditor
+      {set, ensure} = vimEditor
 
     runs ->
       set text: textInitial
@@ -150,7 +150,7 @@ describe "Visual Blockwise", ->
         cursor: [[2, 5], [3, 5], [4, 5], [5, 5] ]
         text: textAfterDeleted
       editor.insertText("!!!")
-      ensure
+      ensure null,
         mode: 'insert'
         cursor: [[2, 8], [3, 8], [4, 8], [5, 8]]
         text: textAfterInserted
@@ -181,9 +181,9 @@ describe "Visual Blockwise", ->
     beforeEach ->
       selectBlockwise()
     it "enter insert mode with each cursors position set to start of selection", ->
-      keystroke 'I'
+      ensure 'I'
       editor.insertText "!!!"
-      ensure
+      ensure null,
         text: """
           01234567890123456789
           1-------------------
@@ -205,9 +205,9 @@ describe "Visual Blockwise", ->
     beforeEach ->
       selectBlockwise()
     it "enter insert mode with each cursors position set to end of selection", ->
-      keystroke 'A'
+      ensure 'A'
       editor.insertText "!!!"
-      ensure
+      ensure null,
         text: """
           01234567890123456789
           1-------------------
@@ -230,16 +230,16 @@ describe "Visual Blockwise", ->
 
     describe 'o', ->
       it "change blockwiseHead to opposite side and reverse selection", ->
-        keystroke 'o'
+        ensure 'o'
         ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: true
 
-        keystroke 'o'
+        ensure 'o'
         ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
     describe 'capital O', ->
       it "reverse each selection", ->
-        keystroke 'O'
+        ensure 'O'
         ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: true
-        keystroke 'O'
+        ensure 'O'
         ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
 
   describe "shift from characterwise to blockwise", ->
@@ -579,26 +579,26 @@ describe "Visual Blockwise", ->
       describe "selection is not reversed", ->
         it 'restore previous selection case-1', ->
           set cursor: [2, 5]
-          keystroke 'ctrl-v 1 0 l'
+          ensure 'ctrl-v 1 0 l'
           ensureRestored '3 j',
             selectedText: blockTexts[2..5]
             mode: ['visual', 'blockwise']
         it 'restore previous selection case-2', ->
           set cursor: [5, 5]
-          keystroke 'ctrl-v 1 0 l'
+          ensure 'ctrl-v 1 0 l'
           ensureRestored '3 k',
             selectedTextOrdered: blockTexts[2..5]
             mode: ['visual', 'blockwise']
       describe "selection is reversed", ->
         it 'restore previous selection case-1', ->
           set cursor: [2, 15]
-          keystroke 'ctrl-v 1 0 h'
+          ensure 'ctrl-v 1 0 h'
           ensureRestored '3 j',
             selectedText: blockTexts[2..5]
             mode: ['visual', 'blockwise']
         it 'restore previous selection case-2', ->
           set cursor: [5, 15]
-          keystroke 'ctrl-v 1 0 h'
+          ensure 'ctrl-v 1 0 h'
           ensureRestored '3 k',
             selectedTextOrdered: blockTexts[2..5]
             mode: ['visual', 'blockwise']

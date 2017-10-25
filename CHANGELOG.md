@@ -1,3 +1,137 @@
+# 1.12.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.12.0...v1.12.1)
+- Improve: `duplicate-with-comment-out-original` flashes correct range(only changed range).
+
+# 1.12.0: Internal redesign of replace and surround(no behavior diff).
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.6...v1.12.0)
+- New: Operator `duplicate-with-comment-out-original`(idea by @nwaywood) #929
+  - Duplicate targeted lines(always works as `linewise`) and comment out original target(selected) text.
+  - No keymap by default. But available from `select-list`(`ctrl-s` for macOS user).
+  - This is maybe useful when you change code with keeping original code as reference.
+    - e.g. If I keymap `g shift-cmd-D` to `vim-mode-plus:duplicate-with-comment-out-original`.
+    - `g shift-cmd-D p`: Duplicate paragraph with original paragraph commentout.
+    - `g shift-cmd-D z`: Duplicate fold with original fold commentout.
+    - `g shift-cmd-D f`: Duplicate function with original function commentout.
+- Improve: Remove operator's `supportEarlySelect` flag used by `surround` and `replace` operator #926
+  - This option's purpose is to select target immediately after target provided and before reading user's input.
+  - Now achieve same UX with more simpler way.
+    - Old: Select target before `execute()` and skip `selectTarget` by checking if it's already selected.
+    - New: Just execute and `await` user's input(simple and no complex skip `selectTarget` scenario).
+  - As result of this re-design, `surround` and `replace` operator now executed in `async`.
+    - This should be no diff from UX perspective. Just diff in internal execution model(require spec code change).
+- Improve: Respect occurrence wise when updating register
+  - When `c o p` update register's content register's type
+    - Old: Save with register's type `linewise`, immediate paste(`cmd-v`) in `insert-mode` surprise user.
+      - Since replaced text by `c` was `characterwise`, but pasted text add extra newline(`\n`).
+    - New: Save with register's type `characterwise`, and immediate paste(`cmd-v`) in `insert-mode` works as expected.
+- Improve: Spec helper
+  - New: `ensureWait` is like `ensure`, but it **wait** till finish operation for async `execution`
+  - Breaking: Remove `ensureByDispatch` since it's non essential, just wrapper. I want manage minimum set of `ensure` family.
+  - Breaking: Disallow `keystroke` helper(after confirmed that it's not used by vmp and vmp-plugins).
+  - Improve: `ensure` now recognize 1st arg as keystroke(not like keystroke or ensureOption as old `ensure`).
+    - This is more clearer and explicit, and allow 2nd ensureOption empty to just dispatch keystroke(as replacement of old `keystroke` helper).
+
+# 1.11.6:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.5...v1.11.6)
+- Fix: `move-up-to-edge`, `move-down-to-edge` motion did not work correctly in soft-wrapped editor.
+  - Regression from v1.11.0.
+
+# 1.11.5:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.4...v1.11.5)
+- Fix: No `r` with `'` or `"` input properly work on some international keyboard which require TWO keystroke to input these quotes.
+  - Fix provided 1.11.4 was just fix issue partially, not perfect.
+
+# 1.11.4:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.3...v1.11.4)
+- Fix: No `r` with `'` or `"` input properly work on some international keyboard which require TWO keystroke to input these quotes.
+
+# 1.11.3:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.2...v1.11.3)
+- Fix: No longer throw exception when `change-surround-any-pair` cannot find surround pair.
+
+# 1.11.2:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.1...v1.11.2)
+- Fix: No longer throw exception when `demo-mode` pkg was activated, regression from v1.11.0.
+- Fix `remove-leading-white-spaces` operator work properly again regression from v1.11.0.
+- Improve: #701, When `wrapLeftRightMotion` is enabled and `l` in `vC` now can select new-line(can stop at column 0 of next-line).
+- Internal: No longer expect `Operator.protoype.setTarget` return instance.
+  - This eliminate unessential contract between caller/callee.
+
+# 1.11.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.0...v1.11.1)
+- Fix: `z c` no longer throw exception, this is regression from v1.11.0.
+- Fix: `highlightSearch`, fix minor not-highlighted issue where it should be.
+  - Fix: Highlight newly opened editor is not highlighted when `mainMoudle.globalState` was not populated.
+    - E.g. `pane:split-right`, `pane:split-down` on fuzzy-finder's `select-list`
+  - Fix: Now highlight newly opened editor even when it's not initially **activated**.(e.g. open on next pane without activating it).
+
+# 1.11.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.10.0...v1.11.0)
+- Fix: `toggle-highlight-search` command now correctly clear/re-highlight when value changed #918
+  - This is regression introduced in v1.10.0 sorry!
+- Improve: `toggle-fold` now work with multiple cursors.
+- Improve, Breaking: How text-object function detect function scopes
+  - Improve: function scope detection for `type-script`.
+  - Improve, Breaking: `source.js` and `source.jsx`.
+    - Ignore arrow function. Use `a-fold`(e.g. `y z`) for arrow-function.
+    - Now no longer detect instantiation (`new Class`) call as function text-object.
+- Breaking: Rename following align operator since it was confusing.
+  - Old: `align-start-of-occurrence`, New: `align-occurrence-by-pad-start`
+  - Old: `align-end-of-occurrence`, New: `align-occurrence-by-pad-end`
+- Internal: Convention change, return value of `Base.prototype.initialize()` is not used, so no need to return `this`.
+
+# 1.10.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.9.1...v1.10.0)
+- New: `numbering-lines` operator, which adds line number to each line.
+  - No default keymap, accessible via `transform-string-by-select-list`(`ctrl-s` for macOS user) command.
+- Improve: `z t`, `z enter` works properly when last screen row was visible. @dcalhoun #915.
+  - `editor.scrollPastEnd` need to be `true` to work these command properly, so show notification if not enabled.
+- Fix: `z e` did not scroll until next cursor move is happens, but now scroll immediately.
+- Improve, Performance: Lazy load further
+- Improve: Improve integration with demo-mode package by making hover and flash highlight fadeout more in-sync.
+- Internal: Remove intermediate class `ScrollWithoutChangingCursorPosition` used for misc-scroll commands.
+
+# 1.9.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.9.0...v1.9.1)
+- Fix: [CRITICAL] No longer throw exception by lack of `semver` dependency. Sorry!
+
+# 1.9.0: Converted to JS, as a result, CoffeeScript based customization is no longer supported.
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.8.2...v1.9.0)
+- Maintenance: Convert from CoffeeScript to JavaScript for operator, motion, text-object codes.
+  - Now all running code is written in JavaScript.
+  - Still test-spec is written in CoffeScript.
+  - Through rewriting to JS, introduced lots of refactoring(architectural simplification, minor bug fixes).
+- Breaking: CoffeeScript based custom-vmp-operation is no longer supported.
+  - From this version, all operations are defined as ES6 class which is NOT extend-able by CoffeeScript.,
+  - If you have custom-vmp-operation in your `init.coffee`, require rewrite to JS. See [Wiki](https://github.com/t9md/atom-vim-mode-plus/wiki/ExtendVimModePlusInInitFile).
+  - Also all vmp-plugin pkg I'm maintaining is rewritten this time, see [#895](https://github.com/t9md/atom-vim-mode-plus/pull/895) for detail.
+- Fix: Broken features broken from Atom-v1.22.0-beta0 now work again.
+  - Fold related commands: `a-fold`, `inner-fold`, `move-to-next-fold-start` etc..
+  - Comment text-object.
+- New: Operator `AlignOccurrence`, `AlignStartOfOccurrence`, `AlignEndOfOccurrence`. #904 #906
+  - No default keymap(set it by yourself if necessary).
+  - Available from `transform-string-by-select-list`(`ctrl-s` for macOS user) commands.
+  - How align operator works.
+    - I introduce this operator with great simplicity by intention.
+    - It's always add space to start or end of occurrence to align occurrence.
+    - Add only, not trim existing spaces, if you want to remove consecutive spaces, use `compact-spaces` operator(`g space` for macOS).
+  - For general purpose aligning(such as align lines by `=` assignment), use pkg like [aligner](https://atom.io/packages/aligner).
+  - This operator's goodness is explicitness and manual control for pattern to use for align, which make it possible general purpose aligner tools is not good at.
+- New: `blackholeRegisteredOperators` to disable register update for selected operator commands. #901, #902
+  - Old `dontUpdateRegisterOnChangeOrSubstitute` are deprecated. it's setting is auto-migrated on first startup.
+  - Set list of operator commands to `blackholeRegisteredOperators`.
+    - E.g. `change, change-to-last-character-of-line, delete-right, delete-left`.
+  - `change*`, `substitute*`, `delete*` is special value available to specify ALL same family operators.
+
+# 1.8.2:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.8.1...v1.8.2)
+- Fix: `TransformStringByExternalCommand` operator now correctly shift to `normal-mode` after operation finished.
+  - This operator is specifically used by `vim-mode-plus-replace-with-execution` pkg(was broken, but recover now).
+
+# 1.8.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.8.0...v1.8.1)
+- Maintenance: Add `Base.initClass` as alias of `Base.extend` for upcoming vmp changes.
+
 # 1.8.0: Expose select operator as normal command
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.7.0...v1.8.0)
 - New: `select` operator just for `select` target.
@@ -1881,13 +2015,13 @@ When disabled, changes are not bundled and user can undo more granular level(sma
 - FIX: debug feature was broken
 - FIX:#4 select area when TextObject is executed via command-pallate(was throw err).
 
-# 0.1.1
+# 0.1.1 first public release of vim-mode-plus.
 - 1st public release
 
 # 0.1.0
 - 2015.9.21 rename vim-mode to vim-mode-plus
 
-# 0.0.0
+# 0.0.0 vim-mode-plus started as fork of vim-mode
 - 2015.8.1 forked from vim-mode.
 
 ---

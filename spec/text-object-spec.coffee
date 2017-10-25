@@ -2,7 +2,7 @@
 settings = require '../lib/settings'
 
 describe "TextObject", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, ensureWait, editor, editorElement, vimState] = []
 
   getCheckFunctionFor = (textObject) ->
     (initialPoint, keystroke, options) ->
@@ -13,7 +13,7 @@ describe "TextObject", ->
     getVimState (state, vimEditor) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vimEditor
+      {set, ensure, ensureWait} = vimEditor
 
   describe "TextObject", ->
     beforeEach ->
@@ -21,7 +21,7 @@ describe "TextObject", ->
         atom.packages.activatePackage('language-coffee-script')
       getVimState 'sample.coffee', (state, vimEditor) ->
         {editor, editorElement} = state
-        {set, ensure, keystroke} = vimEditor
+        {set, ensure} = vimEditor
     afterEach ->
       atom.packages.deactivatePackage('language-coffee-script')
 
@@ -29,7 +29,7 @@ describe "TextObject", ->
       it "select that TextObject", ->
         set cursor: [8, 7]
         dispatch(editorElement, 'vim-mode-plus:inner-word')
-        ensure selectedText: 'QuickSort'
+        ensure null, selectedText: 'QuickSort'
 
   describe "Word", ->
     describe "inner-word", ->
@@ -145,7 +145,7 @@ describe "TextObject", ->
         ensure 'v a W', selectedBufferRange: [[0, 0], [0, 5]]
 
   describe "Subword", ->
-    escape = -> keystroke('escape')
+    escape = -> ensure('escape')
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
@@ -219,7 +219,7 @@ describe "TextObject", ->
             """
       it "can expand selection", ->
         set text: complexText, cursor: [2, 8]
-        keystroke 'v'
+        ensure 'v'
         ensure 'i s', selectedText: """1s-1e"""
         ensure 'i s', selectedText: """2s(1s-1e)2e"""
         ensure 'i s', selectedText: """3s\n----"2s(1s-1e)2e"\n---3e"""
@@ -248,7 +248,7 @@ describe "TextObject", ->
             """
       it "can expand selection", ->
         set text: complexText, cursor: [2, 8]
-        keystroke 'v'
+        ensure 'v'
         ensure 'a s', selectedText: """(1s-1e)"""
         ensure 'a s', selectedText: """\"2s(1s-1e)2e\""""
         ensure 'a s', selectedText: """{3s\n----"2s(1s-1e)2e"\n---3e}"""
@@ -267,7 +267,7 @@ describe "TextObject", ->
         ensure '.', text: """--"" ``  'efg'--"""
         ensure '.', text: """--"" ``  ''--"""
       it "can select next quote", ->
-        keystroke 'v'
+        ensure 'v'
         ensure 'i q', selectedText: 'abc'
         ensure 'i q', selectedText: 'def'
         ensure 'i q', selectedText: 'efg'
@@ -277,7 +277,7 @@ describe "TextObject", ->
         ensure '.'  , text: """--   'efg'--"""
         ensure '.'  , text: """--   --"""
       it "can select next quote", ->
-        keystroke 'v'
+        ensure 'v'
         ensure 'a q', selectedText: '"abc"'
         ensure 'a q', selectedText: '`def`'
         ensure 'a q', selectedText: "'efg'"
@@ -291,46 +291,46 @@ describe "TextObject", ->
 
       describe "quote is un-balanced", ->
         it "case1", ->
-          set                 textC_: '_|_"____"____"'
-          ensure 'g r i " +', textC_: '__"|++++"____"'
+          set                     textC_: '_|_"____"____"'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"'
         it "case2", ->
-          set                 textC_: '__"__|__"____"'
-          ensure 'g r i " +', textC_: '__"|++++"____"'
+          set                     textC_: '__"__|__"____"'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"'
         it "case3", ->
-          set                 textC_: '__"____"__|__"'
-          ensure 'g r i " +', textC_: '__"____"|++++"'
+          set                     textC_: '__"____"__|__"'
+          ensureWait 'g r i " +', textC_: '__"____"|++++"'
         it "case4", ->
-          set                 textC_: '__|"____"____"'
-          ensure 'g r i " +', textC_: '__"|++++"____"'
+          set                     textC_: '__|"____"____"'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"'
         it "case5", ->
-          set                 textC_: '__"____|"____"'
-          ensure 'g r i " +', textC_: '__"|++++"____"'
+          set                     textC_: '__"____|"____"'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"'
         it "case6", ->
-          set                 textC_: '__"____"____|"'
-          ensure 'g r i " +', textC_: '__"____"|++++"'
+          set                     textC_: '__"____"____|"'
+          ensureWait 'g r i " +', textC_: '__"____"|++++"'
 
       describe "quote is balanced", ->
         it "case1", ->
-          set                 textC_: '_|_"===="____"==="'
-          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+          set                     textC_: '_|_"===="____"==="'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"==="'
         it "case2", ->
-          set                 textC_: '__"==|=="____"==="'
-          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+          set                     textC_: '__"==|=="____"==="'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"==="'
         it "case3", ->
-          set                 textC_: '__"===="__|__"==="'
-          ensure 'g r i " +', textC_: '__"===="|++++"==="'
+          set                     textC_: '__"===="__|__"==="'
+          ensureWait 'g r i " +', textC_: '__"===="|++++"==="'
         it "case4", ->
-          set                 textC_: '__"===="____"=|=="'
-          ensure 'g r i " +', textC_: '__"===="____"|+++"'
+          set                     textC_: '__"===="____"=|=="'
+          ensureWait 'g r i " +', textC_: '__"===="____"|+++"'
         it "case5", ->
-          set                 textC_: '__|"===="____"==="'
-          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+          set                     textC_: '__|"===="____"==="'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"==="'
         it "case6", ->
-          set                 textC_: '__"====|"____"==="'
-          ensure 'g r i " +', textC_: '__"|++++"____"==="'
+          set                     textC_: '__"====|"____"==="'
+          ensureWait 'g r i " +', textC_: '__"|++++"____"==="'
         it "case7", ->
-          set                 textC_: '__"===="____|"==="'
-          ensure 'g r i " +', textC_: '__"===="____"|+++"'
+          set                     textC_: '__"===="____|"==="'
+          ensureWait 'g r i " +', textC_: '__"===="____"|+++"'
 
     describe "inner-double-quote", ->
       beforeEach ->
@@ -364,9 +364,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 2]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-double-quote", ->
       originalText = '" something in here and in "here" "'
@@ -394,9 +394,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 1]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
   describe "SingleQuote", ->
     describe "inner-single-quote", ->
@@ -469,9 +469,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 2]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-single-quote", ->
       originalText = "' something in here and in 'here' '"
@@ -611,9 +611,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 2]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
 
       describe "change mode to characterwise", ->
@@ -634,7 +634,7 @@ describe "TextObject", ->
               3
             }
             """
-          ensure mode: 'normal'
+          ensure null, mode: 'normal'
 
         it "from vC, final-mode is 'characterwise'", ->
           ensure 'v',
@@ -704,9 +704,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 1]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
 
       describe "change mode to characterwise", ->
@@ -728,7 +728,7 @@ describe "TextObject", ->
 
             hello
             """
-          ensure mode: 'normal'
+          ensure null, mode: 'normal'
 
         it "from vC, final-mode is 'characterwise'", ->
           ensure 'v',
@@ -799,9 +799,9 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 2]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 2]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 2]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
     describe "a-angle-bracket", ->
       beforeEach ->
@@ -830,24 +830,24 @@ describe "TextObject", ->
         close = [0, 3]
         beforeEach ->
           set {text}
-        it "case-1 normal", -> check open, 'd', text: textFinal, cursor: [0, 1]
+        it "case-1 normal", -> check open,  'd', text: textFinal, cursor: [0, 1]
         it "case-2 normal", -> check close, 'd', text: textFinal, cursor: [0, 1]
-        it "case-3 visual", -> check open, 'v', {selectedText}
+        it "case-3 visual", -> check open,  'v', {selectedText}
         it "case-4 visual", -> check close, 'v', {selectedText}
 
   describe "AllowForwarding family", ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
-          'i }':  'vim-mode-plus:inner-curly-bracket-allow-forwarding'
-          'i >':  'vim-mode-plus:inner-angle-bracket-allow-forwarding'
-          'i ]':  'vim-mode-plus:inner-square-bracket-allow-forwarding'
-          'i )':  'vim-mode-plus:inner-parenthesis-allow-forwarding'
+          'i }': 'vim-mode-plus:inner-curly-bracket-allow-forwarding'
+          'i >': 'vim-mode-plus:inner-angle-bracket-allow-forwarding'
+          'i ]': 'vim-mode-plus:inner-square-bracket-allow-forwarding'
+          'i )': 'vim-mode-plus:inner-parenthesis-allow-forwarding'
 
-          'a }':  'vim-mode-plus:a-curly-bracket-allow-forwarding'
-          'a >':  'vim-mode-plus:a-angle-bracket-allow-forwarding'
-          'a ]':  'vim-mode-plus:a-square-bracket-allow-forwarding'
-          'a )':  'vim-mode-plus:a-parenthesis-allow-forwarding'
+          'a }': 'vim-mode-plus:a-curly-bracket-allow-forwarding'
+          'a >': 'vim-mode-plus:a-angle-bracket-allow-forwarding'
+          'a ]': 'vim-mode-plus:a-square-bracket-allow-forwarding'
+          'a )': 'vim-mode-plus:a-parenthesis-allow-forwarding'
 
       set
         text: """
@@ -892,31 +892,19 @@ describe "TextObject", ->
           111}
           """
       describe "forwarding inner", ->
-        it "select forwarding range", ->
-          set cursor: [1, 0]; ensure "v i }", selectedText: textOneInner
-        it "select forwarding range", ->
-          set cursor: [2, 0]; ensure "v i }", selectedText: "22"
-        it "[case-1] no forwarding open pair, fail to find", ->
-          set cursor: [0, 0]; ensure "v i }", selectedText: '0', cursor: [0, 1]
-        it "[case-2] no forwarding open pair, select enclosed", ->
-          set cursor: [1, 4]; ensure "v i }", selectedText: textOneInner
-        it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [3, 0]; ensure "v i }", selectedText: textOneInner
-        it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [4, 0]; ensure "v i }", selectedText: textOneInner
+        it "select forwarding range", ->           set cursor: [1, 0]; ensure "v i }", selectedText: textOneInner
+        it "select forwarding range", ->           set cursor: [2, 0]; ensure "v i }", selectedText: "22"
+        it "[c1] no fwd open, fail to find", ->    set cursor: [0, 0]; ensure "v i }", selectedText: '0', cursor: [0, 1]
+        it "[c2] no fwd open, select enclosed", -> set cursor: [1, 4]; ensure "v i }", selectedText: textOneInner
+        it "[c3] no fwd open, select enclosed", -> set cursor: [3, 0]; ensure "v i }", selectedText: textOneInner
+        it "[c3] no fwd open, select enclosed", -> set cursor: [4, 0]; ensure "v i }", selectedText: textOneInner
       describe "forwarding a", ->
-        it "select forwarding range", ->
-          set cursor: [1, 0]; ensure "v a }", selectedText: textOneA
-        it "select forwarding range", ->
-          set cursor: [2, 0]; ensure "v a }", selectedText: "{22}"
-        it "[case-1] no forwarding open pair, fail to find", ->
-          set cursor: [0, 0]; ensure "v a }", selectedText: '0', cursor: [0, 1]
-        it "[case-2] no forwarding open pair, select enclosed", ->
-          set cursor: [1, 4]; ensure "v a }", selectedText: textOneA
-        it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [3, 0]; ensure "v a }", selectedText: textOneA
-        it "[case-3] no forwarding open pair, select enclosed", ->
-          set cursor: [4, 0]; ensure "v a }", selectedText: textOneA
+        it "select forwarding range", ->           set cursor: [1, 0]; ensure "v a }", selectedText: textOneA
+        it "select forwarding range", ->           set cursor: [2, 0]; ensure "v a }", selectedText: "{22}"
+        it "[c1] no fwd open, fail to find", ->    set cursor: [0, 0]; ensure "v a }", selectedText: '0', cursor: [0, 1]
+        it "[c2] no fwd open, select enclosed", -> set cursor: [1, 4]; ensure "v a }", selectedText: textOneA
+        it "[c3] no fwd open, select enclosed", -> set cursor: [3, 0]; ensure "v a }", selectedText: textOneA
+        it "[c3] no fwd open, select enclosed", -> set cursor: [4, 0]; ensure "v a }", selectedText: textOneA
 
   describe "AnyPairAllowForwarding", ->
     beforeEach ->
@@ -936,14 +924,14 @@ describe "TextObject", ->
     describe "inner", ->
       it "select forwarding range within enclosed range(if exists)", ->
         set cursor: [2, 0]
-        keystroke 'v'
+        ensure 'v'
         ensure ';', selectedText: "222"
         ensure ';', selectedText: "333"
         ensure ';', selectedText: "444()444"
     describe "a", ->
       it "select forwarding range within enclosed range(if exists)", ->
         set cursor: [2, 0]
-        keystroke 'v'
+        ensure 'v'
         ensure ':', selectedText: '"222"'
         ensure ':', selectedText: "{333}"
         ensure ':', selectedText: "(\n444()444\n)"
@@ -981,22 +969,22 @@ describe "TextObject", ->
           set {text}
 
         # Select
-        it "[1] forwarding", -> check [1, 0], 'v', {selectedText}
-        it "[2] openTag leftmost", -> check [1, 2], 'v', {selectedText}
-        it "[3] openTag rightmost", -> check [1, 8], 'v', {selectedText}
-        it "[4] Inner text", -> check [1, 10], 'v', {selectedText}
-        it "[5] closeTag leftmost", -> check [1, 14], 'v', {selectedText}
-        it "[6] closeTag rightmost", -> check [1, 21], 'v', {selectedText}
-        it "[7] right of closeTag", -> check [2, 0], 'v', {selectedText: innerABC}
+        it "[1] forwarding",         -> check [1,  0],  'v', {selectedText}
+        it "[2] openTag leftmost",   -> check [1,  2],  'v', {selectedText}
+        it "[3] openTag rightmost",  -> check [1,  8],  'v', {selectedText}
+        it "[4] Inner text",         -> check [1,  10], 'v', {selectedText}
+        it "[5] closeTag leftmost",  -> check [1,  14], 'v', {selectedText}
+        it "[6] closeTag rightmost", -> check [1,  21], 'v', {selectedText}
+        it "[7] right of closeTag",  -> check [2,  0],  'v', {selectedText: innerABC}
 
         # Delete
-        it "[8] forwarding", -> check [1, 0], 'd', {text: textAfterDeleted}
-        it "[9] openTag leftmost", -> check [1, 2], 'd', {text: textAfterDeleted}
-        it "[10] openTag rightmost", -> check [1, 8], 'd', {text: textAfterDeleted}
-        it "[11] Inner text", -> check [1, 10], 'd', {text: textAfterDeleted}
-        it "[12] closeTag leftmost", -> check [1, 14], 'd', {text: textAfterDeleted}
+        it "[8] forwarding",          -> check [1, 0],  'd', {text: textAfterDeleted}
+        it "[9] openTag leftmost",    -> check [1, 2],  'd', {text: textAfterDeleted}
+        it "[10] openTag rightmost",  -> check [1, 8],  'd', {text: textAfterDeleted}
+        it "[11] Inner text",         -> check [1, 10], 'd', {text: textAfterDeleted}
+        it "[12] closeTag leftmost",  -> check [1, 14], 'd', {text: textAfterDeleted}
         it "[13] closeTag rightmost", -> check [1, 21], 'd', {text: textAfterDeleted}
-        it "[14] right of closeTag", -> check [2, 0], 'd', {text: "<abc></abc>"}
+        it "[14] right of closeTag",  -> check [2, 0],  'd', {text: "<abc></abc>"}
 
       describe "expansion and deletion", ->
         beforeEach ->
@@ -1154,22 +1142,22 @@ describe "TextObject", ->
           set {text}
 
         # Select
-        it "[1] forwarding", -> check [1, 0], 'v', {selectedText}
-        it "[2] openTag leftmost", -> check [1, 2], 'v', {selectedText}
-        it "[3] openTag rightmost", -> check [1, 8], 'v', {selectedText}
-        it "[4] Inner text", -> check [1, 10], 'v', {selectedText}
-        it "[5] closeTag leftmost", -> check [1, 14], 'v', {selectedText}
+        it "[1] forwarding",         -> check [1, 0],  'v', {selectedText}
+        it "[2] openTag leftmost",   -> check [1, 2],  'v', {selectedText}
+        it "[3] openTag rightmost",  -> check [1, 8],  'v', {selectedText}
+        it "[4] Inner text",         -> check [1, 10], 'v', {selectedText}
+        it "[5] closeTag leftmost",  -> check [1, 14], 'v', {selectedText}
         it "[6] closeTag rightmost", -> check [1, 21], 'v', {selectedText}
-        it "[7] right of closeTag", -> check [2, 0], 'v', {selectedText: aABC}
+        it "[7] right of closeTag",  -> check [2, 0],  'v', {selectedText: aABC}
 
         # Delete
-        it "[8] forwarding", -> check [1, 0], 'd', {text: textAfterDeleted}
-        it "[9] openTag leftmost", -> check [1, 2], 'd', {text: textAfterDeleted}
-        it "[10] openTag rightmost", -> check [1, 8], 'd', {text: textAfterDeleted}
-        it "[11] Inner text", -> check [1, 10], 'd', {text: textAfterDeleted}
-        it "[12] closeTag leftmost", -> check [1, 14], 'd', {text: textAfterDeleted}
+        it "[8] forwarding",          -> check [1, 0],  'd', {text: textAfterDeleted}
+        it "[9] openTag leftmost",    -> check [1, 2],  'd', {text: textAfterDeleted}
+        it "[10] openTag rightmost",  -> check [1, 8],  'd', {text: textAfterDeleted}
+        it "[11] Inner text",         -> check [1, 10], 'd', {text: textAfterDeleted}
+        it "[12] closeTag leftmost",  -> check [1, 14], 'd', {text: textAfterDeleted}
         it "[13] closeTag rightmost", -> check [1, 21], 'd', {text: textAfterDeleted}
-        it "[14] right of closeTag", -> check [2, 0], 'd', {text: ""}
+        it "[14] right of closeTag",  -> check [2, 0],  'd', {text: ""}
 
   describe "SquareBracket", ->
     describe "inner-square-bracket", ->
@@ -1426,7 +1414,7 @@ describe "TextObject", ->
         atom.packages.activatePackage('language-coffee-script')
       getVimState 'sample.coffee', (vimState, vim) ->
         {editor, editorElement} = vimState
-        {set, ensure, keystroke} = vim
+        {set, ensure} = vim
     afterEach ->
       atom.packages.deactivatePackage('language-coffee-script')
 
@@ -1450,7 +1438,7 @@ describe "TextObject", ->
         atom.packages.activatePackage('language-coffee-script')
       getVimState 'sample.coffee', (vimState, vim) ->
         {editor, editorElement} = vimState
-        {set, ensure, keystroke} = vim
+        {set, ensure} = vim
     afterEach ->
       atom.packages.deactivatePackage('language-coffee-script')
 
@@ -1465,7 +1453,7 @@ describe "TextObject", ->
 
       it "can expand selection", ->
         set cursor: [23, 0]
-        keystroke 'v'
+        ensure 'v'
         ensure 'i z', selectedBufferRange: rangeForRows(23, 23)
         ensure 'i z', selectedBufferRange: rangeForRows(19, 23)
         ensure 'i z', selectedBufferRange: rangeForRows(10, 25)
@@ -1488,7 +1476,7 @@ describe "TextObject", ->
             atom.packages.activatePackage('language-javascript')
           getVimState 'sample.js', (state, vimEditor) ->
             {editor, editorElement} = state
-            {set, ensure, keystroke} = vimEditor
+            {set, ensure} = vimEditor
         afterEach ->
           atom.packages.deactivatePackage('language-javascript')
 
@@ -1508,7 +1496,7 @@ describe "TextObject", ->
 
       it 'can expand selection', ->
         set cursor: [23, 0]
-        keystroke 'v'
+        ensure 'v'
         ensure 'a z', selectedBufferRange: rangeForRows(22, 23)
         ensure 'a z', selectedBufferRange: rangeForRows(18, 23)
         ensure 'a z', selectedBufferRange: rangeForRows(9, 25)
@@ -1747,7 +1735,7 @@ describe "TextObject", ->
           }
           """
 
-    describe 'slingle line comma separated text', ->
+    describe 'single line comma separated text', ->
       describe "change 1st arg", ->
         beforeEach ->               set textC: "var a = func(f|irst(1, 2, 3), second(), 3)"
         it 'change', -> ensure 'c i ,', textC: "var a = func(|, second(), 3)"
@@ -2041,7 +2029,7 @@ describe "TextObject", ->
             3 xxx abc
             4 abc\n
             """
-        keystroke 'escape'
+        ensure 'escape'
         set cursor: [4, 0]
         ensure 'c g N',
           cursor: [3, 6]
