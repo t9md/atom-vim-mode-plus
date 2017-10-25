@@ -1787,3 +1787,82 @@ describe "Operator TransformString", ->
     beforeEach -> set textC: "|a\nb\nc\n\n"
     it "numbering by motion", ->     ensureNumbering "j", textC: "|1: a\n2: b\nc\n\n"
     it "numbering by text-object", -> ensureNumbering "p", textC: "|1: a\n2: b\n3: c\n\n"
+
+  describe "DuplicateWithCommentOutOriginal", ->
+    ensureDuplicateWithCommentOutOriginal = (args...) ->
+      dispatch(editor.element, 'vim-mode-plus:duplicate-with-comment-out-original')
+      ensure args...
+
+    beforeEach ->
+      set
+        textC: """
+
+        1: |Pen
+        2: Pineapple
+
+        4: Apple
+        5: Pen\n
+        """
+
+    it "dup-and-commentout", ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-javascript').then ->
+          set grammar: "source.js"
+          ensureDuplicateWithCommentOutOriginal "i p",
+            textC: """
+
+            // 1: Pen
+            // 2: Pineapple
+            1: |Pen
+            2: Pineapple
+
+            4: Apple
+            5: Pen\n
+            """
+      runs ->
+        ensure ".",
+          textC: """
+
+          // // 1: Pen
+          // // 2: Pineapple
+          // 1: Pen
+          // 2: Pineapple
+          // 1: Pen
+          // 2: Pineapple
+          1: |Pen
+          2: Pineapple
+
+          4: Apple
+          5: Pen\n
+          """
+    it "dup-and-commentout", ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-javascript').then ->
+          set grammar: "source.js"
+          ensureDuplicateWithCommentOutOriginal "i p",
+            textC: """
+
+            # 1: Pen
+            # 2: Pineapple
+            1: |Pen
+            2: Pineapple
+
+            4: Apple
+            5: Pen\n
+            """
+      runs ->
+        ensure ".",
+          textC: """
+
+          # # 1: Pen
+          # # 2: Pineapple
+          # 1: Pen
+          # 2: Pineapple
+          # 1: Pen
+          # 2: Pineapple
+          1: |Pen
+          2: Pineapple
+
+          4: Apple
+          5: Pen\n
+          """

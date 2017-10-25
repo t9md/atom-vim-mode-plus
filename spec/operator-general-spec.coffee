@@ -938,45 +938,48 @@ describe "Operator general", ->
           """
 
     describe "put-after-with-auto-indent command", ->
+      ensurePutAfterWithAutoIndent = (options) ->
+        dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
+        ensure(null, options)
+
       beforeEach ->
         waitsForPromise ->
           settings.set('useClipboardAsDefaultRegister', false)
-          atom.packages.activatePackage('language-javascript')
-        runs ->
-          set grammar: 'source.js'
+          atom.packages.activatePackage('language-javascript').then ->
+            set grammar: 'source.js'
 
       describe "paste with auto-indent", ->
         it "inserts the contents of the default register", ->
           set
-            register: '"': {text: " 345\n", type: 'linewise'}
+            register: '"':
+              type: 'linewise'
+              text: " 345\n",
             textC_: """
-            if| () {
-            }
-            """
-          dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
-          ensure null,
-            textC_: """
-            if () {
-              |345
-            }
-            """
-
-        it "multi-line register contents with auto indent", ->
-          registerContent = """
-            if(3) {
-              if(4) {}
-            }
-            """
-          set
-            register: '"': {text: registerContent, type: 'linewise'}
-            textC: """
-            if (1) {
-              |if (2) {
+              if| () {
               }
-            }
-            """
-          dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
-          ensure null,
+              """
+          ensurePutAfterWithAutoIndent
+            textC_: """
+              if () {
+                |345
+              }
+              """
+        it "multi-line register contents with auto indent", ->
+          set
+            register: '"':
+              type: 'linewise'
+              text: """
+                if(3) {
+                  if(4) {}
+                }
+                """
+            textC: """
+              if (1) {
+                |if (2) {
+                }
+              }
+              """
+          ensurePutAfterWithAutoIndent
             textC: """
             if (1) {
               if (2) {
@@ -998,14 +1001,13 @@ describe "Operator general", ->
             """
 
         it "keep original layout", ->
-          registerContent = """
+          set register: '"':
+            type: 'linewise'
+            text: """
                a: 123,
             bbbb: 456,
             """
-
-          set register: '"': {text: registerContent, type: 'linewise'}
-          dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
-          ensure null,
+          ensurePutAfterWithAutoIndent
             textC: """
             if (1) {
               if (2) {
@@ -1016,31 +1018,27 @@ describe "Operator general", ->
             """
 
         it "keep original layout [register content have blank row]", ->
-          registerContent = """
-            if(3) {
-            __abc
+          set register: '"':
+            type: 'linewise'
+            text: """
+              if(3) {
+              __abc
 
-            __def
-            }
-            """.replace(/_/g, ' ')
-
-          set register: '"': {text: registerContent, type: 'linewise'}
-          dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
-          ensure null,
+              __def
+              }
+              """.replace(/_/g, ' ')
+          ensurePutAfterWithAutoIndent
             textC_: """
-            if (1) {
-              if (2) {
-                |if(3) {
-                  abc
+              if (1) {
+                if (2) {
+                  |if(3) {
+                    abc
 
-                  def
+                    def
+                  }
                 }
               }
-            }
-            """
-    # HERE
-    # -------------------------
-
+              """
 
     describe "pasting twice", ->
       beforeEach ->
