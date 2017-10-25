@@ -3,22 +3,22 @@ _ = require 'underscore-plus'
 settings = require '../lib/settings'
 
 describe "VimState", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = vim
+      {set, ensure} = vim
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->
-      ensure mode: 'normal'
+      ensure null, mode: 'normal'
 
     it "puts the editor in insert-mode if startInInsertMode is true", ->
       settings.set 'startInInsertMode', true
       getVimState (state, vim) ->
-        vim.ensure mode: 'insert'
+        vim.ensure null, mode: 'insert'
 
   describe "::destroy", ->
     it "re-enables text input on the editor", ->
@@ -27,7 +27,7 @@ describe "VimState", ->
       expect(editorElement.component.isInputEnabled()).toBeTruthy()
 
     it "removes the mode classes from the editor", ->
-      ensure mode: 'normal'
+      ensure null, mode: 'normal'
       vimState.destroy()
       expect(editorElement.classList.contains("normal-mode")).toBeFalsy()
 
@@ -38,32 +38,32 @@ describe "VimState", ->
   describe "normal-mode", ->
     describe "when entering an insertable character", ->
       beforeEach ->
-        keystroke '\\'
+        ensure '\\'
 
       it "stops propagation", ->
-        ensure text: ''
+        ensure null, text: ''
 
     describe "when entering an operator", ->
       beforeEach ->
-        keystroke 'd'
+        ensure 'd'
 
       describe "with an operator that can't be composed", ->
         beforeEach ->
-          keystroke 'x'
+          ensure 'x'
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the escape keybinding", ->
         beforeEach ->
-          keystroke 'escape'
+          ensure 'escape'
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
 
       describe "the ctrl-c keybinding", ->
         beforeEach ->
-          keystroke 'ctrl-c'
+          ensure 'ctrl-c'
 
         it "clears the operator stack", ->
           expect(vimState.operationStack.isEmpty()).toBe(true)
@@ -73,7 +73,7 @@ describe "VimState", ->
         set
           text: "one-two-three"
           addCursor: [0, 3]
-        ensure numCursors: 2
+        ensure null, numCursors: 2
         ensure 'escape', numCursors: 1
 
     describe "the v keybinding", ->
@@ -83,10 +83,10 @@ describe "VimState", ->
             abc
             """
           cursor: [0, 0]
-        keystroke 'v'
+        ensure 'v'
 
       it "puts the editor into visual characterwise mode", ->
-        ensure
+        ensure null,
           mode: ['visual', 'characterwise']
 
     describe "the V keybinding", ->
@@ -113,11 +113,11 @@ describe "VimState", ->
         set text: "abc def", cursor: [0, 0]
 
       it "puts the editor into visual mode", ->
-        ensure mode: 'normal'
+        ensure null, mode: 'normal'
 
         advanceClock(200)
         atom.commands.dispatch(editorElement, "core:select-right")
-        ensure
+        ensure null,
           mode: ['visual', 'characterwise']
           selectedBufferRange: [[0, 0], [0, 1]]
 
@@ -129,7 +129,7 @@ describe "VimState", ->
 
       it 'handles native selection such as core:select-all', ->
         atom.commands.dispatch(editorElement, 'core:select-all')
-        ensure selectedBufferRange: [[0, 0], [0, 7]]
+        ensure null, selectedBufferRange: [[0, 0], [0, 7]]
 
     describe "the i keybinding", ->
       it "puts the editor into insert mode", ->
@@ -145,14 +145,14 @@ describe "VimState", ->
 
       describe "on a line with content", ->
         it "[Changed] won't adjust cursor position if outer command place the cursor on end of line('\\n') character", ->
-          ensure mode: 'normal'
+          ensure null, mode: 'normal'
           atom.commands.dispatch(editorElement, "editor:move-to-end-of-line")
-          ensure cursor: [0, 6]
+          ensure null, cursor: [0, 6]
 
       describe "on an empty line", ->
         it "allows the cursor to be placed on the \n character", ->
           set cursor: [1, 0]
-          ensure cursor: [1, 0]
+          ensure null, cursor: [1, 0]
 
     describe 'with character-input operations', ->
       beforeEach ->
@@ -185,7 +185,7 @@ describe "VimState", ->
       ensure 'l', cursor: [0, 3], mode: 'insert'
 
   describe "insert-mode", ->
-    beforeEach -> keystroke 'i'
+    beforeEach -> ensure 'i'
 
     describe "with content", ->
       beforeEach ->
@@ -204,7 +204,7 @@ describe "VimState", ->
       describe "on a line with content", ->
         it "allows the cursor to be placed on the \n character", ->
           set cursor: [0, 6]
-          ensure cursor: [0, 6]
+          ensure null, cursor: [0, 6]
 
     it "puts the editor into normal mode when <escape> is pressed", ->
       escape 'escape',
@@ -261,8 +261,8 @@ describe "VimState", ->
           pane.activateItem(otherEditor)
           expect(pane.getActiveItem()).toBe(otherEditor)
 
-          ensure mode: 'insert'
-          otherVim.ensure mode: 'insert'
+          ensure null, mode: 'insert'
+          otherVim.ensure null, mode: 'insert'
 
       describe "automaticallyEscapeInsertModeOnActivePaneItemChange = true", ->
         beforeEach ->
@@ -281,8 +281,8 @@ describe "VimState", ->
 
           runs ->
             expect(pane.getActiveItem()).toBe(otherEditor)
-            ensure mode: 'normal'
-            otherVim.ensure mode: 'insert'
+            ensure null, mode: 'normal'
+            otherVim.ensure null, mode: 'insert'
 
   describe "replace-mode", ->
     describe "with content", ->
@@ -302,9 +302,9 @@ describe "VimState", ->
 
       describe "on a line with content", ->
         it "allows the cursor to be placed on the \n character", ->
-          keystroke 'R'
+          ensure 'R'
           set cursor: [0, 6]
-          ensure cursor: [0, 6]
+          ensure null, cursor: [0, 6]
 
     it "puts the editor into normal mode when <escape> is pressed", ->
       ensure 'R escape',
@@ -321,10 +321,10 @@ describe "VimState", ->
         one two three
         """
         cursor: [0, 4]
-      keystroke 'v'
+      ensure 'v'
 
     it "selects the character under the cursor", ->
-      ensure
+      ensure null,
         selectedBufferRange: [[0, 4], [0, 5]]
         selectedText: 't'
 
@@ -334,7 +334,7 @@ describe "VimState", ->
         mode: 'normal'
 
     it "puts the editor into normal mode when <escape> is pressed on selection is reversed", ->
-      ensure selectedText: 't'
+      ensure null, selectedText: 't'
       ensure 'h h',
         selectedText: 'e t'
         selectionIsReversed: true
@@ -374,7 +374,7 @@ describe "VimState", ->
 
       xit "harmonizes selection directions", ->
         set cursor: [0, 0]
-        keystroke 'e e'
+        ensure 'e e'
         set addCursor: [0, Infinity]
         ensure 'h h',
           selectedBufferRange: [
@@ -554,19 +554,19 @@ describe "VimState", ->
 
     it "basic marking functionality", ->
       set cursor: [1, 1]
-      keystroke 'm t'
+      ensure 'm t'
       set cursor: [2, 2]
       ensure '` t', cursor: [1, 1]
 
     it "real (tracking) marking functionality", ->
       set cursor: [2, 2]
-      keystroke 'm q'
+      ensure 'm q'
       set cursor: [1, 2]
       ensure 'o escape ` q', cursor: [3, 2]
 
     it "real (tracking) marking functionality", ->
       set cursor: [2, 2]
-      keystroke 'm q'
+      ensure 'm q'
       set cursor: [1, 2]
       ensure 'd d escape ` q', cursor: [1, 2]
 
@@ -588,7 +588,7 @@ describe "VimState", ->
 
     describe "normal-mode", ->
       it "is not narrowed", ->
-        ensure
+        ensure null,
           mode: ['normal']
           selectionIsNarrowed: false
     describe "visual-mode.characterwise", ->

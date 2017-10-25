@@ -3,13 +3,13 @@ settings = require '../lib/settings'
 {inspect} = require 'util'
 
 describe "Operator ActivateInsertMode family", ->
-  [set, ensure, bindEnsureOption, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, bindEnsureOption, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure, keystroke, bindEnsureOption} = vim
+      {set, ensure, bindEnsureOption} = vim
 
   describe "the s keybinding", ->
     beforeEach ->
@@ -24,7 +24,7 @@ describe "Operator ActivateInsertMode family", ->
 
     it "is repeatable", ->
       set cursor: [0, 0]
-      keystroke '3 s'
+      ensure '3 s'
       editor.insertText 'ab'
       ensure 'escape', text: 'ab345'
       set cursor: [0, 2]
@@ -32,17 +32,17 @@ describe "Operator ActivateInsertMode family", ->
 
     it "is undoable", ->
       set cursor: [0, 0]
-      keystroke '3 s'
+      ensure '3 s'
       editor.insertText 'ab'
       ensure 'escape', text: 'ab345'
       ensure 'u', text: '012345', selectedText: ''
 
     describe "in visual mode", ->
       beforeEach ->
-        keystroke 'v l s'
+        ensure 'v l s'
 
       it "deletes the selected characters and enters insert mode", ->
-        ensure
+        ensure null,
           mode: 'insert'
           text: '0345'
           cursor: [0, 1]
@@ -61,14 +61,14 @@ describe "Operator ActivateInsertMode family", ->
         register: {'"': text: 'abcde\n', type: 'linewise'}
 
     it "is repeatable", ->
-      keystroke 'S'
+      ensure 'S'
       editor.insertText 'abc'
       ensure 'escape', text: '12345\nabc\nABCDE'
       set cursor: [2, 3]
       ensure '.', text: '12345\nabc\nabc'
 
     it "is undoable", ->
-      keystroke 'S'
+      ensure 'S'
       editor.insertText 'abc'
       ensure 'escape', text: '12345\nabc\nABCDE'
       ensure 'u', text: "12345\nabcde\nABCDE", selectedText: ''
@@ -119,14 +119,14 @@ describe "Operator ActivateInsertMode family", ->
             mode: 'insert'
 
         it "is repeatable", ->
-          keystroke 'c c'
+          ensure 'c c'
           editor.insertText("abc")
           ensure 'escape', text: "12345\n  abc\nABCDE\n"
           set cursor: [2, 3]
           ensure '.', text: "12345\n  abc\n  abc\n"
 
         it "is undoable", ->
-          keystroke 'c c'
+          ensure 'c c'
           editor.insertText("abc")
           ensure 'escape', text: "12345\n  abc\nABCDE\n"
           ensure 'u', text: "12345\n  abcde\nABCDE\n", selectedText: ''
@@ -305,8 +305,8 @@ describe "Operator ActivateInsertMode family", ->
         """
 
     it "switches to insert and adds a newline above the current one", ->
-      keystroke 'O'
-      ensure
+      ensure 'O'
+      ensure null,
         textC_: """
         __abc
         __|
@@ -323,7 +323,7 @@ describe "Operator ActivateInsertMode family", ->
           """
       # set
       #   text: "  abc\n  012\n    4spaces\n", cursor: [1, 1]
-      keystroke 'O'
+      ensure 'O'
       editor.insertText "def"
       ensure 'escape',
         textC_: """
@@ -352,7 +352,7 @@ describe "Operator ActivateInsertMode family", ->
         """
 
     it "is undoable", ->
-      keystroke 'O'
+      ensure 'O'
       editor.insertText "def"
       ensure 'escape',
         textC_: """
@@ -385,7 +385,7 @@ describe "Operator ActivateInsertMode family", ->
     # to fix it.
     xit "is repeatable", ->
       set text: "  abc\n  012\n    4spaces\n", cursor: [1, 1]
-      keystroke 'o'
+      ensure 'o'
       editor.insertText "def"
       ensure 'escape', text: "  abc\n  012\n  def\n    4spaces\n"
       ensure '.', text: "  abc\n  012\n  def\n  def\n    4spaces\n"
@@ -393,7 +393,7 @@ describe "Operator ActivateInsertMode family", ->
       ensure '.', text: "  abc\n  def\n  def\n  012\n    4spaces\n    def\n"
 
     it "is undoable", ->
-      keystroke 'o'
+      ensure 'o'
       editor.insertText "def"
       ensure 'escape', text: "abc\n  012\n  def\n"
       ensure 'u', text: "abc\n  012\n"
@@ -421,18 +421,18 @@ describe "Operator ActivateInsertMode family", ->
     describe "at the beginning of the line", ->
       beforeEach ->
         set cursor: [0, 0]
-        keystroke 'a'
+        ensure 'a'
 
       it "switches to insert mode and shifts to the right", ->
-        ensure cursor: [0, 1], mode: 'insert'
+        ensure null, cursor: [0, 1], mode: 'insert'
 
     describe "at the end of the line", ->
       beforeEach ->
         set cursor: [0, 3]
-        keystroke 'a'
+        ensure 'a'
 
       it "doesn't linewrap", ->
-        ensure cursor: [0, 3]
+        ensure null, cursor: [0, 3]
 
   describe "the A keybinding", ->
     beforeEach ->
@@ -447,9 +447,9 @@ describe "Operator ActivateInsertMode family", ->
 
       it "repeats always as insert at the end of the line", ->
         set cursor: [0, 0]
-        keystroke 'A'
+        ensure 'A'
         editor.insertText("abc")
-        keystroke 'escape'
+        ensure 'escape'
         set cursor: [1, 0]
 
         ensure '.',
@@ -707,7 +707,7 @@ describe "Operator ActivateInsertMode family", ->
         atom.packages.activatePackage('language-coffee-script')
       getVimState 'sample.coffee', (state, vim) ->
         {editor, editorElement} = state
-        {set, ensure, keystroke} = vim
+        {set, ensure} = vim
 
       runs ->
         atom.keymaps.add "test",
@@ -745,13 +745,13 @@ describe "Operator ActivateInsertMode family", ->
           """
 
     it "allows undoing an entire batch of typing", ->
-      keystroke 'i'
+      ensure 'i'
       editor.insertText("abcXX")
       editor.backspace()
       editor.backspace()
       ensure 'escape', text: "abc123\nabc4567"
 
-      keystroke 'i'
+      ensure 'i'
       editor.insertText "d"
       editor.insertText "e"
       editor.insertText "f"
@@ -760,7 +760,7 @@ describe "Operator ActivateInsertMode family", ->
       ensure 'u', text: "123\n4567"
 
     it "allows repeating typing", ->
-      keystroke 'i'
+      ensure 'i'
       editor.insertText("abcXX")
       editor.backspace()
       editor.backspace()
@@ -773,7 +773,7 @@ describe "Operator ActivateInsertMode family", ->
         set text: '', cursor: [0, 0]
 
       it 'deals with auto-matched brackets', ->
-        keystroke 'i'
+        ensure 'i'
         # this sequence simulates what the bracket-matcher package does
         # when the user types (a)b<enter>
         editor.insertText '()'
@@ -787,7 +787,7 @@ describe "Operator ActivateInsertMode family", ->
           cursor: [2,  0]
 
       it 'deals with autocomplete', ->
-        keystroke 'i'
+        ensure 'i'
         # this sequence simulates autocompletion of 'add' to 'addFoo'
         editor.insertText 'a'
         editor.insertText 'd'
@@ -807,13 +807,13 @@ describe "Operator ActivateInsertMode family", ->
         cursor: [0, 0]
 
     it "can be undone in one go", ->
-      keystroke 'a'
+      ensure 'a'
       editor.insertText("abc")
       ensure 'escape', text: "abc"
       ensure 'u', text: ""
 
     it "repeats correctly", ->
-      keystroke 'a'
+      ensure 'a'
       editor.insertText("abc")
       ensure 'escape',
         text: "abc"
@@ -852,34 +852,34 @@ describe "Operator ActivateInsertMode family", ->
 
       it "can repeat backspace only mutation: case-i", ->
         set cursor: [0, 1]
-        keystroke 'i'
+        ensure 'i'
         editor.backspace()
         ensure 'escape', text: "23\n123", cursor: [0, 0]
         ensure 'j .', text: "23\n123" # nothing happen
         ensure 'l .', text: "23\n23"
 
       it "can repeat backspace only mutation: case-a", ->
-        keystroke 'a'
+        ensure 'a'
         editor.backspace()
         ensure 'escape', text: "23\n123", cursor: [0, 0]
         ensure '.', text: "3\n123", cursor: [0, 0]
         ensure 'j . .', text: "3\n3"
 
       it "can repeat delete only mutation: case-i", ->
-        keystroke 'i'
+        ensure 'i'
         editor.delete()
         ensure 'escape', text: "23\n123"
         ensure 'j .', text: "23\n23"
 
       it "can repeat delete only mutation: case-a", ->
-        keystroke 'a'
+        ensure 'a'
         editor.delete()
         ensure 'escape', text: "13\n123"
         ensure 'j .', text: "13\n13"
 
       it "can repeat backspace and insert mutation: case-i", ->
         set cursor: [0, 1]
-        keystroke 'i'
+        ensure 'i'
         editor.backspace()
         editor.insertText("!!!")
         ensure 'escape', text: "!!!23\n123"
@@ -887,21 +887,21 @@ describe "Operator ActivateInsertMode family", ->
         ensure '.', text: "!!!23\n!!!23"
 
       it "can repeat backspace and insert mutation: case-a", ->
-        keystroke 'a'
+        ensure 'a'
         editor.backspace()
         editor.insertText("!!!")
         ensure 'escape', text: "!!!23\n123"
         ensure 'j 0 .', text: "!!!23\n!!!23"
 
       it "can repeat delete and insert mutation: case-i", ->
-        keystroke 'i'
+        ensure 'i'
         editor.delete()
         editor.insertText("!!!")
         ensure 'escape', text: "!!!23\n123"
         ensure 'j 0 .', text: "!!!23\n!!!23"
 
       it "can repeat delete and insert mutation: case-a", ->
-        keystroke 'a'
+        ensure 'a'
         editor.delete()
         editor.insertText("!!!")
         ensure 'escape', text: "1!!!3\n123"
@@ -936,14 +936,14 @@ describe "Operator ActivateInsertMode family", ->
 
   describe 'specify insertion count', ->
     ensureInsertionCount = (key, {insert, text, cursor}) ->
-      keystroke key
+      ensure key
       editor.insertText(insert)
       ensure "escape", text: text, cursor: cursor
 
     beforeEach ->
       initialText = "*\n*\n"
       set text: "", cursor: [0, 0]
-      keystroke 'i'
+      ensure 'i'
       editor.insertText(initialText)
       ensure "escape g g", text: initialText, cursor: [0, 0]
 
@@ -955,7 +955,7 @@ describe "Operator ActivateInsertMode family", ->
       describe "children of Change operation won't repeate insertion count times", ->
         beforeEach ->
           set text: "", cursor: [0, 0]
-          keystroke 'i'
+          ensure 'i'
           editor.insertText('*')
           ensure 'escape g g', text: '*', cursor: [0, 0]
 

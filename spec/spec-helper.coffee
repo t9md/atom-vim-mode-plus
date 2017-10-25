@@ -266,16 +266,13 @@ class VimEditor
     textC_: ['cursor', 'cursorScreen']
 
   getAndDeleteKeystrokeOptions: (options) ->
-    {partialMatchTimeout} = options
+    {partialMatchTimeout, waitsForFinish} = options
     delete options.partialMatchTimeout
-    {partialMatchTimeout}
+    delete options.waitsForFinish
+    {partialMatchTimeout, waitsForFinish}
 
   # Public
-  ensure: (args...) =>
-    switch args.length
-      when 1 then [options] = args
-      when 2 then [keystroke, options] = args
-
+  ensure: (keystroke, options={}) =>
     unless typeof(options) is 'object'
       throw new Error("Invalid options for 'ensure': must be 'object' but got '#{typeof(options)}'")
     if keystroke? and not (typeof(keystroke) is 'string' or Array.isArray(keystroke))
@@ -286,28 +283,74 @@ class VimEditor
     @validateOptions(options, ensureOptionsOrdered, 'Invalid ensure option')
     @validateExclusiveOptions(options, ensureExclusiveRules)
 
-    # Input
-    unless _.isEmpty(keystroke)
-      @keystroke(keystroke, keystrokeOptions)
+    runSmart = (fn) -> if keystrokeOptions.waitsForFinish then runs(fn) else fn()
 
-    for name in ensureOptionsOrdered when options[name]?
-      method = 'ensure' + _.capitalize(_.camelize(name))
-      this[method](options[name])
+    runSmart =>
+      @_keystroke(keystroke, keystrokeOptions) unless _.isEmpty(keystroke)
 
-  bindEnsureOption: (optionsBase) =>
+    runSmart =>
+      for name in ensureOptionsOrdered when options[name]?
+        method = 'ensure' + _.capitalize(_.camelize(name))
+        this[method](options[name])
+
+  ensureWait: (keystroke, options={}) =>
+    @ensure(keystroke, Object.assign(options, waitsForFinish: true))
+
+  bindEnsureOption: (optionsBase, wait=false) =>
     (keystroke, options) =>
       intersectingOptions = _.intersection(_.keys(options), _.keys(optionsBase))
       if intersectingOptions.length
         throw new Error("conflict with bound options #{inspect(intersectingOptions)}")
 
-      @ensure(keystroke, _.defaults(_.clone(options), optionsBase))
+      options = _.defaults(_.clone(options), optionsBase)
+      options.waitsForFinish = true if wait
+      @ensure(keystroke, options)
 
-  ensureByDispatch: (command, options) =>
-    dispatch(atom.views.getView(@editor), command)
-    for name in ensureOptionsOrdered when options[name]?
-      method = 'ensure' + _.capitalize(_.camelize(name))
-      this[method](options[name])
+  bindEnsureWaitOption: (optionsBase) =>
+    @bindEnsureOption(optionsBase, true)
 
+  _keystroke: (keys, options={}) =>
+    target = @editorElement
+    keystrokesToExecute = keys.split(/\s+/)
+    lastKeystrokeIndex = keystrokesToExecute.length - 1
+
+    for key, i in keystrokesToExecute
+      waitsForFinish = (i is lastKeystrokeIndex) and options.waitsForFinish
+      if waitsForFinish
+        finished = false
+        @vimState.onDidFinishOperation -> finished = true
+
+      # [FIXME] Why can't I let atom.keymaps handle enter/escape by buildEvent and handleKeyboardEvent
+      if @vimState.__searchInput?.hasFocus() # to avoid auto populate
+        target = @vimState.searchInput.editorElement
+        switch key
+          when "enter" then atom.commands.dispatch(target, 'core:confirm')
+          when "escape" then atom.commands.dispatch(target, 'core:cancel')
+          else @vimState.searchInput.editor.insertText(key)
+
+      else if @vimState.inputEditor?
+        target = @vimState.inputEditor.element
+        switch key
+          when "enter" then atom.commands.dispatch(target, 'core:confirm')
+          when "escape" then atom.commands.dispatch(target, 'core:cancel')
+          else @vimState.inputEditor.insertText(key)
+
+      else
+        event = buildKeydownEventFromKeystroke(normalizeKeystrokes(key), target)
+        atom.keymaps.handleKeyboardEvent(event)
+
+      if waitsForFinish
+        waitsFor -> finished
+
+    if options.partialMatchTimeout
+      advanceClock(atom.keymaps.getPartialMatchTimeout())
+
+  keystroke: ->
+    # DONT remove this method since field extraction is still used in vmp plugins
+    throw new Error('Dont use `keystroke("x y z")`, instead use `ensure("x y z")`')
+
+  # Ensure each options from here
+  # -----------------------------
   ensureText: (text) ->
     expect(@editor.getText()).toEqual(text)
 
@@ -445,42 +488,5 @@ class VimEditor
     shouldNotContainClasses = _.difference(supportedModeClass, mode)
     for m in shouldNotContainClasses
       expect(@editorElement.classList.contains(m)).toBe(false)
-
-  # Public
-  # options
-  # - waitsForFinish
-  keystroke: (keys, options={}) =>
-    if options.waitsForFinish
-      finished = false
-      @vimState.onDidFinishOperation -> finished = true
-      delete options.waitsForFinish
-      @keystroke(keys, options)
-      waitsFor -> finished
-      return
-
-    target = @editorElement
-
-    for key in keys.split(/\s+/)
-      # [FIXME] Why can't I let atom.keymaps handle enter/escape by buildEvent and handleKeyboardEvent
-      if @vimState.__searchInput?.hasFocus() # to avoid auto populate
-        target = @vimState.searchInput.editorElement
-        switch key
-          when "enter" then atom.commands.dispatch(target, 'core:confirm')
-          when "escape" then atom.commands.dispatch(target, 'core:cancel')
-          else @vimState.searchInput.editor.insertText(key)
-
-      else if @vimState.inputEditor?
-        target = @vimState.inputEditor.element
-        switch key
-          when "enter" then atom.commands.dispatch(target, 'core:confirm')
-          when "escape" then atom.commands.dispatch(target, 'core:cancel')
-          else @vimState.inputEditor.insertText(key)
-
-      else
-        event = buildKeydownEventFromKeystroke(normalizeKeystrokes(key), target)
-        atom.keymaps.handleKeyboardEvent(event)
-
-    if options.partialMatchTimeout
-      advanceClock(atom.keymaps.getPartialMatchTimeout())
 
 module.exports = {getVimState, getView, dispatch, TextData, withMockPlatform}

@@ -10,13 +10,13 @@ setEditorWidthInCharacters = (editor, widthInCharacters) ->
   return component.getNextUpdatePromise()
 
 describe "Motion general", ->
-  [set, ensure, keystroke, editor, editorElement, vimState] = []
+  [set, ensure, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
-      {set, ensure, keystroke} = _vim
+      {set, ensure} = _vim
 
   describe "simple motions", ->
     text = null
@@ -75,7 +75,7 @@ describe "Motion general", ->
           ensure 'j', cursor: [2, 2], selectedText: "bcd\nAB"
 
         it "keep same column(goalColumn) even after across the empty line", ->
-          keystroke 'escape'
+          ensure 'escape'
           set
             text: """
               abcdefg
@@ -410,12 +410,12 @@ describe "Motion general", ->
 
           getVimState 'sample.go', (state, vimEditor) ->
             {editor, editorElement} = state
-            {set, ensure, keystroke} = vimEditor
+            {set, ensure} = vimEditor
 
           runs ->
             set cursorScreen: [8, 2]
             # In hardTab indent bufferPosition is not same as screenPosition
-            ensure cursor: [8, 1]
+            ensure null, cursor: [8, 1]
 
         afterEach ->
           atom.packages.deactivatePackage(pack)
@@ -453,7 +453,7 @@ describe "Motion general", ->
           222\n
           """
       originalText = editor.getText()
-      ensure register: {'"': text: undefined}
+      ensure null, register: {'"': text: undefined}
 
     describe "moveSuccessOnLinewise=false motion", ->
       describe "when it can move", ->
@@ -804,7 +804,7 @@ describe "Motion general", ->
         set text: "cet document", cursor: [0, 7]
         ensure 'c g e', cursor: [0, 2], text: "cement", mode: 'insert'
         # TODO: I'm not sure how to check the register after checking the document
-        # ensure register: '"', text: 't docu'
+        # ensure null, register: '"', text: 't docu'
 
       it "changes whitespace properly", ->
         set text: "ce    doc", cursor: [0, 4]
@@ -1364,7 +1364,7 @@ describe "Motion general", ->
         it "selects to the first character of the previous line (directly above)", ->
           ensure 'd -', text: "abcdefg\n"
           # FIXME commented out because the column is wrong due to a bug in `k`; re-enable when `k` is fixed
-          # ensure cursor: [0, 2]
+          # ensure null, cursor: [0, 2]
 
     describe "from the beginning of a line preceded by an indented line", ->
       beforeEach ->
@@ -1507,7 +1507,7 @@ describe "Motion general", ->
           set
             text: startingText
             cursor: startingCursorPosition
-          keystroke '+'
+          ensure '+'
           referenceCursorPosition = editor.getCursorScreenPosition()
           set
             text: startingText
@@ -1522,7 +1522,7 @@ describe "Motion general", ->
             text: startingText
             cursor: startingCursorPosition
 
-          keystroke 'd +'
+          ensure 'd +'
           referenceText = editor.getText()
           referenceCursorPosition = editor.getCursorScreenPosition()
 
@@ -1759,44 +1759,44 @@ describe "Motion general", ->
 
     it 'moves to the beginning of the line of a mark', ->
       set cursor: [1, 1]
-      keystroke 'm a'
+      ensure 'm a'
       set cursor: [0, 0]
       ensure "' a", cursor: [1, 4]
 
     it 'moves literally to a mark', ->
       set cursor: [1, 2]
-      keystroke 'm a'
+      ensure 'm a'
       set cursor: [0, 0]
       ensure '` a', cursor: [1, 2]
 
     it 'deletes to a mark by line', ->
       set cursor: [1, 5]
-      keystroke 'm a'
+      ensure 'm a'
       set cursor: [0, 0]
       ensure "d ' a", text: '56\n'
 
     it 'deletes before to a mark literally', ->
       set cursor: [1, 5]
-      keystroke 'm a'
+      ensure 'm a'
       set cursor: [0, 2]
       ensure 'd ` a', text: '  4\n56\n'
 
     it 'deletes after to a mark literally', ->
       set cursor: [1, 5]
-      keystroke 'm a'
+      ensure 'm a'
       set cursor: [2, 1]
       ensure 'd ` a', text: '  12\n    36\n'
 
     it 'moves back to previous', ->
       set cursor: [1, 5]
-      keystroke '` `'
+      ensure '` `'
       set cursor: [2, 1]
       ensure '` `', cursor: [1, 5]
 
   describe "jump command update ` and ' mark", ->
     ensureJumpMark = (value) ->
-      ensure mark: "`": value
-      ensure mark: "'": value
+      ensure null, mark: "`": value
+      ensure null, mark: "'": value
 
     ensureJumpAndBack = (keystroke, option) ->
       afterMove = option.cursor
@@ -1842,8 +1842,8 @@ describe "Motion general", ->
 
     describe "initial state", ->
       it "return [0, 0]", ->
-        ensure mark: "'": [0, 0]
-        ensure mark: "`": [0, 0]
+        ensure null, mark: "'": [0, 0]
+        ensure null, mark: "`": [0, 0]
 
     describe "jump motion in normal-mode", ->
       initial = [3, 3]
@@ -1856,8 +1856,8 @@ describe "Motion general", ->
           component.element.style.height = component.getLineHeight() * editor.getLineCount() + 'px'
           editorElement.measureDimensions()
 
-        ensure mark: "'": [0, 0]
-        ensure mark: "`": [0, 0]
+        ensure null, mark: "'": [0, 0]
+        ensure null, mark: "`": [0, 0]
         set cursor: initial
 
       it "G jump&back", -> ensureJumpAndBack 'G', cursor: [5, 3]
@@ -1934,7 +1934,7 @@ describe "Motion general", ->
         atom.packages.activatePackage('language-coffee-script')
       getVimState 'sample.coffee', (state, vim) ->
         {editor, editorElement} = state
-        {set, ensure, keystroke} = vim
+        {set, ensure} = vim
 
       runs ->
         atom.keymaps.add "test",
@@ -2039,7 +2039,7 @@ describe "Motion general", ->
 
         getVimState 'sample.go', (state, vimEditor) ->
           {editor, editorElement} = state
-          {set, ensure, keystroke} = vimEditor
+          {set, ensure} = vimEditor
 
       afterEach ->
         atom.packages.deactivatePackage(pack)
