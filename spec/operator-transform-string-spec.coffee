@@ -1789,10 +1789,6 @@ describe "Operator TransformString", ->
     it "numbering by text-object", -> ensureNumbering "p", textC: "|1: a\n2: b\n3: c\n\n"
 
   describe "DuplicateWithCommentOutOriginal", ->
-    ensureDuplicateWithCommentOutOriginal = (args...) ->
-      dispatch(editor.element, 'vim-mode-plus:duplicate-with-comment-out-original')
-      ensure args...
-
     beforeEach ->
       set
         textC: """
@@ -1808,7 +1804,8 @@ describe "Operator TransformString", ->
       waitsForPromise ->
         atom.packages.activatePackage('language-javascript').then ->
           set grammar: "source.js"
-          ensureDuplicateWithCommentOutOriginal "i p",
+          dispatch(editor.element, 'vim-mode-plus:duplicate-with-comment-out-original')
+          ensure "i p",
             textC: """
 
             // 1: Pen
@@ -1837,9 +1834,10 @@ describe "Operator TransformString", ->
           """
     it "dup-and-commentout", ->
       waitsForPromise ->
-        atom.packages.activatePackage('language-javascript').then ->
-          set grammar: "source.js"
-          ensureDuplicateWithCommentOutOriginal "i p",
+        atom.packages.activatePackage('language-ruby').then ->
+          set grammar: "source.ruby"
+          dispatch(editor.element, 'vim-mode-plus:duplicate-with-comment-out-original')
+          ensure "i p",
             textC: """
 
             # 1: Pen

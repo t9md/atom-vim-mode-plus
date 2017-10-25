@@ -1,3 +1,32 @@
+# 1.12.0: Internal redesign of replace and surround(no behavior diff).
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.6...v1.12.0)
+- New: Operator `duplicate-with-comment-out-original`(idea by @nwaywood) #929
+  - Duplicate targeted lines(always works as `linewise`) and comment out original target(selected) text.
+  - No keymap by default. But available from `select-list`(`ctrl-s` for macOS user).
+  - This is maybe useful when you change code with keeping original code as reference.
+    - e.g. If I keymap `g shift-cmd-D` to `vim-mode-plus:duplicate-with-comment-out-original`.
+    - `g shift-cmd-D p`: Duplicate paragraph with original paragraph commentout.
+    - `g shift-cmd-D z`: Duplicate fold with original fold commentout.
+    - `g shift-cmd-D f`: Duplicate function with original function commentout.
+- Improve: Remove operator's `supportEarlySelect` flag used by `surround` and `replace` operator #926
+  - This option's purpose is to select target immediately after target provided and before reading user's input.
+  - Now achieve same UX with more simpler way.
+    - Old: Select target before `execute()` and skip `selectTarget` by checking if it's already selected.
+    - New: Just execute and `await` user's input(simple and no complex skip `selectTarget` scenario).
+  - As result of this re-design, `surround` and `replace` operator now executed in `async`.
+    - This should be no diff from UX perspective. Just diff in internal execution model(require spec code change).
+- Improve: Respect occurrence wise when updating register
+  - When `c o p` update register's content register's type
+    - Old: Save with register's type `linewise`, immediate paste(`cmd-v`) in `insert-mode` surprise user.
+      - Since replaced text by `c` was `characterwise`, but pasted text add extra newline(`\n`).
+    - New: Save with register's type `characterwise`, and immediate paste(`cmd-v`) in `insert-mode` works as expected.
+- Improve: Spec helper
+  - New: `ensureWait` is like `ensure`, but it **wait** till finish operation for async `execution`
+  - Breaking: Remove `ensureByDispatch` since it's non essential, just wrapper. I want manage minimum set of `ensure` family.
+  - Breaking: Disallow `keystroke` helper(after confirmed that it's not used by vmp and vmp-plugins).
+  - Improve: `ensure` now recognize 1st arg as keystroke(not like keystroke or ensureOption as old `ensure`).
+    - This is more clearer and explicit, and allow 2nd ensureOption empty to just dispatch keystroke(as replacement of old `keystroke` helper).
+
 # 1.11.6:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.5...v1.11.6)
 - Fix: `move-up-to-edge`, `move-down-to-edge` motion did not work correctly in soft-wrapped editor.
