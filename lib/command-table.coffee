@@ -119,6 +119,8 @@ AddBlankLineAbove:
   file: "./operator"
   commandName: "vim-mode-plus:add-blank-line-above"
   commandScope: "atom-text-editor"
+ActivateInsertModeBase:
+  file: "./operator-insert"
 ActivateInsertMode:
   file: "./operator-insert"
   commandName: "vim-mode-plus:activate-insert-mode"
