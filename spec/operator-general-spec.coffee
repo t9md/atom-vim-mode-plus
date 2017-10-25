@@ -937,7 +937,7 @@ describe "Operator general", ->
            678\n
           """
 
-    ffdescribe "put-after-with-auto-indent command", ->
+    describe "put-after-with-auto-indent command", ->
       ensurePutAfterWithAutoIndent = (options) ->
         dispatch(editor.element, 'vim-mode-plus:put-after-with-auto-indent')
         ensure(null, options)
@@ -1039,3 +1039,623 @@ describe "Operator general", ->
                 }
               }
               """
+
+    describe "pasting twice", ->
+      beforeEach ->
+        set
+          text: "12345\nabcde\nABCDE\nQWERT"
+          cursor: [1, 1]
+          register: '"': text: '123'
+        ensure '2 p'
+
+      it "inserts the same line twice", ->
+        ensure null, text: "12345\nab123123cde\nABCDE\nQWERT"
+
+      describe "when undone", ->
+        it "removes both lines", ->
+          ensure 'u', text: "12345\nabcde\nABCDE\nQWERT"
+
+    describe "support multiple cursors", ->
+      it "paste text for each cursors", ->
+        set
+          text: "12345\nabcde\nABCDE\nQWERT"
+          cursor: [[1, 0], [2, 0]]
+          register: '"': text: 'ZZZ'
+        ensure 'p',
+          text: "12345\naZZZbcde\nAZZZBCDE\nQWERT"
+          cursor: [[1, 3], [2, 3]]
+
+    describe "with a selection", ->
+      beforeEach ->
+        set
+          text: '012\n'
+          cursor: [0, 1]
+      describe "with characterwise selection", ->
+        it "replaces selection with charwise content", ->
+          set register: '"': text: "345"
+          ensure 'v p', text: "03452\n", cursor: [0, 3]
+        it "replaces selection with linewise content", ->
+          set register: '"': text: "345\n"
+          ensure 'v p', text: "0\n345\n2\n", cursor: [1, 0]
+
+      describe "with linewise selection", ->
+        it "replaces selection with charwise content", ->
+          set text: "012\nabc", cursor: [0, 1]
+          set register: '"': text: "345"
+          ensure 'V p', text: "345\nabc", cursor: [0, 0]
+        it "replaces selection with linewise content", ->
+          set register: '"': text: "345\n"
+          ensure 'V p', text: "345\n", cursor: [0, 0]
+
+  describe "the P keybinding", ->
+    describe "with character contents", ->
+      beforeEach ->
+        set text: "012\n", cursor: [0, 0]
+        set register: '"': text: '345'
+        set register: a: text: 'a'
+        ensure 'P'
+
+      it "inserts the contents of the default register above", ->
+        ensure null, text: "345012\n", cursor: [0, 2]
+
+  describe "the . keybinding", ->
+    beforeEach ->
+      set text: "12\n34\n56\n78", cursor: [0, 0]
+
+    it "repeats the last operation", ->
+      ensure '2 d d .', text: ""
+
+    it "composes with motions", ->
+      ensure 'd d 2 .', text: "78"
+
+  describe "the r keybinding", ->
+    beforeEach ->
+      set
+        text: """
+        12
+        34
+        \n
+        """
+        cursor: [[0, 0], [1, 0]]
+
+    it "replaces a single character", ->
+      ensureWait 'r x', text: 'x2\nx4\n\n'
+
+    it "remain visual-mode when cancelled", ->
+      ensureWait 'v r escape',
+        text: '12\n34\n\n'
+        mode: ['visual', 'characterwise']
+
+    it "replaces a single character with a line break", ->
+      ensureWait 'r enter',
+        text: '\n2\n\n4\n\n'
+        cursor: [[1, 0], [3, 0]]
+
+    it "auto indent when replaced with singe new line", ->
+      set
+        textC_: """
+        __a|bc
+        """
+      ensureWait 'r enter',
+        textC_: """
+        __a
+        __|c
+        """
+
+    it "composes properly with motions", ->
+      ensureWait '2 r x', text: 'xx\nxx\n\n'
+
+    it "does nothing on an empty line", ->
+      set cursor: [2, 0]
+      ensureWait 'r x', text: '12\n34\n\n'
+
+    it "does nothing if asked to replace more characters than there are on a line", ->
+      ensureWait '3 r x', text: '12\n34\n\n'
+
+    describe "cancellation", ->
+      it "does nothing when cancelled", ->
+        ensureWait 'r escape', text: '12\n34\n\n', mode: 'normal'
+
+      it "keep multi-cursor on cancelled", ->
+        set                textC: "|    a\n!    a\n|    a\n"
+        ensureWait "r escape", textC: "|    a\n!    a\n|    a\n", mode: "normal"
+
+      it "keep multi-cursor on cancelled", ->
+        set                textC: "|**a\n!**a\n|**a\n"
+        ensureWait "v l",      textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
+        ensureWait "r escape", textC: "**|a\n**!a\n**|a\n", selectedText: ["**", "**", "**"], mode: ["visual", "characterwise"]
+
+    describe "when in visual mode", ->
+      beforeEach ->
+        ensure 'v e'
+
+      it "replaces the entire selection with the given character", ->
+        ensureWait 'r x', text: 'xx\nxx\n\n'
+
+      it "leaves the cursor at the beginning of the selection", ->
+        ensureWait 'r x', cursor: [[0, 0], [1, 0]]
+
+    describe "when in visual-block mode", ->
+      beforeEach ->
+        set
+          cursor: [1, 4]
+          text: """
+            0:2345
+            1: o11o
+            2: o22o
+            3: o33o
+            4: o44o\n
+            """
+        ensure 'ctrl-v l 3 j',
+          mode: ['visual', 'blockwise']
+          selectedTextOrdered: ['11', '22', '33', '44'],
+
+      it "replaces each selection and put cursor on start of top selection", ->
+        runs ->
+          ensureWait 'r x',
+            mode: 'normal'
+            cursor: [1, 4]
+            text: """
+              0:2345
+              1: oxxo
+              2: oxxo
+              3: oxxo
+              4: oxxo\n
+              """
+
+        runs ->
+          set cursor: [1, 0]
+
+        runs ->
+          ensureWait '.',
+            mode: 'normal'
+            cursor: [1, 0]
+            text: """
+              0:2345
+              xx oxxo
+              xx oxxo
+              xx oxxo
+              xx oxxo\n
+              """
+
+  describe 'the m keybinding', ->
+    ensureMarkByMode = (mode) ->
+      _ensure = bindEnsureOption({mode})
+      _ensure "m a", mark: "a": [0, 2]
+      _ensure "l m a", mark: "a": [0, 3]
+      _ensure "j m a", mark: "a": [1, 3]
+      _ensure "j m b", mark: "a": [1, 3], "b": [2, 3]
+      _ensure "l m c", mark: "a": [1, 3], "b": [2, 3], "c": [2, 4]
+
+    beforeEach ->
+      set
+        textC: """
+        0:| 12
+        1: 34
+        2: 56
+        """
+
+    it "[normal] can mark multiple positon", ->
+      ensureMarkByMode("normal")
+    it "[vC] can mark", ->
+      ensure "v"
+      ensureMarkByMode(["visual", "characterwise"])
+    it "[vL] can mark", ->
+      ensure "V"
+      ensureMarkByMode(["visual", "linewise"])
+
+  describe 'the R keybinding', ->
+    beforeEach ->
+      set
+        text: """
+          12345
+          67890
+          """
+        cursor: [0, 2]
+
+    it "enters replace mode and replaces characters", ->
+      ensure 'R',
+        mode: ['insert', 'replace']
+      editor.insertText "ab"
+      ensure 'escape',
+        text: "12ab5\n67890"
+        cursor: [0, 3]
+        mode: 'normal'
+
+    it "continues beyond end of line as insert", ->
+      ensure 'R',
+        mode: ['insert', 'replace']
+      editor.insertText "abcde"
+      ensure 'escape', text: '12abcde\n67890'
+
+    it 'treats backspace as undo', ->
+      editor.insertText "foo"
+      ensure 'R'
+      editor.insertText "a"
+      editor.insertText "b"
+      ensure null, text: "12fooab5\n67890"
+
+      ensure 'backspace', text: "12fooa45\n67890"
+      editor.insertText "c"
+      ensure null, text: "12fooac5\n67890"
+      ensure 'backspace backspace',
+        text: "12foo345\n67890"
+        selectedText: ''
+
+      ensure 'backspace',
+        text: "12foo345\n67890"
+        selectedText: ''
+
+    it "can be repeated", ->
+      ensure 'R'
+      editor.insertText "ab"
+      ensure 'escape'
+      set cursor: [1, 2]
+      ensure '.', text: "12ab5\n67ab0", cursor: [1, 3]
+      set cursor: [0, 4]
+      ensure '.', text: "12abab\n67ab0", cursor: [0, 5]
+
+    it "can be interrupted by arrow keys and behave as insert for repeat", ->
+      # FIXME don't know how to test this (also, depends on PR #568)
+
+    it "repeats correctly when backspace was used in the text", ->
+      ensure 'R'
+      editor.insertText "a"
+      ensure 'backspace'
+      editor.insertText "b"
+      ensure 'escape'
+      set cursor: [1, 2]
+      ensure '.', text: "12b45\n67b90", cursor: [1, 2]
+      set cursor: [0, 4]
+      ensure '.', text: "12b4b\n67b90", cursor: [0, 4]
+
+    it "doesn't replace a character if newline is entered", ->
+      ensure 'R', mode: ['insert', 'replace']
+      editor.insertText "\n"
+      ensure 'escape', text: "12\n345\n67890"
+
+    describe "multiline situation", ->
+      textOriginal = """
+        01234
+        56789
+        """
+      beforeEach ->
+        set text: textOriginal, cursor: [0, 0]
+      it "replace character unless input isnt new line(\\n)", ->
+        ensure 'R', mode: ['insert', 'replace']
+        editor.insertText "a\nb\nc"
+        ensure null,
+          text: """
+            a
+            b
+            c34
+            56789
+            """
+          cursor: [2, 1]
+      it "handle backspace", ->
+        ensure 'R', mode: ['insert', 'replace']
+        set cursor: [0, 1]
+        editor.insertText "a\nb\nc"
+        ensure null,
+          text: """
+            0a
+            b
+            c4
+            56789
+            """
+          cursor: [2, 1]
+        ensure 'backspace',
+          text: """
+            0a
+            b
+            34
+            56789
+            """
+          cursor: [2, 0]
+        ensure 'backspace',
+          text: """
+            0a
+            b34
+            56789
+            """
+          cursor: [1, 1]
+        ensure 'backspace',
+          text: """
+            0a
+            234
+            56789
+            """
+          cursor: [1, 0]
+        ensure 'backspace',
+          text: """
+            0a234
+            56789
+            """
+          cursor: [0, 2]
+        ensure 'backspace',
+          text: """
+            01234
+            56789
+            """
+          cursor: [0, 1]
+        ensure 'backspace', # do nothing
+          text: """
+            01234
+            56789
+            """
+          cursor: [0, 1]
+        ensure 'escape',
+          text: """
+            01234
+            56789
+            """
+          cursor: [0, 0]
+          mode: 'normal'
+      it "repeate multiline text case-1", ->
+        ensure 'R', mode: ['insert', 'replace']
+        editor.insertText "abc\ndef"
+        ensure null,
+          text: """
+            abc
+            def
+            56789
+            """
+          cursor: [1, 3]
+        ensure 'escape', cursor: [1, 2], mode: 'normal'
+        ensure 'u', text: textOriginal
+        ensure '.',
+          text: """
+            abc
+            def
+            56789
+            """
+          cursor: [1, 2]
+          mode: 'normal'
+        ensure 'j .',
+          text: """
+            abc
+            def
+            56abc
+            def
+            """
+          cursor: [3, 2]
+          mode: 'normal'
+      it "repeate multiline text case-2", ->
+        ensure 'R', mode: ['insert', 'replace']
+        editor.insertText "abc\nd"
+        ensure null,
+          text: """
+            abc
+            d4
+            56789
+            """
+          cursor: [1, 1]
+        ensure 'escape', cursor: [1, 0], mode: 'normal'
+        ensure 'j .',
+          text: """
+          abc
+          d4
+          abc
+          d9
+          """
+          cursor: [3, 0]
+          mode: 'normal'
+
+  describe 'AddBlankLineBelow, AddBlankLineAbove', ->
+    beforeEach ->
+      set
+        textC: """
+        line0
+        li|ne1
+        line2
+        line3
+        """
+
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus.normal-mode':
+          'enter': 'vim-mode-plus:add-blank-line-below'
+          'shift-enter': 'vim-mode-plus:add-blank-line-above'
+
+    it "insert blank line below/above", ->
+      ensure "enter",
+        textC: """
+        line0
+        li|ne1
+
+        line2
+        line3
+        """
+      ensure "shift-enter",
+        textC: """
+        line0
+
+        li|ne1
+
+        line2
+        line3
+        """
+
+    it "[with-count] insert blank line below/above", ->
+      ensure "2 enter",
+        textC: """
+        line0
+        li|ne1
+
+
+        line2
+        line3
+        """
+      ensure "2 shift-enter",
+        textC: """
+        line0
+
+
+        li|ne1
+
+
+        line2
+        line3
+        """
+
+  describe 'Select as operator', ->
+    beforeEach ->
+      settings.set('keymapSToSelect', true)
+      jasmine.attachToDOM(editorElement)
+
+    describe "select by target", ->
+      beforeEach ->
+        set
+          textC: """
+          0 |ooo xxx ***
+          1 xxx *** ooo
+
+          3 ooo xxx ***
+          4 xxx *** ooo\n
+          """
+
+      it "select text-object", ->
+        ensure "s p", # p is `i p` shorthand.
+          mode: ["visual", "linewise"]
+          selectedText: "0 ooo xxx ***\n1 xxx *** ooo\n"
+          propertyHead: [1, 13]
+
+      it "select by motion j with stayOnSelectTextObject", ->
+        settings.set("stayOnSelectTextObject", true)
+        ensure "s i p",
+          mode: ["visual", "linewise"]
+          selectedText: "0 ooo xxx ***\n1 xxx *** ooo\n"
+          propertyHead: [1, 2]
+
+      it "select occurrence in text-object with occurrence-modifier", ->
+        ensure "s o p", # p is `i p` shorthand.
+          mode: ["visual", "characterwise"]
+          selectedText: ["ooo", "ooo"]
+          selectedBufferRangeOrdered: [
+            [[0, 2], [0, 5]]
+            [[1, 10], [1, 13]]
+          ]
+
+      it "select occurrence in text-object with preset-occurrence", ->
+        ensure "g o s p", # p is `i p` shorthand.
+          mode: ["visual", "characterwise"]
+          selectedText: ["ooo", "ooo"]
+          selectedBufferRangeOrdered: [
+            [[0, 2], [0, 5]]
+            [[1, 10], [1, 13]]
+          ]
+
+      it "convert presistent-selection into normal selection", ->
+        ensure "v j enter",
+          mode: "normal"
+          persistentSelectionCount: 1
+          persistentSelectionBufferRange: [
+            [[0, 2], [1, 3]]
+          ]
+
+        ensure "j j v j",
+          persistentSelectionCount: 1
+          persistentSelectionBufferRange: [
+            [[0, 2], [1, 3]]
+          ]
+          mode: ["visual", "characterwise"]
+          selectedText: "ooo xxx ***\n4 x"
+
+        # Now it's show time, to convert persistent selection into normal selection
+        # by only `s`.
+        ensure "s",
+          mode: ["visual", "characterwise"]
+          persistentSelectionCount: 0
+          selectedTextOrdered: ["ooo xxx ***\n1 x", "ooo xxx ***\n4 x"]
+
+      it "select preset-occurrence in presistent-selection and normal selection", ->
+        ensure "g o",
+          occurrenceText: ['ooo', 'ooo', 'ooo', 'ooo']
+
+        ensure "V j enter G V",
+          persistentSelectionCount: 1
+          mode: ["visual", "linewise"]
+          selectedText: "4 xxx *** ooo\n"
+
+        ensure "s", # Notice `ooo` in row 3 is EXCLUDED.
+          persistentSelectionCount: 0
+          mode: ["visual", "characterwise"]
+          selectedText: ["ooo", "ooo", "ooo"]
+          selectedBufferRangeOrdered: [
+            [[0, 2], [0, 5]]
+            [[1, 10], [1, 13]]
+            [[4, 10], [4, 13]]
+          ]
+
+      it "select by motion $", ->
+        ensure "s $",
+          mode: ["visual", "characterwise"]
+          selectedText: "ooo xxx ***\n"
+
+      it "select by motion j", ->
+        ensure "s j",
+          mode: ["visual", "linewise"]
+          selectedText: "0 ooo xxx ***\n1 xxx *** ooo\n"
+
+      it "select by motion j v-modifier", ->
+        ensure "s v j",
+          mode: ["visual", "characterwise"]
+          selectedText: "ooo xxx ***\n1 x"
+
+      it "select occurrence by motion G", ->
+        ensure "s o G",
+          mode: ["visual", "characterwise"]
+          selectedText: ["ooo", "ooo", "ooo", "ooo"]
+          selectedBufferRangeOrdered: [
+            [[0, 2], [0, 5]]
+            [[1, 10], [1, 13]]
+            [[3, 2], [3, 5]]
+            [[4, 10], [4, 13]]
+          ]
+
+      it "select occurrence by motion G with explicit V-modifier", ->
+        ensure "s o V G",
+          mode: ["visual", "linewise"]
+          selectedTextOrdered: [
+            "0 ooo xxx ***\n1 xxx *** ooo\n"
+            "3 ooo xxx ***\n4 xxx *** ooo\n"
+          ]
+
+      it "return to normal-mode when fail to select", ->
+        # attempt to select inner-function but there is no function.
+        ensure "s i f",
+          mode: "normal"
+          cursor: [0, 2]
+
+        # attempt to find 'z' but no "z".
+        ensure "s f z",
+          mode: "normal"
+          cursor: [0, 2]
+
+      describe "complex scenario", ->
+        beforeEach ->
+          waitsForPromise ->
+            atom.packages.activatePackage('language-javascript')
+
+          runs ->
+            set
+              grammar: 'source.js'
+              textC: """
+              const result = []
+              for (const !member of members) {
+                let member2 = member + member
+                let member3 = member + member + member
+                result.push(member2, member3)
+              }\n
+              """
+
+        it "select occurrence in a-fold ,reverse(o) then escape to normal-mode", ->
+          ensure "s o z o escape",
+            mode: "normal"
+            textC: """
+            const result = []
+            for (const |member of members) {
+              let member2 = |member + |member
+              let member3 = |member + |member + |member
+              result.push(member2, member3)
+            }\n
+            """
