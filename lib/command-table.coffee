@@ -491,6 +491,10 @@ NumberingLines:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:numbering-lines"
   commandScope: "atom-text-editor"
+DuplicateWithCommentOutOriginal:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:duplicate-with-comment-out-original"
+  commandScope: "atom-text-editor"
 Motion:
   file: "./motion"
 CurrentSelection:
@@ -661,10 +665,6 @@ MoveToFirstCharacterOfLineAndDown:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-first-character-of-line-and-down"
   commandScope: "atom-text-editor"
-MoveToFirstLine:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-first-line"
-  commandScope: "atom-text-editor"
 MoveToScreenColumn:
   file: "./motion"
 MoveToBeginningOfScreenLine:
@@ -678,6 +678,10 @@ MoveToFirstCharacterOfScreenLine:
 MoveToLastCharacterOfScreenLine:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-last-character-of-screen-line"
+  commandScope: "atom-text-editor"
+MoveToFirstLine:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-first-line"
   commandScope: "atom-text-editor"
 MoveToLastLine:
   file: "./motion"
