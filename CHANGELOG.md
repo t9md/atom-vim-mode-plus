@@ -1,3 +1,7 @@
+# 1.12.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.12.0...v1.12.1)
+- Improve: `duplicate-with-comment-out-original` flashes correct range(only changed range).
+
 # 1.12.0: Internal redesign of replace and surround(no behavior diff).
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.11.6...v1.12.0)
 - New: Operator `duplicate-with-comment-out-original`(idea by @nwaywood) #929
