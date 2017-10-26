@@ -638,8 +638,7 @@ describe "Operator general", ->
 
     describe "with a register", ->
       it "saves the line to the a register", ->
-        ensure '" a y y',
-          register: a: text: "012 345\n"
+        ensure '" a y y', register: a: text: "012 345\n"
 
     describe "with A register", ->
       it "append to existing value of lowercase-named register", ->
