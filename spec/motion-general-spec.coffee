@@ -10,13 +10,13 @@ setEditorWidthInCharacters = (editor, widthInCharacters) ->
   return component.getNextUpdatePromise()
 
 describe "Motion general", ->
-  [set, ensure, editor, editorElement, vimState] = []
+  [set, ensure, ensureWait, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, _vim) ->
       vimState = state # to refer as vimState later.
       {editor, editorElement} = vimState
-      {set, ensure} = _vim
+      {set, ensure, ensureWait} = _vim
 
   describe "simple motions", ->
     text = null
@@ -1758,34 +1758,24 @@ describe "Motion general", ->
         cursor: [0, 1]
 
     it 'moves to the beginning of the line of a mark', ->
-      set cursor: [1, 1]
-      ensure 'm a'
-      set cursor: [0, 0]
-      ensure "' a", cursor: [1, 4]
+      runs -> set cursor: [1, 1]; ensureWait 'm a'
+      runs -> set cursor: [0, 0]; ensure "' a", cursor: [1, 4]
 
     it 'moves literally to a mark', ->
-      set cursor: [1, 2]
-      ensure 'm a'
-      set cursor: [0, 0]
-      ensure '` a', cursor: [1, 2]
+      runs -> set cursor: [1, 2]; ensureWait 'm a'
+      runs -> set cursor: [0, 0]; ensure '` a', cursor: [1, 2]
 
     it 'deletes to a mark by line', ->
-      set cursor: [1, 5]
-      ensure 'm a'
-      set cursor: [0, 0]
-      ensure "d ' a", text: '56\n'
+      runs -> set cursor: [1, 5]; ensureWait 'm a'
+      runs -> set cursor: [0, 0]; ensure "d ' a", text: '56\n'
 
     it 'deletes before to a mark literally', ->
-      set cursor: [1, 5]
-      ensure 'm a'
-      set cursor: [0, 2]
-      ensure 'd ` a', text: '  4\n56\n'
+      runs -> set cursor: [1, 5]; ensureWait 'm a'
+      runs -> set cursor: [0, 2]; ensure 'd ` a', text: '  4\n56\n'
 
     it 'deletes after to a mark literally', ->
-      set cursor: [1, 5]
-      ensure 'm a'
-      set cursor: [2, 1]
-      ensure 'd ` a', text: '  12\n    36\n'
+      runs -> set cursor: [1, 5]; ensureWait 'm a'
+      runs -> set cursor: [2, 1]; ensure 'd ` a', text: '  12\n    36\n'
 
     it 'moves back to previous', ->
       set cursor: [1, 5]

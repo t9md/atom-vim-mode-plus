@@ -2,13 +2,13 @@
 settings = require '../lib/settings'
 
 describe "Prefixes", ->
-  [set, ensure, editor, editorElement, vimState] = []
+  [set, ensure, ensureWait, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure} = vim
+      {set, ensure, ensureWait} = vim
 
   describe "Repeat", ->
     describe "with operations", ->
@@ -317,39 +317,33 @@ describe "Prefixes", ->
 
     describe "the ctrl-r command in insert mode", ->
       beforeEach ->
-        set register: '"': text: '345'
-        set register: 'a': text: 'abc'
-        set register: '*': text: 'abc'
         atom.clipboard.write "clip"
-        set text: "012\n", cursor: [0, 2]
+        set
+          register:
+            '"': text: '345'
+            'a': text: 'abc'
+            '*': text: 'abc'
+        set textC: "01|2\n"
         ensure 'i', mode: 'insert'
 
       describe "useClipboardAsDefaultRegister = true", ->
-        beforeEach ->
+        it "inserts from \" paste clipboard content", ->
           settings.set 'useClipboardAsDefaultRegister', true
-          set register: '"': text: '345'
           atom.clipboard.write "clip"
-
-        it "inserts contents from clipboard with \"", ->
-          ensure 'ctrl-r "', text: '01clip2\n'
+          ensureWait 'ctrl-r "', text: '01clip2\n'
 
       describe "useClipboardAsDefaultRegister = false", ->
-        beforeEach ->
+        it "inserts from \" register ", ->
           settings.set 'useClipboardAsDefaultRegister', false
           set register: '"': text: '345'
           atom.clipboard.write "clip"
+          ensureWait 'ctrl-r "', text: '013452\n'
 
-        it "inserts contents from \" with \"", ->
-          ensure 'ctrl-r "', text: '013452\n'
-
-      it "inserts contents of the 'a' register", ->
-        ensure 'ctrl-r a', text: '01abc2\n'
-
-      it "is cancelled with the escape key", ->
-        ensure 'ctrl-r escape',
-          text: '012\n'
-          mode: 'insert'
-          cursor: [0, 2]
+      describe "insert from named register", ->
+        it "insert from 'a'", ->
+          ensureWait 'ctrl-r a', textC: '01abc|2\n', mode: 'insert'
+        it "cancel with escape", ->
+          ensureWait 'ctrl-r escape', textC: '01|2\n', mode: 'insert'
 
     describe "per selection clipboard", ->
       ensurePerSelectionRegister = (texts...) ->
@@ -419,7 +413,7 @@ describe "Prefixes", ->
         it "insert from per selection registe", ->
           ensure "d i w", text: ":\n:\n:\n"
           ensure 'a', mode: 'insert'
-          ensure 'ctrl-r "',
+          ensureWait 'ctrl-r "',
             text: """
               :012
               :abc
