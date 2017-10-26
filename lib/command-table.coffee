@@ -1255,6 +1255,14 @@ ScrollCursorToMiddleLeave:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-middle-leave"
   commandScope: "atom-text-editor"
+ScrollCursorToUpperMiddle:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:scroll-cursor-to-upper-middle"
+  commandScope: "atom-text-editor"
+ScrollCursorToUpperMiddleLeave:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:scroll-cursor-to-upper-middle-leave"
+  commandScope: "atom-text-editor"
 ScrollCursorToBottom:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-cursor-to-bottom"

@@ -296,6 +296,8 @@
   'z t': 'vim-mode-plus:scroll-cursor-to-top-leave'
   'z .': 'vim-mode-plus:scroll-cursor-to-middle'
   'z z': 'vim-mode-plus:scroll-cursor-to-middle-leave'
+  'z space': 'vim-mode-plus:scroll-cursor-to-upper-middle'
+  'z u': 'vim-mode-plus:scroll-cursor-to-upper-middle-leave'
   'z -': 'vim-mode-plus:scroll-cursor-to-bottom'
   'z b': 'vim-mode-plus:scroll-cursor-to-bottom-leave'
   'z s': 'vim-mode-plus:scroll-cursor-to-left'
