@@ -343,6 +343,10 @@ ReplaceWithRegister:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:replace-with-register"
   commandScope: "atom-text-editor"
+ReplaceOccurrenceWithRegister:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:replace-occurrence-with-register"
+  commandScope: "atom-text-editor"
 SwapWithRegister:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:swap-with-register"
