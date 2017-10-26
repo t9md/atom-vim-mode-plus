@@ -1237,31 +1237,39 @@ ScrollUp:
   file: "./misc-command"
   commandName: "vim-mode-plus:scroll-up"
   commandScope: "atom-text-editor"
-ScrollCursor:
+RedrawCursorLine:
   file: "./misc-command"
-ScrollCursorToTop:
+RedrawCursorLineAtTop:
   file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-top"
+  commandName: "vim-mode-plus:redraw-cursor-line-at-top"
   commandScope: "atom-text-editor"
-ScrollCursorToTopLeave:
+RedrawCursorLineAtTopAndMoveToFirstCharacterOfLine:
   file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-top-leave"
+  commandName: "vim-mode-plus:redraw-cursor-line-at-top-and-move-to-first-character-of-line"
   commandScope: "atom-text-editor"
-ScrollCursorToMiddle:
+RedrawCursorLineAtUpperMiddle:
   file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-middle"
+  commandName: "vim-mode-plus:redraw-cursor-line-at-upper-middle"
   commandScope: "atom-text-editor"
-ScrollCursorToMiddleLeave:
+RedrawCursorLineAtUpperMiddleAndMoveToFirstCharacterOfLine:
   file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-middle-leave"
+  commandName: "vim-mode-plus:redraw-cursor-line-at-upper-middle-and-move-to-first-character-of-line"
   commandScope: "atom-text-editor"
-ScrollCursorToBottom:
+RedrawCursorLineAtMiddle:
   file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-bottom"
+  commandName: "vim-mode-plus:redraw-cursor-line-at-middle"
   commandScope: "atom-text-editor"
-ScrollCursorToBottomLeave:
+RedrawCursorLineAtMiddleAndMoveToFirstCharacterOfLine:
   file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-cursor-to-bottom-leave"
+  commandName: "vim-mode-plus:redraw-cursor-line-at-middle-and-move-to-first-character-of-line"
+  commandScope: "atom-text-editor"
+RedrawCursorLineAtBottom:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:redraw-cursor-line-at-bottom"
+  commandScope: "atom-text-editor"
+RedrawCursorLineAtBottomAndMoveToFirstCharacterOfLine:
+  file: "./misc-command"
+  commandName: "vim-mode-plus:redraw-cursor-line-at-bottom-and-move-to-first-character-of-line"
   commandScope: "atom-text-editor"
 ScrollCursorToLeft:
   file: "./misc-command"

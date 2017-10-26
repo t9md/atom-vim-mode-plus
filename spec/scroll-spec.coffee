@@ -47,7 +47,15 @@ describe "Scrolling", ->
         expect(editor.getFirstVisibleScreenRow()).toBe 1
         expect(editor.getLastVisibleScreenRow()).toBe 6
 
-  describe "scroll cursor keybindings", ->
+  describe "redraw-cursor-line keybindings", ->
+    _ensure = (keystroke, {scrollTop, moveToFirstChar}) ->
+      ensure(keystroke)
+      expect(editorElement.setScrollTop).toHaveBeenCalledWith(scrollTop)
+      if moveToFirstChar
+        expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
+      else
+        expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
+
     beforeEach ->
       editor.setText [1..200].join("\n")
       editorElement.style.lineHeight = "20px"
@@ -61,41 +69,18 @@ describe "Scrolling", ->
       spyOn(editor, 'getLastVisibleScreenRow').andReturn(110)
       spyOn(editorElement, 'pixelPositionForScreenPosition').andReturn({top: 1000, left: 0})
 
-    describe "the z<CR> keybinding", ->
-      it "moves the screen to position cursor at the top of the window and moves cursor to first non-blank in the line", ->
-        ensure 'z enter'
-        expect(editorElement.setScrollTop).toHaveBeenCalledWith(960)
-        expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
-
-    describe "the zt keybinding", ->
-      it "moves the screen to position cursor at the top of the window and leave cursor in the same column", ->
-        ensure 'z t'
-        expect(editorElement.setScrollTop).toHaveBeenCalledWith(960)
-        expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
-
-    describe "the z. keybinding", ->
-      it "moves the screen to position cursor at the center of the window and moves cursor to first non-blank in the line", ->
-        ensure 'z .'
-        expect(editorElement.setScrollTop).toHaveBeenCalledWith(900)
-        expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
-
-    describe "the zz keybinding", ->
-      it "moves the screen to position cursor at the center of the window and leave cursor in the same column", ->
-        ensure 'z z'
-        expect(editorElement.setScrollTop).toHaveBeenCalledWith(900)
-        expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
-
-    describe "the z- keybinding", ->
-      it "moves the screen to position cursor at the bottom of the window and moves cursor to first non-blank in the line", ->
-        ensure 'z -'
-        expect(editorElement.setScrollTop).toHaveBeenCalledWith(860)
-        expect(editor.moveToFirstCharacterOfLine).toHaveBeenCalled()
-
-    describe "the zb keybinding", ->
-      it "moves the screen to position cursor at the bottom of the window and leave cursor in the same column", ->
-        ensure 'z b'
-        expect(editorElement.setScrollTop).toHaveBeenCalledWith(860)
-        expect(editor.moveToFirstCharacterOfLine).not.toHaveBeenCalled()
+    describe "at top", ->
+      it "without move cursor", ->   _ensure 'z t',     scrollTop: 960, moveToFirstChar: false
+      it "with move to 1st char", -> _ensure 'z enter', scrollTop: 960, moveToFirstChar: true
+    describe "at upper-middle", ->
+      it "without move cursor", ->   _ensure 'z u',     scrollTop: 950, moveToFirstChar: false
+      it "with move to 1st char", -> _ensure 'z space', scrollTop: 950, moveToFirstChar: true
+    describe "at middle", ->
+      it "without move cursor", ->   _ensure 'z z',     scrollTop: 900, moveToFirstChar: false
+      it "with move to 1st char", -> _ensure 'z .',     scrollTop: 900, moveToFirstChar: true
+    describe "at bottom", ->
+      it "without move cursor", ->   _ensure 'z b',     scrollTop: 860, moveToFirstChar: false
+      it "with move to 1st char", -> _ensure 'z -',     scrollTop: 860, moveToFirstChar: true
 
   describe "horizontal scroll cursor keybindings", ->
     beforeEach ->

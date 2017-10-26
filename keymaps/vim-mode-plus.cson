@@ -292,12 +292,18 @@
   'shift-tab': 'vim-mode-plus:move-to-previous-occurrence'
 
 'atom-text-editor.vim-mode-plus:not(.insert-mode):not(.operator-pending-mode)':
-  'z enter': 'vim-mode-plus:scroll-cursor-to-top'
-  'z t': 'vim-mode-plus:scroll-cursor-to-top-leave'
-  'z .': 'vim-mode-plus:scroll-cursor-to-middle'
-  'z z': 'vim-mode-plus:scroll-cursor-to-middle-leave'
-  'z -': 'vim-mode-plus:scroll-cursor-to-bottom'
-  'z b': 'vim-mode-plus:scroll-cursor-to-bottom-leave'
+  'z t': 'vim-mode-plus:redraw-cursor-line-at-top'
+  'z enter': 'vim-mode-plus:redraw-cursor-line-at-top-and-move-to-first-character-of-line'
+
+  'z u': 'vim-mode-plus:redraw-cursor-line-at-upper-middle'
+  'z space': 'vim-mode-plus:redraw-cursor-line-at-upper-middle-and-move-to-first-character-of-line'
+
+  'z z': 'vim-mode-plus:redraw-cursor-line-at-middle'
+  'z .': 'vim-mode-plus:redraw-cursor-line-at-middle-and-move-to-first-character-of-line'
+
+  'z b': 'vim-mode-plus:redraw-cursor-line-at-bottom'
+  'z -': 'vim-mode-plus:redraw-cursor-line-at-bottom-and-move-to-first-character-of-line'
+
   'z s': 'vim-mode-plus:scroll-cursor-to-left'
   'z e': 'vim-mode-plus:scroll-cursor-to-right'
 
