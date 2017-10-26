@@ -1,4 +1,4 @@
-# 1.13.0: WIP
+# 1.13.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.12.1...v1.13.0)
 - Improve: Better multi cursors support for `toggle-persist-selection`.
 - Improve: Refold temporarily opened fold by `/` and `?` when confirmed #931
@@ -25,8 +25,12 @@
   - `z b`: `ScrollCursorToBottomLeave` to `RedrawCursorLineAtBottom`
 - Internal: Remove `Operator.prototype.requireTarget`, now all operator have **target**.
   - Use `target = "Empty"` for old `requireTarget = false` equivalent.
-- Internal: Remove casual use of `isComplete` and renamed to `isReady` as prep for upcoming refactoring.
+- Internal: Remove casual use of `isComplete` and renamed to `isReady` as prep for upcoming refactoring. #933
   - Now `isReady`(was `isComplete`) is used only in `operationStack`.
+  - For input taking `MiscCommand` family command such as `mark`, `insert-register` now executed in async.
+  - All operators which take extra input now executed in async(no longer user `requireInput` mechanism).
+  - At this point, `requireInput` is used only by Motion, which I cannot make it simply transform to use `async` execution.
+  - Since motion is used as Operator's target and Operator has not yet support target executed in async scenario.
 
 # 1.12.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.12.0...v1.12.1)
