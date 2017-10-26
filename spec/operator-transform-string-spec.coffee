@@ -813,9 +813,11 @@ describe "Operator TransformString", ->
 
         describe "with '`' motion", ->
           beforeEach ->
-            set cursor: [0, 8] # start at `e` char
-            ensure 'm a', mark: 'a': [0, 8]
-            set cursor: [0, 0]
+            runs ->
+              set cursor: [0, 8] # start at `e` char
+              ensureWait 'm a', mark: 'a': [0, 8]
+            runs ->
+              set cursor: [0, 0]
 
           it "surround with '`' motion", ->
             ensureWait 'y s ` a (', text: "(s _____ )e", cursor: [0, 0]
@@ -1334,32 +1336,32 @@ describe "Operator TransformString", ->
             'g J': 'vim-mode-plus:join-by-input'
 
       it "joins lines by char from user with triming leading whitespace", ->
-        ensure 'g J : : enter',
+        ensureWait 'g J : : enter',
           textC_: """
           __0|12::345
           __678
           __9ab\n
           """
-        ensure '.',
+        ensureWait '.',
           textC_: """
           __0|12::345::678
           __9ab\n
           """
-        ensure 'u u',
+        ensureWait 'u u',
           textC_: """
           __0|12
           __345
           __678
           __9ab\n
           """
-        ensure '4 g J : : enter',
+        ensureWait '4 g J : : enter',
           textC_: """
           __0|12::345::678::9ab\n
           """
 
       it "keep multi-cursors on cancel", ->
-        set                    textC: "  0|12\n  345\n  6!78\n  9ab\n  c|de\n  fgh\n"
-        ensure "g J : escape", textC: "  0|12\n  345\n  6!78\n  9ab\n  c|de\n  fgh\n"
+        set                        textC: "  0|12\n  345\n  6!78\n  9ab\n  c|de\n  fgh\n"
+        ensureWait "g J : escape", textC: "  0|12\n  345\n  6!78\n  9ab\n  c|de\n  fgh\n"
 
     describe "JoinByInputWithKeepingSpace", ->
       beforeEach ->
@@ -1368,25 +1370,25 @@ describe "Operator TransformString", ->
             'g J': 'vim-mode-plus:join-by-input-with-keeping-space'
 
       it "joins lines by char from user without triming leading whitespace", ->
-        ensure 'g J : : enter',
+        ensureWait 'g J : : enter',
           textC_: """
           __0|12::__345
           __678
           __9ab\n
           """
-        ensure '.',
+        ensureWait '.',
           textC_: """
           __0|12::__345::__678
           __9ab\n
           """
-        ensure 'u u',
+        ensureWait 'u u',
           textC_: """
           __0|12
           __345
           __678
           __9ab\n
           """
-        ensure '4 g J : : enter',
+        ensureWait '4 g J : : enter',
           textC_: """
           __0|12::__345::__678::__9ab\n
           """
@@ -1457,14 +1459,14 @@ describe "Operator TransformString", ->
         """
     describe "SplitString", ->
       it "split string into lines", ->
-        ensure "g / : enter",
+        ensureWait "g / : enter",
           textC: """
           |a
           b
           c
           d:e:f\n
           """
-        ensure "G .",
+        ensureWait "G .",
           textC: """
           a
           b
@@ -1474,23 +1476,23 @@ describe "Operator TransformString", ->
           f\n
           """
       it "[from normal] keep multi-cursors on cancel", ->
-        set textC_: "  0|12  345  6!78  9ab  c|de  fgh"
-        ensure "g / : escape", textC_: "  0|12  345  6!78  9ab  c|de  fgh"
+        set                        textC_: "  0|12  345  6!78  9ab  c|de  fgh"
+        ensureWait "g / : escape", textC_: "  0|12  345  6!78  9ab  c|de  fgh"
       it "[from visual] keep multi-cursors on cancel", ->
-        set                  textC: "  0|12  345  6!78  9ab  c|de  fgh"
-        ensure "v",          textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
-        ensure "g / escape", textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
+        set                      textC: "  0|12  345  6!78  9ab  c|de  fgh"
+        ensure "v",              textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
+        ensureWait "g / escape", textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
 
     describe "SplitStringWithKeepingSplitter", ->
       it "split string into lines without removing spliter char", ->
-        ensure "g ? : enter",
+        ensureWait "g ? : enter",
           textC: """
           |a:
           b:
           c
           d:e:f\n
           """
-        ensure "G .",
+        ensureWait "G .",
           textC: """
           a:
           b:
@@ -1500,12 +1502,12 @@ describe "Operator TransformString", ->
           f\n
           """
       it "keep multi-cursors on cancel", ->
-        set textC_: "  0|12  345  6!78  9ab  c|de  fgh"
-        ensure "g ? : escape", textC_: "  0|12  345  6!78  9ab  c|de  fgh"
+        set                        textC_: "  0|12  345  6!78  9ab  c|de  fgh"
+        ensureWait "g ? : escape", textC_: "  0|12  345  6!78  9ab  c|de  fgh"
       it "[from visual] keep multi-cursors on cancel", ->
-        set                  textC: "  0|12  345  6!78  9ab  c|de  fgh"
-        ensure "v",          textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
-        ensure "g ? escape", textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
+        set                      textC: "  0|12  345  6!78  9ab  c|de  fgh"
+        ensure "v",              textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
+        ensureWait "g ? escape", textC: "  01|2  345  67!8  9ab  cd|e  fgh", selectedTextOrdered: ["1", "7", "d"], mode: ["visual", "characterwise"]
 
   describe "SplitArguments, SplitArgumentsWithRemoveSeparator", ->
     beforeEach ->

@@ -1220,7 +1220,7 @@ describe "Operator general", ->
 
   describe 'the m keybinding', ->
     ensureMarkByMode = (mode) ->
-      _ensure = bindEnsureOption({mode})
+      _ensure = bindEnsureWaitOption({mode})
       _ensure "m a", mark: "a": [0, 2]
       _ensure "l m a", mark: "a": [0, 3]
       _ensure "j m a", mark: "a": [1, 3]

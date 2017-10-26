@@ -3,13 +3,13 @@ _ = require 'underscore-plus'
 settings = require '../lib/settings'
 
 describe "VimState", ->
-  [set, ensure, editor, editorElement, vimState] = []
+  [set, ensure, ensureWait, editor, editorElement, vimState] = []
 
   beforeEach ->
     getVimState (state, vim) ->
       vimState = state
       {editor, editorElement} = vimState
-      {set, ensure} = vim
+      {set, ensure, ensureWait} = vim
 
   describe "initialization", ->
     it "puts the editor in normal-mode initially by default", ->
@@ -553,22 +553,28 @@ describe "VimState", ->
     beforeEach -> set text: "text in line 1\ntext in line 2\ntext in line 3"
 
     it "basic marking functionality", ->
-      set cursor: [1, 1]
-      ensure 'm t'
-      set cursor: [2, 2]
-      ensure '` t', cursor: [1, 1]
+      runs ->
+        set cursor: [1, 1]
+        ensureWait 'm t'
+      runs ->
+        set cursor: [2, 2]
+        ensure '` t', cursor: [1, 1]
 
     it "real (tracking) marking functionality", ->
-      set cursor: [2, 2]
-      ensure 'm q'
-      set cursor: [1, 2]
-      ensure 'o escape ` q', cursor: [3, 2]
+      runs ->
+        set cursor: [2, 2]
+        ensureWait 'm q'
+      runs ->
+        set cursor: [1, 2]
+        ensure 'o escape ` q', cursor: [3, 2]
 
     it "real (tracking) marking functionality", ->
-      set cursor: [2, 2]
-      ensure 'm q'
-      set cursor: [1, 2]
-      ensure 'd d escape ` q', cursor: [1, 2]
+      runs ->
+        set cursor: [2, 2]
+        ensureWait 'm q'
+      runs ->
+        set cursor: [1, 2]
+        ensure 'd d escape ` q', cursor: [1, 2]
 
   describe "is-narrowed attribute", ->
     ensureNormalModeState = ->
