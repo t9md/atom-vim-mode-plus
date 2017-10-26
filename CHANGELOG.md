@@ -1,3 +1,15 @@
+# 1.13.0: WIP
+- Breaking: rename confusing `ScrollCursorToTop` commands.
+  - `z enter`: `ScrollCursorToTop` to `RedrawCursorLineAtTopAndMoveToFirstCharacterOfLine`
+  - `z t`: `ScrollCursorToTopLeave` to `RedrawCursorLineAtTop`
+  - `z .`: `ScrollCursorToMiddle` to `RedrawCursorLineAtMiddleAndMoveToFirstCharacterOfLine`
+  - `z z`: `ScrollCursorToMiddleLeave` to `RedrawCursorLineAtMiddle`
+  - `z -`: `ScrollCursorToBottom` to `RedrawCursorLineAtBottomAndMoveToFirstCharacterOfLine`
+  - `z b`: `ScrollCursorToBottomLeave` to `RedrawCursorLineAtBottom`
+- New: `z X` faimly to redraw cursor line at upper middle.
+  - `z u`: `RedrawCursorLineAtUpperMiddle`
+  - `z space`: `RedrawCursorLineAtUpperMiddleAndMoveToFirstCharacterOfLine`
+
 # 1.12.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.12.0...v1.12.1)
 - Improve: `duplicate-with-comment-out-original` flashes correct range(only changed range).
