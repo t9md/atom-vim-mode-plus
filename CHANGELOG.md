@@ -1,14 +1,32 @@
 # 1.13.0: WIP
-- Breaking: rename confusing `ScrollCursorToTop` commands.
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.12.1...v1.13.0)
+- Improve: Better multi cursors support for `toggle-persist-selection`.
+- Improve: Refold temporarily opened fold by `/` and `?` when confirmed #931
+- New: `z X` family to redraw cursor line at `upper-middle`. #932
+  - Keymap and Command
+    - `z u`: `redraw-cursor-line-at-upper-middle`
+    - `z space`: `redraw-cursor-line-at-upper-middle-and-move-to-first-character-of-line`
+  - Conflict: `z u` with pureVim's `spellfile` related command. But OK, vmp have no plan for this feat.
+  - Here is summary table of keymap and where to draw
+    ```
+    | where        | no move | move to 1st char |
+    |--------------|---------|------------------|
+    | top          | z t     | z enter          |
+    | upper-middle | z u     | z space          |
+    | middle       | z z     | z .              |
+    | bottom       | z b     | z -              |
+    ```
+- Breaking: rename confusing `ScrollCursorToTop` commands. #932
   - `z enter`: `ScrollCursorToTop` to `RedrawCursorLineAtTopAndMoveToFirstCharacterOfLine`
   - `z t`: `ScrollCursorToTopLeave` to `RedrawCursorLineAtTop`
   - `z .`: `ScrollCursorToMiddle` to `RedrawCursorLineAtMiddleAndMoveToFirstCharacterOfLine`
   - `z z`: `ScrollCursorToMiddleLeave` to `RedrawCursorLineAtMiddle`
   - `z -`: `ScrollCursorToBottom` to `RedrawCursorLineAtBottomAndMoveToFirstCharacterOfLine`
   - `z b`: `ScrollCursorToBottomLeave` to `RedrawCursorLineAtBottom`
-- New: `z X` faimly to redraw cursor line at upper middle.
-  - `z u`: `RedrawCursorLineAtUpperMiddle`
-  - `z space`: `RedrawCursorLineAtUpperMiddleAndMoveToFirstCharacterOfLine`
+- Internal: Remove `Operator.prototype.requireTarget`, now all operator have **target**.
+  - Use `target = "Empty"` for old `requireTarget = false` equivalent.
+- Internal: Remove casual use of `isComplete` and renamed to `isReady` as prep for upcoming refactoring.
+  - Now `isReady`(was `isComplete`) is used only in `operationStack`.
 
 # 1.12.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.12.0...v1.12.1)
