@@ -1,3 +1,7 @@
+# 1.14.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.14.0...v1.14.1)
+- Fix: Remove spec for now removed feature.
+
 # 1.14.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.13.0...v1.14.0)
 - Fix: `transform-string-by-select-list` throw exception when executed in `visual-mode`.
