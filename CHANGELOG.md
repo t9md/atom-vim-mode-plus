@@ -1,5 +1,5 @@
-# 1.13.1:
-- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.13.0...v1.13.1)
+# 1.14.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.13.0...v1.14.0)
 - Fix: `transform-string-by-select-list` throw exception when executed in `visual-mode`.
   - Regression by operator execution model redesign from v1.13.0.
 - Internal:
