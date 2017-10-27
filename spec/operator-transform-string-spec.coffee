@@ -1866,21 +1866,3 @@ describe "Operator TransformString", ->
           4: Apple
           5: Pen\n
           """
-
-  describe "ReplaceWithExecution", ->
-    beforeEach ->
-      atom.keymaps.add "test",
-        'atom-text-editor.vim-mode-plus.normal-mode, atom-text-editor.vim-mode-plus.visual-mode':
-          'ctrl-r': 'vim-mode-plus:replace-with-execution'
-          'ctrl-R': 'vim-mode-plus:replace-with-execution-keep-original-text'
-        , 100
-
-      set textC: "|echo ABC\n"
-
-    describe "replace with execution result", ->
-      it "normal", -> ensureWait 'ctrl-r $', text: "ABC\n", mode: 'normal'
-      it "visual", -> ensureWait 'V ctrl-r', text: "ABC\n", mode: 'normal'
-
-    describe "replace with execution result with keep original text", ->
-      it "normal", -> ensureWait 'ctrl-R $', text: "echo ABC\nABC\n", mode: 'normal'
-      it "visual", -> ensureWait 'V ctrl-R', text: "echo ABC\nABC\n", mode: 'normal'
