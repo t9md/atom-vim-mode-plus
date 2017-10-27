@@ -1,16 +1,8 @@
-# 1.14.0:
+# 1.13.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.13.0...v1.14.0)
 - Fix: `transform-string-by-select-list` throw exception when executed in `visual-mode`.
   - Regression by operator execution model redesign from v1.13.0.
-- New: `replace-with-execution`, `replace-with-execution-keep-original-text`
-  - No default keymap, but available from `transform-string-by-select-list`(`ctrl-s` on macOS).
-  - What this command do?
-    - `replace-with-execution`: Execute selected text as external command, then replace selection with result(= stdout).
-    - `replace-with-execution-keep-original-text`: Same except it insert result after selected text.
-  - Both commands are provided as external `replace-with-execution` vmp-plugin package(I maintained it).
-  - Now decided to include into vmp-core.
-  - Why was provided separately is async execution model was experimental before.
-  - Now async execution is used in many operators, so I have no reason to maintain it separately.
+- Internal: Improve how `transform-string-by-external-command` is executed.
 
 # 1.13.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.12.1...v1.13.0)
