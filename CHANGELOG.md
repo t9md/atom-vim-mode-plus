@@ -3,6 +3,7 @@
 - Fix: `transform-string-by-select-list` throw exception when executed in `visual-mode`.
   - Regression by operator execution model redesign from v1.13.0.
 - Internal: Improve how `transform-string-by-external-command` is executed.
+- New, Experimental: `JoinTarget` operator(wanted to name just `Join` but it's already taken by `J`)
 
 # 1.13.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.12.1...v1.13.0)

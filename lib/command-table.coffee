@@ -327,14 +327,6 @@ ConvertToHardTab:
   commandScope: "atom-text-editor"
 TransformStringByExternalCommand:
   file: "./operator-transform-string"
-ReplaceWithExecution:
-  file: "./operator-transform-string"
-  commandName: "vim-mode-plus:replace-with-execution"
-  commandScope: "atom-text-editor"
-ReplaceWithExecutionKeepOriginalText:
-  file: "./operator-transform-string"
-  commandName: "vim-mode-plus:replace-with-execution-keep-original-text"
-  commandScope: "atom-text-editor"
 TransformStringBySelectList:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:transform-string-by-select-list"
