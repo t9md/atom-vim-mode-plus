@@ -417,6 +417,10 @@ ChangeSurroundAnyPairAllowForwarding:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:change-surround-any-pair-allow-forwarding"
   commandScope: "atom-text-editor"
+JoinTarget:
+  file: "./operator-transform-string"
+  commandName: "vim-mode-plus:join-target"
+  commandScope: "atom-text-editor"
 Join:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:join"
