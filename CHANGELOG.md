@@ -2,7 +2,9 @@
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.13.0...v1.13.1)
 - Fix: `transform-string-by-select-list` throw exception when executed in `visual-mode`.
   - Regression by operator execution model redesign from v1.13.0.
-- Internal: Improve how `transform-string-by-external-command` is executed.
+- Internal:
+  - Improve how `transform-string-by-external-command` is executed.
+  - Remove `OperationAbortedError` which is vmp specific error used to `abort()` operation, but now no longer used.
 - New, Experimental: `JoinTarget` operator(wanted to name just `Join` but it's already taken by `J`)
 
 # 1.13.0:
