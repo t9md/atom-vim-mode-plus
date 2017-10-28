@@ -1660,7 +1660,7 @@ describe "Motion general", ->
       settings.set('stayOnVerticalMotion', false)
 
       set
-        text: """
+        textC: """
             1
           2
           3
@@ -1669,12 +1669,14 @@ describe "Motion general", ->
           6
           7
           8
-          9
+          |9
             10
           """
-        cursor: [8, 0]
 
     describe "the H keybinding", ->
+      beforeEach ->
+        spyOn(editor, 'getLastVisibleScreenRow').andReturn(9)
+
       it "moves the cursor to the non-blank-char on first row if visible", ->
         spyOn(editor, 'getFirstVisibleScreenRow').andReturn(0)
         ensure 'H', cursor: [0, 2]
@@ -1688,6 +1690,9 @@ describe "Motion general", ->
         ensure '4 H', cursor: [3, 0]
 
     describe "the L keybinding", ->
+      beforeEach ->
+        spyOn(editor, 'getFirstVisibleScreenRow').andReturn(0)
+
       it "moves the cursor to non-blank-char on last row if visible", ->
         spyOn(editor, 'getLastVisibleScreenRow').andReturn(9)
         ensure 'L', cursor: [9, 2]
@@ -1703,7 +1708,7 @@ describe "Motion general", ->
     describe "the M keybinding", ->
       beforeEach ->
         spyOn(editor, 'getFirstVisibleScreenRow').andReturn(0)
-        spyOn(editor, 'getLastVisibleScreenRow').andReturn(10)
+        spyOn(editor, 'getLastVisibleScreenRow').andReturn(9)
 
       it "moves the cursor to the non-blank-char of middle of screen", ->
         ensure 'M', cursor: [4, 2]
