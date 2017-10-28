@@ -25,7 +25,7 @@ SelectOccurrence:
   file: "./operator"
   commandName: "vim-mode-plus:select-occurrence"
   commandScope: "atom-text-editor"
-SelectInVisualMode:
+VisualModeSelect:
   file: "./operator"
 CreatePersistentSelection:
   file: "./operator"
