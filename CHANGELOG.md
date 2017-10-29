@@ -1,3 +1,16 @@
+# 1.15.0: WIP
+- Breaking: Rename confusing `ScrollXXX`(It easily confused with scroll motions(`ctrl-f` etc..)
+  - `ScrollDown`(`ctrl-e`) to `MiniScrollDown`
+  - `ScrollUp`(`ctrl-y`) to `MiniScrollUp`
+- New: New config options to tune `MiniScroll`(`ctrl-y`, `ctrl-e`)
+  - `smoothScrollOnMiniScroll`: default `false`
+  - `smoothScrollOnMiniScrollDuration`: default `200`
+  - `defaultScrollRowsOnMiniScroll`: default `1`
+- New, Experimental: New scroll motion to scroll 1/4.
+  - `ScrollQuarterScreenDown`: `g ctrl-d`
+  - `ScrollQuarterScreenUp`: `g ctrl-u`
+  - Smooth scroll options are NOT explicitly provided, it use `ScrollHalf`'s config.
+
 # 1.14.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.14.0...v1.14.1)
 - Fix: Remove spec for now removed feature.
