@@ -18,11 +18,10 @@ describe "Scrolling", ->
       initialRowRange = [0, 5]
 
       set
-        cursor: [1, 2]
-        text: """
+        textC: """
           100
           200
-          300
+          30|0
           400
           500
           600
@@ -35,15 +34,15 @@ describe "Scrolling", ->
 
     describe "the ctrl-e and ctrl-y keybindings", ->
       it "moves the screen up and down by one and keeps cursor onscreen", ->
-        ensure 'ctrl-e', cursor: [2, 2]
+        ensure 'ctrl-e', cursor: [3, 2]
         expect(editor.getFirstVisibleScreenRow()).toBe 1
         expect(editor.getLastVisibleScreenRow()).toBe 6
 
-        ensure '2 ctrl-e', cursor: [4, 2]
+        ensure '2 ctrl-e', cursor: [5, 2]
         expect(editor.getFirstVisibleScreenRow()).toBe 3
         expect(editor.getLastVisibleScreenRow()).toBe 8
 
-        ensure '2 ctrl-y', cursor: [2, 2]
+        ensure '2 ctrl-y', cursor: [4, 2]
         expect(editor.getFirstVisibleScreenRow()).toBe 1
         expect(editor.getLastVisibleScreenRow()).toBe 6
 

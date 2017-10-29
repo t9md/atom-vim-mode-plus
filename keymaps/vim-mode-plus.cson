@@ -111,12 +111,17 @@
   'g $': 'vim-mode-plus:move-to-last-character-of-screen-line'
 
   # scroll
-  'ctrl-u': 'vim-mode-plus:scroll-half-screen-up'
-  'ctrl-b': 'vim-mode-plus:scroll-full-screen-up'
-  'ctrl-d': 'vim-mode-plus:scroll-half-screen-down'
   'ctrl-f': 'vim-mode-plus:scroll-full-screen-down'
-  'ctrl-e': 'vim-mode-plus:scroll-down'
-  'ctrl-y': 'vim-mode-plus:scroll-up'
+  'ctrl-b': 'vim-mode-plus:scroll-full-screen-up'
+
+  'ctrl-d': 'vim-mode-plus:scroll-half-screen-down'
+  'ctrl-u': 'vim-mode-plus:scroll-half-screen-up'
+
+  'g ctrl-d': 'vim-mode-plus:scroll-quarter-screen-down'
+  'g ctrl-u': 'vim-mode-plus:scroll-quarter-screen-up'
+
+  'ctrl-e': 'vim-mode-plus:mini-scroll-down'
+  'ctrl-y': 'vim-mode-plus:mini-scroll-up'
 
   'G': 'vim-mode-plus:move-to-last-line'
   'g g': 'vim-mode-plus:move-to-first-line'
