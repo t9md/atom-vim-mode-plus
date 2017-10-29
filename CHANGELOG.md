@@ -2,10 +2,15 @@
 - Breaking: Rename confusing `ScrollXXX`(It easily confused with scroll motions(`ctrl-f` etc..)
   - `ScrollDown`(`ctrl-e`) to `MiniScrollDown`
   - `ScrollUp`(`ctrl-y`) to `MiniScrollUp`
-- New: New config options to tune `MiniScroll`(`ctrl-y`, `ctrl-e`)
+- New: Smooth scroll option plus more for `MiniScroll`(`ctrl-y`, `ctrl-e`)
   - `smoothScrollOnMiniScroll`: default `false`
   - `smoothScrollOnMiniScrollDuration`: default `200`
   - `defaultScrollRowsOnMiniScroll`: default `1`
+- New: Smooth scroll option for `redraw-cursor-line` commands.
+  - `redraw-cursor-line` is `z` begging command like `z t`, `z u`, `z z`, `z b` etc..
+  - Default disabled, I need this when I do demo. With smooth scroll on `z u`, less chance to leave behind audiences.
+  - `smoothScrollOnRedrawCursorLine`: default `false`
+  - `smoothScrollOnRedrawCursorLineDuration`: default `300`
 - New, Experimental: New scroll motion to scroll 1/4.
   - `ScrollQuarterScreenDown`: `g ctrl-d`
   - `ScrollQuarterScreenUp`: `g ctrl-u`
