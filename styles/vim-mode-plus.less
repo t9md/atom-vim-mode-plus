@@ -82,6 +82,7 @@ atom-text-editor.vim-mode-plus-input-char-waiting {
 @flash-search-color: fadeout(darken(@syntax-selection-flash-color, 10%), 20%);
 @flash-added-color: fadeout(darken(@syntax-color-added, 10%), 50%);
 @flash-removed-color: fadeout(@syntax-color-removed, 50%);
+@flash-screen-line-color: fadeout(darken(@syntax-selection-flash-color, 10%), 20%);
 
 // flashOnOperate
 .flash-animation(flash-operator, @flash-base-color);
@@ -96,6 +97,9 @@ atom-text-editor.vim-mode-plus-input-char-waiting {
 // flashOnSearch
 .flash-animation(flash-search, @flash-search-color);
 .flash-animation(flash-screen, @flash-base-color);
+
+// CursorLine on ctrl-f, b, d, u
+.flash-animation(flash-screen-line, @flash-screen-line-color);
 
 atom-text-editor .vim-mode-plus-flash {
   // flashOnOperate
@@ -121,6 +125,13 @@ atom-text-editor .vim-mode-plus-flash {
   &.undo-redo-demo                  .region { background: @flash-base-color; }
   &.undo-redo-multiple-changes-demo .region { background: @flash-added-color; }
   &.undo-redo-multiple-delete-demo  .region { background: @flash-removed-color; }
+}
+
+atom-text-editor {
+  // CursorLine on ctrl-f, b, d, u
+  .line.vim-mode-plus-flash.screen-line {
+    .flash(flash-screen-line, 0.5s);
+  }
 }
 
 // Hover Counter

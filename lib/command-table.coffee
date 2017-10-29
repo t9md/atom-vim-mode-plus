@@ -735,6 +735,14 @@ ScrollHalfScreenUp:
   file: "./motion"
   commandName: "vim-mode-plus:scroll-half-screen-up"
   commandScope: "atom-text-editor"
+ScrollQuarterScreenDown:
+  file: "./motion"
+  commandName: "vim-mode-plus:scroll-quarter-screen-down"
+  commandScope: "atom-text-editor"
+ScrollQuarterScreenUp:
+  file: "./motion"
+  commandName: "vim-mode-plus:scroll-quarter-screen-up"
+  commandScope: "atom-text-editor"
 Find:
   file: "./motion"
   commandName: "vim-mode-plus:find"
@@ -1233,13 +1241,13 @@ ReplaceModeBackspace:
   file: "./misc-command"
   commandName: "vim-mode-plus:replace-mode-backspace"
   commandScope: "atom-text-editor.vim-mode-plus.insert-mode.replace"
-ScrollDown:
+MiniScrollDown:
   file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-down"
+  commandName: "vim-mode-plus:mini-scroll-down"
   commandScope: "atom-text-editor"
-ScrollUp:
+MiniScrollUp:
   file: "./misc-command"
-  commandName: "vim-mode-plus:scroll-up"
+  commandName: "vim-mode-plus:mini-scroll-up"
   commandScope: "atom-text-editor"
 RedrawCursorLine:
   file: "./misc-command"
