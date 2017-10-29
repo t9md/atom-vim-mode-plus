@@ -1,5 +1,5 @@
-# 1.15.0: WIP
-- Breaking: Rename confusing `ScrollXXX`(It easily confused with scroll motions(`ctrl-f` etc..)
+# 1.15.0:
+- Breaking: Rename confusing `ScrollXXX`(It easily be confused with scroll motions(`ctrl-f` etc..)
   - `ScrollDown`(`ctrl-e`) to `MiniScrollDown`
   - `ScrollUp`(`ctrl-y`) to `MiniScrollUp`
 - New: Smooth scroll option plus more for `MiniScroll`(`ctrl-y`, `ctrl-e`)
@@ -12,9 +12,12 @@
   - `smoothScrollOnRedrawCursorLine`: default `false`
   - `smoothScrollOnRedrawCursorLineDuration`: default `300`
 - New, Experimental: New scroll motion to scroll 1/4.
-  - `ScrollQuarterScreenDown`: `g ctrl-d`
-  - `ScrollQuarterScreenUp`: `g ctrl-u`
+  - `ScrollQuarterScreenDown`: keymap `g ctrl-d`
+  - `ScrollQuarterScreenUp`: keymap `g ctrl-u`
   - Smooth scroll options are NOT explicitly provided, it use `ScrollHalf`'s config.
+- Internal: Rename non-straightforward naming
+  - From `SelectInVisualMode` to `VisualModeSelect`
+  - From `isAsTargetExceptSelectInVisualMode` to `isTargetOfNormalOperator`
 
 # 1.14.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.14.0...v1.14.1)
