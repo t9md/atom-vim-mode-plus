@@ -91,7 +91,7 @@ atom-text-editor.vim-mode-plus-input-char-waiting {
 // flashOnUndoRedo
 .flash-animation(flash-undo-redo, @flash-base-color);
 .flash-animation(flash-undo-redo-multiple-changes, @flash-added-color);
-.flash-animation(flash-undo-redo-multiple-delete, @flash-removed-color);
+.flash-animation(flash-undo-redo-multiple-deletes, @flash-removed-color);
 
 // flashOnSearch
 .flash-animation(flash-search, @flash-search-color);
@@ -107,7 +107,7 @@ atom-text-editor .vim-mode-plus-flash {
   // flashOnUndoRedo
   &.undo-redo                  .region { .flash(flash-undo-redo, 0.5s); }
   &.undo-redo-multiple-changes .region { .flash(flash-undo-redo-multiple-changes, 0.5s); }
-  &.undo-redo-multiple-delete  .region { .flash(flash-undo-redo-multiple-delete, 0.5s); }
+  &.undo-redo-multiple-deletes  .region { .flash(flash-undo-redo-multiple-deletes, 0.5s); }
 
   // flashOnSearch
   &.search .region { .flash(flash-search, 0.5s); z-index: 1; }
@@ -120,7 +120,7 @@ atom-text-editor .vim-mode-plus-flash {
   &.operator-remove-occurrence-demo .region { background: @flash-removed-color; }
   &.undo-redo-demo                  .region { background: @flash-base-color; }
   &.undo-redo-multiple-changes-demo .region { background: @flash-added-color; }
-  &.undo-redo-multiple-delete-demo  .region { background: @flash-removed-color; }
+  &.undo-redo-multiple-deletes-demo  .region { background: @flash-removed-color; }
 }
 
 // Hover Counter
