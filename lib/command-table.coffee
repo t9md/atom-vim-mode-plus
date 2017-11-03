@@ -799,6 +799,14 @@ MoveToNextFunction:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-next-function"
   commandScope: "atom-text-editor"
+MoveToPreviousFunctionAndRedrawCursorLineAtUpperMiddle:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-previous-function-and-redraw-cursor-line-at-upper-middle"
+  commandScope: "atom-text-editor"
+MoveToNextFunctionAndRedrawCursorLineAtUpperMiddle:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-next-function-and-redraw-cursor-line-at-upper-middle"
+  commandScope: "atom-text-editor"
 MoveToPositionByScope:
   file: "./motion"
 MoveToPreviousString:
