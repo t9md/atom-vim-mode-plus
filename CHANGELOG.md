@@ -1,3 +1,13 @@
+# 1.16.0:
+- New: Motion to scroll to function and redraw at uppper middle.
+  - Following two commands are defined(no keymap by default)
+    - `move-to-previous-function-and-redraw-cursor-line-at-upper-middle`
+    - `move-to-next-function-and-redraw-cursor-line-at-upper-middle`
+  - I created this command to use in vmp-demo at vimConf2017.
+- Internal: Refacotoring.
+- Fix: Amount of scroll rows was not symmetric in `ctrl-d` and `ctrl-u`, but now fixed.
+- Improve: Use TextBuffer's new `onDidChangeText` event to flash for undo/redo. #941.
+
 # 1.15.0:
 - Breaking: Rename confusing `ScrollXXX`(It easily be confused with scroll motions(`ctrl-f` etc..)
   - `ScrollDown`(`ctrl-e`) to `MiniScrollDown`
