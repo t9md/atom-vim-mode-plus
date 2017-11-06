@@ -470,13 +470,13 @@ describe "Motion general", ->
         beforeEach -> set cursor: [0, 0]
         it "delete by dk", -> ensure "d k", text: originalText, mode: 'normal'
         it "yank by yk", ->   ensure "y k", text: originalText, register: {'"': text: undefined}, mode: 'normal'
-        it "change by ck", -> ensure "c k", textC: "|000\n111\n222\n", register: {'"': text: "\n"}, mode: 'insert' # FIXME, incompatible: shoud remain in normal.
+        it "change by ck", -> ensure "c k", textC: "|000\n111\n222\n", register: {'"': text: undefined}, mode: 'normal'
 
       describe "when it can not move-down", ->
         beforeEach -> set cursor: [2, 0]
         it "delete by dj", -> ensure "d j", text: originalText, mode: 'normal'
         it "yank by yj", ->   ensure "y j", text: originalText, register: {'"': text: undefined}, mode: 'normal'
-        it "change by cj", -> ensure "c j", textC: "000\n111\n|222\n", register: {'"': text: "\n"}, mode: 'insert' # FIXME, incompatible: shoud remain in normal.
+        it "change by cj", -> ensure "c j", textC: "000\n111\n|222\n", register: {'"': text: undefined}, mode: 'normal'
 
     describe "moveSuccessOnLinewise=true motion", ->
       describe "when it can move", ->

@@ -125,116 +125,144 @@ ActivateInsertMode:
   file: "./operator-insert"
   commandName: "vim-mode-plus:activate-insert-mode"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ActivateReplaceMode:
   file: "./operator-insert"
   commandName: "vim-mode-plus:activate-replace-mode"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAfter:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-after"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtBeginningOfLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-beginning-of-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAfterEndOfLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-after-end-of-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtFirstCharacterOfLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-first-character-of-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtLastInsert:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-last-insert"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAboveWithNewline:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-above-with-newline"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertBelowWithNewline:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-below-with-newline"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertByTarget:
   file: "./operator-insert"
 InsertAtStartOfTarget:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-target"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtEndOfTarget:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-target"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtHeadOfTarget:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-head-of-target"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtStartOfOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtEndOfOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtHeadOfOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-head-of-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtStartOfSubwordOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-subword-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtEndOfSubwordOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-subword-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtHeadOfSubwordOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-head-of-subword-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtStartOfSmartWord:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-smart-word"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtEndOfSmartWord:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-smart-word"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtPreviousFoldStart:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-previous-fold-start"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtNextFoldStart:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-next-fold-start"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Change:
   file: "./operator-insert"
   commandName: "vim-mode-plus:change"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:change-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Substitute:
   file: "./operator-insert"
   commandName: "vim-mode-plus:substitute"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SubstituteLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:substitute-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:change-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeToLastCharacterOfLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:change-to-last-character-of-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 TransformString:
   file: "./operator-transform-string"
 ToggleCase:
