@@ -1338,10 +1338,6 @@ FoldNextIndentLevel:
   file: "./misc-command"
   commandName: "vim-mode-plus:fold-next-indent-level"
   commandScope: "atom-text-editor"
-ReplaceModeBackspace:
-  file: "./misc-command"
-  commandName: "vim-mode-plus:replace-mode-backspace"
-  commandScope: "atom-text-editor.vim-mode-plus.insert-mode.replace"
 MiniScrollDown:
   file: "./misc-command"
   commandName: "vim-mode-plus:mini-scroll-down"
