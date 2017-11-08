@@ -67,7 +67,6 @@ describe "dirty work for fast package activation", ->
       "lib/base.js"
       "lib/settings.js"
       "lib/vim-state.js"
-      "lib/mode-manager.js"
       "lib/command-table.coffee"
     ]
     if atom.inDevMode()
