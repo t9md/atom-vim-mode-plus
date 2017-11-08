@@ -1,4 +1,26 @@
+# 1.17.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.16.0...v1.17.0)
+- Improve: Hide some vmp commands from command-palette.
+  - Hide only super-basic small num of commands only whic is defined in `main.js`
+  - I evaluated hide **all** vmp commands in #943 but reverted.
+  - I was expected hiding all vmp commands improve command-palette's responsiveness but it was not.
+  - So I took benefit to invoke all vmp command from palette as of now.
+- Improve: `c j`, `c k` at first or last buffer row no longer enter insert-mode.
+- Fix: In v1.23.0-beta0, some TextObject(e.g `fold`, `comment`) did not work.
+- Support: set minimum engines to `1.22.0`
+- Internal, Breaking: Remove `ModeManager` class and re-blend it to `VimState`.
+  - In original vim-mode, mode handling was done in `VimState`.
+  - I extracted mode handling as `ModeManager`.
+  - But now ModeManager’s task now get very small, I’m OK to re-blend it again.
+  - Add deprecation warning when calling old `ModeManager`'s event API.
+- Internal: `insert-mode`'s task done in `ModeManager` is now handled in `ActivateInsertMode` operation class.
+  - Remove `replace-mode-backspace` command
+    - This was mapped from `backspace` in `insert.replace` mode.
+    - But now achieve same functionality by overriding `core:backspace`.
+    - So, this intermediate command is no longer necessary.
+
 # 1.16.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.15.0...v1.16.0)
 - New: Motion to scroll to function and redraw at uppper middle.
   - Following two commands are defined(no keymap by default)
     - `move-to-previous-function-and-redraw-cursor-line-at-upper-middle`
@@ -9,6 +31,7 @@
 - Improve: Use TextBuffer's new `onDidChangeText` event to flash for undo/redo. #941.
 
 # 1.15.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.14.1...v1.15.0)
 - Breaking: Rename confusing `ScrollXXX`(It easily be confused with scroll motions(`ctrl-f` etc..)
   - `ScrollDown`(`ctrl-e`) to `MiniScrollDown`
   - `ScrollUp`(`ctrl-y`) to `MiniScrollUp`
