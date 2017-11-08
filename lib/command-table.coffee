@@ -125,386 +125,479 @@ ActivateInsertMode:
   file: "./operator-insert"
   commandName: "vim-mode-plus:activate-insert-mode"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ActivateReplaceMode:
   file: "./operator-insert"
   commandName: "vim-mode-plus:activate-replace-mode"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAfter:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-after"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtBeginningOfLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-beginning-of-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAfterEndOfLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-after-end-of-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtFirstCharacterOfLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-first-character-of-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtLastInsert:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-last-insert"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAboveWithNewline:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-above-with-newline"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertBelowWithNewline:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-below-with-newline"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertByTarget:
   file: "./operator-insert"
 InsertAtStartOfTarget:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-target"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtEndOfTarget:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-target"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtHeadOfTarget:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-head-of-target"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtStartOfOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtEndOfOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtHeadOfOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-head-of-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtStartOfSubwordOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-subword-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtEndOfSubwordOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-subword-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtHeadOfSubwordOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-head-of-subword-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtStartOfSmartWord:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-start-of-smart-word"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtEndOfSmartWord:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-end-of-smart-word"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtPreviousFoldStart:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-previous-fold-start"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 InsertAtNextFoldStart:
   file: "./operator-insert"
   commandName: "vim-mode-plus:insert-at-next-fold-start"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Change:
   file: "./operator-insert"
   commandName: "vim-mode-plus:change"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeOccurrence:
   file: "./operator-insert"
   commandName: "vim-mode-plus:change-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Substitute:
   file: "./operator-insert"
   commandName: "vim-mode-plus:substitute"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SubstituteLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:substitute-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:change-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeToLastCharacterOfLine:
   file: "./operator-insert"
   commandName: "vim-mode-plus:change-to-last-character-of-line"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 TransformString:
   file: "./operator-transform-string"
 ToggleCase:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:toggle-case"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ToggleCaseAndMoveRight:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:toggle-case-and-move-right"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 UpperCase:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:upper-case"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 LowerCase:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:lower-case"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Replace:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:replace"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ReplaceCharacter:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:replace-character"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SplitByCharacter:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:split-by-character"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 CamelCase:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:camel-case"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SnakeCase:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:snake-case"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 PascalCase:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:pascal-case"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 DashCase:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:dash-case"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 TitleCase:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:title-case"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 EncodeUriComponent:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:encode-uri-component"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 DecodeUriComponent:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:decode-uri-component"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 TrimString:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:trim-string"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 CompactSpaces:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:compact-spaces"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 AlignOccurrence:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:align-occurrence"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 AlignOccurrenceByPadLeft:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:align-occurrence-by-pad-left"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 AlignOccurrenceByPadRight:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:align-occurrence-by-pad-right"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 RemoveLeadingWhiteSpaces:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:remove-leading-white-spaces"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ConvertToSoftTab:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:convert-to-soft-tab"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ConvertToHardTab:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:convert-to-hard-tab"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 TransformStringByExternalCommand:
   file: "./operator-transform-string"
 TransformStringBySelectList:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:transform-string-by-select-list"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 TransformWordBySelectList:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:transform-word-by-select-list"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 TransformSmartWordBySelectList:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:transform-smart-word-by-select-list"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ReplaceWithRegister:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:replace-with-register"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ReplaceOccurrenceWithRegister:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:replace-occurrence-with-register"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SwapWithRegister:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:swap-with-register"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Indent:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:indent"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Outdent:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:outdent"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 AutoIndent:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:auto-indent"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ToggleLineComments:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:toggle-line-comments"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Reflow:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:reflow"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ReflowWithStay:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:reflow-with-stay"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SurroundBase:
   file: "./operator-transform-string"
 Surround:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:surround"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SurroundWord:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:surround-word"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SurroundSmartWord:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:surround-smart-word"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 MapSurround:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:map-surround"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 DeleteSurround:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:delete-surround"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 DeleteSurroundAnyPair:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:delete-surround-any-pair"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 DeleteSurroundAnyPairAllowForwarding:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:delete-surround-any-pair-allow-forwarding"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeSurround:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:change-surround"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeSurroundAnyPair:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:change-surround-any-pair"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeSurroundAnyPairAllowForwarding:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:change-surround-any-pair-allow-forwarding"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 JoinTarget:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:join-target"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Join:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:join"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 JoinBase:
   file: "./operator-transform-string"
 JoinWithKeepingSpace:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:join-with-keeping-space"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 JoinByInput:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:join-by-input"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 JoinByInputWithKeepingSpace:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:join-by-input-with-keeping-space"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SplitString:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:split-string"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SplitStringWithKeepingSplitter:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:split-string-with-keeping-splitter"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SplitArguments:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:split-arguments"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SplitArgumentsWithRemoveSeparator:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:split-arguments-with-remove-separator"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SplitArgumentsOfInnerAnyPair:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:split-arguments-of-inner-any-pair"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ChangeOrder:
   file: "./operator-transform-string"
 Reverse:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:reverse"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 ReverseInnerAnyPair:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:reverse-inner-any-pair"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Rotate:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:rotate"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 RotateBackwards:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:rotate-backwards"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 RotateArgumentsOfInnerPair:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:rotate-arguments-of-inner-pair"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 RotateArgumentsBackwardsOfInnerPair:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:rotate-arguments-backwards-of-inner-pair"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Sort:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:sort"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SortCaseInsensitively:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:sort-case-insensitively"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 SortByNumber:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:sort-by-number"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 NumberingLines:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:numbering-lines"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 DuplicateWithCommentOutOriginal:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:duplicate-with-comment-out-original"
   commandScope: "atom-text-editor"
+  hiddenCommand: false
 Motion:
   file: "./motion"
 CurrentSelection:
@@ -1245,10 +1338,6 @@ FoldNextIndentLevel:
   file: "./misc-command"
   commandName: "vim-mode-plus:fold-next-indent-level"
   commandScope: "atom-text-editor"
-ReplaceModeBackspace:
-  file: "./misc-command"
-  commandName: "vim-mode-plus:replace-mode-backspace"
-  commandScope: "atom-text-editor.vim-mode-plus.insert-mode.replace"
 MiniScrollDown:
   file: "./misc-command"
   commandName: "vim-mode-plus:mini-scroll-down"

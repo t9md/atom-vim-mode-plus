@@ -39,12 +39,6 @@
   'ctrl-r': 'vim-mode-plus:insert-register'
   'ctrl-o': 'vim-mode-plus:activate-normal-mode-once'
 
-# Insert-replace
-# -------------------------
-'atom-text-editor.vim-mode-plus.insert-mode.replace':
-  'ctrl-h': 'vim-mode-plus:replace-mode-backspace'
-  'backspace': 'vim-mode-plus:replace-mode-backspace'
-
 # except insert
 # -------------------------
 'atom-text-editor.vim-mode-plus:not(.insert-mode)':

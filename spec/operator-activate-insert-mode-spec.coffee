@@ -823,13 +823,12 @@ describe "Operator ActivateInsertMode family", ->
         cursor: [0, 5]
 
   describe 'preserve inserted text', ->
-    ensureDotRegister = null
-    beforeEach ->
-      ensureDotRegister = (key, {text}) ->
-        ensure key, mode: 'insert'
-        editor.insertText(text)
-        ensure "escape", register: '.': text: text
+    ensureDotRegister = (key, {text}) ->
+      ensure key, mode: 'insert'
+      editor.insertText(text)
+      ensure "escape", register: '.': text: text
 
+    beforeEach ->
       set
         text: "\n\n"
         cursor: [0, 0]

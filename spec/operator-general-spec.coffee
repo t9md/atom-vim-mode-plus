@@ -1262,8 +1262,7 @@ describe "Operator general", ->
         mode: 'normal'
 
     it "continues beyond end of line as insert", ->
-      ensure 'R',
-        mode: ['insert', 'replace']
+      ensure 'R', mode: ['insert', 'replace']
       editor.insertText "abcde"
       ensure 'escape', text: '12abcde\n67890'
 
@@ -1274,16 +1273,18 @@ describe "Operator general", ->
       editor.insertText "b"
       ensure null, text: "12fooab5\n67890"
 
-      ensure 'backspace', text: "12fooa45\n67890"
+      dispatch(editorElement, 'core:backspace')
+      ensure null, text: "12fooa45\n67890"
+
       editor.insertText "c"
       ensure null, text: "12fooac5\n67890"
-      ensure 'backspace backspace',
-        text: "12foo345\n67890"
-        selectedText: ''
 
-      ensure 'backspace',
-        text: "12foo345\n67890"
-        selectedText: ''
+      dispatch(editor.element, 'core:backspace')
+      dispatch(editor.element, 'core:backspace')
+      ensure null, text: "12foo345\n67890", selectedText: ''
+
+      dispatch(editor.element, 'core:backspace')
+      ensure null, text: "12foo345\n67890", selectedText: ''
 
     it "can be repeated", ->
       ensure 'R'
@@ -1300,7 +1301,7 @@ describe "Operator general", ->
     it "repeats correctly when backspace was used in the text", ->
       ensure 'R'
       editor.insertText "a"
-      ensure 'backspace'
+      dispatch(editor.element, 'core:backspace')
       editor.insertText "b"
       ensure 'escape'
       set cursor: [1, 2]
@@ -1343,7 +1344,9 @@ describe "Operator general", ->
             56789
             """
           cursor: [2, 1]
-        ensure 'backspace',
+
+        dispatch(editor.element, 'core:backspace')
+        ensure null,
           text: """
             0a
             b
@@ -1351,38 +1354,49 @@ describe "Operator general", ->
             56789
             """
           cursor: [2, 0]
-        ensure 'backspace',
+
+        dispatch(editor.element, 'core:backspace')
+        ensure null,
           text: """
             0a
             b34
             56789
             """
           cursor: [1, 1]
-        ensure 'backspace',
+
+        dispatch(editor.element, 'core:backspace')
+        ensure null,
           text: """
             0a
             234
             56789
             """
           cursor: [1, 0]
-        ensure 'backspace',
+
+        dispatch(editor.element, 'core:backspace')
+        ensure null,
           text: """
             0a234
             56789
             """
           cursor: [0, 2]
-        ensure 'backspace',
+
+        dispatch(editor.element, 'core:backspace')
+        ensure null,
           text: """
             01234
             56789
             """
           cursor: [0, 1]
-        ensure 'backspace', # do nothing
+
+        dispatch(editor.element, 'core:backspace') # do nothing
+        ensure null,
           text: """
             01234
             56789
             """
           cursor: [0, 1]
+
         ensure 'escape',
           text: """
             01234
