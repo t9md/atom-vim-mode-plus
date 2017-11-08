@@ -386,7 +386,7 @@ class VimEditor
     @ensureSelectedText(text.replace(/_/g, ' '), ordered)
 
   ensureSelectionIsNarrowed: (isNarrowed) ->
-    actual = @vimState.modeManager.isNarrowed()
+    actual = @vimState.isNarrowed()
     expect(actual).toEqual(isNarrowed)
 
   ensureSelectedTextOrdered: (text) ->
