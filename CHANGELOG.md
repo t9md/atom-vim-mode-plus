@@ -1,8 +1,8 @@
 # 1.17.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.16.0...v1.17.0)
-- Improve: Hide some vmp commands from command-palette.
+- Improve: Hide some vmp commands from command-palette #943
   - Hide only super-basic small num of commands only whic is defined in `main.js`
-  - I evaluated hide **all** vmp commands in #943 but reverted.
+  - I evaluated hide **all** vmp commands in #943 but reverted
   - I was expected hiding all vmp commands improve command-palette's responsiveness but it was not.
   - So I took benefit to invoke all vmp command from palette as of now.
 - Improve: `c j`, `c k` at first or last buffer row no longer enter insert-mode.
