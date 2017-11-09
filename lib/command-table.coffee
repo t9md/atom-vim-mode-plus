@@ -119,6 +119,122 @@ AddBlankLineAbove:
   file: "./operator"
   commandName: "vim-mode-plus:add-blank-line-above"
   commandScope: "atom-text-editor"
+ActivateInsertModeBase:
+  file: "./operator-insert"
+ActivateInsertMode:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:activate-insert-mode"
+  commandScope: "atom-text-editor"
+ActivateReplaceMode:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:activate-replace-mode"
+  commandScope: "atom-text-editor"
+InsertAfter:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-after"
+  commandScope: "atom-text-editor"
+InsertAtBeginningOfLine:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-beginning-of-line"
+  commandScope: "atom-text-editor"
+InsertAfterEndOfLine:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-after-end-of-line"
+  commandScope: "atom-text-editor"
+InsertAtFirstCharacterOfLine:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-first-character-of-line"
+  commandScope: "atom-text-editor"
+InsertAtLastInsert:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-last-insert"
+  commandScope: "atom-text-editor"
+InsertAboveWithNewline:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-above-with-newline"
+  commandScope: "atom-text-editor"
+InsertBelowWithNewline:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-below-with-newline"
+  commandScope: "atom-text-editor"
+InsertByTarget:
+  file: "./operator-insert"
+InsertAtStartOfTarget:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-start-of-target"
+  commandScope: "atom-text-editor"
+InsertAtEndOfTarget:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-end-of-target"
+  commandScope: "atom-text-editor"
+InsertAtHeadOfTarget:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-head-of-target"
+  commandScope: "atom-text-editor"
+InsertAtStartOfOccurrence:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-start-of-occurrence"
+  commandScope: "atom-text-editor"
+InsertAtEndOfOccurrence:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-end-of-occurrence"
+  commandScope: "atom-text-editor"
+InsertAtHeadOfOccurrence:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-head-of-occurrence"
+  commandScope: "atom-text-editor"
+InsertAtStartOfSubwordOccurrence:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-start-of-subword-occurrence"
+  commandScope: "atom-text-editor"
+InsertAtEndOfSubwordOccurrence:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-end-of-subword-occurrence"
+  commandScope: "atom-text-editor"
+InsertAtHeadOfSubwordOccurrence:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-head-of-subword-occurrence"
+  commandScope: "atom-text-editor"
+InsertAtStartOfSmartWord:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-start-of-smart-word"
+  commandScope: "atom-text-editor"
+InsertAtEndOfSmartWord:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-end-of-smart-word"
+  commandScope: "atom-text-editor"
+InsertAtPreviousFoldStart:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-previous-fold-start"
+  commandScope: "atom-text-editor"
+InsertAtNextFoldStart:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:insert-at-next-fold-start"
+  commandScope: "atom-text-editor"
+Change:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:change"
+  commandScope: "atom-text-editor"
+ChangeOccurrence:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:change-occurrence"
+  commandScope: "atom-text-editor"
+Substitute:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:substitute"
+  commandScope: "atom-text-editor"
+SubstituteLine:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:substitute-line"
+  commandScope: "atom-text-editor"
+ChangeLine:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:change-line"
+  commandScope: "atom-text-editor"
+ChangeToLastCharacterOfLine:
+  file: "./operator-insert"
+  commandName: "vim-mode-plus:change-to-last-character-of-line"
+  commandScope: "atom-text-editor"
 TransformString:
   file: "./operator-transform-string"
 ToggleCase:
@@ -388,122 +504,6 @@ NumberingLines:
 DuplicateWithCommentOutOriginal:
   file: "./operator-transform-string"
   commandName: "vim-mode-plus:duplicate-with-comment-out-original"
-  commandScope: "atom-text-editor"
-ActivateInsertModeBase:
-  file: "./operator-insert"
-ActivateInsertMode:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:activate-insert-mode"
-  commandScope: "atom-text-editor"
-ActivateReplaceMode:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:activate-replace-mode"
-  commandScope: "atom-text-editor"
-InsertAfter:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-after"
-  commandScope: "atom-text-editor"
-InsertAtBeginningOfLine:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-beginning-of-line"
-  commandScope: "atom-text-editor"
-InsertAfterEndOfLine:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-after-end-of-line"
-  commandScope: "atom-text-editor"
-InsertAtFirstCharacterOfLine:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-first-character-of-line"
-  commandScope: "atom-text-editor"
-InsertAtLastInsert:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-last-insert"
-  commandScope: "atom-text-editor"
-InsertAboveWithNewline:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-above-with-newline"
-  commandScope: "atom-text-editor"
-InsertBelowWithNewline:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-below-with-newline"
-  commandScope: "atom-text-editor"
-InsertByTarget:
-  file: "./operator-insert"
-InsertAtStartOfTarget:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-start-of-target"
-  commandScope: "atom-text-editor"
-InsertAtEndOfTarget:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-end-of-target"
-  commandScope: "atom-text-editor"
-InsertAtHeadOfTarget:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-head-of-target"
-  commandScope: "atom-text-editor"
-InsertAtStartOfOccurrence:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-start-of-occurrence"
-  commandScope: "atom-text-editor"
-InsertAtEndOfOccurrence:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-end-of-occurrence"
-  commandScope: "atom-text-editor"
-InsertAtHeadOfOccurrence:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-head-of-occurrence"
-  commandScope: "atom-text-editor"
-InsertAtStartOfSubwordOccurrence:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-start-of-subword-occurrence"
-  commandScope: "atom-text-editor"
-InsertAtEndOfSubwordOccurrence:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-end-of-subword-occurrence"
-  commandScope: "atom-text-editor"
-InsertAtHeadOfSubwordOccurrence:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-head-of-subword-occurrence"
-  commandScope: "atom-text-editor"
-InsertAtStartOfSmartWord:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-start-of-smart-word"
-  commandScope: "atom-text-editor"
-InsertAtEndOfSmartWord:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-end-of-smart-word"
-  commandScope: "atom-text-editor"
-InsertAtPreviousFoldStart:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-previous-fold-start"
-  commandScope: "atom-text-editor"
-InsertAtNextFoldStart:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:insert-at-next-fold-start"
-  commandScope: "atom-text-editor"
-Change:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:change"
-  commandScope: "atom-text-editor"
-ChangeOccurrence:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:change-occurrence"
-  commandScope: "atom-text-editor"
-Substitute:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:substitute"
-  commandScope: "atom-text-editor"
-SubstituteLine:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:substitute-line"
-  commandScope: "atom-text-editor"
-ChangeLine:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:change-line"
-  commandScope: "atom-text-editor"
-ChangeToLastCharacterOfLine:
-  file: "./operator-insert"
-  commandName: "vim-mode-plus:change-to-last-character-of-line"
   commandScope: "atom-text-editor"
 Motion:
   file: "./motion"
@@ -861,6 +861,80 @@ TextObject:
   file: "./text-object"
 Word:
   file: "./text-object"
+WholeWord:
+  file: "./text-object"
+SmartWord:
+  file: "./text-object"
+Subword:
+  file: "./text-object"
+Pair:
+  file: "./text-object"
+APair:
+  file: "./text-object"
+AnyPair:
+  file: "./text-object"
+AnyPairAllowForwarding:
+  file: "./text-object"
+AnyQuote:
+  file: "./text-object"
+Quote:
+  file: "./text-object"
+DoubleQuote:
+  file: "./text-object"
+SingleQuote:
+  file: "./text-object"
+BackTick:
+  file: "./text-object"
+CurlyBracket:
+  file: "./text-object"
+SquareBracket:
+  file: "./text-object"
+Parenthesis:
+  file: "./text-object"
+AngleBracket:
+  file: "./text-object"
+Tag:
+  file: "./text-object"
+Paragraph:
+  file: "./text-object"
+Indentation:
+  file: "./text-object"
+Comment:
+  file: "./text-object"
+CommentOrParagraph:
+  file: "./text-object"
+Fold:
+  file: "./text-object"
+Function:
+  file: "./text-object"
+Arguments:
+  file: "./text-object"
+CurrentLine:
+  file: "./text-object"
+Entire:
+  file: "./text-object"
+Empty:
+  file: "./text-object"
+LatestChange:
+  file: "./text-object"
+SearchMatchForward:
+  file: "./text-object"
+  commandName: "vim-mode-plus:search-match-forward"
+  commandScope: "atom-text-editor"
+SearchMatchBackward:
+  file: "./text-object"
+  commandName: "vim-mode-plus:search-match-backward"
+  commandScope: "atom-text-editor"
+PreviousSelection:
+  file: "./text-object"
+  commandName: "vim-mode-plus:previous-selection"
+  commandScope: "atom-text-editor"
+PersistentSelection:
+  file: "./text-object"
+LastPastedRange:
+  file: "./text-object"
+VisibleArea:
+  file: "./text-object"
 AWord:
   file: "./text-object"
   commandName: "vim-mode-plus:a-word"
@@ -869,8 +943,6 @@ InnerWord:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-word"
   commandScope: "atom-text-editor"
-WholeWord:
-  file: "./text-object"
 AWholeWord:
   file: "./text-object"
   commandName: "vim-mode-plus:a-whole-word"
@@ -879,8 +951,6 @@ InnerWholeWord:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-whole-word"
   commandScope: "atom-text-editor"
-SmartWord:
-  file: "./text-object"
 ASmartWord:
   file: "./text-object"
   commandName: "vim-mode-plus:a-smart-word"
@@ -889,8 +959,6 @@ InnerSmartWord:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-smart-word"
   commandScope: "atom-text-editor"
-Subword:
-  file: "./text-object"
 ASubword:
   file: "./text-object"
   commandName: "vim-mode-plus:a-subword"
@@ -899,12 +967,6 @@ InnerSubword:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-subword"
   commandScope: "atom-text-editor"
-Pair:
-  file: "./text-object"
-APair:
-  file: "./text-object"
-AnyPair:
-  file: "./text-object"
 AAnyPair:
   file: "./text-object"
   commandName: "vim-mode-plus:a-any-pair"
@@ -913,8 +975,6 @@ InnerAnyPair:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-any-pair"
   commandScope: "atom-text-editor"
-AnyPairAllowForwarding:
-  file: "./text-object"
 AAnyPairAllowForwarding:
   file: "./text-object"
   commandName: "vim-mode-plus:a-any-pair-allow-forwarding"
@@ -923,8 +983,6 @@ InnerAnyPairAllowForwarding:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-any-pair-allow-forwarding"
   commandScope: "atom-text-editor"
-AnyQuote:
-  file: "./text-object"
 AAnyQuote:
   file: "./text-object"
   commandName: "vim-mode-plus:a-any-quote"
@@ -933,10 +991,6 @@ InnerAnyQuote:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-any-quote"
   commandScope: "atom-text-editor"
-Quote:
-  file: "./text-object"
-DoubleQuote:
-  file: "./text-object"
 ADoubleQuote:
   file: "./text-object"
   commandName: "vim-mode-plus:a-double-quote"
@@ -945,8 +999,6 @@ InnerDoubleQuote:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-double-quote"
   commandScope: "atom-text-editor"
-SingleQuote:
-  file: "./text-object"
 ASingleQuote:
   file: "./text-object"
   commandName: "vim-mode-plus:a-single-quote"
@@ -955,8 +1007,6 @@ InnerSingleQuote:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-single-quote"
   commandScope: "atom-text-editor"
-BackTick:
-  file: "./text-object"
 ABackTick:
   file: "./text-object"
   commandName: "vim-mode-plus:a-back-tick"
@@ -965,8 +1015,6 @@ InnerBackTick:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-back-tick"
   commandScope: "atom-text-editor"
-CurlyBracket:
-  file: "./text-object"
 ACurlyBracket:
   file: "./text-object"
   commandName: "vim-mode-plus:a-curly-bracket"
@@ -983,8 +1031,6 @@ InnerCurlyBracketAllowForwarding:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-curly-bracket-allow-forwarding"
   commandScope: "atom-text-editor"
-SquareBracket:
-  file: "./text-object"
 ASquareBracket:
   file: "./text-object"
   commandName: "vim-mode-plus:a-square-bracket"
@@ -1001,8 +1047,6 @@ InnerSquareBracketAllowForwarding:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-square-bracket-allow-forwarding"
   commandScope: "atom-text-editor"
-Parenthesis:
-  file: "./text-object"
 AParenthesis:
   file: "./text-object"
   commandName: "vim-mode-plus:a-parenthesis"
@@ -1019,8 +1063,6 @@ InnerParenthesisAllowForwarding:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-parenthesis-allow-forwarding"
   commandScope: "atom-text-editor"
-AngleBracket:
-  file: "./text-object"
 AAngleBracket:
   file: "./text-object"
   commandName: "vim-mode-plus:a-angle-bracket"
@@ -1037,8 +1079,6 @@ InnerAngleBracketAllowForwarding:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-angle-bracket-allow-forwarding"
   commandScope: "atom-text-editor"
-Tag:
-  file: "./text-object"
 ATag:
   file: "./text-object"
   commandName: "vim-mode-plus:a-tag"
@@ -1047,8 +1087,6 @@ InnerTag:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-tag"
   commandScope: "atom-text-editor"
-Paragraph:
-  file: "./text-object"
 AParagraph:
   file: "./text-object"
   commandName: "vim-mode-plus:a-paragraph"
@@ -1057,8 +1095,6 @@ InnerParagraph:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-paragraph"
   commandScope: "atom-text-editor"
-Indentation:
-  file: "./text-object"
 AIndentation:
   file: "./text-object"
   commandName: "vim-mode-plus:a-indentation"
@@ -1067,8 +1103,6 @@ InnerIndentation:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-indentation"
   commandScope: "atom-text-editor"
-Comment:
-  file: "./text-object"
 AComment:
   file: "./text-object"
   commandName: "vim-mode-plus:a-comment"
@@ -1077,8 +1111,6 @@ InnerComment:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-comment"
   commandScope: "atom-text-editor"
-CommentOrParagraph:
-  file: "./text-object"
 ACommentOrParagraph:
   file: "./text-object"
   commandName: "vim-mode-plus:a-comment-or-paragraph"
@@ -1087,8 +1119,6 @@ InnerCommentOrParagraph:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-comment-or-paragraph"
   commandScope: "atom-text-editor"
-Fold:
-  file: "./text-object"
 AFold:
   file: "./text-object"
   commandName: "vim-mode-plus:a-fold"
@@ -1097,8 +1127,6 @@ InnerFold:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-fold"
   commandScope: "atom-text-editor"
-Function:
-  file: "./text-object"
 AFunction:
   file: "./text-object"
   commandName: "vim-mode-plus:a-function"
@@ -1107,8 +1135,6 @@ InnerFunction:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-function"
   commandScope: "atom-text-editor"
-Arguments:
-  file: "./text-object"
 AArguments:
   file: "./text-object"
   commandName: "vim-mode-plus:a-arguments"
@@ -1117,8 +1143,6 @@ InnerArguments:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-arguments"
   commandScope: "atom-text-editor"
-CurrentLine:
-  file: "./text-object"
 ACurrentLine:
   file: "./text-object"
   commandName: "vim-mode-plus:a-current-line"
@@ -1127,8 +1151,6 @@ InnerCurrentLine:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-current-line"
   commandScope: "atom-text-editor"
-Entire:
-  file: "./text-object"
 AEntire:
   file: "./text-object"
   commandName: "vim-mode-plus:a-entire"
@@ -1137,10 +1159,6 @@ InnerEntire:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-entire"
   commandScope: "atom-text-editor"
-Empty:
-  file: "./text-object"
-LatestChange:
-  file: "./text-object"
 ALatestChange:
   file: "./text-object"
   commandName: "vim-mode-plus:a-latest-change"
@@ -1149,20 +1167,6 @@ InnerLatestChange:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-latest-change"
   commandScope: "atom-text-editor"
-SearchMatchForward:
-  file: "./text-object"
-  commandName: "vim-mode-plus:search-match-forward"
-  commandScope: "atom-text-editor"
-SearchMatchBackward:
-  file: "./text-object"
-  commandName: "vim-mode-plus:search-match-backward"
-  commandScope: "atom-text-editor"
-PreviousSelection:
-  file: "./text-object"
-  commandName: "vim-mode-plus:previous-selection"
-  commandScope: "atom-text-editor"
-PersistentSelection:
-  file: "./text-object"
 APersistentSelection:
   file: "./text-object"
   commandName: "vim-mode-plus:a-persistent-selection"
@@ -1171,10 +1175,6 @@ InnerPersistentSelection:
   file: "./text-object"
   commandName: "vim-mode-plus:inner-persistent-selection"
   commandScope: "atom-text-editor"
-LastPastedRange:
-  file: "./text-object"
-VisibleArea:
-  file: "./text-object"
 AVisibleArea:
   file: "./text-object"
   commandName: "vim-mode-plus:a-visible-area"
