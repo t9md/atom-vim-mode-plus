@@ -766,38 +766,33 @@ describe "Motion general", ->
   describe "the ge keybinding", ->
     describe "as a motion", ->
       it "moves the cursor to the end of the previous word", ->
-        set text: "1234 5678 wordword", cursor: [0, 16]
-        ensure 'g e', cursor: [0, 8]
-        ensure 'g e', cursor: [0, 3]
-        ensure 'g e', cursor: [0, 0]
-        ensure 'g e', cursor: [0, 0]
+        set           textC: "1234 5678 wordwo|rd"
+        ensure "g e", textC: "1234 567|8 wordword"
+        ensure "g e", textC: "123|4 5678 wordword"
+        ensure "g e", textC: "|1234 5678 wordword"
+        ensure "g e", textC: "|1234 5678 wordword"
 
       it "moves corrently when starting between words", ->
-        set text: "1 leading     end", cursor: [0, 12]
-        ensure 'g e', cursor: [0, 8]
+        set           textC: "1 leading   |  end"
+        ensure 'g e', textC: "1 leadin|g     end"
 
       it "takes a count", ->
-        set text: "vim mode plus is getting there", cursor: [0, 28]
-        ensure '5 g e', cursor: [0, 2]
+        set             textC: "vim mode plus is getting the|re"
+        ensure '5 g e', textC: "vi|m mode plus is getting there"
 
-      # test will fail until the code is fixed
-      xit "handles non-words inside words like vim", ->
-        set text: "1234 5678 word-word", cursor: [0, 18]
-        ensure 'g e', cursor: [0, 14]
-        ensure 'g e', cursor: [0, 13]
-        ensure 'g e', cursor: [0, 8]
+      it "handles non-words inside words like vim", ->
+        set           textC: "1234 5678 word-wor|d"
+        ensure 'g e', textC: "1234 5678 word|-word"
+        ensure 'g e', textC: "1234 5678 wor|d-word"
+        ensure 'g e', textC: "1234 567|8 word-word"
 
-      # test will fail until the code is fixed
-      xit "handles newlines like vim", ->
-        set text: "1234\n\n\n\n5678", cursor: [5, 2]
-        # vim seems to think an end-of-word is at every blank line
-        ensure 'g e', cursor: [4, 0]
-        ensure 'g e', cursor: [3, 0]
-        ensure 'g e', cursor: [2, 0]
-        ensure 'g e', cursor: [1, 0]
-        ensure 'g e', cursor: [1, 0]
-        ensure 'g e', cursor: [0, 3]
-        ensure 'g e', cursor: [0, 0]
+      it "handles newlines like vim", ->
+        set           textC: "1234\n\n\n\n56|78"
+        ensure "g e", textC: "1234\n\n\n|\n5678"
+        ensure "g e", textC: "1234\n\n|\n\n5678"
+        ensure "g e", textC: "1234\n|\n\n\n5678"
+        ensure "g e", textC: "123|4\n\n\n\n5678"
+        ensure "g e", textC: "|1234\n\n\n\n5678"
 
     describe "when used by Change operator", ->
       it "changes word fragments", ->
@@ -854,11 +849,11 @@ describe "Motion general", ->
   describe "the gE keybinding", ->
     describe "as a motion", ->
       it "moves the cursor to the end of the previous word", ->
-        set text: "12.4 5~7- word-word", cursor: [0, 16]
-        ensure 'g E', cursor: [0, 8]
-        ensure 'g E', cursor: [0, 3]
-        ensure 'g E', cursor: [0, 0]
-        ensure 'g E', cursor: [0, 0]
+        set textC: "12.4 5~7- word-w|ord"
+        ensure 'g E', textC: "12.4 5~7|- word-word"
+        ensure 'g E', textC: "12.|4 5~7- word-word"
+        ensure 'g E', textC: "|12.4 5~7- word-word"
+        ensure 'g E', textC: "|12.4 5~7- word-word"
 
   describe "the (,) sentence keybinding", ->
     describe "as a motion", ->
