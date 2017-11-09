@@ -125,9 +125,7 @@ describe "dirty work for fast package activation", ->
           Base = pack.mainModule.provideVimModePlus().Base
           classRegistry = Base.getClassRegistry()
           keys = Object.keys(classRegistry)
-          expect(keys).toHaveLength(1)
-          expect(keys[0]).toBe("Base")
-          expect(classRegistry[keys[0]]).toBe(Base)
+          expect(keys).toHaveLength(0)
 
     describe "fully populated classRegistry", ->
       it "generateCommandTableByEagerLoad populate all registry eagerly", ->
@@ -135,7 +133,7 @@ describe "dirty work for fast package activation", ->
           Base = pack.mainModule.provideVimModePlus().Base
           oldRegistries = Base.getClassRegistry()
           oldRegistriesLength = Object.keys(oldRegistries).length
-          expect(Object.keys(oldRegistries)).toHaveLength(1)
+          expect(Object.keys(oldRegistries)).toHaveLength(0)
 
           Base.generateCommandTableByEagerLoad()
           newRegistriesLength = Object.keys(Base.getClassRegistry()).length
