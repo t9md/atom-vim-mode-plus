@@ -551,73 +551,75 @@ MoveDownToEdge:
   file: "./motion"
   commandName: "vim-mode-plus:move-down-to-edge"
   commandScope: "atom-text-editor"
+WordMotion:
+  file: "./motion"
 MoveToNextWord:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-next-word"
-  commandScope: "atom-text-editor"
-MoveToPreviousWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-previous-word"
-  commandScope: "atom-text-editor"
-MoveToEndOfWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-end-of-word"
-  commandScope: "atom-text-editor"
-MoveToPreviousEndOfWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-previous-end-of-word"
   commandScope: "atom-text-editor"
 MoveToNextWholeWord:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-next-whole-word"
   commandScope: "atom-text-editor"
-MoveToPreviousWholeWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-previous-whole-word"
-  commandScope: "atom-text-editor"
-MoveToEndOfWholeWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-end-of-whole-word"
-  commandScope: "atom-text-editor"
-MoveToPreviousEndOfWholeWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-previous-end-of-whole-word"
-  commandScope: "atom-text-editor"
 MoveToNextAlphanumericWord:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-next-alphanumeric-word"
-  commandScope: "atom-text-editor"
-MoveToPreviousAlphanumericWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-previous-alphanumeric-word"
-  commandScope: "atom-text-editor"
-MoveToEndOfAlphanumericWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-end-of-alphanumeric-word"
   commandScope: "atom-text-editor"
 MoveToNextSmartWord:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-next-smart-word"
   commandScope: "atom-text-editor"
-MoveToPreviousSmartWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-previous-smart-word"
-  commandScope: "atom-text-editor"
-MoveToEndOfSmartWord:
-  file: "./motion"
-  commandName: "vim-mode-plus:move-to-end-of-smart-word"
-  commandScope: "atom-text-editor"
 MoveToNextSubword:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-next-subword"
+  commandScope: "atom-text-editor"
+MoveToPreviousWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-previous-word"
+  commandScope: "atom-text-editor"
+MoveToPreviousWholeWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-previous-whole-word"
+  commandScope: "atom-text-editor"
+MoveToPreviousAlphanumericWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-previous-alphanumeric-word"
+  commandScope: "atom-text-editor"
+MoveToPreviousSmartWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-previous-smart-word"
   commandScope: "atom-text-editor"
 MoveToPreviousSubword:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-previous-subword"
   commandScope: "atom-text-editor"
+MoveToEndOfWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-end-of-word"
+  commandScope: "atom-text-editor"
+MoveToEndOfWholeWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-end-of-whole-word"
+  commandScope: "atom-text-editor"
+MoveToEndOfAlphanumericWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-end-of-alphanumeric-word"
+  commandScope: "atom-text-editor"
+MoveToEndOfSmartWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-end-of-smart-word"
+  commandScope: "atom-text-editor"
 MoveToEndOfSubword:
   file: "./motion"
   commandName: "vim-mode-plus:move-to-end-of-subword"
+  commandScope: "atom-text-editor"
+MoveToPreviousEndOfWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-previous-end-of-word"
+  commandScope: "atom-text-editor"
+MoveToPreviousEndOfWholeWord:
+  file: "./motion"
+  commandName: "vim-mode-plus:move-to-previous-end-of-whole-word"
   commandScope: "atom-text-editor"
 MoveToNextSentence:
   file: "./motion"
