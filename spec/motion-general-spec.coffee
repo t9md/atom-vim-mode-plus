@@ -501,236 +501,143 @@ describe "Motion general", ->
         it "change by G", ->  ensure "c G", textC: "000\n111\n|\n", register: {'"': text: "222\n"}, mode: 'insert'
 
   describe "the w keybinding", ->
-    baseText = """
-      ab cde1+-
-       xyz
-
-      zip
-      """
-    beforeEach ->
-      set text: baseText
-
     describe "as a motion", ->
-      beforeEach ->
-        set cursor: [0, 0]
-
       it "moves the cursor to the beginning of the next word", ->
-        ensure 'w', cursor: [0, 3]
-        ensure 'w', cursor: [0, 7]
-        ensure 'w', cursor: [1, 1]
-        ensure 'w', cursor: [2, 0]
-        ensure 'w', cursor: [3, 0]
-        ensure 'w', cursor: [3, 2]
-        # When the cursor gets to the EOF, it should stay there.
-        ensure 'w', cursor: [3, 2]
+        set         textC: "|ab cde1+-\n xyz\n\nzip"
+        ensure "w", textC: "ab |cde1+-\n xyz\n\nzip"
+        ensure "w", textC: "ab cde1|+-\n xyz\n\nzip"
+        ensure "w", textC: "ab cde1+-\n |xyz\n\nzip"
+        ensure "w", textC: "ab cde1+-\n xyz\n|\nzip"
+        ensure "w", textC: "ab cde1+-\n xyz\n\n|zip"
+        ensure "w", textC: "ab cde1+-\n xyz\n\nzi|p"
+        ensure "w", textC: "ab cde1+-\n xyz\n\nzi|p" # Do nothing at vimEOF
 
-      it "moves the cursor to the end of the word if last word in file", ->
-        set text: 'abc', cursor: [0, 0]
-        ensure 'w', cursor: [0, 2]
+      it "[CRLF] moves the cursor to the beginning of the next word", ->
+        set         textC: "|ab cde1+-\r\n xyz\r\n\r\nzip"
+        ensure "w", textC: "ab |cde1+-\r\n xyz\r\n\r\nzip"
+        ensure "w", textC: "ab cde1|+-\r\n xyz\r\n\r\nzip"
+        ensure "w", textC: "ab cde1+-\r\n |xyz\r\n\r\nzip"
+        ensure "w", textC: "ab cde1+-\r\n xyz\r\n|\r\nzip"
+        ensure "w", textC: "ab cde1+-\r\n xyz\r\n\r\n|zip"
+        ensure "w", textC: "ab cde1+-\r\n xyz\r\n\r\nzi|p"
+        ensure "w", textC: "ab cde1+-\r\n xyz\r\n\r\nzi|p" # Do nothing at vimEOF
 
       it "move to next word by skipping trailing white spaces", ->
-        set
-          textC_: """
-            012|___
-              234
-            """
-        ensure 'w',
-          textC_: """
-            012___
-              |234
-            """
+        set         textC: "012|   \n  234"
+        ensure "w", textC: "012   \n  |234"
 
       it "move to next word from EOL", ->
-        set
-          textC_: """
-            |
-            __234"
-            """
-        ensure 'w',
-          textC_: """
+        set         textC: "|\n  234"
+        ensure "w", textC: "\n  |234"
 
-            __|234"
-            """
+    describe "used as change TARGET", ->
+      it "[at-word] not eat whitespace", ->
+        set           textC: "v|ar1 = 1"
+        ensure 'c w', textC: "v = 1"
 
-      # [FIXME] improve spec to loop same section with different text
-      describe "for CRLF buffer", ->
-        beforeEach ->
-          set text: baseText.replace(/\n/g, "\r\n")
+      it "[at white-space] only eat white space", ->
+        set           textC: "|  var1 = 1"
+        ensure 'c w', textC: "var1 = 1"
 
-        describe "as a motion", ->
-          beforeEach ->
-            set cursor: [0, 0]
+      it "[at trailing whitespace] doesnt eat new line character", ->
+        set           textC: "abc|  \ndef"
+        ensure 'c w', textC: "abc|\ndef"
 
-          it "moves the cursor to the beginning of the next word", ->
-            ensure 'w', cursor: [0, 3]
-            ensure 'w', cursor: [0, 7]
-            ensure 'w', cursor: [1, 1]
-            ensure 'w', cursor: [2, 0]
-            ensure 'w', cursor: [3, 0]
-            ensure 'w', cursor: [3, 2]
-            # When the cursor gets to the EOF, it should stay there.
-            ensure 'w', cursor: [3, 2]
-
-    describe "when used by Change operator", ->
-      beforeEach ->
-        set
-          text_: """
-          __var1 = 1
-          __var2 = 2\n
-          """
-
-      describe "when cursor is on word", ->
-        it "not eat whitespace", ->
-          set cursor: [0, 3]
-          ensure 'c w',
-            text_: """
-            __v = 1
-            __var2 = 2\n
-            """
-            cursor: [0, 3]
-
-      describe "when cursor is on white space", ->
-        it "only eat white space", ->
-          set cursor: [0, 0]
-          ensure 'c w',
-            text_: """
-            var1 = 1
-            __var2 = 2\n
-            """
-            cursor: [0, 0]
-
-      describe "when text to EOL is all white space", ->
-        it "wont eat new line character", ->
-          set
-            text_: """
-            abc__
-            def\n
-            """
-            cursor: [0, 3]
-          ensure 'c w',
-            text: """
-            abc
-            def\n
-            """
-            cursor: [0, 3]
-
-        it "cant eat new line when count is specified", ->
-          set text: "\n\n\n\n\nline6\n", cursor: [0, 0]
-          ensure '5 c w', text: "\nline6\n", cursor: [0, 0]
+      it "[at trailing whitespace] eat new line when count is specified", ->
+        set             textC: "|\n\n\n\n\nline6\n"
+        ensure '5 c w', textC: "|\nline6\n"
 
     describe "as a selection", ->
-      describe "within a word", ->
-        it "selects to the end of the word", ->
-          set cursor: [0, 0]
-          ensure 'y w', register: '"': text: 'ab '
+      it "[within-word] selects to the end of the word", ->
+        set textC: "|ab cd"
+        ensure 'y w', register: '"': text: 'ab '
 
-      describe "between words", ->
-        it "selects the whitespace", ->
-          set cursor: [0, 2]
-          ensure 'y w', register: '"': text: ' '
+      it "[between-word] selects the whitespace", ->
+        set textC: "ab| cd"
+        ensure 'y w', register: '"': text: ' '
 
   describe "the W keybinding", ->
-    beforeEach ->
-      set text: "cde1+- ab \n xyz\n\nzip"
-
     describe "as a motion", ->
-      beforeEach ->
-        set cursor: [0, 0]
-
       it "moves the cursor to the beginning of the next word", ->
-        ensure 'W', cursor: [0, 7]
-        ensure 'W', cursor: [1, 1]
-        ensure 'W', cursor: [2, 0]
-        ensure 'W', cursor: [3, 0]
+        set         textC: "|cde1+- ab \n xyz\n\nzip"
+        ensure "W", textC: "cde1+- |ab \n xyz\n\nzip"
+        ensure "W", textC: "cde1+- ab \n |xyz\n\nzip"
+        ensure "W", textC: "cde1+- ab \n xyz\n|\nzip"
+        ensure "W", textC: "cde1+- ab \n xyz\n\n|zip"
+        ensure "W", textC: "cde1+- ab \n xyz\n\nzi|p"
+        ensure "W", textC: "cde1+- ab \n xyz\n\nzi|p" # Do nothing at vimEOF
 
-      it "moves the cursor to beginning of the next word of next line when all remaining text is white space.", ->
-        set
-          text_: """
-            012___
-            __234
-            """
-          cursor: [0, 3]
-        ensure 'W', cursor: [1, 2]
+      it "[at-trailing-WS] moves the cursor to beginning of the next word at next line", ->
+        set         textC: "012|   \n  234"
+        ensure 'W', textC: "012   \n  |234"
 
       it "moves the cursor to beginning of the next word of next line when cursor is at EOL.", ->
-        set
-          text_: """
-
-          __234
-          """
-          cursor: [0, 0]
-        ensure 'W', cursor: [1, 2]
+        set         textC: "|\n  234"
+        ensure 'W', textC: "\n  |234"
 
     # This spec is redundant since W(MoveToNextWholeWord) is child of w(MoveToNextWord).
-    describe "when used by Change operator", ->
-      beforeEach ->
-        set
-          text_: """
-            __var1 = 1
-            __var2 = 2\n
-            """
+    describe "used as change TARGET", ->
+      it "[at-word] not eat whitespace", ->
+        set           textC: "v|ar1 = 1"
+        ensure 'c W', textC: "v| = 1"
 
-      describe "when cursor is on word", ->
-        it "not eat whitespace", ->
-          set cursor: [0, 3]
-          ensure 'c W',
-            text_: """
-              __v = 1
-              __var2 = 2\n
-              """
-            cursor: [0, 3]
+      it "[at-WS] only eat white space", ->
+        set           textC: "|  var1 = 1"
+        ensure 'c W', textC: "var1 = 1"
 
-      describe "when cursor is on white space", ->
-        it "only eat white space", ->
-          set cursor: [0, 0]
-          ensure 'c W',
-            text_: """
-              var1 = 1
-              __var2 = 2\n
-              """
-            cursor: [0, 0]
+      it "[at-trailing-WS] doesn't eat new line character", ->
+        set           textC: "abc|  \ndef\n"
+        ensure 'c W', textC: "abc|\ndef\n"
 
-      describe "when text to EOL is all white space", ->
-        it "wont eat new line character", ->
-          set text: "abc  \ndef\n", cursor: [0, 3]
-          ensure 'c W', text: "abc\ndef\n", cursor: [0, 3]
+      it "can eat new line when count is specified", ->
+        set             textC: "|\n\n\n\n\nline6\n"
+        ensure '5 c W', textC: "|\nline6\n"
 
-        it "cant eat new line when count is specified", ->
-          set text: "\n\n\n\n\nline6\n", cursor: [0, 0]
-          ensure '5 c W', text: "\nline6\n", cursor: [0, 0]
+    describe "as a TARGET", ->
+      it "[at-word] yank", ->
+        set textC: "|cde1+- ab"
+        ensure 'y W', register: '"': text: 'cde1+- '
 
-    describe "as a selection", ->
-      describe "within a word", ->
-        it "selects to the end of the whole word", ->
-          set cursor: [0, 0]
-          ensure 'y W', register: '"': text: 'cde1+- '
+      it "delete new line", ->
+        set           textC: "cde1+- ab \n xyz\n|\nzip"
+        ensure 'd W', textC: "cde1+- ab \n xyz\n|zip", register: {'"': text: "\n"}
 
-      it "continues past blank lines", ->
-        set cursor: [2, 0]
-        ensure 'd W',
-          text_: """
-          cde1+- ab_
-          _xyz
-          zip
-          """
-          register: '"': text: "\n"
-
-      it "doesn't go past the end of the file", ->
-        set cursor: [3, 0]
-        ensure 'd W',
-          text_: """
-          cde1+- ab_
-          _xyz\n\n
-          """
-          register: '"': text: 'zip'
+      it "delete last word in buffer and adjut cursor row to not past vimLastRow", ->
+        set           textC: "cde1+- ab \n xyz\n\n|zip"
+        ensure 'd W', textC: "cde1+- ab \n xyz\n|\n", register: {'"': text: "zip"}
 
   describe "the e keybinding", ->
+    describe "as a motion", ->
+      it "moves the cursor to the end of the current word", ->
+        set         textC_: "|ab cde1+-_\n_xyz\n\nzip"
+        ensure 'e', textC_: "a|b cde1+-_\n_xyz\n\nzip"
+        ensure 'e', textC_: "ab cde|1+-_\n_xyz\n\nzip"
+        ensure 'e', textC_: "ab cde1+|-_\n_xyz\n\nzip"
+        ensure 'e', textC_: "ab cde1+-_\n_xy|z\n\nzip"
+        ensure 'e', textC_: "ab cde1+-_\n_xyz\n\nzi|p"
+
+      it "skips whitespace until EOF", ->
+        set         textC: "|012\n\n\n012\n\n"
+        ensure 'e', textC: "01|2\n\n\n012\n\n"
+        ensure 'e', textC: "012\n\n\n01|2\n\n"
+        ensure 'e', textC: "012\n\n\n012\n|\n"
+
+    describe "as selection", ->
+      it "[in-word] selects to the end of the current word", ->
+        set textC_: "|ab cde1+-_"
+        ensure 'y e', register: '"': text: 'ab'
+
+      it "[between-word] selects to the end of the next word", ->
+        set textC_: "ab| cde1+-_"
+        ensure 'y e', register: '"': text: ' cde1'
+
+  describe "the E keybinding", ->
     beforeEach ->
       set text_: """
-      ab cde1+-_
-      _xyz
+      ab  cde1+-_
+      _xyz_
 
-      zip
+      zip\n
       """
 
     describe "as a motion", ->
@@ -738,30 +645,27 @@ describe "Motion general", ->
         set cursor: [0, 0]
 
       it "moves the cursor to the end of the current word", ->
-        ensure 'e', cursor: [0, 1]
-        ensure 'e', cursor: [0, 6]
-        ensure 'e', cursor: [0, 8]
-        ensure 'e', cursor: [1, 3]
-        ensure 'e', cursor: [3, 2]
-
-      it "skips whitespace until EOF", ->
-        set
-          text: "012\n\n\n012\n\n"
-          cursor: [0, 0]
-        ensure 'e', cursor: [0, 2]
-        ensure 'e', cursor: [3, 2]
-        ensure 'e', cursor: [4, 0]
+        ensure 'E', cursor: [0, 1]
+        ensure 'E', cursor: [0, 9]
+        ensure 'E', cursor: [1, 3]
+        ensure 'E', cursor: [3, 2]
+        ensure 'E', cursor: [3, 2]
 
     describe "as selection", ->
       describe "within a word", ->
         it "selects to the end of the current word", ->
           set cursor: [0, 0]
-          ensure 'y e', register: '"': text: 'ab'
+          ensure 'y E', register: '"': text: 'ab'
 
       describe "between words", ->
         it "selects to the end of the next word", ->
           set cursor: [0, 2]
-          ensure 'y e', register: '"': text: ' cde1'
+          ensure 'y E', register: '"': text: '  cde1+-'
+
+      describe "press more than once", ->
+        it "selects to the end of the current word", ->
+          set cursor: [0, 0]
+          ensure 'v E E y', register: '"': text: 'ab  cde1+-'
 
   describe "the ge keybinding", ->
     describe "as a motion", ->
@@ -809,42 +713,6 @@ describe "Motion general", ->
       it "selects word fragments", ->
         set text: "cet document", cursor: [0, 7]
         ensure 'v g e', cursor: [0, 2], selectedText: "t docu"
-
-  describe "the E keybinding", ->
-    beforeEach ->
-      set text_: """
-      ab  cde1+-_
-      _xyz_
-
-      zip\n
-      """
-
-    describe "as a motion", ->
-      beforeEach ->
-        set cursor: [0, 0]
-
-      it "moves the cursor to the end of the current word", ->
-        ensure 'E', cursor: [0, 1]
-        ensure 'E', cursor: [0, 9]
-        ensure 'E', cursor: [1, 3]
-        ensure 'E', cursor: [3, 2]
-        ensure 'E', cursor: [3, 2]
-
-    describe "as selection", ->
-      describe "within a word", ->
-        it "selects to the end of the current word", ->
-          set cursor: [0, 0]
-          ensure 'y E', register: '"': text: 'ab'
-
-      describe "between words", ->
-        it "selects to the end of the next word", ->
-          set cursor: [0, 2]
-          ensure 'y E', register: '"': text: '  cde1+-'
-
-      describe "press more than once", ->
-        it "selects to the end of the current word", ->
-          set cursor: [0, 0]
-          ensure 'v E E y', register: '"': text: 'ab  cde1+-'
 
   describe "the gE keybinding", ->
     describe "as a motion", ->
