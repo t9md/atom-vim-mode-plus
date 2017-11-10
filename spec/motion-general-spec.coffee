@@ -669,7 +669,7 @@ describe "Motion general", ->
 
   describe "the ge keybinding", ->
     describe "as a motion", ->
-      fit "moves the cursor to the end of the previous word", ->
+      it "moves the cursor to the end of the previous word", ->
         set           textC: "1234 5678 wordwo|rd"
         ensure "g e", textC: "1234 567|8 wordword"
         ensure "g e", textC: "123|4 5678 wordword"
