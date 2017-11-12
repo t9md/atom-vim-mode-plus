@@ -1,3 +1,23 @@
+# 1.18.0: BIG overhaul in different aspect
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.17.0...v1.18.0)
+- Performance: Small activation performance gain by `Base.js` refactoring and JSON form of command-table.
+- Fix: Fix broken word motion family from Atom v1.23.0-beta0. #946, #953.
+  - `w`, `b`, `e`, `g e` and it's variant have been broken after v1.23.0-beta0 was out.
+  - This is because vmp depends Atom's cursor's method to find word.
+  - But this dependency also make vmp's word motion vulnerable to changes in atom-core.
+  - So this time, did overhaul these word-motion to not use cursors's method
+- Internal:
+  - Changes in how vmp commands are loaded.
+    - Previously, each operation class need to calll `register()` in it's own file.
+      - e.g. call `MoveDown.register()` in `./motion.js`.
+      - This mechanism was once useful, especially as executable-class-body when vmp was written in coffee-script.
+    - Now all operations class are jus `requre`-ed by `/base.js` and manually registerd.
+      - So less magic, more explicit, easy to understand.
+  - Use JSON format for command-table for faster activation. #958
+    - This involve changes in field name of command spec.
+    - So also updated vmp plugins which use `registerCommandFromSpec` function provided as vmp service.
+  - Introduce `findInEditor` utility and cleanup lot of boilerplate code by using this new utility.
+
 # 1.17.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.16.0...v1.17.0)
 - Improve: Hide some vmp commands from command-palette #943
