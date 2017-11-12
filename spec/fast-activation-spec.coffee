@@ -128,25 +128,25 @@ describe "dirty work for fast package activation", ->
           expect(keys).toHaveLength(0)
 
     describe "fully populated classRegistry", ->
-      it "generateCommandTableByEagerLoad populate all registry eagerly", ->
+      it "buildCommandTable populate all registry eagerly", ->
         withCleanActivation (pack) ->
           Base = pack.mainModule.provideVimModePlus().Base
           oldRegistries = Base.getClassRegistry()
           oldRegistriesLength = Object.keys(oldRegistries).length
           expect(Object.keys(oldRegistries)).toHaveLength(0)
 
-          Base.generateCommandTableByEagerLoad()
+          Base.buildCommandTable()
           newRegistriesLength = Object.keys(Base.getClassRegistry()).length
           expect(newRegistriesLength).toBeGreaterThan(oldRegistriesLength)
 
     describe "make sure cmd-table is NOT out-of-date", ->
-      it "generateCommandTableByEagerLoad return table which is equals to initially loaded command table", ->
+      it "buildCommandTable return table which is equals to initially loaded command table", ->
         withCleanActivation (pack) ->
           Base = pack.mainModule.provideVimModePlus().Base
           [oldCommandTable, newCommandTable] = []
 
           oldCommandTable = Base.commandTable
-          newCommandTable = Base.generateCommandTableByEagerLoad()
+          newCommandTable = Base.buildCommandTable()
           loadedCommandTable = require('../lib/command-table')
 
           expect(oldCommandTable).not.toBe(newCommandTable)
