@@ -1,4 +1,12 @@
 # 1.18.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.18.1...v1.18.2)
+- Change mind:
+  - Update all vmp-plugins which affect changes in v1.18.0.
+  - Remove `registerCommandFromSpec` migration code.
+  - Why? migration for passed `spec` was not perfect, just confusing.
+  - So I decided to simply let user update to latest, thats works.
+
+# 1.18.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.18.0...v1.18.1)
 - Fix: user's custom command in `init.js` throw exception when calling `registerCommand()`.
   - Regression introduced in v1.18.0 sorry!
