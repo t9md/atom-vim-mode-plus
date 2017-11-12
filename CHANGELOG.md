@@ -1,3 +1,8 @@
+# 1.18.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.18.0...v1.18.1)
+- Fix: user's custom command in `init.js` throw exception when calling `registerCommand()`.
+  - Regression introduced in v1.18.0 sorry!
+
 # 1.18.0: BIG overhaul in different aspect
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.17.0...v1.18.0)
 - Performance: Small activation performance gain by `Base.js` refactoring and JSON form of command-table.
