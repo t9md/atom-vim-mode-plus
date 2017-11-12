@@ -67,7 +67,7 @@ describe "dirty work for fast package activation", ->
       "lib/base.js"
       "lib/settings.js"
       "lib/vim-state.js"
-      "lib/command-table.coffee"
+      "lib/command-table.json"
     ]
     if atom.inDevMode()
       shouldRequireFilesInOrdered.push('lib/developer.js')
