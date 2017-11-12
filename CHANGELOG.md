@@ -1,4 +1,4 @@
-# 1.18.1:
+# 1.18.2:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.18.1...v1.18.2)
 - Change mind:
   - Update all vmp-plugins which affect changes in v1.18.0.
