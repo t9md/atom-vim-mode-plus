@@ -109,7 +109,7 @@ describe "Motion Find", ->
       set cursor: [0, 3]
       ensure 'd F a', text: 'abcabcabc\n'
 
-  describe "[regression gurad] repeat(; or ,) after used as operator target", ->
+  describe "[regression guard] repeat(; or ,) after used as operator target", ->
     it "repeat after d f", ->
       set             textC: "a1    |a2    a3    a4"
       ensure "d f a", textC: "a1    |3    a4", mode: "normal", selectedText: ""
