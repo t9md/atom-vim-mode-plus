@@ -1,3 +1,14 @@
+# 1.19.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.18.2...v1.19.0)
+- Improve: Scroll motions `ctrl-f`, `ctrl-b`... now works more correctly in editor having block decoration by @jdanbrown.
+  - Previously amount of scroll was based on screen rows, which doesn't block-decoration take into account.
+  - Now scroll pixel based, so accurate even if editor have block decoration inline image.
+- Improve: Smoother scroll in sequential scroll motion execution.
+  - Previously when multiple scroll request was made in very short time-gap, it immediately finalize previous request.
+  - This means user see non-smooth scrollTop change although user enabled smooth scroll feature.
+  - Now previous request is just cancelled and calculate new scrollTop based on previously requested value.
+  - So in UX-wise, user no longer see sudden scrollTop change, always see smoooooth scroll congrats!!
+
 # 1.18.2:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.18.1...v1.18.2)
 - Change mind:
