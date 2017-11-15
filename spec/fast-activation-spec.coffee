@@ -138,11 +138,12 @@ describe "dirty work for fast package activation", ->
       it "buildCommandTable return table which is equals to initially loaded command table", ->
         withCleanActivation (pack) ->
           Base = pack.mainModule.provideVimModePlus().Base
-          {commandTable: oldCommandTable, fileTable: oldFileTable} = Base
-          {commandTable: newCommandTable, fileTable: newFileTable} = Base.buildCommandTableAndFileTable()
+          oldCommandTable = require("../lib/command-table.json")
+          oldFileTable = require("../lib/file-table.json")
+          {commandTable, fileTable} = Base.buildCommandTableAndFileTable()
 
-          expect(oldCommandTable).not.toBe(newCommandTable)
-          expect(oldCommandTable).toEqual(newCommandTable)
+          expect(oldCommandTable).not.toBe(commandTable)
+          expect(oldCommandTable).toEqual(commandTable)
 
-          expect(oldFileTable).not.toBe(newFileTable)
-          expect(oldFileTable).toEqual(newFileTable)
+          expect(oldFileTable).not.toBe(fileTable)
+          expect(oldFileTable).toEqual(fileTable)
