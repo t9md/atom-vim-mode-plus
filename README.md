@@ -7,7 +7,7 @@ vim-mode improved.
 - [Installation](#installation)
 - [Some Features](#some-features)
 - [Important](#important)
-    - [**vim-mode-plus is replacement for vim-mode, you must disable vim-mode first to use vim-mode-plus**.](#vim-mode-plus-is-replacement-for-vim-mode-you-must-disable-vim-mode-first-to-use-vim-mode-plus)
+    - [vim-mode-plus is replacement for vim-mode, you must disable vim-mode first to use vim-mode-plus](#vim-mode-plus-is-replacement-for-vim-mode-you-must-disable-vim-mode-first-to-use-vim-mode-plus)
     - [From v1.9.0 CoffeeScript based vmp-extension is no longer supported](#from-v190-coffeescript-based-vmp-extension-is-no-longer-supported)
 - [Thanks](#thanks)
 - [Issue report](#issue-report)
@@ -45,7 +45,7 @@ These features are very powerful, especially for the power user. Read the follow
 
 # Important
 
-### **vim-mode-plus is replacement for vim-mode, you must disable vim-mode first to use vim-mode-plus**.
+### vim-mode-plus is replacement for vim-mode, you must disable vim-mode first to use vim-mode-plus
 
 - You don't need the following packages since they're built-in to vim-mode-plus:
   - [vim-surround](https://atom.io/packages/vim-surround): No default keymap. See FAQ section in this doc.
