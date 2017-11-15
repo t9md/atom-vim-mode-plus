@@ -8,4 +8,4 @@ You have to check all before open issue.
 - [ ] Contrast current behavior if you want to change current behavior, with sample text, operation(keystroke) and result.
 - [ ] Include real use case so that maintainer can understand "why" you need help.
 - [ ] Include Atom(`atom --version`), vim-mode-plus version, and OS version(e.g. macOS Sierra 10.12.3).
-- [ ] If keybinding issue, [Read this](https://github.com/t9md/atom-vim-mode-plus/wiki/IssueReport#some-keybinding-not-working).
+- [ ] If keybinding issue, Read https://github.com/t9md/atom-vim-mode-plus/wiki/IssueReport#some-keybinding-not-working
