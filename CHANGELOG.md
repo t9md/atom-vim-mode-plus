@@ -1,3 +1,20 @@
+# 1.20.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.19.0...v1.20.0)
+- Fix: No longer throw exception on keystroke `o escape .` when `groupChangesWhenLeavingInsertMode` have enabled #966
+- Performance: Reduce IOs at package activation further for faster startup #965
+  - Separate `file-table.json` from `command-table.json`.
+  - Optimize command-table data format to reduce file size.
+  - Now in my MacBook Pro Late 2016. it score around 40ms(38ms-45ms) activation time(measured by package cop).
+  - This is **NOT BAD** when considering vmp adds 300+ commands on activation.
+  - 2017-11-06:    40ms (vmp-v1.20.0 + Atom-v1.23.0-beta1) Now!
+  - 2017-04-17: 60-80ms (vmp-v0.90.0 + Atom-v1.16.0)
+  - 2017-01-04:   150ms (vmp-v0.78.0 + Atom-v1.13.0-beta10)
+- Improve: Longer search-flash duration from 0.5s to 1.0s to more easy to spot found word.
+- Support, Doc: No longer warn that CoffeeScript based extension is no longer supported on pkg activation.
+  - Instead it is now explained in README.md with english correction PR made by @filipewl
+  - Why I remove now is I noticed that  warning was made on newly installed case(bad), it's been a month from this warning was added.
+- Support: Update issue template so that issue opener will see TODOs without jumping to link.
+
 # 1.19.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.18.2...v1.19.0)
 - Improve: Scroll motions `ctrl-f`, `ctrl-b`... now works more correctly in editor having block decoration by @jdanbrown.
