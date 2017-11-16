@@ -125,12 +125,13 @@ describe "dirty work for fast package activation", ->
           expect(Object.keys(Base.classTable)).toHaveLength(0)
 
     describe "fully populated classTable", ->
-      it "developer.buildCommandTable populate class table(since Base.getClass is called during require files)", ->
+      it "Base.getClass(motionClass) populate class table for all members belonging to same file(motions)", ->
         withCleanActivation (pack) ->
           Base = pack.mainModule.provideVimModePlus().Base
           expect(Object.keys(Base.classTable)).toHaveLength(0)
-          developer = require "../lib/developer"
-          developer.buildCommandTableAndFileTable()
+          Base.getClass("MoveRight")
+          fileTable = require("../lib/file-table.json")
+          expect(fileTable["./motion"].length).toBe(Object.keys(Base.classTable).length)
           expect(Object.keys(Base.classTable).length).toBeGreaterThan(0)
 
     describe "make sure command-table and file-table is NOT out-of-date", ->
