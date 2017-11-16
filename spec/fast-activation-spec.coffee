@@ -126,12 +126,13 @@ describe "dirty work for fast package activation", ->
           Base = pack.mainModule.provideVimModePlus().Base
           expect(Object.keys(Base.classTable)).toHaveLength(0)
 
-    describe "fully populated classRegistry", ->
-      it "buildCommandTable populate all class table eagerly", ->
+    describe "fully populated classTable", ->
+      it "developer.buildCommandTable populate class table(since Base.getClass is called during require files)", ->
         withCleanActivation (pack) ->
           Base = pack.mainModule.provideVimModePlus().Base
           expect(Object.keys(Base.classTable)).toHaveLength(0)
-          Base.buildCommandTableAndFileTable()
+          developer = require "../lib/developer"
+          developer.buildCommandTableAndFileTable()
           expect(Object.keys(Base.classTable).length).toBeGreaterThan(0)
 
     describe "make sure command-table and file-table is NOT out-of-date", ->
@@ -140,7 +141,9 @@ describe "dirty work for fast package activation", ->
           Base = pack.mainModule.provideVimModePlus().Base
           oldCommandTable = require("../lib/command-table.json")
           oldFileTable = require("../lib/file-table.json")
-          {commandTable, fileTable} = Base.buildCommandTableAndFileTable()
+
+          developer = require "../lib/developer"
+          {commandTable, fileTable} = developer.buildCommandTableAndFileTable()
 
           expect(oldCommandTable).not.toBe(commandTable)
           expect(oldCommandTable).toEqual(commandTable)
