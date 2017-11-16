@@ -105,8 +105,6 @@ describe "dirty work for fast package activation", ->
             "lib/operation-stack.js"
             "lib/file-table.json"
             "lib/motion.js"
-            "node_modules/underscore-plus/lib/underscore-plus.js"
-            "node_modules/underscore/underscore.js"
             "lib/utils.js"
             "lib/cursor-style-manager.js"
           ]
