@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "atom-space-pen-views": "^2.1.1",
+    "change-case": "^3.0.1",
     "fs-plus": "^2.8.1",
     "fuzzaldrin": "^2.1.0",
     "grim": "^2.0.2",
