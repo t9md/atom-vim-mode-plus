@@ -366,7 +366,7 @@ describe "Operator TransformString", ->
       ensure 'j .', text: 'VimMode\nAtomTextEditor\n', cursor: [1, 0]
 
     it "transform selection", ->
-      ensure 'V j g C', text: 'VimMode\natomTextEditor\n', cursor: [0, 0]
+      ensure 'V j g C', text: 'VimMode\nAtomTextEditor\n', cursor: [0, 0]
 
     it "repeating twice works on current-line and won't move cursor", ->
       ensure 'l g C g C', text: 'VimMode\natom-text-editor\n', cursor: [0, 1]
