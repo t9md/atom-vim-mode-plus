@@ -133,9 +133,9 @@ If you want to directly edit `config.cson`, here it is.
   ]
 ```
 
-### Flash effect not appear on cursor-line, occurrence-marker is not displayed on cursor-line too.
+### Flash effect does not appear on cursor-line, occurrence-marker is not displayed on cursor-line either.
 
-This is because of syntax-theme you are using.
+This is because of the syntax-theme you are using.
 See [this tips on Wiki](https://github.com/t9md/atom-vim-mode-plus/wiki/TIPS#flash-effect-not-appear-on-cursor-line-occurrence-marker-is-not-displayed-on-cursor-line-too).
 
 ### Surround not work
