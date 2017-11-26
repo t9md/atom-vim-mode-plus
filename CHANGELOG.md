@@ -1,3 +1,24 @@
+# 1.21.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.20.0...v1.21.0)
+- Support: No longer warning when user enabled `vim-mode`.
+  - In old days, I frequently got report who enabled both `vim-mode` and `vim-mode-plus`.
+  - But now `vim-mode` is obviously unmaintained, and I think less chance to confuse user.
+- New, Breaking: Use [change-case](https://github.com/blakeembrey/change-case) npm in TransformString operator.
+  - As a result, added new operators, also non-listed exiting operator improve translate-ability between different case.
+  - `SwapCase`: Same as existing ToggleCase but add to reflect original change-case's function name.
+  - `ParamCase`: Same as existing DashCase but add to reflect original change-case's function name.
+  - `PathCase`: New transform `a_b_c` to `a/b/c`, `camelCase` to `camel/case`.
+  - `HeaderCase`: New, transform `HeaderCase` to `Header-Case`, `header_case` to `Header-Case`.
+  - `ConstantCase`: New, transform `ConstantCase` to `CONSTANT_CASE`, `constant-case` to `CONSTANT_CASE`.
+  - `SentenceCase`: New, transform `SentenceCase` to `Sentence case`, `sentence_case` to `Sentence case`.
+  - `UpperCaseFirst`: New, transform `upperCaseFirst` to `UpperCaseFirst`, `abc def` to `Abc Def`.
+  - `LowerCaseFirst`: New, transform `LowerCaseFirst` to `lowerCaseFirst`, `ABC DEF` to `aBC dEF`.
+- Breaking: Now `transform-string-by-select-list` just simply shows "Title Case"-ed operator class name.
+  - No longer display different name like it didsplayed `Underscore _` for `SnakeCase` operator. Now it just show `Snake Case`.
+  - Which might confuse you if you've been familier with old names. Sorry, but I think it was unnecessary.
+- Performance: Delay loading underscore-plus in operator.
+- Internal: Move commandTable generation logic to developer.js
+
 # 1.20.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.19.0...v1.20.0)
 - Fix: No longer throw exception on keystroke `o escape .` when `groupChangesWhenLeavingInsertMode` have enabled #966
