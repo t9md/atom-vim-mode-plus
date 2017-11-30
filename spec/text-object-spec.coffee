@@ -1577,17 +1577,20 @@ describe "TextObject", ->
       describe 'non-multi-line-param function', ->
         beforeEach ->
           set
-            textC: """
+            text: """
 
             function f1(a1, a2, a3) {
-              // comment
-              con|sole.log(a1, a2, a3)
+              if (true) {
+                console.log("hello")
+              }
             }
 
             """
 
-        it 'select a f', -> ensure 'v a f', selectedBufferRange: rangeForRows(1, 4)
-        it 'select i f', -> ensure 'v i f', selectedBufferRange: rangeForRows(2, 3)
+        it '[from param] a f', -> set cursor: [1, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from  body] a f', -> set cursor: [3, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from param] i f', -> set cursor: [1, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(2, 4)
+        it '[from  body] i f', -> set cursor: [3, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(2, 4)
 
       describe '[case-1]: multi-line-param-function', ->
         beforeEach ->
