@@ -1,5 +1,7 @@
 {getVimState, dispatch, TextData} = require './spec-helper'
 settings = require '../lib/settings'
+rangeForRows = (startRow, endRow) ->
+  [[startRow, 0], [endRow + 1, 0]]
 
 describe "TextObject", ->
   [set, ensure, ensureWait, editor, editorElement, vimState] = []
@@ -1430,9 +1432,6 @@ describe "TextObject", ->
           selectedBufferRange: [[10, 0], [27, 0]]
 
   describe 'Fold', ->
-    rangeForRows = (startRow, endRow) ->
-      [[startRow, 0], [endRow + 1, 0]]
-
     beforeEach ->
       waitsForPromise ->
         atom.packages.activatePackage('language-coffee-script')
@@ -1445,6 +1444,10 @@ describe "TextObject", ->
     describe 'inner-fold', ->
       it "select inner range of fold", ->
         set cursor: [13, 0]
+        ensure 'v i z', selectedBufferRange: rangeForRows(10, 25)
+
+      it "[when cursor is at column 0 of fold start row] select inner range of fold", ->
+        set cursor: [9, 0]
         ensure 'v i z', selectedBufferRange: rangeForRows(10, 25)
 
       it "select inner range of fold", ->
@@ -1490,6 +1493,10 @@ describe "TextObject", ->
         set cursor: [13, 0]
         ensure 'v a z', selectedBufferRange: rangeForRows(9, 25)
 
+      it "[when cursor is at column 0 of fold start row] select inner range of fold", ->
+        set cursor: [9, 0]
+        ensure 'v a z', selectedBufferRange: rangeForRows(9, 25)
+
       it 'select fold row range', ->
         set cursor: [19, 0]
         ensure 'v a z', selectedBufferRange: rangeForRows(18, 23)
@@ -1533,7 +1540,6 @@ describe "TextObject", ->
 
             # Commment
             """
-          cursor: [3, 0]
 
         runs ->
           grammar = atom.grammars.grammarForScopeName(scope)
@@ -1543,11 +1549,106 @@ describe "TextObject", ->
 
       describe 'inner-function for coffee', ->
         it 'select except start row', ->
+          set cursor: [3, 3]
+          ensure 'v i f', selectedBufferRange: [[3, 0], [6, 0]]
+
+        it "[when cursor is at column 0 of function-fold start row]", ->
+          set cursor: [2, 0]
           ensure 'v i f', selectedBufferRange: [[3, 0], [6, 0]]
 
       describe 'a-function for coffee', ->
         it 'select function', ->
+          set cursor: [3, 3]
           ensure 'v a f', selectedBufferRange: [[2, 0], [6, 0]]
+
+        it "[when cursor is at column 0 of function-fold start row]", ->
+          set cursor: [2, 0]
+          ensure 'v a f', selectedBufferRange: [[2, 0], [6, 0]]
+
+    describe 'javascript', ->
+      pack = 'language-javascript'
+      scope = 'source.js'
+      beforeEach ->
+        waitsForPromise -> atom.packages.activatePackage(pack)
+        runs -> editor.setGrammar(atom.grammars.grammarForScopeName(scope))
+      afterEach ->
+        atom.packages.deactivatePackage(pack)
+
+      describe 'non-multi-line-param function', ->
+        beforeEach ->
+          set
+            textC: """
+
+            function f1(a1, a2, a3) {
+              // comment
+              con|sole.log(a1, a2, a3)
+            }
+
+            """
+
+        it 'select a f', -> ensure 'v a f', selectedBufferRange: rangeForRows(1, 4)
+        it 'select i f', -> ensure 'v i f', selectedBufferRange: rangeForRows(2, 3)
+
+      describe '[case-1]: multi-line-param-function', ->
+        beforeEach ->
+          set
+            text: """
+
+            function f2(
+              a1,
+              a2,
+              a3
+            ) {
+              // comment
+              console.log(a1, a2, a3)
+            }
+
+            """
+
+        it '[from param] a f', -> set cursor: [3, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 8)
+        it '[from  body] a f', -> set cursor: [6, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 8)
+        it '[from param] i f', -> set cursor: [3, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(6, 7)
+        it '[from  body] i f', -> set cursor: [6, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(6, 7)
+
+      describe '[case-2]: multi-line-param-function', ->
+        beforeEach ->
+          set
+            textC: """
+
+            function f3(
+              a1,
+              a2,
+              a3
+            )
+            {
+              // comment
+              console.log(a1, a2, a3)
+            }
+
+            """
+
+        it '[from param] a f', -> set cursor: [3, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 9)
+        it '[from  body] a f', -> set cursor: [7, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 9)
+        it '[from param] i f', -> set cursor: [3, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(7, 8)
+        it '[from  body] i f', -> set cursor: [7, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(7, 8)
+
+      describe '[case-3]: body start from next-row-of-param-end-row', ->
+        beforeEach ->
+          set
+            textC: """
+
+            function f3(a1, a2, a3)
+            {
+              // comment
+              console.log(a1, a2, a3)
+            }
+
+            """
+
+        it '[from param] a f', -> set cursor: [1, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from  body] a f', -> set cursor: [3, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from param] i f', -> set cursor: [1, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(3, 4)
+        it '[from  body] i f', -> set cursor: [3, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(3, 4)
 
     describe 'ruby', ->
       pack = 'language-ruby'
