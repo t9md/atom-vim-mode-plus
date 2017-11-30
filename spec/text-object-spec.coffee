@@ -1632,6 +1632,24 @@ describe "TextObject", ->
         it '[from param] i f', -> set cursor: [3, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(7, 8)
         it '[from  body] i f', -> set cursor: [7, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(7, 8)
 
+      describe '[case-3]: body start from next-row-of-param-end-row', ->
+        beforeEach ->
+          set
+            textC: """
+
+            function f3(a1, a2, a3)
+            {
+              // comment
+              console.log(a1, a2, a3)
+            }
+
+            """
+
+        it '[from param] a f', -> set cursor: [1, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from  body] a f', -> set cursor: [3, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from param] i f', -> set cursor: [1, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(3, 4)
+        it '[from  body] i f', -> set cursor: [3, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(3, 4)
+
     describe 'ruby', ->
       pack = 'language-ruby'
       scope = 'source.ruby'
