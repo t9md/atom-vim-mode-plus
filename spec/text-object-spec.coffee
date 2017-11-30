@@ -1447,6 +1447,10 @@ describe "TextObject", ->
         set cursor: [13, 0]
         ensure 'v i z', selectedBufferRange: rangeForRows(10, 25)
 
+      it "[when cursor is at column 0 of fold start row] select inner range of fold", ->
+        set cursor: [9, 0]
+        ensure 'v i z', selectedBufferRange: rangeForRows(10, 25)
+
       it "select inner range of fold", ->
         set cursor: [19, 0]
         ensure 'v i z', selectedBufferRange: rangeForRows(19, 23)
@@ -1488,6 +1492,10 @@ describe "TextObject", ->
     describe 'a-fold', ->
       it 'select fold row range', ->
         set cursor: [13, 0]
+        ensure 'v a z', selectedBufferRange: rangeForRows(9, 25)
+
+      it "[when cursor is at column 0 of fold start row] select inner range of fold", ->
+        set cursor: [9, 0]
         ensure 'v a z', selectedBufferRange: rangeForRows(9, 25)
 
       it 'select fold row range', ->
@@ -1533,7 +1541,6 @@ describe "TextObject", ->
 
             # Commment
             """
-          cursor: [3, 0]
 
         runs ->
           grammar = atom.grammars.grammarForScopeName(scope)
@@ -1543,10 +1550,20 @@ describe "TextObject", ->
 
       describe 'inner-function for coffee', ->
         it 'select except start row', ->
+          cursor: [3, 3]
+          ensure 'v i f', selectedBufferRange: [[3, 0], [6, 0]]
+
+        it "[when cursor is at column 0 of function-fold start row]", ->
+          set cursor: [2, 0]
           ensure 'v i f', selectedBufferRange: [[3, 0], [6, 0]]
 
       describe 'a-function for coffee', ->
         it 'select function', ->
+          cursor: [3, 3]
+          ensure 'v a f', selectedBufferRange: [[2, 0], [6, 0]]
+
+        it "[when cursor is at column 0 of function-fold start row]", ->
+          set cursor: [2, 0]
           ensure 'v a f', selectedBufferRange: [[2, 0], [6, 0]]
 
     describe 'ruby', ->
