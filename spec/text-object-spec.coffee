@@ -1550,7 +1550,7 @@ describe "TextObject", ->
 
       describe 'inner-function for coffee', ->
         it 'select except start row', ->
-          cursor: [3, 3]
+          set cursor: [3, 3]
           ensure 'v i f', selectedBufferRange: [[3, 0], [6, 0]]
 
         it "[when cursor is at column 0 of function-fold start row]", ->
@@ -1559,7 +1559,7 @@ describe "TextObject", ->
 
       describe 'a-function for coffee', ->
         it 'select function', ->
-          cursor: [3, 3]
+          set cursor: [3, 3]
           ensure 'v a f', selectedBufferRange: [[2, 0], [6, 0]]
 
         it "[when cursor is at column 0 of function-fold start row]", ->
