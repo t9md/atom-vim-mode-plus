@@ -1,3 +1,11 @@
+# 1.22.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.21.0...v1.22.0)
+- Improve: Now `Function` TextObject(`i f`, `a f`) can detect **more** function. #984
+  - Previously vmp can detect only function which parameter-list and body forms single fold.
+  - Now vmp can detect function if parameter-list and body form different fold.
+- Fix: No longer editor freeze when big count was set for `MoveToRelativeLine` targeted operation. #985
+  - E.g. `1 0 0 0 0 0 0 0 0 0 d d`, `1 0 0 0 0 0 0 0 0 0 y y`
+
 # 1.21.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.20.0...v1.21.0)
 - Support: No longer warning when user enabled `vim-mode`.
