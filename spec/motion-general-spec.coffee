@@ -182,6 +182,7 @@ describe "Motion general", ->
       it "by `g }`", -> ensureBigCountMotion 'g }', cursor: [1, 2] # No fold no move but won't freeze.
       it "by `, N`", -> ensureBigCountMotion ', N', cursor: [1, 2] # No grammar, no move but won't freeze.
       it "by `, n`", -> ensureBigCountMotion ', n', cursor: [1, 2] # No grammar, no move but won't freeze.
+      it "by `y y`", -> ensureBigCountMotion 'y y', cursor: [1, 2]
 
     describe "the k keybinding", ->
       beforeEach ->
