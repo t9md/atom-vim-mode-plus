@@ -10,10 +10,10 @@
     "atom": "^1.22.0"
   },
   "dependencies": {
-    "atom-space-pen-views": "^2.1.1",
+    "atom-select-list": "^0.7.0",
     "change-case": "^3.0.1",
     "fs-plus": "^2.8.1",
-    "fuzzaldrin": "^2.1.0",
+    "fuzzaldrin-plus": "^0.6.0",
     "grim": "^2.0.2",
     "semver": "^5.4.1",
     "underscore-plus": "1.x"
