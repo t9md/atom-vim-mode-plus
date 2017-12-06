@@ -1,3 +1,8 @@
+# 1.22.1:
+- Fix: Allow `numpad0` to be used when entering a number before a command #989 by @sunjay
+  - Now: Can set number `1 0` by `numpad1 numpad0`.
+  - Old: `numpad0` incorrectly moved cursor to head of line by incorrect keymap.
+
 # 1.22.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.21.0...v1.22.0)
 - Improve: Now `Function` TextObject(`i f`, `a f`) can detect **more** function. #984
