@@ -18,7 +18,7 @@ vim-mode improved.
     - [In visual-block mode, some motions make the editor slow, freeze.](#in-visual-block-mode-some-motions-make-the-editor-slow-freeze)
     - [ex-mode?](#ex-mode)
     - [Want to suppress autocomplete-plus's auto suggestion except insert-mode.](#want-to-suppress-autocomplete-pluss-auto-suggestion-except-insert-mode)
-    - [Flash effect not appear on cursor-line, occurrence-marker is not displayed on cursor-line too.](#flash-effect-not-appear-on-cursor-line-occurrence-marker-is-not-displayed-on-cursor-line-too)
+    - [Flash effect does not appear on cursor-line, occurrence-marker is not displayed on cursor-line either.](#flash-effect-does-not-appear-on-cursor-line-occurrence-marker-is-not-displayed-on-cursor-line-either)
     - [Surround not work](#surround-not-work)
     - [How can I insert single white space when surround?](#how-can-i-insert-single-white-space-when-surround)
 - [Wiki](#wiki)
@@ -39,6 +39,8 @@ Install using [Atoms package installer](http://flight-manual.atom.io/using-atom/
 
 These features are very powerful, especially for the power user. Read the following documents to learn how to use them.  
 
+- [Movie on youtube to show power of occurrence](https://www.youtube.com/watch?v=01yHgi59ASg&t=119s)
+- [Tweet for quick guide for occurrence](https://twitter.com/t9md/status/928155248283197440)
 - [Advanced Topic Tutorial](https://github.com/t9md/atom-vim-mode-plus/wiki/AdvancedTopicTutorial)
 - [Occurrence Modifier](https://github.com/t9md/atom-vim-mode-plus/wiki/OccurrenceModifier)
 - [CHANGELOG.md](https://github.com/t9md/atom-vim-mode-plus/blob/master/CHANGELOG.md)
