@@ -67,7 +67,7 @@ describe "dirty work for fast package activation", ->
       "lib/base.js"
       "lib/settings.js"
       "lib/vim-state.js"
-      "lib/command-table.json"
+      "lib/json/command-table.json"
     ]
     if atom.inDevMode()
       shouldRequireFilesInOrdered.push('lib/developer.js')
@@ -103,7 +103,7 @@ describe "dirty work for fast package activation", ->
           extraShouldRequireFilesInOrdered = [
             "lib/status-bar-manager.js"
             "lib/operation-stack.js"
-            "lib/file-table.json"
+            "lib/json/file-table.json"
             "lib/motion.js"
             "lib/utils.js"
             "lib/cursor-style-manager.js"
@@ -130,7 +130,7 @@ describe "dirty work for fast package activation", ->
           Base = pack.mainModule.provideVimModePlus().Base
           expect(Object.keys(Base.classTable)).toHaveLength(0)
           Base.getClass("MoveRight")
-          fileTable = require("../lib/file-table.json")
+          fileTable = require("../lib/json/file-table.json")
           expect(fileTable["./motion"].length).toBe(Object.keys(Base.classTable).length)
           expect(Object.keys(Base.classTable).length).toBeGreaterThan(0)
 
@@ -138,8 +138,8 @@ describe "dirty work for fast package activation", ->
       it "buildCommandTable return table which is equals to initially loaded command table", ->
         withCleanActivation (pack) ->
           Base = pack.mainModule.provideVimModePlus().Base
-          oldCommandTable = require("../lib/command-table.json")
-          oldFileTable = require("../lib/file-table.json")
+          oldCommandTable = require("../lib/json/command-table.json")
+          oldFileTable = require("../lib/json/file-table.json")
 
           developer = require "../lib/developer"
           {commandTable, fileTable} = developer.buildCommandTableAndFileTable()
