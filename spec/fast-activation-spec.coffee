@@ -64,7 +64,6 @@ describe "dirty work for fast package activation", ->
   describe "requrie as minimum num of file as possible on startup", ->
     shouldRequireFilesInOrdered = [
       "lib/main.js"
-      "lib/base.js"
       "lib/settings.js"
       "lib/vim-state.js"
       "lib/json/command-table.json"
@@ -103,6 +102,7 @@ describe "dirty work for fast package activation", ->
           extraShouldRequireFilesInOrdered = [
             "lib/status-bar-manager.js"
             "lib/operation-stack.js"
+            "lib/base.js"
             "lib/json/file-table.json"
             "lib/motion.js"
             "lib/utils.js"
@@ -121,13 +121,13 @@ describe "dirty work for fast package activation", ->
     describe "initial classRegistry", ->
       it "is empty", ->
         withCleanActivation (pack) ->
-          Base = pack.mainModule.provideVimModePlus().Base
+          Base = require '../lib/base'
           expect(Object.keys(Base.classTable)).toHaveLength(0)
 
     describe "fully populated classTable", ->
       it "Base.getClass(motionClass) populate class table for all members belonging to same file(motions)", ->
         withCleanActivation (pack) ->
-          Base = pack.mainModule.provideVimModePlus().Base
+          Base = require '../lib/base'
           expect(Object.keys(Base.classTable)).toHaveLength(0)
           Base.getClass("MoveRight")
           fileTable = require("../lib/json/file-table.json")
@@ -137,7 +137,7 @@ describe "dirty work for fast package activation", ->
     describe "make sure command-table and file-table is NOT out-of-date", ->
       it "buildCommandTable return table which is equals to initially loaded command table", ->
         withCleanActivation (pack) ->
-          Base = pack.mainModule.provideVimModePlus().Base
+          Base = require '../lib/base'
           oldCommandTable = require("../lib/json/command-table.json")
           oldFileTable = require("../lib/json/file-table.json")
 
