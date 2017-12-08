@@ -62,14 +62,17 @@ describe "dirty work for fast package activation", ->
 
   # * To reduce IO and compile-evaluation of js file on startup
   describe "requrie as minimum num of file as possible on startup", ->
-    shouldRequireFilesInOrdered = [
-      "lib/main.js"
-      "lib/settings.js"
-      "lib/vim-state.js"
-      "lib/json/command-table.json"
-    ]
-    if atom.inDevMode()
-      shouldRequireFilesInOrdered.push('lib/developer.js')
+    shouldRequireFilesInOrdered = null
+
+    beforeEach ->
+      shouldRequireFilesInOrdered = [
+        "lib/main.js"
+        "lib/settings.js"
+        "lib/vim-state.js"
+        "lib/json/command-table.json"
+      ]
+      if atom.inDevMode()
+        shouldRequireFilesInOrdered.push('lib/developer.js')
 
     it "THIS IS WORKAROUND FOR Travis-CI's", ->
       # HACK:
@@ -110,6 +113,30 @@ describe "dirty work for fast package activation", ->
           ]
           files = shouldRequireFilesInOrdered.concat(extraShouldRequireFilesInOrdered)
           ensureRequiredFiles(files)
+
+    it "just referencing service function doesn't load base.js", ->
+      withCleanActivation (pack) ->
+        service = pack.mainModule.provideVimModePlus()
+        for key in Object.keys(service)
+          service.key
+        ensureRequiredFiles(shouldRequireFilesInOrdered)
+
+    it "calling service.getClass load base.js", ->
+      withCleanActivation (pack) ->
+        service = pack.mainModule.provideVimModePlus()
+        service.getClass("MoveRight")
+        extraShouldRequireFilesInOrdered = [
+          "lib/base.js"
+          "lib/json/file-table.json"
+          "lib/motion.js"
+        ]
+        ensureRequiredFiles(shouldRequireFilesInOrdered.concat(extraShouldRequireFilesInOrdered))
+
+    it "calling service.registerCommandFromSpec doesn't load base.js", ->
+      withCleanActivation (pack) ->
+        service = pack.mainModule.provideVimModePlus()
+        service.registerCommandFromSpec("SampleCommand", {prefix: 'vim-mode-plus-user', getClass: () => "SampleCommand"})
+        ensureRequiredFiles(shouldRequireFilesInOrdered)
 
   describe "command-table", ->
     # * Loading atom commands from pre-generated command-table.
