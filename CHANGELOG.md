@@ -1,4 +1,20 @@
+# 1.23.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.22.1...v1.23.0)
+- Doc: add youtube movie link on README.md
+- Performance: Now `base.js` is not loaded on startup. So we got extra performance boost. #993.
+  - Now in my MacBook Pro Late 2016. it score under 30ms(27ms is fastest record) activation time.
+- Support: Now deprecate use of `service.Base` provided by `provideVimModePlus()` service, warn to use `service.getClass` instead.
+  - new `service.getClass`: since I decided to not expose bare `Base` class as it was.
+  - new `service.registerCommandsFromSpec`: for adding multiple commands which load body lazily
+- Internal:
+  - Move `command-table.json`, `file-table.json` to under directly `lib/json`. #990
+  - Keep `command-table-pretty.json`, `file-table-pretty.json` for human read. #990
+- Improve: Smooth scroll now no longer depends on jQuery, use `window.requestAnimationFrame()` instead #991
+- Improve: `TransformStringBySelectList` now use `atom-select-list` instead of `space-pen-view`'s `SelectListView`
+  - As a result, vmp no remove dependency to `space-pen-view`
+
 # 1.22.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.22.0...v1.22.1)
 - Fix: Allow `numpad0` to be used when entering a number before a command #989 by @sunjay
   - Now: Can set number `1 0` by `numpad1 numpad0`.
   - Old: `numpad0` incorrectly moved cursor to head of line by incorrect keymap.
