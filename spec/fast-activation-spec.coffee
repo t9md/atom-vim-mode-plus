@@ -135,7 +135,7 @@ describe "dirty work for fast package activation", ->
     it "calling service.registerCommandFromSpec doesn't load base.js", ->
       withCleanActivation (pack) ->
         service = pack.mainModule.provideVimModePlus()
-        service.registerCommandFromSpec("SampleCommand", {prefix: 'vim-mode-plus-user', getClass: () => "SampleCommand"})
+        service.registerCommandFromSpec("SampleCommand", {prefix: 'vim-mode-plus-user', getClass: -> "SampleCommand"})
         ensureRequiredFiles(shouldRequireFilesInOrdered)
 
   describe "command-table", ->
