@@ -1,3 +1,16 @@
+# 1.24.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.23.0...v1.24.0)
+- New, Breaking: `a-fold` now select "conjoined" fold #996
+  - Old: `a-fold` just select current fold only.
+  - New: `a-fold` select all conjoined fold range.
+    - select previous fold if previous fold end at startRow of current fold.
+    - select next fold if next fold start at endRow of current fold.
+  - So you can do
+    - delete(`d z`) or yank(`y z`) whole `if/else-if/else` clause by just two keystrokes.
+    - delete(`d z`) or yank(`y z`) whole `try/catch/finally` clause by just two keystrokes.
+- Fix: `j` and `k` no longer stuck at row when screenRow contains multiple fold. #994, #995
+  - e.g. fold `else if`-fold, then `if`-fold, then try to cross row by `j` or `k` but couldn't.
+
 # 1.23.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.22.1...v1.23.0)
 - Doc: add youtube movie link on README.md
