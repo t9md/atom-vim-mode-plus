@@ -1,3 +1,6 @@
+# 1.24.1:
+- Fix: quick fix for cursor become invisible in Atom-v1.24.0-beta0.
+
 # 1.24.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.23.0...v1.24.0)
 - New, Breaking: `a-fold` now select "conjoined" fold #996
