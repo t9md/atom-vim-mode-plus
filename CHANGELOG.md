@@ -1,3 +1,8 @@
+# 1.24.2:
+- Fix: All code fold related features were broken in Atom-v1.24.0-beta0, but no longer. #1002
+  - Since `editor.tokenizedBuffer.getFoldableRanges(N)` now seems require explicit indentLevel(`N`).
+- Fix: `vim-mode-plus:reload` and `vim-mode-plus:reload-with-dependencies` which are used for faster dev cycle. #1002
+
 # 1.24.1:
 - Fix: quick fix for cursor become invisible in Atom-v1.24.0-beta0.
 
