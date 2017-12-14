@@ -1,3 +1,8 @@
+# 1.24.3:
+- Fix: Remove no longer necessary temporal imperfect workaround of Atom-v1.24.0-beta0 issue. #998
+  - After Atom-v1.24.0-beta1, no need to workaround beta0 issue since it's fixed.
+  - Detailed information is here https://github.com/atom/atom/pull/16294.
+
 # 1.24.2:
 - Fix: All code fold related features were broken in Atom-v1.24.0-beta0, but no longer. #1002
   - Since `editor.tokenizedBuffer.getFoldableRanges(N)` now seems require explicit indentLevel(`N`).
