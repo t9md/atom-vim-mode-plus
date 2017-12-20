@@ -1,14 +1,21 @@
+# 1.24.4:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.24.3...v1.24.4)
+- Fix: `j`, `k` threw exception on folded row which is also soft-wrapped, but no longer. #1003
+
 # 1.24.3:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.24.2...v1.24.3)
 - Fix: Remove no longer necessary temporal imperfect workaround of Atom-v1.24.0-beta0 issue. #998
   - After Atom-v1.24.0-beta1, no need to workaround beta0 issue since it's fixed.
   - Detailed information is here https://github.com/atom/atom/pull/16294.
 
 # 1.24.2:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.24.1...v1.24.2)
 - Fix: All code fold related features were broken in Atom-v1.24.0-beta0, but no longer. #1002
   - Since `editor.tokenizedBuffer.getFoldableRanges(N)` now seems require explicit indentLevel(`N`).
 - Fix: `vim-mode-plus:reload` and `vim-mode-plus:reload-with-dependencies` which are used for faster dev cycle. #1002
 
 # 1.24.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.24.0...v1.24.1)
 - Fix: quick fix for cursor become invisible in Atom-v1.24.0-beta0.
 
 # 1.24.0:
