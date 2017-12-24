@@ -28,6 +28,7 @@
   "vim-mode-plus:put-after-with-auto-indent",
   "vim-mode-plus:add-blank-line-below",
   "vim-mode-plus:add-blank-line-above",
+  "vim-mode-plus:resolve-git-conflict",
   "vim-mode-plus:activate-insert-mode",
   "vim-mode-plus:activate-replace-mode",
   "vim-mode-plus:insert-after",

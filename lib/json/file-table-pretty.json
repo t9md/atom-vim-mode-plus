@@ -31,7 +31,8 @@
     "PutBeforeWithAutoIndent",
     "PutAfterWithAutoIndent",
     "AddBlankLineBelow",
-    "AddBlankLineAbove"
+    "AddBlankLineAbove",
+    "ResolveGitConflict"
   ],
   "./operator-insert": [
     "ActivateInsertModeBase",
