@@ -1716,52 +1716,143 @@ describe "Operator general", ->
             """
 
   describe 'ResolveGitConflict', ->
-    resolveConflictAtRowThenEnsure = (row, text) ->
+    resolveConflictAtRowThenEnsure = (row, options) ->
       set cursor: [row, 0]
       dispatch(editor.element, 'vim-mode-plus:resolve-git-conflict')
-      ensure null, {text}
+      ensure null, options
 
-    texts =
-      original: """
-
+    describe "normal conflict section", ->
+      original = """
+        ------start
         <<<<<<< HEAD
         ours 1
         ours 2
-        ours 3
         =======
         theirs 1
         theirs 2
-        theirs 3
-        >>>>>>> bob
-        \n
+        >>>>>>> branch-a
+        ------end
         """
-      ours: """
-
-        ours 1
+      ours = """
+        ------start
+        |ours 1
         ours 2
-        ours 3
-        \n
+        ------end
         """
-      theirs: """
-
-        theirs 1
+      theirs = """
+        ------start
+        |theirs 1
         theirs 2
-        theirs 3
-        \n
+        ------end
         """
 
+      beforeEach -> set text: original
 
-    beforeEach ->
-      set text: texts.original
+      it "row 0", -> resolveConflictAtRowThenEnsure 0, text: original
+      it "row 1", -> resolveConflictAtRowThenEnsure 1, textC: ours # <<<<<<< HEAD
+      it "row 2", -> resolveConflictAtRowThenEnsure 2, textC: ours
+      it "row 3", -> resolveConflictAtRowThenEnsure 3, textC: ours
+      it "row 4", -> resolveConflictAtRowThenEnsure 4, text: original # =======
+      it "row 5", -> resolveConflictAtRowThenEnsure 5, textC: theirs
+      it "row 6", -> resolveConflictAtRowThenEnsure 6, textC: theirs
+      it "row 7", -> resolveConflictAtRowThenEnsure 7, textC: theirs # >>>>>>> branch-a
+      it "row 8", -> resolveConflictAtRowThenEnsure 8, text: original
 
-    it "row 0", -> resolveConflictAtRowThenEnsure 0, texts.original
-    it "row 1", -> resolveConflictAtRowThenEnsure 1, texts.ours
-    it "row 2", -> resolveConflictAtRowThenEnsure 2, texts.ours
-    it "row 3", -> resolveConflictAtRowThenEnsure 3, texts.ours
-    it "row 4", -> resolveConflictAtRowThenEnsure 4, texts.ours
-    it "row 5", -> resolveConflictAtRowThenEnsure 5, texts.original
-    it "row 6", -> resolveConflictAtRowThenEnsure 6, texts.theirs
-    it "row 7", -> resolveConflictAtRowThenEnsure 7, texts.theirs
-    it "row 8", -> resolveConflictAtRowThenEnsure 8, texts.theirs
-    it "row 9", -> resolveConflictAtRowThenEnsure 9, texts.theirs
-    it "row 10", -> resolveConflictAtRowThenEnsure 10, texts.original
+    describe "ours section is empty", ->
+      original = """
+        ------start
+        <<<<<<< HEAD
+        =======
+        theirs 1
+        >>>>>>> branch-a
+        ------end
+        """
+      ours = """
+        ------start
+        |------end
+        """
+      theirs = """
+        ------start
+        |theirs 1
+        ------end
+        """
+
+      beforeEach -> set text: original
+
+      it "row 0", -> resolveConflictAtRowThenEnsure 0, text: original
+      it "row 1", -> resolveConflictAtRowThenEnsure 1, textC: ours # <<<<<<< HEAD
+      it "row 2", -> resolveConflictAtRowThenEnsure 2, text: original # =======
+      it "row 3", -> resolveConflictAtRowThenEnsure 3, textC: theirs
+      it "row 4", -> resolveConflictAtRowThenEnsure 4, textC: theirs # >>>>>>> branch-a
+      it "row 5", -> resolveConflictAtRowThenEnsure 5, text: original
+
+    describe "theirs section is empty", ->
+      original = """
+        ------start
+        <<<<<<< HEAD
+        ours 1
+        =======
+        >>>>>>> branch-a
+        ------end
+        """
+      ours = """
+        ------start
+        |ours 1
+        ------end
+        """
+      theirs = """
+        ------start
+        |------end
+        """
+
+      beforeEach -> set text: original
+
+      it "row 0", -> resolveConflictAtRowThenEnsure 0, text: original
+      it "row 1", -> resolveConflictAtRowThenEnsure 1, textC: ours # <<<<<<< HEAD
+      it "row 2", -> resolveConflictAtRowThenEnsure 2, textC: ours
+      it "row 3", -> resolveConflictAtRowThenEnsure 3, text: original # =======
+      it "row 4", -> resolveConflictAtRowThenEnsure 4, textC: theirs # >>>>>>> branch-a
+      it "row 5", -> resolveConflictAtRowThenEnsure 5, text: original
+
+    describe "both ours and theirs section is empty", ->
+      original = """
+        ------start
+        <<<<<<< HEAD
+        =======
+        >>>>>>> branch-a
+        ------end
+        """
+      ours = """
+        ------start
+        |------end
+        """
+
+      beforeEach -> set text: original
+
+      it "row 0", -> resolveConflictAtRowThenEnsure 0, text: original
+      it "row 1", -> resolveConflictAtRowThenEnsure 1, textC: ours # <<<<<<< HEAD
+      it "row 2", -> resolveConflictAtRowThenEnsure 2, text: original # =======
+      it "row 3", -> resolveConflictAtRowThenEnsure 3, textC: ours # >>>>>>> branch-a
+      it "row 4", -> resolveConflictAtRowThenEnsure 4, text: original
+
+    describe "no separator section", ->
+      original = """
+        ------start
+        <<<<<<< HEAD
+        ours 1
+        >>>>>>> branch-a
+        ------end
+        """
+      ours = """
+        ------start
+        |ours 1
+        ------end
+        """
+
+      beforeEach -> set text: original
+
+      it "row 0", -> resolveConflictAtRowThenEnsure 0, text: original
+      it "row 1", -> resolveConflictAtRowThenEnsure 1, textC: ours # <<<<<<< HEAD
+      it "row 2", -> resolveConflictAtRowThenEnsure 2, textC: ours
+      it "row 3", -> resolveConflictAtRowThenEnsure 3, textC: ours  # >>>>>>> branch-a
+      it "row 4", -> resolveConflictAtRowThenEnsure 4, text: original
