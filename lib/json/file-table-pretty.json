@@ -21,6 +21,7 @@
     "Yank",
     "YankLine",
     "YankToLastCharacterOfLine",
+    "YankDiffHunk",
     "Increase",
     "Decrease",
     "IncrementNumber",
@@ -343,7 +344,9 @@
     "APersistentSelection",
     "InnerPersistentSelection",
     "AVisibleArea",
-    "InnerVisibleArea"
+    "InnerVisibleArea",
+    "ADiffHunk",
+    "InnerDiffHunk"
   ],
   "./misc-command": [
     "MiscCommand",
