@@ -802,6 +802,48 @@ describe "Operator general", ->
     it "yank the whole lines to the default register", ->
       ensure 'v j Y', cursor: [0, 0], register: '"': text: text
 
+  describe "YankDiffHunk", ->
+    beforeEach ->
+      set
+        text: """
+        --- file        2017-12-24 15:11:33.000000000 +0900
+        +++ file-new    2017-12-24 15:15:09.000000000 +0900
+        @@ -1,9 +1,9 @@
+         line 0
+        +line 0-1
+         line 1
+        -line 2
+        +line 1-1
+         line 3
+        -line 4
+         line 5
+        -line 6
+        -line 7
+        +line 7-1
+        +line 7-2
+         line 8\n
+        """
+
+      settings.set('useClipboardAsDefaultRegister', true)
+      atom.clipboard.write('___________')
+      ensure null, register: '"': text: '___________'
+
+    it "yank diff-hunk under cursor", ->
+      ensureYankedText = (row, text) ->
+        set cursor: [row, 0]
+        dispatch(editor.element, 'vim-mode-plus:yank-diff-hunk')
+        ensure null, register: '"': text: text
+
+      ensureYankedText 2, "___________" # do nothing
+      ensureYankedText 4, "line 0-1\n"
+      ensureYankedText 6, "line 2\n"
+      ensureYankedText 7, "line 1-1\n"
+      ensureYankedText 9, "line 4\n"
+      ensureYankedText 11, "line 6\nline 7\n"
+      ensureYankedText 12, "line 6\nline 7\n"
+      ensureYankedText 13, "line 7-1\nline 7-2\n"
+      ensureYankedText 14, "line 7-1\nline 7-2\n"
+
   describe "the p keybinding", ->
     describe "with single line character contents", ->
       beforeEach ->
