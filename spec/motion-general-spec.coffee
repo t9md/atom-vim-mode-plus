@@ -897,6 +897,54 @@ describe "Motion general", ->
         set cursor: [4, 3]
         ensure 'y {', register: '"': text: "\n3: paragraph-1\n4: "
 
+  describe "MoveToNextDiffHunk, MoveToPreviousDiffHunk", ->
+    beforeEach ->
+      set
+        text: """
+        --- file        2017-12-24 15:11:33.000000000 +0900
+        +++ file-new    2017-12-24 15:15:09.000000000 +0900
+        @@ -1,9 +1,9 @@
+         line 0
+        +line 0-1
+         line 1
+        -line 2
+        +line 1-1
+         line 3
+        -line 4
+         line 5
+        -line 6
+        -line 7
+        +line 7-1
+        +line 7-2
+         line 8\n
+        """
+        cursor: [0, 0]
+
+      runs ->
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            ']': 'vim-mode-plus:move-to-next-diff-hunk'
+            '[': 'vim-mode-plus:move-to-previous-diff-hunk'
+
+    it "move to next and previous hunk", ->
+      ensure ']', cursor: [1, 0]
+      ensure ']', cursor: [4, 0]
+      ensure ']', cursor: [6, 0]
+      ensure ']', cursor: [7, 0]
+      ensure ']', cursor: [9, 0]
+      ensure ']', cursor: [11, 0]
+      ensure ']', cursor: [13, 0]
+      ensure ']', cursor: [13, 0]
+
+      ensure '[', cursor: [11, 0]
+      ensure '[', cursor: [9, 0]
+      ensure '[', cursor: [7, 0]
+      ensure '[', cursor: [6, 0]
+      ensure '[', cursor: [4, 0]
+      ensure '[', cursor: [1, 0]
+      ensure '[', cursor: [0, 0]
+      ensure '[', cursor: [0, 0]
+
   describe "the b keybinding", ->
     beforeEach ->
       set
