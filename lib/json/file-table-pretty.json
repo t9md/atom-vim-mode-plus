@@ -184,6 +184,8 @@
     "MoveToPreviousSentenceSkipBlankRow",
     "MoveToNextParagraph",
     "MoveToPreviousParagraph",
+    "MoveToNextHunk",
+    "MoveToPreviousHunk",
     "MoveToBeginningOfLine",
     "MoveToColumn",
     "MoveToLastCharacterOfLine",
