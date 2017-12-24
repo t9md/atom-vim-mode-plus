@@ -1714,3 +1714,54 @@ describe "Operator general", ->
               result.push(member2, member3)
             }\n
             """
+
+  describe 'ResolveGitConflict', ->
+    resolveConflictAtRowThenEnsure = (row, text) ->
+      set cursor: [row, 0]
+      dispatch(editor.element, 'vim-mode-plus:resolve-git-conflict')
+      ensure null, {text}
+
+    texts =
+      original: """
+
+        <<<<<<< HEAD
+        ours 1
+        ours 2
+        ours 3
+        =======
+        theirs 1
+        theirs 2
+        theirs 3
+        >>>>>>> bob
+        \n
+        """
+      ours: """
+
+        ours 1
+        ours 2
+        ours 3
+        \n
+        """
+      theirs: """
+
+        theirs 1
+        theirs 2
+        theirs 3
+        \n
+        """
+
+
+    beforeEach ->
+      set text: texts.original
+
+    it "row 0", -> resolveConflictAtRowThenEnsure 0, texts.original
+    it "row 1", -> resolveConflictAtRowThenEnsure 1, texts.ours
+    it "row 2", -> resolveConflictAtRowThenEnsure 2, texts.ours
+    it "row 3", -> resolveConflictAtRowThenEnsure 3, texts.ours
+    it "row 4", -> resolveConflictAtRowThenEnsure 4, texts.ours
+    it "row 5", -> resolveConflictAtRowThenEnsure 5, texts.original
+    it "row 6", -> resolveConflictAtRowThenEnsure 6, texts.theirs
+    it "row 7", -> resolveConflictAtRowThenEnsure 7, texts.theirs
+    it "row 8", -> resolveConflictAtRowThenEnsure 8, texts.theirs
+    it "row 9", -> resolveConflictAtRowThenEnsure 9, texts.theirs
+    it "row 10", -> resolveConflictAtRowThenEnsure 10, texts.original
