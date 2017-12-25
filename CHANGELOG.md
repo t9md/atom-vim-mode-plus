@@ -1,3 +1,33 @@
+# 1.25.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.24.4...v1.25.0)
+- Fix: Hide bottom gutter on `maximize-pane`
+- New: Motion, TextObjet, Operator for work with `diff` buffer. #1009
+  - Operator: `yank-diff-hunk`
+    - Yank diff-hunk under cursor with auto-removing leading `+` or `-` char
+  - Motion: `move-to-next-diff-hunk` and `move-to-previous-diff-hunk`
+    - Move to next diff-hunk which starts with `+` or `-` char
+  - TextObject: `a-diff-hunk` and `inner-diff-hunk`(No behavior differences in these two text-object)
+    - Just for used by `yank-diff-hunk` operator
+  - Intending to be used in diff output text buffer(e.g. output of `git diff`).
+  - No keymaps are provided, set as you like in your `keymap.cson`, here is example.
+
+    ```coffeescript
+    # "source diff" is provided by language-diff package
+    'atom-text-editor.vim-mode-plus.normal-mode[data-grammar="source diff"]':
+      'tab': "vim-mode-plus:move-to-next-diff-hunk"
+      'shift-tab': "vim-mode-plus:move-to-previous-diff-hunk"
+    ```
+
+- New: `vim-mode-plus:resolve-git-conflict` operator. #1011
+  - Detail: https://github.com/t9md/atom-vim-mode-plus/pull/1011
+  - Quickly replace git-conflict's hunk with `ours` or `theirs` based on cursor position when you execute this command.
+  - No keymap provided. Keymap example is here
+  
+    ```coffeescript
+    'atom-text-editor.vim-mode-plus.normal-mode':
+      'space g c': 'vim-mode-plus:resolve-git-conflict'
+    ```
+
 # 1.24.4:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.24.3...v1.24.4)
 - Fix: `j`, `k` threw exception on folded row which is also soft-wrapped, but no longer. #1003
