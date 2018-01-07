@@ -35,6 +35,8 @@ vim-mode improved.
 
 Install using [Atoms package installer](http://flight-manual.atom.io/using-atom/sections/atom-packages/)
 
+`apm install vim-mode-plus`
+
 # Some Features
 
 These features are very powerful, especially for the power user. Read the following documents to learn how to use them.  
