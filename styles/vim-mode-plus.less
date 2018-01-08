@@ -294,7 +294,17 @@ atom-workspace.vim-mode-plus--pane-maximized {
   }
   &.vim-mode-plus--hide-tab-bar { .tab-bar { display: none; } }
   &.vim-mode-plus--hide-status-bar { .status-bar { display: none; } }
-  &.vim-mode-plus--pane-centered { atom-text-editor:not(.mini) { margin-left: 20%; } }
+  &.vim-mode-plus--pane-centered {
+    atom-text-editor:not(.mini) {
+      margin-left: 20%;
+      atom-text-editor {
+        // Some package embed another text-editor into normal text-editor by using block decoration.
+        // But we don't want this editor in editor centered again.
+        // E.g. git-diff-details, inline-git-diff
+        margin-left: 0%;
+      }
+    }
+  }
 }
 
 
