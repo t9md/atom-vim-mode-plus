@@ -1,3 +1,9 @@
+# 1.25.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.25.0...v1.25.1)
+- Improve: Avoid centering editor-in-editor on `vim-mode-plus:maximize-pane` #1014
+  - No longer centering text-editor which is rendered within normal text-editor using block decoration
+  - This editor-in-editor is created by pkg `git-diff-details` or `inline-git-diff`(my fork of `git-diff-details`)
+
 # 1.25.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.24.4...v1.25.0)
 - Fix: Hide bottom gutter on `maximize-pane`
@@ -22,7 +28,7 @@
   - Detail: https://github.com/t9md/atom-vim-mode-plus/pull/1011
   - Quickly replace git-conflict's hunk with `ours` or `theirs` based on cursor position when you execute this command.
   - No keymap provided. Keymap example is here
-  
+
     ```coffeescript
     'atom-text-editor.vim-mode-plus.normal-mode':
       'space g c': 'vim-mode-plus:resolve-git-conflict'
