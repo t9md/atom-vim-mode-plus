@@ -1582,9 +1582,9 @@ describe "Operator TransformString", ->
               {f1, f2, f3} = require('hello')
               f1(f2(1, "a, b, c"), 2, (arg) => console.log(arg))
               s = |`
-              abc
-              def
-              hij
+                abc
+                def
+                hij
               `
             }
             """
