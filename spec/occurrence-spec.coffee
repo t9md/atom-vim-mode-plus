@@ -1156,8 +1156,16 @@ describe "Occurrence", ->
         ensure "c o", mode: "operator-pending", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']
         expect(atom.confirm).not.toHaveBeenCalled()
 
+      it "does not ask confirmation on O-modifier", ->
+        ensure "c O", mode: "operator-pending", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']
+        expect(atom.confirm).not.toHaveBeenCalled()
+
       it "does not ask confirmation on `g o`", ->
         ensure "g o", mode: "normal", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']
+        expect(atom.confirm).not.toHaveBeenCalled()
+
+      it "does not ask confirmation on `g O`", ->
+        ensure "g O", mode: "normal", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']
         expect(atom.confirm).not.toHaveBeenCalled()
 
     describe "when exceeding threshold", ->
@@ -1166,6 +1174,10 @@ describe "Occurrence", ->
 
       it "ask confirmation on o-modifier", ->
         ensure "c o", mode: "operator-pending", occurrenceText: []
+        expect(atom.confirm).toHaveBeenCalled()
+
+      it "ask confirmation on O-modifier", ->
+        ensure "c O", mode: "operator-pending", occurrenceText: []
         expect(atom.confirm).toHaveBeenCalled()
 
       it "can cancel and confirm on o-modifier", ->
@@ -1177,6 +1189,10 @@ describe "Occurrence", ->
 
       it "ask confirmation on `g o`", ->
         ensure "g o", mode: "normal", occurrenceText: []
+        expect(atom.confirm).toHaveBeenCalled()
+
+      it "ask confirmation on `g O`", ->
+        ensure "g O", mode: "normal", occurrenceText: []
         expect(atom.confirm).toHaveBeenCalled()
 
       it "can cancel and confirm on `g o`", ->
