@@ -1,3 +1,25 @@
+# 1.26.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.25.1...v1.26.0)
+- Fix: `confirmThresholdOnOccurrenceOperation` now properly applied to subword occurrence operation like `g O`, `c O` etc.
+  - Previously `confirmThresholdOnOccurrenceOperation` check was just bypassed for subword occurrence.
+- New, Experimental: Replace text via diff for `TransformString` operators.
+  - Currently this new way of text mutation is used by `trim-string`(`g |`) and `surround` family(disabled by default).
+  - To enable it for `surround` family enable `replaceByDiffOnSurround` new configuration.
+  - How different from normal replace?
+    - Scenario: `foo` - surround -> `(foo)` - change surround -> `{foo}` - delete surround -> `foo`
+    - Normal replace:
+      - All text transformation is done by replacing old text with new text.
+    - Replace by diff:
+      - All text transformation is done inserting/deleting minimum amount of text.
+      - `surround`: adding `(` and `)`,
+      - `change-surround`: replace `(` to `{`, `)` to `}`
+      - `delete-surround`: remove `{` and `}`
+  - Pros vs Cons
+    - Pros: Cleaner undo/redo highlight, more accurate cursor staying by using marker to track original position.
+    - Cons: When redoing/undoing `delete-surround`, `change-surround` happens at off-screen position, user doesn't see flash highlight
+      - Because inner text of surround pair is not mutated(so not flashed), This is most significant disadvantage.
+- Internal: Simplify commands registration for vimState bound command in `main.js`.
+
 # 1.25.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.25.0...v1.25.1)
 - Improve: Avoid centering editor-in-editor on `vim-mode-plus:maximize-pane` #1014
