@@ -55,7 +55,9 @@
     "parser": "babel-eslint",
     "globals": [
       "atom",
-      "describe"
+      "describe",
+      "jasmine",
+      "expect"
     ]
   }
 }
