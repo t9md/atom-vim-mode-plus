@@ -53,6 +53,7 @@
   "vim-mode-plus:insert-at-next-fold-start",
   "vim-mode-plus:change",
   "vim-mode-plus:change-occurrence",
+  "vim-mode-plus:change-subword-occurrence",
   "vim-mode-plus:substitute",
   "vim-mode-plus:substitute-line",
   "vim-mode-plus:change-line",

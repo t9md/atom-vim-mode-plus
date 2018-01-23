@@ -61,6 +61,7 @@
     "InsertAtNextFoldStart",
     "Change",
     "ChangeOccurrence",
+    "ChangeSubwordOccurrence",
     "Substitute",
     "SubstituteLine",
     "ChangeLine",
