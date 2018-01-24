@@ -40,7 +40,7 @@
     }
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.1",
+    "babel-eslint": "^7.2.3",
     "coffeelint": "^1.10.1",
     "prettier": "^1.10.2",
     "standard": "^10.0.3"
