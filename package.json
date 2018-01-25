@@ -58,6 +58,9 @@
       "describe",
       "jasmine",
       "expect"
+    ],
+    "ignore": [
+      "spec/fixtures/*"
     ]
   }
 }
