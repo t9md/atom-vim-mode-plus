@@ -1,3 +1,9 @@
+# 1.27.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.26.0...v1.27.0)
+- New, Experimental: `change-subword-occurrence` command for direct keymap use.
+  - One-key version of `c O`.
+- Apply `standard` linting/formatting. As a result fixed lots of minor variable scope related bugs.
+
 # 1.26.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.25.1...v1.26.0)
 - Fix: `confirmThresholdOnOccurrenceOperation` now properly applied to subword occurrence operation like `g O`, `c O` etc.
