@@ -40,12 +40,27 @@
     }
   },
   "devDependencies": {
+    "babel-eslint": "^7.2.3",
     "coffeelint": "^1.10.1",
-    "prettier": "^1.10.2"
+    "prettier": "^1.10.2",
+    "standard": "^10.0.3"
   },
   "scripts": {
     "test": "apm test",
     "watch": "fswatch -0 spec lib | xargs -0 -n1 -I{} apm test",
-    "prettier": "prettier --write --no-semi --print-width=120 --no-bracket-spacing --trailing-comma=es5 'lib/**/*.js' 'spec/*.js'"
+    "prettier": "prettier --write --no-semi --print-width=120 --no-bracket-spacing --trailing-comma=es5 'lib/**/*.js' 'spec/*.js'",
+    "lint": "standard lib/*.js spec/*.js"
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "globals": [
+      "atom",
+      "describe",
+      "jasmine",
+      "expect"
+    ],
+    "ignore": [
+      "spec/fixtures/*"
+    ]
   }
 }
