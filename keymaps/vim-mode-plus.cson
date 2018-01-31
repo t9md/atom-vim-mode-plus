@@ -39,6 +39,11 @@
   'ctrl-r': 'vim-mode-plus:insert-register'
   'ctrl-o': 'vim-mode-plus:activate-normal-mode-once'
 
+# insert except autocomplete-active
+'atom-text-editor.vim-mode-plus.insert-mode:not(.autocomplete-active)':
+  'ctrl-n': 'autocomplete-plus:activate'
+  'ctrl-p': 'autocomplete-plus:activate'
+
 # except insert
 # -------------------------
 'atom-text-editor.vim-mode-plus:not(.insert-mode)':
