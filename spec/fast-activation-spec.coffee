@@ -149,17 +149,17 @@ describe "dirty work for fast package activation", ->
       it "is empty", ->
         withCleanActivation (pack) ->
           Base = require '../lib/base'
-          expect(Object.keys(Base.classTable)).toHaveLength(0)
+          expect(Base.classByName.size).toBe(0)
 
-    describe "fully populated classTable", ->
+    describe "fully populated Base.classByName", ->
       it "Base.getClass(motionClass) populate class table for all members belonging to same file(motions)", ->
         withCleanActivation (pack) ->
           Base = require '../lib/base'
-          expect(Object.keys(Base.classTable)).toHaveLength(0)
+          expect(Base.classByName.size).toBe(0)
           Base.getClass("MoveRight")
           fileTable = require("../lib/json/file-table.json")
-          expect(fileTable["./motion"].length).toBe(Object.keys(Base.classTable).length)
-          expect(Object.keys(Base.classTable).length).toBeGreaterThan(0)
+          expect(fileTable["./motion"].length).toBe(Base.classByName.size)
+          expect(Base.classByName.size > 0).toBe true
 
     describe "make sure command-table and file-table is NOT out-of-date", ->
       it "buildCommandTable return table which is equals to initially loaded command table", ->
