@@ -313,6 +313,7 @@
   "vim-mode-plus:scroll-cursor-to-left",
   "vim-mode-plus:scroll-cursor-to-right",
   "vim-mode-plus:activate-normal-mode-once",
+  "vim-mode-plus:toggle-replace-mode",
   "vim-mode-plus:insert-register",
   "vim-mode-plus:insert-last-inserted",
   "vim-mode-plus:copy-from-line-above",

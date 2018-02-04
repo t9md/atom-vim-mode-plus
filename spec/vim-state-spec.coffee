@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{getVimState, TextData, withMockPlatform} = require './spec-helper'
+{getVimState, TextData, withMockPlatform, dispatch} = require './spec-helper'
 settings = require '../lib/settings'
 
 describe "VimState", ->
@@ -313,6 +313,56 @@ describe "VimState", ->
     it "puts the editor into normal mode when <ctrl-c> is pressed", ->
       withMockPlatform editorElement, 'platform-darwin' , ->
         ensure 'R ctrl-c', mode: 'normal'
+
+    describe "shift between insert and replace", ->
+      startReplaceMode = -> dispatch(editorElement, "vim-mode-plus:activate-replace-mode")
+      startInsertMode = -> dispatch(editorElement, "vim-mode-plus:activate-insert-mode")
+
+      it "move left on escape since replace mode is submode of insert-mode", ->
+        set                textC: "01234|5"
+        ensure 'R escape', textC: "0123|45", mode: "normal"
+        ensure 'R escape', textC: "012|345", mode: "normal"
+        ensure 'R escape', textC: "01|2345", mode: "normal"
+        ensure 'R escape', textC: "0|12345", mode: "normal"
+
+      it "can activate replace multiple times but move left once on escape", ->
+        set         textC: "01234|5"
+        ensure 'R', mode: ["insert", "replace"]
+        startReplaceMode()
+        ensure null, mode: ["insert", "replace"]
+        startReplaceMode()
+        ensure null, mode: ["insert", "replace"]
+        ensure 'escape', textC: "0123|45", mode: "normal"
+
+      it "can toggle between insert and replace", ->
+        set textC: "012|345"
+
+        startReplaceMode(); editor.insertText("r"); ensure null, textC: "012r|45", mode: ["insert", "replace"]
+        startInsertMode(); editor.insertText("i"); ensure null, textC: "012ri|45", mode: ["insert", undefined]
+        startReplaceMode(); editor.insertText("r"); ensure null, textC: "012rir|5", mode: ["insert", "replace"]
+
+      it "can toggle between insert and replace by toggle-replace-mode command", ->
+        toggle = -> dispatch(editorElement, 'vim-mode-plus:toggle-replace-mode')
+        insertText = (text) -> editor.insertText(text)
+
+        set textC: "012|345"
+        startInsertMode()
+        ensure null, textC: "012|345", mode: "insert"
+
+        toggle(); insertText("r"); ensure null, textC: "012r|45",  mode: ["insert", "replace"]
+        toggle(); insertText("i"); ensure null, textC: "012ri|45", mode: ["insert", undefined]
+        toggle(); insertText("r"); ensure null, textC: "012rir|5", mode: ["insert", "replace"]
+        toggle();                  ensure null, textC: "012rir|5", mode: ["insert", undefined]
+        toggle();                  ensure null, textC: "012rir|5", mode: ["insert", "replace"]
+        toggle();                  ensure null, textC: "012rir|5", mode: ["insert", undefined]
+        toggle();                  ensure null, textC: "012rir|5", mode: ["insert", "replace"]
+
+        # Do nothing if not already in insert-mode
+        ensure "escape", textC: "012ri|r5", mode: "normal"
+        toggle(); ensure null, textC: "012ri|r5", mode: "normal"
+        toggle(); ensure null, textC: "012ri|r5", mode: "normal"
+        toggle(); ensure null, textC: "012ri|r5", mode: "normal"
+        toggle(); ensure null, textC: "012ri|r5", mode: "normal"
 
   describe "visual-mode", ->
     beforeEach ->

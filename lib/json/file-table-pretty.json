@@ -382,6 +382,7 @@
     "ScrollCursorToLeft",
     "ScrollCursorToRight",
     "ActivateNormalModeOnce",
+    "ToggleReplaceMode",
     "InsertRegister",
     "InsertLastInserted",
     "CopyFromLineAbove",
