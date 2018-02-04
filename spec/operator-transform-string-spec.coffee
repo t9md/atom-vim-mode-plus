@@ -1688,14 +1688,23 @@ describe "Operator TransformString", ->
               "[( d e f"    "(a, b, c)"
             )
             """
+        it "[text not separated] reverse text", ->
+          set textC_: " 12|345 "
+          ensure 'g r i w', textC_: " |54321 "
       describe "Sort", ->
         it "[comma separated] sort text", ->
           set textC: "   ( dog, ca|t, fish, rabbit, duck, gopher, squid )"
           ensure 'g s i (', textC: "   (| cat, dog, duck, fish, gopher, rabbit, squid )"
+        it "[text not separated] sort text", ->
+          set textC_: " fe|dcba "
+          ensure 'g s i w', textC_: " |abcdef "
       describe "SortByNumber", ->
         it "[comma separated] sort by number", ->
           set textC_: "___(9, 1, |10, 5)"
           ensure 'g S i (', textC_: "___(|1, 5, 9, 10)"
+        it "[text not separated] sort by number", ->
+          set textC_: " 91|3za87 "
+          ensure 'g s i w', textC_: " |13789az "
 
     describe "linewise target", ->
       beforeEach ->
