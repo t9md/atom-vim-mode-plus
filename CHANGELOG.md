@@ -1,3 +1,36 @@
+# 1.28.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.27.0...v1.28.0)
+- Internal: Code cleanup
+- Improve: ChangeOrder family operators now work for non-separted word
+  - Previously, change-order family operators(e.g. `reverse`) cannot reverse characters in word.
+  - But now it can reverse, rotate, sort... characters when target have not space or comma separated.
+    - Old: only can change order of separated text(space or comma or new line char)
+      - reverse: `a b c` get `c b a`
+      - reverse: `a, b, c` get `c, b, a`
+      - reverse: `abc` get `abc`(**do nothing**)
+    - New: can change order of non separated text
+      - reverse: `a b c` get `c b a`
+      - reverse: `a, b, c` get `c, b, a`
+      - reverse: `abc` get `cba`(**this is new**)
+    - Affect child of `ChangeOrder` operators bellow.
+      - `Reverse`, `ReverseInnerAnyPair`
+      - `Rotate`, `RotateBackwards`,
+      - `RotateArgumentsOfInnerPair`, `RotateArgumentsBackwardsOfInnerPair`,
+      - `Sort`, `SortCaseInsensitively`, `SortByNumber`,
+- New: Support activating `replace-mode` mode from `insert-mode`.
+  - Previously it worked, but have some odd behavior, now officially supported.
+  - New `toggle-replace-mode` misc command by which you can shift mode between `insert` and `insert.replace`. #1026
+  - This command works only in `insert-mode`, use this to quickly switch to `replace-mode` then back to `insert-mode`.
+  - No keymap by default, here is example keymap.
+    ```coffeescript
+    'atom-text-editor.vim-mode-plus.insert-mode':
+      'ctrl-cmd-r': 'vim-mode-plus:toggle-replace-mode'
+    ```
+- Internal: Introduce `operationStack.runNext` to queue operations to run next after current operation finished.
+- Internal, Fix: [harmless] `vimState.reset()` was called twice on single operator action, now reset just once.
+- Breaking, Improve: Invert rotation order for following operators(since it's counter-intuitive)
+  - `Rotate`, `RotateBackwards`, `RotateArgumentsOfInnerPair`, `RotateArgumentsBackwardsOfInnerPair`
+
 # 1.27.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.26.0...v1.27.0)
 - New, Experimental: `change-subword-occurrence` command for direct keymap use.
