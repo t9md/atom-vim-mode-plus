@@ -1,14 +1,14 @@
 # 1.28.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.27.0...v1.28.0)
 - Internal: Code cleanup
-- Improve: ChangeOrder family operators now work for non-separted word
-  - Previously, change-order family operators(e.g. `reverse`) cannot reverse characters in word.
+- Improve: `ChangeOrder` family operators now work for non-separated word
+  - Previously, `ChangeOrder` family operators(e.g. `reverse`) cannot reverse characters in word.
   - But now it can reverse, rotate, sort... characters when target have not space or comma separated.
-    - Old: only can change order of separated text(space or comma or new line char)
+    - Old: Can change only order of separated text(space or comma or new line char).
       - reverse: `a b c` get `c b a`
       - reverse: `a, b, c` get `c, b, a`
       - reverse: `abc` get `abc`(**do nothing**)
-    - New: can change order of non separated text
+    - New: Can change order of non separated text.
       - reverse: `a b c` get `c b a`
       - reverse: `a, b, c` get `c, b, a`
       - reverse: `abc` get `cba`(**this is new**)
