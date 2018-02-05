@@ -27,7 +27,6 @@
       'ctrl-cmd-r': 'vim-mode-plus:toggle-replace-mode'
     ```
 - Internal: Introduce `operationStack.runNext` to queue operations to run next after current operation finished.
-- Internal, Fix: [harmless] `vimState.reset()` was called twice on single operator action, now reset just once.
 - Breaking, Improve: Invert rotation order for following operators(since it's counter-intuitive)
   - `Rotate`, `RotateBackwards`, `RotateArgumentsOfInnerPair`, `RotateArgumentsBackwardsOfInnerPair`
 
