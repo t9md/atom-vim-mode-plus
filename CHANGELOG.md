@@ -1,3 +1,12 @@
+# 1.28.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.28.0...v1.28.1)
+- FIX: Add `altgraph` using version of keymap to to workaround atom-keymap issue @lydell #661, #1031
+  - In many keyboard layouts, such as German, French and Swedish, some characters have to be typed using the AltGr key.
+  - For example, `i {` keymap doesn't work for these keyboard, since to type `{`, they need to type `altgraph {`.
+  - But atom-keymap doesn't treat `altgraph` as modifier, so it immediately terminate pendingstate when it see `altgraph`.
+  - To workaround this issue, we defined `i altgraph {` keymap. other keymap is also defined in same manner.
+  - This fix is temporal workaround should be removed after atom-keymap solve this `altgraph` issue.
+
 # 1.28.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.27.0...v1.28.0)
 - Internal: Code cleanup
