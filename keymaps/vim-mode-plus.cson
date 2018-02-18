@@ -103,6 +103,7 @@
   'g 0': 'vim-mode-plus:move-to-beginning-of-screen-line'
   'g ^': 'vim-mode-plus:move-to-first-character-of-screen-line'
   'g $': 'vim-mode-plus:move-to-last-character-of-screen-line'
+  'g altgraph $': 'vim-mode-plus:move-to-last-character-of-screen-line'
 
   # scroll
   'ctrl-f': 'vim-mode-plus:scroll-full-screen-down'
@@ -154,6 +155,7 @@
   # String transformation
   '~': 'vim-mode-plus:toggle-case-and-move-right'
   'g ~': 'vim-mode-plus:toggle-case'
+  'g altgraph ~': 'vim-mode-plus:toggle-case'
   'g U': 'vim-mode-plus:upper-case'
   'g u': 'vim-mode-plus:lower-case'
   'g C': 'vim-mode-plus:camel-case'
@@ -164,6 +166,7 @@
   'g q': 'vim-mode-plus:reflow'
   'g w': 'vim-mode-plus:reflow-with-stay'
   'g |': 'vim-mode-plus:trim-string'
+  'g altgraph |': 'vim-mode-plus:trim-string'
   'g cmd-d': 'vim-mode-plus:select-occurrence'
   'g ,': 'vim-mode-plus:split-arguments'
   # 'g _': 'vim-mode-plus:snake-case'
@@ -270,9 +273,13 @@
   ']': 'vim-mode-plus:move-down-to-edge'
 
   # '[ [': 'vim-mode-plus:move-to-previous-fold-start'
+  # '[ altgraph [': 'vim-mode-plus:move-to-previous-fold-start'
   # '] [': 'vim-mode-plus:move-to-next-fold-start'
+  # '] altgraph [': 'vim-mode-plus:move-to-next-fold-start'
   # '[ ]': 'vim-mode-plus:move-to-previous-fold-end'
+  # '[ altgraph ]': 'vim-mode-plus:move-to-previous-fold-end'
   # '] ]': 'vim-mode-plus:move-to-next-fold-end'
+  # '] altgraph ]': 'vim-mode-plus:move-to-next-fold-end'
   # '(': 'vim-mode-plus:move-to-previous-fold-start-with-same-indent'
   # ')': 'vim-mode-plus:move-to-next-fold-start-with-same-indent'
 
@@ -567,9 +574,13 @@
   'a `': 'vim-mode-plus:a-back-tick'
 
   'i {': 'vim-mode-plus:inner-curly-bracket'
+  'i altgraph {': 'vim-mode-plus:inner-curly-bracket'
   'i }': 'vim-mode-plus:inner-curly-bracket'
+  'i altgraph }': 'vim-mode-plus:inner-curly-bracket'
   'a {': 'vim-mode-plus:a-curly-bracket'
+  'a altgraph {': 'vim-mode-plus:a-curly-bracket'
   'a }': 'vim-mode-plus:a-curly-bracket'
+  'a altgraph }': 'vim-mode-plus:a-curly-bracket'
 
   'i B': 'vim-mode-plus:inner-curly-bracket'
   'a B': 'vim-mode-plus:a-curly-bracket'
@@ -581,11 +592,15 @@
 
   # allow-forwarding family
   # 'i }':  'vim-mode-plus:inner-curly-bracket-allow-forwarding'
+  # 'i altgraph }':  'vim-mode-plus:inner-curly-bracket-allow-forwarding'
   # 'a }':  'vim-mode-plus:a-curly-bracket-allow-forwarding'
+  # 'a altgraph }':  'vim-mode-plus:a-curly-bracket-allow-forwarding'
   # 'i >':  'vim-mode-plus:inner-angle-bracket-allow-forwarding'
   # 'a >':  'vim-mode-plus:a-angle-bracket-allow-forwarding'
   # 'i ]':  'vim-mode-plus:inner-square-bracket-allow-forwarding'
+  # 'i altgraph ]':  'vim-mode-plus:inner-square-bracket-allow-forwarding'
   # 'a ]':  'vim-mode-plus:a-square-bracket-allow-forwarding'
+  # 'a altgraph ]':  'vim-mode-plus:a-square-bracket-allow-forwarding'
   # 'i )':  'vim-mode-plus:inner-parenthesis-allow-forwarding'
   # 'a )':  'vim-mode-plus:a-parenthesis-allow-forwarding'
 
@@ -593,9 +608,13 @@
   'a t': 'vim-mode-plus:a-tag'
 
   'i [': 'vim-mode-plus:inner-square-bracket'
+  'i altgraph [': 'vim-mode-plus:inner-square-bracket'
   'i ]': 'vim-mode-plus:inner-square-bracket'
+  'i altgraph ]': 'vim-mode-plus:inner-square-bracket'
   'a [': 'vim-mode-plus:a-square-bracket'
+  'a altgraph [': 'vim-mode-plus:a-square-bracket'
   'a ]': 'vim-mode-plus:a-square-bracket'
+  'a altgraph ]': 'vim-mode-plus:a-square-bracket'
 
   'i (': 'vim-mode-plus:inner-parenthesis'
   'i )': 'vim-mode-plus:inner-parenthesis'
