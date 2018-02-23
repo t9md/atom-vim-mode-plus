@@ -6,7 +6,7 @@ globalState = require '../lib/global-state'
 settings = require '../lib/settings'
 
 KeymapManager = atom.keymaps.constructor
-{normalizeKeystrokes} = require(atom.config.resourcePath + "/node_modules/atom-keymap/lib/helpers")
+{normalizeKeystrokes} = require(atom.getLoadSettings().resourcePath + "/node_modules/atom-keymap/lib/helpers")
 
 supportedModeClass = [
   'normal-mode'
