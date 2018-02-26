@@ -1,7 +1,12 @@
-# 1.29.0: WIP
+# 1.29.0:
 - New: `hideCommandsFromCommandPalette` config which hide commands from command-palette when set to `true` #1033, #1034
+  - Default `false` to to make it compatible with older version.
   - This feature is once implemented in #943 but reverted before releasing it. Because I find no big perf gain by this feature.
-  - But this time I changed mind, Because I got requested, plus getting think to reducing noise when searching palette is good idea.
+  - But this time I changed mind, reducing noise when searching palette is good idea.
+- New, Support: Add support helper command. #1037
+  - To let user paste clipped info when they open issue.
+  - `vim-mode-plus:clip-debug-info`, `vim-mode-plus:clip-debug-info-with-package-info`
+  - These command write collected debug info to clipboard with the form of foldable(by `detail` tag) to not mess issue board.
 
 # 1.28.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.28.0...v1.28.1)
