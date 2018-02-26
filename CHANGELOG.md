@@ -1,7 +1,7 @@
 # 1.29.0: WIP
-- New, Breaking: `hideCommandsFromCommandPalette` config which hide commands from command-palette when set to `true` #1033, #1034
+- New: `hideCommandsFromCommandPalette` config which hide commands from command-palette when set to `true` #1033, #1034
   - This feature is once implemented in #943 but reverted before releasing it. Because I find no big perf gain by this feature.
-  - But this time I changed mind, Because I got requested, plus getting thik to reducing noise when searching palette is good idea.
+  - But this time I changed mind, Because I got requested, plus getting think to reducing noise when searching palette is good idea.
 
 # 1.28.1:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.28.0...v1.28.1)
