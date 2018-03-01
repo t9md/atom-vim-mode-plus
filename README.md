@@ -21,6 +21,7 @@ vim-mode improved.
     - [Flash effect does not appear on cursor-line, occurrence-marker is not displayed on cursor-line either.](#flash-effect-does-not-appear-on-cursor-line-occurrence-marker-is-not-displayed-on-cursor-line-either)
     - [Surround not work](#surround-not-work)
     - [How can I insert single white space when surround?](#how-can-i-insert-single-white-space-when-surround)
+    - [I want to automatically disable IME when leaving `insert-mode`.(want `set imdisable` equivalent in pure-Vim).](#i-want-to-automatically-disable-ime-when-leaving-insert-modewant-set-imdisable-equivalent-in-pure-vim)
 - [Wiki](#wiki)
 - [Keymap](#keymap)
 - [Helper packages](#helper-packages)
@@ -150,6 +151,11 @@ If you want, install [vim-mode-plus-keymaps-for-surround](https://github.com/t9m
 ### How can I insert single white space when surround?
 
 Set `Characters To Add Space On Surround`. from vim-mode-plus's setting.
+
+### I want to automatically disable IME when leaving `insert-mode`.(want `set imdisable` equivalent in pure-Vim).
+
+Now in-eval phase for this feature.
+From vim-mode-plus's settings-view set `autoDisableInputMethodWhenLeavingInsertMode` to `true`(default `false`).
 
 # Wiki
 
