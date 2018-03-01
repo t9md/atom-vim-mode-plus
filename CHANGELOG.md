@@ -1,3 +1,11 @@
+# 1.30.0:
+- New, Experiment: `autoDisableInputMethodWhenLeavingInsertMode` config to auto-disable IME when leaving `insert-mode`.
+  - Default `false`.
+  - Once this feature was brought by PR#151 then reverted because of unfixable BUG.
+  - Now retrying to bring same feature in different approach
+    - setting `readOnly` attribute to `false` than setting `input.type = "password"`.
+  - Credit: Borrowed whole idea from @frapples's `vim-mode-plus-patch-switch-ime` package. Thanks @frapples!!
+
 # 1.29.0:
 - New: `hideCommandsFromCommandPalette` config which hide commands from command-palette when set to `true` #1033, #1034
   - Default `false` to to make it compatible with older version.
