@@ -154,7 +154,7 @@ Set `Characters To Add Space On Surround`. from vim-mode-plus's setting.
 
 ### I want to automatically disable IME when leaving `insert-mode`.(want `set imdisable` equivalent in pure-Vim).
 
-Now in-eval phase for this feature.
+Now in-eval phase for this experimental feature.
 From vim-mode-plus's settings-view set `autoDisableInputMethodWhenLeavingInsertMode` to `true`(default `false`).
 
 # Wiki
