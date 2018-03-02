@@ -154,8 +154,15 @@ Set `Characters To Add Space On Surround`. from vim-mode-plus's setting.
 
 ### I want to automatically disable IME when leaving `insert-mode`.(want `set imdisable` equivalent in pure-Vim).
 
-Now in-eval phase for this experimental feature.
+Now in-eval phase for this experimental feature.  
 From vim-mode-plus's settings-view set `autoDisableInputMethodWhenLeavingInsertMode` to `true`(default `false`).
+
+This feature doesn't actually disable IME, its' just set `readonly` attribute to editor's hidden [input][MDN input] element.  
+It should work for most IME but some Chinese IME still type multibyte character even in `readonly` input.  
+For detail, see this [discussion][discussion].  
+
+[MDN input]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+[discussion]: https://github.com/frapples/vim-mode-plus-patch-switch-ime/issues/1
 
 # Wiki
 
