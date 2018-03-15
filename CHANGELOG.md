@@ -1,3 +1,6 @@
+# 1.30.1:
+- Improve: `deMaximize` maximized state also on `atom.workspace.onDidAddPaneItem` timing.
+
 # 1.30.0:
 - New, Experiment: `autoDisableInputMethodWhenLeavingInsertMode` config to auto-disable IME when leaving `insert-mode`.
   - Default `false`.
