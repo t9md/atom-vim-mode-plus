@@ -1,3 +1,13 @@
+# 1.31.0:
+- New: Introduce new configuration to affect **word** finding in motion and text-object.
+  - Purpose
+    - When finding word in motions(`w`, `e` etc) and text-objet(`i w` etc), vmp use nonWordCharacters which vary from grammars.
+    - Some grammar treat `-` as non-word, but some are not, this inconsistency is a bit confusing.
+    - So user can avoid this inconsistencies by enabling this new setting.
+  - `useLanguageIndependentNonWordCharacters`: Enable this to always use same `nonWordCharacters` regardless of grammar.
+  - `languageIndependentNonWordCharacters`: This value is used only when `useLanguageIndependentNonWordCharacters` was enabled.
+    - Default value is borrowed from `DEFAULT_NON_WORD_CHARACTERS` in `text-editor.js`.
+
 # 1.30.1:
 - Improve: `deMaximize` maximized state also on `atom.workspace.onDidAddPaneItem` timing.
 
