@@ -1,3 +1,10 @@
+# 1.31.1:
+- Fix: Now properly disable `readOnly` state on package deactivation.
+  - Condition
+    - When user enabled `autoDisableInputMethodWhenLeavingInsertMode`
+    - Then deactivate `vim-mode-plus` package.
+  - editor's hiddenInput remain `readOnly = true` which make editor un-editable.
+
 # 1.31.0:
 - New: Introduce new configuration to affect **word** finding in motion and text-object.
   - Purpose
