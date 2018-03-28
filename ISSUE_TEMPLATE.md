@@ -1,4 +1,5 @@
-Then execute `Vim Mode Plus: Clip Debug Info`(which write info to clipboard) then paste here.
+Execute `Vim Mode Plus: Clip Debug Info`(which write info to clipboard) then paste here.
+
 Read and check all "Check list" bellow.
 
 # Check list
