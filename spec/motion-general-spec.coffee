@@ -1963,7 +1963,7 @@ describe "Motion general", ->
         ensure '] [', cursor: [20, 6]
         ensure '] [', cursor: [22, 6]
 
-    describe "MoveToPrevisFoldEnd", ->
+    describe "MoveToPreviousFoldEnd", ->
       beforeEach ->
         set cursor: [30, 0]
       it "move to first char of previous fold end row", ->
@@ -1980,6 +1980,104 @@ describe "Motion general", ->
         ensure '] ]', cursor: [23, 8]
         ensure '] ]', cursor: [25, 4]
         ensure '] ]', cursor: [28, 2]
+
+  describe 'MoveTo(Previous|Next)Fold(Start|End)WithSameIndent', ->
+    beforeEach ->
+      waitsForPromise ->
+        atom.packages.activatePackage('language-javascript')
+      getVimState (state, vim) ->
+        {editor, editorElement} = state
+        {set, ensure} = vim
+
+      runs ->
+        set
+          grammar: "source.js"
+          text: """
+          class TestA {
+            methA() {
+              if (true) {
+                null
+              }
+            }
+          }
+
+          class TestB {
+            methB() {
+              if (true) {
+                null
+              }
+            }
+          }\n
+          """
+
+        atom.keymaps.add "test",
+          'atom-text-editor.vim-mode-plus:not(.insert-mode)':
+            '[ [': 'vim-mode-plus:move-to-previous-fold-start-with-same-indent'
+            '] [': 'vim-mode-plus:move-to-next-fold-start-with-same-indent'
+            '[ ]': 'vim-mode-plus:move-to-previous-fold-end-with-same-indent'
+            '] ]': 'vim-mode-plus:move-to-next-fold-end-with-same-indent'
+
+    afterEach ->
+      atom.packages.deactivatePackage('language-javascript')
+
+    describe "MoveToPreviousFoldStartWithSameIndent", ->
+      it "[from largetst fold] move to first char of previous fold start row", ->
+        set cursor: [14, 0]
+        ensure '[ [', cursor: [8, 0]
+        ensure '[ [', cursor: [0, 0]
+        ensure '[ [', cursor: [0, 0]
+      it "[from outer fold] move to first char of previous fold start row", ->
+        set cursor: [7, 0] # blank row
+        ensure '[ [', cursor: [0, 0]
+        ensure '[ [', cursor: [0, 0]
+      it "[from one level deeper fold] move to first char of previous fold start row", ->
+        set cursor: [9, 0]
+        ensure '[ [', cursor: [1, 2]
+        ensure '[ [', cursor: [1, 2]
+
+    describe "MoveToNextFoldStartWithSameIndent", ->
+      it "[from largetst fold] move to first char of next fold start row", ->
+        set cursor: [0, 0]
+        ensure '] [', cursor: [8, 0]
+        ensure '] [', cursor: [8, 0]
+      it "[from outer fold] move to first char of next fold start row", ->
+        set cursor: [7, 0] # blank row
+        ensure '] [', cursor: [8, 0]
+        ensure '] [', cursor: [8, 0]
+      it "[from one level deeper fold] move to first char of next fold start row", ->
+        set cursor: [1, 0]
+        ensure '] [', cursor: [9, 2]
+        ensure '] [', cursor: [9, 2]
+
+    describe "MoveToPreviousFoldEndWithSameIndent", ->
+      it "[from largetst fold] move to first char of previous fold end row", ->
+        set cursor: [14, 0]
+        ensure '[ ]', cursor: [6, 0]
+        ensure '[ ]', cursor: [6, 0]
+      it "[from outer fold] move to first char of previous fold end row", ->
+        set cursor: [7, 0] # blank row
+        ensure '[ ]', cursor: [6, 0]
+        ensure '[ ]', cursor: [6, 0]
+      it "[from one level deeper fold] move to first char of previous fold end row", ->
+        set cursor: [13, 0]
+        ensure '[ ]', cursor: [5, 2]
+        ensure '[ ]', cursor: [5, 2]
+
+    describe "MoveToNextFoldEndWithSameIndent", ->
+      it "[from largetst fold] move to first char of next fold end row", ->
+        set cursor: [0, 0]
+        ensure '] ]', cursor: [6, 0]
+        ensure '] ]', cursor: [14, 0]
+        ensure '] ]', cursor: [14, 0]
+      it "[from outer fold] move to first char of next fold end row", ->
+        set cursor: [7, 0] # blank row
+        ensure '] ]', cursor: [14, 0]
+        ensure '] ]', cursor: [14, 0]
+      it "[from one level deeper fold] move to first char of next fold end row", ->
+        set cursor: [1, 0] # blank row
+        ensure '] ]', cursor: [5, 2]
+        ensure '] ]', cursor: [13, 2]
+        ensure '] ]', cursor: [13, 2]
 
   describe 'MoveTo(Previous|Next)String', ->
     beforeEach ->

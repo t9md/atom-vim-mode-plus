@@ -201,6 +201,8 @@
   "vim-mode-plus:move-to-next-fold-start",
   "vim-mode-plus:move-to-previous-fold-start-with-same-indent",
   "vim-mode-plus:move-to-next-fold-start-with-same-indent",
+  "vim-mode-plus:move-to-previous-fold-end-with-same-indent",
+  "vim-mode-plus:move-to-next-fold-end-with-same-indent",
   "vim-mode-plus:move-to-previous-fold-end",
   "vim-mode-plus:move-to-next-fold-end",
   "vim-mode-plus:move-to-previous-function",
