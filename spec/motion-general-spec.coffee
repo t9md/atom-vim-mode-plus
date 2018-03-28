@@ -1874,7 +1874,7 @@ describe "Motion general", ->
         ensure '] [', cursor: [20, 6]
         ensure '] [', cursor: [22, 6]
 
-    describe "MoveToPrevisFoldEnd", ->
+    describe "MoveToPreviousFoldEnd", ->
       beforeEach ->
         set cursor: [30, 0]
       it "move to first char of previous fold end row", ->
