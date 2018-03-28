@@ -211,6 +211,96 @@ describe "Motion general", ->
           ensure 'v', cursor: [2, 4], selectedText: 'd'
           ensure 'k k', cursor: [0, 3], selectedText: "defg\n\nabcd"
 
+    describe "the j, k keybinding in hardTab text", ->
+      beforeEach ->
+        jasmine.attachToDOM(atom.workspace.getElement())
+
+        waitsForPromise ->
+          atom.packages.activatePackage('language-go')
+
+        getVimState (state, vimEditor) ->
+          {editor, editorElement} = state
+          {set, ensure} = vimEditor
+
+        runs ->
+          set
+            grammar: 'source.go'
+            textC: """
+            packa|ge main
+
+            import "fmt"
+
+            func main() {
+            \tif 7%2 == 0 {
+            \t\tfmt.Println("7 is even")
+            \t} else {
+            \t\tfmt.Println("7 is odd")
+            \t}
+            }\n
+            """
+
+      it "[tabLength = 2] move up/down bufferRow wise with aware of tabLength", ->
+        editor.update(tabLength: 2)
+
+        ensure 'j', cursor: [1, 0], cursorScreen: [1, 0]
+        ensure 'j', cursor: [2, 5], cursorScreen: [2, 5]
+        ensure 'j', cursor: [3, 0], cursorScreen: [3, 0]
+        ensure 'j', cursor: [4, 5], cursorScreen: [4, 5]
+        ensure 'j', cursor: [5, 4], cursorScreen: [5, 5]
+        ensure 'j', cursor: [6, 3], cursorScreen: [6, 5]
+        ensure 'j', cursor: [7, 4], cursorScreen: [7, 5]
+        ensure 'j', cursor: [8, 3], cursorScreen: [8, 5]
+        ensure 'j', cursor: [9, 1], cursorScreen: [9, 2]
+        ensure 'j', cursor: [10, 0], cursorScreen: [10, 0]
+        ensure 'k', cursor: [9, 1], cursorScreen: [9, 2]
+        ensure 'k', cursor: [8, 3], cursorScreen: [8, 5]
+        ensure 'k', cursor: [7, 4], cursorScreen: [7, 5]
+        ensure 'k', cursor: [6, 3], cursorScreen: [6, 5]
+        ensure 'k', cursor: [5, 4], cursorScreen: [5, 5]
+        ensure 'k', cursor: [4, 5], cursorScreen: [4, 5]
+        ensure 'k', cursor: [3, 0], cursorScreen: [3, 0]
+        ensure 'k', cursor: [2, 5], cursorScreen: [2, 5]
+        ensure 'k', cursor: [1, 0], cursorScreen: [1, 0]
+        ensure 'k', cursor: [0, 5], cursorScreen: [0, 5]
+
+      it "[tabLength = 4] move up/down bufferRow wise with aware of tabLength", ->
+        editor.update(tabLength: 4)
+
+        ensure 'j', cursor: [1, 0], cursorScreen: [1, 0]
+        ensure 'j', cursor: [2, 5], cursorScreen: [2, 5]
+        ensure 'j', cursor: [3, 0], cursorScreen: [3, 0]
+        ensure 'j', cursor: [4, 5], cursorScreen: [4, 5]
+        ensure 'j', cursor: [5, 2], cursorScreen: [5, 5]
+        ensure 'j', cursor: [6, 1], cursorScreen: [6, 4]
+        ensure 'j', cursor: [7, 2], cursorScreen: [7, 5]
+        ensure 'j', cursor: [8, 1], cursorScreen: [8, 4]
+        ensure 'j', cursor: [9, 1], cursorScreen: [9, 4]
+        ensure 'j', cursor: [10, 0], cursorScreen: [10, 0]
+        ensure 'k', cursor: [9, 1], cursorScreen: [9, 4]
+        ensure 'k', cursor: [8, 1], cursorScreen: [8, 4]
+        ensure 'k', cursor: [7, 2], cursorScreen: [7, 5]
+        ensure 'k', cursor: [6, 1], cursorScreen: [6, 4]
+        ensure 'k', cursor: [5, 2], cursorScreen: [5, 5]
+        ensure 'k', cursor: [4, 5], cursorScreen: [4, 5]
+        ensure 'k', cursor: [3, 0], cursorScreen: [3, 0]
+        ensure 'k', cursor: [2, 5], cursorScreen: [2, 5]
+        ensure 'k', cursor: [1, 0], cursorScreen: [1, 0]
+        ensure 'k', cursor: [0, 5], cursorScreen: [0, 5]
+
+      it "[tabLength = 8] move up/down bufferRow wise with aware of tabLength", ->
+        editor.update(tabLength: 8)
+        set cursor: [5, 9]
+
+        ensure 'j', cursor: [6, 2], cursorScreen: [6, 16]
+        ensure 'j', cursor: [7, 8], cursorScreen: [7, 15]
+        ensure 'j', cursor: [8, 2], cursorScreen: [8, 16]
+        ensure 'j', cursor: [9, 1], cursorScreen: [9, 8]
+        ensure 'j', cursor: [10, 0], cursorScreen: [10, 0]
+        ensure 'k', cursor: [9, 1], cursorScreen: [9, 8]
+        ensure 'k', cursor: [8, 2], cursorScreen: [8, 16]
+        ensure 'k', cursor: [7, 8], cursorScreen: [7, 15]
+        ensure 'k', cursor: [6, 2], cursorScreen: [6, 16]
+
     describe "gj gk in softwrap", ->
       [text] = []
 
@@ -1081,7 +1171,6 @@ describe "Motion general", ->
       scrollbarStyle = document.createElement('style')
       scrollbarStyle.textContent = '::-webkit-scrollbar { -webkit-appearance: none }'
       jasmine.attachToDOM(scrollbarStyle)
-
 
       set text_: """
       _123456789B123456789C123456789
