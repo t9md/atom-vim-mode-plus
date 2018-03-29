@@ -508,6 +508,108 @@ describe "Visual Blockwise", ->
           ensure "k", selectedTextOrdered: ["", "567890"], cursor: [[1, 15], [2, 15]]
           ensure "k", selectedTextOrdered: ["0123", "", "0123"], cursor: [[0, 24], [1, 15], [2, 24]]
 
+  describe "In hardTab text", ->
+    beforeEach ->
+      jasmine.attachToDOM(atom.workspace.getElement())
+
+      waitsForPromise ->
+        atom.packages.activatePackage('language-go')
+
+      runs ->
+        set
+          grammar: 'source.go'
+          textC: """
+          package main
+
+          import "fmt"
+
+          func| main() {
+          \tif 7%2 == 0 {
+          \t\tfmt.Println("7 is even")
+          \t} else {
+          \t\tfmt.Println("7 is odd")
+          \t}
+          }\n
+          """
+
+    it "[tabLength = 2] select blockwise", ->
+      editor.update(tabLength: 2)
+
+      blockwiseEnsureOptions =
+        mode: ['visual', 'blockwise']
+        selectedTextOrdered: [
+          " main"
+          " 7%2 "
+          "fmt.P"
+          "else "
+          "fmt.P"
+        ]
+
+      ensure "v 4 j 4 l"
+      ensure "ctrl-v", blockwiseEnsureOptions
+      ensure "v ctrl-v", blockwiseEnsureOptions
+
+      ensure 'o'; ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: true
+      ensure "v ctrl-v", blockwiseEnsureOptions
+      ensure 'O'; ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: false
+      ensure "v ctrl-v", blockwiseEnsureOptions
+      ensure 'o'; ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: true
+      ensure "v ctrl-v", blockwiseEnsureOptions
+      ensure 'O'; ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
+      ensure "v ctrl-v", blockwiseEnsureOptions
+
+    it "[tabLength = 4] move up/down bufferRow wise with aware of tabLength", ->
+      editor.update(tabLength: 4)
+
+      blockwiseEnsureOptions =
+        mode: ['visual', 'blockwise']
+        selectedTextOrdered: [
+          " main"
+          "if 7%"
+          "\tf"
+          "} els"
+          "\tf"
+        ]
+
+      ensure "v 4 j l"
+      ensure "ctrl-v", blockwiseEnsureOptions
+      ensure "v ctrl-v", blockwiseEnsureOptions
+
+      ensure 'o'; ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: true
+      ensure "v ctrl-v", blockwiseEnsureOptions
+      ensure 'O'; ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: false
+      ensure "v ctrl-v", blockwiseEnsureOptions
+      ensure 'o'; ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: true
+      ensure "v ctrl-v", blockwiseEnsureOptions
+      ensure 'O'; ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
+      ensure "v ctrl-v", blockwiseEnsureOptions
+
+    it "[tabLength = 8] move up/down bufferRow wise with aware of tabLength", ->
+      editor.update(tabLength: 8)
+      set cursor: [5, 1]
+
+      blockwiseEnsureOptions =
+        mode: ['visual', 'blockwise']
+        selectedTextOrdered: [
+          "if 7%2 == 0 {"
+          "\tfmt.P"
+          "} else {"
+          "\tfmt.P"
+        ]
+
+      ensure "v 3 j 5 l"
+      ensure "ctrl-v", blockwiseEnsureOptions
+      ensure "v ctrl-v", blockwiseEnsureOptions
+
+      ensure 'o'; ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: true
+      ensure "v ctrl-v", blockwiseEnsureOptions
+      ensure 'O'; ensureBlockwiseSelection head: 'top', tail: 'bottom', headReversed: false
+      ensure "v ctrl-v", blockwiseEnsureOptions
+      ensure 'o'; ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: true
+      ensure "v ctrl-v", blockwiseEnsureOptions
+      ensure 'O'; ensureBlockwiseSelection head: 'bottom', tail: 'top', headReversed: false
+      ensure "v ctrl-v", blockwiseEnsureOptions
+
   # [FIXME] not appropriate put here, re-consider all spec file layout later.
   describe "gv feature", ->
     preserveSelection = ->
