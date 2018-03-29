@@ -634,7 +634,7 @@ describe "Motion general", ->
         set           textC: "abc|  \ndef"
         ensure 'c w', textC: "abc|\ndef"
 
-      it "[at trailing whitespace] eat new line when count is specified", ->
+      xit "[at trailing whitespace] eat new line when count is specified", -> # TODO re-enable after atom/atom#16983 comes in to STABLE
         set             textC: "|\n\n\n\n\nline6\n"
         ensure '5 c w', textC: "|\nline6\n"
 
@@ -680,7 +680,7 @@ describe "Motion general", ->
         set           textC: "abc|  \ndef\n"
         ensure 'c W', textC: "abc|\ndef\n"
 
-      it "can eat new line when count is specified", ->
+      xit "can eat new line when count is specified", ->  # TODO re-enable after atom/atom#16983 comes in to STABLE
         set             textC: "|\n\n\n\n\nline6\n"
         ensure '5 c W', textC: "|\nline6\n"
 
@@ -781,7 +781,7 @@ describe "Motion general", ->
         ensure 'g e', textC: "1234 5678 wor|d-word"
         ensure 'g e', textC: "1234 567|8 word-word"
 
-      it "handles newlines like vim", ->
+      xit "handles newlines like vim", -> # TODO re-enable after atom/atom#16983 comes in to STABLE
         set           textC: "1234\n\n\n\n56|78"
         ensure "g e", textC: "1234\n\n\n|\n5678"
         ensure "g e", textC: "1234\n\n|\n\n5678"
