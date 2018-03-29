@@ -1,3 +1,16 @@
+# 1.32.0: Big improvement for hardTab editor(`j`, `k` and `visual-blockwise-mode`)!!
+- Improve: Now BlockwiseSelection properly select block in hardTab using editor #1052.
+  - Calculate accurate column by expanidng/de-expanding hardTab of selected row.
+- Improve: `j`, `k` motions now handle hardTab appropriately when moving up and down.
+  - Calculate accurate column by expanidng/de-expanding hardTab of selected row.
+- Fix: Apply workaround to broken paragraph motion(`{`, `}`)
+  - Which was broken from Atom v1.25.0 because of atom-core's bug. #1047.
+- Tweak: `move-to-(next/previous)-fold-(start/end)-with-same-indent` command.
+  - Previously it used to use indent level of cursor's row.
+  - Now it use indent level of closest fold cursor's row is contained.
+  - New: Add following commands for consistency
+    - `move-to-previous-fold-end-with-same-indent`, `move-to-next-fold-end-with-same-indent`
+
 # 1.31.1:
 - Fix: Now properly disable `readOnly` state on package deactivation.
   - Condition
