@@ -100,6 +100,7 @@
   "vim-mode-plus:outdent",
   "vim-mode-plus:auto-indent",
   "vim-mode-plus:toggle-line-comments",
+  "vim-mode-plus:toggle-inline-comments",
   "vim-mode-plus:reflow",
   "vim-mode-plus:reflow-with-stay",
   "vim-mode-plus:surround",
