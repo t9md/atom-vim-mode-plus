@@ -112,7 +112,6 @@
     "Outdent",
     "AutoIndent",
     "ToggleLineComments",
-    "ToggleInlineComments",
     "Reflow",
     "ReflowWithStay",
     "SurroundBase",
