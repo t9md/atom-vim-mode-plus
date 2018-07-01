@@ -1,3 +1,6 @@
+# 1.32.1:
+- Improve: `vim-mode-plus:clip-debug-info` no longer report diff for default value with `type:array` config.
+
 # 1.32.0: Big improvement for hardTab editor(`j`, `k` and `visual-blockwise-mode`)!!
 - Improve: Now BlockwiseSelection properly select block in hardTab using editor #1052.
   - Calculate accurate column by expanidng/de-expanding hardTab of selected row.
