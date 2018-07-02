@@ -333,6 +333,8 @@
     "InnerIndentation",
     "AComment",
     "InnerComment",
+    "ABlockComment",
+    "InnerBlockComment",
     "ACommentOrParagraph",
     "InnerCommentOrParagraph",
     "AFold",

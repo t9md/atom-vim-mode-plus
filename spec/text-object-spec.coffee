@@ -1410,6 +1410,47 @@ describe "TextObject", ->
           selectedText: '# Comment\n# border\n'
           selectedBufferRange: [[6, 0], [8, 0]]
 
+  describe 'BlockComment', ->
+    pack = 'language-javascript'
+    beforeEach ->
+      waitsForPromise -> atom.packages.activatePackage(pack)
+      runs -> set grammar: 'source.js'
+
+    afterEach ->
+      atom.packages.deactivatePackage(pack)
+
+    describe "inner-line block comment", ->
+      it 'select inner comment block', ->
+        set textC: "let a, b |/* 2nd var */, c"; ensure 'v i *', selectedText: '2nd var'
+        set textC: "let a, b /* 2nd |var */, c"; ensure 'v i *', selectedText: '2nd var'
+        set textC: "let a, b /* 2nd var *|/, c"; ensure 'v i *', selectedText: '2nd var'
+        set textC: "let a, b /* 2nd var */|, c"; ensure 'v i *', selectedText: ','
+      it 'select a comment block', ->
+        set textC: "let a, b |/* 2nd var */, c"; ensure 'v a *', selectedText: '/* 2nd var */'
+        set textC: "let a, b /* 2nd |var */, c"; ensure 'v a *', selectedText: '/* 2nd var */'
+        set textC: "let a, b /* 2nd var *|/, c"; ensure 'v a *', selectedText: '/* 2nd var */'
+        set textC: "let a, b /* 2nd var */|, c"; ensure 'v a *', selectedText: ','
+
+    describe 'a-block-comment', ->
+      beforeEach ->
+        set text: """
+          if (true) {
+            /** consecutive
+            block
+            comment **/ console.log("hello")
+          }
+          """
+      it 'select inner comment block', ->
+        set cursor: [1, 3];  ensure 'v i *', selectedText: 'consecutive\n  block\n  comment'
+        set cursor: [2, 0];  ensure 'v i *', selectedText: 'consecutive\n  block\n  comment'
+        set cursor: [3, 12]; ensure 'v i *', selectedText: 'consecutive\n  block\n  comment'
+        set cursor: [3, 13]; ensure 'v i *', selectedText: ' '
+      it 'select a comment block', ->
+        set cursor: [1, 3];  ensure 'v a *', selectedText: '/** consecutive\n  block\n  comment **/'
+        set cursor: [2, 0];  ensure 'v a *', selectedText: '/** consecutive\n  block\n  comment **/'
+        set cursor: [3, 12]; ensure 'v a *', selectedText: '/** consecutive\n  block\n  comment **/'
+        set cursor: [3, 13]; ensure 'v a *', selectedText: ' '
+
   describe 'Indentation', ->
     beforeEach ->
       waitsForPromise ->
