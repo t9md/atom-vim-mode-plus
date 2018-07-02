@@ -267,6 +267,8 @@
   "vim-mode-plus:inner-indentation",
   "vim-mode-plus:a-comment",
   "vim-mode-plus:inner-comment",
+  "vim-mode-plus:a-block-comment",
+  "vim-mode-plus:inner-block-comment",
   "vim-mode-plus:a-comment-or-paragraph",
   "vim-mode-plus:inner-comment-or-paragraph",
   "vim-mode-plus:a-fold",

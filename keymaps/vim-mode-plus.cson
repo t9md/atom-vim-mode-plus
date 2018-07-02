@@ -629,6 +629,9 @@
   'i /': 'vim-mode-plus:inner-comment'
   'a /': 'vim-mode-plus:a-comment'
 
+  'i *': 'vim-mode-plus:inner-block-comment'
+  'a *': 'vim-mode-plus:a-block-comment'
+
   'i i': 'vim-mode-plus:inner-indentation'
   'a i': 'vim-mode-plus:a-indentation'
 
