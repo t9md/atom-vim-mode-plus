@@ -1,7 +1,17 @@
+# 1.33.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.32.1...v1.33.0)
+- New: BlockComment text-object. #1082
+  - `inner-block-comment`(`i *`)
+    - Select from first non-white-space-char to last non-white-space-char within block comment.
+  - `a-block-comment`(`a *`)
+    - Select whole block-comment.
+
 # 1.32.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.32.0...v1.32.1)
 - Improve: `vim-mode-plus:clip-debug-info` no longer report diff for default value with `type:array` config.
 
 # 1.32.0: Big improvement for hardTab editor(`j`, `k` and `visual-blockwise-mode`)!!
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.31.1...v1.32.0)
 - Improve: Now BlockwiseSelection properly select block in hardTab using editor #1052.
   - Calculate accurate column by expanidng/de-expanding hardTab of selected row.
 - Improve: `j`, `k` motions now handle hardTab appropriately when moving up and down.
@@ -15,6 +25,7 @@
     - `move-to-previous-fold-end-with-same-indent`, `move-to-next-fold-end-with-same-indent`
 
 # 1.31.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.31.0...v1.31.1)
 - Fix: Now properly disable `readOnly` state on package deactivation.
   - Condition
     - When user enabled `autoDisableInputMethodWhenLeavingInsertMode`
@@ -22,6 +33,7 @@
   - editor's hiddenInput remain `readOnly = true` which make editor un-editable.
 
 # 1.31.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.30.1...v1.31.0)
 - New: Introduce new configuration to affect **word** finding in motion and text-object.
   - Purpose
     - When finding word in motions(`w`, `e` etc) and text-objet(`i w` etc), vmp use nonWordCharacters which vary from grammars.
@@ -32,9 +44,11 @@
     - Default value is borrowed from `DEFAULT_NON_WORD_CHARACTERS` in `text-editor.js`.
 
 # 1.30.1:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.30.0...v1.30.1)
 - Improve: `deMaximize` maximized state also on `atom.workspace.onDidAddPaneItem` timing.
 
 # 1.30.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.29.0...v1.30.0)
 - New, Experiment: `autoDisableInputMethodWhenLeavingInsertMode` config to auto-disable IME when leaving `insert-mode`.
   - Default `false`.
   - Once this feature was brought by PR#151 then reverted because of unfixable BUG.
@@ -43,6 +57,7 @@
   - Credit: Borrowed whole idea from @frapples's `vim-mode-plus-patch-switch-ime` package. Thanks @frapples!!
 
 # 1.29.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.28.0...v1.29.0)
 - New: `hideCommandsFromCommandPalette` config which hide commands from command-palette when set to `true` #1033, #1034
   - Default `false` to to make it compatible with older version.
   - This feature is once implemented in #943 but reverted before releasing it. Because I find no big perf gain by this feature.
