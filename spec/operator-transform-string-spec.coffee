@@ -103,6 +103,18 @@ describe "Operator TransformString", ->
       set cursor: [0, 1]
       ensure 'g u g u', text: 'abc\nXyZ', cursor: [0, 1]
 
+  describe 'change case for greek character', ->
+    lowerGreek = "α β δ ε θ ι κ λ ο π ρ τ υ φ χ ψ γ ζ η μ ν ξ σ ω"
+    upperGreek = "Α Β Δ Ε Θ Ι Κ Λ Ο Π Ρ Τ Υ Φ Χ Ψ Γ Ζ Η Μ Ν Ξ Σ Ω"
+
+    it "change case to lower-to-upper", ->
+      set text: lowerGreek, cursor: [0, 0]
+      ensure 'g U $', text: upperGreek, cursor: [0, 0]
+
+    it "change case to upper-to-lower", ->
+      set text: upperGreek, cursor: [0, 0]
+      ensure 'g u $', text: lowerGreek, cursor: [0, 0]
+
   describe "the > keybinding", ->
     beforeEach ->
       set text: """
