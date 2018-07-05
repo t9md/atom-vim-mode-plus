@@ -1,3 +1,8 @@
+# 1.34.0:
+- Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.33.0...v1.34.0)
+- Improve: `ChangeCase` family operators(`~`, `g u` and `g U`) now target non-ascii chars. #1085 by @zensoup
+  - Ex: `g U` can upper-case `αρρ` to `ΑΡΡ`.
+
 # 1.33.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.32.1...v1.33.0)
 - New: BlockComment text-object. #1082
