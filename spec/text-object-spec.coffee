@@ -2265,3 +2265,41 @@ describe "TextObject", ->
             3 xxx_
             4 abc\n
             """
+
+  describe 'LeftAssignment, RightAssignment', ->
+    text = """
+      let value = 'hello'
+      """
+    beforeEach ->
+      jasmine.attachToDOM(atom.views.getView(atom.workspace))
+
+      atom.keymaps.add "test",
+        'atom-text-editor.vim-mode-plus.operator-pending-mode, atom-text-editor.vim-mode-plus.visual-mode':
+          'i h': 'vim-mode-plus:left-assignment'
+          'i l': 'vim-mode-plus:right-assignment'
+
+      set text: text, cursor: [0, 0]
+
+    describe 'RightAssignment', ->
+      it 'applies operators inside the right value in operator-pending mode', ->
+        ensure 'c i l',
+          cursor: [0, 12]
+          mode: ['insert']
+          text: 'let value = '
+      it 'selects the right value in visual mode', ->
+        ensure 'v i l',
+          selectionIsReversed: false
+          mode: ['visual', 'characterwise']
+          selectedText: "'hello'"
+
+    describe 'LeftAssignment', ->
+      it 'applies operators inside the left value in operator-pending mode', ->
+        ensure 'c i h',
+          cursor: [0, 0]
+          mode: ['insert']
+          text: " = 'hello'"
+      it 'selects the left value in visual mode', ->
+        ensure 'v i h',
+          selectionIsReversed: false
+          mode: ['visual', 'characterwise']
+          selectedText: "let value"
