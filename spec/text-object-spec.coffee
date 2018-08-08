@@ -2291,6 +2291,18 @@ describe "TextObject", ->
           selectionIsReversed: false
           mode: ['visual', 'characterwise']
           selectedText: "'hello'"
+      it 'doesnt select the trailing semi-colon', ->
+        set text: "let value = 'hello';", cursor: [0, 0]
+        ensure 'c i l',
+          cursor: [0, 12]
+          mode: ['insert']
+          text: 'let value = ;'
+      it 'doesnt select the trailing comma', ->
+        set text: "  key: 'value', ", cursor: [0, 0]
+        ensure 'c i l',
+          cursor: [0, 7]
+          mode: ['insert']
+          text: '  key: , '
 
     describe 'LeftAssignment', ->
       it 'applies operators inside the left value in operator-pending mode', ->
