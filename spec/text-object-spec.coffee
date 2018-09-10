@@ -1563,82 +1563,100 @@ describe "TextObject", ->
 
       describe "select conjoined fold", ->
         # This feature is language agnostic, don't misunderstsand it as JS specific feature.
-        pack = 'language-javascript'
-        scope = 'source.js'
-        beforeEach ->
-          waitsForPromise -> atom.packages.activatePackage(pack)
-          runs -> editor.setGrammar(atom.grammars.grammarForScopeName(scope))
-        afterEach ->
-          atom.packages.deactivatePackage(pack)
+        [ensureSelectedText] = []
 
-        it "select if/else if/else from any row", ->
-          set
-            text: """
+        beforeEach -> waitsForPromise -> atom.packages.activatePackage('language-javascript')
+        afterEach -> atom.packages.deactivatePackage('language-javascript')
 
-            if (num === 1) {
-              console.log(1)
-            } else if (num === 2) {
-              console.log(2)
-            } else if (num === 3) {
-              console.log(3)
-            } else {
-              console.log(4)
-            }
+        describe "select if/else if/else from any row", ->
+          beforeEach ->
+            ensureSelectedText = ->
+              set
+                grammar: "source.js"
+                text: """
 
-            """
+                if (num === 1) {
+                  console.log(1)
+                } else if (num === 2) {
+                  console.log(2)
+                } else if (num === 3) {
+                  console.log(3)
+                } else {
+                  console.log(4)
+                }
 
-          selectedText = """
-          if (num === 1) {
-            console.log(1)
-          } else if (num === 2) {
-            console.log(2)
-          } else if (num === 3) {
-            console.log(3)
-          } else {
-            console.log(4)
-          }\n
-          """
-          set cursor: [1, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [2, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [3, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [4, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [5, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [6, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [7, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [8, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [9, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+                """
 
-        it "select try/catch/finally from any row", ->
-          set
-            text: """
+              selectedText = """
+                if (num === 1) {
+                  console.log(1)
+                } else if (num === 2) {
+                  console.log(2)
+                } else if (num === 3) {
+                  console.log(3)
+                } else {
+                  console.log(4)
+                }\n
+                """
+              set cursor: [1, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [2, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [3, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [4, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [5, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [6, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [7, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [8, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [9, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
 
-            try {
-              console.log(1);
-            } catch (e) {
-              console.log(2);
-            } finally {
-              console.log(3);
-            }
+          it "[treeSitter = on] outmost conjoined range", ->
+            atom.config.set('core.useTreeSitterParsers', true)
+            ensureSelectedText()
 
-            """
+          it "[treeSitter = off] outmost conjoined range", ->
+            atom.config.set('core.useTreeSitterParsers', false)
+            ensureSelectedText()
 
-          selectedText = """
-          try {
-            console.log(1);
-          } catch (e) {
-            console.log(2);
-          } finally {
-            console.log(3);
-          }\n
-          """
-          set cursor: [1, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [2, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [3, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [4, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [5, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [6, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
-          set cursor: [7, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+        describe "select try/catch/finally from any row", ->
+          beforeEach ->
+            ensureSelectedText = ->
+              set
+                grammar: "source.js"
+                text: """
 
+                try {
+                  console.log(1);
+                } catch (e) {
+                  console.log(2);
+                } finally {
+                  console.log(3);
+                }
+
+                """
+              selectedText = """
+                try {
+                  console.log(1);
+                } catch (e) {
+                  console.log(2);
+                } finally {
+                  console.log(3);
+                }\n
+                """
+
+              set cursor: [1, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [2, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [3, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [4, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [5, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [6, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+              set cursor: [7, 0]; ensure "v a z", {selectedText}; ensure "escape", mode: "normal"
+
+          it "[treeSitter = on] outmost range", ->
+            atom.config.set('core.useTreeSitterParsers', true)
+            ensureSelectedText()
+
+          it "[treeSitter = off] outmost range", ->
+            atom.config.set('core.useTreeSitterParsers', false)
+            ensureSelectedText()
 
   # Although following test picks specific language, other langauages are alsoe supported.
   describe 'Function', ->
