@@ -1,3 +1,9 @@
+# 1.35.0: TreeSitter support
+- Support: Set minimum engines to `^1.31.0-beta1`.
+- Fix: TextObject function and fold now work with TreeSitter parser have enabled.
+  - Function TextObject #1096
+  - Fold TextObject #1096
+
 # 1.34.0:
 - Diff: [here](https://github.com/t9md/atom-vim-mode-plus/compare/v1.33.0...v1.34.0)
 - Improve: `ChangeCase` family operators(`~`, `g u` and `g U`) now target non-ascii chars. #1085 by @zensoup
