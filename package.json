@@ -7,7 +7,7 @@
   "private": true,
   "repository": "https://github.com/t9md/atom-vim-mode-plus",
   "engines": {
-    "atom": "^1.22.0"
+    "atom": "^1.31.0-beta1"
   },
   "dependencies": {
     "atom-select-list": "^0.7.0",
