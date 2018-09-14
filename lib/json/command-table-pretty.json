@@ -223,6 +223,8 @@
   "vim-mode-plus:search-match-forward",
   "vim-mode-plus:search-match-backward",
   "vim-mode-plus:previous-selection",
+  "vim-mode-plus:left-assignment",
+  "vim-mode-plus:right-assignment",
   "vim-mode-plus:a-word",
   "vim-mode-plus:inner-word",
   "vim-mode-plus:a-whole-word",
