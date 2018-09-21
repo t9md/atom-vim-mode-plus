@@ -223,12 +223,12 @@ describe "VimState", ->
       describe "when enabled, clear multiple cursors on escaping insert-mode", ->
         beforeEach ->
           settings.set('clearMultipleCursorsOnEscapeInsertMode', true)
-        it "clear multiple cursors by respecting last cursor's position", ->
-          ensure 'escape', mode: 'normal', numCursors: 1, cursor: [0, 1]
-
-        it "clear multiple cursors by respecting last cursor's position", ->
-          set cursor: [[0, 2], [0, 1]]
+        it "clear multiple cursors by respecting first added cursor's position", ->
           ensure 'escape', mode: 'normal', numCursors: 1, cursor: [0, 0]
+
+        it "clear multiple cursors by respecting first added cursor's position", ->
+          set cursor: [[0, 2], [0, 1]]
+          ensure 'escape', mode: 'normal', numCursors: 1, cursor: [0, 1]
 
       describe "when disabled", ->
         beforeEach ->
