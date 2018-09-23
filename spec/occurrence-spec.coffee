@@ -1201,3 +1201,19 @@ describe "Occurrence", ->
         ensure null, mode: "normal", occurrenceText: []
         atom.confirm.andCallFake ({buttons}) -> buttons.indexOf("Continue")
         ensure "g o", mode: "normal", occurrenceText: ['oo', 'oo', 'oo', 'oo', 'oo']
+
+  describe "clearMultipleCursorsToFirstPosition setting", ->
+    beforeEach ->
+      settings.set('clearMultipleCursorsToFirstPosition', true)
+
+    it "clear multiple occurence cursors by respecting first cursor's position", ->
+      set
+        text: """
+        ooo: xxx: ooo:
+        xxx: ooo: xxx:
+        """
+        cursor: [0, 0]
+      ensure "c o a e", mode: 'insert', numCursors: 3
+      editor.insertText('===')
+      ensure "escape"
+      ensure "escape", mode: 'normal', numCursors: 1, cursor: [0, 2]
