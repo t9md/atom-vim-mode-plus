@@ -875,6 +875,26 @@ describe "Operator TransformString", ->
             it "c7", -> ensureWait 'y s i w <', text: "<abc>"
             it "c8", -> ensureWait 'y s i w a', text: "< abc >"
 
+    describe 'customSurroundPairs setting', ->
+      beforeEach ->
+        settings.set('customSurroundPairs', [{
+          alias: 'c',
+          start: '/* ',
+          end: ' */',
+        }])
+
+      it 'allow adding a surrounding custom pair', ->
+        set
+          textC: '|test'
+
+        ensureWait 'y s i w c', text: "/* test */"
+
+      it 'allow changing an existing surrounding pair to a custom pair', ->
+        set
+          textC: '(|test)'
+
+        ensureWait 'c s c', text: "/* test */"
+
     describe 'map-surround', ->
       beforeEach ->
         jasmine.attachToDOM(editorElement)
