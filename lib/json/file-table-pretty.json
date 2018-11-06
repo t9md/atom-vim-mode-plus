@@ -236,11 +236,6 @@
     "MoveToNextFunction",
     "MoveToPreviousFunctionAndRedrawCursorLineAtUpperMiddle",
     "MoveToNextFunctionAndRedrawCursorLineAtUpperMiddle",
-    "MotionByScope",
-    "MoveToPreviousString",
-    "MoveToNextString",
-    "MoveToPreviousNumber",
-    "MoveToNextNumber",
     "MoveToNextOccurrence",
     "MoveToPreviousOccurrence",
     "MoveToPair"
