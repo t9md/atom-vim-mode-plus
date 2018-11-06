@@ -1,3 +1,27 @@
+# 1.36.0:
+- New: custom surround #1104, #1102(inspirational PR by @isundaylee)
+  - New `customSurroundPairs` config is introduced, its value is JSON string with following key-value pair.
+    - key: char to access
+    - value: array `[openText:string, closeText:string, addSpace:boolean]`
+      - `addSpace` is optional, it control padding space.
+  - Custom surround can be used in all surround operation(`surround`, `delete-surround`, `change-surround`)
+  - Example configuration and possible operations
+    - Config
+      ```coffeescript
+      "vim-mode-plus":
+        customSurroundPairs: '''
+          {
+            "p": ["<?php", "?>", true],
+            "%": ["<%", "%>", true],
+            "=": ["<%=", "%>", true],
+            "s": ["\\"", "\\""]
+          }
+        '''
+      ```
+    - `y s c p`: `surround`(`y s`) `inner-word`(`c` or `i w`) with `p`(PHP tag)
+    - `c s p s`: `change-surround`(`c s`) from `p`(PHP tag) to `s`(double quotes)
+    - `d s =`: `delete-surround`(`d s`) of `=`(ruby-IRB tag)
+
 # 1.35.0: TreeSitter support
 - Support: Set minimum engines to `^1.31.0-beta1`.
 - Fix: TextObject function and fold now work with TreeSitter parser have enabled.
