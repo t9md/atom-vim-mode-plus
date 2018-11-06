@@ -1,4 +1,12 @@
-# 1.36.0:
+# 1.36.0: Big default changes and custom surround
+- Breaking, new Default: #1106
+  - `setCursorToStartOfChangeOnUndoRedo`: now `false` for precise cursor placement on `undo/redo`
+    - To say simply, this is just directly using atom's undo/redo marker for cursor placement.
+    - To make this work well, careful marker snapshotting(transact, checkpoint) is crucial(#603).
+    - I consider this change as part of default `stayOnXXX` = `true`.
+  - `replaceByDiffOnSurround`: now `true` for better cursor placement and highlight on `undo/redo`
+    - Old: Replaced whole text. e.g. Replacing `word` with `(word)`
+    - New: Modify surrounding text only, intact inner text.
 - New: custom surround #1104, #1102(inspirational PR by @isundaylee)
   - New `customSurroundPairs` config is introduced, its value is JSON string with following key-value pair.
     - key: char to access
