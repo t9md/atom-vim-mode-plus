@@ -897,9 +897,9 @@ describe "Operator TransformString", ->
 
       it "surround text for each word in target case-1", ->
         ensureWait 'm s i p (',
-          text: """
+          textC: """
 
-          (apple)
+          (|apple)
           (pairs) (tomato)
           (orange)
           (milk)
@@ -911,7 +911,7 @@ describe "Operator TransformString", ->
           textC: """
 
           apple
-          <|pairs> <tomato>
+          <p|airs> <tomato>
           orange
           milk
 
@@ -924,7 +924,7 @@ describe "Operator TransformString", ->
           "apple"
           "pairs" "tomato"
           "orange"
-          |"milk"
+          "|milk"
 
           """
 
