@@ -180,7 +180,8 @@ describe "Operator general", ->
           selectedText: ""
 
       describe "with multiple cursors", ->
-        describe "setCursorToStartOfChangeOnUndoRedo is true(default)", ->
+        describe "setCursorToStartOfChangeOnUndoRedo is true", ->
+          settings.set('setCursorToStartOfChangeOnUndoRedo', true)
           it "clear multiple cursors and set cursor to start of changes of last cursor", ->
             set
               text: originalText
