@@ -1058,6 +1058,34 @@ describe "Operator TransformString", ->
             it "case2", -> set textC: '|"  apple  "'; ensureWait 'c S " `', text: "`  apple  `"
             it "case3", -> set textC: '|"  apple  "'; ensureWait 'c S " \'', text: "'  apple  '"
 
+      describe 'customSurroundPairs setting', ->
+        beforeEach ->
+          constomSurround = '''
+            {
+              "p": ["<?php", "?>", true],
+              "%": ["<%", "%>", true],
+              "=": ["<%=", "%>", true],
+              "s": ["\\"", "\\""]
+            }
+          '''
+          settings.set('customSurroundPairs', constomSurround)
+
+        describe 'surround', ->
+          it "case1", -> set textC: "ap|ple"; ensureWait 'y s c p', text: "<?php apple ?>"
+          it "case2", -> set textC: "ap|ple"; ensureWait 'y s c %', text: "<% apple %>"
+          it "case2", -> set textC: "ap|ple"; ensureWait 'y s c =', text: "<%= apple %>"
+          it "case2", -> set textC: "ap|ple"; ensureWait 'y s c s', text: '"apple"'
+        describe 'delete-surround', ->
+          it "case1", -> set textC: "<?php ap|ple ?>"; ensureWait 'd S p', text: "apple"
+          it "case2", -> set textC: "<% ap|ple %>";    ensureWait 'd S %', text: "apple"
+          it "case2", -> set textC: "<%= ap|ple %>";   ensureWait 'd S =', text: "apple"
+          it "case2", -> set textC: '"ap|ple"';        ensureWait 'd S s', text: "apple"
+        describe 'change-surround', ->
+          it "case1", -> set textC: "<?php ap|ple ?>"; ensureWait 'c S p %', text: "<% apple %>"
+          it "case2", -> set textC: "<% ap|ple %>";    ensureWait 'c S % =', text: "<%= apple %>"
+          it "case2", -> set textC: "<%= ap|ple %>";   ensureWait 'c S = s', text: '"apple"'
+          it "case2", -> set textC: '"ap|ple"';        ensureWait 'c S s p', text: "<?php apple ?>"
+
     describe 'surround-word', ->
       beforeEach ->
         atom.keymaps.add "surround-test",
