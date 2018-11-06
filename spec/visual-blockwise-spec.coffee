@@ -531,6 +531,7 @@ describe "Visual Blockwise", ->
           \t}
           }\n
           """
+        editor.setSoftTabs(false) # FIXME
 
     it "[tabLength = 2] select blockwise", ->
       editor.update(tabLength: 2)

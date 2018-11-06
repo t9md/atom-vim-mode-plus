@@ -238,6 +238,7 @@ describe "Motion general", ->
             \t}
             }\n
             """
+          editor.setSoftTabs(false) # FIXME
 
       it "[tabLength = 2] move up/down bufferRow wise with aware of tabLength", ->
         editor.update(tabLength: 2)
@@ -2078,138 +2079,6 @@ describe "Motion general", ->
         ensure '] ]', cursor: [5, 2]
         ensure '] ]', cursor: [13, 2]
         ensure '] ]', cursor: [13, 2]
-
-  describe 'MoveTo(Previous|Next)String', ->
-    beforeEach ->
-      atom.keymaps.add "test",
-        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g s': 'vim-mode-plus:move-to-next-string'
-          'g S': 'vim-mode-plus:move-to-previous-string'
-
-    describe 'editor for softTab', ->
-      pack = 'language-coffee-script'
-      beforeEach ->
-        waitsForPromise ->
-          atom.packages.activatePackage(pack)
-
-        runs ->
-          set
-            text: """
-            disposable?.dispose()
-            disposable = atom.commands.add 'atom-workspace',
-              'check-up': -> fun('backward')
-              'check-down': -> fun('forward')
-            \n
-            """
-            grammar: 'source.coffee'
-
-      afterEach ->
-        atom.packages.deactivatePackage(pack)
-
-      it "move to next string", ->
-        set cursor: [0, 0]
-        ensure 'g s', cursor: [1, 31]
-        ensure 'g s', cursor: [2, 2]
-        ensure 'g s', cursor: [2, 21]
-        ensure 'g s', cursor: [3, 2]
-        ensure 'g s', cursor: [3, 23]
-      it "move to previous string", ->
-        set cursor: [4, 0]
-        ensure 'g S', cursor: [3, 23]
-        ensure 'g S', cursor: [3, 2]
-        ensure 'g S', cursor: [2, 21]
-        ensure 'g S', cursor: [2, 2]
-        ensure 'g S', cursor: [1, 31]
-      it "support count", ->
-        set cursor: [0, 0]
-        ensure '3 g s', cursor: [2, 21]
-        ensure '3 g S', cursor: [1, 31]
-
-    describe 'editor for hardTab', ->
-      pack = 'language-go'
-      beforeEach ->
-        waitsForPromise ->
-          atom.packages.activatePackage(pack)
-
-        getVimState 'sample.go', (state, vimEditor) ->
-          {editor, editorElement} = state
-          {set, ensure} = vimEditor
-
-      afterEach ->
-        atom.packages.deactivatePackage(pack)
-
-      it "move to next string", ->
-        set cursorScreen: [0, 0]
-        ensure 'g s', cursorScreen: [2, 7]
-        ensure 'g s', cursorScreen: [3, 7]
-        ensure 'g s', cursorScreen: [8, 8]
-        ensure 'g s', cursorScreen: [9, 8]
-        ensure 'g s', cursorScreen: [11, 20]
-        ensure 'g s', cursorScreen: [12, 15]
-        ensure 'g s', cursorScreen: [13, 15]
-        ensure 'g s', cursorScreen: [15, 15]
-        ensure 'g s', cursorScreen: [16, 15]
-      it "move to previous string", ->
-        set cursorScreen: [18, 0]
-        ensure 'g S', cursorScreen: [16, 15]
-        ensure 'g S', cursorScreen: [15, 15]
-        ensure 'g S', cursorScreen: [13, 15]
-        ensure 'g S', cursorScreen: [12, 15]
-        ensure 'g S', cursorScreen: [11, 20]
-        ensure 'g S', cursorScreen: [9, 8]
-        ensure 'g S', cursorScreen: [8, 8]
-        ensure 'g S', cursorScreen: [3, 7]
-        ensure 'g S', cursorScreen: [2, 7]
-
-  describe 'MoveTo(Previous|Next)Number', ->
-    pack = 'language-coffee-script'
-    beforeEach ->
-      atom.keymaps.add "test",
-        'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g n': 'vim-mode-plus:move-to-next-number'
-          'g N': 'vim-mode-plus:move-to-previous-number'
-
-      waitsForPromise ->
-        atom.packages.activatePackage(pack)
-
-      runs ->
-        set grammar: 'source.coffee'
-
-      set
-        text: """
-        num1 = 1
-        arr1 = [1, 101, 1001]
-        arr2 = ["1", "2", "3"]
-        num2 = 2
-        fun("1", 2, 3)
-        \n
-        """
-
-    afterEach ->
-      atom.packages.deactivatePackage(pack)
-
-    it "move to next number", ->
-      set cursor: [0, 0]
-      ensure 'g n', cursor: [0, 7]
-      ensure 'g n', cursor: [1, 8]
-      ensure 'g n', cursor: [1, 11]
-      ensure 'g n', cursor: [1, 16]
-      ensure 'g n', cursor: [3, 7]
-      ensure 'g n', cursor: [4, 9]
-      ensure 'g n', cursor: [4, 12]
-    it "move to previous number", ->
-      set cursor: [5, 0]
-      ensure 'g N', cursor: [4, 12]
-      ensure 'g N', cursor: [4, 9]
-      ensure 'g N', cursor: [3, 7]
-      ensure 'g N', cursor: [1, 16]
-      ensure 'g N', cursor: [1, 11]
-      ensure 'g N', cursor: [1, 8]
-      ensure 'g N', cursor: [0, 7]
-    it "support count", ->
-      set cursor: [0, 0]
-      ensure '5 g n', cursor: [3, 7]
-      ensure '3 g N', cursor: [1, 8]
 
   describe 'subword motion', ->
     beforeEach ->
