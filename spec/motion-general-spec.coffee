@@ -212,6 +212,7 @@ describe "Motion general", ->
           ensure 'k k', cursor: [0, 3], selectedText: "defg\n\nabcd"
 
     describe "the j, k keybinding in hardTab text", ->
+      languageModePromse = null
       beforeEach ->
         jasmine.attachToDOM(atom.workspace.getElement())
 
@@ -223,6 +224,9 @@ describe "Motion general", ->
           {set, ensure} = vimEditor
 
         runs ->
+          languageModePromse = new Promise (resolve, reject) ->
+            editor.buffer.onDidChangeLanguageMode(resolve)
+
           set
             grammar: 'source.go'
             textC: """
@@ -238,6 +242,9 @@ describe "Motion general", ->
             \t}
             }\n
             """
+
+        waitsForPromise -> languageModePromse
+
 
       it "[tabLength = 2] move up/down bufferRow wise with aware of tabLength", ->
         editor.update(tabLength: 2)
