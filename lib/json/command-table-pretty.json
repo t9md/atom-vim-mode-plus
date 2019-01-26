@@ -131,6 +131,7 @@
   "vim-mode-plus:sort",
   "vim-mode-plus:sort-case-insensitively",
   "vim-mode-plus:sort-by-number",
+  "vim-mode-plus:randomize",
   "vim-mode-plus:numbering-lines",
   "vim-mode-plus:duplicate-with-comment-out-original",
   "vim-mode-plus:move-left",
