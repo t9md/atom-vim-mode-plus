@@ -146,6 +146,7 @@
     "Sort",
     "SortCaseInsensitively",
     "SortByNumber",
+    "Randomize",
     "NumberingLines",
     "DuplicateWithCommentOutOriginal"
   ],
