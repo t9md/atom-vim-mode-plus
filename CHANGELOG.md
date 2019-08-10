@@ -1,3 +1,6 @@
+# 1.36.1:
+- FIX: Fix sort operator. Thanks @bennypowers ! #1125
+
 # 1.36.0: Big default changes and custom surround
 - Breaking, new Default: #1106
   - `setCursorToStartOfChangeOnUndoRedo`: now `false` for precise cursor placement on `undo/redo`
