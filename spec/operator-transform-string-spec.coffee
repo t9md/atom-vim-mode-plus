@@ -1646,7 +1646,7 @@ describe "Operator TransformString", ->
           }
           """
 
-  describe "Change Order faimliy: Reverse, Sort, SortCaseInsensitively, SortByNumber", ->
+  describe "Change Order family: Reverse, Sort, SortCaseInsensitively, SortByNumber", ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
