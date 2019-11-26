@@ -2,34 +2,33 @@
 
 vim-mode improved.
 
-<!-- TOC START min:1 max:3 link:true update:true -->
-- [vim-mode-plus](#vim-mode-plus)
-- [Installation](#installation)
-- [Some Features](#some-features)
-- [Important](#important)
-    - [You must disable vim-mode to use vim-mode-plus](#you-must-disable-vim-mode-to-use-vim-mode-plus)
-    - [From v1.9.0 CoffeeScript based vim-mode-plus extension is no longer supported](#from-v190-coffeescript-based-vim-mode-plus-extension-is-no-longer-supported)
-- [Thanks](#thanks)
-- [Issue report](#issue-report)
-- [Whats this?](#whats-this)
-- [FAQ](#faq)
-    - [Why fork? why not directly contribute to official vim-mode?](#why-fork-why-not-directly-contribute-to-official-vim-mode)
-    - [Behavior different from pure Vim?](#behavior-different-from-pure-vim)
-    - [In visual-block mode, some motions make the editor slow, freeze.](#in-visual-block-mode-some-motions-make-the-editor-slow-freeze)
-    - [ex-mode?](#ex-mode)
-    - [Want to suppress autocomplete-plus's auto suggestion except insert-mode.](#want-to-suppress-autocomplete-pluss-auto-suggestion-except-insert-mode)
-    - [Flash effect does not appear on cursor-line, occurrence-marker is not displayed on cursor-line either.](#flash-effect-does-not-appear-on-cursor-line-occurrence-marker-is-not-displayed-on-cursor-line-either)
-    - [Surround not work](#surround-not-work)
-    - [How can I insert single white space when surround?](#how-can-i-insert-single-white-space-when-surround)
-    - [I want to automatically disable IME when leaving `insert-mode`.(want `set imdisable` equivalent in pure-Vim).](#i-want-to-automatically-disable-ime-when-leaving-insert-modewant-set-imdisable-equivalent-in-pure-vim)
-- [Wiki](#wiki)
-- [Keymap](#keymap)
-- [Helper packages](#helper-packages)
-- [References](#references)
-  - [Vim official](#vim-official)
-  - [Other](#other)
-- [Commit emoji convention](#commit-emoji-convention)
-
+<!-- TOC START min:1 max:3 link:true asterisk:true update:true -->
+* [vim-mode-plus](#vim-mode-plus)
+* [Installation](#installation)
+* [Some Features](#some-features)
+* [Important](#important)
+    * [You must disable vim-mode to use vim-mode-plus](#you-must-disable-vim-mode-to-use-vim-mode-plus)
+    * [From v1.9.0 CoffeeScript based vim-mode-plus extension is no longer supported](#from-v190-coffeescript-based-vim-mode-plus-extension-is-no-longer-supported)
+* [Thanks](#thanks)
+* [Issue report](#issue-report)
+* [Whats this?](#whats-this)
+* [FAQ](#faq)
+    * [Why fork? why not directly contribute to official vim-mode?](#why-fork-why-not-directly-contribute-to-official-vim-mode)
+    * [Behavior different from pure Vim?](#behavior-different-from-pure-vim)
+    * [In visual-block mode, some motions make the editor slow, freeze.](#in-visual-block-mode-some-motions-make-the-editor-slow-freeze)
+    * [ex-mode?](#ex-mode)
+    * [Want to suppress autocomplete-plus's auto suggestion except insert-mode.](#want-to-suppress-autocomplete-pluss-auto-suggestion-except-insert-mode)
+    * [Flash effect does not appear on cursor-line, occurrence-marker is not displayed on cursor-line either.](#flash-effect-does-not-appear-on-cursor-line-occurrence-marker-is-not-displayed-on-cursor-line-either)
+    * [Surround not work](#surround-not-work)
+    * [How can I insert single white space when surround?](#how-can-i-insert-single-white-space-when-surround)
+    * [I want to automatically disable IME when leaving `insert-mode`.(want `set imdisable` equivalent in pure-Vim).](#i-want-to-automatically-disable-ime-when-leaving-insert-modewant-set-imdisable-equivalent-in-pure-vim)
+* [Wiki](#wiki)
+* [Keymap](#keymap)
+* [Helper packages](#helper-packages)
+* [References](#references)
+  * [Vim official](#vim-official)
+  * [Other](#other)
+* [Commit emoji convention](#commit-emoji-convention)
 <!-- TOC END -->
 
 # Installation
@@ -217,7 +216,7 @@ Keystrokes to keystroke keyamp in you `keymap.cson`.
 
 - :memo: Add comment or doc
 - :gift: New feature.
-- :bug: Bug fix
+- :bug: Bug fix.
 - :bomb: Breaking compatibility.
 - :white_check_mark: Write test.
 - :fire: Remove something.
