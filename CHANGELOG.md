@@ -1,5 +1,5 @@
 # 1.36.3:
-- FIX: `groupChangesWhenLeavingInsertMode` configuration was not properly honored in previous version but now works. #1130
+- FIX: `groupChangesWhenLeavingInsertMode` configuration was not properly honored in previous version but now  works. #1130
   - In previous version, even user change it to `false` it still group all changes user make into one change.
 
 # 1.36.2:
