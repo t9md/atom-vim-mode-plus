@@ -1730,6 +1730,42 @@ describe "TextObject", ->
         it '[from param] i f', -> set cursor: [1, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(2, 4)
         it '[from  body] i f', -> set cursor: [3, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(2, 4)
 
+      describe 'anonymous function', ->
+        beforeEach ->
+          set
+            text: """
+
+            const f1 = function(a1) {
+              if (true) {
+                console.log("hello")
+              }
+            }
+
+            """
+
+        it '[from param] a f', -> set cursor: [1, 11]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from  body] a f', -> set cursor: [3, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from param] i f', -> set cursor: [1, 11]; ensure 'v i f', selectedBufferRange: rangeForRows(2, 4)
+        it '[from  body] i f', -> set cursor: [3, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(2, 4)
+
+      describe 'arrow function', ->
+        beforeEach ->
+          set
+            text: """
+
+            const f1 = (a1) => {
+              if (true) {
+                console.log("hello")
+              }
+            }
+
+            """
+
+        it '[from param] a f', -> set cursor: [1, 11]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from  body] a f', -> set cursor: [3, 0]; ensure 'v a f', selectedBufferRange: rangeForRows(1, 5)
+        it '[from param] i f', -> set cursor: [1, 11]; ensure 'v i f', selectedBufferRange: rangeForRows(2, 4)
+        it '[from  body] i f', -> set cursor: [3, 0]; ensure 'v i f', selectedBufferRange: rangeForRows(2, 4)
+
       describe '[case-1]: multi-line-param-function', ->
         beforeEach ->
           set
