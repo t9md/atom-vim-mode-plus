@@ -1,3 +1,6 @@
+# 1.36.4:
+- FIX: `a-f` (a-function) in JS when using tree-sitter #1134 by @jonboiser.
+
 # 1.36.3:
 - FIX: `groupChangesWhenLeavingInsertMode` configuration was not properly honored in previous version but now  works. #1130
   - In previous version, even user change it to `false` it still group all changes user make into one change.
