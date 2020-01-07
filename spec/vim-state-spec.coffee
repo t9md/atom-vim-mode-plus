@@ -230,6 +230,16 @@ describe "VimState", ->
           set cursor: [[0, 2], [0, 1]]
           ensure 'escape', mode: 'normal', numCursors: 1, cursor: [0, 0]
 
+        describe "clearMultipleCursorsToFirstPosition setting", ->
+          beforeEach ->
+            settings.set('clearMultipleCursorsToFirstPosition', true)
+          it "clear multiple cursors by respecting first cursor's position", ->
+            ensure 'escape', mode: 'normal', numCursors: 1, cursor: [0, 0]
+
+          it "clear multiple cursors by respecting first cursor's position", ->
+            set cursor: [[0, 2], [0, 1]]
+            ensure 'escape', mode: 'normal', numCursors: 1, cursor: [0, 1]
+
       describe "when disabled", ->
         beforeEach ->
           settings.set('clearMultipleCursorsOnEscapeInsertMode', false)
