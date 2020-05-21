@@ -183,6 +183,8 @@ If you want to use the full power of vim-mode-plus, see and experiment with each
 Below is list of my packages which provide more vim-like experience.  
 Why I don't build in these features? Because it takes more time and some features are useful for non-vim user.
 
+- [no-evil-eol-newline](https://atom.io/packages/no-evil-eol-newline)
+Hide the last "empty line", like what Vim is doing.
 - [cursor-history](https://atom.io/packages/cursor-history)
 provides <kbd>c-i</kbd>, <kbd>c-o</kbd> to go/back in the cursor position history.
 - [open-this](https://atom.io/packages/open-this)
