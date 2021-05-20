@@ -11,15 +11,17 @@
 
 # all
 # -------------------------
-'atom-text-editor.vim-mode-plus':
+'atom-text-editor.vim-mode-plus:not(.autocomplete-active)':
   'escape': 'vim-mode-plus:reset-normal-mode'
+'atom-text-editor.vim-mode-plus':
   'ctrl-c': 'vim-mode-plus:reset-normal-mode'
   'ctrl-[': 'vim-mode-plus:reset-normal-mode'
 
 # all except normal
 # -------------------------
-'atom-text-editor.vim-mode-plus:not(.normal-mode)':
+'atom-text-editor.vim-mode-plus:not([.normal-mode, .autocomplete-active])':
   'escape': 'vim-mode-plus:activate-normal-mode'
+'atom-text-editor.vim-mode-plus:not(.normal-mode)':
   'ctrl-[': 'vim-mode-plus:activate-normal-mode'
 
 # all except normal
