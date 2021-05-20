@@ -1,3 +1,6 @@
+# 1.36.5:
+- FIX: Disable Esc for Normal mode during autocomplete #1150 by @charlesangus.
+
 # 1.36.4:
 - FIX: `a-f` (a-function) in JS when using tree-sitter #1134 by @jonboiser.
 
