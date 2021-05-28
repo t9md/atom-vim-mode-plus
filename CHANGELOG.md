@@ -1,3 +1,6 @@
+# 1.36.6:
+- FIX: Revert #1150 to avoid unexpected workflow disruption. Sorry for my lack of scrutiny.
+
 # 1.36.5:
 - FIX: Disable Esc for Normal mode during autocomplete #1150 by @charlesangus.
 
