@@ -111,11 +111,9 @@ See [DifferencesFromPureVim](https://github.com/t9md/atom-vim-mode-plus/wiki/Dif
 Not freezing, it's just VERY slow.  
 You can workaround by disabling some keymap. See [#214](https://github.com/t9md/atom-vim-mode-plus/issues/214).
 
-### ex-mode?
+### How can I use `:w` to save, `:10` to go to line ten, and `:$s/text/replacement/g`?
 
-- The [ex-mode](https://atom.io/packages/ex-mode) package has the most complete ex-mode support.
-- Very immature package [vim-mode-plus-ex-mode](https://atom.io/packages/vim-mode-plus-ex-mode) exists.
-- My thought for ex-mode is [here #52](https://github.com/t9md/atom-vim-mode-plus/issues/52).
+Install [ex-mode](https://atom.io/packages/ex-mode) package.  This provides various 'ex' commands when the colon (:) is typed in normal mode, including the ability to save a file and close the Atom tab with `:wq`.
 
 ### Want to suppress autocomplete-plus's auto suggestion except insert-mode.
 
