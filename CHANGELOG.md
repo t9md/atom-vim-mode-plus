@@ -1,3 +1,6 @@
+# 1.36.7:
+- FIX: Reported on Windows 10, search cause `'filter' of undefined` exception on search-model #1155.
+
 # 1.36.6:
 - FIX: Revert #1150 to avoid unexpected workflow disruption. Sorry for my lack of scrutiny.
 
